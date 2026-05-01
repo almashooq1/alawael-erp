@@ -34,16 +34,33 @@ jest.mock('express', () => ({
 
 jest.mock('../../middleware/auth', () => {
   const mw = jest.fn((req, res, next) => next && next());
-  mw.authenticate = mw; mw.authorize = jest.fn(() => mw); mw.protect = mw;
-  mw.restrictTo = jest.fn(() => mw); mw.isAdmin = mw; mw.isAuth = mw;
+  mw.authenticate = mw;
+  mw.authorize = jest.fn(() => mw);
+  mw.protect = mw;
+  mw.restrictTo = jest.fn(() => mw);
+  mw.isAdmin = mw;
+  mw.isAuth = mw;
   return mw;
 });
-jest.mock('../../services/nitaqat.service', () => new Proxy({}, { get: () => jest.fn().mockResolvedValue({}) }));
-jest.mock('../../services/wps-enhanced.service', () => new Proxy({}, { get: () => jest.fn().mockResolvedValue({}) }));
-jest.mock('../../services/contract.service', () => new Proxy({}, { get: () => jest.fn().mockResolvedValue({}) }));
+jest.mock(
+  '../../services/nitaqat.service',
+  () => new Proxy({}, { get: () => jest.fn().mockResolvedValue({}) })
+);
+jest.mock(
+  '../../services/wps-enhanced.service',
+  () => new Proxy({}, { get: () => jest.fn().mockResolvedValue({}) })
+);
+jest.mock(
+  '../../services/contract.service',
+  () => new Proxy({}, { get: () => jest.fn().mockResolvedValue({}) })
+);
 
 let routeModule;
-try { routeModule = require('../../routes/nitaqat.routes'); } catch(e) { /* load fail */ }
+try {
+  routeModule = require('../../routes/nitaqat.routes');
+} catch {
+  /* load fail */
+}
 
 describe('routes/nitaqat.routes', () => {
   test('module loads without crash', () => {
@@ -102,5 +119,4 @@ describe('routes/nitaqat.routes', () => {
       expect(true).toBe(true);
     }
   });
-
 });

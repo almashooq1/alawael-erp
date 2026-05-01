@@ -11,7 +11,7 @@ jest.mock('util', () => ({}));
 let mod;
 try {
   mod = require('../../utils/urlValidator');
-} catch (e) {
+} catch {
   /* load fail */
 }
 
@@ -53,7 +53,7 @@ describe('utils/urlValidator', () => {
     if (typeof fn !== 'function') return;
     try {
       await fn.call(target);
-    } catch (e) {
+    } catch {
       /* allowed */
     }
     expect(true).toBe(true);
@@ -77,7 +77,7 @@ describe('utils/urlValidator', () => {
     if (typeof fn !== 'function') return;
     try {
       await fn.call(target);
-    } catch (e) {
+    } catch {
       /* allowed */
     }
     expect(true).toBe(true);
@@ -101,7 +101,7 @@ describe('utils/urlValidator', () => {
     if (typeof fn !== 'function') return;
     try {
       await fn.call(target);
-    } catch (e) {
+    } catch {
       /* allowed */
     }
     expect(true).toBe(true);

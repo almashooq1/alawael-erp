@@ -5,12 +5,33 @@
 'use strict';
 
 jest.mock('../../utils/tokenBlacklist', () => ({}));
-jest.mock('crypto', () => ({ randomBytes: jest.fn(() => ({ toString: jest.fn(() => 'abc123') })), createHash: jest.fn(() => ({ update: jest.fn().mockReturnThis(), digest: jest.fn(() => 'hash123') })), createCipheriv: jest.fn(() => ({ update: jest.fn(() => 'enc'), final: jest.fn(() => 'final') })), createDecipheriv: jest.fn(() => ({ update: jest.fn(() => 'dec'), final: jest.fn(() => 'final') })) }));
-jest.mock('../../utils/logger', () => ({ info: jest.fn(), error: jest.fn(), warn: jest.fn(), debug: jest.fn(), log: jest.fn() }));
+jest.mock('crypto', () => ({
+  randomBytes: jest.fn(() => ({ toString: jest.fn(() => 'abc123') })),
+  createHash: jest.fn(() => ({
+    update: jest.fn().mockReturnThis(),
+    digest: jest.fn(() => 'hash123'),
+  })),
+  createCipheriv: jest.fn(() => ({ update: jest.fn(() => 'enc'), final: jest.fn(() => 'final') })),
+  createDecipheriv: jest.fn(() => ({
+    update: jest.fn(() => 'dec'),
+    final: jest.fn(() => 'final'),
+  })),
+}));
+jest.mock('../../utils/logger', () => ({
+  info: jest.fn(),
+  error: jest.fn(),
+  warn: jest.fn(),
+  debug: jest.fn(),
+  log: jest.fn(),
+}));
 jest.mock('../../config/cache.config', () => ({}));
 
 let mod;
-try { mod = require('../../utils/tokenBlacklist'); } catch(e) { /* load fail */ }
+try {
+  mod = require('../../utils/tokenBlacklist');
+} catch {
+  /* load fail */
+}
 
 describe('utils/tokenBlacklist', () => {
   test('module loads without crash', () => {
@@ -28,5 +49,4 @@ describe('utils/tokenBlacklist', () => {
     const keys = Object.keys(mod);
     expect(Array.isArray(keys)).toBe(true);
   });
-
 });

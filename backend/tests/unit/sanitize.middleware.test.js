@@ -1,10 +1,15 @@
 'use strict';
 
 // Auto-generated unit test for middleware/sanitize.js
-jest.mock('../../utils/logger', () => ({ info: jest.fn(), error: jest.fn(), warn: jest.fn(), debug: jest.fn() }));
-jest.mock('express-mongo-sanitize', () => jest.fn(() => (req,res,next) => next()));
-jest.mock('express-xss-sanitizer', () => jest.fn(() => (req,res,next) => next()));
-jest.mock('hpp', () => jest.fn(() => (req,res,next) => next()));
+jest.mock('../../utils/logger', () => ({
+  info: jest.fn(),
+  error: jest.fn(),
+  warn: jest.fn(),
+  debug: jest.fn(),
+}));
+jest.mock('express-mongo-sanitize', () => jest.fn(() => (req, res, next) => next()));
+jest.mock('express-xss-sanitizer', () => jest.fn(() => (req, res, next) => next()));
+jest.mock('hpp', () => jest.fn(() => (req, res, next) => next()));
 
 const mockReq = (overrides = {}) => ({
   headers: { authorization: 'Bearer mock.jwt.token' },
@@ -15,7 +20,12 @@ const mockReq = (overrides = {}) => ({
   path: '/test',
   method: 'GET',
   ip: '127.0.0.1',
-  get: jest.fn(h => ({ 'content-type': 'application/json', authorization: 'Bearer mock.jwt.token' })[h.toLowerCase()]),
+  get: jest.fn(
+    h =>
+      ({ 'content-type': 'application/json', authorization: 'Bearer mock.jwt.token' })[
+        h.toLowerCase()
+      ]
+  ),
   ...overrides,
 });
 
@@ -39,10 +49,16 @@ const mockRes = () => {
 const mockNext = jest.fn();
 
 let mw;
-try { mw = require('../../middleware/sanitize'); } catch (e) { mw = null; }
+try {
+  mw = require('../../middleware/sanitize');
+} catch {
+  mw = null;
+}
 
 describe('middleware/sanitize.js', () => {
-  beforeEach(() => { jest.clearAllMocks(); });
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   test('module loads without crash', () => {
     expect(true).toBe(true);
@@ -52,5 +68,4 @@ describe('middleware/sanitize.js', () => {
     if (!mw) return;
     expect(typeof mw).toBe('function');
   });
-
 });

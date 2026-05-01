@@ -4,9 +4,12 @@
  */
 'use strict';
 
-
 let mod;
-try { mod = require('../../utils/escapeRegex'); } catch(e) { /* load fail */ }
+try {
+  mod = require('../../utils/escapeRegex');
+} catch {
+  /* load fail */
+}
 
 describe('utils/escapeRegex', () => {
   test('module loads without crash', () => {
@@ -20,8 +23,11 @@ describe('utils/escapeRegex', () => {
 
   test('exported function can be invoked without crash', async () => {
     if (!mod || typeof mod !== 'function') return;
-    try { await mod(); } catch(e) { /* allowed */ }
+    try {
+      await mod();
+    } catch {
+      /* allowed */
+    }
     expect(true).toBe(true);
   });
-
 });

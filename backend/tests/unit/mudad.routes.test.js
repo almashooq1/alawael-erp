@@ -34,14 +34,25 @@ jest.mock('express', () => ({
 
 jest.mock('../../middleware/auth', () => {
   const mw = jest.fn((req, res, next) => next && next());
-  mw.authenticate = mw; mw.authorize = jest.fn(() => mw); mw.protect = mw;
-  mw.restrictTo = jest.fn(() => mw); mw.isAdmin = mw; mw.isAuth = mw;
+  mw.authenticate = mw;
+  mw.authorize = jest.fn(() => mw);
+  mw.protect = mw;
+  mw.restrictTo = jest.fn(() => mw);
+  mw.isAdmin = mw;
+  mw.isAuth = mw;
   return mw;
 });
-jest.mock('../../services/mudad.service', () => new Proxy({}, { get: () => jest.fn().mockResolvedValue({}) }));
+jest.mock(
+  '../../services/mudad.service',
+  () => new Proxy({}, { get: () => jest.fn().mockResolvedValue({}) })
+);
 
 let routeModule;
-try { routeModule = require('../../routes/mudad.routes'); } catch(e) { /* load fail */ }
+try {
+  routeModule = require('../../routes/mudad.routes');
+} catch {
+  /* load fail */
+}
 
 describe('routes/mudad.routes', () => {
   test('module loads without crash', () => {
@@ -90,5 +101,4 @@ describe('routes/mudad.routes', () => {
       expect(true).toBe(true);
     }
   });
-
 });

@@ -11,7 +11,12 @@ const mockReq = (overrides = {}) => ({
   path: '/test',
   method: 'GET',
   ip: '127.0.0.1',
-  get: jest.fn(h => ({ 'content-type': 'application/json', authorization: 'Bearer mock.jwt.token' })[h.toLowerCase()]),
+  get: jest.fn(
+    h =>
+      ({ 'content-type': 'application/json', authorization: 'Bearer mock.jwt.token' })[
+        h.toLowerCase()
+      ]
+  ),
   ...overrides,
 });
 
@@ -35,10 +40,16 @@ const mockRes = () => {
 const mockNext = jest.fn();
 
 let mw;
-try { mw = require('../../middleware/capPagination'); } catch (e) { mw = null; }
+try {
+  mw = require('../../middleware/capPagination');
+} catch {
+  mw = null;
+}
 
 describe('middleware/capPagination.js', () => {
-  beforeEach(() => { jest.clearAllMocks(); });
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   test('module loads without crash', () => {
     expect(true).toBe(true);
@@ -48,5 +59,4 @@ describe('middleware/capPagination.js', () => {
     if (!mw) return;
     expect(typeof mw).toBe('function');
   });
-
 });

@@ -34,13 +34,21 @@ jest.mock('express', () => ({
 
 jest.mock('../../middleware/auth', () => {
   const mw = jest.fn((req, res, next) => next && next());
-  mw.authenticate = mw; mw.authorize = jest.fn(() => mw); mw.protect = mw;
-  mw.restrictTo = jest.fn(() => mw); mw.isAdmin = mw; mw.isAuth = mw;
+  mw.authenticate = mw;
+  mw.authorize = jest.fn(() => mw);
+  mw.protect = mw;
+  mw.restrictTo = jest.fn(() => mw);
+  mw.isAdmin = mw;
+  mw.isAuth = mw;
   return mw;
 });
 
 let routeModule;
-try { routeModule = require('../../routes/phases-18-20.routes'); } catch(e) { /* load fail */ }
+try {
+  routeModule = require('../../routes/phases-18-20.routes');
+} catch {
+  /* load fail */
+}
 
 describe('routes/phases-18-20.routes', () => {
   test('module loads without crash', () => {
@@ -109,5 +117,4 @@ describe('routes/phases-18-20.routes', () => {
       expect(true).toBe(true);
     }
   });
-
 });

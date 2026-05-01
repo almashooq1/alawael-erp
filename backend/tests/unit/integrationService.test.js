@@ -27,14 +27,25 @@ const mockIntegrationChain = {
   exec: jest.fn().mockResolvedValue([]),
 };
 jest.mock('../../models/Integration', () => {
-  const M = jest.fn().mockImplementation(() => ({ save: jest.fn().mockResolvedValue({ _id: 'id1' }) }));
+  const M = jest
+    .fn()
+    .mockImplementation(() => ({ save: jest.fn().mockResolvedValue({ _id: 'id1' }) }));
   Object.assign(M, mockIntegrationChain);
   return M;
 });
-jest.mock('../../utils/logger', () => ({ info: jest.fn(), error: jest.fn(), warn: jest.fn(), debug: jest.fn() }));
+jest.mock('../../utils/logger', () => ({
+  info: jest.fn(),
+  error: jest.fn(),
+  warn: jest.fn(),
+  debug: jest.fn(),
+}));
 
 let svc;
-try { svc = require('../../services/integrationService'); } catch(e) { svc = null; }
+try {
+  svc = require('../../services/integrationService');
+} catch {
+  svc = null;
+}
 
 describe('integrationService service', () => {
   test('module loads without crash', () => {
@@ -151,7 +162,8 @@ describe('integrationService service', () => {
 
   test('configureIntegration exists', () => {
     const target = typeof svc === 'function' ? svc : svc;
-    const fn = target.configureIntegration || (target.prototype && target.prototype.configureIntegration);
+    const fn =
+      target.configureIntegration || (target.prototype && target.prototype.configureIntegration);
     if (typeof fn === 'function') {
       expect(fn).toBeDefined();
     }
@@ -204,5 +216,4 @@ describe('integrationService service', () => {
       expect(fn).toBeDefined();
     }
   });
-
 });

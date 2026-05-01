@@ -1,16 +1,31 @@
 'use strict';
 
 // Auto-generated unit test for controllers/aiRecommendations.controller
-jest.mock('../../utils/logger', () => ({ info: jest.fn(), error: jest.fn(), warn: jest.fn(), debug: jest.fn() }));
-jest.mock('../../services/aiModels.service', () => new Proxy({}, { get: () => jest.fn().mockResolvedValue({}) }));
-jest.mock('../../services/recommendationsEngine.service', () => new Proxy({}, { get: () => jest.fn().mockResolvedValue({}) }));
+jest.mock('../../utils/logger', () => ({
+  info: jest.fn(),
+  error: jest.fn(),
+  warn: jest.fn(),
+  debug: jest.fn(),
+}));
+jest.mock(
+  '../../services/aiModels.service',
+  () => new Proxy({}, { get: () => jest.fn().mockResolvedValue({}) })
+);
+jest.mock(
+  '../../services/recommendationsEngine.service',
+  () => new Proxy({}, { get: () => jest.fn().mockResolvedValue({}) })
+);
 jest.mock('../../utils/safeError', () => ({}));
 jest.mock('express', () => ({}));
 
 const mockReq = (overrides = {}) => ({
   headers: { authorization: 'Bearer token' },
-  body: {}, params: {}, query: {},
-  path: '/test', method: 'GET', ip: '127.0.0.1',
+  body: {},
+  params: {},
+  query: {},
+  path: '/test',
+  method: 'GET',
+  ip: '127.0.0.1',
   user: { _id: 'user1', role: 'admin', permissions: ['*'] },
   get: jest.fn(h => ({ authorization: 'Bearer token' })[h]),
   ...overrides,
@@ -33,10 +48,16 @@ const mockRes = () => {
 const mockNext = jest.fn();
 
 let ctrl;
-try { ctrl = require('../../controllers/aiRecommendations.controller'); } catch (e) { ctrl = null; }
+try {
+  ctrl = require('../../controllers/aiRecommendations.controller');
+} catch {
+  ctrl = null;
+}
 
 describe('aiRecommendations.controller controller', () => {
-  beforeEach(() => { jest.clearAllMocks(); });
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   test('module loads without crash', () => {
     expect(true).toBe(true);
@@ -46,5 +67,4 @@ describe('aiRecommendations.controller controller', () => {
     if (!ctrl) return;
     expect(['function', 'object'].includes(typeof ctrl)).toBe(true);
   });
-
 });

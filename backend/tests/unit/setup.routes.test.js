@@ -32,23 +32,71 @@ jest.mock('express', () => ({
   static: jest.fn(() => jest.fn()),
 }));
 
-jest.mock('bcryptjs', () => new Proxy({}, { get: (t, p) => p === '__esModule' ? false : jest.fn() }));
-jest.mock('../../utils/logger', () => ({ info: jest.fn(), error: jest.fn(), warn: jest.fn(), debug: jest.fn(), log: jest.fn() }));
-jest.mock('mongoose', () => ({ model: jest.fn(() => ({})), Schema: jest.fn(() => ({ pre: jest.fn(), post: jest.fn(), plugin: jest.fn(), index: jest.fn(), virtual: jest.fn().mockReturnValue({ get: jest.fn() }), methods: {}, statics: {} })), Types: { ObjectId: 'ObjectId' }, connect: jest.fn() }));
-jest.mock('../../utils/safeError', () => new Proxy({}, { get: (t, p) => p === '__esModule' ? false : jest.fn() }));
+jest.mock(
+  'bcryptjs',
+  () => new Proxy({}, { get: (t, p) => (p === '__esModule' ? false : jest.fn()) })
+);
+jest.mock('../../utils/logger', () => ({
+  info: jest.fn(),
+  error: jest.fn(),
+  warn: jest.fn(),
+  debug: jest.fn(),
+  log: jest.fn(),
+}));
+jest.mock('mongoose', () => ({
+  model: jest.fn(() => ({})),
+  Schema: jest.fn(() => ({
+    pre: jest.fn(),
+    post: jest.fn(),
+    plugin: jest.fn(),
+    index: jest.fn(),
+    virtual: jest.fn().mockReturnValue({ get: jest.fn() }),
+    methods: {},
+    statics: {},
+  })),
+  Types: { ObjectId: 'ObjectId' },
+  connect: jest.fn(),
+}));
+jest.mock(
+  '../../utils/safeError',
+  () => new Proxy({}, { get: (t, p) => (p === '__esModule' ? false : jest.fn()) })
+);
 jest.mock('../../models/User', () => {
   const M = jest.fn(() => ({ save: jest.fn().mockResolvedValue({}) }));
-  M.find = jest.fn().mockReturnValue({ sort: jest.fn().mockReturnThis(), limit: jest.fn().mockReturnThis(), lean: jest.fn().mockResolvedValue([]) });
+  M.find = jest
+    .fn()
+    .mockReturnValue({
+      sort: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockReturnThis(),
+      lean: jest.fn().mockResolvedValue([]),
+    });
   M.findOne = jest.fn().mockResolvedValue(null);
   M.findById = jest.fn().mockResolvedValue(null);
   M.create = jest.fn().mockResolvedValue({ _id: 'id1' });
   M.countDocuments = jest.fn().mockResolvedValue(0);
   return M;
 });
-jest.mock('mongoose', () => ({ model: jest.fn(() => ({})), Schema: jest.fn(() => ({ pre: jest.fn(), post: jest.fn(), plugin: jest.fn(), index: jest.fn(), virtual: jest.fn().mockReturnValue({ get: jest.fn() }), methods: {}, statics: {} })), Types: { ObjectId: 'ObjectId' }, connect: jest.fn() }));
+jest.mock('mongoose', () => ({
+  model: jest.fn(() => ({})),
+  Schema: jest.fn(() => ({
+    pre: jest.fn(),
+    post: jest.fn(),
+    plugin: jest.fn(),
+    index: jest.fn(),
+    virtual: jest.fn().mockReturnValue({ get: jest.fn() }),
+    methods: {},
+    statics: {},
+  })),
+  Types: { ObjectId: 'ObjectId' },
+  connect: jest.fn(),
+}));
 
 let routeModule;
-try { routeModule = require('../../routes/setup.routes'); } catch(e) { /* load fail */ }
+try {
+  routeModule = require('../../routes/setup.routes');
+} catch {
+  /* load fail */
+}
 
 describe('routes/setup.routes', () => {
   test('module loads without crash', () => {
@@ -87,5 +135,4 @@ describe('routes/setup.routes', () => {
       expect(true).toBe(true);
     }
   });
-
 });

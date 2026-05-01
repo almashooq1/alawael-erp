@@ -4,10 +4,20 @@
  */
 'use strict';
 
-jest.mock('../../utils/logger', () => ({ info: jest.fn(), error: jest.fn(), warn: jest.fn(), debug: jest.fn(), log: jest.fn() }));
+jest.mock('../../utils/logger', () => ({
+  info: jest.fn(),
+  error: jest.fn(),
+  warn: jest.fn(),
+  debug: jest.fn(),
+  log: jest.fn(),
+}));
 
 let mod;
-try { mod = require('../../utils/safeError'); } catch(e) { /* load fail */ }
+try {
+  mod = require('../../utils/safeError');
+} catch {
+  /* load fail */
+}
 
 describe('utils/safeError', () => {
   test('module loads without crash', () => {
@@ -21,8 +31,11 @@ describe('utils/safeError', () => {
 
   test('exported function can be invoked without crash', async () => {
     if (!mod || typeof mod !== 'function') return;
-    try { await mod(); } catch(e) { /* allowed */ }
+    try {
+      await mod();
+    } catch {
+      /* allowed */
+    }
     expect(true).toBe(true);
   });
-
 });

@@ -7,7 +7,11 @@
 jest.mock('net', () => ({}));
 
 let mod;
-try { mod = require('../../utils/validateUrl'); } catch(e) { /* load fail */ }
+try {
+  mod = require('../../utils/validateUrl');
+} catch {
+  /* load fail */
+}
 
 describe('utils/validateUrl', () => {
   test('module loads without crash', () => {
@@ -23,8 +27,11 @@ describe('utils/validateUrl', () => {
     if (!mod) return;
     const fn = mod.validateOutboundUrl;
     if (typeof fn !== 'function') return;
-    try { await fn(); } catch(e) { /* allowed */ }
+    try {
+      await fn();
+    } catch {
+      /* allowed */
+    }
     expect(true).toBe(true);
   });
-
 });

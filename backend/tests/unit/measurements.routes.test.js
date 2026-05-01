@@ -32,17 +32,33 @@ jest.mock('express', () => ({
   static: jest.fn(() => jest.fn()),
 }));
 
-jest.mock('../../utils/safeError', () => new Proxy({}, { get: (t, p) => p === '__esModule' ? false : jest.fn() }));
+jest.mock(
+  '../../utils/safeError',
+  () => new Proxy({}, { get: (t, p) => (p === '__esModule' ? false : jest.fn()) })
+);
 jest.mock('../../middleware/auth', () => {
   const mw = jest.fn((req, res, next) => next && next());
-  mw.authenticate = mw; mw.authorize = jest.fn(() => mw); mw.protect = mw;
-  mw.restrictTo = jest.fn(() => mw); mw.isAdmin = mw; mw.isAuth = mw;
+  mw.authenticate = mw;
+  mw.authorize = jest.fn(() => mw);
+  mw.protect = mw;
+  mw.restrictTo = jest.fn(() => mw);
+  mw.isAdmin = mw;
+  mw.isAuth = mw;
   return mw;
 });
-jest.mock('../../utils/paginate', () => new Proxy({}, { get: (t, p) => p === '__esModule' ? false : jest.fn() }));
+jest.mock(
+  '../../utils/paginate',
+  () => new Proxy({}, { get: (t, p) => (p === '__esModule' ? false : jest.fn()) })
+);
 jest.mock('../../models/MeasurementModels', () => {
   const M = jest.fn(() => ({ save: jest.fn().mockResolvedValue({}) }));
-  M.find = jest.fn().mockReturnValue({ sort: jest.fn().mockReturnThis(), limit: jest.fn().mockReturnThis(), lean: jest.fn().mockResolvedValue([]) });
+  M.find = jest
+    .fn()
+    .mockReturnValue({
+      sort: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockReturnThis(),
+      lean: jest.fn().mockResolvedValue([]),
+    });
   M.findOne = jest.fn().mockResolvedValue(null);
   M.findById = jest.fn().mockResolvedValue(null);
   M.create = jest.fn().mockResolvedValue({ _id: 'id1' });
@@ -51,19 +67,48 @@ jest.mock('../../models/MeasurementModels', () => {
 });
 jest.mock('../../models/RehabilitationProgramModels', () => {
   const M = jest.fn(() => ({ save: jest.fn().mockResolvedValue({}) }));
-  M.find = jest.fn().mockReturnValue({ sort: jest.fn().mockReturnThis(), limit: jest.fn().mockReturnThis(), lean: jest.fn().mockResolvedValue([]) });
+  M.find = jest
+    .fn()
+    .mockReturnValue({
+      sort: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockReturnThis(),
+      lean: jest.fn().mockResolvedValue([]),
+    });
   M.findOne = jest.fn().mockResolvedValue(null);
   M.findById = jest.fn().mockResolvedValue(null);
   M.create = jest.fn().mockResolvedValue({ _id: 'id1' });
   M.countDocuments = jest.fn().mockResolvedValue(0);
   return M;
 });
-jest.mock('../../services/MeasurementService', () => new Proxy({}, { get: () => jest.fn().mockResolvedValue({}) }));
-jest.mock('../../services/SmartMeasurementProgramEngine', () => new Proxy({}, { get: () => jest.fn().mockResolvedValue({}) }));
-jest.mock('mongoose', () => ({ model: jest.fn(() => ({})), Schema: jest.fn(() => ({ pre: jest.fn(), post: jest.fn(), plugin: jest.fn(), index: jest.fn(), virtual: jest.fn().mockReturnValue({ get: jest.fn() }), methods: {}, statics: {} })), Types: { ObjectId: 'ObjectId' }, connect: jest.fn() }));
+jest.mock(
+  '../../services/MeasurementService',
+  () => new Proxy({}, { get: () => jest.fn().mockResolvedValue({}) })
+);
+jest.mock(
+  '../../services/SmartMeasurementProgramEngine',
+  () => new Proxy({}, { get: () => jest.fn().mockResolvedValue({}) })
+);
+jest.mock('mongoose', () => ({
+  model: jest.fn(() => ({})),
+  Schema: jest.fn(() => ({
+    pre: jest.fn(),
+    post: jest.fn(),
+    plugin: jest.fn(),
+    index: jest.fn(),
+    virtual: jest.fn().mockReturnValue({ get: jest.fn() }),
+    methods: {},
+    statics: {},
+  })),
+  Types: { ObjectId: 'ObjectId' },
+  connect: jest.fn(),
+}));
 
 let routeModule;
-try { routeModule = require('../../routes/measurements.routes'); } catch(e) { /* load fail */ }
+try {
+  routeModule = require('../../routes/measurements.routes');
+} catch {
+  /* load fail */
+}
 
 describe('routes/measurements.routes', () => {
   test('module loads without crash', () => {
@@ -132,5 +177,4 @@ describe('routes/measurements.routes', () => {
       expect(true).toBe(true);
     }
   });
-
 });

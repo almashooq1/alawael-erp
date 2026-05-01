@@ -34,24 +34,54 @@ jest.mock('express', () => ({
 
 jest.mock('../../middleware/auth', () => {
   const mw = jest.fn((req, res, next) => next && next());
-  mw.authenticate = mw; mw.authorize = jest.fn(() => mw); mw.protect = mw;
-  mw.restrictTo = jest.fn(() => mw); mw.isAdmin = mw; mw.isAuth = mw;
+  mw.authenticate = mw;
+  mw.authorize = jest.fn(() => mw);
+  mw.protect = mw;
+  mw.restrictTo = jest.fn(() => mw);
+  mw.isAdmin = mw;
+  mw.isAuth = mw;
   return mw;
 });
 jest.mock('../../models/KnowledgeBase', () => {
   const M = jest.fn(() => ({ save: jest.fn().mockResolvedValue({}) }));
-  M.find = jest.fn().mockReturnValue({ sort: jest.fn().mockReturnThis(), limit: jest.fn().mockReturnThis(), lean: jest.fn().mockResolvedValue([]) });
+  M.find = jest
+    .fn()
+    .mockReturnValue({
+      sort: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockReturnThis(),
+      lean: jest.fn().mockResolvedValue([]),
+    });
   M.findOne = jest.fn().mockResolvedValue(null);
   M.findById = jest.fn().mockResolvedValue(null);
   M.create = jest.fn().mockResolvedValue({ _id: 'id1' });
   M.countDocuments = jest.fn().mockResolvedValue(0);
   return M;
 });
-jest.mock('../../utils/safeError', () => new Proxy({}, { get: (t, p) => p === '__esModule' ? false : jest.fn() }));
-jest.mock('mongoose', () => ({ model: jest.fn(() => ({})), Schema: jest.fn(() => ({ pre: jest.fn(), post: jest.fn(), plugin: jest.fn(), index: jest.fn(), virtual: jest.fn().mockReturnValue({ get: jest.fn() }), methods: {}, statics: {} })), Types: { ObjectId: 'ObjectId' }, connect: jest.fn() }));
+jest.mock(
+  '../../utils/safeError',
+  () => new Proxy({}, { get: (t, p) => (p === '__esModule' ? false : jest.fn()) })
+);
+jest.mock('mongoose', () => ({
+  model: jest.fn(() => ({})),
+  Schema: jest.fn(() => ({
+    pre: jest.fn(),
+    post: jest.fn(),
+    plugin: jest.fn(),
+    index: jest.fn(),
+    virtual: jest.fn().mockReturnValue({ get: jest.fn() }),
+    methods: {},
+    statics: {},
+  })),
+  Types: { ObjectId: 'ObjectId' },
+  connect: jest.fn(),
+}));
 
 let routeModule;
-try { routeModule = require('../../routes/knowledge'); } catch(e) { /* load fail */ }
+try {
+  routeModule = require('../../routes/knowledge');
+} catch {
+  /* load fail */
+}
 
 describe('routes/knowledge', () => {
   test('module loads without crash', () => {
@@ -110,5 +140,4 @@ describe('routes/knowledge', () => {
       expect(true).toBe(true);
     }
   });
-
 });

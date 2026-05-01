@@ -34,14 +34,25 @@ jest.mock('express', () => ({
 
 jest.mock('../../middleware/auth', () => {
   const mw = jest.fn((req, res, next) => next && next());
-  mw.authenticate = mw; mw.authorize = jest.fn(() => mw); mw.protect = mw;
-  mw.restrictTo = jest.fn(() => mw); mw.isAdmin = mw; mw.isAuth = mw;
+  mw.authenticate = mw;
+  mw.authorize = jest.fn(() => mw);
+  mw.protect = mw;
+  mw.restrictTo = jest.fn(() => mw);
+  mw.isAdmin = mw;
+  mw.isAuth = mw;
   return mw;
 });
-jest.mock('../../services/therapistPortal.service', () => new Proxy({}, { get: () => jest.fn().mockResolvedValue({}) }));
+jest.mock(
+  '../../services/therapistPortal.service',
+  () => new Proxy({}, { get: () => jest.fn().mockResolvedValue({}) })
+);
 
 let routeModule;
-try { routeModule = require('../../routes/therapist'); } catch(e) { /* load fail */ }
+try {
+  routeModule = require('../../routes/therapist');
+} catch {
+  /* load fail */
+}
 
 describe('routes/therapist', () => {
   test('module loads without crash', () => {
@@ -120,5 +131,4 @@ describe('routes/therapist', () => {
       expect(true).toBe(true);
     }
   });
-
 });

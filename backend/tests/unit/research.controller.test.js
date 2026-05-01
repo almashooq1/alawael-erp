@@ -1,13 +1,25 @@
 'use strict';
 
 // Auto-generated unit test for controllers/research.controller
-jest.mock('../../utils/logger', () => ({ info: jest.fn(), error: jest.fn(), warn: jest.fn(), debug: jest.fn() }));
-jest.mock('../../services/research.service', () => new Proxy({}, { get: () => jest.fn().mockResolvedValue({}) }));
+jest.mock('../../utils/logger', () => ({
+  info: jest.fn(),
+  error: jest.fn(),
+  warn: jest.fn(),
+  debug: jest.fn(),
+}));
+jest.mock(
+  '../../services/research.service',
+  () => new Proxy({}, { get: () => jest.fn().mockResolvedValue({}) })
+);
 
 const mockReq = (overrides = {}) => ({
   headers: { authorization: 'Bearer token' },
-  body: {}, params: {}, query: {},
-  path: '/test', method: 'GET', ip: '127.0.0.1',
+  body: {},
+  params: {},
+  query: {},
+  path: '/test',
+  method: 'GET',
+  ip: '127.0.0.1',
   user: { _id: 'user1', role: 'admin', permissions: ['*'] },
   get: jest.fn(h => ({ authorization: 'Bearer token' })[h]),
   ...overrides,
@@ -30,10 +42,16 @@ const mockRes = () => {
 const mockNext = jest.fn();
 
 let ctrl;
-try { ctrl = require('../../controllers/research.controller'); } catch (e) { ctrl = null; }
+try {
+  ctrl = require('../../controllers/research.controller');
+} catch {
+  ctrl = null;
+}
 
 describe('research.controller controller', () => {
-  beforeEach(() => { jest.clearAllMocks(); });
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   test('module loads without crash', () => {
     expect(true).toBe(true);
@@ -44,7 +62,11 @@ describe('research.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.getStudyById(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.getStudyById(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -53,7 +75,11 @@ describe('research.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.createStudy(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.createStudy(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -62,7 +88,11 @@ describe('research.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.updateStudy(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.updateStudy(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -71,7 +101,11 @@ describe('research.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.deleteStudy(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.deleteStudy(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -80,7 +114,11 @@ describe('research.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.getOutcomeMeasureById(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.getOutcomeMeasureById(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -89,7 +127,11 @@ describe('research.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.createOutcomeMeasure(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.createOutcomeMeasure(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -98,7 +140,11 @@ describe('research.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.updateOutcomeMeasure(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.updateOutcomeMeasure(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -107,7 +153,11 @@ describe('research.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.deleteOutcomeMeasure(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.deleteOutcomeMeasure(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -116,7 +166,11 @@ describe('research.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.seedStandardMeasures(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.seedStandardMeasures(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -125,7 +179,11 @@ describe('research.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.getDatasetById(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.getDatasetById(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -134,7 +192,11 @@ describe('research.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.createDataset(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.createDataset(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -143,7 +205,11 @@ describe('research.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.updateDataset(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.updateDataset(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -152,7 +218,11 @@ describe('research.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.deleteDataset(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.deleteDataset(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -161,7 +231,11 @@ describe('research.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.getEffectivenessReportById(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.getEffectivenessReportById(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -170,7 +244,11 @@ describe('research.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.createEffectivenessReport(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.createEffectivenessReport(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -179,7 +257,11 @@ describe('research.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.updateEffectivenessReport(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.updateEffectivenessReport(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -188,7 +270,11 @@ describe('research.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.deleteEffectivenessReport(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.deleteEffectivenessReport(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -197,7 +283,11 @@ describe('research.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.getBenchmarkingReportById(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.getBenchmarkingReportById(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -206,7 +296,11 @@ describe('research.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.createBenchmarkingReport(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.createBenchmarkingReport(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -215,7 +309,11 @@ describe('research.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.updateBenchmarkingReport(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.updateBenchmarkingReport(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -224,7 +322,11 @@ describe('research.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.deleteBenchmarkingReport(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.deleteBenchmarkingReport(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -233,7 +335,11 @@ describe('research.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.getExportById(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.getExportById(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -242,7 +348,11 @@ describe('research.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.createExport(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.createExport(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -251,7 +361,11 @@ describe('research.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.updateExport(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.updateExport(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -260,7 +374,11 @@ describe('research.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.approveExport(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.approveExport(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -269,7 +387,11 @@ describe('research.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.revokeExport(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.revokeExport(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -278,8 +400,11 @@ describe('research.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.deleteExport(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.deleteExport(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
-
 });

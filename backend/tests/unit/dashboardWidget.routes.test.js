@@ -34,14 +34,32 @@ jest.mock('express', () => ({
 
 jest.mock('../../middleware/auth', () => {
   const mw = jest.fn((req, res, next) => next && next());
-  mw.authenticate = mw; mw.authorize = jest.fn(() => mw); mw.protect = mw;
-  mw.restrictTo = jest.fn(() => mw); mw.isAdmin = mw; mw.isAuth = mw;
+  mw.authenticate = mw;
+  mw.authorize = jest.fn(() => mw);
+  mw.protect = mw;
+  mw.restrictTo = jest.fn(() => mw);
+  mw.isAdmin = mw;
+  mw.isAuth = mw;
   return mw;
 });
-jest.mock('../../controllers/dashboardWidget.controller', () => new Proxy({}, { get: (t, p) => p === '__esModule' ? false : jest.fn((req, res) => res && res.json && res.json({})) }));
+jest.mock(
+  '../../controllers/dashboardWidget.controller',
+  () =>
+    new Proxy(
+      {},
+      {
+        get: (t, p) =>
+          p === '__esModule' ? false : jest.fn((req, res) => res && res.json && res.json({})),
+      }
+    )
+);
 
 let routeModule;
-try { routeModule = require('../../routes/dashboardWidget.routes'); } catch(e) { /* load fail */ }
+try {
+  routeModule = require('../../routes/dashboardWidget.routes');
+} catch {
+  /* load fail */
+}
 
 describe('routes/dashboardWidget.routes', () => {
   test('module loads without crash', () => {
@@ -100,5 +118,4 @@ describe('routes/dashboardWidget.routes', () => {
       expect(true).toBe(true);
     }
   });
-
 });

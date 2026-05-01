@@ -4,10 +4,20 @@
  */
 'use strict';
 
-jest.mock('../../utils/logger', () => ({ info: jest.fn(), error: jest.fn(), warn: jest.fn(), debug: jest.fn(), log: jest.fn() }));
+jest.mock('../../utils/logger', () => ({
+  info: jest.fn(),
+  error: jest.fn(),
+  warn: jest.fn(),
+  debug: jest.fn(),
+  log: jest.fn(),
+}));
 
 let mod;
-try { mod = require('../../utils/socketEmitter'); } catch(e) { /* load fail */ }
+try {
+  mod = require('../../utils/socketEmitter');
+} catch {
+  /* load fail */
+}
 
 describe('utils/socketEmitter', () => {
   test('module loads without crash', () => {
@@ -23,7 +33,11 @@ describe('utils/socketEmitter', () => {
     if (!mod) return;
     const fn = mod.initializeSocketEmitter;
     if (typeof fn !== 'function') return;
-    try { await fn(); } catch(e) { /* allowed */ }
+    try {
+      await fn();
+    } catch {
+      /* allowed */
+    }
     expect(true).toBe(true);
   });
 
@@ -36,7 +50,11 @@ describe('utils/socketEmitter', () => {
     if (!mod) return;
     const fn = mod.getIO;
     if (typeof fn !== 'function') return;
-    try { await fn(); } catch(e) { /* allowed */ }
+    try {
+      await fn();
+    } catch {
+      /* allowed */
+    }
     expect(true).toBe(true);
   });
 
@@ -49,7 +67,11 @@ describe('utils/socketEmitter', () => {
     if (!mod) return;
     const fn = mod.emitModuleKPIUpdate;
     if (typeof fn !== 'function') return;
-    try { await fn(); } catch(e) { /* allowed */ }
+    try {
+      await fn();
+    } catch {
+      /* allowed */
+    }
     expect(true).toBe(true);
   });
 
@@ -62,7 +84,11 @@ describe('utils/socketEmitter', () => {
     if (!mod) return;
     const fn = mod.emitDashboardUpdate;
     if (typeof fn !== 'function') return;
-    try { await fn(); } catch(e) { /* allowed */ }
+    try {
+      await fn();
+    } catch {
+      /* allowed */
+    }
     expect(true).toBe(true);
   });
 
@@ -75,7 +101,11 @@ describe('utils/socketEmitter', () => {
     if (!mod) return;
     const fn = mod.emitNotification;
     if (typeof fn !== 'function') return;
-    try { await fn(); } catch(e) { /* allowed */ }
+    try {
+      await fn();
+    } catch {
+      /* allowed */
+    }
     expect(true).toBe(true);
   });
 
@@ -88,7 +118,11 @@ describe('utils/socketEmitter', () => {
     if (!mod) return;
     const fn = mod.emitChatMessage;
     if (typeof fn !== 'function') return;
-    try { await fn(); } catch(e) { /* allowed */ }
+    try {
+      await fn();
+    } catch {
+      /* allowed */
+    }
     expect(true).toBe(true);
   });
 
@@ -101,7 +135,11 @@ describe('utils/socketEmitter', () => {
     if (!mod) return;
     const fn = mod.emitSystemAlert;
     if (typeof fn !== 'function') return;
-    try { await fn(); } catch(e) { /* allowed */ }
+    try {
+      await fn();
+    } catch {
+      /* allowed */
+    }
     expect(true).toBe(true);
   });
 
@@ -114,7 +152,11 @@ describe('utils/socketEmitter', () => {
     if (!mod) return;
     const fn = mod.emitDataChange;
     if (typeof fn !== 'function') return;
-    try { await fn(); } catch(e) { /* allowed */ }
+    try {
+      await fn();
+    } catch {
+      /* allowed */
+    }
     expect(true).toBe(true);
   });
 
@@ -127,7 +169,11 @@ describe('utils/socketEmitter', () => {
     if (!mod) return;
     const fn = mod.getConnectedClientsCount;
     if (typeof fn !== 'function') return;
-    try { await fn(); } catch(e) { /* allowed */ }
+    try {
+      await fn();
+    } catch {
+      /* allowed */
+    }
     expect(true).toBe(true);
   });
 
@@ -140,7 +186,11 @@ describe('utils/socketEmitter', () => {
     if (!mod) return;
     const fn = mod.getClientsInRoom;
     if (typeof fn !== 'function') return;
-    try { await fn(); } catch(e) { /* allowed */ }
+    try {
+      await fn();
+    } catch {
+      /* allowed */
+    }
     expect(true).toBe(true);
   });
 
@@ -153,8 +203,11 @@ describe('utils/socketEmitter', () => {
     if (!mod) return;
     const fn = mod.broadcast;
     if (typeof fn !== 'function') return;
-    try { await fn(); } catch(e) { /* allowed */ }
+    try {
+      await fn();
+    } catch {
+      /* allowed */
+    }
     expect(true).toBe(true);
   });
-
 });

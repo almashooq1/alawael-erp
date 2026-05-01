@@ -27,13 +27,19 @@ const mockSystemSettingsChain = {
   exec: jest.fn().mockResolvedValue([]),
 };
 jest.mock('../../models/SystemSettings', () => {
-  const M = jest.fn().mockImplementation(() => ({ save: jest.fn().mockResolvedValue({ _id: 'id1' }) }));
+  const M = jest
+    .fn()
+    .mockImplementation(() => ({ save: jest.fn().mockResolvedValue({ _id: 'id1' }) }));
   Object.assign(M, mockSystemSettingsChain);
   return M;
 });
 
 let svc;
-try { svc = require('../../services/systemSettingsService'); } catch(e) { svc = null; }
+try {
+  svc = require('../../services/systemSettingsService');
+} catch {
+  svc = null;
+}
 
 describe('systemSettingsService service', () => {
   test('module loads without crash', () => {
@@ -43,5 +49,4 @@ describe('systemSettingsService service', () => {
   test('exports something', () => {
     expect(svc !== null).toBe(true);
   });
-
 });

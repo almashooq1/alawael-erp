@@ -8,7 +8,9 @@
 const mockSchema = {
   add: jest.fn().mockReturnThis(),
   index: jest.fn().mockReturnThis(),
-  virtual: jest.fn().mockReturnValue({ get: jest.fn().mockReturnThis(), set: jest.fn().mockReturnThis() }),
+  virtual: jest
+    .fn()
+    .mockReturnValue({ get: jest.fn().mockReturnThis(), set: jest.fn().mockReturnThis() }),
   pre: jest.fn().mockReturnThis(),
   post: jest.fn().mockReturnThis(),
   plugin: jest.fn().mockReturnThis(),
@@ -19,14 +21,35 @@ const mockSchema = {
   obj: {},
 };
 
-const mockModelFn = jest.fn().mockImplementation(function(data) {
+const mockModelFn = jest.fn().mockImplementation(function (data) {
   Object.assign(this, data);
   this.save = jest.fn().mockResolvedValue(this);
   this.validate = jest.fn().mockResolvedValue(undefined);
 });
-mockModelFn.find = jest.fn().mockReturnValue({ sort: jest.fn().mockReturnThis(), limit: jest.fn().mockReturnThis(), skip: jest.fn().mockReturnThis(), lean: jest.fn().mockResolvedValue([]), exec: jest.fn().mockResolvedValue([]), populate: jest.fn().mockReturnThis() });
-mockModelFn.findOne = jest.fn().mockReturnValue({ lean: jest.fn().mockResolvedValue(null), exec: jest.fn().mockResolvedValue(null), populate: jest.fn().mockReturnThis() });
-mockModelFn.findById = jest.fn().mockReturnValue({ lean: jest.fn().mockResolvedValue(null), exec: jest.fn().mockResolvedValue(null), populate: jest.fn().mockReturnThis() });
+mockModelFn.find = jest
+  .fn()
+  .mockReturnValue({
+    sort: jest.fn().mockReturnThis(),
+    limit: jest.fn().mockReturnThis(),
+    skip: jest.fn().mockReturnThis(),
+    lean: jest.fn().mockResolvedValue([]),
+    exec: jest.fn().mockResolvedValue([]),
+    populate: jest.fn().mockReturnThis(),
+  });
+mockModelFn.findOne = jest
+  .fn()
+  .mockReturnValue({
+    lean: jest.fn().mockResolvedValue(null),
+    exec: jest.fn().mockResolvedValue(null),
+    populate: jest.fn().mockReturnThis(),
+  });
+mockModelFn.findById = jest
+  .fn()
+  .mockReturnValue({
+    lean: jest.fn().mockResolvedValue(null),
+    exec: jest.fn().mockResolvedValue(null),
+    populate: jest.fn().mockReturnThis(),
+  });
 mockModelFn.create = jest.fn().mockResolvedValue({ _id: 'mock-id' });
 mockModelFn.countDocuments = jest.fn().mockResolvedValue(0);
 mockModelFn.deleteMany = jest.fn().mockResolvedValue({ deletedCount: 0 });
@@ -39,9 +62,15 @@ mockModelFn.modelName = 'User';
 
 jest.mock('mongoose', () => {
   const actualTypes = {
-    String: 'String', Number: 'Number', Boolean: 'Boolean',
-    Date: 'Date', Buffer: 'Buffer', Mixed: 'Mixed',
-    ObjectId: 'ObjectId', Array: 'Array', Decimal128: 'Decimal128',
+    String: 'String',
+    Number: 'Number',
+    Boolean: 'Boolean',
+    Date: 'Date',
+    Buffer: 'Buffer',
+    Mixed: 'Mixed',
+    ObjectId: 'ObjectId',
+    Array: 'Array',
+    Decimal128: 'Decimal128',
     Map: 'Map',
   };
   return {
@@ -58,11 +87,23 @@ jest.mock('mongoose', () => {
   };
 });
 
-jest.mock('bcryptjs', () => ({ hash: jest.fn().mockResolvedValue('hashed'), compare: jest.fn().mockResolvedValue(true), genSalt: jest.fn().mockResolvedValue('salt') }));
-jest.mock('bcryptjs', () => ({ hash: jest.fn().mockResolvedValue('hashed'), compare: jest.fn().mockResolvedValue(true), genSalt: jest.fn().mockResolvedValue('salt') }));
+jest.mock('bcryptjs', () => ({
+  hash: jest.fn().mockResolvedValue('hashed'),
+  compare: jest.fn().mockResolvedValue(true),
+  genSalt: jest.fn().mockResolvedValue('salt'),
+}));
+jest.mock('bcryptjs', () => ({
+  hash: jest.fn().mockResolvedValue('hashed'),
+  compare: jest.fn().mockResolvedValue(true),
+  genSalt: jest.fn().mockResolvedValue('salt'),
+}));
 
 let Model;
-try { Model = require('../../models/User'); } catch(e) { /* load fail */ }
+try {
+  Model = require('../../models/User');
+} catch {
+  /* load fail */
+}
 
 describe('models/User', () => {
   test('module loads without crash', () => {
@@ -121,5 +162,4 @@ describe('models/User', () => {
     if (fn) expect(typeof fn).toBe('function');
     else expect(true).toBe(true);
   });
-
 });

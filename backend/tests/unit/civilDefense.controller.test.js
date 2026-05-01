@@ -1,34 +1,50 @@
 'use strict';
 
 // Auto-generated unit test for controllers/civilDefense.controller
-jest.mock('../../services/civilDefenseIntegration.service', () => new Proxy({}, { get: () => jest.fn().mockResolvedValue({}) }));
+jest.mock(
+  '../../services/civilDefenseIntegration.service',
+  () => new Proxy({}, { get: () => jest.fn().mockResolvedValue({}) })
+);
 jest.mock('../../utils/escapeRegex', () => ({}));
 jest.mock('../../models/civilDefense.model', () => {
   const M = jest.fn(() => ({ save: jest.fn().mockResolvedValue({ _id: 'id1' }) }));
   Object.assign(M, {
-    find: jest.fn().mockReturnThis(), findOne: jest.fn().mockReturnThis(),
+    find: jest.fn().mockReturnThis(),
+    findOne: jest.fn().mockReturnThis(),
     findById: jest.fn().mockResolvedValue({ _id: 'id1' }),
     findOneAndUpdate: jest.fn().mockResolvedValue({ _id: 'id1' }),
     findByIdAndUpdate: jest.fn().mockResolvedValue({ _id: 'id1' }),
     findByIdAndDelete: jest.fn().mockResolvedValue({ _id: 'id1' }),
     countDocuments: jest.fn().mockResolvedValue(0),
     aggregate: jest.fn().mockResolvedValue([]),
-    populate: jest.fn().mockReturnThis(), lean: jest.fn().mockResolvedValue([]),
-    sort: jest.fn().mockReturnThis(), limit: jest.fn().mockReturnThis(),
-    skip: jest.fn().mockReturnThis(), select: jest.fn().mockReturnThis(),
+    populate: jest.fn().mockReturnThis(),
+    lean: jest.fn().mockResolvedValue([]),
+    sort: jest.fn().mockReturnThis(),
+    limit: jest.fn().mockReturnThis(),
+    skip: jest.fn().mockReturnThis(),
+    select: jest.fn().mockReturnThis(),
     exec: jest.fn().mockResolvedValue([]),
     create: jest.fn().mockResolvedValue({ _id: 'id1' }),
     deleteMany: jest.fn().mockResolvedValue({ deletedCount: 0 }),
   });
   return M;
 });
-jest.mock('../../utils/logger', () => ({ info: jest.fn(), error: jest.fn(), warn: jest.fn(), debug: jest.fn() }));
+jest.mock('../../utils/logger', () => ({
+  info: jest.fn(),
+  error: jest.fn(),
+  warn: jest.fn(),
+  debug: jest.fn(),
+}));
 jest.mock('../../utils/safeError', () => ({}));
 
 const mockReq = (overrides = {}) => ({
   headers: { authorization: 'Bearer token' },
-  body: {}, params: {}, query: {},
-  path: '/test', method: 'GET', ip: '127.0.0.1',
+  body: {},
+  params: {},
+  query: {},
+  path: '/test',
+  method: 'GET',
+  ip: '127.0.0.1',
   user: { _id: 'user1', role: 'admin', permissions: ['*'] },
   get: jest.fn(h => ({ authorization: 'Bearer token' })[h]),
   ...overrides,
@@ -51,10 +67,16 @@ const mockRes = () => {
 const mockNext = jest.fn();
 
 let ctrl;
-try { ctrl = require('../../controllers/civilDefense.controller'); } catch (e) { ctrl = null; }
+try {
+  ctrl = require('../../controllers/civilDefense.controller');
+} catch {
+  ctrl = null;
+}
 
 describe('civilDefense.controller controller', () => {
-  beforeEach(() => { jest.clearAllMocks(); });
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   test('module loads without crash', () => {
     expect(true).toBe(true);
@@ -65,7 +87,11 @@ describe('civilDefense.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.requestSafetyCertificate(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.requestSafetyCertificate(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -74,7 +100,11 @@ describe('civilDefense.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.getCertificateStatus(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.getCertificateStatus(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -83,7 +113,11 @@ describe('civilDefense.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.renewSafetyCertificate(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.renewSafetyCertificate(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -92,7 +126,11 @@ describe('civilDefense.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.getCertificatesForFacility(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.getCertificatesForFacility(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -101,7 +139,11 @@ describe('civilDefense.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.listCertificates(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.listCertificates(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -110,7 +152,11 @@ describe('civilDefense.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.scheduleSafetyAudit(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.scheduleSafetyAudit(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -119,7 +165,11 @@ describe('civilDefense.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.getAuditDetails(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.getAuditDetails(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -128,7 +178,11 @@ describe('civilDefense.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.getAuditsByFacility(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.getAuditsByFacility(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -137,7 +191,11 @@ describe('civilDefense.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.getAvailableAuditSlots(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.getAvailableAuditSlots(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -146,7 +204,11 @@ describe('civilDefense.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.completeAudit(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.completeAudit(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -155,7 +217,11 @@ describe('civilDefense.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.getComplianceStatus(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.getComplianceStatus(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -164,7 +230,11 @@ describe('civilDefense.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.getViolations(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.getViolations(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -173,7 +243,11 @@ describe('civilDefense.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.resolveViolation(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.resolveViolation(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -182,7 +256,11 @@ describe('civilDefense.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.generateComplianceReport(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.generateComplianceReport(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -191,7 +269,11 @@ describe('civilDefense.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.scheduleFireSafetyInspection(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.scheduleFireSafetyInspection(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -200,7 +282,11 @@ describe('civilDefense.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.getFireSafetyStatus(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.getFireSafetyStatus(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -209,7 +295,11 @@ describe('civilDefense.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.updateFireSafetyEquipment(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.updateFireSafetyEquipment(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -218,7 +308,11 @@ describe('civilDefense.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.logMaintenanceActivity(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.logMaintenanceActivity(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -227,7 +321,11 @@ describe('civilDefense.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.scheduleEmergencyDrill(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.scheduleEmergencyDrill(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -236,7 +334,11 @@ describe('civilDefense.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.getEmergencyDrillResults(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.getEmergencyDrillResults(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -245,7 +347,11 @@ describe('civilDefense.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.getEmergencyDrillsByFacility(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.getEmergencyDrillsByFacility(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -254,7 +360,11 @@ describe('civilDefense.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.completeEmergencyDrill(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.completeEmergencyDrill(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -263,7 +373,11 @@ describe('civilDefense.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.uploadSafetyDocuments(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.uploadSafetyDocuments(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -272,7 +386,11 @@ describe('civilDefense.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.getFacilityDocuments(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.getFacilityDocuments(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -281,7 +399,11 @@ describe('civilDefense.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.deleteDocument(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.deleteDocument(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -290,7 +412,11 @@ describe('civilDefense.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.getRequiredDocuments(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.getRequiredDocuments(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -299,7 +425,11 @@ describe('civilDefense.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.getFacilityNotifications(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.getFacilityNotifications(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -308,7 +438,11 @@ describe('civilDefense.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.acknowledgeNotification(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.acknowledgeNotification(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -317,7 +451,11 @@ describe('civilDefense.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.getDashboardData(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.getDashboardData(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -326,7 +464,11 @@ describe('civilDefense.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.generateFacilityReport(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.generateFacilityReport(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -335,7 +477,11 @@ describe('civilDefense.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.exportReport(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.exportReport(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -344,7 +490,11 @@ describe('civilDefense.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.getSettings(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.getSettings(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -353,7 +503,11 @@ describe('civilDefense.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.updateSettings(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.updateSettings(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -362,7 +516,11 @@ describe('civilDefense.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.checkHealth(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.checkHealth(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -371,7 +529,11 @@ describe('civilDefense.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.globalSearch(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.globalSearch(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -380,7 +542,11 @@ describe('civilDefense.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.getFacilitiesComplianceSummary(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.getFacilitiesComplianceSummary(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -389,8 +555,11 @@ describe('civilDefense.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.groupByType(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.groupByType(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
-
 });

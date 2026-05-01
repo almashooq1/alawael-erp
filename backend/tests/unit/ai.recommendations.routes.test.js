@@ -32,10 +32,24 @@ jest.mock('express', () => ({
   static: jest.fn(() => jest.fn()),
 }));
 
-jest.mock('../../controllers/aiRecommendations.controller', () => new Proxy({}, { get: (t, p) => p === '__esModule' ? false : jest.fn((req, res) => res && res.json && res.json({})) }));
+jest.mock(
+  '../../controllers/aiRecommendations.controller',
+  () =>
+    new Proxy(
+      {},
+      {
+        get: (t, p) =>
+          p === '__esModule' ? false : jest.fn((req, res) => res && res.json && res.json({})),
+      }
+    )
+);
 
 let routeModule;
-try { routeModule = require('../../routes/ai.recommendations.routes'); } catch(e) { /* load fail */ }
+try {
+  routeModule = require('../../routes/ai.recommendations.routes');
+} catch {
+  /* load fail */
+}
 
 describe('routes/ai.recommendations.routes', () => {
   test('module loads without crash', () => {
@@ -64,5 +78,4 @@ describe('routes/ai.recommendations.routes', () => {
       expect(true).toBe(true);
     }
   });
-
 });

@@ -4,9 +4,12 @@
  */
 'use strict';
 
-
 let mod;
-try { mod = require('../../utils/paginate'); } catch(e) { /* load fail */ }
+try {
+  mod = require('../../utils/paginate');
+} catch {
+  /* load fail */
+}
 
 describe('utils/paginate', () => {
   test('module loads without crash', () => {
@@ -22,7 +25,11 @@ describe('utils/paginate', () => {
     if (!mod) return;
     const fn = mod.paginate;
     if (typeof fn !== 'function') return;
-    try { await fn(); } catch(e) { /* allowed */ }
+    try {
+      await fn();
+    } catch {
+      /* allowed */
+    }
     expect(true).toBe(true);
   });
 
@@ -35,7 +42,11 @@ describe('utils/paginate', () => {
     if (!mod) return;
     const fn = mod.paginateMeta;
     if (typeof fn !== 'function') return;
-    try { await fn(); } catch(e) { /* allowed */ }
+    try {
+      await fn();
+    } catch {
+      /* allowed */
+    }
     expect(true).toBe(true);
   });
 
@@ -48,8 +59,11 @@ describe('utils/paginate', () => {
     if (!mod) return;
     const fn = mod.DEFAULT_LIMIT;
     if (typeof fn !== 'function') return;
-    try { await fn(); } catch(e) { /* allowed */ }
+    try {
+      await fn();
+    } catch {
+      /* allowed */
+    }
     expect(true).toBe(true);
   });
-
 });

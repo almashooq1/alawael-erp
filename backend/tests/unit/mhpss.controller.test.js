@@ -1,7 +1,10 @@
 'use strict';
 
 // Auto-generated unit test for controllers/mhpss.controller
-jest.mock('../../services/mhpss.service', () => new Proxy({}, { get: () => jest.fn().mockResolvedValue({}) }));
+jest.mock(
+  '../../services/mhpss.service',
+  () => new Proxy({}, { get: () => jest.fn().mockResolvedValue({}) })
+);
 jest.mock('../../utils/sanitize', () => ({}));
 jest.mock('../../utils/safeError', () => ({}));
 jest.mock('../../utils/sanitize', () => ({}));
@@ -11,8 +14,12 @@ jest.mock('../../utils/sanitize', () => ({}));
 
 const mockReq = (overrides = {}) => ({
   headers: { authorization: 'Bearer token' },
-  body: {}, params: {}, query: {},
-  path: '/test', method: 'GET', ip: '127.0.0.1',
+  body: {},
+  params: {},
+  query: {},
+  path: '/test',
+  method: 'GET',
+  ip: '127.0.0.1',
   user: { _id: 'user1', role: 'admin', permissions: ['*'] },
   get: jest.fn(h => ({ authorization: 'Bearer token' })[h]),
   ...overrides,
@@ -35,10 +42,16 @@ const mockRes = () => {
 const mockNext = jest.fn();
 
 let ctrl;
-try { ctrl = require('../../controllers/mhpss.controller'); } catch (e) { ctrl = null; }
+try {
+  ctrl = require('../../controllers/mhpss.controller');
+} catch {
+  ctrl = null;
+}
 
 describe('mhpss.controller controller', () => {
-  beforeEach(() => { jest.clearAllMocks(); });
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   test('module loads without crash', () => {
     expect(true).toBe(true);
@@ -49,7 +62,11 @@ describe('mhpss.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.createSession(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.createSession(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -58,7 +75,11 @@ describe('mhpss.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.getSessions(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.getSessions(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -67,7 +88,11 @@ describe('mhpss.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.getSessionById(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.getSessionById(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -76,7 +101,11 @@ describe('mhpss.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.updateSession(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.updateSession(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -85,7 +114,11 @@ describe('mhpss.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.deleteSession(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.deleteSession(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -94,7 +127,11 @@ describe('mhpss.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.getSessionStats(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.getSessionStats(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -103,7 +140,11 @@ describe('mhpss.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.createProgram(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.createProgram(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -112,7 +153,11 @@ describe('mhpss.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.getPrograms(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.getPrograms(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -121,7 +166,11 @@ describe('mhpss.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.getProgramById(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.getProgramById(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -130,7 +179,11 @@ describe('mhpss.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.updateProgram(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.updateProgram(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -139,7 +192,11 @@ describe('mhpss.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.deleteProgram(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.deleteProgram(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -148,7 +205,11 @@ describe('mhpss.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.enrollInProgram(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.enrollInProgram(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -157,7 +218,11 @@ describe('mhpss.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.unenrollFromProgram(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.unenrollFromProgram(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -166,7 +231,11 @@ describe('mhpss.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.createAssessment(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.createAssessment(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -175,7 +244,11 @@ describe('mhpss.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.getAssessments(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.getAssessments(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -184,7 +257,11 @@ describe('mhpss.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.getAssessmentById(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.getAssessmentById(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -193,7 +270,11 @@ describe('mhpss.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.updateAssessment(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.updateAssessment(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -202,7 +283,11 @@ describe('mhpss.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.deleteAssessment(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.deleteAssessment(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -211,7 +296,11 @@ describe('mhpss.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.getBeneficiaryAssessmentHistory(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.getBeneficiaryAssessmentHistory(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -220,7 +309,11 @@ describe('mhpss.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.getAssessmentStats(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.getAssessmentStats(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -229,7 +322,11 @@ describe('mhpss.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.createCrisis(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.createCrisis(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -238,7 +335,11 @@ describe('mhpss.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.getCrises(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.getCrises(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -247,7 +348,11 @@ describe('mhpss.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.getCrisisById(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.getCrisisById(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -256,7 +361,11 @@ describe('mhpss.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.updateCrisis(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.updateCrisis(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -265,7 +374,11 @@ describe('mhpss.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.deleteCrisis(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.deleteCrisis(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -274,7 +387,11 @@ describe('mhpss.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.addCrisisTimelineEvent(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.addCrisisTimelineEvent(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -283,7 +400,11 @@ describe('mhpss.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.addCrisisFollowUp(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.addCrisisFollowUp(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -292,7 +413,11 @@ describe('mhpss.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.getCrisisStats(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.getCrisisStats(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -301,7 +426,11 @@ describe('mhpss.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.createGroup(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.createGroup(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -310,7 +439,11 @@ describe('mhpss.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.getGroups(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.getGroups(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -319,7 +452,11 @@ describe('mhpss.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.getGroupById(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.getGroupById(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -328,7 +465,11 @@ describe('mhpss.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.updateGroup(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.updateGroup(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -337,7 +478,11 @@ describe('mhpss.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.deleteGroup(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.deleteGroup(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -346,7 +491,11 @@ describe('mhpss.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.addGroupMember(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.addGroupMember(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -355,7 +504,11 @@ describe('mhpss.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.removeGroupMember(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.removeGroupMember(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -364,7 +517,11 @@ describe('mhpss.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.addGroupSession(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.addGroupSession(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -373,8 +530,11 @@ describe('mhpss.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.getDashboard(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.getDashboard(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
-
 });

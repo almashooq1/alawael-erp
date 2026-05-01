@@ -32,16 +32,27 @@ jest.mock('express', () => ({
   static: jest.fn(() => jest.fn()),
 }));
 
-jest.mock('../../services/gosi-full.service', () => new Proxy({}, { get: () => jest.fn().mockResolvedValue({}) }));
+jest.mock(
+  '../../services/gosi-full.service',
+  () => new Proxy({}, { get: () => jest.fn().mockResolvedValue({}) })
+);
 jest.mock('../../middleware/auth', () => {
   const mw = jest.fn((req, res, next) => next && next());
-  mw.authenticate = mw; mw.authorize = jest.fn(() => mw); mw.protect = mw;
-  mw.restrictTo = jest.fn(() => mw); mw.isAdmin = mw; mw.isAuth = mw;
+  mw.authenticate = mw;
+  mw.authorize = jest.fn(() => mw);
+  mw.protect = mw;
+  mw.restrictTo = jest.fn(() => mw);
+  mw.isAdmin = mw;
+  mw.isAuth = mw;
   return mw;
 });
 
 let routeModule;
-try { routeModule = require('../../routes/gosi-full.routes'); } catch(e) { /* load fail */ }
+try {
+  routeModule = require('../../routes/gosi-full.routes');
+} catch {
+  /* load fail */
+}
 
 describe('routes/gosi-full.routes', () => {
   test('module loads without crash', () => {
@@ -90,5 +101,4 @@ describe('routes/gosi-full.routes', () => {
       expect(true).toBe(true);
     }
   });
-
 });

@@ -7,7 +7,11 @@
 jest.mock('../../config/logging.advanced', () => ({}));
 
 let mod;
-try { mod = require('../../utils/logger'); } catch(e) { /* load fail */ }
+try {
+  mod = require('../../utils/logger');
+} catch {
+  /* load fail */
+}
 
 describe('utils/logger', () => {
   test('module loads without crash', () => {
@@ -23,7 +27,11 @@ describe('utils/logger', () => {
     if (!mod) return;
     const fn = mod.createChildLogger;
     if (typeof fn !== 'function') return;
-    try { await fn(); } catch(e) { /* allowed */ }
+    try {
+      await fn();
+    } catch {
+      /* allowed */
+    }
     expect(true).toBe(true);
   });
 
@@ -36,8 +44,11 @@ describe('utils/logger', () => {
     if (!mod) return;
     const fn = mod.sanitizeLogData;
     if (typeof fn !== 'function') return;
-    try { await fn(); } catch(e) { /* allowed */ }
+    try {
+      await fn();
+    } catch {
+      /* allowed */
+    }
     expect(true).toBe(true);
   });
-
 });

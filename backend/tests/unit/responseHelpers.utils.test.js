@@ -4,9 +4,12 @@
  */
 'use strict';
 
-
 let mod;
-try { mod = require('../../utils/responseHelpers'); } catch(e) { /* load fail */ }
+try {
+  mod = require('../../utils/responseHelpers');
+} catch {
+  /* load fail */
+}
 
 describe('utils/responseHelpers', () => {
   test('module loads without crash', () => {
@@ -22,7 +25,11 @@ describe('utils/responseHelpers', () => {
     if (!mod) return;
     const fn = mod.sendSuccess;
     if (typeof fn !== 'function') return;
-    try { await fn(); } catch(e) { /* allowed */ }
+    try {
+      await fn();
+    } catch {
+      /* allowed */
+    }
     expect(true).toBe(true);
   });
 
@@ -35,8 +42,11 @@ describe('utils/responseHelpers', () => {
     if (!mod) return;
     const fn = mod.sendError;
     if (typeof fn !== 'function') return;
-    try { await fn(); } catch(e) { /* allowed */ }
+    try {
+      await fn();
+    } catch {
+      /* allowed */
+    }
     expect(true).toBe(true);
   });
-
 });

@@ -1,7 +1,10 @@
 'use strict';
 
 // Auto-generated unit test for middleware/validateObjectId.js
-jest.mock('mongoose', () => ({ connection: { readyState: 1 }, Types: { ObjectId: jest.fn(v => v || 'id') } }));
+jest.mock('mongoose', () => ({
+  connection: { readyState: 1 },
+  Types: { ObjectId: jest.fn(v => v || 'id') },
+}));
 
 const mockReq = (overrides = {}) => ({
   headers: { authorization: 'Bearer mock.jwt.token' },
@@ -12,7 +15,12 @@ const mockReq = (overrides = {}) => ({
   path: '/test',
   method: 'GET',
   ip: '127.0.0.1',
-  get: jest.fn(h => ({ 'content-type': 'application/json', authorization: 'Bearer mock.jwt.token' })[h.toLowerCase()]),
+  get: jest.fn(
+    h =>
+      ({ 'content-type': 'application/json', authorization: 'Bearer mock.jwt.token' })[
+        h.toLowerCase()
+      ]
+  ),
   ...overrides,
 });
 
@@ -36,10 +44,16 @@ const mockRes = () => {
 const mockNext = jest.fn();
 
 let mw;
-try { mw = require('../../middleware/validateObjectId'); } catch (e) { mw = null; }
+try {
+  mw = require('../../middleware/validateObjectId');
+} catch {
+  mw = null;
+}
 
 describe('middleware/validateObjectId.js', () => {
-  beforeEach(() => { jest.clearAllMocks(); });
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   test('module loads without crash', () => {
     expect(true).toBe(true);
@@ -55,8 +69,11 @@ describe('middleware/validateObjectId.js', () => {
     const req = mockReq();
     const res = mockRes();
     const next = jest.fn();
-    try { await mw(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await mw(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
-
 });

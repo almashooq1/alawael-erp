@@ -4,9 +4,12 @@
  */
 'use strict';
 
-
 let mod;
-try { mod = require('../../utils/sanitize'); } catch(e) { /* load fail */ }
+try {
+  mod = require('../../utils/sanitize');
+} catch {
+  /* load fail */
+}
 
 describe('utils/sanitize', () => {
   test('module loads without crash', () => {
@@ -22,7 +25,11 @@ describe('utils/sanitize', () => {
     if (!mod) return;
     const fn = mod.escapeRegex;
     if (typeof fn !== 'function') return;
-    try { await fn(); } catch(e) { /* allowed */ }
+    try {
+      await fn();
+    } catch {
+      /* allowed */
+    }
     expect(true).toBe(true);
   });
 
@@ -35,7 +42,11 @@ describe('utils/sanitize', () => {
     if (!mod) return;
     const fn = mod.stripDangerousKeys;
     if (typeof fn !== 'function') return;
-    try { await fn(); } catch(e) { /* allowed */ }
+    try {
+      await fn();
+    } catch {
+      /* allowed */
+    }
     expect(true).toBe(true);
   });
 
@@ -48,7 +59,11 @@ describe('utils/sanitize', () => {
     if (!mod) return;
     const fn = mod.stripUpdateMeta;
     if (typeof fn !== 'function') return;
-    try { await fn(); } catch(e) { /* allowed */ }
+    try {
+      await fn();
+    } catch {
+      /* allowed */
+    }
     expect(true).toBe(true);
   });
 
@@ -61,7 +76,11 @@ describe('utils/sanitize', () => {
     if (!mod) return;
     const fn = mod.DANGEROUS_KEYS;
     if (typeof fn !== 'function') return;
-    try { await fn(); } catch(e) { /* allowed */ }
+    try {
+      await fn();
+    } catch {
+      /* allowed */
+    }
     expect(true).toBe(true);
   });
 
@@ -74,8 +93,11 @@ describe('utils/sanitize', () => {
     if (!mod) return;
     const fn = mod.UPDATE_BLACKLIST;
     if (typeof fn !== 'function') return;
-    try { await fn(); } catch(e) { /* allowed */ }
+    try {
+      await fn();
+    } catch {
+      /* allowed */
+    }
     expect(true).toBe(true);
   });
-
 });

@@ -27,80 +27,124 @@ const mockTrafficAccidentReportChain = {
   exec: jest.fn().mockResolvedValue([]),
 };
 jest.mock('../../models/TrafficAccidentReport', () => {
-  const M = jest.fn().mockImplementation(() => ({ save: jest.fn().mockResolvedValue({ _id: 'id1' }) }));
+  const M = jest
+    .fn()
+    .mockImplementation(() => ({ save: jest.fn().mockResolvedValue({ _id: 'id1' }) }));
   Object.assign(M, mockTrafficAccidentReportChain);
   return M;
 });
 
 let svc;
-try { svc = require('../../services/trafficAccidentAnalytics'); } catch (e) { svc = null; }
+try {
+  svc = require('../../services/trafficAccidentAnalytics');
+} catch {
+  svc = null;
+}
 
 describe('trafficAccidentAnalytics service', () => {
   test('module loads without crash', () => {
-    if (!svc) { console.warn(' could not be loaded'); } expect(true).toBe(true);
+    if (!svc) {
+      console.warn(' could not be loaded');
+    }
+    expect(true).toBe(true);
   });
 
   test('analyzeTimelineTrends is callable', async () => {
     if (typeof svc.analyzeTimelineTrends !== 'function') return;
     let r;
-    try { r = await svc.analyzeTimelineTrends({}); } catch (e) { r = e; }
+    try {
+      r = await svc.analyzeTimelineTrends({});
+    } catch (e) {
+      r = e;
+    }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('analyzeHotspots is callable', async () => {
     if (typeof svc.analyzeHotspots !== 'function') return;
     let r;
-    try { r = await svc.analyzeHotspots({}); } catch (e) { r = e; }
+    try {
+      r = await svc.analyzeHotspots({});
+    } catch (e) {
+      r = e;
+    }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('analyzeViolationPatterns is callable', async () => {
     if (typeof svc.analyzeViolationPatterns !== 'function') return;
     let r;
-    try { r = await svc.analyzeViolationPatterns({}); } catch (e) { r = e; }
+    try {
+      r = await svc.analyzeViolationPatterns({});
+    } catch (e) {
+      r = e;
+    }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('analyzeInjuryAndFatalityRates is callable', async () => {
     if (typeof svc.analyzeInjuryAndFatalityRates !== 'function') return;
     let r;
-    try { r = await svc.analyzeInjuryAndFatalityRates({}); } catch (e) { r = e; }
+    try {
+      r = await svc.analyzeInjuryAndFatalityRates({});
+    } catch (e) {
+      r = e;
+    }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('analyzeFinancialImpact is callable', async () => {
     if (typeof svc.analyzeFinancialImpact !== 'function') return;
     let r;
-    try { r = await svc.analyzeFinancialImpact({}); } catch (e) { r = e; }
+    try {
+      r = await svc.analyzeFinancialImpact({});
+    } catch (e) {
+      r = e;
+    }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('getInvestigatorPerformance is callable', async () => {
     if (typeof svc.getInvestigatorPerformance !== 'function') return;
     let r;
-    try { r = await svc.getInvestigatorPerformance({}); } catch (e) { r = e; }
+    try {
+      r = await svc.getInvestigatorPerformance({});
+    } catch (e) {
+      r = e;
+    }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('analyzeSeasonalTrends is callable', async () => {
     if (typeof svc.analyzeSeasonalTrends !== 'function') return;
     let r;
-    try { r = await svc.analyzeSeasonalTrends({}); } catch (e) { r = e; }
+    try {
+      r = await svc.analyzeSeasonalTrends({});
+    } catch (e) {
+      r = e;
+    }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('generateComprehensiveSummary is callable', async () => {
     if (typeof svc.generateComprehensiveSummary !== 'function') return;
     let r;
-    try { r = await svc.generateComprehensiveSummary({}); } catch (e) { r = e; }
+    try {
+      r = await svc.generateComprehensiveSummary({});
+    } catch (e) {
+      r = e;
+    }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('extractKeyInsights is callable', async () => {
     if (typeof svc.extractKeyInsights !== 'function') return;
     let r;
-    try { r = await svc.extractKeyInsights({}); } catch (e) { r = e; }
+    try {
+      r = await svc.extractKeyInsights({});
+    } catch (e) {
+      r = e;
+    }
     expect(true).toBe(true) /* ran without crash */;
   });
-
 });

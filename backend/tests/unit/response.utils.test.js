@@ -4,9 +4,12 @@
  */
 'use strict';
 
-
 let mod;
-try { mod = require('../../utils/response'); } catch(e) { /* load fail */ }
+try {
+  mod = require('../../utils/response');
+} catch {
+  /* load fail */
+}
 
 describe('utils/response', () => {
   test('module loads without crash', () => {
@@ -22,7 +25,11 @@ describe('utils/response', () => {
     if (!mod) return;
     const fn = mod.successResponse;
     if (typeof fn !== 'function') return;
-    try { await fn(); } catch(e) { /* allowed */ }
+    try {
+      await fn();
+    } catch {
+      /* allowed */
+    }
     expect(true).toBe(true);
   });
 
@@ -35,7 +42,11 @@ describe('utils/response', () => {
     if (!mod) return;
     const fn = mod.errorResponse;
     if (typeof fn !== 'function') return;
-    try { await fn(); } catch(e) { /* allowed */ }
+    try {
+      await fn();
+    } catch {
+      /* allowed */
+    }
     expect(true).toBe(true);
   });
 
@@ -48,8 +59,11 @@ describe('utils/response', () => {
     if (!mod) return;
     const fn = mod.paginatedResponse;
     if (typeof fn !== 'function') return;
-    try { await fn(); } catch(e) { /* allowed */ }
+    try {
+      await fn();
+    } catch {
+      /* allowed */
+    }
     expect(true).toBe(true);
   });
-
 });

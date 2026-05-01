@@ -32,31 +32,77 @@ jest.mock('express', () => ({
   static: jest.fn(() => jest.fn()),
 }));
 
-jest.mock('jsonwebtoken', () => ({ sign: jest.fn(() => 'tok'), verify: jest.fn(() => ({ id: 'u1' })), decode: jest.fn(() => ({ id: 'u1' })) }));
-jest.mock('bcryptjs', () => new Proxy({}, { get: (t, p) => p === '__esModule' ? false : jest.fn() }));
-jest.mock('express-validator', () => new Proxy({}, { get: (t, p) => p === '__esModule' ? false : jest.fn(() => jest.fn((r,s,n) => n && n())) }));
+jest.mock('jsonwebtoken', () => ({
+  sign: jest.fn(() => 'tok'),
+  verify: jest.fn(() => ({ id: 'u1' })),
+  decode: jest.fn(() => ({ id: 'u1' })),
+}));
+jest.mock(
+  'bcryptjs',
+  () => new Proxy({}, { get: (t, p) => (p === '__esModule' ? false : jest.fn()) })
+);
+jest.mock(
+  'express-validator',
+  () =>
+    new Proxy(
+      {},
+      {
+        get: (t, p) => (p === '__esModule' ? false : jest.fn(() => jest.fn((r, s, n) => n && n()))),
+      }
+    )
+);
 jest.mock('../../middleware/rateLimiter', () => {
   const mw = jest.fn((req, res, next) => next && next());
-  mw.authenticate = mw; mw.authorize = jest.fn(() => mw); mw.protect = mw;
-  mw.restrictTo = jest.fn(() => mw); mw.isAdmin = mw; mw.isAuth = mw;
+  mw.authenticate = mw;
+  mw.authorize = jest.fn(() => mw);
+  mw.protect = mw;
+  mw.restrictTo = jest.fn(() => mw);
+  mw.isAdmin = mw;
+  mw.isAuth = mw;
   return mw;
 });
-jest.mock('../../auth/otp-service', () => new Proxy({}, { get: () => jest.fn().mockResolvedValue({}) }));
-jest.mock('../../errors/AppError', () => new Proxy({}, { get: (t, p) => p === '__esModule' ? false : jest.fn() }));
+jest.mock(
+  '../../auth/otp-service',
+  () => new Proxy({}, { get: () => jest.fn().mockResolvedValue({}) })
+);
+jest.mock(
+  '../../errors/AppError',
+  () => new Proxy({}, { get: (t, p) => (p === '__esModule' ? false : jest.fn()) })
+);
 jest.mock('../../models/User', () => {
   const M = jest.fn(() => ({ save: jest.fn().mockResolvedValue({}) }));
-  M.find = jest.fn().mockReturnValue({ sort: jest.fn().mockReturnThis(), limit: jest.fn().mockReturnThis(), lean: jest.fn().mockResolvedValue([]) });
+  M.find = jest
+    .fn()
+    .mockReturnValue({
+      sort: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockReturnThis(),
+      lean: jest.fn().mockResolvedValue([]),
+    });
   M.findOne = jest.fn().mockResolvedValue(null);
   M.findById = jest.fn().mockResolvedValue(null);
   M.create = jest.fn().mockResolvedValue({ _id: 'id1' });
   M.countDocuments = jest.fn().mockResolvedValue(0);
   return M;
 });
-jest.mock('../../config/secrets', () => ({ jwtSecret: 'test', dbUri: 'test', port: 3000, env: 'test' }));
-jest.mock('../../config/secrets', () => ({ jwtSecret: 'test', dbUri: 'test', port: 3000, env: 'test' }));
+jest.mock('../../config/secrets', () => ({
+  jwtSecret: 'test',
+  dbUri: 'test',
+  port: 3000,
+  env: 'test',
+}));
+jest.mock('../../config/secrets', () => ({
+  jwtSecret: 'test',
+  dbUri: 'test',
+  port: 3000,
+  env: 'test',
+}));
 
 let routeModule;
-try { routeModule = require('../../routes/otp-auth.routes'); } catch(e) { /* load fail */ }
+try {
+  routeModule = require('../../routes/otp-auth.routes');
+} catch {
+  /* load fail */
+}
 
 describe('routes/otp-auth.routes', () => {
   test('module loads without crash', () => {
@@ -95,5 +141,4 @@ describe('routes/otp-auth.routes', () => {
       expect(true).toBe(true);
     }
   });
-
 });

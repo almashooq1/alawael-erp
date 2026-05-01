@@ -32,20 +32,51 @@ jest.mock('express', () => ({
   static: jest.fn(() => jest.fn()),
 }));
 
-jest.mock('bcryptjs', () => new Proxy({}, { get: (t, p) => p === '__esModule' ? false : jest.fn() }));
-jest.mock('../../utils/safeError', () => new Proxy({}, { get: (t, p) => p === '__esModule' ? false : jest.fn() }));
-jest.mock('jsonwebtoken', () => ({ sign: jest.fn(() => 'tok'), verify: jest.fn(() => ({ id: 'u1' })), decode: jest.fn(() => ({ id: 'u1' })) }));
+jest.mock(
+  'bcryptjs',
+  () => new Proxy({}, { get: (t, p) => (p === '__esModule' ? false : jest.fn()) })
+);
+jest.mock(
+  '../../utils/safeError',
+  () => new Proxy({}, { get: (t, p) => (p === '__esModule' ? false : jest.fn()) })
+);
+jest.mock('jsonwebtoken', () => ({
+  sign: jest.fn(() => 'tok'),
+  verify: jest.fn(() => ({ id: 'u1' })),
+  decode: jest.fn(() => ({ id: 'u1' })),
+}));
 jest.mock('../../middleware/auth', () => {
   const mw = jest.fn((req, res, next) => next && next());
-  mw.authenticate = mw; mw.authorize = jest.fn(() => mw); mw.protect = mw;
-  mw.restrictTo = jest.fn(() => mw); mw.isAdmin = mw; mw.isAuth = mw;
+  mw.authenticate = mw;
+  mw.authorize = jest.fn(() => mw);
+  mw.protect = mw;
+  mw.restrictTo = jest.fn(() => mw);
+  mw.isAdmin = mw;
+  mw.isAuth = mw;
   return mw;
 });
-jest.mock('../../utils/logger', () => ({ info: jest.fn(), error: jest.fn(), warn: jest.fn(), debug: jest.fn(), log: jest.fn() }));
-jest.mock('../../config/secrets', () => ({ jwtSecret: 'test', dbUri: 'test', port: 3000, env: 'test' }));
+jest.mock('../../utils/logger', () => ({
+  info: jest.fn(),
+  error: jest.fn(),
+  warn: jest.fn(),
+  debug: jest.fn(),
+  log: jest.fn(),
+}));
+jest.mock('../../config/secrets', () => ({
+  jwtSecret: 'test',
+  dbUri: 'test',
+  port: 3000,
+  env: 'test',
+}));
 jest.mock('../../models/ParentPortal', () => {
   const M = jest.fn(() => ({ save: jest.fn().mockResolvedValue({}) }));
-  M.find = jest.fn().mockReturnValue({ sort: jest.fn().mockReturnThis(), limit: jest.fn().mockReturnThis(), lean: jest.fn().mockResolvedValue([]) });
+  M.find = jest
+    .fn()
+    .mockReturnValue({
+      sort: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockReturnThis(),
+      lean: jest.fn().mockResolvedValue([]),
+    });
   M.findOne = jest.fn().mockResolvedValue(null);
   M.findById = jest.fn().mockResolvedValue(null);
   M.create = jest.fn().mockResolvedValue({ _id: 'id1' });
@@ -54,13 +85,21 @@ jest.mock('../../models/ParentPortal', () => {
 });
 jest.mock('../../middleware/rateLimiter', () => {
   const mw = jest.fn((req, res, next) => next && next());
-  mw.authenticate = mw; mw.authorize = jest.fn(() => mw); mw.protect = mw;
-  mw.restrictTo = jest.fn(() => mw); mw.isAdmin = mw; mw.isAuth = mw;
+  mw.authenticate = mw;
+  mw.authorize = jest.fn(() => mw);
+  mw.protect = mw;
+  mw.restrictTo = jest.fn(() => mw);
+  mw.isAdmin = mw;
+  mw.isAuth = mw;
   return mw;
 });
 
 let routeModule;
-try { routeModule = require('../../routes/parent-portal-enhanced.routes'); } catch(e) { /* load fail */ }
+try {
+  routeModule = require('../../routes/parent-portal-enhanced.routes');
+} catch {
+  /* load fail */
+}
 
 describe('routes/parent-portal-enhanced.routes', () => {
   test('module loads without crash', () => {
@@ -129,5 +168,4 @@ describe('routes/parent-portal-enhanced.routes', () => {
       expect(true).toBe(true);
     }
   });
-
 });

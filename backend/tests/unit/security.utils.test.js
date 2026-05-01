@@ -4,11 +4,32 @@
  */
 'use strict';
 
-jest.mock('crypto', () => ({ randomBytes: jest.fn(() => ({ toString: jest.fn(() => 'abc123') })), createHash: jest.fn(() => ({ update: jest.fn().mockReturnThis(), digest: jest.fn(() => 'hash123') })), createCipheriv: jest.fn(() => ({ update: jest.fn(() => 'enc'), final: jest.fn(() => 'final') })), createDecipheriv: jest.fn(() => ({ update: jest.fn(() => 'dec'), final: jest.fn(() => 'final') })) }));
-jest.mock('../../utils/logger', () => ({ info: jest.fn(), error: jest.fn(), warn: jest.fn(), debug: jest.fn(), log: jest.fn() }));
+jest.mock('crypto', () => ({
+  randomBytes: jest.fn(() => ({ toString: jest.fn(() => 'abc123') })),
+  createHash: jest.fn(() => ({
+    update: jest.fn().mockReturnThis(),
+    digest: jest.fn(() => 'hash123'),
+  })),
+  createCipheriv: jest.fn(() => ({ update: jest.fn(() => 'enc'), final: jest.fn(() => 'final') })),
+  createDecipheriv: jest.fn(() => ({
+    update: jest.fn(() => 'dec'),
+    final: jest.fn(() => 'final'),
+  })),
+}));
+jest.mock('../../utils/logger', () => ({
+  info: jest.fn(),
+  error: jest.fn(),
+  warn: jest.fn(),
+  debug: jest.fn(),
+  log: jest.fn(),
+}));
 
 let mod;
-try { mod = require('../../utils/security'); } catch(e) { /* load fail */ }
+try {
+  mod = require('../../utils/security');
+} catch {
+  /* load fail */
+}
 
 describe('utils/security', () => {
   test('module loads without crash', () => {
@@ -24,7 +45,11 @@ describe('utils/security', () => {
     if (!mod) return;
     const fn = mod.generateSecureToken;
     if (typeof fn !== 'function') return;
-    try { await fn(); } catch(e) { /* allowed */ }
+    try {
+      await fn();
+    } catch {
+      /* allowed */
+    }
     expect(true).toBe(true);
   });
 
@@ -37,7 +62,11 @@ describe('utils/security', () => {
     if (!mod) return;
     const fn = mod.hashToken;
     if (typeof fn !== 'function') return;
-    try { await fn(); } catch(e) { /* allowed */ }
+    try {
+      await fn();
+    } catch {
+      /* allowed */
+    }
     expect(true).toBe(true);
   });
 
@@ -50,7 +79,11 @@ describe('utils/security', () => {
     if (!mod) return;
     const fn = mod.generateRandomPassword;
     if (typeof fn !== 'function') return;
-    try { await fn(); } catch(e) { /* allowed */ }
+    try {
+      await fn();
+    } catch {
+      /* allowed */
+    }
     expect(true).toBe(true);
   });
 
@@ -63,7 +96,11 @@ describe('utils/security', () => {
     if (!mod) return;
     const fn = mod.checkIPWhitelist;
     if (typeof fn !== 'function') return;
-    try { await fn(); } catch(e) { /* allowed */ }
+    try {
+      await fn();
+    } catch {
+      /* allowed */
+    }
     expect(true).toBe(true);
   });
 
@@ -76,7 +113,11 @@ describe('utils/security', () => {
     if (!mod) return;
     const fn = mod.getClientIP;
     if (typeof fn !== 'function') return;
-    try { await fn(); } catch(e) { /* allowed */ }
+    try {
+      await fn();
+    } catch {
+      /* allowed */
+    }
     expect(true).toBe(true);
   });
 
@@ -89,7 +130,11 @@ describe('utils/security', () => {
     if (!mod) return;
     const fn = mod.logSecurityEvent;
     if (typeof fn !== 'function') return;
-    try { await fn(); } catch(e) { /* allowed */ }
+    try {
+      await fn();
+    } catch {
+      /* allowed */
+    }
     expect(true).toBe(true);
   });
 
@@ -102,7 +147,11 @@ describe('utils/security', () => {
     if (!mod) return;
     const fn = mod.detectSuspiciousActivity;
     if (typeof fn !== 'function') return;
-    try { await fn(); } catch(e) { /* allowed */ }
+    try {
+      await fn();
+    } catch {
+      /* allowed */
+    }
     expect(true).toBe(true);
   });
 
@@ -115,8 +164,11 @@ describe('utils/security', () => {
     if (!mod) return;
     const fn = mod.suspiciousActivityDetector;
     if (typeof fn !== 'function') return;
-    try { await fn(); } catch(e) { /* allowed */ }
+    try {
+      await fn();
+    } catch {
+      /* allowed */
+    }
     expect(true).toBe(true);
   });
-
 });

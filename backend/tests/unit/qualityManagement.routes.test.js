@@ -32,18 +32,47 @@ jest.mock('express', () => ({
   static: jest.fn(() => jest.fn()),
 }));
 
-jest.mock('express-validator', () => new Proxy({}, { get: (t, p) => p === '__esModule' ? false : jest.fn(() => jest.fn((r,s,n) => n && n())) }));
+jest.mock(
+  'express-validator',
+  () =>
+    new Proxy(
+      {},
+      {
+        get: (t, p) => (p === '__esModule' ? false : jest.fn(() => jest.fn((r, s, n) => n && n()))),
+      }
+    )
+);
 jest.mock('../../middleware/authMiddleware', () => {
   const mw = jest.fn((req, res, next) => next && next());
-  mw.authenticate = mw; mw.authorize = jest.fn(() => mw); mw.protect = mw;
-  mw.restrictTo = jest.fn(() => mw); mw.isAdmin = mw; mw.isAuth = mw;
+  mw.authenticate = mw;
+  mw.authorize = jest.fn(() => mw);
+  mw.protect = mw;
+  mw.restrictTo = jest.fn(() => mw);
+  mw.isAdmin = mw;
+  mw.isAuth = mw;
   return mw;
 });
-jest.mock('../../services/qualityManagement.service', () => new Proxy({}, { get: () => jest.fn().mockResolvedValue({}) }));
-jest.mock('express-validator', () => new Proxy({}, { get: (t, p) => p === '__esModule' ? false : jest.fn(() => jest.fn((r,s,n) => n && n())) }));
+jest.mock(
+  '../../services/qualityManagement.service',
+  () => new Proxy({}, { get: () => jest.fn().mockResolvedValue({}) })
+);
+jest.mock(
+  'express-validator',
+  () =>
+    new Proxy(
+      {},
+      {
+        get: (t, p) => (p === '__esModule' ? false : jest.fn(() => jest.fn((r, s, n) => n && n()))),
+      }
+    )
+);
 
 let routeModule;
-try { routeModule = require('../../routes/qualityManagement.routes'); } catch(e) { /* load fail */ }
+try {
+  routeModule = require('../../routes/qualityManagement.routes');
+} catch {
+  /* load fail */
+}
 
 describe('routes/qualityManagement.routes', () => {
   test('module loads without crash', () => {
@@ -102,5 +131,4 @@ describe('routes/qualityManagement.routes', () => {
       expect(true).toBe(true);
     }
   });
-
 });

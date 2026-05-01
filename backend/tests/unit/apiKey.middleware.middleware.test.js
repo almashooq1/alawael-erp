@@ -2,7 +2,9 @@
 
 // Auto-generated unit test for middleware/apiKey.middleware.js
 jest.mock('../../models/ApiKey', () => {
-  const M = jest.fn().mockImplementation(() => ({ save: jest.fn().mockResolvedValue({ _id: 'id1' }) }));
+  const M = jest
+    .fn()
+    .mockImplementation(() => ({ save: jest.fn().mockResolvedValue({ _id: 'id1' }) }));
   M.findById = jest.fn().mockResolvedValue({ _id: 'id1', role: 'admin' });
   M.findOne = jest.fn().mockResolvedValue({ _id: 'id1' });
   M.find = jest.fn().mockResolvedValue([]);
@@ -19,7 +21,12 @@ const mockReq = (overrides = {}) => ({
   path: '/test',
   method: 'GET',
   ip: '127.0.0.1',
-  get: jest.fn(h => ({ 'content-type': 'application/json', authorization: 'Bearer mock.jwt.token' })[h.toLowerCase()]),
+  get: jest.fn(
+    h =>
+      ({ 'content-type': 'application/json', authorization: 'Bearer mock.jwt.token' })[
+        h.toLowerCase()
+      ]
+  ),
   ...overrides,
 });
 
@@ -43,10 +50,16 @@ const mockRes = () => {
 const mockNext = jest.fn();
 
 let mw;
-try { mw = require('../../middleware/apiKey.middleware'); } catch (e) { mw = null; }
+try {
+  mw = require('../../middleware/apiKey.middleware');
+} catch {
+  mw = null;
+}
 
 describe('middleware/apiKey.middleware.js', () => {
-  beforeEach(() => { jest.clearAllMocks(); });
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   test('module loads without crash', () => {
     expect(true).toBe(true);
@@ -62,8 +75,11 @@ describe('middleware/apiKey.middleware.js', () => {
     const req = mockReq();
     const res = mockRes();
     const next = jest.fn();
-    try { await mw(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await mw(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
-
 });

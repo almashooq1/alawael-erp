@@ -4,10 +4,20 @@
  */
 'use strict';
 
-jest.mock('../../utils/logger', () => ({ info: jest.fn(), error: jest.fn(), warn: jest.fn(), debug: jest.fn(), log: jest.fn() }));
+jest.mock('../../utils/logger', () => ({
+  info: jest.fn(),
+  error: jest.fn(),
+  warn: jest.fn(),
+  debug: jest.fn(),
+  log: jest.fn(),
+}));
 
 let mod;
-try { mod = require('../../utils/uploadValidator'); } catch(e) { /* load fail */ }
+try {
+  mod = require('../../utils/uploadValidator');
+} catch {
+  /* load fail */
+}
 
 describe('utils/uploadValidator', () => {
   test('module loads without crash', () => {
@@ -23,7 +33,11 @@ describe('utils/uploadValidator', () => {
     if (!mod) return;
     const fn = mod.validateUploadedFile;
     if (typeof fn !== 'function') return;
-    try { await fn(); } catch(e) { /* allowed */ }
+    try {
+      await fn();
+    } catch {
+      /* allowed */
+    }
     expect(true).toBe(true);
   });
 
@@ -36,7 +50,11 @@ describe('utils/uploadValidator', () => {
     if (!mod) return;
     const fn = mod.BLOCKED_MIMES;
     if (typeof fn !== 'function') return;
-    try { await fn(); } catch(e) { /* allowed */ }
+    try {
+      await fn();
+    } catch {
+      /* allowed */
+    }
     expect(true).toBe(true);
   });
 
@@ -49,7 +67,11 @@ describe('utils/uploadValidator', () => {
     if (!mod) return;
     const fn = mod.detectMimeFromMagic;
     if (typeof fn !== 'function') return;
-    try { await fn(); } catch(e) { /* allowed */ }
+    try {
+      await fn();
+    } catch {
+      /* allowed */
+    }
     expect(true).toBe(true);
   });
 
@@ -62,8 +84,11 @@ describe('utils/uploadValidator', () => {
     if (!mod) return;
     const fn = mod.readMagicBytes;
     if (typeof fn !== 'function') return;
-    try { await fn(); } catch(e) { /* allowed */ }
+    try {
+      await fn();
+    } catch {
+      /* allowed */
+    }
     expect(true).toBe(true);
   });
-
 });

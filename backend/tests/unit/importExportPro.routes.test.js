@@ -32,17 +32,44 @@ jest.mock('express', () => ({
   static: jest.fn(() => jest.fn()),
 }));
 
-jest.mock('multer', () => { const m = jest.fn(() => ({ single: jest.fn(() => jest.fn((r,s,n) => n && n())), array: jest.fn(() => jest.fn((r,s,n) => n && n())), fields: jest.fn(() => jest.fn((r,s,n) => n && n())) })); m.diskStorage = jest.fn(() => ({})); m.memoryStorage = jest.fn(() => ({})); return m; });
+jest.mock('multer', () => {
+  const m = jest.fn(() => ({
+    single: jest.fn(() => jest.fn((r, s, n) => n && n())),
+    array: jest.fn(() => jest.fn((r, s, n) => n && n())),
+    fields: jest.fn(() => jest.fn((r, s, n) => n && n())),
+  }));
+  m.diskStorage = jest.fn(() => ({}));
+  m.memoryStorage = jest.fn(() => ({}));
+  return m;
+});
 jest.mock('../../middleware/auth', () => {
   const mw = jest.fn((req, res, next) => next && next());
-  mw.authenticate = mw; mw.authorize = jest.fn(() => mw); mw.protect = mw;
-  mw.restrictTo = jest.fn(() => mw); mw.isAdmin = mw; mw.isAuth = mw;
+  mw.authenticate = mw;
+  mw.authorize = jest.fn(() => mw);
+  mw.protect = mw;
+  mw.restrictTo = jest.fn(() => mw);
+  mw.isAdmin = mw;
+  mw.isAuth = mw;
   return mw;
 });
-jest.mock('../../controllers/importExportPro.controller', () => new Proxy({}, { get: (t, p) => p === '__esModule' ? false : jest.fn((req, res) => res && res.json && res.json({})) }));
+jest.mock(
+  '../../controllers/importExportPro.controller',
+  () =>
+    new Proxy(
+      {},
+      {
+        get: (t, p) =>
+          p === '__esModule' ? false : jest.fn((req, res) => res && res.json && res.json({})),
+      }
+    )
+);
 
 let routeModule;
-try { routeModule = require('../../routes/importExportPro.routes'); } catch(e) { /* load fail */ }
+try {
+  routeModule = require('../../routes/importExportPro.routes');
+} catch {
+  /* load fail */
+}
 
 describe('routes/importExportPro.routes', () => {
   test('module loads without crash', () => {
@@ -111,5 +138,4 @@ describe('routes/importExportPro.routes', () => {
       expect(true).toBe(true);
     }
   });
-
 });

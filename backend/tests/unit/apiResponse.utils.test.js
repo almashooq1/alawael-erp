@@ -7,7 +7,7 @@
 let mod;
 try {
   mod = require('../../utils/apiResponse');
-} catch (e) {
+} catch {
   /* load fail */
 }
 
@@ -46,7 +46,7 @@ describe('utils/apiResponse', () => {
     if (typeof fn !== 'function') return;
     try {
       await fn.call(target);
-    } catch (e) {
+    } catch {
       /* allowed */
     }
     expect(true).toBe(true);
@@ -67,7 +67,7 @@ describe('utils/apiResponse', () => {
     if (typeof fn !== 'function') return;
     try {
       await fn.call(target);
-    } catch (e) {
+    } catch {
       /* allowed */
     }
     expect(true).toBe(true);

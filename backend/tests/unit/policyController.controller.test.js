@@ -1,15 +1,31 @@
 'use strict';
 
 // Auto-generated unit test for controllers/policyController
-jest.mock('../../services/policyService', () => new Proxy({}, { get: () => jest.fn().mockResolvedValue({}) }));
-jest.mock('../../utils/logger', () => ({ info: jest.fn(), error: jest.fn(), warn: jest.fn(), debug: jest.fn() }));
+jest.mock(
+  '../../services/policyService',
+  () => new Proxy({}, { get: () => jest.fn().mockResolvedValue({}) })
+);
+jest.mock('../../utils/logger', () => ({
+  info: jest.fn(),
+  error: jest.fn(),
+  warn: jest.fn(),
+  debug: jest.fn(),
+}));
 jest.mock('../../utils/safeError', () => ({}));
-jest.mock('express-validator', () => ({ validationResult: jest.fn(() => ({ isEmpty: () => true, array: () => [] })), body: jest.fn().mockReturnThis(), param: jest.fn().mockReturnThis() }));
+jest.mock('express-validator', () => ({
+  validationResult: jest.fn(() => ({ isEmpty: () => true, array: () => [] })),
+  body: jest.fn().mockReturnThis(),
+  param: jest.fn().mockReturnThis(),
+}));
 
 const mockReq = (overrides = {}) => ({
   headers: { authorization: 'Bearer token' },
-  body: {}, params: {}, query: {},
-  path: '/test', method: 'GET', ip: '127.0.0.1',
+  body: {},
+  params: {},
+  query: {},
+  path: '/test',
+  method: 'GET',
+  ip: '127.0.0.1',
   user: { _id: 'user1', role: 'admin', permissions: ['*'] },
   get: jest.fn(h => ({ authorization: 'Bearer token' })[h]),
   ...overrides,
@@ -32,10 +48,16 @@ const mockRes = () => {
 const mockNext = jest.fn();
 
 let ctrl;
-try { ctrl = require('../../controllers/policyController'); } catch (e) { ctrl = null; }
+try {
+  ctrl = require('../../controllers/policyController');
+} catch {
+  ctrl = null;
+}
 
 describe('policyController controller', () => {
-  beforeEach(() => { jest.clearAllMocks(); });
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   test('module loads without crash', () => {
     expect(true).toBe(true);
@@ -46,7 +68,11 @@ describe('policyController controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.createPolicy(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.createPolicy(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -55,7 +81,11 @@ describe('policyController controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.updatePolicy(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.updatePolicy(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -64,7 +94,11 @@ describe('policyController controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.getPolicy(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.getPolicy(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -73,7 +107,11 @@ describe('policyController controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.getPolicies(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.getPolicies(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -82,7 +120,11 @@ describe('policyController controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.getActivePolicies(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.getActivePolicies(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -91,7 +133,11 @@ describe('policyController controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.deletePolicy(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.deletePolicy(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -100,7 +146,11 @@ describe('policyController controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.submitForApproval(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.submitForApproval(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -109,7 +159,11 @@ describe('policyController controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.approvePolicy(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.approvePolicy(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -118,7 +172,11 @@ describe('policyController controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.rejectPolicy(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.rejectPolicy(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -127,7 +185,11 @@ describe('policyController controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.getPendingApprovals(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.getPendingApprovals(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -136,7 +198,11 @@ describe('policyController controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.sendForAcknowledgement(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.sendForAcknowledgement(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -145,7 +211,11 @@ describe('policyController controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.acknowledgePolicies(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.acknowledgePolicies(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -154,7 +224,11 @@ describe('policyController controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.getPendingAcknowledgements(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.getPendingAcknowledgements(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -163,7 +237,11 @@ describe('policyController controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.getAcknowledgementReports(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.getAcknowledgementReports(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -172,7 +250,11 @@ describe('policyController controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.getPolicyTypes(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.getPolicyTypes(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -181,7 +263,11 @@ describe('policyController controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.getPolicyStatuses(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.getPolicyStatuses(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -190,8 +276,11 @@ describe('policyController controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.getStatistics(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.getStatistics(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
-
 });

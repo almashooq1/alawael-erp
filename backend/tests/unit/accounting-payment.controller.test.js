@@ -4,31 +4,44 @@
 jest.mock('../../models/AccountingPayment', () => {
   const M = jest.fn(() => ({ save: jest.fn().mockResolvedValue({ _id: 'id1' }) }));
   Object.assign(M, {
-    find: jest.fn().mockReturnThis(), findOne: jest.fn().mockReturnThis(),
+    find: jest.fn().mockReturnThis(),
+    findOne: jest.fn().mockReturnThis(),
     findById: jest.fn().mockResolvedValue({ _id: 'id1' }),
     findOneAndUpdate: jest.fn().mockResolvedValue({ _id: 'id1' }),
     findByIdAndUpdate: jest.fn().mockResolvedValue({ _id: 'id1' }),
     findByIdAndDelete: jest.fn().mockResolvedValue({ _id: 'id1' }),
     countDocuments: jest.fn().mockResolvedValue(0),
     aggregate: jest.fn().mockResolvedValue([]),
-    populate: jest.fn().mockReturnThis(), lean: jest.fn().mockResolvedValue([]),
-    sort: jest.fn().mockReturnThis(), limit: jest.fn().mockReturnThis(),
-    skip: jest.fn().mockReturnThis(), select: jest.fn().mockReturnThis(),
+    populate: jest.fn().mockReturnThis(),
+    lean: jest.fn().mockResolvedValue([]),
+    sort: jest.fn().mockReturnThis(),
+    limit: jest.fn().mockReturnThis(),
+    skip: jest.fn().mockReturnThis(),
+    select: jest.fn().mockReturnThis(),
     exec: jest.fn().mockResolvedValue([]),
     create: jest.fn().mockResolvedValue({ _id: 'id1' }),
     deleteMany: jest.fn().mockResolvedValue({ deletedCount: 0 }),
   });
   return M;
 });
-jest.mock('../../utils/logger', () => ({ info: jest.fn(), error: jest.fn(), warn: jest.fn(), debug: jest.fn() }));
+jest.mock('../../utils/logger', () => ({
+  info: jest.fn(),
+  error: jest.fn(),
+  warn: jest.fn(),
+  debug: jest.fn(),
+}));
 jest.mock('../../utils/sanitize', () => ({}));
 jest.mock('../../utils/safeError', () => ({}));
 jest.mock('pdfkit', () => ({}));
 
 const mockReq = (overrides = {}) => ({
   headers: { authorization: 'Bearer token' },
-  body: {}, params: {}, query: {},
-  path: '/test', method: 'GET', ip: '127.0.0.1',
+  body: {},
+  params: {},
+  query: {},
+  path: '/test',
+  method: 'GET',
+  ip: '127.0.0.1',
   user: { _id: 'user1', role: 'admin', permissions: ['*'] },
   get: jest.fn(h => ({ authorization: 'Bearer token' })[h]),
   ...overrides,
@@ -51,10 +64,16 @@ const mockRes = () => {
 const mockNext = jest.fn();
 
 let ctrl;
-try { ctrl = require('../../controllers/accounting-payment.controller'); } catch (e) { ctrl = null; }
+try {
+  ctrl = require('../../controllers/accounting-payment.controller');
+} catch {
+  ctrl = null;
+}
 
 describe('accounting-payment.controller controller', () => {
-  beforeEach(() => { jest.clearAllMocks(); });
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   test('module loads without crash', () => {
     expect(true).toBe(true);
@@ -64,5 +83,4 @@ describe('accounting-payment.controller controller', () => {
     if (!ctrl) return;
     expect(['function', 'object'].includes(typeof ctrl)).toBe(true);
   });
-
 });

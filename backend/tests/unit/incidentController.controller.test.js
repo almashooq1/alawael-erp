@@ -1,15 +1,31 @@
 'use strict';
 
 // Auto-generated unit test for controllers/incidentController
-jest.mock('../../services/incidentService', () => new Proxy({}, { get: () => jest.fn().mockResolvedValue({}) }));
-jest.mock('../../utils/logger', () => ({ info: jest.fn(), error: jest.fn(), warn: jest.fn(), debug: jest.fn() }));
+jest.mock(
+  '../../services/incidentService',
+  () => new Proxy({}, { get: () => jest.fn().mockResolvedValue({}) })
+);
+jest.mock('../../utils/logger', () => ({
+  info: jest.fn(),
+  error: jest.fn(),
+  warn: jest.fn(),
+  debug: jest.fn(),
+}));
 jest.mock('../../utils/safeError', () => ({}));
-jest.mock('express-validator', () => ({ validationResult: jest.fn(() => ({ isEmpty: () => true, array: () => [] })), body: jest.fn().mockReturnThis(), param: jest.fn().mockReturnThis() }));
+jest.mock('express-validator', () => ({
+  validationResult: jest.fn(() => ({ isEmpty: () => true, array: () => [] })),
+  body: jest.fn().mockReturnThis(),
+  param: jest.fn().mockReturnThis(),
+}));
 
 const mockReq = (overrides = {}) => ({
   headers: { authorization: 'Bearer token' },
-  body: {}, params: {}, query: {},
-  path: '/test', method: 'GET', ip: '127.0.0.1',
+  body: {},
+  params: {},
+  query: {},
+  path: '/test',
+  method: 'GET',
+  ip: '127.0.0.1',
   user: { _id: 'user1', role: 'admin', permissions: ['*'] },
   get: jest.fn(h => ({ authorization: 'Bearer token' })[h]),
   ...overrides,
@@ -32,10 +48,16 @@ const mockRes = () => {
 const mockNext = jest.fn();
 
 let ctrl;
-try { ctrl = require('../../controllers/incidentController'); } catch (e) { ctrl = null; }
+try {
+  ctrl = require('../../controllers/incidentController');
+} catch {
+  ctrl = null;
+}
 
 describe('incidentController controller', () => {
-  beforeEach(() => { jest.clearAllMocks(); });
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   test('module loads without crash', () => {
     expect(true).toBe(true);
@@ -46,7 +68,11 @@ describe('incidentController controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.createIncident(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.createIncident(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -55,7 +81,11 @@ describe('incidentController controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.getAllIncidents(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.getAllIncidents(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -64,7 +94,11 @@ describe('incidentController controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.forEach(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.forEach(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -73,7 +107,11 @@ describe('incidentController controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.getIncidentById(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.getIncidentById(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -82,7 +120,11 @@ describe('incidentController controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.updateIncident(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.updateIncident(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -91,7 +133,11 @@ describe('incidentController controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.deleteIncident(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.deleteIncident(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -100,7 +146,11 @@ describe('incidentController controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.updateStatus(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.updateStatus(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -109,7 +159,11 @@ describe('incidentController controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.assignIncident(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.assignIncident(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -118,7 +172,11 @@ describe('incidentController controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.addResponder(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.addResponder(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -127,7 +185,11 @@ describe('incidentController controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.escalateIncident(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.escalateIncident(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -136,7 +198,11 @@ describe('incidentController controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.addComment(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.addComment(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -145,7 +211,11 @@ describe('incidentController controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.addAttachment(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.addAttachment(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -154,7 +224,11 @@ describe('incidentController controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.resolveIncident(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.resolveIncident(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -163,7 +237,11 @@ describe('incidentController controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.closeIncident(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.closeIncident(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -172,7 +250,11 @@ describe('incidentController controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.generateReport(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.generateReport(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -181,7 +263,11 @@ describe('incidentController controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.getStatistics(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.getStatistics(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -190,7 +276,11 @@ describe('incidentController controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.searchIncidents(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.searchIncidents(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -199,7 +289,11 @@ describe('incidentController controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.archiveIncident(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.archiveIncident(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -208,7 +302,11 @@ describe('incidentController controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.getRelatedIncidents(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.getRelatedIncidents(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -217,7 +315,11 @@ describe('incidentController controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.getPendingIncidents(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.getPendingIncidents(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -226,8 +328,11 @@ describe('incidentController controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.getCriticalIncidents(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.getCriticalIncidents(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
-
 });

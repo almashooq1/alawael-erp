@@ -1,20 +1,27 @@
 'use strict';
 
 // Auto-generated unit test for controllers/importExportPro.controller
-jest.mock('../../services/importExportPro.service', () => new Proxy({}, { get: () => jest.fn().mockResolvedValue({}) }));
+jest.mock(
+  '../../services/importExportPro.service',
+  () => new Proxy({}, { get: () => jest.fn().mockResolvedValue({}) })
+);
 jest.mock('../../models/ImportExportJob', () => {
   const M = jest.fn(() => ({ save: jest.fn().mockResolvedValue({ _id: 'id1' }) }));
   Object.assign(M, {
-    find: jest.fn().mockReturnThis(), findOne: jest.fn().mockReturnThis(),
+    find: jest.fn().mockReturnThis(),
+    findOne: jest.fn().mockReturnThis(),
     findById: jest.fn().mockResolvedValue({ _id: 'id1' }),
     findOneAndUpdate: jest.fn().mockResolvedValue({ _id: 'id1' }),
     findByIdAndUpdate: jest.fn().mockResolvedValue({ _id: 'id1' }),
     findByIdAndDelete: jest.fn().mockResolvedValue({ _id: 'id1' }),
     countDocuments: jest.fn().mockResolvedValue(0),
     aggregate: jest.fn().mockResolvedValue([]),
-    populate: jest.fn().mockReturnThis(), lean: jest.fn().mockResolvedValue([]),
-    sort: jest.fn().mockReturnThis(), limit: jest.fn().mockReturnThis(),
-    skip: jest.fn().mockReturnThis(), select: jest.fn().mockReturnThis(),
+    populate: jest.fn().mockReturnThis(),
+    lean: jest.fn().mockResolvedValue([]),
+    sort: jest.fn().mockReturnThis(),
+    limit: jest.fn().mockReturnThis(),
+    skip: jest.fn().mockReturnThis(),
+    select: jest.fn().mockReturnThis(),
     exec: jest.fn().mockResolvedValue([]),
     create: jest.fn().mockResolvedValue({ _id: 'id1' }),
     deleteMany: jest.fn().mockResolvedValue({ deletedCount: 0 }),
@@ -24,29 +31,42 @@ jest.mock('../../models/ImportExportJob', () => {
 jest.mock('../../models/ImportExportTemplate', () => {
   const M = jest.fn(() => ({ save: jest.fn().mockResolvedValue({ _id: 'id1' }) }));
   Object.assign(M, {
-    find: jest.fn().mockReturnThis(), findOne: jest.fn().mockReturnThis(),
+    find: jest.fn().mockReturnThis(),
+    findOne: jest.fn().mockReturnThis(),
     findById: jest.fn().mockResolvedValue({ _id: 'id1' }),
     findOneAndUpdate: jest.fn().mockResolvedValue({ _id: 'id1' }),
     findByIdAndUpdate: jest.fn().mockResolvedValue({ _id: 'id1' }),
     findByIdAndDelete: jest.fn().mockResolvedValue({ _id: 'id1' }),
     countDocuments: jest.fn().mockResolvedValue(0),
     aggregate: jest.fn().mockResolvedValue([]),
-    populate: jest.fn().mockReturnThis(), lean: jest.fn().mockResolvedValue([]),
-    sort: jest.fn().mockReturnThis(), limit: jest.fn().mockReturnThis(),
-    skip: jest.fn().mockReturnThis(), select: jest.fn().mockReturnThis(),
+    populate: jest.fn().mockReturnThis(),
+    lean: jest.fn().mockResolvedValue([]),
+    sort: jest.fn().mockReturnThis(),
+    limit: jest.fn().mockReturnThis(),
+    skip: jest.fn().mockReturnThis(),
+    select: jest.fn().mockReturnThis(),
     exec: jest.fn().mockResolvedValue([]),
     create: jest.fn().mockResolvedValue({ _id: 'id1' }),
     deleteMany: jest.fn().mockResolvedValue({ deletedCount: 0 }),
   });
   return M;
 });
-jest.mock('../../utils/logger', () => ({ info: jest.fn(), error: jest.fn(), warn: jest.fn(), debug: jest.fn() }));
+jest.mock('../../utils/logger', () => ({
+  info: jest.fn(),
+  error: jest.fn(),
+  warn: jest.fn(),
+  debug: jest.fn(),
+}));
 jest.mock('../../utils/safeError', () => ({}));
 
 const mockReq = (overrides = {}) => ({
   headers: { authorization: 'Bearer token' },
-  body: {}, params: {}, query: {},
-  path: '/test', method: 'GET', ip: '127.0.0.1',
+  body: {},
+  params: {},
+  query: {},
+  path: '/test',
+  method: 'GET',
+  ip: '127.0.0.1',
   user: { _id: 'user1', role: 'admin', permissions: ['*'] },
   get: jest.fn(h => ({ authorization: 'Bearer token' })[h]),
   ...overrides,
@@ -69,10 +89,16 @@ const mockRes = () => {
 const mockNext = jest.fn();
 
 let ctrl;
-try { ctrl = require('../../controllers/importExportPro.controller'); } catch (e) { ctrl = null; }
+try {
+  ctrl = require('../../controllers/importExportPro.controller');
+} catch {
+  ctrl = null;
+}
 
 describe('importExportPro.controller controller', () => {
-  beforeEach(() => { jest.clearAllMocks(); });
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   test('module loads without crash', () => {
     expect(true).toBe(true);
@@ -83,7 +109,11 @@ describe('importExportPro.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.createExport(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.createExport(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -92,7 +122,11 @@ describe('importExportPro.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.previewExport(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.previewExport(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -101,7 +135,11 @@ describe('importExportPro.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.bulkExport(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.bulkExport(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -110,7 +148,11 @@ describe('importExportPro.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.parseImportFile(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.parseImportFile(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -119,7 +161,11 @@ describe('importExportPro.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.executeImport(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.executeImport(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -128,7 +174,11 @@ describe('importExportPro.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.validateImport(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.validateImport(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -137,7 +187,11 @@ describe('importExportPro.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.listTemplates(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.listTemplates(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -146,7 +200,11 @@ describe('importExportPro.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.getTemplate(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.getTemplate(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -155,7 +213,11 @@ describe('importExportPro.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.createTemplate(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.createTemplate(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -164,7 +226,11 @@ describe('importExportPro.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.updateTemplate(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.updateTemplate(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -173,7 +239,11 @@ describe('importExportPro.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.deleteTemplate(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.deleteTemplate(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -182,7 +252,11 @@ describe('importExportPro.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.downloadTemplate(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.downloadTemplate(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -191,7 +265,11 @@ describe('importExportPro.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.listJobs(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.listJobs(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -200,7 +278,11 @@ describe('importExportPro.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.getJob(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.getJob(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -209,7 +291,11 @@ describe('importExportPro.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.cancelJob(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.cancelJob(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -218,7 +304,11 @@ describe('importExportPro.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.retryJob(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.retryJob(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -227,7 +317,11 @@ describe('importExportPro.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.deleteJob(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.deleteJob(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -236,7 +330,11 @@ describe('importExportPro.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.listModules(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.listModules(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -245,7 +343,11 @@ describe('importExportPro.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.getModuleFields(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.getModuleFields(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -254,7 +356,11 @@ describe('importExportPro.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.getStatistics(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.getStatistics(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -263,7 +369,11 @@ describe('importExportPro.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.downloadFile(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.downloadFile(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -272,7 +382,11 @@ describe('importExportPro.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.getInfo(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.getInfo(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -281,7 +395,11 @@ describe('importExportPro.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.listScheduledExports(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.listScheduledExports(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -290,7 +408,11 @@ describe('importExportPro.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.executeScheduledExports(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.executeScheduledExports(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -299,7 +421,11 @@ describe('importExportPro.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.toggleScheduledExport(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.toggleScheduledExport(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -308,7 +434,11 @@ describe('importExportPro.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.generateQualityReport(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.generateQualityReport(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -317,7 +447,11 @@ describe('importExportPro.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.listTransformRules(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.listTransformRules(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -326,8 +460,11 @@ describe('importExportPro.controller controller', () => {
     const req = mockReq();
     const res = mockRes();
     const next = mockNext;
-    try { await ctrl.streamProgress(req, res, next); } catch (e) { /* expected */ }
+    try {
+      await ctrl.streamProgress(req, res, next);
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
-
 });

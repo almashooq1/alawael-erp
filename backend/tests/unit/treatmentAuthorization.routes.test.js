@@ -32,16 +32,27 @@ jest.mock('express', () => ({
   static: jest.fn(() => jest.fn()),
 }));
 
-jest.mock('../../services/treatmentAuthorization.service', () => new Proxy({}, { get: () => jest.fn().mockResolvedValue({}) }));
+jest.mock(
+  '../../services/treatmentAuthorization.service',
+  () => new Proxy({}, { get: () => jest.fn().mockResolvedValue({}) })
+);
 jest.mock('../../middleware/auth', () => {
   const mw = jest.fn((req, res, next) => next && next());
-  mw.authenticate = mw; mw.authorize = jest.fn(() => mw); mw.protect = mw;
-  mw.restrictTo = jest.fn(() => mw); mw.isAdmin = mw; mw.isAuth = mw;
+  mw.authenticate = mw;
+  mw.authorize = jest.fn(() => mw);
+  mw.protect = mw;
+  mw.restrictTo = jest.fn(() => mw);
+  mw.isAdmin = mw;
+  mw.isAuth = mw;
   return mw;
 });
 
 let routeModule;
-try { routeModule = require('../../routes/treatmentAuthorization.routes'); } catch(e) { /* load fail */ }
+try {
+  routeModule = require('../../routes/treatmentAuthorization.routes');
+} catch {
+  /* load fail */
+}
 
 describe('routes/treatmentAuthorization.routes', () => {
   test('module loads without crash', () => {
@@ -90,5 +101,4 @@ describe('routes/treatmentAuthorization.routes', () => {
       expect(true).toBe(true);
     }
   });
-
 });

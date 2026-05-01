@@ -42,7 +42,7 @@ const mockNext = jest.fn();
 let mw;
 try {
   mw = require('../../middleware/auth.middleware');
-} catch (e) {
+} catch {
   mw = null;
 }
 
@@ -71,7 +71,7 @@ describe('middleware/auth.middleware.js', () => {
         // Factory pattern — invoke returned middleware
         try {
           await result(req, res, next);
-        } catch (e) {
+        } catch {
           /* expected */
         }
       } else if (result && typeof result.then === 'function') {
@@ -94,7 +94,7 @@ describe('middleware/auth.middleware.js', () => {
         // Factory pattern — invoke returned middleware
         try {
           await result(req, res, next);
-        } catch (e) {
+        } catch {
           /* expected */
         }
       } else if (result && typeof result.then === 'function') {
@@ -117,7 +117,7 @@ describe('middleware/auth.middleware.js', () => {
         // Factory pattern — invoke returned middleware
         try {
           await result(req, res, next);
-        } catch (e) {
+        } catch {
           /* expected */
         }
       } else if (result && typeof result.then === 'function') {
@@ -140,7 +140,7 @@ describe('middleware/auth.middleware.js', () => {
         // Factory pattern — invoke returned middleware
         try {
           await result(req, res, next);
-        } catch (e) {
+        } catch {
           /* expected */
         }
       } else if (result && typeof result.then === 'function') {
@@ -163,7 +163,7 @@ describe('middleware/auth.middleware.js', () => {
         // Factory pattern — invoke returned middleware
         try {
           await result(req, res, next);
-        } catch (e) {
+        } catch {
           /* expected */
         }
       } else if (result && typeof result.then === 'function') {
@@ -186,7 +186,7 @@ describe('middleware/auth.middleware.js', () => {
         // Factory pattern — invoke returned middleware
         try {
           await result(req, res, next);
-        } catch (e) {
+        } catch {
           /* expected */
         }
       } else if (result && typeof result.then === 'function') {
@@ -209,7 +209,7 @@ describe('middleware/auth.middleware.js', () => {
         // Factory pattern — invoke returned middleware
         try {
           await result(req, res, next);
-        } catch (e) {
+        } catch {
           /* expected */
         }
       } else if (result && typeof result.then === 'function') {
@@ -232,7 +232,7 @@ describe('middleware/auth.middleware.js', () => {
         // Factory pattern — invoke returned middleware
         try {
           await result(req, res, next);
-        } catch (e) {
+        } catch {
           /* expected */
         }
       } else if (result && typeof result.then === 'function') {
@@ -255,7 +255,7 @@ describe('middleware/auth.middleware.js', () => {
         // Factory pattern — invoke returned middleware
         try {
           await result(req, res, next);
-        } catch (e) {
+        } catch {
           /* expected */
         }
       } else if (result && typeof result.then === 'function') {
@@ -278,7 +278,7 @@ describe('middleware/auth.middleware.js', () => {
         // Factory pattern — invoke returned middleware
         try {
           await result(req, res, next);
-        } catch (e) {
+        } catch {
           /* expected */
         }
       } else if (result && typeof result.then === 'function') {
@@ -301,7 +301,7 @@ describe('middleware/auth.middleware.js', () => {
         // Factory pattern — invoke returned middleware
         try {
           await result(req, res, next);
-        } catch (e) {
+        } catch {
           /* expected */
         }
       } else if (result && typeof result.then === 'function') {
@@ -324,7 +324,7 @@ describe('middleware/auth.middleware.js', () => {
         // Factory pattern — invoke returned middleware
         try {
           await result(req, res, next);
-        } catch (e) {
+        } catch {
           /* expected */
         }
       } else if (result && typeof result.then === 'function') {
@@ -347,7 +347,7 @@ describe('middleware/auth.middleware.js', () => {
         // Factory pattern — invoke returned middleware
         try {
           await result(req, res, next);
-        } catch (e) {
+        } catch {
           /* expected */
         }
       } else if (result && typeof result.then === 'function') {

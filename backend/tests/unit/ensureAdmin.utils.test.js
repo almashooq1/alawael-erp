@@ -4,18 +4,42 @@
  */
 'use strict';
 
-jest.mock('bcryptjs', () => ({ hash: jest.fn().mockResolvedValue('hashed'), compare: jest.fn().mockResolvedValue(true), genSalt: jest.fn().mockResolvedValue('salt') }));
+jest.mock('bcryptjs', () => ({
+  hash: jest.fn().mockResolvedValue('hashed'),
+  compare: jest.fn().mockResolvedValue(true),
+  genSalt: jest.fn().mockResolvedValue('salt'),
+}));
 jest.mock('mongoose', () => {
   const mockModel = jest.fn(() => ({ save: jest.fn().mockResolvedValue({}) }));
-  mockModel.find = jest.fn().mockReturnValue({ sort: jest.fn().mockReturnThis(), limit: jest.fn().mockReturnThis(), lean: jest.fn().mockResolvedValue([]) });
+  mockModel.find = jest
+    .fn()
+    .mockReturnValue({
+      sort: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockReturnThis(),
+      lean: jest.fn().mockResolvedValue([]),
+    });
   mockModel.findOne = jest.fn().mockResolvedValue(null);
   mockModel.findById = jest.fn().mockResolvedValue(null);
-  return { model: jest.fn(() => mockModel), connect: jest.fn().mockResolvedValue({}), connection: { readyState: 1 } };
+  return {
+    model: jest.fn(() => mockModel),
+    connect: jest.fn().mockResolvedValue({}),
+    connection: { readyState: 1 },
+  };
 });
-jest.mock('../../utils/logger', () => ({ info: jest.fn(), error: jest.fn(), warn: jest.fn(), debug: jest.fn(), log: jest.fn() }));
+jest.mock('../../utils/logger', () => ({
+  info: jest.fn(),
+  error: jest.fn(),
+  warn: jest.fn(),
+  debug: jest.fn(),
+  log: jest.fn(),
+}));
 
 let mod;
-try { mod = require('../../utils/ensureAdmin'); } catch(e) { /* load fail */ }
+try {
+  mod = require('../../utils/ensureAdmin');
+} catch {
+  /* load fail */
+}
 
 describe('utils/ensureAdmin', () => {
   test('module loads without crash', () => {
@@ -31,8 +55,11 @@ describe('utils/ensureAdmin', () => {
     if (!mod) return;
     const fn = mod.ensureAdmin;
     if (typeof fn !== 'function') return;
-    try { await fn(); } catch(e) { /* allowed */ }
+    try {
+      await fn();
+    } catch {
+      /* allowed */
+    }
     expect(true).toBe(true);
   });
-
 });

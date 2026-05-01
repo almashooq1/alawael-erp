@@ -34,14 +34,30 @@ jest.mock('express', () => ({
 
 jest.mock('../../middleware/auth', () => {
   const mw = jest.fn((req, res, next) => next && next());
-  mw.authenticate = mw; mw.authorize = jest.fn(() => mw); mw.protect = mw;
-  mw.restrictTo = jest.fn(() => mw); mw.isAdmin = mw; mw.isAuth = mw;
+  mw.authenticate = mw;
+  mw.authorize = jest.fn(() => mw);
+  mw.protect = mw;
+  mw.restrictTo = jest.fn(() => mw);
+  mw.isAdmin = mw;
+  mw.isAuth = mw;
   return mw;
 });
-jest.mock('../../utils/logger', () => ({ info: jest.fn(), error: jest.fn(), warn: jest.fn(), debug: jest.fn(), log: jest.fn() }));
+jest.mock('../../utils/logger', () => ({
+  info: jest.fn(),
+  error: jest.fn(),
+  warn: jest.fn(),
+  debug: jest.fn(),
+  log: jest.fn(),
+}));
 jest.mock('../../models/ESignature', () => {
   const M = jest.fn(() => ({ save: jest.fn().mockResolvedValue({}) }));
-  M.find = jest.fn().mockReturnValue({ sort: jest.fn().mockReturnThis(), limit: jest.fn().mockReturnThis(), lean: jest.fn().mockResolvedValue([]) });
+  M.find = jest
+    .fn()
+    .mockReturnValue({
+      sort: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockReturnThis(),
+      lean: jest.fn().mockResolvedValue([]),
+    });
   M.findOne = jest.fn().mockResolvedValue(null);
   M.findById = jest.fn().mockResolvedValue(null);
   M.create = jest.fn().mockResolvedValue({ _id: 'id1' });
@@ -50,20 +66,48 @@ jest.mock('../../models/ESignature', () => {
 });
 jest.mock('../../models/EStamp', () => {
   const M = jest.fn(() => ({ save: jest.fn().mockResolvedValue({}) }));
-  M.find = jest.fn().mockReturnValue({ sort: jest.fn().mockReturnThis(), limit: jest.fn().mockReturnThis(), lean: jest.fn().mockResolvedValue([]) });
+  M.find = jest
+    .fn()
+    .mockReturnValue({
+      sort: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockReturnThis(),
+      lean: jest.fn().mockResolvedValue([]),
+    });
   M.findOne = jest.fn().mockResolvedValue(null);
   M.findById = jest.fn().mockResolvedValue(null);
   M.create = jest.fn().mockResolvedValue({ _id: 'id1' });
   M.countDocuments = jest.fn().mockResolvedValue(0);
   return M;
 });
-jest.mock('multer', () => { const m = jest.fn(() => ({ single: jest.fn(() => jest.fn((r,s,n) => n && n())), array: jest.fn(() => jest.fn((r,s,n) => n && n())), fields: jest.fn(() => jest.fn((r,s,n) => n && n())) })); m.diskStorage = jest.fn(() => ({})); m.memoryStorage = jest.fn(() => ({})); return m; });
-jest.mock('pdf-lib', () => new Proxy({}, { get: (t, p) => p === '__esModule' ? false : jest.fn() }));
-jest.mock('qrcode', () => new Proxy({}, { get: (t, p) => p === '__esModule' ? false : jest.fn() }));
-jest.mock('../../utils/safeError', () => new Proxy({}, { get: (t, p) => p === '__esModule' ? false : jest.fn() }));
+jest.mock('multer', () => {
+  const m = jest.fn(() => ({
+    single: jest.fn(() => jest.fn((r, s, n) => n && n())),
+    array: jest.fn(() => jest.fn((r, s, n) => n && n())),
+    fields: jest.fn(() => jest.fn((r, s, n) => n && n())),
+  }));
+  m.diskStorage = jest.fn(() => ({}));
+  m.memoryStorage = jest.fn(() => ({}));
+  return m;
+});
+jest.mock(
+  'pdf-lib',
+  () => new Proxy({}, { get: (t, p) => (p === '__esModule' ? false : jest.fn()) })
+);
+jest.mock(
+  'qrcode',
+  () => new Proxy({}, { get: (t, p) => (p === '__esModule' ? false : jest.fn()) })
+);
+jest.mock(
+  '../../utils/safeError',
+  () => new Proxy({}, { get: (t, p) => (p === '__esModule' ? false : jest.fn()) })
+);
 
 let routeModule;
-try { routeModule = require('../../routes/eSignaturePdf.routes'); } catch(e) { /* load fail */ }
+try {
+  routeModule = require('../../routes/eSignaturePdf.routes');
+} catch {
+  /* load fail */
+}
 
 describe('routes/eSignaturePdf.routes', () => {
   test('module loads without crash', () => {
@@ -112,5 +156,4 @@ describe('routes/eSignaturePdf.routes', () => {
       expect(true).toBe(true);
     }
   });
-
 });

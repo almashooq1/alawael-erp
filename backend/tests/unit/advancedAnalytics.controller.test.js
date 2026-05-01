@@ -1,14 +1,26 @@
 'use strict';
 
 // Auto-generated unit test for controllers/advancedAnalytics.controller
-jest.mock('../../services/advancedAnalytics.service', () => new Proxy({}, { get: () => jest.fn().mockResolvedValue({}) }));
-jest.mock('../../utils/logger', () => ({ info: jest.fn(), error: jest.fn(), warn: jest.fn(), debug: jest.fn() }));
+jest.mock(
+  '../../services/advancedAnalytics.service',
+  () => new Proxy({}, { get: () => jest.fn().mockResolvedValue({}) })
+);
+jest.mock('../../utils/logger', () => ({
+  info: jest.fn(),
+  error: jest.fn(),
+  warn: jest.fn(),
+  debug: jest.fn(),
+}));
 jest.mock('../../utils/safeError', () => ({}));
 
 const mockReq = (overrides = {}) => ({
   headers: { authorization: 'Bearer token' },
-  body: {}, params: {}, query: {},
-  path: '/test', method: 'GET', ip: '127.0.0.1',
+  body: {},
+  params: {},
+  query: {},
+  path: '/test',
+  method: 'GET',
+  ip: '127.0.0.1',
   user: { _id: 'user1', role: 'admin', permissions: ['*'] },
   get: jest.fn(h => ({ authorization: 'Bearer token' })[h]),
   ...overrides,
@@ -31,10 +43,16 @@ const mockRes = () => {
 const mockNext = jest.fn();
 
 let ctrl;
-try { ctrl = require('../../controllers/advancedAnalytics.controller'); } catch (e) { ctrl = null; }
+try {
+  ctrl = require('../../controllers/advancedAnalytics.controller');
+} catch {
+  ctrl = null;
+}
 
 describe('advancedAnalytics.controller controller', () => {
-  beforeEach(() => { jest.clearAllMocks(); });
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   test('module loads without crash', () => {
     expect(true).toBe(true);
@@ -104,5 +122,4 @@ describe('advancedAnalytics.controller controller', () => {
     if (!ctrl || !ctrl.prototype) return;
     expect(typeof ctrl.prototype.getStatistics).toBe('function');
   });
-
 });

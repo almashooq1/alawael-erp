@@ -66,7 +66,7 @@ const TaxCalendar = require('./TaxCalendar');
 const EInvoice = require('./EInvoice');
 
 // ── HR & Employee ────────────────────────────────────────────────────────────
-const Employee = require('./Employee');
+const Employee = require('./HR/Employee');
 const Department = require('./Department');
 const Position = require('./Position');
 const Leave = require('./Leave');

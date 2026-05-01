@@ -64,9 +64,12 @@ const emailConfigSchema = Joi.object({
   }),
 
   rateLimit: Joi.object({
+    // Defaults must satisfy the consistency checks below
+    // (maxPerMinute × 60 ≤ maxPerHour, maxPerHour × 24 ≤ maxPerDay) or
+    // every boot logs warnings about its own defaults.
     maxPerMinute: Joi.number().integer().min(1).max(1000).default(30),
-    maxPerHour: Joi.number().integer().min(1).max(50000).default(500),
-    maxPerDay: Joi.number().integer().min(1).max(500000).default(5000),
+    maxPerHour: Joi.number().integer().min(1).max(50000).default(1800),
+    maxPerDay: Joi.number().integer().min(1).max(500000).default(10000),
   }),
 
   retry: Joi.object({

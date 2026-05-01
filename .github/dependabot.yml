@@ -95,3 +95,103 @@ updates:
       - "ci"
     commit-message:
       prefix: "ci(deps)"
+
+  # ─── Mobile (React Native + Expo) ────────────────────────────
+  - package-ecosystem: "npm"
+    directory: "/mobile"
+    schedule:
+      interval: "weekly"
+      day: "saturday"
+      time: "06:00"
+      timezone: "Asia/Riyadh"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "mobile"
+    commit-message:
+      prefix: "chore(deps-mobile)"
+
+  # ─── Supply Chain Management (backend) ───────────────────────
+  - package-ecosystem: "npm"
+    directory: "/supply-chain-management/backend"
+    schedule:
+      interval: "weekly"
+      day: "saturday"
+      time: "06:00"
+      timezone: "Asia/Riyadh"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "scm"
+    commit-message:
+      prefix: "chore(deps-scm-be)"
+
+  # ─── Supply Chain Management (frontend) ──────────────────────
+  - package-ecosystem: "npm"
+    directory: "/supply-chain-management/frontend"
+    schedule:
+      interval: "weekly"
+      day: "saturday"
+      time: "06:00"
+      timezone: "Asia/Riyadh"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "scm"
+    commit-message:
+      prefix: "chore(deps-scm-fe)"
+
+  # ─── Microservices (file-processor, queue-worker, etc.) ──────
+  - package-ecosystem: "npm"
+    directory: "/services/file-processor"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 3
+    labels: ["dependencies", "services"]
+    commit-message:
+      prefix: "chore(deps-svc)"
+
+  - package-ecosystem: "npm"
+    directory: "/services/queue-worker"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 3
+    labels: ["dependencies", "services"]
+    commit-message:
+      prefix: "chore(deps-svc)"
+
+  - package-ecosystem: "npm"
+    directory: "/services/iot-gateway"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 3
+    labels: ["dependencies", "services"]
+    commit-message:
+      prefix: "chore(deps-svc)"
+
+  - package-ecosystem: "npm"
+    directory: "/services/saudi-gov-gateway"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 3
+    labels: ["dependencies", "services"]
+    commit-message:
+      prefix: "chore(deps-svc)"
+
+  - package-ecosystem: "npm"
+    directory: "/services/scheduler"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 3
+    labels: ["dependencies", "services"]
+    commit-message:
+      prefix: "chore(deps-svc)"
+
+  - package-ecosystem: "npm"
+    directory: "/services/webhook-worker"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 3
+    labels: ["dependencies", "services"]
+    commit-message:
+      prefix: "chore(deps-svc)"

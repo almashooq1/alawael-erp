@@ -19,6 +19,7 @@ module.exports = [
       'dist/**',
       'build/**',
       '_archived/**', // historical / dead code — not linted
+      '**/_archived/**', // nested archives (e.g. __tests__/_archived/)
       'tests/gen/**', // auto-generated tests
       'tests/load/**', // k6 load tests use ESM (different parser)
       'tests/tests/**', // legacy nested test dirs

@@ -6,6 +6,8 @@ module.exports = {
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
     '\\.(gif|ttf|eot|svg|png|jpg|jpeg)$': '<rootDir>/__mocks__/fileMock.js',
     '^xlsx$': '<rootDir>/__mocks__/xlsx.js',
+    '^jspdf$': '<rootDir>/__mocks__/jspdf.js',
+    '^jspdf-autotable$': '<rootDir>/__mocks__/jspdf-autotable.js',
   },
   transform: {
     '^.+\\.(js|jsx|ts|tsx)$': 'babel-jest',

@@ -257,7 +257,7 @@ PortalPaymentSchema.statics.getUpcomingPayments = function (days = 7) {
 PortalPaymentSchema.statics.getTotalDue = function (guardianId) {
   return this.aggregate([
     { $match: { guardianId, status: { $in: ['pending', 'overdue'] } } },
-    { $group: { _id: null, totalDue: { $sum: '$amountRemaining' || '$amount' } } },
+    { $group: { _id: null, totalDue: { $sum: { $ifNull: ['$amountRemaining', '$amount'] } } } },
   ]);
 };
 

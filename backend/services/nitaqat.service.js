@@ -203,11 +203,11 @@ class NitaqatService {
     const year = new Date().getFullYear();
     return (
       (await NitaqatActivityParam.findOne({ activityCode, subActivityCode, year }).lean()) ||
-      (await NitaqatActivityParam.findOne({
+      NitaqatActivityParam.findOne({
         activityCode,
         subActivityCode: 'default',
         year,
-      }).lean())
+      }).lean()
     );
   }
 

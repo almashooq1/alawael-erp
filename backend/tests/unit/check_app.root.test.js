@@ -24,11 +24,10 @@ describe('check_app.js', () => {
     process.env.NODE_ENV = 'test';
     process.env.MONGODB_URI = 'mongodb://localhost/test';
     process.env.JWT_SECRET = 'test-secret';
-    let error = null;
     try {
       require('../../check_app');
-    } catch (e) {
-      error = e;
+    } catch {
+      // Module should load regardless of missing config — swallow any failure
     }
     // Module should load regardless of any missing config
     expect(true).toBe(true);

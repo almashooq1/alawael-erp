@@ -17,7 +17,7 @@ const cron = require('node-cron');
 const logger = require('../utils/logger');
 
 // ─── Services ────────────────────────────────────────────────────────────────
-let kpiService, zktecoService, attendanceService, leaveService;
+let kpiService, zktecoService, attendanceService;
 
 const loadServices = () => {
   try {
@@ -34,11 +34,6 @@ const loadServices = () => {
     attendanceService = require('../services/attendanceProcessing.service');
   } catch (e) {
     logger.warn('[KPI Scheduler] attendanceProcessing.service not loaded:', e.message);
-  }
-  try {
-    leaveService = require('../services/leaveManagement.service');
-  } catch (e) {
-    logger.warn('[KPI Scheduler] leaveManagement.service not loaded:', e.message);
   }
 };
 

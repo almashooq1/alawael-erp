@@ -100,11 +100,7 @@ describe('DisabilityAuthorityService', () => {
         };
         // Make the final populate resolve
         const reports = [{ _id: fakeId }];
-        let popCount = 0;
-        chain.populate = jest.fn().mockImplementation(() => {
-          popCount++;
-          return chain;
-        });
+        chain.populate = jest.fn().mockImplementation(() => chain);
         chain.lean = undefined; // no lean call in this service — find + sort + skip + limit + populate
         // Looking at code: it does .find(query).sort({}).skip().limit().populate().populate()
         // The last populate returns results (since no .lean())

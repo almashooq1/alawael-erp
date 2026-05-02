@@ -17,17 +17,15 @@ const { v4: uuidv4 } = require('uuid');
 const logger = require('../utils/logger');
 
 // ─── نماذج قاعدة البيانات ──────────────────────────────────────────────────
-let EligibilityCheck, PriorAuthorization, InsuranceClaim, InsurancePolicy;
+let EligibilityCheck, PriorAuthorization, InsuranceClaim;
 try {
   EligibilityCheck = require('../models/nphies/EligibilityCheck');
   PriorAuthorization = require('../models/nphies/PriorAuthorization');
   InsuranceClaim = require('../models/nphies/InsuranceClaim');
-  InsurancePolicy = require('../models/nphies/InsurancePolicy');
 } catch {
   EligibilityCheck = null;
   PriorAuthorization = null;
   InsuranceClaim = null;
-  InsurancePolicy = null;
 }
 
 // ─── الإعدادات الأساسية ────────────────────────────────────────────────────

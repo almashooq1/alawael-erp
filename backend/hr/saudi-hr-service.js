@@ -308,45 +308,41 @@ class SaudiHRService {
    * Create new employee with Saudi-specific validations
    */
   async createEmployee(employeeData) {
-    try {
-      // Validate national ID
-      if (!this.validateSaudiNationalId(employeeData.nationalId)) {
-        // Check if it's a valid Iqama number for non-Saudis
-        if (!this.validateIqamaNumber(employeeData.nationalId)) {
-          throw new Error('رقم الهوية/الإقامة غير صحيح');
-        }
+    // Validate national ID
+    if (!this.validateSaudiNationalId(employeeData.nationalId)) {
+      // Check if it's a valid Iqama number for non-Saudis
+      if (!this.validateIqamaNumber(employeeData.nationalId)) {
+        throw new Error('رقم الهوية/الإقامة غير صحيح');
       }
-
-      // Generate employee ID
-      employeeData.employeeId = await this.generateEmployeeId();
-
-      // Calculate total salary
-      employeeData.salary.total =
-        employeeData.salary.basic +
-        (employeeData.salary.housingAllowance || 0) +
-        (employeeData.salary.transportAllowance || 0) +
-        (employeeData.salary.otherAllowances || 0);
-
-      // Set default work schedule (Saudi standard)
-      employeeData.workSchedule = {
-        startTime: '08:00',
-        endTime: '16:00',
-        workingDays: ['sun', 'mon', 'tue', 'wed', 'thu'],
-        weeklyHours: 48,
-      };
-
-      const employee = new Employee(employeeData);
-      await employee.save();
-
-      // Register with GOSI if Saudi
-      if (employee.nationality === 'SA') {
-        await this.registerWithGOSI(employee._id);
-      }
-
-      return employee;
-    } catch (error) {
-      throw error;
     }
+
+    // Generate employee ID
+    employeeData.employeeId = await this.generateEmployeeId();
+
+    // Calculate total salary
+    employeeData.salary.total =
+      employeeData.salary.basic +
+      (employeeData.salary.housingAllowance || 0) +
+      (employeeData.salary.transportAllowance || 0) +
+      (employeeData.salary.otherAllowances || 0);
+
+    // Set default work schedule (Saudi standard)
+    employeeData.workSchedule = {
+      startTime: '08:00',
+      endTime: '16:00',
+      workingDays: ['sun', 'mon', 'tue', 'wed', 'thu'],
+      weeklyHours: 48,
+    };
+
+    const employee = new Employee(employeeData);
+    await employee.save();
+
+    // Register with GOSI if Saudi
+    if (employee.nationality === 'SA') {
+      await this.registerWithGOSI(employee._id);
+    }
+
+    return employee;
   }
 
   /**

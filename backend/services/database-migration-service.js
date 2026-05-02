@@ -278,26 +278,22 @@ module.exports = {
 
     const startTime = Date.now();
 
-    try {
-      // تنفيذ التراجع
-      await migration.down(this.connection.db);
+    // تنفيذ التراجع
+    await migration.down(this.connection.db);
 
-      // تحديث السجل
-      await this.Migration.findByIdAndUpdate(migrationRecord._id, {
-        status: 'rolled_back',
-        rolledBackAt: new Date(),
-        rollbackDuration: Date.now() - startTime,
-      });
+    // تحديث السجل
+    await this.Migration.findByIdAndUpdate(migrationRecord._id, {
+      status: 'rolled_back',
+      rolledBackAt: new Date(),
+      rollbackDuration: Date.now() - startTime,
+    });
 
-      return {
-        success: true,
-        name: migrationName,
-        duration: Date.now() - startTime,
-        backupPath,
-      };
-    } catch (error) {
-      throw error;
-    }
+    return {
+      success: true,
+      name: migrationName,
+      duration: Date.now() - startTime,
+      backupPath,
+    };
   }
 
   // التراجع عن آخر n ترحيلات

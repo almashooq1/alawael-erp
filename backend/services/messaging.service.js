@@ -11,165 +11,133 @@ const Conversation = require('../models/conversation.model');
  * Create a new message
  */
 const createMessage = async messageData => {
-  try {
-    const {
-      content,
-      sender,
-      recipient,
-      conversationId,
-      attachments = [],
-      mentions = [],
-      read = false,
-    } = messageData;
+  const {
+    content,
+    sender,
+    recipient,
+    conversationId,
+    attachments = [],
+    mentions = [],
+    read = false,
+  } = messageData;
 
-    // In Phase 2, we return a simple message object
-    // In Phase 3, this would save to database
-    return {
-      _id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      content,
-      sender,
-      recipient,
-      conversationId,
-      attachments,
-      mentions,
-      read,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-  } catch (error) {
-    throw error;
-  }
+  // In Phase 2, we return a simple message object
+  // In Phase 3, this would save to database
+  return {
+    _id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    content,
+    sender,
+    recipient,
+    conversationId,
+    attachments,
+    mentions,
+    read,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
 };
 
 /**
  * Get messages with filtering and pagination
  */
 const getMessages = async (options = {}) => {
-  try {
-    // Return mock data for Phase 2
-    // In Phase 3, this would query the database
-    const {
-      page: _page = 1,
-      limit: _limit = 20,
-      conversationId: _conversationId,
-      unread: _unread,
-      userId: _userId,
-    } = options;
+  // Return mock data for Phase 2
+  // In Phase 3, this would query the database
+  const {
+    page: _page = 1,
+    limit: _limit = 20,
+    conversationId: _conversationId,
+    unread: _unread,
+    userId: _userId,
+  } = options;
 
-    return [
-      {
-        _id: 'msg-001',
-        content: 'First message',
-        sender: 'user-001',
-        recipient: 'user-002',
-        read: true,
-        createdAt: new Date('2026-01-15'),
-      },
-      {
-        _id: 'msg-002',
-        content: 'Second message',
-        sender: 'user-002',
-        recipient: 'user-001',
-        read: false,
-        createdAt: new Date('2026-01-20'),
-      },
-    ];
-  } catch (error) {
-    throw error;
-  }
+  return [
+    {
+      _id: 'msg-001',
+      content: 'First message',
+      sender: 'user-001',
+      recipient: 'user-002',
+      read: true,
+      createdAt: new Date('2026-01-15'),
+    },
+    {
+      _id: 'msg-002',
+      content: 'Second message',
+      sender: 'user-002',
+      recipient: 'user-001',
+      read: false,
+      createdAt: new Date('2026-01-20'),
+    },
+  ];
 };
 
 /**
  * Get a specific message by ID
  */
 const getMessage = async (messageId, _userId) => {
-  try {
-    return {
-      _id: messageId,
-      content: 'Message content',
-      sender: 'user-001',
-      read: true,
-      createdAt: new Date(),
-    };
-  } catch (error) {
-    throw error;
-  }
+  return {
+    _id: messageId,
+    content: 'Message content',
+    sender: 'user-001',
+    read: true,
+    createdAt: new Date(),
+  };
 };
 
 /**
  * Update message content
  */
 const updateMessage = async (messageId, updates) => {
-  try {
-    return {
-      _id: messageId,
-      content: updates.content || 'Updated message',
-      updated: true,
-      updatedAt: new Date(),
-    };
-  } catch (error) {
-    throw error;
-  }
+  return {
+    _id: messageId,
+    content: updates.content || 'Updated message',
+    updated: true,
+    updatedAt: new Date(),
+  };
 };
 
 /**
  * Delete a message
  */
 const deleteMessage = async (messageId, userId) => {
-  try {
-    return {
-      success: true,
-      deletedId: messageId,
-    };
-  } catch (error) {
-    throw error;
-  }
+  return {
+    success: true,
+    deletedId: messageId,
+  };
 };
 
 /**
  * Mark message(s) as read
  */
 const markAsRead = async (messageId, userId) => {
-  try {
-    return {
-      success: true,
-      messageId,
-      read: true,
-      updatedAt: new Date(),
-    };
-  } catch (error) {
-    throw error;
-  }
+  return {
+    success: true,
+    messageId,
+    read: true,
+    updatedAt: new Date(),
+  };
 };
 
 /**
  * Bulk mark messages as read
  */
 const markMultipleAsRead = async (messageIds, userId) => {
-  try {
-    return {
-      success: true,
-      updatedCount: (messageIds || []).length,
-      messageIds,
-    };
-  } catch (error) {
-    throw error;
-  }
+  return {
+    success: true,
+    updatedCount: (messageIds || []).length,
+    messageIds,
+  };
 };
 
 /**
  * Bulk delete messages
  */
 const bulkDeleteMessages = async (messageIds, userId) => {
-  try {
-    return {
-      success: true,
-      deletedCount: (messageIds || []).length,
-      deletedIds: messageIds,
-    };
-  } catch (error) {
-    throw error;
-  }
+  return {
+    success: true,
+    deletedCount: (messageIds || []).length,
+    deletedIds: messageIds,
+  };
 };
 
 /**
@@ -199,109 +167,85 @@ const getUnreadCount = async userId => {
  * Create a message thread
  */
 const createThread = async threadData => {
-  try {
-    const { participants = [], subject, conversationId } = threadData;
+  const { participants = [], subject, conversationId } = threadData;
 
-    return {
-      _id: `thread-${Date.now()}`,
-      participants,
-      subject,
-      conversationId,
-      messages: [],
-      createdAt: new Date(),
-    };
-  } catch (error) {
-    throw error;
-  }
+  return {
+    _id: `thread-${Date.now()}`,
+    participants,
+    subject,
+    conversationId,
+    messages: [],
+    createdAt: new Date(),
+  };
 };
 
 /**
  * Get threads for a user
  */
 const getThreads = async (userId, options = {}) => {
-  try {
-    return [
-      {
-        _id: 'thread-001',
-        participants: ['user-001', 'user-002'],
-        subject: 'Thread subject',
-        lastMessage: 'Last message in thread',
-        unreadCount: 0,
-        updatedAt: new Date(),
-      },
-    ];
-  } catch (error) {
-    throw error;
-  }
+  return [
+    {
+      _id: 'thread-001',
+      participants: ['user-001', 'user-002'],
+      subject: 'Thread subject',
+      lastMessage: 'Last message in thread',
+      unreadCount: 0,
+      updatedAt: new Date(),
+    },
+  ];
 };
 
 /**
  * Get a specific thread with messages
  */
 const getThread = async (threadId, userId) => {
-  try {
-    return {
-      _id: threadId,
-      participants: ['user-001', 'user-002'],
-      messages: [
-        {
-          _id: 'msg-001',
-          content: 'Message in thread',
-          sender: 'user-001',
-        },
-      ],
-      createdAt: new Date(),
-    };
-  } catch (error) {
-    throw error;
-  }
+  return {
+    _id: threadId,
+    participants: ['user-001', 'user-002'],
+    messages: [
+      {
+        _id: 'msg-001',
+        content: 'Message in thread',
+        sender: 'user-001',
+      },
+    ],
+    createdAt: new Date(),
+  };
 };
 
 /**
  * Add message to thread
  */
 const addMessageToThread = async (threadId, messageData, userId) => {
-  try {
-    return {
-      _id: `msg-${Date.now()}`,
-      threadId,
-      ...messageData,
-      sender: userId,
-      createdAt: new Date(),
-    };
-  } catch (error) {
-    throw error;
-  }
+  return {
+    _id: `msg-${Date.now()}`,
+    threadId,
+    ...messageData,
+    sender: userId,
+    createdAt: new Date(),
+  };
 };
 
 /**
  * Archive thread
  */
 const archiveThread = async (threadId, userId) => {
-  try {
-    return {
-      _id: threadId,
-      archived: true,
-      archivedAt: new Date(),
-    };
-  } catch (error) {
-    throw error;
-  }
+  return {
+    _id: threadId,
+    archived: true,
+    archivedAt: new Date(),
+  };
 };
 
 /**
  * Leave thread
  */
 const leaveThread = async (threadId, userId) => {
-  try {
-    return {
-      _id: threadId,
-      left: true,
-      leftAt: new Date(),
-    };
-  } catch (error) {
-    throw error;
-  }
+  return {
+    _id: threadId,
+    left: true,
+    leftAt: new Date(),
+  };
 };
 
 /**
@@ -315,30 +259,22 @@ const getUnreadMessages = async userId => {
  * Clear unread for user
  */
 const clearUnread = async (userId, conversationId) => {
-  try {
-    return {
-      success: true,
-      userId,
-      conversationId,
-    };
-  } catch (error) {
-    throw error;
-  }
+  return {
+    success: true,
+    userId,
+    conversationId,
+  };
 };
 
 /**
  * Mark conversation as read
  */
 const markConversationAsRead = async (conversationId, userId) => {
-  try {
-    return {
-      success: true,
-      conversationId,
-      userId,
-    };
-  } catch (error) {
-    throw error;
-  }
+  return {
+    success: true,
+    conversationId,
+    userId,
+  };
 };
 
 // Export all methods as an object

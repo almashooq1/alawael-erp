@@ -60,7 +60,7 @@ const { jwtSecret } = require('../config/secrets');
  * تحقق من أن ولي الأمر المصادق عليه هو نفسه صاحب الطلب
  * أو أن المستخدم هو موظف مخوّل
  */
-function isGuardianOrStaff(req, guardianId) {
+function _isGuardianOrStaff(req, guardianId) {
   if (!req.user) return false;
   const roles = req.user.role || req.user.roles || [];
   const staffRoles = ['admin', 'manager', 'specialist', 'coordinator'];

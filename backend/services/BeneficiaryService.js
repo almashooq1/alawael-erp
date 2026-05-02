@@ -23,8 +23,8 @@ const BeneficiaryTransfer = require('../models/BeneficiaryTransfer');
 const WaitlistEntry = require('../models/WaitlistEntry');
 const {
   BENEFICIARY_STATUSES,
-  DISABILITY_SEVERITY_LABELS,
-  PRIORITY_LEVEL_SCORES,
+  _DISABILITY_SEVERITY_LABELS,
+  _PRIORITY_LEVEL_SCORES,
 } = require('../constants/beneficiary.constants');
 
 // ─── استيراد اختياري للنماذج (قد تكون غير موجودة في بعض البيئات) ───────────────

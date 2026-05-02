@@ -29,7 +29,7 @@ const COMPENSATION_FIELDS = [
   'other_allowances',
 ];
 
-function getField(obj, path) {
+function _getField(obj, path) {
   if (!obj) return undefined;
   const parts = path.split('.');
   let cur = obj;

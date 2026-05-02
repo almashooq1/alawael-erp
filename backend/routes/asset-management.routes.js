@@ -125,7 +125,7 @@ router.delete('/categories/:id', authorize(['admin']), async (req, res) => {
 // Dashboard stats
 router.get('/assets/stats', async (req, res) => {
   try {
-    const [total, byStatus, byCategory, warrantyExpiringSoon, maintenanceDue] = await Promise.all([
+    const [total, byStatus, _byCategory, warrantyExpiringSoon, maintenanceDue] = await Promise.all([
       Asset.countDocuments(),
       Asset.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
       Asset.aggregate([{ $group: { _id: '$category', count: { $sum: 1 } } }]),
@@ -274,8 +274,8 @@ router.post('/depreciation', authorize(['admin', 'manager']), async (req, res) =
       periodMonth,
       depreciationDate,
       depreciationAmount,
-      accumulatedDepreciation,
-      netBookValue,
+      _accumulatedDepreciation,
+      _netBookValue,
     } = req.body;
     if (!assetId || !periodYear || !periodMonth || !depreciationAmount) {
       return res.status(400).json({ success: false, message: 'البيانات الأساسية مطلوبة' });

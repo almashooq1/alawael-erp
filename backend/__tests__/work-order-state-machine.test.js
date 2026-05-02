@@ -12,8 +12,8 @@ process.env.NODE_ENV = 'test';
 
 const {
   createWorkOrderStateMachine,
-  IllegalTransitionError,
-  MissingFieldError,
+  _IllegalTransitionError,
+  _MissingFieldError,
 } = require('../services/operations/workOrderStateMachine.service');
 
 // ── fakes ─────────────────────────────────────────────────────────

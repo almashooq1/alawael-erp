@@ -27,7 +27,7 @@
 
 const {
   CONTROL_LIBRARY,
-  CONTROL_FREQUENCIES,
+  _CONTROL_FREQUENCIES,
   TEST_RESULT_OUTCOMES,
 } = require('../../config/control-library.registry');
 

@@ -170,7 +170,7 @@ describe('Psych registry — scales', () => {
   });
 
   it('all scale bands cover full total range contiguously', () => {
-    for (const [code, s] of Object.entries(registry.SCALES)) {
+    for (const [_code, s] of Object.entries(registry.SCALES)) {
       let cursor = s.totalMin;
       for (const b of s.bands) {
         expect(b.minScore).toBe(cursor);

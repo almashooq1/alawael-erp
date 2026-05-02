@@ -278,7 +278,7 @@ class ZatcaPhase2Service {
    */
   buildInvoiceXml(invoiceData) {
     const {
-      invoiceNumber,
+      _invoiceNumber,
       invoiceDate,
       invoiceTime = '00:00:00',
       sellerName,

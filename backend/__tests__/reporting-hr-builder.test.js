@@ -49,7 +49,7 @@ function cpe(overrides = {}) {
   };
 }
 
-function makeRowModel(rows) {
+function _makeRowModel(rows) {
   return {
     model: {
       find: jest.fn(async (filter = {}) => {

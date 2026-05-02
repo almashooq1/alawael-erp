@@ -46,7 +46,7 @@ function encryptData(data, masterKey) {
   };
 }
 
-function decryptData(encryptedObj, masterKey) {
+function _decryptData(encryptedObj, masterKey) {
   const salt = Buffer.from(encryptedObj.salt, 'hex');
   const key = deriveKey(masterKey, salt);
   const iv = Buffer.from(encryptedObj.iv, 'hex');

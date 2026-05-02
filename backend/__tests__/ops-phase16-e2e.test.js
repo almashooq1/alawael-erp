@@ -25,7 +25,7 @@ process.env.NODE_ENV = 'test';
 
 const {
   createFacilityInspectionService,
-  createFacilityService,
+  _createFacilityService,
 } = require('../services/operations/facility.service');
 const {
   createWorkOrderStateMachine,

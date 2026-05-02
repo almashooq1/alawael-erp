@@ -33,7 +33,7 @@ async function findRows(Model, filter) {
   }
 }
 
-async function countDocs(Model, filter) {
+async function _countDocs(Model, filter) {
   if (!Model) return 0;
   try {
     if (typeof Model.countDocuments === 'function') {

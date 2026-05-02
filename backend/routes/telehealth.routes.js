@@ -29,7 +29,7 @@ const {
   issuePrescription,
   getDashboardStats,
   getProviderQueue,
-  generateAgoraToken,
+  _generateAgoraToken,
 } = require('../services/telehealthService');
 
 const { v4: uuidv4 } = require('uuid');

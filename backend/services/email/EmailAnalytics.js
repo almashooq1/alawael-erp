@@ -172,7 +172,7 @@ class EmailAnalytics {
       status,
       provider,
       to,
-      from,
+      _from,
       startDate,
       endDate,
       search,

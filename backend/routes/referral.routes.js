@@ -30,7 +30,7 @@ const {
   getAnalytics,
   attemptAutoAssignment,
   recalculatePriority,
-  canTransition,
+  _canTransition,
 } = require('../services/referralService');
 const escapeRegex = require('../utils/escapeRegex');
 const { stripUpdateMeta } = require('../utils/sanitize');

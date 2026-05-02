@@ -71,7 +71,7 @@ function checkMongodump() {
   }
 }
 
-function checkMongorestore() {
+function _checkMongorestore() {
   try {
     execSync('mongorestore --version', { stdio: 'pipe' });
     return true;

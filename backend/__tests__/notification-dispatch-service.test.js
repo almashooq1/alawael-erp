@@ -124,7 +124,7 @@ function makePushAdapter({ alwaysFail = false } = {}) {
   };
 }
 
-function makeSmsAdapter() {
+function _makeSmsAdapter() {
   const calls = [];
   return {
     calls,

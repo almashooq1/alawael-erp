@@ -13,8 +13,8 @@ const { RehabPlan, RehabPlanGoal } = require('../../models/rehabilitation/RehabP
 const {
   RehabSession,
   SessionGoalProgress,
-  GroupSession,
-  ProgramReferral,
+  _GroupSession,
+  _ProgramReferral,
 } = require('../../models/rehabilitation/RehabSession');
 
 const logger = require('../../utils/logger');

@@ -71,7 +71,7 @@ const safeError = require('../utils/safeError');
  * تنفيذ Aggregation pipeline ديناميكي على أي مجموعة
  * مع دعم فلاتر التاريخ، الفرع، والحالة
  */
-async function runPipeline(collection, basePipeline = [], params = {}) {
+async function _runPipeline(collection, basePipeline = [], params = {}) {
   const db = mongoose.connection.db;
   const { date_from, date_to, branch_id, date_field = 'createdAt' } = params;
 

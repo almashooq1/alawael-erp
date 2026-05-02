@@ -235,7 +235,7 @@ function nearestNeighborSort(start, points) {
  * @param {number} j
  * @returns {number}
  */
-function segmentDistance(route, i, j) {
+function _segmentDistance(route, i, j) {
   let dist = 0;
   for (let k = i; k < j; k++) {
     dist += haversineDistance(route[k].lat, route[k].lng, route[k + 1].lat, route[k + 1].lng);

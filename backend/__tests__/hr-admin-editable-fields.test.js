@@ -10,8 +10,8 @@
 const { ROLES } = require('../config/rbac.config');
 const {
   WRITE_TIERS,
-  ROLE_WRITE_TIER,
-  ADMIN_FIELDS,
+  _ROLE_WRITE_TIER,
+  _ADMIN_FIELDS,
   writeTierForRole,
   canWrite,
   fieldSpec,

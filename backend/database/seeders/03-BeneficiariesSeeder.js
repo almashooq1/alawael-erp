@@ -9,7 +9,7 @@ const Beneficiary = require('../../models/Beneficiary');
 const Branch = require('../../models/Branch');
 
 // ─── دالة مساعدة: تاريخ عشوائي بين تاريخين ───────────────────────────────
-function randomDate(start, end) {
+function _randomDate(start, end) {
   return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
 }
 

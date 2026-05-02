@@ -11,7 +11,7 @@ const logger = require('../utils/logger');
 
 const {
   Referral,
-  ReferralDocument,
+  _ReferralDocument,
   ReferringFacility,
   ReferralCommunication,
   ReferralAssessment,

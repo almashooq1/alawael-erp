@@ -90,8 +90,8 @@ describe('AsyncAPI event spec — structural checks', () => {
   });
 
   it('every channel references messages that exist in components.messages', () => {
-    for (const [channelName, channel] of Object.entries(spec.channels)) {
-      for (const [msgKey, msg] of Object.entries(channel.messages || {})) {
+    for (const [_channelName, channel] of Object.entries(spec.channels)) {
+      for (const [_msgKey, msg] of Object.entries(channel.messages || {})) {
         expect(msg.$ref).toBeTruthy();
         const m = msg.$ref.match(/#\/components\/messages\/(\w+)/);
         expect(m).toBeTruthy();

@@ -57,7 +57,7 @@ jest.mock('../../utils/logger', () => ({
 }));
 
 const {
-  processLog,
+  _processLog,
   processBatch,
   generateMonthlyReport,
   list,

@@ -9,7 +9,7 @@ const {
   Audit,
   ImprovementProject,
   Risk,
-  QualityStandard,
+  _QualityStandard,
 } = require('../../models/QualityModels');
 const logger = require('../../utils/logger');
 

@@ -605,7 +605,7 @@ router.post('/', async (req, res) => {
       isActive,
       customPermissions,
       deniedPermissions,
-      notifyByEmail,
+      _notifyByEmail,
     } = req.body;
 
     // Sanitize inputs

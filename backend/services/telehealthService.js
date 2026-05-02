@@ -11,12 +11,12 @@ const logger = require('../utils/logger');
 
 const {
   Teleconsultation,
-  VirtualSession,
+  _VirtualSession,
   RemotePrescription,
   TelehealthWaitingRoom,
-  SessionRecording,
-  TelehealthDevice,
-  ProviderAvailabilitySlot,
+  _SessionRecording,
+  _TelehealthDevice,
+  _ProviderAvailabilitySlot,
   TeleconsultationParticipant,
 } = require('../models/Telehealth');
 

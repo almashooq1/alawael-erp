@@ -4,9 +4,9 @@ const { jwtSecret } = require('../config/secrets');
 const tokenBlacklist = require('../utils/tokenBlacklist');
 const safeError = require('../utils/safeError');
 const {
-  ROLES,
+  _ROLES,
   hasPermission: configHasPermission,
-  getRoleLevel,
+  _getRoleLevel,
 } = require('../config/rbac.config');
 
 // Use centralized secret management (no hardcoded fallbacks)
@@ -14,7 +14,7 @@ const JWT_SECRET = jwtSecret;
 
 // ── Lazy-loaded models (avoid circular deps at startup) ──────────────
 let _User, _Session;
-function getUser() {
+function _getUser() {
   if (!_User) _User = require('../models/User');
   return _User;
 }

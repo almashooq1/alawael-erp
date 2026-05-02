@@ -17,7 +17,7 @@ const {
   GOSISubscription,
   GOSIContribution,
   GOSIPayment,
-  GOSIComplianceReport,
+  _GOSIComplianceReport,
   EndOfServiceCalculation,
 } = require('../models/gosi.models');
 

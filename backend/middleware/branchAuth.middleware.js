@@ -4,7 +4,7 @@
  */
 const {
   hasPermission,
-  MODULES,
+  _MODULES,
   ACTIONS,
   createAuditEntry,
 } = require('../services/branchPermission.service');

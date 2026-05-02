@@ -33,7 +33,7 @@ describe('getPeriodDates — monthly', () => {
   });
 
   it('February leap year', () => {
-    const [start, end] = getPeriodDates('monthly', 2024, 2);
+    const [_start, end] = getPeriodDates('monthly', 2024, 2);
     expect(end.getDate()).toBe(29);
   });
 

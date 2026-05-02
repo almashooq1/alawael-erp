@@ -102,7 +102,7 @@ describe('AsyncAPI event spec — structural checks', () => {
   });
 
   it('every message payload $ref resolves to a defined schema', () => {
-    for (const [name, msg] of Object.entries(spec.components.messages)) {
+    for (const [_name, msg] of Object.entries(spec.components.messages)) {
       const payload = msg.payload;
       expect(payload).toBeTruthy();
       if (payload.$ref) {
@@ -113,7 +113,7 @@ describe('AsyncAPI event spec — structural checks', () => {
   });
 
   it('every schema that uses allOf points at defined bases', () => {
-    for (const [name, schema] of Object.entries(spec.components.schemas)) {
+    for (const [_name, schema] of Object.entries(spec.components.schemas)) {
       if (Array.isArray(schema.allOf)) {
         for (const part of schema.allOf) {
           if (part.$ref) {

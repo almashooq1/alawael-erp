@@ -173,7 +173,7 @@ describe('Phase 16 drift — notification priority matrix', () => {
   const nd = require('../config/notificationDispatch.registry');
 
   it('every priority uses only supported channels', () => {
-    for (const [priority, channels] of Object.entries(nd.PRIORITY_CHANNEL_MATRIX)) {
+    for (const [_priority, channels] of Object.entries(nd.PRIORITY_CHANNEL_MATRIX)) {
       for (const ch of channels) {
         expect(nd.SUPPORTED_CHANNELS).toContain(ch);
       }

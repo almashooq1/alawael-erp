@@ -64,8 +64,8 @@ describe('openapiToPostman.convert — structural', () => {
     const items = collection.item.flatMap(folder => folder.item);
     expect(items.length).toBe(allOps.length);
     const tags = new Set();
-    for (const [p, methods] of Object.entries(spec.paths)) {
-      for (const [m, op] of Object.entries(methods)) {
+    for (const [_p, methods] of Object.entries(spec.paths)) {
+      for (const [_m, op] of Object.entries(methods)) {
         if (typeof op !== 'object' || !op.responses) continue;
         tags.add((op.tags && op.tags[0]) || 'Default');
       }

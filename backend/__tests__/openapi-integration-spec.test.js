@@ -86,8 +86,8 @@ describe('OpenAPI integration spec — structural checks', () => {
   });
 
   it('every operation with a 200 response declares a content type', () => {
-    for (const [p, methods] of Object.entries(spec.paths)) {
-      for (const [m, op] of Object.entries(methods)) {
+    for (const [_p, methods] of Object.entries(spec.paths)) {
+      for (const [_m, op] of Object.entries(methods)) {
         if (typeof op !== 'object' || !op.responses) continue;
         const ok = op.responses['200'] || op.responses['201'];
         if (!ok) continue;

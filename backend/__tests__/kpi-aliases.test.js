@@ -19,7 +19,7 @@ describe('KPI_ALIASES shape', () => {
   });
 
   test('every non-null value is an id that exists in kpi.registry', () => {
-    for (const [alias, target] of Object.entries(KPI_ALIASES)) {
+    for (const [_alias, target] of Object.entries(KPI_ALIASES)) {
       if (target == null) continue;
       expect(kpi.byId(target)).toBeTruthy();
     }

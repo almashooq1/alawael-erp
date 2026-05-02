@@ -146,7 +146,7 @@ describe('catalog drift — rbac.config role references', () => {
   });
 
   test('every rbac alias (non-group) maps to a real rbac.config role value', () => {
-    for (const [alias, target] of Object.entries(rbacAliases.ROLE_ALIASES)) {
+    for (const [_alias, target] of Object.entries(rbacAliases.ROLE_ALIASES)) {
       if (target == null) continue; // groups handled below
       expect(rbacValues.has(target)).toBe(true);
     }
@@ -218,7 +218,7 @@ describe('catalog drift — PERIODICITY_CRON', () => {
       // node-cron not installed in this environment — skip soft.
       return;
     }
-    for (const [p, expr] of Object.entries(catalog.PERIODICITY_CRON)) {
+    for (const [_p, expr] of Object.entries(catalog.PERIODICITY_CRON)) {
       if (expr == null) continue;
       expect(cron.validate(expr)).toBe(true);
     }

@@ -225,7 +225,7 @@ router.post('/verify/bulk', async (req, res) => {
         errors.push({
           type: doc.type,
           identifier: doc.value,
-          error: 'حدث خطأ داخلي' || error.error,
+          error: error.error || error.message || 'حدث خطأ داخلي',
           status: 'failed',
         });
       }

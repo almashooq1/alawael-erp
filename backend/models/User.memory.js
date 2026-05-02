@@ -1,4 +1,4 @@
-/* eslint-disable no-unused-vars, no-constant-condition */
+/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 const db = require('../config/inMemoryDB');
 const logger = require('../utils/logger');
@@ -253,31 +253,6 @@ const UserModel = {
   },
 };
 
-// Initialize with admin user (only if no users exist and not in test mode)
-// AUTO INITIALIZATION DISABLED - Use pre-seeded users from db.json
-if (false && process.env.NODE_ENV !== 'test') {
-  (async () => {
-    const data = db.read();
-    if (!data.users || data.users.length === 0) {
-      const bcrypt = require('bcryptjs');
-      const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash(
-        process.env.ADMIN_INITIAL_PASS || 'Change_Me_On_First_Login!1',
-        salt
-      );
-
-      await UserModel.create({
-        email: 'admin@alawael.com',
-        password: hashedPassword,
-        fullName: 'مدير النظام',
-        role: 'admin',
-      });
-
-      logger.info('✅ In-memory database initialized with admin user');
-      logger.info('📧 Email: admin@alawael.com');
-      logger.info('🔑 Password: (set via ADMIN_INITIAL_PASS env var)');
-    }
-  })();
-}
+// Auto-init disabled — admin/users come from pre-seeded db.json.
 
 module.exports = UserModel;

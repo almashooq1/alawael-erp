@@ -17,7 +17,7 @@ const clampLimit = (raw, fallback = 100) => Math.min(parseInt(raw, 10) || fallba
 // Helper function for error handling
 const handleError = (error, res, defaultStatus = 500) => {
   const status = error.statusCode || defaultStatus;
-  const message = 'حدث خطأ داخلي' || 'Internal server error';
+  const message = error.message || 'حدث خطأ داخلي';
 
   res.status(status).json({
     success: false,

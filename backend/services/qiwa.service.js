@@ -115,7 +115,9 @@ class QiwaService extends EventEmitter {
             this.retryConfig.retryDelay *
             Math.pow(this.retryConfig.backoffMultiplier, config.retryCount - 1);
 
-          await new Promise(resolve => { setTimeout(resolve, delay); });
+          await new Promise(resolve => {
+            setTimeout(resolve, delay);
+          });
           return this.client(config);
         }
 
@@ -837,9 +839,7 @@ class QiwaService extends EventEmitter {
    * Format error response
    */
   _formatError(error) {
-    const formattedError = new Error(
-      error.response?.data?.message || 'حدث خطأ داخلي' || 'Unknown error'
-    );
+    const formattedError = new Error(error.response?.data?.message || 'حدث خطأ داخلي');
 
     formattedError.statusCode = error.response?.status || 500;
     formattedError.data = error.response?.data || {};

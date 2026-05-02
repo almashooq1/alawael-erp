@@ -52,7 +52,7 @@ class MissingFieldError extends Error {
 
 // ── Facility service ────────────────────────────────────────────────
 
-function createFacilityService({ facilityModel, inspectionModel = null, logger = console } = {}) {
+function createFacilityService({ facilityModel, inspectionModel = null, _logger = console } = {}) {
   if (!facilityModel) throw new Error('facility.service: facilityModel required');
   registry.validate();
 

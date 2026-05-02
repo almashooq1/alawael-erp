@@ -14,7 +14,7 @@ class DocumentAnalyticsEngine {
   /**
    * لوحة المعلومات الرئيسية
    */
-  async getDashboardAnalytics(options = {}) {
+  async getDashboardAnalytics(_options = {}) {
     try {
       const Document = mongoose.model('Document');
       const now = new Date();

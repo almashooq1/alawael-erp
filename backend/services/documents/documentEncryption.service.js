@@ -548,7 +548,7 @@ class DocumentEncryptionService {
 
   /* ══════ DLP ══════ */
 
-  async scanContent(content, options = {}) {
+  async scanContent(content, _options = {}) {
     const violations = [];
     const policies = await DLPPolicy.find({ isActive: true }).sort({ priority: -1 });
 

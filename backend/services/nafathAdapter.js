@@ -38,7 +38,7 @@ function validateNationalId(id) {
 }
 
 // ── Mock adapter ─────────────────────────────────────────────────────────
-function mockInitiate({ nationalId, purpose = 'login' }) {
+function mockInitiate({ nationalId, _purpose = 'login' }) {
   if (!validateNationalId(nationalId)) {
     throw Object.assign(new Error('رقم الهوية الوطنية غير صالح'), { code: 'INVALID_ID' });
   }

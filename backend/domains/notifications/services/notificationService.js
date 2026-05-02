@@ -439,7 +439,7 @@ async function processScheduled() {
 // 7. ANALYTICS — تحليلات الإشعارات
 // ═══════════════════════════════════════════════════════════════════════════
 
-async function getStats({ startDate, endDate, type, channel } = {}) {
+async function getStats({ startDate, endDate, type, _channel } = {}) {
   const { Notification: Model } = getModels();
   if (!Model) return {};
   const match = {};

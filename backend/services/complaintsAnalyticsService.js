@@ -73,7 +73,7 @@ function slaHoursFor(priority) {
   return THRESHOLDS.sla[priority] ?? null;
 }
 
-function summarize(complaints, now = new Date()) {
+function summarize(complaints, _now = new Date()) {
   const stats = {
     total: complaints.length,
     open: 0,

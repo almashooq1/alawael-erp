@@ -180,7 +180,7 @@ function evaluateRules(log) {
  * @param {Array} alerts
  * @param {Object} options
  */
-async function dispatchAlerts(alerts, options = {}) {
+async function dispatchAlerts(alerts, _options = {}) {
   const dispatched = [];
 
   for (const alert of alerts) {

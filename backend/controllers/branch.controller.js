@@ -368,7 +368,7 @@ exports.getBranchDashboard = async (req, res) => {
 // [11] GET /api/branches/:branch_code/patients — Branch patients
 exports.getBranchPatients = async (req, res) => {
   try {
-    const { page = 1, limit = 20, status, search, therapist_id } = req.query;
+    const { page = 1, limit = 20, therapist_id } = req.query;
     const branchCode = req.branchCode || req.params.branch_code.toUpperCase();
 
     // For therapists: only own patients
@@ -392,7 +392,7 @@ exports.getBranchPatients = async (req, res) => {
 exports.getBranchSchedule = async (req, res) => {
   try {
     const branchCode = req.branchCode || req.params.branch_code.toUpperCase();
-    const { date, week } = req.query;
+    const { date } = req.query;
     const targetDate = date ? new Date(date) : new Date();
 
     ok(res, {

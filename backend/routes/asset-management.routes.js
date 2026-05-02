@@ -76,7 +76,7 @@ router.get('/categories', async (req, res) => {
 
 router.post('/categories', authorize(['admin', 'manager']), async (req, res) => {
   try {
-    const { nameAr, nameEn, code, depreciationMethod, usefulLifeYears, parentId } = req.body;
+    const { nameAr, code } = req.body;
     if (!nameAr || !code)
       return res.status(400).json({ success: false, message: 'الاسم والكود مطلوبان' });
     const category = await AssetCategory.create({
@@ -411,7 +411,7 @@ router.patch(
   async (req, res) => {
     if (!validId(req, res)) return;
     try {
-      const { findings, resolution, actualCost, partsUsed, assetCondition } = req.body;
+      const { findings, resolution, actualCost, partsUsed } = req.body;
       if (!findings || !resolution) {
         return res.status(400).json({ success: false, message: 'النتائج والإجراء مطلوبان' });
       }

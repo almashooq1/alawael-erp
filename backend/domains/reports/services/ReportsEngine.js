@@ -437,7 +437,7 @@ const BUILTIN_REPORTS = {
     category: 'outcomes',
     scope: 'program',
     generate: async params => {
-      const { programId, from, to } = params;
+      const { programId } = params;
       const [Program, ProgramEnrollment] = [
         mongoose.model('Program'),
         mongoose.model('ProgramEnrollment'),

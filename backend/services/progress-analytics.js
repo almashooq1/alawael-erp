@@ -364,7 +364,7 @@ class ProgressAnalytics {
       return { prediction: 'insufficient_data', prediction_ar: 'بيانات غير كافية للتنبؤ' };
     }
 
-    const { slope, intercept } = trendResult.regression;
+    const { slope } = trendResult.regression;
     const lastPoint = dataPoints[dataPoints.length - 1];
     const lastScore = lastPoint.score;
     const lastDate = new Date(lastPoint.date);

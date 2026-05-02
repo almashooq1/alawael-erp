@@ -941,7 +941,7 @@ router.get('/analytics/financial', authenticate, requireBranchAccess, async (req
 // GET /analytics/hr — تحليلات الموارد البشرية
 router.get('/analytics/hr', authenticate, requireBranchAccess, async (req, res) => {
   try {
-    const { date_from, date_to, branch_id } = req.query;
+    const { branch_id } = req.query;
     const db = mongoose.connection.db;
 
     const matchHR = { deleted_at: null, is_active: true };
@@ -1034,7 +1034,7 @@ router.get('/analytics/hr', authenticate, requireBranchAccess, async (req, res) 
 // GET /analytics/operational — التحليلات التشغيلية
 router.get('/analytics/operational', authenticate, requireBranchAccess, async (req, res) => {
   try {
-    const { date_from, date_to, branch_id } = req.query;
+    const { branch_id } = req.query;
     const db = mongoose.connection.db;
 
     const matchBase = { deleted_at: null };
@@ -1136,7 +1136,7 @@ router.get('/analytics/operational', authenticate, requireBranchAccess, async (r
 // GET /analytics/quality — تحليلات الجودة
 router.get('/analytics/quality', authenticate, requireBranchAccess, async (req, res) => {
   try {
-    const { date_from, date_to, branch_id } = req.query;
+    const { date_from, date_to } = req.query;
     const db = mongoose.connection.db;
 
     const matchBase = { deleted_at: null };
@@ -1314,7 +1314,7 @@ router.get(
   requireBranchAccess,
   async (req, res) => {
     try {
-      const { branch_id, date_from, date_to, page = 1, limit = 50 } = req.query;
+      const { branch_id, page = 1, limit = 50 } = req.query;
       const db = mongoose.connection.db;
 
       const match = { deleted_at: null };

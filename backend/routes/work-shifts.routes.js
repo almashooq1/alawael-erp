@@ -147,7 +147,7 @@ router.get(
   authorize(['admin', 'hr', 'manager']),
   async (req, res) => {
     try {
-      const { branchId, employeeId, shiftId, page = 1, limit = 20 } = req.query;
+      const { branchId, employeeId, page = 1, limit = 20 } = req.query;
 
       // استخدام الموظف مباشرة مع populate لجلب بيانات الدوام
       const empFilter = { deletedAt: null };

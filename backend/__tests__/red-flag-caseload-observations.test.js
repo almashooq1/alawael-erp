@@ -93,7 +93,7 @@ describe('activeCountForTherapist', () => {
 
   it('returns the therapist’s distinct beneficiary count within the caseload window', async () => {
     const now = new Date('2026-04-22T12:00:00.000Z');
-    const { therapistId, beneficiaryIds } = await seedTherapistWithCaseload({
+    const { beneficiaryIds } = await seedTherapistWithCaseload({
       count: 12,
       daysAgo: 5,
       now,

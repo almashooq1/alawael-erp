@@ -419,7 +419,7 @@ router.get('/children/:id/assessments', async (req, res) => {
  */
 router.get('/appointments', async (req, res) => {
   try {
-    const { childId, from, to, page = 1, perPage = 15 } = req.query;
+    const { page = 1, perPage = 15 } = req.query;
     return res.json({
       success: true,
       data: [],
@@ -436,7 +436,7 @@ router.get('/appointments', async (req, res) => {
  */
 router.post('/appointments/request', async (req, res) => {
   try {
-    const { childId, preferredDate, preferredTime, notes } = req.body;
+    const { childId, preferredDate, preferredTime } = req.body;
 
     if (!childId || !preferredDate) {
       return res.status(422).json({
@@ -517,7 +517,7 @@ router.get('/transport/schedule', async (req, res) => {
  */
 router.get('/invoices', async (req, res) => {
   try {
-    const { status, page = 1, perPage = 15 } = req.query;
+    const { page = 1, perPage = 15 } = req.query;
     return res.json({
       success: true,
       data: [],
@@ -863,7 +863,7 @@ router.get('/settings', async (req, res) => {
  */
 router.put('/settings', async (req, res) => {
   try {
-    const { language, notificationPreferences, quietHours, preferredContactMethod } = req.body;
+    const { language, preferredContactMethod } = req.body;
 
     const validLanguages = ['ar', 'en'];
     const validContactMethods = ['sms', 'whatsapp', 'email', 'app'];

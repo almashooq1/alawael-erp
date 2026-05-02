@@ -317,7 +317,7 @@ function createHomeVisitService({
     { visitSummary, overallConcernLevel = null, actorId = null, departureCoordinates = null } = {}
   ) {
     if (!visitSummary) throw new MissingFieldError(['visitSummary']);
-    const { doc, fromStatus, event } = await _transition(id, 'completed', {
+    const { doc, fromStatus } = await _transition(id, 'completed', {
       actorId,
       patch: { visitSummary },
     });

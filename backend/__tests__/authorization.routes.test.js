@@ -322,7 +322,7 @@ describe('/api/delegations', () => {
   });
 
   test('POST /:id/revoke marks as revoked', async () => {
-    const { app, store } = makeApp({ id: 'u-1', roles: ['head_office_admin'] });
+    const { app } = makeApp({ id: 'u-1', roles: ['head_office_admin'] });
     const created = await request(app)
       .post('/api/delegations')
       .send({

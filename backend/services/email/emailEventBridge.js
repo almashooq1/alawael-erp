@@ -316,7 +316,7 @@ class EmailEventBridge {
   }
 
   async _onPasswordResetRequested(data) {
-    const { user, token, resetToken, resetUrl } = data;
+    const { user, token, resetToken } = data;
     if (!user?.email) return;
     await this._safeSend(
       () => this.emailManager.sendPasswordReset(user, token || resetToken),

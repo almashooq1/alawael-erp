@@ -383,7 +383,7 @@ class DocumentReportingEngine extends EventEmitter {
 
   /* ─── Execute Report Data Query ───────────────────────────── */
   async _executeReport(template, parameters) {
-    const { startDate, endDate, department, category, limit: rowLimit } = parameters;
+    const { limit: rowLimit } = parameters;
 
     // Simulate data generation based on template
     const rows = [];

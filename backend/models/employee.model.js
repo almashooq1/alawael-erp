@@ -1,7 +1,8 @@
 /**
  * employee.model.js — Compatibility Alias
  * ══════════════════════════════════════════════
- * DEPRECATED: Use require('./Employee') instead.
- * This file re-exports the canonical Employee model.
+ * Re-exports the canonical HR/Employee model directly,
+ * bypassing the legacy ./Employee proxy (which emits a
+ * deprecation warning on every load).
  */
-module.exports = require('./Employee');
+module.exports = require('./HR/Employee');

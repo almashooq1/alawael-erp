@@ -196,32 +196,33 @@ services:
   # ─── WhatsApp Service ── ARCHIVED ───────────────────────────────────────────
   # whatsapp: # ARCHIVED → _archived/dead-subprojects/whatsapp/
 
-  # ─── Intelligent Agent ───────────────────────────────────────────────────
-  intelligent-agent:
-    build:
-      context: ./intelligent-agent
-      dockerfile: Dockerfile
-    container_name: alawael-intelligent-agent
-    <<: *restart-policy
-    environment:
-      <<: *common-env
-      PORT: 3020
-      MONGODB_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:?Set MONGO_ROOT_PASSWORD in .env}@mongodb:27017/alawael_agent?authSource=admin
-      REDIS_URL: redis://:${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env}@redis:6379
-      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
-      BACKEND_URL: http://backend:3001
-    ports:
-      - "${AGENT_PORT:-3020}:3020"
-    depends_on:
-      mongodb:
-        condition: service_healthy
-    networks:
-      - alawael-net
-    deploy:
-      resources:
-        limits:
-          memory: 2G
-          cpus: "1.0"
+  # ─── Intelligent Agent ─── DISABLED ──────────────────────────────────────
+  # intelligent-agent: # DISABLED — no Dockerfile in intelligent-agent/ (see docker-compose.yml)
+  # intelligent-agent:
+  #   build:
+  #     context: ./intelligent-agent
+  #     dockerfile: Dockerfile
+  #   container_name: alawael-intelligent-agent
+  #   <<: *restart-policy
+  #   environment:
+  #     <<: *common-env
+  #     PORT: 3020
+  #     MONGODB_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:?Set MONGO_ROOT_PASSWORD in .env}@mongodb:27017/alawael_agent?authSource=admin
+  #     REDIS_URL: redis://:${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env}@redis:6379
+  #     OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+  #     BACKEND_URL: http://backend:3001
+  #   ports:
+  #     - "${AGENT_PORT:-3020}:3020"
+  #   depends_on:
+  #     mongodb:
+  #       condition: service_healthy
+  #   networks:
+  #     - alawael-net
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         memory: 2G
+  #         cpus: "1.0"
 
   # ─── Finance Module ── ARCHIVED ────────────────────────────────────────
   # finance-backend: # ARCHIVED → _archived/dead-subprojects/finance-module/

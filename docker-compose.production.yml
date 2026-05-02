@@ -171,16 +171,17 @@ services:
   # Applied via x-service-defaults anchor
 
   # api-gateway: # DISABLED — redundant pass-through proxy, all traffic goes to backend:3001 via NGINX
-  intelligent-agent:
-    restart: always
-    security_opt: [no-new-privileges:true]
-    environment:
-      NODE_ENV: production
-      LOG_LEVEL: warn
-    deploy:
-      resources:
-        limits: { memory: 1G, cpus: "1.0" }
-    logging: *prod-logging
+  # intelligent-agent: # DISABLED — no Dockerfile in intelligent-agent/ (see docker-compose.yml)
+  # intelligent-agent:
+  #   restart: always
+  #   security_opt: [no-new-privileges:true]
+  #   environment:
+  #     NODE_ENV: production
+  #     LOG_LEVEL: warn
+  #   deploy:
+  #     resources:
+  #       limits: { memory: 1G, cpus: "1.0" }
+  #   logging: *prod-logging
 
   # secretary-ai: # ARCHIVED → _archived/dead-subprojects/secretary_ai/
 

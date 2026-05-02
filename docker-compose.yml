@@ -464,32 +464,34 @@ services:
   # ║  خدمات الذكاء الاصطناعي — AI / ML SERVICES                          ║
   # ╚═════════════════════════════════════════════════════════════════════════╝
 
-  # ─── Intelligent Agent (Node.js) ─────────────────────────────────────────
-  intelligent-agent:
-    build:
-      context: ./intelligent-agent
-      dockerfile: Dockerfile
-    container_name: alawael-intelligent-agent
-    <<: *restart-policy
-    environment:
-      <<: *common-env
-      PORT: 3020
-      MONGODB_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD}@mongodb:27017/alawael_agent?authSource=admin
-      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
-      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
-      BACKEND_URL: http://alawael-backend:3001
-    ports:
-      - "${AGENT_PORT:-3020}:3020"
-    depends_on:
-      mongodb:
-        condition: service_healthy
-    networks:
-      - alawael-net
-    deploy:
-      resources:
-        limits:
-          memory: 2G
-          cpus: "1.0"
+  # ─── Intelligent Agent (Node.js) ─── DISABLED ────────────────────────────
+  # intelligent-agent: # DISABLED — no Dockerfile / package.json yet (only 2 stub TS files in intelligent-agent/).
+  # Re-enable when the service is implemented. Original config preserved below for reference.
+  # intelligent-agent:
+  #   build:
+  #     context: ./intelligent-agent
+  #     dockerfile: Dockerfile
+  #   container_name: alawael-intelligent-agent
+  #   <<: *restart-policy
+  #   environment:
+  #     <<: *common-env
+  #     PORT: 3020
+  #     MONGODB_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD}@mongodb:27017/alawael_agent?authSource=admin
+  #     REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+  #     OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+  #     BACKEND_URL: http://alawael-backend:3001
+  #   ports:
+  #     - "${AGENT_PORT:-3020}:3020"
+  #   depends_on:
+  #     mongodb:
+  #       condition: service_healthy
+  #   networks:
+  #     - alawael-net
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         memory: 2G
+  #         cpus: "1.0"
 
   # ─── Secretary AI (Python) ── ARCHIVED (merged into python-ml) ──────────
   # secretary-ai: # ARCHIVED → _archived/dead-subprojects/secretary_ai/

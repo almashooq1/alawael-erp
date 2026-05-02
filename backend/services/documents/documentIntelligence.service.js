@@ -201,7 +201,7 @@ const CLASSIFICATION_RULES = {
     patterns: [
       /فاتورة\s*(رقم|ضريبية|شراء|بيع)/i,
       /invoice\s*(number|tax|purchase|sale)/i,
-      /\d+[\.,]\d+\s*(ريال|SAR|USD|EUR)/i,
+      /\d+[.,]\d+\s*(ريال|SAR|USD|EUR)/i,
     ],
     weight: 1.3,
   },

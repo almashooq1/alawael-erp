@@ -59,7 +59,7 @@ function navigatePath(value, path) {
   if (value == null) return null;
   if (!path) return typeof value === 'number' ? value : null;
   // Refuse JMESPath-style expressions — no bracket filter support yet.
-  if (/[\[\]?=*]/.test(path)) return null;
+  if (/[[\]?=*]/.test(path)) return null;
   const segs = path.split('.').filter(Boolean);
   let node = value;
   for (const seg of segs) {

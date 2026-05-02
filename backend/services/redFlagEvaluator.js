@@ -54,7 +54,7 @@ function tokenize(path) {
   // Filter tokens may appear at start (path begins with '[?...]'),
   // mid-path after a '.', or chained. The registries only use them
   // at the head, but supporting mid-chain costs nothing.
-  const raw = path.split(/\.(?![^\[]*\])/);
+  const raw = path.split(/\.(?![^[]*\])/);
   return raw
     .filter(s => s.length > 0)
     .map(seg => {
@@ -197,15 +197,10 @@ function evaluateFlag(flag, serviceResponse, { now = new Date() } = {}) {
     };
   }
 
-  let raised;
-  try {
-    raised = evaluateCondition(flag.trigger.condition, observedValue);
-  } catch (err) {
-    // Composite operators + registry corruption surface as errors —
-    // rethrow so the orchestrator can alert ops, don't silently
-    // suppress.
-    throw err;
-  }
+  // Composite operators + registry corruption surface as errors —
+  // we let them propagate so the orchestrator can alert ops,
+  // not silently suppress.
+  const raised = evaluateCondition(flag.trigger.condition, observedValue);
 
   return {
     flagId: flag.id,

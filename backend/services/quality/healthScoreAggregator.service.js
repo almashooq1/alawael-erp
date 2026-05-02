@@ -214,7 +214,7 @@ class HealthScoreAggregator {
     if (!total) return { score: null, details: cov, hotspots: [] };
 
     const pass = cov.byOutcome.pass || 0;
-    const fail = cov.byOutcome.fail || 0;
+    const _fail = cov.byOutcome.fail || 0;
     const partial = cov.byOutcome.partial || 0;
 
     // Half credit for partial.

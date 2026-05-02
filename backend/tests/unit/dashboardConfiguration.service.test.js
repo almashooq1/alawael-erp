@@ -108,7 +108,7 @@ describe('dashboardConfiguration.service', () => {
 
     test('removes widget by id', () => {
       const d = svc.createDashboard({ name: 'W2', userId: 'u1' });
-      const after = svc.addWidget(d.id, { id: 'w1', type: 'table', title: 'T' });
+      const _after = svc.addWidget(d.id, { id: 'w1', type: 'table', title: 'T' });
       const removed = svc.removeWidget(d.id, 'w1');
       expect(removed.widgets).toHaveLength(0);
     });

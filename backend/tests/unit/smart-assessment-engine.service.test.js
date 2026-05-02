@@ -507,7 +507,7 @@ describe('SmartAssessmentEngine — scoreBRIEF2', () => {
     }
     const result = SmartAssessmentEngine.scoreBRIEF2(items);
     // At least one scale should be clinically elevated or higher
-    const elevated = Object.values(result.scale_scores).some(s => s.classification !== 'normal');
+    const _elevated = Object.values(result.scale_scores).some(s => s.classification !== 'normal');
     // This may or may not trigger depending on algorithm — just verify structure
     expect(result.scale_scores).toBeDefined();
   });

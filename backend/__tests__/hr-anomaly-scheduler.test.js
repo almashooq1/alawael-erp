@@ -85,7 +85,7 @@ describe('createHrAnomalyScheduler — construction', () => {
 // ─── Interval clamping ──────────────────────────────────────────
 
 describe('interval clamping', () => {
-  const timers = fakeTimers();
+  const _timers = fakeTimers();
 
   it('clamps below MIN_INTERVAL_MS to MIN_INTERVAL_MS', async () => {
     const t = fakeTimers();

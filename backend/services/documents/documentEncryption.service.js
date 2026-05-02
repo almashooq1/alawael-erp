@@ -358,7 +358,7 @@ class DocumentEncryptionService {
   }
 
   async decryptDocument(documentId, options = {}, userId) {
-    const masterKey =
+    const _masterKey =
       options.key || process.env.ENCRYPTION_MASTER_KEY || 'default-master-key-change-me';
 
     const record = await EncryptionRecord.findOne({ documentId, status: 'encrypted' }).sort({

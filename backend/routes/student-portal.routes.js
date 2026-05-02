@@ -341,7 +341,7 @@ router.post('/activities/:id/complete', authenticate, async (req, res) => {
 
     const currentLevel = Number(b.student_level) || 1;
     const currentXp = Number(b.student_xp) || 0;
-    const xpToNext = Math.round(100 * Math.pow(1.5, Math.max(0, currentLevel - 1)));
+    const _xpToNext = Math.round(100 * Math.pow(1.5, Math.max(0, currentLevel - 1)));
 
     let newXp = currentXp + XP_GAIN;
     let newLevel = currentLevel;

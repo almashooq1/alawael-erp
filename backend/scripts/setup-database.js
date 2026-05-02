@@ -450,7 +450,7 @@ async function main() {
   banner('Setup Complete', '─');
   console.log(`\n  Total Duration: ${(totalMs / 1000).toFixed(2)}s\n`);
 
-  const statusEmoji = { true: '✅', false: '❌', undefined: '⏩' };
+  const _statusEmoji = { true: '✅', false: '❌', undefined: '⏩' };
   stepsToRun.forEach(({ key }) => {
     const r = results[key];
     const emoji = r?.skipped ? '⏩' : r?.success ? '✅' : '❌';

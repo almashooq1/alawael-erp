@@ -42,7 +42,7 @@ const paginate = req => {
   return { skip: (page - 1) * limit, limit, page };
 };
 const userId = req => req.user?.userId || req.user?._id || req.user?.id;
-const branchId = req => req.query.branchId || req.body.branchId || req.user?.branchId;
+const _branchId = req => req.query.branchId || req.body.branchId || req.user?.branchId;
 
 /**
  * Builds a generic CRUD controller for a Mongoose model.

@@ -23,21 +23,6 @@ const { MongoDeadLetterStore } = require('../infrastructure/adapters/mongoDeadLe
 function createFakeModel() {
   const rows = new Map();
 
-  function lean() {
-    return this;
-  }
-  function sort() {
-    return this;
-  }
-  function skip(n) {
-    this._skip = n;
-    return this;
-  }
-  function limit(n) {
-    this._limit = n;
-    return this;
-  }
-
   return {
     _rows: rows,
 

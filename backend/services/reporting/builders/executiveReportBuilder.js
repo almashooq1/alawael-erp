@@ -148,7 +148,7 @@ async function buildProgramsReview({ report, periodKey, scopeKey, ctx = {} }) {
 
 async function buildAnnualReport({ report, periodKey, scopeKey, ctx = {} }) {
   const range = parsePeriodKey(periodKey);
-  const scope = parseScopeKey(scopeKey);
+  const _scope = parseScopeKey(scopeKey);
   const result = baseResult(report, 'exec.annual.report', periodKey, scopeKey, range);
   Object.assign(result, {
     sections: {

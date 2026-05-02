@@ -14,11 +14,11 @@ class ConflictDetectionService {
       therapist_id,
       beneficiary_id,
       room_id,
-      branch_id,
+      _branch_id,
       appointment_date,
       start_time,
       end_time,
-      duration_minutes,
+      _duration_minutes,
       exclude_id,
     } = data;
     const conflicts = [];

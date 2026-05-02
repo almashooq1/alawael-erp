@@ -869,7 +869,7 @@ describe('GosiFullService', () => {
       // 4 years exactly
       const emp = makeEmployee('2021-01-01', 10000, 2500, 500, 0);
       const result = await service.calculateEndOfService(emp, 'employer_termination', '2025-01-01');
-      const lastSalary = 10000 + 2500 + 500 + 0;
+      const _lastSalary = 10000 + 2500 + 500 + 0;
       // first 5 years: (lastSalary/2) * ~4 years
       expect(result.firstFiveYearsAmount).toBeGreaterThan(0);
       expect(result.remainingYearsAmount).toBe(0); // <5 years

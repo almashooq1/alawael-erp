@@ -143,7 +143,7 @@ describe('saudizationAnalyticsService.detectRiskAlarm', () => {
     for (let m = 5; m >= 0; m--) {
       items.push(snap({ daysAgo: m * 30, pct: 22 + m * 0.6, band: 'low_green' }));
     }
-    const a = svc.detectRiskAlarm(items);
+    const _a = svc.detectRiskAlarm(items);
     // With alarm threshold = 3 months default, runway might be above it.
     // Test the correctness of the runway-is-short logic with a smaller threshold.
     process.env.NITAQAT_ALARM_MONTHS = '10';

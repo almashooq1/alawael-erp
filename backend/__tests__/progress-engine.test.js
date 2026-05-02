@@ -220,7 +220,7 @@ describe('progressEngine.daysSinceLastProgress()', () => {
   });
 
   it('returns the floor-days from the most recent entry', () => {
-    const entries = [entry(30, 40), entry(7, 50)];
+    const _entries = [entry(30, 40), entry(7, 50)];
     // "7 days ago" relative to default new Date() — the helper uses
     // Date.now() at call time. We pass `now` to keep it deterministic.
     const latestAt = new Date(now.getTime() - 7 * 86400000);

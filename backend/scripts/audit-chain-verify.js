@@ -97,7 +97,7 @@ async function main() {
 
   // Prepend a synthetic sentinel so verifyChain starts with the
   // seeded prevHash. Easier than parameterizing.
-  const sentinel = { _id: '__seed__', chainHash: seedPrevHash, prevHash: null };
+  const _sentinel = { _id: '__seed__', chainHash: seedPrevHash, prevHash: null };
   // Can't just verify sentinel directly — it wouldn't have its own
   // hash compute-able. Instead inline the seed by temporarily
   // setting `lastHash` via a copy of verifyChain with initial hash

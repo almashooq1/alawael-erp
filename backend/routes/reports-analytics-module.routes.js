@@ -494,7 +494,7 @@ router.delete('/schedules/:id', authenticate, requireBranchAccess, async (req, r
 router.get('/analytics/executive', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { date_from, date_to, branch_id } = req.query;
-    const params = { date_from, date_to, branch_id };
+    const _params = { date_from, date_to, branch_id };
     const db = mongoose.connection.db;
 
     const buildMatch = (extra = {}) => {

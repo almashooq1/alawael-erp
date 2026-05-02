@@ -272,7 +272,7 @@ router.post('/depreciation', authorize(['admin', 'manager']), async (req, res) =
       assetId,
       periodYear,
       periodMonth,
-      depreciationDate,
+      _depreciationDate,
       depreciationAmount,
       _accumulatedDepreciation,
       _netBookValue,

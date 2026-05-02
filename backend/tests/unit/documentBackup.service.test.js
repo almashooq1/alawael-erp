@@ -87,7 +87,7 @@ describe('DocumentBackupService', () => {
     it('cancels pending job (needs save)', async () => {
       // Mock store objects lack .save() method — test boundary: wrong status
       const created = await service.createBackup({ name: 'Cancel me', status: 'completed' }, 'u1');
-      const id = created.job._id.toString();
+      const _id = created.job._id.toString();
       // findById finds it, but status check rejects if not pending/running
       // Since create sets status from service, it's 'pending' → goes past check → hits .save()
       // We verify the error path instead

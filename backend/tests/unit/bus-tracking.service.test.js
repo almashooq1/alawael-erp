@@ -658,7 +658,7 @@ describe('BusTrackingService — Trip Lifecycle', () => {
 
     test('sets currentStop to first stop of route', () => {
       const trip = service.getTripById(tripId);
-      const route = service.getRouteById(2000);
+      const _route = service.getRouteById(2000);
       // After updateRoute in route test, stops were changed; let's just verify it has a currentStop
       expect(trip.currentStop).toBeDefined();
       expect(trip.currentStopIndex).toBe(0);

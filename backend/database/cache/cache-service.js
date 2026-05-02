@@ -711,7 +711,7 @@ class CacheService {
    * Flush only keys with our prefix (safe)
    */
   async flushNamespace() {
-    const prefix = this.client.options.keyPrefix || 'awael:';
+    const _prefix = this.client.options.keyPrefix || 'awael:';
     return this.invalidatePattern('*');
   }
 }

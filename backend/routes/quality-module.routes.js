@@ -482,7 +482,7 @@ router.delete('/incidents/:id', async (req, res) => {
 // GET /api/quality-module/dashboard
 router.get('/dashboard', async (req, res) => {
   try {
-    const { branch_id, period_type = 'monthly' } = req.query;
+    const { branch_id, _period_type = 'monthly' } = req.query;
     const baseFilter = { deleted_at: null };
     if (branch_id) baseFilter.branch_id = new mongoose.Types.ObjectId(branch_id);
 

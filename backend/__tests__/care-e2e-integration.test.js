@@ -391,7 +391,7 @@ describe('Phase 17 E2E — home visit critical concern auto-flags case', () => {
     expect(refreshedCase.riskLevel).toBe('high');
 
     // Verify: high-risk SLA activated
-    const { slaEngine } = bootE2E(); // fresh engine — we need the original
+    const { _slaEngine } = bootE2E(); // fresh engine — we need the original
   });
 });
 

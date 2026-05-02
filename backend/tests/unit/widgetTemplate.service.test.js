@@ -356,7 +356,7 @@ describe('WidgetTemplateService', () => {
       // Clear built-ins which lack metadata
       svc.templates.clear();
       const t = seedCustom();
-      const t2 = seedCustom({ name: 'T2', category: 'hr' });
+      const _t2 = seedCustom({ name: 'T2', category: 'hr' });
       svc.trackUsage(t.id);
       svc.rateTemplate(t.id, { score: 5, userId: 'u1' });
 

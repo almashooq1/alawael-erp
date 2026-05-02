@@ -31,7 +31,7 @@ const svc = require('../../services/research.service');
 const fakeId = 'aabbccddeeff00112233aabb';
 const uid = 'cc00112233445566778899aa';
 
-const chainable = (resolveValue = []) => {
+const _chainable = (resolveValue = []) => {
   const chain = {};
   ['populate', 'sort', 'skip', 'limit', 'select', 'lean'].forEach(m => {
     chain[m] = jest.fn().mockReturnValue(chain);
@@ -115,7 +115,7 @@ describe('Research Service', () => {
     });
 
     it('getStudyById — returns populated study', async () => {
-      const chain = makeFindChain({ _id: fakeId, title: 'Test Study' });
+      const _chain = makeFindChain({ _id: fakeId, title: 'Test Study' });
       // findById returns a chainable
       ResearchStudy.findById = jest.fn().mockReturnValue({
         populate: jest.fn().mockReturnValue({

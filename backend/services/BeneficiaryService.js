@@ -525,7 +525,7 @@ class BeneficiaryService {
    */
   async getBeneficiaryStats(beneficiary) {
     const now = new Date();
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const _startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
     // حساب أيام التسجيل
     const daysEnrolled = beneficiary.enrollmentDate

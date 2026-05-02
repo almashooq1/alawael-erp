@@ -1036,7 +1036,7 @@ describe('searchDocuments()', () => {
 
   it('search is case-insensitive for English text', () => {
     // Upload a lab_report whose simulated text contains 'Lab Report'
-    const d = service.uploadDocument(
+    const _d = service.uploadDocument(
       {
         fileName: 'search_en.jpg',
         documentType: 'lab_report',

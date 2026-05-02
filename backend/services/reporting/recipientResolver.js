@@ -103,7 +103,7 @@ function createRecipientResolver({
   const Beneficiary = getModel(BeneficiaryModel);
   const Guardian = getModel(GuardianModel);
   const User = getModel(UserModel);
-  const Employee = getModel(EmployeeModel);
+  const _Employee = getModel(EmployeeModel);
   const Session = getModel(SessionModel);
 
   async function resolveBeneficiary(scope) {

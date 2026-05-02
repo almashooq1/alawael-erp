@@ -620,7 +620,6 @@ describe('Retention — sweep', () => {
 
   it('sweep continues past per-beneficiary failures', async () => {
     const assessmentModel = makeAssessmentModel();
-    let calls = 0;
     const flakyB360 = {
       async getProfile(id) {
         if (id === 'ben-2') throw new Error('profile boom');
@@ -637,7 +636,6 @@ describe('Retention — sweep', () => {
         };
       },
       async getHealthScore() {
-        calls++;
         return {
           overall: 70,
           band: 'stable',

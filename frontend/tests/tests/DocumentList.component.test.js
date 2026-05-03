@@ -8,7 +8,7 @@ import { render, screen, fireEvent, waitFor, within } from '@testing-library/rea
 import userEvent from '@testing-library/user-event';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
-import DocumentList from '../src/components/documents/DocumentList';
+import DocumentList from 'components/documents/DocumentList';
 
 // Mock Redux store
 const createMockStore = () =>

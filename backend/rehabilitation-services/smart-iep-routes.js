@@ -129,6 +129,137 @@ router.get('/goals-bank/domains', async (req, res) => {
 // ─── Smart IEP Routes ──────────────────────────────────────────────────────────
 
 /**
+ * GET /iep
+ * قائمة عامة لخطط IEP مع تصفية وترقيم.
+ * Query: status, branch_id, beneficiary_id, plan_type, page, limit
+ */
+router.get('/iep', async (req, res) => {
+  try {
+    const { status, branch_id, beneficiary_id, plan_type } = req.query;
+    const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit, 10) || 20));
+
+    const filter = {};
+    if (status) filter.status = status;
+    if (plan_type) filter.plan_type = plan_type;
+    if (mongoose.Types.ObjectId.isValid(branch_id)) filter.branch_id = branch_id;
+    if (mongoose.Types.ObjectId.isValid(beneficiary_id)) filter.beneficiary_id = beneficiary_id;
+
+    const [items, total] = await Promise.all([
+      SmartIEP.find(filter)
+        .select(
+          'iep_number plan_type plan_period status overall_progress beneficiary_id branch_id annual_goals updatedAt createdAt'
+        )
+        .populate('beneficiary_id', 'name name_ar full_name birth_date')
+        .sort({ updatedAt: -1, createdAt: -1 })
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .lean(),
+      SmartIEP.countDocuments(filter),
+    ]);
+
+    res.json({ success: true, total, page, limit, count: items.length, data: items });
+  } catch (err) {
+    safeError(res, err, 'smart-iep');
+  }
+});
+
+/**
+ * POST /iep/:id/transition
+ * انتقالات حالة الخطة (draft → pending_review → active → completed/discontinued)
+ * Body: { to: 'pending_review' | 'active' | 'discontinued' | 'completed' | 'under_review', notes? }
+ */
+const ALLOWED_TRANSITIONS = {
+  draft: ['pending_review', 'discontinued'],
+  pending_review: ['active', 'draft', 'discontinued'],
+  active: ['under_review', 'completed', 'discontinued'],
+  under_review: ['active', 'completed', 'discontinued'],
+  completed: [],
+  discontinued: [],
+};
+
+router.post('/iep/:id/transition', async (req, res) => {
+  try {
+    const { to, notes } = req.body || {};
+    if (!to) {
+      return res.status(400).json({ success: false, error: 'to مطلوب' });
+    }
+
+    const iep = await SmartIEP.findById(req.params.id);
+    if (!iep) return res.status(404).json({ success: false, error: 'الخطة غير موجودة' });
+
+    const allowed = ALLOWED_TRANSITIONS[iep.status] || [];
+    if (!allowed.includes(to)) {
+      return res.status(409).json({
+        success: false,
+        error: `لا يمكن الانتقال من ${iep.status} إلى ${to}`,
+        from: iep.status,
+        to,
+        allowed,
+      });
+    }
+
+    const userId = req.user?._id || req.user?.id || null;
+
+    iep.status = to;
+    if (to === 'active') {
+      iep.approval_date = new Date();
+      if (userId) iep.approved_by = userId;
+    }
+    if (notes) {
+      iep.notes = iep.notes ? `${iep.notes}\n— ${notes}` : notes;
+    }
+
+    await iep.save();
+    res.json({
+      success: true,
+      message: 'تم تحديث حالة الخطة',
+      data: {
+        id: iep._id,
+        status: iep.status,
+        approved_by: iep.approved_by,
+        approval_date: iep.approval_date,
+      },
+    });
+  } catch (err) {
+    safeError(res, err, 'smart-iep');
+  }
+});
+
+/**
+ * POST /iep/:id/parent-consent
+ * تسجيل موافقة ولي الأمر على الخطة (يمكن ربطها بتوقيع نفاذ).
+ * Body: { guardian_name, guardian_signature_id?, consent_notes? }
+ */
+router.post('/iep/:id/parent-consent', async (req, res) => {
+  try {
+    const { guardian_name, guardian_signature_id, consent_notes } = req.body || {};
+    if (!guardian_name) {
+      return res.status(400).json({ success: false, error: 'guardian_name مطلوب' });
+    }
+    const iep = await SmartIEP.findByIdAndUpdate(
+      req.params.id,
+      {
+        $set: {
+          parent_consent: {
+            consent_given: true,
+            consent_date: new Date(),
+            guardian_name,
+            guardian_signature_id: guardian_signature_id || '',
+            consent_notes: consent_notes || '',
+          },
+        },
+      },
+      { new: true }
+    );
+    if (!iep) return res.status(404).json({ success: false, error: 'الخطة غير موجودة' });
+    res.json({ success: true, message: 'تم تسجيل موافقة ولي الأمر', data: iep.parent_consent });
+  } catch (err) {
+    safeError(res, err, 'smart-iep');
+  }
+});
+
+/**
  * POST /iep
  * إنشاء خطة تعليمية فردية جديدة
  * Body: { beneficiary_id, branch_id, plan_start, plan_end, team_members, present_level, services, family_involvement }

@@ -1020,6 +1020,1147 @@ class TherapistPortalService {
       peakHours: byHour.map(h => ({ time: h._id, count: h.count })),
     };
   }
+
+  // ─── Telehealth (consumed by routes/therapistElite.routes.js) ────────────
+  // Backed by `models/Telehealth.js` Teleconsultation model. Implements the
+  // CRUD surface the route already wires up. UUID + consultationNumber are
+  // generated on create when missing.
+
+  async getTelehealthSessions(query = {}) {
+    const { Teleconsultation } = require('../models/Telehealth');
+    const filter = { deletedAt: null };
+    if (query.status) filter.status = query.status;
+    if (query.type) filter.type = query.type;
+    if (query.provider) filter.provider = query.provider;
+    if (query.beneficiary) filter.beneficiary = query.beneficiary;
+    if (query.from || query.to) {
+      filter.scheduledAt = {};
+      if (query.from) filter.scheduledAt.$gte = new Date(query.from);
+      if (query.to) filter.scheduledAt.$lte = new Date(query.to);
+    }
+    return Teleconsultation.find(filter)
+      .populate('beneficiary', 'name nationalId phone')
+      .populate('provider', 'name')
+      .sort({ scheduledAt: -1 })
+      .limit(Number(query.limit) || 100);
+  }
+
+  async createTelehealthSession(data) {
+    const { Teleconsultation } = require('../models/Telehealth');
+    const year = new Date().getFullYear();
+    const count = await Teleconsultation.countDocuments({
+      consultationNumber: { $regex: `^TC-${year}` },
+    });
+    const consultationNumber = `TC-${year}-${String(count + 1).padStart(5, '0')}`;
+    const uuid =
+      data.uuid || `tc-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+    return Teleconsultation.create({
+      ...data,
+      uuid,
+      consultationNumber,
+      scheduledAt: data.scheduledAt ? new Date(data.scheduledAt) : new Date(),
+    });
+  }
+
+  async updateTelehealthSession(id, patch) {
+    const { Teleconsultation } = require('../models/Telehealth');
+    return Teleconsultation.findByIdAndUpdate(id, patch, { new: true });
+  }
+
+  async updateTelehealthStatus(id, status) {
+    const { Teleconsultation } = require('../models/Telehealth');
+    const update = { status };
+    if (status === 'in_progress') update.startedAt = new Date();
+    if (status === 'completed') {
+      update.endedAt = new Date();
+      const doc = await Teleconsultation.findById(id, { startedAt: 1 });
+      if (doc?.startedAt) {
+        update.durationMinutes = Math.round((Date.now() - doc.startedAt.getTime()) / 60000);
+      }
+    }
+    return Teleconsultation.findByIdAndUpdate(id, update, { new: true });
+  }
+
+  async deleteTelehealthSession(id) {
+    const { Teleconsultation } = require('../models/Telehealth');
+    return Teleconsultation.findByIdAndUpdate(id, { deletedAt: new Date() }, { new: true });
+  }
+
+  // ─── Consent Management (consumed by routes/therapistElite.routes.js) ────
+  // Backed by `models/Consent.js`. The model is append-only by convention:
+  // revoke sets `revokedAt` instead of mutating; sign attaches signature
+  // metadata. Both keep the audit trail intact.
+
+  async getConsents(query = {}) {
+    const { Consent } = require('../models/Consent');
+    const filter = {};
+    if (query.beneficiaryId) filter.beneficiaryId = query.beneficiaryId;
+    if (query.type) filter.type = query.type;
+    if (query.active === 'true' || query.active === true) {
+      filter.revokedAt = null;
+    }
+    return Consent.find(filter)
+      .sort({ grantedAt: -1 })
+      .limit(Number(query.limit) || 100);
+  }
+
+  async createConsent(data) {
+    const { Consent } = require('../models/Consent');
+    return Consent.create({
+      ...data,
+      grantedAt: data.grantedAt ? new Date(data.grantedAt) : new Date(),
+    });
+  }
+
+  async updateConsent(id, patch) {
+    const { Consent } = require('../models/Consent');
+    return Consent.findByIdAndUpdate(id, patch, { new: true });
+  }
+
+  async signConsent(id, payload = {}) {
+    const { Consent } = require('../models/Consent');
+    const update = {
+      grantedAt: new Date(),
+      ...(payload.signatureRef ? { signatureRef: payload.signatureRef } : {}),
+      ...(payload.documentRef ? { documentRef: payload.documentRef } : {}),
+      ...(payload.grantedBy ? { grantedBy: payload.grantedBy } : {}),
+      ...(payload.expiresAt ? { expiresAt: new Date(payload.expiresAt) } : {}),
+    };
+    return Consent.findByIdAndUpdate(id, update, { new: true });
+  }
+
+  async revokeConsent(id, reason = null) {
+    const { Consent } = require('../models/Consent');
+    return Consent.findByIdAndUpdate(
+      id,
+      { revokedAt: new Date(), revokedReason: reason },
+      { new: true }
+    );
+  }
+
+  async deleteConsent(id) {
+    const { Consent } = require('../models/Consent');
+    return Consent.findByIdAndDelete(id);
+  }
+
+  // ─── Waiting List (consumed by routes/therapistElite.routes.js) ──────────
+  // Backed by `models/WaitingListEntry.js`. State machine:
+  // waiting → offered → enrolled (or withdrawn / lapsed).
+
+  async getWaitingList(query = {}) {
+    const WaitingListEntry = require('../models/WaitingListEntry');
+    const filter = {};
+    if (query.status) filter.status = query.status;
+    if (query.serviceType) filter.serviceType = query.serviceType;
+    if (query.branchId) filter.branchId = query.branchId;
+    return WaitingListEntry.find(filter)
+      .sort({ createdAt: 1 }) // FIFO
+      .limit(Number(query.limit) || 200);
+  }
+
+  async addToWaitingList(data) {
+    const WaitingListEntry = require('../models/WaitingListEntry');
+    return WaitingListEntry.create({ ...data, status: data.status || 'waiting' });
+  }
+
+  async updateWaitingListItem(id, patch) {
+    const WaitingListEntry = require('../models/WaitingListEntry');
+    return WaitingListEntry.findByIdAndUpdate(id, patch, { new: true });
+  }
+
+  async updateWaitingStatus(id, status) {
+    const WaitingListEntry = require('../models/WaitingListEntry');
+    const update = { status };
+    if (status === 'offered') update.offeredAt = new Date();
+    if (status === 'enrolled') update.enrolledAt = new Date();
+    return WaitingListEntry.findByIdAndUpdate(id, update, { new: true });
+  }
+
+  async removeFromWaitingList(id) {
+    const WaitingListEntry = require('../models/WaitingListEntry');
+    return WaitingListEntry.findByIdAndDelete(id);
+  }
+
+  // ─── Field Training (consumed by routes/therapistElite.routes.js) ────────
+  // Backed by `models/FieldTraining.js`. Tracks supervised practice,
+  // workshops, certification prep with append-only hours log + evaluations.
+
+  async getFieldTraining(query = {}) {
+    const FieldTraining = require('../models/FieldTraining');
+    const filter = { deletedAt: null };
+    if (query.therapist) filter.therapist = query.therapist;
+    if (query.status) filter.status = query.status;
+    if (query.type) filter.type = query.type;
+    if (query.branch) filter.branch = query.branch;
+    return FieldTraining.find(filter)
+      .populate('therapist', 'name')
+      .populate('supervisor', 'name')
+      .sort({ startDate: -1 })
+      .limit(Number(query.limit) || 100);
+  }
+
+  async createFieldTraining(data) {
+    const FieldTraining = require('../models/FieldTraining');
+    return FieldTraining.create({
+      ...data,
+      ...(data.startDate ? { startDate: new Date(data.startDate) } : {}),
+      ...(data.endDate ? { endDate: new Date(data.endDate) } : {}),
+    });
+  }
+
+  async updateFieldTraining(id, patch) {
+    const FieldTraining = require('../models/FieldTraining');
+    return FieldTraining.findByIdAndUpdate(id, patch, { new: true });
+  }
+
+  async addTrainingEvaluation(id, evaluation) {
+    const FieldTraining = require('../models/FieldTraining');
+    return FieldTraining.findByIdAndUpdate(
+      id,
+      {
+        $push: {
+          evaluations: { ...evaluation, date: evaluation?.date || new Date() },
+        },
+      },
+      { new: true }
+    );
+  }
+
+  async logTrainingHours(id, payload = {}) {
+    const FieldTraining = require('../models/FieldTraining');
+    const hours = Number(payload.hours) || 0;
+    if (hours <= 0) throw Object.assign(new Error('hours must be > 0'), { status: 400 });
+    return FieldTraining.findByIdAndUpdate(
+      id,
+      {
+        $push: {
+          hoursLog: {
+            date: payload.date ? new Date(payload.date) : new Date(),
+            hours,
+            activity: payload.activity || null,
+            verified: !!payload.verified,
+          },
+        },
+        $inc: { completedHours: hours },
+      },
+      { new: true }
+    );
+  }
+
+  async deleteFieldTraining(id) {
+    const FieldTraining = require('../models/FieldTraining');
+    return FieldTraining.findByIdAndUpdate(id, { deletedAt: new Date() }, { new: true });
+  }
+
+  // ─── Quality Reports (therapist-portal scope) ────────────────────────────
+  // Backed by `models/TherapyQualityReport.js`. Distinct from formal CBAHI
+  // audits in `services/quality/*` — this is the lighter therapist-side log
+  // (peer reviews, near-misses, satisfaction snapshots).
+
+  async getQualityReports(query = {}) {
+    const TherapyQualityReport = require('../models/TherapyQualityReport');
+    const filter = { deletedAt: null };
+    if (query.status) filter.status = query.status;
+    if (query.type) filter.type = query.type;
+    if (query.author) filter.author = query.author;
+    if (query.branch) filter.branch = query.branch;
+    return TherapyQualityReport.find(filter)
+      .populate('author', 'name')
+      .sort({ createdAt: -1 })
+      .limit(Number(query.limit) || 100);
+  }
+
+  async createQualityReport(data) {
+    const TherapyQualityReport = require('../models/TherapyQualityReport');
+    const year = new Date().getFullYear();
+    const count = await TherapyQualityReport.countDocuments({
+      reportNumber: { $regex: `^QR-${year}` },
+    });
+    const reportNumber = `QR-${year}-${String(count + 1).padStart(4, '0')}`;
+    return TherapyQualityReport.create({ ...data, reportNumber });
+  }
+
+  async updateQualityReport(id, patch) {
+    const TherapyQualityReport = require('../models/TherapyQualityReport');
+    return TherapyQualityReport.findByIdAndUpdate(id, patch, { new: true });
+  }
+
+  async addFinding(id, finding) {
+    const TherapyQualityReport = require('../models/TherapyQualityReport');
+    if (!finding || !finding.description) {
+      throw Object.assign(new Error('finding.description is required'), { status: 400 });
+    }
+    return TherapyQualityReport.findByIdAndUpdate(
+      id,
+      { $push: { findings: { ...finding, raisedAt: finding.raisedAt || new Date() } } },
+      { new: true }
+    );
+  }
+
+  async deleteQualityReport(id) {
+    const TherapyQualityReport = require('../models/TherapyQualityReport');
+    return TherapyQualityReport.findByIdAndUpdate(id, { deletedAt: new Date() }, { new: true });
+  }
+
+  // ─── Achievements (therapist recognition feed) ───────────────────────────
+  // Backed by `models/TherapistAchievement.js`. Lightweight kudos / awards /
+  // publications log — distinct from formal CPE credits + HR credentials.
+
+  async getAchievements(query = {}) {
+    const TherapistAchievement = require('../models/TherapistAchievement');
+    const filter = { deletedAt: null };
+    if (query.therapist) filter.therapist = query.therapist;
+    if (query.type) filter.type = query.type;
+    if (query.branch) filter.branch = query.branch;
+    if (query.verified === 'true' || query.verified === true) filter.verified = true;
+    return TherapistAchievement.find(filter)
+      .populate('therapist', 'name')
+      .sort({ date: -1 })
+      .limit(Number(query.limit) || 100);
+  }
+
+  async createAchievement(data) {
+    const TherapistAchievement = require('../models/TherapistAchievement');
+    return TherapistAchievement.create({
+      ...data,
+      ...(data.date ? { date: new Date(data.date) } : {}),
+    });
+  }
+
+  async updateAchievement(id, patch) {
+    const TherapistAchievement = require('../models/TherapistAchievement');
+    return TherapistAchievement.findByIdAndUpdate(id, patch, { new: true });
+  }
+
+  async deleteAchievement(id) {
+    const TherapistAchievement = require('../models/TherapistAchievement');
+    return TherapistAchievement.findByIdAndUpdate(id, { deletedAt: new Date() }, { new: true });
+  }
+
+  // ─── Treatment Plans (consumed by routes/therapistExtended.routes.js) ────
+  // Aliases over the existing TherapeuticPlan model. The route uses
+  // "Treatment Plan" terminology; service used "Therapeutic Plan" — same
+  // entity. Aliases keep both names working without renaming the model.
+
+  async getTreatmentPlans(therapistId, query = {}) {
+    return this.getTherapeuticPlans(therapistId, query);
+  }
+
+  async getTreatmentPlanDetail(therapistId, planId) {
+    return this.getPlanById(therapistId, planId);
+  }
+
+  async createTreatmentPlan(therapistId, data) {
+    const TherapeuticPlan = getPlan();
+    return TherapeuticPlan.create({
+      ...data,
+      assignedTherapists: data.assignedTherapists?.length ? data.assignedTherapists : [therapistId],
+    });
+  }
+
+  async updateTreatmentPlan(therapistId, planId, patch) {
+    const TherapeuticPlan = getPlan();
+    return TherapeuticPlan.findOneAndUpdate(
+      { _id: planId, assignedTherapists: therapistId },
+      patch,
+      { new: true }
+    );
+  }
+
+  // ─── Assessments (therapist-scope) ───────────────────────────────────────
+  // Backed by `models/TherapyAssessment.js`.
+
+  async getAssessments(therapistId, query = {}) {
+    const TherapyAssessment = require('../models/TherapyAssessment');
+    const filter = { therapist: therapistId, deletedAt: null };
+    if (query.beneficiary) filter.beneficiary = query.beneficiary;
+    if (query.type) filter.type = query.type;
+    return TherapyAssessment.find(filter)
+      .sort({ conductedAt: -1 })
+      .limit(Number(query.limit) || 100);
+  }
+
+  async createAssessment(therapistId, data) {
+    const TherapyAssessment = require('../models/TherapyAssessment');
+    const year = new Date().getFullYear();
+    const count = await TherapyAssessment.countDocuments({
+      assessmentNumber: { $regex: `^AS-${year}` },
+    });
+    const assessmentNumber = `AS-${year}-${String(count + 1).padStart(5, '0')}`;
+    return TherapyAssessment.create({ ...data, therapist: therapistId, assessmentNumber });
+  }
+
+  async getAssessmentDetail(therapistId, assessmentId) {
+    const TherapyAssessment = require('../models/TherapyAssessment');
+    return TherapyAssessment.findOne({
+      _id: assessmentId,
+      therapist: therapistId,
+      deletedAt: null,
+    });
+  }
+
+  async deleteAssessment(therapistId, assessmentId) {
+    const TherapyAssessment = require('../models/TherapyAssessment');
+    return TherapyAssessment.findOneAndUpdate(
+      { _id: assessmentId, therapist: therapistId },
+      { deletedAt: new Date() },
+      { new: true }
+    );
+  }
+
+  // ─── Prescriptions (therapist-scope, non-pharmacological) ────────────────
+  // Backed by `models/TherapyPrescription.js`.
+
+  async getPrescriptions(therapistId, query = {}) {
+    const TherapyPrescription = require('../models/TherapyPrescription');
+    const filter = { therapist: therapistId, deletedAt: null };
+    if (query.beneficiary) filter.beneficiary = query.beneficiary;
+    if (query.status) filter.status = query.status;
+    return TherapyPrescription.find(filter)
+      .sort({ issuedAt: -1 })
+      .limit(Number(query.limit) || 100);
+  }
+
+  async createPrescription(therapistId, data) {
+    const TherapyPrescription = require('../models/TherapyPrescription');
+    const year = new Date().getFullYear();
+    const count = await TherapyPrescription.countDocuments({
+      prescriptionNumber: { $regex: `^TP-${year}` },
+    });
+    const prescriptionNumber = `TP-${year}-${String(count + 1).padStart(5, '0')}`;
+    return TherapyPrescription.create({
+      ...data,
+      therapist: therapistId,
+      prescriptionNumber,
+    });
+  }
+
+  async updatePrescription(therapistId, prescriptionId, patch) {
+    const TherapyPrescription = require('../models/TherapyPrescription');
+    return TherapyPrescription.findOneAndUpdate(
+      { _id: prescriptionId, therapist: therapistId },
+      patch,
+      { new: true }
+    );
+  }
+
+  async deletePrescription(therapistId, prescriptionId) {
+    const TherapyPrescription = require('../models/TherapyPrescription');
+    return TherapyPrescription.findOneAndUpdate(
+      { _id: prescriptionId, therapist: therapistId },
+      { deletedAt: new Date() },
+      { new: true }
+    );
+  }
+
+  // ─── Professional Development ────────────────────────────────────────────
+  // Backed by `models/ProfessionalDevActivity.js`.
+
+  async getProfessionalDev(therapistId, query = {}) {
+    const ProfessionalDevActivity = require('../models/ProfessionalDevActivity');
+    const filter = { therapist: therapistId, deletedAt: null };
+    if (query.type) filter.type = query.type;
+    if (query.from || query.to) {
+      filter.date = {};
+      if (query.from) filter.date.$gte = new Date(query.from);
+      if (query.to) filter.date.$lte = new Date(query.to);
+    }
+    return ProfessionalDevActivity.find(filter)
+      .sort({ date: -1 })
+      .limit(Number(query.limit) || 100);
+  }
+
+  async addProfessionalDev(therapistId, data) {
+    const ProfessionalDevActivity = require('../models/ProfessionalDevActivity');
+    return ProfessionalDevActivity.create({
+      ...data,
+      therapist: therapistId,
+      ...(data.date ? { date: new Date(data.date) } : {}),
+    });
+  }
+
+  async updateProfessionalDev(therapistId, activityId, patch) {
+    const ProfessionalDevActivity = require('../models/ProfessionalDevActivity');
+    return ProfessionalDevActivity.findOneAndUpdate(
+      { _id: activityId, therapist: therapistId },
+      patch,
+      { new: true }
+    );
+  }
+
+  async deleteProfessionalDev(therapistId, activityId) {
+    const ProfessionalDevActivity = require('../models/ProfessionalDevActivity');
+    return ProfessionalDevActivity.findOneAndUpdate(
+      { _id: activityId, therapist: therapistId },
+      { deletedAt: new Date() },
+      { new: true }
+    );
+  }
+
+  // ─── Advanced Analytics + Productivity ───────────────────────────────────
+  // Aggregations on existing TherapySession data — no new model required.
+
+  async getAdvancedAnalytics(therapistId, query = {}) {
+    const Session = getTherapySession();
+    const since = query.from ? new Date(query.from) : new Date(Date.now() - 90 * 86400000);
+    const until = query.to ? new Date(query.to) : new Date();
+
+    const [byStatus, byType, byMonth] = await Promise.all([
+      Session.aggregate([
+        { $match: { therapist: therapistId, date: { $gte: since, $lte: until } } },
+        { $group: { _id: '$status', count: { $sum: 1 } } },
+      ]),
+      Session.aggregate([
+        { $match: { therapist: therapistId, date: { $gte: since, $lte: until } } },
+        { $group: { _id: '$sessionType', count: { $sum: 1 } } },
+      ]),
+      Session.aggregate([
+        { $match: { therapist: therapistId, date: { $gte: since, $lte: until } } },
+        {
+          $group: {
+            _id: { y: { $year: '$date' }, m: { $month: '$date' } },
+            count: { $sum: 1 },
+          },
+        },
+        { $sort: { '_id.y': 1, '_id.m': 1 } },
+      ]),
+    ]);
+
+    return {
+      window: { from: since, to: until },
+      byStatus: byStatus.reduce((acc, r) => ({ ...acc, [r._id || 'unknown']: r.count }), {}),
+      byType: byType.reduce((acc, r) => ({ ...acc, [r._id || 'unknown']: r.count }), {}),
+      byMonth: byMonth.map(r => ({ year: r._id.y, month: r._id.m, count: r.count })),
+    };
+  }
+
+  async getProductivityReport(therapistId) {
+    const Session = getTherapySession();
+    const start = new Date();
+    start.setDate(start.getDate() - 30);
+
+    const [completed, cancelled, noShow, total] = await Promise.all([
+      Session.countDocuments({
+        therapist: therapistId,
+        status: 'completed',
+        date: { $gte: start },
+      }),
+      Session.countDocuments({
+        therapist: therapistId,
+        status: 'cancelled',
+        date: { $gte: start },
+      }),
+      Session.countDocuments({ therapist: therapistId, status: 'no_show', date: { $gte: start } }),
+      Session.countDocuments({ therapist: therapistId, date: { $gte: start } }),
+    ]);
+
+    return {
+      windowDays: 30,
+      total,
+      completed,
+      cancelled,
+      noShow,
+      completionRate: total > 0 ? Math.round((completed / total) * 1000) / 10 : 0,
+      noShowRate: total > 0 ? Math.round((noShow / total) * 1000) / 10 : 0,
+    };
+  }
+
+  // ─── Consultations (provider-to-provider) ────────────────────────────────
+  // Backed by `models/TherapistConsultation.js`.
+
+  async getConsultations(therapistId, query = {}) {
+    const TherapistConsultation = require('../models/TherapistConsultation');
+    const filter = { deletedAt: null };
+    // Show consultations where the therapist is either requester or consultant.
+    filter.$or = [{ requester: therapistId }, { consultant: therapistId }];
+    if (query.status) filter.status = query.status;
+    return TherapistConsultation.find(filter)
+      .sort({ createdAt: -1 })
+      .limit(Number(query.limit) || 100);
+  }
+
+  async createConsultation(therapistId, data) {
+    const TherapistConsultation = require('../models/TherapistConsultation');
+    return TherapistConsultation.create({
+      ...data,
+      requester: therapistId,
+      status: data.consultant ? 'awaiting_response' : 'open',
+    });
+  }
+
+  async respondToConsultation(therapistId, consultationId, payload) {
+    const TherapistConsultation = require('../models/TherapistConsultation');
+    if (!payload?.content) {
+      throw Object.assign(new Error('response content required'), { status: 400 });
+    }
+    return TherapistConsultation.findByIdAndUpdate(
+      consultationId,
+      {
+        $push: {
+          responses: {
+            respondedBy: therapistId,
+            content: payload.content,
+            attachments: payload.attachments || [],
+          },
+        },
+        status: 'answered',
+      },
+      { new: true }
+    );
+  }
+
+  async updateConsultationStatus(therapistId, consultationId, body) {
+    const TherapistConsultation = require('../models/TherapistConsultation');
+    const status = body?.status;
+    if (!status) throw Object.assign(new Error('status required'), { status: 400 });
+    const update = { status };
+    if (status === 'closed') update.closedAt = new Date();
+    return TherapistConsultation.findOneAndUpdate(
+      {
+        _id: consultationId,
+        $or: [{ requester: therapistId }, { consultant: therapistId }],
+      },
+      update,
+      { new: true }
+    );
+  }
+
+  async deleteConsultation(therapistId, consultationId) {
+    const TherapistConsultation = require('../models/TherapistConsultation');
+    return TherapistConsultation.findOneAndUpdate(
+      { _id: consultationId, requester: therapistId },
+      { deletedAt: new Date() },
+      { new: true }
+    );
+  }
+
+  // ─── Daily Tasks (consumed by routes/therapistPro.routes.js) ─────────────
+
+  async getDailyTasks(therapistId, query = {}) {
+    const DailyTask = require('../models/DailyTask');
+    const filter = { therapist: therapistId, deletedAt: null };
+    if (query.status) filter.status = query.status;
+    if (query.from || query.to) {
+      filter.dueDate = {};
+      if (query.from) filter.dueDate.$gte = new Date(query.from);
+      if (query.to) filter.dueDate.$lte = new Date(query.to);
+    }
+    return DailyTask.find(filter)
+      .sort({ dueDate: 1, createdAt: -1 })
+      .limit(Number(query.limit) || 200);
+  }
+
+  async createTask(therapistId, data) {
+    const DailyTask = require('../models/DailyTask');
+    return DailyTask.create({
+      ...data,
+      therapist: therapistId,
+      ...(data.dueDate ? { dueDate: new Date(data.dueDate) } : {}),
+    });
+  }
+
+  async updateTask(therapistId, taskId, patch) {
+    const DailyTask = require('../models/DailyTask');
+    const update = { ...patch };
+    if (patch.status === 'completed' && !patch.completedAt) update.completedAt = new Date();
+    return DailyTask.findOneAndUpdate({ _id: taskId, therapist: therapistId }, update, {
+      new: true,
+    });
+  }
+
+  async deleteTask(therapistId, taskId) {
+    const DailyTask = require('../models/DailyTask');
+    return DailyTask.findOneAndUpdate(
+      { _id: taskId, therapist: therapistId },
+      { deletedAt: new Date() },
+      { new: true }
+    );
+  }
+
+  // ─── Progress Records ────────────────────────────────────────────────────
+
+  async getProgressRecords(therapistId, query = {}) {
+    const TherapistProgressRecord = require('../models/TherapistProgressRecord');
+    const filter = { therapist: therapistId, deletedAt: null };
+    if (query.beneficiary) filter.beneficiary = query.beneficiary;
+    if (query.domain) filter.domain = query.domain;
+    return TherapistProgressRecord.find(filter)
+      .sort({ recordedAt: -1 })
+      .limit(Number(query.limit) || 100);
+  }
+
+  async addProgressRecord(therapistId, data) {
+    const TherapistProgressRecord = require('../models/TherapistProgressRecord');
+    return TherapistProgressRecord.create({ ...data, therapist: therapistId });
+  }
+
+  async deleteProgressRecord(therapistId, recordId) {
+    const TherapistProgressRecord = require('../models/TherapistProgressRecord');
+    return TherapistProgressRecord.findOneAndUpdate(
+      { _id: recordId, therapist: therapistId },
+      { deletedAt: new Date() },
+      { new: true }
+    );
+  }
+
+  // ─── Library Items ───────────────────────────────────────────────────────
+
+  async getLibraryItems(query = {}) {
+    const TherapistLibraryItem = require('../models/TherapistLibraryItem');
+    const filter = { deletedAt: null };
+    if (query.therapist) filter.therapist = query.therapist;
+    if (query.kind) filter.kind = query.kind;
+    if (query.tag) filter.tags = query.tag;
+    return TherapistLibraryItem.find(filter)
+      .sort({ addedAt: -1 })
+      .limit(Number(query.limit) || 100);
+  }
+
+  async getLibraryItem(itemId) {
+    const TherapistLibraryItem = require('../models/TherapistLibraryItem');
+    return TherapistLibraryItem.findOne({ _id: itemId, deletedAt: null });
+  }
+
+  async addLibraryItem(therapistId, data) {
+    const TherapistLibraryItem = require('../models/TherapistLibraryItem');
+    return TherapistLibraryItem.create({ ...data, therapist: therapistId });
+  }
+
+  async deleteLibraryItem(itemId) {
+    const TherapistLibraryItem = require('../models/TherapistLibraryItem');
+    return TherapistLibraryItem.findByIdAndUpdate(itemId, { deletedAt: new Date() }, { new: true });
+  }
+
+  // ─── Templates ───────────────────────────────────────────────────────────
+
+  async getTemplates(query = {}) {
+    const TherapistTemplate = require('../models/TherapistTemplate');
+    const filter = { deletedAt: null };
+    if (query.therapist) filter.therapist = query.therapist;
+    if (query.kind) filter.kind = query.kind;
+    return TherapistTemplate.find(filter)
+      .sort({ usageCount: -1, createdAt: -1 })
+      .limit(Number(query.limit) || 100);
+  }
+
+  async getTemplateById(templateId) {
+    const TherapistTemplate = require('../models/TherapistTemplate');
+    return TherapistTemplate.findOne({ _id: templateId, deletedAt: null });
+  }
+
+  async createTemplate(therapistId, data) {
+    const TherapistTemplate = require('../models/TherapistTemplate');
+    return TherapistTemplate.create({ ...data, therapist: therapistId });
+  }
+
+  async updateTemplate(therapistId, templateId, patch) {
+    const TherapistTemplate = require('../models/TherapistTemplate');
+    return TherapistTemplate.findOneAndUpdate({ _id: templateId, therapist: therapistId }, patch, {
+      new: true,
+    });
+  }
+
+  async useTemplate(templateId) {
+    const TherapistTemplate = require('../models/TherapistTemplate');
+    return TherapistTemplate.findByIdAndUpdate(
+      templateId,
+      { $inc: { usageCount: 1 }, lastUsedAt: new Date() },
+      { new: true }
+    );
+  }
+
+  async deleteTemplate(templateId) {
+    const TherapistTemplate = require('../models/TherapistTemplate');
+    return TherapistTemplate.findByIdAndUpdate(
+      templateId,
+      { deletedAt: new Date() },
+      { new: true }
+    );
+  }
+
+  // ─── Parent Messages ─────────────────────────────────────────────────────
+
+  async getParentMessages(therapistId, query = {}) {
+    const ParentMessage = require('../models/ParentMessage');
+    const filter = { therapist: therapistId, deletedAt: null };
+    if (query.beneficiary) filter.beneficiary = query.beneficiary;
+    if (query.guardian) filter.guardian = query.guardian;
+    if (query.unread === 'true' || query.unread === true) filter.readAt = null;
+    return ParentMessage.find(filter)
+      .sort({ sentAt: -1 })
+      .limit(Number(query.limit) || 100);
+  }
+
+  async sendParentMessage(therapistId, data) {
+    const ParentMessage = require('../models/ParentMessage');
+    return ParentMessage.create({
+      ...data,
+      therapist: therapistId,
+      direction: data.direction || 'to_parent',
+      sentAt: new Date(),
+    });
+  }
+
+  async markMessageRead(therapistId, messageId) {
+    const ParentMessage = require('../models/ParentMessage');
+    return ParentMessage.findOneAndUpdate(
+      { _id: messageId, therapist: therapistId },
+      { readAt: new Date() },
+      { new: true }
+    );
+  }
+
+  async deleteParentMessage(therapistId, messageId) {
+    const ParentMessage = require('../models/ParentMessage');
+    return ParentMessage.findOneAndUpdate(
+      { _id: messageId, therapist: therapistId },
+      { deletedAt: new Date() },
+      { new: true }
+    );
+  }
+
+  // ─── Smart Goals ─────────────────────────────────────────────────────────
+
+  async getSmartGoals(therapistId, query = {}) {
+    const SmartGoal = require('../models/SmartGoal');
+    const filter = { therapist: therapistId, deletedAt: null };
+    if (query.beneficiary) filter.beneficiary = query.beneficiary;
+    if (query.status) filter.status = query.status;
+    return SmartGoal.find(filter)
+      .sort({ createdAt: -1 })
+      .limit(Number(query.limit) || 100);
+  }
+
+  async createSmartGoal(therapistId, data) {
+    const SmartGoal = require('../models/SmartGoal');
+    return SmartGoal.create({
+      ...data,
+      therapist: therapistId,
+      ...(data.timeBoundDate ? { timeBoundDate: new Date(data.timeBoundDate) } : {}),
+    });
+  }
+
+  async updateSmartGoal(therapistId, goalId, patch) {
+    const SmartGoal = require('../models/SmartGoal');
+    return SmartGoal.findOneAndUpdate({ _id: goalId, therapist: therapistId }, patch, {
+      new: true,
+    });
+  }
+
+  /**
+   * Update one milestone within a SmartGoal. Recomputes overallProgress
+   * as the average of milestone progress values so the parent goal stays
+   * in sync without a separate save call.
+   */
+  async updateMilestone(therapistId, goalId, milestoneId, patch) {
+    const SmartGoal = require('../models/SmartGoal');
+    const goal = await SmartGoal.findOne({ _id: goalId, therapist: therapistId });
+    if (!goal) return null;
+    const milestone = goal.milestones.id(milestoneId);
+    if (!milestone) return null;
+    if (patch.title !== undefined) milestone.title = patch.title;
+    if (patch.targetDate !== undefined)
+      milestone.targetDate = patch.targetDate ? new Date(patch.targetDate) : null;
+    if (patch.progress !== undefined) milestone.progress = patch.progress;
+    if (patch.notes !== undefined) milestone.notes = patch.notes;
+    if (patch.completedAt !== undefined)
+      milestone.completedAt = patch.completedAt ? new Date(patch.completedAt) : null;
+    if (patch.progress === 100 && !milestone.completedAt) milestone.completedAt = new Date();
+    if (goal.milestones.length > 0) {
+      const sum = goal.milestones.reduce((acc, m) => acc + (m.progress || 0), 0);
+      goal.overallProgress = Math.round(sum / goal.milestones.length);
+    }
+    await goal.save();
+    return goal;
+  }
+
+  async deleteSmartGoal(therapistId, goalId) {
+    const SmartGoal = require('../models/SmartGoal');
+    return SmartGoal.findOneAndUpdate(
+      { _id: goalId, therapist: therapistId },
+      { deletedAt: new Date() },
+      { new: true }
+    );
+  }
+
+  // ─── Referrals (consumed by routes/therapistUltra.routes.js) ─────────────
+
+  async getReferrals(therapistId) {
+    const TherapyReferral = require('../models/TherapyReferral');
+    return TherapyReferral.find({
+      $or: [{ referrer: therapistId }, { referredTo: therapistId }],
+      deletedAt: null,
+    }).sort({ createdAt: -1 });
+  }
+
+  async createReferral(data, therapistId) {
+    const TherapyReferral = require('../models/TherapyReferral');
+    const year = new Date().getFullYear();
+    const count = await TherapyReferral.countDocuments({
+      referralNumber: { $regex: `^REF-${year}` },
+    });
+    const referralNumber = `REF-${year}-${String(count + 1).padStart(5, '0')}`;
+    return TherapyReferral.create({ ...data, referrer: therapistId, referralNumber });
+  }
+
+  async updateReferral(id, patch) {
+    const TherapyReferral = require('../models/TherapyReferral');
+    return TherapyReferral.findByIdAndUpdate(id, patch, { new: true });
+  }
+
+  async updateReferralStatus(id, status) {
+    const TherapyReferral = require('../models/TherapyReferral');
+    const update = { status };
+    if (status === 'accepted' || status === 'declined') update.respondedAt = new Date();
+    if (status === 'completed') update.completedAt = new Date();
+    return TherapyReferral.findByIdAndUpdate(id, update, { new: true });
+  }
+
+  async deleteReferral(id) {
+    const TherapyReferral = require('../models/TherapyReferral');
+    return TherapyReferral.findByIdAndUpdate(id, { deletedAt: new Date() }, { new: true });
+  }
+
+  // ─── Groups (group therapy) ──────────────────────────────────────────────
+
+  async getGroups(therapistId) {
+    const TherapyGroup = require('../models/TherapyGroup');
+    return TherapyGroup.find({
+      $or: [{ facilitator: therapistId }, { coFacilitators: therapistId }],
+      deletedAt: null,
+    }).sort({ createdAt: -1 });
+  }
+
+  async createGroup(data, therapistId) {
+    const TherapyGroup = require('../models/TherapyGroup');
+    return TherapyGroup.create({ ...data, facilitator: data.facilitator || therapistId });
+  }
+
+  async updateGroup(id, patch) {
+    const TherapyGroup = require('../models/TherapyGroup');
+    return TherapyGroup.findByIdAndUpdate(id, patch, { new: true });
+  }
+
+  async addParticipant(groupId, payload) {
+    const TherapyGroup = require('../models/TherapyGroup');
+    if (!payload?.beneficiary) {
+      throw Object.assign(new Error('beneficiary required'), { status: 400 });
+    }
+    const group = await TherapyGroup.findById(groupId);
+    if (!group) return null;
+    if (group.participants.some(p => String(p.beneficiary) === String(payload.beneficiary))) {
+      throw Object.assign(new Error('beneficiary already in group'), { status: 400 });
+    }
+    if (group.participants.length >= group.maxParticipants) {
+      throw Object.assign(new Error('group at capacity'), { status: 400 });
+    }
+    group.participants.push({ beneficiary: payload.beneficiary });
+    await group.save();
+    return group;
+  }
+
+  async removeParticipant(groupId, participantId) {
+    const TherapyGroup = require('../models/TherapyGroup');
+    return TherapyGroup.findByIdAndUpdate(
+      groupId,
+      { $pull: { participants: { beneficiary: participantId } } },
+      { new: true }
+    );
+  }
+
+  async deleteGroup(id) {
+    const TherapyGroup = require('../models/TherapyGroup');
+    return TherapyGroup.findByIdAndUpdate(id, { deletedAt: new Date() }, { new: true });
+  }
+
+  // ─── Equipment (booking) ─────────────────────────────────────────────────
+
+  async getEquipment(_therapistId) {
+    const TherapyEquipment = require('../models/TherapyEquipment');
+    return TherapyEquipment.find({ deletedAt: null }).sort({ name: 1 });
+  }
+
+  async createEquipment(data) {
+    const TherapyEquipment = require('../models/TherapyEquipment');
+    return TherapyEquipment.create(data);
+  }
+
+  async updateEquipment(id, patch) {
+    const TherapyEquipment = require('../models/TherapyEquipment');
+    return TherapyEquipment.findByIdAndUpdate(id, patch, { new: true });
+  }
+
+  async bookEquipment(id, bookedBy, until) {
+    const TherapyEquipment = require('../models/TherapyEquipment');
+    const eq = await TherapyEquipment.findById(id);
+    if (!eq) return null;
+    if (eq.status !== 'available') {
+      throw Object.assign(new Error('equipment not available'), { status: 400 });
+    }
+    eq.status = 'in_use';
+    eq.currentHolder = bookedBy;
+    eq.bookings.push({
+      bookedBy,
+      from: new Date(),
+      to: until ? new Date(until) : new Date(Date.now() + 24 * 3600 * 1000),
+      purpose: null,
+    });
+    await eq.save();
+    return eq;
+  }
+
+  async returnEquipment(id) {
+    const TherapyEquipment = require('../models/TherapyEquipment');
+    const eq = await TherapyEquipment.findById(id);
+    if (!eq) return null;
+    const open = eq.bookings.find(b => !b.returnedAt);
+    if (open) open.returnedAt = new Date();
+    eq.status = 'available';
+    eq.currentHolder = null;
+    await eq.save();
+    return eq;
+  }
+
+  async deleteEquipment(id) {
+    const TherapyEquipment = require('../models/TherapyEquipment');
+    return TherapyEquipment.findByIdAndUpdate(id, { deletedAt: new Date() }, { new: true });
+  }
+
+  // ─── Custom KPIs ─────────────────────────────────────────────────────────
+
+  async getKPIs(therapistId) {
+    const TherapyCustomKPI = require('../models/TherapyCustomKPI');
+    return TherapyCustomKPI.find({ therapist: therapistId, deletedAt: null }).sort({ name: 1 });
+  }
+
+  async createCustomKPI(data, therapistId) {
+    const TherapyCustomKPI = require('../models/TherapyCustomKPI');
+    return TherapyCustomKPI.create({ ...data, therapist: therapistId });
+  }
+
+  async updateKPI(id, patch) {
+    const TherapyCustomKPI = require('../models/TherapyCustomKPI');
+    // Treat measurement add as a special case so the parent currentValue
+    // stays in sync without forcing the caller to pass both fields.
+    if (patch.measurement) {
+      const kpi = await TherapyCustomKPI.findById(id);
+      if (!kpi) return null;
+      kpi.measurements.push({
+        date: patch.measurement.date ? new Date(patch.measurement.date) : new Date(),
+        value: patch.measurement.value,
+        notes: patch.measurement.notes || null,
+      });
+      kpi.currentValue = patch.measurement.value;
+      await kpi.save();
+      return kpi;
+    }
+    return TherapyCustomKPI.findByIdAndUpdate(id, patch, { new: true });
+  }
+
+  async deleteKPI(id) {
+    const TherapyCustomKPI = require('../models/TherapyCustomKPI');
+    return TherapyCustomKPI.findByIdAndUpdate(id, { deletedAt: new Date() }, { new: true });
+  }
+
+  // ─── Safety Protocols ────────────────────────────────────────────────────
+
+  async getSafetyProtocols(_therapistId) {
+    const SafetyProtocol = require('../models/SafetyProtocol');
+    return SafetyProtocol.find({ deletedAt: null, status: { $ne: 'archived' } }).sort({
+      createdAt: -1,
+    });
+  }
+
+  async createSafetyProtocol(data) {
+    const SafetyProtocol = require('../models/SafetyProtocol');
+    const year = new Date().getFullYear();
+    const count = await SafetyProtocol.countDocuments({
+      protocolNumber: { $regex: `^SP-${year}` },
+    });
+    const protocolNumber = `SP-${year}-${String(count + 1).padStart(4, '0')}`;
+    return SafetyProtocol.create({ ...data, protocolNumber });
+  }
+
+  async updateSafetyProtocol(id, patch) {
+    const SafetyProtocol = require('../models/SafetyProtocol');
+    return SafetyProtocol.findByIdAndUpdate(id, patch, { new: true });
+  }
+
+  async reportIncident(protocolId, incident) {
+    const SafetyProtocol = require('../models/SafetyProtocol');
+    if (!incident?.description) {
+      throw Object.assign(new Error('incident.description required'), { status: 400 });
+    }
+    return SafetyProtocol.findByIdAndUpdate(
+      protocolId,
+      { $push: { incidents: { ...incident, reportedAt: new Date() } } },
+      { new: true }
+    );
+  }
+
+  async resolveIncident(protocolId, incidentId) {
+    const SafetyProtocol = require('../models/SafetyProtocol');
+    const protocol = await SafetyProtocol.findById(protocolId);
+    if (!protocol) return null;
+    const inc = protocol.incidents.id(incidentId);
+    if (!inc) return null;
+    inc.resolved = true;
+    inc.resolvedAt = new Date();
+    await protocol.save();
+    return protocol;
+  }
+
+  async deleteSafetyProtocol(id) {
+    const SafetyProtocol = require('../models/SafetyProtocol');
+    return SafetyProtocol.findByIdAndUpdate(id, { deletedAt: new Date() }, { new: true });
+  }
+
+  // ─── Research ────────────────────────────────────────────────────────────
+
+  async getResearch(therapistId) {
+    const TherapyResearch = require('../models/TherapyResearch');
+    return TherapyResearch.find({
+      $or: [{ principalInvestigator: therapistId }, { coInvestigators: therapistId }],
+      deletedAt: null,
+    }).sort({ createdAt: -1 });
+  }
+
+  async createResearch(data, therapistId) {
+    const TherapyResearch = require('../models/TherapyResearch');
+    return TherapyResearch.create({
+      ...data,
+      principalInvestigator: data.principalInvestigator || therapistId,
+    });
+  }
+
+  async updateResearch(id, patch) {
+    const TherapyResearch = require('../models/TherapyResearch');
+    return TherapyResearch.findByIdAndUpdate(id, patch, { new: true });
+  }
+
+  async addPublication(researchId, publication) {
+    const TherapyResearch = require('../models/TherapyResearch');
+    if (!publication?.title) {
+      throw Object.assign(new Error('publication.title required'), { status: 400 });
+    }
+    return TherapyResearch.findByIdAndUpdate(
+      researchId,
+      {
+        $push: {
+          publications: {
+            ...publication,
+            ...(publication.publishedAt ? { publishedAt: new Date(publication.publishedAt) } : {}),
+          },
+        },
+      },
+      { new: true }
+    );
+  }
+
+  async deleteResearch(id) {
+    const TherapyResearch = require('../models/TherapyResearch');
+    return TherapyResearch.findByIdAndUpdate(id, { deletedAt: new Date() }, { new: true });
+  }
 }
 
 module.exports = new TherapistPortalService();

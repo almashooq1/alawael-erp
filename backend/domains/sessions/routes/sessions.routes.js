@@ -10,18 +10,25 @@
 const express = require('express');
 const router = express.Router();
 
-let ClinicalSession;
+// Load model (registers it with Mongoose for the service layer)
 try {
-  ({ ClinicalSession } = require('../models/ClinicalSession'));
+  require('../models/ClinicalSession');
 } catch (_e) {
-  ClinicalSession = null;
+  // model registration failed — service will return 503 on first call
+}
+
+let sessionsService;
+try {
+  ({ sessionsService } = require('../services/SessionsService'));
+} catch (_e) {
+  sessionsService = null;
 }
 
 const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
-const requireModel = (req, res, next) => {
-  if (!ClinicalSession) {
-    return res.status(503).json({ success: false, message: 'Session model unavailable' });
+const requireService = (req, res, next) => {
+  if (!sessionsService) {
+    return res.status(503).json({ success: false, message: 'Session service unavailable' });
   }
   next();
 };
@@ -29,25 +36,9 @@ const requireModel = (req, res, next) => {
 /* ─── POST /sessions — Schedule a session ────────────────────────────────── */
 router.post(
   '/',
-  requireModel,
+  requireService,
   asyncHandler(async (req, res) => {
-    const { beneficiaryId, episodeId, therapistId, carePlanId, scheduledDate, type, modality } =
-      req.body;
-    if (!beneficiaryId || !scheduledDate) {
-      return res
-        .status(400)
-        .json({ success: false, message: 'beneficiaryId and scheduledDate are required' });
-    }
-    const session = await ClinicalSession.create({
-      beneficiaryId,
-      episodeId,
-      therapistId,
-      carePlanId,
-      scheduledDate,
-      type: type || 'individual',
-      modality: modality || 'in_person',
-      status: 'scheduled',
-    });
+    const session = await sessionsService.scheduleSession(req.body);
     res.status(201).json({ success: true, data: session });
   })
 );
@@ -55,7 +46,7 @@ router.post(
 /* ─── GET /sessions — List sessions ─────────────────────────────────────── */
 router.get(
   '/',
-  requireModel,
+  requireService,
   asyncHandler(async (req, res) => {
     const {
       beneficiaryId,
@@ -67,24 +58,10 @@ router.get(
       limit = 20,
       skip = 0,
     } = req.query;
-    const filter = {};
-    if (beneficiaryId) filter.beneficiaryId = beneficiaryId;
-    if (episodeId) filter.episodeId = episodeId;
-    if (therapistId) filter.therapistId = therapistId;
-    if (status) filter.status = status;
-    if (from || to) {
-      filter.scheduledDate = {};
-      if (from) filter.scheduledDate.$gte = new Date(from);
-      if (to) filter.scheduledDate.$lte = new Date(to);
-    }
-    const [data, total] = await Promise.all([
-      ClinicalSession.find(filter)
-        .sort({ scheduledDate: -1 })
-        .skip(Number(skip))
-        .limit(Number(limit))
-        .lean(),
-      ClinicalSession.countDocuments(filter),
-    ]);
+    const { data, total } = await sessionsService.listSessions(
+      { beneficiaryId, episodeId, therapistId, status, from, to },
+      { limit, skip }
+    );
     res.json({ success: true, data, total, skip: Number(skip), limit: Number(limit) });
   })
 );
@@ -92,89 +69,49 @@ router.get(
 /* ─── GET /sessions/dashboard — Summary stats ───────────────────────────── */
 router.get(
   '/dashboard',
-  requireModel,
+  requireService,
   asyncHandler(async (req, res) => {
     const { from, to } = req.query;
-    const dateFilter = {};
-    if (from || to) {
-      dateFilter.scheduledDate = {};
-      if (from) dateFilter.scheduledDate.$gte = new Date(from);
-      if (to) dateFilter.scheduledDate.$lte = new Date(to);
-    }
-    const [total, byStatus, byModality, todaySessions] = await Promise.all([
-      ClinicalSession.countDocuments(dateFilter),
-      ClinicalSession.aggregate([
-        { $match: dateFilter },
-        { $group: { _id: '$status', count: { $sum: 1 } } },
-      ]),
-      ClinicalSession.aggregate([
-        { $match: dateFilter },
-        { $group: { _id: '$modality', count: { $sum: 1 } } },
-      ]),
-      ClinicalSession.countDocuments({
-        scheduledDate: {
-          $gte: new Date(new Date().setHours(0, 0, 0, 0)),
-          $lte: new Date(new Date().setHours(23, 59, 59, 999)),
-        },
-      }),
-    ]);
-    res.json({
-      success: true,
-      data: {
-        total,
-        todaySessions,
-        byStatus: Object.fromEntries(byStatus.map(r => [r._id, r.count])),
-        byModality: Object.fromEntries(byModality.map(r => [r._id, r.count])),
-      },
-    });
+    const data = await sessionsService.getDashboard({ from, to });
+    res.json({ success: true, data });
   })
 );
 
 /* ─── GET /sessions/beneficiary/:id ─────────────────────────────────────── */
 router.get(
   '/beneficiary/:id',
-  requireModel,
+  requireService,
   asyncHandler(async (req, res) => {
     const { limit = 50, skip = 0 } = req.query;
-    const data = await ClinicalSession.find({ beneficiaryId: req.params.id })
-      .sort({ scheduledDate: -1 })
-      .skip(Number(skip))
-      .limit(Number(limit))
-      .lean();
-    res.json({ success: true, data, total: data.length });
+    const { data, total } = await sessionsService.getBeneficiarySessions(req.params.id, {
+      limit,
+      skip,
+    });
+    res.json({ success: true, data, total });
   })
 );
 
 /* ─── GET /sessions/therapist/:id ───────────────────────────────────────── */
 router.get(
   '/therapist/:id',
-  requireModel,
+  requireService,
   asyncHandler(async (req, res) => {
     const { from, to, limit = 50, skip = 0 } = req.query;
-    const filter = { therapistId: req.params.id };
-    if (from || to) {
-      filter.scheduledDate = {};
-      if (from) filter.scheduledDate.$gte = new Date(from);
-      if (to) filter.scheduledDate.$lte = new Date(to);
-    }
-    const data = await ClinicalSession.find(filter)
-      .sort({ scheduledDate: 1 })
-      .skip(Number(skip))
-      .limit(Number(limit))
-      .lean();
-    res.json({ success: true, data, total: data.length });
+    const { data, total } = await sessionsService.getTherapistSessions(
+      req.params.id,
+      { from, to },
+      { limit, skip }
+    );
+    res.json({ success: true, data, total });
   })
 );
 
 /* ─── GET /sessions/:id ─────────────────────────────────────────────────── */
 router.get(
   '/:id',
-  requireModel,
+  requireService,
   asyncHandler(async (req, res) => {
-    const session = await ClinicalSession.findById(req.params.id).lean();
-    if (!session) {
-      return res.status(404).json({ success: false, message: 'Session not found' });
-    }
+    const session = await sessionsService.getSessionById(req.params.id);
     res.json({ success: true, data: session });
   })
 );
@@ -182,16 +119,9 @@ router.get(
 /* ─── PUT /sessions/:id — Update session ────────────────────────────────── */
 router.put(
   '/:id',
-  requireModel,
+  requireService,
   asyncHandler(async (req, res) => {
-    const session = await ClinicalSession.findByIdAndUpdate(
-      req.params.id,
-      { $set: req.body },
-      { new: true, runValidators: true }
-    ).lean();
-    if (!session) {
-      return res.status(404).json({ success: false, message: 'Session not found' });
-    }
+    const session = await sessionsService.updateSession(req.params.id, req.body);
     res.json({ success: true, data: session });
   })
 );
@@ -199,28 +129,9 @@ router.put(
 /* ─── PUT /sessions/:id/complete — Complete session with documentation ───── */
 router.put(
   '/:id/complete',
-  requireModel,
+  requireService,
   asyncHandler(async (req, res) => {
-    const { duration, attendanceStatus, goalProgress, notes, vitalSigns, activities } = req.body;
-    const session = await ClinicalSession.findByIdAndUpdate(
-      req.params.id,
-      {
-        $set: {
-          status: 'completed',
-          actualDate: new Date(),
-          duration,
-          attendanceStatus: attendanceStatus || 'attended',
-          goalProgress: goalProgress || [],
-          notes,
-          vitalSigns,
-          activities: activities || [],
-        },
-      },
-      { new: true, runValidators: true }
-    ).lean();
-    if (!session) {
-      return res.status(404).json({ success: false, message: 'Session not found' });
-    }
+    const session = await sessionsService.completeSession(req.params.id, req.body);
     res.json({ success: true, data: session });
   })
 );
@@ -228,17 +139,9 @@ router.put(
 /* ─── PUT /sessions/:id/cancel — Cancel session ─────────────────────────── */
 router.put(
   '/:id/cancel',
-  requireModel,
+  requireService,
   asyncHandler(async (req, res) => {
-    const { reason } = req.body;
-    const session = await ClinicalSession.findByIdAndUpdate(
-      req.params.id,
-      { $set: { status: 'cancelled', cancellationReason: reason } },
-      { new: true }
-    ).lean();
-    if (!session) {
-      return res.status(404).json({ success: false, message: 'Session not found' });
-    }
+    const session = await sessionsService.cancelSession(req.params.id, req.body.reason);
     res.json({ success: true, data: session });
   })
 );

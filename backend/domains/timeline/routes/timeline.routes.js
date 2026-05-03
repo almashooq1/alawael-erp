@@ -10,18 +10,20 @@
 const express = require('express');
 const router = express.Router();
 
-let CareTimeline;
+let timelineService;
 try {
-  ({ CareTimeline } = require('../models/CareTimeline'));
+  ({ timelineService } = require('../services/TimelineService'));
+  // Ensure model is registered
+  require('../models/CareTimeline');
 } catch (_e) {
-  CareTimeline = null;
+  timelineService = null;
 }
 
 const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
-const requireModel = (req, res, next) => {
-  if (!CareTimeline) {
-    return res.status(503).json({ success: false, message: 'Timeline model unavailable' });
+const requireService = (req, res, next) => {
+  if (!timelineService) {
+    return res.status(503).json({ success: false, message: 'Timeline service unavailable' });
   }
   next();
 };
@@ -29,24 +31,14 @@ const requireModel = (req, res, next) => {
 /* ─── GET /timeline/beneficiary/:id — Full longitudinal timeline ──────────── */
 router.get(
   '/beneficiary/:id',
-  requireModel,
+  requireService,
   asyncHandler(async (req, res) => {
-    const { eventType, from, to, limit = 100, skip = 0 } = req.query;
-    const filter = { beneficiaryId: req.params.id };
-    if (eventType) filter.eventType = eventType;
-    if (from || to) {
-      filter.eventDate = {};
-      if (from) filter.eventDate.$gte = new Date(from);
-      if (to) filter.eventDate.$lte = new Date(to);
-    }
-    const [data, total] = await Promise.all([
-      CareTimeline.find(filter)
-        .sort({ eventDate: -1 })
-        .skip(Number(skip))
-        .limit(Number(limit))
-        .lean(),
-      CareTimeline.countDocuments(filter),
-    ]);
+    const { eventType, category, from, to, limit = 100, skip = 0 } = req.query;
+    const { data, total } = await timelineService.getBeneficiaryTimeline(
+      req.params.id,
+      { eventType, category, from, to },
+      { limit: Number(limit), skip: Number(skip) }
+    );
     res.json({ success: true, data, total, skip: Number(skip), limit: Number(limit) });
   })
 );
@@ -54,19 +46,14 @@ router.get(
 /* ─── GET /timeline/episode/:id — Timeline for an episode ────────────────── */
 router.get(
   '/episode/:id',
-  requireModel,
+  requireService,
   asyncHandler(async (req, res) => {
     const { eventType, limit = 100, skip = 0 } = req.query;
-    const filter = { episodeId: req.params.id };
-    if (eventType) filter.eventType = eventType;
-    const [data, total] = await Promise.all([
-      CareTimeline.find(filter)
-        .sort({ eventDate: -1 })
-        .skip(Number(skip))
-        .limit(Number(limit))
-        .lean(),
-      CareTimeline.countDocuments(filter),
-    ]);
+    const { data, total } = await timelineService.getEpisodeTimeline(
+      req.params.id,
+      { eventType },
+      { limit: Number(limit), skip: Number(skip) }
+    );
     res.json({ success: true, data, total, skip: Number(skip), limit: Number(limit) });
   })
 );
@@ -74,24 +61,9 @@ router.get(
 /* ─── POST /timeline — Add a timeline event ─────────────────────────────── */
 router.post(
   '/',
-  requireModel,
+  requireService,
   asyncHandler(async (req, res) => {
-    const { beneficiaryId, episodeId, eventType, title, description, metadata, eventDate } =
-      req.body;
-    if (!beneficiaryId || !eventType) {
-      return res
-        .status(400)
-        .json({ success: false, message: 'beneficiaryId and eventType are required' });
-    }
-    const event = await CareTimeline.create({
-      beneficiaryId,
-      episodeId,
-      eventType,
-      title,
-      description,
-      metadata: metadata || {},
-      eventDate: eventDate ? new Date(eventDate) : new Date(),
-    });
+    const event = await timelineService.addEvent(req.body);
     res.status(201).json({ success: true, data: event });
   })
 );
@@ -99,12 +71,9 @@ router.post(
 /* ─── GET /timeline/:id — Single event ───────────────────────────────────── */
 router.get(
   '/:id',
-  requireModel,
+  requireService,
   asyncHandler(async (req, res) => {
-    const event = await CareTimeline.findById(req.params.id).lean();
-    if (!event) {
-      return res.status(404).json({ success: false, message: 'Timeline event not found' });
-    }
+    const event = await timelineService.getEventById(req.params.id);
     res.json({ success: true, data: event });
   })
 );

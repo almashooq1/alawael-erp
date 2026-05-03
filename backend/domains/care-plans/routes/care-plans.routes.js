@@ -10,18 +10,18 @@
 const express = require('express');
 const router = express.Router();
 
-let UnifiedCarePlan;
+let carePlansService;
 try {
-  ({ UnifiedCarePlan } = require('../models/UnifiedCarePlan'));
+  ({ carePlansService } = require('../services/CarePlansService'));
 } catch (_e) {
-  UnifiedCarePlan = null;
+  carePlansService = null;
 }
 
 const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
-const requireModel = (req, res, next) => {
-  if (!UnifiedCarePlan) {
-    return res.status(503).json({ success: false, message: 'CarePlan model unavailable' });
+const requireService = (req, res, next) => {
+  if (!carePlansService) {
+    return res.status(503).json({ success: false, message: 'CarePlansService unavailable' });
   }
   next();
 };
@@ -29,21 +29,9 @@ const requireModel = (req, res, next) => {
 /* ─── POST /care-plans — Create care plan ────────────────────────────────── */
 router.post(
   '/',
-  requireModel,
+  requireService,
   asyncHandler(async (req, res) => {
-    const { beneficiaryId, episodeId, type, goals, interventions, primaryTherapistId } = req.body;
-    if (!beneficiaryId) {
-      return res.status(400).json({ success: false, message: 'beneficiaryId is required' });
-    }
-    const plan = await UnifiedCarePlan.create({
-      beneficiaryId,
-      episodeId,
-      type: type || 'rehabilitation',
-      goals: goals || [],
-      interventions: interventions || [],
-      primaryTherapistId,
-      status: 'draft',
-    });
+    const plan = await carePlansService.createPlan(req.body);
     res.status(201).json({ success: true, data: plan });
   })
 );
@@ -51,67 +39,40 @@ router.post(
 /* ─── GET /care-plans — List care plans ─────────────────────────────────── */
 router.get(
   '/',
-  requireModel,
+  requireService,
   asyncHandler(async (req, res) => {
-    const { beneficiaryId, episodeId, status, limit = 20, skip = 0 } = req.query;
-    const filter = {};
-    if (beneficiaryId) filter.beneficiaryId = beneficiaryId;
-    if (episodeId) filter.episodeId = episodeId;
-    if (status) filter.status = status;
-    const [data, total] = await Promise.all([
-      UnifiedCarePlan.find(filter)
-        .sort({ createdAt: -1 })
-        .skip(Number(skip))
-        .limit(Number(limit))
-        .lean(),
-      UnifiedCarePlan.countDocuments(filter),
-    ]);
-    res.json({ success: true, data, total, skip: Number(skip), limit: Number(limit) });
+    const { limit = 20, skip = 0, ...filter } = req.query;
+    const result = await carePlansService.listPlans(filter, { limit, skip });
+    res.json({ success: true, ...result, skip: Number(skip), limit: Number(limit) });
   })
 );
 
 /* ─── GET /care-plans/dashboard — Stats ─────────────────────────────────── */
 router.get(
   '/dashboard',
-  requireModel,
+  requireService,
   asyncHandler(async (req, res) => {
-    const [total, byStatus, active] = await Promise.all([
-      UnifiedCarePlan.countDocuments({}),
-      UnifiedCarePlan.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
-      UnifiedCarePlan.countDocuments({ status: 'active' }),
-    ]);
-    res.json({
-      success: true,
-      data: {
-        total,
-        active,
-        byStatus: Object.fromEntries(byStatus.map(r => [r._id, r.count])),
-      },
-    });
+    const data = await carePlansService.getDashboard();
+    res.json({ success: true, data });
   })
 );
 
 /* ─── GET /care-plans/beneficiary/:id — By beneficiary ──────────────────── */
 router.get(
   '/beneficiary/:id',
-  requireModel,
+  requireService,
   asyncHandler(async (req, res) => {
-    const data = await UnifiedCarePlan.find({ beneficiaryId: req.params.id })
-      .sort({ createdAt: -1 })
-      .lean();
-    res.json({ success: true, data, total: data.length });
+    const result = await carePlansService.getBeneficiaryPlans(req.params.id);
+    res.json({ success: true, ...result });
   })
 );
 
 /* ─── GET /care-plans/:id ────────────────────────────────────────────────── */
 router.get(
   '/:id',
-  requireModel,
+  requireService,
   asyncHandler(async (req, res) => {
-    const plan = await UnifiedCarePlan.findById(req.params.id).lean();
-    if (!plan) {
-      return res.status(404).json({ success: false, message: 'Care plan not found' });
-    }
+    const plan = await carePlansService.getPlanById(req.params.id);
     res.json({ success: true, data: plan });
   })
 );
@@ -119,16 +80,9 @@ router.get(
 /* ─── PUT /care-plans/:id — Update ──────────────────────────────────────── */
 router.put(
   '/:id',
-  requireModel,
+  requireService,
   asyncHandler(async (req, res) => {
-    const plan = await UnifiedCarePlan.findByIdAndUpdate(
-      req.params.id,
-      { $set: req.body },
-      { new: true, runValidators: true }
-    ).lean();
-    if (!plan) {
-      return res.status(404).json({ success: false, message: 'Care plan not found' });
-    }
+    const plan = await carePlansService.updatePlan(req.params.id, req.body);
     res.json({ success: true, data: plan });
   })
 );
@@ -136,16 +90,9 @@ router.put(
 /* ─── PUT /care-plans/:id/activate — Activate care plan ─────────────────── */
 router.put(
   '/:id/activate',
-  requireModel,
+  requireService,
   asyncHandler(async (req, res) => {
-    const plan = await UnifiedCarePlan.findByIdAndUpdate(
-      req.params.id,
-      { $set: { status: 'active', activatedDate: new Date() } },
-      { new: true }
-    ).lean();
-    if (!plan) {
-      return res.status(404).json({ success: false, message: 'Care plan not found' });
-    }
+    const plan = await carePlansService.activatePlan(req.params.id);
     res.json({ success: true, data: plan });
   })
 );
@@ -153,17 +100,9 @@ router.put(
 /* ─── PUT /care-plans/:id/complete — Complete care plan ─────────────────── */
 router.put(
   '/:id/complete',
-  requireModel,
+  requireService,
   asyncHandler(async (req, res) => {
-    const { summary, outcomeRating } = req.body;
-    const plan = await UnifiedCarePlan.findByIdAndUpdate(
-      req.params.id,
-      { $set: { status: 'completed', completedDate: new Date(), summary, outcomeRating } },
-      { new: true }
-    ).lean();
-    if (!plan) {
-      return res.status(404).json({ success: false, message: 'Care plan not found' });
-    }
+    const plan = await carePlansService.completePlan(req.params.id, req.body);
     res.json({ success: true, data: plan });
   })
 );
@@ -171,16 +110,9 @@ router.put(
 /* ─── POST /care-plans/:id/goals — Add goal to plan ─────────────────────── */
 router.post(
   '/:id/goals',
-  requireModel,
+  requireService,
   asyncHandler(async (req, res) => {
-    const plan = await UnifiedCarePlan.findByIdAndUpdate(
-      req.params.id,
-      { $push: { goals: req.body } },
-      { new: true }
-    ).lean();
-    if (!plan) {
-      return res.status(404).json({ success: false, message: 'Care plan not found' });
-    }
+    const plan = await carePlansService.addGoal(req.params.id, req.body);
     res.json({ success: true, data: plan });
   })
 );

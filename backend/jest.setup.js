@@ -61,6 +61,7 @@ jest.mock(
       }
       [Symbol.toStringTag] = 'ObjectId';
     }
+    MockObjectId.isValid = id => /^[a-f\d]{24}$/i.test(String(id ?? ''));
 
     // Mock Types object
     const Types = {

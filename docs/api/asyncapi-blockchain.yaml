@@ -1,0 +1,208 @@
+asyncapi: 3.0.0
+info:
+  title: Al-Awael ERP — Blockchain Certificate Events
+  version: 4.0.110
+  summary: |
+    Catalog of blockchain certificate events emitted on the database event bus
+    (MongoDB Change Streams). Subscribers can react to certificate lifecycle
+    transitions without polling the API.
+  description: |
+    All blockchain certificate state lives in three Mongoose models — every
+    state transition is observable via the existing `databaseEventBus`
+    (`backend/database/event-bus.js`). The events below are the four that
+    the auto-issue subscriber listens to today; others (template CRUD, cert
+    create/update) flow through the same bus with the same naming scheme but
+    are considered internal.
+
+    To subscribe in code:
+      const { databaseEventBus } = require('./database/event-bus');
+      databaseEventBus.handle('BlockchainCertificate:update', async (e) => { ... });
+
+    Payload shape: each event is a Change Stream event:
+      { fullDocument, updateDescription: { updatedFields, removedFields }, operationType }
+    The schemas below describe the `fullDocument` portion only — that's what
+    consumers actually use.
+
+  contact:
+    name: Al-Awael Platform
+    email: platform@alawael.sa
+
+defaultContentType: application/json
+
+servers:
+  database-bus:
+    host: in-process
+    protocol: node-eventemitter
+    description: >
+      MongoDB Change Streams adapted into a Node EventEmitter. Resume tokens
+      are persisted so a restart replays events from the last checkpoint.
+
+channels:
+  blockchain-certificate-issued:
+    address: 'BlockchainCertificate:update'
+    description: >
+      Fired when a certificate's `status` flips from `draft` to `issued`
+      (i.e. the merkle root has been anchored on the configured chain).
+      Subscribers should `if (e.fullDocument.status === 'issued' && e.updateDescription.updatedFields.status)` to filter.
+    messages:
+      certIssued:
+        $ref: '#/components/messages/CertIssued'
+
+  blockchain-certificate-signed:
+    address: 'BlockchainCertificate:update'
+    description: >
+      Fired when a new signature is appended to `signatures[]`. Consumers
+      typically parse `updateDescription.updatedFields` for entries matching
+      `signatures.<idx>`.
+    messages:
+      certSigned:
+        $ref: '#/components/messages/CertSigned'
+
+  blockchain-certificate-revoked:
+    address: 'BlockchainCertificate:update'
+    description: >
+      Fired when `status` becomes `revoked` and `revocation` is populated.
+      Subscribers (e.g. parent portal) should treat this as a "terminate
+      access to the cert" signal — the cert remains visible at /verify but
+      shows the `revoked` badge.
+    messages:
+      certRevoked:
+        $ref: '#/components/messages/CertRevoked'
+
+  blockchain-certificate-verified:
+    address: 'VerificationLog:insert'
+    description: >
+      Fired on every public/admin verification call. Useful for fraud
+      detection (high lookup rate from one IP) and analytics.
+    messages:
+      certVerified:
+        $ref: '#/components/messages/CertVerified'
+
+components:
+  messages:
+    CertIssued:
+      name: blockchain.certificate.issued
+      title: Certificate issued and anchored
+      payload:
+        $ref: '#/components/schemas/Certificate'
+
+    CertSigned:
+      name: blockchain.certificate.signed
+      title: New signature appended
+      payload:
+        $ref: '#/components/schemas/Certificate'
+
+    CertRevoked:
+      name: blockchain.certificate.revoked
+      title: Certificate revoked
+      payload:
+        $ref: '#/components/schemas/Certificate'
+
+    CertVerified:
+      name: blockchain.certificate.verified
+      title: Public verification call
+      payload:
+        $ref: '#/components/schemas/VerificationLog'
+
+  schemas:
+    Certificate:
+      type: object
+      required: [_id, certificateNumber, hash, status]
+      properties:
+        _id: { type: string }
+        certificateNumber: { type: string, example: CERT-1234567ABCDE }
+        recipient:
+          type: object
+          properties:
+            name:
+              type: object
+              properties:
+                ar: { type: string }
+                en: { type: string }
+            nationalId: { type: string }
+            email: { type: string, format: email }
+        title:
+          type: object
+          properties:
+            ar: { type: string }
+            en: { type: string }
+        category:
+          type: string
+          enum:
+            - academic
+            - professional
+            - training
+            - rehabilitation
+            - attendance
+            - achievement
+            - compliance
+            - accreditation
+        status:
+          type: string
+          enum: [draft, issued, verified, revoked, expired]
+        issueDate: { type: string, format: date-time }
+        expiryDate: { type: string, format: date-time, nullable: true }
+        hash:
+          type: string
+          pattern: '^[a-f0-9]{64}$'
+          description: SHA-256 of the canonical cert payload.
+        merkleRoot:
+          type: string
+          pattern: '^[a-f0-9]{64}$'
+        merkleProof:
+          type: array
+          description: Sibling hashes leaf→root, each as `position:hex` (e.g. `left:abc…`).
+          items: { type: string }
+        batchId:
+          type: string
+          description: The anchor tx hash that batched this cert; same value across all certs in the batch.
+        idempotencyKey:
+          type: string
+          description: Stable key for at-least-once create flows (e.g. `auto:lms:<enrollmentId>`).
+        blockchain:
+          type: object
+          properties:
+            network: { type: string, enum: [internal, ethereum, polygon, sepolia, amoy, hyperledger] }
+            transactionHash: { type: string }
+            blockNumber: { type: integer }
+            contractAddress: { type: string, nullable: true }
+            timestamp: { type: string, format: date-time }
+            gasUsed: { type: integer }
+        signatures:
+          type: array
+          items:
+            type: object
+            properties:
+              signerName: { type: string }
+              signerTitle: { type: string }
+              signature: { type: string, pattern: '^[a-f0-9]{64}$' }
+              signedAt: { type: string, format: date-time }
+        revocation:
+          type: object
+          nullable: true
+          properties:
+            revokedAt: { type: string, format: date-time }
+            revokedBy: { type: string }
+            reason: { type: string }
+
+    VerificationLog:
+      type: object
+      required: [result]
+      properties:
+        certificate: { type: string }
+        certificateNumber: { type: string }
+        verifiedBy:
+          type: object
+          properties:
+            ip: { type: string }
+            userAgent: { type: string }
+            userId: { type: string, nullable: true }
+        method:
+          type: string
+          enum: [qr_scan, manual_lookup, api_call, blockchain_verify]
+        result:
+          type: string
+          enum: [valid, invalid, expired, revoked, not_found]
+        hashMatch: { type: boolean }
+        blockchainMatch: { type: boolean }
+        createdAt: { type: string, format: date-time }

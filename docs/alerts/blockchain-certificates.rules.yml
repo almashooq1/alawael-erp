@@ -1,0 +1,119 @@
+groups:
+  # ──────────────────────────────────────────────────────────────────────
+  # Blockchain Certificates — alert rules for the counters emitted by
+  # `backend/services/blockchain/metrics.js` and surfaced through the
+  # existing /integrations-metrics Prometheus endpoint.
+  #
+  # Counter names:
+  #   blockchain_certificates_total{outcome=created|deduped|issued|signed|revoked}
+  #   blockchain_anchors_total{network, outcome=success|fail}
+  #   blockchain_verifications_total{result, hash_match}
+  #   blockchain_auto_issue_total{source, outcome=issued|deduped|error}
+  #
+  # Drop into Prometheus via:
+  #   rule_files:
+  #     - /etc/prometheus/rules/blockchain-certificates.rules.yml
+  # ──────────────────────────────────────────────────────────────────────
+  - name: blockchain-anchors
+    interval: 1m
+    rules:
+      - alert: BlockchainAnchorFailureSpike
+        expr: |
+          increase(blockchain_anchors_total{outcome="fail"}[10m]) > 3
+        for: 5m
+        labels:
+          severity: page
+          team: platform
+          component: blockchain
+        annotations:
+          summary: 'Anchor failures: more than 3 in 10m on {{ $labels.network }}'
+          description: |
+            The blockchain adapter for {{ $labels.network }} has failed to
+            anchor merkle roots more than 3 times in 10 minutes. Likely
+            causes: RPC outage, gas-pricing issue, signer key rotation, or
+            quota exhaustion. Issuance is currently degraded — new certs may
+            be stuck in `draft` even after the user clicks "Issue".
+
+            Runbook: docs/blueprint/20-blockchain-certificates.md#anchor-failures
+
+      - alert: BlockchainNoAnchorsRecently
+        expr: |
+          (sum(rate(blockchain_anchors_total{outcome="success"}[1h])) == 0)
+          and (sum(blockchain_certificates_total{outcome="issued"}) > 0)
+        for: 30m
+        labels:
+          severity: warn
+          team: platform
+          component: blockchain
+        annotations:
+          summary: 'No successful anchors in the last hour despite cert activity'
+          description: |
+            No successful anchor in 1h while certs continue to be created.
+            Either the platform stopped issuing (UI bug, feature flag flip)
+            or the adapter silently fails before counting. Investigate the
+            adapter logs and confirm BLOCKCHAIN_NETWORK is set as expected.
+
+  - name: blockchain-verifications
+    interval: 1m
+    rules:
+      - alert: BlockchainHashTamperDetected
+        expr: |
+          increase(blockchain_verifications_total{hash_match="false", result="valid"}[15m]) > 0
+        for: 0m
+        labels:
+          severity: page
+          team: security
+          component: blockchain
+        annotations:
+          summary: 'Tampered certificate detected at /verify'
+          description: |
+            A certificate that the DB still considers `valid` produced a
+            hash mismatch on verification. This means either a record in
+            the BlockchainCertificate collection was modified out-of-band,
+            or the hashing payload conventions have drifted between
+            services. Investigate immediately — this is the canary for
+            silent data corruption.
+
+            Runbook: docs/blueprint/20-blockchain-certificates.md#tamper-detection
+
+      - alert: BlockchainVerificationFloodFromSingleSource
+        # Burst of >100 verifications/min sustained for 10m suggests scraping
+        # or a misbehaving widget. The page rate-limit middleware should be
+        # already returning 429s — this alert flags the demand pattern.
+        expr: |
+          sum(rate(blockchain_verifications_total[1m])) > 100
+        for: 10m
+        labels:
+          severity: warn
+          team: platform
+          component: blockchain
+        annotations:
+          summary: 'Verification request rate elevated (>100/min for 10m)'
+          description: |
+            Investigate logs for a single IP / cert that's being hammered.
+            If legitimate (e.g. a public partner is bulk-checking), consider
+            issuing them an API key or batching their workflow.
+
+  - name: blockchain-auto-issue
+    interval: 5m
+    rules:
+      - alert: BlockchainAutoIssueFailing
+        expr: |
+          (
+            sum by (source) (increase(blockchain_auto_issue_total{outcome="error"}[15m]))
+            /
+            clamp_min(sum by (source) (increase(blockchain_auto_issue_total[15m])), 1)
+          ) > 0.5
+        for: 15m
+        labels:
+          severity: warn
+          team: platform
+          component: blockchain
+        annotations:
+          summary: 'Auto-issue error rate > 50% on {{ $labels.source }}'
+          description: |
+            More than half of auto-issue calls from `{{ $labels.source }}`
+            errored in the last 15 minutes. Source-side completion events
+            may have a payload-shape regression, or the chain adapter is
+            unhealthy. Auto-issue swallows errors so the source flow keeps
+            working — but the certs aren't being minted.

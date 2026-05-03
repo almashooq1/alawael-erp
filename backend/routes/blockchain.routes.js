@@ -1,16 +1,22 @@
 /**
- * Blockchain Certificate Routes — مسارات شهادات البلوكتشين
+ * Blockchain Certificate Routes — مسارات شهادات البلوكتشين (Admin)
  *
- * Endpoints:
- *   /api/blockchain/certificates  — Certificate CRUD + issuance + revocation
- *   /api/blockchain/templates     — Certificate templates management
- *   /api/blockchain/verify        — Public verification endpoints
- *   /api/blockchain/dashboard     — Blockchain dashboard
+ * Endpoints (all require auth + branch scope):
+ *   /api/blockchain/templates         — Certificate templates CRUD
+ *   /api/blockchain/certificates      — Certificate CRUD + lifecycle
+ *   /api/blockchain/certificates/batch-issue — Anchor many certs in one tx
+ *   /api/blockchain/certificates/:id/pdf     — PDF download with QR
+ *   /api/blockchain/verify            — Authenticated verification (logs userId)
+ *   /api/blockchain/dashboard         — Stats
+ *
+ * Public, unauthenticated verification lives at /api/v1/blockchain/public/*.
+ * Logic is in services/blockchainCertService.js — this file is HTTP only.
  */
+
+'use strict';
 
 const express = require('express');
 const router = express.Router();
-const crypto = require('crypto');
 const mongoose = require('mongoose');
 const {
   BlockchainCertificate,
@@ -20,13 +26,13 @@ const {
 const { authenticate } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
-const _logger = require('../utils/logger');
 const safeError = require('../utils/safeError');
+const certService = require('../services/blockchainCertService');
+const { generateCertificatePdf } = require('../services/blockchainPdfService');
 
-// ── Auth: all routes below require authentication ────────────────────────────
 router.use(authenticate);
 router.use(requireBranchAccess);
-// ── ObjectId param validation ────────────────────────────────────────────────
+
 router.param('id', (req, res, next, id) => {
   if (!mongoose.Types.ObjectId.isValid(id)) {
     return res.status(400).json({ success: false, error: 'معرف غير صالح' });
@@ -34,24 +40,16 @@ router.param('id', (req, res, next, id) => {
   next();
 });
 
-// ═══════════════════════════════════════════════════════════════════════════
-// HELPERS — دوال مساعدة
-// ═══════════════════════════════════════════════════════════════════════════
-
-function computeHash(data) {
-  return crypto.createHash('sha256').update(JSON.stringify(data)).digest('hex');
-}
-
-async function getLastCertificateHash() {
-  const last = await BlockchainCertificate.findOne({ status: { $ne: 'draft' } })
-    .sort({ createdAt: -1 })
-    .select('hash')
-    .lean();
-  return last ? last.hash : '0'.repeat(64); // genesis block
+// ── helper: map service-thrown errors to HTTP ──────────────────────────────
+function send(res, err, defaultLabel) {
+  if (err && err.status) {
+    return res.status(err.status).json({ success: false, error: err.message });
+  }
+  return safeError(res, err, defaultLabel);
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// TEMPLATES — قوالب الشهادات
+// TEMPLATES
 // ═══════════════════════════════════════════════════════════════════════════
 
 router.get('/templates', async (req, res) => {
@@ -60,7 +58,6 @@ router.get('/templates', async (req, res) => {
     const filter = {};
     if (category) filter.category = category;
     if (active !== undefined) filter.isActive = active === 'true';
-
     const templates = await CertificateTemplate.find(filter).sort({ createdAt: -1 }).lean();
     res.json({ success: true, data: templates });
   } catch (error) {
@@ -85,10 +82,7 @@ router.put('/templates/:id', async (req, res) => {
     const template = await CertificateTemplate.findByIdAndUpdate(
       req.params.id,
       stripUpdateMeta(req.body),
-      {
-        new: true,
-        runValidators: true,
-      }
+      { new: true, runValidators: true }
     );
     if (!template) return res.status(404).json({ success: false, error: 'القالب غير موجود' });
     res.json({ success: true, data: template });
@@ -98,24 +92,25 @@ router.put('/templates/:id', async (req, res) => {
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
-// CERTIFICATES — الشهادات
+// CERTIFICATES — list + read
 // ═══════════════════════════════════════════════════════════════════════════
 
 router.get('/certificates', async (req, res) => {
   try {
-    const { status, category, recipient, page = 1, limit = 20 } = req.query;
+    const { status, category, recipient, batchId, network, page = 1, limit = 20 } = req.query;
     const filter = { isDeleted: { $ne: true } };
     if (status) filter.status = status;
     if (category) filter.category = category;
+    if (batchId) filter.batchId = batchId;
+    if (network) filter['blockchain.network'] = network;
     if (recipient) {
-      const safeRecipient = escapeRegex(recipient);
+      const safe = escapeRegex(recipient);
       filter.$or = [
-        { 'recipient.name.ar': { $regex: safeRecipient, $options: 'i' } },
-        { 'recipient.name.en': { $regex: safeRecipient, $options: 'i' } },
+        { 'recipient.name.ar': { $regex: safe, $options: 'i' } },
+        { 'recipient.name.en': { $regex: safe, $options: 'i' } },
         { 'recipient.nationalId': recipient },
       ];
     }
-
     const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
     const [certificates, total] = await Promise.all([
       BlockchainCertificate.find(filter)
@@ -126,7 +121,6 @@ router.get('/certificates', async (req, res) => {
         .lean(),
       BlockchainCertificate.countDocuments(filter),
     ]);
-
     res.json({
       success: true,
       data: certificates,
@@ -156,195 +150,112 @@ router.get('/certificates/:id', async (req, res) => {
   }
 });
 
-// Allowed fields for certificate creation
-const CERT_ALLOWED_FIELDS = [
-  'recipient',
-  'title',
-  'data',
-  'issueDate',
-  'expiryDate',
-  'category',
-  'template',
-];
+// ═══════════════════════════════════════════════════════════════════════════
+// CERTIFICATES — lifecycle
+// ═══════════════════════════════════════════════════════════════════════════
 
 router.post('/certificates', async (req, res) => {
   try {
-    const previousHash = await getLastCertificateHash();
-    const picked = {};
-    for (const f of CERT_ALLOWED_FIELDS) {
-      if (req.body[f] !== undefined) picked[f] = req.body[f];
-    }
-    const certData = {
-      ...picked,
-      previousHash,
-      createdBy: req.user._id,
-    };
-
-    // Compute hash from certificate data
-    const hash = computeHash({
-      recipient: certData.recipient,
-      title: certData.title,
-      data: certData.data,
-      issueDate: certData.issueDate || new Date(),
-      previousHash,
+    const idempotencyKey = req.get('Idempotency-Key') || req.body?.idempotencyKey || undefined;
+    const result = await certService.createCertificate(req.body, {
+      userId: req.user?._id,
+      idempotencyKey,
     });
-
-    certData.hash = hash;
-    certData.verificationUrl = `/api/blockchain/verify/${hash}`;
-
-    const certificate = await BlockchainCertificate.create(certData);
-    res.status(201).json({ success: true, data: certificate });
-  } catch {
-    res.status(400).json({ success: false });
+    res
+      .status(result.deduped ? 200 : 201)
+      .json({ success: true, data: result.certificate, deduped: result.deduped });
+  } catch (err) {
+    send(res, err, 'blockchain.create');
   }
 });
 
 router.patch('/certificates/:id/issue', async (req, res) => {
   try {
-    const cert = await BlockchainCertificate.findById(req.params.id);
-    if (!cert) return res.status(404).json({ success: false, error: 'الشهادة غير موجودة' });
-
-    if (cert.status !== 'draft') {
-      return res
-        .status(400)
-        .json({ success: false, error: 'لا يمكن إصدار شهادة ليست في حالة مسودة' });
-    }
-
-    cert.status = 'issued';
-    cert.issueDate = new Date();
-    cert.issuer.issuedBy = req.user._id;
-
-    // Simulate blockchain transaction
-    cert.blockchain = {
-      network: 'internal',
-      transactionHash: computeHash({ certId: cert._id, timestamp: Date.now() }),
-      blockNumber: (parseInt(crypto.randomBytes(4).toString('hex'), 16) % 1000000) + 1,
-      timestamp: new Date(),
-    };
-
-    await cert.save();
+    const cert = await certService.issueCertificate(req.params.id, { userId: req.user?._id });
     res.json({ success: true, data: cert, message: 'تم إصدار الشهادة بنجاح' });
-  } catch (error) {
-    safeError(res, error, 'blockchain');
+  } catch (err) {
+    send(res, err, 'blockchain.issue');
+  }
+});
+
+router.post('/certificates/batch-issue', async (req, res) => {
+  try {
+    const { certificateIds } = req.body || {};
+    const result = await certService.batchIssue(certificateIds, { userId: req.user?._id });
+    res.json({
+      success: true,
+      data: result,
+      message: `تم تثبيت ${result.issued} شهادة في معاملة واحدة`,
+    });
+  } catch (err) {
+    send(res, err, 'blockchain.batch-issue');
   }
 });
 
 router.patch('/certificates/:id/sign', async (req, res) => {
   try {
-    const cert = await BlockchainCertificate.findById(req.params.id);
-    if (!cert) return res.status(404).json({ success: false, error: 'الشهادة غير موجودة' });
-
-    const signatureHash = computeHash({
-      certHash: cert.hash,
-      signer: req.user._id || req.body.signerName,
-      timestamp: Date.now(),
+    const cert = await certService.signCertificate(req.params.id, {
+      userId: req.user?._id,
+      signerName: req.body?.signerName,
+      signerTitle: req.body?.signerTitle,
     });
-
-    cert.signatures.push({
-      signer: req.user._id,
-      signerName: req.body.signerName,
-      signerTitle: req.body.signerTitle,
-      signature: signatureHash,
-    });
-
-    await cert.save();
     res.json({ success: true, data: cert, message: 'تم التوقيع بنجاح' });
-  } catch (error) {
-    safeError(res, error, 'blockchain');
+  } catch (err) {
+    send(res, err, 'blockchain.sign');
   }
 });
 
 router.patch('/certificates/:id/revoke', async (req, res) => {
   try {
-    const cert = await BlockchainCertificate.findById(req.params.id);
-    if (!cert) return res.status(404).json({ success: false, error: 'الشهادة غير موجودة' });
-
-    if (cert.status === 'revoked') {
-      return res.status(400).json({ success: false, error: 'الشهادة مُلغاة بالفعل' });
-    }
-
-    cert.status = 'revoked';
-    cert.revocation = {
-      revokedAt: new Date(),
-      revokedBy: req.user._id,
-      reason: req.body.reason || 'غير محدد',
-    };
-
-    await cert.save();
+    const cert = await certService.revokeCertificate(req.params.id, {
+      userId: req.user?._id,
+      reason: req.body?.reason,
+    });
     res.json({ success: true, data: cert, message: 'تم إلغاء الشهادة' });
-  } catch (error) {
-    safeError(res, error, 'blockchain');
+  } catch (err) {
+    send(res, err, 'blockchain.revoke');
   }
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
-// VERIFICATION — التحقق (Public endpoints)
+// CERTIFICATES — PDF download
+// ═══════════════════════════════════════════════════════════════════════════
+
+router.get('/certificates/:id/pdf', async (req, res) => {
+  try {
+    const cert = await BlockchainCertificate.findById(req.params.id).lean();
+    if (!cert) return res.status(404).json({ success: false, error: 'الشهادة غير موجودة' });
+    const verifyUrl = certService.publicVerifyUrl(cert.hash);
+    const pdf = await generateCertificatePdf(cert, { verifyUrl });
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader(
+      'Content-Disposition',
+      `inline; filename="certificate-${cert.certificateNumber || cert._id}.pdf"`
+    );
+    res.send(pdf);
+  } catch (err) {
+    safeError(res, err, 'blockchain.pdf');
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// VERIFICATION (authenticated — public mirror at /public/verify)
 // ═══════════════════════════════════════════════════════════════════════════
 
 router.get('/verify/:hash', async (req, res) => {
   try {
-    const cert = await BlockchainCertificate.findOne({ hash: req.params.hash })
-      .populate('template', 'name category')
-      .select('-__v')
-      .lean();
-
-    const result = cert
-      ? cert.status === 'revoked'
-        ? 'revoked'
-        : cert.status === 'expired'
-          ? 'expired'
-          : 'valid'
-      : 'not_found';
-
-    // Verify hash integrity
-    let hashMatch = false;
-    if (cert) {
-      const recomputedHash = computeHash({
-        recipient: cert.recipient,
-        title: cert.title,
-        data: cert.data,
-        issueDate: cert.issueDate,
-        previousHash: cert.previousHash,
-      });
-      hashMatch = recomputedHash === cert.hash;
-    }
-
-    // Log verification
-    await VerificationLog.create({
-      certificate: cert?._id,
-      certificateNumber: cert?.certificateNumber,
-      verifiedBy: {
-        ip: req.ip,
-        userAgent: req.get('User-Agent'),
-        userId: req.user?._id,
-      },
+    const out = await certService.verifyByHash(req.params.hash, {
+      ip: req.ip,
+      userAgent: req.get('User-Agent'),
+      userId: req.user?._id,
       method: 'manual_lookup',
-      result,
-      hashMatch,
     });
-
-    if (!cert) {
-      return res.status(404).json({ success: false, verified: false, result: 'not_found' });
+    if (out.result === 'not_found') {
+      return res.status(404).json({ success: false, verified: false, ...out });
     }
-
-    res.json({
-      success: true,
-      verified: result === 'valid' && hashMatch,
-      result,
-      hashMatch,
-      certificate: {
-        certificateNumber: cert.certificateNumber,
-        title: cert.title,
-        recipient: cert.recipient?.name,
-        issueDate: cert.issueDate,
-        expiryDate: cert.expiryDate,
-        status: cert.status,
-        category: cert.category,
-        signatures: cert.signatures?.length || 0,
-      },
-    });
+    res.json({ success: true, ...out });
   } catch (error) {
-    safeError(res, error, 'blockchain');
+    safeError(res, error, 'blockchain.verify');
   }
 });
 
@@ -352,20 +263,18 @@ router.get('/verify/number/:certNumber', async (req, res) => {
   try {
     const cert = await BlockchainCertificate.findOne({
       certificateNumber: req.params.certNumber,
-    }).lean();
-
+    })
+      .select('hash')
+      .lean();
     if (!cert) {
       return res.status(404).json({ success: false, verified: false, result: 'not_found' });
     }
-
-    // Redirect to hash-based verification — validate hash is safe hex to prevent open redirect
     const safeHash = /^[a-fA-F0-9]{1,128}$/.test(cert.hash) ? cert.hash : '';
-    if (!safeHash) {
+    if (!safeHash)
       return res.status(400).json({ success: false, message: 'Invalid certificate hash' });
-    }
     res.redirect(`/api/blockchain/verify/${safeHash}`);
   } catch (error) {
-    safeError(res, error, 'blockchain');
+    safeError(res, error, 'blockchain.verify-number');
   }
 });
 
@@ -377,12 +286,58 @@ router.get('/verify/:certId/logs', async (req, res) => {
       .lean();
     res.json({ success: true, data: logs });
   } catch (error) {
-    safeError(res, error, 'blockchain');
+    safeError(res, error, 'blockchain.logs');
+  }
+});
+
+// All verification logs across all certs — paged + filterable for the admin UI
+router.get('/logs', async (req, res) => {
+  try {
+    const { result, method, certificateNumber, from, to, page = 1, limit = 50 } = req.query;
+    const filter = {};
+    if (result) filter.result = result;
+    if (method) filter.method = method;
+    if (certificateNumber) filter.certificateNumber = certificateNumber;
+    if (from || to) {
+      filter.createdAt = {};
+      if (from) filter.createdAt.$gte = new Date(from);
+      if (to) filter.createdAt.$lte = new Date(to);
+    }
+    const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
+    const [logs, total, byResult, byMethod] = await Promise.all([
+      VerificationLog.find(filter)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(parseInt(limit, 10))
+        .lean(),
+      VerificationLog.countDocuments(filter),
+      VerificationLog.aggregate([
+        { $match: filter },
+        { $group: { _id: '$result', count: { $sum: 1 } } },
+      ]),
+      VerificationLog.aggregate([
+        { $match: filter },
+        { $group: { _id: '$method', count: { $sum: 1 } } },
+      ]),
+    ]);
+    res.json({
+      success: true,
+      data: logs,
+      pagination: {
+        page: parseInt(page, 10),
+        limit: parseInt(limit, 10),
+        total,
+        pages: Math.ceil(total / parseInt(limit, 10)),
+      },
+      stats: { byResult, byMethod },
+    });
+  } catch (error) {
+    safeError(res, error, 'blockchain.logs.all');
   }
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
-// DASHBOARD — لوحة تحكم البلوكتشين
+// DASHBOARD
 // ═══════════════════════════════════════════════════════════════════════════
 
 router.get('/dashboard', async (_req, res) => {
@@ -395,7 +350,9 @@ router.get('/dashboard', async (_req, res) => {
       templates,
       totalVerifications,
       byCategory,
+      byNetwork,
       recentCertificates,
+      recentVerifications,
     ] = await Promise.all([
       BlockchainCertificate.countDocuments({ isDeleted: { $ne: true } }),
       BlockchainCertificate.countDocuments({ status: 'issued', isDeleted: { $ne: true } }),
@@ -409,10 +366,20 @@ router.get('/dashboard', async (_req, res) => {
         { $sort: { count: -1 } },
         { $limit: 50 },
       ]),
+      BlockchainCertificate.aggregate([
+        { $match: { isDeleted: { $ne: true }, 'blockchain.network': { $exists: true } } },
+        { $group: { _id: '$blockchain.network', count: { $sum: 1 } } },
+        { $sort: { count: -1 } },
+      ]),
       BlockchainCertificate.find({ isDeleted: { $ne: true } })
         .sort({ createdAt: -1 })
         .limit(10)
-        .select('certificateNumber title status issueDate category')
+        .select('certificateNumber title status issueDate category blockchain.network hash')
+        .lean(),
+      VerificationLog.find()
+        .sort({ createdAt: -1 })
+        .limit(10)
+        .select('certificateNumber method result hashMatch createdAt')
         .lean(),
     ]);
 
@@ -426,7 +393,9 @@ router.get('/dashboard', async (_req, res) => {
         activeTemplates: templates,
         totalVerifications,
         byCategory,
+        byNetwork,
         recentCertificates,
+        recentVerifications,
       },
     });
   } catch (error) {

@@ -129,6 +129,9 @@ const BlockchainCertificateSchema = new Schema(
     previousHash: String,
     nonce: { type: Number, default: 0 },
     merkleRoot: String,
+    merkleProof: [String], // sibling hashes, root → leaf order
+    batchId: String, // groups certs anchored together
+    idempotencyKey: { type: String, index: true, sparse: true },
 
     // QR verification
     qrCode: String,

@@ -36,8 +36,8 @@ describe('EmailConfig', () => {
   test('exposes required config keys', () => {
     expect(EmailConfig).toBeDefined();
     expect(typeof EmailConfig.enabled).toBe('boolean');
-    expect(typeof EmailConfig.from).toBe('object');
-    expect(EmailConfig.from).toHaveProperty('address');
+    expect(typeof EmailConfig.defaults).toBe('object');
+    expect(EmailConfig.defaults).toHaveProperty('from');
   });
 
   test('resolveProvider returns a string', () => {
@@ -58,30 +58,26 @@ describe('EmailCircuitBreaker', () => {
     expect(cb.state).toBe('CLOSED');
   });
 
-  test('records failure and opens circuit after threshold', () => {
-    cb.recordFailure();
-    cb.recordFailure();
-    cb.recordFailure();
+  test('trip() opens circuit', () => {
+    cb.trip('test');
     expect(cb.state).toBe('OPEN');
   });
 
-  test('records success and resets failure count when CLOSED', () => {
-    cb.recordFailure();
-    cb.recordSuccess();
-    expect(cb.failureCount).toBe(0);
+  test('reset() restores CLOSED state', () => {
+    cb.trip('test');
+    cb.reset();
+    expect(cb.state).toBe('CLOSED');
   });
 
-  test('isOpen() returns true when OPEN', () => {
-    cb.recordFailure();
-    cb.recordFailure();
-    cb.recordFailure();
-    expect(cb.isOpen()).toBe(true);
+  test('isAllowed is false when OPEN', () => {
+    cb.trip('test');
+    expect(cb.isAllowed).toBe(false);
   });
 
-  test('getStats() returns state and counts', () => {
-    const stats = cb.getStats();
+  test('stats getter returns state and counts', () => {
+    const stats = cb.stats;
     expect(stats).toHaveProperty('state');
-    expect(stats).toHaveProperty('failureCount');
+    expect(stats).toHaveProperty('recentFailures');
   });
 });
 
@@ -99,21 +95,22 @@ describe('EmailTemplateEngine', () => {
   test('BRAND export has name and color', () => {
     expect(BRAND).toBeDefined();
     expect(BRAND).toHaveProperty('name');
-    expect(BRAND).toHaveProperty('primary');
+    expect(BRAND).toHaveProperty('primaryColor');
   });
 
-  test('render() returns html string', () => {
-    const html = engine.render('notification', {
+  test('render() returns an object with html string', () => {
+    const result = engine.render('NOTIFICATION', {
       title: 'Test Notification',
       message: 'This is a test message',
       recipientName: 'أحمد',
     });
-    expect(typeof html).toBe('string');
-    expect(html.length).toBeGreaterThan(50);
+    expect(result).toBeDefined();
+    expect(typeof result.html).toBe('string');
+    expect(result.html.length).toBeGreaterThan(50);
   });
 
-  test('wrapHtml() wraps content in base layout', () => {
-    const html = engine.wrapHtml('<p>Content</p>', { subject: 'Test' });
+  test('wrapInLayout() wraps content in base layout', () => {
+    const html = engine.wrapInLayout('Test', '<p>Content</p>');
     expect(html).toContain('Content');
   });
 });
@@ -144,11 +141,11 @@ describe('EmailManager', () => {
     expect(manager.initialized).toBe(true);
   });
 
-  test('getStats() returns current stats', () => {
-    const stats = manager.getStats();
-    expect(stats).toHaveProperty('sent');
-    expect(stats).toHaveProperty('failed');
-    expect(stats).toHaveProperty('queued');
+  test('getStats() returns current stats', async () => {
+    const stats = await manager.getStats();
+    expect(stats).toHaveProperty('inMemory');
+    expect(stats.inMemory).toHaveProperty('sent');
+    expect(stats.inMemory).toHaveProperty('failed');
   });
 
   test('send() in mock mode logs and returns success', async () => {

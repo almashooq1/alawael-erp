@@ -43,9 +43,15 @@ jest.mock('../../services/visitor-advanced.service', () => ({
     getCurrentlyInside: (...a) => mockGetCurrentlyInside(...a),
     getExpectedToday: (...a) => mockGetExpectedToday(...a),
     getRecentLogs: (...a) => mockGetRecentLogs(...a),
+    // list — route calls getVisitors, test asserts via mockListVisitors
     listVisitors: (...a) => mockListVisitors(...a),
+    getVisitors: (...a) => mockListVisitors(...a),
+    // get — route calls getVisitorById
     getVisitor: (...a) => mockGetVisitor(...a),
+    getVisitorById: (...a) => mockGetVisitor(...a),
+    // create — route calls registerVisitor
     createVisitor: (...a) => mockCreateVisitor(...a),
+    registerVisitor: (...a) => mockCreateVisitor(...a),
     updateVisitor: (...a) => mockUpdateVisitor(...a),
     checkIn: (...a) => mockCheckIn(...a),
     checkOut: (...a) => mockCheckOut(...a),

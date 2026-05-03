@@ -1,4 +1,3 @@
-/* eslint-disable import/no-anonymous-default-export */
 /**
  * Sentry Error Tracking Configuration
  * تكوين تتبع الأخطاء عبر Sentry

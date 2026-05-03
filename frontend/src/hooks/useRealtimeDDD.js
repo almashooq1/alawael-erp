@@ -19,7 +19,7 @@ import { io } from 'socket.io-client';
 
 /* ── Socket singleton ── */
 let socketInstance = null;
-let connectionListeners = new Set();
+const connectionListeners = new Set();
 
 function getSocket() {
   if (!socketInstance) {

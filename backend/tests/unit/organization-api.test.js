@@ -124,8 +124,8 @@ describe('GET /organization/departments', () => {
 
   test('filters by parent department', async () => {
     mockDeptFind.mockReturnValue(makeChain([]));
-    await request(makeApp()).get('/api/organization/departments?parentId=d0');
-    expect(mockDeptFind).toHaveBeenCalledWith(expect.objectContaining({ parentId: 'd0' }));
+    await request(makeApp()).get('/api/organization/departments?parent=d0');
+    expect(mockDeptFind).toHaveBeenCalledWith(expect.objectContaining({ parent: 'd0' }));
   });
 });
 
@@ -141,7 +141,7 @@ describe('POST /organization/departments', () => {
 
 describe('PUT /organization/departments/:id', () => {
   test('returns 404 when department not found', async () => {
-    mockDeptUpdate.mockReturnValue(makeChain(null));
+    mockDeptUpdate.mockResolvedValue(null);
     const res = await request(makeApp())
       .put('/api/organization/departments/507f1f77bcf86cd799439011')
       .send({ name: 'Updated' });
@@ -149,7 +149,7 @@ describe('PUT /organization/departments/:id', () => {
   });
 
   test('updates department successfully', async () => {
-    mockDeptUpdate.mockReturnValue(makeChain({ _id: 'd1', name: 'Updated Dept' }));
+    mockDeptUpdate.mockResolvedValue({ _id: 'd1', name: 'Updated Dept' });
     const res = await request(makeApp())
       .put('/api/organization/departments/507f1f77bcf86cd799439011')
       .send({ name: 'Updated Dept' });

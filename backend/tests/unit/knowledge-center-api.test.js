@@ -21,9 +21,7 @@ jest.mock('../../middleware/validate', () => ({
   validate: () => (_req, _res, next) => next(),
 }));
 jest.mock('../../utils/logger', () => ({ info: jest.fn(), warn: jest.fn(), error: jest.fn() }));
-jest.mock('../../utils/safeError', () =>
-  jest.fn((res, _e, _ctx) => res.status(500).json({ success: false, message: 'Error' }))
-);
+jest.mock('../../utils/safeError', () => jest.fn(() => 'Error'));
 
 const mockGetStats = jest.fn().mockResolvedValue({ totalArticles: 10, totalCategories: 4 });
 const mockGetAnalytics = jest.fn().mockResolvedValue({ views: 200, uniqueReaders: 50 });
@@ -62,6 +60,7 @@ jest.mock('../../services/knowledge-center.service', () => ({
     getArticle: (...a) => mockGetArticle(...a),
     updateArticle: (...a) => mockUpdateArticle(...a),
     deleteArticle: (...a) => mockDeleteArticle(...a),
+    getArticleById: (...a) => mockGetArticle(...a),
     rateArticle: (...a) => mockRateArticle(...a),
     addComment: (...a) => mockCommentArticle(...a),
     updateArticleStatus: (...a) => mockUpdateStatus(...a),

@@ -1,4 +1,3 @@
-/* eslint-disable import/no-anonymous-default-export */
 /**
  * ♿ خدمة تأهيل ذوي الإعاقة — Disability Rehabilitation Service
  * AlAwael ERP — Comprehensive Disability Rehab Management

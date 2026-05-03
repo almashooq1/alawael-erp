@@ -81,6 +81,7 @@ jest.mock('../../models/RoomBooking', () => {
   M.find = (...a) => mockBookingFind(...a);
   M.findById = (...a) => mockBookingFindById(...a);
   M.countDocuments = (...a) => mockBookingCount(...a);
+  M.findOne = jest.fn().mockResolvedValue(null); // no conflicts by default
   M.findByIdAndUpdate = (...a) => mockBookingFindByIdAndUpdate(...a);
   return M;
 });
@@ -112,9 +113,9 @@ describe('GET /facilities/rooms', () => {
     expect(Array.isArray(res.body.data)).toBe(true);
   });
 
-  test('filters by floor', async () => {
-    await request(makeApp()).get('/api/facilities/rooms?floor=2');
-    expect(mockRoomFind).toHaveBeenCalledWith(expect.objectContaining({ floor: '2' }));
+  test('filters by type', async () => {
+    await request(makeApp()).get('/api/facilities/rooms?type=meeting');
+    expect(mockRoomFind).toHaveBeenCalledWith(expect.objectContaining({ type: 'meeting' }));
   });
 });
 
@@ -158,10 +159,11 @@ describe('POST /facilities/bookings', () => {
     const res = await request(makeApp())
       .post('/api/facilities/bookings')
       .send({
-        roomId: 'r1',
-        startTime: new Date(Date.now() + 3600000).toISOString(),
-        endTime: new Date(Date.now() + 7200000).toISOString(),
-        purpose: 'اجتماع',
+        room: '507f1f77bcf86cd799439011',
+        title: 'اجتماع أسبوعي',
+        bookingDate: new Date(Date.now() + 3600000).toISOString(),
+        startTime: '09:00',
+        endTime: '10:00',
       });
     expect([201, 200]).toContain(res.status);
     expect(res.body.success).toBe(true);

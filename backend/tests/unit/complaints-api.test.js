@@ -19,7 +19,7 @@ jest.mock('../../middleware/branchScope.middleware', () => ({
 jest.mock('../../middleware/validate', () => ({
   validate: () => (_req, _res, next) => next(),
 }));
-jest.mock('../../middleware/validateObjectId', () => (_req, _res, next) => next());
+jest.mock('../../middleware/validateObjectId', () => () => (_req, _res, next) => next());
 jest.mock('../../utils/logger', () => ({ info: jest.fn(), warn: jest.fn(), error: jest.fn() }));
 jest.mock('../../utils/safeError', () =>
   jest.fn((res, _e, _ctx) => res.status(500).json({ success: false, message: 'Error' }))
@@ -47,7 +47,7 @@ const mockFindById = jest.fn(() => makeChain(null));
 const mockCountDocuments = jest.fn().mockResolvedValue(0);
 const mockAggregate = jest.fn().mockResolvedValue([]);
 const mockSave = jest.fn().mockResolvedValue({});
-const mockFindByIdAndUpdate = jest.fn(() => makeChain(null));
+const mockFindByIdAndUpdate = jest.fn().mockResolvedValue(null);
 const mockFindByIdAndDelete = jest.fn().mockResolvedValue({ _id: 'c1' });
 
 jest.mock('../../models/Complaint', () => {
@@ -142,7 +142,7 @@ describe('POST /complaints', () => {
 
 describe('PUT /complaints/:id', () => {
   test('returns 404 when complaint not found', async () => {
-    mockFindByIdAndUpdate.mockReturnValue(makeChain(null));
+    mockFindByIdAndUpdate.mockResolvedValue(null);
     const res = await request(makeApp())
       .put('/api/complaints/507f1f77bcf86cd799439011')
       .send({ status: 'resolved' });
@@ -151,7 +151,7 @@ describe('PUT /complaints/:id', () => {
 
   test('returns updated complaint', async () => {
     const updated = { _id: 'c1', status: 'resolved' };
-    mockFindByIdAndUpdate.mockReturnValue(makeChain(updated));
+    mockFindByIdAndUpdate.mockResolvedValue(updated);
     const res = await request(makeApp())
       .put('/api/complaints/507f1f77bcf86cd799439011')
       .send({ status: 'resolved' });

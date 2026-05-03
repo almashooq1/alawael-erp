@@ -1,4 +1,3 @@
-/* eslint-disable import/no-anonymous-default-export */
 /**
  * 📦 خدمة العمليات والأصول — Operations & Assets Service
  * AlAwael ERP — Unified Frontend Service

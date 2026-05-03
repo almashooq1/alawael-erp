@@ -44,7 +44,9 @@ const makeChain = val => {
 const mockFind = jest.fn(() => makeChain([]));
 const mockFindById = jest.fn(() => makeChain(null));
 const mockCountDocuments = jest.fn().mockResolvedValue(0);
-const mockSave = jest.fn().mockResolvedValue({});
+const mockCreate = jest
+  .fn()
+  .mockResolvedValue({ _id: 'm1', title: 'Test Meeting', status: 'scheduled' });
 const mockFindByIdAndUpdate = jest.fn(() => makeChain(null));
 const mockFindByIdAndDelete = jest.fn().mockResolvedValue({ _id: 'm1' });
 const mockAggregate = jest.fn().mockResolvedValue([]);
@@ -52,11 +54,12 @@ const mockAggregate = jest.fn().mockResolvedValue([]);
 jest.mock('../../models/Meeting', () => {
   const M = jest.fn().mockImplementation(function (data) {
     Object.assign(this, data, { _id: 'm1' });
-    this.save = mockSave;
+    this.save = jest.fn().mockResolvedValue(this);
   });
   M.find = (...a) => mockFind(...a);
   M.findById = (...a) => mockFindById(...a);
   M.countDocuments = (...a) => mockCountDocuments(...a);
+  M.create = (...a) => mockCreate(...a);
   M.findByIdAndUpdate = (...a) => mockFindByIdAndUpdate(...a);
   M.findByIdAndDelete = (...a) => mockFindByIdAndDelete(...a);
   M.aggregate = (...a) => mockAggregate(...a);
@@ -123,7 +126,11 @@ describe('GET /meetings/:id', () => {
 
 describe('POST /meetings', () => {
   test('creates meeting and returns 201', async () => {
-    mockSave.mockResolvedValue({});
+    mockCreate.mockResolvedValue({
+      _id: 'm1',
+      title: 'اجتماع التقييم الأسبوعي',
+      status: 'scheduled',
+    });
     const res = await request(makeApp())
       .post('/api/meetings')
       .send({

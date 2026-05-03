@@ -276,4 +276,17 @@ router.delete('/positions/:id', authorize(['admin', 'super_admin']), async (req,
   }
 });
 
+// GET /stats — Organization summary statistics
+router.get('/stats', async (_req, res) => {
+  try {
+    const [totalDepartments, totalPositions] = await Promise.all([
+      Department.countDocuments(),
+      Position.countDocuments(),
+    ]);
+    res.json({ success: true, data: { totalDepartments, totalPositions } });
+  } catch (err) {
+    safeError(res, err, 'Organization stats error');
+  }
+});
+
 module.exports = router;

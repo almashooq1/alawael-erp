@@ -338,6 +338,8 @@ jest.mock(
         withTransaction: jest.fn(async callback => callback({})),
       })),
       Promise: Promise,
+      // Used by route-level guards (e.g. meetings.routes.js validObjectId helper)
+      isValidObjectId: id => /^[a-f\d]{24}$/i.test(String(id ?? '')),
     };
 
     return mockMongoose;

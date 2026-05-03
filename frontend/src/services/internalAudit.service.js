@@ -1,4 +1,3 @@
-/* eslint-disable import/no-anonymous-default-export */
 /**
  * Internal Audit Service — خدمة التدقيق الداخلي
  */

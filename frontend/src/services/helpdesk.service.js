@@ -1,4 +1,3 @@
-/* eslint-disable import/no-anonymous-default-export */
 /**
  * Help Desk Service — خدمة مكتب المساعدة
  */

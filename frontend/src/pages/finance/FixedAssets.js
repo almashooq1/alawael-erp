@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
@@ -37,7 +36,7 @@ import {
   Search as SearchIcon,
   Add as AddIcon,
   Visibility as ViewIcon,
-  } from '@mui/icons-material';
+} from '@mui/icons-material';
 import accountingService from 'services/accountingService';
 import logger from 'utils/logger';
 import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from 'theme/palette';

@@ -248,6 +248,96 @@ const shouldSkipDBInit = isTestEnv && process.env.SMART_TEST_MODE === 'true';
     logger.info('Recruitment Scheduler initialization skipped:', err.message);
   }
 
+  // Quality & Compliance Schedulers (Phase 13) — wire 4 sweepers
+  // that already shipped as services but were never booted. Each
+  // uses qualityEventBus as dispatcher so emitted events fan out
+  // to email / SMS / in-app channels. Opt-out via
+  // QUALITY_SCHEDULERS_ENABLED=false.
+  if (process.env.QUALITY_SCHEDULERS_ENABLED !== 'false') {
+    try {
+      const qualityEventBus = require('./services/quality/qualityEventBus.service').getDefault();
+      const { createCapaAgingScheduler } = require('./services/quality/capaAgingScheduler.service');
+      const {
+        createComplianceCalendarAlertSweeper,
+      } = require('./services/quality/complianceCalendarAlertSweeper.service');
+      const {
+        createEvidenceRetentionSweeper,
+      } = require('./services/quality/evidenceRetentionSweeper.service');
+      const {
+        createRiskReassessmentScheduler,
+      } = require('./services/quality/riskReassessmentScheduler.service');
+      const calendarService = require('./services/quality/complianceCalendar.service').getDefault();
+
+      const capaModel = require('./models/internal-audit/CorrectivePreventiveAction.model');
+      const evidenceModel = require('./models/quality/EvidenceItem.model');
+      const calendarEventModel = require('./models/quality/ComplianceCalendarEvent.model');
+      const riskModel = require('./models/quality/Risk.model');
+
+      server._qualitySchedulers = [
+        {
+          name: 'CAPA Aging',
+          icon: '🛠️',
+          instance: createCapaAgingScheduler({
+            capaModel,
+            dispatcher: qualityEventBus,
+            logger,
+          }),
+        },
+        {
+          name: 'Compliance Calendar Alerts',
+          icon: '🗓️',
+          instance: createComplianceCalendarAlertSweeper({
+            calendarService,
+            eventModel: calendarEventModel,
+            dispatcher: qualityEventBus,
+            logger,
+          }),
+        },
+        {
+          name: 'Evidence Retention',
+          icon: '📁',
+          instance: createEvidenceRetentionSweeper({
+            evidenceModel,
+            dispatcher: qualityEventBus,
+            logger,
+          }),
+        },
+        {
+          name: 'Risk Reassessment',
+          icon: '⚠️',
+          instance: createRiskReassessmentScheduler({
+            riskModel,
+            dispatcher: qualityEventBus,
+            logger,
+          }),
+        },
+      ];
+
+      for (const s of server._qualitySchedulers) {
+        s.instance.start();
+        logger.info(`${s.icon} ${s.name} Scheduler ready (hourly tick)`);
+      }
+
+      try {
+        const { registerShutdownHook } = require('./utils/gracefulShutdown');
+        registerShutdownHook('Quality Schedulers', () => {
+          for (const s of server._qualitySchedulers || []) {
+            try {
+              s.instance.stop();
+              logger.info(`${s.icon} ${s.name} Scheduler stopped`);
+            } catch {
+              /* swallow during shutdown */
+            }
+          }
+        });
+      } catch {
+        /* gracefulShutdown may not be loaded yet */
+      }
+    } catch (err) {
+      logger.warn('Quality & Compliance Schedulers setup skipped:', err.message);
+    }
+  }
+
   // Schedule log cleanup — daily at startup, then every 24h
   try {
     const { cleanupOldLogs } = require('./config/logging.advanced');

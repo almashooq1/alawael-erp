@@ -180,6 +180,39 @@ router.post(
   }
 );
 
+router.get('/warehouses/:id', authenticate, requireBranchAccess, async (req, res) => {
+  try {
+    const Warehouse = require('../models/Warehouse');
+    const warehouse = await Warehouse.findById(req.params.id).populate('branchId');
+    if (!warehouse) return res.status(404).json({ success: false, message: 'المستودع غير موجود' });
+    res.json({ success: true, data: warehouse });
+  } catch (err) {
+    safeError(res, err);
+  }
+});
+
+router.put(
+  '/warehouses/:id',
+  authenticate,
+  requireBranchAccess,
+  authorize('admin', 'super_admin'),
+  async (req, res) => {
+    try {
+      const Warehouse = require('../models/Warehouse');
+      const warehouse = await Warehouse.findByIdAndUpdate(
+        req.params.id,
+        stripUpdateMeta(req.body),
+        { new: true }
+      );
+      if (!warehouse)
+        return res.status(404).json({ success: false, message: 'المستودع غير موجود' });
+      res.json({ success: true, data: warehouse });
+    } catch (err) {
+      res.status(400).json({ success: false, message: err.message });
+    }
+  }
+);
+
 // ── الموردون ──────────────────────────────────────────
 router.get('/suppliers', authenticate, requireBranchAccess, async (req, res) => {
   try {
@@ -207,6 +240,17 @@ router.post(
     }
   }
 );
+
+router.get('/suppliers/:id', authenticate, requireBranchAccess, async (req, res) => {
+  try {
+    const { Supplier } = require('../models/InventoryStock');
+    const supplier = await Supplier.findById(req.params.id);
+    if (!supplier) return res.status(404).json({ success: false, message: 'المورد غير موجود' });
+    res.json({ success: true, data: supplier });
+  } catch (err) {
+    safeError(res, err);
+  }
+});
 
 router.put(
   '/suppliers/:id',
@@ -370,7 +414,7 @@ router.post(
   authorize('admin', 'super_admin', 'inventory_manager', 'warehouse_keeper'),
   async (req, res) => {
     try {
-      const result = await svc.receiveGoods(req.params.poId, req.body.items, req.user._id);
+      const result = await svc.receiveGoodsFromPO(req.params.poId, req.body.items, req.user._id);
       res.json({ success: true, data: result });
     } catch (err) {
       res.status(400).json({ success: false, message: err.message });
@@ -498,7 +542,12 @@ router.post(
   authorize('admin', 'super_admin', 'inventory_manager'),
   async (req, res) => {
     try {
-      const count = await svc.initiateStockCount(req.body.warehouseId, req.body.type, req.user._id);
+      const count = await svc.createStockCount(
+        req.body.warehouseId,
+        req.body.type,
+        req.body.countDate,
+        req.user._id
+      );
       res.status(201).json({ success: true, data: count });
     } catch (err) {
       res.status(400).json({ success: false, message: err.message });
@@ -512,11 +561,10 @@ router.post(
   requireBranchAccess,
   async (req, res) => {
     try {
-      const result = await svc.recordStockCount(
+      const result = await svc.recordItemCount(
         req.params.countId,
         req.params.itemId,
-        req.body.countedQuantity,
-        req.body.notes
+        req.body.countedQuantity
       );
       res.json({ success: true, data: result });
     } catch (err) {

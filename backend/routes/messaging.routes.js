@@ -808,8 +808,9 @@ router.post('/send', async (req, res) => {
       });
     }
 
-    // Call sendMessage service method
-    const result = await messagingService.sendMessage(userId, conversationId, {
+    const result = await messagingService.createMessage({
+      senderId: userId,
+      conversationId,
       content,
       attachments,
       mentions,
@@ -840,8 +841,7 @@ router.get('/conversation/:id', async (req, res) => {
       });
     }
 
-    // Call getConversationMessages service method
-    const result = await messagingService.getConversationMessages(id);
+    const result = await messagingService.getMessages({ conversationId: id });
 
     return res.status(200).json({
       success: true,
@@ -868,8 +868,7 @@ router.post('/mark-read/:conversationId', async (req, res) => {
       });
     }
 
-    // Call markAllAsRead service method
-    const result = await messagingService.markAllAsRead(userId, conversationId);
+    const result = await messagingService.markConversationAsRead(userId, conversationId);
 
     return res.status(200).json({
       success: true,

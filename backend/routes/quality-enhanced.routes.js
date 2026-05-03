@@ -222,8 +222,13 @@ router.post('/incidents/:incidentId/rca', authenticate, requireBranchAccess, asy
     const { Incident } = require('../models/QualityModels');
     const incident = await Incident.findById(req.params.incidentId);
     if (!incident) return res.status(404).json({ success: false, message: 'الحادثة غير موجودة' });
-    await svc.performFiveWhyAnalysis(incident, req.body.whys);
-    res.json({ success: true, data: incident });
+    const updated = await svc.submitRca(
+      incident._id,
+      'five_why',
+      { whys: req.body.whys },
+      req.user._id
+    );
+    res.json({ success: true, data: updated });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
   }
@@ -420,11 +425,7 @@ router.post(
   authorize('admin', 'super_admin', 'quality_manager'),
   async (req, res) => {
     try {
-      const { Audit } = require('../models/QualityModels');
-      const audit = await Audit.create({
-        ...req.body,
-        auditNumber: await svc.generateAuditNumber(),
-      });
+      const audit = await svc.createAudit(req.body);
       res.status(201).json({ success: true, data: audit });
     } catch (err) {
       res.status(400).json({ success: false, message: err.message });
@@ -482,12 +483,7 @@ router.get('/improvements', authenticate, requireBranchAccess, async (req, res) 
 
 router.post('/improvements', authenticate, requireBranchAccess, async (req, res) => {
   try {
-    const { ImprovementProject } = require('../models/QualityModels');
-    const project = await ImprovementProject.create({
-      ...req.body,
-      ownerId: req.user._id,
-      projectNumber: await svc.generateProjectNumber(),
-    });
+    const project = await svc.createImprovementProject(req.body, req.user._id);
     res.status(201).json({ success: true, data: project });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
@@ -560,14 +556,8 @@ router.get('/risks', authenticate, requireBranchAccess, async (req, res) => {
 
 router.post('/risks', authenticate, requireBranchAccess, async (req, res) => {
   try {
-    const { Risk } = require('../models/QualityModels');
     const riskLevel = svc.assessRiskLevel(req.body.likelihood, req.body.impact);
-    const risk = await Risk.create({
-      ...req.body,
-      riskLevel,
-      riskNumber: await svc.generateRiskNumber(),
-      ownerId: req.body.ownerId || req.user._id,
-    });
+    const risk = await svc.createRisk({ ...req.body, riskLevel }, req.body.ownerId || req.user._id);
     res.status(201).json({ success: true, data: risk });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });

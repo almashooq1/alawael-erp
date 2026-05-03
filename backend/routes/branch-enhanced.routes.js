@@ -218,7 +218,7 @@ router.post(
   authorize('admin', 'super_admin', 'branch_manager'),
   async (req, res) => {
     try {
-      const service = await svc.upsertBranchService(req.params.branchId, req.body);
+      const service = await svc.createBranchService(req.params.branchId, req.body);
       res.status(201).json({ success: true, data: service });
     } catch (err) {
       res.status(400).json({ success: false, message: err.message });
@@ -330,11 +330,7 @@ router.post(
   authorize('admin', 'super_admin', 'branch_manager'),
   async (req, res) => {
     try {
-      const BeneficiaryTransfer = require('../models/BeneficiaryTransfer');
-      const transfer = await BeneficiaryTransfer.findById(req.params.transferId);
-      if (!transfer)
-        return res.status(404).json({ success: false, message: 'طلب النقل غير موجود' });
-      await svc.completeBeneficiaryTransfer(transfer);
+      const transfer = await svc.completeTransfer(req.params.transferId);
       res.json({ success: true, message: 'تم نقل المستفيد بنجاح', data: transfer });
     } catch (err) {
       res.status(400).json({ success: false, message: err.message });

@@ -537,6 +537,131 @@ function matchesConditions(conditions, event) {
 // EXPORTS
 // ═══════════════════════════════════════════════════════════════════════════
 
+// ─── Adapter methods needed by notifications.routes.js ────────────────────
+// Each maps to existing surface or runs a thin mongoose query. Favorite +
+// snooze are stored in `metadata` (Mixed) since the schema doesn't carry
+// dedicated fields. Retry re-sends with the original payload.
+
+async function getNotificationById(id) {
+  const { Notification: M } = getModels();
+  return M.findById(id);
+}
+
+async function getDeliveryStatus(id) {
+  const { Notification: M } = getModels();
+  const doc = await M.findById(id, { status: 1, channel: 1, readAt: 1, createdAt: 1 });
+  if (!doc) return null;
+  return {
+    id: doc._id,
+    status: doc.status,
+    channel: doc.channel,
+    readAt: doc.readAt || null,
+    createdAt: doc.createdAt,
+  };
+}
+
+async function updateNotification(id, patch) {
+  const { Notification: M } = getModels();
+  return M.findByIdAndUpdate(id, patch, { new: true });
+}
+
+async function archiveNotification(id) {
+  const { Notification: M } = getModels();
+  return M.findByIdAndUpdate(id, { status: 'archived' }, { new: true });
+}
+
+async function restoreNotification(id) {
+  const { Notification: M } = getModels();
+  return M.findByIdAndUpdate(id, { status: 'sent' }, { new: true });
+}
+
+async function toggleFavorite(id) {
+  const { Notification: M } = getModels();
+  const doc = await M.findById(id);
+  if (!doc) return null;
+  const meta = doc.metadata || {};
+  meta.favorite = !meta.favorite;
+  doc.metadata = meta;
+  doc.markModified('metadata');
+  await doc.save();
+  return doc;
+}
+
+async function snoozeNotification(id, snoozeUntil) {
+  const { Notification: M } = getModels();
+  const doc = await M.findById(id);
+  if (!doc) return null;
+  const meta = doc.metadata || {};
+  meta.snoozeUntil = new Date(snoozeUntil);
+  doc.metadata = meta;
+  doc.markModified('metadata');
+  await doc.save();
+  return doc;
+}
+
+async function deleteReadNotifications(userId) {
+  const { Notification: M } = getModels();
+  const res = await M.updateMany(
+    { recipientId: userId, $or: [{ read: true }, { isRead: true }] },
+    { deletedAt: new Date() }
+  );
+  return { deletedCount: res.modifiedCount ?? res.nModified ?? 0 };
+}
+
+async function retrySendNotification(id) {
+  const doc = await getNotificationById(id);
+  if (!doc) throw new Error('Notification not found');
+  return send({
+    recipientId: doc.recipientId || doc.userId || doc.recipient,
+    title: doc.title,
+    message: doc.message,
+    type: doc.type,
+    channel: doc.channel,
+    priority: doc.priority,
+    metadata: doc.metadata,
+    link: doc.link,
+  });
+}
+
+async function markMultipleAsRead(ids) {
+  const { Notification: M } = getModels();
+  const res = await M.updateMany(
+    { _id: { $in: ids } },
+    { read: true, isRead: true, readAt: new Date(), status: 'read' }
+  );
+  return { updatedCount: res.modifiedCount ?? res.nModified ?? 0 };
+}
+
+async function deleteMultiple(ids) {
+  const { Notification: M } = getModels();
+  const res = await M.updateMany({ _id: { $in: ids } }, { deletedAt: new Date() });
+  return { deletedCount: res.modifiedCount ?? res.nModified ?? 0 };
+}
+
+async function getUnreadCountByType(userId) {
+  const { Notification: M } = getModels();
+  const rows = await M.aggregate([
+    {
+      $match: {
+        recipientId: typeof userId === 'string' ? new mongoose.Types.ObjectId(userId) : userId,
+        $or: [{ read: false }, { isRead: false }],
+        deletedAt: null,
+      },
+    },
+    { $group: { _id: '$type', count: { $sum: 1 } } },
+  ]);
+  return rows.reduce((acc, r) => {
+    acc[r._id || 'other'] = r.count;
+    return acc;
+  }, {});
+}
+
+async function getTemplate(templateId) {
+  const { NotificationTemplate: T } = getModels();
+  if (!T) return null;
+  return T.findById(templateId);
+}
+
 module.exports = {
   // Core
   send,
@@ -544,17 +669,32 @@ module.exports = {
   // Aliases for backward compatibility
   sendNotification: send,
   sendBulkNotification: sendBulk,
+  createNotification: send,
 
   // Read state
   markAsRead,
   markAllAsRead,
+  markMultipleAsRead,
   getUnreadCount,
+  getUnreadCountByType,
 
   // CRUD
   getNotifications,
   getUserNotifications: getNotifications,
+  getNotificationById,
+  updateNotification,
   deleteNotification,
   deleteAllNotifications,
+  deleteReadNotifications,
+  deleteMultiple,
+
+  // State transitions
+  archiveNotification,
+  restoreNotification,
+  toggleFavorite,
+  snoozeNotification,
+  retrySendNotification,
+  getDeliveryStatus,
 
   // Preferences
   getPreferences,
@@ -563,6 +703,7 @@ module.exports = {
   // Templates
   renderTemplate,
   getTemplates,
+  getTemplate,
 
   // Scheduling
   scheduleNotification,

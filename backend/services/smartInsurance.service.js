@@ -556,6 +556,98 @@ class SmartInsuranceService {
     }
     return alerts;
   }
+
+  /**
+   * حساب حصة المريض (copay + deductible) من مبلغ خدمة.
+   * Returns a breakdown the route can render directly.
+   */
+  async calculateCopay(policyId, amount) {
+    const policy = await InsurancePolicy.findOne({ _id: policyId, deletedAt: null });
+    if (!policy) throw new Error('بوليصة التأمين غير موجودة');
+
+    const total = Number(amount) || 0;
+    const deductible = Number(policy.deductibleAmount) || 0;
+    const copayPct = Number(policy.copayPercentage) || 0;
+    const copayMax = policy.copayMaxAmount != null ? Number(policy.copayMaxAmount) : null;
+
+    const afterDeductible = Math.max(0, total - deductible);
+    let copay = afterDeductible * (copayPct / 100);
+    if (copayMax != null && copay > copayMax) copay = copayMax;
+
+    const patientShare = deductible + copay;
+    const payerShare = Math.max(0, total - patientShare);
+
+    return {
+      totalAmount: total,
+      deductible,
+      copayPercentage: copayPct,
+      copayMaxAmount: copayMax,
+      copayAmount: round2(copay),
+      patientShare: round2(patientShare),
+      payerShare: round2(payerShare),
+    };
+  }
+
+  /**
+   * تحليلات أسباب رفض المطالبات للفترة المحددة.
+   * Aggregates denied claims grouped by `adjudication.denialReasons.code`.
+   */
+  async getRejectionAnalytics(branchId, dateFrom, dateTo) {
+    const match = {
+      status: { $in: ['denied', 'partially_approved'] },
+      submissionDate: { $gte: new Date(dateFrom), $lte: new Date(dateTo) },
+    };
+    if (branchId) match.branch = branchId;
+
+    const [byReason, totals] = await Promise.all([
+      InsuranceClaim.aggregate([
+        { $match: match },
+        { $unwind: { path: '$adjudication.denialReasons', preserveNullAndEmptyArrays: true } },
+        {
+          $group: {
+            _id: '$adjudication.denialReasons.code',
+            label: { $first: '$adjudication.denialReasons.reason' },
+            count: { $sum: 1 },
+            deniedAmount: { $sum: { $ifNull: ['$adjudication.deniedAmount', 0] } },
+          },
+        },
+        { $sort: { count: -1 } },
+        { $limit: 50 },
+      ]),
+      InsuranceClaim.aggregate([
+        { $match: match },
+        {
+          $group: {
+            _id: null,
+            totalClaims: { $sum: 1 },
+            totalDenied: { $sum: { $ifNull: ['$adjudication.deniedAmount', 0] } },
+            totalRequested: { $sum: { $ifNull: ['$totalAmount', 0] } },
+          },
+        },
+      ]),
+    ]);
+
+    const summary = totals[0] || { totalClaims: 0, totalDenied: 0, totalRequested: 0 };
+    return {
+      window: { from: dateFrom, to: dateTo, branchId: branchId || null },
+      summary,
+      reasons: byReason.map(r => ({
+        code: r._id || 'UNSPECIFIED',
+        label: r.label || null,
+        count: r.count,
+        deniedAmount: round2(r.deniedAmount),
+      })),
+    };
+  }
+
+  /** Alias kept for route compatibility — `requestPriorAuth` is the canonical name. */
+  async submitPriorAuthorization(data) {
+    return this.requestPriorAuth(data);
+  }
+}
+
+function round2(n) {
+  return Math.round((Number(n) || 0) * 100) / 100;
 }
 
 module.exports = new SmartInsuranceService();

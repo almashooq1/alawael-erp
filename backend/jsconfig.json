@@ -21,7 +21,8 @@
     "noImplicitThis": true,
     "noUnusedLocals": true,
     "noUnusedParameters": false,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "ignoreDeprecations": "6.0"
   },
   "include": ["**/*.js"],
   "exclude": ["node_modules", "coverage", "dist", "logs", ".jest-cache", "_archived"]

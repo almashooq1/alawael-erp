@@ -15,7 +15,8 @@ import {
   Chip,
   Card,
   CardContent,
-  Skeleton,  alpha,
+  Skeleton,
+  alpha,
   Avatar,
   TextField,
   Dialog,
@@ -31,15 +32,7 @@ import {
   TableRow,
   CircularProgress,
 } from '@mui/material';
-import {
-  ArrowBack,
-  Refresh,
-  Add,
-  Label,
-  Edit,
-  Delete,
-  LocalOffer,  Tag,
-} from '@mui/icons-material';
+import { ArrowBack, Refresh, Add, Label, Edit, Delete, LocalOffer, Tag } from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import workflowService from '../../services/workflow.service';
 

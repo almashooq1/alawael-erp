@@ -32,17 +32,20 @@ import {
   Alert,
   Snackbar,
   CircularProgress,
-  Divider,  Tooltip,
+  Divider,
+  Tooltip,
   Select,
   MenuItem,
   FormControl,
-  InputLabel,  Table,
+  InputLabel,
+  Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  LinearProgress,} from '@mui/material';
+  LinearProgress,
+} from '@mui/material';
 
 import {
   Star as StarIcon,
@@ -71,7 +74,7 @@ import {
   Schedule as ScheduleIcon,
   DeleteForever as PermanentDeleteIcon,
   Bookmark as BookmarkIcon,
-  } from '@mui/icons-material';
+} from '@mui/icons-material';
 
 import documentAdvancedService from '../../services/documentAdvancedService';
 

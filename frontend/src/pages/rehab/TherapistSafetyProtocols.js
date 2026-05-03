@@ -29,7 +29,8 @@ import {
   ListItemText,
   Stepper,
   Step,
-  StepLabel,} from '@mui/material';
+  StepLabel,
+} from '@mui/material';
 import {
   Add as AddIcon,
   Search as SearchIcon,
@@ -89,7 +90,7 @@ const TherapistSafetyProtocols = () => {
 
   useEffect(() => {
     fetchProtocols();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchProtocols = async () => {

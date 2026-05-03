@@ -4,16 +4,16 @@
  *
  * ═══════════════════════════════════════════════════════════
  *  Organized into 9 logical sections with dividers:
- *  ① الرئيسية        — Dashboard & Monitoring
- *  ② الخدمات الأساسية — Beneficiaries, Rehab, Education, Scheduling
- *  ③ الموارد البشرية  — HR, Recruitment, Training, Performance
- *  ④ المالية والمحاسبة — Finance, Budget, Donations
- *  ⑤ العمليات والإمداد — Operations, Fleet, Maintenance, Projects...
- *  ⑥ التواصل والمراسلات — Comms, Admin-Comms, Directives, Meetings
- *  ⑦ المستندات والأرشفة — Docs, Media, Signatures, Stamps, Forms
- *  ⑧ التحليلات والذكاء — Analytics, CRM, KPI
- *  ⑨ البوابات         — Student, Therapist, Parent, Employee
- *  ⑩ الإدارة والنظام  — Admin, Security, Settings
+ *  ① الرئيسية          — Dashboard & Monitoring
+ *  ② الخدمات الأساسية  — Beneficiaries, Rehab, Education, Scheduling
+ *  ③ الموارد البشرية   — HR, Recruitment, Training, Performance
+ *  ④ المالية والمحاسبة — Finance (5 sub-groups)
+ *  ⑤ العمليات والإمداد — Operations, Fleet, Logistics, Quality & Safety
+ *  ⑥ التواصل والمعلومات — Comms, Docs, Media, Signatures, Forms
+ *  ⑦ التحليلات والذكاء — Analytics, CRM, KPI, BI
+ *  ⑧ إدارة الأعمال    — Administration, Workflow, Tasks, Business
+ *  ⑨ البوابات          — Student, Therapist, Parent, Employee
+ *  ⑩ الإدارة والنظام   — Gov Integration, Admin Portal, System, Security
  * ═══════════════════════════════════════════════════════════
  */
 import {
@@ -42,7 +42,6 @@ import {
   DriveFileRenameOutline as SignatureIcon,
   Verified as StampIcon,
   MenuBook as KnowledgeIcon,
-  Shield as RiskIcon,
   AccountBalanceWallet as BudgetIcon,
   Person as EmployeeIcon,
   Speed as KPIChartIcon,
@@ -74,35 +73,21 @@ import {
   ChildCare as EarlyInterventionIcon,
   FollowTheSigns as PostRehabIcon,
   SupervisedUserCircle as GuardianIcon,
-  Flag as StrategicIcon,
-  TrendingUp as SuccessionIcon,
-  MeetingRoom as FacilityRoomIcon,
   // ─── Phase: 14 Additional Systems ───
   MedicalInformation as MedicalFilesIcon,
-  Restaurant as KitchenIcon,
-  LocalLaundryService as LaundryIcon,
-  Groups as CommunityIcon,
-  Favorite as VolunteerIcon,
   Psychology as MHPSSIcon,
   Home as IndependentLivingIcon,
   Science as ResearchIcon,
   ShoppingCart as ECommerceIcon,
   Article as CMSIcon,
   HourglassBottom as WaitlistIcon,
-  GpsFixed as GPSTrackingIcon,
-  Sensors as IoTIcon,
   VpnKey as SSOIcon,
   // ─── Phase 10: Missing Sidebar Systems ───
   Warehouse as WarehouseIcon,
-  LocalShipping as SupplyChainIcon,
   HealthAndSafety as HSEIcon,
-  Warning as CrisisIcon,
-  Event as EventIcon,
   RecordVoiceOver as PRIcon,
   BarChart as BIDashboardIcon,
   SupportAgent as HelpDeskIcon,
-  Balance as LegalIcon,
-  RecentActors as EmployeeAffairsIcon,
   // ─── Phase: Advanced Systems (Blockchain, ICF, MDT, AR-Rehab) ───
   Token as BlockchainIcon,
   Assessment as ICFIcon,
@@ -133,65 +118,14 @@ const getNavigationItems = () => [
     roles: ['admin', 'super_admin', 'manager'],
   },
 
-  // ═══════════════════════════════════════════════════════
-  //  ★ لوحات بريميوم — Premium Glassmorphism Dashboards
-  // ═══════════════════════════════════════════════════════
-  { id: 'divider-premium', type: 'divider', label: '★ لوحات بريميوم' },
   {
     id: 'premium-hub',
-    label: 'مركز اللوحات البريميوم',
+    label: 'اللوحات التخصصية',
     icon: <PremiumIcon />,
     path: '/premium',
     roles: ['admin', 'super_admin', 'manager'],
-    badge: 'NEW',
+    badge: 'PRO',
     badgeColor: 'success',
-  },
-  {
-    id: 'premium-dashboards',
-    label: 'اللوحات البريميوم',
-    icon: <PremiumIcon />,
-    roles: ['admin', 'super_admin', 'manager'],
-    children: [
-      { id: 'ceo-pro', label: 'لوحة الرئيس التنفيذي', path: '/ceo-pro' },
-      { id: 'hr-pro', label: 'الموارد البشرية المتقدمة', path: '/hr-pro' },
-      { id: 'finance-pro', label: 'المالية والمحاسبة', path: '/finance-pro' },
-      { id: 'patients-pro', label: 'إدارة المرضى', path: '/patients-pro' },
-      { id: 'schedule-pro', label: 'الجدول والمواعيد', path: '/schedule-pro' },
-      { id: 'reports-pro', label: 'التقارير والذكاء', path: '/reports-pro' },
-      { id: 'inventory-pro', label: 'المخزون والتوريد', path: '/inventory-pro' },
-      { id: 'notifications-pro', label: 'مركز الإشعارات', path: '/notifications-pro' },
-      { id: 'security-pro', label: 'الأمان والحماية', path: '/security-pro' },
-      { id: 'analytics-pro', label: 'التحليلات المتقدمة', path: '/analytics-pro' },
-      { id: 'settings-pro', label: 'إعدادات النظام', path: '/settings-pro' },
-      { id: 'therapist-pro', label: 'لوحة المعالج المتكاملة', path: '/therapist-pro' },
-      { id: 'kpi-pro', label: 'مؤشرات الأداء الاستراتيجية', path: '/kpi-pro' },
-      { id: 'rehab-pro', label: 'لوحة التأهيل الشاملة', path: '/rehab-pro' },
-      { id: 'admin-executive', label: 'الإدارة التنفيذية', path: '/admin-executive' },
-      { id: 'pharmacy-pro', label: 'الصيدلية والأدوية', path: '/pharmacy-pro' },
-      { id: 'lab-pro', label: 'المختبرات والتحاليل', path: '/lab-pro' },
-      { id: 'insurance-pro', label: 'التأمين الصحي', path: '/insurance-pro' },
-      { id: 'quality-pro', label: 'الجودة والامتثال', path: '/quality-pro' },
-      { id: 'training-pro', label: 'التدريب والتطوير', path: '/training-pro' },
-      { id: 'crm-pro', label: 'علاقات العملاء', path: '/crm-pro' },
-      { id: 'operations-pro', label: 'العمليات والتشغيل', path: '/operations-pro' },
-      { id: 'nursing-pro', label: 'التمريض والرعاية', path: '/nursing-pro' },
-      { id: 'procurement-pro', label: 'المشتريات والعقود', path: '/procurement-pro' },
-      { id: 'radiology-pro', label: 'الأشعة والتصوير', path: '/radiology-pro' },
-      { id: 'emergency-pro', label: 'الطوارئ والإسعاف', path: '/emergency-pro' },
-      { id: 'risk-pro', label: 'إدارة المخاطر', path: '/risk-pro' },
-      { id: 'nutrition-pro', label: 'التغذية والمطبخ', path: '/nutrition-pro' },
-      { id: 'infection-control-pro', label: 'مكافحة العدوى', path: '/infection-control-pro' },
-      { id: 'social-work-pro', label: 'الخدمة الاجتماعية', path: '/social-work-pro' },
-      { id: 'maintenance-pro', label: 'الصيانة والمرافق', path: '/maintenance-pro' },
-      { id: 'blood-bank-pro', label: 'بنك الدم', path: '/blood-bank-pro' },
-      { id: 'medical-records-pro', label: 'السجلات الطبية', path: '/medical-records-pro' },
-      { id: 'transport-pro', label: 'النقل والمواصلات', path: '/transport-pro' },
-      { id: 'compliance-pro', label: 'الامتثال التنظيمي', path: '/compliance-pro' },
-      { id: 'waste-management-pro', label: 'النفايات الطبية', path: '/waste-management-pro' },
-      { id: 'telemedicine-pro', label: 'الطب عن بُعد', path: '/telemedicine-pro' },
-      { id: 'clinical-trials-pro', label: 'الأبحاث السريرية', path: '/clinical-trials-pro' },
-      { id: 'patient-safety-pro', label: 'سلامة المرضى', path: '/patient-safety-pro' },
-    ],
   },
 
   // ═══════════════════════════════════════════════════════
@@ -258,6 +192,45 @@ const getNavigationItems = () => [
     badgeColor: '#7b1fa2',
   },
   {
+    id: 'icf-assessments',
+    label: 'تقييمات ICF',
+    icon: <ICFIcon />,
+    path: '/icf-assessments',
+    roles: ['admin', 'super_admin', 'therapist', 'specialist'],
+  },
+  {
+    id: 'mdt-coordination',
+    label: 'التنسيق متعدد التخصصات',
+    icon: <MDTIcon />,
+    path: '/mdt-coordination',
+    roles: ['admin', 'super_admin', 'therapist', 'specialist', 'doctor'],
+  },
+  {
+    id: 'ar-rehab',
+    label: 'تأهيل الواقع المعزز',
+    icon: <ARRehabIcon />,
+    path: '/ar-rehab',
+    roles: ['admin', 'super_admin', 'therapist', 'specialist'],
+  },
+  {
+    id: 'telehealth',
+    label: 'جلسات الفيديو',
+    icon: <TelehealthIcon />,
+    path: '/telehealth',
+    badge: 'جديد',
+    badgeColor: 'success',
+    roles: [
+      'admin',
+      'super_admin',
+      'therapist',
+      'specialist',
+      'clinical_supervisor',
+      'manager',
+      'parent',
+      'guardian',
+    ],
+  },
+  {
     id: 'scheduling',
     label: 'الجلسات والمواعيد',
     icon: <ScheduleIcon />,
@@ -297,22 +270,18 @@ const getNavigationItems = () => [
   },
   {
     id: 'education',
-    label: 'التعليم الإلكتروني',
-    icon: <SchoolIcon />,
-    path: '/lms',
-    roles: ['admin', 'super_admin', 'teacher', 'student'],
-  },
-  {
-    id: 'education-rehab',
     label: 'التعليم والتأهيل',
     icon: <SchoolIcon />,
-    path: '/education',
-    roles: ['admin', 'super_admin', 'teacher', 'therapist'],
+    roles: ['admin', 'super_admin', 'teacher', 'therapist', 'student'],
+    children: [
+      { id: 'education-lms', label: 'التعليم الإلكتروني (LMS)', path: '/lms' },
+      { id: 'education-rehab', label: 'برنامج التعليم التأهيلي', path: '/education' },
+    ],
   },
   {
     id: 'montessori',
     label: 'برنامج مونتيسوري',
-    icon: <SchoolIcon />,
+    icon: <EarlyInterventionIcon />,
     roles: ['admin', 'super_admin', 'teacher', 'therapist'],
     children: [
       { id: 'montessori-dashboard', label: 'لوحة تحكم مونتيسوري', path: '/montessori' },
@@ -336,6 +305,7 @@ const getNavigationItems = () => [
       { id: 'hr-main', label: 'لوحة الموارد البشرية', path: '/hr' },
       { id: 'hr-employees', label: 'إدارة الموظفين', path: '/hr/employees' },
       { id: 'hr-attendance', label: 'الحضور والانصراف', path: '/hr/attendance' },
+      { id: 'hr-attendance-pro', label: '⚡ نظام الحضور الذكي', path: '/attendance/pro' },
       { id: 'hr-leaves', label: 'إدارة الإجازات', path: '/hr/leaves' },
       { id: 'hr-payroll', label: 'الرواتب', path: '/hr/payroll' },
       { id: 'hr-incentives', label: 'الحوافز', path: '/hr/incentives' },
@@ -381,20 +351,45 @@ const getNavigationItems = () => [
   // ═══════════════════════════════════════════════════════
   { id: 'divider-finance', type: 'divider', label: 'المالية والمحاسبة' },
   {
-    id: 'finance',
-    label: 'المالية والمحاسبة',
+    id: 'finance-core',
+    label: 'المحاسبة الأساسية',
     icon: <FinanceIcon />,
     roles: ['admin', 'super_admin', 'finance_manager', 'accountant'],
     children: [
-      // ─── أساسي ───
       { id: 'accounting-dashboard', label: 'لوحة المحاسبة', path: '/accounting' },
       { id: 'chart-of-accounts', label: 'دليل الحسابات', path: '/accounting/chart-of-accounts' },
       { id: 'journal-entries', label: 'القيود اليومية', path: '/accounting/journal-entries' },
       { id: 'general-ledger', label: 'الأستاذ العام', path: '/accounting/general-ledger' },
       { id: 'trial-balance', label: 'ميزان المراجعة', path: '/accounting/trial-balance' },
+      { id: 'profit-loss', label: 'الأرباح والخسائر', path: '/accounting/profit-loss' },
+      { id: 'balance-sheet', label: 'الميزانية العمومية', path: '/accounting/balance-sheet' },
+    ],
+  },
+  {
+    id: 'finance-billing',
+    label: 'الفوترة والمدفوعات',
+    icon: <BudgetIcon />,
+    roles: ['admin', 'super_admin', 'finance_manager', 'accountant'],
+    children: [
       { id: 'invoices', label: 'الفواتير', path: '/accounting/invoices' },
-      { id: 'expenses-mgmt', label: 'المصروفات', path: '/accounting/expenses' },
-      { id: 'payments', label: 'المدفوعات', path: '/finance' },
+      { id: 'e-invoicing', label: 'الفوترة الإلكترونية (ZATCA)', path: '/e-invoicing' },
+      { id: 'payment-vouchers', label: 'سندات الصرف والقبض', path: '/accounting/payment-vouchers' },
+      {
+        id: 'bank-reconciliation',
+        label: 'التسوية البنكية',
+        path: '/accounting/bank-reconciliation',
+      },
+      { id: 'bank-accounts', label: 'الحسابات البنكية', path: '/accounting/bank-accounts' },
+      { id: 'petty-cash', label: 'العهد والصندوق', path: '/accounting/petty-cash' },
+      { id: 'multi-currency', label: 'العملات وأسعار الصرف', path: '/accounting/multi-currency' },
+    ],
+  },
+  {
+    id: 'finance-budget',
+    label: 'الموازنات والتكاليف',
+    icon: <DonationsIcon />,
+    roles: ['admin', 'super_admin', 'finance_manager', 'accountant', 'manager'],
+    children: [
       { id: 'budgets', label: 'الموازنات', path: '/accounting/budgets' },
       {
         id: 'budget-variance',
@@ -402,120 +397,37 @@ const getNavigationItems = () => [
         path: '/accounting/budget-variance',
       },
       { id: 'cost-centers', label: 'مراكز التكلفة', path: '/accounting/cost-centers' },
-      { id: 'cash-flow', label: 'التدفقات النقدية', path: '/accounting/cash-flow' },
       { id: 'fixed-assets', label: 'الأصول الثابتة', path: '/accounting/fixed-assets' },
-      { id: 'depreciation', label: 'جدول الإهلاك', path: '/accounting/depreciation' },
-      // ─── الضرائب والزكاة ───
-      { id: 'vat-zakat', label: 'الضريبة والزكاة', path: '/accounting/vat-zakat' },
-      { id: 'withholding-tax', label: 'ضريبة الاستقطاع', path: '/accounting/withholding-tax' },
-      { id: 'tax-calendar', label: 'التقويم الضريبي', path: '/accounting/tax-calendar' },
-      { id: 'e-invoicing', label: 'الفوترة الإلكترونية', path: '/e-invoicing' },
-      // ─── البنوك والمدفوعات ───
-      {
-        id: 'bank-reconciliation',
-        label: 'التسوية البنكية',
-        path: '/accounting/bank-reconciliation',
-      },
-      { id: 'cheque-management', label: 'إدارة الشيكات', path: '/accounting/cheques' },
-      { id: 'payment-vouchers', label: 'سندات الصرف والقبض', path: '/accounting/payment-vouchers' },
-      { id: 'multi-currency', label: 'العملات وأسعار الصرف', path: '/accounting/multi-currency' },
-      {
-        id: 'recurring-transactions',
-        label: 'المعاملات المتكررة',
-        path: '/accounting/recurring-transactions',
-      },
-      {
-        id: 'credit-debit-notes',
-        label: 'إشعارات دائن/مدين',
-        path: '/accounting/credit-debit-notes',
-      },
-      // ─── التقارير والتحليل ───
-      { id: 'financial-reports', label: 'التقارير المالية', path: '/accounting/reports' },
-      { id: 'financial-ratios', label: 'النسب المالية', path: '/accounting/financial-ratios' },
-      { id: 'aged-reports', label: 'تقارير أعمار الديون', path: '/accounting/aged-reports' },
-      {
-        id: 'customer-statements',
-        label: 'كشوف حساب العملاء',
-        path: '/accounting/customer-statements',
-      },
-      { id: 'fiscal-periods', label: 'الفترات المالية', path: '/accounting/fiscal-periods' },
-      { id: 'audit-trail', label: 'سجل المراجعة', path: '/accounting/audit-trail' },
-      { id: 'executive-summary', label: 'الملخص التنفيذي', path: '/accounting/executive-summary' },
+      { id: 'cash-flow', label: 'التدفقات النقدية', path: '/accounting/cash-flow' },
       { id: 'donations', label: 'التبرعات', path: '/donations' },
-      { id: 'financial-settings', label: 'إعدادات المحاسبة', path: '/accounting/settings' },
-      // ─── Pro Finance - المميزات الاحترافية ───
-      { id: 'profit-loss', label: 'قائمة الأرباح والخسائر', path: '/accounting/profit-loss' },
-      { id: 'balance-sheet', label: 'الميزانية العمومية', path: '/accounting/balance-sheet' },
-      { id: 'bank-accounts', label: 'الحسابات البنكية', path: '/accounting/bank-accounts' },
-      { id: 'petty-cash', label: 'العهد والصندوق', path: '/accounting/petty-cash' },
-      { id: 'employee-loans', label: 'سلف الموظفين', path: '/accounting/employee-loans' },
-      { id: 'vendor-payments', label: 'مدفوعات الموردين', path: '/accounting/vendor-payments' },
-      // ─── Enterprise Finance - المميزات المؤسسية ───
-      { id: 'period-closing', label: 'إقفال الفترات', path: '/finance/period-closing' },
-      {
-        id: 'account-reconciliation',
-        label: 'تسوية الحسابات',
-        path: '/finance/account-reconciliation',
-      },
-      { id: 'dunning-management', label: 'التحصيل والمطالبات', path: '/finance/dunning' },
-      {
-        id: 'bank-guarantees',
-        label: 'خطابات الضمان والاعتمادات',
-        path: '/finance/bank-guarantees',
-      },
-      { id: 'treasury-forecasting', label: 'إدارة الخزينة', path: '/finance/treasury' },
-      { id: 'tax-filing', label: 'الإقرارات الضريبية', path: '/finance/tax-filing' },
-      {
-        id: 'financial-approvals',
-        label: 'الاعتمادات المالية',
-        path: '/finance/financial-approvals',
-      },
-      { id: 'company-loans', label: 'القروض والتمويل', path: '/finance/company-loans' },
-      // ─── Ultimate Finance - الميزات المتقدمة ───
-      { id: 'financial-consolidation', label: 'التجميع المالي', path: '/finance/consolidation' },
-      {
-        id: 'revenue-recognition',
-        label: 'الاعتراف بالإيراد',
-        path: '/finance/revenue-recognition',
-      },
-      { id: 'lease-accounting', label: 'محاسبة الإيجارات', path: '/finance/leases' },
-      { id: 'investment-portfolio', label: 'المحفظة الاستثمارية', path: '/finance/investments' },
-      { id: 'credit-management', label: 'إدارة الائتمان', path: '/finance/credit-management' },
-      { id: 'financial-planning', label: 'التخطيط المالي', path: '/finance/financial-planning' },
-      { id: 'compliance-controls', label: 'الامتثال والرقابة', path: '/finance/compliance' },
-      {
-        id: 'intercompany-settlement',
-        label: 'التسويات بين الشركات',
-        path: '/finance/intercompany',
-      },
-      // ─── Elite Finance - الميزات الاستراتيجية ───
-      { id: 'risk-management', label: 'إدارة المخاطر المالية', path: '/finance/risk-management' },
-      { id: 'financial-dashboards', label: 'لوحات البيانات المخصصة', path: '/finance/dashboards' },
-      {
-        id: 'treasury-management',
-        label: 'إدارة الخزينة المتقدمة',
-        path: '/finance/treasury-management',
-      },
-      { id: 'debt-management', label: 'إدارة الديون', path: '/finance/debt-management' },
-      { id: 'cost-allocation', label: 'توزيع التكاليف', path: '/finance/cost-allocation' },
-      { id: 'financial-workflow', label: 'سير العمل المالي', path: '/finance/workflow' },
-      { id: 'tax-planning', label: 'التخطيط الضريبي', path: '/finance/tax-planning' },
-      { id: 'audit-manager', label: 'إدارة التدقيق', path: '/finance/audit-manager' },
     ],
   },
   {
-    id: 'budget-management',
-    label: 'إدارة الميزانيات',
-    icon: <BudgetIcon />,
-    path: '/budget-management',
-    roles: ['admin', 'super_admin', 'manager', 'accountant'],
+    id: 'finance-tax',
+    label: 'الضرائب والزكاة',
+    icon: <FinanceIcon />,
+    roles: ['admin', 'super_admin', 'finance_manager', 'accountant'],
+    children: [
+      { id: 'vat-zakat', label: 'ضريبة القيمة المضافة والزكاة', path: '/accounting/vat-zakat' },
+      { id: 'withholding-tax', label: 'ضريبة الاستقطاع', path: '/accounting/withholding-tax' },
+      { id: 'tax-filing', label: 'الإقرارات الضريبية', path: '/finance/tax-filing' },
+      { id: 'tax-calendar', label: 'التقويم الضريبي', path: '/accounting/tax-calendar' },
+    ],
   },
   {
-    id: 'donations-section',
-    label: 'التبرعات والرعاية',
-    icon: <DonationsIcon />,
-    path: '/donations',
-    roles: ['admin', 'super_admin', 'manager', 'accountant'],
+    id: 'finance-reports',
+    label: 'التقارير المالية',
+    icon: <AnalyticsIcon />,
+    roles: ['admin', 'super_admin', 'finance_manager', 'accountant', 'manager'],
+    children: [
+      { id: 'financial-reports', label: 'التقارير المالية', path: '/accounting/reports' },
+      { id: 'financial-ratios', label: 'النسب المالية', path: '/accounting/financial-ratios' },
+      { id: 'aged-reports', label: 'تقارير أعمار الديون', path: '/accounting/aged-reports' },
+      { id: 'cash-flow-report', label: 'التدفقات النقدية', path: '/accounting/cash-flow' },
+      { id: 'executive-summary', label: 'الملخص التنفيذي', path: '/accounting/executive-summary' },
+      { id: 'financial-planning', label: 'التخطيط المالي', path: '/finance/financial-planning' },
+      { id: 'audit-manager', label: 'إدارة التدقيق', path: '/finance/audit-manager' },
+    ],
   },
 
   // ═══════════════════════════════════════════════════════
@@ -587,91 +499,38 @@ const getNavigationItems = () => [
     roles: ['admin', 'super_admin', 'manager'],
   },
   {
-    id: 'quality',
-    label: 'الجودة والامتثال',
-    icon: <SecurityIcon />,
-    roles: ['admin', 'super_admin', 'quality_manager'],
+    id: 'ops-extended',
+    label: 'اللوجستيات والخدمات',
+    icon: <WarehouseIcon />,
+    roles: ['admin', 'super_admin', 'manager', 'operations_manager'],
+    children: [
+      { id: 'warehouse', label: 'إدارة المستودعات', path: '/warehouse' },
+      { id: 'supply-chain', label: 'سلسلة الإمداد', path: '/supply-chain' },
+      { id: 'gps-tracking', label: 'تتبع GPS', path: '/gps-tracking' },
+      { id: 'iot-management', label: 'إنترنت الأشياء (IoT)', path: '/iot' },
+      { id: 'kitchen', label: 'إدارة المطبخ', path: '/kitchen' },
+      { id: 'laundry', label: 'إدارة المغسلة', path: '/laundry' },
+    ],
+  },
+  {
+    id: 'ops-compliance',
+    label: 'الجودة والسلامة',
+    icon: <HSEIcon />,
+    roles: ['admin', 'super_admin', 'manager', 'quality_manager', 'hse_officer'],
     children: [
       { id: 'quality-dashboard', label: 'لوحة تحكم الجودة', path: '/quality-dashboard' },
       { id: 'quality-manage', label: 'إدارة الجودة', path: '/quality' },
       { id: 'quality-audit', label: 'التدقيق الداخلي', path: '/internal-audit' },
+      { id: 'risk-assessment', label: 'تقييم المخاطر', path: '/risk-assessment' },
+      { id: 'hse', label: 'الصحة والسلامة (HSE)', path: '/hse' },
+      { id: 'crisis-management', label: 'إدارة الأزمات', path: '/crisis' },
     ],
-  },
-  {
-    id: 'risk-assessment',
-    label: 'تقييم المخاطر',
-    icon: <RiskIcon />,
-    path: '/risk-assessment',
-    roles: ['admin', 'super_admin', 'manager'],
-  },
-  {
-    id: 'kitchen',
-    label: 'إدارة المطبخ',
-    icon: <KitchenIcon />,
-    path: '/kitchen',
-    roles: ['admin', 'super_admin', 'manager', 'operations_manager'],
-  },
-  {
-    id: 'laundry',
-    label: 'إدارة المغسلة',
-    icon: <LaundryIcon />,
-    path: '/laundry',
-    roles: ['admin', 'super_admin', 'manager', 'operations_manager'],
-  },
-  {
-    id: 'gps-tracking',
-    label: 'تتبع GPS',
-    icon: <GPSTrackingIcon />,
-    path: '/gps-tracking',
-    roles: ['admin', 'super_admin', 'manager', 'fleet_manager'],
-  },
-  {
-    id: 'iot-management',
-    label: 'إنترنت الأشياء (IoT)',
-    icon: <IoTIcon />,
-    path: '/iot',
-    roles: ['admin', 'super_admin', 'manager', 'operations_manager'],
-  },
-  {
-    id: 'warehouse',
-    label: 'إدارة المستودعات',
-    icon: <WarehouseIcon />,
-    path: '/warehouse',
-    roles: ['admin', 'super_admin', 'manager', 'operations_manager'],
-  },
-  {
-    id: 'supply-chain',
-    label: 'سلسلة الإمداد',
-    icon: <SupplyChainIcon />,
-    path: '/supply-chain',
-    roles: ['admin', 'super_admin', 'manager', 'operations_manager'],
-  },
-  {
-    id: 'hse',
-    label: 'الصحة والسلامة (HSE)',
-    icon: <HSEIcon />,
-    path: '/hse',
-    roles: ['admin', 'super_admin', 'manager', 'operations_manager', 'hse_officer'],
-  },
-  {
-    id: 'crisis-management',
-    label: 'إدارة الأزمات',
-    icon: <CrisisIcon />,
-    path: '/crisis',
-    roles: ['admin', 'super_admin', 'manager'],
-  },
-  {
-    id: 'helpdesk',
-    label: 'الدعم الفني (HelpDesk)',
-    icon: <HelpDeskIcon />,
-    path: '/helpdesk',
-    roles: ['*'],
   },
 
   // ═══════════════════════════════════════════════════════
   //  ⑥ التواصل والمراسلات — Communications & Messaging
   // ═══════════════════════════════════════════════════════
-  { id: 'divider-comms', type: 'divider', label: 'التواصل والمراسلات' },
+  { id: 'divider-comms', type: 'divider', label: 'التواصل والمعلومات' },
   {
     id: 'communications',
     label: 'التواصل',
@@ -687,6 +546,13 @@ const getNavigationItems = () => [
       },
       { id: 'comm-messages', label: 'الرسائل', path: '/messages' },
       { id: 'comm-system', label: 'نظام التواصل', path: '/communications-system' },
+      {
+        id: 'comm-whatsapp',
+        label: 'واتساب / الذكاء الاصطناعي',
+        path: '/whatsapp',
+        badge: 'جديد',
+        badgeColor: 'success',
+      },
     ],
   },
   {
@@ -741,10 +607,7 @@ const getNavigationItems = () => [
     roles: ['admin', 'super_admin', 'manager', 'pr_officer'],
   },
 
-  // ═══════════════════════════════════════════════════════
-  //  ⑦ المستندات والأرشفة — Documents & Archive
-  // ═══════════════════════════════════════════════════════
-  { id: 'divider-docs', type: 'divider', label: 'المستندات والأرشفة' },
+  // ─── المستندات والأرشفة (ضمن قسم التواصل والمعلومات) ───
   {
     id: 'documents',
     label: 'المستندات',
@@ -1125,9 +988,9 @@ const getNavigationItems = () => [
   },
 
   // ═══════════════════════════════════════════════════════
-  //  ⑪ التكامل الحكومي والامتثال — Government Integration
+  //  ⑩ الإدارة والنظام — System Administration & Gov Integration
   // ═══════════════════════════════════════════════════════
-  { id: 'divider-gov', type: 'divider', label: 'التكامل الحكومي والامتثال' },
+  { id: 'divider-admin', type: 'divider', label: 'الإدارة والنظام' },
   {
     id: 'gov-integration',
     label: 'التكامل الحكومي',
@@ -1183,108 +1046,23 @@ const getNavigationItems = () => [
       },
     ],
   },
-
-  // ═══════════════════════════════════════════════════════
-  //  ⑫ الأنظمة الإدارية — Administrative Systems
-  // ═══════════════════════════════════════════════════════
-  { id: 'divider-admin-systems', type: 'divider', label: 'الأنظمة الإدارية' },
   {
-    id: 'strategic-planning',
-    label: 'التخطيط الاستراتيجي',
-    icon: <StrategicIcon />,
-    path: '/strategic-planning',
+    id: 'institutional-admin',
+    label: 'الإدارة المؤسسية',
+    icon: <AdministrationIcon />,
     roles: ['admin', 'super_admin', 'manager'],
+    children: [
+      { id: 'strategic-planning', label: 'التخطيط الاستراتيجي', path: '/strategic-planning' },
+      { id: 'org-structure', label: 'الهيكل التنظيمي', path: '/org-structure' },
+      { id: 'succession-planning', label: 'التعاقب الوظيفي', path: '/succession-planning' },
+      { id: 'facility-management', label: 'إدارة المرافق', path: '/facility-management' },
+      { id: 'legal-affairs', label: 'الشؤون القانونية', path: '/legal-affairs' },
+      { id: 'events-management', label: 'إدارة الفعاليات', path: '/events' },
+      { id: 'employee-affairs', label: 'شؤون الموظفين', path: '/employee-affairs' },
+      { id: 'community-integration', label: 'التكامل المجتمعي', path: '/community' },
+      { id: 'volunteer-management', label: 'إدارة المتطوعين', path: '/volunteers' },
+    ],
   },
-  {
-    id: 'meetings-management',
-    label: 'إدارة الاجتماعات',
-    icon: <MeetingIcon />,
-    path: '/meetings',
-    roles: ['*'],
-  },
-  {
-    id: 'visitors-management',
-    label: 'إدارة الزوار',
-    icon: <VisitorIcon />,
-    path: '/visitors',
-    roles: ['admin', 'super_admin', 'receptionist', 'security'],
-  },
-  {
-    id: 'complaints-management',
-    label: 'الشكاوى والمقترحات',
-    icon: <ComplaintsIcon />,
-    path: '/complaints',
-    roles: ['*'],
-  },
-  {
-    id: 'org-structure',
-    label: 'الهيكل التنظيمي',
-    icon: <AccountTreeIcon />,
-    path: '/org-structure',
-    roles: ['admin', 'super_admin', 'hr_manager'],
-  },
-  {
-    id: 'succession-planning',
-    label: 'التعاقب الوظيفي',
-    icon: <SuccessionIcon />,
-    path: '/succession-planning',
-    roles: ['admin', 'super_admin', 'hr_manager'],
-  },
-  {
-    id: 'facility-management',
-    label: 'إدارة المرافق',
-    icon: <FacilityRoomIcon />,
-    path: '/facility-management',
-    roles: ['admin', 'super_admin', 'facility_manager'],
-  },
-  {
-    id: 'legal-affairs',
-    label: 'الشؤون القانونية',
-    icon: <LegalIcon />,
-    path: '/legal-affairs',
-    roles: ['admin', 'super_admin', 'manager', 'legal_officer'],
-  },
-  {
-    id: 'events-management',
-    label: 'إدارة الفعاليات',
-    icon: <EventIcon />,
-    path: '/events',
-    roles: ['admin', 'super_admin', 'manager', 'pr_officer'],
-  },
-  {
-    id: 'employee-affairs',
-    label: 'شؤون الموظفين',
-    icon: <EmployeeAffairsIcon />,
-    path: '/employee-affairs',
-    roles: ['admin', 'super_admin', 'hr_manager'],
-  },
-  {
-    id: 'waitlist-management',
-    label: 'قائمة الانتظار',
-    icon: <WaitlistIcon />,
-    path: '/waitlist',
-    roles: ['admin', 'super_admin', 'manager', 'receptionist'],
-  },
-
-  {
-    id: 'community-integration',
-    label: 'التكامل المجتمعي',
-    icon: <CommunityIcon />,
-    path: '/community',
-    roles: ['admin', 'super_admin', 'manager', 'social_worker'],
-  },
-  {
-    id: 'volunteer-management',
-    label: 'إدارة المتطوعين',
-    icon: <VolunteerIcon />,
-    path: '/volunteers',
-    roles: ['admin', 'super_admin', 'manager', 'hr_manager'],
-  },
-
-  // ═══════════════════════════════════════════════════════
-  //  ⑬ الإدارة والنظام — System Administration
-  // ═══════════════════════════════════════════════════════
-  { id: 'divider-admin', type: 'divider', label: 'الإدارة والنظام' },
   {
     id: 'admin-operations',
     label: 'إدارة العمليات',
@@ -1297,7 +1075,6 @@ const getNavigationItems = () => [
       'receptionist',
       'coordinator',
     ],
-    badge: 'جديد',
     children: [
       { id: 'admin-branches', label: 'الفروع والمراكز', path: '/admin/branches' },
       { id: 'admin-beneficiaries', label: 'المستفيدون', path: '/admin/beneficiaries' },
@@ -1480,6 +1257,83 @@ const getNavigationItems = () => [
         badge: 'NPHIES',
         badgeColor: 'success',
       },
+      {
+        id: 'admin-insurance-tariffs',
+        label: 'تعريفات أسعار التأمين',
+        path: '/insurance-tariffs',
+        badge: 'NPHIES',
+        badgeColor: 'success',
+      },
+      {
+        id: 'admin-zatca-credentials',
+        label: 'بيانات اعتماد ZATCA',
+        path: '/zatca-credentials',
+        badge: 'ZATCA',
+        badgeColor: 'warning',
+      },
+      {
+        id: 'admin-management-review',
+        label: 'مراجعات الإدارة (ISO 9.3)',
+        path: '/quality/management-review',
+        badge: 'CBAHI',
+        badgeColor: 'info',
+      },
+      {
+        id: 'admin-evidence-vault',
+        label: 'خزنة الأدلة',
+        path: '/quality/evidence',
+        badge: 'CBAHI',
+        badgeColor: 'info',
+      },
+      {
+        id: 'admin-compliance-calendar',
+        label: 'تقويم الامتثال',
+        path: '/quality/compliance-calendar',
+        badge: 'CBAHI',
+        badgeColor: 'info',
+      },
+      {
+        id: 'admin-pdpl-dashboard',
+        label: 'لوحة امتثال PDPL',
+        path: '/quality/pdpl',
+        badge: 'PDPL',
+        badgeColor: 'error',
+      },
+      {
+        id: 'admin-pdpl-subject-requests',
+        label: 'طلبات أصحاب البيانات (PDPL)',
+        path: '/quality/pdpl/subject-requests',
+        badge: 'PDPL',
+        badgeColor: 'error',
+      },
+      {
+        id: 'admin-pdpl-consents',
+        label: 'إدارة الموافقات (PDPL)',
+        path: '/quality/pdpl/consents',
+        badge: 'PDPL',
+        badgeColor: 'error',
+      },
+      {
+        id: 'admin-pdpl-breaches',
+        label: 'خرق البيانات (مادة 20)',
+        path: '/quality/pdpl/breaches',
+        badge: 'PDPL',
+        badgeColor: 'error',
+      },
+      {
+        id: 'admin-pdpl-processing-records',
+        label: 'سجل المعالجة (مادة 32)',
+        path: '/quality/pdpl/processing-records',
+        badge: 'PDPL',
+        badgeColor: 'error',
+      },
+      {
+        id: 'admin-pdpl-access-audit',
+        label: 'سجل الوصول (مادة 13)',
+        path: '/quality/pdpl/access-audit',
+        badge: 'PDPL',
+        badgeColor: 'error',
+      },
       { id: 'admin-notifications', label: 'التنبيهات الموحَّدة', path: '/admin/notifications' },
       { id: 'admin-bookings', label: 'حجوزات الموقع', path: '/admin/bookings' },
       { id: 'admin-applications', label: 'طلبات التوظيف', path: '/admin/applications' },
@@ -1492,8 +1346,6 @@ const getNavigationItems = () => [
     roles: ['admin', 'super_admin'],
     children: [
       { id: 'admin-main', label: 'اللوحة الرئيسية', path: '/admin-portal' },
-      { id: 'admin-users', label: 'إدارة المستخدمين (قديم)', path: '/admin-portal/users' },
-      { id: 'admin-user-mgmt', label: 'إدارة المستخدمين', path: '/user-management', badge: 'جديد' },
       { id: 'admin-settings', label: 'إعدادات النظام', path: '/admin-portal/settings' },
       { id: 'admin-branding', label: 'الهوية والتصميم', path: '/admin-portal/branding' },
       { id: 'admin-audit', label: 'سجل المراجعة', path: '/admin-portal/audit-logs' },
@@ -1529,53 +1381,25 @@ const getNavigationItems = () => [
     path: '/sso-admin',
     roles: ['admin', 'super_admin'],
   },
-  // ─── أنظمة متقدمة: بلوكتشين، ICF، MDT، واقع معزز ───
+  // ─── أنظمة متقدمة ───
   {
     id: 'blockchain-certificates',
     label: 'شهادات البلوكتشين',
     icon: <BlockchainIcon />,
-    path: '/blockchain-certificates',
     roles: ['admin', 'super_admin'],
-  },
-  {
-    id: 'icf-assessments',
-    label: 'تقييمات ICF',
-    icon: <ICFIcon />,
-    path: '/icf-assessments',
-    roles: ['admin', 'super_admin', 'therapist', 'specialist'],
-  },
-  {
-    id: 'mdt-coordination',
-    label: 'التنسيق متعدد التخصصات',
-    icon: <MDTIcon />,
-    path: '/mdt-coordination',
-    roles: ['admin', 'super_admin', 'therapist', 'specialist', 'doctor'],
-  },
-  {
-    id: 'ar-rehab',
-    label: 'تأهيل الواقع المعزز',
-    icon: <ARRehabIcon />,
-    path: '/ar-rehab',
-    roles: ['admin', 'super_admin', 'therapist', 'specialist'],
-  },
-  // ─── الطب عن بُعد (Telehealth) ───
-  {
-    id: 'telehealth',
-    label: 'جلسات الفيديو',
-    icon: <TelehealthIcon />,
-    path: '/telehealth',
-    badge: 'جديد',
-    badgeColor: 'success',
-    roles: [
-      'admin',
-      'super_admin',
-      'therapist',
-      'specialist',
-      'clinical_supervisor',
-      'manager',
-      'parent',
-      'guardian',
+    children: [
+      { id: 'bc-dashboard', label: 'لوحة الشهادات', path: '/blockchain-certificates' },
+      { id: 'bc-templates', label: 'القوالب', path: '/blockchain-certificates/templates' },
+      { id: 'bc-batch', label: 'إصدار بالجملة', path: '/blockchain-certificates/batch-issue' },
+      { id: 'bc-logs', label: 'سجل التحقق', path: '/blockchain-certificates/logs' },
     ],
+  },
+  {
+    id: 'helpdesk',
+    label: 'الدعم الفني',
+    icon: <HelpDeskIcon />,
+    path: '/helpdesk',
+    roles: ['*'],
   },
   {
     id: 'settings',

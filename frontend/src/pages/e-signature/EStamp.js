@@ -26,7 +26,8 @@ import {
   CircularProgress,
   Tooltip,
   Menu,
-  MenuItem,  Checkbox,
+  MenuItem,
+  Checkbox,
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -38,7 +39,8 @@ import {
   Visibility,
   CheckCircle,
   Cancel,
-  PendingActions,  BarChart,
+  PendingActions,
+  BarChart,
   Delete as DeleteIcon,
   Edit,
 } from '@mui/icons-material';

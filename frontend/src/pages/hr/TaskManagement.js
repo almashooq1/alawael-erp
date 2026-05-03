@@ -29,18 +29,16 @@ import {
   Alert,
   Snackbar,
   CircularProgress,
-  LinearProgress,} from '@mui/material';
-import {
-  Add as AddIcon,
-  Visibility as ViewIcon,
-  Flag as FlagIcon,
-  } from '@mui/icons-material';
+  LinearProgress,
+} from '@mui/material';
+import { Add as AddIcon, Visibility as ViewIcon, Flag as FlagIcon } from '@mui/icons-material';
 import {
   getTasks,
   createTask,
   getTaskById,
   updateTaskStatus,
-  addTaskComment,  getTaskStats,
+  addTaskComment,
+  getTaskStats,
 } from '../../services/hr/employeeAffairsPhase2Service';
 
 const TYPES = ['مهمة عادية', 'تكليف رسمي', 'مشروع', 'مهمة عاجلة', 'متابعة', 'تحسين', 'بحث ودراسة'];

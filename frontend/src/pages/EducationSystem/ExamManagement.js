@@ -9,7 +9,8 @@ import {
   Paper,
   Box,
   Typography,
-  Button,  Table,
+  Button,
+  Table,
   TableBody,
   TableCell,
   TableContainer,
@@ -30,11 +31,13 @@ import {
   InputLabel,
   FormControl,
   Avatar,
-  TablePagination,  Divider,
+  TablePagination,
+  Divider,
   List,
   ListItem,
   ListItemText,
-  ListItemIcon,} from '@mui/material';
+  ListItemIcon,
+} from '@mui/material';
 import {
   Add as AddIcon,
   Edit as EditIcon,
@@ -43,7 +46,7 @@ import {
   ArrowBack as BackIcon,
   Timer as TimerIcon,
   QuestionAnswer as QuestionIcon,
-  } from '@mui/icons-material';
+} from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { gradients } from '../../theme/palette';
 import educationSystemService from '../../services/educationSystem.service';

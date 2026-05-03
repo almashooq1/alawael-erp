@@ -37,17 +37,20 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  CircularProgress,} from '@mui/material';
+  CircularProgress,
+} from '@mui/material';
 import {
   ArrowBack,
   Refresh,
   Add,
   Webhook,
   Edit,
-  Delete,  CheckCircle,
+  Delete,
+  CheckCircle,
   Error,
   History,
-  Link,  Send,
+  Link,
+  Send,
 } from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import workflowService from '../../services/workflow.service';

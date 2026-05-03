@@ -1,9 +1,20 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import computeStatusCounts from '../../utils/computeStatusCounts';
 import {
-  Container, Typography, Grid, Paper, Box,
-  Chip, Table, TableBody, TableCell, TableContainer,
-  TableHead, TableRow, LinearProgress, Button,
+  Container,
+  Typography,
+  Grid,
+  Paper,
+  Box,
+  Chip,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  LinearProgress,
+  Button,
 } from '@mui/material';
 import {
   Schedule as ScheduleIcon,
@@ -17,9 +28,19 @@ import {
   ArrowForward as ArrowForwardIcon,
 } from '@mui/icons-material';
 import {
-  BarChart, Bar, PieChart, Pie, Cell, LineChart, Line,
-  XAxis, YAxis, CartesianGrid, Tooltip as RTooltip,
-  ResponsiveContainer, Legend,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as RTooltip,
+  ResponsiveContainer,
+  Legend,
 } from 'recharts';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients, chartColors, statusColors } from '../../theme/palette';
@@ -32,7 +53,7 @@ import { useNavigate } from 'react-router-dom';
 import { STATUS_MAP as CONST_STATUS_MAP, getSessionType } from './constants';
 
 /* ──────── بيانات تجريبية ──────── */
-const DEMO_STATS = {
+const DATA_STATS = {
   totalToday: 24,
   completedToday: 18,
   cancelledToday: 2,
@@ -44,7 +65,7 @@ const DEMO_STATS = {
   totalTherapists: 12,
 };
 
-const DEMO_BY_TYPE = [
+const DATA_BY_TYPE = [
   { name: 'علاج طبيعي', value: 45, color: chartColors.category[0] },
   { name: 'علاج وظيفي', value: 32, color: chartColors.category[1] },
   { name: 'علاج نطق', value: 28, color: chartColors.category[2] },
@@ -53,7 +74,7 @@ const DEMO_BY_TYPE = [
   { name: 'خدمات مساندة', value: 10, color: chartColors.category[9] },
 ];
 
-const DEMO_WEEKLY_TREND = [
+const DATA_WEEKLY_TREND = [
   { day: 'السبت', completed: 22, cancelled: 3, noShow: 1 },
   { day: 'الأحد', completed: 28, cancelled: 2, noShow: 2 },
   { day: 'الاثنين', completed: 25, cancelled: 4, noShow: 1 },
@@ -62,7 +83,7 @@ const DEMO_WEEKLY_TREND = [
   { day: 'الخميس', completed: 18, cancelled: 2, noShow: 1 },
 ];
 
-const DEMO_HOURLY = [
+const DATA_HOURLY = [
   { hour: '8:00', sessions: 4 },
   { hour: '9:00', sessions: 8 },
   { hour: '10:00', sessions: 12 },
@@ -75,7 +96,7 @@ const DEMO_HOURLY = [
   { hour: '17:00', sessions: 4 },
 ];
 
-const DEMO_THERAPIST_LOAD = [
+const DATA_THERAPIST_LOAD = [
   { name: 'أ. محمد العلي', sessions: 8, completion: 95 },
   { name: 'أ. فاطمة أحمد', sessions: 7, completion: 90 },
   { name: 'أ. سارة الخالد', sessions: 6, completion: 88 },
@@ -84,12 +105,47 @@ const DEMO_THERAPIST_LOAD = [
   { name: 'أ. خالد الراشد', sessions: 5, completion: 91 },
 ];
 
-const DEMO_RECENT = [
-  { id: 1, student: 'يوسف أحمد', therapist: 'أ. محمد العلي', type: 'علاج طبيعي', time: '09:00', status: 'completed' },
-  { id: 2, student: 'ليلى خالد', therapist: 'أ. فاطمة أحمد', type: 'علاج نطق', time: '09:30', status: 'completed' },
-  { id: 3, student: 'عمر سعيد', therapist: 'أ. سارة الخالد', type: 'علاج وظيفي', time: '10:00', status: 'in-progress' },
-  { id: 4, student: 'ريم محمد', therapist: 'أ. عبدالله الحربي', type: 'علاج سلوكي', time: '10:30', status: 'scheduled' },
-  { id: 5, student: 'سلمان ناصر', therapist: 'أ. نورة السعيد', type: 'علاج طبيعي', time: '11:00', status: 'cancelled' },
+const DATA_RECENT = [
+  {
+    id: 1,
+    student: 'يوسف أحمد',
+    therapist: 'أ. محمد العلي',
+    type: 'علاج طبيعي',
+    time: '09:00',
+    status: 'completed',
+  },
+  {
+    id: 2,
+    student: 'ليلى خالد',
+    therapist: 'أ. فاطمة أحمد',
+    type: 'علاج نطق',
+    time: '09:30',
+    status: 'completed',
+  },
+  {
+    id: 3,
+    student: 'عمر سعيد',
+    therapist: 'أ. سارة الخالد',
+    type: 'علاج وظيفي',
+    time: '10:00',
+    status: 'in-progress',
+  },
+  {
+    id: 4,
+    student: 'ريم محمد',
+    therapist: 'أ. عبدالله الحربي',
+    type: 'علاج سلوكي',
+    time: '10:30',
+    status: 'scheduled',
+  },
+  {
+    id: 5,
+    student: 'سلمان ناصر',
+    therapist: 'أ. نورة السعيد',
+    type: 'علاج طبيعي',
+    time: '11:00',
+    status: 'cancelled',
+  },
 ];
 
 const STATUS_MAP = {
@@ -104,12 +160,12 @@ export default function SessionsDashboard() {
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState(DEMO_STATS);
-  const [byType, setByType] = useState(DEMO_BY_TYPE);
-  const [weeklyTrend, _setWeeklyTrend] = useState(DEMO_WEEKLY_TREND);
-  const [hourlyDist, _setHourlyDist] = useState(DEMO_HOURLY);
-  const [therapistLoad, _setTherapistLoad] = useState(DEMO_THERAPIST_LOAD);
-  const [recentSessions, setRecentSessions] = useState(DEMO_RECENT);
+  const [stats, setStats] = useState(DATA_STATS);
+  const [byType, setByType] = useState(DATA_BY_TYPE);
+  const [weeklyTrend, _setWeeklyTrend] = useState(DATA_WEEKLY_TREND);
+  const [hourlyDist, _setHourlyDist] = useState(DATA_HOURLY);
+  const [therapistLoad, _setTherapistLoad] = useState(DATA_THERAPIST_LOAD);
+  const [recentSessions, setRecentSessions] = useState(DATA_RECENT);
 
   const loadDashboard = useCallback(async () => {
     setLoading(true);
@@ -142,12 +198,24 @@ export default function SessionsDashboard() {
         const sessions = sessionsRes.value?.sessions || sessionsRes.value?.data || [];
         if (Array.isArray(sessions) && sessions.length > 0) {
           const today = new Date().toISOString().slice(0, 10);
-          const todaySessions = sessions.filter(s => (s.date || s.createdAt || '')?.slice(0, 10) === today);
+          const todaySessions = sessions.filter(
+            s => (s.date || s.createdAt || '')?.slice(0, 10) === today
+          );
 
           if (todaySessions.length > 0 && statsRes.status !== 'fulfilled') {
-            const { COMPLETED: completed = 0, CANCELLED_BY_PATIENT: cpat = 0, CANCELLED_BY_CENTER: ccen = 0, NO_SHOW: noShow = 0, SCHEDULED: scheduled = 0 } = computeStatusCounts(
-              todaySessions, 'status', ['COMPLETED', 'CANCELLED_BY_PATIENT', 'CANCELLED_BY_CENTER', 'NO_SHOW', 'SCHEDULED']
-            );
+            const {
+              COMPLETED: completed = 0,
+              CANCELLED_BY_PATIENT: cpat = 0,
+              CANCELLED_BY_CENTER: ccen = 0,
+              NO_SHOW: noShow = 0,
+              SCHEDULED: scheduled = 0,
+            } = computeStatusCounts(todaySessions, 'status', [
+              'COMPLETED',
+              'CANCELLED_BY_PATIENT',
+              'CANCELLED_BY_CENTER',
+              'NO_SHOW',
+              'SCHEDULED',
+            ]);
             setStats(prev => ({
               ...prev,
               totalToday: todaySessions.length,
@@ -156,7 +224,8 @@ export default function SessionsDashboard() {
               noShowToday: noShow,
               scheduledToday: scheduled,
               totalWeek: sessions.length,
-              completionRate: todaySessions.length > 0 ? Math.round((completed / todaySessions.length) * 100) : 0,
+              completionRate:
+                todaySessions.length > 0 ? Math.round((completed / todaySessions.length) * 100) : 0,
             }));
           }
 
@@ -180,7 +249,7 @@ export default function SessionsDashboard() {
             .slice(0, 5)
             .map((s, i) => ({
               id: s._id || i,
-              student: s.studentName || s.beneficiary?.name || (s.participants?.[0]?.name) || 'طالب',
+              student: s.studentName || s.beneficiary?.name || s.participants?.[0]?.name || 'طالب',
               therapist: s.therapistName || s.therapist?.name || s.createdBy?.name || 'معالج',
               type: getSessionType(s),
               time: s.startTime || s.time || '-',
@@ -203,265 +272,571 @@ export default function SessionsDashboard() {
 
   return (
     <DashboardErrorBoundary>
-    <Container maxWidth="xl" sx={{ py: 3 }}>
-      {loading && <LinearProgress sx={{ mb: 2, borderRadius: 1 }} />}
+      <Container maxWidth="xl" sx={{ py: 3 }}>
+        {loading && <LinearProgress sx={{ mb: 2, borderRadius: 1 }} />}
 
-      {/* ──── Header ──── */}
-      <Box
-        sx={{
-          background: gradients.info,
-          borderRadius: 3,
-          p: 3,
-          mb: 4,
-          color: 'white',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-        }}
-      >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <ScheduleIcon sx={{ fontSize: 44 }} />
-          <Box>
-            <Typography variant="h4" fontWeight="bold">
-              لوحة تحكم الجلسات
-            </Typography>
-            <Typography variant="body2" sx={{ opacity: 0.9 }}>
-              نظرة عامة على الجلسات العلاجية والمواعيد
-            </Typography>
-          </Box>
-        </Box>
-        <Button
-          variant="contained"
-          color="inherit"
-          sx={{ color: '#0288d1', fontWeight: 600 }}
-          startIcon={<ArrowForwardIcon />}
-          onClick={() => navigate('/sessions')}
+        {/* ──── Header ──── */}
+        <Box
+          sx={{
+            background: gradients.info,
+            borderRadius: 3,
+            p: 3,
+            mb: 4,
+            color: 'white',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
         >
-          إدارة الجلسات
-        </Button>
-      </Box>
-
-      {/* ──── KPI Cards ──── */}
-      <Grid container spacing={2} sx={{ mb: 4 }}>
-        <Grid item xs={12} sm={6} md={4} lg={2}>
-          <ModuleKPICard title="جلسات اليوم" value={stats.totalToday} subtitle="إجمالي مجدول" icon={<TodayIcon />} color="primary" />
-        </Grid>
-        <Grid item xs={12} sm={6} md={4} lg={2}>
-          <ModuleKPICard title="مكتملة اليوم" value={stats.completedToday} subtitle={`${stats.completionRate}% نسبة الإكمال`} icon={<CheckCircleIcon />} color="success" />
-        </Grid>
-        <Grid item xs={12} sm={6} md={4} lg={2}>
-          <ModuleKPICard title="ملغاة" value={stats.cancelledToday} subtitle="هذا اليوم" icon={<CancelIcon />} color="error" />
-        </Grid>
-        <Grid item xs={12} sm={6} md={4} lg={2}>
-          <ModuleKPICard title="لم يحضر" value={stats.noShowToday} subtitle="عدم الحضور" icon={<NoShowIcon />} color="warning" />
-        </Grid>
-        <Grid item xs={12} sm={6} md={4} lg={2}>
-          <ModuleKPICard title="إجمالي الأسبوع" value={stats.totalWeek} subtitle="جلسة" icon={<TrendingUpIcon />} color="info" />
-        </Grid>
-        <Grid item xs={12} sm={6} md={4} lg={2}>
-          <ModuleKPICard title="متوسط المدة" value={`${stats.avgDuration} د`} subtitle={`${stats.totalTherapists} معالج`} icon={<AccessTimeIcon />} color="secondary" />
-        </Grid>
-      </Grid>
-
-      {/* ──── Charts Row 1: Weekly Trend + By Type ──── */}
-      <Grid container spacing={3} sx={{ mb: 3 }}>
-        <Grid item xs={12} md={8}>
-          <Paper sx={{ p: 3, borderRadius: '20px', height: '100%', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)', transition: 'all 0.3s', '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' } }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                <Box sx={{ width: 36, height: 36, borderRadius: '10px', bgcolor: 'rgba(16,185,129,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <TrendingUpIcon sx={{ fontSize: 20, color: statusColors.success }} />
-                </Box>
-                <Typography variant="h6" fontWeight={700} fontSize="1rem">اتجاه الجلسات الأسبوعي</Typography>
-              </Box>
-              <Chip label="هذا الأسبوع" size="small" variant="outlined" sx={{ borderRadius: '8px', fontWeight: 500 }} />
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <ScheduleIcon sx={{ fontSize: 44 }} />
+            <Box>
+              <Typography variant="h4" fontWeight="bold">
+                لوحة تحكم الجلسات
+              </Typography>
+              <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                نظرة عامة على الجلسات العلاجية والمواعيد
+              </Typography>
             </Box>
-            {weeklyTrend.length > 0 ? (
-              <ResponsiveContainer width="100%" height={280} role="img" aria-label="رسم بياني لاتجاه الجلسات الأسبوعي">
-                <BarChart data={weeklyTrend} barSize={20}>
-                  <defs>
-                    <linearGradient id="sessDone" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#10b981" /><stop offset="100%" stopColor="#059669" /></linearGradient>
-                    <linearGradient id="sessCancel" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#ef4444" /><stop offset="100%" stopColor="#dc2626" /></linearGradient>
-                    <linearGradient id="sessNoShow" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#f59e0b" /><stop offset="100%" stopColor="#d97706" /></linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
-                  <XAxis dataKey="day" tick={{ fontSize: 12, fill: '#999' }} />
-                  <YAxis tick={{ fontSize: 12, fill: '#999' }} />
-                  <RTooltip contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.12)' }} />
-                  <Legend />
-                  <Bar dataKey="completed" fill="url(#sessDone)" name="مكتملة" radius={[6, 6, 0, 0]} />
-                  <Bar dataKey="cancelled" fill="url(#sessCancel)" name="ملغاة" radius={[6, 6, 0, 0]} />
-                  <Bar dataKey="noShow" fill="url(#sessNoShow)" name="لم يحضر" radius={[6, 6, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <EmptyState height={280} />
-            )}
-          </Paper>
-        </Grid>
-        <Grid item xs={12} md={4}>
-          <Paper sx={{ p: 3, borderRadius: '20px', height: '100%', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)', transition: 'all 0.3s', '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' } }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
-              <Box sx={{ width: 36, height: 36, borderRadius: '10px', bgcolor: 'rgba(99,102,241,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <ScheduleIcon sx={{ fontSize: 20, color: '#6366f1' }} />
-              </Box>
-              <Typography variant="h6" fontWeight={700} fontSize="1rem">الجلسات حسب النوع</Typography>
-            </Box>
-            {byType.length > 0 ? (
-              <ResponsiveContainer width="100%" height={280} role="img" aria-label="رسم بياني لتوزيع الجلسات حسب النوع">
-                <PieChart>
-                  <Pie
-                    data={byType}
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={90}
-                    innerRadius={50}
-                    paddingAngle={2}
-                    dataKey="value"
-                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                  >
-                    {byType.map((entry, i) => (
-                      <Cell key={i} fill={entry.color} stroke="none" />
-                    ))}
-                  </Pie>
-                  <RTooltip contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.12)' }} />
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              <EmptyState height={280} />
-            )}
-          </Paper>
-        </Grid>
-      </Grid>
-
-      {/* ──── Charts Row 2: Hourly Distribution + Therapist Load ──── */}
-      <Grid container spacing={3} sx={{ mb: 3 }}>
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 3, borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)', transition: 'all 0.3s', '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' } }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
-              <Box sx={{ width: 36, height: 36, borderRadius: '10px', bgcolor: 'rgba(59,130,246,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <AccessTimeIcon sx={{ fontSize: 20, color: '#3b82f6' }} />
-              </Box>
-              <Typography variant="h6" fontWeight={700} fontSize="1rem">توزيع الجلسات حسب الساعة</Typography>
-            </Box>
-            {hourlyDist.length > 0 ? (
-              <ResponsiveContainer width="100%" height={260} role="img" aria-label="رسم بياني لتوزيع الجلسات حسب الساعة">
-                <LineChart data={hourlyDist}>
-                  <defs>
-                    <linearGradient id="sessLineGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.15} />
-                      <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.01} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
-                  <XAxis dataKey="hour" tick={{ fontSize: 12, fill: '#999' }} />
-                  <YAxis tick={{ fontSize: 12, fill: '#999' }} />
-                  <RTooltip contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.12)' }} />
-                  <Line type="monotone" dataKey="sessions" stroke="#3b82f6" strokeWidth={2.5} name="عدد الجلسات" dot={{ r: 4, fill: '#3b82f6' }} activeDot={{ r: 6 }} />
-                </LineChart>
-              </ResponsiveContainer>
-            ) : (
-              <EmptyState height={260} />
-            )}
-          </Paper>
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 3, borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)', transition: 'all 0.3s', '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' } }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
-              <Box sx={{ width: 36, height: 36, borderRadius: '10px', bgcolor: 'rgba(139,92,246,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <GroupsIcon sx={{ fontSize: 20, color: '#8b5cf6' }} />
-              </Box>
-              <Typography variant="h6" fontWeight={700} fontSize="1rem">عبء عمل المعالجين</Typography>
-            </Box>
-            <TableContainer>
-              <Table size="small" sx={{ '& .MuiTableCell-root': { borderColor: 'rgba(0,0,0,0.06)', py: 1.5 } }}>
-                <TableHead>
-                  <TableRow sx={{ '& .MuiTableCell-head': { fontWeight: 700, color: 'text.secondary', fontSize: '12px', letterSpacing: 0.5, bgcolor: 'rgba(0,0,0,0.02)', borderRadius: 0 } }}>
-                    <TableCell>المعالج</TableCell>
-                    <TableCell align="center">الجلسات</TableCell>
-                    <TableCell>نسبة الإنجاز</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {therapistLoad.map((t, i) => (
-                    <TableRow key={i} sx={{ transition: 'all 0.2s', '&:hover': { bgcolor: 'rgba(0,0,0,0.015)' } }}>
-                      <TableCell sx={{ fontWeight: 600 }}>{t.name}</TableCell>
-                      <TableCell align="center">
-                        <Chip label={t.sessions} size="small" sx={{ bgcolor: 'rgba(99,102,241,0.08)', color: '#6366f1', fontWeight: 700, borderRadius: '8px' }} />
-                      </TableCell>
-                      <TableCell>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <LinearProgress
-                            variant="determinate"
-                            value={t.completion}
-                            sx={{
-                              flex: 1, height: 6, borderRadius: 3, bgcolor: 'rgba(0,0,0,0.04)',
-                              '& .MuiLinearProgress-bar': {
-                                borderRadius: 3,
-                                background: t.completion >= 90 ? 'linear-gradient(90deg, #10b981, #34d399)' : t.completion >= 80 ? 'linear-gradient(90deg, #f59e0b, #fbbf24)' : 'linear-gradient(90deg, #ef4444, #f87171)',
-                              },
-                            }}
-                          />
-                          <Chip label={`${t.completion}%`} size="small" sx={{ height: 22, fontSize: '11px', fontWeight: 700, bgcolor: t.completion >= 90 ? 'rgba(16,185,129,0.1)' : t.completion >= 80 ? 'rgba(245,158,11,0.1)' : 'rgba(239,68,68,0.1)', color: t.completion >= 90 ? '#059669' : t.completion >= 80 ? '#D97706' : '#DC2626', borderRadius: '6px' }} />
-                        </Box>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Paper>
-        </Grid>
-      </Grid>
-
-      {/* ──── Recent Sessions ──── */}
-      <Paper sx={{ p: 3, borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)', transition: 'all 0.3s', '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' } }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-            <Box sx={{ width: 36, height: 36, borderRadius: '10px', bgcolor: 'rgba(245,158,11,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <ScheduleIcon sx={{ fontSize: 20, color: '#f59e0b' }} />
-            </Box>
-            <Typography variant="h6" fontWeight={700} fontSize="1rem">آخر الجلسات</Typography>
           </Box>
-          <Button size="small" onClick={() => navigate('/sessions')} sx={{ borderRadius: '10px', fontWeight: 600, fontSize: '12px' }} endIcon={<ArrowForwardIcon sx={{ fontSize: 16 }} />}>
-            عرض الكل
+          <Button
+            variant="contained"
+            color="inherit"
+            sx={{ color: '#0288d1', fontWeight: 600 }}
+            startIcon={<ArrowForwardIcon />}
+            onClick={() => navigate('/sessions')}
+          >
+            إدارة الجلسات
           </Button>
         </Box>
-        <TableContainer>
-          <Table sx={{ '& .MuiTableCell-root': { borderColor: 'rgba(0,0,0,0.06)' } }}>
-            <TableHead>
-              <TableRow sx={{ '& .MuiTableCell-head': { fontWeight: 700, color: 'text.secondary', fontSize: '12px', letterSpacing: 0.5, bgcolor: 'rgba(0,0,0,0.02)' } }}>
-                <TableCell>الطالب</TableCell>
-                <TableCell>المعالج</TableCell>
-                <TableCell>النوع</TableCell>
-                <TableCell>الوقت</TableCell>
-                <TableCell>الحالة</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {recentSessions.map(s => (
-                <TableRow key={s.id} sx={{ transition: 'all 0.2s', '&:hover': { bgcolor: 'rgba(0,0,0,0.015)' } }}>
-                  <TableCell sx={{ fontWeight: 600 }}>{s.student}</TableCell>
-                  <TableCell>{s.therapist}</TableCell>
-                  <TableCell>{s.type}</TableCell>
-                  <TableCell>
-                    <Chip label={s.time} size="small" sx={{ bgcolor: 'rgba(59,130,246,0.08)', color: '#3b82f6', fontWeight: 600, borderRadius: '8px', '& .MuiChip-icon': { color: '#3b82f6' } }} icon={<AccessTimeIcon />} />
-                  </TableCell>
-                  <TableCell>
-                    <Chip
-                      label={STATUS_MAP[s.status]?.label || s.status}
-                      color={STATUS_MAP[s.status]?.color || 'default'}
-                      size="small"
-                      sx={{ fontWeight: 600, borderRadius: '8px' }}
+
+        {/* ──── KPI Cards ──── */}
+        <Grid container spacing={2} sx={{ mb: 4 }}>
+          <Grid item xs={12} sm={6} md={4} lg={2}>
+            <ModuleKPICard
+              title="جلسات اليوم"
+              value={stats.totalToday}
+              subtitle="إجمالي مجدول"
+              icon={<TodayIcon />}
+              color="primary"
+            />
+          </Grid>
+          <Grid item xs={12} sm={6} md={4} lg={2}>
+            <ModuleKPICard
+              title="مكتملة اليوم"
+              value={stats.completedToday}
+              subtitle={`${stats.completionRate}% نسبة الإكمال`}
+              icon={<CheckCircleIcon />}
+              color="success"
+            />
+          </Grid>
+          <Grid item xs={12} sm={6} md={4} lg={2}>
+            <ModuleKPICard
+              title="ملغاة"
+              value={stats.cancelledToday}
+              subtitle="هذا اليوم"
+              icon={<CancelIcon />}
+              color="error"
+            />
+          </Grid>
+          <Grid item xs={12} sm={6} md={4} lg={2}>
+            <ModuleKPICard
+              title="لم يحضر"
+              value={stats.noShowToday}
+              subtitle="عدم الحضور"
+              icon={<NoShowIcon />}
+              color="warning"
+            />
+          </Grid>
+          <Grid item xs={12} sm={6} md={4} lg={2}>
+            <ModuleKPICard
+              title="إجمالي الأسبوع"
+              value={stats.totalWeek}
+              subtitle="جلسة"
+              icon={<TrendingUpIcon />}
+              color="info"
+            />
+          </Grid>
+          <Grid item xs={12} sm={6} md={4} lg={2}>
+            <ModuleKPICard
+              title="متوسط المدة"
+              value={`${stats.avgDuration} د`}
+              subtitle={`${stats.totalTherapists} معالج`}
+              icon={<AccessTimeIcon />}
+              color="secondary"
+            />
+          </Grid>
+        </Grid>
+
+        {/* ──── Charts Row 1: Weekly Trend + By Type ──── */}
+        <Grid container spacing={3} sx={{ mb: 3 }}>
+          <Grid item xs={12} md={8}>
+            <Paper
+              sx={{
+                p: 3,
+                borderRadius: '20px',
+                height: '100%',
+                border: '1px solid rgba(0,0,0,0.04)',
+                boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+                transition: 'all 0.3s',
+                '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' },
+              }}
+            >
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  mb: 2,
+                }}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                  <Box
+                    sx={{
+                      width: 36,
+                      height: 36,
+                      borderRadius: '10px',
+                      bgcolor: 'rgba(16,185,129,0.1)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <TrendingUpIcon sx={{ fontSize: 20, color: statusColors.success }} />
+                  </Box>
+                  <Typography variant="h6" fontWeight={700} fontSize="1rem">
+                    اتجاه الجلسات الأسبوعي
+                  </Typography>
+                </Box>
+                <Chip
+                  label="هذا الأسبوع"
+                  size="small"
+                  variant="outlined"
+                  sx={{ borderRadius: '8px', fontWeight: 500 }}
+                />
+              </Box>
+              {weeklyTrend.length > 0 ? (
+                <ResponsiveContainer
+                  width="100%"
+                  height={280}
+                  role="img"
+                  aria-label="رسم بياني لاتجاه الجلسات الأسبوعي"
+                >
+                  <BarChart data={weeklyTrend} barSize={20}>
+                    <defs>
+                      <linearGradient id="sessDone" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#10b981" />
+                        <stop offset="100%" stopColor="#059669" />
+                      </linearGradient>
+                      <linearGradient id="sessCancel" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#ef4444" />
+                        <stop offset="100%" stopColor="#dc2626" />
+                      </linearGradient>
+                      <linearGradient id="sessNoShow" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#f59e0b" />
+                        <stop offset="100%" stopColor="#d97706" />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
+                    <XAxis dataKey="day" tick={{ fontSize: 12, fill: '#999' }} />
+                    <YAxis tick={{ fontSize: 12, fill: '#999' }} />
+                    <RTooltip
+                      contentStyle={{
+                        borderRadius: 12,
+                        border: 'none',
+                        boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
+                      }}
                     />
-                  </TableCell>
+                    <Legend />
+                    <Bar
+                      dataKey="completed"
+                      fill="url(#sessDone)"
+                      name="مكتملة"
+                      radius={[6, 6, 0, 0]}
+                    />
+                    <Bar
+                      dataKey="cancelled"
+                      fill="url(#sessCancel)"
+                      name="ملغاة"
+                      radius={[6, 6, 0, 0]}
+                    />
+                    <Bar
+                      dataKey="noShow"
+                      fill="url(#sessNoShow)"
+                      name="لم يحضر"
+                      radius={[6, 6, 0, 0]}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <EmptyState height={280} />
+              )}
+            </Paper>
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <Paper
+              sx={{
+                p: 3,
+                borderRadius: '20px',
+                height: '100%',
+                border: '1px solid rgba(0,0,0,0.04)',
+                boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+                transition: 'all 0.3s',
+                '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' },
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
+                <Box
+                  sx={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: '10px',
+                    bgcolor: 'rgba(99,102,241,0.1)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <ScheduleIcon sx={{ fontSize: 20, color: '#6366f1' }} />
+                </Box>
+                <Typography variant="h6" fontWeight={700} fontSize="1rem">
+                  الجلسات حسب النوع
+                </Typography>
+              </Box>
+              {byType.length > 0 ? (
+                <ResponsiveContainer
+                  width="100%"
+                  height={280}
+                  role="img"
+                  aria-label="رسم بياني لتوزيع الجلسات حسب النوع"
+                >
+                  <PieChart>
+                    <Pie
+                      data={byType}
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={90}
+                      innerRadius={50}
+                      paddingAngle={2}
+                      dataKey="value"
+                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                    >
+                      {byType.map((entry, i) => (
+                        <Cell key={i} fill={entry.color} stroke="none" />
+                      ))}
+                    </Pie>
+                    <RTooltip
+                      contentStyle={{
+                        borderRadius: 12,
+                        border: 'none',
+                        boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
+                      }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              ) : (
+                <EmptyState height={280} />
+              )}
+            </Paper>
+          </Grid>
+        </Grid>
+
+        {/* ──── Charts Row 2: Hourly Distribution + Therapist Load ──── */}
+        <Grid container spacing={3} sx={{ mb: 3 }}>
+          <Grid item xs={12} md={6}>
+            <Paper
+              sx={{
+                p: 3,
+                borderRadius: '20px',
+                border: '1px solid rgba(0,0,0,0.04)',
+                boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+                transition: 'all 0.3s',
+                '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' },
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
+                <Box
+                  sx={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: '10px',
+                    bgcolor: 'rgba(59,130,246,0.1)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <AccessTimeIcon sx={{ fontSize: 20, color: '#3b82f6' }} />
+                </Box>
+                <Typography variant="h6" fontWeight={700} fontSize="1rem">
+                  توزيع الجلسات حسب الساعة
+                </Typography>
+              </Box>
+              {hourlyDist.length > 0 ? (
+                <ResponsiveContainer
+                  width="100%"
+                  height={260}
+                  role="img"
+                  aria-label="رسم بياني لتوزيع الجلسات حسب الساعة"
+                >
+                  <LineChart data={hourlyDist}>
+                    <defs>
+                      <linearGradient id="sessLineGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.15} />
+                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.01} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
+                    <XAxis dataKey="hour" tick={{ fontSize: 12, fill: '#999' }} />
+                    <YAxis tick={{ fontSize: 12, fill: '#999' }} />
+                    <RTooltip
+                      contentStyle={{
+                        borderRadius: 12,
+                        border: 'none',
+                        boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
+                      }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="sessions"
+                      stroke="#3b82f6"
+                      strokeWidth={2.5}
+                      name="عدد الجلسات"
+                      dot={{ r: 4, fill: '#3b82f6' }}
+                      activeDot={{ r: 6 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              ) : (
+                <EmptyState height={260} />
+              )}
+            </Paper>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <Paper
+              sx={{
+                p: 3,
+                borderRadius: '20px',
+                border: '1px solid rgba(0,0,0,0.04)',
+                boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+                transition: 'all 0.3s',
+                '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' },
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
+                <Box
+                  sx={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: '10px',
+                    bgcolor: 'rgba(139,92,246,0.1)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <GroupsIcon sx={{ fontSize: 20, color: '#8b5cf6' }} />
+                </Box>
+                <Typography variant="h6" fontWeight={700} fontSize="1rem">
+                  عبء عمل المعالجين
+                </Typography>
+              </Box>
+              <TableContainer>
+                <Table
+                  size="small"
+                  sx={{ '& .MuiTableCell-root': { borderColor: 'rgba(0,0,0,0.06)', py: 1.5 } }}
+                >
+                  <TableHead>
+                    <TableRow
+                      sx={{
+                        '& .MuiTableCell-head': {
+                          fontWeight: 700,
+                          color: 'text.secondary',
+                          fontSize: '12px',
+                          letterSpacing: 0.5,
+                          bgcolor: 'rgba(0,0,0,0.02)',
+                          borderRadius: 0,
+                        },
+                      }}
+                    >
+                      <TableCell>المعالج</TableCell>
+                      <TableCell align="center">الجلسات</TableCell>
+                      <TableCell>نسبة الإنجاز</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {therapistLoad.map((t, i) => (
+                      <TableRow
+                        key={i}
+                        sx={{ transition: 'all 0.2s', '&:hover': { bgcolor: 'rgba(0,0,0,0.015)' } }}
+                      >
+                        <TableCell sx={{ fontWeight: 600 }}>{t.name}</TableCell>
+                        <TableCell align="center">
+                          <Chip
+                            label={t.sessions}
+                            size="small"
+                            sx={{
+                              bgcolor: 'rgba(99,102,241,0.08)',
+                              color: '#6366f1',
+                              fontWeight: 700,
+                              borderRadius: '8px',
+                            }}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <LinearProgress
+                              variant="determinate"
+                              value={t.completion}
+                              sx={{
+                                flex: 1,
+                                height: 6,
+                                borderRadius: 3,
+                                bgcolor: 'rgba(0,0,0,0.04)',
+                                '& .MuiLinearProgress-bar': {
+                                  borderRadius: 3,
+                                  background:
+                                    t.completion >= 90
+                                      ? 'linear-gradient(90deg, #10b981, #34d399)'
+                                      : t.completion >= 80
+                                        ? 'linear-gradient(90deg, #f59e0b, #fbbf24)'
+                                        : 'linear-gradient(90deg, #ef4444, #f87171)',
+                                },
+                              }}
+                            />
+                            <Chip
+                              label={`${t.completion}%`}
+                              size="small"
+                              sx={{
+                                height: 22,
+                                fontSize: '11px',
+                                fontWeight: 700,
+                                bgcolor:
+                                  t.completion >= 90
+                                    ? 'rgba(16,185,129,0.1)'
+                                    : t.completion >= 80
+                                      ? 'rgba(245,158,11,0.1)'
+                                      : 'rgba(239,68,68,0.1)',
+                                color:
+                                  t.completion >= 90
+                                    ? '#059669'
+                                    : t.completion >= 80
+                                      ? '#D97706'
+                                      : '#DC2626',
+                                borderRadius: '6px',
+                              }}
+                            />
+                          </Box>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Paper>
+          </Grid>
+        </Grid>
+
+        {/* ──── Recent Sessions ──── */}
+        <Paper
+          sx={{
+            p: 3,
+            borderRadius: '20px',
+            border: '1px solid rgba(0,0,0,0.04)',
+            boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+            transition: 'all 0.3s',
+            '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' },
+          }}
+        >
+          <Box
+            sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              <Box
+                sx={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: '10px',
+                  bgcolor: 'rgba(245,158,11,0.1)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <ScheduleIcon sx={{ fontSize: 20, color: '#f59e0b' }} />
+              </Box>
+              <Typography variant="h6" fontWeight={700} fontSize="1rem">
+                آخر الجلسات
+              </Typography>
+            </Box>
+            <Button
+              size="small"
+              onClick={() => navigate('/sessions')}
+              sx={{ borderRadius: '10px', fontWeight: 600, fontSize: '12px' }}
+              endIcon={<ArrowForwardIcon sx={{ fontSize: 16 }} />}
+            >
+              عرض الكل
+            </Button>
+          </Box>
+          <TableContainer>
+            <Table sx={{ '& .MuiTableCell-root': { borderColor: 'rgba(0,0,0,0.06)' } }}>
+              <TableHead>
+                <TableRow
+                  sx={{
+                    '& .MuiTableCell-head': {
+                      fontWeight: 700,
+                      color: 'text.secondary',
+                      fontSize: '12px',
+                      letterSpacing: 0.5,
+                      bgcolor: 'rgba(0,0,0,0.02)',
+                    },
+                  }}
+                >
+                  <TableCell>الطالب</TableCell>
+                  <TableCell>المعالج</TableCell>
+                  <TableCell>النوع</TableCell>
+                  <TableCell>الوقت</TableCell>
+                  <TableCell>الحالة</TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Paper>
-    </Container>
+              </TableHead>
+              <TableBody>
+                {recentSessions.map(s => (
+                  <TableRow
+                    key={s.id}
+                    sx={{ transition: 'all 0.2s', '&:hover': { bgcolor: 'rgba(0,0,0,0.015)' } }}
+                  >
+                    <TableCell sx={{ fontWeight: 600 }}>{s.student}</TableCell>
+                    <TableCell>{s.therapist}</TableCell>
+                    <TableCell>{s.type}</TableCell>
+                    <TableCell>
+                      <Chip
+                        label={s.time}
+                        size="small"
+                        sx={{
+                          bgcolor: 'rgba(59,130,246,0.08)',
+                          color: '#3b82f6',
+                          fontWeight: 600,
+                          borderRadius: '8px',
+                          '& .MuiChip-icon': { color: '#3b82f6' },
+                        }}
+                        icon={<AccessTimeIcon />}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Chip
+                        label={STATUS_MAP[s.status]?.label || s.status}
+                        color={STATUS_MAP[s.status]?.color || 'default'}
+                        size="small"
+                        sx={{ fontWeight: 600, borderRadius: '8px' }}
+                      />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Paper>
+      </Container>
     </DashboardErrorBoundary>
   );
 }

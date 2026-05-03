@@ -7,7 +7,9 @@ import {
   Box,
   Typography,
   Paper,
-  Grid,  Chip,  Divider,
+  Grid,
+  Chip,
+  Divider,
   IconButton,
   Tooltip,
   Button,
@@ -44,9 +46,15 @@ import {
   Timer as TimerIcon,
   Close as CloseIcon,
   Save as SaveIcon,
-  } from '@mui/icons-material';
+} from '@mui/icons-material';
 import { useSnackbar } from 'contexts/SnackbarContext';
 import { therapySessionService } from 'services/disabilityRehabService';
+import {
+  ReceiptLong as ReceiptLongIcon,
+  PlaylistAddCheck as PlaylistAddCheckIcon,
+} from '@mui/icons-material';
+import CreateClaimDialog from 'components/nphies/CreateClaimDialog';
+import BulkCreateClaimsDialog from 'components/nphies/BulkCreateClaimsDialog';
 
 const SESSION_CATEGORIES = [
   'علاج طبيعي',
@@ -108,6 +116,11 @@ export default function TherapySessionAdmin() {
   const [completeOpen, setCompleteOpen] = useState(false);
   const [completeForm, setCompleteForm] = useState({ notes: '', rating: 4, outcomes: '' });
   const [completeTarget, setCompleteTarget] = useState(null);
+
+  // Create-claim dialog (NPHIES bridge)
+  const [claimOpen, setClaimOpen] = useState(false);
+  // Bulk create-claims dialog (NPHIES month-end batch)
+  const [bulkClaimsOpen, setBulkClaimsOpen] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -251,14 +264,31 @@ export default function TherapySessionAdmin() {
               عرض وإدارة جميع الجلسات — جدولة وتوثيق ومتابعة
             </Typography>
           </Box>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={openCreate}
-            sx={{ bgcolor: 'rgba(255,255,255,.2)', '&:hover': { bgcolor: 'rgba(255,255,255,.3)' } }}
-          >
-            جلسة جديدة
-          </Button>
+          <Stack direction="row" spacing={1}>
+            <Button
+              variant="outlined"
+              startIcon={<PlaylistAddCheckIcon />}
+              onClick={() => setBulkClaimsOpen(true)}
+              sx={{
+                color: 'white',
+                borderColor: 'rgba(255,255,255,.5)',
+                '&:hover': { borderColor: 'white', bgcolor: 'rgba(255,255,255,.08)' },
+              }}
+            >
+              مطالبات مجمّعة
+            </Button>
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={openCreate}
+              sx={{
+                bgcolor: 'rgba(255,255,255,.2)',
+                '&:hover': { bgcolor: 'rgba(255,255,255,.3)' },
+              }}
+            >
+              جلسة جديدة
+            </Button>
+          </Stack>
         </Stack>
       </Paper>
 
@@ -782,9 +812,48 @@ export default function TherapySessionAdmin() {
                 )}
               </Grid>
             </DialogContent>
+            <DialogActions>
+              <Button
+                onClick={() => setClaimOpen(true)}
+                variant="contained"
+                startIcon={<ReceiptLongIcon />}
+                disabled={!selectedSession?._id && !selectedSession?.id}
+              >
+                إنشاء مطالبة تأمينية
+              </Button>
+              <Button onClick={() => setDetailOpen(false)}>إغلاق</Button>
+            </DialogActions>
           </>
         )}
       </Dialog>
+
+      {/* ═══ Bulk create-claims dialog (NPHIES month-end batch) ═══ */}
+      <BulkCreateClaimsDialog
+        open={bulkClaimsOpen}
+        onClose={() => setBulkClaimsOpen(false)}
+        onCompleted={report => {
+          showSnackbar(
+            `تم إنشاء ${report.created.length} مطالبة (${report.skipped.length} تخطّي · ${report.failed.length} فشل)`,
+            report.failed.length ? 'warning' : 'success'
+          );
+        }}
+      />
+
+      {/* ═══ Create-claim dialog (NPHIES bridge) ═══ */}
+      <CreateClaimDialog
+        open={claimOpen}
+        sessionId={selectedSession?._id || selectedSession?.id}
+        sessionMeta={
+          selectedSession
+            ? `${selectedSession.beneficiary || ''} · ${selectedSession.type || ''} · ${selectedSession.date || ''}`
+            : ''
+        }
+        onClose={() => setClaimOpen(false)}
+        onCreated={claim => {
+          showSnackbar(`تم إنشاء المطالبة ${claim.claimNumber}`, 'success');
+          setClaimOpen(false);
+        }}
+      />
     </Box>
   );
 }

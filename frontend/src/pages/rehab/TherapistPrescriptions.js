@@ -20,7 +20,8 @@ import {
   FormControl,
   InputLabel,
   Paper,
-  Tooltip,} from '@mui/material';
+  Tooltip,
+} from '@mui/material';
 import {
   Add as AddIcon,
   Search as SearchIcon,

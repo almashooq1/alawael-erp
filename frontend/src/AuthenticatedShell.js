@@ -112,6 +112,8 @@ import {
   ZatcaPhase2Routes,
   NphiesRoutes,
   AuditLogsRoutes,
+  EpisodesRoutes,
+  Beneficiary360Routes,
 } from './routes';
 
 // Pages
@@ -183,6 +185,7 @@ const CommunicationsSystem = lazyWithRetry(
   () => import('./pages/communications/CommunicationsSystem')
 );
 const MessagingPage = lazyWithRetry(() => import('./pages/communications/MessagingPage'));
+const WhatsAppDashboard = lazyWithRetry(() => import('./pages/whatsapp/WhatsAppDashboard'));
 const Documents = lazyWithRetry(() => import('./pages/documents/Documents'));
 const DocumentsPage = lazyWithRetry(() => import('./pages/documents/DocumentsMgmt'));
 const SmartDocumentsPage = lazyWithRetry(() => import('./pages/documents/SmartDocumentsPage'));
@@ -405,6 +408,8 @@ export default function AuthenticatedShell() {
                   {safeRoutes(WafRateLimitRoutes, 'WafRateLimit')}
                   {safeRoutes(PrintCenterRoutes, 'PrintCenter')}
                   {safeRoutes(CarePlanRoutes, 'CarePlan')}
+                  {safeRoutes(EpisodesRoutes, 'Episodes')}
+                  {safeRoutes(Beneficiary360Routes, 'Beneficiary360')}
                   {safeRoutes(MuqeemRoutes, 'Muqeem')}
                   {safeRoutes(ZatcaPhase2Routes, 'ZatcaPhase2')}
                   {safeRoutes(NphiesRoutes, 'Nphies')}
@@ -420,6 +425,7 @@ export default function AuthenticatedShell() {
                   <Route path="messages" element={<MessagingPage />} />
                   <Route path="communications" element={<Communications />} />
                   <Route path="communications-system" element={<CommunicationsSystem />} />
+                  <Route path="whatsapp" element={<WhatsAppDashboard />} />
                   <Route path="documents" element={<Documents />} />
                   <Route path="documents-management" element={<DocumentsPage />} />
                   <Route path="smart-documents" element={<SmartDocumentsPage />} />

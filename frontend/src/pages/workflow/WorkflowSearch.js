@@ -15,7 +15,8 @@ import {
   TextField,
   InputAdornment,
   Skeleton,
-  alpha,  Table,
+  alpha,
+  Table,
   TableBody,
   TableCell,
   TableContainer,
@@ -27,13 +28,17 @@ import {
   Select,
   MenuItem,
   FormControl,
-  InputLabel,} from '@mui/material';
+  InputLabel,
+} from '@mui/material';
 import {
   ArrowBack,
-  Search,  Assignment,
+  Search,
+  Assignment,
   Description,
   Label,
-  Comment,  OpenInNew,  TuneRounded,
+  Comment,
+  OpenInNew,
+  TuneRounded,
 } from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import workflowService from '../../services/workflow.service';

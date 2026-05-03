@@ -46,21 +46,43 @@ const StudentPortal = () => {
   const [announcements, setAnnouncements] = useState([]);
   const [upcomingAssignments, setUpcomingAssignments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [moodSubmitting, setMoodSubmitting] = useState(false);
+  const [moodCheckedToday, setMoodCheckedToday] = useState(false);
+  const [moodHistory, setMoodHistory] = useState({ entries: [], summary: null });
+  const [todayActivities, setTodayActivities] = useState([]);
 
   const loadDashboardData = useCallback(async () => {
     try {
       setLoading(true);
       const studentId = userId;
 
-      const [dashboard, announcementsData, assignmentsData] = await Promise.all([
+      const [dashboard, announcementsData, assignmentsData, moodHist] = await Promise.all([
         studentPortalService.getStudentDashboard(studentId),
         studentPortalService.getAnnouncements(studentId),
         studentPortalService.getStudentAssignments(studentId),
+        studentPortalService.getMoodHistory(14),
       ]);
 
+      const announcementsList = Array.isArray(announcementsData)
+        ? announcementsData
+        : (announcementsData?.items ?? []);
+      const assignmentsList = Array.isArray(assignmentsData?.assignments)
+        ? assignmentsData.assignments
+        : Array.isArray(assignmentsData?.pending)
+          ? assignmentsData.pending
+          : [];
+      const pending = assignmentsList.filter(a => a.status !== 'مكتمل' && a.status !== 'completed');
+
       setDashboardData(dashboard);
-      setAnnouncements(announcementsData.slice(0, 3)); // أول 3 إعلانات
-      setUpcomingAssignments(assignmentsData.pending.slice(0, 3)); // أول 3 واجبات
+      setAnnouncements(announcementsList.slice(0, 3));
+      setUpcomingAssignments(pending.slice(0, 3));
+      setMoodCheckedToday(Boolean(dashboard?.moodCheckedInToday));
+      setTodayActivities(
+        Array.isArray(dashboard?.todayActivities) ? dashboard.todayActivities : []
+      );
+      setMoodHistory(
+        moodHist && Array.isArray(moodHist.entries) ? moodHist : { entries: [], summary: null }
+      );
     } catch (error) {
       logger.error('Error loading dashboard:', error);
       showSnackbar('حدث خطأ في تحميل لوحة المعلومات', 'error');
@@ -72,6 +94,55 @@ const StudentPortal = () => {
   useEffect(() => {
     loadDashboardData();
   }, [loadDashboardData]);
+
+  const handleMoodSubmit = useCallback(
+    async mood => {
+      if (moodSubmitting || moodCheckedToday) return;
+      setMoodSubmitting(true);
+      try {
+        const entry = await studentPortalService.submitMood(mood);
+        setMoodCheckedToday(true);
+        setMoodHistory(prev => ({
+          entries: [...(prev?.entries || []), { ...entry, mood }].slice(-14),
+          summary: prev?.summary || null,
+        }));
+        showSnackbar('شكراً لمشاركتك مزاجك اليوم 💙', 'success');
+      } catch (error) {
+        logger.error('Error submitting mood:', error);
+        showSnackbar('تعذّر حفظ المزاج، حاول مرة أخرى', 'error');
+      } finally {
+        setMoodSubmitting(false);
+      }
+    },
+    [moodSubmitting, moodCheckedToday, showSnackbar]
+  );
+
+  const formatNextSession = useCallback(startsAtIso => {
+    if (!startsAtIso) return null;
+    const start = new Date(startsAtIso);
+    const now = new Date();
+    const diffMs = start.getTime() - now.getTime();
+    const sameDay =
+      start.getFullYear() === now.getFullYear() &&
+      start.getMonth() === now.getMonth() &&
+      start.getDate() === now.getDate();
+    const time = start.toLocaleTimeString('ar', { hour: '2-digit', minute: '2-digit' });
+
+    if (diffMs <= 0) return { label: 'بدأت الآن', emphasis: 'now', time };
+    const minutes = Math.round(diffMs / 60000);
+    if (minutes < 60)
+      return { label: `بعد ${minutes} دقيقة`, emphasis: minutes <= 30 ? 'soon' : 'today', time };
+    if (sameDay) {
+      const hours = Math.round(minutes / 60);
+      return { label: `بعد ${hours} ساعة`, emphasis: 'today', time };
+    }
+    const days = Math.ceil(diffMs / (24 * 3600 * 1000));
+    return {
+      label: days === 1 ? 'غداً' : `بعد ${days} أيام`,
+      emphasis: 'later',
+      time: `${start.toLocaleDateString('ar')} • ${time}`,
+    };
+  }, []);
 
   const getPriorityColor = priority => {
     const colors = {
@@ -93,6 +164,14 @@ const StudentPortal = () => {
   }
 
   const { student, stats, quickActions } = dashboardData;
+  const nextSession = dashboardData?.nextSession || null;
+  const nextSessionInfo = nextSession ? formatNextSession(nextSession.startsAt) : null;
+  const nextEmphasisColor = {
+    now: 'error.main',
+    soon: 'warning.main',
+    today: 'primary.main',
+    later: 'info.main',
+  };
 
   return (
     <Box sx={{ p: 3 }}>
@@ -178,6 +257,55 @@ const StudentPortal = () => {
           }}
         />
       </Box>
+
+      {/* Next Session Card */}
+      {nextSession && nextSessionInfo && (
+        <Paper
+          sx={{
+            p: 2.5,
+            mb: 3,
+            borderRadius: 2,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 2,
+            borderLeft: '6px solid',
+            borderColor: nextEmphasisColor[nextSessionInfo.emphasis] || 'primary.main',
+          }}
+        >
+          <Box sx={{ fontSize: 36 }}>⏰</Box>
+          <Box sx={{ flex: 1 }}>
+            <Typography variant="overline" sx={{ color: 'text.secondary', fontWeight: 600 }}>
+              جلستك القادمة
+            </Typography>
+            <Typography variant="h6" sx={{ fontWeight: 700, mb: 0.5 }}>
+              {nextSession.programNameAr || 'جلسة'} مع {nextSession.therapistNameAr || 'معالجك'}
+            </Typography>
+            <Stack direction="row" spacing={1} flexWrap="wrap">
+              <Chip
+                label={nextSessionInfo.label}
+                size="small"
+                color={
+                  nextSessionInfo.emphasis === 'now'
+                    ? 'error'
+                    : nextSessionInfo.emphasis === 'soon'
+                      ? 'warning'
+                      : nextSessionInfo.emphasis === 'today'
+                        ? 'primary'
+                        : 'info'
+                }
+              />
+              <Chip label={nextSessionInfo.time} size="small" variant="outlined" />
+            </Stack>
+          </Box>
+          <Button
+            variant="contained"
+            size="small"
+            onClick={() => navigate('/student-portal/schedule')}
+          >
+            عرض الجدول
+          </Button>
+        </Paper>
+      )}
 
       {/* Stats Cards */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
@@ -336,6 +464,145 @@ const StudentPortal = () => {
         </Grid>
       </Grid>
 
+      {/* Daily Mood Check-in */}
+      <Paper sx={{ p: 3, mb: 3, borderRadius: 2 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+            💙 كيف تشعر اليوم؟
+          </Typography>
+          {moodCheckedToday && <Chip label="تم تسجيل مزاجك اليوم ✓" color="success" size="small" />}
+        </Box>
+        <Stack direction="row" spacing={2} justifyContent="center" flexWrap="wrap">
+          {[
+            { value: 1, emoji: '😢', label: 'سيّئ جداً' },
+            { value: 2, emoji: '😟', label: 'سيّئ' },
+            { value: 3, emoji: '😐', label: 'عادي' },
+            { value: 4, emoji: '🙂', label: 'جيّد' },
+            { value: 5, emoji: '😄', label: 'ممتاز' },
+          ].map(opt => (
+            <Button
+              key={opt.value}
+              onClick={() => handleMoodSubmit(opt.value)}
+              disabled={moodSubmitting || moodCheckedToday}
+              aria-label={`مزاجي: ${opt.label}`}
+              sx={{
+                minWidth: 80,
+                py: 1.5,
+                flexDirection: 'column',
+                fontSize: 32,
+                borderRadius: 2,
+                border: '2px solid transparent',
+                opacity: moodCheckedToday ? 0.55 : 1,
+                '&:hover': { borderColor: 'primary.main', backgroundColor: 'primary.50' },
+              }}
+            >
+              {opt.emoji}
+              <Typography variant="caption" sx={{ mt: 0.5, fontWeight: 600 }}>
+                {opt.label}
+              </Typography>
+            </Button>
+          ))}
+        </Stack>
+
+        {moodHistory.entries.length > 0 && (
+          <Box sx={{ mt: 3 }}>
+            <Box
+              sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}
+            >
+              <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.secondary' }}>
+                مزاجك خلال آخر {moodHistory.entries.length} مشاركة
+              </Typography>
+              {moodHistory.summary?.average != null && (
+                <Chip
+                  label={`المتوسط ${moodHistory.summary.average} / 5`}
+                  size="small"
+                  color={moodHistory.summary.worrisome ? 'warning' : 'default'}
+                  variant="outlined"
+                />
+              )}
+            </Box>
+            <Box
+              sx={{
+                display: 'flex',
+                gap: 0.5,
+                alignItems: 'flex-end',
+                height: 56,
+                overflowX: 'auto',
+                pb: 0.5,
+              }}
+            >
+              {moodHistory.entries.map((e, i) => {
+                const moodPalette = ['#e74c3c', '#e67e22', '#f1c40f', '#2ecc71', '#27ae60'];
+                const m = Number(e.mood) || 3;
+                const color = moodPalette[Math.max(0, Math.min(4, m - 1))];
+                return (
+                  <Box
+                    key={e.id || i}
+                    title={`${e.date ? new Date(e.date).toLocaleDateString('ar') : ''} • ${m}/5`}
+                    sx={{
+                      width: 14,
+                      flexShrink: 0,
+                      height: `${(m / 5) * 100}%`,
+                      minHeight: 6,
+                      borderRadius: 1,
+                      background: color,
+                    }}
+                  />
+                );
+              })}
+            </Box>
+          </Box>
+        )}
+      </Paper>
+
+      {/* Today's Sessions / Activities */}
+      {todayActivities.length > 0 && (
+        <Paper sx={{ p: 3, mb: 3, borderRadius: 2 }}>
+          <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
+            ⭐ جلسات اليوم
+          </Typography>
+          <Stack spacing={1.5}>
+            {todayActivities.map(act => (
+              <Box
+                key={act.id}
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 2,
+                  p: 1.5,
+                  borderRadius: 2,
+                  border: '1px solid',
+                  borderColor: act.completed ? 'success.light' : 'divider',
+                  backgroundColor: act.completed ? 'success.50' : 'background.paper',
+                }}
+              >
+                <Box sx={{ fontSize: 32 }}>{act.icon}</Box>
+                <Box sx={{ flex: 1 }}>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                    {act.titleAr}
+                  </Typography>
+                  {act.time && (
+                    <Typography variant="caption" color="text.secondary">
+                      🕐 {act.time}
+                    </Typography>
+                  )}
+                </Box>
+                {act.completed ? (
+                  <Chip label="مكتمل ✓" size="small" color="success" />
+                ) : (
+                  <Chip
+                    label={`+${act.xpReward || 30} XP`}
+                    size="small"
+                    color="primary"
+                    variant="outlined"
+                  />
+                )}
+              </Box>
+            ))}
+          </Stack>
+        </Paper>
+      )}
+
       {/* Quick Actions */}
       <Paper sx={{ p: 3, mb: 3, borderRadius: 2 }}>
         <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
@@ -418,6 +685,12 @@ const StudentPortal = () => {
               icon: '📚',
               path: '/student-portal/elearning',
               color: '#0984e3',
+            },
+            {
+              title: 'إنجازاتي',
+              icon: '🏅',
+              path: '/student-portal/achievements',
+              color: '#d35400',
             },
           ].map((svc, idx) => (
             <Grid item xs={6} sm={4} md={2} key={idx}>

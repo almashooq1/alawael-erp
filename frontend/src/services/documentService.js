@@ -289,7 +289,27 @@ const documentService = {
     }
   },
 
-  // 🔎 معاينة المستند
+  // � عمليات جماعية (حذف/أرشفة/استرجاع)
+  bulkOperation: async (action, ids) => {
+    try {
+      return await apiClient.post('/documents/bulk', { action, ids });
+    } catch (error) {
+      logger.error('خطأ في العملية الجماعية:', error);
+      throw error;
+    }
+  },
+
+  // 🗄️ أرشفة مستند
+  archiveDocument: async id => {
+    try {
+      return await apiClient.post(`/documents/${id}/archive`);
+    } catch (error) {
+      logger.error('خطأ في أرشفة المستند:', error);
+      throw error;
+    }
+  },
+
+  // �🔎 معاينة المستند
   getPreviewUrl: id => `/api/documents/${id}/preview`,
 };
 

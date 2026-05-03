@@ -22,7 +22,8 @@ import {
   CheckCircle,
   Cancel,
   ContentCopy,
-  Description,} from '@mui/icons-material';
+  Description,
+} from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients } from '../../theme/palette';
 

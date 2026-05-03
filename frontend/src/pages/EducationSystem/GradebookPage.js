@@ -24,8 +24,12 @@ import {
   DialogActions,
   TextField,
   Chip,
-  IconButton,  LinearProgress,
-  Alert,  Avatar,  Divider,} from '@mui/material';
+  IconButton,
+  LinearProgress,
+  Alert,
+  Avatar,
+  Divider,
+} from '@mui/material';
 import {
   Add as AddIcon,
   Edit as EditIcon,
@@ -34,7 +38,7 @@ import {
   ArrowBack as BackIcon,
   Lock as FinalizeIcon,
   Person as StudentIcon,
-  } from '@mui/icons-material';
+} from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { gradients } from '../../theme/palette';
 import educationSystemService from '../../services/educationSystem.service';

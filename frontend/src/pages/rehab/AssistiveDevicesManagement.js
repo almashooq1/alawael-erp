@@ -11,7 +11,8 @@ import {
   Card,
   CardContent,
   Chip,
-  Avatar,  Divider,
+  Avatar,
+  Divider,
   IconButton,
   Tooltip,
   Button,
@@ -51,7 +52,7 @@ import {
   Close as CloseIcon,
   Save as SaveIcon,
   Category as CategoryIcon,
-  } from '@mui/icons-material';
+} from '@mui/icons-material';
 import { useSnackbar } from 'contexts/SnackbarContext';
 import { assistiveDeviceService } from 'services/disabilityRehabService';
 

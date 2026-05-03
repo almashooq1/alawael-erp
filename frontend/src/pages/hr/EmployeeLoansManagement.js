@@ -29,7 +29,8 @@ import {
   Alert,
   Snackbar,
   CircularProgress,
-  LinearProgress,} from '@mui/material';
+  LinearProgress,
+} from '@mui/material';
 import {
   Add as AddIcon,
   Visibility as ViewIcon,
@@ -39,7 +40,8 @@ import {
   getLoans,
   createLoan,
   getLoanById,
-  approveLoanStep,  getLoanStats,
+  approveLoanStep,
+  getLoanStats,
 } from '../../services/hr/employeeAffairsExpandedService';
 
 const LOAN_TYPES = ['سلفة راتب', 'قرض شخصي', 'سلفة طوارئ', 'قرض سكني', 'قرض تعليمي', 'قرض طبي'];

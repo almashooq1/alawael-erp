@@ -23,7 +23,8 @@ import {
   Paper,
   Avatar,
   Divider,
-  LinearProgress,} from '@mui/material';
+  LinearProgress,
+} from '@mui/material';
 import {
   Add as AddIcon,
   Search as SearchIcon,
@@ -79,7 +80,7 @@ const TherapistQualityReports = () => {
 
   useEffect(() => {
     fetchReports();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchReports = async () => {

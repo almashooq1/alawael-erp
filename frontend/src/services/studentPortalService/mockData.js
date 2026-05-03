@@ -166,7 +166,9 @@ export function getMockGradesData() {
 }
 
 export function getMockAnnouncementsData() {
-  return getMockOldAnnouncementsData();
+  // getMockOldAssignmentsData historically holds the announcements array
+  // (the legacy helper names were swapped); the announcement-shaped data is there.
+  return getMockOldAssignmentsData();
 }
 
 export function getMockOldAnnouncementsData() {

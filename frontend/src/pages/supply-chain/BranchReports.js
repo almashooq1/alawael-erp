@@ -10,9 +10,11 @@ import {
   CardContent,
   Grid,
   Tabs,
-  Tab,  LinearProgress,
+  Tab,
+  LinearProgress,
   Avatar,
-  Divider,  Chip,
+  Divider,
+  Chip,
   Table,
   TableBody,
   TableCell,
@@ -20,7 +22,8 @@ import {
   TableHead,
   TableRow,
   Paper,
-  Button,} from '@mui/material';
+  Button,
+} from '@mui/material';
 import {
   Assessment as ReportIcon,
   Store as BranchIcon,

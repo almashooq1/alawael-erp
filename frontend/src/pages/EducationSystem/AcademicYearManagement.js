@@ -9,7 +9,8 @@ import {
   Paper,
   Box,
   Typography,
-  Button,  Table,
+  Button,
+  Table,
   TableBody,
   TableCell,
   TableContainer,
@@ -24,11 +25,13 @@ import {
   IconButton,
   Tooltip,
   LinearProgress,
-  Alert,  List,
+  Alert,
+  List,
   ListItem,
   ListItemText,
   ListItemIcon,
-  Divider,  MenuItem,
+  Divider,
+  MenuItem,
   Select,
   InputLabel,
   FormControl,
@@ -42,7 +45,7 @@ import {
   CheckCircle as ActiveIcon,
   RadioButtonUnchecked as InactiveIcon,
   DateRange as SemesterIcon,
-  } from '@mui/icons-material';
+} from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { gradients } from '../../theme/palette';
 import educationSystemService from '../../services/educationSystem.service';

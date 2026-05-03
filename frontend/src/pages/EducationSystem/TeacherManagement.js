@@ -9,7 +9,8 @@ import {
   Paper,
   Box,
   Typography,
-  Button,  Table,
+  Button,
+  Table,
   TableBody,
   TableCell,
   TableContainer,
@@ -32,7 +33,8 @@ import {
   Avatar,
   TablePagination,
   InputAdornment,
-  Rating,  Divider,
+  Rating,
+  Divider,
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -43,7 +45,7 @@ import {
   Search as SearchIcon,
   Phone as PhoneIcon,
   Email as EmailIcon,
-  } from '@mui/icons-material';
+} from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { gradients } from '../../theme/palette';
 import educationSystemService from '../../services/educationSystem.service';

@@ -19,16 +19,19 @@ import {
   MenuItem,
   Avatar,
   Divider,
-  Tooltip,  CircularProgress,
+  Tooltip,
+  CircularProgress,
   Switch,
-  FormControlLabel,} from '@mui/material';
+  FormControlLabel,
+} from '@mui/material';
 import {
   Add as AddIcon,
   Edit,
   Delete,
   Description,
   ArrowBack,
-  ContentCopy,  Refresh,
+  ContentCopy,
+  Refresh,
 } from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients } from '../../theme/palette';

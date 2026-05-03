@@ -32,7 +32,8 @@ import {
   InputAdornment,
   Rating,
   Tabs,
-  Tab,  useTheme,
+  Tab,
+  useTheme,
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -51,9 +52,11 @@ import {
 } from '@mui/icons-material';
 import {
   BarChart,
-  Bar,  PieChart,
+  Bar,
+  PieChart,
   Pie,
-  Cell,  XAxis,
+  Cell,
+  XAxis,
   YAxis,
   CartesianGrid,
   Tooltip as RTooltip,

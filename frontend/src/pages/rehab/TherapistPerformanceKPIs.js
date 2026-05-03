@@ -13,7 +13,8 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions,  Paper,
+  DialogActions,
+  Paper,
   Avatar,
   Divider,
   LinearProgress,
@@ -69,7 +70,7 @@ const TherapistPerformanceKPIs = () => {
 
   useEffect(() => {
     fetchKPIs();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchKPIs = async () => {

@@ -139,16 +139,10 @@ Cypress.Commands.add('waitForAPI', alias => {
   }
 });
 
-/**
- * Check accessibility
- * Usage: cy.checkA11y()
- */
-Cypress.Commands.add('checkA11y', () => {
-  // This would require the axe library and @cypress/axe
-  cy.window().then(() => {
-    // Accessibility checks would go here
-  });
-});
+// NOTE: We deliberately do NOT define our own `cy.checkA11y` here.
+// `cypress-axe` (imported in support/e2e.js) registers the real one which
+// runs an axe-core audit and reports violations. A previous empty stub here
+// silently shadowed cypress-axe and made every a11y test trivially pass.
 
 /**
  * Test responsive behavior

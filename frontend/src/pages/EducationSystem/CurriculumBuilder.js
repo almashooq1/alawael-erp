@@ -9,7 +9,8 @@ import {
   Paper,
   Box,
   Typography,
-  Button,  Dialog,
+  Button,
+  Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
@@ -18,7 +19,8 @@ import {
   IconButton,
   Tooltip,
   LinearProgress,
-  Alert,  Avatar,
+  Alert,
+  Avatar,
   Accordion,
   AccordionSummary,
   AccordionDetails,
@@ -27,7 +29,8 @@ import {
   ListItemText,
   ListItemIcon,
   ListItemSecondaryAction,
-  Divider,} from '@mui/material';
+  Divider,
+} from '@mui/material';
 import {
   Add as AddIcon,
   Edit as EditIcon,
@@ -38,7 +41,7 @@ import {
   LibraryBooks as UnitIcon,
   MenuBook as LessonIcon,
   CheckCircle as ApproveIcon,
-  } from '@mui/icons-material';
+} from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { gradients } from '../../theme/palette';
 import educationSystemService from '../../services/educationSystem.service';

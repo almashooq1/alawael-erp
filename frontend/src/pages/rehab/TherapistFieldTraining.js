@@ -23,7 +23,8 @@ import {
   Paper,
   Avatar,
   Divider,
-  LinearProgress,} from '@mui/material';
+  LinearProgress,
+} from '@mui/material';
 import {
   Add as AddIcon,
   Search as SearchIcon,
@@ -36,7 +37,7 @@ import {
   Assignment as TaskIcon,
   Person as PersonIcon,
   Business as InstitutionIcon,
-  } from '@mui/icons-material';
+} from '@mui/icons-material';
 import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
@@ -78,7 +79,7 @@ const TherapistFieldTraining = () => {
 
   useEffect(() => {
     fetchTraining();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchTraining = async () => {

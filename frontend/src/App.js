@@ -21,6 +21,7 @@ const RegisterPage = React.lazy(() => import('./pages/Landing/RegisterPage'));
 const ArticleList = React.lazy(() => import('./pages/Articles/ArticleList'));
 const ArticleDetail = React.lazy(() => import('./pages/Articles/ArticleDetail'));
 const CareersPage = React.lazy(() => import('./pages/Careers/CareersPage'));
+const PublicVerifyPage = React.lazy(() => import('./pages/blockchain/PublicVerifyPage'));
 
 // Authenticated shell — heavy providers + all routes (lazy loaded ONCE after login)
 const AuthenticatedShell = React.lazy(() =>
@@ -148,6 +149,23 @@ function AppRoutes() {
         element={
           <Suspense fallback={<div style={{ minHeight: '100vh' }} />}>
             <CareersPage />
+          </Suspense>
+        }
+      />
+      {/* Certificate verification — public (QR scan landing) */}
+      <Route
+        path="/verify"
+        element={
+          <Suspense fallback={<div style={{ minHeight: '100vh' }} />}>
+            <PublicVerifyPage />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/verify/:hash"
+        element={
+          <Suspense fallback={<div style={{ minHeight: '100vh' }} />}>
+            <PublicVerifyPage />
           </Suspense>
         }
       />

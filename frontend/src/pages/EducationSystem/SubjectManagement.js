@@ -9,7 +9,8 @@ import {
   Paper,
   Box,
   Typography,
-  Button,  Table,
+  Button,
+  Table,
   TableBody,
   TableCell,
   TableContainer,
@@ -24,7 +25,8 @@ import {
   IconButton,
   Tooltip,
   LinearProgress,
-  Alert,  MenuItem,
+  Alert,
+  MenuItem,
   Select,
   InputLabel,
   FormControl,
@@ -41,7 +43,7 @@ import {
   MenuBook as SubjectIcon,
   ArrowBack as BackIcon,
   Search as SearchIcon,
-  } from '@mui/icons-material';
+} from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { gradients } from '../../theme/palette';
 import educationSystemService from '../../services/educationSystem.service';

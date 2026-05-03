@@ -31,7 +31,8 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  LinearProgress,  Avatar,
+  LinearProgress,
+  Avatar,
   Divider,
   Stack,
   Alert,
@@ -49,7 +50,7 @@ import {
   Refresh as RefreshIcon,
   TrendingUp as TrendUpIcon,
   Warning as WarningIcon,
-  } from '@mui/icons-material';
+} from '@mui/icons-material';
 import { useSnackbar } from 'contexts/SnackbarContext';
 import { gradients, statusColors, surfaceColors } from 'theme/palette';
 import { branchService, warehouseService } from 'services/branchWarehouseService';

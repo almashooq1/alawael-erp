@@ -17,7 +17,8 @@ import {
   TableHead,
   TableRow,
   Chip,
-  LinearProgress,  IconButton,
+  LinearProgress,
+  IconButton,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -26,7 +27,8 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  Tooltip,} from '@mui/material';
+  Tooltip,
+} from '@mui/material';
 import {
   Build as EqIcon,
   Add as AddIcon,

@@ -19,13 +19,17 @@ export const coreAPI = {
   remove: id => apiClient.delete(`/core/beneficiaries/${id}`),
   search: params => apiClient.get('/core/beneficiaries/search', { params }),
   getStats: params => apiClient.get('/core/beneficiaries/stats', { params }),
-  // 360° Profile
-  get360: id => apiClient.get(`/core/360/${id}`),
-  get360Widget: (id, widget) => apiClient.get(`/core/360/${id}/${widget}`),
-  get360Summary: id => apiClient.get(`/core/360/${id}/summary`),
-  get360Timeline: (id, params) => apiClient.get(`/core/360/${id}/timeline`, { params }),
-  get360Risks: id => apiClient.get(`/core/360/${id}/risks`),
-  get360Recommendations: id => apiClient.get(`/core/360/${id}/recommendations`),
+  // 360° Profile — paths match domains/core/routes/beneficiary360.routes.js
+  get360: id => apiClient.get(`/core/beneficiaries/${id}/360`),
+  get360Widget: (id, widget) => apiClient.get(`/core/beneficiaries/${id}/360/widget/${widget}`),
+  get360Summary: id => apiClient.get(`/core/beneficiaries/${id}/360/summary`),
+  get360Clinical: id => apiClient.get(`/core/beneficiaries/${id}/360/clinical`),
+  get360Operational: id => apiClient.get(`/core/beneficiaries/${id}/360/operational`),
+  get360Family: id => apiClient.get(`/core/beneficiaries/${id}/360/family`),
+  // Aliases kept for backward compat (map to closest available endpoint)
+  get360Timeline: (id, params) => apiClient.get(`/core/beneficiaries/${id}/360`, { params }),
+  get360Risks: id => apiClient.get(`/core/beneficiaries/${id}/360`),
+  get360Recommendations: id => apiClient.get(`/core/beneficiaries/${id}/360`),
 };
 
 /* ═══════════════════════════════════════════════════════════
@@ -163,18 +167,26 @@ export const programsAPI = {
  *  10. AI RECOMMENDATIONS — التوصيات الذكية
  * ═══════════════════════════════════════════════════════════ */
 export const aiRecommendationsAPI = {
-  // Recommendations
-  generate: beneficiaryId => apiClient.post(`/ai-recommendations/generate/${beneficiaryId}`),
-  list: params => apiClient.get('/ai-recommendations', { params }),
-  get: id => apiClient.get(`/ai-recommendations/${id}`),
-  accept: id => apiClient.put(`/ai-recommendations/${id}/accept`),
-  dismiss: (id, data) => apiClient.put(`/ai-recommendations/${id}/dismiss`, data),
+  // Recommendations — paths match domains/ai-recommendations/routes/recommendations.routes.js
+  generate: beneficiaryId => apiClient.post(`/ai-recommendations/risk/calculate/${beneficiaryId}`),
+  list: params => apiClient.get('/ai-recommendations/risk/high-risk', { params }),
+  get: beneficiaryId => apiClient.get(`/ai-recommendations/recommendations/${beneficiaryId}`),
+  accept: id =>
+    apiClient.post(`/ai-recommendations/recommendations/${id}/respond`, {
+      action: 'accepted',
+    }),
+  dismiss: (id, data) =>
+    apiClient.post(`/ai-recommendations/recommendations/${id}/respond`, {
+      action: 'dismissed',
+      note: data?.reason,
+    }),
   getByBeneficiary: beneficiaryId =>
-    apiClient.get(`/ai-recommendations/beneficiary/${beneficiaryId}`),
+    apiClient.get(`/ai-recommendations/recommendations/${beneficiaryId}`),
   // Risk Scores
-  calculateRisk: beneficiaryId => apiClient.post(`/ai-recommendations/risk/${beneficiaryId}`),
-  getRiskScore: beneficiaryId => apiClient.get(`/ai-recommendations/risk/${beneficiaryId}`),
-  getRiskDashboard: params => apiClient.get('/ai-recommendations/risk/dashboard', { params }),
+  calculateRisk: beneficiaryId =>
+    apiClient.post(`/ai-recommendations/risk/calculate/${beneficiaryId}`),
+  getRiskScore: beneficiaryId => apiClient.get(`/ai-recommendations/risk/latest/${beneficiaryId}`),
+  getRiskDashboard: params => apiClient.get('/ai-recommendations/dashboard', { params }),
 };
 
 /* ═══════════════════════════════════════════════════════════

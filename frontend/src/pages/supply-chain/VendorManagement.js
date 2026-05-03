@@ -32,7 +32,8 @@ import {
   InputAdornment,
   Tabs,
   Tab,
-  Rating,} from '@mui/material';
+  Rating,
+} from '@mui/material';
 import {
   Add as AddIcon,
   Edit as EditIcon,
@@ -43,7 +44,7 @@ import {
   Visibility as ViewIcon,
   Business as VendorIcon,
   Assessment as EvalIcon,
-  } from '@mui/icons-material';
+} from '@mui/icons-material';
 import {
   BarChart,
   Bar,
@@ -54,7 +55,8 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip as RTooltip,
-  ResponsiveContainer,} from 'recharts';
+  ResponsiveContainer,
+} from 'recharts';
 import {
   vendorsService,
   evaluationsService,

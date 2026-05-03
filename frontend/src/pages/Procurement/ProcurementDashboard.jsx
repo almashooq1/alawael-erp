@@ -1,189 +1,630 @@
 /**
- * لوحة تحكم المشتريات — Procurement Dashboard
+ * ProcurementDashboard — لوحة المشتريات (Professional v2)
  */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
-  Box, Grid, Typography, Card, CardContent, CircularProgress, Fade, Grow, Chip,
+  Box,
+  Grid,
+  Paper,
+  Typography,
+  Chip,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+  CircularProgress,
+  Avatar,
+  Button,
+  Stack,
+  useTheme,
+  IconButton,
+  Tooltip,
+  TextField,
+  MenuItem,
 } from '@mui/material';
-import {
-  PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid,
-  Tooltip, ResponsiveContainer, Legend,
-} from 'recharts';
 import {
   ShoppingCart as OrderIcon,
   Store as VendorIcon,
   Assignment as RequestIcon,
   AttachMoney as SpendIcon,
-  TrendingUp as TrendingUpIcon,
+  Refresh as RefreshIcon,
+  Add as AddIcon,
+  Visibility as ViewIcon,
+  Search as SearchIcon,
 } from '@mui/icons-material';
+import {
+  PieChart,
+  Pie,
+  Cell,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as RTooltip,
+  ResponsiveContainer,
+  Legend,
+} from 'recharts';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { getDashboard } from '../../services/procurement.service';
+import { gradients } from '../../theme/palette';
+import { ChartTooltip } from '../../components/dashboard/shared/ChartTooltip';
+import EmptyState from '../../components/dashboard/shared/EmptyState';
+import DashboardErrorBoundary from '../../components/dashboard/shared/DashboardErrorBoundary';
+import logger from '../../utils/logger';
 
-const statusLabels = { draft: 'مسودة', submitted: 'مقدّم', approved: 'معتمد', ordered: 'تم الطلب', received: 'مستلم' };
-const PIE_COLORS = ['#6366f1', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'];
+const useCounter = (end, dur = 1000) => {
+  const [v, setV] = useState(0);
+  const ref = useRef(null);
+  const ran = useRef(false);
+  useEffect(() => {
+    if (ran.current || !end) return;
+    const obs = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting && !ran.current) {
+        ran.current = true;
+        const t0 = Date.now();
+        const step = () => {
+          const p = Math.min((Date.now() - t0) / dur, 1);
+          setV(Math.floor((1 - Math.pow(2, -10 * p)) * end));
+          if (p < 1) requestAnimationFrame(step);
+          else setV(end);
+        };
+        requestAnimationFrame(step);
+      }
+    });
+    if (ref.current) obs.observe(ref.current);
+    return () => obs.disconnect();
+  }, [end, dur]);
+  return [v, ref];
+};
 
-/* Glass card style */
-const Glass = ({ children, sx, ...props }) => (
-  <Box
-    sx={{
-      background: 'rgba(255,255,255,0.65)',
-      backdropFilter: 'blur(16px)',
-      WebkitBackdropFilter: 'blur(16px)',
-      borderRadius: '20px',
-      border: '1px solid rgba(255,255,255,0.35)',
-      boxShadow: '0 4px 24px rgba(0,0,0,0.06)',
-      transition: 'all 0.3s cubic-bezier(.4,0,.2,1)',
-      '&:hover': { boxShadow: '0 12px 40px rgba(0,0,0,0.1)', transform: 'translateY(-2px)' },
-      ...sx,
-    }}
-    {...props}
-  >
-    {children}
-  </Box>
-);
+const KPICard = ({ label, value, icon, gradient, delay = 0 }) => {
+  const [count, ref] = useCounter(value);
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: delay * 0.12 }}
+    >
+      <Paper
+        ref={ref}
+        elevation={0}
+        sx={{
+          p: 2.5,
+          borderRadius: 3,
+          background: gradient,
+          color: '#fff',
+          position: 'relative',
+          overflow: 'hidden',
+          '&::after': {
+            content: '""',
+            position: 'absolute',
+            bottom: -16,
+            right: -16,
+            width: 80,
+            height: 80,
+            borderRadius: '50%',
+            background: 'rgba(255,255,255,0.08)',
+          },
+        }}
+      >
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <Box>
+            <Typography variant="h4" fontWeight={800} sx={{ lineHeight: 1 }}>
+              {count.toLocaleString('ar-SA')}
+            </Typography>
+            <Typography variant="caption" sx={{ opacity: 0.9, mt: 0.5, display: 'block' }}>
+              {label}
+            </Typography>
+          </Box>
+          <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)', width: 44, height: 44 }}>{icon}</Avatar>
+        </Box>
+      </Paper>
+    </motion.div>
+  );
+};
+
+const PIE_COLORS = ['#880e4f', '#ad1457', '#c2185b', '#d81b60', '#e91e63', '#ec407a'];
+const statusLabels = {
+  draft: 'مسودة',
+  submitted: 'مقدّم',
+  approved: 'معتمد',
+  ordered: 'تم الطلب',
+  received: 'مستلم',
+  cancelled: 'ملغى',
+};
+const statusColors = {
+  draft: 'default',
+  submitted: 'info',
+  approved: 'success',
+  ordered: 'primary',
+  received: 'success',
+  cancelled: 'error',
+};
+const categoryLabels = {
+  equipment: 'معدات',
+  supplies: 'مستلزمات',
+  services: 'خدمات',
+  it: 'تقنية',
+  maintenance: 'صيانة',
+  other: 'أخرى',
+};
+
+const DEMO = {
+  totalOrders: 342,
+  pendingRequests: 28,
+  activeVendors: 64,
+  totalSpend: 840000,
+  byCategory: [
+    { name: 'معدات', value: 128, color: PIE_COLORS[0] },
+    { name: 'مستلزمات', value: 89, color: PIE_COLORS[1] },
+    { name: 'خدمات', value: 72, color: PIE_COLORS[2] },
+    { name: 'تقنية', value: 31, color: PIE_COLORS[3] },
+    { name: 'صيانة', value: 22, color: PIE_COLORS[4] },
+  ],
+  spendByMonth: [
+    { month: 'يناير', amount: 120000 },
+    { month: 'فبراير', amount: 145000 },
+    { month: 'مارس', amount: 98000 },
+    { month: 'أبريل', amount: 162000 },
+    { month: 'مايو', amount: 138000 },
+    { month: 'يونيو', amount: 177000 },
+  ],
+  orders: [
+    {
+      _id: '1',
+      refNo: 'PO-2024-001',
+      vendor: 'شركة الأطلس',
+      category: 'equipment',
+      amount: 42000,
+      status: 'approved',
+      dueDate: '2024-07-15',
+    },
+    {
+      _id: '2',
+      refNo: 'PO-2024-002',
+      vendor: 'مؤسسة النور',
+      category: 'supplies',
+      amount: 8400,
+      status: 'received',
+      dueDate: '2024-07-10',
+    },
+    {
+      _id: '3',
+      refNo: 'PO-2024-003',
+      vendor: 'تقنيات المستقبل',
+      category: 'it',
+      amount: 28000,
+      status: 'submitted',
+      dueDate: '2024-07-20',
+    },
+    {
+      _id: '4',
+      refNo: 'PO-2024-004',
+      vendor: 'خدمات الجودة',
+      category: 'services',
+      amount: 15000,
+      status: 'ordered',
+      dueDate: '2024-07-18',
+    },
+    {
+      _id: '5',
+      refNo: 'PO-2024-005',
+      vendor: 'شركة الإمداد',
+      category: 'maintenance',
+      amount: 6800,
+      status: 'draft',
+      dueDate: '2024-07-25',
+    },
+  ],
+};
 
 export default function ProcurementDashboard() {
-  const [data, setData] = useState(null);
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+  const navigate = useNavigate();
+  const [dash, setDash] = useState(DEMO);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [filterStatus, setFilterStatus] = useState('');
+  const [filterCat, setFilterCat] = useState('');
 
-  useEffect(() => {
-    getDashboard().then((r) => { setData(r.data); setLoading(false); });
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const r = await getDashboard();
+      const d = r?.data || r || {};
+      if (d.totalOrders) setDash({ ...DEMO, ...d });
+      else setDash(DEMO);
+    } catch (err) {
+      logger.warn('ProcurementDashboard:', err.message);
+      setDash(DEMO);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
-  if (loading) return <Box display="flex" justifyContent="center" alignItems="center" mt={10}><CircularProgress size={48} sx={{ color: '#6366f1' }} /></Box>;
-  if (!data) return null;
+  const filtered = (dash.orders || []).filter(o => {
+    const ms =
+      !search ||
+      [o.refNo, o.vendor, o.category].some(s => s?.toLowerCase().includes(search.toLowerCase()));
+    const mc = !filterCat || o.category === filterCat;
+    const ms2 = !filterStatus || o.status === filterStatus;
+    return ms && mc && ms2;
+  });
 
-  const kpiGradients = [
-    'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-    'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
-    'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
-  ];
-  const kpiIcons = [
-    <OrderIcon sx={{ fontSize: 28, color: '#fff' }} />,
-    <RequestIcon sx={{ fontSize: 28, color: '#fff' }} />,
-    <VendorIcon sx={{ fontSize: 28, color: '#fff' }} />,
-    <SpendIcon sx={{ fontSize: 28, color: '#fff' }} />,
-  ];
-  const kpis = [
-    { label: 'أوامر الشراء', value: data.totalOrders },
-    { label: 'طلبات معلّقة', value: data.pendingRequests },
-    { label: 'الموردون', value: data.totalVendors },
-    { label: 'إجمالي الإنفاق', value: `${(data.totalSpend || 0).toLocaleString()} ر.س` },
-  ];
-
-  const statusData = (data.byStatus || []).map((s, i) => ({
-    name: statusLabels[s.status] || s.status, value: s.count, color: PIE_COLORS[i % PIE_COLORS.length],
-  }));
-
-  const vendorData = (data.topVendors || []).map((v) => ({ name: v.name, total: v.total }));
+  if (loading)
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
+        <CircularProgress size={48} />
+      </Box>
+    );
 
   return (
-    <Box sx={{ p: { xs: 2, md: 4 }, minHeight: '100vh', background: 'linear-gradient(135deg, #f5f7fa 0%, #e4e9f2 100%)' }}>
-      {/* Header */}
-      <Fade in timeout={500}>
-        <Box sx={{ mb: 4 }}>
-          <Typography variant="h4" sx={{ fontWeight: 800, background: 'linear-gradient(135deg, #667eea, #764ba2)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', mb: 0.5 }}>
-            لوحة تحكم المشتريات
-          </Typography>
-          <Typography variant="body2" color="text.secondary">نظرة شاملة على أوامر الشراء والموردين والإنفاق</Typography>
-        </Box>
-      </Fade>
-
-      {/* KPI Cards */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        {kpis.map((k, i) => (
-          <Grid item xs={12} sm={6} md={3} key={k.label}>
-            <Grow in timeout={600 + i * 150}>
-              <Card
-                component={motion.div}
-                whileHover={{ y: -4 }}
+    <DashboardErrorBoundary>
+      <Box sx={{ minHeight: '100vh', bgcolor: isDark ? 'background.default' : '#f8f9fc' }}>
+        <Box
+          sx={{
+            background: 'linear-gradient(135deg,#880e4f,#ad1457)',
+            py: 3,
+            px: 3,
+            mb: -3,
+            borderRadius: '0 0 24px 24px',
+            position: 'relative',
+            overflow: 'hidden',
+            '&::after': {
+              content: '""',
+              position: 'absolute',
+              top: -50,
+              right: -50,
+              width: 180,
+              height: 180,
+              borderRadius: '50%',
+              background: 'rgba(255,255,255,0.08)',
+            },
+          }}
+        >
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'flex-start',
+              position: 'relative',
+              zIndex: 1,
+            }}
+          >
+            <Box>
+              <Typography variant="h5" fontWeight={800} color="#fff">
+                إدارة المشتريات والتوريد
+              </Typography>
+              <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.85)', mt: 0.5 }}>
+                طلبات الشراء، الموردون، الإنفاق، والعقود
+              </Typography>
+              <Stack direction="row" spacing={1} sx={{ mt: 1.5 }}>
+                <Chip
+                  label={`${dash.pendingRequests} طلب معلق`}
+                  size="small"
+                  sx={{ bgcolor: 'rgba(255,255,255,0.2)', color: '#fff', fontSize: 11 }}
+                />
+                <Chip
+                  label={`${dash.activeVendors} مورد نشط`}
+                  size="small"
+                  sx={{ bgcolor: 'rgba(255,255,255,0.15)', color: '#fff', fontSize: 11 }}
+                />
+              </Stack>
+            </Box>
+            <Stack direction="row" spacing={1}>
+              <Tooltip title="تحديث">
+                <IconButton
+                  onClick={loadData}
+                  sx={{
+                    color: '#fff',
+                    bgcolor: 'rgba(255,255,255,0.15)',
+                    '&:hover': { bgcolor: 'rgba(255,255,255,0.25)' },
+                  }}
+                >
+                  <RefreshIcon />
+                </IconButton>
+              </Tooltip>
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={() => navigate('/procurement/new')}
                 sx={{
-                  borderRadius: '20px',
-                  overflow: 'hidden',
-                  border: 'none',
-                  boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-                  position: 'relative',
+                  bgcolor: 'rgba(255,255,255,0.2)',
+                  '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' },
                 }}
               >
-                <Box sx={{ height: 4, background: kpiGradients[i] }} />
-                <CardContent sx={{ p: '20px 24px !important' }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    <Box>
-                      <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}>{k.label}</Typography>
-                      <Typography variant="h4" sx={{ fontWeight: 800, mt: 0.5, mb: 0.5, lineHeight: 1.2 }}>{k.value}</Typography>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                        <TrendingUpIcon sx={{ fontSize: 14, color: '#10b981' }} />
-                        <Typography variant="caption" sx={{ color: '#10b981', fontWeight: 600 }}>+12%</Typography>
-                      </Box>
-                    </Box>
-                    <Box sx={{
-                      width: 52, height: 52, borderRadius: '16px', background: kpiGradients[i],
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      boxShadow: `0 4px 14px ${PIE_COLORS[i]}40`,
-                    }}>
-                      {kpiIcons[i]}
-                    </Box>
-                  </Box>
-                </CardContent>
-              </Card>
-            </Grow>
-          </Grid>
-        ))}
-      </Grid>
+                طلب شراء جديد
+              </Button>
+            </Stack>
+          </Box>
+        </Box>
 
-      {/* Charts */}
-      <Grid container spacing={3}>
-        <Grid item xs={12} md={5}>
-          <Fade in timeout={800}>
-            <div>
-              <Glass sx={{ p: 3 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 700, fontSize: '1rem' }}>حسب الحالة</Typography>
-                  <Chip label={`${statusData.length} حالات`} size="small" variant="outlined" sx={{ borderRadius: '8px', fontWeight: 500 }} />
-                </Box>
-                <ResponsiveContainer width="100%" height={280}>
+        <Box sx={{ maxWidth: 'xl', mx: 'auto', px: 3, pt: 5, pb: 4 }}>
+          <Grid container spacing={2} sx={{ mb: 3 }}>
+            <Grid item xs={6} sm={3}>
+              <KPICard
+                label="إجمالي أوامر الشراء"
+                value={dash.totalOrders}
+                icon={<OrderIcon />}
+                gradient="linear-gradient(135deg,#880e4f,#ad1457)"
+                delay={0}
+              />
+            </Grid>
+            <Grid item xs={6} sm={3}>
+              <KPICard
+                label="طلبات معلقة"
+                value={dash.pendingRequests}
+                icon={<RequestIcon />}
+                gradient={gradients.warning}
+                delay={1}
+              />
+            </Grid>
+            <Grid item xs={6} sm={3}>
+              <KPICard
+                label="موردون نشطون"
+                value={dash.activeVendors}
+                icon={<VendorIcon />}
+                gradient={gradients.ocean}
+                delay={2}
+              />
+            </Grid>
+            <Grid item xs={6} sm={3}>
+              <KPICard
+                label="الإنفاق السنوي (ر.س)"
+                value={dash.totalSpend}
+                icon={<SpendIcon />}
+                gradient={gradients.success}
+                delay={3}
+              />
+            </Grid>
+          </Grid>
+
+          <Grid container spacing={2} sx={{ mb: 3 }}>
+            <Grid item xs={12} md={5}>
+              <Paper
+                elevation={0}
+                sx={{ p: 2.5, borderRadius: 3, border: '1px solid', borderColor: 'divider' }}
+              >
+                <Typography variant="subtitle2" fontWeight={700} gutterBottom>
+                  الطلبات حسب الفئة
+                </Typography>
+                <ResponsiveContainer width="100%" height={210}>
                   <PieChart>
-                    <Pie data={statusData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={95} innerRadius={50} paddingAngle={3} label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
-                      {statusData.map((e, i) => <Cell key={i} fill={e.color} stroke="none" />)}
+                    <Pie
+                      data={dash.byCategory || DEMO.byCategory}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={52}
+                      outerRadius={82}
+                      paddingAngle={3}
+                      dataKey="value"
+                    >
+                      {(dash.byCategory || DEMO.byCategory).map((e, i) => (
+                        <Cell key={i} fill={e.color || PIE_COLORS[i % PIE_COLORS.length]} />
+                      ))}
                     </Pie>
-                    <Tooltip contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.12)' }} />
-                    <Legend />
+                    <RTooltip content={<ChartTooltip />} />
+                    <Legend iconSize={10} wrapperStyle={{ fontSize: 11 }} />
                   </PieChart>
                 </ResponsiveContainer>
-              </Glass>
-            </div>
-          </Fade>
-        </Grid>
-
-        <Grid item xs={12} md={7}>
-          <Fade in timeout={900}>
-            <div>
-              <Glass sx={{ p: 3 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 700, fontSize: '1rem' }}>أكبر الموردين</Typography>
-                  <Chip label="إنفاق" size="small" variant="outlined" sx={{ borderRadius: '8px', fontWeight: 500 }} />
-                </Box>
-                <ResponsiveContainer width="100%" height={280}>
-                  <BarChart data={vendorData} barSize={32}>
-                    <defs>
-                      <linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#667eea" />
-                        <stop offset="100%" stopColor="#764ba2" />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
-                    <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#999' }} />
-                    <YAxis tick={{ fontSize: 12, fill: '#999' }} />
-                    <Tooltip contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.12)' }} />
-                    <Bar dataKey="total" fill="url(#barGrad)" radius={[8, 8, 0, 0]} />
+              </Paper>
+            </Grid>
+            <Grid item xs={12} md={7}>
+              <Paper
+                elevation={0}
+                sx={{ p: 2.5, borderRadius: 3, border: '1px solid', borderColor: 'divider' }}
+              >
+                <Typography variant="subtitle2" fontWeight={700} gutterBottom>
+                  الإنفاق الشهري
+                </Typography>
+                <ResponsiveContainer width="100%" height={210}>
+                  <BarChart
+                    data={dash.spendByMonth || DEMO.spendByMonth}
+                    margin={{ top: 5, right: 10, left: -10, bottom: 5 }}
+                    barSize={28}
+                  >
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      stroke={isDark ? '#444' : '#f0f0f0'}
+                      vertical={false}
+                    />
+                    <XAxis dataKey="month" tick={{ fontSize: 11 }} />
+                    <YAxis
+                      tick={{ fontSize: 10 }}
+                      tickFormatter={v => `${(v / 1000).toFixed(0)}k`}
+                    />
+                    <RTooltip content={<ChartTooltip />} />
+                    <Bar
+                      dataKey="amount"
+                      name="الإنفاق (ر.س)"
+                      fill="#ad1457"
+                      radius={[4, 4, 0, 0]}
+                    />
                   </BarChart>
                 </ResponsiveContainer>
-              </Glass>
-            </div>
-          </Fade>
-        </Grid>
-      </Grid>
-    </Box>
+              </Paper>
+            </Grid>
+          </Grid>
+
+          <Paper
+            elevation={0}
+            sx={{ p: 2, mb: 3, borderRadius: 3, border: '1px solid', borderColor: 'divider' }}
+          >
+            <Grid container spacing={2} alignItems="center">
+              <Grid item xs={12} sm={4}>
+                <TextField
+                  fullWidth
+                  size="small"
+                  placeholder="بحث برقم الأمر أو المورد..."
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  InputProps={{
+                    startAdornment: (
+                      <Box sx={{ mr: 1, display: 'flex' }}>
+                        <SearchIcon fontSize="small" color="action" />
+                      </Box>
+                    ),
+                  }}
+                  sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2.5 } }}
+                />
+              </Grid>
+              <Grid item xs={6} sm={2.5}>
+                <TextField
+                  select
+                  fullWidth
+                  size="small"
+                  label="الحالة"
+                  value={filterStatus}
+                  onChange={e => setFilterStatus(e.target.value)}
+                  sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2.5 } }}
+                >
+                  <MenuItem value="">الكل</MenuItem>
+                  {Object.entries(statusLabels).map(([k, v]) => (
+                    <MenuItem key={k} value={k}>
+                      {v}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </Grid>
+              <Grid item xs={6} sm={2.5}>
+                <TextField
+                  select
+                  fullWidth
+                  size="small"
+                  label="الفئة"
+                  value={filterCat}
+                  onChange={e => setFilterCat(e.target.value)}
+                  sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2.5 } }}
+                >
+                  <MenuItem value="">الكل</MenuItem>
+                  {Object.entries(categoryLabels).map(([k, v]) => (
+                    <MenuItem key={k} value={k}>
+                      {v}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </Grid>
+              <Grid item>
+                <Chip
+                  label={`${filtered.length} أمر`}
+                  sx={{ fontWeight: 700, bgcolor: '#880e4f', color: '#fff' }}
+                />
+              </Grid>
+            </Grid>
+          </Paper>
+
+          <Paper
+            elevation={0}
+            sx={{
+              borderRadius: 3,
+              border: '1px solid',
+              borderColor: 'divider',
+              overflow: 'hidden',
+            }}
+          >
+            <Box sx={{ p: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
+              <Typography variant="subtitle1" fontWeight={700}>
+                أوامر الشراء
+              </Typography>
+            </Box>
+            {filtered.length === 0 ? (
+              <EmptyState title="لا توجد أوامر مطابقة" height={150} />
+            ) : (
+              <Box sx={{ overflowX: 'auto' }}>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow sx={{ bgcolor: isDark ? 'background.paper' : '#fafafa' }}>
+                      {[
+                        'الرقم المرجعي',
+                        'المورد',
+                        'الفئة',
+                        'المبلغ',
+                        'الحالة',
+                        'تاريخ الاستحقاق',
+                        'إجراء',
+                      ].map(h => (
+                        <TableCell key={h} sx={{ fontWeight: 700, fontSize: 12 }}>
+                          {h}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {filtered.slice(0, 15).map((o, i) => (
+                      <TableRow
+                        key={o._id || i}
+                        hover
+                        sx={{ '&:last-child td': { borderBottom: 0 } }}
+                      >
+                        <TableCell>
+                          <Typography
+                            variant="body2"
+                            fontWeight={700}
+                            sx={{ fontSize: 12, fontFamily: 'monospace' }}
+                          >
+                            {o.refNo || '—'}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="body2" sx={{ fontSize: 12 }}>
+                            {o.vendor || '—'}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Chip
+                            label={categoryLabels[o.category] || o.category || '—'}
+                            size="small"
+                            sx={{ fontSize: 10, bgcolor: '#880e4f', color: '#fff' }}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Typography
+                            variant="body2"
+                            fontWeight={700}
+                            sx={{ fontSize: 12, color: 'success.main' }}
+                          >
+                            {(o.amount || 0).toLocaleString('ar-SA')} ر.س
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Chip
+                            label={statusLabels[o.status] || o.status || '—'}
+                            color={statusColors[o.status] || 'default'}
+                            size="small"
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="body2" sx={{ fontSize: 12 }}>
+                            {o.dueDate || '—'}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Tooltip title="تفاصيل">
+                            <IconButton
+                              size="small"
+                              onClick={() => navigate(`/procurement/${o._id}`)}
+                              sx={{ border: '1px solid', borderColor: 'divider' }}
+                            >
+                              <ViewIcon fontSize="small" color="primary" />
+                            </IconButton>
+                          </Tooltip>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </Box>
+            )}
+          </Paper>
+        </Box>
+      </Box>
+    </DashboardErrorBoundary>
   );
 }

@@ -148,3 +148,9 @@ export { default as AuditLogsRoutes } from './AuditLogsRoutes';
 // === DDD Unified Rehabilitation Platform (منصة التأهيل الموحدة) ===
 export { default as DDDRoutes } from './DDDRoutes';
 export { DDD_NAV_ITEMS } from './DDDRoutes';
+
+// === Core Clinical Pathways ===
+// Episodes of Care — حلقات الرعاية
+export { default as EpisodesRoutes } from './EpisodesRoutes';
+// Beneficiary 360° Profile — الملف الشامل للمستفيد
+export { default as Beneficiary360Routes } from './Beneficiary360Routes';

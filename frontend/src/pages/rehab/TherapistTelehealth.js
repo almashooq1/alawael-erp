@@ -22,7 +22,8 @@ import {
   Tooltip,
   Paper,
   Avatar,
-  Divider,  Rating,
+  Divider,
+  Rating,
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -83,7 +84,7 @@ const TherapistTelehealth = () => {
 
   useEffect(() => {
     fetchSessions();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchSessions = async () => {

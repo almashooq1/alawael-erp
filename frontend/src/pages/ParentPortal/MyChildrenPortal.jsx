@@ -47,6 +47,8 @@ import HealingIcon from '@mui/icons-material/Healing';
 import HomeWorkIcon from '@mui/icons-material/HomeWork';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import DownloadIcon from '@mui/icons-material/Download';
+import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
+import QrCode2Icon from '@mui/icons-material/QrCode2';
 import {
   FormControl,
   InputLabel,
@@ -199,6 +201,10 @@ export default function MyChildrenPortal() {
           ]);
           next.assessments = { items: assess.data?.items || [], byTool: assess.data?.byTool || {} };
           next.attendance = att.data;
+        }
+        if (tabIndex === 4 && !cache.certificates) {
+          const { data } = await api.get(`/parent-v2/children/${childId}/certificates`);
+          next.certificates = data?.items || [];
         }
         setChildData(prev => ({ ...prev, [childId]: next }));
       } catch (err) {
@@ -414,6 +420,7 @@ export default function MyChildrenPortal() {
             <Tab icon={<EventIcon />} iconPosition="start" label="الجلسات" />
             <Tab icon={<AssignmentIcon />} iconPosition="start" label="خطة الرعاية" />
             <Tab icon={<AssessmentIcon />} iconPosition="start" label="التقييمات" />
+            <Tab icon={<VerifiedUserIcon />} iconPosition="start" label="الشهادات" />
           </Tabs>
           {childLoading && <LinearProgress />}
           <Box sx={{ p: 3 }}>
@@ -425,6 +432,9 @@ export default function MyChildrenPortal() {
                 assessments={activeData.assessments}
                 attendance={activeData.attendance}
               />
+            )}
+            {tab === 4 && (
+              <CertificatesTab childId={activeChildId} certificates={activeData.certificates} />
             )}
           </Box>
         </Paper>
@@ -822,6 +832,108 @@ function AssessmentsTab({ assessments, attendance }) {
           </TableContainer>
         )}
       </Box>
+    </Stack>
+  );
+}
+
+// Renders the child's blockchain certificates with download + verify links.
+// PDF download hits the parent-portal endpoint (gated by guardian → child),
+// QR/verify link goes to the public /verify page so it's shareable.
+function CertificatesTab({ childId, certificates }) {
+  if (!certificates) return null;
+  if (certificates.length === 0) {
+    return (
+      <Alert severity="info">
+        لا توجد شهادات صادرة لهذا الطفل بعد. ستظهر الشهادات هنا تلقائياً عند إصدارها.
+      </Alert>
+    );
+  }
+  const fmt = d => {
+    if (!d) return '—';
+    try {
+      return new Date(d).toLocaleDateString('ar-SA-u-ca-gregory');
+    } catch {
+      return String(d).slice(0, 10);
+    }
+  };
+  const STATUS = {
+    issued: { label: 'مُصدرة', color: 'info' },
+    verified: { label: 'موثقة', color: 'success' },
+    expired: { label: 'منتهية', color: 'warning' },
+  };
+  return (
+    <Stack spacing={2}>
+      <Typography variant="subtitle2" color="text.secondary">
+        {certificates.length} شهادة صادرة باسم طفلك. كل شهادة موثّقة على البلوكتشين ويمكن التحقق
+        منها بمسح رمز QR.
+      </Typography>
+      <Grid container spacing={2}>
+        {certificates.map(c => {
+          const s = STATUS[c.status] || { label: c.status, color: 'default' };
+          const title = c.title?.ar || c.title?.en || '—';
+          return (
+            <Grid item xs={12} sm={6} key={c._id}>
+              <Card variant="outlined">
+                <CardContent>
+                  <Stack direction="row" spacing={1} alignItems="flex-start">
+                    <VerifiedUserIcon color={s.color === 'default' ? 'action' : s.color} />
+                    <Box flex={1}>
+                      <Typography variant="subtitle1" fontWeight={700}>
+                        {title}
+                      </Typography>
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{ fontFamily: 'monospace' }}
+                      >
+                        {c.certificateNumber}
+                      </Typography>
+                      <Stack direction="row" spacing={1} mt={1} flexWrap="wrap">
+                        <Chip size="small" label={s.label} color={s.color} />
+                        {c.category && <Chip size="small" variant="outlined" label={c.category} />}
+                        {c.signatures?.length > 0 && (
+                          <Chip
+                            size="small"
+                            variant="outlined"
+                            label={`${c.signatures.length} توقيع`}
+                          />
+                        )}
+                      </Stack>
+                      <Typography variant="caption" color="text.secondary" mt={1} display="block">
+                        صدرت: {fmt(c.issueDate)}
+                        {c.expiryDate ? ` · تنتهي: ${fmt(c.expiryDate)}` : ''}
+                      </Typography>
+                    </Box>
+                  </Stack>
+                  <Stack direction="row" spacing={1} mt={2}>
+                    <Button
+                      size="small"
+                      startIcon={<DownloadIcon />}
+                      href={`/api/parent-v2/children/${childId}/certificates/${c._id}/pdf`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      تحميل PDF
+                    </Button>
+                    {c.hash && (
+                      <Button
+                        size="small"
+                        startIcon={<QrCode2Icon />}
+                        href={`/verify/${c.hash}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        color="success"
+                      >
+                        التحقق
+                      </Button>
+                    )}
+                  </Stack>
+                </CardContent>
+              </Card>
+            </Grid>
+          );
+        })}
+      </Grid>
     </Stack>
   );
 }

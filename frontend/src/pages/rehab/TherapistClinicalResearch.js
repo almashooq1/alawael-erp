@@ -22,7 +22,8 @@ import {
   Tooltip,
   Paper,
   Avatar,
-  Divider,  LinearProgress,
+  Divider,
+  LinearProgress,
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -93,7 +94,7 @@ const TherapistClinicalResearch = () => {
 
   useEffect(() => {
     fetchResearch();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchResearch = async () => {

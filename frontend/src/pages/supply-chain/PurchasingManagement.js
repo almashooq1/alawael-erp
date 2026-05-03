@@ -30,7 +30,8 @@ import {
   Select,
   MenuItem,
   Rating,
-  Tooltip,} from '@mui/material';
+  Tooltip,
+} from '@mui/material';
 import {
   ShoppingCart as PurIcon,
   Add as AddIcon,
@@ -39,7 +40,7 @@ import {
   Description as POIcon,
   Visibility as ViewIcon,
   Check as ApproveIcon,
-  } from '@mui/icons-material';
+} from '@mui/icons-material';
 import { purchasingService } from 'services/operationsService';
 import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from 'theme/palette';
 import { useSnackbar } from '../../contexts/SnackbarContext';

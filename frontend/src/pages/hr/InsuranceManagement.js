@@ -48,7 +48,8 @@ import {
   TablePagination,
   Stepper,
   Step,
-  StepLabel,} from '@mui/material';
+  StepLabel,
+} from '@mui/material';
 import {
   Add as AddIcon,
   Refresh as RefreshIcon,
@@ -70,7 +71,7 @@ import {
   TimerOff as ExpiredIcon,
   TrendingUp as TrendingUpIcon,
   NotificationsActive as AlertIcon,
-  } from '@mui/icons-material';
+} from '@mui/icons-material';
 import insuranceService from '../../services/insurance.service';
 
 /* ─── Constants ──────────────────────────────────────────────────────── */

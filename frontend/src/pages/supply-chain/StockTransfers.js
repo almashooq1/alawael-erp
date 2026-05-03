@@ -36,7 +36,8 @@ import {
   Stepper,
   Step,
   StepLabel,
-  Divider,  Tooltip,
+  Divider,
+  Tooltip,
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -53,12 +54,10 @@ import {
   Send as SendIcon,
   CallReceived as ReceiveIcon,
   ArrowForward as ArrowIcon,
-  } from '@mui/icons-material';
+} from '@mui/icons-material';
 import { useSnackbar } from 'contexts/SnackbarContext';
 import { gradients, surfaceColors } from 'theme/palette';
-import {
-  stockTransferService,
-  warehouseService,} from 'services/branchWarehouseService';
+import { stockTransferService, warehouseService } from 'services/branchWarehouseService';
 
 const statusConfig = {
   draft: { label: 'مسودة', color: 'default', icon: <DraftIcon fontSize="small" /> },

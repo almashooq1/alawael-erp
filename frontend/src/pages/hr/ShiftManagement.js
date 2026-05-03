@@ -20,7 +20,8 @@ import {
   TableCell,
   TableContainer,
   TableHead,
-  TableRow,  Card,
+  TableRow,
+  Card,
   CardContent,
   Alert,
   Snackbar,
@@ -40,7 +41,8 @@ import {
 import {
   getShiftDefinitions,
   createShiftDefinition,
-  getShiftStats,} from '../../services/hr/employeeAffairsPhase2Service';
+  getShiftStats,
+} from '../../services/hr/employeeAffairsPhase2Service';
 
 const SHIFT_TYPES = ['صباحي', 'مسائي', 'ليلي', 'مرن', 'متقطع', 'مناوبة'];
 const DAYS = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس'];

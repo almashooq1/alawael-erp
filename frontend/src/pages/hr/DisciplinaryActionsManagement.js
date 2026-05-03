@@ -23,7 +23,8 @@ import {
   TableRow,
   TablePagination,
   IconButton,
-  Tooltip,  Alert,
+  Tooltip,
+  Alert,
   Snackbar,
   CircularProgress,
 } from '@mui/material';
@@ -31,12 +32,13 @@ import {
   Add as AddIcon,
   Visibility as ViewIcon,
   ThumbUp as ApproveIcon,
-  } from '@mui/icons-material';
+} from '@mui/icons-material';
 import {
   getDisciplinaryActions,
   createDisciplinaryAction,
   getDisciplinaryActionById,
-  approveDisciplinaryAction,} from '../../services/hr/employeeAffairsExpandedService';
+  approveDisciplinaryAction,
+} from '../../services/hr/employeeAffairsExpandedService';
 
 const ACTION_TYPES = [
   'تنبيه شفهي',

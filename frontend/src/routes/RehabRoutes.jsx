@@ -9,9 +9,7 @@ import { lazyWithRetry } from '../utils/lazyLoader';
 const DisabilityAssessmentScales = lazyWithRetry(
   () => import('../pages/DisabilityAssessmentScales')
 );
-const DisabilityAssessmentTests = lazyWithRetry(
-  () => import('../pages/DisabilityAssessmentTests')
-);
+const DisabilityAssessmentTests = lazyWithRetry(() => import('../pages/DisabilityAssessmentTests'));
 
 // Integrated Care
 const CarePlansDashboard = lazyWithRetry(
@@ -59,10 +57,15 @@ const SmartAssessmentDashboard = lazyWithRetry(
   () => import('../pages/SmartAssessment/SmartAssessmentDashboard')
 );
 
+// Group Therapy
+const GroupTherapyPage = lazyWithRetry(() => import('../pages/group-therapy/GroupTherapyPage'));
+
 // Sessions
 const SessionsManagement = lazyWithRetry(() => import('../pages/Sessions'));
 const SessionsDashboard = lazyWithRetry(() => import('../pages/Sessions/SessionsDashboard'));
-const SessionAnalyticsDashboard = lazyWithRetry(() => import('../pages/Sessions/SessionAnalyticsDashboard'));
+const SessionAnalyticsDashboard = lazyWithRetry(
+  () => import('../pages/Sessions/SessionAnalyticsDashboard')
+);
 const SessionCalendarView = lazyWithRetry(() => import('../pages/Sessions/SessionCalendarView'));
 
 export default function RehabRoutes() {
@@ -106,6 +109,10 @@ export default function RehabRoutes() {
 
       {/* Smart Clinical Assessment Engine — محرك التقييم الذكي */}
       <Route path="smart-assessment" element={<SmartAssessmentDashboard />} />
+
+      {/* Group Therapy — إدارة العلاج الجماعي */}
+      <Route path="group-therapy" element={<GroupTherapyPage />} />
+      <Route path="therapist-portal/group-therapy" element={<GroupTherapyPage />} />
     </>
   );
 }

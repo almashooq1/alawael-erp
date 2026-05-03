@@ -23,6 +23,7 @@ const StudentHealthTracker = lazyWithRetry(() => import('../pages/education/Stud
 const StudentRewardsStore = lazyWithRetry(() => import('../pages/education/StudentRewardsStore'));
 const StudentEvents = lazyWithRetry(() => import('../pages/education/StudentEvents'));
 const StudentELearning = lazyWithRetry(() => import('../pages/education/StudentELearning'));
+const StudentAchievements = lazyWithRetry(() => import('../pages/education/StudentAchievements'));
 
 // Therapist Portal
 const TherapistDashboard = lazyWithRetry(() => import('../pages/rehab/TherapistDashboard'));
@@ -35,17 +36,25 @@ const TherapistReports = lazyWithRetry(() => import('../pages/rehab/TherapistRep
 const TherapistMessages = lazyWithRetry(() => import('../pages/rehab/TherapistMessages'));
 
 // Therapist Portal Extended
-const TherapistTreatmentPlans = lazyWithRetry(() => import('../pages/rehab/TherapistTreatmentPlans'));
+const TherapistTreatmentPlans = lazyWithRetry(
+  () => import('../pages/rehab/TherapistTreatmentPlans')
+);
 const TherapistAssessments = lazyWithRetry(() => import('../pages/rehab/TherapistAssessments'));
 const TherapistPrescriptions = lazyWithRetry(() => import('../pages/rehab/TherapistPrescriptions'));
-const TherapistProfessionalDev = lazyWithRetry(() => import('../pages/rehab/TherapistProfessionalDev'));
+const TherapistProfessionalDev = lazyWithRetry(
+  () => import('../pages/rehab/TherapistProfessionalDev')
+);
 const TherapistAnalytics = lazyWithRetry(() => import('../pages/rehab/TherapistAnalytics'));
 const TherapistConsultations = lazyWithRetry(() => import('../pages/rehab/TherapistConsultations'));
 
 // Therapist Portal Pro
 const TherapistDailyTasks = lazyWithRetry(() => import('../pages/rehab/TherapistDailyTasks'));
-const TherapistProgressTracking = lazyWithRetry(() => import('../pages/rehab/TherapistProgressTracking'));
-const TherapistClinicalLibrary = lazyWithRetry(() => import('../pages/rehab/TherapistClinicalLibrary'));
+const TherapistProgressTracking = lazyWithRetry(
+  () => import('../pages/rehab/TherapistProgressTracking')
+);
+const TherapistClinicalLibrary = lazyWithRetry(
+  () => import('../pages/rehab/TherapistClinicalLibrary')
+);
 const TherapistDocTemplates = lazyWithRetry(() => import('../pages/rehab/TherapistDocTemplates'));
 const TherapistParentComm = lazyWithRetry(() => import('../pages/rehab/TherapistParentComm'));
 const TherapistSmartGoals = lazyWithRetry(() => import('../pages/rehab/TherapistSmartGoals'));
@@ -54,15 +63,25 @@ const TherapistSmartGoals = lazyWithRetry(() => import('../pages/rehab/Therapist
 const TherapistReferrals = lazyWithRetry(() => import('../pages/rehab/TherapistReferrals'));
 const TherapistGroupTherapy = lazyWithRetry(() => import('../pages/rehab/TherapistGroupTherapy'));
 const TherapistEquipment = lazyWithRetry(() => import('../pages/rehab/TherapistEquipment'));
-const TherapistPerformanceKPIs = lazyWithRetry(() => import('../pages/rehab/TherapistPerformanceKPIs'));
-const TherapistSafetyProtocols = lazyWithRetry(() => import('../pages/rehab/TherapistSafetyProtocols'));
-const TherapistClinicalResearch = lazyWithRetry(() => import('../pages/rehab/TherapistClinicalResearch'));
+const TherapistPerformanceKPIs = lazyWithRetry(
+  () => import('../pages/rehab/TherapistPerformanceKPIs')
+);
+const TherapistSafetyProtocols = lazyWithRetry(
+  () => import('../pages/rehab/TherapistSafetyProtocols')
+);
+const TherapistClinicalResearch = lazyWithRetry(
+  () => import('../pages/rehab/TherapistClinicalResearch')
+);
 
 // Therapist Portal Elite
 const TherapistTelehealth = lazyWithRetry(() => import('../pages/rehab/TherapistTelehealth'));
 const TherapistFieldTraining = lazyWithRetry(() => import('../pages/rehab/TherapistFieldTraining'));
-const TherapistConsentManagement = lazyWithRetry(() => import('../pages/rehab/TherapistConsentManagement'));
-const TherapistQualityReports = lazyWithRetry(() => import('../pages/rehab/TherapistQualityReports'));
+const TherapistConsentManagement = lazyWithRetry(
+  () => import('../pages/rehab/TherapistConsentManagement')
+);
+const TherapistQualityReports = lazyWithRetry(
+  () => import('../pages/rehab/TherapistQualityReports')
+);
 const TherapistWaitingList = lazyWithRetry(() => import('../pages/rehab/TherapistWaitingList'));
 const TherapistAchievements = lazyWithRetry(() => import('../pages/rehab/TherapistAchievements'));
 
@@ -70,10 +89,14 @@ const TherapistAchievements = lazyWithRetry(() => import('../pages/rehab/Therapi
 const ParentDashboard = lazyWithRetry(() => import('../pages/common/ParentDashboard'));
 const ChildrenProgress = lazyWithRetry(() => import('../pages/education/ChildrenProgress'));
 const AttendanceReports = lazyWithRetry(() => import('../pages/hr/AttendanceReports'));
-const TherapistCommunications = lazyWithRetry(() => import('../pages/rehab/TherapistCommunications'));
+const TherapistCommunications = lazyWithRetry(
+  () => import('../pages/rehab/TherapistCommunications')
+);
 const PaymentsHistory = lazyWithRetry(() => import('../pages/finance/PaymentsHistory'));
 const DocumentsReports = lazyWithRetry(() => import('../pages/documents/DocumentsReports'));
-const AppointmentsScheduling = lazyWithRetry(() => import('../pages/common/AppointmentsScheduling'));
+const AppointmentsScheduling = lazyWithRetry(
+  () => import('../pages/common/AppointmentsScheduling')
+);
 const ParentMessages = lazyWithRetry(() => import('../pages/common/ParentMessages'));
 
 export default function PortalRoutes() {
@@ -95,6 +118,7 @@ export default function PortalRoutes() {
       <Route path="student-portal/rewards" element={<StudentRewardsStore />} />
       <Route path="student-portal/events" element={<StudentEvents />} />
       <Route path="student-portal/elearning" element={<StudentELearning />} />
+      <Route path="student-portal/achievements" element={<StudentAchievements />} />
 
       {/* Therapist Portal */}
       <Route path="therapist-portal" element={<TherapistDashboard />} />

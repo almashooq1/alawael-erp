@@ -163,6 +163,9 @@ export const gradients = {
   orangeStatus: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)',
   redStatus: 'linear-gradient(135deg, #F43F5E 0%, #E11D48 100%)',
   infoDeep: 'linear-gradient(135deg, #0EA5E9 0%, #0369A1 100%)',
+  // Assessment page gradients
+  assessmentBlue: 'linear-gradient(135deg, #1565c0 0%, #0D47A1 100%)',
+  assessmentPurple: 'linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%)',
 };
 
 // ─── Brand Colors (named palette) ────────────────────────────────────────────
@@ -362,6 +365,15 @@ export const assessmentColors = {
   average: '#F59E0B',
   poor: '#EF4444',
   pending: '#94A3B8',
+  // Severity aliases (used in scales & tests)
+  normal: '#10B981', // = excellent
+  mild: '#6366F1', // = good
+  moderate: '#F59E0B', // = average
+  severe: '#EF4444', // = poor
+  // Functional aliases
+  independent: '#10B981',
+  functional: '#6366F1',
+  dependent: '#EF4444',
 };
 
 // ─── Progress Colors ──────────────────────────────────────────────────────────

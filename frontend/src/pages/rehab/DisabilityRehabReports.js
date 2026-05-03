@@ -12,7 +12,8 @@ import {
   CardContent,
   Chip,
   Avatar,
-  LinearProgress,  Button,
+  LinearProgress,
+  Button,
   Tab,
   Tabs,
   Table,
@@ -36,11 +37,9 @@ import {
   Refresh as RefreshIcon,
   Star as StarIcon,
   CheckCircle as CheckIcon,
-  } from '@mui/icons-material';
+} from '@mui/icons-material';
 import { useSnackbar } from 'contexts/SnackbarContext';
-import {
-  rehabReportService,
-  rehabProgramService,} from 'services/disabilityRehabService';
+import { rehabReportService, rehabProgramService } from 'services/disabilityRehabService';
 
 const fmtNum = n => (n ?? 0).toLocaleString('ar-SA');
 const pctColor = v => (v >= 80 ? 'success' : v >= 50 ? 'warning' : 'error');

@@ -39,6 +39,12 @@ import {
   TablePagination,
   LinearProgress,
   Avatar,
+  Checkbox,
+  ToggleButton,
+  ToggleButtonGroup,
+  Alert,
+  Badge,
+  Collapse,
 } from '@mui/material';
 import {
   CloudUpload as UploadIcon,
@@ -62,13 +68,23 @@ import {
   History as HistoryIcon,
   Refresh as RefreshIcon,
   Storage as StorageIcon,
-  PeopleAlt as SharedIcon,
   HourglassEmpty as PendingIcon,
   FolderOpen as FolderOpenIcon,
   Scanner as ScannerIcon,
   AudioFile as AudioFileIcon,
   VideoLibrary as VideoFileIcon,
   DataObject as DataIcon,
+  Inventory2 as ArchiveIcon,
+  ViewModule as GridViewIcon,
+  ViewList as ListViewIcon,
+  CheckBox as CheckBoxIcon,
+  Warning as WarningIcon,
+  FilterList as FilterIcon,
+  CalendarToday as CalendarIcon,
+  LocalOffer as TagIcon,
+  Close as CloseIcon,
+  Edit as EditIcon,
+  PublishedWithChanges as UploadVersionIcon,
 } from '@mui/icons-material';
 import documentService from 'services/documentService';
 import DocumentUploader from 'components/documents/DocumentUploader';
@@ -254,6 +270,31 @@ const DocumentsMgmt = () => {
   // Detail dialog
   const [detailDialog, setDetailDialog] = useState({ open: false, doc: null });
 
+  // ─── New: Bulk Selection & View Mode ───────────────────────────────────────
+  const [selectedIds, setSelectedIds] = useState(new Set());
+  const [viewMode, setViewMode] = useState('list'); // 'list' | 'grid'
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
+  const [fileTypeFilter, setFileTypeFilter] = useState('');
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+
+  // ─── New: Upload Version dialog ────────────────────────────────────────────
+  const [uploadVersionDialog, setUploadVersionDialog] = useState({ open: false, doc: null });
+  const [versionFile, setVersionFile] = useState(null);
+  const [versionNotes, setVersionNotes] = useState('');
+  const [versionUploading, setVersionUploading] = useState(false);
+  const versionFileRef = useRef(null);
+
+  // ─── New: Inline Edit dialog ───────────────────────────────────────────────
+  const [editDialog, setEditDialog] = useState({ open: false, doc: null });
+  const [editTitle, setEditTitle] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+  const [editCategory, setEditCategory] = useState('');
+  const [editTagInput, setEditTagInput] = useState('');
+  const [editTags, setEditTags] = useState([]);
+  const [editSaving, setEditSaving] = useState(false);
+  // ──────────────────────────────────────────────────────────────────────────
+
   const searchTimerRef = useRef(null);
   const searchQueryRef = useRef('');
 
@@ -290,16 +331,30 @@ const DocumentsMgmt = () => {
         page: page + 1,
         limit: rowsPerPage,
       };
+      if (dateFrom) params.dateFrom = dateFrom;
+      if (dateTo) params.dateTo = dateTo;
+      if (fileTypeFilter) params.fileType = fileTypeFilter;
       const result = await documentService.getAllDocuments(params);
       setDocuments(result.documents || []);
       setTotalDocuments(result.total || result.documents?.length || 0);
+      setSelectedIds(new Set()); // clear selection on reload
     } catch (err) {
       logger.error('Documents load error:', err);
       showSnackbar('خطأ في تحميل المستندات', 'error');
     } finally {
       setLoading(false);
     }
-  }, [selectedCategory, selectedStatus, sortBy, page, rowsPerPage, showSnackbar]);
+  }, [
+    selectedCategory,
+    selectedStatus,
+    sortBy,
+    page,
+    rowsPerPage,
+    dateFrom,
+    dateTo,
+    fileTypeFilter,
+    showSnackbar,
+  ]);
 
   useEffect(() => {
     loadDashboard();
@@ -408,10 +463,121 @@ const DocumentsMgmt = () => {
     }
   };
 
+  /* ─── Upload New Version ────────────────────────────────────────────── */
+  const handleUploadVersion = async () => {
+    if (!versionFile) {
+      showSnackbar('اختر ملفاً', 'warning');
+      return;
+    }
+    setVersionUploading(true);
+    try {
+      await documentService.uploadVersion(uploadVersionDialog.doc._id, versionFile, versionNotes);
+      showSnackbar('تم رفع النسخة الجديدة بنجاح', 'success');
+      setUploadVersionDialog({ open: false, doc: null });
+      setVersionFile(null);
+      setVersionNotes('');
+      loadDocuments();
+      // refresh version list if dialog was open
+      if (versionDialog.open && versionDialog.doc?._id === uploadVersionDialog.doc._id) {
+        const data = await documentService.getVersions(uploadVersionDialog.doc._id);
+        setVersionDialog(v => ({ ...v, versions: data.versions || [] }));
+      }
+    } catch (_e) {
+      showSnackbar('خطأ في رفع النسخة', 'error');
+    } finally {
+      setVersionUploading(false);
+    }
+  };
+
+  /* ─── Inline Edit ────────────────────────────────────────────────────── */
+  const openEditDialog = doc => {
+    setEditTitle(doc.title || '');
+    setEditDescription(doc.description || '');
+    setEditCategory(doc.category || 'أخرى');
+    setEditTags(doc.tags || []);
+    setEditTagInput('');
+    setEditDialog({ open: true, doc });
+  };
+
+  const handleEditSave = async () => {
+    if (!editTitle.trim()) {
+      showSnackbar('العنوان مطلوب', 'warning');
+      return;
+    }
+    setEditSaving(true);
+    try {
+      await documentService.updateDocument(editDialog.doc._id, {
+        title: editTitle,
+        description: editDescription,
+        category: editCategory,
+        tags: editTags,
+      });
+      showSnackbar('تم تحديث المستند بنجاح', 'success');
+      setEditDialog({ open: false, doc: null });
+      loadDocuments();
+    } catch (_e) {
+      showSnackbar('خطأ في التحديث', 'error');
+    } finally {
+      setEditSaving(false);
+    }
+  };
+
   const refreshAll = () => {
     loadDashboard();
     loadAnalytics();
     loadDocuments();
+  };
+
+  /* ─── Bulk Selection Handlers ──────────────────────────────────────── */
+  const handleToggleSelect = id => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const handleSelectAll = checked => {
+    if (checked) setSelectedIds(new Set(documents.map(d => d._id || d.id)));
+    else setSelectedIds(new Set());
+  };
+
+  const handleBulkDelete = async () => {
+    if (!selectedIds.size) return;
+    try {
+      await documentService.bulkOperation('delete', [...selectedIds]);
+      showSnackbar(`تم حذف ${selectedIds.size} مستند`, 'success');
+      setSelectedIds(new Set());
+      loadDocuments();
+      loadDashboard();
+    } catch (_e) {
+      showSnackbar('خطأ في الحذف المجمّع', 'error');
+    }
+  };
+
+  const handleBulkArchive = async () => {
+    if (!selectedIds.size) return;
+    try {
+      await documentService.bulkOperation('archive', [...selectedIds]);
+      showSnackbar(`تم أرشفة ${selectedIds.size} مستند`, 'success');
+      setSelectedIds(new Set());
+      loadDocuments();
+      loadDashboard();
+    } catch (_e) {
+      showSnackbar('خطأ في الأرشفة المجمّعة', 'error');
+    }
+  };
+
+  const handleArchive = async doc => {
+    try {
+      await documentService.archiveDocument(doc._id || doc.id);
+      showSnackbar('تمت الأرشفة بنجاح', 'success');
+      loadDocuments();
+      loadDashboard();
+    } catch (_e) {
+      showSnackbar('خطأ في الأرشفة', 'error');
+    }
   };
 
   const stats = dashboard?.stats || {};
@@ -478,7 +644,7 @@ const DocumentsMgmt = () => {
           <StatCard
             icon={<FileIcon />}
             label="إجمالي المستندات"
-            value={stats.totalDocuments ?? '—'}
+            value={stats.totalDocuments ?? stats.total ?? '—'}
             color={brandColors?.primary || '#667eea'}
           />
         </Grid>
@@ -492,9 +658,9 @@ const DocumentsMgmt = () => {
         </Grid>
         <Grid item xs={6} sm={3}>
           <StatCard
-            icon={<SharedIcon />}
-            label="مستندات مشتركة"
-            value={stats.sharedDocuments ?? '—'}
+            icon={<ArchiveIcon />}
+            label="مستندات مؤرشفة"
+            value={stats.totalArchived ?? stats.archived ?? '—'}
             color="#D69E2E"
           />
         </Grid>
@@ -502,11 +668,42 @@ const DocumentsMgmt = () => {
           <StatCard
             icon={<PendingIcon />}
             label="بانتظار الموافقة"
-            value={stats.pendingApproval ?? '—'}
+            value={stats.pendingApproval ?? stats.pending ?? '—'}
             color="#E53E3E"
           />
         </Grid>
       </Grid>
+
+      {/* ═══ Expiring Docs Alert ═══ */}
+      <Collapse in={Boolean(dashboard?.expiringDocuments?.length > 0)}>
+        <Alert
+          severity="warning"
+          icon={<WarningIcon />}
+          sx={{ mb: 2, borderRadius: 2, fontWeight: 600 }}
+          action={
+            <Button
+              color="inherit"
+              size="small"
+              onClick={() => {
+                setSelectedStatus('');
+                setActiveTab(0);
+              }}
+            >
+              عرض الكل
+            </Button>
+          }
+        >
+          {`يوجد ${dashboard?.expiringDocuments?.length || 0} مستند ستنتهي صلاحيته قريباً`}
+          {dashboard?.expiringDocuments?.slice(0, 3).map(d => (
+            <Chip
+              key={d._id}
+              label={d.title}
+              size="small"
+              sx={{ ml: 1, bgcolor: 'warning.light', fontSize: '0.7rem' }}
+            />
+          ))}
+        </Alert>
+      </Collapse>
 
       {/* ═══ Tabs ═══ */}
       <Paper sx={{ borderRadius: 3, overflow: 'hidden' }}>
@@ -531,7 +728,7 @@ const DocumentsMgmt = () => {
         {activeTab === 0 && (
           <Box sx={{ p: 2 }}>
             {/* Filters Row */}
-            <Box sx={{ display: 'flex', gap: 1.5, mb: 2, flexWrap: 'wrap', alignItems: 'center' }}>
+            <Box sx={{ display: 'flex', gap: 1.5, mb: 1, flexWrap: 'wrap', alignItems: 'center' }}>
               <TextField
                 placeholder="بحث في المستندات..."
                 size="small"
@@ -597,7 +794,172 @@ const DocumentsMgmt = () => {
                   <MenuItem value="-downloadCount">الأكثر تنزيلاً</MenuItem>
                 </Select>
               </FormControl>
+
+              {/* Advanced Filters Toggle */}
+              <Tooltip title="فلاتر متقدمة">
+                <Badge
+                  badgeContent={dateFrom || dateTo || fileTypeFilter ? '•' : 0}
+                  color="primary"
+                >
+                  <IconButton
+                    size="small"
+                    onClick={() => setShowAdvancedFilters(v => !v)}
+                    color={showAdvancedFilters ? 'primary' : 'default'}
+                  >
+                    <FilterIcon />
+                  </IconButton>
+                </Badge>
+              </Tooltip>
+
+              <Box sx={{ flex: 1 }} />
+
+              {/* View Mode Toggle */}
+              <ToggleButtonGroup
+                value={viewMode}
+                exclusive
+                onChange={(_e, v) => v && setViewMode(v)}
+                size="small"
+              >
+                <ToggleButton value="list">
+                  <Tooltip title="عرض قائمة">
+                    <ListViewIcon fontSize="small" />
+                  </Tooltip>
+                </ToggleButton>
+                <ToggleButton value="grid">
+                  <Tooltip title="عرض شبكي">
+                    <GridViewIcon fontSize="small" />
+                  </Tooltip>
+                </ToggleButton>
+              </ToggleButtonGroup>
             </Box>
+
+            {/* Advanced Filters Row */}
+            <Collapse in={showAdvancedFilters}>
+              <Box
+                sx={{ display: 'flex', gap: 1.5, mb: 1.5, flexWrap: 'wrap', alignItems: 'center' }}
+              >
+                <TextField
+                  label="من تاريخ"
+                  type="date"
+                  size="small"
+                  value={dateFrom}
+                  onChange={e => {
+                    setDateFrom(e.target.value);
+                    setPage(0);
+                  }}
+                  InputLabelProps={{ shrink: true }}
+                  sx={{ minWidth: 160 }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <CalendarIcon fontSize="small" />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+                <TextField
+                  label="إلى تاريخ"
+                  type="date"
+                  size="small"
+                  value={dateTo}
+                  onChange={e => {
+                    setDateTo(e.target.value);
+                    setPage(0);
+                  }}
+                  InputLabelProps={{ shrink: true }}
+                  sx={{ minWidth: 160 }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <CalendarIcon fontSize="small" />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+                <FormControl size="small" sx={{ minWidth: 140 }}>
+                  <InputLabel>نوع الملف</InputLabel>
+                  <Select
+                    value={fileTypeFilter}
+                    onChange={e => {
+                      setFileTypeFilter(e.target.value);
+                      setPage(0);
+                    }}
+                    label="نوع الملف"
+                  >
+                    <MenuItem value="">الكل</MenuItem>
+                    {['pdf', 'word', 'excel', 'image', 'text', 'video', 'audio', 'other'].map(
+                      ft => (
+                        <MenuItem key={ft} value={ft}>
+                          {ft.toUpperCase()}
+                        </MenuItem>
+                      )
+                    )}
+                  </Select>
+                </FormControl>
+                {(dateFrom || dateTo || fileTypeFilter) && (
+                  <Button
+                    size="small"
+                    startIcon={<CloseIcon />}
+                    onClick={() => {
+                      setDateFrom('');
+                      setDateTo('');
+                      setFileTypeFilter('');
+                      setPage(0);
+                    }}
+                    color="error"
+                    variant="outlined"
+                  >
+                    مسح الفلاتر
+                  </Button>
+                )}
+              </Box>
+            </Collapse>
+
+            {/* Bulk Action Bar */}
+            <Collapse in={selectedIds.size > 0}>
+              <Paper
+                elevation={3}
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1.5,
+                  px: 2,
+                  py: 1,
+                  mb: 1.5,
+                  borderRadius: 2,
+                  bgcolor: 'primary.50',
+                  border: '1px solid',
+                  borderColor: 'primary.200',
+                }}
+              >
+                <CheckBoxIcon color="primary" />
+                <Typography variant="body2" sx={{ fontWeight: 700, color: 'primary.main' }}>
+                  {selectedIds.size} مستند محدد
+                </Typography>
+                <Box sx={{ flex: 1 }} />
+                <Button
+                  size="small"
+                  variant="contained"
+                  color="warning"
+                  startIcon={<ArchiveIcon />}
+                  onClick={handleBulkArchive}
+                >
+                  أرشفة المحدد
+                </Button>
+                <Button
+                  size="small"
+                  variant="contained"
+                  color="error"
+                  startIcon={<DeleteIcon />}
+                  onClick={handleBulkDelete}
+                >
+                  حذف المحدد
+                </Button>
+                <IconButton size="small" onClick={() => setSelectedIds(new Set())}>
+                  <CloseIcon fontSize="small" />
+                </IconButton>
+              </Paper>
+            </Collapse>
 
             {/* Documents Table */}
             {loading ? (
@@ -624,92 +986,73 @@ const DocumentsMgmt = () => {
               </Box>
             ) : (
               <>
-                <TableContainer>
-                  <Table size="small">
-                    <TableHead>
-                      <TableRow sx={{ bgcolor: 'grey.50' }}>
-                        <TableCell sx={{ fontWeight: 700 }}>النوع</TableCell>
-                        <TableCell sx={{ fontWeight: 700 }}>العنوان</TableCell>
-                        <TableCell sx={{ fontWeight: 700 }}>الفئة</TableCell>
-                        <TableCell sx={{ fontWeight: 700 }}>الحجم</TableCell>
-                        <TableCell sx={{ fontWeight: 700 }}>الإصدار</TableCell>
-                        <TableCell sx={{ fontWeight: 700 }}>الحالة</TableCell>
-                        <TableCell sx={{ fontWeight: 700 }}>التاريخ</TableCell>
-                        <TableCell sx={{ fontWeight: 700 }}>التنزيلات</TableCell>
-                        <TableCell align="center" sx={{ fontWeight: 700 }}>
-                          الإجراءات
-                        </TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {documents.map(doc => (
-                        <TableRow
-                          key={doc._id || doc.id}
-                          hover
+                {/* ── Grid View ── */}
+                {viewMode === 'grid' && (
+                  <Grid container spacing={2} sx={{ mb: 2 }}>
+                    {documents.map(doc => (
+                      <Grid item xs={12} sm={6} md={4} lg={3} key={doc._id || doc.id}>
+                        <Card
                           sx={{
-                            cursor: 'pointer',
-                            '&:hover': { bgcolor: 'action.hover' },
+                            borderRadius: 3,
+                            border: selectedIds.has(doc._id || doc.id) ? '2px solid' : '1px solid',
+                            borderColor: selectedIds.has(doc._id || doc.id)
+                              ? 'primary.main'
+                              : 'divider',
+                            transition: 'all 0.2s',
+                            '&:hover': { boxShadow: 4, transform: 'translateY(-2px)' },
+                            position: 'relative',
                           }}
                         >
-                          <TableCell>{getFileIcon(doc.fileType)}</TableCell>
-                          <TableCell>
-                            <Box>
-                              <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                                {doc.title}
-                              </Typography>
-                              {doc.description && (
-                                <Typography
-                                  variant="caption"
-                                  color="text.secondary"
-                                  noWrap
-                                  sx={{ maxWidth: 200, display: 'block' }}
-                                >
-                                  {doc.description}
-                                </Typography>
-                              )}
+                          <Checkbox
+                            size="small"
+                            checked={selectedIds.has(doc._id || doc.id)}
+                            onChange={() => handleToggleSelect(doc._id || doc.id)}
+                            sx={{ position: 'absolute', top: 4, left: 4 }}
+                          />
+                          <CardContent sx={{ pt: 4 }}>
+                            <Box sx={{ textAlign: 'center', mb: 1 }}>
+                              <Box sx={{ fontSize: 40 }}>{getFileIcon(doc.fileType)}</Box>
                             </Box>
-                          </TableCell>
-                          <TableCell>
-                            <Chip
-                              label={doc.category || 'أخرى'}
-                              size="small"
-                              sx={{
-                                bgcolor: (CATEGORY_COLORS[doc.category] || '#607D8B') + '22',
-                                color: CATEGORY_COLORS[doc.category] || '#607D8B',
-                                fontWeight: 600,
-                                fontSize: '0.7rem',
-                              }}
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <Typography variant="caption">
-                              {formatFileSize(doc.fileSize)}
+                            <Typography
+                              variant="subtitle2"
+                              sx={{ fontWeight: 700, mb: 0.5, textAlign: 'center' }}
+                              noWrap
+                            >
+                              {doc.title}
                             </Typography>
-                          </TableCell>
-                          <TableCell>
-                            <Chip
-                              label={`v${doc.version || 1}`}
-                              size="small"
-                              variant="outlined"
-                              sx={{ fontSize: '0.7rem' }}
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <Chip
-                              label={doc.status || 'نشط'}
-                              size="small"
-                              color={STATUS_COLORS[doc.status] || 'default'}
-                              sx={{ fontSize: '0.7rem' }}
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <Typography variant="caption">{formatDate(doc.createdAt)}</Typography>
-                          </TableCell>
-                          <TableCell>
-                            <Typography variant="caption">{doc.downloadCount || 0}</Typography>
-                          </TableCell>
-                          <TableCell align="center">
-                            <Box sx={{ display: 'flex', gap: 0.3, justifyContent: 'center' }}>
+                            <Box
+                              sx={{
+                                display: 'flex',
+                                justifyContent: 'center',
+                                gap: 0.5,
+                                mb: 1,
+                                flexWrap: 'wrap',
+                              }}
+                            >
+                              <Chip
+                                label={doc.category || 'أخرى'}
+                                size="small"
+                                sx={{
+                                  bgcolor: (CATEGORY_COLORS[doc.category] || '#607D8B') + '22',
+                                  color: CATEGORY_COLORS[doc.category] || '#607D8B',
+                                  fontSize: '0.65rem',
+                                }}
+                              />
+                              <Chip
+                                label={doc.status || 'نشط'}
+                                size="small"
+                                color={STATUS_COLORS[doc.status] || 'default'}
+                                sx={{ fontSize: '0.65rem' }}
+                              />
+                            </Box>
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                              sx={{ display: 'block', textAlign: 'center', mb: 1 }}
+                            >
+                              {formatFileSize(doc.fileSize)} · {formatDate(doc.createdAt)}
+                            </Typography>
+                            <Box sx={{ display: 'flex', justifyContent: 'center', gap: 0.5 }}>
                               <Tooltip title="معاينة">
                                 <IconButton
                                   size="small"
@@ -717,14 +1060,6 @@ const DocumentsMgmt = () => {
                                   onClick={() => handlePreview(doc)}
                                 >
                                   <ViewIcon fontSize="small" />
-                                </IconButton>
-                              </Tooltip>
-                              <Tooltip title="عرض التفاصيل">
-                                <IconButton
-                                  size="small"
-                                  onClick={() => setDetailDialog({ open: true, doc })}
-                                >
-                                  <FileIcon fontSize="small" />
                                 </IconButton>
                               </Tooltip>
                               <Tooltip title="تنزيل">
@@ -745,15 +1080,17 @@ const DocumentsMgmt = () => {
                                   <ShareIcon fontSize="small" />
                                 </IconButton>
                               </Tooltip>
-                              <Tooltip title="النسخ">
-                                <IconButton
-                                  size="small"
-                                  color="secondary"
-                                  onClick={() => handleViewVersions(doc)}
-                                >
-                                  <HistoryIcon fontSize="small" />
-                                </IconButton>
-                              </Tooltip>
+                              {doc.status !== 'محذوف' && doc.status !== 'مؤرشف' && (
+                                <Tooltip title="أرشفة">
+                                  <IconButton
+                                    size="small"
+                                    color="warning"
+                                    onClick={() => handleArchive(doc)}
+                                  >
+                                    <ArchiveIcon fontSize="small" />
+                                  </IconButton>
+                                </Tooltip>
+                              )}
                               {doc.status === 'محذوف' ? (
                                 <Tooltip title="استرجاع">
                                   <IconButton
@@ -776,12 +1113,224 @@ const DocumentsMgmt = () => {
                                 </Tooltip>
                               )}
                             </Box>
+                          </CardContent>
+                        </Card>
+                      </Grid>
+                    ))}
+                  </Grid>
+                )}
+
+                {/* ── List (Table) View ── */}
+                {viewMode === 'list' && (
+                  <TableContainer>
+                    <Table size="small">
+                      <TableHead>
+                        <TableRow sx={{ bgcolor: 'grey.50' }}>
+                          <TableCell padding="checkbox">
+                            <Checkbox
+                              size="small"
+                              indeterminate={
+                                selectedIds.size > 0 && selectedIds.size < documents.length
+                              }
+                              checked={
+                                documents.length > 0 && selectedIds.size === documents.length
+                              }
+                              onChange={e => handleSelectAll(e.target.checked)}
+                            />
+                          </TableCell>
+                          <TableCell sx={{ fontWeight: 700 }}>النوع</TableCell>
+                          <TableCell sx={{ fontWeight: 700 }}>العنوان</TableCell>
+                          <TableCell sx={{ fontWeight: 700 }}>الفئة</TableCell>
+                          <TableCell sx={{ fontWeight: 700 }}>الحجم</TableCell>
+                          <TableCell sx={{ fontWeight: 700 }}>الإصدار</TableCell>
+                          <TableCell sx={{ fontWeight: 700 }}>الحالة</TableCell>
+                          <TableCell sx={{ fontWeight: 700 }}>التاريخ</TableCell>
+                          <TableCell sx={{ fontWeight: 700 }}>التنزيلات</TableCell>
+                          <TableCell align="center" sx={{ fontWeight: 700 }}>
+                            الإجراءات
                           </TableCell>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
+                      </TableHead>
+                      <TableBody>
+                        {documents.map(doc => (
+                          <TableRow
+                            key={doc._id || doc.id}
+                            hover
+                            selected={selectedIds.has(doc._id || doc.id)}
+                            sx={{
+                              cursor: 'pointer',
+                              '&:hover': { bgcolor: 'action.hover' },
+                              '&.Mui-selected': { bgcolor: 'primary.50' },
+                            }}
+                          >
+                            <TableCell padding="checkbox">
+                              <Checkbox
+                                size="small"
+                                checked={selectedIds.has(doc._id || doc.id)}
+                                onChange={() => handleToggleSelect(doc._id || doc.id)}
+                              />
+                            </TableCell>
+                            <TableCell>{getFileIcon(doc.fileType)}</TableCell>
+                            <TableCell>
+                              <Box>
+                                <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                  {doc.title}
+                                </Typography>
+                                {doc.description && (
+                                  <Typography
+                                    variant="caption"
+                                    color="text.secondary"
+                                    noWrap
+                                    sx={{ maxWidth: 200, display: 'block' }}
+                                  >
+                                    {doc.description}
+                                  </Typography>
+                                )}
+                              </Box>
+                            </TableCell>
+                            <TableCell>
+                              <Chip
+                                label={doc.category || 'أخرى'}
+                                size="small"
+                                sx={{
+                                  bgcolor: (CATEGORY_COLORS[doc.category] || '#607D8B') + '22',
+                                  color: CATEGORY_COLORS[doc.category] || '#607D8B',
+                                  fontWeight: 600,
+                                  fontSize: '0.7rem',
+                                }}
+                              />
+                            </TableCell>
+                            <TableCell>
+                              <Typography variant="caption">
+                                {formatFileSize(doc.fileSize)}
+                              </Typography>
+                            </TableCell>
+                            <TableCell>
+                              <Chip
+                                label={`v${doc.version || 1}`}
+                                size="small"
+                                variant="outlined"
+                                sx={{ fontSize: '0.7rem' }}
+                              />
+                            </TableCell>
+                            <TableCell>
+                              <Chip
+                                label={doc.status || 'نشط'}
+                                size="small"
+                                color={STATUS_COLORS[doc.status] || 'default'}
+                                sx={{ fontSize: '0.7rem' }}
+                              />
+                            </TableCell>
+                            <TableCell>
+                              <Typography variant="caption">{formatDate(doc.createdAt)}</Typography>
+                            </TableCell>
+                            <TableCell>
+                              <Typography variant="caption">{doc.downloadCount || 0}</Typography>
+                            </TableCell>
+                            <TableCell align="center">
+                              <Box sx={{ display: 'flex', gap: 0.3, justifyContent: 'center' }}>
+                                <Tooltip title="معاينة">
+                                  <IconButton
+                                    size="small"
+                                    color="success"
+                                    onClick={() => handlePreview(doc)}
+                                  >
+                                    <ViewIcon fontSize="small" />
+                                  </IconButton>
+                                </Tooltip>
+                                <Tooltip title="عرض التفاصيل">
+                                  <IconButton
+                                    size="small"
+                                    onClick={() => setDetailDialog({ open: true, doc })}
+                                  >
+                                    <FileIcon fontSize="small" />
+                                  </IconButton>
+                                </Tooltip>
+                                <Tooltip title="تنزيل">
+                                  <IconButton
+                                    size="small"
+                                    color="primary"
+                                    onClick={() => handleDownload(doc)}
+                                  >
+                                    <DownloadIcon fontSize="small" />
+                                  </IconButton>
+                                </Tooltip>
+                                <Tooltip title="مشاركة">
+                                  <IconButton
+                                    size="small"
+                                    color="info"
+                                    onClick={() => setShareDialog({ open: true, doc })}
+                                  >
+                                    <ShareIcon fontSize="small" />
+                                  </IconButton>
+                                </Tooltip>
+                                <Tooltip title="النسخ">
+                                  <IconButton
+                                    size="small"
+                                    color="secondary"
+                                    onClick={() => handleViewVersions(doc)}
+                                  >
+                                    <HistoryIcon fontSize="small" />
+                                  </IconButton>
+                                </Tooltip>
+                                <Tooltip title="رفع نسخة جديدة">
+                                  <IconButton
+                                    size="small"
+                                    sx={{ color: '#38A169' }}
+                                    onClick={() => setUploadVersionDialog({ open: true, doc })}
+                                  >
+                                    <UploadVersionIcon fontSize="small" />
+                                  </IconButton>
+                                </Tooltip>
+                                <Tooltip title="تعديل">
+                                  <IconButton
+                                    size="small"
+                                    sx={{ color: '#D69E2E' }}
+                                    onClick={() => openEditDialog(doc)}
+                                  >
+                                    <EditIcon fontSize="small" />
+                                  </IconButton>
+                                </Tooltip>
+                                {doc.status !== 'محذوف' && doc.status !== 'مؤرشف' && (
+                                  <Tooltip title="أرشفة">
+                                    <IconButton
+                                      size="small"
+                                      color="warning"
+                                      onClick={() => handleArchive(doc)}
+                                    >
+                                      <ArchiveIcon fontSize="small" />
+                                    </IconButton>
+                                  </Tooltip>
+                                )}
+                                {doc.status === 'محذوف' ? (
+                                  <Tooltip title="استرجاع">
+                                    <IconButton
+                                      size="small"
+                                      color="success"
+                                      onClick={() => handleRestore(doc)}
+                                    >
+                                      <RestoreIcon fontSize="small" />
+                                    </IconButton>
+                                  </Tooltip>
+                                ) : (
+                                  <Tooltip title="حذف">
+                                    <IconButton
+                                      size="small"
+                                      color="error"
+                                      onClick={() => handleDeleteClick(doc)}
+                                    >
+                                      <DeleteIcon fontSize="small" />
+                                    </IconButton>
+                                  </Tooltip>
+                                )}
+                              </Box>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                )}
 
                 <TablePagination
                   component="div"
@@ -1337,13 +1886,222 @@ const DocumentsMgmt = () => {
           )}
         </DialogContent>
         <DialogActions>
+          <Button
+            startIcon={<UploadVersionIcon />}
+            onClick={() => {
+              setVersionDialog({ open: false, doc: null, versions: [] });
+              setUploadVersionDialog({ open: true, doc: versionDialog.doc });
+            }}
+            color="primary"
+            variant="outlined"
+          >
+            رفع نسخة جديدة
+          </Button>
           <Button onClick={() => setVersionDialog({ open: false, doc: null, versions: [] })}>
             إغلاق
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* Preview Dialog — عرض المستند */}
+      {/* ─── Upload Version Dialog ─── */}
+      <Dialog
+        open={uploadVersionDialog.open}
+        onClose={() => {
+          setUploadVersionDialog({ open: false, doc: null });
+          setVersionFile(null);
+          setVersionNotes('');
+        }}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <UploadVersionIcon color="primary" />
+            <Typography variant="h6">رفع نسخة جديدة</Typography>
+          </Box>
+          <Typography variant="caption" color="text.secondary">
+            {uploadVersionDialog.doc?.title}
+          </Typography>
+        </DialogTitle>
+        <DialogContent sx={{ mt: 1 }}>
+          <Box
+            sx={{
+              border: '2px dashed',
+              borderColor: versionFile ? 'success.main' : 'divider',
+              borderRadius: 2,
+              p: 3,
+              textAlign: 'center',
+              cursor: 'pointer',
+              mb: 2,
+              bgcolor: versionFile ? 'success.50' : 'grey.50',
+            }}
+            onClick={() => versionFileRef.current?.click()}
+          >
+            <UploadVersionIcon
+              sx={{ fontSize: 36, color: versionFile ? 'success.main' : 'action.disabled', mb: 1 }}
+            />
+            {versionFile ? (
+              <Typography variant="body2" sx={{ fontWeight: 600, color: 'success.main' }}>
+                {versionFile.name}
+              </Typography>
+            ) : (
+              <Typography variant="body2" color="text.secondary">
+                انقر لاختيار الملف
+              </Typography>
+            )}
+          </Box>
+          <input
+            type="file"
+            ref={versionFileRef}
+            style={{ display: 'none' }}
+            onChange={e => setVersionFile(e.target.files[0] || null)}
+          />
+          <TextField
+            fullWidth
+            size="small"
+            label="ملاحظات التغييرات (اختياري)"
+            multiline
+            rows={2}
+            value={versionNotes}
+            onChange={e => setVersionNotes(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => {
+              setUploadVersionDialog({ open: false, doc: null });
+              setVersionFile(null);
+              setVersionNotes('');
+            }}
+          >
+            إلغاء
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleUploadVersion}
+            disabled={!versionFile || versionUploading}
+            startIcon={versionUploading ? <CircularProgress size={16} /> : <UploadVersionIcon />}
+          >
+            {versionUploading ? 'جاري الرفع...' : 'رفع'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* ─── Inline Edit Dialog ─── */}
+      <Dialog
+        open={editDialog.open}
+        onClose={() => setEditDialog({ open: false, doc: null })}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <EditIcon sx={{ color: '#D69E2E' }} />
+            <Typography variant="h6">تعديل المستند</Typography>
+          </Box>
+        </DialogTitle>
+        <DialogContent sx={{ mt: 1 }}>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                size="small"
+                label="العنوان"
+                required
+                value={editTitle}
+                onChange={e => setEditTitle(e.target.value)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                size="small"
+                label="الوصف"
+                multiline
+                rows={2}
+                value={editDescription}
+                onChange={e => setEditDescription(e.target.value)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <FormControl fullWidth size="small">
+                <InputLabel>الفئة</InputLabel>
+                <Select
+                  value={editCategory}
+                  onChange={e => setEditCategory(e.target.value)}
+                  label="الفئة"
+                >
+                  {['تقارير', 'عقود', 'سياسات', 'تدريب', 'مالي', 'شهادات', 'مراسلات', 'أخرى'].map(
+                    c => (
+                      <MenuItem key={c} value={c}>
+                        {c}
+                      </MenuItem>
+                    )
+                  )}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12}>
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <TextField
+                  size="small"
+                  label="إضافة وسم"
+                  value={editTagInput}
+                  onChange={e => setEditTagInput(e.target.value)}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter' && editTagInput.trim()) {
+                      e.preventDefault();
+                      setEditTags(t => [...t, editTagInput.trim()]);
+                      setEditTagInput('');
+                    }
+                  }}
+                  sx={{ flex: 1 }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <TagIcon fontSize="small" />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+                <Button
+                  variant="outlined"
+                  size="small"
+                  onClick={() => {
+                    if (editTagInput.trim()) {
+                      setEditTags(t => [...t, editTagInput.trim()]);
+                      setEditTagInput('');
+                    }
+                  }}
+                >
+                  إضافة
+                </Button>
+              </Box>
+              <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mt: 1 }}>
+                {editTags.map((tag, i) => (
+                  <Chip
+                    key={i}
+                    label={tag}
+                    size="small"
+                    onDelete={() => setEditTags(t => t.filter((_, idx) => idx !== i))}
+                  />
+                ))}
+              </Box>
+            </Grid>
+          </Grid>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setEditDialog({ open: false, doc: null })}>إلغاء</Button>
+          <Button
+            variant="contained"
+            onClick={handleEditSave}
+            disabled={editSaving}
+            startIcon={editSaving ? <CircularProgress size={16} /> : <EditIcon />}
+          >
+            {editSaving ? 'جاري الحفظ...' : 'حفظ'}
+          </Button>
+        </DialogActions>
+      </Dialog>
       <Dialog
         open={previewDialog.open}
         onClose={() => setPreviewDialog({ open: false, doc: null })}

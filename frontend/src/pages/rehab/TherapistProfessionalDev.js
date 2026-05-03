@@ -7,7 +7,8 @@ import {
   Typography,
   Grid,
   Button,
-  Chip,  Dialog,
+  Chip,
+  Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
@@ -16,7 +17,9 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
-  Paper,  LinearProgress,  Avatar,
+  Paper,
+  LinearProgress,
+  Avatar,
   List,
   ListItem,
   ListItemAvatar,
@@ -39,7 +42,7 @@ import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import {  statusColors, neutralColors, surfaceColors } from '../../theme/palette';
+import { statusColors, neutralColors, surfaceColors } from '../../theme/palette';
 
 const categoryIcons = {
   courses: <SchoolIcon />,

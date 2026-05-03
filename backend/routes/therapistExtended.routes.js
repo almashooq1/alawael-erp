@@ -244,7 +244,7 @@ router.patch(
     const data = await svc.updateConsultationStatus(
       req.user.id,
       req.params.consultationId,
-      req.body.status
+      req.body
     );
     if (!data) return res.status(404).json({ success: false, error: 'الاستشارة غير موجودة' });
     res.json({ success: true, data });

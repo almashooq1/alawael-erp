@@ -73,7 +73,7 @@ router.post(
 );
 router.patch(
   '/field-training/:id/hours',
-  wrap(req => svc.logTrainingHours(req.params.id, req.body.hours))
+  wrap(req => svc.logTrainingHours(req.params.id, req.body))
 );
 router.delete(
   '/field-training/:id',

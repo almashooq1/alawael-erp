@@ -50,6 +50,13 @@ tags:
     description: Dead Letter Queue inspection + replay + discard.
   - name: Observability
     description: Prometheus metrics for integrations + hardening layer.
+  - name: PDPL Audit
+    description: PDPL Article 13 — read access audit. DPO / compliance only.
+  - name: Session→Claim Bridge
+    description: |
+      Phase 21 — bridges completed therapy sessions into NPHIES draft claims.
+      Output is a draft only; submission to NPHIES still goes through
+      `POST /api/admin/nphies-claims/:id/submit` (idempotent + real adapter).
 
 security:
   - bearerAuth: []
@@ -482,6 +489,189 @@ paths:
                   ok:    { type: boolean }
                   entry: { $ref: '#/components/schemas/DlqEntry' }
 
+  # ─── Phase 21 — Session→Claim Bridge ────────────────────────────────────
+  /api/admin/therapy-sessions/{id}/create-claim:
+    post:
+      tags: [Session→Claim Bridge]
+      summary: Build a draft NPHIES claim from a completed therapy session
+      description: |
+        Resolves the session's CPT code from the Arabic session-type
+        registry, looks up the unit price in `InsuranceTariff`, and persists
+        a draft `NphiesClaim` linked to the session. The draft is NOT
+        submitted to NPHIES — that's a separate step at
+        `POST /api/admin/nphies-claims/:id/submit`.
+
+        Errors (`result.errors`) block creation outright (e.g. missing
+        diagnosis, no insurance, no tariff). Warnings (`result.warnings`)
+        surface for the billing UI to highlight but do not block.
+
+        `dryRun: true` returns the same response shape with `claim` filled
+        in but nothing written to Mongo — useful for previewing what the
+        bridge will produce before committing.
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SessionToClaimRequest' }
+      responses:
+        '201':
+          description: Draft claim persisted.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SessionToClaimResponse' }
+        '200':
+          description: Dry-run preview — same shape, no DB write.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SessionToClaimResponse' }
+        '400':
+          description: Invalid session ID.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '422':
+          description: |
+            Bridge ran but produced blocking errors (missing diagnosis,
+            uninsured beneficiary, no tariff for the resolved CPT, etc.).
+            Body shape is the same as 201 except `ok: false` and warnings
+            may also be present.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SessionToClaimErrorResponse' }
+
+  /api/admin/therapy-sessions/bulk-create-claims:
+    post:
+      tags: [Session→Claim Bridge]
+      summary: Month-end batch — bridge every COMPLETED session in a window
+      description: |
+        Finds COMPLETED sessions in the given date window, branch-scoped
+        for non-HQ users. For each session without an existing `NphiesClaim`
+        runs the same bridge as the per-session endpoint. Returns a
+        partition-honest report with `created` / `skipped` / `failed`
+        arrays so the caller can act on each bucket.
+
+        Hard cap of 500 sessions per call — use multiple windows for
+        larger ranges. Atomic per session (one failure does not roll back
+        successful neighbours) and idempotent (re-running with the same
+        window is a no-op for sessions already bridged).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/BulkCreateClaimsRequest' }
+      responses:
+        '201':
+          description: Bulk run completed (real, sessions written).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/BulkCreateClaimsResponse' }
+        '200':
+          description: Dry-run preview — same shape, no DB writes.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/BulkCreateClaimsResponse' }
+        '400':
+          description: '`from` or `to` missing, or hard cap exceeded.'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  # ─── PDPL Article 13 — PII access audit ─────────────────────────────────
+  /api/admin/pii-access-audit:
+    get:
+      tags: [PDPL Audit]
+      summary: List PII access events (filterable feed)
+      description: |
+        Returns the `pii.access.read` AuditLog rows authored by
+        `middleware/piiAccess.middleware.js` on every successful 2xx read of
+        a sensitive resource. DPO + compliance can filter by target, viewer,
+        and date range to satisfy a Subject Access Request.
+
+        The middleware writes one row per successful disclosure; failed reads
+        (4xx/5xx) are never logged here — they are not disclosures.
+      parameters:
+        - name: targetType
+          in: query
+          description: 'Resource model name (e.g. `Beneficiary`, `Invoice`, `NphiesClaim`).'
+          schema: { type: string }
+        - name: targetId
+          in: query
+          description: ObjectId of the viewed resource.
+          schema: { type: string }
+        - name: userId
+          in: query
+          description: Filter to a specific viewer.
+          schema: { type: string }
+        - name: fromDate
+          in: query
+          schema: { type: string, format: date }
+        - name: toDate
+          in: query
+          schema: { type: string, format: date }
+        - name: page
+          in: query
+          schema: { type: integer, default: 1, minimum: 1 }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 50, maximum: 500 }
+      responses:
+        '200':
+          description: Paginated feed of PII read events.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PiiAccessListResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403':
+          description: Caller lacks DPO / compliance / admin role.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+  /api/admin/pii-access-audit/by-target:
+    get:
+      tags: [PDPL Audit]
+      summary: 'Aggregator — "who viewed this record?" lookup'
+      description: |
+        Returns distinct viewers + per-viewer access counts within a time
+        window. This is the shape the DPO actually wants when answering
+        "who has looked at this beneficiary in the last 90 days?" — the
+        list endpoint above gives raw rows.
+
+        Window is capped at 365 days server-side regardless of `days` value.
+      parameters:
+        - name: targetType
+          in: query
+          required: true
+          schema: { type: string, example: Beneficiary }
+        - name: targetId
+          in: query
+          required: true
+          schema: { type: string }
+        - name: days
+          in: query
+          schema: { type: integer, default: 90, minimum: 1, maximum: 365 }
+      responses:
+        '200':
+          description: Aggregated viewer report for the requested window.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PiiAccessByTargetResponse' }
+        '400':
+          description: targetType or targetId missing.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403':
+          description: Caller lacks DPO / compliance / admin role.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+
   # ─── Observability ──────────────────────────────────────────────────────
   /api/health/metrics/integrations:
     get:
@@ -895,3 +1085,196 @@ components:
         meta:
           type: object
           description: Tenant / branch / user tags attached by the caller.
+
+    PiiAccessRecord:
+      type: object
+      properties:
+        _id:        { type: string }
+        eventType:  { type: string, enum: ['pii.access.read'] }
+        userId:     { type: string, description: ObjectId of the viewer. }
+        action:     { type: string, example: read }
+        method:     { type: string, example: GET }
+        path:       { type: string, example: /api/admin/beneficiaries/65f1... }
+        ip:         { type: string, nullable: true }
+        userAgent:  { type: string, nullable: true }
+        statusCode: { type: integer, example: 200 }
+        metadata:
+          type: object
+          description: Caller-supplied tag set + the auto-derived target reference.
+          properties:
+            targetType: { type: string, example: Beneficiary }
+            targetId:   { type: string }
+            tenantId:   { type: string, nullable: true }
+            branchId:   { type: string, nullable: true }
+        createdAt:  { type: string, format: date-time }
+
+    PiiAccessListResponse:
+      type: object
+      properties:
+        success: { type: boolean }
+        page:    { type: integer }
+        limit:   { type: integer }
+        total:   { type: integer }
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/PiiAccessRecord' }
+
+    PiiAccessViewer:
+      type: object
+      properties:
+        userId:    { type: string }
+        count:     { type: integer, description: Reads attributed to this viewer in the window. }
+        firstSeen: { type: string, format: date-time }
+        lastSeen:  { type: string, format: date-time }
+
+    PiiAccessByTargetResponse:
+      type: object
+      properties:
+        success:        { type: boolean }
+        target:
+          type: object
+          properties:
+            type: { type: string }
+            id:   { type: string }
+        windowDays:     { type: integer }
+        totalAccesses:  { type: integer }
+        uniqueViewers:  { type: integer }
+        viewers:
+          type: array
+          description: Distinct viewers, sorted by `count` descending.
+          items: { $ref: '#/components/schemas/PiiAccessViewer' }
+        recent:
+          type: array
+          description: Up to 50 most-recent raw rows for quick eyeballing.
+          items: { $ref: '#/components/schemas/PiiAccessRecord' }
+
+    DiagnosisCode:
+      type: object
+      properties:
+        code:        { type: string, example: F84.0, description: ICD-10 code }
+        description: { type: string, example: 'Childhood autism' }
+
+    CptOverride:
+      type: object
+      description: |
+        Forces a specific CPT mapping for this bridge run, bypassing the
+        registry. Use sparingly — the registry is the auditable source of
+        truth for session-type → CPT mapping.
+      properties:
+        code:        { type: string, example: 97530 }
+        description: { type: string, example: Therapeutic activities }
+        specialty:   { type: string, example: occupational_therapy }
+
+    SessionToClaimRequest:
+      type: object
+      properties:
+        unitPrice:
+          type: number
+          description: Override the tariff resolver. Plain currency value (e.g. 350.00).
+        diagnosis:
+          type: array
+          minItems: 1
+          items: { $ref: '#/components/schemas/DiagnosisCode' }
+        cptOverride: { $ref: '#/components/schemas/CptOverride' }
+        dryRun:
+          type: boolean
+          default: false
+
+    SessionToClaimResponse:
+      type: object
+      properties:
+        ok: { type: boolean, example: true }
+        claim:
+          type: object
+          description: |
+            The persisted (or, in dry-run, prospective) NphiesClaim draft.
+            Schema overlaps `NphiesClaim` collection — refer to the model
+            in `backend/models/NphiesClaim.js` for the canonical shape.
+          properties:
+            _id:           { type: string }
+            sessionId:     { type: string }
+            beneficiaryId: { type: string }
+            cptCode:       { type: string, example: 97530 }
+            unitPrice:     { type: number }
+            diagnosis:
+              type: array
+              items: { $ref: '#/components/schemas/DiagnosisCode' }
+            status:        { type: string, example: DRAFT }
+        warnings:
+          type: array
+          description: Non-blocking findings the UI should highlight.
+          items: { type: string }
+        dryRun:           { type: boolean }
+
+    SessionToClaimErrorResponse:
+      type: object
+      properties:
+        ok:       { type: boolean, example: false }
+        errors:
+          type: array
+          items: { type: string }
+        warnings:
+          type: array
+          items: { type: string }
+
+    BulkCreateClaimsRequest:
+      type: object
+      required: [from, to]
+      properties:
+        from:
+          type: string
+          format: date
+          description: Inclusive lower bound on `serviceDate`.
+        to:
+          type: string
+          format: date
+          description: Inclusive upper bound (entire day).
+        dryRun:
+          type: boolean
+          default: false
+        maxBatch:
+          type: integer
+          maximum: 500
+          description: Hard-cap override (default 500).
+
+    BulkCreateClaimEntry:
+      type: object
+      properties:
+        sessionId: { type: string }
+        claimId:   { type: string, nullable: true, description: Null in dry-run mode. }
+
+    BulkCreateClaimSkip:
+      type: object
+      properties:
+        sessionId: { type: string }
+        reason:
+          type: string
+          example: already_has_claim
+
+    BulkCreateClaimFailure:
+      type: object
+      properties:
+        sessionId: { type: string }
+        errors:
+          type: array
+          items: { type: string }
+        warnings:
+          type: array
+          items: { type: string }
+
+    BulkCreateClaimsResponse:
+      type: object
+      properties:
+        ok:             { type: boolean }
+        candidateCount: { type: integer, description: Sessions found in the window. }
+        created:
+          type: array
+          items: { $ref: '#/components/schemas/BulkCreateClaimEntry' }
+        skipped:
+          type: array
+          items: { $ref: '#/components/schemas/BulkCreateClaimSkip' }
+        failed:
+          type: array
+          items: { $ref: '#/components/schemas/BulkCreateClaimFailure' }
+        durationMs:     { type: integer }
+        dryRun:         { type: boolean }

@@ -97,13 +97,23 @@ jobs:
           fi
 
   # ─── Run Tests ──────────────────────────────────────────────────
+  # Real gate now. Two prior failure-masking layers were removed in
+  # the same commit:
+  #   1. job-level `continue-on-error: true` (made any failure non-blocking)
+  #   2. step-level `|| echo "⚠️ ..."` after npm test (forced exit 0)
+  # Either alone would have been enough to silence a regression. Verified
+  # 316/316 pass locally before flipping. If a flake appears, fix the test —
+  # don't reintroduce the masks.
+  #
+  # Security audit retains its `|| echo` because npm audit at
+  # --audit-level=critical is informational and can flake from registry
+  # outages we can't fix.
   test:
     name: "🧪 Run Tests"
     runs-on: ubuntu-latest
     needs: preflight
     if: ${{ github.event.inputs.skip_tests != 'true' }}
     timeout-minutes: 15
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
 
@@ -117,7 +127,7 @@ jobs:
 
       - name: Run backend tests
         working-directory: backend
-        run: npm test -- --forceExit --detectOpenHandles --passWithNoTests --no-coverage 2>&1 || echo "⚠️ Some tests failed — check logs above"
+        run: npm test -- --forceExit --detectOpenHandles --passWithNoTests --no-coverage
         env:
           NODE_ENV: test
           JWT_SECRET: test-jwt-secret-ci-only
@@ -125,7 +135,7 @@ jobs:
 
       - name: Security audit
         working-directory: backend
-        run: npm audit --audit-level=critical --omit=dev 2>&1 || echo "⚠️ Audit warnings found"
+        run: npm audit --audit-level=critical --omit=dev 2>&1 || echo "⚠️ Audit warnings found (non-blocking)"
 
   # ─── Build Frontend ──────────────────────────────────────────────
   build-frontend:
@@ -197,6 +207,11 @@ jobs:
           retention-days: 3
 
   # ─── Deploy ──────────────────────────────────────────────────────
+  # Gating: deploy proceeds only when preflight + (test or skipped) +
+  # (build-frontend success or skipped). Previously the `if` block did not
+  # reference `needs.test.result` at all, so a failing test job could not
+  # block the deploy even with `continue-on-error: false`. Fixed in the
+  # same commit that removed the `|| echo` mask on `npm test`.
   deploy:
     name: "🚀 Deploy to VPS"
     runs-on: ubuntu-latest
@@ -204,6 +219,7 @@ jobs:
     if: |
       always() &&
       needs.preflight.result == 'success' &&
+      (needs.test.result == 'success' || needs.test.result == 'skipped') &&
       (needs.build-frontend.result == 'success' || needs.build-frontend.result == 'skipped')
     timeout-minutes: 20
     environment:
@@ -457,6 +473,27 @@ jobs:
             echo "✅ Services restarted"
           REMOTE_SCRIPT
 
+      - name: Apply idempotent seeds (post-restart)
+        if: needs.preflight.outputs.deploy_backend == 'true'
+        continue-on-error: true
+        run: |
+          # Seeds are idempotent + best-effort: failure here logs but does
+          # NOT fail the deploy (the workflow already shipped new code +
+          # restarted pm2). The seed updates the InsuranceTariff table with
+          # any pricing drift since the last deploy and is safe to re-run.
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" bash -s <<'SEED_SCRIPT'
+            set +e
+            cd /home/alawael/app/backend
+            echo "🌱 Seeding insurance tariffs (idempotent)..."
+            sudo -u alawael node scripts/seed-insurance-tariffs.js --json 2>&1 | tail -10
+            EXIT=$?
+            if [ "$EXIT" -ne 0 ]; then
+              echo "⚠️  Tariff seed exited $EXIT — investigate but deploy succeeded"
+            else
+              echo "✅ Tariff seed applied"
+            fi
+          SEED_SCRIPT
+
       - name: Health check
         run: |
           echo "⏳ Waiting for app..."
@@ -466,12 +503,35 @@ jobs:
               "curl -sf http://127.0.0.1:5000/health 2>/dev/null || curl -sf http://127.0.0.1:3001/health 2>/dev/null" || echo "")
             if echo "$HEALTH" | grep -q '"ok"\|"status"'; then
               echo "✅ Health check PASSED (attempt $i)"
-              exit 0
+              break
             fi
             echo "⏳ Attempt $i/5..."
             sleep 5
+            [ "$i" = "5" ] && echo "⚠️ Health check could not confirm — check manually"
           done
-          echo "⚠️ Health check could not confirm — check manually"
+
+      - name: Post-deploy smoke probes
+        # Catches what /health alone cannot — routes that boot but aren't
+        # actually mounted in _registry.js (the bug that hid every ZATCA
+        # endpoint behind 404 until 2026-05-02). Non-blocking: failures
+        # surface in the GitHub UI and the workflow summary, but don't
+        # flip the deploy red because we're past restart at this point.
+        if: needs.preflight.outputs.deploy_backend == 'true'
+        continue-on-error: true
+        run: |
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" bash -s <<'SMOKE_SCRIPT'
+            set +e
+            cd /home/alawael/app/backend
+            echo "🔬 Running post-deploy smoke probes..."
+            sudo -u alawael node scripts/post-deploy-smoke.js --json 2>&1 | tee /tmp/smoke-report.json
+            EXIT=$?
+            if [ "$EXIT" -ne 0 ]; then
+              echo "⚠️  Smoke detected a critical regression (exit $EXIT)"
+              echo "Critical probes failed — check the JSON above + investigate"
+            else
+              echo "✅ Smoke probes passed"
+            fi
+          SMOKE_SCRIPT
 
   # ─── Summary ─────────────────────────────────────────────────────
   notify:

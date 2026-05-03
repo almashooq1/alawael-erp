@@ -4,7 +4,49 @@
 
 ---
 
-## 1. System Context Diagram (C4 Level 1)
+## 1. System Context Diagram (C4 Level 1 — Mermaid)
+
+```mermaid
+C4Context
+    title Al-Awael Unified Rehabilitation Platform — System Context
+
+    Person(superAdmin, "Super Admin (L1)", "Full platform control, CLI access")
+    Person(headOffice, "Head Office Executives (L2)", "CEO / CFO / CHRO / Compliance — group-level visibility")
+    Person(branchMgr, "Branch Manager (L3)", "Branch operations, staffing, finance")
+    Person(clinician, "Clinician / Therapist (L4–L5)", "Clinical workflows, sessions, goals, assessments")
+    Person(guardian, "Parent / Guardian (L6)", "Beneficiary portal via Mobile App or Web")
+
+    System_Boundary(platform, "Al-Awael Unified Platform") {
+        System(core, "ERP + EMR + CRM + Rehab Core", "Beneficiary management, episodes of care, scheduling, finance, HR, quality, reporting")
+        System(api, "API Gateway + Auth Layer", "JWT/RBAC/ABAC, rate-limiting, audit trail")
+        System(mobile, "Mobile Apps (iOS / Android)", "Therapist App + Parent/Guardian Portal")
+    }
+
+    System_Ext(govSA, "Saudi Government APIs", "ZATCA · GOSI · Qiwa · Nafath · Yakeen · Absher · Wasel/CHI · Etimad · MoH · CBAHI · HRDF/MoHRSD")
+    System_Ext(payment, "Payment & Insurance", "Mada · HyperPay · STC Pay · Stripe · Bupa · Tawuniya · MedGulf")
+    System_Ext(comms, "Communications Stack", "SendGrid · Twilio SMS · WhatsApp Business API · FCM · APNs")
+    System_Ext(storage, "Cloud Storage / CDN", "AWS S3 (documents, media, reports)")
+    System_Ext(observe, "Observability", "Prometheus · Grafana · Sentry · Audit Logs")
+    System_Ext(ai, "AI / ML Services", "OpenAI · Claude API · Custom Rehab ML Models")
+
+    Rel(superAdmin, api, "Manages platform, seeds, audits", "Web / CLI")
+    Rel(headOffice, api, "BI dashboards, compliance reports", "Web Portal")
+    Rel(branchMgr, api, "Branch ops, schedules, staff", "Web")
+    Rel(clinician, api, "Sessions, assessments, care plans", "Web + Mobile App")
+    Rel(guardian, mobile, "Tracks beneficiary progress", "Mobile / Web Portal")
+
+    Rel(api, core, "Routes authenticated requests")
+    Rel(mobile, api, "Calls REST APIs")
+
+    Rel(core, govSA, "E-invoicing, social insurance, identity verification, accreditation reports", "XML/REST/SOAP/OIDC")
+    Rel(core, payment, "Billing charges, insurance claims, payroll transfers", "REST + Webhooks")
+    Rel(core, comms, "Appointment reminders, alerts, session summaries", "REST + SMTP")
+    Rel(core, storage, "Store / retrieve documents, media, exports", "S3 API")
+    Rel(core, observe, "Metrics, structured logs, error tracking", "HTTP / Prometheus")
+    Rel(core, ai, "Goal suggestions, risk flags, SOAP note assist", "REST")
+```
+
+## 1-B. System Context Diagram (ASCII — Legacy Reference)
 
 ```
                                   ┌──────────────────────────────────┐

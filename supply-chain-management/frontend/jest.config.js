@@ -14,10 +14,7 @@ module.exports = {
   },
   transformIgnorePatterns: ['node_modules/(?!(axios)/)'],
   collectCoverageFrom: ['src/**/*.{js,jsx}', '!src/index.js', '!src/reportWebVitals.js'],
-  testMatch: [
-    '<rootDir>/src/**/__tests__/**/*.{js,jsx}',
-    '<rootDir>/src/**/*.{spec,test}.{js,jsx}',
-  ],
+  testMatch: ['<rootDir>/src/**/__tests__/**/*.{js,jsx}', '<rootDir>/src/**/*.{spec,test}.{js,jsx}'],
   moduleDirectories: ['node_modules', 'src'],
   testTimeout: 15000,
   // Performance optimizations

@@ -4,6 +4,128 @@
 
 ---
 
+## 0. خريطة التكاملات الكاملة (Mermaid)
+
+```mermaid
+flowchart TD
+    subgraph CORE["Al-Awael Core Platform"]
+        direction TB
+        BC03["BC-03 Clinical EMR"]
+        BC06["BC-06 Finance & Billing"]
+        BC07["BC-07 HR & Payroll"]
+        BC08["BC-08 Quality & Compliance"]
+        BC12["BC-12 Gov Integrations ACL"]
+        BC11["BC-11 Communications"]
+    end
+
+    subgraph GOV["الأنظمة الحكومية السعودية"]
+        ZATCA["🏛️ ZATCA\nE-Invoice Phase 2\nXAdES-BES / UBL 2.1"]
+        GOSI["🏛️ GOSI\nSocial Insurance\nSOAP/REST"]
+        QIWA["🏛️ Qiwa\nLabor Contracts / WPS\nREST"]
+        NAFATH["🏛️ Nafath\nDigital Signature / OIDC\nSAML/OIDC"]
+        YAKEEN["🏛️ Yakeen\nCivil Registry Verify\nREST"]
+        ABSHER["🏛️ Absher\nCitizen ID Verify\nOAuth2"]
+        WASEL["🏛️ Wasel / CHI\nHealth Insurance\nREST"]
+        ETIMAD["🏛️ Etimad\nGov Doc Authentication\nREST"]
+        MOH["🏛️ MoH\nLicensing / Epidemiology\nREST/Portal"]
+        CBAHI["🏛️ CBAHI\nHealth Accreditation\nREST/Export"]
+        HRDF["🏛️ HRDF / MoHRSD\nSaudization Support\nPortal/REST"]
+        APD["🏛️ APD\nPersons with Disabilities\nREST"]
+    end
+
+    subgraph PAY["المدفوعات والتأمين"]
+        MADA["💳 Mada / HyperPay\nSTC Pay / Stripe"]
+        INS["🏥 Insurance\nBupa · Tawuniya · MedGulf"]
+        BANKS["🏦 SAMA Open Banking\nPayroll Transfers"]
+    end
+
+    subgraph COMM["الاتصالات"]
+        EMAIL["📧 SendGrid / SES"]
+        SMS["📱 Twilio / Unifonic"]
+        WA["💬 WhatsApp Business\nMeta / Twilio"]
+        PUSH["🔔 FCM / APNs"]
+    end
+
+    subgraph INFRA["البنية التحتية"]
+        S3["☁️ AWS S3\nDocuments / Media"]
+        OBS["📊 Prometheus + Grafana\nSentry"]
+        AI["🤖 OpenAI / Claude\nCustom ML"]
+    end
+
+    BC06 -->|"Invoice XML\nSign + Submit"| BC12
+    BC07 -->|"Employee events\nPayroll file"| BC12
+    BC08 -->|"Accreditation reports"| BC12
+    BC03 -->|"Identity verify\nSigned consent"| BC12
+
+    BC12 -->|"E-Invoice / QR hash"| ZATCA
+    BC12 -->|"Enroll / Contribute / Terminate"| GOSI
+    BC12 -->|"Contract / WPS report"| QIWA
+    BC12 -->|"Signature request / callback"| NAFATH
+    BC12 -->|"NationalId + DOB verify"| YAKEEN
+    BC12 -->|"Citizen identity verify"| ABSHER
+    BC12 -->|"Coverage check / claim"| WASEL
+    BC12 -->|"Doc authentication"| ETIMAD
+    BC12 -->|"License / report"| MOH
+    BC12 -->|"Accreditation evidence"| CBAHI
+    BC12 -->|"Saudization report"| HRDF
+    BC12 -->|"Disability registry"| APD
+
+    BC06 -->|"Payment charge"| MADA
+    BC06 -->|"Insurance claim"| INS
+    BC07 -->|"Salary transfer"| BANKS
+
+    BC11 -->|"Appointment reminders\nAlert notifications"| EMAIL
+    BC11 -->|"SMS OTP / alerts"| SMS
+    BC11 -->|"Session summaries\nProgress updates"| WA
+    BC11 -->|"Mobile push"| PUSH
+
+    BC03 -->|"Store files, media"| S3
+    BC06 -->|"Store invoices, reports"| S3
+    CORE -->|"Metrics, logs, errors"| OBS
+    BC03 -->|"Goal suggestions\nSOAP note assist"| AI
+
+    style GOV fill:#fff3cd,stroke:#856404
+    style PAY fill:#d1ecf1,stroke:#0c5460
+    style COMM fill:#d4edda,stroke:#155724
+    style INFRA fill:#e2d9f3,stroke:#6f42c1
+    style CORE fill:#f8f9fa,stroke:#343a40
+```
+
+---
+
+## 0-B. ACL Adapter Pattern (نمط الطبقة العازلة)
+
+```mermaid
+sequenceDiagram
+    participant Core as Internal Core
+    participant ACL as ACL Adapter (BC-12)
+    participant CB as Circuit Breaker
+    participant RL as Rate Limiter
+    participant EXT as External Gov API
+    participant DLQ as Dead-Letter Queue
+
+    Core->>ACL: Request (clean internal model)
+    ACL->>RL: Check rate limit
+    RL-->>ACL: Allowed / throttled
+    ACL->>CB: Check circuit state
+    CB-->>ACL: Open / Closed / Half-open
+    ACL->>ACL: Translate to external schema
+    ACL->>EXT: HTTP call (signed/authenticated)
+    EXT-->>ACL: Response / Error
+    alt Success
+        ACL->>ACL: Translate response to internal model
+        ACL-->>Core: Canonical result
+    else Failure (retriable)
+        ACL->>DLQ: Enqueue for retry
+        ACL-->>Core: Error + correlationId
+    else Circuit Open
+        ACL->>DLQ: Enqueue (circuit open)
+        ACL-->>Core: ServiceUnavailable
+    end
+```
+
+---
+
 ## 1. مبدأ التكامل
 
 > **"Anti-Corruption Layer (ACL) بين الخارج والـ Core"**

@@ -4,6 +4,67 @@
 
 ---
 
+## 0. Gantt Chart — خارطة الطريق المرئية
+
+```mermaid
+gantt
+    title Al-Awael Unified Platform — Phased Delivery Roadmap
+    dateFormat  YYYY-MM-DD
+    axisFormat  %b %Y
+
+    section P0 — Stabilize
+    Phantom test cleanup          :done,    p0_1, 2025-04-01, 3d
+    Canonical Data Model sign-off :done,    p0_2, 2025-04-01, 14d
+    Architecture Decision Records :done,    p0_3, 2025-04-01, 14d
+    CI gate + quality thresholds  :done,    p0_4, 2025-04-07, 7d
+    Docs blueprint (00–21)        :done,    p0_5, 2025-04-07, 14d
+
+    section P1 — Foundation Hardening
+    ABAC engine (full policies)   :active,  p1_1, 2025-05-01, 21d
+    MFA universal (all clinical)  :active,  p1_2, 2025-05-01, 14d
+    Break-glass workflow complete :         p1_3, 2025-05-10, 14d
+    ZATCA Phase-2 chain verify    :active,  p1_4, 2025-05-01, 21d
+    Nafath e-signature adapter    :         p1_5, 2025-05-15, 21d
+    Yakeen / Absher adapters      :         p1_6, 2025-05-15, 14d
+    Wasel / CHI insurance adapter :         p1_7, 2025-05-22, 21d
+    CBAHI evidence library        :         p1_8, 2025-06-01, 30d
+    PDPL data program             :         p1_9, 2025-06-01, 30d
+    ICF full coding               :         p1_a, 2025-05-15, 30d
+    Document retention automation :         p1_b, 2025-06-01, 21d
+
+    section P2 — Unified Portals & Experience
+    Parent Portal v2 (mobile)     :         p2_1, 2025-07-01, 30d
+    Therapist Elite Dashboard     :         p2_2, 2025-07-01, 30d
+    Executive BI Portal (L1–L2)   :         p2_3, 2025-07-15, 30d
+    NPS dashboard + CRM campaigns :         p2_4, 2025-08-01, 21d
+    CBAHI Phase 2 evidence upload :         p2_5, 2025-08-01, 21d
+    WA migration to Meta Cloud API:         p2_6, 2025-07-15, 14d
+    Cross-branch delegation UI    :         p2_7, 2025-07-01, 21d
+
+    section P3 — Intelligence & Automation
+    AI goal suggestions (prod)    :         p3_1, 2025-10-01, 45d
+    Red-flag engine (ML v2)       :         p3_2, 2025-10-01, 45d
+    Outcome prediction models     :         p3_3, 2025-11-01, 45d
+    Scheduling optimizer v2       :         p3_4, 2025-10-15, 30d
+    Tele-rehab AR/VR integration  :         p3_5, 2025-11-01, 60d
+    FHIR R4 readiness             :         p3_6, 2025-10-01, 60d
+    Data lake (analytics)         :         p3_7, 2025-10-01, 90d
+
+    section P4 — Scale & Decoupling
+    Event sourcing (CQRS full)    :         p4_1, 2026-02-01, 60d
+    Micro-frontend shell          :         p4_2, 2026-02-01, 60d
+    IoT device integration        :         p4_3, 2026-03-01, 45d
+    Multi-tenant isolation v2     :         p4_4, 2026-02-01, 45d
+    API marketplace / SDK         :         p4_5, 2026-04-01, 60d
+
+    section P5 — Continuous Improvement
+    Monthly KPI reviews           :         p5_1, 2026-06-01, 365d
+    Annual CBAHI re-certification :         p5_2, 2027-01-01, 30d
+    Quarterly security pen-tests  :         p5_3, 2026-09-01, 365d
+```
+
+---
+
 ## 1. النظرة العامة
 
 ```

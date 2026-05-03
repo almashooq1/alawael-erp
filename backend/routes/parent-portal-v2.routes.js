@@ -35,6 +35,9 @@ const ClinicalAssessment = require('../models/ClinicalAssessment');
 const Complaint = require('../models/Complaint');
 const PortalNotification = require('../models/PortalNotification');
 const parentReportService = require('../services/parentReportService');
+const { BlockchainCertificate } = require('../models/blockchain.model');
+const { generateCertificatePdf } = require('../services/blockchainPdfService');
+const certService = require('../services/blockchainCertService');
 
 router.use(authenticateToken);
 
@@ -318,6 +321,104 @@ router.get('/children/:id/attendance', async (req, res) => {
     });
   } catch (err) {
     return safeError(res, err, 'parent-v2.attendance');
+  }
+});
+
+// ── GET /children/:id/certificates ───────────────────────────────────────
+// Lists blockchain certificates issued to this child. Match key is
+// `BlockchainCertificate.recipient.nationalId` ↔ `Beneficiary.nationalId`,
+// since certs are minted with national-id rather than an internal beneficiary
+// ref. Drafts and revoked certs are excluded — parents see issued/expired only.
+router.get('/children/:id/certificates', async (req, res) => {
+  try {
+    const check = await assertChildAccess(req, req.params.id);
+    if (!check.ok) return res.status(check.status).json({ success: false, message: check.msg });
+    const child = check.child;
+    if (!child?.nationalId) {
+      return res.json({ success: true, items: [] }); // no NID → no certs to show
+    }
+
+    const certs = await BlockchainCertificate.find({
+      'recipient.nationalId': child.nationalId,
+      isDeleted: { $ne: true },
+      status: { $in: ['issued', 'verified', 'expired'] },
+    })
+      .select(
+        'certificateNumber title category status issueDate expiryDate hash blockchain.network signatures'
+      )
+      .sort({ issueDate: -1 })
+      .lean();
+
+    res.json({ success: true, items: certs });
+  } catch (err) {
+    return safeError(res, err, 'parent-v2.certificates.list');
+  }
+});
+
+// ── GET /children/:id/certificates/:certId ───────────────────────────────
+// Detail view for a single cert, gated by both child access AND the cert's
+// nationalId matching. Returns the same payload shape as the public verify
+// page (no PII beyond what's already on the cert).
+router.get('/children/:id/certificates/:certId', async (req, res) => {
+  try {
+    const check = await assertChildAccess(req, req.params.id);
+    if (!check.ok) return res.status(check.status).json({ success: false, message: check.msg });
+    const child = check.child;
+    if (!mongoose.isValidObjectId(req.params.certId)) {
+      return res.status(400).json({ success: false, message: 'معرّف الشهادة غير صالح' });
+    }
+    const cert = await BlockchainCertificate.findById(req.params.certId).lean();
+    if (!cert || cert.isDeleted)
+      return res.status(404).json({ success: false, message: 'الشهادة غير موجودة' });
+    if (cert.recipient?.nationalId !== child?.nationalId) {
+      return res.status(403).json({ success: false, message: 'الشهادة لا تخص هذا الطفل' });
+    }
+
+    const verdict = cert.hash ? await certService.verifyByHash(cert.hash) : null;
+
+    res.json({
+      success: true,
+      certificate: cert,
+      integrity: verdict
+        ? {
+            verified: verdict.verified,
+            hashMatch: verdict.hashMatch,
+            merkleMatch: verdict.merkleMatch,
+            blockchainMatch: verdict.blockchainMatch,
+          }
+        : null,
+    });
+  } catch (err) {
+    return safeError(res, err, 'parent-v2.certificates.detail');
+  }
+});
+
+// ── GET /children/:id/certificates/:certId/pdf ───────────────────────────
+// PDF download with embedded QR linking to the public verify page.
+router.get('/children/:id/certificates/:certId/pdf', async (req, res) => {
+  try {
+    const check = await assertChildAccess(req, req.params.id);
+    if (!check.ok) return res.status(check.status).json({ success: false, message: check.msg });
+    const child = check.child;
+    if (!mongoose.isValidObjectId(req.params.certId)) {
+      return res.status(400).json({ success: false, message: 'معرّف الشهادة غير صالح' });
+    }
+    const cert = await BlockchainCertificate.findById(req.params.certId).lean();
+    if (!cert || cert.isDeleted)
+      return res.status(404).json({ success: false, message: 'الشهادة غير موجودة' });
+    if (cert.recipient?.nationalId !== child?.nationalId) {
+      return res.status(403).json({ success: false, message: 'الشهادة لا تخص هذا الطفل' });
+    }
+    const verifyUrl = certService.publicVerifyUrl(cert.hash);
+    const pdf = await generateCertificatePdf(cert, { verifyUrl });
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader(
+      'Content-Disposition',
+      `inline; filename="certificate-${cert.certificateNumber || cert._id}.pdf"`
+    );
+    res.send(pdf);
+  } catch (err) {
+    return safeError(res, err, 'parent-v2.certificates.pdf');
   }
 });
 

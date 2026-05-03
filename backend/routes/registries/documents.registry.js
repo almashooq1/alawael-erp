@@ -25,7 +25,7 @@ module.exports = function registerDocumentRoutes(
   // ══════════════════════════════════════════════════════════════════════════
   // ── Imports ─────────────────────────────────────────────────────────────
   // ══════════════════════════════════════════════════════════════════════════
-  // PHANTOM: const documentsRoutes = safeRequire('../routes/documents');
+  const documentsRoutes = safeRequire('../routes/documents.routes');
   // PHANTOM: const documentsSmartRouter = safeRequire('../routes/documents.smart.routes');
   const documentAdvancedRoutes = safeRequire('../routes/documentAdvanced.routes');
   // PHANTOM: const archiveRoutes = safeRequire('../routes/archive.routes');
@@ -46,9 +46,9 @@ module.exports = function registerDocumentRoutes(
   // ══════════════════════════════════════════════════════════════════════════
   // ── Core Documents ─────────────────────────────────────────────────────
   // ══════════════════════════════════════════════════════════════════════════
-  // PHANTOM-FIX: dualMount(app, 'documents', documentsRoutes);
+  dualMount(app, 'documents', documentsRoutes);
   // PHANTOM-FIX: dualMount(app, 'documents-smart', documentsSmartRouter);
-  logger.info('[Docs] Core documents SKIPPED (phantom imports)');
+  logger.info('[Docs] Core documents routes mounted (upload, CRUD, share, versioning, bulk)');
 
   // ══════════════════════════════════════════════════════════════════════════
   // ── Document Advanced Services (خدمات المستندات المتقدمة) ──────────────

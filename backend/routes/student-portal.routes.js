@@ -20,7 +20,7 @@ const express = require('express');
 const router = express.Router();
 
 // Lazy requires so a missing dep never crashes module load.
-let _authenticate, _Beneficiary, _Appointment, _RedFlagState;
+let _authenticate, _Beneficiary, _Appointment, _RedFlagState, _StudentActivity;
 function authenticate(req, res, next) {
   if (!_authenticate) _authenticate = require('../middleware/auth').authenticate;
   return _authenticate(req, res, next);
@@ -36,6 +36,40 @@ function Appointment() {
 function RedFlagState() {
   if (!_RedFlagState) _RedFlagState = require('../models/RedFlagState');
   return _RedFlagState;
+}
+function StudentActivity() {
+  if (!_StudentActivity) _StudentActivity = require('../models/StudentActivity');
+  return _StudentActivity;
+}
+
+/**
+ * Resolve the beneficiary id this request is allowed to touch.
+ *
+ * Returns the id on success, or `null` after sending a 401/403 response.
+ * Callers MUST short-circuit when `null` is returned (do not proceed).
+ *
+ * Scoping rules:
+ *   - A beneficiary token (`req.user.beneficiaryId` set) is the normal case
+ *     and always wins; it can only access its own data.
+ *   - Admin / clinical roles MAY pass `?beneficiaryId=` to read another
+ *     student's data. The whitelist intentionally excludes 'parent' /
+ *     'guardian' — those go through the parent-portal routes which carry
+ *     their own scoping.
+ *   - All other tokens (regular users, therapists without override scope,
+ *     etc.) are rejected with 403.
+ */
+function resolveBeneficiaryScope(req, res) {
+  if (req.user?.beneficiaryId) return String(req.user.beneficiaryId);
+  const role = req.user?.role || '';
+  const adminLike = ['admin', 'super-admin', 'clinical-director', 'medical-director'];
+  if (adminLike.includes(role) && req.query?.beneficiaryId) {
+    return String(req.query.beneficiaryId);
+  }
+  res.status(req.user ? 403 : 401).json({
+    error: req.user ? 'Forbidden' : 'Unauthorized',
+    message: req.user ? 'this token cannot access student-portal data' : 'authentication required',
+  });
+  return null;
 }
 
 /**
@@ -178,12 +212,8 @@ router.get('/me', authenticate, async (req, res) => {
     // Student portal auth uses the Beneficiary's own portal login; the JWT
     // `sub` is the beneficiary._id (not a User._id). Fallback to `userId`
     // for legacy tokens that linked via a User record.
-    const beneficiaryId = req.user?.beneficiaryId || req.user?.sub || req.user?.id || req.user?._id;
-    if (!beneficiaryId) {
-      return res
-        .status(401)
-        .json({ error: 'Unauthorized', message: 'beneficiary id missing from token' });
-    }
+    const beneficiaryId = resolveBeneficiaryScope(req, res);
+    if (!beneficiaryId) return;
 
     const b = await Beneficiary()
       .findById(beneficiaryId)
@@ -233,12 +263,8 @@ router.get('/me', authenticate, async (req, res) => {
 // ── Today & Mission ───────────────────────────────────────────────────────────
 router.get('/today', authenticate, async (req, res) => {
   try {
-    const beneficiaryId = req.user?.beneficiaryId || req.user?.sub || req.user?.id || req.user?._id;
-    if (!beneficiaryId) {
-      return res
-        .status(401)
-        .json({ error: 'Unauthorized', message: 'beneficiary id missing from token' });
-    }
+    const beneficiaryId = resolveBeneficiaryScope(req, res);
+    if (!beneficiaryId) return;
 
     const b = await Beneficiary()
       .findById(beneficiaryId)
@@ -251,8 +277,62 @@ router.get('/today', authenticate, async (req, res) => {
     const age = ageInYears(b.dateOfBirth);
     const variant = variantForAge(age);
 
-    // Next session today or later, sorted earliest first.
     const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const startOfTomorrow = new Date(startOfToday);
+    startOfTomorrow.setDate(startOfTomorrow.getDate() + 1);
+
+    // Today's appointments are surfaced as the StudentActivity placeholder
+    // until the real collection lands (Phase 17). Each appointment becomes
+    // one "session-kind" activity with the same icon mapping as /schedule.
+    const todayAppts = await Appointment()
+      .find({
+        beneficiary: beneficiaryId,
+        date: { $gte: startOfToday, $lt: startOfTomorrow },
+      })
+      .sort({ startTime: 1 })
+      .select('date startTime type therapistName status')
+      .lean();
+
+    const apptActivities = todayAppts.map(a => {
+      const meta = appointmentIcon(a.type);
+      const isDone = a.status === 'COMPLETED';
+      return {
+        id: `appt:${String(a._id)}`,
+        source: 'APPOINTMENT',
+        kind: meta.kind,
+        icon: meta.icon,
+        time: a.startTime || null,
+        titleAr: a.type
+          ? `${a.type} مع ${a.therapistName || 'معالجك'}`
+          : `جلسة مع ${a.therapistName || 'معالجك'}`,
+        completed: isDone,
+        xpReward: 30,
+      };
+    });
+
+    // Real StudentActivity rows due today — pending and completed alike, so
+    // the UI can show ✓ on already-finished tasks.
+    const realActivities = await StudentActivity()
+      .find({ beneficiaryId, dueAt: { $gte: startOfToday, $lt: startOfTomorrow } })
+      .sort({ dueAt: 1 })
+      .lean();
+    const taskActivities = realActivities.map(a => ({
+      id: String(a._id),
+      source: 'TASK',
+      kind: a.kind,
+      icon: a.icon,
+      time: a.dueAt
+        ? new Date(a.dueAt).toLocaleTimeString('ar', { hour: '2-digit', minute: '2-digit' })
+        : null,
+      titleAr: a.titleAr,
+      completed: a.status === 'completed',
+      xpReward: a.xpReward,
+    }));
+
+    const todayActivities = [...apptActivities, ...taskActivities];
+
+    // Next session today or later, sorted earliest first.
     const nextAppt = await Appointment()
       .findOne({
         beneficiary: beneficiaryId,
@@ -277,6 +357,17 @@ router.get('/today', authenticate, async (req, res) => {
       };
     }
 
+    // Today's mood: scan the trailing 5 entries for one whose date sits in
+    // [startOfToday, startOfTomorrow). Avoids loading the full 365-entry log.
+    const moodTail = await Beneficiary()
+      .findById(beneficiaryId)
+      .select({ moodLog: { $slice: -5 } })
+      .lean();
+    const moodCheckedInToday = (moodTail?.moodLog || []).some(m => {
+      const d = m?.date ? new Date(m.date) : null;
+      return d && d >= startOfToday && d < startOfTomorrow;
+    });
+
     const level = Number(b.student_level) || 1;
     const xp = Number(b.student_xp) || 0;
     const xpToNext = Math.round(100 * Math.pow(1.5, Math.max(0, level - 1)));
@@ -295,10 +386,10 @@ router.get('/today', authenticate, async (req, res) => {
         streakDays,
       },
       date: now.toISOString().slice(0, 10),
-      todayActivities: [],
+      todayActivities,
       nextSession,
       recentBadge: null,
-      moodCheckedInToday: false,
+      moodCheckedInToday,
     });
   } catch (err) {
     return res
@@ -308,31 +399,93 @@ router.get('/today', authenticate, async (req, res) => {
 });
 
 // ── Activities ────────────────────────────────────────────────────────────────
-// Activity assignment requires a dedicated StudentActivity collection
-// (Phase 17). Returning `[]` lets the UI render its "no activities today"
-// empty-state without hardcoded fallbacks.
-router.get('/activities', authenticate, (_req, res) => res.json([]));
-router.get('/activities/:id', authenticate, (_req, res) => {
-  // Until the StudentActivity collection lands (Phase 17), there are no
-  // discoverable activity detail pages. The list endpoint returns []
-  // so the UI never reaches this handler with a real ID, but we return
-  // a clean 404 for anyone probing the URL directly.
-  return res.status(404).json({
-    error: 'NotFound',
-    message: 'activity not found — StudentActivity collection not yet wired',
-  });
+// Backed by the StudentActivity collection. The list endpoint returns
+// pending tasks whose dueAt sits inside today's window — same window
+// /today.todayActivities uses, so both surfaces stay consistent.
+router.get('/activities', authenticate, async (req, res) => {
+  try {
+    const beneficiaryId = resolveBeneficiaryScope(req, res);
+    if (!beneficiaryId) return;
+
+    const now = new Date();
+    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const startOfTomorrow = new Date(startOfDay);
+    startOfTomorrow.setDate(startOfTomorrow.getDate() + 1);
+
+    const rows = await StudentActivity()
+      .find({
+        beneficiaryId,
+        status: 'pending',
+        dueAt: { $gte: startOfDay, $lt: startOfTomorrow },
+      })
+      .sort({ dueAt: 1 })
+      .lean();
+
+    return res.json(
+      rows.map(a => ({
+        id: String(a._id),
+        kind: a.kind,
+        icon: a.icon,
+        titleAr: a.titleAr,
+        descriptionAr: a.descriptionAr || null,
+        xpReward: a.xpReward,
+        dueAt: a.dueAt ? new Date(a.dueAt).toISOString() : null,
+        completed: false,
+      }))
+    );
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ error: 'InternalError', message: err instanceof Error ? err.message : 'failed' });
+  }
+});
+
+router.get('/activities/:id', authenticate, async (req, res) => {
+  try {
+    const beneficiaryId = resolveBeneficiaryScope(req, res);
+    if (!beneficiaryId) return;
+
+    const a = await StudentActivity().findById(req.params.id).lean();
+    if (!a || String(a.beneficiaryId) !== beneficiaryId) {
+      // Don't leak existence of another student's activity.
+      return res.status(404).json({ error: 'NotFound', message: 'activity not found' });
+    }
+    return res.json({
+      id: String(a._id),
+      kind: a.kind,
+      icon: a.icon,
+      titleAr: a.titleAr,
+      descriptionAr: a.descriptionAr || null,
+      xpReward: a.xpReward,
+      dueAt: a.dueAt ? new Date(a.dueAt).toISOString() : null,
+      status: a.status,
+      completedAt: a.completedAt ? new Date(a.completedAt).toISOString() : null,
+    });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ error: 'InternalError', message: err instanceof Error ? err.message : 'failed' });
+  }
 });
 
 router.post('/activities/:id/complete', authenticate, async (req, res) => {
   try {
-    const beneficiaryId = req.user?.beneficiaryId || req.user?.sub || req.user?.id || req.user?._id;
-    if (!beneficiaryId) return res.status(401).json({ error: 'Unauthorized' });
+    const beneficiaryId = resolveBeneficiaryScope(req, res);
+    if (!beneficiaryId) return;
 
-    // Without StudentActivity we can't lookup the actual XP reward, but we
-    // still want the celebration flow to work. Award a conservative fixed
-    // amount so streaks and leveling respond. This mirrors the frontend
-    // DEMO fallback of 30 XP and keeps the UX identical.
-    const XP_GAIN = 30;
+    // Look up the activity first so we can scope-check + read its real
+    // xpReward. A 30 XP fallback applies only when the activity record
+    // is absent (e.g. UI demo mode); never when it's present-but-foreign.
+    const activity = await StudentActivity().findById(req.params.id);
+    if (activity && String(activity.beneficiaryId) !== beneficiaryId) {
+      return res.status(404).json({ error: 'NotFound', message: 'activity not found' });
+    }
+    if (activity && activity.status === 'completed') {
+      return res
+        .status(409)
+        .json({ error: 'AlreadyCompleted', message: 'activity already completed' });
+    }
+    const xpGain = activity ? Number(activity.xpReward) || 30 : 30;
 
     const b = await Beneficiary()
       .findById(beneficiaryId)
@@ -341,9 +494,8 @@ router.post('/activities/:id/complete', authenticate, async (req, res) => {
 
     const currentLevel = Number(b.student_level) || 1;
     const currentXp = Number(b.student_xp) || 0;
-    const _xpToNext = Math.round(100 * Math.pow(1.5, Math.max(0, currentLevel - 1)));
 
-    let newXp = currentXp + XP_GAIN;
+    let newXp = currentXp + xpGain;
     let newLevel = currentLevel;
     let levelUp = false;
     while (newXp >= Math.round(100 * Math.pow(1.5, Math.max(0, newLevel - 1)))) {
@@ -356,10 +508,16 @@ router.post('/activities/:id/complete', authenticate, async (req, res) => {
     b.student_level = newLevel;
     await b.save({ validateBeforeSave: false });
 
+    if (activity) {
+      activity.status = 'completed';
+      activity.completedAt = new Date();
+      await activity.save({ validateBeforeSave: false });
+    }
+
     return res.json({
-      xpGained: XP_GAIN,
+      xpGained: xpGain,
       levelUp,
-      newBadge: null, // Badge collection integration pending (Phase 17)
+      newBadge: null, // Badge collection integration pending
     });
   } catch (err) {
     return res
@@ -371,8 +529,8 @@ router.post('/activities/:id/complete', authenticate, async (req, res) => {
 // ── Schedule ──────────────────────────────────────────────────────────────────
 router.get('/schedule', authenticate, async (req, res) => {
   try {
-    const beneficiaryId = req.user?.beneficiaryId || req.user?.sub || req.user?.id || req.user?._id;
-    if (!beneficiaryId) return res.status(401).json({ error: 'Unauthorized' });
+    const beneficiaryId = resolveBeneficiaryScope(req, res);
+    if (!beneficiaryId) return;
 
     const now = new Date();
     const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -418,8 +576,8 @@ router.get('/schedule', authenticate, async (req, res) => {
 // ── Achievements ──────────────────────────────────────────────────────────────
 router.get('/achievements', authenticate, async (req, res) => {
   try {
-    const beneficiaryId = req.user?.beneficiaryId || req.user?.sub || req.user?.id || req.user?._id;
-    if (!beneficiaryId) return res.status(401).json({ error: 'Unauthorized' });
+    const beneficiaryId = resolveBeneficiaryScope(req, res);
+    if (!beneficiaryId) return;
 
     const b = await Beneficiary()
       .findById(beneficiaryId)
@@ -460,14 +618,59 @@ router.get('/achievements', authenticate, async (req, res) => {
 });
 
 // ── Mood ──────────────────────────────────────────────────────────────────────
+
+/**
+ * Trailing mood history (oldest → newest). Default window: 30 entries.
+ * Used by the dashboard mood-trend strip and any clinician-facing chart.
+ *
+ * Returns `{ entries: [{date, mood, note}], summary: {...} }`. The summary
+ * is computed here so every consumer (web, mobile, parent portal) gets the
+ * same numbers without re-implementing the rollup.
+ */
+router.get('/mood/history', authenticate, async (req, res) => {
+  try {
+    const beneficiaryId = resolveBeneficiaryScope(req, res);
+    if (!beneficiaryId) return;
+
+    const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 30, 1), 90);
+    const doc = await Beneficiary()
+      .findById(beneficiaryId)
+      .select({ moodLog: { $slice: -limit } })
+      .lean();
+    if (!doc) return res.status(404).json({ error: 'BeneficiaryNotFound' });
+
+    const entries = (doc.moodLog || []).map(m => ({
+      id: m._id ? String(m._id) : null,
+      date: m.date ? new Date(m.date).toISOString() : null,
+      mood: Number(m.mood) || null,
+      note: m.note || null,
+    }));
+
+    const valid = entries.filter(e => Number.isFinite(e.mood));
+    const avg = valid.length ? valid.reduce((s, e) => s + e.mood, 0) / valid.length : null;
+    const counts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+    for (const e of valid) counts[e.mood] = (counts[e.mood] || 0) + 1;
+
+    return res.json({
+      entries,
+      summary: {
+        count: valid.length,
+        average: avg !== null ? Math.round(avg * 10) / 10 : null,
+        counts,
+        worrisome: moodPatternWorrisome(valid),
+      },
+    });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ error: 'InternalError', message: err instanceof Error ? err.message : 'failed' });
+  }
+});
+
 router.post('/mood', authenticate, async (req, res) => {
   try {
-    const beneficiaryId = req.user?.beneficiaryId || req.user?.sub || req.user?.id || req.user?._id;
-    if (!beneficiaryId) {
-      return res
-        .status(401)
-        .json({ error: 'Unauthorized', message: 'beneficiary id missing from token' });
-    }
+    const beneficiaryId = resolveBeneficiaryScope(req, res);
+    if (!beneficiaryId) return;
 
     const mood = Number(req.body?.mood);
     if (!Number.isInteger(mood) || mood < 1 || mood > 5) {

@@ -16,6 +16,7 @@ const Beneficiary = require('../models/Beneficiary');
 const safeError = require('../utils/safeError');
 const logger = require('../utils/logger');
 const { normalize, buildOrClause } = require('../utils/arabicSearch');
+const logPiiAccess = require('../middleware/piiAccess.middleware');
 
 router.use(authenticateToken);
 
@@ -196,7 +197,10 @@ router.get('/stats', requireRole(STAFF_ROLES), async (req, res) => {
 });
 
 // ── GET /:id — single beneficiary (full) ─────────────────────────────────
-router.get('/:id', requireRole(STAFF_ROLES), async (req, res) => {
+// PDPL Article 13: log every read so the DPO can answer "who viewed
+// user X's record?". The middleware fires post-response — zero latency
+// added — and only logs 2xx (real disclosures, not denied access).
+router.get('/:id', requireRole(STAFF_ROLES), logPiiAccess('Beneficiary'), async (req, res) => {
   try {
     const doc = await Beneficiary.findById(req.params.id).lean();
     if (!doc) return res.status(404).json({ success: false, message: 'المستفيد غير موجود' });

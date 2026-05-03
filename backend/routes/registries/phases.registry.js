@@ -182,6 +182,13 @@ module.exports = function registerPhaseRoutes(app, { safeRequire, dualMount, saf
   safeMount(app, ['/api/crisis', '/api/v1/crisis'], '../routes/crisis.routes');
   safeMount(app, ['/api/recruitment', '/api/v1/recruitment'], '../routes/recruitment.routes');
   safeMount(app, ['/api/iot', '/api/v1/iot'], '../routes/iot.routes');
+  // Public verification MUST mount before the auth-gated admin router so the
+  // /public/* paths match a router without authenticate middleware.
+  safeMount(
+    app,
+    ['/api/blockchain/public', '/api/v1/blockchain/public'],
+    '../routes/blockchain-public.routes'
+  );
   safeMount(app, ['/api/blockchain', '/api/v1/blockchain'], '../routes/blockchain.routes');
   safeMount(app, ['/api/ar-rehab', '/api/v1/ar-rehab'], '../routes/ar-rehab.routes');
   logger.info(

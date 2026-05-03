@@ -182,6 +182,16 @@ try {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// 7.062 STUDENT PORTAL — beneficiary-scoped read APIs (today, schedule, mood…)
+// ═══════════════════════════════════════════════════════════════════════════
+try {
+  app.use('/api/v1/student', require('./routes/student-portal.routes'));
+  logger.info('[StudentPortal] ✓ routes mounted at /api/v1/student');
+} catch (err) {
+  logger.warn('[StudentPortal] routes skipped:', err.message);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // 7.065 OPENAPI — hand-crafted spec for the integration surface + Swagger UI
 // ═══════════════════════════════════════════════════════════════════════════
 try {
@@ -319,6 +329,22 @@ try {
   logger.warn('[NPHIES] reconciliation scheduler skipped:', err.message);
 }
 
+// ZATCA B2C 24-hour SLA sweeper — retries overdue simplified invoices and
+// fires a single aggregated ops-alert when any breach the 23h breach
+// threshold. Off by default; flip ZATCA_SLA_SWEEPER_ENABLED=true at the
+// same time as ZATCA_AUTOSUBMIT=true at go-live.
+try {
+  if (!isTestEnv && process.env.ZATCA_SLA_SWEEPER_ENABLED === 'true') {
+    const { createZatcaB2cSlaScheduler } = require('./startup/zatcaB2cSlaScheduler');
+    const slaService = require('./services/zatcaB2cSlaSweeper');
+    const slaWorker = createZatcaB2cSlaScheduler({ service: slaService });
+    slaWorker.start();
+    app.locals.zatcaSlaWorker = slaWorker;
+  }
+} catch (err) {
+  logger.warn('[ZATCA] B2C SLA sweeper skipped:', err.message);
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // 7.1 FINANCE BOOTSTRAP — seed default Chart of Accounts + cheque-expiry job
 //      (Phase 12 Commit 6)
@@ -358,6 +384,46 @@ try {
   app.use('/api/v1/beneficiaries', authenticate, redFlags.router);
   app.use('/api/v1/admin/red-flags', authenticate, redFlags.adminRouter);
   logger.info('[RedFlag] ✓ routes mounted (beneficiary + admin)');
+
+  // Stagnant-goal sweeper — daily 03:00 sweep that auto-raises GOAL_STAGNANT
+  // for any in-progress goal with no progress entry in the last 28 days.
+  // Backs the therapist portal's "goalsAtRisk" counter and the supervisor
+  // dashboard's stagnant-goals widget. Idempotent: relies on the unique
+  // (beneficiaryId, flagId, status) index on RedFlagState, so re-running
+  // is cheap and free of duplicates.
+  try {
+    const createStagnantGoalScheduler = require('./services/stagnantGoalScheduler');
+    const CarePlanModel = require('./models/CarePlan');
+    const GoalProgressEntryModel = require('./models/GoalProgressEntry');
+    const RedFlagStateModel = require('./models/RedFlagState');
+    let NotificationModel = null;
+    try {
+      NotificationModel = require('./models/Notification');
+    } catch {
+      /* notifications are optional — sweep still runs without them */
+    }
+    const stagnantSweeper = createStagnantGoalScheduler({
+      CarePlan: CarePlanModel,
+      GoalProgressEntry: GoalProgressEntryModel,
+      RedFlagState: RedFlagStateModel,
+      Notification: NotificationModel,
+      logger,
+    });
+    app.locals.stagnantGoalSweeper = stagnantSweeper;
+    if (cronDep && process.env.NODE_ENV !== 'test' && process.env.STAGNANT_GOAL_SWEEPER !== 'off') {
+      stagnantSweeper.start({
+        schedule: process.env.STAGNANT_GOAL_SCHEDULE || '0 3 * * *',
+        cron: cronDep,
+      });
+      logger.info('[StagnantGoals] ✓ sweeper scheduled (daily 03:00)');
+    } else {
+      logger.info(
+        '[StagnantGoals] ✓ sweeper available via app.locals.stagnantGoalSweeper.runOnce()'
+      );
+    }
+  } catch (stagnantErr) {
+    logger.warn('[StagnantGoals] sweeper skipped:', stagnantErr.message);
+  }
 
   // Consent capture surface — the HTTP side of the Consent model
   // (Commit 19). Without these routes, the CRITICAL consent flags

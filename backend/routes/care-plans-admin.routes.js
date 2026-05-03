@@ -23,6 +23,7 @@ const { authenticateToken, requireRole } = require('../middleware/auth');
 const CarePlan = require('../models/CarePlan');
 const safeError = require('../utils/safeError');
 const logger = require('../utils/logger');
+const logPiiAccess = require('../middleware/piiAccess.middleware');
 
 router.use(authenticateToken);
 
@@ -190,7 +191,9 @@ router.get('/beneficiary/:id', requireRole(STAFF_ROLES), async (req, res) => {
 });
 
 // ── GET /:id ─────────────────────────────────────────────────────────────
-router.get('/:id', requireRole(STAFF_ROLES), async (req, res) => {
+// PDPL Article 13: care plans contain clinical PII (diagnoses, goals,
+// therapy modalities) — log every read for the DPO's audit trail.
+router.get('/:id', requireRole(STAFF_ROLES), logPiiAccess('CarePlan'), async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });

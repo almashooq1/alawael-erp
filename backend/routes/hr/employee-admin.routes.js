@@ -19,6 +19,7 @@
 
 const express = require('express');
 const mongoose = require('mongoose');
+const logPiiAccess = require('../../middleware/piiAccess.middleware');
 
 function createEmployeeAdminRouter({
   service,
@@ -138,7 +139,9 @@ function createEmployeeAdminRouter({
     }
   });
 
-  router.get('/employees/:id', async (req, res) => {
+  // PDPL Article 13: employee record reveals salary, contract terms,
+  // leave balances, contact info — log every direct read.
+  router.get('/employees/:id', logPiiAccess('Employee'), async (req, res) => {
     try {
       if (!req.user) return res.status(401).json({ error: 'auth required' });
       const ctx = resolveCallerContext(req);

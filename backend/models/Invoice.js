@@ -86,6 +86,39 @@ invoiceSchema.pre('save', function () {
   }
 });
 
+// Post-save: fire-and-forget submission to ZATCA Phase 2 when:
+//   • ZATCA_AUTOSUBMIT=true (env feature flag, default OFF)
+//   • The invoice is newly issued and not already ACCEPTED
+//
+// The hook is intentionally fire-and-forget: invoice creation latency
+// stays low, and the bridge writes results back via Invoice.updateOne()
+// (NOT save()) so we don't recurse into this hook. Failures are logged
+// but never thrown — see services/invoiceZatcaHook.js for the contract.
+invoiceSchema.post('save', function (doc) {
+  try {
+    const status = doc?.zatca?.zatcaStatus;
+    if (status === 'ACCEPTED' || status === 'SUBMITTED') return;
+    if (String(process.env.ZATCA_AUTOSUBMIT || '').toLowerCase() !== 'true') return;
+
+    const { submitInvoiceToZatca } = require('../services/invoiceZatcaHook');
+    setImmediate(() => {
+      submitInvoiceToZatca(doc).catch(err => {
+        // submitInvoiceToZatca already logs internally; this catch is
+        // defense-in-depth so an unhandled rejection cannot escape.
+        require('../utils/logger').error('[invoice.post-save] zatca submit threw unexpectedly', {
+          error: err && err.message,
+        });
+      });
+    });
+  } catch (err) {
+    // Synchronous failure here would mean a bad require/wiring — log it
+    // and move on. We never want to break Invoice persistence.
+    require('../utils/logger').error('[invoice.post-save] hook setup failed', {
+      error: err && err.message,
+    });
+  }
+});
+
 // ─── Compound Indexes ────────────────────────────────────────────────────────
 // Beneficiary invoices filtered by status (most common query pattern)
 invoiceSchema.index({ beneficiary: 1, status: 1 });

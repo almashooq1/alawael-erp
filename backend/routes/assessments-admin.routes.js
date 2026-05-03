@@ -22,6 +22,7 @@ const { authenticateToken, requireRole } = require('../middleware/auth');
 const ClinicalAssessment = require('../models/ClinicalAssessment');
 const safeError = require('../utils/safeError');
 const logger = require('../utils/logger');
+const logPiiAccess = require('../middleware/piiAccess.middleware');
 
 router.use(authenticateToken);
 
@@ -196,33 +197,40 @@ router.get('/beneficiary/:id/trend', requireRole(STAFF_ROLES), async (req, res) 
 });
 
 // ── GET /:id ─────────────────────────────────────────────────────────────
-router.get('/:id', requireRole(STAFF_ROLES), async (req, res) => {
-  try {
-    if (!mongoose.isValidObjectId(req.params.id))
-      return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
-    const doc = await ClinicalAssessment.findById(req.params.id)
-      .populate(
-        'beneficiary',
-        'firstName lastName firstName_ar lastName_ar beneficiaryNumber branchId'
-      )
-      .populate('therapist', 'firstName lastName fullName')
-      .populate('reviewer', 'firstName lastName fullName')
-      .lean();
-    if (!doc) return res.status(404).json({ success: false, message: 'غير موجود' });
+// PDPL Article 13: clinical assessments contain detailed health data —
+// scores, notes, diagnoses. Log every read.
+router.get(
+  '/:id',
+  requireRole(STAFF_ROLES),
+  logPiiAccess('ClinicalAssessment'),
+  async (req, res) => {
+    try {
+      if (!mongoose.isValidObjectId(req.params.id))
+        return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
+      const doc = await ClinicalAssessment.findById(req.params.id)
+        .populate(
+          'beneficiary',
+          'firstName lastName firstName_ar lastName_ar beneficiaryNumber branchId'
+        )
+        .populate('therapist', 'firstName lastName fullName')
+        .populate('reviewer', 'firstName lastName fullName')
+        .lean();
+      if (!doc) return res.status(404).json({ success: false, message: 'غير موجود' });
 
-    if (
-      !HQ_ROLES.includes(req.user?.role) &&
-      req.user?.branchId &&
-      doc.branchId &&
-      String(doc.branchId) !== String(req.user.branchId)
-    ) {
-      return res.status(403).json({ success: false, message: 'غير مصرح' });
+      if (
+        !HQ_ROLES.includes(req.user?.role) &&
+        req.user?.branchId &&
+        doc.branchId &&
+        String(doc.branchId) !== String(req.user.branchId)
+      ) {
+        return res.status(403).json({ success: false, message: 'غير مصرح' });
+      }
+      res.json({ success: true, data: doc });
+    } catch (err) {
+      return safeError(res, err, 'assessments.getOne');
     }
-    res.json({ success: true, data: doc });
-  } catch (err) {
-    return safeError(res, err, 'assessments.getOne');
   }
-});
+);
 
 // ── POST / ───────────────────────────────────────────────────────────────
 router.post('/', requireRole(WRITE_ROLES), async (req, res) => {

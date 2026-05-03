@@ -32,7 +32,15 @@ let _authenticate,
   _Appointment,
   _RedFlagState,
   _CarePlan,
-  _GoalProgressEntry;
+  _GoalProgressEntry,
+  _User,
+  _Notification,
+  _AuditLog,
+  _generateToken,
+  _requireRole,
+  _idempotency,
+  _mutationIdAdapter;
+
 function authenticate(req, res, next) {
   if (!_authenticate) _authenticate = require('../middleware/auth').authenticate;
   return _authenticate(req, res, next);
@@ -60,6 +68,86 @@ function CarePlan() {
 function GoalProgressEntry() {
   if (!_GoalProgressEntry) _GoalProgressEntry = require('../models/GoalProgressEntry');
   return _GoalProgressEntry;
+}
+function User() {
+  if (!_User) _User = require('../models/User');
+  return _User;
+}
+function Notification() {
+  if (!_Notification) _Notification = require('../models/Notification');
+  return _Notification;
+}
+function AuditLog() {
+  if (!_AuditLog) {
+    try {
+      _AuditLog = require('../models/auditLog.model');
+    } catch {
+      _AuditLog = null;
+    }
+  }
+  return _AuditLog;
+}
+function generateToken(...args) {
+  if (!_generateToken) _generateToken = require('../middleware/auth').generateToken;
+  return _generateToken(...args);
+}
+
+// Governance: only clinical staff may use the therapist portal.
+// `super_admin` and any role at or above `supervisor` level pass via
+// the requireRole hierarchy fallback in rbac.v2.middleware.
+const THERAPIST_ROLES = [
+  'therapist',
+  'clinical_staff',
+  'supervisor',
+  'clinical_supervisor',
+  'clinical_director',
+  'manager',
+  'admin',
+];
+
+function requireTherapistRole(req, res, next) {
+  if (!_requireRole) _requireRole = require('../middleware/rbac.v2.middleware').requireRole;
+  return _requireRole(...THERAPIST_ROLES)(req, res, next);
+}
+
+function idempotency() {
+  if (!_idempotency) _idempotency = require('../middleware/idempotency.middleware');
+  // Per-user namespace so two therapists cannot collide on the same mutation id.
+  return _idempotency({
+    scope: req => `therapist:${req.user?.id || req.user?._id || 'anon'}`,
+  });
+}
+
+function mutationIdAdapter(req, res, next) {
+  if (!_mutationIdAdapter)
+    _mutationIdAdapter = require('../middleware/mutationIdAdapter.middleware');
+  return _mutationIdAdapter(req, res, next);
+}
+
+/**
+ * Best-effort audit log helper. AuditLog is optional in some test envs, and
+ * we never want a logging failure to fail the user-facing request.
+ */
+function audit(eventType, req, extras = {}) {
+  try {
+    const Model = AuditLog();
+    if (!Model || typeof Model.create !== 'function') return;
+    const userId = req.user?.id || req.user?._id || req.user?.userId;
+    Model.create({
+      eventType,
+      eventCategory: extras.category || 'clinical',
+      severity: extras.severity || 'info',
+      status: extras.status || 'success',
+      ip: req.ip,
+      userAgent: req.get && req.get('user-agent'),
+      userId,
+      actionDetails: extras.actionDetails || {},
+      affectedResources: extras.affectedResources || [],
+      result: extras.result || 'success',
+    }).catch(() => {});
+  } catch {
+    /* swallow — audit must never break the request path */
+  }
 }
 
 const DISABILITY_LEVEL_MAP = {
@@ -209,23 +297,117 @@ function notImplemented(contract) {
     });
 }
 
+// ── Cross-cutting middleware ──────────────────────────────────────────────────
+// 1. mutationIdAdapter copies x-client-mutation-id → Idempotency-Key so the
+//    offline queue's replay tag is honored by the platform-wide idempotency layer.
+// 2. idempotency() then dedupes POST/PUT/PATCH/DELETE per (user, route, key).
+// Both are no-ops on requests without the relevant header — safe to apply globally.
+router.use(mutationIdAdapter);
+router.use(idempotency());
+
 // ── Auth ──────────────────────────────────────────────────────────────────────
-router.post(
-  '/auth/login',
-  notImplemented({
-    request: { identifier: 'string', password: 'string' },
-    response: {
-      accessToken: 'string',
-      therapistId: 'string',
-      employeeId: 'string',
-      nameAr: 'string',
-      specialty: 'string',
-    },
-  })
-);
+/**
+ * POST /auth/login
+ * Therapist-portal-specific login. Authenticates via User.comparePassword and
+ * returns the JWT alongside the therapist's Employee identity, so the SPA can
+ * pre-populate `/me` without an extra round-trip on first paint.
+ *
+ * The token shape and verification path are identical to the platform-wide
+ * authenticate() middleware — this endpoint just bundles the Employee lookup.
+ */
+router.post('/auth/login', async (req, res) => {
+  try {
+    const { identifier, password } = req.body || {};
+    if (
+      !identifier ||
+      typeof identifier !== 'string' ||
+      !password ||
+      typeof password !== 'string'
+    ) {
+      return res
+        .status(400)
+        .json({ error: 'InvalidBody', message: 'identifier and password are required' });
+    }
+
+    const trimmed = identifier.trim().toLowerCase();
+    // identifier may be an email or an employee_number (national id login is
+    // out of scope for v1 — therapists onboard with email by default).
+    const user = await User()
+      .findOne({ $or: [{ email: trimmed }, { username: trimmed }] })
+      .select('+password +role +email +username +isActive');
+
+    if (!user || (typeof user.isActive === 'boolean' && user.isActive === false)) {
+      audit('auth.login_failed', req, {
+        severity: 'medium',
+        status: 'failure',
+        actionDetails: { identifier: trimmed, reason: 'user_not_found_or_inactive' },
+      });
+      return res
+        .status(401)
+        .json({ error: 'InvalidCredentials', message: 'بيانات الدخول غير صحيحة' });
+    }
+
+    const ok =
+      typeof user.comparePassword === 'function' ? await user.comparePassword(password) : false;
+    if (!ok) {
+      audit('auth.login_failed', req, {
+        severity: 'medium',
+        status: 'failure',
+        actionDetails: { identifier: trimmed, reason: 'bad_password' },
+      });
+      return res
+        .status(401)
+        .json({ error: 'InvalidCredentials', message: 'بيانات الدخول غير صحيحة' });
+    }
+
+    // Resolve the Employee record so the SPA gets a complete identity envelope.
+    const emp = await Employee()
+      .findOne({ user_id: user._id })
+      .select('_id employee_number name_ar specialization')
+      .lean();
+
+    if (!emp) {
+      // The user authenticated but isn't enrolled as an Employee — block portal
+      // access since every downstream route needs an Employee anchor.
+      return res.status(403).json({
+        error: 'EmployeeNotFound',
+        message: 'الحساب غير مرتبط بسجل موظف. يرجى التواصل مع الموارد البشرية.',
+      });
+    }
+
+    const token = generateToken(
+      {
+        id: String(user._id),
+        email: user.email,
+        role: user.role,
+        permissions: [],
+      },
+      '8h'
+    );
+
+    audit('auth.login', req, {
+      severity: 'info',
+      status: 'success',
+      actionDetails: { userId: String(user._id), employeeId: String(emp._id) },
+    });
+
+    return res.json({
+      accessToken: token,
+      therapistId: String(emp._id),
+      employeeId: emp.employee_number || String(emp._id),
+      nameAr: emp.name_ar || '—',
+      specialty: SPECIALIZATION_LABEL_AR[emp.specialization] || emp.specialization || '—',
+    });
+  } catch (err) {
+    return res.status(500).json({
+      error: 'InternalError',
+      message: err instanceof Error ? err.message : 'login failed',
+    });
+  }
+});
 
 // ── Identity ──────────────────────────────────────────────────────────────────
-router.get('/me', authenticate, async (req, res) => {
+router.get('/me', authenticate, requireTherapistRole, async (req, res) => {
   try {
     const userId = req.user?.id || req.user?._id || req.user?.userId;
     if (!userId) {
@@ -277,7 +459,7 @@ router.get('/me', authenticate, async (req, res) => {
 });
 
 // ── Today & Schedule ──────────────────────────────────────────────────────────
-router.get('/today', authenticate, async (req, res) => {
+router.get('/today', authenticate, requireTherapistRole, async (req, res) => {
   try {
     const userId = req.user?.id || req.user?._id || req.user?.userId;
     if (!userId) {
@@ -360,7 +542,7 @@ router.get('/today', authenticate, async (req, res) => {
   }
 });
 
-router.get('/schedule', authenticate, async (req, res) => {
+router.get('/schedule', authenticate, requireTherapistRole, async (req, res) => {
   try {
     const userId = req.user?.id || req.user?._id || req.user?.userId;
     const employeeId = await resolveEmployeeId(userId);
@@ -399,7 +581,7 @@ router.get('/schedule', authenticate, async (req, res) => {
 });
 
 // ── Sessions ──────────────────────────────────────────────────────────────────
-router.get('/sessions/:id', authenticate, async (req, res) => {
+router.get('/sessions/:id', authenticate, requireTherapistRole, async (req, res) => {
   try {
     const userId = req.user?.id || req.user?._id || req.user?.userId;
     const employeeId = await resolveEmployeeId(userId);
@@ -434,7 +616,7 @@ router.get('/sessions/:id', authenticate, async (req, res) => {
   }
 });
 
-router.post('/sessions/:id/start', authenticate, async (req, res) => {
+router.post('/sessions/:id/start', authenticate, requireTherapistRole, async (req, res) => {
   try {
     const userId = req.user?.id || req.user?._id || req.user?.userId;
     const employeeId = await resolveEmployeeId(userId);
@@ -514,7 +696,7 @@ function validateSoapBody(body) {
   return null;
 }
 
-router.post('/sessions/:id/draft', authenticate, async (req, res) => {
+router.post('/sessions/:id/draft', authenticate, requireTherapistRole, async (req, res) => {
   try {
     const userId = req.user?.id || req.user?._id || req.user?.userId;
     const employeeId = await resolveEmployeeId(userId);
@@ -546,6 +728,19 @@ router.post('/sessions/:id/draft', authenticate, async (req, res) => {
         .json({ error: 'AlreadySigned', message: 'session already signed — cannot overwrite' });
     }
 
+    // Optimistic-concurrency check: if the client supplies an If-Match header
+    // with the lastDraftAt it last saw, reject when the server-side draft has
+    // moved forward (e.g., another tab synced first). Without this, an offline
+    // tab returning online could silently overwrite newer in-clinic edits.
+    const ifMatch = req.get('if-match') || req.get('If-Match');
+    if (ifMatch && existing && existing.lastDraftAt && existing.lastDraftAt !== ifMatch) {
+      return res.status(412).json({
+        error: 'PreconditionFailed',
+        message: 'draft has been updated since you last loaded it — refresh and re-apply',
+        currentLastDraftAt: existing.lastDraftAt,
+      });
+    }
+
     const savedAt = new Date().toISOString();
     const envelope = {
       soap: {
@@ -556,6 +751,7 @@ router.post('/sessions/:id/draft', authenticate, async (req, res) => {
       },
       signedAt: null,
       lastDraftAt: savedAt,
+      lastDraftBy: String(employeeId),
     };
     appt.internalNotes = JSON.stringify(envelope);
     await appt.save();
@@ -569,7 +765,7 @@ router.post('/sessions/:id/draft', authenticate, async (req, res) => {
   }
 });
 
-router.post('/sessions/:id/sign', authenticate, async (req, res) => {
+router.post('/sessions/:id/sign', authenticate, requireTherapistRole, async (req, res) => {
   try {
     const userId = req.user?.id || req.user?._id || req.user?.userId;
     const employeeId = await resolveEmployeeId(userId);
@@ -622,11 +818,33 @@ router.post('/sessions/:id/sign', authenticate, async (req, res) => {
       return res.status(409).json({ error: 'AlreadySigned', message: 'session already signed' });
     }
 
+    // Optimistic-concurrency on sign: protects the same race as /draft.
+    const ifMatch = req.get('if-match') || req.get('If-Match');
+    if (ifMatch && envelope.lastDraftAt && envelope.lastDraftAt !== ifMatch) {
+      return res.status(412).json({
+        error: 'PreconditionFailed',
+        message: 'draft has been updated since you last loaded it — refresh before signing',
+        currentLastDraftAt: envelope.lastDraftAt,
+      });
+    }
+
     const signedAt = new Date().toISOString();
     envelope.signedAt = signedAt;
+    envelope.signedBy = String(employeeId);
     appt.internalNotes = JSON.stringify(envelope);
     appt.status = 'COMPLETED';
     await appt.save();
+
+    audit('clinical.session_signed', req, {
+      severity: 'info',
+      category: 'clinical',
+      actionDetails: {
+        appointmentId: String(appt._id),
+        beneficiaryId: appt.beneficiary ? String(appt.beneficiary) : null,
+        signedAt,
+      },
+      affectedResources: [{ type: 'Appointment', id: String(appt._id) }],
+    });
 
     return res.json({ id: String(appt._id), status: 'COMPLETED_SIGNED', signedAt });
   } catch (err) {
@@ -638,7 +856,7 @@ router.post('/sessions/:id/sign', authenticate, async (req, res) => {
 });
 
 // ── Beneficiaries (assigned to therapist only) ────────────────────────────────
-router.get('/beneficiaries', authenticate, async (req, res) => {
+router.get('/beneficiaries', authenticate, requireTherapistRole, async (req, res) => {
   try {
     const userId = req.user?.id || req.user?._id || req.user?.userId;
     const employeeId = await resolveEmployeeId(userId);
@@ -711,7 +929,7 @@ router.get('/beneficiaries', authenticate, async (req, res) => {
   }
 });
 
-router.get('/beneficiaries/:id', authenticate, async (req, res) => {
+router.get('/beneficiaries/:id', authenticate, requireTherapistRole, async (req, res) => {
   try {
     const userId = req.user?.id || req.user?._id || req.user?.userId;
     const employeeId = await resolveEmployeeId(userId);
@@ -746,6 +964,15 @@ router.get('/beneficiaries/:id', authenticate, async (req, res) => {
       .populate('branchId', 'name_ar')
       .lean();
     if (!b) return res.status(404).json({ error: 'NotFound', message: 'beneficiary not found' });
+
+    // PDPL Art.13: every read of a beneficiary's clinical record must be logged
+    // so the DPO can answer "who viewed my data" subject requests.
+    audit('pii.beneficiary_view', req, {
+      severity: 'info',
+      category: 'pii',
+      actionDetails: { beneficiaryId: String(b._id), via: 'therapist-portal' },
+      affectedResources: [{ type: 'Beneficiary', id: String(b._id) }],
+    });
 
     // Parallel: active care plan, recent sessions, active red-flags.
     const [activePlan, recentSessions, rfDocs] = await Promise.all([
@@ -915,7 +1142,7 @@ async function findCarePlanByGoalId(goalId) {
   return { plan, goal: null, path: null };
 }
 
-router.post('/goals/:goalId/progress', authenticate, async (req, res) => {
+router.post('/goals/:goalId/progress', authenticate, requireTherapistRole, async (req, res) => {
   try {
     const userId = req.user?.id || req.user?._id || req.user?.userId;
     if (!userId)
@@ -1040,7 +1267,7 @@ const RED_FLAG_CATALOG = [
   },
 ];
 
-router.get('/red-flags/catalog', authenticate, (_req, res) => {
+router.get('/red-flags/catalog', authenticate, requireTherapistRole, (_req, res) => {
   // No DB round-trip needed — this is a static enum that therapists pick from.
   res.json(RED_FLAG_CATALOG);
 });
@@ -1055,7 +1282,7 @@ const PRIORITY_TO_SEVERITY = {
   LOW: 'info',
 };
 
-router.post('/red-flags', authenticate, async (req, res) => {
+router.post('/red-flags', authenticate, requireTherapistRole, async (req, res) => {
   try {
     const userId = req.user?.id || req.user?._id || req.user?.userId;
     if (!userId)
@@ -1106,7 +1333,77 @@ router.post('/red-flags', authenticate, async (req, res) => {
           sessionId: sessionId ? String(sessionId) : null,
         },
       });
-      return res.status(201).json({ id: String(doc._id) });
+
+      // Audit every raise — required for CBAHI / PDPL incident traceability.
+      audit('clinical.red_flag_raised', req, {
+        severity: priority === 'CRITICAL' ? 'high' : 'medium',
+        category: 'clinical',
+        actionDetails: {
+          redFlagId: String(doc._id),
+          beneficiaryId: String(beneficiaryId),
+          code,
+          priority,
+        },
+        affectedResources: [
+          { type: 'RedFlagState', id: String(doc._id) },
+          { type: 'Beneficiary', id: String(beneficiaryId) },
+        ],
+      });
+
+      // Escalation: CRITICAL flags are blocking and must wake a supervisor.
+      // We notify all active users with a clinical-supervisor level role.
+      // Best-effort: if Notification or User querying fails, we still return
+      // 201 — the audit trail is the authoritative record.
+      if (priority === 'CRITICAL') {
+        try {
+          const supervisorRoles = [
+            'clinical_supervisor',
+            'clinical_director',
+            'supervisor',
+            'manager',
+            'admin',
+          ];
+          const supervisors = await User()
+            .find({ role: { $in: supervisorRoles }, isActive: { $ne: false } })
+            .select('_id')
+            .limit(50)
+            .lean();
+
+          if (supervisors && supervisors.length > 0) {
+            await Notification().insertMany(
+              supervisors.map(s => ({
+                recipientId: s._id,
+                userId: s._id,
+                title: 'علامة حمراء حرجة تتطلب مراجعة فورية',
+                message: `${validCode.labelAr} — ${notes.trim().slice(0, 160)}`,
+                type: 'alert',
+                category: 'clinical',
+                priority: 'critical',
+                actionUrl: `/admin/beneficiaries/${beneficiaryId}#red-flags`,
+                metadata: {
+                  redFlagId: String(doc._id),
+                  beneficiaryId: String(beneficiaryId),
+                  code,
+                  raisedByUserId: String(userId),
+                },
+              })),
+              { ordered: false }
+            );
+          }
+        } catch (notifyErr) {
+          // Escalation is best-effort; surface in audit but don't 500 the user.
+          audit('clinical.red_flag_escalation_failed', req, {
+            severity: 'high',
+            status: 'failure',
+            actionDetails: {
+              redFlagId: String(doc._id),
+              error: notifyErr instanceof Error ? notifyErr.message : 'unknown',
+            },
+          });
+        }
+      }
+
+      return res.status(201).json({ id: String(doc._id), escalated: priority === 'CRITICAL' });
     } catch (dbErr) {
       // Duplicate key → flag already active for this beneficiary.
       if (dbErr && dbErr.code === 11000) {
@@ -1167,14 +1464,14 @@ const ASSESSMENT_TEMPLATES = [
   },
 ];
 
-router.get('/assessments/templates', authenticate, (_req, res) => {
+router.get('/assessments/templates', authenticate, requireTherapistRole, (_req, res) => {
   res.json(ASSESSMENT_TEMPLATES);
 });
 
 // Appointments of type="تقييم" act as assessment records until a dedicated
 // Assessment collection lands (Phase 16). The therapist UI treats them as
 // a separate stream to surface outstanding evaluations.
-router.get('/assessments', authenticate, async (req, res) => {
+router.get('/assessments', authenticate, requireTherapistRole, async (req, res) => {
   try {
     const userId = req.user?.id || req.user?._id || req.user?.userId;
     const employeeId = await resolveEmployeeId(userId);
@@ -1235,27 +1532,161 @@ router.get('/assessments', authenticate, async (req, res) => {
       .json({ error: 'InternalError', message: err instanceof Error ? err.message : 'failed' });
   }
 });
-router.post(
-  '/assessments',
-  notImplemented({
-    request: { beneficiaryId: 'string', templateCode: 'string' },
-    response: { id: 'string' },
-  })
-);
+/**
+ * POST /assessments
+ *
+ * Creates a placeholder assessment record by booking an Appointment of
+ * type='تقييم' against today's date for the assigned therapist. This is
+ * the same convention GET /assessments reads from. When a dedicated
+ * Assessment collection lands (Phase 16), only this handler body changes.
+ */
+router.post('/assessments', authenticate, requireTherapistRole, async (req, res) => {
+  try {
+    const userId = req.user?.id || req.user?._id || req.user?.userId;
+    const employeeId = await resolveEmployeeId(userId);
+    if (!employeeId) {
+      return res
+        .status(404)
+        .json({ error: 'EmployeeNotFound', message: 'No Employee record for this user.' });
+    }
+
+    const { beneficiaryId, templateCode } = req.body || {};
+    if (!beneficiaryId || !isValidObjectId(beneficiaryId)) {
+      return res
+        .status(400)
+        .json({ error: 'InvalidBody', message: 'beneficiaryId must be a valid ObjectId' });
+    }
+    const tpl = ASSESSMENT_TEMPLATES.find(t => t.code === templateCode);
+    if (!tpl) {
+      return res
+        .status(400)
+        .json({ error: 'InvalidBody', message: `unknown templateCode '${templateCode}'` });
+    }
+
+    // Caseload guard: therapist must have a recent assignment to the beneficiary.
+    const twelveMonthsAgo = new Date();
+    twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12);
+    const hasAccess = await Appointment().countDocuments({
+      therapist: employeeId,
+      beneficiary: beneficiaryId,
+      date: { $gte: twelveMonthsAgo },
+    });
+    if (!hasAccess) {
+      return res
+        .status(403)
+        .json({ error: 'Forbidden', message: 'no active assignment to this beneficiary' });
+    }
+
+    const ben = await Beneficiary()
+      .findById(beneficiaryId)
+      .select('firstName_ar lastName_ar')
+      .lean();
+
+    const now = new Date();
+    const startTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+    const endHour = String((now.getHours() + Math.ceil(tpl.estimatedMinutes / 60)) % 24).padStart(
+      2,
+      '0'
+    );
+    const endTime = `${endHour}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+    const doc = await Appointment().create({
+      therapist: employeeId,
+      beneficiary: beneficiaryId,
+      beneficiaryName: ben
+        ? [ben.firstName_ar, ben.lastName_ar].filter(Boolean).join(' ').trim()
+        : '—',
+      type: 'تقييم',
+      date: now,
+      startTime,
+      endTime,
+      status: 'PENDING',
+      internalNotes: JSON.stringify({
+        assessmentTemplate: tpl.code,
+        domains: tpl.domains,
+        createdAt: now.toISOString(),
+      }),
+    });
+
+    audit('clinical.assessment_created', req, {
+      severity: 'info',
+      category: 'clinical',
+      actionDetails: {
+        assessmentId: String(doc._id),
+        beneficiaryId: String(beneficiaryId),
+        templateCode: tpl.code,
+      },
+      affectedResources: [
+        { type: 'Appointment', id: String(doc._id) },
+        { type: 'Beneficiary', id: String(beneficiaryId) },
+      ],
+    });
+
+    return res.status(201).json({ id: String(doc._id) });
+  } catch (err) {
+    return res.status(500).json({
+      error: 'InternalError',
+      message: err instanceof Error ? err.message : 'failed to create assessment',
+    });
+  }
+});
 
 // ── Inbox ─────────────────────────────────────────────────────────────────────
 // Returns tasks + consult requests + supervisor reviews + care-plan updates.
 // Pending wiring to the Notification + ChangeRequest services (Phase 11/15);
 // for now we return an empty array so the UI renders its "inbox is empty"
 // state cleanly. When the services are wired, only this handler body changes.
-router.get('/inbox', authenticate, async (req, res) => {
+router.get('/inbox', authenticate, requireTherapistRole, async (req, res) => {
   try {
     const userId = req.user?.id || req.user?._id || req.user?.userId;
     if (!userId)
       return res.status(401).json({ error: 'Unauthorized', message: 'user id missing from token' });
-    // TODO(phase-16): merge from Notification.find({ userId, type: { $in: [...] } })
-    //                 and ChangeRequest/ConsultRequest services.
-    return res.json([]);
+
+    const limit = Math.min(parseInt(req.query.limit, 10) || 50, 200);
+    const docs = await Notification()
+      .find({
+        $or: [{ recipientId: userId }, { userId }, { recipient: userId }],
+        deletedAt: { $exists: false },
+      })
+      .sort({ createdAt: -1 })
+      .limit(limit)
+      .select(
+        '_id title message type category priority read isRead actionUrl link metadata createdAt'
+      )
+      .lean();
+
+    // Map server-side notification types to the therapist-portal taxonomy
+    // (TASK | CONSULT | REVIEW | PLAN_UPDATE) the SPA filters by.
+    const TYPE_MAP = {
+      task: 'TASK',
+      reminder: 'TASK',
+      approval: 'REVIEW',
+      message: 'CONSULT',
+      update: 'PLAN_UPDATE',
+      alert: 'REVIEW',
+      info: 'TASK',
+    };
+    const PRIORITY_MAP = {
+      critical: 'CRITICAL',
+      urgent: 'HIGH',
+      high: 'HIGH',
+      medium: 'MEDIUM',
+      low: 'LOW',
+    };
+
+    return res.json(
+      docs.map(d => ({
+        id: String(d._id),
+        type: TYPE_MAP[d.type] || 'TASK',
+        priority: PRIORITY_MAP[d.priority] || 'MEDIUM',
+        title: d.title || '—',
+        body: d.message || '',
+        actionUrl: d.actionUrl || d.link || null,
+        unread: !(d.read || d.isRead),
+        createdAt: d.createdAt ? new Date(d.createdAt).toISOString() : new Date().toISOString(),
+        metadata: d.metadata || {},
+      }))
+    );
   } catch (err) {
     return res.status(500).json({
       error: 'InternalError',
@@ -1278,7 +1709,7 @@ function credentialStatus(expiresAt) {
   return { status: 'VALID', daysUntilExpiry: days };
 }
 
-router.get('/credentials', authenticate, async (req, res) => {
+router.get('/credentials', authenticate, requireTherapistRole, async (req, res) => {
   try {
     const userId = req.user?.id || req.user?._id || req.user?.userId;
     if (!userId)

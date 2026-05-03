@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Automated Backup Configuration
  * نظام النسخ الاحتياطي التلقائي
@@ -50,6 +49,10 @@ const ensureBackupDir = () => {
 };
 
 // MongoDB Backup
+//
+// If BACKUP_ENCRYPTION_KEY is set, the gzip archive is encrypted in-place
+// with AES-256-GCM (output: `<file>.gz.enc`, plaintext deleted on success).
+// PDPL/NPHIES require encryption-at-rest for healthcare PII.
 const backupMongoDB = () => {
   return new Promise((resolve, reject) => {
     ensureBackupDir();
@@ -62,14 +65,42 @@ const backupMongoDB = () => {
     // Use execFile to prevent command injection via mongoUri
     const args = ['--uri', mongoUri, '--archive', backupFile, '--gzip'];
 
-    execFile('mongodump', args, (error, stdout, stderr) => {
+    execFile('mongodump', args, async (error, _stdout, _stderr) => {
       if (error) {
         logger.error('Backup failed:', { error: error.message });
-        reject(error);
-        return;
+        return reject(error);
       }
 
-      resolve(backupFile);
+      const keyHex = process.env.BACKUP_ENCRYPTION_KEY;
+      if (!keyHex) {
+        return resolve(backupFile);
+      }
+
+      try {
+        const { encryptFile } = require('../utils/backup-crypto');
+        const encryptedFile = `${backupFile}.enc`;
+        const meta = await encryptFile({
+          inputPath: backupFile,
+          outputPath: encryptedFile,
+          keyHex,
+        });
+        fs.unlinkSync(backupFile); // remove plaintext
+        logger.info('Backup encrypted', {
+          file: encryptedFile,
+          plaintextBytes: meta.plaintextBytes,
+          ciphertextBytes: meta.ciphertextBytes,
+          durationMs: meta.durationMs,
+        });
+        resolve(encryptedFile);
+      } catch (encErr) {
+        logger.error('Backup encryption failed — keeping plaintext archive', {
+          error: encErr.message,
+        });
+        // Reject so the scheduler triggers ops-alerter — a plaintext archive
+        // sitting on disk when encryption was supposed to run is a security
+        // incident, not a non-event.
+        reject(encErr);
+      }
     });
   });
 };
@@ -112,41 +143,38 @@ const scheduleBackups = () => {
   // Run backup every 24 hours
   const BACKUP_INTERVAL = 24 * 60 * 60 * 1000;
 
-  setInterval(async () => {
+  const runOnce = async label => {
     const locked = await acquireBackupLock();
     if (!locked) {
-      logger.info('Backup skipped — another instance holds the lock');
+      logger.info(`${label} backup skipped — another instance holds the lock`);
       return;
     }
     try {
       await backupMongoDB();
       cleanOldBackups();
     } catch (error) {
-      logger.error('Scheduled backup failed:', { error: error.message });
+      logger.error(`${label} backup failed:`, { error: error.message });
+      try {
+        const { sendOpsAlert } = require('../services/ops-alerter');
+        await sendOpsAlert({
+          kind: 'backup_failed',
+          severity: 'critical',
+          subject: `فشل ${label} للنسخ الاحتياطي`,
+          body: `فشل النسخ الاحتياطي المجدول. السبب: ${error.message}`,
+          metadata: { label, error: error.message },
+        });
+      } catch (alertErr) {
+        logger.error('Backup alert dispatch failed:', { error: alertErr.message });
+      }
     } finally {
       await releaseBackupLock();
     }
-  }, BACKUP_INTERVAL);
+  };
+
+  setInterval(() => runOnce('Scheduled'), BACKUP_INTERVAL);
 
   // Run initial backup after 5 minutes
-  setTimeout(
-    async () => {
-      const locked = await acquireBackupLock();
-      if (!locked) {
-        logger.info('Initial backup skipped — another instance holds the lock');
-        return;
-      }
-      try {
-        await backupMongoDB();
-        cleanOldBackups();
-      } catch (error) {
-        logger.error('Initial backup failed:', { error: error.message });
-      } finally {
-        await releaseBackupLock();
-      }
-    },
-    5 * 60 * 1000
-  );
+  setTimeout(() => runOnce('Initial'), 5 * 60 * 1000);
 };
 
 module.exports = {

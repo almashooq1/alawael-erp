@@ -339,7 +339,16 @@ const shouldSkipDBInit = isTestEnv && process.env.SMART_TEST_MODE === 'true';
         communication: {
           emailService: communicationService && communicationService.email,
           smsService: communicationService && communicationService.sms,
-          whatsappService: communicationService && communicationService.whatsapp,
+          whatsappService: (() => {
+            // Prefer the new AI-enabled WhatsApp service if available
+            try {
+              const { whatsappService: ws } = require('./services/whatsapp');
+              if (ws && ws.isEnabled()) return ws;
+            } catch (_e) {
+              /* fallback */
+            }
+            return communicationService && communicationService.whatsapp;
+          })(),
         },
         cron,
         logger,
@@ -475,6 +484,40 @@ const shouldSkipDBInit = isTestEnv && process.env.SMART_TEST_MODE === 'true';
     logger.info(`🔗 Cross-Module Subscribers ready (${result.subscriberCount} registered)`);
   } catch (err) {
     logger.info('Cross-Module Subscribers initialization skipped:', err.message);
+  }
+
+  // Initialize Blockchain Auto-Issue Subscribers (off by default; opt-in via
+  // BLOCKCHAIN_AUTO_ISSUE=1). Wires LMS course / IEP / onboarding completions
+  // to automatic certificate issuance via the database event bus.
+  if (String(process.env.BLOCKCHAIN_AUTO_ISSUE || '').trim() === '1') {
+    try {
+      const { databaseEventBus } = require('./database/event-bus');
+      const subs = require('./services/blockchain/autoIssueSubscribers');
+      const r = subs.register(databaseEventBus);
+      logger.info(`⛓  Blockchain Auto-Issue Subscribers ready (${r.registered} sources)`);
+    } catch (err) {
+      logger.info('Blockchain Auto-Issue Subscribers initialization skipped:', err.message);
+    }
+  }
+
+  // Sync AnchorLedger from on-chain events when running on a real chain.
+  // Recovers from DB pruning / restore by replaying `Anchored` events. Off
+  // unless explicitly requested — adds a few seconds to boot.
+  if (String(process.env.BLOCKCHAIN_SYNC_ON_BOOT || '').trim() === '1') {
+    try {
+      const { getAdapter } = require('./services/blockchain/adapters');
+      const adapter = getAdapter();
+      if (typeof adapter.syncFromChain === 'function') {
+        const r = await adapter.syncFromChain();
+        if (r.skipped) logger.info(`⛓  AnchorLedger sync skipped (${r.reason})`);
+        else
+          logger.info(
+            `⛓  AnchorLedger sync: +${r.inserted} new, ${r.skipped} already-known (blocks ${r.scannedFromBlock}–${r.scannedToBlock})`
+          );
+      }
+    } catch (err) {
+      logger.info('AnchorLedger boot-sync skipped:', err.message);
+    }
   }
 
   // Run pending database migrations

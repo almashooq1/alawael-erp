@@ -27,6 +27,7 @@ const fatoora = require('../services/fatooraAdapter');
 const safeError = require('../utils/safeError');
 const logger = require('../utils/logger');
 const idempotency = require('../middleware/idempotency.middleware');
+const logPiiAccess = require('../middleware/piiAccess.middleware');
 
 router.use(authenticateToken);
 
@@ -166,7 +167,10 @@ router.get('/stats', requireRole(STAFF_ROLES), async (req, res) => {
 });
 
 // ── GET /:id ─────────────────────────────────────────────────────────────
-router.get('/:id', requireRole(STAFF_ROLES), async (req, res) => {
+// PDPL Article 13: log every read — invoices contain financial PII
+// (totalAmount, payment method, beneficiary identifiers). The middleware
+// fires post-response with zero added latency.
+router.get('/:id', requireRole(STAFF_ROLES), logPiiAccess('Invoice'), async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });

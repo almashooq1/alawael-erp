@@ -12,7 +12,6 @@
 const express = require('express');
 const logger = require('../utils/logger');
 
-
 // ─── Safe Require — returns empty router on failure ───────────────────────────
 //
 // Two failure shapes worth distinguishing:
@@ -103,8 +102,7 @@ const ecommerceRoutes = safeRequire('../routes/ecommerce.routes');
 // Guard against module missing — safeRequire returns an empty Router (no .router)
 // so destructure defensively to avoid a silent undefined downstream.
 const purchasingRoutes =
-  (safeRequire('../routes/purchasing.routes.unified') || {}).router ||
-  require('express').Router();
+  (safeRequire('../routes/purchasing.routes.unified') || {}).router || require('express').Router();
 // Fleet & Transport — delegated to registries/fleet.registry.js (34 modules)
 const registerFleetRoutes = require('./registries/fleet.registry');
 const cmsRoutes = safeRequire('../routes/cms');
@@ -151,8 +149,7 @@ const communityIntegrationRoutes = safeRequire('../routes/communityIntegration.r
 const civilDefenseRoutes = safeRequire('../routes/civilDefense.routes');
 // Guard against missing module (same defensive pattern as purchasingRoutes)
 const inventoryUnifiedRoutes =
-  (safeRequire('../routes/inventory.routes.unified') || {}).router ||
-  require('express').Router();
+  (safeRequire('../routes/inventory.routes.unified') || {}).router || require('express').Router();
 const supplyChainRoutes = safeRequire('../routes/supplyChain.routes');
 const trafficAccidentRoutes = safeRequire('../routes/trafficAccidents');
 const mfaRoutes = safeRequire('../routes/mfa');
@@ -419,8 +416,20 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   dualMount(app, 'admin/beneficiaries', require('../routes/beneficiaries-admin.routes'));
   dualMount(app, 'admin/therapy-sessions', require('../routes/therapy-sessions-admin.routes'));
   dualMount(app, 'admin/assessments', require('../routes/assessments-admin.routes'));
+  // ── Disability Assessment Tests (اختبارات تقييم الإعاقة) ─────────────────
+  dualMount(app, 'disability', safeRequire('../routes/disability-assessment.routes'));
   dualMount(app, 'admin/care-plans', require('../routes/care-plans-admin.routes'));
+  dualMount(app, 'episodes', require('../routes/episodes.routes'));
+  dualMount(
+    app,
+    'rehabilitation-advanced',
+    safeRequire('../routes/rehabilitation-advanced.routes')
+  );
+  logger.info(
+    'Rehabilitation Advanced routes mounted (behavior-incidents, behavior-plans, vocational, home-programs, etc.)'
+  );
   dualMount(app, 'parent-v2', require('../routes/parent-portal-v2.routes'));
+  dualMount(app, 'parent-v2', require('../routes/parent-portal-v2-extras.routes'));
   dualMount(app, 'therapist-workbench', require('../routes/therapist-workbench.routes'));
 
   // ── v1 Portal skeletons (frontend contracts; implementations pending) ───
@@ -440,6 +449,7 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   dualMount(app, 'admin/hr/compliance', require('../routes/hr-compliance.routes'));
   dualMount(app, 'admin/hr/cpe', require('../routes/cpe-admin.routes'));
   dualMount(app, 'admin/attendance', require('../routes/attendance-admin.routes'));
+  dualMount(app, 'attendance-mgmt', require('../routes/attendance-management.routes'));
   dualMount(app, 'admin/outcomes', require('../routes/outcomes-admin.routes'));
   dualMount(app, 'admin/nps', require('../routes/nps-admin.routes'));
   app.use('/api/public/nps', require('../routes/public-nps.routes'));
@@ -451,13 +461,25 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   dualMount(app, 'admin/claims-analytics', require('../routes/claims-analytics-admin.routes'));
   dualMount(app, 'admin/revenue-forecast', require('../routes/revenue-forecast-admin.routes'));
   dualMount(app, 'admin/retention', require('../routes/retention-admin.routes'));
-  dualMount(app, 'admin/complaints-analytics', require('../routes/complaints-analytics-admin.routes'));
+  dualMount(
+    app,
+    'admin/complaints-analytics',
+    require('../routes/complaints-analytics-admin.routes')
+  );
   dualMount(app, 'admin/document-expiry', require('../routes/document-expiry-admin.routes'));
-  dualMount(app, 'admin/incidents-analytics', require('../routes/incidents-analytics-admin.routes'));
+  dualMount(
+    app,
+    'admin/incidents-analytics',
+    require('../routes/incidents-analytics-admin.routes')
+  );
   dualMount(app, 'admin/saudization', require('../routes/saudization-admin.routes'));
   dualMount(app, 'admin/onboarding', require('../routes/onboarding-admin.routes'));
   dualMount(app, 'admin/gov-integrations', require('../routes/gov-integrations.routes'));
   dualMount(app, 'admin/nphies-claims', require('../routes/nphies-claims.routes'));
+  dualMount(app, 'admin/insurance-tariffs', require('../routes/insurance-tariffs-admin.routes'));
+  dualMount(app, 'admin/zatca-credentials', require('../routes/zatca-credentials-admin.routes'));
+  dualMount(app, 'admin/pii-access-audit', require('../routes/pii-access-audit-admin.routes'));
+  dualMount(app, 'zatca-phase2', require('../routes/zatca-phase2.routes'));
   dualMount(app, 'admin/branch-compliance', require('../routes/branch-compliance.routes'));
   dualMount(app, 'admin/adapter-audit', require('../routes/adapter-audit.routes'));
   dualMount(app, 'notify', require('../routes/notify.routes'));
@@ -465,7 +487,108 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   dualMount(app, 'approval-requests', require('../routes/approvalRequests.routes'));
   dualMount(app, 'templates', require('../routes/templates.routes'));
   dualMount(app, 'groups', require('../routes/groups.routes'));
-  logger.info('New frontend-backend integration routes mounted (8 new + 4 dual-mounted)');
+
+  // ── Reports & Analytics Module (وحدة التقارير والتحليلات) ─────────────────
+  dualMount(app, 'reports', safeRequire('../routes/reports-analytics-module.routes'));
+
+  // ── DDD Domain Routes (مسارات نطاقات DDD) ──────────────────────────────────
+  // Core: Beneficiary CRUD (/core/beneficiaries) + 360° dashboard
+  dualMount(app, 'core', safeRequire('../domains/core/routes/core.routes'));
+  // Workflow & Journey Engine
+  dualMount(app, 'workflow', safeRequire('../domains/workflow/routes/workflow.routes'));
+  // Rehabilitation Programs Library
+  dualMount(app, 'programs', safeRequire('../domains/programs/routes/programs.routes'));
+  // AI Recommendations & Risk Scoring
+  dualMount(
+    app,
+    'ai-recommendations',
+    safeRequire('../domains/ai-recommendations/routes/recommendations.routes')
+  );
+  // Family Engagement Portal
+  dualMount(app, 'family', safeRequire('../domains/family/routes/family.routes'));
+  // WhatsApp AI Integration
+  dualMount(app, 'whatsapp', safeRequire('../routes/whatsapp.routes'));
+  // Group Therapy
+  dualMount(
+    app,
+    'group-therapy',
+    safeRequire('../domains/group-therapy/routes/group-therapy.routes')
+  );
+  // Tele-Rehabilitation
+  dualMount(app, 'tele-rehab', safeRequire('../domains/tele-rehab/routes/tele-rehab.routes'));
+  // AR/VR Rehabilitation
+  dualMount(app, 'ar-vr', safeRequire('../domains/ar-vr/routes/ar-vr.routes'));
+  // Behavior Management
+  dualMount(app, 'behavior', safeRequire('../domains/behavior/routes/behavior.routes'));
+  // Goals & Measures Library (/goals/goals CRUD + /goals/measures/*)
+  dualMount(app, 'goals', safeRequire('../domains/goals/routes/index.routes'));
+  // Dashboards & Decision Support
+  dualMount(app, 'dashboards', safeRequire('../domains/dashboards/routes/dashboards.routes'));
+  // Field Training
+  dualMount(
+    app,
+    'field-training',
+    safeRequire('../domains/field-training/routes/field-training.routes')
+  );
+  // Clinical Research
+  dualMount(app, 'research', safeRequire('../domains/research/routes/research.routes'));
+  // Clinical Assessments (تقييمات سريرية)
+  dualMount(app, 'assessments', safeRequire('../domains/assessments/routes/assessments.routes'));
+  // Clinical Sessions (جلسات علاجية)
+  dualMount(app, 'sessions', safeRequire('../domains/sessions/routes/sessions.routes'));
+  // Unified Care Plans (خطط الرعاية الموحدة)
+  dualMount(app, 'care-plans', safeRequire('../domains/care-plans/routes/care-plans.routes'));
+  // Care Timeline (الخط الزمني الطولي)
+  dualMount(app, 'timeline', safeRequire('../domains/timeline/routes/timeline.routes'));
+
+  // ── Platform Extension Modules — 32 generic CRUD domains ─────────────────
+  const makeGenericCrudRouter = require('../domains/extensions/routes/generic-crud.factory');
+  [
+    // HRD & Training
+    'workforce-analytics',
+    'credential-manager',
+    'mentorship-program',
+    'career-pathway',
+    // Quality & Compliance
+    'accreditation-manager',
+    'inspection-tracker',
+    'standards-compliance',
+    'licensure-manager',
+    // Patient Engagement
+    'patient-portal',
+    'health-education',
+    'remote-monitoring',
+    'patient-community',
+    // Interoperability
+    'fhir-integration',
+    'hl7-messaging',
+    'data-exchange',
+    'interoperability-hub',
+    // Infrastructure & Resilience
+    'backup-manager',
+    'business-continuity',
+    'system-failover',
+    'incident-response',
+    // Facilities & Assets
+    'equipment-lifecycle',
+    'environmental-monitoring',
+    'space-management',
+    'asset-tracking',
+    // Research
+    'clinical-research',
+    'clinical-trials',
+    'outcome-research',
+    'publication-manager',
+    // Community & Outreach
+    'volunteer-management',
+    'community-outreach',
+    'donor-relations',
+    'advocacy-program',
+  ].forEach(slug => dualMount(app, slug, makeGenericCrudRouter(slug)));
+
+  logger.info(
+    'New frontend-backend integration routes mounted (8 new + 4 dual-mounted + 17 DDD + 32 extension modules)'
+  );
 
   // ── Phases & Systems (~100 modules) — delegated to registries/phases.registry.js ──
   registerPhaseRoutes(app, { safeRequire, dualMount, safeMount, logger });

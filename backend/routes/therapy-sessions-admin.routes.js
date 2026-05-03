@@ -27,6 +27,7 @@ const TherapySession = require('../models/TherapySession');
 const Beneficiary = require('../models/Beneficiary');
 const safeError = require('../utils/safeError');
 const logger = require('../utils/logger');
+const logPiiAccess = require('../middleware/piiAccess.middleware');
 
 router.use(authenticateToken);
 
@@ -267,7 +268,9 @@ router.get('/calendar', requireRole(STAFF_ROLES), async (req, res) => {
 });
 
 // ── GET /:id — single ────────────────────────────────────────────────────
-router.get('/:id', requireRole(STAFF_ROLES), async (req, res) => {
+// PDPL Article 13: therapy sessions contain detailed clinical notes,
+// goals progress, and beneficiary identifiers — log every read.
+router.get('/:id', requireRole(STAFF_ROLES), logPiiAccess('TherapySession'), async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
@@ -509,6 +512,99 @@ router.delete('/:id', requireRole(WRITE_ROLES), async (req, res) => {
     res.json({ success: true, message: 'تم إلغاء الجلسة' });
   } catch (err) {
     return safeError(res, err, 'therapy-sessions.cancel');
+  }
+});
+
+// ── POST /bulk-create-claims — month-end batch driver ──────────────────────
+//
+// Body:
+//   { from: 'YYYY-MM-DD', to: 'YYYY-MM-DD', dryRun?, maxBatch? }
+//
+// Behavior:
+//   • Finds COMPLETED sessions in [from, to] (branch-scoped for non-HQ).
+//   • For each session that doesn't already have a NphiesClaim, runs the
+//     bridge (which auto-resolves price from the tariff table).
+//   • Returns a structured report — see services/bulkSessionClaims.js.
+//   • DRY-RUN: returns the same shape but `created[].claimId` is null and
+//     nothing is written to Mongo.
+//
+// Hard cap: 500 sessions per call. Use multiple windows for larger ranges.
+router.post('/bulk-create-claims', requireRole(WRITE_ROLES), async (req, res) => {
+  try {
+    const { from, to, dryRun, maxBatch } = req.body || {};
+    if (!from || !to) {
+      return res.status(400).json({ ok: false, error: 'from_and_to_required' });
+    }
+
+    const branchBeneficiaryIds = await getScopedBeneficiaryIds(req);
+
+    const { runBulk } = require('../services/bulkSessionClaims');
+    const report = await runBulk({
+      from,
+      to,
+      branchBeneficiaryIds,
+      dryRun: dryRun === true,
+      maxBatch,
+    });
+
+    if (!report.ok) {
+      return res.status(400).json(report);
+    }
+
+    logger.info('bulk-create-claims completed', {
+      actor: req.user?._id,
+      candidateCount: report.candidateCount,
+      created: report.created.length,
+      skipped: report.skipped.length,
+      failed: report.failed.length,
+      durationMs: report.durationMs,
+      dryRun: report.dryRun,
+    });
+
+    return res.status(report.dryRun ? 200 : 201).json(report);
+  } catch (err) {
+    return res.status(500).json(safeError(err, 'bulk create-claims failed'));
+  }
+});
+
+// ── POST /:id/create-claim — bridge session into a draft NPHIES claim ────
+//
+// Returns 201 with the persisted draft. The caller can then submit it via
+// POST /api/admin/nphies-claims/:id/submit (which has idempotency + the
+// real adapter). Errors block creation; warnings are surfaced for the UI
+// to highlight to the billing user but do not prevent the draft.
+//
+// Body (all optional):
+//   { unitPrice, diagnosis: [{code, description}], cptOverride: {code, description, specialty}, dryRun }
+router.post('/:id/create-claim', requireRole(WRITE_ROLES), async (req, res) => {
+  try {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({ ok: false, error: 'invalid_session_id' });
+    }
+    const { buildClaimFromSession } = require('../services/sessionToClaimBridge');
+    const result = await buildClaimFromSession(req.params.id, {
+      unitPrice: req.body?.unitPrice,
+      diagnosis: req.body?.diagnosis,
+      cptOverride: req.body?.cptOverride,
+      dryRun: req.body?.dryRun === true,
+    });
+
+    if (!result.ok) {
+      return res.status(422).json({
+        ok: false,
+        errors: result.errors,
+        warnings: result.warnings,
+      });
+    }
+
+    return res.status(result.dryRun ? 200 : 201).json({
+      ok: true,
+      claim: result.claim,
+      warnings: result.warnings,
+      dryRun: result.dryRun,
+    });
+  } catch (err) {
+    return res.status(500).json(safeError(err, 'failed to bridge session into claim'));
   }
 });
 

@@ -68,12 +68,16 @@ module.exports = {
   // package.json), which intentionally runs a narrow subset of suites.
   // Raise these incrementally as more suites are wired into the gate —
   // do NOT lower them. Treat this as a ratcheting baseline.
+  //
+  // Baseline measured 2025-04-16 (initial gate): statements:18, lines:20, branches:4, functions:4
+  // Baseline re-measured 2026-05-02 after document-management backend additions:
+  //   statements:20.55 → floor 20, lines:22, branches:6.64 → floor 6, functions:6
   coverageThreshold: {
     global: {
-      branches: 4,
-      functions: 4,
-      lines: 20,
-      statements: 18,
+      branches: 6,
+      functions: 6,
+      lines: 22,
+      statements: 20,
     },
   },
 

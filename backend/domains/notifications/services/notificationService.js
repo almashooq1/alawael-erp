@@ -125,19 +125,22 @@ const channelAdapters = {
     }
   },
 
-  // The legacy `services/whatsapp-integration.service` adapter was retired.
-  // The current WhatsApp surface lives in
-  // `services/reporting/channels/whatsapp.channel.js` and uses a factory
-  // (`createWhatsAppChannel`) with a different send signature, so wiring
-  // it through this consolidated dispatcher needs a small adapter. Until
-  // that lands, the channel is intentionally a no-op that reports its
-  // disabled state — every caller already handles `success: false`.
-  async whatsapp(_notification) {
-    return {
-      success: false,
-      channel: 'whatsapp',
-      error: 'whatsapp_channel_not_wired',
-    };
+  async whatsapp(notification) {
+    try {
+      const { whatsappService } = require('../../../services/whatsapp');
+      if (!whatsappService.isEnabled()) {
+        return { success: false, channel: 'whatsapp', error: 'whatsapp_disabled' };
+      }
+      const phone = notification.recipientPhone;
+      if (!phone) {
+        return { success: false, channel: 'whatsapp', error: 'whatsapp_no_phone' };
+      }
+      const text = notification.body || notification.title || '';
+      const result = await whatsappService.sendText(phone, text);
+      return { ...result, channel: 'whatsapp' };
+    } catch (err) {
+      return { success: false, channel: 'whatsapp', error: err.message };
+    }
   },
 };
 

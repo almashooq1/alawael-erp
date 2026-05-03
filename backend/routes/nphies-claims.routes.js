@@ -27,6 +27,7 @@ const nphies = require('../services/nphiesAdapter');
 const safeError = require('../utils/safeError');
 const logger = require('../utils/logger');
 const idempotency = require('../middleware/idempotency.middleware');
+const logPiiAccess = require('../middleware/piiAccess.middleware');
 
 router.use(authenticateToken);
 
@@ -144,7 +145,9 @@ router.get('/stats', requireRole(STAFF_ROLES), async (req, res) => {
 });
 
 // ── GET /:id ─────────────────────────────────────────────────────────────
-router.get('/:id', requireRole(STAFF_ROLES), async (req, res) => {
+// PDPL Article 13: log every read — NPHIES claims combine medical
+// (diagnosis, services) + financial (amounts) + member-id PII.
+router.get('/:id', requireRole(STAFF_ROLES), logPiiAccess('NphiesClaim'), async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });

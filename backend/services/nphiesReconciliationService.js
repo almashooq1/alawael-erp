@@ -16,9 +16,18 @@
 
 'use strict';
 
+const mongoose = require('mongoose');
 const DefaultClaim = require('../models/NphiesClaim');
 const defaultAdapter = require('./nphiesAdapter');
 const logger = require('../utils/logger');
+
+function defaultSessionModel() {
+  try {
+    return mongoose.model('TherapySession');
+  } catch {
+    return null;
+  }
+}
 
 function _mapStatus(raw) {
   const map = {
@@ -33,7 +42,11 @@ function _mapStatus(raw) {
   return map[String(raw || '').toUpperCase()] || 'PENDING_REVIEW';
 }
 
-function createService({ claimModel = DefaultClaim, adapter = defaultAdapter } = {}) {
+function createService({ claimModel = DefaultClaim, adapter = defaultAdapter, sessionModel } = {}) {
+  // Resolved lazily so the model registry is populated by the time we need it.
+  const resolveSessionModel = () =>
+    sessionModel !== undefined ? sessionModel : defaultSessionModel();
+
   /**
    * Shared mutation path for both webhook + sweeper. Passing the full update
    * dict (not just status) so the webhook's richer fields (e.g. reason code
@@ -70,7 +83,45 @@ function createService({ claimModel = DefaultClaim, adapter = defaultAdapter } =
       source,
       status: claim.nphies.submission.status,
     });
-    return { before, after: claim.toObject(), changed: true };
+
+    // Side-effect: when the claim transitions INTO APPROVED, mark the
+    // linked session as billed so it cannot be re-billed accidentally
+    // (single-source-of-truth for the "is this session reimbursed?"
+    // question). Failure here NEVER rolls back the claim — the claim
+    // mutation is the source of truth and billing-state can be reconciled
+    // later if needed.
+    const newStatus = _mapStatus(update.status);
+    const previousStatus = before?.nphies?.submission?.status;
+    const isNewApproval =
+      newStatus === 'APPROVED' && previousStatus !== 'APPROVED' && !!claim.session;
+
+    let sessionUpdated = false;
+    if (isNewApproval) {
+      try {
+        const SM = resolveSessionModel();
+        if (SM && typeof SM.updateOne === 'function') {
+          const r = await SM.updateOne(
+            { _id: claim.session, isBilled: { $ne: true } },
+            { $set: { isBilled: true, invoiceId: claim._id } }
+          );
+          sessionUpdated = !!(r && (r.modifiedCount > 0 || r.nModified > 0));
+          if (sessionUpdated) {
+            logger.info('[nphies-recon] session marked billed', {
+              claimId: String(claim._id),
+              sessionId: String(claim.session),
+            });
+          }
+        }
+      } catch (err) {
+        logger.warn('[nphies-recon] session billing update failed (claim update preserved)', {
+          claimId: String(claim._id),
+          sessionId: String(claim.session),
+          err: err.message,
+        });
+      }
+    }
+
+    return { before, after: claim.toObject(), changed: true, sessionUpdated };
   }
 
   /**

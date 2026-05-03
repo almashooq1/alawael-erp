@@ -1,0 +1,134 @@
+# ════════════════════════════════════════════════════════════════════
+#  Al-Awael ERP — Daily DR (Disaster-Recovery) Drill
+#  يستعيد آخر نسخة احتياطية في sandbox DB ويتحقق من سلامتها
+# ════════════════════════════════════════════════════════════════════
+#
+# Why this workflow exists:
+#   The internal Node scheduler in `backend/config/backup.js` already
+#   creates the daily archive — but if pm2 / Node crashed silently,
+#   the scheduler never fires. This workflow runs from GitHub's
+#   infrastructure, so it detects "VPS scheduler is dead" too.
+#
+# What it does:
+#   • SSH to the VPS as the deploy user
+#   • Runs `node backend/scripts/dr-verify.js --json`
+#   • Parses the report
+#   • Fails the workflow on any non-zero exit OR `success != true`
+#
+# Two layers of alerting:
+#   1. The script itself fires `ops-alerter` (whatsapp/sms/email) on failure.
+#   2. GitHub Actions sends the standard workflow-failure email to the repo
+#      admins. Both run independently so a single point of failure won't
+#      silence the alarm.
+#
+# Required secrets (already exist for deploy-hostinger.yml):
+#   VPS_HOST, VPS_USER, VPS_SSH_KEY
+
+name: "🛡️ DR Drill (daily)"
+
+on:
+  schedule:
+    # 04:00 UTC = 07:00 KSA — after the 02:00 KSA scheduled backup but
+    # before business hours, so a failure can be triaged before users arrive.
+    - cron: "0 4 * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "تخطّي الاستعادة الفعلية (تأكد فقط من وجود نسخة حديثة)"
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dr-verify
+  cancel-in-progress: false
+
+jobs:
+  drill:
+    name: "🛡️ Verify latest backup"
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: production
+    steps:
+      - name: Check secrets
+        run: |
+          MISSING=0
+          [ -z "${{ secrets.VPS_HOST }}" ]    && echo "❌ Missing VPS_HOST"    && MISSING=1
+          [ -z "${{ secrets.VPS_USER }}" ]    && echo "❌ Missing VPS_USER"    && MISSING=1
+          [ -z "${{ secrets.VPS_SSH_KEY }}" ] && echo "❌ Missing VPS_SSH_KEY" && MISSING=1
+          [ "$MISSING" = "1" ] && exit 1
+          echo "✅ Secrets present"
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null || true
+
+      - name: Run DR drill on VPS
+        id: drill
+        run: |
+          DRY_RUN_FLAG=""
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            DRY_RUN_FLAG="--dry-run"
+          fi
+
+          SSH_CMD="ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -o ConnectTimeout=15"
+          SSH_TARGET="${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}"
+
+          # Run as the alawael user so $HOME is right, the .env is found, and
+          # the temp dir is on the same volume as the backups (avoids cross-fs
+          # rename surprises during decrypt).
+          set +e
+          REPORT=$($SSH_CMD $SSH_TARGET "sudo -u alawael bash -lc 'cd /home/alawael/app/backend && node scripts/dr-verify.js --json $DRY_RUN_FLAG'" 2>&1)
+          EXIT=$?
+          set -e
+
+          echo "$REPORT" > /tmp/dr-report.json
+          echo "exit_code=$EXIT" >> $GITHUB_OUTPUT
+
+          # Surface the report as a step summary
+          {
+            echo "## 🛡️ DR Drill Report"
+            echo ""
+            echo '```json'
+            echo "$REPORT"
+            echo '```'
+          } >> $GITHUB_STEP_SUMMARY
+
+          # Pretty-log to the live log
+          echo "─── DR Report ─────────────────────────────────────────"
+          echo "$REPORT"
+          echo "───────────────────────────────────────────────────────"
+
+          if [ "$EXIT" -ne 0 ]; then
+            echo "::error::DR drill failed with exit code $EXIT"
+            exit $EXIT
+          fi
+
+          # Sanity-check: even on exit 0, confirm the JSON says success:true.
+          # Some failure modes write to stderr but exit 0 (defensive).
+          if ! echo "$REPORT" | grep -q '"success": true'; then
+            echo "::error::DR drill report does not contain success:true"
+            exit 1
+          fi
+
+          echo "✅ DR drill passed"
+
+      - name: Upload report artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dr-report-${{ github.run_id }}
+          path: /tmp/dr-report.json
+          retention-days: 30
+          if-no-files-found: ignore
+
+      - name: Annotate failure
+        if: failure()
+        run: |
+          echo "::error::DR drill failed. Check the JSON report above + alerts that should have fired via ops-alerter (whatsapp/sms/email). Runbook: docs/blueprint/19-dr-verification.md"

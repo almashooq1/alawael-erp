@@ -99,10 +99,11 @@ const qiwaRoutes = safeRequire('../routes/qiwa.routes');
 const gosiRoutes = safeRequire('../routes/gosi.routes');
 const govIntegrationRoutes = safeRequire('../routes/governmentIntegration.routes');
 const ecommerceRoutes = safeRequire('../routes/ecommerce.routes');
-// Guard against module missing — safeRequire returns an empty Router (no .router)
-// so destructure defensively to avoid a silent undefined downstream.
-const purchasingRoutes =
-  (safeRequire('../routes/purchasing.routes.unified') || {}).router || require('express').Router();
+// `purchasing.routes.unified` was archived to `_archived/dead-routes/`.
+// The live procurement surface is `/api/ops/purchase-requests` (mounted
+// below from `routes/operations/purchaseRequest.routes.js`). The legacy
+// `/api/purchasing` mount has been removed — it served an empty Router
+// and produced silent 404s for ~unknown stretch.
 // Fleet & Transport — delegated to registries/fleet.registry.js (34 modules)
 const registerFleetRoutes = require('./registries/fleet.registry');
 const cmsRoutes = safeRequire('../routes/cms');
@@ -147,9 +148,12 @@ const communityIntegrationRoutes = safeRequire('../routes/communityIntegration.r
 
 // Wave 2: Fixed Route Files (16 additional CRUD routes)
 const civilDefenseRoutes = safeRequire('../routes/civilDefense.routes');
-// Guard against missing module (same defensive pattern as purchasingRoutes)
+// inventory-enhanced.routes.js carries the live 34-endpoint surface (items,
+// stock, transactions, categories, warehouses, suppliers, POs, assets,
+// reorder/expiring alerts). The previous `inventory.routes.unified` module
+// was archived to `_archived/dead-routes/`, leaving inventory unreachable.
 const inventoryUnifiedRoutes =
-  (safeRequire('../routes/inventory.routes.unified') || {}).router || require('express').Router();
+  safeRequire('../routes/inventory-enhanced.routes') || require('express').Router();
 const supplyChainRoutes = safeRequire('../routes/supplyChain.routes');
 const trafficAccidentRoutes = safeRequire('../routes/trafficAccidents');
 const mfaRoutes = safeRequire('../routes/mfa');
@@ -180,8 +184,26 @@ const registerFeatureRoutes = require('./registries/features.registry');
 
 /**
  * Mount a route handler on both /api/<path> and /api/v1/<path>.
+ *
+ * Surfaces silent dead mounts: when a `safeRequire` falls back to an
+ * empty Router (because the source file was archived or renamed), the
+ * old behavior was to log nothing — endpoints just 404'd. Now the
+ * mount logs a warning so the issue shows up in boot logs and CI.
+ * Opt-out: `SUPPRESS_EMPTY_MOUNT_WARN=1`.
  */
 const dualMount = (app, path, handler) => {
+  if (
+    process.env.SUPPRESS_EMPTY_MOUNT_WARN !== '1' &&
+    handler &&
+    typeof handler === 'function' &&
+    Array.isArray(handler.stack) &&
+    handler.stack.length === 0
+  ) {
+     
+    console.warn(
+      `[registry] /api/${path} mounted on EMPTY router — likely an archived/missing route module`
+    );
+  }
   app.use(`/api/${path}`, handler);
   app.use(`/api/v1/${path}`, handler);
 };
@@ -311,7 +333,6 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   dualMount(app, 'gosi', gosiRoutes);
   dualMount(app, 'government', govIntegrationRoutes);
   dualMount(app, 'ecommerce', ecommerceRoutes);
-  dualMount(app, 'purchasing', purchasingRoutes);
 
   // ── Fleet & Transport (delegated to registries/fleet.registry.js) ──────────
   registerFleetRoutes(app, { safeRequire, dualMount, logger });

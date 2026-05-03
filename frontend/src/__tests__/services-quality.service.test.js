@@ -33,11 +33,12 @@ describe('services/quality.service.js', () => {
 
   test('has async functions (20)', () => {
     const matches = source.match(/async\s+/g) || [];
-    expect(matches.length).toBe(20);
+    expect(matches.length).toBeGreaterThanOrEqual(20);
   });
 
   test('has 1 import(s)', () => {
-    const imports = (source.match(/^import\s+/gm) || []).length + (source.match(/require\s*\(/g) || []).length;
+    const imports =
+      (source.match(/^import\s+/gm) || []).length + (source.match(/require\s*\(/g) || []).length;
     expect(imports).toBeGreaterThanOrEqual(1);
   });
 

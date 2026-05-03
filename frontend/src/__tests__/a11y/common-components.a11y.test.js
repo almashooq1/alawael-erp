@@ -59,13 +59,7 @@ describe('a11y / ConfirmDialog', () => {
 
   test('closed dialog has no violations', async () => {
     const { container } = render(
-      <ConfirmDialog
-        open={false}
-        title="x"
-        message="y"
-        onConfirm={() => {}}
-        onCancel={() => {}}
-      />
+      <ConfirmDialog open={false} title="x" message="y" onConfirm={() => {}} onCancel={() => {}} />
     );
     await expectNoA11yViolations(container);
   });
@@ -100,20 +94,14 @@ describe('a11y baseline (informational)', () => {
       ['LoadingSpinner', <LoadingSpinner open message="x" />],
       [
         'ConfirmDialog',
-        <ConfirmDialog
-          open
-          title="t"
-          message="m"
-          onConfirm={() => {}}
-          onCancel={() => {}}
-        />,
+        <ConfirmDialog open title="t" message="m" onConfirm={() => {}} onCancel={() => {}} />,
       ],
     ];
 
     for (const [name, element] of samples) {
       const { container } = render(element);
       const audit = await auditA11y(container);
-      // eslint-disable-next-line no-console
+
       console.log(
         `[a11y-baseline] ${name}: critical=${audit.bySeverity.critical} ` +
           `serious=${audit.bySeverity.serious} ` +

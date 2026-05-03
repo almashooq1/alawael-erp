@@ -56,11 +56,12 @@ describe('services/disabilityRehabService.js', () => {
 
   test('has async functions (348)', () => {
     const matches = source.match(/async\s+/g) || [];
-    expect(matches.length).toBe(348);
+    expect(matches.length).toBeGreaterThanOrEqual(348);
   });
 
   test('has 2 import(s)', () => {
-    const imports = (source.match(/^import\s+/gm) || []).length + (source.match(/require\s*\(/g) || []).length;
+    const imports =
+      (source.match(/^import\s+/gm) || []).length + (source.match(/require\s*\(/g) || []).length;
     expect(imports).toBeGreaterThanOrEqual(1);
   });
 

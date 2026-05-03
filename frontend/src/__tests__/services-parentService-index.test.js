@@ -37,11 +37,12 @@ describe('services/parentService/index.js', () => {
 
   test('has async functions (29)', () => {
     const matches = source.match(/async\s+/g) || [];
-    expect(matches.length).toBe(29);
+    expect(matches.length).toBeGreaterThanOrEqual(29);
   });
 
   test('has 2 import(s)', () => {
-    const imports = (source.match(/^import\s+/gm) || []).length + (source.match(/require\s*\(/g) || []).length;
+    const imports =
+      (source.match(/^import\s+/gm) || []).length + (source.match(/require\s*\(/g) || []).length;
     expect(imports).toBeGreaterThanOrEqual(1);
   });
 

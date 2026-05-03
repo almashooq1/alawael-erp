@@ -42,6 +42,10 @@ const REQUIRED_PATHS = [
   '/api/v1/admin/ops/dlq/{id}',
   '/api/v1/admin/ops/dlq/{id}/replay',
   '/api/v1/admin/ops/dlq/{id}/discard',
+  '/api/admin/pii-access-audit',
+  '/api/admin/pii-access-audit/by-target',
+  '/api/admin/therapy-sessions/{id}/create-claim',
+  '/api/admin/therapy-sessions/bulk-create-claims',
   '/api/health/metrics/integrations',
 ];
 

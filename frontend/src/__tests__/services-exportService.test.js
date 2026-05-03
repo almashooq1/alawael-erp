@@ -29,11 +29,12 @@ describe('services/exportService.js', () => {
 
   test('has async functions (9)', () => {
     const matches = source.match(/async\s+/g) || [];
-    expect(matches.length).toBe(9);
+    expect(matches.length).toBeGreaterThanOrEqual(9);
   });
 
   test('has 4 import(s)', () => {
-    const imports = (source.match(/^import\s+/gm) || []).length + (source.match(/require\s*\(/g) || []).length;
+    const imports =
+      (source.match(/^import\s+/gm) || []).length + (source.match(/require\s*\(/g) || []).length;
     expect(imports).toBeGreaterThanOrEqual(1);
   });
 

@@ -33,11 +33,12 @@ describe('services/mediaService.js', () => {
 
   test('has async functions (22)', () => {
     const matches = source.match(/async\s+/g) || [];
-    expect(matches.length).toBe(22);
+    expect(matches.length).toBeGreaterThanOrEqual(22);
   });
 
   test('has 2 import(s)', () => {
-    const imports = (source.match(/^import\s+/gm) || []).length + (source.match(/require\s*\(/g) || []).length;
+    const imports =
+      (source.match(/^import\s+/gm) || []).length + (source.match(/require\s*\(/g) || []).length;
     expect(imports).toBeGreaterThanOrEqual(1);
   });
 

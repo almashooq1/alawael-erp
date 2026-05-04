@@ -9,6 +9,11 @@
 
 const express = require('express');
 const router = express.Router();
+const {
+  validateCreateAssessment,
+  validateUpdateAssessment,
+  validate,
+} = require('../validators/assessments.validator');
 
 let assessmentsService;
 try {
@@ -31,6 +36,7 @@ const requireService = (req, res, next) => {
 router.post(
   '/',
   requireService,
+  validate(validateCreateAssessment),
   asyncHandler(async (req, res) => {
     const assessment = await assessmentsService.createAssessment(req.body);
     res.status(201).json({ success: true, data: assessment });
@@ -95,6 +101,7 @@ router.get(
 router.put(
   '/:id',
   requireService,
+  validate(validateUpdateAssessment),
   asyncHandler(async (req, res) => {
     const assessment = await assessmentsService.updateAssessment(req.params.id, req.body);
     res.json({ success: true, data: assessment });

@@ -9,6 +9,11 @@
 
 const express = require('express');
 const router = express.Router();
+const {
+  validateCreateSession,
+  validateUpdateSession,
+  validate,
+} = require('../validators/sessions.validator');
 
 // Load model (registers it with Mongoose for the service layer)
 try {
@@ -37,6 +42,7 @@ const requireService = (req, res, next) => {
 router.post(
   '/',
   requireService,
+  validate(validateCreateSession),
   asyncHandler(async (req, res) => {
     const session = await sessionsService.scheduleSession(req.body);
     res.status(201).json({ success: true, data: session });
@@ -120,6 +126,7 @@ router.get(
 router.put(
   '/:id',
   requireService,
+  validate(validateUpdateSession),
   asyncHandler(async (req, res) => {
     const session = await sessionsService.updateSession(req.params.id, req.body);
     res.json({ success: true, data: session });

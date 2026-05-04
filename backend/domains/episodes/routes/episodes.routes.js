@@ -11,6 +11,14 @@
 
 const express = require('express');
 const router = express.Router();
+const {
+  validateCreateEpisode,
+  validateUpdateEpisode,
+  validatePhaseTransition,
+  validateDischarge,
+  validateAddTeamMember,
+  validate,
+} = require('../validators/episodes.validator');
 
 // ─── Service (lazy-load to avoid circular deps at startup) ───────────────────
 
@@ -139,6 +147,7 @@ router.get(
 router.post(
   '/',
   requireDomain,
+  validate(validateCreateEpisode),
   asyncHandler(async (req, res) => {
     const context = { userId: req.user?._id, branchId: req.user?.branchId };
     const episode = await svc().create(req.body, context);
@@ -150,6 +159,7 @@ router.post(
 router.put(
   '/:id',
   requireDomain,
+  validate(validateUpdateEpisode),
   asyncHandler(async (req, res) => {
     const context = { userId: req.user?._id };
     const updated = await svc().update(req.params.id, req.body, context);
@@ -195,6 +205,7 @@ router.post(
 router.post(
   '/:id/discharge',
   requireDomain,
+  validate(validateDischarge),
   asyncHandler(async (req, res) => {
     const result = await svc().dischargeEpisode(req.params.id, {
       ...req.body,
@@ -212,6 +223,7 @@ router.post(
 router.post(
   '/:id/team',
   requireDomain,
+  validate(validateAddTeamMember),
   asyncHandler(async (req, res) => {
     const result = await svc().addTeamMember(req.params.id, req.body);
     res.json({ success: true, data: result });

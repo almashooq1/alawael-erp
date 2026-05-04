@@ -59,7 +59,7 @@ const mockGosiBasic = {};
 
 jest.mock('../../services/gosi-advanced.service', () => mockGosiAdvanced);
 jest.mock('../../services/qiwa.service', () => mockQiwa);
-jest.mock('../../services/gosi.service', () => mockGosiBasic);
+jest.mock('../../services/gosi.service', () => mockGosiBasic, { virtual: true });
 jest.mock('../../utils/logger', () => ({
   info: jest.fn(),
   error: jest.fn(),

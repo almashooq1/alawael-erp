@@ -48,7 +48,8 @@ jest.mock('../../middleware/auth', () => {
 });
 jest.mock(
   '../../services/therapistPortalElite.service',
-  () => new Proxy({}, { get: () => jest.fn().mockResolvedValue({}) })
+  () => new Proxy({}, { get: () => jest.fn().mockResolvedValue({}) }),
+  { virtual: true }
 );
 
 let routeModule;

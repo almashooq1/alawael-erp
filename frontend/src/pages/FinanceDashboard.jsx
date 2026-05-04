@@ -648,6 +648,7 @@ export default function FinanceDashboard() {
     } finally {
       setLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const refresh = useCallback(() => {
     fetchData();

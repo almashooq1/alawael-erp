@@ -85,16 +85,20 @@ jest.mock('../../middleware/auth.middleware', () => {
   mw.isAuth = mw;
   return mw;
 });
-jest.mock('../../middleware/authMiddleware', () => {
-  const mw = jest.fn((req, res, next) => next && next());
-  mw.authenticate = mw;
-  mw.authorize = jest.fn(() => mw);
-  mw.protect = mw;
-  mw.restrictTo = jest.fn(() => mw);
-  mw.isAdmin = mw;
-  mw.isAuth = mw;
-  return mw;
-});
+jest.mock(
+  '../../middleware/authMiddleware',
+  () => {
+    const mw = jest.fn((req, res, next) => next && next());
+    mw.authenticate = mw;
+    mw.authorize = jest.fn(() => mw);
+    mw.protect = mw;
+    mw.restrictTo = jest.fn(() => mw);
+    mw.isAdmin = mw;
+    mw.isAuth = mw;
+    return mw;
+  },
+  { virtual: true }
+);
 
 let routeModule;
 try {

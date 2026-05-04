@@ -1,9 +1,23 @@
 /**
  * Beneficiary Portal Models
  * نماذج بوابة المستفيدين الذكية
+ *
+ * IMPORTANT: The three models that share names with canonical models
+ * (Beneficiary, Notification, Document) are loaded from the canonical
+ * files below. This guarantees getOrCreateModel() always returns the
+ * canonical Mongoose model regardless of require() order.
+ * The local schemas defined below are kept for test compatibility only
+ * and are NOT used to register new Mongoose models.
  */
 
 const mongoose = require('mongoose');
+
+// ── Force canonical registrations FIRST to prevent schema collision ──────────
+// Any getOrCreateModel('Beneficiary'|'Notification'|'Document') call below
+// will find these already registered and return them unchanged.
+require('./Beneficiary');
+require('./Notification');
+require('./Document');
 
 // ==================== Beneficiary Profile ====================
 // نموذج ملف المستفيد

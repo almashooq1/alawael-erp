@@ -114,8 +114,8 @@ describe('buildEngine() with bundled rules', () => {
   });
 
   test('credential-expiry-30d fires on near-expiry records', async () => {
-    const eng = buildEngine();
     const now = new Date('2026-04-17');
+    const eng = buildEngine({ now: () => now });
     const Credential = finder([
       {
         _id: 'c1',
@@ -140,7 +140,7 @@ describe('buildEngine() with bundled rules', () => {
         branchId: 'br-1',
       }, // not verified
     ]);
-    const result = await eng.runAll({ now: () => now, models: { Credential } });
+    const result = await eng.runAll({ models: { Credential } });
     const cred = result.raised.filter(a => a.ruleId === 'credential-expiry-30d');
     expect(cred.length).toBe(1);
     expect(cred[0].message).toContain('L-1');

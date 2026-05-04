@@ -71,7 +71,7 @@ export default function TelehealthRoom() {
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState('');
   const [joining, setJoining] = useState(false);
-  const [joinInfo, setJoinInfo] = useState(null);
+  const [_joinInfo, setJoinInfo] = useState(null);
   const [embedReady, setEmbedReady] = useState(false);
   const [ended, setEnded] = useState(false);
   const embedRef = useRef(null);

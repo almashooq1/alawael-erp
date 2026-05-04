@@ -18,7 +18,6 @@ import {
   Button,
   Stack,
   useTheme,
-  alpha,
   IconButton,
   Tooltip,
   TextField,
@@ -35,8 +34,6 @@ import {
   Search as SearchIcon,
 } from '@mui/icons-material';
 import {
-  BarChart,
-  Bar,
   XAxis,
   YAxis,
   CartesianGrid,

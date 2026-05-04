@@ -358,7 +358,7 @@ describe('HomeVisit — critical-concern event', () => {
     const visitModel = makeVisitModel();
     const dispatcher = makeDispatcher();
     const svc = createHomeVisitService({ visitModel, dispatcher });
-    const { _caseId, ...dataNoCase } = baseVisit();
+    const { caseId: _caseId, ...dataNoCase } = baseVisit();
     const v = await svc.scheduleVisit(dataNoCase);
     await svc.markArrived(v._id);
     await svc.addObservation(v._id, {

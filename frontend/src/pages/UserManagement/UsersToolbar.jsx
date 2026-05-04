@@ -36,7 +36,7 @@ import {
   ManageAccounts as RoleIcon,
   Refresh as RefreshIcon,
 } from '@mui/icons-material';
-import { ROLE_OPTIONS, STATUS_OPTIONS, SORT_OPTIONS, BULK_ACTIONS } from './constants';
+import { ROLE_OPTIONS, STATUS_OPTIONS, BULK_ACTIONS } from './constants';
 
 const UsersToolbar = ({
   search,
@@ -77,7 +77,7 @@ const UsersToolbar = ({
               size="small"
               placeholder="بحث بالاسم أو البريد أو الهاتف..."
               value={search}
-              onChange={(e) => onSearch(e.target.value)}
+              onChange={e => onSearch(e.target.value)}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -92,13 +92,9 @@ const UsersToolbar = ({
           <Grid item xs={6} sm={3} md={2}>
             <FormControl fullWidth size="small">
               <InputLabel>الدور</InputLabel>
-              <Select
-                value={roleFilter}
-                label="الدور"
-                onChange={(e) => onRoleFilter(e.target.value)}
-              >
+              <Select value={roleFilter} label="الدور" onChange={e => onRoleFilter(e.target.value)}>
                 <MenuItem value="all">جميع الأدوار</MenuItem>
-                {ROLE_OPTIONS.map((r) => (
+                {ROLE_OPTIONS.map(r => (
                   <MenuItem key={r.value} value={r.value}>
                     {r.label}
                   </MenuItem>
@@ -114,9 +110,9 @@ const UsersToolbar = ({
               <Select
                 value={statusFilter}
                 label="الحالة"
-                onChange={(e) => onStatusFilter(e.target.value)}
+                onChange={e => onStatusFilter(e.target.value)}
               >
-                {STATUS_OPTIONS.map((s) => (
+                {STATUS_OPTIONS.map(s => (
                   <MenuItem key={s.value} value={s.value}>
                     {s.label}
                   </MenuItem>
@@ -127,7 +123,14 @@ const UsersToolbar = ({
 
           {/* أزرار الإجراءات */}
           <Grid item xs={12} md={5}>
-            <Box sx={{ display: 'flex', gap: 1, justifyContent: { xs: 'flex-start', md: 'flex-end' }, flexWrap: 'wrap' }}>
+            <Box
+              sx={{
+                display: 'flex',
+                gap: 1,
+                justifyContent: { xs: 'flex-start', md: 'flex-end' },
+                flexWrap: 'wrap',
+              }}
+            >
               {/* عمليات جماعية */}
               {selectedCount > 0 && (
                 <>
@@ -142,7 +145,7 @@ const UsersToolbar = ({
                     size="small"
                     variant="outlined"
                     startIcon={<MoreIcon />}
-                    onClick={(e) => setBulkAnchor(e.currentTarget)}
+                    onClick={e => setBulkAnchor(e.currentTarget)}
                   >
                     عمليات جماعية
                   </Button>
@@ -151,7 +154,7 @@ const UsersToolbar = ({
                     open={Boolean(bulkAnchor)}
                     onClose={() => setBulkAnchor(null)}
                   >
-                    {BULK_ACTIONS.map((action) => (
+                    {BULK_ACTIONS.map(action => (
                       <MenuItem
                         key={action.value}
                         onClick={() => {
@@ -184,7 +187,7 @@ const UsersToolbar = ({
                 size="small"
                 variant="outlined"
                 startIcon={<ExportIcon />}
-                onClick={(e) => setExportAnchor(e.currentTarget)}
+                onClick={e => setExportAnchor(e.currentTarget)}
               >
                 تصدير
               </Button>
@@ -193,10 +196,20 @@ const UsersToolbar = ({
                 open={Boolean(exportAnchor)}
                 onClose={() => setExportAnchor(null)}
               >
-                <MenuItem onClick={() => { setExportAnchor(null); onExport('excel'); }}>
+                <MenuItem
+                  onClick={() => {
+                    setExportAnchor(null);
+                    onExport('excel');
+                  }}
+                >
                   تصدير Excel
                 </MenuItem>
-                <MenuItem onClick={() => { setExportAnchor(null); onExport('csv'); }}>
+                <MenuItem
+                  onClick={() => {
+                    setExportAnchor(null);
+                    onExport('csv');
+                  }}
+                >
                   تصدير CSV
                 </MenuItem>
               </Menu>
@@ -234,7 +247,12 @@ const UsersToolbar = ({
       </CardContent>
 
       {/* حوار اختيار الدور للعملية الجماعية */}
-      <Dialog open={roleDialogOpen} onClose={() => setRoleDialogOpen(false)} maxWidth="xs" fullWidth>
+      <Dialog
+        open={roleDialogOpen}
+        onClose={() => setRoleDialogOpen(false)}
+        maxWidth="xs"
+        fullWidth
+      >
         <DialogTitle>تغيير دور المستخدمين المحددين</DialogTitle>
         <DialogContent>
           <FormControl fullWidth size="small" sx={{ mt: 1 }}>
@@ -242,10 +260,12 @@ const UsersToolbar = ({
             <Select
               value={selectedRole}
               label="الدور الجديد"
-              onChange={(e) => setSelectedRole(e.target.value)}
+              onChange={e => setSelectedRole(e.target.value)}
             >
-              {ROLE_OPTIONS.map((r) => (
-                <MenuItem key={r.value} value={r.value}>{r.label}</MenuItem>
+              {ROLE_OPTIONS.map(r => (
+                <MenuItem key={r.value} value={r.value}>
+                  {r.label}
+                </MenuItem>
               ))}
             </Select>
           </FormControl>

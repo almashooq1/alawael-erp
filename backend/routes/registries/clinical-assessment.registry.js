@@ -60,12 +60,7 @@ module.exports = function registerClinicalAssessmentRoutes(
     'MHPSS routes mounted (35+ endpoints — 5 modules: counseling sessions, mental health programs, psychological assessments, crisis interventions, psychosocial support groups)'
   );
 
-  // Research & Evidence-Based Practice (نظام البحث العلمي وقياس الأثر)
-  const researchRoutes = safeRequire('../routes/research.routes');
-  dualMount(app, 'research', researchRoutes);
-  logger.info(
-    'Research & Evidence-Based Practice routes mounted (35+ endpoints — 7 modules: research studies, internationally-recognized outcome measures FIM/WHODAS/Barthel/COPM/GAS/PHQ-9/EQ-5D, anonymized datasets with k-anonymity/differential-privacy, evidence-based program effectiveness reports, benchmarking with other centers, data export to REDCap/SPSS/Stata/R/FHIR, dashboard & statistics)'
-  );
+  // Research & Evidence-Based Practice: now registered via DDD domain (_registry.js → domains/research)
 
   // Multidisciplinary Team Coordination System (نظام التنسيق متعدد التخصصات)
   const mdtCoordinationRoutes = safeRequire('../routes/mdt-coordination.routes');

@@ -199,7 +199,6 @@ const dualMount = (app, path, handler) => {
     Array.isArray(handler.stack) &&
     handler.stack.length === 0
   ) {
-     
     console.warn(
       `[registry] /api/${path} mounted on EMPTY router — likely an archived/missing route module`
     );
@@ -441,23 +440,14 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   dualMount(app, 'disability', safeRequire('../routes/disability-assessment.routes'));
   dualMount(app, 'admin/care-plans', require('../routes/care-plans-admin.routes'));
   dualMount(app, 'episodes', require('../routes/episodes.routes'));
-  dualMount(
-    app,
-    'rehabilitation-advanced',
-    safeRequire('../routes/rehabilitation-advanced.routes')
-  );
-  logger.info(
-    'Rehabilitation Advanced routes mounted (behavior-incidents, behavior-plans, vocational, home-programs, etc.)'
-  );
+  // rehabilitation-advanced is now registered via clinical-therapy.registry.js (via phases.registry.js)
   dualMount(app, 'parent-v2', require('../routes/parent-portal-v2.routes'));
   dualMount(app, 'parent-v2', require('../routes/parent-portal-v2-extras.routes'));
   dualMount(app, 'therapist-workbench', require('../routes/therapist-workbench.routes'));
 
   // ── v1 Portal skeletons (frontend contracts; implementations pending) ───
-  // Mounted so that /api/v1/therapist/*, /api/v1/portal/*, /api/v1/student/*
-  // return documented 501 envelopes instead of 404s. Each 501 response carries
-  // the request/response shape the portal app expects — see the per-file docs.
-  safeMount(app, ['/api/v1/therapist'], '../routes/therapist-portal.routes');
+  // Mounted so that /api/v1/portal/*, /api/v1/student/* return documented 501 envelopes.
+  // NOTE: /api/v1/therapist is now registered via clinical-therapy.registry.js (5-tier multi-mount)
   safeMount(app, ['/api/v1/portal'], '../routes/parent-portal-v1.routes');
   safeMount(app, ['/api/v1/student'], '../routes/student-portal.routes');
   safeMount(app, ['/api/v1/hq-reports'], '../routes/hq-reports.routes');
@@ -500,7 +490,7 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   dualMount(app, 'admin/insurance-tariffs', require('../routes/insurance-tariffs-admin.routes'));
   dualMount(app, 'admin/zatca-credentials', require('../routes/zatca-credentials-admin.routes'));
   dualMount(app, 'admin/pii-access-audit', require('../routes/pii-access-audit-admin.routes'));
-  dualMount(app, 'zatca-phase2', require('../routes/zatca-phase2.routes'));
+  // zatca-phase2 is now registered via government.registry.js (via phases.registry.js)
   dualMount(app, 'admin/branch-compliance', require('../routes/branch-compliance.routes'));
   dualMount(app, 'admin/adapter-audit', require('../routes/adapter-audit.routes'));
   dualMount(app, 'notify', require('../routes/notify.routes'));

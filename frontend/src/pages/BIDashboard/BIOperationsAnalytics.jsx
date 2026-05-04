@@ -21,13 +21,7 @@ import {
   useTheme,
   alpha,
 } from '@mui/material';
-import {
-  EventNote,
-  ReportProblem,
-  Build,
-  DirectionsCar,
-  Refresh,
-} from '@mui/icons-material';
+import { EventNote, ReportProblem, Build, DirectionsCar, Refresh } from '@mui/icons-material';
 import {
   BarChart,
   Bar,
@@ -74,10 +68,14 @@ const STATUS_LABELS = {
 
 // ── Ops Status Card ───────────────────────────────────────────────
 function OpsCard({ title, total, breakdown, icon: Icon, color }) {
-  const theme = useTheme();
+  const _theme = useTheme();
 
   return (
-    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+    >
       <Card
         elevation={0}
         sx={{
@@ -157,7 +155,7 @@ function OpsCard({ title, total, breakdown, icon: Icon, color }) {
 // ═══════════════════════════════════════════════════════════════════
 
 export default function BIOperationsAnalytics() {
-  const theme = useTheme();
+  const _theme = useTheme();
   const [loading, setLoading] = useState(true);
   const [ops, setOps] = useState({});
   const [sessionTrend, setSessionTrend] = useState([]);
@@ -205,7 +203,7 @@ export default function BIOperationsAnalytics() {
   }));
 
   // Bar data for fleet
-  const fleetBar = (fleet.breakdown || []).map((f) => ({
+  const fleetBar = (fleet.breakdown || []).map(f => ({
     name: STATUS_LABELS[f.status] || f.status,
     count: f.count,
     fill: STATUS_COLORS[f.status] || '#607D8B',
@@ -280,7 +278,17 @@ export default function BIOperationsAnalytics() {
       <Grid container spacing={3} sx={{ mb: 3 }}>
         {/* Session Trend */}
         <Grid item xs={12} md={6}>
-          <Paper elevation={0} sx={{ p: 3, borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)', transition: 'all 0.3s', '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' } }}>
+          <Paper
+            elevation={0}
+            sx={{
+              p: 3,
+              borderRadius: '20px',
+              border: '1px solid rgba(0,0,0,0.04)',
+              boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+              transition: 'all 0.3s',
+              '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' },
+            }}
+          >
             <Typography variant="h6" fontWeight={700} gutterBottom>
               اتجاه الجلسات (آخر 6 أشهر)
             </Typography>
@@ -289,7 +297,13 @@ export default function BIOperationsAnalytics() {
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
                 <XAxis dataKey="label" tick={{ fontSize: 10 }} />
                 <YAxis tick={{ fontSize: 11 }} />
-                <RechartTooltip contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.12)' }} />
+                <RechartTooltip
+                  contentStyle={{
+                    borderRadius: 12,
+                    border: 'none',
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
+                  }}
+                />
                 <Bar dataKey="value" fill="#9C27B0" name="الجلسات" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
@@ -298,7 +312,17 @@ export default function BIOperationsAnalytics() {
 
         {/* Complaint Trend */}
         <Grid item xs={12} md={6}>
-          <Paper elevation={0} sx={{ p: 3, borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)', transition: 'all 0.3s', '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' } }}>
+          <Paper
+            elevation={0}
+            sx={{
+              p: 3,
+              borderRadius: '20px',
+              border: '1px solid rgba(0,0,0,0.04)',
+              boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+              transition: 'all 0.3s',
+              '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' },
+            }}
+          >
             <Typography variant="h6" fontWeight={700} gutterBottom>
               اتجاه الشكاوى (آخر 6 أشهر)
             </Typography>
@@ -307,7 +331,13 @@ export default function BIOperationsAnalytics() {
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
                 <XAxis dataKey="label" tick={{ fontSize: 10 }} />
                 <YAxis tick={{ fontSize: 11 }} />
-                <RechartTooltip contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.12)' }} />
+                <RechartTooltip
+                  contentStyle={{
+                    borderRadius: 12,
+                    border: 'none',
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
+                  }}
+                />
                 <Bar dataKey="value" fill="#F44336" name="الشكاوى" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
@@ -319,19 +349,44 @@ export default function BIOperationsAnalytics() {
       <Grid container spacing={3}>
         {/* Complaint Distribution */}
         <Grid item xs={12} md={6}>
-          <Paper elevation={0} sx={{ p: 3, borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)', transition: 'all 0.3s', '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' } }}>
+          <Paper
+            elevation={0}
+            sx={{
+              p: 3,
+              borderRadius: '20px',
+              border: '1px solid rgba(0,0,0,0.04)',
+              boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+              transition: 'all 0.3s',
+              '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' },
+            }}
+          >
             <Typography variant="h6" fontWeight={700} gutterBottom>
               توزيع حالات الشكاوى
             </Typography>
             {complaintPie.length > 0 ? (
               <ResponsiveContainer width="100%" height={280}>
                 <PieChart>
-                  <Pie data={complaintPie} cx="50%" cy="50%" outerRadius={90} innerRadius={50} paddingAngle={3} dataKey="value" label>
+                  <Pie
+                    data={complaintPie}
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={90}
+                    innerRadius={50}
+                    paddingAngle={3}
+                    dataKey="value"
+                    label
+                  >
                     {complaintPie.map((entry, idx) => (
                       <Cell key={idx} fill={entry.fill} />
                     ))}
                   </Pie>
-                  <RechartTooltip contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.12)' }} />
+                  <RechartTooltip
+                    contentStyle={{
+                      borderRadius: 12,
+                      border: 'none',
+                      boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
+                    }}
+                  />
                   <Legend />
                 </PieChart>
               </ResponsiveContainer>
@@ -345,7 +400,17 @@ export default function BIOperationsAnalytics() {
 
         {/* Fleet Status */}
         <Grid item xs={12} md={6}>
-          <Paper elevation={0} sx={{ p: 3, borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)', transition: 'all 0.3s', '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' } }}>
+          <Paper
+            elevation={0}
+            sx={{
+              p: 3,
+              borderRadius: '20px',
+              border: '1px solid rgba(0,0,0,0.04)',
+              boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+              transition: 'all 0.3s',
+              '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' },
+            }}
+          >
             <Typography variant="h6" fontWeight={700} gutterBottom>
               حالة الأسطول
             </Typography>
@@ -355,7 +420,13 @@ export default function BIOperationsAnalytics() {
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
                   <XAxis type="number" tick={{ fontSize: 11 }} />
                   <YAxis dataKey="name" type="category" tick={{ fontSize: 11 }} width={80} />
-                  <RechartTooltip contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.12)' }} />
+                  <RechartTooltip
+                    contentStyle={{
+                      borderRadius: 12,
+                      border: 'none',
+                      boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
+                    }}
+                  />
                   <Bar dataKey="count" name="عدد المركبات" radius={[0, 6, 6, 0]}>
                     {fleetBar.map((entry, idx) => (
                       <Cell key={idx} fill={entry.fill} />

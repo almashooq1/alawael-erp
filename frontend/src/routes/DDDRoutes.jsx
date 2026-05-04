@@ -21,7 +21,7 @@ const QualityPage = lazy(() => import('../pages/Quality/QualityPage'));
 const ReportsPage = lazy(() => import('../pages/Reports/ReportsPage'));
 
 /* Domain pages from factory */
-const DomainPages = lazy(() => import('../pages/domains/DomainPages'));
+const _DomainPages = lazy(() => import('../pages/domains/DomainPages'));
 
 /* ── Loading fallback ── */
 const PageLoader = () => (

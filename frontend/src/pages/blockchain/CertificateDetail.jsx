@@ -204,7 +204,7 @@ export default function CertificateDetail() {
     );
   }
 
-  const recipient = cert.recipient?.name?.ar || cert.recipient?.name?.en || '—';
+  const _recipient = cert.recipient?.name?.ar || cert.recipient?.name?.en || '—';
   const title = cert.title?.ar || cert.title?.en || '—';
   const isDraft = cert.status === 'draft';
   const isRevoked = cert.status === 'revoked';

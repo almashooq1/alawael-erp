@@ -18,7 +18,6 @@ import {
   Button,
   Stack,
   useTheme,
-  alpha,
   IconButton,
   Tooltip,
   TextField,
@@ -135,8 +134,8 @@ const KPICard = ({ label, value, icon, gradient, delay }) => {
   );
 };
 
-const SESSION_TYPE = { individual: 'فردية', group: 'جماعية', family: 'أسرية', emergency: 'طوارئ' };
-const SESSION_COLORS = {
+const _SESSION_TYPE = { individual: 'فردية', group: 'جماعية', family: 'أسرية', emergency: 'طوارئ' };
+const _SESSION_COLORS = {
   individual: 'primary',
   group: 'success',
   family: 'warning',

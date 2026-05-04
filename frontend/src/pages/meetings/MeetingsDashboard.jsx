@@ -155,7 +155,7 @@ const DEMO = {
   scheduled: 31,
   completed: 46,
   inProgress: 7,
-  byType: Object.entries(typeLabels).map(([k, v], i) => ({
+  byType: Object.entries(typeLabels).map(([_k, v], i) => ({
     name: v,
     value: [18, 12, 14, 5, 15, 10, 10][i] || 5,
     color: PIE_COLORS[i],

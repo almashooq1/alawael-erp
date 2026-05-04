@@ -8,7 +8,6 @@ import {
   Grid,
   Card,
   CardContent,
-  IconButton,
   Button,
   Chip,
   Avatar,
@@ -16,11 +15,9 @@ import {
   ListItem,
   ListItemAvatar,
   ListItemText,
-  ListItemSecondaryAction,
   Divider,
   LinearProgress,
   Alert,
-  Tooltip,
   Badge,
   Stack,
   TextField,
@@ -34,36 +31,19 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Switch,
-  FormControlLabel,
   CircularProgress,
 } from '@mui/material';
 import {
-  Comment as CommentIcon,
   Share as ShareIcon,
-  Archive as ArchiveIcon,
   Star as StarIcon,
   Analytics as AnalyticsIcon,
-  TrendingUp,
   Storage as StorageIcon,
-  People as PeopleIcon,
   Description as DocIcon,
   Favorite as FavoriteIcon,
-  BookmarkBorder,
-  Bookmark,
-  Folder as FolderIcon,
   Schedule as ScheduleIcon,
-  Lock as LockIcon,
-  Public as PublicIcon,
-  Link as LinkIcon,
-  ContentCopy,
-  Delete as DeleteIcon,
-  Edit as EditIcon,
   Visibility as ViewIcon,
   Download as DownloadIcon,
   BarChart as ChartIcon,
-  PieChart as PieIcon,
-  Speed as SpeedIcon,
   Gavel as GavelIcon,
   Policy as PolicyIcon,
   Add as AddIcon,
@@ -80,7 +60,6 @@ import {
   collectionsApi,
   recentApi,
   retentionApi,
-  sharingApi,
   dashboardApi,
 } from '../../services/documentProPhase3Service';
 import logger from '../../utils/logger';
@@ -101,9 +80,17 @@ function StatCard({ icon, title, value, color = 'primary.main', trend, sub }) {
       <CardContent>
         <Stack direction="row" justifyContent="space-between" alignItems="start">
           <Box>
-            <Typography variant="caption" color="text.secondary">{title}</Typography>
-            <Typography variant="h4" fontWeight={700}>{value ?? '—'}</Typography>
-            {sub && <Typography variant="caption" color="text.secondary">{sub}</Typography>}
+            <Typography variant="caption" color="text.secondary">
+              {title}
+            </Typography>
+            <Typography variant="h4" fontWeight={700}>
+              {value ?? '—'}
+            </Typography>
+            {sub && (
+              <Typography variant="caption" color="text.secondary">
+                {sub}
+              </Typography>
+            )}
           </Box>
           <Avatar sx={{ bgcolor: color, width: 44, height: 44 }}>{icon}</Avatar>
         </Stack>
@@ -144,7 +131,7 @@ export default function DocumentsProPhase3() {
   const [productivityData, setProductivityData] = useState(null);
 
   // Dialogs
-  const [policyDialog, setPolicyDialog] = useState(false);
+  const [_policyDialog, setPolicyDialog] = useState(false);
   const [collectionDialog, setCollectionDialog] = useState(false);
 
   // ── Load dashboard data ────────────────────
@@ -258,14 +245,25 @@ export default function DocumentsProPhase3() {
         </Button>
       </Stack>
 
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
       {loading && <LinearProgress sx={{ mb: 2 }} />}
 
       {/* Tabs */}
       <Paper sx={{ mb: 3 }}>
         <Tabs value={tab} onChange={(_, v) => setTab(v)} variant="scrollable" scrollButtons="auto">
           <Tab icon={<DashboardIcon />} label="نظرة عامة" />
-          <Tab icon={<Badge badgeContent={favorites.length} color="secondary"><StarIcon /></Badge>} label="المفضلة" />
+          <Tab
+            icon={
+              <Badge badgeContent={favorites.length} color="secondary">
+                <StarIcon />
+              </Badge>
+            }
+            label="المفضلة"
+          />
           <Tab icon={<PolicyIcon />} label="سياسات الاحتفاظ" />
           <Tab icon={<AnalyticsIcon />} label="التحليلات" />
         </Tabs>
@@ -276,23 +274,49 @@ export default function DocumentsProPhase3() {
         {dashboard && (
           <Grid container spacing={3}>
             <Grid item xs={12} md={3}>
-              <StatCard icon={<DocIcon />} title="إجمالي المستندات" value={dashboard.analytics?.totalDocuments ?? 0} color="primary.main" />
+              <StatCard
+                icon={<DocIcon />}
+                title="إجمالي المستندات"
+                value={dashboard.analytics?.totalDocuments ?? 0}
+                color="primary.main"
+              />
             </Grid>
             <Grid item xs={12} md={3}>
-              <StatCard icon={<FavoriteIcon />} title="المفضلة" value={dashboard.favorites?.totalFavorites ?? 0} color="error.main" />
+              <StatCard
+                icon={<FavoriteIcon />}
+                title="المفضلة"
+                value={dashboard.favorites?.totalFavorites ?? 0}
+                color="error.main"
+              />
             </Grid>
             <Grid item xs={12} md={3}>
-              <StatCard icon={<PolicyIcon />} title="سياسات نشطة" value={dashboard.retention?.activePolicies ?? 0} color="warning.main" />
+              <StatCard
+                icon={<PolicyIcon />}
+                title="سياسات نشطة"
+                value={dashboard.retention?.activePolicies ?? 0}
+                color="warning.main"
+              />
             </Grid>
             <Grid item xs={12} md={3}>
-              <StatCard icon={<StorageIcon />} title="حجم التخزين" value={dashboard.analytics?.totalSize ? `${(dashboard.analytics.totalSize / 1024 / 1024).toFixed(1)} MB` : '—'} color="info.main" />
+              <StatCard
+                icon={<StorageIcon />}
+                title="حجم التخزين"
+                value={
+                  dashboard.analytics?.totalSize
+                    ? `${(dashboard.analytics.totalSize / 1024 / 1024).toFixed(1)} MB`
+                    : '—'
+                }
+                color="info.main"
+              />
             </Grid>
 
             {/* Recent documents from dashboard */}
             <Grid item xs={12}>
               <Card>
                 <CardContent>
-                  <Typography variant="h6" gutterBottom>📄 المستندات الأخيرة</Typography>
+                  <Typography variant="h6" gutterBottom>
+                    📄 المستندات الأخيرة
+                  </Typography>
                   {(dashboard.recentDocuments || []).length === 0 ? (
                     <Typography color="text.secondary">لا توجد مستندات حديثة</Typography>
                   ) : (
@@ -301,11 +325,17 @@ export default function DocumentsProPhase3() {
                         <React.Fragment key={doc._id || i}>
                           <ListItem>
                             <ListItemAvatar>
-                              <Avatar sx={{ bgcolor: 'primary.light' }}><DocIcon /></Avatar>
+                              <Avatar sx={{ bgcolor: 'primary.light' }}>
+                                <DocIcon />
+                              </Avatar>
                             </ListItemAvatar>
                             <ListItemText
                               primary={doc.title || doc.name || 'مستند'}
-                              secondary={doc.lastAccessedAt ? new Date(doc.lastAccessedAt).toLocaleString('ar-SA') : ''}
+                              secondary={
+                                doc.lastAccessedAt
+                                  ? new Date(doc.lastAccessedAt).toLocaleString('ar-SA')
+                                  : ''
+                              }
                             />
                           </ListItem>
                           {i < dashboard.recentDocuments.length - 1 && <Divider />}
@@ -318,9 +348,7 @@ export default function DocumentsProPhase3() {
             </Grid>
           </Grid>
         )}
-        {!dashboard && !loading && (
-          <Alert severity="info">اضغط تحديث لتحميل البيانات</Alert>
-        )}
+        {!dashboard && !loading && <Alert severity="info">اضغط تحديث لتحميل البيانات</Alert>}
       </TabPanel>
 
       {/* ── Tab 1: Favorites & Collections ── */}
@@ -332,7 +360,11 @@ export default function DocumentsProPhase3() {
               <CardContent>
                 <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
                   <Typography variant="h6">📁 المجموعات</Typography>
-                  <Button size="small" startIcon={<AddIcon />} onClick={() => setCollectionDialog(true)}>
+                  <Button
+                    size="small"
+                    startIcon={<AddIcon />}
+                    onClick={() => setCollectionDialog(true)}
+                  >
                     إنشاء
                   </Button>
                 </Stack>
@@ -340,7 +372,7 @@ export default function DocumentsProPhase3() {
                   <Typography color="text.secondary">لا توجد مجموعات بعد</Typography>
                 ) : (
                   <List dense>
-                    {collections.map((col) => (
+                    {collections.map(col => (
                       <ListItem key={col._id}>
                         <ListItemAvatar>
                           <Avatar sx={{ bgcolor: col.color || '#1976d2' }}>
@@ -363,7 +395,9 @@ export default function DocumentsProPhase3() {
           <Grid item xs={12} md={7}>
             <Card sx={{ height: '100%' }}>
               <CardContent>
-                <Typography variant="h6" gutterBottom>⭐ المفضلة</Typography>
+                <Typography variant="h6" gutterBottom>
+                  ⭐ المفضلة
+                </Typography>
                 {favorites.length === 0 ? (
                   <Typography color="text.secondary">لا توجد مستندات مفضلة</Typography>
                 ) : (
@@ -394,7 +428,9 @@ export default function DocumentsProPhase3() {
           <Grid item xs={12}>
             <Card>
               <CardContent>
-                <Typography variant="h6" gutterBottom>🕐 المستندات الأخيرة</Typography>
+                <Typography variant="h6" gutterBottom>
+                  🕐 المستندات الأخيرة
+                </Typography>
                 {recentDocs.length === 0 ? (
                   <Typography color="text.secondary">لا توجد مستندات حديثة</Typography>
                 ) : (
@@ -410,7 +446,9 @@ export default function DocumentsProPhase3() {
                               </Typography>
                             </Stack>
                             <Typography variant="caption" color="text.secondary">
-                              {doc.lastAccessedAt ? new Date(doc.lastAccessedAt).toLocaleString('ar-SA') : ''}
+                              {doc.lastAccessedAt
+                                ? new Date(doc.lastAccessedAt).toLocaleString('ar-SA')
+                                : ''}
                             </Typography>
                           </CardContent>
                         </Card>
@@ -427,7 +465,10 @@ export default function DocumentsProPhase3() {
         <CollectionDialog
           open={collectionDialog}
           onClose={() => setCollectionDialog(false)}
-          onCreated={() => { setCollectionDialog(false); loadFavorites(); }}
+          onCreated={() => {
+            setCollectionDialog(false);
+            loadFavorites();
+          }}
         />
       </TabPanel>
 
@@ -438,13 +479,28 @@ export default function DocumentsProPhase3() {
           {retentionStats && (
             <>
               <Grid item xs={12} sm={4}>
-                <StatCard icon={<PolicyIcon />} title="إجمالي السياسات" value={retentionStats.totalPolicies ?? 0} color="primary.main" />
+                <StatCard
+                  icon={<PolicyIcon />}
+                  title="إجمالي السياسات"
+                  value={retentionStats.totalPolicies ?? 0}
+                  color="primary.main"
+                />
               </Grid>
               <Grid item xs={12} sm={4}>
-                <StatCard icon={<GavelIcon />} title="تحت التعليق القانوني" value={retentionStats.legalHoldCount ?? 0} color="error.main" />
+                <StatCard
+                  icon={<GavelIcon />}
+                  title="تحت التعليق القانوني"
+                  value={retentionStats.legalHoldCount ?? 0}
+                  color="error.main"
+                />
               </Grid>
               <Grid item xs={12} sm={4}>
-                <StatCard icon={<ScheduleIcon />} title="تنتهي قريباً" value={retentionStats.expiringCount ?? 0} color="warning.main" />
+                <StatCard
+                  icon={<ScheduleIcon />}
+                  title="تنتهي قريباً"
+                  value={retentionStats.expiringCount ?? 0}
+                  color="warning.main"
+                />
               </Grid>
             </>
           )}
@@ -456,22 +512,35 @@ export default function DocumentsProPhase3() {
                 <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
                   <Typography variant="h6">📋 سياسات الاحتفاظ</Typography>
                   <Stack direction="row" spacing={1}>
-                    <Button size="small" startIcon={<AddIcon />} variant="contained" onClick={() => setPolicyDialog(true)}>
+                    <Button
+                      size="small"
+                      startIcon={<AddIcon />}
+                      variant="contained"
+                      onClick={() => setPolicyDialog(true)}
+                    >
                       سياسة جديدة
                     </Button>
-                    <Button size="small" variant="outlined" onClick={async () => {
-                      try {
-                        await retentionApi.initialize();
-                        loadRetention();
-                      } catch (e) { logger.error(e); }
-                    }}>
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      onClick={async () => {
+                        try {
+                          await retentionApi.initialize();
+                          loadRetention();
+                        } catch (e) {
+                          logger.error(e);
+                        }
+                      }}
+                    >
                       تهيئة افتراضية
                     </Button>
                   </Stack>
                 </Stack>
 
                 {policies.length === 0 ? (
-                  <Alert severity="info">لا توجد سياسات. اضغط "تهيئة افتراضية" لإضافة سياسات جاهزة.</Alert>
+                  <Alert severity="info">
+                    لا توجد سياسات. اضغط "تهيئة افتراضية" لإضافة سياسات جاهزة.
+                  </Alert>
                 ) : (
                   <TableContainer>
                     <Table size="small">
@@ -485,7 +554,7 @@ export default function DocumentsProPhase3() {
                         </TableRow>
                       </TableHead>
                       <TableBody>
-                        {policies.map((p) => (
+                        {policies.map(p => (
                           <TableRow key={p._id}>
                             <TableCell align="right">{p.name}</TableCell>
                             <TableCell align="right">
@@ -498,7 +567,13 @@ export default function DocumentsProPhase3() {
                               <Chip
                                 size="small"
                                 label={
-                                  { archive: 'أرشفة', delete: 'حذف', review: 'مراجعة', extend: 'تمديد', notify: 'إشعار' }[p.action] || p.action
+                                  {
+                                    archive: 'أرشفة',
+                                    delete: 'حذف',
+                                    review: 'مراجعة',
+                                    extend: 'تمديد',
+                                    notify: 'إشعار',
+                                  }[p.action] || p.action
                                 }
                                 color={p.action === 'delete' ? 'error' : 'default'}
                               />
@@ -528,16 +603,36 @@ export default function DocumentsProPhase3() {
           {analytics && (
             <>
               <Grid item xs={12} sm={3}>
-                <StatCard icon={<DocIcon />} title="إجمالي المستندات" value={analytics.overview?.totalDocuments ?? 0} color="primary.main" />
+                <StatCard
+                  icon={<DocIcon />}
+                  title="إجمالي المستندات"
+                  value={analytics.overview?.totalDocuments ?? 0}
+                  color="primary.main"
+                />
               </Grid>
               <Grid item xs={12} sm={3}>
-                <StatCard icon={<ViewIcon />} title="المشاهدات (30 يوم)" value={analytics.activity?.views ?? 0} color="info.main" />
+                <StatCard
+                  icon={<ViewIcon />}
+                  title="المشاهدات (30 يوم)"
+                  value={analytics.activity?.views ?? 0}
+                  color="info.main"
+                />
               </Grid>
               <Grid item xs={12} sm={3}>
-                <StatCard icon={<DownloadIcon />} title="التحميلات (30 يوم)" value={analytics.activity?.downloads ?? 0} color="success.main" />
+                <StatCard
+                  icon={<DownloadIcon />}
+                  title="التحميلات (30 يوم)"
+                  value={analytics.activity?.downloads ?? 0}
+                  color="success.main"
+                />
               </Grid>
               <Grid item xs={12} sm={3}>
-                <StatCard icon={<ShareIcon />} title="المشاركات (30 يوم)" value={analytics.activity?.shares ?? 0} color="secondary.main" />
+                <StatCard
+                  icon={<ShareIcon />}
+                  title="المشاركات (30 يوم)"
+                  value={analytics.activity?.shares ?? 0}
+                  color="secondary.main"
+                />
               </Grid>
             </>
           )}
@@ -547,13 +642,17 @@ export default function DocumentsProPhase3() {
             <Grid item xs={12} md={6}>
               <Card>
                 <CardContent>
-                  <Typography variant="h6" gutterBottom>💾 تحليل التخزين</Typography>
+                  <Typography variant="h6" gutterBottom>
+                    💾 تحليل التخزين
+                  </Typography>
                   <Stack spacing={2}>
                     <Box>
                       <Stack direction="row" justifyContent="space-between">
                         <Typography variant="body2">الحجم الكلي</Typography>
                         <Typography variant="body2" fontWeight={600}>
-                          {storageData.totalSize ? `${(storageData.totalSize / 1024 / 1024).toFixed(2)} MB` : '—'}
+                          {storageData.totalSize
+                            ? `${(storageData.totalSize / 1024 / 1024).toFixed(2)} MB`
+                            : '—'}
                         </Typography>
                       </Stack>
                     </Box>
@@ -565,7 +664,11 @@ export default function DocumentsProPhase3() {
                         </Stack>
                         <LinearProgress
                           variant="determinate"
-                          value={storageData.totalSize ? (item.totalSize / storageData.totalSize) * 100 : 0}
+                          value={
+                            storageData.totalSize
+                              ? (item.totalSize / storageData.totalSize) * 100
+                              : 0
+                          }
                           sx={{ height: 6, borderRadius: 3, mt: 0.5 }}
                         />
                       </Box>
@@ -581,21 +684,35 @@ export default function DocumentsProPhase3() {
             <Grid item xs={12} md={6}>
               <Card>
                 <CardContent>
-                  <Typography variant="h6" gutterBottom>📈 الإنتاجية</Typography>
+                  <Typography variant="h6" gutterBottom>
+                    📈 الإنتاجية
+                  </Typography>
                   <Stack spacing={2}>
                     <Box>
-                      <Typography variant="body2" color="text.secondary">المستندات المنشأة</Typography>
-                      <Typography variant="h5" fontWeight={600}>{productivityData.documentsCreated ?? 0}</Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        المستندات المنشأة
+                      </Typography>
+                      <Typography variant="h5" fontWeight={600}>
+                        {productivityData.documentsCreated ?? 0}
+                      </Typography>
                     </Box>
                     <Divider />
                     <Box>
-                      <Typography variant="body2" color="text.secondary">المستندات المعدّلة</Typography>
-                      <Typography variant="h5" fontWeight={600}>{productivityData.documentsEdited ?? 0}</Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        المستندات المعدّلة
+                      </Typography>
+                      <Typography variant="h5" fontWeight={600}>
+                        {productivityData.documentsEdited ?? 0}
+                      </Typography>
                     </Box>
                     <Divider />
                     <Box>
-                      <Typography variant="body2" color="text.secondary">معدل الإنتاجية اليومي</Typography>
-                      <Typography variant="h5" fontWeight={600}>{productivityData.dailyAverage?.toFixed(1) ?? '—'}</Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        معدل الإنتاجية اليومي
+                      </Typography>
+                      <Typography variant="h5" fontWeight={600}>
+                        {productivityData.dailyAverage?.toFixed(1) ?? '—'}
+                      </Typography>
                     </Box>
                   </Stack>
                 </CardContent>
@@ -615,7 +732,9 @@ export default function DocumentsProPhase3() {
                     onClick={async () => {
                       try {
                         const res = await analyticsApi.getFullReport({ days: 30 });
-                        const blob = new Blob([JSON.stringify(res.data, null, 2)], { type: 'application/json' });
+                        const blob = new Blob([JSON.stringify(res.data, null, 2)], {
+                          type: 'application/json',
+                        });
                         const url = URL.createObjectURL(blob);
                         const a = document.createElement('a');
                         a.href = url;
@@ -670,7 +789,7 @@ function CollectionDialog({ open, onClose, onCreated }) {
           fullWidth
           label="اسم المجموعة"
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={e => setName(e.target.value)}
           sx={{ mt: 1, mb: 2 }}
         />
         <TextField
@@ -679,7 +798,7 @@ function CollectionDialog({ open, onClose, onCreated }) {
           multiline
           rows={2}
           value={description}
-          onChange={(e) => setDescription(e.target.value)}
+          onChange={e => setDescription(e.target.value)}
         />
       </DialogContent>
       <DialogActions>

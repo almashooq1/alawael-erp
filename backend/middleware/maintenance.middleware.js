@@ -29,7 +29,8 @@ const setMaintenanceMode = enabled => {
  */
 const maintenanceMiddleware = (req, res, next) => {
   // Skip for login/auth routes so admins can still log in
-  if (req.path.startsWith('/api/auth')) {
+  // Also skip health/readiness probes so k8s/load-balancers always get a response
+  if (req.path.startsWith('/api/auth') || req.path === '/health' || req.path === '/readiness') {
     return next();
   }
 

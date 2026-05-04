@@ -4,13 +4,39 @@
  */
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Box, Tabs, Tab, Paper, Typography, Grid, Card, CardContent,
-  Button, TextField, IconButton, Chip, Alert, CircularProgress,
-  Dialog, DialogTitle, DialogContent, DialogActions, Divider,
-  List, ListItem, ListItemIcon, ListItemText, ListItemSecondaryAction,
-  Switch, Tooltip, Badge, Avatar, LinearProgress, Snackbar,
-  Table, TableHead, TableRow, TableCell, TableBody,
-  FormControl, InputLabel, Select, MenuItem
+  Box,
+  Tabs,
+  Tab,
+  Paper,
+  Typography,
+  Grid,
+  Card,
+  CardContent,
+  Button,
+  TextField,
+  IconButton,
+  Chip,
+  Alert,
+  CircularProgress,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  ListItemSecondaryAction,
+  Switch,
+  Tooltip,
+  Avatar,
+  LinearProgress,
+  Snackbar,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
 } from '@mui/material';
 import {
   DocumentScanner as OCRIcon,
@@ -18,35 +44,32 @@ import {
   Assessment as ReportIcon,
   Email as EmailIcon,
   SmartToy as AIIcon,
-  Upload as UploadIcon,
   Search as SearchIcon,
   PlayArrow as RunIcon,
   Send as SendIcon,
   Chat as ChatIcon,
   Refresh as RefreshIcon,
   CheckCircle as CheckIcon,
-  Error as ErrorIcon,
-  Warning as WarningIcon,
-  Visibility as ViewIcon,
   Download as DownloadIcon,
-  Add as AddIcon,
-  Delete as DeleteIcon,
-  Edit as EditIcon,
   Gavel as LegalIcon,
   VerifiedUser as ComplianceIcon,
-  Schedule as ScheduleIcon,
   ForwardToInbox as ForwardIcon,
   Psychology as BrainIcon,
   AutoFixHigh as AutoIcon,
-  ContentCopy as DuplicateIcon,
   Summarize as SummarizeIcon,
   Category as ClassifyIcon,
   DataObject as ExtractIcon,
   Dashboard as DashIcon,
 } from '@mui/icons-material';
 
-import { ocrApi, archiveApi, reportApi, emailApi, aiApi, getDashboard }
-  from '../../services/documentProPhase6Service';
+import {
+  ocrApi,
+  archiveApi,
+  reportApi,
+  emailApi,
+  aiApi,
+  getDashboard,
+} from '../../services/documentProPhase6Service';
 
 /* ─── Tab Panel ──────────────────────────────────────────────── */
 function TabPanel({ children, value, index }) {
@@ -58,16 +81,15 @@ function TabPanel({ children, value, index }) {
    ═══════════════════════════════════════════════════════════════ */
 export default function DocumentsProPhase6() {
   const [tab, setTab] = useState(0);
-  const [loading, setLoading] = useState(false);
+  const [_loading, _setLoading] = useState(false);
   const [snack, setSnack] = useState({ open: false, message: '', severity: 'success' });
   const [dashboard, setDashboard] = useState(null);
 
-  const showSnack = (message, severity = 'success') =>
-    setSnack({ open: true, message, severity });
+  const showSnack = (message, severity = 'success') => setSnack({ open: true, message, severity });
 
   useEffect(() => {
     getDashboard()
-      .then((r) => setDashboard(r.data?.dashboard))
+      .then(r => setDashboard(r.data?.dashboard))
       .catch(() => {});
   }, []);
 
@@ -85,20 +107,58 @@ export default function DocumentsProPhase6() {
       {dashboard && (
         <Grid container spacing={2} sx={{ mb: 3 }}>
           {[
-            { label: 'نتائج OCR', value: dashboard.ocr?.totalResults || 0, icon: <OCRIcon />, color: '#3b82f6' },
-            { label: 'السجلات المؤرشفة', value: dashboard.archive?.totalRecords || 0, icon: <ArchiveIcon />, color: '#8b5cf6' },
-            { label: 'التقارير المنفذة', value: dashboard.reports?.totalExecutions || 0, icon: <ReportIcon />, color: '#10b981' },
-            { label: 'الرسائل', value: dashboard.email?.totalMessages || 0, icon: <EmailIcon />, color: '#f59e0b' },
-            { label: 'تفاعلات AI', value: dashboard.ai?.totalInteractions || 0, icon: <AIIcon />, color: '#ef4444' },
+            {
+              label: 'نتائج OCR',
+              value: dashboard.ocr?.totalResults || 0,
+              icon: <OCRIcon />,
+              color: '#3b82f6',
+            },
+            {
+              label: 'السجلات المؤرشفة',
+              value: dashboard.archive?.totalRecords || 0,
+              icon: <ArchiveIcon />,
+              color: '#8b5cf6',
+            },
+            {
+              label: 'التقارير المنفذة',
+              value: dashboard.reports?.totalExecutions || 0,
+              icon: <ReportIcon />,
+              color: '#10b981',
+            },
+            {
+              label: 'الرسائل',
+              value: dashboard.email?.totalMessages || 0,
+              icon: <EmailIcon />,
+              color: '#f59e0b',
+            },
+            {
+              label: 'تفاعلات AI',
+              value: dashboard.ai?.totalInteractions || 0,
+              icon: <AIIcon />,
+              color: '#ef4444',
+            },
           ].map((c, i) => (
             <Grid item xs={12} sm={6} md={2.4} key={i}>
               <Card sx={{ border: `2px solid ${c.color}20`, borderRadius: 2 }}>
                 <CardContent sx={{ textAlign: 'center' }}>
-                  <Avatar sx={{ bgcolor: `${c.color}15`, color: c.color, mx: 'auto', mb: 1, width: 48, height: 48 }}>
+                  <Avatar
+                    sx={{
+                      bgcolor: `${c.color}15`,
+                      color: c.color,
+                      mx: 'auto',
+                      mb: 1,
+                      width: 48,
+                      height: 48,
+                    }}
+                  >
                     {c.icon}
                   </Avatar>
-                  <Typography variant="h5" fontWeight={700}>{c.value}</Typography>
-                  <Typography variant="caption" color="text.secondary">{c.label}</Typography>
+                  <Typography variant="h5" fontWeight={700}>
+                    {c.value}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {c.label}
+                  </Typography>
                 </CardContent>
               </Card>
             </Grid>
@@ -143,10 +203,14 @@ export default function DocumentsProPhase6() {
       <Snackbar
         open={snack.open}
         autoHideDuration={4000}
-        onClose={() => setSnack((s) => ({ ...s, open: false }))}
+        onClose={() => setSnack(s => ({ ...s, open: false }))}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
       >
-        <Alert severity={snack.severity} variant="filled" onClose={() => setSnack((s) => ({ ...s, open: false }))}>
+        <Alert
+          severity={snack.severity}
+          variant="filled"
+          onClose={() => setSnack(s => ({ ...s, open: false }))}
+        >
           {snack.message}
         </Alert>
       </Snackbar>
@@ -168,11 +232,13 @@ function OCRTab({ showSnack }) {
     try {
       const r = await ocrApi.getJobs({});
       setJobs(r.data?.jobs || []);
-    } catch { }
+    } catch {}
     setLoading(false);
   }, []);
 
-  useEffect(() => { loadJobs(); }, [loadJobs]);
+  useEffect(() => {
+    loadJobs();
+  }, [loadJobs]);
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
@@ -196,22 +262,34 @@ function OCRTab({ showSnack }) {
         {/* Search OCR content */}
         <Grid item xs={12}>
           <Paper variant="outlined" sx={{ p: 2 }}>
-            <Typography variant="h6" gutterBottom><SearchIcon sx={{ mr: 1 }} />بحث في نصوص OCR</Typography>
+            <Typography variant="h6" gutterBottom>
+              <SearchIcon sx={{ mr: 1 }} />
+              بحث في نصوص OCR
+            </Typography>
             <Box sx={{ display: 'flex', gap: 1 }}>
               <TextField
-                fullWidth size="small" placeholder="ابحث في النصوص المستخرجة..."
+                fullWidth
+                size="small"
+                placeholder="ابحث في النصوص المستخرجة..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                onChange={e => setSearchQuery(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleSearch()}
               />
-              <Button variant="contained" onClick={handleSearch} startIcon={<SearchIcon />}>بحث</Button>
+              <Button variant="contained" onClick={handleSearch} startIcon={<SearchIcon />}>
+                بحث
+              </Button>
             </Box>
             {searchResults.length > 0 && (
               <List dense sx={{ mt: 1 }}>
                 {searchResults.map((r, i) => (
                   <ListItem key={i}>
-                    <ListItemIcon><CheckIcon color="success" /></ListItemIcon>
-                    <ListItemText primary={r.documentTitle || r.documentId} secondary={r.matchedText?.substring(0, 100)} />
+                    <ListItemIcon>
+                      <CheckIcon color="success" />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={r.documentTitle || r.documentId}
+                      secondary={r.matchedText?.substring(0, 100)}
+                    />
                   </ListItem>
                 ))}
               </List>
@@ -224,41 +302,61 @@ function OCRTab({ showSnack }) {
           <Paper variant="outlined" sx={{ p: 2 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
               <Typography variant="h6">مهام OCR</Typography>
-              <IconButton onClick={loadJobs}><RefreshIcon /></IconButton>
+              <IconButton onClick={loadJobs}>
+                <RefreshIcon />
+              </IconButton>
             </Box>
-            {loading ? <CircularProgress /> : (
-              jobs.length === 0 ? (
-                <Typography color="text.secondary" textAlign="center" py={3}>لا توجد مهام OCR حالياً</Typography>
-              ) : (
-                <Table size="small">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>المستند</TableCell>
-                      <TableCell>الحالة</TableCell>
-                      <TableCell>اللغة</TableCell>
-                      <TableCell>الثقة</TableCell>
-                      <TableCell>التاريخ</TableCell>
+            {loading ? (
+              <CircularProgress />
+            ) : jobs.length === 0 ? (
+              <Typography color="text.secondary" textAlign="center" py={3}>
+                لا توجد مهام OCR حالياً
+              </Typography>
+            ) : (
+              <Table size="small">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>المستند</TableCell>
+                    <TableCell>الحالة</TableCell>
+                    <TableCell>اللغة</TableCell>
+                    <TableCell>الثقة</TableCell>
+                    <TableCell>التاريخ</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {jobs.map((j, i) => (
+                    <TableRow key={i}>
+                      <TableCell>{j.documentId?.title || j.documentId}</TableCell>
+                      <TableCell>
+                        <Chip
+                          size="small"
+                          label={
+                            j.status === 'completed'
+                              ? 'مكتمل'
+                              : j.status === 'failed'
+                                ? 'فشل'
+                                : 'قيد المعالجة'
+                          }
+                          color={
+                            j.status === 'completed'
+                              ? 'success'
+                              : j.status === 'failed'
+                                ? 'error'
+                                : 'warning'
+                          }
+                        />
+                      </TableCell>
+                      <TableCell>{j.language || '-'}</TableCell>
+                      <TableCell>
+                        {j.confidence ? `${(j.confidence * 100).toFixed(0)}%` : '-'}
+                      </TableCell>
+                      <TableCell>
+                        {j.createdAt ? new Date(j.createdAt).toLocaleDateString('ar-SA') : '-'}
+                      </TableCell>
                     </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {jobs.map((j, i) => (
-                      <TableRow key={i}>
-                        <TableCell>{j.documentId?.title || j.documentId}</TableCell>
-                        <TableCell>
-                          <Chip
-                            size="small"
-                            label={j.status === 'completed' ? 'مكتمل' : j.status === 'failed' ? 'فشل' : 'قيد المعالجة'}
-                            color={j.status === 'completed' ? 'success' : j.status === 'failed' ? 'error' : 'warning'}
-                          />
-                        </TableCell>
-                        <TableCell>{j.language || '-'}</TableCell>
-                        <TableCell>{j.confidence ? `${(j.confidence * 100).toFixed(0)}%` : '-'}</TableCell>
-                        <TableCell>{j.createdAt ? new Date(j.createdAt).toLocaleDateString('ar-SA') : '-'}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )
+                  ))}
+                </TableBody>
+              </Table>
             )}
           </Paper>
         </Grid>
@@ -270,7 +368,7 @@ function OCRTab({ showSnack }) {
 /* ═══════════════════════════════════════════════════════════════
    Archive Tab — الأرشفة والامتثال
    ═══════════════════════════════════════════════════════════════ */
-function ArchiveTab({ showSnack }) {
+function ArchiveTab({ _showSnack }) {
   const [policies, setPolicies] = useState([]);
   const [legalHolds, setLegalHolds] = useState([]);
   const [stats, setStats] = useState(null);
@@ -287,11 +385,13 @@ function ArchiveTab({ showSnack }) {
       setPolicies(pRes.data?.policies || []);
       setLegalHolds(hRes.data?.holds || []);
       setStats(sRes.data?.stats || null);
-    } catch { }
+    } catch {}
     setLoading(false);
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    load();
+  }, [load]);
 
   return (
     <Box>
@@ -314,7 +414,9 @@ function ArchiveTab({ showSnack }) {
                 <Grid item xs={4} key={i}>
                   <Card sx={{ textAlign: 'center', border: `2px solid ${s.color}20` }}>
                     <CardContent>
-                      <Typography variant="h4" fontWeight={700} color={s.color}>{s.value}</Typography>
+                      <Typography variant="h4" fontWeight={700} color={s.color}>
+                        {s.value}
+                      </Typography>
                       <Typography variant="caption">{s.label}</Typography>
                     </CardContent>
                   </Card>
@@ -327,23 +429,32 @@ function ArchiveTab({ showSnack }) {
         {/* Policies */}
         <Grid item xs={12} md={6}>
           <Paper variant="outlined" sx={{ p: 2, height: '100%' }}>
-            <Typography variant="h6" gutterBottom><ArchiveIcon sx={{ mr: 1 }} />سياسات الأرشفة</Typography>
-            {loading ? <CircularProgress /> : (
-              policies.length === 0 ? (
-                <Typography color="text.secondary" textAlign="center" py={3}>لا توجد سياسات — سيتم إنشاء السياسات الافتراضية تلقائياً</Typography>
-              ) : (
-                <List dense>
-                  {policies.map((p, i) => (
-                    <ListItem key={i} divider>
-                      <ListItemText
-                        primary={p.nameAr || p.name}
-                        secondary={`فترة الاحتفاظ: ${p.retentionPeriod?.value || '?'} ${p.retentionPeriod?.unit === 'years' ? 'سنة' : 'شهر'}`}
-                      />
-                      <Chip size="small" label={p.isActive ? 'نشط' : 'معطل'} color={p.isActive ? 'success' : 'default'} />
-                    </ListItem>
-                  ))}
-                </List>
-              )
+            <Typography variant="h6" gutterBottom>
+              <ArchiveIcon sx={{ mr: 1 }} />
+              سياسات الأرشفة
+            </Typography>
+            {loading ? (
+              <CircularProgress />
+            ) : policies.length === 0 ? (
+              <Typography color="text.secondary" textAlign="center" py={3}>
+                لا توجد سياسات — سيتم إنشاء السياسات الافتراضية تلقائياً
+              </Typography>
+            ) : (
+              <List dense>
+                {policies.map((p, i) => (
+                  <ListItem key={i} divider>
+                    <ListItemText
+                      primary={p.nameAr || p.name}
+                      secondary={`فترة الاحتفاظ: ${p.retentionPeriod?.value || '?'} ${p.retentionPeriod?.unit === 'years' ? 'سنة' : 'شهر'}`}
+                    />
+                    <Chip
+                      size="small"
+                      label={p.isActive ? 'نشط' : 'معطل'}
+                      color={p.isActive ? 'success' : 'default'}
+                    />
+                  </ListItem>
+                ))}
+              </List>
             )}
           </Paper>
         </Grid>
@@ -351,9 +462,14 @@ function ArchiveTab({ showSnack }) {
         {/* Legal Holds */}
         <Grid item xs={12} md={6}>
           <Paper variant="outlined" sx={{ p: 2, height: '100%' }}>
-            <Typography variant="h6" gutterBottom><LegalIcon sx={{ mr: 1 }} />التجميد القانوني</Typography>
+            <Typography variant="h6" gutterBottom>
+              <LegalIcon sx={{ mr: 1 }} />
+              التجميد القانوني
+            </Typography>
             {legalHolds.length === 0 ? (
-              <Typography color="text.secondary" textAlign="center" py={3}>لا يوجد تجميد قانوني نشط</Typography>
+              <Typography color="text.secondary" textAlign="center" py={3}>
+                لا يوجد تجميد قانوني نشط
+              </Typography>
             ) : (
               <List dense>
                 {legalHolds.map((h, i) => (
@@ -396,13 +512,15 @@ function ReportTab({ showSnack }) {
       ]);
       setTemplates(tRes.data?.templates || []);
       setHistory(hRes.data?.executions || []);
-    } catch { }
+    } catch {}
     setLoading(false);
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    load();
+  }, [load]);
 
-  const handleRun = async (templateId) => {
+  const handleRun = async templateId => {
     setRunningTemplate(templateId);
     try {
       await reportApi.runFromTemplate(templateId, {});
@@ -426,13 +544,23 @@ function ReportTab({ showSnack }) {
         {/* Templates */}
         <Grid item xs={12}>
           <Paper variant="outlined" sx={{ p: 2 }}>
-            <Typography variant="h6" gutterBottom>قوالب التقارير</Typography>
-            {loading ? <CircularProgress /> : (
+            <Typography variant="h6" gutterBottom>
+              قوالب التقارير
+            </Typography>
+            {loading ? (
+              <CircularProgress />
+            ) : (
               <Grid container spacing={1}>
                 {templates.map((t, i) => (
                   <Grid item xs={12} sm={6} md={4} key={i}>
                     <Card variant="outlined" sx={{ p: 1.5 }}>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                        }}
+                      >
                         <Box>
                           <Typography fontWeight={600}>{t.nameAr || t.name}</Typography>
                           <Typography variant="caption" color="text.secondary">
@@ -440,8 +568,12 @@ function ReportTab({ showSnack }) {
                           </Typography>
                         </Box>
                         <Button
-                          size="small" variant="contained" color="primary"
-                          startIcon={runningTemplate === t._id ? <CircularProgress size={16} /> : <RunIcon />}
+                          size="small"
+                          variant="contained"
+                          color="primary"
+                          startIcon={
+                            runningTemplate === t._id ? <CircularProgress size={16} /> : <RunIcon />
+                          }
                           onClick={() => handleRun(t._id)}
                           disabled={!!runningTemplate}
                         >
@@ -459,9 +591,13 @@ function ReportTab({ showSnack }) {
         {/* History */}
         <Grid item xs={12}>
           <Paper variant="outlined" sx={{ p: 2 }}>
-            <Typography variant="h6" gutterBottom>سجل التقارير</Typography>
+            <Typography variant="h6" gutterBottom>
+              سجل التقارير
+            </Typography>
             {history.length === 0 ? (
-              <Typography color="text.secondary" textAlign="center" py={3}>لم يتم تنفيذ أي تقرير بعد</Typography>
+              <Typography color="text.secondary" textAlign="center" py={3}>
+                لم يتم تنفيذ أي تقرير بعد
+              </Typography>
             ) : (
               <Table size="small">
                 <TableHead>
@@ -480,15 +616,31 @@ function ReportTab({ showSnack }) {
                       <TableCell>
                         <Chip
                           size="small"
-                          label={h.status === 'completed' ? 'مكتمل' : h.status === 'failed' ? 'فشل' : 'قيد التنفيذ'}
-                          color={h.status === 'completed' ? 'success' : h.status === 'failed' ? 'error' : 'warning'}
+                          label={
+                            h.status === 'completed'
+                              ? 'مكتمل'
+                              : h.status === 'failed'
+                                ? 'فشل'
+                                : 'قيد التنفيذ'
+                          }
+                          color={
+                            h.status === 'completed'
+                              ? 'success'
+                              : h.status === 'failed'
+                                ? 'error'
+                                : 'warning'
+                          }
                         />
                       </TableCell>
                       <TableCell>{h.resultCount || 0}</TableCell>
-                      <TableCell>{h.createdAt ? new Date(h.createdAt).toLocaleDateString('ar-SA') : '-'}</TableCell>
+                      <TableCell>
+                        {h.createdAt ? new Date(h.createdAt).toLocaleDateString('ar-SA') : '-'}
+                      </TableCell>
                       <TableCell>
                         <Tooltip title="تصدير">
-                          <IconButton size="small"><DownloadIcon /></IconButton>
+                          <IconButton size="small">
+                            <DownloadIcon />
+                          </IconButton>
                         </Tooltip>
                       </TableCell>
                     </TableRow>
@@ -509,7 +661,7 @@ function ReportTab({ showSnack }) {
 function EmailTab({ showSnack }) {
   const [messages, setMessages] = useState([]);
   const [rules, setRules] = useState([]);
-  const [templates, setTemplates] = useState([]);
+  const [_templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(false);
   const [sendDialog, setSendDialog] = useState(false);
   const [sendForm, setSendForm] = useState({ to: '', subject: '', body: '' });
@@ -525,16 +677,18 @@ function EmailTab({ showSnack }) {
       setMessages(mRes.data?.messages || []);
       setRules(rRes.data?.rules || []);
       setTemplates(tRes.data?.templates || []);
-    } catch { }
+    } catch {}
     setLoading(false);
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    load();
+  }, [load]);
 
   const handleSend = async () => {
     try {
       await emailApi.send({
-        to: sendForm.to.split(',').map((e) => e.trim()),
+        to: sendForm.to.split(',').map(e => e.trim()),
         subject: sendForm.subject,
         body: sendForm.body,
       });
@@ -547,12 +701,14 @@ function EmailTab({ showSnack }) {
     }
   };
 
-  const handleToggleRule = async (ruleId) => {
+  const handleToggleRule = async ruleId => {
     try {
       await emailApi.toggleRule(ruleId);
       showSnack('تم تحديث القاعدة');
       load();
-    } catch { showSnack('فشل التحديث', 'error'); }
+    } catch {
+      showSnack('فشل التحديث', 'error');
+    }
   };
 
   return (
@@ -574,30 +730,52 @@ function EmailTab({ showSnack }) {
         {/* Messages */}
         <Grid item xs={12} md={7}>
           <Paper variant="outlined" sx={{ p: 2 }}>
-            <Typography variant="h6" gutterBottom>الرسائل</Typography>
-            {loading ? <CircularProgress /> : (
-              messages.length === 0 ? (
-                <Typography color="text.secondary" textAlign="center" py={3}>لا توجد رسائل</Typography>
-              ) : (
-                <List dense>
-                  {messages.slice(0, 15).map((m, i) => (
-                    <ListItem key={i} divider>
-                      <ListItemIcon>
-                        {m.direction === 'outbound' ? <SendIcon color="primary" /> : <ForwardIcon color="secondary" />}
-                      </ListItemIcon>
-                      <ListItemText
-                        primary={m.subject || '(بدون موضوع)'}
-                        secondary={`إلى: ${m.to?.map((t) => t.email).join(', ') || '-'} | ${m.status}`}
-                      />
-                      <Chip
-                        size="small"
-                        label={m.status === 'sent' ? 'مرسل' : m.status === 'delivered' ? 'تم التسليم' : m.status === 'failed' ? 'فشل' : m.status}
-                        color={m.status === 'sent' || m.status === 'delivered' ? 'success' : m.status === 'failed' ? 'error' : 'default'}
-                      />
-                    </ListItem>
-                  ))}
-                </List>
-              )
+            <Typography variant="h6" gutterBottom>
+              الرسائل
+            </Typography>
+            {loading ? (
+              <CircularProgress />
+            ) : messages.length === 0 ? (
+              <Typography color="text.secondary" textAlign="center" py={3}>
+                لا توجد رسائل
+              </Typography>
+            ) : (
+              <List dense>
+                {messages.slice(0, 15).map((m, i) => (
+                  <ListItem key={i} divider>
+                    <ListItemIcon>
+                      {m.direction === 'outbound' ? (
+                        <SendIcon color="primary" />
+                      ) : (
+                        <ForwardIcon color="secondary" />
+                      )}
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={m.subject || '(بدون موضوع)'}
+                      secondary={`إلى: ${m.to?.map(t => t.email).join(', ') || '-'} | ${m.status}`}
+                    />
+                    <Chip
+                      size="small"
+                      label={
+                        m.status === 'sent'
+                          ? 'مرسل'
+                          : m.status === 'delivered'
+                            ? 'تم التسليم'
+                            : m.status === 'failed'
+                              ? 'فشل'
+                              : m.status
+                      }
+                      color={
+                        m.status === 'sent' || m.status === 'delivered'
+                          ? 'success'
+                          : m.status === 'failed'
+                            ? 'error'
+                            : 'default'
+                      }
+                    />
+                  </ListItem>
+                ))}
+              </List>
             )}
           </Paper>
         </Grid>
@@ -605,9 +783,14 @@ function EmailTab({ showSnack }) {
         {/* Rules */}
         <Grid item xs={12} md={5}>
           <Paper variant="outlined" sx={{ p: 2 }}>
-            <Typography variant="h6" gutterBottom><ForwardIcon sx={{ mr: 1 }} />قواعد التوجيه</Typography>
+            <Typography variant="h6" gutterBottom>
+              <ForwardIcon sx={{ mr: 1 }} />
+              قواعد التوجيه
+            </Typography>
             {rules.length === 0 ? (
-              <Typography color="text.secondary" textAlign="center" py={3}>لا توجد قواعد توجيه</Typography>
+              <Typography color="text.secondary" textAlign="center" py={3}>
+                لا توجد قواعد توجيه
+              </Typography>
             ) : (
               <List dense>
                 {rules.map((r, i) => (
@@ -636,24 +819,34 @@ function EmailTab({ showSnack }) {
         <DialogTitle>إرسال بريد إلكتروني</DialogTitle>
         <DialogContent>
           <TextField
-            fullWidth margin="dense" label="إلى (مفصولة بفاصلة)"
+            fullWidth
+            margin="dense"
+            label="إلى (مفصولة بفاصلة)"
             value={sendForm.to}
-            onChange={(e) => setSendForm((f) => ({ ...f, to: e.target.value }))}
+            onChange={e => setSendForm(f => ({ ...f, to: e.target.value }))}
           />
           <TextField
-            fullWidth margin="dense" label="الموضوع"
+            fullWidth
+            margin="dense"
+            label="الموضوع"
             value={sendForm.subject}
-            onChange={(e) => setSendForm((f) => ({ ...f, subject: e.target.value }))}
+            onChange={e => setSendForm(f => ({ ...f, subject: e.target.value }))}
           />
           <TextField
-            fullWidth margin="dense" label="المحتوى" multiline rows={4}
+            fullWidth
+            margin="dense"
+            label="المحتوى"
+            multiline
+            rows={4}
             value={sendForm.body}
-            onChange={(e) => setSendForm((f) => ({ ...f, body: e.target.value }))}
+            onChange={e => setSendForm(f => ({ ...f, body: e.target.value }))}
           />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setSendDialog(false)}>إلغاء</Button>
-          <Button variant="contained" startIcon={<SendIcon />} onClick={handleSend}>إرسال</Button>
+          <Button variant="contained" startIcon={<SendIcon />} onClick={handleSend}>
+            إرسال
+          </Button>
         </DialogActions>
       </Dialog>
     </Box>
@@ -678,14 +871,14 @@ function AITab({ showSnack }) {
   const handleChat = async () => {
     if (!chatInput.trim()) return;
     const question = chatInput;
-    setChatMessages((prev) => [...prev, { role: 'user', text: question }]);
+    setChatMessages(prev => [...prev, { role: 'user', text: question }]);
     setChatInput('');
     setLoading(true);
     try {
       const r = await aiApi.chat({ question });
-      setChatMessages((prev) => [...prev, { role: 'ai', text: r.data?.answer || 'لم أجد إجابة' }]);
+      setChatMessages(prev => [...prev, { role: 'ai', text: r.data?.answer || 'لم أجد إجابة' }]);
     } catch {
-      setChatMessages((prev) => [...prev, { role: 'ai', text: 'حدث خطأ في المعالجة' }]);
+      setChatMessages(prev => [...prev, { role: 'ai', text: 'حدث خطأ في المعالجة' }]);
     }
     setLoading(false);
   };
@@ -697,7 +890,9 @@ function AITab({ showSnack }) {
       const r = await aiApi.classify({ text: classifyText });
       setClassifyResult(r.data);
       showSnack('تم التصنيف بنجاح');
-    } catch { showSnack('فشل التصنيف', 'error'); }
+    } catch {
+      showSnack('فشل التصنيف', 'error');
+    }
     setLoading(false);
   };
 
@@ -708,7 +903,9 @@ function AITab({ showSnack }) {
       const r = await aiApi.summarize({ text: summarizeText });
       setSummarizeResult(r.data);
       showSnack('تم التلخيص بنجاح');
-    } catch { showSnack('فشل التلخيص', 'error'); }
+    } catch {
+      showSnack('فشل التلخيص', 'error');
+    }
     setLoading(false);
   };
 
@@ -719,7 +916,9 @@ function AITab({ showSnack }) {
       const r = await aiApi.analyzeContent({ text: analyzeText });
       setAnalyzeResult(r.data?.analysis);
       showSnack('تم التحليل بنجاح');
-    } catch { showSnack('فشل التحليل', 'error'); }
+    } catch {
+      showSnack('فشل التحليل', 'error');
+    }
     setLoading(false);
   };
 
@@ -740,7 +939,7 @@ function AITab({ showSnack }) {
               { key: 'classify', label: 'تصنيف', icon: <ClassifyIcon /> },
               { key: 'summarize', label: 'تلخيص', icon: <SummarizeIcon /> },
               { key: 'analyze', label: 'تحليل', icon: <ExtractIcon /> },
-            ].map((a) => (
+            ].map(a => (
               <Chip
                 key={a.key}
                 icon={a.icon}
@@ -758,24 +957,46 @@ function AITab({ showSnack }) {
         {activeAction === 'chat' && (
           <Grid item xs={12}>
             <Paper variant="outlined" sx={{ p: 2 }}>
-              <Typography variant="h6" gutterBottom><ChatIcon sx={{ mr: 1 }} />المحادثة الذكية</Typography>
-              <Box sx={{ maxHeight: 300, overflowY: 'auto', mb: 2, p: 1, bgcolor: 'grey.50', borderRadius: 1 }}>
+              <Typography variant="h6" gutterBottom>
+                <ChatIcon sx={{ mr: 1 }} />
+                المحادثة الذكية
+              </Typography>
+              <Box
+                sx={{
+                  maxHeight: 300,
+                  overflowY: 'auto',
+                  mb: 2,
+                  p: 1,
+                  bgcolor: 'grey.50',
+                  borderRadius: 1,
+                }}
+              >
                 {chatMessages.length === 0 && (
                   <Typography color="text.secondary" textAlign="center" py={3}>
                     اسألني أي سؤال عن المستندات — مثال: "كم مستند في النظام؟"
                   </Typography>
                 )}
                 {chatMessages.map((m, i) => (
-                  <Box key={i} sx={{
-                    display: 'flex', justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start', mb: 1
-                  }}>
-                    <Paper sx={{
-                      p: 1.5, maxWidth: '75%',
-                      bgcolor: m.role === 'user' ? 'primary.main' : 'grey.200',
-                      color: m.role === 'user' ? 'white' : 'text.primary',
-                      borderRadius: 2,
-                    }}>
-                      <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>{m.text}</Typography>
+                  <Box
+                    key={i}
+                    sx={{
+                      display: 'flex',
+                      justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start',
+                      mb: 1,
+                    }}
+                  >
+                    <Paper
+                      sx={{
+                        p: 1.5,
+                        maxWidth: '75%',
+                        bgcolor: m.role === 'user' ? 'primary.main' : 'grey.200',
+                        color: m.role === 'user' ? 'white' : 'text.primary',
+                        borderRadius: 2,
+                      }}
+                    >
+                      <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
+                        {m.text}
+                      </Typography>
                     </Paper>
                   </Box>
                 ))}
@@ -783,10 +1004,12 @@ function AITab({ showSnack }) {
               </Box>
               <Box sx={{ display: 'flex', gap: 1 }}>
                 <TextField
-                  fullWidth size="small" placeholder="اكتب سؤالك هنا..."
+                  fullWidth
+                  size="small"
+                  placeholder="اكتب سؤالك هنا..."
                   value={chatInput}
-                  onChange={(e) => setChatInput(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleChat()}
+                  onChange={e => setChatInput(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleChat()}
                 />
                 <Button variant="contained" onClick={handleChat} disabled={loading}>
                   <SendIcon />
@@ -800,24 +1023,48 @@ function AITab({ showSnack }) {
         {activeAction === 'classify' && (
           <Grid item xs={12}>
             <Paper variant="outlined" sx={{ p: 2 }}>
-              <Typography variant="h6" gutterBottom><ClassifyIcon sx={{ mr: 1 }} />التصنيف التلقائي</Typography>
+              <Typography variant="h6" gutterBottom>
+                <ClassifyIcon sx={{ mr: 1 }} />
+                التصنيف التلقائي
+              </Typography>
               <TextField
-                fullWidth multiline rows={3} placeholder="الصق نص المستند هنا للتصنيف التلقائي..."
+                fullWidth
+                multiline
+                rows={3}
+                placeholder="الصق نص المستند هنا للتصنيف التلقائي..."
                 value={classifyText}
-                onChange={(e) => setClassifyText(e.target.value)}
+                onChange={e => setClassifyText(e.target.value)}
                 sx={{ mb: 2 }}
               />
-              <Button variant="contained" onClick={handleClassify} disabled={loading} startIcon={<AutoIcon />}>
+              <Button
+                variant="contained"
+                onClick={handleClassify}
+                disabled={loading}
+                startIcon={<AutoIcon />}
+              >
                 تصنيف تلقائي
               </Button>
               {classifyResult?.classification && (
-                <Box sx={{ mt: 2, p: 2, bgcolor: 'success.50', borderRadius: 1, border: '1px solid', borderColor: 'success.light' }}>
+                <Box
+                  sx={{
+                    mt: 2,
+                    p: 2,
+                    bgcolor: 'success.50',
+                    borderRadius: 1,
+                    border: '1px solid',
+                    borderColor: 'success.light',
+                  }}
+                >
                   <Typography fontWeight={600}>
-                    التصنيف: {classifyResult.classification.nameAr} ({(classifyResult.confidence * 100).toFixed(0)}%)
+                    التصنيف: {classifyResult.classification.nameAr} (
+                    {(classifyResult.confidence * 100).toFixed(0)}%)
                   </Typography>
                   {classifyResult.alternatives?.length > 0 && (
                     <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                      بدائل: {classifyResult.alternatives.map((a) => `${a.nameAr} (${(a.confidence * 100).toFixed(0)}%)`).join(' • ')}
+                      بدائل:{' '}
+                      {classifyResult.alternatives
+                        .map(a => `${a.nameAr} (${(a.confidence * 100).toFixed(0)}%)`)
+                        .join(' • ')}
                     </Typography>
                   )}
                 </Box>
@@ -830,22 +1077,47 @@ function AITab({ showSnack }) {
         {activeAction === 'summarize' && (
           <Grid item xs={12}>
             <Paper variant="outlined" sx={{ p: 2 }}>
-              <Typography variant="h6" gutterBottom><SummarizeIcon sx={{ mr: 1 }} />التلخيص التلقائي</Typography>
+              <Typography variant="h6" gutterBottom>
+                <SummarizeIcon sx={{ mr: 1 }} />
+                التلخيص التلقائي
+              </Typography>
               <TextField
-                fullWidth multiline rows={4} placeholder="الصق النص هنا للتلخيص..."
+                fullWidth
+                multiline
+                rows={4}
+                placeholder="الصق النص هنا للتلخيص..."
                 value={summarizeText}
-                onChange={(e) => setSummarizeText(e.target.value)}
+                onChange={e => setSummarizeText(e.target.value)}
                 sx={{ mb: 2 }}
               />
-              <Button variant="contained" onClick={handleSummarize} disabled={loading} startIcon={<SummarizeIcon />}>
+              <Button
+                variant="contained"
+                onClick={handleSummarize}
+                disabled={loading}
+                startIcon={<SummarizeIcon />}
+              >
                 تلخيص
               </Button>
               {summarizeResult?.summary && (
-                <Box sx={{ mt: 2, p: 2, bgcolor: 'info.50', borderRadius: 1, border: '1px solid', borderColor: 'info.light' }}>
+                <Box
+                  sx={{
+                    mt: 2,
+                    p: 2,
+                    bgcolor: 'info.50',
+                    borderRadius: 1,
+                    border: '1px solid',
+                    borderColor: 'info.light',
+                  }}
+                >
                   <Typography fontWeight={600}>الملخص:</Typography>
                   <Typography variant="body2">{summarizeResult.summary}</Typography>
-                  <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-                    النص الأصلي: {summarizeResult.originalLength} حرف → الملخص: {summarizeResult.summaryLength} حرف
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{ mt: 1, display: 'block' }}
+                  >
+                    النص الأصلي: {summarizeResult.originalLength} حرف → الملخص:{' '}
+                    {summarizeResult.summaryLength} حرف
                   </Typography>
                 </Box>
               )}
@@ -857,21 +1129,35 @@ function AITab({ showSnack }) {
         {activeAction === 'analyze' && (
           <Grid item xs={12}>
             <Paper variant="outlined" sx={{ p: 2 }}>
-              <Typography variant="h6" gutterBottom><ExtractIcon sx={{ mr: 1 }} />تحليل المحتوى</Typography>
+              <Typography variant="h6" gutterBottom>
+                <ExtractIcon sx={{ mr: 1 }} />
+                تحليل المحتوى
+              </Typography>
               <TextField
-                fullWidth multiline rows={3} placeholder="الصق النص هنا للتحليل..."
+                fullWidth
+                multiline
+                rows={3}
+                placeholder="الصق النص هنا للتحليل..."
                 value={analyzeText}
-                onChange={(e) => setAnalyzeText(e.target.value)}
+                onChange={e => setAnalyzeText(e.target.value)}
                 sx={{ mb: 2 }}
               />
-              <Button variant="contained" onClick={handleAnalyze} disabled={loading} startIcon={<ExtractIcon />}>
+              <Button
+                variant="contained"
+                onClick={handleAnalyze}
+                disabled={loading}
+                startIcon={<ExtractIcon />}
+              >
                 تحليل
               </Button>
               {analyzeResult && (
                 <Box sx={{ mt: 2 }}>
                   <Grid container spacing={1}>
                     {[
-                      { label: 'اللغة', value: analyzeResult.language === 'arabic' ? 'عربي' : 'إنجليزي' },
+                      {
+                        label: 'اللغة',
+                        value: analyzeResult.language === 'arabic' ? 'عربي' : 'إنجليزي',
+                      },
                       { label: 'الكلمات', value: analyzeResult.wordCount },
                       { label: 'الجمل', value: analyzeResult.sentenceCount },
                       { label: 'سهولة القراءة', value: analyzeResult.readability },
@@ -879,7 +1165,9 @@ function AITab({ showSnack }) {
                     ].map((s, i) => (
                       <Grid item xs={6} sm={4} md={2.4} key={i}>
                         <Card variant="outlined" sx={{ textAlign: 'center', p: 1 }}>
-                          <Typography variant="h6" fontWeight={700}>{s.value}</Typography>
+                          <Typography variant="h6" fontWeight={700}>
+                            {s.value}
+                          </Typography>
                           <Typography variant="caption">{s.label}</Typography>
                         </Card>
                       </Grid>
@@ -890,7 +1178,12 @@ function AITab({ showSnack }) {
                       <Typography variant="subtitle2">أكثر الكلمات تكراراً:</Typography>
                       <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mt: 1 }}>
                         {analyzeResult.topWords.slice(0, 10).map((w, i) => (
-                          <Chip key={i} size="small" label={`${w.word} (${w.count})`} variant="outlined" />
+                          <Chip
+                            key={i}
+                            size="small"
+                            label={`${w.word} (${w.count})`}
+                            variant="outlined"
+                          />
                         ))}
                       </Box>
                     </Box>

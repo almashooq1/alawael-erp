@@ -1,4 +1,4 @@
-﻿/**
+/**
  * ARRehabDashboard — لوحة تحكم التأهيل بالواقع المعزز (Professional v2)
  * AR/VR/XR — هولوجرام، BCI، تعاون عن بعد
  */
@@ -8,8 +8,6 @@ import {
   Grid,
   Paper,
   Typography,
-  Card,
-  CardContent,
   Chip,
   Table,
   TableHead,
@@ -35,9 +33,6 @@ import {
   Groups as CollabIcon,
   VideogameAsset as VRIcon,
   TrendingUp as TrendingIcon,
-  Schedule as PendingIcon,
-  CheckCircle as DoneIcon,
-  Download as DownloadIcon,
   Refresh as RefreshIcon,
   Search as SearchIcon,
   Add as AddIcon,
@@ -53,8 +48,6 @@ import {
   Tooltip as RTooltip,
   ResponsiveContainer,
   Legend,
-  LineChart,
-  Line,
   PieChart,
   Pie,
   Cell,

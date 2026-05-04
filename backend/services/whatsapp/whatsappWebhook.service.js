@@ -313,7 +313,7 @@ async function handleIncomingMessage(msg, contact, _phoneNumberId) {
   // Emit internal event for critical messages
   if (classified.urgencyLevel === 'critical' || classified.requiresHumanReview) {
     try {
-      const notifService = require('../notifications/notificationService');
+      const notifService = require('../notifications/notification-enhanced.service');
       if (notifService?.send) {
         await notifService.send({
           title: `⚠️ رسالة واتساب عاجلة من ${senderName}`,

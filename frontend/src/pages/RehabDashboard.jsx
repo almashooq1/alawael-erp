@@ -1,4 +1,4 @@
-﻿/**
+/**
  * RehabDashboard.jsx — لوحة تحكم خطط التأهيل الذكية | Premium v2
  */
 

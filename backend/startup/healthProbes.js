@@ -10,6 +10,15 @@ const mongoose = require('mongoose');
 const _logger = require('../utils/logger');
 const { getRedisStatus } = require('../config/performance');
 
+// Lazy-load routeHealth so healthProbes can be mounted before _registry runs
+function getRouteHealth() {
+  try {
+    return require('../routes/_registry').routeHealth;
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Mount public health/readiness/info probes + root endpoint.
  *
@@ -57,17 +66,33 @@ function setupHealthProbes(app, { isTestEnv, isProd }) {
     });
   });
 
-  // Kubernetes readiness probe — DB + Redis must be ready
+  // Kubernetes readiness probe — DB + Redis + route health must all be ready
   app.get('/readiness', (_req, res) => {
     const dbReady = isTestEnv || mongoose.connection.readyState === 1;
     const redisReady = getRedisStatus() === 'connected' || getRedisStatus() === 'disabled';
-    const isReady = dbReady && redisReady;
+
+    // Route errors where the file EXISTS but crashed (not just missing legacy routes)
+    // are real bugs and must block readiness.
+    const routeHealth = getRouteHealth();
+    const crashedRoutes = routeHealth ? routeHealth.failed.filter(f => !f.missing) : [];
+    const routesOk = crashedRoutes.length === 0;
+
+    const isReady = dbReady && redisReady && routesOk;
     if (isReady) {
-      return res.status(200).json({ status: 'ready', db: 'ok', redis: getRedisStatus() });
+      return res.status(200).json({
+        status: 'ready',
+        db: 'ok',
+        redis: getRedisStatus(),
+        routes: routeHealth ? `${routeHealth.mounted.length} mounted` : 'unknown',
+      });
     }
-    return res
-      .status(503)
-      .json({ status: 'not-ready', db: dbReady ? 'ok' : 'down', redis: getRedisStatus() });
+    return res.status(503).json({
+      status: 'not-ready',
+      db: dbReady ? 'ok' : 'down',
+      redis: getRedisStatus(),
+      routes: routesOk ? 'ok' : `${crashedRoutes.length} crashed`,
+      ...(crashedRoutes.length > 0 ? { crashedRoutes: crashedRoutes.map(r => r.path) } : {}),
+    });
   });
 
   // System info — restricted in production (no internal flags exposed)

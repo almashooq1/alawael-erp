@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Jest Setup File
  * Database mocking setup to prevent MongoDB timeouts during testing
@@ -18,335 +17,392 @@ process.env.MONGODB_URI = 'mongodb://mock-test-db';
 jest.setTimeout(60000);
 
 // Mock mongoose connection at module level
-jest.mock(
-  'mongoose',
-  () => {
-    // Mock database store
-    const store = {
-      assets: [],
-      maintenances: [],
-      schedules: [],
-      health: [],
-      users: [],
-      reports: [],
-      categories: [],
-      documents: [],
-      messages: [],
-      notifications: [],
-      payroll: [],
-      analytics: [],
-      disabilities: [],
-      finances: [],
-    };
+jest.mock('mongoose', () => {
+  // Mock database store
+  const store = {
+    assets: [],
+    maintenances: [],
+    schedules: [],
+    health: [],
+    users: [],
+    reports: [],
+    categories: [],
+    documents: [],
+    messages: [],
+    notifications: [],
+    payroll: [],
+    analytics: [],
+    disabilities: [],
+    finances: [],
+  };
 
-    // Helper to match queries
-    const matchesQuery = (item, query) => {
-      if (!query || typeof query !== 'object') return true;
-      for (const [key, val] of Object.entries(query)) {
-        if (val === undefined) continue;
-        if (val instanceof RegExp && !val.test(item[key]?.toString() || '')) return false;
-        if (item[key]?.toString() !== val?.toString()) return false;
-      }
-      return true;
-    };
-
-    // Mock ObjectId generator
-    let objectIdCounter = 0;
-    class MockObjectId {
-      constructor(id) {
-        this._id = id ? id.toString() : `${++objectIdCounter}`.padStart(24, '0');
-      }
-      toString() {
-        return this._id;
-      }
-      [Symbol.toStringTag] = 'ObjectId';
+  // Helper to match queries
+  const matchesQuery = (item, query) => {
+    if (!query || typeof query !== 'object') return true;
+    for (const [key, val] of Object.entries(query)) {
+      if (val === undefined) continue;
+      if (val instanceof RegExp && !val.test(item[key]?.toString() || '')) return false;
+      if (item[key]?.toString() !== val?.toString()) return false;
     }
-    MockObjectId.isValid = id => /^[a-f\d]{24}$/i.test(String(id ?? ''));
+    return true;
+  };
 
-    // Mock Types object
-    const Types = {
-      ObjectId: MockObjectId,
+  // Mock ObjectId generator
+  let objectIdCounter = 0;
+  class MockObjectId {
+    constructor(id) {
+      this._id = id ? id.toString() : `${++objectIdCounter}`.padStart(24, '0');
+    }
+    toString() {
+      return this._id;
+    }
+    [Symbol.toStringTag] = 'ObjectId';
+  }
+  MockObjectId.isValid = id => /^[a-f\d]{24}$/i.test(String(id ?? ''));
+
+  // Mock Types object
+  const Types = {
+    ObjectId: MockObjectId,
+  };
+
+  // Generic mock model
+  const createModel = () => {
+    const queryObj = {
+      q: {},
+      _isSingleDoc: false,
+      select: jest.fn(function () {
+        return this;
+      }),
+      lean: jest.fn(function () {
+        return this;
+      }),
+      populate: jest.fn(function () {
+        return this;
+      }),
+      limit: jest.fn(function (n) {
+        this._limit = n;
+        return this;
+      }),
+      skip: jest.fn(function (n) {
+        this._skip = n;
+        return this;
+      }),
+      sort: jest.fn(function (s) {
+        this._sort = s;
+        return this;
+      }),
+      _resolveResults: function () {
+        if (this._isSingleDoc) {
+          for (const coll of Object.values(store)) {
+            const item = coll.find(i => matchesQuery(i, this.q));
+            if (item) return item;
+          }
+          return null;
+        }
+        const results = [];
+        for (const coll of Object.values(store)) {
+          results.push(...coll.filter(i => matchesQuery(i, this.q)));
+        }
+        return results;
+      },
+      exec: jest.fn(async function () {
+        return this._resolveResults();
+      }),
+      then: jest.fn(function (cb, ecb) {
+        try {
+          const result = this._resolveResults();
+          return Promise.resolve(result).then(cb, ecb);
+        } catch (err) {
+          if (ecb) return Promise.reject(err).catch(ecb);
+          return Promise.reject(err);
+        }
+      }),
+      catch: jest.fn(function (ecb) {
+        return this.then(undefined, ecb);
+      }),
     };
 
-    // Generic mock model
-    const createModel = () => {
-      const queryObj = {
-        q: {},
-        _isSingleDoc: false,
-        select: jest.fn(function () {
-          return this;
-        }),
-        lean: jest.fn(function () {
-          return this;
-        }),
-        populate: jest.fn(function () {
-          return this;
-        }),
-        limit: jest.fn(function (n) {
-          this._limit = n;
-          return this;
-        }),
-        skip: jest.fn(function (n) {
-          this._skip = n;
-          return this;
-        }),
-        sort: jest.fn(function (s) {
-          this._sort = s;
-          return this;
-        }),
-        _resolveResults: function () {
-          if (this._isSingleDoc) {
-            for (const coll of Object.values(store)) {
-              const item = coll.find(i => matchesQuery(i, this.q));
-              if (item) return item;
-            }
-            return null;
-          }
-          const results = [];
-          for (const coll of Object.values(store)) {
-            results.push(...coll.filter(i => matchesQuery(i, this.q)));
-          }
-          return results;
-        },
-        exec: jest.fn(async function () {
-          return this._resolveResults();
-        }),
-        then: jest.fn(function (cb, ecb) {
-          try {
-            const result = this._resolveResults();
-            return Promise.resolve(result).then(cb, ecb);
-          } catch (err) {
-            if (ecb) return Promise.reject(err).catch(ecb);
-            return Promise.reject(err);
-          }
-        }),
-        catch: jest.fn(function (ecb) {
-          return this.then(undefined, ecb);
-        }),
-      };
-
-      return {
-        find: jest.fn(function (q = {}) {
-          const qObj = Object.create(queryObj);
-          qObj.q = q;
-          return qObj;
-        }),
-        findById: jest.fn(function (id) {
-          const qObj = Object.create(queryObj);
-          qObj.q = { _id: id };
-          qObj._isSingleDoc = true;
-          qObj._resolveResults = function () {
-            for (const coll of Object.values(store)) {
-              const item = coll.find(i => i._id?.toString() === id?.toString());
-              if (item) return item;
-            }
-            return null;
-          };
-          return qObj;
-        }),
-        findByIdAndUpdate: jest.fn(async (id, u) => {
+    return {
+      find: jest.fn(function (q = {}) {
+        const qObj = Object.create(queryObj);
+        qObj.q = q;
+        return qObj;
+      }),
+      findById: jest.fn(function (id) {
+        const qObj = Object.create(queryObj);
+        qObj.q = { _id: id };
+        qObj._isSingleDoc = true;
+        qObj._resolveResults = function () {
           for (const coll of Object.values(store)) {
             const item = coll.find(i => i._id?.toString() === id?.toString());
-            if (item) {
+            if (item) return item;
+          }
+          return null;
+        };
+        return qObj;
+      }),
+      findByIdAndUpdate: jest.fn(async (id, u) => {
+        for (const coll of Object.values(store)) {
+          const item = coll.find(i => i._id?.toString() === id?.toString());
+          if (item) {
+            Object.assign(item, u);
+            return item;
+          }
+        }
+        return null;
+      }),
+      findByIdAndDelete: jest.fn(async id => {
+        for (const coll of Object.values(store)) {
+          const idx = coll.findIndex(i => i._id?.toString() === id?.toString());
+          if (idx !== -1) return coll.splice(idx, 1)[0];
+        }
+        return null;
+      }),
+      findOne: jest.fn(function (q = {}) {
+        const qObj = Object.create(queryObj);
+        qObj.q = q;
+        qObj._isSingleDoc = true;
+        return qObj;
+      }),
+      findOneAndUpdate: jest.fn(async (q, u) => {
+        for (const coll of Object.values(store)) {
+          const item = coll.find(i => matchesQuery(i, q));
+          if (item) {
+            Object.assign(item, u);
+            return item;
+          }
+        }
+        return null;
+      }),
+      findOneAndDelete: jest.fn(async q => {
+        for (const coll of Object.values(store)) {
+          const idx = coll.findIndex(i => matchesQuery(i, q));
+          if (idx !== -1) return coll.splice(idx, 1)[0];
+        }
+        return null;
+      }),
+      create: jest.fn(async function (...args) {
+        const docs = Array.isArray(args[0]) ? args[0] : args;
+        const collName = this._collectionName || 'assets';
+        if (!store[collName]) store[collName] = [];
+        const coll = store[collName];
+        const res = [];
+        for (const doc of docs) {
+          const newDoc = {
+            _id: new Types.ObjectId(),
+            ...doc,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          };
+          coll.push(newDoc);
+          res.push(newDoc);
+        }
+        return docs.length === 1 ? res[0] : res;
+      }),
+      insertMany: jest.fn(async function (docs) {
+        const collName = this._collectionName || 'assets';
+        if (!store[collName]) store[collName] = [];
+        const coll = store[collName];
+        const res = [];
+        for (const doc of docs) {
+          const newDoc = { _id: new Types.ObjectId(), ...doc, createdAt: new Date() };
+          coll.push(newDoc);
+          res.push(newDoc);
+        }
+        return res;
+      }),
+      updateMany: jest.fn(async (q, u) => {
+        let cnt = 0;
+        for (const coll of Object.values(store)) {
+          for (const item of coll) {
+            if (matchesQuery(item, q)) {
               Object.assign(item, u);
-              return item;
+              cnt++;
             }
           }
-          return null;
-        }),
-        findByIdAndDelete: jest.fn(async id => {
-          for (const coll of Object.values(store)) {
-            const idx = coll.findIndex(i => i._id?.toString() === id?.toString());
-            if (idx !== -1) return coll.splice(idx, 1)[0];
-          }
-          return null;
-        }),
-        findOne: jest.fn(function (q = {}) {
-          const qObj = Object.create(queryObj);
-          qObj.q = q;
-          qObj._isSingleDoc = true;
-          return qObj;
-        }),
-        findOneAndUpdate: jest.fn(async (q, u) => {
-          for (const coll of Object.values(store)) {
-            const item = coll.find(i => matchesQuery(i, q));
-            if (item) {
-              Object.assign(item, u);
-              return item;
+        }
+        return { modifiedCount: cnt, ok: 1 };
+      }),
+      deleteMany: jest.fn(async q => {
+        let cnt = 0;
+        for (const coll of Object.values(store)) {
+          for (let i = coll.length - 1; i >= 0; i--) {
+            if (matchesQuery(coll[i], q)) {
+              coll.splice(i, 1);
+              cnt++;
             }
           }
-          return null;
-        }),
-        findOneAndDelete: jest.fn(async q => {
-          for (const coll of Object.values(store)) {
-            const idx = coll.findIndex(i => matchesQuery(i, q));
-            if (idx !== -1) return coll.splice(idx, 1)[0];
-          }
-          return null;
-        }),
-        create: jest.fn(async function (...args) {
-          const docs = Array.isArray(args[0]) ? args[0] : args;
-          const collName = this._collectionName || 'assets';
-          if (!store[collName]) store[collName] = [];
-          const coll = store[collName];
-          const res = [];
-          for (const doc of docs) {
-            const newDoc = {
-              _id: new Types.ObjectId(),
-              ...doc,
-              createdAt: new Date(),
-              updatedAt: new Date(),
-            };
-            coll.push(newDoc);
-            res.push(newDoc);
-          }
-          return docs.length === 1 ? res[0] : res;
-        }),
-        insertMany: jest.fn(async function (docs) {
-          const collName = this._collectionName || 'assets';
-          if (!store[collName]) store[collName] = [];
-          const coll = store[collName];
-          const res = [];
-          for (const doc of docs) {
-            const newDoc = { _id: new Types.ObjectId(), ...doc, createdAt: new Date() };
-            coll.push(newDoc);
-            res.push(newDoc);
-          }
-          return res;
-        }),
-        updateMany: jest.fn(async (q, u) => {
-          let cnt = 0;
-          for (const coll of Object.values(store)) {
-            for (const item of coll) {
-              if (matchesQuery(item, q)) {
-                Object.assign(item, u);
-                cnt++;
-              }
-            }
-          }
-          return { modifiedCount: cnt, ok: 1 };
-        }),
-        deleteMany: jest.fn(async q => {
-          let cnt = 0;
-          for (const coll of Object.values(store)) {
-            for (let i = coll.length - 1; i >= 0; i--) {
-              if (matchesQuery(coll[i], q)) {
-                coll.splice(i, 1);
-                cnt++;
-              }
-            }
-          }
-          return { deletedCount: cnt, ok: 1 };
-        }),
-        countDocuments: jest.fn(async (q = {}) => {
-          let cnt = 0;
-          for (const coll of Object.values(store)) {
-            cnt += coll.filter(i => matchesQuery(i, q)).length;
-          }
-          return cnt;
-        }),
-        exists: jest.fn(async q => {
-          for (const coll of Object.values(store)) {
-            if (coll.some(i => matchesQuery(i, q))) return { _id: true };
-          }
-          return null;
-        }),
-        aggregate: jest.fn(() => ({
-          exec: jest.fn(async () => []),
-          then: jest.fn(async cb => cb([])),
-        })),
-        distinct: jest.fn(async () => []),
-      };
+        }
+        return { deletedCount: cnt, ok: 1 };
+      }),
+      countDocuments: jest.fn(async (q = {}) => {
+        let cnt = 0;
+        for (const coll of Object.values(store)) {
+          cnt += coll.filter(i => matchesQuery(i, q)).length;
+        }
+        return cnt;
+      }),
+      exists: jest.fn(async q => {
+        for (const coll of Object.values(store)) {
+          if (coll.some(i => matchesQuery(i, q))) return { _id: true };
+        }
+        return null;
+      }),
+      aggregate: jest.fn(() => ({
+        exec: jest.fn(async () => []),
+        then: jest.fn(async cb => cb([])),
+      })),
+      distinct: jest.fn(async () => []),
     };
+  };
 
-    // Mock mongoose.model() and mongoose.Schema
-    const mockModels = {};
+  // Mock mongoose.model() and mongoose.Schema
+  const mockModels = {};
 
-    const SchemaConstructor = jest.fn(function (schema) {
-      const schemaInstance = {
-        methods: {},
-        statics: {},
-        _schema: schema,
-        index: jest.fn(() => schemaInstance),
-        post: jest.fn(() => schemaInstance),
-        pre: jest.fn(() => schemaInstance),
-        virtual: jest.fn(() => ({
-          get: jest.fn(() => schemaInstance),
-          set: jest.fn(() => schemaInstance),
-        })),
-        path: jest.fn(() => ({
+  const SchemaConstructor = jest.fn(function (schema) {
+    const _pres = {};
+
+    // Build a flattened paths map so schema.paths and schema.path() work in tests
+    function buildPaths(schemaDef, prefix) {
+      const result = {};
+      if (!schemaDef || typeof schemaDef !== 'object') return result;
+      for (const [key, val] of Object.entries(schemaDef)) {
+        const fullKey = prefix ? `${prefix}.${key}` : key;
+        if (Array.isArray(val)) {
+          // Array schema — add parent key and recurse into first element if it's a plain object
+          result[fullKey] = { enumValues: undefined, defaultValue: undefined };
+          if (
+            val.length > 0 &&
+            val[0] &&
+            typeof val[0] === 'object' &&
+            !val[0].type &&
+            !(val[0] instanceof Function)
+          ) {
+            Object.assign(result, buildPaths(val[0], fullKey));
+          }
+        } else if (!val || typeof val === 'function' || typeof val !== 'object') {
+          // Primitive type constructor (String, Number, etc.) or null/undefined
+          result[fullKey] = { enumValues: undefined, defaultValue: undefined };
+        } else if ('type' in val) {
+          // Explicit { type, enum, default, ... } definition
+          result[fullKey] = {
+            enumValues: Array.isArray(val.enum) ? val.enum : undefined,
+            defaultValue: val.default !== undefined ? val.default : undefined,
+          };
+        } else {
+          // Nested sub-document — add parent key and recurse
+          result[fullKey] = { enumValues: undefined, defaultValue: undefined };
+          Object.assign(result, buildPaths(val, fullKey));
+        }
+      }
+      return result;
+    }
+
+    const paths = buildPaths(schema);
+
+    const schemaInstance = {
+      methods: {},
+      statics: {},
+      _schema: schema,
+      _preHooks: _pres,
+      paths,
+      index: jest.fn(() => schemaInstance),
+      post: jest.fn(() => schemaInstance),
+      pre: jest.fn(function (event, handler) {
+        if (!_pres[event]) _pres[event] = [];
+        _pres[event].push({ fn: handler });
+        return schemaInstance;
+      }),
+      virtual: jest.fn(() => ({
+        get: jest.fn(() => schemaInstance),
+        set: jest.fn(() => schemaInstance),
+      })),
+      path: jest.fn(fieldName => {
+        const def = paths[fieldName] || {};
+        return {
+          enumValues: def.enumValues,
+          defaultValue: def.defaultValue,
           validate: jest.fn(),
           get: jest.fn(),
           set: jest.fn(),
           required: jest.fn(),
-        })),
-        add: jest.fn(() => schemaInstance),
-        set: jest.fn(() => schemaInstance),
-        get: jest.fn(),
-        plugin: jest.fn(() => schemaInstance),
-        obj: schema || {},
-      };
-      return schemaInstance;
-    });
-    SchemaConstructor.Types = Types;
-
-    const createModelFn = jest.fn((name, schema) => {
-      if (!mockModels[name]) {
-        mockModels[name] = createModel();
-      }
-      // Track collection name for create/insertMany operations
-      const collKey = name.toLowerCase();
-      if (!store[collKey]) store[collKey] = [];
-      mockModels[name]._collectionName = collKey;
-      mockModels[name].modelName = name;
-      mockModels[name].collection = { name: collKey, collectionName: collKey };
-      return mockModels[name];
-    });
-
-    const mockMongoose = {
-      Types,
-      Schema: SchemaConstructor,
-      models: mockModels,
-      model: createModelFn,
-      plugin: jest.fn(),
-      set: jest.fn(),
+        };
+      }),
+      add: jest.fn(() => schemaInstance),
+      set: jest.fn(() => schemaInstance),
       get: jest.fn(),
-      connect: jest.fn(async () => ({ connected: true })),
-      disconnect: jest.fn(async () => ({})),
-      connection: {
-        readyState: 0,
-        on: jest.fn(),
-        once: jest.fn(),
-        off: jest.fn(),
-        removeListener: jest.fn(),
-        close: jest.fn(async () => {}),
-        db: {
-          admin: jest.fn(() => ({ ping: jest.fn(async () => ({ ok: 1 })) })),
-          collection: jest.fn(() => ({})),
+      plugin: jest.fn(() => schemaInstance),
+      obj: schema || {},
+      s: {
+        hooks: {
+          _pres: {
+            get: jest.fn(event => _pres[event] || []),
+          },
         },
-        getClient: jest.fn(() => ({
-          db: jest.fn(() => ({
-            collection: jest.fn(() => ({})),
-          })),
-          topology: { s: { pool: {} } },
-        })),
       },
-      startSession: jest.fn(async () => ({
-        startTransaction: jest.fn(),
-        commitTransaction: jest.fn(),
-        abortTransaction: jest.fn(),
-        endSession: jest.fn(),
-        withTransaction: jest.fn(async callback => callback({})),
-      })),
-      Promise: Promise,
-      // Used by route-level guards (e.g. meetings.routes.js validObjectId helper)
-      isValidObjectId: id => /^[a-f\d]{24}$/i.test(String(id ?? '')),
     };
+    return schemaInstance;
+  });
+  SchemaConstructor.Types = Types;
 
-    return mockMongoose;
-  },
-  { virtual: true }
-);
+  const createModelFn = jest.fn((name, schema) => {
+    if (!mockModels[name]) {
+      mockModels[name] = createModel();
+    }
+    // Track collection name for create/insertMany operations
+    const collKey = name.toLowerCase();
+    if (!store[collKey]) store[collKey] = [];
+    mockModels[name]._collectionName = collKey;
+    mockModels[name].modelName = name;
+    mockModels[name].collection = { name: collKey, collectionName: collKey };
+    if (schema) {
+      mockModels[name].schema = schema;
+    }
+    return mockModels[name];
+  });
+
+  const mockMongoose = {
+    Types,
+    Schema: SchemaConstructor,
+    models: mockModels,
+    model: createModelFn,
+    plugin: jest.fn(),
+    set: jest.fn(),
+    get: jest.fn(),
+    connect: jest.fn(async () => ({ connected: true })),
+    disconnect: jest.fn(async () => ({})),
+    connection: {
+      readyState: 0,
+      on: jest.fn(),
+      once: jest.fn(),
+      off: jest.fn(),
+      removeListener: jest.fn(),
+      close: jest.fn(async () => {}),
+      db: {
+        admin: jest.fn(() => ({ ping: jest.fn(async () => ({ ok: 1 })) })),
+        collection: jest.fn(() => ({})),
+      },
+      getClient: jest.fn(() => ({
+        db: jest.fn(() => ({
+          collection: jest.fn(() => ({})),
+        })),
+        topology: { s: { pool: {} } },
+      })),
+    },
+    startSession: jest.fn(async () => ({
+      startTransaction: jest.fn(),
+      commitTransaction: jest.fn(),
+      abortTransaction: jest.fn(),
+      endSession: jest.fn(),
+      withTransaction: jest.fn(async callback => callback({})),
+    })),
+    Promise: Promise,
+    // Used by route-level guards (e.g. meetings.routes.js validObjectId helper)
+    isValidObjectId: id => /^[a-f\d]{24}$/i.test(String(id ?? '')),
+  };
+
+  return mockMongoose;
+});
 
 // Suppress console (keep error/warn in CI for debugging)
 const _isCI = process.env.CI === 'true';

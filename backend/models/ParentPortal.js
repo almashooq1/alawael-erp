@@ -5,6 +5,10 @@
 
 const mongoose = require('mongoose');
 
+// ParentMessage is defined in its own canonical file to avoid duplicate
+// mongoose.model() registrations detected by the collision guard.
+const ParentMessage = require('./ParentMessage');
+
 // ─── ParentOtp ───────────────────────────────────────────────────────────────
 const parentOtpSchema = new mongoose.Schema(
   {
@@ -62,70 +66,6 @@ const parentDeviceSchema = new mongoose.Schema(
 );
 
 parentDeviceSchema.index({ guardianId: 1, isActive: 1 });
-
-// ─── ParentMessage ───────────────────────────────────────────────────────────
-const parentMessageSchema = new mongoose.Schema(
-  {
-    guardianId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Guardian',
-      required: true,
-    },
-    beneficiaryId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Beneficiary',
-      default: null,
-    },
-    recipientType: { type: String, default: null }, // 'specialist', 'administration'
-    recipientId: { type: mongoose.Schema.Types.ObjectId, default: null },
-    subject: { type: String, default: null, maxlength: 200 },
-    body: { type: String, required: true, maxlength: 2000 },
-    direction: {
-      type: String,
-      required: true,
-      enum: ['inbound', 'outbound'], // inbound=parent→center, outbound=center→parent
-    },
-    messageType: {
-      type: String,
-      default: 'general',
-      enum: [
-        'general',
-        'appointment_request',
-        'schedule_change',
-        'leave_request',
-        'inquiry',
-        'complaint',
-        'suggestion',
-      ],
-    },
-    attachments: [
-      {
-        filename: String,
-        path: String,
-        mimeType: String,
-        size: Number,
-      },
-    ],
-    isRead: { type: Boolean, default: false },
-    readAt: { type: Date, default: null },
-    repliedToId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'ParentMessage',
-      default: null,
-    },
-    status: {
-      type: String,
-      default: 'active',
-      enum: ['active', 'archived', 'resolved'],
-    },
-    branchId: { type: mongoose.Schema.Types.ObjectId, ref: 'Branch' },
-    deletedAt: { type: Date, default: null },
-  },
-  { timestamps: true }
-);
-
-parentMessageSchema.index({ guardianId: 1, direction: 1, isRead: 1 });
-parentMessageSchema.index({ recipientType: 1, recipientId: 1 });
 
 // ─── ParentComplaint ─────────────────────────────────────────────────────────
 const parentComplaintSchema = new mongoose.Schema(
@@ -247,8 +187,7 @@ parentNotificationSchema.index({ guardianId: 1, isRead: 1, createdAt: -1 });
 module.exports = {
   ParentOtp: mongoose.models.ParentOtp || mongoose.model('ParentOtp', parentOtpSchema),
   ParentDevice: mongoose.models.ParentDevice || mongoose.model('ParentDevice', parentDeviceSchema),
-  ParentMessage:
-    mongoose.models.ParentMessage || mongoose.model('ParentMessage', parentMessageSchema),
+  ParentMessage,
   ParentComplaint:
     mongoose.models.ParentComplaint || mongoose.model('ParentComplaint', parentComplaintSchema),
   ParentNotification:

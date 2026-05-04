@@ -212,14 +212,14 @@ const buildStats = (products = [], orders = []) => {
 
 const DEMO = buildStats([], []);
 
-const orderStatusLabels = {
+const _orderStatusLabels = {
   pending: 'معلق',
   processing: 'قيد التجهيز',
   shipped: 'مشحون',
   delivered: 'مُسلَّم',
   cancelled: 'ملغى',
 };
-const orderStatusColors = {
+const _orderStatusColors = {
   pending: 'default',
   processing: 'info',
   shipped: 'primary',

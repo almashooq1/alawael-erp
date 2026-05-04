@@ -76,12 +76,21 @@ jest.mock('../../models/InsuranceTariff', () => {
     countDocuments: jest.fn(async filter => {
       let rows = Array.from(store.values());
       if (filter?.cptCode) rows = rows.filter(r => r.cptCode === filter.cptCode);
+      if (filter?.provider?.$regex) {
+        const re = new RegExp(filter.provider.$regex, filter.provider.$options || '');
+        rows = rows.filter(r => re.test(r.provider));
+      }
       if (filter && filter.isActive !== undefined) {
         rows = rows.filter(r => r.isActive === filter.isActive);
       }
       return rows.length;
     }),
-    findById: jest.fn(async id => store.get(String(id)) || null),
+    findById: jest.fn(id => {
+      const doc = store.get(String(id)) || null;
+      const p = Promise.resolve(doc);
+      p.lean = jest.fn(() => Promise.resolve(doc));
+      return p;
+    }),
     create: jest.fn(async props => {
       if (
         props.effectiveTo &&

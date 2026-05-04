@@ -136,7 +136,7 @@ const categoryLabels = {
   educational: 'تعليمية',
   other: 'أخرى',
 };
-const txTypeLabels = {
+const _txTypeLabels = {
   receive: 'استلام',
   issue: 'صرف',
   transfer: 'تحويل',

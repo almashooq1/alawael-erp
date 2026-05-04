@@ -1,4 +1,4 @@
-﻿/**
+/**
  * BlockchainDashboard — لوحة تحكم الشهادات الرقمية والبلوكتشين (Professional v2)
  */
 import React, { useState, useEffect, useCallback, useRef } from 'react';

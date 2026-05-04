@@ -15,7 +15,7 @@
  *   • السجل — paginated filterable list
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   Box,
   Container,
@@ -33,7 +33,6 @@ import {
   CircularProgress,
   Tabs,
   Tab,
-  Divider,
   Table,
   TableBody,
   TableCell,

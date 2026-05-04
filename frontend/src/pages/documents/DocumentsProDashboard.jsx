@@ -5,7 +5,7 @@
  * إشعارات، وتوصيات ذكية
  */
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Container,
@@ -14,7 +14,6 @@ import {
   Typography,
   Card,
   CardContent,
-  CardHeader,
   IconButton,
   Chip,
   Button,
@@ -27,7 +26,6 @@ import {
   ListItem,
   ListItemAvatar,
   ListItemText,
-  ListItemSecondaryAction,
   LinearProgress,
   CircularProgress,
   Tooltip,
@@ -48,11 +46,9 @@ import {
   Notifications as NotifIcon,
   Assignment as TaskIcon,
   TrendingUp as TrendIcon,
-  Security as SecurityIcon,
   Speed as SpeedIcon,
   Warning as WarningIcon,
   CheckCircle as CheckIcon,
-  Error as ErrorIcon,
   Refresh as RefreshIcon,
   BarChart as ChartIcon,
   FolderOpen as FolderIcon,
@@ -63,11 +59,7 @@ import {
   AccountTree as WorkflowIcon,
   Summarize as SummaryIcon,
   ContentCopy as DuplicateIcon,
-  Label as TagIcon,
-  StarBorder as StarIcon,
   ArrowForward as ArrowIcon,
-  MoreVert as MoreIcon,
-  InfoOutlined as InfoIcon,
   PieChart as PieIcon,
 } from '@mui/icons-material';
 
@@ -221,7 +213,7 @@ function CategoryDistribution({ categories, loading }) {
     );
   }
 
-  const maxCount = Math.max(...categories.map((c) => c.count));
+  const maxCount = Math.max(...categories.map(c => c.count));
 
   return (
     <Box>
@@ -265,24 +257,21 @@ function QuickSearchBar({ onSearch }) {
   const [results, setResults] = useState([]);
   const [searching, setSearching] = useState(false);
 
-  const handleSearch = useCallback(
-    async (q) => {
-      if (!q || q.length < 2) {
-        setResults([]);
-        return;
-      }
-      setSearching(true);
-      try {
-        const res = await documentProService.quickSearch(q);
-        setResults(res.results || []);
-      } catch {
-        setResults([]);
-      } finally {
-        setSearching(false);
-      }
-    },
-    []
-  );
+  const handleSearch = useCallback(async q => {
+    if (!q || q.length < 2) {
+      setResults([]);
+      return;
+    }
+    setSearching(true);
+    try {
+      const res = await documentProService.quickSearch(q);
+      setResults(res.results || []);
+    } catch {
+      setResults([]);
+    } finally {
+      setSearching(false);
+    }
+  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => handleSearch(query), 300);
@@ -295,8 +284,8 @@ function QuickSearchBar({ onSearch }) {
         fullWidth
         placeholder="ابحث في المستندات... (عنوان، وسم، اسم ملف)"
         value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        onKeyPress={(e) => e.key === 'Enter' && onSearch?.(query)}
+        onChange={e => setQuery(e.target.value)}
+        onKeyPress={e => e.key === 'Enter' && onSearch?.(query)}
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
@@ -327,7 +316,7 @@ function QuickSearchBar({ onSearch }) {
           }}
         >
           <List dense>
-            {results.map((doc) => (
+            {results.map(doc => (
               <ListItem
                 key={doc.id}
                 button
@@ -338,7 +327,14 @@ function QuickSearchBar({ onSearch }) {
                 }}
               >
                 <ListItemAvatar>
-                  <Avatar sx={{ width: 32, height: 32, bgcolor: `${COLORS.primary}15`, color: COLORS.primary }}>
+                  <Avatar
+                    sx={{
+                      width: 32,
+                      height: 32,
+                      bgcolor: `${COLORS.primary}15`,
+                      color: COLORS.primary,
+                    }}
+                  >
                     <DocIcon sx={{ fontSize: 18 }} />
                   </Avatar>
                 </ListItemAvatar>
@@ -349,7 +345,12 @@ function QuickSearchBar({ onSearch }) {
                   secondaryTypographyProps={{ fontSize: 11 }}
                 />
                 {doc.tags?.map((tag, i) => (
-                  <Chip key={i} label={tag} size="small" sx={{ ml: 0.5, height: 20, fontSize: 10 }} />
+                  <Chip
+                    key={i}
+                    label={tag}
+                    size="small"
+                    sx={{ ml: 0.5, height: 20, fontSize: 10 }}
+                  />
                 ))}
               </ListItem>
             ))}
@@ -447,7 +448,8 @@ function ExpiringDocsList({ documents, loading }) {
         const daysLeft = doc.expiryDate
           ? Math.max(0, Math.floor((new Date(doc.expiryDate) - new Date()) / (1000 * 60 * 60 * 24)))
           : null;
-        const color = daysLeft <= 7 ? COLORS.danger : daysLeft <= 15 ? COLORS.orange : COLORS.warning;
+        const color =
+          daysLeft <= 7 ? COLORS.danger : daysLeft <= 15 ? COLORS.orange : COLORS.warning;
 
         return (
           <ListItem key={idx} sx={{ borderRadius: 1.5, mb: 0.5 }}>
@@ -485,13 +487,18 @@ function RecentDocsList({ documents, loading }) {
     );
   }
 
-  const formatDate = (dateStr) => {
+  const formatDate = dateStr => {
     if (!dateStr) return '';
     const d = new Date(dateStr);
-    return d.toLocaleDateString('ar-SA', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    return d.toLocaleDateString('ar-SA', {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
   };
 
-  const formatSize = (bytes) => {
+  const formatSize = bytes => {
     if (!bytes) return '';
     const k = 1024;
     const sizes = ['B', 'KB', 'MB', 'GB'];
@@ -556,7 +563,7 @@ function RecentDocsList({ documents, loading }) {
 // ══════════════════════════════════════════════════════════════
 
 export default function DocumentsProDashboard() {
-  const theme = useTheme();
+  const _theme = useTheme();
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
@@ -605,9 +612,15 @@ export default function DocumentsProDashboard() {
         }}
       >
         <Container maxWidth="xl">
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+          <Box
+            sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}
+          >
             <Box>
-              <Typography variant="h5" fontWeight="bold" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography
+                variant="h5"
+                fontWeight="bold"
+                sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+              >
                 <PremiumIcon /> إدارة المستندات الاحترافية
               </Typography>
               <Typography variant="body2" sx={{ opacity: 0.85, mt: 0.5 }}>
@@ -632,7 +645,7 @@ export default function DocumentsProDashboard() {
 
           {/* شريط البحث */}
           <QuickSearchBar
-            onSearch={(q) => {
+            onSearch={q => {
               if (q) {
                 window.location.href = `/document-management/list?q=${encodeURIComponent(q)}`;
               }
@@ -698,7 +711,10 @@ export default function DocumentsProDashboard() {
         </Grid>
 
         {/* ── المحتوى الرئيسي (Tabs) ───────────────────── */}
-        <Paper elevation={0} sx={{ borderRadius: 3, border: '1px solid', borderColor: 'divider', mb: 3 }}>
+        <Paper
+          elevation={0}
+          sx={{ borderRadius: 3, border: '1px solid', borderColor: 'divider', mb: 3 }}
+        >
           <Tabs
             value={activeTab}
             onChange={(_, v) => setActiveTab(v)}
@@ -710,10 +726,22 @@ export default function DocumentsProDashboard() {
               '& .MuiTab-root': { fontWeight: 600, fontSize: 13, minHeight: 44 },
             }}
           >
-            <Tab icon={<AnalyticsIcon sx={{ fontSize: 18 }} />} iconPosition="start" label="التحليلات" />
+            <Tab
+              icon={<AnalyticsIcon sx={{ fontSize: 18 }} />}
+              iconPosition="start"
+              label="التحليلات"
+            />
             <Tab icon={<TaskIcon sx={{ fontSize: 18 }} />} iconPosition="start" label="سير العمل" />
-            <Tab icon={<TimerIcon sx={{ fontSize: 18 }} />} iconPosition="start" label="التنبيهات" />
-            <Tab icon={<AIIcon sx={{ fontSize: 18 }} />} iconPosition="start" label="الذكاء الاصطناعي" />
+            <Tab
+              icon={<TimerIcon sx={{ fontSize: 18 }} />}
+              iconPosition="start"
+              label="التنبيهات"
+            />
+            <Tab
+              icon={<AIIcon sx={{ fontSize: 18 }} />}
+              iconPosition="start"
+              label="الذكاء الاصطناعي"
+            />
           </Tabs>
           <Divider />
 
@@ -723,20 +751,35 @@ export default function DocumentsProDashboard() {
               <Grid container spacing={3}>
                 {/* توزيع الفئات */}
                 <Grid item xs={12} md={5}>
-                  <Typography variant="subtitle1" fontWeight="bold" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Typography
+                    variant="subtitle1"
+                    fontWeight="bold"
+                    gutterBottom
+                    sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+                  >
                     <PieIcon fontSize="small" /> توزيع المستندات حسب الفئة
                   </Typography>
                   <CategoryDistribution categories={distributions.byCategory} loading={loading} />
                 </Grid>
 
                 {/* صحة قاعدة المستندات */}
-                <Grid item xs={12} md={3} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                <Grid
+                  item
+                  xs={12}
+                  md={3}
+                  sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+                >
                   <HealthGauge health={health} loading={loading} />
                 </Grid>
 
                 {/* توزيع أنواع الملفات */}
                 <Grid item xs={12} md={4}>
-                  <Typography variant="subtitle1" fontWeight="bold" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Typography
+                    variant="subtitle1"
+                    fontWeight="bold"
+                    gutterBottom
+                    sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+                  >
                     <FolderIcon fontSize="small" /> أنواع الملفات
                   </Typography>
                   {loading ? (
@@ -763,7 +806,12 @@ export default function DocumentsProDashboard() {
 
                   <Divider sx={{ my: 2 }} />
 
-                  <Typography variant="subtitle1" fontWeight="bold" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Typography
+                    variant="subtitle1"
+                    fontWeight="bold"
+                    gutterBottom
+                    sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+                  >
                     <ChartIcon fontSize="small" /> توزيع الحالات
                   </Typography>
                   {loading ? (
@@ -776,9 +824,13 @@ export default function DocumentsProDashboard() {
                           label={`${status.status} (${status.count})`}
                           size="small"
                           color={
-                            status.status === 'نشط' ? 'success' :
-                            status.status === 'مؤرشف' ? 'default' :
-                            status.status === 'محذوف' ? 'error' : 'primary'
+                            status.status === 'نشط'
+                              ? 'success'
+                              : status.status === 'مؤرشف'
+                                ? 'default'
+                                : status.status === 'محذوف'
+                                  ? 'error'
+                                  : 'primary'
                           }
                           sx={{ fontSize: 11 }}
                         />
@@ -799,7 +851,12 @@ export default function DocumentsProDashboard() {
             <Box sx={{ p: 3 }}>
               <Grid container spacing={3}>
                 <Grid item xs={12} md={6}>
-                  <Typography variant="subtitle1" fontWeight="bold" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Typography
+                    variant="subtitle1"
+                    fontWeight="bold"
+                    gutterBottom
+                    sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+                  >
                     <TaskIcon fontSize="small" /> المهام المعلقة
                   </Typography>
                   <PendingTasksList tasks={workflow.pendingTasks} loading={loading} />
@@ -868,13 +925,23 @@ export default function DocumentsProDashboard() {
             <Box sx={{ p: 3 }}>
               <Grid container spacing={3}>
                 <Grid item xs={12} md={6}>
-                  <Typography variant="subtitle1" fontWeight="bold" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Typography
+                    variant="subtitle1"
+                    fontWeight="bold"
+                    gutterBottom
+                    sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+                  >
                     <WarningIcon fontSize="small" color="warning" /> مستندات قريبة الانتهاء
                   </Typography>
                   <ExpiringDocsList documents={expiringSoon} loading={loading} />
                 </Grid>
                 <Grid item xs={12} md={6}>
-                  <Typography variant="subtitle1" fontWeight="bold" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Typography
+                    variant="subtitle1"
+                    fontWeight="bold"
+                    gutterBottom
+                    sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+                  >
                     <NotifIcon fontSize="small" /> الإشعارات
                   </Typography>
                   <Box sx={{ textAlign: 'center', py: 3 }}>
@@ -884,11 +951,7 @@ export default function DocumentsProDashboard() {
                     <Typography variant="h6" sx={{ mt: 1 }}>
                       {unreadNotifications} إشعار غير مقروء
                     </Typography>
-                    <Button
-                      variant="outlined"
-                      size="small"
-                      sx={{ mt: 1, borderRadius: 2 }}
-                    >
+                    <Button variant="outlined" size="small" sx={{ mt: 1, borderRadius: 2 }}>
                       عرض جميع الإشعارات
                     </Button>
                   </Box>
@@ -968,12 +1031,32 @@ export default function DocumentsProDashboard() {
                   </Typography>
                   <Grid container spacing={2}>
                     {[
-                      { icon: '🏷️', title: 'اقتراح الوسوم', desc: 'وسوم مقترحة تلقائياً لكل مستند' },
+                      {
+                        icon: '🏷️',
+                        title: 'اقتراح الوسوم',
+                        desc: 'وسوم مقترحة تلقائياً لكل مستند',
+                      },
                       { icon: '🔒', title: 'اكتشاف الأمان', desc: 'تحديد مستوى السرية تلقائياً' },
-                      { icon: '📊', title: 'استخراج الكيانات', desc: 'استخراج التواريخ والمبالغ والمراجع' },
-                      { icon: '🌍', title: 'اكتشاف اللغة', desc: 'دعم العربية والإنجليزية والمزدوج' },
-                      { icon: '📋', title: 'التوصيات الذكية', desc: 'توصيات لتحسين المستندات وأمانها' },
-                      { icon: '📈', title: 'تحليلات الصحة', desc: 'تقييم شامل لجودة قاعدة المستندات' },
+                      {
+                        icon: '📊',
+                        title: 'استخراج الكيانات',
+                        desc: 'استخراج التواريخ والمبالغ والمراجع',
+                      },
+                      {
+                        icon: '🌍',
+                        title: 'اكتشاف اللغة',
+                        desc: 'دعم العربية والإنجليزية والمزدوج',
+                      },
+                      {
+                        icon: '📋',
+                        title: 'التوصيات الذكية',
+                        desc: 'توصيات لتحسين المستندات وأمانها',
+                      },
+                      {
+                        icon: '📈',
+                        title: 'تحليلات الصحة',
+                        desc: 'تقييم شامل لجودة قاعدة المستندات',
+                      },
                     ].map((feature, idx) => (
                       <Grid item xs={12} sm={6} md={4} key={idx}>
                         <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'flex-start', p: 1 }}>
@@ -999,9 +1082,23 @@ export default function DocumentsProDashboard() {
         {/* ── المستندات الأخيرة ───────────────────────────── */}
         <Grid container spacing={3}>
           <Grid item xs={12} md={8}>
-            <Paper elevation={0} sx={{ borderRadius: 3, border: '1px solid', borderColor: 'divider', p: 2.5 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Typography variant="subtitle1" fontWeight="bold" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Paper
+              elevation={0}
+              sx={{ borderRadius: 3, border: '1px solid', borderColor: 'divider', p: 2.5 }}
+            >
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  mb: 2,
+                }}
+              >
+                <Typography
+                  variant="subtitle1"
+                  fontWeight="bold"
+                  sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+                >
                   <DocIcon fontSize="small" /> آخر المستندات المرفوعة
                 </Typography>
                 <Button
@@ -1019,17 +1116,50 @@ export default function DocumentsProDashboard() {
 
           {/* أدوات سريعة */}
           <Grid item xs={12} md={4}>
-            <Paper elevation={0} sx={{ borderRadius: 3, border: '1px solid', borderColor: 'divider', p: 2.5 }}>
-              <Typography variant="subtitle1" fontWeight="bold" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Paper
+              elevation={0}
+              sx={{ borderRadius: 3, border: '1px solid', borderColor: 'divider', p: 2.5 }}
+            >
+              <Typography
+                variant="subtitle1"
+                fontWeight="bold"
+                gutterBottom
+                sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+              >
                 <SpeedIcon fontSize="small" /> أدوات سريعة
               </Typography>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                 {[
-                  { icon: <UploadIcon />, label: 'رفع مستند جديد', href: '/document-management/list', color: COLORS.primary },
-                  { icon: <SmartSearchIcon />, label: 'البحث المتقدم', href: '/document-management/advanced', color: COLORS.purple },
-                  { icon: <AnalyticsIcon />, label: 'التقارير والإحصائيات', href: '/document-management/reports', color: COLORS.success },
-                  { icon: <WorkflowIcon />, label: 'إدارة سير العمل', href: '/document-management/smart', color: COLORS.orange },
-                  { icon: <FolderIcon />, label: 'الأرشيف', href: '/document-management/archive', color: COLORS.gray },
+                  {
+                    icon: <UploadIcon />,
+                    label: 'رفع مستند جديد',
+                    href: '/document-management/list',
+                    color: COLORS.primary,
+                  },
+                  {
+                    icon: <SmartSearchIcon />,
+                    label: 'البحث المتقدم',
+                    href: '/document-management/advanced',
+                    color: COLORS.purple,
+                  },
+                  {
+                    icon: <AnalyticsIcon />,
+                    label: 'التقارير والإحصائيات',
+                    href: '/document-management/reports',
+                    color: COLORS.success,
+                  },
+                  {
+                    icon: <WorkflowIcon />,
+                    label: 'إدارة سير العمل',
+                    href: '/document-management/smart',
+                    color: COLORS.orange,
+                  },
+                  {
+                    icon: <FolderIcon />,
+                    label: 'الأرشيف',
+                    href: '/document-management/archive',
+                    color: COLORS.gray,
+                  },
                 ].map((tool, idx) => (
                   <Button
                     key={idx}

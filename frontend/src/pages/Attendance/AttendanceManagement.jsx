@@ -20,7 +20,6 @@ import {
   TableCell,
   TableBody,
   TableContainer,
-  Paper,
   Tabs,
   Tab,
   Button,
@@ -55,8 +54,6 @@ import {
   Pie,
   Cell,
   Legend,
-  LineChart,
-  Line,
   Area,
   AreaChart,
 } from 'recharts';
@@ -74,7 +71,6 @@ import {
   Refresh,
   Download,
   Add,
-  FilterList,
   Search,
   LocationOn,
   EventAvailable,
@@ -82,25 +78,17 @@ import {
   ThumbUp,
   ThumbDown,
   Warning,
-  Info,
-  ArrowUpward,
-  ArrowDownward,
   Timer,
   HourglassEmpty,
-  Schedule,
   Assignment,
-  AssignmentTurnedIn,
   PersonSearch,
   NotificationsActive,
   Close,
-  CheckBox,
-  RadioButtonUnchecked,
   History,
   WorkOutline,
   AccountBalance,
   CalendarViewMonth,
   Speed,
-  MoreVert,
   ErrorOutline,
   WatchLater,
   ManageAccounts,
@@ -1146,7 +1134,7 @@ function DashboardTab() {
 // TAB: CHECK-IN / CHECK-OUT
 // ─────────────────────────────────────────────────────────────────────────────
 
-function CheckInOutTab({ currentUser }) {
+function CheckInOutTab({ _currentUser }) {
   const [status, setStatus] = useState(null); // 'checked_in' | 'checked_out' | null
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);

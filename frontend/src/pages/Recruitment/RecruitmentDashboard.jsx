@@ -18,12 +18,10 @@ import {
   Button,
   Stack,
   useTheme,
-  alpha,
   IconButton,
   Tooltip,
   TextField,
   MenuItem,
-  LinearProgress,
 } from '@mui/material';
 import {
   Work as JobIcon,

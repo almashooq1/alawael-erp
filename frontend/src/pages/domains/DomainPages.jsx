@@ -30,35 +30,16 @@ import {
   TableHead,
   TableRow,
   Paper,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemIcon,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
-  Divider,
 } from '@mui/material';
 import {
   Search as SearchIcon,
   Refresh as RefreshIcon,
   Add as AddIcon,
   Visibility as ViewIcon,
-  Assignment as AssessIcon,
-  ListAlt as PlanIcon,
-  TrackChanges as GoalIcon,
-  Groups as GroupIcon,
-  Videocam as VideoIcon,
-  Vrpano as VrIcon,
-  Psychology as BehaviorIcon,
-  FamilyRestroom as FamilyIcon,
-  School as ProgramIcon,
-  AutoAwesome as AIIcon,
-  Biotech as ResearchIcon,
-  ModelTraining as TrainingIcon,
-  CheckCircle as CheckIcon,
-  Warning as WarnIcon,
 } from '@mui/icons-material';
 
 import {
@@ -109,7 +90,15 @@ import {
 } from '../../services/ddd';
 
 /* ── Generic Domain Page Factory ── */
-function createDomainPage({ title, titleEn, icon, apiModule, columns, detailFields, statsConfig }) {
+function createDomainPage({
+  title,
+  _titleEn,
+  icon,
+  apiModule,
+  columns,
+  detailFields,
+  statsConfig,
+}) {
   return function DomainPage() {
     const navigate = useNavigate();
     const [items, setItems] = useState([]);

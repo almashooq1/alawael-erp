@@ -218,15 +218,8 @@ describe('evaluateBeneficiary — error isolation', () => {
 describe('evaluateBeneficiary — subset filters', () => {
   it('domains filter narrows to the requested domain', async () => {
     // Register everything the "clinical" domain flags need.
-    const clinicalIds = [
-      'clinical.allergy.severe.medication_conflict',
-      'clinical.progress.regression.significant',
-      'clinical.seizure.cluster.48h',
-      'clinical.pediatric.weight.drop_5pct',
-      'clinical.vaccination.overdue.60d',
-      'clinical.consent.treatment.missing_pre_session',
-      'clinical.puberty.consent_review.due',
-    ];
+    const { RED_FLAGS: ALL_FLAGS } = require('../config/red-flags.registry');
+    const clinicalIds = ALL_FLAGS.filter(f => f.domain === 'clinical').map(f => f.id);
     const responses = {};
     for (const id of clinicalIds) responses[id] = {};
     const locator = fakeLocatorFor(clinicalIds, responses);

@@ -1,10 +1,26 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Box, Typography, Card, CardContent, Stack, Chip, Avatar, IconButton, Button,
-  CircularProgress, Alert, Tabs, Tab, Paper, Grid, Divider, Tooltip,
-  TextField, Dialog, DialogTitle, DialogContent, DialogActions,
-  List, ListItem, ListItemAvatar, ListItemText, Badge,
-  Select, MenuItem, FormControl, InputLabel, LinearProgress,
+  Box,
+  Typography,
+  Card,
+  CardContent,
+  Stack,
+  Chip,
+  Avatar,
+  IconButton,
+  Button,
+  CircularProgress,
+  Alert,
+  Tabs,
+  Tab,
+  Paper,
+  Grid,
+  Divider,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  Badge,
 } from '@mui/material';
 import {
   QrCode2 as QrCodeIcon,
@@ -13,17 +29,20 @@ import {
   Webhook as IntegrationsIcon,
   Dashboard as DashboardIcon,
   Refresh as RefreshIcon,
-  Add as AddIcon,
-  Event as EventIcon,
   Warning as WarningIcon,
   CheckCircle as CheckIcon,
-  Schedule as ScheduleIcon,
   Print as PrintIcon,
-  QrCodeScanner as ScanIcon,
   AccessTime as TimeIcon,
   TrendingUp as TrendIcon,
 } from '@mui/icons-material';
-import { qrApi, calendarApi, comparisonApi, integrationsApi, dashboardApi, overviewApi } from '../../services/documentProPhase5Service';
+import {
+  qrApi,
+  calendarApi,
+  comparisonApi,
+  integrationsApi,
+  dashboardApi,
+  overviewApi,
+} from '../../services/documentProPhase5Service';
 import logger from '../../utils/logger';
 
 function TabPanel({ children, value, index }) {
@@ -33,8 +52,8 @@ function TabPanel({ children, value, index }) {
 export default function DocumentsProPhase5() {
   const [tab, setTab] = useState(0);
   const [overview, setOverview] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [_loading, setLoading] = useState(false);
+  const [error, _setError] = useState(null);
 
   const loadOverview = useCallback(async () => {
     setLoading(true);
@@ -48,7 +67,9 @@ export default function DocumentsProPhase5() {
     }
   }, []);
 
-  useEffect(() => { loadOverview(); }, [loadOverview]);
+  useEffect(() => {
+    loadOverview();
+  }, [loadOverview]);
 
   return (
     <Box dir="rtl" p={3} sx={{ minHeight: '100vh', bgcolor: '#f8fafc' }}>
@@ -62,10 +83,16 @@ export default function DocumentsProPhase5() {
             أكواد QR والباركود • التقويم والمواعيد • المقارنة • التكاملات • لوحة التحكم
           </Typography>
         </Box>
-        <IconButton onClick={loadOverview}><RefreshIcon /></IconButton>
+        <IconButton onClick={loadOverview}>
+          <RefreshIcon />
+        </IconButton>
       </Stack>
 
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
 
       {/* Quick Stats */}
       <Grid container spacing={2} mb={3}>
@@ -74,12 +101,16 @@ export default function DocumentsProPhase5() {
             <CardContent>
               <Stack direction="row" justifyContent="space-between" alignItems="center">
                 <Box>
-                  <Typography variant="caption" color="text.secondary">أكواد QR</Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    أكواد QR
+                  </Typography>
                   <Typography variant="h5" fontWeight={700} color="#6366f1">
                     {overview?.qrCodes?.total ?? '—'}
                   </Typography>
                 </Box>
-                <Avatar sx={{ bgcolor: '#6366f1' }}><QrCodeIcon /></Avatar>
+                <Avatar sx={{ bgcolor: '#6366f1' }}>
+                  <QrCodeIcon />
+                </Avatar>
               </Stack>
             </CardContent>
           </Card>
@@ -89,12 +120,16 @@ export default function DocumentsProPhase5() {
             <CardContent>
               <Stack direction="row" justifyContent="space-between" alignItems="center">
                 <Box>
-                  <Typography variant="caption" color="text.secondary">أحداث التقويم</Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    أحداث التقويم
+                  </Typography>
                   <Typography variant="h5" fontWeight={700} color="#f59e0b">
                     {overview?.calendar?.total ?? '—'}
                   </Typography>
                 </Box>
-                <Avatar sx={{ bgcolor: '#f59e0b' }}><CalendarIcon /></Avatar>
+                <Avatar sx={{ bgcolor: '#f59e0b' }}>
+                  <CalendarIcon />
+                </Avatar>
               </Stack>
             </CardContent>
           </Card>
@@ -104,12 +139,16 @@ export default function DocumentsProPhase5() {
             <CardContent>
               <Stack direction="row" justifyContent="space-between" alignItems="center">
                 <Box>
-                  <Typography variant="caption" color="text.secondary">المقارنات</Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    المقارنات
+                  </Typography>
                   <Typography variant="h5" fontWeight={700} color="#3b82f6">
                     {overview?.comparisons?.total ?? '—'}
                   </Typography>
                 </Box>
-                <Avatar sx={{ bgcolor: '#3b82f6' }}><CompareIcon /></Avatar>
+                <Avatar sx={{ bgcolor: '#3b82f6' }}>
+                  <CompareIcon />
+                </Avatar>
               </Stack>
             </CardContent>
           </Card>
@@ -119,12 +158,16 @@ export default function DocumentsProPhase5() {
             <CardContent>
               <Stack direction="row" justifyContent="space-between" alignItems="center">
                 <Box>
-                  <Typography variant="caption" color="text.secondary">التكاملات</Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    التكاملات
+                  </Typography>
                   <Typography variant="h5" fontWeight={700} color="#ec4899">
                     {overview?.integrations?.total ?? '—'}
                   </Typography>
                 </Box>
-                <Avatar sx={{ bgcolor: '#ec4899' }}><IntegrationsIcon /></Avatar>
+                <Avatar sx={{ bgcolor: '#ec4899' }}>
+                  <IntegrationsIcon />
+                </Avatar>
               </Stack>
             </CardContent>
           </Card>
@@ -134,12 +177,16 @@ export default function DocumentsProPhase5() {
             <CardContent>
               <Stack direction="row" justifyContent="space-between" alignItems="center">
                 <Box>
-                  <Typography variant="caption" color="text.secondary">الويدجت</Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    الويدجت
+                  </Typography>
                   <Typography variant="h5" fontWeight={700} color="#22c55e">
                     {overview?.dashboard?.totalWidgets ?? '—'}
                   </Typography>
                 </Box>
-                <Avatar sx={{ bgcolor: '#22c55e' }}><DashboardIcon /></Avatar>
+                <Avatar sx={{ bgcolor: '#22c55e' }}>
+                  <DashboardIcon />
+                </Avatar>
               </Stack>
             </CardContent>
           </Card>
@@ -200,13 +247,18 @@ function QRCodesTab() {
       setLoading(true);
       try {
         const [sr, tr, pr, jr] = await Promise.all([
-          qrApi.getStats(), qrApi.getTypes(), qrApi.getPurposes(), qrApi.getPrintJobs(),
+          qrApi.getStats(),
+          qrApi.getTypes(),
+          qrApi.getPurposes(),
+          qrApi.getPrintJobs(),
         ]);
         setStats(sr.data?.stats);
         setTypes(tr.data?.types ?? []);
         setPurposes(pr.data?.purposes ?? []);
         setPrintJobs(jr.data?.jobs ?? []);
-      } catch (err) { logger.error(err); }
+      } catch (err) {
+        logger.error(err);
+      }
       setLoading(false);
     }
     load();
@@ -220,9 +272,11 @@ function QRCodesTab() {
       <Grid item xs={12} md={6}>
         <Card variant="outlined">
           <CardContent>
-            <Typography variant="h6" gutterBottom>📱 أنواع الأكواد المدعومة</Typography>
+            <Typography variant="h6" gutterBottom>
+              📱 أنواع الأكواد المدعومة
+            </Typography>
             <Stack spacing={1}>
-              {types.map((t) => (
+              {types.map(t => (
                 <Stack key={t.key} direction="row" alignItems="center" spacing={1}>
                   <Typography>{t.icon}</Typography>
                   <Typography fontWeight={600}>{t.labelAr}</Typography>
@@ -238,9 +292,11 @@ function QRCodesTab() {
       <Grid item xs={12} md={6}>
         <Card variant="outlined">
           <CardContent>
-            <Typography variant="h6" gutterBottom>🎯 أغراض الاستخدام</Typography>
+            <Typography variant="h6" gutterBottom>
+              🎯 أغراض الاستخدام
+            </Typography>
             <Stack spacing={1}>
-              {purposes.map((p) => (
+              {purposes.map(p => (
                 <Stack key={p.key} direction="row" alignItems="center" spacing={1}>
                   <Typography>{p.icon}</Typography>
                   <Typography fontWeight={600}>{p.labelAr}</Typography>
@@ -256,16 +312,25 @@ function QRCodesTab() {
       <Grid item xs={12}>
         <Card variant="outlined">
           <CardContent>
-            <Typography variant="h6" gutterBottom><PrintIcon sx={{ mr: 1 }} />مهام الطباعة الأخيرة</Typography>
+            <Typography variant="h6" gutterBottom>
+              <PrintIcon sx={{ mr: 1 }} />
+              مهام الطباعة الأخيرة
+            </Typography>
             {printJobs.length === 0 ? (
-              <Typography color="text.secondary" textAlign="center" py={3}>لا توجد مهام طباعة</Typography>
+              <Typography color="text.secondary" textAlign="center" py={3}>
+                لا توجد مهام طباعة
+              </Typography>
             ) : (
               <List dense>
-                {printJobs.slice(0, 5).map((job) => (
+                {printJobs.slice(0, 5).map(job => (
                   <ListItem key={job._id}>
                     <ListItemAvatar>
                       <Avatar sx={{ bgcolor: job.status === 'completed' ? '#d1fae5' : '#fef3c7' }}>
-                        {job.status === 'completed' ? <CheckIcon color="success" /> : <TimeIcon color="warning" />}
+                        {job.status === 'completed' ? (
+                          <CheckIcon color="success" />
+                        ) : (
+                          <TimeIcon color="warning" />
+                        )}
                       </Avatar>
                     </ListItemAvatar>
                     <ListItemText
@@ -307,7 +372,9 @@ function CalendarTab() {
         setOverdue(or.data?.overdue ?? []);
         setTypes(tr.data?.types ?? []);
         setStats(sr.data?.stats);
-      } catch (err) { logger.error(err); }
+      } catch (err) {
+        logger.error(err);
+      }
       setLoading(false);
     }
     load();
@@ -330,7 +397,9 @@ function CalendarTab() {
       <Grid item xs={12} md={4}>
         <Card variant="outlined">
           <CardContent>
-            <Typography variant="h6" gutterBottom>📊 إحصائيات التقويم</Typography>
+            <Typography variant="h6" gutterBottom>
+              📊 إحصائيات التقويم
+            </Typography>
             <Stack spacing={1}>
               {Object.entries(stats?.byStatus || {}).map(([key, val]) => (
                 <Stack key={key} direction="row" justifyContent="space-between">
@@ -347,13 +416,19 @@ function CalendarTab() {
       <Grid item xs={12} md={4}>
         <Card variant="outlined">
           <CardContent>
-            <Typography variant="h6" gutterBottom>📋 أنواع الأحداث</Typography>
+            <Typography variant="h6" gutterBottom>
+              📋 أنواع الأحداث
+            </Typography>
             <Stack spacing={1}>
-              {types.map((t) => (
+              {types.map(t => (
                 <Stack key={t.key} direction="row" alignItems="center" spacing={1}>
                   <Typography>{t.icon}</Typography>
                   <Typography>{t.labelAr}</Typography>
-                  <Chip label={stats?.byType?.[t.key] || 0} size="small" sx={{ bgcolor: t.color + '20', color: t.color }} />
+                  <Chip
+                    label={stats?.byType?.[t.key] || 0}
+                    size="small"
+                    sx={{ bgcolor: t.color + '20', color: t.color }}
+                  />
                 </Stack>
               ))}
             </Stack>
@@ -365,18 +440,26 @@ function CalendarTab() {
       <Grid item xs={12} md={4}>
         <Card variant="outlined">
           <CardContent>
-            <Typography variant="h6" gutterBottom>⏰ المواعيد القادمة (14 يوم)</Typography>
+            <Typography variant="h6" gutterBottom>
+              ⏰ المواعيد القادمة (14 يوم)
+            </Typography>
             {deadlines.length === 0 ? (
-              <Typography color="text.secondary" textAlign="center" py={3}>لا توجد مواعيد قادمة</Typography>
+              <Typography color="text.secondary" textAlign="center" py={3}>
+                لا توجد مواعيد قادمة
+              </Typography>
             ) : (
               <List dense>
-                {deadlines.slice(0, 8).map((d) => (
+                {deadlines.slice(0, 8).map(d => (
                   <ListItem key={d._id}>
                     <ListItemText
                       primary={d.titleAr || d.title}
                       secondary={new Date(d.startDate).toLocaleDateString('ar-SA')}
                     />
-                    <Chip label={d.priority} size="small" color={d.priority === 'critical' ? 'error' : 'default'} />
+                    <Chip
+                      label={d.priority}
+                      size="small"
+                      color={d.priority === 'critical' ? 'error' : 'default'}
+                    />
                   </ListItem>
                 ))}
               </List>
@@ -390,12 +473,16 @@ function CalendarTab() {
         <Grid item xs={12}>
           <Card variant="outlined" sx={{ borderColor: '#ef4444' }}>
             <CardContent>
-              <Typography variant="h6" color="error" gutterBottom>🔴 المتأخرة ({overdue.length})</Typography>
+              <Typography variant="h6" color="error" gutterBottom>
+                🔴 المتأخرة ({overdue.length})
+              </Typography>
               <List dense>
-                {overdue.map((o) => (
+                {overdue.map(o => (
                   <ListItem key={o._id}>
                     <ListItemAvatar>
-                      <Avatar sx={{ bgcolor: '#fef2f2' }}><WarningIcon color="error" /></Avatar>
+                      <Avatar sx={{ bgcolor: '#fef2f2' }}>
+                        <WarningIcon color="error" />
+                      </Avatar>
                     </ListItemAvatar>
                     <ListItemText
                       primary={o.titleAr || o.title}
@@ -430,7 +517,9 @@ function ComparisonTab() {
         ]);
         setHistory(hr.data?.comparisons ?? []);
         setStats(sr.data?.stats);
-      } catch (err) { logger.error(err); }
+      } catch (err) {
+        logger.error(err);
+      }
       setLoading(false);
     }
     load();
@@ -444,16 +533,26 @@ function ComparisonTab() {
       <Grid item xs={12} md={4}>
         <Card variant="outlined">
           <CardContent>
-            <Typography variant="h6" gutterBottom>📊 إحصائيات المقارنة</Typography>
+            <Typography variant="h6" gutterBottom>
+              📊 إحصائيات المقارنة
+            </Typography>
             <Stack spacing={2}>
               <Box>
-                <Typography variant="body2" color="text.secondary">إجمالي المقارنات</Typography>
-                <Typography variant="h4" fontWeight={700}>{stats?.total ?? 0}</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  إجمالي المقارنات
+                </Typography>
+                <Typography variant="h4" fontWeight={700}>
+                  {stats?.total ?? 0}
+                </Typography>
               </Box>
               <Box>
-                <Typography variant="body2" color="text.secondary">متوسط التشابه</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  متوسط التشابه
+                </Typography>
                 <Stack direction="row" alignItems="center" spacing={1}>
-                  <Typography variant="h4" fontWeight={700} color="primary">{stats?.averageSimilarity ?? 0}%</Typography>
+                  <Typography variant="h4" fontWeight={700} color="primary">
+                    {stats?.averageSimilarity ?? 0}%
+                  </Typography>
                   <TrendIcon color="primary" />
                 </Stack>
               </Box>
@@ -466,13 +565,26 @@ function ComparisonTab() {
       <Grid item xs={12} md={4}>
         <Card variant="outlined">
           <CardContent>
-            <Typography variant="h6" gutterBottom>حسب النوع</Typography>
+            <Typography variant="h6" gutterBottom>
+              حسب النوع
+            </Typography>
             {Object.entries(stats?.byType || {}).map(([type, data]) => (
-              <Stack key={type} direction="row" justifyContent="space-between" alignItems="center" py={0.5}>
+              <Stack
+                key={type}
+                direction="row"
+                justifyContent="space-between"
+                alignItems="center"
+                py={0.5}
+              >
                 <Typography>{type}</Typography>
                 <Stack direction="row" spacing={1}>
                   <Chip label={`${data.count} مقارنة`} size="small" />
-                  <Chip label={`${data.avgSimilarity}%`} size="small" color="primary" variant="outlined" />
+                  <Chip
+                    label={`${data.avgSimilarity}%`}
+                    size="small"
+                    color="primary"
+                    variant="outlined"
+                  />
                 </Stack>
               </Stack>
             ))}
@@ -484,15 +596,21 @@ function ComparisonTab() {
       <Grid item xs={12} md={4}>
         <Card variant="outlined">
           <CardContent>
-            <Typography variant="h6" gutterBottom>آخر المقارنات</Typography>
+            <Typography variant="h6" gutterBottom>
+              آخر المقارنات
+            </Typography>
             {history.length === 0 ? (
-              <Typography color="text.secondary" textAlign="center" py={3}>لا توجد مقارنات</Typography>
+              <Typography color="text.secondary" textAlign="center" py={3}>
+                لا توجد مقارنات
+              </Typography>
             ) : (
               <List dense>
-                {history.map((c) => (
+                {history.map(c => (
                   <ListItem key={c._id}>
                     <ListItemAvatar>
-                      <Avatar sx={{ bgcolor: '#dbeafe' }}><CompareIcon color="primary" /></Avatar>
+                      <Avatar sx={{ bgcolor: '#dbeafe' }}>
+                        <CompareIcon color="primary" />
+                      </Avatar>
                     </ListItemAvatar>
                     <ListItemText
                       primary={`${c.sourceDocument?.title || '?'} ↔ ${c.targetDocument?.title || '?'}`}
@@ -523,31 +641,39 @@ function IntegrationsTab() {
       setLoading(true);
       try {
         const [ir, pr, sr] = await Promise.all([
-          integrationsApi.getAll(), integrationsApi.getProviders(), integrationsApi.getStats(),
+          integrationsApi.getAll(),
+          integrationsApi.getProviders(),
+          integrationsApi.getStats(),
         ]);
         setIntegrations(ir.data?.integrations ?? []);
         setProviders(pr.data?.providers ?? []);
         setStats(sr.data?.stats);
-      } catch (err) { logger.error(err); }
+      } catch (err) {
+        logger.error(err);
+      }
       setLoading(false);
     }
     load();
   }, []);
 
-  const handleToggle = async (id) => {
+  const handleToggle = async id => {
     try {
       await integrationsApi.toggle(id);
       const res = await integrationsApi.getAll();
       setIntegrations(res.data?.integrations ?? []);
-    } catch (err) { logger.error(err); }
+    } catch (err) {
+      logger.error(err);
+    }
   };
 
-  const handleTest = async (id) => {
+  const handleTest = async id => {
     try {
       await integrationsApi.test(id);
       const res = await integrationsApi.getAll();
       setIntegrations(res.data?.integrations ?? []);
-    } catch (err) { logger.error(err); }
+    } catch (err) {
+      logger.error(err);
+    }
   };
 
   if (loading) return <CircularProgress sx={{ display: 'block', mx: 'auto' }} />;
@@ -558,9 +684,11 @@ function IntegrationsTab() {
       <Grid item xs={12} md={4}>
         <Card variant="outlined">
           <CardContent>
-            <Typography variant="h6" gutterBottom>🔌 مزودي التكامل</Typography>
+            <Typography variant="h6" gutterBottom>
+              🔌 مزودي التكامل
+            </Typography>
             <Stack spacing={1}>
-              {providers.map((p) => (
+              {providers.map(p => (
                 <Stack key={p.key} direction="row" alignItems="center" spacing={1}>
                   <Typography fontSize={20}>{p.icon}</Typography>
                   <Typography fontWeight={600}>{p.nameAr}</Typography>
@@ -576,21 +704,33 @@ function IntegrationsTab() {
       <Grid item xs={12} md={8}>
         <Card variant="outlined">
           <CardContent>
-            <Typography variant="h6" gutterBottom>التكاملات المُعدة ({integrations.length})</Typography>
+            <Typography variant="h6" gutterBottom>
+              التكاملات المُعدة ({integrations.length})
+            </Typography>
             {integrations.length === 0 ? (
-              <Typography color="text.secondary" textAlign="center" py={3}>لا توجد تكاملات — أضف تكاملاً جديداً</Typography>
+              <Typography color="text.secondary" textAlign="center" py={3}>
+                لا توجد تكاملات — أضف تكاملاً جديداً
+              </Typography>
             ) : (
               <List>
-                {integrations.map((intg) => (
+                {integrations.map(intg => (
                   <React.Fragment key={intg._id}>
                     <ListItem
                       secondaryAction={
                         <Stack direction="row" spacing={1}>
-                          <Button size="small" variant="outlined" onClick={() => handleTest(intg._id)}>اختبار</Button>
-                          <Button size="small"
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            onClick={() => handleTest(intg._id)}
+                          >
+                            اختبار
+                          </Button>
+                          <Button
+                            size="small"
                             variant={intg.status === 'active' ? 'contained' : 'outlined'}
                             color={intg.status === 'active' ? 'success' : 'default'}
-                            onClick={() => handleToggle(intg._id)}>
+                            onClick={() => handleToggle(intg._id)}
+                          >
                             {intg.status === 'active' ? 'نشط' : 'معطل'}
                           </Button>
                         </Stack>
@@ -598,8 +738,15 @@ function IntegrationsTab() {
                     >
                       <ListItemAvatar>
                         <Badge
-                          color={intg.status === 'active' ? 'success' : intg.status === 'error' ? 'error' : 'default'}
-                          variant="dot" overlap="circular"
+                          color={
+                            intg.status === 'active'
+                              ? 'success'
+                              : intg.status === 'error'
+                                ? 'error'
+                                : 'default'
+                          }
+                          variant="dot"
+                          overlap="circular"
                         >
                           <Avatar sx={{ bgcolor: '#f1f5f9' }}>
                             <IntegrationsIcon />
@@ -638,14 +785,18 @@ function DashboardWidgetsTab() {
       setLoading(true);
       try {
         const [wr, cr, lr, sr] = await Promise.all([
-          dashboardApi.getWidgets(), dashboardApi.getCategories(),
-          dashboardApi.getLayouts(), dashboardApi.getStats(),
+          dashboardApi.getWidgets(),
+          dashboardApi.getCategories(),
+          dashboardApi.getLayouts(),
+          dashboardApi.getStats(),
         ]);
         setWidgets(wr.data?.widgets ?? []);
         setCategories(cr.data?.categories ?? []);
         setLayouts(lr.data?.layouts ?? []);
         setStats(sr.data?.stats);
-      } catch (err) { logger.error(err); }
+      } catch (err) {
+        logger.error(err);
+      }
       setLoading(false);
     }
     load();
@@ -659,7 +810,9 @@ function DashboardWidgetsTab() {
       <Grid item xs={12} md={4}>
         <Card variant="outlined" sx={{ mb: 2 }}>
           <CardContent>
-            <Typography variant="h6" gutterBottom>📊 إحصائيات اللوحة</Typography>
+            <Typography variant="h6" gutterBottom>
+              📊 إحصائيات اللوحة
+            </Typography>
             <Stack spacing={1}>
               <Stack direction="row" justifyContent="space-between">
                 <Typography>إجمالي الويدجت</Typography>
@@ -680,13 +833,15 @@ function DashboardWidgetsTab() {
         {/* Categories */}
         <Card variant="outlined">
           <CardContent>
-            <Typography variant="h6" gutterBottom>التصنيفات</Typography>
+            <Typography variant="h6" gutterBottom>
+              التصنيفات
+            </Typography>
             <Stack spacing={1}>
-              {categories.map((c) => (
+              {categories.map(c => (
                 <Stack key={c.key} direction="row" alignItems="center" spacing={1}>
                   <Typography>{c.icon}</Typography>
                   <Typography>{c.labelAr}</Typography>
-                  <Chip label={widgets.filter((w) => w.category === c.key).length} size="small" />
+                  <Chip label={widgets.filter(w => w.category === c.key).length} size="small" />
                 </Stack>
               ))}
             </Stack>
@@ -698,16 +853,26 @@ function DashboardWidgetsTab() {
       <Grid item xs={12} md={8}>
         <Card variant="outlined">
           <CardContent>
-            <Typography variant="h6" gutterBottom>🧩 الويدجات المتاحة ({widgets.length})</Typography>
+            <Typography variant="h6" gutterBottom>
+              🧩 الويدجات المتاحة ({widgets.length})
+            </Typography>
             <Grid container spacing={1}>
-              {widgets.map((w) => (
+              {widgets.map(w => (
                 <Grid item xs={12} sm={6} md={4} key={w.key}>
                   <Paper variant="outlined" sx={{ p: 1.5, textAlign: 'center' }}>
                     <Typography fontSize={24}>{w.icon}</Typography>
-                    <Typography variant="body2" fontWeight={700}>{w.nameAr || w.name}</Typography>
-                    <Typography variant="caption" color="text.secondary">{w.descriptionAr}</Typography>
+                    <Typography variant="body2" fontWeight={700}>
+                      {w.nameAr || w.name}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {w.descriptionAr}
+                    </Typography>
                     <Stack direction="row" justifyContent="center" spacing={0.5} mt={0.5}>
-                      <Chip label={`${w.defaultSize?.cols ?? 3}×${w.defaultSize?.rows ?? 2}`} size="small" variant="outlined" />
+                      <Chip
+                        label={`${w.defaultSize?.cols ?? 3}×${w.defaultSize?.rows ?? 2}`}
+                        size="small"
+                        variant="outlined"
+                      />
                       <Chip label={w.type} size="small" color="primary" variant="outlined" />
                     </Stack>
                   </Paper>
@@ -722,14 +887,16 @@ function DashboardWidgetsTab() {
       <Grid item xs={12}>
         <Card variant="outlined">
           <CardContent>
-            <Typography variant="h6" gutterBottom>📐 تخطيطاتك ({layouts.length})</Typography>
+            <Typography variant="h6" gutterBottom>
+              📐 تخطيطاتك ({layouts.length})
+            </Typography>
             {layouts.length === 0 ? (
               <Typography color="text.secondary" textAlign="center" py={3}>
                 لم يتم إنشاء تخطيطات بعد — سيتم إنشاء التخطيط الافتراضي تلقائياً
               </Typography>
             ) : (
               <Grid container spacing={1}>
-                {layouts.map((l) => (
+                {layouts.map(l => (
                   <Grid item xs={12} sm={6} md={4} key={l._id}>
                     <Paper variant="outlined" sx={{ p: 2 }}>
                       <Stack direction="row" justifyContent="space-between" alignItems="center">
@@ -737,7 +904,8 @@ function DashboardWidgetsTab() {
                         {l.isDefault && <Chip label="افتراضي" size="small" color="primary" />}
                       </Stack>
                       <Typography variant="body2" color="text.secondary">
-                        {l.widgets?.length ?? 0} عنصر • {l.theme || 'light'} • {l.columns || 12} عمود
+                        {l.widgets?.length ?? 0} عنصر • {l.theme || 'light'} • {l.columns || 12}{' '}
+                        عمود
                       </Typography>
                     </Paper>
                   </Grid>

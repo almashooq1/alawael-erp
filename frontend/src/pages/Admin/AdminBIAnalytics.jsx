@@ -20,14 +20,12 @@ import {
   LinearProgress,
   Tabs,
   Tab,
-  Divider,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Tooltip as MTooltip,
 } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import PeopleIcon from '@mui/icons-material/People';
@@ -36,7 +34,6 @@ import AssessmentIcon from '@mui/icons-material/Assessment';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import {
   BarChart,
@@ -133,6 +130,7 @@ export default function AdminBIAnalytics() {
     load();
   }, [load]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const kpis = overview?.kpis || {};
 
   const kpiCards = useMemo(

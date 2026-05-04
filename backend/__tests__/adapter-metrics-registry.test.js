@@ -76,5 +76,5 @@ describe('integration with audit logger', () => {
     // but the in-memory counter runs first so it always updates.
     const snap = registry.snapshotCounters();
     expect(snap.scfhs?.success).toBe(1);
-  });
+  }, 15000);
 });

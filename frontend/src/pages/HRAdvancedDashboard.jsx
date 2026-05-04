@@ -743,6 +743,7 @@ export default function HRAdvancedDashboard() {
     } finally {
       setLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const refresh = useCallback(() => {
     fetchData();

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * SessionAnalyticsDashboard — لوحة تحليلات الجلسات العلاجية المتقدمة
  *
  * Comprehensive analytics dashboard for therapy sessions featuring:

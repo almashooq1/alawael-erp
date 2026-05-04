@@ -8,8 +8,16 @@
 import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import {
-  Box, AppBar, Toolbar, Typography, IconButton, Avatar,
-  Badge, Tooltip, useMediaQuery, useTheme, Chip,
+  Box,
+  AppBar,
+  Toolbar,
+  Typography,
+  IconButton,
+  Badge,
+  Tooltip,
+  useMediaQuery,
+  useTheme,
+  Chip,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -47,13 +55,14 @@ export default function DDDPlatformLayout({ children }) {
             easing: theme.transitions.easing.sharp,
             duration: theme.transitions.duration.leavingScreen,
           }),
-          ...(sidebarOpen && !isMobile && {
-            marginRight: `${DRAWER_WIDTH}px`,
-            transition: theme.transitions.create('margin', {
-              easing: theme.transitions.easing.easeOut,
-              duration: theme.transitions.duration.enteringScreen,
+          ...(sidebarOpen &&
+            !isMobile && {
+              marginRight: `${DRAWER_WIDTH}px`,
+              transition: theme.transitions.create('margin', {
+                easing: theme.transitions.easing.easeOut,
+                duration: theme.transitions.duration.enteringScreen,
+              }),
             }),
-          }),
         }}
       >
         {/* ── Top AppBar ── */}
@@ -85,25 +94,40 @@ export default function DDDPlatformLayout({ children }) {
               sx={{ fontSize: 10 }}
             />
 
-            <Tooltip title="بحث"><IconButton size="small"><SearchIcon /></IconButton></Tooltip>
+            <Tooltip title="بحث">
+              <IconButton size="small">
+                <SearchIcon />
+              </IconButton>
+            </Tooltip>
             <Tooltip title="الإشعارات">
               <IconButton size="small">
-                <Badge badgeContent={3} color="error"><NotifIcon /></Badge>
+                <Badge badgeContent={3} color="error">
+                  <NotifIcon />
+                </Badge>
               </IconButton>
             </Tooltip>
             <Tooltip title="ملء الشاشة">
-              <IconButton size="small" onClick={() => document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen()}>
+              <IconButton
+                size="small"
+                onClick={() =>
+                  document.fullscreenElement
+                    ? document.exitFullscreen()
+                    : document.documentElement.requestFullscreen()
+                }
+              >
                 <FullscreenIcon />
               </IconButton>
             </Tooltip>
-            <Tooltip title="الإعدادات"><IconButton size="small"><SettingsIcon /></IconButton></Tooltip>
+            <Tooltip title="الإعدادات">
+              <IconButton size="small">
+                <SettingsIcon />
+              </IconButton>
+            </Tooltip>
           </Toolbar>
         </AppBar>
 
         {/* ── Page Content ── */}
-        <Box sx={{ flex: 1, bgcolor: 'grey.50', overflow: 'auto' }}>
-          {children || <Outlet />}
-        </Box>
+        <Box sx={{ flex: 1, bgcolor: 'grey.50', overflow: 'auto' }}>{children || <Outlet />}</Box>
       </Box>
     </Box>
   );

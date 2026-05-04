@@ -8,9 +8,18 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
-  Box, Drawer, List, ListItem, ListItemButton, ListItemIcon,
-  ListItemText, Collapse, Typography, Divider, Avatar,
-  IconButton, Tooltip, Chip, useMediaQuery, useTheme,
+  Box,
+  Drawer,
+  List,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Collapse,
+  Typography,
+  Avatar,
+  IconButton,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material';
 import {
   Dashboard as DashboardIcon,
@@ -32,9 +41,9 @@ import {
   BarChart as ReportIcon,
   Biotech as ResearchIcon,
   ModelTraining as TrainingIcon,
-  ExpandLess, ExpandMore,
+  ExpandLess,
+  ExpandMore,
   ChevronRight as CollapseIcon,
-  Menu as MenuIcon,
 } from '@mui/icons-material';
 
 const DRAWER_WIDTH = 260;
@@ -68,7 +77,12 @@ const NAV_SECTIONS = [
     title: 'لوحة التحكم',
     titleEn: 'Dashboard',
     items: [
-      { id: 'dashboard', title: 'نظرة عامة تنفيذية', path: '/platform/dashboard', icon: 'Dashboard' },
+      {
+        id: 'dashboard',
+        title: 'نظرة عامة تنفيذية',
+        path: '/platform/dashboard',
+        icon: 'Dashboard',
+      },
     ],
   },
   {
@@ -94,8 +108,18 @@ const NAV_SECTIONS = [
     title: 'التأهيل المتخصص',
     titleEn: 'Specialized Rehab',
     items: [
-      { id: 'group-therapy', title: 'العلاج الجماعي', path: '/platform/group-therapy', icon: 'Groups' },
-      { id: 'tele-rehab', title: 'التأهيل عن بُعد', path: '/platform/tele-rehab', icon: 'Videocam' },
+      {
+        id: 'group-therapy',
+        title: 'العلاج الجماعي',
+        path: '/platform/group-therapy',
+        icon: 'Groups',
+      },
+      {
+        id: 'tele-rehab',
+        title: 'التأهيل عن بُعد',
+        path: '/platform/tele-rehab',
+        icon: 'Videocam',
+      },
       { id: 'ar-vr', title: 'الواقع الافتراضي', path: '/platform/ar-vr', icon: 'Vrpano' },
       { id: 'behavior', title: 'إدارة السلوك', path: '/platform/behavior', icon: 'Psychology' },
     ],
@@ -105,7 +129,12 @@ const NAV_SECTIONS = [
     titleEn: 'Programs & Training',
     items: [
       { id: 'programs', title: 'البرامج', path: '/platform/programs', icon: 'School' },
-      { id: 'field-training', title: 'التدريب الميداني', path: '/platform/field-training', icon: 'ModelTraining' },
+      {
+        id: 'field-training',
+        title: 'التدريب الميداني',
+        path: '/platform/field-training',
+        icon: 'ModelTraining',
+      },
       { id: 'research', title: 'البحث السريري', path: '/platform/research', icon: 'Biotech' },
     ],
   },
@@ -121,7 +150,12 @@ const NAV_SECTIONS = [
     titleEn: 'Quality & Intelligence',
     items: [
       { id: 'quality', title: 'الجودة والامتثال', path: '/platform/quality', icon: 'VerifiedUser' },
-      { id: 'ai-recommendations', title: 'التوصيات الذكية', path: '/platform/ai-recommendations', icon: 'AutoAwesome' },
+      {
+        id: 'ai-recommendations',
+        title: 'التوصيات الذكية',
+        path: '/platform/ai-recommendations',
+        icon: 'AutoAwesome',
+      },
       { id: 'reports', title: 'التقارير', path: '/platform/reports', icon: 'BarChart' },
     ],
   },
@@ -136,22 +170,35 @@ export default function DDDSidebar({ open = true, onToggle }) {
     NAV_SECTIONS.reduce((acc, s) => ({ ...acc, [s.titleEn]: true }), {})
   );
 
-  const toggleSection = (key) => {
+  const toggleSection = key => {
     setExpandedSections(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
-  const isActive = (path) => location.pathname === path || location.pathname.startsWith(path + '/');
+  const isActive = path => location.pathname === path || location.pathname.startsWith(path + '/');
 
   const drawerContent = (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       {/* Header */}
-      <Box sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 1.5, borderBottom: 1, borderColor: 'divider' }}>
+      <Box
+        sx={{
+          p: 2,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1.5,
+          borderBottom: 1,
+          borderColor: 'divider',
+        }}
+      >
         <Avatar sx={{ bgcolor: 'primary.main', width: 40, height: 40 }}>
           <DashboardIcon />
         </Avatar>
         <Box sx={{ flex: 1 }}>
-          <Typography variant="subtitle2" fontWeight="bold">منصة التأهيل</Typography>
-          <Typography variant="caption" color="text.secondary">Unified Rehab Platform</Typography>
+          <Typography variant="subtitle2" fontWeight="bold">
+            منصة التأهيل
+          </Typography>
+          <Typography variant="caption" color="text.secondary">
+            Unified Rehab Platform
+          </Typography>
         </Box>
         {onToggle && (
           <IconButton size="small" onClick={onToggle}>
@@ -162,13 +209,10 @@ export default function DDDSidebar({ open = true, onToggle }) {
 
       {/* Navigation */}
       <Box sx={{ flex: 1, overflowY: 'auto', py: 1 }}>
-        {NAV_SECTIONS.map((section) => (
+        {NAV_SECTIONS.map(section => (
           <React.Fragment key={section.titleEn}>
             {/* Section header */}
-            <ListItemButton
-              onClick={() => toggleSection(section.titleEn)}
-              sx={{ py: 0.5, px: 2 }}
-            >
+            <ListItemButton onClick={() => toggleSection(section.titleEn)} sx={{ py: 0.5, px: 2 }}>
               <ListItemText
                 primary={section.title}
                 primaryTypographyProps={{
@@ -179,12 +223,16 @@ export default function DDDSidebar({ open = true, onToggle }) {
                   fontSize: 11,
                 }}
               />
-              {expandedSections[section.titleEn] ? <ExpandLess fontSize="small" /> : <ExpandMore fontSize="small" />}
+              {expandedSections[section.titleEn] ? (
+                <ExpandLess fontSize="small" />
+              ) : (
+                <ExpandMore fontSize="small" />
+              )}
             </ListItemButton>
 
             <Collapse in={expandedSections[section.titleEn]} timeout="auto">
               <List disablePadding>
-                {section.items.map((item) => {
+                {section.items.map(item => {
                   const active = isActive(item.path);
                   return (
                     <ListItemButton
@@ -194,7 +242,9 @@ export default function DDDSidebar({ open = true, onToggle }) {
                         if (isMobile && onToggle) onToggle();
                       }}
                       sx={{
-                        py: 0.75, px: 2, pl: 3,
+                        py: 0.75,
+                        px: 2,
+                        pl: 3,
                         bgcolor: active ? 'primary.light' : 'transparent',
                         color: active ? 'primary.contrastText' : 'text.primary',
                         borderRight: active ? 3 : 0,
@@ -202,7 +252,12 @@ export default function DDDSidebar({ open = true, onToggle }) {
                         '&:hover': { bgcolor: active ? 'primary.light' : 'action.hover' },
                       }}
                     >
-                      <ListItemIcon sx={{ minWidth: 36, color: active ? 'primary.contrastText' : 'action.active' }}>
+                      <ListItemIcon
+                        sx={{
+                          minWidth: 36,
+                          color: active ? 'primary.contrastText' : 'action.active',
+                        }}
+                      >
                         {ICONS[item.icon] || <DashboardIcon />}
                       </ListItemIcon>
                       <ListItemText

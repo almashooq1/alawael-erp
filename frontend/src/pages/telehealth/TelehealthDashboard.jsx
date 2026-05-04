@@ -7,7 +7,6 @@ import {
   getTelehealthStats,
   cancelConsultation,
   STATUS_LABELS,
-  STATUS_COLORS,
   TYPE_LABELS,
   PRIORITY_LABELS,
 } from '../../services/telehealthService';
@@ -35,7 +34,7 @@ export default function TelehealthDashboard() {
   const [filters, setFilters] = useState({ status: '', date: '', search: '', page: 1 });
   const [loading, setLoading] = useState(false);
   const [total, setTotal] = useState(0);
-  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [_showCreateModal, setShowCreateModal] = useState(false);
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -74,7 +73,9 @@ export default function TelehealthDashboard() {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold text-gray-800">الطب عن بعد</h1>
-            <p className="text-gray-500 text-sm mt-1">إدارة الاستشارات الافتراضية والجلسات عن بُعد</p>
+            <p className="text-gray-500 text-sm mt-1">
+              إدارة الاستشارات الافتراضية والجلسات عن بُعد
+            </p>
           </div>
           <button
             onClick={() => setShowCreateModal(true)}
@@ -89,10 +90,23 @@ export default function TelehealthDashboard() {
           {[
             { label: 'اليوم', value: stats.todayCount ?? '—', color: 'blue', icon: '📅' },
             { label: 'نشطة الآن', value: stats.activeCount ?? '—', color: 'green', icon: '🎥' },
-            { label: 'مكتملة اليوم', value: stats.completedToday ?? '—', color: 'teal', icon: '✅' },
-            { label: 'هذا الأسبوع', value: stats.thisWeekCount ?? '—', color: 'indigo', icon: '📊' },
+            {
+              label: 'مكتملة اليوم',
+              value: stats.completedToday ?? '—',
+              color: 'teal',
+              icon: '✅',
+            },
+            {
+              label: 'هذا الأسبوع',
+              value: stats.thisWeekCount ?? '—',
+              color: 'indigo',
+              icon: '📊',
+            },
           ].map(card => (
-            <div key={card.label} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+            <div
+              key={card.label}
+              className="bg-white rounded-xl p-4 shadow-sm border border-gray-100"
+            >
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-gray-500 text-xs mb-1">{card.label}</p>
@@ -121,7 +135,9 @@ export default function TelehealthDashboard() {
             >
               <option value="">جميع الحالات</option>
               {Object.entries(STATUS_LABELS).map(([v, l]) => (
-                <option key={v} value={v}>{l}</option>
+                <option key={v} value={v}>
+                  {l}
+                </option>
               ))}
             </select>
             <input
@@ -156,8 +172,20 @@ export default function TelehealthDashboard() {
               <table className="w-full text-sm">
                 <thead className="bg-gray-50 border-b border-gray-100">
                   <tr>
-                    {['رقم الاستشارة', 'المستفيد', 'المعالج', 'النوع', 'الموعد', 'الأولوية', 'الحالة', 'إجراءات'].map(h => (
-                      <th key={h} className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase">
+                    {[
+                      'رقم الاستشارة',
+                      'المستفيد',
+                      'المعالج',
+                      'النوع',
+                      'الموعد',
+                      'الأولوية',
+                      'الحالة',
+                      'إجراءات',
+                    ].map(h => (
+                      <th
+                        key={h}
+                        className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase"
+                      >
                         {h}
                       </th>
                     ))}
@@ -170,7 +198,9 @@ export default function TelehealthDashboard() {
                         {c.consultationNumber}
                       </td>
                       <td className="px-4 py-3">
-                        <div className="font-medium text-gray-800">{c.beneficiary?.name || '—'}</div>
+                        <div className="font-medium text-gray-800">
+                          {c.beneficiary?.name || '—'}
+                        </div>
                         <div className="text-xs text-gray-400">{c.beneficiary?.nationalId}</div>
                       </td>
                       <td className="px-4 py-3 text-gray-700">{c.provider?.name || '—'}</td>
@@ -179,12 +209,16 @@ export default function TelehealthDashboard() {
                         {formatDate(c.scheduledAt)}
                       </td>
                       <td className="px-4 py-3">
-                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${priorityBadgeClass[c.priority] || ''}`}>
+                        <span
+                          className={`px-2 py-0.5 rounded-full text-xs font-medium ${priorityBadgeClass[c.priority] || ''}`}
+                        >
                           {PRIORITY_LABELS[c.priority] || c.priority}
                         </span>
                       </td>
                       <td className="px-4 py-3">
-                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusBadgeClass[c.status] || 'bg-gray-100 text-gray-600'}`}>
+                        <span
+                          className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusBadgeClass[c.status] || 'bg-gray-100 text-gray-600'}`}
+                        >
                           {STATUS_LABELS[c.status] || c.status}
                         </span>
                       </td>

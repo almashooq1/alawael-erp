@@ -137,7 +137,8 @@ describe('onboardingAnalyticsService.monthlyTrend', () => {
   it('counts started + completed per month', () => {
     const rows = svc.monthlyTrend([
       cl({ startedDaysAgo: 5, status: 'in_progress' }),
-      cl({ startedDaysAgo: 5, status: 'completed', completedDaysAgo: 2 }),
+      // completedDaysAgo matches startedDaysAgo to guarantee same month bucket
+      cl({ startedDaysAgo: 5, status: 'completed', completedDaysAgo: 5 }),
     ]);
     expect(rows.length).toBeGreaterThanOrEqual(1);
     const latest = rows[rows.length - 1];

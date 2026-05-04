@@ -36,8 +36,6 @@ import {
   AccessTime as TimeIcon,
 } from '@mui/icons-material';
 import {
-  BarChart,
-  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -214,7 +212,7 @@ const DEMO = {
   ],
   byType: Object.entries(TYPE_LABELS)
     .slice(0, 5)
-    .map(([k, v], i) => ({ name: v, value: [62, 28, 18, 16, 12][i], color: COLORS[i] })),
+    .map(([_k, v], i) => ({ name: v, value: [62, 28, 18, 16, 12][i], color: COLORS[i] })),
   hourly: HOURLY,
 };
 

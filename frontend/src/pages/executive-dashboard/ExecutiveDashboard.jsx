@@ -43,7 +43,7 @@ import {
   Dashboard as DashboardIcon,
   Psychology as AIIcon,
 } from '@mui/icons-material';
-import { dashboardsAPI, aiRecommendationsAPI, qualityAPI } from '../../services/ddd';
+import { dashboardsAPI } from '../../services/ddd';
 
 /* ── Severity colors ── */
 const SEVERITY_COLORS = {

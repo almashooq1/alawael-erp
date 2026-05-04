@@ -32,16 +32,20 @@ jest.mock('express', () => ({
   static: jest.fn(() => jest.fn()),
 }));
 
-jest.mock('../../middleware/authMiddleware', () => {
-  const mw = jest.fn((req, res, next) => next && next());
-  mw.authenticate = mw;
-  mw.authorize = jest.fn(() => mw);
-  mw.protect = mw;
-  mw.restrictTo = jest.fn(() => mw);
-  mw.isAdmin = mw;
-  mw.isAuth = mw;
-  return mw;
-});
+jest.mock(
+  '../../middleware/authMiddleware',
+  () => {
+    const mw = jest.fn((req, res, next) => next && next());
+    mw.authenticate = mw;
+    mw.authorize = jest.fn(() => mw);
+    mw.protect = mw;
+    mw.restrictTo = jest.fn(() => mw);
+    mw.isAdmin = mw;
+    mw.isAuth = mw;
+    return mw;
+  },
+  { virtual: true }
+);
 jest.mock('../../utils/logger', () => ({
   info: jest.fn(),
   error: jest.fn(),

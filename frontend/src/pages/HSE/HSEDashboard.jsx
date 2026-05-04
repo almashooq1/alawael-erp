@@ -26,7 +26,6 @@ import {
 } from '@mui/material';
 import {
   LocalFireDepartment as FireIcon,
-  Engineering as SafetyIcon,
   Warning as WarningIcon,
   CheckCircle as SafeIcon,
   BugReport as IncidentIcon,

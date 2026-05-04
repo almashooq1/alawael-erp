@@ -8,21 +8,42 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
-  Box, Card, CardContent, Typography, TextField, InputAdornment,
-  Chip, Avatar, Button, IconButton, Pagination, Grid,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Paper, ToggleButtonGroup, ToggleButton, Stack, Skeleton,
-  Alert, Menu, MenuItem, Select, FormControl, InputLabel,
-  Tooltip, Badge, LinearProgress,
+  Box,
+  Card,
+  CardContent,
+  Typography,
+  TextField,
+  InputAdornment,
+  Chip,
+  Avatar,
+  Button,
+  IconButton,
+  Pagination,
+  Grid,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  ToggleButtonGroup,
+  ToggleButton,
+  Stack,
+  Alert,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
+  Tooltip,
+  LinearProgress,
 } from '@mui/material';
 import {
   Search as SearchIcon,
   ViewList as ListIcon,
   ViewModule as GridIcon,
-  FilterList as FilterIcon,
   Add as AddIcon,
   Visibility as ViewIcon,
-  Person as PersonIcon,
   Download as DownloadIcon,
   Refresh as RefreshIcon,
   Clear as ClearIcon,
@@ -102,7 +123,9 @@ export default function BeneficiaryListPage() {
     }
   }, [page, perPage, search, status, disabilityType]);
 
-  useEffect(() => { loadBeneficiaries(); }, [loadBeneficiaries]);
+  useEffect(() => {
+    loadBeneficiaries();
+  }, [loadBeneficiaries]);
 
   /* ── Update URL ── */
   useEffect(() => {
@@ -135,7 +158,7 @@ export default function BeneficiaryListPage() {
   const hasFilters = search || status || disabilityType;
   const pageCount = Math.ceil(total / perPage);
 
-  const getAge = (dob) => {
+  const getAge = dob => {
     if (!dob) return '-';
     return Math.floor((Date.now() - new Date(dob)) / (365.25 * 24 * 60 * 60 * 1000));
   };
@@ -145,20 +168,30 @@ export default function BeneficiaryListPage() {
       {/* ── Header ── */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Box>
-          <Typography variant="h5" fontWeight="bold">المستفيدون</Typography>
+          <Typography variant="h5" fontWeight="bold">
+            المستفيدون
+          </Typography>
           <Typography variant="body2" color="text.secondary">
             {total} مستفيد {hasFilters ? '(مُصفّى)' : 'مسجل'}
           </Typography>
         </Box>
         <Stack direction="row" spacing={1}>
-          <Button variant="contained" startIcon={<AddIcon />} onClick={() => navigate('/beneficiaries/new')}>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => navigate('/beneficiaries/new')}
+          >
             إضافة مستفيد
           </Button>
           <Tooltip title="تصدير">
-            <IconButton><DownloadIcon /></IconButton>
+            <IconButton>
+              <DownloadIcon />
+            </IconButton>
           </Tooltip>
           <Tooltip title="تحديث">
-            <IconButton onClick={loadBeneficiaries}><RefreshIcon /></IconButton>
+            <IconButton onClick={loadBeneficiaries}>
+              <RefreshIcon />
+            </IconButton>
           </Tooltip>
         </Stack>
       </Box>
@@ -173,12 +206,18 @@ export default function BeneficiaryListPage() {
                 size="small"
                 placeholder="بحث بالاسم أو رقم الملف أو الهوية..."
                 value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
+                onChange={e => setSearchInput(e.target.value)}
                 InputProps={{
-                  startAdornment: <InputAdornment position="start"><SearchIcon /></InputAdornment>,
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon />
+                    </InputAdornment>
+                  ),
                   endAdornment: searchInput && (
                     <InputAdornment position="end">
-                      <IconButton size="small" onClick={() => setSearchInput('')}><ClearIcon /></IconButton>
+                      <IconButton size="small" onClick={() => setSearchInput('')}>
+                        <ClearIcon />
+                      </IconButton>
                     </InputAdornment>
                   ),
                 }}
@@ -187,10 +226,19 @@ export default function BeneficiaryListPage() {
             <Grid item xs={6} md={2}>
               <FormControl fullWidth size="small">
                 <InputLabel>الحالة</InputLabel>
-                <Select value={status} label="الحالة" onChange={(e) => { setStatus(e.target.value); setPage(1); }}>
+                <Select
+                  value={status}
+                  label="الحالة"
+                  onChange={e => {
+                    setStatus(e.target.value);
+                    setPage(1);
+                  }}
+                >
                   <MenuItem value="">الكل</MenuItem>
                   {Object.entries(STATUS_MAP).map(([val, { label }]) => (
-                    <MenuItem key={val} value={val}>{label}</MenuItem>
+                    <MenuItem key={val} value={val}>
+                      {label}
+                    </MenuItem>
                   ))}
                 </Select>
               </FormControl>
@@ -198,20 +246,42 @@ export default function BeneficiaryListPage() {
             <Grid item xs={6} md={2}>
               <FormControl fullWidth size="small">
                 <InputLabel>نوع الإعاقة</InputLabel>
-                <Select value={disabilityType} label="نوع الإعاقة" onChange={(e) => { setDisabilityType(e.target.value); setPage(1); }}>
-                  {DISABILITY_TYPES.map(t => <MenuItem key={t.value} value={t.value}>{t.label}</MenuItem>)}
+                <Select
+                  value={disabilityType}
+                  label="نوع الإعاقة"
+                  onChange={e => {
+                    setDisabilityType(e.target.value);
+                    setPage(1);
+                  }}
+                >
+                  {DISABILITY_TYPES.map(t => (
+                    <MenuItem key={t.value} value={t.value}>
+                      {t.label}
+                    </MenuItem>
+                  ))}
                 </Select>
               </FormControl>
             </Grid>
             <Grid item xs={6} md={2}>
               {hasFilters && (
-                <Button size="small" startIcon={<ClearIcon />} onClick={clearFilters}>مسح الفلاتر</Button>
+                <Button size="small" startIcon={<ClearIcon />} onClick={clearFilters}>
+                  مسح الفلاتر
+                </Button>
               )}
             </Grid>
             <Grid item xs={6} md={2} sx={{ textAlign: 'left' }}>
-              <ToggleButtonGroup value={view} exclusive onChange={(_, v) => v && setView(v)} size="small">
-                <ToggleButton value="table"><ListIcon /></ToggleButton>
-                <ToggleButton value="grid"><GridIcon /></ToggleButton>
+              <ToggleButtonGroup
+                value={view}
+                exclusive
+                onChange={(_, v) => v && setView(v)}
+                size="small"
+              >
+                <ToggleButton value="table">
+                  <ListIcon />
+                </ToggleButton>
+                <ToggleButton value="grid">
+                  <GridIcon />
+                </ToggleButton>
               </ToggleButtonGroup>
             </Grid>
           </Grid>
@@ -220,7 +290,13 @@ export default function BeneficiaryListPage() {
 
       {/* ── Error ── */}
       {error && (
-        <Alert severity="error" action={<Button onClick={loadBeneficiaries}>إعادة المحاولة</Button>} sx={{ mb: 2 }}>{error}</Alert>
+        <Alert
+          severity="error"
+          action={<Button onClick={loadBeneficiaries}>إعادة المحاولة</Button>}
+          sx={{ mb: 2 }}
+        >
+          {error}
+        </Alert>
       )}
 
       {/* ── Loading ── */}
@@ -261,19 +337,33 @@ export default function BeneficiaryListPage() {
                     >
                       <TableCell>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <Avatar sx={{ width: 32, height: 32, bgcolor: 'primary.main', fontSize: 14 }}>
+                          <Avatar
+                            sx={{ width: 32, height: 32, bgcolor: 'primary.main', fontSize: 14 }}
+                          >
                             {(b.name?.first || b.fullName || '?')[0]}
                           </Avatar>
                           <Typography variant="body2">
-                            {b.name?.full || b.fullName || `${b.name?.first || ''} ${b.name?.last || ''}`}
+                            {b.name?.full ||
+                              b.fullName ||
+                              `${b.name?.first || ''} ${b.name?.last || ''}`}
                           </Typography>
                         </Box>
                       </TableCell>
-                      <TableCell><Typography variant="body2">{b.fileNumber || '-'}</Typography></TableCell>
-                      <TableCell><Typography variant="body2">{getAge(b.dateOfBirth)}</Typography></TableCell>
-                      <TableCell><Typography variant="body2">{b.disabilityType || '-'}</Typography></TableCell>
-                      <TableCell><Chip size="small" label={st.label} color={st.color} /></TableCell>
-                      <TableCell><Typography variant="body2">{b.branch || '-'}</Typography></TableCell>
+                      <TableCell>
+                        <Typography variant="body2">{b.fileNumber || '-'}</Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2">{getAge(b.dateOfBirth)}</Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2">{b.disabilityType || '-'}</Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Chip size="small" label={st.label} color={st.color} />
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2">{b.branch || '-'}</Typography>
+                      </TableCell>
                       <TableCell>
                         <Typography variant="caption" color="text.secondary">
                           {b.updatedAt ? new Date(b.updatedAt).toLocaleDateString('ar-SA') : '-'}
@@ -281,7 +371,13 @@ export default function BeneficiaryListPage() {
                       </TableCell>
                       <TableCell align="center">
                         <Tooltip title="عرض الملف الشامل">
-                          <IconButton size="small" onClick={(e) => { e.stopPropagation(); navigate(`/beneficiaries/${b._id}`); }}>
+                          <IconButton
+                            size="small"
+                            onClick={e => {
+                              e.stopPropagation();
+                              navigate(`/beneficiaries/${b._id}`);
+                            }}
+                          >
                             <ViewIcon fontSize="small" />
                           </IconButton>
                         </Tooltip>
@@ -299,7 +395,9 @@ export default function BeneficiaryListPage() {
       {view === 'grid' && (
         <Grid container spacing={2}>
           {beneficiaries.length === 0 && !loading ? (
-            <Grid item xs={12}><Alert severity="info">لا توجد نتائج</Alert></Grid>
+            <Grid item xs={12}>
+              <Alert severity="info">لا توجد نتائج</Alert>
+            </Grid>
           ) : (
             beneficiaries.map((b, i) => {
               const st = STATUS_MAP[b.status] || { label: b.status || '-', color: 'default' };
@@ -307,7 +405,11 @@ export default function BeneficiaryListPage() {
                 <Grid item xs={12} sm={6} md={4} lg={3} key={b._id || i}>
                   <Card
                     variant="outlined"
-                    sx={{ cursor: 'pointer', '&:hover': { boxShadow: 2 }, transition: 'box-shadow .2s' }}
+                    sx={{
+                      cursor: 'pointer',
+                      '&:hover': { boxShadow: 2 },
+                      transition: 'box-shadow .2s',
+                    }}
                     onClick={() => navigate(`/beneficiaries/${b._id}`)}
                   >
                     <CardContent>
@@ -317,7 +419,9 @@ export default function BeneficiaryListPage() {
                         </Avatar>
                         <Box sx={{ flex: 1, minWidth: 0 }}>
                           <Typography variant="subtitle2" fontWeight="bold" noWrap>
-                            {b.name?.full || b.fullName || `${b.name?.first || ''} ${b.name?.last || ''}`}
+                            {b.name?.full ||
+                              b.fullName ||
+                              `${b.name?.first || ''} ${b.name?.last || ''}`}
                           </Typography>
                           <Typography variant="caption" color="text.secondary">
                             {b.fileNumber || '-'} • {getAge(b.dateOfBirth)} سنة
@@ -326,7 +430,9 @@ export default function BeneficiaryListPage() {
                       </Box>
                       <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
                         <Chip size="small" label={st.label} color={st.color} />
-                        {b.disabilityType && <Chip size="small" variant="outlined" label={b.disabilityType} />}
+                        {b.disabilityType && (
+                          <Chip size="small" variant="outlined" label={b.disabilityType} />
+                        )}
                         {b.branch && <Chip size="small" variant="outlined" label={b.branch} />}
                       </Stack>
                     </CardContent>

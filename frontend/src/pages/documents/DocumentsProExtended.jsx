@@ -21,48 +21,32 @@ import {
   Divider,
   Avatar,
   Stack,
-  IconButton,
-  Tooltip,
   List,
   ListItem,
   ListItemText,
   ListItemAvatar,
   ListItemSecondaryAction,
-  Badge,
-  LinearProgress,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
   TextField,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
 } from '@mui/material';
 import {
   Draw as SignIcon,
-  History as VersionIcon,
   Description as TemplateIcon,
   Security as AuditIcon,
   ContentCopy as BulkIcon,
   Dashboard as DashboardIcon,
-  VerifiedUser as VerifiedIcon,
   Warning as WarningIcon,
-  CheckCircle as CheckIcon,
-  Schedule as ScheduleIcon,
   Refresh as RefreshIcon,
   Add as AddIcon,
-  Visibility as ViewIcon,
-  Download as DownloadIcon,
   PlayArrow as PlayIcon,
   Article as ArticleIcon,
   Shield as ShieldIcon,
-  TrendingUp as TrendIcon,
 } from '@mui/icons-material';
-import documentProExtService, {
+import {
   signatureApi,
-  versionApi,
   templateApi,
   auditApi,
   bulkApi,
@@ -79,10 +63,34 @@ const TAB_CONFIG = [
 ];
 
 const STAT_CARDS = [
-  { key: 'pendingSignatures', label: 'توقيعات معلقة', icon: <SignIcon />, color: '#FF9800', bg: '#FFF3E0' },
-  { key: 'totalTemplates', label: 'القوالب المتاحة', icon: <TemplateIcon />, color: '#2196F3', bg: '#E3F2FD' },
-  { key: 'auditLogs', label: 'سجلات التدقيق', icon: <AuditIcon />, color: '#9C27B0', bg: '#F3E5F5' },
-  { key: 'suspiciousCount', label: 'أنشطة مشبوهة', icon: <WarningIcon />, color: '#F44336', bg: '#FFEBEE' },
+  {
+    key: 'pendingSignatures',
+    label: 'توقيعات معلقة',
+    icon: <SignIcon />,
+    color: '#FF9800',
+    bg: '#FFF3E0',
+  },
+  {
+    key: 'totalTemplates',
+    label: 'القوالب المتاحة',
+    icon: <TemplateIcon />,
+    color: '#2196F3',
+    bg: '#E3F2FD',
+  },
+  {
+    key: 'auditLogs',
+    label: 'سجلات التدقيق',
+    icon: <AuditIcon />,
+    color: '#9C27B0',
+    bg: '#F3E5F5',
+  },
+  {
+    key: 'suspiciousCount',
+    label: 'أنشطة مشبوهة',
+    icon: <WarningIcon />,
+    color: '#F44336',
+    bg: '#FFEBEE',
+  },
 ];
 
 export default function DocumentsProExtended() {
@@ -120,21 +128,24 @@ export default function DocumentsProExtended() {
     }
   }, []);
 
-  const loadTabData = useCallback(async (tabKey) => {
+  const loadTabData = useCallback(async tabKey => {
     try {
       switch (tabKey) {
-        case 'signatures':
+        case 'signatures': {
           const sigResult = await signatureApi.getPending().catch(() => ({ signatures: [] }));
           setPendingSignatures(sigResult.signatures || []);
           break;
-        case 'audit':
+        }
+        case 'audit': {
           const auditResult = await auditApi.getStats().catch(() => ({ stats: {} }));
           setAuditStats(auditResult.stats || {});
           break;
-        case 'bulk':
+        }
+        case 'bulk': {
           const bulkResult = await bulkApi.getJobs().catch(() => ({ jobs: [] }));
           setBulkJobs(bulkResult.jobs || []);
           break;
+        }
         default:
           break;
       }
@@ -143,7 +154,9 @@ export default function DocumentsProExtended() {
     }
   }, []);
 
-  useEffect(() => { loadDashboard(); }, [loadDashboard]);
+  useEffect(() => {
+    loadDashboard();
+  }, [loadDashboard]);
 
   useEffect(() => {
     const tabKey = TAB_CONFIG[activeTab]?.key;
@@ -208,20 +221,20 @@ export default function DocumentsProExtended() {
             التوقيع الرقمي • القوالب • الإصدارات • التدقيق • العمليات المجمعة
           </Typography>
         </Box>
-        <Button
-          variant="outlined"
-          startIcon={<RefreshIcon />}
-          onClick={loadDashboard}
-        >
+        <Button variant="outlined" startIcon={<RefreshIcon />} onClick={loadDashboard}>
           تحديث
         </Button>
       </Box>
 
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
 
       {/* بطاقات الإحصائيات */}
       <Grid container spacing={2} sx={{ mb: 3 }}>
-        {STAT_CARDS.map((card) => (
+        {STAT_CARDS.map(card => (
           <Grid item xs={12} sm={6} md={3} key={card.key}>
             <Card
               elevation={0}
@@ -235,9 +248,7 @@ export default function DocumentsProExtended() {
               }}
             >
               <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Avatar sx={{ bgcolor: card.color, width: 48, height: 48 }}>
-                  {card.icon}
-                </Avatar>
+                <Avatar sx={{ bgcolor: card.color, width: 48, height: 48 }}>{card.icon}</Avatar>
                 <Box>
                   <Typography variant="h4" sx={{ fontWeight: 800, color: card.color }}>
                     {stats[card.key] || 0}
@@ -261,7 +272,7 @@ export default function DocumentsProExtended() {
           scrollButtons="auto"
           sx={{ borderBottom: '1px solid', borderColor: 'divider', px: 2 }}
         >
-          {TAB_CONFIG.map((tab, i) => (
+          {TAB_CONFIG.map((tab, _i) => (
             <Tab key={tab.key} icon={tab.icon} label={tab.label} iconPosition="start" />
           ))}
         </Tabs>
@@ -273,7 +284,14 @@ export default function DocumentsProExtended() {
               {/* القوالب السريعة */}
               <Grid item xs={12} md={6}>
                 <Paper variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      mb: 2,
+                    }}
+                  >
                     <Typography variant="h6" sx={{ fontWeight: 700 }}>
                       📄 القوالب الجاهزة
                     </Typography>
@@ -283,7 +301,7 @@ export default function DocumentsProExtended() {
                   </Box>
                   {templates.length > 0 ? (
                     <List dense>
-                      {templates.slice(0, 5).map((tmpl) => (
+                      {templates.slice(0, 5).map(tmpl => (
                         <ListItem
                           key={tmpl.id}
                           sx={{ bgcolor: '#FAFAFA', borderRadius: 1, mb: 0.5, cursor: 'pointer' }}
@@ -293,7 +311,13 @@ export default function DocumentsProExtended() {
                           }}
                         >
                           <ListItemAvatar>
-                            <Avatar sx={{ bgcolor: tmpl.category?.color || '#2196F3', width: 36, height: 36 }}>
+                            <Avatar
+                              sx={{
+                                bgcolor: tmpl.category?.color || '#2196F3',
+                                width: 36,
+                                height: 36,
+                              }}
+                            >
                               <ArticleIcon sx={{ fontSize: 20 }} />
                             </Avatar>
                           </ListItemAvatar>
@@ -326,15 +350,41 @@ export default function DocumentsProExtended() {
                     🔒 سجل التدقيق
                   </Typography>
                   <Stack spacing={1.5}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                      }}
+                    >
                       <Typography variant="body2">إجمالي السجلات</Typography>
-                      <Chip label={dashboardData?.audit?.totalLogs || 0} color="primary" size="small" />
+                      <Chip
+                        label={dashboardData?.audit?.totalLogs || 0}
+                        color="primary"
+                        size="small"
+                      />
                     </Box>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                      }}
+                    >
                       <Typography variant="body2">سجلات اليوم</Typography>
-                      <Chip label={dashboardData?.audit?.todayLogs || 0} color="info" size="small" />
+                      <Chip
+                        label={dashboardData?.audit?.todayLogs || 0}
+                        color="info"
+                        size="small"
+                      />
                     </Box>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                      }}
+                    >
                       <Typography variant="body2">أنشطة مشبوهة</Typography>
                       <Chip
                         label={dashboardData?.audit?.suspiciousLogs || 0}
@@ -343,7 +393,13 @@ export default function DocumentsProExtended() {
                       />
                     </Box>
                     <Divider />
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                      }}
+                    >
                       <Typography variant="body2">سلامة السلسلة</Typography>
                       <Chip
                         icon={<ShieldIcon />}
@@ -434,7 +490,12 @@ export default function DocumentsProExtended() {
                   القوالب المتاحة ({templates.length})
                 </Typography>
                 <Stack direction="row" spacing={1}>
-                  <Button size="small" variant="outlined" startIcon={<PlayIcon />} onClick={handleInitTemplates}>
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    startIcon={<PlayIcon />}
+                    onClick={handleInitTemplates}
+                  >
                     تهيئة الافتراضيات
                   </Button>
                   <Button size="small" variant="contained" startIcon={<AddIcon />}>
@@ -443,7 +504,7 @@ export default function DocumentsProExtended() {
                 </Stack>
               </Box>
               <Grid container spacing={2}>
-                {templates.map((tmpl) => (
+                {templates.map(tmpl => (
                   <Grid item xs={12} sm={6} md={4} key={tmpl.id}>
                     <Card
                       variant="outlined"
@@ -460,7 +521,13 @@ export default function DocumentsProExtended() {
                     >
                       <CardContent>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                          <Avatar sx={{ bgcolor: tmpl.category?.color || '#2196F3', width: 32, height: 32 }}>
+                          <Avatar
+                            sx={{
+                              bgcolor: tmpl.category?.color || '#2196F3',
+                              width: 32,
+                              height: 32,
+                            }}
+                          >
                             <ArticleIcon sx={{ fontSize: 18 }} />
                           </Avatar>
                           <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
@@ -471,8 +538,17 @@ export default function DocumentsProExtended() {
                           {tmpl.description || 'بدون وصف'}
                         </Typography>
                         <Stack direction="row" spacing={0.5} flexWrap="wrap">
-                          <Chip label={tmpl.category?.label || 'عام'} size="small" color="primary" variant="outlined" />
-                          <Chip label={`${tmpl.variablesCount || 0} متغير`} size="small" variant="outlined" />
+                          <Chip
+                            label={tmpl.category?.label || 'عام'}
+                            size="small"
+                            color="primary"
+                            variant="outlined"
+                          />
+                          <Chip
+                            label={`${tmpl.variablesCount || 0} متغير`}
+                            size="small"
+                            variant="outlined"
+                          />
                           {tmpl.isSystem && <Chip label="نظام" size="small" color="secondary" />}
                         </Stack>
                       </CardContent>
@@ -496,7 +572,9 @@ export default function DocumentsProExtended() {
                       <Typography variant="h3" color="primary" sx={{ fontWeight: 800 }}>
                         {auditStats.totalLogs || 0}
                       </Typography>
-                      <Typography variant="body2" color="text.secondary">إجمالي السجلات</Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        إجمالي السجلات
+                      </Typography>
                     </Card>
                   </Grid>
                   <Grid item xs={6} md={3}>
@@ -504,7 +582,9 @@ export default function DocumentsProExtended() {
                       <Typography variant="h3" color="info.main" sx={{ fontWeight: 800 }}>
                         {auditStats.todayLogs || 0}
                       </Typography>
-                      <Typography variant="body2" color="text.secondary">سجلات اليوم</Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        سجلات اليوم
+                      </Typography>
                     </Card>
                   </Grid>
                   <Grid item xs={6} md={3}>
@@ -512,7 +592,9 @@ export default function DocumentsProExtended() {
                       <Typography variant="h3" color="warning.main" sx={{ fontWeight: 800 }}>
                         {auditStats.weekLogs || 0}
                       </Typography>
-                      <Typography variant="body2" color="text.secondary">هذا الأسبوع</Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        هذا الأسبوع
+                      </Typography>
                     </Card>
                   </Grid>
                   <Grid item xs={6} md={3}>
@@ -520,7 +602,9 @@ export default function DocumentsProExtended() {
                       <Typography variant="h3" color="error.main" sx={{ fontWeight: 800 }}>
                         {auditStats.suspiciousLogs || 0}
                       </Typography>
-                      <Typography variant="body2" color="text.secondary">مشبوهة</Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        مشبوهة
+                      </Typography>
                     </Card>
                   </Grid>
                 </Grid>
@@ -539,13 +623,21 @@ export default function DocumentsProExtended() {
               {bulkJobs.length > 0 ? (
                 <List>
                   {bulkJobs.map((job, i) => (
-                    <ListItem key={job.jobId || i} sx={{ bgcolor: '#FAFAFA', borderRadius: 1, mb: 1 }}>
+                    <ListItem
+                      key={job.jobId || i}
+                      sx={{ bgcolor: '#FAFAFA', borderRadius: 1, mb: 1 }}
+                    >
                       <ListItemAvatar>
-                        <Avatar sx={{
-                          bgcolor: job.status === 'completed' ? '#4CAF50'
-                            : job.status === 'failed' ? '#F44336'
-                            : '#FF9800',
-                        }}>
+                        <Avatar
+                          sx={{
+                            bgcolor:
+                              job.status === 'completed'
+                                ? '#4CAF50'
+                                : job.status === 'failed'
+                                  ? '#F44336'
+                                  : '#FF9800',
+                          }}
+                        >
                           <BulkIcon />
                         </Avatar>
                       </ListItemAvatar>
@@ -556,14 +648,21 @@ export default function DocumentsProExtended() {
                       <ListItemSecondaryAction>
                         <Chip
                           label={
-                            job.status === 'completed' ? 'مكتمل' :
-                            job.status === 'failed' ? 'فشل' :
-                            job.status === 'processing' ? 'جاري' : job.status
+                            job.status === 'completed'
+                              ? 'مكتمل'
+                              : job.status === 'failed'
+                                ? 'فشل'
+                                : job.status === 'processing'
+                                  ? 'جاري'
+                                  : job.status
                           }
                           size="small"
                           color={
-                            job.status === 'completed' ? 'success' :
-                            job.status === 'failed' ? 'error' : 'warning'
+                            job.status === 'completed'
+                              ? 'success'
+                              : job.status === 'failed'
+                                ? 'error'
+                                : 'warning'
                           }
                         />
                       </ListItemSecondaryAction>
@@ -591,22 +690,25 @@ export default function DocumentsProExtended() {
         </DialogTitle>
         <DialogContent>
           {selectedTemplate?.description && (
-            <Alert severity="info" sx={{ mb: 2 }}>{selectedTemplate.description}</Alert>
+            <Alert severity="info" sx={{ mb: 2 }}>
+              {selectedTemplate.description}
+            </Alert>
           )}
           <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
-            تعبئة المتغيرات ({selectedTemplate?.requiredVariables || 0} مطلوبة من {selectedTemplate?.variablesCount || 0})
+            تعبئة المتغيرات ({selectedTemplate?.requiredVariables || 0} مطلوبة من{' '}
+            {selectedTemplate?.variablesCount || 0})
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
             اضغط "إنشاء" لتعبئة القالب بالقيم المدخلة وإنشاء مستند جديد
           </Typography>
           <Grid container spacing={2}>
-            {(selectedTemplate?.variables || []).map((v) => (
+            {(selectedTemplate?.variables || []).map(v => (
               <Grid item xs={12} sm={6} key={v.key}>
                 <TextField
                   fullWidth
                   label={`${v.label || v.key}${v.required ? ' *' : ''}`}
                   value={templateVars[v.key] || ''}
-                  onChange={(e) => setTemplateVars({ ...templateVars, [v.key]: e.target.value })}
+                  onChange={e => setTemplateVars({ ...templateVars, [v.key]: e.target.value })}
                   placeholder={v.placeholder || ''}
                   type={v.type === 'number' || v.type === 'currency' ? 'number' : 'text'}
                   multiline={v.type === 'textarea'}
@@ -618,8 +720,14 @@ export default function DocumentsProExtended() {
           </Grid>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setTemplateDialogOpen(false)} color="inherit">إلغاء</Button>
-          <Button variant="contained" onClick={handleGenerateFromTemplate} startIcon={<ArticleIcon />}>
+          <Button onClick={() => setTemplateDialogOpen(false)} color="inherit">
+            إلغاء
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleGenerateFromTemplate}
+            startIcon={<ArticleIcon />}
+          >
             إنشاء المستند
           </Button>
         </DialogActions>

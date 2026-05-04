@@ -73,7 +73,7 @@ function formatDate(v) {
     return '—';
   }
 }
-function fullName(x) {
+function _fullName(x) {
   if (!x) return '';
   return (
     x.firstName_ar || x.name || `${x.firstName || ''} ${x.lastName || ''}`.trim() || x.email || ''

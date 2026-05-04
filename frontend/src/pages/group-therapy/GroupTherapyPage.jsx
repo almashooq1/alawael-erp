@@ -49,13 +49,10 @@ import {
   Delete as DeleteIcon,
   Person as PersonIcon,
   Schedule as ScheduleIcon,
-  Assignment as AssignmentIcon,
   BarChart as BarChartIcon,
   Close as CloseIcon,
-  Check as CheckIcon,
   EventNote as EventNoteIcon,
   Pending as PendingIcon,
-  CheckCircle as CheckCircleIcon,
   PlayCircle as PlayCircleIcon,
   Psychology as PsychologyIcon,
   Work as WorkIcon,
@@ -64,7 +61,6 @@ import {
   ExpandMore as ExpandMoreIcon,
   ExpandLess as ExpandLessIcon,
   CalendarMonth as CalendarMonthIcon,
-  FaceRetouchingNatural as FaceRetouchingNaturalIcon,
 } from '@mui/icons-material';
 import {
   PieChart,
@@ -77,7 +73,6 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
-  Legend,
 } from 'recharts';
 import groupTherapyService from 'services/groupTherapyService';
 

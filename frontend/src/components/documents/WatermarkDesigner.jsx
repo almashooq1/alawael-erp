@@ -4,25 +4,36 @@
  */
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField,
-  Grid, Typography, Box, Select, MenuItem, FormControl, InputLabel,
-  Switch, FormControlLabel, Slider, Stack, Chip, Paper, Divider,
-  ToggleButton, ToggleButtonGroup, IconButton, Tooltip, Tab, Tabs,
-  Card, CardContent, Alert
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  TextField,
+  Grid,
+  Typography,
+  Box,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Switch,
+  FormControlLabel,
+  Slider,
+  Stack,
+  Chip,
+  Paper,
+  Divider,
+  ToggleButton,
+  ToggleButtonGroup,
+  Alert,
 } from '@mui/material';
 import {
   TextFields as TextIcon,
   Image as ImageIcon,
   QrCode as QrCodeIcon,
   VisibilityOff as InvisibleIcon,
-  Palette as PaletteIcon,
-  FormatSize as SizeIcon,
-  RotateRight as RotateIcon,
-  Opacity as OpacityIcon,
-  GridOn as TileIcon,
-  CenterFocusStrong as CenterIcon,
   Save as SaveIcon,
-  Preview as PreviewIcon,
   Refresh as ResetIcon,
 } from '@mui/icons-material';
 
@@ -66,7 +77,7 @@ const defaultForm = {
 
 export default function WatermarkDesigner({ open, onClose, onSave, profile }) {
   const [form, setForm] = useState(defaultForm);
-  const [previewTab, setPreviewTab] = useState(0);
+  const [_previewTab, _setPreviewTab] = useState(0);
   const canvasRef = useRef(null);
 
   useEffect(() => {
@@ -129,11 +140,21 @@ export default function WatermarkDesigner({ open, onClose, onSave, profile }) {
           }
         }
       } else {
-        let cx = w / 2, cy = h / 2;
-        if (s.position === 'top-right') { cx = w - 60; cy = 40; }
-        else if (s.position === 'top-left') { cx = 60; cy = 40; }
-        else if (s.position === 'bottom-right') { cx = w - 60; cy = h - 40; }
-        else if (s.position === 'bottom-left') { cx = 60; cy = h - 40; }
+        let cx = w / 2,
+          cy = h / 2;
+        if (s.position === 'top-right') {
+          cx = w - 60;
+          cy = 40;
+        } else if (s.position === 'top-left') {
+          cx = 60;
+          cy = 40;
+        } else if (s.position === 'bottom-right') {
+          cx = w - 60;
+          cy = h - 40;
+        } else if (s.position === 'bottom-left') {
+          cx = 60;
+          cy = h - 40;
+        }
         ctx.translate(cx, cy);
         ctx.rotate((s.rotation * Math.PI) / 180);
         ctx.fillText(s.text, 0, 0);
@@ -168,7 +189,7 @@ export default function WatermarkDesigner({ open, onClose, onSave, profile }) {
     setForm(p => ({ ...p, settings: { ...p.settings, [key]: val } }));
   };
 
-  const applyPreset = (preset) => {
+  const applyPreset = preset => {
     setForm(p => ({
       ...p,
       type: 'text',
@@ -193,39 +214,62 @@ export default function WatermarkDesigner({ open, onClose, onSave, profile }) {
             {/* Basic Info */}
             <Stack spacing={2} mb={2}>
               <TextField
-                fullWidth label="اسم الملف" value={form.name}
-                onChange={(e) => setForm(p => ({ ...p, name: e.target.value }))}
+                fullWidth
+                label="اسم الملف"
+                value={form.name}
+                onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
                 required
               />
               <TextField
-                fullWidth label="الوصف" multiline rows={2} value={form.description}
-                onChange={(e) => setForm(p => ({ ...p, description: e.target.value }))}
+                fullWidth
+                label="الوصف"
+                multiline
+                rows={2}
+                value={form.description}
+                onChange={e => setForm(p => ({ ...p, description: e.target.value }))}
               />
             </Stack>
 
             {/* Type */}
-            <Typography variant="subtitle2" gutterBottom>نوع العلامة المائية</Typography>
+            <Typography variant="subtitle2" gutterBottom>
+              نوع العلامة المائية
+            </Typography>
             <ToggleButtonGroup
               value={form.type}
               exclusive
               onChange={(_, v) => v && setForm(p => ({ ...p, type: v }))}
               sx={{ mb: 2 }}
             >
-              <ToggleButton value="text"><TextIcon sx={{ ml: 1 }} /> نص</ToggleButton>
-              <ToggleButton value="image"><ImageIcon sx={{ ml: 1 }} /> صورة</ToggleButton>
-              <ToggleButton value="qr"><QrCodeIcon sx={{ ml: 1 }} /> رمز QR</ToggleButton>
-              <ToggleButton value="invisible"><InvisibleIcon sx={{ ml: 1 }} /> مخفي</ToggleButton>
+              <ToggleButton value="text">
+                <TextIcon sx={{ ml: 1 }} /> نص
+              </ToggleButton>
+              <ToggleButton value="image">
+                <ImageIcon sx={{ ml: 1 }} /> صورة
+              </ToggleButton>
+              <ToggleButton value="qr">
+                <QrCodeIcon sx={{ ml: 1 }} /> رمز QR
+              </ToggleButton>
+              <ToggleButton value="invisible">
+                <InvisibleIcon sx={{ ml: 1 }} /> مخفي
+              </ToggleButton>
             </ToggleButtonGroup>
 
             {/* Presets */}
-            <Typography variant="subtitle2" gutterBottom>قوالب جاهزة</Typography>
+            <Typography variant="subtitle2" gutterBottom>
+              قوالب جاهزة
+            </Typography>
             <Stack direction="row" spacing={1} mb={2} flexWrap="wrap">
-              {PRESETS.map((p) => (
+              {PRESETS.map(p => (
                 <Chip
                   key={p.label}
                   label={p.label}
                   onClick={() => applyPreset(p)}
-                  sx={{ bgcolor: p.color + '22', color: p.color, fontWeight: 'bold', cursor: 'pointer' }}
+                  sx={{
+                    bgcolor: p.color + '22',
+                    color: p.color,
+                    fontWeight: 'bold',
+                    cursor: 'pointer',
+                  }}
                 />
               ))}
             </Stack>
@@ -236,16 +280,21 @@ export default function WatermarkDesigner({ open, onClose, onSave, profile }) {
             {form.type === 'text' && (
               <Stack spacing={2}>
                 <TextField
-                  fullWidth label="نص العلامة المائية" value={form.settings.text}
-                  onChange={(e) => updateSettings('text', e.target.value)}
+                  fullWidth
+                  label="نص العلامة المائية"
+                  value={form.settings.text}
+                  onChange={e => updateSettings('text', e.target.value)}
                   placeholder="مثال: سري — للاستخدام الداخلي فقط"
                 />
                 <Grid container spacing={2}>
                   <Grid item xs={6}>
                     <FormControl fullWidth size="small">
                       <InputLabel>الخط</InputLabel>
-                      <Select value={form.settings.fontFamily} label="الخط"
-                        onChange={(e) => updateSettings('fontFamily', e.target.value)}>
+                      <Select
+                        value={form.settings.fontFamily}
+                        label="الخط"
+                        onChange={e => updateSettings('fontFamily', e.target.value)}
+                      >
                         <MenuItem value="Arial">Arial</MenuItem>
                         <MenuItem value="Tahoma">Tahoma</MenuItem>
                         <MenuItem value="Cairo">Cairo</MenuItem>
@@ -255,9 +304,12 @@ export default function WatermarkDesigner({ open, onClose, onSave, profile }) {
                   </Grid>
                   <Grid item xs={6}>
                     <TextField
-                      fullWidth size="small" label="اللون" type="color"
+                      fullWidth
+                      size="small"
+                      label="اللون"
+                      type="color"
                       value={form.settings.color}
-                      onChange={(e) => updateSettings('color', e.target.value)}
+                      onChange={e => updateSettings('color', e.target.value)}
                     />
                   </Grid>
                 </Grid>
@@ -271,7 +323,9 @@ export default function WatermarkDesigner({ open, onClose, onSave, profile }) {
               </Typography>
               <Slider
                 value={form.settings.fontSize}
-                min={12} max={120} step={2}
+                min={12}
+                max={120}
+                step={2}
                 onChange={(_, v) => updateSettings('fontSize', v)}
               />
 
@@ -280,7 +334,9 @@ export default function WatermarkDesigner({ open, onClose, onSave, profile }) {
               </Typography>
               <Slider
                 value={form.settings.opacity}
-                min={0.01} max={0.5} step={0.01}
+                min={0.01}
+                max={0.5}
+                step={0.01}
                 onChange={(_, v) => updateSettings('opacity', v)}
               />
 
@@ -289,22 +345,34 @@ export default function WatermarkDesigner({ open, onClose, onSave, profile }) {
               </Typography>
               <Slider
                 value={form.settings.rotation}
-                min={-180} max={180} step={5}
+                min={-180}
+                max={180}
+                step={5}
                 onChange={(_, v) => updateSettings('rotation', v)}
               />
 
               <FormControl fullWidth size="small" sx={{ mt: 1 }}>
                 <InputLabel>الموضع</InputLabel>
-                <Select value={form.settings.position} label="الموضع"
-                  onChange={(e) => updateSettings('position', e.target.value)}>
+                <Select
+                  value={form.settings.position}
+                  label="الموضع"
+                  onChange={e => updateSettings('position', e.target.value)}
+                >
                   {POSITIONS.map(p => (
-                    <MenuItem key={p.value} value={p.value}>{p.label}</MenuItem>
+                    <MenuItem key={p.value} value={p.value}>
+                      {p.label}
+                    </MenuItem>
                   ))}
                 </Select>
               </FormControl>
 
               <FormControlLabel
-                control={<Switch checked={form.settings.tiled} onChange={(e) => updateSettings('tiled', e.target.checked)} />}
+                control={
+                  <Switch
+                    checked={form.settings.tiled}
+                    onChange={e => updateSettings('tiled', e.target.checked)}
+                  />
+                }
                 label="تبليط كامل الصفحة"
                 sx={{ mt: 1 }}
               />
@@ -316,7 +384,9 @@ export default function WatermarkDesigner({ open, onClose, onSave, profile }) {
                   </Typography>
                   <Slider
                     value={form.settings.tileSpacing}
-                    min={50} max={300} step={10}
+                    min={50}
+                    max={300}
+                    step={10}
                     onChange={(_, v) => updateSettings('tileSpacing', v)}
                   />
                 </>
@@ -326,13 +396,21 @@ export default function WatermarkDesigner({ open, onClose, onSave, profile }) {
             {/* Active / AppliesTo */}
             <Stack direction="row" spacing={2} mt={2}>
               <FormControlLabel
-                control={<Switch checked={form.isActive} onChange={(e) => setForm(p => ({ ...p, isActive: e.target.checked }))} />}
+                control={
+                  <Switch
+                    checked={form.isActive}
+                    onChange={e => setForm(p => ({ ...p, isActive: e.target.checked }))}
+                  />
+                }
                 label="نشط"
               />
               <FormControl size="small" sx={{ minWidth: 160 }}>
                 <InputLabel>ينطبق على</InputLabel>
-                <Select value={form.appliesTo} label="ينطبق على"
-                  onChange={(e) => setForm(p => ({ ...p, appliesTo: e.target.value }))}>
+                <Select
+                  value={form.appliesTo}
+                  label="ينطبق على"
+                  onChange={e => setForm(p => ({ ...p, appliesTo: e.target.value }))}
+                >
                   <MenuItem value="all">جميع المستندات</MenuItem>
                   <MenuItem value="confidential">السرية فقط</MenuItem>
                   <MenuItem value="internal">الداخلية فقط</MenuItem>
@@ -348,7 +426,14 @@ export default function WatermarkDesigner({ open, onClose, onSave, profile }) {
               <Typography variant="subtitle1" fontWeight="bold" textAlign="center" gutterBottom>
                 معاينة حية
               </Typography>
-              <Box sx={{ border: '1px solid #ddd', borderRadius: 1, overflow: 'hidden', bgcolor: '#fff' }}>
+              <Box
+                sx={{
+                  border: '1px solid #ddd',
+                  borderRadius: 1,
+                  overflow: 'hidden',
+                  bgcolor: '#fff',
+                }}
+              >
                 <canvas
                   ref={canvasRef}
                   width={340}
@@ -366,9 +451,16 @@ export default function WatermarkDesigner({ open, onClose, onSave, profile }) {
               {/* Settings Summary */}
               <Box mt={2}>
                 <Typography variant="caption" color="text.secondary">
-                  النوع: {form.type === 'text' ? 'نص' : form.type === 'image' ? 'صورة' : form.type === 'qr' ? 'QR' : 'مخفي'} |
-                  الشفافية: {Math.round(form.settings.opacity * 100)}% |
-                  الزاوية: {form.settings.rotation}°
+                  النوع:{' '}
+                  {form.type === 'text'
+                    ? 'نص'
+                    : form.type === 'image'
+                      ? 'صورة'
+                      : form.type === 'qr'
+                        ? 'QR'
+                        : 'مخفي'}{' '}
+                  | الشفافية: {Math.round(form.settings.opacity * 100)}% | الزاوية:{' '}
+                  {form.settings.rotation}°
                 </Typography>
               </Box>
             </Paper>
@@ -377,8 +469,15 @@ export default function WatermarkDesigner({ open, onClose, onSave, profile }) {
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>إلغاء</Button>
-        <Button onClick={() => setForm(defaultForm)} startIcon={<ResetIcon />}>إعادة تعيين</Button>
-        <Button variant="contained" onClick={handleSave} startIcon={<SaveIcon />} disabled={!form.name}>
+        <Button onClick={() => setForm(defaultForm)} startIcon={<ResetIcon />}>
+          إعادة تعيين
+        </Button>
+        <Button
+          variant="contained"
+          onClick={handleSave}
+          startIcon={<SaveIcon />}
+          disabled={!form.name}
+        >
           {profile ? 'تحديث' : 'إنشاء'}
         </Button>
       </DialogActions>

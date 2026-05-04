@@ -29,7 +29,6 @@ import {
   Alert,
   Button,
   Tooltip,
-  Menu,
   MenuItem,
   Select,
   FormControl,
@@ -57,10 +56,7 @@ import {
   SmartToy as AIIcon,
   Warning as WarningIcon,
   CheckCircle as CheckCircleIcon,
-  Schedule as ScheduleIcon,
   Analytics as AnalyticsIcon,
-  FilterList as FilterIcon,
-  MoreVert as MoreVertIcon,
   Assignment as TemplateIcon,
   Close as CloseIcon,
   Person as PersonIcon,
@@ -104,7 +100,7 @@ const INTENT_COLOR = {
   general_question: 'default',
 };
 
-const SENTIMENT_COLOR = {
+const _SENTIMENT_COLOR = {
   positive: 'success',
   neutral: 'default',
   negative: 'error',
@@ -410,7 +406,7 @@ function TemplateDialog({ open, phone, onClose, onSend }) {
 }
 
 // ─── AI Suggestions Panel ─────────────────────────────────────────────────────
-function AISuggestPanel({ conversationId, intent, context, onSelect }) {
+function AISuggestPanel({ _conversationId, intent, context, onSelect }) {
   const [suggestions, setSuggestions] = useState([]);
   const [loading, setLoading] = useState(false);
 

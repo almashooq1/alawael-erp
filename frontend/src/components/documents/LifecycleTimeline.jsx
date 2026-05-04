@@ -4,10 +4,31 @@
  */
 import React, { useState, useEffect } from 'react';
 import {
-  Box, Dialog, DialogTitle, DialogContent, DialogActions, Button,
-  TextField, Typography, Chip, Stack, Paper, Stepper, Step, StepLabel,
-  StepContent, CircularProgress, Alert, Divider, Card, CardContent,
-  Avatar, List, ListItem, ListItemIcon, ListItemText, Tooltip
+  Box,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  TextField,
+  Typography,
+  Chip,
+  Stack,
+  Paper,
+  Stepper,
+  Step,
+  StepLabel,
+  StepContent,
+  CircularProgress,
+  Alert,
+  Divider,
+  Card,
+  CardContent,
+  Avatar,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
 } from '@mui/material';
 import {
   Timeline as TimelineIcon,
@@ -21,30 +42,38 @@ import {
   CalendarToday as CalIcon,
   ArrowForward as ArrowIcon,
   Warning as WarningIcon,
-  Info as InfoIcon,
 } from '@mui/icons-material';
 import { lifecycleApi } from '../../services/documentProPhase9Service';
 import logger from '../../utils/logger';
 
-const fmtDateTime = (d) => d ? new Date(d).toLocaleString('ar-SA') : '—';
-const fmtDate = (d) => d ? new Date(d).toLocaleDateString('ar-SA') : '—';
-const fmtDuration = (mins) => {
+const fmtDateTime = d => (d ? new Date(d).toLocaleString('ar-SA') : '—');
+const fmtDate = d => (d ? new Date(d).toLocaleDateString('ar-SA') : '—');
+const fmtDuration = mins => {
   if (!mins) return '—';
   if (mins < 60) return `${mins} دقيقة`;
   if (mins < 1440) return `${Math.round(mins / 60)} ساعة`;
   return `${Math.round(mins / 1440)} يوم`;
 };
 
-const phaseColors = ['#1976d2', '#4caf50', '#ff9800', '#9c27b0', '#f44336', '#00bcd4', '#795548', '#607d8b'];
+const phaseColors = [
+  '#1976d2',
+  '#4caf50',
+  '#ff9800',
+  '#9c27b0',
+  '#f44336',
+  '#00bcd4',
+  '#795548',
+  '#607d8b',
+];
 
 function EventTimeline({ events }) {
   if (!events?.length) return <Alert severity="info">لا توجد أحداث</Alert>;
 
   const eventIcons = {
     lifecycle_assigned: <ActiveIcon color="primary" />,
-    phase_transition:   <ArrowIcon color="info" />,
-    legal_hold_set:     <LegalIcon color="error" />,
-    legal_hold_released:<LegalIcon color="success" />,
+    phase_transition: <ArrowIcon color="info" />,
+    legal_hold_set: <LegalIcon color="error" />,
+    legal_hold_released: <LegalIcon color="success" />,
     retention_extended: <CalIcon color="warning" />,
     disposition_requested: <WarningIcon color="warning" />,
     disposed: <DisposedIcon color="error" />,
@@ -52,9 +81,9 @@ function EventTimeline({ events }) {
 
   const eventLabels = {
     lifecycle_assigned: 'تعيين دورة الحياة',
-    phase_transition:   'انتقال مرحلة',
-    legal_hold_set:     'تطبيق حجز قانوني',
-    legal_hold_released:'رفع حجز قانوني',
+    phase_transition: 'انتقال مرحلة',
+    legal_hold_set: 'تطبيق حجز قانوني',
+    legal_hold_released: 'رفع حجز قانوني',
     retention_extended: 'تمديد الاحتفاظ',
     disposition_requested: 'طلب إتلاف',
     disposed: 'تم الإتلاف',
@@ -63,16 +92,25 @@ function EventTimeline({ events }) {
   return (
     <List dense>
       {events.slice(0, 30).map((e, i) => (
-        <ListItem key={i} sx={{ borderRight: `3px solid ${i === 0 ? '#1976d2' : '#e0e0e0'}`, mb: 0.5 }}>
+        <ListItem
+          key={i}
+          sx={{ borderRight: `3px solid ${i === 0 ? '#1976d2' : '#e0e0e0'}`, mb: 0.5 }}
+        >
           <ListItemIcon sx={{ minWidth: 36 }}>
             {eventIcons[e.type] || <EventIcon color="action" />}
           </ListItemIcon>
           <ListItemText
             primary={
               <Stack direction="row" spacing={1} alignItems="center">
-                <Typography variant="body2" fontWeight="bold">{eventLabels[e.type] || e.type}</Typography>
+                <Typography variant="body2" fontWeight="bold">
+                  {eventLabels[e.type] || e.type}
+                </Typography>
                 {e.details?.from && e.details?.to && (
-                  <Chip label={`${e.details.from} → ${e.details.to}`} size="small" variant="outlined" />
+                  <Chip
+                    label={`${e.details.from} → ${e.details.to}`}
+                    size="small"
+                    variant="outlined"
+                  />
                 )}
               </Stack>
             }
@@ -91,11 +129,14 @@ export default function LifecycleTimeline({ open, onClose, documentId: propDocId
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (propDocId) { setDocId(propDocId); }
+    if (propDocId) {
+      setDocId(propDocId);
+    }
   }, [propDocId]);
 
   useEffect(() => {
     if (open && docId) loadTimeline();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, docId]);
 
   const loadTimeline = async () => {
@@ -121,7 +162,11 @@ export default function LifecycleTimeline({ open, onClose, documentId: propDocId
   };
 
   const statusLabel = {
-    active: 'نشط', legal_hold: 'حجز قانوني', completed: 'مكتمل', disposed: 'مُتلَف', suspended: 'معلق',
+    active: 'نشط',
+    legal_hold: 'حجز قانوني',
+    completed: 'مكتمل',
+    disposed: 'مُتلَف',
+    suspended: 'معلق',
   };
 
   return (
@@ -129,18 +174,36 @@ export default function LifecycleTimeline({ open, onClose, documentId: propDocId
       <DialogTitle>
         <Stack direction="row" spacing={2} alignItems="center">
           <TimelineIcon color="primary" />
-          <Typography variant="h6" fontWeight="bold">الجدول الزمني لدورة الحياة</Typography>
+          <Typography variant="h6" fontWeight="bold">
+            الجدول الزمني لدورة الحياة
+          </Typography>
         </Stack>
       </DialogTitle>
       <DialogContent dividers dir="rtl" sx={{ minHeight: 400 }}>
         {/* Document ID Input */}
         <Stack direction="row" spacing={2} mb={3} alignItems="center">
-          <TextField fullWidth size="small" label="معرف المستند" value={docId} onChange={e => setDocId(e.target.value)} />
-          <Button variant="contained" onClick={loadTimeline} disabled={!docId || loading}>عرض</Button>
+          <TextField
+            fullWidth
+            size="small"
+            label="معرف المستند"
+            value={docId}
+            onChange={e => setDocId(e.target.value)}
+          />
+          <Button variant="contained" onClick={loadTimeline} disabled={!docId || loading}>
+            عرض
+          </Button>
         </Stack>
 
-        {loading && <Box textAlign="center" py={4}><CircularProgress /></Box>}
-        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+        {loading && (
+          <Box textAlign="center" py={4}>
+            <CircularProgress />
+          </Box>
+        )}
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {error}
+          </Alert>
+        )}
 
         {timeline && !loading && (
           <Box>
@@ -149,13 +212,21 @@ export default function LifecycleTimeline({ open, onClose, documentId: propDocId
               <Stack direction="row" spacing={3} alignItems="center" flexWrap="wrap">
                 <Stack direction="row" spacing={1} alignItems="center">
                   {statusIcon[timeline.status] || statusIcon.active}
-                  <Typography fontWeight="bold">{statusLabel[timeline.status] || timeline.status}</Typography>
+                  <Typography fontWeight="bold">
+                    {statusLabel[timeline.status] || timeline.status}
+                  </Typography>
                 </Stack>
                 {timeline.currentPhase && (
                   <Chip label={`المرحلة الحالية: ${timeline.currentPhase.name}`} color="primary" />
                 )}
                 {timeline.currentPhase?.expiresAt && (
-                  <Chip label={`تنتهي: ${fmtDate(timeline.currentPhase.expiresAt)}`} color={new Date(timeline.currentPhase.expiresAt) < new Date() ? 'error' : 'default'} variant="outlined" />
+                  <Chip
+                    label={`تنتهي: ${fmtDate(timeline.currentPhase.expiresAt)}`}
+                    color={
+                      new Date(timeline.currentPhase.expiresAt) < new Date() ? 'error' : 'default'
+                    }
+                    variant="outlined"
+                  />
                 )}
               </Stack>
             </Paper>
@@ -164,14 +235,27 @@ export default function LifecycleTimeline({ open, onClose, documentId: propDocId
             {timeline.retention && (
               <Card variant="outlined" sx={{ mb: 3, borderRadius: 2 }}>
                 <CardContent>
-                  <Typography variant="subtitle1" fontWeight="bold" gutterBottom>معلومات الاحتفاظ</Typography>
+                  <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                    معلومات الاحتفاظ
+                  </Typography>
                   <Stack direction="row" spacing={2} flexWrap="wrap">
-                    <Chip icon={<CalIcon />} label={`نهاية الاحتفاظ: ${fmtDate(timeline.retention.retentionEndDate)}`} variant="outlined" />
+                    <Chip
+                      icon={<CalIcon />}
+                      label={`نهاية الاحتفاظ: ${fmtDate(timeline.retention.retentionEndDate)}`}
+                      variant="outlined"
+                    />
                     {timeline.retention.legalHold && (
-                      <Chip icon={<LegalIcon />} label={`حجز قانوني: ${timeline.retention.legalHoldReason}`} color="error" />
+                      <Chip
+                        icon={<LegalIcon />}
+                        label={`حجز قانوني: ${timeline.retention.legalHoldReason}`}
+                        color="error"
+                      />
                     )}
                     {timeline.retention.dispositionMethod && (
-                      <Chip label={`طريقة الإتلاف: ${timeline.retention.dispositionMethod}`} variant="outlined" />
+                      <Chip
+                        label={`طريقة الإتلاف: ${timeline.retention.dispositionMethod}`}
+                        variant="outlined"
+                      />
                     )}
                   </Stack>
                 </CardContent>
@@ -181,12 +265,25 @@ export default function LifecycleTimeline({ open, onClose, documentId: propDocId
             {/* Phase History */}
             {timeline.phases?.length > 0 && (
               <Box mb={3}>
-                <Typography variant="subtitle1" fontWeight="bold" gutterBottom>تاريخ المراحل</Typography>
+                <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                  تاريخ المراحل
+                </Typography>
                 <Stepper orientation="vertical" activeStep={timeline.phases.length}>
                   {timeline.phases.map((p, i) => (
                     <Step key={i} completed>
                       <StepLabel
-                        icon={<Avatar sx={{ width: 28, height: 28, bgcolor: phaseColors[i % phaseColors.length], fontSize: 14 }}>{i + 1}</Avatar>}
+                        icon={
+                          <Avatar
+                            sx={{
+                              width: 28,
+                              height: 28,
+                              bgcolor: phaseColors[i % phaseColors.length],
+                              fontSize: 14,
+                            }}
+                          >
+                            {i + 1}
+                          </Avatar>
+                        }
                       >
                         <Stack direction="row" spacing={1} alignItems="center">
                           <Typography fontWeight="bold">{p.phase}</Typography>
@@ -197,20 +294,35 @@ export default function LifecycleTimeline({ open, onClose, documentId: propDocId
                         <Typography variant="body2" color="text.secondary">
                           دخول: {fmtDateTime(p.enteredAt)} | خروج: {fmtDateTime(p.exitedAt)}
                         </Typography>
-                        {p.exitReason && <Chip label={p.exitReason} size="small" sx={{ mt: 0.5 }} />}
-                        {p.notes && <Typography variant="body2" sx={{ mt: 0.5 }}>{p.notes}</Typography>}
+                        {p.exitReason && (
+                          <Chip label={p.exitReason} size="small" sx={{ mt: 0.5 }} />
+                        )}
+                        {p.notes && (
+                          <Typography variant="body2" sx={{ mt: 0.5 }}>
+                            {p.notes}
+                          </Typography>
+                        )}
                       </StepContent>
                     </Step>
                   ))}
                   {timeline.currentPhase && (
                     <Step active>
-                      <StepLabel icon={<Avatar sx={{ width: 28, height: 28, bgcolor: '#4caf50', fontSize: 14 }}><ActiveIcon sx={{ fontSize: 16 }} /></Avatar>}>
-                        <Typography fontWeight="bold" color="primary">{timeline.currentPhase.name} (حالي)</Typography>
+                      <StepLabel
+                        icon={
+                          <Avatar sx={{ width: 28, height: 28, bgcolor: '#4caf50', fontSize: 14 }}>
+                            <ActiveIcon sx={{ fontSize: 16 }} />
+                          </Avatar>
+                        }
+                      >
+                        <Typography fontWeight="bold" color="primary">
+                          {timeline.currentPhase.name} (حالي)
+                        </Typography>
                       </StepLabel>
                       <StepContent>
                         <Typography variant="body2" color="text.secondary">
                           دخول: {fmtDateTime(timeline.currentPhase.enteredAt)}
-                          {timeline.currentPhase.expiresAt && ` | تنتهي: ${fmtDate(timeline.currentPhase.expiresAt)}`}
+                          {timeline.currentPhase.expiresAt &&
+                            ` | تنتهي: ${fmtDate(timeline.currentPhase.expiresAt)}`}
                         </Typography>
                       </StepContent>
                     </Step>
@@ -221,7 +333,9 @@ export default function LifecycleTimeline({ open, onClose, documentId: propDocId
 
             {/* Events */}
             <Divider sx={{ mb: 2 }} />
-            <Typography variant="subtitle1" fontWeight="bold" gutterBottom>الأحداث ({timeline.events?.length || 0})</Typography>
+            <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+              الأحداث ({timeline.events?.length || 0})
+            </Typography>
             <EventTimeline events={timeline.events} />
           </Box>
         )}
@@ -229,7 +343,9 @@ export default function LifecycleTimeline({ open, onClose, documentId: propDocId
         {!timeline && !loading && !error && (
           <Box textAlign="center" py={6}>
             <TimelineIcon sx={{ fontSize: 60, color: 'text.disabled' }} />
-            <Typography color="text.secondary" mt={1}>أدخل معرف المستند لعرض الجدول الزمني</Typography>
+            <Typography color="text.secondary" mt={1}>
+              أدخل معرف المستند لعرض الجدول الزمني
+            </Typography>
           </Box>
         )}
       </DialogContent>

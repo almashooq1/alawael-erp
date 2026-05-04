@@ -148,8 +148,8 @@ const STATUS_COLORS = {
   planned: 'info',
   draft: 'default',
 };
-const FINDING_SEVERITY = { critical: 'حرج', high: 'عالي', medium: 'متوسط', low: 'منخفض' };
-const SEV_COLORS = { critical: 'error', high: 'warning', medium: 'info', low: 'success' };
+const _FINDING_SEVERITY = { critical: 'حرج', high: 'عالي', medium: 'متوسط', low: 'منخفض' };
+const _SEV_COLORS = { critical: 'error', high: 'warning', medium: 'info', low: 'success' };
 const COLORS = ['#37474f', '#546e7a', '#0288d1', '#26a69a', '#ef5350'];
 
 const DEMO = {

@@ -18,7 +18,6 @@ import {
   Button,
   Stack,
   useTheme,
-  alpha,
   IconButton,
   Tooltip,
   TextField,
@@ -36,8 +35,6 @@ import {
   ThumbUp as LikeIcon,
 } from '@mui/icons-material';
 import {
-  BarChart,
-  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -216,7 +213,7 @@ const DEMO = {
   ],
   byCategory: Object.entries(CAT_LABELS)
     .slice(0, 5)
-    .map(([k, v], i) => ({ name: v, value: [92, 78, 56, 48, 38][i], color: COLORS[i] })),
+    .map(([_k, v], i) => ({ name: v, value: [92, 78, 56, 48, 38][i], color: COLORS[i] })),
   trend: TREND,
 };
 

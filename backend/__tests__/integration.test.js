@@ -14,6 +14,11 @@ jest.mock('../rbac', () => ({
   RBAC_ROLES: {},
   RBAC_PERMISSIONS: {},
 }));
+
+// === Maintenance Mode Mock (bypass flag file) ===
+jest.mock('../middleware/maintenance.middleware', () => ({
+  maintenanceMiddleware: (req, res, next) => next(),
+}));
 describe('System Routes and Integration Tests', () => {
   let adminToken;
   let userToken;

@@ -36,16 +36,20 @@ jest.mock(
   '../../services/EcommerceService',
   () => new Proxy({}, { get: () => jest.fn().mockResolvedValue({}) })
 );
-jest.mock('../../middleware/authenticate', () => {
-  const mw = jest.fn((req, res, next) => next && next());
-  mw.authenticate = mw;
-  mw.authorize = jest.fn(() => mw);
-  mw.protect = mw;
-  mw.restrictTo = jest.fn(() => mw);
-  mw.isAdmin = mw;
-  mw.isAuth = mw;
-  return mw;
-});
+jest.mock(
+  '../../middleware/authenticate',
+  () => {
+    const mw = jest.fn((req, res, next) => next && next());
+    mw.authenticate = mw;
+    mw.authorize = jest.fn(() => mw);
+    mw.protect = mw;
+    mw.restrictTo = jest.fn(() => mw);
+    mw.isAdmin = mw;
+    mw.isAuth = mw;
+    return mw;
+  },
+  { virtual: true }
+);
 jest.mock('../../middleware/auth', () => {
   const mw = jest.fn((req, res, next) => next && next());
   mw.authenticate = mw;

@@ -8,7 +8,6 @@ import {
   Grid,
   Card,
   CardContent,
-  IconButton,
   Button,
   Chip,
   Avatar,
@@ -16,11 +15,8 @@ import {
   ListItem,
   ListItemAvatar,
   ListItemText,
-  ListItemSecondaryAction,
-  Divider,
   LinearProgress,
   Alert,
-  Tooltip,
   Stack,
   TextField,
   Dialog,
@@ -49,13 +45,10 @@ import {
   Dashboard as DashboardIcon,
   Add as AddIcon,
   Refresh as RefreshIcon,
-  AccountTree as GraphIcon,
-  Cloud as CloudIcon,
   Lock as LockIcon,
   Shield as ShieldIcon,
   Merge as MergeIcon,
   CallSplit as SplitIcon,
-  Description as DocIcon,
   People as PeopleIcon,
   Gavel as GavelIcon,
   Verified as VerifiedIcon,
@@ -64,16 +57,11 @@ import {
   MenuBook as CoverIcon,
   FormatListNumbered as NumberIcon,
   Compress as CompressIcon,
-  Download as DownloadIcon,
-  Visibility as ViewIcon,
   Edit as EditIcon,
   Campaign as BroadcastIcon,
   Circle as CircleIcon,
-  ArrowUpward,
-  ArrowDownward,
 } from '@mui/icons-material';
 import {
-  linkingApi,
   tagsApi,
   tagCategoriesApi,
   aclApi,
@@ -137,7 +125,7 @@ export default function DocumentsProPhase4() {
 
   // Dialogs
   const [tagDialog, setTagDialog] = useState(false);
-  const [pdfDialog, setPdfDialog] = useState(false);
+  const [_pdfDialog, _setPdfDialog] = useState(false);
 
   // ── Loaders ───────────────────────────
   const loadDashboard = useCallback(async () => {

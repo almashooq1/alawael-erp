@@ -64,72 +64,72 @@ describe('realtimeCollaboration.controller controller', () => {
   });
 
   test('createSession is a method', () => {
-    if (!ctrl || !ctrl.prototype) return;
-    expect(typeof ctrl.prototype.createSession).toBe('function');
+    if (!ctrl) return;
+    expect(typeof ctrl.createSession).toBe('function');
   });
 
   test('joinSession is a method', () => {
-    if (!ctrl || !ctrl.prototype) return;
-    expect(typeof ctrl.prototype.joinSession).toBe('function');
+    if (!ctrl) return;
+    expect(typeof ctrl.joinSession).toBe('function');
   });
 
   test('applyChange is a method', () => {
-    if (!ctrl || !ctrl.prototype) return;
-    expect(typeof ctrl.prototype.applyChange).toBe('function');
+    if (!ctrl) return;
+    expect(typeof ctrl.applyChange).toBe('function');
   });
 
   test('updatePresence is a method', () => {
-    if (!ctrl || !ctrl.prototype) return;
-    expect(typeof ctrl.prototype.updatePresence).toBe('function');
+    if (!ctrl) return;
+    expect(typeof ctrl.updatePresence).toBe('function');
   });
 
   test('updateTypingStatus is a method', () => {
-    if (!ctrl || !ctrl.prototype) return;
-    expect(typeof ctrl.prototype.updateTypingStatus).toBe('function');
+    if (!ctrl) return;
+    expect(typeof ctrl.updateTypingStatus).toBe('function');
   });
 
   test('addComment is a method', () => {
-    if (!ctrl || !ctrl.prototype) return;
-    expect(typeof ctrl.prototype.addComment).toBe('function');
+    if (!ctrl) return;
+    expect(typeof ctrl.addComment).toBe('function');
   });
 
   test('replyToComment is a method', () => {
-    if (!ctrl || !ctrl.prototype) return;
-    expect(typeof ctrl.prototype.replyToComment).toBe('function');
+    if (!ctrl) return;
+    expect(typeof ctrl.replyToComment).toBe('function');
   });
 
   test('undo is a method', () => {
-    if (!ctrl || !ctrl.prototype) return;
-    expect(typeof ctrl.prototype.undo).toBe('function');
+    if (!ctrl) return;
+    expect(typeof ctrl.undo).toBe('function');
   });
 
   test('redo is a method', () => {
-    if (!ctrl || !ctrl.prototype) return;
-    expect(typeof ctrl.prototype.redo).toBe('function');
+    if (!ctrl) return;
+    expect(typeof ctrl.redo).toBe('function');
   });
 
   test('getDocumentSnapshot is a method', () => {
-    if (!ctrl || !ctrl.prototype) return;
-    expect(typeof ctrl.prototype.getDocumentSnapshot).toBe('function');
+    if (!ctrl) return;
+    expect(typeof ctrl.getDocumentSnapshot).toBe('function');
   });
 
   test('getActiveUsers is a method', () => {
-    if (!ctrl || !ctrl.prototype) return;
-    expect(typeof ctrl.prototype.getActiveUsers).toBe('function');
+    if (!ctrl) return;
+    expect(typeof ctrl.getActiveUsers).toBe('function');
   });
 
   test('leaveSession is a method', () => {
-    if (!ctrl || !ctrl.prototype) return;
-    expect(typeof ctrl.prototype.leaveSession).toBe('function');
+    if (!ctrl) return;
+    expect(typeof ctrl.leaveSession).toBe('function');
   });
 
   test('getSessionStats is a method', () => {
-    if (!ctrl || !ctrl.prototype) return;
-    expect(typeof ctrl.prototype.getSessionStats).toBe('function');
+    if (!ctrl) return;
+    expect(typeof ctrl.getSessionStats).toBe('function');
   });
 
   test('exportChangeHistory is a method', () => {
-    if (!ctrl || !ctrl.prototype) return;
-    expect(typeof ctrl.prototype.exportChangeHistory).toBe('function');
+    if (!ctrl) return;
+    expect(typeof ctrl.exportChangeHistory).toBe('function');
   });
 });

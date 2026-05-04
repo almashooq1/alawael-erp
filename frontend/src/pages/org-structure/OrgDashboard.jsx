@@ -127,7 +127,7 @@ const KPICard = ({ label, value, icon, gradient, delay = 0 }) => {
 };
 
 const PIE_COLORS = ['#01579b', '#0277bd', '#0288d1', '#039be5', '#029fcb', '#4fc3f7'];
-const deptTypeLabels = {
+const _deptTypeLabels = {
   clinical: 'سريري',
   administrative: 'إداري',
   support: 'دعم',

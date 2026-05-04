@@ -31,7 +31,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import accountingService from 'services/accountingService';
 import logger from 'utils/logger';
-import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from 'theme/palette';
+import { gradients, brandColors, statusColors, neutralColors } from 'theme/palette';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 
 const StatCard = ({ title, value, icon, color, subtitle, trend }) => (

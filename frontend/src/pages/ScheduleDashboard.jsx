@@ -730,7 +730,7 @@ const DEMO = {
 };
 
 const TABS = ['نظرة عامة', 'جدول اليوم', 'الأطباء', 'الغرف', 'التنبيهات', 'ذكاء اصطناعي'];
-const STATUS_AR = {
+const _STATUS_AR = {
   pending: 'مؤكد',
   confirmed: 'مؤكد',
   'in-progress': 'قيد التنفيذ',

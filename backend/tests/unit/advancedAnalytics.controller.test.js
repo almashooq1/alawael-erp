@@ -64,62 +64,62 @@ describe('advancedAnalytics.controller controller', () => {
   });
 
   test('logEvent is a method', () => {
-    if (!ctrl || !ctrl.prototype) return;
-    expect(typeof ctrl.prototype.logEvent).toBe('function');
+    if (!ctrl) return;
+    expect(typeof ctrl.logEvent).toBe('function');
   });
 
   test('trackMetric is a method', () => {
-    if (!ctrl || !ctrl.prototype) return;
-    expect(typeof ctrl.prototype.trackMetric).toBe('function');
+    if (!ctrl) return;
+    expect(typeof ctrl.trackMetric).toBe('function');
   });
 
   test('generateReport is a method', () => {
-    if (!ctrl || !ctrl.prototype) return;
-    expect(typeof ctrl.prototype.generateReport).toBe('function');
+    if (!ctrl) return;
+    expect(typeof ctrl.generateReport).toBe('function');
   });
 
   test('predictValues is a method', () => {
-    if (!ctrl || !ctrl.prototype) return;
-    expect(typeof ctrl.prototype.predictValues).toBe('function');
+    if (!ctrl) return;
+    expect(typeof ctrl.predictValues).toBe('function');
   });
 
   test('getAnomalies is a method', () => {
-    if (!ctrl || !ctrl.prototype) return;
-    expect(typeof ctrl.prototype.getAnomalies).toBe('function');
+    if (!ctrl) return;
+    expect(typeof ctrl.getAnomalies).toBe('function');
   });
 
   test('getEvents is a method', () => {
-    if (!ctrl || !ctrl.prototype) return;
-    expect(typeof ctrl.prototype.getEvents).toBe('function');
+    if (!ctrl) return;
+    expect(typeof ctrl.getEvents).toBe('function');
   });
 
   test('createDashboard is a method', () => {
-    if (!ctrl || !ctrl.prototype) return;
-    expect(typeof ctrl.prototype.createDashboard).toBe('function');
+    if (!ctrl) return;
+    expect(typeof ctrl.createDashboard).toBe('function');
   });
 
   test('getDashboard is a method', () => {
-    if (!ctrl || !ctrl.prototype) return;
-    expect(typeof ctrl.prototype.getDashboard).toBe('function');
+    if (!ctrl) return;
+    expect(typeof ctrl.getDashboard).toBe('function');
   });
 
   test('addWidget is a method', () => {
-    if (!ctrl || !ctrl.prototype) return;
-    expect(typeof ctrl.prototype.addWidget).toBe('function');
+    if (!ctrl) return;
+    expect(typeof ctrl.addWidget).toBe('function');
   });
 
   test('getComparativeAnalysis is a method', () => {
-    if (!ctrl || !ctrl.prototype) return;
-    expect(typeof ctrl.prototype.getComparativeAnalysis).toBe('function');
+    if (!ctrl) return;
+    expect(typeof ctrl.getComparativeAnalysis).toBe('function');
   });
 
   test('exportReport is a method', () => {
-    if (!ctrl || !ctrl.prototype) return;
-    expect(typeof ctrl.prototype.exportReport).toBe('function');
+    if (!ctrl) return;
+    expect(typeof ctrl.exportReport).toBe('function');
   });
 
   test('getStatistics is a method', () => {
-    if (!ctrl || !ctrl.prototype) return;
-    expect(typeof ctrl.prototype.getStatistics).toBe('function');
+    if (!ctrl) return;
+    expect(typeof ctrl.getStatistics).toBe('function');
   });
 });

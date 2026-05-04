@@ -43,7 +43,6 @@ import {
   AccordionDetails,
   Switch,
   FormControlLabel,
-  Checkbox,
 } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import AddIcon from '@mui/icons-material/Add';

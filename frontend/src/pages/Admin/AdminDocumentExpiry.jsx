@@ -91,6 +91,7 @@ export default function AdminDocumentExpiry() {
     load();
   }, [load]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const summary = overview?.summary || {};
   const surge = overview?.surge || {};
   const thresholds = overview?.thresholds || {};

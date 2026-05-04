@@ -1,4 +1,4 @@
-﻿/**
+/**
  * MontessoriPrograms — إدارة برامج مونتيسوري (Professional v3)
  * @version 3.0.0
  */
@@ -476,13 +476,11 @@ const MontessoriPrograms = () => {
     value: programs.filter(p => p.status === s).length,
   })).filter(d => d.value > 0);
   const PIE_COLORS = ['#66bb6a', '#42a5f5', '#ff9800', '#9e9e9e', '#78909c'];
-  const barData = programs
-    .slice(0, 8)
-    .map(p => ({
-      name: p.name.replace('برنامج ', '').slice(0, 8),
-      طاقة: p.capacity || 0,
-      مسجلون: p.enrolled || 0,
-    }));
+  const barData = programs.slice(0, 8).map(p => ({
+    name: p.name.replace('برنامج ', '').slice(0, 8),
+    طاقة: p.capacity || 0,
+    مسجلون: p.enrolled || 0,
+  }));
 
   const openCreate = () => {
     setEditItem(null);

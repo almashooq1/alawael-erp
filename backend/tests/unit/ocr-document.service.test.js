@@ -4,7 +4,11 @@
  */
 
 /* ── suppress logger (service uses `const logger = console;`) ── */
+/* ── Force a fresh module load regardless of what other test files mocked ── */
+let service;
 beforeAll(() => {
+  jest.resetModules();
+  service = require('../../services/ocrDocument.service');
   jest.spyOn(console, 'info').mockImplementation(() => {});
   jest.spyOn(console, 'warn').mockImplementation(() => {});
   jest.spyOn(console, 'error').mockImplementation(() => {});
@@ -12,8 +16,6 @@ beforeAll(() => {
 afterAll(() => {
   jest.restoreAllMocks();
 });
-
-const service = require('../../services/ocrDocument.service');
 
 /* ══════════════════════════════════════════════════════════════════════
    1. Module exports

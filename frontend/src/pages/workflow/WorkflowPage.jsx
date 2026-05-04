@@ -8,19 +8,44 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Box, Card, CardContent, Typography, Chip, Grid, Avatar,
-  Button, IconButton, TextField, InputAdornment, Select,
-  FormControl, InputLabel, MenuItem, Stack, LinearProgress,
-  Alert, Tooltip, Tab, Tabs, Badge, Paper, Divider,
-  List, ListItem, ListItemText, ListItemAvatar, ListItemSecondaryAction,
+  Box,
+  Card,
+  CardContent,
+  Typography,
+  Chip,
+  Grid,
+  Avatar,
+  IconButton,
+  TextField,
+  InputAdornment,
+  Select,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Stack,
+  LinearProgress,
+  Alert,
+  Tab,
+  Tabs,
+  Badge,
+  Paper,
+  Divider,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemAvatar,
 } from '@mui/material';
 import {
-  Search as SearchIcon, Refresh as RefreshIcon,
-  AccountTree as WorkflowIcon, PlayArrow as PlayIcon,
-  CheckCircle as DoneIcon, Warning as WarningIcon,
-  Schedule as PendingIcon, Person as PersonIcon,
-  ArrowForward as ArrowIcon, Flag as FlagIcon,
-  Assessment as AssessmentIcon, Notifications as NotifIcon,
+  Search as SearchIcon,
+  Refresh as RefreshIcon,
+  AccountTree as WorkflowIcon,
+  PlayArrow as PlayIcon,
+  CheckCircle as DoneIcon,
+  Warning as WarningIcon,
+  Schedule as PendingIcon,
+  Person as PersonIcon,
+  Flag as FlagIcon,
+  Assessment as AssessmentIcon,
 } from '@mui/icons-material';
 
 import { workflowAPI } from '../../services/ddd';
@@ -72,30 +97,36 @@ export default function WorkflowPage() {
     }
   }, [search, priorityFilter]);
 
-  useEffect(() => { loadTasks(); }, [loadTasks]);
+  useEffect(() => {
+    loadTasks();
+  }, [loadTasks]);
 
   /* ── Grouped by status ── */
   const columns = COLUMNS.map(col => ({
     ...col,
-    tasks: tasks.filter(t => t.status === col.key)
+    tasks: tasks
+      .filter(t => t.status === col.key)
       .sort((a, b) => (PRIORITY[b.priority]?.weight || 0) - (PRIORITY[a.priority]?.weight || 0)),
   }));
 
   /* ── Stats ── */
-  const overdue = tasks.filter(t => t.dueDate && new Date(t.dueDate) < new Date() && t.status !== 'completed');
+  const overdue = tasks.filter(
+    t => t.dueDate && new Date(t.dueDate) < new Date() && t.status !== 'completed'
+  );
   const totalCompleted = tasks.filter(t => t.status === 'completed').length;
   const completionRate = tasks.length > 0 ? Math.round((totalCompleted / tasks.length) * 100) : 0;
 
   return (
     <Box sx={{ p: 3, direction: 'rtl' }}>
-
       {/* ── Header ── */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Box>
           <Typography variant="h5" fontWeight="bold">
             <WorkflowIcon sx={{ verticalAlign: 'middle', mr: 1 }} /> سير العمل
           </Typography>
-          <Typography variant="body2" color="text.secondary">{tasks.length} مهمة</Typography>
+          <Typography variant="body2" color="text.secondary">
+            {tasks.length} مهمة
+          </Typography>
         </Box>
         <Stack direction="row" spacing={1}>
           {overdue.length > 0 && (
@@ -106,7 +137,9 @@ export default function WorkflowPage() {
               variant="outlined"
             />
           )}
-          <IconButton onClick={loadTasks}><RefreshIcon /></IconButton>
+          <IconButton onClick={loadTasks}>
+            <RefreshIcon />
+          </IconButton>
         </Stack>
       </Box>
 
@@ -115,16 +148,24 @@ export default function WorkflowPage() {
         <Grid item xs={6} md={3}>
           <Card variant="outlined">
             <CardContent sx={{ textAlign: 'center', py: 1.5, '&:last-child': { pb: 1.5 } }}>
-              <Typography variant="h4" fontWeight="bold" color="primary">{tasks.length}</Typography>
-              <Typography variant="caption" color="text.secondary">إجمالي المهام</Typography>
+              <Typography variant="h4" fontWeight="bold" color="primary">
+                {tasks.length}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                إجمالي المهام
+              </Typography>
             </CardContent>
           </Card>
         </Grid>
         <Grid item xs={6} md={3}>
           <Card variant="outlined">
             <CardContent sx={{ textAlign: 'center', py: 1.5, '&:last-child': { pb: 1.5 } }}>
-              <Typography variant="h4" fontWeight="bold" color="success.main">{completionRate}%</Typography>
-              <Typography variant="caption" color="text.secondary">نسبة الإنجاز</Typography>
+              <Typography variant="h4" fontWeight="bold" color="success.main">
+                {completionRate}%
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                نسبة الإنجاز
+              </Typography>
             </CardContent>
           </Card>
         </Grid>
@@ -134,15 +175,21 @@ export default function WorkflowPage() {
               <Typography variant="h4" fontWeight="bold" color="warning.main">
                 {tasks.filter(t => t.status === 'in_progress').length}
               </Typography>
-              <Typography variant="caption" color="text.secondary">قيد التنفيذ</Typography>
+              <Typography variant="caption" color="text.secondary">
+                قيد التنفيذ
+              </Typography>
             </CardContent>
           </Card>
         </Grid>
         <Grid item xs={6} md={3}>
           <Card variant="outlined">
             <CardContent sx={{ textAlign: 'center', py: 1.5, '&:last-child': { pb: 1.5 } }}>
-              <Typography variant="h4" fontWeight="bold" color="error.main">{overdue.length}</Typography>
-              <Typography variant="caption" color="text.secondary">متأخرة</Typography>
+              <Typography variant="h4" fontWeight="bold" color="error.main">
+                {overdue.length}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                متأخرة
+              </Typography>
             </CardContent>
           </Card>
         </Grid>
@@ -160,19 +207,33 @@ export default function WorkflowPage() {
           <Grid container spacing={2} alignItems="center">
             <Grid item xs={12} md={6}>
               <TextField
-                fullWidth size="small" placeholder="بحث في المهام..."
+                fullWidth
+                size="small"
+                placeholder="بحث في المهام..."
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                InputProps={{ startAdornment: <InputAdornment position="start"><SearchIcon /></InputAdornment> }}
+                onChange={e => setSearch(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon />
+                    </InputAdornment>
+                  ),
+                }}
               />
             </Grid>
             <Grid item xs={12} md={3}>
               <FormControl fullWidth size="small">
                 <InputLabel>الأولوية</InputLabel>
-                <Select value={priorityFilter} label="الأولوية" onChange={(e) => setPriorityFilter(e.target.value)}>
+                <Select
+                  value={priorityFilter}
+                  label="الأولوية"
+                  onChange={e => setPriorityFilter(e.target.value)}
+                >
                   <MenuItem value="">الكل</MenuItem>
                   {Object.entries(PRIORITY).map(([val, { label }]) => (
-                    <MenuItem key={val} value={val}>{label}</MenuItem>
+                    <MenuItem key={val} value={val}>
+                      {label}
+                    </MenuItem>
                   ))}
                 </Select>
               </FormControl>
@@ -181,7 +242,11 @@ export default function WorkflowPage() {
         </CardContent>
       </Card>
 
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
       {loading && <LinearProgress sx={{ mb: 2 }} />}
 
       {/* ── Kanban View ── */}
@@ -194,23 +259,42 @@ export default function WorkflowPage() {
               sx={{ minWidth: 280, maxWidth: 320, flex: '0 0 auto', bgcolor: 'grey.50' }}
             >
               {/* Column header */}
-              <Box sx={{ p: 1.5, display: 'flex', alignItems: 'center', gap: 1, borderBottom: `3px solid ${col.color}` }}>
+              <Box
+                sx={{
+                  p: 1.5,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                  borderBottom: `3px solid ${col.color}`,
+                }}
+              >
                 <Avatar sx={{ bgcolor: col.color, width: 28, height: 28 }}>{col.icon}</Avatar>
-                <Typography variant="subtitle2" fontWeight="bold">{col.label}</Typography>
-                <Badge badgeContent={col.tasks.length} color="primary" sx={{ ml: 'auto' }}><Box /></Badge>
+                <Typography variant="subtitle2" fontWeight="bold">
+                  {col.label}
+                </Typography>
+                <Badge badgeContent={col.tasks.length} color="primary" sx={{ ml: 'auto' }}>
+                  <Box />
+                </Badge>
               </Box>
 
               {/* Tasks */}
               <Box sx={{ p: 1, maxHeight: 500, overflowY: 'auto' }}>
                 {col.tasks.length === 0 ? (
-                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', textAlign: 'center', py: 3 }}>
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{ display: 'block', textAlign: 'center', py: 3 }}
+                  >
                     لا توجد مهام
                   </Typography>
                 ) : (
                   <Stack spacing={1}>
                     {col.tasks.map((task, i) => {
                       const pri = PRIORITY[task.priority] || PRIORITY.medium;
-                      const isOverdue = task.dueDate && new Date(task.dueDate) < new Date() && task.status !== 'completed';
+                      const isOverdue =
+                        task.dueDate &&
+                        new Date(task.dueDate) < new Date() &&
+                        task.status !== 'completed';
                       return (
                         <Card
                           key={task._id || i}
@@ -230,16 +314,41 @@ export default function WorkflowPage() {
                             <Typography variant="caption" color="text.secondary" noWrap>
                               {task.description || task.notes || ''}
                             </Typography>
-                            <Stack direction="row" spacing={0.5} sx={{ mt: 1 }} flexWrap="wrap" useFlexGap>
-                              <Chip size="small" label={pri.label} sx={{ bgcolor: pri.color, color: '#fff', height: 20, fontSize: 10 }} />
+                            <Stack
+                              direction="row"
+                              spacing={0.5}
+                              sx={{ mt: 1 }}
+                              flexWrap="wrap"
+                              useFlexGap
+                            >
+                              <Chip
+                                size="small"
+                                label={pri.label}
+                                sx={{ bgcolor: pri.color, color: '#fff', height: 20, fontSize: 10 }}
+                              />
                               {task.assignedTo?.name && (
-                                <Chip size="small" variant="outlined" icon={<PersonIcon sx={{ fontSize: 12 }} />} label={task.assignedTo.name} sx={{ height: 20, fontSize: 10 }} />
+                                <Chip
+                                  size="small"
+                                  variant="outlined"
+                                  icon={<PersonIcon sx={{ fontSize: 12 }} />}
+                                  label={task.assignedTo.name}
+                                  sx={{ height: 20, fontSize: 10 }}
+                                />
                               )}
                               {isOverdue && (
-                                <Chip size="small" icon={<WarningIcon sx={{ fontSize: 12 }} />} label="متأخر" color="error" sx={{ height: 20, fontSize: 10 }} />
+                                <Chip
+                                  size="small"
+                                  icon={<WarningIcon sx={{ fontSize: 12 }} />}
+                                  label="متأخر"
+                                  color="error"
+                                  sx={{ height: 20, fontSize: 10 }}
+                                />
                               )}
                               {task.dueDate && (
-                                <Typography variant="caption" color={isOverdue ? 'error' : 'text.secondary'}>
+                                <Typography
+                                  variant="caption"
+                                  color={isOverdue ? 'error' : 'text.secondary'}
+                                >
                                   {new Date(task.dueDate).toLocaleDateString('ar-SA')}
                                 </Typography>
                               )}
@@ -261,12 +370,17 @@ export default function WorkflowPage() {
         <Paper variant="outlined">
           <List>
             {tasks.length === 0 && !loading ? (
-              <ListItem><ListItemText primary="لا توجد مهام" /></ListItem>
+              <ListItem>
+                <ListItemText primary="لا توجد مهام" />
+              </ListItem>
             ) : (
               tasks.map((task, i) => {
                 const pri = PRIORITY[task.priority] || PRIORITY.medium;
                 const st = COLUMNS.find(c => c.key === task.status) || COLUMNS[0];
-                const isOverdue = task.dueDate && new Date(task.dueDate) < new Date() && task.status !== 'completed';
+                const isOverdue =
+                  task.dueDate &&
+                  new Date(task.dueDate) < new Date() &&
+                  task.status !== 'completed';
                 return (
                   <React.Fragment key={task._id || i}>
                     <ListItem
@@ -283,17 +397,36 @@ export default function WorkflowPage() {
                       <ListItemText
                         primary={
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <Typography variant="body2" fontWeight="bold">{task.title || task.taskType || 'مهمة'}</Typography>
-                            <Chip size="small" label={pri.label} sx={{ bgcolor: pri.color, color: '#fff', height: 18, fontSize: 10 }} />
-                            <Chip size="small" label={st.label} variant="outlined" sx={{ height: 18, fontSize: 10 }} />
-                            {isOverdue && <Chip size="small" label="متأخر" color="error" sx={{ height: 18, fontSize: 10 }} />}
+                            <Typography variant="body2" fontWeight="bold">
+                              {task.title || task.taskType || 'مهمة'}
+                            </Typography>
+                            <Chip
+                              size="small"
+                              label={pri.label}
+                              sx={{ bgcolor: pri.color, color: '#fff', height: 18, fontSize: 10 }}
+                            />
+                            <Chip
+                              size="small"
+                              label={st.label}
+                              variant="outlined"
+                              sx={{ height: 18, fontSize: 10 }}
+                            />
+                            {isOverdue && (
+                              <Chip
+                                size="small"
+                                label="متأخر"
+                                color="error"
+                                sx={{ height: 18, fontSize: 10 }}
+                              />
+                            )}
                           </Box>
                         }
                         secondary={
                           <>
                             {task.description || ''}
                             {task.assignedTo?.name && ` • ${task.assignedTo.name}`}
-                            {task.dueDate && ` • ${new Date(task.dueDate).toLocaleDateString('ar-SA')}`}
+                            {task.dueDate &&
+                              ` • ${new Date(task.dueDate).toLocaleDateString('ar-SA')}`}
                           </>
                         }
                       />

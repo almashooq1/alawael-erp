@@ -99,7 +99,7 @@ module.exports = function registerPhaseRoutes(app, { safeRequire, dualMount, saf
     ['/api/administration', '/api/v1/administration'],
     '../routes/administration.routes'
   );
-  safeMount(app, ['/api/workflow', '/api/v1/workflow'], '../routes/workflow.routes');
+  // /api/workflow is now registered via DDD domain (_registry.js → domains/workflow)
   safeMount(
     app,
     ['/api/workflow-enhanced', '/api/v1/workflow-enhanced'],
@@ -274,11 +274,7 @@ module.exports = function registerPhaseRoutes(app, { safeRequire, dualMount, saf
     ['/api/advanced-analytics', '/api/v1/advanced-analytics'],
     '../routes/advancedAnalytics.routes'
   );
-  safeMount(
-    app,
-    ['/api/ai-recommendations', '/api/v1/ai-recommendations'],
-    '../routes/ai.recommendations.routes'
-  );
+  // /api/ai-recommendations is now registered via DDD domain (_registry.js → domains/ai-recommendations)
   safeMount(
     app,
     ['/api/ai-notifications', '/api/v1/ai-notifications'],
@@ -500,8 +496,7 @@ module.exports = function registerPhaseRoutes(app, { safeRequire, dualMount, saf
   logger.info('Phase 28 mounted (2 modules: portal-notifications, activities)');
 
   // ── Phase 29: Generic Programs — البرامج العامة ──────────────────────────
-  safeMount(app, ['/api/programs', '/api/v1/programs'], '../routes/programs.routes');
-  logger.info('Phase 29 mounted (1 module: programs)');
+  // /api/programs is now registered via DDD domain (_registry.js → domains/programs)
 
   // ── Phase 34: Smart Attendance — الحضور الذكي ────────────────────────────
   // NOTE: smart-attendance is already mounted via dualMount (Wave 2) using smart_attendance.routes.js

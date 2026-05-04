@@ -84,6 +84,8 @@ describe('Route Mount Guard', () => {
       // Known intentional multi-mounts (sub-router merging)
       const allowedDuplicates = new Set([
         '/api/dashboard', // 3 sub-routers intentionally merged
+        '/api/therapist', // 5 tier sub-routers intentionally co-mounted (base/extended/pro/ultra/elite)
+        '/api/parent-v2', // 2 route files intentionally co-mounted (v2 + v2-extras)
       ]);
 
       const duplicates = {};
@@ -97,7 +99,9 @@ describe('Route Mount Guard', () => {
         const details = Object.entries(duplicates)
           .map(([p, s]) => `  ${p} (${s.length}x): ${s.join(', ')}`)
           .join('\n');
-        fail(`Found ${Object.keys(duplicates).length} duplicate mount paths:\n${details}`);
+        throw new Error(
+          `Found ${Object.keys(duplicates).length} duplicate mount paths:\n${details}`
+        );
       }
     });
   });

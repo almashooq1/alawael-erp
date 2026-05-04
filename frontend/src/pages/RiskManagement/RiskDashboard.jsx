@@ -136,7 +136,12 @@ const KPICard = ({ label, value, icon, gradient, delay }) => {
 };
 
 const PRIORITY_LABELS = { critical: 'حرج', high: 'عالي', medium: 'متوسط', low: 'منخفض' };
-const PRIORITY_COLORS = { critical: '#f44336', high: '#ff9800', medium: '#2196f3', low: '#4caf50' };
+const _PRIORITY_COLORS = {
+  critical: '#f44336',
+  high: '#ff9800',
+  medium: '#2196f3',
+  low: '#4caf50',
+};
 const PRIORITY_CHIP = { critical: 'error', high: 'warning', medium: 'info', low: 'success' };
 const STATUS_LABELS = {
   identified: 'محدد',

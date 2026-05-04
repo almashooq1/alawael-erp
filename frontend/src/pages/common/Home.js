@@ -9,7 +9,6 @@ import {
   TrendingUp as TrendingUpIcon,
   Shield as ShieldIcon,
   AccountTree as AccountTreeIcon,
-  Groups as GroupsIcon,
   AccessTime as AccessTimeIcon,
   QueryStats as QueryStatsIcon,
   Home as HomeIcon,

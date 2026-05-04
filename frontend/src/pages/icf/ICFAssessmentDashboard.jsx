@@ -1,4 +1,4 @@
-﻿/**
+/**
  * ICFAssessmentDashboard — لوحة تحكم تقييمات ICF الوظيفية (Professional v2)
  * التصنيف الدولي للأداء الوظيفي والإعاقة والصحة — منظمة الصحة العالمية
  */
@@ -8,8 +8,6 @@ import {
   Grid,
   Paper,
   Typography,
-  Card,
-  CardContent,
   Chip,
   Table,
   TableHead,
@@ -21,7 +19,6 @@ import {
   Button,
   Stack,
   LinearProgress,
-  Divider,
   useTheme,
   alpha,
   IconButton,
@@ -32,9 +29,6 @@ import {
 } from '@mui/material';
 import {
   Assessment as AssessIcon,
-  Analytics as StatsIcon,
-  CompareArrows as CompareIcon,
-  AccountTree as TreeIcon,
   TrendingUp as TrendingIcon,
   CheckCircle as CheckIcon,
   Schedule as PendingIcon,
@@ -51,11 +45,6 @@ import {
   PolarAngleAxis,
   PolarRadiusAxis,
   ResponsiveContainer,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
   Tooltip as RTooltip,
   Legend,
   PieChart,

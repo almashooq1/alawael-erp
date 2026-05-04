@@ -157,6 +157,7 @@ export default function AdminSaudization() {
     load();
   }, [load]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const status = overview?.status || { hasData: false };
   const runway = overview?.runway || {};
   const alarm = overview?.alarm || {};

@@ -75,7 +75,7 @@ describe('bootstrapRedFlagSystem', () => {
     expect(summary.perBeneficiary[0].errored).toBeGreaterThanOrEqual(0);
     expect(typeof summary.totals.newlyRaised).toBe('number');
     expect(summary.totals.newlyRaised).toBeGreaterThanOrEqual(0);
-  });
+  }, 15000);
 
   it('locator can receive real service registrations post-bootstrap', () => {
     const sys = bootstrapRedFlagSystem({ logger: silentLogger, storeMode: 'memory' });

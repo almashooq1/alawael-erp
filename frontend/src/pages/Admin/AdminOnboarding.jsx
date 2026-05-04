@@ -59,7 +59,7 @@ function completionColor(rate) {
 
 export default function AdminOnboarding() {
   const [overview, setOverview] = useState(null);
-  const [byStatus, setByStatus] = useState([]);
+  const [_byStatus, setByStatus] = useState([]);
   const [taskCompletion, setTaskCompletion] = useState([]);
   const [byResponsible, setByResponsible] = useState([]);
   const [stalled, setStalled] = useState([]);

@@ -55,14 +55,10 @@ jest.mock('../../constants/beneficiary.constants', () => ({
 
 // Optional models — just provide empty defaults
 const mockBranchFindById = jest.fn();
-jest.mock(
-  '../../models/Branch',
-  () => {
-    const mock = { findById: (...a) => mockBranchFindById(...a) };
-    return mock;
-  },
-  { virtual: true }
-);
+jest.mock('../../models/Branch', () => {
+  const mock = { findById: (...a) => mockBranchFindById(...a) };
+  return mock;
+});
 
 jest.mock(
   '../../models/ActivityLog',
@@ -397,16 +393,14 @@ describe('BeneficiaryService', () => {
     test('includes transfer events', async () => {
       mockTransferFind.mockReturnValue({
         populate: jest.fn().mockReturnThis(),
-        lean: jest
-          .fn()
-          .mockResolvedValue([
-            {
-              transferDate: new Date('2025-03-01'),
-              status: 'completed',
-              fromBranch: { nameAr: 'الرياض' },
-              toBranch: { nameAr: 'جدة' },
-            },
-          ]),
+        lean: jest.fn().mockResolvedValue([
+          {
+            transferDate: new Date('2025-03-01'),
+            status: 'completed',
+            fromBranch: { nameAr: 'الرياض' },
+            toBranch: { nameAr: 'جدة' },
+          },
+        ]),
       });
 
       const ben = { _id: 'ben1', createdAt: new Date('2025-01-01') };

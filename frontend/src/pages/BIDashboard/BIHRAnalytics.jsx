@@ -21,13 +21,7 @@ import {
   useTheme,
   alpha,
 } from '@mui/material';
-import {
-  People,
-  PersonOff,
-  EventAvailable,
-  Star,
-  Refresh,
-} from '@mui/icons-material';
+import { People, PersonOff, EventAvailable, Star, Refresh } from '@mui/icons-material';
 import {
   BarChart,
   Bar,
@@ -51,14 +45,29 @@ import {
 import { motion } from 'framer-motion';
 import { getHRAnalytics, getDepartmentComparison } from '../../services/biDashboard.service';
 
-const COLORS = ['#2196F3', '#4CAF50', '#FF9800', '#F44336', '#9C27B0', '#00BCD4', '#FF5722', '#795548', '#607D8B', '#E91E63'];
+const COLORS = [
+  '#2196F3',
+  '#4CAF50',
+  '#FF9800',
+  '#F44336',
+  '#9C27B0',
+  '#00BCD4',
+  '#FF5722',
+  '#795548',
+  '#607D8B',
+  '#E91E63',
+];
 
 // ── HR Metric Card ────────────────────────────────────────────────
 function HRMetricCard({ title, value, subtitle, icon: Icon, color, progress }) {
-  const theme = useTheme();
+  const _theme = useTheme();
 
   return (
-    <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
+    <motion.div
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+    >
       <Card
         elevation={0}
         sx={{
@@ -73,7 +82,14 @@ function HRMetricCard({ title, value, subtitle, icon: Icon, color, progress }) {
       >
         <Box sx={{ height: 3, background: `linear-gradient(90deg, ${color}, ${color}88)` }} />
         <CardContent sx={{ p: 3 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'flex-start',
+              mb: 2,
+            }}
+          >
             <Box
               sx={{
                 width: 44,
@@ -124,7 +140,7 @@ function HRMetricCard({ title, value, subtitle, icon: Icon, color, progress }) {
 // ═══════════════════════════════════════════════════════════════════
 
 export default function BIHRAnalytics() {
-  const theme = useTheme();
+  const _theme = useTheme();
   const [loading, setLoading] = useState(true);
   const [hrData, setHRData] = useState(null);
   const [deptComparison, setDeptComparison] = useState([]);
@@ -156,7 +172,13 @@ export default function BIHRAnalytics() {
     );
   }
 
-  const { headcount = {}, departments = [], leaves = {}, attendance = {}, performance = {} } = hrData || {};
+  const {
+    headcount = {},
+    departments = [],
+    leaves = {},
+    attendance = {},
+    performance = {},
+  } = hrData || {};
 
   // Department pie data
   const deptPie = departments.slice(0, 8).map((d, i) => ({
@@ -166,14 +188,21 @@ export default function BIHRAnalytics() {
   }));
 
   // Leave breakdown
-  const leaveData = (leaves.breakdown || []).map((l) => ({
-    name: l.status === 'approved' ? 'مقبولة' : l.status === 'pending' ? 'معلقة' : l.status === 'rejected' ? 'مرفوضة' : l.status,
+  const leaveData = (leaves.breakdown || []).map(l => ({
+    name:
+      l.status === 'approved'
+        ? 'مقبولة'
+        : l.status === 'pending'
+          ? 'معلقة'
+          : l.status === 'rejected'
+            ? 'مرفوضة'
+            : l.status,
     count: l.count,
     days: l.totalDays,
   }));
 
   // Attendance monthly
-  const attendanceData = (attendance.monthly || []).map((a) => ({
+  const attendanceData = (attendance.monthly || []).map(a => ({
     month: `شهر ${a.month}`,
     rate: parseFloat(a.rate) || 0,
   }));
@@ -219,7 +248,11 @@ export default function BIHRAnalytics() {
           <HRMetricCard
             title="معدل الدوران الوظيفي"
             value={`${headcount.turnoverRate || 0}%`}
-            subtitle={parseFloat(headcount.turnoverRate) > 15 ? 'مرتفع — يحتاج اهتمام' : 'ضمن النطاق الطبيعي'}
+            subtitle={
+              parseFloat(headcount.turnoverRate) > 15
+                ? 'مرتفع — يحتاج اهتمام'
+                : 'ضمن النطاق الطبيعي'
+            }
             icon={PersonOff}
             color={parseFloat(headcount.turnoverRate) > 15 ? '#F44336' : '#4CAF50'}
           />
@@ -248,19 +281,44 @@ export default function BIHRAnalytics() {
       <Grid container spacing={3} sx={{ mb: 3 }}>
         {/* Department Distribution */}
         <Grid item xs={12} md={6}>
-          <Paper elevation={0} sx={{ p: 3, borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)', transition: 'all 0.3s', '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' } }}>
+          <Paper
+            elevation={0}
+            sx={{
+              p: 3,
+              borderRadius: '20px',
+              border: '1px solid rgba(0,0,0,0.04)',
+              boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+              transition: 'all 0.3s',
+              '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' },
+            }}
+          >
             <Typography variant="h6" fontWeight={700} gutterBottom>
               توزيع الموظفين حسب القسم
             </Typography>
             {deptPie.length > 0 ? (
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
-                  <Pie data={deptPie} cx="50%" cy="50%" innerRadius={60} outerRadius={100} paddingAngle={3} dataKey="value" label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}>
+                  <Pie
+                    data={deptPie}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={100}
+                    paddingAngle={3}
+                    dataKey="value"
+                    label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                  >
                     {deptPie.map((entry, idx) => (
                       <Cell key={idx} fill={entry.fill} />
                     ))}
                   </Pie>
-                  <RechartTooltip contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.12)' }} />
+                  <RechartTooltip
+                    contentStyle={{
+                      borderRadius: 12,
+                      border: 'none',
+                      boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
+                    }}
+                  />
                 </PieChart>
               </ResponsiveContainer>
             ) : (
@@ -273,7 +331,17 @@ export default function BIHRAnalytics() {
 
         {/* Attendance Trend */}
         <Grid item xs={12} md={6}>
-          <Paper elevation={0} sx={{ p: 3, borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)', transition: 'all 0.3s', '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' } }}>
+          <Paper
+            elevation={0}
+            sx={{
+              p: 3,
+              borderRadius: '20px',
+              border: '1px solid rgba(0,0,0,0.04)',
+              boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+              transition: 'all 0.3s',
+              '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' },
+            }}
+          >
             <Typography variant="h6" fontWeight={700} gutterBottom>
               اتجاه نسبة الحضور الشهري
             </Typography>
@@ -283,8 +351,22 @@ export default function BIHRAnalytics() {
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
                   <XAxis dataKey="month" tick={{ fontSize: 11 }} />
                   <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} unit="%" />
-                  <RechartTooltip formatter={(val) => `${val}%`} contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.12)' }} />
-                  <Line type="monotone" dataKey="rate" stroke="#4CAF50" strokeWidth={3} dot={{ r: 5 }} name="نسبة الحضور" />
+                  <RechartTooltip
+                    formatter={val => `${val}%`}
+                    contentStyle={{
+                      borderRadius: 12,
+                      border: 'none',
+                      boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
+                    }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="rate"
+                    stroke="#4CAF50"
+                    strokeWidth={3}
+                    dot={{ r: 5 }}
+                    name="نسبة الحضور"
+                  />
                 </LineChart>
               </ResponsiveContainer>
             ) : (
@@ -300,7 +382,17 @@ export default function BIHRAnalytics() {
       <Grid container spacing={3}>
         {/* Leave Breakdown */}
         <Grid item xs={12} md={4}>
-          <Paper elevation={0} sx={{ p: 3, borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)', transition: 'all 0.3s', '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' } }}>
+          <Paper
+            elevation={0}
+            sx={{
+              p: 3,
+              borderRadius: '20px',
+              border: '1px solid rgba(0,0,0,0.04)',
+              boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+              transition: 'all 0.3s',
+              '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' },
+            }}
+          >
             <Typography variant="h6" fontWeight={700} gutterBottom>
               توزيع الإجازات
             </Typography>
@@ -310,7 +402,13 @@ export default function BIHRAnalytics() {
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
                   <XAxis type="number" tick={{ fontSize: 11 }} />
                   <YAxis dataKey="name" type="category" tick={{ fontSize: 11 }} width={60} />
-                  <RechartTooltip contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.12)' }} />
+                  <RechartTooltip
+                    contentStyle={{
+                      borderRadius: 12,
+                      border: 'none',
+                      boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
+                    }}
+                  />
                   <Bar dataKey="count" fill="#9C27B0" name="عدد الطلبات" radius={[0, 4, 4, 0]} />
                 </BarChart>
               </ResponsiveContainer>
@@ -324,23 +422,47 @@ export default function BIHRAnalytics() {
 
         {/* Department Performance Radar */}
         <Grid item xs={12} md={8}>
-          <Paper elevation={0} sx={{ p: 3, borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)', transition: 'all 0.3s', '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' } }}>
+          <Paper
+            elevation={0}
+            sx={{
+              p: 3,
+              borderRadius: '20px',
+              border: '1px solid rgba(0,0,0,0.04)',
+              boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+              transition: 'all 0.3s',
+              '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' },
+            }}
+          >
             <Typography variant="h6" fontWeight={700} gutterBottom>
               مقارنة أداء الأقسام
             </Typography>
             {deptComparison.length > 0 ? (
               <ResponsiveContainer width="100%" height={300}>
-                <RadarChart data={deptComparison.slice(0, 6).map((d) => ({
-                  department: d.department?.substring(0, 15) || 'غير محدد',
-                  headcount: d.headcount || 0,
-                  sessions: d.sessions || 0,
-                  efficiency: parseFloat(d.efficiency) || 0,
-                }))}>
+                <RadarChart
+                  data={deptComparison.slice(0, 6).map(d => ({
+                    department: d.department?.substring(0, 15) || 'غير محدد',
+                    headcount: d.headcount || 0,
+                    sessions: d.sessions || 0,
+                    efficiency: parseFloat(d.efficiency) || 0,
+                  }))}
+                >
                   <PolarGrid />
                   <PolarAngleAxis dataKey="department" tick={{ fontSize: 10 }} />
                   <PolarRadiusAxis tick={{ fontSize: 10 }} />
-                  <Radar name="الموظفون" dataKey="headcount" stroke="#2196F3" fill="#2196F3" fillOpacity={0.2} />
-                  <Radar name="الجلسات" dataKey="sessions" stroke="#4CAF50" fill="#4CAF50" fillOpacity={0.2} />
+                  <Radar
+                    name="الموظفون"
+                    dataKey="headcount"
+                    stroke="#2196F3"
+                    fill="#2196F3"
+                    fillOpacity={0.2}
+                  />
+                  <Radar
+                    name="الجلسات"
+                    dataKey="sessions"
+                    stroke="#4CAF50"
+                    fill="#4CAF50"
+                    fillOpacity={0.2}
+                  />
                   <Legend />
                   <RechartTooltip />
                 </RadarChart>

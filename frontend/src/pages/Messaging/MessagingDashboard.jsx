@@ -45,9 +45,6 @@ import {
   Tooltip as RTooltip,
   ResponsiveContainer,
   Legend,
-  defs,
-  linearGradient,
-  stop,
 } from 'recharts';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';

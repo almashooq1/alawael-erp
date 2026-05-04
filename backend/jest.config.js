@@ -84,11 +84,12 @@ module.exports = {
     global: {
       // Ratchet history (never lower):
       // d124aa72 → stmts:33, branches:20, funcs:23, lines:34 (1192 suites / 15430 tests)
-      // current  → stmts:36, branches:24, funcs:26, lines:38 (1381 suites / 18325 tests)
-      branches: 24,
-      functions: 26,
-      lines: 38,
-      statements: 36,
+      // 8678e7a4 → stmts:36, branches:24, funcs:26, lines:38 (1381 suites / 18325 tests)
+      // current  → stmts:45, branches:35, funcs:36, lines:46 (1687 suites / 23909 tests)
+      branches: 35,
+      functions: 36,
+      lines: 46,
+      statements: 45,
     },
   },
 

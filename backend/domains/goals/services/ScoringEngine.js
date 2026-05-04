@@ -171,7 +171,10 @@ class ScoringEngine {
     };
 
     // Use administrationTime hints or default intervals
-    const intervalDays = intervalMap[purpose] || 90;
+    // NOTE: use hasOwnProperty so that discharge:null is not overridden by || 90
+    const intervalDays = Object.prototype.hasOwnProperty.call(intervalMap, purpose)
+      ? intervalMap[purpose]
+      : 90;
     if (!intervalDays) return { nextDate: null, intervalDays: null };
 
     const nextDate = new Date(lastDate);

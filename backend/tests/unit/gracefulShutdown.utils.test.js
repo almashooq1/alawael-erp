@@ -36,6 +36,21 @@ jest.mock('readline', () => ({
   })),
 }));
 
+// Prevent TTYWRAP open handle: mock process.stdin before module load
+Object.defineProperty(process, 'stdin', {
+  get: jest.fn(() => ({
+    on: jest.fn(),
+    resume: jest.fn(),
+    pause: jest.fn(),
+    destroy: jest.fn(),
+    pipe: jest.fn(),
+    unpipe: jest.fn(),
+    readable: true,
+    setRawMode: jest.fn(),
+  })),
+  configurable: true,
+});
+
 let mod;
 try {
   mod = require('../../utils/gracefulShutdown');

@@ -76,6 +76,8 @@ module.exports = {
   //   statements:20.98 → floor 20, lines:22.49 → floor 22, branches:7.18 → floor 7, functions:6.85 → floor 6
   // Ratchet 2025-05-04 after adding piiRedactor / arabicSearch / kpiCalculator unit tests (+72):
   //   statements:21.06 → 21, lines:22.56 → 22, branches:7.23 → 7, functions:6.89 → 6
+  // Ratchet 2025-05-04 after wiring all 310 tests/unit/*.routes?. files into quality gate (+2267 tests):
+  //   statements:21.21, branches:7.38, functions:6.98, lines:22.72 — floor unchanged; thresholds held
   coverageThreshold: {
     global: {
       branches: 7,

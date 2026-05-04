@@ -550,7 +550,11 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   // Security/RBAC — الأمان وإدارة الصلاحيات الموحدة
   dualMount(app, 'security/domain', safeRequire('../domains/security/routes/security-rbac.routes'));
   // Notifications (الإشعارات الموحدة)
-  dualMount(app, 'notifications', safeRequire('../domains/notifications/routes/notifications.routes'));
+  dualMount(
+    app,
+    'notifications',
+    safeRequire('../domains/notifications/routes/notifications.routes')
+  );
   // Quality & Compliance (الجودة والامتثال)
   dualMount(app, 'quality', safeRequire('../domains/quality/routes/quality.routes'));
   // Reports Engine (محرك التقارير)

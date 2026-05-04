@@ -13,13 +13,11 @@ jest.mock('../../utils/logger', () => ({
 }));
 jest.mock('mongoose', () => {
   const mockModel = jest.fn(() => ({ save: jest.fn().mockResolvedValue({}) }));
-  mockModel.find = jest
-    .fn()
-    .mockReturnValue({
-      sort: jest.fn().mockReturnThis(),
-      limit: jest.fn().mockReturnThis(),
-      lean: jest.fn().mockResolvedValue([]),
-    });
+  mockModel.find = jest.fn().mockReturnValue({
+    sort: jest.fn().mockReturnThis(),
+    limit: jest.fn().mockReturnThis(),
+    lean: jest.fn().mockResolvedValue([]),
+  });
   mockModel.findOne = jest.fn().mockResolvedValue(null);
   mockModel.findById = jest.fn().mockResolvedValue(null);
   return {
@@ -30,7 +28,13 @@ jest.mock('mongoose', () => {
 });
 jest.mock('../../config/performance', () => ({}));
 jest.mock('../../config/redis', () => ({}));
-jest.mock('readline', () => ({}));
+jest.mock('readline', () => ({
+  createInterface: jest.fn(() => ({
+    on: jest.fn(),
+    close: jest.fn(),
+    question: jest.fn(),
+  })),
+}));
 
 let mod;
 try {

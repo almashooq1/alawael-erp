@@ -166,6 +166,8 @@ __pycache__/
 **/chrome/*
 **/plugins/*
 **/extensions/*
+# Exception: our domains/extensions/ source code is not a browser extension
+!backend/domains/extensions/**
 
 # ───────────────────────────────────────────────────────────────
 # 11. Temp Scripts & Debug (ops/ directory)

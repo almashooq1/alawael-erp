@@ -70,16 +70,18 @@ module.exports = {
   // do NOT lower them. Treat this as a ratcheting baseline.
   //
   // Baseline measured 2025-04-16 (initial gate): statements:18, lines:20, branches:4, functions:4
-  // Baseline re-measured 2026-05-04 after domain layer additions (goals, episodes,
+  // Baseline re-measured 2025-05-04 after domain layer additions (goals, episodes,
   //   sessions, assessments, care-plans, group-therapy, tele-rehab, ar-vr, behavior,
   //   family, quality, research, field-training, reports, dashboards, workflow, etc.):
   //   statements:20.98 → floor 20, lines:22.49 → floor 22, branches:7.18 → floor 7, functions:6.85 → floor 6
+  // Ratchet 2025-05-04 after adding piiRedactor / arabicSearch / kpiCalculator unit tests (+72):
+  //   statements:21.06 → 21, lines:22.56 → 22, branches:7.23 → 7, functions:6.89 → 6
   coverageThreshold: {
     global: {
       branches: 7,
       functions: 6,
       lines: 22,
-      statements: 20,
+      statements: 21,
     },
   },
 

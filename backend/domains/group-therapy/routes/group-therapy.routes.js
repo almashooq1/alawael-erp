@@ -5,6 +5,13 @@
 const express = require('express');
 const router = express.Router();
 const { groupTherapyService } = require('../services/GroupTherapyService');
+const {
+  validateCreateGroup,
+  validateUpdateGroup,
+  validateAddMember,
+  validateCreateGroupSession,
+  validate,
+} = require('../validators/group-therapy.validator');
 
 function asyncHandler(fn) {
   return (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
@@ -16,6 +23,7 @@ function getUserId(req) {
 // Groups
 router.post(
   '/',
+  validate(validateCreateGroup),
   asyncHandler(async (req, res) => {
     const data = await groupTherapyService.createGroup({
       ...req.body,
@@ -62,6 +70,7 @@ router.get(
 );
 router.put(
   '/:id',
+  validate(validateUpdateGroup),
   asyncHandler(async (req, res) => {
     const data = await groupTherapyService.updateGroup(req.params.id, req.body);
     res.json({ success: true, data });
@@ -71,6 +80,7 @@ router.put(
 // Members
 router.post(
   '/:id/members',
+  validate(validateAddMember),
   asyncHandler(async (req, res) => {
     const data = await groupTherapyService.addMember(req.params.id, req.body);
     res.json({ success: true, data });
@@ -91,6 +101,7 @@ router.post(
 // Sessions
 router.post(
   '/:id/sessions',
+  validate(validateCreateGroupSession),
   asyncHandler(async (req, res) => {
     const data = await groupTherapyService.createGroupSession({
       ...req.body,

@@ -5,6 +5,13 @@
 const express = require('express');
 const router = express.Router();
 const { behaviorService } = require('../services/BehaviorService');
+const {
+  validateCreateRecord,
+  validateCreatePlan,
+  validateUpdatePlan,
+  validateAddReview,
+  validate,
+} = require('../validators/behavior.validator');
 
 function asyncHandler(fn) {
   return (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
@@ -16,6 +23,7 @@ function getUserId(req) {
 /* ── Records ── */
 router.post(
   '/records',
+  validate(validateCreateRecord),
   asyncHandler(async (req, res) => {
     const data = await behaviorService.createRecord({
       ...req.body,
@@ -62,6 +70,7 @@ router.put(
 /* ── Plans ── */
 router.post(
   '/plans',
+  validate(validateCreatePlan),
   asyncHandler(async (req, res) => {
     const data = await behaviorService.createPlan({
       ...req.body,
@@ -92,6 +101,7 @@ router.get(
 );
 router.put(
   '/plans/:id',
+  validate(validateUpdatePlan),
   asyncHandler(async (req, res) => {
     const data = await behaviorService.updatePlan(req.params.id, req.body);
     res.json({ success: true, data });
@@ -106,6 +116,7 @@ router.put(
 );
 router.post(
   '/plans/:id/reviews',
+  validate(validateAddReview),
   asyncHandler(async (req, res) => {
     const data = await behaviorService.addReview(req.params.id, {
       ...req.body,

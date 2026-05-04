@@ -11,6 +11,12 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const { TherapeuticGoal } = require('../models/TherapeuticGoal');
+const {
+  validateCreateGoal,
+  validateUpdateGoal,
+  validateLogProgress,
+  validate,
+} = require('../validators/goals.validator');
 
 function asyncHandler(fn) {
   return (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
@@ -55,6 +61,7 @@ router.get(
 // ═══════════════════════════════════════════════════════════════════════════════
 router.post(
   '/goals',
+  validate(validateCreateGoal),
   asyncHandler(async (req, res) => {
     const goal = new TherapeuticGoal(req.body);
     await goal.save();
@@ -114,6 +121,7 @@ router.get(
 // ═══════════════════════════════════════════════════════════════════════════════
 router.put(
   '/goals/:id',
+  validate(validateUpdateGoal),
   asyncHandler(async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
       return res.status(400).json({ success: false, message: 'Invalid goal id' });
@@ -132,6 +140,7 @@ router.put(
 // ═══════════════════════════════════════════════════════════════════════════════
 router.post(
   '/goals/:id/progress',
+  validate(validateLogProgress),
   asyncHandler(async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
       return res.status(400).json({ success: false, message: 'Invalid goal id' });

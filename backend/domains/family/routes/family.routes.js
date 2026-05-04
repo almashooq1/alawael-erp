@@ -7,6 +7,14 @@
 const express = require('express');
 const router = express.Router();
 const { familyService } = require('../services/FamilyService');
+const {
+  validateAddFamilyMember,
+  validateUpdateFamilyMember,
+  validateLogCommunication,
+  validateAssignHomework,
+  validateUpdateHomeworkStatus,
+  validate,
+} = require('../validators/family.validator');
 
 function asyncHandler(fn) {
   return (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
@@ -23,6 +31,7 @@ function getUserId(req) {
 /** POST /members — إضافة فرد أسرة */
 router.post(
   '/members',
+  validate(validateAddFamilyMember),
   asyncHandler(async (req, res) => {
     const data = await familyService.addFamilyMember({
       ...req.body,
@@ -45,6 +54,7 @@ router.get(
 /** PUT /members/:id — تحديث بيانات فرد أسرة */
 router.put(
   '/members/:id',
+  validate(validateUpdateFamilyMember),
   asyncHandler(async (req, res) => {
     const data = await familyService.updateFamilyMember(req.params.id, req.body);
     res.json({ success: true, data });
@@ -98,6 +108,7 @@ router.get(
 /** POST /communications — تسجيل تواصل */
 router.post(
   '/communications',
+  validate(validateLogCommunication),
   asyncHandler(async (req, res) => {
     const data = await familyService.logCommunication({
       ...req.body,
@@ -150,6 +161,7 @@ router.post(
 /** POST /homework — تكليف واجب منزلي */
 router.post(
   '/homework',
+  validate(validateAssignHomework),
   asyncHandler(async (req, res) => {
     const data = await familyService.assignHomework({
       ...req.body,
@@ -172,6 +184,7 @@ router.get(
 /** PUT /homework/:commId/:homeworkId — تحديث حالة واجب */
 router.put(
   '/homework/:commId/:homeworkId',
+  validate(validateUpdateHomeworkStatus),
   asyncHandler(async (req, res) => {
     const data = await familyService.updateHomeworkStatus(
       req.params.commId,

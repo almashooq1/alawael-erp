@@ -7,6 +7,12 @@
 const express = require('express');
 const router = express.Router();
 const { programsService } = require('../services/ProgramsService');
+const {
+  validateCreateProgram,
+  validateUpdateProgram,
+  validateEnrollBeneficiary,
+  validate,
+} = require('../validators/programs.validator');
 
 function asyncHandler(fn) {
   return (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
@@ -23,6 +29,7 @@ function getUserId(req) {
 /** POST / — إنشاء برنامج */
 router.post(
   '/',
+  validate(validateCreateProgram),
   asyncHandler(async (req, res) => {
     const program = await programsService.createProgram({
       ...req.body,
@@ -85,6 +92,7 @@ router.get(
 /** PUT /:id — تحديث برنامج */
 router.put(
   '/:id',
+  validate(validateUpdateProgram),
   asyncHandler(async (req, res) => {
     const program = await programsService.updateProgram(req.params.id, req.body);
     res.json({ success: true, data: program });
@@ -116,6 +124,7 @@ router.get(
 /** POST /enroll — تسجيل مستفيد في برنامج */
 router.post(
   '/enroll',
+  validate(validateEnrollBeneficiary),
   asyncHandler(async (req, res) => {
     const enrollment = await programsService.enrollBeneficiary({
       ...req.body,

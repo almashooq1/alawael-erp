@@ -158,8 +158,8 @@ const TherapistDashboard = () => {
   }
 
   const {
-    therapist,
-    stats,
+    therapist: rawTherapist = {},
+    stats: rawStats = {},
     todaySessions,
     urgentCases,
     monthlyStats,
@@ -169,6 +169,33 @@ const TherapistDashboard = () => {
     recentActivity,
     notifications,
   } = therapistData;
+
+  const therapist = {
+    name: '',
+    specialization: '',
+    department: '',
+    clinic: '',
+    experience: '',
+    licenseNo: '',
+    ...rawTherapist,
+  };
+
+  const stats = {
+    totalPatients: 0,
+    activePatients: 0,
+    weeklySessions: 0,
+    completedSessions: 0,
+    improvementRate: 0,
+    improvementTrend: 0,
+    patientSatisfaction: 0,
+    totalRatings: 0,
+    pendingReports: 0,
+    upcomingAssessments: 0,
+    avgSessionDuration: 0,
+    monthlyHours: 0,
+    ...rawStats,
+  };
+
   const unreadNotifs = (notifications || []).filter(n => !n.read).length;
 
   /* ═══ Stat cards definition ═══ */
@@ -333,24 +360,24 @@ const TherapistDashboard = () => {
                 border: '3px solid rgba(255,255,255,0.3)',
               }}
             >
-              {therapist.name?.charAt(0) || 'د'}
+              {therapist?.name?.charAt(0) || 'د'}
             </Avatar>
           </Grid>
           <Grid item xs>
             <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 0.5 }}>
-              مرحباً، دكتور {therapist.name}
+              مرحباً، دكتور {therapist?.name}
             </Typography>
             <Typography variant="body2" sx={{ opacity: 0.9, mb: 0.5 }}>
-              {therapist.specialization} • {therapist.department || therapist.clinic}
+              {therapist?.specialization} • {therapist?.department || therapist?.clinic}
             </Typography>
             <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 0.5 }}>
               <Chip
-                label={therapist.experience}
+                label={therapist?.experience}
                 size="small"
                 sx={{ background: 'rgba(255,255,255,0.2)', color: 'white', fontSize: '0.7rem' }}
               />
               <Chip
-                label={therapist.licenseNo || 'مُرخص'}
+                label={therapist?.licenseNo || 'مُرخص'}
                 size="small"
                 sx={{ background: 'rgba(255,255,255,0.2)', color: 'white', fontSize: '0.7rem' }}
               />

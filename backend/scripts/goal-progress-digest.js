@@ -54,8 +54,8 @@ async function main() {
   const gp = require('../services/goalProgressService');
 
   await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/alawael-erp', {
-    serverSelectionTimeoutMS: 8000,
-    connectTimeoutMS: 8000,
+    serverSelectionTimeoutMS: Number(process.env.MONGO_TIMEOUT_MS) || 4000,
+    connectTimeoutMS: Number(process.env.MONGO_TIMEOUT_MS) || 4000,
   });
 
   // 6-month window is enough to catch stale goals without pulling all history.

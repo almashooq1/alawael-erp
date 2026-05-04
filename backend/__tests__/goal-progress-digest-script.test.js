@@ -10,9 +10,14 @@ const path = require('path');
 const SCRIPT = path.join(__dirname, '..', 'scripts', 'goal-progress-digest.js');
 const run = (args = [], env = {}) =>
   spawnSync('node', [SCRIPT, ...args], {
-    env: { ...process.env, MONGODB_URI: 'mongodb://127.0.0.1:1/nope', ...env },
+    env: {
+      ...process.env,
+      MONGODB_URI: 'mongodb://127.0.0.1:1/nope',
+      MONGO_TIMEOUT_MS: '3000',
+      ...env,
+    },
     encoding: 'utf8',
-    timeout: 20000,
+    timeout: 25000,
   });
 
 describe('goal-progress-digest CLI', () => {

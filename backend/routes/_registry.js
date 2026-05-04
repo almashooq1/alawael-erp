@@ -545,6 +545,10 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   dualMount(app, 'research', safeRequire('../domains/research/routes/research.routes'));
   // Episodes of Care — محور المنصة (الحلقة العلاجية الموحدة)
   dualMount(app, 'episodes', safeRequire('../domains/episodes/routes/episodes.routes'));
+  // HR — الموارد البشرية الموحدة
+  dualMount(app, 'hr', safeRequire('../domains/hr/routes/hr.routes'));
+  // Security/RBAC — الأمان وإدارة الصلاحيات الموحدة
+  dualMount(app, 'security/domain', safeRequire('../domains/security/routes/security-rbac.routes'));
   // Notifications (الإشعارات الموحدة)
   dualMount(app, 'notifications', safeRequire('../domains/notifications/routes/notifications.routes'));
   // Quality & Compliance (الجودة والامتثال)

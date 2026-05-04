@@ -86,6 +86,12 @@ describe('Route Mount Guard', () => {
         '/api/dashboard', // 3 sub-routers intentionally merged
         '/api/therapist', // 5 tier sub-routers intentionally co-mounted (base/extended/pro/ultra/elite)
         '/api/parent-v2', // 2 route files intentionally co-mounted (v2 + v2-extras)
+        // DDD domain routes co-mounted with legacy routes (partial DDD migration — legacy routes
+        // have 200–1800 lines of endpoints not yet ported to domain layer; both must stay active)
+        '/api/notifications', // legacy (643 lines) + DDD domain (284 lines, partial)
+        '/api/episodes', // legacy (238 lines) + DDD domain (204 lines, partial)
+        '/api/quality', // legacy (file missing, null handler) + DDD domain
+        '/api/reports', // legacy (1844 lines) + DDD domain (86 lines, partial)
       ]);
 
       const duplicates = {};

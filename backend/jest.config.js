@@ -82,10 +82,13 @@ module.exports = {
   //   statements:33.70, branches:20.48, functions:23.03, lines:34.98 → raise floors
   coverageThreshold: {
     global: {
-      branches: 20,
-      functions: 23,
-      lines: 34,
-      statements: 33,
+      // Ratchet history (never lower):
+      // d124aa72 → stmts:33, branches:20, funcs:23, lines:34 (1192 suites / 15430 tests)
+      // current  → stmts:36, branches:24, funcs:26, lines:38 (1381 suites / 18325 tests)
+      branches: 24,
+      functions: 26,
+      lines: 38,
+      statements: 36,
     },
   },
 

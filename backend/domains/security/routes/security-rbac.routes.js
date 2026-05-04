@@ -11,6 +11,13 @@
 
 const express = require('express');
 const router = express.Router();
+const {
+  validateCreateRole,
+  validateCreatePermission,
+  validateAssignPermission,
+  validateCheckPermission,
+  validate,
+} = require('../validators/security.validator');
 
 let sec;
 try {
@@ -46,6 +53,7 @@ router.get(
 router.post(
   '/rbac/roles',
   requireService,
+  validate(validateCreateRole),
   asyncHandler(async (req, res) => {
     const role = await sec.roles.create(req.body);
     res.status(201).json({ success: true, data: role });
@@ -110,6 +118,7 @@ router.get(
 router.post(
   '/rbac/permissions',
   requireService,
+  validate(validateCreatePermission),
   asyncHandler(async (req, res) => {
     const permission = await sec.permissions.create(req.body);
     res.status(201).json({ success: true, data: permission });
@@ -120,6 +129,7 @@ router.post(
 router.post(
   '/rbac/roles/:roleId/permissions',
   requireService,
+  validate(validateAssignPermission),
   asyncHandler(async (req, res) => {
     const result = await sec.permissions.assignToRole(req.params.roleId, req.body.permissionId);
     res.json({ success: true, data: result });
@@ -150,6 +160,7 @@ router.get(
 router.post(
   '/rbac/check',
   requireService,
+  validate(validateCheckPermission),
   asyncHandler(async (req, res) => {
     const { userId, permission, resource } = req.body;
     const allowed = await sec.permissions.checkUserPermission(userId, permission, resource);

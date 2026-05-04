@@ -5,6 +5,12 @@
 const express = require('express');
 const router = express.Router();
 const { researchService } = require('../services/ResearchService');
+const {
+  validateCreateStudy,
+  validateEnrollParticipant,
+  validateTransitionStatus,
+  validate,
+} = require('../validators/research.validator');
 
 function asyncHandler(fn) {
   return (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
@@ -16,6 +22,7 @@ function getUserId(req) {
 // Create study
 router.post(
   '/',
+  validate(validateCreateStudy),
   asyncHandler(async (req, res) => {
     const data = await researchService.createStudy({
       ...req.body,
@@ -72,6 +79,7 @@ router.put(
 // Transition status
 router.put(
   '/:id/status',
+  validate(validateTransitionStatus),
   asyncHandler(async (req, res) => {
     const data = await researchService.transitionStatus(
       req.params.id,
@@ -86,6 +94,7 @@ router.put(
 // Enroll participant
 router.post(
   '/:id/participants',
+  validate(validateEnrollParticipant),
   asyncHandler(async (req, res) => {
     const data = await researchService.enrollParticipant(req.params.id, req.body);
     res.json({ success: true, data });

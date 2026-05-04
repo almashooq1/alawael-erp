@@ -8,6 +8,12 @@ const express = require('express');
 const router = express.Router();
 const { journeyService } = require('../services/JourneyService');
 const { workflowEngine } = require('../WorkflowEngine');
+const {
+  validateStartJourney,
+  validateAdvancePhase,
+  validateExceptionAdvance,
+  validate,
+} = require('../validators/workflow.validator');
 
 // ─── Helper ─────────────────────────────────────────────────────────────────
 
@@ -29,11 +35,9 @@ function getUserId(req) {
  */
 router.post(
   '/journey/start',
+  validate(validateStartJourney),
   asyncHandler(async (req, res) => {
     const { beneficiaryId, referralData } = req.body;
-    if (!beneficiaryId) {
-      return res.status(400).json({ success: false, message: 'معرّف المستفيد مطلوب' });
-    }
 
     const result = await journeyService.startJourney({
       beneficiaryId,
@@ -53,11 +57,9 @@ router.post(
  */
 router.post(
   '/journey/:episodeId/advance',
+  validate(validateAdvancePhase),
   asyncHandler(async (req, res) => {
     const { toPhase, reason, context } = req.body;
-    if (!toPhase) {
-      return res.status(400).json({ success: false, message: 'المرحلة المطلوبة مفقودة' });
-    }
 
     const result = await journeyService.advancePhase({
       episodeId: req.params.episodeId,
@@ -77,11 +79,9 @@ router.post(
  */
 router.post(
   '/journey/:episodeId/exception',
+  validate(validateExceptionAdvance),
   asyncHandler(async (req, res) => {
     const { toPhase, reason, approvedBy } = req.body;
-    if (!toPhase || !reason) {
-      return res.status(400).json({ success: false, message: 'المرحلة وسبب التجاوز مطلوبان' });
-    }
 
     const result = await journeyService.exceptionAdvance({
       episodeId: req.params.episodeId,

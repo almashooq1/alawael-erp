@@ -7,6 +7,11 @@
 const express = require('express');
 const router = express.Router();
 const { riskScoringService } = require('../services/RiskScoringService');
+const {
+  validateCalculateBatch,
+  validateFeedback,
+  validate,
+} = require('../validators/ai-recommendations.validator');
 
 function asyncHandler(fn) {
   return (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
@@ -36,6 +41,7 @@ router.post(
 /** POST /risk/calculate-batch — حساب دفعة لكل المستفيدين */
 router.post(
   '/risk/calculate-batch',
+  validate(validateCalculateBatch),
   asyncHandler(async (req, res) => {
     const result = await riskScoringService.calculateBatch(req.body.branchId || req.user?.branchId);
     res.json({ success: true, data: result });
@@ -104,6 +110,7 @@ router.get(
 /** POST /recommendations/:id/respond — الرد على توصية */
 router.post(
   '/recommendations/:id/respond',
+  validate(validateFeedback),
   asyncHandler(async (req, res) => {
     const data = await riskScoringService.respondToRecommendation(req.params.id, getUserId(req), {
       action: req.body.action,

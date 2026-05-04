@@ -5,6 +5,7 @@
 const express = require('express');
 const router = express.Router();
 const { arvrService } = require('../services/ARVRService');
+const { validateCreateSession, validate } = require('../validators/ar-vr.validator');
 
 function asyncHandler(fn) {
   return (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
@@ -16,6 +17,7 @@ function getUserId(req) {
 // Create
 router.post(
   '/',
+  validate(validateCreateSession),
   asyncHandler(async (req, res) => {
     const data = await arvrService.createSession({
       ...req.body,

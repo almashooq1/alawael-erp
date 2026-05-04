@@ -9,6 +9,7 @@
 
 const express = require('express');
 const router = express.Router();
+const { validateAddEvent, validate } = require('../validators/timeline.validator');
 
 let timelineService;
 try {
@@ -62,6 +63,7 @@ router.get(
 router.post(
   '/',
   requireService,
+  validate(validateAddEvent),
   asyncHandler(async (req, res) => {
     const event = await timelineService.addEvent(req.body);
     res.status(201).json({ success: true, data: event });

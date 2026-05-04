@@ -5,6 +5,11 @@
 const express = require('express');
 const router = express.Router();
 const { fieldTrainingService } = require('../services/FieldTrainingService');
+const {
+  validateCreateProgram,
+  validateEnrollTrainee,
+  validate,
+} = require('../validators/field-training.validator');
 
 function asyncHandler(fn) {
   return (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
@@ -16,6 +21,7 @@ function getUserId(req) {
 /* ── Programs ── */
 router.post(
   '/programs',
+  validate(validateCreateProgram),
   asyncHandler(async (req, res) => {
     const data = await fieldTrainingService.createProgram({
       ...req.body,
@@ -57,6 +63,7 @@ router.put(
 /* ── Trainees ── */
 router.post(
   '/programs/:programId/trainees',
+  validate(validateEnrollTrainee),
   asyncHandler(async (req, res) => {
     const data = await fieldTrainingService.enrollTrainee(req.params.programId, req.body);
     res.status(201).json({ success: true, data });

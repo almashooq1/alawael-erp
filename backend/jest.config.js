@@ -78,12 +78,14 @@ module.exports = {
   //   statements:21.06 → 21, lines:22.56 → 22, branches:7.23 → 7, functions:6.89 → 6
   // Ratchet 2025-05-04 after wiring all 310 tests/unit/*.routes?. files into quality gate (+2267 tests):
   //   statements:21.21, branches:7.38, functions:6.98, lines:22.72 — floor unchanged; thresholds held
+  // Ratchet 2025-05-05 after wiring model(406)/middleware(36)/service(264)/domain(51)/controller(22)/module(56) tests (+11782 tests, 1192 total suites):
+  //   statements:33.70, branches:20.48, functions:23.03, lines:34.98 → raise floors
   coverageThreshold: {
     global: {
-      branches: 7,
-      functions: 6,
-      lines: 22,
-      statements: 21,
+      branches: 20,
+      functions: 23,
+      lines: 34,
+      statements: 33,
     },
   },
 

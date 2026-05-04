@@ -21,6 +21,14 @@ try {
 
 const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
+const {
+  validateSendNotification,
+  validateSendBulk,
+  validateScheduleNotification,
+  validateSnoozeNotification,
+  validate,
+} = require('../validators/notifications.validator');
+
 const requireService = (req, res, next) => {
   if (!ns) {
     return res.status(503).json({ success: false, message: 'Notification service unavailable' });
@@ -132,6 +140,7 @@ router.patch(
 router.patch(
   '/:id/snooze',
   requireService,
+  validate(validateSnoozeNotification),
   asyncHandler(async (req, res) => {
     const result = await ns.snoozeNotification(req.params.id, req.body.snoozeUntil);
     res.json({ success: true, data: result });
@@ -197,6 +206,7 @@ router.delete(
 router.post(
   '/send',
   requireService,
+  validate(validateSendNotification),
   asyncHandler(async (req, res) => {
     const result = await ns.send(req.body);
     res.status(201).json({ success: true, data: result });
@@ -207,6 +217,7 @@ router.post(
 router.post(
   '/send-bulk',
   requireService,
+  validate(validateSendBulk),
   asyncHandler(async (req, res) => {
     const { recipientIds, ...opts } = req.body;
     const results = await ns.sendBulk(recipientIds, opts);
@@ -292,6 +303,7 @@ router.get(
 router.post(
   '/schedule',
   requireService,
+  validate(validateScheduleNotification),
   asyncHandler(async (req, res) => {
     const result = await ns.scheduleNotification(req.body);
     res.status(201).json({ success: true, data: result });

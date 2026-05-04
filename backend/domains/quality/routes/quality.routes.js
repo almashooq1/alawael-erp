@@ -7,6 +7,7 @@
 const express = require('express');
 const router = express.Router();
 const { qualityEngine } = require('../services/QualityEngine');
+const { validateResolveAction, validate } = require('../validators/quality.validator');
 
 function asyncHandler(fn) {
   return (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
@@ -84,6 +85,7 @@ router.get(
 /** POST /actions/:id/resolve — حل إجراء تصحيحي */
 router.post(
   '/actions/:id/resolve',
+  validate(validateResolveAction),
   asyncHandler(async (req, res) => {
     const data = await qualityEngine.resolveAction(req.params.id, getUserId(req), req.body.note);
     res.json({ success: true, data });

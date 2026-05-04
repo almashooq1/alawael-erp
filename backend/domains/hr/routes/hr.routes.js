@@ -21,6 +21,14 @@ try {
 
 const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
+const {
+  validateCreateEmployee,
+  validateUpdateEmployee,
+  validateRequestLeave,
+  validateCheckIn,
+  validate,
+} = require('../validators/hr.validator');
+
 const requireService = (req, res, next) => {
   if (!hr) {
     return res.status(503).json({ success: false, message: 'HR service unavailable' });
@@ -53,6 +61,7 @@ router.get(
 router.post(
   '/employees',
   requireService,
+  validate(validateCreateEmployee),
   asyncHandler(async (req, res) => {
     const employee = await hr.employee.create(req.body);
     res.status(201).json({ success: true, data: employee });
@@ -83,6 +92,7 @@ router.get(
 router.put(
   '/employees/:id',
   requireService,
+  validate(validateUpdateEmployee),
   asyncHandler(async (req, res) => {
     const updated = await hr.employee.update(req.params.id, req.body);
     res.json({ success: true, data: updated });
@@ -107,6 +117,7 @@ router.patch(
 router.post(
   '/leaves',
   requireService,
+  validate(validateRequestLeave),
   asyncHandler(async (req, res) => {
     const leave = await hr.leave.request({ ...req.body, employeeId: req.user?._id });
     res.status(201).json({ success: true, data: leave });
@@ -171,6 +182,7 @@ router.patch(
 router.post(
   '/attendance/check-in',
   requireService,
+  validate(validateCheckIn),
   asyncHandler(async (req, res) => {
     const record = await hr.attendance.checkIn({ employeeId: req.user?._id, ...req.body });
     res.status(201).json({ success: true, data: record });

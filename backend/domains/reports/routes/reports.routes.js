@@ -7,6 +7,7 @@
 const express = require('express');
 const router = express.Router();
 const { reportsEngine } = require('../services/ReportsEngine');
+const { validateGenerateReport, validate } = require('../validators/reports.validator');
 
 function asyncHandler(fn) {
   return (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
@@ -23,6 +24,7 @@ function getUserId(req) {
 /** POST /generate/:templateCode — توليد تقرير */
 router.post(
   '/generate/:templateCode',
+  validate(validateGenerateReport),
   asyncHandler(async (req, res) => {
     const report = await reportsEngine.generateReport(req.params.templateCode, {
       ...req.body,

@@ -5,6 +5,13 @@
 const express = require('express');
 const router = express.Router();
 const { teleRehabService } = require('../services/TeleRehabService');
+const {
+  validateScheduleSession,
+  validateCompleteSession,
+  validateRecordQuality,
+  validateSubmitSatisfaction,
+  validate,
+} = require('../validators/tele-rehab.validator');
 
 function asyncHandler(fn) {
   return (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
@@ -16,6 +23,7 @@ function getUserId(req) {
 // Schedule
 router.post(
   '/',
+  validate(validateScheduleSession),
   asyncHandler(async (req, res) => {
     const data = await teleRehabService.scheduleSession({
       ...req.body,
@@ -73,6 +81,7 @@ router.put(
 // Complete
 router.put(
   '/:id/complete',
+  validate(validateCompleteSession),
   asyncHandler(async (req, res) => {
     const data = await teleRehabService.completeSession(req.params.id, req.body);
     res.json({ success: true, data });
@@ -91,6 +100,7 @@ router.put(
 // Connection quality
 router.put(
   '/:id/quality',
+  validate(validateRecordQuality),
   asyncHandler(async (req, res) => {
     const data = await teleRehabService.recordQuality(req.params.id, req.body);
     res.json({ success: true, data });
@@ -100,6 +110,7 @@ router.put(
 // Satisfaction
 router.put(
   '/:id/satisfaction',
+  validate(validateSubmitSatisfaction),
   asyncHandler(async (req, res) => {
     const data = await teleRehabService.submitSatisfaction(req.params.id, req.body);
     res.json({ success: true, data });

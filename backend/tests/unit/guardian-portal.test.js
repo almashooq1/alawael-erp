@@ -20,6 +20,7 @@ jest.mock('../../utils/logger', () => ({ info: jest.fn(), warn: jest.fn(), error
 jest.mock('../../utils/sanitize', () => ({ escapeRegex: jest.fn(s => s) }));
 
 const makeChain = val => {
+  const p = Promise.resolve(val);
   const c = {
     sort: jest.fn(),
     skip: jest.fn(),
@@ -27,6 +28,8 @@ const makeChain = val => {
     populate: jest.fn(),
     select: jest.fn(),
     lean: jest.fn().mockResolvedValue(val),
+    then: (onFulfilled, onRejected) => p.then(onFulfilled, onRejected),
+    catch: onRejected => p.catch(onRejected),
   };
   c.sort.mockReturnValue(c);
   c.skip.mockReturnValue(c);
@@ -38,9 +41,10 @@ const makeChain = val => {
 
 const mockGuardianFind = jest.fn(() => makeChain([]));
 const mockGuardianFindById = jest.fn(() => makeChain(null));
-const mockGuardianFindOne = jest.fn().mockResolvedValue(null);
+const mockGuardianFindOne = jest.fn(() => makeChain(null));
 const mockGuardianCount = jest.fn().mockResolvedValue(0);
 const mockGuardianSave = jest.fn().mockResolvedValue({});
+const mockGuardianCreate = jest.fn().mockResolvedValue({ _id: 'g1' });
 const mockGuardianFindByIdAndUpdate = jest.fn(() => makeChain(null));
 const mockGuardianFindByIdAndDelete = jest.fn().mockResolvedValue({ _id: 'g1' });
 
@@ -53,14 +57,19 @@ jest.mock('../../models/Guardian', () => {
   M.findById = (...a) => mockGuardianFindById(...a);
   M.findOne = (...a) => mockGuardianFindOne(...a);
   M.countDocuments = (...a) => mockGuardianCount(...a);
+  M.create = (...a) => mockGuardianCreate(...a);
   M.findByIdAndUpdate = (...a) => mockGuardianFindByIdAndUpdate(...a);
   M.findByIdAndDelete = (...a) => mockGuardianFindByIdAndDelete(...a);
   return M;
 });
 
 const mockBeneficiaryFindById = jest.fn().mockResolvedValue(null);
+const mockBeneficiaryFind = jest.fn(() => makeChain([]));
+const mockBeneficiaryCount = jest.fn().mockResolvedValue(0);
 jest.mock('../../models/Beneficiary', () => ({
   findById: (...a) => mockBeneficiaryFindById(...a),
+  find: (...a) => mockBeneficiaryFind(...a),
+  countDocuments: (...a) => mockBeneficiaryCount(...a),
 }));
 
 function makeApp() {
@@ -81,8 +90,8 @@ describe('GET /guardians/search', () => {
   });
 
   test('searches guardians with valid query', async () => {
-    mockGuardianFind.mockReturnValue(makeChain([{ _id: 'g1', firstName_ar: 'أحمد' }]));
-    const res = await request(makeApp()).get('/api/guardians/search?q=أحمد');
+    mockGuardianFind.mockReturnValue(makeChain([{ _id: 'g1', firstName_ar: 'test' }]));
+    const res = await request(makeApp()).get('/api/guardians/search?q=test');
     expect(res.status).toBe(200);
     expect(res.body.data).toHaveLength(1);
   });
@@ -137,7 +146,7 @@ describe('POST /guardians', () => {
   });
 
   test('returns 409 when guardian with same idNumber already exists', async () => {
-    mockGuardianFindOne.mockResolvedValue({ _id: 'existing', idNumber: '1234567890' });
+    mockGuardianFindOne.mockReturnValue(makeChain({ _id: 'existing', idNumber: '1234567890' }));
     const res = await request(makeApp()).post('/api/guardians').send({
       firstName_ar: 'عبدالله',
       lastName_ar: 'الشمري',
@@ -172,13 +181,13 @@ describe('PUT /guardians/:id', () => {
 
 describe('DELETE /guardians/:id', () => {
   test('returns 404 when guardian not found', async () => {
-    mockGuardianFindByIdAndDelete.mockResolvedValue(null);
+    mockGuardianFindById.mockReturnValue(makeChain(null));
     const res = await request(makeApp()).delete('/api/guardians/507f1f77bcf86cd799439011');
     expect(res.status).toBe(404);
   });
 
   test('soft-deletes guardian', async () => {
-    mockGuardianFindByIdAndDelete.mockResolvedValue({ _id: 'g1' });
+    mockGuardianFindById.mockReturnValue(makeChain({ _id: 'g1' }));
     const res = await request(makeApp()).delete('/api/guardians/507f1f77bcf86cd799439011');
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);

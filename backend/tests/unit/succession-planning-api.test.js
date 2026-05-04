@@ -26,6 +26,7 @@ jest.mock('../../utils/safeError', () =>
 jest.mock('../../utils/sanitize', () => ({ stripUpdateMeta: jest.fn(d => d) }));
 
 const makeChain = val => {
+  const p = Promise.resolve(val);
   const c = {
     sort: jest.fn(),
     skip: jest.fn(),
@@ -33,6 +34,8 @@ const makeChain = val => {
     populate: jest.fn(),
     select: jest.fn(),
     lean: jest.fn().mockResolvedValue(val),
+    then: (onFulfilled, onRejected) => p.then(onFulfilled, onRejected),
+    catch: onRejected => p.catch(onRejected),
   };
   c.sort.mockReturnValue(c);
   c.skip.mockReturnValue(c);

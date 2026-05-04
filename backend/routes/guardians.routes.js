@@ -200,9 +200,9 @@ router.post('/', async (req, res) => {
     if (!relationship) return fail(res, 'صلة القرابة مطلوبة', 422);
 
     // التحقق من تكرار الهوية
-    const exists = await Guardian.findOne({ idNumber: idNumber.trim() }).lean();
+    const exists = await Guardian.findOne({ idNumber: idNumber.trim() });
     if (exists) {
-      return fail(res, 'ولي الأمر مسجل مسبقاً بهذا الرقم', 422, { existingId: exists._id });
+      return fail(res, 'ولي الأمر مسجل مسبقاً بهذا الرقم', 409, { existingId: exists._id });
     }
 
     const guardian = await Guardian.create({

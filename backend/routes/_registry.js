@@ -543,6 +543,10 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   );
   // Clinical Research
   dualMount(app, 'research', safeRequire('../domains/research/routes/research.routes'));
+  // Episodes of Care — محور المنصة (الحلقة العلاجية الموحدة)
+  dualMount(app, 'episodes', safeRequire('../domains/episodes/routes/episodes.routes'));
+  // Notifications (الإشعارات الموحدة)
+  dualMount(app, 'notifications', safeRequire('../domains/notifications/routes/notifications.routes'));
   // Quality & Compliance (الجودة والامتثال)
   dualMount(app, 'quality', safeRequire('../domains/quality/routes/quality.routes'));
   // Reports Engine (محرك التقارير)

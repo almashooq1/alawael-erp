@@ -21,6 +21,7 @@ const DEFAULT_OK = {
   '/api/evidence/reference': { status: 200, body: '{}' },
   '/api/compliance-calendar/reference': { status: 200, body: '{}' },
   '/api/pdpl/retention-periods': { status: 200, body: '{}' },
+  '/api/admin/capa': { status: 200, body: '{}' },
   '/api/v1/admin/ops/integration-health': { status: 200, body: '{}' },
   '/api/v1/admin/ops/dlq': { status: 200, body: '{}' },
   '/api/docs/integration.json': { status: 200, body: '{"openapi":"3.1.0"}' },

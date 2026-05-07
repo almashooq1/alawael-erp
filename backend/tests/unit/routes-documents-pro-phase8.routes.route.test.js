@@ -22,7 +22,9 @@ describe('api/routes/documents-pro-phase8.routes.js', () => {
   });
 
   test('is syntactically valid JavaScript', () => {
-    expect(() => new vm.Script(source, { filename: 'documents-pro-phase8.routes.js' })).not.toThrow();
+    expect(
+      () => new vm.Script(source, { filename: 'documents-pro-phase8.routes.js' })
+    ).not.toThrow();
   });
 
   test('uses express Router', () => {
@@ -54,12 +56,12 @@ describe('api/routes/documents-pro-phase8.routes.js', () => {
   });
 
   test('has npm dependencies (1)', () => {
-    const npms = (source.match(/require\s*\(\s*['"](?![./])[^'"]+['"]\s*\)/g) || []);
+    const npms = source.match(/require\s*\(\s*['"](?![./])[^'"]+['"]\s*\)/g) || [];
     expect(npms.length).toBe(1);
   });
 
   test('has local dependencies (6)', () => {
-    const locals = (source.match(/require\s*\(\s*['"]\.[^'"]+['"]\s*\)/g) || []);
+    const locals = source.match(/require\s*\(\s*['"]\.[^'"]+['"]\s*\)/g) || [];
     expect(locals.length).toBe(6);
   });
 

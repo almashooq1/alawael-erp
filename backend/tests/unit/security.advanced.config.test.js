@@ -18,7 +18,11 @@ jest.mock('../../utils/logger', () => ({
 
 jest.mock('express-rate-limit', () => jest.fn(() => jest.fn((req, res, next) => next && next())));
 
-jest.mock('express-mongo-sanitize', () => jest.fn(() => jest.fn((req, res, next) => next && next())), { virtual: true });
+jest.mock(
+  'express-mongo-sanitize',
+  () => jest.fn(() => jest.fn((req, res, next) => next && next())),
+  { virtual: true }
+);
 
 /* ── Module under test ── */
 const mod = require('../../config/security.advanced');
@@ -60,5 +64,4 @@ describe('config/security.advanced', () => {
     expect(mod.requestLogger).toBeDefined();
     expect(typeof mod.requestLogger).toBe('function');
   });
-
 });

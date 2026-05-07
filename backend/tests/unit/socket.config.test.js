@@ -16,45 +16,73 @@ jest.mock('../../utils/logger', () => ({
   stream: { write: jest.fn() },
 }));
 
-jest.mock('socket.io', () => ({
-  Server: jest.fn(() => ({
-    on: jest.fn(),
-    emit: jest.fn(),
-    use: jest.fn(),
-    of: jest.fn(() => ({ on: jest.fn(), emit: jest.fn(), use: jest.fn() })),
-    to: jest.fn(() => ({ emit: jest.fn() })),
-  })),
-}), { virtual: true });
+jest.mock(
+  'socket.io',
+  () => ({
+    Server: jest.fn(() => ({
+      on: jest.fn(),
+      emit: jest.fn(),
+      use: jest.fn(),
+      of: jest.fn(() => ({ on: jest.fn(), emit: jest.fn(), use: jest.fn() })),
+      to: jest.fn(() => ({ emit: jest.fn() })),
+    })),
+  }),
+  { virtual: true }
+);
 
 jest.mock('jsonwebtoken', () => ({
-  verify: jest.fn((token, secret, cb) => { if (cb) cb(null, { id: 'user1' }); return { id: 'user1' }; }),
+  verify: jest.fn((token, secret, cb) => {
+    if (cb) cb(null, { id: 'user1' });
+    return { id: 'user1' };
+  }),
   sign: jest.fn(() => 'mock-token'),
   decode: jest.fn(() => ({ id: 'user1' })),
 }));
 
-jest.mock('../../models/message.model', () => new Proxy({}, {
-  get: (_, p) => {
-    if (p === '__esModule') return false;
-    if (p === 'default') return {};
-    return jest.fn(() => Promise.resolve({}));
-  },
-}));
+jest.mock(
+  '../../models/message.model',
+  () =>
+    new Proxy(
+      {},
+      {
+        get: (_, p) => {
+          if (p === '__esModule') return false;
+          if (p === 'default') return {};
+          return jest.fn(() => Promise.resolve({}));
+        },
+      }
+    )
+);
 
-jest.mock('../../models/conversation.model', () => new Proxy({}, {
-  get: (_, p) => {
-    if (p === '__esModule') return false;
-    if (p === 'default') return {};
-    return jest.fn(() => Promise.resolve({}));
-  },
-}));
+jest.mock(
+  '../../models/conversation.model',
+  () =>
+    new Proxy(
+      {},
+      {
+        get: (_, p) => {
+          if (p === '__esModule') return false;
+          if (p === 'default') return {};
+          return jest.fn(() => Promise.resolve({}));
+        },
+      }
+    )
+);
 
-jest.mock('../../config/secrets', () => new Proxy({}, {
-  get: (_, p) => {
-    if (p === '__esModule') return false;
-    if (p === 'default') return {};
-    return jest.fn(() => Promise.resolve({}));
-  },
-}));
+jest.mock(
+  '../../config/secrets',
+  () =>
+    new Proxy(
+      {},
+      {
+        get: (_, p) => {
+          if (p === '__esModule') return false;
+          if (p === 'default') return {};
+          return jest.fn(() => Promise.resolve({}));
+        },
+      }
+    )
+);
 
 /* ── Module under test (loaded after mocks) ── */
 let mod;
@@ -154,5 +182,4 @@ describe('config/socket.config', () => {
       expect(mod).toBeTruthy();
     }
   });
-
 });

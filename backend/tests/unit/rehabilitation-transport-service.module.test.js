@@ -22,7 +22,9 @@ describe('vehicles/rehabilitation-transport-service.js', () => {
   });
 
   test('is syntactically valid JavaScript', () => {
-    expect(() => new vm.Script(source, { filename: 'rehabilitation-transport-service.js' })).not.toThrow();
+    expect(
+      () => new vm.Script(source, { filename: 'rehabilitation-transport-service.js' })
+    ).not.toThrow();
   });
 
   test('defines class AIRouteOptimizer', () => {
@@ -39,12 +41,12 @@ describe('vehicles/rehabilitation-transport-service.js', () => {
   });
 
   test('has npm dependencies (2)', () => {
-    const npms = (source.match(/require\s*\(\s*['"](?![./])[^'"]+['"]\s*\)/g) || []);
+    const npms = source.match(/require\s*\(\s*['"](?![./])[^'"]+['"]\s*\)/g) || [];
     expect(npms.length).toBe(2);
   });
 
   test('has local dependencies (1)', () => {
-    const locals = (source.match(/require\s*\(\s*['"]\.[^'"]+['"]\s*\)/g) || []);
+    const locals = source.match(/require\s*\(\s*['"]\.[^'"]+['"]\s*\)/g) || [];
     expect(locals.length).toBe(1);
   });
 

@@ -71,5 +71,4 @@ describe('config/rbac.config', () => {
     expect(mod.clearCache).toBeDefined();
     expect(typeof mod.clearCache).toBe('function');
   });
-
 });

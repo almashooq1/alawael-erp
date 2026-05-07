@@ -9,7 +9,10 @@ const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
 
-const SRC = path.resolve(__dirname, '../../rehabilitation-services/escalation-notifications-service.js');
+const SRC = path.resolve(
+  __dirname,
+  '../../rehabilitation-services/escalation-notifications-service.js'
+);
 
 describe('rehabilitation-services/escalation-notifications-service.js', () => {
   let source;
@@ -22,7 +25,9 @@ describe('rehabilitation-services/escalation-notifications-service.js', () => {
   });
 
   test('is syntactically valid JavaScript', () => {
-    expect(() => new vm.Script(source, { filename: 'escalation-notifications-service.js' })).not.toThrow();
+    expect(
+      () => new vm.Script(source, { filename: 'escalation-notifications-service.js' })
+    ).not.toThrow();
   });
 
   test('defines a Mongoose model', () => {
@@ -38,7 +43,7 @@ describe('rehabilitation-services/escalation-notifications-service.js', () => {
   });
 
   test('has npm dependencies (2)', () => {
-    const npms = (source.match(/require\s*\(\s*['"](?![./])[^'"]+['"]\s*\)/g) || []);
+    const npms = source.match(/require\s*\(\s*['"](?![./])[^'"]+['"]\s*\)/g) || [];
     expect(npms.length).toBe(2);
   });
 

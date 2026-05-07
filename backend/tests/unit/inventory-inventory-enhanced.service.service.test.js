@@ -22,7 +22,9 @@ describe('services/inventory/inventory-enhanced.service.js', () => {
   });
 
   test('is syntactically valid JavaScript', () => {
-    expect(() => new vm.Script(source, { filename: 'inventory-enhanced.service.js' })).not.toThrow();
+    expect(
+      () => new vm.Script(source, { filename: 'inventory-enhanced.service.js' })
+    ).not.toThrow();
   });
 
   test('defines class InventoryEnhancedService', () => {
@@ -39,12 +41,12 @@ describe('services/inventory/inventory-enhanced.service.js', () => {
   });
 
   test('has npm dependencies (1)', () => {
-    const npms = (source.match(/require\s*\(\s*['"](?![./])[^'"]+['"]\s*\)/g) || []);
+    const npms = source.match(/require\s*\(\s*['"](?![./])[^'"]+['"]\s*\)/g) || [];
     expect(npms.length).toBe(1);
   });
 
   test('has local dependencies (6)', () => {
-    const locals = (source.match(/require\s*\(\s*['"]\.[^'"]+['"]\s*\)/g) || []);
+    const locals = source.match(/require\s*\(\s*['"]\.[^'"]+['"]\s*\)/g) || [];
     expect(locals.length).toBe(6);
   });
 

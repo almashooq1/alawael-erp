@@ -9,7 +9,10 @@ const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
 
-const SRC = path.resolve(__dirname, '../../rehabilitation-services/individualized-rehabilitation-plan-service.js');
+const SRC = path.resolve(
+  __dirname,
+  '../../rehabilitation-services/individualized-rehabilitation-plan-service.js'
+);
 
 describe('rehabilitation-services/individualized-rehabilitation-plan-service.js', () => {
   let source;
@@ -22,7 +25,9 @@ describe('rehabilitation-services/individualized-rehabilitation-plan-service.js'
   });
 
   test('is syntactically valid JavaScript', () => {
-    expect(() => new vm.Script(source, { filename: 'individualized-rehabilitation-plan-service.js' })).not.toThrow();
+    expect(
+      () => new vm.Script(source, { filename: 'individualized-rehabilitation-plan-service.js' })
+    ).not.toThrow();
   });
 
   test('defines class IndividualizedRehabilitationPlanService', () => {
@@ -35,7 +40,7 @@ describe('rehabilitation-services/individualized-rehabilitation-plan-service.js'
   });
 
   test('has npm dependencies (1)', () => {
-    const npms = (source.match(/require\s*\(\s*['"](?![./])[^'"]+['"]\s*\)/g) || []);
+    const npms = source.match(/require\s*\(\s*['"](?![./])[^'"]+['"]\s*\)/g) || [];
     expect(npms.length).toBe(1);
   });
 

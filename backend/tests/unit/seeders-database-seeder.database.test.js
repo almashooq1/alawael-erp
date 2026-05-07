@@ -38,7 +38,7 @@ describe('database/seeders/database-seeder.js', () => {
   });
 
   test('has npm dependencies (2)', () => {
-    const npms = (source.match(/require\s*\(\s*['"](?![./])[^'"]+['"]\s*\)/g) || []);
+    const npms = source.match(/require\s*\(\s*['"](?![./])[^'"]+['"]\s*\)/g) || [];
     expect(npms.length).toBe(2);
   });
 

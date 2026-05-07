@@ -13,8 +13,11 @@ describe('aiNotificationService service', () => {
   test('analyzeAndSuggestNotifications is callable', async () => {
     if (typeof svc.analyzeAndSuggestNotifications !== 'function') return;
     let r;
-    try { r = await svc.analyzeAndSuggestNotifications({}); } catch (e) { r = e; }
+    try {
+      r = await svc.analyzeAndSuggestNotifications({});
+    } catch (e) {
+      r = e;
+    }
     expect(r).toBeDefined();
   });
-
 });

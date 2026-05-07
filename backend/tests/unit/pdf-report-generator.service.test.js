@@ -35,7 +35,7 @@ describe('rehabilitation-services/pdf-report-generator.js', () => {
   });
 
   test('has npm dependencies (3)', () => {
-    const npms = (source.match(/require\s*\(\s*['"](?![./])[^'"]+['"]\s*\)/g) || []);
+    const npms = source.match(/require\s*\(\s*['"](?![./])[^'"]+['"]\s*\)/g) || [];
     expect(npms.length).toBe(3);
   });
 

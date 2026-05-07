@@ -71,5 +71,4 @@ describe('errors/responseSystem', () => {
     expect(mod.enhanceResponse).toBeDefined();
     expect(typeof mod.enhanceResponse).toBe('function');
   });
-
 });

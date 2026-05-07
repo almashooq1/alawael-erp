@@ -5,13 +5,20 @@
 'use strict';
 
 /* ── Mocks ── */
-jest.mock('../../config/secrets', () => new Proxy({}, {
-  get: (_, p) => {
-    if (p === '__esModule') return false;
-    if (p === 'default') return {};
-    return jest.fn(() => Promise.resolve({}));
-  },
-}));
+jest.mock(
+  '../../config/secrets',
+  () =>
+    new Proxy(
+      {},
+      {
+        get: (_, p) => {
+          if (p === '__esModule') return false;
+          if (p === 'default') return {};
+          return jest.fn(() => Promise.resolve({}));
+        },
+      }
+    )
+);
 
 /* ── Module under test (loaded after mocks) ── */
 let mod;
@@ -64,5 +71,4 @@ describe('config/secrets', () => {
   test('should export fcmServerKey', () => {
     expect(mod.fcmServerKey).toBeDefined();
   });
-
 });

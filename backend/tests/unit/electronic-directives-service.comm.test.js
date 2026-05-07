@@ -22,7 +22,9 @@ describe('communication/electronic-directives-service.js', () => {
   });
 
   test('is syntactically valid JavaScript', () => {
-    expect(() => new vm.Script(source, { filename: 'electronic-directives-service.js' })).not.toThrow();
+    expect(
+      () => new vm.Script(source, { filename: 'electronic-directives-service.js' })
+    ).not.toThrow();
   });
 
   test('defines a Mongoose model', () => {
@@ -46,12 +48,12 @@ describe('communication/electronic-directives-service.js', () => {
   });
 
   test('has npm dependencies (2)', () => {
-    const npms = (source.match(/require\s*\(\s*['"](?![./])[^'"]+['"]\s*\)/g) || []);
+    const npms = source.match(/require\s*\(\s*['"](?![./])[^'"]+['"]\s*\)/g) || [];
     expect(npms.length).toBe(2);
   });
 
   test('has local dependencies (2)', () => {
-    const locals = (source.match(/require\s*\(\s*['"]\.[^'"]+['"]\s*\)/g) || []);
+    const locals = source.match(/require\s*\(\s*['"]\.[^'"]+['"]\s*\)/g) || [];
     expect(locals.length).toBe(2);
   });
 

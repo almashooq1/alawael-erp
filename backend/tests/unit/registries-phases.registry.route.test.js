@@ -26,7 +26,7 @@ describe('routes/registries/phases.registry.js', () => {
   });
 
   test('has local dependencies (7)', () => {
-    const locals = (source.match(/require\s*\(\s*['"]\.[^'"]+['"]\s*\)/g) || []);
+    const locals = source.match(/require\s*\(\s*['"]\.[^'"]+['"]\s*\)/g) || [];
     expect(locals.length).toBe(7);
   });
 

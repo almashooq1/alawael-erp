@@ -20,5 +20,4 @@ describe('ecosystem.config', () => {
       expect(mod).toBeTruthy();
     }
   });
-
 });

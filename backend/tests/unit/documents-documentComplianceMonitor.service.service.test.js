@@ -9,7 +9,10 @@ const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
 
-const SRC = path.resolve(__dirname, '../../services/documents/documentComplianceMonitor.service.js');
+const SRC = path.resolve(
+  __dirname,
+  '../../services/documents/documentComplianceMonitor.service.js'
+);
 
 describe('services/documents/documentComplianceMonitor.service.js', () => {
   let source;
@@ -22,7 +25,9 @@ describe('services/documents/documentComplianceMonitor.service.js', () => {
   });
 
   test('is syntactically valid JavaScript', () => {
-    expect(() => new vm.Script(source, { filename: 'documentComplianceMonitor.service.js' })).not.toThrow();
+    expect(
+      () => new vm.Script(source, { filename: 'documentComplianceMonitor.service.js' })
+    ).not.toThrow();
   });
 
   test('defines a Mongoose model', () => {
@@ -42,7 +47,7 @@ describe('services/documents/documentComplianceMonitor.service.js', () => {
   });
 
   test('has npm dependencies (1)', () => {
-    const npms = (source.match(/require\s*\(\s*['"](?![./])[^'"]+['"]\s*\)/g) || []);
+    const npms = source.match(/require\s*\(\s*['"](?![./])[^'"]+['"]\s*\)/g) || [];
     expect(npms.length).toBe(1);
   });
 

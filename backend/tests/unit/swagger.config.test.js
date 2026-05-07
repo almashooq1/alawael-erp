@@ -16,24 +16,40 @@ jest.mock('../../utils/logger', () => ({
   stream: { write: jest.fn() },
 }));
 
-jest.mock('swagger-jsdoc', () => jest.fn(() => ({
-  openapi: '3.0.0',
-  info: { title: 'Test', version: '1.0.0' },
-  paths: {},
-})), { virtual: true });
+jest.mock(
+  'swagger-jsdoc',
+  () =>
+    jest.fn(() => ({
+      openapi: '3.0.0',
+      info: { title: 'Test', version: '1.0.0' },
+      paths: {},
+    })),
+  { virtual: true }
+);
 
-jest.mock('swagger-ui-express', () => ({
-  serve: [jest.fn()],
-  setup: jest.fn(() => jest.fn()),
-}), { virtual: true });
+jest.mock(
+  'swagger-ui-express',
+  () => ({
+    serve: [jest.fn()],
+    setup: jest.fn(() => jest.fn()),
+  }),
+  { virtual: true }
+);
 
-jest.mock('../../config/swagger-ddd.config', () => new Proxy({}, {
-  get: (_, p) => {
-    if (p === '__esModule') return false;
-    if (p === 'default') return {};
-    return jest.fn(() => Promise.resolve({}));
-  },
-}));
+jest.mock(
+  '../../config/swagger-ddd.config',
+  () =>
+    new Proxy(
+      {},
+      {
+        get: (_, p) => {
+          if (p === '__esModule') return false;
+          if (p === 'default') return {};
+          return jest.fn(() => Promise.resolve({}));
+        },
+      }
+    )
+);
 
 /* ── Module under test ── */
 const mod = require('../../config/swagger.config');
@@ -52,5 +68,4 @@ describe('config/swagger.config', () => {
     expect(mod.setupSwagger).toBeDefined();
     expect(typeof mod.setupSwagger).toBe('function');
   });
-
 });

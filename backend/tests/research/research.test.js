@@ -491,19 +491,17 @@ describe('Research & Evidence-Based Practice API', () => {
       ResearchDataExport.countDocuments = jest.fn().mockResolvedValue(6);
 
       // find() for recent studies
-      ResearchStudy.find = jest
-        .fn()
-        .mockReturnValue(
-          chainable([
-            {
-              _id: mockId(),
-              title: 'Recent study',
-              status: 'draft',
-              studyType: 'rct',
-              createdAt: new Date(),
-            },
-          ])
-        );
+      ResearchStudy.find = jest.fn().mockReturnValue(
+        chainable([
+          {
+            _id: mockId(),
+            title: 'Recent study',
+            status: 'draft',
+            studyType: 'rct',
+            createdAt: new Date(),
+          },
+        ])
+      );
     });
 
     it('GET /dashboard — should return aggregated stats', async () => {

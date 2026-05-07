@@ -27,7 +27,9 @@ const mocknitaqat_modelsChain = {
   exec: jest.fn().mockResolvedValue([]),
 };
 jest.mock('../../models/nitaqat.models', () => {
-  const M = jest.fn().mockImplementation(() => ({ save: jest.fn().mockResolvedValue({ _id: 'id1' }) }));
+  const M = jest
+    .fn()
+    .mockImplementation(() => ({ save: jest.fn().mockResolvedValue({ _id: 'id1' }) }));
   Object.assign(M, mocknitaqat_modelsChain);
   return M;
 });
@@ -43,50 +45,77 @@ describe('wps-enhanced.service service', () => {
   test('generateSalaryFile is callable', async () => {
     if (typeof svc.generateSalaryFile !== 'function') return;
     let r;
-    try { r = await svc.generateSalaryFile({}); } catch (e) { r = e; }
+    try {
+      r = await svc.generateSalaryFile({});
+    } catch (e) {
+      r = e;
+    }
     expect(r).toBeDefined();
   });
 
   test('validateCompliance is callable', async () => {
     if (typeof svc.validateCompliance !== 'function') return;
     let r;
-    try { r = await svc.validateCompliance({}); } catch (e) { r = e; }
+    try {
+      r = await svc.validateCompliance({});
+    } catch (e) {
+      r = e;
+    }
     expect(r).toBeDefined();
   });
 
   test('markAsUploaded is callable', async () => {
     if (typeof svc.markAsUploaded !== 'function') return;
     let r;
-    try { r = await svc.markAsUploaded({}); } catch (e) { r = e; }
+    try {
+      r = await svc.markAsUploaded({});
+    } catch (e) {
+      r = e;
+    }
     expect(r).toBeDefined();
   });
 
   test('recordComplianceResult is callable', async () => {
     if (typeof svc.recordComplianceResult !== 'function') return;
     let r;
-    try { r = await svc.recordComplianceResult({}); } catch (e) { r = e; }
+    try {
+      r = await svc.recordComplianceResult({});
+    } catch (e) {
+      r = e;
+    }
     expect(r).toBeDefined();
   });
 
   test('getRecords is callable', async () => {
     if (typeof svc.getRecords !== 'function') return;
     let r;
-    try { r = await svc.getRecords({}); } catch (e) { r = e; }
+    try {
+      r = await svc.getRecords({});
+    } catch (e) {
+      r = e;
+    }
     expect(r).toBeDefined();
   });
 
   test('getRecord is callable', async () => {
     if (typeof svc.getRecord !== 'function') return;
     let r;
-    try { r = await svc.getRecord({}); } catch (e) { r = e; }
+    try {
+      r = await svc.getRecord({});
+    } catch (e) {
+      r = e;
+    }
     expect(r).toBeDefined();
   });
 
   test('getDashboardStats is callable', async () => {
     if (typeof svc.getDashboardStats !== 'function') return;
     let r;
-    try { r = await svc.getDashboardStats({}); } catch (e) { r = e; }
+    try {
+      r = await svc.getDashboardStats({});
+    } catch (e) {
+      r = e;
+    }
     expect(r).toBeDefined();
   });
-
 });

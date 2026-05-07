@@ -26,7 +26,7 @@ describe('seeds/admin-users.seed.js', () => {
   });
 
   test('has npm dependencies (3)', () => {
-    const npms = (source.match(/require\s*\(\s*['"](?![./])[^'"]+['"]\s*\)/g) || []);
+    const npms = source.match(/require\s*\(\s*['"](?![./])[^'"]+['"]\s*\)/g) || [];
     expect(npms.length).toBe(3);
   });
 

@@ -22,7 +22,9 @@ describe('rehabilitation-services/tele-rehabilitation-service.js', () => {
   });
 
   test('is syntactically valid JavaScript', () => {
-    expect(() => new vm.Script(source, { filename: 'tele-rehabilitation-service.js' })).not.toThrow();
+    expect(
+      () => new vm.Script(source, { filename: 'tele-rehabilitation-service.js' })
+    ).not.toThrow();
   });
 
   test('defines class TeleRehabilitationService', () => {

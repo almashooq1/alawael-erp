@@ -39,7 +39,7 @@ describe('domains/workflow/services/JourneyService.js', () => {
   });
 
   test('has local dependencies (12)', () => {
-    const locals = (source.match(/require\s*\(\s*['"]\.[^'"]+['"]\s*\)/g) || []);
+    const locals = source.match(/require\s*\(\s*['"]\.[^'"]+['"]\s*\)/g) || [];
     expect(locals.length).toBe(12);
   });
 

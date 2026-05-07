@@ -11,13 +11,11 @@ jest.mock('bcryptjs', () => ({
 }));
 jest.mock('mongoose', () => {
   const mockModel = jest.fn(() => ({ save: jest.fn().mockResolvedValue({}) }));
-  mockModel.find = jest
-    .fn()
-    .mockReturnValue({
-      sort: jest.fn().mockReturnThis(),
-      limit: jest.fn().mockReturnThis(),
-      lean: jest.fn().mockResolvedValue([]),
-    });
+  mockModel.find = jest.fn().mockReturnValue({
+    sort: jest.fn().mockReturnThis(),
+    limit: jest.fn().mockReturnThis(),
+    lean: jest.fn().mockResolvedValue([]),
+  });
   mockModel.findOne = jest.fn().mockResolvedValue(null);
   mockModel.findById = jest.fn().mockResolvedValue(null);
   return {

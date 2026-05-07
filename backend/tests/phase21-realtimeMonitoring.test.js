@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * 🚀 Phase 21: Real-Time Monitoring & Analytics System
  * Advanced Real-Time Dashboard, Metrics, and Monitoring

@@ -30,7 +30,7 @@ describe('services/ai/proactiveAlerts.service.js', () => {
   });
 
   test('has local dependencies (17)', () => {
-    const locals = (source.match(/require\s*\(\s*['"]\.[^'"]+['"]\s*\)/g) || []);
+    const locals = source.match(/require\s*\(\s*['"]\.[^'"]+['"]\s*\)/g) || [];
     expect(locals.length).toBe(17);
   });
 

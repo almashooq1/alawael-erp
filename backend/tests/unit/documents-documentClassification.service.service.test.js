@@ -22,7 +22,9 @@ describe('services/documents/documentClassification.service.js', () => {
   });
 
   test('is syntactically valid JavaScript', () => {
-    expect(() => new vm.Script(source, { filename: 'documentClassification.service.js' })).not.toThrow();
+    expect(
+      () => new vm.Script(source, { filename: 'documentClassification.service.js' })
+    ).not.toThrow();
   });
 
   test('defines a Mongoose model', () => {
@@ -42,7 +44,7 @@ describe('services/documents/documentClassification.service.js', () => {
   });
 
   test('has npm dependencies (2)', () => {
-    const npms = (source.match(/require\s*\(\s*['"](?![./])[^'"]+['"]\s*\)/g) || []);
+    const npms = source.match(/require\s*\(\s*['"](?![./])[^'"]+['"]\s*\)/g) || [];
     expect(npms.length).toBe(2);
   });
 

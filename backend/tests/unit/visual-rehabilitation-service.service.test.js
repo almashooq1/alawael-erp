@@ -9,7 +9,10 @@ const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
 
-const SRC = path.resolve(__dirname, '../../rehabilitation-services/visual-rehabilitation-service.js');
+const SRC = path.resolve(
+  __dirname,
+  '../../rehabilitation-services/visual-rehabilitation-service.js'
+);
 
 describe('rehabilitation-services/visual-rehabilitation-service.js', () => {
   let source;
@@ -22,7 +25,9 @@ describe('rehabilitation-services/visual-rehabilitation-service.js', () => {
   });
 
   test('is syntactically valid JavaScript', () => {
-    expect(() => new vm.Script(source, { filename: 'visual-rehabilitation-service.js' })).not.toThrow();
+    expect(
+      () => new vm.Script(source, { filename: 'visual-rehabilitation-service.js' })
+    ).not.toThrow();
   });
 
   test('defines class VisualRehabilitationService', () => {

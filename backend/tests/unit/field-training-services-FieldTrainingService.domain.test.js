@@ -9,7 +9,10 @@ const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
 
-const SRC = path.resolve(__dirname, '../../domains/field-training/services/FieldTrainingService.js');
+const SRC = path.resolve(
+  __dirname,
+  '../../domains/field-training/services/FieldTrainingService.js'
+);
 
 describe('domains/field-training/services/FieldTrainingService.js', () => {
   let source;
@@ -30,12 +33,12 @@ describe('domains/field-training/services/FieldTrainingService.js', () => {
   });
 
   test('has npm dependencies (1)', () => {
-    const npms = (source.match(/require\s*\(\s*['"](?![./])[^'"]+['"]\s*\)/g) || []);
+    const npms = source.match(/require\s*\(\s*['"](?![./])[^'"]+['"]\s*\)/g) || [];
     expect(npms.length).toBe(1);
   });
 
   test('has local dependencies (1)', () => {
-    const locals = (source.match(/require\s*\(\s*['"]\.[^'"]+['"]\s*\)/g) || []);
+    const locals = source.match(/require\s*\(\s*['"]\.[^'"]+['"]\s*\)/g) || [];
     expect(locals.length).toBe(1);
   });
 

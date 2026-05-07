@@ -27,7 +27,9 @@ const mockAnalyticsChain = {
   exec: jest.fn().mockResolvedValue([]),
 };
 jest.mock('../../models/Analytics', () => {
-  const M = jest.fn().mockImplementation(() => ({ save: jest.fn().mockResolvedValue({ _id: 'id1' }) }));
+  const M = jest
+    .fn()
+    .mockImplementation(() => ({ save: jest.fn().mockResolvedValue({ _id: 'id1' }) }));
   Object.assign(M, mockAnalyticsChain);
   return M;
 });
@@ -43,64 +45,99 @@ describe('performanceAnalyticsService service', () => {
   test('getOverview is callable', async () => {
     if (typeof svc.getOverview !== 'function') return;
     let r;
-    try { r = await svc.getOverview({}); } catch (e) { r = e; }
+    try {
+      r = await svc.getOverview({});
+    } catch (e) {
+      r = e;
+    }
     expect(r).toBeDefined();
   });
 
   test('getDashboard is callable', async () => {
     if (typeof svc.getDashboard !== 'function') return;
     let r;
-    try { r = await svc.getDashboard({}); } catch (e) { r = e; }
+    try {
+      r = await svc.getDashboard({});
+    } catch (e) {
+      r = e;
+    }
     expect(r).toBeDefined();
   });
 
   test('forEach is callable', async () => {
     if (typeof svc.forEach !== 'function') return;
     let r;
-    try { r = await svc.forEach({}); } catch (e) { r = e; }
+    try {
+      r = await svc.forEach({});
+    } catch (e) {
+      r = e;
+    }
     expect(r).toBeDefined();
   });
 
   test('getModuleAnalytics is callable', async () => {
     if (typeof svc.getModuleAnalytics !== 'function') return;
     let r;
-    try { r = await svc.getModuleAnalytics({}); } catch (e) { r = e; }
+    try {
+      r = await svc.getModuleAnalytics({});
+    } catch (e) {
+      r = e;
+    }
     expect(r).toBeDefined();
   });
 
   test('getUserAnalytics is callable', async () => {
     if (typeof svc.getUserAnalytics !== 'function') return;
     let r;
-    try { r = await svc.getUserAnalytics({}); } catch (e) { r = e; }
+    try {
+      r = await svc.getUserAnalytics({});
+    } catch (e) {
+      r = e;
+    }
     expect(r).toBeDefined();
   });
 
   test('getPerformanceTrends is callable', async () => {
     if (typeof svc.getPerformanceTrends !== 'function') return;
     let r;
-    try { r = await svc.getPerformanceTrends({}); } catch (e) { r = e; }
+    try {
+      r = await svc.getPerformanceTrends({});
+    } catch (e) {
+      r = e;
+    }
     expect(r).toBeDefined();
   });
 
   test('getKPIs is callable', async () => {
     if (typeof svc.getKPIs !== 'function') return;
     let r;
-    try { r = await svc.getKPIs({}); } catch (e) { r = e; }
+    try {
+      r = await svc.getKPIs({});
+    } catch (e) {
+      r = e;
+    }
     expect(r).toBeDefined();
   });
 
   test('trackEvent is callable', async () => {
     if (typeof svc.trackEvent !== 'function') return;
     let r;
-    try { r = await svc.trackEvent({}); } catch (e) { r = e; }
+    try {
+      r = await svc.trackEvent({});
+    } catch (e) {
+      r = e;
+    }
     expect(r).toBeDefined();
   });
 
   test('getHealthStatus is callable', async () => {
     if (typeof svc.getHealthStatus !== 'function') return;
     let r;
-    try { r = await svc.getHealthStatus({}); } catch (e) { r = e; }
+    try {
+      r = await svc.getHealthStatus({});
+    } catch (e) {
+      r = e;
+    }
     expect(r).toBeDefined();
   });
-
 });

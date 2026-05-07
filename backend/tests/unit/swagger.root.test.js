@@ -5,24 +5,40 @@
 'use strict';
 
 /* ── Mocks ── */
-jest.mock('swagger-jsdoc', () => jest.fn(() => ({
-  openapi: '3.0.0',
-  info: { title: 'Test API', version: '1.0.0' },
-  paths: {},
-})), { virtual: true });
+jest.mock(
+  'swagger-jsdoc',
+  () =>
+    jest.fn(() => ({
+      openapi: '3.0.0',
+      info: { title: 'Test API', version: '1.0.0' },
+      paths: {},
+    })),
+  { virtual: true }
+);
 
-jest.mock('swagger-ui-express', () => ({
-  serve: [jest.fn()],
-  setup: jest.fn(() => jest.fn()),
-}), { virtual: true });
+jest.mock(
+  'swagger-ui-express',
+  () => ({
+    serve: [jest.fn()],
+    setup: jest.fn(() => jest.fn()),
+  }),
+  { virtual: true }
+);
 
-jest.mock('../../swagger', () => new Proxy({}, {
-  get: (_, p) => {
-    if (p === '__esModule') return false;
-    if (p === 'default') return {};
-    return jest.fn(() => Promise.resolve({}));
-  },
-}));
+jest.mock(
+  '../../swagger',
+  () =>
+    new Proxy(
+      {},
+      {
+        get: (_, p) => {
+          if (p === '__esModule') return false;
+          if (p === 'default') return {};
+          return jest.fn(() => Promise.resolve({}));
+        },
+      }
+    )
+);
 
 /* ── Module under test ── */
 const mod = require('../../swagger');
@@ -40,5 +56,4 @@ describe('swagger', () => {
       expect(mod).toBeTruthy();
     }
   });
-
 });

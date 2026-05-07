@@ -27,7 +27,9 @@ const mockReportChain = {
   exec: jest.fn().mockResolvedValue([]),
 };
 jest.mock('../../models/Report', () => {
-  const M = jest.fn().mockImplementation(() => ({ save: jest.fn().mockResolvedValue({ _id: 'id1' }) }));
+  const M = jest
+    .fn()
+    .mockImplementation(() => ({ save: jest.fn().mockResolvedValue({ _id: 'id1' }) }));
   Object.assign(M, mockReportChain);
   return M;
 });
@@ -43,71 +45,110 @@ describe('reportService service', () => {
   test('getAvailableReports is callable', async () => {
     if (typeof svc.getAvailableReports !== 'function') return;
     let r;
-    try { r = await svc.getAvailableReports({}); } catch (e) { r = e; }
+    try {
+      r = await svc.getAvailableReports({});
+    } catch (e) {
+      r = e;
+    }
     expect(r).toBeDefined();
   });
 
   test('generateReport is callable', async () => {
     if (typeof svc.generateReport !== 'function') return;
     let r;
-    try { r = await svc.generateReport({}); } catch (e) { r = e; }
+    try {
+      r = await svc.generateReport({});
+    } catch (e) {
+      r = e;
+    }
     expect(r).toBeDefined();
   });
 
   test('getReportById is callable', async () => {
     if (typeof svc.getReportById !== 'function') return;
     let r;
-    try { r = await svc.getReportById({}); } catch (e) { r = e; }
+    try {
+      r = await svc.getReportById({});
+    } catch (e) {
+      r = e;
+    }
     expect(r).toBeDefined();
   });
 
   test('downloadReport is callable', async () => {
     if (typeof svc.downloadReport !== 'function') return;
     let r;
-    try { r = await svc.downloadReport({}); } catch (e) { r = e; }
+    try {
+      r = await svc.downloadReport({});
+    } catch (e) {
+      r = e;
+    }
     expect(r).toBeDefined();
   });
 
   test('deleteReport is callable', async () => {
     if (typeof svc.deleteReport !== 'function') return;
     let r;
-    try { r = await svc.deleteReport({}); } catch (e) { r = e; }
+    try {
+      r = await svc.deleteReport({});
+    } catch (e) {
+      r = e;
+    }
     expect(r).toBeDefined();
   });
 
   test('getDisabilitySummary is callable', async () => {
     if (typeof svc.getDisabilitySummary !== 'function') return;
     let r;
-    try { r = await svc.getDisabilitySummary({}); } catch (e) { r = e; }
+    try {
+      r = await svc.getDisabilitySummary({});
+    } catch (e) {
+      r = e;
+    }
     expect(r).toBeDefined();
   });
 
   test('getMaintenanceSchedule is callable', async () => {
     if (typeof svc.getMaintenanceSchedule !== 'function') return;
     let r;
-    try { r = await svc.getMaintenanceSchedule({}); } catch (e) { r = e; }
+    try {
+      r = await svc.getMaintenanceSchedule({});
+    } catch (e) {
+      r = e;
+    }
     expect(r).toBeDefined();
   });
 
   test('exportBatch is callable', async () => {
     if (typeof svc.exportBatch !== 'function') return;
     let r;
-    try { r = await svc.exportBatch({}); } catch (e) { r = e; }
+    try {
+      r = await svc.exportBatch({});
+    } catch (e) {
+      r = e;
+    }
     expect(r).toBeDefined();
   });
 
   test('getReportSchedule is callable', async () => {
     if (typeof svc.getReportSchedule !== 'function') return;
     let r;
-    try { r = await svc.getReportSchedule({}); } catch (e) { r = e; }
+    try {
+      r = await svc.getReportSchedule({});
+    } catch (e) {
+      r = e;
+    }
     expect(r).toBeDefined();
   });
 
   test('getHealthStatus is callable', async () => {
     if (typeof svc.getHealthStatus !== 'function') return;
     let r;
-    try { r = await svc.getHealthStatus({}); } catch (e) { r = e; }
+    try {
+      r = await svc.getHealthStatus({});
+    } catch (e) {
+      r = e;
+    }
     expect(r).toBeDefined();
   });
-
 });

@@ -47,7 +47,7 @@ describe('services/rehabilitation/RehabService.js', () => {
   });
 
   test('has local dependencies (5)', () => {
-    const locals = (source.match(/require\s*\(\s*['"]\.[^'"]+['"]\s*\)/g) || []);
+    const locals = source.match(/require\s*\(\s*['"]\.[^'"]+['"]\s*\)/g) || [];
     expect(locals.length).toBe(5);
   });
 

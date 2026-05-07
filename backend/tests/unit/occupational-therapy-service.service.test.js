@@ -9,7 +9,10 @@ const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
 
-const SRC = path.resolve(__dirname, '../../rehabilitation-services/occupational-therapy-service.js');
+const SRC = path.resolve(
+  __dirname,
+  '../../rehabilitation-services/occupational-therapy-service.js'
+);
 
 describe('rehabilitation-services/occupational-therapy-service.js', () => {
   let source;
@@ -22,7 +25,9 @@ describe('rehabilitation-services/occupational-therapy-service.js', () => {
   });
 
   test('is syntactically valid JavaScript', () => {
-    expect(() => new vm.Script(source, { filename: 'occupational-therapy-service.js' })).not.toThrow();
+    expect(
+      () => new vm.Script(source, { filename: 'occupational-therapy-service.js' })
+    ).not.toThrow();
   });
 
   test('defines class OccupationalTherapyService', () => {

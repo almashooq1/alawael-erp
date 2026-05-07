@@ -30,5 +30,4 @@ describe('config/swagger-ddd.config', () => {
     expect(mod.getDDDSwaggerPaths).toBeDefined();
     expect(typeof mod.getDDDSwaggerPaths).toBe('function');
   });
-
 });

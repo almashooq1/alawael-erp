@@ -22,7 +22,9 @@ describe('services/ai/smartPlanSuggestion.service.js', () => {
   });
 
   test('is syntactically valid JavaScript', () => {
-    expect(() => new vm.Script(source, { filename: 'smartPlanSuggestion.service.js' })).not.toThrow();
+    expect(
+      () => new vm.Script(source, { filename: 'smartPlanSuggestion.service.js' })
+    ).not.toThrow();
   });
 
   test('uses error handling', () => {
@@ -30,7 +32,7 @@ describe('services/ai/smartPlanSuggestion.service.js', () => {
   });
 
   test('has local dependencies (2)', () => {
-    const locals = (source.match(/require\s*\(\s*['"]\.[^'"]+['"]\s*\)/g) || []);
+    const locals = source.match(/require\s*\(\s*['"]\.[^'"]+['"]\s*\)/g) || [];
     expect(locals.length).toBe(2);
   });
 

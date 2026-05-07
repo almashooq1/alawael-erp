@@ -39,7 +39,7 @@ describe('integration/erp-branch-integration.js', () => {
   });
 
   test('has local dependencies (1)', () => {
-    const locals = (source.match(/require\s*\(\s*['"]\.[^'"]+['"]\s*\)/g) || []);
+    const locals = source.match(/require\s*\(\s*['"]\.[^'"]+['"]\s*\)/g) || [];
     expect(locals.length).toBe(1);
   });
 

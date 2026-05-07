@@ -16,28 +16,48 @@ jest.mock('../../utils/logger', () => ({
   stream: { write: jest.fn() },
 }));
 
-jest.mock('../../config/secrets', () => new Proxy({}, {
-  get: (_, p) => {
-    if (p === '__esModule') return false;
-    if (p === 'default') return {};
-    return jest.fn(() => Promise.resolve({}));
-  },
-}));
+jest.mock(
+  '../../config/secrets',
+  () =>
+    new Proxy(
+      {},
+      {
+        get: (_, p) => {
+          if (p === '__esModule') return false;
+          if (p === 'default') return {};
+          return jest.fn(() => Promise.resolve({}));
+        },
+      }
+    )
+);
 
 jest.mock('crypto', () => ({
   ...jest.requireActual('crypto'),
   randomBytes: jest.fn(() => Buffer.from('abcdef1234567890', 'hex')),
-  createHash: jest.fn(() => ({ update: jest.fn().mockReturnThis(), digest: jest.fn(() => 'mockhash') })),
-  createHmac: jest.fn(() => ({ update: jest.fn().mockReturnThis(), digest: jest.fn(() => 'mockhmac') })),
+  createHash: jest.fn(() => ({
+    update: jest.fn().mockReturnThis(),
+    digest: jest.fn(() => 'mockhash'),
+  })),
+  createHmac: jest.fn(() => ({
+    update: jest.fn().mockReturnThis(),
+    digest: jest.fn(() => 'mockhmac'),
+  })),
 }));
 
-jest.mock('../../config/redis.config', () => new Proxy({}, {
-  get: (_, p) => {
-    if (p === '__esModule') return false;
-    if (p === 'default') return {};
-    return jest.fn(() => Promise.resolve({}));
-  },
-}));
+jest.mock(
+  '../../config/redis.config',
+  () =>
+    new Proxy(
+      {},
+      {
+        get: (_, p) => {
+          if (p === '__esModule') return false;
+          if (p === 'default') return {};
+          return jest.fn(() => Promise.resolve({}));
+        },
+      }
+    )
+);
 
 /* ── Module under test (loaded after mocks) ── */
 let mod;
@@ -64,5 +84,4 @@ describe('config/security.config', () => {
     expect(mod.RateLimiter).toBeDefined();
     expect(typeof mod.RateLimiter).toBe('function');
   });
-
 });

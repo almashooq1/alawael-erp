@@ -43,7 +43,7 @@ describe('services/transport/TransportService.js', () => {
   });
 
   test('has local dependencies (4)', () => {
-    const locals = (source.match(/require\s*\(\s*['"]\.[^'"]+['"]\s*\)/g) || []);
+    const locals = source.match(/require\s*\(\s*['"]\.[^'"]+['"]\s*\)/g) || [];
     expect(locals.length).toBe(4);
   });
 

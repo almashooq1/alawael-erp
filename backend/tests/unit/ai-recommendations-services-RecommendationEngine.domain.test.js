@@ -9,7 +9,10 @@ const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
 
-const SRC = path.resolve(__dirname, '../../domains/ai-recommendations/services/RecommendationEngine.js');
+const SRC = path.resolve(
+  __dirname,
+  '../../domains/ai-recommendations/services/RecommendationEngine.js'
+);
 
 describe('domains/ai-recommendations/services/RecommendationEngine.js', () => {
   let source;
@@ -30,12 +33,12 @@ describe('domains/ai-recommendations/services/RecommendationEngine.js', () => {
   });
 
   test('has npm dependencies (1)', () => {
-    const npms = (source.match(/require\s*\(\s*['"](?![./])[^'"]+['"]\s*\)/g) || []);
+    const npms = source.match(/require\s*\(\s*['"](?![./])[^'"]+['"]\s*\)/g) || [];
     expect(npms.length).toBe(1);
   });
 
   test('has local dependencies (1)', () => {
-    const locals = (source.match(/require\s*\(\s*['"]\.[^'"]+['"]\s*\)/g) || []);
+    const locals = source.match(/require\s*\(\s*['"]\.[^'"]+['"]\s*\)/g) || [];
     expect(locals.length).toBe(1);
   });
 

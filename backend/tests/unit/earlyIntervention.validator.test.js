@@ -6,13 +6,14 @@
 
 /* ── Mocks ── */
 jest.mock('express-validator', () => {
-  const chain = () => new Proxy(jest.fn(), {
-    get: (target, prop) => {
-      if (prop === 'then' || prop === 'catch') return undefined;
-      if (typeof prop === 'symbol') return target[prop];
-      return jest.fn(() => chain());
-    },
-  });
+  const chain = () =>
+    new Proxy(jest.fn(), {
+      get: (target, prop) => {
+        if (prop === 'then' || prop === 'catch') return undefined;
+        if (typeof prop === 'symbol') return target[prop];
+        return jest.fn(() => chain());
+      },
+    });
   return {
     body: jest.fn(() => chain()),
     param: jest.fn(() => chain()),
@@ -119,115 +120,162 @@ describe('validators/earlyIntervention.validator', () => {
 
   test('should export validateCreateChild as an array', () => {
     if (mod.validateCreateChild) {
-      expect(Array.isArray(mod.validateCreateChild) || typeof mod.validateCreateChild === 'function').toBe(true);
+      expect(
+        Array.isArray(mod.validateCreateChild) || typeof mod.validateCreateChild === 'function'
+      ).toBe(true);
     }
   });
 
   test('should export validateUpdateChild as an array', () => {
     if (mod.validateUpdateChild) {
-      expect(Array.isArray(mod.validateUpdateChild) || typeof mod.validateUpdateChild === 'function').toBe(true);
+      expect(
+        Array.isArray(mod.validateUpdateChild) || typeof mod.validateUpdateChild === 'function'
+      ).toBe(true);
     }
   });
 
   test('should export validateGetChildren as an array', () => {
     if (mod.validateGetChildren) {
-      expect(Array.isArray(mod.validateGetChildren) || typeof mod.validateGetChildren === 'function').toBe(true);
+      expect(
+        Array.isArray(mod.validateGetChildren) || typeof mod.validateGetChildren === 'function'
+      ).toBe(true);
     }
   });
 
   test('should export validateCreateScreening as an array', () => {
     if (mod.validateCreateScreening) {
-      expect(Array.isArray(mod.validateCreateScreening) || typeof mod.validateCreateScreening === 'function').toBe(true);
+      expect(
+        Array.isArray(mod.validateCreateScreening) ||
+          typeof mod.validateCreateScreening === 'function'
+      ).toBe(true);
     }
   });
 
   test('should export validateUpdateScreening as an array', () => {
     if (mod.validateUpdateScreening) {
-      expect(Array.isArray(mod.validateUpdateScreening) || typeof mod.validateUpdateScreening === 'function').toBe(true);
+      expect(
+        Array.isArray(mod.validateUpdateScreening) ||
+          typeof mod.validateUpdateScreening === 'function'
+      ).toBe(true);
     }
   });
 
   test('should export validateGetScreenings as an array', () => {
     if (mod.validateGetScreenings) {
-      expect(Array.isArray(mod.validateGetScreenings) || typeof mod.validateGetScreenings === 'function').toBe(true);
+      expect(
+        Array.isArray(mod.validateGetScreenings) || typeof mod.validateGetScreenings === 'function'
+      ).toBe(true);
     }
   });
 
   test('should export validateCreateMilestone as an array', () => {
     if (mod.validateCreateMilestone) {
-      expect(Array.isArray(mod.validateCreateMilestone) || typeof mod.validateCreateMilestone === 'function').toBe(true);
+      expect(
+        Array.isArray(mod.validateCreateMilestone) ||
+          typeof mod.validateCreateMilestone === 'function'
+      ).toBe(true);
     }
   });
 
   test('should export validateUpdateMilestone as an array', () => {
     if (mod.validateUpdateMilestone) {
-      expect(Array.isArray(mod.validateUpdateMilestone) || typeof mod.validateUpdateMilestone === 'function').toBe(true);
+      expect(
+        Array.isArray(mod.validateUpdateMilestone) ||
+          typeof mod.validateUpdateMilestone === 'function'
+      ).toBe(true);
     }
   });
 
   test('should export validateGetMilestones as an array', () => {
     if (mod.validateGetMilestones) {
-      expect(Array.isArray(mod.validateGetMilestones) || typeof mod.validateGetMilestones === 'function').toBe(true);
+      expect(
+        Array.isArray(mod.validateGetMilestones) || typeof mod.validateGetMilestones === 'function'
+      ).toBe(true);
     }
   });
 
   test('should export validateCreateIFSP as an array', () => {
     if (mod.validateCreateIFSP) {
-      expect(Array.isArray(mod.validateCreateIFSP) || typeof mod.validateCreateIFSP === 'function').toBe(true);
+      expect(
+        Array.isArray(mod.validateCreateIFSP) || typeof mod.validateCreateIFSP === 'function'
+      ).toBe(true);
     }
   });
 
   test('should export validateUpdateIFSP as an array', () => {
     if (mod.validateUpdateIFSP) {
-      expect(Array.isArray(mod.validateUpdateIFSP) || typeof mod.validateUpdateIFSP === 'function').toBe(true);
+      expect(
+        Array.isArray(mod.validateUpdateIFSP) || typeof mod.validateUpdateIFSP === 'function'
+      ).toBe(true);
     }
   });
 
   test('should export validateGetIFSPs as an array', () => {
     if (mod.validateGetIFSPs) {
-      expect(Array.isArray(mod.validateGetIFSPs) || typeof mod.validateGetIFSPs === 'function').toBe(true);
+      expect(
+        Array.isArray(mod.validateGetIFSPs) || typeof mod.validateGetIFSPs === 'function'
+      ).toBe(true);
     }
   });
 
   test('should export validateAddIFSPReview as an array', () => {
     if (mod.validateAddIFSPReview) {
-      expect(Array.isArray(mod.validateAddIFSPReview) || typeof mod.validateAddIFSPReview === 'function').toBe(true);
+      expect(
+        Array.isArray(mod.validateAddIFSPReview) || typeof mod.validateAddIFSPReview === 'function'
+      ).toBe(true);
     }
   });
 
   test('should export validateUpdateGoalProgress as an array', () => {
     if (mod.validateUpdateGoalProgress) {
-      expect(Array.isArray(mod.validateUpdateGoalProgress) || typeof mod.validateUpdateGoalProgress === 'function').toBe(true);
+      expect(
+        Array.isArray(mod.validateUpdateGoalProgress) ||
+          typeof mod.validateUpdateGoalProgress === 'function'
+      ).toBe(true);
     }
   });
 
   test('should export validateCreateReferral as an array', () => {
     if (mod.validateCreateReferral) {
-      expect(Array.isArray(mod.validateCreateReferral) || typeof mod.validateCreateReferral === 'function').toBe(true);
+      expect(
+        Array.isArray(mod.validateCreateReferral) ||
+          typeof mod.validateCreateReferral === 'function'
+      ).toBe(true);
     }
   });
 
   test('should export validateUpdateReferral as an array', () => {
     if (mod.validateUpdateReferral) {
-      expect(Array.isArray(mod.validateUpdateReferral) || typeof mod.validateUpdateReferral === 'function').toBe(true);
+      expect(
+        Array.isArray(mod.validateUpdateReferral) ||
+          typeof mod.validateUpdateReferral === 'function'
+      ).toBe(true);
     }
   });
 
   test('should export validateGetReferrals as an array', () => {
     if (mod.validateGetReferrals) {
-      expect(Array.isArray(mod.validateGetReferrals) || typeof mod.validateGetReferrals === 'function').toBe(true);
+      expect(
+        Array.isArray(mod.validateGetReferrals) || typeof mod.validateGetReferrals === 'function'
+      ).toBe(true);
     }
   });
 
   test('should export validateUpdateReferralStatus as an array', () => {
     if (mod.validateUpdateReferralStatus) {
-      expect(Array.isArray(mod.validateUpdateReferralStatus) || typeof mod.validateUpdateReferralStatus === 'function').toBe(true);
+      expect(
+        Array.isArray(mod.validateUpdateReferralStatus) ||
+          typeof mod.validateUpdateReferralStatus === 'function'
+      ).toBe(true);
     }
   });
 
   test('should export validateAddCommunication as an array', () => {
     if (mod.validateAddCommunication) {
-      expect(Array.isArray(mod.validateAddCommunication) || typeof mod.validateAddCommunication === 'function').toBe(true);
+      expect(
+        Array.isArray(mod.validateAddCommunication) ||
+          typeof mod.validateAddCommunication === 'function'
+      ).toBe(true);
     }
   });
 
@@ -239,8 +287,9 @@ describe('validators/earlyIntervention.validator', () => {
 
   test('should export paginationQuery as an array', () => {
     if (mod.paginationQuery) {
-      expect(Array.isArray(mod.paginationQuery) || typeof mod.paginationQuery === 'function').toBe(true);
+      expect(Array.isArray(mod.paginationQuery) || typeof mod.paginationQuery === 'function').toBe(
+        true
+      );
     }
   });
-
 });

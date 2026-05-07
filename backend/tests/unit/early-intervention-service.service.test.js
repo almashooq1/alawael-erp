@@ -22,7 +22,9 @@ describe('rehabilitation-services/early-intervention-service.js', () => {
   });
 
   test('is syntactically valid JavaScript', () => {
-    expect(() => new vm.Script(source, { filename: 'early-intervention-service.js' })).not.toThrow();
+    expect(
+      () => new vm.Script(source, { filename: 'early-intervention-service.js' })
+    ).not.toThrow();
   });
 
   test('defines class EarlyInterventionService', () => {

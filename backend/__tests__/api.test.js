@@ -1,5 +1,3 @@
-/* eslint-disable no-unused-vars */
-
 /**
  * api.test.js
  * اختبارات شاملة لنقاط نهاية API

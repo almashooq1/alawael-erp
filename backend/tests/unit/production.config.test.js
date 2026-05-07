@@ -5,13 +5,21 @@
 'use strict';
 
 /* ── Mocks ── */
-jest.mock('../../../package.json', () => new Proxy({}, {
-  get: (_, p) => {
-    if (p === '__esModule') return false;
-    if (p === 'default') return {};
-    return jest.fn(() => Promise.resolve({}));
-  },
-}), { virtual: true });
+jest.mock(
+  '../../../package.json',
+  () =>
+    new Proxy(
+      {},
+      {
+        get: (_, p) => {
+          if (p === '__esModule') return false;
+          if (p === 'default') return {};
+          return jest.fn(() => Promise.resolve({}));
+        },
+      }
+    ),
+  { virtual: true }
+);
 
 /* ── Module under test ── */
 const mod = require('../../config/production');
@@ -37,5 +45,4 @@ describe('config/production', () => {
       expect(mod).toBeTruthy();
     }
   });
-
 });

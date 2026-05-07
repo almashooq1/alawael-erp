@@ -22,7 +22,9 @@ describe('workflow/intelligent-workflow-engine.js', () => {
   });
 
   test('is syntactically valid JavaScript', () => {
-    expect(() => new vm.Script(source, { filename: 'intelligent-workflow-engine.js' })).not.toThrow();
+    expect(
+      () => new vm.Script(source, { filename: 'intelligent-workflow-engine.js' })
+    ).not.toThrow();
   });
 
   test('defines a Mongoose model', () => {
@@ -42,7 +44,7 @@ describe('workflow/intelligent-workflow-engine.js', () => {
   });
 
   test('has npm dependencies (1)', () => {
-    const npms = (source.match(/require\s*\(\s*['"](?![./])[^'"]+['"]\s*\)/g) || []);
+    const npms = source.match(/require\s*\(\s*['"](?![./])[^'"]+['"]\s*\)/g) || [];
     expect(npms.length).toBe(1);
   });
 

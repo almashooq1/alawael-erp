@@ -5,13 +5,20 @@
 'use strict';
 
 /* ── Mocks ── */
-jest.mock('../../errors/errorCodes', () => new Proxy({}, {
-  get: (_, p) => {
-    if (p === '__esModule') return false;
-    if (p === 'default') return {};
-    return jest.fn(() => Promise.resolve({}));
-  },
-}));
+jest.mock(
+  '../../errors/errorCodes',
+  () =>
+    new Proxy(
+      {},
+      {
+        get: (_, p) => {
+          if (p === '__esModule') return false;
+          if (p === 'default') return {};
+          return jest.fn(() => Promise.resolve({}));
+        },
+      }
+    )
+);
 
 /* ── Module under test ── */
 const mod = require('../../errors/errorCodes');
@@ -29,5 +36,4 @@ describe('errors/errorCodes', () => {
       expect(mod).toBeTruthy();
     }
   });
-
 });

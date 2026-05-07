@@ -384,16 +384,14 @@ describe('ZKTecoService', () => {
   describe('getStats', () => {
     it('returns aggregated stats', async () => {
       ZKTecoDevice.find.mockReturnValue({
-        lean: jest
-          .fn()
-          .mockResolvedValue([
-            {
-              status: 'online',
-              isActive: true,
-              userMappings: [{ employeeId: '1' }],
-              syncSettings: { autoSync: true },
-            },
-          ]),
+        lean: jest.fn().mockResolvedValue([
+          {
+            status: 'online',
+            isActive: true,
+            userMappings: [{ employeeId: '1' }],
+            syncSettings: { autoSync: true },
+          },
+        ]),
       });
       SmartAttendance.countDocuments.mockResolvedValue(500);
       const stats = await ZKTecoService.getStats();

@@ -17,7 +17,10 @@ jest.mock('../../utils/logger', () => ({
 }));
 
 jest.mock('child_process', () => ({
-  execFile: jest.fn((cmd, args, opts, cb) => { if (typeof opts === 'function') opts(null, '', ''); else if (cb) cb(null, '', ''); }),
+  execFile: jest.fn((cmd, args, opts, cb) => {
+    if (typeof opts === 'function') opts(null, '', '');
+    else if (cb) cb(null, '', '');
+  }),
   exec: jest.fn((cmd, cb) => cb && cb(null, '', '')),
   spawn: jest.fn(() => ({ on: jest.fn(), stdout: { on: jest.fn() }, stderr: { on: jest.fn() } })),
 }));
@@ -34,13 +37,20 @@ jest.mock('fs', () => ({
   createWriteStream: jest.fn(() => ({ on: jest.fn(), end: jest.fn() })),
 }));
 
-jest.mock('../../config/redis', () => new Proxy({}, {
-  get: (_, p) => {
-    if (p === '__esModule') return false;
-    if (p === 'default') return {};
-    return jest.fn(() => Promise.resolve({}));
-  },
-}));
+jest.mock(
+  '../../config/redis',
+  () =>
+    new Proxy(
+      {},
+      {
+        get: (_, p) => {
+          if (p === '__esModule') return false;
+          if (p === 'default') return {};
+          return jest.fn(() => Promise.resolve({}));
+        },
+      }
+    )
+);
 
 /* ── Module under test ── */
 const mod = require('../../config/backup');
@@ -70,5 +80,4 @@ describe('config/backup', () => {
     expect(mod.ensureBackupDir).toBeDefined();
     expect(typeof mod.ensureBackupDir).toBe('function');
   });
-
 });

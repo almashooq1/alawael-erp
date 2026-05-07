@@ -22,7 +22,9 @@ describe('rehabilitation-services/transition-planning-service.js', () => {
   });
 
   test('is syntactically valid JavaScript', () => {
-    expect(() => new vm.Script(source, { filename: 'transition-planning-service.js' })).not.toThrow();
+    expect(
+      () => new vm.Script(source, { filename: 'transition-planning-service.js' })
+    ).not.toThrow();
   });
 
   test('defines class TransitionPlanningService', () => {

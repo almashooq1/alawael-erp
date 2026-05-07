@@ -46,5 +46,4 @@ describe('config/inMemoryDB', () => {
     expect(mod.write).toBeDefined();
     expect(typeof mod.write).toBe('function');
   });
-
 });

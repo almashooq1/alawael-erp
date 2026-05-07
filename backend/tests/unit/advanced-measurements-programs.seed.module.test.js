@@ -22,7 +22,9 @@ describe('seeds/advanced-measurements-programs.seed.js', () => {
   });
 
   test('is syntactically valid JavaScript', () => {
-    expect(() => new vm.Script(source, { filename: 'advanced-measurements-programs.seed.js' })).not.toThrow();
+    expect(
+      () => new vm.Script(source, { filename: 'advanced-measurements-programs.seed.js' })
+    ).not.toThrow();
   });
 
   test('has module.exports', () => {

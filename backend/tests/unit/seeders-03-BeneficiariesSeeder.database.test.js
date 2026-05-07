@@ -26,7 +26,7 @@ describe('database/seeders/03-BeneficiariesSeeder.js', () => {
   });
 
   test('has local dependencies (2)', () => {
-    const locals = (source.match(/require\s*\(\s*['"]\.[^'"]+['"]\s*\)/g) || []);
+    const locals = source.match(/require\s*\(\s*['"]\.[^'"]+['"]\s*\)/g) || [];
     expect(locals.length).toBe(2);
   });
 

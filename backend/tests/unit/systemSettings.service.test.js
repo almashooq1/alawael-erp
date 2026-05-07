@@ -27,7 +27,9 @@ const mockSystemSettingsChain = {
   exec: jest.fn().mockResolvedValue([]),
 };
 jest.mock('../../models/SystemSettings', () => {
-  const M = jest.fn().mockImplementation(() => ({ save: jest.fn().mockResolvedValue({ _id: 'id1' }) }));
+  const M = jest
+    .fn()
+    .mockImplementation(() => ({ save: jest.fn().mockResolvedValue({ _id: 'id1' }) }));
   Object.assign(M, mockSystemSettingsChain);
   return M;
 });
@@ -43,22 +45,33 @@ describe('systemSettings.service service', () => {
   test('update is callable', async () => {
     if (typeof svc.update !== 'function') return;
     let r;
-    try { r = await svc.update({}); } catch (e) { r = e; }
+    try {
+      r = await svc.update({});
+    } catch (e) {
+      r = e;
+    }
     expect(r).toBeDefined();
   });
 
   test('resetSection is callable', async () => {
     if (typeof svc.resetSection !== 'function') return;
     let r;
-    try { r = await svc.resetSection({}); } catch (e) { r = e; }
+    try {
+      r = await svc.resetSection({});
+    } catch (e) {
+      r = e;
+    }
     expect(r).toBeDefined();
   });
 
   test('toggleMaintenance is callable', async () => {
     if (typeof svc.toggleMaintenance !== 'function') return;
     let r;
-    try { r = await svc.toggleMaintenance({}); } catch (e) { r = e; }
+    try {
+      r = await svc.toggleMaintenance({});
+    } catch (e) {
+      r = e;
+    }
     expect(r).toBeDefined();
   });
-
 });

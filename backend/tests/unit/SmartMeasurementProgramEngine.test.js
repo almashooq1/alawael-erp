@@ -84,10 +84,7 @@ describe('calculateProgressTrend', () => {
   it('multiple previous results — uses reversed order', () => {
     // prev [{40},{60}] mapped → [40,60], reversed → [60,40], push 90 → [60,40,90]
     // initial=60, latest=90, imp=(90-60)/60*100 = 50%
-    const r = engine.calculateProgressTrend(
-      [{ rawScore: 40 }, { rawScore: 60 }],
-      { rawScore: 90 }
-    );
+    const r = engine.calculateProgressTrend([{ rawScore: 40 }, { rawScore: 60 }], { rawScore: 90 });
     expect(r.trend).toBe('تحسن قوي');
     expect(r.rate).toBe(50);
   });
@@ -99,10 +96,7 @@ describe('calculateProgressTrend', () => {
 describe('generateProgressRecommendations', () => {
   it('improvement > 20 → continue + advance', () => {
     const r = engine.generateProgressRecommendations('تحسن قوي', 25);
-    expect(r).toEqual([
-      'الاستمرار في البرنامج الحالي',
-      'الترقي لمستوى أعلى من الصعوبة',
-    ]);
+    expect(r).toEqual(['الاستمرار في البرنامج الحالي', 'الترقي لمستوى أعلى من الصعوبة']);
   });
 
   it('improvement 10-20 → reinforce', () => {
@@ -122,11 +116,7 @@ describe('generateProgressRecommendations', () => {
 
   it('improvement < -10 → full re-assessment', () => {
     const r = engine.generateProgressRecommendations('انخفاض حاد', -25);
-    expect(r).toEqual([
-      'إعادة تقييم شامل',
-      'مراجعة التشخيص الأساسي',
-      'استشارة متخصصين إضافيين',
-    ]);
+    expect(r).toEqual(['إعادة تقييم شامل', 'مراجعة التشخيص الأساسي', 'استشارة متخصصين إضافيين']);
   });
 
   it('boundary: exactly 0 → radical change bucket', () => {

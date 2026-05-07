@@ -22,7 +22,9 @@ describe('scheduler/community-service.scheduler.js', () => {
   });
 
   test('is syntactically valid JavaScript', () => {
-    expect(() => new vm.Script(source, { filename: 'community-service.scheduler.js' })).not.toThrow();
+    expect(
+      () => new vm.Script(source, { filename: 'community-service.scheduler.js' })
+    ).not.toThrow();
   });
 
   test('uses error handling', () => {
@@ -30,12 +32,12 @@ describe('scheduler/community-service.scheduler.js', () => {
   });
 
   test('has npm dependencies (1)', () => {
-    const npms = (source.match(/require\s*\(\s*['"](?![./])[^'"]+['"]\s*\)/g) || []);
+    const npms = source.match(/require\s*\(\s*['"](?![./])[^'"]+['"]\s*\)/g) || [];
     expect(npms.length).toBe(1);
   });
 
   test('has local dependencies (5)', () => {
-    const locals = (source.match(/require\s*\(\s*['"]\.[^'"]+['"]\s*\)/g) || []);
+    const locals = source.match(/require\s*\(\s*['"]\.[^'"]+['"]\s*\)/g) || [];
     expect(locals.length).toBe(5);
   });
 

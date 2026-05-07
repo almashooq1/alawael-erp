@@ -7,13 +7,23 @@
 /* ── Mocks ── */
 jest.mock('winston', () => ({
   createLogger: jest.fn(() => ({
-    info: jest.fn(), error: jest.fn(), warn: jest.fn(), debug: jest.fn(),
-    add: jest.fn(), stream: { write: jest.fn() },
+    info: jest.fn(),
+    error: jest.fn(),
+    warn: jest.fn(),
+    debug: jest.fn(),
+    add: jest.fn(),
+    stream: { write: jest.fn() },
   })),
   format: {
-    combine: jest.fn(), timestamp: jest.fn(), printf: jest.fn(() => jest.fn()),
-    colorize: jest.fn(), simple: jest.fn(), json: jest.fn(),
-    errors: jest.fn(), metadata: jest.fn(), label: jest.fn(),
+    combine: jest.fn(),
+    timestamp: jest.fn(),
+    printf: jest.fn(() => jest.fn()),
+    colorize: jest.fn(),
+    simple: jest.fn(),
+    json: jest.fn(),
+    errors: jest.fn(),
+    metadata: jest.fn(),
+    label: jest.fn(),
   },
   transports: { Console: jest.fn(), File: jest.fn(), DailyRotateFile: jest.fn() },
   addColors: jest.fn(),
@@ -31,13 +41,21 @@ jest.mock('fs', () => ({
   createWriteStream: jest.fn(() => ({ on: jest.fn(), end: jest.fn() })),
 }));
 
-jest.mock('../../package.json', () => new Proxy({}, {
-  get: (_, p) => {
-    if (p === '__esModule') return false;
-    if (p === 'default') return {};
-    return jest.fn(() => Promise.resolve({}));
-  },
-}), { virtual: true });
+jest.mock(
+  '../../package.json',
+  () =>
+    new Proxy(
+      {},
+      {
+        get: (_, p) => {
+          if (p === '__esModule') return false;
+          if (p === 'default') return {};
+          return jest.fn(() => Promise.resolve({}));
+        },
+      }
+    ),
+  { virtual: true }
+);
 
 /* ── Module under test ── */
 const mod = require('../../config/logging.advanced');
@@ -96,5 +114,4 @@ describe('config/logging.advanced', () => {
     expect(mod.cleanupOldLogs).toBeDefined();
     expect(typeof mod.cleanupOldLogs).toBe('function');
   });
-
 });

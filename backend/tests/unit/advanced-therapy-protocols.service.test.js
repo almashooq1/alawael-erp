@@ -22,7 +22,9 @@ describe('rehabilitation-services/advanced-therapy-protocols.js', () => {
   });
 
   test('is syntactically valid JavaScript', () => {
-    expect(() => new vm.Script(source, { filename: 'advanced-therapy-protocols.js' })).not.toThrow();
+    expect(
+      () => new vm.Script(source, { filename: 'advanced-therapy-protocols.js' })
+    ).not.toThrow();
   });
 
   test('defines a Mongoose model', () => {
@@ -38,7 +40,7 @@ describe('rehabilitation-services/advanced-therapy-protocols.js', () => {
   });
 
   test('has npm dependencies (1)', () => {
-    const npms = (source.match(/require\s*\(\s*['"](?![./])[^'"]+['"]\s*\)/g) || []);
+    const npms = source.match(/require\s*\(\s*['"](?![./])[^'"]+['"]\s*\)/g) || [];
     expect(npms.length).toBe(1);
   });
 

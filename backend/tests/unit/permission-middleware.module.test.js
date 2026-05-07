@@ -30,7 +30,7 @@ describe('permissions/permission-middleware.js', () => {
   });
 
   test('has local dependencies (3)', () => {
-    const locals = (source.match(/require\s*\(\s*['"]\.[^'"]+['"]\s*\)/g) || []);
+    const locals = source.match(/require\s*\(\s*['"]\.[^'"]+['"]\s*\)/g) || [];
     expect(locals.length).toBe(3);
   });
 

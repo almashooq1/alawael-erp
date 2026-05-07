@@ -22,7 +22,9 @@ describe('rehabilitation-services/unified-assessment-service.js', () => {
   });
 
   test('is syntactically valid JavaScript', () => {
-    expect(() => new vm.Script(source, { filename: 'unified-assessment-service.js' })).not.toThrow();
+    expect(
+      () => new vm.Script(source, { filename: 'unified-assessment-service.js' })
+    ).not.toThrow();
   });
 
   test('defines class UnifiedAssessmentService', () => {

@@ -22,7 +22,9 @@ describe('communication/administrative-communications-routes.js', () => {
   });
 
   test('is syntactically valid JavaScript', () => {
-    expect(() => new vm.Script(source, { filename: 'administrative-communications-routes.js' })).not.toThrow();
+    expect(
+      () => new vm.Script(source, { filename: 'administrative-communications-routes.js' })
+    ).not.toThrow();
   });
 
   test('uses express Router', () => {
@@ -49,12 +51,12 @@ describe('communication/administrative-communications-routes.js', () => {
   });
 
   test('has npm dependencies (4)', () => {
-    const npms = (source.match(/require\s*\(\s*['"](?![./])[^'"]+['"]\s*\)/g) || []);
+    const npms = source.match(/require\s*\(\s*['"](?![./])[^'"]+['"]\s*\)/g) || [];
     expect(npms.length).toBe(4);
   });
 
   test('has local dependencies (3)', () => {
-    const locals = (source.match(/require\s*\(\s*['"]\.[^'"]+['"]\s*\)/g) || []);
+    const locals = source.match(/require\s*\(\s*['"]\.[^'"]+['"]\s*\)/g) || [];
     expect(locals.length).toBe(3);
   });
 

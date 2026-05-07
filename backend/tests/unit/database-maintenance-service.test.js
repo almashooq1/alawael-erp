@@ -13,17 +13,15 @@ jest.mock('../../utils/logger', () => ({
 
 const mockReIndex = jest.fn().mockResolvedValue({});
 const mockDeleteMany = jest.fn().mockResolvedValue({ deletedCount: 5 });
-const mockCollStats = jest
-  .fn()
-  .mockResolvedValue({
-    padding: 1.0,
-    storageSize: 100,
-    size: 90,
-    count: 10,
-    avgObjSize: 200,
-    nindexes: 2,
-    totalIndexSize: 50,
-  });
+const mockCollStats = jest.fn().mockResolvedValue({
+  padding: 1.0,
+  storageSize: 100,
+  size: 90,
+  count: 10,
+  avgObjSize: 200,
+  nindexes: 2,
+  totalIndexSize: 50,
+});
 const mockCollIndexes = jest.fn().mockResolvedValue([{ name: '_id_' }]);
 const mockInsertOne = jest.fn().mockResolvedValue({});
 const mockFindMock = jest.fn().mockReturnValue({ toArray: jest.fn().mockResolvedValue([]) });
@@ -47,26 +45,22 @@ const mockDb = {
   command: mockDbCommand,
   admin: jest.fn().mockReturnValue({
     ping: jest.fn().mockResolvedValue({ ok: 1 }),
-    serverStatus: jest
-      .fn()
-      .mockResolvedValue({
-        version: '6.0',
-        uptime: 9999,
-        connections: {},
-        network: {},
-        opcounters: {},
-      }),
+    serverStatus: jest.fn().mockResolvedValue({
+      version: '6.0',
+      uptime: 9999,
+      connections: {},
+      network: {},
+      opcounters: {},
+    }),
     command: jest.fn().mockResolvedValue({ inprog: [] }),
   }),
-  stats: jest
-    .fn()
-    .mockResolvedValue({
-      collections: 5,
-      objects: 1000,
-      dataSize: 50000,
-      indexSize: 10000,
-      storageSize: 80000,
-    }),
+  stats: jest.fn().mockResolvedValue({
+    collections: 5,
+    objects: 1000,
+    dataSize: 50000,
+    indexSize: 10000,
+    storageSize: 80000,
+  }),
 };
 
 const mockFsReaddir = jest.fn().mockResolvedValue([]);

@@ -50,15 +50,15 @@ jest.mock('../../utils/logger', () => ({
   log: jest.fn(),
 }));
 jest.mock(
-  '../../services/documentFavoritesService',
+  '../../services/documents/documentFavorites.service',
   () => new Proxy({}, { get: () => jest.fn().mockResolvedValue({}) })
 );
 jest.mock(
-  '../../services/documentAuditService',
+  '../../services/documents/documentAudit.service',
   () => new Proxy({}, { get: () => jest.fn().mockResolvedValue({}) })
 );
 jest.mock(
-  '../../services/documentWatermarkService',
+  '../../services/documents/documentWatermark.service',
   () => new Proxy({}, { get: () => jest.fn().mockResolvedValue({}) })
 );
 jest.mock(
@@ -78,15 +78,15 @@ jest.mock(
   () => new Proxy({}, { get: () => jest.fn().mockResolvedValue({}) })
 );
 jest.mock(
-  '../../services/documentComparisonService',
+  '../../services/documents/documentComparison.service',
   () => new Proxy({}, { get: () => jest.fn().mockResolvedValue({}) })
 );
 jest.mock(
-  '../../services/documentExportService',
+  '../../services/documents/documentImportExport.service',
   () => new Proxy({}, { get: () => jest.fn().mockResolvedValue({}) })
 );
 jest.mock(
-  '../../services/documentQRService',
+  '../../services/documents/documentQRCode.service',
   () => new Proxy({}, { get: () => jest.fn().mockResolvedValue({}) })
 );
 jest.mock(

@@ -9,7 +9,10 @@ const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
 
-const SRC = path.resolve(__dirname, '../../rehabilitation-services/advanced-physical-therapy-service.js');
+const SRC = path.resolve(
+  __dirname,
+  '../../rehabilitation-services/advanced-physical-therapy-service.js'
+);
 
 describe('rehabilitation-services/advanced-physical-therapy-service.js', () => {
   let source;
@@ -22,7 +25,9 @@ describe('rehabilitation-services/advanced-physical-therapy-service.js', () => {
   });
 
   test('is syntactically valid JavaScript', () => {
-    expect(() => new vm.Script(source, { filename: 'advanced-physical-therapy-service.js' })).not.toThrow();
+    expect(
+      () => new vm.Script(source, { filename: 'advanced-physical-therapy-service.js' })
+    ).not.toThrow();
   });
 
   test('defines class AdvancedPhysicalTherapyService', () => {

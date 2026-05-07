@@ -16,13 +16,34 @@ jest.mock('../../utils/logger', () => ({
   stream: { write: jest.fn() },
 }));
 
-const mockSchema = { index: jest.fn().mockReturnThis(), virtual: jest.fn(() => ({ get: jest.fn() })), pre: jest.fn(), post: jest.fn(), plugin: jest.fn(), statics: {}, methods: {}, set: jest.fn() };
+const mockSchema = {
+  index: jest.fn().mockReturnThis(),
+  virtual: jest.fn(() => ({ get: jest.fn() })),
+  pre: jest.fn(),
+  post: jest.fn(),
+  plugin: jest.fn(),
+  statics: {},
+  methods: {},
+  set: jest.fn(),
+};
 jest.mock('mongoose', () => ({
   Schema: jest.fn(() => mockSchema),
   model: jest.fn(() => ({ find: jest.fn(), findOne: jest.fn(), create: jest.fn() })),
   connect: jest.fn(() => Promise.resolve()),
   disconnect: jest.fn(() => Promise.resolve()),
-  connection: { readyState: 1, on: jest.fn(), close: jest.fn(), db: { admin: jest.fn(() => ({ ping: jest.fn(() => Promise.resolve({ ok: 1 })), serverStatus: jest.fn(() => Promise.resolve({ connections: {} })) })), stats: jest.fn(() => Promise.resolve({})), command: jest.fn(() => Promise.resolve({})) } },
+  connection: {
+    readyState: 1,
+    on: jest.fn(),
+    close: jest.fn(),
+    db: {
+      admin: jest.fn(() => ({
+        ping: jest.fn(() => Promise.resolve({ ok: 1 })),
+        serverStatus: jest.fn(() => Promise.resolve({ connections: {} })),
+      })),
+      stats: jest.fn(() => Promise.resolve({})),
+      command: jest.fn(() => Promise.resolve({})),
+    },
+  },
   plugin: jest.fn(),
   Types: { ObjectId: { isValid: jest.fn(() => true) } },
   set: jest.fn(),
@@ -64,5 +85,4 @@ describe('config/database.optimization', () => {
     expect(mod.cleanupConnections).toBeDefined();
     expect(typeof mod.cleanupConnections).toBe('function');
   });
-
 });

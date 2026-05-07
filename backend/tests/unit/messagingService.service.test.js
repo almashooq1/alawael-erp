@@ -19,31 +19,61 @@ jest.mock('../../utils/logger', () => ({
 jest.mock('crypto', () => ({
   ...jest.requireActual('crypto'),
   randomBytes: jest.fn(() => Buffer.from('abcdef1234567890abcdef1234567890', 'hex')),
-  createHash: jest.fn(() => ({ update: jest.fn().mockReturnThis(), digest: jest.fn(() => 'mockhash') })),
-  createHmac: jest.fn(() => ({ update: jest.fn().mockReturnThis(), digest: jest.fn(() => 'mockhmac') })),
-  createCipheriv: jest.fn(() => ({ update: jest.fn(() => 'enc'), final: jest.fn(() => ''), getAuthTag: jest.fn(() => Buffer.from('tag')) })),
-  createDecipheriv: jest.fn(() => ({ update: jest.fn(() => 'dec'), final: jest.fn(() => ''), setAuthTag: jest.fn() })),
+  createHash: jest.fn(() => ({
+    update: jest.fn().mockReturnThis(),
+    digest: jest.fn(() => 'mockhash'),
+  })),
+  createHmac: jest.fn(() => ({
+    update: jest.fn().mockReturnThis(),
+    digest: jest.fn(() => 'mockhmac'),
+  })),
+  createCipheriv: jest.fn(() => ({
+    update: jest.fn(() => 'enc'),
+    final: jest.fn(() => ''),
+    getAuthTag: jest.fn(() => Buffer.from('tag')),
+  })),
+  createDecipheriv: jest.fn(() => ({
+    update: jest.fn(() => 'dec'),
+    final: jest.fn(() => ''),
+    setAuthTag: jest.fn(),
+  })),
   pbkdf2Sync: jest.fn(() => Buffer.from('derived-key-32-bytes-long!!!!!!!')),
 }));
 
-jest.mock('nodemailer', () => ({
-  createTransport: jest.fn(() => ({
-    sendMail: jest.fn(() => Promise.resolve({ messageId: 'mock-id' })),
-    verify: jest.fn(() => Promise.resolve(true)),
-  })),
-}), { virtual: true });
+jest.mock(
+  'nodemailer',
+  () => ({
+    createTransport: jest.fn(() => ({
+      sendMail: jest.fn(() => Promise.resolve({ messageId: 'mock-id' })),
+      verify: jest.fn(() => Promise.resolve(true)),
+    })),
+  }),
+  { virtual: true }
+);
 
-jest.mock('twilio', () => jest.fn(() => ({
-  messages: { create: jest.fn(() => Promise.resolve({ sid: 'mock-sid' })) },
-})), { virtual: true });
+jest.mock(
+  'twilio',
+  () =>
+    jest.fn(() => ({
+      messages: { create: jest.fn(() => Promise.resolve({ sid: 'mock-sid' })) },
+    })),
+  { virtual: true }
+);
 
-jest.mock('../../config/secrets', () => new Proxy({}, {
-  get: (_, p) => {
-    if (p === '__esModule') return false;
-    if (p === 'default') return {};
-    return jest.fn(() => Promise.resolve({}));
-  },
-}));
+jest.mock(
+  '../../config/secrets',
+  () =>
+    new Proxy(
+      {},
+      {
+        get: (_, p) => {
+          if (p === '__esModule') return false;
+          if (p === 'default') return {};
+          return jest.fn(() => Promise.resolve({}));
+        },
+      }
+    )
+);
 
 /* ── Module under test ── */
 const mod = require('../../services/messagingService');
@@ -78,5 +108,4 @@ describe('services/messagingService', () => {
     expect(mod.AbuseDetectionService).toBeDefined();
     expect(typeof mod.AbuseDetectionService).toBe('function');
   });
-
 });

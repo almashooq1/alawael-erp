@@ -48,11 +48,9 @@ jest.mock('../../models/advanced_attendance.model', () => {
 /* ───── Mock WorkShift model ───── */
 jest.mock('../../models/workShift.model', () => {
   const Model = {
-    find: jest
-      .fn()
-      .mockReturnValue({
-        sort: jest.fn().mockReturnValue({ lean: jest.fn().mockResolvedValue([]) }),
-      }),
+    find: jest.fn().mockReturnValue({
+      sort: jest.fn().mockReturnValue({ lean: jest.fn().mockResolvedValue([]) }),
+    }),
     findById: jest.fn().mockResolvedValue(null),
     getEmployeeShift: jest.fn().mockResolvedValue(null),
     assignShift: jest.fn().mockResolvedValue({ success: true }),

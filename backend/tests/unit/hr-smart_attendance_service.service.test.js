@@ -39,7 +39,7 @@ describe('services/hr/smart_attendance_service.js', () => {
   });
 
   test('has local dependencies (6)', () => {
-    const locals = (source.match(/require\s*\(\s*['"]\.[^'"]+['"]\s*\)/g) || []);
+    const locals = source.match(/require\s*\(\s*['"]\.[^'"]+['"]\s*\)/g) || [];
     expect(locals.length).toBe(6);
   });
 

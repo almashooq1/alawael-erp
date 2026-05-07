@@ -22,7 +22,9 @@ describe('seeds/notification-templates.seed.js', () => {
   });
 
   test('is syntactically valid JavaScript', () => {
-    expect(() => new vm.Script(source, { filename: 'notification-templates.seed.js' })).not.toThrow();
+    expect(
+      () => new vm.Script(source, { filename: 'notification-templates.seed.js' })
+    ).not.toThrow();
   });
 
   test('has module.exports', () => {

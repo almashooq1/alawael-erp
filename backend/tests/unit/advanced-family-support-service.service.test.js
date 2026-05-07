@@ -9,7 +9,10 @@ const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
 
-const SRC = path.resolve(__dirname, '../../rehabilitation-services/advanced-family-support-service.js');
+const SRC = path.resolve(
+  __dirname,
+  '../../rehabilitation-services/advanced-family-support-service.js'
+);
 
 describe('rehabilitation-services/advanced-family-support-service.js', () => {
   let source;
@@ -22,7 +25,9 @@ describe('rehabilitation-services/advanced-family-support-service.js', () => {
   });
 
   test('is syntactically valid JavaScript', () => {
-    expect(() => new vm.Script(source, { filename: 'advanced-family-support-service.js' })).not.toThrow();
+    expect(
+      () => new vm.Script(source, { filename: 'advanced-family-support-service.js' })
+    ).not.toThrow();
   });
 
   test('defines class AdvancedFamilySupportService', () => {

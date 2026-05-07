@@ -27,7 +27,9 @@ const mockScheduleChain = {
   exec: jest.fn().mockResolvedValue([]),
 };
 jest.mock('../../models/Schedule', () => {
-  const M = jest.fn().mockImplementation(() => ({ save: jest.fn().mockResolvedValue({ _id: 'id1' }) }));
+  const M = jest
+    .fn()
+    .mockImplementation(() => ({ save: jest.fn().mockResolvedValue({ _id: 'id1' }) }));
   Object.assign(M, mockScheduleChain);
   return M;
 });
@@ -43,64 +45,99 @@ describe('scheduleManagementService service', () => {
   test('getAllSchedules is callable', async () => {
     if (typeof svc.getAllSchedules !== 'function') return;
     let r;
-    try { r = await svc.getAllSchedules({}); } catch (e) { r = e; }
+    try {
+      r = await svc.getAllSchedules({});
+    } catch (e) {
+      r = e;
+    }
     expect(r).toBeDefined();
   });
 
   test('createSchedule is callable', async () => {
     if (typeof svc.createSchedule !== 'function') return;
     let r;
-    try { r = await svc.createSchedule({}); } catch (e) { r = e; }
+    try {
+      r = await svc.createSchedule({});
+    } catch (e) {
+      r = e;
+    }
     expect(r).toBeDefined();
   });
 
   test('getScheduleById is callable', async () => {
     if (typeof svc.getScheduleById !== 'function') return;
     let r;
-    try { r = await svc.getScheduleById({}); } catch (e) { r = e; }
+    try {
+      r = await svc.getScheduleById({});
+    } catch (e) {
+      r = e;
+    }
     expect(r).toBeDefined();
   });
 
   test('updateSchedule is callable', async () => {
     if (typeof svc.updateSchedule !== 'function') return;
     let r;
-    try { r = await svc.updateSchedule({}); } catch (e) { r = e; }
+    try {
+      r = await svc.updateSchedule({});
+    } catch (e) {
+      r = e;
+    }
     expect(r).toBeDefined();
   });
 
   test('deleteSchedule is callable', async () => {
     if (typeof svc.deleteSchedule !== 'function') return;
     let r;
-    try { r = await svc.deleteSchedule({}); } catch (e) { r = e; }
+    try {
+      r = await svc.deleteSchedule({});
+    } catch (e) {
+      r = e;
+    }
     expect(r).toBeDefined();
   });
 
   test('getSchedulesByResource is callable', async () => {
     if (typeof svc.getSchedulesByResource !== 'function') return;
     let r;
-    try { r = await svc.getSchedulesByResource({}); } catch (e) { r = e; }
+    try {
+      r = await svc.getSchedulesByResource({});
+    } catch (e) {
+      r = e;
+    }
     expect(r).toBeDefined();
   });
 
   test('getSchedulesByDateRange is callable', async () => {
     if (typeof svc.getSchedulesByDateRange !== 'function') return;
     let r;
-    try { r = await svc.getSchedulesByDateRange({}); } catch (e) { r = e; }
+    try {
+      r = await svc.getSchedulesByDateRange({});
+    } catch (e) {
+      r = e;
+    }
     expect(r).toBeDefined();
   });
 
   test('confirmSchedule is callable', async () => {
     if (typeof svc.confirmSchedule !== 'function') return;
     let r;
-    try { r = await svc.confirmSchedule({}); } catch (e) { r = e; }
+    try {
+      r = await svc.confirmSchedule({});
+    } catch (e) {
+      r = e;
+    }
     expect(r).toBeDefined();
   });
 
   test('getHealthStatus is callable', async () => {
     if (typeof svc.getHealthStatus !== 'function') return;
     let r;
-    try { r = await svc.getHealthStatus({}); } catch (e) { r = e; }
+    try {
+      r = await svc.getHealthStatus({});
+    } catch (e) {
+      r = e;
+    }
     expect(r).toBeDefined();
   });
-
 });

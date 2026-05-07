@@ -108,15 +108,13 @@ jest.mock('axios', () => ({}));
 jest.mock('mongoose', () => ({
   connection: { readyState: 1, db: { admin: () => ({ ping: jest.fn().mockResolvedValue(true) }) } },
   model: jest.fn(),
-  Schema: jest
-    .fn()
-    .mockImplementation(() => ({
-      index: jest.fn(),
-      pre: jest.fn(),
-      post: jest.fn(),
-      virtual: jest.fn().mockReturnThis(),
-      set: jest.fn(),
-    })),
+  Schema: jest.fn().mockImplementation(() => ({
+    index: jest.fn(),
+    pre: jest.fn(),
+    post: jest.fn(),
+    virtual: jest.fn().mockReturnThis(),
+    set: jest.fn(),
+  })),
   Types: { ObjectId: jest.fn(v => v || 'mock-id') },
 }));
 jest.mock('../../utils/logger', () => ({

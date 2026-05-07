@@ -27,8 +27,14 @@ const mocknitaqat_modelsChain = {
   exec: jest.fn().mockResolvedValue([]),
 };
 jest.mock('../../models/nitaqat.models', () => ({
-  NitaqatCalculation: Object.assign(jest.fn().mockImplementation(() => ({ save: jest.fn().mockResolvedValue({ _id: 'id1' }) })), mocknitaqat_modelsChain),
-  NitaqatActivityParam: Object.assign(jest.fn().mockImplementation(() => ({ save: jest.fn().mockResolvedValue({ _id: 'id1' }) })), mocknitaqat_modelsChain)
+  NitaqatCalculation: Object.assign(
+    jest.fn().mockImplementation(() => ({ save: jest.fn().mockResolvedValue({ _id: 'id1' }) })),
+    mocknitaqat_modelsChain
+  ),
+  NitaqatActivityParam: Object.assign(
+    jest.fn().mockImplementation(() => ({ save: jest.fn().mockResolvedValue({ _id: 'id1' }) })),
+    mocknitaqat_modelsChain
+  ),
 }));
 
 const svc = require('../../services/nitaqat.service');
@@ -42,57 +48,88 @@ describe('nitaqat.service service', () => {
   test('calculateNitaqat is callable', async () => {
     if (typeof svc.calculateNitaqat !== 'function') return;
     let r;
-    try { r = await svc.calculateNitaqat({}); } catch (e) { r = e; }
+    try {
+      r = await svc.calculateNitaqat({});
+    } catch (e) {
+      r = e;
+    }
     expect(r).toBeDefined();
   });
 
   test('getLatestCalculation is callable', async () => {
     if (typeof svc.getLatestCalculation !== 'function') return;
     let r;
-    try { r = await svc.getLatestCalculation({}); } catch (e) { r = e; }
+    try {
+      r = await svc.getLatestCalculation({});
+    } catch (e) {
+      r = e;
+    }
     expect(r).toBeDefined();
   });
 
   test('getCalculationHistory is callable', async () => {
     if (typeof svc.getCalculationHistory !== 'function') return;
     let r;
-    try { r = await svc.getCalculationHistory({}); } catch (e) { r = e; }
+    try {
+      r = await svc.getCalculationHistory({});
+    } catch (e) {
+      r = e;
+    }
     expect(r).toBeDefined();
   });
 
   test('whatIfAnalysis is callable', async () => {
     if (typeof svc.whatIfAnalysis !== 'function') return;
     let r;
-    try { r = await svc.whatIfAnalysis({}); } catch (e) { r = e; }
+    try {
+      r = await svc.whatIfAnalysis({});
+    } catch (e) {
+      r = e;
+    }
     expect(r).toBeDefined();
   });
 
   test('upsertActivityParams is callable', async () => {
     if (typeof svc.upsertActivityParams !== 'function') return;
     let r;
-    try { r = await svc.upsertActivityParams({}); } catch (e) { r = e; }
+    try {
+      r = await svc.upsertActivityParams({});
+    } catch (e) {
+      r = e;
+    }
     expect(r).toBeDefined();
   });
 
   test('getActivityParams is callable', async () => {
     if (typeof svc.getActivityParams !== 'function') return;
     let r;
-    try { r = await svc.getActivityParams({}); } catch (e) { r = e; }
+    try {
+      r = await svc.getActivityParams({});
+    } catch (e) {
+      r = e;
+    }
     expect(r).toBeDefined();
   });
 
   test('listActivityParams is callable', async () => {
     if (typeof svc.listActivityParams !== 'function') return;
     let r;
-    try { r = await svc.listActivityParams({}); } catch (e) { r = e; }
+    try {
+      r = await svc.listActivityParams({});
+    } catch (e) {
+      r = e;
+    }
     expect(r).toBeDefined();
   });
 
   test('getDashboardStats is callable', async () => {
     if (typeof svc.getDashboardStats !== 'function') return;
     let r;
-    try { r = await svc.getDashboardStats({}); } catch (e) { r = e; }
+    try {
+      r = await svc.getDashboardStats({});
+    } catch (e) {
+      r = e;
+    }
     expect(r).toBeDefined();
   });
-
 });

@@ -22,7 +22,9 @@ describe('routes/registries/clinical-assessment.registry.js', () => {
   });
 
   test('is syntactically valid JavaScript', () => {
-    expect(() => new vm.Script(source, { filename: 'clinical-assessment.registry.js' })).not.toThrow();
+    expect(
+      () => new vm.Script(source, { filename: 'clinical-assessment.registry.js' })
+    ).not.toThrow();
   });
 
   test('has module.exports', () => {

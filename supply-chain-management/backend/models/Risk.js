@@ -71,7 +71,7 @@ const riskSchema = new mongoose.Schema(
     },
     createdAt: {
       type: Date,
-      default: Date.now
+      default: Date.now,
     },
     updatedAt: {
       type: Date,
@@ -91,7 +91,7 @@ const riskSchema = new mongoose.Schema(
       },
     ],
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 riskSchema.index({ category: 1, status: 1 });

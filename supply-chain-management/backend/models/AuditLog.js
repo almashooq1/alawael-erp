@@ -6,7 +6,7 @@ const auditLogSchema = new mongoose.Schema({
   entity: { type: String }, // مثال: 'Supplier', 'Product', ...
   entityId: { type: String },
   details: { type: Object }, // تفاصيل إضافية (قبل/بعد، بيانات مختصرة)
-  timestamp: { type: Date, default: Date.now }
+  timestamp: { type: Date, default: Date.now },
 });
 
 module.exports = mongoose.model('AuditLog', auditLogSchema);

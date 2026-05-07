@@ -18,7 +18,7 @@ const logger = winston.createLogger({
   format: winston.format.combine(
     winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
     winston.format.errors({ stack: true }),
-    winston.format.json()
+    winston.format.json(),
   ),
   defaultMeta: { service: 'barcode-api' },
   transports: [
@@ -46,9 +46,9 @@ if (process.env.NODE_ENV !== 'production') {
         winston.format.colorize(),
         winston.format.printf(({ level, message, timestamp }) => {
           return `${timestamp} [${level}]: ${message}`;
-        })
+        }),
       ),
-    })
+    }),
   );
 }
 

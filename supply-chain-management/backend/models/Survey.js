@@ -56,7 +56,7 @@ const surveySchema = new mongoose.Schema(
       customFields: mongoose.Schema.Types.Mixed,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 module.exports = mongoose.model('Survey', surveySchema);

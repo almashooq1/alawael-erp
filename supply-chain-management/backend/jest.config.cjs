@@ -1,22 +1,11 @@
 module.exports = {
   testEnvironment: 'node',
-  testMatch: [
-    '**/__tests__/**/*.test.js',
-    '**/__tests__/**/*.test.cjs',
-    '**/?(*.)+(spec|test).cjs',
-  ],
+  testMatch: ['**/__tests__/**/*.test.js', '**/__tests__/**/*.test.cjs', '**/?(*.)+(spec|test).cjs'],
   transform: {},
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1',
   },
-  collectCoverageFrom: [
-    'middleware/**/*.js',
-    'models/**/*.js',
-    'utils/**/*.js',
-    'routes/**/*.js',
-    '!node_modules/**',
-    '!__tests__/**',
-  ],
+  collectCoverageFrom: ['middleware/**/*.js', 'models/**/*.js', 'utils/**/*.js', 'routes/**/*.js', '!node_modules/**', '!__tests__/**'],
   coverageThreshold: {
     global: {
       branches: 50,

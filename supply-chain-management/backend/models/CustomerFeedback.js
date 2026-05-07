@@ -8,7 +8,7 @@ const feedbackSchema = new mongoose.Schema(
     },
     customerId: {
       type: String,
-      required: true
+      required: true,
     },
     channel: {
       type: String,
@@ -17,16 +17,7 @@ const feedbackSchema = new mongoose.Schema(
     },
     category: {
       type: String,
-      enum: [
-        'product_quality',
-        'service_quality',
-        'price',
-        'delivery',
-        'support',
-        'general',
-        'bug_report',
-        'feature_request',
-      ],
+      enum: ['product_quality', 'service_quality', 'price', 'delivery', 'support', 'general', 'bug_report', 'feature_request'],
       default: 'general',
     },
     title: String,
@@ -71,7 +62,7 @@ const feedbackSchema = new mongoose.Schema(
     },
     createdAt: {
       type: Date,
-      default: Date.now
+      default: Date.now,
     },
     updatedAt: {
       type: Date,
@@ -79,7 +70,7 @@ const feedbackSchema = new mongoose.Schema(
     },
     resolvedAt: Date,
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 feedbackSchema.index({ customerId: 1, createdAt: -1 });

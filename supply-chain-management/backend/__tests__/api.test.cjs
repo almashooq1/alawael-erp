@@ -18,7 +18,7 @@ describe('Supply Chain Management API', () => {
     test('Required dependencies are installed', () => {
       expect(() => require('express-validator')).not.toThrow();
       expect(() => require('jsonwebtoken')).not.toThrow();
-      
+
       // bcrypt may not be available in all test environments
       try {
         require('bcrypt');
@@ -239,12 +239,7 @@ describe('Supply Chain Management API', () => {
   describe('Production Readiness Summary', () => {
     test('All critical files are in place', () => {
       const backend = path.join(__dirname, '..');
-      const criticalFiles = [
-        'package.json',
-        'jest.config.cjs',
-        'middleware/errorHandler.js',
-        'middleware/validation.js',
-      ];
+      const criticalFiles = ['package.json', 'jest.config.cjs', 'middleware/errorHandler.js', 'middleware/validation.js'];
 
       criticalFiles.forEach(file => {
         const fullPath = path.join(backend, file);

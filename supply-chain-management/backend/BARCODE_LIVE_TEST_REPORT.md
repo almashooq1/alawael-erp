@@ -169,11 +169,13 @@ Authentication: Required (Admin Token)
 **Roles Tested:**
 
 1. ✅ **Admin** (admin-001)
+
    - Role: admin
    - Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
    - Permissions: All endpoints
 
 2. ✅ **Warehouse Manager** (manager-001)
+
    - Role: warehouse_manager
    - Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
    - Permissions: QR, Barcode, Batch

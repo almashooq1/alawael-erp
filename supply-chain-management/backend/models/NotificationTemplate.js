@@ -10,7 +10,7 @@ const NotificationTemplateSchema = new mongoose.Schema(
     templateName: {
       type: String,
       required: true,
-      unique: true
+      unique: true,
     },
 
     templateCode: {
@@ -74,7 +74,7 @@ const NotificationTemplateSchema = new mongoose.Schema(
     // Template Status
     isActive: {
       type: Boolean,
-      default: true
+      default: true,
     },
 
     isDefault: {
@@ -233,7 +233,7 @@ const NotificationTemplateSchema = new mongoose.Schema(
     // Timestamps
     createdAt: {
       type: Date,
-      default: Date.now
+      default: Date.now,
     },
 
     updatedAt: {
@@ -243,7 +243,7 @@ const NotificationTemplateSchema = new mongoose.Schema(
 
     deprecatedAt: Date,
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // Indexes
@@ -346,11 +346,7 @@ NotificationTemplateSchema.methods.validate = function () {
   this.variables.forEach(variable => {
     if (variable.required) {
       const regex = new RegExp(`{{${variable.name}}}`, 'g');
-      if (
-        !this.emailBody.match(regex) &&
-        !this.smsBody.match(regex) &&
-        !this.pushMessage.match(regex)
-      ) {
+      if (!this.emailBody.match(regex) && !this.smsBody.match(regex) && !this.pushMessage.match(regex)) {
         errors.push(`Required variable ${variable.name} is not used in any channel`);
       }
     }
@@ -433,14 +429,8 @@ NotificationTemplateSchema.statics.getByCode = function (code) {
 /**
  * Get best performing templates
  */
-NotificationTemplateSchema.statics.getTopPerformers = function (
-  metric = 'deliveryRate',
-  limit = 10
-) {
-  const sortField =
-    metric === 'deliveryRate'
-      ? 'totalDelivered'
-      : `total${metric.charAt(0).toUpperCase()}${metric.slice(1)}`;
+NotificationTemplateSchema.statics.getTopPerformers = function (metric = 'deliveryRate', limit = 10) {
+  const sortField = metric === 'deliveryRate' ? 'totalDelivered' : `total${metric.charAt(0).toUpperCase()}${metric.slice(1)}`;
   return this.find({ isActive: true })
     .sort({ [sortField]: -1 })
     .limit(limit);

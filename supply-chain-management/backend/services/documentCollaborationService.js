@@ -10,14 +10,7 @@ class DocumentCollaborationService {
    */
   async createVersion(documentId, userId, contentData, options = {}) {
     try {
-      const {
-        title = 'Untitled',
-        changeDescription = '',
-        status = 'draft',
-        contentType = 'text',
-        tags = [],
-        category = '',
-      } = options;
+      const { title = 'Untitled', changeDescription = '', status = 'draft', contentType = 'text', tags = [], category = '' } = options;
 
       // Get the latest version number
       const latestVersion = await DocumentVersion.findLatestVersion(documentId);
@@ -100,7 +93,7 @@ class DocumentCollaborationService {
           contentType: versionToRestore.contentType,
           tags: versionToRestore.tags,
           category: versionToRestore.category,
-        }
+        },
       );
 
       return newVersion;
@@ -275,9 +268,7 @@ class DocumentCollaborationService {
    */
   async archiveOldVersions(documentId, keepVersions = 5) {
     try {
-      const allVersions = await DocumentVersion.find({ documentId })
-        .sort({ versionNumber: -1 })
-        .exec();
+      const allVersions = await DocumentVersion.find({ documentId }).sort({ versionNumber: -1 }).exec();
 
       const versionsToArchive = allVersions.slice(keepVersions);
 

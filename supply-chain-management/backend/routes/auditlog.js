@@ -10,10 +10,7 @@ router.get('/', authMiddleware, async (req, res) => {
     if (req.user.role !== 'admin' && req.user.role !== 'manager') {
       return res.status(403).json({ message: 'غير مصرح' });
     }
-    const logs = await AuditLog.find({})
-      .populate('user', 'username role')
-      .sort({ timestamp: -1 })
-      .limit(100);
+    const logs = await AuditLog.find({}).populate('user', 'username role').sort({ timestamp: -1 }).limit(100);
     res.json(logs);
   } catch (_err) {
     res.status(500).json({ message: 'خطأ في جلب السجل' });

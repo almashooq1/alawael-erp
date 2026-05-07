@@ -51,25 +51,16 @@ describe('Smart Notification System - Phase 5', () => {
         sentAt: new Date(),
       };
 
-      smartNotificationService.sendNotification.mockImplementation(
-        async (type, recipientId, data) => {
-          smartNotificationService.emit('notification-created', expectedNotification);
-          return expectedNotification;
-        }
-      );
+      smartNotificationService.sendNotification.mockImplementation(async (type, recipientId, data) => {
+        smartNotificationService.emit('notification-created', expectedNotification);
+        return expectedNotification;
+      });
 
-      const result = await smartNotificationService.sendNotification(
-        'payment_confirmation',
-        'user-123',
-        { amount: '$100' }
-      );
+      const result = await smartNotificationService.sendNotification('payment_confirmation', 'user-123', { amount: '$100' });
 
       expect(result.notificationId).toBe('NOTIF-123456789');
       expect(result.status).toBe('sent');
-      expect(smartNotificationService.emit).toHaveBeenCalledWith(
-        'notification-created',
-        expect.any(Object)
-      );
+      expect(smartNotificationService.emit).toHaveBeenCalledWith('notification-created', expect.any(Object));
     });
 
     test('should send via multiple channels', async () => {
@@ -98,18 +89,14 @@ describe('Smart Notification System - Phase 5', () => {
         { notificationId: 'NOTIF-3', recipientId: 'user-3', status: 'sent' },
       ];
 
-      smartNotificationService.batchSend.mockImplementation(
-        async (recipients, templateName, data) => {
-          smartNotificationService.emit('batch-sent', { count: notifications.length, recipients });
-          return notifications;
-        }
-      );
+      smartNotificationService.batchSend.mockImplementation(async (recipients, templateName, data) => {
+        smartNotificationService.emit('batch-sent', { count: notifications.length, recipients });
+        return notifications;
+      });
 
-      const result = await smartNotificationService.batchSend(
-        ['user-1', 'user-2', 'user-3'],
-        'invoice_reminder',
-        { invoiceNumber: 'INV-001' }
-      );
+      const result = await smartNotificationService.batchSend(['user-1', 'user-2', 'user-3'], 'invoice_reminder', {
+        invoiceNumber: 'INV-001',
+      });
 
       expect(result).toHaveLength(3);
       expect(smartNotificationService.emit).toHaveBeenCalledWith('batch-sent', expect.any(Object));
@@ -130,7 +117,7 @@ describe('Smart Notification System - Phase 5', () => {
           { recipientId: 'user-2', type: 'promotion' },
         ],
         'promotional_offer',
-        scheduledDate
+        scheduledDate,
       );
 
       expect(result).toHaveLength(2);
@@ -151,10 +138,7 @@ describe('Smart Notification System - Phase 5', () => {
       const result = await smartNotificationService.processPending();
 
       expect(result).toHaveLength(2);
-      expect(smartNotificationService.emit).toHaveBeenCalledWith(
-        'pending-processed',
-        expect.any(Object)
-      );
+      expect(smartNotificationService.emit).toHaveBeenCalledWith('pending-processed', expect.any(Object));
     });
 
     test('should retry failed notifications', async () => {
@@ -199,10 +183,7 @@ describe('Smart Notification System - Phase 5', () => {
       const result = await smartNotificationService.markAsRead('NOTIF-1');
 
       expect(result.readAt).toBeDefined();
-      expect(smartNotificationService.emit).toHaveBeenCalledWith(
-        'notification-read',
-        expect.any(Object)
-      );
+      expect(smartNotificationService.emit).toHaveBeenCalledWith('notification-read', expect.any(Object));
     });
 
     test('should record notification click', async () => {
@@ -219,10 +200,7 @@ describe('Smart Notification System - Phase 5', () => {
       const result = await smartNotificationService.recordClick('NOTIF-1');
 
       expect(result.clickCount).toBe(1);
-      expect(smartNotificationService.emit).toHaveBeenCalledWith(
-        'notification-clicked',
-        expect.any(Object)
-      );
+      expect(smartNotificationService.emit).toHaveBeenCalledWith('notification-clicked', expect.any(Object));
     });
 
     test('should unsubscribe from notification', async () => {
@@ -240,10 +218,7 @@ describe('Smart Notification System - Phase 5', () => {
       const result = await smartNotificationService.unsubscribe('NOTIF-1');
 
       expect(result.isUnsubscribed).toBe(true);
-      expect(smartNotificationService.emit).toHaveBeenCalledWith(
-        'notification-unsubscribed',
-        expect.any(Object)
-      );
+      expect(smartNotificationService.emit).toHaveBeenCalledWith('notification-unsubscribed', expect.any(Object));
     });
 
     test('should get notifications by type', async () => {
@@ -254,10 +229,7 @@ describe('Smart Notification System - Phase 5', () => {
 
       smartNotificationService.getNotificationsByType.mockResolvedValue(notifications);
 
-      const result = await smartNotificationService.getNotificationsByType(
-        'user-123',
-        'payment_confirmation'
-      );
+      const result = await smartNotificationService.getNotificationsByType('user-123', 'payment_confirmation');
 
       expect(result).toHaveLength(2);
       expect(result[0].type).toBe('payment_confirmation');
@@ -288,10 +260,7 @@ describe('Smart Notification System - Phase 5', () => {
       });
 
       expect(result.templateCode).toBe('PAYMENT_CONFIRM');
-      expect(smartNotificationService.emit).toHaveBeenCalledWith(
-        'template-created',
-        expect.any(Object)
-      );
+      expect(smartNotificationService.emit).toHaveBeenCalledWith('template-created', expect.any(Object));
     });
 
     test('should get template performance', async () => {
@@ -360,9 +329,7 @@ describe('Smart Notification System - Phase 5', () => {
     });
 
     test('should handle channel delivery failure', async () => {
-      smartNotificationService.sendToChannel.mockRejectedValue(
-        new Error('Email service unavailable')
-      );
+      smartNotificationService.sendToChannel.mockRejectedValue(new Error('Email service unavailable'));
 
       try {
         await smartNotificationService.sendToChannel({}, 'email');
@@ -372,9 +339,7 @@ describe('Smart Notification System - Phase 5', () => {
     });
 
     test('should validate template fields', async () => {
-      smartNotificationService.createTemplate.mockRejectedValue(
-        new Error('Template validation failed')
-      );
+      smartNotificationService.createTemplate.mockRejectedValue(new Error('Template validation failed'));
 
       try {
         await smartNotificationService.createTemplate({
@@ -464,10 +429,7 @@ describe('Smart Notification System - Phase 5', () => {
 
       await smartNotificationService.sendNotification('template-code', 'user-123');
 
-      expect(smartNotificationService.emit).toHaveBeenCalledWith(
-        'notification-created',
-        expect.any(Object)
-      );
+      expect(smartNotificationService.emit).toHaveBeenCalledWith('notification-created', expect.any(Object));
     });
 
     test('should emit batch-sent event', async () => {
@@ -478,10 +440,7 @@ describe('Smart Notification System - Phase 5', () => {
 
       await smartNotificationService.batchSend(['u1', 'u2', 'u3'], 'code');
 
-      expect(smartNotificationService.emit).toHaveBeenCalledWith(
-        'batch-sent',
-        expect.objectContaining({ count: 3 })
-      );
+      expect(smartNotificationService.emit).toHaveBeenCalledWith('batch-sent', expect.objectContaining({ count: 3 }));
     });
   });
 });

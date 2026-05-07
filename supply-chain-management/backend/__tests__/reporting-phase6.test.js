@@ -187,9 +187,7 @@ describe('Advanced Reporting Engine - Phase 6', () => {
 
       reportingService.scheduleReport.mockResolvedValue(report);
 
-      const result = await reportingService.scheduleReport('REPORT-123456789', 'daily', [
-        { email: 'user@example.com', name: 'John' },
-      ]);
+      const result = await reportingService.scheduleReport('REPORT-123456789', 'daily', [{ email: 'user@example.com', name: 'John' }]);
 
       expect(result.isScheduled).toBe(true);
       expect(result.refreshFrequency).toBe('daily');
@@ -275,7 +273,7 @@ describe('Advanced Reporting Engine - Phase 6', () => {
           dashboardName: 'Executive Dashboard',
           dashboardType: 'executive',
         },
-        'user-123'
+        'user-123',
       );
 
       expect(result.dashboardId).toBeDefined();
@@ -323,13 +321,7 @@ describe('Advanced Reporting Engine - Phase 6', () => {
 
       reportingService.shareDashboard.mockResolvedValue(dashboard);
 
-      const result = await reportingService.shareDashboard(
-        'DASHBOARD-123456789',
-        'user-456',
-        'user@example.com',
-        'John',
-        'view'
-      );
+      const result = await reportingService.shareDashboard('DASHBOARD-123456789', 'user-456', 'user@example.com', 'John', 'view');
 
       expect(result.sharedWith).toHaveLength(1);
     });
@@ -382,7 +374,7 @@ describe('Advanced Reporting Engine - Phase 6', () => {
             metrics: [{ metricCode: 'REVENUE' }],
           },
         },
-        'user-123'
+        'user-123',
       );
 
       expect(result.templateCode).toBe('SALES_SUMMARY');
@@ -390,9 +382,7 @@ describe('Advanced Reporting Engine - Phase 6', () => {
     });
 
     test('should validate template structure', async () => {
-      reportingService.createTemplate.mockRejectedValue(
-        new Error('Template validation failed: At least one metric is required')
-      );
+      reportingService.createTemplate.mockRejectedValue(new Error('Template validation failed: At least one metric is required'));
 
       try {
         await reportingService.createTemplate({}, 'user-123');
@@ -411,10 +401,7 @@ describe('Advanced Reporting Engine - Phase 6', () => {
 
       reportingService.approveTemplate.mockResolvedValue(template);
 
-      const result = await reportingService.approveTemplate(
-        'TEMPLATE-123456789',
-        'admin@example.com'
-      );
+      const result = await reportingService.approveTemplate('TEMPLATE-123456789', 'admin@example.com');
 
       expect(result.isApproved).toBe(true);
       expect(result.status).toBe('published');
@@ -515,10 +502,7 @@ describe('Advanced Reporting Engine - Phase 6', () => {
       const result = await reportingService.processScheduledReports();
 
       expect(result).toBeDefined();
-      expect(reportingService.emit).toHaveBeenCalledWith(
-        'scheduled-reports-processed',
-        expect.any(Object)
-      );
+      expect(reportingService.emit).toHaveBeenCalledWith('scheduled-reports-processed', expect.any(Object));
     });
 
     test('should handle processing errors gracefully', async () => {
@@ -558,9 +542,7 @@ describe('Advanced Reporting Engine - Phase 6', () => {
 
   describe('ERROR HANDLING', () => {
     test('should provide meaningful error messages', async () => {
-      reportingService.generateReport.mockRejectedValue(
-        new Error('Template validation failed: Missing metric definitions')
-      );
+      reportingService.generateReport.mockRejectedValue(new Error('Template validation failed: Missing metric definitions'));
 
       try {
         await reportingService.generateReport('INVALID', {}, 'user-123');

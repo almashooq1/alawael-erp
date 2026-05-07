@@ -1,4 +1,5 @@
-/* eslint-disable no-undef */\nconst DocumentCollaborationService = require('../services/documentCollaborationService');
+/* eslint-disable no-undef */
+const DocumentCollaborationService = require('../services/documentCollaborationService');
 const DocumentVersion = require('../models/DocumentVersion');
 const { generateObjectId } = require('./testUtils');
 
@@ -42,51 +43,47 @@ describe('Phase 3: Advanced Document Management', () => {
     ]);
 
     // Setup default mock implementations using spyOn
-    jest
-      .spyOn(DocumentCollaborationService, 'createVersion')
-      .mockImplementation(async (docId, userId, changes, metadata) => {
-        const vNum = versionCounter++;
-        const content = changes?.content || '';
-        const wordCount = content.split(' ').filter(w => w.length > 0).length;
-        const estimatedReadTime = Math.ceil(wordCount / 200); // Assume 200 words per minute
-        const versionData = {
-          versionNumber: vNum,
-          documentId: docId || mockDocumentId,
-          createdBy: userId || mockUserId,
-          content: content,
-          title: metadata?.title || 'Test Document',
-          status: 'draft',
-          isDraft: true,
-          isPublished: false,
-          changes: changes
-            ? Object.keys(changes).map(key => ({ field: key, value: changes[key] }))
-            : [],
-          metadata: {
-            wordCount: wordCount,
-            estimatedReadTime: estimatedReadTime,
-            charCount: content.length,
-          },
-          _id: generateObjectId(),
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          getChangesSummary() {
-            return {
-              totalChanges: this.changes.length,
-              changedFields: this.changes.map(c => c.field),
-            };
-          },
-          getStatistics() {
-            return {
-              status: this.status,
-              wordCount: (this.content || '').split(' ').length,
-              charCount: (this.content || '').length,
-            };
-          },
-        };
-        // Store version data for restore operations
-        createdVersions.set(vNum, versionData);
-        return versionData;
-      });
+    jest.spyOn(DocumentCollaborationService, 'createVersion').mockImplementation(async (docId, userId, changes, metadata) => {
+      const vNum = versionCounter++;
+      const content = changes?.content || '';
+      const wordCount = content.split(' ').filter(w => w.length > 0).length;
+      const estimatedReadTime = Math.ceil(wordCount / 200); // Assume 200 words per minute
+      const versionData = {
+        versionNumber: vNum,
+        documentId: docId || mockDocumentId,
+        createdBy: userId || mockUserId,
+        content: content,
+        title: metadata?.title || 'Test Document',
+        status: 'draft',
+        isDraft: true,
+        isPublished: false,
+        changes: changes ? Object.keys(changes).map(key => ({ field: key, value: changes[key] })) : [],
+        metadata: {
+          wordCount: wordCount,
+          estimatedReadTime: estimatedReadTime,
+          charCount: content.length,
+        },
+        _id: generateObjectId(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        getChangesSummary() {
+          return {
+            totalChanges: this.changes.length,
+            changedFields: this.changes.map(c => c.field),
+          };
+        },
+        getStatistics() {
+          return {
+            status: this.status,
+            wordCount: (this.content || '').split(' ').length,
+            charCount: (this.content || '').length,
+          };
+        },
+      };
+      // Store version data for restore operations
+      createdVersions.set(vNum, versionData);
+      return versionData;
+    });
 
     jest.spyOn(DocumentCollaborationService, 'getVersionHistory').mockResolvedValue({
       versions: [
@@ -111,21 +108,19 @@ describe('Phase 3: Advanced Document Management', () => {
       totalChanges: 1,
     });
 
-    jest
-      .spyOn(DocumentCollaborationService, 'updateWorkflowStatus')
-      .mockImplementation(async (docId, versionNum, status, userId) => {
-        const validStatuses = ['draft', 'review', 'published', 'archived'];
-        if (!validStatuses.includes(status)) {
-          throw new Error('Invalid status transition');
-        }
-        return {
-          versionNumber: versionNum,
-          status: status,
-          publishedAt: status === 'published' ? new Date() : null,
-          publishedBy: status === 'published' ? userId : null,
-          _id: generateObjectId(),
-        };
-      });
+    jest.spyOn(DocumentCollaborationService, 'updateWorkflowStatus').mockImplementation(async (docId, versionNum, status, userId) => {
+      const validStatuses = ['draft', 'review', 'published', 'archived'];
+      if (!validStatuses.includes(status)) {
+        throw new Error('Invalid status transition');
+      }
+      return {
+        versionNumber: versionNum,
+        status: status,
+        publishedAt: status === 'published' ? new Date() : null,
+        publishedBy: status === 'published' ? userId : null,
+        _id: generateObjectId(),
+      };
+    });
 
     jest.spyOn(DocumentCollaborationService, 'shareVersion').mockResolvedValue({
       versionNumber: 1,
@@ -151,9 +146,7 @@ describe('Phase 3: Advanced Document Management', () => {
       sessionId: generateObjectId(),
       endTime: new Date(),
       duration: 3600,
-      editSessions: [
-        { sessionId: generateObjectId(), userId: mockUserId, status: 'ended', endTime: new Date() },
-      ],
+      editSessions: [{ sessionId: generateObjectId(), userId: mockUserId, status: 'ended', endTime: new Date() }],
     });
 
     jest.spyOn(DocumentCollaborationService, 'getCollaborators').mockResolvedValue({
@@ -166,43 +159,34 @@ describe('Phase 3: Advanced Document Management', () => {
       kept: 10,
     });
 
-    jest
-      .spyOn(DocumentCollaborationService, 'getVersion')
-      .mockImplementation(async (docId, versionNum) => {
-        if (versionNum === 999) {
-          throw new Error('Version not found');
-        }
-        return {
-          versionNumber: versionNum,
-          documentId: docId,
-          status: 'draft',
-        };
-      });
+    jest.spyOn(DocumentCollaborationService, 'getVersion').mockImplementation(async (docId, versionNum) => {
+      if (versionNum === 999) {
+        throw new Error('Version not found');
+      }
+      return {
+        versionNumber: versionNum,
+        documentId: docId,
+        status: 'draft',
+      };
+    });
 
-    jest
-      .spyOn(DocumentCollaborationService, 'restoreVersion')
-      .mockImplementation(async (docId, versionNum, userId, reason) => {
-        // Get the content from the original version that was created
-        const originalVersion = createdVersions.get(versionNum);
-        return {
-          versionNumber: versionNum + 1,
-          documentId: docId,
-          content: originalVersion?.content || 'Restored content',
-          status: 'draft',
-          _id: generateObjectId(),
-        };
-      });
+    jest.spyOn(DocumentCollaborationService, 'restoreVersion').mockImplementation(async (docId, versionNum, userId, reason) => {
+      // Get the content from the original version that was created
+      const originalVersion = createdVersions.get(versionNum);
+      return {
+        versionNumber: versionNum + 1,
+        documentId: docId,
+        content: originalVersion?.content || 'Restored content',
+        status: 'draft',
+        _id: generateObjectId(),
+      };
+    });
   });
 
   describe('Document Versioning', () => {
     test('should create a new version with change tracking', async () => {
       const content = 'This is version 1';
-      const result = await DocumentCollaborationService.createVersion(
-        mockDocumentId,
-        mockUserId,
-        { content },
-        { title: 'Test Document' }
-      );
+      const result = await DocumentCollaborationService.createVersion(mockDocumentId, mockUserId, { content }, { title: 'Test Document' });
 
       expect(result).toBeDefined();
       expect(result.versionNumber).toBe(1);
@@ -216,7 +200,7 @@ describe('Phase 3: Advanced Document Management', () => {
         mockDocumentId,
         mockUserId,
         { content: 'Version 1' },
-        { title: 'Test Doc' }
+        { title: 'Test Doc' },
       );
 
       expect(v1.versionNumber).toBe(1);
@@ -226,7 +210,7 @@ describe('Phase 3: Advanced Document Management', () => {
         mockDocumentId,
         mockUserId,
         { content: 'Version 2' },
-        { title: 'Test Doc' }
+        { title: 'Test Doc' },
       );
 
       expect(v2.versionNumber).toBe(2);
@@ -245,7 +229,7 @@ describe('Phase 3: Advanced Document Management', () => {
         mockDocumentId,
         mockUserId,
         { content: newContent },
-        { changeDescription: 'Updated introduction and added conclusion' }
+        { changeDescription: 'Updated introduction and added conclusion' },
       );
 
       expect(v2.changes).toBeDefined();
@@ -297,7 +281,7 @@ describe('Phase 3: Advanced Document Management', () => {
         mockDocumentId,
         v1.versionNumber,
         mockUserId,
-        'User requested restore'
+        'User requested restore',
       );
 
       expect(restored).toBeDefined();
@@ -317,11 +301,7 @@ describe('Phase 3: Advanced Document Management', () => {
         content: 'Line 1 Modified\nLine 2\nLine 3\nLine 4',
       });
 
-      const comparison = await DocumentCollaborationService.compareVersions(
-        mockDocumentId,
-        v1.versionNumber,
-        v2.versionNumber
-      );
+      const comparison = await DocumentCollaborationService.compareVersions(mockDocumentId, v1.versionNumber, v2.versionNumber);
 
       expect(comparison).toBeDefined();
       expect(comparison.differences).toBeDefined();
@@ -338,12 +318,7 @@ describe('Phase 3: Advanced Document Management', () => {
 
       expect(version.status).toBe('draft');
 
-      const updated = await DocumentCollaborationService.updateWorkflowStatus(
-        mockDocumentId,
-        version.versionNumber,
-        'review',
-        mockUserId
-      );
+      const updated = await DocumentCollaborationService.updateWorkflowStatus(mockDocumentId, version.versionNumber, 'review', mockUserId);
 
       expect(updated.status).toBe('review');
     });
@@ -357,7 +332,7 @@ describe('Phase 3: Advanced Document Management', () => {
         mockDocumentId,
         version.versionNumber,
         'published',
-        mockUserId
+        mockUserId,
       );
 
       expect(published.status).toBe('published');
@@ -377,7 +352,7 @@ describe('Phase 3: Advanced Document Management', () => {
         version.versionNumber,
         mockShareUserId,
         'edit',
-        mockUserId
+        mockUserId,
       );
 
       expect(shared).toBeDefined();
@@ -398,7 +373,7 @@ describe('Phase 3: Advanced Document Management', () => {
         version.versionNumber,
         mockUserId,
         'This needs review',
-        5
+        5,
       );
 
       expect(commented.comments).toBeDefined();
@@ -410,21 +385,13 @@ describe('Phase 3: Advanced Document Management', () => {
         content: 'Editable content',
       });
 
-      const started = await DocumentCollaborationService.startEditSession(
-        mockDocumentId,
-        version.versionNumber,
-        mockUserId
-      );
+      const started = await DocumentCollaborationService.startEditSession(mockDocumentId, version.versionNumber, mockUserId);
 
       expect(started.editSessions).toBeDefined();
       const activeSession = started.editSessions.find(s => s.status === 'active');
       expect(activeSession).toBeDefined();
 
-      const ended = await DocumentCollaborationService.endEditSession(
-        mockDocumentId,
-        version.versionNumber,
-        mockUserId
-      );
+      const ended = await DocumentCollaborationService.endEditSession(mockDocumentId, version.versionNumber, mockUserId);
 
       const endedSession = ended.editSessions.find(s => s.userId.toString() === mockUserId);
       expect(endedSession.status).toBe('ended');
@@ -436,16 +403,9 @@ describe('Phase 3: Advanced Document Management', () => {
         content: 'Collaborative content',
       });
 
-      await DocumentCollaborationService.startEditSession(
-        mockDocumentId,
-        version.versionNumber,
-        mockUserId
-      );
+      await DocumentCollaborationService.startEditSession(mockDocumentId, version.versionNumber, mockUserId);
 
-      const collaborators = await DocumentCollaborationService.getCollaborators(
-        mockDocumentId,
-        version.versionNumber
-      );
+      const collaborators = await DocumentCollaborationService.getCollaborators(mockDocumentId, version.versionNumber);
 
       expect(collaborators).toBeDefined();
       expect(typeof collaborators.total).toBe('number');
@@ -535,12 +495,7 @@ describe('Phase 3: Advanced Document Management', () => {
       });
 
       try {
-        await DocumentCollaborationService.updateWorkflowStatus(
-          mockDocumentId,
-          version.versionNumber,
-          'invalid-status',
-          mockUserId
-        );
+        await DocumentCollaborationService.updateWorkflowStatus(mockDocumentId, version.versionNumber, 'invalid-status', mockUserId);
         fail('Should have thrown an error');
       } catch (error) {
         expect(error).toBeDefined();

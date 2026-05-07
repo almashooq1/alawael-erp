@@ -33,7 +33,7 @@ describe('BarcodeService', () => {
           type: 'QR',
           data: data,
           status: 'success',
-        })
+        }),
       );
     });
 
@@ -50,7 +50,7 @@ describe('BarcodeService', () => {
         expect(BarcodeLog.create).toHaveBeenCalledWith(
           expect.objectContaining({
             errorCorrection: level,
-          })
+          }),
         );
       }
     });
@@ -68,7 +68,7 @@ describe('BarcodeService', () => {
           data: data,
           format: 'CODE128',
           status: 'success',
-        })
+        }),
       );
     });
 
@@ -89,9 +89,7 @@ describe('BarcodeService', () => {
     });
 
     it('should reject invalid format', async () => {
-      await expect(BarcodeService.generateBarcode('data', 'INVALID')).rejects.toThrow(
-        'Invalid format'
-      );
+      await expect(BarcodeService.generateBarcode('data', 'INVALID')).rejects.toThrow('Invalid format');
     });
 
     it('should reject empty data', async () => {
@@ -143,9 +141,7 @@ describe('BarcodeService', () => {
     });
 
     it('should reject empty items array', async () => {
-      await expect(BarcodeService.generateBatchCodes([])).rejects.toThrow(
-        'Items must be a non-empty array'
-      );
+      await expect(BarcodeService.generateBatchCodes([])).rejects.toThrow('Items must be a non-empty array');
     });
 
     it('should limit batch size to 1000', async () => {
@@ -154,9 +150,7 @@ describe('BarcodeService', () => {
         type: 'QR',
       }));
 
-      await expect(BarcodeService.generateBatchCodes(items)).rejects.toThrow(
-        'Maximum 1000 items allowed'
-      );
+      await expect(BarcodeService.generateBatchCodes(items)).rejects.toThrow('Maximum 1000 items allowed');
     });
 
     it('should handle partial failures in batch', async () => {
@@ -195,9 +189,7 @@ describe('BarcodeService', () => {
 
 describe('BarcodeService Integration', () => {
   it('should handle concurrent requests', async () => {
-    const promises = Array.from({ length: 10 }, (_, i) =>
-      BarcodeService.generateQRCode(`data-${i}`)
-    );
+    const promises = Array.from({ length: 10 }, (_, i) => BarcodeService.generateQRCode(`data-${i}`));
 
     const results = await Promise.all(promises);
 

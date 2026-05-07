@@ -18,7 +18,7 @@ const surveyResponseSchema = new mongoose.Schema(
     },
     surveyId: {
       type: String,
-      required: true
+      required: true,
     },
     customerId: {
       type: String,
@@ -55,7 +55,7 @@ const surveyResponseSchema = new mongoose.Schema(
       default: Date.now,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 module.exports = mongoose.model('SurveyResponse', surveyResponseSchema);

@@ -26,23 +26,27 @@ module resolution failures.
 Converted the following files from CommonJS to ES modules:
 
 1. **routes/barcode-pro.js**
+
    - Changed: `const express = require('express')` →
      `import express from 'express'`
    - Changed: `module.exports = router` → `export default router`
    - Fixed: All require() statements to import statements
 
 2. **services/BarcodeService.js**
+
    - Changed: All `const X = require('...')` → `import X from '...'`
    - Changed: `module.exports = new BarcodeService()` →
      `export default new BarcodeService()`
 
 3. **middleware/barcodeAuth.js**
+
    - Changed: `const jwt = require('jsonwebtoken')` →
      `import jwt from 'jsonwebtoken'`
    - Changed: `module.exports = { ... }` → `export const barcodeAuth = ...`
    - Updated: All exports to named exports
 
 4. **models/BarcodeLog.js**
+
    - Changed: `const mongoose = require('mongoose')` →
      `import mongoose from 'mongoose'`
    - Changed: `module.exports = mongoose.model(...)` →
@@ -281,16 +285,19 @@ npm run start:barcode
 ## 🔮 Future Improvements
 
 1. **Environment Variables:**
+
    - Add JWT_SECRET to .env for production
    - Configure MongoDB URI in .env
    - Set PORT in .env
 
 2. **Error Handling:**
+
    - Add try-catch for image generation failures
    - Implement retry logic for batch operations
    - Better error messages for invalid inputs
 
 3. **Performance:**
+
    - Cache frequently generated codes
    - Implement image optimization
    - Add compression for large batch responses

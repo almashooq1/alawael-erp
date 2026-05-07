@@ -120,16 +120,19 @@ http://localhost:3001/health
 ### خطوات الإعداد:
 
 1. **إنشاء حساب على MongoDB Atlas:**
+
    - اذهب إلى: https://www.mongodb.com/cloud/atlas
    - اضغط "Sign Up"
    - أنشئ حسابك
 
 2. **إنشاء Cluster:**
+
    - في لوحة التحكم، اضغط "Create Cluster"
    - اختر الخطة المجانية
    - اختر منطقة قريبة منك
 
 3. **الحصول على Connection String:**
+
    - اذهب إلى "Database" > "Connect"
    - اختر "Connect your application"
    - انسخ Connection String

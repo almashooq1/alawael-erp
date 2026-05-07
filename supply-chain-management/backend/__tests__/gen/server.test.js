@@ -17,28 +17,28 @@ describe('../../server.js', () => {
     src = fs.readFileSync(filePath, 'utf8');
   });
 
-    test('source file is readable', () => {
-      expect(src.length).toBeGreaterThan(0);
-    });
+  test('source file is readable', () => {
+    expect(src.length).toBeGreaterThan(0);
+  });
 
-    test('has no obvious syntax issues', () => {
-      // Unmatched template literals or unterminated strings
-      const backtickCount = (src.match(/`/g) || []).length;
-      expect(backtickCount % 2).toBe(0);
-    });
+  test('has no obvious syntax issues', () => {
+    // Unmatched template literals or unterminated strings
+    const backtickCount = (src.match(/`/g) || []).length;
+    expect(backtickCount % 2).toBe(0);
+  });
 
-    test('file has reasonable length (860 lines)', () => {
-      expect(860).toBeGreaterThan(0);
-      expect(860).toBeLessThan(10000);
-    });
+  test('file has reasonable length (860 lines)', () => {
+    expect(860).toBeGreaterThan(0);
+    expect(860).toBeLessThan(10000);
+  });
 
-    test('no hardcoded secrets', () => {
-      const secrets = /(?:password|secret|api_key|apikey|token)\s*[:=]\s*['"][^'"]{8,}['"]/i;
-      const hasSecrets = secrets.test(src);
-      // Allow if it's in example/config context
-      if (hasSecrets) {
-        const isExample = /example|sample|default|placeholder|process\.env/i.test(src);
-        expect(isExample).toBe(true);
-      }
-    });
+  test('no hardcoded secrets', () => {
+    const secrets = /(?:password|secret|api_key|apikey|token)\s*[:=]\s*['"][^'"]{8,}['"]/i;
+    const hasSecrets = secrets.test(src);
+    // Allow if it's in example/config context
+    if (hasSecrets) {
+      const isExample = /example|sample|default|placeholder|process\.env/i.test(src);
+      expect(isExample).toBe(true);
+    }
+  });
 });

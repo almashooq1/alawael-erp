@@ -42,11 +42,7 @@ export const validateRegister = [
  * Product validation rules
  */
 export const validateProduct = [
-  body('name')
-    .notEmpty()
-    .trim()
-    .isLength({ min: 3 })
-    .withMessage('Product name must be at least 3 characters'),
+  body('name').notEmpty().trim().isLength({ min: 3 }).withMessage('Product name must be at least 3 characters'),
   body('sku').notEmpty().trim().isAlphanumeric().withMessage('SKU must be alphanumeric'),
   body('description').optional().trim().isLength({ max: 1000 }),
   body('price').isFloat({ min: 0 }).withMessage('Price must be a positive number'),

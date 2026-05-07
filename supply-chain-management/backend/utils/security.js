@@ -9,7 +9,7 @@ import crypto from 'crypto';
 
 if (!process.env.JWT_SECRET) {
   process.stderr.write('CRITICAL: JWT_SECRET environment variable is not set!\n');
-}}
+}
 const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
 

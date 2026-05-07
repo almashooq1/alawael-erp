@@ -63,7 +63,7 @@ const complianceControlSchema = new mongoose.Schema(
     ],
     createdAt: {
       type: Date,
-      default: Date.now
+      default: Date.now,
     },
     updatedAt: {
       type: Date,
@@ -75,7 +75,7 @@ const complianceControlSchema = new mongoose.Schema(
       customFields: mongoose.Schema.Types.Mixed,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 complianceControlSchema.index({ framework: 1, status: 1 });

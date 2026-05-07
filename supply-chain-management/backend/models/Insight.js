@@ -19,15 +19,7 @@ const insightSchema = new mongoose.Schema(
     },
     category: {
       type: String,
-      enum: [
-        'sales',
-        'financial',
-        'inventory',
-        'customer',
-        'supply_chain',
-        'performance',
-        'custom',
-      ],
+      enum: ['sales', 'financial', 'inventory', 'customer', 'supply_chain', 'performance', 'custom'],
     },
 
     // Core Insight Data
@@ -42,14 +34,7 @@ const insightSchema = new mongoose.Schema(
     // Data Context
     source: {
       type: String,
-      enum: [
-        'analytics',
-        'prediction',
-        'anomaly-detection',
-        'correlation-analysis',
-        'nlp',
-        'custom',
-      ],
+      enum: ['analytics', 'prediction', 'anomaly-detection', 'correlation-analysis', 'nlp', 'custom'],
     },
     dataSource: String, // Reference to data that generated insight
     metrics: [
@@ -259,7 +244,7 @@ const insightSchema = new mongoose.Schema(
   {
     timestamps: true,
     collection: 'insights',
-  }
+  },
 );
 
 // Indexes
@@ -399,11 +384,7 @@ insightSchema.statics.getByTag = function (tag) {
 
 insightSchema.statics.searchInsights = function (keyword) {
   return this.find({
-    $or: [
-      { title: new RegExp(keyword, 'i') },
-      { description: new RegExp(keyword, 'i') },
-      { tags: keyword },
-    ],
+    $or: [{ title: new RegExp(keyword, 'i') }, { description: new RegExp(keyword, 'i') }, { tags: keyword }],
     status: 'published',
   });
 };
@@ -421,10 +402,7 @@ insightSchema.statics.getImplementationStatus = function () {
 
 // Virtual Properties
 insightSchema.virtual('requiresAttention').get(function () {
-  return (
-    (this.impact.magnitude === 'critical' || this.impact.magnitude === 'high') &&
-    this.implementation.status === 'not-started'
-  );
+  return (this.impact.magnitude === 'critical' || this.impact.magnitude === 'high') && this.implementation.status === 'not-started';
 });
 
 insightSchema.virtual('isApproved').get(function () {

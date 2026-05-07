@@ -15,15 +15,7 @@ const analyticsSchema = new mongoose.Schema(
     },
     analyticsType: {
       type: String,
-      enum: [
-        'sales',
-        'financial',
-        'inventory',
-        'customer',
-        'supply_chain',
-        'performance',
-        'custom',
-      ],
+      enum: ['sales', 'financial', 'inventory', 'customer', 'supply_chain', 'performance', 'custom'],
       default: 'custom',
     },
     period: {
@@ -228,7 +220,7 @@ const analyticsSchema = new mongoose.Schema(
   {
     timestamps: true,
     collection: 'analytics',
-  }
+  },
 );
 
 // Indexes for performance
@@ -272,9 +264,7 @@ analyticsSchema.methods.getKeyFindingsForKPI = function (kpiCode) {
   return {
     kpi: this.kpis.find(k => k.kpiCode === kpiCode),
     relatedAnomalies: this.anomalies.filter(a => a.metric === kpiCode),
-    relatedInsights: this.insights.filter(
-      i => i.actionableItems && i.actionableItems.some(item => item.includes(kpiCode))
-    ),
+    relatedInsights: this.insights.filter(i => i.actionableItems && i.actionableItems.some(item => item.includes(kpiCode))),
   };
 };
 
@@ -360,11 +350,7 @@ analyticsSchema.statics.getDataQualityReport = function () {
 
 analyticsSchema.statics.searchByInsight = function (keyword) {
   return this.find({
-    $or: [
-      { 'insights.insight': new RegExp(keyword, 'i') },
-      { tags: new RegExp(keyword, 'i') },
-      { description: new RegExp(keyword, 'i') },
-    ],
+    $or: [{ 'insights.insight': new RegExp(keyword, 'i') }, { tags: new RegExp(keyword, 'i') }, { description: new RegExp(keyword, 'i') }],
     status: 'published',
   });
 };

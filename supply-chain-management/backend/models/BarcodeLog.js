@@ -5,7 +5,7 @@ const barcodeLogSchema = new mongoose.Schema(
     type: {
       type: String,
       enum: ['QR', 'BARCODE', 'BATCH'],
-      required: true
+      required: true,
     },
     data: {
       type: String,
@@ -30,7 +30,7 @@ const barcodeLogSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: ['success', 'error', 'pending', 'completed'],
-      default: 'success'
+      default: 'success',
     },
     generatedBy: {
       type: String,
@@ -38,7 +38,7 @@ const barcodeLogSchema = new mongoose.Schema(
     },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
+      ref: 'User',
     },
     ipAddress: String,
     userAgent: String,
@@ -47,7 +47,7 @@ const barcodeLogSchema = new mongoose.Schema(
   {
     timestamps: true,
     collection: 'barcode_logs',
-  }
+  },
 );
 
 // TTL Index - Auto delete logs older than 30 days

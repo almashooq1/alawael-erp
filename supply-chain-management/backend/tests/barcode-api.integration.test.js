@@ -72,23 +72,17 @@ const createMockApp = () => {
   });
 
   // QR code endpoint with role check
-  mockApp.post(
-    '/api/barcode/qr-code',
-    authMiddleware,
-    requireRole(['admin', 'user']),
-    (req, res) => {
-      const { data, errorCorrectionLevel } = req.body;
-      if (!data)
-        return res.status(400).json({ code: 'MISSING_DATA', message: 'Data field is required' });
-      res.status(200).json({
-        success: true,
-        type: 'QR',
-        data,
-        errorCorrection: errorCorrectionLevel || 'M',
-        code: 'data:image/png;base64,mockQRCode',
-      });
-    }
-  );
+  mockApp.post('/api/barcode/qr-code', authMiddleware, requireRole(['admin', 'user']), (req, res) => {
+    const { data, errorCorrectionLevel } = req.body;
+    if (!data) return res.status(400).json({ code: 'MISSING_DATA', message: 'Data field is required' });
+    res.status(200).json({
+      success: true,
+      type: 'QR',
+      data,
+      errorCorrection: errorCorrectionLevel || 'M',
+      code: 'data:image/png;base64,mockQRCode',
+    });
+  });
 
   mockApp.post('/api/barcode/barcode', authMiddleware, (req, res) => {
     const { data, format } = req.body;
@@ -188,13 +182,10 @@ describe('Barcode API Endpoints', () => {
     });
 
     it('should generate QR code with valid auth', async () => {
-      const response = await request(app)
-        .post('/api/barcode/qr-code')
-        .set('Authorization', `Bearer ${token}`)
-        .send({
-          data: 'https://example.com/product/123',
-          errorCorrectionLevel: 'H',
-        });
+      const response = await request(app).post('/api/barcode/qr-code').set('Authorization', `Bearer ${token}`).send({
+        data: 'https://example.com/product/123',
+        errorCorrectionLevel: 'H',
+      });
 
       expect(response.status).toBe(200);
       expect(response.body).toMatchObject({
@@ -207,20 +198,14 @@ describe('Barcode API Endpoints', () => {
     });
 
     it('should validate required fields', async () => {
-      const response = await request(app)
-        .post('/api/barcode/qr-code')
-        .set('Authorization', `Bearer ${token}`)
-        .send({});
+      const response = await request(app).post('/api/barcode/qr-code').set('Authorization', `Bearer ${token}`).send({});
 
       expect(response.status).toBe(400);
       expect(response.body.code).toBe('MISSING_DATA');
     });
 
     it('should handle default error correction level', async () => {
-      const response = await request(app)
-        .post('/api/barcode/qr-code')
-        .set('Authorization', `Bearer ${token}`)
-        .send({ data: 'test-data' });
+      const response = await request(app).post('/api/barcode/qr-code').set('Authorization', `Bearer ${token}`).send({ data: 'test-data' });
 
       expect(response.status).toBe(200);
       expect(response.body.errorCorrection).toBe('M');
@@ -229,13 +214,10 @@ describe('Barcode API Endpoints', () => {
 
   describe('POST /api/barcode/barcode', () => {
     it('should generate barcode with valid auth', async () => {
-      const response = await request(app)
-        .post('/api/barcode/barcode')
-        .set('Authorization', `Bearer ${token}`)
-        .send({
-          data: 'PROD-2025-001',
-          format: 'CODE128',
-        });
+      const response = await request(app).post('/api/barcode/barcode').set('Authorization', `Bearer ${token}`).send({
+        data: 'PROD-2025-001',
+        format: 'CODE128',
+      });
 
       expect(response.status).toBe(200);
       expect(response.body).toMatchObject({
@@ -250,13 +232,10 @@ describe('Barcode API Endpoints', () => {
       const formats = ['CODE128', 'CODE39', 'EAN13'];
 
       for (const format of formats) {
-        const response = await request(app)
-          .post('/api/barcode/barcode')
-          .set('Authorization', `Bearer ${token}`)
-          .send({
-            data: 'TEST-DATA',
-            format,
-          });
+        const response = await request(app).post('/api/barcode/barcode').set('Authorization', `Bearer ${token}`).send({
+          data: 'TEST-DATA',
+          format,
+        });
 
         expect(response.status).toBe(200);
         expect(response.body.format).toBe(format);
@@ -264,13 +243,10 @@ describe('Barcode API Endpoints', () => {
     });
 
     it('should reject invalid format', async () => {
-      const response = await request(app)
-        .post('/api/barcode/barcode')
-        .set('Authorization', `Bearer ${token}`)
-        .send({
-          data: 'TEST-DATA',
-          format: 'INVALID_FORMAT',
-        });
+      const response = await request(app).post('/api/barcode/barcode').set('Authorization', `Bearer ${token}`).send({
+        data: 'TEST-DATA',
+        format: 'INVALID_FORMAT',
+      });
 
       expect(response.status).toBe(500);
     });
@@ -301,10 +277,7 @@ describe('Barcode API Endpoints', () => {
     });
 
     it('should require non-empty items array', async () => {
-      const response = await request(app)
-        .post('/api/barcode/batch')
-        .set('Authorization', `Bearer ${token}`)
-        .send({ items: [] });
+      const response = await request(app).post('/api/barcode/batch').set('Authorization', `Bearer ${token}`).send({ items: [] });
 
       expect(response.status).toBe(400);
       expect(response.body.code).toBe('INVALID_ITEMS');
@@ -329,9 +302,7 @@ describe('Barcode API Endpoints', () => {
 
   describe('GET /api/barcode/statistics', () => {
     it('should return statistics with auth', async () => {
-      const response = await request(app)
-        .get('/api/barcode/statistics')
-        .set('Authorization', `Bearer ${token}`);
+      const response = await request(app).get('/api/barcode/statistics').set('Authorization', `Bearer ${token}`);
 
       expect(response.status).toBe(200);
       expect(response.body).toMatchObject({
@@ -381,10 +352,7 @@ describe('Barcode API Endpoints', () => {
     });
 
     it('should return rate limit headers', async () => {
-      const response = await request(app)
-        .post('/api/barcode/qr-code')
-        .set('Authorization', `Bearer ${token}`)
-        .send({ data: 'test' });
+      const response = await request(app).post('/api/barcode/qr-code').set('Authorization', `Bearer ${token}`).send({ data: 'test' });
 
       expect(response.headers['x-ratelimit-limit']).toBe('100');
       expect(response.headers['x-ratelimit-remaining']).toBeDefined();
@@ -394,10 +362,7 @@ describe('Barcode API Endpoints', () => {
 
   describe('Authorization & Roles', () => {
     it('should reject invalid token', async () => {
-      const response = await request(app)
-        .post('/api/barcode/qr-code')
-        .set('Authorization', 'Bearer invalid-token')
-        .send({ data: 'test' });
+      const response = await request(app).post('/api/barcode/qr-code').set('Authorization', 'Bearer invalid-token').send({ data: 'test' });
 
       expect(response.status).toBe(401);
       expect(response.body.code).toBe('INVALID_TOKEN');
@@ -444,10 +409,7 @@ describe('Barcode API Endpoints', () => {
     });
 
     it('should include error messages', async () => {
-      const response = await request(app)
-        .post('/api/barcode/qr-code')
-        .set('Authorization', `Bearer ${token}`)
-        .send({});
+      const response = await request(app).post('/api/barcode/qr-code').set('Authorization', `Bearer ${token}`).send({});
 
       expect(response.body.message).toBeDefined();
       expect(response.body.code).toBeDefined();

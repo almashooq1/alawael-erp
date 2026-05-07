@@ -162,7 +162,7 @@ async function seedTestDatabase() {
     createMockUser({
       username: name,
       _id: generateObjectId(),
-    })
+    }),
   );
 
   const documents = ['doc1', 'doc2', 'doc3'].map(name =>
@@ -170,7 +170,7 @@ async function seedTestDatabase() {
       title: name,
       _id: generateObjectId(),
       owner: users[0]._id,
-    })
+    }),
   );
 
   return { users, documents };

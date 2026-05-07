@@ -88,12 +88,8 @@ jest.mock('../services/mlService', () => ({
     insights: [{ type: 'trend', description: 'Sales trending up' }],
     actions: [{ action: 'increase inventory' }],
   }),
-  getHighImpactInsights: jest
-    .fn()
-    .mockResolvedValue([{ impact: 'high', description: 'Critical trend detected' }]),
-  getActiveModels: jest
-    .fn()
-    .mockResolvedValue([{ modelId: 'model-1', name: 'Model 1', status: 'active' }]),
+  getHighImpactInsights: jest.fn().mockResolvedValue([{ impact: 'high', description: 'Critical trend detected' }]),
+  getActiveModels: jest.fn().mockResolvedValue([{ modelId: 'model-1', name: 'Model 1', status: 'active' }]),
   checkModelHealth: jest.fn().mockResolvedValue({
     status: 'healthy',
     alerts: [],

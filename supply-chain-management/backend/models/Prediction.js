@@ -18,14 +18,7 @@ const predictionSchema = new mongoose.Schema(
     },
     modelType: {
       type: String,
-      enum: [
-        'regression',
-        'classification',
-        'clustering',
-        'time-series',
-        'anomaly-detection',
-        'recommendation',
-      ],
+      enum: ['regression', 'classification', 'clustering', 'time-series', 'anomaly-detection', 'recommendation'],
       required: true,
     },
     modelVersion: {
@@ -170,7 +163,7 @@ const predictionSchema = new mongoose.Schema(
   {
     timestamps: true,
     collection: 'predictions',
-  }
+  },
 );
 
 // Indexes
@@ -226,8 +219,7 @@ predictionSchema.methods.updateMonitoring = async function (metrics) {
   // Check for model drift
   if (this.monitoring.accuracy < this.performance.accuracy * 0.9) {
     this.monitoring.modelDrift.detected = true;
-    this.monitoring.modelDrift.driftScore =
-      1 - this.monitoring.accuracy / this.performance.accuracy;
+    this.monitoring.modelDrift.driftScore = 1 - this.monitoring.accuracy / this.performance.accuracy;
     this.health.status = 'degraded';
   }
 
@@ -315,8 +307,7 @@ predictionSchema.virtual('isHighPerformer').get(function () {
 
 predictionSchema.virtual('requiresAttention').get(function () {
   return (
-    this.health.status === 'needs-retraining' ||
-    (this.monitoring?.modelDrift?.detected && this.monitoring.modelDrift.driftScore > 0.1)
+    this.health.status === 'needs-retraining' || (this.monitoring?.modelDrift?.detected && this.monitoring.modelDrift.driftScore > 0.1)
   );
 });
 

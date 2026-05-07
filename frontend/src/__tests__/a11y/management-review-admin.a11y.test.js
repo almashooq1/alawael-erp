@@ -10,7 +10,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { expectNoA11yViolations } from '../../__test-utils__/a11y';
 
-import ManagementReviewAdmin from '../../pages/quality/ManagementReviewAdmin';
+import ManagementReviewAdmin from '../../pages/Quality/ManagementReviewAdmin';
 
 // Match the working pattern from insurance-tariffs-admin.a11y.test.js verbatim.
 jest.mock('../../services/api.client', () => ({

@@ -169,9 +169,9 @@ const AdminNphiesClaims = lazyWithRetry(() => import('./pages/Admin/AdminNphiesC
 const AdminNotifications = lazyWithRetry(() => import('./pages/Admin/AdminNotifications'));
 const RedFlagAdmin = lazyWithRetry(() => import('./pages/Admin/RedFlagAdmin'));
 const RehabDisciplinesTaxonomy = lazyWithRetry(
-  () => import('./pages/Rehab/RehabDisciplinesTaxonomy')
+  () => import('./pages/rehab/RehabDisciplinesTaxonomy')
 );
-const RehabGoalSuggestions = lazyWithRetry(() => import('./pages/Rehab/RehabGoalSuggestions'));
+const RehabGoalSuggestions = lazyWithRetry(() => import('./pages/rehab/RehabGoalSuggestions'));
 const BeneficiaryConsentAdmin = lazyWithRetry(
   () => import('./pages/Beneficiaries/BeneficiaryConsentAdmin')
 );

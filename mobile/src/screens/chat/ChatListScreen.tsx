@@ -24,13 +24,7 @@ import { chat, type Conversation, type ChatContact } from '../../services/module
 
 function displayName(p: any): string {
   if (!p) return '—';
-  return (
-    p.firstName_ar ||
-    p.name ||
-    `${p.firstName || ''} ${p.lastName || ''}`.trim() ||
-    p.email ||
-    '—'
-  );
+  return p.firstName_ar || p.name || `${p.firstName || ''} ${p.lastName || ''}`.trim() || p.email || '—';
 }
 
 function initial(s: string) {
@@ -50,11 +44,7 @@ function timeLabel(d?: string): string {
   return date.toLocaleDateString('ar-SA', { month: 'short', day: 'numeric' });
 }
 
-export default function ChatListScreen({
-  onOpenConversation,
-}: {
-  onOpenConversation?: (conversationId: string) => void;
-}) {
+export default function ChatListScreen({ onOpenConversation }: { onOpenConversation?: (conversationId: string) => void }) {
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState('');
@@ -88,10 +78,7 @@ export default function ChatListScreen({
     setRefreshing(false);
   }, [load]);
 
-  const totalUnread = useMemo(
-    () => conversations.reduce((sum, c) => sum + (c.unread || 0), 0),
-    [conversations]
-  );
+  const totalUnread = useMemo(() => conversations.reduce((sum, c) => sum + (c.unread || 0), 0), [conversations]);
 
   const openNew = async () => {
     setNewModal({ open: true, loading: true, contacts: [], filter: '' });
@@ -119,11 +106,7 @@ export default function ChatListScreen({
     const filter = newModal.filter.trim().toLowerCase();
     const filtered = newModal.contacts.filter(c => {
       if (!filter) return true;
-      return (
-        c.name?.toLowerCase().includes(filter) ||
-        c.email?.toLowerCase().includes(filter) ||
-        c.role?.toLowerCase().includes(filter)
-      );
+      return c.name?.toLowerCase().includes(filter) || c.email?.toLowerCase().includes(filter) || c.role?.toLowerCase().includes(filter);
     });
     const groups: Record<string, ChatContact[]> = {};
     for (const c of filtered) {
@@ -139,9 +122,7 @@ export default function ChatListScreen({
       <View style={styles.header}>
         <View>
           <Text style={styles.title}>الرسائل</Text>
-          <Text style={styles.subtitle}>
-            {totalUnread > 0 ? `${totalUnread} رسالة غير مقروءة` : 'كل الرسائل محدَّثة'}
-          </Text>
+          <Text style={styles.subtitle}>{totalUnread > 0 ? `${totalUnread} رسالة غير مقروءة` : 'كل الرسائل محدَّثة'}</Text>
         </View>
         <TouchableOpacity style={styles.newBtn} onPress={openNew}>
           <Text style={styles.newBtnText}>＋ جديد</Text>
@@ -153,9 +134,7 @@ export default function ChatListScreen({
           <ActivityIndicator size="large" color="#1976d2" />
         </View>
       ) : (
-        <ScrollView
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-        >
+        <ScrollView refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
           {error ? (
             <View style={styles.errorBox}>
               <Text style={styles.errorText}>{error}</Text>
@@ -166,19 +145,12 @@ export default function ChatListScreen({
             <View style={styles.emptyBox}>
               <Text style={styles.emptyIcon}>💬</Text>
               <Text style={styles.emptyTitle}>لا توجد محادثات</Text>
-              <Text style={styles.emptyText}>
-                اضغط "جديد" لبدء محادثة مع المعالج أو ولي أمر.
-              </Text>
+              <Text style={styles.emptyText}>اضغط "جديد" لبدء محادثة مع المعالج أو ولي أمر.</Text>
             </View>
           ) : null}
 
           {conversations.map(c => (
-            <TouchableOpacity
-              key={c._id}
-              style={styles.row}
-              onPress={() => onOpenConversation?.(c._id)}
-              activeOpacity={0.7}
-            >
+            <TouchableOpacity key={c._id} style={styles.row} onPress={() => onOpenConversation?.(c._id)} activeOpacity={0.7}>
               <View style={styles.avatarWrap}>
                 <View style={styles.avatar}>
                   <Text style={styles.avatarText}>{initial(displayName(c.other))}</Text>
@@ -194,10 +166,7 @@ export default function ChatListScreen({
                   <Text style={styles.name}>{displayName(c.other)}</Text>
                   <Text style={styles.time}>{timeLabel(c.lastActivityAt)}</Text>
                 </View>
-                <Text
-                  style={[styles.lastMsg, c.unread > 0 && styles.lastMsgUnread]}
-                  numberOfLines={1}
-                >
+                <Text style={[styles.lastMsg, c.unread > 0 && styles.lastMsgUnread]} numberOfLines={1}>
                   {c.lastMessage?.content || 'لا توجد رسائل بعد'}
                 </Text>
               </View>
@@ -222,19 +191,13 @@ export default function ChatListScreen({
             ) : (
               <ScrollView style={{ maxHeight: 400 }}>
                 {Object.keys(groupedContacts).length === 0 ? (
-                  <Text style={styles.modalEmpty}>
-                    لا توجد جهات اتصال متاحة. جرّب تسجيل دخول كمعالج/ولي أمر.
-                  </Text>
+                  <Text style={styles.modalEmpty}>لا توجد جهات اتصال متاحة. جرّب تسجيل دخول كمعالج/ولي أمر.</Text>
                 ) : null}
                 {Object.keys(groupedContacts).map(cat => (
                   <View key={cat}>
                     <Text style={styles.modalGroup}>{cat}</Text>
                     {groupedContacts[cat].map(c => (
-                      <TouchableOpacity
-                        key={c._id}
-                        style={styles.contactRow}
-                        onPress={() => startConversation(c)}
-                      >
+                      <TouchableOpacity key={c._id} style={styles.contactRow} onPress={() => startConversation(c)}>
                         <View style={styles.contactAvatar}>
                           <Text style={styles.contactAvatarText}>{initial(c.name)}</Text>
                         </View>
@@ -248,10 +211,7 @@ export default function ChatListScreen({
                 ))}
               </ScrollView>
             )}
-            <TouchableOpacity
-              style={styles.modalClose}
-              onPress={() => setNewModal(m => ({ ...m, open: false }))}
-            >
+            <TouchableOpacity style={styles.modalClose} onPress={() => setNewModal(m => ({ ...m, open: false }))}>
               <Text style={styles.modalCloseText}>إغلاق</Text>
             </TouchableOpacity>
           </View>

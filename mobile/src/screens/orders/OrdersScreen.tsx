@@ -3,26 +3,15 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import {
-  View,
-  FlatList,
-  StyleSheet,
-  ActivityIndicator,
-  TouchableOpacity,
-  TextInput,
-} from 'react-native';
+import { View, FlatList, StyleSheet, ActivityIndicator, TouchableOpacity, TextInput } from 'react-native';
 import { Text } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useAppDispatch, useAppSelector } from '../../store';
-import {
-  fetchOrders,
-  setStatusFilter,
-  clearFilters,
-} from '../../store/slices/ordersSlice';
+import { fetchOrders, setStatusFilter, clearFilters } from '../../store/slices/ordersSlice';
 
 export default function OrdersScreen({ navigation }: any) {
   const dispatch = useAppDispatch();
-  const { items: orders, isLoading, filters } = useAppSelector((state) => state.orders);
+  const { items: orders, isLoading, filters } = useAppSelector(state => state.orders);
   const [searchText, setSearchText] = useState('');
   const [showFilters, setShowFilters] = useState(false);
 
@@ -42,9 +31,7 @@ export default function OrdersScreen({ navigation }: any) {
     navigation.navigate('OrderDetail', { orderId });
   };
 
-  const filteredOrders = orders.filter((order: any) =>
-    order.orderNumber?.toLowerCase().includes(searchText.toLowerCase())
-  );
+  const filteredOrders = orders.filter((order: any) => order.orderNumber?.toLowerCase().includes(searchText.toLowerCase()));
 
   return (
     <View style={styles.container}>
@@ -52,12 +39,7 @@ export default function OrdersScreen({ navigation }: any) {
       <View style={styles.header}>
         <View style={styles.searchBar}>
           <MaterialCommunityIcons name="magnify" size={20} color="#999" />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search orders..."
-            value={searchText}
-            onChangeText={setSearchText}
-          />
+          <TextInput style={styles.searchInput} placeholder="Search orders..." value={searchText} onChangeText={setSearchText} />
         </View>
         <TouchableOpacity style={styles.filterButton} onPress={() => setShowFilters(!showFilters)}>
           <MaterialCommunityIcons name="filter" size={20} color="#1673e6" />
@@ -70,32 +52,19 @@ export default function OrdersScreen({ navigation }: any) {
           <View style={styles.filterGroup}>
             <Text style={styles.filterLabel}>Status</Text>
             <View style={styles.filterOptions}>
-              {['pending', 'processing', 'completed', 'cancelled'].map((status) => (
+              {['pending', 'processing', 'completed', 'cancelled'].map(status => (
                 <TouchableOpacity
                   key={status}
-                  style={[
-                    styles.filterOption,
-                    filters.status === status && styles.filterOptionActive,
-                  ]}
+                  style={[styles.filterOption, filters.status === status && styles.filterOptionActive]}
                   onPress={() => handleStatusFilter(status)}
                 >
-                  <Text
-                    style={[
-                      styles.filterOptionText,
-                      filters.status === status && styles.filterOptionActiveText,
-                    ]}
-                  >
-                    {status}
-                  </Text>
+                  <Text style={[styles.filterOptionText, filters.status === status && styles.filterOptionActiveText]}>{status}</Text>
                 </TouchableOpacity>
               ))}
             </View>
           </View>
           {filters.status && (
-            <TouchableOpacity
-              style={styles.clearFiltersButton}
-              onPress={() => dispatch(clearFilters())}
-            >
+            <TouchableOpacity style={styles.clearFiltersButton} onPress={() => dispatch(clearFilters())}>
               <Text style={styles.clearFiltersText}>Clear Filters</Text>
             </TouchableOpacity>
           )}
@@ -111,7 +80,7 @@ export default function OrdersScreen({ navigation }: any) {
         <FlatList
           data={filteredOrders}
           renderItem={({ item }) => <OrderItem order={item} onPress={() => handleOrderPress(item.id)} />}
-          keyExtractor={(item) => item.id}
+          keyExtractor={item => item.id}
           contentContainerStyle={styles.listContainer}
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={<EmptyState />}
@@ -132,10 +101,10 @@ function OrderItem({ order, onPress }: { order: any; onPress: () => void }) {
     order.status === 'completed'
       ? '#4CAF50'
       : order.status === 'pending'
-      ? '#FF9800'
-      : order.status === 'processing'
-      ? '#2196F3'
-      : '#9E9E9E';
+        ? '#FF9800'
+        : order.status === 'processing'
+          ? '#2196F3'
+          : '#9E9E9E';
 
   return (
     <TouchableOpacity style={styles.orderItem} onPress={onPress}>

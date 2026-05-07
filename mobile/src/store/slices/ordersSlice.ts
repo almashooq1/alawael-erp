@@ -43,69 +43,54 @@ const initialState: OrdersState = {
 // Async thunks
 export const fetchOrders = createAsyncThunk(
   'orders/fetchOrders',
-  async (
-    params: { page?: number; limit?: number; status?: string },
-    { rejectWithValue }
-  ) => {
+  async (params: { page?: number; limit?: number; status?: string }, { rejectWithValue }) => {
     try {
       const response: any = await ApiService.get('/orders', params);
       return { items: response.items, total: response.total };
     } catch (error: any) {
       return rejectWithValue(error.message || 'Failed to fetch orders');
     }
-  }
+  },
 );
 
-export const fetchOrderById = createAsyncThunk(
-  'orders/fetchOrderById',
-  async (orderId: string, { rejectWithValue }) => {
-    try {
-      const response = await ApiService.get(`/orders/${orderId}`);
-      return response;
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Failed to fetch order');
-    }
+export const fetchOrderById = createAsyncThunk('orders/fetchOrderById', async (orderId: string, { rejectWithValue }) => {
+  try {
+    const response = await ApiService.get(`/orders/${orderId}`);
+    return response;
+  } catch (error: any) {
+    return rejectWithValue(error.message || 'Failed to fetch order');
   }
-);
+});
 
-export const createOrder = createAsyncThunk(
-  'orders/createOrder',
-  async (orderData: any, { rejectWithValue }) => {
-    try {
-      const response = await ApiService.post('/orders', orderData);
-      return response;
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Failed to create order');
-    }
+export const createOrder = createAsyncThunk('orders/createOrder', async (orderData: any, { rejectWithValue }) => {
+  try {
+    const response = await ApiService.post('/orders', orderData);
+    return response;
+  } catch (error: any) {
+    return rejectWithValue(error.message || 'Failed to create order');
   }
-);
+});
 
 export const updateOrder = createAsyncThunk(
   'orders/updateOrder',
-  async (
-    { orderId, data }: { orderId: string; data: any },
-    { rejectWithValue }
-  ) => {
+  async ({ orderId, data }: { orderId: string; data: any }, { rejectWithValue }) => {
     try {
       const response = await ApiService.put(`/orders/${orderId}`, data);
       return response;
     } catch (error: any) {
       return rejectWithValue(error.message || 'Failed to update order');
     }
-  }
+  },
 );
 
-export const deleteOrder = createAsyncThunk(
-  'orders/deleteOrder',
-  async (orderId: string, { rejectWithValue }) => {
-    try {
-      await ApiService.delete(`/orders/${orderId}`);
-      return orderId;
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Failed to delete order');
-    }
+export const deleteOrder = createAsyncThunk('orders/deleteOrder', async (orderId: string, { rejectWithValue }) => {
+  try {
+    await ApiService.delete(`/orders/${orderId}`);
+    return orderId;
+  } catch (error: any) {
+    return rejectWithValue(error.message || 'Failed to delete order');
   }
-);
+});
 
 const ordersSlice = createSlice({
   name: 'orders',
@@ -117,17 +102,17 @@ const ordersSlice = createSlice({
     setDateRangeFilter: (state, action) => {
       state.filters.dateRange = action.payload;
     },
-    clearFilters: (state) => {
+    clearFilters: state => {
       state.filters = { status: null, dateRange: null };
     },
-    clearError: (state) => {
+    clearError: state => {
       state.error = null;
     },
   },
-  extraReducers: (builder) => {
+  extraReducers: builder => {
     // Fetch Orders
     builder
-      .addCase(fetchOrders.pending, (state) => {
+      .addCase(fetchOrders.pending, state => {
         state.isLoading = true;
         state.error = null;
       })
@@ -143,7 +128,7 @@ const ordersSlice = createSlice({
 
     // Fetch Order by ID
     builder
-      .addCase(fetchOrderById.pending, (state) => {
+      .addCase(fetchOrderById.pending, state => {
         state.isLoading = true;
         state.error = null;
       })
@@ -158,7 +143,7 @@ const ordersSlice = createSlice({
 
     // Create Order
     builder
-      .addCase(createOrder.pending, (state) => {
+      .addCase(createOrder.pending, state => {
         state.isLoading = true;
         state.error = null;
       })
@@ -174,13 +159,13 @@ const ordersSlice = createSlice({
 
     // Update Order
     builder
-      .addCase(updateOrder.pending, (state) => {
+      .addCase(updateOrder.pending, state => {
         state.isLoading = true;
         state.error = null;
       })
       .addCase(updateOrder.fulfilled, (state, action) => {
         state.isLoading = false;
-        const index = state.items.findIndex((o) => o.id === action.payload.id);
+        const index = state.items.findIndex(o => o.id === action.payload.id);
         if (index !== -1) {
           state.items[index] = action.payload;
         }
@@ -195,13 +180,13 @@ const ordersSlice = createSlice({
 
     // Delete Order
     builder
-      .addCase(deleteOrder.pending, (state) => {
+      .addCase(deleteOrder.pending, state => {
         state.isLoading = true;
         state.error = null;
       })
       .addCase(deleteOrder.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.items = state.items.filter((o) => o.id !== action.payload);
+        state.items = state.items.filter(o => o.id !== action.payload);
         state.total -= 1;
       })
       .addCase(deleteOrder.rejected, (state, action) => {

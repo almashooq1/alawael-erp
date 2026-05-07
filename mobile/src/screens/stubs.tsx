@@ -132,11 +132,7 @@ export function NotificationsScreen({ navigation }: any) {
           )}
         </View>
         <TouchableOpacity onPress={markAllRead} disabled={unreadCount === 0}>
-          <MaterialCommunityIcons
-            name="email-open-outline"
-            size={22}
-            color={unreadCount > 0 ? '#1673e6' : '#ccc'}
-          />
+          <MaterialCommunityIcons name="email-open-outline" size={22} color={unreadCount > 0 ? '#1673e6' : '#ccc'} />
         </TouchableOpacity>
       </View>
 
@@ -176,9 +172,7 @@ export function NotificationsScreen({ navigation }: any) {
                     {item.message}
                   </Text>
                 ) : null}
-                <Text style={styles.notifDate}>
-                  {item.createdAt ? new Date(item.createdAt).toLocaleString() : ''}
-                </Text>
+                <Text style={styles.notifDate}>{item.createdAt ? new Date(item.createdAt).toLocaleString() : ''}</Text>
               </View>
             </TouchableOpacity>
           )}

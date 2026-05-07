@@ -43,7 +43,7 @@ export const fetchReports = createAsyncThunk(
     } catch (error: any) {
       return rejectWithValue(error.message || 'Failed to fetch reports');
     }
-  }
+  },
 );
 
 export const generateReport = createAsyncThunk(
@@ -55,7 +55,7 @@ export const generateReport = createAsyncThunk(
       format: string;
       filters?: any;
     },
-    { rejectWithValue }
+    { rejectWithValue },
   ) => {
     try {
       const response = await ApiService.post('/reports/generate', reportData);
@@ -63,33 +63,30 @@ export const generateReport = createAsyncThunk(
     } catch (error: any) {
       return rejectWithValue(error.message || 'Failed to generate report');
     }
-  }
+  },
 );
 
-export const downloadReport = createAsyncThunk(
-  'reports/downloadReport',
-  async (reportId: string, { rejectWithValue }) => {
-    try {
-      const response = await ApiService.get(`/reports/${reportId}/download`);
-      return response;
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Failed to download report');
-    }
+export const downloadReport = createAsyncThunk('reports/downloadReport', async (reportId: string, { rejectWithValue }) => {
+  try {
+    const response = await ApiService.get(`/reports/${reportId}/download`);
+    return response;
+  } catch (error: any) {
+    return rejectWithValue(error.message || 'Failed to download report');
   }
-);
+});
 
 const reportsSlice = createSlice({
   name: 'reports',
   initialState,
   reducers: {
-    clearError: (state) => {
+    clearError: state => {
       state.error = null;
     },
   },
-  extraReducers: (builder) => {
+  extraReducers: builder => {
     // Fetch Reports
     builder
-      .addCase(fetchReports.pending, (state) => {
+      .addCase(fetchReports.pending, state => {
         state.isLoading = true;
         state.error = null;
       })
@@ -104,7 +101,7 @@ const reportsSlice = createSlice({
 
     // Generate Report
     builder
-      .addCase(generateReport.pending, (state) => {
+      .addCase(generateReport.pending, state => {
         state.isGenerating = true;
         state.error = null;
       })
@@ -120,10 +117,10 @@ const reportsSlice = createSlice({
 
     // Download Report
     builder
-      .addCase(downloadReport.pending, (state) => {
+      .addCase(downloadReport.pending, state => {
         state.isLoading = true;
       })
-      .addCase(downloadReport.fulfilled, (state) => {
+      .addCase(downloadReport.fulfilled, state => {
         state.isLoading = false;
       })
       .addCase(downloadReport.rejected, (state, action) => {

@@ -28,13 +28,7 @@ const POLL_MS = 5000;
 
 function displayName(p: any): string {
   if (!p) return '—';
-  return (
-    p.firstName_ar ||
-    p.name ||
-    `${p.firstName || ''} ${p.lastName || ''}`.trim() ||
-    p.email ||
-    '—'
-  );
+  return p.firstName_ar || p.name || `${p.firstName || ''} ${p.lastName || ''}`.trim() || p.email || '—';
 }
 
 function initial(s: string) {
@@ -100,9 +94,7 @@ export default function ChatThreadScreen({
           const newLast = items[items.length - 1]?._id || '';
           if (newLast !== lastMessageIdRef.current) {
             lastMessageIdRef.current = newLast;
-            requestAnimationFrame(() =>
-              scrollRef.current?.scrollToEnd({ animated: !silent })
-            );
+            requestAnimationFrame(() => scrollRef.current?.scrollToEnd({ animated: !silent }));
           }
           return items;
         });
@@ -111,7 +103,7 @@ export default function ChatThreadScreen({
         if (!silent) setError(e?.response?.data?.message || 'تعذّر تحميل الرسائل');
       }
     },
-    [conversationId]
+    [conversationId],
   );
 
   useEffect(() => {
@@ -183,44 +175,23 @@ export default function ChatThreadScreen({
             {messages.length === 0 ? (
               <View style={styles.emptyThread}>
                 <Text style={styles.emptyThreadIcon}>💬</Text>
-                <Text style={styles.emptyThreadText}>
-                  لا توجد رسائل بعد. كن أوّل من يكتب.
-                </Text>
+                <Text style={styles.emptyThreadText}>لا توجد رسائل بعد. كن أوّل من يكتب.</Text>
               </View>
             ) : null}
 
             {messages.map(m => {
               const mine = String(m.sender?._id || (m as any).sender) === myId;
               return (
-                <View
-                  key={m._id}
-                  style={[
-                    styles.bubbleRow,
-                    mine ? styles.bubbleRowMine : styles.bubbleRowOther,
-                  ]}
-                >
+                <View key={m._id} style={[styles.bubbleRow, mine ? styles.bubbleRowMine : styles.bubbleRowOther]}>
                   {!mine && (
                     <View style={styles.bubbleAvatar}>
-                      <Text style={styles.bubbleAvatarText}>
-                        {initial(displayName(m.sender))}
-                      </Text>
+                      <Text style={styles.bubbleAvatarText}>{initial(displayName(m.sender))}</Text>
                     </View>
                   )}
-                  <View
-                    style={[
-                      styles.bubble,
-                      mine ? styles.bubbleMine : styles.bubbleOther,
-                    ]}
-                  >
-                    {!mine && (
-                      <Text style={styles.bubbleSender}>{displayName(m.sender)}</Text>
-                    )}
-                    <Text style={[styles.bubbleText, mine && styles.bubbleTextMine]}>
-                      {m.content?.text || ''}
-                    </Text>
-                    <Text style={[styles.bubbleTime, mine && styles.bubbleTimeMine]}>
-                      {formatTime(m.createdAt)}
-                    </Text>
+                  <View style={[styles.bubble, mine ? styles.bubbleMine : styles.bubbleOther]}>
+                    {!mine && <Text style={styles.bubbleSender}>{displayName(m.sender)}</Text>}
+                    <Text style={[styles.bubbleText, mine && styles.bubbleTextMine]}>{m.content?.text || ''}</Text>
+                    <Text style={[styles.bubbleTime, mine && styles.bubbleTimeMine]}>{formatTime(m.createdAt)}</Text>
                   </View>
                 </View>
               );
@@ -243,11 +214,7 @@ export default function ChatThreadScreen({
             onPress={send}
             disabled={!draft.trim() || sending}
           >
-            {sending ? (
-              <ActivityIndicator color="#fff" size="small" />
-            ) : (
-              <Text style={styles.sendIcon}>➤</Text>
-            )}
+            {sending ? <ActivityIndicator color="#fff" size="small" /> : <Text style={styles.sendIcon}>➤</Text>}
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>

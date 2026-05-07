@@ -31,24 +31,17 @@ const TH = '/telehealth-v2';
 
 export const telehealth = {
   async myUpcoming() {
-    const res = await api.get<{ success: boolean; items: TelehealthSession[] }>(
-      `${TH}/my/upcoming`
-    );
+    const res = await api.get<{ success: boolean; items: TelehealthSession[] }>(`${TH}/my/upcoming`);
     return res.items || [];
   },
 
   async getSession(sessionId: string) {
-    const res = await api.get<{ success: boolean; data: TelehealthSession }>(
-      `${TH}/sessions/${sessionId}`
-    );
+    const res = await api.get<{ success: boolean; data: TelehealthSession }>(`${TH}/sessions/${sessionId}`);
     return res.data;
   },
 
   async createRoom(sessionId: string, provider: 'jitsi' | 'custom' = 'jitsi') {
-    const res = await api.post<{ success: boolean; data: TelehealthSession }>(
-      `${TH}/sessions/${sessionId}/create-room`,
-      { provider }
-    );
+    const res = await api.post<{ success: boolean; data: TelehealthSession }>(`${TH}/sessions/${sessionId}/create-room`, { provider });
     return res.data;
   },
 
@@ -65,10 +58,7 @@ export const telehealth = {
   },
 
   async end(sessionId: string) {
-    const res = await api.post<{ success: boolean; data: TelehealthSession }>(
-      `${TH}/sessions/${sessionId}/end`,
-      {}
-    );
+    const res = await api.post<{ success: boolean; data: TelehealthSession }>(`${TH}/sessions/${sessionId}/end`, {});
     return res.data;
   },
 };

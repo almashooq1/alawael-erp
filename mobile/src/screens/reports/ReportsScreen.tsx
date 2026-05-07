@@ -11,20 +11,22 @@ import { fetchReports, generateReport } from '../../store/slices/reportsSlice';
 
 export default function ReportsScreen({ navigation: _navigation }: any) {
   const dispatch = useAppDispatch();
-  const { items: reports, isGenerating, isLoading } = useAppSelector((state) => state.reports);
-  const { templates } = useAppSelector((state) => state.reports);
+  const { items: reports, isGenerating, isLoading } = useAppSelector(state => state.reports);
+  const { templates } = useAppSelector(state => state.reports);
 
   useEffect(() => {
     dispatch(fetchReports({ limit: 20 }));
   }, [dispatch]);
 
   const handleGenerateReport = (template: string) => {
-    dispatch(generateReport({
-      type: 'standard',
-      template: template.toLowerCase(),
-      format: 'pdf',
-      filters: {}
-    }));
+    dispatch(
+      generateReport({
+        type: 'standard',
+        template: template.toLowerCase(),
+        format: 'pdf',
+        filters: {},
+      }),
+    );
   };
 
   return (
@@ -33,7 +35,7 @@ export default function ReportsScreen({ navigation: _navigation }: any) {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Generate Report</Text>
         <View style={styles.templatesGrid}>
-          {templates.map((template) => (
+          {templates.map(template => (
             <TouchableOpacity
               key={template}
               style={styles.templateCard}
@@ -55,7 +57,7 @@ export default function ReportsScreen({ navigation: _navigation }: any) {
           <ActivityIndicator size="large" color="#1673e6" />
         ) : (
           <View>
-            {reports.slice(0, 10).map((report) => (
+            {reports.slice(0, 10).map(report => (
               <ReportItem key={report.id} report={report} />
             ))}
             {reports.length === 0 && <Text style={styles.emptyText}>No reports yet</Text>}
@@ -72,7 +74,9 @@ function ReportItem({ report }: { report: any }) {
       <View style={styles.reportHeader}>
         <View>
           <Text style={styles.reportName}>{report.name}</Text>
-          <Text style={styles.reportType}>{report.type} • {report.format.toUpperCase()}</Text>
+          <Text style={styles.reportType}>
+            {report.type} • {report.format.toUpperCase()}
+          </Text>
         </View>
         <Text style={styles.reportStatus}>{report.status}</Text>
       </View>

@@ -88,10 +88,7 @@ describe('NotificationService', () => {
 
       expect(Notifications.getPermissionsAsync).toHaveBeenCalled();
       expect(token).toBe('ExponentPushToken[xyz]');
-      expect(mockedAS.setItem).toHaveBeenCalledWith(
-        'push_notification_token',
-        'ExponentPushToken[xyz]'
-      );
+      expect(mockedAS.setItem).toHaveBeenCalledWith('push_notification_token', 'ExponentPushToken[xyz]');
     });
 
     it('requests permissions if not already granted', async () => {
@@ -160,14 +157,8 @@ describe('NotificationService', () => {
       mockedAS.getItem.mockResolvedValue(JSON.stringify({ enabled: true, pushEnabled: true }));
       const result = await updateNotificationPreferences({ pushEnabled: false });
       expect(result).toMatchObject({ enabled: true, pushEnabled: false });
-      expect(mockedAS.setItem).toHaveBeenCalledWith(
-        'notification_preferences',
-        expect.stringContaining('"pushEnabled":false')
-      );
-      expect(mockedApi.put).toHaveBeenCalledWith(
-        '/user/notification-preferences',
-        expect.objectContaining({ pushEnabled: false })
-      );
+      expect(mockedAS.setItem).toHaveBeenCalledWith('notification_preferences', expect.stringContaining('"pushEnabled":false'));
+      expect(mockedApi.put).toHaveBeenCalledWith('/user/notification-preferences', expect.objectContaining({ pushEnabled: false }));
     });
   });
 
@@ -190,7 +181,7 @@ describe('NotificationService', () => {
       await unregisterDevice();
       expect(mockedApi.post).toHaveBeenCalledWith(
         '/notifications/unregister-device',
-        expect.objectContaining({ token: 'ExponentPushToken[old]' })
+        expect.objectContaining({ token: 'ExponentPushToken[old]' }),
       );
       expect(mockedAS.removeItem).toHaveBeenCalledWith('push_notification_token');
     });

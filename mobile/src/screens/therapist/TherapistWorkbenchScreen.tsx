@@ -20,11 +20,7 @@ import {
   TextInput,
   Alert,
 } from 'react-native';
-import {
-  therapistWorkbench,
-  type WorkbenchSession,
-  type CaseloadRow,
-} from '../../services/modules';
+import { therapistWorkbench, type WorkbenchSession, type CaseloadRow } from '../../services/modules';
 
 type Tab = 'today' | 'week' | 'caseload';
 
@@ -164,9 +160,7 @@ export default function TherapistWorkbenchScreen() {
       <StatusBar barStyle="dark-content" />
       <View style={styles.header}>
         <Text style={styles.title}>منصّة المعالج</Text>
-        <Text style={styles.subtitle}>
-          {tab === 'today' ? 'جلسات اليوم' : tab === 'week' ? 'جدول الأسبوع' : 'حالاتي'}
-        </Text>
+        <Text style={styles.subtitle}>{tab === 'today' ? 'جلسات اليوم' : tab === 'week' ? 'جدول الأسبوع' : 'حالاتي'}</Text>
       </View>
 
       <View style={styles.tabs}>
@@ -175,11 +169,7 @@ export default function TherapistWorkbenchScreen() {
           { k: 'week' as Tab, label: 'الأسبوع' },
           { k: 'caseload' as Tab, label: 'حالاتي' },
         ].map(t => (
-          <TouchableOpacity
-            key={t.k}
-            style={[styles.tab, tab === t.k && styles.tabActive]}
-            onPress={() => setTab(t.k)}
-          >
+          <TouchableOpacity key={t.k} style={[styles.tab, tab === t.k && styles.tabActive]} onPress={() => setTab(t.k)}>
             <Text style={[styles.tabText, tab === t.k && styles.tabTextActive]}>{t.label}</Text>
           </TouchableOpacity>
         ))}
@@ -199,98 +189,90 @@ export default function TherapistWorkbenchScreen() {
           <ActivityIndicator size="large" color="#1976d2" />
         </View>
       ) : (
-        <ScrollView
-          contentContainerStyle={styles.list}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-        >
+        <ScrollView contentContainerStyle={styles.list} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
           {error ? (
             <View style={styles.errorBox}>
               <Text style={styles.errorText}>{error}</Text>
             </View>
           ) : null}
 
-          {tab === 'today' && todayData.items.map(s => (
-            <SessionCard
-              key={s._id}
-              session={s}
-              onCheckIn={() => checkIn(s)}
-              onEditNotes={() => openSoap(s, 'edit')}
-              onComplete={() => openSoap(s, 'complete')}
-            />
-          ))}
+          {tab === 'today' &&
+            todayData.items.map(s => (
+              <SessionCard
+                key={s._id}
+                session={s}
+                onCheckIn={() => checkIn(s)}
+                onEditNotes={() => openSoap(s, 'edit')}
+                onComplete={() => openSoap(s, 'complete')}
+              />
+            ))}
 
-          {tab === 'week' && Object.keys(weekGrouped).sort().map(day => (
-            <View key={day}>
-              <Text style={styles.dayHeader}>
-                {new Date(day).toLocaleDateString('ar-SA', {
-                  weekday: 'long',
-                  day: 'numeric',
-                  month: 'long',
-                })}
-                {'  ·  '}
-                {weekGrouped[day].length} جلسة
-              </Text>
-              {weekGrouped[day].map(s => (
-                <SessionCard
-                  key={s._id}
-                  session={s}
-                  compact
-                  onEditNotes={() => openSoap(s, 'edit')}
-                />
+          {tab === 'week' &&
+            Object.keys(weekGrouped)
+              .sort()
+              .map(day => (
+                <View key={day}>
+                  <Text style={styles.dayHeader}>
+                    {new Date(day).toLocaleDateString('ar-SA', {
+                      weekday: 'long',
+                      day: 'numeric',
+                      month: 'long',
+                    })}
+                    {'  ·  '}
+                    {weekGrouped[day].length} جلسة
+                  </Text>
+                  {weekGrouped[day].map(s => (
+                    <SessionCard key={s._id} session={s} compact onEditNotes={() => openSoap(s, 'edit')} />
+                  ))}
+                </View>
               ))}
-            </View>
-          ))}
 
-          {tab === 'caseload' && caseload.map((row, i) => (
-            <View key={i} style={styles.caseloadRow}>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.caseloadName}>
-                  {row.beneficiary?.firstName_ar || row.beneficiary?.beneficiaryNumber || '—'}
-                </Text>
-                <Text style={styles.caseloadMeta}>
-                  {row.beneficiary?.disability?.primaryType || '—'}
-                </Text>
+          {tab === 'caseload' &&
+            caseload.map((row, i) => (
+              <View key={i} style={styles.caseloadRow}>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.caseloadName}>{row.beneficiary?.firstName_ar || row.beneficiary?.beneficiaryNumber || '—'}</Text>
+                  <Text style={styles.caseloadMeta}>{row.beneficiary?.disability?.primaryType || '—'}</Text>
+                </View>
+                <View style={styles.caseloadStats}>
+                  <Text style={styles.caseloadCount}>{row.sessionCount}</Text>
+                  <Text style={styles.caseloadLabel}>جلسات</Text>
+                </View>
+                <View style={styles.caseloadStats}>
+                  <Text style={[styles.caseloadCount, { color: '#16a34a' }]}>{row.completed}</Text>
+                  <Text style={styles.caseloadLabel}>مكتملة</Text>
+                </View>
+                <View style={styles.caseloadStats}>
+                  <Text style={[styles.caseloadCount, { color: '#ed6c02' }]}>{row.upcoming}</Text>
+                  <Text style={styles.caseloadLabel}>قادمة</Text>
+                </View>
               </View>
-              <View style={styles.caseloadStats}>
-                <Text style={styles.caseloadCount}>{row.sessionCount}</Text>
-                <Text style={styles.caseloadLabel}>جلسات</Text>
-              </View>
-              <View style={styles.caseloadStats}>
-                <Text style={[styles.caseloadCount, { color: '#16a34a' }]}>{row.completed}</Text>
-                <Text style={styles.caseloadLabel}>مكتملة</Text>
-              </View>
-              <View style={styles.caseloadStats}>
-                <Text style={[styles.caseloadCount, { color: '#ed6c02' }]}>{row.upcoming}</Text>
-                <Text style={styles.caseloadLabel}>قادمة</Text>
-              </View>
-            </View>
-          ))}
+            ))}
         </ScrollView>
       )}
 
       <Modal visible={soapModal.open} animationType="slide" transparent>
         <View style={styles.modalBackdrop}>
           <View style={styles.modalSheet}>
-            <Text style={styles.modalTitle}>
-              {soapModal.mode === 'complete' ? 'إنهاء الجلسة + SOAP' : 'ملاحظات SOAP'}
-            </Text>
-            <Text style={styles.modalSub}>
-              {beneficiaryName(soapModal.session as any)}
-            </Text>
+            <Text style={styles.modalTitle}>{soapModal.mode === 'complete' ? 'إنهاء الجلسة + SOAP' : 'ملاحظات SOAP'}</Text>
+            <Text style={styles.modalSub}>{beneficiaryName(soapModal.session as any)}</Text>
             <ScrollView style={{ maxHeight: 400 }}>
               {(['subjective', 'objective', 'assessment', 'plan'] as const).map(key => (
                 <View key={key} style={styles.soapField}>
                   <Text style={styles.soapLabel}>
-                    {key === 'subjective' ? 'S — ما قاله المستفيد'
-                      : key === 'objective' ? 'O — ما لاحظه المعالج'
-                      : key === 'assessment' ? 'A — التحليل'
-                      : 'P — الخطة التالية'}
+                    {key === 'subjective'
+                      ? 'S — ما قاله المستفيد'
+                      : key === 'objective'
+                        ? 'O — ما لاحظه المعالج'
+                        : key === 'assessment'
+                          ? 'A — التحليل'
+                          : 'P — الخطة التالية'}
                   </Text>
                   <TextInput
                     style={styles.soapInput}
                     multiline
                     value={(soapModal as any)[key]}
-                    onChangeText={(v) => setSoapModal(m => ({ ...m, [key]: v }))}
+                    onChangeText={v => setSoapModal(m => ({ ...m, [key]: v }))}
                   />
                 </View>
               ))}
@@ -304,19 +286,14 @@ export default function TherapistWorkbenchScreen() {
                 <Text style={styles.modalBtnText}>إلغاء</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[
-                  styles.modalBtn,
-                  soapModal.mode === 'complete' ? styles.modalBtnComplete : styles.modalBtnSave,
-                ]}
+                style={[styles.modalBtn, soapModal.mode === 'complete' ? styles.modalBtnComplete : styles.modalBtnSave]}
                 onPress={saveSoap}
                 disabled={soapModal.saving}
               >
                 {soapModal.saving ? (
                   <ActivityIndicator color="#fff" />
                 ) : (
-                  <Text style={[styles.modalBtnText, { color: '#fff' }]}>
-                    {soapModal.mode === 'complete' ? 'إنهاء + حفظ' : 'حفظ'}
-                  </Text>
+                  <Text style={[styles.modalBtnText, { color: '#fff' }]}>{soapModal.mode === 'complete' ? 'إنهاء + حفظ' : 'حفظ'}</Text>
                 )}
               </TouchableOpacity>
             </View>

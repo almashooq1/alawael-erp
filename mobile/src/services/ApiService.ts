@@ -13,8 +13,7 @@ const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'https://api.alawael.com
 // accepts (^[a-zA-Z0-9_\-.=+/]{1,128}$) so the server preserves it
 // rather than generating a fresh one. Good enough for correlation;
 // not cryptographic.
-const REQUEST_ID_ALPHABET =
-  'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-';
+const REQUEST_ID_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-';
 function makeRequestId(): string {
   let out = '';
   for (let i = 0; i < 22; i += 1) {
@@ -54,7 +53,7 @@ class ApiService {
     // requestId middleware preserves a client-supplied valid id; we
     // generate one per request here.
     this.api.interceptors.request.use(
-      async (config) => {
+      async config => {
         const token = await SecureStore.getItemAsync('authToken');
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
@@ -64,13 +63,13 @@ class ApiService {
         }
         return config;
       },
-      (error) => Promise.reject(error)
+      error => Promise.reject(error),
     );
 
     // Response interceptor - Handle errors
     this.api.interceptors.response.use(
-      (response) => response,
-      async (error) => {
+      response => response,
+      async error => {
         const originalRequest = error.config;
 
         // Handle 401 - Token expired
@@ -117,7 +116,7 @@ class ApiService {
         }
 
         return Promise.reject(error);
-      }
+      },
     );
   }
 
@@ -178,7 +177,7 @@ class ApiService {
    */
   async batch<T = any>(requests: Array<{ method: string; url: string; data?: any }>): Promise<T[]> {
     try {
-      const promises = requests.map((req) => {
+      const promises = requests.map(req => {
         switch (req.method.toLowerCase()) {
           case 'get':
             return this.get(req.url);

@@ -9,16 +9,7 @@
  */
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  ActivityIndicator,
-  SafeAreaView,
-  StatusBar,
-} from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator, SafeAreaView, StatusBar } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 import { nafath, type NafathStatus } from '../../services/modules';
 
@@ -73,15 +64,10 @@ export default function NafathLoginScreen({
 
       pollRef.current = setInterval(() => pollStatus(data.requestId), POLL_INTERVAL_MS);
       clockRef.current = setInterval(() => {
-        const left = Math.max(
-          0,
-          Math.floor((new Date(data.expiresAt).getTime() - Date.now()) / 1000)
-        );
+        const left = Math.max(0, Math.floor((new Date(data.expiresAt).getTime() - Date.now()) / 1000));
         setRemainingSec(left);
       }, 1000);
-      setRemainingSec(
-        Math.max(0, Math.floor((new Date(data.expiresAt).getTime() - Date.now()) / 1000))
-      );
+      setRemainingSec(Math.max(0, Math.floor((new Date(data.expiresAt).getTime() - Date.now()) / 1000)));
     } catch (e: any) {
       setErr(e?.response?.data?.message || e?.message || 'تعذّر بدء الطلب');
     } finally {
@@ -105,9 +91,7 @@ export default function NafathLoginScreen({
           onSuccess?.(res.user!);
         }, 1200);
       } else if (res.status === 'APPROVED' && res.needsOnboarding) {
-        setFinalMessage(
-          res.message || 'تم التحقق من هويتك — لا يوجد حساب مرتبط، تواصل مع الإدارة.'
-        );
+        setFinalMessage(res.message || 'تم التحقق من هويتك — لا يوجد حساب مرتبط، تواصل مع الإدارة.');
       } else if (res.status === 'REJECTED') {
         setFinalMessage('رفضت الطلب في تطبيق نفاذ.');
       } else if (res.status === 'EXPIRED') {
@@ -187,15 +171,9 @@ export default function NafathLoginScreen({
               onPress={initiate}
               disabled={!nationalId || loading}
             >
-              {loading ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text style={styles.submitText}>بدء التحقق عبر نفاذ</Text>
-              )}
+              {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.submitText}>بدء التحقق عبر نفاذ</Text>}
             </TouchableOpacity>
-            <Text style={styles.devHint}>
-              💡 للتطوير: رقم ينتهي بـ 99 → رفض، بـ 88 → انتهاء المهلة
-            </Text>
+            <Text style={styles.devHint}>💡 للتطوير: رقم ينتهي بـ 99 → رفض، بـ 88 → انتهاء المهلة</Text>
           </View>
         )}
 
@@ -207,8 +185,8 @@ export default function NafathLoginScreen({
               <Text style={styles.randomValue}>{randomNumber}</Text>
             </View>
             <Text style={styles.instructions}>
-              افتح تطبيق نفاذ على جوالك، ستجد طلباً معلَّقاً. اضغط على الرقم{' '}
-              <Text style={styles.instructionsBold}>{randomNumber}</Text> لاعتماد تسجيل الدخول.
+              افتح تطبيق نفاذ على جوالك، ستجد طلباً معلَّقاً. اضغط على الرقم <Text style={styles.instructionsBold}>{randomNumber}</Text>{' '}
+              لاعتماد تسجيل الدخول.
             </Text>
             <Text style={styles.timer}>
               الوقت المتبقي: {String(mins).padStart(2, '0')}:{String(secs).padStart(2, '0')}
@@ -233,11 +211,7 @@ export default function NafathLoginScreen({
           <View style={[styles.card, styles.failedCard]}>
             <Text style={styles.failedIcon}>✗</Text>
             <Text style={styles.failedTitle}>
-              {status === 'REJECTED'
-                ? 'تم رفض الطلب'
-                : status === 'EXPIRED'
-                ? 'انتهت مهلة الطلب'
-                : 'حدث خطأ'}
+              {status === 'REJECTED' ? 'تم رفض الطلب' : status === 'EXPIRED' ? 'انتهت مهلة الطلب' : 'حدث خطأ'}
             </Text>
             {finalMessage ? <Text style={styles.failedText}>{finalMessage}</Text> : null}
             <TouchableOpacity style={styles.retryBtn} onPress={reset}>

@@ -31,31 +31,22 @@ const initialState: AuthState = {
 };
 
 // Async thunks
-export const login = createAsyncThunk(
-  'auth/login',
-  async (
-    credentials: { email: string; password: string },
-    { rejectWithValue }
-  ) => {
-    try {
-      const response: any = await ApiService.post('/auth/login', credentials);
-      await SecureStore.setItemAsync('authToken', response.token);
-      if (response.refreshToken) {
-        await SecureStore.setItemAsync('refreshToken', response.refreshToken);
-      }
-      return { user: response.user, token: response.token };
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Login failed');
+export const login = createAsyncThunk('auth/login', async (credentials: { email: string; password: string }, { rejectWithValue }) => {
+  try {
+    const response: any = await ApiService.post('/auth/login', credentials);
+    await SecureStore.setItemAsync('authToken', response.token);
+    if (response.refreshToken) {
+      await SecureStore.setItemAsync('refreshToken', response.refreshToken);
     }
+    return { user: response.user, token: response.token };
+  } catch (error: any) {
+    return rejectWithValue(error.response?.data?.message || 'Login failed');
   }
-);
+});
 
 export const register = createAsyncThunk(
   'auth/register',
-  async (
-    userData: { email: string; password: string; name: string; company: string },
-    { rejectWithValue }
-  ) => {
+  async (userData: { email: string; password: string; name: string; company: string }, { rejectWithValue }) => {
     try {
       const response: any = await ApiService.post('/auth/register', userData);
       await SecureStore.setItemAsync('authToken', response.token);
@@ -66,7 +57,7 @@ export const register = createAsyncThunk(
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Registration failed');
     }
-  }
+  },
 );
 
 export const logout = createAsyncThunk('auth/logout', async () => {
@@ -94,14 +85,14 @@ const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    clearError: (state) => {
+    clearError: state => {
       state.error = null;
     },
   },
-  extraReducers: (builder) => {
+  extraReducers: builder => {
     // Login
     builder
-      .addCase(login.pending, (state) => {
+      .addCase(login.pending, state => {
         state.isLoading = true;
         state.error = null;
       })
@@ -118,7 +109,7 @@ const authSlice = createSlice({
 
     // Register
     builder
-      .addCase(register.pending, (state) => {
+      .addCase(register.pending, state => {
         state.isLoading = true;
         state.error = null;
       })
@@ -134,7 +125,7 @@ const authSlice = createSlice({
       });
 
     // Logout
-    builder.addCase(logout.fulfilled, (state) => {
+    builder.addCase(logout.fulfilled, state => {
       state.isAuthenticated = false;
       state.user = null;
       state.token = null;
@@ -147,7 +138,7 @@ const authSlice = createSlice({
         state.user = action.payload.user;
         state.token = action.payload.token;
       })
-      .addCase(checkAuth.rejected, (state) => {
+      .addCase(checkAuth.rejected, state => {
         state.isAuthenticated = false;
       });
   },

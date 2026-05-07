@@ -76,27 +76,10 @@ function ParentTabs({ navigation }: any) {
         tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
       }}
     >
-      <ParentTab.Screen
-        name="MyChildren"
-        component={MyChildrenScreen as any}
-        options={{ tabBarLabel: 'أطفالي' }}
-      />
-      <ParentTab.Screen
-        name="Telehealth"
-        component={TelehealthScreen as any}
-        options={{ tabBarLabel: 'جلسات الفيديو' }}
-      />
-      <ParentTab.Screen
-        name="ChatList"
-        options={{ tabBarLabel: 'الرسائل' }}
-      >
-        {() => (
-          <ChatListScreen
-            onOpenConversation={id =>
-              navigation.navigate('ChatThread', { conversationId: id })
-            }
-          />
-        )}
+      <ParentTab.Screen name="MyChildren" component={MyChildrenScreen as any} options={{ tabBarLabel: 'أطفالي' }} />
+      <ParentTab.Screen name="Telehealth" component={TelehealthScreen as any} options={{ tabBarLabel: 'جلسات الفيديو' }} />
+      <ParentTab.Screen name="ChatList" options={{ tabBarLabel: 'الرسائل' }}>
+        {() => <ChatListScreen onOpenConversation={id => navigation.navigate('ChatThread', { conversationId: id })} />}
       </ParentTab.Screen>
     </ParentTab.Navigator>
   );
@@ -111,27 +94,10 @@ function TherapistTabs({ navigation }: any) {
         tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
       }}
     >
-      <TherapistTab.Screen
-        name="Workbench"
-        component={TherapistWorkbenchScreen as any}
-        options={{ tabBarLabel: 'منصّتي' }}
-      />
-      <TherapistTab.Screen
-        name="Telehealth"
-        component={TelehealthScreen as any}
-        options={{ tabBarLabel: 'جلسات الفيديو' }}
-      />
-      <TherapistTab.Screen
-        name="ChatList"
-        options={{ tabBarLabel: 'الرسائل' }}
-      >
-        {() => (
-          <ChatListScreen
-            onOpenConversation={id =>
-              navigation.navigate('ChatThread', { conversationId: id })
-            }
-          />
-        )}
+      <TherapistTab.Screen name="Workbench" component={TherapistWorkbenchScreen as any} options={{ tabBarLabel: 'منصّتي' }} />
+      <TherapistTab.Screen name="Telehealth" component={TelehealthScreen as any} options={{ tabBarLabel: 'جلسات الفيديو' }} />
+      <TherapistTab.Screen name="ChatList" options={{ tabBarLabel: 'الرسائل' }}>
+        {() => <ChatListScreen onOpenConversation={id => navigation.navigate('ChatThread', { conversationId: id })} />}
       </TherapistTab.Screen>
     </TherapistTab.Navigator>
   );

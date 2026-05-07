@@ -3,16 +3,7 @@
  */
 
 import React, { useState } from 'react';
-import {
-  View,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-} from 'react-native';
+import { View, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { Text } from 'react-native';
 import { useAppDispatch, useAppSelector } from '../../store';
 import { register } from '../../store/slices/authSlice';
@@ -37,14 +28,11 @@ export default function RegisterScreen({ navigation }: any) {
   };
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
-    >
+    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {/* Header */}
         <View style={styles.header}>
@@ -64,7 +52,7 @@ export default function RegisterScreen({ navigation }: any) {
               style={styles.input}
               placeholder="John Doe"
               value={formData.name}
-              onChangeText={(value) => handleInputChange('name', value)}
+              onChangeText={value => handleInputChange('name', value)}
               editable={!isLoading}
             />
           </View>
@@ -75,7 +63,7 @@ export default function RegisterScreen({ navigation }: any) {
               style={styles.input}
               placeholder="your@email.com"
               value={formData.email}
-              onChangeText={(value) => handleInputChange('email', value)}
+              onChangeText={value => handleInputChange('email', value)}
               keyboardType="email-address"
               editable={!isLoading}
             />
@@ -87,7 +75,7 @@ export default function RegisterScreen({ navigation }: any) {
               style={styles.input}
               placeholder="Your Company Name"
               value={formData.company}
-              onChangeText={(value) => handleInputChange('company', value)}
+              onChangeText={value => handleInputChange('company', value)}
               editable={!isLoading}
             />
           </View>
@@ -98,22 +86,14 @@ export default function RegisterScreen({ navigation }: any) {
               style={styles.input}
               placeholder="••••••••"
               value={formData.password}
-              onChangeText={(value) => handleInputChange('password', value)}
+              onChangeText={value => handleInputChange('password', value)}
               secureTextEntry
               editable={!isLoading}
             />
           </View>
 
-          <TouchableOpacity
-            style={[styles.registerButton, isLoading && styles.disabled]}
-            onPress={handleRegister}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <ActivityIndicator size="small" color="white" />
-            ) : (
-              <Text style={styles.registerButtonText}>Create Account</Text>
-            )}
+          <TouchableOpacity style={[styles.registerButton, isLoading && styles.disabled]} onPress={handleRegister} disabled={isLoading}>
+            {isLoading ? <ActivityIndicator size="small" color="white" /> : <Text style={styles.registerButtonText}>Create Account</Text>}
           </TouchableOpacity>
         </View>
 

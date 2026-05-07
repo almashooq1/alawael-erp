@@ -78,18 +78,16 @@ async function registerPushToken(token: string) {
  */
 function setupNotificationListeners() {
   // Listener for notifications received while app is foreground
-  const foregroundSubscription = Notifications.addNotificationReceivedListener((notification) => {
+  const foregroundSubscription = Notifications.addNotificationReceivedListener(notification => {
     console.log('Notification received (foreground):', notification);
     handleNotificationReceived(notification);
   });
 
   // Listener for notifications tapped while app is background
-  const backgroundSubscription = Notifications.addNotificationResponseReceivedListener(
-    (response) => {
-      console.log('Notification tapped:', response);
-      handleNotificationTapped(response.notification);
-    }
-  );
+  const backgroundSubscription = Notifications.addNotificationResponseReceivedListener(response => {
+    console.log('Notification tapped:', response);
+    handleNotificationTapped(response.notification);
+  });
 
   return () => {
     foregroundSubscription.remove();
@@ -135,11 +133,7 @@ async function handleNotificationTapped(notification: Notifications.Notification
 /**
  * Send local notification
  */
-export async function sendLocalNotification(
-  title: string,
-  body: string,
-  data?: Record<string, any>
-) {
+export async function sendLocalNotification(title: string, body: string, data?: Record<string, any>) {
   try {
     await Notifications.scheduleNotificationAsync({
       content: {
@@ -161,12 +155,7 @@ export async function sendLocalNotification(
 /**
  * Schedule notification
  */
-export async function scheduleNotification(
-  title: string,
-  body: string,
-  delay: number,
-  data?: Record<string, any>
-) {
+export async function scheduleNotification(title: string, body: string, delay: number, data?: Record<string, any>) {
   try {
     await Notifications.scheduleNotificationAsync({
       content: {

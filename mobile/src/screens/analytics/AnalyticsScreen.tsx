@@ -3,13 +3,7 @@
  */
 
 import React, { useEffect } from 'react';
-import {
-  View,
-  StyleSheet,
-  ActivityIndicator,
-  TouchableOpacity,
-  ScrollView,
-} from 'react-native';
+import { View, StyleSheet, ActivityIndicator, TouchableOpacity, ScrollView } from 'react-native';
 import { Text } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useAppDispatch, useAppSelector } from '../../store';
@@ -17,7 +11,7 @@ import { fetchDashboards, fetchMetrics } from '../../store/slices/analyticsSlice
 
 export default function AnalyticsScreen({ navigation }: any) {
   const dispatch = useAppDispatch();
-  const { dashboards, metrics, isLoading } = useAppSelector((state) => state.analytics);
+  const { dashboards, metrics, isLoading } = useAppSelector(state => state.analytics);
 
   useEffect(() => {
     dispatch(fetchDashboards());
@@ -37,7 +31,7 @@ export default function AnalyticsScreen({ navigation }: any) {
           <ActivityIndicator size="large" color="#1673e6" />
         ) : (
           <View style={styles.metricsContainer}>
-            {metrics.slice(0, 6).map((metric) => (
+            {metrics.slice(0, 6).map(metric => (
               <MetricCard key={metric.name} metric={metric} />
             ))}
           </View>
@@ -51,12 +45,8 @@ export default function AnalyticsScreen({ navigation }: any) {
           <ActivityIndicator size="large" color="#1673e6" />
         ) : (
           <View>
-            {dashboards.map((dashboard) => (
-              <DashboardCard
-                key={dashboard.id}
-                dashboard={dashboard}
-                onPress={() => handleDashboardPress(dashboard.id)}
-              />
+            {dashboards.map(dashboard => (
+              <DashboardCard key={dashboard.id} dashboard={dashboard} onPress={() => handleDashboardPress(dashboard.id)} />
             ))}
           </View>
         )}
@@ -73,14 +63,8 @@ function MetricCard({ metric }: { metric: any }) {
       <Text style={styles.metricLabel}>{metric.name}</Text>
       <Text style={styles.metricValue}>{metric.value}</Text>
       <View style={styles.trendContainer}>
-        <MaterialCommunityIcons
-          name={metric.trend > 0 ? 'trending-up' : 'trending-down'}
-          size={14}
-          color={trendColor}
-        />
-        <Text style={[styles.trendValue, { color: trendColor }]}>
-          {Math.abs(metric.trend)}%
-        </Text>
+        <MaterialCommunityIcons name={metric.trend > 0 ? 'trending-up' : 'trending-down'} size={14} color={trendColor} />
+        <Text style={[styles.trendValue, { color: trendColor }]}>{Math.abs(metric.trend)}%</Text>
       </View>
     </View>
   );

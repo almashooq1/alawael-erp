@@ -52,26 +52,20 @@ export const chat = {
   },
 
   async findOrCreate(withUserId: string) {
-    const res = await api.post<{ success: boolean; data: Conversation }>(
-      `${CHAT}/conversations`,
-      { withUserId }
-    );
+    const res = await api.post<{ success: boolean; data: Conversation }>(`${CHAT}/conversations`, { withUserId });
     return res.data;
   },
 
   async messages(conversationId: string, before?: string, limit = 50) {
     const res = await api.get<{ success: boolean; items: Message[]; hasMore: boolean }>(
       `${CHAT}/conversations/${conversationId}/messages`,
-      { before, limit }
+      { before, limit },
     );
     return { items: res.items || [], hasMore: res.hasMore || false };
   },
 
   async send(conversationId: string, text: string, replyTo?: string) {
-    const res = await api.post<{ success: boolean; data: Message }>(
-      `${CHAT}/conversations/${conversationId}/messages`,
-      { text, replyTo }
-    );
+    const res = await api.post<{ success: boolean; data: Message }>(`${CHAT}/conversations/${conversationId}/messages`, { text, replyTo });
     return res.data;
   },
 

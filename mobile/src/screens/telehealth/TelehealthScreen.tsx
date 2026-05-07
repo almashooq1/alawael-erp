@@ -23,11 +23,7 @@ import { telehealth, type TelehealthSession } from '../../services/modules';
 
 function fullName(p?: { firstName_ar?: string; lastName_ar?: string; beneficiaryNumber?: string }) {
   if (!p) return '—';
-  return (
-    [p.firstName_ar, p.lastName_ar].filter(Boolean).join(' ') ||
-    p.beneficiaryNumber ||
-    '—'
-  );
+  return [p.firstName_ar, p.lastName_ar].filter(Boolean).join(' ') || p.beneficiaryNumber || '—';
 }
 
 function formatDateTime(s?: string): string {
@@ -124,10 +120,7 @@ export default function TelehealthScreen() {
           <ActivityIndicator size="large" color="#7c3aed" />
         </View>
       ) : (
-        <ScrollView
-          contentContainerStyle={styles.list}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-        >
+        <ScrollView contentContainerStyle={styles.list} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
           {error ? (
             <View style={styles.errorBox}>
               <Text style={styles.errorText}>{error}</Text>
@@ -138,9 +131,7 @@ export default function TelehealthScreen() {
             <View style={styles.emptyBox}>
               <Text style={styles.emptyIcon}>📹</Text>
               <Text style={styles.emptyTitle}>لا توجد جلسات فيديو قادمة</Text>
-              <Text style={styles.emptyText}>
-                ستظهر هنا الجلسات المجدولة مع الطب عن بُعد المفعَّل.
-              </Text>
+              <Text style={styles.emptyText}>ستظهر هنا الجلسات المجدولة مع الطب عن بُعد المفعَّل.</Text>
             </View>
           ) : null}
 
@@ -166,22 +157,17 @@ export default function TelehealthScreen() {
                 <View style={styles.participants}>
                   <View style={styles.participant}>
                     <Text style={styles.participantLabel}>المستفيد</Text>
-                    <Text style={styles.participantName}>
-                      {fullName(session.beneficiary)}
-                    </Text>
+                    <Text style={styles.participantName}>{fullName(session.beneficiary)}</Text>
                   </View>
                   <View style={styles.participant}>
                     <Text style={styles.participantLabel}>المعالج</Text>
-                    <Text style={styles.participantName}>
-                      {fullName(session.therapist)}
-                    </Text>
+                    <Text style={styles.participantName}>{fullName(session.therapist)}</Text>
                   </View>
                 </View>
 
                 {session.telehealth?.hostJoinedAt ? (
                   <Text style={styles.connectedText}>
-                    ● المعالج متصل منذ{' '}
-                    {new Date(session.telehealth.hostJoinedAt).toLocaleTimeString('ar-SA')}
+                    ● المعالج متصل منذ {new Date(session.telehealth.hostJoinedAt).toLocaleTimeString('ar-SA')}
                   </Text>
                 ) : null}
 
@@ -198,17 +184,12 @@ export default function TelehealthScreen() {
                     )}
                   </TouchableOpacity>
                 ) : canCreate ? (
-                  <TouchableOpacity
-                    style={[styles.joinBtn, styles.createBtn]}
-                    onPress={() => createRoom(session)}
-                  >
+                  <TouchableOpacity style={[styles.joinBtn, styles.createBtn]} onPress={() => createRoom(session)}>
                     <Text style={styles.joinBtnText}>✨ إنشاء غرفة Jitsi</Text>
                   </TouchableOpacity>
                 ) : (
                   <View style={styles.notReadyBox}>
-                    <Text style={styles.notReadyText}>
-                      لم يُنشئ المعالج الغرفة بعد — حاول تحديث الصفحة.
-                    </Text>
+                    <Text style={styles.notReadyText}>لم يُنشئ المعالج الغرفة بعد — حاول تحديث الصفحة.</Text>
                   </View>
                 )}
               </View>

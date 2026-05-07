@@ -3,26 +3,16 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  ScrollView,
-  StyleSheet,
-  TouchableOpacity,
-  Switch,
-  Alert,
-} from 'react-native';
+import { View, ScrollView, StyleSheet, TouchableOpacity, Switch, Alert } from 'react-native';
 import { Text } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useAppDispatch, useAppSelector } from '../../store';
 import { logout } from '../../store/slices/authSlice';
-import {
-  getNotificationPreferences,
-  updateNotificationPreferences,
-} from '../../services/NotificationService';
+import { getNotificationPreferences, updateNotificationPreferences } from '../../services/NotificationService';
 
 export default function SettingsScreen({ navigation }: any) {
   const dispatch = useAppDispatch();
-  const { user } = useAppSelector((state) => state.auth);
+  const { user } = useAppSelector(state => state.auth);
   const [notificationSettings, setNotificationSettings] = useState<any>(null);
 
   useEffect(() => {
@@ -58,10 +48,7 @@ export default function SettingsScreen({ navigation }: any) {
       {/* Account Section */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Account</Text>
-        <TouchableOpacity
-          style={styles.settingItem}
-          onPress={() => navigation.navigate('Profile')}
-        >
+        <TouchableOpacity style={styles.settingItem} onPress={() => navigation.navigate('Profile')}>
           <MaterialCommunityIcons name="account" size={20} color="#1673e6" />
           <View style={styles.settingContent}>
             <Text style={styles.settingLabel}>Profile</Text>
@@ -175,17 +162,7 @@ export default function SettingsScreen({ navigation }: any) {
   );
 }
 
-function SettingToggle({
-  icon,
-  label,
-  value,
-  onToggle,
-}: {
-  icon: string;
-  label: string;
-  value: boolean;
-  onToggle: () => void;
-}) {
+function SettingToggle({ icon, label, value, onToggle }: { icon: string; label: string; value: boolean; onToggle: () => void }) {
   return (
     <View style={styles.settingItem}>
       <MaterialCommunityIcons name={icon as any} size={20} color="#1673e6" />

@@ -18,19 +18,10 @@ import {
   SafeAreaView,
   StatusBar,
 } from 'react-native';
-import {
-  parentPortal,
-  type ChildSummary,
-  type ChildOverview,
-} from '../../services/modules';
+import { parentPortal, type ChildSummary, type ChildOverview } from '../../services/modules';
 
 function fullName(c: ChildSummary): string {
-  return (
-    c.firstName_ar ||
-    `${c.firstName || ''} ${c.lastName || ''}`.trim() ||
-    c.beneficiaryNumber ||
-    '—'
-  );
+  return c.firstName_ar || `${c.firstName || ''} ${c.lastName || ''}`.trim() || c.beneficiaryNumber || '—';
 }
 
 function formatDate(v?: string | Date): string {
@@ -66,9 +57,7 @@ export default function MyChildrenScreen() {
       const list = await parentPortal.myChildren();
       setChildren(list);
       // Fetch overviews in parallel
-      const pairs = await Promise.all(
-        list.map(async c => [c._id, await parentPortal.childOverview(c._id).catch(() => null)] as const)
-      );
+      const pairs = await Promise.all(list.map(async c => [c._id, await parentPortal.childOverview(c._id).catch(() => null)] as const));
       const map: Record<string, ChildOverview> = {};
       for (const [id, ov] of pairs) {
         if (ov) map[id] = ov;
@@ -106,10 +95,7 @@ export default function MyChildrenScreen() {
           <ActivityIndicator size="large" color="#1976d2" />
         </View>
       ) : (
-        <ScrollView
-          contentContainerStyle={styles.list}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-        >
+        <ScrollView contentContainerStyle={styles.list} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
           {error ? (
             <View style={styles.errorBox}>
               <Text style={styles.errorText}>{error}</Text>
@@ -118,9 +104,7 @@ export default function MyChildrenScreen() {
 
           {children.length === 0 && !error ? (
             <View style={styles.emptyBox}>
-              <Text style={styles.emptyText}>
-                لا يوجد أطفال مسجَّلون تحت حسابك حالياً.
-              </Text>
+              <Text style={styles.emptyText}>لا يوجد أطفال مسجَّلون تحت حسابك حالياً.</Text>
             </View>
           ) : null}
 
@@ -139,9 +123,7 @@ export default function MyChildrenScreen() {
                       {child.dateOfBirth ? `  ·  ${formatDate(child.dateOfBirth)}` : ''}
                     </Text>
                     {child.disability?.primaryType ? (
-                      <Text style={styles.meta}>
-                        {DISABILITY_LABELS[child.disability.primaryType] || child.disability.primaryType}
-                      </Text>
+                      <Text style={styles.meta}>{DISABILITY_LABELS[child.disability.primaryType] || child.disability.primaryType}</Text>
                     ) : null}
                   </View>
                 </View>
@@ -160,13 +142,9 @@ export default function MyChildrenScreen() {
                     <Text style={styles.lastLabel}>آخر تقييم</Text>
                     <Text style={styles.lastTool}>
                       {ov.summary.lastAssessment.tool}
-                      {ov.summary.lastAssessment.score != null
-                        ? `  ·  ${ov.summary.lastAssessment.score}/100`
-                        : ''}
+                      {ov.summary.lastAssessment.score != null ? `  ·  ${ov.summary.lastAssessment.score}/100` : ''}
                     </Text>
-                    <Text style={styles.lastDate}>
-                      {formatDate(ov.summary.lastAssessment.assessmentDate)}
-                    </Text>
+                    <Text style={styles.lastDate}>{formatDate(ov.summary.lastAssessment.assessmentDate)}</Text>
                   </View>
                 ) : null}
               </TouchableOpacity>

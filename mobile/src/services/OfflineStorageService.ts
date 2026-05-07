@@ -120,7 +120,7 @@ export async function saveOrderLocal(order: any) {
         order.createdAt,
         order.updatedAt,
         order.synced || 0,
-      ]
+      ],
     );
   } catch (error) {
     console.error('Error saving order:', error);
@@ -156,7 +156,7 @@ export async function saveNotificationLocal(notification: any) {
         notification.read ? 1 : 0,
         notification.createdAt,
         notification.data ? JSON.stringify(notification.data) : null,
-      ]
+      ],
     );
   } catch (error) {
     console.error('Error saving notification:', error);
@@ -166,11 +166,7 @@ export async function saveNotificationLocal(notification: any) {
 export async function getLocalNotifications(limit: number = 50) {
   if (!db) return [];
   try {
-    const rows = await run(
-      `SELECT * FROM notifications ORDER BY createdAt DESC LIMIT ?`,
-      [limit],
-      true
-    );
+    const rows = await run(`SELECT * FROM notifications ORDER BY createdAt DESC LIMIT ?`, [limit], true);
     return rows.map((n: any) => ({
       ...n,
       read: !!n.read,
@@ -189,7 +185,7 @@ export async function queueForSync(type: string, action: string, payload: any) {
     await run(
       `INSERT INTO sync_queue (id, type, action, payload, timestamp, retries)
        VALUES (?, ?, ?, ?, ?, ?)`,
-      [id, type, action, JSON.stringify(payload), new Date().toISOString(), 0]
+      [id, type, action, JSON.stringify(payload), new Date().toISOString(), 0],
     );
   } catch (error) {
     console.error('Error queueing for sync:', error);
@@ -241,16 +237,8 @@ export async function getDatabaseStats() {
   if (!db) return null;
   try {
     const ordersRows = await run('SELECT COUNT(*) as count FROM orders', [], true);
-    const notificationsRows = await run(
-      'SELECT COUNT(*) as count FROM notifications',
-      [],
-      true
-    );
-    const syncQueueRows = await run(
-      'SELECT COUNT(*) as count FROM sync_queue',
-      [],
-      true
-    );
+    const notificationsRows = await run('SELECT COUNT(*) as count FROM notifications', [], true);
+    const syncQueueRows = await run('SELECT COUNT(*) as count FROM sync_queue', [], true);
     return {
       orders: ordersRows[0]?.count || 0,
       notifications: notificationsRows[0]?.count || 0,

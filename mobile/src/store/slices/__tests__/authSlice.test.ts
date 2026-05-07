@@ -11,13 +11,7 @@ jest.mock('expo-secure-store');
 
 import { configureStore } from '@reduxjs/toolkit';
 import ApiService from '../../../services/ApiService';
-import authReducer, {
-  login,
-  register,
-  logout,
-  checkAuth,
-  clearError,
-} from '../authSlice';
+import authReducer, { login, register, logout, checkAuth, clearError } from '../authSlice';
 import * as SecureStore from 'expo-secure-store';
 
 const mockedApi = ApiService as jest.Mocked<typeof ApiService>;
@@ -72,10 +66,7 @@ describe('authSlice', () => {
       expect(state.user).toEqual(mockResponse.user);
       expect(state.isAuthenticated).toBe(true);
       expect(state.isLoading).toBe(false);
-      expect(SecureStore.setItemAsync).toHaveBeenCalledWith(
-        'authToken',
-        'test-token-123'
-      );
+      expect(SecureStore.setItemAsync).toHaveBeenCalledWith('authToken', 'test-token-123');
     });
 
     it('should handle login error', async () => {
@@ -123,10 +114,7 @@ describe('authSlice', () => {
       expect(state.user).toEqual(mockResponse.user);
       expect(state.token).toBe('new-token-456');
       expect(state.isAuthenticated).toBe(true);
-      expect(SecureStore.setItemAsync).toHaveBeenCalledWith(
-        'authToken',
-        'new-token-456'
-      );
+      expect(SecureStore.setItemAsync).toHaveBeenCalledWith('authToken', 'new-token-456');
     });
   });
 

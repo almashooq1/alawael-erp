@@ -37,13 +37,7 @@ import AnalyticsScreen from './src/screens/analytics/AnalyticsScreen';
 import SettingsScreen from './src/screens/settings/SettingsScreen';
 
 // Modal Screens (Stubs)
-import {
-  OrderDetailScreen,
-  CreateOrderScreen,
-  DashboardViewScreen,
-  NotificationsScreen,
-  ProfileScreen,
-} from './src/screens/stubs';
+import { OrderDetailScreen, CreateOrderScreen, DashboardViewScreen, NotificationsScreen, ProfileScreen } from './src/screens/stubs';
 
 // Prevent splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
@@ -83,40 +77,18 @@ const MainTabNavigator = () => {
             iconName = focused ? 'cog' : 'cog-outline';
           }
 
-          return (
-            <MaterialCommunityIcons name={iconName as any} size={size} color={color} />
-          );
+          return <MaterialCommunityIcons name={iconName as any} size={size} color={color} />;
         },
         tabBarActiveTintColor: '#1673e6',
         tabBarInactiveTintColor: 'gray',
         headerShown: true,
       })}
     >
-      <Tab.Screen
-        name="Dashboard"
-        component={DashboardScreen}
-        options={{ title: 'Home' }}
-      />
-      <Tab.Screen
-        name="Orders"
-        component={OrdersScreen}
-        options={{ title: 'Orders' }}
-      />
-      <Tab.Screen
-        name="Reports"
-        component={ReportsScreen}
-        options={{ title: 'Reports' }}
-      />
-      <Tab.Screen
-        name="Analytics"
-        component={AnalyticsScreen}
-        options={{ title: 'Analytics' }}
-      />
-      <Tab.Screen
-        name="Settings"
-        component={SettingsScreen}
-        options={{ title: 'Settings' }}
-      />
+      <Tab.Screen name="Dashboard" component={DashboardScreen} options={{ title: 'Home' }} />
+      <Tab.Screen name="Orders" component={OrdersScreen} options={{ title: 'Orders' }} />
+      <Tab.Screen name="Reports" component={ReportsScreen} options={{ title: 'Reports' }} />
+      <Tab.Screen name="Analytics" component={AnalyticsScreen} options={{ title: 'Analytics' }} />
+      <Tab.Screen name="Settings" component={SettingsScreen} options={{ title: 'Settings' }} />
     </Tab.Navigator>
   );
 };
@@ -171,40 +143,17 @@ export default function App() {
         <Stack.Navigator screenOptions={{ headerShown: false }}>
           {isSignedIn ? (
             <>
-              <Stack.Screen
-                name="MainApp"
-                component={MainTabNavigator}
-                options={{ animation: 'none' }}
-              />
+              <Stack.Screen name="MainApp" component={MainTabNavigator} options={{ animation: 'none' }} />
               <Stack.Group screenOptions={{ presentation: 'modal' }}>
-                <Stack.Screen
-                  name="OrderDetail"
-                  component={OrderDetailScreen}
-                />
-                <Stack.Screen
-                  name="CreateOrder"
-                  component={CreateOrderScreen}
-                />
-                <Stack.Screen
-                  name="DashboardView"
-                  component={DashboardViewScreen}
-                />
-                <Stack.Screen
-                  name="Notifications"
-                  component={NotificationsScreen}
-                />
-                <Stack.Screen
-                  name="Profile"
-                  component={ProfileScreen}
-                />
+                <Stack.Screen name="OrderDetail" component={OrderDetailScreen} />
+                <Stack.Screen name="CreateOrder" component={CreateOrderScreen} />
+                <Stack.Screen name="DashboardView" component={DashboardViewScreen} />
+                <Stack.Screen name="Notifications" component={NotificationsScreen} />
+                <Stack.Screen name="Profile" component={ProfileScreen} />
               </Stack.Group>
             </>
           ) : (
-            <Stack.Screen
-              name="Auth"
-              component={AuthNavigator}
-              options={{ animation: 'none' }}
-            />
+            <Stack.Screen name="Auth" component={AuthNavigator} options={{ animation: 'none' }} />
           )}
         </Stack.Navigator>
       </NavigationContainer>

@@ -11,10 +11,10 @@ import { fetchNotifications } from '../../store/slices/notificationsSlice';
 
 export default function DashboardScreen() {
   const dispatch = useAppDispatch();
-  const { metrics, isLoading } = useAppSelector((state) => state.analytics);
-  const { items: orders, total: totalOrders } = useAppSelector((state) => state.orders);
-  const { unreadCount } = useAppSelector((state) => state.notifications);
-  const { user } = useAppSelector((state) => state.auth);
+  const { metrics, isLoading } = useAppSelector(state => state.analytics);
+  const { items: orders, total: totalOrders } = useAppSelector(state => state.orders);
+  const { unreadCount } = useAppSelector(state => state.notifications);
+  const { user } = useAppSelector(state => state.auth);
 
   useEffect(() => {
     // Load dashboard data
@@ -48,7 +48,7 @@ export default function DashboardScreen() {
 
       {/* Key Metrics */}
       <View style={styles.metricsGrid}>
-        {metrics.slice(0, 4).map((metric) => (
+        {metrics.slice(0, 4).map(metric => (
           <MetricCard key={metric.name} metric={metric} />
         ))}
       </View>
@@ -57,7 +57,7 @@ export default function DashboardScreen() {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Recent Orders</Text>
         <Text style={styles.metric}>{totalOrders} total orders</Text>
-        {orders.slice(0, 5).map((order) => (
+        {orders.slice(0, 5).map(order => (
           <OrderCard key={order.id} order={order} />
         ))}
       </View>
@@ -95,8 +95,7 @@ function MetricCard({ metric }: { metric: any }) {
 // Order Card Component
 function OrderCard({ order }: { order: any }) {
   const { Text } = require('react-native');
-  const statusColor =
-    order.status === 'completed' ? '#4CAF50' : order.status === 'pending' ? '#FF9800' : '#2196F3';
+  const statusColor = order.status === 'completed' ? '#4CAF50' : order.status === 'pending' ? '#FF9800' : '#2196F3';
 
   return (
     <View style={styles.orderCard}>

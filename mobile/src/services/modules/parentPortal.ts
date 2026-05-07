@@ -19,14 +19,7 @@ export type SessionStatus =
   | 'RESCHEDULED';
 
 export type GoalStatus = 'PENDING' | 'IN_PROGRESS' | 'ACHIEVED' | 'DISCONTINUED';
-export type AssessmentInterpretation =
-  | 'within_normal'
-  | 'borderline'
-  | 'mild'
-  | 'moderate'
-  | 'severe'
-  | 'profound'
-  | 'not_applicable';
+export type AssessmentInterpretation = 'within_normal' | 'borderline' | 'mild' | 'moderate' | 'severe' | 'profound' | 'not_applicable';
 
 export interface Guardian {
   _id: string;
@@ -156,24 +149,20 @@ export const parentPortal = {
   },
 
   async childOverview(childId: string) {
-    const res = await api.get<{ success: boolean } & ChildOverview>(
-      `${PARENT}/children/${childId}/overview`
-    );
+    const res = await api.get<{ success: boolean } & ChildOverview>(`${PARENT}/children/${childId}/overview`);
     return res as ChildOverview;
   },
 
   async childSessions(childId: string, scope: 'upcoming' | 'past' | 'all' = 'all', limit = 50) {
-    const res = await api.get<{ success: boolean; items: TherapySessionSummary[] }>(
-      `${PARENT}/children/${childId}/sessions`,
-      { scope, limit }
-    );
+    const res = await api.get<{ success: boolean; items: TherapySessionSummary[] }>(`${PARENT}/children/${childId}/sessions`, {
+      scope,
+      limit,
+    });
     return res.items || [];
   },
 
   async childCarePlan(childId: string): Promise<CarePlanSnapshot | null> {
-    const res = await api.get<{ success: boolean; data: CarePlanSnapshot | null }>(
-      `${PARENT}/children/${childId}/care-plan`
-    );
+    const res = await api.get<{ success: boolean; data: CarePlanSnapshot | null }>(`${PARENT}/children/${childId}/care-plan`);
     return res.data;
   },
 
@@ -187,9 +176,7 @@ export const parentPortal = {
   },
 
   async childAttendance(childId: string) {
-    const res = await api.get<{ success: boolean } & AttendanceStats>(
-      `${PARENT}/children/${childId}/attendance`
-    );
+    const res = await api.get<{ success: boolean } & AttendanceStats>(`${PARENT}/children/${childId}/attendance`);
     return res as AttendanceStats;
   },
 };

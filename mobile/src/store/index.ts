@@ -20,7 +20,7 @@ const store = configureStore({
     analytics: analyticsReducer,
     notifications: notificationsReducer,
   },
-  middleware: (getDefaultMiddleware) =>
+  middleware: getDefaultMiddleware =>
     getDefaultMiddleware({
       serializableCheck: {
         ignoredActions: ['persist/PERSIST', 'persist/REHYDRATE'],

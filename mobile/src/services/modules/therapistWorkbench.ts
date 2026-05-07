@@ -76,9 +76,7 @@ export const therapistWorkbench = {
   },
 
   async caseload() {
-    const res = await api.get<{ success: boolean; items: CaseloadRow[]; total: number }>(
-      `${WB}/caseload`
-    );
+    const res = await api.get<{ success: boolean; items: CaseloadRow[]; total: number }>(`${WB}/caseload`);
     return res.items || [];
   },
 
@@ -88,10 +86,7 @@ export const therapistWorkbench = {
   },
 
   async checkIn(id: string, arrivalTime?: string, lateMinutes = 0) {
-    const res = await api.post<{ success: boolean; data: WorkbenchSession }>(
-      `${WB}/session/${id}/check-in`,
-      { arrivalTime, lateMinutes }
-    );
+    const res = await api.post<{ success: boolean; data: WorkbenchSession }>(`${WB}/session/${id}/check-in`, { arrivalTime, lateMinutes });
     return res.data;
   },
 
@@ -101,12 +96,9 @@ export const therapistWorkbench = {
       notes?: { subjective?: string; objective?: string; assessment?: string; plan?: string };
       rating?: number;
       goalsProgress?: Array<{ goalId: string; achieved: number; notes?: string }>;
-    }
+    },
   ) {
-    const res = await api.post<{ success: boolean; data: WorkbenchSession }>(
-      `${WB}/session/${id}/notes`,
-      payload
-    );
+    const res = await api.post<{ success: boolean; data: WorkbenchSession }>(`${WB}/session/${id}/notes`, payload);
     return res.data;
   },
 
@@ -117,12 +109,9 @@ export const therapistWorkbench = {
       rating?: number;
       goalsProgress?: Array<{ goalId: string; achieved: number; notes?: string }>;
       departureTime?: string;
-    }
+    },
   ) {
-    const res = await api.post<{ success: boolean; data: WorkbenchSession }>(
-      `${WB}/session/${id}/complete`,
-      payload
-    );
+    const res = await api.post<{ success: boolean; data: WorkbenchSession }>(`${WB}/session/${id}/complete`, payload);
     return res.data;
   },
 };

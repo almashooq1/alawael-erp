@@ -52,8 +52,26 @@ describe('ordersSlice', () => {
   describe('fetchOrders thunk', () => {
     it('should fetch orders successfully', async () => {
       const mockOrders = [
-        { id: '1', orderNumber: 'ORD-001', customerId: 'cust-1', totalAmount: 1000, status: 'completed', items: [], createdAt: '2026-04-21', updatedAt: '2026-04-21' },
-        { id: '2', orderNumber: 'ORD-002', customerId: 'cust-2', totalAmount: 2000, status: 'pending', items: [], createdAt: '2026-04-21', updatedAt: '2026-04-21' },
+        {
+          id: '1',
+          orderNumber: 'ORD-001',
+          customerId: 'cust-1',
+          totalAmount: 1000,
+          status: 'completed',
+          items: [],
+          createdAt: '2026-04-21',
+          updatedAt: '2026-04-21',
+        },
+        {
+          id: '2',
+          orderNumber: 'ORD-002',
+          customerId: 'cust-2',
+          totalAmount: 2000,
+          status: 'pending',
+          items: [],
+          createdAt: '2026-04-21',
+          updatedAt: '2026-04-21',
+        },
       ];
       mockedApi.get.mockResolvedValue({ items: mockOrders, total: 2 });
 
@@ -242,9 +260,7 @@ describe('ordersSlice', () => {
 
     it('should clear filters', () => {
       store.dispatch(setStatusFilter('completed'));
-      store.dispatch(
-        clearFilters()
-      );
+      store.dispatch(clearFilters());
       const state = store.getState().orders;
 
       expect(state.filters.status).toBeNull();

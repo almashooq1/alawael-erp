@@ -36,48 +36,36 @@ const initialState: AnalyticsState = {
 };
 
 // Async thunks
-export const fetchMetrics = createAsyncThunk(
-  'analytics/fetchMetrics',
-  async (params: { period?: string } = {}, { rejectWithValue }) => {
-    try {
-      const response: any = await ApiService.get('/analytics/metrics', params);
-      return response;
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Failed to fetch metrics');
-    }
+export const fetchMetrics = createAsyncThunk('analytics/fetchMetrics', async (params: { period?: string } = {}, { rejectWithValue }) => {
+  try {
+    const response: any = await ApiService.get('/analytics/metrics', params);
+    return response;
+  } catch (error: any) {
+    return rejectWithValue(error.message || 'Failed to fetch metrics');
   }
-);
+});
 
-export const fetchDashboards = createAsyncThunk(
-  'analytics/fetchDashboards',
-  async (_, { rejectWithValue }) => {
-    try {
-      const response: any = await ApiService.get('/analytics/dashboards');
-      return response.items || response;
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Failed to fetch dashboards');
-    }
+export const fetchDashboards = createAsyncThunk('analytics/fetchDashboards', async (_, { rejectWithValue }) => {
+  try {
+    const response: any = await ApiService.get('/analytics/dashboards');
+    return response.items || response;
+  } catch (error: any) {
+    return rejectWithValue(error.message || 'Failed to fetch dashboards');
   }
-);
+});
 
-export const fetchDashboard = createAsyncThunk(
-  'analytics/fetchDashboard',
-  async (dashboardId: string, { rejectWithValue }) => {
-    try {
-      const response = await ApiService.get(`/analytics/dashboards/${dashboardId}`);
-      return response;
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Failed to fetch dashboard');
-    }
+export const fetchDashboard = createAsyncThunk('analytics/fetchDashboard', async (dashboardId: string, { rejectWithValue }) => {
+  try {
+    const response = await ApiService.get(`/analytics/dashboards/${dashboardId}`);
+    return response;
+  } catch (error: any) {
+    return rejectWithValue(error.message || 'Failed to fetch dashboard');
   }
-);
+});
 
 export const fetchTrends = createAsyncThunk(
   'analytics/fetchTrends',
-  async (
-    params: { metricName: string; period?: string },
-    { rejectWithValue }
-  ) => {
+  async (params: { metricName: string; period?: string }, { rejectWithValue }) => {
     try {
       const response = await ApiService.get(`/analytics/trends/${params.metricName}`, {
         period: params.period,
@@ -86,21 +74,21 @@ export const fetchTrends = createAsyncThunk(
     } catch (error: any) {
       return rejectWithValue(error.message || 'Failed to fetch trends');
     }
-  }
+  },
 );
 
 const analyticsSlice = createSlice({
   name: 'analytics',
   initialState,
   reducers: {
-    clearError: (state) => {
+    clearError: state => {
       state.error = null;
     },
   },
-  extraReducers: (builder) => {
+  extraReducers: builder => {
     // Fetch Metrics
     builder
-      .addCase(fetchMetrics.pending, (state) => {
+      .addCase(fetchMetrics.pending, state => {
         state.isLoading = true;
         state.error = null;
       })
@@ -115,7 +103,7 @@ const analyticsSlice = createSlice({
 
     // Fetch Dashboards
     builder
-      .addCase(fetchDashboards.pending, (state) => {
+      .addCase(fetchDashboards.pending, state => {
         state.isLoading = true;
         state.error = null;
       })
@@ -130,7 +118,7 @@ const analyticsSlice = createSlice({
 
     // Fetch Dashboard
     builder
-      .addCase(fetchDashboard.pending, (state) => {
+      .addCase(fetchDashboard.pending, state => {
         state.isLoading = true;
         state.error = null;
       })
@@ -145,10 +133,10 @@ const analyticsSlice = createSlice({
 
     // Fetch Trends
     builder
-      .addCase(fetchTrends.pending, (state) => {
+      .addCase(fetchTrends.pending, state => {
         state.isLoading = true;
       })
-      .addCase(fetchTrends.fulfilled, (state) => {
+      .addCase(fetchTrends.fulfilled, state => {
         state.isLoading = false;
       })
       .addCase(fetchTrends.rejected, (state, action) => {

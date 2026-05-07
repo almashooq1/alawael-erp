@@ -128,6 +128,14 @@
       "eslint --fix",
       "prettier --write"
     ],
+    "supply-chain-management/frontend/src/**/*.{js,jsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "mobile/{src,App.tsx}/**/*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
     "**/*.{json,md}": [
       "prettier --write"
     ]

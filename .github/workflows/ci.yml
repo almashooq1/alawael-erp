@@ -67,6 +67,50 @@ jobs:
           CI: "false"
           DISABLE_ESLINT_PLUGIN: "true"
 
+  scm-frontend:
+    name: SCM Frontend Quality Gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Install
+        working-directory: supply-chain-management/frontend
+        run: npm ci --legacy-peer-deps 2>&1 || npm install --legacy-peer-deps
+      - name: Lint (zero warnings)
+        working-directory: supply-chain-management/frontend
+        run: npm run lint
+        env:
+          CI: "false"
+      - name: Tests
+        working-directory: supply-chain-management/frontend
+        run: npm test -- --watchAll=false --ci --passWithNoTests
+        env:
+          CI: "true"
+
+  mobile:
+    name: Mobile Quality Gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Install
+        working-directory: mobile
+        run: npm ci --legacy-peer-deps 2>&1 || npm install --legacy-peer-deps
+      - name: Lint (zero warnings)
+        working-directory: mobile
+        run: npm run lint
+      - name: Tests
+        working-directory: mobile
+        run: npm test -- --watchAll=false --ci --passWithNoTests
+        env:
+          CI: "true"
+
   security:
     name: Security Scanning
     runs-on: ubuntu-latest

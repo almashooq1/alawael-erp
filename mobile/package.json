@@ -9,7 +9,7 @@
     "build:ios": "eas build --platform ios",
     "eject": "expo eject",
     "ios": "expo start --ios",
-    "lint": "eslint \"src/**/*.{ts,tsx}\" App.tsx",
+    "lint": "eslint \"src/**/*.{ts,tsx}\" App.tsx --max-warnings=0",
     "quality": "npm run quality:ci",
     "quality:ci": "npm run quality:guard && npm test -- --coverage --passWithNoTests",
     "quality:fast": "npm run quality:guard && npm test -- --passWithNoTests",
@@ -33,6 +33,7 @@
     "postcss": "^8.5.10",
     "semver": "^7.6.3",
     "tar": "^7.5.11",
+    "test-exclude": "^7.0.1",
     "uuid": "^14.0.0",
     "yaml": "^2.8.3"
   },

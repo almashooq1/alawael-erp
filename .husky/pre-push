@@ -1,2 +1,23 @@
+#!/bin/sh
+# Platform-wide pre-push gate: enforces zero-warning lint on all subprojects
+# plus backend's deeper push checks. SCM backend is a placeholder lint.
+
+set -e
+
+echo "[pre-push] backend quality:push…"
 cd backend && npm run quality:push
-cd ../frontend && npm run lint
+cd ..
+
+echo "[pre-push] frontend lint (--max-warnings=0)…"
+cd frontend && npm run lint
+cd ..
+
+echo "[pre-push] supply-chain-management/frontend lint (--max-warnings=0)…"
+cd supply-chain-management/frontend && npm run lint
+cd ../..
+
+echo "[pre-push] mobile lint (--max-warnings=0)…"
+cd mobile && npm run lint
+cd ..
+
+echo "[pre-push] ✅ all lint gates passed"

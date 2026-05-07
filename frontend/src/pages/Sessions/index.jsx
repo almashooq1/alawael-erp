@@ -6,7 +6,15 @@
  */
 import React from 'react';
 import {
-  Container, Typography, Box, Grid, Button, IconButton, Stack, Alert, Paper,
+  Container,
+  Typography,
+  Box,
+  Grid,
+  Button,
+  IconButton,
+  Stack,
+  Alert,
+  Paper,
 } from '@mui/material';
 import { Add as AddIcon, Event as EventIcon, Refresh, ErrorOutline } from '@mui/icons-material';
 
@@ -70,7 +78,12 @@ const SessionsManagementInner = () => {
           </Grid>
           <Grid item xs={12} md={4}>
             <Stack direction="row" spacing={1} justifyContent="flex-end">
-              <Button variant="contained" startIcon={<AddIcon />} onClick={ctx.handleOpenCreate} sx={{ borderRadius: 2 }}>
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={ctx.handleOpenCreate}
+                sx={{ borderRadius: 2 }}
+              >
                 جلسة جديدة
               </Button>
               <IconButton onClick={ctx.fetchSessions} disabled={ctx.loading}>
@@ -126,6 +139,7 @@ const SessionsManagementInner = () => {
         saving={ctx.saving}
         formError={ctx.formError}
         onSave={ctx.handleSave}
+        episodes={ctx.episodes}
       />
 
       {/* ── Delete Confirmation ── */}

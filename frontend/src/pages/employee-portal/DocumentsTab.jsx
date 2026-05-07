@@ -84,8 +84,13 @@ export default function DocumentsTab({ documents, loading }) {
                       {doc.name || doc.title}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
-                      {doc.uploadDate || (doc.createdAt && new Date(doc.createdAt).toLocaleDateString('ar-SA'))}
-                      {doc.size ? ` • ${doc.size}` : doc.fileSize ? ` • ${documentService.formatFileSize(doc.fileSize)}` : ''}
+                      {doc.uploadDate ||
+                        (doc.createdAt && new Date(doc.createdAt).toLocaleDateString('ar-SA'))}
+                      {doc.size
+                        ? ` • ${doc.size}`
+                        : doc.fileSize
+                          ? ` • ${documentService.formatFileSize(doc.fileSize)}`
+                          : ''}
                     </Typography>
                   </Box>
                 </Box>

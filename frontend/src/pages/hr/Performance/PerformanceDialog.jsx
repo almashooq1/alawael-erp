@@ -75,9 +75,7 @@ const PerformanceDialog = ({
               {Object.entries(RATING_CONFIG).map(([k, v]) => (
                 <MenuItem key={k} value={k}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Box
-                      sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: v.color }}
-                    />
+                    <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: v.color }} />
                     {v.label}
                   </Box>
                 </MenuItem>

@@ -5,31 +5,85 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Box, Grid, Card, CardContent, Typography, Table, TableBody, TableCell,
-  TableContainer, TableHead, TableRow, Paper, Chip, LinearProgress,
-  Button, IconButton, Tooltip,
+  Box,
+  Grid,
+  Card,
+  CardContent,
+  Typography,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Chip,
+  LinearProgress,
+  Button,
+  IconButton,
+  Tooltip,
 } from '@mui/material';
 import {
-  Draw, Approval as Stamp, Verified, PendingActions,
-  TrendingUp, Speed, Description, Refresh, ArrowForward,
+  Draw,
+  Approval as Stamp,
+  Verified,
+  PendingActions,
+  TrendingUp,
+  Speed,
+  Description,
+  Refresh,
+  ArrowForward,
 } from '@mui/icons-material';
 import {
-  PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid,
-  Tooltip as ChartTooltip, ResponsiveContainer, Legend,
+  PieChart,
+  Pie,
+  Cell,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as ChartTooltip,
+  ResponsiveContainer,
+  Legend,
 } from 'recharts';
 import eSignatureService from '../../services/eSignature.service';
 import eStampService from '../../services/eStamp.service';
 
 const COLORS = ['#4caf50', '#ff9800', '#f44336', '#2196f3', '#9c27b0', '#607d8b'];
-const MONTH_NAMES = ['', 'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+const MONTH_NAMES = [
+  '',
+  'يناير',
+  'فبراير',
+  'مارس',
+  'أبريل',
+  'مايو',
+  'يونيو',
+  'يوليو',
+  'أغسطس',
+  'سبتمبر',
+  'أكتوبر',
+  'نوفمبر',
+  'ديسمبر',
+];
 
 const statusAr = {
-  pending: 'معلق', in_progress: 'قيد التنفيذ', completed: 'مكتمل',
-  rejected: 'مرفوض', expired: 'منتهي', cancelled: 'ملغي', draft: 'مسودة',
+  pending: 'معلق',
+  in_progress: 'قيد التنفيذ',
+  completed: 'مكتمل',
+  rejected: 'مرفوض',
+  expired: 'منتهي',
+  cancelled: 'ملغي',
+  draft: 'مسودة',
 };
 const statusChipColor = {
-  pending: 'warning', in_progress: 'info', completed: 'success',
-  rejected: 'error', expired: 'default', cancelled: 'default', draft: 'default',
+  pending: 'warning',
+  in_progress: 'info',
+  completed: 'success',
+  rejected: 'error',
+  expired: 'default',
+  cancelled: 'default',
+  draft: 'default',
 };
 
 const KPICard = ({ icon: Icon, title, value, color, subtitle }) => (
@@ -40,12 +94,18 @@ const KPICard = ({ icon: Icon, title, value, color, subtitle }) => (
           <Icon sx={{ color, fontSize: 28 }} />
         </Box>
         <Box flex={1}>
-          <Typography variant="body2" color="text.secondary">{title}</Typography>
-          <Typography variant="h4" fontWeight="bold">{value}</Typography>
+          <Typography variant="body2" color="text.secondary">
+            {title}
+          </Typography>
+          <Typography variant="h4" fontWeight="bold">
+            {value}
+          </Typography>
         </Box>
       </Box>
       {subtitle && (
-        <Typography variant="caption" color="text.secondary">{subtitle}</Typography>
+        <Typography variant="caption" color="text.secondary">
+          {subtitle}
+        </Typography>
       )}
     </CardContent>
   </Card>
@@ -73,7 +133,9 @@ export default function ESignatureDashboard() {
     }
   };
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   if (loading) return <LinearProgress />;
 
@@ -111,9 +173,7 @@ export default function ESignatureDashboard() {
   }, {});
 
   monthlyActivity.forEach(m => {
-    const entry = (sigData?.monthlyTrend || []).find(
-      t => MONTH_NAMES[t._id?.month] === m.month
-    );
+    const entry = (sigData?.monthlyTrend || []).find(t => MONTH_NAMES[t._id?.month] === m.month);
     if (entry) {
       const key = `${entry._id?.year}-${entry._id?.month}`;
       m.stamps = stampMonthly[key] || 0;
@@ -137,40 +197,77 @@ export default function ESignatureDashboard() {
           لوحة تحكم التوقيع والختم الإلكتروني
         </Typography>
         <Tooltip title="تحديث">
-          <IconButton onClick={fetchData}><Refresh /></IconButton>
+          <IconButton onClick={fetchData}>
+            <Refresh />
+          </IconButton>
         </Tooltip>
       </Box>
 
       {/* ── KPI Cards ──────────────────────────────────────────────── */}
       <Grid container spacing={3} mb={4}>
         <Grid item xs={12} sm={6} md={3}>
-          <KPICard icon={Draw} title="إجمالي التوقيعات" value={totalSigs} color="#1976d2"
-            subtitle={`هذا الشهر: ${sigData?.thisMonth || 0}`} />
+          <KPICard
+            icon={Draw}
+            title="إجمالي التوقيعات"
+            value={totalSigs}
+            color="#1976d2"
+            subtitle={`هذا الشهر: ${sigData?.thisMonth || 0}`}
+          />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <KPICard icon={PendingActions} title="بانتظار التوقيع" value={pendingSigs} color="#ff9800"
-            subtitle={rejectedSigs > 0 ? `${rejectedSigs} مرفوض` : undefined} />
+          <KPICard
+            icon={PendingActions}
+            title="بانتظار التوقيع"
+            value={pendingSigs}
+            color="#ff9800"
+            subtitle={rejectedSigs > 0 ? `${rejectedSigs} مرفوض` : undefined}
+          />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <KPICard icon={Verified} title="مكتملة" value={completedSigs} color="#4caf50"
-            subtitle={`نسبة الإكمال: ${completionRate}%`} />
+          <KPICard
+            icon={Verified}
+            title="مكتملة"
+            value={completedSigs}
+            color="#4caf50"
+            subtitle={`نسبة الإكمال: ${completionRate}%`}
+          />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <KPICard icon={Stamp} title="الأختام النشطة" value={activeStamps} color="#9c27b0"
-            subtitle={`الإجمالي: ${stampData?.total || 0}`} />
+          <KPICard
+            icon={Stamp}
+            title="الأختام النشطة"
+            value={activeStamps}
+            color="#9c27b0"
+            subtitle={`الإجمالي: ${stampData?.total || 0}`}
+          />
         </Grid>
       </Grid>
 
       {/* ── Extra KPIs ─────────────────────────────────────────────── */}
       <Grid container spacing={3} mb={4}>
         <Grid item xs={12} sm={4}>
-          <KPICard icon={Speed} title="متوسط وقت الإكمال" value={`${avgHours} ساعة`} color="#00897b" />
+          <KPICard
+            icon={Speed}
+            title="متوسط وقت الإكمال"
+            value={`${avgHours} ساعة`}
+            color="#00897b"
+          />
         </Grid>
         <Grid item xs={12} sm={4}>
-          <KPICard icon={Description} title="القوالب النشطة" value={sigData?.templates || 0} color="#5c6bc0" />
+          <KPICard
+            icon={Description}
+            title="القوالب النشطة"
+            value={sigData?.templates || 0}
+            color="#5c6bc0"
+          />
         </Grid>
         <Grid item xs={12} sm={4}>
-          <KPICard icon={TrendingUp} title="استخدامات الأختام" value={stampData?.totalUsage || 0} color="#e65100" />
+          <KPICard
+            icon={TrendingUp}
+            title="استخدامات الأختام"
+            value={stampData?.totalUsage || 0}
+            color="#e65100"
+          />
         </Grid>
       </Grid>
 
@@ -178,18 +275,39 @@ export default function ESignatureDashboard() {
       <Grid container spacing={3} mb={4}>
         <Grid item xs={12} md={6}>
           <Paper sx={{ p: 2, borderRadius: 2 }}>
-            <Typography variant="h6" mb={2} fontWeight="bold">حالة التوقيعات</Typography>
+            <Typography variant="h6" mb={2} fontWeight="bold">
+              حالة التوقيعات
+            </Typography>
             {byStatusPie.length > 0 ? (
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
-                  <Pie data={byStatusPie} cx="50%" cy="50%" outerRadius={100} innerRadius={50} dataKey="value" nameKey="name" label>
-                    {byStatusPie.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                  <Pie
+                    data={byStatusPie}
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={100}
+                    innerRadius={50}
+                    dataKey="value"
+                    nameKey="name"
+                    label
+                  >
+                    {byStatusPie.map((_, i) => (
+                      <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                    ))}
                   </Pie>
-                  <ChartTooltip /><Legend />
+                  <ChartTooltip />
+                  <Legend />
                 </PieChart>
               </ResponsiveContainer>
             ) : (
-              <Box sx={{ height: 300, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Box
+                sx={{
+                  height: 300,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
                 <Typography color="text.secondary">لا توجد بيانات بعد</Typography>
               </Box>
             )}
@@ -197,7 +315,9 @@ export default function ESignatureDashboard() {
         </Grid>
         <Grid item xs={12} md={6}>
           <Paper sx={{ p: 2, borderRadius: 2 }}>
-            <Typography variant="h6" mb={2} fontWeight="bold">النشاط الشهري</Typography>
+            <Typography variant="h6" mb={2} fontWeight="bold">
+              النشاط الشهري
+            </Typography>
             {monthlyActivity.length > 0 ? (
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={monthlyActivity}>
@@ -206,12 +326,19 @@ export default function ESignatureDashboard() {
                   <YAxis />
                   <ChartTooltip />
                   <Legend />
-                  <Bar dataKey="signatures" name="توقيعات" fill="#1976d2" radius={[4,4,0,0]} />
-                  <Bar dataKey="stamps" name="أختام" fill="#9c27b0" radius={[4,4,0,0]} />
+                  <Bar dataKey="signatures" name="توقيعات" fill="#1976d2" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="stamps" name="أختام" fill="#9c27b0" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <Box sx={{ height: 300, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Box
+                sx={{
+                  height: 300,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
                 <Typography color="text.secondary">لا توجد بيانات شهرية بعد</Typography>
               </Box>
             )}
@@ -222,7 +349,9 @@ export default function ESignatureDashboard() {
       {/* ── Recent Documents ───────────────────────────────────────── */}
       <Paper sx={{ p: 2, borderRadius: 2 }}>
         <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-          <Typography variant="h6" fontWeight="bold">آخر المستندات</Typography>
+          <Typography variant="h6" fontWeight="bold">
+            آخر المستندات
+          </Typography>
           <Button size="small" endIcon={<ArrowForward />} onClick={() => navigate('/e-signature')}>
             عرض الكل
           </Button>

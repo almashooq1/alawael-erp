@@ -6,15 +6,43 @@
  */
 
 import {
-  Box, Typography, Grid, Card, useTheme, alpha, Chip,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  LinearProgress, IconButton, Tooltip,
+  Box,
+  Typography,
+  Grid,
+  Card,
+  useTheme,
+  alpha,
+  Chip,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  LinearProgress,
+  IconButton,
+  Tooltip,
 } from '@mui/material';
 import { motion } from 'framer-motion';
 import {
-  AreaChart, Area, PieChart, Pie, Cell, BarChart, Bar,
-  RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
-  XAxis, YAxis, CartesianGrid, Tooltip as RTooltip, ResponsiveContainer, Legend,
+  AreaChart,
+  Area,
+  PieChart,
+  Pie,
+  Cell,
+  BarChart,
+  Bar,
+  RadarChart,
+  Radar,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as RTooltip,
+  ResponsiveContainer,
+  Legend,
 } from 'recharts';
 
 import HealthAndSafetyIcon from '@mui/icons-material/HealthAndSafety';
@@ -36,7 +64,7 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 const GRAD = ['#0ea5e9', '#22c55e', '#f59e0b'];
 const gradient = `linear-gradient(135deg, ${GRAD[0]} 0%, ${GRAD[1]} 50%, ${GRAD[2]} 100%)`;
 
-const glass = (isDark) => ({
+const glass = isDark => ({
   borderRadius: '20px',
   border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.9)'}`,
   background: isDark ? 'rgba(15,23,42,0.65)' : 'rgba(255,255,255,0.8)',
@@ -102,13 +130,62 @@ const COVERAGE_DATA = [
 ];
 
 const RECENT_CLAIMS = [
-  { id: 'CLM-2847', patient: 'أحمد المحمدي', type: 'علاج طبيعي', amount: '٣,٢٥٠', status: 'approved', date: '٢٠٢٦/٠٣/٢٨' },
-  { id: 'CLM-2846', patient: 'فاطمة الزهراء', type: 'فحوصات مخبرية', amount: '١,٨٧٠', status: 'pending', date: '٢٠٢٦/٠٣/٢٨' },
-  { id: 'CLM-2845', patient: 'محمد العلي', type: 'أدوية', amount: '٩٤٥', status: 'approved', date: '٢٠٢٦/٠٣/٢٧' },
-  { id: 'CLM-2844', patient: 'نورة السعيد', type: 'إقامة مستشفى', amount: '١٢,٥٠٠', status: 'review', date: '٢٠٢٦/٠٣/٢٧' },
-  { id: 'CLM-2843', patient: 'عبدالله القحطاني', type: 'طوارئ', amount: '٥,٣٢٠', status: 'approved', date: '٢٠٢٦/٠٣/٢٦' },
-  { id: 'CLM-2842', patient: 'سارة الحربي', type: 'أسنان', amount: '٢,١٠٠', status: 'rejected', date: '٢٠٢٦/٠٣/٢٦' },
-  { id: 'CLM-2841', patient: 'خالد الدوسري', type: 'علاج طبيعي', amount: '٤,٧٨٠', status: 'approved', date: '٢٠٢٦/٠٣/٢٥' },
+  {
+    id: 'CLM-2847',
+    patient: 'أحمد المحمدي',
+    type: 'علاج طبيعي',
+    amount: '٣,٢٥٠',
+    status: 'approved',
+    date: '٢٠٢٦/٠٣/٢٨',
+  },
+  {
+    id: 'CLM-2846',
+    patient: 'فاطمة الزهراء',
+    type: 'فحوصات مخبرية',
+    amount: '١,٨٧٠',
+    status: 'pending',
+    date: '٢٠٢٦/٠٣/٢٨',
+  },
+  {
+    id: 'CLM-2845',
+    patient: 'محمد العلي',
+    type: 'أدوية',
+    amount: '٩٤٥',
+    status: 'approved',
+    date: '٢٠٢٦/٠٣/٢٧',
+  },
+  {
+    id: 'CLM-2844',
+    patient: 'نورة السعيد',
+    type: 'إقامة مستشفى',
+    amount: '١٢,٥٠٠',
+    status: 'review',
+    date: '٢٠٢٦/٠٣/٢٧',
+  },
+  {
+    id: 'CLM-2843',
+    patient: 'عبدالله القحطاني',
+    type: 'طوارئ',
+    amount: '٥,٣٢٠',
+    status: 'approved',
+    date: '٢٠٢٦/٠٣/٢٦',
+  },
+  {
+    id: 'CLM-2842',
+    patient: 'سارة الحربي',
+    type: 'أسنان',
+    amount: '٢,١٠٠',
+    status: 'rejected',
+    date: '٢٠٢٦/٠٣/٢٦',
+  },
+  {
+    id: 'CLM-2841',
+    patient: 'خالد الدوسري',
+    type: 'علاج طبيعي',
+    amount: '٤,٧٨٠',
+    status: 'approved',
+    date: '٢٠٢٦/٠٣/٢٥',
+  },
 ];
 
 const POLICY_SUMMARY = [
@@ -137,8 +214,13 @@ const SectionHeader = ({ icon: Icon, title, isDark }) => (
   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
     <Box
       sx={{
-        width: 36, height: 36, borderRadius: '12px',
-        background: gradient, display: 'flex', alignItems: 'center', justifyContent: 'center',
+        width: 36,
+        height: 36,
+        borderRadius: '12px',
+        background: gradient,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
         boxShadow: `0 4px 14px ${alpha(GRAD[0], 0.35)}`,
       }}
     >
@@ -152,10 +234,30 @@ const SectionHeader = ({ icon: Icon, title, isDark }) => (
 
 const StatusChip = ({ status }) => {
   const map = {
-    approved: { label: 'موافق', color: '#10b981', bg: 'rgba(16,185,129,0.12)', icon: <CheckCircleIcon sx={{ fontSize: 14 }} /> },
-    pending: { label: 'قيد المراجعة', color: '#f59e0b', bg: 'rgba(245,158,11,0.12)', icon: <PendingIcon sx={{ fontSize: 14 }} /> },
-    rejected: { label: 'مرفوض', color: '#ef4444', bg: 'rgba(239,68,68,0.12)', icon: <CancelIcon sx={{ fontSize: 14 }} /> },
-    review: { label: 'مراجعة طبية', color: '#8b5cf6', bg: 'rgba(139,92,246,0.12)', icon: <VisibilityIcon sx={{ fontSize: 14 }} /> },
+    approved: {
+      label: 'موافق',
+      color: '#10b981',
+      bg: 'rgba(16,185,129,0.12)',
+      icon: <CheckCircleIcon sx={{ fontSize: 14 }} />,
+    },
+    pending: {
+      label: 'قيد المراجعة',
+      color: '#f59e0b',
+      bg: 'rgba(245,158,11,0.12)',
+      icon: <PendingIcon sx={{ fontSize: 14 }} />,
+    },
+    rejected: {
+      label: 'مرفوض',
+      color: '#ef4444',
+      bg: 'rgba(239,68,68,0.12)',
+      icon: <CancelIcon sx={{ fontSize: 14 }} />,
+    },
+    review: {
+      label: 'مراجعة طبية',
+      color: '#8b5cf6',
+      bg: 'rgba(139,92,246,0.12)',
+      icon: <VisibilityIcon sx={{ fontSize: 14 }} />,
+    },
   };
   const s = map[status] || map.pending;
   return (
@@ -164,8 +266,11 @@ const StatusChip = ({ status }) => {
       label={s.label}
       size="small"
       sx={{
-        height: 24, fontSize: '0.7rem', fontWeight: 600,
-        backgroundColor: s.bg, color: s.color,
+        height: 24,
+        fontSize: '0.7rem',
+        fontWeight: 600,
+        backgroundColor: s.bg,
+        color: s.color,
         border: `1px solid ${alpha(s.color, 0.25)}`,
         '& .MuiChip-icon': { color: s.color },
         '& .MuiChip-label': { px: 0.8 },
@@ -184,10 +289,17 @@ export default function InsuranceProDashboard() {
   return (
     <Box sx={{ minHeight: '100vh', direction: 'rtl' }}>
       {/* ── Hero ─────────────────────────────────────────────────────── */}
-      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
         <Box
           sx={{
-            position: 'relative', borderRadius: '28px', overflow: 'hidden', mb: 4,
+            position: 'relative',
+            borderRadius: '28px',
+            overflow: 'hidden',
+            mb: 4,
             p: { xs: 3, md: 4 },
             background: isDark
               ? `linear-gradient(135deg, ${alpha(GRAD[0], 0.25)} 0%, ${alpha(GRAD[1], 0.18)} 50%, ${alpha(GRAD[2], 0.12)} 100%)`
@@ -208,8 +320,11 @@ export default function InsuranceProDashboard() {
                 animate={{ scale: [1, 1.15, 1], opacity: [0.6, 1, 0.6] }}
                 transition={{ duration: 6 + i * 2, repeat: Infinity, ease: 'easeInOut' }}
                 style={{
-                  position: 'absolute', ...b,
-                  width: b.size, height: b.size, borderRadius: '50%',
+                  position: 'absolute',
+                  ...b,
+                  width: b.size,
+                  height: b.size,
+                  borderRadius: '50%',
                   background: `radial-gradient(circle, ${b.color} 0%, transparent 70%)`,
                 }}
               />
@@ -220,9 +335,13 @@ export default function InsuranceProDashboard() {
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
               <Box
                 sx={{
-                  width: 56, height: 56, borderRadius: '18px',
+                  width: 56,
+                  height: 56,
+                  borderRadius: '18px',
                   background: gradient,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                   boxShadow: `0 8px 24px ${alpha(GRAD[0], 0.4)}`,
                 }}
               >
@@ -231,15 +350,24 @@ export default function InsuranceProDashboard() {
               <Box>
                 <Typography
                   sx={{
-                    fontWeight: 800, fontSize: { xs: '1.4rem', md: '1.8rem' },
+                    fontWeight: 800,
+                    fontSize: { xs: '1.4rem', md: '1.8rem' },
                     background: gradient,
-                    WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text', lineHeight: 1.2,
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
+                    lineHeight: 1.2,
                   }}
                 >
                   لوحة التأمين الصحي
                 </Typography>
-                <Typography sx={{ fontSize: '0.9rem', color: isDark ? 'rgba(255,255,255,0.55)' : '#64748B', mt: 0.25 }}>
+                <Typography
+                  sx={{
+                    fontSize: '0.9rem',
+                    color: isDark ? 'rgba(255,255,255,0.55)' : '#64748B',
+                    mt: 0.25,
+                  }}
+                >
                   إدارة شاملة لبوالص التأمين والمطالبات ومقدمي الخدمة
                 </Typography>
               </Box>
@@ -262,26 +390,49 @@ export default function InsuranceProDashboard() {
                 <Card elevation={0} sx={{ ...glass(isDark), p: 2, textAlign: 'center' }}>
                   <Box
                     sx={{
-                      width: 44, height: 44, borderRadius: '14px', mx: 'auto', mb: 1.5,
+                      width: 44,
+                      height: 44,
+                      borderRadius: '14px',
+                      mx: 'auto',
+                      mb: 1.5,
                       background: `linear-gradient(135deg, ${alpha(kpi.color, 0.15)}, ${alpha(kpi.color, 0.05)})`,
                       border: `1px solid ${alpha(kpi.color, 0.2)}`,
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
                     }}
                   >
                     <Icon sx={{ fontSize: 22, color: kpi.color }} />
                   </Box>
-                  <Typography sx={{ fontWeight: 800, fontSize: '1.3rem', color: isDark ? '#F1F5F9' : '#0F172A', fontFamily: 'monospace' }}>
+                  <Typography
+                    sx={{
+                      fontWeight: 800,
+                      fontSize: '1.3rem',
+                      color: isDark ? '#F1F5F9' : '#0F172A',
+                      fontFamily: 'monospace',
+                    }}
+                  >
                     {kpi.value}
                   </Typography>
-                  <Typography sx={{ fontSize: '0.72rem', color: isDark ? 'rgba(255,255,255,0.45)' : '#64748B', mb: 0.5 }}>
+                  <Typography
+                    sx={{
+                      fontSize: '0.72rem',
+                      color: isDark ? 'rgba(255,255,255,0.45)' : '#64748B',
+                      mb: 0.5,
+                    }}
+                  >
                     {kpi.label}
                   </Typography>
                   <Chip
                     label={kpi.change}
                     size="small"
                     sx={{
-                      height: 20, fontSize: '0.65rem', fontWeight: 700,
-                      backgroundColor: kpi.change.startsWith('+') ? 'rgba(16,185,129,0.12)' : 'rgba(239,68,68,0.12)',
+                      height: 20,
+                      fontSize: '0.65rem',
+                      fontWeight: 700,
+                      backgroundColor: kpi.change.startsWith('+')
+                        ? 'rgba(16,185,129,0.12)'
+                        : 'rgba(239,68,68,0.12)',
                       color: kpi.change.startsWith('+') ? '#10b981' : '#ef4444',
                       '& .MuiChip-label': { px: 0.6 },
                     }}
@@ -310,20 +461,49 @@ export default function InsuranceProDashboard() {
                     <stop offset="95%" stopColor={GRAD[0]} stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke={isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'} />
-                <XAxis dataKey="month" tick={{ fontSize: 11, fill: isDark ? '#94A3B8' : '#64748B' }} />
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke={isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}
+                />
+                <XAxis
+                  dataKey="month"
+                  tick={{ fontSize: 11, fill: isDark ? '#94A3B8' : '#64748B' }}
+                />
                 <YAxis tick={{ fontSize: 11, fill: isDark ? '#94A3B8' : '#64748B' }} />
                 <RTooltip
                   contentStyle={{
                     background: isDark ? 'rgba(15,23,42,0.9)' : 'rgba(255,255,255,0.95)',
-                    border: 'none', borderRadius: 12, backdropFilter: 'blur(10px)',
+                    border: 'none',
+                    borderRadius: 12,
+                    backdropFilter: 'blur(10px)',
                     boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
                   }}
                 />
                 <Legend />
-                <Area type="monotone" dataKey="submitted" name="مقدمة" stroke={GRAD[0]} fill="url(#insGradSubmitted)" strokeWidth={2.5} />
-                <Area type="monotone" dataKey="approved" name="موافقة" stroke={GRAD[1]} fill="url(#insGradApproved)" strokeWidth={2.5} />
-                <Area type="monotone" dataKey="rejected" name="مرفوضة" stroke="#ef4444" fill="rgba(239,68,68,0.1)" strokeWidth={2} />
+                <Area
+                  type="monotone"
+                  dataKey="submitted"
+                  name="مقدمة"
+                  stroke={GRAD[0]}
+                  fill="url(#insGradSubmitted)"
+                  strokeWidth={2.5}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="approved"
+                  name="موافقة"
+                  stroke={GRAD[1]}
+                  fill="url(#insGradApproved)"
+                  strokeWidth={2.5}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="rejected"
+                  name="مرفوضة"
+                  stroke="#ef4444"
+                  fill="rgba(239,68,68,0.1)"
+                  strokeWidth={2}
+                />
               </AreaChart>
             </ResponsiveContainer>
           </GlassCard>
@@ -336,8 +516,10 @@ export default function InsuranceProDashboard() {
               <PieChart>
                 <Pie
                   data={CLAIM_TYPES}
-                  cx="50%" cy="50%"
-                  innerRadius={55} outerRadius={90}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={55}
+                  outerRadius={90}
                   paddingAngle={4}
                   dataKey="value"
                 >
@@ -348,11 +530,16 @@ export default function InsuranceProDashboard() {
                 <RTooltip
                   contentStyle={{
                     background: isDark ? 'rgba(15,23,42,0.9)' : 'rgba(255,255,255,0.95)',
-                    border: 'none', borderRadius: 12,
+                    border: 'none',
+                    borderRadius: 12,
                   }}
                 />
                 <Legend
-                  formatter={(val) => <span style={{ fontSize: '0.75rem', color: isDark ? '#94A3B8' : '#64748B' }}>{val}</span>}
+                  formatter={val => (
+                    <span style={{ fontSize: '0.75rem', color: isDark ? '#94A3B8' : '#64748B' }}>
+                      {val}
+                    </span>
+                  )}
                 />
               </PieChart>
             </ResponsiveContainer>
@@ -373,10 +560,26 @@ export default function InsuranceProDashboard() {
                   tick={{ fontSize: 10, fill: isDark ? '#94A3B8' : '#64748B' }}
                 />
                 <PolarRadiusAxis tick={{ fontSize: 9 }} domain={[0, 100]} />
-                <Radar name="شبكة أ" dataKey="A" stroke={GRAD[0]} fill={alpha(GRAD[0], 0.25)} strokeWidth={2} />
-                <Radar name="شبكة ب" dataKey="B" stroke={GRAD[2]} fill={alpha(GRAD[2], 0.2)} strokeWidth={2} />
+                <Radar
+                  name="شبكة أ"
+                  dataKey="A"
+                  stroke={GRAD[0]}
+                  fill={alpha(GRAD[0], 0.25)}
+                  strokeWidth={2}
+                />
+                <Radar
+                  name="شبكة ب"
+                  dataKey="B"
+                  stroke={GRAD[2]}
+                  fill={alpha(GRAD[2], 0.2)}
+                  strokeWidth={2}
+                />
                 <Legend
-                  formatter={(val) => <span style={{ fontSize: '0.75rem', color: isDark ? '#94A3B8' : '#64748B' }}>{val}</span>}
+                  formatter={val => (
+                    <span style={{ fontSize: '0.75rem', color: isDark ? '#94A3B8' : '#64748B' }}>
+                      {val}
+                    </span>
+                  )}
                 />
               </RadarChart>
             </ResponsiveContainer>
@@ -388,18 +591,34 @@ export default function InsuranceProDashboard() {
             <SectionHeader icon={TrendingUpIcon} title="نسبة التغطية حسب الفئة" isDark={isDark} />
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={COVERAGE_DATA} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" stroke={isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'} />
-                <XAxis type="number" domain={[0, 100]} tick={{ fontSize: 11, fill: isDark ? '#94A3B8' : '#64748B' }} />
-                <YAxis dataKey="category" type="category" tick={{ fontSize: 11, fill: isDark ? '#94A3B8' : '#64748B' }} width={60} />
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke={isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}
+                />
+                <XAxis
+                  type="number"
+                  domain={[0, 100]}
+                  tick={{ fontSize: 11, fill: isDark ? '#94A3B8' : '#64748B' }}
+                />
+                <YAxis
+                  dataKey="category"
+                  type="category"
+                  tick={{ fontSize: 11, fill: isDark ? '#94A3B8' : '#64748B' }}
+                  width={60}
+                />
                 <RTooltip
                   contentStyle={{
                     background: isDark ? 'rgba(15,23,42,0.9)' : 'rgba(255,255,255,0.95)',
-                    border: 'none', borderRadius: 12,
+                    border: 'none',
+                    borderRadius: 12,
                   }}
                 />
                 <Bar dataKey="covered" name="نسبة التغطية" radius={[0, 8, 8, 0]} barSize={20}>
                   {COVERAGE_DATA.map((entry, i) => (
-                    <Cell key={i} fill={entry.covered >= 90 ? GRAD[1] : entry.covered >= 70 ? GRAD[0] : GRAD[2]} />
+                    <Cell
+                      key={i}
+                      fill={entry.covered >= 90 ? GRAD[1] : entry.covered >= 70 ? GRAD[0] : GRAD[2]}
+                    />
                   ))}
                 </Bar>
               </BarChart>
@@ -422,7 +641,9 @@ export default function InsuranceProDashboard() {
               >
                 <Box
                   sx={{
-                    p: 2, borderRadius: '14px', mb: 1.5,
+                    p: 2,
+                    borderRadius: '14px',
+                    mb: 1.5,
                     background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)',
                     border: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'}`,
                   }}
@@ -433,15 +654,31 @@ export default function InsuranceProDashboard() {
                         label={plan.plan}
                         size="small"
                         sx={{
-                          height: 22, fontWeight: 700, fontSize: '0.7rem',
-                          background: gradient, color: '#fff',
+                          height: 22,
+                          fontWeight: 700,
+                          fontSize: '0.7rem',
+                          background: gradient,
+                          color: '#fff',
                         }}
                       />
-                      <Typography sx={{ fontSize: '0.82rem', fontWeight: 600, color: isDark ? '#E2E8F0' : '#334155' }}>
+                      <Typography
+                        sx={{
+                          fontSize: '0.82rem',
+                          fontWeight: 600,
+                          color: isDark ? '#E2E8F0' : '#334155',
+                        }}
+                      >
                         {plan.members} عضو
                       </Typography>
                     </Box>
-                    <Typography sx={{ fontSize: '0.82rem', fontWeight: 700, color: GRAD[0], fontFamily: 'monospace' }}>
+                    <Typography
+                      sx={{
+                        fontSize: '0.82rem',
+                        fontWeight: 700,
+                        color: GRAD[0],
+                        fontFamily: 'monospace',
+                      }}
+                    >
                       {plan.premium} ر.س
                     </Typography>
                   </Box>
@@ -450,7 +687,9 @@ export default function InsuranceProDashboard() {
                       variant="determinate"
                       value={plan.utilization}
                       sx={{
-                        flex: 1, height: 6, borderRadius: 3,
+                        flex: 1,
+                        height: 6,
+                        borderRadius: 3,
                         backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
                         '& .MuiLinearProgress-bar': {
                           borderRadius: 3,
@@ -458,7 +697,14 @@ export default function InsuranceProDashboard() {
                         },
                       }}
                     />
-                    <Typography sx={{ fontSize: '0.7rem', fontWeight: 600, color: isDark ? '#94A3B8' : '#64748B', minWidth: 35 }}>
+                    <Typography
+                      sx={{
+                        fontSize: '0.7rem',
+                        fontWeight: 600,
+                        color: isDark ? '#94A3B8' : '#64748B',
+                        minWidth: 35,
+                      }}
+                    >
                       {plan.utilization}٪
                     </Typography>
                   </Box>
@@ -471,7 +717,9 @@ export default function InsuranceProDashboard() {
         {/* ── Recent Claims Table ────────────────────────────────────── */}
         <Grid item xs={12} md={7}>
           <GlassCard isDark={isDark}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+            <Box
+              sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}
+            >
               <SectionHeader icon={ReceiptLongIcon} title="أحدث المطالبات" isDark={isDark} />
               <Tooltip title="تحديث">
                 <IconButton size="small">
@@ -483,11 +731,12 @@ export default function InsuranceProDashboard() {
               <Table size="small" stickyHeader>
                 <TableHead>
                   <TableRow>
-                    {['رقم المطالبة', 'المريض', 'النوع', 'المبلغ', 'الحالة', 'التاريخ'].map((h) => (
+                    {['رقم المطالبة', 'المريض', 'النوع', 'المبلغ', 'الحالة', 'التاريخ'].map(h => (
                       <TableCell
                         key={h}
                         sx={{
-                          fontWeight: 700, fontSize: '0.72rem',
+                          fontWeight: 700,
+                          fontSize: '0.72rem',
                           color: isDark ? '#94A3B8' : '#64748B',
                           backgroundColor: isDark ? 'rgba(15,23,42,0.8)' : 'rgba(248,250,252,0.95)',
                           borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
@@ -508,22 +757,61 @@ export default function InsuranceProDashboard() {
                       component={TableRow}
                       style={{ display: 'table-row' }}
                     >
-                      <TableCell sx={{ fontSize: '0.78rem', fontWeight: 600, color: GRAD[0], fontFamily: 'monospace', borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)'}` }}>
+                      <TableCell
+                        sx={{
+                          fontSize: '0.78rem',
+                          fontWeight: 600,
+                          color: GRAD[0],
+                          fontFamily: 'monospace',
+                          borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)'}`,
+                        }}
+                      >
                         {claim.id}
                       </TableCell>
-                      <TableCell sx={{ fontSize: '0.78rem', color: isDark ? '#E2E8F0' : '#334155', borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)'}` }}>
+                      <TableCell
+                        sx={{
+                          fontSize: '0.78rem',
+                          color: isDark ? '#E2E8F0' : '#334155',
+                          borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)'}`,
+                        }}
+                      >
                         {claim.patient}
                       </TableCell>
-                      <TableCell sx={{ fontSize: '0.75rem', color: isDark ? '#94A3B8' : '#64748B', borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)'}` }}>
+                      <TableCell
+                        sx={{
+                          fontSize: '0.75rem',
+                          color: isDark ? '#94A3B8' : '#64748B',
+                          borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)'}`,
+                        }}
+                      >
                         {claim.type}
                       </TableCell>
-                      <TableCell sx={{ fontSize: '0.78rem', fontWeight: 700, color: isDark ? '#E2E8F0' : '#334155', fontFamily: 'monospace', borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)'}` }}>
+                      <TableCell
+                        sx={{
+                          fontSize: '0.78rem',
+                          fontWeight: 700,
+                          color: isDark ? '#E2E8F0' : '#334155',
+                          fontFamily: 'monospace',
+                          borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)'}`,
+                        }}
+                      >
                         {claim.amount} ر.س
                       </TableCell>
-                      <TableCell sx={{ borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)'}` }}>
+                      <TableCell
+                        sx={{
+                          borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)'}`,
+                        }}
+                      >
                         <StatusChip status={claim.status} />
                       </TableCell>
-                      <TableCell sx={{ fontSize: '0.72rem', color: isDark ? '#94A3B8' : '#94A3B8', fontFamily: 'monospace', borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)'}` }}>
+                      <TableCell
+                        sx={{
+                          fontSize: '0.72rem',
+                          color: isDark ? '#94A3B8' : '#94A3B8',
+                          fontFamily: 'monospace',
+                          borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)'}`,
+                        }}
+                      >
                         {claim.date}
                       </TableCell>
                     </motion.tr>
@@ -539,15 +827,22 @@ export default function InsuranceProDashboard() {
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }}>
         <Box
           sx={{
-            mt: 4, p: 2.5, borderRadius: '16px',
+            mt: 4,
+            p: 2.5,
+            borderRadius: '16px',
             background: isDark ? alpha(GRAD[0], 0.08) : alpha(GRAD[0], 0.04),
             border: `1px solid ${isDark ? alpha(GRAD[0], 0.2) : alpha(GRAD[0], 0.1)}`,
-            display: 'flex', alignItems: 'center', gap: 2,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 2,
           }}
         >
           <AutoAwesomeIcon sx={{ fontSize: 20, color: GRAD[0], flexShrink: 0 }} />
-          <Typography sx={{ fontSize: '0.82rem', color: isDark ? 'rgba(255,255,255,0.5)' : '#64748B' }}>
-            لوحة التأمين الصحي — تتبع المطالبات وبوالص التأمين ومقدمي الخدمة في الوقت الفعلي مع تحليلات ذكية
+          <Typography
+            sx={{ fontSize: '0.82rem', color: isDark ? 'rgba(255,255,255,0.5)' : '#64748B' }}
+          >
+            لوحة التأمين الصحي — تتبع المطالبات وبوالص التأمين ومقدمي الخدمة في الوقت الفعلي مع
+            تحليلات ذكية
           </Typography>
         </Box>
       </motion.div>

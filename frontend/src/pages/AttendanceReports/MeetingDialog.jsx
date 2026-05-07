@@ -1,14 +1,28 @@
 import React from 'react';
 import {
-  Dialog, DialogTitle, DialogContent, DialogActions,
-  Button, TextField, FormControl, InputLabel, Select, MenuItem,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from '@mui/material';
 
 const MeetingDialog = ({ open, onClose }) => (
   <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
     <DialogTitle>تحديد موعد مقابلة</DialogTitle>
     <DialogContent sx={{ pt: 2 }}>
-      <TextField fullWidth label="التاريخ" type="date" InputLabelProps={{ shrink: true }} sx={{ mb: 2 }} />
+      <TextField
+        fullWidth
+        label="التاريخ"
+        type="date"
+        InputLabelProps={{ shrink: true }}
+        sx={{ mb: 2 }}
+      />
       <FormControl fullWidth sx={{ mb: 2 }}>
         <InputLabel>المعالج</InputLabel>
         <Select label="المعالج">
@@ -20,7 +34,9 @@ const MeetingDialog = ({ open, onClose }) => (
     </DialogContent>
     <DialogActions>
       <Button onClick={onClose}>إلغاء</Button>
-      <Button variant="contained" onClick={onClose}>تحديد الموعد</Button>
+      <Button variant="contained" onClick={onClose}>
+        تحديد الموعد
+      </Button>
     </DialogActions>
   </Dialog>
 );

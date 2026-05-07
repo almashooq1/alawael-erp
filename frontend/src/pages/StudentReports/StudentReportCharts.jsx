@@ -5,14 +5,29 @@
 import React from 'react';
 import { Card, CardContent, Typography, Grid, Stack, Chip } from '@mui/material';
 import {
-  LineChart, Line, BarChart, Bar, RadarChart, Radar,
-  PolarGrid, PolarAngleAxis, PolarRadiusAxis,
-  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  RadarChart,
+  Radar,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
 } from 'recharts';
 import { brandColors } from 'theme/palette';
 
 const StudentReportCharts = ({
-  safeTrends, hasGpaTrend, hasAttendanceTrend, safeSubjects, safeSkills,
+  safeTrends,
+  hasGpaTrend,
+  hasAttendanceTrend,
+  safeSubjects,
+  safeSkills,
 }) => (
   <>
     {/* Trends */}
@@ -30,7 +45,12 @@ const StudentReportCharts = ({
                   <XAxis dataKey="label" />
                   <YAxis domain={[3.5, 5]} />
                   <Tooltip />
-                  <Line type="monotone" dataKey="value" stroke={brandColors.accentSky} strokeWidth={3} />
+                  <Line
+                    type="monotone"
+                    dataKey="value"
+                    stroke={brandColors.accentSky}
+                    strokeWidth={3}
+                  />
                 </LineChart>
               </ResponsiveContainer>
             ) : (
@@ -88,10 +108,18 @@ const StudentReportCharts = ({
                 </ResponsiveContainer>
                 <Stack direction="row" spacing={1} sx={{ mt: 2 }} flexWrap="wrap">
                   {safeSubjects.map(subject => (
-                    <Chip key={subject.subject}
+                    <Chip
+                      key={subject.subject}
                       label={`${subject.subject} • ${subject.trendLabel}`}
-                      color={subject.trend === 'up' ? 'success' : subject.trend === 'down' ? 'warning' : 'default'}
-                      variant="outlined" />
+                      color={
+                        subject.trend === 'up'
+                          ? 'success'
+                          : subject.trend === 'down'
+                            ? 'warning'
+                            : 'default'
+                      }
+                      variant="outlined"
+                    />
                   ))}
                 </Stack>
               </>
@@ -116,9 +144,13 @@ const StudentReportCharts = ({
                     <PolarGrid />
                     <PolarAngleAxis dataKey="skill" />
                     <PolarRadiusAxis angle={30} domain={[0, 100]} />
-                    <Radar name="المستوى" dataKey="value"
-                      stroke={brandColors.accentCoral} fill={brandColors.accentCoral}
-                      fillOpacity={0.5} />
+                    <Radar
+                      name="المستوى"
+                      dataKey="value"
+                      stroke={brandColors.accentCoral}
+                      fill={brandColors.accentCoral}
+                      fillOpacity={0.5}
+                    />
                   </RadarChart>
                 </ResponsiveContainer>
                 <Typography variant="caption" color="textSecondary">

@@ -4,6 +4,7 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 import therapySessionsService from '../../services/therapySessions.service';
+import { episodesAPI } from '../../services/ddd';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { INITIAL_FORM, generateDemoSessions, getSessionType } from './constants';
 
@@ -31,6 +32,9 @@ const useSessionsManagement = () => {
 
   // Delete confirmation
   const [deleteTarget, setDeleteTarget] = useState(null);
+
+  // Episodes (for linking sessions to an Episode of Care)
+  const [episodes, setEpisodes] = useState([]);
 
   // Stats
   const [stats, setStats] = useState({
@@ -103,6 +107,17 @@ const useSessionsManagement = () => {
     fetchSessions();
   }, [fetchSessions]);
 
+  // ─── Fetch Active Episodes (for episode selector in form) ───
+  useEffect(() => {
+    episodesAPI
+      .list({ status: 'active', limit: 200 })
+      .then(res => {
+        const items = res?.data?.episodes || res?.data?.data || res?.data || [];
+        setEpisodes(Array.isArray(items) ? items : []);
+      })
+      .catch(() => setEpisodes([]));
+  }, []);
+
   // ─── Handlers ───
   const handleOpenCreate = () => {
     setEditingSession(null);
@@ -124,6 +139,8 @@ const useSessionsManagement = () => {
         : '',
       recurrence: session.recurrence || 'none',
       notes: typeof session.notes === 'string' ? session.notes : session.notes?.subjective || '',
+      episodeOfCare: session.episodeOfCare?._id || session.episodeOfCare || '',
+      carePlan: session.carePlan?._id || session.carePlan || '',
     });
     setFormError('');
     setOpenDialog(true);
@@ -160,6 +177,8 @@ const useSessionsManagement = () => {
           : [],
         recurrence: form.recurrence,
         notes: form.notes || undefined,
+        episodeOfCare: form.episodeOfCare || undefined,
+        carePlan: form.carePlan || undefined,
       };
 
       if (editingSession) {
@@ -261,6 +280,7 @@ const useSessionsManagement = () => {
     sessions,
     filtered,
     stats,
+    episodes,
     totalCount,
     loading,
     error,

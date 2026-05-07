@@ -52,7 +52,7 @@ const COLUMNS = [
   { id: 'actions', label: 'الإجراءات', sortable: false },
 ];
 
-const formatDate = (date) => {
+const formatDate = date => {
   if (!date) return '—';
   try {
     return new Date(date).toLocaleDateString('ar-SA', {
@@ -65,7 +65,7 @@ const formatDate = (date) => {
   }
 };
 
-const formatDateTime = (date) => {
+const formatDateTime = date => {
   if (!date) return 'لم يسجل دخول';
   try {
     return new Date(date).toLocaleDateString('ar-SA', {
@@ -123,9 +123,9 @@ const UsersTable = ({
         <TableContainer>
           <Table>
             <TableBody>
-              {[1, 2, 3, 4, 5].map((i) => (
+              {[1, 2, 3, 4, 5].map(i => (
                 <TableRow key={i}>
-                  {COLUMNS.map((col) => (
+                  {COLUMNS.map(col => (
                     <TableCell key={col.id}>
                       <Skeleton variant="text" />
                     </TableCell>
@@ -161,7 +161,7 @@ const UsersTable = ({
                   size="small"
                 />
               </TableCell>
-              {COLUMNS.map((col) => (
+              {COLUMNS.map(col => (
                 <TableCell key={col.id} sx={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>
                   {col.sortable ? (
                     <TableSortLabel
@@ -188,10 +188,11 @@ const UsersTable = ({
                 </TableCell>
               </TableRow>
             ) : (
-              users.map((user) => {
+              users.map(user => {
                 const userId = user._id || user.id;
                 const isSelected = selectedIds.includes(userId);
-                const isLocked = user.isLocked || (user.lockUntil && new Date(user.lockUntil) > new Date());
+                const isLocked =
+                  user.isLocked || (user.lockUntil && new Date(user.lockUntil) > new Date());
 
                 return (
                   <TableRow
@@ -201,7 +202,7 @@ const UsersTable = ({
                     sx={{ cursor: 'pointer' }}
                     onClick={() => onView(user)}
                   >
-                    <TableCell padding="checkbox" onClick={(e) => e.stopPropagation()}>
+                    <TableCell padding="checkbox" onClick={e => e.stopPropagation()}>
                       <Checkbox
                         checked={isSelected}
                         onChange={() => onToggleSelect(userId)}
@@ -310,7 +311,7 @@ const UsersTable = ({
                     </TableCell>
 
                     {/* الإجراءات */}
-                    <TableCell onClick={(e) => e.stopPropagation()}>
+                    <TableCell onClick={e => e.stopPropagation()}>
                       <Box sx={{ display: 'flex', gap: 0.25 }}>
                         <Tooltip title="عرض">
                           <IconButton size="small" onClick={() => onView(user)}>
@@ -323,7 +324,7 @@ const UsersTable = ({
                           </IconButton>
                         </Tooltip>
                         <Tooltip title="المزيد">
-                          <IconButton size="small" onClick={(e) => handleMenuOpen(e, user)}>
+                          <IconButton size="small" onClick={e => handleMenuOpen(e, user)}>
                             <MoreIcon fontSize="small" />
                           </IconButton>
                         </Tooltip>
@@ -343,18 +344,14 @@ const UsersTable = ({
         page={pagination.page - 1}
         rowsPerPage={pagination.limit}
         onPageChange={(_, newPage) => onPageChange(newPage + 1)}
-        onRowsPerPageChange={(e) => onLimitChange(parseInt(e.target.value, 10))}
+        onRowsPerPageChange={e => onLimitChange(parseInt(e.target.value, 10))}
         rowsPerPageOptions={[10, 20, 50, 100]}
         labelRowsPerPage="عدد الصفوف:"
         labelDisplayedRows={({ from, to, count }) => `${from}–${to} من ${count}`}
       />
 
       {/* قائمة الإجراءات */}
-      <Menu
-        anchorEl={menuAnchor}
-        open={Boolean(menuAnchor)}
-        onClose={handleMenuClose}
-      >
+      <Menu anchorEl={menuAnchor} open={Boolean(menuAnchor)} onClose={handleMenuClose}>
         <MenuItem
           onClick={() => {
             handleMenuClose();
@@ -377,7 +374,8 @@ const UsersTable = ({
           </ListItemIcon>
           <ListItemText>إعادة تعيين كلمة المرور</ListItemText>
         </MenuItem>
-        {(menuUser?.isLocked || (menuUser?.lockUntil && new Date(menuUser.lockUntil) > new Date())) && (
+        {(menuUser?.isLocked ||
+          (menuUser?.lockUntil && new Date(menuUser.lockUntil) > new Date())) && (
           <MenuItem
             onClick={() => {
               handleMenuClose();

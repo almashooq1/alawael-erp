@@ -12,13 +12,49 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
-  Box, Paper, Typography, Grid, Tabs, Tab, Button, IconButton, Chip,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TablePagination,
-  TextField, MenuItem, Dialog, DialogTitle, DialogContent, DialogActions,
-  Card, CardContent, Divider, Avatar, LinearProgress, Tooltip, Alert,
-  InputAdornment, FormControl, InputLabel, Select, CircularProgress,
-  List, ListItem, ListItemText, ListItemAvatar, ListItemSecondaryAction,
-  Accordion, AccordionSummary, AccordionDetails, Badge,
+  Box,
+  Paper,
+  Typography,
+  Grid,
+  Tabs,
+  Tab,
+  Button,
+  IconButton,
+  Chip,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TablePagination,
+  TextField,
+  MenuItem,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Card,
+  CardContent,
+  Divider,
+  Avatar,
+  LinearProgress,
+  Tooltip,
+  Alert,
+  InputAdornment,
+  FormControl,
+  InputLabel,
+  Select,
+  CircularProgress,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemAvatar,
+  ListItemSecondaryAction,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Badge,
 } from '@mui/material';
 import {
   HealthAndSafety as InsuranceIcon,
@@ -57,7 +93,11 @@ const STATUS_CONFIG = {
   suspended: { label: 'معلق', color: 'default', icon: <WarningIcon fontSize="small" /> },
   expired: { label: 'منتهي', color: 'error', icon: <CancelIcon fontSize="small" /> },
   cancelled: { label: 'ملغي', color: 'error', icon: <CancelIcon fontSize="small" /> },
-  renewal_pending: { label: 'بانتظار التجديد', color: 'info', icon: <RenewIcon fontSize="small" /> },
+  renewal_pending: {
+    label: 'بانتظار التجديد',
+    color: 'info',
+    icon: <RenewIcon fontSize="small" />,
+  },
 };
 
 const CLASS_CONFIG = {
@@ -101,8 +141,12 @@ const CLAIM_STATUS_CONFIG = {
 };
 
 // ─── Helper: Format Currency ─────────────────────────────────────────────────
-const formatCurrency = (amount) =>
-  new Intl.NumberFormat('ar-SA', { style: 'currency', currency: 'SAR', maximumFractionDigits: 0 }).format(amount || 0);
+const formatCurrency = amount =>
+  new Intl.NumberFormat('ar-SA', {
+    style: 'currency',
+    currency: 'SAR',
+    maximumFractionDigits: 0,
+  }).format(amount || 0);
 
 // ─── KPI Card ────────────────────────────────────────────────────────────────
 const KPICard = ({ title, value, icon, gradient, subtitle, badge }) => (
@@ -129,9 +173,17 @@ const KPICard = ({ title, value, icon, gradient, subtitle, badge }) => (
     <CardContent sx={{ p: 2.5 }}>
       <Box display="flex" justifyContent="space-between" alignItems="flex-start">
         <Box>
-          <Typography variant="body2" sx={{ opacity: 0.85, mb: 0.5 }}>{title}</Typography>
+          <Typography variant="body2" sx={{ opacity: 0.85, mb: 0.5 }}>
+            {title}
+          </Typography>
           <Typography variant="h4" fontWeight={700}>
-            {badge ? <Badge badgeContent={badge} color="error">{value}</Badge> : value}
+            {badge ? (
+              <Badge badgeContent={badge} color="error">
+                {value}
+              </Badge>
+            ) : (
+              value
+            )}
           </Typography>
           {subtitle && (
             <Typography variant="caption" sx={{ opacity: 0.75, mt: 0.5, display: 'block' }}>
@@ -139,9 +191,7 @@ const KPICard = ({ title, value, icon, gradient, subtitle, badge }) => (
             </Typography>
           )}
         </Box>
-        <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)', width: 48, height: 48 }}>
-          {icon}
-        </Avatar>
+        <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)', width: 48, height: 48 }}>{icon}</Avatar>
       </Box>
     </CardContent>
   </Card>
@@ -190,21 +240,27 @@ export default function HRInsuranceDashboard() {
     try {
       const res = await hrInsuranceService.getStats();
       setStats(res.data?.data || res.data);
-    } catch { /* stats optional */ }
+    } catch {
+      /* stats optional */
+    }
   }, []);
 
   const fetchCompanies = useCallback(async () => {
     try {
       const res = await hrInsuranceService.getCompanies();
       setCompanies(res.data?.data || []);
-    } catch { /* ref data optional */ }
+    } catch {
+      /* ref data optional */
+    }
   }, []);
 
   const fetchClasses = useCallback(async () => {
     try {
       const res = await hrInsuranceService.getCoverageClasses();
       _setCoverageClasses(res.data?.data || []);
-    } catch { /* ref data optional */ }
+    } catch {
+      /* ref data optional */
+    }
   }, []);
 
   const fetchPolicies = useCallback(async () => {
@@ -222,27 +278,39 @@ export default function HRInsuranceDashboard() {
       const data = res.data;
       setPolicies(data?.data || []);
       if (data?.pagination) {
-        setPagination((prev) => ({ ...prev, total: data.pagination.total }));
+        setPagination(prev => ({ ...prev, total: data.pagination.total }));
       }
     } catch {
       showSnackbar('خطأ في جلب وثائق التأمين', 'error');
     } finally {
       setLoading(false);
     }
-  }, [pagination.page, pagination.limit, searchQuery, filterStatus, filterCompany, filterClass, showSnackbar]);
+  }, [
+    pagination.page,
+    pagination.limit,
+    searchQuery,
+    filterStatus,
+    filterCompany,
+    filterClass,
+    showSnackbar,
+  ]);
 
   const fetchExpiring = useCallback(async () => {
     try {
       const res = await hrInsuranceService.getExpiringPolicies(30);
       setExpiringPolicies(res.data?.data || []);
-    } catch { /* optional */ }
+    } catch {
+      /* optional */
+    }
   }, []);
 
   const fetchReport = useCallback(async () => {
     try {
       const res = await hrInsuranceService.getReportSummary();
       setReportData(res.data?.data || res.data);
-    } catch { /* optional */ }
+    } catch {
+      /* optional */
+    }
   }, []);
 
   useEffect(() => {
@@ -269,7 +337,9 @@ export default function HRInsuranceDashboard() {
   // ── Company lookup ─────────────────────────────────────────────────────
   const companyMap = useMemo(() => {
     const map = {};
-    companies.forEach((c) => { map[c.id] = c; });
+    companies.forEach(c => {
+      map[c.id] = c;
+    });
     return map;
   }, [companies]);
 
@@ -300,7 +370,7 @@ export default function HRInsuranceDashboard() {
     }
   };
 
-  const handleDeletePolicy = async (id) => {
+  const handleDeletePolicy = async id => {
     if (!window.confirm('هل أنت متأكد من إلغاء هذه الوثيقة؟')) return;
     try {
       await hrInsuranceService.deletePolicy(id);
@@ -349,7 +419,7 @@ export default function HRInsuranceDashboard() {
     }
   };
 
-  const openEditPolicy = (policy) => {
+  const openEditPolicy = policy => {
     setSelectedPolicy(policy);
     setPolicyForm({
       employeeId: policy.employeeId,
@@ -369,7 +439,7 @@ export default function HRInsuranceDashboard() {
     setPolicyDialog(true);
   };
 
-  const openDetail = async (policy) => {
+  const openDetail = async policy => {
     try {
       const res = await hrInsuranceService.getPolicy(policy._id);
       setSelectedPolicy(res.data?.data || policy);
@@ -386,7 +456,14 @@ export default function HRInsuranceDashboard() {
   return (
     <Box sx={{ p: { xs: 2, md: 3 } }}>
       {/* ── Header ───────────────────────────────────────────────────────── */}
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3} flexWrap="wrap" gap={1}>
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={3}
+        flexWrap="wrap"
+        gap={1}
+      >
         <Box display="flex" alignItems="center" gap={1}>
           <InsuranceIcon sx={{ fontSize: 36, color: 'primary.main' }} />
           <Box>
@@ -407,7 +484,11 @@ export default function HRInsuranceDashboard() {
           <Button
             variant="contained"
             startIcon={<AddIcon />}
-            onClick={() => { setSelectedPolicy(null); setPolicyForm({}); setPolicyDialog(true); }}
+            onClick={() => {
+              setSelectedPolicy(null);
+              setPolicyForm({});
+              setPolicyDialog(true);
+            }}
           >
             وثيقة جديدة
           </Button>
@@ -415,13 +496,29 @@ export default function HRInsuranceDashboard() {
       </Box>
 
       {/* ── Tabs ─────────────────────────────────────────────────────────── */}
-      <Paper sx={{ borderRadius: '16px', mb: 3, border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
+      <Paper
+        sx={{
+          borderRadius: '16px',
+          mb: 3,
+          border: '1px solid rgba(0,0,0,0.04)',
+          boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+        }}
+      >
         <Tabs
           value={activeTab}
-          onChange={(_, v) => { setActiveTab(v); if (v === 3) fetchReport(); }}
+          onChange={(_, v) => {
+            setActiveTab(v);
+            if (v === 3) fetchReport();
+          }}
           variant="scrollable"
           scrollButtons="auto"
-          sx={{ borderBottom: 1, borderColor: 'divider', '& .MuiTab-root': { fontWeight: 600, textTransform: 'none', minHeight: 48 }, '& .Mui-selected': { fontWeight: 700 }, '& .MuiTabs-indicator': { height: 3, borderRadius: '3px 3px 0 0' } }}
+          sx={{
+            borderBottom: 1,
+            borderColor: 'divider',
+            '& .MuiTab-root': { fontWeight: 600, textTransform: 'none', minHeight: 48 },
+            '& .Mui-selected': { fontWeight: 700 },
+            '& .MuiTabs-indicator': { height: 3, borderRadius: '3px 3px 0 0' },
+          }}
         >
           <Tab icon={<InsuranceIcon />} label="لوحة المعلومات" iconPosition="start" />
           <Tab icon={<PeopleIcon />} label="وثائق التأمين" iconPosition="start" />
@@ -479,7 +576,14 @@ export default function HRInsuranceDashboard() {
           <Grid container spacing={3}>
             {/* Company Distribution */}
             <Grid item xs={12} md={6}>
-              <Paper sx={{ p: 2.5, borderRadius: '16px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
+              <Paper
+                sx={{
+                  p: 2.5,
+                  borderRadius: '16px',
+                  border: '1px solid rgba(0,0,0,0.04)',
+                  boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+                }}
+              >
                 <Typography variant="h6" fontWeight={700} mb={2}>
                   <CompanyIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
                   توزيع شركات التأمين
@@ -489,7 +593,13 @@ export default function HRInsuranceDashboard() {
                     {stats.byCompany.map((item, idx) => (
                       <ListItem key={item.company} divider={idx < stats.byCompany.length - 1}>
                         <ListItemAvatar>
-                          <Avatar sx={{ bgcolor: chartColors[idx % chartColors.length], width: 36, height: 36 }}>
+                          <Avatar
+                            sx={{
+                              bgcolor: chartColors[idx % chartColors.length],
+                              width: 36,
+                              height: 36,
+                            }}
+                          >
                             {item.companyInfo?.nameAr?.charAt(0) || '?'}
                           </Avatar>
                         </ListItemAvatar>
@@ -513,26 +623,42 @@ export default function HRInsuranceDashboard() {
 
             {/* Coverage Class Distribution */}
             <Grid item xs={12} md={6}>
-              <Paper sx={{ p: 2.5, borderRadius: '16px', mb: 2, border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
+              <Paper
+                sx={{
+                  p: 2.5,
+                  borderRadius: '16px',
+                  mb: 2,
+                  border: '1px solid rgba(0,0,0,0.04)',
+                  boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+                }}
+              >
                 <Typography variant="h6" fontWeight={700} mb={2}>
                   <VipIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
                   فئات التغطية
                 </Typography>
                 {stats?.byClass?.length > 0 ? (
                   <Box>
-                    {stats.byClass.map((item) => {
+                    {stats.byClass.map(item => {
                       const cls = CLASS_CONFIG[item._id] || {};
                       return (
                         <Box key={item._id} display="flex" alignItems="center" mb={1.5}>
                           <Chip
                             label={cls.label || item._id}
                             size="small"
-                            sx={{ bgcolor: cls.bgColor, color: cls.color, fontWeight: 'bold', minWidth: 80, mr: 2 }}
+                            sx={{
+                              bgcolor: cls.bgColor,
+                              color: cls.color,
+                              fontWeight: 'bold',
+                              minWidth: 80,
+                              mr: 2,
+                            }}
                           />
                           <Box flex={1} mr={2}>
                             <LinearProgress
                               variant="determinate"
-                              value={stats.activePolicies ? (item.count / stats.activePolicies) * 100 : 0}
+                              value={
+                                stats.activePolicies ? (item.count / stats.activePolicies) * 100 : 0
+                              }
                               sx={{
                                 height: 10,
                                 borderRadius: 5,
@@ -556,21 +682,49 @@ export default function HRInsuranceDashboard() {
               </Paper>
 
               {/* Financial Summary */}
-              <Paper sx={{ p: 2.5, borderRadius: '16px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
+              <Paper
+                sx={{
+                  p: 2.5,
+                  borderRadius: '16px',
+                  border: '1px solid rgba(0,0,0,0.04)',
+                  boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+                }}
+              >
                 <Typography variant="h6" fontWeight={700} mb={2}>
                   <MoneyIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
                   الملخص المالي
                 </Typography>
                 <Grid container spacing={1}>
                   {[
-                    { label: 'حصة صاحب العمل', value: formatCurrency(stats?.financials?.totalEmployerShare), color: statusColors.success },
-                    { label: 'حصة الموظفين', value: formatCurrency(stats?.financials?.totalEmployeeShare), color: statusColors.warning },
-                    { label: 'ضريبة القيمة المضافة (15%)', value: formatCurrency(stats?.financials?.totalVAT), color: statusColors.error },
-                  ].map((item) => (
+                    {
+                      label: 'حصة صاحب العمل',
+                      value: formatCurrency(stats?.financials?.totalEmployerShare),
+                      color: statusColors.success,
+                    },
+                    {
+                      label: 'حصة الموظفين',
+                      value: formatCurrency(stats?.financials?.totalEmployeeShare),
+                      color: statusColors.warning,
+                    },
+                    {
+                      label: 'ضريبة القيمة المضافة (15%)',
+                      value: formatCurrency(stats?.financials?.totalVAT),
+                      color: statusColors.error,
+                    },
+                  ].map(item => (
                     <Grid item xs={12} key={item.label}>
-                      <Box display="flex" justifyContent="space-between" alignItems="center" py={0.5}>
-                        <Typography variant="body2" color="text.secondary">{item.label}</Typography>
-                        <Typography fontWeight={700} sx={{ color: item.color }}>{item.value}</Typography>
+                      <Box
+                        display="flex"
+                        justifyContent="space-between"
+                        alignItems="center"
+                        py={0.5}
+                      >
+                        <Typography variant="body2" color="text.secondary">
+                          {item.label}
+                        </Typography>
+                        <Typography fontWeight={700} sx={{ color: item.color }}>
+                          {item.value}
+                        </Typography>
                       </Box>
                       <Divider />
                     </Grid>
@@ -586,7 +740,7 @@ export default function HRInsuranceDashboard() {
                   <Typography fontWeight={700} mb={1}>
                     تنبيه: {expiringPolicies.length} وثيقة تأمين تنتهي خلال 30 يوم
                   </Typography>
-                  {expiringPolicies.slice(0, 5).map((p) => (
+                  {expiringPolicies.slice(0, 5).map(p => (
                     <Typography key={p._id} variant="body2">
                       • {p.employeeName} — {p.policyNumber} — تنتهي في{' '}
                       {new Date(p.endDate).toLocaleDateString('ar-SA')}
@@ -603,41 +757,74 @@ export default function HRInsuranceDashboard() {
       {/* TAB 1: وثائق التأمين (Policies Table)                           */}
       {/* ══════════════════════════════════════════════════════════════════ */}
       {activeTab === 1 && (
-        <Paper sx={{ borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
+        <Paper
+          sx={{
+            borderRadius: '20px',
+            border: '1px solid rgba(0,0,0,0.04)',
+            boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+          }}
+        >
           {/* Filters */}
           <Box p={2} display="flex" gap={2} flexWrap="wrap" alignItems="center">
             <TextField
               size="small"
               placeholder="بحث بالاسم أو رقم الوثيقة..."
               value={searchQuery}
-              onChange={(e) => { setSearchQuery(e.target.value); setPagination((p) => ({ ...p, page: 0 })); }}
-              InputProps={{ startAdornment: <InputAdornment position="start"><SearchIcon /></InputAdornment> }}
+              onChange={e => {
+                setSearchQuery(e.target.value);
+                setPagination(p => ({ ...p, page: 0 }));
+              }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon />
+                  </InputAdornment>
+                ),
+              }}
               sx={{ minWidth: 260 }}
             />
             <FormControl size="small" sx={{ minWidth: 150 }}>
               <InputLabel>الحالة</InputLabel>
-              <Select value={filterStatus} label="الحالة" onChange={(e) => setFilterStatus(e.target.value)}>
+              <Select
+                value={filterStatus}
+                label="الحالة"
+                onChange={e => setFilterStatus(e.target.value)}
+              >
                 <MenuItem value="">الكل</MenuItem>
                 {Object.entries(STATUS_CONFIG).map(([k, v]) => (
-                  <MenuItem key={k} value={k}>{v.label}</MenuItem>
+                  <MenuItem key={k} value={k}>
+                    {v.label}
+                  </MenuItem>
                 ))}
               </Select>
             </FormControl>
             <FormControl size="small" sx={{ minWidth: 180 }}>
               <InputLabel>شركة التأمين</InputLabel>
-              <Select value={filterCompany} label="شركة التأمين" onChange={(e) => setFilterCompany(e.target.value)}>
+              <Select
+                value={filterCompany}
+                label="شركة التأمين"
+                onChange={e => setFilterCompany(e.target.value)}
+              >
                 <MenuItem value="">الكل</MenuItem>
-                {companies.map((c) => (
-                  <MenuItem key={c.id} value={c.id}>{c.nameAr}</MenuItem>
+                {companies.map(c => (
+                  <MenuItem key={c.id} value={c.id}>
+                    {c.nameAr}
+                  </MenuItem>
                 ))}
               </Select>
             </FormControl>
             <FormControl size="small" sx={{ minWidth: 120 }}>
               <InputLabel>الفئة</InputLabel>
-              <Select value={filterClass} label="الفئة" onChange={(e) => setFilterClass(e.target.value)}>
+              <Select
+                value={filterClass}
+                label="الفئة"
+                onChange={e => setFilterClass(e.target.value)}
+              >
                 <MenuItem value="">الكل</MenuItem>
                 {Object.entries(CLASS_CONFIG).map(([k, v]) => (
-                  <MenuItem key={k} value={k}>{v.label}</MenuItem>
+                  <MenuItem key={k} value={k}>
+                    {v.label}
+                  </MenuItem>
                 ))}
               </Select>
             </FormControl>
@@ -649,15 +836,97 @@ export default function HRInsuranceDashboard() {
             <Table size="small">
               <TableHead>
                 <TableRow sx={{ bgcolor: 'rgba(0,0,0,0.02)' }}>
-                  <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>الموظف</TableCell>
-                  <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>رقم الوثيقة</TableCell>
-                  <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>شركة التأمين</TableCell>
-                  <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>الفئة</TableCell>
-                  <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>تاريخ الانتهاء</TableCell>
-                  <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>المعالون</TableCell>
-                  <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>القسط السنوي</TableCell>
-                  <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>الحالة</TableCell>
-                  <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }} align="center">إجراءات</TableCell>
+                  <TableCell
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: '12px',
+                      letterSpacing: 0.5,
+                      color: 'text.secondary',
+                    }}
+                  >
+                    الموظف
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: '12px',
+                      letterSpacing: 0.5,
+                      color: 'text.secondary',
+                    }}
+                  >
+                    رقم الوثيقة
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: '12px',
+                      letterSpacing: 0.5,
+                      color: 'text.secondary',
+                    }}
+                  >
+                    شركة التأمين
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: '12px',
+                      letterSpacing: 0.5,
+                      color: 'text.secondary',
+                    }}
+                  >
+                    الفئة
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: '12px',
+                      letterSpacing: 0.5,
+                      color: 'text.secondary',
+                    }}
+                  >
+                    تاريخ الانتهاء
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: '12px',
+                      letterSpacing: 0.5,
+                      color: 'text.secondary',
+                    }}
+                  >
+                    المعالون
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: '12px',
+                      letterSpacing: 0.5,
+                      color: 'text.secondary',
+                    }}
+                  >
+                    القسط السنوي
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: '12px',
+                      letterSpacing: 0.5,
+                      color: 'text.secondary',
+                    }}
+                  >
+                    الحالة
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: '12px',
+                      letterSpacing: 0.5,
+                      color: 'text.secondary',
+                    }}
+                    align="center"
+                  >
+                    إجراءات
+                  </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -668,50 +937,99 @@ export default function HRInsuranceDashboard() {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  policies.map((p) => {
+                  policies.map(p => {
                     const comp = companyMap[p.insuranceCompany];
                     const cls = CLASS_CONFIG[p.coverageClass] || {};
                     const sts = STATUS_CONFIG[p.status] || {};
-                    const depCount = p.dependents?.filter((d) => d.status === 'active').length || 0;
+                    const depCount = p.dependents?.filter(d => d.status === 'active').length || 0;
                     return (
                       <TableRow key={p._id} hover>
                         <TableCell>
                           <Box>
-                            <Typography variant="body2" fontWeight={700}>{p.employeeName}</Typography>
-                            <Typography variant="caption" color="text.secondary">{p.employeeId} — {p.department}</Typography>
+                            <Typography variant="body2" fontWeight={700}>
+                              {p.employeeName}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                              {p.employeeId} — {p.department}
+                            </Typography>
                           </Box>
                         </TableCell>
                         <TableCell>
-                          <Typography variant="body2" fontFamily="monospace">{p.policyNumber}</Typography>
+                          <Typography variant="body2" fontFamily="monospace">
+                            {p.policyNumber}
+                          </Typography>
                         </TableCell>
                         <TableCell>
-                          <Typography variant="body2">{comp?.nameAr || p.insuranceCompanyNameAr || p.insuranceCompany}</Typography>
+                          <Typography variant="body2">
+                            {comp?.nameAr || p.insuranceCompanyNameAr || p.insuranceCompany}
+                          </Typography>
                         </TableCell>
                         <TableCell>
-                          <Chip label={cls.label || p.coverageClass} size="small" sx={{ bgcolor: cls.bgColor, color: cls.color, fontWeight: 'bold' }} />
+                          <Chip
+                            label={cls.label || p.coverageClass}
+                            size="small"
+                            sx={{ bgcolor: cls.bgColor, color: cls.color, fontWeight: 'bold' }}
+                          />
                         </TableCell>
                         <TableCell>
-                          <Typography variant="body2">{p.endDate ? new Date(p.endDate).toLocaleDateString('ar-SA') : '—'}</Typography>
+                          <Typography variant="body2">
+                            {p.endDate ? new Date(p.endDate).toLocaleDateString('ar-SA') : '—'}
+                          </Typography>
                         </TableCell>
                         <TableCell>
-                          <Chip icon={<FamilyIcon />} label={depCount} size="small" variant="outlined" />
+                          <Chip
+                            icon={<FamilyIcon />}
+                            label={depCount}
+                            size="small"
+                            variant="outlined"
+                          />
                         </TableCell>
                         <TableCell>
-                          <Typography variant="body2" fontWeight={700}>{formatCurrency(p.premium?.totalAnnualPremium)}</Typography>
+                          <Typography variant="body2" fontWeight={700}>
+                            {formatCurrency(p.premium?.totalAnnualPremium)}
+                          </Typography>
                         </TableCell>
                         <TableCell>
-                          <Chip icon={sts.icon} label={sts.label || p.status} size="small" color={sts.color || 'default'} />
+                          <Chip
+                            icon={sts.icon}
+                            label={sts.label || p.status}
+                            size="small"
+                            color={sts.color || 'default'}
+                          />
                         </TableCell>
                         <TableCell align="center">
                           <Box display="flex" gap={0.5} justifyContent="center">
-                            <Tooltip title="عرض"><IconButton size="small" onClick={() => openDetail(p)}><ViewIcon fontSize="small" /></IconButton></Tooltip>
-                            <Tooltip title="تعديل"><IconButton size="small" onClick={() => openEditPolicy(p)}><EditIcon fontSize="small" /></IconButton></Tooltip>
+                            <Tooltip title="عرض">
+                              <IconButton size="small" onClick={() => openDetail(p)}>
+                                <ViewIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                            <Tooltip title="تعديل">
+                              <IconButton size="small" onClick={() => openEditPolicy(p)}>
+                                <EditIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
                             <Tooltip title="تجديد">
-                              <IconButton size="small" color="info" onClick={() => { setSelectedPolicy(p); setRenewDialog(true); }}>
+                              <IconButton
+                                size="small"
+                                color="info"
+                                onClick={() => {
+                                  setSelectedPolicy(p);
+                                  setRenewDialog(true);
+                                }}
+                              >
                                 <RenewIcon fontSize="small" />
                               </IconButton>
                             </Tooltip>
-                            <Tooltip title="إلغاء"><IconButton size="small" color="error" onClick={() => handleDeletePolicy(p._id)}><DeleteIcon fontSize="small" /></IconButton></Tooltip>
+                            <Tooltip title="إلغاء">
+                              <IconButton
+                                size="small"
+                                color="error"
+                                onClick={() => handleDeletePolicy(p._id)}
+                              >
+                                <DeleteIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
                           </Box>
                         </TableCell>
                       </TableRow>
@@ -726,9 +1044,15 @@ export default function HRInsuranceDashboard() {
             component="div"
             count={pagination.total}
             page={pagination.page}
-            onPageChange={(_, p) => setPagination((prev) => ({ ...prev, page: p }))}
+            onPageChange={(_, p) => setPagination(prev => ({ ...prev, page: p }))}
             rowsPerPage={pagination.limit}
-            onRowsPerPageChange={(e) => setPagination({ page: 0, limit: parseInt(e.target.value, 10), total: pagination.total })}
+            onRowsPerPageChange={e =>
+              setPagination({
+                page: 0,
+                limit: parseInt(e.target.value, 10),
+                total: pagination.total,
+              })
+            }
             labelRowsPerPage="عدد الصفوف:"
             rowsPerPageOptions={[5, 10, 25, 50]}
           />
@@ -739,26 +1063,51 @@ export default function HRInsuranceDashboard() {
       {/* TAB 2: المطالبات الطبية (Claims)                                 */}
       {/* ══════════════════════════════════════════════════════════════════ */}
       {activeTab === 2 && (
-        <Paper sx={{ borderRadius: '20px', p: 2.5, border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
+        <Paper
+          sx={{
+            borderRadius: '20px',
+            p: 2.5,
+            border: '1px solid rgba(0,0,0,0.04)',
+            boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+          }}
+        >
           <Typography variant="h6" fontWeight={700} mb={2}>
             <ClaimIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
             المطالبات الطبية
           </Typography>
           <Typography variant="body2" color="text.secondary" mb={2}>
-            اختر وثيقة تأمين من تبويب &quot;وثائق التأمين&quot; ثم اضغط &quot;عرض&quot; لإدارة مطالباتها، أو استعرض جميع المطالبات أدناه
+            اختر وثيقة تأمين من تبويب &quot;وثائق التأمين&quot; ثم اضغط &quot;عرض&quot; لإدارة
+            مطالباتها، أو استعرض جميع المطالبات أدناه
           </Typography>
 
           {/* Claims summary from stats */}
           {stats?.claimStats?.length > 0 ? (
             <Grid container spacing={2} mb={3}>
-              {stats.claimStats.map((cs) => {
+              {stats.claimStats.map(cs => {
                 const csConfig = CLAIM_STATUS_CONFIG[cs._id] || {};
                 return (
                   <Grid item xs={6} sm={4} md={3} key={cs._id}>
-                    <Card variant="outlined" sx={{ borderRadius: '16px', transition: 'all 0.3s cubic-bezier(.4,0,.2,1)', '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)', transform: 'translateY(-2px)' } }}>
+                    <Card
+                      variant="outlined"
+                      sx={{
+                        borderRadius: '16px',
+                        transition: 'all 0.3s cubic-bezier(.4,0,.2,1)',
+                        '&:hover': {
+                          boxShadow: '0 8px 30px rgba(0,0,0,0.08)',
+                          transform: 'translateY(-2px)',
+                        },
+                      }}
+                    >
                       <CardContent sx={{ textAlign: 'center', p: 2 }}>
-                        <Chip label={csConfig.label || cs._id} color={csConfig.color || 'default'} size="small" sx={{ mb: 1 }} />
-                        <Typography variant="h5" fontWeight={700}>{cs.count}</Typography>
+                        <Chip
+                          label={csConfig.label || cs._id}
+                          color={csConfig.color || 'default'}
+                          size="small"
+                          sx={{ mb: 1 }}
+                        />
+                        <Typography variant="h5" fontWeight={700}>
+                          {cs.count}
+                        </Typography>
                         <Typography variant="caption" color="text.secondary">
                           {formatCurrency(cs.totalClaimed)} مطالبة
                         </Typography>
@@ -769,15 +1118,20 @@ export default function HRInsuranceDashboard() {
               })}
             </Grid>
           ) : (
-            <Alert severity="info" sx={{ mb: 2 }}>لا توجد مطالبات مسجلة بعد</Alert>
+            <Alert severity="info" sx={{ mb: 2 }}>
+              لا توجد مطالبات مسجلة بعد
+            </Alert>
           )}
 
           {/* Per policy claims */}
-          {policies.filter((p) => p.claims?.length > 0).length > 0 ? (
+          {policies.filter(p => p.claims?.length > 0).length > 0 ? (
             policies
-              .filter((p) => p.claims?.length > 0)
-              .map((p) => (
-                <Accordion key={p._id} sx={{ mb: 1, borderRadius: '10px', '&:before': { display: 'none' } }}>
+              .filter(p => p.claims?.length > 0)
+              .map(p => (
+                <Accordion
+                  key={p._id}
+                  sx={{ mb: 1, borderRadius: '10px', '&:before': { display: 'none' } }}
+                >
                   <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                     <Box display="flex" alignItems="center" gap={2} width="100%">
                       <MedicalIcon color="primary" />
@@ -787,7 +1141,12 @@ export default function HRInsuranceDashboard() {
                           {p.policyNumber} — {p.claims.length} مطالبة
                         </Typography>
                       </Box>
-                      <Chip label={`${p.claims.length} مطالبة`} size="small" color="primary" variant="outlined" />
+                      <Chip
+                        label={`${p.claims.length} مطالبة`}
+                        size="small"
+                        color="primary"
+                        variant="outlined"
+                      />
                     </Box>
                   </AccordionSummary>
                   <AccordionDetails>
@@ -803,16 +1162,33 @@ export default function HRInsuranceDashboard() {
                         </TableRow>
                       </TableHead>
                       <TableBody>
-                        {p.claims.map((c) => {
+                        {p.claims.map(c => {
                           const csConfig = CLAIM_STATUS_CONFIG[c.status] || {};
                           return (
                             <TableRow key={c._id}>
-                              <TableCell><Typography variant="body2" fontFamily="monospace">{c.claimNumber}</Typography></TableCell>
-                              <TableCell>{CLAIM_TYPES.find((t) => t.value === c.claimType)?.label || c.claimType}</TableCell>
+                              <TableCell>
+                                <Typography variant="body2" fontFamily="monospace">
+                                  {c.claimNumber}
+                                </Typography>
+                              </TableCell>
+                              <TableCell>
+                                {CLAIM_TYPES.find(t => t.value === c.claimType)?.label ||
+                                  c.claimType}
+                              </TableCell>
                               <TableCell>{formatCurrency(c.amounts?.claimed)}</TableCell>
                               <TableCell>{formatCurrency(c.amounts?.approved)}</TableCell>
-                              <TableCell><Chip label={csConfig.label || c.status} size="small" color={csConfig.color || 'default'} /></TableCell>
-                              <TableCell>{c.submittedDate ? new Date(c.submittedDate).toLocaleDateString('ar-SA') : '—'}</TableCell>
+                              <TableCell>
+                                <Chip
+                                  label={csConfig.label || c.status}
+                                  size="small"
+                                  color={csConfig.color || 'default'}
+                                />
+                              </TableCell>
+                              <TableCell>
+                                {c.submittedDate
+                                  ? new Date(c.submittedDate).toLocaleDateString('ar-SA')
+                                  : '—'}
+                              </TableCell>
                             </TableRow>
                           );
                         })}
@@ -837,7 +1213,14 @@ export default function HRInsuranceDashboard() {
           <Grid container spacing={3}>
             {/* Financial Overview */}
             <Grid item xs={12} md={6}>
-              <Paper sx={{ p: 2.5, borderRadius: '16px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
+              <Paper
+                sx={{
+                  p: 2.5,
+                  borderRadius: '16px',
+                  border: '1px solid rgba(0,0,0,0.04)',
+                  boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+                }}
+              >
                 <Typography variant="h6" fontWeight={700} mb={2}>
                   <TrendingUpIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
                   نظرة مالية عامة
@@ -845,13 +1228,28 @@ export default function HRInsuranceDashboard() {
                 {reportData?.financials ? (
                   <List dense>
                     {[
-                      { label: 'إجمالي الأقساط السنوية', value: formatCurrency(reportData.financials.totalAnnualPremium) },
-                      { label: 'حصة صاحب العمل', value: formatCurrency(reportData.financials.totalEmployerShare) },
-                      { label: 'حصة الموظفين', value: formatCurrency(reportData.financials.totalEmployeeShare) },
-                      { label: 'ضريبة القيمة المضافة', value: formatCurrency(reportData.financials.totalVAT) },
-                      { label: 'متوسط القسط السنوي', value: formatCurrency(reportData.financials.avgPremium) },
+                      {
+                        label: 'إجمالي الأقساط السنوية',
+                        value: formatCurrency(reportData.financials.totalAnnualPremium),
+                      },
+                      {
+                        label: 'حصة صاحب العمل',
+                        value: formatCurrency(reportData.financials.totalEmployerShare),
+                      },
+                      {
+                        label: 'حصة الموظفين',
+                        value: formatCurrency(reportData.financials.totalEmployeeShare),
+                      },
+                      {
+                        label: 'ضريبة القيمة المضافة',
+                        value: formatCurrency(reportData.financials.totalVAT),
+                      },
+                      {
+                        label: 'متوسط القسط السنوي',
+                        value: formatCurrency(reportData.financials.avgPremium),
+                      },
                       { label: 'إجمالي الأعضاء', value: reportData.financials.totalMembers },
-                    ].map((item) => (
+                    ].map(item => (
                       <ListItem key={item.label} divider>
                         <ListItemText primary={item.label} />
                         <Typography fontWeight={700}>{item.value}</Typography>
@@ -859,28 +1257,39 @@ export default function HRInsuranceDashboard() {
                     ))}
                   </List>
                 ) : (
-                  <Box textAlign="center" py={3}><CircularProgress size={32} /></Box>
+                  <Box textAlign="center" py={3}>
+                    <CircularProgress size={32} />
+                  </Box>
                 )}
               </Paper>
             </Grid>
 
             {/* Claims by Type */}
             <Grid item xs={12} md={6}>
-              <Paper sx={{ p: 2.5, borderRadius: '16px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
+              <Paper
+                sx={{
+                  p: 2.5,
+                  borderRadius: '16px',
+                  border: '1px solid rgba(0,0,0,0.04)',
+                  boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+                }}
+              >
                 <Typography variant="h6" fontWeight={700} mb={2}>
                   <HospitalIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
                   المطالبات حسب النوع
                 </Typography>
                 {reportData?.claimsByType?.length > 0 ? (
                   <List dense>
-                    {reportData.claimsByType.map((ct) => (
+                    {reportData.claimsByType.map(ct => (
                       <ListItem key={ct._id} divider>
                         <ListItemText
-                          primary={CLAIM_TYPES.find((t) => t.value === ct._id)?.label || ct._id}
+                          primary={CLAIM_TYPES.find(t => t.value === ct._id)?.label || ct._id}
                           secondary={`${ct.count} مطالبة`}
                         />
                         <Box textAlign="right">
-                          <Typography variant="body2" fontWeight={700}>{formatCurrency(ct.totalClaimed)}</Typography>
+                          <Typography variant="body2" fontWeight={700}>
+                            {formatCurrency(ct.totalClaimed)}
+                          </Typography>
                           <Typography variant="caption" color="success.main">
                             معتمد: {formatCurrency(ct.totalApproved)}
                           </Typography>
@@ -889,14 +1298,23 @@ export default function HRInsuranceDashboard() {
                     ))}
                   </List>
                 ) : (
-                  <Typography color="text.secondary" textAlign="center" py={3}>لا توجد بيانات</Typography>
+                  <Typography color="text.secondary" textAlign="center" py={3}>
+                    لا توجد بيانات
+                  </Typography>
                 )}
               </Paper>
             </Grid>
 
             {/* Department Breakdown */}
             <Grid item xs={12}>
-              <Paper sx={{ p: 2.5, borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
+              <Paper
+                sx={{
+                  p: 2.5,
+                  borderRadius: '20px',
+                  border: '1px solid rgba(0,0,0,0.04)',
+                  boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+                }}
+              >
                 <Typography variant="h6" fontWeight={700} mb={2}>
                   <PeopleIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
                   التوزيع حسب الأقسام
@@ -906,26 +1324,66 @@ export default function HRInsuranceDashboard() {
                     <Table size="small">
                       <TableHead>
                         <TableRow sx={{ bgcolor: 'rgba(0,0,0,0.02)' }}>
-                          <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>القسم</TableCell>
-                          <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>عدد الموظفين المؤمنين</TableCell>
-                          <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>إجمالي الأقساط</TableCell>
-                          <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>متوسط القسط</TableCell>
+                          <TableCell
+                            sx={{
+                              fontWeight: 700,
+                              fontSize: '12px',
+                              letterSpacing: 0.5,
+                              color: 'text.secondary',
+                            }}
+                          >
+                            القسم
+                          </TableCell>
+                          <TableCell
+                            sx={{
+                              fontWeight: 700,
+                              fontSize: '12px',
+                              letterSpacing: 0.5,
+                              color: 'text.secondary',
+                            }}
+                          >
+                            عدد الموظفين المؤمنين
+                          </TableCell>
+                          <TableCell
+                            sx={{
+                              fontWeight: 700,
+                              fontSize: '12px',
+                              letterSpacing: 0.5,
+                              color: 'text.secondary',
+                            }}
+                          >
+                            إجمالي الأقساط
+                          </TableCell>
+                          <TableCell
+                            sx={{
+                              fontWeight: 700,
+                              fontSize: '12px',
+                              letterSpacing: 0.5,
+                              color: 'text.secondary',
+                            }}
+                          >
+                            متوسط القسط
+                          </TableCell>
                         </TableRow>
                       </TableHead>
                       <TableBody>
-                        {reportData.byDepartment.map((dept) => (
+                        {reportData.byDepartment.map(dept => (
                           <TableRow key={dept._id} hover>
                             <TableCell>{dept._id || 'غير محدد'}</TableCell>
                             <TableCell>{dept.count}</TableCell>
                             <TableCell>{formatCurrency(dept.totalPremium)}</TableCell>
-                            <TableCell>{formatCurrency(dept.count ? dept.totalPremium / dept.count : 0)}</TableCell>
+                            <TableCell>
+                              {formatCurrency(dept.count ? dept.totalPremium / dept.count : 0)}
+                            </TableCell>
                           </TableRow>
                         ))}
                       </TableBody>
                     </Table>
                   </TableContainer>
                 ) : (
-                  <Typography color="text.secondary" textAlign="center" py={3}>لا توجد بيانات</Typography>
+                  <Typography color="text.secondary" textAlign="center" py={3}>
+                    لا توجد بيانات
+                  </Typography>
                 )}
               </Paper>
             </Grid>
@@ -938,68 +1396,180 @@ export default function HRInsuranceDashboard() {
       {/* ══════════════════════════════════════════════════════════════════ */}
 
       {/* ── Policy Create/Edit Dialog ──────────────────────────────────── */}
-      <Dialog open={policyDialog} onClose={() => setPolicyDialog(false)} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: '20px' } }}>
-        <DialogTitle>{selectedPolicy ? 'تعديل وثيقة التأمين' : 'إنشاء وثيقة تأمين جديدة'}</DialogTitle>
+      <Dialog
+        open={policyDialog}
+        onClose={() => setPolicyDialog(false)}
+        maxWidth="md"
+        fullWidth
+        PaperProps={{ sx: { borderRadius: '20px' } }}
+      >
+        <DialogTitle>
+          {selectedPolicy ? 'تعديل وثيقة التأمين' : 'إنشاء وثيقة تأمين جديدة'}
+        </DialogTitle>
         <DialogContent dividers>
           <Grid container spacing={2} sx={{ mt: 0.5 }}>
             <Grid item xs={12} sm={6}>
-              <TextField fullWidth label="رقم الموظف" size="small" value={policyForm.employeeId || ''} onChange={(e) => setPolicyForm({ ...policyForm, employeeId: e.target.value })} />
+              <TextField
+                fullWidth
+                label="رقم الموظف"
+                size="small"
+                value={policyForm.employeeId || ''}
+                onChange={e => setPolicyForm({ ...policyForm, employeeId: e.target.value })}
+              />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField fullWidth label="اسم الموظف" size="small" value={policyForm.employeeName || ''} onChange={(e) => setPolicyForm({ ...policyForm, employeeName: e.target.value })} />
+              <TextField
+                fullWidth
+                label="اسم الموظف"
+                size="small"
+                value={policyForm.employeeName || ''}
+                onChange={e => setPolicyForm({ ...policyForm, employeeName: e.target.value })}
+              />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField fullWidth label="رقم الهوية" size="small" value={policyForm.nationalId || ''} onChange={(e) => setPolicyForm({ ...policyForm, nationalId: e.target.value })} />
+              <TextField
+                fullWidth
+                label="رقم الهوية"
+                size="small"
+                value={policyForm.nationalId || ''}
+                onChange={e => setPolicyForm({ ...policyForm, nationalId: e.target.value })}
+              />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField fullWidth label="القسم" size="small" value={policyForm.department || ''} onChange={(e) => setPolicyForm({ ...policyForm, department: e.target.value })} />
+              <TextField
+                fullWidth
+                label="القسم"
+                size="small"
+                value={policyForm.department || ''}
+                onChange={e => setPolicyForm({ ...policyForm, department: e.target.value })}
+              />
             </Grid>
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth size="small">
                 <InputLabel>شركة التأمين</InputLabel>
-                <Select value={policyForm.insuranceCompany || ''} label="شركة التأمين" onChange={(e) => setPolicyForm({ ...policyForm, insuranceCompany: e.target.value })}>
-                  {companies.map((c) => <MenuItem key={c.id} value={c.id}>{c.nameAr} ({c.nameEn})</MenuItem>)}
+                <Select
+                  value={policyForm.insuranceCompany || ''}
+                  label="شركة التأمين"
+                  onChange={e => setPolicyForm({ ...policyForm, insuranceCompany: e.target.value })}
+                >
+                  {companies.map(c => (
+                    <MenuItem key={c.id} value={c.id}>
+                      {c.nameAr} ({c.nameEn})
+                    </MenuItem>
+                  ))}
                 </Select>
               </FormControl>
             </Grid>
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth size="small">
                 <InputLabel>فئة التغطية</InputLabel>
-                <Select value={policyForm.coverageClass || 'B'} label="فئة التغطية" onChange={(e) => setPolicyForm({ ...policyForm, coverageClass: e.target.value })}>
-                  {Object.entries(CLASS_CONFIG).map(([k, v]) => <MenuItem key={k} value={k}>{v.label}</MenuItem>)}
+                <Select
+                  value={policyForm.coverageClass || 'B'}
+                  label="فئة التغطية"
+                  onChange={e => setPolicyForm({ ...policyForm, coverageClass: e.target.value })}
+                >
+                  {Object.entries(CLASS_CONFIG).map(([k, v]) => (
+                    <MenuItem key={k} value={k}>
+                      {v.label}
+                    </MenuItem>
+                  ))}
                 </Select>
               </FormControl>
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField fullWidth label="رقم الوثيقة" size="small" value={policyForm.policyNumber || ''} onChange={(e) => setPolicyForm({ ...policyForm, policyNumber: e.target.value })} />
+              <TextField
+                fullWidth
+                label="رقم الوثيقة"
+                size="small"
+                value={policyForm.policyNumber || ''}
+                onChange={e => setPolicyForm({ ...policyForm, policyNumber: e.target.value })}
+              />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField fullWidth label="رقم العضوية" size="small" value={policyForm.memberNumber || ''} onChange={(e) => setPolicyForm({ ...policyForm, memberNumber: e.target.value })} />
+              <TextField
+                fullWidth
+                label="رقم العضوية"
+                size="small"
+                value={policyForm.memberNumber || ''}
+                onChange={e => setPolicyForm({ ...policyForm, memberNumber: e.target.value })}
+              />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField fullWidth label="تاريخ البداية" size="small" type="date" InputLabelProps={{ shrink: true }} value={policyForm.startDate || ''} onChange={(e) => setPolicyForm({ ...policyForm, startDate: e.target.value })} />
+              <TextField
+                fullWidth
+                label="تاريخ البداية"
+                size="small"
+                type="date"
+                InputLabelProps={{ shrink: true }}
+                value={policyForm.startDate || ''}
+                onChange={e => setPolicyForm({ ...policyForm, startDate: e.target.value })}
+              />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField fullWidth label="تاريخ الانتهاء" size="small" type="date" InputLabelProps={{ shrink: true }} value={policyForm.endDate || ''} onChange={(e) => setPolicyForm({ ...policyForm, endDate: e.target.value })} />
+              <TextField
+                fullWidth
+                label="تاريخ الانتهاء"
+                size="small"
+                type="date"
+                InputLabelProps={{ shrink: true }}
+                value={policyForm.endDate || ''}
+                onChange={e => setPolicyForm({ ...policyForm, endDate: e.target.value })}
+              />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField fullWidth label="القسط السنوي (ريال)" size="small" type="number" value={policyForm.premium?.employeePremium || ''} onChange={(e) => setPolicyForm({ ...policyForm, premium: { ...policyForm.premium, employeePremium: parseFloat(e.target.value) } })} />
+              <TextField
+                fullWidth
+                label="القسط السنوي (ريال)"
+                size="small"
+                type="number"
+                value={policyForm.premium?.employeePremium || ''}
+                onChange={e =>
+                  setPolicyForm({
+                    ...policyForm,
+                    premium: { ...policyForm.premium, employeePremium: parseFloat(e.target.value) },
+                  })
+                }
+              />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField fullWidth label="نسبة تحمل صاحب العمل (%)" size="small" type="number" value={policyForm.premium?.employerSharePercent ?? 100} onChange={(e) => setPolicyForm({ ...policyForm, premium: { ...policyForm.premium, employerSharePercent: parseFloat(e.target.value) } })} />
+              <TextField
+                fullWidth
+                label="نسبة تحمل صاحب العمل (%)"
+                size="small"
+                type="number"
+                value={policyForm.premium?.employerSharePercent ?? 100}
+                onChange={e =>
+                  setPolicyForm({
+                    ...policyForm,
+                    premium: {
+                      ...policyForm.premium,
+                      employerSharePercent: parseFloat(e.target.value),
+                    },
+                  })
+                }
+              />
             </Grid>
           </Grid>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setPolicyDialog(false)}>إلغاء</Button>
-          <Button variant="contained" onClick={selectedPolicy ? handleUpdatePolicy : handleCreatePolicy}>
+          <Button
+            variant="contained"
+            onClick={selectedPolicy ? handleUpdatePolicy : handleCreatePolicy}
+          >
             {selectedPolicy ? 'حفظ التعديلات' : 'إنشاء الوثيقة'}
           </Button>
         </DialogActions>
       </Dialog>
 
       {/* ── Policy Detail Dialog ───────────────────────────────────────── */}
-      <Dialog open={detailDialog} onClose={() => setDetailDialog(false)} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: '20px' } }}>
+      <Dialog
+        open={detailDialog}
+        onClose={() => setDetailDialog(false)}
+        maxWidth="md"
+        fullWidth
+        PaperProps={{ sx: { borderRadius: '20px' } }}
+      >
         <DialogTitle>
           <Box display="flex" alignItems="center" gap={1}>
             <InsuranceIcon color="primary" />
@@ -1012,31 +1582,65 @@ export default function HRInsuranceDashboard() {
               {/* Basic Info */}
               <Grid container spacing={2} mb={3}>
                 <Grid item xs={6} sm={4}>
-                  <Typography variant="caption" color="text.secondary">رقم الموظف</Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    رقم الموظف
+                  </Typography>
                   <Typography fontWeight={700}>{selectedPolicy.employeeId}</Typography>
                 </Grid>
                 <Grid item xs={6} sm={4}>
-                  <Typography variant="caption" color="text.secondary">شركة التأمين</Typography>
-                  <Typography fontWeight={700}>{selectedPolicy.insuranceCompanyNameAr || selectedPolicy.insuranceCompany}</Typography>
-                </Grid>
-                <Grid item xs={6} sm={4}>
-                  <Typography variant="caption" color="text.secondary">فئة التغطية</Typography>
-                  <Chip label={CLASS_CONFIG[selectedPolicy.coverageClass]?.label || selectedPolicy.coverageClass} size="small" sx={{ bgcolor: CLASS_CONFIG[selectedPolicy.coverageClass]?.bgColor, color: CLASS_CONFIG[selectedPolicy.coverageClass]?.color, fontWeight: 'bold' }} />
-                </Grid>
-                <Grid item xs={6} sm={4}>
-                  <Typography variant="caption" color="text.secondary">رقم الوثيقة</Typography>
-                  <Typography fontFamily="monospace">{selectedPolicy.policyNumber}</Typography>
-                </Grid>
-                <Grid item xs={6} sm={4}>
-                  <Typography variant="caption" color="text.secondary">الصلاحية</Typography>
-                  <Typography variant="body2">
-                    {selectedPolicy.startDate && new Date(selectedPolicy.startDate).toLocaleDateString('ar-SA')} — {selectedPolicy.endDate && new Date(selectedPolicy.endDate).toLocaleDateString('ar-SA')}
+                  <Typography variant="caption" color="text.secondary">
+                    شركة التأمين
+                  </Typography>
+                  <Typography fontWeight={700}>
+                    {selectedPolicy.insuranceCompanyNameAr || selectedPolicy.insuranceCompany}
                   </Typography>
                 </Grid>
                 <Grid item xs={6} sm={4}>
-                  <Typography variant="caption" color="text.secondary">الحالة</Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    فئة التغطية
+                  </Typography>
+                  <Chip
+                    label={
+                      CLASS_CONFIG[selectedPolicy.coverageClass]?.label ||
+                      selectedPolicy.coverageClass
+                    }
+                    size="small"
+                    sx={{
+                      bgcolor: CLASS_CONFIG[selectedPolicy.coverageClass]?.bgColor,
+                      color: CLASS_CONFIG[selectedPolicy.coverageClass]?.color,
+                      fontWeight: 'bold',
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={6} sm={4}>
+                  <Typography variant="caption" color="text.secondary">
+                    رقم الوثيقة
+                  </Typography>
+                  <Typography fontFamily="monospace">{selectedPolicy.policyNumber}</Typography>
+                </Grid>
+                <Grid item xs={6} sm={4}>
+                  <Typography variant="caption" color="text.secondary">
+                    الصلاحية
+                  </Typography>
+                  <Typography variant="body2">
+                    {selectedPolicy.startDate &&
+                      new Date(selectedPolicy.startDate).toLocaleDateString('ar-SA')}{' '}
+                    —{' '}
+                    {selectedPolicy.endDate &&
+                      new Date(selectedPolicy.endDate).toLocaleDateString('ar-SA')}
+                  </Typography>
+                </Grid>
+                <Grid item xs={6} sm={4}>
+                  <Typography variant="caption" color="text.secondary">
+                    الحالة
+                  </Typography>
                   <Box>
-                    <Chip icon={STATUS_CONFIG[selectedPolicy.status]?.icon} label={STATUS_CONFIG[selectedPolicy.status]?.label || selectedPolicy.status} size="small" color={STATUS_CONFIG[selectedPolicy.status]?.color || 'default'} />
+                    <Chip
+                      icon={STATUS_CONFIG[selectedPolicy.status]?.icon}
+                      label={STATUS_CONFIG[selectedPolicy.status]?.label || selectedPolicy.status}
+                      size="small"
+                      color={STATUS_CONFIG[selectedPolicy.status]?.color || 'default'}
+                    />
                   </Box>
                 </Grid>
               </Grid>
@@ -1049,16 +1653,29 @@ export default function HRInsuranceDashboard() {
                   <FamilyIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
                   المعالون ({selectedPolicy.dependents?.length || 0})
                 </Typography>
-                <Button size="small" startIcon={<AddDependentIcon />} onClick={() => { setDependentForm({}); setDependentDialog(true); }}>
+                <Button
+                  size="small"
+                  startIcon={<AddDependentIcon />}
+                  onClick={() => {
+                    setDependentForm({});
+                    setDependentDialog(true);
+                  }}
+                >
                   إضافة تابع
                 </Button>
               </Box>
               {selectedPolicy.dependents?.length > 0 ? (
                 <List dense>
-                  {selectedPolicy.dependents.map((dep) => (
+                  {selectedPolicy.dependents.map(dep => (
                     <ListItem key={dep._id} divider>
                       <ListItemAvatar>
-                        <Avatar sx={{ width: 32, height: 32, bgcolor: dep.status === 'active' ? 'success.main' : 'grey.400' }}>
+                        <Avatar
+                          sx={{
+                            width: 32,
+                            height: 32,
+                            bgcolor: dep.status === 'active' ? 'success.main' : 'grey.400',
+                          }}
+                        >
                           {dep.name?.charAt(0)}
                         </Avatar>
                       </ListItemAvatar>
@@ -1066,12 +1683,18 @@ export default function HRInsuranceDashboard() {
                         primary={dep.name}
                         secondary={`${dep.relationshipAr || dep.relationship} — ${dep.nationalId}`}
                       />
-                      <Chip label={dep.status === 'active' ? 'نشط' : dep.status} size="small" color={dep.status === 'active' ? 'success' : 'default'} />
+                      <Chip
+                        label={dep.status === 'active' ? 'نشط' : dep.status}
+                        size="small"
+                        color={dep.status === 'active' ? 'success' : 'default'}
+                      />
                     </ListItem>
                   ))}
                 </List>
               ) : (
-                <Typography variant="body2" color="text.secondary" py={1}>لا يوجد معالون</Typography>
+                <Typography variant="body2" color="text.secondary" py={1}>
+                  لا يوجد معالون
+                </Typography>
               )}
 
               <Divider sx={{ my: 2 }} />
@@ -1083,7 +1706,14 @@ export default function HRInsuranceDashboard() {
                   المطالبات ({selectedPolicy.claims?.length || 0})
                 </Typography>
                 {selectedPolicy.status === 'active' && (
-                  <Button size="small" startIcon={<AddIcon />} onClick={() => { setClaimForm({}); setClaimDialog(true); }}>
+                  <Button
+                    size="small"
+                    startIcon={<AddIcon />}
+                    onClick={() => {
+                      setClaimForm({});
+                      setClaimDialog(true);
+                    }}
+                  >
                     مطالبة جديدة
                   </Button>
                 )}
@@ -1099,18 +1729,34 @@ export default function HRInsuranceDashboard() {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {selectedPolicy.claims.map((c) => (
+                    {selectedPolicy.claims.map(c => (
                       <TableRow key={c._id}>
-                        <TableCell><Typography variant="body2" fontFamily="monospace">{c.claimNumber}</Typography></TableCell>
-                        <TableCell>{c.claimTypeAr || CLAIM_TYPES.find((t) => t.value === c.claimType)?.label || c.claimType}</TableCell>
+                        <TableCell>
+                          <Typography variant="body2" fontFamily="monospace">
+                            {c.claimNumber}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          {c.claimTypeAr ||
+                            CLAIM_TYPES.find(t => t.value === c.claimType)?.label ||
+                            c.claimType}
+                        </TableCell>
                         <TableCell>{formatCurrency(c.amounts?.claimed)}</TableCell>
-                        <TableCell><Chip label={CLAIM_STATUS_CONFIG[c.status]?.label || c.status} size="small" color={CLAIM_STATUS_CONFIG[c.status]?.color || 'default'} /></TableCell>
+                        <TableCell>
+                          <Chip
+                            label={CLAIM_STATUS_CONFIG[c.status]?.label || c.status}
+                            size="small"
+                            color={CLAIM_STATUS_CONFIG[c.status]?.color || 'default'}
+                          />
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
                 </Table>
               ) : (
-                <Typography variant="body2" color="text.secondary" py={1}>لا توجد مطالبات</Typography>
+                <Typography variant="body2" color="text.secondary" py={1}>
+                  لا توجد مطالبات
+                </Typography>
               )}
             </Box>
           )}
@@ -1121,31 +1767,71 @@ export default function HRInsuranceDashboard() {
       </Dialog>
 
       {/* ── Add Dependent Dialog ───────────────────────────────────────── */}
-      <Dialog open={dependentDialog} onClose={() => setDependentDialog(false)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: '20px' } }}>
+      <Dialog
+        open={dependentDialog}
+        onClose={() => setDependentDialog(false)}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{ sx: { borderRadius: '20px' } }}
+      >
         <DialogTitle>إضافة تابع جديد</DialogTitle>
         <DialogContent dividers>
           <Grid container spacing={2} sx={{ mt: 0.5 }}>
             <Grid item xs={12}>
-              <TextField fullWidth label="اسم التابع" size="small" value={dependentForm.name || ''} onChange={(e) => setDependentForm({ ...dependentForm, name: e.target.value })} />
+              <TextField
+                fullWidth
+                label="اسم التابع"
+                size="small"
+                value={dependentForm.name || ''}
+                onChange={e => setDependentForm({ ...dependentForm, name: e.target.value })}
+              />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField fullWidth label="رقم الهوية" size="small" value={dependentForm.nationalId || ''} onChange={(e) => setDependentForm({ ...dependentForm, nationalId: e.target.value })} />
+              <TextField
+                fullWidth
+                label="رقم الهوية"
+                size="small"
+                value={dependentForm.nationalId || ''}
+                onChange={e => setDependentForm({ ...dependentForm, nationalId: e.target.value })}
+              />
             </Grid>
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth size="small">
                 <InputLabel>صلة القرابة</InputLabel>
-                <Select value={dependentForm.relationship || ''} label="صلة القرابة" onChange={(e) => setDependentForm({ ...dependentForm, relationship: e.target.value })}>
-                  {RELATIONSHIPS.map((r) => <MenuItem key={r.value} value={r.value}>{r.label}</MenuItem>)}
+                <Select
+                  value={dependentForm.relationship || ''}
+                  label="صلة القرابة"
+                  onChange={e =>
+                    setDependentForm({ ...dependentForm, relationship: e.target.value })
+                  }
+                >
+                  {RELATIONSHIPS.map(r => (
+                    <MenuItem key={r.value} value={r.value}>
+                      {r.label}
+                    </MenuItem>
+                  ))}
                 </Select>
               </FormControl>
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField fullWidth label="تاريخ الميلاد" size="small" type="date" InputLabelProps={{ shrink: true }} value={dependentForm.dateOfBirth || ''} onChange={(e) => setDependentForm({ ...dependentForm, dateOfBirth: e.target.value })} />
+              <TextField
+                fullWidth
+                label="تاريخ الميلاد"
+                size="small"
+                type="date"
+                InputLabelProps={{ shrink: true }}
+                value={dependentForm.dateOfBirth || ''}
+                onChange={e => setDependentForm({ ...dependentForm, dateOfBirth: e.target.value })}
+              />
             </Grid>
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth size="small">
                 <InputLabel>الجنس</InputLabel>
-                <Select value={dependentForm.gender || ''} label="الجنس" onChange={(e) => setDependentForm({ ...dependentForm, gender: e.target.value })}>
+                <Select
+                  value={dependentForm.gender || ''}
+                  label="الجنس"
+                  onChange={e => setDependentForm({ ...dependentForm, gender: e.target.value })}
+                >
                   <MenuItem value="male">ذكر</MenuItem>
                   <MenuItem value="female">أنثى</MenuItem>
                 </Select>
@@ -1155,54 +1841,127 @@ export default function HRInsuranceDashboard() {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDependentDialog(false)}>إلغاء</Button>
-          <Button variant="contained" onClick={handleAddDependent}>إضافة</Button>
+          <Button variant="contained" onClick={handleAddDependent}>
+            إضافة
+          </Button>
         </DialogActions>
       </Dialog>
 
       {/* ── Submit Claim Dialog ────────────────────────────────────────── */}
-      <Dialog open={claimDialog} onClose={() => setClaimDialog(false)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: '20px' } }}>
+      <Dialog
+        open={claimDialog}
+        onClose={() => setClaimDialog(false)}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{ sx: { borderRadius: '20px' } }}
+      >
         <DialogTitle>تقديم مطالبة طبية جديدة</DialogTitle>
         <DialogContent dividers>
           <Grid container spacing={2} sx={{ mt: 0.5 }}>
             <Grid item xs={12}>
               <FormControl fullWidth size="small">
                 <InputLabel>نوع المطالبة</InputLabel>
-                <Select value={claimForm.claimType || ''} label="نوع المطالبة" onChange={(e) => setClaimForm({ ...claimForm, claimType: e.target.value })}>
-                  {CLAIM_TYPES.map((t) => <MenuItem key={t.value} value={t.value}>{t.label}</MenuItem>)}
+                <Select
+                  value={claimForm.claimType || ''}
+                  label="نوع المطالبة"
+                  onChange={e => setClaimForm({ ...claimForm, claimType: e.target.value })}
+                >
+                  {CLAIM_TYPES.map(t => (
+                    <MenuItem key={t.value} value={t.value}>
+                      {t.label}
+                    </MenuItem>
+                  ))}
                 </Select>
               </FormControl>
             </Grid>
             <Grid item xs={12}>
               <FormControl fullWidth size="small">
                 <InputLabel>مقدم المطالبة</InputLabel>
-                <Select value={claimForm.claimant || 'employee'} label="مقدم المطالبة" onChange={(e) => setClaimForm({ ...claimForm, claimant: e.target.value })}>
+                <Select
+                  value={claimForm.claimant || 'employee'}
+                  label="مقدم المطالبة"
+                  onChange={e => setClaimForm({ ...claimForm, claimant: e.target.value })}
+                >
                   <MenuItem value="employee">الموظف</MenuItem>
                   <MenuItem value="dependent">تابع</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField fullWidth label="اسم المستشفى/العيادة" size="small" value={claimForm.provider?.name || ''} onChange={(e) => setClaimForm({ ...claimForm, provider: { ...claimForm.provider, name: e.target.value } })} />
+              <TextField
+                fullWidth
+                label="اسم المستشفى/العيادة"
+                size="small"
+                value={claimForm.provider?.name || ''}
+                onChange={e =>
+                  setClaimForm({
+                    ...claimForm,
+                    provider: { ...claimForm.provider, name: e.target.value },
+                  })
+                }
+              />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField fullWidth label="المدينة" size="small" value={claimForm.provider?.city || ''} onChange={(e) => setClaimForm({ ...claimForm, provider: { ...claimForm.provider, city: e.target.value } })} />
+              <TextField
+                fullWidth
+                label="المدينة"
+                size="small"
+                value={claimForm.provider?.city || ''}
+                onChange={e =>
+                  setClaimForm({
+                    ...claimForm,
+                    provider: { ...claimForm.provider, city: e.target.value },
+                  })
+                }
+              />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField fullWidth label="المبلغ المطالب (ريال)" size="small" type="number" value={claimForm.amounts?.claimed || ''} onChange={(e) => setClaimForm({ ...claimForm, amounts: { ...claimForm.amounts, claimed: parseFloat(e.target.value) } })} />
+              <TextField
+                fullWidth
+                label="المبلغ المطالب (ريال)"
+                size="small"
+                type="number"
+                value={claimForm.amounts?.claimed || ''}
+                onChange={e =>
+                  setClaimForm({
+                    ...claimForm,
+                    amounts: { ...claimForm.amounts, claimed: parseFloat(e.target.value) },
+                  })
+                }
+              />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField fullWidth label="وصف التشخيص" size="small" value={claimForm.diagnosis?.description || ''} onChange={(e) => setClaimForm({ ...claimForm, diagnosis: { ...claimForm.diagnosis, description: e.target.value } })} />
+              <TextField
+                fullWidth
+                label="وصف التشخيص"
+                size="small"
+                value={claimForm.diagnosis?.description || ''}
+                onChange={e =>
+                  setClaimForm({
+                    ...claimForm,
+                    diagnosis: { ...claimForm.diagnosis, description: e.target.value },
+                  })
+                }
+              />
             </Grid>
           </Grid>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setClaimDialog(false)}>إلغاء</Button>
-          <Button variant="contained" onClick={handleSubmitClaim}>تقديم المطالبة</Button>
+          <Button variant="contained" onClick={handleSubmitClaim}>
+            تقديم المطالبة
+          </Button>
         </DialogActions>
       </Dialog>
 
       {/* ── Renewal Dialog ─────────────────────────────────────────────── */}
-      <Dialog open={renewDialog} onClose={() => setRenewDialog(false)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: '20px' } }}>
+      <Dialog
+        open={renewDialog}
+        onClose={() => setRenewDialog(false)}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{ sx: { borderRadius: '20px' } }}
+      >
         <DialogTitle>
           <RenewIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
           تجديد وثيقة التأمين — {selectedPolicy?.employeeName}
@@ -1210,16 +1969,41 @@ export default function HRInsuranceDashboard() {
         <DialogContent dividers>
           <Grid container spacing={2} sx={{ mt: 0.5 }}>
             <Grid item xs={12}>
-              <TextField fullWidth label="تاريخ الانتهاء الجديد" size="small" type="date" InputLabelProps={{ shrink: true }} value={renewForm.newEndDate || ''} onChange={(e) => setRenewForm({ ...renewForm, newEndDate: e.target.value })} />
+              <TextField
+                fullWidth
+                label="تاريخ الانتهاء الجديد"
+                size="small"
+                type="date"
+                InputLabelProps={{ shrink: true }}
+                value={renewForm.newEndDate || ''}
+                onChange={e => setRenewForm({ ...renewForm, newEndDate: e.target.value })}
+              />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField fullWidth label="القسط الجديد (ريال)" size="small" type="number" value={renewForm.newPremium || ''} onChange={(e) => setRenewForm({ ...renewForm, newPremium: parseFloat(e.target.value) })} />
+              <TextField
+                fullWidth
+                label="القسط الجديد (ريال)"
+                size="small"
+                type="number"
+                value={renewForm.newPremium || ''}
+                onChange={e =>
+                  setRenewForm({ ...renewForm, newPremium: parseFloat(e.target.value) })
+                }
+              />
             </Grid>
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth size="small">
                 <InputLabel>فئة التغطية الجديدة</InputLabel>
-                <Select value={renewForm.newCoverageClass || selectedPolicy?.coverageClass || 'B'} label="فئة التغطية الجديدة" onChange={(e) => setRenewForm({ ...renewForm, newCoverageClass: e.target.value })}>
-                  {Object.entries(CLASS_CONFIG).map(([k, v]) => <MenuItem key={k} value={k}>{v.label}</MenuItem>)}
+                <Select
+                  value={renewForm.newCoverageClass || selectedPolicy?.coverageClass || 'B'}
+                  label="فئة التغطية الجديدة"
+                  onChange={e => setRenewForm({ ...renewForm, newCoverageClass: e.target.value })}
+                >
+                  {Object.entries(CLASS_CONFIG).map(([k, v]) => (
+                    <MenuItem key={k} value={k}>
+                      {v.label}
+                    </MenuItem>
+                  ))}
                 </Select>
               </FormControl>
             </Grid>
@@ -1227,7 +2011,9 @@ export default function HRInsuranceDashboard() {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setRenewDialog(false)}>إلغاء</Button>
-          <Button variant="contained" color="primary" onClick={handleRenewPolicy}>تجديد</Button>
+          <Button variant="contained" color="primary" onClick={handleRenewPolicy}>
+            تجديد
+          </Button>
         </DialogActions>
       </Dialog>
     </Box>

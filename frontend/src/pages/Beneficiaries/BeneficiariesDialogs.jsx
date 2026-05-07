@@ -35,7 +35,7 @@ export const FilterDialog = ({ open, onClose, filters, setFilters, applyFilters 
           <Select
             value={filters.status}
             label="الحالة"
-            onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+            onChange={e => setFilters({ ...filters, status: e.target.value })}
           >
             <MenuItem value="all">الكل</MenuItem>
             <MenuItem value="active">نشط</MenuItem>
@@ -49,7 +49,7 @@ export const FilterDialog = ({ open, onClose, filters, setFilters, applyFilters 
           <Select
             value={filters.category}
             label="نوع الإعاقة"
-            onChange={(e) => setFilters({ ...filters, category: e.target.value })}
+            onChange={e => setFilters({ ...filters, category: e.target.value })}
           >
             <MenuItem value="all">الكل</MenuItem>
             <MenuItem value="physical">إعاقة حركية</MenuItem>
@@ -64,7 +64,7 @@ export const FilterDialog = ({ open, onClose, filters, setFilters, applyFilters 
           <Select
             value={filters.gender}
             label="الجنس"
-            onChange={(e) => setFilters({ ...filters, gender: e.target.value })}
+            onChange={e => setFilters({ ...filters, gender: e.target.value })}
           >
             <MenuItem value="all">الكل</MenuItem>
             <MenuItem value="male">ذكر</MenuItem>
@@ -77,7 +77,7 @@ export const FilterDialog = ({ open, onClose, filters, setFilters, applyFilters 
           <Select
             value={filters.ageRange}
             label="الفئة العمرية"
-            onChange={(e) => setFilters({ ...filters, ageRange: e.target.value })}
+            onChange={e => setFilters({ ...filters, ageRange: e.target.value })}
           >
             <MenuItem value="all">الكل</MenuItem>
             <MenuItem value="0-5">0-5 سنوات</MenuItem>
@@ -174,6 +174,4 @@ export const BeneficiariesSnackbar = ({ snackbar, setSnackbar }) => (
   </Snackbar>
 );
 
-export const BeneficiariesConfirmDialog = ({ confirmState }) => (
-  <ConfirmDialog {...confirmState} />
-);
+export const BeneficiariesConfirmDialog = ({ confirmState }) => <ConfirmDialog {...confirmState} />;

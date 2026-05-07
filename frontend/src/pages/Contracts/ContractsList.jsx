@@ -3,12 +3,34 @@
  */
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Box, Typography, Paper, Table, TableHead, TableRow, TableCell, TableBody,
-  TablePagination, Button, Chip, IconButton, Dialog, DialogTitle, DialogContent,
-  DialogActions, TextField, MenuItem, CircularProgress,
+  Box,
+  Typography,
+  Paper,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+  TablePagination,
+  Button,
+  Chip,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  MenuItem,
+  CircularProgress,
 } from '@mui/material';
 import { Add, Edit, Delete, Refresh, Autorenew } from '@mui/icons-material';
-import { getContracts, createContract, updateContract, deleteContract, renewContract } from '../../services/contractManagement.service';
+import {
+  getContracts,
+  createContract,
+  updateContract,
+  deleteContract,
+  renewContract,
+} from '../../services/contractManagement.service';
 
 const typeOptions = [
   { value: 'SERVICE_AGREEMENT', label: 'عقد خدمات' },
@@ -27,7 +49,15 @@ const statusOptions = [
   { value: 'SUSPENDED', label: 'معلق', color: 'warning' },
 ];
 
-const emptyForm = { contractTitle: '', contractType: 'SERVICE_AGREEMENT', status: 'DRAFT', startDate: '', endDate: '', supplierName: '', estimatedAnnualValue: '' };
+const emptyForm = {
+  contractTitle: '',
+  contractType: 'SERVICE_AGREEMENT',
+  status: 'DRAFT',
+  startDate: '',
+  endDate: '',
+  supplierName: '',
+  estimatedAnnualValue: '',
+};
 
 export default function ContractsList() {
   const [rows, setRows] = useState([]);
@@ -45,7 +75,9 @@ export default function ContractsList() {
     setLoading(false);
   }, [page, rpp]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    load();
+  }, [load]);
 
   const handleSave = async () => {
     const payload = {
@@ -55,14 +87,19 @@ export default function ContractsList() {
       startDate: form.startDate,
       endDate: form.endDate,
       supplier: { supplierName: form.supplierName },
-      contractValue: { estimatedAnnualValue: form.estimatedAnnualValue ? Number(form.estimatedAnnualValue) : 0 },
+      contractValue: {
+        estimatedAnnualValue: form.estimatedAnnualValue ? Number(form.estimatedAnnualValue) : 0,
+      },
     };
     if (editId) await updateContract(editId, payload);
     else await createContract(payload);
-    setOpen(false); setForm(emptyForm); setEditId(null); load();
+    setOpen(false);
+    setForm(emptyForm);
+    setEditId(null);
+    load();
   };
 
-  const handleEdit = (row) => {
+  const handleEdit = row => {
     setForm({
       contractTitle: row.contractTitle || '',
       contractType: row.contractType || 'SERVICE_AGREEMENT',
@@ -72,25 +109,48 @@ export default function ContractsList() {
       supplierName: row.supplier?.supplierName || '',
       estimatedAnnualValue: row.contractValue?.estimatedAnnualValue || '',
     });
-    setEditId(row._id); setOpen(true);
+    setEditId(row._id);
+    setOpen(true);
   };
 
-  const handleDelete = async (id) => { await deleteContract(id); load(); };
-  const handleRenew = async (id) => { await renewContract(id); load(); };
+  const handleDelete = async id => {
+    await deleteContract(id);
+    load();
+  };
+  const handleRenew = async id => {
+    await renewContract(id);
+    load();
+  };
 
   return (
     <Box p={3}>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-        <Typography variant="h5" fontWeight="bold">العقود</Typography>
+        <Typography variant="h5" fontWeight="bold">
+          العقود
+        </Typography>
         <Box>
-          <Button startIcon={<Refresh />} onClick={load} sx={{ mr: 1 }}>تحديث</Button>
-          <Button variant="contained" startIcon={<Add />} onClick={() => { setForm(emptyForm); setEditId(null); setOpen(true); }}>عقد جديد</Button>
+          <Button startIcon={<Refresh />} onClick={load} sx={{ mr: 1 }}>
+            تحديث
+          </Button>
+          <Button
+            variant="contained"
+            startIcon={<Add />}
+            onClick={() => {
+              setForm(emptyForm);
+              setEditId(null);
+              setOpen(true);
+            }}
+          >
+            عقد جديد
+          </Button>
         </Box>
       </Box>
 
       <Paper>
         {loading ? (
-          <Box display="flex" justifyContent="center" p={4}><CircularProgress /></Box>
+          <Box display="flex" justifyContent="center" p={4}>
+            <CircularProgress />
+          </Box>
         ) : (
           <>
             <Table size="small">
@@ -108,28 +168,62 @@ export default function ContractsList() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {rows.map((r) => (
+                {rows.map(r => (
                   <TableRow key={r._id} hover>
                     <TableCell>{r.contractNumber}</TableCell>
                     <TableCell>{r.contractTitle}</TableCell>
-                    <TableCell>{typeOptions.find((o) => o.value === r.contractType)?.label || r.contractType}</TableCell>
+                    <TableCell>
+                      {typeOptions.find(o => o.value === r.contractType)?.label || r.contractType}
+                    </TableCell>
                     <TableCell>{r.supplier?.supplierName}</TableCell>
                     <TableCell>
-                      <Chip size="small" label={statusOptions.find((o) => o.value === r.status)?.label || r.status} color={statusOptions.find((o) => o.value === r.status)?.color || 'default'} />
+                      <Chip
+                        size="small"
+                        label={statusOptions.find(o => o.value === r.status)?.label || r.status}
+                        color={statusOptions.find(o => o.value === r.status)?.color || 'default'}
+                      />
                     </TableCell>
-                    <TableCell>{(r.contractValue?.estimatedAnnualValue || 0).toLocaleString()} ر.س</TableCell>
-                    <TableCell>{r.startDate ? new Date(r.startDate).toLocaleDateString('ar-SA') : '—'}</TableCell>
-                    <TableCell>{r.endDate ? new Date(r.endDate).toLocaleDateString('ar-SA') : '—'}</TableCell>
                     <TableCell>
-                      <IconButton size="small" onClick={() => handleEdit(r)}><Edit fontSize="small" /></IconButton>
-                      <IconButton size="small" color="info" title="تجديد" onClick={() => handleRenew(r._id)}><Autorenew fontSize="small" /></IconButton>
-                      <IconButton size="small" color="error" onClick={() => handleDelete(r._id)}><Delete fontSize="small" /></IconButton>
+                      {(r.contractValue?.estimatedAnnualValue || 0).toLocaleString()} ر.س
+                    </TableCell>
+                    <TableCell>
+                      {r.startDate ? new Date(r.startDate).toLocaleDateString('ar-SA') : '—'}
+                    </TableCell>
+                    <TableCell>
+                      {r.endDate ? new Date(r.endDate).toLocaleDateString('ar-SA') : '—'}
+                    </TableCell>
+                    <TableCell>
+                      <IconButton size="small" onClick={() => handleEdit(r)}>
+                        <Edit fontSize="small" />
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        color="info"
+                        title="تجديد"
+                        onClick={() => handleRenew(r._id)}
+                      >
+                        <Autorenew fontSize="small" />
+                      </IconButton>
+                      <IconButton size="small" color="error" onClick={() => handleDelete(r._id)}>
+                        <Delete fontSize="small" />
+                      </IconButton>
                     </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
-            <TablePagination component="div" count={-1} page={page} onPageChange={(_, p) => setPage(p)} rowsPerPage={rpp} onRowsPerPageChange={(e) => { setRpp(+e.target.value); setPage(0); }} labelRowsPerPage="عدد الصفوف:" />
+            <TablePagination
+              component="div"
+              count={-1}
+              page={page}
+              onPageChange={(_, p) => setPage(p)}
+              rowsPerPage={rpp}
+              onRowsPerPageChange={e => {
+                setRpp(+e.target.value);
+                setPage(0);
+              }}
+              labelRowsPerPage="عدد الصفوف:"
+            />
           </>
         )}
       </Paper>
@@ -137,21 +231,68 @@ export default function ContractsList() {
       <Dialog open={open} onClose={() => setOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>{editId ? 'تعديل العقد' : 'عقد جديد'}</DialogTitle>
         <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
-          <TextField label="عنوان العقد" value={form.contractTitle} onChange={(e) => setForm({ ...form, contractTitle: e.target.value })} fullWidth required />
-          <TextField select label="النوع" value={form.contractType} onChange={(e) => setForm({ ...form, contractType: e.target.value })}>
-            {typeOptions.map((o) => <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>)}
+          <TextField
+            label="عنوان العقد"
+            value={form.contractTitle}
+            onChange={e => setForm({ ...form, contractTitle: e.target.value })}
+            fullWidth
+            required
+          />
+          <TextField
+            select
+            label="النوع"
+            value={form.contractType}
+            onChange={e => setForm({ ...form, contractType: e.target.value })}
+          >
+            {typeOptions.map(o => (
+              <MenuItem key={o.value} value={o.value}>
+                {o.label}
+              </MenuItem>
+            ))}
           </TextField>
-          <TextField select label="الحالة" value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}>
-            {statusOptions.map((o) => <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>)}
+          <TextField
+            select
+            label="الحالة"
+            value={form.status}
+            onChange={e => setForm({ ...form, status: e.target.value })}
+          >
+            {statusOptions.map(o => (
+              <MenuItem key={o.value} value={o.value}>
+                {o.label}
+              </MenuItem>
+            ))}
           </TextField>
-          <TextField label="اسم المورد" value={form.supplierName} onChange={(e) => setForm({ ...form, supplierName: e.target.value })} />
-          <TextField label="القيمة السنوية (ر.س)" type="number" value={form.estimatedAnnualValue} onChange={(e) => setForm({ ...form, estimatedAnnualValue: e.target.value })} />
-          <TextField label="تاريخ البدء" type="date" InputLabelProps={{ shrink: true }} value={form.startDate} onChange={(e) => setForm({ ...form, startDate: e.target.value })} />
-          <TextField label="تاريخ الانتهاء" type="date" InputLabelProps={{ shrink: true }} value={form.endDate} onChange={(e) => setForm({ ...form, endDate: e.target.value })} />
+          <TextField
+            label="اسم المورد"
+            value={form.supplierName}
+            onChange={e => setForm({ ...form, supplierName: e.target.value })}
+          />
+          <TextField
+            label="القيمة السنوية (ر.س)"
+            type="number"
+            value={form.estimatedAnnualValue}
+            onChange={e => setForm({ ...form, estimatedAnnualValue: e.target.value })}
+          />
+          <TextField
+            label="تاريخ البدء"
+            type="date"
+            InputLabelProps={{ shrink: true }}
+            value={form.startDate}
+            onChange={e => setForm({ ...form, startDate: e.target.value })}
+          />
+          <TextField
+            label="تاريخ الانتهاء"
+            type="date"
+            InputLabelProps={{ shrink: true }}
+            value={form.endDate}
+            onChange={e => setForm({ ...form, endDate: e.target.value })}
+          />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpen(false)}>إلغاء</Button>
-          <Button variant="contained" onClick={handleSave}>حفظ</Button>
+          <Button variant="contained" onClick={handleSave}>
+            حفظ
+          </Button>
         </DialogActions>
       </Dialog>
     </Box>

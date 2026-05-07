@@ -4,25 +4,55 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 import {
-  Box, Card, CardContent, Typography, Grid, Chip, Table,
-  TableBody, TableCell, TableContainer, TableHead, TableRow,
-  CircularProgress, Alert, Tabs, Tab, IconButton, Avatar, LinearProgress,
+  Box,
+  Card,
+  CardContent,
+  Typography,
+  Grid,
+  Chip,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  CircularProgress,
+  Alert,
+  Tabs,
+  Tab,
+  IconButton,
+  Avatar,
+  LinearProgress,
 } from '@mui/material';
 import {
-  Work, Person, Refresh,
-  Assessment, CheckCircle, HourglassEmpty,
+  Work,
+  Person,
+  Refresh,
+  Assessment,
+  CheckCircle,
+  HourglassEmpty,
 } from '@mui/icons-material';
 import taqatService from '../../services/taqat.service';
 
 const applicationStatusLabels = {
-  submitted: 'مقدّم', screening: 'فرز', shortlisted: 'قائمة قصيرة',
-  interview: 'مقابلة', offered: 'عرض وظيفي', accepted: 'مقبول',
-  rejected: 'مرفوض', withdrawn: 'منسحب',
+  submitted: 'مقدّم',
+  screening: 'فرز',
+  shortlisted: 'قائمة قصيرة',
+  interview: 'مقابلة',
+  offered: 'عرض وظيفي',
+  accepted: 'مقبول',
+  rejected: 'مرفوض',
+  withdrawn: 'منسحب',
 };
 const applicationStatusColors = {
-  submitted: 'default', screening: 'info', shortlisted: 'primary',
-  interview: 'warning', offered: 'secondary', accepted: 'success',
-  rejected: 'error', withdrawn: 'default',
+  submitted: 'default',
+  screening: 'info',
+  shortlisted: 'primary',
+  interview: 'warning',
+  offered: 'secondary',
+  accepted: 'success',
+  rejected: 'error',
+  withdrawn: 'default',
 };
 
 export default function TaqatDashboard() {
@@ -56,7 +86,9 @@ export default function TaqatDashboard() {
     }
   }, []);
 
-  useEffect(() => { fetchData(); }, [fetchData]);
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   if (loading) {
     return (
@@ -80,10 +112,16 @@ export default function TaqatDashboard() {
             إدارة توظيف وتأهيل ذوي الإعاقة عبر منصة طاقات
           </Typography>
         </Box>
-        <IconButton onClick={fetchData}><Refresh /></IconButton>
+        <IconButton onClick={fetchData}>
+          <Refresh />
+        </IconButton>
       </Box>
 
-      {error && <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>{error}</Alert>}
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
+          {error}
+        </Alert>
+      )}
 
       {/* بطاقات إحصائية */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
@@ -92,10 +130,16 @@ export default function TaqatDashboard() {
             <CardContent>
               <Box display="flex" justifyContent="space-between" alignItems="center">
                 <Box>
-                  <Typography variant="body2" color="text.secondary">الباحثون عن عمل</Typography>
-                  <Typography variant="h4" fontWeight="bold">{stats.totalJobSeekers || 0}</Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    الباحثون عن عمل
+                  </Typography>
+                  <Typography variant="h4" fontWeight="bold">
+                    {stats.totalJobSeekers || 0}
+                  </Typography>
                 </Box>
-                <Avatar sx={{ bgcolor: 'primary.light' }}><Person /></Avatar>
+                <Avatar sx={{ bgcolor: 'primary.light' }}>
+                  <Person />
+                </Avatar>
               </Box>
             </CardContent>
           </Card>
@@ -105,10 +149,16 @@ export default function TaqatDashboard() {
             <CardContent>
               <Box display="flex" justifyContent="space-between" alignItems="center">
                 <Box>
-                  <Typography variant="body2" color="text.secondary">الفرص المتاحة</Typography>
-                  <Typography variant="h4" fontWeight="bold">{stats.activeOpportunities || 0}</Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    الفرص المتاحة
+                  </Typography>
+                  <Typography variant="h4" fontWeight="bold">
+                    {stats.activeOpportunities || 0}
+                  </Typography>
                 </Box>
-                <Avatar sx={{ bgcolor: 'success.light' }}><Work /></Avatar>
+                <Avatar sx={{ bgcolor: 'success.light' }}>
+                  <Work />
+                </Avatar>
               </Box>
             </CardContent>
           </Card>
@@ -118,10 +168,16 @@ export default function TaqatDashboard() {
             <CardContent>
               <Box display="flex" justifyContent="space-between" alignItems="center">
                 <Box>
-                  <Typography variant="body2" color="text.secondary">طلبات قيد المعالجة</Typography>
-                  <Typography variant="h4" fontWeight="bold">{stats.pendingApplications || 0}</Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    طلبات قيد المعالجة
+                  </Typography>
+                  <Typography variant="h4" fontWeight="bold">
+                    {stats.pendingApplications || 0}
+                  </Typography>
                 </Box>
-                <Avatar sx={{ bgcolor: 'warning.light' }}><HourglassEmpty /></Avatar>
+                <Avatar sx={{ bgcolor: 'warning.light' }}>
+                  <HourglassEmpty />
+                </Avatar>
               </Box>
             </CardContent>
           </Card>
@@ -131,10 +187,16 @@ export default function TaqatDashboard() {
             <CardContent>
               <Box display="flex" justifyContent="space-between" alignItems="center">
                 <Box>
-                  <Typography variant="body2" color="text.secondary">تم التوظيف</Typography>
-                  <Typography variant="h4" fontWeight="bold">{stats.placed || 0}</Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    تم التوظيف
+                  </Typography>
+                  <Typography variant="h4" fontWeight="bold">
+                    {stats.placed || 0}
+                  </Typography>
                 </Box>
-                <Avatar sx={{ bgcolor: 'info.light' }}><CheckCircle /></Avatar>
+                <Avatar sx={{ bgcolor: 'info.light' }}>
+                  <CheckCircle />
+                </Avatar>
               </Box>
             </CardContent>
           </Card>
@@ -165,29 +227,51 @@ export default function TaqatDashboard() {
                 </TableHead>
                 <TableBody>
                   {jobSeekers.length === 0 ? (
-                    <TableRow><TableCell colSpan={5} align="center">لا يوجد باحثون مسجلون</TableCell></TableRow>
-                  ) : jobSeekers.map((s) => (
-                    <TableRow key={s._id} hover>
-                      <TableCell>{s.personalInfo?.fullNameAr || s.personalInfo?.fullName || '—'}</TableCell>
-                      <TableCell>{s.disabilityInfo?.type || '—'}</TableCell>
-                      <TableCell>{s.education?.level || '—'}</TableCell>
-                      <TableCell align="center">
-                        <LinearProgress
-                          variant="determinate"
-                          value={s.employmentReadiness?.score || 0}
-                          sx={{ height: 8, borderRadius: 4, width: 80, display: 'inline-flex' }}
-                        />
-                        <Typography variant="caption" sx={{ ml: 1 }}>{s.employmentReadiness?.score || 0}%</Typography>
-                      </TableCell>
-                      <TableCell align="center">
-                        <Chip
-                          label={s.status === 'active' ? 'نشط' : s.status === 'placed' ? 'موظف' : s.status}
-                          color={s.status === 'active' ? 'success' : s.status === 'placed' ? 'info' : 'default'}
-                          size="small"
-                        />
+                    <TableRow>
+                      <TableCell colSpan={5} align="center">
+                        لا يوجد باحثون مسجلون
                       </TableCell>
                     </TableRow>
-                  ))}
+                  ) : (
+                    jobSeekers.map(s => (
+                      <TableRow key={s._id} hover>
+                        <TableCell>
+                          {s.personalInfo?.fullNameAr || s.personalInfo?.fullName || '—'}
+                        </TableCell>
+                        <TableCell>{s.disabilityInfo?.type || '—'}</TableCell>
+                        <TableCell>{s.education?.level || '—'}</TableCell>
+                        <TableCell align="center">
+                          <LinearProgress
+                            variant="determinate"
+                            value={s.employmentReadiness?.score || 0}
+                            sx={{ height: 8, borderRadius: 4, width: 80, display: 'inline-flex' }}
+                          />
+                          <Typography variant="caption" sx={{ ml: 1 }}>
+                            {s.employmentReadiness?.score || 0}%
+                          </Typography>
+                        </TableCell>
+                        <TableCell align="center">
+                          <Chip
+                            label={
+                              s.status === 'active'
+                                ? 'نشط'
+                                : s.status === 'placed'
+                                  ? 'موظف'
+                                  : s.status
+                            }
+                            color={
+                              s.status === 'active'
+                                ? 'success'
+                                : s.status === 'placed'
+                                  ? 'info'
+                                  : 'default'
+                            }
+                            size="small"
+                          />
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
                 </TableBody>
               </Table>
             </TableContainer>
@@ -209,23 +293,35 @@ export default function TaqatDashboard() {
                 </TableHead>
                 <TableBody>
                   {opportunities.length === 0 ? (
-                    <TableRow><TableCell colSpan={6} align="center">لا توجد فرص وظيفية</TableCell></TableRow>
-                  ) : opportunities.map((o) => (
-                    <TableRow key={o._id} hover>
-                      <TableCell>{o.title}</TableCell>
-                      <TableCell>{o.company?.name || '—'}</TableCell>
-                      <TableCell>{o.location?.city || '—'}</TableCell>
-                      <TableCell align="center">{o.vacancies || 0}</TableCell>
-                      <TableCell align="center">{o.applicationCount || 0}</TableCell>
-                      <TableCell align="center">
-                        <Chip
-                          label={o.status === 'active' ? 'نشطة' : o.status === 'closed' ? 'مغلقة' : o.status}
-                          color={o.status === 'active' ? 'success' : 'default'}
-                          size="small"
-                        />
+                    <TableRow>
+                      <TableCell colSpan={6} align="center">
+                        لا توجد فرص وظيفية
                       </TableCell>
                     </TableRow>
-                  ))}
+                  ) : (
+                    opportunities.map(o => (
+                      <TableRow key={o._id} hover>
+                        <TableCell>{o.title}</TableCell>
+                        <TableCell>{o.company?.name || '—'}</TableCell>
+                        <TableCell>{o.location?.city || '—'}</TableCell>
+                        <TableCell align="center">{o.vacancies || 0}</TableCell>
+                        <TableCell align="center">{o.applicationCount || 0}</TableCell>
+                        <TableCell align="center">
+                          <Chip
+                            label={
+                              o.status === 'active'
+                                ? 'نشطة'
+                                : o.status === 'closed'
+                                  ? 'مغلقة'
+                                  : o.status
+                            }
+                            color={o.status === 'active' ? 'success' : 'default'}
+                            size="small"
+                          />
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
                 </TableBody>
               </Table>
             </TableContainer>
@@ -246,22 +342,28 @@ export default function TaqatDashboard() {
                 </TableHead>
                 <TableBody>
                   {applications.length === 0 ? (
-                    <TableRow><TableCell colSpan={5} align="center">لا توجد طلبات</TableCell></TableRow>
-                  ) : applications.map((a) => (
-                    <TableRow key={a._id} hover>
-                      <TableCell>{a.jobSeeker?.personalInfo?.fullNameAr || '—'}</TableCell>
-                      <TableCell>{a.jobOpportunity?.title || '—'}</TableCell>
-                      <TableCell>{new Date(a.createdAt).toLocaleDateString('ar-SA')}</TableCell>
-                      <TableCell align="center">{a.matchScore || 0}%</TableCell>
-                      <TableCell align="center">
-                        <Chip
-                          label={applicationStatusLabels[a.status] || a.status}
-                          color={applicationStatusColors[a.status] || 'default'}
-                          size="small"
-                        />
+                    <TableRow>
+                      <TableCell colSpan={5} align="center">
+                        لا توجد طلبات
                       </TableCell>
                     </TableRow>
-                  ))}
+                  ) : (
+                    applications.map(a => (
+                      <TableRow key={a._id} hover>
+                        <TableCell>{a.jobSeeker?.personalInfo?.fullNameAr || '—'}</TableCell>
+                        <TableCell>{a.jobOpportunity?.title || '—'}</TableCell>
+                        <TableCell>{new Date(a.createdAt).toLocaleDateString('ar-SA')}</TableCell>
+                        <TableCell align="center">{a.matchScore || 0}%</TableCell>
+                        <TableCell align="center">
+                          <Chip
+                            label={applicationStatusLabels[a.status] || a.status}
+                            color={applicationStatusColors[a.status] || 'default'}
+                            size="small"
+                          />
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
                 </TableBody>
               </Table>
             </TableContainer>

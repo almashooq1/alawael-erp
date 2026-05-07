@@ -2,7 +2,14 @@
  * RecentResults – Tab 1: Recent test results
  */
 import {
-  Box, Grid, Card, CardContent, Typography, Chip, LinearProgress, Alert,
+  Box,
+  Grid,
+  Card,
+  CardContent,
+  Typography,
+  Chip,
+  LinearProgress,
+  Alert,
 } from '@mui/material';
 import { surfaceColors } from '../../theme/palette';
 import { getLevelColor } from './constants';
@@ -14,7 +21,7 @@ const RecentResults = ({ testResults, onOpenDetail }) => {
 
   return (
     <Grid container spacing={2}>
-      {testResults.map((result) => (
+      {testResults.map(result => (
         <Grid item xs={12} md={6} key={result.id}>
           <Card
             elevation={2}
@@ -23,7 +30,9 @@ const RecentResults = ({ testResults, onOpenDetail }) => {
           >
             <CardContent>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography variant="subtitle1" fontWeight="bold">{result.testName}</Typography>
+                <Typography variant="subtitle1" fontWeight="bold">
+                  {result.testName}
+                </Typography>
                 <Chip
                   label={result.overallLevel}
                   size="small"
@@ -47,7 +56,10 @@ const RecentResults = ({ testResults, onOpenDetail }) => {
                     height: 10,
                     borderRadius: 5,
                     bgcolor: surfaceColors.divider,
-                    '& .MuiLinearProgress-bar': { bgcolor: getLevelColor(result.percentage), borderRadius: 5 },
+                    '& .MuiLinearProgress-bar': {
+                      bgcolor: getLevelColor(result.percentage),
+                      borderRadius: 5,
+                    },
                   }}
                 />
               </Box>

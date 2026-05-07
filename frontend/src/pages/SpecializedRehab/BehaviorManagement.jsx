@@ -214,7 +214,7 @@ export default function BehaviorManagement() {
     if (filterSeverity) params.severity = filterSeverity;
     try {
       const [incRes, benefRes] = await Promise.allSettled([
-        behaviorAPI.list(params),
+        behaviorAPI.listRecords(params),
         coreAPI.list({ limit: 200 }),
       ]);
       if (incRes.status === 'fulfilled') {
@@ -239,7 +239,7 @@ export default function BehaviorManagement() {
   const handleCreate = async form => {
     setFormError('');
     try {
-      await behaviorAPI.create({
+      await behaviorAPI.createRecord({
         ...form,
         observedAt: form.observedAt
           ? new Date(form.observedAt).toISOString()

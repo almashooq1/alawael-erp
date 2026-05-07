@@ -30,11 +30,7 @@ import {
   Tab,
   Divider,
 } from '@mui/material';
-import {
-  Add as AddIcon,
-  Home as HomeIcon,
-  DirectionsBus as BusIcon,
-} from '@mui/icons-material';
+import { Add as AddIcon, Home as HomeIcon, DirectionsBus as BusIcon } from '@mui/icons-material';
 import {
   getHousingUnits,
   createHousingUnit,

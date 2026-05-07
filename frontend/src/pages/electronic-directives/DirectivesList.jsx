@@ -151,7 +151,15 @@ export default function DirectivesList() {
       )}
 
       {/* Filters */}
-      <Paper sx={{ p: 2, mb: 3, borderRadius: '16px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
+      <Paper
+        sx={{
+          p: 2,
+          mb: 3,
+          borderRadius: '16px',
+          border: '1px solid rgba(0,0,0,0.04)',
+          boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+        }}
+      >
         <Grid container spacing={2} alignItems="center">
           <Grid item xs={12} md={4}>
             <TextField
@@ -159,7 +167,7 @@ export default function DirectivesList() {
               size="small"
               placeholder="بحث بالموضوع أو الرقم المرجعي..."
               value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
+              onChange={e => setSearchInput(e.target.value)}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -175,13 +183,13 @@ export default function DirectivesList() {
               <Select
                 value={statusFilter}
                 label="الحالة"
-                onChange={(e) => {
+                onChange={e => {
                   setStatusFilter(e.target.value);
                   setPage(0);
                 }}
               >
                 <MenuItem value="">الكل</MenuItem>
-                {statusOptions.map((s) => (
+                {statusOptions.map(s => (
                   <MenuItem key={s.value} value={s.value}>
                     {s.label}
                   </MenuItem>
@@ -195,13 +203,13 @@ export default function DirectivesList() {
               <Select
                 value={typeFilter}
                 label="النوع"
-                onChange={(e) => {
+                onChange={e => {
                   setTypeFilter(e.target.value);
                   setPage(0);
                 }}
               >
                 <MenuItem value="">الكل</MenuItem>
-                {typeOptions.map((t) => (
+                {typeOptions.map(t => (
                   <MenuItem key={t.value} value={t.value}>
                     {t.label}
                   </MenuItem>
@@ -215,13 +223,13 @@ export default function DirectivesList() {
               <Select
                 value={priorityFilter}
                 label="الأولوية"
-                onChange={(e) => {
+                onChange={e => {
                   setPriorityFilter(e.target.value);
                   setPage(0);
                 }}
               >
                 <MenuItem value="">الكل</MenuItem>
-                {priorityOptions.map((p) => (
+                {priorityOptions.map(p => (
                   <MenuItem key={p.value} value={p.value}>
                     {p.label}
                   </MenuItem>
@@ -233,133 +241,211 @@ export default function DirectivesList() {
       </Paper>
 
       {/* Table */}
-      <TableContainer component={Paper} sx={{ borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
+      <TableContainer
+        component={Paper}
+        sx={{
+          borderRadius: '20px',
+          border: '1px solid rgba(0,0,0,0.04)',
+          boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+        }}
+      >
         <Table>
           <TableHead>
             <TableRow sx={{ bgcolor: 'rgba(0,0,0,0.02)' }}>
-              <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>النوع</TableCell>
-              <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>الرقم المرجعي</TableCell>
-              <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>الموضوع</TableCell>
-              <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>الأولوية</TableCell>
-              <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>الحالة</TableCell>
-              <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>تاريخ الإصدار</TableCell>
-              <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>المستلمون</TableCell>
-              <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }} align="center">
+              <TableCell
+                sx={{
+                  fontWeight: 700,
+                  fontSize: '12px',
+                  letterSpacing: 0.5,
+                  color: 'text.secondary',
+                }}
+              >
+                النوع
+              </TableCell>
+              <TableCell
+                sx={{
+                  fontWeight: 700,
+                  fontSize: '12px',
+                  letterSpacing: 0.5,
+                  color: 'text.secondary',
+                }}
+              >
+                الرقم المرجعي
+              </TableCell>
+              <TableCell
+                sx={{
+                  fontWeight: 700,
+                  fontSize: '12px',
+                  letterSpacing: 0.5,
+                  color: 'text.secondary',
+                }}
+              >
+                الموضوع
+              </TableCell>
+              <TableCell
+                sx={{
+                  fontWeight: 700,
+                  fontSize: '12px',
+                  letterSpacing: 0.5,
+                  color: 'text.secondary',
+                }}
+              >
+                الأولوية
+              </TableCell>
+              <TableCell
+                sx={{
+                  fontWeight: 700,
+                  fontSize: '12px',
+                  letterSpacing: 0.5,
+                  color: 'text.secondary',
+                }}
+              >
+                الحالة
+              </TableCell>
+              <TableCell
+                sx={{
+                  fontWeight: 700,
+                  fontSize: '12px',
+                  letterSpacing: 0.5,
+                  color: 'text.secondary',
+                }}
+              >
+                تاريخ الإصدار
+              </TableCell>
+              <TableCell
+                sx={{
+                  fontWeight: 700,
+                  fontSize: '12px',
+                  letterSpacing: 0.5,
+                  color: 'text.secondary',
+                }}
+              >
+                المستلمون
+              </TableCell>
+              <TableCell
+                sx={{
+                  fontWeight: 700,
+                  fontSize: '12px',
+                  letterSpacing: 0.5,
+                  color: 'text.secondary',
+                }}
+                align="center"
+              >
                 إجراءات
               </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {loading
-              ? [...Array(5)].map((_, i) => (
-                  <TableRow key={i}>
-                    {[...Array(8)].map((__, j) => (
-                      <TableCell key={j}>
-                        <Skeleton />
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))
-              : directives.length === 0
-              ? (
-                <TableRow>
-                  <TableCell colSpan={8} align="center" sx={{ py: 6 }}>
-                    <Typography color="text.secondary">
-                      لا توجد توجيهات مطابقة لمعايير البحث
-                    </Typography>
-                  </TableCell>
+            {loading ? (
+              [...Array(5)].map((_, i) => (
+                <TableRow key={i}>
+                  {[...Array(8)].map((__, j) => (
+                    <TableCell key={j}>
+                      <Skeleton />
+                    </TableCell>
+                  ))}
                 </TableRow>
-              )
-              : directives.map((d) => {
-                  const typeInfo = DIRECTIVE_TYPES[d.type] || {};
-                  const priorityInfo = DIRECTIVE_PRIORITIES[d.priority] || {};
-                  const statusInfo = DIRECTIVE_STATUS[d.status] || {};
-                  return (
-                    <TableRow
-                      key={d._id}
-                      hover
-                      sx={{ cursor: 'pointer' }}
-                      onClick={() => navigate(`/electronic-directives/view/${d._id}`)}
-                    >
-                      <TableCell>
-                        <Box display="flex" alignItems="center" gap={1}>
-                          <Avatar
-                            sx={{
-                              width: 32,
-                              height: 32,
-                              bgcolor: `${typeInfo.color || '#1976d2'}20`,
-                              color: typeInfo.color || '#1976d2',
-                            }}
-                          >
-                            {typeIcons[d.type] || <CampaignIcon fontSize="small" />}
-                          </Avatar>
-                          <Typography variant="body2">{typeInfo.label || d.type}</Typography>
-                        </Box>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2" fontFamily="monospace" fontSize="0.8rem">
-                          {d.referenceNumber}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2" noWrap sx={{ maxWidth: 250 }}>
-                          {d.subject}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Chip
-                          label={priorityInfo.label || d.priority}
-                          size="small"
+              ))
+            ) : directives.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={8} align="center" sx={{ py: 6 }}>
+                  <Typography color="text.secondary">
+                    لا توجد توجيهات مطابقة لمعايير البحث
+                  </Typography>
+                </TableCell>
+              </TableRow>
+            ) : (
+              directives.map(d => {
+                const typeInfo = DIRECTIVE_TYPES[d.type] || {};
+                const priorityInfo = DIRECTIVE_PRIORITIES[d.priority] || {};
+                const statusInfo = DIRECTIVE_STATUS[d.status] || {};
+                return (
+                  <TableRow
+                    key={d._id}
+                    hover
+                    sx={{ cursor: 'pointer' }}
+                    onClick={() => navigate(`/electronic-directives/view/${d._id}`)}
+                  >
+                    <TableCell>
+                      <Box display="flex" alignItems="center" gap={1}>
+                        <Avatar
                           sx={{
-                            bgcolor: `${priorityInfo.color || '#9e9e9e'}20`,
-                            color: priorityInfo.color || '#9e9e9e',
-                            fontWeight: 'bold',
+                            width: 32,
+                            height: 32,
+                            bgcolor: `${typeInfo.color || '#1976d2'}20`,
+                            color: typeInfo.color || '#1976d2',
                           }}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Chip
-                          label={statusInfo.label || d.status}
-                          size="small"
-                          variant="outlined"
-                          sx={{
-                            borderColor: statusInfo.color || '#9e9e9e',
-                            color: statusInfo.color || '#9e9e9e',
-                          }}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2">
-                          {d.issuedAt
-                            ? new Date(d.issuedAt).toLocaleDateString('ar-SA')
-                            : d.createdAt
+                        >
+                          {typeIcons[d.type] || <CampaignIcon fontSize="small" />}
+                        </Avatar>
+                        <Typography variant="body2">{typeInfo.label || d.type}</Typography>
+                      </Box>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2" fontFamily="monospace" fontSize="0.8rem">
+                        {d.referenceNumber}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2" noWrap sx={{ maxWidth: 250 }}>
+                        {d.subject}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Chip
+                        label={priorityInfo.label || d.priority}
+                        size="small"
+                        sx={{
+                          bgcolor: `${priorityInfo.color || '#9e9e9e'}20`,
+                          color: priorityInfo.color || '#9e9e9e',
+                          fontWeight: 'bold',
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Chip
+                        label={statusInfo.label || d.status}
+                        size="small"
+                        variant="outlined"
+                        sx={{
+                          borderColor: statusInfo.color || '#9e9e9e',
+                          color: statusInfo.color || '#9e9e9e',
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2">
+                        {d.issuedAt
+                          ? new Date(d.issuedAt).toLocaleDateString('ar-SA')
+                          : d.createdAt
                             ? new Date(d.createdAt).toLocaleDateString('ar-SA')
                             : '—'}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Chip
-                          label={d.deliveryStats?.totalRecipients || d.recipients?.length || 0}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Chip
+                        label={d.deliveryStats?.totalRecipients || d.recipients?.length || 0}
+                        size="small"
+                        variant="outlined"
+                      />
+                    </TableCell>
+                    <TableCell align="center">
+                      <Tooltip title="عرض التفاصيل">
+                        <IconButton
                           size="small"
-                          variant="outlined"
-                        />
-                      </TableCell>
-                      <TableCell align="center">
-                        <Tooltip title="عرض التفاصيل">
-                          <IconButton
-                            size="small"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              navigate(`/electronic-directives/view/${d._id}`);
-                            }}
-                          >
-                            <ViewIcon />
-                          </IconButton>
-                        </Tooltip>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
+                          onClick={e => {
+                            e.stopPropagation();
+                            navigate(`/electronic-directives/view/${d._id}`);
+                          }}
+                        >
+                          <ViewIcon />
+                        </IconButton>
+                      </Tooltip>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
+            )}
           </TableBody>
         </Table>
         <TablePagination
@@ -368,7 +454,7 @@ export default function DirectivesList() {
           page={page}
           onPageChange={(_, newPage) => setPage(newPage)}
           rowsPerPage={rowsPerPage}
-          onRowsPerPageChange={(e) => {
+          onRowsPerPageChange={e => {
             setRowsPerPage(parseInt(e.target.value, 10));
             setPage(0);
           }}

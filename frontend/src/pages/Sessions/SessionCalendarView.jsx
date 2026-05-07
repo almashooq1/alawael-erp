@@ -14,9 +14,27 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
-  Container, Typography, Grid, Paper, Box, Card, CardContent,
-  Chip, Button, IconButton, TextField, MenuItem,
-  LinearProgress, Dialog, DialogTitle, DialogContent, DialogActions, Stack, Divider, ToggleButton, ToggleButtonGroup,
+  Container,
+  Typography,
+  Grid,
+  Paper,
+  Box,
+  Card,
+  CardContent,
+  Chip,
+  Button,
+  IconButton,
+  TextField,
+  MenuItem,
+  LinearProgress,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Stack,
+  Divider,
+  ToggleButton,
+  ToggleButtonGroup,
   Badge,
 } from '@mui/material';
 import {
@@ -46,8 +64,18 @@ import DashboardErrorBoundary from '../../components/dashboard/shared/DashboardE
 
 /* ──────── Arabic locale data ──────── */
 const AR_MONTHS = [
-  'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
-  'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر',
+  'يناير',
+  'فبراير',
+  'مارس',
+  'أبريل',
+  'مايو',
+  'يونيو',
+  'يوليو',
+  'أغسطس',
+  'سبتمبر',
+  'أكتوبر',
+  'نوفمبر',
+  'ديسمبر',
 ];
 
 const AR_DAYS_SHORT = ['سبت', 'أحد', 'اثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة'];
@@ -55,18 +83,34 @@ const AR_DAYS_FULL = ['السبت', 'الأحد', 'الاثنين', 'الثلا�
 
 /* ──────── Helpers ──────── */
 const STATUS_CONFIG = {
-  COMPLETED:  { label: 'مكتملة', color: statusColors.success, icon: <CheckCircle fontSize="small" /> },
-  SCHEDULED:  { label: 'مجدولة', color: statusColors.primaryBlue || chartColors.category[0], icon: <EventAvailable fontSize="small" /> },
-  CONFIRMED:  { label: 'مؤكدة', color: '#1976d2', icon: <EventAvailable fontSize="small" /> },
-  IN_PROGRESS:{ label: 'جارية', color: '#0288d1', icon: <HourglassEmpty fontSize="small" /> },
-  CANCELLED:  { label: 'ملغاة', color: statusColors.error, icon: <Cancel fontSize="small" /> },
-  CANCELLED_BY_PATIENT: { label: 'ملغاة (مريض)', color: statusColors.error, icon: <Cancel fontSize="small" /> },
-  CANCELLED_BY_CENTER:  { label: 'ملغاة (مركز)', color: '#d32f2f', icon: <Cancel fontSize="small" /> },
-  NO_SHOW:    { label: 'لم يحضر', color: statusColors.warning, icon: <PersonOff fontSize="small" /> },
-  PENDING:    { label: 'معلقة', color: '#9e9e9e', icon: <HourglassEmpty fontSize="small" /> },
+  COMPLETED: {
+    label: 'مكتملة',
+    color: statusColors.success,
+    icon: <CheckCircle fontSize="small" />,
+  },
+  SCHEDULED: {
+    label: 'مجدولة',
+    color: statusColors.primaryBlue || chartColors.category[0],
+    icon: <EventAvailable fontSize="small" />,
+  },
+  CONFIRMED: { label: 'مؤكدة', color: '#1976d2', icon: <EventAvailable fontSize="small" /> },
+  IN_PROGRESS: { label: 'جارية', color: '#0288d1', icon: <HourglassEmpty fontSize="small" /> },
+  CANCELLED: { label: 'ملغاة', color: statusColors.error, icon: <Cancel fontSize="small" /> },
+  CANCELLED_BY_PATIENT: {
+    label: 'ملغاة (مريض)',
+    color: statusColors.error,
+    icon: <Cancel fontSize="small" />,
+  },
+  CANCELLED_BY_CENTER: {
+    label: 'ملغاة (مركز)',
+    color: '#d32f2f',
+    icon: <Cancel fontSize="small" />,
+  },
+  NO_SHOW: { label: 'لم يحضر', color: statusColors.warning, icon: <PersonOff fontSize="small" /> },
+  PENDING: { label: 'معلقة', color: '#9e9e9e', icon: <HourglassEmpty fontSize="small" /> },
 };
 
-const getStatusConf = (status) => STATUS_CONFIG[status] || STATUS_CONFIG.SCHEDULED;
+const getStatusConf = status => STATUS_CONFIG[status] || STATUS_CONFIG.SCHEDULED;
 
 const isSameDay = (d1, d2) =>
   d1.getFullYear() === d2.getFullYear() &&
@@ -128,7 +172,12 @@ const DEMO_EVENTS = (() => {
         therapistName: therapists[j % therapists.length],
         room: rooms[j % rooms.length],
         patientName: patients[j % patients.length],
-        status: i < 0 ? (Math.random() > 0.2 ? 'COMPLETED' : statuses[3 + Math.floor(Math.random() * 2)]) : statuses[Math.floor(Math.random() * 3)],
+        status:
+          i < 0
+            ? Math.random() > 0.2
+              ? 'COMPLETED'
+              : statuses[3 + Math.floor(Math.random() * 2)]
+            : statuses[Math.floor(Math.random() * 3)],
         duration: 45 + Math.floor(Math.random() * 4) * 15,
       });
     }
@@ -156,13 +205,22 @@ export default function SessionCalendarView() {
   const [filterRoom, setFilterRoom] = useState('');
   const [filterType, setFilterType] = useState('');
 
-  const year  = currentDate.getFullYear();
+  const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
 
   // ─── Derived lists for filters ───
-  const therapistOptions = useMemo(() => [...new Set(events.map(e => e.therapistName).filter(Boolean))], [events]);
-  const roomOptions = useMemo(() => [...new Set(events.map(e => e.room).filter(Boolean))], [events]);
-  const typeOptions = useMemo(() => [...new Set(events.map(e => e.sessionType).filter(Boolean))], [events]);
+  const therapistOptions = useMemo(
+    () => [...new Set(events.map(e => e.therapistName).filter(Boolean))],
+    [events]
+  );
+  const roomOptions = useMemo(
+    () => [...new Set(events.map(e => e.room).filter(Boolean))],
+    [events]
+  );
+  const typeOptions = useMemo(
+    () => [...new Set(events.map(e => e.sessionType).filter(Boolean))],
+    [events]
+  );
 
   // ─── Filtered events ───
   const filteredEvents = useMemo(() => {
@@ -191,7 +249,9 @@ export default function SessionCalendarView() {
     }
   }, [year, month]);
 
-  useEffect(() => { fetchCalendar(); }, [fetchCalendar]);
+  useEffect(() => {
+    fetchCalendar();
+  }, [fetchCalendar]);
 
   // ─── Navigation ───
   const goToToday = () => setCurrentDate(new Date());
@@ -222,7 +282,9 @@ export default function SessionCalendarView() {
       map[key].push(e);
     });
     // Sort each day by time
-    Object.values(map).forEach(arr => arr.sort((a, b) => (a.startTime || '').localeCompare(b.startTime || '')));
+    Object.values(map).forEach(arr =>
+      arr.sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''))
+    );
     return map;
   }, [filteredEvents]);
 
@@ -239,17 +301,18 @@ export default function SessionCalendarView() {
   }, [currentDate]);
 
   // ─── Event click ───
-  const handleEventClick = (evt) => {
+  const handleEventClick = evt => {
     setSelectedEvent(evt);
     setDetailOpen(true);
   };
 
   /* ─── Title text ─── */
-  const headerTitle = viewMode === 'month'
-    ? `${AR_MONTHS[month]} ${year}`
-    : viewMode === 'week'
-    ? `${weekDays[0].getDate()} - ${weekDays[6].getDate()} ${AR_MONTHS[weekDays[0].getMonth()]} ${weekDays[0].getFullYear()}`
-    : `${currentDate.getDate()} ${AR_MONTHS[month]} ${year} — ${AR_DAYS_FULL[(currentDate.getDay() + 1) % 7]}`;
+  const headerTitle =
+    viewMode === 'month'
+      ? `${AR_MONTHS[month]} ${year}`
+      : viewMode === 'week'
+        ? `${weekDays[0].getDate()} - ${weekDays[6].getDate()} ${AR_MONTHS[weekDays[0].getMonth()]} ${weekDays[0].getFullYear()}`
+        : `${currentDate.getDate()} ${AR_MONTHS[month]} ${year} — ${AR_DAYS_FULL[(currentDate.getDay() + 1) % 7]}`;
 
   /* ═════════════════ RENDER ═════════════════ */
   return (
@@ -261,16 +324,26 @@ export default function SessionCalendarView() {
         <Box
           sx={{
             background: gradients.info,
-            borderRadius: 3, p: 3, mb: 3, color: 'white',
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            flexWrap: 'wrap', gap: 2,
+            borderRadius: 3,
+            p: 3,
+            mb: 3,
+            color: 'white',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: 2,
           }}
         >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <CalendarIcon sx={{ fontSize: 44 }} />
             <Box>
-              <Typography variant="h4" fontWeight="bold">تقويم الجلسات</Typography>
-              <Typography variant="body2" sx={{ opacity: 0.9 }}>عرض الجلسات العلاجية على التقويم</Typography>
+              <Typography variant="h4" fontWeight="bold">
+                تقويم الجلسات
+              </Typography>
+              <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                عرض الجلسات العلاجية على التقويم
+              </Typography>
             </Box>
           </Box>
         </Box>
@@ -281,9 +354,20 @@ export default function SessionCalendarView() {
             {/* Navigation */}
             <Grid item xs={12} md={4}>
               <Stack direction="row" spacing={1} alignItems="center">
-                <IconButton onClick={goPrev}><NextIcon /></IconButton>
-                <Button variant="outlined" size="small" startIcon={<TodayIcon />} onClick={goToToday}>اليوم</Button>
-                <IconButton onClick={goNext}><PrevIcon /></IconButton>
+                <IconButton onClick={goPrev}>
+                  <NextIcon />
+                </IconButton>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  startIcon={<TodayIcon />}
+                  onClick={goToToday}
+                >
+                  اليوم
+                </Button>
+                <IconButton onClick={goNext}>
+                  <PrevIcon />
+                </IconButton>
                 <Typography variant="h6" fontWeight={600} sx={{ mx: 1 }}>
                   {headerTitle}
                 </Typography>
@@ -295,13 +379,21 @@ export default function SessionCalendarView() {
               <ToggleButtonGroup
                 value={viewMode}
                 exclusive
-                onChange={(_, v) => { if (v) setViewMode(v); }}
+                onChange={(_, v) => {
+                  if (v) setViewMode(v);
+                }}
                 size="small"
                 fullWidth
               >
-                <ToggleButton value="month"><MonthIcon sx={{ mr: 0.5 }} /> شهري</ToggleButton>
-                <ToggleButton value="week"><WeekIcon sx={{ mr: 0.5 }} /> أسبوعي</ToggleButton>
-                <ToggleButton value="day"><DayIcon sx={{ mr: 0.5 }} /> يومي</ToggleButton>
+                <ToggleButton value="month">
+                  <MonthIcon sx={{ mr: 0.5 }} /> شهري
+                </ToggleButton>
+                <ToggleButton value="week">
+                  <WeekIcon sx={{ mr: 0.5 }} /> أسبوعي
+                </ToggleButton>
+                <ToggleButton value="day">
+                  <DayIcon sx={{ mr: 0.5 }} /> يومي
+                </ToggleButton>
               </ToggleButtonGroup>
             </Grid>
 
@@ -309,28 +401,52 @@ export default function SessionCalendarView() {
             <Grid item xs={12} md={5}>
               <Stack direction="row" spacing={1}>
                 <TextField
-                  select size="small" value={filterTherapist}
-                  onChange={(e) => setFilterTherapist(e.target.value)}
-                  label="المعالج" sx={{ minWidth: 130 }} SelectProps={{ displayEmpty: true }}
+                  select
+                  size="small"
+                  value={filterTherapist}
+                  onChange={e => setFilterTherapist(e.target.value)}
+                  label="المعالج"
+                  sx={{ minWidth: 130 }}
+                  SelectProps={{ displayEmpty: true }}
                 >
                   <MenuItem value="">الكل</MenuItem>
-                  {therapistOptions.map(t => <MenuItem key={t} value={t}>{t}</MenuItem>)}
+                  {therapistOptions.map(t => (
+                    <MenuItem key={t} value={t}>
+                      {t}
+                    </MenuItem>
+                  ))}
                 </TextField>
                 <TextField
-                  select size="small" value={filterRoom}
-                  onChange={(e) => setFilterRoom(e.target.value)}
-                  label="الغرفة" sx={{ minWidth: 110 }} SelectProps={{ displayEmpty: true }}
+                  select
+                  size="small"
+                  value={filterRoom}
+                  onChange={e => setFilterRoom(e.target.value)}
+                  label="الغرفة"
+                  sx={{ minWidth: 110 }}
+                  SelectProps={{ displayEmpty: true }}
                 >
                   <MenuItem value="">الكل</MenuItem>
-                  {roomOptions.map(r => <MenuItem key={r} value={r}>{r}</MenuItem>)}
+                  {roomOptions.map(r => (
+                    <MenuItem key={r} value={r}>
+                      {r}
+                    </MenuItem>
+                  ))}
                 </TextField>
                 <TextField
-                  select size="small" value={filterType}
-                  onChange={(e) => setFilterType(e.target.value)}
-                  label="النوع" sx={{ minWidth: 120 }} SelectProps={{ displayEmpty: true }}
+                  select
+                  size="small"
+                  value={filterType}
+                  onChange={e => setFilterType(e.target.value)}
+                  label="النوع"
+                  sx={{ minWidth: 120 }}
+                  SelectProps={{ displayEmpty: true }}
                 >
                   <MenuItem value="">الكل</MenuItem>
-                  {typeOptions.map(t => <MenuItem key={t} value={t}>{t}</MenuItem>)}
+                  {typeOptions.map(t => (
+                    <MenuItem key={t} value={t}>
+                      {t}
+                    </MenuItem>
+                  ))}
                 </TextField>
               </Stack>
             </Grid>
@@ -343,8 +459,19 @@ export default function SessionCalendarView() {
             {/* Day headers */}
             <Grid container sx={{ bgcolor: 'primary.main', color: 'white' }}>
               {AR_DAYS_SHORT.map(d => (
-                <Grid item xs key={d} sx={{ p: 1.5, textAlign: 'center', borderLeft: '1px solid rgba(255,255,255,0.15)' }}>
-                  <Typography variant="subtitle2" fontWeight={600}>{d}</Typography>
+                <Grid
+                  item
+                  xs
+                  key={d}
+                  sx={{
+                    p: 1.5,
+                    textAlign: 'center',
+                    borderLeft: '1px solid rgba(255,255,255,0.15)',
+                  }}
+                >
+                  <Typography variant="subtitle2" fontWeight={600}>
+                    {d}
+                  </Typography>
                 </Grid>
               ))}
             </Grid>
@@ -358,22 +485,45 @@ export default function SessionCalendarView() {
 
                   return (
                     <Grid
-                      item xs key={ci}
+                      item
+                      xs
+                      key={ci}
                       sx={{
-                        minHeight: 100, p: 0.5,
+                        minHeight: 100,
+                        p: 0.5,
                         borderLeft: ci > 0 ? '1px solid' : 'none',
                         borderColor: 'divider',
-                        bgcolor: isToday ? 'action.selected' : cell.inMonth ? 'background.paper' : 'action.hover',
+                        bgcolor: isToday
+                          ? 'action.selected'
+                          : cell.inMonth
+                            ? 'background.paper'
+                            : 'action.hover',
                         cursor: 'pointer',
                         '&:hover': { bgcolor: 'action.focus' },
                       }}
-                      onClick={() => { setCurrentDate(new Date(cell.date)); setViewMode('day'); }}
+                      onClick={() => {
+                        setCurrentDate(new Date(cell.date));
+                        setViewMode('day');
+                      }}
                     >
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', px: 0.5 }}>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          px: 0.5,
+                        }}
+                      >
                         <Typography
                           variant="body2"
                           fontWeight={isToday ? 700 : cell.inMonth ? 500 : 400}
-                          color={isToday ? 'primary.main' : cell.inMonth ? 'text.primary' : 'text.disabled'}
+                          color={
+                            isToday
+                              ? 'primary.main'
+                              : cell.inMonth
+                                ? 'text.primary'
+                                : 'text.disabled'
+                          }
                         >
                           {cell.date.getDate()}
                         </Typography>
@@ -382,17 +532,26 @@ export default function SessionCalendarView() {
                         )}
                       </Box>
                       <Stack spacing={0.3} sx={{ mt: 0.3, maxHeight: 64, overflow: 'hidden' }}>
-                        {dayEvents.slice(0, 3).map((evt) => {
+                        {dayEvents.slice(0, 3).map(evt => {
                           const sc = getStatusConf(evt.status);
                           return (
                             <Box
                               key={evt._id}
-                              onClick={(e) => { e.stopPropagation(); handleEventClick(evt); }}
+                              onClick={e => {
+                                e.stopPropagation();
+                                handleEventClick(evt);
+                              }}
                               sx={{
-                                bgcolor: sc.color, color: '#fff',
-                                borderRadius: 1, px: 0.6, py: 0.15,
-                                fontSize: '0.65rem', lineHeight: 1.3,
-                                whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                                bgcolor: sc.color,
+                                color: '#fff',
+                                borderRadius: 1,
+                                px: 0.6,
+                                py: 0.15,
+                                fontSize: '0.65rem',
+                                lineHeight: 1.3,
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
                                 cursor: 'pointer',
                                 '&:hover': { opacity: 0.85 },
                               }}
@@ -420,8 +579,19 @@ export default function SessionCalendarView() {
           <Paper sx={{ borderRadius: 3, overflow: 'hidden' }}>
             <Grid container sx={{ bgcolor: 'primary.main', color: 'white' }}>
               {weekDays.map((d, i) => (
-                <Grid item xs key={i} sx={{ p: 1, textAlign: 'center', borderLeft: i > 0 ? '1px solid rgba(255,255,255,0.15)' : 'none' }}>
-                  <Typography variant="subtitle2" fontWeight={600}>{AR_DAYS_SHORT[i]}</Typography>
+                <Grid
+                  item
+                  xs
+                  key={i}
+                  sx={{
+                    p: 1,
+                    textAlign: 'center',
+                    borderLeft: i > 0 ? '1px solid rgba(255,255,255,0.15)' : 'none',
+                  }}
+                >
+                  <Typography variant="subtitle2" fontWeight={600}>
+                    {AR_DAYS_SHORT[i]}
+                  </Typography>
                   <Typography variant="body2">{d.getDate()}</Typography>
                 </Grid>
               ))}
@@ -433,14 +603,19 @@ export default function SessionCalendarView() {
                 const isToday = isSameDay(d, today);
 
                 return (
-                  <Grid item xs key={i} sx={{
-                    borderLeft: i > 0 ? '1px solid' : 'none',
-                    borderColor: 'divider',
-                    bgcolor: isToday ? 'action.selected' : 'background.paper',
-                    p: 1,
-                  }}>
+                  <Grid
+                    item
+                    xs
+                    key={i}
+                    sx={{
+                      borderLeft: i > 0 ? '1px solid' : 'none',
+                      borderColor: 'divider',
+                      bgcolor: isToday ? 'action.selected' : 'background.paper',
+                      p: 1,
+                    }}
+                  >
                     <Stack spacing={0.5}>
-                      {dayEvents.map((evt) => {
+                      {dayEvents.map(evt => {
                         const sc = getStatusConf(evt.status);
                         return (
                           <Card
@@ -455,7 +630,9 @@ export default function SessionCalendarView() {
                             onClick={() => handleEventClick(evt)}
                           >
                             <CardContent sx={{ py: 0.5, px: 1, '&:last-child': { pb: 0.5 } }}>
-                              <Typography variant="caption" fontWeight={600} color="primary">{evt.startTime}</Typography>
+                              <Typography variant="caption" fontWeight={600} color="primary">
+                                {evt.startTime}
+                              </Typography>
                               <Typography variant="body2" noWrap sx={{ fontSize: '0.75rem' }}>
                                 {evt.patientName || evt.sessionType}
                               </Typography>
@@ -467,7 +644,11 @@ export default function SessionCalendarView() {
                         );
                       })}
                       {dayEvents.length === 0 && (
-                        <Typography variant="caption" color="text.disabled" sx={{ textAlign: 'center', mt: 4 }}>
+                        <Typography
+                          variant="caption"
+                          color="text.disabled"
+                          sx={{ textAlign: 'center', mt: 4 }}
+                        >
                           لا توجد جلسات
                         </Typography>
                       )}
@@ -480,90 +661,127 @@ export default function SessionCalendarView() {
         )}
 
         {/* ═══════ DAY VIEW ═══════ */}
-        {viewMode === 'day' && (() => {
-          const dateKey = currentDate.toISOString().slice(0, 10);
-          const dayEvents = eventsByDate[dateKey] || [];
-          const hours = Array.from({ length: 12 }, (_, i) => i + 7); // 7 AM to 6 PM
+        {viewMode === 'day' &&
+          (() => {
+            const dateKey = currentDate.toISOString().slice(0, 10);
+            const dayEvents = eventsByDate[dateKey] || [];
+            const hours = Array.from({ length: 12 }, (_, i) => i + 7); // 7 AM to 6 PM
 
-          return (
-            <Paper sx={{ borderRadius: 3, p: 2 }}>
-              <Typography variant="h6" fontWeight={600} gutterBottom>
-                {currentDate.getDate()} {AR_MONTHS[month]} — {AR_DAYS_FULL[(currentDate.getDay() + 1) % 7]}
-                <Chip label={`${dayEvents.length} جلسة`} size="small" color="primary" sx={{ mr: 1 }} />
-              </Typography>
-              <Stack spacing={0}>
-                {hours.map(h => {
-                  const hourStr = `${String(h).padStart(2, '0')}`;
-                  const hourEvents = dayEvents.filter(e => (e.startTime || '').startsWith(hourStr));
+            return (
+              <Paper sx={{ borderRadius: 3, p: 2 }}>
+                <Typography variant="h6" fontWeight={600} gutterBottom>
+                  {currentDate.getDate()} {AR_MONTHS[month]} —{' '}
+                  {AR_DAYS_FULL[(currentDate.getDay() + 1) % 7]}
+                  <Chip
+                    label={`${dayEvents.length} جلسة`}
+                    size="small"
+                    color="primary"
+                    sx={{ mr: 1 }}
+                  />
+                </Typography>
+                <Stack spacing={0}>
+                  {hours.map(h => {
+                    const hourStr = `${String(h).padStart(2, '0')}`;
+                    const hourEvents = dayEvents.filter(e =>
+                      (e.startTime || '').startsWith(hourStr)
+                    );
 
-                  return (
-                    <Box
-                      key={h}
-                      sx={{
-                        display: 'flex', borderBottom: '1px solid', borderColor: 'divider',
-                        minHeight: 56, '&:hover': { bgcolor: 'action.hover' },
-                      }}
-                    >
-                      <Box sx={{ width: 70, flexShrink: 0, p: 1, borderLeft: '1px solid', borderColor: 'divider', bgcolor: 'grey.50' }}>
-                        <Typography variant="body2" fontWeight={600} color="text.secondary">
-                          {hourStr}:00
-                        </Typography>
-                      </Box>
-                      <Box sx={{ flex: 1, p: 0.5, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                        {hourEvents.map(evt => {
-                          const sc = getStatusConf(evt.status);
-                          return (
-                            <Card
-                              key={evt._id}
-                              sx={{
-                                borderLeft: `4px solid ${sc.color}`,
-                                borderRadius: 2, flex: '1 1 auto',
-                                maxWidth: 300, cursor: 'pointer',
-                                '&:hover': { boxShadow: 3 },
-                              }}
-                              variant="outlined"
-                              onClick={() => handleEventClick(evt)}
-                            >
-                              <CardContent sx={{ py: 0.5, px: 1.5, '&:last-child': { pb: 0.5 } }}>
-                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                  <Typography variant="body2" fontWeight={600}>
-                                    {evt.patientName || 'مريض'}
+                    return (
+                      <Box
+                        key={h}
+                        sx={{
+                          display: 'flex',
+                          borderBottom: '1px solid',
+                          borderColor: 'divider',
+                          minHeight: 56,
+                          '&:hover': { bgcolor: 'action.hover' },
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            width: 70,
+                            flexShrink: 0,
+                            p: 1,
+                            borderLeft: '1px solid',
+                            borderColor: 'divider',
+                            bgcolor: 'grey.50',
+                          }}
+                        >
+                          <Typography variant="body2" fontWeight={600} color="text.secondary">
+                            {hourStr}:00
+                          </Typography>
+                        </Box>
+                        <Box sx={{ flex: 1, p: 0.5, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                          {hourEvents.map(evt => {
+                            const sc = getStatusConf(evt.status);
+                            return (
+                              <Card
+                                key={evt._id}
+                                sx={{
+                                  borderLeft: `4px solid ${sc.color}`,
+                                  borderRadius: 2,
+                                  flex: '1 1 auto',
+                                  maxWidth: 300,
+                                  cursor: 'pointer',
+                                  '&:hover': { boxShadow: 3 },
+                                }}
+                                variant="outlined"
+                                onClick={() => handleEventClick(evt)}
+                              >
+                                <CardContent sx={{ py: 0.5, px: 1.5, '&:last-child': { pb: 0.5 } }}>
+                                  <Box
+                                    sx={{
+                                      display: 'flex',
+                                      justifyContent: 'space-between',
+                                      alignItems: 'center',
+                                    }}
+                                  >
+                                    <Typography variant="body2" fontWeight={600}>
+                                      {evt.patientName || 'مريض'}
+                                    </Typography>
+                                    <Chip
+                                      icon={sc.icon}
+                                      label={sc.label}
+                                      size="small"
+                                      sx={{
+                                        bgcolor: sc.color,
+                                        color: '#fff',
+                                        height: 22,
+                                        '& .MuiChip-icon': { color: '#fff' },
+                                      }}
+                                    />
+                                  </Box>
+                                  <Typography variant="caption" color="text.secondary">
+                                    {evt.startTime} - {evt.endTime} | {evt.therapistName} |{' '}
+                                    {evt.room}
                                   </Typography>
-                                  <Chip
-                                    icon={sc.icon}
-                                    label={sc.label}
-                                    size="small"
-                                    sx={{ bgcolor: sc.color, color: '#fff', height: 22, '& .MuiChip-icon': { color: '#fff' } }}
-                                  />
-                                </Box>
-                                <Typography variant="caption" color="text.secondary">
-                                  {evt.startTime} - {evt.endTime} | {evt.therapistName} | {evt.room}
-                                </Typography>
-                              </CardContent>
-                            </Card>
-                          );
-                        })}
+                                </CardContent>
+                              </Card>
+                            );
+                          })}
+                        </Box>
                       </Box>
-                    </Box>
-                  );
-                })}
-              </Stack>
-            </Paper>
-          );
-        })()}
+                    );
+                  })}
+                </Stack>
+              </Paper>
+            );
+          })()}
 
         {/* ──── Legend ──── */}
         <Paper sx={{ p: 2, mt: 2, borderRadius: 3 }}>
           <Stack direction="row" spacing={2} flexWrap="wrap" justifyContent="center">
-            {Object.entries(STATUS_CONFIG).filter(([k]) => !k.includes('BY_')).map(([key, conf]) => (
-              <Chip
-                key={key}
-                icon={conf.icon}
-                label={conf.label}
-                size="small"
-                sx={{ bgcolor: conf.color, color: '#fff', '& .MuiChip-icon': { color: '#fff' } }}
-              />
-            ))}
+            {Object.entries(STATUS_CONFIG)
+              .filter(([k]) => !k.includes('BY_'))
+              .map(([key, conf]) => (
+                <Chip
+                  key={key}
+                  icon={conf.icon}
+                  label={conf.label}
+                  size="small"
+                  sx={{ bgcolor: conf.color, color: '#fff', '& .MuiChip-icon': { color: '#fff' } }}
+                />
+              ))}
           </Stack>
         </Paper>
 
@@ -575,106 +793,148 @@ export default function SessionCalendarView() {
           fullWidth
           PaperProps={{ sx: { borderRadius: 3 } }}
         >
-          {selectedEvent && (() => {
-            const sc = getStatusConf(selectedEvent.status);
-            return (
-              <>
-                <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <ScheduleIcon color="primary" />
-                    <Typography variant="h6" fontWeight={600}>تفاصيل الجلسة</Typography>
-                  </Box>
-                  <IconButton onClick={() => setDetailOpen(false)}><CloseIcon /></IconButton>
-                </DialogTitle>
-                <Divider />
-                <DialogContent>
-                  <Stack spacing={2.5} sx={{ pt: 1 }}>
-                    {/* Status badge */}
-                    <Box sx={{ textAlign: 'center' }}>
-                      <Chip
-                        icon={sc.icon}
-                        label={sc.label}
-                        sx={{ bgcolor: sc.color, color: '#fff', fontSize: '1rem', height: 36, '& .MuiChip-icon': { color: '#fff' } }}
-                      />
+          {selectedEvent &&
+            (() => {
+              const sc = getStatusConf(selectedEvent.status);
+              return (
+                <>
+                  <DialogTitle
+                    sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                  >
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <ScheduleIcon color="primary" />
+                      <Typography variant="h6" fontWeight={600}>
+                        تفاصيل الجلسة
+                      </Typography>
                     </Box>
+                    <IconButton onClick={() => setDetailOpen(false)}>
+                      <CloseIcon />
+                    </IconButton>
+                  </DialogTitle>
+                  <Divider />
+                  <DialogContent>
+                    <Stack spacing={2.5} sx={{ pt: 1 }}>
+                      {/* Status badge */}
+                      <Box sx={{ textAlign: 'center' }}>
+                        <Chip
+                          icon={sc.icon}
+                          label={sc.label}
+                          sx={{
+                            bgcolor: sc.color,
+                            color: '#fff',
+                            fontSize: '1rem',
+                            height: 36,
+                            '& .MuiChip-icon': { color: '#fff' },
+                          }}
+                        />
+                      </Box>
 
-                    {/* Info rows */}
-                    <Grid container spacing={2}>
-                      <Grid item xs={6}>
-                        <Stack direction="row" spacing={1} alignItems="center">
-                          <PersonIcon color="primary" />
-                          <Box>
-                            <Typography variant="caption" color="text.secondary">المريض</Typography>
-                            <Typography variant="body2" fontWeight={600}>{selectedEvent.patientName || '-'}</Typography>
-                          </Box>
-                        </Stack>
+                      {/* Info rows */}
+                      <Grid container spacing={2}>
+                        <Grid item xs={6}>
+                          <Stack direction="row" spacing={1} alignItems="center">
+                            <PersonIcon color="primary" />
+                            <Box>
+                              <Typography variant="caption" color="text.secondary">
+                                المريض
+                              </Typography>
+                              <Typography variant="body2" fontWeight={600}>
+                                {selectedEvent.patientName || '-'}
+                              </Typography>
+                            </Box>
+                          </Stack>
+                        </Grid>
+                        <Grid item xs={6}>
+                          <Stack direction="row" spacing={1} alignItems="center">
+                            <PersonIcon color="secondary" />
+                            <Box>
+                              <Typography variant="caption" color="text.secondary">
+                                المعالج
+                              </Typography>
+                              <Typography variant="body2" fontWeight={600}>
+                                {selectedEvent.therapistName || '-'}
+                              </Typography>
+                            </Box>
+                          </Stack>
+                        </Grid>
+                        <Grid item xs={6}>
+                          <Stack direction="row" spacing={1} alignItems="center">
+                            <TypeIcon color="info" />
+                            <Box>
+                              <Typography variant="caption" color="text.secondary">
+                                نوع الجلسة
+                              </Typography>
+                              <Typography variant="body2" fontWeight={600}>
+                                {selectedEvent.sessionType || '-'}
+                              </Typography>
+                            </Box>
+                          </Stack>
+                        </Grid>
+                        <Grid item xs={6}>
+                          <Stack direction="row" spacing={1} alignItems="center">
+                            <RoomIcon color="action" />
+                            <Box>
+                              <Typography variant="caption" color="text.secondary">
+                                الغرفة
+                              </Typography>
+                              <Typography variant="body2" fontWeight={600}>
+                                {selectedEvent.room || '-'}
+                              </Typography>
+                            </Box>
+                          </Stack>
+                        </Grid>
+                        <Grid item xs={6}>
+                          <Stack direction="row" spacing={1} alignItems="center">
+                            <CalendarIcon color="primary" />
+                            <Box>
+                              <Typography variant="caption" color="text.secondary">
+                                التاريخ
+                              </Typography>
+                              <Typography variant="body2" fontWeight={600}>
+                                {selectedEvent.date || '-'}
+                              </Typography>
+                            </Box>
+                          </Stack>
+                        </Grid>
+                        <Grid item xs={6}>
+                          <Stack direction="row" spacing={1} alignItems="center">
+                            <ScheduleIcon color="primary" />
+                            <Box>
+                              <Typography variant="caption" color="text.secondary">
+                                الوقت
+                              </Typography>
+                              <Typography variant="body2" fontWeight={600}>
+                                {selectedEvent.startTime} — {selectedEvent.endTime} (
+                                {selectedEvent.duration || '-'} دقيقة)
+                              </Typography>
+                            </Box>
+                          </Stack>
+                        </Grid>
                       </Grid>
-                      <Grid item xs={6}>
-                        <Stack direction="row" spacing={1} alignItems="center">
-                          <PersonIcon color="secondary" />
+
+                      {selectedEvent.notes && (
+                        <>
+                          <Divider />
                           <Box>
-                            <Typography variant="caption" color="text.secondary">المعالج</Typography>
-                            <Typography variant="body2" fontWeight={600}>{selectedEvent.therapistName || '-'}</Typography>
-                          </Box>
-                        </Stack>
-                      </Grid>
-                      <Grid item xs={6}>
-                        <Stack direction="row" spacing={1} alignItems="center">
-                          <TypeIcon color="info" />
-                          <Box>
-                            <Typography variant="caption" color="text.secondary">نوع الجلسة</Typography>
-                            <Typography variant="body2" fontWeight={600}>{selectedEvent.sessionType || '-'}</Typography>
-                          </Box>
-                        </Stack>
-                      </Grid>
-                      <Grid item xs={6}>
-                        <Stack direction="row" spacing={1} alignItems="center">
-                          <RoomIcon color="action" />
-                          <Box>
-                            <Typography variant="caption" color="text.secondary">الغرفة</Typography>
-                            <Typography variant="body2" fontWeight={600}>{selectedEvent.room || '-'}</Typography>
-                          </Box>
-                        </Stack>
-                      </Grid>
-                      <Grid item xs={6}>
-                        <Stack direction="row" spacing={1} alignItems="center">
-                          <CalendarIcon color="primary" />
-                          <Box>
-                            <Typography variant="caption" color="text.secondary">التاريخ</Typography>
-                            <Typography variant="body2" fontWeight={600}>{selectedEvent.date || '-'}</Typography>
-                          </Box>
-                        </Stack>
-                      </Grid>
-                      <Grid item xs={6}>
-                        <Stack direction="row" spacing={1} alignItems="center">
-                          <ScheduleIcon color="primary" />
-                          <Box>
-                            <Typography variant="caption" color="text.secondary">الوقت</Typography>
-                            <Typography variant="body2" fontWeight={600}>
-                              {selectedEvent.startTime} — {selectedEvent.endTime} ({selectedEvent.duration || '-'} دقيقة)
+                            <Typography variant="subtitle2" fontWeight={600} gutterBottom>
+                              ملاحظات
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              {selectedEvent.notes}
                             </Typography>
                           </Box>
-                        </Stack>
-                      </Grid>
-                    </Grid>
-
-                    {selectedEvent.notes && (
-                      <>
-                        <Divider />
-                        <Box>
-                          <Typography variant="subtitle2" fontWeight={600} gutterBottom>ملاحظات</Typography>
-                          <Typography variant="body2" color="text.secondary">{selectedEvent.notes}</Typography>
-                        </Box>
-                      </>
-                    )}
-                  </Stack>
-                </DialogContent>
-                <DialogActions sx={{ px: 3, pb: 2 }}>
-                  <Button onClick={() => setDetailOpen(false)} variant="outlined">إغلاق</Button>
-                </DialogActions>
-              </>
-            );
-          })()}
+                        </>
+                      )}
+                    </Stack>
+                  </DialogContent>
+                  <DialogActions sx={{ px: 3, pb: 2 }}>
+                    <Button onClick={() => setDetailOpen(false)} variant="outlined">
+                      إغلاق
+                    </Button>
+                  </DialogActions>
+                </>
+              );
+            })()}
         </Dialog>
       </Container>
     </DashboardErrorBoundary>

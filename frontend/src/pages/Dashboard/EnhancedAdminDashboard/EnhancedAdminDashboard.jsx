@@ -49,7 +49,11 @@ const EnhancedAdminDashboard = () => {
         <Grid container spacing={3}>
           {/* Revenue Chart */}
           <Grid item xs={12} md={8}>
-            <RevenueChart revenueData={revenueData} timeRange={timeRange} setTimeRange={setTimeRange} />
+            <RevenueChart
+              revenueData={revenueData}
+              timeRange={timeRange}
+              setTimeRange={setTimeRange}
+            />
           </Grid>
 
           {/* Sessions by Category */}

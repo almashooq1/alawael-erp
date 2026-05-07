@@ -15,8 +15,7 @@ const DeleteStudentDialog = ({ open, student, onClose, onConfirm }) => (
       <DialogContentText>
         هل أنت متأكد من حذف الطالب{' '}
         <strong>
-          {student?.personalInfo?.firstName?.ar || ''}{' '}
-          {student?.personalInfo?.lastName?.ar || ''}
+          {student?.personalInfo?.firstName?.ar || ''} {student?.personalInfo?.lastName?.ar || ''}
         </strong>
         ؟ لا يمكن التراجع عن هذا الإجراء.
       </DialogContentText>

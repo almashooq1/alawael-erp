@@ -1,21 +1,48 @@
 /**
  * SessionFormDialog — Create / Edit session dialog
- * Enhanced with date field, recurrence from constants, and status display
+ * Enhanced with episodeOfCare + carePlan linking
  */
 import React from 'react';
 import {
-  Dialog, DialogTitle, DialogContent, DialogActions, Divider,
-  Typography, IconButton, Alert, Stack, TextField, MenuItem,
-  Grid, InputAdornment, Button, Box, Fade, Chip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Divider,
+  Typography,
+  IconButton,
+  Alert,
+  Stack,
+  TextField,
+  MenuItem,
+  Grid,
+  InputAdornment,
+  Button,
+  Box,
+  Fade,
+  Chip,
 } from '@mui/material';
 import {
-  Close as CloseIcon, Edit as EditIcon, Add as AddIcon, Person,
+  Close as CloseIcon,
+  Edit as EditIcon,
+  Add as AddIcon,
+  Person,
   CalendarToday,
+  Link as LinkIcon,
 } from '@mui/icons-material';
 import { SESSION_TYPES, RECURRENCE_OPTIONS, STATUS_MAP } from './constants';
 
 const SessionFormDialog = ({
-  open, onClose, editingSession, form, setForm, saving, formError, onSave,
+  open,
+  onClose,
+  editingSession,
+  form,
+  setForm,
+  saving,
+  formError,
+  onSave,
+  episodes,
+  carePlans,
 }) => (
   <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm" TransitionComponent={Fade}>
     <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -31,24 +58,33 @@ const SessionFormDialog = ({
           />
         )}
       </Box>
-      <IconButton onClick={onClose} size="small"><CloseIcon /></IconButton>
+      <IconButton onClick={onClose} size="small">
+        <CloseIcon />
+      </IconButton>
     </DialogTitle>
     <Divider />
     <DialogContent sx={{ pt: 3 }}>
-      {formError && <Alert severity="error" sx={{ mb: 2 }}>{formError}</Alert>}
+      {formError && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {formError}
+        </Alert>
+      )}
       <Stack spacing={2.5}>
         <TextField
-          label="عنوان الجلسة *" fullWidth
+          label="عنوان الجلسة *"
+          fullWidth
           value={form.title}
-          onChange={(e) => setForm({ ...form, title: e.target.value })}
+          onChange={e => setForm({ ...form, title: e.target.value })}
           placeholder="مثال: جلسة علاج طبيعي - أحمد"
         />
         <TextField
-          select label="نوع الجلسة" fullWidth
+          select
+          label="نوع الجلسة"
+          fullWidth
           value={form.type}
-          onChange={(e) => setForm({ ...form, type: e.target.value })}
+          onChange={e => setForm({ ...form, type: e.target.value })}
         >
-          {SESSION_TYPES.map((t) => (
+          {SESSION_TYPES.map(t => (
             <MenuItem key={t.value} value={t.value}>
               <Box display="flex" alignItems="center" gap={1}>
                 <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: t.color }} />
@@ -60,12 +96,18 @@ const SessionFormDialog = ({
 
         {/* Date */}
         <TextField
-          label="التاريخ *" type="date" fullWidth
+          label="التاريخ *"
+          type="date"
+          fullWidth
           value={form.date}
-          onChange={(e) => setForm({ ...form, date: e.target.value })}
+          onChange={e => setForm({ ...form, date: e.target.value })}
           InputLabelProps={{ shrink: true }}
           InputProps={{
-            startAdornment: <InputAdornment position="start"><CalendarToday fontSize="small" /></InputAdornment>,
+            startAdornment: (
+              <InputAdornment position="start">
+                <CalendarToday fontSize="small" />
+              </InputAdornment>
+            ),
           }}
         />
 
@@ -73,51 +115,116 @@ const SessionFormDialog = ({
         <Grid container spacing={2}>
           <Grid item xs={6}>
             <TextField
-              label="وقت البداية *" type="time" fullWidth
+              label="وقت البداية *"
+              type="time"
+              fullWidth
               value={form.startTime}
-              onChange={(e) => setForm({ ...form, startTime: e.target.value })}
+              onChange={e => setForm({ ...form, startTime: e.target.value })}
               InputLabelProps={{ shrink: true }}
             />
           </Grid>
           <Grid item xs={6}>
             <TextField
-              label="وقت النهاية" type="time" fullWidth
+              label="وقت النهاية"
+              type="time"
+              fullWidth
               value={form.endTime}
-              onChange={(e) => setForm({ ...form, endTime: e.target.value })}
+              onChange={e => setForm({ ...form, endTime: e.target.value })}
               InputLabelProps={{ shrink: true }}
             />
           </Grid>
         </Grid>
 
         <TextField
-          label="المشاركون (مفصولين بفواصل)" fullWidth
+          label="المشاركون (مفصولين بفواصل)"
+          fullWidth
           value={form.participants}
-          onChange={(e) => setForm({ ...form, participants: e.target.value })}
+          onChange={e => setForm({ ...form, participants: e.target.value })}
           placeholder="أحمد محمد, د. سارة أحمد"
-          InputProps={{ startAdornment: <InputAdornment position="start"><Person /></InputAdornment> }}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <Person />
+              </InputAdornment>
+            ),
+          }}
         />
 
         <TextField
-          select label="التكرار" fullWidth
+          select
+          label="التكرار"
+          fullWidth
           value={form.recurrence}
-          onChange={(e) => setForm({ ...form, recurrence: e.target.value })}
+          onChange={e => setForm({ ...form, recurrence: e.target.value })}
         >
-          {RECURRENCE_OPTIONS.map((r) => (
-            <MenuItem key={r.value} value={r.value}>{r.label}</MenuItem>
+          {RECURRENCE_OPTIONS.map(r => (
+            <MenuItem key={r.value} value={r.value}>
+              {r.label}
+            </MenuItem>
           ))}
         </TextField>
 
+        {/* Episode of Care link */}
+        {episodes && episodes.length > 0 && (
+          <TextField
+            select
+            label="الحلقة العلاجية (اختياري)"
+            fullWidth
+            value={form.episodeOfCare || ''}
+            onChange={e => setForm({ ...form, episodeOfCare: e.target.value, carePlan: '' })}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <LinkIcon fontSize="small" />
+                </InputAdornment>
+              ),
+            }}
+          >
+            <MenuItem value="">— غير مرتبطة —</MenuItem>
+            {episodes.map(ep => (
+              <MenuItem key={ep._id} value={ep._id}>
+                {ep.episodeNumber} — {ep.type} ({ep.status})
+              </MenuItem>
+            ))}
+          </TextField>
+        )}
+
+        {/* Care Plan link */}
+        {carePlans && carePlans.length > 0 && (
+          <TextField
+            select
+            label="خطة الرعاية (اختياري)"
+            fullWidth
+            value={form.carePlan || ''}
+            onChange={e => setForm({ ...form, carePlan: e.target.value })}
+          >
+            <MenuItem value="">— بدون خطة —</MenuItem>
+            {carePlans.map(cp => (
+              <MenuItem key={cp._id} value={cp._id}>
+                {cp.title || cp.planNumber || cp._id}
+              </MenuItem>
+            ))}
+          </TextField>
+        )}
+
         <TextField
-          label="ملاحظات" fullWidth multiline rows={3}
+          label="ملاحظات"
+          fullWidth
+          multiline
+          rows={3}
           value={form.notes}
-          onChange={(e) => setForm({ ...form, notes: e.target.value })}
+          onChange={e => setForm({ ...form, notes: e.target.value })}
         />
       </Stack>
     </DialogContent>
     <DialogActions sx={{ px: 3, pb: 2 }}>
-      <Button onClick={onClose} color="inherit">إلغاء</Button>
+      <Button onClick={onClose} color="inherit">
+        إلغاء
+      </Button>
       <Button
-        variant="contained" onClick={onSave} disabled={saving}
+        variant="contained"
+        onClick={onSave}
+        disabled={saving}
         startIcon={saving ? null : editingSession ? <EditIcon /> : <AddIcon />}
       >
         {saving ? 'جاري الحفظ...' : editingSession ? 'تحديث' : 'إضافة'}

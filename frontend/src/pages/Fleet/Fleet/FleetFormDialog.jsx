@@ -105,9 +105,9 @@ const FleetFormDialog = ({
     ? `تعديل ${DIALOG_TITLES[dialogType] || ''}`
     : `إضافة ${DIALOG_TITLES[dialogType] || ''} جديد`;
 
-  const handleChange = (key) => (e) => {
+  const handleChange = key => e => {
     const value = e.target.type === 'number' ? Number(e.target.value) : e.target.value;
-    setForm((prev) => ({ ...prev, [key]: value }));
+    setForm(prev => ({ ...prev, [key]: value }));
   };
 
   const handleClose = () => setDialogOpen(false);
@@ -122,7 +122,7 @@ const FleetFormDialog = ({
 
       <DialogContent dividers sx={{ pt: 3 }}>
         <Grid container spacing={2}>
-          {fields.map((field) => (
+          {fields.map(field => (
             <Grid item xs={12} sm={6} key={field.key}>
               {field.type === 'select' ? (
                 <TextField
@@ -134,7 +134,7 @@ const FleetFormDialog = ({
                   required={!!field.required}
                   size="small"
                 >
-                  {(field.options || []).map((opt) => (
+                  {(field.options || []).map(opt => (
                     <MenuItem key={opt.value} value={opt.value}>
                       {opt.label}
                     </MenuItem>
@@ -144,7 +144,9 @@ const FleetFormDialog = ({
                 <TextField
                   fullWidth
                   label={field.label}
-                  type={field.type === 'date' ? 'date' : field.type === 'number' ? 'number' : 'text'}
+                  type={
+                    field.type === 'date' ? 'date' : field.type === 'number' ? 'number' : 'text'
+                  }
                   value={form[field.key] ?? ''}
                   onChange={handleChange(field.key)}
                   required={!!field.required}

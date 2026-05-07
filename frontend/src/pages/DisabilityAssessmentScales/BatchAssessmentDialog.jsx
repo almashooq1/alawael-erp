@@ -22,7 +22,9 @@ import {
   MenuItem,
   IconButton,
   Checkbox,
-  FormControlLabel,  LinearProgress,  Avatar,
+  FormControlLabel,
+  LinearProgress,
+  Avatar,
   Divider,
 } from '@mui/material';
 import {
@@ -61,17 +63,19 @@ const BatchAssessmentDialog = ({
   const totalSteps = selectedScales.length + 1; // step 0 = config, steps 1..N = scales
 
   /* ── Toggle a scale checkbox ── */
-  const toggleScale = (scaleId) => {
+  const toggleScale = scaleId => {
     setSelectedScaleIds(prev =>
       prev.includes(scaleId) ? prev.filter(id => id !== scaleId) : [...prev, scaleId]
     );
   };
 
   /* ── Initialize domain scores when moving to a scale step ── */
-  const ensureDomainScores = (scale) => {
+  const ensureDomainScores = scale => {
     if (!allDomainScores[scale.id]) {
       const initial = {};
-      scale.domains.forEach(d => { initial[d.key] = 0; });
+      scale.domains.forEach(d => {
+        initial[d.key] = 0;
+      });
       setAllDomainScores(prev => ({ ...prev, [scale.id]: initial }));
     }
   };
@@ -136,7 +140,7 @@ const BatchAssessmentDialog = ({
   };
 
   /* ── Scale score summary ── */
-  const getScaleTotal = (scaleId) => {
+  const getScaleTotal = scaleId => {
     const scores = allDomainScores[scaleId] || {};
     return Object.values(scores).reduce((a, b) => a + b, 0);
   };
@@ -155,7 +159,9 @@ const BatchAssessmentDialog = ({
           <BatchIcon />
           <span>تقييم جماعي — متعدد المقاييس</span>
         </Box>
-        <IconButton onClick={onClose} sx={{ color: 'white' }}><CloseIcon /></IconButton>
+        <IconButton onClick={onClose} sx={{ color: 'white' }}>
+          <CloseIcon />
+        </IconButton>
       </DialogTitle>
 
       <DialogContent sx={{ pt: 3, minHeight: 400 }}>
@@ -164,17 +170,21 @@ const BatchAssessmentDialog = ({
         {activeStep === 0 ? (
           /* ── Step 0: Configuration ── */
           <Box>
-            <Typography variant="h6" gutterBottom>1. اختر المستفيد والمقاييس</Typography>
+            <Typography variant="h6" gutterBottom>
+              1. اختر المستفيد والمقاييس
+            </Typography>
 
             <FormControl fullWidth sx={{ mb: 3, mt: 1 }}>
               <InputLabel>اختر المستفيد</InputLabel>
               <Select
                 value={selectedBeneficiary}
-                onChange={(e) => setSelectedBeneficiary(e.target.value)}
+                onChange={e => setSelectedBeneficiary(e.target.value)}
                 label="اختر المستفيد"
               >
-                {beneficiaries.map((b) => (
-                  <MenuItem key={b.id} value={b.id}>{b.name}</MenuItem>
+                {beneficiaries.map(b => (
+                  <MenuItem key={b.id} value={b.id}>
+                    {b.name}
+                  </MenuItem>
                 ))}
               </Select>
             </FormControl>
@@ -184,7 +194,11 @@ const BatchAssessmentDialog = ({
             </Typography>
             <Box sx={{ maxHeight: 350, overflow: 'auto' }}>
               {scales.map(scale => (
-                <Paper key={scale.id} elevation={1} sx={{ p: 1, mb: 1, display: 'flex', alignItems: 'center' }}>
+                <Paper
+                  key={scale.id}
+                  elevation={1}
+                  sx={{ p: 1, mb: 1, display: 'flex', alignItems: 'center' }}
+                >
                   <FormControlLabel
                     control={
                       <Checkbox
@@ -199,7 +213,9 @@ const BatchAssessmentDialog = ({
                           {SCALE_ICONS[scale.icon] || <AssessmentIcon fontSize="small" />}
                         </Avatar>
                         <Box>
-                          <Typography variant="body2" fontWeight="bold">{scale.name}</Typography>
+                          <Typography variant="body2" fontWeight="bold">
+                            {scale.name}
+                          </Typography>
                           <Typography variant="caption" color="text.secondary">
                             {scale.domains.length} مجالات — الحد الأقصى {scale.maxScore}
                           </Typography>
@@ -230,7 +246,9 @@ const BatchAssessmentDialog = ({
                     {SCALE_ICONS[scale.icon] || <AssessmentIcon />}
                   </Avatar>
                   <Box>
-                    <Typography variant="h6" fontWeight="bold">{scale.name}</Typography>
+                    <Typography variant="h6" fontWeight="bold">
+                      {scale.name}
+                    </Typography>
                     <Typography variant="caption" color="text.secondary">
                       المقياس {scaleIndex + 1} من {selectedScales.length}
                     </Typography>
@@ -245,21 +263,42 @@ const BatchAssessmentDialog = ({
 
                 {interp && (
                   <Alert severity="info" sx={{ mb: 2 }}>
-                    <Chip label={interp.label} size="small" sx={{ bgcolor: interp.color, color: 'white' }} />
+                    <Chip
+                      label={interp.label}
+                      size="small"
+                      sx={{ bgcolor: interp.color, color: 'white' }}
+                    />
                   </Alert>
                 )}
 
                 {scale.domains.map(domain => {
                   const score = scores[domain.key] || 0;
                   const domPct = Math.round((score / domain.maxScore) * 100);
-                  const pctColor = domPct < 25 ? '#d32f2f' : domPct < 50 ? '#ed6c02' : domPct < 75 ? '#0288d1' : '#2e7d32';
+                  const pctColor =
+                    domPct < 25
+                      ? '#d32f2f'
+                      : domPct < 50
+                        ? '#ed6c02'
+                        : domPct < 75
+                          ? '#0288d1'
+                          : '#2e7d32';
                   return (
                     <Paper key={domain.key} elevation={1} sx={{ p: 2, mb: 1.5 }}>
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-                        <Typography variant="body2" fontWeight="bold">{domain.name}</Typography>
+                        <Typography variant="body2" fontWeight="bold">
+                          {domain.name}
+                        </Typography>
                         <Box sx={{ display: 'flex', gap: 0.5 }}>
-                          <Chip label={`${domPct}%`} size="small" sx={{ bgcolor: pctColor, color: 'white', minWidth: 42 }} />
-                          <Chip label={`${score}/${domain.maxScore}`} size="small" sx={{ bgcolor: scale.color, color: 'white' }} />
+                          <Chip
+                            label={`${domPct}%`}
+                            size="small"
+                            sx={{ bgcolor: pctColor, color: 'white', minWidth: 42 }}
+                          />
+                          <Chip
+                            label={`${score}/${domain.maxScore}`}
+                            size="small"
+                            sx={{ bgcolor: scale.color, color: 'white' }}
+                          />
                         </Box>
                       </Box>
                       <Slider
@@ -283,7 +322,7 @@ const BatchAssessmentDialog = ({
                     rows={2}
                     fullWidth
                     value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
+                    onChange={e => setNotes(e.target.value)}
                     sx={{ mt: 2 }}
                   />
                 )}
@@ -298,7 +337,9 @@ const BatchAssessmentDialog = ({
       <DialogActions sx={{ px: 3, py: 2, justifyContent: 'space-between' }}>
         <Box>
           {activeStep > 0 && (
-            <Button startIcon={<BackIcon />} onClick={handleBack}>السابق</Button>
+            <Button startIcon={<BackIcon />} onClick={handleBack}>
+              السابق
+            </Button>
           )}
         </Box>
         <Box sx={{ display: 'flex', gap: 1 }}>
@@ -308,9 +349,7 @@ const BatchAssessmentDialog = ({
               variant="contained"
               endIcon={<NextIcon />}
               onClick={handleNext}
-              disabled={
-                activeStep === 0 && (!selectedBeneficiary || selectedScaleIds.length === 0)
-              }
+              disabled={activeStep === 0 && (!selectedBeneficiary || selectedScaleIds.length === 0)}
             >
               التالي
             </Button>

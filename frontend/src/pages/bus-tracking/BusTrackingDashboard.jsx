@@ -86,7 +86,13 @@ export default function BusTrackingDashboard() {
   const [routes, setRoutes] = useState([]);
   const [error, setError] = useState('');
   const [busDialog, setBusDialog] = useState(false);
-  const [newBus, setNewBus] = useState({ plateNumber: '', capacity: '', model: '', driverName: '', driverPhone: '' });
+  const [newBus, setNewBus] = useState({
+    plateNumber: '',
+    capacity: '',
+    model: '',
+    driverName: '',
+    driverPhone: '',
+  });
   const [tripDialog, setTripDialog] = useState(false);
   const [tripData, setTripData] = useState({ busId: '', routeId: '', type: 'morning' });
   const [autoRefresh, _setAutoRefresh] = useState(true);
@@ -188,11 +194,7 @@ export default function BusTrackingDashboard() {
           </Typography>
         </Box>
         <Box display="flex" gap={1}>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={() => setBusDialog(true)}
-          >
+          <Button variant="contained" startIcon={<AddIcon />} onClick={() => setBusDialog(true)}>
             إضافة حافلة
           </Button>
           <Button
@@ -252,7 +254,9 @@ export default function BusTrackingDashboard() {
             value={kpi.activeAlerts || 0}
             icon={<WarningIcon />}
             color={kpi.criticalAlerts > 0 ? '#d32f2f' : '#757575'}
-            subtitle={kpi.criticalAlerts > 0 ? `${kpi.criticalAlerts} حرجة!` : 'لا توجد تنبيهات حرجة'}
+            subtitle={
+              kpi.criticalAlerts > 0 ? `${kpi.criticalAlerts} حرجة!` : 'لا توجد تنبيهات حرجة'
+            }
           />
         </Grid>
       </Grid>
@@ -306,7 +310,10 @@ export default function BusTrackingDashboard() {
                         </TableCell>
                         <TableCell>
                           {trip.eta
-                            ? new Date(trip.eta).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' })
+                            ? new Date(trip.eta).toLocaleTimeString('ar-SA', {
+                                hour: '2-digit',
+                                minute: '2-digit',
+                              })
                             : '—'}
                         </TableCell>
                         <TableCell>
@@ -544,7 +551,11 @@ export default function BusTrackingDashboard() {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setBusDialog(false)}>إلغاء</Button>
-          <Button variant="contained" onClick={handleCreateBus} disabled={!newBus.plateNumber || !newBus.capacity}>
+          <Button
+            variant="contained"
+            onClick={handleCreateBus}
+            disabled={!newBus.plateNumber || !newBus.capacity}
+          >
             إضافة
           </Button>
         </DialogActions>

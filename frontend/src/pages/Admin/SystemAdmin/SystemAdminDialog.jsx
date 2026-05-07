@@ -17,7 +17,18 @@ import CloseIcon from '@mui/icons-material/Close';
 /* ------------------------------------------------------------------ */
 /*  Status options (shared across tabs)                                */
 /* ------------------------------------------------------------------ */
-const STATUS_OPTIONS = ['متوفر', 'نشط', 'مفعّل', 'معتمد', 'سارية', 'فعّال', 'منخفض', 'معلّق', 'منتهي', 'قيد المراجعة'];
+const STATUS_OPTIONS = [
+  'متوفر',
+  'نشط',
+  'مفعّل',
+  'معتمد',
+  'سارية',
+  'فعّال',
+  'منخفض',
+  'معلّق',
+  'منتهي',
+  'قيد المراجعة',
+];
 
 /* ------------------------------------------------------------------ */
 /*  SystemAdminDialog                                                  */
@@ -33,8 +44,8 @@ const SystemAdminDialog = ({
 }) => {
   const isEdit = dialogType === 'edit';
 
-  const handleChange = (field) => (e) => {
-    setForm((prev) => ({ ...prev, [field]: e.target.value }));
+  const handleChange = field => e => {
+    setForm(prev => ({ ...prev, [field]: e.target.value }));
   };
 
   const onClose = () => setDialogOpen(false);
@@ -101,7 +112,7 @@ const SystemAdminDialog = ({
           select
           size="small"
         >
-          {STATUS_OPTIONS.map((opt) => (
+          {STATUS_OPTIONS.map(opt => (
             <MenuItem key={opt} value={opt}>
               {opt}
             </MenuItem>

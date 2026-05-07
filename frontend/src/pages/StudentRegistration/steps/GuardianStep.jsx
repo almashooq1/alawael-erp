@@ -4,8 +4,16 @@
 
 import React from 'react';
 import {
-  Box, Grid, TextField, Typography, InputAdornment, Divider,
-  Accordion, AccordionSummary, AccordionDetails, Fade,
+  Box,
+  Grid,
+  TextField,
+  Typography,
+  InputAdornment,
+  Divider,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Fade,
 } from '@mui/material';
 import { Person, FamilyRestroom, Badge, Phone, Email, ExpandMore } from '@mui/icons-material';
 import { SectionTitle } from '../StyledComponents';
@@ -24,33 +32,76 @@ const GuardianStep = ({ formData, fieldErrors, handleChange }) => (
         <AccordionDetails>
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
-              <TextField fullWidth label="اسم الأب *" value={formData.fatherName}
-                onChange={handleChange('fatherName')} error={!!fieldErrors.fatherName}
+              <TextField
+                fullWidth
+                label="اسم الأب *"
+                value={formData.fatherName}
+                onChange={handleChange('fatherName')}
+                error={!!fieldErrors.fatherName}
                 helperText={fieldErrors.fatherName}
-                InputProps={{ startAdornment: <InputAdornment position="start"><Person color="action" /></InputAdornment> }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Person color="action" />
+                    </InputAdornment>
+                  ),
+                }}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField fullWidth label="رقم هوية الأب" value={formData.fatherNationalId}
+              <TextField
+                fullWidth
+                label="رقم هوية الأب"
+                value={formData.fatherNationalId}
                 onChange={handleChange('fatherNationalId')}
-                InputProps={{ startAdornment: <InputAdornment position="start"><Badge color="action" /></InputAdornment> }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Badge color="action" />
+                    </InputAdornment>
+                  ),
+                }}
               />
             </Grid>
             <Grid item xs={12} sm={4}>
-              <TextField fullWidth label="جوال الأب" value={formData.fatherMobile}
-                onChange={handleChange('fatherMobile')} placeholder="05XXXXXXXX"
-                InputProps={{ startAdornment: <InputAdornment position="start"><Phone color="action" /></InputAdornment> }}
+              <TextField
+                fullWidth
+                label="جوال الأب"
+                value={formData.fatherMobile}
+                onChange={handleChange('fatherMobile')}
+                placeholder="05XXXXXXXX"
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Phone color="action" />
+                    </InputAdornment>
+                  ),
+                }}
               />
             </Grid>
             <Grid item xs={12} sm={4}>
-              <TextField fullWidth label="بريد الأب" value={formData.fatherEmail}
-                onChange={handleChange('fatherEmail')} type="email"
-                InputProps={{ startAdornment: <InputAdornment position="start"><Email color="action" /></InputAdornment> }}
+              <TextField
+                fullWidth
+                label="بريد الأب"
+                value={formData.fatherEmail}
+                onChange={handleChange('fatherEmail')}
+                type="email"
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Email color="action" />
+                    </InputAdornment>
+                  ),
+                }}
               />
             </Grid>
             <Grid item xs={12} sm={4}>
-              <TextField fullWidth label="المهنة" value={formData.fatherOccupation}
-                onChange={handleChange('fatherOccupation')} />
+              <TextField
+                fullWidth
+                label="المهنة"
+                value={formData.fatherOccupation}
+                onChange={handleChange('fatherOccupation')}
+              />
             </Grid>
           </Grid>
         </AccordionDetails>
@@ -64,26 +115,59 @@ const GuardianStep = ({ formData, fieldErrors, handleChange }) => (
         <AccordionDetails>
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
-              <TextField fullWidth label="اسم الأم" value={formData.motherName}
+              <TextField
+                fullWidth
+                label="اسم الأم"
+                value={formData.motherName}
                 onChange={handleChange('motherName')}
-                InputProps={{ startAdornment: <InputAdornment position="start"><Person color="action" /></InputAdornment> }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Person color="action" />
+                    </InputAdornment>
+                  ),
+                }}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField fullWidth label="جوال الأم" value={formData.motherMobile}
-                onChange={handleChange('motherMobile')} placeholder="05XXXXXXXX"
-                InputProps={{ startAdornment: <InputAdornment position="start"><Phone color="action" /></InputAdornment> }}
+              <TextField
+                fullWidth
+                label="جوال الأم"
+                value={formData.motherMobile}
+                onChange={handleChange('motherMobile')}
+                placeholder="05XXXXXXXX"
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Phone color="action" />
+                    </InputAdornment>
+                  ),
+                }}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField fullWidth label="بريد الأم" value={formData.motherEmail}
-                onChange={handleChange('motherEmail')} type="email"
-                InputProps={{ startAdornment: <InputAdornment position="start"><Email color="action" /></InputAdornment> }}
+              <TextField
+                fullWidth
+                label="بريد الأم"
+                value={formData.motherEmail}
+                onChange={handleChange('motherEmail')}
+                type="email"
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Email color="action" />
+                    </InputAdornment>
+                  ),
+                }}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField fullWidth label="المهنة" value={formData.motherOccupation}
-                onChange={handleChange('motherOccupation')} />
+              <TextField
+                fullWidth
+                label="المهنة"
+                value={formData.motherOccupation}
+                onChange={handleChange('motherOccupation')}
+              />
             </Grid>
           </Grid>
         </AccordionDetails>
@@ -96,18 +180,36 @@ const GuardianStep = ({ formData, fieldErrors, handleChange }) => (
       </Typography>
       <Grid container spacing={2}>
         <Grid item xs={12} sm={4}>
-          <TextField fullWidth label="الاسم" value={formData.emergencyName}
-            onChange={handleChange('emergencyName')} />
+          <TextField
+            fullWidth
+            label="الاسم"
+            value={formData.emergencyName}
+            onChange={handleChange('emergencyName')}
+          />
         </Grid>
         <Grid item xs={12} sm={4}>
-          <TextField fullWidth label="صلة القرابة" value={formData.emergencyRelation}
-            onChange={handleChange('emergencyRelation')} />
+          <TextField
+            fullWidth
+            label="صلة القرابة"
+            value={formData.emergencyRelation}
+            onChange={handleChange('emergencyRelation')}
+          />
         </Grid>
         <Grid item xs={12} sm={4}>
-          <TextField fullWidth label="رقم الجوال *" value={formData.emergencyMobile}
-            onChange={handleChange('emergencyMobile')} error={!!fieldErrors.emergencyMobile}
+          <TextField
+            fullWidth
+            label="رقم الجوال *"
+            value={formData.emergencyMobile}
+            onChange={handleChange('emergencyMobile')}
+            error={!!fieldErrors.emergencyMobile}
             helperText={fieldErrors.emergencyMobile}
-            InputProps={{ startAdornment: <InputAdornment position="start"><Phone color="action" /></InputAdornment> }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Phone color="action" />
+                </InputAdornment>
+              ),
+            }}
           />
         </Grid>
       </Grid>

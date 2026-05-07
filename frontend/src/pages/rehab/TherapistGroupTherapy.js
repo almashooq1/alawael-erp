@@ -82,7 +82,7 @@ const TherapistGroupTherapy = () => {
 
   useEffect(() => {
     fetchGroups();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchGroups = async () => {

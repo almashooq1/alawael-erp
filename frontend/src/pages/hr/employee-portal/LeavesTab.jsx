@@ -41,22 +41,14 @@ const STATUS_MAP = {
 /**
  * LeavesTab – Leave balance cards + leave history table.
  */
-export default function LeavesTab({
-  leaveBalances = {},
-  leaveHistory = [],
-  onOpenLeaveDialog,
-}) {
+export default function LeavesTab({ leaveBalances = {}, leaveHistory = [], onOpenLeaveDialog }) {
   const balanceEntries = Object.entries(leaveBalances);
 
   return (
     <Box>
       {/* ─── Action Row ─── */}
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={onOpenLeaveDialog}
-        >
+        <Button variant="contained" startIcon={<AddIcon />} onClick={onOpenLeaveDialog}>
           طلب إجازة جديدة
         </Button>
       </Box>
@@ -70,10 +62,7 @@ export default function LeavesTab({
             <Grid item xs={6} sm={3} key={type}>
               <Card variant="outlined" sx={{ borderColor: color, borderWidth: 1.5 }}>
                 <CardContent sx={{ textAlign: 'center', pb: '12px !important' }}>
-                  <Typography
-                    variant="subtitle2"
-                    sx={{ color, fontWeight: 700, mb: 1 }}
-                  >
+                  <Typography variant="subtitle2" sx={{ color, fontWeight: 700, mb: 1 }}>
                     {LEAVE_TYPE_LABELS[type] || type}
                   </Typography>
                   <Typography variant="h4" fontWeight={700}>
@@ -130,7 +119,7 @@ export default function LeavesTab({
                 </TableCell>
               </TableRow>
             ) : (
-              leaveHistory.map((lv) => {
+              leaveHistory.map(lv => {
                 const st = STATUS_MAP[lv.status] || {
                   label: lv.status,
                   color: 'default',
@@ -148,12 +137,8 @@ export default function LeavesTab({
                         }}
                       />
                     </TableCell>
-                    <TableCell>
-                      {new Date(lv.startDate).toLocaleDateString('ar-SA')}
-                    </TableCell>
-                    <TableCell>
-                      {new Date(lv.endDate).toLocaleDateString('ar-SA')}
-                    </TableCell>
+                    <TableCell>{new Date(lv.startDate).toLocaleDateString('ar-SA')}</TableCell>
+                    <TableCell>{new Date(lv.endDate).toLocaleDateString('ar-SA')}</TableCell>
                     <TableCell align="center">{lv.days}</TableCell>
                     <TableCell>{lv.reason}</TableCell>
                     <TableCell align="center">

@@ -3,14 +3,21 @@
  */
 import React from 'react';
 import {
-  Dialog, DialogTitle, DialogContent, DialogActions,
-  Box, TextField, Button, FormControl, InputLabel, Select, MenuItem,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Box,
+  TextField,
+  Button,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from '@mui/material';
 import { DIALOG_FIELDS } from './constants';
 
-const OperationsDialog = ({
-  open, onClose, dialogType, editItem, form, setForm, onSave, tabs,
-}) => {
+const OperationsDialog = ({ open, onClose, dialogType, editItem, form, setForm, onSave, tabs }) => {
   const fields = DIALOG_FIELDS[dialogType] || [];
 
   return (

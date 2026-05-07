@@ -27,19 +27,82 @@
 
 import { useState, useEffect, useCallback, useRef, Fragment } from 'react';
 import {
-  Box, Container, Grid, Card, CardContent, Typography, Button, TextField,
-  InputAdornment, IconButton, Chip, Avatar, MenuItem, Select, FormControl,
-  InputLabel, Stack, Alert, Snackbar, Skeleton, Fade, Tooltip, Pagination,
-  ToggleButton, ToggleButtonGroup, Table, TableBody, TableCell, TableContainer,
-  TableHead, TableRow, TableSortLabel, Checkbox, LinearProgress, Collapse,
-  Paper, Menu, ListItemIcon, ListItemText, Divider, Badge, Dialog,
-  DialogTitle, DialogContent, DialogActions,
+  Box,
+  Container,
+  Grid,
+  Card,
+  CardContent,
+  Typography,
+  Button,
+  TextField,
+  InputAdornment,
+  IconButton,
+  Chip,
+  Avatar,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
+  Stack,
+  Alert,
+  Snackbar,
+  Skeleton,
+  Fade,
+  Tooltip,
+  Pagination,
+  ToggleButton,
+  ToggleButtonGroup,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TableSortLabel,
+  Checkbox,
+  LinearProgress,
+  Collapse,
+  Paper,
+  Menu,
+  ListItemIcon,
+  ListItemText,
+  Divider,
+  Badge,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from '@mui/material';
 import {
-  Search, Download, PersonAdd, CheckCircle, Pending, TrendingUp as TrendingUpIcon,
-  GridView, ViewList, Refresh, Groups, MoreVert, KeyboardArrowDown, KeyboardArrowUp, Edit, Visibility, Archive, Phone,
-  WhatsApp, Email as EmailIcon, FilterList, Print, Warning, Close, Clear,
-  Description, Send, CalendarMonth, LocalHospital, FamilyRestroom,
+  Search,
+  Download,
+  PersonAdd,
+  CheckCircle,
+  Pending,
+  TrendingUp as TrendingUpIcon,
+  GridView,
+  ViewList,
+  Refresh,
+  Groups,
+  MoreVert,
+  KeyboardArrowDown,
+  KeyboardArrowUp,
+  Edit,
+  Visibility,
+  Archive,
+  Phone,
+  WhatsApp,
+  Email as EmailIcon,
+  FilterList,
+  Print,
+  Warning,
+  Close,
+  Clear,
+  Description,
+  Send,
+  CalendarMonth,
+  LocalHospital,
+  FamilyRestroom,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useSnackbar } from 'contexts/SnackbarContext';
@@ -58,8 +121,14 @@ const GradientHeader = styled(Box)(() => ({
   overflow: 'hidden',
   boxShadow: '0 8px 32px rgba(102,126,234,0.25)',
   '&::before': {
-    content: '""', position: 'absolute', top: -30, right: -30,
-    width: 140, height: 140, borderRadius: '50%', background: 'rgba(255,255,255,0.06)',
+    content: '""',
+    position: 'absolute',
+    top: -30,
+    right: -30,
+    width: 140,
+    height: 140,
+    borderRadius: '50%',
+    background: 'rgba(255,255,255,0.06)',
   },
 }));
 
@@ -74,21 +143,38 @@ const KpiCard = styled(Card)(({ gradient }) => ({
 
 // ── Constants ────────────────────────────────────
 const STATUS_LABELS = {
-  active: 'نشط', pending: 'قيد الانتظار', inactive: 'غير نشط',
-  transferred: 'محوّل', graduated: 'متخرج', deceased: 'متوفي',
+  active: 'نشط',
+  pending: 'قيد الانتظار',
+  inactive: 'غير نشط',
+  transferred: 'محوّل',
+  graduated: 'متخرج',
+  deceased: 'متوفي',
 };
 const STATUS_COLORS = {
-  active: statusColors.success, pending: statusColors.warning, inactive: statusColors.error,
-  transferred: statusColors.info, graduated: statusColors.purple || '#9c27b0', deceased: '#616161',
+  active: statusColors.success,
+  pending: statusColors.warning,
+  inactive: statusColors.error,
+  transferred: statusColors.info,
+  graduated: statusColors.purple || '#9c27b0',
+  deceased: '#616161',
 };
 const CATEGORY_LABELS = {
-  physical: 'حركية', mental: 'ذهنية', sensory: 'حسية',
-  multiple: 'متعددة', learning: 'تعلم', speech: 'نطق', other: 'أخرى',
+  physical: 'حركية',
+  mental: 'ذهنية',
+  sensory: 'حسية',
+  multiple: 'متعددة',
+  learning: 'تعلم',
+  speech: 'نطق',
+  other: 'أخرى',
 };
 const CATEGORY_COLORS = {
-  physical: statusColors.info, mental: statusColors.pink || '#e91e63',
-  sensory: statusColors.warning, multiple: statusColors.purple || '#9c27b0',
-  learning: '#ff9800', speech: '#00bcd4', other: neutralColors.fallback,
+  physical: statusColors.info,
+  mental: statusColors.pink || '#e91e63',
+  sensory: statusColors.warning,
+  multiple: statusColors.purple || '#9c27b0',
+  learning: '#ff9800',
+  speech: '#00bcd4',
+  other: neutralColors.fallback,
 };
 const GENDER_LABELS = { male: 'ذكر', female: 'أنثى' };
 const ROWS_PER_PAGE = 15;
@@ -108,40 +194,59 @@ const columns = [
 ];
 
 // ── Helper: format date in Arabic ─────────────────
-const formatDate = (d) => {
+const formatDate = d => {
   if (!d) return '—';
   try {
-    return new Intl.DateTimeFormat('ar-SA', { year: 'numeric', month: 'short', day: 'numeric' }).format(new Date(d));
-  } catch { return String(d).slice(0, 10); }
+    return new Intl.DateTimeFormat('ar-SA', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    }).format(new Date(d));
+  } catch {
+    return String(d).slice(0, 10);
+  }
 };
 
 // ── Helper: compute age ────────────────────────────
-const computeAge = (dob) => {
+const computeAge = dob => {
   if (!dob) return null;
   const diff = Date.now() - new Date(dob).getTime();
   return Math.floor(diff / (365.25 * 24 * 60 * 60 * 1000));
 };
 
 // ── Helper: normalize beneficiary data ─────────────
-const normalize = (b) => ({
+const normalize = b => ({
   ...b,
   id: b._id || b.id,
-  name: b.fullName || b.name || b.fullNameArabic || `${b.firstName_ar || b.firstName || ''} ${b.lastName_ar || b.lastName || ''}`.trim() || '—',
-  nameEn: b.fullNameEnglish || b.nameEn || `${b.firstName_en || b.firstName || ''} ${b.lastName_en || b.lastName || ''}`.trim() || '',
+  name:
+    b.fullName ||
+    b.name ||
+    b.fullNameArabic ||
+    `${b.firstName_ar || b.firstName || ''} ${b.lastName_ar || b.lastName || ''}`.trim() ||
+    '—',
+  nameEn:
+    b.fullNameEnglish ||
+    b.nameEn ||
+    `${b.firstName_en || b.firstName || ''} ${b.lastName_en || b.lastName || ''}`.trim() ||
+    '',
   age: b.age || computeAge(b.dateOfBirth) || null,
   phone: b.contactInfo?.primaryPhone || b.phone || '',
   email: b.contactInfo?.email || b.email || '',
-  guardian: b.familyMembers?.find(f => f.isPrimaryCaregiver || f.hasLegalGuardianship)
-    || b.emergencyContacts?.[0] || null,
+  guardian:
+    b.familyMembers?.find(f => f.isPrimaryCaregiver || f.hasLegalGuardianship) ||
+    b.emergencyContacts?.[0] ||
+    null,
   guardianName: (() => {
-    const g = b.familyMembers?.find(f => f.isPrimaryCaregiver || f.hasLegalGuardianship)
-      || b.emergencyContacts?.[0];
+    const g =
+      b.familyMembers?.find(f => f.isPrimaryCaregiver || f.hasLegalGuardianship) ||
+      b.emergencyContacts?.[0];
     if (!g) return b.guardian || '—';
     return g.name || `${g.firstName || ''} ${g.lastName || ''}`.trim() || '—';
   })(),
   guardianPhone: (() => {
-    const g = b.familyMembers?.find(f => f.isPrimaryCaregiver || f.hasLegalGuardianship)
-      || b.emergencyContacts?.[0];
+    const g =
+      b.familyMembers?.find(f => f.isPrimaryCaregiver || f.hasLegalGuardianship) ||
+      b.emergencyContacts?.[0];
     return g?.phone || b.guardianPhone || '';
   })(),
   category: b.category || b.disability?.type || 'other',
@@ -154,8 +259,10 @@ const normalize = (b) => ({
   therapist: b.therapist || '',
   address: b.address?.city || b.address?.street || b.address || '',
   notes: b.generalNotes || b.notes || '',
-  isAtRisk: (b.attendanceRate !== null && b.attendanceRate < 75) || (b.progress !== null && b.progress < 30)
-    || (b.academicScore !== null && b.academicScore < 50),
+  isAtRisk:
+    (b.attendanceRate !== null && b.attendanceRate < 75) ||
+    (b.progress !== null && b.progress < 30) ||
+    (b.academicScore !== null && b.academicScore < 50),
 });
 
 // ═════════════════════════════════════════════════════════════════
@@ -177,7 +284,11 @@ const BeneficiariesListPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [filters, setFilters] = useState({
-    status: 'all', category: 'all', gender: 'all', ageRange: 'all', city: '',
+    status: 'all',
+    category: 'all',
+    gender: 'all',
+    ageRange: 'all',
+    city: '',
   });
   const [cities, setCities] = useState([]);
   const [filterDialogOpen, setFilterDialogOpen] = useState(false);
@@ -199,7 +310,14 @@ const BeneficiariesListPage = () => {
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
   // ── Statistics State ────────────────────────────
-  const [stats, setStats] = useState({ total: 0, active: 0, pending: 0, inactive: 0, newThisMonth: 0, atRisk: 0 });
+  const [stats, setStats] = useState({
+    total: 0,
+    active: 0,
+    pending: 0,
+    inactive: 0,
+    newThisMonth: 0,
+    atRisk: 0,
+  });
 
   // ── Debounced Search ────────────────────────────
   useEffect(() => {
@@ -213,21 +331,27 @@ const BeneficiariesListPage = () => {
 
   // ── Load Cities ─────────────────────────────────
   useEffect(() => {
-    beneficiaryService.getCities().then(res => {
-      const data = res?.data?.data || res?.data || [];
-      if (Array.isArray(data)) setCities(data);
-    }).catch(() => {});
+    beneficiaryService
+      .getCities()
+      .then(res => {
+        const data = res?.data?.data || res?.data || [];
+        if (Array.isArray(data)) setCities(data);
+      })
+      .catch(() => {});
   }, []);
 
   // ── Load At-Risk IDs ────────────────────────────
   useEffect(() => {
-    beneficiaryService.getAtRisk(200).then(res => {
-      const data = res?.data?.data || res?.data || [];
-      if (Array.isArray(data)) {
-        setAtRiskIds(new Set(data.map(b => b._id || b.id)));
-        setStats(prev => ({ ...prev, atRisk: data.length }));
-      }
-    }).catch(() => {});
+    beneficiaryService
+      .getAtRisk(200)
+      .then(res => {
+        const data = res?.data?.data || res?.data || [];
+        if (Array.isArray(data)) {
+          setAtRiskIds(new Set(data.map(b => b._id || b.id)));
+          setStats(prev => ({ ...prev, atRisk: data.length }));
+        }
+      })
+      .catch(() => {});
   }, []);
 
   // ── Load Data (server-side pagination) ──────────
@@ -273,33 +397,38 @@ const BeneficiariesListPage = () => {
     }
   }, [page, orderBy, order, debouncedSearch, filters, quickFilter, atRiskIds, showSnackbar]);
 
-  useEffect(() => { loadData(); }, [loadData]);
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   // ── Load Statistics ─────────────────────────────
   useEffect(() => {
-    beneficiaryService.getStatistics().then(res => {
-      const d = res?.data?.data || res?.data;
-      if (d) {
-        setStats(prev => ({
-          total: d.total || 0,
-          active: d.byStatus?.active || d.active || 0,
-          pending: d.byStatus?.pending || d.pending || 0,
-          inactive: d.byStatus?.inactive || d.inactive || 0,
-          newThisMonth: d.newThisMonth || 0,
-          atRisk: prev.atRisk,
-        }));
-      }
-    }).catch(() => {});
+    beneficiaryService
+      .getStatistics()
+      .then(res => {
+        const d = res?.data?.data || res?.data;
+        if (d) {
+          setStats(prev => ({
+            total: d.total || 0,
+            active: d.byStatus?.active || d.active || 0,
+            pending: d.byStatus?.pending || d.pending || 0,
+            inactive: d.byStatus?.inactive || d.inactive || 0,
+            newThisMonth: d.newThisMonth || 0,
+            atRisk: prev.atRisk,
+          }));
+        }
+      })
+      .catch(() => {});
   }, []);
 
   // ── Computed ────────────────────────────────────
   const totalPages = Math.max(1, Math.ceil(totalCount / ROWS_PER_PAGE));
-  const activeFilterCount = Object.entries(filters).filter(([k, v]) =>
-    (k === 'city' ? v !== '' : v !== 'all')
-  ).length + (debouncedSearch ? 1 : 0);
+  const activeFilterCount =
+    Object.entries(filters).filter(([k, v]) => (k === 'city' ? v !== '' : v !== 'all')).length +
+    (debouncedSearch ? 1 : 0);
 
   // ── Sorting ─────────────────────────────────────
-  const handleRequestSort = (property) => {
+  const handleRequestSort = property => {
     const isAsc = orderBy === property && order === 'asc';
     setOrder(isAsc ? 'desc' : 'asc');
     setOrderBy(property);
@@ -307,14 +436,14 @@ const BeneficiariesListPage = () => {
   };
 
   // ── Selection ───────────────────────────────────
-  const handleSelectAll = (event) => {
+  const handleSelectAll = event => {
     if (event.target.checked) setSelected(beneficiaries.map(b => b.id));
     else setSelected([]);
   };
-  const handleSelectOne = (id) => {
-    setSelected(prev => prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]);
+  const handleSelectOne = id => {
+    setSelected(prev => (prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]));
   };
-  const isSelected = (id) => selected.includes(id);
+  const isSelected = id => selected.includes(id);
 
   // ── Quick Filter ────────────────────────────────
   const handleQuickFilter = (_, val) => {
@@ -336,8 +465,8 @@ const BeneficiariesListPage = () => {
   };
 
   // ── Actions ─────────────────────────────────────
-  const handleView = (id) => navigate(`/beneficiary-portal/${id}`);
-  const handleEdit = (id) => navigate(`/beneficiary-portal/${id}`);
+  const handleView = id => navigate(`/beneficiary-portal/${id}`);
+  const handleEdit = id => navigate(`/beneficiary-portal/${id}`);
   const handleAdd = () => navigate('/student-registration');
 
   const handleStatusChange = async (id, newStatus) => {
@@ -345,17 +474,21 @@ const BeneficiariesListPage = () => {
       await beneficiaryService.updateStatus(id, newStatus);
       showSnackbar('تم تحديث حالة المستفيد', 'success');
       loadData();
-    } catch { showSnackbar('فشل في تحديث الحالة', 'error'); }
+    } catch {
+      showSnackbar('فشل في تحديث الحالة', 'error');
+    }
     setStatusMenu(null);
   };
 
-  const handleArchive = async (id) => {
+  const handleArchive = async id => {
     if (!window.confirm('هل أنت متأكد من أرشفة هذا المستفيد؟')) return;
     try {
       await beneficiaryService.remove(id, 'أرشفة من قائمة المستفيدين');
       showSnackbar('تم أرشفة المستفيد بنجاح', 'success');
       loadData();
-    } catch { showSnackbar('فشل في أرشفة المستفيد', 'error'); }
+    } catch {
+      showSnackbar('فشل في أرشفة المستفيد', 'error');
+    }
   };
 
   const handleExport = async () => {
@@ -365,11 +498,15 @@ const BeneficiariesListPage = () => {
       if (blob instanceof Blob) {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
-        a.href = url; a.download = `beneficiaries-${new Date().toISOString().slice(0, 10)}.csv`; a.click();
+        a.href = url;
+        a.download = `beneficiaries-${new Date().toISOString().slice(0, 10)}.csv`;
+        a.click();
         window.URL.revokeObjectURL(url);
       }
       showSnackbar('تم تصدير البيانات بنجاح', 'success');
-    } catch { showSnackbar('فشل في تصدير البيانات', 'error'); }
+    } catch {
+      showSnackbar('فشل في تصدير البيانات', 'error');
+    }
   };
 
   const handlePrint = () => window.print();
@@ -382,27 +519,31 @@ const BeneficiariesListPage = () => {
       showSnackbar(`تم أرشفة ${selected.length} مستفيد`, 'success');
       setSelected([]);
       loadData();
-    } catch { showSnackbar('فشل في الأرشفة الجماعية', 'error'); }
+    } catch {
+      showSnackbar('فشل في الأرشفة الجماعية', 'error');
+    }
   };
 
-  const handleBulkStatusChange = async (newStatus) => {
+  const handleBulkStatusChange = async newStatus => {
     try {
       await beneficiaryService.bulkAction('update-status', selected, { status: newStatus });
       showSnackbar(`تم تحديث حالة ${selected.length} مستفيد`, 'success');
       setSelected([]);
       loadData();
-    } catch { showSnackbar('فشل في تحديث الحالة', 'error'); }
+    } catch {
+      showSnackbar('فشل في تحديث الحالة', 'error');
+    }
     setBulkStatusMenu(null);
   };
 
-  const handleWhatsApp = (phone) => {
+  const handleWhatsApp = phone => {
     if (!phone) return;
     const clean = phone.replace(/\D/g, '');
     const num = clean.startsWith('0') ? `966${clean.slice(1)}` : clean;
     window.open(`https://wa.me/${num}`, '_blank');
   };
 
-  const handleCall = (phone) => {
+  const handleCall = phone => {
     if (phone) window.open(`tel:${phone}`, '_self');
   };
 
@@ -410,7 +551,10 @@ const BeneficiariesListPage = () => {
   //  RENDER
   // ═════════════════════════════════════════════════
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: surfaceColors.brandTint }} className="beneficiaries-list-page">
+    <Box
+      sx={{ minHeight: '100vh', bgcolor: surfaceColors.brandTint }}
+      className="beneficiaries-list-page"
+    >
       {/* ── Gradient Header ──────────────── */}
       <GradientHeader>
         <Container maxWidth="xl">
@@ -425,15 +569,52 @@ const BeneficiariesListPage = () => {
               </Typography>
             </Grid>
             <Grid item xs={12} md={5}>
-              <Stack direction="row" spacing={1} justifyContent={{ xs: 'flex-start', md: 'flex-end' }} flexWrap="wrap">
-                <Tooltip title="تحديث"><IconButton onClick={loadData} sx={{ color: 'white', bgcolor: 'rgba(255,255,255,0.15)' }}><Refresh /></IconButton></Tooltip>
-                <Tooltip title="طباعة"><IconButton onClick={handlePrint} sx={{ color: 'white', bgcolor: 'rgba(255,255,255,0.15)' }}><Print /></IconButton></Tooltip>
-                <Button variant="outlined" startIcon={<Description />} onClick={() => navigate('/beneficiaries/templates')}
-                  sx={{ color: 'white', borderColor: 'rgba(255,255,255,0.5)', fontWeight: 700 }}>قوالب الطباعة</Button>
-                <Button variant="outlined" startIcon={<Download />} onClick={handleExport}
-                  sx={{ color: 'white', borderColor: 'rgba(255,255,255,0.5)' }}>تصدير CSV</Button>
-                <Button variant="contained" startIcon={<PersonAdd />} onClick={handleAdd}
-                  sx={{ bgcolor: 'rgba(255,255,255,0.2)', fontWeight: 700 }}>إضافة مستفيد</Button>
+              <Stack
+                direction="row"
+                spacing={1}
+                justifyContent={{ xs: 'flex-start', md: 'flex-end' }}
+                flexWrap="wrap"
+              >
+                <Tooltip title="تحديث">
+                  <IconButton
+                    onClick={loadData}
+                    sx={{ color: 'white', bgcolor: 'rgba(255,255,255,0.15)' }}
+                  >
+                    <Refresh />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="طباعة">
+                  <IconButton
+                    onClick={handlePrint}
+                    sx={{ color: 'white', bgcolor: 'rgba(255,255,255,0.15)' }}
+                  >
+                    <Print />
+                  </IconButton>
+                </Tooltip>
+                <Button
+                  variant="outlined"
+                  startIcon={<Description />}
+                  onClick={() => navigate('/beneficiaries/templates')}
+                  sx={{ color: 'white', borderColor: 'rgba(255,255,255,0.5)', fontWeight: 700 }}
+                >
+                  قوالب الطباعة
+                </Button>
+                <Button
+                  variant="outlined"
+                  startIcon={<Download />}
+                  onClick={handleExport}
+                  sx={{ color: 'white', borderColor: 'rgba(255,255,255,0.5)' }}
+                >
+                  تصدير CSV
+                </Button>
+                <Button
+                  variant="contained"
+                  startIcon={<PersonAdd />}
+                  onClick={handleAdd}
+                  sx={{ bgcolor: 'rgba(255,255,255,0.2)', fontWeight: 700 }}
+                >
+                  إضافة مستفيد
+                </Button>
               </Stack>
             </Grid>
           </Grid>
@@ -445,21 +626,52 @@ const BeneficiariesListPage = () => {
         <Grid container spacing={2} sx={{ mb: 3 }}>
           {[
             { label: 'إجمالي', value: stats.total, icon: <Groups />, gradient: gradients.primary },
-            { label: 'نشطين', value: stats.active, icon: <CheckCircle />, gradient: gradients.success },
-            { label: 'قيد الانتظار', value: stats.pending, icon: <Pending />, gradient: gradients.warning },
-            { label: 'غير نشطين', value: stats.inactive, icon: <Close />, gradient: gradients.error || '#e53935' },
-            { label: 'جدد هذا الشهر', value: stats.newThisMonth, icon: <TrendingUpIcon />, gradient: gradients.info },
-            { label: 'يحتاجون متابعة', value: stats.atRisk, icon: <Warning />, gradient: 'linear-gradient(135deg, #ff6b6b, #ee5a24)' },
+            {
+              label: 'نشطين',
+              value: stats.active,
+              icon: <CheckCircle />,
+              gradient: gradients.success,
+            },
+            {
+              label: 'قيد الانتظار',
+              value: stats.pending,
+              icon: <Pending />,
+              gradient: gradients.warning,
+            },
+            {
+              label: 'غير نشطين',
+              value: stats.inactive,
+              icon: <Close />,
+              gradient: gradients.error || '#e53935',
+            },
+            {
+              label: 'جدد هذا الشهر',
+              value: stats.newThisMonth,
+              icon: <TrendingUpIcon />,
+              gradient: gradients.info,
+            },
+            {
+              label: 'يحتاجون متابعة',
+              value: stats.atRisk,
+              icon: <Warning />,
+              gradient: 'linear-gradient(135deg, #ff6b6b, #ee5a24)',
+            },
           ].map((kpi, idx) => (
             <Grid item xs={6} sm={4} md={2} key={idx}>
               <KpiCard gradient={kpi.gradient} elevation={0}>
                 <CardContent sx={{ py: 2, px: 2 }}>
                   <Box display="flex" justifyContent="space-between" alignItems="center">
                     <Box>
-                      <Typography variant="h5" fontWeight={700}>{loading ? '—' : kpi.value}</Typography>
-                      <Typography variant="caption" sx={{ opacity: 0.9 }}>{kpi.label}</Typography>
+                      <Typography variant="h5" fontWeight={700}>
+                        {loading ? '—' : kpi.value}
+                      </Typography>
+                      <Typography variant="caption" sx={{ opacity: 0.9 }}>
+                        {kpi.label}
+                      </Typography>
                     </Box>
-                    <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)', width: 40, height: 40 }}>{kpi.icon}</Avatar>
+                    <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)', width: 40, height: 40 }}>
+                      {kpi.icon}
+                    </Avatar>
                   </Box>
                 </CardContent>
               </KpiCard>
@@ -469,8 +681,13 @@ const BeneficiariesListPage = () => {
 
         {/* ── Quick Filter Tabs ──────────── */}
         <Box sx={{ mb: 2, display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
-          <ToggleButtonGroup size="small" value={quickFilter} exclusive onChange={handleQuickFilter}
-            sx={{ '& .MuiToggleButton-root': { borderRadius: 2, px: 2 } }}>
+          <ToggleButtonGroup
+            size="small"
+            value={quickFilter}
+            exclusive
+            onChange={handleQuickFilter}
+            sx={{ '& .MuiToggleButton-root': { borderRadius: 2, px: 2 } }}
+          >
             <ToggleButton value="all">الكل ({stats.total})</ToggleButton>
             <ToggleButton value="active">نشط ({stats.active})</ToggleButton>
             <ToggleButton value="pending">انتظار ({stats.pending})</ToggleButton>
@@ -480,56 +697,116 @@ const BeneficiariesListPage = () => {
             </ToggleButton>
           </ToggleButtonGroup>
           <Box flex={1} />
-          <ToggleButtonGroup size="small" value={viewMode} exclusive onChange={(_, v) => { if (v) setViewMode(v); }}>
-            <ToggleButton value="table"><ViewList fontSize="small" /></ToggleButton>
-            <ToggleButton value="grid"><GridView fontSize="small" /></ToggleButton>
+          <ToggleButtonGroup
+            size="small"
+            value={viewMode}
+            exclusive
+            onChange={(_, v) => {
+              if (v) setViewMode(v);
+            }}
+          >
+            <ToggleButton value="table">
+              <ViewList fontSize="small" />
+            </ToggleButton>
+            <ToggleButton value="grid">
+              <GridView fontSize="small" />
+            </ToggleButton>
           </ToggleButtonGroup>
         </Box>
 
         {/* ── Search & Filter Bar ────────── */}
-        <Card elevation={0} sx={{ borderRadius: '20px', mb: 2, boxShadow: '0 2px 16px rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.04)' }}>
+        <Card
+          elevation={0}
+          sx={{
+            borderRadius: '20px',
+            mb: 2,
+            boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+            border: '1px solid rgba(0,0,0,0.04)',
+          }}
+        >
           <CardContent sx={{ py: 2 }}>
             <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} alignItems="center">
-              <TextField fullWidth placeholder="بحث: اسم، هوية، هاتف، بريد، ملف طبي..."
-                value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+              <TextField
+                fullWidth
+                placeholder="بحث: اسم، هوية، هاتف، بريد، ملف طبي..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
                 size="small"
                 InputProps={{
-                  startAdornment: <InputAdornment position="start"><Search /></InputAdornment>,
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Search />
+                    </InputAdornment>
+                  ),
                   endAdornment: searchQuery ? (
                     <InputAdornment position="end">
-                      <IconButton size="small" onClick={() => { setSearchQuery(''); setDebouncedSearch(''); }}>
+                      <IconButton
+                        size="small"
+                        onClick={() => {
+                          setSearchQuery('');
+                          setDebouncedSearch('');
+                        }}
+                      >
                         <Clear fontSize="small" />
                       </IconButton>
                     </InputAdornment>
                   ) : null,
                 }}
-                sx={{ maxWidth: { md: 400 }, '& .MuiOutlinedInput-root': { borderRadius: 2 } }} />
+                sx={{ maxWidth: { md: 400 }, '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+              />
               <FormControl size="small" sx={{ minWidth: 120 }}>
                 <InputLabel>الفئة</InputLabel>
-                <Select value={filters.category} label="الفئة"
-                  onChange={(e) => { setFilters(prev => ({ ...prev, category: e.target.value })); setPage(1); }}>
+                <Select
+                  value={filters.category}
+                  label="الفئة"
+                  onChange={e => {
+                    setFilters(prev => ({ ...prev, category: e.target.value }));
+                    setPage(1);
+                  }}
+                >
                   <MenuItem value="all">الكل</MenuItem>
-                  {Object.entries(CATEGORY_LABELS).map(([k, v]) => <MenuItem key={k} value={k}>{v}</MenuItem>)}
+                  {Object.entries(CATEGORY_LABELS).map(([k, v]) => (
+                    <MenuItem key={k} value={k}>
+                      {v}
+                    </MenuItem>
+                  ))}
                 </Select>
               </FormControl>
               <FormControl size="small" sx={{ minWidth: 100 }}>
                 <InputLabel>الجنس</InputLabel>
-                <Select value={filters.gender} label="الجنس"
-                  onChange={(e) => { setFilters(prev => ({ ...prev, gender: e.target.value })); setPage(1); }}>
+                <Select
+                  value={filters.gender}
+                  label="الجنس"
+                  onChange={e => {
+                    setFilters(prev => ({ ...prev, gender: e.target.value }));
+                    setPage(1);
+                  }}
+                >
                   <MenuItem value="all">الكل</MenuItem>
                   <MenuItem value="male">ذكر</MenuItem>
                   <MenuItem value="female">أنثى</MenuItem>
                 </Select>
               </FormControl>
               <Badge badgeContent={activeFilterCount} color="primary">
-                <Button variant="outlined" startIcon={<FilterList />} size="small"
-                  onClick={() => setFilterDialogOpen(true)} sx={{ borderRadius: 2 }}>
+                <Button
+                  variant="outlined"
+                  startIcon={<FilterList />}
+                  size="small"
+                  onClick={() => setFilterDialogOpen(true)}
+                  sx={{ borderRadius: 2 }}
+                >
                   فلاتر متقدمة
                 </Button>
               </Badge>
               {activeFilterCount > 0 && (
-                <Button size="small" startIcon={<Clear />} onClick={clearAllFilters}
-                  sx={{ color: 'error.main' }}>مسح الكل</Button>
+                <Button
+                  size="small"
+                  startIcon={<Clear />}
+                  onClick={clearAllFilters}
+                  sx={{ color: 'error.main' }}
+                >
+                  مسح الكل
+                </Button>
               )}
               <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>
                 {totalCount} نتيجة
@@ -540,29 +817,50 @@ const BeneficiariesListPage = () => {
             {activeFilterCount > 0 && (
               <Stack direction="row" spacing={1} sx={{ mt: 1.5 }} flexWrap="wrap" useFlexGap>
                 {debouncedSearch && (
-                  <Chip size="small" label={`بحث: ${debouncedSearch}`}
-                    onDelete={() => { setSearchQuery(''); setDebouncedSearch(''); }}
-                    sx={{ bgcolor: 'primary.50' }} />
+                  <Chip
+                    size="small"
+                    label={`بحث: ${debouncedSearch}`}
+                    onDelete={() => {
+                      setSearchQuery('');
+                      setDebouncedSearch('');
+                    }}
+                    sx={{ bgcolor: 'primary.50' }}
+                  />
                 )}
                 {filters.status !== 'all' && (
-                  <Chip size="small" label={`الحالة: ${STATUS_LABELS[filters.status] || filters.status}`}
-                    onDelete={() => setFilters(prev => ({ ...prev, status: 'all' }))} />
+                  <Chip
+                    size="small"
+                    label={`الحالة: ${STATUS_LABELS[filters.status] || filters.status}`}
+                    onDelete={() => setFilters(prev => ({ ...prev, status: 'all' }))}
+                  />
                 )}
                 {filters.category !== 'all' && (
-                  <Chip size="small" label={`الفئة: ${CATEGORY_LABELS[filters.category] || filters.category}`}
-                    onDelete={() => setFilters(prev => ({ ...prev, category: 'all' }))} />
+                  <Chip
+                    size="small"
+                    label={`الفئة: ${CATEGORY_LABELS[filters.category] || filters.category}`}
+                    onDelete={() => setFilters(prev => ({ ...prev, category: 'all' }))}
+                  />
                 )}
                 {filters.gender !== 'all' && (
-                  <Chip size="small" label={`الجنس: ${GENDER_LABELS[filters.gender]}`}
-                    onDelete={() => setFilters(prev => ({ ...prev, gender: 'all' }))} />
+                  <Chip
+                    size="small"
+                    label={`الجنس: ${GENDER_LABELS[filters.gender]}`}
+                    onDelete={() => setFilters(prev => ({ ...prev, gender: 'all' }))}
+                  />
                 )}
                 {filters.ageRange !== 'all' && (
-                  <Chip size="small" label={`العمر: ${filters.ageRange} سنة`}
-                    onDelete={() => setFilters(prev => ({ ...prev, ageRange: 'all' }))} />
+                  <Chip
+                    size="small"
+                    label={`العمر: ${filters.ageRange} سنة`}
+                    onDelete={() => setFilters(prev => ({ ...prev, ageRange: 'all' }))}
+                  />
                 )}
                 {filters.city && (
-                  <Chip size="small" label={`المدينة: ${filters.city}`}
-                    onDelete={() => setFilters(prev => ({ ...prev, city: '' }))} />
+                  <Chip
+                    size="small"
+                    label={`المدينة: ${filters.city}`}
+                    onDelete={() => setFilters(prev => ({ ...prev, city: '' }))}
+                  />
                 )}
               </Stack>
             )}
@@ -571,26 +869,72 @@ const BeneficiariesListPage = () => {
 
         {/* ── Bulk Actions Bar ───────────── */}
         {selected.length > 0 && (
-          <Paper elevation={3} sx={{ p: 2, mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', bgcolor: 'primary.50', borderRadius: '16px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
+          <Paper
+            elevation={3}
+            sx={{
+              p: 2,
+              mb: 2,
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              bgcolor: 'primary.50',
+              borderRadius: '16px',
+              border: '1px solid rgba(0,0,0,0.04)',
+              boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+            }}
+          >
             <Typography variant="subtitle2" fontWeight={700}>
               تم تحديد {selected.length} مستفيد
             </Typography>
             <Stack direction="row" spacing={1}>
-              <Button size="small" variant="outlined" startIcon={<Send />}
-                onClick={() => showSnackbar('ميزة الرسائل الجماعية قيد التطوير', 'info')}>رسالة جماعية</Button>
-              <Button size="small" variant="outlined" onClick={(e) => setBulkStatusMenu(e.currentTarget)}>
+              <Button
+                size="small"
+                variant="outlined"
+                startIcon={<Send />}
+                onClick={() => showSnackbar('ميزة الرسائل الجماعية قيد التطوير', 'info')}
+              >
+                رسالة جماعية
+              </Button>
+              <Button
+                size="small"
+                variant="outlined"
+                onClick={e => setBulkStatusMenu(e.currentTarget)}
+              >
                 تغيير الحالة
               </Button>
-              <Button size="small" variant="outlined" startIcon={<Download />}
-                onClick={handleExport}>تصدير المحدد</Button>
-              <Button size="small" variant="outlined" color="error" startIcon={<Archive />}
-                onClick={handleBulkArchive}>أرشفة</Button>
-              <Button size="small" onClick={() => setSelected([])}>إلغاء التحديد</Button>
+              <Button
+                size="small"
+                variant="outlined"
+                startIcon={<Download />}
+                onClick={handleExport}
+              >
+                تصدير المحدد
+              </Button>
+              <Button
+                size="small"
+                variant="outlined"
+                color="error"
+                startIcon={<Archive />}
+                onClick={handleBulkArchive}
+              >
+                أرشفة
+              </Button>
+              <Button size="small" onClick={() => setSelected([])}>
+                إلغاء التحديد
+              </Button>
             </Stack>
-            <Menu anchorEl={bulkStatusMenu} open={Boolean(bulkStatusMenu)} onClose={() => setBulkStatusMenu(null)}>
-              {Object.entries(STATUS_LABELS).filter(([k]) => !['deceased'].includes(k)).map(([k, v]) => (
-                <MenuItem key={k} onClick={() => handleBulkStatusChange(k)}>{v}</MenuItem>
-              ))}
+            <Menu
+              anchorEl={bulkStatusMenu}
+              open={Boolean(bulkStatusMenu)}
+              onClose={() => setBulkStatusMenu(null)}
+            >
+              {Object.entries(STATUS_LABELS)
+                .filter(([k]) => !['deceased'].includes(k))
+                .map(([k, v]) => (
+                  <MenuItem key={k} onClick={() => handleBulkStatusChange(k)}>
+                    {v}
+                  </MenuItem>
+                ))}
             </Menu>
           </Paper>
         )}
@@ -600,28 +944,60 @@ const BeneficiariesListPage = () => {
 
         {/* ── TABLE VIEW ─────────────────── */}
         {viewMode === 'table' && (
-          <Card elevation={0} sx={{ borderRadius: '20px', boxShadow: '0 2px 16px rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.04)', overflow: 'hidden' }}>
+          <Card
+            elevation={0}
+            sx={{
+              borderRadius: '20px',
+              boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+              border: '1px solid rgba(0,0,0,0.04)',
+              overflow: 'hidden',
+            }}
+          >
             <TableContainer>
               <Table size="small" id="beneficiaries-table">
                 <TableHead>
                   <TableRow sx={{ bgcolor: 'rgba(0,0,0,0.02)' }}>
                     <TableCell padding="checkbox">
                       <Checkbox
-                        indeterminate={selected.length > 0 && selected.length < beneficiaries.length}
-                        checked={beneficiaries.length > 0 && selected.length === beneficiaries.length}
-                        onChange={handleSelectAll} size="small" />
+                        indeterminate={
+                          selected.length > 0 && selected.length < beneficiaries.length
+                        }
+                        checked={
+                          beneficiaries.length > 0 && selected.length === beneficiaries.length
+                        }
+                        onChange={handleSelectAll}
+                        size="small"
+                      />
                     </TableCell>
                     <TableCell sx={{ width: 40 }} />
-                    {columns.map((col) => (
-                      <TableCell key={col.id} sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary', minWidth: col.minWidth, whiteSpace: 'nowrap' }}>
+                    {columns.map(col => (
+                      <TableCell
+                        key={col.id}
+                        sx={{
+                          fontWeight: 700,
+                          fontSize: '12px',
+                          letterSpacing: 0.5,
+                          color: 'text.secondary',
+                          minWidth: col.minWidth,
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
                         {col.sortable ? (
-                          <TableSortLabel active={orderBy === col.id}
+                          <TableSortLabel
+                            active={orderBy === col.id}
                             direction={orderBy === col.id ? order : 'asc'}
-                            onClick={() => handleRequestSort(col.id)}>
+                            onClick={() => handleRequestSort(col.id)}
+                          >
                             {col.label}
-                            {orderBy === col.id && <Box component="span" sx={visuallyHidden}>{order === 'desc' ? 'sorted descending' : 'sorted ascending'}</Box>}
+                            {orderBy === col.id && (
+                              <Box component="span" sx={visuallyHidden}>
+                                {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
+                              </Box>
+                            )}
                           </TableSortLabel>
-                        ) : col.label}
+                        ) : (
+                          col.label
+                        )}
                       </TableCell>
                     ))}
                   </TableRow>
@@ -637,237 +1013,439 @@ const BeneficiariesListPage = () => {
                             : 'لا يوجد مستفيدين مسجّلين بعد'}
                         </Typography>
                         {!debouncedSearch && activeFilterCount === 0 && (
-                          <Button variant="contained" startIcon={<PersonAdd />} onClick={handleAdd}
-                            sx={{ mt: 2, background: gradients.primary }}>تسجيل أول مستفيد</Button>
+                          <Button
+                            variant="contained"
+                            startIcon={<PersonAdd />}
+                            onClick={handleAdd}
+                            sx={{ mt: 2, background: gradients.primary }}
+                          >
+                            تسجيل أول مستفيد
+                          </Button>
                         )}
                       </TableCell>
                     </TableRow>
                   )}
-                  {loading && [...Array(8)].map((_, i) => (
-                    <TableRow key={i}>
-                      {[...Array(columns.length + 2)].map((__, j) => (
-                        <TableCell key={j}><Skeleton height={24} /></TableCell>
-                      ))}
-                    </TableRow>
-                  ))}
-                  {!loading && beneficiaries.map((row) => {
-                    const isItemSelected = isSelected(row.id);
-                    const isOpen = openRow === row.id;
+                  {loading &&
+                    [...Array(8)].map((_, i) => (
+                      <TableRow key={i}>
+                        {[...Array(columns.length + 2)].map((__, j) => (
+                          <TableCell key={j}>
+                            <Skeleton height={24} />
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))}
+                  {!loading &&
+                    beneficiaries.map(row => {
+                      const isItemSelected = isSelected(row.id);
+                      const isOpen = openRow === row.id;
 
-                    return (
-                      <Fragment key={row.id}>
-                        <TableRow hover selected={isItemSelected}
-                          sx={{ '& > *': { borderBottom: isOpen ? 'unset !important' : undefined } }}>
-                          <TableCell padding="checkbox">
-                            <Checkbox checked={isItemSelected} onChange={() => handleSelectOne(row.id)} size="small" />
-                          </TableCell>
-                          <TableCell>
-                            <IconButton size="small" onClick={() => setOpenRow(isOpen ? null : row.id)}>
-                              {isOpen ? <KeyboardArrowUp fontSize="small" /> : <KeyboardArrowDown fontSize="small" />}
-                            </IconButton>
-                          </TableCell>
-                          {/* Name */}
-                          <TableCell>
-                            <Box display="flex" alignItems="center" gap={1}>
-                              <Badge
-                                overlap="circular"
-                                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                                badgeContent={row.isAtRisk ? <Warning sx={{ fontSize: 14, color: '#ff6b6b' }} /> : null}>
-                                <Avatar sx={{ width: 36, height: 36, bgcolor: CATEGORY_COLORS[row.category] || neutralColors.fallback, fontSize: 14 }}>
-                                  {(row.name || '?').charAt(0)}
-                                </Avatar>
-                              </Badge>
-                              <Box>
-                                <Typography variant="body2" fontWeight={600} sx={{ lineHeight: 1.3 }}>
-                                  {row.name}
-                                </Typography>
-                                {row.nameEn && (
-                                  <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1 }}>
-                                    {row.nameEn}
-                                  </Typography>
+                      return (
+                        <Fragment key={row.id}>
+                          <TableRow
+                            hover
+                            selected={isItemSelected}
+                            sx={{
+                              '& > *': { borderBottom: isOpen ? 'unset !important' : undefined },
+                            }}
+                          >
+                            <TableCell padding="checkbox">
+                              <Checkbox
+                                checked={isItemSelected}
+                                onChange={() => handleSelectOne(row.id)}
+                                size="small"
+                              />
+                            </TableCell>
+                            <TableCell>
+                              <IconButton
+                                size="small"
+                                onClick={() => setOpenRow(isOpen ? null : row.id)}
+                              >
+                                {isOpen ? (
+                                  <KeyboardArrowUp fontSize="small" />
+                                ) : (
+                                  <KeyboardArrowDown fontSize="small" />
                                 )}
-                              </Box>
-                            </Box>
-                          </TableCell>
-                          {/* National ID */}
-                          <TableCell>
-                            <Typography variant="body2" sx={{ fontFamily: 'monospace', fontSize: 12 }}>
-                              {row.nationalId || '—'}
-                            </Typography>
-                          </TableCell>
-                          {/* Age */}
-                          <TableCell>
-                            <Typography variant="body2">{row.age ? `${row.age} سنة` : '—'}</Typography>
-                          </TableCell>
-                          {/* Gender */}
-                          <TableCell>
-                            <Typography variant="body2">{GENDER_LABELS[row.gender] || '—'}</Typography>
-                          </TableCell>
-                          {/* Category */}
-                          <TableCell>
-                            <Chip size="small" variant="outlined"
-                              label={CATEGORY_LABELS[row.category] || row.category || '—'}
-                              sx={{ borderColor: CATEGORY_COLORS[row.category], color: CATEGORY_COLORS[row.category], fontWeight: 600, fontSize: 11 }} />
-                          </TableCell>
-                          {/* Status */}
-                          <TableCell>
-                            <Chip size="small"
-                              label={STATUS_LABELS[row.status] || row.status}
-                              onClick={(e) => { setStatusMenu(e.currentTarget); setStatusRow(row.id); }}
-                              sx={{ bgcolor: STATUS_COLORS[row.status] || neutralColors.fallback, color: 'white', fontWeight: 600, fontSize: 11, cursor: 'pointer' }} />
-                          </TableCell>
-                          {/* Progress */}
-                          <TableCell>
-                            <Box display="flex" alignItems="center" gap={1}>
-                              <LinearProgress variant="determinate" value={row.progress || 0}
-                                sx={{ flex: 1, height: 7, borderRadius: 4, bgcolor: 'grey.200',
-                                  '& .MuiLinearProgress-bar': {
-                                    borderRadius: 4,
-                                    bgcolor: (row.progress || 0) >= 70 ? statusColors.success : (row.progress || 0) >= 40 ? statusColors.warning : statusColors.error,
-                                  },
-                                }} />
-                              <Typography variant="caption" fontWeight={600} sx={{ minWidth: 32 }}>
-                                {row.progress || 0}%
-                              </Typography>
-                            </Box>
-                          </TableCell>
-                          {/* Phone */}
-                          <TableCell>
-                            {row.phone ? (
-                              <Stack direction="row" spacing={0.5} alignItems="center">
-                                <Typography variant="body2" sx={{ direction: 'ltr', fontSize: 12 }}>{row.phone}</Typography>
-                                <Tooltip title="واتساب">
-                                  <IconButton size="small" onClick={() => handleWhatsApp(row.phone)} sx={{ color: '#25D366' }}>
-                                    <WhatsApp sx={{ fontSize: 16 }} />
-                                  </IconButton>
-                                </Tooltip>
-                                <Tooltip title="اتصال">
-                                  <IconButton size="small" onClick={() => handleCall(row.phone)} color="primary">
-                                    <Phone sx={{ fontSize: 16 }} />
-                                  </IconButton>
-                                </Tooltip>
-                              </Stack>
-                            ) : <Typography variant="body2" color="text.secondary">—</Typography>}
-                          </TableCell>
-                          {/* Guardian */}
-                          <TableCell>
-                            <Box>
-                              <Typography variant="body2" sx={{ fontSize: 12 }}>{row.guardianName}</Typography>
-                              {row.guardianPhone && (
-                                <Stack direction="row" spacing={0.3} alignItems="center">
-                                  <Typography variant="caption" color="text.secondary" sx={{ direction: 'ltr', fontSize: 11 }}>
-                                    {row.guardianPhone}
+                              </IconButton>
+                            </TableCell>
+                            {/* Name */}
+                            <TableCell>
+                              <Box display="flex" alignItems="center" gap={1}>
+                                <Badge
+                                  overlap="circular"
+                                  anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                                  badgeContent={
+                                    row.isAtRisk ? (
+                                      <Warning sx={{ fontSize: 14, color: '#ff6b6b' }} />
+                                    ) : null
+                                  }
+                                >
+                                  <Avatar
+                                    sx={{
+                                      width: 36,
+                                      height: 36,
+                                      bgcolor:
+                                        CATEGORY_COLORS[row.category] || neutralColors.fallback,
+                                      fontSize: 14,
+                                    }}
+                                  >
+                                    {(row.name || '?').charAt(0)}
+                                  </Avatar>
+                                </Badge>
+                                <Box>
+                                  <Typography
+                                    variant="body2"
+                                    fontWeight={600}
+                                    sx={{ lineHeight: 1.3 }}
+                                  >
+                                    {row.name}
                                   </Typography>
-                                  <Tooltip title="واتساب ولي الأمر">
-                                    <IconButton size="small" onClick={() => handleWhatsApp(row.guardianPhone)} sx={{ color: '#25D366', p: 0.3 }}>
-                                      <WhatsApp sx={{ fontSize: 13 }} />
+                                  {row.nameEn && (
+                                    <Typography
+                                      variant="caption"
+                                      color="text.secondary"
+                                      sx={{ lineHeight: 1 }}
+                                    >
+                                      {row.nameEn}
+                                    </Typography>
+                                  )}
+                                </Box>
+                              </Box>
+                            </TableCell>
+                            {/* National ID */}
+                            <TableCell>
+                              <Typography
+                                variant="body2"
+                                sx={{ fontFamily: 'monospace', fontSize: 12 }}
+                              >
+                                {row.nationalId || '—'}
+                              </Typography>
+                            </TableCell>
+                            {/* Age */}
+                            <TableCell>
+                              <Typography variant="body2">
+                                {row.age ? `${row.age} سنة` : '—'}
+                              </Typography>
+                            </TableCell>
+                            {/* Gender */}
+                            <TableCell>
+                              <Typography variant="body2">
+                                {GENDER_LABELS[row.gender] || '—'}
+                              </Typography>
+                            </TableCell>
+                            {/* Category */}
+                            <TableCell>
+                              <Chip
+                                size="small"
+                                variant="outlined"
+                                label={CATEGORY_LABELS[row.category] || row.category || '—'}
+                                sx={{
+                                  borderColor: CATEGORY_COLORS[row.category],
+                                  color: CATEGORY_COLORS[row.category],
+                                  fontWeight: 600,
+                                  fontSize: 11,
+                                }}
+                              />
+                            </TableCell>
+                            {/* Status */}
+                            <TableCell>
+                              <Chip
+                                size="small"
+                                label={STATUS_LABELS[row.status] || row.status}
+                                onClick={e => {
+                                  setStatusMenu(e.currentTarget);
+                                  setStatusRow(row.id);
+                                }}
+                                sx={{
+                                  bgcolor: STATUS_COLORS[row.status] || neutralColors.fallback,
+                                  color: 'white',
+                                  fontWeight: 600,
+                                  fontSize: 11,
+                                  cursor: 'pointer',
+                                }}
+                              />
+                            </TableCell>
+                            {/* Progress */}
+                            <TableCell>
+                              <Box display="flex" alignItems="center" gap={1}>
+                                <LinearProgress
+                                  variant="determinate"
+                                  value={row.progress || 0}
+                                  sx={{
+                                    flex: 1,
+                                    height: 7,
+                                    borderRadius: 4,
+                                    bgcolor: 'grey.200',
+                                    '& .MuiLinearProgress-bar': {
+                                      borderRadius: 4,
+                                      bgcolor:
+                                        (row.progress || 0) >= 70
+                                          ? statusColors.success
+                                          : (row.progress || 0) >= 40
+                                            ? statusColors.warning
+                                            : statusColors.error,
+                                    },
+                                  }}
+                                />
+                                <Typography
+                                  variant="caption"
+                                  fontWeight={600}
+                                  sx={{ minWidth: 32 }}
+                                >
+                                  {row.progress || 0}%
+                                </Typography>
+                              </Box>
+                            </TableCell>
+                            {/* Phone */}
+                            <TableCell>
+                              {row.phone ? (
+                                <Stack direction="row" spacing={0.5} alignItems="center">
+                                  <Typography
+                                    variant="body2"
+                                    sx={{ direction: 'ltr', fontSize: 12 }}
+                                  >
+                                    {row.phone}
+                                  </Typography>
+                                  <Tooltip title="واتساب">
+                                    <IconButton
+                                      size="small"
+                                      onClick={() => handleWhatsApp(row.phone)}
+                                      sx={{ color: '#25D366' }}
+                                    >
+                                      <WhatsApp sx={{ fontSize: 16 }} />
+                                    </IconButton>
+                                  </Tooltip>
+                                  <Tooltip title="اتصال">
+                                    <IconButton
+                                      size="small"
+                                      onClick={() => handleCall(row.phone)}
+                                      color="primary"
+                                    >
+                                      <Phone sx={{ fontSize: 16 }} />
                                     </IconButton>
                                   </Tooltip>
                                 </Stack>
+                              ) : (
+                                <Typography variant="body2" color="text.secondary">
+                                  —
+                                </Typography>
                               )}
-                            </Box>
-                          </TableCell>
-                          {/* Last Visit */}
-                          <TableCell>
-                            <Typography variant="body2" sx={{ fontSize: 12 }}>
-                              {formatDate(row.lastVisit)}
-                            </Typography>
-                          </TableCell>
-                          {/* Actions */}
-                          <TableCell>
-                            <Stack direction="row" spacing={0.3}>
-                              <Tooltip title="عرض الملف">
-                                <IconButton size="small" onClick={() => handleView(row.id)}>
-                                  <Visibility sx={{ fontSize: 18 }} />
-                                </IconButton>
-                              </Tooltip>
-                              <Tooltip title="تعديل">
-                                <IconButton size="small" color="primary" onClick={() => handleEdit(row.id)}>
-                                  <Edit sx={{ fontSize: 18 }} />
-                                </IconButton>
-                              </Tooltip>
-                              <IconButton size="small" onClick={(e) => { setActionMenu(e.currentTarget); setActionRow(row); }}>
-                                <MoreVert sx={{ fontSize: 18 }} />
-                              </IconButton>
-                            </Stack>
-                          </TableCell>
-                        </TableRow>
-
-                        {/* Expandable Detail Row */}
-                        <TableRow>
-                          <TableCell sx={{ py: 0 }} colSpan={columns.length + 2}>
-                            <Collapse in={isOpen} timeout="auto" unmountOnExit>
-                              <Box sx={{ m: 2, p: 2, bgcolor: 'rgba(0,0,0,0.02)', borderRadius: '16px' }}>
-                                <Grid container spacing={3}>
-                                  <Grid item xs={12} md={4}>
-                                    <Stack spacing={1.5}>
-                                      <Typography variant="subtitle2" fontWeight={700} color="primary">
-                                        <FamilyRestroom sx={{ fontSize: 16, mr: 0.5, verticalAlign: 'text-bottom' }} />
-                                        بيانات الاتصال
-                                      </Typography>
-                                      <Box>
-                                        <Typography variant="caption" color="text.secondary">الهاتف</Typography>
-                                        <Typography variant="body2">{row.phone || '—'}</Typography>
-                                      </Box>
-                                      <Box>
-                                        <Typography variant="caption" color="text.secondary">البريد الإلكتروني</Typography>
-                                        <Typography variant="body2">{row.email || '—'}</Typography>
-                                      </Box>
-                                      <Box>
-                                        <Typography variant="caption" color="text.secondary">العنوان</Typography>
-                                        <Typography variant="body2">{typeof row.address === 'string' ? row.address : row.address?.city || '—'}</Typography>
-                                      </Box>
-                                    </Stack>
-                                  </Grid>
-                                  <Grid item xs={12} md={4}>
-                                    <Stack spacing={1.5}>
-                                      <Typography variant="subtitle2" fontWeight={700} color="primary">
-                                        <LocalHospital sx={{ fontSize: 16, mr: 0.5, verticalAlign: 'text-bottom' }} />
-                                        المعالج والجلسات
-                                      </Typography>
-                                      <Box>
-                                        <Typography variant="caption" color="text.secondary">المعالج المسؤول</Typography>
-                                        <Typography variant="body2">{row.therapist || '—'}</Typography>
-                                      </Box>
-                                      <Box>
-                                        <Typography variant="caption" color="text.secondary">الجلسات</Typography>
-                                        <Typography variant="body2">
-                                          {row.completedSessions || 0} / {row.sessions || 0} جلسة
-                                        </Typography>
-                                      </Box>
-                                      <Box>
-                                        <Typography variant="caption" color="text.secondary">تاريخ التسجيل</Typography>
-                                        <Typography variant="body2">{formatDate(row.joinDate)}</Typography>
-                                      </Box>
-                                    </Stack>
-                                  </Grid>
-                                  <Grid item xs={12} md={4}>
-                                    <Stack spacing={1.5}>
-                                      <Typography variant="subtitle2" fontWeight={700} color="primary">
-                                        <Description sx={{ fontSize: 16, mr: 0.5, verticalAlign: 'text-bottom' }} />
-                                        ولي الأمر والملاحظات
-                                      </Typography>
-                                      <Box>
-                                        <Typography variant="caption" color="text.secondary">ولي الأمر</Typography>
-                                        <Typography variant="body2">{row.guardianName} {row.guardianPhone ? `(${row.guardianPhone})` : ''}</Typography>
-                                      </Box>
-                                      <Box>
-                                        <Typography variant="caption" color="text.secondary">ملاحظات</Typography>
-                                        <Typography variant="body2">{row.notes || 'لا توجد ملاحظات'}</Typography>
-                                      </Box>
-                                      {row.isAtRisk && (
-                                        <Chip icon={<Warning />} label="يحتاج متابعة" size="small" color="error" variant="outlined" />
-                                      )}
-                                    </Stack>
-                                  </Grid>
-                                </Grid>
+                            </TableCell>
+                            {/* Guardian */}
+                            <TableCell>
+                              <Box>
+                                <Typography variant="body2" sx={{ fontSize: 12 }}>
+                                  {row.guardianName}
+                                </Typography>
+                                {row.guardianPhone && (
+                                  <Stack direction="row" spacing={0.3} alignItems="center">
+                                    <Typography
+                                      variant="caption"
+                                      color="text.secondary"
+                                      sx={{ direction: 'ltr', fontSize: 11 }}
+                                    >
+                                      {row.guardianPhone}
+                                    </Typography>
+                                    <Tooltip title="واتساب ولي الأمر">
+                                      <IconButton
+                                        size="small"
+                                        onClick={() => handleWhatsApp(row.guardianPhone)}
+                                        sx={{ color: '#25D366', p: 0.3 }}
+                                      >
+                                        <WhatsApp sx={{ fontSize: 13 }} />
+                                      </IconButton>
+                                    </Tooltip>
+                                  </Stack>
+                                )}
                               </Box>
-                            </Collapse>
-                          </TableCell>
-                        </TableRow>
-                      </Fragment>
-                    );
-                  })}
+                            </TableCell>
+                            {/* Last Visit */}
+                            <TableCell>
+                              <Typography variant="body2" sx={{ fontSize: 12 }}>
+                                {formatDate(row.lastVisit)}
+                              </Typography>
+                            </TableCell>
+                            {/* Actions */}
+                            <TableCell>
+                              <Stack direction="row" spacing={0.3}>
+                                <Tooltip title="عرض الملف">
+                                  <IconButton size="small" onClick={() => handleView(row.id)}>
+                                    <Visibility sx={{ fontSize: 18 }} />
+                                  </IconButton>
+                                </Tooltip>
+                                <Tooltip title="تعديل">
+                                  <IconButton
+                                    size="small"
+                                    color="primary"
+                                    onClick={() => handleEdit(row.id)}
+                                  >
+                                    <Edit sx={{ fontSize: 18 }} />
+                                  </IconButton>
+                                </Tooltip>
+                                <IconButton
+                                  size="small"
+                                  onClick={e => {
+                                    setActionMenu(e.currentTarget);
+                                    setActionRow(row);
+                                  }}
+                                >
+                                  <MoreVert sx={{ fontSize: 18 }} />
+                                </IconButton>
+                              </Stack>
+                            </TableCell>
+                          </TableRow>
+
+                          {/* Expandable Detail Row */}
+                          <TableRow>
+                            <TableCell sx={{ py: 0 }} colSpan={columns.length + 2}>
+                              <Collapse in={isOpen} timeout="auto" unmountOnExit>
+                                <Box
+                                  sx={{
+                                    m: 2,
+                                    p: 2,
+                                    bgcolor: 'rgba(0,0,0,0.02)',
+                                    borderRadius: '16px',
+                                  }}
+                                >
+                                  <Grid container spacing={3}>
+                                    <Grid item xs={12} md={4}>
+                                      <Stack spacing={1.5}>
+                                        <Typography
+                                          variant="subtitle2"
+                                          fontWeight={700}
+                                          color="primary"
+                                        >
+                                          <FamilyRestroom
+                                            sx={{
+                                              fontSize: 16,
+                                              mr: 0.5,
+                                              verticalAlign: 'text-bottom',
+                                            }}
+                                          />
+                                          بيانات الاتصال
+                                        </Typography>
+                                        <Box>
+                                          <Typography variant="caption" color="text.secondary">
+                                            الهاتف
+                                          </Typography>
+                                          <Typography variant="body2">
+                                            {row.phone || '—'}
+                                          </Typography>
+                                        </Box>
+                                        <Box>
+                                          <Typography variant="caption" color="text.secondary">
+                                            البريد الإلكتروني
+                                          </Typography>
+                                          <Typography variant="body2">
+                                            {row.email || '—'}
+                                          </Typography>
+                                        </Box>
+                                        <Box>
+                                          <Typography variant="caption" color="text.secondary">
+                                            العنوان
+                                          </Typography>
+                                          <Typography variant="body2">
+                                            {typeof row.address === 'string'
+                                              ? row.address
+                                              : row.address?.city || '—'}
+                                          </Typography>
+                                        </Box>
+                                      </Stack>
+                                    </Grid>
+                                    <Grid item xs={12} md={4}>
+                                      <Stack spacing={1.5}>
+                                        <Typography
+                                          variant="subtitle2"
+                                          fontWeight={700}
+                                          color="primary"
+                                        >
+                                          <LocalHospital
+                                            sx={{
+                                              fontSize: 16,
+                                              mr: 0.5,
+                                              verticalAlign: 'text-bottom',
+                                            }}
+                                          />
+                                          المعالج والجلسات
+                                        </Typography>
+                                        <Box>
+                                          <Typography variant="caption" color="text.secondary">
+                                            المعالج المسؤول
+                                          </Typography>
+                                          <Typography variant="body2">
+                                            {row.therapist || '—'}
+                                          </Typography>
+                                        </Box>
+                                        <Box>
+                                          <Typography variant="caption" color="text.secondary">
+                                            الجلسات
+                                          </Typography>
+                                          <Typography variant="body2">
+                                            {row.completedSessions || 0} / {row.sessions || 0} جلسة
+                                          </Typography>
+                                        </Box>
+                                        <Box>
+                                          <Typography variant="caption" color="text.secondary">
+                                            تاريخ التسجيل
+                                          </Typography>
+                                          <Typography variant="body2">
+                                            {formatDate(row.joinDate)}
+                                          </Typography>
+                                        </Box>
+                                      </Stack>
+                                    </Grid>
+                                    <Grid item xs={12} md={4}>
+                                      <Stack spacing={1.5}>
+                                        <Typography
+                                          variant="subtitle2"
+                                          fontWeight={700}
+                                          color="primary"
+                                        >
+                                          <Description
+                                            sx={{
+                                              fontSize: 16,
+                                              mr: 0.5,
+                                              verticalAlign: 'text-bottom',
+                                            }}
+                                          />
+                                          ولي الأمر والملاحظات
+                                        </Typography>
+                                        <Box>
+                                          <Typography variant="caption" color="text.secondary">
+                                            ولي الأمر
+                                          </Typography>
+                                          <Typography variant="body2">
+                                            {row.guardianName}{' '}
+                                            {row.guardianPhone ? `(${row.guardianPhone})` : ''}
+                                          </Typography>
+                                        </Box>
+                                        <Box>
+                                          <Typography variant="caption" color="text.secondary">
+                                            ملاحظات
+                                          </Typography>
+                                          <Typography variant="body2">
+                                            {row.notes || 'لا توجد ملاحظات'}
+                                          </Typography>
+                                        </Box>
+                                        {row.isAtRisk && (
+                                          <Chip
+                                            icon={<Warning />}
+                                            label="يحتاج متابعة"
+                                            size="small"
+                                            color="error"
+                                            variant="outlined"
+                                          />
+                                        )}
+                                      </Stack>
+                                    </Grid>
+                                  </Grid>
+                                </Box>
+                              </Collapse>
+                            </TableCell>
+                          </TableRow>
+                        </Fragment>
+                      );
+                    })}
                 </TableBody>
               </Table>
             </TableContainer>
@@ -881,7 +1459,9 @@ const BeneficiariesListPage = () => {
               <Fade in timeout={500}>
                 <Box sx={{ textAlign: 'center', py: 8 }}>
                   <Groups sx={{ fontSize: 64, color: 'grey.300', mb: 2 }} />
-                  <Typography variant="h6" color="text.secondary">لا يوجد نتائج مطابقة</Typography>
+                  <Typography variant="h6" color="text.secondary">
+                    لا يوجد نتائج مطابقة
+                  </Typography>
                 </Box>
               </Fade>
             )}
@@ -892,10 +1472,16 @@ const BeneficiariesListPage = () => {
                     <Card sx={{ borderRadius: '20px', p: 2 }}>
                       <Box display="flex" gap={2} mb={2}>
                         <Skeleton variant="circular" width={48} height={48} />
-                        <Box flex={1}><Skeleton width="60%" height={22} /><Skeleton width="40%" height={16} /></Box>
+                        <Box flex={1}>
+                          <Skeleton width="60%" height={22} />
+                          <Skeleton width="40%" height={16} />
+                        </Box>
                       </Box>
                       <Skeleton width="100%" height={8} sx={{ borderRadius: 4 }} />
-                      <Box display="flex" gap={1} mt={2}><Skeleton width={60} height={26} sx={{ borderRadius: 2 }} /><Skeleton width={60} height={26} sx={{ borderRadius: 2 }} /></Box>
+                      <Box display="flex" gap={1} mt={2}>
+                        <Skeleton width={60} height={26} sx={{ borderRadius: 2 }} />
+                        <Skeleton width={60} height={26} sx={{ borderRadius: 2 }} />
+                      </Box>
                     </Card>
                   </Grid>
                 ))}
@@ -903,34 +1489,86 @@ const BeneficiariesListPage = () => {
             )}
             {!loading && (
               <Grid container spacing={2.5}>
-                {beneficiaries.map((b) => (
+                {beneficiaries.map(b => (
                   <Grid item xs={12} sm={6} md={4} key={b.id}>
                     <Fade in timeout={400}>
-                      <Card elevation={0} sx={{
-                        borderRadius: '20px', height: '100%',
-                        boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
-                        transition: 'all 0.3s cubic-bezier(.4,0,.2,1)',
-                        border: b.isAtRisk ? '2px solid #ff6b6b' : '1px solid rgba(0,0,0,0.04)',
-                        '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)', transform: 'translateY(-2px)' },
-                      }}>
+                      <Card
+                        elevation={0}
+                        sx={{
+                          borderRadius: '20px',
+                          height: '100%',
+                          boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+                          transition: 'all 0.3s cubic-bezier(.4,0,.2,1)',
+                          border: b.isAtRisk ? '2px solid #ff6b6b' : '1px solid rgba(0,0,0,0.04)',
+                          '&:hover': {
+                            boxShadow: '0 8px 30px rgba(0,0,0,0.08)',
+                            transform: 'translateY(-2px)',
+                          },
+                        }}
+                      >
                         <CardContent>
                           {/* Card Header */}
-                          <Box display="flex" justifyContent="space-between" alignItems="start" mb={1.5}>
+                          <Box
+                            display="flex"
+                            justifyContent="space-between"
+                            alignItems="start"
+                            mb={1.5}
+                          >
                             <Box display="flex" gap={1.5}>
-                              <Badge overlap="circular" anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                                badgeContent={b.isAtRisk ? <Warning sx={{ fontSize: 12, color: '#ff6b6b' }} /> : null}>
-                                <Avatar sx={{ width: 48, height: 48, bgcolor: CATEGORY_COLORS[b.category] || neutralColors.fallback, fontWeight: 'bold' }}>
+                              <Badge
+                                overlap="circular"
+                                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                                badgeContent={
+                                  b.isAtRisk ? (
+                                    <Warning sx={{ fontSize: 12, color: '#ff6b6b' }} />
+                                  ) : null
+                                }
+                              >
+                                <Avatar
+                                  sx={{
+                                    width: 48,
+                                    height: 48,
+                                    bgcolor: CATEGORY_COLORS[b.category] || neutralColors.fallback,
+                                    fontWeight: 'bold',
+                                  }}
+                                >
                                   {(b.name || '?').charAt(0)}
                                 </Avatar>
                               </Badge>
                               <Box>
-                                <Typography variant="subtitle2" fontWeight={700} sx={{ lineHeight: 1.3 }}>{b.name}</Typography>
-                                {b.nameEn && <Typography variant="caption" color="text.secondary">{b.nameEn}</Typography>}
-                                {b.nationalId && <Box><Chip label={b.nationalId} size="small" sx={{ mt: 0.3, fontSize: 10, height: 20 }} /></Box>}
+                                <Typography
+                                  variant="subtitle2"
+                                  fontWeight={700}
+                                  sx={{ lineHeight: 1.3 }}
+                                >
+                                  {b.name}
+                                </Typography>
+                                {b.nameEn && (
+                                  <Typography variant="caption" color="text.secondary">
+                                    {b.nameEn}
+                                  </Typography>
+                                )}
+                                {b.nationalId && (
+                                  <Box>
+                                    <Chip
+                                      label={b.nationalId}
+                                      size="small"
+                                      sx={{ mt: 0.3, fontSize: 10, height: 20 }}
+                                    />
+                                  </Box>
+                                )}
                               </Box>
                             </Box>
-                            <Chip size="small" label={STATUS_LABELS[b.status]}
-                              sx={{ bgcolor: STATUS_COLORS[b.status], color: 'white', fontWeight: 600, fontSize: 10 }} />
+                            <Chip
+                              size="small"
+                              label={STATUS_LABELS[b.status]}
+                              sx={{
+                                bgcolor: STATUS_COLORS[b.status],
+                                color: 'white',
+                                fontWeight: 600,
+                                fontSize: 10,
+                              }}
+                            />
                           </Box>
 
                           <Divider sx={{ my: 1 }} />
@@ -938,67 +1576,123 @@ const BeneficiariesListPage = () => {
                           {/* Card Details */}
                           <Grid container spacing={1} sx={{ mb: 1.5 }}>
                             <Grid item xs={4}>
-                              <Typography variant="caption" color="text.secondary">العمر</Typography>
-                              <Typography variant="body2" fontWeight={600}>{b.age ? `${b.age} سنة` : '—'}</Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                العمر
+                              </Typography>
+                              <Typography variant="body2" fontWeight={600}>
+                                {b.age ? `${b.age} سنة` : '—'}
+                              </Typography>
                             </Grid>
                             <Grid item xs={4}>
-                              <Typography variant="caption" color="text.secondary">الجنس</Typography>
-                              <Typography variant="body2" fontWeight={600}>{GENDER_LABELS[b.gender] || '—'}</Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                الجنس
+                              </Typography>
+                              <Typography variant="body2" fontWeight={600}>
+                                {GENDER_LABELS[b.gender] || '—'}
+                              </Typography>
                             </Grid>
                             <Grid item xs={4}>
-                              <Typography variant="caption" color="text.secondary">الفئة</Typography>
-                              <Typography variant="body2" fontWeight={600}>{CATEGORY_LABELS[b.category] || '—'}</Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                الفئة
+                              </Typography>
+                              <Typography variant="body2" fontWeight={600}>
+                                {CATEGORY_LABELS[b.category] || '—'}
+                              </Typography>
                             </Grid>
                           </Grid>
 
                           {/* Progress */}
                           <Box mb={1.5}>
                             <Box display="flex" justifyContent="space-between" mb={0.3}>
-                              <Typography variant="caption" color="text.secondary">التقدم</Typography>
-                              <Typography variant="caption" fontWeight={600}>{b.progress}%</Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                التقدم
+                              </Typography>
+                              <Typography variant="caption" fontWeight={600}>
+                                {b.progress}%
+                              </Typography>
                             </Box>
-                            <LinearProgress variant="determinate" value={b.progress || 0}
-                              sx={{ height: 6, borderRadius: 3, bgcolor: 'grey.200',
+                            <LinearProgress
+                              variant="determinate"
+                              value={b.progress || 0}
+                              sx={{
+                                height: 6,
+                                borderRadius: 3,
+                                bgcolor: 'grey.200',
                                 '& .MuiLinearProgress-bar': {
                                   borderRadius: 3,
-                                  bgcolor: b.progress >= 70 ? statusColors.success : b.progress >= 40 ? statusColors.warning : statusColors.error,
+                                  bgcolor:
+                                    b.progress >= 70
+                                      ? statusColors.success
+                                      : b.progress >= 40
+                                        ? statusColors.warning
+                                        : statusColors.error,
                                 },
-                              }} />
+                              }}
+                            />
                           </Box>
 
                           {/* Contact */}
                           <Box mb={1.5}>
                             <Grid container spacing={1}>
                               <Grid item xs={6}>
-                                <Typography variant="caption" color="text.secondary">الهاتف</Typography>
-                                <Typography variant="body2" sx={{ direction: 'ltr', fontSize: 12 }}>{b.phone || '—'}</Typography>
+                                <Typography variant="caption" color="text.secondary">
+                                  الهاتف
+                                </Typography>
+                                <Typography variant="body2" sx={{ direction: 'ltr', fontSize: 12 }}>
+                                  {b.phone || '—'}
+                                </Typography>
                               </Grid>
                               <Grid item xs={6}>
-                                <Typography variant="caption" color="text.secondary">ولي الأمر</Typography>
-                                <Typography variant="body2" sx={{ fontSize: 12 }}>{b.guardianName}</Typography>
+                                <Typography variant="caption" color="text.secondary">
+                                  ولي الأمر
+                                </Typography>
+                                <Typography variant="body2" sx={{ fontSize: 12 }}>
+                                  {b.guardianName}
+                                </Typography>
                               </Grid>
                             </Grid>
                           </Box>
 
                           {/* Card Actions */}
                           <Divider sx={{ mb: 1 }} />
-                          <Stack direction="row" spacing={0.5} justifyContent="space-between" alignItems="center">
+                          <Stack
+                            direction="row"
+                            spacing={0.5}
+                            justifyContent="space-between"
+                            alignItems="center"
+                          >
                             <Stack direction="row" spacing={0.5}>
                               <Tooltip title="عرض الملف">
-                                <IconButton size="small" onClick={() => handleView(b.id)}><Visibility sx={{ fontSize: 18 }} /></IconButton>
+                                <IconButton size="small" onClick={() => handleView(b.id)}>
+                                  <Visibility sx={{ fontSize: 18 }} />
+                                </IconButton>
                               </Tooltip>
                               <Tooltip title="تعديل">
-                                <IconButton size="small" color="primary" onClick={() => handleEdit(b.id)}><Edit sx={{ fontSize: 18 }} /></IconButton>
+                                <IconButton
+                                  size="small"
+                                  color="primary"
+                                  onClick={() => handleEdit(b.id)}
+                                >
+                                  <Edit sx={{ fontSize: 18 }} />
+                                </IconButton>
                               </Tooltip>
                               {b.phone && (
                                 <>
                                   <Tooltip title="واتساب">
-                                    <IconButton size="small" onClick={() => handleWhatsApp(b.phone)} sx={{ color: '#25D366' }}>
+                                    <IconButton
+                                      size="small"
+                                      onClick={() => handleWhatsApp(b.phone)}
+                                      sx={{ color: '#25D366' }}
+                                    >
                                       <WhatsApp sx={{ fontSize: 18 }} />
                                     </IconButton>
                                   </Tooltip>
                                   <Tooltip title="اتصال">
-                                    <IconButton size="small" onClick={() => handleCall(b.phone)} color="primary">
+                                    <IconButton
+                                      size="small"
+                                      onClick={() => handleCall(b.phone)}
+                                      color="primary"
+                                    >
                                       <Phone sx={{ fontSize: 18 }} />
                                     </IconButton>
                                   </Tooltip>
@@ -1022,89 +1716,182 @@ const BeneficiariesListPage = () => {
         {/* ── Pagination ─────────────────── */}
         {totalPages > 1 && (
           <Box display="flex" justifyContent="center" mt={3} mb={2}>
-            <Pagination count={totalPages} page={page} onChange={(_, p) => setPage(p)}
-              color="primary" shape="rounded" showFirstButton showLastButton />
+            <Pagination
+              count={totalPages}
+              page={page}
+              onChange={(_, p) => setPage(p)}
+              color="primary"
+              shape="rounded"
+              showFirstButton
+              showLastButton
+            />
           </Box>
         )}
       </Container>
 
       {/* ── Status Change Menu ────────── */}
       <Menu anchorEl={statusMenu} open={Boolean(statusMenu)} onClose={() => setStatusMenu(null)}>
-        <Typography variant="caption" sx={{ px: 2, pb: 0.5, display: 'block', color: 'text.secondary' }}>تغيير الحالة إلى:</Typography>
+        <Typography
+          variant="caption"
+          sx={{ px: 2, pb: 0.5, display: 'block', color: 'text.secondary' }}
+        >
+          تغيير الحالة إلى:
+        </Typography>
         <Divider />
-        {Object.entries(STATUS_LABELS).filter(([k]) => !['deceased'].includes(k)).map(([k, v]) => (
-          <MenuItem key={k} onClick={() => handleStatusChange(statusRow, k)}>
-            <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: STATUS_COLORS[k], mr: 1 }} />
-            {v}
-          </MenuItem>
-        ))}
+        {Object.entries(STATUS_LABELS)
+          .filter(([k]) => !['deceased'].includes(k))
+          .map(([k, v]) => (
+            <MenuItem key={k} onClick={() => handleStatusChange(statusRow, k)}>
+              <Box
+                sx={{
+                  width: 10,
+                  height: 10,
+                  borderRadius: '50%',
+                  bgcolor: STATUS_COLORS[k],
+                  mr: 1,
+                }}
+              />
+              {v}
+            </MenuItem>
+          ))}
       </Menu>
 
       {/* ── Row Action Menu ──────────── */}
       <Menu anchorEl={actionMenu} open={Boolean(actionMenu)} onClose={() => setActionMenu(null)}>
-        <MenuItem onClick={() => { handleView(actionRow?.id); setActionMenu(null); }}>
-          <ListItemIcon><Visibility fontSize="small" /></ListItemIcon>
+        <MenuItem
+          onClick={() => {
+            handleView(actionRow?.id);
+            setActionMenu(null);
+          }}
+        >
+          <ListItemIcon>
+            <Visibility fontSize="small" />
+          </ListItemIcon>
           <ListItemText>عرض التفاصيل</ListItemText>
         </MenuItem>
-        <MenuItem onClick={() => { handleEdit(actionRow?.id); setActionMenu(null); }}>
-          <ListItemIcon><Edit fontSize="small" /></ListItemIcon>
+        <MenuItem
+          onClick={() => {
+            handleEdit(actionRow?.id);
+            setActionMenu(null);
+          }}
+        >
+          <ListItemIcon>
+            <Edit fontSize="small" />
+          </ListItemIcon>
           <ListItemText>تعديل البيانات</ListItemText>
         </MenuItem>
         {actionRow?.phone && (
           <>
-            <MenuItem onClick={() => { handleWhatsApp(actionRow.phone); setActionMenu(null); }}>
-              <ListItemIcon><WhatsApp fontSize="small" sx={{ color: '#25D366' }} /></ListItemIcon>
+            <MenuItem
+              onClick={() => {
+                handleWhatsApp(actionRow.phone);
+                setActionMenu(null);
+              }}
+            >
+              <ListItemIcon>
+                <WhatsApp fontSize="small" sx={{ color: '#25D366' }} />
+              </ListItemIcon>
               <ListItemText>واتساب</ListItemText>
             </MenuItem>
-            <MenuItem onClick={() => { handleCall(actionRow.phone); setActionMenu(null); }}>
-              <ListItemIcon><Phone fontSize="small" /></ListItemIcon>
+            <MenuItem
+              onClick={() => {
+                handleCall(actionRow.phone);
+                setActionMenu(null);
+              }}
+            >
+              <ListItemIcon>
+                <Phone fontSize="small" />
+              </ListItemIcon>
               <ListItemText>اتصال</ListItemText>
             </MenuItem>
           </>
         )}
         {actionRow?.email && (
-          <MenuItem onClick={() => { window.open(`mailto:${actionRow.email}`); setActionMenu(null); }}>
-            <ListItemIcon><EmailIcon fontSize="small" /></ListItemIcon>
+          <MenuItem
+            onClick={() => {
+              window.open(`mailto:${actionRow.email}`);
+              setActionMenu(null);
+            }}
+          >
+            <ListItemIcon>
+              <EmailIcon fontSize="small" />
+            </ListItemIcon>
             <ListItemText>بريد إلكتروني</ListItemText>
           </MenuItem>
         )}
-        <MenuItem onClick={() => { navigate(`/beneficiary-portal/${actionRow?.id}`); setActionMenu(null); }}>
-          <ListItemIcon><CalendarMonth fontSize="small" /></ListItemIcon>
+        <MenuItem
+          onClick={() => {
+            navigate(`/beneficiary-portal/${actionRow?.id}`);
+            setActionMenu(null);
+          }}
+        >
+          <ListItemIcon>
+            <CalendarMonth fontSize="small" />
+          </ListItemIcon>
           <ListItemText>الجدول والمواعيد</ListItemText>
         </MenuItem>
         <Divider />
-        <MenuItem onClick={() => { handleArchive(actionRow?.id); setActionMenu(null); }}>
-          <ListItemIcon><Archive fontSize="small" color="error" /></ListItemIcon>
+        <MenuItem
+          onClick={() => {
+            handleArchive(actionRow?.id);
+            setActionMenu(null);
+          }}
+        >
+          <ListItemIcon>
+            <Archive fontSize="small" color="error" />
+          </ListItemIcon>
           <ListItemText sx={{ color: 'error.main' }}>أرشفة</ListItemText>
         </MenuItem>
       </Menu>
 
       {/* ── Advanced Filter Dialog ────── */}
-      <Dialog open={filterDialogOpen} onClose={() => setFilterDialogOpen(false)} maxWidth="sm" fullWidth
-        PaperProps={{ sx: { borderRadius: '20px' } }}>
+      <Dialog
+        open={filterDialogOpen}
+        onClose={() => setFilterDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{ sx: { borderRadius: '20px' } }}
+      >
         <DialogTitle sx={{ fontWeight: 700 }}>الفلاتر المتقدمة</DialogTitle>
         <DialogContent>
           <Stack spacing={3} sx={{ mt: 1 }}>
             <FormControl fullWidth>
               <InputLabel>الحالة</InputLabel>
-              <Select value={filters.status} label="الحالة"
-                onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}>
+              <Select
+                value={filters.status}
+                label="الحالة"
+                onChange={e => setFilters(prev => ({ ...prev, status: e.target.value }))}
+              >
                 <MenuItem value="all">الكل</MenuItem>
-                {Object.entries(STATUS_LABELS).map(([k, v]) => <MenuItem key={k} value={k}>{v}</MenuItem>)}
+                {Object.entries(STATUS_LABELS).map(([k, v]) => (
+                  <MenuItem key={k} value={k}>
+                    {v}
+                  </MenuItem>
+                ))}
               </Select>
             </FormControl>
             <FormControl fullWidth>
               <InputLabel>نوع الإعاقة</InputLabel>
-              <Select value={filters.category} label="نوع الإعاقة"
-                onChange={(e) => setFilters(prev => ({ ...prev, category: e.target.value }))}>
+              <Select
+                value={filters.category}
+                label="نوع الإعاقة"
+                onChange={e => setFilters(prev => ({ ...prev, category: e.target.value }))}
+              >
                 <MenuItem value="all">الكل</MenuItem>
-                {Object.entries(CATEGORY_LABELS).map(([k, v]) => <MenuItem key={k} value={k}>{v}</MenuItem>)}
+                {Object.entries(CATEGORY_LABELS).map(([k, v]) => (
+                  <MenuItem key={k} value={k}>
+                    {v}
+                  </MenuItem>
+                ))}
               </Select>
             </FormControl>
             <FormControl fullWidth>
               <InputLabel>الجنس</InputLabel>
-              <Select value={filters.gender} label="الجنس"
-                onChange={(e) => setFilters(prev => ({ ...prev, gender: e.target.value }))}>
+              <Select
+                value={filters.gender}
+                label="الجنس"
+                onChange={e => setFilters(prev => ({ ...prev, gender: e.target.value }))}
+              >
                 <MenuItem value="all">الكل</MenuItem>
                 <MenuItem value="male">ذكر</MenuItem>
                 <MenuItem value="female">أنثى</MenuItem>
@@ -1112,8 +1899,11 @@ const BeneficiariesListPage = () => {
             </FormControl>
             <FormControl fullWidth>
               <InputLabel>الفئة العمرية</InputLabel>
-              <Select value={filters.ageRange} label="الفئة العمرية"
-                onChange={(e) => setFilters(prev => ({ ...prev, ageRange: e.target.value }))}>
+              <Select
+                value={filters.ageRange}
+                label="الفئة العمرية"
+                onChange={e => setFilters(prev => ({ ...prev, ageRange: e.target.value }))}
+              >
                 <MenuItem value="all">الكل</MenuItem>
                 <MenuItem value="0-6">0-6 سنوات</MenuItem>
                 <MenuItem value="7-12">7-12 سنة</MenuItem>
@@ -1125,30 +1915,61 @@ const BeneficiariesListPage = () => {
             {cities.length > 0 && (
               <FormControl fullWidth>
                 <InputLabel>المدينة</InputLabel>
-                <Select value={filters.city} label="المدينة"
-                  onChange={(e) => setFilters(prev => ({ ...prev, city: e.target.value }))}>
+                <Select
+                  value={filters.city}
+                  label="المدينة"
+                  onChange={e => setFilters(prev => ({ ...prev, city: e.target.value }))}
+                >
                   <MenuItem value="">الكل</MenuItem>
-                  {cities.map(c => <MenuItem key={c} value={c}>{c}</MenuItem>)}
+                  {cities.map(c => (
+                    <MenuItem key={c} value={c}>
+                      {c}
+                    </MenuItem>
+                  ))}
                 </Select>
               </FormControl>
             )}
           </Stack>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => {
-            setFilters({ status: 'all', category: 'all', gender: 'all', ageRange: 'all', city: '' });
-            setQuickFilter('all');
-          }}>مسح الكل</Button>
-          <Button variant="contained" onClick={() => { setFilterDialogOpen(false); setPage(1); }}
-            sx={{ background: gradients.primary }}>تطبيق</Button>
+          <Button
+            onClick={() => {
+              setFilters({
+                status: 'all',
+                category: 'all',
+                gender: 'all',
+                ageRange: 'all',
+                city: '',
+              });
+              setQuickFilter('all');
+            }}
+          >
+            مسح الكل
+          </Button>
+          <Button
+            variant="contained"
+            onClick={() => {
+              setFilterDialogOpen(false);
+              setPage(1);
+            }}
+            sx={{ background: gradients.primary }}
+          >
+            تطبيق
+          </Button>
         </DialogActions>
       </Dialog>
 
       {/* ── Snackbar ─────────────────── */}
-      <Snackbar open={snackbar.open} autoHideDuration={3000}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}>
-        <Alert onClose={() => setSnackbar({ ...snackbar, open: false })}
-          severity={snackbar.severity} sx={{ width: '100%' }}>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+      >
+        <Alert
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
+          severity={snackbar.severity}
+          sx={{ width: '100%' }}
+        >
           {snackbar.message}
         </Alert>
       </Snackbar>

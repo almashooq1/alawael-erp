@@ -25,11 +25,22 @@ import {
 } from '@mui/icons-material';
 
 const MONTH_NAMES = [
-  '', 'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
-  'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر',
+  '',
+  'يناير',
+  'فبراير',
+  'مارس',
+  'أبريل',
+  'مايو',
+  'يونيو',
+  'يوليو',
+  'أغسطس',
+  'سبتمبر',
+  'أكتوبر',
+  'نوفمبر',
+  'ديسمبر',
 ];
 
-const fmt = (v) => Number(v || 0).toLocaleString('ar-SA');
+const fmt = v => Number(v || 0).toLocaleString('ar-SA');
 
 /**
  * PayslipsTab – Payroll summary + payslips list with view / print actions.
@@ -118,7 +129,7 @@ export default function PayslipsTab({
                 </TableCell>
               </TableRow>
             ) : (
-              payslips.map((p) => (
+              payslips.map(p => (
                 <TableRow key={p._id} hover>
                   <TableCell>
                     <Chip
@@ -139,19 +150,12 @@ export default function PayslipsTab({
                   </TableCell>
                   <TableCell align="center">
                     <Tooltip title="عرض التفاصيل">
-                      <IconButton
-                        size="small"
-                        color="primary"
-                        onClick={() => onViewPayslip?.(p)}
-                      >
+                      <IconButton size="small" color="primary" onClick={() => onViewPayslip?.(p)}>
                         <ViewIcon fontSize="small" />
                       </IconButton>
                     </Tooltip>
                     <Tooltip title="طباعة">
-                      <IconButton
-                        size="small"
-                        onClick={() => onPrint?.(p)}
-                      >
+                      <IconButton size="small" onClick={() => onPrint?.(p)}>
                         <PrintIcon fontSize="small" />
                       </IconButton>
                     </Tooltip>

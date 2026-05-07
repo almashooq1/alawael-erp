@@ -61,7 +61,7 @@ const DocumentsListTab = ({
             fullWidth
             placeholder="البحث في المستندات..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={e => setSearchQuery(e.target.value)}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
@@ -76,11 +76,11 @@ const DocumentsListTab = ({
             <InputLabel>التصنيف</InputLabel>
             <Select
               value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
+              onChange={e => setSelectedCategory(e.target.value)}
               label="التصنيف"
             >
               <MenuItem value="">الكل</MenuItem>
-              {categories.map((cat) => (
+              {categories.map(cat => (
                 <MenuItem key={cat.id} value={cat.id}>
                   {cat.name}
                 </MenuItem>
@@ -101,7 +101,7 @@ const DocumentsListTab = ({
       <LinearProgress />
     ) : (
       <Grid container spacing={2}>
-        {documents.map((doc) => (
+        {documents.map(doc => (
           <Grid item xs={12} sm={6} md={4} key={doc.id}>
             <Card>
               <CardContent>

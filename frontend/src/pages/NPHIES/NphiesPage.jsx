@@ -9,10 +9,31 @@
  */
 import React, { useState, useCallback } from 'react';
 import {
-  Box, Typography, Card, CardContent, Grid, Button, TextField,
-  Dialog, DialogTitle, DialogContent, DialogActions, Alert, CircularProgress,
-  Tabs, Tab, Chip, Divider, Paper, Table, TableBody, TableCell,
-  TableContainer, TableHead, TableRow, MenuItem,
+  Box,
+  Typography,
+  Card,
+  CardContent,
+  Grid,
+  Button,
+  TextField,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Alert,
+  CircularProgress,
+  Tabs,
+  Tab,
+  Chip,
+  Divider,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  MenuItem,
 } from '@mui/material';
 import {
   HealthAndSafety as NphiesIcon,
@@ -64,8 +85,12 @@ export default function NphiesPage() {
 
   // ── أهلية التأمين ──
   const [eligibilityForm, setEligibilityForm] = useState({
-    patientId: '', patientName: '', patientDob: '',
-    memberId: '', payerId: '', payerName: '',
+    patientId: '',
+    patientName: '',
+    patientDob: '',
+    memberId: '',
+    payerId: '',
+    payerName: '',
     serviceDate: new Date().toISOString().split('T')[0],
   });
   const [eligibilityResult, setEligibilityResult] = useState(null);
@@ -76,8 +101,10 @@ export default function NphiesPage() {
 
   // ── موافقة مسبقة ──
   const [authForm, setAuthForm] = useState({
-    patientId: '', patientName: '',
-    payerId: '', payerName: '',
+    patientId: '',
+    patientName: '',
+    payerId: '',
+    payerName: '',
     diagnosisCodes: [''],
     requestedServices: [{ code: '', description: '', quantity: 1 }],
     clinicalInfo: '',
@@ -190,7 +217,10 @@ export default function NphiesPage() {
 
   const updateClaimService = (i, field, value) => {
     const services = [...claim.services];
-    services[i] = { ...services[i], [field]: field === 'description' ? value : field === 'code' ? value : Number(value) };
+    services[i] = {
+      ...services[i],
+      [field]: field === 'description' ? value : field === 'code' ? value : Number(value),
+    };
     setClaim({ ...claim, services });
   };
 
@@ -223,14 +253,26 @@ export default function NphiesPage() {
       </Box>
 
       {connStatus && (
-        <Alert severity={connStatus.connected ? 'success' : 'warning'} sx={{ mb: 2 }} onClose={() => setConnStatus(null)}>
+        <Alert
+          severity={connStatus.connected ? 'success' : 'warning'}
+          sx={{ mb: 2 }}
+          onClose={() => setConnStatus(null)}
+        >
           {connStatus.connected
             ? `متصل بـ NPHIES — البيئة: ${connStatus.environment || '—'} — المزود: ${connStatus.providerId || '—'}`
             : 'غير متصل — تحقق من إعدادات NPHIES'}
         </Alert>
       )}
-      {error && <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>{error}</Alert>}
-      {success && <Alert severity="success" sx={{ mb: 2 }} onClose={() => setSuccess(null)}>{success}</Alert>}
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
+          {error}
+        </Alert>
+      )}
+      {success && (
+        <Alert severity="success" sx={{ mb: 2 }} onClose={() => setSuccess(null)}>
+          {success}
+        </Alert>
+      )}
 
       <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 3 }}>
         <Tab icon={<EligibilityIcon />} iconPosition="start" label="أهلية التأمين" />
@@ -245,50 +287,99 @@ export default function NphiesPage() {
           <Grid item xs={12} md={7}>
             <Card>
               <CardContent>
-                <Typography variant="h6" mb={2}>التحقق من أهلية التأمين</Typography>
+                <Typography variant="h6" mb={2}>
+                  التحقق من أهلية التأمين
+                </Typography>
                 <Grid container spacing={2}>
                   <Grid item xs={12} sm={6}>
-                    <TextField fullWidth size="small" label="رقم هوية المريض"
+                    <TextField
+                      fullWidth
+                      size="small"
+                      label="رقم هوية المريض"
                       value={eligibilityForm.patientId}
-                      onChange={(e) => setEligibilityForm({ ...eligibilityForm, patientId: e.target.value })} />
+                      onChange={e =>
+                        setEligibilityForm({ ...eligibilityForm, patientId: e.target.value })
+                      }
+                    />
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    <TextField fullWidth size="small" label="اسم المريض"
+                    <TextField
+                      fullWidth
+                      size="small"
+                      label="اسم المريض"
                       value={eligibilityForm.patientName}
-                      onChange={(e) => setEligibilityForm({ ...eligibilityForm, patientName: e.target.value })} />
+                      onChange={e =>
+                        setEligibilityForm({ ...eligibilityForm, patientName: e.target.value })
+                      }
+                    />
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    <TextField fullWidth size="small" label="تاريخ الميلاد" type="date"
+                    <TextField
+                      fullWidth
+                      size="small"
+                      label="تاريخ الميلاد"
+                      type="date"
                       value={eligibilityForm.patientDob}
-                      onChange={(e) => setEligibilityForm({ ...eligibilityForm, patientDob: e.target.value })}
-                      InputLabelProps={{ shrink: true }} />
+                      onChange={e =>
+                        setEligibilityForm({ ...eligibilityForm, patientDob: e.target.value })
+                      }
+                      InputLabelProps={{ shrink: true }}
+                    />
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    <TextField fullWidth size="small" label="رقم العضوية / الوثيقة"
+                    <TextField
+                      fullWidth
+                      size="small"
+                      label="رقم العضوية / الوثيقة"
                       value={eligibilityForm.memberId}
-                      onChange={(e) => setEligibilityForm({ ...eligibilityForm, memberId: e.target.value })} />
+                      onChange={e =>
+                        setEligibilityForm({ ...eligibilityForm, memberId: e.target.value })
+                      }
+                    />
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    <TextField fullWidth size="small" label="كود شركة التأمين (Payer ID)"
+                    <TextField
+                      fullWidth
+                      size="small"
+                      label="كود شركة التأمين (Payer ID)"
                       value={eligibilityForm.payerId}
-                      onChange={(e) => setEligibilityForm({ ...eligibilityForm, payerId: e.target.value })} />
+                      onChange={e =>
+                        setEligibilityForm({ ...eligibilityForm, payerId: e.target.value })
+                      }
+                    />
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    <TextField fullWidth size="small" label="اسم شركة التأمين"
+                    <TextField
+                      fullWidth
+                      size="small"
+                      label="اسم شركة التأمين"
                       value={eligibilityForm.payerName}
-                      onChange={(e) => setEligibilityForm({ ...eligibilityForm, payerName: e.target.value })} />
+                      onChange={e =>
+                        setEligibilityForm({ ...eligibilityForm, payerName: e.target.value })
+                      }
+                    />
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    <TextField fullWidth size="small" label="تاريخ الخدمة" type="date"
+                    <TextField
+                      fullWidth
+                      size="small"
+                      label="تاريخ الخدمة"
+                      type="date"
                       value={eligibilityForm.serviceDate}
-                      onChange={(e) => setEligibilityForm({ ...eligibilityForm, serviceDate: e.target.value })}
-                      InputLabelProps={{ shrink: true }} />
+                      onChange={e =>
+                        setEligibilityForm({ ...eligibilityForm, serviceDate: e.target.value })
+                      }
+                      InputLabelProps={{ shrink: true }}
+                    />
                   </Grid>
                   <Grid item xs={12}>
-                    <Button variant="contained" fullWidth
+                    <Button
+                      variant="contained"
+                      fullWidth
                       startIcon={loading ? <CircularProgress size={16} /> : <EligibilityIcon />}
                       onClick={handleEligibility}
-                      disabled={loading || !eligibilityForm.patientId || !eligibilityForm.payerId}>
+                      disabled={loading || !eligibilityForm.patientId || !eligibilityForm.payerId}
+                    >
                       التحقق من الأهلية
                     </Button>
                   </Grid>
@@ -301,26 +392,61 @@ export default function NphiesPage() {
             {eligibilityResult ? (
               <Card>
                 <CardContent>
-                  <Typography variant="h6" mb={2} color="primary">نتيجة التحقق</Typography>
+                  <Typography variant="h6" mb={2} color="primary">
+                    نتيجة التحقق
+                  </Typography>
                   <Box mb={2}>
-                    <ClaimStatusChip status={eligibilityResult.eligible ? 'approved' : 'rejected'} />
+                    <ClaimStatusChip
+                      status={eligibilityResult.eligible ? 'approved' : 'rejected'}
+                    />
                   </Box>
                   {eligibilityResult.coverage && (
                     <>
                       <Divider sx={{ my: 1 }} />
-                      <Typography variant="subtitle2" mb={1}>تفاصيل التغطية</Typography>
+                      <Typography variant="subtitle2" mb={1}>
+                        تفاصيل التغطية
+                      </Typography>
                       {[
                         ['نوع التغطية', eligibilityResult.coverage.type],
-                        ['تاريخ البدء', eligibilityResult.coverage.startDate && new Date(eligibilityResult.coverage.startDate).toLocaleDateString('ar-SA')],
-                        ['تاريخ الانتهاء', eligibilityResult.coverage.endDate && new Date(eligibilityResult.coverage.endDate).toLocaleDateString('ar-SA')],
-                        ['نسبة التحمل', eligibilityResult.coverage.copay ? `${eligibilityResult.coverage.copay}%` : '—'],
-                        ['الحد الأقصى', eligibilityResult.coverage.maxBenefit ? `${eligibilityResult.coverage.maxBenefit?.toLocaleString()} ر.س` : '—'],
-                      ].map(([label, val]) => val && (
-                        <Box key={label} display="flex" justifyContent="space-between" mb={0.5}>
-                          <Typography variant="body2" color="text.secondary">{label}</Typography>
-                          <Typography variant="body2" fontWeight="medium">{val}</Typography>
-                        </Box>
-                      ))}
+                        [
+                          'تاريخ البدء',
+                          eligibilityResult.coverage.startDate &&
+                            new Date(eligibilityResult.coverage.startDate).toLocaleDateString(
+                              'ar-SA'
+                            ),
+                        ],
+                        [
+                          'تاريخ الانتهاء',
+                          eligibilityResult.coverage.endDate &&
+                            new Date(eligibilityResult.coverage.endDate).toLocaleDateString(
+                              'ar-SA'
+                            ),
+                        ],
+                        [
+                          'نسبة التحمل',
+                          eligibilityResult.coverage.copay
+                            ? `${eligibilityResult.coverage.copay}%`
+                            : '—',
+                        ],
+                        [
+                          'الحد الأقصى',
+                          eligibilityResult.coverage.maxBenefit
+                            ? `${eligibilityResult.coverage.maxBenefit?.toLocaleString()} ر.س`
+                            : '—',
+                        ],
+                      ].map(
+                        ([label, val]) =>
+                          val && (
+                            <Box key={label} display="flex" justifyContent="space-between" mb={0.5}>
+                              <Typography variant="body2" color="text.secondary">
+                                {label}
+                              </Typography>
+                              <Typography variant="body2" fontWeight="medium">
+                                {val}
+                              </Typography>
+                            </Box>
+                          )
+                      )}
                     </>
                   )}
                   {eligibilityResult.message && (
@@ -331,7 +457,14 @@ export default function NphiesPage() {
                 </CardContent>
               </Card>
             ) : (
-              <Card sx={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Card
+                sx={{
+                  height: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
                 <CardContent sx={{ textAlign: 'center', color: 'text.secondary' }}>
                   <EligibilityIcon sx={{ fontSize: 64, mb: 1, opacity: 0.3 }} />
                   <Typography>أدخل بيانات المريض وشركة التأمين للتحقق من الأهلية</Typography>
@@ -348,42 +481,85 @@ export default function NphiesPage() {
           <Grid item xs={12} md={8}>
             <Card sx={{ mb: 2 }}>
               <CardContent>
-                <Typography variant="h6" mb={2}>بيانات المطالبة</Typography>
+                <Typography variant="h6" mb={2}>
+                  بيانات المطالبة
+                </Typography>
                 <Grid container spacing={2}>
                   <Grid item xs={12} sm={6}>
-                    <TextField fullWidth size="small" label="هوية المريض"
-                      value={claim.patientId} onChange={(e) => setClaim({ ...claim, patientId: e.target.value })} />
+                    <TextField
+                      fullWidth
+                      size="small"
+                      label="هوية المريض"
+                      value={claim.patientId}
+                      onChange={e => setClaim({ ...claim, patientId: e.target.value })}
+                    />
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    <TextField fullWidth size="small" label="اسم المريض"
-                      value={claim.patientName} onChange={(e) => setClaim({ ...claim, patientName: e.target.value })} />
+                    <TextField
+                      fullWidth
+                      size="small"
+                      label="اسم المريض"
+                      value={claim.patientName}
+                      onChange={e => setClaim({ ...claim, patientName: e.target.value })}
+                    />
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    <TextField fullWidth size="small" label="كود شركة التأمين"
-                      value={claim.payerId} onChange={(e) => setClaim({ ...claim, payerId: e.target.value })} />
+                    <TextField
+                      fullWidth
+                      size="small"
+                      label="كود شركة التأمين"
+                      value={claim.payerId}
+                      onChange={e => setClaim({ ...claim, payerId: e.target.value })}
+                    />
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    <TextField fullWidth size="small" label="اسم شركة التأمين"
-                      value={claim.payerName} onChange={(e) => setClaim({ ...claim, payerName: e.target.value })} />
+                    <TextField
+                      fullWidth
+                      size="small"
+                      label="اسم شركة التأمين"
+                      value={claim.payerName}
+                      onChange={e => setClaim({ ...claim, payerName: e.target.value })}
+                    />
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    <TextField fullWidth size="small" label="تاريخ الخدمة" type="date"
-                      value={claim.serviceDate} onChange={(e) => setClaim({ ...claim, serviceDate: e.target.value })}
-                      InputLabelProps={{ shrink: true }} />
+                    <TextField
+                      fullWidth
+                      size="small"
+                      label="تاريخ الخدمة"
+                      type="date"
+                      value={claim.serviceDate}
+                      onChange={e => setClaim({ ...claim, serviceDate: e.target.value })}
+                      InputLabelProps={{ shrink: true }}
+                    />
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    <TextField fullWidth size="small" label="نوع المطالبة" select
-                      value={claim.claimType} onChange={(e) => setClaim({ ...claim, claimType: e.target.value })}>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      label="نوع المطالبة"
+                      select
+                      value={claim.claimType}
+                      onChange={e => setClaim({ ...claim, claimType: e.target.value })}
+                    >
                       <MenuItem value="professional">مهنية (Professional)</MenuItem>
                       <MenuItem value="institutional">مؤسسية (Institutional)</MenuItem>
                       <MenuItem value="pharmacy">صيدلانية (Pharmacy)</MenuItem>
                     </TextField>
                   </Grid>
                   <Grid item xs={12}>
-                    <TextField fullWidth size="small" label="أكواد التشخيص (ICD-10) — مفصولة بفاصلة"
+                    <TextField
+                      fullWidth
+                      size="small"
+                      label="أكواد التشخيص (ICD-10) — مفصولة بفاصلة"
                       value={claim.diagnosisCodes.join(', ')}
-                      onChange={(e) => setClaim({ ...claim, diagnosisCodes: e.target.value.split(',').map(c => c.trim()) })}
-                      placeholder="مثال: F84.0, Z99.9" />
+                      onChange={e =>
+                        setClaim({
+                          ...claim,
+                          diagnosisCodes: e.target.value.split(',').map(c => c.trim()),
+                        })
+                      }
+                      placeholder="مثال: F84.0, Z99.9"
+                    />
                   </Grid>
                 </Grid>
               </CardContent>
@@ -391,7 +567,9 @@ export default function NphiesPage() {
 
             <Card>
               <CardContent>
-                <Typography variant="h6" mb={2}>الخدمات المُطالب بها</Typography>
+                <Typography variant="h6" mb={2}>
+                  الخدمات المُطالب بها
+                </Typography>
                 <TableContainer>
                   <Table size="small">
                     <TableHead>
@@ -407,24 +585,46 @@ export default function NphiesPage() {
                       {claim.services.map((sv, i) => (
                         <TableRow key={i}>
                           <TableCell>
-                            <TextField size="small" variant="standard" value={sv.code}
-                              onChange={(e) => updateClaimService(i, 'code', e.target.value)}
-                              sx={{ width: 90 }} placeholder="CPT/HCPCS" />
+                            <TextField
+                              size="small"
+                              variant="standard"
+                              value={sv.code}
+                              onChange={e => updateClaimService(i, 'code', e.target.value)}
+                              sx={{ width: 90 }}
+                              placeholder="CPT/HCPCS"
+                            />
                           </TableCell>
                           <TableCell>
-                            <TextField size="small" variant="standard" value={sv.description}
-                              onChange={(e) => updateClaimService(i, 'description', e.target.value)}
-                              fullWidth placeholder="وصف الخدمة" />
+                            <TextField
+                              size="small"
+                              variant="standard"
+                              value={sv.description}
+                              onChange={e => updateClaimService(i, 'description', e.target.value)}
+                              fullWidth
+                              placeholder="وصف الخدمة"
+                            />
                           </TableCell>
                           <TableCell align="center">
-                            <TextField size="small" type="number" variant="standard" value={sv.quantity}
-                              onChange={(e) => updateClaimService(i, 'quantity', e.target.value)}
-                              sx={{ width: 60 }} inputProps={{ min: 1 }} />
+                            <TextField
+                              size="small"
+                              type="number"
+                              variant="standard"
+                              value={sv.quantity}
+                              onChange={e => updateClaimService(i, 'quantity', e.target.value)}
+                              sx={{ width: 60 }}
+                              inputProps={{ min: 1 }}
+                            />
                           </TableCell>
                           <TableCell align="center">
-                            <TextField size="small" type="number" variant="standard" value={sv.unitPrice}
-                              onChange={(e) => updateClaimService(i, 'unitPrice', e.target.value)}
-                              sx={{ width: 90 }} inputProps={{ min: 0, step: 0.01 }} />
+                            <TextField
+                              size="small"
+                              type="number"
+                              variant="standard"
+                              value={sv.unitPrice}
+                              onChange={e => updateClaimService(i, 'unitPrice', e.target.value)}
+                              sx={{ width: 90 }}
+                              inputProps={{ min: 0, step: 0.01 }}
+                            />
                           </TableCell>
                           <TableCell align="center">
                             {(sv.quantity * sv.unitPrice).toFixed(2)} ر.س
@@ -434,8 +634,19 @@ export default function NphiesPage() {
                     </TableBody>
                   </Table>
                 </TableContainer>
-                <Button size="small" sx={{ mt: 1 }}
-                  onClick={() => setClaim({ ...claim, services: [...claim.services, { code: '', description: '', quantity: 1, unitPrice: 0 }] })}>
+                <Button
+                  size="small"
+                  sx={{ mt: 1 }}
+                  onClick={() =>
+                    setClaim({
+                      ...claim,
+                      services: [
+                        ...claim.services,
+                        { code: '', description: '', quantity: 1, unitPrice: 0 },
+                      ],
+                    })
+                  }
+                >
                   + إضافة خدمة
                 </Button>
               </CardContent>
@@ -445,26 +656,37 @@ export default function NphiesPage() {
           <Grid item xs={12} md={4}>
             <Card sx={{ mb: 2 }}>
               <CardContent>
-                <Typography variant="h6" mb={1}>إجمالي المطالبة</Typography>
+                <Typography variant="h6" mb={1}>
+                  إجمالي المطالبة
+                </Typography>
                 <Typography variant="h4" color="primary.main" fontWeight="bold">
-                  {claim.services.reduce((s, sv) => s + sv.quantity * sv.unitPrice, 0).toFixed(2)} ر.س
+                  {claim.services.reduce((s, sv) => s + sv.quantity * sv.unitPrice, 0).toFixed(2)}{' '}
+                  ر.س
                 </Typography>
               </CardContent>
             </Card>
-            <Button variant="contained" fullWidth size="large"
+            <Button
+              variant="contained"
+              fullWidth
+              size="large"
               startIcon={loading ? <CircularProgress size={16} /> : <SendIcon />}
               onClick={handleSubmitClaim}
-              disabled={loading || !claim.patientId || !claim.payerId}>
+              disabled={loading || !claim.patientId || !claim.payerId}
+            >
               تقديم المطالبة
             </Button>
 
             {claimResult && (
               <Card sx={{ mt: 2 }}>
                 <CardContent>
-                  <Typography variant="subtitle2" mb={1}>نتيجة التقديم</Typography>
+                  <Typography variant="subtitle2" mb={1}>
+                    نتيجة التقديم
+                  </Typography>
                   <ClaimStatusChip status={claimResult.status} />
                   {claimResult.claimId && (
-                    <Typography variant="body2" mt={1}>رقم المطالبة: <strong>{claimResult.claimId}</strong></Typography>
+                    <Typography variant="body2" mt={1}>
+                      رقم المطالبة: <strong>{claimResult.claimId}</strong>
+                    </Typography>
                   )}
                   {claimResult.responseId && (
                     <Typography variant="body2">Response ID: {claimResult.responseId}</Typography>
@@ -482,45 +704,86 @@ export default function NphiesPage() {
           <Grid item xs={12} md={7}>
             <Card>
               <CardContent>
-                <Typography variant="h6" mb={2}>طلب الموافقة المسبقة</Typography>
+                <Typography variant="h6" mb={2}>
+                  طلب الموافقة المسبقة
+                </Typography>
                 <Grid container spacing={2}>
                   <Grid item xs={12} sm={6}>
-                    <TextField fullWidth size="small" label="هوية المريض"
-                      value={authForm.patientId} onChange={(e) => setAuthForm({ ...authForm, patientId: e.target.value })} />
+                    <TextField
+                      fullWidth
+                      size="small"
+                      label="هوية المريض"
+                      value={authForm.patientId}
+                      onChange={e => setAuthForm({ ...authForm, patientId: e.target.value })}
+                    />
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    <TextField fullWidth size="small" label="اسم المريض"
-                      value={authForm.patientName} onChange={(e) => setAuthForm({ ...authForm, patientName: e.target.value })} />
+                    <TextField
+                      fullWidth
+                      size="small"
+                      label="اسم المريض"
+                      value={authForm.patientName}
+                      onChange={e => setAuthForm({ ...authForm, patientName: e.target.value })}
+                    />
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    <TextField fullWidth size="small" label="كود شركة التأمين"
-                      value={authForm.payerId} onChange={(e) => setAuthForm({ ...authForm, payerId: e.target.value })} />
+                    <TextField
+                      fullWidth
+                      size="small"
+                      label="كود شركة التأمين"
+                      value={authForm.payerId}
+                      onChange={e => setAuthForm({ ...authForm, payerId: e.target.value })}
+                    />
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    <TextField fullWidth size="small" label="درجة الإلحاح" select
-                      value={authForm.urgency} onChange={(e) => setAuthForm({ ...authForm, urgency: e.target.value })}>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      label="درجة الإلحاح"
+                      select
+                      value={authForm.urgency}
+                      onChange={e => setAuthForm({ ...authForm, urgency: e.target.value })}
+                    >
                       <MenuItem value="routine">عادي (Routine)</MenuItem>
                       <MenuItem value="urgent">عاجل (Urgent)</MenuItem>
                       <MenuItem value="stat">طارئ (Stat)</MenuItem>
                     </TextField>
                   </Grid>
                   <Grid item xs={12}>
-                    <TextField fullWidth size="small" label="أكواد التشخيص (ICD-10)"
+                    <TextField
+                      fullWidth
+                      size="small"
+                      label="أكواد التشخيص (ICD-10)"
                       value={authForm.diagnosisCodes.join(', ')}
-                      onChange={(e) => setAuthForm({ ...authForm, diagnosisCodes: e.target.value.split(',').map(c => c.trim()) })}
-                      placeholder="مثال: F84.0, G40.0" />
+                      onChange={e =>
+                        setAuthForm({
+                          ...authForm,
+                          diagnosisCodes: e.target.value.split(',').map(c => c.trim()),
+                        })
+                      }
+                      placeholder="مثال: F84.0, G40.0"
+                    />
                   </Grid>
                   <Grid item xs={12}>
-                    <TextField fullWidth size="small" label="المبرر السريري" multiline rows={3}
+                    <TextField
+                      fullWidth
+                      size="small"
+                      label="المبرر السريري"
+                      multiline
+                      rows={3}
                       value={authForm.clinicalInfo}
-                      onChange={(e) => setAuthForm({ ...authForm, clinicalInfo: e.target.value })}
-                      placeholder="وصف الحالة السريرية ومبرر الطلب..." />
+                      onChange={e => setAuthForm({ ...authForm, clinicalInfo: e.target.value })}
+                      placeholder="وصف الحالة السريرية ومبرر الطلب..."
+                    />
                   </Grid>
                   <Grid item xs={12}>
-                    <Button variant="contained" fullWidth
+                    <Button
+                      variant="contained"
+                      fullWidth
                       startIcon={loading ? <CircularProgress size={16} /> : <AuthIcon />}
                       onClick={handlePriorAuth}
-                      disabled={loading || !authForm.patientId || !authForm.payerId}>
+                      disabled={loading || !authForm.patientId || !authForm.payerId}
+                    >
                       تقديم طلب الموافقة المسبقة
                     </Button>
                   </Grid>
@@ -533,32 +796,55 @@ export default function NphiesPage() {
             {authResult ? (
               <Card>
                 <CardContent>
-                  <Typography variant="h6" mb={2} color="primary">نتيجة الطلب</Typography>
+                  <Typography variant="h6" mb={2} color="primary">
+                    نتيجة الطلب
+                  </Typography>
                   <ClaimStatusChip status={authResult.status} />
                   {authResult.authorizationId && (
                     <Box mt={2}>
-                      <Typography variant="body2" color="text.secondary">رقم الموافقة</Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        رقم الموافقة
+                      </Typography>
                       <Typography fontWeight="bold">{authResult.authorizationId}</Typography>
                     </Box>
                   )}
                   {authResult.expiryDate && (
                     <Box mt={1}>
-                      <Typography variant="body2" color="text.secondary">صالحة حتى</Typography>
-                      <Typography>{new Date(authResult.expiryDate).toLocaleDateString('ar-SA')}</Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        صالحة حتى
+                      </Typography>
+                      <Typography>
+                        {new Date(authResult.expiryDate).toLocaleDateString('ar-SA')}
+                      </Typography>
                     </Box>
                   )}
                   {authResult.approvedServices?.length > 0 && (
                     <Box mt={2}>
-                      <Typography variant="subtitle2" mb={1}>الخدمات الموافق عليها</Typography>
+                      <Typography variant="subtitle2" mb={1}>
+                        الخدمات الموافق عليها
+                      </Typography>
                       {authResult.approvedServices.map((s, i) => (
-                        <Chip key={i} label={s} size="small" color="success" sx={{ mr: 0.5, mb: 0.5 }} />
+                        <Chip
+                          key={i}
+                          label={s}
+                          size="small"
+                          color="success"
+                          sx={{ mr: 0.5, mb: 0.5 }}
+                        />
                       ))}
                     </Box>
                   )}
                 </CardContent>
               </Card>
             ) : (
-              <Card sx={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Card
+                sx={{
+                  height: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
                 <CardContent sx={{ textAlign: 'center', color: 'text.secondary' }}>
                   <AuthIcon sx={{ fontSize: 64, mb: 1, opacity: 0.3 }} />
                   <Typography>أدخل بيانات الطلب للحصول على الموافقة المسبقة</Typography>
@@ -575,21 +861,36 @@ export default function NphiesPage() {
           <Grid item xs={12} md={6}>
             <Card>
               <CardContent>
-                <Typography variant="h6" mb={2}>استعلام حالة المطالبة</Typography>
+                <Typography variant="h6" mb={2}>
+                  استعلام حالة المطالبة
+                </Typography>
                 <Grid container spacing={2}>
                   <Grid item xs={12}>
-                    <TextField fullWidth size="small" label="رقم المطالبة (Claim ID)"
-                      value={statusClaimId} onChange={(e) => setStatusClaimId(e.target.value)} />
+                    <TextField
+                      fullWidth
+                      size="small"
+                      label="رقم المطالبة (Claim ID)"
+                      value={statusClaimId}
+                      onChange={e => setStatusClaimId(e.target.value)}
+                    />
                   </Grid>
                   <Grid item xs={12}>
-                    <TextField fullWidth size="small" label="كود شركة التأمين (Payer ID) — اختياري"
-                      value={statusPayerId} onChange={(e) => setStatusPayerId(e.target.value)} />
+                    <TextField
+                      fullWidth
+                      size="small"
+                      label="كود شركة التأمين (Payer ID) — اختياري"
+                      value={statusPayerId}
+                      onChange={e => setStatusPayerId(e.target.value)}
+                    />
                   </Grid>
                   <Grid item xs={12}>
-                    <Button variant="contained" fullWidth
+                    <Button
+                      variant="contained"
+                      fullWidth
                       startIcon={loading ? <CircularProgress size={16} /> : <SearchIcon />}
                       onClick={handleCheckStatus}
-                      disabled={loading || !statusClaimId}>
+                      disabled={loading || !statusClaimId}
+                    >
                       استعلام الحالة
                     </Button>
                   </Grid>
@@ -598,28 +899,54 @@ export default function NphiesPage() {
                 {statusResult && (
                   <Box mt={3}>
                     <Divider sx={{ mb: 2 }} />
-                    <Typography variant="subtitle1" mb={2}>نتيجة الاستعلام</Typography>
+                    <Typography variant="subtitle1" mb={2}>
+                      نتيجة الاستعلام
+                    </Typography>
                     <TableContainer component={Paper} variant="outlined">
                       <Table size="small">
                         <TableBody>
                           {[
                             ['رقم المطالبة', statusResult.claimId],
                             ['الحالة', <ClaimStatusChip key="s" status={statusResult.status} />],
-                            ['تاريخ التقديم', statusResult.submittedAt && new Date(statusResult.submittedAt).toLocaleDateString('ar-SA')],
-                            ['آخر تحديث', statusResult.updatedAt && new Date(statusResult.updatedAt).toLocaleDateString('ar-SA')],
-                            ['المبلغ الموافق عليه', statusResult.approvedAmount ? `${statusResult.approvedAmount?.toLocaleString()} ر.س` : null],
-                            ['المبلغ المرفوض', statusResult.rejectedAmount ? `${statusResult.rejectedAmount?.toLocaleString()} ر.س` : null],
-                          ].filter(([_, v]) => v).map(([label, val]) => (
-                            <TableRow key={label}>
-                              <TableCell sx={{ color: 'text.secondary', width: '40%' }}>{label}</TableCell>
-                              <TableCell>{val}</TableCell>
-                            </TableRow>
-                          ))}
+                            [
+                              'تاريخ التقديم',
+                              statusResult.submittedAt &&
+                                new Date(statusResult.submittedAt).toLocaleDateString('ar-SA'),
+                            ],
+                            [
+                              'آخر تحديث',
+                              statusResult.updatedAt &&
+                                new Date(statusResult.updatedAt).toLocaleDateString('ar-SA'),
+                            ],
+                            [
+                              'المبلغ الموافق عليه',
+                              statusResult.approvedAmount
+                                ? `${statusResult.approvedAmount?.toLocaleString()} ر.س`
+                                : null,
+                            ],
+                            [
+                              'المبلغ المرفوض',
+                              statusResult.rejectedAmount
+                                ? `${statusResult.rejectedAmount?.toLocaleString()} ر.س`
+                                : null,
+                            ],
+                          ]
+                            .filter(([_, v]) => v)
+                            .map(([label, val]) => (
+                              <TableRow key={label}>
+                                <TableCell sx={{ color: 'text.secondary', width: '40%' }}>
+                                  {label}
+                                </TableCell>
+                                <TableCell>{val}</TableCell>
+                              </TableRow>
+                            ))}
                         </TableBody>
                       </Table>
                     </TableContainer>
                     {statusResult.remarks && (
-                      <Alert severity="info" sx={{ mt: 1 }}>{statusResult.remarks}</Alert>
+                      <Alert severity="info" sx={{ mt: 1 }}>
+                        {statusResult.remarks}
+                      </Alert>
                     )}
                   </Box>
                 )}
@@ -638,18 +965,33 @@ export default function NphiesPage() {
         <DialogContent>
           <Grid container spacing={2} sx={{ mt: 1 }}>
             <Grid item xs={12}>
-              <TextField fullWidth label="رقم المطالبة المراد إلغاؤها"
-                value={cancelClaimId} onChange={(e) => setCancelClaimId(e.target.value)} />
+              <TextField
+                fullWidth
+                label="رقم المطالبة المراد إلغاؤها"
+                value={cancelClaimId}
+                onChange={e => setCancelClaimId(e.target.value)}
+              />
             </Grid>
             <Grid item xs={12}>
-              <TextField fullWidth label="سبب الإلغاء" multiline rows={3}
-                value={cancelReason} onChange={(e) => setCancelReason(e.target.value)} />
+              <TextField
+                fullWidth
+                label="سبب الإلغاء"
+                multiline
+                rows={3}
+                value={cancelReason}
+                onChange={e => setCancelReason(e.target.value)}
+              />
             </Grid>
           </Grid>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setCancelDialog(false)}>إغلاق</Button>
-          <Button variant="contained" color="error" onClick={handleCancel} disabled={!cancelClaimId}>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={handleCancel}
+            disabled={!cancelClaimId}
+          >
             إلغاء المطالبة
           </Button>
         </DialogActions>

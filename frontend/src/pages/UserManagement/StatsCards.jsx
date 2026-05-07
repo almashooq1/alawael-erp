@@ -15,7 +15,12 @@ import { gradients } from '../../theme/palette';
 const statCards = [
   { key: 'total', label: 'إجمالي المستخدمين', icon: PeopleIcon, gradient: gradients.primary },
   { key: 'active', label: 'المستخدمون النشطون', icon: ActiveIcon, gradient: gradients.success },
-  { key: 'inactive', label: 'المستخدمون المعطلون', icon: InactiveIcon, gradient: gradients.warning },
+  {
+    key: 'inactive',
+    label: 'المستخدمون المعطلون',
+    icon: InactiveIcon,
+    gradient: gradients.warning,
+  },
   { key: 'locked', label: 'الحسابات المقفلة', icon: LockedIcon, gradient: gradients.error },
   { key: 'newThisMonth', label: 'مستخدمون جدد (الشهر)', icon: NewIcon, gradient: gradients.info },
 ];

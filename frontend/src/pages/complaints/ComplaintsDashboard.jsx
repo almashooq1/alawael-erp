@@ -32,6 +32,8 @@ import {
   Add as AddIcon,
   Visibility as ViewIcon,
   Search as SearchIcon,
+  Timer as SlaIcon,
+  Settings as SettingsIcon,
 } from '@mui/icons-material';
 import {
   PieChart,
@@ -160,6 +162,8 @@ const DEMO = {
   pending: 74,
   resolved: 198,
   escalated: 18,
+  slaBreached: 11,
+  slaCompliance: 88,
   byCategory: [
     { name: 'خدمة', value: 98, color: PIE_COLORS[0] },
     { name: 'موظف', value: 72, color: PIE_COLORS[1] },
@@ -243,7 +247,9 @@ export default function ComplaintsDashboard() {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const r = await apiClient.get('/api/complaints/stats').catch(() => ({ data: {} }));
+      const r = await apiClient
+        .get('/api/complaints-enhanced/stats')
+        .catch(() => apiClient.get('/api/complaints/stats').catch(() => ({ data: {} })));
       const d = r?.data?.data || r?.data || {};
       if (d.total) setDash({ ...DEMO, ...d });
       else setDash(DEMO);
@@ -325,6 +331,14 @@ export default function ComplaintsDashboard() {
                   size="small"
                   sx={{ bgcolor: 'rgba(255,80,80,0.4)', color: '#fff', fontSize: 11 }}
                 />
+                {(dash.slaBreached ?? 0) > 0 && (
+                  <Chip
+                    label={`${dash.slaBreached} خرق SLA`}
+                    size="small"
+                    icon={<SlaIcon sx={{ color: '#fff !important', fontSize: 13 }} />}
+                    sx={{ bgcolor: 'rgba(220,38,38,0.55)', color: '#fff', fontSize: 11 }}
+                  />
+                )}
               </Stack>
             </Box>
             <Stack direction="row" spacing={1}>
@@ -342,6 +356,28 @@ export default function ComplaintsDashboard() {
               </Tooltip>
               <Button
                 variant="contained"
+                startIcon={<SettingsIcon />}
+                onClick={() => navigate('/complaints/sla-admin')}
+                sx={{
+                  bgcolor: 'rgba(255,255,255,0.15)',
+                  '&:hover': { bgcolor: 'rgba(255,255,255,0.25)' },
+                }}
+              >
+                إعدادات SLA
+              </Button>
+              <Button
+                variant="contained"
+                startIcon={<SettingsIcon />}
+                onClick={() => navigate('/complaints/sla-admin')}
+                sx={{
+                  bgcolor: 'rgba(255,255,255,0.15)',
+                  '&:hover': { bgcolor: 'rgba(255,255,255,0.25)' },
+                }}
+              >
+                إعدادات SLA
+              </Button>
+              <Button
+                variant="contained"
                 startIcon={<AddIcon />}
                 onClick={() => navigate('/complaints/new')}
                 sx={{
@@ -357,7 +393,7 @@ export default function ComplaintsDashboard() {
 
         <Box sx={{ maxWidth: 'xl', mx: 'auto', px: 3, pt: 5, pb: 4 }}>
           <Grid container spacing={2} sx={{ mb: 3 }}>
-            <Grid item xs={6} sm={3}>
+            <Grid item xs={6} sm={2.4}>
               <KPICard
                 label="إجمالي الشكاوى"
                 value={dash.total}
@@ -366,7 +402,7 @@ export default function ComplaintsDashboard() {
                 delay={0}
               />
             </Grid>
-            <Grid item xs={6} sm={3}>
+            <Grid item xs={6} sm={2.4}>
               <KPICard
                 label="قيد المعالجة"
                 value={dash.pending}
@@ -375,7 +411,7 @@ export default function ComplaintsDashboard() {
                 delay={1}
               />
             </Grid>
-            <Grid item xs={6} sm={3}>
+            <Grid item xs={6} sm={2.4}>
               <KPICard
                 label="تم الحل"
                 value={dash.resolved}
@@ -384,13 +420,22 @@ export default function ComplaintsDashboard() {
                 delay={2}
               />
             </Grid>
-            <Grid item xs={6} sm={3}>
+            <Grid item xs={6} sm={2.4}>
               <KPICard
                 label="مُصعَّدة"
                 value={dash.escalated}
                 icon={<EscalateIcon />}
                 gradient="linear-gradient(135deg,#e53935,#d32f2f)"
                 delay={3}
+              />
+            </Grid>
+            <Grid item xs={6} sm={2.4}>
+              <KPICard
+                label="خرق SLA"
+                value={dash.slaBreached ?? 0}
+                icon={<SlaIcon />}
+                gradient="linear-gradient(135deg,#7b1fa2,#9c27b0)"
+                delay={4}
               />
             </Grid>
           </Grid>

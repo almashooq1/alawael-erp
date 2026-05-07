@@ -25,7 +25,12 @@ import {
   Alert,
 } from '@mui/material';
 import {
-  PieChart, Pie, Cell, Tooltip as RechartsTooltip, ResponsiveContainer, Legend,
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip as RechartsTooltip,
+  ResponsiveContainer,
+  Legend,
 } from 'recharts';
 import { chartColors } from '../../theme/palette';
 import { tooltipStyle, ARABIC_LEGEND_PROPS } from '../../utils/chartHelpers';

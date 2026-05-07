@@ -1,13 +1,4 @@
-import {
-  Box,
-  Grid,
-  Typography,
-  Button,
-  IconButton,
-  Stack,
-  Badge,
-  Alert,
-} from '@mui/material';
+import { Box, Grid, Typography, Button, IconButton, Stack, Badge, Alert } from '@mui/material';
 import { Notifications, Refresh } from '@mui/icons-material';
 import { gradients } from 'theme/palette';
 
@@ -45,7 +36,11 @@ const DashboardHeader = ({ loading, dashError, fetchDashboard }) => (
               startIcon={<Refresh />}
               onClick={fetchDashboard}
               disabled={loading}
-              sx={{ color: '#fff', borderColor: 'rgba(255,255,255,0.5)', '&:hover': { borderColor: '#fff', bgcolor: 'rgba(255,255,255,0.1)' } }}
+              sx={{
+                color: '#fff',
+                borderColor: 'rgba(255,255,255,0.5)',
+                '&:hover': { borderColor: '#fff', bgcolor: 'rgba(255,255,255,0.1)' },
+              }}
             >
               تحديث
             </Button>
@@ -55,9 +50,15 @@ const DashboardHeader = ({ loading, dashError, fetchDashboard }) => (
     </Box>
 
     {dashError && (
-      <Alert severity="error" sx={{ mb: 3, borderRadius: '12px' }} action={
-        <Button color="inherit" size="small" onClick={fetchDashboard}>إعادة المحاولة</Button>
-      }>
+      <Alert
+        severity="error"
+        sx={{ mb: 3, borderRadius: '12px' }}
+        action={
+          <Button color="inherit" size="small" onClick={fetchDashboard}>
+            إعادة المحاولة
+          </Button>
+        }
+      >
         {dashError}
       </Alert>
     )}

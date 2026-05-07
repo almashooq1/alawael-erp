@@ -12,12 +12,36 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Container, Typography, Grid, Paper, Box, Card, CardContent,
-  Avatar, Chip, IconButton, Button, LinearProgress, Tabs, Tab,
-  TextField, InputAdornment, Menu, MenuItem, Tooltip, Divider,
-  Pagination, Dialog, DialogTitle, DialogContent, DialogActions,
-  Select, FormControl, InputLabel,
-  ToggleButtonGroup, ToggleButton,
+  Container,
+  Typography,
+  Grid,
+  Paper,
+  Box,
+  Card,
+  CardContent,
+  Avatar,
+  Chip,
+  IconButton,
+  Button,
+  LinearProgress,
+  Tabs,
+  Tab,
+  TextField,
+  InputAdornment,
+  Menu,
+  MenuItem,
+  Tooltip,
+  Divider,
+  Pagination,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Select,
+  FormControl,
+  InputLabel,
+  ToggleButtonGroup,
+  ToggleButton,
 } from '@mui/material';
 import {
   PhotoLibrary as MediaIcon,
@@ -48,7 +72,13 @@ import {
   CloudDone as CloudIcon,
 } from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from '../../theme/palette';
+import {
+  gradients,
+  brandColors,
+  statusColors,
+  surfaceColors,
+  neutralColors,
+} from '../../theme/palette';
 import logger from '../../utils/logger';
 import mediaService from '../../services/mediaService';
 
@@ -63,9 +93,18 @@ const TYPE_CONFIG = {
 };
 
 const CATEGORIES = [
-  'عام', 'صور المؤسسة', 'صور الفعاليات', 'صور الموظفين',
-  'فيديوهات تعليمية', 'فيديوهات توعوية', 'تسجيلات صوتية',
-  'مستندات رسمية', 'عروض تقديمية', 'تصاميم', 'شعارات', 'أخرى',
+  'عام',
+  'صور المؤسسة',
+  'صور الفعاليات',
+  'صور الموظفين',
+  'فيديوهات تعليمية',
+  'فيديوهات توعوية',
+  'تسجيلات صوتية',
+  'مستندات رسمية',
+  'عروض تقديمية',
+  'تصاميم',
+  'شعارات',
+  'أخرى',
 ];
 
 /* ─── Helper Components ────────────────────────────────────────────────────── */
@@ -106,11 +145,22 @@ const MediaThumbnail = ({ item, onClick, height = 160 }) => {
           src={item.url}
           alt={item.title || item.originalName}
           sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
-          onError={(e) => { e.target.style.display = 'none'; }}
+          onError={e => {
+            e.target.style.display = 'none';
+          }}
         />
       ) : (
         <Box sx={{ textAlign: 'center' }}>
-          <Avatar sx={{ width: 56, height: 56, bgcolor: `${config.color}20`, color: config.color, mx: 'auto', mb: 1 }}>
+          <Avatar
+            sx={{
+              width: 56,
+              height: 56,
+              bgcolor: `${config.color}20`,
+              color: config.color,
+              mx: 'auto',
+              mb: 1,
+            }}
+          >
             {React.cloneElement(config.icon, { sx: { fontSize: 28 } })}
           </Avatar>
           <Typography variant="caption" sx={{ color: neutralColors.textSecondary }}>
@@ -119,7 +169,9 @@ const MediaThumbnail = ({ item, onClick, height = 160 }) => {
         </Box>
       )}
       {isVid && (
-        <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
+        <Box
+          sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}
+        >
           <Avatar sx={{ bgcolor: 'rgba(0,0,0,0.6)', width: 40, height: 40 }}>
             <VideoIcon sx={{ color: '#fff', fontSize: 20 }} />
           </Avatar>
@@ -154,7 +206,12 @@ export default function MediaLibrary() {
   const [newAlbumDesc, setNewAlbumDesc] = useState('');
   const [anchorEl, setAnchorEl] = useState(null);
   const [contextItem, setContextItem] = useState(null);
-  const [editForm, setEditForm] = useState({ title: '', description: '', category: 'عام', tags: '' });
+  const [editForm, setEditForm] = useState({
+    title: '',
+    description: '',
+    category: 'عام',
+    tags: '',
+  });
 
   /* ── Data Loading ────────────────────────────────────────────────────── */
   const loadDashboard = useCallback(async () => {
@@ -170,28 +227,35 @@ export default function MediaLibrary() {
     }
   }, []);
 
-  const loadMedia = useCallback(async (p = 1) => {
-    try {
-      const params = { page: p, limit: 24 };
-      if (filters.mediaType) params.mediaType = filters.mediaType;
-      if (filters.category) params.category = filters.category;
-      if (filters.search) params.search = filters.search;
-      if (filters.album) params.album = filters.album;
-      if (tabValue === 2) params.favorites = 'true';
+  const loadMedia = useCallback(
+    async (p = 1) => {
+      try {
+        const params = { page: p, limit: 24 };
+        if (filters.mediaType) params.mediaType = filters.mediaType;
+        if (filters.category) params.category = filters.category;
+        if (filters.search) params.search = filters.search;
+        if (filters.album) params.album = filters.album;
+        if (tabValue === 2) params.favorites = 'true';
 
-      const result = await mediaService.list(params);
-      setMedia(result.data || []);
-      setPagination(result.pagination || { total: 0, page: 1, pages: 0 });
-    } catch (err) {
-      logger.error('MediaLibrary loadMedia:', err);
-    }
-  }, [filters, tabValue]);
+        const result = await mediaService.list(params);
+        setMedia(result.data || []);
+        setPagination(result.pagination || { total: 0, page: 1, pages: 0 });
+      } catch (err) {
+        logger.error('MediaLibrary loadMedia:', err);
+      }
+    },
+    [filters, tabValue]
+  );
 
-  useEffect(() => { loadDashboard(); }, [loadDashboard]);
-  useEffect(() => { if (tabValue >= 1) loadMedia(page); }, [loadMedia, page, tabValue]);
+  useEffect(() => {
+    loadDashboard();
+  }, [loadDashboard]);
+  useEffect(() => {
+    if (tabValue >= 1) loadMedia(page);
+  }, [loadMedia, page, tabValue]);
 
   /* ── Upload Handlers ─────────────────────────────────────────────────── */
-  const handleUpload = async (e) => {
+  const handleUpload = async e => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
 
@@ -202,13 +266,13 @@ export default function MediaLibrary() {
         await mediaService.upload(files[0], {
           category: filters.category || 'عام',
           album: filters.album || undefined,
-          onProgress: (ev) => setUploadProgress(Math.round((ev.loaded * 100) / ev.total)),
+          onProgress: ev => setUploadProgress(Math.round((ev.loaded * 100) / ev.total)),
         });
       } else {
         await mediaService.uploadBulk(files, {
           category: filters.category || 'عام',
           album: filters.album || undefined,
-          onProgress: (ev) => setUploadProgress(Math.round((ev.loaded * 100) / ev.total)),
+          onProgress: ev => setUploadProgress(Math.round((ev.loaded * 100) / ev.total)),
         });
       }
       showSnackbar(`تم تحميل ${files.length} ملف بنجاح`, 'success');
@@ -225,21 +289,25 @@ export default function MediaLibrary() {
   };
 
   /* ── CRUD Handlers ───────────────────────────────────────────────────── */
-  const handleDelete = async (id) => {
+  const handleDelete = async id => {
     try {
       await mediaService.delete(id);
       showSnackbar('تم حذف الملف بنجاح', 'success');
       loadMedia(page);
       loadDashboard();
-    } catch { showSnackbar('خطأ في حذف الملف', 'error'); }
+    } catch {
+      showSnackbar('خطأ في حذف الملف', 'error');
+    }
     setAnchorEl(null);
   };
 
-  const handleToggleFavorite = async (id) => {
+  const handleToggleFavorite = async id => {
     try {
       await mediaService.toggleFavorite(id);
       loadMedia(page);
-    } catch { showSnackbar('خطأ في تحديث المفضلة', 'error'); }
+    } catch {
+      showSnackbar('خطأ في تحديث المفضلة', 'error');
+    }
   };
 
   const handleBulkDelete = async () => {
@@ -250,7 +318,9 @@ export default function MediaLibrary() {
       setSelected([]);
       loadMedia(page);
       loadDashboard();
-    } catch { showSnackbar('خطأ في الحذف الجماعي', 'error'); }
+    } catch {
+      showSnackbar('خطأ في الحذف الجماعي', 'error');
+    }
   };
 
   const handleCreateAlbum = async () => {
@@ -262,7 +332,9 @@ export default function MediaLibrary() {
       setNewAlbumName('');
       setNewAlbumDesc('');
       loadDashboard();
-    } catch { showSnackbar('خطأ في إنشاء الألبوم', 'error'); }
+    } catch {
+      showSnackbar('خطأ في إنشاء الألبوم', 'error');
+    }
   };
 
   const handleEditSave = async () => {
@@ -277,10 +349,12 @@ export default function MediaLibrary() {
       showSnackbar('تم تحديث البيانات بنجاح', 'success');
       setEditItem(null);
       loadMedia(page);
-    } catch { showSnackbar('خطأ في تحديث البيانات', 'error'); }
+    } catch {
+      showSnackbar('خطأ في تحديث البيانات', 'error');
+    }
   };
 
-  const openEdit = (item) => {
+  const openEdit = item => {
     setEditItem(item);
     setEditForm({
       title: item.title || '',
@@ -291,8 +365,8 @@ export default function MediaLibrary() {
     setAnchorEl(null);
   };
 
-  const toggleSelect = (id) => {
-    setSelected(prev => prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]);
+  const toggleSelect = id => {
+    setSelected(prev => (prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]));
   };
 
   /* ── Stats from dashboard ────────────────────────────────────────────── */
@@ -323,7 +397,9 @@ export default function MediaLibrary() {
                 <MediaIcon sx={{ fontSize: 30 }} />
               </Avatar>
               <Box>
-                <Typography variant="h5" fontWeight={700}>مكتبة الوسائط</Typography>
+                <Typography variant="h5" fontWeight={700}>
+                  مكتبة الوسائط
+                </Typography>
                 <Typography variant="body2" sx={{ opacity: 0.9 }}>
                   إدارة شاملة للصور والفيديو والصوت والمستندات
                 </Typography>
@@ -331,7 +407,13 @@ export default function MediaLibrary() {
             </Box>
             <Box sx={{ display: 'flex', gap: 1 }}>
               <Tooltip title="تحديث">
-                <IconButton sx={{ color: '#fff' }} onClick={() => { loadDashboard(); if (tabValue >= 1) loadMedia(page); }}>
+                <IconButton
+                  sx={{ color: '#fff' }}
+                  onClick={() => {
+                    loadDashboard();
+                    if (tabValue >= 1) loadMedia(page);
+                  }}
+                >
                   <RefreshIcon />
                 </IconButton>
               </Tooltip>
@@ -340,13 +422,20 @@ export default function MediaLibrary() {
                 startIcon={<UploadIcon />}
                 component="label"
                 sx={{
-                  bgcolor: 'rgba(255,255,255,0.2)', color: '#fff',
+                  bgcolor: 'rgba(255,255,255,0.2)',
+                  color: '#fff',
                   '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' },
                   borderRadius: 2,
                 }}
               >
                 رفع ملفات
-                <input type="file" hidden multiple accept={mediaService.getAcceptedTypes('all')} onChange={handleUpload} />
+                <input
+                  type="file"
+                  hidden
+                  multiple
+                  accept={mediaService.getAcceptedTypes('all')}
+                  onChange={handleUpload}
+                />
               </Button>
             </Box>
           </Box>
@@ -356,18 +445,42 @@ export default function MediaLibrary() {
       {/* ═══ KPI Cards ════════════════════════════════════════════════════ */}
       <Grid container spacing={2} sx={{ mb: 3 }}>
         {[
-          { label: 'إجمالي الملفات', value: stats.totalFiles || 0, icon: <CloudIcon />, color: brandColors.primary },
-          { label: 'المساحة المستخدمة', value: stats.totalSizeFormatted || '0 B', icon: <StorageIcon />, color: statusColors.info },
-          { label: 'نسبة الاستخدام', value: `${stats.usagePercent || 0}%`, icon: <TrendUpIcon />, color: stats.usagePercent > 80 ? statusColors.error : statusColors.success },
-          { label: 'الألبومات', value: albums.length, icon: <FolderIcon />, color: statusColors.warning },
+          {
+            label: 'إجمالي الملفات',
+            value: stats.totalFiles || 0,
+            icon: <CloudIcon />,
+            color: brandColors.primary,
+          },
+          {
+            label: 'المساحة المستخدمة',
+            value: stats.totalSizeFormatted || '0 B',
+            icon: <StorageIcon />,
+            color: statusColors.info,
+          },
+          {
+            label: 'نسبة الاستخدام',
+            value: `${stats.usagePercent || 0}%`,
+            icon: <TrendUpIcon />,
+            color: stats.usagePercent > 80 ? statusColors.error : statusColors.success,
+          },
+          {
+            label: 'الألبومات',
+            value: albums.length,
+            icon: <FolderIcon />,
+            color: statusColors.warning,
+          },
         ].map((kpi, i) => (
           <Grid item xs={6} md={3} key={i}>
             <Card sx={{ borderRadius: 2.5, border: `1px solid ${surfaceColors.border}` }}>
               <CardContent sx={{ py: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
                 <Avatar sx={{ bgcolor: `${kpi.color}15`, color: kpi.color }}>{kpi.icon}</Avatar>
                 <Box>
-                  <Typography variant="h6" fontWeight={800} sx={{ color: kpi.color }}>{kpi.value}</Typography>
-                  <Typography variant="caption" sx={{ color: neutralColors.textSecondary }}>{kpi.label}</Typography>
+                  <Typography variant="h6" fontWeight={800} sx={{ color: kpi.color }}>
+                    {kpi.value}
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: neutralColors.textSecondary }}>
+                    {kpi.label}
+                  </Typography>
                 </Box>
               </CardContent>
             </Card>
@@ -379,7 +492,9 @@ export default function MediaLibrary() {
       <Card sx={{ mb: 3, borderRadius: 2.5, border: `1px solid ${surfaceColors.border}` }}>
         <CardContent sx={{ py: 2 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-            <Typography variant="body2" fontWeight={600}>المساحة التخزينية</Typography>
+            <Typography variant="body2" fontWeight={600}>
+              المساحة التخزينية
+            </Typography>
             <Typography variant="body2" sx={{ color: neutralColors.textSecondary }}>
               {stats.totalSizeFormatted || '0 B'} / {stats.quotaFormatted || '5.0 GB'}
             </Typography>
@@ -388,7 +503,8 @@ export default function MediaLibrary() {
             variant="determinate"
             value={Math.min(stats.usagePercent || 0, 100)}
             sx={{
-              height: 10, borderRadius: 5,
+              height: 10,
+              borderRadius: 5,
               bgcolor: surfaceColors.background,
               '& .MuiLinearProgress-bar': {
                 borderRadius: 5,
@@ -397,7 +513,7 @@ export default function MediaLibrary() {
             }}
           />
           <Box sx={{ display: 'flex', gap: 2, mt: 1.5, flexWrap: 'wrap' }}>
-            {(stats.byType || []).map((t) => {
+            {(stats.byType || []).map(t => {
               const cfg = TYPE_CONFIG[t.type] || TYPE_CONFIG.other;
               return (
                 <Chip
@@ -417,7 +533,11 @@ export default function MediaLibrary() {
       <Card sx={{ borderRadius: 3, border: `1px solid ${surfaceColors.border}` }}>
         <Tabs
           value={tabValue}
-          onChange={(_, v) => { setTabValue(v); setPage(1); setSelected([]); }}
+          onChange={(_, v) => {
+            setTabValue(v);
+            setPage(1);
+            setSelected([]);
+          }}
           sx={{ borderBottom: `1px solid ${surfaceColors.border}`, px: 2 }}
         >
           <Tab label="نظرة عامة" />
@@ -436,19 +556,41 @@ export default function MediaLibrary() {
               </Typography>
               <Grid container spacing={2} sx={{ mb: 4 }}>
                 {Object.entries(TYPE_CONFIG).map(([type, cfg]) => {
-                  const typeData = (stats.byType || []).find(t => t.type === type) || { count: 0, sizeFormatted: '0 B' };
+                  const typeData = (stats.byType || []).find(t => t.type === type) || {
+                    count: 0,
+                    sizeFormatted: '0 B',
+                  };
                   return (
                     <Grid item xs={6} sm={4} md={2} key={type}>
                       <Paper
                         sx={{
-                          p: 2, textAlign: 'center', borderRadius: 2.5,
+                          p: 2,
+                          textAlign: 'center',
+                          borderRadius: 2.5,
                           border: `1px solid ${surfaceColors.border}`,
-                          cursor: 'pointer', transition: 'all 0.2s',
-                          '&:hover': { borderColor: cfg.color, transform: 'translateY(-2px)', boxShadow: 2 },
+                          cursor: 'pointer',
+                          transition: 'all 0.2s',
+                          '&:hover': {
+                            borderColor: cfg.color,
+                            transform: 'translateY(-2px)',
+                            boxShadow: 2,
+                          },
                         }}
-                        onClick={() => { setFilters(f => ({ ...f, mediaType: type })); setTabValue(1); }}
+                        onClick={() => {
+                          setFilters(f => ({ ...f, mediaType: type }));
+                          setTabValue(1);
+                        }}
                       >
-                        <Avatar sx={{ bgcolor: `${cfg.color}15`, color: cfg.color, mx: 'auto', mb: 1, width: 48, height: 48 }}>
+                        <Avatar
+                          sx={{
+                            bgcolor: `${cfg.color}15`,
+                            color: cfg.color,
+                            mx: 'auto',
+                            mb: 1,
+                            width: 48,
+                            height: 48,
+                          }}
+                        >
                           {React.cloneElement(cfg.icon, { sx: { fontSize: 24 } })}
                         </Avatar>
                         <Typography variant="h6" fontWeight={800} sx={{ color: cfg.color }}>
@@ -457,7 +599,11 @@ export default function MediaLibrary() {
                         <Typography variant="caption" sx={{ color: neutralColors.textSecondary }}>
                           {cfg.label}
                         </Typography>
-                        <Typography variant="caption" display="block" sx={{ color: neutralColors.textSecondary, fontSize: '0.7rem' }}>
+                        <Typography
+                          variant="caption"
+                          display="block"
+                          sx={{ color: neutralColors.textSecondary, fontSize: '0.7rem' }}
+                        >
                           {typeData.sizeFormatted}
                         </Typography>
                       </Paper>
@@ -475,7 +621,9 @@ export default function MediaLibrary() {
                   <Grid item xs={6} sm={4} md={3} key={item._id || i}>
                     <Card
                       sx={{
-                        borderRadius: 2, overflow: 'hidden', cursor: 'pointer',
+                        borderRadius: 2,
+                        overflow: 'hidden',
+                        cursor: 'pointer',
                         border: `1px solid ${surfaceColors.border}`,
                         transition: 'all 0.2s',
                         '&:hover': { boxShadow: 3, transform: 'translateY(-2px)' },
@@ -484,12 +632,26 @@ export default function MediaLibrary() {
                     >
                       <MediaThumbnail item={item} height={140} />
                       <CardContent sx={{ py: 1.5, px: 2 }}>
-                        <Typography variant="body2" fontWeight={600} noWrap>{item.title || item.originalName}</Typography>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 0.5 }}>
+                        <Typography variant="body2" fontWeight={600} noWrap>
+                          {item.title || item.originalName}
+                        </Typography>
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            mt: 0.5,
+                          }}
+                        >
                           <Chip
                             size="small"
                             label={(TYPE_CONFIG[item.mediaType] || TYPE_CONFIG.other).label}
-                            sx={{ height: 20, fontSize: '0.7rem', bgcolor: `${(TYPE_CONFIG[item.mediaType] || TYPE_CONFIG.other).color}15`, color: (TYPE_CONFIG[item.mediaType] || TYPE_CONFIG.other).color }}
+                            sx={{
+                              height: 20,
+                              fontSize: '0.7rem',
+                              bgcolor: `${(TYPE_CONFIG[item.mediaType] || TYPE_CONFIG.other).color}15`,
+                              color: (TYPE_CONFIG[item.mediaType] || TYPE_CONFIG.other).color,
+                            }}
                           />
                           <Typography variant="caption" sx={{ color: neutralColors.textSecondary }}>
                             {item.formattedSize}
@@ -501,14 +663,34 @@ export default function MediaLibrary() {
                 ))}
                 {recent.length === 0 && (
                   <Grid item xs={12}>
-                    <Paper sx={{ p: 4, textAlign: 'center', bgcolor: surfaceColors.background, borderRadius: 2 }}>
-                      <UploadIcon sx={{ fontSize: 48, color: neutralColors.textSecondary, mb: 1 }} />
+                    <Paper
+                      sx={{
+                        p: 4,
+                        textAlign: 'center',
+                        bgcolor: surfaceColors.background,
+                        borderRadius: 2,
+                      }}
+                    >
+                      <UploadIcon
+                        sx={{ fontSize: 48, color: neutralColors.textSecondary, mb: 1 }}
+                      />
                       <Typography variant="body1" sx={{ color: neutralColors.textSecondary }}>
                         لا توجد ملفات بعد. ابدأ برفع ملفاتك الأولى!
                       </Typography>
-                      <Button variant="contained" startIcon={<UploadIcon />} component="label" sx={{ mt: 2, borderRadius: 2 }}>
+                      <Button
+                        variant="contained"
+                        startIcon={<UploadIcon />}
+                        component="label"
+                        sx={{ mt: 2, borderRadius: 2 }}
+                      >
                         رفع ملفات
-                        <input type="file" hidden multiple accept={mediaService.getAcceptedTypes('all')} onChange={handleUpload} />
+                        <input
+                          type="file"
+                          hidden
+                          multiple
+                          accept={mediaService.getAcceptedTypes('all')}
+                          onChange={handleUpload}
+                        />
                       </Button>
                     </Paper>
                   </Grid>
@@ -516,30 +698,51 @@ export default function MediaLibrary() {
               </Grid>
 
               {/* Albums Preview */}
-              <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography
+                variant="subtitle1"
+                fontWeight={700}
+                sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}
+              >
                 <FolderIcon sx={{ color: statusColors.warning }} /> الألبومات
-                <Button size="small" sx={{ mr: 'auto' }} onClick={() => setAlbumDialog(true)} startIcon={<NewFolderIcon />}>
+                <Button
+                  size="small"
+                  sx={{ mr: 'auto' }}
+                  onClick={() => setAlbumDialog(true)}
+                  startIcon={<NewFolderIcon />}
+                >
                   ألبوم جديد
                 </Button>
               </Typography>
               <Grid container spacing={2}>
-                {albums.map((album) => (
+                {albums.map(album => (
                   <Grid item xs={6} sm={4} md={3} key={album._id}>
                     <Paper
                       sx={{
-                        p: 2, borderRadius: 2.5, cursor: 'pointer',
+                        p: 2,
+                        borderRadius: 2.5,
+                        cursor: 'pointer',
                         border: `2px solid ${album.color || surfaceColors.border}`,
                         transition: 'all 0.2s',
                         '&:hover': { transform: 'translateY(-2px)', boxShadow: 2 },
                       }}
-                      onClick={() => { setFilters(f => ({ ...f, album: album._id })); setTabValue(1); }}
+                      onClick={() => {
+                        setFilters(f => ({ ...f, album: album._id }));
+                        setTabValue(1);
+                      }}
                     >
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
-                        <Avatar sx={{ bgcolor: `${album.color || brandColors.primary}15`, color: album.color || brandColors.primary }}>
+                        <Avatar
+                          sx={{
+                            bgcolor: `${album.color || brandColors.primary}15`,
+                            color: album.color || brandColors.primary,
+                          }}
+                        >
                           <FolderIcon />
                         </Avatar>
                         <Box>
-                          <Typography variant="body2" fontWeight={700}>{album.name}</Typography>
+                          <Typography variant="body2" fontWeight={700}>
+                            {album.name}
+                          </Typography>
                           <Typography variant="caption" sx={{ color: neutralColors.textSecondary }}>
                             {album.mediaCount || 0} ملف
                           </Typography>
@@ -550,7 +753,10 @@ export default function MediaLibrary() {
                 ))}
                 {albums.length === 0 && (
                   <Grid item xs={12}>
-                    <Typography variant="body2" sx={{ color: neutralColors.textSecondary, textAlign: 'center', py: 2 }}>
+                    <Typography
+                      variant="body2"
+                      sx={{ color: neutralColors.textSecondary, textAlign: 'center', py: 2 }}
+                    >
                       لا توجد ألبومات بعد
                     </Typography>
                   </Grid>
@@ -568,11 +774,15 @@ export default function MediaLibrary() {
                   size="small"
                   placeholder="بحث في الوسائط..."
                   value={filters.search}
-                  onChange={(e) => setFilters(f => ({ ...f, search: e.target.value }))}
-                  onKeyDown={(e) => e.key === 'Enter' && loadMedia(1)}
+                  onChange={e => setFilters(f => ({ ...f, search: e.target.value }))}
+                  onKeyDown={e => e.key === 'Enter' && loadMedia(1)}
                   sx={{ minWidth: 220 }}
                   InputProps={{
-                    startAdornment: <InputAdornment position="start"><SearchIcon sx={{ fontSize: 20 }} /></InputAdornment>,
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchIcon sx={{ fontSize: 20 }} />
+                      </InputAdornment>
+                    ),
                   }}
                 />
                 <FormControl size="small" sx={{ minWidth: 130 }}>
@@ -580,11 +790,16 @@ export default function MediaLibrary() {
                   <Select
                     value={filters.mediaType}
                     label="النوع"
-                    onChange={(e) => { setFilters(f => ({ ...f, mediaType: e.target.value })); setPage(1); }}
+                    onChange={e => {
+                      setFilters(f => ({ ...f, mediaType: e.target.value }));
+                      setPage(1);
+                    }}
                   >
                     <MenuItem value="">الكل</MenuItem>
                     {Object.entries(TYPE_CONFIG).map(([k, v]) => (
-                      <MenuItem key={k} value={k}>{v.label}</MenuItem>
+                      <MenuItem key={k} value={k}>
+                        {v.label}
+                      </MenuItem>
                     ))}
                   </Select>
                 </FormControl>
@@ -593,37 +808,77 @@ export default function MediaLibrary() {
                   <Select
                     value={filters.category}
                     label="التصنيف"
-                    onChange={(e) => { setFilters(f => ({ ...f, category: e.target.value })); setPage(1); }}
+                    onChange={e => {
+                      setFilters(f => ({ ...f, category: e.target.value }));
+                      setPage(1);
+                    }}
                   >
                     <MenuItem value="">الكل</MenuItem>
-                    {CATEGORIES.map(c => <MenuItem key={c} value={c}>{c}</MenuItem>)}
+                    {CATEGORIES.map(c => (
+                      <MenuItem key={c} value={c}>
+                        {c}
+                      </MenuItem>
+                    ))}
                   </Select>
                 </FormControl>
                 <Button
                   size="small"
-                  onClick={() => { setFilters({ mediaType: '', category: '', search: '', album: '' }); setPage(1); }}
+                  onClick={() => {
+                    setFilters({ mediaType: '', category: '', search: '', album: '' });
+                    setPage(1);
+                  }}
                 >
                   مسح الفلاتر
                 </Button>
                 <Box sx={{ flex: 1 }} />
                 {selected.length > 0 && (
-                  <Button color="error" size="small" startIcon={<DeleteIcon />} onClick={handleBulkDelete}>
+                  <Button
+                    color="error"
+                    size="small"
+                    startIcon={<DeleteIcon />}
+                    onClick={handleBulkDelete}
+                  >
                     حذف ({selected.length})
                   </Button>
                 )}
-                <ToggleButtonGroup size="small" value={viewMode} exclusive onChange={(_, v) => v && setViewMode(v)}>
-                  <ToggleButton value="grid"><GridViewIcon fontSize="small" /></ToggleButton>
-                  <ToggleButton value="list"><ListViewIcon fontSize="small" /></ToggleButton>
+                <ToggleButtonGroup
+                  size="small"
+                  value={viewMode}
+                  exclusive
+                  onChange={(_, v) => v && setViewMode(v)}
+                >
+                  <ToggleButton value="grid">
+                    <GridViewIcon fontSize="small" />
+                  </ToggleButton>
+                  <ToggleButton value="list">
+                    <ListViewIcon fontSize="small" />
+                  </ToggleButton>
                 </ToggleButtonGroup>
-                <Button variant="contained" size="small" startIcon={<UploadIcon />} component="label" sx={{ borderRadius: 2 }}>
+                <Button
+                  variant="contained"
+                  size="small"
+                  startIcon={<UploadIcon />}
+                  component="label"
+                  sx={{ borderRadius: 2 }}
+                >
                   رفع
-                  <input type="file" hidden multiple accept={mediaService.getAcceptedTypes('all')} onChange={handleUpload} />
+                  <input
+                    type="file"
+                    hidden
+                    multiple
+                    accept={mediaService.getAcceptedTypes('all')}
+                    onChange={handleUpload}
+                  />
                 </Button>
               </Box>
 
               {uploading && (
                 <Box sx={{ mb: 2 }}>
-                  <LinearProgress variant="determinate" value={uploadProgress} sx={{ height: 8, borderRadius: 4 }} />
+                  <LinearProgress
+                    variant="determinate"
+                    value={uploadProgress}
+                    sx={{ height: 8, borderRadius: 4 }}
+                  />
                   <Typography variant="caption" sx={{ color: neutralColors.textSecondary }}>
                     جاري الرفع... {uploadProgress}%
                   </Typography>
@@ -633,48 +888,97 @@ export default function MediaLibrary() {
               {/* Grid View */}
               {viewMode === 'grid' ? (
                 <Grid container spacing={2}>
-                  {media.map((item) => {
+                  {media.map(item => {
                     const isSelected = selected.includes(item._id);
                     return (
                       <Grid item xs={6} sm={4} md={3} lg={2} key={item._id}>
                         <Card
                           sx={{
-                            borderRadius: 2, overflow: 'hidden', position: 'relative',
-                            border: isSelected ? `2px solid ${brandColors.primary}` : `1px solid ${surfaceColors.border}`,
+                            borderRadius: 2,
+                            overflow: 'hidden',
+                            position: 'relative',
+                            border: isSelected
+                              ? `2px solid ${brandColors.primary}`
+                              : `1px solid ${surfaceColors.border}`,
                             transition: 'all 0.2s',
                             '&:hover': { boxShadow: 3 },
                             '&:hover .media-actions': { opacity: 1 },
                           }}
                         >
-                          <MediaThumbnail item={item} height={120} onClick={() => setPreviewItem(item)} />
+                          <MediaThumbnail
+                            item={item}
+                            height={120}
+                            onClick={() => setPreviewItem(item)}
+                          />
                           {/* Overlay actions */}
                           <Box
                             className="media-actions"
                             sx={{
-                              position: 'absolute', top: 4, right: 4, left: 4,
-                              display: 'flex', justifyContent: 'space-between',
-                              opacity: 0, transition: 'opacity 0.2s',
+                              position: 'absolute',
+                              top: 4,
+                              right: 4,
+                              left: 4,
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              opacity: 0,
+                              transition: 'opacity 0.2s',
                             }}
                           >
                             <IconButton
                               size="small"
-                              sx={{ bgcolor: 'rgba(255,255,255,0.9)', '&:hover': { bgcolor: '#fff' } }}
-                              onClick={(e) => { e.stopPropagation(); toggleSelect(item._id); }}
+                              sx={{
+                                bgcolor: 'rgba(255,255,255,0.9)',
+                                '&:hover': { bgcolor: '#fff' },
+                              }}
+                              onClick={e => {
+                                e.stopPropagation();
+                                toggleSelect(item._id);
+                              }}
                             >
-                              {isSelected ? <CheckIcon color="primary" fontSize="small" /> : <Box sx={{ width: 18, height: 18, border: '2px solid #999', borderRadius: 0.5 }} />}
+                              {isSelected ? (
+                                <CheckIcon color="primary" fontSize="small" />
+                              ) : (
+                                <Box
+                                  sx={{
+                                    width: 18,
+                                    height: 18,
+                                    border: '2px solid #999',
+                                    borderRadius: 0.5,
+                                  }}
+                                />
+                              )}
                             </IconButton>
                             <Box>
                               <IconButton
                                 size="small"
-                                sx={{ bgcolor: 'rgba(255,255,255,0.9)', ml: 0.5, '&:hover': { bgcolor: '#fff' } }}
-                                onClick={(e) => { e.stopPropagation(); handleToggleFavorite(item._id); }}
+                                sx={{
+                                  bgcolor: 'rgba(255,255,255,0.9)',
+                                  ml: 0.5,
+                                  '&:hover': { bgcolor: '#fff' },
+                                }}
+                                onClick={e => {
+                                  e.stopPropagation();
+                                  handleToggleFavorite(item._id);
+                                }}
                               >
-                                {item.isFavorite ? <StarIcon sx={{ color: statusColors.warning, fontSize: 18 }} /> : <StarBorderIcon sx={{ fontSize: 18 }} />}
+                                {item.isFavorite ? (
+                                  <StarIcon sx={{ color: statusColors.warning, fontSize: 18 }} />
+                                ) : (
+                                  <StarBorderIcon sx={{ fontSize: 18 }} />
+                                )}
                               </IconButton>
                               <IconButton
                                 size="small"
-                                sx={{ bgcolor: 'rgba(255,255,255,0.9)', ml: 0.5, '&:hover': { bgcolor: '#fff' } }}
-                                onClick={(e) => { e.stopPropagation(); setContextItem(item); setAnchorEl(e.currentTarget); }}
+                                sx={{
+                                  bgcolor: 'rgba(255,255,255,0.9)',
+                                  ml: 0.5,
+                                  '&:hover': { bgcolor: '#fff' },
+                                }}
+                                onClick={e => {
+                                  e.stopPropagation();
+                                  setContextItem(item);
+                                  setAnchorEl(e.currentTarget);
+                                }}
                               >
                                 <MoreIcon sx={{ fontSize: 18 }} />
                               </IconButton>
@@ -684,7 +988,10 @@ export default function MediaLibrary() {
                             <Typography variant="caption" fontWeight={600} noWrap display="block">
                               {item.title || item.originalName}
                             </Typography>
-                            <Typography variant="caption" sx={{ color: neutralColors.textSecondary, fontSize: '0.65rem' }}>
+                            <Typography
+                              variant="caption"
+                              sx={{ color: neutralColors.textSecondary, fontSize: '0.65rem' }}
+                            >
                               {item.formattedSize}
                             </Typography>
                           </CardContent>
@@ -694,8 +1001,17 @@ export default function MediaLibrary() {
                   })}
                   {media.length === 0 && (
                     <Grid item xs={12}>
-                      <Paper sx={{ p: 4, textAlign: 'center', bgcolor: surfaceColors.background, borderRadius: 2 }}>
-                        <FileIcon sx={{ fontSize: 48, color: neutralColors.textSecondary, mb: 1 }} />
+                      <Paper
+                        sx={{
+                          p: 4,
+                          textAlign: 'center',
+                          bgcolor: surfaceColors.background,
+                          borderRadius: 2,
+                        }}
+                      >
+                        <FileIcon
+                          sx={{ fontSize: 48, color: neutralColors.textSecondary, mb: 1 }}
+                        />
                         <Typography sx={{ color: neutralColors.textSecondary }}>
                           {tabValue === 2 ? 'لا توجد ملفات مفضلة' : 'لا توجد ملفات'}
                         </Typography>
@@ -706,39 +1022,85 @@ export default function MediaLibrary() {
               ) : (
                 /* List View */
                 <Box>
-                  {media.map((item) => {
+                  {media.map(item => {
                     const cfg = TYPE_CONFIG[item.mediaType] || TYPE_CONFIG.other;
                     const isSelected = selected.includes(item._id);
                     return (
                       <Paper
                         key={item._id}
                         sx={{
-                          display: 'flex', alignItems: 'center', gap: 2, p: 1.5, mb: 1,
-                          borderRadius: 2, cursor: 'pointer',
-                          border: isSelected ? `2px solid ${brandColors.primary}` : `1px solid ${surfaceColors.border}`,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 2,
+                          p: 1.5,
+                          mb: 1,
+                          borderRadius: 2,
+                          cursor: 'pointer',
+                          border: isSelected
+                            ? `2px solid ${brandColors.primary}`
+                            : `1px solid ${surfaceColors.border}`,
                           '&:hover': { bgcolor: surfaceColors.background },
                         }}
                         onClick={() => setPreviewItem(item)}
                       >
-                        <IconButton size="small" onClick={(e) => { e.stopPropagation(); toggleSelect(item._id); }}>
-                          {isSelected ? <CheckIcon color="primary" /> : <Box sx={{ width: 18, height: 18, border: '2px solid #ccc', borderRadius: 0.5 }} />}
+                        <IconButton
+                          size="small"
+                          onClick={e => {
+                            e.stopPropagation();
+                            toggleSelect(item._id);
+                          }}
+                        >
+                          {isSelected ? (
+                            <CheckIcon color="primary" />
+                          ) : (
+                            <Box
+                              sx={{
+                                width: 18,
+                                height: 18,
+                                border: '2px solid #ccc',
+                                borderRadius: 0.5,
+                              }}
+                            />
+                          )}
                         </IconButton>
                         <Avatar sx={{ bgcolor: `${cfg.color}15`, color: cfg.color }}>
                           {cfg.icon}
                         </Avatar>
                         <Box sx={{ flex: 1, minWidth: 0 }}>
-                          <Typography variant="body2" fontWeight={600} noWrap>{item.title || item.originalName}</Typography>
+                          <Typography variant="body2" fontWeight={600} noWrap>
+                            {item.title || item.originalName}
+                          </Typography>
                           <Typography variant="caption" sx={{ color: neutralColors.textSecondary }}>
                             {cfg.label} · {item.formattedSize} · {item.uploadedBy?.name || '-'}
                           </Typography>
                         </Box>
-                        <Typography variant="caption" sx={{ color: neutralColors.textSecondary, mx: 1 }}>
+                        <Typography
+                          variant="caption"
+                          sx={{ color: neutralColors.textSecondary, mx: 1 }}
+                        >
                           {new Date(item.createdAt).toLocaleDateString('ar-SA')}
                         </Typography>
-                        <IconButton size="small" onClick={(e) => { e.stopPropagation(); handleToggleFavorite(item._id); }}>
-                          {item.isFavorite ? <StarIcon sx={{ color: statusColors.warning }} /> : <StarBorderIcon />}
+                        <IconButton
+                          size="small"
+                          onClick={e => {
+                            e.stopPropagation();
+                            handleToggleFavorite(item._id);
+                          }}
+                        >
+                          {item.isFavorite ? (
+                            <StarIcon sx={{ color: statusColors.warning }} />
+                          ) : (
+                            <StarBorderIcon />
+                          )}
                         </IconButton>
-                        <IconButton size="small" onClick={(e) => { e.stopPropagation(); setContextItem(item); setAnchorEl(e.currentTarget); }}>
+                        <IconButton
+                          size="small"
+                          onClick={e => {
+                            e.stopPropagation();
+                            setContextItem(item);
+                            setAnchorEl(e.currentTarget);
+                          }}
+                        >
                           <MoreIcon />
                         </IconButton>
                       </Paper>
@@ -753,7 +1115,10 @@ export default function MediaLibrary() {
                   <Pagination
                     count={pagination.pages}
                     page={page}
-                    onChange={(_, p) => { setPage(p); loadMedia(p); }}
+                    onChange={(_, p) => {
+                      setPage(p);
+                      loadMedia(p);
+                    }}
                     color="primary"
                   />
                 </Box>
@@ -765,34 +1130,60 @@ export default function MediaLibrary() {
           {tabValue === 3 && (
             <Box>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-                <Typography variant="subtitle1" fontWeight={700}>إدارة الألبومات</Typography>
-                <Button variant="contained" size="small" startIcon={<NewFolderIcon />} onClick={() => setAlbumDialog(true)} sx={{ borderRadius: 2 }}>
+                <Typography variant="subtitle1" fontWeight={700}>
+                  إدارة الألبومات
+                </Typography>
+                <Button
+                  variant="contained"
+                  size="small"
+                  startIcon={<NewFolderIcon />}
+                  onClick={() => setAlbumDialog(true)}
+                  sx={{ borderRadius: 2 }}
+                >
                   ألبوم جديد
                 </Button>
               </Box>
               <Grid container spacing={2}>
-                {albums.map((album) => (
+                {albums.map(album => (
                   <Grid item xs={12} sm={6} md={4} key={album._id}>
                     <Card
                       sx={{
-                        borderRadius: 2.5, border: `2px solid ${album.color || surfaceColors.border}`,
-                        cursor: 'pointer', transition: 'all 0.2s',
+                        borderRadius: 2.5,
+                        border: `2px solid ${album.color || surfaceColors.border}`,
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
                         '&:hover': { transform: 'translateY(-2px)', boxShadow: 3 },
                       }}
-                      onClick={() => { setFilters(f => ({ ...f, album: album._id })); setTabValue(1); }}
+                      onClick={() => {
+                        setFilters(f => ({ ...f, album: album._id }));
+                        setTabValue(1);
+                      }}
                     >
                       <CardContent>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                          <Avatar sx={{ width: 56, height: 56, bgcolor: `${album.color || brandColors.primary}15`, color: album.color || brandColors.primary }}>
+                          <Avatar
+                            sx={{
+                              width: 56,
+                              height: 56,
+                              bgcolor: `${album.color || brandColors.primary}15`,
+                              color: album.color || brandColors.primary,
+                            }}
+                          >
                             <FolderIcon sx={{ fontSize: 28 }} />
                           </Avatar>
                           <Box sx={{ flex: 1 }}>
-                            <Typography variant="subtitle1" fontWeight={700}>{album.name}</Typography>
+                            <Typography variant="subtitle1" fontWeight={700}>
+                              {album.name}
+                            </Typography>
                             <Typography variant="body2" sx={{ color: neutralColors.textSecondary }}>
                               {album.mediaCount || 0} ملف
                             </Typography>
                             {album.description && (
-                              <Typography variant="caption" sx={{ color: neutralColors.textSecondary }} noWrap>
+                              <Typography
+                                variant="caption"
+                                sx={{ color: neutralColors.textSecondary }}
+                                noWrap
+                              >
                                 {album.description}
                               </Typography>
                             )}
@@ -804,9 +1195,20 @@ export default function MediaLibrary() {
                 ))}
                 {albums.length === 0 && (
                   <Grid item xs={12}>
-                    <Paper sx={{ p: 4, textAlign: 'center', bgcolor: surfaceColors.background, borderRadius: 2 }}>
-                      <FolderIcon sx={{ fontSize: 48, color: neutralColors.textSecondary, mb: 1 }} />
-                      <Typography sx={{ color: neutralColors.textSecondary }}>لا توجد ألبومات بعد</Typography>
+                    <Paper
+                      sx={{
+                        p: 4,
+                        textAlign: 'center',
+                        bgcolor: surfaceColors.background,
+                        borderRadius: 2,
+                      }}
+                    >
+                      <FolderIcon
+                        sx={{ fontSize: 48, color: neutralColors.textSecondary, mb: 1 }}
+                      />
+                      <Typography sx={{ color: neutralColors.textSecondary }}>
+                        لا توجد ألبومات بعد
+                      </Typography>
                     </Paper>
                   </Grid>
                 )}
@@ -823,45 +1225,94 @@ export default function MediaLibrary() {
         onClose={() => setAnchorEl(null)}
         PaperProps={{ sx: { minWidth: 160 } }}
       >
-        <MenuItem onClick={() => { setPreviewItem(contextItem); setAnchorEl(null); }}>
+        <MenuItem
+          onClick={() => {
+            setPreviewItem(contextItem);
+            setAnchorEl(null);
+          }}
+        >
           <PreviewIcon sx={{ mr: 1, fontSize: 20 }} /> معاينة
         </MenuItem>
         <MenuItem onClick={() => openEdit(contextItem)}>
           <EditIcon sx={{ mr: 1, fontSize: 20 }} /> تعديل
         </MenuItem>
         {contextItem && (
-          <MenuItem component="a" href={mediaService.getDownloadUrl(contextItem._id)} target="_blank" onClick={() => setAnchorEl(null)}>
+          <MenuItem
+            component="a"
+            href={mediaService.getDownloadUrl(contextItem._id)}
+            target="_blank"
+            onClick={() => setAnchorEl(null)}
+          >
             <DownloadIcon sx={{ mr: 1, fontSize: 20 }} /> تحميل
           </MenuItem>
         )}
         <Divider />
-        <MenuItem sx={{ color: statusColors.error }} onClick={() => contextItem && handleDelete(contextItem._id)}>
+        <MenuItem
+          sx={{ color: statusColors.error }}
+          onClick={() => contextItem && handleDelete(contextItem._id)}
+        >
           <DeleteIcon sx={{ mr: 1, fontSize: 20 }} /> حذف
         </MenuItem>
       </Menu>
 
       {/* ═══ Preview Dialog ═══════════════════════════════════════════════ */}
-      <Dialog open={Boolean(previewItem)} onClose={() => setPreviewItem(null)} maxWidth="md" fullWidth>
+      <Dialog
+        open={Boolean(previewItem)}
+        onClose={() => setPreviewItem(null)}
+        maxWidth="md"
+        fullWidth
+      >
         {previewItem && (
           <>
-            <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <DialogTitle
+              sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+            >
               <Typography variant="h6" fontWeight={700} noWrap sx={{ flex: 1 }}>
                 {previewItem.title || previewItem.originalName}
               </Typography>
-              <IconButton onClick={() => setPreviewItem(null)}><CloseIcon /></IconButton>
+              <IconButton onClick={() => setPreviewItem(null)}>
+                <CloseIcon />
+              </IconButton>
             </DialogTitle>
             <DialogContent dividers>
               <Box sx={{ textAlign: 'center', mb: 2 }}>
                 {previewItem.mediaType === 'image' && previewItem.url ? (
-                  <Box component="img" src={previewItem.url} alt={previewItem.title} sx={{ maxWidth: '100%', maxHeight: 500, borderRadius: 2 }} />
+                  <Box
+                    component="img"
+                    src={previewItem.url}
+                    alt={previewItem.title}
+                    sx={{ maxWidth: '100%', maxHeight: 500, borderRadius: 2 }}
+                  />
                 ) : previewItem.mediaType === 'video' && previewItem.url ? (
-                  <Box component="video" controls src={previewItem.url} sx={{ maxWidth: '100%', maxHeight: 500, borderRadius: 2 }} />
+                  <Box
+                    component="video"
+                    controls
+                    src={previewItem.url}
+                    sx={{ maxWidth: '100%', maxHeight: 500, borderRadius: 2 }}
+                  />
                 ) : previewItem.mediaType === 'audio' && previewItem.url ? (
-                  <Box component="audio" controls src={previewItem.url} sx={{ width: '100%', mt: 4 }} />
+                  <Box
+                    component="audio"
+                    controls
+                    src={previewItem.url}
+                    sx={{ width: '100%', mt: 4 }}
+                  />
                 ) : (
                   <Box sx={{ py: 4 }}>
-                    <Avatar sx={{ width: 80, height: 80, bgcolor: `${(TYPE_CONFIG[previewItem.mediaType] || TYPE_CONFIG.other).color}15`, color: (TYPE_CONFIG[previewItem.mediaType] || TYPE_CONFIG.other).color, mx: 'auto', mb: 2 }}>
-                      {React.cloneElement((TYPE_CONFIG[previewItem.mediaType] || TYPE_CONFIG.other).icon, { sx: { fontSize: 40 } })}
+                    <Avatar
+                      sx={{
+                        width: 80,
+                        height: 80,
+                        bgcolor: `${(TYPE_CONFIG[previewItem.mediaType] || TYPE_CONFIG.other).color}15`,
+                        color: (TYPE_CONFIG[previewItem.mediaType] || TYPE_CONFIG.other).color,
+                        mx: 'auto',
+                        mb: 2,
+                      }}
+                    >
+                      {React.cloneElement(
+                        (TYPE_CONFIG[previewItem.mediaType] || TYPE_CONFIG.other).icon,
+                        { sx: { fontSize: 40 } }
+                      )}
                     </Avatar>
                     <Typography>{previewItem.originalName}</Typography>
                   </Box>
@@ -869,24 +1320,38 @@ export default function MediaLibrary() {
               </Box>
               <Grid container spacing={2}>
                 {[
-                  { label: 'النوع', value: (TYPE_CONFIG[previewItem.mediaType] || TYPE_CONFIG.other).label },
+                  {
+                    label: 'النوع',
+                    value: (TYPE_CONFIG[previewItem.mediaType] || TYPE_CONFIG.other).label,
+                  },
                   { label: 'الحجم', value: previewItem.formattedSize },
                   { label: 'الصيغة', value: previewItem.extension || previewItem.mimeType },
                   { label: 'رفع بواسطة', value: previewItem.uploadedBy?.name || '-' },
-                  { label: 'تاريخ الرفع', value: new Date(previewItem.createdAt).toLocaleDateString('ar-SA') },
+                  {
+                    label: 'تاريخ الرفع',
+                    value: new Date(previewItem.createdAt).toLocaleDateString('ar-SA'),
+                  },
                   { label: 'التصنيف', value: previewItem.category || 'عام' },
                 ].map((info, i) => (
                   <Grid item xs={6} sm={4} key={i}>
-                    <Typography variant="caption" sx={{ color: neutralColors.textSecondary }}>{info.label}</Typography>
-                    <Typography variant="body2" fontWeight={600}>{info.value}</Typography>
+                    <Typography variant="caption" sx={{ color: neutralColors.textSecondary }}>
+                      {info.label}
+                    </Typography>
+                    <Typography variant="body2" fontWeight={600}>
+                      {info.value}
+                    </Typography>
                   </Grid>
                 ))}
               </Grid>
               {previewItem.tags?.length > 0 && (
                 <Box sx={{ mt: 2 }}>
-                  <Typography variant="caption" sx={{ color: neutralColors.textSecondary }}>الوسوم</Typography>
+                  <Typography variant="caption" sx={{ color: neutralColors.textSecondary }}>
+                    الوسوم
+                  </Typography>
                   <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mt: 0.5 }}>
-                    {previewItem.tags.map((tag, i) => <Chip key={i} label={tag} size="small" />)}
+                    {previewItem.tags.map((tag, i) => (
+                      <Chip key={i} label={tag} size="small" />
+                    ))}
                   </Box>
                 </Box>
               )}
@@ -900,7 +1365,13 @@ export default function MediaLibrary() {
               >
                 تحميل
               </Button>
-              <Button onClick={() => { openEdit(previewItem); setPreviewItem(null); }} startIcon={<EditIcon />}>
+              <Button
+                onClick={() => {
+                  openEdit(previewItem);
+                  setPreviewItem(null);
+                }}
+                startIcon={<EditIcon />}
+              >
                 تعديل
               </Button>
               <Button onClick={() => setPreviewItem(null)}>إغلاق</Button>
@@ -917,37 +1388,48 @@ export default function MediaLibrary() {
             <TextField
               label="العنوان"
               value={editForm.title}
-              onChange={(e) => setEditForm(f => ({ ...f, title: e.target.value }))}
-              fullWidth size="small"
+              onChange={e => setEditForm(f => ({ ...f, title: e.target.value }))}
+              fullWidth
+              size="small"
             />
             <TextField
               label="الوصف"
               value={editForm.description}
-              onChange={(e) => setEditForm(f => ({ ...f, description: e.target.value }))}
-              fullWidth size="small" multiline rows={2}
+              onChange={e => setEditForm(f => ({ ...f, description: e.target.value }))}
+              fullWidth
+              size="small"
+              multiline
+              rows={2}
             />
             <FormControl fullWidth size="small">
               <InputLabel>التصنيف</InputLabel>
               <Select
                 value={editForm.category}
                 label="التصنيف"
-                onChange={(e) => setEditForm(f => ({ ...f, category: e.target.value }))}
+                onChange={e => setEditForm(f => ({ ...f, category: e.target.value }))}
               >
-                {CATEGORIES.map(c => <MenuItem key={c} value={c}>{c}</MenuItem>)}
+                {CATEGORIES.map(c => (
+                  <MenuItem key={c} value={c}>
+                    {c}
+                  </MenuItem>
+                ))}
               </Select>
             </FormControl>
             <TextField
               label="الوسوم (مفصولة بفاصلة)"
               value={editForm.tags}
-              onChange={(e) => setEditForm(f => ({ ...f, tags: e.target.value }))}
-              fullWidth size="small"
+              onChange={e => setEditForm(f => ({ ...f, tags: e.target.value }))}
+              fullWidth
+              size="small"
               placeholder="صورة, فعالية, 2026"
             />
           </Box>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setEditItem(null)}>إلغاء</Button>
-          <Button variant="contained" onClick={handleEditSave} sx={{ borderRadius: 2 }}>حفظ</Button>
+          <Button variant="contained" onClick={handleEditSave} sx={{ borderRadius: 2 }}>
+            حفظ
+          </Button>
         </DialogActions>
       </Dialog>
 
@@ -959,20 +1441,30 @@ export default function MediaLibrary() {
             <TextField
               label="اسم الألبوم"
               value={newAlbumName}
-              onChange={(e) => setNewAlbumName(e.target.value)}
-              fullWidth size="small" autoFocus
+              onChange={e => setNewAlbumName(e.target.value)}
+              fullWidth
+              size="small"
+              autoFocus
             />
             <TextField
               label="الوصف (اختياري)"
               value={newAlbumDesc}
-              onChange={(e) => setNewAlbumDesc(e.target.value)}
-              fullWidth size="small" multiline rows={2}
+              onChange={e => setNewAlbumDesc(e.target.value)}
+              fullWidth
+              size="small"
+              multiline
+              rows={2}
             />
           </Box>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setAlbumDialog(false)}>إلغاء</Button>
-          <Button variant="contained" onClick={handleCreateAlbum} disabled={!newAlbumName} sx={{ borderRadius: 2 }}>
+          <Button
+            variant="contained"
+            onClick={handleCreateAlbum}
+            disabled={!newAlbumName}
+            sx={{ borderRadius: 2 }}
+          >
             إنشاء
           </Button>
         </DialogActions>

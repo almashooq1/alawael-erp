@@ -207,10 +207,10 @@ const AssessmentDialog = ({
           <InputLabel>اختر المستفيد</InputLabel>
           <Select
             value={selectedBeneficiary}
-            onChange={(e) => onBeneficiaryChange(e.target.value)}
+            onChange={e => onBeneficiaryChange(e.target.value)}
             label="اختر المستفيد"
           >
-            {beneficiaries.map((b) => (
+            {beneficiaries.map(b => (
               <MenuItem key={b.id} value={b.id}>
                 {b.name} — {b.age} سنة (
                 {assessmentService.getDisabilityTypes()[b.disabilityType] || b.disabilityType})
@@ -220,10 +220,11 @@ const AssessmentDialog = ({
         </FormControl>
 
         {/* Domain sliders with percentage badge */}
-        {selectedScale?.domains.map((domain) => {
+        {selectedScale?.domains.map(domain => {
           const score = domainScores[domain.key] || 0;
           const pct = Math.round((score / domain.maxScore) * 100);
-          const pctColor = pct < 25 ? '#d32f2f' : pct < 50 ? '#ed6c02' : pct < 75 ? '#0288d1' : '#2e7d32';
+          const pctColor =
+            pct < 25 ? '#d32f2f' : pct < 50 ? '#ed6c02' : pct < 75 ? '#0288d1' : '#2e7d32';
           return (
             <Paper key={domain.key} elevation={1} sx={{ p: 2, mb: 2 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
@@ -309,7 +310,7 @@ const AssessmentDialog = ({
           rows={3}
           fullWidth
           value={assessorNotes}
-          onChange={(e) => onNotesChange(e.target.value)}
+          onChange={e => onNotesChange(e.target.value)}
           placeholder="أدخل ملاحظاتك وتوصياتك هنا..."
         />
       </DialogContent>

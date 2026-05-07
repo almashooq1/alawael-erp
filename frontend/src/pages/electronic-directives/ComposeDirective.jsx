@@ -15,7 +15,8 @@ import {
   MenuItem,
   Button,
   Chip,
-  IconButton,  Switch,
+  IconButton,
+  Switch,
   FormControlLabel,
   Alert,
   Snackbar,
@@ -30,13 +31,9 @@ import {
   Add as AddIcon,
   Delete as DeleteIcon,
   AttachFile as AttachIcon,
-  } from '@mui/icons-material';
+} from '@mui/icons-material';
 import electronicDirectivesService from '../../services/electronicDirectives.service';
-import {
-  typeOptions,
-  priorityOptions,
-  issuerOptions,
-  recipientTypeOptions,} from './constants';
+import { typeOptions, priorityOptions, issuerOptions, recipientTypeOptions } from './constants';
 
 export default function ComposeDirective() {
   const navigate = useNavigate();
@@ -64,9 +61,7 @@ export default function ComposeDirective() {
   const [issuerPosition, setIssuerPosition] = useState('');
 
   // Recipients
-  const [recipients, setRecipients] = useState([
-    { type: 'all', name: 'الجميع', targetId: '' },
-  ]);
+  const [recipients, setRecipients] = useState([{ type: 'all', name: 'الجميع', targetId: '' }]);
 
   // Actions
   const [actions, setActions] = useState([]);
@@ -80,60 +75,57 @@ export default function ComposeDirective() {
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
   // ─── Handlers ────────────────────────────────────────
-  const handleChange = (field) => (e) => {
+  const handleChange = field => e => {
     const val = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
-    setForm((prev) => ({ ...prev, [field]: val }));
+    setForm(prev => ({ ...prev, [field]: val }));
   };
 
-  const handleSwitchChange = (field) => (e) => {
-    setForm((prev) => ({ ...prev, [field]: e.target.checked }));
+  const handleSwitchChange = field => e => {
+    setForm(prev => ({ ...prev, [field]: e.target.checked }));
   };
 
   // Recipients management
   const addRecipient = () => {
-    setRecipients((prev) => [...prev, { type: 'department', name: '', targetId: '' }]);
+    setRecipients(prev => [...prev, { type: 'department', name: '', targetId: '' }]);
   };
 
   const updateRecipient = (index, field, value) => {
-    setRecipients((prev) => {
+    setRecipients(prev => {
       const updated = [...prev];
       updated[index] = { ...updated[index], [field]: value };
       return updated;
     });
   };
 
-  const removeRecipient = (index) => {
-    setRecipients((prev) => prev.filter((_, i) => i !== index));
+  const removeRecipient = index => {
+    setRecipients(prev => prev.filter((_, i) => i !== index));
   };
 
   // Actions management
   const addAction = () => {
-    setActions((prev) => [
-      ...prev,
-      { description: '', deadline: '', assignee: '' },
-    ]);
+    setActions(prev => [...prev, { description: '', deadline: '', assignee: '' }]);
   };
 
   const updateAction = (index, field, value) => {
-    setActions((prev) => {
+    setActions(prev => {
       const updated = [...prev];
       updated[index] = { ...updated[index], [field]: value };
       return updated;
     });
   };
 
-  const removeAction = (index) => {
-    setActions((prev) => prev.filter((_, i) => i !== index));
+  const removeAction = index => {
+    setActions(prev => prev.filter((_, i) => i !== index));
   };
 
   // File attachment
-  const handleFileSelect = (e) => {
+  const handleFileSelect = e => {
     const files = Array.from(e.target.files);
-    setAttachments((prev) => [...prev, ...files]);
+    setAttachments(prev => [...prev, ...files]);
   };
 
-  const removeAttachment = (index) => {
-    setAttachments((prev) => prev.filter((_, i) => i !== index));
+  const removeAttachment = index => {
+    setAttachments(prev => prev.filter((_, i) => i !== index));
   };
 
   // ─── Build Payload ───────────────────────────────────
@@ -149,7 +141,7 @@ export default function ComposeDirective() {
       name: issuerName.trim() || undefined,
       position: issuerPosition.trim() || undefined,
     },
-    recipients: recipients.map((r) => ({
+    recipients: recipients.map(r => ({
       type: r.type,
       name: r.name.trim() || undefined,
       targetId: r.targetId || undefined,
@@ -161,8 +153,8 @@ export default function ComposeDirective() {
     requiresAction: actions.length > 0,
     actionDeadline: form.requiresAction ? form.actionDeadline || undefined : undefined,
     requiredActions: actions
-      .filter((a) => a.description.trim())
-      .map((a) => ({
+      .filter(a => a.description.trim())
+      .map(a => ({
         description: a.description.trim(),
         deadline: a.deadline || undefined,
       })),
@@ -210,17 +202,13 @@ export default function ComposeDirective() {
 
       setSnackbar({
         open: true,
-        message: issueImmediately
-          ? 'تم إصدار التوجيه بنجاح'
-          : 'تم حفظ المسودة بنجاح',
+        message: issueImmediately ? 'تم إصدار التوجيه بنجاح' : 'تم حفظ المسودة بنجاح',
         severity: 'success',
       });
 
       setTimeout(() => {
         navigate(
-          directiveId
-            ? `/electronic-directives/view/${directiveId}`
-            : '/electronic-directives/list'
+          directiveId ? `/electronic-directives/view/${directiveId}` : '/electronic-directives/list'
         );
       }, 1000);
     } catch (err) {
@@ -274,7 +262,7 @@ export default function ComposeDirective() {
             <FormControl fullWidth>
               <InputLabel>النوع *</InputLabel>
               <Select value={form.type} label="النوع *" onChange={handleChange('type')}>
-                {typeOptions.map((t) => (
+                {typeOptions.map(t => (
                   <MenuItem key={t.value} value={t.value}>
                     <Box display="flex" alignItems="center" gap={1}>
                       <Box
@@ -295,12 +283,8 @@ export default function ComposeDirective() {
           <Grid item xs={12} md={4}>
             <FormControl fullWidth>
               <InputLabel>الأولوية *</InputLabel>
-              <Select
-                value={form.priority}
-                label="الأولوية *"
-                onChange={handleChange('priority')}
-              >
-                {priorityOptions.map((p) => (
+              <Select value={form.priority} label="الأولوية *" onChange={handleChange('priority')}>
+                {priorityOptions.map(p => (
                   <MenuItem key={p.value} value={p.value}>
                     <Box display="flex" alignItems="center" gap={1}>
                       <span>{p.icon}</span>
@@ -357,9 +341,9 @@ export default function ComposeDirective() {
               <Select
                 value={issuerType}
                 label="نوع المُصدِر"
-                onChange={(e) => setIssuerType(e.target.value)}
+                onChange={e => setIssuerType(e.target.value)}
               >
-                {issuerOptions.map((o) => (
+                {issuerOptions.map(o => (
                   <MenuItem key={o.value} value={o.value}>
                     {o.label}
                   </MenuItem>
@@ -372,7 +356,7 @@ export default function ComposeDirective() {
               fullWidth
               label="اسم المُصدِر"
               value={issuerName}
-              onChange={(e) => setIssuerName(e.target.value)}
+              onChange={e => setIssuerName(e.target.value)}
             />
           </Grid>
           <Grid item xs={12} md={4}>
@@ -380,7 +364,7 @@ export default function ComposeDirective() {
               fullWidth
               label="المنصب"
               value={issuerPosition}
-              onChange={(e) => setIssuerPosition(e.target.value)}
+              onChange={e => setIssuerPosition(e.target.value)}
             />
           </Grid>
         </Grid>
@@ -403,9 +387,9 @@ export default function ComposeDirective() {
               <Select
                 value={r.type}
                 label="النوع"
-                onChange={(e) => updateRecipient(idx, 'type', e.target.value)}
+                onChange={e => updateRecipient(idx, 'type', e.target.value)}
               >
-                {recipientTypeOptions.map((o) => (
+                {recipientTypeOptions.map(o => (
                   <MenuItem key={o.value} value={o.value}>
                     {o.label}
                   </MenuItem>
@@ -416,7 +400,7 @@ export default function ComposeDirective() {
               size="small"
               label="الاسم / المعرّف"
               value={r.name}
-              onChange={(e) => updateRecipient(idx, 'name', e.target.value)}
+              onChange={e => updateRecipient(idx, 'name', e.target.value)}
               sx={{ flex: 1 }}
             />
             {recipients.length > 1 && (
@@ -460,10 +444,7 @@ export default function ComposeDirective() {
           <Grid item xs={12} md={6}>
             <FormControlLabel
               control={
-                <Switch
-                  checked={form.autoExpire}
-                  onChange={handleSwitchChange('autoExpire')}
-                />
+                <Switch checked={form.autoExpire} onChange={handleSwitchChange('autoExpire')} />
               }
               label="انتهاء صلاحية تلقائي"
             />
@@ -496,7 +477,7 @@ export default function ComposeDirective() {
                       size="small"
                       label="وصف الإجراء"
                       value={a.description}
-                      onChange={(e) => updateAction(idx, 'description', e.target.value)}
+                      onChange={e => updateAction(idx, 'description', e.target.value)}
                     />
                   </Grid>
                   <Grid item xs={12} md={4}>
@@ -506,7 +487,7 @@ export default function ComposeDirective() {
                       label="الموعد النهائي"
                       type="date"
                       value={a.deadline}
-                      onChange={(e) => updateAction(idx, 'deadline', e.target.value)}
+                      onChange={e => updateAction(idx, 'deadline', e.target.value)}
                       InputLabelProps={{ shrink: true }}
                     />
                   </Grid>
@@ -534,13 +515,13 @@ export default function ComposeDirective() {
               freeSolo
               options={[]}
               value={form.tags}
-              onChange={(_, newVal) => setForm((prev) => ({ ...prev, tags: newVal }))}
+              onChange={(_, newVal) => setForm(prev => ({ ...prev, tags: newVal }))}
               renderTags={(value, getTagProps) =>
                 value.map((option, index) => (
                   <Chip label={option} size="small" {...getTagProps({ index })} key={option} />
                 ))
               }
-              renderInput={(params) => (
+              renderInput={params => (
                 <TextField {...params} label="الوسوم" placeholder="أضف وسماً..." size="small" />
               )}
             />
@@ -551,13 +532,13 @@ export default function ComposeDirective() {
               freeSolo
               options={[]}
               value={form.categories}
-              onChange={(_, newVal) => setForm((prev) => ({ ...prev, categories: newVal }))}
+              onChange={(_, newVal) => setForm(prev => ({ ...prev, categories: newVal }))}
               renderTags={(value, getTagProps) =>
                 value.map((option, index) => (
                   <Chip label={option} size="small" {...getTagProps({ index })} key={option} />
                 ))
               }
-              renderInput={(params) => (
+              renderInput={params => (
                 <TextField
                   {...params}
                   label="التصنيفات"
@@ -628,7 +609,7 @@ export default function ComposeDirective() {
       <Snackbar
         open={snackbar.open}
         autoHideDuration={4000}
-        onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
+        onClose={() => setSnackbar(s => ({ ...s, open: false }))}
       >
         <Alert severity={snackbar.severity} variant="filled">
           {snackbar.message}

@@ -25,7 +25,7 @@ const UpcomingAppointments = ({ upcomingAppointments }) => (
         <Chip label="اليوم" color="primary" size="small" />
       </Box>
       <List>
-        {upcomingAppointments.map((appointment) => (
+        {upcomingAppointments.map(appointment => (
           <ListItem
             key={appointment.id}
             sx={{

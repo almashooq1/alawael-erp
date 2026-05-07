@@ -43,10 +43,7 @@ const EnhancedBeneficiariesTable = () => {
       />
 
       {/* Bulk Actions Bar */}
-      <BeneficiariesBulkBar
-        selected={state.selected}
-        handleBulkAction={state.handleBulkAction}
-      />
+      <BeneficiariesBulkBar selected={state.selected} handleBulkAction={state.handleBulkAction} />
 
       {/* Table with head, body, expandable rows, pagination */}
       <BeneficiariesTableBody
@@ -95,10 +92,7 @@ const EnhancedBeneficiariesTable = () => {
       />
 
       {/* Snackbar */}
-      <BeneficiariesSnackbar
-        snackbar={state.snackbar}
-        setSnackbar={state.setSnackbar}
-      />
+      <BeneficiariesSnackbar snackbar={state.snackbar} setSnackbar={state.setSnackbar} />
 
       {/* Confirm Dialog */}
       <BeneficiariesConfirmDialog confirmState={state.confirmState} />

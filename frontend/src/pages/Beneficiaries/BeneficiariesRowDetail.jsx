@@ -54,9 +54,7 @@ const BeneficiariesRowDetail = ({ row, isOpen }) => (
               <Typography variant="caption" color="text.secondary">
                 الموعد القادم
               </Typography>
-              <Typography variant="body2">
-                {row.nextAppointment || 'لا يوجد'}
-              </Typography>
+              <Typography variant="body2">{row.nextAppointment || 'لا يوجد'}</Typography>
             </Box>
           </Stack>
         </Grid>

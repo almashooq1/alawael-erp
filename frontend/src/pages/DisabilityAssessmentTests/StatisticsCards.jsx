@@ -16,7 +16,9 @@ const StatisticsCards = ({ statistics }) => (
       <Card sx={{ background: gradients.assessmentBlue }}>
         <CardContent sx={{ textAlign: 'center', color: '#fff' }}>
           <AssignmentIcon sx={{ fontSize: 40 }} />
-          <Typography variant="h4" fontWeight="bold">{statistics.testAssessments}</Typography>
+          <Typography variant="h4" fontWeight="bold">
+            {statistics.testAssessments}
+          </Typography>
           <Typography variant="body2">اختبارات مكتملة</Typography>
         </CardContent>
       </Card>
@@ -25,7 +27,9 @@ const StatisticsCards = ({ statistics }) => (
       <Card sx={{ background: gradients.greenStatus }}>
         <CardContent sx={{ textAlign: 'center', color: '#fff' }}>
           <PersonIcon sx={{ fontSize: 40 }} />
-          <Typography variant="h4" fontWeight="bold">{statistics.totalBeneficiaries}</Typography>
+          <Typography variant="h4" fontWeight="bold">
+            {statistics.totalBeneficiaries}
+          </Typography>
           <Typography variant="body2">المستفيدون</Typography>
         </CardContent>
       </Card>
@@ -34,7 +38,9 @@ const StatisticsCards = ({ statistics }) => (
       <Card sx={{ background: gradients.orangeStatus }}>
         <CardContent sx={{ textAlign: 'center', color: '#fff' }}>
           <TrendingUpIcon sx={{ fontSize: 40 }} />
-          <Typography variant="h4" fontWeight="bold">{statistics.averageScore}%</Typography>
+          <Typography variant="h4" fontWeight="bold">
+            {statistics.averageScore}%
+          </Typography>
           <Typography variant="body2">متوسط الأداء</Typography>
         </CardContent>
       </Card>
@@ -43,7 +49,9 @@ const StatisticsCards = ({ statistics }) => (
       <Card sx={{ background: gradients.assessmentPurple }}>
         <CardContent sx={{ textAlign: 'center', color: '#fff' }}>
           <BarChartIcon sx={{ fontSize: 40 }} />
-          <Typography variant="h4" fontWeight="bold">{statistics.completionRate}%</Typography>
+          <Typography variant="h4" fontWeight="bold">
+            {statistics.completionRate}%
+          </Typography>
           <Typography variant="body2">معدل الإنجاز</Typography>
         </CardContent>
       </Card>

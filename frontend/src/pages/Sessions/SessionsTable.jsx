@@ -4,29 +4,77 @@
  */
 import React from 'react';
 import {
-  Card, CardContent, Stack, TextField, InputAdornment, Button, Collapse,
-  MenuItem, TableContainer, Paper, Table, TableHead, TableRow, TableCell,
-  TableBody, Skeleton, Typography, Box, Avatar, Chip, IconButton, Tooltip,
+  Card,
+  CardContent,
+  Stack,
+  TextField,
+  InputAdornment,
+  Button,
+  Collapse,
+  MenuItem,
+  TableContainer,
+  Paper,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+  Skeleton,
+  Typography,
+  Box,
+  Avatar,
+  Chip,
+  IconButton,
+  Tooltip,
   TablePagination,
 } from '@mui/material';
 import {
-  Search as SearchIcon, FilterList, Add as AddIcon,
-  Edit as EditIcon, Delete as DeleteIcon,
-  Event as EventIcon, CalendarToday, AccessTime, Person, LocalHospital,
-  CheckCircle as CheckCircleIcon, Cancel as CancelIcon, PersonOff as NoShowIcon,
+  Search as SearchIcon,
+  FilterList,
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Event as EventIcon,
+  CalendarToday,
+  AccessTime,
+  Person,
+  LocalHospital,
+  CheckCircle as CheckCircleIcon,
+  Cancel as CancelIcon,
+  PersonOff as NoShowIcon,
 } from '@mui/icons-material';
 import {
-  SESSION_TYPES, STATUS_MAP, STATUS_FILTER_OPTIONS,
-  getTypeColor, getSessionType, formatDate, formatTime,
+  SESSION_TYPES,
+  STATUS_MAP,
+  STATUS_FILTER_OPTIONS,
+  getTypeColor,
+  getSessionType,
+  formatDate,
+  formatTime,
 } from './constants';
 
 const SessionsTable = ({
-  filtered, loading, totalCount, search, setSearch,
-  filterType, setFilterType, filterStatus, setFilterStatus,
-  showFilters, setShowFilters, page, setPage,
-  rowsPerPage, setRowsPerPage,
-  handleOpenCreate, handleOpenEdit, setDeleteTarget,
-  handleCancel, handleMarkAttendance, handleMarkNoShow,
+  filtered,
+  loading,
+  totalCount,
+  search,
+  setSearch,
+  filterType,
+  setFilterType,
+  filterStatus,
+  setFilterStatus,
+  showFilters,
+  setShowFilters,
+  page,
+  setPage,
+  rowsPerPage,
+  setRowsPerPage,
+  handleOpenCreate,
+  handleOpenEdit,
+  setDeleteTarget,
+  handleCancel,
+  handleMarkAttendance,
+  handleMarkNoShow,
 }) => (
   <>
     {/* ── Search & Filters ── */}
@@ -38,7 +86,7 @@ const SessionsTable = ({
             size="small"
             fullWidth
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={e => setSearch(e.target.value)}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
@@ -60,29 +108,48 @@ const SessionsTable = ({
         <Collapse in={showFilters}>
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mt: 2 }}>
             <TextField
-              select label="نوع الجلسة" size="small"
+              select
+              label="نوع الجلسة"
+              size="small"
               value={filterType}
-              onChange={(e) => { setFilterType(e.target.value); setPage(0); }}
+              onChange={e => {
+                setFilterType(e.target.value);
+                setPage(0);
+              }}
               sx={{ minWidth: 180 }}
             >
               <MenuItem value="">الكل</MenuItem>
-              {SESSION_TYPES.map((t) => (
-                <MenuItem key={t.value} value={t.value}>{t.label}</MenuItem>
+              {SESSION_TYPES.map(t => (
+                <MenuItem key={t.value} value={t.value}>
+                  {t.label}
+                </MenuItem>
               ))}
             </TextField>
             <TextField
-              select label="الحالة" size="small"
+              select
+              label="الحالة"
+              size="small"
               value={filterStatus}
-              onChange={(e) => { setFilterStatus(e.target.value); setPage(0); }}
+              onChange={e => {
+                setFilterStatus(e.target.value);
+                setPage(0);
+              }}
               sx={{ minWidth: 180 }}
             >
-              {STATUS_FILTER_OPTIONS.map((o) => (
-                <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>
+              {STATUS_FILTER_OPTIONS.map(o => (
+                <MenuItem key={o.value} value={o.value}>
+                  {o.label}
+                </MenuItem>
               ))}
             </TextField>
             <Button
               size="small"
-              onClick={() => { setFilterType(''); setFilterStatus(''); setSearch(''); setPage(0); }}
+              onClick={() => {
+                setFilterType('');
+                setFilterStatus('');
+                setSearch('');
+                setPage(0);
+              }}
             >
               مسح الفلاتر
             </Button>
@@ -103,15 +170,19 @@ const SessionsTable = ({
               <TableCell sx={{ fontWeight: 'bold' }}>الوقت</TableCell>
               <TableCell sx={{ fontWeight: 'bold' }}>المشاركون</TableCell>
               <TableCell sx={{ fontWeight: 'bold' }}>الحالة</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }} align="center">الإجراءات</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }} align="center">
+                الإجراءات
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {loading ? (
-              [0, 1, 2, 3, 4].map((i) => (
+              [0, 1, 2, 3, 4].map(i => (
                 <TableRow key={i}>
-                  {[0, 1, 2, 3, 4, 5, 6].map((j) => (
-                    <TableCell key={j}><Skeleton /></TableCell>
+                  {[0, 1, 2, 3, 4, 5, 6].map(j => (
+                    <TableCell key={j}>
+                      <Skeleton />
+                    </TableCell>
                   ))}
                 </TableRow>
               ))
@@ -120,25 +191,36 @@ const SessionsTable = ({
                 <TableCell colSpan={7} align="center" sx={{ py: 6 }}>
                   <EventIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 1 }} />
                   <Typography color="text.secondary">لا توجد جلسات</Typography>
-                  <Button variant="outlined" startIcon={<AddIcon />} sx={{ mt: 2 }} onClick={handleOpenCreate}>
+                  <Button
+                    variant="outlined"
+                    startIcon={<AddIcon />}
+                    sx={{ mt: 2 }}
+                    onClick={handleOpenCreate}
+                  >
                     إضافة جلسة جديدة
                   </Button>
                 </TableCell>
               </TableRow>
             ) : (
-              filtered.map((session) => {
+              filtered.map(session => {
                 const sType = getSessionType(session);
                 const statusInfo = STATUS_MAP[session.status] || STATUS_MAP.SCHEDULED;
                 const isActive = session.status === 'SCHEDULED' || session.status === 'CONFIRMED';
                 return (
-                  <TableRow key={session._id || session.id} hover sx={{ '&:last-child td': { border: 0 } }}>
+                  <TableRow
+                    key={session._id || session.id}
+                    hover
+                    sx={{ '&:last-child td': { border: 0 } }}
+                  >
                     <TableCell>
                       <Box display="flex" alignItems="center" gap={1.5}>
                         <Avatar sx={{ bgcolor: getTypeColor(sType), width: 36, height: 36 }}>
                           <LocalHospital fontSize="small" />
                         </Avatar>
                         <Box>
-                          <Typography variant="body2" fontWeight="bold">{session.title}</Typography>
+                          <Typography variant="body2" fontWeight="bold">
+                            {session.title}
+                          </Typography>
                           {session.createdBy?.name && (
                             <Typography variant="caption" color="text.secondary">
                               بواسطة: {session.createdBy.name}
@@ -151,13 +233,19 @@ const SessionsTable = ({
                       <Chip
                         label={sType}
                         size="small"
-                        sx={{ bgcolor: getTypeColor(sType) + '22', color: getTypeColor(sType), fontWeight: 600 }}
+                        sx={{
+                          bgcolor: getTypeColor(sType) + '22',
+                          color: getTypeColor(sType),
+                          fontWeight: 600,
+                        }}
                       />
                     </TableCell>
                     <TableCell>
                       <Box display="flex" alignItems="center" gap={0.5}>
                         <CalendarToday fontSize="small" color="action" />
-                        <Typography variant="body2">{formatDate(session.date || session.startTime)}</Typography>
+                        <Typography variant="body2">
+                          {formatDate(session.date || session.startTime)}
+                        </Typography>
                       </Box>
                     </TableCell>
                     <TableCell>
@@ -172,18 +260,31 @@ const SessionsTable = ({
                       {Array.isArray(session.participants) && session.participants.length > 0 ? (
                         <Stack direction="row" spacing={0.5} flexWrap="wrap">
                           {session.participants.slice(0, 2).map((p, idx) => (
-                            <Chip key={idx} icon={<Person />} label={p.name || p} size="small" variant="outlined" />
+                            <Chip
+                              key={idx}
+                              icon={<Person />}
+                              label={p.name || p}
+                              size="small"
+                              variant="outlined"
+                            />
                           ))}
                           {session.participants.length > 2 && (
                             <Chip label={`+${session.participants.length - 2}`} size="small" />
                           )}
                         </Stack>
                       ) : (
-                        <Typography variant="caption" color="text.secondary">—</Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          —
+                        </Typography>
                       )}
                     </TableCell>
                     <TableCell>
-                      <Chip label={statusInfo.label} color={statusInfo.color} size="small" variant="outlined" />
+                      <Chip
+                        label={statusInfo.label}
+                        color={statusInfo.color}
+                        size="small"
+                        variant="outlined"
+                      />
                     </TableCell>
                     <TableCell align="center">
                       <Stack direction="row" spacing={0.5} justifyContent="center">
@@ -191,7 +292,8 @@ const SessionsTable = ({
                         {isActive && handleMarkAttendance && (
                           <Tooltip title="تسجيل حضور">
                             <IconButton
-                              size="small" color="success"
+                              size="small"
+                              color="success"
                               onClick={() => handleMarkAttendance(session._id || session.id)}
                             >
                               <CheckCircleIcon fontSize="small" />
@@ -202,7 +304,8 @@ const SessionsTable = ({
                         {isActive && handleMarkNoShow && (
                           <Tooltip title="لم يحضر">
                             <IconButton
-                              size="small" color="warning"
+                              size="small"
+                              color="warning"
                               onClick={() => handleMarkNoShow(session._id || session.id)}
                             >
                               <NoShowIcon fontSize="small" />
@@ -213,7 +316,8 @@ const SessionsTable = ({
                         {isActive && handleCancel && (
                           <Tooltip title="إلغاء">
                             <IconButton
-                              size="small" color="error"
+                              size="small"
+                              color="error"
                               onClick={() => handleCancel(session._id || session.id)}
                             >
                               <CancelIcon fontSize="small" />
@@ -221,12 +325,20 @@ const SessionsTable = ({
                           </Tooltip>
                         )}
                         <Tooltip title="تعديل">
-                          <IconButton size="small" color="primary" onClick={() => handleOpenEdit(session)}>
+                          <IconButton
+                            size="small"
+                            color="primary"
+                            onClick={() => handleOpenEdit(session)}
+                          >
                             <EditIcon fontSize="small" />
                           </IconButton>
                         </Tooltip>
                         <Tooltip title="حذف">
-                          <IconButton size="small" color="error" onClick={() => setDeleteTarget(session)}>
+                          <IconButton
+                            size="small"
+                            color="error"
+                            onClick={() => setDeleteTarget(session)}
+                          >
                             <DeleteIcon fontSize="small" />
                           </IconButton>
                         </Tooltip>
@@ -245,10 +357,15 @@ const SessionsTable = ({
         page={page}
         onPageChange={(_, p) => setPage(p)}
         rowsPerPage={rowsPerPage}
-        onRowsPerPageChange={(e) => { setRowsPerPage(parseInt(e.target.value, 10)); setPage(0); }}
+        onRowsPerPageChange={e => {
+          setRowsPerPage(parseInt(e.target.value, 10));
+          setPage(0);
+        }}
         rowsPerPageOptions={[5, 10, 25, 50]}
         labelRowsPerPage="صفوف لكل صفحة:"
-        labelDisplayedRows={({ from, to, count }) => `${from}–${to} من ${count !== -1 ? count : `أكثر من ${to}`}`}
+        labelDisplayedRows={({ from, to, count }) =>
+          `${from}–${to} من ${count !== -1 ? count : `أكثر من ${to}`}`
+        }
       />
     </Card>
   </>

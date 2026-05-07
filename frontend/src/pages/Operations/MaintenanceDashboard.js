@@ -45,7 +45,7 @@ import {
   Visibility as ViewIcon,
   CheckCircle as CompleteIcon,
   Schedule as ScheduleIcon,
-  } from '@mui/icons-material';
+} from '@mui/icons-material';
 import {
   BarChart,
   Bar,

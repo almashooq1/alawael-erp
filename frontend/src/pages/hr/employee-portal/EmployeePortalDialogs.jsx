@@ -35,11 +35,22 @@ const REQUEST_TYPES = [
 ];
 
 const MONTH_NAMES = [
-  '', 'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
-  'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر',
+  '',
+  'يناير',
+  'فبراير',
+  'مارس',
+  'أبريل',
+  'مايو',
+  'يونيو',
+  'يوليو',
+  'أغسطس',
+  'سبتمبر',
+  'أكتوبر',
+  'نوفمبر',
+  'ديسمبر',
 ];
 
-const fmt = (v) => Number(v || 0).toLocaleString('ar-SA');
+const fmt = v => Number(v || 0).toLocaleString('ar-SA');
 
 /* ══════════════════════════════════════════════════════════
    LeaveDialog
@@ -53,8 +64,7 @@ export function LeaveDialog({
   leaveBalances = {},
   onSubmit,
 }) {
-  const handleChange = (field) => (e) =>
-    setLeaveForm?.((prev) => ({ ...prev, [field]: e.target.value }));
+  const handleChange = field => e => setLeaveForm?.(prev => ({ ...prev, [field]: e.target.value }));
 
   const selectedBal = leaveBalances[leaveForm.type] || {};
 
@@ -72,7 +82,7 @@ export function LeaveDialog({
                 label="نوع الإجازة"
                 onChange={handleChange('type')}
               >
-                {LEAVE_TYPES.map((t) => (
+                {LEAVE_TYPES.map(t => (
                   <MenuItem key={t.value} value={t.value}>
                     {t.label}
                   </MenuItem>
@@ -140,15 +150,9 @@ export function LeaveDialog({
    RequestDialog
    ══════════════════════════════════════════════════════════ */
 
-export function RequestDialog({
-  open,
-  onClose,
-  requestForm = {},
-  setRequestForm,
-  onSubmit,
-}) {
-  const handleChange = (field) => (e) =>
-    setRequestForm?.((prev) => ({ ...prev, [field]: e.target.value }));
+export function RequestDialog({ open, onClose, requestForm = {}, setRequestForm, onSubmit }) {
+  const handleChange = field => e =>
+    setRequestForm?.(prev => ({ ...prev, [field]: e.target.value }));
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
@@ -164,7 +168,7 @@ export function RequestDialog({
                 label="نوع الطلب"
                 onChange={handleChange('type')}
               >
-                {REQUEST_TYPES.map((t) => (
+                {REQUEST_TYPES.map(t => (
                   <MenuItem key={t.value} value={t.value}>
                     {t.label}
                   </MenuItem>
@@ -213,8 +217,7 @@ export function PayslipDetailDialog({ open, onClose, payslip }) {
   return (
     <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
       <DialogTitle sx={{ fontWeight: 700 }}>
-        تفاصيل كشف الراتب — {MONTH_NAMES[payslip.month] || payslip.month}{' '}
-        {payslip.year}
+        تفاصيل كشف الراتب — {MONTH_NAMES[payslip.month] || payslip.month} {payslip.year}
       </DialogTitle>
       <DialogContent dividers>
         {rows.map((r, i) => (

@@ -1,13 +1,5 @@
 import React from 'react';
-import {
-  Box,
-  Typography,
-  Button,
-  Grid,
-  Paper,
-  IconButton,
-  Tooltip,
-} from '@mui/material';
+import { Box, Typography, Button, Grid, Paper, IconButton, Tooltip } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
@@ -16,7 +8,7 @@ import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 /*  SystemAdminHeader                                                 */
 /* ------------------------------------------------------------------ */
 const SystemAdminHeader = ({ stats = [], loadData, openCreate, activeTab, tabs = [] }) => {
-  const currentTab = tabs.find((t) => t.key === activeTab);
+  const currentTab = tabs.find(t => t.key === activeTab);
 
   return (
     <Box sx={{ mb: 3 }}>
@@ -74,7 +66,7 @@ const SystemAdminHeader = ({ stats = [], loadData, openCreate, activeTab, tabs =
 
       {/* ---- stats cards grid ---- */}
       <Grid container spacing={2}>
-        {stats.map((stat) => (
+        {stats.map(stat => (
           <Grid item xs={6} sm={4} md={3} lg={1.5} key={stat.label}>
             <Paper
               elevation={1}

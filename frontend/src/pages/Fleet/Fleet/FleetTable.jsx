@@ -102,7 +102,7 @@ const FleetTable = ({ activeTab, data, openEdit, handleDelete }) => {
       <Table size="small">
         <TableHead>
           <TableRow sx={{ bgcolor: 'grey.100' }}>
-            {columns.map((col) => (
+            {columns.map(col => (
               <TableCell key={col.key} sx={{ fontWeight: 'bold', textAlign: 'right' }}>
                 {col.label}
               </TableCell>
@@ -115,9 +115,9 @@ const FleetTable = ({ activeTab, data, openEdit, handleDelete }) => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {rows.map((row) => (
+          {rows.map(row => (
             <TableRow key={row.id} hover>
-              {columns.map((col) => (
+              {columns.map(col => (
                 <TableCell key={col.key} sx={{ textAlign: 'right' }}>
                   {renderCell(row, col)}
                 </TableCell>
@@ -130,7 +130,11 @@ const FleetTable = ({ activeTab, data, openEdit, handleDelete }) => {
                     </IconButton>
                   </Tooltip>
                   <Tooltip title="حذف">
-                    <IconButton size="small" color="error" onClick={() => handleDelete(tabKey, row)}>
+                    <IconButton
+                      size="small"
+                      color="error"
+                      onClick={() => handleDelete(tabKey, row)}
+                    >
                       <DeleteIcon fontSize="small" />
                     </IconButton>
                   </Tooltip>

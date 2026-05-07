@@ -8,8 +8,16 @@
 
 import { useState } from 'react';
 import {
-  Box, Typography, Grid, Card, CardActionArea, Chip,
-  useTheme, alpha, TextField, InputAdornment,
+  Box,
+  Typography,
+  Grid,
+  Card,
+  CardActionArea,
+  Chip,
+  useTheme,
+  alpha,
+  TextField,
+  InputAdornment,
 } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
@@ -667,9 +675,7 @@ function PremiumCard({ dash, index, isDark }) {
           borderRadius: '20px',
           overflow: 'hidden',
           border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.9)'}`,
-          background: isDark
-            ? 'rgba(15,23,42,0.7)'
-            : 'rgba(255,255,255,0.85)',
+          background: isDark ? 'rgba(15,23,42,0.7)' : 'rgba(255,255,255,0.85)',
           backdropFilter: 'blur(20px) saturate(180%)',
           WebkitBackdropFilter: 'blur(20px) saturate(180%)',
           boxShadow: hovered
@@ -713,14 +719,23 @@ function PremiumCard({ dash, index, isDark }) {
 
           <Box sx={{ p: 2.5, pt: 2 }}>
             {/* Icon + Arrow row */}
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'flex-start',
+                mb: 2,
+              }}
+            >
               {/* Icon */}
               <Box
                 sx={{
                   width: 52,
                   height: 52,
                   borderRadius: '16px',
-                  background: hovered ? dash.gradient : alpha(dash.glow.replace('0.4)', '0.15)'), 0.9),
+                  background: hovered
+                    ? dash.gradient
+                    : alpha(dash.glow.replace('0.4)', '0.15)'), 0.9),
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -809,9 +824,10 @@ function PremiumCard({ dash, index, isDark }) {
                   sx={{
                     flex: 1,
                     textAlign: 'center',
-                    borderRight: si < dash.stats.length - 1
-                      ? `1px solid ${isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)'}`
-                      : 'none',
+                    borderRight:
+                      si < dash.stats.length - 1
+                        ? `1px solid ${isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)'}`
+                        : 'none',
                     borderLeft: 'none',
                   }}
                 >
@@ -845,7 +861,7 @@ function PremiumCard({ dash, index, isDark }) {
 
             {/* Tags */}
             <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap' }}>
-              {dash.tags.map((tag) => (
+              {dash.tags.map(tag => (
                 <Chip
                   key={tag}
                   label={tag}
@@ -854,9 +870,7 @@ function PremiumCard({ dash, index, isDark }) {
                     height: 20,
                     fontSize: '0.62rem',
                     fontWeight: 600,
-                    backgroundColor: isDark
-                      ? 'rgba(255,255,255,0.07)'
-                      : 'rgba(0,0,0,0.04)',
+                    backgroundColor: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.04)',
                     color: isDark ? 'rgba(255,255,255,0.55)' : '#64748B',
                     border: `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)'}`,
                     '& .MuiChip-label': { px: 0.8 },
@@ -884,10 +898,10 @@ export default function PremiumHub() {
   const [search, setSearch] = useState('');
 
   const filtered = PREMIUM_DASHBOARDS.filter(
-    (d) =>
+    d =>
       d.title.includes(search) ||
       d.subtitle.includes(search) ||
-      d.tags.some((t) => t.includes(search))
+      d.tags.some(t => t.includes(search))
   );
 
   return (
@@ -996,19 +1010,21 @@ export default function PremiumHub() {
                 { label: 'RTL عربي', color: '#06b6d4' },
                 { label: 'Dark / Light', color: '#10b981' },
                 { label: 'Framer Motion', color: '#f59e0b' },
-              ].map((c) => (
+              ].map(c => (
                 <Chip
                   key={c.label}
-                  icon={<StarIcon sx={{ fontSize: '12px !important', color: `${c.color} !important` }} />}
+                  icon={
+                    <StarIcon
+                      sx={{ fontSize: '12px !important', color: `${c.color} !important` }}
+                    />
+                  }
                   label={c.label}
                   size="small"
                   sx={{
                     height: 26,
                     fontSize: '0.75rem',
                     fontWeight: 600,
-                    backgroundColor: isDark
-                      ? `${c.color}22`
-                      : `${c.color}14`,
+                    backgroundColor: isDark ? `${c.color}22` : `${c.color}14`,
                     color: c.color,
                     border: `1px solid ${c.color}33`,
                     '& .MuiChip-label': { px: 1 },
@@ -1022,7 +1038,7 @@ export default function PremiumHub() {
               size="small"
               placeholder="ابحث في اللوحات..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={e => setSearch(e.target.value)}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -1074,8 +1090,12 @@ export default function PremiumHub() {
                 border: `1px dashed ${isDark ? 'rgba(255,255,255,0.12)' : 'rgba(99,102,241,0.2)'}`,
               }}
             >
-              <SearchIcon sx={{ fontSize: 48, color: isDark ? 'rgba(255,255,255,0.15)' : '#CBD5E1', mb: 2 }} />
-              <Typography sx={{ color: isDark ? 'rgba(255,255,255,0.35)' : '#94A3B8', fontSize: '0.95rem' }}>
+              <SearchIcon
+                sx={{ fontSize: 48, color: isDark ? 'rgba(255,255,255,0.15)' : '#CBD5E1', mb: 2 }}
+              />
+              <Typography
+                sx={{ color: isDark ? 'rgba(255,255,255,0.35)' : '#94A3B8', fontSize: '0.95rem' }}
+              >
                 لا توجد نتائج لـ «{search}»
               </Typography>
             </Box>
@@ -1094,9 +1114,7 @@ export default function PremiumHub() {
             mt: 5,
             p: 2.5,
             borderRadius: '16px',
-            background: isDark
-              ? 'rgba(99,102,241,0.08)'
-              : 'rgba(99,102,241,0.04)',
+            background: isDark ? 'rgba(99,102,241,0.08)' : 'rgba(99,102,241,0.04)',
             border: `1px solid ${isDark ? 'rgba(99,102,241,0.2)' : 'rgba(99,102,241,0.1)'}`,
             display: 'flex',
             alignItems: 'center',
@@ -1104,9 +1122,13 @@ export default function PremiumHub() {
           }}
         >
           <AutoAwesomeIcon sx={{ fontSize: 20, color: '#6366f1', flexShrink: 0 }} />
-          <Typography sx={{ fontSize: '0.82rem', color: isDark ? 'rgba(255,255,255,0.5)' : '#64748B' }}>
-            جميع اللوحات مبنية بـ <strong style={{ color: '#6366f1' }}>React + MUI + Framer Motion</strong> مع تصميم{' '}
-            <strong style={{ color: '#8b5cf6' }}>Glassmorphism</strong> ودعم كامل لـ RTL العربية والوضع الليلي
+          <Typography
+            sx={{ fontSize: '0.82rem', color: isDark ? 'rgba(255,255,255,0.5)' : '#64748B' }}
+          >
+            جميع اللوحات مبنية بـ{' '}
+            <strong style={{ color: '#6366f1' }}>React + MUI + Framer Motion</strong> مع تصميم{' '}
+            <strong style={{ color: '#8b5cf6' }}>Glassmorphism</strong> ودعم كامل لـ RTL العربية
+            والوضع الليلي
           </Typography>
         </Box>
       </motion.div>

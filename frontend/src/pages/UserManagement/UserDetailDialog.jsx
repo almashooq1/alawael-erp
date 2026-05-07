@@ -53,7 +53,7 @@ import {
 import { getRoleColor, getRoleLabel } from './constants';
 import userManagementService from 'services/userManagementService';
 
-const formatDate = (date) => {
+const formatDate = date => {
   if (!date) return '—';
   try {
     return new Date(date).toLocaleDateString('ar-SA', {
@@ -128,7 +128,9 @@ const UserDetailDialog = ({ open, onClose, user }) => {
       const userId = user._id || user.id;
       const result = await userManagementService.getLoginHistory(userId, { limit: 50 });
       setLoginHistory(result.history || []);
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
     setHistoryLoading(false);
   }, [user]);
 
@@ -172,11 +174,26 @@ const UserDetailDialog = ({ open, onClose, user }) => {
                 }}
               />
               {isLocked ? (
-                <Chip icon={<LockedIcon sx={{ fontSize: 14 }} />} label="مقفل" size="small" color="error" />
+                <Chip
+                  icon={<LockedIcon sx={{ fontSize: 14 }} />}
+                  label="مقفل"
+                  size="small"
+                  color="error"
+                />
               ) : user.isActive ? (
-                <Chip icon={<ActiveIcon sx={{ fontSize: 14 }} />} label="نشط" size="small" color="success" />
+                <Chip
+                  icon={<ActiveIcon sx={{ fontSize: 14 }} />}
+                  label="نشط"
+                  size="small"
+                  color="success"
+                />
               ) : (
-                <Chip icon={<InactiveIcon sx={{ fontSize: 14 }} />} label="معطل" size="small" color="default" />
+                <Chip
+                  icon={<InactiveIcon sx={{ fontSize: 14 }} />}
+                  label="معطل"
+                  size="small"
+                  color="default"
+                />
               )}
             </Box>
           </Box>
@@ -207,32 +224,65 @@ const UserDetailDialog = ({ open, onClose, user }) => {
                   <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 'bold' }}>
                     معلومات الاتصال
                   </Typography>
-                  <InfoRow icon={PersonIcon} label="اسم المستخدم" value={user.username ? `@${user.username}` : '—'} dir="ltr" />
-                  <InfoRow icon={EmailIcon} label="البريد الإلكتروني" value={
-                    user.email ? (
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                        <Typography variant="body2" dir="ltr" sx={{ fontWeight: 500 }}>{user.email}</Typography>
-                        {user.emailVerified ? (
-                          <Tooltip title="بريد موثق"><VerifiedIcon sx={{ fontSize: 16, color: 'success.main' }} /></Tooltip>
-                        ) : (
-                          <Tooltip title="غير موثق"><NotVerifiedIcon sx={{ fontSize: 16, color: 'text.disabled' }} /></Tooltip>
-                        )}
-                      </Box>
-                    ) : '—'
-                  } />
-                  <InfoRow icon={PhoneIcon} label="الهاتف" value={
-                    user.phone ? (
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                        <Typography variant="body2" dir="ltr" sx={{ fontWeight: 500 }}>{user.phone}</Typography>
-                        {user.phoneVerified ? (
-                          <Tooltip title="هاتف موثق"><VerifiedIcon sx={{ fontSize: 16, color: 'success.main' }} /></Tooltip>
-                        ) : (
-                          <Tooltip title="غير موثق"><NotVerifiedIcon sx={{ fontSize: 16, color: 'text.disabled' }} /></Tooltip>
-                        )}
-                      </Box>
-                    ) : '—'
-                  } />
-                  <InfoRow icon={BranchIcon} label="الفرع" value={user.branch?.name || user.branch?.name_ar || '—'} />
+                  <InfoRow
+                    icon={PersonIcon}
+                    label="اسم المستخدم"
+                    value={user.username ? `@${user.username}` : '—'}
+                    dir="ltr"
+                  />
+                  <InfoRow
+                    icon={EmailIcon}
+                    label="البريد الإلكتروني"
+                    value={
+                      user.email ? (
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                          <Typography variant="body2" dir="ltr" sx={{ fontWeight: 500 }}>
+                            {user.email}
+                          </Typography>
+                          {user.emailVerified ? (
+                            <Tooltip title="بريد موثق">
+                              <VerifiedIcon sx={{ fontSize: 16, color: 'success.main' }} />
+                            </Tooltip>
+                          ) : (
+                            <Tooltip title="غير موثق">
+                              <NotVerifiedIcon sx={{ fontSize: 16, color: 'text.disabled' }} />
+                            </Tooltip>
+                          )}
+                        </Box>
+                      ) : (
+                        '—'
+                      )
+                    }
+                  />
+                  <InfoRow
+                    icon={PhoneIcon}
+                    label="الهاتف"
+                    value={
+                      user.phone ? (
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                          <Typography variant="body2" dir="ltr" sx={{ fontWeight: 500 }}>
+                            {user.phone}
+                          </Typography>
+                          {user.phoneVerified ? (
+                            <Tooltip title="هاتف موثق">
+                              <VerifiedIcon sx={{ fontSize: 16, color: 'success.main' }} />
+                            </Tooltip>
+                          ) : (
+                            <Tooltip title="غير موثق">
+                              <NotVerifiedIcon sx={{ fontSize: 16, color: 'text.disabled' }} />
+                            </Tooltip>
+                          )}
+                        </Box>
+                      ) : (
+                        '—'
+                      )
+                    }
+                  />
+                  <InfoRow
+                    icon={BranchIcon}
+                    label="الفرع"
+                    value={user.branch?.name || user.branch?.name_ar || '—'}
+                  />
                 </Paper>
               </Grid>
 
@@ -241,12 +291,28 @@ const UserDetailDialog = ({ open, onClose, user }) => {
                   <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 'bold' }}>
                     معلومات الحساب
                   </Typography>
-                  <InfoRow icon={RoleIcon} label="الدور" value={user.roleLabel || getRoleLabel(user.role)} />
-                  <InfoRow icon={DateIcon} label="تاريخ الإنشاء" value={formatDate(user.createdAt)} />
-                  <InfoRow icon={LoginIcon} label="آخر تسجيل دخول" value={formatDate(user.lastLogin)} />
+                  <InfoRow
+                    icon={RoleIcon}
+                    label="الدور"
+                    value={user.roleLabel || getRoleLabel(user.role)}
+                  />
+                  <InfoRow
+                    icon={DateIcon}
+                    label="تاريخ الإنشاء"
+                    value={formatDate(user.createdAt)}
+                  />
+                  <InfoRow
+                    icon={LoginIcon}
+                    label="آخر تسجيل دخول"
+                    value={formatDate(user.lastLogin)}
+                  />
                   <InfoRow icon={DateIcon} label="آخر تحديث" value={formatDate(user.updatedAt)} />
                   {user.failedLoginAttempts > 0 && (
-                    <InfoRow icon={LockedIcon} label="محاولات فاشلة" value={user.failedLoginAttempts} />
+                    <InfoRow
+                      icon={LockedIcon}
+                      label="محاولات فاشلة"
+                      value={user.failedLoginAttempts}
+                    />
                   )}
                 </Paper>
               </Grid>
@@ -262,14 +328,22 @@ const UserDetailDialog = ({ open, onClose, user }) => {
                     {/* MFA */}
                     <Chip
                       icon={<MfaIcon sx={{ fontSize: 16 }} />}
-                      label={user.mfa?.enabled ? 'المصادقة الثنائية مفعلة' : 'المصادقة الثنائية معطلة'}
+                      label={
+                        user.mfa?.enabled ? 'المصادقة الثنائية مفعلة' : 'المصادقة الثنائية معطلة'
+                      }
                       color={user.mfa?.enabled ? 'success' : 'default'}
                       variant="outlined"
                       size="small"
                     />
                     {/* البريد */}
                     <Chip
-                      icon={user.emailVerified ? <VerifiedIcon sx={{ fontSize: 16 }} /> : <NotVerifiedIcon sx={{ fontSize: 16 }} />}
+                      icon={
+                        user.emailVerified ? (
+                          <VerifiedIcon sx={{ fontSize: 16 }} />
+                        ) : (
+                          <NotVerifiedIcon sx={{ fontSize: 16 }} />
+                        )
+                      }
                       label={user.emailVerified ? 'البريد موثق' : 'البريد غير موثق'}
                       color={user.emailVerified ? 'success' : 'warning'}
                       variant="outlined"
@@ -277,7 +351,13 @@ const UserDetailDialog = ({ open, onClose, user }) => {
                     />
                     {/* الهاتف */}
                     <Chip
-                      icon={user.phoneVerified ? <VerifiedIcon sx={{ fontSize: 16 }} /> : <NotVerifiedIcon sx={{ fontSize: 16 }} />}
+                      icon={
+                        user.phoneVerified ? (
+                          <VerifiedIcon sx={{ fontSize: 16 }} />
+                        ) : (
+                          <NotVerifiedIcon sx={{ fontSize: 16 }} />
+                        )
+                      }
                       label={user.phoneVerified ? 'الهاتف موثق' : 'الهاتف غير موثق'}
                       color={user.phoneVerified ? 'success' : 'warning'}
                       variant="outlined"
@@ -317,7 +397,7 @@ const UserDetailDialog = ({ open, onClose, user }) => {
               </Typography>
               {user.customPermissions?.length > 0 ? (
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                  {user.customPermissions.map((perm) => (
+                  {user.customPermissions.map(perm => (
                     <Chip key={perm} label={perm} size="small" color="success" variant="outlined" />
                   ))}
                 </Box>
@@ -334,7 +414,7 @@ const UserDetailDialog = ({ open, onClose, user }) => {
               </Typography>
               {user.deniedPermissions?.length > 0 ? (
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                  {user.deniedPermissions.map((perm) => (
+                  {user.deniedPermissions.map(perm => (
                     <Chip key={perm} label={perm} size="small" color="error" variant="outlined" />
                   ))}
                 </Box>
@@ -384,7 +464,9 @@ const UserDetailDialog = ({ open, onClose, user }) => {
                 سجل تسجيلات الدخول
               </Typography>
               {historyLoading ? (
-                <Typography variant="body2" color="text.secondary">جاري التحميل...</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  جاري التحميل...
+                </Typography>
               ) : loginHistory.length > 0 ? (
                 <TableContainer>
                   <Table size="small">
@@ -405,13 +487,23 @@ const UserDetailDialog = ({ open, onClose, user }) => {
                           <TableCell>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                               <IpIcon sx={{ fontSize: 14, color: 'text.secondary' }} />
-                              <Typography variant="caption" dir="ltr">{entry.ip || '—'}</Typography>
+                              <Typography variant="caption" dir="ltr">
+                                {entry.ip || '—'}
+                              </Typography>
                             </Box>
                           </TableCell>
                           <TableCell>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                               <DeviceIcon sx={{ fontSize: 14, color: 'text.secondary' }} />
-                              <Typography variant="caption" sx={{ maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              <Typography
+                                variant="caption"
+                                sx={{
+                                  maxWidth: 200,
+                                  overflow: 'hidden',
+                                  textOverflow: 'ellipsis',
+                                  whiteSpace: 'nowrap',
+                                }}
+                              >
                                 {entry.device || '—'}
                               </Typography>
                             </Box>

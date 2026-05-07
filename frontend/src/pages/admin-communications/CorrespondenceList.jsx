@@ -51,11 +51,7 @@ import {
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients } from '../../theme/palette';
 import adminCommunicationsService from '../../services/adminCommunications.service';
-import {
-  CORRESPONDENCE_TYPES,
-  CORRESPONDENCE_STATUS,
-  PRIORITY_LEVELS,
-} from './constants';
+import { CORRESPONDENCE_TYPES, CORRESPONDENCE_STATUS, PRIORITY_LEVELS } from './constants';
 
 /* ═══ View Modes ═════════════════════════════════════════════════════════ */
 const VIEW_MODES = {
@@ -195,8 +191,7 @@ export default function CorrespondenceList({ viewMode = 'all' }) {
         sx={{
           p: 3,
           mb: 3,
-          background:
-            gradients?.primary || 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',
+          background: gradients?.primary || 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',
           color: '#fff',
           borderRadius: '20px',
           boxShadow: '0 8px 32px rgba(25,118,210,0.25)',
@@ -204,10 +199,7 @@ export default function CorrespondenceList({ viewMode = 'all' }) {
       >
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Box display="flex" alignItems="center" gap={2}>
-            <IconButton
-              sx={{ color: '#fff' }}
-              onClick={() => navigate('/admin-communications')}
-            >
+            <IconButton sx={{ color: '#fff' }} onClick={() => navigate('/admin-communications')}>
               <ArrowBack />
             </IconButton>
             <Box>
@@ -241,7 +233,15 @@ export default function CorrespondenceList({ viewMode = 'all' }) {
       </Paper>
 
       {/* ── Filters ─────────────────────────────────────────── */}
-      <Paper sx={{ p: 2, mb: 2, borderRadius: '16px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
+      <Paper
+        sx={{
+          p: 2,
+          mb: 2,
+          borderRadius: '16px',
+          border: '1px solid rgba(0,0,0,0.04)',
+          boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+        }}
+      >
         <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap" useFlexGap>
           <TextField
             size="small"
@@ -327,21 +327,89 @@ export default function CorrespondenceList({ viewMode = 'all' }) {
       </Paper>
 
       {/* ── Table ───────────────────────────────────────────── */}
-      <Paper sx={{ overflow: 'hidden', borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
+      <Paper
+        sx={{
+          overflow: 'hidden',
+          borderRadius: '20px',
+          border: '1px solid rgba(0,0,0,0.04)',
+          boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+        }}
+      >
         <TableContainer>
           <Table size="small">
             <TableHead>
               <TableRow sx={{ bgcolor: 'rgba(0,0,0,0.02)' }}>
                 <TableCell width={50} />
-                <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>الرقم المرجعي</TableCell>
-                <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>الموضوع</TableCell>
-                <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>
+                <TableCell
+                  sx={{
+                    fontWeight: 700,
+                    fontSize: '12px',
+                    letterSpacing: 0.5,
+                    color: 'text.secondary',
+                  }}
+                >
+                  الرقم المرجعي
+                </TableCell>
+                <TableCell
+                  sx={{
+                    fontWeight: 700,
+                    fontSize: '12px',
+                    letterSpacing: 0.5,
+                    color: 'text.secondary',
+                  }}
+                >
+                  الموضوع
+                </TableCell>
+                <TableCell
+                  sx={{
+                    fontWeight: 700,
+                    fontSize: '12px',
+                    letterSpacing: 0.5,
+                    color: 'text.secondary',
+                  }}
+                >
                   {viewMode === 'outbox' ? 'المستلم' : 'المرسل'}
                 </TableCell>
-                <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>النوع</TableCell>
-                <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>الأولوية</TableCell>
-                <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>الحالة</TableCell>
-                <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>التاريخ</TableCell>
+                <TableCell
+                  sx={{
+                    fontWeight: 700,
+                    fontSize: '12px',
+                    letterSpacing: 0.5,
+                    color: 'text.secondary',
+                  }}
+                >
+                  النوع
+                </TableCell>
+                <TableCell
+                  sx={{
+                    fontWeight: 700,
+                    fontSize: '12px',
+                    letterSpacing: 0.5,
+                    color: 'text.secondary',
+                  }}
+                >
+                  الأولوية
+                </TableCell>
+                <TableCell
+                  sx={{
+                    fontWeight: 700,
+                    fontSize: '12px',
+                    letterSpacing: 0.5,
+                    color: 'text.secondary',
+                  }}
+                >
+                  الحالة
+                </TableCell>
+                <TableCell
+                  sx={{
+                    fontWeight: 700,
+                    fontSize: '12px',
+                    letterSpacing: 0.5,
+                    color: 'text.secondary',
+                  }}
+                >
+                  التاريخ
+                </TableCell>
                 <TableCell width={50} />
               </TableRow>
             </TableHead>
@@ -377,7 +445,8 @@ export default function CorrespondenceList({ viewMode = 'all' }) {
                 items.map(item => {
                   const isIncoming =
                     item.type === 'incoming' || item.correspondenceType === 'incoming';
-                  const typeConfig = CORRESPONDENCE_TYPES[item.type || item.correspondenceType] || {};
+                  const typeConfig =
+                    CORRESPONDENCE_TYPES[item.type || item.correspondenceType] || {};
                   const statusConfig = CORRESPONDENCE_STATUS[item.status] || {};
                   const priorityConfig = PRIORITY_LEVELS[item.priority] || {};
                   const isUnread = !item.readAt && isIncoming;
@@ -422,13 +491,7 @@ export default function CorrespondenceList({ viewMode = 'all' }) {
                           noWrap
                           sx={{ maxWidth: 250 }}
                         >
-                          {isUnread && (
-                            <Badge
-                              color="primary"
-                              variant="dot"
-                              sx={{ mr: 1 }}
-                            />
-                          )}
+                          {isUnread && <Badge color="primary" variant="dot" sx={{ mr: 1 }} />}
                           {item.subject || 'بدون عنوان'}
                         </Typography>
                       </TableCell>
@@ -479,10 +542,7 @@ export default function CorrespondenceList({ viewMode = 'all' }) {
                         </Typography>
                       </TableCell>
                       <TableCell>
-                        <IconButton
-                          size="small"
-                          onClick={e => openMenu(e, item)}
-                        >
+                        <IconButton size="small" onClick={e => openMenu(e, item)}>
                           <MoreVert fontSize="small" />
                         </IconButton>
                       </TableCell>

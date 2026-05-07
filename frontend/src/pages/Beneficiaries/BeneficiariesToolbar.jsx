@@ -14,13 +14,7 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
-import {
-  Search,
-  FilterList,
-  Download,
-  Upload,
-  PersonAdd,
-} from '@mui/icons-material';
+import { Search, FilterList, Download, Upload, PersonAdd } from '@mui/icons-material';
 import { gradients } from '../../theme/palette';
 import { getStatusLabel, getCategoryLabel } from './beneficiariesLabelHelpers';
 import { DEFAULT_FILTERS } from './beneficiariesTableConstants';
@@ -87,7 +81,7 @@ const BeneficiariesToolbar = ({
               fullWidth
               placeholder="البحث بالاسم، رقم الهوية، أو رقم الهاتف..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={e => setSearchQuery(e.target.value)}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -107,9 +101,7 @@ const BeneficiariesToolbar = ({
           </Stack>
 
           {/* Active Filter Chips */}
-          {(filters.status !== 'all' ||
-            filters.category !== 'all' ||
-            filters.gender !== 'all') && (
+          {(filters.status !== 'all' || filters.category !== 'all' || filters.gender !== 'all') && (
             <Stack direction="row" spacing={1} flexWrap="wrap">
               {filters.status !== 'all' && (
                 <Chip

@@ -4,11 +4,36 @@
  */
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Box, Typography, Grid, Card, CardContent, Chip, LinearProgress,
-  Alert, Snackbar, Tabs, Tab, Paper, Avatar, IconButton,
-  Tooltip, CircularProgress, List, ListItem, ListItemIcon, ListItemText,
-  Accordion, AccordionSummary, AccordionDetails, Button, Table,
-  TableBody, TableCell, TableContainer, TableHead, TableRow,
+  Box,
+  Typography,
+  Grid,
+  Card,
+  CardContent,
+  Chip,
+  LinearProgress,
+  Alert,
+  Snackbar,
+  Tabs,
+  Tab,
+  Paper,
+  Avatar,
+  IconButton,
+  Tooltip,
+  CircularProgress,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
 } from '@mui/material';
 import {
   Psychology as PsychologyIcon,
@@ -35,9 +60,10 @@ import { useParams, useNavigate } from 'react-router-dom';
 import aiDiagnosticService from '../../services/aiDiagnosticService';
 
 /* ── helpers ── */
-const priorityColor = (p) => ({ high: 'error', medium: 'warning', low: 'success' }[p] || 'default');
-const riskColor = (l) => ({ critical: 'error', high: 'error', medium: 'warning', low: 'success' }[l] || 'default');
-const trendIcon = (d) => {
+const priorityColor = p => ({ high: 'error', medium: 'warning', low: 'success' })[p] || 'default';
+const riskColor = l =>
+  ({ critical: 'error', high: 'error', medium: 'warning', low: 'success' })[l] || 'default';
+const trendIcon = d => {
   if (d === 'improving' || d === 'increasing') return <TrendingUpIcon color="success" />;
   if (d === 'declining' || d === 'decreasing') return <TrendingDownIcon color="error" />;
   return <FlatIcon color="action" />;
@@ -63,17 +89,18 @@ export default function BeneficiaryAnalysis() {
   const load = useCallback(async () => {
     try {
       setLoading(true);
-      const [benRes, analysisRes, recRes, patRes, riskRes, goalRes, asmtRes, sessRes, behRes] = await Promise.all([
-        aiDiagnosticService.getBeneficiary(id),
-        aiDiagnosticService.analyzeProgress(id),
-        aiDiagnosticService.getRecommendations(id),
-        aiDiagnosticService.detectPatterns(id),
-        aiDiagnosticService.assessRisk(id),
-        aiDiagnosticService.listGoals(id),
-        aiDiagnosticService.listAssessments(id),
-        aiDiagnosticService.listSessions(id),
-        aiDiagnosticService.listBehaviorLogs(id),
-      ]);
+      const [benRes, analysisRes, recRes, patRes, riskRes, goalRes, asmtRes, sessRes, behRes] =
+        await Promise.all([
+          aiDiagnosticService.getBeneficiary(id),
+          aiDiagnosticService.analyzeProgress(id),
+          aiDiagnosticService.getRecommendations(id),
+          aiDiagnosticService.detectPatterns(id),
+          aiDiagnosticService.assessRisk(id),
+          aiDiagnosticService.listGoals(id),
+          aiDiagnosticService.listAssessments(id),
+          aiDiagnosticService.listSessions(id),
+          aiDiagnosticService.listBehaviorLogs(id),
+        ]);
       setBeneficiary(benRes.data?.data || benRes.data);
       setAnalysis(analysisRes.data?.data || analysisRes.data);
       setRecommendations(recRes.data?.data || recRes.data);
@@ -100,7 +127,9 @@ export default function BeneficiaryAnalysis() {
     }
   }, [id]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    load();
+  }, [load]);
 
   if (loading) {
     return (
@@ -111,7 +140,11 @@ export default function BeneficiaryAnalysis() {
   }
 
   if (!beneficiary) {
-    return <Alert severity="error" sx={{ m: 3 }}>لم يتم العثور على المستفيد</Alert>;
+    return (
+      <Alert severity="error" sx={{ m: 3 }}>
+        لم يتم العثور على المستفيد
+      </Alert>
+    );
   }
 
   return (
@@ -125,21 +158,22 @@ export default function BeneficiaryAnalysis() {
           <PsychologyIcon />
         </Avatar>
         <Box sx={{ flex: 1 }}>
-          <Typography variant="h5" fontWeight="bold">{beneficiary.name}</Typography>
+          <Typography variant="h5" fontWeight="bold">
+            {beneficiary.name}
+          </Typography>
           <Typography variant="body2" color="text.secondary">
-            {beneficiary.nationalId} • {beneficiary.disabilityType} • {beneficiary.disabilitySeverity}
+            {beneficiary.nationalId} • {beneficiary.disabilityType} •{' '}
+            {beneficiary.disabilitySeverity}
           </Typography>
         </Box>
         <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button
-            variant="outlined"
-            startIcon={<ReportIcon />}
-            onClick={generateReport}
-          >
+          <Button variant="outlined" startIcon={<ReportIcon />} onClick={generateReport}>
             تقرير AI شامل
           </Button>
           <Tooltip title="تحديث">
-            <IconButton onClick={load} color="primary"><RefreshIcon /></IconButton>
+            <IconButton onClick={load} color="primary">
+              <RefreshIcon />
+            </IconButton>
           </Tooltip>
         </Box>
       </Box>
@@ -160,8 +194,21 @@ export default function BeneficiaryAnalysis() {
           <Grid item xs={6} sm={3}>
             <Card elevation={2}>
               <CardContent sx={{ textAlign: 'center' }}>
-                <Chip label={risk?.riskLevel === 'low' ? 'منخفض' : risk?.riskLevel === 'medium' ? 'متوسط' : risk?.riskLevel === 'high' ? 'مرتفع' : 'حرج'} color={riskColor(risk?.riskLevel)} />
-                <Typography variant="caption" display="block" mt={1}>مستوى المخاطر</Typography>
+                <Chip
+                  label={
+                    risk?.riskLevel === 'low'
+                      ? 'منخفض'
+                      : risk?.riskLevel === 'medium'
+                        ? 'متوسط'
+                        : risk?.riskLevel === 'high'
+                          ? 'مرتفع'
+                          : 'حرج'
+                  }
+                  color={riskColor(risk?.riskLevel)}
+                />
+                <Typography variant="caption" display="block" mt={1}>
+                  مستوى المخاطر
+                </Typography>
               </CardContent>
             </Card>
           </Grid>
@@ -178,10 +225,16 @@ export default function BeneficiaryAnalysis() {
           <Grid item xs={6} sm={3}>
             <Card elevation={2}>
               <CardContent sx={{ textAlign: 'center' }}>
-                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 0.5 }}>
+                <Box
+                  sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 0.5 }}
+                >
                   {trendIcon(analysis.trajectory?.direction)}
                   <Typography variant="h6" fontWeight="bold">
-                    {analysis.trajectory?.direction === 'improving' ? 'تحسن' : analysis.trajectory?.direction === 'declining' ? 'تراجع' : 'مستقر'}
+                    {analysis.trajectory?.direction === 'improving'
+                      ? 'تحسن'
+                      : analysis.trajectory?.direction === 'declining'
+                        ? 'تراجع'
+                        : 'مستقر'}
                   </Typography>
                 </Box>
                 <Typography variant="caption">مسار التقدم</Typography>
@@ -193,12 +246,7 @@ export default function BeneficiaryAnalysis() {
 
       {/* ── Tabs ── */}
       <Paper sx={{ mb: 3 }}>
-        <Tabs
-          value={tab}
-          onChange={(_, v) => setTab(v)}
-          variant="scrollable"
-          scrollButtons="auto"
-        >
+        <Tabs value={tab} onChange={(_, v) => setTab(v)} variant="scrollable" scrollButtons="auto">
           <Tab icon={<AssessmentIcon />} label="التحليل" />
           <Tab icon={<RecommendIcon />} label="التوصيات" />
           <Tab icon={<TimelineIcon />} label="الأهداف" />
@@ -231,8 +279,8 @@ export default function BeneficiaryAnalysis() {
                 {analysis.trajectory?.startScore !== undefined && (
                   <Box>
                     <Typography variant="body2" color="text.secondary">
-                      من {analysis.trajectory.startScore} إلى {analysis.trajectory.endScore}
-                      ({analysis.trajectory.daysObserved} يوم)
+                      من {analysis.trajectory.startScore} إلى {analysis.trajectory.endScore}(
+                      {analysis.trajectory.daysObserved} يوم)
                     </Typography>
                     <LinearProgress
                       variant="determinate"
@@ -261,11 +309,22 @@ export default function BeneficiaryAnalysis() {
                 <LinearProgress
                   variant="determinate"
                   value={analysis.engagementTrend?.avgEngagement || 0}
-                  color={analysis.engagementTrend?.avgEngagement >= 70 ? 'success' : analysis.engagementTrend?.avgEngagement >= 50 ? 'warning' : 'error'}
+                  color={
+                    analysis.engagementTrend?.avgEngagement >= 70
+                      ? 'success'
+                      : analysis.engagementTrend?.avgEngagement >= 50
+                        ? 'warning'
+                        : 'error'
+                  }
                   sx={{ height: 8, borderRadius: 4 }}
                 />
-                <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-                  {analysis.engagementTrend?.completedSessions || 0} جلسة مكتملة من {analysis.engagementTrend?.totalSessions || 0}
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  sx={{ mt: 1, display: 'block' }}
+                >
+                  {analysis.engagementTrend?.completedSessions || 0} جلسة مكتملة من{' '}
+                  {analysis.engagementTrend?.totalSessions || 0}
                 </Typography>
               </CardContent>
             </Card>
@@ -285,7 +344,9 @@ export default function BeneficiaryAnalysis() {
                     ))}
                   </Box>
                 ) : (
-                  <Typography variant="body2" color="text.secondary">لا توجد نقاط قوة محددة بعد</Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    لا توجد نقاط قوة محددة بعد
+                  </Typography>
                 )}
               </CardContent>
             </Card>
@@ -304,7 +365,9 @@ export default function BeneficiaryAnalysis() {
                     ))}
                   </Box>
                 ) : (
-                  <Typography variant="body2" color="text.secondary">أداء جيد في جميع المجالات</Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    أداء جيد في جميع المجالات
+                  </Typography>
                 )}
               </CardContent>
             </Card>
@@ -319,20 +382,34 @@ export default function BeneficiaryAnalysis() {
                 </Typography>
                 <Grid container spacing={2}>
                   <Grid item xs={4}>
-                    <Typography variant="body2" color="text.secondary">إجمالي السجلات</Typography>
-                    <Typography variant="h6">{analysis.behaviorAnalysis?.totalLogs || 0}</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      إجمالي السجلات
+                    </Typography>
+                    <Typography variant="h6">
+                      {analysis.behaviorAnalysis?.totalLogs || 0}
+                    </Typography>
                   </Grid>
                   <Grid item xs={4}>
-                    <Typography variant="body2" color="text.secondary">إيجابية</Typography>
-                    <Typography variant="h6" color="success.main">{analysis.behaviorAnalysis?.positive || 0}</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      إيجابية
+                    </Typography>
+                    <Typography variant="h6" color="success.main">
+                      {analysis.behaviorAnalysis?.positive || 0}
+                    </Typography>
                   </Grid>
                   <Grid item xs={4}>
-                    <Typography variant="body2" color="text.secondary">تحدية</Typography>
-                    <Typography variant="h6" color="error.main">{analysis.behaviorAnalysis?.challenging || 0}</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      تحدية
+                    </Typography>
+                    <Typography variant="h6" color="error.main">
+                      {analysis.behaviorAnalysis?.challenging || 0}
+                    </Typography>
                   </Grid>
                 </Grid>
                 <Box sx={{ mt: 1 }}>
-                  <Typography variant="caption">نسبة الإيجابية: {analysis.behaviorAnalysis?.positiveRatio || 0}%</Typography>
+                  <Typography variant="caption">
+                    نسبة الإيجابية: {analysis.behaviorAnalysis?.positiveRatio || 0}%
+                  </Typography>
                   <LinearProgress
                     variant="determinate"
                     value={analysis.behaviorAnalysis?.positiveRatio || 0}
@@ -355,27 +432,47 @@ export default function BeneficiaryAnalysis() {
                   <Table size="small">
                     <TableHead>
                       <TableRow>
-                        {['التاريخ', 'نوع العلاج', 'المدة', 'المشاركة', 'التقييم', 'تحليل AI'].map((h) => (
-                          <TableCell key={h} sx={{ fontWeight: 'bold' }}>{h}</TableCell>
-                        ))}
+                        {['التاريخ', 'نوع العلاج', 'المدة', 'المشاركة', 'التقييم', 'تحليل AI'].map(
+                          h => (
+                            <TableCell key={h} sx={{ fontWeight: 'bold' }}>
+                              {h}
+                            </TableCell>
+                          )
+                        )}
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {sessions.slice(0, 10).map((s) => (
+                      {sessions.slice(0, 10).map(s => (
                         <TableRow key={s.id} hover>
                           <TableCell>{s.date}</TableCell>
-                          <TableCell><Chip label={s.therapyType} size="small" /></TableCell>
+                          <TableCell>
+                            <Chip label={s.therapyType} size="small" />
+                          </TableCell>
                           <TableCell>{s.duration} د</TableCell>
                           <TableCell>{s.outcomes?.engagement ?? '-'}%</TableCell>
                           <TableCell>{s.outcomes?.progressRating ?? '-'}/5</TableCell>
                           <TableCell>
                             {s.aiAnalysis ? (
                               <Chip
-                                label={s.aiAnalysis.engagementLevel === 'high' ? 'عالي' : s.aiAnalysis.engagementLevel === 'medium' ? 'متوسط' : 'منخفض'}
-                                color={s.aiAnalysis.engagementLevel === 'high' ? 'success' : s.aiAnalysis.engagementLevel === 'medium' ? 'warning' : 'error'}
+                                label={
+                                  s.aiAnalysis.engagementLevel === 'high'
+                                    ? 'عالي'
+                                    : s.aiAnalysis.engagementLevel === 'medium'
+                                      ? 'متوسط'
+                                      : 'منخفض'
+                                }
+                                color={
+                                  s.aiAnalysis.engagementLevel === 'high'
+                                    ? 'success'
+                                    : s.aiAnalysis.engagementLevel === 'medium'
+                                      ? 'warning'
+                                      : 'error'
+                                }
                                 size="small"
                               />
-                            ) : '-'}
+                            ) : (
+                              '-'
+                            )}
                           </TableCell>
                         </TableRow>
                       ))}
@@ -398,10 +495,22 @@ export default function BeneficiaryAnalysis() {
             <Accordion key={i} defaultExpanded={rec.priority === 'high'}>
               <AccordionSummary expandIcon={<ExpandIcon />}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
-                  <Chip label={rec.priority === 'high' ? 'عاجل' : rec.priority === 'medium' ? 'متوسط' : 'منخفض'} size="small" color={priorityColor(rec.priority)} />
+                  <Chip
+                    label={
+                      rec.priority === 'high'
+                        ? 'عاجل'
+                        : rec.priority === 'medium'
+                          ? 'متوسط'
+                          : 'منخفض'
+                    }
+                    size="small"
+                    color={priorityColor(rec.priority)}
+                  />
                   <Typography fontWeight="bold">{rec.title}</Typography>
                   <Box sx={{ flex: 1 }} />
-                  <Typography variant="caption" color="text.secondary">ثقة: {Math.round((rec.confidence || 0) * 100)}%</Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    ثقة: {Math.round((rec.confidence || 0) * 100)}%
+                  </Typography>
                 </Box>
               </AccordionSummary>
               <AccordionDetails>
@@ -422,7 +531,7 @@ export default function BeneficiaryAnalysis() {
             الأهداف العلاجية ({goals.length})
           </Typography>
           <Grid container spacing={2}>
-            {goals.map((g) => (
+            {goals.map(g => (
               <Grid item xs={12} md={6} key={g.id}>
                 <Card elevation={1}>
                   <CardContent>
@@ -434,15 +543,21 @@ export default function BeneficiaryAnalysis() {
                         size="small"
                       />
                     </Box>
-                    <Typography variant="body2" color="text.secondary" gutterBottom>{g.description}</Typography>
+                    <Typography variant="body2" color="text.secondary" gutterBottom>
+                      {g.description}
+                    </Typography>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                       <LinearProgress
                         variant="determinate"
                         value={g.progress}
                         sx={{ flex: 1, height: 8, borderRadius: 4 }}
-                        color={g.progress >= 70 ? 'success' : g.progress >= 40 ? 'warning' : 'error'}
+                        color={
+                          g.progress >= 70 ? 'success' : g.progress >= 40 ? 'warning' : 'error'
+                        }
                       />
-                      <Typography variant="body2" fontWeight="bold">{g.progress}%</Typography>
+                      <Typography variant="body2" fontWeight="bold">
+                        {g.progress}%
+                      </Typography>
                     </Box>
                     <Typography variant="caption" color="text.secondary">
                       الهدف: {g.targetDate}
@@ -452,7 +567,11 @@ export default function BeneficiaryAnalysis() {
                         {g.milestones.map((m, mi) => (
                           <ListItem key={mi} disablePadding sx={{ py: 0.25 }}>
                             <ListItemIcon sx={{ minWidth: 28 }}>
-                              {m.achieved ? <CheckIcon color="success" fontSize="small" /> : <UncheckedIcon fontSize="small" />}
+                              {m.achieved ? (
+                                <CheckIcon color="success" fontSize="small" />
+                              ) : (
+                                <UncheckedIcon fontSize="small" />
+                              )}
                             </ListItemIcon>
                             <ListItemText
                               primary={m.label}
@@ -484,10 +603,15 @@ export default function BeneficiaryAnalysis() {
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                   <PatternIcon color="primary" />
                   <Typography fontWeight="bold">
-                    {p.type === 'engagement_trend' ? 'اتجاه المشاركة' :
-                     p.type === 'behavior_ratio' ? 'نسبة السلوك' :
-                     p.type === 'assessment_trend' ? 'اتجاه التقييم' :
-                     p.type === 'session_frequency' ? 'تكرار الجلسات' : p.type}
+                    {p.type === 'engagement_trend'
+                      ? 'اتجاه المشاركة'
+                      : p.type === 'behavior_ratio'
+                        ? 'نسبة السلوك'
+                        : p.type === 'assessment_trend'
+                          ? 'اتجاه التقييم'
+                          : p.type === 'session_frequency'
+                            ? 'تكرار الجلسات'
+                            : p.type}
                   </Typography>
                   <Chip
                     label={p.significance === 'significant' ? 'مهم' : 'طفيف'}
@@ -507,11 +631,23 @@ export default function BeneficiaryAnalysis() {
         <Box>
           <Card elevation={2} sx={{ mb: 3 }}>
             <CardContent sx={{ textAlign: 'center' }}>
-              <Typography variant="h3" fontWeight="bold" color={riskColor(risk.riskLevel) + '.main'}>
+              <Typography
+                variant="h3"
+                fontWeight="bold"
+                color={riskColor(risk.riskLevel) + '.main'}
+              >
                 {risk.riskScore}
               </Typography>
               <Chip
-                label={risk.riskLevel === 'low' ? 'منخفض' : risk.riskLevel === 'medium' ? 'متوسط' : risk.riskLevel === 'high' ? 'مرتفع' : 'حرج'}
+                label={
+                  risk.riskLevel === 'low'
+                    ? 'منخفض'
+                    : risk.riskLevel === 'medium'
+                      ? 'متوسط'
+                      : risk.riskLevel === 'high'
+                        ? 'مرتفع'
+                        : 'حرج'
+                }
                 color={riskColor(risk.riskLevel)}
                 sx={{ mt: 1 }}
               />
@@ -531,7 +667,17 @@ export default function BeneficiaryAnalysis() {
                   {risk.riskFactors.map((rf, i) => (
                     <ListItem key={i}>
                       <ListItemIcon>
-                        <Chip label={rf.severity === 'critical' ? 'حرج' : rf.severity === 'high' ? 'عالي' : 'متوسط'} size="small" color={riskColor(rf.severity)} />
+                        <Chip
+                          label={
+                            rf.severity === 'critical'
+                              ? 'حرج'
+                              : rf.severity === 'high'
+                                ? 'عالي'
+                                : 'متوسط'
+                          }
+                          size="small"
+                          color={riskColor(rf.severity)}
+                        />
                       </ListItemIcon>
                       <ListItemText primary={rf.description} />
                     </ListItem>
@@ -550,7 +696,9 @@ export default function BeneficiaryAnalysis() {
                 <List dense>
                   {risk.mitigationSuggestions.map((m, i) => (
                     <ListItem key={i}>
-                      <ListItemIcon><CheckIcon color="success" fontSize="small" /></ListItemIcon>
+                      <ListItemIcon>
+                        <CheckIcon color="success" fontSize="small" />
+                      </ListItemIcon>
                       <ListItemText primary={m} />
                     </ListItem>
                   ))}
@@ -567,7 +715,9 @@ export default function BeneficiaryAnalysis() {
           {!report ? (
             <Box sx={{ textAlign: 'center', py: 6 }}>
               <ReportIcon sx={{ fontSize: 60, color: 'text.secondary', mb: 2 }} />
-              <Typography variant="h6" color="text.secondary" gutterBottom>لم يتم إنشاء تقرير بعد</Typography>
+              <Typography variant="h6" color="text.secondary" gutterBottom>
+                لم يتم إنشاء تقرير بعد
+              </Typography>
               <Button variant="contained" startIcon={<ReportIcon />} onClick={generateReport}>
                 إنشاء تقرير AI شامل
               </Button>
@@ -581,17 +731,26 @@ export default function BeneficiaryAnalysis() {
               {/* Summary */}
               <Card elevation={1} sx={{ mb: 2 }}>
                 <CardContent>
-                  <Typography variant="subtitle1" fontWeight="bold" gutterBottom>الملخص</Typography>
+                  <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                    الملخص
+                  </Typography>
                   <Grid container spacing={2}>
                     {[
                       { l: 'النتيجة الكلية', v: `${report.summary?.overallScore}%` },
                       { l: 'مستوى المخاطر', v: report.summary?.riskLevel },
-                      { l: 'الأهداف', v: `${report.summary?.achievedGoals}/${report.summary?.totalGoals}` },
+                      {
+                        l: 'الأهداف',
+                        v: `${report.summary?.achievedGoals}/${report.summary?.totalGoals}`,
+                      },
                       { l: 'متوسط التقدم', v: `${report.summary?.avgProgress}%` },
                     ].map((item, i) => (
                       <Grid item xs={6} sm={3} key={i}>
-                        <Typography variant="caption" color="text.secondary">{item.l}</Typography>
-                        <Typography variant="h6" fontWeight="bold">{item.v}</Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {item.l}
+                        </Typography>
+                        <Typography variant="h6" fontWeight="bold">
+                          {item.v}
+                        </Typography>
                       </Grid>
                     ))}
                   </Grid>
@@ -601,7 +760,9 @@ export default function BeneficiaryAnalysis() {
               {/* Conclusion */}
               <Card elevation={1} sx={{ mb: 2 }}>
                 <CardContent>
-                  <Typography variant="subtitle1" fontWeight="bold" gutterBottom>الاستنتاج</Typography>
+                  <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                    الاستنتاج
+                  </Typography>
                   <Typography>{report.conclusion}</Typography>
                 </CardContent>
               </Card>
@@ -609,11 +770,15 @@ export default function BeneficiaryAnalysis() {
               {/* Next Steps */}
               <Card elevation={1}>
                 <CardContent>
-                  <Typography variant="subtitle1" fontWeight="bold" gutterBottom>الخطوات التالية</Typography>
+                  <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                    الخطوات التالية
+                  </Typography>
                   <List dense>
                     {report.nextSteps?.map((step, i) => (
                       <ListItem key={i}>
-                        <ListItemIcon><CheckIcon color="primary" fontSize="small" /></ListItemIcon>
+                        <ListItemIcon>
+                          <CheckIcon color="primary" fontSize="small" />
+                        </ListItemIcon>
                         <ListItemText primary={step} />
                       </ListItem>
                     ))}
@@ -629,10 +794,13 @@ export default function BeneficiaryAnalysis() {
       <Snackbar
         open={snackbar.open}
         autoHideDuration={4000}
-        onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
+        onClose={() => setSnackbar(s => ({ ...s, open: false }))}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert severity={snackbar.severity} onClose={() => setSnackbar((s) => ({ ...s, open: false }))}>
+        <Alert
+          severity={snackbar.severity}
+          onClose={() => setSnackbar(s => ({ ...s, open: false }))}
+        >
           {snackbar.message}
         </Alert>
       </Snackbar>

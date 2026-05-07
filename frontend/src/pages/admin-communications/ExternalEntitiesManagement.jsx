@@ -24,7 +24,8 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions,  Tooltip,
+  DialogActions,
+  Tooltip,
   Alert,
   Snackbar,
   Skeleton,
@@ -114,7 +115,7 @@ export default function ExternalEntitiesManagement() {
 
   // ─── Helper: set nested field ────────────────────────
   const setField = (path, value) => {
-    setForm((prev) => {
+    setForm(prev => {
       const updated = { ...prev };
       const parts = path.split('.');
       if (parts.length === 2) {
@@ -130,12 +131,17 @@ export default function ExternalEntitiesManagement() {
   const handleCreate = () => {
     setEditMode(false);
     setEditId(null);
-    setForm({ ...EMPTY_FORM, governmentInfo: { ...EMPTY_FORM.governmentInfo }, contactInfo: { ...EMPTY_FORM.contactInfo }, address: { ...EMPTY_FORM.address } });
+    setForm({
+      ...EMPTY_FORM,
+      governmentInfo: { ...EMPTY_FORM.governmentInfo },
+      contactInfo: { ...EMPTY_FORM.contactInfo },
+      address: { ...EMPTY_FORM.address },
+    });
     setDialogTab(0);
     setDialogOpen(true);
   };
 
-  const handleEdit = async (entity) => {
+  const handleEdit = async entity => {
     setEditMode(true);
     setEditId(entity._id);
     setForm({
@@ -217,7 +223,7 @@ export default function ExternalEntitiesManagement() {
               size="small"
               placeholder="بحث بالاسم..."
               value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
+              onChange={e => setSearchInput(e.target.value)}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -233,10 +239,10 @@ export default function ExternalEntitiesManagement() {
               <Select
                 value={typeFilter}
                 label="نوع الجهة"
-                onChange={(e) => setTypeFilter(e.target.value)}
+                onChange={e => setTypeFilter(e.target.value)}
               >
                 <MenuItem value="">الكل</MenuItem>
-                {typeOptions.map((t) => (
+                {typeOptions.map(t => (
                   <MenuItem key={t.value} value={t.value}>
                     {t.label}
                   </MenuItem>
@@ -282,7 +288,7 @@ export default function ExternalEntitiesManagement() {
                 </TableCell>
               </TableRow>
             ) : (
-              entities.map((entity) => {
+              entities.map(entity => {
                 const typeInfo = ENTITY_TYPES[entity.type] || {};
                 return (
                   <TableRow key={entity._id} hover>
@@ -321,14 +327,10 @@ export default function ExternalEntitiesManagement() {
                       />
                     </TableCell>
                     <TableCell>
-                      <Typography variant="body2">
-                        {entity.contactInfo?.email || '—'}
-                      </Typography>
+                      <Typography variant="body2">{entity.contactInfo?.email || '—'}</Typography>
                     </TableCell>
                     <TableCell>
-                      <Typography variant="body2">
-                        {entity.contactInfo?.phone || '—'}
-                      </Typography>
+                      <Typography variant="body2">{entity.contactInfo?.phone || '—'}</Typography>
                     </TableCell>
                     <TableCell>
                       <Typography variant="body2">
@@ -381,7 +383,7 @@ export default function ExternalEntitiesManagement() {
                   fullWidth
                   label="اسم الجهة (English) *"
                   value={form.name}
-                  onChange={(e) => setField('name', e.target.value)}
+                  onChange={e => setField('name', e.target.value)}
                 />
               </Grid>
               <Grid item xs={12} md={6}>
@@ -389,7 +391,7 @@ export default function ExternalEntitiesManagement() {
                   fullWidth
                   label="اسم الجهة (عربي) *"
                   value={form.nameAr}
-                  onChange={(e) => setField('nameAr', e.target.value)}
+                  onChange={e => setField('nameAr', e.target.value)}
                 />
               </Grid>
               <Grid item xs={12} md={6}>
@@ -398,9 +400,9 @@ export default function ExternalEntitiesManagement() {
                   <Select
                     value={form.type}
                     label="نوع الجهة *"
-                    onChange={(e) => setField('type', e.target.value)}
+                    onChange={e => setField('type', e.target.value)}
                   >
-                    {typeOptions.map((t) => (
+                    {typeOptions.map(t => (
                       <MenuItem key={t.value} value={t.value}>
                         {t.label}
                       </MenuItem>
@@ -413,7 +415,7 @@ export default function ExternalEntitiesManagement() {
                   control={
                     <Switch
                       checked={form.isActive}
-                      onChange={(e) => setField('isActive', e.target.checked)}
+                      onChange={e => setField('isActive', e.target.checked)}
                     />
                   }
                   label="جهة نشطة"
@@ -426,7 +428,7 @@ export default function ExternalEntitiesManagement() {
                   rows={3}
                   label="ملاحظات"
                   value={form.notes}
-                  onChange={(e) => setField('notes', e.target.value)}
+                  onChange={e => setField('notes', e.target.value)}
                 />
               </Grid>
             </Grid>
@@ -440,7 +442,7 @@ export default function ExternalEntitiesManagement() {
                   fullWidth
                   label="الهاتف"
                   value={form.contactInfo.phone}
-                  onChange={(e) => setField('contactInfo.phone', e.target.value)}
+                  onChange={e => setField('contactInfo.phone', e.target.value)}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
@@ -455,7 +457,7 @@ export default function ExternalEntitiesManagement() {
                   fullWidth
                   label="الفاكس"
                   value={form.contactInfo.fax}
-                  onChange={(e) => setField('contactInfo.fax', e.target.value)}
+                  onChange={e => setField('contactInfo.fax', e.target.value)}
                 />
               </Grid>
               <Grid item xs={12} md={6}>
@@ -464,7 +466,7 @@ export default function ExternalEntitiesManagement() {
                   label="البريد الإلكتروني"
                   type="email"
                   value={form.contactInfo.email}
-                  onChange={(e) => setField('contactInfo.email', e.target.value)}
+                  onChange={e => setField('contactInfo.email', e.target.value)}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
@@ -479,7 +481,7 @@ export default function ExternalEntitiesManagement() {
                   fullWidth
                   label="الموقع الإلكتروني"
                   value={form.contactInfo.website}
-                  onChange={(e) => setField('contactInfo.website', e.target.value)}
+                  onChange={e => setField('contactInfo.website', e.target.value)}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
@@ -494,7 +496,7 @@ export default function ExternalEntitiesManagement() {
                   fullWidth
                   label="صندوق البريد"
                   value={form.contactInfo.poBox}
-                  onChange={(e) => setField('contactInfo.poBox', e.target.value)}
+                  onChange={e => setField('contactInfo.poBox', e.target.value)}
                 />
               </Grid>
               <Grid item xs={12} md={6}>
@@ -502,7 +504,7 @@ export default function ExternalEntitiesManagement() {
                   fullWidth
                   label="الرمز البريدي"
                   value={form.contactInfo.postalCode}
-                  onChange={(e) => setField('contactInfo.postalCode', e.target.value)}
+                  onChange={e => setField('contactInfo.postalCode', e.target.value)}
                 />
               </Grid>
             </Grid>
@@ -516,7 +518,7 @@ export default function ExternalEntitiesManagement() {
                   fullWidth
                   label="الشارع"
                   value={form.address.street}
-                  onChange={(e) => setField('address.street', e.target.value)}
+                  onChange={e => setField('address.street', e.target.value)}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
@@ -531,7 +533,7 @@ export default function ExternalEntitiesManagement() {
                   fullWidth
                   label="المدينة"
                   value={form.address.city}
-                  onChange={(e) => setField('address.city', e.target.value)}
+                  onChange={e => setField('address.city', e.target.value)}
                 />
               </Grid>
               <Grid item xs={12} md={4}>
@@ -539,7 +541,7 @@ export default function ExternalEntitiesManagement() {
                   fullWidth
                   label="المنطقة"
                   value={form.address.region}
-                  onChange={(e) => setField('address.region', e.target.value)}
+                  onChange={e => setField('address.region', e.target.value)}
                 />
               </Grid>
               <Grid item xs={12} md={4}>
@@ -547,7 +549,7 @@ export default function ExternalEntitiesManagement() {
                   fullWidth
                   label="الدولة"
                   value={form.address.country}
-                  onChange={(e) => setField('address.country', e.target.value)}
+                  onChange={e => setField('address.country', e.target.value)}
                 />
               </Grid>
             </Grid>
@@ -561,7 +563,7 @@ export default function ExternalEntitiesManagement() {
                   fullWidth
                   label="اسم الوزارة"
                   value={form.governmentInfo.ministryName}
-                  onChange={(e) => setField('governmentInfo.ministryName', e.target.value)}
+                  onChange={e => setField('governmentInfo.ministryName', e.target.value)}
                 />
               </Grid>
               <Grid item xs={12} md={6}>
@@ -569,7 +571,7 @@ export default function ExternalEntitiesManagement() {
                   fullWidth
                   label="اسم الإدارة"
                   value={form.governmentInfo.departmentName}
-                  onChange={(e) => setField('governmentInfo.departmentName', e.target.value)}
+                  onChange={e => setField('governmentInfo.departmentName', e.target.value)}
                 />
               </Grid>
               <Grid item xs={12} md={6}>
@@ -577,7 +579,7 @@ export default function ExternalEntitiesManagement() {
                   fullWidth
                   label="المنطقة"
                   value={form.governmentInfo.region}
-                  onChange={(e) => setField('governmentInfo.region', e.target.value)}
+                  onChange={e => setField('governmentInfo.region', e.target.value)}
                 />
               </Grid>
               <Grid item xs={12} md={6}>
@@ -585,7 +587,7 @@ export default function ExternalEntitiesManagement() {
                   fullWidth
                   label="المدينة"
                   value={form.governmentInfo.city}
-                  onChange={(e) => setField('governmentInfo.city', e.target.value)}
+                  onChange={e => setField('governmentInfo.city', e.target.value)}
                 />
               </Grid>
             </Grid>
@@ -603,7 +605,7 @@ export default function ExternalEntitiesManagement() {
       <Snackbar
         open={snackbar.open}
         autoHideDuration={4000}
-        onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
+        onClose={() => setSnackbar(s => ({ ...s, open: false }))}
       >
         <Alert severity={snackbar.severity} variant="filled">
           {snackbar.message}

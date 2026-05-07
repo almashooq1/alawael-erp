@@ -14,8 +14,13 @@ import {
 } from '@mui/material';
 import { Print as PrintIcon, Close as CloseIcon } from '@mui/icons-material';
 import {
-  RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
-  ResponsiveContainer, Tooltip as RechartsTooltip,
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  Radar,
+  ResponsiveContainer,
+  Tooltip as RechartsTooltip,
 } from 'recharts';
 import { surfaceColors } from '../../theme/palette';
 
@@ -28,10 +33,10 @@ const DetailDialog = ({ open, selectedResult, scales, onClose }) => (
   <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
     {selectedResult &&
       (() => {
-        const scale = scales.find((s) => s.id === selectedResult.scaleId);
+        const scale = scales.find(s => s.id === selectedResult.scaleId);
         /* Build radar data from domains */
         const radarData = scale
-          ? scale.domains.map((d) => ({
+          ? scale.domains.map(d => ({
               domain: d.name,
               score: selectedResult.domainScores?.[d.key] || 0,
               max: d.maxScore,
@@ -100,11 +105,7 @@ const DetailDialog = ({ open, selectedResult, scales, onClose }) => (
 
               {/* Overall score */}
               <Paper elevation={1} sx={{ p: 2, mb: 3, textAlign: 'center' }}>
-                <Typography
-                  variant="h3"
-                  fontWeight="bold"
-                  color={selectedResult.levelColor}
-                >
+                <Typography variant="h3" fontWeight="bold" color={selectedResult.levelColor}>
                   {selectedResult.percentage}%
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
@@ -139,7 +140,7 @@ const DetailDialog = ({ open, selectedResult, scales, onClose }) => (
                       <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fontSize: 10 }} />
                       <RechartsTooltip
                         formatter={(value, _name) => [`${value}%`, 'النسبة']}
-                        labelFormatter={(label) => label}
+                        labelFormatter={label => label}
                       />
                       <Radar
                         name="النسبة المئوية"
@@ -160,7 +161,7 @@ const DetailDialog = ({ open, selectedResult, scales, onClose }) => (
                   <Typography variant="h6" gutterBottom>
                     تفصيل المجالات
                   </Typography>
-                  {scale.domains.map((d) => {
+                  {scale.domains.map(d => {
                     const score = selectedResult.domainScores?.[d.key] || 0;
                     const pct = Math.round((score / d.maxScore) * 100);
                     return (

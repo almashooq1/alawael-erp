@@ -76,7 +76,7 @@ const TherapistConsentManagement = () => {
 
   useEffect(() => {
     fetchConsents();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchConsents = async () => {

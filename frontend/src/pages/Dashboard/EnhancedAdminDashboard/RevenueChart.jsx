@@ -20,7 +20,7 @@ const RevenueChart = ({ revenueData, timeRange, setTimeRange }) => (
           الإيرادات والمصروفات
         </Typography>
         <Stack direction="row" spacing={1}>
-          {['أسبوع', 'شهر', 'سنة'].map((range) => (
+          {['أسبوع', 'شهر', 'سنة'].map(range => (
             <Chip
               key={range}
               label={range}

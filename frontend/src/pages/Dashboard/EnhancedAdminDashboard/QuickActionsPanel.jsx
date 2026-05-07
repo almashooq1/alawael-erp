@@ -1,17 +1,15 @@
-import {
-  Card,
-  CardContent,
-  Typography,
-  Grid,
-  Paper,
-  Avatar,
-} from '@mui/material';
+import { Card, CardContent, Typography, Grid, Paper, Avatar } from '@mui/material';
 import { People, CalendarToday, Assessment, School } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { statusColors } from 'theme/palette';
 
 const QUICK_ACTIONS = [
-  { title: 'تسجيل مستفيد', icon: <People />, color: statusColors.info, path: '/student-registration' },
+  {
+    title: 'تسجيل مستفيد',
+    icon: <People />,
+    color: statusColors.info,
+    path: '/student-registration',
+  },
   { title: 'جدولة جلسة', icon: <CalendarToday />, color: statusColors.success, path: '/sessions' },
   { title: 'إنشاء تقرير', icon: <Assessment />, color: statusColors.warning, path: '/reports' },
   { title: 'إدارة الموظفين', icon: <School />, color: statusColors.purple, path: '/hr' },

@@ -5,15 +5,40 @@
  */
 
 import {
-  Box, Typography, Grid, Card, useTheme, Chip,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  Box,
+  Typography,
+  Grid,
+  Card,
+  useTheme,
+  Chip,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   LinearProgress,
 } from '@mui/material';
 import { motion } from 'framer-motion';
 import {
-  AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
-  RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
-  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  RadarChart,
+  Radar,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
 } from 'recharts';
 import RadiologyIcon from '@mui/icons-material/CoronavirusOutlined';
 import ScannerIcon from '@mui/icons-material/Scanner';
@@ -24,10 +49,38 @@ import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 
 // ─── Data ──────────────────────────────────────────────────────────────────────
 const kpiData = [
-  { title: 'فحوصات اليوم', value: '١٢٤', sub: '+١٥٪ عن الأمس', icon: ScannerIcon, trend: 'up', color: '#06b6d4' },
-  { title: 'التقارير الجاهزة', value: '٩٨', sub: '٧٩٪ معدل الإنجاز', icon: ImageSearchIcon, trend: 'up', color: '#8b5cf6' },
-  { title: 'متوسط الانتظار', value: '٢٥ د', sub: '-٥ دقائق عن الأمس', icon: AccessTimeIcon, trend: 'down', color: '#22c55e' },
-  { title: 'الأجهزة العاملة', value: '١٨/٢٠', sub: '٢ تحت الصيانة', icon: RadiologyIcon, trend: 'up', color: '#ec4899' },
+  {
+    title: 'فحوصات اليوم',
+    value: '١٢٤',
+    sub: '+١٥٪ عن الأمس',
+    icon: ScannerIcon,
+    trend: 'up',
+    color: '#06b6d4',
+  },
+  {
+    title: 'التقارير الجاهزة',
+    value: '٩٨',
+    sub: '٧٩٪ معدل الإنجاز',
+    icon: ImageSearchIcon,
+    trend: 'up',
+    color: '#8b5cf6',
+  },
+  {
+    title: 'متوسط الانتظار',
+    value: '٢٥ د',
+    sub: '-٥ دقائق عن الأمس',
+    icon: AccessTimeIcon,
+    trend: 'down',
+    color: '#22c55e',
+  },
+  {
+    title: 'الأجهزة العاملة',
+    value: '١٨/٢٠',
+    sub: '٢ تحت الصيانة',
+    icon: RadiologyIcon,
+    trend: 'up',
+    color: '#ec4899',
+  },
 ];
 
 const monthlyScans = [
@@ -65,16 +118,51 @@ const departmentLoad = [
 ];
 
 const recentExams = [
-  { id: 'RAD-4821', patient: 'أحمد محمد', type: 'CT صدر', radiologist: 'د. سارة', status: 'جاهز', priority: 'عادي' },
-  { id: 'RAD-4820', patient: 'فاطمة علي', type: 'MRI دماغ', radiologist: 'د. خالد', status: 'قيد القراءة', priority: 'مستعجل' },
-  { id: 'RAD-4819', patient: 'عمر حسن', type: 'أشعة سينية يد', radiologist: 'د. سارة', status: 'جاهز', priority: 'عادي' },
-  { id: 'RAD-4818', patient: 'نورة سعد', type: 'موجات بطن', radiologist: 'د. ليلى', status: 'جاهز', priority: 'عادي' },
-  { id: 'RAD-4817', patient: 'محمد إبراهيم', type: 'CT بطن', radiologist: 'د. خالد', status: 'قيد التصوير', priority: 'طارئ' },
+  {
+    id: 'RAD-4821',
+    patient: 'أحمد محمد',
+    type: 'CT صدر',
+    radiologist: 'د. سارة',
+    status: 'جاهز',
+    priority: 'عادي',
+  },
+  {
+    id: 'RAD-4820',
+    patient: 'فاطمة علي',
+    type: 'MRI دماغ',
+    radiologist: 'د. خالد',
+    status: 'قيد القراءة',
+    priority: 'مستعجل',
+  },
+  {
+    id: 'RAD-4819',
+    patient: 'عمر حسن',
+    type: 'أشعة سينية يد',
+    radiologist: 'د. سارة',
+    status: 'جاهز',
+    priority: 'عادي',
+  },
+  {
+    id: 'RAD-4818',
+    patient: 'نورة سعد',
+    type: 'موجات بطن',
+    radiologist: 'د. ليلى',
+    status: 'جاهز',
+    priority: 'عادي',
+  },
+  {
+    id: 'RAD-4817',
+    patient: 'محمد إبراهيم',
+    type: 'CT بطن',
+    radiologist: 'د. خالد',
+    status: 'قيد التصوير',
+    priority: 'طارئ',
+  },
 ];
 
 const GRADIENT = 'linear-gradient(135deg, #06b6d4 0%, #8b5cf6 50%, #ec4899 100%)';
 
-const glass = (isDark) => ({
+const glass = isDark => ({
   borderRadius: '20px',
   border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.9)'}`,
   background: isDark ? 'rgba(15,23,42,0.7)' : 'rgba(255,255,255,0.85)',
@@ -83,10 +171,8 @@ const glass = (isDark) => ({
   boxShadow: isDark ? '0 4px 24px rgba(0,0,0,0.3)' : '0 4px 24px rgba(0,0,0,0.06)',
 });
 
-const statusColor = (s) =>
-  s === 'جاهز' ? '#22c55e' : s === 'قيد القراءة' ? '#f59e0b' : '#06b6d4';
-const priorityColor = (p) =>
-  p === 'طارئ' ? '#ef4444' : p === 'مستعجل' ? '#f59e0b' : '#64748B';
+const statusColor = s => (s === 'جاهز' ? '#22c55e' : s === 'قيد القراءة' ? '#f59e0b' : '#06b6d4');
+const priorityColor = p => (p === 'طارئ' ? '#ef4444' : p === 'مستعجل' ? '#f59e0b' : '#64748B');
 
 export default function RadiologyProDashboard() {
   const theme = useTheme();
@@ -96,26 +182,47 @@ export default function RadiologyProDashboard() {
   return (
     <Box sx={{ direction: 'rtl', minHeight: '100vh' }}>
       {/* Hero */}
-      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-        <Box sx={{
-          ...glass(isDark), mb: 3, p: { xs: 2.5, md: 4 }, overflow: 'hidden',
-          background: isDark
-            ? 'linear-gradient(135deg, rgba(6,182,212,0.25) 0%, rgba(139,92,246,0.2) 50%, rgba(236,72,153,0.15) 100%)'
-            : 'linear-gradient(135deg, rgba(6,182,212,0.12) 0%, rgba(139,92,246,0.08) 50%, rgba(236,72,153,0.06) 100%)',
-        }}>
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        <Box
+          sx={{
+            ...glass(isDark),
+            mb: 3,
+            p: { xs: 2.5, md: 4 },
+            overflow: 'hidden',
+            background: isDark
+              ? 'linear-gradient(135deg, rgba(6,182,212,0.25) 0%, rgba(139,92,246,0.2) 50%, rgba(236,72,153,0.15) 100%)'
+              : 'linear-gradient(135deg, rgba(6,182,212,0.12) 0%, rgba(139,92,246,0.08) 50%, rgba(236,72,153,0.06) 100%)',
+          }}
+        >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Box sx={{
-              width: 52, height: 52, borderRadius: '16px',
-              background: GRADIENT, display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 8px 24px rgba(6,182,212,0.4)',
-            }}>
+            <Box
+              sx={{
+                width: 52,
+                height: 52,
+                borderRadius: '16px',
+                background: GRADIENT,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 8px 24px rgba(6,182,212,0.4)',
+              }}
+            >
               <ScannerIcon sx={{ fontSize: 26, color: '#fff' }} />
             </Box>
             <Box>
-              <Typography sx={{
-                fontWeight: 800, fontSize: { xs: '1.4rem', md: '1.8rem' },
-                background: GRADIENT, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-              }}>
+              <Typography
+                sx={{
+                  fontWeight: 800,
+                  fontSize: { xs: '1.4rem', md: '1.8rem' },
+                  background: GRADIENT,
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                }}
+              >
                 لوحة الأشعة والتصوير الطبي
               </Typography>
               <Typography sx={{ fontSize: '0.85rem', color: sub }}>
@@ -132,25 +239,54 @@ export default function RadiologyProDashboard() {
           const Icon = kpi.icon;
           return (
             <Grid item xs={12} sm={6} md={3} key={i}>
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.1 }}
+              >
                 <Card elevation={0} sx={{ ...glass(isDark), p: 2.5 }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'flex-start',
+                    }}
+                  >
                     <Box>
-                      <Typography sx={{ fontSize: '0.78rem', color: sub, mb: 0.5 }}>{kpi.title}</Typography>
-                      <Typography sx={{ fontWeight: 800, fontSize: '1.5rem', color: isDark ? '#F1F5F9' : '#0F172A' }}>
+                      <Typography sx={{ fontSize: '0.78rem', color: sub, mb: 0.5 }}>
+                        {kpi.title}
+                      </Typography>
+                      <Typography
+                        sx={{
+                          fontWeight: 800,
+                          fontSize: '1.5rem',
+                          color: isDark ? '#F1F5F9' : '#0F172A',
+                        }}
+                      >
                         {kpi.value}
                       </Typography>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5 }}>
-                        {kpi.trend === 'up'
-                          ? <TrendingUpIcon sx={{ fontSize: 14, color: '#22c55e' }} />
-                          : <TrendingDownIcon sx={{ fontSize: 14, color: '#22c55e' }} />}
-                        <Typography sx={{ fontSize: '0.7rem', color: '#22c55e' }}>{kpi.sub}</Typography>
+                        {kpi.trend === 'up' ? (
+                          <TrendingUpIcon sx={{ fontSize: 14, color: '#22c55e' }} />
+                        ) : (
+                          <TrendingDownIcon sx={{ fontSize: 14, color: '#22c55e' }} />
+                        )}
+                        <Typography sx={{ fontSize: '0.7rem', color: '#22c55e' }}>
+                          {kpi.sub}
+                        </Typography>
                       </Box>
                     </Box>
-                    <Box sx={{
-                      width: 44, height: 44, borderRadius: '14px',
-                      background: `${kpi.color}22`, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    }}>
+                    <Box
+                      sx={{
+                        width: 44,
+                        height: 44,
+                        borderRadius: '14px',
+                        background: `${kpi.color}22`,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
                       <Icon sx={{ fontSize: 22, color: kpi.color }} />
                     </Box>
                   </Box>
@@ -164,7 +300,11 @@ export default function RadiologyProDashboard() {
       {/* Charts Row 1 */}
       <Grid container spacing={2.5} sx={{ mb: 3 }}>
         <Grid item xs={12} md={8}>
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+          >
             <Card elevation={0} sx={{ ...glass(isDark), p: 2.5 }}>
               <Typography sx={{ fontWeight: 700, mb: 2, color: isDark ? '#F1F5F9' : '#0F172A' }}>
                 الفحوصات الشهرية حسب النوع
@@ -177,22 +317,59 @@ export default function RadiologyProDashboard() {
                       { id: 'radGrad2', color: '#8b5cf6' },
                       { id: 'radGrad3', color: '#ec4899' },
                       { id: 'radGrad4', color: '#f59e0b' },
-                    ].map((g) => (
+                    ].map(g => (
                       <linearGradient key={g.id} id={g.id} x1="0" y1="0" x2="0" y2="1">
                         <stop offset="0%" stopColor={g.color} stopOpacity={0.25} />
                         <stop offset="100%" stopColor={g.color} stopOpacity={0} />
                       </linearGradient>
                     ))}
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke={isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'} />
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke={isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}
+                  />
                   <XAxis dataKey="month" tick={{ fontSize: 11, fill: sub }} />
                   <YAxis tick={{ fontSize: 11, fill: sub }} />
-                  <Tooltip contentStyle={{ borderRadius: 12, border: 'none', background: isDark ? '#1E293B' : '#fff' }} />
+                  <Tooltip
+                    contentStyle={{
+                      borderRadius: 12,
+                      border: 'none',
+                      background: isDark ? '#1E293B' : '#fff',
+                    }}
+                  />
                   <Legend />
-                  <Area type="monotone" dataKey="xray" name="أشعة سينية" stroke="#06b6d4" fill="url(#radGrad1)" strokeWidth={2} />
-                  <Area type="monotone" dataKey="ct" name="مقطعي" stroke="#8b5cf6" fill="url(#radGrad2)" strokeWidth={2} />
-                  <Area type="monotone" dataKey="mri" name="رنين" stroke="#ec4899" fill="url(#radGrad3)" strokeWidth={2} />
-                  <Area type="monotone" dataKey="ultrasound" name="موجات" stroke="#f59e0b" fill="url(#radGrad4)" strokeWidth={2} />
+                  <Area
+                    type="monotone"
+                    dataKey="xray"
+                    name="أشعة سينية"
+                    stroke="#06b6d4"
+                    fill="url(#radGrad1)"
+                    strokeWidth={2}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="ct"
+                    name="مقطعي"
+                    stroke="#8b5cf6"
+                    fill="url(#radGrad2)"
+                    strokeWidth={2}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="mri"
+                    name="رنين"
+                    stroke="#ec4899"
+                    fill="url(#radGrad3)"
+                    strokeWidth={2}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="ultrasound"
+                    name="موجات"
+                    stroke="#f59e0b"
+                    fill="url(#radGrad4)"
+                    strokeWidth={2}
+                  />
                 </AreaChart>
               </ResponsiveContainer>
             </Card>
@@ -200,18 +377,38 @@ export default function RadiologyProDashboard() {
         </Grid>
 
         <Grid item xs={12} md={4}>
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+          >
             <Card elevation={0} sx={{ ...glass(isDark), p: 2.5, height: '100%' }}>
               <Typography sx={{ fontWeight: 700, mb: 2, color: isDark ? '#F1F5F9' : '#0F172A' }}>
                 توزيع أنواع الفحوصات
               </Typography>
               <ResponsiveContainer width="100%" height={240}>
                 <PieChart>
-                  <Pie data={modalityData} cx="50%" cy="50%" innerRadius={55} outerRadius={85}
-                    dataKey="value" paddingAngle={3} stroke="none">
-                    {modalityData.map((e, i) => <Cell key={i} fill={e.color} />)}
+                  <Pie
+                    data={modalityData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={55}
+                    outerRadius={85}
+                    dataKey="value"
+                    paddingAngle={3}
+                    stroke="none"
+                  >
+                    {modalityData.map((e, i) => (
+                      <Cell key={i} fill={e.color} />
+                    ))}
                   </Pie>
-                  <Tooltip contentStyle={{ borderRadius: 12, border: 'none', background: isDark ? '#1E293B' : '#fff' }} />
+                  <Tooltip
+                    contentStyle={{
+                      borderRadius: 12,
+                      border: 'none',
+                      background: isDark ? '#1E293B' : '#fff',
+                    }}
+                  />
                   <Legend iconType="circle" wrapperStyle={{ fontSize: 11 }} />
                 </PieChart>
               </ResponsiveContainer>
@@ -223,7 +420,11 @@ export default function RadiologyProDashboard() {
       {/* Charts Row 2 */}
       <Grid container spacing={2.5} sx={{ mb: 3 }}>
         <Grid item xs={12} md={4}>
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+          >
             <Card elevation={0} sx={{ ...glass(isDark), p: 2.5 }}>
               <Typography sx={{ fontWeight: 700, mb: 2, color: isDark ? '#F1F5F9' : '#0F172A' }}>
                 مقاييس الجودة
@@ -233,7 +434,14 @@ export default function RadiologyProDashboard() {
                   <PolarGrid stroke={isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'} />
                   <PolarAngleAxis dataKey="subject" tick={{ fontSize: 10, fill: sub }} />
                   <PolarRadiusAxis tick={{ fontSize: 9, fill: sub }} />
-                  <Radar name="الأداء" dataKey="A" stroke="#06b6d4" fill="#06b6d4" fillOpacity={0.25} strokeWidth={2} />
+                  <Radar
+                    name="الأداء"
+                    dataKey="A"
+                    stroke="#06b6d4"
+                    fill="#06b6d4"
+                    fillOpacity={0.25}
+                    strokeWidth={2}
+                  />
                 </RadarChart>
               </ResponsiveContainer>
             </Card>
@@ -241,7 +449,11 @@ export default function RadiologyProDashboard() {
         </Grid>
 
         <Grid item xs={12} md={4}>
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+          >
             <Card elevation={0} sx={{ ...glass(isDark), p: 2.5, height: '100%' }}>
               <Typography sx={{ fontWeight: 700, mb: 2, color: isDark ? '#F1F5F9' : '#0F172A' }}>
                 حمل الأقسام (فحص/يوم)
@@ -249,16 +461,25 @@ export default function RadiologyProDashboard() {
               {departmentLoad.map((d, i) => (
                 <Box key={i} sx={{ mb: 2 }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-                    <Typography sx={{ fontSize: '0.78rem', fontWeight: 600, color: isDark ? '#F1F5F9' : '#0F172A' }}>
+                    <Typography
+                      sx={{
+                        fontSize: '0.78rem',
+                        fontWeight: 600,
+                        color: isDark ? '#F1F5F9' : '#0F172A',
+                      }}
+                    >
                       {d.dept}
                     </Typography>
                     <Typography sx={{ fontSize: '0.75rem', fontWeight: 700, color: d.color }}>
                       {d.scans}
                     </Typography>
                   </Box>
-                  <LinearProgress variant="determinate" value={d.scans}
+                  <LinearProgress
+                    variant="determinate"
+                    value={d.scans}
                     sx={{
-                      height: 8, borderRadius: 4,
+                      height: 8,
+                      borderRadius: 4,
                       backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)',
                       '& .MuiLinearProgress-bar': { borderRadius: 4, background: d.color },
                     }}
@@ -270,17 +491,35 @@ export default function RadiologyProDashboard() {
         </Grid>
 
         <Grid item xs={12} md={4}>
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }}>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7 }}
+          >
             <Card elevation={0} sx={{ ...glass(isDark), p: 2.5 }}>
               <Typography sx={{ fontWeight: 700, mb: 2, color: isDark ? '#F1F5F9' : '#0F172A' }}>
                 فحوصات حسب القسم
               </Typography>
               <ResponsiveContainer width="100%" height={260}>
                 <BarChart data={departmentLoad} layout="vertical">
-                  <CartesianGrid strokeDasharray="3 3" stroke={isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'} />
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke={isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}
+                  />
                   <XAxis type="number" tick={{ fontSize: 11, fill: sub }} />
-                  <YAxis dataKey="dept" type="category" tick={{ fontSize: 11, fill: sub }} width={60} />
-                  <Tooltip contentStyle={{ borderRadius: 12, border: 'none', background: isDark ? '#1E293B' : '#fff' }} />
+                  <YAxis
+                    dataKey="dept"
+                    type="category"
+                    tick={{ fontSize: 11, fill: sub }}
+                    width={60}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      borderRadius: 12,
+                      border: 'none',
+                      background: isDark ? '#1E293B' : '#fff',
+                    }}
+                  />
                   <Bar dataKey="scans" name="فحوصات" fill="#8b5cf6" radius={[0, 8, 8, 0]} />
                 </BarChart>
               </ResponsiveContainer>
@@ -290,7 +529,11 @@ export default function RadiologyProDashboard() {
       </Grid>
 
       {/* Recent Exams Table */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8 }}>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.8 }}
+      >
         <Card elevation={0} sx={{ ...glass(isDark), p: 2.5 }}>
           <Typography sx={{ fontWeight: 700, mb: 2, color: isDark ? '#F1F5F9' : '#0F172A' }}>
             آخر الفحوصات
@@ -299,29 +542,82 @@ export default function RadiologyProDashboard() {
             <Table size="small">
               <TableHead>
                 <TableRow>
-                  {['رقم الفحص', 'المريض', 'النوع', 'الأخصائي', 'الحالة', 'الأولوية'].map((h) => (
-                    <TableCell key={h} sx={{ fontWeight: 700, fontSize: '0.75rem', color: sub, border: 'none' }}>{h}</TableCell>
+                  {['رقم الفحص', 'المريض', 'النوع', 'الأخصائي', 'الحالة', 'الأولوية'].map(h => (
+                    <TableCell
+                      key={h}
+                      sx={{ fontWeight: 700, fontSize: '0.75rem', color: sub, border: 'none' }}
+                    >
+                      {h}
+                    </TableCell>
                   ))}
                 </TableRow>
               </TableHead>
               <TableBody>
-                {recentExams.map((e) => (
-                  <TableRow key={e.id} sx={{ '&:hover': { background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)' } }}>
-                    <TableCell sx={{ fontSize: '0.78rem', fontWeight: 600, color: '#06b6d4', border: 'none' }}>{e.id}</TableCell>
-                    <TableCell sx={{ fontSize: '0.78rem', color: isDark ? '#F1F5F9' : '#0F172A', border: 'none' }}>{e.patient}</TableCell>
-                    <TableCell sx={{ fontSize: '0.78rem', color: sub, border: 'none' }}>{e.type}</TableCell>
-                    <TableCell sx={{ fontSize: '0.78rem', color: isDark ? '#F1F5F9' : '#0F172A', border: 'none' }}>{e.radiologist}</TableCell>
-                    <TableCell sx={{ border: 'none' }}>
-                      <Chip label={e.status} size="small" sx={{
-                        height: 22, fontSize: '0.65rem', fontWeight: 600,
-                        backgroundColor: `${statusColor(e.status)}22`, color: statusColor(e.status),
-                      }} />
+                {recentExams.map(e => (
+                  <TableRow
+                    key={e.id}
+                    sx={{
+                      '&:hover': {
+                        background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
+                      },
+                    }}
+                  >
+                    <TableCell
+                      sx={{
+                        fontSize: '0.78rem',
+                        fontWeight: 600,
+                        color: '#06b6d4',
+                        border: 'none',
+                      }}
+                    >
+                      {e.id}
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        fontSize: '0.78rem',
+                        color: isDark ? '#F1F5F9' : '#0F172A',
+                        border: 'none',
+                      }}
+                    >
+                      {e.patient}
+                    </TableCell>
+                    <TableCell sx={{ fontSize: '0.78rem', color: sub, border: 'none' }}>
+                      {e.type}
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        fontSize: '0.78rem',
+                        color: isDark ? '#F1F5F9' : '#0F172A',
+                        border: 'none',
+                      }}
+                    >
+                      {e.radiologist}
                     </TableCell>
                     <TableCell sx={{ border: 'none' }}>
-                      <Chip label={e.priority} size="small" sx={{
-                        height: 22, fontSize: '0.65rem', fontWeight: 600,
-                        backgroundColor: `${priorityColor(e.priority)}22`, color: priorityColor(e.priority),
-                      }} />
+                      <Chip
+                        label={e.status}
+                        size="small"
+                        sx={{
+                          height: 22,
+                          fontSize: '0.65rem',
+                          fontWeight: 600,
+                          backgroundColor: `${statusColor(e.status)}22`,
+                          color: statusColor(e.status),
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell sx={{ border: 'none' }}>
+                      <Chip
+                        label={e.priority}
+                        size="small"
+                        sx={{
+                          height: 22,
+                          fontSize: '0.65rem',
+                          fontWeight: 600,
+                          backgroundColor: `${priorityColor(e.priority)}22`,
+                          color: priorityColor(e.priority),
+                        }}
+                      />
                     </TableCell>
                   </TableRow>
                 ))}

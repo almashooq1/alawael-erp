@@ -71,7 +71,7 @@ export default function BITrendExplorer() {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
 
-  const currentMetric = METRICS.find((m) => m.value === metric);
+  const currentMetric = METRICS.find(m => m.value === metric);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -113,7 +113,11 @@ export default function BITrendExplorer() {
         : theme.palette.grey[500];
 
   const trendLabel =
-    trend.direction === 'increasing' ? 'تصاعدي' : trend.direction === 'decreasing' ? 'تنازلي' : 'مستقر';
+    trend.direction === 'increasing'
+      ? 'تصاعدي'
+      : trend.direction === 'decreasing'
+        ? 'تنازلي'
+        : 'مستقر';
 
   // Render chart based on type
   const renderChart = () => {
@@ -125,8 +129,18 @@ export default function BITrendExplorer() {
             <XAxis dataKey="label" tick={{ fontSize: 10 }} />
             <YAxis tick={{ fontSize: 11 }} />
             <RechartTooltip />
-            <ReferenceLine y={avgValue} stroke="#FF9800" strokeDasharray="5 5" label={{ value: 'المتوسط', position: 'right', fontSize: 11 }} />
-            <Bar dataKey="value" fill={currentMetric?.color} name={currentMetric?.label} radius={[6, 6, 0, 0]} />
+            <ReferenceLine
+              y={avgValue}
+              stroke="#FF9800"
+              strokeDasharray="5 5"
+              label={{ value: 'المتوسط', position: 'right', fontSize: 11 }}
+            />
+            <Bar
+              dataKey="value"
+              fill={currentMetric?.color}
+              name={currentMetric?.label}
+              radius={[6, 6, 0, 0]}
+            />
           </BarChart>
         </ResponsiveContainer>
       );
@@ -167,7 +181,12 @@ export default function BITrendExplorer() {
           <XAxis dataKey="label" tick={{ fontSize: 10 }} />
           <YAxis tick={{ fontSize: 11 }} />
           <RechartTooltip />
-          <ReferenceLine y={avgValue} stroke="#FF9800" strokeDasharray="5 5" label={{ value: 'المتوسط', position: 'right', fontSize: 11 }} />
+          <ReferenceLine
+            y={avgValue}
+            stroke="#FF9800"
+            strokeDasharray="5 5"
+            label={{ value: 'المتوسط', position: 'right', fontSize: 11 }}
+          />
           <Area
             type="monotone"
             dataKey="value"
@@ -184,7 +203,16 @@ export default function BITrendExplorer() {
   return (
     <Box sx={{ p: { xs: 2, md: 3 } }}>
       {/* Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 2 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          mb: 3,
+          flexWrap: 'wrap',
+          gap: 2,
+        }}
+      >
         <Box>
           <Typography variant="h4" fontWeight={700}>
             مستكشف الاتجاهات
@@ -207,13 +235,16 @@ export default function BITrendExplorer() {
       )}
 
       {/* Controls */}
-      <Paper elevation={0} sx={{ p: 2, borderRadius: 3, border: `1px solid ${theme.palette.divider}`, mb: 3 }}>
+      <Paper
+        elevation={0}
+        sx={{ p: 2, borderRadius: 3, border: `1px solid ${theme.palette.divider}`, mb: 3 }}
+      >
         <Grid container spacing={2} alignItems="center">
           <Grid item xs={12} sm={4}>
             <FormControl fullWidth size="small">
               <InputLabel>المقياس</InputLabel>
-              <Select value={metric} label="المقياس" onChange={(e) => setMetric(e.target.value)}>
-                {METRICS.map((m) => (
+              <Select value={metric} label="المقياس" onChange={e => setMetric(e.target.value)}>
+                {METRICS.map(m => (
                   <MenuItem key={m.value} value={m.value}>
                     {m.icon} {m.label}
                   </MenuItem>
@@ -224,8 +255,8 @@ export default function BITrendExplorer() {
           <Grid item xs={12} sm={4}>
             <FormControl fullWidth size="small">
               <InputLabel>الفترة</InputLabel>
-              <Select value={months} label="الفترة" onChange={(e) => setMonths(e.target.value)}>
-                {PERIODS.map((p) => (
+              <Select value={months} label="الفترة" onChange={e => setMonths(e.target.value)}>
+                {PERIODS.map(p => (
                   <MenuItem key={p.value} value={p.value}>
                     {p.label}
                   </MenuItem>
@@ -238,14 +269,21 @@ export default function BITrendExplorer() {
               {[
                 { type: 'area', icon: <ShowChart />, label: 'مساحة' },
                 { type: 'line', icon: <Timeline />, label: 'خطي' },
-                { type: 'bar', icon: <ShowChart sx={{ transform: 'rotate(90deg)' }} />, label: 'أعمدة' },
-              ].map((ct) => (
+                {
+                  type: 'bar',
+                  icon: <ShowChart sx={{ transform: 'rotate(90deg)' }} />,
+                  label: 'أعمدة',
+                },
+              ].map(ct => (
                 <Tooltip title={ct.label} key={ct.type}>
                   <IconButton
                     onClick={() => setChartType(ct.type)}
                     color={chartType === ct.type ? 'primary' : 'default'}
                     sx={{
-                      bgcolor: chartType === ct.type ? alpha(theme.palette.primary.main, 0.1) : 'transparent',
+                      bgcolor:
+                        chartType === ct.type
+                          ? alpha(theme.palette.primary.main, 0.1)
+                          : 'transparent',
                     }}
                   >
                     {ct.icon}
@@ -266,7 +304,15 @@ export default function BITrendExplorer() {
           {/* Summary Strip */}
           <Grid container spacing={2} sx={{ mb: 3 }}>
             <Grid item xs={6} sm={3}>
-              <Paper elevation={0} sx={{ p: 2, borderRadius: 3, border: `1px solid ${theme.palette.divider}`, textAlign: 'center' }}>
+              <Paper
+                elevation={0}
+                sx={{
+                  p: 2,
+                  borderRadius: 3,
+                  border: `1px solid ${theme.palette.divider}`,
+                  textAlign: 'center',
+                }}
+              >
                 <Typography variant="caption" color="text.secondary">
                   القيمة الحالية
                 </Typography>
@@ -276,7 +322,15 @@ export default function BITrendExplorer() {
               </Paper>
             </Grid>
             <Grid item xs={6} sm={3}>
-              <Paper elevation={0} sx={{ p: 2, borderRadius: 3, border: `1px solid ${theme.palette.divider}`, textAlign: 'center' }}>
+              <Paper
+                elevation={0}
+                sx={{
+                  p: 2,
+                  borderRadius: 3,
+                  border: `1px solid ${theme.palette.divider}`,
+                  textAlign: 'center',
+                }}
+              >
                 <Typography variant="caption" color="text.secondary">
                   القيمة السابقة
                 </Typography>
@@ -286,31 +340,60 @@ export default function BITrendExplorer() {
               </Paper>
             </Grid>
             <Grid item xs={6} sm={3}>
-              <Paper elevation={0} sx={{ p: 2, borderRadius: 3, border: `1px solid ${theme.palette.divider}`, textAlign: 'center' }}>
+              <Paper
+                elevation={0}
+                sx={{
+                  p: 2,
+                  borderRadius: 3,
+                  border: `1px solid ${theme.palette.divider}`,
+                  textAlign: 'center',
+                }}
+              >
                 <Typography variant="caption" color="text.secondary">
                   التغيير
                 </Typography>
-                <Typography variant="h5" fontWeight={700} color={parseFloat(summary.change) >= 0 ? 'success.main' : 'error.main'}>
+                <Typography
+                  variant="h5"
+                  fontWeight={700}
+                  color={parseFloat(summary.change) >= 0 ? 'success.main' : 'error.main'}
+                >
                   {summary.change > 0 ? '+' : ''}
                   {summary.change || 0}%
                 </Typography>
               </Paper>
             </Grid>
             <Grid item xs={6} sm={3}>
-              <Paper elevation={0} sx={{ p: 2, borderRadius: 3, border: `1px solid ${theme.palette.divider}`, textAlign: 'center' }}>
+              <Paper
+                elevation={0}
+                sx={{
+                  p: 2,
+                  borderRadius: 3,
+                  border: `1px solid ${theme.palette.divider}`,
+                  textAlign: 'center',
+                }}
+              >
                 <Typography variant="caption" color="text.secondary">
                   الاتجاه
                 </Typography>
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+                <Box
+                  sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}
+                >
                   <Box sx={{ color: trendColor }}>{trendIcon}</Box>
-                  <Chip label={trendLabel} size="small" sx={{ bgcolor: alpha(trendColor, 0.1), color: trendColor, fontWeight: 600 }} />
+                  <Chip
+                    label={trendLabel}
+                    size="small"
+                    sx={{ bgcolor: alpha(trendColor, 0.1), color: trendColor, fontWeight: 600 }}
+                  />
                 </Box>
               </Paper>
             </Grid>
           </Grid>
 
           {/* Chart */}
-          <Paper elevation={0} sx={{ p: 3, borderRadius: 3, border: `1px solid ${theme.palette.divider}` }}>
+          <Paper
+            elevation={0}
+            sx={{ p: 3, borderRadius: 3, border: `1px solid ${theme.palette.divider}` }}
+          >
             <Typography variant="h6" fontWeight={600} gutterBottom>
               {currentMetric?.icon} {currentMetric?.label} — آخر {months} شهر
             </Typography>

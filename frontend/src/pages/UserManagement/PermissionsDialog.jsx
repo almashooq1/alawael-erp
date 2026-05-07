@@ -20,10 +20,7 @@ import {
   Alert,
 } from '@mui/material';
 import { useState, useEffect, useMemo } from 'react';
-import {
-  Security as SecurityIcon,
-  Add as AddIcon,
-} from '@mui/icons-material';
+import { Security as SecurityIcon, Add as AddIcon } from '@mui/icons-material';
 
 // الصلاحيات الافتراضية مجمعة حسب الوحدة
 const PERMISSION_GROUPS = {
@@ -88,32 +85,32 @@ const PermissionsDialog = ({ open, onClose, user, onSave }) => {
 
   const allPermissionKeys = useMemo(() => {
     const keys = [];
-    Object.values(PERMISSION_GROUPS).forEach((perms) => {
-      perms.forEach((p) => keys.push(p.key));
+    Object.values(PERMISSION_GROUPS).forEach(perms => {
+      perms.forEach(p => keys.push(p.key));
     });
     return keys;
   }, []);
 
-  const handleToggleCustom = (key) => {
-    setCustomPermissions((prev) =>
-      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
+  const handleToggleCustom = key => {
+    setCustomPermissions(prev =>
+      prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]
     );
     // إذا كانت في المرفوض، أزلها
-    setDeniedPermissions((prev) => prev.filter((k) => k !== key));
+    setDeniedPermissions(prev => prev.filter(k => k !== key));
   };
 
-  const handleToggleDenied = (key) => {
-    setDeniedPermissions((prev) =>
-      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
+  const handleToggleDenied = key => {
+    setDeniedPermissions(prev =>
+      prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]
     );
     // إذا كانت في المسموح، أزلها
-    setCustomPermissions((prev) => prev.filter((k) => k !== key));
+    setCustomPermissions(prev => prev.filter(k => k !== key));
   };
 
   const handleAddCustom = () => {
     const key = customInput.trim();
     if (key && !customPermissions.includes(key) && !allPermissionKeys.includes(key)) {
-      setCustomPermissions((prev) => [...prev, key]);
+      setCustomPermissions(prev => [...prev, key]);
       setCustomInput('');
     }
   };
@@ -137,8 +134,8 @@ const PermissionsDialog = ({ open, onClose, user, onSave }) => {
       <DialogContent>
         <Box sx={{ pt: 1 }}>
           <Alert severity="info" sx={{ mb: 2 }}>
-            الصلاحيات المخصصة تُضاف فوق صلاحيات الدور الافتراضية.
-            الصلاحيات المرفوضة تُلغي حتى صلاحيات الدور.
+            الصلاحيات المخصصة تُضاف فوق صلاحيات الدور الافتراضية. الصلاحيات المرفوضة تُلغي حتى
+            صلاحيات الدور.
           </Alert>
 
           <Grid container spacing={2}>
@@ -149,7 +146,7 @@ const PermissionsDialog = ({ open, onClose, user, onSave }) => {
                     {group}
                   </Typography>
                   <FormGroup>
-                    {perms.map((perm) => {
+                    {perms.map(perm => {
                       const isCustom = customPermissions.includes(perm.key);
                       const isDenied = deniedPermissions.includes(perm.key);
 
@@ -207,10 +204,10 @@ const PermissionsDialog = ({ open, onClose, user, onSave }) => {
             <TextField
               size="small"
               value={customInput}
-              onChange={(e) => setCustomInput(e.target.value)}
+              onChange={e => setCustomInput(e.target.value)}
               placeholder="مثال: reports.special_export"
               dir="ltr"
-              onKeyDown={(e) => e.key === 'Enter' && handleAddCustom()}
+              onKeyDown={e => e.key === 'Enter' && handleAddCustom()}
               sx={{ flex: 1 }}
             />
             <Button
@@ -225,20 +222,18 @@ const PermissionsDialog = ({ open, onClose, user, onSave }) => {
           </Box>
 
           {/* عرض الصلاحيات المخصصة الإضافية */}
-          {customPermissions.filter((p) => !allPermissionKeys.includes(p)).length > 0 && (
+          {customPermissions.filter(p => !allPermissionKeys.includes(p)).length > 0 && (
             <Box sx={{ mt: 1.5, display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
               {customPermissions
-                .filter((p) => !allPermissionKeys.includes(p))
-                .map((p) => (
+                .filter(p => !allPermissionKeys.includes(p))
+                .map(p => (
                   <Chip
                     key={p}
                     label={p}
                     size="small"
                     color="success"
                     variant="outlined"
-                    onDelete={() =>
-                      setCustomPermissions((prev) => prev.filter((k) => k !== p))
-                    }
+                    onDelete={() => setCustomPermissions(prev => prev.filter(k => k !== p))}
                   />
                 ))}
             </Box>

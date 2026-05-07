@@ -85,7 +85,7 @@ export default function TemplatesManagement() {
   }, [fetchTemplates]);
 
   // ─── Filtered templates ──────────────────────────────
-  const filtered = templates.filter((t) => {
+  const filtered = templates.filter(t => {
     if (!searchInput) return true;
     const q = searchInput.toLowerCase();
     return (
@@ -96,8 +96,8 @@ export default function TemplatesManagement() {
   });
 
   // ─── Handlers ────────────────────────────────────────
-  const handleChange = (field) => (e) => {
-    setForm((prev) => ({ ...prev, [field]: e.target.value }));
+  const handleChange = field => e => {
+    setForm(prev => ({ ...prev, [field]: e.target.value }));
   };
 
   const handleCreate = () => {
@@ -116,7 +116,7 @@ export default function TemplatesManagement() {
     setDialogOpen(true);
   };
 
-  const handlePreview = (template) => {
+  const handlePreview = template => {
     setSelectedTemplate(template);
     setPreviewDialog(true);
   };
@@ -143,25 +143,22 @@ export default function TemplatesManagement() {
 
   // Add a placeholder
   const addPlaceholder = () => {
-    setForm((prev) => ({
+    setForm(prev => ({
       ...prev,
-      placeholders: [
-        ...prev.placeholders,
-        { name: '', description: '', defaultValue: '' },
-      ],
+      placeholders: [...prev.placeholders, { name: '', description: '', defaultValue: '' }],
     }));
   };
 
   const updatePlaceholder = (idx, field, value) => {
-    setForm((prev) => {
+    setForm(prev => {
       const updated = [...prev.placeholders];
       updated[idx] = { ...updated[idx], [field]: value };
       return { ...prev, placeholders: updated };
     });
   };
 
-  const removePlaceholder = (idx) => {
-    setForm((prev) => ({
+  const removePlaceholder = idx => {
+    setForm(prev => ({
       ...prev,
       placeholders: prev.placeholders.filter((_, i) => i !== idx),
     }));
@@ -197,7 +194,15 @@ export default function TemplatesManagement() {
       )}
 
       {/* Filters */}
-      <Paper sx={{ p: 2, mb: 3, borderRadius: '16px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
+      <Paper
+        sx={{
+          p: 2,
+          mb: 3,
+          borderRadius: '16px',
+          border: '1px solid rgba(0,0,0,0.04)',
+          boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+        }}
+      >
         <Grid container spacing={2} alignItems="center">
           <Grid item xs={12} md={6}>
             <TextField
@@ -205,7 +210,7 @@ export default function TemplatesManagement() {
               size="small"
               placeholder="بحث في القوالب..."
               value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
+              onChange={e => setSearchInput(e.target.value)}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -221,10 +226,10 @@ export default function TemplatesManagement() {
               <Select
                 value={typeFilter}
                 label="نوع المراسلة"
-                onChange={(e) => setTypeFilter(e.target.value)}
+                onChange={e => setTypeFilter(e.target.value)}
               >
                 <MenuItem value="">الكل</MenuItem>
-                {typeOptions.map((t) => (
+                {typeOptions.map(t => (
                   <MenuItem key={t.value} value={t.value}>
                     {t.label}
                   </MenuItem>
@@ -245,7 +250,14 @@ export default function TemplatesManagement() {
           ))}
         </Grid>
       ) : filtered.length === 0 ? (
-        <Paper sx={{ p: 6, textAlign: 'center', borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)' }}>
+        <Paper
+          sx={{
+            p: 6,
+            textAlign: 'center',
+            borderRadius: '20px',
+            border: '1px solid rgba(0,0,0,0.04)',
+          }}
+        >
           <TemplateIcon sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
           <Typography variant="h6" color="text.secondary">
             لا توجد قوالب
@@ -259,7 +271,7 @@ export default function TemplatesManagement() {
         </Paper>
       ) : (
         <Grid container spacing={3}>
-          {filtered.map((template) => {
+          {filtered.map(template => {
             const typeInfo = CORRESPONDENCE_TYPES[template.type] || {};
             return (
               <Grid item xs={12} sm={6} md={4} key={template._id}>
@@ -272,11 +284,19 @@ export default function TemplatesManagement() {
                     border: '1px solid rgba(0,0,0,0.04)',
                     boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
                     transition: 'all 0.3s cubic-bezier(.4,0,.2,1)',
-                    '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)', transform: 'translateY(-2px)' },
+                    '&:hover': {
+                      boxShadow: '0 8px 30px rgba(0,0,0,0.08)',
+                      transform: 'translateY(-2px)',
+                    },
                   }}
                 >
                   <CardContent sx={{ flex: 1 }}>
-                    <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={1}>
+                    <Box
+                      display="flex"
+                      justifyContent="space-between"
+                      alignItems="flex-start"
+                      mb={1}
+                    >
                       <Typography variant="h6" fontWeight="bold" noWrap>
                         {template.nameAr || template.name}
                       </Typography>
@@ -361,7 +381,13 @@ export default function TemplatesManagement() {
       )}
 
       {/* ═══ Create Dialog ═══════════════════════════════ */}
-      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: '20px' } }}>
+      <Dialog
+        open={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+        maxWidth="md"
+        fullWidth
+        PaperProps={{ sx: { borderRadius: '20px' } }}
+      >
         <DialogTitle>إنشاء قالب جديد</DialogTitle>
         <DialogContent>
           <Grid container spacing={2} sx={{ mt: 0.5 }}>
@@ -385,7 +411,7 @@ export default function TemplatesManagement() {
               <FormControl fullWidth>
                 <InputLabel>نوع المراسلة *</InputLabel>
                 <Select value={form.type} label="نوع المراسلة *" onChange={handleChange('type')}>
-                  {typeOptions.map((t) => (
+                  {typeOptions.map(t => (
                     <MenuItem key={t.value} value={t.value}>
                       {t.label}
                     </MenuItem>
@@ -457,21 +483,21 @@ export default function TemplatesManagement() {
                     size="small"
                     label="الاسم"
                     value={p.name}
-                    onChange={(e) => updatePlaceholder(idx, 'name', e.target.value)}
+                    onChange={e => updatePlaceholder(idx, 'name', e.target.value)}
                     sx={{ flex: 1 }}
                   />
                   <TextField
                     size="small"
                     label="الوصف"
                     value={p.description}
-                    onChange={(e) => updatePlaceholder(idx, 'description', e.target.value)}
+                    onChange={e => updatePlaceholder(idx, 'description', e.target.value)}
                     sx={{ flex: 1 }}
                   />
                   <TextField
                     size="small"
                     label="القيمة الافتراضية"
                     value={p.defaultValue}
-                    onChange={(e) => updatePlaceholder(idx, 'defaultValue', e.target.value)}
+                    onChange={e => updatePlaceholder(idx, 'defaultValue', e.target.value)}
                     sx={{ flex: 1 }}
                   />
                   <IconButton color="error" size="small" onClick={() => removePlaceholder(idx)}>
@@ -491,12 +517,7 @@ export default function TemplatesManagement() {
       </Dialog>
 
       {/* ═══ Preview Dialog ══════════════════════════════ */}
-      <Dialog
-        open={previewDialog}
-        onClose={() => setPreviewDialog(false)}
-        maxWidth="md"
-        fullWidth
-      >
+      <Dialog open={previewDialog} onClose={() => setPreviewDialog(false)} maxWidth="md" fullWidth>
         <DialogTitle>
           معاينة القالب: {selectedTemplate?.nameAr || selectedTemplate?.name}
         </DialogTitle>
@@ -505,7 +526,9 @@ export default function TemplatesManagement() {
             <Box>
               <Box display="flex" gap={1} mb={2}>
                 <Chip
-                  label={CORRESPONDENCE_TYPES[selectedTemplate.type]?.label || selectedTemplate.type}
+                  label={
+                    CORRESPONDENCE_TYPES[selectedTemplate.type]?.label || selectedTemplate.type
+                  }
                   size="small"
                 />
                 {selectedTemplate.category && (
@@ -569,7 +592,7 @@ export default function TemplatesManagement() {
       <Snackbar
         open={snackbar.open}
         autoHideDuration={4000}
-        onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
+        onClose={() => setSnackbar(s => ({ ...s, open: false }))}
       >
         <Alert severity={snackbar.severity} variant="filled">
           {snackbar.message}

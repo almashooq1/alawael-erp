@@ -44,24 +44,48 @@ import {
 import qualityManagementService from '../../services/qualityManagementService';
 
 /* ═══ Helper — severity chip ═══ */
-const severityColor = (sev) => {
-  const map = { critical: 'error', major: 'warning', minor: 'info', observation: 'default', opportunity: 'success' };
+const severityColor = sev => {
+  const map = {
+    critical: 'error',
+    major: 'warning',
+    minor: 'info',
+    observation: 'default',
+    opportunity: 'success',
+  };
   return map[sev] || 'default';
 };
 
-const statusColor = (st) => {
+const statusColor = st => {
   const map = {
-    planned: 'info', in_progress: 'warning', completed: 'success', cancelled: 'default',
-    open: 'error', root_cause_analysis: 'warning', action_planned: 'info',
-    verification: 'secondary', closed: 'success', draft: 'default',
-    approved: 'success', under_review: 'warning', active: 'error', mitigated: 'success',
-    ready: 'success', nearly_ready: 'info', not_ready: 'error',
+    planned: 'info',
+    in_progress: 'warning',
+    completed: 'success',
+    cancelled: 'default',
+    open: 'error',
+    root_cause_analysis: 'warning',
+    action_planned: 'info',
+    verification: 'secondary',
+    closed: 'success',
+    draft: 'default',
+    approved: 'success',
+    under_review: 'warning',
+    active: 'error',
+    mitigated: 'success',
+    ready: 'success',
+    nearly_ready: 'info',
+    not_ready: 'error',
   };
   return map[st] || 'default';
 };
 
-const riskColor = (level) => {
-  const map = { very_high: '#d32f2f', high: '#f44336', medium: '#ff9800', low: '#4caf50', very_low: '#81c784' };
+const riskColor = level => {
+  const map = {
+    very_high: '#d32f2f',
+    high: '#f44336',
+    medium: '#ff9800',
+    low: '#4caf50',
+    very_low: '#81c784',
+  };
   return map[level] || '#9e9e9e';
 };
 
@@ -70,9 +94,17 @@ const StatCard = ({ icon, title, value, color = 'primary.main', subtitle }) => (
   <Card elevation={2} sx={{ height: '100%' }}>
     <CardContent sx={{ textAlign: 'center', py: 2 }}>
       <Box sx={{ color, mb: 1 }}>{icon}</Box>
-      <Typography variant="h4" fontWeight="bold">{value}</Typography>
-      <Typography variant="body2" color="text.secondary">{title}</Typography>
-      {subtitle && <Typography variant="caption" color="text.secondary">{subtitle}</Typography>}
+      <Typography variant="h4" fontWeight="bold">
+        {value}
+      </Typography>
+      <Typography variant="body2" color="text.secondary">
+        {title}
+      </Typography>
+      {subtitle && (
+        <Typography variant="caption" color="text.secondary">
+          {subtitle}
+        </Typography>
+      )}
     </CardContent>
   </Card>
 );
@@ -125,10 +157,12 @@ export default function QualityManagement() {
     }
   }, []);
 
-  useEffect(() => { fetchAll(); }, [fetchAll]);
+  useEffect(() => {
+    fetchAll();
+  }, [fetchAll]);
 
   /* ── Generate Report ── */
-  const handleGenerateReport = async (standard) => {
+  const handleGenerateReport = async standard => {
     try {
       await qualityManagementService.generateAccreditationReport({ standard, period: '2026' });
       fetchAll();
@@ -137,8 +171,19 @@ export default function QualityManagement() {
     }
   };
 
-  if (loading) return <Box sx={{ p: 4, textAlign: 'center' }}><CircularProgress size={48} /><Typography sx={{ mt: 2 }}>جاري تحميل نظام إدارة الجودة...</Typography></Box>;
-  if (error) return <Box sx={{ p: 4 }}><Alert severity="error">{error}</Alert></Box>;
+  if (loading)
+    return (
+      <Box sx={{ p: 4, textAlign: 'center' }}>
+        <CircularProgress size={48} />
+        <Typography sx={{ mt: 2 }}>جاري تحميل نظام إدارة الجودة...</Typography>
+      </Box>
+    );
+  if (error)
+    return (
+      <Box sx={{ p: 4 }}>
+        <Alert severity="error">{error}</Alert>
+      </Box>
+    );
 
   const summary = dashboard?.summary || {};
 
@@ -155,48 +200,104 @@ export default function QualityManagement() {
             ISO 9001 / CBAHI / JCI — تدقيق، مؤشرات جودة، تقارير اعتماد
           </Typography>
         </Box>
-        <Button variant="outlined" startIcon={<RefreshIcon />} onClick={fetchAll}>تحديث</Button>
+        <Button variant="outlined" startIcon={<RefreshIcon />} onClick={fetchAll}>
+          تحديث
+        </Button>
       </Box>
 
       {/* Summary Cards */}
       <Grid container spacing={2} sx={{ mb: 3 }}>
         <Grid item xs={12} sm={6} md={3} lg={1.5}>
-          <StatCard icon={<AssessmentIcon fontSize="large" />} title="التدقيقات" value={summary.totalAudits || 0} color="primary.main" />
+          <StatCard
+            icon={<AssessmentIcon fontSize="large" />}
+            title="التدقيقات"
+            value={summary.totalAudits || 0}
+            color="primary.main"
+          />
         </Grid>
         <Grid item xs={12} sm={6} md={3} lg={1.5}>
-          <StatCard icon={<CheckCircleIcon fontSize="large" />} title="مكتملة" value={summary.completedAudits || 0} color="success.main" />
+          <StatCard
+            icon={<CheckCircleIcon fontSize="large" />}
+            title="مكتملة"
+            value={summary.completedAudits || 0}
+            color="success.main"
+          />
         </Grid>
         <Grid item xs={12} sm={6} md={3} lg={1.5}>
-          <StatCard icon={<FindInPageIcon fontSize="large" />} title="ملاحظات مفتوحة" value={summary.openFindings || 0} color="warning.main" />
+          <StatCard
+            icon={<FindInPageIcon fontSize="large" />}
+            title="ملاحظات مفتوحة"
+            value={summary.openFindings || 0}
+            color="warning.main"
+          />
         </Grid>
         <Grid item xs={12} sm={6} md={3} lg={1.5}>
-          <StatCard icon={<ErrorIcon fontSize="large" />} title="ملاحظات حرجة" value={summary.criticalFindings || 0} color="error.main" />
+          <StatCard
+            icon={<ErrorIcon fontSize="large" />}
+            title="ملاحظات حرجة"
+            value={summary.criticalFindings || 0}
+            color="error.main"
+          />
         </Grid>
         <Grid item xs={12} sm={6} md={3} lg={1.5}>
-          <StatCard icon={<WarningIcon fontSize="large" />} title="عدم مطابقة" value={summary.openNonConformances || 0} color="warning.dark" />
+          <StatCard
+            icon={<WarningIcon fontSize="large" />}
+            title="عدم مطابقة"
+            value={summary.openNonConformances || 0}
+            color="warning.dark"
+          />
         </Grid>
         <Grid item xs={12} sm={6} md={3} lg={1.5}>
-          <StatCard icon={<ScheduleIcon fontSize="large" />} title="إجراءات متأخرة" value={summary.overdueActions || 0} color="error.dark" />
+          <StatCard
+            icon={<ScheduleIcon fontSize="large" />}
+            title="إجراءات متأخرة"
+            value={summary.overdueActions || 0}
+            color="error.dark"
+          />
         </Grid>
         <Grid item xs={12} sm={6} md={3} lg={1.5}>
-          <StatCard icon={<SecurityIcon fontSize="large" />} title="مخاطر عالية" value={summary.highRisks || 0} color="error.main" />
+          <StatCard
+            icon={<SecurityIcon fontSize="large" />}
+            title="مخاطر عالية"
+            value={summary.highRisks || 0}
+            color="error.main"
+          />
         </Grid>
         <Grid item xs={12} sm={6} md={3} lg={1.5}>
-          <StatCard icon={<DescriptionIcon fontSize="large" />} title="الوثائق" value={summary.totalDocuments || 0} color="info.main" />
+          <StatCard
+            icon={<DescriptionIcon fontSize="large" />}
+            title="الوثائق"
+            value={summary.totalDocuments || 0}
+            color="info.main"
+          />
         </Grid>
       </Grid>
 
       {/* Compliance by Standard */}
       {dashboard?.complianceByStandard && (
         <Paper sx={{ p: 2, mb: 3 }}>
-          <Typography variant="h6" gutterBottom>نسبة الامتثال حسب المعيار</Typography>
+          <Typography variant="h6" gutterBottom>
+            نسبة الامتثال حسب المعيار
+          </Typography>
           <Grid container spacing={2}>
-            {dashboard.complianceByStandard.map((cs) => (
+            {dashboard.complianceByStandard.map(cs => (
               <Grid item xs={12} sm={6} md={4} lg={2.4} key={cs.standard}>
                 <Card variant="outlined">
                   <CardContent sx={{ textAlign: 'center' }}>
-                    <Typography variant="subtitle2" color="text.secondary">{cs.nameAr}</Typography>
-                    <Typography variant="h3" fontWeight="bold" color={cs.averageCompliance >= 80 ? 'success.main' : cs.averageCompliance >= 60 ? 'warning.main' : 'error.main'}>
+                    <Typography variant="subtitle2" color="text.secondary">
+                      {cs.nameAr}
+                    </Typography>
+                    <Typography
+                      variant="h3"
+                      fontWeight="bold"
+                      color={
+                        cs.averageCompliance >= 80
+                          ? 'success.main'
+                          : cs.averageCompliance >= 60
+                            ? 'warning.main'
+                            : 'error.main'
+                      }
+                    >
                       {cs.averageCompliance !== null ? `${cs.averageCompliance}%` : '—'}
                     </Typography>
                     <Typography variant="caption">{cs.auditCount} تدقيق</Typography>
@@ -210,7 +311,13 @@ export default function QualityManagement() {
 
       {/* Tabs */}
       <Paper sx={{ mb: 3 }}>
-        <Tabs value={tab} onChange={(_, v) => setTab(v)} variant="scrollable" scrollButtons="auto" sx={{ borderBottom: 1, borderColor: 'divider' }}>
+        <Tabs
+          value={tab}
+          onChange={(_, v) => setTab(v)}
+          variant="scrollable"
+          scrollButtons="auto"
+          sx={{ borderBottom: 1, borderColor: 'divider' }}
+        >
           <Tab label="التدقيقات" icon={<AssessmentIcon />} iconPosition="start" />
           <Tab label="الملاحظات" icon={<FindInPageIcon />} iconPosition="start" />
           <Tab label="عدم المطابقة" icon={<WarningIcon />} iconPosition="start" />
@@ -239,16 +346,40 @@ export default function QualityManagement() {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {audits.map((a) => (
+                  {audits.map(a => (
                     <TableRow key={a.id} hover>
                       <TableCell>{a.titleAr}</TableCell>
                       <TableCell>{a.type}</TableCell>
-                      <TableCell><Chip label={a.standard} size="small" variant="outlined" /></TableCell>
+                      <TableCell>
+                        <Chip label={a.standard} size="small" variant="outlined" />
+                      </TableCell>
                       <TableCell>{a.department}</TableCell>
-                      <TableCell><Chip label={a.status} size="small" color={statusColor(a.status)} /></TableCell>
+                      <TableCell>
+                        <Chip label={a.status} size="small" color={statusColor(a.status)} />
+                      </TableCell>
                       <TableCell>{a.scheduledDate}</TableCell>
                       <TableCell>{a.leadAuditor}</TableCell>
-                      <TableCell>{a.complianceScore !== null ? <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}><LinearProgress variant="determinate" value={a.complianceScore} sx={{ width: 60, height: 8, borderRadius: 4 }} color={a.complianceScore >= 80 ? 'success' : a.complianceScore >= 60 ? 'warning' : 'error'} /><Typography variant="caption">{a.complianceScore}%</Typography></Box> : '—'}</TableCell>
+                      <TableCell>
+                        {a.complianceScore !== null ? (
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <LinearProgress
+                              variant="determinate"
+                              value={a.complianceScore}
+                              sx={{ width: 60, height: 8, borderRadius: 4 }}
+                              color={
+                                a.complianceScore >= 80
+                                  ? 'success'
+                                  : a.complianceScore >= 60
+                                    ? 'warning'
+                                    : 'error'
+                              }
+                            />
+                            <Typography variant="caption">{a.complianceScore}%</Typography>
+                          </Box>
+                        ) : (
+                          '—'
+                        )}
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -271,12 +402,18 @@ export default function QualityManagement() {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {findings.map((f) => (
+                  {findings.map(f => (
                     <TableRow key={f.id} hover>
                       <TableCell>{f.titleAr}</TableCell>
-                      <TableCell><Chip label={f.clauseRef} size="small" variant="outlined" /></TableCell>
-                      <TableCell><Chip label={f.severity} size="small" color={severityColor(f.severity)} /></TableCell>
-                      <TableCell><Chip label={f.status} size="small" color={statusColor(f.status)} /></TableCell>
+                      <TableCell>
+                        <Chip label={f.clauseRef} size="small" variant="outlined" />
+                      </TableCell>
+                      <TableCell>
+                        <Chip label={f.severity} size="small" color={severityColor(f.severity)} />
+                      </TableCell>
+                      <TableCell>
+                        <Chip label={f.status} size="small" color={statusColor(f.status)} />
+                      </TableCell>
                       <TableCell>{f.responsiblePerson}</TableCell>
                       <TableCell>{f.dueDate}</TableCell>
                     </TableRow>
@@ -302,13 +439,19 @@ export default function QualityManagement() {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {ncs.map((nc) => (
+                  {ncs.map(nc => (
                     <TableRow key={nc.id} hover>
                       <TableCell>{nc.titleAr}</TableCell>
-                      <TableCell><Chip label={nc.standard} size="small" variant="outlined" /></TableCell>
+                      <TableCell>
+                        <Chip label={nc.standard} size="small" variant="outlined" />
+                      </TableCell>
                       <TableCell>{nc.department}</TableCell>
-                      <TableCell><Chip label={nc.severity} size="small" color={severityColor(nc.severity)} /></TableCell>
-                      <TableCell><Chip label={nc.status} size="small" color={statusColor(nc.status)} /></TableCell>
+                      <TableCell>
+                        <Chip label={nc.severity} size="small" color={severityColor(nc.severity)} />
+                      </TableCell>
+                      <TableCell>
+                        <Chip label={nc.status} size="small" color={statusColor(nc.status)} />
+                      </TableCell>
                       <TableCell>{nc.reportedDate}</TableCell>
                       <TableCell>{nc.dueDate}</TableCell>
                     </TableRow>
@@ -333,13 +476,30 @@ export default function QualityManagement() {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {capas.map((c) => (
+                  {capas.map(c => (
                     <TableRow key={c.id} hover>
                       <TableCell>{c.titleAr}</TableCell>
-                      <TableCell><Chip label={c.type === 'corrective' ? 'تصحيحي' : 'وقائي'} size="small" color={c.type === 'corrective' ? 'warning' : 'info'} /></TableCell>
-                      <TableCell><Chip label={c.status} size="small" color={statusColor(c.status)} /></TableCell>
+                      <TableCell>
+                        <Chip
+                          label={c.type === 'corrective' ? 'تصحيحي' : 'وقائي'}
+                          size="small"
+                          color={c.type === 'corrective' ? 'warning' : 'info'}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Chip label={c.status} size="small" color={statusColor(c.status)} />
+                      </TableCell>
                       <TableCell>{c.responsiblePerson}</TableCell>
-                      <TableCell><Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}><LinearProgress variant="determinate" value={c.completionPercent} sx={{ width: 60, height: 8, borderRadius: 4 }} /><Typography variant="caption">{c.completionPercent}%</Typography></Box></TableCell>
+                      <TableCell>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <LinearProgress
+                            variant="determinate"
+                            value={c.completionPercent}
+                            sx={{ width: 60, height: 8, borderRadius: 4 }}
+                          />
+                          <Typography variant="caption">{c.completionPercent}%</Typography>
+                        </Box>
+                      </TableCell>
                       <TableCell>{c.dueDate}</TableCell>
                     </TableRow>
                   ))}
@@ -364,9 +524,11 @@ export default function QualityManagement() {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {indicators.map((qi) => (
+                  {indicators.map(qi => (
                     <TableRow key={qi.id} hover>
-                      <TableCell><Chip label={qi.code} size="small" variant="outlined" /></TableCell>
+                      <TableCell>
+                        <Chip label={qi.code} size="small" variant="outlined" />
+                      </TableCell>
                       <TableCell>{qi.nameAr}</TableCell>
                       <TableCell>{qi.standard}</TableCell>
                       <TableCell>{qi.department}</TableCell>
@@ -396,14 +558,18 @@ export default function QualityManagement() {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {documents.map((d) => (
+                  {documents.map(d => (
                     <TableRow key={d.id} hover>
-                      <TableCell><Chip label={d.code} size="small" variant="outlined" /></TableCell>
+                      <TableCell>
+                        <Chip label={d.code} size="small" variant="outlined" />
+                      </TableCell>
                       <TableCell>{d.titleAr}</TableCell>
                       <TableCell>{d.type}</TableCell>
                       <TableCell>{d.standard}</TableCell>
                       <TableCell>{d.version}</TableCell>
-                      <TableCell><Chip label={d.status} size="small" color={statusColor(d.status)} /></TableCell>
+                      <TableCell>
+                        <Chip label={d.status} size="small" color={statusColor(d.status)} />
+                      </TableCell>
                       <TableCell>{d.reviewDate}</TableCell>
                     </TableRow>
                   ))}
@@ -429,16 +595,26 @@ export default function QualityManagement() {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {risks.map((r) => (
+                  {risks.map(r => (
                     <TableRow key={r.id} hover>
                       <TableCell>{r.titleAr}</TableCell>
                       <TableCell>{r.standard}</TableCell>
                       <TableCell>{r.department}</TableCell>
                       <TableCell>{r.likelihood}</TableCell>
                       <TableCell>{r.impact}</TableCell>
-                      <TableCell><Typography fontWeight="bold">{r.riskScore}</Typography></TableCell>
-                      <TableCell><Chip label={r.riskLevel} size="small" sx={{ bgcolor: riskColor(r.riskLevel), color: '#fff' }} /></TableCell>
-                      <TableCell><Chip label={r.status} size="small" color={statusColor(r.status)} /></TableCell>
+                      <TableCell>
+                        <Typography fontWeight="bold">{r.riskScore}</Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          label={r.riskLevel}
+                          size="small"
+                          sx={{ bgcolor: riskColor(r.riskLevel), color: '#fff' }}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Chip label={r.status} size="small" color={statusColor(r.status)} />
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -450,45 +626,109 @@ export default function QualityManagement() {
           {tab === 7 && (
             <Box>
               <Box sx={{ display: 'flex', gap: 1, mb: 2, flexWrap: 'wrap' }}>
-                {['cbahi', 'jci', 'iso9001', 'iso45001', 'iso14001'].map((std) => (
-                  <Button key={std} variant="outlined" size="small" onClick={() => handleGenerateReport(std)} startIcon={<DescriptionIcon />}>
+                {['cbahi', 'jci', 'iso9001', 'iso45001', 'iso14001'].map(std => (
+                  <Button
+                    key={std}
+                    variant="outlined"
+                    size="small"
+                    onClick={() => handleGenerateReport(std)}
+                    startIcon={<DescriptionIcon />}
+                  >
                     إنشاء تقرير {std.toUpperCase()}
                   </Button>
                 ))}
               </Box>
               <Divider sx={{ mb: 2 }} />
               {reports.length === 0 ? (
-                <Alert severity="info">لا توجد تقارير اعتماد بعد. اضغط على أحد الأزرار أعلاه لإنشاء تقرير.</Alert>
+                <Alert severity="info">
+                  لا توجد تقارير اعتماد بعد. اضغط على أحد الأزرار أعلاه لإنشاء تقرير.
+                </Alert>
               ) : (
                 <Grid container spacing={2}>
-                  {reports.map((rpt) => (
+                  {reports.map(rpt => (
                     <Grid item xs={12} md={6} key={rpt.id}>
                       <Card variant="outlined">
                         <CardContent>
-                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                          <Box
+                            sx={{
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              mb: 1,
+                            }}
+                          >
                             <Typography variant="h6">{rpt.titleAr}</Typography>
-                            <Chip label={rpt.readinessLevel} size="small" color={statusColor(rpt.readinessLevel)} />
+                            <Chip
+                              label={rpt.readinessLevel}
+                              size="small"
+                              color={statusColor(rpt.readinessLevel)}
+                            />
                           </Box>
-                          <Typography variant="h3" fontWeight="bold" color={rpt.overallCompliance >= 80 ? 'success.main' : rpt.overallCompliance >= 60 ? 'warning.main' : 'error.main'} sx={{ mb: 1 }}>
+                          <Typography
+                            variant="h3"
+                            fontWeight="bold"
+                            color={
+                              rpt.overallCompliance >= 80
+                                ? 'success.main'
+                                : rpt.overallCompliance >= 60
+                                  ? 'warning.main'
+                                  : 'error.main'
+                            }
+                            sx={{ mb: 1 }}
+                          >
                             {rpt.overallCompliance}%
                           </Typography>
                           <Grid container spacing={1}>
-                            <Grid item xs={6}><Typography variant="caption" color="text.secondary">التدقيقات: {rpt.auditSummary?.total}</Typography></Grid>
-                            <Grid item xs={6}><Typography variant="caption" color="text.secondary">الملاحظات المفتوحة: {rpt.findingsSummary?.open}</Typography></Grid>
-                            <Grid item xs={6}><Typography variant="caption" color="text.secondary">عدم المطابقة المفتوح: {rpt.ncSummary?.open}</Typography></Grid>
-                            <Grid item xs={6}><Typography variant="caption" color="text.secondary">المخاطر العالية: {rpt.riskSummary?.high}</Typography></Grid>
+                            <Grid item xs={6}>
+                              <Typography variant="caption" color="text.secondary">
+                                التدقيقات: {rpt.auditSummary?.total}
+                              </Typography>
+                            </Grid>
+                            <Grid item xs={6}>
+                              <Typography variant="caption" color="text.secondary">
+                                الملاحظات المفتوحة: {rpt.findingsSummary?.open}
+                              </Typography>
+                            </Grid>
+                            <Grid item xs={6}>
+                              <Typography variant="caption" color="text.secondary">
+                                عدم المطابقة المفتوح: {rpt.ncSummary?.open}
+                              </Typography>
+                            </Grid>
+                            <Grid item xs={6}>
+                              <Typography variant="caption" color="text.secondary">
+                                المخاطر العالية: {rpt.riskSummary?.high}
+                              </Typography>
+                            </Grid>
                           </Grid>
                           {rpt.recommendations && rpt.recommendations.length > 0 && (
                             <Box sx={{ mt: 1 }}>
-                              <Typography variant="caption" fontWeight="bold">التوصيات:</Typography>
+                              <Typography variant="caption" fontWeight="bold">
+                                التوصيات:
+                              </Typography>
                               {rpt.recommendations.map((rec, i) => (
-                                <Typography key={i} variant="caption" display="block" sx={{ color: rec.priority === 'critical' ? 'error.main' : rec.priority === 'high' ? 'warning.main' : 'text.secondary' }}>
+                                <Typography
+                                  key={i}
+                                  variant="caption"
+                                  display="block"
+                                  sx={{
+                                    color:
+                                      rec.priority === 'critical'
+                                        ? 'error.main'
+                                        : rec.priority === 'high'
+                                          ? 'warning.main'
+                                          : 'text.secondary',
+                                  }}
+                                >
                                   • {rec.textAr}
                                 </Typography>
                               ))}
                             </Box>
                           )}
-                          <Typography variant="caption" display="block" sx={{ mt: 1, color: 'text.disabled' }}>
+                          <Typography
+                            variant="caption"
+                            display="block"
+                            sx={{ mt: 1, color: 'text.disabled' }}
+                          >
                             {new Date(rpt.generatedAt).toLocaleString('ar-SA')}
                           </Typography>
                         </CardContent>

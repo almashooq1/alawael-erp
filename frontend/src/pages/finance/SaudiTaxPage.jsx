@@ -28,7 +28,8 @@ import {
   Tab,
   LinearProgress,
   Stack,
-  Alert,} from '@mui/material';
+  Alert,
+} from '@mui/material';
 import {
   AccountBalance as TaxIcon,
   Refresh as RefreshIcon,
@@ -155,12 +156,8 @@ export default function SaudiTaxPage() {
                     <>
                       <TableCell>{item.returnNumber || '—'}</TableCell>
                       <TableCell>{item.period || '—'}</TableCell>
-                      <TableCell>
-                        {item.totalSales?.toLocaleString('ar-SA')} ر.س
-                      </TableCell>
-                      <TableCell>
-                        {item.vatDue?.toLocaleString('ar-SA')} ر.س
-                      </TableCell>
+                      <TableCell>{item.totalSales?.toLocaleString('ar-SA')} ر.س</TableCell>
+                      <TableCell>{item.vatDue?.toLocaleString('ar-SA')} ر.س</TableCell>
                       <TableCell>{getStatusChip(item.status)}</TableCell>
                     </>
                   )}
@@ -169,9 +166,7 @@ export default function SaudiTaxPage() {
                       <TableCell>{item.filingNumber || '—'}</TableCell>
                       <TableCell>{item.taxYear || '—'}</TableCell>
                       <TableCell>{item.filingType || '—'}</TableCell>
-                      <TableCell>
-                        {item.totalAmount?.toLocaleString('ar-SA')} ر.س
-                      </TableCell>
+                      <TableCell>{item.totalAmount?.toLocaleString('ar-SA')} ر.س</TableCell>
                       <TableCell>{getStatusChip(item.status)}</TableCell>
                     </>
                   )}
@@ -179,9 +174,7 @@ export default function SaudiTaxPage() {
                     <>
                       <TableCell>{item.referenceNumber || '—'}</TableCell>
                       <TableCell>{item.vendorName || '—'}</TableCell>
-                      <TableCell>
-                        {item.amount?.toLocaleString('ar-SA')} ر.س
-                      </TableCell>
+                      <TableCell>{item.amount?.toLocaleString('ar-SA')} ر.س</TableCell>
                       <TableCell>{item.withholdingRate}%</TableCell>
                       <TableCell>{getStatusChip(item.status)}</TableCell>
                     </>
@@ -240,9 +233,7 @@ export default function SaudiTaxPage() {
                   <TableRow key={i}>
                     <TableCell>{d.type || '—'}</TableCell>
                     <TableCell>
-                      {d.dueDate
-                        ? new Date(d.dueDate).toLocaleDateString('ar-SA')
-                        : '—'}
+                      {d.dueDate ? new Date(d.dueDate).toLocaleDateString('ar-SA') : '—'}
                     </TableCell>
                     <TableCell>{d.description || '—'}</TableCell>
                   </TableRow>
@@ -266,11 +257,7 @@ export default function SaudiTaxPage() {
           </Typography>
         </Box>
         <Stack direction="row" spacing={1}>
-          <Button
-            startIcon={<CalcIcon />}
-            onClick={() => setZakatDialog(true)}
-            variant="outlined"
-          >
+          <Button startIcon={<CalcIcon />} onClick={() => setZakatDialog(true)} variant="outlined">
             حاسبة الزكاة
           </Button>
           <Button startIcon={<RefreshIcon />} onClick={fetchData} variant="outlined" size="small">
@@ -327,8 +314,7 @@ export default function SaudiTaxPage() {
             </Button>
             {zakatResult && (
               <Alert severity="info">
-                <strong>الوعاء الزكوي:</strong>{' '}
-                {zakatResult.zakatBase?.toLocaleString('ar-SA')} ر.س
+                <strong>الوعاء الزكوي:</strong> {zakatResult.zakatBase?.toLocaleString('ar-SA')} ر.س
                 <br />
                 <strong>مبلغ الزكاة المستحق:</strong>{' '}
                 {zakatResult.zakatDue?.toLocaleString('ar-SA')} ر.س

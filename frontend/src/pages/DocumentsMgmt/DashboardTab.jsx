@@ -55,7 +55,7 @@ const DashboardTab = ({ stats, categories, setSelectedCategory, setActiveTab }) 
         التصنيفات
       </Typography>
       <Grid container spacing={2}>
-        {categories.map((category) => (
+        {categories.map(category => (
           <Grid item xs={12} sm={6} md={4} key={category.id}>
             <Card
               sx={{

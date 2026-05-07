@@ -122,29 +122,52 @@ export default function LearningDevelopment() {
 
   // Form states
   const [programForm, setProgramForm] = useState({
-    name: '', description: '', category: 'technical', level: 'intermediate',
-    duration: 0, cost: 0, maxParticipants: 100,
+    name: '',
+    description: '',
+    category: 'technical',
+    level: 'intermediate',
+    duration: 0,
+    cost: 0,
+    maxParticipants: 100,
   });
   const [enrollForm, setEnrollForm] = useState({
-    employeeId: '', programId: '', enrollmentType: 'self', priority: 'normal',
+    employeeId: '',
+    programId: '',
+    enrollmentType: 'self',
+    priority: 'normal',
   });
   const [certForm, setCertForm] = useState({
-    name: '', description: '', level: 'intermediate', passingScore: 70, validityPeriod: 365,
+    name: '',
+    description: '',
+    level: 'intermediate',
+    passingScore: 70,
+    validityPeriod: 365,
   });
   const [integrationForm, setIntegrationForm] = useState({
-    platformName: '', apiKey: '', endpoint: '', syncFrequency: 'daily',
+    platformName: '',
+    apiKey: '',
+    endpoint: '',
+    syncFrequency: 'daily',
   });
 
   /* ── API helpers ── */
-  const showError = (msg) => { setError(msg); setTimeout(() => setError(''), 5000); };
-  const showSuccess = (msg) => { setSuccess(msg); setTimeout(() => setSuccess(''), 4000); };
+  const showError = msg => {
+    setError(msg);
+    setTimeout(() => setError(''), 5000);
+  };
+  const showSuccess = msg => {
+    setSuccess(msg);
+    setTimeout(() => setSuccess(''), 4000);
+  };
 
   const fetchPrograms = useCallback(async () => {
     setLoading(true);
     try {
       const { data } = await learningDevelopmentService.listPrograms();
       setPrograms(data?.data?.programs || []);
-    } catch { showError('فشل تحميل البرامج'); }
+    } catch {
+      showError('فشل تحميل البرامج');
+    }
     setLoading(false);
   }, []);
 
@@ -153,7 +176,9 @@ export default function LearningDevelopment() {
     try {
       const { data } = await learningDevelopmentService.getCompletionRates();
       setAnalytics(data?.data || null);
-    } catch { showError('فشل تحميل التحليلات'); }
+    } catch {
+      showError('فشل تحميل التحليلات');
+    }
     setLoading(false);
   }, []);
 
@@ -163,51 +188,75 @@ export default function LearningDevelopment() {
       await learningDevelopmentService.createProgram(programForm);
       showSuccess('تم إنشاء البرنامج بنجاح');
       setProgramDialog(false);
-      setProgramForm({ name: '', description: '', category: 'technical', level: 'intermediate', duration: 0, cost: 0, maxParticipants: 100 });
+      setProgramForm({
+        name: '',
+        description: '',
+        category: 'technical',
+        level: 'intermediate',
+        duration: 0,
+        cost: 0,
+        maxParticipants: 100,
+      });
       fetchPrograms();
-    } catch { showError('فشل إنشاء البرنامج'); }
+    } catch {
+      showError('فشل إنشاء البرنامج');
+    }
   };
 
   /* ── Archive program ── */
-  const handleArchive = async (id) => {
+  const handleArchive = async id => {
     try {
       await learningDevelopmentService.archiveProgram(id);
       showSuccess('تم أرشفة البرنامج');
       fetchPrograms();
-    } catch { showError('فشل الأرشفة'); }
+    } catch {
+      showError('فشل الأرشفة');
+    }
   };
 
   /* ── Enroll employee ── */
   const handleEnroll = async () => {
     try {
       const { data } = await learningDevelopmentService.enrollEmployee(enrollForm);
-      setEnrollments((prev) => [...prev, data?.data]);
+      setEnrollments(prev => [...prev, data?.data]);
       showSuccess('تم التسجيل بنجاح');
       setEnrollDialog(false);
       setEnrollForm({ employeeId: '', programId: '', enrollmentType: 'self', priority: 'normal' });
-    } catch { showError('فشل التسجيل'); }
+    } catch {
+      showError('فشل التسجيل');
+    }
   };
 
   /* ── Create certification ── */
   const handleCreateCert = async () => {
     try {
       const { data } = await learningDevelopmentService.defineCertificationPath(certForm);
-      setCertifications((prev) => [...prev, data?.data]);
+      setCertifications(prev => [...prev, data?.data]);
       showSuccess('تم إنشاء مسار الشهادة');
       setCertDialog(false);
-      setCertForm({ name: '', description: '', level: 'intermediate', passingScore: 70, validityPeriod: 365 });
-    } catch { showError('فشل إنشاء الشهادة'); }
+      setCertForm({
+        name: '',
+        description: '',
+        level: 'intermediate',
+        passingScore: 70,
+        validityPeriod: 365,
+      });
+    } catch {
+      showError('فشل إنشاء الشهادة');
+    }
   };
 
   /* ── Connect integration ── */
   const handleConnectIntegration = async () => {
     try {
       const { data } = await learningDevelopmentService.connectPlatform(integrationForm);
-      setIntegrations((prev) => [...prev, data?.data]);
+      setIntegrations(prev => [...prev, data?.data]);
       showSuccess('تم ربط المنصة بنجاح');
       setIntegrationDialog(false);
       setIntegrationForm({ platformName: '', apiKey: '', endpoint: '', syncFrequency: 'daily' });
-    } catch { showError('فشل ربط المنصة'); }
+    } catch {
+      showError('فشل ربط المنصة');
+    }
   };
 
   /* ════════════════════════════════════════════════════════════════════════ */
@@ -228,24 +277,48 @@ export default function LearningDevelopment() {
         </Box>
       </Box>
 
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-      {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
+      {success && (
+        <Alert severity="success" sx={{ mb: 2 }}>
+          {success}
+        </Alert>
+      )}
       {loading && <LinearProgress sx={{ mb: 2 }} />}
 
       {/* KPI Cards */}
       <Grid container spacing={2} sx={{ mb: 3 }}>
         {[
-          { label: 'البرامج التعليمية', count: programs.length, icon: <CourseIcon />, color: '#1976d2' },
+          {
+            label: 'البرامج التعليمية',
+            count: programs.length,
+            icon: <CourseIcon />,
+            color: '#1976d2',
+          },
           { label: 'المسجلون', count: enrollments.length, icon: <PersonIcon />, color: '#2e7d32' },
           { label: 'الشهادات', count: certifications.length, icon: <CertIcon />, color: '#ed6c02' },
-          { label: 'التكاملات', count: integrations.length, icon: <IntegrationIcon />, color: '#9c27b0' },
-        ].map((kpi) => (
+          {
+            label: 'التكاملات',
+            count: integrations.length,
+            icon: <IntegrationIcon />,
+            color: '#9c27b0',
+          },
+        ].map(kpi => (
           <Grid item xs={12} sm={6} md={3} key={kpi.label}>
             <Card sx={{ borderTop: `4px solid ${kpi.color}` }}>
-              <CardContent sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <CardContent
+                sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+              >
                 <Box>
-                  <Typography variant="h3" fontWeight="bold">{kpi.count}</Typography>
-                  <Typography variant="body2" color="text.secondary">{kpi.label}</Typography>
+                  <Typography variant="h3" fontWeight="bold">
+                    {kpi.count}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {kpi.label}
+                  </Typography>
                 </Box>
                 <Box sx={{ color: kpi.color, opacity: 0.6, fontSize: 48 }}>{kpi.icon}</Box>
               </CardContent>
@@ -279,9 +352,13 @@ export default function LearningDevelopment() {
           <Grid item xs={12} md={6}>
             <Card>
               <CardContent>
-                <Typography variant="h6" gutterBottom>🎓 ملخص النظام</Typography>
+                <Typography variant="h6" gutterBottom>
+                  🎓 ملخص النظام
+                </Typography>
                 <Divider sx={{ mb: 2 }} />
-                <Typography>نظام التدريب الإلكتروني يوفر بيئة تعليمية متكاملة لموظفي مركز الأوائل.</Typography>
+                <Typography>
+                  نظام التدريب الإلكتروني يوفر بيئة تعليمية متكاملة لموظفي مركز الأوائل.
+                </Typography>
                 <Box sx={{ mt: 2 }}>
                   <Typography variant="subtitle2">✅ إنشاء البرامج التدريبية وإدارتها</Typography>
                   <Typography variant="subtitle2">✅ تسجيل الموظفين وتتبع التقدم</Typography>
@@ -296,7 +373,9 @@ export default function LearningDevelopment() {
           <Grid item xs={12} md={6}>
             <Card>
               <CardContent>
-                <Typography variant="h6" gutterBottom>📊 إحصائيات سريعة</Typography>
+                <Typography variant="h6" gutterBottom>
+                  📊 إحصائيات سريعة
+                </Typography>
                 <Divider sx={{ mb: 2 }} />
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -305,11 +384,23 @@ export default function LearningDevelopment() {
                   </Box>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                     <Typography>المسجلون النشطون</Typography>
-                    <Chip label={enrollments.filter(e => e?.status === 'enrolled' || e?.status === 'in-progress').length} color="info" size="small" />
+                    <Chip
+                      label={
+                        enrollments.filter(
+                          e => e?.status === 'enrolled' || e?.status === 'in-progress'
+                        ).length
+                      }
+                      color="info"
+                      size="small"
+                    />
                   </Box>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                     <Typography>المكتملون</Typography>
-                    <Chip label={enrollments.filter(e => e?.status === 'completed').length} color="success" size="small" />
+                    <Chip
+                      label={enrollments.filter(e => e?.status === 'completed').length}
+                      color="success"
+                      size="small"
+                    />
                   </Box>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                     <Typography>الشهادات الصادرة</Typography>
@@ -327,8 +418,16 @@ export default function LearningDevelopment() {
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
           <Typography variant="h6">البرامج التعليمية</Typography>
           <Box sx={{ display: 'flex', gap: 1 }}>
-            <Button variant="outlined" startIcon={<RefreshIcon />} onClick={fetchPrograms}>تحديث</Button>
-            <Button variant="contained" startIcon={<AddIcon />} onClick={() => setProgramDialog(true)}>برنامج جديد</Button>
+            <Button variant="outlined" startIcon={<RefreshIcon />} onClick={fetchPrograms}>
+              تحديث
+            </Button>
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={() => setProgramDialog(true)}
+            >
+              برنامج جديد
+            </Button>
           </Box>
         </Box>
         <TableContainer component={Paper}>
@@ -355,15 +454,21 @@ export default function LearningDevelopment() {
                   </TableCell>
                 </TableRow>
               ) : (
-                programs.map((p) => (
+                programs.map(p => (
                   <TableRow key={p.id} hover>
                     <TableCell>{p.name}</TableCell>
-                    <TableCell>{CATEGORY_OPTIONS.find(c => c.value === p.category)?.label || p.category}</TableCell>
-                    <TableCell>{LEVEL_OPTIONS.find(l => l.value === p.level)?.label || p.level}</TableCell>
+                    <TableCell>
+                      {CATEGORY_OPTIONS.find(c => c.value === p.category)?.label || p.category}
+                    </TableCell>
+                    <TableCell>
+                      {LEVEL_OPTIONS.find(l => l.value === p.level)?.label || p.level}
+                    </TableCell>
                     <TableCell>{p.duration}</TableCell>
                     <TableCell>{p.cost?.toLocaleString()} ر.س</TableCell>
                     <TableCell>{p.enrollmentCount || 0}</TableCell>
-                    <TableCell><StatusChip status={p.status} /></TableCell>
+                    <TableCell>
+                      <StatusChip status={p.status} />
+                    </TableCell>
                     <TableCell>
                       <Tooltip title="أرشفة">
                         <IconButton size="small" onClick={() => handleArchive(p.id)}>
@@ -383,7 +488,9 @@ export default function LearningDevelopment() {
       <TabPanel value={tab} index={2}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
           <Typography variant="h6">تسجيل الموظفين</Typography>
-          <Button variant="contained" startIcon={<AddIcon />} onClick={() => setEnrollDialog(true)}>تسجيل جديد</Button>
+          <Button variant="contained" startIcon={<AddIcon />} onClick={() => setEnrollDialog(true)}>
+            تسجيل جديد
+          </Button>
         </Box>
         <TableContainer component={Paper}>
           <Table>
@@ -401,25 +508,50 @@ export default function LearningDevelopment() {
               {enrollments.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} align="center">
-                    <Typography color="text.secondary" sx={{ py: 4 }}>لا توجد تسجيلات بعد</Typography>
+                    <Typography color="text.secondary" sx={{ py: 4 }}>
+                      لا توجد تسجيلات بعد
+                    </Typography>
                   </TableCell>
                 </TableRow>
               ) : (
-                enrollments.filter(Boolean).map((e) => (
+                enrollments.filter(Boolean).map(e => (
                   <TableRow key={e.id} hover>
                     <TableCell>{e.employeeId}</TableCell>
-                    <TableCell>{programs.find(p => p.id === e.programId)?.name || e.programId}</TableCell>
-                    <TableCell>{e.enrollmentType === 'self' ? 'ذاتي' : e.enrollmentType === 'manager' ? 'المدير' : 'إلزامي'}</TableCell>
+                    <TableCell>
+                      {programs.find(p => p.id === e.programId)?.name || e.programId}
+                    </TableCell>
+                    <TableCell>
+                      {e.enrollmentType === 'self'
+                        ? 'ذاتي'
+                        : e.enrollmentType === 'manager'
+                          ? 'المدير'
+                          : 'إلزامي'}
+                    </TableCell>
                     <TableCell>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <LinearProgress variant="determinate" value={e.progress || 0} sx={{ flexGrow: 1, height: 8, borderRadius: 4 }} />
+                        <LinearProgress
+                          variant="determinate"
+                          value={e.progress || 0}
+                          sx={{ flexGrow: 1, height: 8, borderRadius: 4 }}
+                        />
                         <Typography variant="caption">{e.progress || 0}%</Typography>
                       </Box>
                     </TableCell>
-                    <TableCell><StatusChip status={e.status} /></TableCell>
                     <TableCell>
-                      <Chip size="small" label={e.priority === 'high' ? 'عالية' : e.priority === 'low' ? 'منخفضة' : 'عادية'}
-                        color={e.priority === 'high' ? 'error' : 'default'} />
+                      <StatusChip status={e.status} />
+                    </TableCell>
+                    <TableCell>
+                      <Chip
+                        size="small"
+                        label={
+                          e.priority === 'high'
+                            ? 'عالية'
+                            : e.priority === 'low'
+                              ? 'منخفضة'
+                              : 'عادية'
+                        }
+                        color={e.priority === 'high' ? 'error' : 'default'}
+                      />
                     </TableCell>
                   </TableRow>
                 ))
@@ -433,18 +565,22 @@ export default function LearningDevelopment() {
       <TabPanel value={tab} index={3}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
           <Typography variant="h6">الشهادات والتراخيص</Typography>
-          <Button variant="contained" startIcon={<AddIcon />} onClick={() => setCertDialog(true)}>شهادة جديدة</Button>
+          <Button variant="contained" startIcon={<AddIcon />} onClick={() => setCertDialog(true)}>
+            شهادة جديدة
+          </Button>
         </Box>
         <Grid container spacing={2}>
           {certifications.length === 0 ? (
             <Grid item xs={12}>
               <Paper sx={{ p: 4, textAlign: 'center' }}>
                 <CertIcon sx={{ fontSize: 60, color: 'text.disabled', mb: 1 }} />
-                <Typography color="text.secondary">لا توجد شهادات — أنشئ مسار شهادة للبدء</Typography>
+                <Typography color="text.secondary">
+                  لا توجد شهادات — أنشئ مسار شهادة للبدء
+                </Typography>
               </Paper>
             </Grid>
           ) : (
-            certifications.filter(Boolean).map((cert) => (
+            certifications.filter(Boolean).map(cert => (
               <Grid item xs={12} sm={6} md={4} key={cert.id}>
                 <Card sx={{ height: '100%' }}>
                   <CardContent>
@@ -452,13 +588,20 @@ export default function LearningDevelopment() {
                       <StarIcon sx={{ color: '#ed6c02' }} />
                       <Typography variant="h6">{cert.name}</Typography>
                     </Box>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>{cert.description}</Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                      {cert.description}
+                    </Typography>
                     <Divider sx={{ mb: 1 }} />
-                    <Typography variant="caption">المستوى: {LEVEL_OPTIONS.find(l => l.value === cert.level)?.label || cert.level}</Typography>
+                    <Typography variant="caption">
+                      المستوى:{' '}
+                      {LEVEL_OPTIONS.find(l => l.value === cert.level)?.label || cert.level}
+                    </Typography>
                     <br />
                     <Typography variant="caption">درجة النجاح: {cert.passingScore}%</Typography>
                     <br />
-                    <Typography variant="caption">مدة الصلاحية: {cert.validityPeriod} يوم</Typography>
+                    <Typography variant="caption">
+                      مدة الصلاحية: {cert.validityPeriod} يوم
+                    </Typography>
                   </CardContent>
                 </Card>
               </Grid>
@@ -471,7 +614,9 @@ export default function LearningDevelopment() {
       <TabPanel value={tab} index={4}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
           <Typography variant="h6">تحليلات التعلم والتطوير</Typography>
-          <Button variant="outlined" startIcon={<RefreshIcon />} onClick={fetchAnalytics}>تحديث البيانات</Button>
+          <Button variant="outlined" startIcon={<RefreshIcon />} onClick={fetchAnalytics}>
+            تحديث البيانات
+          </Button>
         </Box>
         <Grid container spacing={3}>
           <Grid item xs={12} md={4}>
@@ -500,7 +645,9 @@ export default function LearningDevelopment() {
                 <Typography variant="h2" fontWeight="bold" color="primary.main">
                   {analytics?.totalEnrollments || 0}
                 </Typography>
-                <Typography variant="body2" color="text.secondary">عبر جميع البرامج</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  عبر جميع البرامج
+                </Typography>
               </CardContent>
             </Card>
           </Grid>
@@ -514,7 +661,9 @@ export default function LearningDevelopment() {
                 <Typography variant="h2" fontWeight="bold" color="warning.main">
                   {(analytics?.totalEnrollments || 0) - (analytics?.totalCompleted || 0)}
                 </Typography>
-                <Typography variant="body2" color="text.secondary">بحاجة للمتابعة</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  بحاجة للمتابعة
+                </Typography>
               </CardContent>
             </Card>
           </Grid>
@@ -522,7 +671,9 @@ export default function LearningDevelopment() {
             <Grid item xs={12}>
               <Card>
                 <CardContent>
-                  <Typography variant="h6" gutterBottom>أداء البرامج</Typography>
+                  <Typography variant="h6" gutterBottom>
+                    أداء البرامج
+                  </Typography>
                   <TableContainer>
                     <Table size="small">
                       <TableHead>
@@ -541,8 +692,11 @@ export default function LearningDevelopment() {
                             <TableCell>{stats.completed}</TableCell>
                             <TableCell>
                               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <LinearProgress variant="determinate" value={stats.rate}
-                                  sx={{ flexGrow: 1, height: 6, borderRadius: 3 }} />
+                                <LinearProgress
+                                  variant="determinate"
+                                  value={stats.rate}
+                                  sx={{ flexGrow: 1, height: 6, borderRadius: 3 }}
+                                />
                                 <Typography variant="caption">{stats.rate.toFixed(0)}%</Typography>
                               </Box>
                             </TableCell>
@@ -562,25 +716,37 @@ export default function LearningDevelopment() {
       <TabPanel value={tab} index={5}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
           <Typography variant="h6">التكامل مع المنصات الخارجية</Typography>
-          <Button variant="contained" startIcon={<AddIcon />} onClick={() => setIntegrationDialog(true)}>ربط منصة</Button>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => setIntegrationDialog(true)}
+          >
+            ربط منصة
+          </Button>
         </Box>
         <Grid container spacing={2}>
           {integrations.length === 0 ? (
             <Grid item xs={12}>
               <Paper sx={{ p: 4, textAlign: 'center' }}>
                 <IntegrationIcon sx={{ fontSize: 60, color: 'text.disabled', mb: 1 }} />
-                <Typography color="text.secondary">لا توجد منصات مرتبطة — اربط منصة تعليمية للبدء</Typography>
+                <Typography color="text.secondary">
+                  لا توجد منصات مرتبطة — اربط منصة تعليمية للبدء
+                </Typography>
               </Paper>
             </Grid>
           ) : (
-            integrations.filter(Boolean).map((intg) => (
+            integrations.filter(Boolean).map(intg => (
               <Grid item xs={12} sm={6} md={4} key={intg.id}>
                 <Card>
                   <CardContent>
                     <Typography variant="h6">{intg.platformName}</Typography>
                     <StatusChip status={intg.status} />
-                    <Typography variant="body2" sx={{ mt: 1 }}>التزامن: {intg.syncFrequency === 'daily' ? 'يومي' : intg.syncFrequency}</Typography>
-                    <Typography variant="caption" color="text.secondary">عدد التزامنات: {intg.syncCount}</Typography>
+                    <Typography variant="body2" sx={{ mt: 1 }}>
+                      التزامن: {intg.syncFrequency === 'daily' ? 'يومي' : intg.syncFrequency}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      عدد التزامنات: {intg.syncCount}
+                    </Typography>
                   </CardContent>
                 </Card>
               </Grid>
@@ -596,37 +762,87 @@ export default function LearningDevelopment() {
         <DialogTitle>إنشاء برنامج تعليمي جديد</DialogTitle>
         <DialogContent>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
-            <TextField label="اسم البرنامج" fullWidth required value={programForm.name}
-              onChange={(e) => setProgramForm({ ...programForm, name: e.target.value })} />
-            <TextField label="الوصف" fullWidth multiline rows={2} value={programForm.description}
-              onChange={(e) => setProgramForm({ ...programForm, description: e.target.value })} />
-            <TextField select label="الفئة" fullWidth value={programForm.category}
-              onChange={(e) => setProgramForm({ ...programForm, category: e.target.value })}>
-              {CATEGORY_OPTIONS.map((o) => <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>)}
+            <TextField
+              label="اسم البرنامج"
+              fullWidth
+              required
+              value={programForm.name}
+              onChange={e => setProgramForm({ ...programForm, name: e.target.value })}
+            />
+            <TextField
+              label="الوصف"
+              fullWidth
+              multiline
+              rows={2}
+              value={programForm.description}
+              onChange={e => setProgramForm({ ...programForm, description: e.target.value })}
+            />
+            <TextField
+              select
+              label="الفئة"
+              fullWidth
+              value={programForm.category}
+              onChange={e => setProgramForm({ ...programForm, category: e.target.value })}
+            >
+              {CATEGORY_OPTIONS.map(o => (
+                <MenuItem key={o.value} value={o.value}>
+                  {o.label}
+                </MenuItem>
+              ))}
             </TextField>
-            <TextField select label="المستوى" fullWidth value={programForm.level}
-              onChange={(e) => setProgramForm({ ...programForm, level: e.target.value })}>
-              {LEVEL_OPTIONS.map((o) => <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>)}
+            <TextField
+              select
+              label="المستوى"
+              fullWidth
+              value={programForm.level}
+              onChange={e => setProgramForm({ ...programForm, level: e.target.value })}
+            >
+              {LEVEL_OPTIONS.map(o => (
+                <MenuItem key={o.value} value={o.value}>
+                  {o.label}
+                </MenuItem>
+              ))}
             </TextField>
             <Grid container spacing={2}>
               <Grid item xs={4}>
-                <TextField label="المدة (ساعة)" type="number" fullWidth value={programForm.duration}
-                  onChange={(e) => setProgramForm({ ...programForm, duration: Number(e.target.value) })} />
+                <TextField
+                  label="المدة (ساعة)"
+                  type="number"
+                  fullWidth
+                  value={programForm.duration}
+                  onChange={e =>
+                    setProgramForm({ ...programForm, duration: Number(e.target.value) })
+                  }
+                />
               </Grid>
               <Grid item xs={4}>
-                <TextField label="التكلفة (ر.س)" type="number" fullWidth value={programForm.cost}
-                  onChange={(e) => setProgramForm({ ...programForm, cost: Number(e.target.value) })} />
+                <TextField
+                  label="التكلفة (ر.س)"
+                  type="number"
+                  fullWidth
+                  value={programForm.cost}
+                  onChange={e => setProgramForm({ ...programForm, cost: Number(e.target.value) })}
+                />
               </Grid>
               <Grid item xs={4}>
-                <TextField label="الحد الأقصى" type="number" fullWidth value={programForm.maxParticipants}
-                  onChange={(e) => setProgramForm({ ...programForm, maxParticipants: Number(e.target.value) })} />
+                <TextField
+                  label="الحد الأقصى"
+                  type="number"
+                  fullWidth
+                  value={programForm.maxParticipants}
+                  onChange={e =>
+                    setProgramForm({ ...programForm, maxParticipants: Number(e.target.value) })
+                  }
+                />
               </Grid>
             </Grid>
           </Box>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setProgramDialog(false)}>إلغاء</Button>
-          <Button variant="contained" onClick={handleCreateProgram} disabled={!programForm.name}>إنشاء</Button>
+          <Button variant="contained" onClick={handleCreateProgram} disabled={!programForm.name}>
+            إنشاء
+          </Button>
         </DialogActions>
       </Dialog>
 
@@ -635,25 +851,55 @@ export default function LearningDevelopment() {
         <DialogTitle>تسجيل موظف في برنامج</DialogTitle>
         <DialogContent>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
-            <TextField label="رقم الموظف" fullWidth required value={enrollForm.employeeId}
-              onChange={(e) => setEnrollForm({ ...enrollForm, employeeId: e.target.value })} />
+            <TextField
+              label="رقم الموظف"
+              fullWidth
+              required
+              value={enrollForm.employeeId}
+              onChange={e => setEnrollForm({ ...enrollForm, employeeId: e.target.value })}
+            />
             {programs.length > 0 ? (
-              <TextField select label="البرنامج" fullWidth required value={enrollForm.programId}
-                onChange={(e) => setEnrollForm({ ...enrollForm, programId: e.target.value })}>
-                {programs.map((p) => <MenuItem key={p.id} value={p.id}>{p.name}</MenuItem>)}
+              <TextField
+                select
+                label="البرنامج"
+                fullWidth
+                required
+                value={enrollForm.programId}
+                onChange={e => setEnrollForm({ ...enrollForm, programId: e.target.value })}
+              >
+                {programs.map(p => (
+                  <MenuItem key={p.id} value={p.id}>
+                    {p.name}
+                  </MenuItem>
+                ))}
               </TextField>
             ) : (
-              <TextField label="رقم البرنامج" fullWidth required value={enrollForm.programId}
-                onChange={(e) => setEnrollForm({ ...enrollForm, programId: e.target.value })} />
+              <TextField
+                label="رقم البرنامج"
+                fullWidth
+                required
+                value={enrollForm.programId}
+                onChange={e => setEnrollForm({ ...enrollForm, programId: e.target.value })}
+              />
             )}
-            <TextField select label="نوع التسجيل" fullWidth value={enrollForm.enrollmentType}
-              onChange={(e) => setEnrollForm({ ...enrollForm, enrollmentType: e.target.value })}>
+            <TextField
+              select
+              label="نوع التسجيل"
+              fullWidth
+              value={enrollForm.enrollmentType}
+              onChange={e => setEnrollForm({ ...enrollForm, enrollmentType: e.target.value })}
+            >
               <MenuItem value="self">ذاتي</MenuItem>
               <MenuItem value="manager">بواسطة المدير</MenuItem>
               <MenuItem value="mandatory">إلزامي</MenuItem>
             </TextField>
-            <TextField select label="الأولوية" fullWidth value={enrollForm.priority}
-              onChange={(e) => setEnrollForm({ ...enrollForm, priority: e.target.value })}>
+            <TextField
+              select
+              label="الأولوية"
+              fullWidth
+              value={enrollForm.priority}
+              onChange={e => setEnrollForm({ ...enrollForm, priority: e.target.value })}
+            >
               <MenuItem value="low">منخفضة</MenuItem>
               <MenuItem value="normal">عادية</MenuItem>
               <MenuItem value="high">عالية</MenuItem>
@@ -662,8 +908,13 @@ export default function LearningDevelopment() {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setEnrollDialog(false)}>إلغاء</Button>
-          <Button variant="contained" onClick={handleEnroll}
-            disabled={!enrollForm.employeeId || !enrollForm.programId}>تسجيل</Button>
+          <Button
+            variant="contained"
+            onClick={handleEnroll}
+            disabled={!enrollForm.employeeId || !enrollForm.programId}
+          >
+            تسجيل
+          </Button>
         </DialogActions>
       </Dialog>
 
@@ -672,45 +923,107 @@ export default function LearningDevelopment() {
         <DialogTitle>إنشاء مسار شهادة</DialogTitle>
         <DialogContent>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
-            <TextField label="اسم الشهادة" fullWidth required value={certForm.name}
-              onChange={(e) => setCertForm({ ...certForm, name: e.target.value })} />
-            <TextField label="الوصف" fullWidth multiline rows={2} value={certForm.description}
-              onChange={(e) => setCertForm({ ...certForm, description: e.target.value })} />
-            <TextField select label="المستوى" fullWidth value={certForm.level}
-              onChange={(e) => setCertForm({ ...certForm, level: e.target.value })}>
-              {LEVEL_OPTIONS.map((o) => <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>)}
+            <TextField
+              label="اسم الشهادة"
+              fullWidth
+              required
+              value={certForm.name}
+              onChange={e => setCertForm({ ...certForm, name: e.target.value })}
+            />
+            <TextField
+              label="الوصف"
+              fullWidth
+              multiline
+              rows={2}
+              value={certForm.description}
+              onChange={e => setCertForm({ ...certForm, description: e.target.value })}
+            />
+            <TextField
+              select
+              label="المستوى"
+              fullWidth
+              value={certForm.level}
+              onChange={e => setCertForm({ ...certForm, level: e.target.value })}
+            >
+              {LEVEL_OPTIONS.map(o => (
+                <MenuItem key={o.value} value={o.value}>
+                  {o.label}
+                </MenuItem>
+              ))}
             </TextField>
             <Grid container spacing={2}>
               <Grid item xs={6}>
-                <TextField label="درجة النجاح (%)" type="number" fullWidth value={certForm.passingScore}
-                  onChange={(e) => setCertForm({ ...certForm, passingScore: Number(e.target.value) })} />
+                <TextField
+                  label="درجة النجاح (%)"
+                  type="number"
+                  fullWidth
+                  value={certForm.passingScore}
+                  onChange={e => setCertForm({ ...certForm, passingScore: Number(e.target.value) })}
+                />
               </Grid>
               <Grid item xs={6}>
-                <TextField label="مدة الصلاحية (يوم)" type="number" fullWidth value={certForm.validityPeriod}
-                  onChange={(e) => setCertForm({ ...certForm, validityPeriod: Number(e.target.value) })} />
+                <TextField
+                  label="مدة الصلاحية (يوم)"
+                  type="number"
+                  fullWidth
+                  value={certForm.validityPeriod}
+                  onChange={e =>
+                    setCertForm({ ...certForm, validityPeriod: Number(e.target.value) })
+                  }
+                />
               </Grid>
             </Grid>
           </Box>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setCertDialog(false)}>إلغاء</Button>
-          <Button variant="contained" onClick={handleCreateCert} disabled={!certForm.name}>إنشاء</Button>
+          <Button variant="contained" onClick={handleCreateCert} disabled={!certForm.name}>
+            إنشاء
+          </Button>
         </DialogActions>
       </Dialog>
 
       {/* Integration Dialog */}
-      <Dialog open={integrationDialog} onClose={() => setIntegrationDialog(false)} maxWidth="sm" fullWidth>
+      <Dialog
+        open={integrationDialog}
+        onClose={() => setIntegrationDialog(false)}
+        maxWidth="sm"
+        fullWidth
+      >
         <DialogTitle>ربط منصة تعليمية خارجية</DialogTitle>
         <DialogContent>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
-            <TextField label="اسم المنصة" fullWidth required value={integrationForm.platformName}
-              onChange={(e) => setIntegrationForm({ ...integrationForm, platformName: e.target.value })} />
-            <TextField label="مفتاح API" fullWidth required value={integrationForm.apiKey}
-              onChange={(e) => setIntegrationForm({ ...integrationForm, apiKey: e.target.value })} />
-            <TextField label="رابط API" fullWidth value={integrationForm.endpoint}
-              onChange={(e) => setIntegrationForm({ ...integrationForm, endpoint: e.target.value })} />
-            <TextField select label="تكرار التزامن" fullWidth value={integrationForm.syncFrequency}
-              onChange={(e) => setIntegrationForm({ ...integrationForm, syncFrequency: e.target.value })}>
+            <TextField
+              label="اسم المنصة"
+              fullWidth
+              required
+              value={integrationForm.platformName}
+              onChange={e =>
+                setIntegrationForm({ ...integrationForm, platformName: e.target.value })
+              }
+            />
+            <TextField
+              label="مفتاح API"
+              fullWidth
+              required
+              value={integrationForm.apiKey}
+              onChange={e => setIntegrationForm({ ...integrationForm, apiKey: e.target.value })}
+            />
+            <TextField
+              label="رابط API"
+              fullWidth
+              value={integrationForm.endpoint}
+              onChange={e => setIntegrationForm({ ...integrationForm, endpoint: e.target.value })}
+            />
+            <TextField
+              select
+              label="تكرار التزامن"
+              fullWidth
+              value={integrationForm.syncFrequency}
+              onChange={e =>
+                setIntegrationForm({ ...integrationForm, syncFrequency: e.target.value })
+              }
+            >
               <MenuItem value="hourly">كل ساعة</MenuItem>
               <MenuItem value="daily">يومي</MenuItem>
               <MenuItem value="weekly">أسبوعي</MenuItem>
@@ -719,8 +1032,13 @@ export default function LearningDevelopment() {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setIntegrationDialog(false)}>إلغاء</Button>
-          <Button variant="contained" onClick={handleConnectIntegration}
-            disabled={!integrationForm.platformName || !integrationForm.apiKey}>ربط</Button>
+          <Button
+            variant="contained"
+            onClick={handleConnectIntegration}
+            disabled={!integrationForm.platformName || !integrationForm.apiKey}
+          >
+            ربط
+          </Button>
         </DialogActions>
       </Dialog>
     </Box>

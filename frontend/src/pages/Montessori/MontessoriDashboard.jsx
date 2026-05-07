@@ -14,10 +14,29 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
-  Container, Typography, Grid, Paper, Box, Card, Avatar,
-  Chip, LinearProgress, Button, Skeleton, IconButton, Tooltip, useTheme, alpha,
-  Stack, List, ListItem, ListItemText, ListItemAvatar, CardActionArea,
-  Badge, CircularProgress,
+  Container,
+  Typography,
+  Grid,
+  Paper,
+  Box,
+  Card,
+  Avatar,
+  Chip,
+  LinearProgress,
+  Button,
+  Skeleton,
+  IconButton,
+  Tooltip,
+  useTheme,
+  alpha,
+  Stack,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemAvatar,
+  CardActionArea,
+  Badge,
+  CircularProgress,
 } from '@mui/material';
 import {
   ChildCare as ChildIcon,
@@ -35,9 +54,17 @@ import {
   AutoAwesome as AutoAwesomeIcon,
 } from '@mui/icons-material';
 import {
-  PieChart, Pie, Cell, BarChart, Bar,
-  XAxis, YAxis, CartesianGrid, Tooltip as RTooltip,
-  ResponsiveContainer, Legend,
+  PieChart,
+  Pie,
+  Cell,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as RTooltip,
+  ResponsiveContainer,
+  Legend,
 } from 'recharts';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
@@ -71,7 +98,7 @@ const useAnimatedCounter = (endValue, duration = 1200) => {
           requestAnimationFrame(step);
         }
       },
-      { threshold: 0.3 },
+      { threshold: 0.3 }
     );
     if (ref.current) observer.observe(ref.current);
     return () => observer.disconnect();
@@ -95,29 +122,54 @@ const AnimatedKPI = ({ title, value, subtitle, icon, gradient, delay = 0 }) => {
       <Paper
         elevation={0}
         sx={{
-          p: 2.5, borderRadius: 3, height: '100%',
-          background: gradient, color: '#fff',
-          position: 'relative', overflow: 'hidden',
+          p: 2.5,
+          borderRadius: 3,
+          height: '100%',
+          background: gradient,
+          color: '#fff',
+          position: 'relative',
+          overflow: 'hidden',
           ...(isZero && { opacity: 0.65, filter: 'grayscale(0.3)' }),
           '&:hover': {
             ...(isZero && { opacity: 0.85, filter: 'grayscale(0)' }),
             boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
           },
           '&::after': {
-            content: '""', position: 'absolute', top: -30, right: -30,
-            width: 110, height: 110, borderRadius: '50%',
+            content: '""',
+            position: 'absolute',
+            top: -30,
+            right: -30,
+            width: 110,
+            height: 110,
+            borderRadius: '50%',
             background: 'rgba(255,255,255,0.1)',
           },
           '&::before': {
-            content: '""', position: 'absolute', bottom: -20, left: -20,
-            width: 80, height: 80, borderRadius: '50%',
+            content: '""',
+            position: 'absolute',
+            bottom: -20,
+            left: -20,
+            width: 80,
+            height: 80,
+            borderRadius: '50%',
             background: 'rgba(255,255,255,0.06)',
           },
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', position: 'relative', zIndex: 1 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'flex-start',
+            justifyContent: 'space-between',
+            position: 'relative',
+            zIndex: 1,
+          }}
+        >
           <Box>
-            <Typography variant="caption" sx={{ opacity: 0.85, fontWeight: 500, letterSpacing: 0.5 }}>
+            <Typography
+              variant="caption"
+              sx={{ opacity: 0.85, fontWeight: 500, letterSpacing: 0.5 }}
+            >
               {title}
             </Typography>
             <Typography variant="h3" fontWeight={800} sx={{ lineHeight: 1.2, my: 0.5 }}>
@@ -129,7 +181,14 @@ const AnimatedKPI = ({ title, value, subtitle, icon, gradient, delay = 0 }) => {
               </Typography>
             )}
           </Box>
-          <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)', width: 52, height: 52, backdropFilter: 'blur(4px)' }}>
+          <Avatar
+            sx={{
+              bgcolor: 'rgba(255,255,255,0.2)',
+              width: 52,
+              height: 52,
+              backdropFilter: 'blur(4px)',
+            }}
+          >
             {icon}
           </Avatar>
         </Box>
@@ -142,12 +201,30 @@ const AnimatedKPI = ({ title, value, subtitle, icon, gradient, delay = 0 }) => {
 const ProgressRing = ({ value, size = 80, color = '#66bb6a', label }) => (
   <Box sx={{ position: 'relative', display: 'inline-flex' }}>
     <CircularProgress
-      variant="determinate" value={Math.min(value, 100)} size={size} thickness={4}
+      variant="determinate"
+      value={Math.min(value, 100)}
+      size={size}
+      thickness={4}
       sx={{ color, '& .MuiCircularProgress-circle': { strokeLinecap: 'round' } }}
     />
-    <Box sx={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-      <Typography variant="h6" fontWeight={800} color="text.primary">{value}%</Typography>
-      {label && <Typography variant="caption" color="text.secondary" sx={{ fontSize: 9 }}>{label}</Typography>}
+    <Box
+      sx={{
+        position: 'absolute',
+        inset: 0,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <Typography variant="h6" fontWeight={800} color="text.primary">
+        {value}%
+      </Typography>
+      {label && (
+        <Typography variant="caption" color="text.secondary" sx={{ fontSize: 9 }}>
+          {label}
+        </Typography>
+      )}
     </Box>
   </Box>
 );
@@ -155,10 +232,42 @@ const ProgressRing = ({ value, size = 80, color = '#66bb6a', label }) => (
 /* ──────── Demo data ──────── */
 const DEMO = {
   programs: [
-    { _id: '1', name: 'برنامج الطفولة المبكرة', ageGroup: '3-6 سنوات', capacity: 20, enrolled: 15, status: 'active', instructor: 'أ. نورة السالم' },
-    { _id: '2', name: 'برنامج الحسي الحركي', ageGroup: '2-4 سنوات', capacity: 12, enrolled: 10, status: 'active', instructor: 'أ. سارة المحمد' },
-    { _id: '3', name: 'برنامج اللغة والتواصل', ageGroup: '4-7 سنوات', capacity: 15, enrolled: 8, status: 'active', instructor: 'أ. هند العتيبي' },
-    { _id: '4', name: 'برنامج المهارات الحياتية', ageGroup: '5-8 سنوات', capacity: 18, enrolled: 14, status: 'planned', instructor: 'أ. ريم الشمري' },
+    {
+      _id: '1',
+      name: 'برنامج الطفولة المبكرة',
+      ageGroup: '3-6 سنوات',
+      capacity: 20,
+      enrolled: 15,
+      status: 'active',
+      instructor: 'أ. نورة السالم',
+    },
+    {
+      _id: '2',
+      name: 'برنامج الحسي الحركي',
+      ageGroup: '2-4 سنوات',
+      capacity: 12,
+      enrolled: 10,
+      status: 'active',
+      instructor: 'أ. سارة المحمد',
+    },
+    {
+      _id: '3',
+      name: 'برنامج اللغة والتواصل',
+      ageGroup: '4-7 سنوات',
+      capacity: 15,
+      enrolled: 8,
+      status: 'active',
+      instructor: 'أ. هند العتيبي',
+    },
+    {
+      _id: '4',
+      name: 'برنامج المهارات الحياتية',
+      ageGroup: '5-8 سنوات',
+      capacity: 18,
+      enrolled: 14,
+      status: 'planned',
+      instructor: 'أ. ريم الشمري',
+    },
   ],
   students: [
     { _id: '1', fullName: 'أحمد محمد العلي', gender: 'ذكر', disabilityTypes: ['توحد'] },
@@ -167,19 +276,65 @@ const DEMO = {
     { _id: '4', fullName: 'لمى سعد الحربي', gender: 'أنثى', disabilityTypes: ['سمعية'] },
     { _id: '5', fullName: 'محمد عبدالرحمن', gender: 'ذكر', disabilityTypes: ['توحد', 'ذهنية'] },
   ],
-  sessions: Array.from({ length: 24 }, (_, i) => ({ _id: `s${i}`, attendance: Math.random() > 0.15 })),
+  sessions: Array.from({ length: 24 }, (_, i) => ({
+    _id: `s${i}`,
+    attendance: Math.random() > 0.15,
+  })),
   evaluations: [
     { _id: '1', area: 'حسي', level: 'جيد', skill: 'التمييز البصري', student: { fullName: 'أحمد' } },
     { _id: '2', area: 'لغوي', level: 'ممتاز', skill: 'المفردات', student: { fullName: 'سارة' } },
-    { _id: '3', area: 'حركي', level: 'متوسط', skill: 'المهارات الدقيقة', student: { fullName: 'عبدالله' } },
-    { _id: '4', area: 'اجتماعي', level: 'جيد', skill: 'التفاعل مع الأقران', student: { fullName: 'لمى' } },
-    { _id: '5', area: 'معرفي', level: 'ممتاز', skill: 'التصنيف والترتيب', student: { fullName: 'محمد' } },
-    { _id: '6', area: 'استقلالية', level: 'ضعيف', skill: 'الاعتناء بالنفس', student: { fullName: 'أحمد' } },
+    {
+      _id: '3',
+      area: 'حركي',
+      level: 'متوسط',
+      skill: 'المهارات الدقيقة',
+      student: { fullName: 'عبدالله' },
+    },
+    {
+      _id: '4',
+      area: 'اجتماعي',
+      level: 'جيد',
+      skill: 'التفاعل مع الأقران',
+      student: { fullName: 'لمى' },
+    },
+    {
+      _id: '5',
+      area: 'معرفي',
+      level: 'ممتاز',
+      skill: 'التصنيف والترتيب',
+      student: { fullName: 'محمد' },
+    },
+    {
+      _id: '6',
+      area: 'استقلالية',
+      level: 'ضعيف',
+      skill: 'الاعتناء بالنفس',
+      student: { fullName: 'أحمد' },
+    },
   ],
   plans: [
-    { _id: '1', goals: [{ area: 'حسي', achieved: true }, { area: 'لغوي', achieved: false }, { area: 'حركي', achieved: true }] },
-    { _id: '2', goals: [{ area: 'اجتماعي', achieved: false }, { area: 'معرفي', achieved: true }] },
-    { _id: '3', goals: [{ area: 'استقلالية', achieved: true }, { area: 'سلوكي', achieved: false }] },
+    {
+      _id: '1',
+      goals: [
+        { area: 'حسي', achieved: true },
+        { area: 'لغوي', achieved: false },
+        { area: 'حركي', achieved: true },
+      ],
+    },
+    {
+      _id: '2',
+      goals: [
+        { area: 'اجتماعي', achieved: false },
+        { area: 'معرفي', achieved: true },
+      ],
+    },
+    {
+      _id: '3',
+      goals: [
+        { area: 'استقلالية', achieved: true },
+        { area: 'سلوكي', achieved: false },
+      ],
+    },
   ],
   activities: Array.from({ length: 12 }, (_, i) => ({ _id: `a${i}`, name: `نشاط ${i + 1}` })),
   team: [
@@ -196,9 +351,18 @@ const DEMO = {
 };
 
 /* ──────── Utility ──────── */
-const arr = (v) => (Array.isArray(v) ? v : []);
-const levelColors = { 'ضعيف': '#ef5350', 'متوسط': '#ff9800', 'جيد': '#66bb6a', 'ممتاز': '#42a5f5' };
-const CHART_COLORS = ['#667eea', '#43e97b', '#ff9800', '#ef5350', '#ab47bc', '#26c6da', '#f093fb', '#ffb347'];
+const arr = v => (Array.isArray(v) ? v : []);
+const levelColors = { ضعيف: '#ef5350', متوسط: '#ff9800', جيد: '#66bb6a', ممتاز: '#42a5f5' };
+const CHART_COLORS = [
+  '#667eea',
+  '#43e97b',
+  '#ff9800',
+  '#ef5350',
+  '#ab47bc',
+  '#26c6da',
+  '#f093fb',
+  '#ffb347',
+];
 
 const statusConfig = {
   active: { label: 'نشط', color: 'success' },
@@ -209,10 +373,42 @@ const statusConfig = {
 
 /* ──────── Nav Cards ──────── */
 const NAV_CARDS = [
-  { id: 'students', label: 'إدارة الطلاب', icon: <ChildIcon sx={{ fontSize: 28 }} />, path: '/montessori/students', gradient: gradients.info, desc: 'تسجيل وإدارة ملفات الطلاب والخطط الفردية', count: 'students' },
-  { id: 'programs', label: 'إدارة البرامج', icon: <ProgramIcon sx={{ fontSize: 28 }} />, path: '/montessori/programs', gradient: gradients.success, desc: 'البرامج التعليمية والحصص والجداول', count: 'programs' },
-  { id: 'sessions', label: 'الجلسات والتقييمات', icon: <SessionIcon sx={{ fontSize: 28 }} />, path: '/montessori/sessions', gradient: gradients.warning, desc: 'تسجيل الحضور وتقييم الأداء اليومي', count: 'sessions' },
-  { id: 'team', label: 'الفريق وأولياء الأمور', icon: <TeamIcon sx={{ fontSize: 28 }} />, path: '/montessori/team', gradient: gradients.primary, desc: 'إدارة المعلمين والأخصائيين والتواصل', count: 'team' },
+  {
+    id: 'students',
+    label: 'إدارة الطلاب',
+    icon: <ChildIcon sx={{ fontSize: 28 }} />,
+    path: '/montessori/students',
+    gradient: gradients.info,
+    desc: 'تسجيل وإدارة ملفات الطلاب والخطط الفردية',
+    count: 'students',
+  },
+  {
+    id: 'programs',
+    label: 'إدارة البرامج',
+    icon: <ProgramIcon sx={{ fontSize: 28 }} />,
+    path: '/montessori/programs',
+    gradient: gradients.success,
+    desc: 'البرامج التعليمية والحصص والجداول',
+    count: 'programs',
+  },
+  {
+    id: 'sessions',
+    label: 'الجلسات والتقييمات',
+    icon: <SessionIcon sx={{ fontSize: 28 }} />,
+    path: '/montessori/sessions',
+    gradient: gradients.warning,
+    desc: 'تسجيل الحضور وتقييم الأداء اليومي',
+    count: 'sessions',
+  },
+  {
+    id: 'team',
+    label: 'الفريق وأولياء الأمور',
+    icon: <TeamIcon sx={{ fontSize: 28 }} />,
+    path: '/montessori/team',
+    gradient: gradients.primary,
+    desc: 'إدارة المعلمين والأخصائيين والتواصل',
+    count: 'team',
+  },
 ];
 
 /* ══════════════════════════════════════════════════════════════════ */
@@ -223,8 +419,15 @@ const MontessoriDashboard = () => {
   const isDark = theme.palette.mode === 'dark';
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState({
-    programs: [], students: [], sessions: [], evaluations: [],
-    plans: [], activities: [], team: [], parents: [], reports: [],
+    programs: [],
+    students: [],
+    sessions: [],
+    evaluations: [],
+    plans: [],
+    activities: [],
+    team: [],
+    parents: [],
+    reports: [],
   });
 
   /* ── Data loading ── */
@@ -242,7 +445,17 @@ const MontessoriDashboard = () => {
         montessoriService.getParents(),
         montessoriService.getReports(),
       ]);
-      const keys = ['programs', 'students', 'sessions', 'evaluations', 'plans', 'activities', 'team', 'parents', 'reports'];
+      const keys = [
+        'programs',
+        'students',
+        'sessions',
+        'evaluations',
+        'plans',
+        'activities',
+        'team',
+        'parents',
+        'reports',
+      ];
       const parsed = {};
       results.forEach((r, i) => {
         parsed[keys[i]] =
@@ -272,35 +485,48 @@ const MontessoriDashboard = () => {
   const team = arr(data.team);
   const parents = arr(data.parents);
 
-  const activePrograms = programs.filter((p) => p.status === 'active').length;
+  const activePrograms = programs.filter(p => p.status === 'active').length;
   const totalCapacity = programs.reduce((s, p) => s + (p.capacity || 0), 0);
   const totalEnrolled = programs.reduce((s, p) => s + (p.enrolled || 0), 0);
-  const attendanceRate = sessions.length > 0 ? Math.round((sessions.filter((s) => s.attendance).length / sessions.length) * 100) : 0;
-  const allGoals = plans.flatMap((p) => p.goals || []);
-  const achievedGoals = allGoals.filter((g) => g.achieved).length;
+  const attendanceRate =
+    sessions.length > 0
+      ? Math.round((sessions.filter(s => s.attendance).length / sessions.length) * 100)
+      : 0;
+  const allGoals = plans.flatMap(p => p.goals || []);
+  const achievedGoals = allGoals.filter(g => g.achieved).length;
   const goalRate = allGoals.length > 0 ? Math.round((achievedGoals / allGoals.length) * 100) : 0;
   const capacityRate = totalCapacity > 0 ? Math.round((totalEnrolled / totalCapacity) * 100) : 0;
-  const goodEvals = evaluations.filter((e) => e.level === 'ممتاز' || e.level === 'جيد').length;
-  const evalQuality = evaluations.length > 0 ? Math.round((goodEvals / evaluations.length) * 100) : 0;
-  const countsMap = { students: students.length, programs: programs.length, sessions: sessions.length, team: team.length };
+  const goodEvals = evaluations.filter(e => e.level === 'ممتاز' || e.level === 'جيد').length;
+  const evalQuality =
+    evaluations.length > 0 ? Math.round((goodEvals / evaluations.length) * 100) : 0;
+  const countsMap = {
+    students: students.length,
+    programs: programs.length,
+    sessions: sessions.length,
+    team: team.length,
+  };
 
   /* ── Chart data ── */
   const disabilityDist = (() => {
     const map = {};
-    students.forEach((s) => (s.disabilityTypes || []).forEach((d) => { map[d] = (map[d] || 0) + 1; }));
+    students.forEach(s =>
+      (s.disabilityTypes || []).forEach(d => {
+        map[d] = (map[d] || 0) + 1;
+      })
+    );
     return Object.entries(map).map(([name, value]) => ({ name, value }));
   })();
 
   const evalByLevel = [
-    { name: 'ضعيف', value: evaluations.filter((e) => e.level === 'ضعيف').length, fill: '#ef5350' },
-    { name: 'متوسط', value: evaluations.filter((e) => e.level === 'متوسط').length, fill: '#ff9800' },
-    { name: 'جيد', value: evaluations.filter((e) => e.level === 'جيد').length, fill: '#66bb6a' },
-    { name: 'ممتاز', value: evaluations.filter((e) => e.level === 'ممتاز').length, fill: '#42a5f5' },
+    { name: 'ضعيف', value: evaluations.filter(e => e.level === 'ضعيف').length, fill: '#ef5350' },
+    { name: 'متوسط', value: evaluations.filter(e => e.level === 'متوسط').length, fill: '#ff9800' },
+    { name: 'جيد', value: evaluations.filter(e => e.level === 'جيد').length, fill: '#66bb6a' },
+    { name: 'ممتاز', value: evaluations.filter(e => e.level === 'ممتاز').length, fill: '#42a5f5' },
   ];
 
   const goalByArea = (() => {
     const map = {};
-    allGoals.forEach((g) => {
+    allGoals.forEach(g => {
       if (!map[g.area]) map[g.area] = { area: g.area, achieved: 0, pending: 0 };
       g.achieved ? map[g.area].achieved++ : map[g.area].pending++;
     });
@@ -332,27 +558,58 @@ const MontessoriDashboard = () => {
   return (
     <DashboardErrorBoundary>
       <Box sx={{ minHeight: '100vh', bgcolor: isDark ? 'background.default' : '#f8f9fc' }}>
-
         {/* ═══ Gradient Header ═══ */}
         <Box
           sx={{
-            background: gradients.primary, py: 4, px: 3, mb: -4,
-            borderRadius: '0 0 24px 24px', position: 'relative', overflow: 'hidden',
+            background: gradients.primary,
+            py: 4,
+            px: 3,
+            mb: -4,
+            borderRadius: '0 0 24px 24px',
+            position: 'relative',
+            overflow: 'hidden',
             '&::after': {
-              content: '""', position: 'absolute', top: -60, right: -60,
-              width: 200, height: 200, borderRadius: '50%', background: 'rgba(255,255,255,0.08)',
+              content: '""',
+              position: 'absolute',
+              top: -60,
+              right: -60,
+              width: 200,
+              height: 200,
+              borderRadius: '50%',
+              background: 'rgba(255,255,255,0.08)',
             },
             '&::before': {
-              content: '""', position: 'absolute', bottom: -40, left: '30%',
-              width: 160, height: 160, borderRadius: '50%', background: 'rgba(255,255,255,0.05)',
+              content: '""',
+              position: 'absolute',
+              bottom: -40,
+              left: '30%',
+              width: 160,
+              height: 160,
+              borderRadius: '50%',
+              background: 'rgba(255,255,255,0.05)',
             },
           }}
         >
           <Container maxWidth="xl">
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1 }}>
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                position: 'relative',
+                zIndex: 1,
+              }}
+            >
               <Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
-                  <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)', width: 48, height: 48, backdropFilter: 'blur(4px)' }}>
+                  <Avatar
+                    sx={{
+                      bgcolor: 'rgba(255,255,255,0.2)',
+                      width: 48,
+                      height: 48,
+                      backdropFilter: 'blur(4px)',
+                    }}
+                  >
                     <AutoAwesomeIcon sx={{ fontSize: 28 }} />
                   </Avatar>
                   <Typography variant="h4" fontWeight={800} color="#fff">
@@ -365,17 +622,39 @@ const MontessoriDashboard = () => {
               </Box>
               <Stack direction="row" spacing={1}>
                 <Tooltip title="تصدير التقرير">
-                  <IconButton onClick={handleExport} sx={{ color: '#fff', bgcolor: 'rgba(255,255,255,0.15)', '&:hover': { bgcolor: 'rgba(255,255,255,0.25)' } }}>
+                  <IconButton
+                    onClick={handleExport}
+                    sx={{
+                      color: '#fff',
+                      bgcolor: 'rgba(255,255,255,0.15)',
+                      '&:hover': { bgcolor: 'rgba(255,255,255,0.25)' },
+                    }}
+                  >
                     <DownloadIcon />
                   </IconButton>
                 </Tooltip>
                 <Tooltip title="طباعة">
-                  <IconButton onClick={() => window.print()} sx={{ color: '#fff', bgcolor: 'rgba(255,255,255,0.15)', '&:hover': { bgcolor: 'rgba(255,255,255,0.25)' } }}>
+                  <IconButton
+                    onClick={() => window.print()}
+                    sx={{
+                      color: '#fff',
+                      bgcolor: 'rgba(255,255,255,0.15)',
+                      '&:hover': { bgcolor: 'rgba(255,255,255,0.25)' },
+                    }}
+                  >
                     <PrintIcon />
                   </IconButton>
                 </Tooltip>
                 <Tooltip title="تحديث البيانات">
-                  <IconButton onClick={loadData} disabled={loading} sx={{ color: '#fff', bgcolor: 'rgba(255,255,255,0.15)', '&:hover': { bgcolor: 'rgba(255,255,255,0.25)' } }}>
+                  <IconButton
+                    onClick={loadData}
+                    disabled={loading}
+                    sx={{
+                      color: '#fff',
+                      bgcolor: 'rgba(255,255,255,0.15)',
+                      '&:hover': { bgcolor: 'rgba(255,255,255,0.25)' },
+                    }}
+                  >
                     <RefreshIcon />
                   </IconButton>
                 </Tooltip>
@@ -390,25 +669,70 @@ const MontessoriDashboard = () => {
           {/* ═══ KPI Row ═══ */}
           <Grid container spacing={2.5} sx={{ mb: 4 }}>
             {[
-              { title: 'إجمالي الطلاب', value: students.length, icon: <ChildIcon />, gradient: gradients.info, subtitle: `${students.filter((s) => s.gender === 'ذكر').length} ذكور • ${students.filter((s) => s.gender === 'أنثى').length} إناث` },
-              { title: 'البرامج النشطة', value: activePrograms, icon: <ProgramIcon />, gradient: gradients.success, subtitle: `${programs.length} إجمالي • ${capacityRate}% استيعاب` },
-              { title: 'الجلسات المنعقدة', value: sessions.length, icon: <SessionIcon />, gradient: gradients.warning, subtitle: `الحضور ${attendanceRate}%` },
-              { title: 'التقييمات', value: evaluations.length, icon: <EvalIcon />, gradient: gradients.assessmentPurple, subtitle: `${goodEvals} جيد/ممتاز` },
-              { title: 'الخطط الفردية', value: plans.length, icon: <PlanIcon />, gradient: gradients.ocean, subtitle: `${allGoals.length} هدف — ${goalRate}% محقق` },
-              { title: 'فريق العمل', value: team.length, icon: <TeamIcon />, gradient: gradients.fire, subtitle: `${parents.length} ولي أمر` },
+              {
+                title: 'إجمالي الطلاب',
+                value: students.length,
+                icon: <ChildIcon />,
+                gradient: gradients.info,
+                subtitle: `${students.filter(s => s.gender === 'ذكر').length} ذكور • ${students.filter(s => s.gender === 'أنثى').length} إناث`,
+              },
+              {
+                title: 'البرامج النشطة',
+                value: activePrograms,
+                icon: <ProgramIcon />,
+                gradient: gradients.success,
+                subtitle: `${programs.length} إجمالي • ${capacityRate}% استيعاب`,
+              },
+              {
+                title: 'الجلسات المنعقدة',
+                value: sessions.length,
+                icon: <SessionIcon />,
+                gradient: gradients.warning,
+                subtitle: `الحضور ${attendanceRate}%`,
+              },
+              {
+                title: 'التقييمات',
+                value: evaluations.length,
+                icon: <EvalIcon />,
+                gradient: gradients.assessmentPurple,
+                subtitle: `${goodEvals} جيد/ممتاز`,
+              },
+              {
+                title: 'الخطط الفردية',
+                value: plans.length,
+                icon: <PlanIcon />,
+                gradient: gradients.ocean,
+                subtitle: `${allGoals.length} هدف — ${goalRate}% محقق`,
+              },
+              {
+                title: 'فريق العمل',
+                value: team.length,
+                icon: <TeamIcon />,
+                gradient: gradients.fire,
+                subtitle: `${parents.length} ولي أمر`,
+              },
             ].map((kpi, i) => (
               <Grid item xs={6} sm={4} md={2} key={i}>
-                {loading
-                  ? <Skeleton variant="rounded" height={130} sx={{ borderRadius: 3 }} />
-                  : <AnimatedKPI {...kpi} delay={i} />
-                }
+                {loading ? (
+                  <Skeleton variant="rounded" height={130} sx={{ borderRadius: 3 }} />
+                ) : (
+                  <AnimatedKPI {...kpi} delay={i} />
+                )}
               </Grid>
             ))}
           </Grid>
 
           {/* ═══ Progress Rings ═══ */}
-          <Paper elevation={0} sx={{ p: 3, mb: 4, borderRadius: 3, border: '1px solid', borderColor: 'divider' }}>
-            <Typography variant="h6" fontWeight={700} gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Paper
+            elevation={0}
+            sx={{ p: 3, mb: 4, borderRadius: 3, border: '1px solid', borderColor: 'divider' }}
+          >
+            <Typography
+              variant="h6"
+              fontWeight={700}
+              gutterBottom
+              sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+            >
               <InsightsIcon color="primary" /> مؤشرات الأداء الرئيسية
             </Typography>
             <Grid container spacing={3} justifyContent="center" sx={{ mt: 1 }}>
@@ -419,7 +743,11 @@ const MontessoriDashboard = () => {
                 { value: evalQuality, label: 'جودة التقييمات', color: statusColors.purple },
               ].map((ring, i) => (
                 <Grid item xs={6} sm={3} key={i} sx={{ textAlign: 'center' }}>
-                  <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.3 + i * 0.15, type: 'spring', stiffness: 150 }}>
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: 0.3 + i * 0.15, type: 'spring', stiffness: 150 }}
+                  >
                     <ProgressRing {...ring} size={90} />
                   </motion.div>
                 </Grid>
@@ -428,40 +756,92 @@ const MontessoriDashboard = () => {
           </Paper>
 
           {/* ═══ Navigation Cards ═══ */}
-          <Typography variant="h6" fontWeight={700} sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Typography
+            variant="h6"
+            fontWeight={700}
+            sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}
+          >
             <ArrowIcon color="primary" /> الأقسام الرئيسية
           </Typography>
           <Grid container spacing={2.5} sx={{ mb: 4 }}>
             {NAV_CARDS.map((card, i) => (
               <Grid item xs={12} sm={6} md={3} key={card.id}>
-                <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.15 + i * 0.12 }}>
+                <motion.div
+                  initial={{ opacity: 0, x: -30 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.15 + i * 0.12 }}
+                >
                   <Card
                     elevation={0}
                     sx={{
-                      height: '100%', background: card.gradient, color: '#fff',
-                      borderRadius: 3, cursor: 'pointer', position: 'relative', overflow: 'hidden',
+                      height: '100%',
+                      background: card.gradient,
+                      color: '#fff',
+                      borderRadius: 3,
+                      cursor: 'pointer',
+                      position: 'relative',
+                      overflow: 'hidden',
                       transition: 'all 0.3s cubic-bezier(0.4,0,0.2,1)',
-                      '&:hover': { transform: 'translateY(-6px)', boxShadow: '0 12px 40px rgba(0,0,0,0.2)' },
+                      '&:hover': {
+                        transform: 'translateY(-6px)',
+                        boxShadow: '0 12px 40px rgba(0,0,0,0.2)',
+                      },
                       '&::after': {
-                        content: '""', position: 'absolute', top: -20, right: -20,
-                        width: 90, height: 90, borderRadius: '50%', background: 'rgba(255,255,255,0.1)',
+                        content: '""',
+                        position: 'absolute',
+                        top: -20,
+                        right: -20,
+                        width: 90,
+                        height: 90,
+                        borderRadius: '50%',
+                        background: 'rgba(255,255,255,0.1)',
                       },
                     }}
                   >
-                    <CardActionArea onClick={() => navigate(card.path)} sx={{ p: 2.5, height: '100%' }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, position: 'relative', zIndex: 1 }}>
-                        <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)', width: 52, height: 52, backdropFilter: 'blur(4px)' }}>
+                    <CardActionArea
+                      onClick={() => navigate(card.path)}
+                      sx={{ p: 2.5, height: '100%' }}
+                    >
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 2,
+                          position: 'relative',
+                          zIndex: 1,
+                        }}
+                      >
+                        <Avatar
+                          sx={{
+                            bgcolor: 'rgba(255,255,255,0.2)',
+                            width: 52,
+                            height: 52,
+                            backdropFilter: 'blur(4px)',
+                          }}
+                        >
                           {card.icon}
                         </Avatar>
                         <Box sx={{ flex: 1 }}>
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <Typography variant="subtitle1" fontWeight={700}>{card.label}</Typography>
+                            <Typography variant="subtitle1" fontWeight={700}>
+                              {card.label}
+                            </Typography>
                             <Badge
-                              badgeContent={countsMap[card.count] || 0} color="error"
-                              sx={{ '& .MuiBadge-badge': { bgcolor: 'rgba(255,255,255,0.3)', color: '#fff', fontWeight: 700 } }}
+                              badgeContent={countsMap[card.count] || 0}
+                              color="error"
+                              sx={{
+                                '& .MuiBadge-badge': {
+                                  bgcolor: 'rgba(255,255,255,0.3)',
+                                  color: '#fff',
+                                  fontWeight: 700,
+                                },
+                              }}
                             />
                           </Box>
-                          <Typography variant="caption" sx={{ opacity: 0.85, display: 'block', mt: 0.3 }}>
+                          <Typography
+                            variant="caption"
+                            sx={{ opacity: 0.85, display: 'block', mt: 0.3 }}
+                          >
                             {card.desc}
                           </Typography>
                         </Box>
@@ -478,7 +858,16 @@ const MontessoriDashboard = () => {
           <Grid container spacing={3} sx={{ mb: 4 }}>
             {/* Disability Distribution */}
             <Grid item xs={12} md={4}>
-              <Paper elevation={0} sx={{ p: 2.5, height: 370, borderRadius: 3, border: '1px solid', borderColor: 'divider' }}>
+              <Paper
+                elevation={0}
+                sx={{
+                  p: 2.5,
+                  height: 370,
+                  borderRadius: 3,
+                  border: '1px solid',
+                  borderColor: 'divider',
+                }}
+              >
                 <Typography variant="subtitle1" fontWeight={700} gutterBottom>
                   توزيع أنواع الإعاقة
                 </Typography>
@@ -489,15 +878,36 @@ const MontessoriDashboard = () => {
                     <PieChart>
                       <defs>
                         {disabilityDist.map((_, idx) => (
-                          <linearGradient key={idx} id={`pieGrad${idx}`} x1="0" y1="0" x2="1" y2="1">
-                            <stop offset="0%" stopColor={CHART_COLORS[idx % CHART_COLORS.length]} stopOpacity={1} />
-                            <stop offset="100%" stopColor={CHART_COLORS[idx % CHART_COLORS.length]} stopOpacity={0.65} />
+                          <linearGradient
+                            key={idx}
+                            id={`pieGrad${idx}`}
+                            x1="0"
+                            y1="0"
+                            x2="1"
+                            y2="1"
+                          >
+                            <stop
+                              offset="0%"
+                              stopColor={CHART_COLORS[idx % CHART_COLORS.length]}
+                              stopOpacity={1}
+                            />
+                            <stop
+                              offset="100%"
+                              stopColor={CHART_COLORS[idx % CHART_COLORS.length]}
+                              stopOpacity={0.65}
+                            />
                           </linearGradient>
                         ))}
                       </defs>
                       <Pie
-                        data={disabilityDist} cx="50%" cy="45%" outerRadius={85} innerRadius={45}
-                        dataKey="value" paddingAngle={3} cornerRadius={4}
+                        data={disabilityDist}
+                        cx="50%"
+                        cy="45%"
+                        outerRadius={85}
+                        innerRadius={45}
+                        dataKey="value"
+                        paddingAngle={3}
+                        cornerRadius={4}
                         label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                       >
                         {disabilityDist.map((_, idx) => (
@@ -514,7 +924,16 @@ const MontessoriDashboard = () => {
 
             {/* Evaluation Levels */}
             <Grid item xs={12} md={4}>
-              <Paper elevation={0} sx={{ p: 2.5, height: 370, borderRadius: 3, border: '1px solid', borderColor: 'divider' }}>
+              <Paper
+                elevation={0}
+                sx={{
+                  p: 2.5,
+                  height: 370,
+                  borderRadius: 3,
+                  border: '1px solid',
+                  borderColor: 'divider',
+                }}
+              >
                 <Typography variant="subtitle1" fontWeight={700} gutterBottom>
                   مستويات التقييم
                 </Typography>
@@ -522,7 +941,12 @@ const MontessoriDashboard = () => {
                   <BarChart data={evalByLevel} layout="vertical" barSize={18}>
                     <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#333' : '#eee'} />
                     <XAxis type="number" tick={{ fontSize: 11 }} />
-                    <YAxis dataKey="name" type="category" width={55} tick={{ fontSize: 12, fontWeight: 600 }} />
+                    <YAxis
+                      dataKey="name"
+                      type="category"
+                      width={55}
+                      tick={{ fontSize: 12, fontWeight: 600 }}
+                    />
                     <RTooltip content={<ChartTooltip />} />
                     <Bar dataKey="value" name="العدد" radius={[0, 8, 8, 0]}>
                       {evalByLevel.map((entry, idx) => (
@@ -536,7 +960,16 @@ const MontessoriDashboard = () => {
 
             {/* Goal Achievement */}
             <Grid item xs={12} md={4}>
-              <Paper elevation={0} sx={{ p: 2.5, height: 370, borderRadius: 3, border: '1px solid', borderColor: 'divider' }}>
+              <Paper
+                elevation={0}
+                sx={{
+                  p: 2.5,
+                  height: 370,
+                  borderRadius: 3,
+                  border: '1px solid',
+                  borderColor: 'divider',
+                }}
+              >
                 <Typography variant="subtitle1" fontWeight={700} gutterBottom>
                   تحقيق الأهداف حسب المجال
                 </Typography>
@@ -561,7 +994,13 @@ const MontessoriDashboard = () => {
                       <RTooltip content={<ChartTooltip />} />
                       <Legend wrapperStyle={{ fontSize: 12 }} />
                       <Bar dataKey="achieved" name="محقق" fill="url(#gAchieved)" stackId="a" />
-                      <Bar dataKey="pending" name="قيد التنفيذ" fill="url(#gPending)" stackId="a" radius={[6, 6, 0, 0]} />
+                      <Bar
+                        dataKey="pending"
+                        name="قيد التنفيذ"
+                        fill="url(#gPending)"
+                        stackId="a"
+                        radius={[6, 6, 0, 0]}
+                      />
                     </BarChart>
                   </ResponsiveContainer>
                 )}
@@ -573,12 +1012,30 @@ const MontessoriDashboard = () => {
           <Grid container spacing={3}>
             {/* Programs List */}
             <Grid item xs={12} md={7}>
-              <Paper elevation={0} sx={{ p: 2.5, borderRadius: 3, border: '1px solid', borderColor: 'divider' }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                  <Typography variant="subtitle1" fontWeight={700} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Paper
+                elevation={0}
+                sx={{ p: 2.5, borderRadius: 3, border: '1px solid', borderColor: 'divider' }}
+              >
+                <Box
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    mb: 2,
+                  }}
+                >
+                  <Typography
+                    variant="subtitle1"
+                    fontWeight={700}
+                    sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+                  >
                     <ProgramIcon color="primary" fontSize="small" /> البرامج الحالية
                   </Typography>
-                  <Button size="small" endIcon={<ArrowIcon />} onClick={() => navigate('/montessori/programs')}>
+                  <Button
+                    size="small"
+                    endIcon={<ArrowIcon />}
+                    onClick={() => navigate('/montessori/programs')}
+                  >
                     عرض الكل
                   </Button>
                 </Box>
@@ -590,29 +1047,43 @@ const MontessoriDashboard = () => {
                       const pct = p.capacity ? Math.round((p.enrolled / p.capacity) * 100) : 0;
                       return (
                         <ListItem
-                          key={p._id || i} divider={i < Math.min(programs.length, 5) - 1}
+                          key={p._id || i}
+                          divider={i < Math.min(programs.length, 5) - 1}
                           sx={{ px: 0 }}
                           secondaryAction={
                             <Chip
-                              label={statusConfig[p.status]?.label || p.status} size="small"
-                              color={statusConfig[p.status]?.color || 'default'} variant="outlined"
+                              label={statusConfig[p.status]?.label || p.status}
+                              size="small"
+                              color={statusConfig[p.status]?.color || 'default'}
+                              variant="outlined"
                             />
                           }
                         >
                           <ListItemAvatar>
-                            <Avatar sx={{ bgcolor: alpha(CHART_COLORS[i % CHART_COLORS.length], 0.15), color: CHART_COLORS[i % CHART_COLORS.length] }}>
+                            <Avatar
+                              sx={{
+                                bgcolor: alpha(CHART_COLORS[i % CHART_COLORS.length], 0.15),
+                                color: CHART_COLORS[i % CHART_COLORS.length],
+                              }}
+                            >
                               <ProgramIcon />
                             </Avatar>
                           </ListItemAvatar>
                           <ListItemText
-                            primary={<Typography variant="body2" fontWeight={600}>{p.name}</Typography>}
+                            primary={
+                              <Typography variant="body2" fontWeight={600}>
+                                {p.name}
+                              </Typography>
+                            }
                             secondary={
                               <Box>
                                 <Typography variant="caption" color="text.secondary">
-                                  {p.ageGroup || '-'} • {p.instructor || '-'} • {p.enrolled || 0}/{p.capacity || 0}
+                                  {p.ageGroup || '-'} • {p.instructor || '-'} • {p.enrolled || 0}/
+                                  {p.capacity || 0}
                                 </Typography>
                                 <LinearProgress
-                                  variant="determinate" value={Math.min(pct, 100)}
+                                  variant="determinate"
+                                  value={Math.min(pct, 100)}
                                   color={pct >= 90 ? 'error' : pct >= 70 ? 'warning' : 'success'}
                                   sx={{ mt: 0.5, height: 4, borderRadius: 2 }}
                                 />
@@ -629,12 +1100,30 @@ const MontessoriDashboard = () => {
 
             {/* Recent Evaluations */}
             <Grid item xs={12} md={5}>
-              <Paper elevation={0} sx={{ p: 2.5, borderRadius: 3, border: '1px solid', borderColor: 'divider' }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                  <Typography variant="subtitle1" fontWeight={700} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Paper
+                elevation={0}
+                sx={{ p: 2.5, borderRadius: 3, border: '1px solid', borderColor: 'divider' }}
+              >
+                <Box
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    mb: 2,
+                  }}
+                >
+                  <Typography
+                    variant="subtitle1"
+                    fontWeight={700}
+                    sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+                  >
                     <EvalIcon color="secondary" fontSize="small" /> آخر التقييمات
                   </Typography>
-                  <Button size="small" endIcon={<ArrowIcon />} onClick={() => navigate('/montessori/sessions')}>
+                  <Button
+                    size="small"
+                    endIcon={<ArrowIcon />}
+                    onClick={() => navigate('/montessori/sessions')}
+                  >
                     عرض الكل
                   </Button>
                 </Box>
@@ -643,21 +1132,39 @@ const MontessoriDashboard = () => {
                 ) : (
                   <List disablePadding>
                     {evaluations.slice(0, 6).map((ev, i) => (
-                      <ListItem key={ev._id || i} divider={i < Math.min(evaluations.length, 6) - 1} sx={{ px: 0 }}>
+                      <ListItem
+                        key={ev._id || i}
+                        divider={i < Math.min(evaluations.length, 6) - 1}
+                        sx={{ px: 0 }}
+                      >
                         <ListItemAvatar>
-                          <Avatar sx={{ bgcolor: alpha(levelColors[ev.level] || '#999', 0.15), color: levelColors[ev.level] || '#999', width: 38, height: 38 }}>
+                          <Avatar
+                            sx={{
+                              bgcolor: alpha(levelColors[ev.level] || '#999', 0.15),
+                              color: levelColors[ev.level] || '#999',
+                              width: 38,
+                              height: 38,
+                            }}
+                          >
                             <StarIcon fontSize="small" />
                           </Avatar>
                         </ListItemAvatar>
                         <ListItemText
-                          primary={<Typography variant="body2" fontWeight={600}>{ev.skill || ev.area}</Typography>}
+                          primary={
+                            <Typography variant="body2" fontWeight={600}>
+                              {ev.skill || ev.area}
+                            </Typography>
+                          }
                           secondary={`${ev.student?.fullName || '-'} • ${ev.area || '-'}`}
                         />
                         <Chip
-                          label={ev.level} size="small"
+                          label={ev.level}
+                          size="small"
                           sx={{
                             bgcolor: alpha(levelColors[ev.level] || '#ccc', 0.15),
-                            color: levelColors[ev.level] || '#666', fontWeight: 700, minWidth: 52,
+                            color: levelColors[ev.level] || '#666',
+                            fontWeight: 700,
+                            minWidth: 52,
                           }}
                         />
                       </ListItem>

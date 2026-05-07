@@ -6,13 +6,42 @@
  */
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Box, Typography, Card, CardContent, Grid, Button, Table, TableBody,
-  TableCell, TableContainer, TableHead, TableRow, Paper, Chip, TextField,
-  Dialog, DialogTitle, DialogContent, DialogActions, Alert, CircularProgress,
-  Tabs, Tab, IconButton, Tooltip, MenuItem, LinearProgress,
+  Box,
+  Typography,
+  Card,
+  CardContent,
+  Grid,
+  Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Chip,
+  TextField,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Alert,
+  CircularProgress,
+  Tabs,
+  Tab,
+  IconButton,
+  Tooltip,
+  MenuItem,
+  LinearProgress,
 } from '@mui/material';
 import {
-  ChildCare as ChildIcon, Assessment as ScreenIcon, Assignment as IFSPIcon, SwapHoriz as ReferralIcon, Refresh as RefreshIcon, Add as AddIcon, Visibility as ViewIcon,
+  ChildCare as ChildIcon,
+  Assessment as ScreenIcon,
+  Assignment as IFSPIcon,
+  SwapHoriz as ReferralIcon,
+  Refresh as RefreshIcon,
+  Add as AddIcon,
+  Visibility as ViewIcon,
   Error as DelayIcon,
 } from '@mui/icons-material';
 import eisApi from '../../services/earlyIntervention.service';
@@ -37,8 +66,11 @@ const statusMap = {
   inconclusive: { label: 'غير حاسم', color: 'warning' },
 };
 const domainMap = {
-  cognitive: 'المعرفي', communication: 'التواصل', motor: 'الحركي',
-  social_emotional: 'الاجتماعي العاطفي', adaptive: 'التكيفي',
+  cognitive: 'المعرفي',
+  communication: 'التواصل',
+  motor: 'الحركي',
+  social_emotional: 'الاجتماعي العاطفي',
+  adaptive: 'التكيفي',
 };
 
 export default function EarlyInterventionDashboard() {
@@ -52,7 +84,14 @@ export default function EarlyInterventionDashboard() {
   const [referrals, setReferrals] = useState([]);
   // dialogs
   const [childDialog, setChildDialog] = useState(false);
-  const [childForm, setChildForm] = useState({ firstName: '', lastName: '', dateOfBirth: '', gender: 'male', disabilityType: '', referralSource: '' });
+  const [childForm, setChildForm] = useState({
+    firstName: '',
+    lastName: '',
+    dateOfBirth: '',
+    gender: 'male',
+    disabilityType: '',
+    referralSource: '',
+  });
   const [profileDialog, setProfileDialog] = useState(false);
   const [profile, setProfile] = useState(null);
 
@@ -68,10 +107,26 @@ export default function EarlyInterventionDashboard() {
         eisApi.getReferrals({ page: 1, limit: 50 }),
       ]);
       setDashboard(dashRes.status === 'fulfilled' ? dashRes.value?.data?.data : null);
-      setChildren(childRes.status === 'fulfilled' ? (childRes.value?.data?.data?.children || childRes.value?.data?.data || []) : []);
-      setScreenings(scrRes.status === 'fulfilled' ? (scrRes.value?.data?.data?.screenings || scrRes.value?.data?.data || []) : []);
-      setIFSPs(ifspRes.status === 'fulfilled' ? (ifspRes.value?.data?.data?.ifsps || ifspRes.value?.data?.data || []) : []);
-      setReferrals(refRes.status === 'fulfilled' ? (refRes.value?.data?.data?.referrals || refRes.value?.data?.data || []) : []);
+      setChildren(
+        childRes.status === 'fulfilled'
+          ? childRes.value?.data?.data?.children || childRes.value?.data?.data || []
+          : []
+      );
+      setScreenings(
+        scrRes.status === 'fulfilled'
+          ? scrRes.value?.data?.data?.screenings || scrRes.value?.data?.data || []
+          : []
+      );
+      setIFSPs(
+        ifspRes.status === 'fulfilled'
+          ? ifspRes.value?.data?.data?.ifsps || ifspRes.value?.data?.data || []
+          : []
+      );
+      setReferrals(
+        refRes.status === 'fulfilled'
+          ? refRes.value?.data?.data?.referrals || refRes.value?.data?.data || []
+          : []
+      );
     } catch (err) {
       setError(err.message);
     } finally {
@@ -79,23 +134,36 @@ export default function EarlyInterventionDashboard() {
     }
   }, []);
 
-  useEffect(() => { loadData(); }, [loadData]);
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const handleCreateChild = async () => {
     try {
       await eisApi.createChild(childForm);
       setChildDialog(false);
-      setChildForm({ firstName: '', lastName: '', dateOfBirth: '', gender: 'male', disabilityType: '', referralSource: '' });
+      setChildForm({
+        firstName: '',
+        lastName: '',
+        dateOfBirth: '',
+        gender: 'male',
+        disabilityType: '',
+        referralSource: '',
+      });
       loadData();
-    } catch { setError('فشل تسجيل الطفل'); }
+    } catch {
+      setError('فشل تسجيل الطفل');
+    }
   };
 
-  const openProfile = async (id) => {
+  const openProfile = async id => {
     try {
       const res = await eisApi.getChildProfile(id);
       setProfile(res?.data?.data || null);
       setProfileDialog(true);
-    } catch { setError('فشل تحميل الملف الشامل'); }
+    } catch {
+      setError('فشل تحميل الملف الشامل');
+    }
   };
 
   const KPI = ({ title, value, icon, color = 'primary.main' }) => (
@@ -103,47 +171,112 @@ export default function EarlyInterventionDashboard() {
       <CardContent>
         <Box display="flex" alignItems="center" gap={1} mb={1}>
           <Box sx={{ color }}>{icon}</Box>
-          <Typography variant="subtitle2" color="text.secondary">{title}</Typography>
+          <Typography variant="subtitle2" color="text.secondary">
+            {title}
+          </Typography>
         </Box>
-        <Typography variant="h4" fontWeight="bold">{value ?? '—'}</Typography>
+        <Typography variant="h4" fontWeight="bold">
+          {value ?? '—'}
+        </Typography>
       </CardContent>
     </Card>
   );
 
-  const getChip = (status) => {
+  const getChip = status => {
     const s = statusMap[status] || { label: status || '—', color: 'default' };
     return <Chip label={s.label} color={s.color} size="small" />;
   };
 
-  if (loading) return <Box p={4} textAlign="center"><CircularProgress /><Typography mt={2}>جاري تحميل بيانات التدخل المبكر...</Typography></Box>;
+  if (loading)
+    return (
+      <Box p={4} textAlign="center">
+        <CircularProgress />
+        <Typography mt={2}>جاري تحميل بيانات التدخل المبكر...</Typography>
+      </Box>
+    );
 
   return (
     <Box p={3} dir="rtl">
       {/* Header */}
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
         <Box>
-          <Typography variant="h4" fontWeight="bold"><ChildIcon sx={{ mr: 1, verticalAlign: 'middle' }} />التدخل المبكر (0–3 سنوات)</Typography>
-          <Typography color="text.secondary">الفحص المبكر، المعالم التنموية، خطط IFSP، والإحالات</Typography>
+          <Typography variant="h4" fontWeight="bold">
+            <ChildIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
+            التدخل المبكر (0–3 سنوات)
+          </Typography>
+          <Typography color="text.secondary">
+            الفحص المبكر، المعالم التنموية، خطط IFSP، والإحالات
+          </Typography>
         </Box>
         <Box display="flex" gap={1}>
-          <Button variant="contained" startIcon={<AddIcon />} onClick={() => setChildDialog(true)}>تسجيل طفل</Button>
-          <Button variant="outlined" startIcon={<RefreshIcon />} onClick={loadData}>تحديث</Button>
+          <Button variant="contained" startIcon={<AddIcon />} onClick={() => setChildDialog(true)}>
+            تسجيل طفل
+          </Button>
+          <Button variant="outlined" startIcon={<RefreshIcon />} onClick={loadData}>
+            تحديث
+          </Button>
         </Box>
       </Box>
 
-      {error && <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>{error}</Alert>}
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
+          {error}
+        </Alert>
+      )}
 
       {/* KPIs */}
       <Grid container spacing={2} mb={3}>
-        <Grid item xs={6} md={2.4}><KPI title="الأطفال المسجلون" value={dashboard?.totalChildren || children.length} icon={<ChildIcon />} /></Grid>
-        <Grid item xs={6} md={2.4}><KPI title="الفحوصات" value={dashboard?.totalScreenings || screenings.length} icon={<ScreenIcon />} color="info.main" /></Grid>
-        <Grid item xs={6} md={2.4}><KPI title="خطط IFSP نشطة" value={dashboard?.activeIFSPs || ifsps.filter(p => p.status === 'active').length} icon={<IFSPIcon />} color="success.main" /></Grid>
-        <Grid item xs={6} md={2.4}><KPI title="الإحالات المعلقة" value={dashboard?.pendingReferrals || referrals.filter(r => r.status === 'pending').length} icon={<ReferralIcon />} color="warning.main" /></Grid>
-        <Grid item xs={6} md={2.4}><KPI title="تأخر تنموي" value={dashboard?.delayedChildren || '—'} icon={<DelayIcon />} color="error.main" /></Grid>
+        <Grid item xs={6} md={2.4}>
+          <KPI
+            title="الأطفال المسجلون"
+            value={dashboard?.totalChildren || children.length}
+            icon={<ChildIcon />}
+          />
+        </Grid>
+        <Grid item xs={6} md={2.4}>
+          <KPI
+            title="الفحوصات"
+            value={dashboard?.totalScreenings || screenings.length}
+            icon={<ScreenIcon />}
+            color="info.main"
+          />
+        </Grid>
+        <Grid item xs={6} md={2.4}>
+          <KPI
+            title="خطط IFSP نشطة"
+            value={dashboard?.activeIFSPs || ifsps.filter(p => p.status === 'active').length}
+            icon={<IFSPIcon />}
+            color="success.main"
+          />
+        </Grid>
+        <Grid item xs={6} md={2.4}>
+          <KPI
+            title="الإحالات المعلقة"
+            value={
+              dashboard?.pendingReferrals || referrals.filter(r => r.status === 'pending').length
+            }
+            icon={<ReferralIcon />}
+            color="warning.main"
+          />
+        </Grid>
+        <Grid item xs={6} md={2.4}>
+          <KPI
+            title="تأخر تنموي"
+            value={dashboard?.delayedChildren || '—'}
+            icon={<DelayIcon />}
+            color="error.main"
+          />
+        </Grid>
       </Grid>
 
       {/* Tabs */}
-      <Tabs value={tab} onChange={(_, v) => setTab(v)} variant="scrollable" scrollButtons="auto" sx={{ mb: 1 }}>
+      <Tabs
+        value={tab}
+        onChange={(_, v) => setTab(v)}
+        variant="scrollable"
+        scrollButtons="auto"
+        sx={{ mb: 1 }}
+      >
         <Tab label="الأطفال" />
         <Tab label="الفحوصات" />
         <Tab label="خطط IFSP" />
@@ -154,25 +287,45 @@ export default function EarlyInterventionDashboard() {
       <TabPanel value={tab} index={0}>
         <TableContainer component={Paper} variant="outlined">
           <Table size="small">
-            <TableHead><TableRow>
-              <TableCell>الاسم</TableCell><TableCell>تاريخ الميلاد</TableCell><TableCell>الجنس</TableCell><TableCell>نوع الإعاقة</TableCell><TableCell>الحالة</TableCell><TableCell>الأهلية</TableCell><TableCell>إجراء</TableCell>
-            </TableRow></TableHead>
+            <TableHead>
+              <TableRow>
+                <TableCell>الاسم</TableCell>
+                <TableCell>تاريخ الميلاد</TableCell>
+                <TableCell>الجنس</TableCell>
+                <TableCell>نوع الإعاقة</TableCell>
+                <TableCell>الحالة</TableCell>
+                <TableCell>الأهلية</TableCell>
+                <TableCell>إجراء</TableCell>
+              </TableRow>
+            </TableHead>
             <TableBody>
               {children.length === 0 ? (
-                <TableRow><TableCell colSpan={7} align="center">لا يوجد أطفال مسجلون</TableCell></TableRow>
-              ) : children.map((c) => (
-                <TableRow key={c._id || c.id}>
-                  <TableCell>{`${c.firstName || ''} ${c.lastName || ''}`}</TableCell>
-                  <TableCell>{c.dateOfBirth ? new Date(c.dateOfBirth).toLocaleDateString('ar-SA') : '—'}</TableCell>
-                  <TableCell>{genderMap[c.gender] || c.gender || '—'}</TableCell>
-                  <TableCell>{c.disabilityType || '—'}</TableCell>
-                  <TableCell>{getChip(c.status)}</TableCell>
-                  <TableCell>{getChip(c.eligibilityStatus)}</TableCell>
-                  <TableCell>
-                    <Tooltip title="عرض الملف الشامل"><IconButton size="small" onClick={() => openProfile(c._id || c.id)}><ViewIcon fontSize="small" /></IconButton></Tooltip>
+                <TableRow>
+                  <TableCell colSpan={7} align="center">
+                    لا يوجد أطفال مسجلون
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : (
+                children.map(c => (
+                  <TableRow key={c._id || c.id}>
+                    <TableCell>{`${c.firstName || ''} ${c.lastName || ''}`}</TableCell>
+                    <TableCell>
+                      {c.dateOfBirth ? new Date(c.dateOfBirth).toLocaleDateString('ar-SA') : '—'}
+                    </TableCell>
+                    <TableCell>{genderMap[c.gender] || c.gender || '—'}</TableCell>
+                    <TableCell>{c.disabilityType || '—'}</TableCell>
+                    <TableCell>{getChip(c.status)}</TableCell>
+                    <TableCell>{getChip(c.eligibilityStatus)}</TableCell>
+                    <TableCell>
+                      <Tooltip title="عرض الملف الشامل">
+                        <IconButton size="small" onClick={() => openProfile(c._id || c.id)}>
+                          <ViewIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </TableContainer>
@@ -182,21 +335,37 @@ export default function EarlyInterventionDashboard() {
       <TabPanel value={tab} index={1}>
         <TableContainer component={Paper} variant="outlined">
           <Table size="small">
-            <TableHead><TableRow>
-              <TableCell>الطفل</TableCell><TableCell>نوع الفحص</TableCell><TableCell>التاريخ</TableCell><TableCell>النتيجة</TableCell><TableCell>الحالة</TableCell>
-            </TableRow></TableHead>
+            <TableHead>
+              <TableRow>
+                <TableCell>الطفل</TableCell>
+                <TableCell>نوع الفحص</TableCell>
+                <TableCell>التاريخ</TableCell>
+                <TableCell>النتيجة</TableCell>
+                <TableCell>الحالة</TableCell>
+              </TableRow>
+            </TableHead>
             <TableBody>
               {screenings.length === 0 ? (
-                <TableRow><TableCell colSpan={5} align="center">لا توجد فحوصات</TableCell></TableRow>
-              ) : screenings.map((s) => (
-                <TableRow key={s._id || s.id}>
-                  <TableCell>{s.childName || s.child?.firstName || '—'}</TableCell>
-                  <TableCell>{s.screeningType || '—'}</TableCell>
-                  <TableCell>{s.screeningDate ? new Date(s.screeningDate).toLocaleDateString('ar-SA') : '—'}</TableCell>
-                  <TableCell>{getChip(s.overallResult)}</TableCell>
-                  <TableCell>{getChip(s.status)}</TableCell>
+                <TableRow>
+                  <TableCell colSpan={5} align="center">
+                    لا توجد فحوصات
+                  </TableCell>
                 </TableRow>
-              ))}
+              ) : (
+                screenings.map(s => (
+                  <TableRow key={s._id || s.id}>
+                    <TableCell>{s.childName || s.child?.firstName || '—'}</TableCell>
+                    <TableCell>{s.screeningType || '—'}</TableCell>
+                    <TableCell>
+                      {s.screeningDate
+                        ? new Date(s.screeningDate).toLocaleDateString('ar-SA')
+                        : '—'}
+                    </TableCell>
+                    <TableCell>{getChip(s.overallResult)}</TableCell>
+                    <TableCell>{getChip(s.status)}</TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </TableContainer>
@@ -206,22 +375,39 @@ export default function EarlyInterventionDashboard() {
       <TabPanel value={tab} index={2}>
         <TableContainer component={Paper} variant="outlined">
           <Table size="small">
-            <TableHead><TableRow>
-              <TableCell>الطفل</TableCell><TableCell>نوع الخطة</TableCell><TableCell>المنسق</TableCell><TableCell>تاريخ البدء</TableCell><TableCell>الأهداف</TableCell><TableCell>الحالة</TableCell>
-            </TableRow></TableHead>
+            <TableHead>
+              <TableRow>
+                <TableCell>الطفل</TableCell>
+                <TableCell>نوع الخطة</TableCell>
+                <TableCell>المنسق</TableCell>
+                <TableCell>تاريخ البدء</TableCell>
+                <TableCell>الأهداف</TableCell>
+                <TableCell>الحالة</TableCell>
+              </TableRow>
+            </TableHead>
             <TableBody>
               {ifsps.length === 0 ? (
-                <TableRow><TableCell colSpan={6} align="center">لا توجد خطط IFSP</TableCell></TableRow>
-              ) : ifsps.map((p) => (
-                <TableRow key={p._id || p.id}>
-                  <TableCell>{p.childName || p.child?.firstName || '—'}</TableCell>
-                  <TableCell>{p.planType || '—'}</TableCell>
-                  <TableCell>{p.serviceCoordinatorName || p.serviceCoordinator?.name || '—'}</TableCell>
-                  <TableCell>{p.startDate ? new Date(p.startDate).toLocaleDateString('ar-SA') : '—'}</TableCell>
-                  <TableCell>{p.goals?.length || 0}</TableCell>
-                  <TableCell>{getChip(p.status)}</TableCell>
+                <TableRow>
+                  <TableCell colSpan={6} align="center">
+                    لا توجد خطط IFSP
+                  </TableCell>
                 </TableRow>
-              ))}
+              ) : (
+                ifsps.map(p => (
+                  <TableRow key={p._id || p.id}>
+                    <TableCell>{p.childName || p.child?.firstName || '—'}</TableCell>
+                    <TableCell>{p.planType || '—'}</TableCell>
+                    <TableCell>
+                      {p.serviceCoordinatorName || p.serviceCoordinator?.name || '—'}
+                    </TableCell>
+                    <TableCell>
+                      {p.startDate ? new Date(p.startDate).toLocaleDateString('ar-SA') : '—'}
+                    </TableCell>
+                    <TableCell>{p.goals?.length || 0}</TableCell>
+                    <TableCell>{getChip(p.status)}</TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </TableContainer>
@@ -231,22 +417,51 @@ export default function EarlyInterventionDashboard() {
       <TabPanel value={tab} index={3}>
         <TableContainer component={Paper} variant="outlined">
           <Table size="small">
-            <TableHead><TableRow>
-              <TableCell>الطفل</TableCell><TableCell>الاتجاه</TableCell><TableCell>نوع المصدر</TableCell><TableCell>الاستعجال</TableCell><TableCell>الحالة</TableCell><TableCell>التاريخ</TableCell>
-            </TableRow></TableHead>
+            <TableHead>
+              <TableRow>
+                <TableCell>الطفل</TableCell>
+                <TableCell>الاتجاه</TableCell>
+                <TableCell>نوع المصدر</TableCell>
+                <TableCell>الاستعجال</TableCell>
+                <TableCell>الحالة</TableCell>
+                <TableCell>التاريخ</TableCell>
+              </TableRow>
+            </TableHead>
             <TableBody>
               {referrals.length === 0 ? (
-                <TableRow><TableCell colSpan={6} align="center">لا توجد إحالات</TableCell></TableRow>
-              ) : referrals.map((r) => (
-                <TableRow key={r._id || r.id}>
-                  <TableCell>{r.childName || r.child?.firstName || '—'}</TableCell>
-                  <TableCell>{r.referralDirection === 'incoming' ? 'واردة' : 'صادرة'}</TableCell>
-                  <TableCell>{r.sourceType || '—'}</TableCell>
-                  <TableCell><Chip label={r.urgency === 'high' ? 'عاجل' : r.urgency === 'medium' ? 'متوسط' : 'عادي'} color={r.urgency === 'high' ? 'error' : r.urgency === 'medium' ? 'warning' : 'default'} size="small" /></TableCell>
-                  <TableCell>{getChip(r.status)}</TableCell>
-                  <TableCell>{r.createdAt ? new Date(r.createdAt).toLocaleDateString('ar-SA') : '—'}</TableCell>
+                <TableRow>
+                  <TableCell colSpan={6} align="center">
+                    لا توجد إحالات
+                  </TableCell>
                 </TableRow>
-              ))}
+              ) : (
+                referrals.map(r => (
+                  <TableRow key={r._id || r.id}>
+                    <TableCell>{r.childName || r.child?.firstName || '—'}</TableCell>
+                    <TableCell>{r.referralDirection === 'incoming' ? 'واردة' : 'صادرة'}</TableCell>
+                    <TableCell>{r.sourceType || '—'}</TableCell>
+                    <TableCell>
+                      <Chip
+                        label={
+                          r.urgency === 'high' ? 'عاجل' : r.urgency === 'medium' ? 'متوسط' : 'عادي'
+                        }
+                        color={
+                          r.urgency === 'high'
+                            ? 'error'
+                            : r.urgency === 'medium'
+                              ? 'warning'
+                              : 'default'
+                        }
+                        size="small"
+                      />
+                    </TableCell>
+                    <TableCell>{getChip(r.status)}</TableCell>
+                    <TableCell>
+                      {r.createdAt ? new Date(r.createdAt).toLocaleDateString('ar-SA') : '—'}
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </TableContainer>
@@ -257,22 +472,67 @@ export default function EarlyInterventionDashboard() {
         <DialogTitle>تسجيل طفل جديد</DialogTitle>
         <DialogContent>
           <Grid container spacing={2} sx={{ mt: 1 }}>
-            <Grid item xs={6}><TextField fullWidth label="الاسم الأول" value={childForm.firstName} onChange={(e) => setChildForm({ ...childForm, firstName: e.target.value })} /></Grid>
-            <Grid item xs={6}><TextField fullWidth label="اسم العائلة" value={childForm.lastName} onChange={(e) => setChildForm({ ...childForm, lastName: e.target.value })} /></Grid>
-            <Grid item xs={6}><TextField fullWidth label="تاريخ الميلاد" type="date" InputLabelProps={{ shrink: true }} value={childForm.dateOfBirth} onChange={(e) => setChildForm({ ...childForm, dateOfBirth: e.target.value })} /></Grid>
             <Grid item xs={6}>
-              <TextField select fullWidth label="الجنس" value={childForm.gender} onChange={(e) => setChildForm({ ...childForm, gender: e.target.value })}>
+              <TextField
+                fullWidth
+                label="الاسم الأول"
+                value={childForm.firstName}
+                onChange={e => setChildForm({ ...childForm, firstName: e.target.value })}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <TextField
+                fullWidth
+                label="اسم العائلة"
+                value={childForm.lastName}
+                onChange={e => setChildForm({ ...childForm, lastName: e.target.value })}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <TextField
+                fullWidth
+                label="تاريخ الميلاد"
+                type="date"
+                InputLabelProps={{ shrink: true }}
+                value={childForm.dateOfBirth}
+                onChange={e => setChildForm({ ...childForm, dateOfBirth: e.target.value })}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <TextField
+                select
+                fullWidth
+                label="الجنس"
+                value={childForm.gender}
+                onChange={e => setChildForm({ ...childForm, gender: e.target.value })}
+              >
                 <MenuItem value="male">ذكر</MenuItem>
                 <MenuItem value="female">أنثى</MenuItem>
               </TextField>
             </Grid>
-            <Grid item xs={6}><TextField fullWidth label="نوع الإعاقة" value={childForm.disabilityType} onChange={(e) => setChildForm({ ...childForm, disabilityType: e.target.value })} /></Grid>
-            <Grid item xs={6}><TextField fullWidth label="مصدر الإحالة" value={childForm.referralSource} onChange={(e) => setChildForm({ ...childForm, referralSource: e.target.value })} /></Grid>
+            <Grid item xs={6}>
+              <TextField
+                fullWidth
+                label="نوع الإعاقة"
+                value={childForm.disabilityType}
+                onChange={e => setChildForm({ ...childForm, disabilityType: e.target.value })}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <TextField
+                fullWidth
+                label="مصدر الإحالة"
+                value={childForm.referralSource}
+                onChange={e => setChildForm({ ...childForm, referralSource: e.target.value })}
+              />
+            </Grid>
           </Grid>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setChildDialog(false)}>إلغاء</Button>
-          <Button variant="contained" onClick={handleCreateChild}>تسجيل</Button>
+          <Button variant="contained" onClick={handleCreateChild}>
+            تسجيل
+          </Button>
         </DialogActions>
       </Dialog>
 
@@ -282,47 +542,90 @@ export default function EarlyInterventionDashboard() {
         <DialogContent>
           {profile ? (
             <Box>
-              <Typography variant="h6">{profile.child?.firstName} {profile.child?.lastName}</Typography>
+              <Typography variant="h6">
+                {profile.child?.firstName} {profile.child?.lastName}
+              </Typography>
               <Grid container spacing={2} mt={1}>
-                <Grid item xs={4}><Typography variant="caption">تاريخ الميلاد</Typography><Typography>{profile.child?.dateOfBirth ? new Date(profile.child.dateOfBirth).toLocaleDateString('ar-SA') : '—'}</Typography></Grid>
-                <Grid item xs={4}><Typography variant="caption">الجنس</Typography><Typography>{genderMap[profile.child?.gender] || '—'}</Typography></Grid>
-                <Grid item xs={4}><Typography variant="caption">الحالة</Typography>{getChip(profile.child?.status)}</Grid>
+                <Grid item xs={4}>
+                  <Typography variant="caption">تاريخ الميلاد</Typography>
+                  <Typography>
+                    {profile.child?.dateOfBirth
+                      ? new Date(profile.child.dateOfBirth).toLocaleDateString('ar-SA')
+                      : '—'}
+                  </Typography>
+                </Grid>
+                <Grid item xs={4}>
+                  <Typography variant="caption">الجنس</Typography>
+                  <Typography>{genderMap[profile.child?.gender] || '—'}</Typography>
+                </Grid>
+                <Grid item xs={4}>
+                  <Typography variant="caption">الحالة</Typography>
+                  {getChip(profile.child?.status)}
+                </Grid>
               </Grid>
               {profile.milestones && profile.milestones.length > 0 && (
                 <Box mt={2}>
-                  <Typography variant="subtitle1" fontWeight="bold">المعالم التنموية ({profile.milestones.length})</Typography>
+                  <Typography variant="subtitle1" fontWeight="bold">
+                    المعالم التنموية ({profile.milestones.length})
+                  </Typography>
                   {Object.entries(
-                    profile.milestones.reduce((acc, m) => { (acc[m.domain] = acc[m.domain] || []).push(m); return acc; }, {})
+                    profile.milestones.reduce((acc, m) => {
+                      (acc[m.domain] = acc[m.domain] || []).push(m);
+                      return acc;
+                    }, {})
                   ).map(([domain, items]) => (
                     <Box key={domain} mt={1}>
-                      <Typography variant="subtitle2">{domainMap[domain] || domain} ({items.length})</Typography>
-                      <LinearProgress variant="determinate" value={items.filter(i => i.status === 'achieved').length / items.length * 100} sx={{ height: 8, borderRadius: 4 }} />
+                      <Typography variant="subtitle2">
+                        {domainMap[domain] || domain} ({items.length})
+                      </Typography>
+                      <LinearProgress
+                        variant="determinate"
+                        value={
+                          (items.filter(i => i.status === 'achieved').length / items.length) * 100
+                        }
+                        sx={{ height: 8, borderRadius: 4 }}
+                      />
                     </Box>
                   ))}
                 </Box>
               )}
               {profile.screenings && profile.screenings.length > 0 && (
                 <Box mt={2}>
-                  <Typography variant="subtitle1" fontWeight="bold">الفحوصات ({profile.screenings.length})</Typography>
+                  <Typography variant="subtitle1" fontWeight="bold">
+                    الفحوصات ({profile.screenings.length})
+                  </Typography>
                   {profile.screenings.map((s, i) => (
-                    <Chip key={i} label={`${s.screeningType || 'فحص'}: ${statusMap[s.overallResult]?.label || s.overallResult || '—'}`} size="small" sx={{ m: 0.5 }} />
+                    <Chip
+                      key={i}
+                      label={`${s.screeningType || 'فحص'}: ${statusMap[s.overallResult]?.label || s.overallResult || '—'}`}
+                      size="small"
+                      sx={{ m: 0.5 }}
+                    />
                   ))}
                 </Box>
               )}
               {profile.ifsps && profile.ifsps.length > 0 && (
                 <Box mt={2}>
-                  <Typography variant="subtitle1" fontWeight="bold">خطط IFSP ({profile.ifsps.length})</Typography>
+                  <Typography variant="subtitle1" fontWeight="bold">
+                    خطط IFSP ({profile.ifsps.length})
+                  </Typography>
                   {profile.ifsps.map((p, i) => (
                     <Box key={i} p={1} bgcolor="grey.50" borderRadius={1} mb={1}>
-                      <Typography variant="body2">{p.planType || '—'} — الأهداف: {p.goals?.length || 0} — {getChip(p.status)}</Typography>
+                      <Typography variant="body2">
+                        {p.planType || '—'} — الأهداف: {p.goals?.length || 0} — {getChip(p.status)}
+                      </Typography>
                     </Box>
                   ))}
                 </Box>
               )}
             </Box>
-          ) : <CircularProgress />}
+          ) : (
+            <CircularProgress />
+          )}
         </DialogContent>
-        <DialogActions><Button onClick={() => setProfileDialog(false)}>إغلاق</Button></DialogActions>
+        <DialogActions>
+          <Button onClick={() => setProfileDialog(false)}>إغلاق</Button>
+        </DialogActions>
       </Dialog>
     </Box>
   );

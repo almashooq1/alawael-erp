@@ -3,14 +3,7 @@
  * Extracted from SystemAdmin.js
  */
 import React from 'react';
-import {
-  Typography,
-  Grid,
-  Box,
-  Button,
-  Card,
-  CardContent,
-} from '@mui/material';
+import { Typography, Grid, Box, Button, Card, CardContent } from '@mui/material';
 import {
   Add as AddIcon,
   Refresh as RefreshIcon,

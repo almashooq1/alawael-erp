@@ -16,17 +16,19 @@ function StatusBadge({ status }) {
   const color = REFERRAL_STATUS_COLORS[status] || 'gray';
   const label = REFERRAL_STATUS_LABELS[status] || status;
   const colorMap = {
-    gray:   'bg-gray-100 text-gray-700',
+    gray: 'bg-gray-100 text-gray-700',
     yellow: 'bg-yellow-100 text-yellow-700',
-    blue:   'bg-blue-100 text-blue-700',
-    red:    'bg-red-100 text-red-700',
+    blue: 'bg-blue-100 text-blue-700',
+    red: 'bg-red-100 text-red-700',
     indigo: 'bg-indigo-100 text-indigo-700',
-    green:  'bg-green-100 text-green-700',
-    teal:   'bg-teal-100 text-teal-700',
-    slate:  'bg-slate-100 text-slate-700',
+    green: 'bg-green-100 text-green-700',
+    teal: 'bg-teal-100 text-teal-700',
+    slate: 'bg-slate-100 text-slate-700',
   };
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${colorMap[color] || colorMap.gray}`}>
+    <span
+      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${colorMap[color] || colorMap.gray}`}
+    >
       {label}
     </span>
   );
@@ -37,13 +39,17 @@ function PriorityBadge({ priority }) {
   const color = PRIORITY_COLORS[priority] || 'gray';
   const label = PRIORITY_LABELS[priority] || priority;
   const colorMap = {
-    red:    'bg-red-100 text-red-700 border border-red-200',
-    blue:   'bg-blue-100 text-blue-700 border border-blue-200',
-    green:  'bg-green-100 text-green-700 border border-green-200',
+    red: 'bg-red-100 text-red-700 border border-red-200',
+    blue: 'bg-blue-100 text-blue-700 border border-blue-200',
+    green: 'bg-green-100 text-green-700 border border-green-200',
   };
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold ${colorMap[color] || 'bg-gray-100 text-gray-700'}`}>
-      {priority === 'urgent' && <span className="w-1.5 h-1.5 rounded-full bg-red-500 ml-1 animate-pulse"></span>}
+    <span
+      className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold ${colorMap[color] || 'bg-gray-100 text-gray-700'}`}
+    >
+      {priority === 'urgent' && (
+        <span className="w-1.5 h-1.5 rounded-full bg-red-500 ml-1 animate-pulse"></span>
+      )}
       {label}
     </span>
   );
@@ -52,12 +58,12 @@ function PriorityBadge({ priority }) {
 // ===== بطاقة إحصائية =====
 function StatCard({ title, value, subtitle, color, icon }) {
   const colorMap = {
-    blue:   'bg-blue-500',
+    blue: 'bg-blue-500',
     yellow: 'bg-yellow-500',
-    green:  'bg-green-500',
-    red:    'bg-red-500',
+    green: 'bg-green-500',
+    red: 'bg-red-500',
     indigo: 'bg-indigo-500',
-    teal:   'bg-teal-500',
+    teal: 'bg-teal-500',
   };
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
@@ -67,7 +73,9 @@ function StatCard({ title, value, subtitle, color, icon }) {
           <p className="text-3xl font-bold text-gray-800">{value ?? '—'}</p>
           {subtitle && <p className="text-xs text-gray-400 mt-1">{subtitle}</p>}
         </div>
-        <div className={`w-12 h-12 ${colorMap[color] || 'bg-gray-400'} rounded-xl flex items-center justify-center text-white text-xl`}>
+        <div
+          className={`w-12 h-12 ${colorMap[color] || 'bg-gray-400'} rounded-xl flex items-center justify-center text-white text-xl`}
+        >
           {icon}
         </div>
       </div>
@@ -82,7 +90,7 @@ function ReviewModal({ referral, onClose, onSuccess }) {
   const [rejectionReason, setRejectionReason] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
     setLoading(true);
     try {
@@ -101,8 +109,12 @@ function ReviewModal({ referral, onClose, onSuccess }) {
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg">
         <div className="p-6 border-b border-gray-100">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-bold text-gray-800">مراجعة التحويل #{referral.referralNumber}</h3>
-            <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
+            <h3 className="text-lg font-bold text-gray-800">
+              مراجعة التحويل #{referral.referralNumber}
+            </h3>
+            <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl">
+              ✕
+            </button>
           </div>
           <p className="text-sm text-gray-500 mt-1">المريض: {referral.patientName}</p>
         </div>
@@ -111,11 +123,23 @@ function ReviewModal({ referral, onClose, onSuccess }) {
             <label className="block text-sm font-medium text-gray-700 mb-2">القرار</label>
             <div className="flex gap-4">
               <label className="flex items-center gap-2 cursor-pointer">
-                <input type="radio" value="accepted" checked={decision === 'accepted'} onChange={e => setDecision(e.target.value)} className="text-green-600" />
+                <input
+                  type="radio"
+                  value="accepted"
+                  checked={decision === 'accepted'}
+                  onChange={e => setDecision(e.target.value)}
+                  className="text-green-600"
+                />
                 <span className="text-green-700 font-medium">قبول</span>
               </label>
               <label className="flex items-center gap-2 cursor-pointer">
-                <input type="radio" value="rejected" checked={decision === 'rejected'} onChange={e => setDecision(e.target.value)} className="text-red-600" />
+                <input
+                  type="radio"
+                  value="rejected"
+                  checked={decision === 'rejected'}
+                  onChange={e => setDecision(e.target.value)}
+                  className="text-red-600"
+                />
                 <span className="text-red-700 font-medium">رفض</span>
               </label>
             </div>
@@ -158,7 +182,11 @@ function ReviewModal({ referral, onClose, onSuccess }) {
             >
               {loading ? 'جاري...' : decision === 'accepted' ? '✓ قبول التحويل' : '✗ رفض التحويل'}
             </button>
-            <button type="button" onClick={onClose} className="px-4 py-2.5 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2.5 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors"
+            >
               إلغاء
             </button>
           </div>
@@ -170,14 +198,18 @@ function ReviewModal({ referral, onClose, onSuccess }) {
 
 // ===== الصفحة الرئيسية =====
 export default function ReferralPortal() {
-  const [referrals, setReferrals]     = useState([]);
-  const [analytics, setAnalytics]     = useState(null);
-  const [loading, setLoading]         = useState(true);
-  const [page, setPage]               = useState(1);
-  const [total, setTotal]             = useState(0);
+  const [referrals, setReferrals] = useState([]);
+  const [analytics, setAnalytics] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
   const [reviewTarget, setReviewTarget] = useState(null);
-  const [filters, setFilters]         = useState({
-    search: '', status: '', priority: '', specialty: '', source: '',
+  const [filters, setFilters] = useState({
+    search: '',
+    status: '',
+    priority: '',
+    specialty: '',
+    source: '',
   });
 
   const limit = 20;
@@ -219,7 +251,7 @@ export default function ReferralPortal() {
     setPage(1);
   };
 
-  const handleAutoAssign = async (referralId) => {
+  const handleAutoAssign = async referralId => {
     try {
       await autoAssignReferral(referralId);
       fetchReferrals();
@@ -246,7 +278,9 @@ export default function ReferralPortal() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">بوابة التحويلات الطبية</h1>
-          <p className="text-gray-500 text-sm mt-1">استقبال وإدارة التحويلات من المستشفيات والعيادات</p>
+          <p className="text-gray-500 text-sm mt-1">
+            استقبال وإدارة التحويلات من المستشفيات والعيادات
+          </p>
         </div>
         <a
           href="/referrals/new"
@@ -303,7 +337,9 @@ export default function ReferralPortal() {
                     <div className="w-24 bg-gray-100 rounded-full h-1.5">
                       <div
                         className="bg-blue-500 h-1.5 rounded-full"
-                        style={{ width: `${Math.min((count / (analytics.total || 1)) * 100, 100)}%` }}
+                        style={{
+                          width: `${Math.min((count / (analytics.total || 1)) * 100, 100)}%`,
+                        }}
                       ></div>
                     </div>
                     <span className="text-sm font-medium text-gray-600 w-8 text-left">{count}</span>
@@ -316,23 +352,32 @@ export default function ReferralPortal() {
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
             <h3 className="font-semibold text-gray-700 mb-4">التخصصات الأكثر طلباً</h3>
             <div className="space-y-2">
-              {Object.entries(analytics.by_specialty || {}).slice(0, 5).map(([specialty, count]) => (
-                <div key={specialty} className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">{specialty}</span>
-                  <div className="flex items-center gap-2">
-                    <div className="w-24 bg-gray-100 rounded-full h-1.5">
-                      <div
-                        className="bg-indigo-500 h-1.5 rounded-full"
-                        style={{ width: `${Math.min((count / (analytics.total || 1)) * 100, 100)}%` }}
-                      ></div>
+              {Object.entries(analytics.by_specialty || {})
+                .slice(0, 5)
+                .map(([specialty, count]) => (
+                  <div key={specialty} className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">{specialty}</span>
+                    <div className="flex items-center gap-2">
+                      <div className="w-24 bg-gray-100 rounded-full h-1.5">
+                        <div
+                          className="bg-indigo-500 h-1.5 rounded-full"
+                          style={{
+                            width: `${Math.min((count / (analytics.total || 1)) * 100, 100)}%`,
+                          }}
+                        ></div>
+                      </div>
+                      <span className="text-sm font-medium text-gray-600 w-8 text-left">
+                        {count}
+                      </span>
                     </div>
-                    <span className="text-sm font-medium text-gray-600 w-8 text-left">{count}</span>
                   </div>
-                </div>
-              ))}
+                ))}
             </div>
             <div className="mt-4 pt-3 border-t border-gray-100 text-sm text-gray-500">
-              متوسط وقت المراجعة: <span className="font-semibold text-gray-700">{analytics.avg_processing_days} يوم</span>
+              متوسط وقت المراجعة:{' '}
+              <span className="font-semibold text-gray-700">
+                {analytics.avg_processing_days} يوم
+              </span>
             </div>
           </div>
         </div>
@@ -355,7 +400,9 @@ export default function ReferralPortal() {
           >
             <option value="">كل الحالات</option>
             {Object.entries(REFERRAL_STATUS_LABELS).map(([val, lbl]) => (
-              <option key={val} value={val}>{lbl}</option>
+              <option key={val} value={val}>
+                {lbl}
+              </option>
             ))}
           </select>
           <select
@@ -374,7 +421,9 @@ export default function ReferralPortal() {
             className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
           >
             {specialties.map(s => (
-              <option key={s.value} value={s.value}>{s.label}</option>
+              <option key={s.value} value={s.value}>
+                {s.label}
+              </option>
             ))}
           </select>
           <select
@@ -429,11 +478,18 @@ export default function ReferralPortal() {
               </thead>
               <tbody className="divide-y divide-gray-50">
                 {referrals.map(ref => (
-                  <tr key={ref._id} className={`hover:bg-gray-50 transition-colors ${ref.priority === 'urgent' ? 'bg-red-50/30' : ''}`}>
+                  <tr
+                    key={ref._id}
+                    className={`hover:bg-gray-50 transition-colors ${ref.priority === 'urgent' ? 'bg-red-50/30' : ''}`}
+                  >
                     <td className="px-4 py-3">
-                      <div className="font-mono text-xs text-blue-600 font-medium">{ref.referralNumber}</div>
+                      <div className="font-mono text-xs text-blue-600 font-medium">
+                        {ref.referralNumber}
+                      </div>
                       {ref.sourceSystem !== 'manual' && (
-                        <span className="text-xs text-gray-400">{ref.sourceSystem?.toUpperCase()}</span>
+                        <span className="text-xs text-gray-400">
+                          {ref.sourceSystem?.toUpperCase()}
+                        </span>
                       )}
                     </td>
                     <td className="px-4 py-3">
@@ -469,7 +525,9 @@ export default function ReferralPortal() {
                     </td>
                     <td className="px-4 py-3">
                       {ref.assignedTo ? (
-                        <span className="text-gray-700 text-xs">{ref.assignedTo?.name || 'مُعيَّن'}</span>
+                        <span className="text-gray-700 text-xs">
+                          {ref.assignedTo?.name || 'مُعيَّن'}
+                        </span>
                       ) : (
                         <span className="text-gray-400 text-xs">غير مُعيَّن</span>
                       )}
@@ -554,7 +612,10 @@ export default function ReferralPortal() {
         <ReviewModal
           referral={reviewTarget}
           onClose={() => setReviewTarget(null)}
-          onSuccess={() => { fetchReferrals(); fetchAnalytics(); }}
+          onSuccess={() => {
+            fetchReferrals();
+            fetchAnalytics();
+          }}
         />
       )}
     </div>

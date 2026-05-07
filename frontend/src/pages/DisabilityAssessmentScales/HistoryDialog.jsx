@@ -60,11 +60,11 @@ const HistoryDialog = ({
             <InputLabel>تصفية حسب المقياس</InputLabel>
             <Select
               value={filterScale}
-              onChange={(e) => onFilterScaleChange(e.target.value)}
+              onChange={e => onFilterScaleChange(e.target.value)}
               label="تصفية حسب المقياس"
             >
               <MenuItem value="">الكل</MenuItem>
-              {scales.map((s) => (
+              {scales.map(s => (
                 <MenuItem key={s.id} value={s.id}>
                   {s.name}
                 </MenuItem>
@@ -77,11 +77,11 @@ const HistoryDialog = ({
             <InputLabel>تصفية حسب المستفيد</InputLabel>
             <Select
               value={filterBeneficiary}
-              onChange={(e) => onFilterBeneficiaryChange(e.target.value)}
+              onChange={e => onFilterBeneficiaryChange(e.target.value)}
               label="تصفية حسب المستفيد"
             >
               <MenuItem value="">الكل</MenuItem>
-              {beneficiaries.map((b) => (
+              {beneficiaries.map(b => (
                 <MenuItem key={b.id} value={b.id}>
                   {b.name}
                 </MenuItem>
@@ -112,7 +112,7 @@ const HistoryDialog = ({
                 </TableCell>
               </TableRow>
             ) : (
-              filteredResults.map((r) => (
+              filteredResults.map(r => (
                 <TableRow
                   key={r.id}
                   hover
@@ -130,7 +130,11 @@ const HistoryDialog = ({
                     {r.totalScore}/{r.maxScore} ({r.percentage}%)
                   </TableCell>
                   <TableCell align="center">
-                    <Chip label={r.level} size="small" sx={{ bgcolor: r.levelColor, color: 'white' }} />
+                    <Chip
+                      label={r.level}
+                      size="small"
+                      sx={{ bgcolor: r.levelColor, color: 'white' }}
+                    />
                   </TableCell>
                   <TableCell align="center">
                     <Tooltip title="عرض التفاصيل">

@@ -28,10 +28,7 @@ import {
   DialogContent,
   DialogActions,
 } from '@mui/material';
-import {
-  CardGiftcard as EOSIcon,
-  Calculate as CalcIcon,
-  } from '@mui/icons-material';
+import { CardGiftcard as EOSIcon, Calculate as CalcIcon } from '@mui/icons-material';
 import payrollService from 'services/payrollService';
 import logger from 'utils/logger';
 import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from 'theme/palette';

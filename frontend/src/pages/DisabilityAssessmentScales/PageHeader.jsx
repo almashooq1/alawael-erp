@@ -43,14 +43,25 @@ const PageHeader = ({
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
         <AssessmentIcon sx={{ fontSize: 40 }} />
         <Box>
-          <Typography variant="h4" sx={{ fontWeight: 'bold' }}>مقاييس تقييم الإعاقة</Typography>
+          <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+            مقاييس تقييم الإعاقة
+          </Typography>
           <Typography variant="body2">إدارة مقاييس وأدوات التقييم المعتمدة — 22 مقياساً</Typography>
         </Box>
       </Box>
     </Box>
 
     {/* Title Row */}
-    <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 2 }}>
+    <Box
+      sx={{
+        mb: 4,
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'flex-start',
+        flexWrap: 'wrap',
+        gap: 2,
+      }}
+    >
       <Box>
         <Typography variant="h4" fontWeight="bold" gutterBottom>
           <AccessibilityIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
@@ -61,13 +72,31 @@ const PageHeader = ({
         </Typography>
       </Box>
       <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-        <Button variant="contained" color="secondary" size="small" startIcon={<RecommendIcon />} onClick={onOpenRecommended}>
+        <Button
+          variant="contained"
+          color="secondary"
+          size="small"
+          startIcon={<RecommendIcon />}
+          onClick={onOpenRecommended}
+        >
           مقاييس مقترحة
         </Button>
-        <Button variant="contained" color="info" size="small" startIcon={<BatchIcon />} onClick={onOpenBatch}>
+        <Button
+          variant="contained"
+          color="info"
+          size="small"
+          startIcon={<BatchIcon />}
+          onClick={onOpenBatch}
+        >
           تقييم جماعي
         </Button>
-        <Button variant="contained" color="success" size="small" startIcon={<TimelineIcon />} onClick={onOpenProgress}>
+        <Button
+          variant="contained"
+          color="success"
+          size="small"
+          startIcon={<TimelineIcon />}
+          onClick={onOpenProgress}
+        >
           متابعة التقدم
         </Button>
         <Button variant="outlined" size="small" startIcon={<HistoryIcon />} onClick={onOpenHistory}>

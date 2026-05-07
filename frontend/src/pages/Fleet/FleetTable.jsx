@@ -3,8 +3,17 @@
  * جدول بيانات الأسطول الديناميكي
  */
 import {
-  Typography, Paper, Chip, IconButton, Tooltip,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  Typography,
+  Paper,
+  Chip,
+  IconButton,
+  Tooltip,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
 } from '@mui/material';
 import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import { STATUS_CHIP_COLORS, TABS, COLUMNS, HEADERS } from './fleetManagement.constants';
@@ -20,7 +29,9 @@ const FleetTable = ({ activeTab, data, openEdit, handleDelete }) => {
         <TableHead>
           <TableRow sx={{ backgroundColor: surfaceColors.lightGray }}>
             {(HEADERS[currentKey] || []).map((h, i) => (
-              <TableCell key={i} sx={{ fontWeight: 'bold' }}>{h}</TableCell>
+              <TableCell key={i} sx={{ fontWeight: 'bold' }}>
+                {h}
+              </TableCell>
             ))}
             {currentKey !== 'gps' && <TableCell sx={{ fontWeight: 'bold' }}>الإجراءات</TableCell>}
           </TableRow>
@@ -29,7 +40,9 @@ const FleetTable = ({ activeTab, data, openEdit, handleDelete }) => {
           {currentData.length === 0 ? (
             <TableRow>
               <TableCell colSpan={8} align="center">
-                <Typography color="text.secondary" sx={{ py: 3 }}>لا توجد بيانات</Typography>
+                <Typography color="text.secondary" sx={{ py: 3 }}>
+                  لا توجد بيانات
+                </Typography>
               </TableCell>
             </TableRow>
           ) : (
@@ -38,7 +51,11 @@ const FleetTable = ({ activeTab, data, openEdit, handleDelete }) => {
                 {(COLUMNS[currentKey] || []).map((col, i) => (
                   <TableCell key={i}>
                     {col === 'status' ? (
-                      <Chip label={row[col]} size="small" color={STATUS_CHIP_COLORS[row[col]] || 'default'} />
+                      <Chip
+                        label={row[col]}
+                        size="small"
+                        color={STATUS_CHIP_COLORS[row[col]] || 'default'}
+                      />
                     ) : (
                       row[col]
                     )}
@@ -47,12 +64,22 @@ const FleetTable = ({ activeTab, data, openEdit, handleDelete }) => {
                 {currentKey !== 'gps' && (
                   <TableCell>
                     <Tooltip title="تعديل">
-                      <IconButton aria-label="إجراء" size="small" color="primary" onClick={() => openEdit(currentKey, row)}>
+                      <IconButton
+                        aria-label="إجراء"
+                        size="small"
+                        color="primary"
+                        onClick={() => openEdit(currentKey, row)}
+                      >
                         <EditIcon />
                       </IconButton>
                     </Tooltip>
                     <Tooltip title="حذف">
-                      <IconButton aria-label="إجراء" size="small" color="error" onClick={() => handleDelete(currentKey, row._id)}>
+                      <IconButton
+                        aria-label="إجراء"
+                        size="small"
+                        color="error"
+                        onClick={() => handleDelete(currentKey, row._id)}
+                      >
                         <DeleteIcon />
                       </IconButton>
                     </Tooltip>

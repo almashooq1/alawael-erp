@@ -493,10 +493,16 @@ export default function ParentBusTracker() {
                       />
                     </ListItem>
                     <ListItem>
-                      <ListItemText primary="المرافق" secondary={trackingData.bus.assistantName || '—'} />
+                      <ListItemText
+                        primary="المرافق"
+                        secondary={trackingData.bus.assistantName || '—'}
+                      />
                     </ListItem>
                     <ListItem>
-                      <ListItemText primary="الموديل" secondary={`${trackingData.bus.model} — ${trackingData.bus.color}`} />
+                      <ListItemText
+                        primary="الموديل"
+                        secondary={`${trackingData.bus.model} — ${trackingData.bus.color}`}
+                      />
                     </ListItem>
                   </List>
                 </Grid>
@@ -512,14 +518,21 @@ export default function ParentBusTracker() {
                           secondary={
                             <Chip
                               size="small"
-                              label={trackingData.trip.status === 'in-progress' ? 'جارية' : trackingData.trip.status}
+                              label={
+                                trackingData.trip.status === 'in-progress'
+                                  ? 'جارية'
+                                  : trackingData.trip.status
+                              }
                               color="success"
                             />
                           }
                         />
                       </ListItem>
                       <ListItem>
-                        <ListItemText primary="المحطة الحالية" secondary={trackingData.trip.currentStop} />
+                        <ListItemText
+                          primary="المحطة الحالية"
+                          secondary={trackingData.trip.currentStop}
+                        />
                       </ListItem>
                       <ListItem>
                         <ListItemText
@@ -579,7 +592,9 @@ export default function ParentBusTracker() {
                       <Chip
                         key={i}
                         label={`${stop.order}. ${stop.name}`}
-                        variant={stop.name === trackingData.trip?.currentStop ? 'filled' : 'outlined'}
+                        variant={
+                          stop.name === trackingData.trip?.currentStop ? 'filled' : 'outlined'
+                        }
                         color={stop.name === trackingData.trip?.currentStop ? 'primary' : 'default'}
                         icon={<LocationIcon />}
                       />

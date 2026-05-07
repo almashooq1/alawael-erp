@@ -17,19 +17,11 @@ import {
   IconButton,
   Tooltip,
 } from '@mui/material';
-import {
-  Print as PrintIcon,
-  Visibility as ViewIcon,
-} from '@mui/icons-material';
+import { Print as PrintIcon, Visibility as ViewIcon } from '@mui/icons-material';
 import { fmt } from './employeePortalData';
 import { gradients } from '../../theme/palette';
 
-export default function PayslipsTab({
-  payslips,
-  payrollSummary,
-  onViewPayslip,
-  onPrint,
-}) {
+export default function PayslipsTab({ payslips, payrollSummary, onViewPayslip, onPrint }) {
   return (
     <Box>
       {payrollSummary && (
@@ -74,12 +66,7 @@ export default function PayslipsTab({
         <Typography variant="h6" fontWeight="bold">
           كشوف الرواتب
         </Typography>
-        <Button
-          size="small"
-          startIcon={<PrintIcon />}
-          onClick={onPrint}
-          sx={{ borderRadius: 2 }}
-        >
+        <Button size="small" startIcon={<PrintIcon />} onClick={onPrint} sx={{ borderRadius: 2 }}>
           طباعة
         </Button>
       </Box>

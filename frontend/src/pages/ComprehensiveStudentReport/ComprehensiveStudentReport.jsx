@@ -148,7 +148,9 @@ const ProgressWithLabel = ({ value, label, color = 'primary' }) => (
 // ─── Risk Chip ───────────────────────────────────
 const RiskChip = ({ level, label }) => {
   const colorMap = { low: 'success', medium: 'warning', high: 'error' };
-  return <Chip label={label} color={colorMap[level] || 'default'} size="small" variant="outlined" />;
+  return (
+    <Chip label={label} color={colorMap[level] || 'default'} size="small" variant="outlined" />
+  );
 };
 
 // ═══════════════════════════════════════════════════
@@ -192,7 +194,9 @@ const ComprehensiveStudentReport = () => {
   // ─── Loading State ─────────────────────────────
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+      <Box
+        sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}
+      >
         <CircularProgress size={60} />
       </Box>
     );
@@ -201,11 +205,27 @@ const ComprehensiveStudentReport = () => {
   // ─── Error State ───────────────────────────────
   if (error || !report) {
     return (
-      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', gap: 2, p: 3 }}>
-        <Alert severity="error" sx={{ maxWidth: 520 }}>{error || 'لا توجد بيانات'}</Alert>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: '60vh',
+          gap: 2,
+          p: 3,
+        }}
+      >
+        <Alert severity="error" sx={{ maxWidth: 520 }}>
+          {error || 'لا توجد بيانات'}
+        </Alert>
         <Stack direction="row" spacing={2}>
-          <Button variant="contained" onClick={loadReport}>إعادة المحاولة</Button>
-          <Button variant="outlined" onClick={() => navigate(-1)}>رجوع</Button>
+          <Button variant="contained" onClick={loadReport}>
+            إعادة المحاولة
+          </Button>
+          <Button variant="outlined" onClick={() => navigate(-1)}>
+            رجوع
+          </Button>
         </Stack>
       </Box>
     );
@@ -240,8 +260,17 @@ const ComprehensiveStudentReport = () => {
     profound: 'عميقة',
   };
   const genderMap = { male: 'ذكر', female: 'أنثى' };
-  const statusMap = { active: 'نشط', inactive: 'غير نشط', graduated: 'متخرج', transferred: 'منقول', suspended: 'موقوف' };
-  const formatDate = d => d ? new Date(d).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' }) : '—';
+  const statusMap = {
+    active: 'نشط',
+    inactive: 'غير نشط',
+    graduated: 'متخرج',
+    transferred: 'منقول',
+    suspended: 'موقوف',
+  };
+  const formatDate = d =>
+    d
+      ? new Date(d).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' })
+      : '—';
 
   return (
     <Box
@@ -296,8 +325,8 @@ const ComprehensiveStudentReport = () => {
           {student.name || '—'}
         </Typography>
         <Typography variant="body2" sx={{ opacity: 0.75 }}>
-          رقم الطالب: {student.studentId || '—'} | المركز: {student.centerName || '—'} | تاريخ التقرير:{' '}
-          {generatedAt ? formatDate(generatedAt) : new Date().toLocaleDateString('ar-EG')}
+          رقم الطالب: {student.studentId || '—'} | المركز: {student.centerName || '—'} | تاريخ
+          التقرير: {generatedAt ? formatDate(generatedAt) : new Date().toLocaleDateString('ar-EG')}
         </Typography>
       </Paper>
 
@@ -404,7 +433,12 @@ const ComprehensiveStudentReport = () => {
                 label="الشدة"
                 value={severityMap[disability.severity] || disability.severity}
               />
-              <InfoRow label="نسبة الإعاقة" value={disability.disabilityPercentage ? `${disability.disabilityPercentage}%` : '—'} />
+              <InfoRow
+                label="نسبة الإعاقة"
+                value={
+                  disability.disabilityPercentage ? `${disability.disabilityPercentage}%` : '—'
+                }
+              />
             </Grid>
             <Grid item xs={12} md={6}>
               <InfoRow label="تاريخ التشخيص" value={formatDate(disability.diagnosisDate)} />
@@ -439,7 +473,10 @@ const ComprehensiveStudentReport = () => {
           <Grid container spacing={3}>
             {guardian.father && Object.keys(guardian.father).length > 0 && (
               <Grid item xs={12} md={4}>
-                <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1, color: brandColors.primaryStart }}>
+                <Typography
+                  variant="subtitle2"
+                  sx={{ fontWeight: 700, mb: 1, color: brandColors.primaryStart }}
+                >
                   الأب
                 </Typography>
                 <InfoRow label="الاسم" value={guardian.father.name} />
@@ -450,7 +487,10 @@ const ComprehensiveStudentReport = () => {
             )}
             {guardian.mother && Object.keys(guardian.mother).length > 0 && (
               <Grid item xs={12} md={4}>
-                <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1, color: brandColors.accentPink }}>
+                <Typography
+                  variant="subtitle2"
+                  sx={{ fontWeight: 700, mb: 1, color: brandColors.accentPink }}
+                >
                   الأم
                 </Typography>
                 <InfoRow label="الاسم" value={guardian.mother.name} />
@@ -461,7 +501,10 @@ const ComprehensiveStudentReport = () => {
             )}
             {guardian.emergencyContact && Object.keys(guardian.emergencyContact).length > 0 && (
               <Grid item xs={12} md={4}>
-                <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1, color: brandColors.accentCoral }}>
+                <Typography
+                  variant="subtitle2"
+                  sx={{ fontWeight: 700, mb: 1, color: brandColors.accentCoral }}
+                >
                   جهة الاتصال الطارئة
                 </Typography>
                 <InfoRow label="الاسم" value={guardian.emergencyContact.name} />
@@ -528,7 +571,13 @@ const ComprehensiveStudentReport = () => {
           <ProgressWithLabel
             value={attStats.attendanceRate || 0}
             label="نسبة الحضور الكلية"
-            color={attStats.attendanceRate >= 90 ? 'success' : attStats.attendanceRate >= 75 ? 'warning' : 'error'}
+            color={
+              attStats.attendanceRate >= 90
+                ? 'success'
+                : attStats.attendanceRate >= 75
+                  ? 'warning'
+                  : 'error'
+            }
           />
         </CardContent>
       </Card>
@@ -563,8 +612,20 @@ const ComprehensiveStudentReport = () => {
                     <TableCell sx={{ textAlign: 'center' }}>{p.sessionDuration}</TableCell>
                     <TableCell>
                       <Chip
-                        label={p.status === 'active' ? 'نشط' : p.status === 'completed' ? 'مكتمل' : p.status}
-                        color={p.status === 'active' ? 'success' : p.status === 'completed' ? 'info' : 'default'}
+                        label={
+                          p.status === 'active'
+                            ? 'نشط'
+                            : p.status === 'completed'
+                              ? 'مكتمل'
+                              : p.status
+                        }
+                        color={
+                          p.status === 'active'
+                            ? 'success'
+                            : p.status === 'completed'
+                              ? 'info'
+                              : 'default'
+                        }
                         size="small"
                       />
                     </TableCell>
@@ -673,7 +734,9 @@ const ComprehensiveStudentReport = () => {
           <ProgressWithLabel
             value={iep.goalProgress || 0}
             label="نسبة تحقيق الأهداف"
-            color={iep.goalProgress >= 70 ? 'success' : iep.goalProgress >= 40 ? 'warning' : 'error'}
+            color={
+              iep.goalProgress >= 70 ? 'success' : iep.goalProgress >= 40 ? 'warning' : 'error'
+            }
           />
           <Divider sx={{ my: 2 }} />
           <Grid container spacing={3}>
@@ -689,13 +752,20 @@ const ComprehensiveStudentReport = () => {
                         {typeof g === 'string' ? g : g.description || g.goal || JSON.stringify(g)}
                       </Typography>
                       {g.status && (
-                        <Chip label={g.status} size="small" sx={{ mt: 0.5 }} color={g.status === 'achieved' ? 'success' : 'default'} />
+                        <Chip
+                          label={g.status}
+                          size="small"
+                          sx={{ mt: 0.5 }}
+                          color={g.status === 'achieved' ? 'success' : 'default'}
+                        />
                       )}
                     </Paper>
                   ))}
                 </Stack>
               ) : (
-                <Typography variant="body2" color="text.secondary">لا توجد أهداف</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  لا توجد أهداف
+                </Typography>
               )}
             </Grid>
             <Grid item xs={12} md={6}>
@@ -710,13 +780,20 @@ const ComprehensiveStudentReport = () => {
                         {typeof g === 'string' ? g : g.description || g.goal || JSON.stringify(g)}
                       </Typography>
                       {g.status && (
-                        <Chip label={g.status} size="small" sx={{ mt: 0.5 }} color={g.status === 'achieved' ? 'success' : 'default'} />
+                        <Chip
+                          label={g.status}
+                          size="small"
+                          sx={{ mt: 0.5 }}
+                          color={g.status === 'achieved' ? 'success' : 'default'}
+                        />
                       )}
                     </Paper>
                   ))}
                 </Stack>
               ) : (
-                <Typography variant="body2" color="text.secondary">لا توجد أهداف</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  لا توجد أهداف
+                </Typography>
               )}
             </Grid>
           </Grid>
@@ -727,7 +804,12 @@ const ComprehensiveStudentReport = () => {
               </Typography>
               <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
                 {iep.accommodations.map((a, i) => (
-                  <Chip key={i} label={typeof a === 'string' ? a : a.description || JSON.stringify(a)} size="small" variant="outlined" />
+                  <Chip
+                    key={i}
+                    label={typeof a === 'string' ? a : a.description || JSON.stringify(a)}
+                    size="small"
+                    variant="outlined"
+                  />
                 ))}
               </Stack>
             </Box>
@@ -789,7 +871,9 @@ const ComprehensiveStudentReport = () => {
                   ))}
                 </Stack>
               ) : (
-                <Typography variant="body2" color="text.secondary">لا توجد شارات بعد</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  لا توجد شارات بعد
+                </Typography>
               )}
             </Grid>
             <Grid item xs={12} md={4}>
@@ -813,7 +897,9 @@ const ComprehensiveStudentReport = () => {
                   ))}
                 </Stack>
               ) : (
-                <Typography variant="body2" color="text.secondary">لا يوجد سجل سلوك</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  لا يوجد سجل سلوك
+                </Typography>
               )}
             </Grid>
           </Grid>
@@ -821,11 +907,7 @@ const ComprehensiveStudentReport = () => {
       </Card>
 
       {/* ═══ 9. Medical ═══ */}
-      <SectionHeader
-        icon={<MedicalIcon />}
-        title="الملف الطبي"
-        gradient={gradients.redStatus}
-      />
+      <SectionHeader icon={<MedicalIcon />} title="الملف الطبي" gradient={gradients.redStatus} />
       <Card sx={{ mb: 3, borderRadius: 3 }}>
         <CardContent>
           <Grid container spacing={3}>
@@ -846,7 +928,9 @@ const ComprehensiveStudentReport = () => {
                   ))}
                 </Stack>
               ) : (
-                <Typography variant="body2" color="text.secondary">لا توجد حساسية مسجلة</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  لا توجد حساسية مسجلة
+                </Typography>
               )}
             </Grid>
             <Grid item xs={12} md={4}>
@@ -866,7 +950,9 @@ const ComprehensiveStudentReport = () => {
                   ))}
                 </Stack>
               ) : (
-                <Typography variant="body2" color="text.secondary">لا توجد أدوية</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  لا توجد أدوية
+                </Typography>
               )}
             </Grid>
             <Grid item xs={12} md={4}>
@@ -886,7 +972,9 @@ const ComprehensiveStudentReport = () => {
                   ))}
                 </Stack>
               ) : (
-                <Typography variant="body2" color="text.secondary">لا توجد أمراض مزمنة</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  لا توجد أمراض مزمنة
+                </Typography>
               )}
             </Grid>
           </Grid>
@@ -932,7 +1020,13 @@ const ComprehensiveStudentReport = () => {
           <ProgressWithLabel
             value={progress.overallProgress || 0}
             label="التقدم العام"
-            color={progress.overallProgress >= 70 ? 'success' : progress.overallProgress >= 40 ? 'warning' : 'error'}
+            color={
+              progress.overallProgress >= 70
+                ? 'success'
+                : progress.overallProgress >= 40
+                  ? 'warning'
+                  : 'error'
+            }
           />
           {(progress.skills || []).length > 0 && (
             <>
@@ -980,14 +1074,23 @@ const ComprehensiveStudentReport = () => {
               <Stack spacing={2}>
                 {riskSignals.map((r, i) => (
                   <Box key={i}>
-                    <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.5 }}>
-                      <Typography variant="body2" sx={{ fontWeight: 600 }}>{r.label}</Typography>
+                    <Stack
+                      direction="row"
+                      justifyContent="space-between"
+                      alignItems="center"
+                      sx={{ mb: 0.5 }}
+                    >
+                      <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                        {r.label}
+                      </Typography>
                       <RiskChip level={r.level} label={r.levelLabel} />
                     </Stack>
                     <LinearProgress
                       variant="determinate"
                       value={r.score}
-                      color={r.level === 'low' ? 'success' : r.level === 'medium' ? 'warning' : 'error'}
+                      color={
+                        r.level === 'low' ? 'success' : r.level === 'medium' ? 'warning' : 'error'
+                      }
                       sx={{ height: 8, borderRadius: 4 }}
                     />
                   </Box>
@@ -1011,11 +1114,20 @@ const ComprehensiveStudentReport = () => {
               <Grid item xs={12} md={6} key={i}>
                 <Card sx={{ borderRadius: 3, height: '100%' }}>
                   <CardContent>
-                    <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
+                    <Stack
+                      direction="row"
+                      justifyContent="space-between"
+                      alignItems="center"
+                      sx={{ mb: 1 }}
+                    >
                       <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
                         {rec.title}
                       </Typography>
-                      <Chip label={rec.priority} size="small" color={rec.priority === 'عالية' ? 'error' : 'warning'} />
+                      <Chip
+                        label={rec.priority}
+                        size="small"
+                        color={rec.priority === 'عالية' ? 'error' : 'warning'}
+                      />
                     </Stack>
                     <Divider sx={{ mb: 1 }} />
                     <Stack spacing={0.5}>
@@ -1047,7 +1159,14 @@ const ComprehensiveStudentReport = () => {
               <Grid container spacing={3}>
                 <Grid item xs={12} md={4}>
                   <InfoRow label="أسلوب التعلم" value={aiInsights.learningStyle} />
-                  <InfoRow label="التقدم المتوقع" value={aiInsights.predictedProgress !== null ? `${aiInsights.predictedProgress}%` : '—'} />
+                  <InfoRow
+                    label="التقدم المتوقع"
+                    value={
+                      aiInsights.predictedProgress !== null
+                        ? `${aiInsights.predictedProgress}%`
+                        : '—'
+                    }
+                  />
                 </Grid>
                 <Grid item xs={12} md={4}>
                   <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 0.5 }}>
@@ -1065,7 +1184,9 @@ const ComprehensiveStudentReport = () => {
                   </Typography>
                   <Stack spacing={0.3}>
                     {(aiInsights.suggestions || []).map((s, i) => (
-                      <Typography key={i} variant="body2">• {s}</Typography>
+                      <Typography key={i} variant="body2">
+                        • {s}
+                      </Typography>
                     ))}
                   </Stack>
                 </Grid>
@@ -1173,7 +1294,9 @@ const ComprehensiveStudentReport = () => {
                   <Paper key={i} sx={{ p: 1.5, borderRadius: 2, bgcolor: '#f8f9fc' }}>
                     <Stack direction="row" justifyContent="space-between" sx={{ mb: 0.5 }}>
                       <Chip label={n.category} size="small" variant="outlined" />
-                      <Typography variant="caption" color="text.secondary">{n.author}</Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {n.author}
+                      </Typography>
                     </Stack>
                     <Typography variant="body2">{n.content}</Typography>
                   </Paper>
@@ -1187,8 +1310,8 @@ const ComprehensiveStudentReport = () => {
       {/* ═══ Footer ═══ */}
       <Paper sx={{ p: 2, textAlign: 'center', borderRadius: 3, bgcolor: '#f8f9fc', mt: 4 }}>
         <Typography variant="caption" color="text.secondary">
-          تم إنشاء هذا التقرير آلياً بواسطة نظام الأوائل — {new Date().toLocaleDateString('ar-EG')} |
-          التقرير سري ومخصص للاستخدام الرسمي فقط
+          تم إنشاء هذا التقرير آلياً بواسطة نظام الأوائل — {new Date().toLocaleDateString('ar-EG')}{' '}
+          | التقرير سري ومخصص للاستخدام الرسمي فقط
         </Typography>
       </Paper>
     </Box>

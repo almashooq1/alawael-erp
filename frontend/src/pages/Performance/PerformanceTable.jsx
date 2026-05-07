@@ -36,12 +36,17 @@ const renderCell = (col, value, _row) => {
       <Chip
         label={cfg.label || value}
         size="small"
-        sx={{ bgcolor: cfg.bgcolor || surfaceColors.lightGray, color: cfg.color || neutralColors.textSecondary, fontWeight: 'bold' }}
+        sx={{
+          bgcolor: cfg.bgcolor || surfaceColors.lightGray,
+          color: cfg.color || neutralColors.textSecondary,
+          fontWeight: 'bold',
+        }}
       />
     );
   }
   if (col === 'overallScore') {
-    const scoreColor = value >= 80 ? statusColors.success : value >= 60 ? statusColors.warning : statusColors.error;
+    const scoreColor =
+      value >= 80 ? statusColors.success : value >= 60 ? statusColors.warning : statusColors.error;
     return (
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 120 }}>
         <LinearProgress
@@ -64,18 +69,20 @@ const renderCell = (col, value, _row) => {
   if (col === 'department') {
     const color = DEPT_COLORS[value] || neutralColors.textSecondary;
     return (
-      <Chip
-        label={value}
-        size="small"
-        sx={{ bgcolor: `${color}15`, color, fontWeight: 'bold' }}
-      />
+      <Chip label={value} size="small" sx={{ bgcolor: `${color}15`, color, fontWeight: 'bold' }} />
     );
   }
   if (col === 'employee' || col === 'employeeName') {
     return (
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
         <Avatar
-          sx={{ width: 28, height: 28, fontSize: 12, bgcolor: surfaceColors.infoLight, color: statusColors.primaryBlue }}
+          sx={{
+            width: 28,
+            height: 28,
+            fontSize: 12,
+            bgcolor: surfaceColors.infoLight,
+            color: statusColors.primaryBlue,
+          }}
         >
           {(value || '')[0]}
         </Avatar>

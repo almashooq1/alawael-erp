@@ -54,7 +54,7 @@ const RecommendedScalesDialog = ({ open, onClose, scales, onOpenAssessment }) =>
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleFetch = async (type) => {
+  const handleFetch = async type => {
     setDisabilityType(type);
     if (!type) {
       setRecommended(null);
@@ -89,7 +89,9 @@ const RecommendedScalesDialog = ({ open, onClose, scales, onOpenAssessment }) =>
           <RecommendIcon />
           <span>المقاييس المقترحة حسب نوع الإعاقة</span>
         </Box>
-        <IconButton onClick={onClose} sx={{ color: 'white' }}><CloseIcon /></IconButton>
+        <IconButton onClick={onClose} sx={{ color: 'white' }}>
+          <CloseIcon />
+        </IconButton>
       </DialogTitle>
 
       <DialogContent sx={{ pt: 3 }}>
@@ -97,17 +99,23 @@ const RecommendedScalesDialog = ({ open, onClose, scales, onOpenAssessment }) =>
           <InputLabel>اختر نوع الإعاقة</InputLabel>
           <Select
             value={disabilityType}
-            onChange={(e) => handleFetch(e.target.value)}
+            onChange={e => handleFetch(e.target.value)}
             label="اختر نوع الإعاقة"
           >
             {DISABILITY_TYPE_OPTIONS.map(opt => (
-              <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
+              <MenuItem key={opt.value} value={opt.value}>
+                {opt.label}
+              </MenuItem>
             ))}
           </Select>
         </FormControl>
 
         {loading && <LinearProgress sx={{ mb: 2 }} />}
-        {error && <Alert severity="warning" sx={{ mb: 2 }}>{error}</Alert>}
+        {error && (
+          <Alert severity="warning" sx={{ mb: 2 }}>
+            {error}
+          </Alert>
+        )}
 
         {recommended && (
           <>
@@ -115,7 +123,7 @@ const RecommendedScalesDialog = ({ open, onClose, scales, onOpenAssessment }) =>
               المقاييس المقترحة ({recommended.scales?.length || recommended.length || 0})
             </Typography>
             <Grid container spacing={2}>
-              {(recommended.scales || recommended || []).map((scaleKey) => {
+              {(recommended.scales || recommended || []).map(scaleKey => {
                 const key = typeof scaleKey === 'string' ? scaleKey : scaleKey?.key || scaleKey?.id;
                 const scaleDef = scales.find(s => s.id === key);
                 if (!scaleDef) {
@@ -123,7 +131,9 @@ const RecommendedScalesDialog = ({ open, onClose, scales, onOpenAssessment }) =>
                     <Grid item xs={12} sm={6} key={key}>
                       <Card elevation={1} sx={{ borderTop: '3px solid #9e9e9e' }}>
                         <CardContent>
-                          <Typography variant="subtitle1" fontWeight="bold">{key}</Typography>
+                          <Typography variant="subtitle1" fontWeight="bold">
+                            {key}
+                          </Typography>
                           <Typography variant="body2" color="text.secondary">
                             مقياس غير متوفر في التعريفات المحلية
                           </Typography>
@@ -179,7 +189,10 @@ const RecommendedScalesDialog = ({ open, onClose, scales, onOpenAssessment }) =>
                           variant="contained"
                           size="small"
                           startIcon={<AddIcon />}
-                          sx={{ bgcolor: scaleDef.color, '&:hover': { bgcolor: scaleDef.color, filter: 'brightness(0.9)' } }}
+                          sx={{
+                            bgcolor: scaleDef.color,
+                            '&:hover': { bgcolor: scaleDef.color, filter: 'brightness(0.9)' },
+                          }}
                           onClick={() => {
                             onClose();
                             onOpenAssessment(scaleDef);

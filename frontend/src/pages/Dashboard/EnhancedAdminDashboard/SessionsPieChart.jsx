@@ -1,11 +1,5 @@
 import { Card, CardContent, Typography } from '@mui/material';
-import {
-  PieChart,
-  Pie,
-  Cell,
-  Tooltip as ChartTooltip,
-  ResponsiveContainer,
-} from 'recharts';
+import { PieChart, Pie, Cell, Tooltip as ChartTooltip, ResponsiveContainer } from 'recharts';
 import { brandColors } from 'theme/palette';
 
 /** Sessions-by-category pie chart */
@@ -22,7 +16,7 @@ const SessionsPieChart = ({ sessionsByCategory }) => (
             cx="50%"
             cy="50%"
             labelLine={false}
-            label={(entry) => `${entry.name}: ${entry.value}`}
+            label={entry => `${entry.name}: ${entry.value}`}
             outerRadius={80}
             fill={brandColors.primaryStart}
             dataKey="value"

@@ -26,10 +26,7 @@ import {
   FormControl,
   InputLabel,
 } from '@mui/material';
-import {
-  CloudUpload as UploadIcon,
-  Download as DownloadIcon,
-} from '@mui/icons-material';
+import { CloudUpload as UploadIcon, Download as DownloadIcon } from '@mui/icons-material';
 import { getStatusColor } from 'utils/statusColors';
 import { formatFileSize } from './useDocumentsPage';
 
@@ -49,7 +46,7 @@ export const UploadDialog = ({ open, onClose, categories, onSubmit }) => (
             <FormControl fullWidth required>
               <InputLabel>التصنيف</InputLabel>
               <Select name="category" label="التصنيف">
-                {categories.map((cat) => (
+                {categories.map(cat => (
                   <MenuItem key={cat.id} value={cat.id}>
                     {cat.name}
                   </MenuItem>

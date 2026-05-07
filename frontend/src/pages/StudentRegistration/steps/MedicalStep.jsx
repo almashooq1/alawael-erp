@@ -4,8 +4,15 @@
 
 import React from 'react';
 import {
-  Box, Grid, TextField, Alert, Divider, Checkbox,
-  FormControlLabel, FormGroup, Fade,
+  Box,
+  Grid,
+  TextField,
+  Alert,
+  Divider,
+  Checkbox,
+  FormControlLabel,
+  FormGroup,
+  Fade,
 } from '@mui/material';
 import { LocalHospital } from '@mui/icons-material';
 import { SectionTitle } from '../StyledComponents';
@@ -17,36 +24,66 @@ const MedicalStep = ({ formData, handleChange, setFormData }) => (
 
       <Grid container spacing={2}>
         <Grid item xs={12}>
-          <TextField fullWidth label="الأمراض المزمنة" value={formData.chronicConditions}
-            onChange={handleChange('chronicConditions')} multiline rows={2}
-            placeholder="افصل بين كل حالة بفاصلة (مثال: ربو، سكري)" />
+          <TextField
+            fullWidth
+            label="الأمراض المزمنة"
+            value={formData.chronicConditions}
+            onChange={handleChange('chronicConditions')}
+            multiline
+            rows={2}
+            placeholder="افصل بين كل حالة بفاصلة (مثال: ربو، سكري)"
+          />
         </Grid>
 
         <Grid item xs={12}>
-          <TextField fullWidth label="الأدوية الحالية" value={formData.medications}
-            onChange={handleChange('medications')} multiline rows={2}
-            placeholder="اسم الدواء والجرعة..." />
+          <TextField
+            fullWidth
+            label="الأدوية الحالية"
+            value={formData.medications}
+            onChange={handleChange('medications')}
+            multiline
+            rows={2}
+            placeholder="اسم الدواء والجرعة..."
+          />
         </Grid>
 
         <Grid item xs={12}>
-          <TextField fullWidth label="الحساسيات"
-            value={Array.isArray(formData.allergies) ? formData.allergies.join(', ') : formData.allergies}
-            onChange={(e) => setFormData((prev) => ({
-              ...prev,
-              allergies: e.target.value.split(',').map((a) => a.trim()).filter(Boolean),
-            }))}
-            multiline rows={2}
-            placeholder="افصل بين كل حساسية بفاصلة (مثال: بنسلين، حليب، غبار)" />
+          <TextField
+            fullWidth
+            label="الحساسيات"
+            value={
+              Array.isArray(formData.allergies) ? formData.allergies.join(', ') : formData.allergies
+            }
+            onChange={e =>
+              setFormData(prev => ({
+                ...prev,
+                allergies: e.target.value
+                  .split(',')
+                  .map(a => a.trim())
+                  .filter(Boolean),
+              }))
+            }
+            multiline
+            rows={2}
+            placeholder="افصل بين كل حساسية بفاصلة (مثال: بنسلين، حليب، غبار)"
+          />
         </Grid>
 
         <Grid item xs={12}>
           <FormGroup row>
             <FormControlLabel
-              control={<Checkbox checked={formData.hasGlasses} onChange={handleChange('hasGlasses')} />}
+              control={
+                <Checkbox checked={formData.hasGlasses} onChange={handleChange('hasGlasses')} />
+              }
               label="يرتدي نظارات طبية"
             />
             <FormControlLabel
-              control={<Checkbox checked={formData.hasHearingAid} onChange={handleChange('hasHearingAid')} />}
+              control={
+                <Checkbox
+                  checked={formData.hasHearingAid}
+                  onChange={handleChange('hasHearingAid')}
+                />
+              }
               label="يستخدم سماعة طبية"
             />
           </FormGroup>

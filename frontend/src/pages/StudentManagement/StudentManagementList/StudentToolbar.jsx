@@ -56,7 +56,7 @@ const StudentToolbar = ({
           size="small"
           placeholder="بحث بالاسم، الهوية، أو رقم الطالب..."
           value={searchQuery}
-          onChange={(e) => {
+          onChange={e => {
             setSearchQuery(e.target.value);
             setPage(0);
           }}
@@ -82,7 +82,7 @@ const StudentToolbar = ({
           <Select
             value={statusFilter}
             label="الحالة"
-            onChange={(e) => {
+            onChange={e => {
               setStatusFilter(e.target.value);
               setPage(0);
             }}
@@ -101,7 +101,7 @@ const StudentToolbar = ({
           <Select
             value={disabilityFilter}
             label="نوع الإعاقة"
-            onChange={(e) => {
+            onChange={e => {
               setDisabilityFilter(e.target.value);
               setPage(0);
             }}

@@ -36,9 +36,19 @@ import logger from 'utils/logger';
 import { gradients, statusColors } from '../../theme/palette';
 
 const systemStats = [
-  { label: 'المستخدمون النشطون', value: '127', icon: <PeopleIcon />, color: statusColors.primaryBlue },
+  {
+    label: 'المستخدمون النشطون',
+    value: '127',
+    icon: <PeopleIcon />,
+    color: statusColors.primaryBlue,
+  },
   { label: 'استخدام المعالج', value: '34%', icon: <SpeedIcon />, color: statusColors.successDark },
-  { label: 'التخزين المستخدم', value: '67%', icon: <StorageIcon />, color: statusColors.warningDark },
+  {
+    label: 'التخزين المستخدم',
+    value: '67%',
+    icon: <StorageIcon />,
+    color: statusColors.warningDark,
+  },
   { label: 'وقت التشغيل', value: '99.9%', icon: <CloudIcon />, color: statusColors.purpleDark },
 ];
 
@@ -52,7 +62,7 @@ const recentActions = [
 const AdvancedAdminPanel = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [stats, setStats] = useState(null);
+  const [_stats, setStats] = useState(null);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -76,7 +86,9 @@ const AdvancedAdminPanel = () => {
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
           <SettingsIcon sx={{ fontSize: 40 }} />
           <Box>
-            <Typography variant="h4" sx={{ fontWeight: 'bold' }}>لوحة الإدارة</Typography>
+            <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+              لوحة الإدارة
+            </Typography>
             <Typography variant="body2">إعدادات وأدوات الإدارة</Typography>
           </Box>
         </Box>
@@ -100,14 +112,21 @@ const AdvancedAdminPanel = () => {
       <Grid container spacing={2} sx={{ mb: 3 }}>
         {systemStats.map((stat, i) => (
           <Grid item xs={6} md={3} key={i}>
-            <Card sx={{ transition: 'all 0.2s', '&:hover': { transform: 'translateY(-2px)', boxShadow: 3 } }}>
+            <Card
+              sx={{
+                transition: 'all 0.2s',
+                '&:hover': { transform: 'translateY(-2px)', boxShadow: 3 },
+              }}
+            >
               <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Avatar sx={{ bgcolor: stat.color + '20', color: stat.color }}>
-                  {stat.icon}
-                </Avatar>
+                <Avatar sx={{ bgcolor: stat.color + '20', color: stat.color }}>{stat.icon}</Avatar>
                 <Box>
-                  <Typography variant="h5" fontWeight={700}>{stat.value}</Typography>
-                  <Typography variant="caption" color="text.secondary">{stat.label}</Typography>
+                  <Typography variant="h5" fontWeight={700}>
+                    {stat.value}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {stat.label}
+                  </Typography>
                 </Box>
               </CardContent>
             </Card>
@@ -134,15 +153,15 @@ const AdvancedAdminPanel = () => {
         <CardContent>
           {activeTab === 0 && (
             <Box>
-              <Typography variant="h6" gutterBottom>آخر الأنشطة</Typography>
+              <Typography variant="h6" gutterBottom>
+                آخر الأنشطة
+              </Typography>
               <List>
                 {recentActions.map((action, i) => (
                   <Box key={i}>
                     <ListItem>
                       <ListItemAvatar>
-                        <Avatar sx={{ bgcolor: 'primary.light' }}>
-                          {action.user[0]}
-                        </Avatar>
+                        <Avatar sx={{ bgcolor: 'primary.light' }}>{action.user[0]}</Avatar>
                       </ListItemAvatar>
                       <ListItemText
                         primary={action.user}
@@ -161,7 +180,9 @@ const AdvancedAdminPanel = () => {
               <SettingsIcon sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
               <Typography variant="h6">إعدادات النظام</Typography>
               <Typography color="text.secondary">إدارة الإعدادات العامة للنظام</Typography>
-              <Button variant="contained" sx={{ mt: 2 }}>فتح الإعدادات</Button>
+              <Button variant="contained" sx={{ mt: 2 }}>
+                فتح الإعدادات
+              </Button>
             </Box>
           )}
           {activeTab === 2 && (
@@ -169,7 +190,9 @@ const AdvancedAdminPanel = () => {
               <SecurityIcon sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
               <Typography variant="h6">إعدادات الأمان</Typography>
               <Typography color="text.secondary">إدارة سياسات الأمان والصلاحيات</Typography>
-              <Button variant="contained" sx={{ mt: 2 }}>إدارة الأمان</Button>
+              <Button variant="contained" sx={{ mt: 2 }}>
+                إدارة الأمان
+              </Button>
             </Box>
           )}
           {activeTab === 3 && (
@@ -177,7 +200,9 @@ const AdvancedAdminPanel = () => {
               <ReportIcon sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
               <Typography variant="h6">التقارير الإدارية</Typography>
               <Typography color="text.secondary">عرض وتصدير التقارير</Typography>
-              <Button variant="contained" sx={{ mt: 2 }}>عرض التقارير</Button>
+              <Button variant="contained" sx={{ mt: 2 }}>
+                عرض التقارير
+              </Button>
             </Box>
           )}
           {activeTab === 4 && (
@@ -185,7 +210,9 @@ const AdvancedAdminPanel = () => {
               <NotifIcon sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
               <Typography variant="h6">إدارة الإشعارات</Typography>
               <Typography color="text.secondary">إعداد وإدارة إشعارات النظام</Typography>
-              <Button variant="contained" sx={{ mt: 2 }}>إدارة الإشعارات</Button>
+              <Button variant="contained" sx={{ mt: 2 }}>
+                إدارة الإشعارات
+              </Button>
             </Box>
           )}
         </CardContent>

@@ -6,10 +6,32 @@
  */
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Box, Typography, Card, CardContent, Grid, Button, Table, TableBody,
-  TableCell, TableContainer, TableHead, TableRow, Paper, Chip, TextField,
-  Dialog, DialogTitle, DialogContent, DialogActions, Alert, CircularProgress,
-  Tabs, Tab, Badge, Tooltip, IconButton,
+  Box,
+  Typography,
+  Card,
+  CardContent,
+  Grid,
+  Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Chip,
+  TextField,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Alert,
+  CircularProgress,
+  Tabs,
+  Tab,
+  Badge,
+  Tooltip,
+  IconButton,
 } from '@mui/material';
 import {
   CreditCard as IqamaIcon,
@@ -55,7 +77,11 @@ export default function MuqeemPage() {
 
   // تغيير المهنة
   const [occupationDialog, setOccupationDialog] = useState(false);
-  const [occupationForm, setOccupationForm] = useState({ iqamaNumber: '', newOccupation: '', reason: '' });
+  const [occupationForm, setOccupationForm] = useState({
+    iqamaNumber: '',
+    newOccupation: '',
+    reason: '',
+  });
 
   const loadWorkers = useCallback(async () => {
     setWorkersLoading(true);
@@ -134,7 +160,7 @@ export default function MuqeemPage() {
     }
   };
 
-  const getExpiryColor = (days) => {
+  const getExpiryColor = days => {
     if (days <= 30) return 'error';
     if (days <= 90) return 'warning';
     return 'success';
@@ -157,7 +183,10 @@ export default function MuqeemPage() {
           <Button
             variant="outlined"
             startIcon={<ExitIcon />}
-            onClick={() => { setVisaType('exit_reentry'); setVisaDialog(true); }}
+            onClick={() => {
+              setVisaType('exit_reentry');
+              setVisaDialog(true);
+            }}
           >
             تأشيرة خروج وعودة
           </Button>
@@ -165,7 +194,10 @@ export default function MuqeemPage() {
             variant="outlined"
             color="error"
             startIcon={<ExitIcon />}
-            onClick={() => { setVisaType('final_exit'); setVisaDialog(true); }}
+            onClick={() => {
+              setVisaType('final_exit');
+              setVisaDialog(true);
+            }}
           >
             خروج نهائي
           </Button>
@@ -180,25 +212,33 @@ export default function MuqeemPage() {
       </Box>
 
       {error && (
-        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>{error}</Alert>
+        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
+          {error}
+        </Alert>
       )}
       {success && (
-        <Alert severity="success" sx={{ mb: 2 }} onClose={() => setSuccess(null)}>{success}</Alert>
+        <Alert severity="success" sx={{ mb: 2 }} onClose={() => setSuccess(null)}>
+          {success}
+        </Alert>
       )}
 
       {/* Tabs */}
       <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 3 }}>
         <Tab label="استعلام إقامة" />
-        <Tab label={
-          <Badge badgeContent={workers.length || 0} color="primary" max={999}>
-            قائمة العمال
-          </Badge>
-        } />
-        <Tab label={
-          <Badge badgeContent={expiring.length || 0} color="error">
-            إقامات منتهية قريباً
-          </Badge>
-        } />
+        <Tab
+          label={
+            <Badge badgeContent={workers.length || 0} color="primary" max={999}>
+              قائمة العمال
+            </Badge>
+          }
+        />
+        <Tab
+          label={
+            <Badge badgeContent={expiring.length || 0} color="error">
+              إقامات منتهية قريباً
+            </Badge>
+          }
+        />
       </Tabs>
 
       {/* Tab 0: Residence Query */}
@@ -206,13 +246,15 @@ export default function MuqeemPage() {
         <Box>
           <Card sx={{ mb: 3 }}>
             <CardContent>
-              <Typography variant="h6" mb={2}>الاستعلام عن إقامة</Typography>
+              <Typography variant="h6" mb={2}>
+                الاستعلام عن إقامة
+              </Typography>
               <Box display="flex" gap={2} alignItems="center">
                 <TextField
                   label="رقم الإقامة (Iqama Number)"
                   value={iqamaNumber}
-                  onChange={(e) => setIqamaNumber(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                  onChange={e => setIqamaNumber(e.target.value)}
+                  onKeyPress={e => e.key === 'Enter' && handleSearch()}
                   size="small"
                   sx={{ flex: 1, maxWidth: 350 }}
                   inputProps={{ maxLength: 10 }}
@@ -233,37 +275,61 @@ export default function MuqeemPage() {
           {residenceInfo && (
             <Card>
               <CardContent>
-                <Typography variant="h6" mb={2} color="primary">نتيجة الاستعلام</Typography>
+                <Typography variant="h6" mb={2} color="primary">
+                  نتيجة الاستعلام
+                </Typography>
                 <Grid container spacing={3}>
                   <Grid item xs={12} sm={6} md={4}>
-                    <Typography variant="caption" color="text.secondary">الاسم</Typography>
-                    <Typography fontWeight="bold">{residenceInfo.name || residenceInfo.fullName || '—'}</Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      الاسم
+                    </Typography>
+                    <Typography fontWeight="bold">
+                      {residenceInfo.name || residenceInfo.fullName || '—'}
+                    </Typography>
                   </Grid>
                   <Grid item xs={12} sm={6} md={4}>
-                    <Typography variant="caption" color="text.secondary">رقم الإقامة</Typography>
-                    <Typography fontWeight="bold">{residenceInfo.iqamaNumber || iqamaNumber}</Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      رقم الإقامة
+                    </Typography>
+                    <Typography fontWeight="bold">
+                      {residenceInfo.iqamaNumber || iqamaNumber}
+                    </Typography>
                   </Grid>
                   <Grid item xs={12} sm={6} md={4}>
-                    <Typography variant="caption" color="text.secondary">الجنسية</Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      الجنسية
+                    </Typography>
                     <Typography>{residenceInfo.nationality || '—'}</Typography>
                   </Grid>
                   <Grid item xs={12} sm={6} md={4}>
-                    <Typography variant="caption" color="text.secondary">المهنة</Typography>
-                    <Typography>{residenceInfo.occupation || residenceInfo.jobTitle || '—'}</Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      المهنة
+                    </Typography>
+                    <Typography>
+                      {residenceInfo.occupation || residenceInfo.jobTitle || '—'}
+                    </Typography>
                   </Grid>
                   <Grid item xs={12} sm={6} md={4}>
-                    <Typography variant="caption" color="text.secondary">تاريخ الانتهاء</Typography>
-                    <Typography color={residenceInfo.daysToExpiry <= 90 ? 'error.main' : 'text.primary'}>
+                    <Typography variant="caption" color="text.secondary">
+                      تاريخ الانتهاء
+                    </Typography>
+                    <Typography
+                      color={residenceInfo.daysToExpiry <= 90 ? 'error.main' : 'text.primary'}
+                    >
                       {residenceInfo.expiryDate
                         ? new Date(residenceInfo.expiryDate).toLocaleDateString('ar-SA')
                         : '—'}
                     </Typography>
                   </Grid>
                   <Grid item xs={12} sm={6} md={4}>
-                    <Typography variant="caption" color="text.secondary">الحالة</Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      الحالة
+                    </Typography>
                     <Box mt={0.5}>
                       <Chip
-                        label={residenceInfo.status === 'active' ? 'نشط' : residenceInfo.status || '—'}
+                        label={
+                          residenceInfo.status === 'active' ? 'نشط' : residenceInfo.status || '—'
+                        }
                         color={residenceInfo.status === 'active' ? 'success' : 'default'}
                         size="small"
                       />
@@ -272,7 +338,13 @@ export default function MuqeemPage() {
                   {residenceInfo.daysToExpiry !== undefined && (
                     <Grid item xs={12}>
                       <Alert
-                        severity={getExpiryColor(residenceInfo.daysToExpiry) === 'error' ? 'error' : getExpiryColor(residenceInfo.daysToExpiry) === 'warning' ? 'warning' : 'success'}
+                        severity={
+                          getExpiryColor(residenceInfo.daysToExpiry) === 'error'
+                            ? 'error'
+                            : getExpiryColor(residenceInfo.daysToExpiry) === 'warning'
+                              ? 'warning'
+                              : 'success'
+                        }
                       >
                         متبقي على الانتهاء: <strong>{residenceInfo.daysToExpiry} يوم</strong>
                       </Alert>
@@ -308,7 +380,9 @@ export default function MuqeemPage() {
               </Box>
             </Box>
             {workersLoading ? (
-              <Box textAlign="center" p={3}><CircularProgress /></Box>
+              <Box textAlign="center" p={3}>
+                <CircularProgress />
+              </Box>
             ) : (
               <TableContainer component={Paper} variant="outlined">
                 <Table size="small">
@@ -325,30 +399,36 @@ export default function MuqeemPage() {
                   <TableBody>
                     {workers.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={6} align="center" sx={{ py: 4, color: 'text.secondary' }}>
+                        <TableCell
+                          colSpan={6}
+                          align="center"
+                          sx={{ py: 4, color: 'text.secondary' }}
+                        >
                           لا توجد بيانات
                         </TableCell>
                       </TableRow>
-                    ) : workers.map((w, i) => (
-                      <TableRow key={w.iqamaNumber || i} hover>
-                        <TableCell>{w.name || w.fullName || '—'}</TableCell>
-                        <TableCell dir="ltr">{w.iqamaNumber || '—'}</TableCell>
-                        <TableCell>{w.nationality || '—'}</TableCell>
-                        <TableCell>{w.occupation || w.jobTitle || '—'}</TableCell>
-                        <TableCell>
-                          {w.expiryDate
-                            ? new Date(w.expiryDate).toLocaleDateString('ar-SA')
-                            : '—'}
-                        </TableCell>
-                        <TableCell>
-                          <Chip
-                            label={w.status === 'active' ? 'نشط' : w.status || '—'}
-                            color={w.status === 'active' ? 'success' : 'default'}
-                            size="small"
-                          />
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    ) : (
+                      workers.map((w, i) => (
+                        <TableRow key={w.iqamaNumber || i} hover>
+                          <TableCell>{w.name || w.fullName || '—'}</TableCell>
+                          <TableCell dir="ltr">{w.iqamaNumber || '—'}</TableCell>
+                          <TableCell>{w.nationality || '—'}</TableCell>
+                          <TableCell>{w.occupation || w.jobTitle || '—'}</TableCell>
+                          <TableCell>
+                            {w.expiryDate
+                              ? new Date(w.expiryDate).toLocaleDateString('ar-SA')
+                              : '—'}
+                          </TableCell>
+                          <TableCell>
+                            <Chip
+                              label={w.status === 'active' ? 'نشط' : w.status || '—'}
+                              color={w.status === 'active' ? 'success' : 'default'}
+                              size="small"
+                            />
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
                   </TableBody>
                 </Table>
               </TableContainer>
@@ -362,7 +442,8 @@ export default function MuqeemPage() {
         <Box>
           {expiring.filter(e => (e.daysToExpiry || 999) <= 30).length > 0 && (
             <Alert severity="error" sx={{ mb: 2 }}>
-              <strong>{expiring.filter(e => (e.daysToExpiry || 999) <= 30).length}</strong> إقامة ستنتهي خلال 30 يوماً — يجب التجديد فوراً
+              <strong>{expiring.filter(e => (e.daysToExpiry || 999) <= 30).length}</strong> إقامة
+              ستنتهي خلال 30 يوماً — يجب التجديد فوراً
             </Alert>
           )}
           <Card>
@@ -379,7 +460,9 @@ export default function MuqeemPage() {
                 </Tooltip>
               </Box>
               {expiringLoading ? (
-                <Box textAlign="center" p={3}><CircularProgress /></Box>
+                <Box textAlign="center" p={3}>
+                  <CircularProgress />
+                </Box>
               ) : (
                 <TableContainer component={Paper} variant="outlined">
                   <Table size="small">
@@ -395,41 +478,47 @@ export default function MuqeemPage() {
                     <TableBody>
                       {expiring.length === 0 ? (
                         <TableRow>
-                          <TableCell colSpan={5} align="center" sx={{ py: 4, color: 'text.secondary' }}>
+                          <TableCell
+                            colSpan={5}
+                            align="center"
+                            sx={{ py: 4, color: 'text.secondary' }}
+                          >
                             <CheckIcon color="success" sx={{ mr: 1 }} />
                             لا توجد إقامات منتهية قريباً
                           </TableCell>
                         </TableRow>
-                      ) : expiring.map((e, i) => (
-                        <TableRow key={e.iqamaNumber || i} hover>
-                          <TableCell>{e.name || e.fullName || '—'}</TableCell>
-                          <TableCell dir="ltr">{e.iqamaNumber || '—'}</TableCell>
-                          <TableCell>
-                            {e.expiryDate
-                              ? new Date(e.expiryDate).toLocaleDateString('ar-SA')
-                              : '—'}
-                          </TableCell>
-                          <TableCell>
-                            <Chip
-                              label={`${e.daysToExpiry || '—'} يوم`}
-                              color={getExpiryColor(e.daysToExpiry || 999)}
-                              size="small"
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <Button
-                              size="small"
-                              variant="outlined"
-                              onClick={() => {
-                                setRenewForm({ iqamaNumber: e.iqamaNumber || '', years: '1' });
-                                setRenewDialog(true);
-                              }}
-                            >
-                              تجديد
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
+                      ) : (
+                        expiring.map((e, i) => (
+                          <TableRow key={e.iqamaNumber || i} hover>
+                            <TableCell>{e.name || e.fullName || '—'}</TableCell>
+                            <TableCell dir="ltr">{e.iqamaNumber || '—'}</TableCell>
+                            <TableCell>
+                              {e.expiryDate
+                                ? new Date(e.expiryDate).toLocaleDateString('ar-SA')
+                                : '—'}
+                            </TableCell>
+                            <TableCell>
+                              <Chip
+                                label={`${e.daysToExpiry || '—'} يوم`}
+                                color={getExpiryColor(e.daysToExpiry || 999)}
+                                size="small"
+                              />
+                            </TableCell>
+                            <TableCell>
+                              <Button
+                                size="small"
+                                variant="outlined"
+                                onClick={() => {
+                                  setRenewForm({ iqamaNumber: e.iqamaNumber || '', years: '1' });
+                                  setRenewDialog(true);
+                                }}
+                              >
+                                تجديد
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
                     </TableBody>
                   </Table>
                 </TableContainer>
@@ -452,7 +541,7 @@ export default function MuqeemPage() {
                 fullWidth
                 label="رقم الإقامة"
                 value={renewForm.iqamaNumber}
-                onChange={(e) => setRenewForm({ ...renewForm, iqamaNumber: e.target.value })}
+                onChange={e => setRenewForm({ ...renewForm, iqamaNumber: e.target.value })}
                 inputProps={{ maxLength: 10 }}
               />
             </Grid>
@@ -462,7 +551,7 @@ export default function MuqeemPage() {
                 label="مدة التجديد (سنوات)"
                 type="number"
                 value={renewForm.years}
-                onChange={(e) => setRenewForm({ ...renewForm, years: e.target.value })}
+                onChange={e => setRenewForm({ ...renewForm, years: e.target.value })}
                 inputProps={{ min: 1, max: 2 }}
               />
             </Grid>
@@ -477,12 +566,26 @@ export default function MuqeemPage() {
       </Dialog>
 
       {/* ─── Visa Dialog ─── */}
-      <Dialog open={visaDialog} onClose={() => { setVisaDialog(false); setVisaResult(null); }} maxWidth="sm" fullWidth>
+      <Dialog
+        open={visaDialog}
+        onClose={() => {
+          setVisaDialog(false);
+          setVisaResult(null);
+        }}
+        maxWidth="sm"
+        fullWidth
+      >
         <DialogTitle>
           {visaType === 'final_exit' ? (
-            <><ExitIcon sx={{ mr: 1, verticalAlign: 'middle', color: 'error.main' }} />إصدار تأشيرة خروج نهائي</>
+            <>
+              <ExitIcon sx={{ mr: 1, verticalAlign: 'middle', color: 'error.main' }} />
+              إصدار تأشيرة خروج نهائي
+            </>
           ) : (
-            <><ReturnIcon sx={{ mr: 1, verticalAlign: 'middle', color: 'primary.main' }} />إصدار تأشيرة خروج وعودة</>
+            <>
+              <ReturnIcon sx={{ mr: 1, verticalAlign: 'middle', color: 'primary.main' }} />
+              إصدار تأشيرة خروج وعودة
+            </>
           )}
         </DialogTitle>
         <DialogContent>
@@ -492,7 +595,7 @@ export default function MuqeemPage() {
                 fullWidth
                 label="رقم الإقامة"
                 value={visaForm.iqamaNumber}
-                onChange={(e) => setVisaForm({ ...visaForm, iqamaNumber: e.target.value })}
+                onChange={e => setVisaForm({ ...visaForm, iqamaNumber: e.target.value })}
                 inputProps={{ maxLength: 10 }}
               />
             </Grid>
@@ -503,7 +606,7 @@ export default function MuqeemPage() {
                   label="المدة (أيام)"
                   type="number"
                   value={visaForm.duration}
-                  onChange={(e) => setVisaForm({ ...visaForm, duration: e.target.value })}
+                  onChange={e => setVisaForm({ ...visaForm, duration: e.target.value })}
                   inputProps={{ min: 30, max: 180 }}
                   helperText="من 30 إلى 180 يوم"
                 />
@@ -516,20 +619,35 @@ export default function MuqeemPage() {
                 multiline
                 rows={2}
                 value={visaForm.reason}
-                onChange={(e) => setVisaForm({ ...visaForm, reason: e.target.value })}
+                onChange={e => setVisaForm({ ...visaForm, reason: e.target.value })}
               />
             </Grid>
           </Grid>
           {visaResult && (
             <Box mt={2} p={2} bgcolor="success.light" borderRadius={1}>
-              <Typography variant="subtitle2" fontWeight="bold">تم إصدار التأشيرة</Typography>
-              {visaResult.visaNumber && <Typography>رقم التأشيرة: {visaResult.visaNumber}</Typography>}
-              {visaResult.expiryDate && <Typography>تنتهي في: {new Date(visaResult.expiryDate).toLocaleDateString('ar-SA')}</Typography>}
+              <Typography variant="subtitle2" fontWeight="bold">
+                تم إصدار التأشيرة
+              </Typography>
+              {visaResult.visaNumber && (
+                <Typography>رقم التأشيرة: {visaResult.visaNumber}</Typography>
+              )}
+              {visaResult.expiryDate && (
+                <Typography>
+                  تنتهي في: {new Date(visaResult.expiryDate).toLocaleDateString('ar-SA')}
+                </Typography>
+              )}
             </Box>
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => { setVisaDialog(false); setVisaResult(null); }}>إغلاق</Button>
+          <Button
+            onClick={() => {
+              setVisaDialog(false);
+              setVisaResult(null);
+            }}
+          >
+            إغلاق
+          </Button>
           {!visaResult && (
             <Button
               variant="contained"
@@ -544,7 +662,12 @@ export default function MuqeemPage() {
       </Dialog>
 
       {/* ─── Change Occupation Dialog ─── */}
-      <Dialog open={occupationDialog} onClose={() => setOccupationDialog(false)} maxWidth="sm" fullWidth>
+      <Dialog
+        open={occupationDialog}
+        onClose={() => setOccupationDialog(false)}
+        maxWidth="sm"
+        fullWidth
+      >
         <DialogTitle>
           <OccupationIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
           تغيير المهنة
@@ -556,7 +679,9 @@ export default function MuqeemPage() {
                 fullWidth
                 label="رقم الإقامة"
                 value={occupationForm.iqamaNumber}
-                onChange={(e) => setOccupationForm({ ...occupationForm, iqamaNumber: e.target.value })}
+                onChange={e =>
+                  setOccupationForm({ ...occupationForm, iqamaNumber: e.target.value })
+                }
                 inputProps={{ maxLength: 10 }}
               />
             </Grid>
@@ -565,7 +690,9 @@ export default function MuqeemPage() {
                 fullWidth
                 label="المهنة الجديدة"
                 value={occupationForm.newOccupation}
-                onChange={(e) => setOccupationForm({ ...occupationForm, newOccupation: e.target.value })}
+                onChange={e =>
+                  setOccupationForm({ ...occupationForm, newOccupation: e.target.value })
+                }
               />
             </Grid>
             <Grid item xs={12}>
@@ -575,7 +702,7 @@ export default function MuqeemPage() {
                 multiline
                 rows={2}
                 value={occupationForm.reason}
-                onChange={(e) => setOccupationForm({ ...occupationForm, reason: e.target.value })}
+                onChange={e => setOccupationForm({ ...occupationForm, reason: e.target.value })}
               />
             </Grid>
           </Grid>

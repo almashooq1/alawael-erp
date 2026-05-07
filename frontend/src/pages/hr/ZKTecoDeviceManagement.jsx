@@ -1,10 +1,35 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
-  Container, Typography, Grid, Paper, Box, Button, TextField, Card, CardContent,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Chip, Avatar, IconButton, Alert, Snackbar, Tooltip, CircularProgress,
-  Dialog, DialogTitle, DialogContent, DialogActions, Divider, Switch,
-  FormControlLabel, LinearProgress,
+  Container,
+  Typography,
+  Grid,
+  Paper,
+  Box,
+  Button,
+  TextField,
+  Card,
+  CardContent,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Chip,
+  Avatar,
+  IconButton,
+  Alert,
+  Snackbar,
+  Tooltip,
+  CircularProgress,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Divider,
+  Switch,
+  FormControlLabel,
+  LinearProgress,
   InputAdornment,
 } from '@mui/material';
 import {
@@ -32,7 +57,7 @@ import {
   LinkOff as UnlinkIcon,
   AccessTime as TimeIcon,
   DeviceHub as DeviceHubIcon,
-  } from '@mui/icons-material';
+} from '@mui/icons-material';
 import zktecoService from 'services/zktecoService';
 import { gradients } from '../../theme/palette';
 
@@ -72,10 +97,24 @@ const ZKTecoDeviceManagement = () => {
   const [search, setSearch] = useState('');
 
   // Dialogs
-  const [deviceDialog, setDeviceDialog] = useState({ open: false, mode: 'add', data: INITIAL_DEVICE });
+  const [deviceDialog, setDeviceDialog] = useState({
+    open: false,
+    mode: 'add',
+    data: INITIAL_DEVICE,
+  });
   const [usersDialog, setUsersDialog] = useState({ open: false, deviceId: null, users: [] });
-  const [syncHistoryDialog, setSyncHistoryDialog] = useState({ open: false, deviceId: null, logs: [] });
-  const [testDialog, setTestDialog] = useState({ open: false, ip: '', port: 4370, result: null, testing: false });
+  const [syncHistoryDialog, setSyncHistoryDialog] = useState({
+    open: false,
+    deviceId: null,
+    logs: [],
+  });
+  const [testDialog, setTestDialog] = useState({
+    open: false,
+    ip: '',
+    port: 4370,
+    result: null,
+    testing: false,
+  });
 
   // Snackbar
   const [snack, setSnack] = useState({ open: false, message: '', severity: 'success' });
@@ -97,16 +136,19 @@ const ZKTecoDeviceManagement = () => {
     setLoading(false);
   }, []);
 
-  useEffect(() => { loadData(); }, [loadData]);
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   /* ─── Filtered Devices ─── */
   const filtered = useMemo(() => {
     if (!search) return devices;
     const q = search.toLowerCase();
-    return devices.filter(d =>
-      d.deviceName?.toLowerCase().includes(q) ||
-      d.ipAddress?.includes(q) ||
-      d.location?.branchName?.toLowerCase().includes(q)
+    return devices.filter(
+      d =>
+        d.deviceName?.toLowerCase().includes(q) ||
+        d.ipAddress?.includes(q) ||
+        d.location?.branchName?.toLowerCase().includes(q)
     );
   }, [devices, search]);
 
@@ -129,7 +171,7 @@ const ZKTecoDeviceManagement = () => {
     setActionLoading(null);
   };
 
-  const handleDeleteDevice = async (id) => {
+  const handleDeleteDevice = async id => {
     if (!window.confirm('هل أنت متأكد من حذف هذا الجهاز؟')) return;
     setActionLoading(`delete-${id}`);
     try {
@@ -143,7 +185,7 @@ const ZKTecoDeviceManagement = () => {
   };
 
   /* ─── Connection ─── */
-  const handleConnect = async (id) => {
+  const handleConnect = async id => {
     setActionLoading(`connect-${id}`);
     try {
       await zktecoService.connectDevice(id);
@@ -155,7 +197,7 @@ const ZKTecoDeviceManagement = () => {
     setActionLoading(null);
   };
 
-  const handleDisconnect = async (id) => {
+  const handleDisconnect = async id => {
     setActionLoading(`disconnect-${id}`);
     try {
       await zktecoService.disconnectDevice(id);
@@ -168,7 +210,7 @@ const ZKTecoDeviceManagement = () => {
   };
 
   /* ─── Sync ─── */
-  const handleSync = async (id) => {
+  const handleSync = async id => {
     setActionLoading(`sync-${id}`);
     try {
       const res = await zktecoService.syncDevice(id);
@@ -211,16 +253,24 @@ const ZKTecoDeviceManagement = () => {
       const res = await zktecoService.testConnection(testDialog.ip, testDialog.port);
       setTestDialog(prev => ({ ...prev, testing: false, result: res.data || res }));
     } catch {
-      setTestDialog(prev => ({ ...prev, testing: false, result: { success: false, message: 'فشل الاتصال' } }));
+      setTestDialog(prev => ({
+        ...prev,
+        testing: false,
+        result: { success: false, message: 'فشل الاتصال' },
+      }));
     }
   };
 
   /* ─── Device Users ─── */
-  const handleOpenUsers = async (deviceId) => {
+  const handleOpenUsers = async deviceId => {
     try {
       setUsersDialog({ open: true, deviceId, users: [], loading: true });
       const res = await zktecoService.getDeviceUsers(deviceId);
-      setUsersDialog(prev => ({ ...prev, users: Array.isArray(res.data) ? res.data : [], loading: false }));
+      setUsersDialog(prev => ({
+        ...prev,
+        users: Array.isArray(res.data) ? res.data : [],
+        loading: false,
+      }));
     } catch {
       showSnack('خطأ في جلب مستخدمي الجهاز', 'error');
       setUsersDialog(prev => ({ ...prev, loading: false }));
@@ -228,7 +278,7 @@ const ZKTecoDeviceManagement = () => {
   };
 
   /* ─── Sync History ─── */
-  const handleOpenSyncHistory = async (deviceId) => {
+  const handleOpenSyncHistory = async deviceId => {
     try {
       setSyncHistoryDialog({ open: true, deviceId, logs: [], loading: true });
       const res = await zktecoService.getSyncHistory(deviceId);
@@ -269,7 +319,9 @@ const ZKTecoDeviceManagement = () => {
           <Button
             variant="outlined"
             startIcon={<TestIcon />}
-            onClick={() => setTestDialog({ open: true, ip: '', port: 4370, result: null, testing: false })}
+            onClick={() =>
+              setTestDialog({ open: true, ip: '', port: 4370, result: null, testing: false })
+            }
           >
             اختبار اتصال
           </Button>
@@ -284,7 +336,9 @@ const ZKTecoDeviceManagement = () => {
           <Button
             variant="contained"
             startIcon={<AddIcon />}
-            onClick={() => setDeviceDialog({ open: true, mode: 'add', data: { ...INITIAL_DEVICE } })}
+            onClick={() =>
+              setDeviceDialog({ open: true, mode: 'add', data: { ...INITIAL_DEVICE } })
+            }
           >
             إضافة جهاز
           </Button>
@@ -299,20 +353,56 @@ const ZKTecoDeviceManagement = () => {
       {/* Stats Cards */}
       <Grid container spacing={2} sx={{ mb: 3 }}>
         {[
-          { label: 'إجمالي الأجهزة', value: stats.totalDevices || 0, icon: <DeviceHubIcon />, gradient: gradients?.primary || 'linear-gradient(135deg, #667eea, #764ba2)' },
-          { label: 'متصل', value: stats.online || 0, icon: <OnlineIcon />, gradient: 'linear-gradient(135deg, #11998e, #38ef7d)' },
-          { label: 'غير متصل', value: stats.offline || 0, icon: <OfflineIcon />, gradient: 'linear-gradient(135deg, #bdc3c7, #95a5a6)' },
-          { label: 'خطأ', value: stats.error || 0, icon: <ErrorIcon />, gradient: 'linear-gradient(135deg, #eb3349, #f45c43)' },
-          { label: 'موظفون مربوطون', value: stats.totalMappedUsers || 0, icon: <PeopleIcon />, gradient: 'linear-gradient(135deg, #4facfe, #00f2fe)' },
-          { label: 'بصمات اليوم', value: stats.todayBiometricCheckIns || 0, icon: <FingerprintIcon />, gradient: 'linear-gradient(135deg, #a18cd1, #fbc2eb)' },
+          {
+            label: 'إجمالي الأجهزة',
+            value: stats.totalDevices || 0,
+            icon: <DeviceHubIcon />,
+            gradient: gradients?.primary || 'linear-gradient(135deg, #667eea, #764ba2)',
+          },
+          {
+            label: 'متصل',
+            value: stats.online || 0,
+            icon: <OnlineIcon />,
+            gradient: 'linear-gradient(135deg, #11998e, #38ef7d)',
+          },
+          {
+            label: 'غير متصل',
+            value: stats.offline || 0,
+            icon: <OfflineIcon />,
+            gradient: 'linear-gradient(135deg, #bdc3c7, #95a5a6)',
+          },
+          {
+            label: 'خطأ',
+            value: stats.error || 0,
+            icon: <ErrorIcon />,
+            gradient: 'linear-gradient(135deg, #eb3349, #f45c43)',
+          },
+          {
+            label: 'موظفون مربوطون',
+            value: stats.totalMappedUsers || 0,
+            icon: <PeopleIcon />,
+            gradient: 'linear-gradient(135deg, #4facfe, #00f2fe)',
+          },
+          {
+            label: 'بصمات اليوم',
+            value: stats.todayBiometricCheckIns || 0,
+            icon: <FingerprintIcon />,
+            gradient: 'linear-gradient(135deg, #a18cd1, #fbc2eb)',
+          },
         ].map(({ label, value, icon, gradient }, i) => (
           <Grid item xs={6} sm={4} md={2} key={i}>
             <Card sx={{ background: gradient, color: '#fff', borderRadius: 3 }}>
               <CardContent sx={{ py: 1.5, px: 2, '&:last-child': { pb: 1.5 } }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Box
+                  sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+                >
                   <Box>
-                    <Typography variant="caption" sx={{ opacity: 0.85 }}>{label}</Typography>
-                    <Typography variant="h5" fontWeight="bold">{value}</Typography>
+                    <Typography variant="caption" sx={{ opacity: 0.85 }}>
+                      {label}
+                    </Typography>
+                    <Typography variant="h5" fontWeight="bold">
+                      {value}
+                    </Typography>
                   </Box>
                   <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)', width: 36, height: 36 }}>
                     {icon}
@@ -334,7 +424,9 @@ const ZKTecoDeviceManagement = () => {
           onChange={e => setSearch(e.target.value)}
           InputProps={{
             startAdornment: (
-              <InputAdornment position="start"><SearchIcon color="action" /></InputAdornment>
+              <InputAdornment position="start">
+                <SearchIcon color="action" />
+              </InputAdornment>
             ),
           }}
         />
@@ -344,12 +436,19 @@ const ZKTecoDeviceManagement = () => {
       {filtered.length === 0 && !loading ? (
         <Paper sx={{ p: 4, textAlign: 'center', borderRadius: 3 }}>
           <DeviceIcon sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
-          <Typography variant="h6" color="text.secondary">لا توجد أجهزة</Typography>
+          <Typography variant="h6" color="text.secondary">
+            لا توجد أجهزة
+          </Typography>
           <Typography variant="body2" color="text.disabled" sx={{ mb: 2 }}>
             أضف جهاز ZKTeco جديد للبدء في مزامنة سجلات الحضور
           </Typography>
-          <Button variant="contained" startIcon={<AddIcon />}
-            onClick={() => setDeviceDialog({ open: true, mode: 'add', data: { ...INITIAL_DEVICE } })}>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() =>
+              setDeviceDialog({ open: true, mode: 'add', data: { ...INITIAL_DEVICE } })
+            }
+          >
             إضافة جهاز
           </Button>
         </Paper>
@@ -360,25 +459,38 @@ const ZKTecoDeviceManagement = () => {
             const isConnected = device.isConnected || device.status === 'online';
             return (
               <Grid item xs={12} md={6} lg={4} key={device._id}>
-                <Card sx={{
-                  borderRadius: 3,
-                  border: '1px solid',
-                  borderColor: isConnected ? 'success.light' : 'divider',
-                  transition: 'all 0.2s',
-                  '&:hover': { boxShadow: 4 },
-                }}>
+                <Card
+                  sx={{
+                    borderRadius: 3,
+                    border: '1px solid',
+                    borderColor: isConnected ? 'success.light' : 'divider',
+                    transition: 'all 0.2s',
+                    '&:hover': { boxShadow: 4 },
+                  }}
+                >
                   <CardContent>
                     {/* Device Header */}
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        mb: 2,
+                      }}
+                    >
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                        <Avatar sx={{
-                          bgcolor: isConnected ? 'success.light' : 'grey.200',
-                          color: isConnected ? 'success.dark' : 'grey.500',
-                        }}>
+                        <Avatar
+                          sx={{
+                            bgcolor: isConnected ? 'success.light' : 'grey.200',
+                            color: isConnected ? 'success.dark' : 'grey.500',
+                          }}
+                        >
                           <FingerprintIcon />
                         </Avatar>
                         <Box>
-                          <Typography variant="subtitle1" fontWeight="bold">{device.deviceName}</Typography>
+                          <Typography variant="subtitle1" fontWeight="bold">
+                            {device.deviceName}
+                          </Typography>
                           <Typography variant="caption" color="text.secondary">
                             {device.ipAddress}:{device.port} • {device.model || 'ZKTeco'}
                           </Typography>
@@ -399,54 +511,103 @@ const ZKTecoDeviceManagement = () => {
                         <Chip label={device.location.branchName} size="small" variant="outlined" />
                       )}
                       {device.serialNumber && (
-                        <Chip label={`SN: ${device.serialNumber}`} size="small" variant="outlined" />
+                        <Chip
+                          label={`SN: ${device.serialNumber}`}
+                          size="small"
+                          variant="outlined"
+                        />
                       )}
                       {device.syncSettings?.autoSync && (
-                        <Chip icon={<ScheduleIcon />} label="مزامنة تلقائية" size="small" color="info" variant="outlined" />
+                        <Chip
+                          icon={<ScheduleIcon />}
+                          label="مزامنة تلقائية"
+                          size="small"
+                          color="info"
+                          variant="outlined"
+                        />
                       )}
                     </Box>
 
                     {/* Last Sync Info */}
                     {device.syncSettings?.lastSync && (
-                      <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 1.5 }}>
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        display="block"
+                        sx={{ mb: 1.5 }}
+                      >
                         <TimeIcon sx={{ fontSize: 12, verticalAlign: 'middle', mr: 0.5 }} />
                         آخر مزامنة: {new Date(device.syncSettings.lastSync).toLocaleString('ar-SA')}
                       </Typography>
                     )}
 
                     {/* User Mapping Count */}
-                    <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 2 }}>
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      display="block"
+                      sx={{ mb: 2 }}
+                    >
                       <PeopleIcon sx={{ fontSize: 12, verticalAlign: 'middle', mr: 0.5 }} />
-                      المستخدمون المربوطون: {device.userMappings?.filter(m => m.employeeId)?.length || 0}
+                      المستخدمون المربوطون:{' '}
+                      {device.userMappings?.filter(m => m.employeeId)?.length || 0}
                     </Typography>
 
                     <Divider sx={{ mb: 1.5 }} />
 
                     {/* Actions */}
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 0.5 }}>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        flexWrap: 'wrap',
+                        gap: 0.5,
+                      }}
+                    >
                       <Box>
                         {isConnected ? (
                           <Tooltip title="قطع الاتصال">
-                            <IconButton color="error" size="small"
+                            <IconButton
+                              color="error"
+                              size="small"
                               disabled={!!actionLoading}
-                              onClick={() => handleDisconnect(device._id)}>
-                              {actionLoading === `disconnect-${device._id}` ? <CircularProgress size={18} /> : <DisconnectIcon />}
+                              onClick={() => handleDisconnect(device._id)}
+                            >
+                              {actionLoading === `disconnect-${device._id}` ? (
+                                <CircularProgress size={18} />
+                              ) : (
+                                <DisconnectIcon />
+                              )}
                             </IconButton>
                           </Tooltip>
                         ) : (
                           <Tooltip title="اتصال">
-                            <IconButton color="success" size="small"
+                            <IconButton
+                              color="success"
+                              size="small"
                               disabled={!!actionLoading}
-                              onClick={() => handleConnect(device._id)}>
-                              {actionLoading === `connect-${device._id}` ? <CircularProgress size={18} /> : <ConnectIcon />}
+                              onClick={() => handleConnect(device._id)}
+                            >
+                              {actionLoading === `connect-${device._id}` ? (
+                                <CircularProgress size={18} />
+                              ) : (
+                                <ConnectIcon />
+                              )}
                             </IconButton>
                           </Tooltip>
                         )}
                         <Tooltip title="مزامنة">
-                          <IconButton color="primary" size="small"
+                          <IconButton
+                            color="primary"
+                            size="small"
                             disabled={!!actionLoading}
-                            onClick={() => handleSync(device._id)}>
-                            {actionLoading === `sync-${device._id}` ? <CircularProgress size={18} /> : <SyncIcon />}
+                            onClick={() => handleSync(device._id)}
+                          >
+                            {actionLoading === `sync-${device._id}` ? (
+                              <CircularProgress size={18} />
+                            ) : (
+                              <SyncIcon />
+                            )}
                           </IconButton>
                         </Tooltip>
                       </Box>
@@ -457,34 +618,55 @@ const ZKTecoDeviceManagement = () => {
                           </IconButton>
                         </Tooltip>
                         <Tooltip title="سجل المزامنة">
-                          <IconButton size="small" onClick={() => handleOpenSyncHistory(device._id)}>
+                          <IconButton
+                            size="small"
+                            onClick={() => handleOpenSyncHistory(device._id)}
+                          >
                             <HistoryIcon />
                           </IconButton>
                         </Tooltip>
                         <Tooltip title="تعديل">
-                          <IconButton size="small"
-                            onClick={() => setDeviceDialog({ open: true, mode: 'edit', data: { ...device } })}>
+                          <IconButton
+                            size="small"
+                            onClick={() =>
+                              setDeviceDialog({ open: true, mode: 'edit', data: { ...device } })
+                            }
+                          >
                             <EditIcon />
                           </IconButton>
                         </Tooltip>
                         <Tooltip title="حذف">
-                          <IconButton size="small" color="error"
+                          <IconButton
+                            size="small"
+                            color="error"
                             disabled={!!actionLoading}
-                            onClick={() => handleDeleteDevice(device._id)}>
-                            {actionLoading === `delete-${device._id}` ? <CircularProgress size={18} /> : <DeleteIcon />}
+                            onClick={() => handleDeleteDevice(device._id)}
+                          >
+                            {actionLoading === `delete-${device._id}` ? (
+                              <CircularProgress size={18} />
+                            ) : (
+                              <DeleteIcon />
+                            )}
                           </IconButton>
                         </Tooltip>
                       </Box>
                     </Box>
 
                     {/* Auto Sync Toggle */}
-                    <Box sx={{ mt: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <Box
+                      sx={{
+                        mt: 1,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                      }}
+                    >
                       <FormControlLabel
                         control={
                           <Switch
                             size="small"
                             checked={!!device.syncSettings?.autoSync}
-                            onChange={(e) => handleAutoSyncToggle(device._id, e.target.checked)}
+                            onChange={e => handleAutoSyncToggle(device._id, e.target.checked)}
                           />
                         }
                         label={<Typography variant="caption">مزامنة تلقائية</Typography>}
@@ -524,7 +706,9 @@ const ZKTecoDeviceManagement = () => {
               required
               fullWidth
               value={deviceDialog.data.deviceName}
-              onChange={e => setDeviceDialog(p => ({ ...p, data: { ...p.data, deviceName: e.target.value } }))}
+              onChange={e =>
+                setDeviceDialog(p => ({ ...p, data: { ...p.data, deviceName: e.target.value } }))
+              }
               placeholder="مثال: جهاز البصمة - المدخل الرئيسي"
             />
             <Box sx={{ display: 'flex', gap: 2 }}>
@@ -533,7 +717,9 @@ const ZKTecoDeviceManagement = () => {
                 required
                 fullWidth
                 value={deviceDialog.data.ipAddress}
-                onChange={e => setDeviceDialog(p => ({ ...p, data: { ...p.data, ipAddress: e.target.value } }))}
+                onChange={e =>
+                  setDeviceDialog(p => ({ ...p, data: { ...p.data, ipAddress: e.target.value } }))
+                }
                 placeholder="192.168.1.100"
               />
               <TextField
@@ -541,7 +727,12 @@ const ZKTecoDeviceManagement = () => {
                 type="number"
                 sx={{ minWidth: 120 }}
                 value={deviceDialog.data.port}
-                onChange={e => setDeviceDialog(p => ({ ...p, data: { ...p.data, port: parseInt(e.target.value) || 4370 } }))}
+                onChange={e =>
+                  setDeviceDialog(p => ({
+                    ...p,
+                    data: { ...p.data, port: parseInt(e.target.value) || 4370 },
+                  }))
+                }
               />
             </Box>
             <Box sx={{ display: 'flex', gap: 2 }}>
@@ -549,41 +740,62 @@ const ZKTecoDeviceManagement = () => {
                 label="الموديل"
                 fullWidth
                 value={deviceDialog.data.model}
-                onChange={e => setDeviceDialog(p => ({ ...p, data: { ...p.data, model: e.target.value } }))}
+                onChange={e =>
+                  setDeviceDialog(p => ({ ...p, data: { ...p.data, model: e.target.value } }))
+                }
               />
               <TextField
                 label="الرقم التسلسلي"
                 fullWidth
                 value={deviceDialog.data.serialNumber}
-                onChange={e => setDeviceDialog(p => ({ ...p, data: { ...p.data, serialNumber: e.target.value } }))}
+                onChange={e =>
+                  setDeviceDialog(p => ({
+                    ...p,
+                    data: { ...p.data, serialNumber: e.target.value },
+                  }))
+                }
               />
             </Box>
-            <Divider><Chip label="الموقع" size="small" /></Divider>
+            <Divider>
+              <Chip label="الموقع" size="small" />
+            </Divider>
             <Box sx={{ display: 'flex', gap: 2 }}>
               <TextField
                 label="الفرع"
                 fullWidth
                 value={deviceDialog.data.location?.branchName || ''}
-                onChange={e => setDeviceDialog(p => ({
-                  ...p, data: { ...p.data, location: { ...p.data.location, branchName: e.target.value } }
-                }))}
+                onChange={e =>
+                  setDeviceDialog(p => ({
+                    ...p,
+                    data: {
+                      ...p.data,
+                      location: { ...p.data.location, branchName: e.target.value },
+                    },
+                  }))
+                }
               />
               <TextField
                 label="الطابق"
                 fullWidth
                 value={deviceDialog.data.location?.floor || ''}
-                onChange={e => setDeviceDialog(p => ({
-                  ...p, data: { ...p.data, location: { ...p.data.location, floor: e.target.value } }
-                }))}
+                onChange={e =>
+                  setDeviceDialog(p => ({
+                    ...p,
+                    data: { ...p.data, location: { ...p.data.location, floor: e.target.value } },
+                  }))
+                }
               />
             </Box>
             <TextField
               label="المنطقة / الوصف"
               fullWidth
               value={deviceDialog.data.location?.area || ''}
-              onChange={e => setDeviceDialog(p => ({
-                ...p, data: { ...p.data, location: { ...p.data.location, area: e.target.value } }
-              }))}
+              onChange={e =>
+                setDeviceDialog(p => ({
+                  ...p,
+                  data: { ...p.data, location: { ...p.data.location, area: e.target.value } },
+                }))
+              }
             />
             <TextField
               label="ملاحظات"
@@ -591,18 +803,26 @@ const ZKTecoDeviceManagement = () => {
               multiline
               rows={2}
               value={deviceDialog.data.notes || ''}
-              onChange={e => setDeviceDialog(p => ({ ...p, data: { ...p.data, notes: e.target.value } }))}
+              onChange={e =>
+                setDeviceDialog(p => ({ ...p, data: { ...p.data, notes: e.target.value } }))
+              }
             />
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDeviceDialog({ open: false, mode: 'add', data: INITIAL_DEVICE })}>
+          <Button
+            onClick={() => setDeviceDialog({ open: false, mode: 'add', data: INITIAL_DEVICE })}
+          >
             إلغاء
           </Button>
           <Button
             variant="contained"
             onClick={handleSaveDevice}
-            disabled={!deviceDialog.data.deviceName || !deviceDialog.data.ipAddress || actionLoading === 'save'}
+            disabled={
+              !deviceDialog.data.deviceName ||
+              !deviceDialog.data.ipAddress ||
+              actionLoading === 'save'
+            }
             startIcon={actionLoading === 'save' ? <CircularProgress size={18} /> : null}
           >
             {deviceDialog.mode === 'add' ? 'إضافة' : 'حفظ'}
@@ -613,7 +833,9 @@ const ZKTecoDeviceManagement = () => {
       {/* Test Connection Dialog */}
       <Dialog
         open={testDialog.open}
-        onClose={() => setTestDialog({ open: false, ip: '', port: 4370, result: null, testing: false })}
+        onClose={() =>
+          setTestDialog({ open: false, ip: '', port: 4370, result: null, testing: false })
+        }
         maxWidth="xs"
         fullWidth
       >
@@ -637,13 +859,18 @@ const ZKTecoDeviceManagement = () => {
             {testDialog.testing && <LinearProgress />}
             {testDialog.result && (
               <Alert severity={testDialog.result.success ? 'success' : 'error'}>
-                {testDialog.result.message || (testDialog.result.success ? 'تم الاتصال بنجاح' : 'فشل الاتصال')}
+                {testDialog.result.message ||
+                  (testDialog.result.success ? 'تم الاتصال بنجاح' : 'فشل الاتصال')}
               </Alert>
             )}
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setTestDialog({ open: false, ip: '', port: 4370, result: null, testing: false })}>
+          <Button
+            onClick={() =>
+              setTestDialog({ open: false, ip: '', port: 4370, result: null, testing: false })
+            }
+          >
             إغلاق
           </Button>
           <Button
@@ -672,7 +899,9 @@ const ZKTecoDeviceManagement = () => {
         </DialogTitle>
         <DialogContent dividers>
           {usersDialog.loading ? (
-            <Box sx={{ textAlign: 'center', py: 4 }}><CircularProgress /></Box>
+            <Box sx={{ textAlign: 'center', py: 4 }}>
+              <CircularProgress />
+            </Box>
           ) : usersDialog.users.length === 0 ? (
             <Typography color="text.secondary" align="center" sx={{ py: 4 }}>
               لا يوجد مستخدمون في هذا الجهاز
@@ -707,12 +936,18 @@ const ZKTecoDeviceManagement = () => {
                       <TableCell align="center">
                         {user.isMapped ? (
                           <Tooltip title="إلغاء الربط">
-                            <IconButton size="small" color="error"
+                            <IconButton
+                              size="small"
+                              color="error"
                               onClick={async () => {
-                                await zktecoService.unmapDeviceUser(usersDialog.deviceId, user.zktecoUserId);
+                                await zktecoService.unmapDeviceUser(
+                                  usersDialog.deviceId,
+                                  user.zktecoUserId
+                                );
                                 handleOpenUsers(usersDialog.deviceId);
                                 showSnack('تم إلغاء الربط');
-                              }}>
+                              }}
+                            >
                               <UnlinkIcon />
                             </IconButton>
                           </Tooltip>
@@ -753,7 +988,9 @@ const ZKTecoDeviceManagement = () => {
         </DialogTitle>
         <DialogContent dividers>
           {syncHistoryDialog.loading ? (
-            <Box sx={{ textAlign: 'center', py: 4 }}><CircularProgress /></Box>
+            <Box sx={{ textAlign: 'center', py: 4 }}>
+              <CircularProgress />
+            </Box>
           ) : syncHistoryDialog.logs.length === 0 ? (
             <Typography color="text.secondary" align="center" sx={{ py: 4 }}>
               لا توجد سجلات مزامنة
@@ -781,16 +1018,42 @@ const ZKTecoDeviceManagement = () => {
                       </TableCell>
                       <TableCell>
                         <Chip
-                          label={log.syncType === 'manual' ? 'يدوي' : log.syncType === 'auto' ? 'تلقائي' : 'مجدول'}
+                          label={
+                            log.syncType === 'manual'
+                              ? 'يدوي'
+                              : log.syncType === 'auto'
+                                ? 'تلقائي'
+                                : 'مجدول'
+                          }
                           size="small"
                           variant="outlined"
                         />
                       </TableCell>
                       <TableCell>
                         <Chip
-                          icon={log.status === 'success' ? <SuccessIcon /> : log.status === 'failed' ? <ErrorIcon /> : <WarningIcon />}
-                          label={log.status === 'success' ? 'نجاح' : log.status === 'failed' ? 'فشل' : 'جزئي'}
-                          color={log.status === 'success' ? 'success' : log.status === 'failed' ? 'error' : 'warning'}
+                          icon={
+                            log.status === 'success' ? (
+                              <SuccessIcon />
+                            ) : log.status === 'failed' ? (
+                              <ErrorIcon />
+                            ) : (
+                              <WarningIcon />
+                            )
+                          }
+                          label={
+                            log.status === 'success'
+                              ? 'نجاح'
+                              : log.status === 'failed'
+                                ? 'فشل'
+                                : 'جزئي'
+                          }
+                          color={
+                            log.status === 'success'
+                              ? 'success'
+                              : log.status === 'failed'
+                                ? 'error'
+                                : 'warning'
+                          }
                           size="small"
                           variant="outlined"
                         />
@@ -799,7 +1062,9 @@ const ZKTecoDeviceManagement = () => {
                       <TableCell>{log.recordsSynced || 0}</TableCell>
                       <TableCell>{log.recordsSkipped || 0}</TableCell>
                       <TableCell>{log.recordsFailed || 0}</TableCell>
-                      <TableCell>{log.duration ? `${(log.duration / 1000).toFixed(1)}s` : '-'}</TableCell>
+                      <TableCell>
+                        {log.duration ? `${(log.duration / 1000).toFixed(1)}s` : '-'}
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

@@ -136,8 +136,8 @@ export default function Beneficiary360Page() {
     try {
       // Load beneficiary and 360 profile in parallel
       const [bRes, p360Res] = await Promise.all([
-        coreAPI.getById(id).catch(() => null),
-        coreAPI.get360Profile(id).catch(() => null),
+        coreAPI.get(id).catch(() => null),
+        coreAPI.get360(id).catch(() => null),
       ]);
 
       if (bRes?.data) setBeneficiary(bRes.data);
@@ -151,8 +151,8 @@ export default function Beneficiary360Page() {
         carePlansAPI.list({ beneficiaryId: id, limit: 50 }).catch(() => ({ data: [] })),
         sessionsAPI.list({ beneficiaryId: id, limit: 100 }).catch(() => ({ data: [] })),
         goalsAPI.list({ beneficiaryId: id, limit: 100 }).catch(() => ({ data: [] })),
-        aiRecommendationsAPI.getForBeneficiary(id).catch(() => ({ data: [] })),
-        familyAPI.list({ beneficiaryId: id, limit: 50 }).catch(() => ({ data: [] })),
+        aiRecommendationsAPI.getByBeneficiary(id).catch(() => ({ data: [] })),
+        familyAPI.listMembers(id).catch(() => ({ data: [] })),
       ]);
 
       setEpisodes(epRes?.data?.data || epRes?.data || []);

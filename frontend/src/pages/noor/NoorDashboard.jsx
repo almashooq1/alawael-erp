@@ -199,7 +199,7 @@ export default function NoorDashboard() {
     }
   };
 
-  const handleSyncStudent = async (id) => {
+  const handleSyncStudent = async id => {
     setSyncingId(id);
     try {
       await noorService.syncStudent(id);
@@ -234,7 +234,7 @@ export default function NoorDashboard() {
     }
   };
 
-  const handleSubmitIEP = async (id) => {
+  const handleSubmitIEP = async id => {
     try {
       await noorService.submitIEPToNoor(id);
       loadData();
@@ -272,12 +272,7 @@ export default function NoorDashboard() {
   return (
     <Box p={3} dir="rtl">
       {/* Header */}
-      <Box
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
-        mb={3}
-      >
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
         <Box>
           <Typography variant="h4" fontWeight="bold">
             <SchoolIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
@@ -287,11 +282,7 @@ export default function NoorDashboard() {
             إدارة التكامل مع نظام نور للطلاب ذوي الإعاقة
           </Typography>
         </Box>
-        <Button
-          variant="outlined"
-          startIcon={<RefreshIcon />}
-          onClick={loadData}
-        >
+        <Button variant="outlined" startIcon={<RefreshIcon />} onClick={loadData}>
           تحديث
         </Button>
       </Box>
@@ -356,9 +347,7 @@ export default function NoorDashboard() {
         <Card>
           <CardContent>
             <Box display="flex" justifyContent="space-between" mb={2}>
-              <Typography variant="h6">
-                الطلاب المسجلون ({studentTotal})
-              </Typography>
+              <Typography variant="h6">الطلاب المسجلون ({studentTotal})</Typography>
               <Box display="flex" gap={1}>
                 <Button
                   variant="outlined"
@@ -401,7 +390,7 @@ export default function NoorDashboard() {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    students.map((s) => (
+                    students.map(s => (
                       <TableRow key={s._id}>
                         <TableCell>{s.noorId}</TableCell>
                         <TableCell>{s.studentName?.ar || '—'}</TableCell>
@@ -413,7 +402,9 @@ export default function NoorDashboard() {
                         </TableCell>
                         <TableCell>
                           <Chip
-                            label={enrollmentStatusMap[s.enrollmentStatus]?.label || s.enrollmentStatus}
+                            label={
+                              enrollmentStatusMap[s.enrollmentStatus]?.label || s.enrollmentStatus
+                            }
                             color={enrollmentStatusMap[s.enrollmentStatus]?.color || 'default'}
                             size="small"
                           />
@@ -455,9 +446,7 @@ export default function NoorDashboard() {
         <Card>
           <CardContent>
             <Box display="flex" justifyContent="space-between" mb={2}>
-              <Typography variant="h6">
-                الخطط التربوية الفردية ({iepTotal})
-              </Typography>
+              <Typography variant="h6">الخطط التربوية الفردية ({iepTotal})</Typography>
               <Button
                 variant="contained"
                 startIcon={<AddIcon />}
@@ -489,16 +478,12 @@ export default function NoorDashboard() {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    ieps.map((iep) => (
+                    ieps.map(iep => (
                       <TableRow key={iep._id}>
                         <TableCell>{iep.planNumber || '—'}</TableCell>
-                        <TableCell>
-                          {iep.student?.studentName?.ar || '—'}
-                        </TableCell>
+                        <TableCell>{iep.student?.studentName?.ar || '—'}</TableCell>
                         <TableCell>{iep.academicYear}</TableCell>
-                        <TableCell>
-                          {iep.semester === 1 ? 'الأول' : 'الثاني'}
-                        </TableCell>
+                        <TableCell>{iep.semester === 1 ? 'الأول' : 'الثاني'}</TableCell>
                         <TableCell>
                           <Chip
                             label={iepStatusMap[iep.status]?.label || iep.status}
@@ -512,35 +497,32 @@ export default function NoorDashboard() {
                               iep.noorSubmissionStatus === 'submitted'
                                 ? 'مُرسلة'
                                 : iep.noorSubmissionStatus === 'approved'
-                                ? 'معتمدة'
-                                : 'غير مُرسلة'
+                                  ? 'معتمدة'
+                                  : 'غير مُرسلة'
                             }
                             color={
                               iep.noorSubmissionStatus === 'approved'
                                 ? 'success'
                                 : iep.noorSubmissionStatus === 'submitted'
-                                ? 'info'
-                                : 'default'
+                                  ? 'info'
+                                  : 'default'
                             }
                             size="small"
                           />
                         </TableCell>
+                        <TableCell>{iep.goals?.length || 0} أهداف</TableCell>
                         <TableCell>
-                          {iep.goals?.length || 0} أهداف
-                        </TableCell>
-                        <TableCell>
-                          {iep.status === 'active' &&
-                            iep.noorSubmissionStatus !== 'submitted' && (
-                              <Tooltip title="إرسال إلى نور">
-                                <IconButton
-                                  size="small"
-                                  color="primary"
-                                  onClick={() => handleSubmitIEP(iep._id)}
-                                >
-                                  <SubmitIcon fontSize="small" />
-                                </IconButton>
-                              </Tooltip>
-                            )}
+                          {iep.status === 'active' && iep.noorSubmissionStatus !== 'submitted' && (
+                            <Tooltip title="إرسال إلى نور">
+                              <IconButton
+                                size="small"
+                                color="primary"
+                                onClick={() => handleSubmitIEP(iep._id)}
+                              >
+                                <SubmitIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                          )}
                         </TableCell>
                       </TableRow>
                     ))
@@ -557,9 +539,7 @@ export default function NoorDashboard() {
         <Card>
           <CardContent>
             <Box display="flex" justifyContent="space-between" mb={2}>
-              <Typography variant="h6">
-                تقارير الأداء الأكاديمي ({reportTotal})
-              </Typography>
+              <Typography variant="h6">تقارير الأداء الأكاديمي ({reportTotal})</Typography>
             </Box>
 
             <TableContainer component={Paper} variant="outlined">
@@ -582,19 +562,17 @@ export default function NoorDashboard() {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    reports.map((r) => (
+                    reports.map(r => (
                       <TableRow key={r._id}>
-                        <TableCell>
-                          {r.student?.studentName?.ar || '—'}
-                        </TableCell>
+                        <TableCell>{r.student?.studentName?.ar || '—'}</TableCell>
                         <TableCell>
                           {r.reportPeriod === 'monthly'
                             ? 'شهري'
                             : r.reportPeriod === 'quarterly'
-                            ? 'ربع سنوي'
-                            : r.reportPeriod === 'semester'
-                            ? 'فصلي'
-                            : 'سنوي'}
+                              ? 'ربع سنوي'
+                              : r.reportPeriod === 'semester'
+                                ? 'فصلي'
+                                : 'سنوي'}
                         </TableCell>
                         <TableCell>
                           {r.academicYear} — فصل {r.semester}
@@ -605,21 +583,21 @@ export default function NoorDashboard() {
                               r.overallProgress === 'excellent'
                                 ? 'ممتاز'
                                 : r.overallProgress === 'good'
-                                ? 'جيد'
-                                : r.overallProgress === 'satisfactory'
-                                ? 'مقبول'
-                                : r.overallProgress === 'needs_improvement'
-                                ? 'يحتاج تحسين'
-                                : 'غير مرضٍ'
+                                  ? 'جيد'
+                                  : r.overallProgress === 'satisfactory'
+                                    ? 'مقبول'
+                                    : r.overallProgress === 'needs_improvement'
+                                      ? 'يحتاج تحسين'
+                                      : 'غير مرضٍ'
                             }
                             color={
                               r.overallProgress === 'excellent'
                                 ? 'success'
                                 : r.overallProgress === 'good'
-                                ? 'primary'
-                                : r.overallProgress === 'satisfactory'
-                                ? 'info'
-                                : 'warning'
+                                  ? 'primary'
+                                  : r.overallProgress === 'satisfactory'
+                                    ? 'info'
+                                    : 'warning'
                             }
                             size="small"
                           />
@@ -635,8 +613,8 @@ export default function NoorDashboard() {
                                   r.attendance.attendanceRate >= 90
                                     ? 'success'
                                     : r.attendance.attendanceRate >= 75
-                                    ? 'warning'
-                                    : 'error'
+                                      ? 'warning'
+                                      : 'error'
                                 }
                               />
                               <Typography variant="caption">
@@ -665,12 +643,7 @@ export default function NoorDashboard() {
       )}
 
       {/* ────── Student Dialog ────── */}
-      <Dialog
-        open={studentDialog}
-        onClose={() => setStudentDialog(false)}
-        maxWidth="sm"
-        fullWidth
-      >
+      <Dialog open={studentDialog} onClose={() => setStudentDialog(false)} maxWidth="sm" fullWidth>
         <DialogTitle>تسجيل طالب جديد في نظام نور</DialogTitle>
         <DialogContent>
           <Grid container spacing={2} sx={{ mt: 1 }}>
@@ -679,9 +652,7 @@ export default function NoorDashboard() {
                 fullWidth
                 label="رقم نور"
                 value={studentForm.noorId}
-                onChange={(e) =>
-                  setStudentForm({ ...studentForm, noorId: e.target.value })
-                }
+                onChange={e => setStudentForm({ ...studentForm, noorId: e.target.value })}
                 required
               />
             </Grid>
@@ -690,9 +661,7 @@ export default function NoorDashboard() {
                 fullWidth
                 label="رقم الهوية الوطنية"
                 value={studentForm.nationalId}
-                onChange={(e) =>
-                  setStudentForm({ ...studentForm, nationalId: e.target.value })
-                }
+                onChange={e => setStudentForm({ ...studentForm, nationalId: e.target.value })}
                 required
               />
             </Grid>
@@ -701,7 +670,7 @@ export default function NoorDashboard() {
                 fullWidth
                 label="اسم الطالب (عربي)"
                 value={studentForm.studentName.ar}
-                onChange={(e) =>
+                onChange={e =>
                   setStudentForm({
                     ...studentForm,
                     studentName: {
@@ -718,7 +687,7 @@ export default function NoorDashboard() {
                 fullWidth
                 label="اسم الطالب (إنجليزي)"
                 value={studentForm.studentName.en}
-                onChange={(e) =>
+                onChange={e =>
                   setStudentForm({
                     ...studentForm,
                     studentName: {
@@ -736,7 +705,7 @@ export default function NoorDashboard() {
                 type="date"
                 InputLabelProps={{ shrink: true }}
                 value={studentForm.dateOfBirth}
-                onChange={(e) =>
+                onChange={e =>
                   setStudentForm({
                     ...studentForm,
                     dateOfBirth: e.target.value,
@@ -751,9 +720,7 @@ export default function NoorDashboard() {
                 select
                 label="الجنس"
                 value={studentForm.gender}
-                onChange={(e) =>
-                  setStudentForm({ ...studentForm, gender: e.target.value })
-                }
+                onChange={e => setStudentForm({ ...studentForm, gender: e.target.value })}
               >
                 <MenuItem value="male">ذكر</MenuItem>
                 <MenuItem value="female">أنثى</MenuItem>
@@ -765,7 +732,7 @@ export default function NoorDashboard() {
                 select
                 label="نوع الإعاقة"
                 value={studentForm.disabilityType}
-                onChange={(e) =>
+                onChange={e =>
                   setStudentForm({
                     ...studentForm,
                     disabilityType: e.target.value,
@@ -785,7 +752,7 @@ export default function NoorDashboard() {
                 select
                 label="التصنيف التعليمي"
                 value={studentForm.educationalPlacement}
-                onChange={(e) =>
+                onChange={e =>
                   setStudentForm({
                     ...studentForm,
                     educationalPlacement: e.target.value,
@@ -805,7 +772,7 @@ export default function NoorDashboard() {
                 select
                 label="الشدة"
                 value={studentForm.disabilitySeverity}
-                onChange={(e) =>
+                onChange={e =>
                   setStudentForm({
                     ...studentForm,
                     disabilitySeverity: e.target.value,
@@ -823,7 +790,7 @@ export default function NoorDashboard() {
                 fullWidth
                 label="السنة الدراسية"
                 value={studentForm.academicYear}
-                onChange={(e) =>
+                onChange={e =>
                   setStudentForm({
                     ...studentForm,
                     academicYear: e.target.value,
@@ -843,12 +810,7 @@ export default function NoorDashboard() {
       </Dialog>
 
       {/* ────── IEP Dialog ────── */}
-      <Dialog
-        open={iepDialog}
-        onClose={() => setIepDialog(false)}
-        maxWidth="sm"
-        fullWidth
-      >
+      <Dialog open={iepDialog} onClose={() => setIepDialog(false)} maxWidth="sm" fullWidth>
         <DialogTitle>إنشاء خطة تربوية فردية جديدة</DialogTitle>
         <DialogContent>
           <Grid container spacing={2} sx={{ mt: 1 }}>
@@ -857,9 +819,7 @@ export default function NoorDashboard() {
                 fullWidth
                 label="رقم نور للطالب"
                 value={iepForm.noorStudentId}
-                onChange={(e) =>
-                  setIepForm({ ...iepForm, noorStudentId: e.target.value })
-                }
+                onChange={e => setIepForm({ ...iepForm, noorStudentId: e.target.value })}
                 required
                 helperText="أدخل رقم نور الخاص بالطالب"
               />
@@ -869,9 +829,7 @@ export default function NoorDashboard() {
                 fullWidth
                 label="السنة الدراسية"
                 value={iepForm.academicYear}
-                onChange={(e) =>
-                  setIepForm({ ...iepForm, academicYear: e.target.value })
-                }
+                onChange={e => setIepForm({ ...iepForm, academicYear: e.target.value })}
               />
             </Grid>
             <Grid item xs={6}>
@@ -880,9 +838,7 @@ export default function NoorDashboard() {
                 select
                 label="الفصل الدراسي"
                 value={iepForm.semester}
-                onChange={(e) =>
-                  setIepForm({ ...iepForm, semester: Number(e.target.value) })
-                }
+                onChange={e => setIepForm({ ...iepForm, semester: Number(e.target.value) })}
               >
                 <MenuItem value={1}>الفصل الأول</MenuItem>
                 <MenuItem value={2}>الفصل الثاني</MenuItem>

@@ -4,8 +4,17 @@
 
 import React from 'react';
 import {
-  Box, Grid, TextField, Typography, FormControl, InputLabel,
-  Select, MenuItem, InputAdornment, Divider, Fade,
+  Box,
+  Grid,
+  TextField,
+  Typography,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  InputAdornment,
+  Divider,
+  Fade,
 } from '@mui/material';
 import { Person, Badge, Cake, Wc, Flag, Home } from '@mui/icons-material';
 import { SectionTitle } from '../StyledComponents';
@@ -17,65 +26,140 @@ const PersonalInfoStep = ({ formData, fieldErrors, handleChange, calculatedAge }
 
       <Grid container spacing={2}>
         <Grid item xs={12} sm={6}>
-          <TextField fullWidth label="الاسم الأول (عربي) *" value={formData.firstNameAr}
-            onChange={handleChange('firstNameAr')} error={!!fieldErrors.firstNameAr}
+          <TextField
+            fullWidth
+            label="الاسم الأول (عربي) *"
+            value={formData.firstNameAr}
+            onChange={handleChange('firstNameAr')}
+            error={!!fieldErrors.firstNameAr}
             helperText={fieldErrors.firstNameAr}
-            InputProps={{ startAdornment: <InputAdornment position="start"><Person color="action" /></InputAdornment> }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Person color="action" />
+                </InputAdornment>
+              ),
+            }}
           />
         </Grid>
         <Grid item xs={12} sm={6}>
-          <TextField fullWidth label="اسم العائلة (عربي) *" value={formData.lastNameAr}
-            onChange={handleChange('lastNameAr')} error={!!fieldErrors.lastNameAr}
-            helperText={fieldErrors.lastNameAr} />
+          <TextField
+            fullWidth
+            label="اسم العائلة (عربي) *"
+            value={formData.lastNameAr}
+            onChange={handleChange('lastNameAr')}
+            error={!!fieldErrors.lastNameAr}
+            helperText={fieldErrors.lastNameAr}
+          />
         </Grid>
         <Grid item xs={12} sm={6}>
-          <TextField fullWidth label="First Name (English)" value={formData.firstNameEn}
-            onChange={handleChange('firstNameEn')} />
+          <TextField
+            fullWidth
+            label="First Name (English)"
+            value={formData.firstNameEn}
+            onChange={handleChange('firstNameEn')}
+          />
         </Grid>
         <Grid item xs={12} sm={6}>
-          <TextField fullWidth label="Last Name (English)" value={formData.lastNameEn}
-            onChange={handleChange('lastNameEn')} />
+          <TextField
+            fullWidth
+            label="Last Name (English)"
+            value={formData.lastNameEn}
+            onChange={handleChange('lastNameEn')}
+          />
         </Grid>
 
         <Grid item xs={12} sm={6}>
-          <TextField fullWidth label="رقم الهوية الوطنية" value={formData.nationalId}
-            onChange={handleChange('nationalId')} error={!!fieldErrors.nationalId}
-            helperText={fieldErrors.nationalId} placeholder="1XXXXXXXXX"
-            InputProps={{ startAdornment: <InputAdornment position="start"><Badge color="action" /></InputAdornment> }}
+          <TextField
+            fullWidth
+            label="رقم الهوية الوطنية"
+            value={formData.nationalId}
+            onChange={handleChange('nationalId')}
+            error={!!fieldErrors.nationalId}
+            helperText={fieldErrors.nationalId}
+            placeholder="1XXXXXXXXX"
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Badge color="action" />
+                </InputAdornment>
+              ),
+            }}
           />
         </Grid>
         <Grid item xs={12} sm={6}>
-          <TextField fullWidth label="تاريخ الميلاد *" type="date" value={formData.dateOfBirth}
-            onChange={handleChange('dateOfBirth')} error={!!fieldErrors.dateOfBirth}
-            helperText={fieldErrors.dateOfBirth || (calculatedAge !== null ? `العمر: ${calculatedAge} سنة` : '')}
+          <TextField
+            fullWidth
+            label="تاريخ الميلاد *"
+            type="date"
+            value={formData.dateOfBirth}
+            onChange={handleChange('dateOfBirth')}
+            error={!!fieldErrors.dateOfBirth}
+            helperText={
+              fieldErrors.dateOfBirth ||
+              (calculatedAge !== null ? `العمر: ${calculatedAge} سنة` : '')
+            }
             InputLabelProps={{ shrink: true }}
-            InputProps={{ startAdornment: <InputAdornment position="start"><Cake color="action" /></InputAdornment> }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Cake color="action" />
+                </InputAdornment>
+              ),
+            }}
           />
         </Grid>
 
         <Grid item xs={12} sm={4}>
           <FormControl fullWidth error={!!fieldErrors.gender}>
             <InputLabel>الجنس *</InputLabel>
-            <Select value={formData.gender} label="الجنس *" onChange={handleChange('gender')}
-              startAdornment={<InputAdornment position="start"><Wc color="action" /></InputAdornment>}>
+            <Select
+              value={formData.gender}
+              label="الجنس *"
+              onChange={handleChange('gender')}
+              startAdornment={
+                <InputAdornment position="start">
+                  <Wc color="action" />
+                </InputAdornment>
+              }
+            >
               <MenuItem value="male">ذكر</MenuItem>
               <MenuItem value="female">أنثى</MenuItem>
             </Select>
-            {fieldErrors.gender && <Typography variant="caption" color="error" sx={{ mt: 0.5, mr: 2 }}>{fieldErrors.gender}</Typography>}
+            {fieldErrors.gender && (
+              <Typography variant="caption" color="error" sx={{ mt: 0.5, mr: 2 }}>
+                {fieldErrors.gender}
+              </Typography>
+            )}
           </FormControl>
         </Grid>
         <Grid item xs={12} sm={4}>
-          <TextField fullWidth label="الجنسية" value={formData.nationality}
+          <TextField
+            fullWidth
+            label="الجنسية"
+            value={formData.nationality}
             onChange={handleChange('nationality')}
-            InputProps={{ startAdornment: <InputAdornment position="start"><Flag color="action" /></InputAdornment> }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Flag color="action" />
+                </InputAdornment>
+              ),
+            }}
           />
         </Grid>
         <Grid item xs={12} sm={4}>
           <FormControl fullWidth>
             <InputLabel>فصيلة الدم</InputLabel>
-            <Select value={formData.bloodType} label="فصيلة الدم" onChange={handleChange('bloodType')}>
-              {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map((bt) => (
-                <MenuItem key={bt} value={bt}>{bt}</MenuItem>
+            <Select
+              value={formData.bloodType}
+              label="فصيلة الدم"
+              onChange={handleChange('bloodType')}
+            >
+              {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map(bt => (
+                <MenuItem key={bt} value={bt}>
+                  {bt}
+                </MenuItem>
               ))}
             </Select>
           </FormControl>
@@ -89,19 +173,44 @@ const PersonalInfoStep = ({ formData, fieldErrors, handleChange, calculatedAge }
       </Typography>
       <Grid container spacing={2}>
         <Grid item xs={12} sm={4}>
-          <TextField fullWidth label="المنطقة" value={formData.region} onChange={handleChange('region')} />
+          <TextField
+            fullWidth
+            label="المنطقة"
+            value={formData.region}
+            onChange={handleChange('region')}
+          />
         </Grid>
         <Grid item xs={12} sm={4}>
-          <TextField fullWidth label="المدينة" value={formData.city} onChange={handleChange('city')} />
+          <TextField
+            fullWidth
+            label="المدينة"
+            value={formData.city}
+            onChange={handleChange('city')}
+          />
         </Grid>
         <Grid item xs={12} sm={4}>
-          <TextField fullWidth label="الحي" value={formData.district} onChange={handleChange('district')} />
+          <TextField
+            fullWidth
+            label="الحي"
+            value={formData.district}
+            onChange={handleChange('district')}
+          />
         </Grid>
         <Grid item xs={12} sm={8}>
-          <TextField fullWidth label="الشارع" value={formData.streetName} onChange={handleChange('streetName')} />
+          <TextField
+            fullWidth
+            label="الشارع"
+            value={formData.streetName}
+            onChange={handleChange('streetName')}
+          />
         </Grid>
         <Grid item xs={12} sm={4}>
-          <TextField fullWidth label="الرمز البريدي" value={formData.postalCode} onChange={handleChange('postalCode')} />
+          <TextField
+            fullWidth
+            label="الرمز البريدي"
+            value={formData.postalCode}
+            onChange={handleChange('postalCode')}
+          />
         </Grid>
       </Grid>
     </Box>

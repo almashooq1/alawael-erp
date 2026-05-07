@@ -2,14 +2,7 @@
  * ProfileTab — بوابة الموظف: تبويب الملف الشخصي
  */
 import React from 'react';
-import {
-  Box,
-  Grid,
-  Card,
-  CardContent,
-  Typography,
-  Divider,
-} from '@mui/material';
+import { Box, Grid, Card, CardContent, Typography, Divider } from '@mui/material';
 import {
   Person as PersonIcon,
   Phone as PhoneIcon,

@@ -44,16 +44,33 @@ import {
   School as SchoolIcon,
 } from '@mui/icons-material';
 import {
-  PieChart, Pie, Cell, BarChart, Bar,
-  XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer, Legend,
+  PieChart,
+  Pie,
+  Cell,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
 } from 'recharts';
 import { gradients, brandColors } from 'theme/palette';
 import studentManagementService from 'services/studentManagementService';
 import { useAuth } from 'contexts/AuthContext';
 import logger from 'utils/logger';
 
-const COLORS = ['#4facfe', '#43e97b', '#fa709a', '#fee140', '#a18cd1', '#f093fb', '#4158D0', '#ff6b6b'];
+const COLORS = [
+  '#4facfe',
+  '#43e97b',
+  '#fa709a',
+  '#fee140',
+  '#a18cd1',
+  '#f093fb',
+  '#4158D0',
+  '#ff6b6b',
+];
 
 const SummaryCard = ({ icon, title, value, subtitle, gradient: bg }) => (
   <Card
@@ -74,9 +91,13 @@ const SummaryCard = ({ icon, title, value, subtitle, gradient: bg }) => (
           {value}
         </Typography>
       </Stack>
-      <Typography variant="body2" sx={{ opacity: 0.92 }}>{title}</Typography>
+      <Typography variant="body2" sx={{ opacity: 0.92 }}>
+        {title}
+      </Typography>
       {subtitle && (
-        <Typography variant="caption" sx={{ opacity: 0.8 }}>{subtitle}</Typography>
+        <Typography variant="caption" sx={{ opacity: 0.8 }}>
+          {subtitle}
+        </Typography>
       )}
     </CardContent>
   </Card>
@@ -87,8 +108,12 @@ const DistributionBar = ({ label, value, total, color = 'primary' }) => {
   return (
     <Box sx={{ mb: 1.5 }}>
       <Stack direction="row" justifyContent="space-between" sx={{ mb: 0.5 }}>
-        <Typography variant="body2" sx={{ fontWeight: 600 }}>{label}</Typography>
-        <Typography variant="body2" color="text.secondary">{value} ({percentage}%)</Typography>
+        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+          {label}
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          {value} ({percentage}%)
+        </Typography>
       </Stack>
       <LinearProgress
         variant="determinate"
@@ -119,9 +144,10 @@ const PeriodicStudentReport = () => {
   const [period, setPeriod] = useState('monthly');
   // Dynamic academic year dates: Sep 1 of current/previous year to current date
   const now = new Date();
-  const academicYearStart = now.getMonth() >= 8 // Sep+
-    ? `${now.getFullYear()}-09-01`
-    : `${now.getFullYear() - 1}-09-01`;
+  const academicYearStart =
+    now.getMonth() >= 8 // Sep+
+      ? `${now.getFullYear()}-09-01`
+      : `${now.getFullYear() - 1}-09-01`;
   const todayStr = now.toISOString().slice(0, 10);
 
   const [dateFrom, setDateFrom] = useState(academicYearStart);
@@ -170,7 +196,9 @@ const PeriodicStudentReport = () => {
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+      <Box
+        sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}
+      >
         <CircularProgress size={60} />
       </Box>
     );
@@ -178,11 +206,24 @@ const PeriodicStudentReport = () => {
 
   if (error && !report) {
     return (
-      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', gap: 2 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: '60vh',
+          gap: 2,
+        }}
+      >
         <Alert severity="error">{error}</Alert>
         <Stack direction="row" spacing={2}>
-          <Button variant="contained" onClick={loadReport}>إعادة المحاولة</Button>
-          <Button variant="outlined" onClick={() => navigate(-1)}>رجوع</Button>
+          <Button variant="contained" onClick={loadReport}>
+            إعادة المحاولة
+          </Button>
+          <Button variant="outlined" onClick={() => navigate(-1)}>
+            رجوع
+          </Button>
         </Stack>
       </Box>
     );
@@ -287,7 +328,8 @@ const PeriodicStudentReport = () => {
           التقرير الدوري للمركز
         </Typography>
         <Typography variant="body1" sx={{ opacity: 0.9 }}>
-          {periodLabel} | {totalStudents} طالب | {report.generatedAt ? new Date(report.generatedAt).toLocaleDateString('ar-EG') : '—'}
+          {periodLabel} | {totalStudents} طالب |{' '}
+          {report.generatedAt ? new Date(report.generatedAt).toLocaleDateString('ar-EG') : '—'}
         </Typography>
       </Paper>
 
@@ -305,7 +347,9 @@ const PeriodicStudentReport = () => {
                 size="small"
               >
                 {periodOptions.map(opt => (
-                  <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
+                  <MenuItem key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </MenuItem>
                 ))}
               </TextField>
             </Grid>
@@ -340,7 +384,11 @@ const PeriodicStudentReport = () => {
         </CardContent>
       </Card>
 
-      {error && <Alert severity="warning" sx={{ mb: 2 }}>{error}</Alert>}
+      {error && (
+        <Alert severity="warning" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
 
       {/* ═══ Summary Cards ═══ */}
       <Grid container spacing={2} sx={{ mb: 3 }}>
@@ -422,7 +470,9 @@ const PeriodicStudentReport = () => {
                   </PieChart>
                 </ResponsiveContainer>
               ) : (
-                <Typography variant="body2" color="text.secondary">لا توجد بيانات حضور</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  لا توجد بيانات حضور
+                </Typography>
               )}
             </CardContent>
           </Card>
@@ -453,7 +503,9 @@ const PeriodicStudentReport = () => {
                   </PieChart>
                 </ResponsiveContainer>
               ) : (
-                <Typography variant="body2" color="text.secondary">لا توجد بيانات تقدم</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  لا توجد بيانات تقدم
+                </Typography>
               )}
             </CardContent>
           </Card>
@@ -512,7 +564,9 @@ const PeriodicStudentReport = () => {
                   </PieChart>
                 </ResponsiveContainer>
               ) : (
-                <Typography variant="body2" color="text.secondary">لا توجد بيانات إعاقة</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  لا توجد بيانات إعاقة
+                </Typography>
               )}
             </CardContent>
           </Card>
@@ -625,7 +679,9 @@ const PeriodicStudentReport = () => {
                       {topPerformers.map((s, i) => (
                         <TableRow key={s.studentId}>
                           <TableCell>
-                            <Avatar sx={{ width: 28, height: 28, bgcolor: '#43e97b', fontSize: 14 }}>
+                            <Avatar
+                              sx={{ width: 28, height: 28, bgcolor: '#43e97b', fontSize: 14 }}
+                            >
                               {i + 1}
                             </Avatar>
                           </TableCell>
@@ -639,10 +695,20 @@ const PeriodicStudentReport = () => {
                             </Typography>
                           </TableCell>
                           <TableCell>
-                            <Chip label={`${s.progress}%`} size="small" color="success" variant="outlined" />
+                            <Chip
+                              label={`${s.progress}%`}
+                              size="small"
+                              color="success"
+                              variant="outlined"
+                            />
                           </TableCell>
                           <TableCell>
-                            <Chip label={`${s.attendanceRate}%`} size="small" color="primary" variant="outlined" />
+                            <Chip
+                              label={`${s.attendanceRate}%`}
+                              size="small"
+                              color="primary"
+                              variant="outlined"
+                            />
                           </TableCell>
                         </TableRow>
                       ))}
@@ -650,7 +716,9 @@ const PeriodicStudentReport = () => {
                   </Table>
                 </TableContainer>
               ) : (
-                <Typography variant="body2" color="text.secondary">لا توجد بيانات</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  لا توجد بيانات
+                </Typography>
               )}
             </CardContent>
           </Card>
@@ -686,15 +754,31 @@ const PeriodicStudentReport = () => {
                             </Typography>
                           </TableCell>
                           <TableCell>
-                            <Chip label={`${s.progress}%`} size="small" color="error" variant="outlined" />
+                            <Chip
+                              label={`${s.progress}%`}
+                              size="small"
+                              color="error"
+                              variant="outlined"
+                            />
                           </TableCell>
                           <TableCell>
-                            <Chip label={`${s.attendanceRate}%`} size="small" color="warning" variant="outlined" />
+                            <Chip
+                              label={`${s.attendanceRate}%`}
+                              size="small"
+                              color="warning"
+                              variant="outlined"
+                            />
                           </TableCell>
                           <TableCell>
                             <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
                               {(s.reasons || []).map((r, i) => (
-                                <Chip key={i} label={r} size="small" color="error" variant="outlined" />
+                                <Chip
+                                  key={i}
+                                  label={r}
+                                  size="small"
+                                  color="error"
+                                  variant="outlined"
+                                />
                               ))}
                             </Stack>
                           </TableCell>
@@ -704,7 +788,9 @@ const PeriodicStudentReport = () => {
                   </Table>
                 </TableContainer>
               ) : (
-                <Typography variant="body2" color="text.secondary">لا توجد بيانات</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  لا توجد بيانات
+                </Typography>
               )}
             </CardContent>
           </Card>
@@ -714,8 +800,8 @@ const PeriodicStudentReport = () => {
       {/* ═══ Footer ═══ */}
       <Paper sx={{ p: 2, textAlign: 'center', borderRadius: 3, bgcolor: '#f8f9fc' }}>
         <Typography variant="caption" color="text.secondary">
-          تم إنشاء هذا التقرير آلياً بواسطة نظام الأوائل — {new Date().toLocaleDateString('ar-EG')} |
-          التقرير سري ومخصص للاستخدام الرسمي فقط
+          تم إنشاء هذا التقرير آلياً بواسطة نظام الأوائل — {new Date().toLocaleDateString('ar-EG')}{' '}
+          | التقرير سري ومخصص للاستخدام الرسمي فقط
         </Typography>
       </Paper>
     </Box>

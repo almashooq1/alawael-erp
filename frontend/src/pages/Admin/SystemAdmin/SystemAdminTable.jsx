@@ -20,25 +20,25 @@ import DeleteIcon from '@mui/icons-material/Delete';
 /*  Column definitions per tab key                                     */
 /* ------------------------------------------------------------------ */
 const COLUMNS = {
-  inventory:     [
+  inventory: [
     { key: 'id', label: '#' },
     { key: 'name', label: 'الصنف' },
     { key: 'qty', label: 'الكمية' },
     { key: 'status', label: 'الحالة' },
   ],
-  ecommerce:     [
+  ecommerce: [
     { key: 'id', label: '#' },
     { key: 'name', label: 'المنتج' },
     { key: 'price', label: 'السعر' },
     { key: 'status', label: 'الحالة' },
   ],
-  templates:     [
+  templates: [
     { key: 'id', label: '#' },
     { key: 'name', label: 'اسم النموذج' },
     { key: 'category', label: 'الفئة' },
     { key: 'status', label: 'الحالة' },
   ],
-  approvals:     [
+  approvals: [
     { key: 'id', label: '#' },
     { key: 'title', label: 'الطلب' },
     { key: 'requester', label: 'مقدّم الطلب' },
@@ -50,19 +50,19 @@ const COLUMNS = {
     { key: 'channel', label: 'القناة' },
     { key: 'status', label: 'الحالة' },
   ],
-  rbac:          [
+  rbac: [
     { key: 'id', label: '#' },
     { key: 'role', label: 'الدور' },
     { key: 'users', label: 'المستخدمون' },
     { key: 'permissions', label: 'الصلاحيات' },
   ],
-  civilDefense:  [
+  civilDefense: [
     { key: 'id', label: '#' },
     { key: 'permit', label: 'الرخصة' },
     { key: 'expiry', label: 'تاريخ الانتهاء' },
     { key: 'status', label: 'الحالة' },
   ],
-  qiwa:          [
+  qiwa: [
     { key: 'id', label: '#' },
     { key: 'name', label: 'العقد' },
     { key: 'type', label: 'النوع' },
@@ -73,7 +73,7 @@ const COLUMNS = {
 /* ------------------------------------------------------------------ */
 /*  Status chip helper                                                 */
 /* ------------------------------------------------------------------ */
-const statusColor = (status) => {
+const statusColor = status => {
   if (!status) return 'default';
   const s = status.trim();
   if (['متوفر', 'نشط', 'مفعّل', 'معتمد', 'سارية', 'فعّال'].includes(s)) return 'success';
@@ -87,8 +87,8 @@ const statusColor = (status) => {
 /* ------------------------------------------------------------------ */
 const SystemAdminTable = ({ activeTab, tabs = [], data = {}, openEdit, handleDelete }) => {
   const columns = COLUMNS[activeTab] || [];
-  const rows    = data[activeTab] || [];
-  const tabMeta = tabs.find((t) => t.key === activeTab);
+  const rows = data[activeTab] || [];
+  const tabMeta = tabs.find(t => t.key === activeTab);
 
   return (
     <Paper elevation={2} sx={{ borderRadius: 3, overflow: 'hidden' }}>
@@ -115,7 +115,7 @@ const SystemAdminTable = ({ activeTab, tabs = [], data = {}, openEdit, handleDel
         <Table size="small" stickyHeader>
           <TableHead>
             <TableRow>
-              {columns.map((col) => (
+              {columns.map(col => (
                 <TableCell key={col.key} sx={{ fontWeight: 700, bgcolor: 'grey.100' }}>
                   {col.label}
                 </TableCell>
@@ -134,9 +134,9 @@ const SystemAdminTable = ({ activeTab, tabs = [], data = {}, openEdit, handleDel
                 </TableCell>
               </TableRow>
             ) : (
-              rows.map((row) => (
+              rows.map(row => (
                 <TableRow key={row.id} hover>
-                  {columns.map((col) => (
+                  {columns.map(col => (
                     <TableCell key={col.key}>
                       {col.key === 'status' ? (
                         <Chip
@@ -146,7 +146,7 @@ const SystemAdminTable = ({ activeTab, tabs = [], data = {}, openEdit, handleDel
                           variant="outlined"
                         />
                       ) : (
-                        row[col.key] ?? '—'
+                        (row[col.key] ?? '—')
                       )}
                     </TableCell>
                   ))}

@@ -4,10 +4,30 @@
  */
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Box, Typography, Grid, Card, CardContent,
-  Chip, LinearProgress, Alert, Snackbar,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Paper, IconButton, Tooltip, Divider, Badge, CircularProgress, Tab, Tabs, Avatar,
+  Box,
+  Typography,
+  Grid,
+  Card,
+  CardContent,
+  Chip,
+  LinearProgress,
+  Alert,
+  Snackbar,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  IconButton,
+  Tooltip,
+  Divider,
+  Badge,
+  CircularProgress,
+  Tab,
+  Tabs,
+  Avatar,
 } from '@mui/material';
 import {
   Dashboard as DashboardIcon,
@@ -31,7 +51,7 @@ import {
   AccountBalance as FinanceIcon,
   Analytics as AnalyticsIcon,
   Notifications as AlertIcon,
-  } from '@mui/icons-material';
+} from '@mui/icons-material';
 import ceoDashboardService from '../../services/ceoDashboardService';
 
 /* ════════════════════════════════════════════════════════════════════
@@ -43,15 +63,28 @@ const fmt = (v, f) => {
   return (v || 0).toLocaleString('ar-SA');
 };
 
-const trendColor = (t) => (t === 'up' ? 'success.main' : 'error.main');
-const trendIcon = (t) => (t === 'up' ? <TrendUpIcon fontSize="small" /> : <TrendDownIcon fontSize="small" />);
+const trendColor = t => (t === 'up' ? 'success.main' : 'error.main');
+const trendIcon = t =>
+  t === 'up' ? <TrendUpIcon fontSize="small" /> : <TrendDownIcon fontSize="small" />;
 
 const severityColor = { critical: 'error', warning: 'warning', info: 'info' };
 const severityIcon = { critical: <ErrorIcon />, warning: <WarningIcon />, info: <InfoIcon /> };
 const severityLabel = { critical: 'حرج', warning: 'تحذير', info: 'معلومات' };
 
-const goalStatusColor = { on_track: 'success', at_risk: 'warning', behind: 'error', completed: 'info', not_started: 'default' };
-const goalStatusLabel = { on_track: 'على المسار', at_risk: 'معرض للخطر', behind: 'متأخر', completed: 'مكتمل', not_started: 'لم يبدأ' };
+const goalStatusColor = {
+  on_track: 'success',
+  at_risk: 'warning',
+  behind: 'error',
+  completed: 'info',
+  not_started: 'default',
+};
+const goalStatusLabel = {
+  on_track: 'على المسار',
+  at_risk: 'معرض للخطر',
+  behind: 'متأخر',
+  completed: 'مكتمل',
+  not_started: 'لم يبدأ',
+};
 
 /* ════════════════════════════════════════════════════════════════════
    COMPONENT
@@ -75,7 +108,9 @@ export default function CEODashboard() {
     }
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    load();
+  }, [load]);
 
   if (loading) {
     return (
@@ -86,12 +121,25 @@ export default function CEODashboard() {
   }
 
   if (!dashboard) {
-    return <Alert severity="error" sx={{ m: 2 }}>لا توجد بيانات</Alert>;
+    return (
+      <Alert severity="error" sx={{ m: 2 }}>
+        لا توجد بيانات
+      </Alert>
+    );
   }
 
   const {
-    summary, financialKpis, operationalKpis, hrKpis, qualityKpis,
-    alerts, alertCounts, goalProgress, topGoals, departmentRanking, lastUpdated,
+    summary,
+    financialKpis,
+    operationalKpis,
+    hrKpis,
+    qualityKpis,
+    alerts,
+    alertCounts,
+    goalProgress,
+    topGoals,
+    departmentRanking,
+    lastUpdated,
   } = dashboard;
 
   /* ════════════════════════════════════════════════════════════════
@@ -104,14 +152,18 @@ export default function CEODashboard() {
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
           <DashboardIcon sx={{ fontSize: 36, color: 'primary.main' }} />
           <Box>
-            <Typography variant="h4" fontWeight={700}>لوحة تحكم الإدارة التنفيذية</Typography>
+            <Typography variant="h4" fontWeight={700}>
+              لوحة تحكم الإدارة التنفيذية
+            </Typography>
             <Typography variant="body2" color="text.secondary">
               آخر تحديث: {new Date(lastUpdated).toLocaleString('ar-SA')}
             </Typography>
           </Box>
         </Box>
         <Tooltip title="تحديث البيانات">
-          <IconButton onClick={load} color="primary"><RefreshIcon /></IconButton>
+          <IconButton onClick={load} color="primary">
+            <RefreshIcon />
+          </IconButton>
         </Tooltip>
       </Box>
 
@@ -120,14 +172,62 @@ export default function CEODashboard() {
          ══════════════════════════════════════════════ */}
       <Grid container spacing={2} sx={{ mb: 3 }}>
         {[
-          { label: 'إجمالي الإيرادات', value: summary.totalRevenue, format: 'currency', icon: <MoneyIcon />, color: '#1976d2' },
-          { label: 'صافي الدخل', value: summary.netIncome, format: 'currency', icon: <FinanceIcon />, color: '#388e3c' },
-          { label: 'المستفيدين النشطين', value: summary.activeBeneficiaries, format: 'number', icon: <BeneficiaryIcon />, color: '#f57c00' },
-          { label: 'نسبة الإشغال', value: summary.occupancyRate, format: 'percent', icon: <OccupancyIcon />, color: '#7b1fa2' },
-          { label: 'عدد الموظفين', value: summary.staffCount, format: 'number', icon: <PeopleIcon />, color: '#0097a7' },
-          { label: 'رضا المستفيدين', value: summary.satisfactionScore, format: 'percent', icon: <SatisfactionIcon />, color: '#c2185b' },
-          { label: 'التدفق النقدي', value: summary.cashFlow, format: 'currency', icon: <TrendUpIcon />, color: '#5d4037' },
-          { label: 'إجمالي المصروفات', value: summary.totalExpenses, format: 'currency', icon: <SpeedIcon />, color: '#d32f2f' },
+          {
+            label: 'إجمالي الإيرادات',
+            value: summary.totalRevenue,
+            format: 'currency',
+            icon: <MoneyIcon />,
+            color: '#1976d2',
+          },
+          {
+            label: 'صافي الدخل',
+            value: summary.netIncome,
+            format: 'currency',
+            icon: <FinanceIcon />,
+            color: '#388e3c',
+          },
+          {
+            label: 'المستفيدين النشطين',
+            value: summary.activeBeneficiaries,
+            format: 'number',
+            icon: <BeneficiaryIcon />,
+            color: '#f57c00',
+          },
+          {
+            label: 'نسبة الإشغال',
+            value: summary.occupancyRate,
+            format: 'percent',
+            icon: <OccupancyIcon />,
+            color: '#7b1fa2',
+          },
+          {
+            label: 'عدد الموظفين',
+            value: summary.staffCount,
+            format: 'number',
+            icon: <PeopleIcon />,
+            color: '#0097a7',
+          },
+          {
+            label: 'رضا المستفيدين',
+            value: summary.satisfactionScore,
+            format: 'percent',
+            icon: <SatisfactionIcon />,
+            color: '#c2185b',
+          },
+          {
+            label: 'التدفق النقدي',
+            value: summary.cashFlow,
+            format: 'currency',
+            icon: <TrendUpIcon />,
+            color: '#5d4037',
+          },
+          {
+            label: 'إجمالي المصروفات',
+            value: summary.totalExpenses,
+            format: 'currency',
+            icon: <SpeedIcon />,
+            color: '#d32f2f',
+          },
         ].map((card, idx) => (
           <Grid item xs={6} sm={4} md={3} lg={1.5} key={idx}>
             <Card sx={{ borderTop: `4px solid ${card.color}`, height: '100%' }}>
@@ -135,10 +235,16 @@ export default function CEODashboard() {
                 <Avatar sx={{ bgcolor: card.color, width: 36, height: 36, mx: 'auto', mb: 0.5 }}>
                   {card.icon}
                 </Avatar>
-                <Typography variant="h6" fontWeight={700} sx={{ fontSize: { xs: '0.9rem', md: '1.1rem' } }}>
+                <Typography
+                  variant="h6"
+                  fontWeight={700}
+                  sx={{ fontSize: { xs: '0.9rem', md: '1.1rem' } }}
+                >
                   {fmt(card.value, card.format)}
                 </Typography>
-                <Typography variant="caption" color="text.secondary">{card.label}</Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {card.label}
+                </Typography>
               </CardContent>
             </Card>
           </Grid>
@@ -151,7 +257,14 @@ export default function CEODashboard() {
       <Paper sx={{ mb: 3 }}>
         <Tabs value={tab} onChange={(_, v) => setTab(v)} variant="scrollable" scrollButtons="auto">
           <Tab icon={<AnalyticsIcon />} label="المؤشرات" />
-          <Tab icon={<Badge badgeContent={alertCounts.critical} color="error"><AlertIcon /></Badge>} label="التنبيهات" />
+          <Tab
+            icon={
+              <Badge badgeContent={alertCounts.critical} color="error">
+                <AlertIcon />
+              </Badge>
+            }
+            label="التنبيهات"
+          />
           <Tab icon={<GoalIcon />} label="الأهداف" />
           <Tab icon={<DeptIcon />} label="الأقسام" />
         </Tabs>
@@ -162,19 +275,39 @@ export default function CEODashboard() {
         <Grid container spacing={2}>
           {/* Financial */}
           <Grid item xs={12} md={6}>
-            <KPISection title="المؤشرات المالية" icon={<MoneyIcon />} kpis={financialKpis} color="#1976d2" />
+            <KPISection
+              title="المؤشرات المالية"
+              icon={<MoneyIcon />}
+              kpis={financialKpis}
+              color="#1976d2"
+            />
           </Grid>
           {/* Operational */}
           <Grid item xs={12} md={6}>
-            <KPISection title="المؤشرات التشغيلية" icon={<SpeedIcon />} kpis={operationalKpis} color="#f57c00" />
+            <KPISection
+              title="المؤشرات التشغيلية"
+              icon={<SpeedIcon />}
+              kpis={operationalKpis}
+              color="#f57c00"
+            />
           </Grid>
           {/* HR */}
           <Grid item xs={12} md={6}>
-            <KPISection title="الموارد البشرية" icon={<PeopleIcon />} kpis={hrKpis} color="#e64a19" />
+            <KPISection
+              title="الموارد البشرية"
+              icon={<PeopleIcon />}
+              kpis={hrKpis}
+              color="#e64a19"
+            />
           </Grid>
           {/* Quality */}
           <Grid item xs={12} md={6}>
-            <KPISection title="الجودة والامتثال" icon={<ComplianceIcon />} kpis={qualityKpis} color="#c2185b" />
+            <KPISection
+              title="الجودة والامتثال"
+              icon={<ComplianceIcon />}
+              kpis={qualityKpis}
+              color="#c2185b"
+            />
           </Grid>
         </Grid>
       )}
@@ -184,9 +317,24 @@ export default function CEODashboard() {
         <Box>
           {/* Alert summary badges */}
           <Box sx={{ display: 'flex', gap: 2, mb: 2, flexWrap: 'wrap' }}>
-            <Chip icon={<ErrorIcon />} label={`حرج: ${alertCounts.critical}`} color="error" variant="outlined" />
-            <Chip icon={<WarningIcon />} label={`تحذير: ${alertCounts.warning}`} color="warning" variant="outlined" />
-            <Chip icon={<InfoIcon />} label={`معلومات: ${alertCounts.info}`} color="info" variant="outlined" />
+            <Chip
+              icon={<ErrorIcon />}
+              label={`حرج: ${alertCounts.critical}`}
+              color="error"
+              variant="outlined"
+            />
+            <Chip
+              icon={<WarningIcon />}
+              label={`تحذير: ${alertCounts.warning}`}
+              color="warning"
+              variant="outlined"
+            />
+            <Chip
+              icon={<InfoIcon />}
+              label={`معلومات: ${alertCounts.info}`}
+              color="info"
+              variant="outlined"
+            />
           </Box>
           <TableContainer component={Paper}>
             <Table size="small">
@@ -200,7 +348,7 @@ export default function CEODashboard() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {alerts.map((a) => (
+                {alerts.map(a => (
                   <TableRow key={a.id} hover>
                     <TableCell align="right">
                       <Chip
@@ -211,17 +359,22 @@ export default function CEODashboard() {
                       />
                     </TableCell>
                     <TableCell align="right">
-                      <Typography variant="body2" fontWeight={a.isRead ? 400 : 700}>{a.titleAr}</Typography>
-                      <Typography variant="caption" color="text.secondary">{a.descriptionAr}</Typography>
+                      <Typography variant="body2" fontWeight={a.isRead ? 400 : 700}>
+                        {a.titleAr}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {a.descriptionAr}
+                      </Typography>
                     </TableCell>
                     <TableCell align="right">{a.department}</TableCell>
                     <TableCell align="right">
-                      {a.isResolved
-                        ? <Chip label="تم الحل" color="success" size="small" icon={<CheckIcon />} />
-                        : a.actionRequired
-                          ? <Chip label="يتطلب إجراء" color="error" size="small" />
-                          : <Chip label="مفتوح" size="small" />
-                      }
+                      {a.isResolved ? (
+                        <Chip label="تم الحل" color="success" size="small" icon={<CheckIcon />} />
+                      ) : a.actionRequired ? (
+                        <Chip label="يتطلب إجراء" color="error" size="small" />
+                      ) : (
+                        <Chip label="مفتوح" size="small" />
+                      )}
                     </TableCell>
                     <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>
                       {new Date(a.createdAt).toLocaleDateString('ar-SA')}
@@ -248,22 +401,40 @@ export default function CEODashboard() {
             <Typography variant="h6">التقدم العام للأهداف الاستراتيجية</Typography>
             <Chip label={`${goalProgress}%`} color="primary" />
           </Box>
-          <LinearProgress variant="determinate" value={goalProgress} sx={{ height: 10, borderRadius: 5, mb: 3 }} />
+          <LinearProgress
+            variant="determinate"
+            value={goalProgress}
+            sx={{ height: 10, borderRadius: 5, mb: 3 }}
+          />
           <Grid container spacing={2}>
-            {topGoals.map((g) => (
+            {topGoals.map(g => (
               <Grid item xs={12} sm={6} md={4} key={g.id}>
                 <Card variant="outlined" sx={{ height: '100%' }}>
                   <CardContent>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                      <Typography variant="subtitle1" fontWeight={600}>{g.nameAr}</Typography>
-                      <Chip label={goalStatusLabel[g.status]} color={goalStatusColor[g.status]} size="small" />
+                      <Typography variant="subtitle1" fontWeight={600}>
+                        {g.nameAr}
+                      </Typography>
+                      <Chip
+                        label={goalStatusLabel[g.status]}
+                        color={goalStatusColor[g.status]}
+                        size="small"
+                      />
                     </Box>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>{g.description}</Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+                      {g.description}
+                    </Typography>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
                       <Typography variant="caption">التقدم</Typography>
-                      <Typography variant="caption" fontWeight={600}>{g.progress}%</Typography>
+                      <Typography variant="caption" fontWeight={600}>
+                        {g.progress}%
+                      </Typography>
                     </Box>
-                    <LinearProgress variant="determinate" value={g.progress} sx={{ height: 8, borderRadius: 4, mb: 1 }} />
+                    <LinearProgress
+                      variant="determinate"
+                      value={g.progress}
+                      sx={{ height: 8, borderRadius: 4, mb: 1 }}
+                    />
                     <Typography variant="caption" color="text.secondary">
                       {g.currentValue} / {g.targetValue} {g.unit} — المسؤول: {g.owner}
                     </Typography>
@@ -273,7 +444,11 @@ export default function CEODashboard() {
                         <Divider sx={{ mb: 0.5 }} />
                         {g.milestones.map((m, mi) => (
                           <Box key={mi} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                            {m.done ? <CheckIcon sx={{ fontSize: 14, color: 'success.main' }} /> : <TimerIcon sx={{ fontSize: 14, color: 'text.disabled' }} />}
+                            {m.done ? (
+                              <CheckIcon sx={{ fontSize: 14, color: 'success.main' }} />
+                            ) : (
+                              <TimerIcon sx={{ fontSize: 14, color: 'text.disabled' }} />
+                            )}
                             <Typography variant="caption">{m.name}</Typography>
                           </Box>
                         ))}
@@ -308,7 +483,14 @@ export default function CEODashboard() {
                   <TableCell align="right">{idx + 1}</TableCell>
                   <TableCell align="right">
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: d.color || 'grey.500' }} />
+                      <Box
+                        sx={{
+                          width: 10,
+                          height: 10,
+                          borderRadius: '50%',
+                          bgcolor: d.color || 'grey.500',
+                        }}
+                      />
                       <Typography variant="body2">{d.nameAr}</Typography>
                     </Box>
                   </TableCell>
@@ -318,13 +500,23 @@ export default function CEODashboard() {
                         variant="determinate"
                         value={d.performance}
                         sx={{ width: 60, height: 6, borderRadius: 3 }}
-                        color={d.performance >= 85 ? 'success' : d.performance >= 70 ? 'warning' : 'error'}
+                        color={
+                          d.performance >= 85
+                            ? 'success'
+                            : d.performance >= 70
+                              ? 'warning'
+                              : 'error'
+                        }
                       />
-                      <Typography variant="body2" fontWeight={600}>{d.performance}%</Typography>
+                      <Typography variant="body2" fontWeight={600}>
+                        {d.performance}%
+                      </Typography>
                     </Box>
                   </TableCell>
                   <TableCell align="right">{(d.budget || 0).toLocaleString('ar-SA')} ر.س</TableCell>
-                  <TableCell align="right">{(d.budgetUsed || 0).toLocaleString('ar-SA')} ر.س</TableCell>
+                  <TableCell align="right">
+                    {(d.budgetUsed || 0).toLocaleString('ar-SA')} ر.س
+                  </TableCell>
                   <TableCell align="right">{d.staffCount}</TableCell>
                   <TableCell align="right">{d.satisfaction}%</TableCell>
                 </TableRow>
@@ -341,7 +533,11 @@ export default function CEODashboard() {
         onClose={() => setSnack({ ...snack, open: false })}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
       >
-        <Alert onClose={() => setSnack({ ...snack, open: false })} severity={snack.severity} sx={{ width: '100%' }}>
+        <Alert
+          onClose={() => setSnack({ ...snack, open: false })}
+          severity={snack.severity}
+          sx={{ width: '100%' }}
+        >
           {snack.msg}
         </Alert>
       </Snackbar>
@@ -358,7 +554,9 @@ function KPISection({ title, icon, kpis, color }) {
       <CardContent>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
           <Avatar sx={{ bgcolor: color, width: 32, height: 32 }}>{icon}</Avatar>
-          <Typography variant="h6" fontWeight={600}>{title}</Typography>
+          <Typography variant="h6" fontWeight={600}>
+            {title}
+          </Typography>
         </Box>
         <Table size="small">
           <TableHead>
@@ -371,7 +569,7 @@ function KPISection({ title, icon, kpis, color }) {
             </TableRow>
           </TableHead>
           <TableBody>
-            {(kpis || []).map((k) => {
+            {(kpis || []).map(k => {
               const pct = k.target ? ((k.currentValue / k.target) * 100).toFixed(0) : 0;
               const met = k.currentValue >= k.target;
               return (
@@ -380,22 +578,37 @@ function KPISection({ title, icon, kpis, color }) {
                     <Typography variant="body2">{k.nameAr}</Typography>
                   </TableCell>
                   <TableCell align="right">
-                    <Typography variant="body2" fontWeight={600}>{fmt(k.currentValue, k.format)}</Typography>
+                    <Typography variant="body2" fontWeight={600}>
+                      {fmt(k.currentValue, k.format)}
+                    </Typography>
                   </TableCell>
                   <TableCell align="right">
-                    <Typography variant="body2" color="text.secondary">{fmt(k.target, k.format)}</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {fmt(k.target, k.format)}
+                    </Typography>
                   </TableCell>
                   <TableCell align="right">
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: trendColor(k.trend) }}>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 0.5,
+                        color: trendColor(k.trend),
+                      }}
+                    >
                       {trendIcon(k.trend)}
-                      <Typography variant="body2">{k.changePercent > 0 ? '+' : ''}{k.changePercent}%</Typography>
+                      <Typography variant="body2">
+                        {k.changePercent > 0 ? '+' : ''}
+                        {k.changePercent}%
+                      </Typography>
                     </Box>
                   </TableCell>
                   <TableCell align="right">
-                    {met
-                      ? <Chip label={`${pct}%`} color="success" size="small" icon={<CheckIcon />} />
-                      : <Chip label={`${pct}%`} color="warning" size="small" />
-                    }
+                    {met ? (
+                      <Chip label={`${pct}%`} color="success" size="small" icon={<CheckIcon />} />
+                    ) : (
+                      <Chip label={`${pct}%`} color="warning" size="small" />
+                    )}
                   </TableCell>
                 </TableRow>
               );

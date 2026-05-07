@@ -36,18 +36,39 @@ import {
   EmojiEvents as TrophyIcon,
   PersonAdd as PersonAddIcon,
   Delete as DeleteIcon,
-  } from '@mui/icons-material';
+} from '@mui/icons-material';
 import {
-  RadarChart, Radar, PolarGrid, PolarAngleAxis,
-  PolarRadiusAxis, ResponsiveContainer, Legend,
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip,
+  RadarChart,
+  Radar,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  ResponsiveContainer,
+  Legend,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as RechartsTooltip,
 } from 'recharts';
 import { gradients, brandColors } from 'theme/palette';
 import studentManagementService from 'services/studentManagementService';
 import { useAuth } from 'contexts/AuthContext';
 import logger from 'utils/logger';
 
-const STUDENT_COLORS = ['#4facfe', '#43e97b', '#fa709a', '#fee140', '#a18cd1', '#f093fb', '#4158D0', '#ff6b6b', '#00d2ff', '#7F00FF'];
+const STUDENT_COLORS = [
+  '#4facfe',
+  '#43e97b',
+  '#fa709a',
+  '#fee140',
+  '#a18cd1',
+  '#f093fb',
+  '#4158D0',
+  '#ff6b6b',
+  '#00d2ff',
+  '#7F00FF',
+];
 
 const METRIC_LABELS = {
   attendance: 'الحضور',
@@ -57,7 +78,7 @@ const METRIC_LABELS = {
 };
 
 // Transform backend flat student data into metrics for UI
-const buildStudentMetrics = (student) => ({
+const buildStudentMetrics = student => ({
   attendance: student.attendance?.rate ?? 0,
   progress: student.progress?.overall ?? 0,
   behavior: student.behavior?.points ?? 0,
@@ -79,7 +100,9 @@ const flattenRankings = (_rankings = {}, students = []) => {
   students.forEach(s => {
     const m = buildStudentMetrics(s);
     const vals = Object.values(m).filter(v => typeof v === 'number');
-    scoreMap[s.studentId] = vals.length ? Math.round(vals.reduce((a, b) => a + b, 0) / vals.length) : 0;
+    scoreMap[s.studentId] = vals.length
+      ? Math.round(vals.reduce((a, b) => a + b, 0) / vals.length)
+      : 0;
   });
   return students
     .map(s => ({ studentId: s.studentId, name: s.name, overallScore: scoreMap[s.studentId] || 0 }))
@@ -152,7 +175,7 @@ const StudentComparisonReport = () => {
     if (selectedIds.length >= 2) {
       loadComparison();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Only on initial load with URL params
 
   const handlePrint = () => window.print();
@@ -163,7 +186,7 @@ const StudentComparisonReport = () => {
     }
   };
 
-  const handleRemoveStudent = (id) => {
+  const handleRemoveStudent = id => {
     setSelectedIds(prev => prev.filter(i => i !== id));
     setReport(null);
   };
@@ -176,15 +199,16 @@ const StudentComparisonReport = () => {
   const normalizedAverages = normalizeAverages(report?.averages);
 
   // Prepare radar data
-  const radarData = normalizedStudents.length > 0
-    ? Object.keys(METRIC_LABELS).map(key => {
-        const entry = { metric: METRIC_LABELS[key] };
-        normalizedStudents.forEach(s => {
-          entry[s.name] = s.metrics?.[key] ?? 0;
-        });
-        return entry;
-      })
-    : [];
+  const radarData =
+    normalizedStudents.length > 0
+      ? Object.keys(METRIC_LABELS).map(key => {
+          const entry = { metric: METRIC_LABELS[key] };
+          normalizedStudents.forEach(s => {
+            entry[s.name] = s.metrics?.[key] ?? 0;
+          });
+          return entry;
+        })
+      : [];
 
   // Rankings — flatten from backend object to sorted array
   const rankingsData = report ? flattenRankings(report.rankings, report.students || []) : [];
@@ -213,7 +237,12 @@ const StudentComparisonReport = () => {
           رجوع لمركز التقارير
         </Button>
         <Stack direction="row" spacing={1}>
-          <Button variant="outlined" startIcon={<PrintIcon />} onClick={handlePrint} disabled={!report}>
+          <Button
+            variant="outlined"
+            startIcon={<PrintIcon />}
+            onClick={handlePrint}
+            disabled={!report}
+          >
             طباعة
           </Button>
         </Stack>
@@ -250,10 +279,10 @@ const StudentComparisonReport = () => {
             <Grid item xs={12} md={8}>
               <Autocomplete
                 options={allStudents.filter(s => !selectedIds.includes(s._id))}
-                getOptionLabel={(opt) => opt.name || opt.studentName || `طالب ${opt._id?.slice(-4)}`}
+                getOptionLabel={opt => opt.name || opt.studentName || `طالب ${opt._id?.slice(-4)}`}
                 onChange={handleAddStudent}
                 loading={loadingStudents}
-                renderInput={(params) => (
+                renderInput={params => (
                   <TextField {...params} label="ابحث واختر طالب..." size="small" fullWidth />
                 )}
                 noOptionsText="لا يوجد طلاب"
@@ -299,7 +328,11 @@ const StudentComparisonReport = () => {
         </CardContent>
       </Card>
 
-      {error && <Alert severity="warning" sx={{ mb: 2 }}>{error}</Alert>}
+      {error && (
+        <Alert severity="warning" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
 
       {loading && (
         <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
@@ -425,8 +458,16 @@ const StudentComparisonReport = () => {
                           p: 2,
                           borderRadius: 3,
                           textAlign: 'center',
-                          border: idx === 0 ? '2px solid #FFD700' : idx === 1 ? '2px solid #C0C0C0' : idx === 2 ? '2px solid #CD7F32' : '1px solid #e0e0e0',
-                          background: idx === 0 ? 'linear-gradient(135deg,#fff9e6,#fffdf5)' : '#fff',
+                          border:
+                            idx === 0
+                              ? '2px solid #FFD700'
+                              : idx === 1
+                                ? '2px solid #C0C0C0'
+                                : idx === 2
+                                  ? '2px solid #CD7F32'
+                                  : '1px solid #e0e0e0',
+                          background:
+                            idx === 0 ? 'linear-gradient(135deg,#fff9e6,#fffdf5)' : '#fff',
                           cursor: 'pointer',
                           '&:hover': { transform: 'translateY(-2px)', boxShadow: 4 },
                           transition: 'all 0.2s',
@@ -439,7 +480,10 @@ const StudentComparisonReport = () => {
                         <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
                           {r.name}
                         </Typography>
-                        <Typography variant="h5" sx={{ fontWeight: 800, color: brandColors.primaryStart }}>
+                        <Typography
+                          variant="h5"
+                          sx={{ fontWeight: 800, color: brandColors.primaryStart }}
+                        >
                           {r.overallScore}%
                         </Typography>
                         <Typography variant="caption" color="text.secondary">

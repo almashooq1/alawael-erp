@@ -8,9 +8,20 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Container, Box, Typography, Button, Paper,
-  Alert, CircularProgress, Stepper, Step, StepLabel,
-  LinearProgress, Slide, Avatar, Snackbar,
+  Container,
+  Box,
+  Typography,
+  Button,
+  Paper,
+  Alert,
+  CircularProgress,
+  Stepper,
+  Step,
+  StepLabel,
+  LinearProgress,
+  Slide,
+  Avatar,
+  Snackbar,
 } from '@mui/material';
 import { ArrowForward, ArrowBack, Save } from '@mui/icons-material';
 import { gradients, surfaceColors } from 'theme/palette';
@@ -43,36 +54,40 @@ const StudentRegistrationForm = () => {
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
   // ─── Helpers ───────────────────────────────────
-  const handleChange = useCallback((field) => (e) => {
-    const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
-    setFormData((prev) => ({ ...prev, [field]: value }));
-    setFieldErrors((prev) => ({ ...prev, [field]: '' }));
-  }, []);
+  const handleChange = useCallback(
+    field => e => {
+      const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
+      setFormData(prev => ({ ...prev, [field]: value }));
+      setFieldErrors(prev => ({ ...prev, [field]: '' }));
+    },
+    []
+  );
 
   const handleMultiSelect = useCallback((field, value) => {
-    setFormData((prev) => {
+    setFormData(prev => {
       const current = prev[field] || [];
       return {
         ...prev,
-        [field]: current.includes(value)
-          ? current.filter((v) => v !== value)
-          : [...current, value],
+        [field]: current.includes(value) ? current.filter(v => v !== value) : [...current, value],
       };
     });
   }, []);
 
   // ─── Validation ────────────────────────────────
-  const validateStep = useCallback((step) => {
-    const errors = validateStepFields(step, formData);
-    setFieldErrors(errors);
-    return Object.keys(errors).length === 0;
-  }, [formData]);
+  const validateStep = useCallback(
+    step => {
+      const errors = validateStepFields(step, formData);
+      setFieldErrors(errors);
+      return Object.keys(errors).length === 0;
+    },
+    [formData]
+  );
 
   const handleNext = useCallback(() => {
-    if (validateStep(activeStep)) setActiveStep((p) => p + 1);
+    if (validateStep(activeStep)) setActiveStep(p => p + 1);
   }, [activeStep, validateStep]);
 
-  const handleBack = useCallback(() => setActiveStep((p) => p - 1), []);
+  const handleBack = useCallback(() => setActiveStep(p => p - 1), []);
 
   // ─── Submit ─────────────────────────────────────
   const handleSubmit = async () => {
@@ -98,8 +113,11 @@ const StudentRegistrationForm = () => {
     const birth = new Date(formData.dateOfBirth);
     const now = new Date();
     let age = now.getFullYear() - birth.getFullYear();
-    if (now.getMonth() < birth.getMonth() ||
-      (now.getMonth() === birth.getMonth() && now.getDate() < birth.getDate())) age--;
+    if (
+      now.getMonth() < birth.getMonth() ||
+      (now.getMonth() === birth.getMonth() && now.getDate() < birth.getDate())
+    )
+      age--;
     return age >= 0 ? age : null;
   }, [formData.dateOfBirth]);
 
@@ -108,7 +126,11 @@ const StudentRegistrationForm = () => {
     return (
       <RegistrationSuccess
         formData={formData}
-        onReset={() => { setSubmitSuccess(false); setFormData(INITIAL_FORM); setActiveStep(0); }}
+        onReset={() => {
+          setSubmitSuccess(false);
+          setFormData(INITIAL_FORM);
+          setActiveStep(0);
+        }}
         onNavigate={navigate}
       />
     );
@@ -116,12 +138,32 @@ const StudentRegistrationForm = () => {
 
   // ─── Step Renderers ────────────────────────────
   const stepRenderers = [
-    () => <PersonalInfoStep formData={formData} fieldErrors={fieldErrors} handleChange={handleChange} calculatedAge={calculatedAge} />,
-    () => <DisabilityStep formData={formData} fieldErrors={fieldErrors} handleChange={handleChange} />,
-    () => <GuardianStep formData={formData} fieldErrors={fieldErrors} handleChange={handleChange} />,
-    () => <ProgramsStep formData={formData} fieldErrors={fieldErrors} handleChange={handleChange} handleMultiSelect={handleMultiSelect} />,
+    () => (
+      <PersonalInfoStep
+        formData={formData}
+        fieldErrors={fieldErrors}
+        handleChange={handleChange}
+        calculatedAge={calculatedAge}
+      />
+    ),
+    () => (
+      <DisabilityStep formData={formData} fieldErrors={fieldErrors} handleChange={handleChange} />
+    ),
+    () => (
+      <GuardianStep formData={formData} fieldErrors={fieldErrors} handleChange={handleChange} />
+    ),
+    () => (
+      <ProgramsStep
+        formData={formData}
+        fieldErrors={fieldErrors}
+        handleChange={handleChange}
+        handleMultiSelect={handleMultiSelect}
+      />
+    ),
     () => <MedicalStep formData={formData} handleChange={handleChange} setFormData={setFormData} />,
-    () => <ReviewStep formData={formData} submitError={submitError} calculatedAge={calculatedAge} />,
+    () => (
+      <ReviewStep formData={formData} submitError={submitError} calculatedAge={calculatedAge} />
+    ),
   ];
 
   // ═══════════════════════════════════════════════════
@@ -132,10 +174,16 @@ const StudentRegistrationForm = () => {
       <GradientHeader>
         <Slide in direction="down" timeout={600}>
           <Box>
-            <Avatar sx={{
-              width: 64, height: 64, bgcolor: 'rgba(255,255,255,0.2)',
-              mx: 'auto', mb: 2, fontSize: 28,
-            }}>
+            <Avatar
+              sx={{
+                width: 64,
+                height: 64,
+                bgcolor: 'rgba(255,255,255,0.2)',
+                mx: 'auto',
+                mb: 2,
+                fontSize: 28,
+              }}
+            >
               📋
             </Avatar>
             <Typography variant="h5" fontWeight="bold" sx={{ mb: 0.5 }}>
@@ -150,67 +198,113 @@ const StudentRegistrationForm = () => {
 
       <Container maxWidth="md" sx={{ mt: -3, position: 'relative', zIndex: 2 }}>
         {/* Stepper */}
-        <Paper elevation={0} sx={{
-          borderRadius: 3, p: 2, mb: 3, bgcolor: 'white',
-          boxShadow: '0 4px 24px rgba(0,0,0,0.06)',
-        }}>
+        <Paper
+          elevation={0}
+          sx={{
+            borderRadius: 3,
+            p: 2,
+            mb: 3,
+            bgcolor: 'white',
+            boxShadow: '0 4px 24px rgba(0,0,0,0.06)',
+          }}
+        >
           <Stepper activeStep={activeStep} alternativeLabel connector={<StyledStepConnector />}>
             {STEPS.map((label, idx) => (
               <Step key={label}>
                 <StepLabel StepIconComponent={CustomStepIcon}>
-                  <Typography variant="caption"
+                  <Typography
+                    variant="caption"
                     fontWeight={activeStep === idx ? 'bold' : 'normal'}
                     color={activeStep >= idx ? 'text.primary' : 'text.secondary'}
-                    sx={{ display: { xs: 'none', sm: 'block' } }}>
+                    sx={{ display: { xs: 'none', sm: 'block' } }}
+                  >
                     {label}
                   </Typography>
                 </StepLabel>
               </Step>
             ))}
           </Stepper>
-          <LinearProgress variant="determinate" value={((activeStep + 1) / STEPS.length) * 100}
+          <LinearProgress
+            variant="determinate"
+            value={((activeStep + 1) / STEPS.length) * 100}
             sx={{
-              mt: 2, height: 4, borderRadius: 2, bgcolor: surfaceColors.softGray,
+              mt: 2,
+              height: 4,
+              borderRadius: 2,
+              bgcolor: surfaceColors.softGray,
               '& .MuiLinearProgress-bar': { background: gradients.primary, borderRadius: 2 },
             }}
           />
-          <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block', textAlign: 'center' }}>
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            sx={{ mt: 1, display: 'block', textAlign: 'center' }}
+          >
             الخطوة {activeStep + 1} من {STEPS.length}
           </Typography>
         </Paper>
 
         {/* Form */}
-        <Paper elevation={0} sx={{
-          borderRadius: 3, p: { xs: 2.5, sm: 4 }, bgcolor: 'white',
-          boxShadow: '0 4px 24px rgba(0,0,0,0.06)',
-        }}>
+        <Paper
+          elevation={0}
+          sx={{
+            borderRadius: 3,
+            p: { xs: 2.5, sm: 4 },
+            bgcolor: 'white',
+            boxShadow: '0 4px 24px rgba(0,0,0,0.06)',
+          }}
+        >
           {stepRenderers[activeStep]()}
 
           {/* Navigation */}
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
-            <Button variant="outlined" onClick={handleBack} disabled={activeStep === 0}
+            <Button
+              variant="outlined"
+              onClick={handleBack}
+              disabled={activeStep === 0}
               startIcon={<ArrowForward />}
-              sx={{ borderRadius: 2, visibility: activeStep === 0 ? 'hidden' : 'visible' }}>
+              sx={{ borderRadius: 2, visibility: activeStep === 0 ? 'hidden' : 'visible' }}
+            >
               السابق
             </Button>
 
             {activeStep < STEPS.length - 1 ? (
-              <Button variant="contained" onClick={handleNext} endIcon={<ArrowBack />}
+              <Button
+                variant="contained"
+                onClick={handleNext}
+                endIcon={<ArrowBack />}
                 sx={{
-                  borderRadius: 2, background: gradients.primary, px: 4, py: 1.2, fontWeight: 'bold',
+                  borderRadius: 2,
+                  background: gradients.primary,
+                  px: 4,
+                  py: 1.2,
+                  fontWeight: 'bold',
                   '&:hover': { background: gradients.primary, filter: 'brightness(1.1)' },
-                }}>
+                }}
+              >
                 التالي
               </Button>
             ) : (
-              <Button variant="contained" onClick={handleSubmit} disabled={isSubmitting}
+              <Button
+                variant="contained"
+                onClick={handleSubmit}
+                disabled={isSubmitting}
                 endIcon={isSubmitting ? null : <Save />}
                 sx={{
-                  borderRadius: 2, background: gradients.success, px: 4, py: 1.2,
-                  fontWeight: 'bold', color: '#fff',
+                  borderRadius: 2,
+                  background: gradients.success,
+                  px: 4,
+                  py: 1.2,
+                  fontWeight: 'bold',
+                  color: '#fff',
                   '&:hover': { background: gradients.success, filter: 'brightness(1.1)' },
-                }}>
-                {isSubmitting ? <CircularProgress size={24} sx={{ color: 'white' }} /> : 'تسجيل الطالب'}
+                }}
+              >
+                {isSubmitting ? (
+                  <CircularProgress size={24} sx={{ color: 'white' }} />
+                ) : (
+                  'تسجيل الطالب'
+                )}
               </Button>
             )}
           </Box>
@@ -220,7 +314,7 @@ const StudentRegistrationForm = () => {
       <Snackbar
         open={snackbar.open}
         autoHideDuration={4000}
-        onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
+        onClose={() => setSnackbar(s => ({ ...s, open: false }))}
       >
         <Alert severity={snackbar.severity} sx={{ width: '100%' }}>
           {snackbar.message}

@@ -40,9 +40,9 @@ import {
   Assignment,
 } from '@mui/icons-material';
 import {
-    AreaChart,
-    Area,
-    PieChart,
+  AreaChart,
+  Area,
+  PieChart,
   Pie,
   Cell,
   ResponsiveContainer,
@@ -62,7 +62,16 @@ const PERIOD_OPTIONS = [
   { value: 'year', label: 'سنة' },
 ];
 
-const COLORS = ['#2196F3', '#4CAF50', '#FF9800', '#F44336', '#9C27B0', '#00BCD4', '#FF5722', '#607D8B'];
+const COLORS = [
+  '#2196F3',
+  '#4CAF50',
+  '#FF9800',
+  '#F44336',
+  '#9C27B0',
+  '#00BCD4',
+  '#FF5722',
+  '#607D8B',
+];
 
 // ── Animated Counter ──────────────────────────────────────────────
 function AnimatedNumber({ value, prefix = '', suffix = '' }) {
@@ -114,10 +123,18 @@ function KPICard({ title, value, unit, trend, trendValue, icon: Icon, color }) {
     );
 
   const trendColor =
-    trend === 'up' ? theme.palette.success.main : trend === 'down' ? theme.palette.error.main : theme.palette.grey[500];
+    trend === 'up'
+      ? theme.palette.success.main
+      : trend === 'down'
+        ? theme.palette.error.main
+        : theme.palette.grey[500];
 
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
       <Card
         elevation={0}
         sx={{
@@ -130,7 +147,14 @@ function KPICard({ title, value, unit, trend, trendValue, icon: Icon, color }) {
         }}
       >
         <CardContent sx={{ p: 3 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'flex-start',
+              mb: 2,
+            }}
+          >
             <Typography variant="body2" color="text.secondary" fontWeight={500}>
               {title}
             </Typography>
@@ -190,13 +214,13 @@ function KPICard({ title, value, unit, trend, trendValue, icon: Icon, color }) {
 // ── Health Score Gauge ────────────────────────────────────────────
 function HealthScoreGauge({ score }) {
   const theme = useTheme();
-  const getScoreColor = (s) => {
+  const getScoreColor = s => {
     if (s >= 80) return theme.palette.success.main;
     if (s >= 60) return theme.palette.warning.main;
     return theme.palette.error.main;
   };
 
-  const getScoreLabel = (s) => {
+  const getScoreLabel = s => {
     if (s >= 80) return 'ممتاز';
     if (s >= 60) return 'جيد';
     if (s >= 40) return 'يحتاج تحسين';
@@ -204,7 +228,15 @@ function HealthScoreGauge({ score }) {
   };
 
   return (
-    <Paper elevation={0} sx={{ p: 3, borderRadius: 3, border: `1px solid ${theme.palette.divider}`, textAlign: 'center' }}>
+    <Paper
+      elevation={0}
+      sx={{
+        p: 3,
+        borderRadius: 3,
+        border: `1px solid ${theme.palette.divider}`,
+        textAlign: 'center',
+      }}
+    >
       <Typography variant="h6" fontWeight={600} gutterBottom>
         مؤشر صحة المنظمة
       </Typography>
@@ -239,7 +271,14 @@ function HealthScoreGauge({ score }) {
         </Box>
       </Box>
 
-      <Chip label={getScoreLabel(score)} sx={{ bgcolor: alpha(getScoreColor(score), 0.1), color: getScoreColor(score), fontWeight: 600 }} />
+      <Chip
+        label={getScoreLabel(score)}
+        sx={{
+          bgcolor: alpha(getScoreColor(score), 0.1),
+          color: getScoreColor(score),
+          fontWeight: 600,
+        }}
+      />
     </Paper>
   );
 }
@@ -366,12 +405,21 @@ export default function BIExecutiveOverview() {
     { name: 'الموظفون', value: summary.staff?.active || 0, color: '#4CAF50' },
     { name: 'الجلسات', value: summary.sessions?.total || 0, color: '#9C27B0' },
     { name: 'الشكاوى', value: summary.complaints?.total || 0, color: '#F44336' },
-  ].filter((d) => d.value > 0);
+  ].filter(d => d.value > 0);
 
   return (
     <Box sx={{ p: { xs: 2, md: 3 } }}>
       {/* Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 2 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          mb: 3,
+          flexWrap: 'wrap',
+          gap: 2,
+        }}
+      >
         <Box>
           <Typography variant="h4" fontWeight={700}>
             لوحة ذكاء الأعمال
@@ -381,8 +429,13 @@ export default function BIExecutiveOverview() {
           </Typography>
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <ToggleButtonGroup value={period} exclusive onChange={(_, v) => v && setPeriod(v)} size="small">
-            {PERIOD_OPTIONS.map((opt) => (
+          <ToggleButtonGroup
+            value={period}
+            exclusive
+            onChange={(_, v) => v && setPeriod(v)}
+            size="small"
+          >
+            {PERIOD_OPTIONS.map(opt => (
               <ToggleButton key={opt.value} value={opt.value}>
                 {opt.label}
               </ToggleButton>
@@ -428,7 +481,10 @@ export default function BIExecutiveOverview() {
       <Grid container spacing={3} sx={{ mb: 3 }}>
         {/* Revenue Trend */}
         <Grid item xs={12} md={8}>
-          <Paper elevation={0} sx={{ p: 3, borderRadius: 3, border: `1px solid ${theme.palette.divider}` }}>
+          <Paper
+            elevation={0}
+            sx={{ p: 3, borderRadius: 3, border: `1px solid ${theme.palette.divider}` }}
+          >
             <Typography variant="h6" fontWeight={600} gutterBottom>
               اتجاه الإيرادات
             </Typography>
@@ -444,7 +500,14 @@ export default function BIExecutiveOverview() {
                 <XAxis dataKey="label" tick={{ fontSize: 11 }} />
                 <YAxis tick={{ fontSize: 11 }} />
                 <RechartTooltip />
-                <Area type="monotone" dataKey="value" stroke="#2196F3" fill="url(#revenueGrad)" strokeWidth={2} name="الإيرادات" />
+                <Area
+                  type="monotone"
+                  dataKey="value"
+                  stroke="#2196F3"
+                  fill="url(#revenueGrad)"
+                  strokeWidth={2}
+                  name="الإيرادات"
+                />
               </AreaChart>
             </ResponsiveContainer>
           </Paper>
@@ -457,13 +520,24 @@ export default function BIExecutiveOverview() {
               <HealthScoreGauge score={overview?.healthScore || 70} />
             </Grid>
             <Grid item>
-              <Paper elevation={0} sx={{ p: 2, borderRadius: 3, border: `1px solid ${theme.palette.divider}` }}>
+              <Paper
+                elevation={0}
+                sx={{ p: 2, borderRadius: 3, border: `1px solid ${theme.palette.divider}` }}
+              >
                 <Typography variant="subtitle2" fontWeight={600} gutterBottom>
                   توزيع النشاط
                 </Typography>
                 <ResponsiveContainer width="100%" height={180}>
                   <PieChart>
-                    <Pie data={summaryPie} cx="50%" cy="50%" innerRadius={40} outerRadius={70} paddingAngle={3} dataKey="value">
+                    <Pie
+                      data={summaryPie}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={40}
+                      outerRadius={70}
+                      paddingAngle={3}
+                      dataKey="value"
+                    >
                       {summaryPie.map((entry, idx) => (
                         <Cell key={idx} fill={entry.color} />
                       ))}
@@ -481,7 +555,10 @@ export default function BIExecutiveOverview() {
       {/* Summary Stats */}
       <Grid container spacing={3}>
         <Grid item xs={12} md={4}>
-          <Paper elevation={0} sx={{ p: 3, borderRadius: 3, border: `1px solid ${theme.palette.divider}` }}>
+          <Paper
+            elevation={0}
+            sx={{ p: 3, borderRadius: 3, border: `1px solid ${theme.palette.divider}` }}
+          >
             <Typography variant="subtitle1" fontWeight={600} gutterBottom>
               الجلسات هذا الشهر
             </Typography>
@@ -509,7 +586,10 @@ export default function BIExecutiveOverview() {
         </Grid>
 
         <Grid item xs={12} md={4}>
-          <Paper elevation={0} sx={{ p: 3, borderRadius: 3, border: `1px solid ${theme.palette.divider}` }}>
+          <Paper
+            elevation={0}
+            sx={{ p: 3, borderRadius: 3, border: `1px solid ${theme.palette.divider}` }}
+          >
             <Typography variant="subtitle1" fontWeight={600} gutterBottom>
               الشكاوى
             </Typography>
@@ -537,7 +617,10 @@ export default function BIExecutiveOverview() {
         </Grid>
 
         <Grid item xs={12} md={4}>
-          <Paper elevation={0} sx={{ p: 3, borderRadius: 3, border: `1px solid ${theme.palette.divider}` }}>
+          <Paper
+            elevation={0}
+            sx={{ p: 3, borderRadius: 3, border: `1px solid ${theme.palette.divider}` }}
+          >
             <Typography variant="subtitle1" fontWeight={600} gutterBottom>
               الحضور
             </Typography>

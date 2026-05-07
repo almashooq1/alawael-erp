@@ -35,11 +35,7 @@ export default function RequestsTab({ requests = [], onOpenDialog }) {
     <Box>
       {/* ─── Action Row ─── */}
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={onOpenDialog}
-        >
+        <Button variant="contained" startIcon={<AddIcon />} onClick={onOpenDialog}>
           طلب جديد
         </Button>
       </Box>
@@ -61,18 +57,14 @@ export default function RequestsTab({ requests = [], onOpenDialog }) {
                 <TableCell colSpan={4} align="center">
                   <Box sx={{ py: 3.5, textAlign: 'center' }}>
                     <AssignmentIcon sx={{ fontSize: 48, color: 'text.disabled' }} />
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{ mt: 1 }}
-                    >
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
                       لا توجد طلبات حتى الآن
                     </Typography>
                   </Box>
                 </TableCell>
               </TableRow>
             ) : (
-              requests.map((req) => {
+              requests.map(req => {
                 const st = STATUS_MAP[req.status] || {
                   label: req.status,
                   color: 'default',
@@ -88,9 +80,7 @@ export default function RequestsTab({ requests = [], onOpenDialog }) {
                     </TableCell>
                     <TableCell>{req.description}</TableCell>
                     <TableCell>
-                      {req.createdAt
-                        ? new Date(req.createdAt).toLocaleDateString('ar-SA')
-                        : '—'}
+                      {req.createdAt ? new Date(req.createdAt).toLocaleDateString('ar-SA') : '—'}
                     </TableCell>
                     <TableCell align="center">
                       <Chip label={st.label} color={st.color} size="small" />

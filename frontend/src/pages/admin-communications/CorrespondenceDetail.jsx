@@ -86,7 +86,13 @@ function DirectiveDialog({ open, onClose, onSubmit }) {
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: '20px' } }}>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="sm"
+      fullWidth
+      PaperProps={{ sx: { borderRadius: '20px' } }}
+    >
       <DialogTitle>إضافة توجيه</DialogTitle>
       <DialogContent>
         <Stack spacing={2} sx={{ mt: 1 }}>
@@ -104,7 +110,9 @@ function DirectiveDialog({ open, onClose, onSubmit }) {
               onChange={e => setForm(p => ({ ...p, toDepartment: e.target.value }))}
             >
               {DEPARTMENTS.map(d => (
-                <MenuItem key={d.value} value={d.value}>{d.label}</MenuItem>
+                <MenuItem key={d.value} value={d.value}>
+                  {d.label}
+                </MenuItem>
               ))}
             </Select>
           </FormControl>
@@ -142,10 +150,14 @@ function ApprovalDialog({ open, onClose, onApprove, onReject }) {
   const [mode, setMode] = useState('approve');
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: '20px' } }}>
-      <DialogTitle>
-        {mode === 'approve' ? 'اعتماد المراسلة' : 'رفض المراسلة'}
-      </DialogTitle>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="sm"
+      fullWidth
+      PaperProps={{ sx: { borderRadius: '20px' } }}
+    >
+      <DialogTitle>{mode === 'approve' ? 'اعتماد المراسلة' : 'رفض المراسلة'}</DialogTitle>
       <DialogContent>
         <Stack direction="row" spacing={1} sx={{ mb: 2, mt: 1 }}>
           <Button
@@ -191,7 +203,10 @@ function ApprovalDialog({ open, onClose, onApprove, onReject }) {
           <Button
             variant="contained"
             color="success"
-            onClick={() => { onApprove(comments); onClose(); }}
+            onClick={() => {
+              onApprove(comments);
+              onClose();
+            }}
           >
             تأكيد الاعتماد
           </Button>
@@ -199,7 +214,10 @@ function ApprovalDialog({ open, onClose, onApprove, onReject }) {
           <Button
             variant="contained"
             color="error"
-            onClick={() => { onReject(reason); onClose(); }}
+            onClick={() => {
+              onReject(reason);
+              onClose();
+            }}
             disabled={!reason.trim()}
           >
             تأكيد الرفض
@@ -342,8 +360,7 @@ export default function CorrespondenceDetail() {
   const statusConfig = CORRESPONDENCE_STATUS[item.status] || {};
   const priorityConfig = PRIORITY_LEVELS[item.priority] || {};
   const confConfig = CONFIDENTIALITY_LEVELS[item.confidentialityLevel] || {};
-  const isIncoming =
-    item.correspondenceType === 'incoming' || item.type === 'incoming';
+  const isIncoming = item.correspondenceType === 'incoming' || item.type === 'incoming';
 
   /* ─── Render ───────────────────────────────────────────────────────────── */
   return (
@@ -353,8 +370,7 @@ export default function CorrespondenceDetail() {
         sx={{
           p: 3,
           mb: 3,
-          background:
-            gradients?.primary || 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',
+          background: gradients?.primary || 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',
           color: '#fff',
           borderRadius: '20px',
           boxShadow: '0 8px 32px rgba(25,118,210,0.25)',
@@ -435,11 +451,7 @@ export default function CorrespondenceDetail() {
         <Grid item xs={12} md={8}>
           {/* Tabs */}
           <Paper sx={{ mb: 2 }}>
-            <Tabs
-              value={activeTab}
-              onChange={(_, v) => setActiveTab(v)}
-              variant="fullWidth"
-            >
+            <Tabs value={activeTab} onChange={(_, v) => setActiveTab(v)} variant="fullWidth">
               <Tab label="المراسلة" />
               <Tab label="المرفقات" />
               <Tab label="سجل الإجراءات" />
@@ -486,10 +498,7 @@ export default function CorrespondenceDetail() {
                   </Typography>
                   <List dense>
                     {item.directives.map((d, i) => (
-                      <ListItem
-                        key={i}
-                        sx={{ bgcolor: '#fff8e1', borderRadius: '10px', mb: 0.5 }}
-                      >
+                      <ListItem key={i} sx={{ bgcolor: '#fff8e1', borderRadius: '10px', mb: 0.5 }}>
                         <ListItemIcon>
                           <Directions color="warning" />
                         </ListItemIcon>
@@ -534,9 +543,7 @@ export default function CorrespondenceDetail() {
                       <ListItemSecondaryAction>
                         <Tooltip title="تحميل">
                           <IconButton
-                            onClick={() =>
-                              handleDownloadAttachment(att.fileName, att.originalName)
-                            }
+                            onClick={() => handleDownloadAttachment(att.fileName, att.originalName)}
                           >
                             <Download />
                           </IconButton>
@@ -623,10 +630,7 @@ export default function CorrespondenceDetail() {
                     >
                       <ListItemText
                         primary={
-                          <Typography
-                            variant="body2"
-                            fontWeight={t._id === id ? 'bold' : 'normal'}
-                          >
+                          <Typography variant="body2" fontWeight={t._id === id ? 'bold' : 'normal'}>
                             {t.subject || 'بدون عنوان'}
                             {t._id === id && ' (الحالية)'}
                           </Typography>
@@ -660,7 +664,9 @@ export default function CorrespondenceDetail() {
                   </Typography>
                 </Box>
                 <Box>
-                  <Typography variant="caption" color="text.secondary">النوع</Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    النوع
+                  </Typography>
                   <Box>
                     <Chip
                       label={typeConfig.label || '-'}
@@ -670,7 +676,9 @@ export default function CorrespondenceDetail() {
                   </Box>
                 </Box>
                 <Box>
-                  <Typography variant="caption" color="text.secondary">الحالة</Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    الحالة
+                  </Typography>
                   <Box>
                     <Chip
                       label={statusConfig.label || item.status}
@@ -680,7 +688,9 @@ export default function CorrespondenceDetail() {
                   </Box>
                 </Box>
                 <Box>
-                  <Typography variant="caption" color="text.secondary">الأولوية</Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    الأولوية
+                  </Typography>
                   <Box>
                     <Chip
                       label={priorityConfig.label || item.priority}
@@ -691,7 +701,9 @@ export default function CorrespondenceDetail() {
                   </Box>
                 </Box>
                 <Box>
-                  <Typography variant="caption" color="text.secondary">السرية</Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    السرية
+                  </Typography>
                   <Typography variant="body2">
                     {item.confidentialityLevel === 'top_secret' && (
                       <Lock fontSize="inherit" sx={{ mr: 0.5, color: '#f44336' }} />
@@ -701,11 +713,11 @@ export default function CorrespondenceDetail() {
                 </Box>
                 <Divider />
                 <Box>
-                  <Typography variant="caption" color="text.secondary">تاريخ الإنشاء</Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    تاريخ الإنشاء
+                  </Typography>
                   <Typography variant="body2">
-                    {item.createdAt
-                      ? new Date(item.createdAt).toLocaleString('ar-SA')
-                      : '-'}
+                    {item.createdAt ? new Date(item.createdAt).toLocaleString('ar-SA') : '-'}
                   </Typography>
                 </Box>
                 {item.dueDate && (
@@ -716,9 +728,7 @@ export default function CorrespondenceDetail() {
                     </Typography>
                     <Typography
                       variant="body2"
-                      color={
-                        new Date(item.dueDate) < new Date() ? 'error.main' : 'text.primary'
-                      }
+                      color={new Date(item.dueDate) < new Date() ? 'error.main' : 'text.primary'}
                       fontWeight="bold"
                     >
                       {new Date(item.dueDate).toLocaleDateString('ar-SA')}

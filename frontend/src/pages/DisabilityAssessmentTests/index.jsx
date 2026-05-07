@@ -6,7 +6,16 @@
  * adaptive behavior), allows conducting tests with item-level scoring,
  * viewing results and tracking progress.
  */
-import { Container, Box, Typography, Button, Paper, Tabs, Tab, LinearProgress } from '@mui/material';
+import {
+  Container,
+  Box,
+  Typography,
+  Button,
+  Paper,
+  Tabs,
+  Tab,
+  LinearProgress,
+} from '@mui/material';
 import {
   Quiz as QuizIcon,
   History as HistoryIcon,
@@ -29,7 +38,9 @@ const DisabilityAssessmentTests = () => {
     return (
       <Container maxWidth="xl" sx={{ py: 4 }}>
         <LinearProgress />
-        <Typography align="center" sx={{ mt: 2 }}>جاري تحميل بيانات الاختبارات...</Typography>
+        <Typography align="center" sx={{ mt: 2 }}>
+          جاري تحميل بيانات الاختبارات...
+        </Typography>
       </Container>
     );
   }
@@ -41,7 +52,9 @@ const DisabilityAssessmentTests = () => {
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
           <AssignmentIcon sx={{ fontSize: 40 }} />
           <Box>
-            <Typography variant="h4" sx={{ fontWeight: 'bold' }}>اختبارات تقييم الإعاقة</Typography>
+            <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+              اختبارات تقييم الإعاقة
+            </Typography>
             <Typography variant="body2">إدارة اختبارات ومقاييس تقييم الإعاقة</Typography>
           </Box>
         </Box>
@@ -110,7 +123,10 @@ const DisabilityAssessmentTests = () => {
         onFilterTest={h.setFilterTest}
         filterBeneficiary={h.filterBeneficiary}
         onFilterBeneficiary={h.setFilterBeneficiary}
-        onRowClick={(r) => { h.handleCloseHistory(); h.handleOpenDetail(r); }}
+        onRowClick={r => {
+          h.handleCloseHistory();
+          h.handleOpenDetail(r);
+        }}
       />
 
       <DetailDialog

@@ -63,7 +63,9 @@ const ProgressDialog = ({ open, onClose, scales, beneficiaries }) => {
       }
     };
     fetchProgress();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [selectedBeneficiary, selectedScaleKey]);
 
   const trendIcon = {
@@ -92,7 +94,9 @@ const ProgressDialog = ({ open, onClose, scales, beneficiaries }) => {
           <TimelineIcon />
           <span>متابعة تقدم المقياس عبر الزمن</span>
         </Box>
-        <IconButton onClick={onClose} sx={{ color: 'white' }}><CloseIcon /></IconButton>
+        <IconButton onClick={onClose} sx={{ color: 'white' }}>
+          <CloseIcon />
+        </IconButton>
       </DialogTitle>
 
       <DialogContent sx={{ pt: 3 }}>
@@ -102,11 +106,13 @@ const ProgressDialog = ({ open, onClose, scales, beneficiaries }) => {
               <InputLabel>اختر المستفيد</InputLabel>
               <Select
                 value={selectedBeneficiary}
-                onChange={(e) => setSelectedBeneficiary(e.target.value)}
+                onChange={e => setSelectedBeneficiary(e.target.value)}
                 label="اختر المستفيد"
               >
-                {beneficiaries.map((b) => (
-                  <MenuItem key={b.id} value={b.id}>{b.name}</MenuItem>
+                {beneficiaries.map(b => (
+                  <MenuItem key={b.id} value={b.id}>
+                    {b.name}
+                  </MenuItem>
                 ))}
               </Select>
             </FormControl>
@@ -116,10 +122,10 @@ const ProgressDialog = ({ open, onClose, scales, beneficiaries }) => {
               <InputLabel>اختر المقياس</InputLabel>
               <Select
                 value={selectedScaleKey}
-                onChange={(e) => setSelectedScaleKey(e.target.value)}
+                onChange={e => setSelectedScaleKey(e.target.value)}
                 label="اختر المقياس"
               >
-                {scales.map((s) => (
+                {scales.map(s => (
                   <MenuItem key={s.id} value={s.id}>
                     {s.name}
                   </MenuItem>
@@ -130,14 +136,24 @@ const ProgressDialog = ({ open, onClose, scales, beneficiaries }) => {
         </Grid>
 
         {loading && <LinearProgress sx={{ mb: 2 }} />}
-        {error && <Alert severity="warning" sx={{ mb: 2 }}>{error}</Alert>}
+        {error && (
+          <Alert severity="warning" sx={{ mb: 2 }}>
+            {error}
+          </Alert>
+        )}
 
         {progress && (
           <>
             {/* Trend indicator */}
             {progress.trend && (
               <Alert
-                severity={progress.trend === 'improving' ? 'success' : progress.trend === 'declining' ? 'error' : 'info'}
+                severity={
+                  progress.trend === 'improving'
+                    ? 'success'
+                    : progress.trend === 'declining'
+                      ? 'error'
+                      : 'info'
+                }
                 sx={{ mb: 2 }}
                 icon={trendIcon[progress.trend] || <TrendingFlatIcon />}
               >
@@ -160,26 +176,41 @@ const ProgressDialog = ({ open, onClose, scales, beneficiaries }) => {
                   const interp = selectedScale?.interpretation?.find(
                     i => assessment.totalScore >= i.min && assessment.totalScore <= i.max
                   );
-                  const prevAssessment = idx < progress.assessments.length - 1
-                    ? progress.assessments[idx + 1]
-                    : null;
+                  const prevAssessment =
+                    idx < progress.assessments.length - 1 ? progress.assessments[idx + 1] : null;
                   const diff = prevAssessment
                     ? assessment.totalScore - prevAssessment.totalScore
                     : null;
 
                   return (
-                    <Paper key={idx} elevation={1} sx={{ p: 2, mb: 1.5, borderRight: `4px solid ${interp?.color || '#666'}` }}>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Paper
+                      key={idx}
+                      elevation={1}
+                      sx={{ p: 2, mb: 1.5, borderRight: `4px solid ${interp?.color || '#666'}` }}
+                    >
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                        }}
+                      >
                         <Box>
                           <Typography variant="subtitle2" fontWeight="bold">
-                            {assessment.date || assessment.createdAt?.split('T')[0] || `تقييم #${idx + 1}`}
+                            {assessment.date ||
+                              assessment.createdAt?.split('T')[0] ||
+                              `تقييم #${idx + 1}`}
                           </Typography>
                           <Typography variant="body2" color="text.secondary">
                             {assessment.assessorName || ''}
                           </Typography>
                         </Box>
                         <Box sx={{ textAlign: 'center' }}>
-                          <Typography variant="h5" fontWeight="bold" color={selectedScale?.color || '#333'}>
+                          <Typography
+                            variant="h5"
+                            fontWeight="bold"
+                            color={selectedScale?.color || '#333'}
+                          >
                             {assessment.totalScore}
                           </Typography>
                           <Typography variant="caption" color="text.secondary">
@@ -195,7 +226,14 @@ const ProgressDialog = ({ open, onClose, scales, beneficiaries }) => {
                             />
                           )}
                           {diff !== null && diff !== 0 && (
-                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 0.5 }}>
+                            <Box
+                              sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'flex-end',
+                                gap: 0.5,
+                              }}
+                            >
                               {diff > 0 ? (
                                 <TrendingUpIcon color="success" fontSize="small" />
                               ) : (
@@ -206,7 +244,8 @@ const ProgressDialog = ({ open, onClose, scales, beneficiaries }) => {
                                 color={diff > 0 ? 'success.main' : 'error.main'}
                                 fontWeight="bold"
                               >
-                                {diff > 0 ? '+' : ''}{diff}
+                                {diff > 0 ? '+' : ''}
+                                {diff}
                               </Typography>
                             </Box>
                           )}

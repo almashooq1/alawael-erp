@@ -41,8 +41,6 @@ import {
   Divider,
 } from '@mui/material';
 import {
-  People as PeopleIcon,
-  Message as MessageIcon,
   Report as ReportIcon,
   CheckCircle as CheckCircleIcon,
   Schedule as ScheduleIcon,
@@ -50,7 +48,6 @@ import {
   Search as SearchIcon,
   FilterList as FilterIcon,
   Reply as ReplyIcon,
-  Assignment as AssignmentIcon,
   Star as StarIcon,
   Warning as WarningIcon,
   Close as CloseIcon,
@@ -283,7 +280,7 @@ export default function ParentPortalManagement() {
       ]);
 
       // إحصاءات حسب الحالة
-      const statusCounts = { submitted: 0, in_progress: 0, resolved: 0 };
+      const _statusCounts = { submitted: 0, in_progress: 0, resolved: 0 };
       const [sub, inprog, res] = await Promise.all([
         axios.get(`${API_BASE}/parent-portal/admin/complaints?status=submitted&limit=1`, {
           headers: authHeader,
@@ -306,6 +303,7 @@ export default function ParentPortalManagement() {
     } catch (err) {
       console.error('Stats fetch error:', err);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- authHeader is per-render
   }, []);
 
   // ─── جلب الشكاوى ──────────────────────────────────────────────────────────
@@ -329,6 +327,7 @@ export default function ParentPortalManagement() {
     } finally {
       setLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- authHeader is per-render
   }, [page, filters]);
 
   // ─── جلب الرسائل ──────────────────────────────────────────────────────────
@@ -346,6 +345,7 @@ export default function ParentPortalManagement() {
     } finally {
       setLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- authHeader is per-render
   }, [page]);
 
   useEffect(() => {
@@ -479,7 +479,9 @@ export default function ParentPortalManagement() {
                   placeholder="بحث برقم التذكرة أو الموضوع أو الاسم..."
                   value={filters.search}
                   onChange={e => setFilters(prev => ({ ...prev, search: e.target.value }))}
-                  InputProps={{ startAdornment: <SearchIcon sx={{ ml: 1, color: 'text.secondary' }} /> }}
+                  InputProps={{
+                    startAdornment: <SearchIcon sx={{ ml: 1, color: 'text.secondary' }} />,
+                  }}
                 />
               </Grid>
               <Grid item xs={6} md={2}>
@@ -675,11 +677,7 @@ export default function ParentPortalManagement() {
               إجمالي: {total} شكوى
             </Typography>
             <Box display="flex" gap={1}>
-              <Button
-                size="small"
-                disabled={page <= 1}
-                onClick={() => setPage(p => p - 1)}
-              >
+              <Button size="small" disabled={page <= 1} onClick={() => setPage(p => p - 1)}>
                 السابق
               </Button>
               <Typography variant="body2" sx={{ px: 2, py: 0.5 }}>
@@ -736,9 +734,7 @@ export default function ParentPortalManagement() {
                   messages.map(msg => (
                     <TableRow key={msg._id} hover>
                       <TableCell align="right">
-                        <Typography variant="body2">
-                          {msg.guardianId?.nameAr || '—'}
-                        </Typography>
+                        <Typography variant="body2">{msg.guardianId?.nameAr || '—'}</Typography>
                       </TableCell>
                       <TableCell align="right">
                         <Typography variant="body2">{msg.subject || '(بدون موضوع)'}</Typography>

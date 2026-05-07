@@ -1,7 +1,13 @@
 import React from 'react';
 import {
-  Dialog, DialogTitle, DialogContent, DialogActions,
-  Button, Box, Typography, LinearProgress,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  Box,
+  Typography,
+  LinearProgress,
 } from '@mui/material';
 import {
   PictureAsPdf as PictureAsPdfIcon,
@@ -13,12 +19,20 @@ const AIPredictionDialog = ({ open, onClose, aiLoading, aiError, aiPrediction, o
   <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
     <DialogTitle>توقع الغياب بالذكاء الاصطناعي</DialogTitle>
     <DialogContent
-      sx={{ minHeight: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}
+      sx={{
+        minHeight: 100,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexDirection: 'column',
+      }}
     >
       {aiLoading ? (
         <Box sx={{ width: '100%' }}>
           <LinearProgress />
-          <Typography align="center" sx={{ mt: 2 }}>جاري التوقع...</Typography>
+          <Typography align="center" sx={{ mt: 2 }}>
+            جاري التوقع...
+          </Typography>
         </Box>
       ) : aiError ? (
         <Typography color="error">{aiError}</Typography>
@@ -38,13 +52,28 @@ const AIPredictionDialog = ({ open, onClose, aiLoading, aiError, aiPrediction, o
             </Typography>
           )}
           <Box sx={{ mt: 3, display: 'flex', gap: 1, justifyContent: 'center' }}>
-            <Button variant="outlined" color="primary" onClick={() => onExport('pdf')} startIcon={<PictureAsPdfIcon />}>
+            <Button
+              variant="outlined"
+              color="primary"
+              onClick={() => onExport('pdf')}
+              startIcon={<PictureAsPdfIcon />}
+            >
               تصدير PDF
             </Button>
-            <Button variant="outlined" color="success" onClick={() => onExport('excel')} startIcon={<TableViewIcon />}>
+            <Button
+              variant="outlined"
+              color="success"
+              onClick={() => onExport('excel')}
+              startIcon={<TableViewIcon />}
+            >
               تصدير Excel
             </Button>
-            <Button variant="outlined" color="info" onClick={() => onExport('csv')} startIcon={<FileDownloadIcon />}>
+            <Button
+              variant="outlined"
+              color="info"
+              onClick={() => onExport('csv')}
+              startIcon={<FileDownloadIcon />}
+            >
               تصدير CSV
             </Button>
           </Box>

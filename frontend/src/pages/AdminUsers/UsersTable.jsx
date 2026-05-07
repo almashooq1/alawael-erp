@@ -47,7 +47,7 @@ const UsersTable = ({
           </TableRow>
         </TableHead>
         <TableBody>
-          {filteredUsers.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((user) => (
+          {filteredUsers.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(user => (
             <TableRow key={user.id} hover>
               <TableCell>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -93,7 +93,11 @@ const UsersTable = ({
               </TableCell>
               <TableCell sx={{ textAlign: 'center' }}>
                 <Tooltip title="تعديل">
-                  <IconButton aria-label="تعديل" size="small" onClick={() => handleOpenDialog(user)}>
+                  <IconButton
+                    aria-label="تعديل"
+                    size="small"
+                    onClick={() => handleOpenDialog(user)}
+                  >
                     <EditIcon fontSize="small" />
                   </IconButton>
                 </Tooltip>

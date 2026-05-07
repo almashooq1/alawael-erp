@@ -2,7 +2,16 @@
  * CommunicationFilters — Search bar + filter selects
  */
 
-import { Card, Grid, TextField, FormControl, InputLabel, Select, MenuItem, Chip } from '@mui/material';
+import {
+  Card,
+  Grid,
+  TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Chip,
+} from '@mui/material';
 import { Search as SearchIcon, FilterList as FilterIcon } from '@mui/icons-material';
 import {
   COMMUNICATION_TYPES,
@@ -38,7 +47,9 @@ const CommunicationFilters = ({
           <Select value={filterType} onChange={e => setFilterType(e.target.value)} label="النوع">
             <MenuItem value="all">الكل</MenuItem>
             {Object.entries(COMMUNICATION_TYPES).map(([key, value]) => (
-              <MenuItem key={key} value={key}>{value.label}</MenuItem>
+              <MenuItem key={key} value={key}>
+                {value.label}
+              </MenuItem>
             ))}
           </Select>
         </FormControl>
@@ -46,10 +57,16 @@ const CommunicationFilters = ({
       <Grid item xs={12} md={2}>
         <FormControl fullWidth size="small">
           <InputLabel>الحالة</InputLabel>
-          <Select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} label="الحالة">
+          <Select
+            value={filterStatus}
+            onChange={e => setFilterStatus(e.target.value)}
+            label="الحالة"
+          >
             <MenuItem value="all">الكل</MenuItem>
             {Object.entries(COMMUNICATION_STATUS).map(([key, value]) => (
-              <MenuItem key={key} value={key}>{value.label}</MenuItem>
+              <MenuItem key={key} value={key}>
+                {value.label}
+              </MenuItem>
             ))}
           </Select>
         </FormControl>
@@ -57,10 +74,16 @@ const CommunicationFilters = ({
       <Grid item xs={12} md={2}>
         <FormControl fullWidth size="small">
           <InputLabel>الأولوية</InputLabel>
-          <Select value={filterPriority} onChange={e => setFilterPriority(e.target.value)} label="الأولوية">
+          <Select
+            value={filterPriority}
+            onChange={e => setFilterPriority(e.target.value)}
+            label="الأولوية"
+          >
             <MenuItem value="all">الكل</MenuItem>
             {Object.entries(PRIORITY_LEVELS).map(([key, value]) => (
-              <MenuItem key={key} value={key}>{value.label}</MenuItem>
+              <MenuItem key={key} value={key}>
+                {value.label}
+              </MenuItem>
             ))}
           </Select>
         </FormControl>

@@ -6,9 +6,21 @@
  */
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Box, Grid, Paper, Typography, Button, Chip, IconButton, Alert,
-  LinearProgress, Card, CardContent, CardActions, Divider,
-  Tooltip, Badge,
+  Box,
+  Grid,
+  Paper,
+  Typography,
+  Button,
+  Chip,
+  IconButton,
+  Alert,
+  LinearProgress,
+  Card,
+  CardContent,
+  CardActions,
+  Divider,
+  Tooltip,
+  Badge,
 } from '@mui/material';
 import {
   People as PeopleIcon,
@@ -45,7 +57,9 @@ export default function TelehealthWaitingRoom() {
     }
   }, []);
 
-  useEffect(() => { fetchWaiting(); }, [fetchWaiting]);
+  useEffect(() => {
+    fetchWaiting();
+  }, [fetchWaiting]);
 
   // Auto-refresh every 30s
   useEffect(() => {
@@ -62,7 +76,7 @@ export default function TelehealthWaitingRoom() {
     return () => clearInterval(ticker);
   }, []);
 
-  const getTimeUntil = (dateStr) => {
+  const getTimeUntil = dateStr => {
     const target = new Date(dateStr);
     const diff = target - now;
     if (diff <= 0) return { text: 'الآن', past: true };
@@ -72,7 +86,7 @@ export default function TelehealthWaitingRoom() {
     return { text: `بعد ${mins} دقيقة`, past: false };
   };
 
-  const handleStartSession = async (id) => {
+  const handleStartSession = async id => {
     try {
       const { data } = await telehealthService.startSession(id);
       if (data.success && data.data?.room?.joinUrl) {
@@ -84,18 +98,22 @@ export default function TelehealthWaitingRoom() {
     }
   };
 
-  const handleJoinSession = (session) => {
+  const handleJoinSession = session => {
     if (session.roomUrl) {
       navigate(`/telehealth/video-room/${session.id}`);
     }
   };
 
-  const scheduled = waitingList.filter((s) => s.status === 'scheduled');
-  const inProgress = waitingList.filter((s) => s.status === 'in-progress');
+  const scheduled = waitingList.filter(s => s.status === 'scheduled');
+  const inProgress = waitingList.filter(s => s.status === 'in-progress');
 
   return (
     <Box sx={{ p: 3 }}>
-      {error && <Alert severity="error" onClose={() => setError('')} sx={{ mb: 2 }}>{error}</Alert>}
+      {error && (
+        <Alert severity="error" onClose={() => setError('')} sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
 
       {/* Header */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
@@ -104,9 +122,15 @@ export default function TelehealthWaitingRoom() {
             <BackIcon />
           </IconButton>
           <PeopleIcon color="primary" fontSize="large" />
-          <Typography variant="h5" fontWeight="bold">غرفة الانتظار</Typography>
+          <Typography variant="h5" fontWeight="bold">
+            غرفة الانتظار
+          </Typography>
           <Chip
-            label={now.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+            label={now.toLocaleTimeString('ar-SA', {
+              hour: '2-digit',
+              minute: '2-digit',
+              second: '2-digit',
+            })}
             color="primary"
             variant="outlined"
             size="small"
@@ -114,7 +138,9 @@ export default function TelehealthWaitingRoom() {
         </Box>
         <Box>
           <Tooltip title="تحديث">
-            <IconButton onClick={fetchWaiting}><RefreshIcon /></IconButton>
+            <IconButton onClick={fetchWaiting}>
+              <RefreshIcon />
+            </IconButton>
           </Tooltip>
         </Box>
       </Box>
@@ -124,24 +150,36 @@ export default function TelehealthWaitingRoom() {
         <Grid item xs={6} sm={4}>
           <Card sx={{ textAlign: 'center', borderTop: '3px solid #1976d2' }}>
             <CardContent sx={{ py: 1.5 }}>
-              <Typography variant="h4" fontWeight="bold">{waitingList.length}</Typography>
-              <Typography variant="body2" color="text.secondary">إجمالي اليوم</Typography>
+              <Typography variant="h4" fontWeight="bold">
+                {waitingList.length}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                إجمالي اليوم
+              </Typography>
             </CardContent>
           </Card>
         </Grid>
         <Grid item xs={6} sm={4}>
           <Card sx={{ textAlign: 'center', borderTop: '3px solid #ed6c02' }}>
             <CardContent sx={{ py: 1.5 }}>
-              <Typography variant="h4" fontWeight="bold" color="warning.main">{inProgress.length}</Typography>
-              <Typography variant="body2" color="text.secondary">جلسات نشطة</Typography>
+              <Typography variant="h4" fontWeight="bold" color="warning.main">
+                {inProgress.length}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                جلسات نشطة
+              </Typography>
             </CardContent>
           </Card>
         </Grid>
         <Grid item xs={12} sm={4}>
           <Card sx={{ textAlign: 'center', borderTop: '3px solid #0288d1' }}>
             <CardContent sx={{ py: 1.5 }}>
-              <Typography variant="h4" fontWeight="bold" color="info.main">{scheduled.length}</Typography>
-              <Typography variant="body2" color="text.secondary">في الانتظار</Typography>
+              <Typography variant="h4" fontWeight="bold" color="info.main">
+                {scheduled.length}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                في الانتظار
+              </Typography>
             </CardContent>
           </Card>
         </Grid>
@@ -159,7 +197,7 @@ export default function TelehealthWaitingRoom() {
             جلسات نشطة الآن
           </Typography>
           <Grid container spacing={2}>
-            {inProgress.map((s) => (
+            {inProgress.map(s => (
               <Grid item xs={12} sm={6} md={4} key={s.id}>
                 <Card
                   sx={{
@@ -170,7 +208,9 @@ export default function TelehealthWaitingRoom() {
                 >
                   <CardContent>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                      <Typography variant="subtitle1" fontWeight="bold">{s.title}</Typography>
+                      <Typography variant="subtitle1" fontWeight="bold">
+                        {s.title}
+                      </Typography>
                       <Chip label="مباشر" color="warning" size="small" />
                     </Box>
                     <Typography variant="body2">👤 {s.patientName}</Typography>
@@ -178,12 +218,7 @@ export default function TelehealthWaitingRoom() {
                     <Typography variant="body2" color="text.secondary">
                       🏥 {s.department || 'غير محدد'} — {s.duration} دقيقة
                     </Typography>
-                    <Chip
-                      label={s.platform}
-                      size="small"
-                      variant="outlined"
-                      sx={{ mt: 1 }}
-                    />
+                    <Chip label={s.platform} size="small" variant="outlined" sx={{ mt: 1 }} />
                   </CardContent>
                   <CardActions>
                     <Button
@@ -215,7 +250,9 @@ export default function TelehealthWaitingRoom() {
       {scheduled.length === 0 && !loading && (
         <Paper sx={{ p: 4, textAlign: 'center' }}>
           <PeopleIcon sx={{ fontSize: 60, opacity: 0.2 }} />
-          <Typography color="text.secondary" sx={{ mt: 1 }}>لا يوجد مرضى في الانتظار حالياً</Typography>
+          <Typography color="text.secondary" sx={{ mt: 1 }}>
+            لا يوجد مرضى في الانتظار حالياً
+          </Typography>
         </Paper>
       )}
 
@@ -247,14 +284,22 @@ export default function TelehealthWaitingRoom() {
                         sx={{ bgcolor: priorityColors[s.priority], color: '#fff' }}
                       />
                     </Box>
-                    <Typography variant="subtitle1" fontWeight="bold">{s.title}</Typography>
+                    <Typography variant="subtitle1" fontWeight="bold">
+                      {s.title}
+                    </Typography>
                     <Typography variant="body2">👤 {s.patientName}</Typography>
                     <Typography variant="body2">🩺 {s.therapistName}</Typography>
                     <Typography variant="body2" color="text.secondary">
                       🏥 {s.department || 'غير محدد'}
                     </Typography>
                     <Divider sx={{ my: 1 }} />
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                      }}
+                    >
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                         <TimeIcon fontSize="small" color={timeInfo.past ? 'error' : 'action'} />
                         <Typography
@@ -268,7 +313,10 @@ export default function TelehealthWaitingRoom() {
                       <Typography variant="caption">{s.duration} د</Typography>
                     </Box>
                     <Typography variant="caption" color="text.secondary" dir="ltr">
-                      {new Date(s.scheduledDate).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' })}
+                      {new Date(s.scheduledDate).toLocaleTimeString('ar-SA', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
                     </Typography>
                   </CardContent>
                   <CardActions>

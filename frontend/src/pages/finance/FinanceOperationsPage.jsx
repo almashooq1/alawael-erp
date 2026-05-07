@@ -6,7 +6,8 @@ import { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Container,
-  Typography,  Button,
+  Typography,
+  Button,
   Chip,
   Table,
   TableBody,
@@ -19,7 +20,8 @@ import {
   Tab,
   LinearProgress,
   Stack,
-  Alert,} from '@mui/material';
+  Alert,
+} from '@mui/material';
 import {
   AccountBalance as FinanceIcon,
   Receipt as InvoiceIcon,
@@ -220,7 +222,13 @@ export default function FinanceOperationsPage() {
       )}
 
       {/* Tabs */}
-      <Tabs value={tab} onChange={(_, v) => setTab(v)} variant="scrollable" scrollButtons="auto" sx={{ mb: 2 }}>
+      <Tabs
+        value={tab}
+        onChange={(_, v) => setTab(v)}
+        variant="scrollable"
+        scrollButtons="auto"
+        sx={{ mb: 2 }}
+      >
         {TAB_CONFIG.map((t, i) => (
           <Tab key={i} icon={t.icon} label={t.label} iconPosition="start" />
         ))}

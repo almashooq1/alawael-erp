@@ -4,14 +4,38 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 import {
-  Box, Card, CardContent, Typography, Grid, Button, Chip, Table,
-  TableBody, TableCell, TableContainer, TableHead, TableRow,
-  CircularProgress, Alert, LinearProgress, IconButton, Tooltip,
-  Dialog, DialogTitle, DialogContent, DialogActions, TextField,
+  Box,
+  Card,
+  CardContent,
+  Typography,
+  Grid,
+  Button,
+  Chip,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  CircularProgress,
+  Alert,
+  LinearProgress,
+  IconButton,
+  Tooltip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
 } from '@mui/material';
 import {
-  AccountBalance, AttachMoney, CheckCircle, Refresh,
-  CloudUpload, TrendingUp, PriorityHigh,
+  AccountBalance,
+  AttachMoney,
+  CheckCircle,
+  Refresh,
+  CloudUpload,
+  TrendingUp,
+  PriorityHigh,
 } from '@mui/icons-material';
 import mudadService from '../../services/mudad.service';
 
@@ -60,7 +84,9 @@ export default function MudadDashboard() {
     }
   }, []);
 
-  useEffect(() => { fetchData(); }, [fetchData]);
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const handleGenerateSalaryRecords = async () => {
     try {
@@ -100,14 +126,24 @@ export default function MudadDashboard() {
           </Typography>
         </Box>
         <Box display="flex" gap={1}>
-          <Button variant="contained" startIcon={<AttachMoney />} onClick={() => setGenerateDialog(true)}>
+          <Button
+            variant="contained"
+            startIcon={<AttachMoney />}
+            onClick={() => setGenerateDialog(true)}
+          >
             توليد سجلات الرواتب
           </Button>
-          <IconButton onClick={fetchData}><Refresh /></IconButton>
+          <IconButton onClick={fetchData}>
+            <Refresh />
+          </IconButton>
         </Box>
       </Box>
 
-      {error && <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>{error}</Alert>}
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
+          {error}
+        </Alert>
+      )}
 
       {/* بطاقات الإحصائيات */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
@@ -116,8 +152,12 @@ export default function MudadDashboard() {
             <CardContent>
               <Box display="flex" justifyContent="space-between" alignItems="center">
                 <Box>
-                  <Typography variant="body2" sx={{ opacity: 0.8 }}>إجمالي الموظفين</Typography>
-                  <Typography variant="h4" fontWeight="bold">{stats.totalEmployees || 0}</Typography>
+                  <Typography variant="body2" sx={{ opacity: 0.8 }}>
+                    إجمالي الموظفين
+                  </Typography>
+                  <Typography variant="h4" fontWeight="bold">
+                    {stats.totalEmployees || 0}
+                  </Typography>
                 </Box>
                 <AccountBalance sx={{ fontSize: 48, opacity: 0.3 }} />
               </Box>
@@ -129,8 +169,12 @@ export default function MudadDashboard() {
             <CardContent>
               <Box display="flex" justifyContent="space-between" alignItems="center">
                 <Box>
-                  <Typography variant="body2" sx={{ opacity: 0.8 }}>نسبة الامتثال</Typography>
-                  <Typography variant="h4" fontWeight="bold">{stats.complianceRate || 0}%</Typography>
+                  <Typography variant="body2" sx={{ opacity: 0.8 }}>
+                    نسبة الامتثال
+                  </Typography>
+                  <Typography variant="h4" fontWeight="bold">
+                    {stats.complianceRate || 0}%
+                  </Typography>
                 </Box>
                 <CheckCircle sx={{ fontSize: 48, opacity: 0.3 }} />
               </Box>
@@ -142,8 +186,12 @@ export default function MudadDashboard() {
             <CardContent>
               <Box display="flex" justifyContent="space-between" alignItems="center">
                 <Box>
-                  <Typography variant="body2" sx={{ opacity: 0.8 }}>دفعات قيد الانتظار</Typography>
-                  <Typography variant="h4" fontWeight="bold">{stats.pendingBatches || 0}</Typography>
+                  <Typography variant="body2" sx={{ opacity: 0.8 }}>
+                    دفعات قيد الانتظار
+                  </Typography>
+                  <Typography variant="h4" fontWeight="bold">
+                    {stats.pendingBatches || 0}
+                  </Typography>
                 </Box>
                 <PriorityHigh sx={{ fontSize: 48, opacity: 0.3 }} />
               </Box>
@@ -155,7 +203,9 @@ export default function MudadDashboard() {
             <CardContent>
               <Box display="flex" justifyContent="space-between" alignItems="center">
                 <Box>
-                  <Typography variant="body2" sx={{ opacity: 0.8 }}>إجمالي المبالغ (ر.س)</Typography>
+                  <Typography variant="body2" sx={{ opacity: 0.8 }}>
+                    إجمالي المبالغ (ر.س)
+                  </Typography>
                   <Typography variant="h4" fontWeight="bold">
                     {(stats.totalAmount || 0).toLocaleString('ar-SA')}
                   </Typography>
@@ -190,29 +240,51 @@ export default function MudadDashboard() {
                   <TableBody>
                     {batches.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={6} align="center">لا توجد دفعات حالياً</TableCell>
+                        <TableCell colSpan={6} align="center">
+                          لا توجد دفعات حالياً
+                        </TableCell>
                       </TableRow>
                     ) : (
-                      batches.map((batch) => (
+                      batches.map(batch => (
                         <TableRow key={batch._id} hover>
                           <TableCell>{batch.batchNumber}</TableCell>
-                          <TableCell>{batch.month}/{batch.year}</TableCell>
+                          <TableCell>
+                            {batch.month}/{batch.year}
+                          </TableCell>
                           <TableCell align="center">{batch.employeeCount || 0}</TableCell>
-                          <TableCell align="center">{(batch.totalAmount || 0).toLocaleString('ar-SA')} ر.س</TableCell>
                           <TableCell align="center">
-                            <Chip label={statusLabels[batch.status] || batch.status} color={statusColors[batch.status] || 'default'} size="small" />
+                            {(batch.totalAmount || 0).toLocaleString('ar-SA')} ر.س
+                          </TableCell>
+                          <TableCell align="center">
+                            <Chip
+                              label={statusLabels[batch.status] || batch.status}
+                              color={statusColors[batch.status] || 'default'}
+                              size="small"
+                            />
                           </TableCell>
                           <TableCell align="center">
                             {batch.status === 'pending' && (
                               <Tooltip title="التحقق من الدفعة">
-                                <IconButton size="small" color="primary" onClick={() => mudadService.validateBatch(batch._id).then(fetchData)}>
+                                <IconButton
+                                  size="small"
+                                  color="primary"
+                                  onClick={() =>
+                                    mudadService.validateBatch(batch._id).then(fetchData)
+                                  }
+                                >
                                   <CheckCircle fontSize="small" />
                                 </IconButton>
                               </Tooltip>
                             )}
                             {batch.status === 'validated' && (
                               <Tooltip title="رفع لمُدد">
-                                <IconButton size="small" color="success" onClick={() => mudadService.uploadBatch(batch._id).then(fetchData)}>
+                                <IconButton
+                                  size="small"
+                                  color="success"
+                                  onClick={() =>
+                                    mudadService.uploadBatch(batch._id).then(fetchData)
+                                  }
+                                >
                                   <CloudUpload fontSize="small" />
                                 </IconButton>
                               </Tooltip>
@@ -240,24 +312,45 @@ export default function MudadDashboard() {
                   لا توجد تقارير امتثال
                 </Typography>
               ) : (
-                compliance.map((report) => (
+                compliance.map(report => (
                   <Box key={report._id} sx={{ mb: 2, p: 1.5, borderRadius: 1, bgcolor: 'grey.50' }}>
                     <Box display="flex" justifyContent="space-between" mb={0.5}>
-                      <Typography variant="body2" fontWeight="bold">{report.month}/{report.year}</Typography>
+                      <Typography variant="body2" fontWeight="bold">
+                        {report.month}/{report.year}
+                      </Typography>
                       <Chip
-                        label={report.riskLevel === 'low' ? 'منخفض' : report.riskLevel === 'medium' ? 'متوسط' : 'مرتفع'}
-                        color={report.riskLevel === 'low' ? 'success' : report.riskLevel === 'medium' ? 'warning' : 'error'}
+                        label={
+                          report.riskLevel === 'low'
+                            ? 'منخفض'
+                            : report.riskLevel === 'medium'
+                              ? 'متوسط'
+                              : 'مرتفع'
+                        }
+                        color={
+                          report.riskLevel === 'low'
+                            ? 'success'
+                            : report.riskLevel === 'medium'
+                              ? 'warning'
+                              : 'error'
+                        }
                         size="small"
                       />
                     </Box>
                     <LinearProgress
                       variant="determinate"
                       value={report.complianceRate || 0}
-                      color={report.complianceRate >= 80 ? 'success' : report.complianceRate >= 60 ? 'warning' : 'error'}
+                      color={
+                        report.complianceRate >= 80
+                          ? 'success'
+                          : report.complianceRate >= 60
+                            ? 'warning'
+                            : 'error'
+                      }
                       sx={{ height: 8, borderRadius: 4, mb: 0.5 }}
                     />
                     <Typography variant="caption" color="text.secondary">
-                      نسبة الامتثال: {report.complianceRate || 0}% | مخالفات: {report.violations?.length || 0}
+                      نسبة الامتثال: {report.complianceRate || 0}% | مخالفات:{' '}
+                      {report.violations?.length || 0}
                     </Typography>
                   </Box>
                 ))
@@ -268,7 +361,12 @@ export default function MudadDashboard() {
       </Grid>
 
       {/* Dialog توليد سجلات الرواتب */}
-      <Dialog open={generateDialog} onClose={() => setGenerateDialog(false)} maxWidth="sm" fullWidth>
+      <Dialog
+        open={generateDialog}
+        onClose={() => setGenerateDialog(false)}
+        maxWidth="sm"
+        fullWidth
+      >
         <DialogTitle>توليد سجلات الرواتب</DialogTitle>
         <DialogContent>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
@@ -281,12 +379,7 @@ export default function MudadDashboard() {
             fullWidth
             sx={{ mb: 2, mt: 1 }}
           />
-          <TextField
-            label="السنة"
-            value={new Date().getFullYear()}
-            disabled
-            fullWidth
-          />
+          <TextField label="السنة" value={new Date().getFullYear()} disabled fullWidth />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setGenerateDialog(false)}>إلغاء</Button>

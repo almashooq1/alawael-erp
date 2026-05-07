@@ -66,8 +66,14 @@ const CommunicationList = ({
               }}
             >
               <ListItemAvatar>
-                <Badge badgeContent={comm.attachmentsCount} color="primary" invisible={!comm.attachmentsCount}>
-                  <Avatar sx={{ bgcolor: COMMUNICATION_TYPES[comm.type]?.color + '.main' || 'grey.500' }}>
+                <Badge
+                  badgeContent={comm.attachmentsCount}
+                  color="primary"
+                  invisible={!comm.attachmentsCount}
+                >
+                  <Avatar
+                    sx={{ bgcolor: COMMUNICATION_TYPES[comm.type]?.color + '.main' || 'grey.500' }}
+                  >
                     {COMMUNICATION_TYPES[comm.type]?.icon || <EmailIcon />}
                   </Avatar>
                 </Badge>
@@ -122,13 +128,34 @@ const CommunicationList = ({
                 }
               />
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, ml: 2 }}>
-                <IconButton size="small" aria-label="تبديل النجمة" onClick={e => { e.stopPropagation(); handleToggleStar(comm.id); }}>
+                <IconButton
+                  size="small"
+                  aria-label="تبديل النجمة"
+                  onClick={e => {
+                    e.stopPropagation();
+                    handleToggleStar(comm.id);
+                  }}
+                >
                   {comm.starred ? <StarIcon color="warning" /> : <StarBorderIcon />}
                 </IconButton>
-                <IconButton size="small" aria-label="أرشفة" onClick={e => { e.stopPropagation(); handleArchive(comm.id); }}>
+                <IconButton
+                  size="small"
+                  aria-label="أرشفة"
+                  onClick={e => {
+                    e.stopPropagation();
+                    handleArchive(comm.id);
+                  }}
+                >
                   <ArchiveIcon />
                 </IconButton>
-                <IconButton size="small" aria-label="حذف" onClick={e => { e.stopPropagation(); handleDelete(comm.id); }}>
+                <IconButton
+                  size="small"
+                  aria-label="حذف"
+                  onClick={e => {
+                    e.stopPropagation();
+                    handleDelete(comm.id);
+                  }}
+                >
                   <DeleteIcon />
                 </IconButton>
               </Box>

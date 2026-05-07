@@ -32,7 +32,9 @@ const NewCommunicationDialog = ({ open, onClose, communication, setCommunication
               label="نوع المراسلة"
             >
               {Object.entries(COMMUNICATION_TYPES).map(([key, value]) => (
-                <MenuItem key={key} value={key}>{value.label}</MenuItem>
+                <MenuItem key={key} value={key}>
+                  {value.label}
+                </MenuItem>
               ))}
             </Select>
           </FormControl>
@@ -46,7 +48,9 @@ const NewCommunicationDialog = ({ open, onClose, communication, setCommunication
               label="الأولوية"
             >
               {Object.entries(PRIORITY_LEVELS).map(([key, value]) => (
-                <MenuItem key={key} value={key}>{value.label}</MenuItem>
+                <MenuItem key={key} value={key}>
+                  {value.label}
+                </MenuItem>
               ))}
             </Select>
           </FormControl>

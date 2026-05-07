@@ -242,52 +242,61 @@ const BrandingSettings = () => {
   }, []);
 
   // =================== رفع الشعار ===================
-  const handleLogoUpload = useCallback((event) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  const handleLogoUpload = useCallback(
+    event => {
+      const file = event.target.files?.[0];
+      if (!file) return;
 
-    if (file.size > 2 * 1024 * 1024) {
-      showSnackbar('حجم الملف يجب ألا يتجاوز 2 ميجابايت', 'error');
-      return;
-    }
+      if (file.size > 2 * 1024 * 1024) {
+        showSnackbar('حجم الملف يجب ألا يتجاوز 2 ميجابايت', 'error');
+        return;
+      }
 
-    const allowedTypes = ['image/png', 'image/jpeg', 'image/svg+xml', 'image/webp'];
-    if (!allowedTypes.includes(file.type)) {
-      showSnackbar('يرجى رفع صورة بتنسيق PNG أو JPG أو SVG أو WebP', 'error');
-      return;
-    }
+      const allowedTypes = ['image/png', 'image/jpeg', 'image/svg+xml', 'image/webp'];
+      if (!allowedTypes.includes(file.type)) {
+        showSnackbar('يرجى رفع صورة بتنسيق PNG أو JPG أو SVG أو WebP', 'error');
+        return;
+      }
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      updateBranding('logo', file);
-      updateBranding('logoPreview', reader.result);
-    };
-    reader.readAsDataURL(file);
-  }, [showSnackbar, updateBranding]);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        updateBranding('logo', file);
+        updateBranding('logoPreview', reader.result);
+      };
+      reader.readAsDataURL(file);
+    },
+    [showSnackbar, updateBranding]
+  );
 
-  const handleFaviconUpload = useCallback((event) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  const handleFaviconUpload = useCallback(
+    event => {
+      const file = event.target.files?.[0];
+      if (!file) return;
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      updateBranding('favicon', file);
-      updateBranding('faviconPreview', reader.result);
-    };
-    reader.readAsDataURL(file);
-  }, [updateBranding]);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        updateBranding('favicon', file);
+        updateBranding('faviconPreview', reader.result);
+      };
+      reader.readAsDataURL(file);
+    },
+    [updateBranding]
+  );
 
-  const handleLoginBgUpload = useCallback((event) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  const handleLoginBgUpload = useCallback(
+    event => {
+      const file = event.target.files?.[0];
+      if (!file) return;
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      updateBranding('loginBgImage', reader.result);
-      updateBranding('loginBgType', 'image');
-    };
-    reader.readAsDataURL(file);
-  }, [updateBranding]);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        updateBranding('loginBgImage', reader.result);
+        updateBranding('loginBgType', 'image');
+      };
+      reader.readAsDataURL(file);
+    },
+    [updateBranding]
+  );
 
   // =================== حفظ الإعدادات ===================
   const handleSave = async () => {
@@ -347,7 +356,7 @@ const BrandingSettings = () => {
   };
 
   // =================== تطبيق ثيم معدّ مسبقاً ===================
-  const applyPresetTheme = (theme) => {
+  const applyPresetTheme = theme => {
     updateBranding('primaryColor', theme.primary);
     updateBranding('secondaryColor', theme.secondary);
     updateBranding('accentColor', theme.accent);
@@ -408,7 +417,10 @@ const BrandingSettings = () => {
                 startIcon={saving ? <CircularProgress size={18} color="inherit" /> : <SaveIcon />}
                 onClick={handleSave}
                 disabled={saving || !hasChanges}
-                sx={{ bgcolor: 'rgba(255,255,255,0.25)', '&:hover': { bgcolor: 'rgba(255,255,255,0.35)' } }}
+                sx={{
+                  bgcolor: 'rgba(255,255,255,0.25)',
+                  '&:hover': { bgcolor: 'rgba(255,255,255,0.35)' },
+                }}
               >
                 {saving ? 'جاري الحفظ...' : 'حفظ التغييرات'}
               </Button>
@@ -416,14 +428,40 @@ const BrandingSettings = () => {
           </Box>
         </Box>
         {/* خلفية زخرفية */}
-        <Box sx={{ position: 'absolute', top: -20, right: -20, width: 120, height: 120, borderRadius: '50%', bgcolor: 'rgba(255,255,255,0.08)' }} />
-        <Box sx={{ position: 'absolute', bottom: -30, left: 40, width: 80, height: 80, borderRadius: '50%', bgcolor: 'rgba(255,255,255,0.05)' }} />
+        <Box
+          sx={{
+            position: 'absolute',
+            top: -20,
+            right: -20,
+            width: 120,
+            height: 120,
+            borderRadius: '50%',
+            bgcolor: 'rgba(255,255,255,0.08)',
+          }}
+        />
+        <Box
+          sx={{
+            position: 'absolute',
+            bottom: -30,
+            left: 40,
+            width: 80,
+            height: 80,
+            borderRadius: '50%',
+            bgcolor: 'rgba(255,255,255,0.05)',
+          }}
+        />
       </Paper>
 
       {hasChanges && (
-        <Alert severity="warning" sx={{ mb: 2, borderRadius: 2 }} action={
-          <Button size="small" color="inherit" onClick={handleReset}>إعادة تعيين</Button>
-        }>
+        <Alert
+          severity="warning"
+          sx={{ mb: 2, borderRadius: 2 }}
+          action={
+            <Button size="small" color="inherit" onClick={handleReset}>
+              إعادة تعيين
+            </Button>
+          }
+        >
           لديك تغييرات غير محفوظة — لا تنسَ الحفظ!
         </Alert>
       )}
@@ -464,7 +502,7 @@ const BrandingSettings = () => {
                         fullWidth
                         label="اسم النظام (عربي)"
                         value={branding.systemName}
-                        onChange={(e) => updateBranding('systemName', e.target.value)}
+                        onChange={e => updateBranding('systemName', e.target.value)}
                         helperText="يظهر في الشريط الجانبي وصفحة الدخول"
                       />
                     </Grid>
@@ -473,7 +511,7 @@ const BrandingSettings = () => {
                         fullWidth
                         label="اسم النظام (إنجليزي)"
                         value={branding.systemNameEn}
-                        onChange={(e) => updateBranding('systemNameEn', e.target.value)}
+                        onChange={e => updateBranding('systemNameEn', e.target.value)}
                         dir="ltr"
                       />
                     </Grid>
@@ -482,7 +520,7 @@ const BrandingSettings = () => {
                         fullWidth
                         label="الاسم المختصر"
                         value={branding.shortName}
-                        onChange={(e) => updateBranding('shortName', e.target.value)}
+                        onChange={e => updateBranding('shortName', e.target.value)}
                         helperText="يظهر عند تصغير الشريط الجانبي"
                       />
                     </Grid>
@@ -491,7 +529,7 @@ const BrandingSettings = () => {
                         fullWidth
                         label="الشعار النصي (Tagline)"
                         value={branding.tagline}
-                        onChange={(e) => updateBranding('tagline', e.target.value)}
+                        onChange={e => updateBranding('tagline', e.target.value)}
                       />
                     </Grid>
                     <Grid item xs={12}>
@@ -501,7 +539,7 @@ const BrandingSettings = () => {
                         rows={3}
                         label="وصف النظام"
                         value={branding.description}
-                        onChange={(e) => updateBranding('description', e.target.value)}
+                        onChange={e => updateBranding('description', e.target.value)}
                       />
                     </Grid>
                     <Grid item xs={12} md={6}>
@@ -509,7 +547,7 @@ const BrandingSettings = () => {
                         fullWidth
                         label="نص التذييل"
                         value={branding.footerText}
-                        onChange={(e) => updateBranding('footerText', e.target.value)}
+                        onChange={e => updateBranding('footerText', e.target.value)}
                         helperText="استخدم {year} للسنة الحالية"
                       />
                     </Grid>
@@ -519,7 +557,7 @@ const BrandingSettings = () => {
                         <Select
                           value={branding.defaultLanguage}
                           label="اللغة الافتراضية"
-                          onChange={(e) => updateBranding('defaultLanguage', e.target.value)}
+                          onChange={e => updateBranding('defaultLanguage', e.target.value)}
                         >
                           <MenuItem value="ar">العربية</MenuItem>
                           <MenuItem value="en">English</MenuItem>
@@ -548,12 +586,7 @@ const BrandingSettings = () => {
                   <Typography variant="body2" color="text.secondary" gutterBottom>
                     {branding.tagline}
                   </Typography>
-                  <Chip
-                    label={branding.shortName}
-                    color="primary"
-                    size="small"
-                    sx={{ mt: 1 }}
-                  />
+                  <Chip label={branding.shortName} color="primary" size="small" sx={{ mt: 1 }} />
                 </CardContent>
               </Card>
             </Grid>
@@ -578,7 +611,11 @@ const BrandingSettings = () => {
                       badgeContent={
                         <IconButton
                           size="small"
-                          sx={{ bgcolor: 'primary.main', color: 'white', '&:hover': { bgcolor: 'primary.dark' } }}
+                          sx={{
+                            bgcolor: 'primary.main',
+                            color: 'white',
+                            '&:hover': { bgcolor: 'primary.dark' },
+                          }}
                           onClick={() => logoInputRef.current?.click()}
                         >
                           <CameraIcon fontSize="small" />
@@ -587,7 +624,13 @@ const BrandingSettings = () => {
                     >
                       <Avatar
                         src={branding.logoPreview}
-                        sx={{ width: 120, height: 120, boxShadow: 3, border: '3px solid', borderColor: 'primary.main' }}
+                        sx={{
+                          width: 120,
+                          height: 120,
+                          boxShadow: 3,
+                          border: '3px solid',
+                          borderColor: 'primary.main',
+                        }}
                       />
                     </Badge>
                     <input
@@ -619,7 +662,11 @@ const BrandingSettings = () => {
                     >
                       إعادة الشعار الافتراضي
                     </Button>
-                    <Typography variant="caption" color="text.secondary" sx={{ textAlign: 'center' }}>
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      sx={{ textAlign: 'center' }}
+                    >
                       يقبل: PNG, JPG, SVG, WebP — بحد أقصى 2 ميجابايت
                     </Typography>
                   </Stack>
@@ -630,7 +677,10 @@ const BrandingSettings = () => {
             {/* أيقونة الموقع (Favicon) */}
             <Grid item xs={12} md={6}>
               <Card sx={{ borderRadius: 2 }}>
-                <CardHeader title="أيقونة الموقع (Favicon)" avatar={<WallpaperIcon color="primary" />} />
+                <CardHeader
+                  title="أيقونة الموقع (Favicon)"
+                  avatar={<WallpaperIcon color="primary" />}
+                />
                 <Divider />
                 <CardContent>
                   <Box sx={{ textAlign: 'center', mb: 3 }}>
@@ -640,7 +690,11 @@ const BrandingSettings = () => {
                       badgeContent={
                         <IconButton
                           size="small"
-                          sx={{ bgcolor: 'secondary.main', color: 'white', '&:hover': { bgcolor: 'secondary.dark' } }}
+                          sx={{
+                            bgcolor: 'secondary.main',
+                            color: 'white',
+                            '&:hover': { bgcolor: 'secondary.dark' },
+                          }}
                           onClick={() => faviconInputRef.current?.click()}
                         >
                           <CameraIcon fontSize="small" />
@@ -649,7 +703,13 @@ const BrandingSettings = () => {
                     >
                       <Avatar
                         src={branding.faviconPreview}
-                        sx={{ width: 80, height: 80, boxShadow: 2, border: '2px solid', borderColor: 'secondary.main' }}
+                        sx={{
+                          width: 80,
+                          height: 80,
+                          boxShadow: 2,
+                          border: '2px solid',
+                          borderColor: 'secondary.main',
+                        }}
                       />
                     </Badge>
                     <input
@@ -668,7 +728,11 @@ const BrandingSettings = () => {
                   >
                     رفع أيقونة
                   </Button>
-                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', textAlign: 'center', mt: 1 }}>
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{ display: 'block', textAlign: 'center', mt: 1 }}
+                  >
                     يُفضّل حجم 32×32 أو 64×64 بكسل
                   </Typography>
                 </CardContent>
@@ -678,7 +742,10 @@ const BrandingSettings = () => {
             {/* معاينة الشعار في السياق */}
             <Grid item xs={12}>
               <Card sx={{ borderRadius: 2 }}>
-                <CardHeader title="معاينة الشعار في واجهة النظام" avatar={<PreviewIcon color="primary" />} />
+                <CardHeader
+                  title="معاينة الشعار في واجهة النظام"
+                  avatar={<PreviewIcon color="primary" />}
+                />
                 <Divider />
                 <CardContent>
                   <Grid container spacing={3}>
@@ -689,7 +756,13 @@ const BrandingSettings = () => {
                       </Typography>
                       <Paper
                         variant="outlined"
-                        sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 1.5, borderRadius: 2 }}
+                        sx={{
+                          p: 2,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 1.5,
+                          borderRadius: 2,
+                        }}
                       >
                         <Avatar src={branding.logoPreview} sx={{ width: 36, height: 36 }} />
                         <Box>
@@ -713,9 +786,10 @@ const BrandingSettings = () => {
                           p: 3,
                           textAlign: 'center',
                           borderRadius: 2,
-                          background: branding.loginBgType === 'gradient'
-                            ? branding.loginBgGradient
-                            : branding.loginBgColor,
+                          background:
+                            branding.loginBgType === 'gradient'
+                              ? branding.loginBgGradient
+                              : branding.loginBgColor,
                         }}
                       >
                         <Avatar
@@ -762,7 +836,7 @@ const BrandingSettings = () => {
                 <Divider />
                 <CardContent>
                   <Grid container spacing={2}>
-                    {PRESET_THEMES.map((theme) => (
+                    {PRESET_THEMES.map(theme => (
                       <Grid item xs={6} sm={4} md={2} key={theme.id}>
                         <Paper
                           onClick={() => applyPresetTheme(theme)}
@@ -771,8 +845,10 @@ const BrandingSettings = () => {
                             textAlign: 'center',
                             cursor: 'pointer',
                             borderRadius: 2,
-                            border: branding.primaryColor === theme.primary ? '2px solid' : '1px solid',
-                            borderColor: branding.primaryColor === theme.primary ? 'primary.main' : 'divider',
+                            border:
+                              branding.primaryColor === theme.primary ? '2px solid' : '1px solid',
+                            borderColor:
+                              branding.primaryColor === theme.primary ? 'primary.main' : 'divider',
                             transition: 'all 0.2s',
                             '&:hover': { transform: 'translateY(-2px)', boxShadow: 3 },
                             position: 'relative',
@@ -780,15 +856,44 @@ const BrandingSettings = () => {
                         >
                           {branding.primaryColor === theme.primary && (
                             <CheckIcon
-                              sx={{ position: 'absolute', top: 4, right: 4, fontSize: 18, color: 'primary.main' }}
+                              sx={{
+                                position: 'absolute',
+                                top: 4,
+                                right: 4,
+                                fontSize: 18,
+                                color: 'primary.main',
+                              }}
                             />
                           )}
                           <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'center', mb: 1 }}>
-                            <Box sx={{ width: 20, height: 20, borderRadius: '50%', bgcolor: theme.primary }} />
-                            <Box sx={{ width: 20, height: 20, borderRadius: '50%', bgcolor: theme.secondary }} />
-                            <Box sx={{ width: 20, height: 20, borderRadius: '50%', bgcolor: theme.accent }} />
+                            <Box
+                              sx={{
+                                width: 20,
+                                height: 20,
+                                borderRadius: '50%',
+                                bgcolor: theme.primary,
+                              }}
+                            />
+                            <Box
+                              sx={{
+                                width: 20,
+                                height: 20,
+                                borderRadius: '50%',
+                                bgcolor: theme.secondary,
+                              }}
+                            />
+                            <Box
+                              sx={{
+                                width: 20,
+                                height: 20,
+                                borderRadius: '50%',
+                                bgcolor: theme.accent,
+                              }}
+                            />
                           </Box>
-                          <Typography variant="caption" fontWeight={600}>{theme.name}</Typography>
+                          <Typography variant="caption" fontWeight={600}>
+                            {theme.name}
+                          </Typography>
                         </Paper>
                       </Grid>
                     ))}
@@ -818,7 +923,7 @@ const BrandingSettings = () => {
                             component="input"
                             type="color"
                             value={branding[key]}
-                            onChange={(e) => updateBranding(key, e.target.value)}
+                            onChange={e => updateBranding(key, e.target.value)}
                             sx={{
                               width: 40,
                               height: 40,
@@ -826,12 +931,19 @@ const BrandingSettings = () => {
                               borderRadius: '8px',
                               cursor: 'pointer',
                               p: 0,
-                              '&::-webkit-color-swatch': { borderRadius: '6px', border: '1px solid #ddd' },
+                              '&::-webkit-color-swatch': {
+                                borderRadius: '6px',
+                                border: '1px solid #ddd',
+                              },
                             }}
                           />
                           <Box sx={{ flex: 1 }}>
-                            <Typography variant="body2" fontWeight={600}>{label}</Typography>
-                            <Typography variant="caption" color="text.secondary">{branding[key]}</Typography>
+                            <Typography variant="body2" fontWeight={600}>
+                              {label}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                              {branding[key]}
+                            </Typography>
                           </Box>
                         </Box>
                       </Grid>
@@ -871,13 +983,28 @@ const BrandingSettings = () => {
                     {/* محتوى المعاينة */}
                     <Box sx={{ p: 2, bgcolor: branding.headerBgColor }}>
                       <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
-                        <Button variant="contained" size="small" sx={{ bgcolor: branding.primaryColor }}>
+                        <Button
+                          variant="contained"
+                          size="small"
+                          sx={{ bgcolor: branding.primaryColor }}
+                        >
                           زر رئيسي
                         </Button>
-                        <Button variant="outlined" size="small" sx={{ color: branding.secondaryColor, borderColor: branding.secondaryColor }}>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          sx={{
+                            color: branding.secondaryColor,
+                            borderColor: branding.secondaryColor,
+                          }}
+                        >
                           زر ثانوي
                         </Button>
-                        <Chip label="شارة" size="small" sx={{ bgcolor: branding.accentColor, color: 'white' }} />
+                        <Chip
+                          label="شارة"
+                          size="small"
+                          sx={{ bgcolor: branding.accentColor, color: 'white' }}
+                        />
                       </Stack>
                       <Paper variant="outlined" sx={{ p: 1.5, borderRadius: 1 }}>
                         <Typography variant="body2" color="text.secondary">
@@ -915,7 +1042,7 @@ const BrandingSettings = () => {
                         <Select
                           value={branding.fontFamily}
                           label="خط النصوص الأساسي"
-                          onChange={(e) => updateBranding('fontFamily', e.target.value)}
+                          onChange={e => updateBranding('fontFamily', e.target.value)}
                         >
                           {FONT_OPTIONS.map(f => (
                             <MenuItem key={f.value} value={f.value} sx={{ fontFamily: f.value }}>
@@ -931,7 +1058,7 @@ const BrandingSettings = () => {
                         <Select
                           value={branding.headingFontFamily}
                           label="خط العناوين"
-                          onChange={(e) => updateBranding('headingFontFamily', e.target.value)}
+                          onChange={e => updateBranding('headingFontFamily', e.target.value)}
                         >
                           {FONT_OPTIONS.map(f => (
                             <MenuItem key={f.value} value={f.value} sx={{ fontFamily: f.value }}>
@@ -969,7 +1096,7 @@ const BrandingSettings = () => {
                     انحناء الزوايا (Border Radius)
                   </Typography>
                   <Grid container spacing={1.5} sx={{ mb: 3 }}>
-                    {BORDER_RADIUS_OPTIONS.map((opt) => (
+                    {BORDER_RADIUS_OPTIONS.map(opt => (
                       <Grid item key={opt.value}>
                         <Paper
                           onClick={() => updateBranding('borderRadius', opt.value)}
@@ -979,12 +1106,15 @@ const BrandingSettings = () => {
                             cursor: 'pointer',
                             borderRadius: `${opt.value}px`,
                             border: branding.borderRadius === opt.value ? '2px solid' : '1px solid',
-                            borderColor: branding.borderRadius === opt.value ? 'primary.main' : 'divider',
+                            borderColor:
+                              branding.borderRadius === opt.value ? 'primary.main' : 'divider',
                             transition: 'all 0.2s',
                             '&:hover': { borderColor: 'primary.main' },
                           }}
                         >
-                          <Typography variant="caption" fontWeight={600}>{opt.label}</Typography>
+                          <Typography variant="caption" fontWeight={600}>
+                            {opt.label}
+                          </Typography>
                         </Paper>
                       </Grid>
                     ))}
@@ -998,10 +1128,12 @@ const BrandingSettings = () => {
                   <FormControl fullWidth sx={{ mb: 2 }}>
                     <Select
                       value={branding.sidebarStyle}
-                      onChange={(e) => updateBranding('sidebarStyle', e.target.value)}
+                      onChange={e => updateBranding('sidebarStyle', e.target.value)}
                     >
                       {SIDEBAR_STYLES.map(s => (
-                        <MenuItem key={s.value} value={s.value}>{s.label}</MenuItem>
+                        <MenuItem key={s.value} value={s.value}>
+                          {s.label}
+                        </MenuItem>
                       ))}
                     </Select>
                   </FormControl>
@@ -1029,12 +1161,36 @@ const BrandingSettings = () => {
                 <CardContent>
                   <Grid container spacing={2}>
                     {[
-                      { key: 'enableAnimations', label: 'تفعيل الحركات والانتقالات', desc: 'تأثيرات حركية عند التنقل وفتح القوائم' },
-                      { key: 'enableGlassEffect', label: 'تأثير الزجاج (Glassmorphism)', desc: 'تأثير شفافية على البطاقات والقوائم' },
-                      { key: 'enableShadows', label: 'الظلال', desc: 'ظلال خفيفة حول البطاقات والأزرار' },
-                      { key: 'compactMode', label: 'الوضع المضغوط', desc: 'تقليل المسافات لعرض محتوى أكثر' },
-                      { key: 'showBreadcrumbs', label: 'مسار التنقل (Breadcrumbs)', desc: 'إظهار مسار الصفحة الحالية' },
-                      { key: 'showSearchBar', label: 'شريط البحث', desc: 'إظهار شريط البحث في الرأس' },
+                      {
+                        key: 'enableAnimations',
+                        label: 'تفعيل الحركات والانتقالات',
+                        desc: 'تأثيرات حركية عند التنقل وفتح القوائم',
+                      },
+                      {
+                        key: 'enableGlassEffect',
+                        label: 'تأثير الزجاج (Glassmorphism)',
+                        desc: 'تأثير شفافية على البطاقات والقوائم',
+                      },
+                      {
+                        key: 'enableShadows',
+                        label: 'الظلال',
+                        desc: 'ظلال خفيفة حول البطاقات والأزرار',
+                      },
+                      {
+                        key: 'compactMode',
+                        label: 'الوضع المضغوط',
+                        desc: 'تقليل المسافات لعرض محتوى أكثر',
+                      },
+                      {
+                        key: 'showBreadcrumbs',
+                        label: 'مسار التنقل (Breadcrumbs)',
+                        desc: 'إظهار مسار الصفحة الحالية',
+                      },
+                      {
+                        key: 'showSearchBar',
+                        label: 'شريط البحث',
+                        desc: 'إظهار شريط البحث في الرأس',
+                      },
                     ].map(({ key, label, desc }) => (
                       <Grid item xs={12} sm={6} md={4} key={key}>
                         <Paper variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
@@ -1042,13 +1198,17 @@ const BrandingSettings = () => {
                             control={
                               <Switch
                                 checked={branding[key]}
-                                onChange={(e) => updateBranding(key, e.target.checked)}
+                                onChange={e => updateBranding(key, e.target.checked)}
                               />
                             }
                             label={
                               <Box>
-                                <Typography variant="body2" fontWeight={600}>{label}</Typography>
-                                <Typography variant="caption" color="text.secondary">{desc}</Typography>
+                                <Typography variant="body2" fontWeight={600}>
+                                  {label}
+                                </Typography>
+                                <Typography variant="caption" color="text.secondary">
+                                  {desc}
+                                </Typography>
                               </Box>
                             }
                             sx={{ m: 0, alignItems: 'flex-start' }}
@@ -1070,7 +1230,10 @@ const BrandingSettings = () => {
           <Grid container spacing={3}>
             <Grid item xs={12} md={7}>
               <Card sx={{ borderRadius: 2 }}>
-                <CardHeader title="تخصيص صفحة تسجيل الدخول" avatar={<DashboardIcon color="primary" />} />
+                <CardHeader
+                  title="تخصيص صفحة تسجيل الدخول"
+                  avatar={<DashboardIcon color="primary" />}
+                />
                 <Divider />
                 <CardContent>
                   <Grid container spacing={2.5}>
@@ -1083,7 +1246,7 @@ const BrandingSettings = () => {
                           { value: 'gradient', label: 'تدرج لوني', icon: <GradientIcon /> },
                           { value: 'solid', label: 'لون واحد', icon: <ColorFillIcon /> },
                           { value: 'image', label: 'صورة', icon: <ImageIcon /> },
-                        ].map((opt) => (
+                        ].map(opt => (
                           <Paper
                             key={opt.value}
                             onClick={() => updateBranding('loginBgType', opt.value)}
@@ -1095,14 +1258,18 @@ const BrandingSettings = () => {
                               gap: 1,
                               cursor: 'pointer',
                               borderRadius: 2,
-                              border: branding.loginBgType === opt.value ? '2px solid' : '1px solid',
-                              borderColor: branding.loginBgType === opt.value ? 'primary.main' : 'divider',
+                              border:
+                                branding.loginBgType === opt.value ? '2px solid' : '1px solid',
+                              borderColor:
+                                branding.loginBgType === opt.value ? 'primary.main' : 'divider',
                               flex: 1,
                               justifyContent: 'center',
                             }}
                           >
                             {opt.icon}
-                            <Typography variant="body2" fontWeight={600}>{opt.label}</Typography>
+                            <Typography variant="body2" fontWeight={600}>
+                              {opt.label}
+                            </Typography>
                           </Paper>
                         ))}
                       </Stack>
@@ -1115,12 +1282,12 @@ const BrandingSettings = () => {
                             component="input"
                             type="color"
                             value={branding.loginBgColor}
-                            onChange={(e) => updateBranding('loginBgColor', e.target.value)}
+                            onChange={e => updateBranding('loginBgColor', e.target.value)}
                             sx={{ width: 50, height: 40, border: 'none', cursor: 'pointer' }}
                           />
                           <TextField
                             value={branding.loginBgColor}
-                            onChange={(e) => updateBranding('loginBgColor', e.target.value)}
+                            onChange={e => updateBranding('loginBgColor', e.target.value)}
                             size="small"
                             label="لون الخلفية"
                           />
@@ -1157,7 +1324,7 @@ const BrandingSettings = () => {
                           { value: 'glass', label: 'زجاجي' },
                           { value: 'solid', label: 'ثابت' },
                           { value: 'minimal', label: 'بسيط' },
-                        ].map((opt) => (
+                        ].map(opt => (
                           <Paper
                             key={opt.value}
                             onClick={() => updateBranding('loginCardStyle', opt.value)}
@@ -1166,13 +1333,17 @@ const BrandingSettings = () => {
                               px: 2,
                               cursor: 'pointer',
                               borderRadius: 2,
-                              border: branding.loginCardStyle === opt.value ? '2px solid' : '1px solid',
-                              borderColor: branding.loginCardStyle === opt.value ? 'primary.main' : 'divider',
+                              border:
+                                branding.loginCardStyle === opt.value ? '2px solid' : '1px solid',
+                              borderColor:
+                                branding.loginCardStyle === opt.value ? 'primary.main' : 'divider',
                               flex: 1,
                               textAlign: 'center',
                             }}
                           >
-                            <Typography variant="body2" fontWeight={600}>{opt.label}</Typography>
+                            <Typography variant="body2" fontWeight={600}>
+                              {opt.label}
+                            </Typography>
                           </Paper>
                         ))}
                       </Stack>
@@ -1183,7 +1354,7 @@ const BrandingSettings = () => {
                         control={
                           <Switch
                             checked={branding.loginShowLogo}
-                            onChange={(e) => updateBranding('loginShowLogo', e.target.checked)}
+                            onChange={e => updateBranding('loginShowLogo', e.target.checked)}
                           />
                         }
                         label="إظهار الشعار في صفحة الدخول"
@@ -1194,7 +1365,7 @@ const BrandingSettings = () => {
                         control={
                           <Switch
                             checked={branding.loginShowTagline}
-                            onChange={(e) => updateBranding('loginShowTagline', e.target.checked)}
+                            onChange={e => updateBranding('loginShowTagline', e.target.checked)}
                           />
                         }
                         label="إظهار الشعار النصي"
@@ -1213,11 +1384,12 @@ const BrandingSettings = () => {
                 <CardContent sx={{ p: 0 }}>
                   <Box
                     sx={{
-                      background: branding.loginBgType === 'gradient'
-                        ? branding.loginBgGradient
-                        : branding.loginBgType === 'image'
-                          ? `url(${branding.loginBgImage}) center/cover`
-                          : branding.loginBgColor,
+                      background:
+                        branding.loginBgType === 'gradient'
+                          ? branding.loginBgGradient
+                          : branding.loginBgType === 'image'
+                            ? `url(${branding.loginBgImage}) center/cover`
+                            : branding.loginBgColor,
                       p: 3,
                       minHeight: 320,
                       display: 'flex',
@@ -1235,9 +1407,10 @@ const BrandingSettings = () => {
                         maxWidth: 280,
                         textAlign: 'center',
                         backdropFilter: branding.loginCardStyle === 'glass' ? 'blur(10px)' : 'none',
-                        bgcolor: branding.loginCardStyle === 'glass'
-                          ? 'rgba(255,255,255,0.85)'
-                          : 'background.paper',
+                        bgcolor:
+                          branding.loginCardStyle === 'glass'
+                            ? 'rgba(255,255,255,0.85)'
+                            : 'background.paper',
                       }}
                     >
                       {branding.loginShowLogo && (
@@ -1288,10 +1461,7 @@ const BrandingSettings = () => {
             {/* الوضع الداكن */}
             <Grid item xs={12} md={6}>
               <Card sx={{ borderRadius: 2 }}>
-                <CardHeader
-                  title="الوضع الداكن"
-                  avatar={<DarkModeIcon color="primary" />}
-                />
+                <CardHeader title="الوضع الداكن" avatar={<DarkModeIcon color="primary" />} />
                 <Divider />
                 <CardContent>
                   <Stack spacing={2}>
@@ -1299,12 +1469,14 @@ const BrandingSettings = () => {
                       control={
                         <Switch
                           checked={branding.darkMode}
-                          onChange={(e) => updateBranding('darkMode', e.target.checked)}
+                          onChange={e => updateBranding('darkMode', e.target.checked)}
                         />
                       }
                       label={
                         <Box>
-                          <Typography variant="body2" fontWeight={600}>تفعيل الوضع الداكن</Typography>
+                          <Typography variant="body2" fontWeight={600}>
+                            تفعيل الوضع الداكن
+                          </Typography>
                           <Typography variant="caption" color="text.secondary">
                             تغيير مظهر النظام للوضع الداكن
                           </Typography>
@@ -1315,12 +1487,14 @@ const BrandingSettings = () => {
                       control={
                         <Switch
                           checked={branding.autoDarkMode}
-                          onChange={(e) => updateBranding('autoDarkMode', e.target.checked)}
+                          onChange={e => updateBranding('autoDarkMode', e.target.checked)}
                         />
                       }
                       label={
                         <Box>
-                          <Typography variant="body2" fontWeight={600}>التبديل التلقائي</Typography>
+                          <Typography variant="body2" fontWeight={600}>
+                            التبديل التلقائي
+                          </Typography>
                           <Typography variant="caption" color="text.secondary">
                             التبديل تلقائياً حسب إعدادات الجهاز
                           </Typography>
@@ -1342,7 +1516,7 @@ const BrandingSettings = () => {
                     control={
                       <Switch
                         checked={branding.enableWatermark}
-                        onChange={(e) => updateBranding('enableWatermark', e.target.checked)}
+                        onChange={e => updateBranding('enableWatermark', e.target.checked)}
                       />
                     }
                     label="تفعيل العلامة المائية على المستندات"
@@ -1352,7 +1526,7 @@ const BrandingSettings = () => {
                       fullWidth
                       label="نص العلامة المائية"
                       value={branding.watermarkText}
-                      onChange={(e) => updateBranding('watermarkText', e.target.value)}
+                      onChange={e => updateBranding('watermarkText', e.target.value)}
                       sx={{ mt: 2 }}
                     />
                   </Collapse>
@@ -1371,7 +1545,7 @@ const BrandingSettings = () => {
                       control={
                         <Switch
                           checked={branding.enableRTL}
-                          onChange={(e) => updateBranding('enableRTL', e.target.checked)}
+                          onChange={e => updateBranding('enableRTL', e.target.checked)}
                         />
                       }
                       label="دعم RTL (من اليمين لليسار)"
@@ -1380,7 +1554,7 @@ const BrandingSettings = () => {
                       control={
                         <Switch
                           checked={branding.enableMultiLanguage}
-                          onChange={(e) => updateBranding('enableMultiLanguage', e.target.checked)}
+                          onChange={e => updateBranding('enableMultiLanguage', e.target.checked)}
                         />
                       }
                       label="دعم تعدد اللغات"
@@ -1389,7 +1563,7 @@ const BrandingSettings = () => {
                       control={
                         <Switch
                           checked={branding.showNotifications}
-                          onChange={(e) => updateBranding('showNotifications', e.target.checked)}
+                          onChange={e => updateBranding('showNotifications', e.target.checked)}
                         />
                       }
                       label="إظهار لوحة الإشعارات"
@@ -1409,7 +1583,7 @@ const BrandingSettings = () => {
                     control={
                       <Switch
                         checked={branding.enableCustomCSS}
-                        onChange={(e) => updateBranding('enableCustomCSS', e.target.checked)}
+                        onChange={e => updateBranding('enableCustomCSS', e.target.checked)}
                       />
                     }
                     label="تفعيل CSS مخصص (للمتقدمين)"
@@ -1420,11 +1594,15 @@ const BrandingSettings = () => {
                       multiline
                       rows={6}
                       value={branding.customCSS}
-                      onChange={(e) => updateBranding('customCSS', e.target.value)}
+                      onChange={e => updateBranding('customCSS', e.target.value)}
                       placeholder={`/* أضف تنسيقاتك المخصصة هنا */\n.MuiCard-root {\n  border-radius: 16px;\n}`}
                       sx={{
                         mt: 2,
-                        '& .MuiInputBase-input': { fontFamily: 'monospace', fontSize: 13, direction: 'ltr' },
+                        '& .MuiInputBase-input': {
+                          fontFamily: 'monospace',
+                          fontSize: 13,
+                          direction: 'ltr',
+                        },
                       }}
                     />
                   </Collapse>
@@ -1440,7 +1618,9 @@ const BrandingSettings = () => {
                     <Button
                       variant="contained"
                       size="large"
-                      startIcon={saving ? <CircularProgress size={18} color="inherit" /> : <SaveIcon />}
+                      startIcon={
+                        saving ? <CircularProgress size={18} color="inherit" /> : <SaveIcon />
+                      }
                       onClick={handleSave}
                       disabled={saving || !hasChanges}
                       sx={{ px: 4 }}
@@ -1472,12 +1652,7 @@ const BrandingSettings = () => {
       )}
 
       {/* =================== نافذة المعاينة الكاملة =================== */}
-      <Dialog
-        open={previewOpen}
-        onClose={() => setPreviewOpen(false)}
-        maxWidth="md"
-        fullWidth
-      >
+      <Dialog open={previewOpen} onClose={() => setPreviewOpen(false)} maxWidth="md" fullWidth>
         <DialogTitle sx={{ fontWeight: 'bold' }}>معاينة الهوية المؤسسية</DialogTitle>
         <DialogContent>
           <Box
@@ -1501,7 +1676,9 @@ const BrandingSettings = () => {
             >
               <Avatar src={branding.logoPreview} sx={{ width: 40, height: 40 }} />
               <Box>
-                <Typography variant="subtitle1" fontWeight={700}>{branding.systemName}</Typography>
+                <Typography variant="subtitle1" fontWeight={700}>
+                  {branding.systemName}
+                </Typography>
                 <Typography variant="caption">{branding.tagline}</Typography>
               </Box>
             </Box>
@@ -1519,11 +1696,26 @@ const BrandingSettings = () => {
               >
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
                   <Avatar src={branding.logoPreview} sx={{ width: 28, height: 28 }} />
-                  <Typography variant="caption" fontWeight={700}>{branding.shortName}</Typography>
+                  <Typography variant="caption" fontWeight={700}>
+                    {branding.shortName}
+                  </Typography>
                 </Box>
                 {['الرئيسية', 'لوحة التحكم', 'المستفيدين', 'الجلسات', 'التقارير'].map((item, i) => (
-                  <Box key={i} sx={{ py: 0.8, px: 1, borderRadius: 1, bgcolor: i === 0 ? `${branding.primaryColor}15` : 'transparent', mb: 0.5 }}>
-                    <Typography variant="caption" fontWeight={i === 0 ? 700 : 400} color={i === 0 ? branding.primaryColor : 'text.secondary'}>
+                  <Box
+                    key={i}
+                    sx={{
+                      py: 0.8,
+                      px: 1,
+                      borderRadius: 1,
+                      bgcolor: i === 0 ? `${branding.primaryColor}15` : 'transparent',
+                      mb: 0.5,
+                    }}
+                  >
+                    <Typography
+                      variant="caption"
+                      fontWeight={i === 0 ? 700 : 400}
+                      color={i === 0 ? branding.primaryColor : 'text.secondary'}
+                    >
                       {item}
                     </Typography>
                   </Box>

@@ -3,9 +3,22 @@
  */
 import React from 'react';
 import {
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  TablePagination, Paper, Avatar, Chip, IconButton, Tooltip,
-  Skeleton, Typography, Box, Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TablePagination,
+  Paper,
+  Avatar,
+  Chip,
+  IconButton,
+  Tooltip,
+  Skeleton,
+  Typography,
+  Box,
+  Stack,
 } from '@mui/material';
 import {
   Visibility as ViewIcon,
@@ -20,28 +33,36 @@ const stringToColor = (str = '') => {
   let hash = 0;
   for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
   let color = '#';
-  for (let i = 0; i < 3; i++) color += (`00${((hash >> (i * 8)) & 0xff).toString(16)}`).slice(-2);
+  for (let i = 0; i < 3; i++) color += `00${((hash >> (i * 8)) & 0xff).toString(16)}`.slice(-2);
   return color;
 };
 
-const initials = (first = '', last = '') =>
-  `${first.charAt(0)}${last.charAt(0)}`.trim() || '؟';
+const initials = (first = '', last = '') => `${first.charAt(0)}${last.charAt(0)}`.trim() || '؟';
 
 /* ── skeleton rows ── */
 const SkeletonRows = ({ count = 5 }) =>
   Array.from({ length: count }).map((_, i) => (
     <TableRow key={i}>
       {Array.from({ length: 6 }).map((__, j) => (
-        <TableCell key={j}><Skeleton variant="text" /></TableCell>
+        <TableCell key={j}>
+          <Skeleton variant="text" />
+        </TableCell>
       ))}
     </TableRow>
   ));
 
 /* ── component ── */
 export default function EmployeeTable({
-  loading, filtered, page, rowsPerPage,
-  setPage, setRowsPerPage,
-  openView, openEdit, setDeleteTarget, handleCopyId,
+  loading,
+  filtered,
+  page,
+  rowsPerPage,
+  setPage,
+  setRowsPerPage,
+  openView,
+  openEdit,
+  setDeleteTarget,
+  handleCopyId,
 }) {
   const paged = filtered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
@@ -55,7 +76,9 @@ export default function EmployeeTable({
               <TableCell sx={{ fontWeight: 700 }}>الرقم الوظيفي</TableCell>
               <TableCell sx={{ fontWeight: 700 }}>القسم</TableCell>
               <TableCell sx={{ fontWeight: 700 }}>الحالة</TableCell>
-              <TableCell sx={{ fontWeight: 700 }} align="center">الإجراءات</TableCell>
+              <TableCell sx={{ fontWeight: 700 }} align="center">
+                الإجراءات
+              </TableCell>
             </TableRow>
           </TableHead>
 
@@ -69,21 +92,19 @@ export default function EmployeeTable({
                 </TableCell>
               </TableRow>
             ) : (
-              paged.map((emp) => {
+              paged.map(emp => {
                 const st = STATUS_MAP[emp.status] || { label: emp.status, color: '#999' };
                 return (
-                  <TableRow
-                    key={emp._id}
-                    hover
-                    sx={{ '&:last-child td': { borderBottom: 0 } }}
-                  >
+                  <TableRow key={emp._id} hover sx={{ '&:last-child td': { borderBottom: 0 } }}>
                     {/* Name + Avatar */}
                     <TableCell>
                       <Stack direction="row" alignItems="center" spacing={1.5}>
                         <Avatar
                           sx={{
                             bgcolor: stringToColor(`${emp.firstName}${emp.lastName}`),
-                            width: 36, height: 36, fontSize: 14,
+                            width: 36,
+                            height: 36,
+                            fontSize: 14,
                           }}
                         >
                           {initials(emp.firstName, emp.lastName)}
@@ -103,7 +124,9 @@ export default function EmployeeTable({
 
                     {/* Emp number */}
                     <TableCell>
-                      <Typography variant="body2" dir="ltr">{emp.employeeId}</Typography>
+                      <Typography variant="body2" dir="ltr">
+                        {emp.employeeId}
+                      </Typography>
                     </TableCell>
 
                     {/* Department */}
@@ -144,7 +167,11 @@ export default function EmployeeTable({
                           </IconButton>
                         </Tooltip>
                         <Tooltip title="حذف">
-                          <IconButton size="small" color="error" onClick={() => setDeleteTarget(emp)}>
+                          <IconButton
+                            size="small"
+                            color="error"
+                            onClick={() => setDeleteTarget(emp)}
+                          >
                             <DeleteIcon fontSize="small" />
                           </IconButton>
                         </Tooltip>
@@ -164,7 +191,10 @@ export default function EmployeeTable({
         page={page}
         onPageChange={(_, p) => setPage(p)}
         rowsPerPage={rowsPerPage}
-        onRowsPerPageChange={(e) => { setRowsPerPage(parseInt(e.target.value, 10)); setPage(0); }}
+        onRowsPerPageChange={e => {
+          setRowsPerPage(parseInt(e.target.value, 10));
+          setPage(0);
+        }}
         rowsPerPageOptions={[5, 10, 25]}
         labelRowsPerPage="عدد الصفوف:"
         labelDisplayedRows={({ from, to, count }) => `${from}–${to} من ${count}`}

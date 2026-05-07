@@ -61,11 +61,25 @@ import {
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid,
-  Tooltip as RechartsTooltip, Legend, ResponsiveContainer,
-  PieChart, Pie, Cell,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as RechartsTooltip,
+  Legend,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
 } from 'recharts';
-import { GRID_PROPS, X_AXIS_PROPS, Y_AXIS_PROPS, ARABIC_LEGEND_PROPS, tooltipStyle } from 'utils/chartHelpers';
+import {
+  GRID_PROPS,
+  X_AXIS_PROPS,
+  Y_AXIS_PROPS,
+  ARABIC_LEGEND_PROPS,
+  tooltipStyle,
+} from 'utils/chartHelpers';
 import { useSnackbar } from 'contexts/SnackbarContext';
 import { gradients, brandColors, surfaceColors } from 'theme/palette';
 import beneficiaryService from 'services/beneficiaryService';
@@ -104,7 +118,9 @@ const BeneficiariesManagementPage = () => {
     }
   }, [showSnackbar]);
 
-  useEffect(() => { loadData(); }, [loadData]);
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   // ── Computed Stats (from real data) ───────────
   const statistics = useMemo(() => {
@@ -117,8 +133,8 @@ const BeneficiariesManagementPage = () => {
       const d = new Date(b.joinDate || b.createdAt);
       return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
     }).length;
-    const completionRate = total > 0
-      ? Math.round(beneficiaries.reduce((s, b) => s + (b.progress || 0), 0) / total) : 0;
+    const completionRate =
+      total > 0 ? Math.round(beneficiaries.reduce((s, b) => s + (b.progress || 0), 0) / total) : 0;
     return { total, active, pending, inactive, newThisMonth, completionRate };
   }, [beneficiaries]);
 
@@ -129,17 +145,18 @@ const BeneficiariesManagementPage = () => {
   const filteredBeneficiaries = useMemo(() => {
     return beneficiaries.filter(b => {
       const q = searchQuery.toLowerCase();
-      const matchesSearch = !q
-        || (b.name || '').toLowerCase().includes(q)
-        || (b.nameEn || '').toLowerCase().includes(q)
-        || (b.firstName_ar || '').toLowerCase().includes(q)
-        || (b.lastName_ar || '').toLowerCase().includes(q)
-        || (b.firstName || '').toLowerCase().includes(q)
-        || (b.lastName || '').toLowerCase().includes(q)
-        || (b.nationalId || '').includes(q)
-        || (b.mrn || '').includes(q)
-        || (b.contactInfo?.primaryPhone || b.phone || '').includes(q)
-        || (b.contactInfo?.email || b.email || '').toLowerCase().includes(q);
+      const matchesSearch =
+        !q ||
+        (b.name || '').toLowerCase().includes(q) ||
+        (b.nameEn || '').toLowerCase().includes(q) ||
+        (b.firstName_ar || '').toLowerCase().includes(q) ||
+        (b.lastName_ar || '').toLowerCase().includes(q) ||
+        (b.firstName || '').toLowerCase().includes(q) ||
+        (b.lastName || '').toLowerCase().includes(q) ||
+        (b.nationalId || '').includes(q) ||
+        (b.mrn || '').includes(q) ||
+        (b.contactInfo?.primaryPhone || b.phone || '').includes(q) ||
+        (b.contactInfo?.email || b.email || '').toLowerCase().includes(q);
       const matchesStatus = selectedStatus === 'all' || b.status === selectedStatus;
       const matchesCategory = selectedCategory === 'all' || b.category === selectedCategory;
       return matchesSearch && matchesStatus && matchesCategory;
@@ -151,11 +168,11 @@ const BeneficiariesManagementPage = () => {
 
   // ── Handlers ──────────────────────────────────
   const handleAddBeneficiary = () => navigate('/student-registration');
-  const handleViewBeneficiary = (id) => navigate(`/beneficiary-portal/${id}`);
-  const handleEditBeneficiary = (id) => navigate(`/beneficiary-portal/${id}`);
+  const handleViewBeneficiary = id => navigate(`/beneficiary-portal/${id}`);
+  const handleEditBeneficiary = id => navigate(`/beneficiary-portal/${id}`);
 
-  const toggleFavorite = (id) => {
-    setBeneficiaries(prev => prev.map(b => b.id === id ? { ...b, favorite: !b.favorite } : b));
+  const toggleFavorite = id => {
+    setBeneficiaries(prev => prev.map(b => (b.id === id ? { ...b, favorite: !b.favorite } : b)));
     setSnackbar({ open: true, message: 'تم تحديث المفضلة', severity: 'success' });
   };
 
@@ -166,20 +183,26 @@ const BeneficiariesManagementPage = () => {
       if (blob instanceof Blob) {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
-        a.href = url; a.download = `beneficiaries-${new Date().toISOString().slice(0,10)}.csv`; a.click();
+        a.href = url;
+        a.download = `beneficiaries-${new Date().toISOString().slice(0, 10)}.csv`;
+        a.click();
         window.URL.revokeObjectURL(url);
       }
       showSnackbar('تم تصدير البيانات بنجاح', 'success');
-    } catch { showSnackbar('فشل في تصدير البيانات', 'error'); }
+    } catch {
+      showSnackbar('فشل في تصدير البيانات', 'error');
+    }
   };
 
-  const _handleDeleteBeneficiary = async (id) => {
+  const _handleDeleteBeneficiary = async id => {
     if (!window.confirm('هل أنت متأكد من أرشفة هذا المستفيد؟')) return;
     try {
       await beneficiaryService.remove(id, 'أرشفة من صفحة الإدارة');
       showSnackbar('تم أرشفة المستفيد بنجاح', 'success');
       loadData();
-    } catch { showSnackbar('فشل في أرشفة المستفيد', 'error'); }
+    } catch {
+      showSnackbar('فشل في أرشفة المستفيد', 'error');
+    }
   };
 
   const _handleStatusChange = async (id, newStatus) => {
@@ -187,7 +210,9 @@ const BeneficiariesManagementPage = () => {
       await beneficiaryService.updateStatus(id, newStatus);
       showSnackbar('تم تحديث حالة المستفيد', 'success');
       loadData();
-    } catch { showSnackbar('فشل في تحديث الحالة', 'error'); }
+    } catch {
+      showSnackbar('فشل في تحديث الحالة', 'error');
+    }
   };
 
   // ── Loading Skeleton ──────────────────────────
@@ -218,24 +243,37 @@ const BeneficiariesManagementPage = () => {
   const renderEmptyState = () => (
     <Fade in timeout={500}>
       <Box sx={{ textAlign: 'center', py: 8, px: 3 }}>
-        <Avatar sx={{
-          width: 88, height: 88, bgcolor: 'rgba(102,126,234,0.1)',
-          mx: 'auto', mb: 3, fontSize: 40,
-        }}>
+        <Avatar
+          sx={{
+            width: 88,
+            height: 88,
+            bgcolor: 'rgba(102,126,234,0.1)',
+            mx: 'auto',
+            mb: 3,
+            fontSize: 40,
+          }}
+        >
           <Groups sx={{ fontSize: 44, color: brandColors.primaryStart }} />
         </Avatar>
         <Typography variant="h5" fontWeight="bold" gutterBottom>
           لا يوجد مستفيدين {searchQuery ? 'مطابقين للبحث' : 'حالياً'}
         </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 3, maxWidth: 400, mx: 'auto' }}>
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{ mb: 3, maxWidth: 400, mx: 'auto' }}
+        >
           {searchQuery
             ? 'جرّب تغيير كلمة البحث أو الفلاتر المستخدمة'
             : 'ابدأ بتسجيل أول مستفيد لبدء استخدام النظام'}
         </Typography>
         {!searchQuery && (
-          <Button variant="contained" startIcon={<PersonAdd />}
+          <Button
+            variant="contained"
+            startIcon={<PersonAdd />}
             onClick={handleAddBeneficiary}
-            sx={{ background: gradients.primary, borderRadius: 2, px: 4, fontWeight: 'bold' }}>
+            sx={{ background: gradients.primary, borderRadius: 2, px: 4, fontWeight: 'bold' }}
+          >
             تسجيل مستفيد جديد
           </Button>
         )}
@@ -261,24 +299,55 @@ const BeneficiariesManagementPage = () => {
               </Typography>
             </Grid>
             <Grid item xs={12} md={5}>
-              <Stack direction="row" spacing={1.5} justifyContent={{ xs: 'flex-start', md: 'flex-end' }} flexWrap="wrap">
+              <Stack
+                direction="row"
+                spacing={1.5}
+                justifyContent={{ xs: 'flex-start', md: 'flex-end' }}
+                flexWrap="wrap"
+              >
                 <Tooltip title="تحديث البيانات">
-                  <IconButton onClick={loadData} sx={{ color: 'white', bgcolor: 'rgba(255,255,255,0.15)' }}>
+                  <IconButton
+                    onClick={loadData}
+                    sx={{ color: 'white', bgcolor: 'rgba(255,255,255,0.15)' }}
+                  >
                     <Refresh />
                   </IconButton>
                 </Tooltip>
-                <Button variant="outlined" startIcon={<Upload />}
+                <Button
+                  variant="outlined"
+                  startIcon={<Upload />}
                   onClick={() => showSnackbar('ميزة الاستيراد قيد التطوير', 'info')}
-                  sx={{ color: 'white', borderColor: 'rgba(255,255,255,0.5)', '&:hover': { borderColor: 'white' } }}>
+                  sx={{
+                    color: 'white',
+                    borderColor: 'rgba(255,255,255,0.5)',
+                    '&:hover': { borderColor: 'white' },
+                  }}
+                >
                   استيراد
                 </Button>
-                <Button variant="outlined" startIcon={<Download />} onClick={handleExport}
-                  sx={{ color: 'white', borderColor: 'rgba(255,255,255,0.5)', '&:hover': { borderColor: 'white' } }}>
+                <Button
+                  variant="outlined"
+                  startIcon={<Download />}
+                  onClick={handleExport}
+                  sx={{
+                    color: 'white',
+                    borderColor: 'rgba(255,255,255,0.5)',
+                    '&:hover': { borderColor: 'white' },
+                  }}
+                >
                   تصدير
                 </Button>
-                <Button variant="contained" startIcon={<PersonAdd />} onClick={handleAddBeneficiary}
-                  sx={{ bgcolor: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(4px)',
-                    fontWeight: 'bold', '&:hover': { bgcolor: 'rgba(255,255,255,0.35)' } }}>
+                <Button
+                  variant="contained"
+                  startIcon={<PersonAdd />}
+                  onClick={handleAddBeneficiary}
+                  sx={{
+                    bgcolor: 'rgba(255,255,255,0.2)',
+                    backdropFilter: 'blur(4px)',
+                    fontWeight: 'bold',
+                    '&:hover': { bgcolor: 'rgba(255,255,255,0.35)' },
+                  }}
+                >
                   تسجيل مستفيد جديد
                 </Button>
               </Stack>
@@ -291,21 +360,52 @@ const BeneficiariesManagementPage = () => {
         {/* ── KPI Ribbon (5 cards) ───────── */}
         <Grid container spacing={2.5} sx={{ mb: 4 }}>
           {[
-            { label: 'إجمالي المستفيدين', value: statistics.total, icon: <Groups />, gradient: gradients.primary },
-            { label: 'نشطين', value: statistics.active, icon: <CheckCircle />, gradient: gradients.success },
-            { label: 'قيد الانتظار', value: statistics.pending, icon: <Pending />, gradient: gradients.warning },
-            { label: 'جدد هذا الشهر', value: statistics.newThisMonth, icon: <TrendingUpIcon />, gradient: gradients.info },
-            { label: 'متوسط التقدم', value: `${statistics.completionRate}%`, icon: <Assignment />, gradient: gradients.primary },
+            {
+              label: 'إجمالي المستفيدين',
+              value: statistics.total,
+              icon: <Groups />,
+              gradient: gradients.primary,
+            },
+            {
+              label: 'نشطين',
+              value: statistics.active,
+              icon: <CheckCircle />,
+              gradient: gradients.success,
+            },
+            {
+              label: 'قيد الانتظار',
+              value: statistics.pending,
+              icon: <Pending />,
+              gradient: gradients.warning,
+            },
+            {
+              label: 'جدد هذا الشهر',
+              value: statistics.newThisMonth,
+              icon: <TrendingUpIcon />,
+              gradient: gradients.info,
+            },
+            {
+              label: 'متوسط التقدم',
+              value: `${statistics.completionRate}%`,
+              icon: <Assignment />,
+              gradient: gradients.primary,
+            },
           ].map((kpi, idx) => (
             <Grid item xs={6} sm={4} md key={idx}>
               <KpiCard gradient={kpi.gradient} elevation={0}>
                 <CardContent sx={{ py: 2.5 }}>
                   <Box display="flex" justifyContent="space-between" alignItems="center">
                     <Box>
-                      <Typography variant="h4" fontWeight="bold">{loading ? '—' : kpi.value}</Typography>
-                      <Typography variant="caption" sx={{ opacity: 0.9 }}>{kpi.label}</Typography>
+                      <Typography variant="h4" fontWeight="bold">
+                        {loading ? '—' : kpi.value}
+                      </Typography>
+                      <Typography variant="caption" sx={{ opacity: 0.9 }}>
+                        {kpi.label}
+                      </Typography>
                     </Box>
-                    <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)', width: 48, height: 48 }}>{kpi.icon}</Avatar>
+                    <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)', width: 48, height: 48 }}>
+                      {kpi.icon}
+                    </Avatar>
                   </Box>
                 </CardContent>
               </KpiCard>
@@ -316,7 +416,16 @@ const BeneficiariesManagementPage = () => {
         {/* ── Charts ─────────────────────── */}
         <Grid container spacing={3} sx={{ mb: 4 }}>
           <Grid item xs={12} md={8}>
-            <Card elevation={0} sx={{ borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)', transition: 'all 0.3s', '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' } }}>
+            <Card
+              elevation={0}
+              sx={{
+                borderRadius: '20px',
+                border: '1px solid rgba(0,0,0,0.04)',
+                boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+                transition: 'all 0.3s',
+                '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' },
+              }}
+            >
               <CardContent>
                 <Typography variant="h6" fontWeight={700} gutterBottom>
                   اتجاه التسجيل الشهري
@@ -344,7 +453,16 @@ const BeneficiariesManagementPage = () => {
             </Card>
           </Grid>
           <Grid item xs={12} md={4}>
-            <Card elevation={0} sx={{ borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)', transition: 'all 0.3s', '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' } }}>
+            <Card
+              elevation={0}
+              sx={{
+                borderRadius: '20px',
+                border: '1px solid rgba(0,0,0,0.04)',
+                boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+                transition: 'all 0.3s',
+                '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' },
+              }}
+            >
               <CardContent>
                 <Typography variant="h6" fontWeight={700} gutterBottom>
                   توزيع الفئات
@@ -368,7 +486,12 @@ const BeneficiariesManagementPage = () => {
                       ))}
                     </Pie>
                     <RechartsTooltip {...tooltipStyle()} />
-                    <Legend {...ARABIC_LEGEND_PROPS} layout="horizontal" align="center" verticalAlign="bottom" />
+                    <Legend
+                      {...ARABIC_LEGEND_PROPS}
+                      layout="horizontal"
+                      align="center"
+                      verticalAlign="bottom"
+                    />
                   </PieChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -378,31 +501,76 @@ const BeneficiariesManagementPage = () => {
 
         {/* ── Quick Links ────────────────── */}
         <Box sx={{ display: 'flex', gap: 1.5, mb: 3, flexWrap: 'wrap' }}>
-          <Chip icon={<PersonAdd />} label="تسجيل مستفيد جديد" clickable
+          <Chip
+            icon={<PersonAdd />}
+            label="تسجيل مستفيد جديد"
+            clickable
             onClick={() => navigate('/student-registration')}
-            sx={{ fontWeight: 'bold', bgcolor: brandColors.primaryStart, color: 'white',
-              '& .MuiChip-icon': { color: 'white' } }} />
-          <Chip icon={<ViewList />} label="عرض جدول المستفيدين" clickable variant="outlined"
-            onClick={() => navigate('/beneficiaries/table')} />
-          <Chip icon={<School />} label="بوابة الطالب" clickable variant="outlined"
-            onClick={() => navigate('/student-portal')} />
+            sx={{
+              fontWeight: 'bold',
+              bgcolor: brandColors.primaryStart,
+              color: 'white',
+              '& .MuiChip-icon': { color: 'white' },
+            }}
+          />
+          <Chip
+            icon={<ViewList />}
+            label="عرض جدول المستفيدين"
+            clickable
+            variant="outlined"
+            onClick={() => navigate('/beneficiaries/table')}
+          />
+          <Chip
+            icon={<School />}
+            label="بوابة الطالب"
+            clickable
+            variant="outlined"
+            onClick={() => navigate('/student-portal')}
+          />
         </Box>
 
         {/* ── Search & Filters ───────────── */}
-        <Card elevation={0} sx={{ borderRadius: '20px', mb: 3, border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
+        <Card
+          elevation={0}
+          sx={{
+            borderRadius: '20px',
+            mb: 3,
+            border: '1px solid rgba(0,0,0,0.04)',
+            boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+          }}
+        >
           <CardContent>
             <Grid container spacing={2} alignItems="center">
               <Grid item xs={12} md={5}>
-                <TextField fullWidth placeholder="البحث بالاسم، رقم الهوية، أو رقم الهاتف..."
-                  value={searchQuery} onChange={(e) => { setSearchQuery(e.target.value); setPage(1); }}
-                  InputProps={{ startAdornment: <InputAdornment position="start"><Search /></InputAdornment> }}
-                  sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }} />
+                <TextField
+                  fullWidth
+                  placeholder="البحث بالاسم، رقم الهوية، أو رقم الهاتف..."
+                  value={searchQuery}
+                  onChange={e => {
+                    setSearchQuery(e.target.value);
+                    setPage(1);
+                  }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Search />
+                      </InputAdornment>
+                    ),
+                  }}
+                  sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                />
               </Grid>
               <Grid item xs={6} sm={3} md={2}>
                 <FormControl fullWidth size="small">
                   <InputLabel>الحالة</InputLabel>
-                  <Select value={selectedStatus} label="الحالة"
-                    onChange={(e) => { setSelectedStatus(e.target.value); setPage(1); }}>
+                  <Select
+                    value={selectedStatus}
+                    label="الحالة"
+                    onChange={e => {
+                      setSelectedStatus(e.target.value);
+                      setPage(1);
+                    }}
+                  >
                     <MenuItem value="all">الكل</MenuItem>
                     <MenuItem value="active">نشط</MenuItem>
                     <MenuItem value="pending">قيد الانتظار</MenuItem>
@@ -413,8 +581,14 @@ const BeneficiariesManagementPage = () => {
               <Grid item xs={6} sm={3} md={2}>
                 <FormControl fullWidth size="small">
                   <InputLabel>الفئة</InputLabel>
-                  <Select value={selectedCategory} label="الفئة"
-                    onChange={(e) => { setSelectedCategory(e.target.value); setPage(1); }}>
+                  <Select
+                    value={selectedCategory}
+                    label="الفئة"
+                    onChange={e => {
+                      setSelectedCategory(e.target.value);
+                      setPage(1);
+                    }}
+                  >
                     <MenuItem value="all">الكل</MenuItem>
                     <MenuItem value="physical">إعاقة حركية</MenuItem>
                     <MenuItem value="mental">إعاقة ذهنية</MenuItem>
@@ -428,10 +602,20 @@ const BeneficiariesManagementPage = () => {
                   <Typography variant="caption" color="text.secondary">
                     {filteredBeneficiaries.length} نتيجة
                   </Typography>
-                  <ToggleButtonGroup size="small" value={viewMode} exclusive
-                    onChange={(_, v) => { if (v) setViewMode(v); }}>
-                    <ToggleButton value="grid"><GridView fontSize="small" /></ToggleButton>
-                    <ToggleButton value="list"><ViewList fontSize="small" /></ToggleButton>
+                  <ToggleButtonGroup
+                    size="small"
+                    value={viewMode}
+                    exclusive
+                    onChange={(_, v) => {
+                      if (v) setViewMode(v);
+                    }}
+                  >
+                    <ToggleButton value="grid">
+                      <GridView fontSize="small" />
+                    </ToggleButton>
+                    <ToggleButton value="list">
+                      <ViewList fontSize="small" />
+                    </ToggleButton>
                   </ToggleButtonGroup>
                 </Box>
               </Grid>
@@ -440,12 +624,21 @@ const BeneficiariesManagementPage = () => {
         </Card>
 
         {/* ── Content Area ───────────────── */}
-        {loading ? renderSkeletons() : filteredBeneficiaries.length === 0 ? renderEmptyState() : (
+        {loading ? (
+          renderSkeletons()
+        ) : filteredBeneficiaries.length === 0 ? (
+          renderEmptyState()
+        ) : (
           <>
             <Grid container spacing={viewMode === 'grid' ? 3 : 1.5}>
-              {paginatedList.map((beneficiary) => (
-                <Grid item xs={12} sm={viewMode === 'grid' ? 6 : 12}
-                  md={viewMode === 'grid' ? 4 : 12} key={beneficiary.id || beneficiary._id}>
+              {paginatedList.map(beneficiary => (
+                <Grid
+                  item
+                  xs={12}
+                  sm={viewMode === 'grid' ? 6 : 12}
+                  md={viewMode === 'grid' ? 4 : 12}
+                  key={beneficiary.id || beneficiary._id}
+                >
                   <BeneficiaryCard
                     beneficiary={beneficiary}
                     viewMode={viewMode}
@@ -461,8 +654,15 @@ const BeneficiariesManagementPage = () => {
             {/* Pagination */}
             {totalPages > 1 && (
               <Box display="flex" justifyContent="center" mt={4}>
-                <Pagination count={totalPages} page={page} onChange={(_, p) => setPage(p)}
-                  color="primary" shape="rounded" showFirstButton showLastButton />
+                <Pagination
+                  count={totalPages}
+                  page={page}
+                  onChange={(_, p) => setPage(p)}
+                  color="primary"
+                  shape="rounded"
+                  showFirstButton
+                  showLastButton
+                />
               </Box>
             )}
           </>
@@ -470,10 +670,16 @@ const BeneficiariesManagementPage = () => {
       </Container>
 
       {/* Snackbar */}
-      <Snackbar open={snackbar.open} autoHideDuration={3000}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}>
-        <Alert onClose={() => setSnackbar({ ...snackbar, open: false })}
-          severity={snackbar.severity} sx={{ width: '100%' }}>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+      >
+        <Alert
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
+          severity={snackbar.severity}
+          sx={{ width: '100%' }}
+        >
           {snackbar.message}
         </Alert>
       </Snackbar>

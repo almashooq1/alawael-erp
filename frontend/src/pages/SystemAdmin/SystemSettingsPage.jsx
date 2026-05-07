@@ -124,12 +124,7 @@ export default function SystemSettingsPage() {
             إعدادات النظام
           </Typography>
           {settings?.maintenance?.enabled && (
-            <Chip
-              icon={<WarningIcon />}
-              label="وضع الصيانة مُفعّل"
-              color="warning"
-              size="small"
-            />
+            <Chip icon={<WarningIcon />} label="وضع الصيانة مُفعّل" color="warning" size="small" />
           )}
         </Box>
         <Stack direction="row" spacing={1}>
@@ -182,36 +177,28 @@ export default function SystemSettingsPage() {
                   <TextField
                     label="اسم الموقع (EN)"
                     value={generalForm.siteName}
-                    onChange={e =>
-                      setGeneralForm(f => ({ ...f, siteName: e.target.value }))
-                    }
+                    onChange={e => setGeneralForm(f => ({ ...f, siteName: e.target.value }))}
                     fullWidth
                     size="small"
                   />
                   <TextField
                     label="اسم الموقع (AR)"
                     value={generalForm.siteNameAr}
-                    onChange={e =>
-                      setGeneralForm(f => ({ ...f, siteNameAr: e.target.value }))
-                    }
+                    onChange={e => setGeneralForm(f => ({ ...f, siteNameAr: e.target.value }))}
                     fullWidth
                     size="small"
                   />
                   <TextField
                     label="المنطقة الزمنية"
                     value={generalForm.timezone}
-                    onChange={e =>
-                      setGeneralForm(f => ({ ...f, timezone: e.target.value }))
-                    }
+                    onChange={e => setGeneralForm(f => ({ ...f, timezone: e.target.value }))}
                     fullWidth
                     size="small"
                   />
                   <TextField
                     label="العملة"
                     value={generalForm.currency}
-                    onChange={e =>
-                      setGeneralForm(f => ({ ...f, currency: e.target.value }))
-                    }
+                    onChange={e => setGeneralForm(f => ({ ...f, currency: e.target.value }))}
                     fullWidth
                     size="small"
                     select

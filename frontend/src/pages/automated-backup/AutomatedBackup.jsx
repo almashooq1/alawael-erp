@@ -32,7 +32,8 @@ import {
   Card,
   CardContent,
   Alert,
-  CircularProgress,  Tooltip,
+  CircularProgress,
+  Tooltip,
   Select,
   MenuItem,
   InputLabel,
@@ -125,7 +126,11 @@ export default function AutomatedBackup() {
         onClose={() => setSnack(s => ({ ...s, open: false }))}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
       >
-        <Alert severity={snack.severity} variant="filled" onClose={() => setSnack(s => ({ ...s, open: false }))}>
+        <Alert
+          severity={snack.severity}
+          variant="filled"
+          onClose={() => setSnack(s => ({ ...s, open: false }))}
+        >
           {snack.msg}
         </Alert>
       </Snackbar>
@@ -156,26 +161,65 @@ function OverviewTab({ notify, setLoading }) {
     }
   }, [notify, setLoading]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    load();
+  }, [load]);
 
   if (!health) return <CircularProgress sx={{ m: 4 }} />;
 
   const cards = [
-    { label: 'حالة النظام', value: health.status === 'healthy' ? 'سليم' : health.status, icon: <CheckCircle />, color: statusColor(health.status) },
-    { label: 'نقاط الصحة', value: `${health.healthScore}%`, icon: <Speed />, color: health.healthScore >= 80 ? 'success' : 'warning' },
+    {
+      label: 'حالة النظام',
+      value: health.status === 'healthy' ? 'سليم' : health.status,
+      icon: <CheckCircle />,
+      color: statusColor(health.status),
+    },
+    {
+      label: 'نقاط الصحة',
+      value: `${health.healthScore}%`,
+      icon: <Speed />,
+      color: health.healthScore >= 80 ? 'success' : 'warning',
+    },
     { label: 'إجمالي النسخ', value: health.totalBackups, icon: <BackupIcon />, color: 'info' },
-    { label: 'الحجم الكلي', value: health.totalSizeFormatted || fmtSize(health.totalSize), icon: <Storage />, color: 'info' },
-    { label: 'نسخ آخر 24 ساعة', value: health.recentBackups24h, icon: <CloudDone />, color: 'success' },
-    { label: 'فشل آخر 24 ساعة', value: health.failedBackups24h, icon: <ErrorIcon />, color: health.failedBackups24h > 0 ? 'error' : 'success' },
-    { label: 'جداول نشطة', value: `${health.activeSchedules}/${health.totalSchedules}`, icon: <Schedule />, color: 'info' },
-    { label: 'أهداف تخزين متصلة', value: `${health.connectedTargets}/${health.totalTargets}`, icon: <NetworkCheck />, color: 'success' },
+    {
+      label: 'الحجم الكلي',
+      value: health.totalSizeFormatted || fmtSize(health.totalSize),
+      icon: <Storage />,
+      color: 'info',
+    },
+    {
+      label: 'نسخ آخر 24 ساعة',
+      value: health.recentBackups24h,
+      icon: <CloudDone />,
+      color: 'success',
+    },
+    {
+      label: 'فشل آخر 24 ساعة',
+      value: health.failedBackups24h,
+      icon: <ErrorIcon />,
+      color: health.failedBackups24h > 0 ? 'error' : 'success',
+    },
+    {
+      label: 'جداول نشطة',
+      value: `${health.activeSchedules}/${health.totalSchedules}`,
+      icon: <Schedule />,
+      color: 'info',
+    },
+    {
+      label: 'أهداف تخزين متصلة',
+      value: `${health.connectedTargets}/${health.totalTargets}`,
+      icon: <NetworkCheck />,
+      color: 'success',
+    },
   ];
 
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
         <Typography variant="h6">نظرة عامة على النسخ الاحتياطي</Typography>
-        <Button startIcon={<Refresh />} onClick={load} variant="outlined" size="small">تحديث</Button>
+        <Button startIcon={<Refresh />} onClick={load} variant="outlined" size="small">
+          تحديث
+        </Button>
       </Box>
 
       <Grid container spacing={2} sx={{ mb: 3 }}>
@@ -184,8 +228,12 @@ function OverviewTab({ notify, setLoading }) {
             <Card>
               <CardContent sx={{ textAlign: 'center' }}>
                 <Box sx={{ color: `${c.color}.main`, mb: 1 }}>{c.icon}</Box>
-                <Typography variant="h5" fontWeight="bold">{c.value}</Typography>
-                <Typography variant="body2" color="text.secondary">{c.label}</Typography>
+                <Typography variant="h5" fontWeight="bold">
+                  {c.value}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {c.label}
+                </Typography>
               </CardContent>
             </Card>
           </Grid>
@@ -194,7 +242,8 @@ function OverviewTab({ notify, setLoading }) {
 
       {health.nextScheduledBackup && (
         <Alert severity="info" sx={{ mb: 2 }}>
-          النسخة القادمة: <strong>{health.nextScheduledBackup.name}</strong> — {fmtDate(health.nextScheduledBackup.nextRun)}
+          النسخة القادمة: <strong>{health.nextScheduledBackup.name}</strong> —{' '}
+          {fmtDate(health.nextScheduledBackup.nextRun)}
         </Alert>
       )}
 
@@ -204,10 +253,26 @@ function OverviewTab({ notify, setLoading }) {
             إحصائيات آخر {analytics.period}
           </Typography>
           <Grid container spacing={2}>
-            <Grid item xs={6} md={3}><Typography variant="body2">معدل النجاح: <strong>{analytics.successRate}%</strong></Typography></Grid>
-            <Grid item xs={6} md={3}><Typography variant="body2">متوسط الحجم: <strong>{fmtSize(analytics.avgBackupSize)}</strong></Typography></Grid>
-            <Grid item xs={6} md={3}><Typography variant="body2">عمليات الاستعادة: <strong>{analytics.restoreCount}</strong></Typography></Grid>
-            <Grid item xs={6} md={3}><Typography variant="body2">إجمالي النسخ: <strong>{analytics.totalBackups}</strong></Typography></Grid>
+            <Grid item xs={6} md={3}>
+              <Typography variant="body2">
+                معدل النجاح: <strong>{analytics.successRate}%</strong>
+              </Typography>
+            </Grid>
+            <Grid item xs={6} md={3}>
+              <Typography variant="body2">
+                متوسط الحجم: <strong>{fmtSize(analytics.avgBackupSize)}</strong>
+              </Typography>
+            </Grid>
+            <Grid item xs={6} md={3}>
+              <Typography variant="body2">
+                عمليات الاستعادة: <strong>{analytics.restoreCount}</strong>
+              </Typography>
+            </Grid>
+            <Grid item xs={6} md={3}>
+              <Typography variant="body2">
+                إجمالي النسخ: <strong>{analytics.totalBackups}</strong>
+              </Typography>
+            </Grid>
           </Grid>
         </Paper>
       )}
@@ -237,7 +302,9 @@ function BackupsTab({ notify, setLoading }) {
     }
   }, [notify, setLoading]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    load();
+  }, [load]);
 
   const handleCreate = async () => {
     try {
@@ -275,8 +342,12 @@ function BackupsTab({ notify, setLoading }) {
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
         <Typography variant="h6">النسخ الاحتياطية ({total})</Typography>
         <Box>
-          <Button startIcon={<Refresh />} onClick={load} sx={{ mr: 1 }}>تحديث</Button>
-          <Button startIcon={<Add />} variant="contained" onClick={() => setDlgOpen(true)}>إنشاء نسخة</Button>
+          <Button startIcon={<Refresh />} onClick={load} sx={{ mr: 1 }}>
+            تحديث
+          </Button>
+          <Button startIcon={<Add />} variant="contained" onClick={() => setDlgOpen(true)}>
+            إنشاء نسخة
+          </Button>
         </Box>
       </Box>
 
@@ -296,20 +367,40 @@ function BackupsTab({ notify, setLoading }) {
           </TableHead>
           <TableBody>
             {backups.length === 0 && (
-              <TableRow><TableCell colSpan={8} align="center">لا توجد نسخ احتياطية</TableCell></TableRow>
+              <TableRow>
+                <TableCell colSpan={8} align="center">
+                  لا توجد نسخ احتياطية
+                </TableCell>
+              </TableRow>
             )}
             {backups.map(b => (
               <TableRow key={b.id}>
                 <TableCell>{b.type}</TableCell>
-                <TableCell><Chip label={b.status} color={statusColor(b.status)} size="small" /></TableCell>
+                <TableCell>
+                  <Chip label={b.status} color={statusColor(b.status)} size="small" />
+                </TableCell>
                 <TableCell>{fmtSize(b.size)}</TableCell>
                 <TableCell>{b.collections}</TableCell>
                 <TableCell>{b.filesCount}</TableCell>
                 <TableCell>{fmtDate(b.createdAt)}</TableCell>
-                <TableCell>{b.verified ? <CheckCircle color="success" fontSize="small" /> : <Warning color="warning" fontSize="small" />}</TableCell>
                 <TableCell>
-                  <Tooltip title="تحقق"><IconButton size="small" onClick={() => handleVerify(b.id)}><VerifiedUser fontSize="small" /></IconButton></Tooltip>
-                  <Tooltip title="حذف"><IconButton size="small" color="error" onClick={() => handleDelete(b.id)}><Delete fontSize="small" /></IconButton></Tooltip>
+                  {b.verified ? (
+                    <CheckCircle color="success" fontSize="small" />
+                  ) : (
+                    <Warning color="warning" fontSize="small" />
+                  )}
+                </TableCell>
+                <TableCell>
+                  <Tooltip title="تحقق">
+                    <IconButton size="small" onClick={() => handleVerify(b.id)}>
+                      <VerifiedUser fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title="حذف">
+                    <IconButton size="small" color="error" onClick={() => handleDelete(b.id)}>
+                      <Delete fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
                 </TableCell>
               </TableRow>
             ))}
@@ -322,18 +413,30 @@ function BackupsTab({ notify, setLoading }) {
         <DialogContent>
           <FormControl fullWidth sx={{ mt: 2 }}>
             <InputLabel>النوع</InputLabel>
-            <Select value={form.type} label="النوع" onChange={e => setForm(f => ({ ...f, type: e.target.value }))}>
+            <Select
+              value={form.type}
+              label="النوع"
+              onChange={e => setForm(f => ({ ...f, type: e.target.value }))}
+            >
               <MenuItem value="full">كامل</MenuItem>
               <MenuItem value="mongodb">MongoDB فقط</MenuItem>
               <MenuItem value="files">ملفات فقط</MenuItem>
               <MenuItem value="incremental">تزايدي</MenuItem>
             </Select>
           </FormControl>
-          <TextField fullWidth label="الوصف" sx={{ mt: 2 }} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} />
+          <TextField
+            fullWidth
+            label="الوصف"
+            sx={{ mt: 2 }}
+            value={form.description}
+            onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+          />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDlgOpen(false)}>إلغاء</Button>
-          <Button variant="contained" onClick={handleCreate}>إنشاء</Button>
+          <Button variant="contained" onClick={handleCreate}>
+            إنشاء
+          </Button>
         </DialogActions>
       </Dialog>
     </Box>
@@ -360,7 +463,9 @@ function SchedulesTab({ notify, setLoading }) {
     }
   }, [notify, setLoading]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    load();
+  }, [load]);
 
   const handleCreate = async () => {
     try {
@@ -398,8 +503,12 @@ function SchedulesTab({ notify, setLoading }) {
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
         <Typography variant="h6">جداول النسخ التلقائي</Typography>
         <Box>
-          <Button startIcon={<Refresh />} onClick={load} sx={{ mr: 1 }}>تحديث</Button>
-          <Button startIcon={<Add />} variant="contained" onClick={() => setDlgOpen(true)}>إضافة جدول</Button>
+          <Button startIcon={<Refresh />} onClick={load} sx={{ mr: 1 }}>
+            تحديث
+          </Button>
+          <Button startIcon={<Add />} variant="contained" onClick={() => setDlgOpen(true)}>
+            إضافة جدول
+          </Button>
         </Box>
       </Box>
 
@@ -422,9 +531,13 @@ function SchedulesTab({ notify, setLoading }) {
               <TableRow key={s.id}>
                 <TableCell>{s.name}</TableCell>
                 <TableCell>{s.type}</TableCell>
-                <TableCell><code>{s.cron}</code></TableCell>
+                <TableCell>
+                  <code>{s.cron}</code>
+                </TableCell>
                 <TableCell>{s.retention}</TableCell>
-                <TableCell><Chip label={s.status} color={statusColor(s.status)} size="small" /></TableCell>
+                <TableCell>
+                  <Chip label={s.status} color={statusColor(s.status)} size="small" />
+                </TableCell>
                 <TableCell>{fmtDate(s.lastRun)}</TableCell>
                 <TableCell>{fmtDate(s.nextRun)}</TableCell>
                 <TableCell>
@@ -433,7 +546,11 @@ function SchedulesTab({ notify, setLoading }) {
                       {s.enabled ? <Pause fontSize="small" /> : <PlayArrow fontSize="small" />}
                     </IconButton>
                   </Tooltip>
-                  <Tooltip title="حذف"><IconButton size="small" color="error" onClick={() => handleDelete(s.id)}><Delete fontSize="small" /></IconButton></Tooltip>
+                  <Tooltip title="حذف">
+                    <IconButton size="small" color="error" onClick={() => handleDelete(s.id)}>
+                      <Delete fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
                 </TableCell>
               </TableRow>
             ))}
@@ -444,22 +561,48 @@ function SchedulesTab({ notify, setLoading }) {
       <Dialog open={dlgOpen} onClose={() => setDlgOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>إضافة جدول نسخ احتياطي</DialogTitle>
         <DialogContent>
-          <TextField fullWidth label="اسم الجدول" sx={{ mt: 2 }} value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
+          <TextField
+            fullWidth
+            label="اسم الجدول"
+            sx={{ mt: 2 }}
+            value={form.name}
+            onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+          />
           <FormControl fullWidth sx={{ mt: 2 }}>
             <InputLabel>النوع</InputLabel>
-            <Select value={form.type} label="النوع" onChange={e => setForm(f => ({ ...f, type: e.target.value }))}>
+            <Select
+              value={form.type}
+              label="النوع"
+              onChange={e => setForm(f => ({ ...f, type: e.target.value }))}
+            >
               <MenuItem value="mongodb">MongoDB</MenuItem>
               <MenuItem value="full">كامل</MenuItem>
               <MenuItem value="files">ملفات</MenuItem>
               <MenuItem value="archive">أرشيف</MenuItem>
             </Select>
           </FormControl>
-          <TextField fullWidth label="Cron Expression" sx={{ mt: 2 }} value={form.cron} onChange={e => setForm(f => ({ ...f, cron: e.target.value }))} placeholder="0 2 * * *" />
-          <TextField fullWidth label="الاحتفاظ (أيام)" type="number" sx={{ mt: 2 }} value={form.retention} onChange={e => setForm(f => ({ ...f, retention: Number(e.target.value) }))} />
+          <TextField
+            fullWidth
+            label="Cron Expression"
+            sx={{ mt: 2 }}
+            value={form.cron}
+            onChange={e => setForm(f => ({ ...f, cron: e.target.value }))}
+            placeholder="0 2 * * *"
+          />
+          <TextField
+            fullWidth
+            label="الاحتفاظ (أيام)"
+            type="number"
+            sx={{ mt: 2 }}
+            value={form.retention}
+            onChange={e => setForm(f => ({ ...f, retention: Number(e.target.value) }))}
+          />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDlgOpen(false)}>إلغاء</Button>
-          <Button variant="contained" onClick={handleCreate}>حفظ</Button>
+          <Button variant="contained" onClick={handleCreate}>
+            حفظ
+          </Button>
         </DialogActions>
       </Dialog>
     </Box>
@@ -486,7 +629,9 @@ function StorageTab({ notify, setLoading }) {
     }
   }, [notify, setLoading]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    load();
+  }, [load]);
 
   const handleCreate = async () => {
     try {
@@ -524,8 +669,12 @@ function StorageTab({ notify, setLoading }) {
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
         <Typography variant="h6">أهداف التخزين</Typography>
         <Box>
-          <Button startIcon={<Refresh />} onClick={load} sx={{ mr: 1 }}>تحديث</Button>
-          <Button startIcon={<Add />} variant="contained" onClick={() => setDlgOpen(true)}>إضافة هدف</Button>
+          <Button startIcon={<Refresh />} onClick={load} sx={{ mr: 1 }}>
+            تحديث
+          </Button>
+          <Button startIcon={<Add />} variant="contained" onClick={() => setDlgOpen(true)}>
+            إضافة هدف
+          </Button>
         </Box>
       </Box>
 
@@ -538,15 +687,32 @@ function StorageTab({ notify, setLoading }) {
                   <Typography variant="h6">{t.name}</Typography>
                   <Chip label={t.status} color={statusColor(t.status)} size="small" />
                 </Box>
-                <Typography variant="body2">النوع: <strong>{t.type.toUpperCase()}</strong></Typography>
+                <Typography variant="body2">
+                  النوع: <strong>{t.type.toUpperCase()}</strong>
+                </Typography>
                 {t.bucket && <Typography variant="body2">Bucket: {t.bucket}</Typography>}
                 {t.region && <Typography variant="body2">المنطقة: {t.region}</Typography>}
                 {t.path && <Typography variant="body2">المسار: {t.path}</Typography>}
-                <Typography variant="body2" color="text.secondary">آخر فحص: {fmtDate(t.lastCheck)}</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  آخر فحص: {fmtDate(t.lastCheck)}
+                </Typography>
                 <Box sx={{ mt: 1 }}>
-                  <Button size="small" startIcon={<NetworkCheck />} onClick={() => handleTest(t.id)}>اختبار</Button>
+                  <Button
+                    size="small"
+                    startIcon={<NetworkCheck />}
+                    onClick={() => handleTest(t.id)}
+                  >
+                    اختبار
+                  </Button>
                   {t.type !== 'local' && (
-                    <Button size="small" color="error" startIcon={<Delete />} onClick={() => handleRemove(t.id)}>حذف</Button>
+                    <Button
+                      size="small"
+                      color="error"
+                      startIcon={<Delete />}
+                      onClick={() => handleRemove(t.id)}
+                    >
+                      حذف
+                    </Button>
                   )}
                 </Box>
               </CardContent>
@@ -558,10 +724,20 @@ function StorageTab({ notify, setLoading }) {
       <Dialog open={dlgOpen} onClose={() => setDlgOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>إضافة هدف تخزين</DialogTitle>
         <DialogContent>
-          <TextField fullWidth label="الاسم" sx={{ mt: 2 }} value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
+          <TextField
+            fullWidth
+            label="الاسم"
+            sx={{ mt: 2 }}
+            value={form.name}
+            onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+          />
           <FormControl fullWidth sx={{ mt: 2 }}>
             <InputLabel>النوع</InputLabel>
-            <Select value={form.type} label="النوع" onChange={e => setForm(f => ({ ...f, type: e.target.value }))}>
+            <Select
+              value={form.type}
+              label="النوع"
+              onChange={e => setForm(f => ({ ...f, type: e.target.value }))}
+            >
               <MenuItem value="s3">AWS S3</MenuItem>
               <MenuItem value="gcs">Google Cloud Storage</MenuItem>
               <MenuItem value="azure">Azure Blob</MenuItem>
@@ -570,14 +746,28 @@ function StorageTab({ notify, setLoading }) {
           </FormControl>
           {form.type === 's3' && (
             <>
-              <TextField fullWidth label="Bucket Name" sx={{ mt: 2 }} value={form.bucket} onChange={e => setForm(f => ({ ...f, bucket: e.target.value }))} />
-              <TextField fullWidth label="Region" sx={{ mt: 2 }} value={form.region} onChange={e => setForm(f => ({ ...f, region: e.target.value }))} />
+              <TextField
+                fullWidth
+                label="Bucket Name"
+                sx={{ mt: 2 }}
+                value={form.bucket}
+                onChange={e => setForm(f => ({ ...f, bucket: e.target.value }))}
+              />
+              <TextField
+                fullWidth
+                label="Region"
+                sx={{ mt: 2 }}
+                value={form.region}
+                onChange={e => setForm(f => ({ ...f, region: e.target.value }))}
+              />
             </>
           )}
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDlgOpen(false)}>إلغاء</Button>
-          <Button variant="contained" onClick={handleCreate}>حفظ</Button>
+          <Button variant="contained" onClick={handleCreate}>
+            حفظ
+          </Button>
         </DialogActions>
       </Dialog>
     </Box>
@@ -610,10 +800,15 @@ function RestoreTab({ notify, setLoading }) {
     }
   }, [notify, setLoading]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    load();
+  }, [load]);
 
   const handleRestore = async () => {
-    if (!selectedBackup) { notify('اختر نسخة احتياطية', 'warning'); return; }
+    if (!selectedBackup) {
+      notify('اختر نسخة احتياطية', 'warning');
+      return;
+    }
     try {
       await automatedBackupService.restoreBackup(selectedBackup, { dryRun });
       notify(dryRun ? 'تم التشغيل التجريبي بنجاح' : 'تمت الاستعادة بنجاح');
@@ -629,12 +824,22 @@ function RestoreTab({ notify, setLoading }) {
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
         <Typography variant="h6">الاستعادة من نسخة احتياطية</Typography>
         <Box>
-          <Button startIcon={<Refresh />} onClick={load} sx={{ mr: 1 }}>تحديث</Button>
-          <Button startIcon={<SettingsBackupRestore />} variant="contained" onClick={() => setDlgOpen(true)}>استعادة</Button>
+          <Button startIcon={<Refresh />} onClick={load} sx={{ mr: 1 }}>
+            تحديث
+          </Button>
+          <Button
+            startIcon={<SettingsBackupRestore />}
+            variant="contained"
+            onClick={() => setDlgOpen(true)}
+          >
+            استعادة
+          </Button>
         </Box>
       </Box>
 
-      <Typography variant="subtitle1" sx={{ mb: 1 }}>سجل الاستعادة</Typography>
+      <Typography variant="subtitle1" sx={{ mb: 1 }}>
+        سجل الاستعادة
+      </Typography>
       <TableContainer component={Paper}>
         <Table size="small">
           <TableHead>
@@ -649,12 +854,18 @@ function RestoreTab({ notify, setLoading }) {
           </TableHead>
           <TableBody>
             {history.length === 0 && (
-              <TableRow><TableCell colSpan={6} align="center">لا يوجد سجل استعادة</TableCell></TableRow>
+              <TableRow>
+                <TableCell colSpan={6} align="center">
+                  لا يوجد سجل استعادة
+                </TableCell>
+              </TableRow>
             )}
             {history.map(r => (
               <TableRow key={r.id}>
                 <TableCell>{r.backupType}</TableCell>
-                <TableCell><Chip label={r.status} color={statusColor(r.status)} size="small" /></TableCell>
+                <TableCell>
+                  <Chip label={r.status} color={statusColor(r.status)} size="small" />
+                </TableCell>
                 <TableCell>{r.collectionsRestored}</TableCell>
                 <TableCell>{r.filesRestored}</TableCell>
                 <TableCell>{r.duration ? `${Math.floor(r.duration / 1000)}s` : '—'}</TableCell>
@@ -670,7 +881,11 @@ function RestoreTab({ notify, setLoading }) {
         <DialogContent>
           <FormControl fullWidth sx={{ mt: 2 }}>
             <InputLabel>اختر نسخة</InputLabel>
-            <Select value={selectedBackup} label="اختر نسخة" onChange={e => setSelectedBackup(e.target.value)}>
+            <Select
+              value={selectedBackup}
+              label="اختر نسخة"
+              onChange={e => setSelectedBackup(e.target.value)}
+            >
               {backups.map(b => (
                 <MenuItem key={b.id} value={b.id}>
                   {b.type} — {fmtSize(b.size)} — {fmtDate(b.createdAt)}
@@ -691,7 +906,11 @@ function RestoreTab({ notify, setLoading }) {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDlgOpen(false)}>إلغاء</Button>
-          <Button variant="contained" color={dryRun ? 'primary' : 'warning'} onClick={handleRestore}>
+          <Button
+            variant="contained"
+            color={dryRun ? 'primary' : 'warning'}
+            onClick={handleRestore}
+          >
             {dryRun ? 'تشغيل تجريبي' : 'استعادة فعلية'}
           </Button>
         </DialogActions>
@@ -718,7 +937,9 @@ function ConfigTab({ notify, setLoading }) {
     }
   }, [notify, setLoading]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    load();
+  }, [load]);
 
   const handleSave = async () => {
     try {
@@ -742,57 +963,150 @@ function ConfigTab({ notify, setLoading }) {
 
   return (
     <Box>
-      <Typography variant="h6" sx={{ mb: 2 }}>إعدادات النسخ الاحتياطي</Typography>
+      <Typography variant="h6" sx={{ mb: 2 }}>
+        إعدادات النسخ الاحتياطي
+      </Typography>
       <Grid container spacing={3}>
         <Grid item xs={12} md={6}>
           <Paper sx={{ p: 2 }}>
-            <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 2 }}>عامة</Typography>
-            <TextField fullWidth label="أيام الاحتفاظ" type="number" sx={{ mb: 2 }}
-              value={config.retentionDays} onChange={e => setConfig(c => ({ ...c, retentionDays: Number(e.target.value) }))} />
-            <TextField fullWidth label="الحد الأقصى للنسخ" type="number" sx={{ mb: 2 }}
-              value={config.maxBackups} onChange={e => setConfig(c => ({ ...c, maxBackups: Number(e.target.value) }))} />
-            <TextField fullWidth label="مسار النسخ" sx={{ mb: 2 }}
-              value={config.backupDir} onChange={e => setConfig(c => ({ ...c, backupDir: e.target.value }))} />
-            <FormControlLabel control={<Switch checked={config.compressionEnabled}
-              onChange={e => setConfig(c => ({ ...c, compressionEnabled: e.target.checked }))} />} label="تمكين الضغط" />
-            <FormControlLabel control={<Switch checked={config.encryptionEnabled}
-              onChange={e => setConfig(c => ({ ...c, encryptionEnabled: e.target.checked }))} />} label="تمكين التشفير" />
+            <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 2 }}>
+              عامة
+            </Typography>
+            <TextField
+              fullWidth
+              label="أيام الاحتفاظ"
+              type="number"
+              sx={{ mb: 2 }}
+              value={config.retentionDays}
+              onChange={e => setConfig(c => ({ ...c, retentionDays: Number(e.target.value) }))}
+            />
+            <TextField
+              fullWidth
+              label="الحد الأقصى للنسخ"
+              type="number"
+              sx={{ mb: 2 }}
+              value={config.maxBackups}
+              onChange={e => setConfig(c => ({ ...c, maxBackups: Number(e.target.value) }))}
+            />
+            <TextField
+              fullWidth
+              label="مسار النسخ"
+              sx={{ mb: 2 }}
+              value={config.backupDir}
+              onChange={e => setConfig(c => ({ ...c, backupDir: e.target.value }))}
+            />
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={config.compressionEnabled}
+                  onChange={e => setConfig(c => ({ ...c, compressionEnabled: e.target.checked }))}
+                />
+              }
+              label="تمكين الضغط"
+            />
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={config.encryptionEnabled}
+                  onChange={e => setConfig(c => ({ ...c, encryptionEnabled: e.target.checked }))}
+                />
+              }
+              label="تمكين التشفير"
+            />
           </Paper>
         </Grid>
 
         <Grid item xs={12} md={6}>
           <Paper sx={{ p: 2 }}>
-            <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 2 }}>الجداول الافتراضية</Typography>
-            <TextField fullWidth label="جدول يومي (Cron)" sx={{ mb: 2 }}
-              value={config.dailySchedule} onChange={e => setConfig(c => ({ ...c, dailySchedule: e.target.value }))} />
-            <TextField fullWidth label="جدول أسبوعي (Cron)" sx={{ mb: 2 }}
-              value={config.weeklySchedule} onChange={e => setConfig(c => ({ ...c, weeklySchedule: e.target.value }))} />
-            <TextField fullWidth label="جدول شهري (Cron)" sx={{ mb: 2 }}
-              value={config.monthlySchedule} onChange={e => setConfig(c => ({ ...c, monthlySchedule: e.target.value }))} />
+            <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 2 }}>
+              الجداول الافتراضية
+            </Typography>
+            <TextField
+              fullWidth
+              label="جدول يومي (Cron)"
+              sx={{ mb: 2 }}
+              value={config.dailySchedule}
+              onChange={e => setConfig(c => ({ ...c, dailySchedule: e.target.value }))}
+            />
+            <TextField
+              fullWidth
+              label="جدول أسبوعي (Cron)"
+              sx={{ mb: 2 }}
+              value={config.weeklySchedule}
+              onChange={e => setConfig(c => ({ ...c, weeklySchedule: e.target.value }))}
+            />
+            <TextField
+              fullWidth
+              label="جدول شهري (Cron)"
+              sx={{ mb: 2 }}
+              value={config.monthlySchedule}
+              onChange={e => setConfig(c => ({ ...c, monthlySchedule: e.target.value }))}
+            />
           </Paper>
         </Grid>
 
         <Grid item xs={12} md={6}>
           <Paper sx={{ p: 2 }}>
-            <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 2 }}>S3 / التخزين السحابي</Typography>
-            <FormControlLabel control={<Switch checked={config.s3Enabled}
-              onChange={e => setConfig(c => ({ ...c, s3Enabled: e.target.checked }))} />} label="تمكين S3" />
-            <TextField fullWidth label="S3 Bucket" sx={{ mb: 2, mt: 1 }}
-              value={config.s3Bucket} onChange={e => setConfig(c => ({ ...c, s3Bucket: e.target.value }))} />
-            <TextField fullWidth label="S3 Region" sx={{ mb: 2 }}
-              value={config.s3Region} onChange={e => setConfig(c => ({ ...c, s3Region: e.target.value }))} />
+            <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 2 }}>
+              S3 / التخزين السحابي
+            </Typography>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={config.s3Enabled}
+                  onChange={e => setConfig(c => ({ ...c, s3Enabled: e.target.checked }))}
+                />
+              }
+              label="تمكين S3"
+            />
+            <TextField
+              fullWidth
+              label="S3 Bucket"
+              sx={{ mb: 2, mt: 1 }}
+              value={config.s3Bucket}
+              onChange={e => setConfig(c => ({ ...c, s3Bucket: e.target.value }))}
+            />
+            <TextField
+              fullWidth
+              label="S3 Region"
+              sx={{ mb: 2 }}
+              value={config.s3Region}
+              onChange={e => setConfig(c => ({ ...c, s3Region: e.target.value }))}
+            />
           </Paper>
         </Grid>
 
         <Grid item xs={12} md={6}>
           <Paper sx={{ p: 2 }}>
-            <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 2 }}>الإشعارات والصيانة</Typography>
-            <FormControlLabel control={<Switch checked={config.notifyOnFailure}
-              onChange={e => setConfig(c => ({ ...c, notifyOnFailure: e.target.checked }))} />} label="إشعار عند الفشل" />
-            <FormControlLabel control={<Switch checked={config.notifyOnSuccess}
-              onChange={e => setConfig(c => ({ ...c, notifyOnSuccess: e.target.checked }))} />} label="إشعار عند النجاح" />
+            <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 2 }}>
+              الإشعارات والصيانة
+            </Typography>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={config.notifyOnFailure}
+                  onChange={e => setConfig(c => ({ ...c, notifyOnFailure: e.target.checked }))}
+                />
+              }
+              label="إشعار عند الفشل"
+            />
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={config.notifyOnSuccess}
+                  onChange={e => setConfig(c => ({ ...c, notifyOnSuccess: e.target.checked }))}
+                />
+              }
+              label="إشعار عند النجاح"
+            />
             <Box sx={{ mt: 2 }}>
-              <Button startIcon={<CleaningServices />} variant="outlined" color="warning" onClick={handleCleanup} fullWidth>
+              <Button
+                startIcon={<CleaningServices />}
+                variant="outlined"
+                color="warning"
+                onClick={handleCleanup}
+                fullWidth
+              >
                 تنظيف النسخ القديمة
               </Button>
             </Box>
@@ -801,7 +1115,9 @@ function ConfigTab({ notify, setLoading }) {
       </Grid>
 
       <Box sx={{ mt: 3, textAlign: 'center' }}>
-        <Button variant="contained" size="large" onClick={handleSave}>حفظ الإعدادات</Button>
+        <Button variant="contained" size="large" onClick={handleSave}>
+          حفظ الإعدادات
+        </Button>
       </Box>
     </Box>
   );

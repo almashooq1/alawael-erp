@@ -5,18 +5,48 @@
  */
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Box, Grid, Paper, Typography, Button, TextField, MenuItem, Select,
-  FormControl, InputLabel, Chip, IconButton, Tooltip, Alert, LinearProgress,
-  Dialog, DialogTitle, DialogContent, DialogActions, Table, TableBody,
-  TableCell, TableContainer, TableHead, TableRow, TablePagination,
-  InputAdornment, Card, CardContent,
+  Box,
+  Grid,
+  Paper,
+  Typography,
+  Button,
+  TextField,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
+  Chip,
+  IconButton,
+  Tooltip,
+  Alert,
+  LinearProgress,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TablePagination,
+  InputAdornment,
+  Card,
+  CardContent,
 } from '@mui/material';
 import {
-  Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon,
-  Search as SearchIcon, VideoCall as VideoCallIcon,
-  PlayArrow as PlayIcon, Stop as StopIcon, Cancel as CancelIcon,
-  Refresh as RefreshIcon, FilterList as FilterIcon,
-  } from '@mui/icons-material';
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Search as SearchIcon,
+  VideoCall as VideoCallIcon,
+  PlayArrow as PlayIcon,
+  Stop as StopIcon,
+  Cancel as CancelIcon,
+  Refresh as RefreshIcon,
+  FilterList as FilterIcon,
+} from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import telehealthService from '../../services/telehealthService';
 
@@ -33,13 +63,30 @@ const priorityOptions = [
   { value: 'high', label: 'مرتفع', color: 'warning' },
   { value: 'urgent', label: 'عاجل', color: 'error' },
 ];
-const statusColors = { scheduled: 'info', 'in-progress': 'warning', completed: 'success', cancelled: 'error' };
-const statusLabels = { scheduled: 'مجدولة', 'in-progress': 'قيد التنفيذ', completed: 'مكتملة', cancelled: 'ملغاة' };
+const statusColors = {
+  scheduled: 'info',
+  'in-progress': 'warning',
+  completed: 'success',
+  cancelled: 'error',
+};
+const statusLabels = {
+  scheduled: 'مجدولة',
+  'in-progress': 'قيد التنفيذ',
+  completed: 'مكتملة',
+  cancelled: 'ملغاة',
+};
 
 const emptyForm = {
-  title: '', patientName: '', therapistName: '', scheduledDate: '',
-  duration: 30, sessionType: 'video', platform: 'jitsi', priority: 'normal',
-  department: '', notes: '',
+  title: '',
+  patientName: '',
+  therapistName: '',
+  scheduledDate: '',
+  duration: 30,
+  sessionType: 'video',
+  platform: 'jitsi',
+  priority: 'normal',
+  department: '',
+  notes: '',
 };
 
 export default function TelehealthSessionsPage() {
@@ -69,7 +116,7 @@ export default function TelehealthSessionsPage() {
       const { data } = await telehealthService.getSessions(params);
       if (data.success) {
         setSessions(data.data);
-        setPagination((p) => ({ ...p, total: data.pagination?.total || 0 }));
+        setPagination(p => ({ ...p, total: data.pagination?.total || 0 }));
       }
     } catch {
       setError('فشل تحميل الجلسات');
@@ -87,8 +134,12 @@ export default function TelehealthSessionsPage() {
     }
   }, []);
 
-  useEffect(() => { fetchSessions(); }, [fetchSessions]);
-  useEffect(() => { fetchStats(); }, [fetchStats]);
+  useEffect(() => {
+    fetchSessions();
+  }, [fetchSessions]);
+  useEffect(() => {
+    fetchStats();
+  }, [fetchStats]);
 
   const handleCreate = async () => {
     try {
@@ -134,7 +185,7 @@ export default function TelehealthSessionsPage() {
     }
   };
 
-  const handleStartSession = async (id) => {
+  const handleStartSession = async id => {
     try {
       const { data } = await telehealthService.startSession(id);
       if (data.success && data.data?.room?.joinUrl) {
@@ -148,7 +199,7 @@ export default function TelehealthSessionsPage() {
     }
   };
 
-  const openEdit = (session) => {
+  const openEdit = session => {
     setEditId(session.id);
     setForm({
       title: session.title || '',
@@ -167,15 +218,42 @@ export default function TelehealthSessionsPage() {
 
   return (
     <Box sx={{ p: 3 }}>
-      {error && <Alert severity="error" onClose={() => setError('')} sx={{ mb: 2 }}>{error}</Alert>}
-      {success && <Alert severity="success" onClose={() => setSuccess('')} sx={{ mb: 2 }}>{success}</Alert>}
+      {error && (
+        <Alert severity="error" onClose={() => setError('')} sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
+      {success && (
+        <Alert severity="success" onClose={() => setSuccess('')} sx={{ mb: 2 }}>
+          {success}
+        </Alert>
+      )}
 
       {/* Header */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h5" fontWeight="bold">📋 إدارة الجلسات</Typography>
+        <Typography variant="h5" fontWeight="bold">
+          📋 إدارة الجلسات
+        </Typography>
         <Box>
-          <Tooltip title="تحديث"><IconButton onClick={() => { fetchSessions(); fetchStats(); }}><RefreshIcon /></IconButton></Tooltip>
-          <Button variant="contained" startIcon={<AddIcon />} onClick={() => { setEditId(null); setForm(emptyForm); setFormOpen(true); }}>
+          <Tooltip title="تحديث">
+            <IconButton
+              onClick={() => {
+                fetchSessions();
+                fetchStats();
+              }}
+            >
+              <RefreshIcon />
+            </IconButton>
+          </Tooltip>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => {
+              setEditId(null);
+              setForm(emptyForm);
+              setFormOpen(true);
+            }}
+          >
             جلسة جديدة
           </Button>
         </Box>
@@ -194,8 +272,12 @@ export default function TelehealthSessionsPage() {
             <Grid item xs={6} sm={4} md={2.4} key={i}>
               <Card sx={{ textAlign: 'center', borderTop: `3px solid ${s.color}` }}>
                 <CardContent sx={{ py: 1 }}>
-                  <Typography variant="h5" fontWeight="bold">{s.value}</Typography>
-                  <Typography variant="body2" color="text.secondary">{s.label}</Typography>
+                  <Typography variant="h5" fontWeight="bold">
+                    {s.value}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {s.label}
+                  </Typography>
                 </CardContent>
               </Card>
             </Grid>
@@ -207,22 +289,39 @@ export default function TelehealthSessionsPage() {
       <Paper sx={{ p: 2, mb: 3, display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
         <FilterIcon color="action" />
         <TextField
-          size="small" placeholder="بحث بالعنوان أو الاسم..."
+          size="small"
+          placeholder="بحث بالعنوان أو الاسم..."
           value={filters.search}
-          onChange={(e) => setFilters((f) => ({ ...f, search: e.target.value }))}
-          InputProps={{ startAdornment: <InputAdornment position="start"><SearchIcon fontSize="small" /></InputAdornment> }}
+          onChange={e => setFilters(f => ({ ...f, search: e.target.value }))}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon fontSize="small" />
+              </InputAdornment>
+            ),
+          }}
           sx={{ minWidth: 250 }}
         />
         <FormControl size="small" sx={{ minWidth: 150 }}>
           <InputLabel>الحالة</InputLabel>
-          <Select value={filters.status} label="الحالة" onChange={(e) => setFilters((f) => ({ ...f, status: e.target.value }))}>
-            {statusOptions.map((o) => <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>)}
+          <Select
+            value={filters.status}
+            label="الحالة"
+            onChange={e => setFilters(f => ({ ...f, status: e.target.value }))}
+          >
+            {statusOptions.map(o => (
+              <MenuItem key={o.value} value={o.value}>
+                {o.label}
+              </MenuItem>
+            ))}
           </Select>
         </FormControl>
       </Paper>
 
       {/* Table */}
-      {loading ? <LinearProgress /> : (
+      {loading ? (
+        <LinearProgress />
+      ) : (
         <TableContainer component={Paper}>
           <Table size="small">
             <TableHead>
@@ -239,32 +338,48 @@ export default function TelehealthSessionsPage() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {sessions.map((s) => (
+              {sessions.map(s => (
                 <TableRow key={s.id} hover>
                   <TableCell>{s.title}</TableCell>
                   <TableCell>{s.patientName}</TableCell>
                   <TableCell>{s.therapistName}</TableCell>
                   <TableCell dir="ltr">
-                    {new Date(s.scheduledDate).toLocaleDateString('ar-SA')}<br />
-                    <Typography variant="caption">{new Date(s.scheduledDate).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' })}</Typography>
+                    {new Date(s.scheduledDate).toLocaleDateString('ar-SA')}
+                    <br />
+                    <Typography variant="caption">
+                      {new Date(s.scheduledDate).toLocaleTimeString('ar-SA', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </Typography>
                   </TableCell>
                   <TableCell>{s.duration} د</TableCell>
-                  <TableCell><Chip label={s.platform} size="small" variant="outlined" /></TableCell>
+                  <TableCell>
+                    <Chip label={s.platform} size="small" variant="outlined" />
+                  </TableCell>
                   <TableCell>
                     <Chip
-                      label={priorityOptions.find((p) => p.value === s.priority)?.label || s.priority}
-                      color={priorityOptions.find((p) => p.value === s.priority)?.color || 'default'}
+                      label={priorityOptions.find(p => p.value === s.priority)?.label || s.priority}
+                      color={priorityOptions.find(p => p.value === s.priority)?.color || 'default'}
                       size="small"
                     />
                   </TableCell>
                   <TableCell>
-                    <Chip label={statusLabels[s.status]} color={statusColors[s.status]} size="small" />
+                    <Chip
+                      label={statusLabels[s.status]}
+                      color={statusColors[s.status]}
+                      size="small"
+                    />
                   </TableCell>
                   <TableCell align="center">
                     <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'center' }}>
                       {s.status === 'scheduled' && (
                         <Tooltip title="بدء الجلسة">
-                          <IconButton size="small" color="success" onClick={() => handleStartSession(s.id)}>
+                          <IconButton
+                            size="small"
+                            color="success"
+                            onClick={() => handleStartSession(s.id)}
+                          >
                             <PlayIcon fontSize="small" />
                           </IconButton>
                         </Tooltip>
@@ -272,12 +387,20 @@ export default function TelehealthSessionsPage() {
                       {s.status === 'in-progress' && (
                         <>
                           <Tooltip title="انضمام">
-                            <IconButton size="small" color="primary" onClick={() => s.roomUrl && window.open(s.roomUrl, '_blank')}>
+                            <IconButton
+                              size="small"
+                              color="primary"
+                              onClick={() => s.roomUrl && window.open(s.roomUrl, '_blank')}
+                            >
                               <VideoCallIcon fontSize="small" />
                             </IconButton>
                           </Tooltip>
                           <Tooltip title="إنهاء">
-                            <IconButton size="small" color="error" onClick={() => handleStatusChange(s.id, 'completed')}>
+                            <IconButton
+                              size="small"
+                              color="error"
+                              onClick={() => handleStatusChange(s.id, 'completed')}
+                            >
                               <StopIcon fontSize="small" />
                             </IconButton>
                           </Tooltip>
@@ -285,16 +408,26 @@ export default function TelehealthSessionsPage() {
                       )}
                       {s.status === 'scheduled' && (
                         <Tooltip title="إلغاء">
-                          <IconButton size="small" color="warning" onClick={() => handleStatusChange(s.id, 'cancelled')}>
+                          <IconButton
+                            size="small"
+                            color="warning"
+                            onClick={() => handleStatusChange(s.id, 'cancelled')}
+                          >
                             <CancelIcon fontSize="small" />
                           </IconButton>
                         </Tooltip>
                       )}
                       <Tooltip title="تعديل">
-                        <IconButton size="small" onClick={() => openEdit(s)}><EditIcon fontSize="small" /></IconButton>
+                        <IconButton size="small" onClick={() => openEdit(s)}>
+                          <EditIcon fontSize="small" />
+                        </IconButton>
                       </Tooltip>
                       <Tooltip title="حذف">
-                        <IconButton size="small" color="error" onClick={() => setDeleteConfirm(s.id)}>
+                        <IconButton
+                          size="small"
+                          color="error"
+                          onClick={() => setDeleteConfirm(s.id)}
+                        >
                           <DeleteIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
@@ -316,8 +449,10 @@ export default function TelehealthSessionsPage() {
             count={pagination.total}
             page={pagination.page - 1}
             rowsPerPage={pagination.limit}
-            onPageChange={(_, p) => setPagination((prev) => ({ ...prev, page: p + 1 }))}
-            onRowsPerPageChange={(e) => setPagination((prev) => ({ ...prev, limit: parseInt(e.target.value), page: 1 }))}
+            onPageChange={(_, p) => setPagination(prev => ({ ...prev, page: p + 1 }))}
+            onRowsPerPageChange={e =>
+              setPagination(prev => ({ ...prev, limit: parseInt(e.target.value), page: 1 }))
+            }
             labelRowsPerPage="عدد الصفوف:"
             rowsPerPageOptions={[5, 10, 20, 50]}
           />
@@ -330,43 +465,100 @@ export default function TelehealthSessionsPage() {
         <DialogContent>
           <Grid container spacing={2} sx={{ mt: 0.5 }}>
             <Grid item xs={12} sm={6}>
-              <TextField fullWidth label="عنوان الجلسة" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required />
+              <TextField
+                fullWidth
+                label="عنوان الجلسة"
+                value={form.title}
+                onChange={e => setForm({ ...form, title: e.target.value })}
+                required
+              />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField fullWidth label="اسم المريض" value={form.patientName} onChange={(e) => setForm({ ...form, patientName: e.target.value })} required />
+              <TextField
+                fullWidth
+                label="اسم المريض"
+                value={form.patientName}
+                onChange={e => setForm({ ...form, patientName: e.target.value })}
+                required
+              />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField fullWidth label="اسم المعالج" value={form.therapistName} onChange={(e) => setForm({ ...form, therapistName: e.target.value })} />
+              <TextField
+                fullWidth
+                label="اسم المعالج"
+                value={form.therapistName}
+                onChange={e => setForm({ ...form, therapistName: e.target.value })}
+              />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField fullWidth label="القسم" value={form.department} onChange={(e) => setForm({ ...form, department: e.target.value })} />
+              <TextField
+                fullWidth
+                label="القسم"
+                value={form.department}
+                onChange={e => setForm({ ...form, department: e.target.value })}
+              />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField fullWidth label="الموعد" type="datetime-local" value={form.scheduledDate} onChange={(e) => setForm({ ...form, scheduledDate: e.target.value })} InputLabelProps={{ shrink: true }} required />
+              <TextField
+                fullWidth
+                label="الموعد"
+                type="datetime-local"
+                value={form.scheduledDate}
+                onChange={e => setForm({ ...form, scheduledDate: e.target.value })}
+                InputLabelProps={{ shrink: true }}
+                required
+              />
             </Grid>
             <Grid item xs={6} sm={3}>
-              <TextField fullWidth label="المدة (دقائق)" type="number" value={form.duration} onChange={(e) => setForm({ ...form, duration: e.target.value })} inputProps={{ min: 5 }} />
+              <TextField
+                fullWidth
+                label="المدة (دقائق)"
+                type="number"
+                value={form.duration}
+                onChange={e => setForm({ ...form, duration: e.target.value })}
+                inputProps={{ min: 5 }}
+              />
             </Grid>
             <Grid item xs={6} sm={3}>
               <FormControl fullWidth>
                 <InputLabel>المنصة</InputLabel>
-                <Select value={form.platform} label="المنصة" onChange={(e) => setForm({ ...form, platform: e.target.value })}>
-                  {platformOptions.map((p) => <MenuItem key={p} value={p}>{p}</MenuItem>)}
+                <Select
+                  value={form.platform}
+                  label="المنصة"
+                  onChange={e => setForm({ ...form, platform: e.target.value })}
+                >
+                  {platformOptions.map(p => (
+                    <MenuItem key={p} value={p}>
+                      {p}
+                    </MenuItem>
+                  ))}
                 </Select>
               </FormControl>
             </Grid>
             <Grid item xs={6} sm={3}>
               <FormControl fullWidth>
                 <InputLabel>الأولوية</InputLabel>
-                <Select value={form.priority} label="الأولوية" onChange={(e) => setForm({ ...form, priority: e.target.value })}>
-                  {priorityOptions.map((p) => <MenuItem key={p.value} value={p.value}>{p.label}</MenuItem>)}
+                <Select
+                  value={form.priority}
+                  label="الأولوية"
+                  onChange={e => setForm({ ...form, priority: e.target.value })}
+                >
+                  {priorityOptions.map(p => (
+                    <MenuItem key={p.value} value={p.value}>
+                      {p.label}
+                    </MenuItem>
+                  ))}
                 </Select>
               </FormControl>
             </Grid>
             <Grid item xs={6} sm={3}>
               <FormControl fullWidth>
                 <InputLabel>النوع</InputLabel>
-                <Select value={form.sessionType} label="النوع" onChange={(e) => setForm({ ...form, sessionType: e.target.value })}>
+                <Select
+                  value={form.sessionType}
+                  label="النوع"
+                  onChange={e => setForm({ ...form, sessionType: e.target.value })}
+                >
                   <MenuItem value="video">فيديو</MenuItem>
                   <MenuItem value="audio">صوتي</MenuItem>
                   <MenuItem value="chat">محادثة</MenuItem>
@@ -374,13 +566,24 @@ export default function TelehealthSessionsPage() {
               </FormControl>
             </Grid>
             <Grid item xs={12}>
-              <TextField fullWidth multiline rows={3} label="ملاحظات" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
+              <TextField
+                fullWidth
+                multiline
+                rows={3}
+                label="ملاحظات"
+                value={form.notes}
+                onChange={e => setForm({ ...form, notes: e.target.value })}
+              />
             </Grid>
           </Grid>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setFormOpen(false)}>إلغاء</Button>
-          <Button variant="contained" onClick={handleCreate} disabled={!form.title || !form.patientName || !form.scheduledDate}>
+          <Button
+            variant="contained"
+            onClick={handleCreate}
+            disabled={!form.title || !form.patientName || !form.scheduledDate}
+          >
             {editId ? 'تحديث' : 'إنشاء'}
           </Button>
         </DialogActions>
@@ -394,7 +597,9 @@ export default function TelehealthSessionsPage() {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDeleteConfirm(null)}>إلغاء</Button>
-          <Button color="error" variant="contained" onClick={handleDelete}>حذف</Button>
+          <Button color="error" variant="contained" onClick={handleDelete}>
+            حذف
+          </Button>
         </DialogActions>
       </Dialog>
     </Box>

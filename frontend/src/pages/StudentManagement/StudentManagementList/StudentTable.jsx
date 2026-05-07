@@ -17,7 +17,14 @@ import {
   Tooltip,
   Skeleton,
 } from '@mui/material';
-import { Add, Visibility, Edit, Delete, PersonSearch, Assessment as AssessmentIcon } from '@mui/icons-material';
+import {
+  Add,
+  Visibility,
+  Edit,
+  Delete,
+  PersonSearch,
+  Assessment as AssessmentIcon,
+} from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { gradients } from 'theme/palette';
 import {
@@ -60,7 +67,7 @@ const StudentTable = ({
         <Table>
           <TableHead>
             <TableRow sx={{ bgcolor: '#f5f7ff' }}>
-              {HEAD_CELLS.map((cell) => (
+              {HEAD_CELLS.map(cell => (
                 <TableCell key={cell.id} sx={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>
                   {cell.sortable ? (
                     <TableSortLabel
@@ -116,7 +123,7 @@ const StudentTable = ({
                 </TableCell>
               </TableRow>
             ) : (
-              paginatedStudents.map((student) => {
+              paginatedStudents.map(student => {
                 const firstName =
                   student.personalInfo?.firstName?.ar || student.personalInfo?.firstName || '';
                 const lastName =
@@ -259,9 +266,7 @@ const StudentTable = ({
                           <IconButton
                             size="small"
                             color="info"
-                            onClick={() =>
-                              navigate(`/student-registration?edit=${student._id}`)
-                            }
+                            onClick={() => navigate(`/student-registration?edit=${student._id}`)}
                           >
                             <Edit fontSize="small" />
                           </IconButton>
@@ -292,7 +297,7 @@ const StudentTable = ({
           page={page}
           onPageChange={(_, p) => setPage(p)}
           rowsPerPage={rowsPerPage}
-          onRowsPerPageChange={(e) => {
+          onRowsPerPageChange={e => {
             setRowsPerPage(parseInt(e.target.value, 10));
             setPage(0);
           }}

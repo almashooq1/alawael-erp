@@ -49,7 +49,9 @@ const ChartsRow = ({ attendanceChartData, departmentChartData }) => (
             </PieChart>
           </ResponsiveContainer>
         ) : (
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 250 }}>
+          <Box
+            sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 250 }}
+          >
             <Typography color="text.secondary">لا توجد بيانات حضور</Typography>
           </Box>
         )}
@@ -79,16 +81,13 @@ const ChartsRow = ({ attendanceChartData, departmentChartData }) => (
                 name="حاضر"
                 radius={[0, 4, 4, 0]}
               />
-              <Bar
-                dataKey="absent"
-                fill={statusColors.error}
-                name="غائب"
-                radius={[0, 4, 4, 0]}
-              />
+              <Bar dataKey="absent" fill={statusColors.error} name="غائب" radius={[0, 4, 4, 0]} />
             </BarChart>
           </ResponsiveContainer>
         ) : (
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 250 }}>
+          <Box
+            sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 250 }}
+          >
             <Typography color="text.secondary">لا توجد بيانات</Typography>
           </Box>
         )}

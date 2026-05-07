@@ -30,10 +30,7 @@ import {
   Snackbar,
   CircularProgress,
 } from '@mui/material';
-import {
-  Add as AddIcon,
-  Visibility as ViewIcon,
-  } from '@mui/icons-material';
+import { Add as AddIcon, Visibility as ViewIcon } from '@mui/icons-material';
 import {
   getComplaints,
   createComplaint,

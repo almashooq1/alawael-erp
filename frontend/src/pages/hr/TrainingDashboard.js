@@ -30,7 +30,7 @@ import {
   TrendingUp as TrendIcon,
   AccountBalanceWallet as BudgetIcon,
   Refresh as RefreshIcon,
-  } from '@mui/icons-material';
+} from '@mui/icons-material';
 import {
   BarChart,
   Bar,

@@ -1,12 +1,5 @@
 import React from 'react';
-import {
-  Box,
-  Card,
-  CardContent,
-  Chip,
-  Grid,
-  Typography,
-} from '@mui/material';
+import { Box, Card, CardContent, Chip, Grid, Typography } from '@mui/material';
 import {
   Description as ContractIcon,
   VerifiedUser as CertIcon,
@@ -43,7 +36,7 @@ export default function DocumentsTab({ documents = [] }) {
 
   return (
     <Grid container spacing={2}>
-      {documents.map((doc) => {
+      {documents.map(doc => {
         const meta = TYPE_META[doc.type] || {
           icon: <FileIcon fontSize="large" />,
           label: doc.type,
@@ -94,9 +87,7 @@ export default function DocumentsTab({ documents = [] }) {
                   }}
                 >
                   <Typography variant="caption" color="text.secondary">
-                    {doc.uploadDate
-                      ? new Date(doc.uploadDate).toLocaleDateString('ar-SA')
-                      : '—'}
+                    {doc.uploadDate ? new Date(doc.uploadDate).toLocaleDateString('ar-SA') : '—'}
                     {doc.size ? ` • ${doc.size}` : ''}
                   </Typography>
                   <Chip label={st.label} color={st.color} size="small" />

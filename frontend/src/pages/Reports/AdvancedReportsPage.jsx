@@ -32,7 +32,7 @@ import {
   Select,
   MenuItem,
   FormControl,
-  InputLabel
+  InputLabel,
 } from '@mui/material';
 import {
   Refresh,
@@ -41,7 +41,7 @@ import {
   Download,
   Assessment,
   TrendingUp,
-  FileDownload
+  FileDownload,
 } from '@mui/icons-material';
 import SmartReportsDashboard from 'components/SmartReportsDashboard';
 import AdvancedChartsComponent from 'components/AdvancedChartsComponent';
@@ -57,37 +57,37 @@ import { useSnackbar } from '../../contexts/SnackbarContext';
 
 // Static sample reports data
 const SAMPLE_REPORTS = [
-    {
-      id: 1,
-      name: 'تقرير الأداء الشهري',
-      type: 'Performance',
-      date: '2026-01-15',
-      status: 'completed',
-      format: 'PDF',
-      size: '2.4 MB',
-      description: 'تقرير شامل عن أداء المركز خلال شهر يناير'
-    },
-    {
-      id: 2,
-      name: 'تحليل الاتجاهات السنوي',
-      type: 'Trends',
-      date: '2026-01-14',
-      status: 'completed',
-      format: 'Excel',
-      size: '1.2 MB',
-      description: 'تحليل تفصيلي للاتجاهات على مدار السنة'
-    },
-    {
-      id: 3,
-      name: 'تقرير المستفيدين الجديد',
-      type: 'Comprehensive',
-      date: '2026-01-13',
-      status: 'processing',
-      format: 'Excel',
-      size: '3.1 MB',
-      description: 'قائمة شاملة بجميع المستفيدين الجدد'
-    }
-  ];
+  {
+    id: 1,
+    name: 'تقرير الأداء الشهري',
+    type: 'Performance',
+    date: '2026-01-15',
+    status: 'completed',
+    format: 'PDF',
+    size: '2.4 MB',
+    description: 'تقرير شامل عن أداء المركز خلال شهر يناير',
+  },
+  {
+    id: 2,
+    name: 'تحليل الاتجاهات السنوي',
+    type: 'Trends',
+    date: '2026-01-14',
+    status: 'completed',
+    format: 'Excel',
+    size: '1.2 MB',
+    description: 'تحليل تفصيلي للاتجاهات على مدار السنة',
+  },
+  {
+    id: 3,
+    name: 'تقرير المستفيدين الجديد',
+    type: 'Comprehensive',
+    date: '2026-01-13',
+    status: 'processing',
+    format: 'Excel',
+    size: '3.1 MB',
+    description: 'قائمة شاملة بجميع المستفيدين الجدد',
+  },
+];
 
 const AdvancedReportsPage = () => {
   const showSnackbar = useSnackbar();
@@ -109,7 +109,9 @@ const AdvancedReportsPage = () => {
 
   // Keep a stable ref so event handlers always call the latest loadReports
   const loadReportsRef = useRef(loadReports);
-  useEffect(() => { loadReportsRef.current = loadReports; }, [loadReports]);
+  useEffect(() => {
+    loadReportsRef.current = loadReports;
+  }, [loadReports]);
 
   // Initialize notifications
   useEffect(() => {
@@ -121,8 +123,7 @@ const AdvancedReportsPage = () => {
       loadReportsRef.current();
     });
 
-    notificationService.on('export-completed', (_data) => {
-    });
+    notificationService.on('export-completed', _data => {});
 
     return () => {
       if (notificationService.isConnected()) {
@@ -140,7 +141,7 @@ const AdvancedReportsPage = () => {
       const _reportData = {
         name: newReport.name,
         type: newReport.type,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
 
       // استدعاء خدمة التقارير
@@ -161,7 +162,7 @@ const AdvancedReportsPage = () => {
       notificationService.addNotification({
         type: 'success',
         title: 'تم إنشاء التقرير',
-        message: `تم إنشاء تقرير "${newReport.name}" بنجاح`
+        message: `تم إنشاء تقرير "${newReport.name}" بنجاح`,
       });
       showSnackbar('تم إنشاء التقرير بنجاح', 'success');
 
@@ -173,7 +174,7 @@ const AdvancedReportsPage = () => {
       notificationService.addNotification({
         type: 'error',
         title: 'خطأ',
-        message: 'حدث خطأ في إنشاء التقرير'
+        message: 'حدث خطأ في إنشاء التقرير',
       });
       showSnackbar('حدث خطأ في إنشاء التقرير', 'error');
     }
@@ -192,7 +193,7 @@ const AdvancedReportsPage = () => {
       notificationService.addNotification({
         type: 'success',
         title: 'تم التصدير',
-        message: `تم تصدير التقرير بصيغة ${format.toUpperCase()}`
+        message: `تم تصدير التقرير بصيغة ${format.toUpperCase()}`,
       });
       showSnackbar('تم تصدير التقرير بنجاح', 'success');
     } catch (error) {
@@ -201,7 +202,7 @@ const AdvancedReportsPage = () => {
     }
   };
 
-  const handleDeleteReport = (reportId) => {
+  const handleDeleteReport = reportId => {
     showConfirm({
       title: 'تأكيد الحذف',
       message: 'هل أنت متأكد من حذف هذا التقرير؟ لا يمكن التراجع عن هذا الإجراء.',
@@ -212,7 +213,7 @@ const AdvancedReportsPage = () => {
         notificationService.addNotification({
           type: 'info',
           title: 'تم الحذف',
-          message: 'تم حذف التقرير بنجاح'
+          message: 'تم حذف التقرير بنجاح',
         });
       },
     });
@@ -227,8 +228,8 @@ const AdvancedReportsPage = () => {
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.5, staggerChildren: 0.1 }
-    }
+      transition: { duration: 0.5, staggerChildren: 0.1 },
+    },
   };
 
   return (
@@ -238,7 +239,9 @@ const AdvancedReportsPage = () => {
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
           <Assessment sx={{ fontSize: 40 }} />
           <Box>
-            <Typography variant="h4" sx={{ fontWeight: 'bold' }}>التقارير المتقدمة</Typography>
+            <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+              التقارير المتقدمة
+            </Typography>
             <Typography variant="body2">تحليلات وتقارير شاملة</Typography>
           </Box>
         </Box>
@@ -300,15 +303,17 @@ const AdvancedReportsPage = () => {
         {/* Tab 2: Reports List */}
         {tabValue === 1 && (
           <Grid container spacing={3}>
-            {reports.map((report) => (
+            {reports.map(report => (
               <Grid item xs={12} md={6} key={report.id}>
-                <motion.div
-                  whileHover={{ scale: 1.02 }}
-                  transition={{ duration: 0.2 }}
-                >
+                <motion.div whileHover={{ scale: 1.02 }} transition={{ duration: 0.2 }}>
                   <Card>
                     <CardContent>
-                      <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={2}>
+                      <Box
+                        display="flex"
+                        justifyContent="space-between"
+                        alignItems="flex-start"
+                        mb={2}
+                      >
                         <Box flex={1}>
                           <Typography variant="h6" fontWeight="bold">
                             {report.name}
@@ -381,11 +386,13 @@ const AdvancedReportsPage = () => {
         {tabValue === 2 && (
           <Card>
             <CardContent>
-              <AdvancedChartsComponent data={reports.map((r, _i) => ({
-                name: r.name,
-                value: Math.random() * 100,
-                date: r.date
-              }))} />
+              <AdvancedChartsComponent
+                data={reports.map((r, _i) => ({
+                  name: r.name,
+                  value: Math.random() * 100,
+                  date: r.date,
+                }))}
+              />
             </CardContent>
           </Card>
         )}
@@ -399,7 +406,7 @@ const AdvancedReportsPage = () => {
             fullWidth
             label="اسم التقرير"
             value={newReport.name}
-            onChange={(e) => setNewReport({ ...newReport, name: e.target.value })}
+            onChange={e => setNewReport({ ...newReport, name: e.target.value })}
             margin="normal"
           />
           <FormControl fullWidth margin="normal">
@@ -407,7 +414,7 @@ const AdvancedReportsPage = () => {
             <Select
               value={newReport.type}
               label="نوع التقرير"
-              onChange={(e) => setNewReport({ ...newReport, type: e.target.value })}
+              onChange={e => setNewReport({ ...newReport, type: e.target.value })}
             >
               <MenuItem value="comprehensive">شامل</MenuItem>
               <MenuItem value="performance">الأداء</MenuItem>
@@ -420,7 +427,7 @@ const AdvancedReportsPage = () => {
             <Select
               value={newReport.format}
               label="صيغة التصدير"
-              onChange={(e) => setNewReport({ ...newReport, format: e.target.value })}
+              onChange={e => setNewReport({ ...newReport, format: e.target.value })}
             >
               <MenuItem value="pdf">PDF</MenuItem>
               <MenuItem value="excel">Excel</MenuItem>

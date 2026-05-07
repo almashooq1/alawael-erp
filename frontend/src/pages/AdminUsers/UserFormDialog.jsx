@@ -26,7 +26,7 @@ const UserFormDialog = ({ open, onClose, editingUser, formData, setFormData, onS
           fullWidth
           label="الاسم الكامل"
           value={formData.name}
-          onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
+          onChange={e => setFormData(prev => ({ ...prev, name: e.target.value }))}
           size="small"
         />
         <TextField
@@ -34,14 +34,14 @@ const UserFormDialog = ({ open, onClose, editingUser, formData, setFormData, onS
           label="البريد الإلكتروني"
           type="email"
           value={formData.email}
-          onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
+          onChange={e => setFormData(prev => ({ ...prev, email: e.target.value }))}
           size="small"
         />
         <TextField
           fullWidth
           label="الهاتف"
           value={formData.phone}
-          onChange={(e) => setFormData((prev) => ({ ...prev, phone: e.target.value }))}
+          onChange={e => setFormData(prev => ({ ...prev, phone: e.target.value }))}
           size="small"
         />
         <FormControl fullWidth size="small">
@@ -49,7 +49,7 @@ const UserFormDialog = ({ open, onClose, editingUser, formData, setFormData, onS
           <Select
             label="الدور"
             value={formData.role}
-            onChange={(e) => setFormData((prev) => ({ ...prev, role: e.target.value }))}
+            onChange={e => setFormData(prev => ({ ...prev, role: e.target.value }))}
           >
             <MenuItem value="إدارة">إدارة</MenuItem>
             <MenuItem value="معالج">معالج</MenuItem>
@@ -62,7 +62,7 @@ const UserFormDialog = ({ open, onClose, editingUser, formData, setFormData, onS
           <Select
             label="الحالة"
             value={formData.status}
-            onChange={(e) => setFormData((prev) => ({ ...prev, status: e.target.value }))}
+            onChange={e => setFormData(prev => ({ ...prev, status: e.target.value }))}
           >
             <MenuItem value="نشط">نشط</MenuItem>
             <MenuItem value="معطل">معطل</MenuItem>

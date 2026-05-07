@@ -36,7 +36,7 @@ import { ROLE_OPTIONS, getRoleColor } from './constants';
 import userManagementService from 'services/userManagementService';
 
 // ─── Password Strength ────────────────────────────────
-const calcPasswordStrength = (pw) => {
+const calcPasswordStrength = pw => {
   if (!pw) return { score: 0, label: '', color: 'inherit' };
   let score = 0;
   if (pw.length >= 8) score += 25;
@@ -59,7 +59,17 @@ const generateStrongPassword = () => {
   return Array.from(arr, v => chars.charAt(v % chars.length)).join('');
 };
 
-const UserFormDialog = ({ open, onClose, editingUser, formData, setFormData, onSave, roles, branches: propBranches, saving }) => {
+const UserFormDialog = ({
+  open,
+  onClose,
+  editingUser,
+  formData,
+  setFormData,
+  onSave,
+  roles,
+  branches: propBranches,
+  saving,
+}) => {
   const [showPassword, setShowPassword] = useState(false);
   const [branches, setBranches] = useState(propBranches || []);
   const isEdit = Boolean(editingUser);
@@ -69,21 +79,25 @@ const UserFormDialog = ({ open, onClose, editingUser, formData, setFormData, onS
   // جلب الفروع إذا لم تُمرر كـ prop
   useEffect(() => {
     if (!propBranches?.length) {
-      userManagementService.getBranches?.().then(b => setBranches(b || [])).catch(() => {});
+      userManagementService
+        .getBranches?.()
+        .then(b => setBranches(b || []))
+        .catch(() => {});
     }
   }, [propBranches]);
 
-  const handleChange = (field) => (e) => {
+  const handleChange = field => e => {
     const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleSwitchChange = (field) => (e) => {
-    setFormData((prev) => ({ ...prev, [field]: e.target.checked }));
+  const handleSwitchChange = field => e => {
+    setFormData(prev => ({ ...prev, [field]: e.target.checked }));
   };
 
   // التحقق البسيط
-  const isValid = formData.fullName?.trim().length >= 2 &&
+  const isValid =
+    formData.fullName?.trim().length >= 2 &&
     (formData.email || formData.username || formData.phone);
 
   return (
@@ -115,8 +129,16 @@ const UserFormDialog = ({ open, onClose, editingUser, formData, setFormData, onS
                 value={formData.fullName}
                 onChange={handleChange('fullName')}
                 size="small"
-                error={formData.fullName !== undefined && formData.fullName.trim().length > 0 && formData.fullName.trim().length < 2}
-                helperText={formData.fullName?.trim().length > 0 && formData.fullName.trim().length < 2 ? 'يجب أن يكون حرفين على الأقل' : ''}
+                error={
+                  formData.fullName !== undefined &&
+                  formData.fullName.trim().length > 0 &&
+                  formData.fullName.trim().length < 2
+                }
+                helperText={
+                  formData.fullName?.trim().length > 0 && formData.fullName.trim().length < 2
+                    ? 'يجب أن يكون حرفين على الأقل'
+                    : ''
+                }
               />
             </Grid>
 
@@ -188,7 +210,10 @@ const UserFormDialog = ({ open, onClose, editingUser, formData, setFormData, onS
                       <IconButton
                         size="small"
                         title="نسخ"
-                        onClick={() => formData.password && navigator.clipboard?.writeText(formData.password).catch(() => {})}
+                        onClick={() =>
+                          formData.password &&
+                          navigator.clipboard?.writeText(formData.password).catch(() => {})
+                        }
                       >
                         <CopyIcon fontSize="small" />
                       </IconButton>
@@ -197,7 +222,11 @@ const UserFormDialog = ({ open, onClose, editingUser, formData, setFormData, onS
                         onClick={() => setShowPassword(!showPassword)}
                         edge="end"
                       >
-                        {showPassword ? <HideIcon fontSize="small" /> : <ShowIcon fontSize="small" />}
+                        {showPassword ? (
+                          <HideIcon fontSize="small" />
+                        ) : (
+                          <ShowIcon fontSize="small" />
+                        )}
                       </IconButton>
                     </InputAdornment>
                   ),
@@ -212,7 +241,11 @@ const UserFormDialog = ({ open, onClose, editingUser, formData, setFormData, onS
                     color={passwordStrength.color}
                     sx={{ height: 4, borderRadius: 2 }}
                   />
-                  <Typography variant="caption" color={`${passwordStrength.color}.main`} sx={{ fontSize: 11 }}>
+                  <Typography
+                    variant="caption"
+                    color={`${passwordStrength.color}.main`}
+                    sx={{ fontSize: 11 }}
+                  >
                     قوة كلمة المرور: {passwordStrength.label}
                   </Typography>
                 </Box>
@@ -227,20 +260,36 @@ const UserFormDialog = ({ open, onClose, editingUser, formData, setFormData, onS
                   value={formData.role}
                   label="الدور"
                   onChange={handleChange('role')}
-                  renderValue={(val) => {
+                  renderValue={val => {
                     const r = roleOptions.find(opt => opt.value === val);
                     return r ? (
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                        <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: getRoleColor(val) }} />
+                        <Box
+                          sx={{
+                            width: 10,
+                            height: 10,
+                            borderRadius: '50%',
+                            bgcolor: getRoleColor(val),
+                          }}
+                        />
                         {r.label}
                       </Box>
-                    ) : val;
+                    ) : (
+                      val
+                    );
                   }}
                 >
-                  {roleOptions.map((r) => (
+                  {roleOptions.map(r => (
                     <MenuItem key={r.value} value={r.value}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: getRoleColor(r.value) }} />
+                        <Box
+                          sx={{
+                            width: 8,
+                            height: 8,
+                            borderRadius: '50%',
+                            bgcolor: getRoleColor(r.value),
+                          }}
+                        />
                         {r.label}
                       </Box>
                     </MenuItem>
@@ -259,7 +308,7 @@ const UserFormDialog = ({ open, onClose, editingUser, formData, setFormData, onS
                   onChange={handleChange('branch')}
                 >
                   <MenuItem value="">بدون فرع</MenuItem>
-                  {branches.map((b) => (
+                  {branches.map(b => (
                     <MenuItem key={b._id || b.id} value={b._id || b.id}>
                       {b.name_ar || b.name || b.label || b.code}
                     </MenuItem>
@@ -327,12 +376,8 @@ const UserFormDialog = ({ open, onClose, editingUser, formData, setFormData, onS
         <Button onClick={onClose} color="inherit" disabled={saving}>
           إلغاء
         </Button>
-        <Button
-          variant="contained"
-          onClick={onSave}
-          disabled={!isValid || saving}
-        >
-          {saving ? 'جاري الحفظ...' : (isEdit ? 'تحديث' : 'إنشاء المستخدم')}
+        <Button variant="contained" onClick={onSave} disabled={!isValid || saving}>
+          {saving ? 'جاري الحفظ...' : isEdit ? 'تحديث' : 'إنشاء المستخدم'}
         </Button>
       </DialogActions>
     </Dialog>

@@ -237,7 +237,7 @@ const StudentReportsCenter = () => {
     }
   };
 
-  const handleStudentSelected = (studentId) => {
+  const handleStudentSelected = studentId => {
     setStudentPickerOpen(false);
     if (!studentId) return;
     if (pendingReportType === 'parent') {
@@ -249,7 +249,9 @@ const StudentReportsCenter = () => {
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+      <Box
+        sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}
+      >
         <CircularProgress size={60} />
       </Box>
     );
@@ -258,9 +260,7 @@ const StudentReportsCenter = () => {
   const overview = summary?.overview || {};
   const reports = summary?.availableReports || [];
   const filteredReports = searchQuery
-    ? reports.filter(r =>
-        r.title.includes(searchQuery) || r.description.includes(searchQuery)
-      )
+    ? reports.filter(r => r.title.includes(searchQuery) || r.description.includes(searchQuery))
     : reports;
 
   return (
@@ -471,7 +471,12 @@ const StudentReportsCenter = () => {
             >
               <CardActionArea
                 onClick={() => handleReportClick(report.id)}
-                sx={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'stretch' }}
+                sx={{
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'stretch',
+                }}
               >
                 <Box
                   sx={{
@@ -487,11 +492,7 @@ const StudentReportsCenter = () => {
                   <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
                     {report.title}
                   </Typography>
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{ mb: 2, flexGrow: 1 }}
-                  >
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2, flexGrow: 1 }}>
                     {report.description}
                   </Typography>
                   <Stack direction="row" justifyContent="space-between" alignItems="center">
@@ -531,21 +532,23 @@ const StudentReportsCenter = () => {
               <CircularProgress />
             </Box>
           ) : allStudents.length === 0 ? (
-            <Alert severity="info" sx={{ mt: 1 }}>لا يوجد طلاب مسجلين</Alert>
+            <Alert severity="info" sx={{ mt: 1 }}>
+              لا يوجد طلاب مسجلين
+            </Alert>
           ) : (
             <>
               <Autocomplete
                 options={allStudents}
-                getOptionLabel={(opt) => opt.name || opt.studentName || `طالب ${opt._id?.slice(-4)}`}
+                getOptionLabel={opt => opt.name || opt.studentName || `طالب ${opt._id?.slice(-4)}`}
                 onChange={(_, student) => student && handleStudentSelected(student._id)}
-                renderInput={(params) => (
+                renderInput={params => (
                   <TextField {...params} label="ابحث عن طالب..." fullWidth sx={{ mt: 1, mb: 2 }} />
                 )}
                 noOptionsText="لا يوجد نتائج"
               />
               <Divider sx={{ mb: 1 }} />
               <List sx={{ maxHeight: 300, overflow: 'auto' }}>
-                {allStudents.slice(0, 50).map((s) => (
+                {allStudents.slice(0, 50).map(s => (
                   <ListItem key={s._id} disablePadding>
                     <ListItemButton onClick={() => handleStudentSelected(s._id)}>
                       <ListItemAvatar>

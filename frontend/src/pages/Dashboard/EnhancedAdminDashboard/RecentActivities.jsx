@@ -26,7 +26,7 @@ const RecentActivities = ({ recentActivities }) => (
         </Button>
       </Box>
       <List>
-        {recentActivities.map((activity) => (
+        {recentActivities.map(activity => (
           <ListItem
             key={activity.id}
             disablePadding
@@ -38,9 +38,7 @@ const RecentActivities = ({ recentActivities }) => (
           >
             <ListItemButton>
               <ListItemAvatar>
-                <Avatar sx={{ bgcolor: activity.color }}>
-                  {activity.icon}
-                </Avatar>
+                <Avatar sx={{ bgcolor: activity.color }}>{activity.icon}</Avatar>
               </ListItemAvatar>
               <ListItemText
                 primary={activity.title}

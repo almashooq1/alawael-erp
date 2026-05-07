@@ -46,9 +46,7 @@ export default function ProfileTab({
     {
       icon: <CalendarIcon />,
       label: 'تاريخ الالتحاق',
-      value: profile.joinDate
-        ? new Date(profile.joinDate).toLocaleDateString('ar-SA')
-        : '—',
+      value: profile.joinDate ? new Date(profile.joinDate).toLocaleDateString('ar-SA') : '—',
     },
   ];
 
@@ -58,16 +56,14 @@ export default function ProfileTab({
       title: 'الإجازات',
       primary: `${leaveStats.totalUsed ?? 0} مستخدمة`,
       secondary: `${leaveStats.totalRemaining ?? 0} متبقية`,
-      extra: leaveStats.pendingCount
-        ? `${leaveStats.pendingCount} معلّقة`
-        : null,
+      extra: leaveStats.pendingCount ? `${leaveStats.pendingCount} معلّقة` : null,
       color: '#2e7d32',
     },
     {
       icon: <AssignmentIcon />,
       title: 'الطلبات',
       primary: `${requests.length} طلب`,
-      secondary: `${requests.filter((r) => r.status === 'pending').length} معلّقة`,
+      secondary: `${requests.filter(r => r.status === 'pending').length} معلّقة`,
       color: '#ed6c02',
     },
     {
@@ -76,9 +72,7 @@ export default function ProfileTab({
       primary: payrollSummary.latest
         ? `${Number(payrollSummary.latest).toLocaleString('ar-SA')} ر.س`
         : '—',
-      secondary: payrollSummary.monthCount
-        ? `${payrollSummary.monthCount} كشف`
-        : null,
+      secondary: payrollSummary.monthCount ? `${payrollSummary.monthCount} كشف` : null,
       color: '#0288d1',
     },
     {
@@ -123,9 +117,7 @@ export default function ProfileTab({
           <List dense disablePadding>
             {infoRows.map((row, idx) => (
               <ListItem key={idx} disableGutters>
-                <ListItemIcon sx={{ minWidth: 36, color: deptColor }}>
-                  {row.icon}
-                </ListItemIcon>
+                <ListItemIcon sx={{ minWidth: 36, color: deptColor }}>{row.icon}</ListItemIcon>
                 <ListItemText
                   primary={row.label}
                   secondary={row.value || '—'}
@@ -167,11 +159,7 @@ export default function ProfileTab({
                 </Typography>
               )}
               {s.extra && (
-                <Typography
-                  variant="caption"
-                  display="block"
-                  sx={{ color: '#ed6c02' }}
-                >
+                <Typography variant="caption" display="block" sx={{ color: '#ed6c02' }}>
                   {s.extra}
                 </Typography>
               )}

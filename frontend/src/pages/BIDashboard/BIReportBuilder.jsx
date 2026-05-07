@@ -6,7 +6,8 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Box,  Paper,
+  Box,
+  Paper,
   Typography,
   CircularProgress,
   Button,
@@ -31,13 +32,7 @@ import {
   useTheme,
   alpha,
 } from '@mui/material';
-import {
-  Add,
-  Refresh,
-  Edit,
-  Delete,  Description,
-  FilterList,
-} from '@mui/icons-material';
+import { Add, Refresh, Edit, Delete, Description, FilterList } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import {
   getReports,
@@ -143,19 +138,28 @@ export default function BIReportBuilder() {
     }
   };
 
-  const openDeleteDialog = (id) => {
+  const openDeleteDialog = id => {
     setSelectedId(id);
     setDeleteDialogOpen(true);
   };
 
   const filteredReports = filterCategory
-    ? reports.filter((r) => r.category === filterCategory)
+    ? reports.filter(r => r.category === filterCategory)
     : reports;
 
   return (
     <Box sx={{ p: { xs: 2, md: 3 } }}>
       {/* Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 2 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          mb: 3,
+          flexWrap: 'wrap',
+          gap: 2,
+        }}
+      >
         <Box>
           <Typography variant="h4" fontWeight={700}>
             منشئ التقارير
@@ -170,7 +174,12 @@ export default function BIReportBuilder() {
               <Refresh />
             </IconButton>
           </Tooltip>
-          <Button variant="contained" startIcon={<Add />} onClick={() => handleOpen('create')} sx={{ borderRadius: 2 }}>
+          <Button
+            variant="contained"
+            startIcon={<Add />}
+            onClick={() => handleOpen('create')}
+            sx={{ borderRadius: 2 }}
+          >
             تقرير جديد
           </Button>
         </Box>
@@ -183,13 +192,20 @@ export default function BIReportBuilder() {
       )}
 
       {/* Filter */}
-      <Paper elevation={0} sx={{ p: 2, borderRadius: 3, border: `1px solid ${theme.palette.divider}`, mb: 3 }}>
+      <Paper
+        elevation={0}
+        sx={{ p: 2, borderRadius: 3, border: `1px solid ${theme.palette.divider}`, mb: 3 }}
+      >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
           <FilterList color="action" />
           <FormControl size="small" sx={{ minWidth: 180 }}>
             <InputLabel>التصنيف</InputLabel>
-            <Select value={filterCategory} label="التصنيف" onChange={(e) => setFilterCategory(e.target.value)}>
-              {CATEGORIES.map((c) => (
+            <Select
+              value={filterCategory}
+              label="التصنيف"
+              onChange={e => setFilterCategory(e.target.value)}
+            >
+              {CATEGORIES.map(c => (
                 <MenuItem key={c.value} value={c.value}>
                   {c.label}
                 </MenuItem>
@@ -206,7 +222,15 @@ export default function BIReportBuilder() {
           <CircularProgress size={60} />
         </Box>
       ) : filteredReports.length === 0 ? (
-        <Paper elevation={0} sx={{ p: 6, borderRadius: 3, border: `1px solid ${theme.palette.divider}`, textAlign: 'center' }}>
+        <Paper
+          elevation={0}
+          sx={{
+            p: 6,
+            borderRadius: 3,
+            border: `1px solid ${theme.palette.divider}`,
+            textAlign: 'center',
+          }}
+        >
           <Description sx={{ fontSize: 64, color: theme.palette.grey[300], mb: 2 }} />
           <Typography variant="h6" color="text.secondary">
             لا توجد تقارير
@@ -219,7 +243,10 @@ export default function BIReportBuilder() {
           </Button>
         </Paper>
       ) : (
-        <Paper elevation={0} sx={{ borderRadius: 3, border: `1px solid ${theme.palette.divider}`, overflow: 'hidden' }}>
+        <Paper
+          elevation={0}
+          sx={{ borderRadius: 3, border: `1px solid ${theme.palette.divider}`, overflow: 'hidden' }}
+        >
           <Table>
             <TableHead>
               <TableRow sx={{ bgcolor: alpha(theme.palette.primary.main, 0.04) }}>
@@ -235,7 +262,7 @@ export default function BIReportBuilder() {
             <TableBody>
               {filteredReports.map((r, idx) => {
                 const st = STATUS_MAP[r.status] || STATUS_MAP.draft;
-                const cat = CATEGORIES.find((c) => c.value === r.category);
+                const cat = CATEGORIES.find(c => c.value === r.category);
                 return (
                   <motion.tr
                     key={r._id || idx}
@@ -266,12 +293,20 @@ export default function BIReportBuilder() {
                     </TableCell>
                     <TableCell align="center">
                       <Tooltip title="تعديل">
-                        <IconButton size="small" color="primary" onClick={() => handleOpen('edit', r)}>
+                        <IconButton
+                          size="small"
+                          color="primary"
+                          onClick={() => handleOpen('edit', r)}
+                        >
                           <Edit fontSize="small" />
                         </IconButton>
                       </Tooltip>
                       <Tooltip title="حذف">
-                        <IconButton size="small" color="error" onClick={() => openDeleteDialog(r._id)}>
+                        <IconButton
+                          size="small"
+                          color="error"
+                          onClick={() => openDeleteDialog(r._id)}
+                        >
                           <Delete fontSize="small" />
                         </IconButton>
                       </Tooltip>
@@ -287,26 +322,32 @@ export default function BIReportBuilder() {
       {/* Create / Edit Dialog */}
       <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>{dialogMode === 'edit' ? 'تعديل التقرير' : 'تقرير جديد'}</DialogTitle>
-        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: '16px !important' }}>
+        <DialogContent
+          sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: '16px !important' }}
+        >
           <TextField
             label="اسم التقرير"
             value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
+            onChange={e => setForm({ ...form, name: e.target.value })}
             fullWidth
             required
           />
           <TextField
             label="الوصف"
             value={form.description}
-            onChange={(e) => setForm({ ...form, description: e.target.value })}
+            onChange={e => setForm({ ...form, description: e.target.value })}
             fullWidth
             multiline
             rows={2}
           />
           <FormControl fullWidth>
             <InputLabel>التصنيف</InputLabel>
-            <Select value={form.category} label="التصنيف" onChange={(e) => setForm({ ...form, category: e.target.value })}>
-              {CATEGORIES.filter((c) => c.value).map((c) => (
+            <Select
+              value={form.category}
+              label="التصنيف"
+              onChange={e => setForm({ ...form, category: e.target.value })}
+            >
+              {CATEGORIES.filter(c => c.value).map(c => (
                 <MenuItem key={c.value} value={c.value}>
                   {c.label}
                 </MenuItem>
@@ -315,7 +356,11 @@ export default function BIReportBuilder() {
           </FormControl>
           <FormControl fullWidth>
             <InputLabel>النوع</InputLabel>
-            <Select value={form.type} label="النوع" onChange={(e) => setForm({ ...form, type: e.target.value })}>
+            <Select
+              value={form.type}
+              label="النوع"
+              onChange={e => setForm({ ...form, type: e.target.value })}
+            >
               <MenuItem value="dashboard">لوحة معلومات</MenuItem>
               <MenuItem value="table">جدول</MenuItem>
               <MenuItem value="chart">رسم بياني</MenuItem>
@@ -326,7 +371,13 @@ export default function BIReportBuilder() {
         <DialogActions>
           <Button onClick={() => setDialogOpen(false)}>إلغاء</Button>
           <Button variant="contained" onClick={handleSave} disabled={saving || !form.name.trim()}>
-            {saving ? <CircularProgress size={20} /> : dialogMode === 'edit' ? 'حفظ التعديلات' : 'إنشاء'}
+            {saving ? (
+              <CircularProgress size={20} />
+            ) : dialogMode === 'edit' ? (
+              'حفظ التعديلات'
+            ) : (
+              'إنشاء'
+            )}
           </Button>
         </DialogActions>
       </Dialog>

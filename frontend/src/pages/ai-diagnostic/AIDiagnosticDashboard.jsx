@@ -4,11 +4,32 @@
  */
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Box, Typography, Grid, Card, CardContent,
-  Chip, Alert, Snackbar, TextField, InputAdornment,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Paper, IconButton, Tooltip, Divider, Avatar, MenuItem, Select,
-  FormControl, InputLabel, CircularProgress,
+  Box,
+  Typography,
+  Grid,
+  Card,
+  CardContent,
+  Chip,
+  Alert,
+  Snackbar,
+  TextField,
+  InputAdornment,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  IconButton,
+  Tooltip,
+  Divider,
+  Avatar,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
+  CircularProgress,
 } from '@mui/material';
 import {
   Psychology as PsychologyIcon,
@@ -29,15 +50,22 @@ import { useNavigate } from 'react-router-dom';
 import aiDiagnosticService from '../../services/aiDiagnosticService';
 
 /* ── helpers ── */
-const _riskColor = (level) => {
+const _riskColor = level => {
   const map = { low: 'success', medium: 'warning', high: 'error', critical: 'error' };
   return map[level] || 'default';
 };
 
 const disabilityLabel = {
-  physical: 'حركية', intellectual: 'ذهنية', autism: 'توحد',
-  hearing: 'سمعية', visual: 'بصرية', speech: 'نطقية',
-  learning: 'تعلم', multiple: 'متعددة', psychiatric: 'نفسية', neurological: 'عصبية',
+  physical: 'حركية',
+  intellectual: 'ذهنية',
+  autism: 'توحد',
+  hearing: 'سمعية',
+  visual: 'بصرية',
+  speech: 'نطقية',
+  learning: 'تعلم',
+  multiple: 'متعددة',
+  psychiatric: 'نفسية',
+  neurological: 'عصبية',
 };
 
 export default function AIDiagnosticDashboard() {
@@ -65,7 +93,9 @@ export default function AIDiagnosticDashboard() {
     }
   }, [search, typeFilter]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    load();
+  }, [load]);
 
   if (loading) {
     return (
@@ -86,7 +116,9 @@ export default function AIDiagnosticDashboard() {
             <PsychologyIcon />
           </Avatar>
           <Box>
-            <Typography variant="h5" fontWeight="bold">ذكاء اصطناعي للتشخيص</Typography>
+            <Typography variant="h5" fontWeight="bold">
+              ذكاء اصطناعي للتشخيص
+            </Typography>
             <Typography variant="body2" color="text.secondary">
               تحليل تقدم المستفيد وتوصيات علاجية بالـ AI
             </Typography>
@@ -102,22 +134,66 @@ export default function AIDiagnosticDashboard() {
       {/* ── KPI Cards ── */}
       <Grid container spacing={2} sx={{ mb: 3 }}>
         {[
-          { label: 'المستفيدون النشطون', value: kpis.totalBeneficiaries, icon: <PeopleIcon />, color: '#1976d2' },
-          { label: 'متوسط التقدم', value: `${kpis.averageProgress || 0}%`, icon: <TrendingUpIcon />, color: '#2e7d32' },
-          { label: 'متوسط المشاركة', value: `${kpis.averageEngagement || 0}%`, icon: <SpeedIcon />, color: '#ed6c02' },
-          { label: 'في تحسن', value: kpis.improvingBeneficiaries, icon: <ChartIcon />, color: '#9c27b0' },
-          { label: 'الأهداف العلاجية', value: kpis.totalGoals, icon: <AssessmentIcon />, color: '#0288d1' },
-          { label: 'الخطط النشطة', value: kpis.activePlans, icon: <MedicalIcon />, color: '#d32f2f' },
-          { label: 'نماذج AI نشطة', value: kpis.aiModelsActive, icon: <AIIcon />, color: '#7b1fa2' },
-          { label: 'تنبيهات نشطة', value: kpis.activeAlerts, icon: <AlertIcon />, color: '#f57c00' },
+          {
+            label: 'المستفيدون النشطون',
+            value: kpis.totalBeneficiaries,
+            icon: <PeopleIcon />,
+            color: '#1976d2',
+          },
+          {
+            label: 'متوسط التقدم',
+            value: `${kpis.averageProgress || 0}%`,
+            icon: <TrendingUpIcon />,
+            color: '#2e7d32',
+          },
+          {
+            label: 'متوسط المشاركة',
+            value: `${kpis.averageEngagement || 0}%`,
+            icon: <SpeedIcon />,
+            color: '#ed6c02',
+          },
+          {
+            label: 'في تحسن',
+            value: kpis.improvingBeneficiaries,
+            icon: <ChartIcon />,
+            color: '#9c27b0',
+          },
+          {
+            label: 'الأهداف العلاجية',
+            value: kpis.totalGoals,
+            icon: <AssessmentIcon />,
+            color: '#0288d1',
+          },
+          {
+            label: 'الخطط النشطة',
+            value: kpis.activePlans,
+            icon: <MedicalIcon />,
+            color: '#d32f2f',
+          },
+          {
+            label: 'نماذج AI نشطة',
+            value: kpis.aiModelsActive,
+            icon: <AIIcon />,
+            color: '#7b1fa2',
+          },
+          {
+            label: 'تنبيهات نشطة',
+            value: kpis.activeAlerts,
+            icon: <AlertIcon />,
+            color: '#f57c00',
+          },
         ].map((kpi, i) => (
           <Grid item xs={12} sm={6} md={3} key={i}>
             <Card elevation={2}>
               <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                 <Avatar sx={{ bgcolor: kpi.color, width: 44, height: 44 }}>{kpi.icon}</Avatar>
                 <Box>
-                  <Typography variant="h5" fontWeight="bold">{kpi.value ?? '-'}</Typography>
-                  <Typography variant="caption" color="text.secondary">{kpi.label}</Typography>
+                  <Typography variant="h5" fontWeight="bold">
+                    {kpi.value ?? '-'}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {kpi.label}
+                  </Typography>
                 </Box>
               </CardContent>
             </Card>
@@ -126,14 +202,15 @@ export default function AIDiagnosticDashboard() {
       </Grid>
 
       {/* ── Alerts Summary ── */}
-      {kpis.alertsSummary && (kpis.alertsSummary.critical > 0 || kpis.alertsSummary.warning > 0) && (
-        <Alert severity="warning" sx={{ mb: 3 }} icon={<WarningIcon />}>
-          <strong>تنبيهات نشطة:</strong>
-          {kpis.alertsSummary.critical > 0 && ` ${kpis.alertsSummary.critical} حرج`}
-          {kpis.alertsSummary.warning > 0 && ` • ${kpis.alertsSummary.warning} تحذير`}
-          {kpis.alertsSummary.info > 0 && ` • ${kpis.alertsSummary.info} معلومات`}
-        </Alert>
-      )}
+      {kpis.alertsSummary &&
+        (kpis.alertsSummary.critical > 0 || kpis.alertsSummary.warning > 0) && (
+          <Alert severity="warning" sx={{ mb: 3 }} icon={<WarningIcon />}>
+            <strong>تنبيهات نشطة:</strong>
+            {kpis.alertsSummary.critical > 0 && ` ${kpis.alertsSummary.critical} حرج`}
+            {kpis.alertsSummary.warning > 0 && ` • ${kpis.alertsSummary.warning} تحذير`}
+            {kpis.alertsSummary.info > 0 && ` • ${kpis.alertsSummary.info} معلومات`}
+          </Alert>
+        )}
 
       {/* ── Disability Distribution ── */}
       {kpis.disabilityDistribution && (
@@ -165,16 +242,28 @@ export default function AIDiagnosticDashboard() {
           size="small"
           placeholder="بحث بالاسم أو رقم الهوية..."
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          InputProps={{ startAdornment: <InputAdornment position="start"><SearchIcon /></InputAdornment> }}
+          onChange={e => setSearch(e.target.value)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon />
+              </InputAdornment>
+            ),
+          }}
           sx={{ minWidth: 280 }}
         />
         <FormControl size="small" sx={{ minWidth: 180 }}>
           <InputLabel>نوع الإعاقة</InputLabel>
-          <Select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)} label="نوع الإعاقة">
+          <Select
+            value={typeFilter}
+            onChange={e => setTypeFilter(e.target.value)}
+            label="نوع الإعاقة"
+          >
             <MenuItem value="">الكل</MenuItem>
             {Object.entries(disabilityLabel).map(([k, v]) => (
-              <MenuItem key={k} value={k}>{v}</MenuItem>
+              <MenuItem key={k} value={k}>
+                {v}
+              </MenuItem>
             ))}
           </Select>
         </FormControl>
@@ -185,13 +274,15 @@ export default function AIDiagnosticDashboard() {
         <Table size="small">
           <TableHead>
             <TableRow sx={{ bgcolor: 'primary.main' }}>
-              {['المستفيد', 'نوع الإعاقة', 'الشدة', 'الحالة', 'تاريخ التسجيل', 'إجراءات'].map((h) => (
-                <TableCell key={h} sx={{ color: 'white', fontWeight: 'bold' }}>{h}</TableCell>
+              {['المستفيد', 'نوع الإعاقة', 'الشدة', 'الحالة', 'تاريخ التسجيل', 'إجراءات'].map(h => (
+                <TableCell key={h} sx={{ color: 'white', fontWeight: 'bold' }}>
+                  {h}
+                </TableCell>
               ))}
             </TableRow>
           </TableHead>
           <TableBody>
-            {beneficiaries.map((b) => (
+            {beneficiaries.map(b => (
               <TableRow key={b.id} hover>
                 <TableCell>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -199,19 +290,39 @@ export default function AIDiagnosticDashboard() {
                       {b.name?.charAt(0)}
                     </Avatar>
                     <Box>
-                      <Typography variant="body2" fontWeight="bold">{b.name}</Typography>
-                      <Typography variant="caption" color="text.secondary">{b.nationalId}</Typography>
+                      <Typography variant="body2" fontWeight="bold">
+                        {b.name}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {b.nationalId}
+                      </Typography>
                     </Box>
                   </Box>
                 </TableCell>
                 <TableCell>
-                  <Chip label={disabilityLabel[b.disabilityType] || b.disabilityType} size="small" variant="outlined" />
+                  <Chip
+                    label={disabilityLabel[b.disabilityType] || b.disabilityType}
+                    size="small"
+                    variant="outlined"
+                  />
                 </TableCell>
                 <TableCell>
                   <Chip
-                    label={b.disabilitySeverity === 'mild' ? 'خفيفة' : b.disabilitySeverity === 'moderate' ? 'متوسطة' : 'شديدة'}
+                    label={
+                      b.disabilitySeverity === 'mild'
+                        ? 'خفيفة'
+                        : b.disabilitySeverity === 'moderate'
+                          ? 'متوسطة'
+                          : 'شديدة'
+                    }
                     size="small"
-                    color={b.disabilitySeverity === 'mild' ? 'success' : b.disabilitySeverity === 'moderate' ? 'warning' : 'error'}
+                    color={
+                      b.disabilitySeverity === 'mild'
+                        ? 'success'
+                        : b.disabilitySeverity === 'moderate'
+                          ? 'warning'
+                          : 'error'
+                    }
                   />
                 </TableCell>
                 <TableCell>
@@ -238,7 +349,9 @@ export default function AIDiagnosticDashboard() {
             {beneficiaries.length === 0 && (
               <TableRow>
                 <TableCell colSpan={6} align="center">
-                  <Typography color="text.secondary" sx={{ py: 4 }}>لا توجد نتائج</Typography>
+                  <Typography color="text.secondary" sx={{ py: 4 }}>
+                    لا توجد نتائج
+                  </Typography>
                 </TableCell>
               </TableRow>
             )}
@@ -250,10 +363,13 @@ export default function AIDiagnosticDashboard() {
       <Snackbar
         open={snackbar.open}
         autoHideDuration={4000}
-        onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
+        onClose={() => setSnackbar(s => ({ ...s, open: false }))}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert severity={snackbar.severity} onClose={() => setSnackbar((s) => ({ ...s, open: false }))}>
+        <Alert
+          severity={snackbar.severity}
+          onClose={() => setSnackbar(s => ({ ...s, open: false }))}
+        >
           {snackbar.message}
         </Alert>
       </Snackbar>

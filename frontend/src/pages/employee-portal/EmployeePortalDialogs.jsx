@@ -21,14 +21,7 @@ import { Download as DownloadIcon } from '@mui/icons-material';
 import { LEAVE_TYPES, REQUEST_TYPES, fmt } from './employeePortalData';
 
 /* ─── Leave Request Dialog ─── */
-export function LeaveDialog({
-  open,
-  onClose,
-  leaveForm,
-  setLeaveForm,
-  leaveBalances,
-  onSubmit,
-}) {
+export function LeaveDialog({ open, onClose, leaveForm, setLeaveForm, leaveBalances, onSubmit }) {
   return (
     <Dialog
       open={open}
@@ -98,13 +91,7 @@ export function LeaveDialog({
 }
 
 /* ─── General Request Dialog ─── */
-export function RequestDialog({
-  open,
-  onClose,
-  requestForm,
-  setRequestForm,
-  onSubmit,
-}) {
+export function RequestDialog({ open, onClose, requestForm, setRequestForm, onSubmit }) {
   return (
     <Dialog
       open={open}
@@ -160,9 +147,7 @@ export function PayslipDetailDialog({ open, onClose, payslip }) {
       fullWidth
       PaperProps={{ sx: { borderRadius: 3 } }}
     >
-      <DialogTitle sx={{ fontWeight: 'bold' }}>
-        تفاصيل كشف الراتب — {payslip?.month}
-      </DialogTitle>
+      <DialogTitle sx={{ fontWeight: 'bold' }}>تفاصيل كشف الراتب — {payslip?.month}</DialogTitle>
       {payslip && (
         <DialogContent dividers>
           <Grid container spacing={2}>

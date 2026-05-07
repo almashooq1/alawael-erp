@@ -3,7 +3,12 @@
  */
 import React from 'react';
 import {
-  Dialog, DialogTitle, DialogContent, DialogActions, Typography, Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Typography,
+  Button,
 } from '@mui/material';
 
 const DeleteConfirmDialog = ({ target, onClose, onConfirm }) => (
@@ -15,8 +20,12 @@ const DeleteConfirmDialog = ({ target, onClose, onConfirm }) => (
       </Typography>
     </DialogContent>
     <DialogActions>
-      <Button onClick={onClose} color="inherit">إلغاء</Button>
-      <Button onClick={onConfirm} color="error" variant="contained">حذف</Button>
+      <Button onClick={onClose} color="inherit">
+        إلغاء
+      </Button>
+      <Button onClick={onConfirm} color="error" variant="contained">
+        حذف
+      </Button>
     </DialogActions>
   </Dialog>
 );

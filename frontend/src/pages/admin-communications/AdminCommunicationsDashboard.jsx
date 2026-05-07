@@ -288,7 +288,15 @@ export default function AdminCommunicationsDashboard() {
       <Grid container spacing={3}>
         {/* Recent Inbox */}
         <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 2, height: '100%', borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
+          <Paper
+            sx={{
+              p: 2,
+              height: '100%',
+              borderRadius: '20px',
+              border: '1px solid rgba(0,0,0,0.04)',
+              boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+            }}
+          >
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
               <Typography variant="h6" fontWeight={700}>
                 <InboxIcon sx={{ mr: 1, verticalAlign: 'middle', color: '#1976d2' }} />
@@ -304,9 +312,7 @@ export default function AdminCommunicationsDashboard() {
             </Box>
             <Divider sx={{ mb: 1 }} />
             {loading ? (
-              [...Array(3)].map((_, i) => (
-                <Skeleton key={i} height={60} sx={{ mb: 1 }} />
-              ))
+              [...Array(3)].map((_, i) => <Skeleton key={i} height={60} sx={{ mb: 1 }} />)
             ) : recentInbox.length === 0 ? (
               <Box py={4} textAlign="center">
                 <MailOutline sx={{ fontSize: 48, color: 'text.disabled', mb: 1 }} />
@@ -328,7 +334,15 @@ export default function AdminCommunicationsDashboard() {
 
         {/* Recent Outbox */}
         <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 2, height: '100%', borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
+          <Paper
+            sx={{
+              p: 2,
+              height: '100%',
+              borderRadius: '20px',
+              border: '1px solid rgba(0,0,0,0.04)',
+              boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+            }}
+          >
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
               <Typography variant="h6" fontWeight={700}>
                 <SendIcon sx={{ mr: 1, verticalAlign: 'middle', color: '#2e7d32' }} />
@@ -344,9 +358,7 @@ export default function AdminCommunicationsDashboard() {
             </Box>
             <Divider sx={{ mb: 1 }} />
             {loading ? (
-              [...Array(3)].map((_, i) => (
-                <Skeleton key={i} height={60} sx={{ mb: 1 }} />
-              ))
+              [...Array(3)].map((_, i) => <Skeleton key={i} height={60} sx={{ mb: 1 }} />)
             ) : recentOutbox.length === 0 ? (
               <Box py={4} textAlign="center">
                 <MailOutline sx={{ fontSize: 48, color: 'text.disabled', mb: 1 }} />
@@ -368,7 +380,14 @@ export default function AdminCommunicationsDashboard() {
 
         {/* Overdue / Alerts */}
         <Grid item xs={12}>
-          <Paper sx={{ p: 2, borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
+          <Paper
+            sx={{
+              p: 2,
+              borderRadius: '20px',
+              border: '1px solid rgba(0,0,0,0.04)',
+              boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+            }}
+          >
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
               <Typography variant="h6" fontWeight={700}>
                 <WarningIcon sx={{ mr: 1, verticalAlign: 'middle', color: '#d32f2f' }} />
@@ -387,9 +406,7 @@ export default function AdminCommunicationsDashboard() {
             ) : overdueItems.length === 0 ? (
               <Box py={3} textAlign="center">
                 <CheckCircleIcon sx={{ fontSize: 48, color: '#4caf50', mb: 1 }} />
-                <Typography color="text.secondary">
-                  لا توجد مراسلات متأخرة — ممتاز!
-                </Typography>
+                <Typography color="text.secondary">لا توجد مراسلات متأخرة — ممتاز!</Typography>
               </Box>
             ) : (
               <List dense>
@@ -421,7 +438,14 @@ export default function AdminCommunicationsDashboard() {
 
         {/* Quick Actions */}
         <Grid item xs={12}>
-          <Paper sx={{ p: 2, borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
+          <Paper
+            sx={{
+              p: 2,
+              borderRadius: '20px',
+              border: '1px solid rgba(0,0,0,0.04)',
+              boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+            }}
+          >
             <Typography variant="h6" fontWeight={700} mb={2}>
               <Speed sx={{ mr: 1, verticalAlign: 'middle', color: '#1976d2' }} />
               إجراءات سريعة

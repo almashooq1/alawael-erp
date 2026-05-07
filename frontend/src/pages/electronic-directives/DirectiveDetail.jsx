@@ -187,7 +187,7 @@ export default function DirectiveDetail() {
     }
   };
 
-  const handleCompleteAction = async (actionIdx) => {
+  const handleCompleteAction = async actionIdx => {
     try {
       await electronicDirectivesService.completeAction(id, actionIdx);
       setSnackbar({ open: true, message: 'تم إكمال الإجراء', severity: 'success' });
@@ -201,7 +201,7 @@ export default function DirectiveDetail() {
     }
   };
 
-  const handleDeleteAttachment = async (attachmentId) => {
+  const handleDeleteAttachment = async attachmentId => {
     try {
       await electronicDirectivesService.deleteAttachment(id, attachmentId);
       setSnackbar({ open: true, message: 'تم حذف المرفق', severity: 'info' });
@@ -229,9 +229,7 @@ export default function DirectiveDetail() {
   if (error || !directive) {
     return (
       <Box sx={{ p: 3 }}>
-        <Alert severity="error">
-          {error || 'التوجيه غير موجود'}
-        </Alert>
+        <Alert severity="error">{error || 'التوجيه غير موجود'}</Alert>
         <Button sx={{ mt: 2 }} onClick={() => navigate(-1)}>
           رجوع
         </Button>
@@ -283,7 +281,11 @@ export default function DirectiveDetail() {
             <Chip
               label={priorityInfo.label || directive.priority}
               size="small"
-              sx={{ bgcolor: `${priorityInfo.color}20`, color: priorityInfo.color, fontWeight: 'bold' }}
+              sx={{
+                bgcolor: `${priorityInfo.color}20`,
+                color: priorityInfo.color,
+                fontWeight: 'bold',
+              }}
             />
             <Chip
               label={statusInfo.label || directive.status}
@@ -315,11 +317,7 @@ export default function DirectiveDetail() {
           )}
           {isActive && (
             <>
-              <Button
-                variant="outlined"
-                startIcon={<ReadIcon />}
-                onClick={handleMarkRead}
-              >
+              <Button variant="outlined" startIcon={<ReadIcon />} onClick={handleMarkRead}>
                 تحديد كمقروء
               </Button>
               <Button
@@ -349,21 +347,34 @@ export default function DirectiveDetail() {
         {/* ═══ Main Content ═══════════════════════════════ */}
         <Grid item xs={12} md={8}>
           {/* Content */}
-          <Paper sx={{ p: 3, mb: 3, borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
+          <Paper
+            sx={{
+              p: 3,
+              mb: 3,
+              borderRadius: '20px',
+              border: '1px solid rgba(0,0,0,0.04)',
+              boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+            }}
+          >
             <Typography variant="h6" fontWeight={700} mb={2}>
               محتوى التوجيه
             </Typography>
             <Divider sx={{ mb: 2 }} />
-            <Typography
-              variant="body1"
-              sx={{ whiteSpace: 'pre-wrap', lineHeight: 1.8 }}
-            >
+            <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap', lineHeight: 1.8 }}>
               {directive.content}
             </Typography>
           </Paper>
 
           {/* Recipients */}
-          <Paper sx={{ p: 3, mb: 3, borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
+          <Paper
+            sx={{
+              p: 3,
+              mb: 3,
+              borderRadius: '20px',
+              border: '1px solid rgba(0,0,0,0.04)',
+              boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+            }}
+          >
             <Typography variant="h6" fontWeight={700} mb={2}>
               المستلمون ({directive.recipients?.length || 0})
             </Typography>
@@ -373,10 +384,46 @@ export default function DirectiveDetail() {
                 <Table size="small">
                   <TableHead>
                     <TableRow sx={{ bgcolor: 'rgba(0,0,0,0.02)' }}>
-                      <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>النوع</TableCell>
-                      <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>الاسم</TableCell>
-                      <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>مقروء</TableCell>
-                      <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>الإقرار</TableCell>
+                      <TableCell
+                        sx={{
+                          fontWeight: 700,
+                          fontSize: '12px',
+                          letterSpacing: 0.5,
+                          color: 'text.secondary',
+                        }}
+                      >
+                        النوع
+                      </TableCell>
+                      <TableCell
+                        sx={{
+                          fontWeight: 700,
+                          fontSize: '12px',
+                          letterSpacing: 0.5,
+                          color: 'text.secondary',
+                        }}
+                      >
+                        الاسم
+                      </TableCell>
+                      <TableCell
+                        sx={{
+                          fontWeight: 700,
+                          fontSize: '12px',
+                          letterSpacing: 0.5,
+                          color: 'text.secondary',
+                        }}
+                      >
+                        مقروء
+                      </TableCell>
+                      <TableCell
+                        sx={{
+                          fontWeight: 700,
+                          fontSize: '12px',
+                          letterSpacing: 0.5,
+                          color: 'text.secondary',
+                        }}
+                      >
+                        الإقرار
+                      </TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -441,17 +488,21 @@ export default function DirectiveDetail() {
           </Paper>
 
           {/* Required Actions */}
-          <Paper sx={{ p: 3, mb: 3, borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
+          <Paper
+            sx={{
+              p: 3,
+              mb: 3,
+              borderRadius: '20px',
+              border: '1px solid rgba(0,0,0,0.04)',
+              boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+            }}
+          >
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
               <Typography variant="h6" fontWeight={700}>
                 الإجراءات المطلوبة ({directive.requiredActions?.length || 0})
               </Typography>
               {isActive && (
-                <Button
-                  size="small"
-                  startIcon={<PlayIcon />}
-                  onClick={() => setActionDialog(true)}
-                >
+                <Button size="small" startIcon={<PlayIcon />} onClick={() => setActionDialog(true)}>
                   إضافة إجراء
                 </Button>
               )}
@@ -513,10 +564,7 @@ export default function DirectiveDetail() {
                       {action.status !== 'completed' && isActive && (
                         <ListItemSecondaryAction>
                           <Tooltip title="إكمال الإجراء">
-                            <IconButton
-                              color="success"
-                              onClick={() => handleCompleteAction(idx)}
-                            >
+                            <IconButton color="success" onClick={() => handleCompleteAction(idx)}>
                               <DoneIcon />
                             </IconButton>
                           </Tooltip>
@@ -534,14 +582,21 @@ export default function DirectiveDetail() {
           </Paper>
 
           {/* Attachments */}
-          <Paper sx={{ p: 3, borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
+          <Paper
+            sx={{
+              p: 3,
+              borderRadius: '20px',
+              border: '1px solid rgba(0,0,0,0.04)',
+              boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+            }}
+          >
             <Typography variant="h6" fontWeight={700} mb={2}>
               المرفقات ({directive.attachments?.length || 0})
             </Typography>
             <Divider sx={{ mb: 2 }} />
             {directive.attachments?.length > 0 ? (
               <List disablePadding dense>
-                {directive.attachments.map((att) => (
+                {directive.attachments.map(att => (
                   <ListItem key={att._id || att.filename}>
                     <ListItemIcon>
                       <AttachIcon />
@@ -552,8 +607,8 @@ export default function DirectiveDetail() {
                         att.size
                           ? `${(att.size / 1024).toFixed(1)} KB`
                           : att.uploadedAt
-                          ? new Date(att.uploadedAt).toLocaleDateString('ar-SA')
-                          : ''
+                            ? new Date(att.uploadedAt).toLocaleDateString('ar-SA')
+                            : ''
                       }
                     />
                     <ListItemSecondaryAction>
@@ -581,7 +636,15 @@ export default function DirectiveDetail() {
         {/* ═══ Sidebar ═══════════════════════════════════ */}
         <Grid item xs={12} md={4}>
           {/* Info Card */}
-          <Paper sx={{ p: 3, mb: 3, borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
+          <Paper
+            sx={{
+              p: 3,
+              mb: 3,
+              borderRadius: '20px',
+              border: '1px solid rgba(0,0,0,0.04)',
+              boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+            }}
+          >
             <Typography variant="h6" fontWeight={700} mb={2}>
               معلومات التوجيه
             </Typography>
@@ -651,9 +714,7 @@ export default function DirectiveDetail() {
                 تاريخ الإنشاء
               </Typography>
               <Typography variant="body2">
-                {directive.createdAt
-                  ? new Date(directive.createdAt).toLocaleString('ar-SA')
-                  : '—'}
+                {directive.createdAt ? new Date(directive.createdAt).toLocaleString('ar-SA') : '—'}
               </Typography>
             </Box>
 
@@ -668,14 +729,20 @@ export default function DirectiveDetail() {
               </Box>
             )}
 
-            {directive.autoExpire && (
-              <Chip label="انتهاء تلقائي" size="small" variant="outlined" />
-            )}
+            {directive.autoExpire && <Chip label="انتهاء تلقائي" size="small" variant="outlined" />}
           </Paper>
 
           {/* Delivery Stats */}
           {isActive && totalRecipients > 0 && (
-            <Paper sx={{ p: 3, mb: 3, borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
+            <Paper
+              sx={{
+                p: 3,
+                mb: 3,
+                borderRadius: '20px',
+                border: '1px solid rgba(0,0,0,0.04)',
+                boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+              }}
+            >
               <Typography variant="h6" fontWeight={700} mb={2}>
                 إحصائيات التسليم
               </Typography>
@@ -723,7 +790,14 @@ export default function DirectiveDetail() {
 
           {/* Tags & Categories */}
           {(directive.tags?.length > 0 || directive.categories?.length > 0) && (
-            <Paper sx={{ p: 3, borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
+            <Paper
+              sx={{
+                p: 3,
+                borderRadius: '20px',
+                border: '1px solid rgba(0,0,0,0.04)',
+                boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+              }}
+            >
               <Typography variant="h6" fontWeight={700} mb={2}>
                 الوسوم والتصنيفات
               </Typography>
@@ -734,7 +808,7 @@ export default function DirectiveDetail() {
                     الوسوم
                   </Typography>
                   <Box display="flex" flexWrap="wrap" gap={0.5}>
-                    {directive.tags.map((tag) => (
+                    {directive.tags.map(tag => (
                       <Chip key={tag} label={tag} size="small" variant="outlined" />
                     ))}
                   </Box>
@@ -746,7 +820,7 @@ export default function DirectiveDetail() {
                     التصنيفات
                   </Typography>
                   <Box display="flex" flexWrap="wrap" gap={0.5}>
-                    {directive.categories.map((cat) => (
+                    {directive.categories.map(cat => (
                       <Chip key={cat} label={cat} size="small" color="primary" variant="outlined" />
                     ))}
                   </Box>
@@ -758,7 +832,13 @@ export default function DirectiveDetail() {
       </Grid>
 
       {/* ═══ Cancel Dialog ═══════════════════════════════ */}
-      <Dialog open={cancelDialog} onClose={() => setCancelDialog(false)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: '20px' } }}>
+      <Dialog
+        open={cancelDialog}
+        onClose={() => setCancelDialog(false)}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{ sx: { borderRadius: '20px' } }}
+      >
         <DialogTitle>إلغاء التوجيه</DialogTitle>
         <DialogContent>
           <Typography variant="body2" color="text.secondary" mb={2}>
@@ -770,7 +850,7 @@ export default function DirectiveDetail() {
             rows={3}
             label="سبب الإلغاء"
             value={cancelReason}
-            onChange={(e) => setCancelReason(e.target.value)}
+            onChange={e => setCancelReason(e.target.value)}
           />
         </DialogContent>
         <DialogActions>
@@ -787,7 +867,13 @@ export default function DirectiveDetail() {
       </Dialog>
 
       {/* ═══ Acknowledge Dialog ══════════════════════════ */}
-      <Dialog open={ackDialog} onClose={() => setAckDialog(false)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: '20px' } }}>
+      <Dialog
+        open={ackDialog}
+        onClose={() => setAckDialog(false)}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{ sx: { borderRadius: '20px' } }}
+      >
         <DialogTitle>الإقرار بالاستلام</DialogTitle>
         <DialogContent>
           <Typography variant="body2" color="text.secondary" mb={2}>
@@ -799,7 +885,7 @@ export default function DirectiveDetail() {
             rows={3}
             label="ملاحظات (اختياري)"
             value={ackResponse}
-            onChange={(e) => setAckResponse(e.target.value)}
+            onChange={e => setAckResponse(e.target.value)}
           />
         </DialogContent>
         <DialogActions>
@@ -811,14 +897,20 @@ export default function DirectiveDetail() {
       </Dialog>
 
       {/* ═══ Add Action Dialog ═══════════════════════════ */}
-      <Dialog open={actionDialog} onClose={() => setActionDialog(false)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: '20px' } }}>
+      <Dialog
+        open={actionDialog}
+        onClose={() => setActionDialog(false)}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{ sx: { borderRadius: '20px' } }}
+      >
         <DialogTitle>إضافة إجراء مطلوب</DialogTitle>
         <DialogContent>
           <TextField
             fullWidth
             label="وصف الإجراء *"
             value={newAction.description}
-            onChange={(e) => setNewAction((a) => ({ ...a, description: e.target.value }))}
+            onChange={e => setNewAction(a => ({ ...a, description: e.target.value }))}
             sx={{ mt: 1, mb: 2 }}
           />
           <TextField
@@ -826,7 +918,7 @@ export default function DirectiveDetail() {
             label="الموعد النهائي"
             type="date"
             value={newAction.deadline}
-            onChange={(e) => setNewAction((a) => ({ ...a, deadline: e.target.value }))}
+            onChange={e => setNewAction(a => ({ ...a, deadline: e.target.value }))}
             InputLabelProps={{ shrink: true }}
           />
         </DialogContent>
@@ -846,7 +938,7 @@ export default function DirectiveDetail() {
       <Snackbar
         open={snackbar.open}
         autoHideDuration={4000}
-        onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
+        onClose={() => setSnackbar(s => ({ ...s, open: false }))}
       >
         <Alert severity={snackbar.severity} variant="filled">
           {snackbar.message}

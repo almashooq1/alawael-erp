@@ -37,13 +37,9 @@ import {
   CheckCircle as CheckCircleIcon,
   AccessTime as AccessTimeIcon,
   Visibility as ViewIcon,
-  } from '@mui/icons-material';
+} from '@mui/icons-material';
 import electronicDirectivesService from '../../services/electronicDirectives.service';
-import {
-  DIRECTIVE_TYPES,
-  DIRECTIVE_PRIORITIES,
-  DIRECTIVE_STATUS,
-} from './constants';
+import { DIRECTIVE_TYPES, DIRECTIVE_PRIORITIES, DIRECTIVE_STATUS } from './constants';
 
 /* ═══ Stat Card ════════════════════════════════════════════════ */
 function StatCard({ title, value, icon, color, onClick, loading }) {
@@ -76,9 +72,7 @@ function StatCard({ title, value, icon, color, onClick, loading }) {
               </Typography>
             )}
           </Box>
-          <Avatar sx={{ bgcolor: `${color}20`, color, width: 48, height: 48 }}>
-            {icon}
-          </Avatar>
+          <Avatar sx={{ bgcolor: `${color}20`, color, width: 48, height: 48 }}>{icon}</Avatar>
         </Box>
       </CardContent>
     </Card>
@@ -209,7 +203,16 @@ export default function DirectivesDashboard() {
       <Grid container spacing={3}>
         {/* ─── Recent Directives ─────────────────────────── */}
         <Grid item xs={12} md={7}>
-          <Paper sx={{ p: 3, borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)', transition: 'all 0.3s', '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' } }}>
+          <Paper
+            sx={{
+              p: 3,
+              borderRadius: '20px',
+              border: '1px solid rgba(0,0,0,0.04)',
+              boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+              transition: 'all 0.3s',
+              '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' },
+            }}
+          >
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
               <Typography variant="h6" fontWeight={700}>
                 آخر التوجيهات
@@ -223,16 +226,14 @@ export default function DirectivesDashboard() {
             </Box>
             <Divider sx={{ mb: 2 }} />
             {loading ? (
-              [...Array(4)].map((_, i) => (
-                <Skeleton key={i} height={64} sx={{ mb: 1 }} />
-              ))
+              [...Array(4)].map((_, i) => <Skeleton key={i} height={64} sx={{ mb: 1 }} />)
             ) : recentDirectives.length === 0 ? (
               <Typography color="text.secondary" textAlign="center" py={4}>
                 لا توجد توجيهات حتى الآن
               </Typography>
             ) : (
               <List disablePadding>
-                {recentDirectives.map((d) => (
+                {recentDirectives.map(d => (
                   <ListItem
                     key={d._id}
                     sx={{
@@ -283,10 +284,7 @@ export default function DirectivesDashboard() {
                             {d.referenceNumber}
                           </Typography>
                           <Typography variant="caption" color="text.secondary">
-                            •{' '}
-                            {d.createdAt
-                              ? new Date(d.createdAt).toLocaleDateString('ar-SA')
-                              : ''}
+                            • {d.createdAt ? new Date(d.createdAt).toLocaleDateString('ar-SA') : ''}
                           </Typography>
                         </Box>
                       }
@@ -294,7 +292,7 @@ export default function DirectivesDashboard() {
                     <ListItemSecondaryAction>
                       <IconButton
                         edge="end"
-                        onClick={(e) => {
+                        onClick={e => {
                           e.stopPropagation();
                           navigate(`/electronic-directives/view/${d._id}`);
                         }}
@@ -312,43 +310,47 @@ export default function DirectivesDashboard() {
         {/* ─── Type Distribution + Overdue ───────────────── */}
         <Grid item xs={12} md={5}>
           {/* Type Distribution */}
-          <Paper sx={{ p: 3, borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)', mb: 3 }}>
+          <Paper
+            sx={{
+              p: 3,
+              borderRadius: '20px',
+              border: '1px solid rgba(0,0,0,0.04)',
+              boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+              mb: 3,
+            }}
+          >
             <Typography variant="h6" fontWeight={700} mb={2}>
               التوزيع حسب النوع
             </Typography>
             <Divider sx={{ mb: 2 }} />
-            {loading ? (
-              [...Array(4)].map((_, i) => (
-                <Skeleton key={i} height={36} sx={{ mb: 1 }} />
-              ))
-            ) : (
-              Object.entries(stats?.byType || {}).map(([type, count]) => (
-                <Box
-                  key={type}
-                  display="flex"
-                  justifyContent="space-between"
-                  alignItems="center"
-                  mb={1.5}
-                >
-                  <Box display="flex" alignItems="center" gap={1}>
-                    <Avatar
-                      sx={{
-                        width: 32,
-                        height: 32,
-                        bgcolor: `${DIRECTIVE_TYPES[type]?.color || '#1976d2'}20`,
-                        color: DIRECTIVE_TYPES[type]?.color || '#1976d2',
-                      }}
-                    >
-                      {typeIcons[type] || <CampaignIcon fontSize="small" />}
-                    </Avatar>
-                    <Typography variant="body2">
-                      {DIRECTIVE_TYPES[type]?.label || type}
-                    </Typography>
+            {loading
+              ? [...Array(4)].map((_, i) => <Skeleton key={i} height={36} sx={{ mb: 1 }} />)
+              : Object.entries(stats?.byType || {}).map(([type, count]) => (
+                  <Box
+                    key={type}
+                    display="flex"
+                    justifyContent="space-between"
+                    alignItems="center"
+                    mb={1.5}
+                  >
+                    <Box display="flex" alignItems="center" gap={1}>
+                      <Avatar
+                        sx={{
+                          width: 32,
+                          height: 32,
+                          bgcolor: `${DIRECTIVE_TYPES[type]?.color || '#1976d2'}20`,
+                          color: DIRECTIVE_TYPES[type]?.color || '#1976d2',
+                        }}
+                      >
+                        {typeIcons[type] || <CampaignIcon fontSize="small" />}
+                      </Avatar>
+                      <Typography variant="body2">
+                        {DIRECTIVE_TYPES[type]?.label || type}
+                      </Typography>
+                    </Box>
+                    <Chip label={count} size="small" color="primary" variant="outlined" />
                   </Box>
-                  <Chip label={count} size="small" color="primary" variant="outlined" />
-                </Box>
-              ))
-            )}
+                ))}
             {!loading && Object.keys(stats?.byType || {}).length === 0 && (
               <Typography color="text.secondary" textAlign="center" py={2}>
                 لا توجد بيانات
@@ -358,7 +360,14 @@ export default function DirectivesDashboard() {
 
           {/* Overdue Actions */}
           {overdueActions.length > 0 && (
-            <Paper sx={{ p: 3, borderRadius: '20px', border: '1px solid #d32f2f15', boxShadow: '0 2px 16px rgba(211,47,47,0.06)' }}>
+            <Paper
+              sx={{
+                p: 3,
+                borderRadius: '20px',
+                border: '1px solid #d32f2f15',
+                boxShadow: '0 2px 16px rgba(211,47,47,0.06)',
+              }}
+            >
               <Box display="flex" alignItems="center" gap={1} mb={2}>
                 <WarningIcon color="error" />
                 <Typography variant="h6" fontWeight="bold" color="error">
@@ -367,7 +376,7 @@ export default function DirectivesDashboard() {
               </Box>
               <Divider sx={{ mb: 2 }} />
               <List disablePadding dense>
-                {overdueActions.slice(0, 5).map((item) => (
+                {overdueActions.slice(0, 5).map(item => (
                   <ListItem
                     key={item._id}
                     sx={{ cursor: 'pointer', borderRadius: 1 }}
@@ -387,7 +396,15 @@ export default function DirectivesDashboard() {
           )}
 
           {/* Engagement Stats */}
-          <Paper sx={{ p: 3, borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)', mt: 3 }}>
+          <Paper
+            sx={{
+              p: 3,
+              borderRadius: '20px',
+              border: '1px solid rgba(0,0,0,0.04)',
+              boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+              mt: 3,
+            }}
+          >
             <Typography variant="h6" fontWeight={700} mb={2}>
               إحصائيات التفاعل
             </Typography>

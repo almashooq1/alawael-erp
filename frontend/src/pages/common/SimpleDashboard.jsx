@@ -7,8 +7,18 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getToken, getUserData, clearAuthData } from 'utils/tokenStorage';
 import {
-  Box, Paper, Typography, Button, Avatar, Chip, List, ListItem,
-  ListItemIcon, ListItemText, Divider, Alert,
+  Box,
+  Paper,
+  Typography,
+  Button,
+  Avatar,
+  Chip,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Divider,
+  Alert,
 } from '@mui/material';
 import {
   Logout as LogoutIcon,
@@ -41,16 +51,24 @@ const SimpleDashboard = () => {
     <Box sx={{ p: { xs: 2, md: 5 }, maxWidth: 1200, mx: 'auto' }}>
       {/* Header */}
       <Paper elevation={2} sx={{ p: 3, mb: 3, borderRadius: 3 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: 2,
+          }}
+        >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <Avatar sx={{ width: 56, height: 56, bgcolor: 'primary.main', fontSize: 24 }}>
               {(user.fullName || user.email || '?')[0]}
             </Avatar>
             <Box>
-              <Typography variant="h5" fontWeight={700}>لوحة التحكم</Typography>
-              <Typography color="text.secondary">
-                مرحباً، {user.fullName || user.email}!
+              <Typography variant="h5" fontWeight={700}>
+                لوحة التحكم
               </Typography>
+              <Typography color="text.secondary">مرحباً، {user.fullName || user.email}!</Typography>
             </Box>
           </Box>
           <Button
@@ -76,23 +94,32 @@ const SimpleDashboard = () => {
       </Alert>
 
       {/* User Info */}
-      <Paper elevation={2} sx={{ p: 3, mb: 3, borderRadius: 3, border: '2px solid', borderColor: 'success.light' }}>
+      <Paper
+        elevation={2}
+        sx={{ p: 3, mb: 3, borderRadius: 3, border: '2px solid', borderColor: 'success.light' }}
+      >
         <Typography variant="h6" fontWeight={600} gutterBottom>
           معلومات المستخدم
         </Typography>
         <List disablePadding>
           <ListItem>
-            <ListItemIcon><PersonIcon color="primary" /></ListItemIcon>
+            <ListItemIcon>
+              <PersonIcon color="primary" />
+            </ListItemIcon>
             <ListItemText primary="الاسم الكامل" secondary={user.fullName || '—'} />
           </ListItem>
           <Divider variant="inset" component="li" />
           <ListItem>
-            <ListItemIcon><EmailIcon color="primary" /></ListItemIcon>
+            <ListItemIcon>
+              <EmailIcon color="primary" />
+            </ListItemIcon>
             <ListItemText primary="البريد الإلكتروني" secondary={user.email || '—'} />
           </ListItem>
           <Divider variant="inset" component="li" />
           <ListItem>
-            <ListItemIcon><RoleIcon color="primary" /></ListItemIcon>
+            <ListItemIcon>
+              <RoleIcon color="primary" />
+            </ListItemIcon>
             <ListItemText
               primary="الدور"
               secondary={
@@ -110,7 +137,10 @@ const SimpleDashboard = () => {
       </Paper>
 
       {/* Session Status */}
-      <Paper elevation={2} sx={{ p: 3, mb: 3, borderRadius: 3, border: '2px solid', borderColor: 'success.light' }}>
+      <Paper
+        elevation={2}
+        sx={{ p: 3, mb: 3, borderRadius: 3, border: '2px solid', borderColor: 'success.light' }}
+      >
         <Typography variant="h6" fontWeight={600} gutterBottom>
           حالة الجلسة
         </Typography>
@@ -119,7 +149,9 @@ const SimpleDashboard = () => {
         </Alert>
 
         <Box sx={{ mt: 2 }}>
-          <Typography variant="subtitle1" fontWeight={600} gutterBottom>الخطوات المكتملة:</Typography>
+          <Typography variant="subtitle1" fontWeight={600} gutterBottom>
+            الخطوات المكتملة:
+          </Typography>
           {[
             { icon: <CheckIcon color="success" />, text: 'تم تسجيل الدخول بنجاح' },
             { icon: <CheckIcon color="success" />, text: 'تم حفظ بيانات المستخدم' },
@@ -134,17 +166,17 @@ const SimpleDashboard = () => {
       </Paper>
 
       {/* Notes */}
-      <Alert
-        severity="info"
-        icon={<InfoIcon fontSize="inherit" />}
-        sx={{ borderRadius: 3 }}
-      >
-        <Typography variant="subtitle2" fontWeight={600} gutterBottom>ملاحظات:</Typography>
+      <Alert severity="info" icon={<InfoIcon fontSize="inherit" />} sx={{ borderRadius: 3 }}>
+        <Typography variant="subtitle2" fontWeight={600} gutterBottom>
+          ملاحظات:
+        </Typography>
         {[
           'إذا رأيت هذه الصفحة، فهذا يعني أن المصادقة تعمل بشكل صحيح',
           'يمكنك الآن البدء في استخدام باقي صفحات النظام',
         ].map((note, i) => (
-          <Typography key={i} variant="body2" sx={{ mb: 0.5 }}>• {note}</Typography>
+          <Typography key={i} variant="body2" sx={{ mb: 0.5 }}>
+            • {note}
+          </Typography>
         ))}
         <Chip icon={<TimerIcon />} label="الجلسة صالحة لمدة 24 ساعة" size="small" sx={{ mt: 1 }} />
       </Alert>

@@ -4,15 +4,30 @@
 
 import React from 'react';
 import {
-  Box, Grid, Card, CardContent, Typography, Stack,
-  Chip, Divider, LinearProgress, Alert, Paper,
+  Box,
+  Grid,
+  Card,
+  CardContent,
+  Typography,
+  Stack,
+  Chip,
+  Divider,
+  LinearProgress,
+  Alert,
+  Paper,
 } from '@mui/material';
 import { Insights as InsightsIcon } from '@mui/icons-material';
 
 const StudentReportInsights = ({
-  safeInsights, safeRiskSignals, safeRecommendations,
-  safeComparison, comparisonCurrentLabel, comparisonCurrentSummary,
-  comparisonPreviousLabel, comparisonPreviousSummary, formatDeltaValue,
+  safeInsights,
+  safeRiskSignals,
+  safeRecommendations,
+  safeComparison,
+  comparisonCurrentLabel,
+  comparisonCurrentSummary,
+  comparisonPreviousLabel,
+  comparisonPreviousSummary,
+  formatDeltaValue,
 }) => (
   <>
     {/* Insights & Risk */}
@@ -26,9 +41,18 @@ const StudentReportInsights = ({
             {safeInsights.length > 0 ? (
               <Stack spacing={2}>
                 {safeInsights.map(item => (
-                  <Alert key={item.title} severity={item.type} icon={<InsightsIcon />} sx={{ borderRadius: 2 }}>
-                    <Typography variant="body2" sx={{ fontWeight: 700 }}>{item.title}</Typography>
-                    <Typography variant="caption" color="textSecondary">{item.details}</Typography>
+                  <Alert
+                    key={item.title}
+                    severity={item.type}
+                    icon={<InsightsIcon />}
+                    sx={{ borderRadius: 2 }}
+                  >
+                    <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                      {item.title}
+                    </Typography>
+                    <Typography variant="caption" color="textSecondary">
+                      {item.details}
+                    </Typography>
                   </Alert>
                 ))}
               </Stack>
@@ -51,12 +75,25 @@ const StudentReportInsights = ({
                 {safeRiskSignals.map(signal => (
                   <Box key={signal.label}>
                     <Stack direction="row" justifyContent="space-between" sx={{ mb: 1 }}>
-                      <Typography variant="body2" sx={{ fontWeight: 600 }}>{signal.label}</Typography>
-                      <Typography variant="caption" color="textSecondary">{signal.levelLabel}</Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                        {signal.label}
+                      </Typography>
+                      <Typography variant="caption" color="textSecondary">
+                        {signal.levelLabel}
+                      </Typography>
                     </Stack>
-                    <LinearProgress variant="determinate" value={signal.score}
+                    <LinearProgress
+                      variant="determinate"
+                      value={signal.score}
                       sx={{ height: 8, borderRadius: 3 }}
-                      color={signal.level === 'low' ? 'success' : signal.level === 'medium' ? 'warning' : 'error'} />
+                      color={
+                        signal.level === 'low'
+                          ? 'success'
+                          : signal.level === 'medium'
+                            ? 'warning'
+                            : 'error'
+                      }
+                    />
                   </Box>
                 ))}
               </Stack>
@@ -82,13 +119,19 @@ const StudentReportInsights = ({
               <Grid item xs={12} md={6} key={item.title}>
                 <Paper sx={{ p: 2, borderRadius: 2, height: '100%' }}>
                   <Stack spacing={1}>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>{item.title}</Typography>
-                    <Typography variant="caption" color="textSecondary">الأولوية: {item.priority}</Typography>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                      {item.title}
+                    </Typography>
+                    <Typography variant="caption" color="textSecondary">
+                      الأولوية: {item.priority}
+                    </Typography>
                     <Divider />
                     <Stack spacing={0.5}>
                       {item.actions.length > 0 ? (
                         item.actions.map(action => (
-                          <Typography key={action} variant="body2">• {action}</Typography>
+                          <Typography key={action} variant="body2">
+                            • {action}
+                          </Typography>
                         ))
                       ) : (
                         <Typography variant="body2" color="textSecondary">
@@ -136,10 +179,12 @@ const StudentReportInsights = ({
             <Stack spacing={1}>
               {(safeComparison.delta || []).length > 0 ? (
                 (safeComparison.delta || []).map(item => (
-                  <Chip key={item.label}
+                  <Chip
+                    key={item.label}
                     label={`${item.label}: ${formatDeltaValue(item.value) ?? '—'}`}
                     color={item.type === 'positive' ? 'success' : 'warning'}
-                    variant="outlined" />
+                    variant="outlined"
+                  />
                 ))
               ) : (
                 <Typography variant="body2" color="textSecondary">

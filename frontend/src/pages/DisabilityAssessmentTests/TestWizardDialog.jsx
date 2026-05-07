@@ -2,11 +2,31 @@
  * TestWizardDialog – multi-step test wizard dialog
  */
 import {
-  Box, Dialog, DialogTitle, DialogContent, DialogActions,
-  Typography, Button, IconButton, Alert, Paper, TextField,
-  Stepper, Step, StepLabel, Radio, RadioGroup,
-  FormControl, FormControlLabel, FormLabel, InputLabel, Select, MenuItem,
-  Chip, Divider, LinearProgress,
+  Box,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Typography,
+  Button,
+  IconButton,
+  Alert,
+  Paper,
+  TextField,
+  Stepper,
+  Step,
+  StepLabel,
+  Radio,
+  RadioGroup,
+  FormControl,
+  FormControlLabel,
+  FormLabel,
+  InputLabel,
+  Select,
+  MenuItem,
+  Chip,
+  Divider,
+  LinearProgress,
 } from '@mui/material';
 import {
   Quiz as QuizIcon,
@@ -20,17 +40,34 @@ import { surfaceColors } from '../../theme/palette';
 import { TEST_ICONS } from './constants';
 
 const TestWizardDialog = ({
-  open, onClose,
-  selectedTest, beneficiaries,
-  selectedBeneficiary, onSelectBeneficiary,
-  activeStep, answers,
-  assessorNotes, onNotesChange,
+  open,
+  onClose,
+  selectedTest,
+  beneficiaries,
+  selectedBeneficiary,
+  onSelectBeneficiary,
+  activeStep,
+  answers,
+  assessorNotes,
+  onNotesChange,
   submitLoading,
-  onAnswer, onNext, onBack, onSubmit,
-  isStepComplete, getStepperSteps,
+  onAnswer,
+  onNext,
+  onBack,
+  onSubmit,
+  isStepComplete,
+  getStepperSteps,
 }) => (
   <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-    <DialogTitle sx={{ bgcolor: selectedTest?.color, color: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+    <DialogTitle
+      sx={{
+        bgcolor: selectedTest?.color,
+        color: '#fff',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+      }}
+    >
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
         {selectedTest && (TEST_ICONS[selectedTest.icon] || <QuizIcon />)}
         <span>تطبيق {selectedTest?.name}</span>
@@ -60,12 +97,13 @@ const TestWizardDialog = ({
             <InputLabel>اختر المستفيد</InputLabel>
             <Select
               value={selectedBeneficiary}
-              onChange={(e) => onSelectBeneficiary(e.target.value)}
+              onChange={e => onSelectBeneficiary(e.target.value)}
               label="اختر المستفيد"
             >
-              {beneficiaries.map((b) => (
+              {beneficiaries.map(b => (
                 <MenuItem key={b.id} value={b.id}>
-                  {b.name} — {b.age} سنة ({assessmentService.getDisabilityTypes()[b.disabilityType] || b.disabilityType})
+                  {b.name} — {b.age} سنة (
+                  {assessmentService.getDisabilityTypes()[b.disabilityType] || b.disabilityType})
                 </MenuItem>
               ))}
             </Select>
@@ -82,7 +120,7 @@ const TestWizardDialog = ({
               {cat.name}
             </Typography>
             <Divider sx={{ mb: 2 }} />
-            {cat.items.map((item) => (
+            {cat.items.map(item => (
               <Paper key={item.key} elevation={1} sx={{ p: 2, mb: 2 }}>
                 <FormControl component="fieldset" fullWidth>
                   <FormLabel component="legend" sx={{ fontWeight: 'bold', mb: 1 }}>
@@ -91,7 +129,7 @@ const TestWizardDialog = ({
                   <RadioGroup
                     row
                     value={String(answers[cat.key]?.[item.key] ?? -1)}
-                    onChange={(e) => onAnswer(cat.key, item.key, e.target.value)}
+                    onChange={e => onAnswer(cat.key, item.key, e.target.value)}
                   >
                     {item.levels.map((level, lvlIdx) => (
                       <FormControlLabel
@@ -102,7 +140,9 @@ const TestWizardDialog = ({
                           <Chip
                             label={level}
                             size="small"
-                            variant={answers[cat.key]?.[item.key] === lvlIdx ? 'filled' : 'outlined'}
+                            variant={
+                              answers[cat.key]?.[item.key] === lvlIdx ? 'filled' : 'outlined'
+                            }
                             color={answers[cat.key]?.[item.key] === lvlIdx ? 'primary' : 'default'}
                           />
                         }
@@ -123,7 +163,7 @@ const TestWizardDialog = ({
             تم الانتهاء من جميع فئات الاختبار. راجع النتائج ثم أرسل.
           </Alert>
 
-          {selectedTest.categories.map((cat) => {
+          {selectedTest.categories.map(cat => {
             const catItems = cat.items;
             const catTotalMax = catItems.reduce((s, item) => s + (item.levels.length - 1), 0);
             const catTotal = catItems.reduce((s, item) => {
@@ -159,7 +199,7 @@ const TestWizardDialog = ({
             rows={3}
             fullWidth
             value={assessorNotes}
-            onChange={(e) => onNotesChange(e.target.value)}
+            onChange={e => onNotesChange(e.target.value)}
             placeholder="أدخل ملاحظاتك وتوصياتك..."
             sx={{ mt: 2 }}
           />

@@ -20,8 +20,8 @@ const RecentResultsTab = ({ tabValue, scales, scaleResults, onOpenDetail }) => (
       <Alert severity="info">لا توجد نتائج تقييم بعد. ابدأ بتطبيق أحد المقاييس.</Alert>
     ) : (
       <Grid container spacing={2}>
-        {scaleResults.map((result) => {
-          const scale = scales.find((s) => s.id === result.scaleId);
+        {scaleResults.map(result => {
+          const scale = scales.find(s => s.id === result.scaleId);
           return (
             <Grid item xs={12} md={6} key={result.id}>
               <Card
@@ -67,7 +67,7 @@ const RecentResultsTab = ({ tabValue, scales, scaleResults, onOpenDetail }) => (
                   {/* Domain mini-bars */}
                   {scale && (
                     <Box sx={{ mt: 2 }}>
-                      {scale.domains.map((d) => {
+                      {scale.domains.map(d => {
                         const domainScore = result.domainScores?.[d.key] || 0;
                         const pct = Math.round((domainScore / d.maxScore) * 100);
                         return (

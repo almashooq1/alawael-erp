@@ -59,6 +59,8 @@ export const INITIAL_FORM = {
   participants: '',
   recurrence: 'none',
   notes: '',
+  episodeOfCare: '',
+  carePlan: '',
 };
 
 /** Demo fallback data aligned with backend schema */

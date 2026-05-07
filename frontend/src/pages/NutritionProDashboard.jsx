@@ -7,15 +7,44 @@
 
 import { useState } from 'react';
 import {
-  Box, Typography, Grid, Card, LinearProgress, Chip, Avatar,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  useTheme, alpha, IconButton, Tooltip,
+  Box,
+  Typography,
+  Grid,
+  Card,
+  LinearProgress,
+  Chip,
+  Avatar,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  useTheme,
+  alpha,
+  IconButton,
+  Tooltip,
 } from '@mui/material';
 import { motion } from 'framer-motion';
 import {
-  AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, RadarChart,
-  Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
-  XAxis, YAxis, CartesianGrid, Tooltip as RTooltip, ResponsiveContainer, Legend,
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  RadarChart,
+  Radar,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as RTooltip,
+  ResponsiveContainer,
+  Legend,
 } from 'recharts';
 import RestaurantIcon from '@mui/icons-material/Restaurant';
 import LocalDiningIcon from '@mui/icons-material/LocalDining';
@@ -36,10 +65,38 @@ const COLORS = ['#22c55e', '#f59e0b', '#ef4444', '#06b6d4', '#8b5cf6', '#ec4899'
 
 // ─── Mock Data ──────────────────────────────────────────────────────────────
 const kpiCards = [
-  { title: 'الوجبات اليومية', value: '٨٤٧', change: '+١٢٪', up: true, icon: RestaurantIcon, color: '#22c55e' },
-  { title: 'الحمية الخاصة', value: '١٢٤', change: '+٨٪', up: true, icon: MonitorHeartIcon, color: '#f59e0b' },
-  { title: 'رضا المرضى', value: '٩٢٪', change: '+٣٪', up: true, icon: SetMealIcon, color: '#06b6d4' },
-  { title: 'هدر الطعام', value: '٤.٢٪', change: '-١.٥٪', up: false, icon: KitchenIcon, color: '#ef4444' },
+  {
+    title: 'الوجبات اليومية',
+    value: '٨٤٧',
+    change: '+١٢٪',
+    up: true,
+    icon: RestaurantIcon,
+    color: '#22c55e',
+  },
+  {
+    title: 'الحمية الخاصة',
+    value: '١٢٤',
+    change: '+٨٪',
+    up: true,
+    icon: MonitorHeartIcon,
+    color: '#f59e0b',
+  },
+  {
+    title: 'رضا المرضى',
+    value: '٩٢٪',
+    change: '+٣٪',
+    up: true,
+    icon: SetMealIcon,
+    color: '#06b6d4',
+  },
+  {
+    title: 'هدر الطعام',
+    value: '٤.٢٪',
+    change: '-١.٥٪',
+    up: false,
+    icon: KitchenIcon,
+    color: '#ef4444',
+  },
 ];
 
 const monthlyMeals = [
@@ -85,10 +142,28 @@ const inventoryStatus = [
 ];
 
 const todayMenu = [
-  { meal: 'الفطور', items: 'بيض مسلوق، جبنة، خبز، شاي', time: '٧:٠٠ ص', served: 780, status: 'مكتمل' },
-  { meal: 'الغداء', items: 'أرز بالدجاج، سلطة، شوربة', time: '١٢:٣٠ م', served: 640, status: 'جاري' },
+  {
+    meal: 'الفطور',
+    items: 'بيض مسلوق، جبنة، خبز، شاي',
+    time: '٧:٠٠ ص',
+    served: 780,
+    status: 'مكتمل',
+  },
+  {
+    meal: 'الغداء',
+    items: 'أرز بالدجاج، سلطة، شوربة',
+    time: '١٢:٣٠ م',
+    served: 640,
+    status: 'جاري',
+  },
   { meal: 'العشاء', items: 'معكرونة، خضار مشوي، فاكهة', time: '٦:٣٠ م', served: 0, status: 'قادم' },
-  { meal: 'وجبة خفيفة', items: 'بسكويت، عصير، فاكهة', time: '٣:٣٠ م', served: 320, status: 'مكتمل' },
+  {
+    meal: 'وجبة خفيفة',
+    items: 'بسكويت، عصير، فاكهة',
+    time: '٣:٣٠ م',
+    served: 320,
+    status: 'مكتمل',
+  },
 ];
 
 // ─── Glass Card ─────────────────────────────────────────────────────────────
@@ -122,11 +197,19 @@ const SectionHeader = ({ title, subtitle, action }) => {
   return (
     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
       <Box>
-        <Typography sx={{ fontWeight: 700, fontSize: '1rem', color: isDark ? '#F1F5F9' : '#0F172A' }}>
+        <Typography
+          sx={{ fontWeight: 700, fontSize: '1rem', color: isDark ? '#F1F5F9' : '#0F172A' }}
+        >
           {title}
         </Typography>
         {subtitle && (
-          <Typography sx={{ fontSize: '0.75rem', color: isDark ? 'rgba(255,255,255,0.45)' : '#64748B', mt: 0.25 }}>
+          <Typography
+            sx={{
+              fontSize: '0.75rem',
+              color: isDark ? 'rgba(255,255,255,0.45)' : '#64748B',
+              mt: 0.25,
+            }}
+          >
             {subtitle}
           </Typography>
         )}
@@ -149,7 +232,11 @@ export default function NutritionProDashboard() {
   return (
     <Box sx={{ direction: 'rtl', minHeight: '100vh' }}>
       {/* ── Hero Header ──────────────────────────────────────────────── */}
-      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
         <Box
           sx={{
             position: 'relative',
@@ -175,7 +262,11 @@ export default function NutritionProDashboard() {
                 animate={{ scale: [1, 1.15, 1], opacity: [0.6, 1, 0.6] }}
                 transition={{ duration: 6 + i * 2, repeat: Infinity }}
                 style={{
-                  position: 'absolute', ...b, width: b.size, height: b.size, borderRadius: '50%',
+                  position: 'absolute',
+                  ...b,
+                  width: b.size,
+                  height: b.size,
+                  borderRadius: '50%',
                   background: `radial-gradient(circle, ${b.color} 0%, transparent 70%)`,
                 }}
               />
@@ -183,14 +274,31 @@ export default function NutritionProDashboard() {
           </Box>
           <Box sx={{ position: 'relative', zIndex: 1 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
-              <Avatar sx={{ width: 52, height: 52, background: GRADIENT, boxShadow: '0 8px 24px rgba(34,197,94,0.4)' }}>
+              <Avatar
+                sx={{
+                  width: 52,
+                  height: 52,
+                  background: GRADIENT,
+                  boxShadow: '0 8px 24px rgba(34,197,94,0.4)',
+                }}
+              >
                 <RestaurantIcon sx={{ fontSize: 26 }} />
               </Avatar>
               <Box>
-                <Typography sx={{ fontWeight: 800, fontSize: { xs: '1.4rem', md: '1.8rem' }, background: GRADIENT, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                <Typography
+                  sx={{
+                    fontWeight: 800,
+                    fontSize: { xs: '1.4rem', md: '1.8rem' },
+                    background: GRADIENT,
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                  }}
+                >
                   لوحة التغذية والمطبخ
                 </Typography>
-                <Typography sx={{ fontSize: '0.85rem', color: isDark ? 'rgba(255,255,255,0.55)' : '#64748B' }}>
+                <Typography
+                  sx={{ fontSize: '0.85rem', color: isDark ? 'rgba(255,255,255,0.55)' : '#64748B' }}
+                >
                   إدارة الوجبات والحمية والمخزون الغذائي
                 </Typography>
               </Box>
@@ -214,22 +322,50 @@ export default function NutritionProDashboard() {
                 onHoverEnd={() => setHoveredKpi(null)}
               >
                 <GlassCard>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'flex-start',
+                    }}
+                  >
                     <Box>
-                      <Typography sx={{ fontSize: '0.75rem', color: isDark ? 'rgba(255,255,255,0.5)' : '#64748B', mb: 0.5 }}>
+                      <Typography
+                        sx={{
+                          fontSize: '0.75rem',
+                          color: isDark ? 'rgba(255,255,255,0.5)' : '#64748B',
+                          mb: 0.5,
+                        }}
+                      >
                         {kpi.title}
                       </Typography>
-                      <Typography sx={{ fontSize: '1.6rem', fontWeight: 800, background: GRADIENT, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                      <Typography
+                        sx={{
+                          fontSize: '1.6rem',
+                          fontWeight: 800,
+                          background: GRADIENT,
+                          WebkitBackgroundClip: 'text',
+                          WebkitTextFillColor: 'transparent',
+                        }}
+                      >
                         {kpi.value}
                       </Typography>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5 }}>
-                        {kpi.up ? <TrendingUpIcon sx={{ fontSize: 14, color: '#22c55e' }} /> : <TrendingDownIcon sx={{ fontSize: 14, color: '#22c55e' }} />}
-                        <Typography sx={{ fontSize: '0.7rem', color: '#22c55e', fontWeight: 600 }}>{kpi.change}</Typography>
+                        {kpi.up ? (
+                          <TrendingUpIcon sx={{ fontSize: 14, color: '#22c55e' }} />
+                        ) : (
+                          <TrendingDownIcon sx={{ fontSize: 14, color: '#22c55e' }} />
+                        )}
+                        <Typography sx={{ fontSize: '0.7rem', color: '#22c55e', fontWeight: 600 }}>
+                          {kpi.change}
+                        </Typography>
                       </Box>
                     </Box>
                     <Avatar
                       sx={{
-                        width: 44, height: 44, borderRadius: '14px',
+                        width: 44,
+                        height: 44,
+                        borderRadius: '14px',
                         background: hoveredKpi === i ? GRADIENT : alpha(kpi.color, 0.12),
                         transition: 'all 0.3s',
                       }}
@@ -248,7 +384,11 @@ export default function NutritionProDashboard() {
       <Grid container spacing={2} sx={{ mb: 3 }}>
         {/* Monthly Meals Area Chart */}
         <Grid item xs={12} md={8}>
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+          >
             <GlassCard>
               <SectionHeader title="الوجبات الشهرية" subtitle="توزيع الوجبات حسب النوع" />
               <ResponsiveContainer width="100%" height={280}>
@@ -261,13 +401,33 @@ export default function NutritionProDashboard() {
                       </linearGradient>
                     ))}
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke={isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'} />
-                  <XAxis dataKey="month" tick={{ fontSize: 11, fill: isDark ? '#94A3B8' : '#64748B' }} />
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke={isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}
+                  />
+                  <XAxis
+                    dataKey="month"
+                    tick={{ fontSize: 11, fill: isDark ? '#94A3B8' : '#64748B' }}
+                  />
                   <YAxis tick={{ fontSize: 11, fill: isDark ? '#94A3B8' : '#64748B' }} />
-                  <RTooltip contentStyle={{ background: isDark ? '#1E293B' : '#fff', border: 'none', borderRadius: 12, boxShadow: '0 8px 24px rgba(0,0,0,0.15)' }} />
+                  <RTooltip
+                    contentStyle={{
+                      background: isDark ? '#1E293B' : '#fff',
+                      border: 'none',
+                      borderRadius: 12,
+                      boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+                    }}
+                  />
                   <Legend />
                   {['فطور', 'غداء', 'عشاء', 'وجبات_خفيفة'].map((key, i) => (
-                    <Area key={key} type="monotone" dataKey={key} stroke={COLORS[i]} fill={`url(#nutGrad${i})`} strokeWidth={2} />
+                    <Area
+                      key={key}
+                      type="monotone"
+                      dataKey={key}
+                      stroke={COLORS[i]}
+                      fill={`url(#nutGrad${i})`}
+                      strokeWidth={2}
+                    />
                   ))}
                 </AreaChart>
               </ResponsiveContainer>
@@ -277,17 +437,35 @@ export default function NutritionProDashboard() {
 
         {/* Diet Categories Pie */}
         <Grid item xs={12} md={4}>
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+          >
             <GlassCard>
               <SectionHeader title="أنواع الحمية" subtitle="توزيع الأنظمة الغذائية" />
               <ResponsiveContainer width="100%" height={280}>
                 <PieChart>
-                  <Pie data={dietCategories} cx="50%" cy="50%" innerRadius={55} outerRadius={90} paddingAngle={3} dataKey="value">
+                  <Pie
+                    data={dietCategories}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={55}
+                    outerRadius={90}
+                    paddingAngle={3}
+                    dataKey="value"
+                  >
                     {dietCategories.map((_, i) => (
                       <Cell key={i} fill={COLORS[i % COLORS.length]} />
                     ))}
                   </Pie>
-                  <RTooltip contentStyle={{ background: isDark ? '#1E293B' : '#fff', border: 'none', borderRadius: 12 }} />
+                  <RTooltip
+                    contentStyle={{
+                      background: isDark ? '#1E293B' : '#fff',
+                      border: 'none',
+                      borderRadius: 12,
+                    }}
+                  />
                   <Legend wrapperStyle={{ fontSize: '11px' }} />
                 </PieChart>
               </ResponsiveContainer>
@@ -300,15 +478,29 @@ export default function NutritionProDashboard() {
       <Grid container spacing={2} sx={{ mb: 3 }}>
         {/* Quality Radar */}
         <Grid item xs={12} md={4}>
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+          >
             <GlassCard>
               <SectionHeader title="مؤشرات الجودة" subtitle="تقييم شامل للخدمة" />
               <ResponsiveContainer width="100%" height={280}>
                 <RadarChart data={qualityRadar}>
                   <PolarGrid stroke={isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'} />
-                  <PolarAngleAxis dataKey="metric" tick={{ fontSize: 10, fill: isDark ? '#94A3B8' : '#64748B' }} />
+                  <PolarAngleAxis
+                    dataKey="metric"
+                    tick={{ fontSize: 10, fill: isDark ? '#94A3B8' : '#64748B' }}
+                  />
                   <PolarRadiusAxis tick={{ fontSize: 9 }} domain={[0, 100]} />
-                  <Radar name="التقييم" dataKey="score" stroke="#22c55e" fill="#22c55e" fillOpacity={0.2} strokeWidth={2} />
+                  <Radar
+                    name="التقييم"
+                    dataKey="score"
+                    stroke="#22c55e"
+                    fill="#22c55e"
+                    fillOpacity={0.2}
+                    strokeWidth={2}
+                  />
                 </RadarChart>
               </ResponsiveContainer>
             </GlassCard>
@@ -317,23 +509,45 @@ export default function NutritionProDashboard() {
 
         {/* Inventory Status */}
         <Grid item xs={12} md={4}>
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+          >
             <GlassCard>
               <SectionHeader title="مخزون المواد الغذائية" subtitle="حالة المخزون الحالية" />
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
                 {inventoryStatus.map((item, i) => (
                   <Box key={i}>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-                      <Typography sx={{ fontSize: '0.8rem', fontWeight: 600, color: isDark ? '#E2E8F0' : '#334155' }}>
+                      <Typography
+                        sx={{
+                          fontSize: '0.8rem',
+                          fontWeight: 600,
+                          color: isDark ? '#E2E8F0' : '#334155',
+                        }}
+                      >
                         {item.item}
                       </Typography>
                       <Chip
                         label={item.status}
                         size="small"
                         sx={{
-                          height: 20, fontSize: '0.6rem', fontWeight: 700,
-                          backgroundColor: item.status === 'ممتاز' ? alpha('#22c55e', 0.12) : item.status === 'تحذير' ? alpha('#f59e0b', 0.12) : alpha('#06b6d4', 0.12),
-                          color: item.status === 'ممتاز' ? '#22c55e' : item.status === 'تحذير' ? '#f59e0b' : '#06b6d4',
+                          height: 20,
+                          fontSize: '0.6rem',
+                          fontWeight: 700,
+                          backgroundColor:
+                            item.status === 'ممتاز'
+                              ? alpha('#22c55e', 0.12)
+                              : item.status === 'تحذير'
+                                ? alpha('#f59e0b', 0.12)
+                                : alpha('#06b6d4', 0.12),
+                          color:
+                            item.status === 'ممتاز'
+                              ? '#22c55e'
+                              : item.status === 'تحذير'
+                                ? '#f59e0b'
+                                : '#06b6d4',
                         }}
                       />
                     </Box>
@@ -341,11 +555,13 @@ export default function NutritionProDashboard() {
                       variant="determinate"
                       value={item.stock}
                       sx={{
-                        height: 6, borderRadius: 3,
+                        height: 6,
+                        borderRadius: 3,
                         backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)',
                         '& .MuiLinearProgress-bar': {
                           borderRadius: 3,
-                          background: item.stock > 80 ? '#22c55e' : item.stock > 50 ? '#f59e0b' : '#ef4444',
+                          background:
+                            item.stock > 80 ? '#22c55e' : item.stock > 50 ? '#f59e0b' : '#ef4444',
                         },
                       }}
                     />
@@ -358,15 +574,31 @@ export default function NutritionProDashboard() {
 
         {/* Meal Distribution Bar Chart */}
         <Grid item xs={12} md={4}>
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }}>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7 }}
+          >
             <GlassCard>
               <SectionHeader title="توزيع الوجبات" subtitle="حسب القسم" />
               <ResponsiveContainer width="100%" height={280}>
                 <BarChart data={mealDistribution}>
-                  <CartesianGrid strokeDasharray="3 3" stroke={isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'} />
-                  <XAxis dataKey="name" tick={{ fontSize: 10, fill: isDark ? '#94A3B8' : '#64748B' }} />
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke={isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}
+                  />
+                  <XAxis
+                    dataKey="name"
+                    tick={{ fontSize: 10, fill: isDark ? '#94A3B8' : '#64748B' }}
+                  />
                   <YAxis tick={{ fontSize: 10, fill: isDark ? '#94A3B8' : '#64748B' }} />
-                  <RTooltip contentStyle={{ background: isDark ? '#1E293B' : '#fff', border: 'none', borderRadius: 12 }} />
+                  <RTooltip
+                    contentStyle={{
+                      background: isDark ? '#1E293B' : '#fff',
+                      border: 'none',
+                      borderRadius: 12,
+                    }}
+                  />
                   <Legend wrapperStyle={{ fontSize: '10px' }} />
                   <Bar dataKey="قسم_الرجال" fill="#22c55e" radius={[4, 4, 0, 0]} />
                   <Bar dataKey="قسم_النساء" fill="#f59e0b" radius={[4, 4, 0, 0]} />
@@ -380,7 +612,11 @@ export default function NutritionProDashboard() {
       </Grid>
 
       {/* ── Today's Menu Table ────────────────────────────────────────── */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8 }}>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.8 }}
+      >
         <GlassCard>
           <SectionHeader
             title="قائمة اليوم"
@@ -397,8 +633,16 @@ export default function NutritionProDashboard() {
             <Table size="small">
               <TableHead>
                 <TableRow>
-                  {['الوجبة', 'الأصناف', 'الوقت', 'تم التقديم', 'الحالة'].map((h) => (
-                    <TableCell key={h} sx={{ fontWeight: 700, fontSize: '0.75rem', color: isDark ? '#94A3B8' : '#64748B', borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }}>
+                  {['الوجبة', 'الأصناف', 'الوقت', 'تم التقديم', 'الحالة'].map(h => (
+                    <TableCell
+                      key={h}
+                      sx={{
+                        fontWeight: 700,
+                        fontSize: '0.75rem',
+                        color: isDark ? '#94A3B8' : '#64748B',
+                        borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)',
+                      }}
+                    >
                       {h}
                     </TableCell>
                   ))}
@@ -406,35 +650,100 @@ export default function NutritionProDashboard() {
               </TableHead>
               <TableBody>
                 {todayMenu.map((row, i) => (
-                  <TableRow key={i} sx={{ '&:hover': { backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)' } }}>
-                    <TableCell sx={{ borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }}>
+                  <TableRow
+                    key={i}
+                    sx={{
+                      '&:hover': {
+                        backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
+                      },
+                    }}
+                  >
+                    <TableCell
+                      sx={{ borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }}
+                    >
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Avatar sx={{ width: 30, height: 30, borderRadius: '8px', background: alpha(COLORS[i % COLORS.length], 0.12) }}>
+                        <Avatar
+                          sx={{
+                            width: 30,
+                            height: 30,
+                            borderRadius: '8px',
+                            background: alpha(COLORS[i % COLORS.length], 0.12),
+                          }}
+                        >
                           <FlatwareIcon sx={{ fontSize: 14, color: COLORS[i % COLORS.length] }} />
                         </Avatar>
-                        <Typography sx={{ fontSize: '0.8rem', fontWeight: 600, color: isDark ? '#E2E8F0' : '#1E293B' }}>
+                        <Typography
+                          sx={{
+                            fontSize: '0.8rem',
+                            fontWeight: 600,
+                            color: isDark ? '#E2E8F0' : '#1E293B',
+                          }}
+                        >
                           {row.meal}
                         </Typography>
                       </Box>
                     </TableCell>
-                    <TableCell sx={{ fontSize: '0.75rem', color: isDark ? '#94A3B8' : '#64748B', borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)', maxWidth: 200 }}>
+                    <TableCell
+                      sx={{
+                        fontSize: '0.75rem',
+                        color: isDark ? '#94A3B8' : '#64748B',
+                        borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)',
+                        maxWidth: 200,
+                      }}
+                    >
                       {row.items}
                     </TableCell>
-                    <TableCell sx={{ fontSize: '0.75rem', fontWeight: 600, color: isDark ? '#E2E8F0' : '#334155', borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }}>
+                    <TableCell
+                      sx={{
+                        fontSize: '0.75rem',
+                        fontWeight: 600,
+                        color: isDark ? '#E2E8F0' : '#334155',
+                        borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)',
+                      }}
+                    >
                       {row.time}
                     </TableCell>
-                    <TableCell sx={{ fontSize: '0.8rem', fontWeight: 700, color: isDark ? '#E2E8F0' : '#1E293B', borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }}>
+                    <TableCell
+                      sx={{
+                        fontSize: '0.8rem',
+                        fontWeight: 700,
+                        color: isDark ? '#E2E8F0' : '#1E293B',
+                        borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)',
+                      }}
+                    >
                       {row.served}
                     </TableCell>
-                    <TableCell sx={{ borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }}>
+                    <TableCell
+                      sx={{ borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }}
+                    >
                       <Chip
-                        icon={row.status === 'مكتمل' ? <CheckCircleIcon sx={{ fontSize: '12px !important' }} /> : row.status === 'جاري' ? <LocalDiningIcon sx={{ fontSize: '12px !important' }} /> : <WarningAmberIcon sx={{ fontSize: '12px !important' }} />}
+                        icon={
+                          row.status === 'مكتمل' ? (
+                            <CheckCircleIcon sx={{ fontSize: '12px !important' }} />
+                          ) : row.status === 'جاري' ? (
+                            <LocalDiningIcon sx={{ fontSize: '12px !important' }} />
+                          ) : (
+                            <WarningAmberIcon sx={{ fontSize: '12px !important' }} />
+                          )
+                        }
                         label={row.status}
                         size="small"
                         sx={{
-                          height: 22, fontSize: '0.65rem', fontWeight: 700,
-                          backgroundColor: row.status === 'مكتمل' ? alpha('#22c55e', 0.12) : row.status === 'جاري' ? alpha('#f59e0b', 0.12) : alpha('#06b6d4', 0.12),
-                          color: row.status === 'مكتمل' ? '#22c55e' : row.status === 'جاري' ? '#f59e0b' : '#06b6d4',
+                          height: 22,
+                          fontSize: '0.65rem',
+                          fontWeight: 700,
+                          backgroundColor:
+                            row.status === 'مكتمل'
+                              ? alpha('#22c55e', 0.12)
+                              : row.status === 'جاري'
+                                ? alpha('#f59e0b', 0.12)
+                                : alpha('#06b6d4', 0.12),
+                          color:
+                            row.status === 'مكتمل'
+                              ? '#22c55e'
+                              : row.status === 'جاري'
+                                ? '#f59e0b'
+                                : '#06b6d4',
                           '& .MuiChip-icon': { color: 'inherit' },
                         }}
                       />

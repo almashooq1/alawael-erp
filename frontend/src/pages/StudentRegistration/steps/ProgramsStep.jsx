@@ -4,8 +4,19 @@
 
 import React from 'react';
 import {
-  Box, Grid, TextField, Typography, FormControl, InputLabel,
-  Select, MenuItem, Card, Chip, Alert, Divider, Fade,
+  Box,
+  Grid,
+  TextField,
+  Typography,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Card,
+  Chip,
+  Alert,
+  Divider,
+  Fade,
 } from '@mui/material';
 import { School, CheckCircle } from '@mui/icons-material';
 import { SectionTitle } from '../StyledComponents';
@@ -21,7 +32,9 @@ const ProgramsStep = ({ formData, fieldErrors, handleChange, handleMultiSelect }
         اختر البرامج المطلوبة *
       </Typography>
       {fieldErrors.selectedPrograms && (
-        <Alert severity="error" sx={{ mb: 2 }}>{fieldErrors.selectedPrograms}</Alert>
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {fieldErrors.selectedPrograms}
+        </Alert>
       )}
 
       <Grid container spacing={1.5} sx={{ mb: 3 }}>
@@ -30,15 +43,24 @@ const ProgramsStep = ({ formData, fieldErrors, handleChange, handleMultiSelect }
             <Card
               onClick={() => handleMultiSelect('selectedPrograms', key)}
               sx={{
-                cursor: 'pointer', textAlign: 'center', py: 1.5, px: 1,
+                cursor: 'pointer',
+                textAlign: 'center',
+                py: 1.5,
+                px: 1,
                 border: formData.selectedPrograms.includes(key)
-                  ? `2px solid ${brandColors.primaryStart}` : '2px solid transparent',
-                bgcolor: formData.selectedPrograms.includes(key) ? 'rgba(102,126,234,0.06)' : 'transparent',
+                  ? `2px solid ${brandColors.primaryStart}`
+                  : '2px solid transparent',
+                bgcolor: formData.selectedPrograms.includes(key)
+                  ? 'rgba(102,126,234,0.06)'
+                  : 'transparent',
                 transition: 'all 0.2s',
                 '&:hover': { boxShadow: 3 },
               }}
             >
-              <Typography variant="body2" fontWeight={formData.selectedPrograms.includes(key) ? 'bold' : 'normal'}>
+              <Typography
+                variant="body2"
+                fontWeight={formData.selectedPrograms.includes(key) ? 'bold' : 'normal'}
+              >
                 {label}
               </Typography>
               {formData.selectedPrograms.includes(key) && (
@@ -61,20 +83,27 @@ const ProgramsStep = ({ formData, fieldErrors, handleChange, handleMultiSelect }
             <InputLabel>الفترة</InputLabel>
             <Select value={formData.shift} label="الفترة" onChange={handleChange('shift')}>
               {Object.entries(SHIFTS).map(([key, label]) => (
-                <MenuItem key={key} value={key}>{label}</MenuItem>
+                <MenuItem key={key} value={key}>
+                  {label}
+                </MenuItem>
               ))}
             </Select>
           </FormControl>
         </Grid>
         <Grid item xs={12} sm={6}>
-          <Typography variant="body2" sx={{ mb: 1 }}>أيام الحضور:</Typography>
+          <Typography variant="body2" sx={{ mb: 1 }}>
+            أيام الحضور:
+          </Typography>
           <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
             {Object.entries(WEEK_DAYS).map(([key, label]) => (
-              <Chip key={key} label={label}
+              <Chip
+                key={key}
+                label={label}
                 onClick={() => handleMultiSelect('days', key)}
                 variant={formData.days.includes(key) ? 'filled' : 'outlined'}
                 color={formData.days.includes(key) ? 'primary' : 'default'}
-                sx={{ cursor: 'pointer' }} />
+                sx={{ cursor: 'pointer' }}
+              />
             ))}
           </Box>
         </Grid>
@@ -82,12 +111,22 @@ const ProgramsStep = ({ formData, fieldErrors, handleChange, handleMultiSelect }
 
       <Grid container spacing={2} sx={{ mt: 2 }}>
         <Grid item xs={12} sm={6}>
-          <TextField fullWidth label="المركز" value={formData.centerName}
-            onChange={handleChange('centerName')} placeholder="اسم المركز" />
+          <TextField
+            fullWidth
+            label="المركز"
+            value={formData.centerName}
+            onChange={handleChange('centerName')}
+            placeholder="اسم المركز"
+          />
         </Grid>
         <Grid item xs={12} sm={6}>
-          <TextField fullWidth label="الفرع" value={formData.branchName}
-            onChange={handleChange('branchName')} placeholder="اسم الفرع" />
+          <TextField
+            fullWidth
+            label="الفرع"
+            value={formData.branchName}
+            onChange={handleChange('branchName')}
+            placeholder="اسم الفرع"
+          />
         </Grid>
       </Grid>
     </Box>

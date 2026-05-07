@@ -50,7 +50,9 @@ const StudentManagementList = () => {
       <GradientHeader>
         <Slide in direction="down" timeout={600}>
           <Box>
-            <Avatar sx={{ width: 64, height: 64, bgcolor: 'rgba(255,255,255,0.2)', mx: 'auto', mb: 2 }}>
+            <Avatar
+              sx={{ width: 64, height: 64, bgcolor: 'rgba(255,255,255,0.2)', mx: 'auto', mb: 2 }}
+            >
               <School sx={{ fontSize: 32 }} />
             </Avatar>
             <Typography variant="h5" fontWeight="bold" sx={{ mb: 0.5 }}>
@@ -129,7 +131,7 @@ const StudentManagementList = () => {
       <Snackbar
         open={snackbar.open}
         autoHideDuration={4000}
-        onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
+        onClose={() => setSnackbar(s => ({ ...s, open: false }))}
       >
         <Alert severity={snackbar.severity} sx={{ width: '100%' }}>
           {snackbar.message}

@@ -33,7 +33,7 @@ import {
   TrendingUp as TrendingUpIcon,
   Edit as EditIcon,
   Visibility as ViewIcon,
-  } from '@mui/icons-material';
+} from '@mui/icons-material';
 import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';

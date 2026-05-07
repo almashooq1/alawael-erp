@@ -79,8 +79,8 @@ const ResetPasswordDialog = ({ open, onClose, user, onResetPassword }) => {
       <DialogContent>
         <Box sx={{ pt: 1 }}>
           <Alert severity="warning" sx={{ mb: 2 }}>
-            سيتم إعادة تعيين كلمة المرور للمستخدم: <strong>{user.fullName || user.username}</strong>.
-            سيُطلب من المستخدم تغيير كلمة المرور عند تسجيل الدخول التالي.
+            سيتم إعادة تعيين كلمة المرور للمستخدم: <strong>{user.fullName || user.username}</strong>
+            . سيُطلب من المستخدم تغيير كلمة المرور عند تسجيل الدخول التالي.
           </Alert>
 
           <Typography variant="subtitle2" sx={{ mb: 1.5 }}>
@@ -114,7 +114,7 @@ const ResetPasswordDialog = ({ open, onClose, user, onResetPassword }) => {
                 label="كلمة المرور الجديدة"
                 type={showPassword ? 'text' : 'password'}
                 value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
+                onChange={e => setNewPassword(e.target.value)}
                 size="small"
                 dir="ltr"
                 placeholder="أدخل كلمة مرور جديدة"
@@ -125,18 +125,17 @@ const ResetPasswordDialog = ({ open, onClose, user, onResetPassword }) => {
                         <CopyIcon fontSize="small" />
                       </IconButton>
                       <IconButton size="small" onClick={() => setShowPassword(!showPassword)}>
-                        {showPassword ? <HideIcon fontSize="small" /> : <ShowIcon fontSize="small" />}
+                        {showPassword ? (
+                          <HideIcon fontSize="small" />
+                        ) : (
+                          <ShowIcon fontSize="small" />
+                        )}
                       </IconButton>
                     </InputAdornment>
                   ),
                 }}
               />
-              <Button
-                size="small"
-                variant="text"
-                sx={{ mt: 1 }}
-                onClick={handleGenerate}
-              >
+              <Button size="small" variant="text" sx={{ mt: 1 }} onClick={handleGenerate}>
                 توليد كلمة مرور عشوائية
               </Button>
             </Box>
@@ -154,12 +153,7 @@ const ResetPasswordDialog = ({ open, onClose, user, onResetPassword }) => {
         <Button onClick={onClose} color="inherit">
           إلغاء
         </Button>
-        <Button
-          variant="contained"
-          color="warning"
-          onClick={handleReset}
-          startIcon={<ResetIcon />}
-        >
+        <Button variant="contained" color="warning" onClick={handleReset} startIcon={<ResetIcon />}>
           إعادة تعيين
         </Button>
       </DialogActions>

@@ -40,7 +40,7 @@ import studentManagementService from 'services/studentManagementService';
 import logger from 'utils/logger';
 
 // Color for level badges
-const levelColor = (level) => {
+const levelColor = level => {
   if (level === 'ممتاز') return '#43e97b';
   if (level === 'جيد جداً') return '#4facfe';
   if (level === 'جيد') return '#fee140';
@@ -77,7 +77,9 @@ const InfoCard = ({ icon, title, children, gradient: bg }) => (
     >
       <Stack direction="row" spacing={1} alignItems="center">
         {icon}
-        <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>{title}</Typography>
+        <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+          {title}
+        </Typography>
       </Stack>
     </Box>
     <CardContent sx={{ pt: 2 }}>{children}</CardContent>
@@ -89,8 +91,12 @@ const ProgressItem = ({ label, value, max = 100 }) => {
   return (
     <Box sx={{ mb: 1.5 }}>
       <Stack direction="row" justifyContent="space-between" sx={{ mb: 0.5 }}>
-        <Typography variant="body2" sx={{ fontWeight: 600 }}>{label}</Typography>
-        <Typography variant="body2" color="text.secondary">{pct}%</Typography>
+        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+          {label}
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          {pct}%
+        </Typography>
       </Stack>
       <LinearProgress
         variant="determinate"
@@ -101,7 +107,8 @@ const ProgressItem = ({ label, value, max = 100 }) => {
           bgcolor: '#e8eaf6',
           '& .MuiLinearProgress-bar': {
             borderRadius: 5,
-            background: pct >= 80 ? gradients.success : pct >= 50 ? gradients.primary : gradients.orange,
+            background:
+              pct >= 80 ? gradients.success : pct >= 50 ? gradients.primary : gradients.orange,
           },
         }}
       />
@@ -138,7 +145,9 @@ const ParentStudentReport = () => {
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+      <Box
+        sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}
+      >
         <CircularProgress size={60} />
       </Box>
     );
@@ -146,11 +155,29 @@ const ParentStudentReport = () => {
 
   if (error && !report) {
     return (
-      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', gap: 2 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: '60vh',
+          gap: 2,
+        }}
+      >
         <Alert severity="error">{error}</Alert>
         <Stack direction="row" spacing={2}>
-          <Button variant="contained" onClick={loadReport}>إعادة المحاولة</Button>
-          <Button variant="outlined" onClick={() => window.history.length > 1 ? navigate(-1) : navigate('/student-reports-center')}>رجوع</Button>
+          <Button variant="contained" onClick={loadReport}>
+            إعادة المحاولة
+          </Button>
+          <Button
+            variant="outlined"
+            onClick={() =>
+              window.history.length > 1 ? navigate(-1) : navigate('/student-reports-center')
+            }
+          >
+            رجوع
+          </Button>
         </Stack>
       </Box>
     );
@@ -184,7 +211,12 @@ const ParentStudentReport = () => {
     >
       {/* ═══ Toolbar ═══ */}
       <Stack direction="row" justifyContent="space-between" sx={{ mb: 3 }} className="no-print">
-        <Button startIcon={<ArrowBackIcon />} onClick={() => window.history.length > 1 ? navigate(-1) : navigate('/student-reports-center')}>
+        <Button
+          startIcon={<ArrowBackIcon />}
+          onClick={() =>
+            window.history.length > 1 ? navigate(-1) : navigate('/student-reports-center')
+          }
+        >
           رجوع
         </Button>
         <Button variant="contained" startIcon={<PrintIcon />} onClick={handlePrint}>
@@ -304,7 +336,9 @@ const ParentStudentReport = () => {
         <Grid item xs={6} sm={3}>
           <Card sx={{ textAlign: 'center', p: 2, borderRadius: 3 }}>
             <AttendanceIcon sx={{ fontSize: 36, color: '#4facfe', mb: 1 }} />
-            <Typography variant="caption" sx={{ display: 'block', mb: 0.5 }}>الحضور</Typography>
+            <Typography variant="caption" sx={{ display: 'block', mb: 0.5 }}>
+              الحضور
+            </Typography>
             <LevelBadge level={attendance.level || '—'} />
             <Typography variant="h5" sx={{ fontWeight: 800, mt: 1 }}>
               {attendance.rate || 0}%
@@ -314,7 +348,9 @@ const ParentStudentReport = () => {
         <Grid item xs={6} sm={3}>
           <Card sx={{ textAlign: 'center', p: 2, borderRadius: 3 }}>
             <TrendingUpIcon sx={{ fontSize: 36, color: '#43e97b', mb: 1 }} />
-            <Typography variant="caption" sx={{ display: 'block', mb: 0.5 }}>التقدم الأكاديمي</Typography>
+            <Typography variant="caption" sx={{ display: 'block', mb: 0.5 }}>
+              التقدم الأكاديمي
+            </Typography>
             <LevelBadge level={progress.level || '—'} />
             <Typography variant="h5" sx={{ fontWeight: 800, mt: 1 }}>
               {progress.overall || 0}%
@@ -324,8 +360,22 @@ const ParentStudentReport = () => {
         <Grid item xs={6} sm={3}>
           <Card sx={{ textAlign: 'center', p: 2, borderRadius: 3 }}>
             <StarIcon sx={{ fontSize: 36, color: '#fee140', mb: 1 }} />
-            <Typography variant="caption" sx={{ display: 'block', mb: 0.5 }}>السلوك</Typography>
-            <LevelBadge level={behavior.points >= 80 ? 'ممتاز' : behavior.points >= 60 ? 'جيد جداً' : behavior.points >= 40 ? 'جيد' : behavior.points >= 20 ? 'مقبول' : '—'} />
+            <Typography variant="caption" sx={{ display: 'block', mb: 0.5 }}>
+              السلوك
+            </Typography>
+            <LevelBadge
+              level={
+                behavior.points >= 80
+                  ? 'ممتاز'
+                  : behavior.points >= 60
+                    ? 'جيد جداً'
+                    : behavior.points >= 40
+                      ? 'جيد'
+                      : behavior.points >= 20
+                        ? 'مقبول'
+                        : '—'
+              }
+            />
             <Typography variant="h5" sx={{ fontWeight: 800, mt: 1 }}>
               {behavior.points || 0} نقطة
             </Typography>
@@ -334,8 +384,20 @@ const ParentStudentReport = () => {
         <Grid item xs={6} sm={3}>
           <Card sx={{ textAlign: 'center', p: 2, borderRadius: 3 }}>
             <CheckCircleIcon sx={{ fontSize: 36, color: '#a18cd1', mb: 1 }} />
-            <Typography variant="caption" sx={{ display: 'block', mb: 0.5 }}>تحقيق الأهداف</Typography>
-            <LevelBadge level={goals.total > 0 ? (goals.achieved / goals.total >= 0.8 ? 'ممتاز' : goals.achieved / goals.total >= 0.5 ? 'جيد جداً' : 'مقبول') : '—'} />
+            <Typography variant="caption" sx={{ display: 'block', mb: 0.5 }}>
+              تحقيق الأهداف
+            </Typography>
+            <LevelBadge
+              level={
+                goals.total > 0
+                  ? goals.achieved / goals.total >= 0.8
+                    ? 'ممتاز'
+                    : goals.achieved / goals.total >= 0.5
+                      ? 'جيد جداً'
+                      : 'مقبول'
+                  : '—'
+              }
+            />
             <Typography variant="h5" sx={{ fontWeight: 800, mt: 1 }}>
               {goals.achieved || 0}/{goals.total || 0}
             </Typography>
@@ -352,7 +414,11 @@ const ParentStudentReport = () => {
             </Typography>
             {attendance.totalDays > 0 && (
               <>
-                <ProgressItem label="أيام الحضور" value={attendance.present || 0} max={attendance.totalDays} />
+                <ProgressItem
+                  label="أيام الحضور"
+                  value={attendance.present || 0}
+                  max={attendance.totalDays}
+                />
                 <Divider sx={{ my: 1.5 }} />
                 <Stack direction="row" justifyContent="space-between">
                   <Typography variant="body2" color="text.secondary">
@@ -378,7 +444,9 @@ const ParentStudentReport = () => {
             </Typography>
             {(goals.achievedList || []).length > 0 && (
               <Box sx={{ mb: 1 }}>
-                <Typography variant="body2" sx={{ fontWeight: 700, mb: 0.5, color: '#43e97b' }}>أهداف محققة:</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 700, mb: 0.5, color: '#43e97b' }}>
+                  أهداف محققة:
+                </Typography>
                 {goals.achievedList.map((g, idx) => (
                   <Chip key={idx} label={g} size="small" sx={{ m: 0.3, bgcolor: '#e8f5e9' }} />
                 ))}
@@ -386,7 +454,9 @@ const ParentStudentReport = () => {
             )}
             {(goals.inProgressList || []).length > 0 && (
               <Box>
-                <Typography variant="body2" sx={{ fontWeight: 700, mb: 0.5, color: '#4facfe' }}>أهداف قيد العمل:</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 700, mb: 0.5, color: '#4facfe' }}>
+                  أهداف قيد العمل:
+                </Typography>
                 {goals.inProgressList.map((g, idx) => (
                   <Chip key={idx} label={g} size="small" sx={{ m: 0.3, bgcolor: '#e3f2fd' }} />
                 ))}
@@ -405,7 +475,9 @@ const ParentStudentReport = () => {
             </Typography>
             {(behavior.recentPositive || []).length > 0 && (
               <Stack spacing={1}>
-                <Typography variant="body2" sx={{ fontWeight: 700 }}>سلوكيات إيجابية حديثة:</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                  سلوكيات إيجابية حديثة:
+                </Typography>
                 {behavior.recentPositive.map((h, i) => (
                   <Chip
                     key={i}
@@ -421,7 +493,8 @@ const ParentStudentReport = () => {
         <Grid item xs={12} md={6}>
           <InfoCard icon={<SchoolIcon />} title="الأهداف التعليمية" gradient={gradients.purple}>
             <Typography variant="body1" sx={{ mb: 2, lineHeight: 1.8 }}>
-              إجمالي الأهداف: {goals.total || 0} — محققة: {goals.achieved || 0} — قيد التنفيذ: {goals.inProgress || 0}
+              إجمالي الأهداف: {goals.total || 0} — محققة: {goals.achieved || 0} — قيد التنفيذ:{' '}
+              {goals.inProgress || 0}
             </Typography>
             {goals.total > 0 && (
               <ProgressItem label="الأهداف المحققة" value={goals.achieved || 0} max={goals.total} />
@@ -433,7 +506,16 @@ const ParentStudentReport = () => {
       {/* ═══ Recommendations ═══ */}
       {recommendations.length > 0 && (
         <Card sx={{ mb: 3, borderRadius: 3 }}>
-          <Box sx={{ background: gradients.info, py: 1.5, px: 2, borderTopLeftRadius: 12, borderTopRightRadius: 12, color: '#fff' }}>
+          <Box
+            sx={{
+              background: gradients.info,
+              py: 1.5,
+              px: 2,
+              borderTopLeftRadius: 12,
+              borderTopRightRadius: 12,
+              color: '#fff',
+            }}
+          >
             <Stack direction="row" spacing={1} alignItems="center">
               <InfoIcon />
               <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
@@ -481,7 +563,8 @@ const ParentStudentReport = () => {
           مركز الأوائل للتربية الخاصة
         </Typography>
         <Typography variant="caption" color="text.secondary">
-          تم إنشاء هذا التقرير بتاريخ {new Date().toLocaleDateString('ar-EG')} — للتواصل مع المعلم المسؤول يرجى زيارة المركز
+          تم إنشاء هذا التقرير بتاريخ {new Date().toLocaleDateString('ar-EG')} — للتواصل مع المعلم
+          المسؤول يرجى زيارة المركز
         </Typography>
         <Divider sx={{ my: 1.5 }} />
         <Typography variant="caption" color="text.secondary" sx={{ fontStyle: 'italic' }}>

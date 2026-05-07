@@ -10,10 +10,7 @@ import {
   Avatar,
   Divider,
 } from '@mui/material';
-import {
-  Assessment as AssessmentIcon,
-  Add as AddIcon,
-} from '@mui/icons-material';
+import { Assessment as AssessmentIcon, Add as AddIcon } from '@mui/icons-material';
 import { SCALE_ICONS, TabPanel } from './constants';
 
 /**
@@ -22,7 +19,7 @@ import { SCALE_ICONS, TabPanel } from './constants';
 const ScaleCardsTab = ({ tabValue, scales, onOpenAssessment }) => (
   <TabPanel value={tabValue} index={0}>
     <Grid container spacing={3}>
-      {scales.map((scale) => (
+      {scales.map(scale => (
         <Grid item xs={12} sm={6} md={4} key={scale.id}>
           <Card
             elevation={3}
@@ -60,7 +57,7 @@ const ScaleCardsTab = ({ tabValue, scales, onOpenAssessment }) => (
                 المجالات ({scale.domains.length}):
               </Typography>
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                {scale.domains.map((d) => (
+                {scale.domains.map(d => (
                   <Chip
                     key={d.key}
                     label={`${d.name} (${d.maxScore})`}
@@ -77,7 +74,7 @@ const ScaleCardsTab = ({ tabValue, scales, onOpenAssessment }) => (
                 مستويات التفسير:
               </Typography>
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                {scale.interpretation.map((interp) => (
+                {scale.interpretation.map(interp => (
                   <Chip
                     key={interp.level}
                     label={`${interp.label} (${interp.min}-${interp.max})`}
@@ -97,7 +94,10 @@ const ScaleCardsTab = ({ tabValue, scales, onOpenAssessment }) => (
                 variant="contained"
                 fullWidth
                 startIcon={<AddIcon />}
-                sx={{ bgcolor: scale.color, '&:hover': { bgcolor: scale.color, filter: 'brightness(0.9)' } }}
+                sx={{
+                  bgcolor: scale.color,
+                  '&:hover': { bgcolor: scale.color, filter: 'brightness(0.9)' },
+                }}
                 onClick={() => onOpenAssessment(scale)}
               >
                 تطبيق المقياس

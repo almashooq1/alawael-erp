@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 // pushService.js
 // خدمة إرسال إشعارات Push عبر FCM
 // يتطلب إضافة ملف serviceAccountKey.json في backend/config أو backend/

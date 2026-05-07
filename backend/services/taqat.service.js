@@ -167,7 +167,8 @@ class TaqatService {
       if (filters.disabilityType) query.suitableDisabilityTypes = filters.disabilityType;
       if (filters.jobType) query.jobType = filters.jobType;
       if (filters.sector) query.sector = filters.sector;
-      if (filters.location) query.location = { $regex: escapeRegex(filters.location), $options: 'i' };
+      if (filters.location)
+        query.location = { $regex: escapeRegex(filters.location), $options: 'i' };
       if (filters.hadafSupported !== undefined) query.hadafSupported = filters.hadafSupported;
       if (filters.search) {
         query.$or = [

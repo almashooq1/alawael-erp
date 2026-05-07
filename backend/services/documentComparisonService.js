@@ -1,327 +1,220 @@
+'use strict';
+
 /**
- * Document Comparison Service — خدمة مقارنة المستندات
- *
- * @deprecated Use services/documents/documentComparison.service.js instead.
- * Kept for documentAdvanced.routes.js legacy compatibility.
- * Migration tracked in docs/technical-debt/consolidation-roadmap.md.
- *
- * Features:
- * - Side-by-side document comparison
- * - Inline diff highlighting
- * - Version-to-version comparison
- * - Structural comparison (metadata, properties)
- * - Comparison reports
+ * documentComparisonService — in-memory singleton
+ * Flat-path barrel for document comparison operations.
  */
 
-const _crypto = require('crypto');
+const { randomUUID } = require('crypto');
+
+const FIELD_NAMES_AR = {
+  title: 'العنوان',
+  category: 'التصنيف',
+  fileSize: 'حجم الملف',
+  status: 'الحالة',
+  version: 'الإصدار',
+  fileType: 'نوع الملف',
+  department: 'القسم',
+  language: 'اللغة',
+  priority: 'الأولوية',
+};
+
+const METADATA_FIELDS = Object.keys(FIELD_NAMES_AR);
 
 class DocumentComparisonService {
   constructor() {
     this.comparisonHistory = [];
   }
 
-  /**
-   * Compare two documents or versions — مقارنة مستندين
-   */
+  // ── compare ────────────────────────────────────────────────────────────────
   async compare(docA, docB) {
-    const comparison = {
-      id: `cmp_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
-      documentA: {
-        id: docA.id,
-        title: docA.title || '',
-        version: docA.version || 1,
-      },
-      documentB: {
-        id: docB.id,
-        title: docB.title || '',
-        version: docB.version || 1,
-      },
-      createdAt: new Date(),
-    };
-
-    // Metadata comparison
-    comparison.metadataDiff = this._compareMetadata(docA, docB);
-
-    // Content comparison (text-based)
-    if (docA.content && docB.content) {
-      comparison.contentDiff = this._compareContent(
-        typeof docA.content === 'string' ? docA.content : JSON.stringify(docA.content),
-        typeof docB.content === 'string' ? docB.content : JSON.stringify(docB.content)
-      );
+    let hashMatch = null;
+    if (docA.hash != null && docB.hash != null) {
+      hashMatch = docA.hash === docB.hash;
     }
 
-    // Tags comparison
-    comparison.tagsDiff = this._compareTags(docA.tags || [], docB.tags || []);
+    const metadataDiff = this._compareMetadata(docA, docB);
+    const tagsDiff = this._compareTags(docA.tags || [], docB.tags || []);
 
-    // File hash comparison
-    comparison.hashMatch = docA.hash && docB.hash ? docA.hash === docB.hash : null;
+    let contentDiff;
+    if (docA.content != null && docB.content != null) {
+      contentDiff = this._compareContent(docA.content, docB.content);
+    }
 
-    // Summary
-    comparison.summary = this._generateSummary(comparison);
+    const summary = this._generateSummary({ hashMatch, metadataDiff, tagsDiff, contentDiff });
 
-    this.comparisonHistory.push(comparison);
+    const result = {
+      success: true,
+      data: { hashMatch, metadataDiff, tagsDiff, summary },
+    };
+    if (contentDiff !== undefined) result.data.contentDiff = contentDiff;
 
-    return { success: true, data: comparison };
-  }
-
-  /**
-   * Compare metadata — مقارنة البيانات الوصفية
-   */
-  _compareMetadata(docA, docB) {
-    const fields = [
-      'title',
-      'description',
-      'category',
-      'status',
-      'fileSize',
-      'mimeType',
-      'isPublic',
-      'folder',
-      'approvalStatus',
-    ];
-
-    const diff = [];
-
-    fields.forEach(field => {
-      const valueA = docA[field];
-      const valueB = docB[field];
-
-      if (JSON.stringify(valueA) !== JSON.stringify(valueB)) {
-        diff.push({
-          field,
-          fieldAr: this._getFieldNameAr(field),
-          valueA: valueA ?? 'غير محدد',
-          valueB: valueB ?? 'غير محدد',
-          changed: true,
-        });
-      } else {
-        diff.push({
-          field,
-          fieldAr: this._getFieldNameAr(field),
-          valueA: valueA ?? 'غير محدد',
-          valueB: valueB ?? 'غير محدد',
-          changed: false,
-        });
-      }
+    this.comparisonHistory.push({
+      id: randomUUID(),
+      docAId: docA.id,
+      docBId: docB.id,
+      timestamp: new Date(),
+      summary,
     });
 
-    return {
-      total: diff.length,
-      changed: diff.filter(d => d.changed).length,
-      unchanged: diff.filter(d => !d.changed).length,
-      details: diff,
-    };
+    return result;
   }
 
-  /**
-   * Get Arabic field name
-   */
+  // ── _compareMetadata ───────────────────────────────────────────────────────
+  _compareMetadata(a, b) {
+    const details = METADATA_FIELDS.map(field => {
+      const changed = (a[field] ?? null) !== (b[field] ?? null);
+      return {
+        field,
+        fieldAr: this._getFieldNameAr(field),
+        changed,
+        valueA: a[field],
+        valueB: b[field],
+      };
+    });
+    const changed = details.filter(d => d.changed).length;
+    const unchanged = details.filter(d => !d.changed).length;
+    return { total: METADATA_FIELDS.length, changed, unchanged, details };
+  }
+
+  // ── _getFieldNameAr ────────────────────────────────────────────────────────
   _getFieldNameAr(field) {
-    const map = {
-      title: 'العنوان',
-      description: 'الوصف',
-      category: 'التصنيف',
-      status: 'الحالة',
-      fileSize: 'حجم الملف',
-      mimeType: 'نوع الملف',
-      isPublic: 'عام',
-      folder: 'المجلد',
-      approvalStatus: 'حالة الموافقة',
-    };
-    return map[field] || field;
+    return FIELD_NAMES_AR[field] || field;
   }
 
-  /**
-   * Compare text content (line-by-line diff) — مقارنة المحتوى النصي
-   */
-  _compareContent(textA, textB) {
-    const linesA = textA.split('\n');
-    const linesB = textB.split('\n');
-
-    const diff = [];
-    const maxLines = Math.max(linesA.length, linesB.length);
+  // ── _compareContent ────────────────────────────────────────────────────────
+  _compareContent(strA, strB) {
+    const linesA = strA.split('\n');
+    const linesB = strB.split('\n');
+    const totalLinesA = linesA.length;
+    const totalLinesB = linesB.length;
+    const maxLen = Math.max(totalLinesA, totalLinesB);
 
     let added = 0,
       removed = 0,
       modified = 0,
       unchanged = 0;
 
-    for (let i = 0; i < maxLines; i++) {
-      const lineA = linesA[i];
-      const lineB = linesB[i];
+    for (let i = 0; i < maxLen; i++) {
+      const lineA = i < totalLinesA ? linesA[i] : undefined;
+      const lineB = i < totalLinesB ? linesB[i] : undefined;
 
       if (lineA === undefined) {
-        diff.push({ lineNumber: i + 1, type: 'added', content: lineB });
         added++;
       } else if (lineB === undefined) {
-        diff.push({ lineNumber: i + 1, type: 'removed', content: lineA });
         removed++;
-      } else if (lineA !== lineB) {
-        diff.push({
-          lineNumber: i + 1,
-          type: 'modified',
-          contentA: lineA,
-          contentB: lineB,
-          charDiff: this._compareChars(lineA, lineB),
-        });
-        modified++;
-      } else {
-        diff.push({ lineNumber: i + 1, type: 'unchanged', content: lineA });
+      } else if (lineA === lineB) {
         unchanged++;
+      } else {
+        modified++;
       }
     }
 
-    return {
-      totalLinesA: linesA.length,
-      totalLinesB: linesB.length,
-      added,
-      removed,
-      modified,
-      unchanged,
-      changePercentage:
-        maxLines > 0 ? Math.round(((added + removed + modified) / maxLines) * 100) : 0,
-      details: diff,
-    };
+    const changed = added + removed + modified;
+    const changePercentage = maxLen > 0 ? Math.round((changed / maxLen) * 100) : 0;
+
+    return { added, removed, modified, unchanged, changePercentage, totalLinesA, totalLinesB };
   }
 
-  /**
-   * Character-level diff for modified lines
-   */
+  // ── _compareChars ──────────────────────────────────────────────────────────
   _compareChars(strA, strB) {
     const changes = [];
     const maxLen = Math.max(strA.length, strB.length);
 
-    let currentChange = null;
-
-    for (let i = 0; i < maxLen; i++) {
-      const charA = strA[i];
-      const charB = strB[i];
-      const isDiff = charA !== charB;
-
-      if (isDiff && !currentChange) {
-        currentChange = {
-          start: i,
-          type: charA === undefined ? 'added' : charB === undefined ? 'removed' : 'modified',
-        };
-      } else if (!isDiff && currentChange) {
-        currentChange.end = i;
-        currentChange.length = i - currentChange.start;
-        changes.push(currentChange);
-        currentChange = null;
+    let i = 0;
+    while (i < maxLen) {
+      if (i >= strA.length) {
+        changes.push({ start: i, type: 'added' });
+        break;
       }
-    }
-
-    if (currentChange) {
-      currentChange.end = maxLen;
-      currentChange.length = maxLen - currentChange.start;
-      changes.push(currentChange);
+      if (i >= strB.length) {
+        changes.push({ start: i, type: 'removed' });
+        break;
+      }
+      if (strA[i] !== strB[i]) {
+        if (i < strA.length && i < strB.length) {
+          changes.push({ start: i, type: 'modified' });
+        }
+      }
+      i++;
     }
 
     return changes;
   }
 
-  /**
-   * Compare tags — مقارنة الوسوم
-   */
-  _compareTags(tagsA, tagsB) {
-    const setA = new Set(tagsA);
-    const setB = new Set(tagsB);
-
-    const added = tagsB.filter(t => !setA.has(t));
-    const removed = tagsA.filter(t => !setB.has(t));
-    const common = tagsA.filter(t => setB.has(t));
-
+  // ── _compareTags ──────────────────────────────────────────────────────────
+  _compareTags(arrA = [], arrB = []) {
+    const setA = new Set(arrA);
+    const setB = new Set(arrB);
+    const common = arrA.filter(t => setB.has(t));
+    const removed = arrA.filter(t => !setB.has(t));
+    const added = arrB.filter(t => !setA.has(t));
     return { added, removed, common };
   }
 
-  /**
-   * Generate comparison summary — ملخص المقارنة
-   */
-  _generateSummary(comparison) {
-    const metaChanged = comparison.metadataDiff.changed;
-    const contentChangePct = comparison.contentDiff?.changePercentage || 0;
-    const tagsChanged = comparison.tagsDiff.added.length + comparison.tagsDiff.removed.length > 0;
-
+  // ── _generateSummary ──────────────────────────────────────────────────────
+  _generateSummary({ hashMatch, metadataDiff, tagsDiff, contentDiff }) {
     let similarity;
-    if (comparison.hashMatch === true) {
-      similarity = 100;
-    } else if (comparison.contentDiff) {
-      similarity = 100 - contentChangePct;
+
+    if (contentDiff != null) {
+      similarity = 100 - (contentDiff.changePercentage || 0);
     } else {
-      const metaTotal = comparison.metadataDiff.total;
-      const metaUnchanged = comparison.metadataDiff.unchanged;
-      similarity = metaTotal > 0 ? Math.round((metaUnchanged / metaTotal) * 100) : 0;
+      // Metadata-based similarity
+      if (
+        metadataDiff.changed === 0 &&
+        (!tagsDiff || (tagsDiff.added.length === 0 && tagsDiff.removed.length === 0))
+      ) {
+        similarity = 100;
+      } else {
+        similarity = Math.round((metadataDiff.unchanged / metadataDiff.total) * 100);
+      }
     }
 
-    return {
-      similarity,
-      identical: comparison.hashMatch === true,
-      metadataChanges: metaChanged,
-      contentChangePercentage: contentChangePct,
-      tagsChanged,
-      overallAssessment:
-        similarity === 100
-          ? 'متطابق تماماً'
-          : similarity >= 90
-            ? 'تغييرات طفيفة'
-            : similarity >= 70
-              ? 'تغييرات معتدلة'
-              : similarity >= 50
-                ? 'تغييرات كبيرة'
-                : 'مختلف بشكل كبير',
-    };
+    const identical = similarity === 100 && hashMatch !== false;
+
+    let overallAssessment;
+    if (similarity === 100) {
+      overallAssessment = 'متطابق تماماً';
+    } else if (similarity <= 40) {
+      overallAssessment = 'مختلف بشكل كبير';
+    } else {
+      overallAssessment = 'متشابه جزئياً';
+    }
+
+    return { similarity, identical, overallAssessment };
   }
 
-  /**
-   * Get comparison history — سجل المقارنات
-   */
-  async getHistory(filters = {}) {
-    let history = [...this.comparisonHistory];
+  // ── getHistory ─────────────────────────────────────────────────────────────
+  async getHistory({ documentId, page = 1, limit = 10 } = {}) {
+    let filtered = [...this.comparisonHistory];
 
-    if (filters.documentId) {
-      history = history.filter(
-        c => c.documentA.id === filters.documentId || c.documentB.id === filters.documentId
-      );
+    if (documentId) {
+      filtered = filtered.filter(h => h.docAId === documentId || h.docBId === documentId);
     }
 
-    history.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
-    const page = parseInt(filters.page) || 1;
-    const limit = parseInt(filters.limit) || 20;
+    const total = filtered.length;
     const start = (page - 1) * limit;
+    const data = filtered.slice(start, start + limit);
 
-    return {
-      success: true,
-      data: history.slice(start, start + limit),
-      total: history.length,
-    };
+    return { success: true, total, data };
   }
 
-  /**
-   * Batch compare multiple versions — مقارنة إصدارات متعددة
-   */
+  // ── batchCompare ──────────────────────────────────────────────────────────
   async batchCompare(versions) {
-    if (!versions || versions.length < 2) {
-      return { success: false, message: 'يجب تقديم إصدارين على الأقل للمقارنة' };
+    if (!versions || !Array.isArray(versions) || versions.length < 2) {
+      return { success: false, error: 'يجب توفير إصدارين على الأقل للمقارنة' };
     }
 
-    const comparisons = [];
-    for (let i = 1; i < versions.length; i++) {
-      const result = await this.compare(versions[i - 1], versions[i]);
-      comparisons.push({
-        fromVersion: versions[i - 1].version || i,
-        toVersion: versions[i].version || i + 1,
-        comparison: result.data,
-      });
+    const data = [];
+    for (let i = 0; i < versions.length - 1; i++) {
+      const result = await this.compare(versions[i], versions[i + 1]);
+      data.push(result.data);
     }
 
     return {
       success: true,
-      data: comparisons,
-      summary: {
-        totalComparisons: comparisons.length,
-        versions: versions.length,
-      },
+      data,
+      summary: { totalComparisons: data.length, versions: versions.length },
     };
   }
 }

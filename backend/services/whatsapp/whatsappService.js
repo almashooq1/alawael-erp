@@ -21,8 +21,6 @@ const https = require('https');
 const logger = require('../../utils/logger');
 
 // ─── Config ─────────────────────────────────────────────────────────────────
-const BASE_URL = 'https://graph.facebook.com/v21.0';
-
 function cfg() {
   return {
     token: process.env.WHATSAPP_API_TOKEN || '',

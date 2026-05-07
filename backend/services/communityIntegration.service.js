@@ -128,9 +128,13 @@ async function getActivityStats() {
           count: { $sum: 1 },
           avgRating: { $avg: '$satisfactionRating' },
         },
-      }, { $limit: 1000 }
+      },
+      { $limit: 1000 },
     ]),
-    CommunityActivity.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }, { $limit: 1000 }]),
+    CommunityActivity.aggregate([
+      { $group: { _id: '$status', count: { $sum: 1 } } },
+      { $limit: 1000 },
+    ]),
     CommunityActivity.countDocuments(),
   ]);
 
@@ -210,8 +214,14 @@ async function deletePartnership(id) {
 
 async function getPartnershipStats() {
   const [typeStats, statusStats, total] = await Promise.all([
-    CivilPartnership.aggregate([{ $group: { _id: '$organizationType', count: { $sum: 1 } } }, { $limit: 1000 }]),
-    CivilPartnership.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }, { $limit: 1000 }]),
+    CivilPartnership.aggregate([
+      { $group: { _id: '$organizationType', count: { $sum: 1 } } },
+      { $limit: 1000 },
+    ]),
+    CivilPartnership.aggregate([
+      { $group: { _id: '$status', count: { $sum: 1 } } },
+      { $limit: 1000 },
+    ]),
     CivilPartnership.countDocuments(),
   ]);
   return { totalPartnerships: total, byType: typeStats, byStatus: statusStats };
@@ -317,7 +327,8 @@ async function getParticipationStats(activityId) {
   const [statusStats, engagementStats, totalCount] = await Promise.all([
     EventParticipation.aggregate([
       { $match: match },
-      { $group: { _id: '$participationStatus', count: { $sum: 1 } } }, { $limit: 1000 }
+      { $group: { _id: '$participationStatus', count: { $sum: 1 } } },
+      { $limit: 1000 },
     ]),
     EventParticipation.aggregate([
       { $match: match },
@@ -329,7 +340,8 @@ async function getParticipationStats(activityId) {
           avgSkillScore: { $avg: '$skillDevelopmentScore' },
           avgIndependence: { $avg: '$independenceScore' },
         },
-      }, { $limit: 1000 }
+      },
+      { $limit: 1000 },
     ]),
     EventParticipation.countDocuments(match),
   ]);
@@ -480,11 +492,13 @@ async function getAssessmentStats() {
           count: { $sum: 1 },
           avgScore: { $avg: '$overallIntegrationScore' },
         },
-      }, { $limit: 1000 }
+      },
+      { $limit: 1000 },
     ]),
     IntegrationAssessment.aggregate([
       { $match: { status: { $in: ['completed', 'approved'] } } },
-      { $group: { _id: '$trend', count: { $sum: 1 } } }, { $limit: 1000 }
+      { $group: { _id: '$trend', count: { $sum: 1 } } },
+      { $limit: 1000 },
     ]),
     IntegrationAssessment.aggregate([
       { $match: { status: { $in: ['completed', 'approved'] } } },
@@ -495,7 +509,8 @@ async function getAssessmentStats() {
           default: 'other',
           output: { count: { $sum: 1 } },
         },
-      }, { $limit: 1000 }
+      },
+      { $limit: 1000 },
     ]),
     IntegrationAssessment.countDocuments(),
   ]);
@@ -612,8 +627,14 @@ async function addMaterial(programId, materialData) {
 
 async function getAwarenessProgramStats() {
   const [typeStats, statusStats, impactStats, totalCount] = await Promise.all([
-    AwarenessProgram.aggregate([{ $group: { _id: '$programType', count: { $sum: 1 } } }, { $limit: 1000 }]),
-    AwarenessProgram.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }, { $limit: 1000 }]),
+    AwarenessProgram.aggregate([
+      { $group: { _id: '$programType', count: { $sum: 1 } } },
+      { $limit: 1000 },
+    ]),
+    AwarenessProgram.aggregate([
+      { $group: { _id: '$status', count: { $sum: 1 } } },
+      { $limit: 1000 },
+    ]),
     AwarenessProgram.aggregate([
       {
         $group: {
@@ -623,7 +644,8 @@ async function getAwarenessProgramStats() {
           totalImpressions: { $sum: '$socialMediaImpressions' },
           totalWorkshops: { $sum: '$totalWorkshopsCompleted' },
         },
-      }, { $limit: 1000 }
+      },
+      { $limit: 1000 },
     ]),
     AwarenessProgram.countDocuments(),
   ]);

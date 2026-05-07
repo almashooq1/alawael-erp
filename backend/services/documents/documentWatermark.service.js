@@ -457,6 +457,23 @@ class DocumentWatermarkService {
       },
     };
   }
+
+  // ── Legacy compatibility aliases (documentAdvanced.routes.js) ──────────────
+  async createTemplate(data) {
+    return this.createProfile(data);
+  }
+  async getTemplates(options = {}) {
+    return this.getProfiles(options);
+  }
+  async getPresets(options = {}) {
+    return this.getProfiles(options);
+  }
+  async getDocumentWatermarks(documentId, options = {}) {
+    return this.getLogs({ documentId, ...options });
+  }
+  async removeWatermark(trackingCode, userId) {
+    return this.revokeWatermark(trackingCode, userId);
+  }
 }
 
 module.exports = new DocumentWatermarkService();

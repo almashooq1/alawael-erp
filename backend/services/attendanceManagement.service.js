@@ -146,7 +146,7 @@ class AttendanceManagementService {
     // Shift lookup (optional — graceful if none found)
     const shift = await AttendanceManagementService._findEmployeeShift(employeeId);
     const scheduledStart = shift ? parseTimeToday(shift.startTime, now) : null;
-    const scheduledEnd = shift ? parseTimeToday(shift.endTime, now) : null;
+    const _scheduledEnd = shift ? parseTimeToday(shift.endTime, now) : null;
     const latenessMinutes = scheduledStart ? calcLatenessMinutes(now, scheduledStart) : 0;
     const status = deriveStatus(latenessMinutes);
 
@@ -333,7 +333,13 @@ class AttendanceManagementService {
   // 4. TODAY'S ATTENDANCE LIST
   // ═══════════════════════════════════════════════════════════════════════════
 
-  static async getTodayAttendance({ branchId, department, status, page = 1, limit = 50 } = {}) {
+  static async getTodayAttendance({
+    branchId: _branchId,
+    department: _department,
+    status,
+    page = 1,
+    limit = 50,
+  } = {}) {
     const { start, end } = todayRange();
     const skip = (page - 1) * limit;
 
@@ -659,7 +665,7 @@ class AttendanceManagementService {
   // 9. ANALYTICS & PATTERN ANALYSIS
   // ═══════════════════════════════════════════════════════════════════════════
 
-  static async getAnalytics({ period = 30, branchId, department } = {}) {
+  static async getAnalytics({ period = 30, branchId: _branchId, department: _department } = {}) {
     const end = new Date();
     const start = new Date();
     start.setDate(start.getDate() - period);
@@ -787,7 +793,7 @@ class AttendanceManagementService {
   // 10. EXPORT
   // ═══════════════════════════════════════════════════════════════════════════
 
-  static async exportMonthlyData(month, year, { department } = {}) {
+  static async exportMonthlyData(month, year, { department: _department } = {}) {
     const { start, end } = monthRange(month, year);
     const filter = { date: { $gte: start, $lte: end } };
 
@@ -828,7 +834,7 @@ class AttendanceManagementService {
     return Shift().findOne({ assignedStaff: employeeId, isActive: true }).lean();
   }
 
-  static async _getWeeklyTrend(branchId, department) {
+  static async _getWeeklyTrend(_branchId, _department) {
     const days = [];
     for (let i = 6; i >= 0; i--) {
       const d = new Date();

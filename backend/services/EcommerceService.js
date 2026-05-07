@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * E-Commerce Service
  * Handles shopping cart, checkout, and product management

@@ -667,6 +667,29 @@ class DocumentAuditService {
       createdAt: log.createdAt,
     };
   }
+
+  // ── Legacy compatibility aliases (documentAdvanced.routes.js) ──────────────
+  async logEvent(params) {
+    return this.log(params);
+  }
+  async getAuditLog(documentId, options = {}) {
+    return this.getDocumentAuditLog(documentId, options);
+  }
+  async getDocumentAuditTrail(documentId, options = {}) {
+    return this.getDocumentAuditLog(documentId, options);
+  }
+  async getUserActivityReport(userId, options = {}) {
+    return this.getUserAuditLog(userId, options);
+  }
+  async generateComplianceReport(options = {}) {
+    return this.getComplianceReport(options);
+  }
+  async getStatistics() {
+    return this.getAuditStats();
+  }
+  async exportAuditLog(options = {}) {
+    return this.getDocumentAuditLog(options.documentId, options);
+  }
 }
 
 module.exports = new DocumentAuditService();

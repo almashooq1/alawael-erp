@@ -530,6 +530,17 @@ class DocumentFavoritesService {
       createdAt: c.createdAt,
     };
   }
+
+  // ── Legacy compatibility aliases (documentAdvanced.routes.js) ──────────────
+  async isFavorited(userId, documentId) {
+    return this.isFavorite(userId, documentId);
+  }
+  async getStatistics(userId) {
+    return this.getStats(userId);
+  }
+  async updateFavorite(userId, documentId, _updates) {
+    return this.toggleFavorite(userId, documentId);
+  }
 }
 
 module.exports = new DocumentFavoritesService();

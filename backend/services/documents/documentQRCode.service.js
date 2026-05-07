@@ -539,6 +539,29 @@ class DocumentQRCodeService extends EventEmitter {
       },
     };
   }
+
+  // ── Legacy compatibility aliases (documentAdvanced.routes.js) ──────────────
+  async generateQR(documentId, options = {}) {
+    return this.generate(documentId, options);
+  }
+  async batchGenerateQR(documentIds, options = {}) {
+    return this.bulkGenerate(documentIds, options);
+  }
+  async getDocumentQRCodes(documentId, options = {}) {
+    return this.getForDocument(documentId, options);
+  }
+  async scanQR(code, scanInfo = {}) {
+    return this.scan(code, scanInfo);
+  }
+  async disableQR(codeId, userId) {
+    return this.revoke(codeId, userId);
+  }
+  async getScanAnalytics(documentId, options = {}) {
+    return this.getScanHistory(documentId, options);
+  }
+  async getStatistics(documentId) {
+    return this.getStats(documentId);
+  }
 }
 
 module.exports = new DocumentQRCodeService();

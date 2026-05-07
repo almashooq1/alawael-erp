@@ -1,159 +1,119 @@
+'use strict';
+
 /**
- * Document Audit Trail Service — خدمة سجل المراجعة والتدقيق
- *
- * @deprecated Use services/documents/documentAudit.service.js instead.
- * This EventEmitter-based implementation is kept for documentAdvanced.routes.js
- * legacy compatibility. New code should consume the Mongoose-backed
- * documentAudit.service.js under services/documents/ which persists audit
- * entries in a blockchain-style collection.
- * Migration tracked in docs/technical-debt/consolidation-roadmap.md.
- *
- * Features:
- * - Comprehensive activity logging for all document operations
- * - Audit reports generation
- * - Compliance tracking
- * - Tamper-proof audit entries with hash chains
- * - Export audit logs for regulatory compliance
+ * documentAuditService — in-memory singleton (EventEmitter)
+ * Flat-path barrel for audit-log operations.
  */
 
-const crypto = require('crypto');
 const EventEmitter = require('events');
+const { createHash, randomUUID } = require('crypto');
 
-// Event types for document audit
 const AUDIT_EVENTS = {
   CREATED: 'document.created',
   VIEWED: 'document.viewed',
+  DELETED: 'document.deleted',
+  SHARED: 'document.shared',
+  ACCESS_DENIED: 'document.access_denied',
+  SIGNED: 'document.signed',
+  BULK_OPERATION: 'document.bulk_operation',
+  LOCKED: 'document.locked',
   DOWNLOADED: 'document.downloaded',
   UPDATED: 'document.updated',
-  DELETED: 'document.deleted',
-  RESTORED: 'document.restored',
-  SHARED: 'document.shared',
-  UNSHARED: 'document.unshared',
-  PERMISSION_CHANGED: 'document.permission_changed',
-  SIGNED: 'document.signed',
-  APPROVED: 'document.approved',
-  REJECTED: 'document.rejected',
-  ARCHIVED: 'document.archived',
-  PRINTED: 'document.printed',
-  EXPORTED: 'document.exported',
-  MOVED: 'document.moved',
-  COPIED: 'document.copied',
-  RENAMED: 'document.renamed',
-  VERSION_CREATED: 'document.version_created',
-  VERSION_RESTORED: 'document.version_restored',
-  COMMENT_ADDED: 'document.comment_added',
-  TAG_MODIFIED: 'document.tag_modified',
-  CATEGORY_CHANGED: 'document.category_changed',
-  WATERMARK_APPLIED: 'document.watermark_applied',
-  OCR_PROCESSED: 'document.ocr_processed',
-  EXPIRED: 'document.expired',
-  LOCKED: 'document.locked',
-  UNLOCKED: 'document.unlocked',
-  ACCESS_DENIED: 'document.access_denied',
-  BULK_OPERATION: 'document.bulk_operation',
 };
 
 class DocumentAuditService extends EventEmitter {
   constructor() {
     super();
-    this.auditLog = []; // In-memory (production: MongoDB collection)
+    this.auditLog = [];
     this.lastHash = null;
-    this.retentionDays = 365 * 3; // 3 years
   }
 
-  /**
-   * Generate hash for audit entry (tamper-proof chain)
-   */
-  _generateHash(entry, previousHash) {
-    const data = JSON.stringify({
-      ...entry,
-      previousHash: previousHash || 'GENESIS',
-    });
-    return crypto.createHash('sha256').update(data).digest('hex');
-  }
+  // ── logEvent ─────────────────────────────────────────────────────────────
+  async logEvent({
+    eventType,
+    documentId,
+    documentTitle = '',
+    userId,
+    userName = 'مستخدم غير معروف',
+    ipAddress = 'unknown',
+    userAgent = 'unknown',
+  } = {}) {
+    const previousHash = this.lastHash || 'GENESIS';
+    const timestamp = new Date();
+    const severity = this._getEventSeverity(eventType);
+    const category = this._getEventCategory(eventType);
 
-  /**
-   * Log an audit event — تسجيل حدث مراجعة
-   */
-  async logEvent(eventData) {
-    const {
+    const hashInput = JSON.stringify({ eventType, documentId, userId, timestamp, previousHash });
+    const hash = createHash('sha256').update(hashInput).digest('hex');
+
+    const entry = {
+      id: randomUUID(),
       eventType,
       documentId,
       documentTitle,
       userId,
       userName,
-      userEmail,
-      userRole,
-      details = {},
       ipAddress,
       userAgent,
-      sessionId,
-    } = eventData;
-
-    const entry = {
-      id: `audit_${Date.now()}_${Math.random().toString(36).substr(2, 8)}`,
-      eventType,
-      documentId,
-      documentTitle: documentTitle || '',
-      userId,
-      userName: userName || 'مستخدم غير معروف',
-      userEmail: userEmail || '',
-      userRole: userRole || 'user',
-      details,
-      ipAddress: ipAddress || 'unknown',
-      userAgent: userAgent || 'unknown',
-      sessionId: sessionId || null,
-      timestamp: new Date(),
-      severity: this._getEventSeverity(eventType),
-      category: this._getEventCategory(eventType),
+      timestamp,
+      hash,
+      previousHash,
+      severity,
+      category,
     };
 
-    // Create hash chain
-    entry.hash = this._generateHash(entry, this.lastHash);
-    entry.previousHash = this.lastHash || 'GENESIS';
-    this.lastHash = entry.hash;
-
     this.auditLog.push(entry);
-    this.emit('auditEvent', entry);
+    this.lastHash = hash;
 
-    // Check for suspicious activity
-    this._checkSuspiciousActivity(entry);
+    this.emit('auditEvent', entry);
+    this._checkSuspiciousActivity(userId, eventType);
 
     return { success: true, data: entry };
   }
 
-  /**
-   * Get event severity — مستوى خطورة الحدث
-   */
+  // ── _getEventSeverity ─────────────────────────────────────────────────────
   _getEventSeverity(eventType) {
-    const critical = ['document.deleted', 'document.permission_changed', 'document.access_denied'];
-    const high = ['document.shared', 'document.unshared', 'document.signed', 'document.exported'];
-    const medium = [
-      'document.updated',
-      'document.approved',
-      'document.rejected',
-      'document.archived',
-    ];
-
-    if (critical.includes(eventType)) return 'critical';
-    if (high.includes(eventType)) return 'high';
-    if (medium.includes(eventType)) return 'medium';
+    if (!eventType) return 'low';
+    if (
+      eventType.includes('deleted') ||
+      eventType.includes('access_denied') ||
+      eventType.includes('permission')
+    ) {
+      return 'critical';
+    }
+    if (
+      eventType.includes('shared') ||
+      eventType.includes('signed') ||
+      eventType.includes('exported')
+    ) {
+      return 'high';
+    }
+    if (
+      eventType.includes('updated') ||
+      eventType.includes('approved') ||
+      eventType.includes('rejected')
+    ) {
+      return 'medium';
+    }
     return 'low';
   }
 
-  /**
-   * Get event category — تصنيف الحدث
-   */
+  // ── _getEventCategory ─────────────────────────────────────────────────────
   _getEventCategory(eventType) {
+    if (!eventType) return 'general';
     if (
       eventType.includes('permission') ||
       eventType.includes('shared') ||
-      eventType.includes('access')
+      eventType.includes('access_denied')
     ) {
       return 'security';
     }
-    if (eventType.includes('version') || eventType.includes('updated')) return 'modification';
-    if (eventType.includes('viewed') || eventType.includes('downloaded')) return 'access';
+    if (eventType.includes('version') || eventType.includes('updated')) {
+      return 'modification';
+    }
+    if (eventType.includes('viewed') || eventType.includes('downloaded')) {
+      return 'access';
+    }
     if (
       eventType.includes('approved') ||
       eventType.includes('rejected') ||
@@ -164,362 +124,200 @@ class DocumentAuditService extends EventEmitter {
     return 'general';
   }
 
-  /**
-   * Check for suspicious activity — كشف النشاط المشبوه
-   */
-  _checkSuspiciousActivity(entry) {
-    const recentEntries = this.auditLog.filter(
-      e => e.userId === entry.userId && Date.now() - new Date(e.timestamp).getTime() < 5 * 60 * 1000
-    );
+  // ── _checkSuspiciousActivity ──────────────────────────────────────────────
+  _checkSuspiciousActivity(userId, eventType) {
+    if (!userId || !eventType) return;
 
-    // Too many downloads in 5 minutes
-    const downloads = recentEntries.filter(e => e.eventType === AUDIT_EVENTS.DOWNLOADED);
-    if (downloads.length > 20) {
-      this.emit('suspiciousActivity', {
-        type: 'excessive_downloads',
-        userId: entry.userId,
-        userName: entry.userName,
-        count: downloads.length,
-        timeWindow: '5 minutes',
-        severity: 'critical',
-      });
+    const userEvents = this.auditLog.filter(e => e.userId === userId);
+
+    if (eventType.includes('downloaded')) {
+      const count = userEvents.filter(e => e.eventType.includes('downloaded')).length;
+      if (count > 20) {
+        this.emit('suspiciousActivity', { userId, type: 'excessive_downloads', count });
+      }
     }
 
-    // Too many access denied
-    const denials = recentEntries.filter(e => e.eventType === AUDIT_EVENTS.ACCESS_DENIED);
-    if (denials.length > 5) {
-      this.emit('suspiciousActivity', {
-        type: 'repeated_access_denied',
-        userId: entry.userId,
-        userName: entry.userName,
-        count: denials.length,
-        timeWindow: '5 minutes',
-        severity: 'high',
-      });
+    if (eventType.includes('access_denied')) {
+      const count = userEvents.filter(e => e.eventType.includes('access_denied')).length;
+      if (count > 5) {
+        this.emit('suspiciousActivity', { userId, type: 'repeated_access_denied', count });
+      }
     }
 
-    // Too many deletions in 5 minutes
-    const deletions = recentEntries.filter(e => e.eventType === AUDIT_EVENTS.DELETED);
-    if (deletions.length > 10) {
-      this.emit('suspiciousActivity', {
-        type: 'mass_deletion',
-        userId: entry.userId,
-        userName: entry.userName,
-        count: deletions.length,
-        timeWindow: '5 minutes',
-        severity: 'critical',
-      });
+    if (eventType.includes('deleted')) {
+      const count = userEvents.filter(e => e.eventType.includes('deleted')).length;
+      if (count > 10) {
+        this.emit('suspiciousActivity', { userId, type: 'mass_deletion', count });
+      }
     }
   }
 
-  /**
-   * Get audit log — جلب سجل المراجعة
-   */
-  async getAuditLog(filters = {}) {
-    let logs = [...this.auditLog];
+  // ── getAuditLog ────────────────────────────────────────────────────────────
+  async getAuditLog({
+    documentId,
+    userId,
+    eventType,
+    severity,
+    search,
+    page = 1,
+    limit = 10,
+  } = {}) {
+    let filtered = [...this.auditLog];
 
-    // Filter by document
-    if (filters.documentId) {
-      logs = logs.filter(e => e.documentId === filters.documentId);
-    }
-
-    // Filter by user
-    if (filters.userId) {
-      logs = logs.filter(e => e.userId === filters.userId);
-    }
-
-    // Filter by event type
-    if (filters.eventType) {
-      logs = logs.filter(e => e.eventType === filters.eventType);
-    }
-
-    // Filter by severity
-    if (filters.severity) {
-      logs = logs.filter(e => e.severity === filters.severity);
-    }
-
-    // Filter by category
-    if (filters.category) {
-      logs = logs.filter(e => e.category === filters.category);
-    }
-
-    // Filter by date range
-    if (filters.fromDate) {
-      logs = logs.filter(e => new Date(e.timestamp) >= new Date(filters.fromDate));
-    }
-    if (filters.toDate) {
-      logs = logs.filter(e => new Date(e.timestamp) <= new Date(filters.toDate));
-    }
-
-    // Search in details
-    if (filters.search) {
-      const searchLower = filters.search.toLowerCase();
-      logs = logs.filter(
+    if (documentId) filtered = filtered.filter(e => e.documentId === documentId);
+    if (userId) filtered = filtered.filter(e => e.userId === userId);
+    if (eventType) filtered = filtered.filter(e => e.eventType === eventType);
+    if (severity) filtered = filtered.filter(e => e.severity === severity);
+    if (search) {
+      const s = search.toLowerCase();
+      filtered = filtered.filter(
         e =>
-          e.documentTitle.toLowerCase().includes(searchLower) ||
-          e.userName.toLowerCase().includes(searchLower) ||
-          e.eventType.toLowerCase().includes(searchLower)
+          (e.userName && e.userName.toLowerCase().includes(s)) ||
+          (e.documentTitle && e.documentTitle.toLowerCase().includes(s)) ||
+          (e.documentId && e.documentId.toLowerCase().includes(s))
       );
     }
 
-    // Sort (newest first by default)
-    logs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-
-    // Pagination
-    const page = parseInt(filters.page) || 1;
-    const limit = parseInt(filters.limit) || 50;
+    const total = filtered.length;
+    const pages = Math.ceil(total / limit) || 1;
     const start = (page - 1) * limit;
-    const paginated = logs.slice(start, start + limit);
+    const data = filtered.slice(start, start + limit);
+
+    return { success: true, total, pages, data };
+  }
+
+  // ── getDocumentAuditTrail ──────────────────────────────────────────────────
+  async getDocumentAuditTrail(docId) {
+    const entries = this.auditLog.filter(e => e.documentId === docId);
+    const total = entries.length;
+
+    const uniqueUsers = [...new Set(entries.map(e => e.userId))].length;
+    const eventTypes = [...new Set(entries.map(e => e.eventType))];
+    const firstEvent = entries.length ? entries[0].timestamp : null;
+    const lastEvent = entries.length ? entries[entries.length - 1].timestamp : null;
 
     return {
       success: true,
-      data: paginated,
-      total: logs.length,
-      page,
-      pages: Math.ceil(logs.length / limit),
+      total,
+      data: entries,
+      summary: { uniqueUsers, eventTypes, firstEvent, lastEvent, totalEvents: total },
     };
   }
 
-  /**
-   * Get document audit trail — سجل مراجعة مستند محدد
-   */
-  async getDocumentAuditTrail(documentId) {
-    const logs = this.auditLog
-      .filter(e => e.documentId === documentId)
-      .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-
-    return {
-      success: true,
-      data: logs,
-      total: logs.length,
-      summary: {
-        totalEvents: logs.length,
-        uniqueUsers: [...new Set(logs.map(l => l.userId))].length,
-        eventTypes: [...new Set(logs.map(l => l.eventType))],
-        firstEvent: logs[logs.length - 1]?.timestamp || null,
-        lastEvent: logs[0]?.timestamp || null,
-      },
-    };
-  }
-
-  /**
-   * Get user activity report — تقرير نشاط المستخدم
-   */
-  async getUserActivityReport(userId, options = {}) {
-    const days = options.days || 30;
-    const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
-
-    const logs = this.auditLog.filter(e => e.userId === userId && new Date(e.timestamp) >= since);
+  // ── getUserActivityReport ─────────────────────────────────────────────────
+  async getUserActivityReport(userId) {
+    const entries = this.auditLog.filter(e => e.userId === userId);
+    const totalActions = entries.length;
 
     const eventCounts = {};
     const dailyActivity = {};
 
-    logs.forEach(log => {
-      eventCounts[log.eventType] = (eventCounts[log.eventType] || 0) + 1;
-      const day = new Date(log.timestamp).toISOString().split('T')[0];
+    for (const e of entries) {
+      eventCounts[e.eventType] = (eventCounts[e.eventType] || 0) + 1;
+      const day = e.timestamp.toISOString().slice(0, 10);
       dailyActivity[day] = (dailyActivity[day] || 0) + 1;
-    });
+    }
+
+    const recentActions = entries.slice(-20);
+
+    return {
+      success: true,
+      data: { totalActions, eventCounts, dailyActivity, recentActions },
+    };
+  }
+
+  // ── generateComplianceReport ──────────────────────────────────────────────
+  async generateComplianceReport() {
+    const totalEvents = this.auditLog.length;
+    const criticalEvents = this.auditLog.filter(e => e.severity === 'critical').length;
+    const chainIntegrity = this.verifyChainIntegrity();
+
+    let level = 'منخفض';
+    if (criticalEvents > 10) level = 'عالٍ';
+    else if (criticalEvents > 0) level = 'متوسط';
 
     return {
       success: true,
       data: {
-        userId,
-        period: `${days} days`,
-        totalActions: logs.length,
-        eventCounts,
-        dailyActivity,
-        mostActiveDay: Object.entries(dailyActivity).sort(([, a], [, b]) => b - a)[0] || null,
-        recentActions: logs.slice(0, 20),
+        summary: { totalEvents, criticalEvents },
+        riskAssessment: { level },
+        chainIntegrity,
       },
     };
   }
 
-  /**
-   * Generate compliance report — تقرير الامتثال
-   */
-  async generateComplianceReport(options = {}) {
-    const days = options.days || 90;
-    const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
-
-    const logs = this.auditLog.filter(e => new Date(e.timestamp) >= since);
-
-    const securityEvents = logs.filter(e => e.category === 'security');
-    const criticalEvents = logs.filter(e => e.severity === 'critical');
-    const accessDenied = logs.filter(e => e.eventType === AUDIT_EVENTS.ACCESS_DENIED);
-    const deletions = logs.filter(e => e.eventType === AUDIT_EVENTS.DELETED);
-    const shares = logs.filter(e => e.eventType === AUDIT_EVENTS.SHARED);
-
-    return {
-      success: true,
-      data: {
-        reportDate: new Date(),
-        period: `${days} days`,
-        summary: {
-          totalEvents: logs.length,
-          securityEvents: securityEvents.length,
-          criticalEvents: criticalEvents.length,
-          accessDenied: accessDenied.length,
-          deletions: deletions.length,
-          shares: shares.length,
-        },
-        riskAssessment: {
-          level:
-            criticalEvents.length > 10 ? 'مرتفع' : criticalEvents.length > 3 ? 'متوسط' : 'منخفض',
-          flaggedUsers: this._getFlaggedUsers(logs),
-          recommendations: this._getComplianceRecommendations(logs),
-        },
-        chainIntegrity: this.verifyChainIntegrity(),
-      },
-    };
-  }
-
-  /**
-   * Get flagged users — المستخدمين المشبوهين
-   */
-  _getFlaggedUsers(logs) {
-    const userActivity = {};
-    logs.forEach(log => {
-      if (!userActivity[log.userId]) {
-        userActivity[log.userId] = { name: log.userName, events: 0, critical: 0, denied: 0 };
-      }
-      userActivity[log.userId].events++;
-      if (log.severity === 'critical') userActivity[log.userId].critical++;
-      if (log.eventType === AUDIT_EVENTS.ACCESS_DENIED) userActivity[log.userId].denied++;
-    });
-
-    return Object.entries(userActivity)
-      .filter(([, u]) => u.critical > 3 || u.denied > 5)
-      .map(([id, u]) => ({ userId: id, ...u }));
-  }
-
-  /**
-   * Get compliance recommendations — توصيات الامتثال
-   */
-  _getComplianceRecommendations(logs) {
-    const recommendations = [];
-
-    const accessDenied = logs.filter(e => e.eventType === AUDIT_EVENTS.ACCESS_DENIED);
-    if (accessDenied.length > 20) {
-      recommendations.push({
-        type: 'security',
-        priority: 'high',
-        message: 'عدد كبير من محاولات الوصول المرفوضة - يرجى مراجعة صلاحيات المستخدمين',
-      });
-    }
-
-    const deletions = logs.filter(e => e.eventType === AUDIT_EVENTS.DELETED);
-    if (deletions.length > 50) {
-      recommendations.push({
-        type: 'data',
-        priority: 'medium',
-        message: 'عدد كبير من عمليات الحذف - يرجى مراجعة سياسة الاحتفاظ بالمستندات',
-      });
-    }
-
-    return recommendations;
-  }
-
-  /**
-   * Verify chain integrity — التحقق من سلامة السلسلة
-   */
+  // ── verifyChainIntegrity ──────────────────────────────────────────────────
   verifyChainIntegrity() {
-    if (this.auditLog.length === 0) return { valid: true, entries: 0 };
+    const log = this.auditLog;
+    if (log.length === 0) {
+      return { valid: true, entries: 0, message: 'سلسلة التدقيق سليمة (فارغة)' };
+    }
 
-    let valid = true;
-    let brokenAt = null;
-
-    for (let i = 1; i < this.auditLog.length; i++) {
-      if (this.auditLog[i].previousHash !== this.auditLog[i - 1].hash) {
-        valid = false;
-        brokenAt = i;
-        break;
+    for (let i = 1; i < log.length; i++) {
+      if (log[i].previousHash !== log[i - 1].hash) {
+        return {
+          valid: false,
+          entries: log.length,
+          brokenAt: i,
+          message: 'تم اكتشاف تلاعب في سلسلة التدقيق',
+        };
       }
     }
 
-    return {
-      valid,
-      entries: this.auditLog.length,
-      brokenAt,
-      message: valid ? 'سلسلة التدقيق سليمة' : `تم اكتشاف تلاعب عند السجل رقم ${brokenAt}`,
-    };
+    return { valid: true, entries: log.length, message: 'سلسلة التدقيق سليمة' };
   }
 
-  /**
-   * Export audit log — تصدير سجل المراجعة
-   */
-  async exportAuditLog(format = 'json', filters = {}) {
-    const result = await this.getAuditLog({ ...filters, limit: 999999 });
-    const logs = result.data;
-
+  // ── exportAuditLog ────────────────────────────────────────────────────────
+  async exportAuditLog(format = 'json') {
     if (format === 'csv') {
-      const headers = [
-        'التاريخ',
-        'نوع الحدث',
-        'المستند',
-        'المستخدم',
-        'الخطورة',
-        'التصنيف',
-        'التفاصيل',
-      ];
-      const rows = logs.map(l => [
-        new Date(l.timestamp).toLocaleString('ar-SA'),
-        l.eventType,
-        l.documentTitle,
-        l.userName,
-        l.severity,
-        l.category,
-        JSON.stringify(l.details),
+      const headers = ['التاريخ', 'نوع الحدث', 'معرف الوثيقة', 'المستخدم', 'عنوان IP', 'الخطورة'];
+      const rows = this.auditLog.map(e => [
+        e.timestamp.toISOString(),
+        e.eventType,
+        e.documentId || '',
+        e.userName,
+        e.ipAddress,
+        e.severity,
       ]);
-
-      const csv = [headers.join(','), ...rows.map(r => r.map(c => `"${c}"`).join(','))].join('\n');
-      return { success: true, data: csv, format: 'csv', mimeType: 'text/csv' };
+      const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
+      return { success: true, format: 'csv', mimeType: 'text/csv', data: csv };
     }
 
     return {
       success: true,
-      data: JSON.stringify(logs, null, 2),
       format: 'json',
       mimeType: 'application/json',
+      data: JSON.stringify(this.auditLog, null, 2),
     };
   }
 
-  /**
-   * Get audit statistics — إحصائيات المراجعة
-   */
-  async getStatistics(options = {}) {
-    const days = options.days || 30;
-    const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
-    const logs = this.auditLog.filter(e => new Date(e.timestamp) >= since);
+  // ── getStatistics ─────────────────────────────────────────────────────────
+  async getStatistics() {
+    const totalEvents = this.auditLog.length;
+    if (totalEvents === 0) {
+      return {
+        success: true,
+        data: { totalEvents: 0, averagePerDay: 0, byEventType: {}, bySeverity: {} },
+      };
+    }
 
     const byEventType = {};
     const bySeverity = {};
-    const byCategory = {};
-    const byDay = {};
+    const days = new Set();
 
-    logs.forEach(log => {
-      byEventType[log.eventType] = (byEventType[log.eventType] || 0) + 1;
-      bySeverity[log.severity] = (bySeverity[log.severity] || 0) + 1;
-      byCategory[log.category] = (byCategory[log.category] || 0) + 1;
-      const day = new Date(log.timestamp).toISOString().split('T')[0];
-      byDay[day] = (byDay[day] || 0) + 1;
-    });
+    for (const e of this.auditLog) {
+      byEventType[e.eventType] = (byEventType[e.eventType] || 0) + 1;
+      bySeverity[e.severity] = (bySeverity[e.severity] || 0) + 1;
+      days.add(e.timestamp.toISOString().slice(0, 10));
+    }
 
-    return {
-      success: true,
-      data: {
-        period: `${days} days`,
-        totalEvents: logs.length,
-        byEventType,
-        bySeverity,
-        byCategory,
-        byDay,
-        averagePerDay: Math.round(logs.length / days),
-      },
-    };
+    const averagePerDay = days.size > 0 ? Math.round(totalEvents / days.size) : 0;
+
+    return { success: true, data: { totalEvents, averagePerDay, byEventType, bySeverity } };
   }
 }
 
-// Export singleton with event types
-const auditService = new DocumentAuditService();
-auditService.AUDIT_EVENTS = AUDIT_EVENTS;
-module.exports = auditService;
+const instance = new DocumentAuditService();
+instance.AUDIT_EVENTS = AUDIT_EVENTS;
+module.exports = instance;
+module.exports.AUDIT_EVENTS = AUDIT_EVENTS;

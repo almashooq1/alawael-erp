@@ -1,290 +1,185 @@
+'use strict';
+
 /**
- * Document Favorites Service — خدمة المستندات المفضلة
- *
- * @deprecated Use services/documents/documentFavorites.service.js instead.
- * This in-memory EventEmitter implementation is kept for
- * documentAdvanced.routes.js legacy compatibility. The canonical version
- * in services/documents/ persists favorites in Mongo.
- * Migration tracked in docs/technical-debt/consolidation-roadmap.md.
- *
- * Features:
- * - Add/remove documents from favorites
- * - Organize favorites into collections
- * - Quick access to frequently used documents
- * - Favorites analytics and suggestions
+ * documentFavoritesService — in-memory singleton (EventEmitter)
+ * Used by documentAdvanced.routes.js for favorites management.
+ * Flat-path barrel kept alongside the Mongoose-based canonical service
+ * at services/documents/documentFavorites.service.js.
  */
 
 const EventEmitter = require('events');
+const { randomUUID } = require('crypto');
 
 class DocumentFavoritesService extends EventEmitter {
   constructor() {
     super();
-    // In-memory store (production: MongoDB collection)
-    this.favorites = new Map(); // userId -> Map<docId, favoriteInfo>
-    this.collections = new Map(); // userId -> Map<collectionId, collectionInfo>
+    // Map<userId, Map<docId, favoriteEntry>>
+    this._favorites = new Map();
+    // Map<userId, Map<colId, collectionEntry>>
+    this._collections = new Map();
   }
 
-  /**
-   * Add document to favorites — إضافة مستند للمفضلة
-   */
-  async addFavorite(userId, documentId, options = {}) {
-    if (!this.favorites.has(userId)) {
-      this.favorites.set(userId, new Map());
+  _userFavs(userId) {
+    if (!this._favorites.has(userId)) this._favorites.set(userId, new Map());
+    return this._favorites.get(userId);
+  }
+
+  _userCols(userId) {
+    if (!this._collections.has(userId)) this._collections.set(userId, new Map());
+    return this._collections.get(userId);
+  }
+
+  // ── addFavorite ──────────────────────────────────────────────────────────
+  async addFavorite(userId, documentId, opts = {}) {
+    const favs = this._userFavs(userId);
+    if (favs.has(documentId)) {
+      return { success: false, message: 'Already in favorites' };
     }
-
-    const userFavorites = this.favorites.get(userId);
-
-    if (userFavorites.has(documentId)) {
-      return { success: false, message: 'المستند موجود بالفعل في المفضلة' };
-    }
-
-    const favorite = {
+    const entry = {
       documentId,
       userId,
-      addedAt: new Date(),
-      note: options.note || '',
-      collectionId: options.collectionId || null,
-      priority: options.priority || 'normal', // low, normal, high, urgent
-      color: options.color || null,
-      tags: options.tags || [],
-      reminder: options.reminder || null,
+      priority: opts.priority || 'normal',
+      note: opts.note || null,
+      tags: opts.tags || [],
+      collectionId: opts.collectionId || null,
       accessCount: 0,
-      lastAccessedAt: null,
+      addedAt: new Date(),
+      updatedAt: new Date(),
     };
-
-    userFavorites.set(documentId, favorite);
-    this.emit('favoriteAdded', { userId, documentId, favorite });
-
-    return { success: true, data: favorite, message: 'تمت الإضافة للمفضلة بنجاح' };
+    favs.set(documentId, entry);
+    this.emit('favoriteAdded', { ...entry });
+    return { success: true, data: { ...entry } };
   }
 
-  /**
-   * Remove document from favorites — إزالة مستند من المفضلة
-   */
+  // ── removeFavorite ───────────────────────────────────────────────────────
   async removeFavorite(userId, documentId) {
-    const userFavorites = this.favorites.get(userId);
-    if (!userFavorites || !userFavorites.has(documentId)) {
-      return { success: false, message: 'المستند غير موجود في المفضلة' };
+    const favs = this._userFavs(userId);
+    if (!favs.has(documentId)) {
+      return { success: false, message: 'Not in favorites' };
     }
-
-    userFavorites.delete(documentId);
+    favs.delete(documentId);
     this.emit('favoriteRemoved', { userId, documentId });
-
-    return { success: true, message: 'تمت الإزالة من المفضلة بنجاح' };
+    return { success: true };
   }
 
-  /**
-   * Toggle favorite status — تبديل حالة المفضلة
-   */
-  async toggleFavorite(userId, documentId, options = {}) {
-    const userFavorites = this.favorites.get(userId);
-    if (userFavorites && userFavorites.has(documentId)) {
+  // ── toggleFavorite ───────────────────────────────────────────────────────
+  async toggleFavorite(userId, documentId, opts = {}) {
+    const favs = this._userFavs(userId);
+    if (favs.has(documentId)) {
       return this.removeFavorite(userId, documentId);
     }
-    return this.addFavorite(userId, documentId, options);
+    return this.addFavorite(userId, documentId, opts);
   }
 
-  /**
-   * Get all favorites for a user — جلب جميع المفضلات
-   */
-  async getFavorites(userId, filters = {}) {
-    const userFavorites = this.favorites.get(userId);
-    if (!userFavorites) return { success: true, data: [], total: 0 };
+  // ── getFavorites ─────────────────────────────────────────────────────────
+  async getFavorites(userId, opts = {}) {
+    const favs = this._userFavs(userId);
+    let list = Array.from(favs.values());
 
-    let favorites = Array.from(userFavorites.values());
+    if (opts.priority) list = list.filter(f => f.priority === opts.priority);
+    if (opts.tag) list = list.filter(f => f.tags && f.tags.includes(opts.tag));
+    if (opts.collectionId) list = list.filter(f => f.collectionId === opts.collectionId);
 
-    // Filter by collection
-    if (filters.collectionId) {
-      favorites = favorites.filter(f => f.collectionId === filters.collectionId);
-    }
-
-    // Filter by priority
-    if (filters.priority) {
-      favorites = favorites.filter(f => f.priority === filters.priority);
-    }
-
-    // Filter by tags
-    if (filters.tag) {
-      favorites = favorites.filter(f => f.tags.includes(filters.tag));
-    }
-
-    // Sort
-    const sortBy = filters.sortBy || 'addedAt';
-    const sortOrder = filters.sortOrder === 'asc' ? 1 : -1;
-    favorites.sort((a, b) => {
-      if (sortBy === 'accessCount') return (b.accessCount - a.accessCount) * sortOrder;
-      if (sortBy === 'priority') {
-        const priorities = { urgent: 4, high: 3, normal: 2, low: 1 };
-        return (priorities[b.priority] - priorities[a.priority]) * sortOrder;
-      }
-      return (new Date(b[sortBy]) - new Date(a[sortBy])) * sortOrder;
-    });
-
-    // Pagination
-    const page = parseInt(filters.page) || 1;
-    const limit = parseInt(filters.limit) || 50;
+    const total = list.length;
+    const limit = opts.limit || total || 1;
+    const page = opts.page || 1;
     const start = (page - 1) * limit;
-    const paginatedFavorites = favorites.slice(start, start + limit);
+    const pages = Math.ceil(total / limit);
+    const data = list.slice(start, start + limit).map(f => ({ ...f }));
 
-    return {
-      success: true,
-      data: paginatedFavorites,
-      total: favorites.length,
-      page,
-      pages: Math.ceil(favorites.length / limit),
-    };
+    return { success: true, total, data, pages, page };
   }
 
-  /**
-   * Check if document is favorited — هل المستند مفضل؟
-   */
+  // ── isFavorited ──────────────────────────────────────────────────────────
   async isFavorited(userId, documentId) {
-    const userFavorites = this.favorites.get(userId);
-    return { isFavorited: userFavorites ? userFavorites.has(documentId) : false };
+    const favs = this._userFavs(userId);
+    return { isFavorited: favs.has(documentId) };
   }
 
-  /**
-   * Update favorite details — تحديث تفاصيل المفضلة
-   */
-  async updateFavorite(userId, documentId, updates) {
-    const userFavorites = this.favorites.get(userId);
-    if (!userFavorites || !userFavorites.has(documentId)) {
-      return { success: false, message: 'المستند غير موجود في المفضلة' };
+  // ── updateFavorite ───────────────────────────────────────────────────────
+  async updateFavorite(userId, documentId, updates = {}) {
+    const favs = this._userFavs(userId);
+    if (!favs.has(documentId)) {
+      return { success: false, message: 'Not in favorites' };
     }
-
-    const favorite = userFavorites.get(documentId);
-    Object.assign(favorite, {
-      ...updates,
-      updatedAt: new Date(),
-    });
-
-    return { success: true, data: favorite, message: 'تم تحديث المفضلة بنجاح' };
+    const entry = favs.get(documentId);
+    Object.assign(entry, updates, { updatedAt: new Date() });
+    return { success: true, data: { ...entry } };
   }
 
-  /**
-   * Record access to a favorite — تسجيل الوصول للمفضلة
-   */
+  // ── recordAccess ─────────────────────────────────────────────────────────
   async recordAccess(userId, documentId) {
-    const userFavorites = this.favorites.get(userId);
-    if (userFavorites && userFavorites.has(documentId)) {
-      const favorite = userFavorites.get(documentId);
-      favorite.accessCount++;
-      favorite.lastAccessedAt = new Date();
+    const favs = this._userFavs(userId);
+    if (favs.has(documentId)) {
+      favs.get(documentId).accessCount += 1;
     }
+    return { success: true };
   }
 
-  // ── Collections Management (مجموعات المفضلة) ──────────────────────────
-
-  /**
-   * Create a collection — إنشاء مجموعة
-   */
-  async createCollection(userId, data) {
-    if (!this.collections.has(userId)) {
-      this.collections.set(userId, new Map());
-    }
-
-    const collectionId = `col_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
-    const collection = {
-      id: collectionId,
+  // ── Collections ──────────────────────────────────────────────────────────
+  async createCollection(userId, opts = {}) {
+    const cols = this._userCols(userId);
+    const id = `col_${randomUUID()}`;
+    const entry = {
+      id,
       userId,
-      name: data.name,
-      description: data.description || '',
-      icon: data.icon || '📁',
-      color: data.color || '#1976d2',
-      isPrivate: data.isPrivate !== false,
+      name: opts.name || 'Untitled',
+      description: opts.description || null,
       createdAt: new Date(),
-      updatedAt: new Date(),
     };
-
-    this.collections.get(userId).set(collectionId, collection);
-    this.emit('collectionCreated', { userId, collection });
-
-    return { success: true, data: collection, message: 'تم إنشاء المجموعة بنجاح' };
+    cols.set(id, entry);
+    return { success: true, data: { ...entry } };
   }
 
-  /**
-   * Get user collections — جلب مجموعات المستخدم
-   */
   async getCollections(userId) {
-    const userCollections = this.collections.get(userId);
-    if (!userCollections) return { success: true, data: [] };
-
-    const collections = Array.from(userCollections.values()).map(col => {
-      // Count documents in collection
-      const userFavorites = this.favorites.get(userId);
-      const docsCount = userFavorites
-        ? Array.from(userFavorites.values()).filter(f => f.collectionId === col.id).length
-        : 0;
-      return { ...col, documentsCount: docsCount };
+    const cols = this._userCols(userId);
+    const favs = this._userFavs(userId);
+    const data = Array.from(cols.values()).map(col => {
+      const documentsCount = Array.from(favs.values()).filter(
+        f => f.collectionId === col.id
+      ).length;
+      return { ...col, documentsCount };
     });
-
-    return { success: true, data: collections };
+    return { success: true, data };
   }
 
-  /**
-   * Delete a collection — حذف مجموعة
-   */
   async deleteCollection(userId, collectionId) {
-    const userCollections = this.collections.get(userId);
-    if (!userCollections || !userCollections.has(collectionId)) {
-      return { success: false, message: 'المجموعة غير موجودة' };
+    const cols = this._userCols(userId);
+    if (!cols.has(collectionId)) {
+      return { success: false, message: 'Collection not found' };
     }
-
-    // Unlink favorites from this collection
-    const userFavorites = this.favorites.get(userId);
-    if (userFavorites) {
-      for (const [, fav] of userFavorites) {
-        if (fav.collectionId === collectionId) {
-          fav.collectionId = null;
-        }
-      }
+    cols.delete(collectionId);
+    // unlink favorites from this collection
+    const favs = this._userFavs(userId);
+    for (const fav of favs.values()) {
+      if (fav.collectionId === collectionId) fav.collectionId = null;
     }
-
-    userCollections.delete(collectionId);
-    return { success: true, message: 'تم حذف المجموعة بنجاح' };
+    return { success: true };
   }
 
-  /**
-   * Get favorites statistics — إحصائيات المفضلة
-   */
+  // ── getStatistics ────────────────────────────────────────────────────────
   async getStatistics(userId) {
-    const userFavorites = this.favorites.get(userId);
-    const userCollections = this.collections.get(userId);
-
-    if (!userFavorites) {
-      return {
-        success: true,
-        data: {
-          totalFavorites: 0,
-          totalCollections: 0,
-          byPriority: {},
-          topAccessed: [],
-          recentlyAdded: [],
-        },
-      };
-    }
-
-    const favorites = Array.from(userFavorites.values());
+    const favs = this._userFavs(userId);
+    const cols = this._userCols(userId);
+    const list = Array.from(favs.values());
 
     const byPriority = {};
-    favorites.forEach(f => {
+    for (const f of list) {
       byPriority[f.priority] = (byPriority[f.priority] || 0) + 1;
-    });
+    }
 
-    const topAccessed = [...favorites].sort((a, b) => b.accessCount - a.accessCount).slice(0, 10);
-
-    const recentlyAdded = [...favorites]
-      .sort((a, b) => new Date(b.addedAt) - new Date(a.addedAt))
-      .slice(0, 10);
+    const topAccessed = [...list]
+      .sort((a, b) => b.accessCount - a.accessCount)
+      .slice(0, 5)
+      .map(f => ({ documentId: f.documentId, accessCount: f.accessCount }));
 
     return {
       success: true,
       data: {
-        totalFavorites: favorites.length,
-        totalCollections: userCollections ? userCollections.size : 0,
+        totalFavorites: list.length,
+        totalCollections: cols.size,
         byPriority,
         topAccessed,
-        recentlyAdded,
       },
     };
   }

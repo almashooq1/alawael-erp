@@ -1,394 +1,232 @@
+'use strict';
+
 /**
- * Document Export/Import Service — خدمة تصدير واستيراد المستندات
- *
- * @deprecated Use services/documents/documentImportExport.service.js instead.
- * Kept for documentAdvanced.routes.js legacy compatibility.
- * Migration tracked in docs/technical-debt/consolidation-roadmap.md.
- *
- * Features:
- * - Bulk export to ZIP
- * - Export with metadata (JSON manifest)
- * - Import from ZIP with validation
- * - Export to various formats
- * - Migration support between systems
- * - Export templates and reports
+ * documentExportService — in-memory singleton (EventEmitter)
+ * Flat-path barrel for document export/import operations.
  */
 
 const EventEmitter = require('events');
-const crypto = require('crypto');
+const { createHash, randomUUID } = require('crypto');
 
-const EXPORT_FORMATS = {
-  ZIP: 'zip',
-  JSON: 'json',
-  CSV: 'csv',
-  PDF_BUNDLE: 'pdf-bundle',
-};
-
-class DocumentExportImportService extends EventEmitter {
+class DocumentExportService extends EventEmitter {
   constructor() {
     super();
-    this.exportJobs = new Map(); // jobId -> job
-    this.importJobs = new Map(); // jobId -> job
+    this.exportJobs = new Map();
+    this.importJobs = new Map();
   }
 
-  /**
-   * Create export job — إنشاء مهمة تصدير
-   */
-  async createExportJob(data) {
-    const {
-      documentIds = [],
-      format = EXPORT_FORMATS.JSON,
-      includeMetadata = true,
-      includeVersions = false,
-      includeComments = false,
-      includeAuditLog = false,
-      requestedBy,
-      requestedByName,
-    } = data;
+  // ── createExportJob ───────────────────────────────────────────────────────
+  async createExportJob({
+    documentIds = [],
+    requestedBy,
+    requestedByName = null,
+    format = 'json',
+    includeMetadata = true,
+    includeVersions = false,
+    includeComments = false,
+  } = {}) {
+    const id = 'exp_' + randomUUID().replace(/-/g, '');
+    const createdAt = new Date();
 
-    const jobId = `exp_${Date.now()}_${Math.random().toString(36).substr(2, 8)}`;
+    this.emit('exportStarted', { id, requestedBy, documentCount: documentIds.length });
+
+    const documents = documentIds.map(docId => {
+      const doc = {};
+      if (includeMetadata) {
+        doc.metadata = { id: docId, title: `Document ${docId}`, exportedAt: createdAt };
+      }
+      if (includeVersions) {
+        doc.versions = [];
+      }
+      if (includeComments) {
+        doc.comments = [];
+      }
+      return doc;
+    });
+
+    const jsonData = JSON.stringify(documents);
+    const checksum = createHash('sha256').update(jsonData).digest('hex');
+    const size = Buffer.byteLength(jsonData, 'utf8');
 
     const job = {
-      id: jobId,
+      id,
       type: 'export',
       format,
-      documentIds,
       documentCount: documentIds.length,
-      includeMetadata,
-      includeVersions,
-      includeComments,
-      includeAuditLog,
-      requestedBy,
-      requestedByName: requestedByName || '',
-      status: 'processing', // processing, completed, failed
-      progress: 0,
-      result: null,
-      error: null,
-      createdAt: new Date(),
-      completedAt: null,
-    };
-
-    this.exportJobs.set(jobId, job);
-    this.emit('exportStarted', job);
-
-    // Simulate export processing
-    await this._processExport(job);
-
-    return {
-      success: true,
-      data: job,
-      message: 'تم إنشاء مهمة التصدير',
-    };
-  }
-
-  /**
-   * Process export job — معالجة مهمة التصدير
-   */
-  async _processExport(job) {
-    try {
-      const exportData = {
-        exportId: job.id,
-        exportDate: new Date().toISOString(),
-        format: job.format,
-        exportedBy: job.requestedByName,
-        system: 'الأوائل لإدارة المستندات',
-        version: '2.0',
-        documents: [],
-        summary: {
-          totalDocuments: job.documentCount,
-          includeMetadata: job.includeMetadata,
-          includeVersions: job.includeVersions,
-          includeComments: job.includeComments,
-        },
-      };
-
-      // Simulate processing each document
-      for (let i = 0; i < job.documentIds.length; i++) {
-        const docId = job.documentIds[i];
-
-        exportData.documents.push({
-          id: docId,
-          exportedAt: new Date().toISOString(),
-          metadata: job.includeMetadata
-            ? {
-                title: `مستند ${i + 1}`,
-                category: 'عام',
-                status: 'نشط',
-              }
-            : undefined,
-          versions: job.includeVersions ? [] : undefined,
-          comments: job.includeComments ? [] : undefined,
-        });
-
-        job.progress = Math.round(((i + 1) / job.documentIds.length) * 100);
-      }
-
-      // Generate checksum
-      exportData.checksum = crypto
-        .createHash('sha256')
-        .update(JSON.stringify(exportData.documents))
-        .digest('hex');
-
-      job.status = 'completed';
-      job.completedAt = new Date();
-      job.result = {
-        data: exportData,
-        size: JSON.stringify(exportData).length,
-        checksum: exportData.checksum,
-        downloadUrl: `/api/documents-advanced/export/${job.id}/download`,
-      };
-      job.progress = 100;
-
-      this.emit('exportCompleted', job);
-    } catch (error) {
-      job.status = 'failed';
-      job.error = error.message;
-      this.emit('exportFailed', { job, error });
-    }
-  }
-
-  /**
-   * Create import job — إنشاء مهمة استيراد
-   */
-  async createImportJob(data) {
-    const {
-      sourceData,
-      sourceFormat = 'json',
-      targetFolder = '',
-      mergeStrategy = 'skip', // skip, overwrite, rename
-      validateOnly = false,
+      status: 'completed',
+      progress: 100,
       requestedBy,
       requestedByName,
-    } = data;
+      createdAt,
+      result: {
+        checksum,
+        downloadUrl: `/api/exports/${id}/download`,
+        size,
+        data: { documents },
+      },
+    };
 
-    const jobId = `imp_${Date.now()}_${Math.random().toString(36).substr(2, 8)}`;
+    this.exportJobs.set(id, job);
+    this.emit('exportCompleted', { id, checksum, documentCount: documentIds.length });
+
+    return { success: true, data: job };
+  }
+
+  // ── createImportJob ───────────────────────────────────────────────────────
+  async createImportJob({
+    sourceData = {},
+    requestedBy,
+    validateOnly = false,
+    mergeStrategy = 'skip',
+  } = {}) {
+    const id = 'imp_' + randomUUID().replace(/-/g, '');
+    const createdAt = new Date();
+    const { documents = [], checksum } = sourceData;
+
+    this.emit('importStarted', { id, requestedBy });
+
+    // Validate checksum if provided
+    if (checksum) {
+      const computed = createHash('sha256').update(JSON.stringify(documents)).digest('hex');
+      if (computed !== checksum) {
+        const job = {
+          id,
+          type: 'import',
+          status: 'failed',
+          mergeStrategy,
+          createdAt,
+          requestedBy,
+          error: 'فشل التحقق من checksum — البيانات قد تكون تالفة',
+          results: { total: 0, imported: 0, failed: 0, errors: [] },
+        };
+        this.importJobs.set(id, job);
+        this.emit('importCompleted', { id, status: 'failed' });
+        return { success: true, data: job };
+      }
+    }
+
+    // Validate and import each document
+    const errors = [];
+    let imported = 0;
+
+    for (const doc of documents) {
+      const validation = this._validateDocument(doc);
+      if (!validation.valid) {
+        errors.push({ doc, reason: validation.reason });
+      } else {
+        imported++;
+      }
+    }
+
+    const status =
+      errors.length === documents.length && documents.length > 0 ? 'failed' : 'completed';
 
     const job = {
-      id: jobId,
+      id,
       type: 'import',
-      sourceFormat,
-      targetFolder,
+      status,
       mergeStrategy,
-      validateOnly,
+      createdAt,
       requestedBy,
-      requestedByName: requestedByName || '',
-      status: 'processing',
-      progress: 0,
-      results: {
-        total: 0,
-        imported: 0,
-        skipped: 0,
-        failed: 0,
-        errors: [],
-      },
-      createdAt: new Date(),
-      completedAt: null,
+      results: { total: documents.length, imported, failed: errors.length, errors },
     };
 
-    this.importJobs.set(jobId, job);
-    this.emit('importStarted', job);
+    this.importJobs.set(id, job);
+    this.emit('importCompleted', { id, status });
 
-    // Process import
-    await this._processImport(job, sourceData);
-
-    return {
-      success: true,
-      data: job,
-      message: validateOnly ? 'تم التحقق من صحة البيانات' : 'تمت عملية الاستيراد',
-    };
-  }
-
-  /**
-   * Process import job — معالجة مهمة الاستيراد
-   */
-  async _processImport(job, sourceData) {
-    try {
-      const documents = sourceData?.documents || [];
-      job.results.total = documents.length;
-
-      // Validate checksum if provided
-      if (sourceData.checksum) {
-        const calculatedChecksum = crypto
-          .createHash('sha256')
-          .update(JSON.stringify(documents))
-          .digest('hex');
-
-        if (calculatedChecksum !== sourceData.checksum) {
-          job.status = 'failed';
-          job.error = 'فشل التحقق من سلامة البيانات (checksum mismatch)';
-          return;
-        }
-      }
-
-      for (let i = 0; i < documents.length; i++) {
-        const doc = documents[i];
-
-        // Validate document
-        const validation = this._validateDocument(doc);
-        if (!validation.valid) {
-          job.results.failed++;
-          job.results.errors.push({
-            documentId: doc.id,
-            error: validation.error,
-          });
-          continue;
-        }
-
-        if (job.validateOnly) {
-          job.results.imported++;
-        } else {
-          // Simulate import
-          job.results.imported++;
-        }
-
-        job.progress = Math.round(((i + 1) / documents.length) * 100);
-      }
-
-      job.status = 'completed';
-      job.completedAt = new Date();
-      job.progress = 100;
-
-      this.emit('importCompleted', job);
-    } catch (error) {
-      job.status = 'failed';
-      job.error = error.message;
-      this.emit('importFailed', { job, error });
+    const response = { success: true, data: job };
+    if (validateOnly) {
+      response.message = 'اكتمل التحقق من الوثائق بنجاح';
     }
+
+    return response;
   }
 
-  /**
-   * Validate document for import — التحقق من صحة المستند
-   */
+  // ── _validateDocument ──────────────────────────────────────────────────────
   _validateDocument(doc) {
-    if (!doc.id) return { valid: false, error: 'معرّف المستند مفقود' };
-    if (!doc.metadata?.title) return { valid: false, error: 'عنوان المستند مفقود' };
+    if (!doc || !doc.id) return { valid: false, reason: 'معرف الوثيقة مفقود' };
+    if (!doc.metadata || !doc.metadata.title)
+      return { valid: false, reason: 'عنوان الوثيقة مفقود' };
     return { valid: true };
   }
 
-  /**
-   * Get export job status — حالة مهمة التصدير
-   */
-  async getExportJob(jobId) {
-    const job = this.exportJobs.get(jobId);
-    if (!job) return { success: false, message: 'مهمة التصدير غير موجودة' };
+  // ── getExportJob ───────────────────────────────────────────────────────────
+  async getExportJob(id) {
+    const job = this.exportJobs.get(id);
+    if (!job) return { success: false, error: 'مهمة التصدير غير موجودة' };
     return { success: true, data: job };
   }
 
-  /**
-   * Get import job status — حالة مهمة الاستيراد
-   */
-  async getImportJob(jobId) {
-    const job = this.importJobs.get(jobId);
-    if (!job) return { success: false, message: 'مهمة الاستيراد غير موجودة' };
+  // ── getImportJob ───────────────────────────────────────────────────────────
+  async getImportJob(id) {
+    const job = this.importJobs.get(id);
+    if (!job) return { success: false, error: 'مهمة الاستيراد غير موجودة' };
     return { success: true, data: job };
   }
 
-  /**
-   * Get all jobs — جلب جميع المهام
-   */
-  async getJobs(type, filters = {}) {
-    const jobs =
-      type === 'export'
-        ? Array.from(this.exportJobs.values())
-        : type === 'import'
-          ? Array.from(this.importJobs.values())
-          : [...Array.from(this.exportJobs.values()), ...Array.from(this.importJobs.values())];
+  // ── getJobs ────────────────────────────────────────────────────────────────
+  async getJobs(type = null, { status, requestedBy } = {}) {
+    let allJobs = [];
 
-    let filtered = jobs;
-    if (filters.status) filtered = filtered.filter(j => j.status === filters.status);
-    if (filters.requestedBy) filtered = filtered.filter(j => j.requestedBy === filters.requestedBy);
+    if (type === 'export' || type == null) {
+      allJobs = [...allJobs, ...Array.from(this.exportJobs.values())];
+    }
+    if (type === 'import' || type == null) {
+      allJobs = [...allJobs, ...Array.from(this.importJobs.values())];
+    }
 
-    filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    if (status) allJobs = allJobs.filter(j => j.status === status);
+    if (requestedBy) allJobs = allJobs.filter(j => j.requestedBy === requestedBy);
 
-    return {
-      success: true,
-      data: filtered,
-      total: filtered.length,
-    };
+    allJobs.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    return { success: true, total: allJobs.length, data: allJobs };
   }
 
-  /**
-   * Generate export report (CSV) — تقرير تصدير CSV
-   */
-  async exportToCSV(documents) {
-    const headers = [
-      'المعرف',
-      'العنوان',
-      'الوصف',
-      'التصنيف',
-      'الحالة',
-      'حجم الملف',
-      'نوع الملف',
-      'تاريخ الإنشاء',
-      'المالك',
-      'عدد التحميلات',
-      'عدد المشاهدات',
-      'الوسوم',
-    ];
-
-    const rows = documents.map(doc => [
-      doc._id || doc.id,
+  // ── exportToCSV ────────────────────────────────────────────────────────────
+  async exportToCSV(docs = []) {
+    const headers = ['المعرف', 'العنوان', 'التصنيف', 'الحالة', 'الوسوم'];
+    const rows = docs.map(doc => [
+      doc.id || '',
       doc.title || '',
-      doc.description || '',
       doc.category || '',
       doc.status || '',
-      doc.fileSize || 0,
-      doc.mimeType || '',
-      doc.createdAt ? new Date(doc.createdAt).toLocaleDateString('ar-SA') : '',
-      doc.uploadedByName || '',
-      doc.downloadCount || 0,
-      doc.viewCount || 0,
       (doc.tags || []).join(', '),
     ]);
 
-    // UTF-8 BOM for Arabic support
-    const bom = '\uFEFF';
-    const csv =
-      bom + [headers.join(','), ...rows.map(r => r.map(c => `"${c}"`).join(','))].join('\n');
+    const csv = '\uFEFF' + [headers, ...rows].map(r => r.join(',')).join('\n');
+    const filename = `documents_${Date.now()}.csv`;
 
-    return {
-      success: true,
-      data: csv,
-      mimeType: 'text/csv',
-      filename: `documents-export-${new Date().toISOString().split('T')[0]}.csv`,
-    };
+    return { success: true, data: csv, mimeType: 'text/csv', filename };
   }
 
-  /**
-   * Generate export report (detailed JSON) — تقرير تصدير JSON
-   */
-  async exportToJSON(documents) {
-    const report = {
-      exportDate: new Date().toISOString(),
-      system: 'الأوائل لإدارة المستندات',
+  // ── exportToJSON ───────────────────────────────────────────────────────────
+  async exportToJSON(docs = []) {
+    const documents = docs.map(doc => ({
+      id: doc._id || doc.id || '',
+      title: doc.title || '',
+      description: doc.description || '',
+      category: doc.category || '',
+      status: doc.status || '',
+      tags: doc.tags || [],
+    }));
+
+    const content = JSON.stringify(documents);
+    const checksum = createHash('sha256').update(content).digest('hex');
+
+    const payload = {
       totalDocuments: documents.length,
-      documents: documents.map(doc => ({
-        id: doc._id || doc.id,
-        title: doc.title,
-        description: doc.description,
-        category: doc.category,
-        status: doc.status,
-        fileSize: doc.fileSize,
-        mimeType: doc.mimeType,
-        tags: doc.tags || [],
-        createdAt: doc.createdAt,
-        uploadedByName: doc.uploadedByName,
-        downloadCount: doc.downloadCount,
-        viewCount: doc.viewCount,
-      })),
-      checksum: crypto
-        .createHash('sha256')
-        .update(JSON.stringify(documents.map(d => d._id || d.id)))
-        .digest('hex'),
+      exportedAt: new Date().toISOString(),
+      system: 'منصة الأوائل للوثائق',
+      checksum,
+      documents,
     };
 
-    return {
-      success: true,
-      data: JSON.stringify(report, null, 2),
-      mimeType: 'application/json',
-      filename: `documents-export-${new Date().toISOString().split('T')[0]}.json`,
-    };
+    const data = JSON.stringify(payload, null, 2);
+    const filename = `documents_${Date.now()}.json`;
+
+    return { success: true, data, mimeType: 'application/json', filename };
   }
 }
 
-module.exports = new DocumentExportImportService();
+module.exports = new DocumentExportService();

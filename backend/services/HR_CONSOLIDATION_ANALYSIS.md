@@ -2,17 +2,17 @@
 
 ## 1. FILE SUMMARY
 
-| # | File | Lines | Export Style | Export Name |
-|---|------|------:|-------------|-------------|
-| 1 | `hrCore.service.js` | 78 | Class + instance | `HRCoreService` + `.instance` |
-| 2 | `hr-advanced.service.js` | 443 | Instance | `new HRService()` |
-| 3 | `hr-dashboard.service.js` | 589 | Instance | `new HRDashboardService()` |
-| 4 | `hr.advanced.service.js` | 630 | Named object (5 classes) | `{ PerformanceManagementService, LeaveManagementService, AttendanceService, PayrollService, TrainingService }` |
-| 5 | `hrPhase6Service.js` | 145 | Class | `HRPhase6Service` |
-| 6 | `employeeAffairs.service.js` | 1052 | Instance | `new EmployeeAffairsService()` |
-| 7 | `employeeAffairs.expanded.service.js` | 998 | Instance | `new EmployeeAffairsExpandedService()` |
-| 8 | `employeeAffairs.phase2.service.js` | 806 | Instance | `new EmployeeAffairsPhase2Service()` |
-| 9 | `employeeAffairs.phase3.service.js` | 651 | Instance | `new EmployeeAffairsPhase3Service()` |
+| #   | File                                  | Lines | Export Style             | Export Name                                                                                                    |
+| --- | ------------------------------------- | ----: | ------------------------ | -------------------------------------------------------------------------------------------------------------- |
+| 1   | `hrCore.service.js`                   |    78 | Class + instance         | `HRCoreService` + `.instance`                                                                                  |
+| 2   | `hr-advanced.service.js`              |   443 | Instance                 | `new HRService()`                                                                                              |
+| 3   | `hr-dashboard.service.js`             |   589 | Instance                 | `new HRDashboardService()`                                                                                     |
+| 4   | `hr.advanced.service.js`              |   630 | Named object (5 classes) | `{ PerformanceManagementService, LeaveManagementService, AttendanceService, PayrollService, TrainingService }` |
+| 5   | `hrPhase6Service.js`                  |   145 | Class                    | `HRPhase6Service`                                                                                              |
+| 6   | `employeeAffairs.service.js`          |  1052 | Instance                 | `new EmployeeAffairsService()`                                                                                 |
+| 7   | `employeeAffairs.expanded.service.js` |   998 | Instance                 | `new EmployeeAffairsExpandedService()`                                                                         |
+| 8   | `employeeAffairs.phase2.service.js`   |   806 | Instance                 | `new EmployeeAffairsPhase2Service()`                                                                           |
+| 9   | `employeeAffairs.phase3.service.js`   |   651 | Instance                 | `new EmployeeAffairsPhase3Service()`                                                                           |
 
 **Total: 5,392 lines across 9 files**
 
@@ -21,21 +21,27 @@
 ## 2. COMPLETE EXPORTS PER FILE
 
 ### File 1: `hrCore.service.js` (78 lines)
+
 ```
 module.exports = HRCoreService;
 module.exports.instance = new HRCoreService();
 ```
+
 **Exported methods (static):**
+
 1. `checkExpiringContracts()` — Contract expiry alerts (mock data)
 2. `generatePayrollRun(month, year)` — Monthly payroll calc with deductions/bonuses (mock data)
 
 ---
 
 ### File 2: `hr-advanced.service.js` (443 lines)
+
 ```
 module.exports = new HRService();
 ```
+
 **Exported methods (instance):**
+
 1. `createEmployee(employeeData)`
 2. `updateEmployee(employeeId, updateData)`
 3. `getEmployee(employeeId)`
@@ -60,10 +66,13 @@ module.exports = new HRService();
 ---
 
 ### File 3: `hr-dashboard.service.js` (589 lines)
+
 ```
 module.exports = new HRDashboardService();
 ```
+
 **Exported methods (instance):**
+
 1. `getHRDashboard(filters)`
 2. `getEmployeeDetails(employeeId)`
 3. `exportHRReport(format)`
@@ -71,6 +80,7 @@ module.exports = new HRDashboardService();
 ---
 
 ### File 4: `hr.advanced.service.js` (630 lines)
+
 ```
 module.exports = {
   PerformanceManagementService,
@@ -80,41 +90,33 @@ module.exports = {
   TrainingService,
 };
 ```
+
 **Exported static methods per class:**
 
 **PerformanceManagementService:**
+
 1. `createPerformanceReview(reviewData)`
 2. `getPerformanceHistory(employeeId, months)`
 3. `generatePerformanceReport(departmentId)`
 
-**LeaveManagementService:**
-4. `submitLeaveRequest(employeeId, leaveData)`
-5. `approveLeaveRequest(leaveRequestId, approverId, approved, comments)`
-6. `getLeaveBalance(employeeId)`
+**LeaveManagementService:** 4. `submitLeaveRequest(employeeId, leaveData)` 5. `approveLeaveRequest(leaveRequestId, approverId, approved, comments)` 6. `getLeaveBalance(employeeId)`
 
-**AttendanceService:**
-7. `recordCheckIn(employeeId, location)`
-8. `recordCheckOut(employeeId)`
-9. `getAttendanceReport(employeeId, month)`
+**AttendanceService:** 7. `recordCheckIn(employeeId, location)` 8. `recordCheckOut(employeeId)` 9. `getAttendanceReport(employeeId, month)`
 
-**PayrollService:**
-10. `calculatePayroll(employeeId, payPeriod)`
-11. `processPayment(payrollId)`
-12. `generatePayslip(payrollId)`
+**PayrollService:** 10. `calculatePayroll(employeeId, payPeriod)` 11. `processPayment(payrollId)` 12. `generatePayslip(payrollId)`
 
-**TrainingService:**
-13. `createTraining(trainingData)`
-14. `registerEmployee(trainingId, employeeId)`
-15. `markAttendance(trainingId, employeeId, status, score)`
-16. `calculateDuration(startDate, endDate)` *(non-async helper)*
+**TrainingService:** 13. `createTraining(trainingData)` 14. `registerEmployee(trainingId, employeeId)` 15. `markAttendance(trainingId, employeeId, status, score)` 16. `calculateDuration(startDate, endDate)` _(non-async helper)_
 
 ---
 
 ### File 5: `hrPhase6Service.js` (145 lines)
+
 ```
 module.exports = HRPhase6Service;
 ```
+
 **Exported methods (instance – class not auto-instantiated):**
+
 1. `getEmployees(filter)`
 2. `getEmployeeById(id)`
 3. `generatePayroll(month, year)`
@@ -131,10 +133,13 @@ module.exports = HRPhase6Service;
 ---
 
 ### File 6: `employeeAffairs.service.js` (1052 lines)
+
 ```
 module.exports = new EmployeeAffairsService();
 ```
+
 **Exported methods (instance, 34 methods):**
+
 1. `createEmployee(data)`
 2. `getEmployeeById(id)`
 3. `listEmployees(filters)`
@@ -173,10 +178,13 @@ module.exports = new EmployeeAffairsService();
 ---
 
 ### File 7: `employeeAffairs.expanded.service.js` (998 lines)
+
 ```
 module.exports = new EmployeeAffairsExpandedService();
 ```
+
 **Exported methods (instance, 34 methods):**
+
 1. `createComplaint(data)`
 2. `listComplaints(filters)`
 3. `getComplaintById(id)`
@@ -215,10 +223,13 @@ module.exports = new EmployeeAffairsExpandedService();
 ---
 
 ### File 8: `employeeAffairs.phase2.service.js` (806 lines)
+
 ```
 module.exports = new EmployeeAffairsPhase2Service();
 ```
+
 **Exported methods (instance, 47 methods):**
+
 1. `createTask(data)`
 2. `listTasks(filters)`
 3. `getTaskById(id)`
@@ -270,10 +281,13 @@ module.exports = new EmployeeAffairsPhase2Service();
 ---
 
 ### File 9: `employeeAffairs.phase3.service.js` (651 lines)
+
 ```
 module.exports = new EmployeeAffairsPhase3Service();
 ```
+
 **Exported methods (instance, 47 methods):**
+
 1. `createContract(data)`
 2. `listContracts(query)`
 3. `getContractById(id)`
@@ -327,85 +341,93 @@ module.exports = new EmployeeAffairsPhase3Service();
 ## 3. OVERLAP ANALYSIS — Functions That Exist in Multiple Files
 
 ### 🔴 Employee CRUD (4 overlapping implementations)
-| Function | hr-advanced | hrPhase6 | empAffairs |
-|----------|:-----------:|:--------:|:----------:|
-| `createEmployee` | ✅ | — | ✅ |
-| `getEmployee` / `getEmployeeById` | ✅ | ✅ | ✅ |
-| `getAllEmployees` / `getEmployees` / `listEmployees` | ✅ | ✅ | ✅ |
-| `updateEmployee` | ✅ | — | ✅ |
-| `deleteEmployee` | ✅ | — | — |
-| `getEmployeeProfile` | ✅ | — | ✅ |
+
+| Function                                             | hr-advanced | hrPhase6 | empAffairs |
+| ---------------------------------------------------- | :---------: | :------: | :--------: |
+| `createEmployee`                                     |     ✅      |    —     |     ✅     |
+| `getEmployee` / `getEmployeeById`                    |     ✅      |    ✅    |     ✅     |
+| `getAllEmployees` / `getEmployees` / `listEmployees` |     ✅      |    ✅    |     ✅     |
+| `updateEmployee`                                     |     ✅      |    —     |     ✅     |
+| `deleteEmployee`                                     |     ✅      |    —     |     —      |
+| `getEmployeeProfile`                                 |     ✅      |    —     |     ✅     |
 
 ### 🔴 Leave Management (4 overlapping implementations)
-| Function | hr.advanced | hrPhase6 | empAffairs | hr-advanced* |
-|----------|:-----------:|:--------:|:----------:|:----------:|
-| `requestLeave` / `submitLeaveRequest` | ✅ | ✅ | ✅ | — |
-| `approveLeave` / `approveLeaveRequest` | ✅ | ✅ | ✅ (2-stage) | — |
-| `getLeaveBalance` | ✅ | — | ✅ | — |
-| `getLeaves` / `listLeaves` | — | ✅ | ✅ | — |
+
+| Function                               | hr.advanced | hrPhase6 |  empAffairs  | hr-advanced\* |
+| -------------------------------------- | :---------: | :------: | :----------: | :-----------: |
+| `requestLeave` / `submitLeaveRequest`  |     ✅      |    ✅    |      ✅      |       —       |
+| `approveLeave` / `approveLeaveRequest` |     ✅      |    ✅    | ✅ (2-stage) |       —       |
+| `getLeaveBalance`                      |     ✅      |    —     |      ✅      |       —       |
+| `getLeaves` / `listLeaves`             |      —      |    ✅    |      ✅      |       —       |
 
 ### 🔴 Attendance (4 overlapping implementations)
-| Function | hr.advanced | hrPhase6 | empAffairs | phase2 |
-|----------|:-----------:|:--------:|:----------:|:------:|
-| `checkIn` / `recordCheckIn` | ✅ | ✅ | ✅ | — |
-| `checkOut` / `recordCheckOut` | ✅ | ✅ | ✅ | — |
-| `getAttendance` / `getAttendanceReport` / `getMonthlyAttendanceReport` | ✅ | ✅ | ✅ | — |
-| `recordShiftAttendance` | — | — | — | ✅ |
+
+| Function                                                               | hr.advanced | hrPhase6 | empAffairs | phase2 |
+| ---------------------------------------------------------------------- | :---------: | :------: | :--------: | :----: |
+| `checkIn` / `recordCheckIn`                                            |     ✅      |    ✅    |     ✅     |   —    |
+| `checkOut` / `recordCheckOut`                                          |     ✅      |    ✅    |     ✅     |   —    |
+| `getAttendance` / `getAttendanceReport` / `getMonthlyAttendanceReport` |     ✅      |    ✅    |     ✅     |   —    |
+| `recordShiftAttendance`                                                |      —      |    —     |     —      |   ✅   |
 
 ### 🔴 Performance Reviews (4 overlapping implementations)
-| Function | hr.advanced | hr-advanced | hrPhase6 | empAffairs |
-|----------|:-----------:|:-----------:|:--------:|:----------:|
-| `createPerformanceReview` | ✅ | ✅ | ✅ (`createAppraisal`) | ✅ |
-| `getPerformanceHistory` / `getEmployeePerformance` | ✅ | — | ✅ | ✅ |
-| `generatePerformanceReport` | ✅ | — | — | — |
+
+| Function                                           | hr.advanced | hr-advanced |        hrPhase6        | empAffairs |
+| -------------------------------------------------- | :---------: | :---------: | :--------------------: | :--------: |
+| `createPerformanceReview`                          |     ✅      |     ✅      | ✅ (`createAppraisal`) |     ✅     |
+| `getPerformanceHistory` / `getEmployeePerformance` |     ✅      |      —      |           ✅           |     ✅     |
+| `generatePerformanceReport`                        |     ✅      |      —      |           —            |     —      |
 
 ### 🔴 Payroll (4 overlapping implementations)
-| Function | hrCore | hr.advanced | hr-advanced | hrPhase6 |
-|----------|:------:|:-----------:|:-----------:|:--------:|
-| `generatePayrollRun` / `calculatePayroll` / `generatePayroll` | ✅ | ✅ | ✅ | ✅ |
-| `processPayroll` / `processPayment` | — | ✅ | ✅ | — |
-| `transferPayroll` | — | — | ✅ | — |
-| `getMonthlyPayrollSummary` / `getPayrollRecords` | — | — | ✅ | ✅ |
-| `generatePayslip` | — | ✅ | — | — |
+
+| Function                                                      | hrCore | hr.advanced | hr-advanced | hrPhase6 |
+| ------------------------------------------------------------- | :----: | :---------: | :---------: | :------: |
+| `generatePayrollRun` / `calculatePayroll` / `generatePayroll` |   ✅   |     ✅      |     ✅      |    ✅    |
+| `processPayroll` / `processPayment`                           |   —    |     ✅      |     ✅      |    —     |
+| `transferPayroll`                                             |   —    |      —      |     ✅      |    —     |
+| `getMonthlyPayrollSummary` / `getPayrollRecords`              |   —    |      —      |     ✅      |    ✅    |
+| `generatePayslip`                                             |   —    |     ✅      |      —      |    —     |
 
 ### 🔴 Training (3 overlapping implementations)
-| Function | hr.advanced | hr-advanced | empAffairs |
-|----------|:-----------:|:-----------:|:----------:|
-| `createTraining` / `createTrainingProgram` | ✅ | ✅ | — |
-| `registerEmployee` / `enrollEmployees` | ✅ | ✅ | — |
-| `markAttendance` / `completeTraining` | ✅ | ✅ | — |
-| `addTraining` (to employee record) | — | — | ✅ |
+
+| Function                                   | hr.advanced | hr-advanced | empAffairs |
+| ------------------------------------------ | :---------: | :---------: | :--------: |
+| `createTraining` / `createTrainingProgram` |     ✅      |     ✅      |     —      |
+| `registerEmployee` / `enrollEmployees`     |     ✅      |     ✅      |     —      |
+| `markAttendance` / `completeTraining`      |     ✅      |     ✅      |     —      |
+| `addTraining` (to employee record)         |      —      |      —      |     ✅     |
 
 ### 🔴 Contract Expiry (3 overlapping implementations)
-| Function | hrCore | hr-advanced | empAffairs | phase3 |
-|----------|:------:|:-----------:|:----------:|:------:|
-| `checkExpiringContracts` / `getExpiringContracts` | ✅ (mock) | ✅ | ✅ | ✅ |
-| `renewContract` | — | — | ✅ | ✅ |
+
+| Function                                          |  hrCore   | hr-advanced | empAffairs | phase3 |
+| ------------------------------------------------- | :-------: | :---------: | :--------: | :----: |
+| `checkExpiringContracts` / `getExpiringContracts` | ✅ (mock) |     ✅      |     ✅     |   ✅   |
+| `renewContract`                                   |     —     |      —      |     ✅     |   ✅   |
 
 ### 🔴 Dashboard/Analytics (4 overlapping implementations)
-| Function | hr-advanced | hr-dashboard | empAffairs | expanded | phase2 | phase3 |
-|----------|:-----------:|:------------:|:----------:|:--------:|:------:|:------:|
-| `getHRAnalytics` / `getHRDashboard` / `getDashboard` | ✅ | ✅ | ✅ | — | — | — |
-| `getExpandedDashboard` | — | — | — | ✅ | — | — |
-| `getPhase2Dashboard` | — | — | — | — | ✅ | — |
-| `getPhase3Dashboard` | — | — | — | — | — | ✅ |
-| `exportHRReport` | — | ✅ | — | — | — | — |
+
+| Function                                             | hr-advanced | hr-dashboard | empAffairs | expanded | phase2 | phase3 |
+| ---------------------------------------------------- | :---------: | :----------: | :--------: | :------: | :----: | :----: |
+| `getHRAnalytics` / `getHRDashboard` / `getDashboard` |     ✅      |      ✅      |     ✅     |    —     |   —    |   —    |
+| `getExpandedDashboard`                               |      —      |      —       |     —      |    ✅    |   —    |   —    |
+| `getPhase2Dashboard`                                 |      —      |      —       |     —      |    —     |   ✅   |   —    |
+| `getPhase3Dashboard`                                 |      —      |      —       |     —      |    —     |   —    |   ✅   |
+| `exportHRReport`                                     |      —      |      ✅      |     —      |    —     |   —    |   —    |
 
 ---
 
 ## 4. UNIQUE CAPABILITIES PER FILE
 
-| File | Unique Capabilities |
-|------|-------------------|
-| **hrCore.service.js** | Mock-based payroll prototype (oldest/simplest implementation) |
-| **hr-advanced.service.js** | `searchEmployees`, `addInterimReview`, `transferPayroll`, `getPendingPayrolls`, `getPendingReviews` |
-| **hr-dashboard.service.js** | `exportHRReport`, comprehensive `getHRDashboard` with 8 sections, `getEmployeeDetails` with full profile |
-| **hr.advanced.service.js** | `generatePerformanceReport(departmentId)`, `generatePayslip(payrollId)`, proper 5-class separation by domain |
-| **hrPhase6Service.js** | Compact CRUD-first design for Employee+Payroll+Attendance+Leave+Performance |
-| **employeeAffairs.service.js** | `terminateEmployee`, `setEmployeeGoals`, `promoteEmployee`, `addCertification`, `addSkill`, `addDocument`, `getDocuments`, `getDepartmentStatistics`, `getEmployeeGovernmentSummary`, `updateEmployeeMOLData`, `updateEmployeeSponsorshipData`, `getExpiringDocumentsReport`, `getSaudizationReport`, 2-stage leave approval (Manager+HR) |
-| **employeeAffairs.expanded.service.js** | Complaints, Loans (with installments), Disciplinary Actions (with appeals), Letter Requests, Promotions/Transfers (multi-step approval), Overtime Requests |
-| **employeeAffairs.phase2.service.js** | Tasks (with delegation/rating), Housing (units + assignments), Transportation Routes, Custody (asset management), Work Permits, Rewards & Points, Shift Management (definitions, assignments, swaps, schedules) |
-| **employeeAffairs.phase3.service.js** | Contract Management (amendments, termination), Settlements (final pay), Warnings (issuance/acknowledgment/appeal), Clearance (exit process, exit interview), Visa Management (travel tracking), Employee Benefits (packages, allowances, air tickets) |
+| File                                    | Unique Capabilities                                                                                                                                                                                                                                                                                                                       |
+| --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **hrCore.service.js**                   | Mock-based payroll prototype (oldest/simplest implementation)                                                                                                                                                                                                                                                                             |
+| **hr-advanced.service.js**              | `searchEmployees`, `addInterimReview`, `transferPayroll`, `getPendingPayrolls`, `getPendingReviews`                                                                                                                                                                                                                                       |
+| **hr-dashboard.service.js**             | `exportHRReport`, comprehensive `getHRDashboard` with 8 sections, `getEmployeeDetails` with full profile                                                                                                                                                                                                                                  |
+| **hr.advanced.service.js**              | `generatePerformanceReport(departmentId)`, `generatePayslip(payrollId)`, proper 5-class separation by domain                                                                                                                                                                                                                              |
+| **hrPhase6Service.js**                  | Compact CRUD-first design for Employee+Payroll+Attendance+Leave+Performance                                                                                                                                                                                                                                                               |
+| **employeeAffairs.service.js**          | `terminateEmployee`, `setEmployeeGoals`, `promoteEmployee`, `addCertification`, `addSkill`, `addDocument`, `getDocuments`, `getDepartmentStatistics`, `getEmployeeGovernmentSummary`, `updateEmployeeMOLData`, `updateEmployeeSponsorshipData`, `getExpiringDocumentsReport`, `getSaudizationReport`, 2-stage leave approval (Manager+HR) |
+| **employeeAffairs.expanded.service.js** | Complaints, Loans (with installments), Disciplinary Actions (with appeals), Letter Requests, Promotions/Transfers (multi-step approval), Overtime Requests                                                                                                                                                                                |
+| **employeeAffairs.phase2.service.js**   | Tasks (with delegation/rating), Housing (units + assignments), Transportation Routes, Custody (asset management), Work Permits, Rewards & Points, Shift Management (definitions, assignments, swaps, schedules)                                                                                                                           |
+| **employeeAffairs.phase3.service.js**   | Contract Management (amendments, termination), Settlements (final pay), Warnings (issuance/acknowledgment/appeal), Clearance (exit process, exit interview), Visa Management (travel tracking), Employee Benefits (packages, allowances, air tickets)                                                                                     |
 
 ---
 
@@ -602,291 +624,318 @@ module.exports = new EmployeeAffairsPhase3Service();
 ## 6. PROPOSED CONSOLIDATED SUB-MODULE GROUPING
 
 ### Module A: `hr.employee` — Employee Core (Lifecycle & Profile)
-| Consolidated Function | Source File(s) | Priority Source |
-|----------------------|---------------|----------------|
-| `createEmployee` | hr-advanced, empAffairs | **empAffairs** |
-| `getEmployeeById` | hr-advanced, hrPhase6, empAffairs | **empAffairs** |
-| `listEmployees` | hr-advanced, hrPhase6, empAffairs | **empAffairs** |
-| `updateEmployee` | hr-advanced, empAffairs | **empAffairs** |
-| `deleteEmployee` | hr-advanced | **hr-advanced** |
-| `terminateEmployee` | empAffairs | **empAffairs** |
-| `getEmployeeProfile` | hr-advanced, empAffairs | **empAffairs** |
-| `searchEmployees` | hr-advanced | **hr-advanced** |
-| `promoteEmployee` | empAffairs | **empAffairs** |
-| `getEmployeeDetails` | hr-dashboard | **hr-dashboard** |
+
+| Consolidated Function | Source File(s)                    | Priority Source  |
+| --------------------- | --------------------------------- | ---------------- |
+| `createEmployee`      | hr-advanced, empAffairs           | **empAffairs**   |
+| `getEmployeeById`     | hr-advanced, hrPhase6, empAffairs | **empAffairs**   |
+| `listEmployees`       | hr-advanced, hrPhase6, empAffairs | **empAffairs**   |
+| `updateEmployee`      | hr-advanced, empAffairs           | **empAffairs**   |
+| `deleteEmployee`      | hr-advanced                       | **hr-advanced**  |
+| `terminateEmployee`   | empAffairs                        | **empAffairs**   |
+| `getEmployeeProfile`  | hr-advanced, empAffairs           | **empAffairs**   |
+| `searchEmployees`     | hr-advanced                       | **hr-advanced**  |
+| `promoteEmployee`     | empAffairs                        | **empAffairs**   |
+| `getEmployeeDetails`  | hr-dashboard                      | **hr-dashboard** |
 
 ### Module B: `hr.leave` — Leave Management
-| Consolidated Function | Source File(s) | Priority Source |
-|----------------------|---------------|----------------|
-| `requestLeave` | hr.advanced, hrPhase6, empAffairs | **empAffairs** |
-| `approveLeaveByManager` | empAffairs | **empAffairs** |
-| `approveLeaveByHR` | empAffairs | **empAffairs** |
-| `approveLeave` | hr.advanced, hrPhase6 | **empAffairs** (2-stage) |
-| `rejectLeave` | empAffairs | **empAffairs** |
-| `cancelLeave` | empAffairs | **empAffairs** |
-| `getLeaveBalance` | hr.advanced, empAffairs | **empAffairs** |
-| `listLeaves` | hrPhase6, empAffairs | **empAffairs** |
+
+| Consolidated Function   | Source File(s)                    | Priority Source          |
+| ----------------------- | --------------------------------- | ------------------------ |
+| `requestLeave`          | hr.advanced, hrPhase6, empAffairs | **empAffairs**           |
+| `approveLeaveByManager` | empAffairs                        | **empAffairs**           |
+| `approveLeaveByHR`      | empAffairs                        | **empAffairs**           |
+| `approveLeave`          | hr.advanced, hrPhase6             | **empAffairs** (2-stage) |
+| `rejectLeave`           | empAffairs                        | **empAffairs**           |
+| `cancelLeave`           | empAffairs                        | **empAffairs**           |
+| `getLeaveBalance`       | hr.advanced, empAffairs           | **empAffairs**           |
+| `listLeaves`            | hrPhase6, empAffairs              | **empAffairs**           |
 
 ### Module C: `hr.attendance` — Attendance & Time Tracking
-| Consolidated Function | Source File(s) | Priority Source |
-|----------------------|---------------|----------------|
-| `checkIn` | hr.advanced, hrPhase6, empAffairs | **empAffairs** |
-| `checkOut` | hr.advanced, hrPhase6, empAffairs | **empAffairs** |
-| `getMonthlyAttendanceReport` | hr.advanced, hrPhase6, empAffairs | **empAffairs** |
+
+| Consolidated Function        | Source File(s)                    | Priority Source |
+| ---------------------------- | --------------------------------- | --------------- |
+| `checkIn`                    | hr.advanced, hrPhase6, empAffairs | **empAffairs**  |
+| `checkOut`                   | hr.advanced, hrPhase6, empAffairs | **empAffairs**  |
+| `getMonthlyAttendanceReport` | hr.advanced, hrPhase6, empAffairs | **empAffairs**  |
 
 ### Module D: `hr.payroll` — Payroll & Compensation
-| Consolidated Function | Source File(s) | Priority Source |
-|----------------------|---------------|----------------|
-| `generatePayroll` | hrCore, hr.advanced, hr-advanced, hrPhase6 | **hr.advanced (PayrollService)** |
-| `processPayroll` | hr.advanced, hr-advanced | **hr.advanced** |
-| `transferPayroll` | hr-advanced | **hr-advanced** |
-| `getMonthlyPayrollSummary` | hr-advanced, hrPhase6 | **hr-advanced** |
-| `generatePayslip` | hr.advanced | **hr.advanced** |
-| `getPendingPayrolls` | hr-advanced | **hr-advanced** |
+
+| Consolidated Function      | Source File(s)                             | Priority Source                  |
+| -------------------------- | ------------------------------------------ | -------------------------------- |
+| `generatePayroll`          | hrCore, hr.advanced, hr-advanced, hrPhase6 | **hr.advanced (PayrollService)** |
+| `processPayroll`           | hr.advanced, hr-advanced                   | **hr.advanced**                  |
+| `transferPayroll`          | hr-advanced                                | **hr-advanced**                  |
+| `getMonthlyPayrollSummary` | hr-advanced, hrPhase6                      | **hr-advanced**                  |
+| `generatePayslip`          | hr.advanced                                | **hr.advanced**                  |
+| `getPendingPayrolls`       | hr-advanced                                | **hr-advanced**                  |
 
 ### Module E: `hr.performance` — Performance & Goals
-| Consolidated Function | Source File(s) | Priority Source |
-|----------------------|---------------|----------------|
-| `createPerformanceReview` | hr.advanced, hr-advanced, hrPhase6, empAffairs | **empAffairs** |
-| `getPerformanceHistory` | hr.advanced, hrPhase6, empAffairs | **empAffairs** |
-| `generatePerformanceReport` | hr.advanced | **hr.advanced** |
-| `addInterimReview` | hr-advanced | **hr-advanced** |
-| `getPendingReviews` | hr-advanced | **hr-advanced** |
-| `setEmployeeGoals` | empAffairs | **empAffairs** |
+
+| Consolidated Function       | Source File(s)                                 | Priority Source |
+| --------------------------- | ---------------------------------------------- | --------------- |
+| `createPerformanceReview`   | hr.advanced, hr-advanced, hrPhase6, empAffairs | **empAffairs**  |
+| `getPerformanceHistory`     | hr.advanced, hrPhase6, empAffairs              | **empAffairs**  |
+| `generatePerformanceReport` | hr.advanced                                    | **hr.advanced** |
+| `addInterimReview`          | hr-advanced                                    | **hr-advanced** |
+| `getPendingReviews`         | hr-advanced                                    | **hr-advanced** |
+| `setEmployeeGoals`          | empAffairs                                     | **empAffairs**  |
 
 ### Module F: `hr.training` — Training & Development
-| Consolidated Function | Source File(s) | Priority Source |
-|----------------------|---------------|----------------|
-| `createTrainingProgram` | hr.advanced, hr-advanced | **hr-advanced** |
-| `enrollEmployees` | hr.advanced, hr-advanced | **hr-advanced** |
-| `completeTraining` | hr-advanced | **hr-advanced** |
-| `markAttendance` | hr.advanced | **hr.advanced** |
-| `addTraining` (to record) | empAffairs | **empAffairs** |
-| `addCertification` | empAffairs | **empAffairs** |
-| `addSkill` | empAffairs | **empAffairs** |
-| `calculateDuration` | hr.advanced | **hr.advanced** |
+
+| Consolidated Function     | Source File(s)           | Priority Source |
+| ------------------------- | ------------------------ | --------------- |
+| `createTrainingProgram`   | hr.advanced, hr-advanced | **hr-advanced** |
+| `enrollEmployees`         | hr.advanced, hr-advanced | **hr-advanced** |
+| `completeTraining`        | hr-advanced              | **hr-advanced** |
+| `markAttendance`          | hr.advanced              | **hr.advanced** |
+| `addTraining` (to record) | empAffairs               | **empAffairs**  |
+| `addCertification`        | empAffairs               | **empAffairs**  |
+| `addSkill`                | empAffairs               | **empAffairs**  |
+| `calculateDuration`       | hr.advanced              | **hr.advanced** |
 
 ### Module G: `hr.contracts` — Contract Management
-| Consolidated Function | Source File(s) | Priority Source |
-|----------------------|---------------|----------------|
-| `createContract` | phase3 | **phase3** |
-| `listContracts` | phase3 | **phase3** |
-| `getContractById` | phase3 | **phase3** |
-| `renewContract` | empAffairs, phase3 | **phase3** |
-| `addContractAmendment` | phase3 | **phase3** |
-| `terminateContract` | phase3 | **phase3** |
-| `getExpiringContracts` | hrCore, hr-advanced, empAffairs, phase3 | **phase3** |
-| `getContractStats` | phase3 | **phase3** |
+
+| Consolidated Function  | Source File(s)                          | Priority Source |
+| ---------------------- | --------------------------------------- | --------------- |
+| `createContract`       | phase3                                  | **phase3**      |
+| `listContracts`        | phase3                                  | **phase3**      |
+| `getContractById`      | phase3                                  | **phase3**      |
+| `renewContract`        | empAffairs, phase3                      | **phase3**      |
+| `addContractAmendment` | phase3                                  | **phase3**      |
+| `terminateContract`    | phase3                                  | **phase3**      |
+| `getExpiringContracts` | hrCore, hr-advanced, empAffairs, phase3 | **phase3**      |
+| `getContractStats`     | phase3                                  | **phase3**      |
 
 ### Module H: `hr.complaints` — Complaints & Disciplinary
-| Consolidated Function | Source File(s) | Priority Source |
-|----------------------|---------------|----------------|
-| `createComplaint` | expanded | **expanded** |
-| `listComplaints` | expanded | **expanded** |
-| `getComplaintById` | expanded | **expanded** |
-| `updateComplaintStatus` | expanded | **expanded** |
-| `getComplaintStats` | expanded | **expanded** |
-| `createDisciplinaryAction` | expanded | **expanded** |
-| `listDisciplinaryActions` | expanded | **expanded** |
-| `getDisciplinaryActionById` | expanded | **expanded** |
-| `approveDisciplinaryAction` | expanded | **expanded** |
-| `fileAppeal` | expanded | **expanded** |
-| `getEmployeeDisciplinaryRecord` | expanded | **expanded** |
-| `createWarning` | phase3 | **phase3** |
-| `listWarnings` | phase3 | **phase3** |
-| `getWarningById` | phase3 | **phase3** |
-| `issueWarning` | phase3 | **phase3** |
-| `acknowledgeWarning` | phase3 | **phase3** |
-| `appealWarning` | phase3 | **phase3** |
-| `getEmployeeWarningHistory` | phase3 | **phase3** |
-| `getWarningStats` | phase3 | **phase3** |
+
+| Consolidated Function           | Source File(s) | Priority Source |
+| ------------------------------- | -------------- | --------------- |
+| `createComplaint`               | expanded       | **expanded**    |
+| `listComplaints`                | expanded       | **expanded**    |
+| `getComplaintById`              | expanded       | **expanded**    |
+| `updateComplaintStatus`         | expanded       | **expanded**    |
+| `getComplaintStats`             | expanded       | **expanded**    |
+| `createDisciplinaryAction`      | expanded       | **expanded**    |
+| `listDisciplinaryActions`       | expanded       | **expanded**    |
+| `getDisciplinaryActionById`     | expanded       | **expanded**    |
+| `approveDisciplinaryAction`     | expanded       | **expanded**    |
+| `fileAppeal`                    | expanded       | **expanded**    |
+| `getEmployeeDisciplinaryRecord` | expanded       | **expanded**    |
+| `createWarning`                 | phase3         | **phase3**      |
+| `listWarnings`                  | phase3         | **phase3**      |
+| `getWarningById`                | phase3         | **phase3**      |
+| `issueWarning`                  | phase3         | **phase3**      |
+| `acknowledgeWarning`            | phase3         | **phase3**      |
+| `appealWarning`                 | phase3         | **phase3**      |
+| `getEmployeeWarningHistory`     | phase3         | **phase3**      |
+| `getWarningStats`               | phase3         | **phase3**      |
 
 ### Module I: `hr.loans` — Loans & Financial
-| Consolidated Function | Source File(s) | Priority Source |
-|----------------------|---------------|----------------|
-| `createLoan` | expanded | **expanded** |
-| `listLoans` | expanded | **expanded** |
-| `getLoanById` | expanded | **expanded** |
-| `approveLoanStep` | expanded | **expanded** |
-| `recordInstallmentPayment` | expanded | **expanded** |
-| `getLoanStats` | expanded | **expanded** |
+
+| Consolidated Function      | Source File(s) | Priority Source |
+| -------------------------- | -------------- | --------------- |
+| `createLoan`               | expanded       | **expanded**    |
+| `listLoans`                | expanded       | **expanded**    |
+| `getLoanById`              | expanded       | **expanded**    |
+| `approveLoanStep`          | expanded       | **expanded**    |
+| `recordInstallmentPayment` | expanded       | **expanded**    |
+| `getLoanStats`             | expanded       | **expanded**    |
 
 ### Module J: `hr.letters` — Official Letters
+
 | Consolidated Function | Source File(s) | Priority Source |
-|----------------------|---------------|----------------|
-| `createLetterRequest` | expanded | **expanded** |
-| `listLetters` | expanded | **expanded** |
-| `getLetterById` | expanded | **expanded** |
-| `updateLetterStatus` | expanded | **expanded** |
-| `getLetterStats` | expanded | **expanded** |
+| --------------------- | -------------- | --------------- |
+| `createLetterRequest` | expanded       | **expanded**    |
+| `listLetters`         | expanded       | **expanded**    |
+| `getLetterById`       | expanded       | **expanded**    |
+| `updateLetterStatus`  | expanded       | **expanded**    |
+| `getLetterStats`      | expanded       | **expanded**    |
 
 ### Module K: `hr.promotions` — Promotions & Transfers
-| Consolidated Function | Source File(s) | Priority Source |
-|----------------------|---------------|----------------|
-| `createPromotionTransfer` | expanded | **expanded** |
-| `listPromotionTransfers` | expanded | **expanded** |
-| `getPromotionTransferById` | expanded | **expanded** |
-| `approvePromotionTransferStep` | expanded | **expanded** |
-| `executePromotionTransfer` | expanded | **expanded** |
-| `promoteEmployee` | empAffairs | **empAffairs** |
+
+| Consolidated Function          | Source File(s) | Priority Source |
+| ------------------------------ | -------------- | --------------- |
+| `createPromotionTransfer`      | expanded       | **expanded**    |
+| `listPromotionTransfers`       | expanded       | **expanded**    |
+| `getPromotionTransferById`     | expanded       | **expanded**    |
+| `approvePromotionTransferStep` | expanded       | **expanded**    |
+| `executePromotionTransfer`     | expanded       | **expanded**    |
+| `promoteEmployee`              | empAffairs     | **empAffairs**  |
 
 ### Module L: `hr.overtime` — Overtime
-| Consolidated Function | Source File(s) | Priority Source |
-|----------------------|---------------|----------------|
-| `createOvertimeRequest` | expanded | **expanded** |
-| `listOvertimeRequests` | expanded | **expanded** |
-| `getOvertimeRequestById` | expanded | **expanded** |
-| `approveOvertimeStep` | expanded | **expanded** |
-| `getOvertimeMonthlyReport` | expanded | **expanded** |
-| `getOvertimeStats` | expanded | **expanded** |
+
+| Consolidated Function      | Source File(s) | Priority Source |
+| -------------------------- | -------------- | --------------- |
+| `createOvertimeRequest`    | expanded       | **expanded**    |
+| `listOvertimeRequests`     | expanded       | **expanded**    |
+| `getOvertimeRequestById`   | expanded       | **expanded**    |
+| `approveOvertimeStep`      | expanded       | **expanded**    |
+| `getOvertimeMonthlyReport` | expanded       | **expanded**    |
+| `getOvertimeStats`         | expanded       | **expanded**    |
 
 ### Module M: `hr.tasks` — Task Management
+
 | Consolidated Function | Source File(s) | Priority Source |
-|----------------------|---------------|----------------|
-| `createTask` | phase2 | **phase2** |
-| `listTasks` | phase2 | **phase2** |
-| `getTaskById` | phase2 | **phase2** |
-| `updateTaskStatus` | phase2 | **phase2** |
-| `addTaskComment` | phase2 | **phase2** |
-| `delegateTask` | phase2 | **phase2** |
-| `rateTask` | phase2 | **phase2** |
-| `getTaskStats` | phase2 | **phase2** |
+| --------------------- | -------------- | --------------- |
+| `createTask`          | phase2         | **phase2**      |
+| `listTasks`           | phase2         | **phase2**      |
+| `getTaskById`         | phase2         | **phase2**      |
+| `updateTaskStatus`    | phase2         | **phase2**      |
+| `addTaskComment`      | phase2         | **phase2**      |
+| `delegateTask`        | phase2         | **phase2**      |
+| `rateTask`            | phase2         | **phase2**      |
+| `getTaskStats`        | phase2         | **phase2**      |
 
 ### Module N: `hr.housing` — Housing & Transportation
-| Consolidated Function | Source File(s) | Priority Source |
-|----------------------|---------------|----------------|
-| `createHousingUnit` | phase2 | **phase2** |
-| `listHousingUnits` | phase2 | **phase2** |
-| `assignHousing` | phase2 | **phase2** |
-| `listHousingAssignments` | phase2 | **phase2** |
-| `createTransportationRoute` | phase2 | **phase2** |
-| `listTransportationRoutes` | phase2 | **phase2** |
-| `assignEmployeeToRoute` | phase2 | **phase2** |
-| `getHousingStats` | phase2 | **phase2** |
+
+| Consolidated Function       | Source File(s) | Priority Source |
+| --------------------------- | -------------- | --------------- |
+| `createHousingUnit`         | phase2         | **phase2**      |
+| `listHousingUnits`          | phase2         | **phase2**      |
+| `assignHousing`             | phase2         | **phase2**      |
+| `listHousingAssignments`    | phase2         | **phase2**      |
+| `createTransportationRoute` | phase2         | **phase2**      |
+| `listTransportationRoutes`  | phase2         | **phase2**      |
+| `assignEmployeeToRoute`     | phase2         | **phase2**      |
+| `getHousingStats`           | phase2         | **phase2**      |
 
 ### Module O: `hr.custody` — Asset Custody
-| Consolidated Function | Source File(s) | Priority Source |
-|----------------------|---------------|----------------|
-| `createCustody` | phase2 | **phase2** |
-| `listCustodies` | phase2 | **phase2** |
-| `getCustodyById` | phase2 | **phase2** |
-| `returnCustody` | phase2 | **phase2** |
-| `reportCustodyIssue` | phase2 | **phase2** |
-| `getEmployeeCustodies` | phase2 | **phase2** |
-| `getCustodyStats` | phase2 | **phase2** |
+
+| Consolidated Function  | Source File(s) | Priority Source |
+| ---------------------- | -------------- | --------------- |
+| `createCustody`        | phase2         | **phase2**      |
+| `listCustodies`        | phase2         | **phase2**      |
+| `getCustodyById`       | phase2         | **phase2**      |
+| `returnCustody`        | phase2         | **phase2**      |
+| `reportCustodyIssue`   | phase2         | **phase2**      |
+| `getEmployeeCustodies` | phase2         | **phase2**      |
+| `getCustodyStats`      | phase2         | **phase2**      |
 
 ### Module P: `hr.permits` — Work Permits
+
 | Consolidated Function | Source File(s) | Priority Source |
-|----------------------|---------------|----------------|
-| `createWorkPermit` | phase2 | **phase2** |
-| `listWorkPermits` | phase2 | **phase2** |
-| `getWorkPermitById` | phase2 | **phase2** |
-| `renewWorkPermit` | phase2 | **phase2** |
-| `getExpiringPermits` | phase2 | **phase2** |
-| `getWorkPermitStats` | phase2 | **phase2** |
+| --------------------- | -------------- | --------------- |
+| `createWorkPermit`    | phase2         | **phase2**      |
+| `listWorkPermits`     | phase2         | **phase2**      |
+| `getWorkPermitById`   | phase2         | **phase2**      |
+| `renewWorkPermit`     | phase2         | **phase2**      |
+| `getExpiringPermits`  | phase2         | **phase2**      |
+| `getWorkPermitStats`  | phase2         | **phase2**      |
 
 ### Module Q: `hr.rewards` — Rewards & Recognition
-| Consolidated Function | Source File(s) | Priority Source |
-|----------------------|---------------|----------------|
-| `createReward` | phase2 | **phase2** |
-| `listRewards` | phase2 | **phase2** |
-| `getRewardById` | phase2 | **phase2** |
-| `approveReward` | phase2 | **phase2** |
-| `disburseReward` | phase2 | **phase2** |
-| `getEmployeeRewardPoints` | phase2 | **phase2** |
-| `getRewardStats` | phase2 | **phase2** |
+
+| Consolidated Function     | Source File(s) | Priority Source |
+| ------------------------- | -------------- | --------------- |
+| `createReward`            | phase2         | **phase2**      |
+| `listRewards`             | phase2         | **phase2**      |
+| `getRewardById`           | phase2         | **phase2**      |
+| `approveReward`           | phase2         | **phase2**      |
+| `disburseReward`          | phase2         | **phase2**      |
+| `getEmployeeRewardPoints` | phase2         | **phase2**      |
+| `getRewardStats`          | phase2         | **phase2**      |
 
 ### Module R: `hr.shifts` — Shift & Schedule Management
-| Consolidated Function | Source File(s) | Priority Source |
-|----------------------|---------------|----------------|
-| `createShiftDefinition` | phase2 | **phase2** |
-| `listShiftDefinitions` | phase2 | **phase2** |
-| `createShiftAssignment` | phase2 | **phase2** |
-| `bulkCreateShiftAssignments` | phase2 | **phase2** |
-| `getEmployeeSchedule` | phase2 | **phase2** |
-| `getDepartmentSchedule` | phase2 | **phase2** |
-| `recordShiftAttendance` | phase2 | **phase2** |
-| `createShiftSwapRequest` | phase2 | **phase2** |
-| `approveShiftSwap` | phase2 | **phase2** |
-| `getShiftStats` | phase2 | **phase2** |
+
+| Consolidated Function        | Source File(s) | Priority Source |
+| ---------------------------- | -------------- | --------------- |
+| `createShiftDefinition`      | phase2         | **phase2**      |
+| `listShiftDefinitions`       | phase2         | **phase2**      |
+| `createShiftAssignment`      | phase2         | **phase2**      |
+| `bulkCreateShiftAssignments` | phase2         | **phase2**      |
+| `getEmployeeSchedule`        | phase2         | **phase2**      |
+| `getDepartmentSchedule`      | phase2         | **phase2**      |
+| `recordShiftAttendance`      | phase2         | **phase2**      |
+| `createShiftSwapRequest`     | phase2         | **phase2**      |
+| `approveShiftSwap`           | phase2         | **phase2**      |
+| `getShiftStats`              | phase2         | **phase2**      |
 
 ### Module S: `hr.settlements` — End of Service / Clearance
-| Consolidated Function | Source File(s) | Priority Source |
-|----------------------|---------------|----------------|
-| `createSettlement` | phase3 | **phase3** |
-| `listSettlements` | phase3 | **phase3** |
-| `getSettlementById` | phase3 | **phase3** |
-| `approveSettlement` | phase3 | **phase3** |
-| `disburseSettlement` | phase3 | **phase3** |
-| `getSettlementStats` | phase3 | **phase3** |
-| `initiateClearance` | phase3 | **phase3** |
-| `listClearances` | phase3 | **phase3** |
-| `getClearanceById` | phase3 | **phase3** |
-| `updateClearanceItem` | phase3 | **phase3** |
-| `calculateFinalSettlement` | phase3 | **phase3** |
-| `conductExitInterview` | phase3 | **phase3** |
-| `getClearanceStats` | phase3 | **phase3** |
+
+| Consolidated Function      | Source File(s) | Priority Source |
+| -------------------------- | -------------- | --------------- |
+| `createSettlement`         | phase3         | **phase3**      |
+| `listSettlements`          | phase3         | **phase3**      |
+| `getSettlementById`        | phase3         | **phase3**      |
+| `approveSettlement`        | phase3         | **phase3**      |
+| `disburseSettlement`       | phase3         | **phase3**      |
+| `getSettlementStats`       | phase3         | **phase3**      |
+| `initiateClearance`        | phase3         | **phase3**      |
+| `listClearances`           | phase3         | **phase3**      |
+| `getClearanceById`         | phase3         | **phase3**      |
+| `updateClearanceItem`      | phase3         | **phase3**      |
+| `calculateFinalSettlement` | phase3         | **phase3**      |
+| `conductExitInterview`     | phase3         | **phase3**      |
+| `getClearanceStats`        | phase3         | **phase3**      |
 
 ### Module T: `hr.visa` — Visa & Travel
+
 | Consolidated Function | Source File(s) | Priority Source |
-|----------------------|---------------|----------------|
-| `createVisaRequest` | phase3 | **phase3** |
-| `listVisaRequests` | phase3 | **phase3** |
-| `getVisaRequestById` | phase3 | **phase3** |
-| `approveVisaRequest` | phase3 | **phase3** |
-| `issueVisa` | phase3 | **phase3** |
-| `recordTravel` | phase3 | **phase3** |
-| `recordReturn` | phase3 | **phase3** |
-| `getExpiringVisas` | phase3 | **phase3** |
-| `getVisaStats` | phase3 | **phase3** |
+| --------------------- | -------------- | --------------- |
+| `createVisaRequest`   | phase3         | **phase3**      |
+| `listVisaRequests`    | phase3         | **phase3**      |
+| `getVisaRequestById`  | phase3         | **phase3**      |
+| `approveVisaRequest`  | phase3         | **phase3**      |
+| `issueVisa`           | phase3         | **phase3**      |
+| `recordTravel`        | phase3         | **phase3**      |
+| `recordReturn`        | phase3         | **phase3**      |
+| `getExpiringVisas`    | phase3         | **phase3**      |
+| `getVisaStats`        | phase3         | **phase3**      |
 
 ### Module U: `hr.benefits` — Employee Benefits
-| Consolidated Function | Source File(s) | Priority Source |
-|----------------------|---------------|----------------|
-| `createBenefitPackage` | phase3 | **phase3** |
-| `listBenefitPackages` | phase3 | **phase3** |
-| `assignBenefit` | phase3 | **phase3** |
-| `listEmployeeBenefits` | phase3 | **phase3** |
-| `getEmployeeBenefitById` | phase3 | **phase3** |
-| `adjustBenefitAllowance` | phase3 | **phase3** |
-| `claimAirTicket` | phase3 | **phase3** |
-| `getBenefitStats` | phase3 | **phase3** |
+
+| Consolidated Function    | Source File(s) | Priority Source |
+| ------------------------ | -------------- | --------------- |
+| `createBenefitPackage`   | phase3         | **phase3**      |
+| `listBenefitPackages`    | phase3         | **phase3**      |
+| `assignBenefit`          | phase3         | **phase3**      |
+| `listEmployeeBenefits`   | phase3         | **phase3**      |
+| `getEmployeeBenefitById` | phase3         | **phase3**      |
+| `adjustBenefitAllowance` | phase3         | **phase3**      |
+| `claimAirTicket`         | phase3         | **phase3**      |
+| `getBenefitStats`        | phase3         | **phase3**      |
 
 ### Module V: `hr.documents` — Documents & Government
-| Consolidated Function | Source File(s) | Priority Source |
-|----------------------|---------------|----------------|
-| `addDocument` | empAffairs | **empAffairs** |
-| `getDocuments` | empAffairs | **empAffairs** |
-| `getEmployeeGovernmentSummary` | empAffairs | **empAffairs** |
-| `updateEmployeeMOLData` | empAffairs | **empAffairs** |
-| `updateEmployeeSponsorshipData` | empAffairs | **empAffairs** |
-| `getExpiringDocumentsReport` | empAffairs | **empAffairs** |
-| `getSaudizationReport` | empAffairs | **empAffairs** |
+
+| Consolidated Function           | Source File(s) | Priority Source |
+| ------------------------------- | -------------- | --------------- |
+| `addDocument`                   | empAffairs     | **empAffairs**  |
+| `getDocuments`                  | empAffairs     | **empAffairs**  |
+| `getEmployeeGovernmentSummary`  | empAffairs     | **empAffairs**  |
+| `updateEmployeeMOLData`         | empAffairs     | **empAffairs**  |
+| `updateEmployeeSponsorshipData` | empAffairs     | **empAffairs**  |
+| `getExpiringDocumentsReport`    | empAffairs     | **empAffairs**  |
+| `getSaudizationReport`          | empAffairs     | **empAffairs**  |
 
 ### Module W: `hr.dashboard` — Analytics & Reporting
-| Consolidated Function | Source File(s) | Priority Source |
-|----------------------|---------------|----------------|
-| `getHRDashboard` | hr-dashboard, hr-advanced, empAffairs | **hr-dashboard** |
-| `getExpandedDashboard` | expanded | **expanded** |
-| `getPhase2Dashboard` | phase2 | **phase2** |
-| `getPhase3Dashboard` | phase3 | **phase3** |
-| `exportHRReport` | hr-dashboard | **hr-dashboard** |
-| `getHRAnalytics` | hr-advanced | **hr-advanced** |
-| `getDepartmentStatistics` | empAffairs | **empAffairs** |
+
+| Consolidated Function     | Source File(s)                        | Priority Source  |
+| ------------------------- | ------------------------------------- | ---------------- |
+| `getHRDashboard`          | hr-dashboard, hr-advanced, empAffairs | **hr-dashboard** |
+| `getExpandedDashboard`    | expanded                              | **expanded**     |
+| `getPhase2Dashboard`      | phase2                                | **phase2**       |
+| `getPhase3Dashboard`      | phase3                                | **phase3**       |
+| `exportHRReport`          | hr-dashboard                          | **hr-dashboard** |
+| `getHRAnalytics`          | hr-advanced                           | **hr-advanced**  |
+| `getDepartmentStatistics` | empAffairs                            | **empAffairs**   |
 
 ---
 
 ## 7. RECOMMENDED CONSOLIDATION PRIORITY
 
 ### Phase 1 — Eliminate Duplicates (High-Impact)
+
 Files to **deprecate** after consolidation:
+
 - `hrCore.service.js` (78 lines) → 100% overlap, mock-only
 - `hrPhase6Service.js` (145 lines) → 100% overlap with empAffairs + hr.advanced
 
 ### Phase 2 — Merge Core HR
+
 - Merge `hr-advanced.service.js` + `hr.advanced.service.js` → they cover the same domains (Performance, Leave, Attendance, Payroll, Training) with different APIs
 
 ### Phase 3 — Create Facade
+
 - Build `hr.consolidated.service.js` as a facade that delegates to the 23 sub-modules (A–W), re-exporting from the 4 surviving source files:
   - `employeeAffairs.service.js`
   - `employeeAffairs.expanded.service.js`

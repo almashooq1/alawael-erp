@@ -610,6 +610,23 @@ class DocumentImportExportService {
       },
     };
   }
+
+  // ── Legacy compatibility aliases (documentAdvanced.routes.js) ──────────────
+  async createExportJob(options = {}) {
+    return this.exportDocuments(options);
+  }
+  async createImportJob(options = {}) {
+    return this.importDocuments(options);
+  }
+  async getExportJob(jobId) {
+    return this.getJob(jobId);
+  }
+  async getImportJob(jobId) {
+    return this.getJob(jobId);
+  }
+  async exportToCSV(options = {}) {
+    return this.exportDocuments({ ...options, format: 'csv' });
+  }
 }
 
 module.exports = new DocumentImportExportService();

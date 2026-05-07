@@ -6,7 +6,10 @@
 const fs = require('fs');
 const path = require('path');
 
-const SRC = path.resolve(__dirname, '../pages/Dashboard/EnhancedAdminDashboard/UpcomingAppointments.jsx');
+const SRC = path.resolve(
+  __dirname,
+  '../pages/Dashboard/EnhancedAdminDashboard/UpcomingAppointments.jsx'
+);
 
 describe('pages/Dashboard/EnhancedAdminDashboard/UpcomingAppointments.jsx', () => {
   let source;
@@ -44,7 +47,8 @@ describe('pages/Dashboard/EnhancedAdminDashboard/UpcomingAppointments.jsx', () =
   });
 
   test('has 3 import(s)', () => {
-    const imports = (source.match(/^import\s+/gm) || []).length + (source.match(/require\s*\(/g) || []).length;
+    const imports =
+      (source.match(/^import\s+/gm) || []).length + (source.match(/require\s*\(/g) || []).length;
     expect(imports).toBeGreaterThanOrEqual(1);
   });
 

@@ -58,7 +58,8 @@ describe('contexts/AuthContext.js', () => {
   });
 
   test('has 4 import(s)', () => {
-    const imports = (source.match(/^import\s+/gm) || []).length + (source.match(/require\s*\(/g) || []).length;
+    const imports =
+      (source.match(/^import\s+/gm) || []).length + (source.match(/require\s*\(/g) || []).length;
     expect(imports).toBeGreaterThanOrEqual(1);
   });
 

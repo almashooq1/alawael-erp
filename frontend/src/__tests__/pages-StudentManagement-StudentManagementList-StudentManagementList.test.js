@@ -6,7 +6,10 @@
 const fs = require('fs');
 const path = require('path');
 
-const SRC = path.resolve(__dirname, '../pages/StudentManagement/StudentManagementList/StudentManagementList.jsx');
+const SRC = path.resolve(
+  __dirname,
+  '../pages/StudentManagement/StudentManagementList/StudentManagementList.jsx'
+);
 
 describe('pages/StudentManagement/StudentManagementList/StudentManagementList.jsx', () => {
   let source;
@@ -50,7 +53,8 @@ describe('pages/StudentManagement/StudentManagementList/StudentManagementList.js
   });
 
   test('has 8 import(s)', () => {
-    const imports = (source.match(/^import\s+/gm) || []).length + (source.match(/require\s*\(/g) || []).length;
+    const imports =
+      (source.match(/^import\s+/gm) || []).length + (source.match(/require\s*\(/g) || []).length;
     expect(imports).toBeGreaterThanOrEqual(1);
   });
 

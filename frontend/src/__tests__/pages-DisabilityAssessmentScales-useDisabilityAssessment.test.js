@@ -6,7 +6,10 @@
 const fs = require('fs');
 const path = require('path');
 
-const SRC = path.resolve(__dirname, '../pages/DisabilityAssessmentScales/useDisabilityAssessment.js');
+const SRC = path.resolve(
+  __dirname,
+  '../pages/DisabilityAssessmentScales/useDisabilityAssessment.js'
+);
 
 describe('pages/DisabilityAssessmentScales/useDisabilityAssessment.js', () => {
   let source;
@@ -42,7 +45,8 @@ describe('pages/DisabilityAssessmentScales/useDisabilityAssessment.js', () => {
   });
 
   test('has 5 import(s)', () => {
-    const imports = (source.match(/^import\s+/gm) || []).length + (source.match(/require\s*\(/g) || []).length;
+    const imports =
+      (source.match(/^import\s+/gm) || []).length + (source.match(/require\s*\(/g) || []).length;
     expect(imports).toBeGreaterThanOrEqual(1);
   });
 

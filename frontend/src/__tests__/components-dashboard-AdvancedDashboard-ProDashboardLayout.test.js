@@ -6,7 +6,10 @@
 const fs = require('fs');
 const path = require('path');
 
-const SRC = path.resolve(__dirname, '../components/dashboard/AdvancedDashboard/ProDashboardLayout.jsx');
+const SRC = path.resolve(
+  __dirname,
+  '../components/dashboard/AdvancedDashboard/ProDashboardLayout.jsx'
+);
 
 describe('components/dashboard/AdvancedDashboard/ProDashboardLayout.jsx', () => {
   let source;
@@ -50,7 +53,8 @@ describe('components/dashboard/AdvancedDashboard/ProDashboardLayout.jsx', () => 
   });
 
   test('has 10 import(s)', () => {
-    const imports = (source.match(/^import\s+/gm) || []).length + (source.match(/require\s*\(/g) || []).length;
+    const imports =
+      (source.match(/^import\s+/gm) || []).length + (source.match(/require\s*\(/g) || []).length;
     expect(imports).toBeGreaterThanOrEqual(1);
   });
 

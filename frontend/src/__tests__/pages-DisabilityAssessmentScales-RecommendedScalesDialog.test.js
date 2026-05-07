@@ -6,7 +6,10 @@
 const fs = require('fs');
 const path = require('path');
 
-const SRC = path.resolve(__dirname, '../pages/DisabilityAssessmentScales/RecommendedScalesDialog.jsx');
+const SRC = path.resolve(
+  __dirname,
+  '../pages/DisabilityAssessmentScales/RecommendedScalesDialog.jsx'
+);
 
 describe('pages/DisabilityAssessmentScales/RecommendedScalesDialog.jsx', () => {
   let source;
@@ -50,7 +53,8 @@ describe('pages/DisabilityAssessmentScales/RecommendedScalesDialog.jsx', () => {
   });
 
   test('has 6 import(s)', () => {
-    const imports = (source.match(/^import\s+/gm) || []).length + (source.match(/require\s*\(/g) || []).length;
+    const imports =
+      (source.match(/^import\s+/gm) || []).length + (source.match(/require\s*\(/g) || []).length;
     expect(imports).toBeGreaterThanOrEqual(1);
   });
 

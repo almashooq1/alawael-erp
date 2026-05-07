@@ -6,7 +6,10 @@
 const fs = require('fs');
 const path = require('path');
 
-const SRC = path.resolve(__dirname, '../components/CompensationStructureManagement/StructureCard.jsx');
+const SRC = path.resolve(
+  __dirname,
+  '../components/CompensationStructureManagement/StructureCard.jsx'
+);
 
 describe('components/CompensationStructureManagement/StructureCard.jsx', () => {
   let source;
@@ -44,7 +47,8 @@ describe('components/CompensationStructureManagement/StructureCard.jsx', () => {
   });
 
   test('has 4 import(s)', () => {
-    const imports = (source.match(/^import\s+/gm) || []).length + (source.match(/require\s*\(/g) || []).length;
+    const imports =
+      (source.match(/^import\s+/gm) || []).length + (source.match(/require\s*\(/g) || []).length;
     expect(imports).toBeGreaterThanOrEqual(1);
   });
 

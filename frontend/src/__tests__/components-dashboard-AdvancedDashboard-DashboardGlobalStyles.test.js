@@ -6,7 +6,10 @@
 const fs = require('fs');
 const path = require('path');
 
-const SRC = path.resolve(__dirname, '../components/dashboard/AdvancedDashboard/DashboardGlobalStyles.jsx');
+const SRC = path.resolve(
+  __dirname,
+  '../components/dashboard/AdvancedDashboard/DashboardGlobalStyles.jsx'
+);
 
 describe('components/dashboard/AdvancedDashboard/DashboardGlobalStyles.jsx', () => {
   let source;
@@ -36,7 +39,8 @@ describe('components/dashboard/AdvancedDashboard/DashboardGlobalStyles.jsx', () 
   });
 
   test('has 2 import(s)', () => {
-    const imports = (source.match(/^import\s+/gm) || []).length + (source.match(/require\s*\(/g) || []).length;
+    const imports =
+      (source.match(/^import\s+/gm) || []).length + (source.match(/require\s*\(/g) || []).length;
     expect(imports).toBeGreaterThanOrEqual(1);
   });
 

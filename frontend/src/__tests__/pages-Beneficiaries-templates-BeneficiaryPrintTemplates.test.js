@@ -6,7 +6,10 @@
 const fs = require('fs');
 const path = require('path');
 
-const SRC = path.resolve(__dirname, '../pages/Beneficiaries/templates/BeneficiaryPrintTemplates.jsx');
+const SRC = path.resolve(
+  __dirname,
+  '../pages/Beneficiaries/templates/BeneficiaryPrintTemplates.jsx'
+);
 
 describe('pages/Beneficiaries/templates/BeneficiaryPrintTemplates.jsx', () => {
   let source;
@@ -54,7 +57,8 @@ describe('pages/Beneficiaries/templates/BeneficiaryPrintTemplates.jsx', () => {
   });
 
   test('has 6 import(s)', () => {
-    const imports = (source.match(/^import\s+/gm) || []).length + (source.match(/require\s*\(/g) || []).length;
+    const imports =
+      (source.match(/^import\s+/gm) || []).length + (source.match(/require\s*\(/g) || []).length;
     expect(imports).toBeGreaterThanOrEqual(1);
   });
 

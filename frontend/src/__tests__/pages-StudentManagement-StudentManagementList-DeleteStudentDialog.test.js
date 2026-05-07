@@ -6,7 +6,10 @@
 const fs = require('fs');
 const path = require('path');
 
-const SRC = path.resolve(__dirname, '../pages/StudentManagement/StudentManagementList/DeleteStudentDialog.jsx');
+const SRC = path.resolve(
+  __dirname,
+  '../pages/StudentManagement/StudentManagementList/DeleteStudentDialog.jsx'
+);
 
 describe('pages/StudentManagement/StudentManagementList/DeleteStudentDialog.jsx', () => {
   let source;
@@ -44,7 +47,8 @@ describe('pages/StudentManagement/StudentManagementList/DeleteStudentDialog.jsx'
   });
 
   test('has 1 import(s)', () => {
-    const imports = (source.match(/^import\s+/gm) || []).length + (source.match(/require\s*\(/g) || []).length;
+    const imports =
+      (source.match(/^import\s+/gm) || []).length + (source.match(/require\s*\(/g) || []).length;
     expect(imports).toBeGreaterThanOrEqual(1);
   });
 

@@ -6,7 +6,10 @@
 const fs = require('fs');
 const path = require('path');
 
-const SRC = path.resolve(__dirname, '../pages/disabilityAuthority/DisabilityAuthorityDashboard.jsx');
+const SRC = path.resolve(
+  __dirname,
+  '../pages/disabilityAuthority/DisabilityAuthorityDashboard.jsx'
+);
 
 describe('pages/disabilityAuthority/DisabilityAuthorityDashboard.jsx', () => {
   let source;
@@ -50,7 +53,8 @@ describe('pages/disabilityAuthority/DisabilityAuthorityDashboard.jsx', () => {
   });
 
   test('has 4 import(s)', () => {
-    const imports = (source.match(/^import\s+/gm) || []).length + (source.match(/require\s*\(/g) || []).length;
+    const imports =
+      (source.match(/^import\s+/gm) || []).length + (source.match(/require\s*\(/g) || []).length;
     expect(imports).toBeGreaterThanOrEqual(1);
   });
 

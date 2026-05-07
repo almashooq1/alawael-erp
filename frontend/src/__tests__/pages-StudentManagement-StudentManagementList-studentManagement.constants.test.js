@@ -6,7 +6,10 @@
 const fs = require('fs');
 const path = require('path');
 
-const SRC = path.resolve(__dirname, '../pages/StudentManagement/StudentManagementList/studentManagement.constants.js');
+const SRC = path.resolve(
+  __dirname,
+  '../pages/StudentManagement/StudentManagementList/studentManagement.constants.js'
+);
 
 describe('pages/StudentManagement/StudentManagementList/studentManagement.constants.js', () => {
   let source;
@@ -39,7 +42,8 @@ describe('pages/StudentManagement/StudentManagementList/studentManagement.consta
   });
 
   test('has 1 import(s)', () => {
-    const imports = (source.match(/^import\s+/gm) || []).length + (source.match(/require\s*\(/g) || []).length;
+    const imports =
+      (source.match(/^import\s+/gm) || []).length + (source.match(/require\s*\(/g) || []).length;
     expect(imports).toBeGreaterThanOrEqual(1);
   });
 

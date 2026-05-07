@@ -6,7 +6,10 @@
 const fs = require('fs');
 const path = require('path');
 
-const SRC = path.resolve(__dirname, '../pages/Dashboard/EnhancedAdminDashboard/useDashboardData.js');
+const SRC = path.resolve(
+  __dirname,
+  '../pages/Dashboard/EnhancedAdminDashboard/useDashboardData.js'
+);
 
 describe('pages/Dashboard/EnhancedAdminDashboard/useDashboardData.js', () => {
   let source;
@@ -50,7 +53,8 @@ describe('pages/Dashboard/EnhancedAdminDashboard/useDashboardData.js', () => {
   });
 
   test('has 8 import(s)', () => {
-    const imports = (source.match(/^import\s+/gm) || []).length + (source.match(/require\s*\(/g) || []).length;
+    const imports =
+      (source.match(/^import\s+/gm) || []).length + (source.match(/require\s*\(/g) || []).length;
     expect(imports).toBeGreaterThanOrEqual(1);
   });
 

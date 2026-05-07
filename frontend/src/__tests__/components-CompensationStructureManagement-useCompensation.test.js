@@ -6,7 +6,10 @@
 const fs = require('fs');
 const path = require('path');
 
-const SRC = path.resolve(__dirname, '../components/CompensationStructureManagement/useCompensation.js');
+const SRC = path.resolve(
+  __dirname,
+  '../components/CompensationStructureManagement/useCompensation.js'
+);
 
 describe('components/CompensationStructureManagement/useCompensation.js', () => {
   let source;
@@ -42,7 +45,8 @@ describe('components/CompensationStructureManagement/useCompensation.js', () => 
   });
 
   test('has 4 import(s)', () => {
-    const imports = (source.match(/^import\s+/gm) || []).length + (source.match(/require\s*\(/g) || []).length;
+    const imports =
+      (source.match(/^import\s+/gm) || []).length + (source.match(/require\s*\(/g) || []).length;
     expect(imports).toBeGreaterThanOrEqual(1);
   });
 

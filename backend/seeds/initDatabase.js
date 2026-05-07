@@ -28,7 +28,7 @@ const seedData = async () => {
         status: 'active',
         rating: 4.8,
         totalOrders: 45,
-        totalSpent: 450000
+        totalSpent: 450000,
       },
       {
         name: 'Global Furniture Co',
@@ -39,7 +39,7 @@ const seedData = async () => {
         status: 'active',
         rating: 4.5,
         totalOrders: 30,
-        totalSpent: 125000
+        totalSpent: 125000,
       },
       {
         name: 'Chemical Supplies Inc',
@@ -50,7 +50,7 @@ const seedData = async () => {
         status: 'active',
         rating: 4.2,
         totalOrders: 60,
-        totalSpent: 280000
+        totalSpent: 280000,
       },
       {
         name: 'Raw Materials Hub',
@@ -61,8 +61,8 @@ const seedData = async () => {
         status: 'active',
         rating: 3.9,
         totalOrders: 25,
-        totalSpent: 95000
-      }
+        totalSpent: 95000,
+      },
     ]);
 
     logger.info(`✅ Seeded ${suppliers.length} suppliers`);
@@ -77,10 +77,10 @@ const seedData = async () => {
         minLevel: 5,
         maxLevel: 100,
         price: 1299.99,
-        cost: 800.00,
+        cost: 800.0,
         unit: 'piece',
         supplierId: suppliers[0]._id,
-        reorderPoint: 15
+        reorderPoint: 15,
       },
       {
         sku: 'MONITOR-001',
@@ -90,10 +90,10 @@ const seedData = async () => {
         minLevel: 10,
         maxLevel: 200,
         price: 599.99,
-        cost: 350.00,
+        cost: 350.0,
         unit: 'piece',
         supplierId: suppliers[0]._id,
-        reorderPoint: 20
+        reorderPoint: 20,
       },
       {
         sku: 'CHAIR-001',
@@ -103,10 +103,10 @@ const seedData = async () => {
         minLevel: 5,
         maxLevel: 50,
         price: 299.99,
-        cost: 150.00,
+        cost: 150.0,
         unit: 'piece',
         supplierId: suppliers[1]._id,
-        reorderPoint: 10
+        reorderPoint: 10,
       },
       {
         sku: 'DESK-001',
@@ -116,10 +116,10 @@ const seedData = async () => {
         minLevel: 3,
         maxLevel: 30,
         price: 449.99,
-        cost: 250.00,
+        cost: 250.0,
         unit: 'piece',
         supplierId: suppliers[1]._id,
-        reorderPoint: 8
+        reorderPoint: 8,
       },
       {
         sku: 'CHEM-001',
@@ -128,11 +128,11 @@ const seedData = async () => {
         quantity: 500,
         minLevel: 50,
         maxLevel: 1000,
-        price: 50.00,
-        cost: 25.00,
+        price: 50.0,
+        cost: 25.0,
         unit: 'liter',
         supplierId: suppliers[2]._id,
-        reorderPoint: 150
+        reorderPoint: 150,
       },
       {
         sku: 'STEEL-001',
@@ -141,12 +141,12 @@ const seedData = async () => {
         quantity: 250,
         minLevel: 50,
         maxLevel: 500,
-        price: 100.00,
-        cost: 60.00,
+        price: 100.0,
+        cost: 60.0,
         unit: 'piece',
         supplierId: suppliers[3]._id,
-        reorderPoint: 100
-      }
+        reorderPoint: 100,
+      },
     ]);
 
     logger.info(`✅ Seeded ${products.length} products`);
@@ -160,36 +160,36 @@ const seedData = async () => {
             productId: products[0]._id,
             quantity: 10,
             unitPrice: 1299.99,
-            subtotal: 12999.90
-          }
+            subtotal: 12999.9,
+          },
         ],
-        totalAmount: 12999.90,
+        totalAmount: 12999.9,
         status: 'delivered',
         priority: 'high',
-        dueDate: new Date(Date.now() + 7*24*60*60*1000),
-        deliveryDate: new Date(Date.now() - 2*24*60*60*1000),
+        dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        deliveryDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
         statusHistory: [
           {
             status: 'draft',
-            timestamp: new Date(Date.now() - 10*24*60*60*1000),
-            note: 'Order created'
+            timestamp: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
+            note: 'Order created',
           },
           {
             status: 'confirmed',
-            timestamp: new Date(Date.now() - 8*24*60*60*1000),
-            note: 'Order confirmed'
+            timestamp: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000),
+            note: 'Order confirmed',
           },
           {
             status: 'shipped',
-            timestamp: new Date(Date.now() - 5*24*60*60*1000),
-            note: 'Order shipped'
+            timestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+            note: 'Order shipped',
           },
           {
             status: 'delivered',
-            timestamp: new Date(Date.now() - 2*24*60*60*1000),
-            note: 'Order delivered'
-          }
-        ]
+            timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+            note: 'Order delivered',
+          },
+        ],
       },
       {
         supplierId: suppliers[1]._id,
@@ -198,25 +198,25 @@ const seedData = async () => {
             productId: products[2]._id,
             quantity: 5,
             unitPrice: 299.99,
-            subtotal: 1499.95
-          }
+            subtotal: 1499.95,
+          },
         ],
         totalAmount: 1499.95,
         status: 'confirmed',
         priority: 'medium',
-        dueDate: new Date(Date.now() + 7*24*60*60*1000),
+        dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         statusHistory: [
           {
             status: 'draft',
-            timestamp: new Date(Date.now() - 3*24*60*60*1000),
-            note: 'Order created'
+            timestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+            note: 'Order created',
           },
           {
             status: 'confirmed',
-            timestamp: new Date(Date.now() - 1*24*60*60*1000),
-            note: 'Order confirmed'
-          }
-        ]
+            timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
+            note: 'Order confirmed',
+          },
+        ],
       },
       {
         supplierId: suppliers[2]._id,
@@ -224,22 +224,22 @@ const seedData = async () => {
           {
             productId: products[4]._id,
             quantity: 100,
-            unitPrice: 50.00,
-            subtotal: 5000.00
-          }
+            unitPrice: 50.0,
+            subtotal: 5000.0,
+          },
         ],
-        totalAmount: 5000.00,
+        totalAmount: 5000.0,
         status: 'draft',
         priority: 'low',
-        dueDate: new Date(Date.now() + 14*24*60*60*1000),
+        dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
         statusHistory: [
           {
             status: 'draft',
             timestamp: new Date(),
-            note: 'Order created'
-          }
-        ]
-      }
+            note: 'Order created',
+          },
+        ],
+      },
     ]);
 
     logger.info(`✅ Seeded ${orders.length} purchase orders`);
@@ -252,47 +252,47 @@ const seedData = async () => {
         carrier: 'DHL',
         status: 'delivered',
         location: 'Delivered',
-        estimatedDelivery: new Date(Date.now() + 5*24*60*60*1000),
-        actualDelivery: new Date(Date.now() - 2*24*60*60*1000),
+        estimatedDelivery: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
+        actualDelivery: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
         weight: 5.5,
-        cost: 150.00,
+        cost: 150.0,
         statusHistory: [
           {
             status: 'pending',
             location: 'Warehouse',
-            timestamp: new Date(Date.now() - 10*24*60*60*1000),
-            note: 'Shipment created'
+            timestamp: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
+            note: 'Shipment created',
           },
           {
             status: 'picked-up',
             location: 'Warehouse',
-            timestamp: new Date(Date.now() - 8*24*60*60*1000),
-            note: 'Picked up from warehouse'
+            timestamp: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000),
+            note: 'Picked up from warehouse',
           },
           {
             status: 'in-transit',
             location: 'Regional Hub - Jeddah',
-            timestamp: new Date(Date.now() - 5*24*60*60*1000),
-            note: 'International transit'
+            timestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+            note: 'International transit',
           },
           {
             status: 'out-for-delivery',
             location: 'Local Delivery Center',
-            timestamp: new Date(Date.now() - 1*24*60*60*1000),
-            note: 'Out for delivery'
+            timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
+            note: 'Out for delivery',
           },
           {
             status: 'delivered',
             location: 'Customer Location',
-            timestamp: new Date(Date.now() - 2*24*60*60*1000),
+            timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
             note: 'Delivered successfully',
             coordinates: {
               latitude: 21.5433,
-              longitude: 39.1728
-            }
-          }
+              longitude: 39.1728,
+            },
+          },
         ],
-        signedBy: 'John Doe'
+        signedBy: 'John Doe',
       },
       {
         trackingNumber: 'ARAMEX-' + Date.now(),
@@ -300,30 +300,30 @@ const seedData = async () => {
         carrier: 'ARAMEX',
         status: 'in-transit',
         location: 'Regional Hub - Riyadh',
-        estimatedDelivery: new Date(Date.now() + 3*24*60*60*1000),
+        estimatedDelivery: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
         weight: 2.0,
-        cost: 75.00,
+        cost: 75.0,
         statusHistory: [
           {
             status: 'pending',
             location: 'Warehouse',
-            timestamp: new Date(Date.now() - 1*24*60*60*1000),
-            note: 'Shipment created'
+            timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
+            note: 'Shipment created',
           },
           {
             status: 'picked-up',
             location: 'Warehouse',
-            timestamp: new Date(Date.now() - 12*60*60*1000),
-            note: 'Picked up'
+            timestamp: new Date(Date.now() - 12 * 60 * 60 * 1000),
+            note: 'Picked up',
           },
           {
             status: 'in-transit',
             location: 'Regional Hub - Riyadh',
-            timestamp: new Date(Date.now() - 2*60*60*1000),
-            note: 'In transit'
-          }
-        ]
-      }
+            timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
+            note: 'In transit',
+          },
+        ],
+      },
     ]);
 
     logger.info(`✅ Seeded ${shipments.length} shipments`);
@@ -333,7 +333,7 @@ const seedData = async () => {
       suppliers: suppliers.length,
       products: products.length,
       orders: orders.length,
-      shipments: shipments.length
+      shipments: shipments.length,
     };
   } catch (error) {
     logger.error(`❌ Seeding failed: ${error.message}`);
@@ -347,12 +347,12 @@ const seedData = async () => {
 const clearDatabase = async () => {
   try {
     logger.warn('🗑️  Clearing database...');
-    
+
     await Promise.all([
       Supplier.deleteMany({}),
       Product.deleteMany({}),
       PurchaseOrder.deleteMany({}),
-      Shipment.deleteMany({})
+      Shipment.deleteMany({}),
     ]);
 
     logger.warn('✅ Database cleared');
@@ -378,5 +378,5 @@ const resetDatabase = async () => {
 module.exports = {
   seedData,
   clearDatabase,
-  resetDatabase
+  resetDatabase,
 };

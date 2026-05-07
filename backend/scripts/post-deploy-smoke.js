@@ -110,6 +110,9 @@ const PROBES = [
   mountedRoute('compliance-calendar', '/api/compliance-calendar/reference'),
   mountedRoute('pdpl', '/api/pdpl/retention-periods'),
 
+  // ── BC-08: CAPA (mounted 2026-05-03) ──
+  adminMounted('capa-admin', '/api/admin/capa'),
+
   // ── Auth-gated diagnostics (non-critical without a token) ────────
   {
     name: 'integration-health-aggregator',

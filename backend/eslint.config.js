@@ -55,7 +55,10 @@ module.exports = [
     },
     rules: {
       ...js.configs.recommended.rules,
-      'no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+      'no-unused-vars': [
+        'warn',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' },
+      ],
       'no-console': 'off',
       'no-process-exit': 'off',
       'no-empty': ['error', { allowEmptyCatch: true }],
@@ -71,6 +74,14 @@ module.exports = [
       'no-return-await': 'warn',
       'no-duplicate-imports': 'error',
       'no-template-curly-in-string': 'warn',
+    },
+  },
+
+  // ── Test files: relax unused-vars (mocks, stubs, spy refs legitimately unused) ──
+  {
+    files: ['tests/**', '__tests__/**', '**/*.test.js', '**/*.spec.js'],
+    rules: {
+      'no-unused-vars': 'off',
     },
   },
 ];

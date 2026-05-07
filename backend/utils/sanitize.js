@@ -43,11 +43,22 @@ const stripDangerousKeys = obj => {
  * @returns {object} Cleaned object without meta/privileged fields
  */
 const UPDATE_BLACKLIST = new Set([
-  '_id', '__v', 'id',
-  'createdBy', 'createdAt', 'updatedAt',
-  'role', 'roles', 'isAdmin', 'isSuperAdmin',
-  'permissions', 'password', 'passwordHash',
-  '__proto__', 'constructor', 'prototype',
+  '_id',
+  '__v',
+  'id',
+  'createdBy',
+  'createdAt',
+  'updatedAt',
+  'role',
+  'roles',
+  'isAdmin',
+  'isSuperAdmin',
+  'permissions',
+  'password',
+  'passwordHash',
+  '__proto__',
+  'constructor',
+  'prototype',
 ]);
 
 const stripUpdateMeta = obj => {

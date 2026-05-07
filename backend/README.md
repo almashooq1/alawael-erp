@@ -4,16 +4,16 @@ Express.js API server for the Al-Awael Day Care Center ERP system.
 
 ## Tech Stack
 
-| Component       | Version    | Purpose                                    |
-| --------------- | ---------- | ------------------------------------------ |
-| Express         | ^4.18.2    | HTTP framework                             |
-| Mongoose        | ^9.1.4     | MongoDB ODM                                |
-| ioredis         | ^5.9.2     | Redis client (caching, rate limiting)      |
-| Socket.IO       | ^4.7.2     | Real-time WebSocket                        |
-| Winston         | ^3.19.0    | Structured logging                         |
-| Jest            | ^29.7.0    | Test framework                             |
-| Helmet          | ^8.0.0     | Security headers                           |
-| express-rate-limit | ^7.x    | API rate limiting                          |
+| Component          | Version | Purpose                               |
+| ------------------ | ------- | ------------------------------------- |
+| Express            | ^4.18.2 | HTTP framework                        |
+| Mongoose           | ^9.1.4  | MongoDB ODM                           |
+| ioredis            | ^5.9.2  | Redis client (caching, rate limiting) |
+| Socket.IO          | ^4.7.2  | Real-time WebSocket                   |
+| Winston            | ^3.19.0 | Structured logging                    |
+| Jest               | ^29.7.0 | Test framework                        |
+| Helmet             | ^8.0.0  | Security headers                      |
+| express-rate-limit | ^7.x    | API rate limiting                     |
 
 ## Directory Structure
 
@@ -93,6 +93,7 @@ CI=true npm test
 ```
 
 **Test Infrastructure:**
+
 - MongoMemoryServer for isolated DB testing
 - Mock database for unit tests (via jest.setup.js)
 - 301 test suites, 9409 tests passing

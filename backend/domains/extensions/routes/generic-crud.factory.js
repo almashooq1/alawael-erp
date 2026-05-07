@@ -12,11 +12,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const { ExtensionRecord } = require('../models/ExtensionRecord');
-const {
-  validateCreateRecord,
-  validateUpdateRecord,
-  validate,
-} = require('../validators/extensions.validator');
+const { validateCreateRecord, validate } = require('../validators/extensions.validator');
 
 function asyncHandler(fn) {
   return (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);

@@ -50,8 +50,8 @@ function ipToInt(ip) {
 }
 
 const BLOCKED_RANGES = [
-  { start: ipToInt('0.0.0.0'),   end: ipToInt('0.255.255.255') },
-  { start: ipToInt('10.0.0.0'),  end: ipToInt('10.255.255.255') },
+  { start: ipToInt('0.0.0.0'), end: ipToInt('0.255.255.255') },
+  { start: ipToInt('10.0.0.0'), end: ipToInt('10.255.255.255') },
   { start: ipToInt('127.0.0.0'), end: ipToInt('127.255.255.255') },
   { start: ipToInt('169.254.0.0'), end: ipToInt('169.254.255.255') },
   { start: ipToInt('172.16.0.0'), end: ipToInt('172.31.255.255') },
@@ -63,9 +63,13 @@ const BLOCKED_RANGES = [
  */
 function isPrivateIP(ip) {
   if (
-    ip === '::1' || ip === '::' ||
-    ip.startsWith('fe80:') || ip.startsWith('fc00:') || ip.startsWith('fd')
-  ) return true;
+    ip === '::1' ||
+    ip === '::' ||
+    ip.startsWith('fe80:') ||
+    ip.startsWith('fc00:') ||
+    ip.startsWith('fd')
+  )
+    return true;
 
   if (!net.isIPv4(ip)) return false;
 
@@ -83,7 +87,9 @@ function validateOutboundUrlSync(urlString) {
   }
 
   let parsed;
-  try { parsed = new URL(urlString); } catch {
+  try {
+    parsed = new URL(urlString);
+  } catch {
     return { valid: false, reason: 'Invalid URL format' };
   }
 
@@ -98,11 +104,16 @@ function validateOutboundUrlSync(urlString) {
   }
 
   // Block IP tricks: decimal notation (http://2130706433), hex (http://0x7f000001)
-  if (/^\d+$/.test(hostname)) return { valid: false, reason: 'Numeric-only hostnames are not allowed' };
-  if (/^0x/i.test(hostname))  return { valid: false, reason: 'Hex hostnames are not allowed' };
+  if (/^\d+$/.test(hostname))
+    return { valid: false, reason: 'Numeric-only hostnames are not allowed' };
+  if (/^0x/i.test(hostname)) return { valid: false, reason: 'Hex hostnames are not allowed' };
 
   // Block .localhost / .local / .internal domains
-  if (hostname.endsWith('.localhost') || hostname.endsWith('.local') || hostname.endsWith('.internal')) {
+  if (
+    hostname.endsWith('.localhost') ||
+    hostname.endsWith('.local') ||
+    hostname.endsWith('.internal')
+  ) {
     return { valid: false, reason: 'Local/internal domain suffixes are not allowed' };
   }
 
@@ -112,7 +123,7 @@ function validateOutboundUrlSync(urlString) {
   }
 
   // Block sensitive ports
-  const port = parsed.port ? parseInt(parsed.port, 10) : (parsed.protocol === 'https:' ? 443 : 80);
+  const port = parsed.port ? parseInt(parsed.port, 10) : parsed.protocol === 'https:' ? 443 : 80;
   if (BLOCKED_PORTS.has(port)) {
     return { valid: false, reason: `Port ${port} is blocked (sensitive service)` };
   }

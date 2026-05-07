@@ -14,7 +14,6 @@ const router = express.Router();
 const {
   validateCreateEpisode,
   validateUpdateEpisode,
-  validatePhaseTransition,
   validateDischarge,
   validateAddTeamMember,
   validate,
@@ -237,6 +236,70 @@ router.delete(
   asyncHandler(async (req, res) => {
     const result = await svc().removeTeamMember(req.params.id, req.params.userId);
     res.json({ success: true, data: result });
+  })
+);
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// Clinical Summary — ملخص سريري شامل للحلقة (Dashboard-ready)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/** GET /:id/summary — ملخص الحلقة: تقييمات + جلسات + خطط + أهداف */
+router.get(
+  '/:id/summary',
+  requireDomain,
+  asyncHandler(async (req, res) => {
+    const mongoose = require('mongoose');
+    const episodeId = req.params.id;
+
+    if (!mongoose.isValidObjectId(episodeId)) {
+      return res.status(400).json({ success: false, message: 'معرّف الحلقة غير صالح' });
+    }
+
+    const TherapySession = require('../../../models/TherapySession');
+    const ClinicalAssessment = require('../../../models/ClinicalAssessment');
+    const CarePlan = mongoose.models.CarePlan || null;
+    const Goal = mongoose.models.RehabGoal || mongoose.models.Goal || null;
+
+    const [episode, sessionCount, assessmentCount, latestAssessment, recentSessions] =
+      await Promise.all([
+        svc().getById(episodeId),
+        TherapySession.countDocuments({ episodeOfCare: episodeId }),
+        ClinicalAssessment.countDocuments({ episodeOfCare: episodeId }),
+        ClinicalAssessment.findOne({ episodeOfCare: episodeId })
+          .sort({ assessmentDate: -1 })
+          .select('tool category score interpretation assessmentDate')
+          .lean(),
+        TherapySession.find({ episodeOfCare: episodeId })
+          .sort({ date: -1 })
+          .limit(5)
+          .select('title sessionType status date startTime endTime')
+          .lean(),
+      ]);
+
+    const [activePlanCount, goalCount] = await Promise.all([
+      CarePlan
+        ? CarePlan.countDocuments({
+            episodeOfCare: episodeId,
+            status: { $nin: ['archived', 'completed'] },
+          })
+        : Promise.resolve(0),
+      Goal ? Goal.countDocuments({ episodeOfCare: episodeId }) : Promise.resolve(0),
+    ]);
+
+    res.json({
+      success: true,
+      data: {
+        episode,
+        metrics: {
+          sessionCount,
+          assessmentCount,
+          activePlanCount,
+          goalCount,
+        },
+        latestAssessment,
+        recentSessions,
+      },
+    });
   })
 );
 

@@ -24,14 +24,14 @@
 
 ## 🌐 نظرة عامة / Overview <a name="overview"></a>
 
-| الخاصية | القيمة |
-|---------|--------|
-| قاعدة البيانات الرئيسية | MongoDB 7.x |
-| ORM | Mongoose 9.x |
-| التخزين المؤقت | Redis (ioredis 5.x) |
-| بيئة الاختبار | MongoDB Memory Server |
-| عدد النماذج | 300+ |
-| المجموعات الأساسية | 150+ |
+| الخاصية                 | القيمة                |
+| ----------------------- | --------------------- |
+| قاعدة البيانات الرئيسية | MongoDB 7.x           |
+| ORM                     | Mongoose 9.x          |
+| التخزين المؤقت          | Redis (ioredis 5.x)   |
+| بيئة الاختبار           | MongoDB Memory Server |
+| عدد النماذج             | 300+                  |
+| المجموعات الأساسية      | 150+                  |
 
 ### المكونات الرئيسية
 
@@ -191,27 +191,27 @@ node -e "
 
 ### الفهارس المتوفرة
 
-| المجموعة | نوع الفهرس | الحقول |
-|---------|-----------|--------|
-| users | unique | email, username |
-| users | compound | role + isActive |
-| users | TTL (1h) | passwordResetToken |
-| users | text | name, email, username |
-| beneficiaries | unique | beneficiaryNumber |
-| beneficiaries | compound | caseStatus + branchId |
-| beneficiaries | text | name.ar, name.en, nationalId |
-| employees | unique | employeeId |
-| employees | compound | department + position |
-| employees | compound | contractEndDate (expiry alerts) |
-| attendances | compound | employeeId + date |
-| therapysessions | compound | beneficiaryId + sessionDate |
-| leaves | compound | employeeId + year |
-| payrolls | compound | employeeId + payPeriod |
-| invoices | unique | invoiceNumber |
-| auditlogs | TTL (90d) | createdAt |
-| notifications | TTL (30d) | createdAt |
-| sessions | TTL | expiresAt |
-| vehicles | unique | plateNumber |
+| المجموعة        | نوع الفهرس | الحقول                          |
+| --------------- | ---------- | ------------------------------- |
+| users           | unique     | email, username                 |
+| users           | compound   | role + isActive                 |
+| users           | TTL (1h)   | passwordResetToken              |
+| users           | text       | name, email, username           |
+| beneficiaries   | unique     | beneficiaryNumber               |
+| beneficiaries   | compound   | caseStatus + branchId           |
+| beneficiaries   | text       | name.ar, name.en, nationalId    |
+| employees       | unique     | employeeId                      |
+| employees       | compound   | department + position           |
+| employees       | compound   | contractEndDate (expiry alerts) |
+| attendances     | compound   | employeeId + date               |
+| therapysessions | compound   | beneficiaryId + sessionDate     |
+| leaves          | compound   | employeeId + year               |
+| payrolls        | compound   | employeeId + payPeriod          |
+| invoices        | unique     | invoiceNumber                   |
+| auditlogs       | TTL (90d)  | createdAt                       |
+| notifications   | TTL (30d)  | createdAt                       |
+| sessions        | TTL        | expiresAt                       |
+| vehicles        | unique     | plateNumber                     |
 
 ### قواعد الفهارس
 
@@ -243,11 +243,11 @@ node backend/scripts/setup-database.js --step migrate
 
 ### الـ Migrations المتوفرة
 
-| الملف | الوصف |
-|-------|-------|
-| 20250101000000_create-core-indexes.js | فهارس أساسية وفريدة |
-| 20250101000001_add-text-search-indexes.js | فهارس البحث النصي |
-| 20250201000000_create-all-collections.js | 🆕 إنشاء جميع المجموعات مع validators |
+| الملف                                     | الوصف                                 |
+| ----------------------------------------- | ------------------------------------- |
+| 20250101000000_create-core-indexes.js     | فهارس أساسية وفريدة                   |
+| 20250101000001_add-text-search-indexes.js | فهارس البحث النصي                     |
+| 20250201000000_create-all-collections.js  | 🆕 إنشاء جميع المجموعات مع validators |
 
 ### تتبع الـ Migrations
 
@@ -286,22 +286,22 @@ node backend/scripts/seed-all.js --reset
 
 ### الـ Seeds المتوفرة
 
-| الترتيب | الاسم | البيئة | الوصف |
-|--------|-------|--------|-------|
-| 1 | system-settings | all | إعدادات النظام الأساسية |
-| 2 | branches | all | 13 فرعاً في السعودية |
-| 3 | roles-permissions | all | الأدوار والصلاحيات |
-| 4 | admin-users | dev/staging | مستخدمون إداريون |
-| 5 | programs | all | برامج التأهيل |
-| 6 | disability-types | all | أنواع الإعاقة |
-| 7 | departments | all | الأقسام والوظائف |
-| 8 | measurement-programs | dev/staging | مقاييس متقدمة |
-| 9 | leave-types | all | أنواع الإجازات |
-| 10 | notification-templates | all | قوالب الإشعارات |
-| 11 | chart-of-accounts | all | دليل الحسابات |
-| 12 | sample-beneficiaries | dev only | بيانات تجريبية |
-| 13 | sample-employees | dev only | موظفون تجريبيون |
-| 14 | fiscal-periods | all | الفترات المالية |
+| الترتيب | الاسم                  | البيئة      | الوصف                   |
+| ------- | ---------------------- | ----------- | ----------------------- |
+| 1       | system-settings        | all         | إعدادات النظام الأساسية |
+| 2       | branches               | all         | 13 فرعاً في السعودية    |
+| 3       | roles-permissions      | all         | الأدوار والصلاحيات      |
+| 4       | admin-users            | dev/staging | مستخدمون إداريون        |
+| 5       | programs               | all         | برامج التأهيل           |
+| 6       | disability-types       | all         | أنواع الإعاقة           |
+| 7       | departments            | all         | الأقسام والوظائف        |
+| 8       | measurement-programs   | dev/staging | مقاييس متقدمة           |
+| 9       | leave-types            | all         | أنواع الإجازات          |
+| 10      | notification-templates | all         | قوالب الإشعارات         |
+| 11      | chart-of-accounts      | all         | دليل الحسابات           |
+| 12      | sample-beneficiaries   | dev only    | بيانات تجريبية          |
+| 13      | sample-employees       | dev only    | موظفون تجريبيون         |
+| 14      | fiscal-periods         | all         | الفترات المالية         |
 
 ---
 
@@ -369,16 +369,16 @@ router.get('/api/health/db', healthEndpointHandler);
 
 ### فحوصات الصحة المتوفرة
 
-| الفحص | الوصف | الحالة |
-|-------|-------|--------|
-| connection | حالة الاتصال | healthy/critical |
-| ping | زمن الاستجابة | healthy/warning/critical |
-| database-stats | إحصاءات قاعدة البيانات | healthy/warning |
-| server-status | حالة الخادم + connections | healthy/warning |
-| collections | المجموعات المطلوبة | healthy/warning |
-| indexes | عدد الفهارس | healthy/warning |
-| replication | حالة Replica Set | healthy/warning/info |
-| error-rate | معدل الأخطاء (آخر ساعة) | healthy/warning/critical |
+| الفحص          | الوصف                     | الحالة                   |
+| -------------- | ------------------------- | ------------------------ |
+| connection     | حالة الاتصال              | healthy/critical         |
+| ping           | زمن الاستجابة             | healthy/warning/critical |
+| database-stats | إحصاءات قاعدة البيانات    | healthy/warning          |
+| server-status  | حالة الخادم + connections | healthy/warning          |
+| collections    | المجموعات المطلوبة        | healthy/warning          |
+| indexes        | عدد الفهارس               | healthy/warning          |
+| replication    | حالة Replica Set          | healthy/warning/info     |
+| error-rate     | معدل الأخطاء (آخر ساعة)   | healthy/warning/critical |
 
 ---
 
@@ -460,8 +460,7 @@ DISABLE_MOCK_FALLBACK=false
 const beneficiaries = await Beneficiary.find({});
 
 // ✅ سريع
-const beneficiaries = await Beneficiary
-  .find({ caseStatus: 'active', branchId: req.user.branchId })
+const beneficiaries = await Beneficiary.find({ caseStatus: 'active', branchId: req.user.branchId })
   .select('name nationalId program therapist')
   .sort({ createdAt: -1 })
   .skip((page - 1) * limit)
@@ -496,12 +495,12 @@ if (process.env.NODE_ENV !== 'production') {
 
 ```javascript
 db.createUser({
-  user: "alawael_app",
-  pwd: "STRONG_PASSWORD_HERE",
+  user: 'alawael_app',
+  pwd: 'STRONG_PASSWORD_HERE',
   roles: [
-    { role: "readWrite", db: "alawael-erp" },
-    { role: "dbAdmin", db: "alawael-erp" }
-  ]
+    { role: 'readWrite', db: 'alawael-erp' },
+    { role: 'dbAdmin', db: 'alawael-erp' },
+  ],
 });
 ```
 
@@ -537,16 +536,16 @@ npm run db:backup:list    # عرض النسخ المتوفرة
 
 ## 🆕 الملفات الجديدة / New Files
 
-| الملف | الوصف |
-|-------|-------|
-| `backend/database/indexes/core-indexes.js` | فهارس شاملة لـ 20+ مجموعة |
-| `backend/database/health/db-health.js` | فحص صحة قاعدة البيانات (8 فحوصات) |
-| `backend/database/DATABASE.md` | توثيق شامل (هذا الملف) |
-| `backend/migrations/20250201000000_create-all-collections.js` | إنشاء 150+ مجموعة مع validators |
-| `backend/scripts/setup-database.js` | سكريبت الإعداد الشامل |
-| `backend/scripts/seed-all.js` | مشغّل الـ Seeds المرتب |
-| `backend/scripts/db-backup.js` | نظام النسخ الاحتياطي |
+| الملف                                                         | الوصف                             |
+| ------------------------------------------------------------- | --------------------------------- |
+| `backend/database/indexes/core-indexes.js`                    | فهارس شاملة لـ 20+ مجموعة         |
+| `backend/database/health/db-health.js`                        | فحص صحة قاعدة البيانات (8 فحوصات) |
+| `backend/database/DATABASE.md`                                | توثيق شامل (هذا الملف)            |
+| `backend/migrations/20250201000000_create-all-collections.js` | إنشاء 150+ مجموعة مع validators   |
+| `backend/scripts/setup-database.js`                           | سكريبت الإعداد الشامل             |
+| `backend/scripts/seed-all.js`                                 | مشغّل الـ Seeds المرتب            |
+| `backend/scripts/db-backup.js`                                | نظام النسخ الاحتياطي              |
 
 ---
 
-*تم التوثيق في: 2025 | Al-Awael ERP System*
+_تم التوثيق في: 2025 | Al-Awael ERP System_

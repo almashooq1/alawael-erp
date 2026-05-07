@@ -44,12 +44,12 @@ beforeAll(async () => {
   }
   await mongoose.connect(mongoServer.getUri(), { dbName: 'self-service-test' });
   Employee = require('../models/HR/Employee');
-  EmploymentContract = require('../models/hr/EmploymentContract');
-  Certification = require('../models/hr/Certification');
-  LeaveBalance = require('../models/hr/LeaveBalance');
-  Leave = require('../models/hr/Leave');
+  EmploymentContract = require('../models/HR/EmploymentContract');
+  Certification = require('../models/HR/Certification');
+  LeaveBalance = require('../models/HR/LeaveBalance');
+  Leave = require('../models/HR/Leave');
   RedFlagState = require('../models/RedFlagState');
-  PerformanceReview = require('../models/hr/PerformanceReview');
+  PerformanceReview = require('../models/HR/PerformanceReview');
 }, 60_000);
 
 afterAll(async () => {

@@ -38,7 +38,7 @@ beforeAll(async () => {
     }
   }
   await mongoose.connect(mongoServer.getUri(), { dbName: 'cr-routes-test' });
-  HrChangeRequest = require('../models/hr/HrChangeRequest');
+  HrChangeRequest = require('../models/HR/HrChangeRequest');
   Employee = require('../models/HR/Employee');
 }, 60_000);
 

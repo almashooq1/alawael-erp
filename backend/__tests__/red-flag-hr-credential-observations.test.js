@@ -47,8 +47,8 @@ beforeAll(async () => {
   await mongoose.connect(mongoServer.getUri(), { dbName: 'hr-cred-obs-test' });
   SessionAttendance = require('../models/SessionAttendance');
   Employee = require('../models/HR/Employee');
-  Certification = require('../models/hr/Certification');
-  EmploymentContract = require('../models/hr/EmploymentContract');
+  Certification = require('../models/HR/Certification');
+  EmploymentContract = require('../models/HR/EmploymentContract');
 }, 60_000);
 
 afterAll(async () => {

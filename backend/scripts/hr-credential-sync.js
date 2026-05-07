@@ -72,8 +72,8 @@ const c = {
 
 async function main() {
   const mongoose = require('mongoose');
-  const Certification = require('../models/hr/Certification');
-  const EmploymentContract = require('../models/hr/EmploymentContract');
+  const Certification = require('../models/HR/Certification');
+  const EmploymentContract = require('../models/HR/EmploymentContract');
   const Employee = require('../models/HR/Employee');
   const { runFullHrCredentialSync } = require('../services/hr/hrCredentialStatusSync');
 

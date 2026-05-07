@@ -44,7 +44,7 @@ beforeAll(async () => {
   }
   await mongoose.connect(mongoServer.getUri(), { dbName: 'hr-webhook-int' });
   AuditLog = require('../models/AuditLog');
-  HrChangeRequest = require('../models/hr/HrChangeRequest');
+  HrChangeRequest = require('../models/HR/HrChangeRequest');
   Employee = require('../models/HR/Employee');
 }, 60_000);
 

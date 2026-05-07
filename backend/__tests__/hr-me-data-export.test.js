@@ -46,12 +46,12 @@ beforeAll(async () => {
   }
   await mongoose.connect(mongoServer.getUri(), { dbName: 'me-export-test' });
   Employee = require('../models/HR/Employee');
-  EmploymentContract = require('../models/hr/EmploymentContract');
-  Certification = require('../models/hr/Certification');
-  LeaveBalance = require('../models/hr/LeaveBalance');
-  Leave = require('../models/hr/Leave');
-  PerformanceReview = require('../models/hr/PerformanceReview');
-  HrChangeRequest = require('../models/hr/HrChangeRequest');
+  EmploymentContract = require('../models/HR/EmploymentContract');
+  Certification = require('../models/HR/Certification');
+  LeaveBalance = require('../models/HR/LeaveBalance');
+  Leave = require('../models/HR/Leave');
+  PerformanceReview = require('../models/HR/PerformanceReview');
+  HrChangeRequest = require('../models/HR/HrChangeRequest');
   AuditLog = require('../models/auditLog.model').AuditLog;
 }, 60_000);
 

@@ -34,7 +34,7 @@ beforeAll(async () => {
     }
   }
   await mongoose.connect(mongoServer.getUri(), { dbName: 'hr-inbox-test' });
-  HrChangeRequest = require('../models/hr/HrChangeRequest');
+  HrChangeRequest = require('../models/HR/HrChangeRequest');
 }, 60_000);
 
 afterAll(async () => {

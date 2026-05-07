@@ -38,13 +38,13 @@ beforeAll(async () => {
     }
   }
   await mongoose.connect(mongoServer.getUri(), { dbName: 'hr-dashboard-test' });
-  Certification = require('../models/hr/Certification');
-  EmploymentContract = require('../models/hr/EmploymentContract');
+  Certification = require('../models/HR/Certification');
+  EmploymentContract = require('../models/HR/EmploymentContract');
   Employee = require('../models/HR/Employee');
-  LeaveBalance = require('../models/hr/LeaveBalance');
-  PerformanceReview = require('../models/hr/PerformanceReview');
+  LeaveBalance = require('../models/HR/LeaveBalance');
+  PerformanceReview = require('../models/HR/PerformanceReview');
   RedFlagState = require('../models/RedFlagState');
-  HrChangeRequest = require('../models/hr/HrChangeRequest');
+  HrChangeRequest = require('../models/HR/HrChangeRequest');
   AuditLog = require('../models/auditLog.model').AuditLog;
 }, 60_000);
 

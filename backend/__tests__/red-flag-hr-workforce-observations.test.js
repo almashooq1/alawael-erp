@@ -48,8 +48,8 @@ beforeAll(async () => {
   await mongoose.connect(mongoServer.getUri(), { dbName: 'hr-workforce-test' });
   SessionAttendance = require('../models/SessionAttendance');
   Employee = require('../models/HR/Employee');
-  LeaveBalance = require('../models/hr/LeaveBalance');
-  PerformanceReview = require('../models/hr/PerformanceReview');
+  LeaveBalance = require('../models/HR/LeaveBalance');
+  PerformanceReview = require('../models/HR/PerformanceReview');
   Shift = require('../models/Shift');
 }, 60_000);
 

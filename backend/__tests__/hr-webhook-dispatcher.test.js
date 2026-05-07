@@ -31,7 +31,7 @@ beforeAll(async () => {
     }
   }
   await mongoose.connect(mongoServer.getUri(), { dbName: 'hr-webhook-test' });
-  HrWebhookSubscription = require('../models/hr/HrWebhookSubscription');
+  HrWebhookSubscription = require('../models/HR/HrWebhookSubscription');
 }, 60_000);
 
 afterAll(async () => {

@@ -41,8 +41,8 @@ beforeAll(async () => {
     }
   }
   await mongoose.connect(mongoServer.getUri(), { dbName: 'hr-sync-test' });
-  Certification = require('../models/hr/Certification');
-  EmploymentContract = require('../models/hr/EmploymentContract');
+  Certification = require('../models/HR/Certification');
+  EmploymentContract = require('../models/HR/EmploymentContract');
   Employee = require('../models/HR/Employee');
 }, 60_000);
 

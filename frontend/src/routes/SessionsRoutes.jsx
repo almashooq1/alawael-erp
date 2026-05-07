@@ -11,7 +11,7 @@ const SessionAnalyticsDashboard = lazyWithRetry(
 const SessionsPage = lazyWithRetry(() => import('../pages/Sessions'));
 // BC-04: amendment audit trail
 const SessionAmendmentAudit = lazyWithRetry(
-  () => import('../pages/sessions/SessionAmendmentAudit')
+  () => import('../pages/Sessions/SessionAmendmentAudit')
 );
 
 export default function SessionsRoutes() {

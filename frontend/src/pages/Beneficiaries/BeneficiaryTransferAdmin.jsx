@@ -11,7 +11,6 @@
  *   POST   /api/beneficiary-transfers/:id/reject  { reason }
  *   POST   /api/beneficiary-transfers/:id/complete
  */
-'use strict';
 
 import { useState, useEffect, useCallback } from 'react';
 import {

@@ -10,7 +10,6 @@
  *   GET  /api/admin/branch-compliance/:id/status  — per-branch detail
  *   POST /api/admin/branch-compliance/:id/verify-balady  — trigger re-verification
  */
-'use strict';
 
 import { useState, useEffect, useCallback } from 'react';
 import {

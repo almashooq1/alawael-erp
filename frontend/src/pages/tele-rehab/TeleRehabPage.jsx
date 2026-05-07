@@ -54,7 +54,6 @@ import {
   Dashboard as DashboardIcon,
   CalendarMonth as CalendarIcon,
   SignalCellularAlt as QualityIcon,
-  ThumbUp as _SatisfactionIcon,
 } from '@mui/icons-material';
 import { teleRehabAPI } from '../../services/ddd';
 

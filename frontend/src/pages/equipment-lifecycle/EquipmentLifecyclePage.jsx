@@ -42,7 +42,6 @@ import {
   CheckCircle as OkIcon,
   Warning as WarnIcon,
   Error as ErrIcon,
-  BarChart as _ChartIcon,
   EventRepeat as NextServiceIcon,
 } from '@mui/icons-material';
 import { equipmentLifecycleAPI } from '../../services/ddd';

@@ -12,7 +12,6 @@
  *   POST   /api/v1/beneficiaries/:id/consents/:cid/revoke
  *   PATCH  /api/v1/beneficiaries/:id/consent-tracking
  */
-'use strict';
 
 import { useState, useEffect, useCallback } from 'react';
 import {

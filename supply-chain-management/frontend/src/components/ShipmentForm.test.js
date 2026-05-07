@@ -77,9 +77,7 @@ describe('ShipmentForm Component', () => {
       trackingNumber: 'TRACK-123',
       status: 'delivered',
     };
-    const { container } = render(
-      <ShipmentForm onSubmit={jest.fn()} initialData={initialData} editMode={true} />
-    );
+    const { container } = render(<ShipmentForm onSubmit={jest.fn()} initialData={initialData} editMode={true} />);
     expect(container).toBeInTheDocument();
   });
 });

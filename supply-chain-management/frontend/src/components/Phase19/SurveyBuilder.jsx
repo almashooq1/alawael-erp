@@ -110,10 +110,7 @@ const SurveyBuilder = () => {
 
           <div className="form-group">
             <label>Type</label>
-            <select
-              value={formData.type}
-              onChange={e => setFormData({ ...formData, type: e.target.value })}
-            >
+            <select value={formData.type} onChange={e => setFormData({ ...formData, type: e.target.value })}>
               <option value="general">General Feedback</option>
               <option value="nps">NPS Survey</option>
               <option value="satisfaction">Satisfaction</option>
@@ -128,9 +125,7 @@ const SurveyBuilder = () => {
                 <select
                   value={q.type}
                   onChange={e => {
-                    const updated = formData.questions.map(qu =>
-                      qu.id === q.id ? { ...qu, type: e.target.value } : qu
-                    );
+                    const updated = formData.questions.map(qu => (qu.id === q.id ? { ...qu, type: e.target.value } : qu));
                     setFormData({ ...formData, questions: updated });
                   }}
                 >
@@ -145,9 +140,7 @@ const SurveyBuilder = () => {
                   placeholder="Question text"
                   value={q.text}
                   onChange={e => {
-                    const updated = formData.questions.map(qu =>
-                      qu.id === q.id ? { ...qu, text: e.target.value } : qu
-                    );
+                    const updated = formData.questions.map(qu => (qu.id === q.id ? { ...qu, text: e.target.value } : qu));
                     setFormData({ ...formData, questions: updated });
                   }}
                 />

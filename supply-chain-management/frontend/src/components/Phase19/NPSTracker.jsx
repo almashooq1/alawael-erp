@@ -91,18 +91,8 @@ const NPSTracker = () => {
       <div className="nps-input-section">
         <h2>Record NPS Score</h2>
         <div className="input-fields">
-          <input
-            type="text"
-            placeholder="Customer ID"
-            value={customerId}
-            onChange={e => setCustomerId(e.target.value)}
-          />
-          <textarea
-            placeholder="Additional feedback (optional)"
-            value={feedback}
-            onChange={e => setFeedback(e.target.value)}
-            rows="3"
-          />
+          <input type="text" placeholder="Customer ID" value={customerId} onChange={e => setCustomerId(e.target.value)} />
+          <textarea placeholder="Additional feedback (optional)" value={feedback} onChange={e => setFeedback(e.target.value)} rows="3" />
         </div>
 
         <div className="score-selector">
@@ -196,11 +186,7 @@ const NPSTracker = () => {
             <label>Response Rate</label>
             <value>
               {npsData.totalResponses > 0
-                ? (
-                    ((npsData.promoters + npsData.passives + npsData.detractors) /
-                      npsData.totalResponses) *
-                    100
-                  ).toFixed(1)
+                ? (((npsData.promoters + npsData.passives + npsData.detractors) / npsData.totalResponses) * 100).toFixed(1)
                 : 0}
               %
             </value>

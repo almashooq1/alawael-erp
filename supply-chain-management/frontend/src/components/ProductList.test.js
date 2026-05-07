@@ -12,7 +12,7 @@ jest.mock(
   './Modal',
   () =>
     ({ open, children }) =>
-      open ? <div>{children}</div> : null
+      open ? <div>{children}</div> : null,
 );
 
 const mockUser = { id: '1', role: 'admin' };

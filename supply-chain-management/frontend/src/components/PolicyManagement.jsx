@@ -70,9 +70,7 @@ const PolicyManagement = () => {
     // Search filter
     if (filter.searchTerm) {
       const term = filter.searchTerm.toLowerCase();
-      filtered = filtered.filter(
-        p => p.policyName.toLowerCase().includes(term) || p.policyNameAr.includes(term)
-      );
+      filtered = filtered.filter(p => p.policyName.toLowerCase().includes(term) || p.policyNameAr.includes(term));
     }
 
     setFilteredPolicies(filtered);
@@ -181,11 +179,7 @@ const PolicyManagement = () => {
 
           <div className="filter-group">
             <label>نوع السياسة:</label>
-            <select
-              value={filter.type}
-              onChange={e => setFilter({ ...filter, type: e.target.value })}
-              className="form-control"
-            >
+            <select value={filter.type} onChange={e => setFilter({ ...filter, type: e.target.value })} className="form-control">
               <option value="ALL">جميع الأنواع</option>
               {policyTypes.map(type => (
                 <option key={type} value={type}>
@@ -197,11 +191,7 @@ const PolicyManagement = () => {
 
           <div className="filter-group">
             <label>الحالة:</label>
-            <select
-              value={filter.status}
-              onChange={e => setFilter({ ...filter, status: e.target.value })}
-              className="form-control"
-            >
+            <select value={filter.status} onChange={e => setFilter({ ...filter, status: e.target.value })} className="form-control">
               <option value="ALL">جميع الحالات</option>
               {policyStatuses.map(status => (
                 <option key={status} value={status}>
@@ -233,22 +223,14 @@ const PolicyManagement = () => {
                     <td>{policy.policyName}</td>
                     <td>{policy.policyType}</td>
                     <td>
-                      <span className={`status-badge status-${policy.status.toLowerCase()}`}>
-                        {policy.status}
-                      </span>
+                      <span className={`status-badge status-${policy.status.toLowerCase()}`}>{policy.status}</span>
                     </td>
                     <td>{new Date(policy.effectiveDate).toLocaleDateString('ar')}</td>
                     <td>
-                      <button
-                        className="btn btn-sm btn-warning"
-                        onClick={() => handleModalOpen(policy)}
-                      >
+                      <button className="btn btn-sm btn-warning" onClick={() => handleModalOpen(policy)}>
                         تعديل
                       </button>
-                      <button
-                        className="btn btn-sm btn-danger"
-                        onClick={() => handleDeletePolicy(policy.policyId)}
-                      >
+                      <button className="btn btn-sm btn-danger" onClick={() => handleDeletePolicy(policy.policyId)}>
                         حذف
                       </button>
                     </td>
@@ -275,13 +257,7 @@ const PolicyManagement = () => {
               <div className="modal-body">
                 <div className="form-group">
                   <label>اسم السياسة (English):</label>
-                  <input
-                    type="text"
-                    name="policyName"
-                    value={formData.policyName}
-                    onChange={handleFormChange}
-                    className="form-control"
-                  />
+                  <input type="text" name="policyName" value={formData.policyName} onChange={handleFormChange} className="form-control" />
                 </div>
 
                 <div className="form-group">
@@ -297,12 +273,7 @@ const PolicyManagement = () => {
 
                 <div className="form-group">
                   <label>نوع السياسة:</label>
-                  <select
-                    name="policyType"
-                    value={formData.policyType}
-                    onChange={handleFormChange}
-                    className="form-control"
-                  >
+                  <select name="policyType" value={formData.policyType} onChange={handleFormChange} className="form-control">
                     {policyTypes.map(type => (
                       <option key={type} value={type}>
                         {type}
@@ -324,24 +295,12 @@ const PolicyManagement = () => {
 
                 <div className="form-group">
                   <label>الموعد النهائي:</label>
-                  <input
-                    type="date"
-                    name="dueDate"
-                    value={formData.dueDate}
-                    onChange={handleFormChange}
-                    className="form-control"
-                  />
+                  <input type="date" name="dueDate" value={formData.dueDate} onChange={handleFormChange} className="form-control" />
                 </div>
 
                 <div className="form-group">
                   <label>الوصف (English):</label>
-                  <textarea
-                    name="description"
-                    value={formData.description}
-                    onChange={handleFormChange}
-                    className="form-control"
-                    rows="3"
-                  />
+                  <textarea name="description" value={formData.description} onChange={handleFormChange} className="form-control" rows="3" />
                 </div>
 
                 <div className="form-group">

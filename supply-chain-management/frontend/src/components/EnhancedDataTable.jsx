@@ -161,12 +161,7 @@ export default function EnhancedDataTable({ entityType = 'suppliers', columns = 
         title={title}
         subheader={`Total: ${totalItems} items`}
         action={
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<AddIcon />}
-            onClick={() => handleOpenDialog()}
-          >
+          <Button variant="contained" color="primary" startIcon={<AddIcon />} onClick={() => handleOpenDialog()}>
             Add New
           </Button>
         }
@@ -232,30 +227,15 @@ export default function EnhancedDataTable({ entityType = 'suppliers', columns = 
                         <TableCell key={col.id} align={col.align || 'left'}>
                           {col.format ? col.format(row[col.id]) : row[col.id]}
                           {col.id === 'status' && (
-                            <Chip
-                              label={row.status}
-                              size="small"
-                              color={getStatusColor(row.status)}
-                              sx={{ ml: 1 }}
-                            />
+                            <Chip label={row.status} size="small" color={getStatusColor(row.status)} sx={{ ml: 1 }} />
                           )}
                         </TableCell>
                       ))}
                       <TableCell align="right">
-                        <Button
-                          size="small"
-                          startIcon={<EditIcon />}
-                          onClick={() => handleOpenDialog(row)}
-                          sx={{ mr: 1 }}
-                        >
+                        <Button size="small" startIcon={<EditIcon />} onClick={() => handleOpenDialog(row)} sx={{ mr: 1 }}>
                           Edit
                         </Button>
-                        <Button
-                          size="small"
-                          startIcon={<DeleteIcon />}
-                          color="error"
-                          onClick={() => handleDelete(row._id)}
-                        >
+                        <Button size="small" startIcon={<DeleteIcon />} color="error" onClick={() => handleDelete(row._id)}>
                           Delete
                         </Button>
                       </TableCell>

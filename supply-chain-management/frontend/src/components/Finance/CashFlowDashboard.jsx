@@ -14,41 +14,11 @@
  */
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import {
-  Card,
-  Row,
-  Col,
-  Table,
-  Statistic,
-  Button,
-  Select,
-  DatePicker,
-  Tabs,
-  message,
-  Empty,
-  Modal,
-  Tooltip,
-  Space,
-  Progress,
-  Collapse,
-  Form,
-  InputNumber,
-} from 'antd';
-import {
-  ArrowUpOutlined,
-  ArrowDownOutlined,
-  DollarOutlined,
-  TrendingUpOutlined,
-  TrendingDownOutlined,
-  ReloadOutlined,
-  FilterOutlined,
-  RiseOutlined,
-  FallOutlined,
-} from '@ant-design/icons';
+import { Card, Row, Col, Table, Statistic, Button, Select, DatePicker, Tabs, message, Empty, Progress } from 'antd';
+import { ArrowUpOutlined, ArrowDownOutlined, ReloadOutlined, FilterOutlined } from '@ant-design/icons';
 import {
   AreaChart,
   Area,
-  BarChart,
   Bar,
   LineChart,
   Line,
@@ -89,7 +59,7 @@ const CashFlowDashboard = () => {
   });
   const [reserves, setReserves] = useState([]);
   const [activeTab, setActiveTab] = useState('overview');
-  const [viewMode, setViewMode] = useState('standard');
+  const [_viewMode, _setViewMode] = useState('standard');
   const wsRef = useRef(null);
 
   // ===== WebSocket Connection =====
@@ -276,9 +246,9 @@ const CashFlowDashboard = () => {
     return trends;
   };
 
-  const handleSimulateWhatIf = async scenario => {
+  const _handleSimulateWhatIf = async scenario => {
     try {
-      const response = await api.post('/finance/cash-flow/simulate', {
+      const _response = await api.post('/finance/cash-flow/simulate', {
         scenario,
         dateRange,
       });
@@ -290,7 +260,7 @@ const CashFlowDashboard = () => {
     }
   };
 
-  const handleDrillDown = dataPoint => {
+  const _handleDrillDown = _dataPoint => {
     // TODO: drill-down detail navigation
   };
 
@@ -324,20 +294,8 @@ const CashFlowDashboard = () => {
                     <YAxis />
                     <RechartsTooltip />
                     <Legend />
-                    <Area
-                      type="monotone"
-                      dataKey="inflows"
-                      stackId="1"
-                      stroke="#52c41a"
-                      fill="#95de64"
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="outflows"
-                      stackId="1"
-                      stroke="#ff7a45"
-                      fill="#ffbb96"
-                    />
+                    <Area type="monotone" dataKey="inflows" stackId="1" stroke="#52c41a" fill="#95de64" />
+                    <Area type="monotone" dataKey="outflows" stackId="1" stroke="#ff7a45" fill="#ffbb96" />
                   </AreaChart>
                 </ResponsiveContainer>
               ) : (
@@ -528,22 +486,12 @@ const CashFlowDashboard = () => {
         </Col>
         <Col xs={24} sm={12} md={6}>
           <Card>
-            <Statistic
-              title="الرصيد الختامي"
-              value={stats.endingBalance}
-              suffix="$"
-              valueStyle={{ color: '#1890ff' }}
-            />
+            <Statistic title="الرصيد الختامي" value={stats.endingBalance} suffix="$" valueStyle={{ color: '#1890ff' }} />
           </Card>
         </Col>
         <Col xs={24} sm={12} md={6}>
           <Card>
-            <Statistic
-              title="متوسط التدفق اليومي"
-              value={stats.averageDailyFlow.toFixed(2)}
-              suffix="$"
-              valueStyle={{ color: '#faad14' }}
-            />
+            <Statistic title="متوسط التدفق اليومي" value={stats.averageDailyFlow.toFixed(2)} suffix="$" valueStyle={{ color: '#faad14' }} />
           </Card>
         </Col>
       </Row>
@@ -557,27 +505,14 @@ const CashFlowDashboard = () => {
               value={selectedAccount}
               onChange={setSelectedAccount}
               style={{ width: '100%' }}
-              options={[
-                { label: 'الكل', value: 'all' },
-                ...stats.accounts.map(acc => ({ label: acc, value: acc })),
-              ]}
+              options={[{ label: 'الكل', value: 'all' }, ...stats.accounts.map(acc => ({ label: acc, value: acc }))]}
             />
           </Col>
           <Col xs={24} sm={12} md={6}>
-            <DatePicker.RangePicker
-              value={dateRange}
-              onChange={dates => setDateRange(dates)}
-              style={{ width: '100%' }}
-            />
+            <DatePicker.RangePicker value={dateRange} onChange={dates => setDateRange(dates)} style={{ width: '100%' }} />
           </Col>
           <Col xs={24} sm={12} md={6}>
-            <Button
-              type="primary"
-              icon={<FilterOutlined />}
-              loading={loading}
-              onClick={fetchCashFlowData}
-              block
-            >
+            <Button type="primary" icon={<FilterOutlined />} loading={loading} onClick={fetchCashFlowData} block>
               بحث
             </Button>
           </Col>

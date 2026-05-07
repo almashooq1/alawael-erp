@@ -53,7 +53,7 @@ const IncidentManagement = () => {
         inc =>
           inc.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
           inc.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          inc.incidentNumber?.toLowerCase().includes(searchTerm.toLowerCase())
+          inc.incidentNumber?.toLowerCase().includes(searchTerm.toLowerCase()),
       );
     }
 
@@ -96,18 +96,14 @@ const IncidentManagement = () => {
     try {
       if (editingId) {
         // تحديث
-        const response = await axios.put(
-          `${API_BASE}/incidents/${editingId}`,
-          formData,
-          {
-            headers: {
-              Authorization: `Bearer ${sessionStorage.getItem('token')}`,
-            },
-          }
-        );
+        const _response = await axios.put(`${API_BASE}/incidents/${editingId}`, formData, {
+          headers: {
+            Authorization: `Bearer ${sessionStorage.getItem('token')}`,
+          },
+        });
       } else {
         // إنشاء جديد
-        const response = await axios.post(`${API_BASE}/incidents`, formData, {
+        const _response = await axios.post(`${API_BASE}/incidents`, formData, {
           headers: {
             Authorization: `Bearer ${sessionStorage.getItem('token')}`,
           },
@@ -213,16 +209,7 @@ const IncidentManagement = () => {
     'OTHER',
   ];
 
-  const statusOptions = [
-    'REPORTED',
-    'ACKNOWLEDGED',
-    'INVESTIGATING',
-    'IDENTIFIED',
-    'IN_RESOLUTION',
-    'RESOLVED',
-    'CLOSED',
-    'REOPENED',
-  ];
+  const statusOptions = ['REPORTED', 'ACKNOWLEDGED', 'INVESTIGATING', 'IDENTIFIED', 'IN_RESOLUTION', 'RESOLVED', 'CLOSED', 'REOPENED'];
 
   return (
     <div className="incident-management">
@@ -249,11 +236,7 @@ const IncidentManagement = () => {
           className="search-input"
         />
 
-        <select
-          value={filterStatus}
-          onChange={e => setFilterStatus(e.target.value)}
-          className="filter-select"
-        >
+        <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} className="filter-select">
           <option value="">جميع الحالات</option>
           {statusOptions.map(status => (
             <option key={status} value={status}>
@@ -262,11 +245,7 @@ const IncidentManagement = () => {
           ))}
         </select>
 
-        <select
-          value={filterSeverity}
-          onChange={e => setFilterSeverity(e.target.value)}
-          className="filter-select"
-        >
+        <select value={filterSeverity} onChange={e => setFilterSeverity(e.target.value)} className="filter-select">
           <option value="">جميع مستويات الخطورة</option>
           <option value="CRITICAL">🔴 حرجة</option>
           <option value="HIGH">🟠 عالية</option>
@@ -274,11 +253,7 @@ const IncidentManagement = () => {
           <option value="LOW">🟢 منخفضة</option>
         </select>
 
-        <select
-          value={filterCategory}
-          onChange={e => setFilterCategory(e.target.value)}
-          className="filter-select"
-        >
+        <select value={filterCategory} onChange={e => setFilterCategory(e.target.value)} className="filter-select">
           <option value="">جميع الأنواع</option>
           {categoryOptions.map(cat => (
             <option key={cat} value={cat}>
@@ -316,42 +291,25 @@ const IncidentManagement = () => {
                     <td className="incident-title">{incident.title}</td>
                     <td className="incident-category">{incident.category}</td>
                     <td>
-                      <span
-                        className="badge"
-                        style={{ backgroundColor: getSeverityColor(incident.severity) }}
-                      >
+                      <span className="badge" style={{ backgroundColor: getSeverityColor(incident.severity) }}>
                         {incident.severity}
                       </span>
                     </td>
                     <td>
-                      <span
-                        className="badge"
-                        style={{ backgroundColor: getStatusColor(incident.status) }}
-                      >
+                      <span className="badge" style={{ backgroundColor: getStatusColor(incident.status) }}>
                         {incident.status}
                       </span>
                     </td>
                     <td>{incident.priority}</td>
-                    <td className="incident-date">
-                      {new Date(incident.discoveryInfo?.discoveredAt).toLocaleDateString('ar-SA')}
-                    </td>
+                    <td className="incident-date">{new Date(incident.discoveryInfo?.discoveredAt).toLocaleDateString('ar-SA')}</td>
                     <td className="actions">
-                      <button
-                        className="btn-sm btn-edit"
-                        onClick={() => handleEditIncident(incident)}
-                      >
+                      <button className="btn-sm btn-edit" onClick={() => handleEditIncident(incident)}>
                         ✏️
                       </button>
-                      <button
-                        className="btn-sm btn-delete"
-                        onClick={() => handleDeleteIncident(incident._id)}
-                      >
+                      <button className="btn-sm btn-delete" onClick={() => handleDeleteIncident(incident._id)}>
                         🗑️
                       </button>
-                      <button
-                        className="btn-sm btn-view"
-                        onClick={() => console.log('View details:', incident)}
-                      >
+                      <button className="btn-sm btn-view" onClick={() => console.log('View details:', incident)}>
                         👁️
                       </button>
                     </td>
@@ -408,12 +366,7 @@ const IncidentManagement = () => {
               <div className="form-row">
                 <div className="form-group">
                   <label>* النوع</label>
-                  <select
-                    name="category"
-                    value={formData.category}
-                    onChange={handleInputChange}
-                    className="form-input"
-                  >
+                  <select name="category" value={formData.category} onChange={handleInputChange} className="form-input">
                     {categoryOptions.map(cat => (
                       <option key={cat} value={cat}>
                         {cat}
@@ -424,12 +377,7 @@ const IncidentManagement = () => {
 
                 <div className="form-group">
                   <label>* مستوى الخطورة</label>
-                  <select
-                    name="severity"
-                    value={formData.severity}
-                    onChange={handleInputChange}
-                    className="form-input"
-                  >
+                  <select name="severity" value={formData.severity} onChange={handleInputChange} className="form-input">
                     <option value="CRITICAL">🔴 حرجة</option>
                     <option value="HIGH">🟠 عالية</option>
                     <option value="MEDIUM">🟡 متوسطة</option>
@@ -439,12 +387,7 @@ const IncidentManagement = () => {
 
                 <div className="form-group">
                   <label>الأولوية</label>
-                  <select
-                    name="priority"
-                    value={formData.priority}
-                    onChange={handleInputChange}
-                    className="form-input"
-                  >
+                  <select name="priority" value={formData.priority} onChange={handleInputChange} className="form-input">
                     <option value="P1">P1 - أعلى</option>
                     <option value="P2">P2</option>
                     <option value="P3">P3</option>

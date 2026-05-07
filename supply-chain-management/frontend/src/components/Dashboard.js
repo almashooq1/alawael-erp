@@ -17,16 +17,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
-const COLORS = [
-  '#0088FE',
-  '#00C49F',
-  '#FFBB28',
-  '#FF8042',
-  '#a832a6',
-  '#e63946',
-  '#457b9d',
-  '#2a9d8f',
-];
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#a832a6', '#e63946', '#457b9d', '#2a9d8f'];
 
 const Dashboard = () => {
   const [stats, setStats] = useState(null);
@@ -75,15 +66,7 @@ const Dashboard = () => {
         <div>
           <h4>الطلبات حسب الحالة</h4>
           <PieChart width={300} height={220}>
-            <Pie
-              data={reports.ordersByStatus}
-              dataKey="count"
-              nameKey="_id"
-              cx="50%"
-              cy="50%"
-              outerRadius={80}
-              label
-            >
+            <Pie data={reports.ordersByStatus} dataKey="count" nameKey="_id" cx="50%" cy="50%" outerRadius={80} label>
               {reports.ordersByStatus.map((entry, idx) => (
                 <Cell key={`cell-${idx}`} fill={COLORS[idx % COLORS.length]} />
               ))}
@@ -96,15 +79,7 @@ const Dashboard = () => {
         <div>
           <h4>الشحنات حسب الحالة</h4>
           <PieChart width={300} height={220}>
-            <Pie
-              data={reports.shipmentsByStatus}
-              dataKey="count"
-              nameKey="_id"
-              cx="50%"
-              cy="50%"
-              outerRadius={80}
-              label
-            >
+            <Pie data={reports.shipmentsByStatus} dataKey="count" nameKey="_id" cx="50%" cy="50%" outerRadius={80} label>
               {reports.shipmentsByStatus.map((entry, idx) => (
                 <Cell key={`cell2-${idx}`} fill={COLORS[idx % COLORS.length]} />
               ))}

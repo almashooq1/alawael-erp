@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Wifi, Zap, Globe, PlugIcon, Clock, AlertTriangle } from 'lucide-react';
+import { Wifi, Zap, Globe, PlugIcon } from 'lucide-react';
 
 // ==================== REAL-TIME COMPONENTS ====================
 
@@ -25,7 +25,7 @@ export const RealtimeStatusComponent = () => {
           setConnectionTime(new Date());
         };
 
-        ws.onmessage = event => {
+        ws.onmessage = _event => {
           setMessageCount(prev => prev + 1);
         };
 
@@ -47,15 +47,7 @@ export const RealtimeStatusComponent = () => {
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
       <div className="flex items-center gap-2 mb-4">
-        <Wifi
-          className={`w-6 h-6 ${
-            status === 'connected'
-              ? 'text-green-600'
-              : status === 'error'
-                ? 'text-red-600'
-                : 'text-gray-400'
-          }`}
-        />
+        <Wifi className={`w-6 h-6 ${status === 'connected' ? 'text-green-600' : status === 'error' ? 'text-red-600' : 'text-gray-400'}`} />
         <h2 className="text-xl font-bold">Real-time Connection</h2>
       </div>
 
@@ -64,11 +56,7 @@ export const RealtimeStatusComponent = () => {
           <p className="text-gray-600 text-sm">Status</p>
           <p
             className={`text-2xl font-bold mt-2 ${
-              status === 'connected'
-                ? 'text-green-600'
-                : status === 'error'
-                  ? 'text-red-600'
-                  : 'text-yellow-600'
+              status === 'connected' ? 'text-green-600' : status === 'error' ? 'text-red-600' : 'text-yellow-600'
             }`}
           >
             {status.toUpperCase()}
@@ -82,9 +70,7 @@ export const RealtimeStatusComponent = () => {
 
         <div className="bg-gray-50 rounded p-4 col-span-2">
           <p className="text-gray-600 text-sm">Connected Since</p>
-          <p className="text-sm mt-2">
-            {connectionTime ? connectionTime.toLocaleString() : 'Not connected'}
-          </p>
+          <p className="text-sm mt-2">{connectionTime ? connectionTime.toLocaleString() : 'Not connected'}</p>
         </div>
       </div>
     </div>
@@ -146,27 +132,19 @@ export const IntegrationManagementComponent = () => {
       ) : (
         <div className="space-y-4">
           {integrations.map(integration => (
-            <div
-              key={integration.name}
-              className="border rounded-lg p-4 hover:shadow-md transition"
-            >
+            <div key={integration.name} className="border rounded-lg p-4 hover:shadow-md transition">
               <div className="flex items-start justify-between">
                 <div>
                   <h3 className="font-semibold text-lg">{integration.name}</h3>
                   <p className="text-sm text-gray-600 mt-1">
-                    Last sync:{' '}
-                    {integration.lastSync
-                      ? new Date(integration.lastSync).toLocaleString()
-                      : 'Never'}
+                    Last sync: {integration.lastSync ? new Date(integration.lastSync).toLocaleString() : 'Never'}
                   </p>
                 </div>
 
                 <div className="flex items-center gap-2">
                   <span
                     className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                      integration.status === 'active'
-                        ? 'bg-green-100 text-green-700'
-                        : 'bg-gray-100 text-gray-700'
+                      integration.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
                     }`}
                   >
                     {integration.status}
@@ -187,9 +165,7 @@ export const IntegrationManagementComponent = () => {
                 >
                   Test Connection
                 </button>
-                <button className="bg-gray-100 text-gray-700 px-3 py-1 rounded text-sm hover:bg-gray-200 transition">
-                  Configure
-                </button>
+                <button className="bg-gray-100 text-gray-700 px-3 py-1 rounded text-sm hover:bg-gray-200 transition">Configure</button>
               </div>
             </div>
           ))}
@@ -285,11 +261,7 @@ export const LocaleFormatterComponent = () => {
         <div className="grid grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium mb-2">Language</label>
-            <select
-              value={language}
-              onChange={e => setLanguage(e.target.value)}
-              className="w-full border rounded px-3 py-2 text-sm"
-            >
+            <select value={language} onChange={e => setLanguage(e.target.value)} className="w-full border rounded px-3 py-2 text-sm">
               <option value="en">English</option>
               <option value="ar">العربية</option>
               <option value="es">Español</option>
@@ -302,11 +274,7 @@ export const LocaleFormatterComponent = () => {
 
           <div>
             <label className="block text-sm font-medium mb-2">Format Type</label>
-            <select
-              value={formatType}
-              onChange={e => setFormatType(e.target.value)}
-              className="w-full border rounded px-3 py-2 text-sm"
-            >
+            <select value={formatType} onChange={e => setFormatType(e.target.value)} className="w-full border rounded px-3 py-2 text-sm">
               <option value="currency">Currency</option>
               <option value="number">Number</option>
               <option value="date">Date</option>
@@ -325,10 +293,7 @@ export const LocaleFormatterComponent = () => {
           </div>
         </div>
 
-        <button
-          onClick={handleFormat}
-          className="w-full bg-purple-600 text-white py-2 rounded hover:bg-purple-700 transition"
-        >
+        <button onClick={handleFormat} className="w-full bg-purple-600 text-white py-2 rounded hover:bg-purple-700 transition">
           Format
         </button>
 
@@ -336,9 +301,7 @@ export const LocaleFormatterComponent = () => {
           <div className="bg-gray-50 rounded p-4 border border-gray-200" dir={textDirection}>
             <p className="text-sm text-gray-600">Formatted Result:</p>
             <p className="text-2xl font-bold mt-2">{formatted}</p>
-            <p className="text-xs text-gray-500 mt-2">
-              Direction: {textDirection === 'rtl' ? 'Right-to-Left' : 'Left-to-Right'}
-            </p>
+            <p className="text-xs text-gray-500 mt-2">Direction: {textDirection === 'rtl' ? 'Right-to-Left' : 'Left-to-Right'}</p>
           </div>
         )}
       </div>
@@ -383,9 +346,7 @@ export const NotificationCenterComponent = () => {
       <div className="flex items-center gap-2 mb-6">
         <Zap className="w-6 h-6 text-yellow-600" />
         <h2 className="text-xl font-bold">Notifications</h2>
-        {ws && ws.readyState === WebSocket.OPEN && (
-          <span className="ml-auto text-xs text-green-600 font-semibold">Live</span>
-        )}
+        {ws && ws.readyState === WebSocket.OPEN && <span className="ml-auto text-xs text-green-600 font-semibold">Live</span>}
       </div>
 
       {notifications.length === 0 ? (
@@ -404,11 +365,7 @@ export const NotificationCenterComponent = () => {
               }`}
             >
               <p className="font-semibold text-sm">{notif.message}</p>
-              {notif.timestamp && (
-                <p className="text-xs text-gray-500 mt-1">
-                  {new Date(notif.timestamp).toLocaleTimeString()}
-                </p>
-              )}
+              {notif.timestamp && <p className="text-xs text-gray-500 mt-1">{new Date(notif.timestamp).toLocaleTimeString()}</p>}
             </div>
           ))}
         </div>

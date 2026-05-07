@@ -63,7 +63,7 @@ function SupplierList({ user, notify }) {
     s =>
       s.name?.toLowerCase().includes(search.toLowerCase()) ||
       s.email?.toLowerCase().includes(search.toLowerCase()) ||
-      s.contact?.toLowerCase().includes(search.toLowerCase())
+      s.contact?.toLowerCase().includes(search.toLowerCase()),
   );
 
   const handleExport = () => {
@@ -76,7 +76,7 @@ function SupplierList({ user, notify }) {
         { label: 'العنوان', value: 'address' },
         { label: 'التقييم', value: 'rating' },
       ],
-      'الموردون.xlsx'
+      'الموردون.xlsx',
     );
   };
 
@@ -90,7 +90,7 @@ function SupplierList({ user, notify }) {
         { label: 'العنوان', value: 'address' },
         { label: 'التقييم', value: 'rating' },
       ],
-      'الموردون.pdf'
+      'الموردون.pdf',
     );
   };
 
@@ -111,9 +111,7 @@ function SupplierList({ user, notify }) {
         onChange={e => setSearch(e.target.value)}
         style={{ marginBottom: 12, padding: 6, width: 260 }}
       />
-      {(user.role === 'admin' || user.role === 'manager') && (
-        <SupplierForm onAdd={fetchSuppliers} user={user} notify={notify} />
-      )}
+      {(user.role === 'admin' || user.role === 'manager') && <SupplierForm onAdd={fetchSuppliers} user={user} notify={notify} />}
       <table border="1" cellPadding="8">
         <thead>
           <tr>
@@ -135,12 +133,7 @@ function SupplierList({ user, notify }) {
               <td>{s.rating ? s.rating.toFixed(2) : '0.00'}</td>
               <td>{Array.isArray(s.reviews) ? s.reviews.length : 0}</td>
               <td>
-                <SupplierReview
-                  supplier={s}
-                  user={user}
-                  onReview={fetchSuppliers}
-                  notify={notify}
-                />
+                <SupplierReview supplier={s} user={user} onReview={fetchSuppliers} notify={notify} />
               </td>
               <td>
                 {(user.role === 'admin' || user.role === 'manager') && (
@@ -171,11 +164,9 @@ function SupplierReview({ supplier, user, onReview, notify }) {
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const alreadyReviewed =
-    Array.isArray(supplier.reviews) && user && supplier.reviews.some(r => r.user === user._id);
+  const alreadyReviewed = Array.isArray(supplier.reviews) && user && supplier.reviews.some(r => r.user === user._id);
 
-  if (!user || alreadyReviewed)
-    return <span style={{ color: '#888' }}>{alreadyReviewed ? 'تم التقييم' : '-'}</span>;
+  if (!user || alreadyReviewed) return <span style={{ color: '#888' }}>{alreadyReviewed ? 'تم التقييم' : '-'}</span>;
 
   const handleSubmit = async e => {
     e.preventDefault();
@@ -202,11 +193,7 @@ function SupplierReview({ supplier, user, onReview, notify }) {
           </option>
         ))}
       </select>
-      <input
-        value={comment}
-        onChange={e => setComment(e.target.value)}
-        placeholder="تعليق (اختياري)"
-      />
+      <input value={comment} onChange={e => setComment(e.target.value)} placeholder="تعليق (اختياري)" />
       <button type="submit" disabled={submitting}>
         {submitting ? 'جاري الإرسال...' : 'إرسال'}
       </button>

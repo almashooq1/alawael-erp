@@ -56,12 +56,7 @@ export default function Register({ onRegister }) {
         required
         style={{ width: '100%', marginBottom: 12 }}
       />
-      <select
-        name="role"
-        value={form.role}
-        onChange={handleChange}
-        style={{ width: '100%', marginBottom: 12 }}
-      >
+      <select name="role" value={form.role} onChange={handleChange} style={{ width: '100%', marginBottom: 12 }}>
         <option value="user">مستخدم عادي</option>
         <option value="manager">مدير</option>
         <option value="admin">مشرف</option>

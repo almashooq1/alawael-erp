@@ -31,25 +31,20 @@ import {
   TableRow,
   IconButton,
   Tooltip,
-  Grid,
   Typography,
   Stack,
   Badge,
-  List,
-  ListItem,
-  ListItemText,
 } from '@mui/material';
 import {
   Delete as DeleteIcon,
   Edit as EditIcon,
   Bell as BellIcon,
-  CheckCircle as CheckCircleIcon,
   Error as ErrorIcon,
   Warning as WarningIcon,
   Info as InfoIcon,
-  Close as CloseIcon,
 } from '@mui/icons-material';
 
+// eslint-disable-next-line no-unused-vars -- `alerts` is part of the public component contract
 const KPIAlertManager = ({ kpiId, alerts = [], onCreateRule, onDeleteRule }) => {
   // State
   const [openDialog, setOpenDialog] = useState(false);
@@ -65,7 +60,7 @@ const KPIAlertManager = ({ kpiId, alerts = [], onCreateRule, onDeleteRule }) => 
     notifyChannels: [],
   });
   const [rules, setRules] = useState([]);
-  const [activeAlerts, setActiveAlerts] = useState([]);
+  const [activeAlerts, _setActiveAlerts] = useState([]);
 
   // Load initial data
   useEffect(() => {
@@ -151,7 +146,7 @@ const KPIAlertManager = ({ kpiId, alerts = [], onCreateRule, onDeleteRule }) => 
         onDeleteRule(ruleId);
       }
     },
-    [onDeleteRule]
+    [onDeleteRule],
   );
 
   // Get severity icon
@@ -313,13 +308,7 @@ const KPIAlertManager = ({ kpiId, alerts = [], onCreateRule, onDeleteRule }) => 
             />
 
             {/* Condition Type */}
-            <Select
-              fullWidth
-              label="Condition"
-              name="condition"
-              value={formData.condition}
-              onChange={handleInputChange}
-            >
+            <Select fullWidth label="Condition" name="condition" value={formData.condition} onChange={handleInputChange}>
               <MenuItem value="below">Below Threshold</MenuItem>
               <MenuItem value="above">Above Threshold</MenuItem>
               <MenuItem value="equals">Equals Value</MenuItem>
@@ -328,9 +317,7 @@ const KPIAlertManager = ({ kpiId, alerts = [], onCreateRule, onDeleteRule }) => 
             </Select>
 
             {/* Threshold Fields */}
-            {(formData.condition === 'below' ||
-              formData.condition === 'above' ||
-              formData.condition === 'equals') && (
+            {(formData.condition === 'below' || formData.condition === 'above' || formData.condition === 'equals') && (
               <TextField
                 fullWidth
                 type="number"
@@ -375,13 +362,7 @@ const KPIAlertManager = ({ kpiId, alerts = [], onCreateRule, onDeleteRule }) => 
             )}
 
             {/* Severity */}
-            <Select
-              fullWidth
-              label="Severity Level"
-              name="severity"
-              value={formData.severity}
-              onChange={handleInputChange}
-            >
+            <Select fullWidth label="Severity Level" name="severity" value={formData.severity} onChange={handleInputChange}>
               <MenuItem value="info">Info</MenuItem>
               <MenuItem value="warning">Warning</MenuItem>
               <MenuItem value="critical">Critical</MenuItem>

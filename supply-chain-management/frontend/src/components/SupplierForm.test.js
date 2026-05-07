@@ -82,9 +82,7 @@ describe('SupplierForm Component', () => {
 
   test('supports edit mode with initial data', () => {
     const initialData = { name: 'Existing Supplier', email: 'existing@test.com' };
-    const { container } = render(
-      <SupplierForm onSubmit={jest.fn()} initialData={initialData} editMode={true} />
-    );
+    const { container } = render(<SupplierForm onSubmit={jest.fn()} initialData={initialData} editMode={true} />);
     expect(container).toBeInTheDocument();
   });
 

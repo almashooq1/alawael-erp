@@ -97,11 +97,7 @@ const IncidentTracking = () => {
           <div className="stat">
             <span className="label">قيد المعالجة:</span>
             <span className="value" style={{ color: '#fd7e14' }}>
-              {
-                incidents.filter(i =>
-                  ['REPORTED', 'ACKNOWLEDGED', 'INVESTIGATING'].includes(i.status)
-                ).length
-              }
+              {incidents.filter(i => ['REPORTED', 'ACKNOWLEDGED', 'INVESTIGATING'].includes(i.status)).length}
             </span>
           </div>
           <div className="stat">
@@ -118,28 +114,16 @@ const IncidentTracking = () => {
         <button className={`filter-btn ${!filter ? 'active' : ''}`} onClick={() => setFilter('')}>
           جميع الحالات ({incidents.length})
         </button>
-        <button
-          className={`filter-btn ${filter === 'INVESTIGATING' ? 'active' : ''}`}
-          onClick={() => setFilter('INVESTIGATING')}
-        >
+        <button className={`filter-btn ${filter === 'INVESTIGATING' ? 'active' : ''}`} onClick={() => setFilter('INVESTIGATING')}>
           قيد التحقيق
         </button>
-        <button
-          className={`filter-btn ${filter === 'IN_RESOLUTION' ? 'active' : ''}`}
-          onClick={() => setFilter('IN_RESOLUTION')}
-        >
+        <button className={`filter-btn ${filter === 'IN_RESOLUTION' ? 'active' : ''}`} onClick={() => setFilter('IN_RESOLUTION')}>
           قيد الحل
         </button>
-        <button
-          className={`filter-btn ${filter === 'RESOLVED' ? 'active' : ''}`}
-          onClick={() => setFilter('RESOLVED')}
-        >
+        <button className={`filter-btn ${filter === 'RESOLVED' ? 'active' : ''}`} onClick={() => setFilter('RESOLVED')}>
           تم حلها
         </button>
-        <button
-          className={`filter-btn ${filter === 'CLOSED' ? 'active' : ''}`}
-          onClick={() => setFilter('CLOSED')}
-        >
+        <button className={`filter-btn ${filter === 'CLOSED' ? 'active' : ''}`} onClick={() => setFilter('CLOSED')}>
           مغلقة
         </button>
       </div>
@@ -192,10 +176,7 @@ const IncidentTracking = () => {
                   </div>
 
                   <div className="card-footer">
-                    <span
-                      className="badge"
-                      style={{ backgroundColor: getSeverityColor(incident.severity) }}
-                    >
+                    <span className="badge" style={{ backgroundColor: getSeverityColor(incident.severity) }}>
                       {incident.severity}
                     </span>
                     <span className="priority">أولوية: {incident.priority}</span>
@@ -224,9 +205,7 @@ const IncidentTracking = () => {
             {selectedIncident.timeline && selectedIncident.timeline.length > 0 ? (
               selectedIncident.timeline.map((event, index) => (
                 <div key={index} className="timeline-item">
-                  <div className="timeline-date">
-                    {new Date(event.timestamp).toLocaleString('ar-SA')}
-                  </div>
+                  <div className="timeline-date">{new Date(event.timestamp).toLocaleString('ar-SA')}</div>
                   <div className="timeline-content">
                     <h4 className="timeline-event">{event.eventType}</h4>
                     <p className="timeline-description">{event.description}</p>
@@ -281,9 +260,7 @@ const IncidentTracking = () => {
             </div>
             <div className="detail-item">
               <label>الحالة:</label>
-              <value style={{ color: getStatusInfo(selectedIncident).color }}>
-                {getStatusInfo(selectedIncident).label}
-              </value>
+              <value style={{ color: getStatusInfo(selectedIncident).color }}>{getStatusInfo(selectedIncident).label}</value>
             </div>
             <div className="detail-item">
               <label>الأولوية:</label>
@@ -291,16 +268,12 @@ const IncidentTracking = () => {
             </div>
             <div className="detail-item">
               <label>تاريخ الاكتشاف:</label>
-              <value>
-                {new Date(selectedIncident.discoveryInfo?.discoveredAt).toLocaleString('ar-SA')}
-              </value>
+              <value>{new Date(selectedIncident.discoveryInfo?.discoveredAt).toLocaleString('ar-SA')}</value>
             </div>
             {selectedIncident.resolution?.resolvedAt && (
               <div className="detail-item">
                 <label>تاريخ الحل:</label>
-                <value>
-                  {new Date(selectedIncident.resolution.resolvedAt).toLocaleString('ar-SA')}
-                </value>
+                <value>{new Date(selectedIncident.resolution.resolvedAt).toLocaleString('ar-SA')}</value>
               </div>
             )}
           </div>

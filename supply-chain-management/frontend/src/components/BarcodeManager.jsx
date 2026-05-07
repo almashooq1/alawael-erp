@@ -3,17 +3,8 @@ import useBarcodeGeneration from '../hooks/useBarcodeGeneration';
 import './BarcodeManager.css';
 
 const BarcodeManager = () => {
-  const {
-    generatedCode,
-    loading,
-    error,
-    batchProgress,
-    generateQRCode,
-    generateBarcode,
-    generateBatch,
-    downloadCode,
-    clear,
-  } = useBarcodeGeneration();
+  const { generatedCode, loading, error, batchProgress, generateQRCode, generateBarcode, generateBatch, downloadCode, clear } =
+    useBarcodeGeneration();
 
   const [activeMode, setActiveMode] = useState('qr'); // 'qr', 'barcode', 'batch'
   const [qrData, setQrData] = useState('');
@@ -130,11 +121,7 @@ const BarcodeManager = () => {
 
             <div className="form-group">
               <label>Error Correction Level:</label>
-              <select
-                value={qrErrorLevel}
-                onChange={e => setQrErrorLevel(e.target.value)}
-                className="input-field"
-              >
+              <select value={qrErrorLevel} onChange={e => setQrErrorLevel(e.target.value)} className="input-field">
                 <option value="L">L (7% recovery)</option>
                 <option value="M">M (15% recovery)</option>
                 <option value="Q">Q (25% recovery)</option>
@@ -166,11 +153,7 @@ const BarcodeManager = () => {
 
             <div className="form-group">
               <label>Barcode Format:</label>
-              <select
-                value={barcodeFormat}
-                onChange={e => setBarcodeFormat(e.target.value)}
-                className="input-field"
-              >
+              <select value={barcodeFormat} onChange={e => setBarcodeFormat(e.target.value)} className="input-field">
                 <option value="CODE128">CODE128</option>
                 <option value="CODE39">CODE39</option>
                 <option value="EAN13">EAN13</option>
@@ -199,11 +182,7 @@ const BarcodeManager = () => {
                     placeholder="Enter data"
                     className="input-field"
                   />
-                  <select
-                    value={item.type}
-                    onChange={e => updateBatchItem(index, 'type', e.target.value)}
-                    className="input-field"
-                  >
+                  <select value={item.type} onChange={e => updateBatchItem(index, 'type', e.target.value)} className="input-field">
                     <option value="QR">QR</option>
                     <option value="BARCODE">Barcode</option>
                   </select>
@@ -218,11 +197,7 @@ const BarcodeManager = () => {
                     <option value="EAN13">EAN13</option>
                     <option value="UPC">UPC</option>
                   </select>
-                  <button
-                    type="button"
-                    onClick={() => removeBatchItem(index)}
-                    className="btn btn-danger"
-                  >
+                  <button type="button" onClick={() => removeBatchItem(index)} className="btn btn-danger">
                     ✕
                   </button>
                 </div>
@@ -247,8 +222,7 @@ const BarcodeManager = () => {
           {generatedCode.type === 'BATCH' ? (
             <div className="batch-result">
               <p>
-                Total: {generatedCode.totalItems} | Success: {generatedCode.successCount} | Errors:{' '}
-                {generatedCode.errorCount}
+                Total: {generatedCode.totalItems} | Success: {generatedCode.successCount} | Errors: {generatedCode.errorCount}
               </p>
               <div className="batch-codes">
                 {generatedCode.results.map((result, idx) => (

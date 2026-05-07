@@ -10,7 +10,7 @@ const RiskDashboard = () => {
   const [risks, setRisks] = useState([]);
   const [report, setReport] = useState(null);
   const [showForm, setShowForm] = useState(false);
-  const [selectedRisk, setSelectedRisk] = useState(null);
+  const [_selectedRisk, setSelectedRisk] = useState(null);
   const [filterCategory, setFilterCategory] = useState('all');
   const [filterLevel, setFilterLevel] = useState('all');
   const [newRisk, setNewRisk] = useState({
@@ -159,10 +159,7 @@ const RiskDashboard = () => {
           <div className="form-row">
             <div className="form-group">
               <label>Category *</label>
-              <select
-                value={newRisk.category}
-                onChange={e => setNewRisk({ ...newRisk, category: e.target.value })}
-              >
+              <select value={newRisk.category} onChange={e => setNewRisk({ ...newRisk, category: e.target.value })}>
                 {riskCategories.map(cat => (
                   <option key={cat} value={cat}>
                     {cat.charAt(0).toUpperCase() + cat.slice(1)}
@@ -286,10 +283,7 @@ const RiskDashboard = () => {
                   <h3>{risk.name}</h3>
                   <p className="category">{risk.category}</p>
                 </div>
-                <div
-                  className="risk-score"
-                  style={{ backgroundColor: getRiskLevelColor(risk.riskScore) }}
-                >
+                <div className="risk-score" style={{ backgroundColor: getRiskLevelColor(risk.riskScore) }}>
                   <div className="score">{risk.riskScore || '—'}</div>
                   <div className="level">{getRiskLevelLabel(risk.riskScore || 0)}</div>
                 </div>

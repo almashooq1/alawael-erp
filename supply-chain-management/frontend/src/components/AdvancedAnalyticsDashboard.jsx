@@ -20,35 +20,16 @@ import {
   Pie,
   Cell,
 } from 'recharts';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  Grid,
-  StaticDatePicker,
-  TextField,
-  Box,
-  Paper,
-  Typography,
-  Chip,
-} from '@mui/material';
+import { Card, CardContent, CardHeader, Grid, Box, Paper, Typography, Chip } from '@mui/material';
 import apiClient from '../utils/api';
 
 // Register ChartJS components
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  Tooltip,
-  Legend
-);
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Tooltip, Legend);
 
 export default function AdvancedAnalyticsDashboard() {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [dateRange, setDateRange] = useState({
+  const [_dateRange, _setDateRange] = useState({
     startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
     endDate: new Date(),
   });
@@ -115,31 +96,16 @@ export default function AdvancedAnalyticsDashboard() {
       {/* Key Metrics */}
       <Grid container spacing={2} sx={{ mb: 4 }}>
         <Grid item xs={12} sm={6} md={3}>
-          <StatCard
-            title="Total Suppliers"
-            value={stats?.supplierCount || 0}
-            color="#4CAF50"
-            icon="🏢"
-          />
+          <StatCard title="Total Suppliers" value={stats?.supplierCount || 0} color="#4CAF50" icon="🏢" />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <StatCard
-            title="Total Products"
-            value={stats?.productCount || 0}
-            color="#2196F3"
-            icon="📦"
-          />
+          <StatCard title="Total Products" value={stats?.productCount || 0} color="#2196F3" icon="📦" />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
           <StatCard title="Total Orders" value={stats?.orderCount || 0} color="#FF9800" icon="📋" />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <StatCard
-            title="Total Inventory"
-            value={stats?.totalInventory || 0}
-            color="#9C27B0"
-            icon="📦"
-          />
+          <StatCard title="Total Inventory" value={stats?.totalInventory || 0} color="#9C27B0" icon="📦" />
         </Grid>
       </Grid>
 

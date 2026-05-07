@@ -52,9 +52,7 @@ function AuditLog({ user }) {
                   </span>
                 )}
                 {log.details && (
-                  <pre style={{ fontSize: 12, maxWidth: 300, overflowX: 'auto' }}>
-                    {JSON.stringify(log.details, null, 1)}
-                  </pre>
+                  <pre style={{ fontSize: 12, maxWidth: 300, overflowX: 'auto' }}>{JSON.stringify(log.details, null, 1)}</pre>
                 )}
               </td>
               <td>{new Date(log.timestamp).toLocaleString()}</td>

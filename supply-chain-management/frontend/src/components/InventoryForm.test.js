@@ -72,9 +72,7 @@ describe('InventoryForm Component', () => {
 
   test('supports edit mode with initial data', () => {
     const initialData = { product: 'existing', quantity: 50 };
-    const { container } = render(
-      <InventoryForm onSubmit={jest.fn()} initialData={initialData} editMode={true} />
-    );
+    const { container } = render(<InventoryForm onSubmit={jest.fn()} initialData={initialData} editMode={true} />);
     expect(container).toBeInTheDocument();
   });
 });

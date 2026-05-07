@@ -65,9 +65,7 @@ describe('OrderForm Component', () => {
 
   test('supports edit mode with initial data', () => {
     const initialData = { supplier: 'test', products: [], status: 'completed' };
-    const { container } = render(
-      <OrderForm onAdd={jest.fn()} initialData={initialData} editMode={true} />
-    );
+    const { container } = render(<OrderForm onAdd={jest.fn()} initialData={initialData} editMode={true} />);
     expect(container).toBeInTheDocument();
   });
 

@@ -21,26 +21,11 @@ import {
   Grid,
   Typography,
   Tooltip,
-  Card,
-  CardContent,
-  Divider,
   Stack,
-  Alert,
 } from '@mui/material';
-import {
-  Search as SearchIcon,
-  FilterList as FilterListIcon,
-  ClearAll as ClearAllIcon,
-  SaveAs as SaveAsIcon,
-  Delete as DeleteIcon,
-} from '@mui/icons-material';
+import { Search as SearchIcon, FilterList as FilterListIcon, ClearAll as ClearAllIcon, SaveAs as SaveAsIcon } from '@mui/icons-material';
 
-const AdvancedDashboardFilters = ({
-  kpis = [],
-  onFiltersChange,
-  onSearch,
-  availableFilters = {},
-}) => {
+const AdvancedDashboardFilters = ({ kpis = [], onFiltersChange, onSearch, availableFilters = {} }) => {
   // State
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilters, setActiveFilters] = useState({
@@ -68,9 +53,7 @@ const AdvancedDashboardFilters = ({
       if (value.length >= 2) {
         // Generate suggestions
         const matchedKPIs = kpis.filter(
-          kpi =>
-            kpi.name.toLowerCase().includes(value.toLowerCase()) ||
-            kpi.category.toLowerCase().includes(value.toLowerCase())
+          kpi => kpi.name.toLowerCase().includes(value.toLowerCase()) || kpi.category.toLowerCase().includes(value.toLowerCase()),
         );
 
         setSuggestions(matchedKPIs.slice(0, 5));
@@ -81,7 +64,7 @@ const AdvancedDashboardFilters = ({
 
       onSearch(value);
     },
-    [kpis, onSearch]
+    [kpis, onSearch],
   );
 
   // Handle filter changes
@@ -106,7 +89,7 @@ const AdvancedDashboardFilters = ({
         return updated;
       });
     },
-    [onFiltersChange]
+    [onFiltersChange],
   );
 
   // Clear all filters
@@ -152,7 +135,7 @@ const AdvancedDashboardFilters = ({
         onFiltersChange(saved.filters);
       }
     },
-    [savedFilters, onFiltersChange]
+    [savedFilters, onFiltersChange],
   );
 
   // Delete saved filter
@@ -220,27 +203,16 @@ const AdvancedDashboardFilters = ({
       <Paper sx={{ p: 2, mb: 2 }}>
         <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
           <FormControlLabel
-            control={
-              <Checkbox checked={advancedMode} onChange={e => setAdvancedMode(e.target.checked)} />
-            }
+            control={<Checkbox checked={advancedMode} onChange={e => setAdvancedMode(e.target.checked)} />}
             label="Advanced Mode"
           />
-          <Button
-            startIcon={<FilterListIcon />}
-            size="small"
-            variant={activeFilterCount > 0 ? 'contained' : 'outlined'}
-          >
+          <Button startIcon={<FilterListIcon />} size="small" variant={activeFilterCount > 0 ? 'contained' : 'outlined'}>
             Filters {activeFilterCount > 0 && `(${activeFilterCount})`}
           </Button>
           <Button startIcon={<SaveAsIcon />} size="small" onClick={() => setOpenSaveDialog(true)}>
             Save Filter
           </Button>
-          <Button
-            startIcon={<ClearAllIcon />}
-            size="small"
-            onClick={handleClearFilters}
-            disabled={activeFilterCount === 0}
-          >
+          <Button startIcon={<ClearAllIcon />} size="small" onClick={handleClearFilters} disabled={activeFilterCount === 0}>
             Clear All
           </Button>
         </Stack>
@@ -322,9 +294,7 @@ const AdvancedDashboardFilters = ({
                   }));
                 }}
                 displayEmpty
-                renderValue={selected =>
-                  selected.length === 0 ? 'Select Categories' : `${selected.length} selected`
-                }
+                renderValue={selected => (selected.length === 0 ? 'Select Categories' : `${selected.length} selected`)}
               >
                 {availableFilters.categories?.map(cat => (
                   <MenuItem key={cat} value={cat}>
@@ -349,9 +319,7 @@ const AdvancedDashboardFilters = ({
                   }));
                 }}
                 displayEmpty
-                renderValue={selected =>
-                  selected.length === 0 ? 'Select Status' : `${selected.length} selected`
-                }
+                renderValue={selected => (selected.length === 0 ? 'Select Status' : `${selected.length} selected`)}
               >
                 {availableFilters.statuses?.map(status => (
                   <MenuItem key={status} value={status}>
@@ -376,9 +344,7 @@ const AdvancedDashboardFilters = ({
                   }));
                 }}
                 displayEmpty
-                renderValue={selected =>
-                  selected.length === 0 ? 'Select Trend' : `${selected.length} selected`
-                }
+                renderValue={selected => (selected.length === 0 ? 'Select Trend' : `${selected.length} selected`)}
               >
                 {availableFilters.trends?.map(trend => (
                   <MenuItem key={trend} value={trend}>

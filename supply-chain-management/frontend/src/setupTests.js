@@ -59,10 +59,7 @@ window.matchMedia = jest.fn(matchMediaMock);
 const originalError = console.error;
 beforeAll(() => {
   console.error = (...args) => {
-    if (
-      typeof args[0] === 'string' &&
-      (args[0].includes('Warning: ReactDOM.render') || args[0].includes('Element with id'))
-    ) {
+    if (typeof args[0] === 'string' && (args[0].includes('Warning: ReactDOM.render') || args[0].includes('Element with id'))) {
       return;
     }
     originalError.call(console, ...args);

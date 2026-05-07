@@ -11,31 +11,12 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Card,
-  Row,
-  Col,
-  Table,
-  Statistic,
-  Button,
-  Select,
-  Progress,
-  Alert,
-  Tag,
-  Modal,
-  List,
-  message,
-  Empty,
-  Tooltip,
-  Badge,
-} from 'antd';
+import { Card, Row, Col, Table, Statistic, Button, Select, Progress, Alert, Tag, Modal, List, message, Empty, Tooltip, Badge } from 'antd';
 import {
   AlertOutlined,
   WarningOutlined,
   ExclamationOutlined,
   CheckCircleOutlined,
-  TrendingUpOutlined,
-  Download,
   FileExcelOutlined,
   FilePdfOutlined,
 } from '@ant-design/icons';
@@ -44,13 +25,10 @@ import {
   Scatter,
   BarChart,
   Bar,
-  LineChart,
-  Line,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip as RechartsTooltip,
-  Legend,
   ResponsiveContainer,
   Cell,
 } from 'recharts';
@@ -59,7 +37,7 @@ import dayjs from 'dayjs';
 const RiskDashboard = () => {
   // ===== State Management =====
   const [risks, setRisks] = useState([]);
-  const [riskMetrics, setRiskMetrics] = useState({});
+  const [_riskMetrics, setRiskMetrics] = useState({});
   const [loading, setLoading] = useState(false);
   const [selectedRisk, setSelectedRisk] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
@@ -184,15 +162,15 @@ const RiskDashboard = () => {
     { name: 'منخفض', value: stats.low, fill: '#52c41a' },
   ];
 
-  const riskMatrixData = risks.map(risk => ({
+  const _riskMatrixData = risks.map(risk => ({
     ...risk,
     riskScore: (risk.probability * risk.impact) / 100,
   }));
 
-  const trendData = risks
+  const _trendData = risks
     .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
     .slice(-10)
-    .map((r, idx) => ({
+    .map((r, _idx) => ({
       month: dayjs(r.createdAt).format('MMM'),
       riskIndex: (r.probability * r.impact) / 100,
       id: r.id,
@@ -331,13 +309,7 @@ const RiskDashboard = () => {
           <Col xs={24} md={18}>
             <Progress
               percent={100 - stats.riskScore}
-              status={
-                stats.overallHealth === 'Good'
-                  ? 'success'
-                  : stats.overallHealth === 'Fair'
-                    ? 'normal'
-                    : 'exception'
-              }
+              status={stats.overallHealth === 'Good' ? 'success' : stats.overallHealth === 'Fair' ? 'normal' : 'exception'}
               format={() => `درجة المخاطر: ${stats.riskScore.toFixed(1)}/100`}
               strokeColor={{
                 '0%': '#52c41a',
@@ -353,42 +325,22 @@ const RiskDashboard = () => {
       <Row gutter={16} style={{ marginBottom: 24 }}>
         <Col xs={24} sm={12} md={6}>
           <Card>
-            <Statistic
-              title="مخاطر حرجة"
-              value={stats.critical}
-              prefix={<AlertOutlined />}
-              valueStyle={{ color: '#ff4d4f' }}
-            />
+            <Statistic title="مخاطر حرجة" value={stats.critical} prefix={<AlertOutlined />} valueStyle={{ color: '#ff4d4f' }} />
           </Card>
         </Col>
         <Col xs={24} sm={12} md={6}>
           <Card>
-            <Statistic
-              title="مخاطر عالية"
-              value={stats.high}
-              prefix={<ExclamationOutlined />}
-              valueStyle={{ color: '#fa8c16' }}
-            />
+            <Statistic title="مخاطر عالية" value={stats.high} prefix={<ExclamationOutlined />} valueStyle={{ color: '#fa8c16' }} />
           </Card>
         </Col>
         <Col xs={24} sm={12} md={6}>
           <Card>
-            <Statistic
-              title="مخاطر متوسطة"
-              value={stats.medium}
-              prefix={<WarningOutlined />}
-              valueStyle={{ color: '#faad14' }}
-            />
+            <Statistic title="مخاطر متوسطة" value={stats.medium} prefix={<WarningOutlined />} valueStyle={{ color: '#faad14' }} />
           </Card>
         </Col>
         <Col xs={24} sm={12} md={6}>
           <Card>
-            <Statistic
-              title="مخاطر منخفضة"
-              value={stats.low}
-              prefix={<CheckCircleOutlined />}
-              valueStyle={{ color: '#52c41a' }}
-            />
+            <Statistic title="مخاطر منخفضة" value={stats.low} prefix={<CheckCircleOutlined />} valueStyle={{ color: '#52c41a' }} />
           </Card>
         </Col>
       </Row>
@@ -499,11 +451,7 @@ const RiskDashboard = () => {
           <Button key="close" onClick={() => setModalVisible(false)}>
             إغلاق
           </Button>,
-          <Button
-            key="mitigate"
-            type="primary"
-            onClick={() => mitigateRisk(selectedRisk?.id, 'apply_controls')}
-          >
+          <Button key="mitigate" type="primary" onClick={() => mitigateRisk(selectedRisk?.id, 'apply_controls')}>
             تطبيق التحكم
           </Button>,
         ]}
@@ -531,8 +479,7 @@ const RiskDashboard = () => {
                   <strong>التأثير:</strong> {selectedRisk.impact}%
                 </p>
                 <p>
-                  <strong>درجة المخاطرة:</strong>{' '}
-                  {((selectedRisk.probability * selectedRisk.impact) / 100).toFixed(2)}
+                  <strong>درجة المخاطرة:</strong> {((selectedRisk.probability * selectedRisk.impact) / 100).toFixed(2)}
                 </p>
               </Col>
             </Row>

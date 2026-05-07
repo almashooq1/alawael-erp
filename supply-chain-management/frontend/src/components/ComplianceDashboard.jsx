@@ -18,7 +18,6 @@ import {
   Table,
   Statistic,
   Button,
-  Select,
   DatePicker,
   Timeline,
   Progress,
@@ -33,7 +32,6 @@ import {
 } from 'antd';
 import {
   CheckCircleOutlined,
-  CloseCircleOutlined,
   ExclamationOutlined,
   FileExcelOutlined,
   FilePdfOutlined,
@@ -41,21 +39,7 @@ import {
   CheckOutlined,
   ClockCircleOutlined,
 } from '@ant-design/icons';
-import {
-  BarChart,
-  Bar,
-  LineChart,
-  Line,
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip as RechartsTooltip,
-  Legend,
-  ResponsiveContainer,
-  Cell,
-} from 'recharts';
+import { BarChart, Bar, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
 import dayjs from 'dayjs';
 
 const ComplianceDashboard = () => {
@@ -243,10 +227,7 @@ const ComplianceDashboard = () => {
       dataIndex: 'status',
       key: 'status',
       render: status => (
-        <Badge
-          status={status === 'resolved' ? 'success' : 'processing'}
-          text={status === 'resolved' ? 'محلول' : 'قيد المعالجة'}
-        />
+        <Badge status={status === 'resolved' ? 'success' : 'processing'} text={status === 'resolved' ? 'محلول' : 'قيد المعالجة'} />
       ),
     },
     {
@@ -268,7 +249,7 @@ const ComplianceDashboard = () => {
     },
   ];
 
-  const auditColumns = [
+  const _auditColumns = [
     {
       title: 'التاريخ والوقت',
       dataIndex: 'timestamp',
@@ -333,12 +314,7 @@ const ComplianceDashboard = () => {
         </Col>
         <Col xs={24} sm={12} md={6}>
           <Card>
-            <Statistic
-              title="إجمالي القواعس"
-              value={stats.totalRules}
-              prefix={<CheckOutlined />}
-              valueStyle={{ color: '#1890ff' }}
-            />
+            <Statistic title="إجمالي القواعس" value={stats.totalRules} prefix={<CheckOutlined />} valueStyle={{ color: '#1890ff' }} />
           </Card>
         </Col>
         <Col xs={24} sm={12} md={6}>
@@ -368,33 +344,18 @@ const ComplianceDashboard = () => {
       <Card style={{ marginBottom: 24, background: '#f0f5ff' }}>
         <Row gutter={24}>
           <Col xs={24} md={8}>
-            <Progress
-              type="circle"
-              percent={parseFloat(stats.complianceRate)}
-              format={() => `${stats.complianceRate}%`}
-            />
+            <Progress type="circle" percent={parseFloat(stats.complianceRate)} format={() => `${stats.complianceRate}%`} />
           </Col>
           <Col xs={24} md={16}>
             <Row gutter={16}>
               <Col xs={12} sm={8}>
-                <Statistic
-                  title="قواعد متوافقة"
-                  value={stats.compliantRules}
-                  valueStyle={{ color: '#52c41a' }}
-                />
+                <Statistic title="قواعد متوافقة" value={stats.compliantRules} valueStyle={{ color: '#52c41a' }} />
               </Col>
               <Col xs={12} sm={8}>
-                <Statistic
-                  title="قواعس منتهكة"
-                  value={stats.violatingRules}
-                  valueStyle={{ color: '#ff4d4f' }}
-                />
+                <Statistic title="قواعس منتهكة" value={stats.violatingRules} valueStyle={{ color: '#ff4d4f' }} />
               </Col>
               <Col xs={12} sm={8}>
-                <Statistic
-                  title="آخر تدقيق"
-                  value={stats.lastAuditDate ? dayjs(stats.lastAuditDate).fromNow() : 'لم يتم'}
-                />
+                <Statistic title="آخر تدقيق" value={stats.lastAuditDate ? dayjs(stats.lastAuditDate).fromNow() : 'لم يتم'} />
               </Col>
             </Row>
           </Col>
@@ -405,20 +366,10 @@ const ComplianceDashboard = () => {
       <Card style={{ marginBottom: 24 }}>
         <Row gutter={16} align="middle">
           <Col xs={24} sm={12} md={8}>
-            <DatePicker.RangePicker
-              value={dateRange}
-              onChange={dates => setDateRange(dates)}
-              style={{ width: '100%' }}
-            />
+            <DatePicker.RangePicker value={dateRange} onChange={dates => setDateRange(dates)} style={{ width: '100%' }} />
           </Col>
           <Col xs={24} sm={12} md={8}>
-            <Button
-              type="primary"
-              block
-              onClick={fetchComplianceData}
-              loading={loading}
-              icon={<ReloadOutlined />}
-            >
+            <Button type="primary" block onClick={fetchComplianceData} loading={loading} icon={<ReloadOutlined />}>
               تحديث البيانات
             </Button>
           </Col>
@@ -450,22 +401,8 @@ const ComplianceDashboard = () => {
                 <XAxis dataKey="date" />
                 <YAxis />
                 <RechartsTooltip />
-                <Area
-                  type="monotone"
-                  dataKey="compliant"
-                  stroke="#52c41a"
-                  fillOpacity={1}
-                  fill="url(#colorCompliant)"
-                  name="متوافقة"
-                />
-                <Area
-                  type="monotone"
-                  dataKey="violating"
-                  stroke="#ff4d4f"
-                  fillOpacity={1}
-                  fill="url(#colorViolating)"
-                  name="منتهكة"
-                />
+                <Area type="monotone" dataKey="compliant" stroke="#52c41a" fillOpacity={1} fill="url(#colorCompliant)" name="متوافقة" />
+                <Area type="monotone" dataKey="violating" stroke="#ff4d4f" fillOpacity={1} fill="url(#colorViolating)" name="منتهكة" />
               </AreaChart>
             </ResponsiveContainer>
           </Card>
@@ -528,8 +465,7 @@ const ComplianceDashboard = () => {
                   children: (
                     <div>
                       <p>
-                        <strong>{event.eventType}</strong> -{' '}
-                        {dayjs(event.timestamp).format('HH:mm DD/MM')}
+                        <strong>{event.eventType}</strong> - {dayjs(event.timestamp).format('HH:mm DD/MM')}
                       </p>
                       <p>{event.description}</p>
                       <small>{event.userId}</small>
@@ -552,11 +488,7 @@ const ComplianceDashboard = () => {
             إغلاق
           </Button>,
           selectedViolation?.status === 'pending' && (
-            <Button
-              key="resolve"
-              type="primary"
-              onClick={() => resolveViolation(selectedViolation.id)}
-            >
+            <Button key="resolve" type="primary" onClick={() => resolveViolation(selectedViolation.id)}>
               حل المخالفة
             </Button>
           ),
@@ -581,8 +513,7 @@ const ComplianceDashboard = () => {
                       <strong>الفئة:</strong> {selectedViolation.category}
                     </p>
                     <p>
-                      <strong>تاريخ الاكتشاف:</strong>{' '}
-                      {dayjs(selectedViolation.createdAt).format('DD/MM/YYYY HH:mm')}
+                      <strong>تاريخ الاكتشاف:</strong> {dayjs(selectedViolation.createdAt).format('DD/MM/YYYY HH:mm')}
                     </p>
                   </div>
                 ),

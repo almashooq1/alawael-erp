@@ -8,7 +8,7 @@ describe('Modal Component', () => {
     const { container } = render(
       <Modal open={false} onClose={jest.fn()}>
         <div>Modal Content</div>
-      </Modal>
+      </Modal>,
     );
     expect(container.firstChild).toBeNull();
   });
@@ -17,7 +17,7 @@ describe('Modal Component', () => {
     render(
       <Modal open={true} onClose={jest.fn()}>
         <div>Modal Content</div>
-      </Modal>
+      </Modal>,
     );
     expect(screen.getByText('Modal Content')).toBeInTheDocument();
   });
@@ -27,7 +27,7 @@ describe('Modal Component', () => {
       <Modal open={true} onClose={jest.fn()}>
         <h1>Test Heading</h1>
         <p>Test paragraph</p>
-      </Modal>
+      </Modal>,
     );
     expect(screen.getByText('Test Heading')).toBeInTheDocument();
     expect(screen.getByText('Test paragraph')).toBeInTheDocument();
@@ -38,7 +38,7 @@ describe('Modal Component', () => {
     render(
       <Modal open={true} onClose={mockOnClose}>
         <div>Modal Content</div>
-      </Modal>
+      </Modal>,
     );
 
     const closeButton = screen.getByRole('button');
@@ -51,7 +51,7 @@ describe('Modal Component', () => {
     const { container } = render(
       <Modal open={true} onClose={jest.fn()}>
         <div>Modal Content</div>
-      </Modal>
+      </Modal>,
     );
 
     const backdrop = container.querySelector('div[style*="background: rgba"]');
@@ -66,7 +66,7 @@ describe('Modal Component', () => {
     render(
       <Modal open={true} onClose={jest.fn()}>
         <div>Modal Content</div>
-      </Modal>
+      </Modal>,
     );
     const closeButton = screen.getByRole('button');
     expect(closeButton.textContent).toBe('×');
@@ -76,7 +76,7 @@ describe('Modal Component', () => {
     const { container } = render(
       <Modal open={true} onClose={jest.fn()}>
         <div>Modal Content</div>
-      </Modal>
+      </Modal>,
     );
 
     const backdrop = container.querySelector('div[style*="fixed"]');
@@ -92,7 +92,7 @@ describe('Modal Component', () => {
     const { container } = render(
       <Modal open={true} onClose={jest.fn()}>
         <div>Modal Content</div>
-      </Modal>
+      </Modal>,
     );
 
     const backdrop = container.querySelector('div[style*="display: flex"]');
@@ -106,7 +106,7 @@ describe('Modal Component', () => {
     const { rerender, container } = render(
       <Modal open={false} onClose={jest.fn()}>
         <div>Modal Content</div>
-      </Modal>
+      </Modal>,
     );
 
     expect(container.firstChild).toBeNull();
@@ -114,7 +114,7 @@ describe('Modal Component', () => {
     rerender(
       <Modal open={true} onClose={jest.fn()}>
         <div>Modal Content</div>
-      </Modal>
+      </Modal>,
     );
 
     expect(screen.getByText('Modal Content')).toBeInTheDocument();
@@ -124,7 +124,7 @@ describe('Modal Component', () => {
     const { container } = render(
       <Modal open={true} onClose={jest.fn()}>
         <div>Modal Content</div>
-      </Modal>
+      </Modal>,
     );
 
     const backdrop = container.querySelector('div[style*="fixed"]');

@@ -59,9 +59,7 @@ function InventoryList({ user, notify }) {
 
   // تصفية المخزون حسب البحث
   const filteredInventory = inventory.filter(
-    i =>
-      i.product?.name?.toLowerCase().includes(search.toLowerCase()) ||
-      i.location?.toLowerCase().includes(search.toLowerCase())
+    i => i.product?.name?.toLowerCase().includes(search.toLowerCase()) || i.location?.toLowerCase().includes(search.toLowerCase()),
   );
 
   const handleExport = () => {
@@ -73,7 +71,7 @@ function InventoryList({ user, notify }) {
         { label: 'الموقع', value: 'location' },
         { label: 'آخر تحديث', value: row => new Date(row.lastUpdated).toLocaleString() },
       ],
-      'المخزون.xlsx'
+      'المخزون.xlsx',
     );
   };
   const handleExportPDF = () => {
@@ -85,7 +83,7 @@ function InventoryList({ user, notify }) {
         { label: 'الموقع', value: 'location' },
         { label: 'آخر تحديث', value: row => new Date(row.lastUpdated).toLocaleString() },
       ],
-      'المخزون.pdf'
+      'المخزون.pdf',
     );
   };
 
@@ -94,13 +92,7 @@ function InventoryList({ user, notify }) {
       return (
       <div style={{ marginBottom: 32 }}>
         <h2>المخزون</h2>
-        <input
-          type="text"
-          placeholder="بحث..."
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          style={{ marginBottom: 8 }}
-        />
+        <input type="text" placeholder="بحث..." value={search} onChange={e => setSearch(e.target.value)} style={{ marginBottom: 8 }} />
         <button onClick={handleExport}>تصدير Excel</button>{' '}
         <button onClick={() => exportToPDF(filteredInventory, 'المخزون')}>تصدير PDF</button>
         <button onClick={() => setModalOpen(true)} style={{ float: 'left' }}>
@@ -121,17 +113,11 @@ function InventoryList({ user, notify }) {
             notify={notify}
           />
         </Modal>
-        {error && (
-          <div style={{ textAlign: 'center', margin: 16, color: '#d32f2f', fontWeight: 'bold' }}>
-            {error}
-          </div>
-        )}
+        {error && <div style={{ textAlign: 'center', margin: 16, color: '#d32f2f', fontWeight: 'bold' }}>{error}</div>}
         {loading ? (
           <div style={{ textAlign: 'center', margin: 16 }}>جاري التحميل...</div>
         ) : !error && filteredInventory.length === 0 ? (
-          <div style={{ textAlign: 'center', margin: 16, color: '#888' }}>
-            لا يوجد بيانات مخزون لعرضها
-          </div>
+          <div style={{ textAlign: 'center', margin: 16, color: '#888' }}>لا يوجد بيانات مخزون لعرضها</div>
         ) : (
           !error && (
             <table border="1" cellPadding="6" style={{ width: '100%', marginTop: 12 }}>
@@ -150,8 +136,7 @@ function InventoryList({ user, notify }) {
                     <td>{i.quantity}</td>
                     <td>{i.location}</td>
                     <td>
-                      <button onClick={() => handleEdit(i)}>تعديل</button>{' '}
-                      <button onClick={() => handleDelete(i._id)}>حذف</button>
+                      <button onClick={() => handleEdit(i)}>تعديل</button> <button onClick={() => handleDelete(i._id)}>حذف</button>
                     </td>
                   </tr>
                 ))}
@@ -161,15 +146,7 @@ function InventoryList({ user, notify }) {
         )}
       </div>
       <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
-        {editInventory && (
-          <InventoryForm
-            initialData={editInventory}
-            onAdd={handleEditSave}
-            editMode
-            user={user}
-            notify={notify}
-          />
-        )}
+        {editInventory && <InventoryForm initialData={editInventory} onAdd={handleEditSave} editMode user={user} notify={notify} />}
       </Modal>
     </div>
   );

@@ -11,35 +11,11 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Card,
-  Row,
-  Col,
-  Table,
-  Statistic,
-  Button,
-  Select,
-  DatePicker,
-  Tabs,
-  message,
-  Empty,
-  Collapse,
-  Tooltip,
-  Progress,
-} from 'antd';
-import {
-  ArrowUpOutlined,
-  ArrowDownOutlined,
-  DollarOutlined,
-  CalculatorOutlined,
-  FileExcelOutlined,
-  FilePdfOutlined,
-  TrendingUpOutlined,
-} from '@ant-design/icons';
+import { Card, Row, Col, Table, Statistic, Button, Select, DatePicker, Tabs, message, Empty, Collapse, Progress } from 'antd';
+import { ArrowUpOutlined, ArrowDownOutlined, FileExcelOutlined, FilePdfOutlined } from '@ant-design/icons';
 import {
   AreaChart,
   Area,
-  BarChart,
   Bar,
   LineChart,
   Line,
@@ -276,12 +252,7 @@ const CashFlowDashboard = () => {
         </Col>
         <Col xs={24} sm={12} md={6}>
           <Card>
-            <Statistic
-              title="الرصيد الختامي"
-              value={stats.endingBalance}
-              prefix="ر.س"
-              valueStyle={{ color: '#1890ff' }}
-            />
+            <Statistic title="الرصيد الختامي" value={stats.endingBalance} prefix="ر.س" valueStyle={{ color: '#1890ff' }} />
           </Card>
         </Col>
       </Row>
@@ -290,12 +261,7 @@ const CashFlowDashboard = () => {
       <Card style={{ marginBottom: 24 }}>
         <Row gutter={16} align="middle">
           <Col xs={24} sm={12} md={8}>
-            <DatePicker.RangePicker
-              value={dateRange}
-              onChange={dates => setDateRange(dates)}
-              style={{ width: '100%' }}
-              className="rtl"
-            />
+            <DatePicker.RangePicker value={dateRange} onChange={dates => setDateRange(dates)} style={{ width: '100%' }} className="rtl" />
           </Col>
           <Col xs={24} sm={12} md={8}>
             <Select
@@ -344,20 +310,8 @@ const CashFlowDashboard = () => {
                         <XAxis dataKey="date" />
                         <YAxis />
                         <RechartsTooltip />
-                        <Area
-                          type="monotone"
-                          dataKey="inflow"
-                          stroke="#52c41a"
-                          fillOpacity={1}
-                          fill="url(#colorInflow)"
-                        />
-                        <Area
-                          type="monotone"
-                          dataKey="outflow"
-                          stroke="#ff4d4f"
-                          fillOpacity={1}
-                          fill="url(#colorOutflow)"
-                        />
+                        <Area type="monotone" dataKey="inflow" stroke="#52c41a" fillOpacity={1} fill="url(#colorInflow)" />
+                        <Area type="monotone" dataKey="outflow" stroke="#ff4d4f" fillOpacity={1} fill="url(#colorOutflow)" />
                       </AreaChart>
                     </ResponsiveContainer>
                   </Card>
@@ -392,13 +346,7 @@ const CashFlowDashboard = () => {
                     <YAxis />
                     <RechartsTooltip />
                     <Legend />
-                    <Line
-                      type="monotone"
-                      dataKey="forecast"
-                      stroke="#1890ff"
-                      strokeWidth={2}
-                      dot={{ r: 4 }}
-                    />
+                    <Line type="monotone" dataKey="forecast" stroke="#1890ff" strokeWidth={2} dot={{ r: 4 }} />
                   </LineChart>
                 </ResponsiveContainer>
               </Card>
@@ -412,11 +360,7 @@ const CashFlowDashboard = () => {
                 title="بيانات التدفق النقدي اليومي"
                 extra={
                   <div>
-                    <Button
-                      icon={<FileExcelOutlined />}
-                      onClick={() => exportData('excel')}
-                      style={{ marginRight: 8 }}
-                    >
+                    <Button icon={<FileExcelOutlined />} onClick={() => exportData('excel')} style={{ marginRight: 8 }}>
                       Excel
                     </Button>
                     <Button icon={<FilePdfOutlined />} onClick={() => exportData('pdf')}>
@@ -457,20 +401,14 @@ const CashFlowDashboard = () => {
                   <Row gutter={16}>
                     <Col xs={24} md={12}>
                       <p>
-                        <strong>متوسط التدفق اليومي:</strong> ر.س{' '}
-                        {Number(stats.averageDailyFlow).toLocaleString('ar-SA')}
+                        <strong>متوسط التدفق اليومي:</strong> ر.س {Number(stats.averageDailyFlow).toLocaleString('ar-SA')}
                       </p>
                       <p>
-                        <strong>أقل رصيد:</strong> ر.س{' '}
-                        {Number(stats.minimumThreshold).toLocaleString('ar-SA')}
+                        <strong>أقل رصيد:</strong> ر.س {Number(stats.minimumThreshold).toLocaleString('ar-SA')}
                       </p>
                     </Col>
                     <Col xs={24} md={12}>
-                      <Progress
-                        type="circle"
-                        percent={Math.min(100, (stats.endingBalance / 100000) * 100)}
-                        format={() => 'السيولة'}
-                      />
+                      <Progress type="circle" percent={Math.min(100, (stats.endingBalance / 100000) * 100)} format={() => 'السيولة'} />
                     </Col>
                   </Row>
                 </div>

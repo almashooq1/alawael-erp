@@ -12,7 +12,7 @@ export default function ShipmentForm({ onAdd, initialData, editMode, user, notif
       status: '',
       trackingNumber: '',
       notes: '',
-    }
+    },
   );
   const [loading, setLoading] = useState(false);
   const [orders, setOrders] = useState([]);
@@ -70,10 +70,7 @@ export default function ShipmentForm({ onAdd, initialData, editMode, user, notif
   if (user && !(user.role === 'admin' || user.role === 'manager')) return null;
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      style={{ marginBottom: 24, border: '1px solid #ccc', padding: 16, borderRadius: 8 }}
-    >
+    <form onSubmit={handleSubmit} style={{ marginBottom: 24, border: '1px solid #ccc', padding: 16, borderRadius: 8 }}>
       <h3>إضافة شحنة جديدة</h3>
       <div>
         <label>
@@ -91,36 +88,19 @@ export default function ShipmentForm({ onAdd, initialData, editMode, user, notif
       <div>
         <label>
           تاريخ الشحن:
-          <input
-            type="date"
-            name="shippedDate"
-            value={shipment.shippedDate}
-            onChange={handleChange}
-            required
-          />
+          <input type="date" name="shippedDate" value={shipment.shippedDate} onChange={handleChange} required />
         </label>
       </div>
       <div>
         <label>
           تاريخ التسليم:
-          <input
-            type="date"
-            name="deliveredDate"
-            value={shipment.deliveredDate}
-            onChange={handleChange}
-          />
+          <input type="date" name="deliveredDate" value={shipment.deliveredDate} onChange={handleChange} />
         </label>
       </div>
       <div>
         <label>
           الحالة:
-          <input
-            name="status"
-            value={shipment.status}
-            onChange={handleChange}
-            placeholder="مثال: تم الشحن، تم التسليم"
-            required
-          />
+          <input name="status" value={shipment.status} onChange={handleChange} placeholder="مثال: تم الشحن، تم التسليم" required />
         </label>
       </div>
       <div>
@@ -142,13 +122,7 @@ export default function ShipmentForm({ onAdd, initialData, editMode, user, notif
         </label>
       </div>
       <button type="submit" disabled={loading}>
-        {loading
-          ? editMode
-            ? 'جاري التعديل...'
-            : 'جاري الإضافة...'
-          : editMode
-            ? 'تعديل الشحنة'
-            : 'إضافة شحنة جديدة'}
+        {loading ? (editMode ? 'جاري التعديل...' : 'جاري الإضافة...') : editMode ? 'تعديل الشحنة' : 'إضافة شحنة جديدة'}
       </button>
       <div>
         <label>مرفقات الشحنة:</label>
@@ -163,9 +137,7 @@ export default function ShipmentForm({ onAdd, initialData, editMode, user, notif
               ...f,
               attachments: files.map(fx => fx.filePath || fx.url || fx.attachmentPath || ''),
             }));
-            setAttachmentPreviews(
-              files.map(fx => fx.filePath || fx.url || fx.attachmentPath || '')
-            );
+            setAttachmentPreviews(files.map(fx => fx.filePath || fx.url || fx.attachmentPath || ''));
           }}
           onError={err => notify && notify('فشل رفع المرفقات', 'error')}
         />

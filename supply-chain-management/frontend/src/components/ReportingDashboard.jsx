@@ -11,41 +11,13 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Card,
-  Row,
-  Col,
-  Table,
-  Statistic,
-  Button,
-  Select,
-  DatePicker,
-  Tabs,
-  message,
-  Empty,
-  Space,
-  Tooltip,
-  Badge,
-  Segmented,
-} from 'antd';
-import {
-  DollarOutlined,
-  PercentageOutlined,
-  ArrowUpOutlined,
-  ArrowDownOutlined,
-  FileExcelOutlined,
-  FilePdfOutlined,
-  DownloadOutlined,
-  PrinterOutlined,
-} from '@ant-design/icons';
+import { Card, Row, Col, Table, Statistic, Button, Select, DatePicker, Tabs, message, Empty, Space, Badge } from 'antd';
+import { ArrowUpOutlined, ArrowDownOutlined, FileExcelOutlined, FilePdfOutlined, PrinterOutlined } from '@ant-design/icons';
 import {
   BarChart,
   Bar,
   LineChart,
   Line,
-  PieChart,
-  Pie,
-  Cell,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -260,22 +232,12 @@ const ReportingDashboard = () => {
       <Row gutter={16} style={{ marginBottom: 24 }}>
         <Col xs={24} sm={12} md={6}>
           <Card>
-            <Statistic
-              title="إجمالي الإيرادات"
-              value={metrics.totalRevenue}
-              prefix="ر.س"
-              valueStyle={{ color: '#52c41a' }}
-            />
+            <Statistic title="إجمالي الإيرادات" value={metrics.totalRevenue} prefix="ر.س" valueStyle={{ color: '#52c41a' }} />
           </Card>
         </Col>
         <Col xs={24} sm={12} md={6}>
           <Card>
-            <Statistic
-              title="إجمالي النفقات"
-              value={metrics.totalExpenses}
-              prefix="ر.س"
-              valueStyle={{ color: '#ff4d4f' }}
-            />
+            <Statistic title="إجمالي النفقات" value={metrics.totalExpenses} prefix="ر.س" valueStyle={{ color: '#ff4d4f' }} />
           </Card>
         </Col>
         <Col xs={24} sm={12} md={6}>
@@ -292,12 +254,7 @@ const ReportingDashboard = () => {
         </Col>
         <Col xs={24} sm={12} md={6}>
           <Card>
-            <Statistic
-              title="الهامش الصافي"
-              value={metrics.netMargin}
-              suffix="%"
-              valueStyle={{ color: '#1890ff' }}
-            />
+            <Statistic title="الهامش الصافي" value={metrics.netMargin} suffix="%" valueStyle={{ color: '#1890ff' }} />
           </Card>
         </Col>
       </Row>
@@ -336,11 +293,7 @@ const ReportingDashboard = () => {
             />
           </Col>
           <Col xs={24} sm={12} md={6}>
-            <DatePicker.RangePicker
-              value={dateRange}
-              onChange={dates => setDateRange(dates)}
-              style={{ width: '100%' }}
-            />
+            <DatePicker.RangePicker value={dateRange} onChange={dates => setDateRange(dates)} style={{ width: '100%' }} />
           </Col>
           <Col xs={24} sm={12} md={6}>
             <Button type="primary" block onClick={fetchReports} loading={loading}>
@@ -354,22 +307,12 @@ const ReportingDashboard = () => {
       <Card style={{ marginBottom: 24, background: '#f0f5ff' }}>
         <Row gutter={16} align="middle">
           <Col xs={12} sm={8} md={4}>
-            <Button
-              icon={<FileExcelOutlined />}
-              onClick={() => generateReport('excel')}
-              loading={loading}
-              block
-            >
+            <Button icon={<FileExcelOutlined />} onClick={() => generateReport('excel')} loading={loading} block>
               Excel
             </Button>
           </Col>
           <Col xs={12} sm={8} md={4}>
-            <Button
-              icon={<FilePdfOutlined />}
-              onClick={() => generateReport('pdf')}
-              loading={loading}
-              block
-            >
+            <Button icon={<FilePdfOutlined />} onClick={() => generateReport('pdf')} loading={loading} block>
               PDF
             </Button>
           </Col>
@@ -446,13 +389,7 @@ const ReportingDashboard = () => {
                 {reports.length === 0 && !loading ? (
                   <Empty description="لا توجد بيانات" />
                 ) : (
-                  <Table
-                    columns={reportColumns}
-                    dataSource={reports}
-                    loading={loading}
-                    rowKey="id"
-                    pagination={false}
-                  />
+                  <Table columns={reportColumns} dataSource={reports} loading={loading} rowKey="id" pagination={false} />
                 )}
               </Card>
             ),

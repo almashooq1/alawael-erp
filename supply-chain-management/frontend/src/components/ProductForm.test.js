@@ -50,9 +50,7 @@ describe('ProductForm Component', () => {
 
   test('supports edit mode with initial data', () => {
     const initialData = { name: 'Existing Product', price: 50 };
-    const { container } = render(
-      <ProductForm onSubmit={jest.fn()} initialData={initialData} editMode={true} />
-    );
+    const { container } = render(<ProductForm onSubmit={jest.fn()} initialData={initialData} editMode={true} />);
     expect(container).toBeInTheDocument();
   });
 

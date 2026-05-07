@@ -19,9 +19,7 @@ function OrderList({ user, notify }) {
     setError('');
     apiClient
       .get('/api/orders')
-      .then(res =>
-        setOrders(res.data.data || res.data.orders || (Array.isArray(res.data) ? res.data : []))
-      )
+      .then(res => setOrders(res.data.data || res.data.orders || (Array.isArray(res.data) ? res.data : [])))
       .catch(() => setError('حدث خطأ أثناء تحميل الطلبات'))
       .finally(() => setLoading(false));
   };
@@ -65,7 +63,7 @@ function OrderList({ user, notify }) {
         o =>
           o.supplier?.name?.toLowerCase().includes(search.toLowerCase()) ||
           o.status?.toLowerCase().includes(search.toLowerCase()) ||
-          o.products?.some(p => p.product?.name?.toLowerCase().includes(search.toLowerCase()))
+          o.products?.some(p => p.product?.name?.toLowerCase().includes(search.toLowerCase())),
       )
     : [];
 
@@ -85,11 +83,10 @@ function OrderList({ user, notify }) {
         },
         {
           label: 'المنتجات',
-          value: row =>
-            (row.products || []).map(p => (p.product?.name || '') + ' × ' + p.quantity).join(', '),
+          value: row => (row.products || []).map(p => (p.product?.name || '') + ' × ' + p.quantity).join(', '),
         },
       ],
-      'الطلبات.xlsx'
+      'الطلبات.xlsx',
     );
   };
   const handleExportPDF = () => {
@@ -108,11 +105,10 @@ function OrderList({ user, notify }) {
         },
         {
           label: 'المنتجات',
-          value: row =>
-            (row.products || []).map(p => (p.product?.name || '') + ' × ' + p.quantity).join(', '),
+          value: row => (row.products || []).map(p => (p.product?.name || '') + ' × ' + p.quantity).join(', '),
         },
       ],
-      'الطلبات.pdf'
+      'الطلبات.pdf',
     );
   };
 
@@ -133,14 +129,8 @@ function OrderList({ user, notify }) {
         onChange={e => setSearch(e.target.value)}
         style={{ marginBottom: 12, padding: 6, width: 260 }}
       />
-      {(user.role === 'admin' || user.role === 'manager') && (
-        <OrderForm onAdd={fetchOrders} user={user} notify={notify} />
-      )}
-      {error && (
-        <div style={{ textAlign: 'center', margin: 16, color: '#d32f2f', fontWeight: 'bold' }}>
-          {error}
-        </div>
-      )}
+      {(user.role === 'admin' || user.role === 'manager') && <OrderForm onAdd={fetchOrders} user={user} notify={notify} />}
+      {error && <div style={{ textAlign: 'center', margin: 16, color: '#d32f2f', fontWeight: 'bold' }}>{error}</div>}
       {loading ? (
         <div style={{ textAlign: 'center', margin: 16 }}>جاري التحميل...</div>
       ) : !error && filteredOrders.length === 0 ? (
@@ -193,15 +183,7 @@ function OrderList({ user, notify }) {
         )
       )}
       <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
-        {editOrder && (
-          <OrderForm
-            initialData={editOrder}
-            onAdd={handleEditSave}
-            editMode
-            user={user}
-            notify={notify}
-          />
-        )}
+        {editOrder && <OrderForm initialData={editOrder} onAdd={handleEditSave} editMode user={user} notify={notify} />}
       </Modal>
     </div>
   );

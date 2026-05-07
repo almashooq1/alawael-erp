@@ -43,14 +43,10 @@ export default function ChangeLogViewer({ entity, entityId }) {
               <td>{log.user || '-'}</td>
               <td>{log.action === 'update' ? 'تعديل' : 'حذف'}</td>
               <td>
-                <pre style={{ maxWidth: 200, whiteSpace: 'pre-wrap' }}>
-                  {JSON.stringify(log.before, null, 2)}
-                </pre>
+                <pre style={{ maxWidth: 200, whiteSpace: 'pre-wrap' }}>{JSON.stringify(log.before, null, 2)}</pre>
               </td>
               <td>
-                <pre style={{ maxWidth: 200, whiteSpace: 'pre-wrap' }}>
-                  {log.after ? JSON.stringify(log.after, null, 2) : '-'}
-                </pre>
+                <pre style={{ maxWidth: 200, whiteSpace: 'pre-wrap' }}>{log.after ? JSON.stringify(log.after, null, 2) : '-'}</pre>
               </td>
             </tr>
           ))}

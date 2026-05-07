@@ -35,18 +35,14 @@ const PolicyApprovals = () => {
       const allPolicies = response.data.data || response.data;
 
       // Filter policies that need approval
-      const approvalPolicies = allPolicies.filter(
-        p => p.status === 'PENDING_APPROVAL' || p.approvals?.some(a => a.status === 'PENDING')
-      );
+      const approvalPolicies = allPolicies.filter(p => p.status === 'PENDING_APPROVAL' || p.approvals?.some(a => a.status === 'PENDING'));
 
       setPolicies(approvalPolicies);
 
       // Calculate stats
       const pending = approvalPolicies.filter(p => p.status === 'PENDING_APPROVAL').length;
       const approved = approvalPolicies.filter(p => p.status === 'APPROVED').length;
-      const rejected = approvalPolicies.filter(p =>
-        p.approvals?.some(a => a.status === 'REJECTED')
-      ).length;
+      const rejected = approvalPolicies.filter(p => p.approvals?.some(a => a.status === 'REJECTED')).length;
 
       setStats({ pending, approved, rejected });
     } catch (error) {
@@ -173,19 +169,14 @@ const PolicyApprovals = () => {
                 return (
                   <div key={policy.policyId} className={`approval-item status-${status}`}>
                     {/* Header */}
-                    <div
-                      className="approval-header"
-                      onClick={() => setExpandedPolicy(isExpanded ? null : policy.policyId)}
-                    >
+                    <div className="approval-header" onClick={() => setExpandedPolicy(isExpanded ? null : policy.policyId)}>
                       <div className="header-content">
                         <div className="policy-info">
                           <h3>{policy.policyName}</h3>
                           <p className="policy-type">{policy.policyType}</p>
                         </div>
                         <div className="approval-status">
-                          <span className={`status-badge status-${status}`}>
-                            {getApprovalStatusLabel(policy.approvals)}
-                          </span>
+                          <span className={`status-badge status-${status}`}>{getApprovalStatusLabel(policy.approvals)}</span>
                         </div>
                       </div>
                       <div className="expand-icon">{isExpanded ? '▼' : '▶'}</div>
@@ -201,12 +192,10 @@ const PolicyApprovals = () => {
                             <strong>الوصف:</strong> {policy.description}
                           </p>
                           <p>
-                            <strong>تاريخ البدء:</strong>{' '}
-                            {new Date(policy.effectiveDate).toLocaleDateString('ar')}
+                            <strong>تاريخ البدء:</strong> {new Date(policy.effectiveDate).toLocaleDateString('ar')}
                           </p>
                           <p>
-                            <strong>الأقسام المعنية:</strong>{' '}
-                            {policy.applicableDepartments?.join(', ') || 'جميع الأقسام'}
+                            <strong>الأقسام المعنية:</strong> {policy.applicableDepartments?.join(', ') || 'جميع الأقسام'}
                           </p>
                         </div>
 
@@ -220,22 +209,13 @@ const PolicyApprovals = () => {
                                 <div className="approvers-list">
                                   {approvers.length > 0 ? (
                                     approvers.map((app, idx) => (
-                                      <div
-                                        key={idx}
-                                        className={`approver-item status-${app.status?.toLowerCase()}`}
-                                      >
+                                      <div key={idx} className={`approver-item status-${app.status?.toLowerCase()}`}>
                                         <span className="approval-badge">{app.status}</span>
-                                        <span className="approver-name">
-                                          {app.approverName || 'غير محدد'}
-                                        </span>
+                                        <span className="approver-name">{app.approverName || 'غير محدد'}</span>
                                         {app.approvalDate && (
-                                          <span className="approval-date">
-                                            {new Date(app.approvalDate).toLocaleDateString('ar')}
-                                          </span>
+                                          <span className="approval-date">{new Date(app.approvalDate).toLocaleDateString('ar')}</span>
                                         )}
-                                        {app.comments && (
-                                          <p className="approval-comments">{app.comments}</p>
-                                        )}
+                                        {app.comments && <p className="approval-comments">{app.comments}</p>}
                                       </div>
                                     ))
                                   ) : (
@@ -250,16 +230,10 @@ const PolicyApprovals = () => {
                         {/* Action Buttons */}
                         {status === 'pending' || status === 'in-progress' ? (
                           <div className="action-buttons">
-                            <button
-                              className="btn btn-approve"
-                              onClick={() => handleApprovalClick(policy, 'approve')}
-                            >
+                            <button className="btn btn-approve" onClick={() => handleApprovalClick(policy, 'approve')}>
                               ✓ الموافقة
                             </button>
-                            <button
-                              className="btn btn-reject"
-                              onClick={() => handleApprovalClick(policy, 'reject')}
-                            >
+                            <button className="btn btn-reject" onClick={() => handleApprovalClick(policy, 'reject')}>
                               ✕ الرفض
                             </button>
                           </div>
@@ -314,11 +288,7 @@ const PolicyApprovals = () => {
                   onClick={handleSubmitApproval}
                   disabled={loading}
                 >
-                  {loading
-                    ? 'جاري...'
-                    : approvalAction === 'approve'
-                      ? 'تأكيد الموافقة'
-                      : 'تأكيد الرفض'}
+                  {loading ? 'جاري...' : approvalAction === 'approve' ? 'تأكيد الموافقة' : 'تأكيد الرفض'}
                 </button>
               </div>
             </div>

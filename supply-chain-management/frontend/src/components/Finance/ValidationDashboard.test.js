@@ -473,9 +473,9 @@ describe('ValidationDashboard Component', () => {
                 resolve({
                   data: { data: mockViolations },
                 }),
-              100
-            )
-          )
+              100,
+            ),
+          ),
       );
       const { container } = render(<ValidationDashboard />);
       // Check for loading indicator

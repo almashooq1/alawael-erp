@@ -9,7 +9,7 @@ jest.mock(
   './Modal',
   () =>
     ({ open, children }) =>
-      open ? <div>{children}</div> : null
+      open ? <div>{children}</div> : null,
 );
 jest.mock('./ShipmentForm', () => () => <div>Form</div>);
 

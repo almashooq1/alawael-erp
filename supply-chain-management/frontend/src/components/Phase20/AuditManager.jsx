@@ -27,16 +27,9 @@ const AuditManager = () => {
     recommendations: '',
   });
 
-  const auditTypes = [
-    'Internal Audit',
-    'External Audit',
-    'Compliance Audit',
-    'Financial Audit',
-    'Operational Audit',
-    'IT Security Audit',
-  ];
+  const auditTypes = ['Internal Audit', 'External Audit', 'Compliance Audit', 'Financial Audit', 'Operational Audit', 'IT Security Audit'];
 
-  const auditStatuses = ['planned', 'scheduled', 'in-progress', 'completed', 'reported'];
+  const _auditStatuses = ['planned', 'scheduled', 'in-progress', 'completed', 'reported'];
 
   const handleCreateAudit = async () => {
     if (!newAudit.name || !newAudit.scope || !newAudit.objectives) {
@@ -98,9 +91,7 @@ const AuditManager = () => {
       });
 
       if (response.ok) {
-        const updated = audits.map(a =>
-          a.id === auditId ? { ...a, status: 'completed', rating: resultForm.rating } : a
-        );
+        const updated = audits.map(a => (a.id === auditId ? { ...a, status: 'completed', rating: resultForm.rating } : a));
         setAudits(updated);
         setSelectedAudit(null);
         setResultForm({ rating: 'compliant', recommendations: '' });
@@ -227,11 +218,7 @@ const AuditManager = () => {
 
       <div className="tabs">
         {['planned', 'scheduled', 'in-progress', 'completed'].map(tab => (
-          <button
-            key={tab}
-            className={`tab ${activeTab === tab ? 'active' : ''}`}
-            onClick={() => setActiveTab(tab)}
-          >
+          <button key={tab} className={`tab ${activeTab === tab ? 'active' : ''}`} onClick={() => setActiveTab(tab)}>
             {tab.replace('-', ' ').toUpperCase()}
             <span className="count">({audits.filter(a => a.status?.includes(tab)).length})</span>
           </button>
@@ -249,10 +236,7 @@ const AuditManager = () => {
                   <h3>{audit.name}</h3>
                   <p className="objectives">{audit.objectives}</p>
                 </div>
-                <div
-                  className="status-badge"
-                  style={{ backgroundColor: getStatusColor(audit.status) }}
-                >
+                <div className="status-badge" style={{ backgroundColor: getStatusColor(audit.status) }}>
                   {(audit.status || 'planned').toUpperCase()}
                 </div>
               </div>
@@ -279,10 +263,7 @@ const AuditManager = () => {
 
                 {audit.rating && (
                   <div className="detail-item">
-                    <div
-                      className="rating-badge"
-                      style={{ backgroundColor: getRatingColor(audit.rating) }}
-                    >
+                    <div className="rating-badge" style={{ backgroundColor: getRatingColor(audit.rating) }}>
                       {audit.rating.toUpperCase()}
                     </div>
                   </div>
@@ -312,9 +293,7 @@ const AuditManager = () => {
                   </button>
                 )}
 
-                {audit.status === 'completed' && (
-                  <button className="btn-secondary">📄 View Report</button>
-                )}
+                {audit.status === 'completed' && <button className="btn-secondary">📄 View Report</button>}
 
                 <button className="btn-secondary">📋 View Details</button>
               </div>
@@ -367,10 +346,7 @@ const AuditManager = () => {
 
             <div className="form-group">
               <label>Audit Rating *</label>
-              <select
-                value={resultForm.rating}
-                onChange={e => setResultForm({ ...resultForm, rating: e.target.value })}
-              >
+              <select value={resultForm.rating} onChange={e => setResultForm({ ...resultForm, rating: e.target.value })}>
                 <option value="compliant">✅ Compliant</option>
                 <option value="partial">⚠️ Partial</option>
                 <option value="non-compliant">❌ Non-Compliant</option>
@@ -388,10 +364,7 @@ const AuditManager = () => {
             </div>
 
             <div className="modal-actions">
-              <button
-                className="btn-primary"
-                onClick={() => handleDocumentResult(selectedAudit.id)}
-              >
+              <button className="btn-primary" onClick={() => handleDocumentResult(selectedAudit.id)}>
                 ✓ Document Result
               </button>
               <button className="btn-secondary" onClick={() => setSelectedAudit(null)}>

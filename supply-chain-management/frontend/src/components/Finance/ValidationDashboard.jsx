@@ -13,27 +13,9 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { Card, Row, Col, Table, Statistic, Button, Select, DatePicker, Badge, Empty, Modal, message, Space } from 'antd';
 import {
-  Card,
-  Row,
-  Col,
-  Table,
-  Statistic,
-  Button,
-  Select,
-  DatePicker,
-  Badge,
-  Empty,
-  Modal,
-  message,
-  Space,
-  Tooltip,
-  Segmented,
-} from 'antd';
-import {
-  CheckCircleOutlined,
   CloseCircleOutlined,
-  WarningOutlined,
   ExclamationOutlined,
   FilePdfOutlined,
   FileExcelOutlined,
@@ -41,8 +23,6 @@ import {
   FilterOutlined,
 } from '@ant-design/icons';
 import {
-  BarChart,
-  Bar,
   LineChart,
   Line,
   PieChart,
@@ -80,7 +60,7 @@ const ValidationDashboard = () => {
     averageResolutionTime: 0,
   });
   const [chartData, setChartData] = useState([]);
-  const [violationsByType, setViolationsByType] = useState([]);
+  const [_violationsByType, setViolationsByType] = useState([]);
   const [trendData, setTrendData] = useState([]);
 
   // ===== Dynamic Colors =====
@@ -138,9 +118,7 @@ const ValidationDashboard = () => {
     const resolved = data.filter(v => v.status === 'resolved' && v.resolvedAt);
     const avgTime =
       resolved.length > 0
-        ? resolved.reduce((sum, v) => sum + (new Date(v.resolvedAt) - new Date(v.createdAt)), 0) /
-          resolved.length /
-          (1000 * 60 * 60)
+        ? resolved.reduce((sum, v) => sum + (new Date(v.resolvedAt) - new Date(v.createdAt)), 0) / resolved.length / (1000 * 60 * 60)
         : 0;
     newStats.averageResolutionTime = Math.round(avgTime);
 
@@ -316,42 +294,22 @@ const ValidationDashboard = () => {
       <Row gutter={[16, 16]} style={{ marginBottom: '24px' }}>
         <Col xs={24} sm={12} md={6}>
           <Card>
-            <Statistic
-              title="إجمالي الانتهاكات"
-              value={stats.total}
-              prefix={<ExclamationOutlined />}
-              valueStyle={{ color: '#ff4d4f' }}
-            />
+            <Statistic title="إجمالي الانتهاكات" value={stats.total} prefix={<ExclamationOutlined />} valueStyle={{ color: '#ff4d4f' }} />
           </Card>
         </Col>
         <Col xs={24} sm={12} md={6}>
           <Card>
-            <Statistic
-              title="انتهاكات حرجة"
-              value={stats.critical}
-              prefix={<CloseCircleOutlined />}
-              valueStyle={{ color: '#ff4d4f' }}
-            />
+            <Statistic title="انتهاكات حرجة" value={stats.critical} prefix={<CloseCircleOutlined />} valueStyle={{ color: '#ff4d4f' }} />
           </Card>
         </Col>
         <Col xs={24} sm={12} md={6}>
           <Card>
-            <Statistic
-              title="معلقة"
-              value={stats.pending}
-              suffix="انتهاك"
-              valueStyle={{ color: '#faad14' }}
-            />
+            <Statistic title="معلقة" value={stats.pending} suffix="انتهاك" valueStyle={{ color: '#faad14' }} />
           </Card>
         </Col>
         <Col xs={24} sm={12} md={6}>
           <Card>
-            <Statistic
-              title="محلولة"
-              value={stats.resolved}
-              suffix="انتهاك"
-              valueStyle={{ color: '#52c41a' }}
-            />
+            <Statistic title="محلولة" value={stats.resolved} suffix="انتهاك" valueStyle={{ color: '#52c41a' }} />
           </Card>
         </Col>
       </Row>
@@ -399,12 +357,7 @@ const ValidationDashboard = () => {
           </Col>
           <Col xs={24} sm={12} md={6}>
             <Space>
-              <Button
-                type="primary"
-                icon={<FilterOutlined />}
-                loading={loading}
-                onClick={fetchViolations}
-              >
+              <Button type="primary" icon={<FilterOutlined />} loading={loading} onClick={fetchViolations}>
                 بحث
               </Button>
               <Button
@@ -535,30 +488,20 @@ const ValidationDashboard = () => {
               <strong>النوع:</strong> {selectedViolation.type}
             </p>
             <p>
-              <strong>الخطورة:</strong>{' '}
-              <Badge
-                color={severityColors[selectedViolation.severity]}
-                text={selectedViolation.severity}
-              />
+              <strong>الخطورة:</strong> <Badge color={severityColors[selectedViolation.severity]} text={selectedViolation.severity} />
             </p>
             <p>
-              <strong>الحالة:</strong>{' '}
-              <Badge
-                color={statusColors[selectedViolation.status]}
-                text={selectedViolation.status}
-              />
+              <strong>الحالة:</strong> <Badge color={statusColors[selectedViolation.status]} text={selectedViolation.status} />
             </p>
             <p>
               <strong>الوصف:</strong> {selectedViolation.description}
             </p>
             <p>
-              <strong>التاريخ:</strong>{' '}
-              {dayjs(selectedViolation.createdAt).format('YYYY-MM-DD HH:mm')}
+              <strong>التاريخ:</strong> {dayjs(selectedViolation.createdAt).format('YYYY-MM-DD HH:mm')}
             </p>
             {selectedViolation.resolvedAt && (
               <p>
-                <strong>تاريخ الحل:</strong>{' '}
-                {dayjs(selectedViolation.resolvedAt).format('YYYY-MM-DD HH:mm')}
+                <strong>تاريخ الحل:</strong> {dayjs(selectedViolation.resolvedAt).format('YYYY-MM-DD HH:mm')}
               </p>
             )}
           </div>

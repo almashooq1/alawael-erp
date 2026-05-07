@@ -18,9 +18,7 @@ export default function Modal({ open, onClose, children }) {
         justifyContent: 'center',
       }}
     >
-      <div
-        style={{ background: '#fff', padding: 24, borderRadius: 8, minWidth: 320, maxWidth: 480 }}
-      >
+      <div style={{ background: '#fff', padding: 24, borderRadius: 8, minWidth: 320, maxWidth: 480 }}>
         <button
           onClick={onClose}
           style={{

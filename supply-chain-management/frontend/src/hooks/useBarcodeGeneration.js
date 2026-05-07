@@ -144,7 +144,7 @@ export const useBarcodeGeneration = () => {
       link.click();
       document.body.removeChild(link);
     },
-    [generatedCode]
+    [generatedCode],
   );
 
   /**

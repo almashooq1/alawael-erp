@@ -11,7 +11,7 @@ function OrderForm({ onAdd, initialData, editMode, user, notify }) {
       orderDate: '',
       deliveryDate: '',
       notes: '',
-    }
+    },
   );
   const [suppliers, setSuppliers] = useState([]);
   const [products, setProducts] = useState([]);
@@ -37,10 +37,7 @@ function OrderForm({ onAdd, initialData, editMode, user, notify }) {
       const prod = products.find(p => p._id === selectedProduct);
       setForm({
         ...form,
-        products: [
-          ...form.products,
-          { product: selectedProduct, quantity: Number(selectedQty), price: prod ? prod.price : 0 },
-        ],
+        products: [...form.products, { product: selectedProduct, quantity: Number(selectedQty), price: prod ? prod.price : 0 }],
       });
       setSelectedProduct('');
       setSelectedQty('');
@@ -93,13 +90,7 @@ function OrderForm({ onAdd, initialData, editMode, user, notify }) {
           </option>
         ))}
       </select>{' '}
-      <input
-        type="number"
-        min="1"
-        placeholder="الكمية"
-        value={selectedQty}
-        onChange={e => setSelectedQty(e.target.value)}
-      />{' '}
+      <input type="number" min="1" placeholder="الكمية" value={selectedQty} onChange={e => setSelectedQty(e.target.value)} />{' '}
       <button type="button" onClick={addProduct}>
         إضافة منتج
       </button>{' '}
@@ -117,13 +108,7 @@ function OrderForm({ onAdd, initialData, editMode, user, notify }) {
       <input name="deliveryDate" type="date" value={form.deliveryDate} onChange={handleChange} />{' '}
       <input name="notes" placeholder="ملاحظات" value={form.notes} onChange={handleChange} />{' '}
       <button type="submit" disabled={loading}>
-        {loading
-          ? editMode
-            ? 'جاري التعديل...'
-            : 'جاري الإضافة...'
-          : editMode
-            ? 'حفظ التعديلات'
-            : 'إضافة طلب'}
+        {loading ? (editMode ? 'جاري التعديل...' : 'جاري الإضافة...') : editMode ? 'حفظ التعديلات' : 'إضافة طلب'}
       </button>
     </form>
   );

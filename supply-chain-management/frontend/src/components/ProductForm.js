@@ -13,7 +13,7 @@ function ProductForm({ onAdd, initialData, editMode, user, notify }) {
       price: '',
       unit: 'pcs',
       imagePath: '',
-    }
+    },
   );
   const [suppliers, setSuppliers] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -70,20 +70,9 @@ function ProductForm({ onAdd, initialData, editMode, user, notify }) {
 
   return (
     <form onSubmit={handleSubmit} style={{ marginBottom: 16 }}>
-      <input
-        name="name"
-        placeholder="اسم المنتج"
-        value={form.name}
-        onChange={handleChange}
-        required
-      />{' '}
+      <input name="name" placeholder="اسم المنتج" value={form.name} onChange={handleChange} required />{' '}
       <input name="sku" placeholder="SKU" value={form.sku} onChange={handleChange} />{' '}
-      <input
-        name="description"
-        placeholder="الوصف"
-        value={form.description}
-        onChange={handleChange}
-      />{' '}
+      <input name="description" placeholder="الوصف" value={form.description} onChange={handleChange} />{' '}
       <select name="supplier" value={form.supplier} onChange={handleChange} required>
         <option value="">اختر المورد</option>
         {suppliers.map(s => (
@@ -92,15 +81,7 @@ function ProductForm({ onAdd, initialData, editMode, user, notify }) {
           </option>
         ))}
       </select>{' '}
-      <input
-        name="price"
-        type="number"
-        min="0"
-        placeholder="السعر"
-        value={form.price}
-        onChange={handleChange}
-        required
-      />{' '}
+      <input name="price" type="number" min="0" placeholder="السعر" value={form.price} onChange={handleChange} required />{' '}
       <input name="unit" placeholder="الوحدة" value={form.unit} onChange={handleChange} />{' '}
       <FileUpload
         url="/api/products/image-upload"
@@ -115,21 +96,11 @@ function ProductForm({ onAdd, initialData, editMode, user, notify }) {
       />
       {imagePreview && (
         <div style={{ margin: '8px 0' }}>
-          <img
-            src={imagePreview}
-            alt="صورة المنتج"
-            style={{ maxWidth: 120, maxHeight: 120, borderRadius: 8 }}
-          />
+          <img src={imagePreview} alt="صورة المنتج" style={{ maxWidth: 120, maxHeight: 120, borderRadius: 8 }} />
         </div>
       )}
       <button type="submit" disabled={loading}>
-        {loading
-          ? editMode
-            ? 'جاري التعديل...'
-            : 'جاري الإضافة...'
-          : editMode
-            ? 'حفظ التعديلات'
-            : 'إضافة منتج'}
+        {loading ? (editMode ? 'جاري التعديل...' : 'جاري الإضافة...') : editMode ? 'حفظ التعديلات' : 'إضافة منتج'}
       </button>
     </form>
   );

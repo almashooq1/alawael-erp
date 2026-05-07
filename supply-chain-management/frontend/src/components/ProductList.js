@@ -19,9 +19,7 @@ function ProductList({ user, notify }) {
     setError('');
     apiClient
       .get('/api/products')
-      .then(res =>
-        setProducts(res.data.data || res.data.products || (Array.isArray(res.data) ? res.data : []))
-      )
+      .then(res => setProducts(res.data.data || res.data.products || (Array.isArray(res.data) ? res.data : [])))
       .catch(() => setError('حدث خطأ أثناء تحميل المنتجات'))
       .finally(() => setLoading(false));
   };
@@ -65,7 +63,7 @@ function ProductList({ user, notify }) {
         p =>
           p.name?.toLowerCase().includes(search.toLowerCase()) ||
           p.supplier?.name?.toLowerCase().includes(search.toLowerCase()) ||
-          p.unit?.toLowerCase().includes(search.toLowerCase())
+          p.unit?.toLowerCase().includes(search.toLowerCase()),
       )
     : [];
 
@@ -78,7 +76,7 @@ function ProductList({ user, notify }) {
         { label: 'السعر', value: 'price' },
         { label: 'الوحدة', value: 'unit' },
       ],
-      'المنتجات.xlsx'
+      'المنتجات.xlsx',
     );
   };
   const handleExportPDF = () => {
@@ -90,7 +88,7 @@ function ProductList({ user, notify }) {
         { label: 'السعر', value: 'price' },
         { label: 'الوحدة', value: 'unit' },
       ],
-      'المنتجات.pdf'
+      'المنتجات.pdf',
     );
   };
 
@@ -111,14 +109,8 @@ function ProductList({ user, notify }) {
         onChange={e => setSearch(e.target.value)}
         style={{ marginBottom: 12, padding: 6, width: 260 }}
       />
-      {(user.role === 'admin' || user.role === 'manager') && (
-        <ProductForm onAdd={fetchProducts} user={user} notify={notify} />
-      )}
-      {error && (
-        <div style={{ textAlign: 'center', margin: 16, color: '#d32f2f', fontWeight: 'bold' }}>
-          {error}
-        </div>
-      )}
+      {(user.role === 'admin' || user.role === 'manager') && <ProductForm onAdd={fetchProducts} user={user} notify={notify} />}
+      {error && <div style={{ textAlign: 'center', margin: 16, color: '#d32f2f', fontWeight: 'bold' }}>{error}</div>}
       {loading ? (
         <div style={{ textAlign: 'center', margin: 16 }}>جاري التحميل...</div>
       ) : !error && filteredProducts.length === 0 ? (
@@ -141,11 +133,7 @@ function ProductList({ user, notify }) {
                 <tr key={p._id}>
                   <td>
                     {p.imagePath ? (
-                      <img
-                        src={p.imagePath}
-                        alt={p.name}
-                        style={{ width: 48, height: 48, objectFit: 'cover', borderRadius: 4 }}
-                      />
+                      <img src={p.imagePath} alt={p.name} style={{ width: 48, height: 48, objectFit: 'cover', borderRadius: 4 }} />
                     ) : (
                       <span style={{ color: '#bbb' }}>بدون صورة</span>
                     )}
@@ -173,15 +161,7 @@ function ProductList({ user, notify }) {
         )
       )}
       <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
-        {editProduct && (
-          <ProductForm
-            initialData={editProduct}
-            onAdd={handleEditSave}
-            editMode
-            user={user}
-            notify={notify}
-          />
-        )}
+        {editProduct && <ProductForm initialData={editProduct} onAdd={handleEditSave} editMode user={user} notify={notify} />}
       </Modal>
     </div>
   );

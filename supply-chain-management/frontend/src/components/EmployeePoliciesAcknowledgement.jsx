@@ -48,12 +48,10 @@ const EmployeePoliciesAcknowledgement = () => {
   };
 
   const handleSelectPolicy = policyId => {
-    setSelectedPolicies(prev =>
-      prev.includes(policyId) ? prev.filter(id => id !== policyId) : [...prev, policyId]
-    );
+    setSelectedPolicies(prev => (prev.includes(policyId) ? prev.filter(id => id !== policyId) : [...prev, policyId]));
   };
 
-  const handleSelectAll = () => {
+  const _handleSelectAll = () => {
     if (selectedPolicies.length === pendingPolicies.length) {
       setSelectedPolicies([]);
     } else {
@@ -163,12 +161,8 @@ const EmployeePoliciesAcknowledgement = () => {
                     <div className="policy-content">
                       <div className="policy-title">
                         <h3>{policy.policyName}</h3>
-                        <span
-                          className={`due-badge ${overdue ? 'overdue' : daysLeft <= 3 ? 'warning' : ''}`}
-                        >
-                          {overdue
-                            ? `متأخر بـ ${Math.abs(daysLeft)} يوم`
-                            : `${daysLeft} أيام متبقية`}
+                        <span className={`due-badge ${overdue ? 'overdue' : daysLeft <= 3 ? 'warning' : ''}`}>
+                          {overdue ? `متأخر بـ ${Math.abs(daysLeft)} يوم` : `${daysLeft} أيام متبقية`}
                         </span>
                       </div>
                       <p className="policy-description">{policy.description}</p>
@@ -178,8 +172,7 @@ const EmployeePoliciesAcknowledgement = () => {
                           <strong>النوع:</strong> {policy.policyType}
                         </span>
                         <span className="meta-item">
-                          <strong>الموعد النهائي:</strong>{' '}
-                          {new Date(policy.dueDate).toLocaleDateString('ar')}
+                          <strong>الموعد النهائي:</strong> {new Date(policy.dueDate).toLocaleDateString('ar')}
                         </span>
                       </div>
                     </div>
@@ -218,9 +211,7 @@ const EmployeePoliciesAcknowledgement = () => {
                     <h3>{policy.policyName}</h3>
                     <p>{policy.description}</p>
                   </div>
-                  <div className="acknowledgement-date">
-                    تم الاعتراف في: {new Date(policy.updatedAt).toLocaleDateString('ar')}
-                  </div>
+                  <div className="acknowledgement-date">تم الاعتراف في: {new Date(policy.updatedAt).toLocaleDateString('ar')}</div>
                 </div>
               ))}
             </div>

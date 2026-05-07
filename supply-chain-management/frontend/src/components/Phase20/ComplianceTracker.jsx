@@ -66,14 +66,11 @@ const ComplianceTracker = () => {
     }
 
     try {
-      const response = await fetch(
-        `/api/v1/risk-management/compliance-controls/${selectedControl.id}/evidence`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(evidenceForm),
-        }
-      );
+      const response = await fetch(`/api/v1/risk-management/compliance-controls/${selectedControl.id}/evidence`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(evidenceForm),
+      });
 
       if (response.ok) {
         setEvidenceForm({ document: '', description: '' });
@@ -86,14 +83,11 @@ const ComplianceTracker = () => {
 
   const handleUpdateStatus = async (controlId, newStatus) => {
     try {
-      const response = await fetch(
-        `/api/v1/risk-management/compliance-controls/${controlId}/status`,
-        {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ status: newStatus }),
-        }
-      );
+      const response = await fetch(`/api/v1/risk-management/compliance-controls/${controlId}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus }),
+      });
 
       if (response.ok) {
         const updated = controls.map(c => (c.id === controlId ? { ...c, status: newStatus } : c));
@@ -115,7 +109,7 @@ const ComplianceTracker = () => {
     return colors[status] || '#6b7280';
   };
 
-  const getFrameworkLabel = framework => {
+  const _getFrameworkLabel = framework => {
     return frameworks.find(f => f.value === framework)?.label || framework;
   };
 
@@ -144,10 +138,7 @@ const ComplianceTracker = () => {
           <div className="form-row">
             <div className="form-group">
               <label>Framework *</label>
-              <select
-                value={newControl.framework}
-                onChange={e => setNewControl({ ...newControl, framework: e.target.value })}
-              >
+              <select value={newControl.framework} onChange={e => setNewControl({ ...newControl, framework: e.target.value })}>
                 {frameworks.map(f => (
                   <option key={f.value} value={f.value}>
                     {f.label}
@@ -240,10 +231,7 @@ const ComplianceTracker = () => {
                       <div key={control.id} className="control-card">
                         <div className="control-header">
                           <h4>{control.name}</h4>
-                          <div
-                            className="status-badge"
-                            style={{ backgroundColor: getStatusColor(control.status) }}
-                          >
+                          <div className="status-badge" style={{ backgroundColor: getStatusColor(control.status) }}>
                             {(control.status || 'planned').replace('_', ' ').toUpperCase()}
                           </div>
                         </div>
@@ -267,10 +255,7 @@ const ComplianceTracker = () => {
                         </div>
 
                         <div className="control-actions">
-                          <button
-                            className="btn-secondary"
-                            onClick={() => setSelectedControl(control)}
-                          >
+                          <button className="btn-secondary" onClick={() => setSelectedControl(control)}>
                             📄 Add Evidence
                           </button>
 

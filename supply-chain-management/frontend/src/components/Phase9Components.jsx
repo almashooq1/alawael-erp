@@ -4,22 +4,8 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import {
-  BarChart,
-  Bar,
-  LineChart,
-  Line,
-  PieChart,
-  Pie,
-  Cell,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from 'recharts';
-import { AlertCircle, Shield, Workflow, TrendingUp, Lock, Zap } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { AlertCircle, Shield, Workflow, TrendingUp, Zap } from 'lucide-react';
 
 // ==================== SECURITY COMPONENTS ====================
 
@@ -67,13 +53,8 @@ export const MFASetupComponent = () => {
 
       {step === 'setup' && (
         <div>
-          <p className="text-gray-600 mb-4">
-            Enable two-factor authentication for enhanced security
-          </p>
-          <button
-            onClick={setupMFA}
-            className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
-          >
+          <p className="text-gray-600 mb-4">Enable two-factor authentication for enhanced security</p>
+          <button onClick={setupMFA} className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition">
             Generate QR Code
           </button>
         </div>
@@ -102,9 +83,7 @@ export const MFASetupComponent = () => {
       {step === 'success' && (
         <div className="bg-green-50 border border-green-200 rounded-lg p-4">
           <p className="text-green-700 font-semibold mb-2">✓ MFA Enabled Successfully</p>
-          <p className="text-sm text-gray-600 mb-4">
-            Save these backup codes in a secure location:
-          </p>
+          <p className="text-sm text-gray-600 mb-4">Save these backup codes in a secure location:</p>
           <div className="bg-white rounded p-3 font-mono text-xs space-y-1">
             {backupCodes.map((code, idx) => (
               <div key={idx} className="text-gray-600">
@@ -115,11 +94,7 @@ export const MFASetupComponent = () => {
         </div>
       )}
 
-      {error && (
-        <div className="mt-4 bg-red-50 border border-red-200 rounded p-3 text-red-700 text-sm">
-          {error}
-        </div>
-      )}
+      {error && <div className="mt-4 bg-red-50 border border-red-200 rounded p-3 text-red-700 text-sm">{error}</div>}
     </div>
   );
 };
@@ -129,7 +104,7 @@ export const MFASetupComponent = () => {
 export const WorkflowDashboard = ({ userId }) => {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('all'); // all, pending, completed
+  const [_filter, _setFilter] = useState('all'); // all, pending, completed
 
   useEffect(() => {
     fetchTasks();
@@ -169,9 +144,7 @@ export const WorkflowDashboard = ({ userId }) => {
       <div className="flex items-center gap-2 mb-6">
         <Workflow className="w-6 h-6 text-blue-600" />
         <h2 className="text-2xl font-bold">My Workflow Tasks</h2>
-        <span className="ml-auto bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
-          {tasks.length} pending
-        </span>
+        <span className="ml-auto bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">{tasks.length} pending</span>
       </div>
 
       {tasks.length === 0 ? (
@@ -187,9 +160,7 @@ export const WorkflowDashboard = ({ userId }) => {
                 </div>
                 <span
                   className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                    task.priority === 'high'
-                      ? 'bg-red-100 text-red-700'
-                      : 'bg-yellow-100 text-yellow-700'
+                    task.priority === 'high' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'
                   }`}
                 >
                   {task.priority}
@@ -197,9 +168,7 @@ export const WorkflowDashboard = ({ userId }) => {
               </div>
 
               <div className="flex items-center justify-between pt-3 border-t">
-                <div className="text-sm text-gray-600">
-                  Due: {new Date(task.dueDate).toLocaleDateString()}
-                </div>
+                <div className="text-sm text-gray-600">Due: {new Date(task.dueDate).toLocaleDateString()}</div>
                 <div className="flex gap-2">
                   <button
                     onClick={() => completeTask(task.workflowId, task.id, true)}
@@ -272,9 +241,7 @@ export const AnalyticsDashboard = () => {
 
         <div className="bg-white rounded-lg shadow p-6">
           <p className="text-gray-600 text-sm">Active Employees</p>
-          <p className="text-3xl font-bold mt-2 text-green-600">
-            {kpis?.summary?.activeEmployees || 0}
-          </p>
+          <p className="text-3xl font-bold mt-2 text-green-600">{kpis?.summary?.activeEmployees || 0}</p>
         </div>
 
         <div className="bg-white rounded-lg shadow p-6">
@@ -296,8 +263,7 @@ export const AnalyticsDashboard = () => {
             <div>
               <h3 className="font-semibold text-red-900">High Turnover Risk Detected</h3>
               <p className="text-red-800 text-sm mt-1">
-                {turnoverData.length} employees have high turnover risk and require management
-                attention
+                {turnoverData.length} employees have high turnover risk and require management attention
               </p>
             </div>
           </div>
@@ -366,9 +332,7 @@ export const AIRecommendations = ({ employeeId }) => {
               <p className="text-sm text-gray-600 mt-1">Type: {rec.type}</p>
               <span
                 className={`inline-block mt-2 px-2 py-1 rounded text-xs font-semibold ${
-                  rec.priority === 'critical'
-                    ? 'bg-red-100 text-red-700'
-                    : 'bg-blue-100 text-blue-700'
+                  rec.priority === 'critical' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'
                 }`}
               >
                 {rec.priority}
@@ -419,16 +383,12 @@ export const TurnoverRiskAnalysis = () => {
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-red-50 rounded p-4 border border-red-200">
               <p className="text-red-800 text-sm">HIGH RISK</p>
-              <p className="text-2xl font-bold text-red-600 mt-2">
-                {riskData.highRiskEmployees?.length || 0}
-              </p>
+              <p className="text-2xl font-bold text-red-600 mt-2">{riskData.highRiskEmployees?.length || 0}</p>
             </div>
 
             <div className="bg-orange-50 rounded p-4 border border-orange-200">
               <p className="text-orange-800 text-sm">CRITICAL RISK</p>
-              <p className="text-2xl font-bold text-orange-600 mt-2">
-                {riskData.criticalRiskEmployees?.length || 0}
-              </p>
+              <p className="text-2xl font-bold text-orange-600 mt-2">{riskData.criticalRiskEmployees?.length || 0}</p>
             </div>
           </div>
 
@@ -440,9 +400,7 @@ export const TurnoverRiskAnalysis = () => {
                   <div key={emp.employeeId} className="border rounded p-3 hover:bg-gray-50">
                     <div className="flex justify-between items-center">
                       <p className="font-semibold">{emp.name}</p>
-                      <span className="bg-red-100 text-red-700 px-2 py-1 rounded text-xs">
-                        {emp.probability}% risk
-                      </span>
+                      <span className="bg-red-100 text-red-700 px-2 py-1 rounded text-xs">{emp.probability}% risk</span>
                     </div>
                     <p className="text-sm text-gray-600 mt-2">{emp.recommendations[0]}</p>
                   </div>

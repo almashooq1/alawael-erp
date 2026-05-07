@@ -19,11 +19,7 @@ function ShipmentList({ user, notify }) {
     setError('');
     apiClient
       .get('/api/shipments')
-      .then(res =>
-        setShipments(
-          res.data.data || res.data.shipments || (Array.isArray(res.data) ? res.data : [])
-        )
-      )
+      .then(res => setShipments(res.data.data || res.data.shipments || (Array.isArray(res.data) ? res.data : [])))
       .catch(() => setError('حدث خطأ أثناء تحميل الشحنات'))
       .finally(() => setLoading(false));
   };
@@ -67,7 +63,7 @@ function ShipmentList({ user, notify }) {
         s =>
           s.trackingNumber?.toLowerCase().includes(search.toLowerCase()) ||
           s.status?.toLowerCase().includes(search.toLowerCase()) ||
-          s.order?.supplier?.name?.toLowerCase().includes(search.toLowerCase())
+          s.order?.supplier?.name?.toLowerCase().includes(search.toLowerCase()),
       )
     : [];
 
@@ -88,7 +84,7 @@ function ShipmentList({ user, notify }) {
           value: row => (row.deliveredDate ? new Date(row.deliveredDate).toLocaleDateString() : ''),
         },
       ],
-      'الشحنات.xlsx'
+      'الشحنات.xlsx',
     );
   };
   const handleExportPDF = () => {
@@ -108,7 +104,7 @@ function ShipmentList({ user, notify }) {
           value: row => (row.deliveredDate ? new Date(row.deliveredDate).toLocaleDateString() : ''),
         },
       ],
-      'الشحنات.pdf'
+      'الشحنات.pdf',
     );
   };
 
@@ -129,14 +125,8 @@ function ShipmentList({ user, notify }) {
         onChange={e => setSearch(e.target.value)}
         style={{ marginBottom: 12, padding: 6, width: 260 }}
       />
-      {(user.role === 'admin' || user.role === 'manager') && (
-        <ShipmentForm onAdd={fetchShipments} user={user} notify={notify} />
-      )}
-      {error && (
-        <div style={{ textAlign: 'center', margin: 16, color: '#d32f2f', fontWeight: 'bold' }}>
-          {error}
-        </div>
-      )}
+      {(user.role === 'admin' || user.role === 'manager') && <ShipmentForm onAdd={fetchShipments} user={user} notify={notify} />}
+      {error && <div style={{ textAlign: 'center', margin: 16, color: '#d32f2f', fontWeight: 'bold' }}>{error}</div>}
       {loading ? (
         <div style={{ textAlign: 'center', margin: 16 }}>جاري التحميل...</div>
       ) : !error && filteredShipments.length === 0 ? (
@@ -168,13 +158,7 @@ function ShipmentList({ user, notify }) {
                   <td>
                     {Array.isArray(s.attachments) && s.attachments.length > 0 ? (
                       s.attachments.map((file, idx) => (
-                        <a
-                          key={idx}
-                          href={file}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          style={{ display: 'block', marginBottom: 2 }}
-                        >
+                        <a key={idx} href={file} target="_blank" rel="noopener noreferrer" style={{ display: 'block', marginBottom: 2 }}>
                           تحميل #{idx + 1}
                         </a>
                       ))
@@ -201,15 +185,7 @@ function ShipmentList({ user, notify }) {
         )
       )}
       <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
-        {editShipment && (
-          <ShipmentForm
-            initialData={editShipment}
-            onAdd={handleEditSave}
-            editMode
-            user={user}
-            notify={notify}
-          />
-        )}
+        {editShipment && <ShipmentForm initialData={editShipment} onAdd={handleEditSave} editMode user={user} notify={notify} />}
       </Modal>
     </div>
   );

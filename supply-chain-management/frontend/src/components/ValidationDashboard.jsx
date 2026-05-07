@@ -11,21 +11,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Card,
-  Row,
-  Col,
-  Table,
-  Statistic,
-  Button,
-  Select,
-  DatePicker,
-  Badge,
-  Empty,
-  Loading,
-  Modal,
-  message,
-} from 'antd';
+import { Card, Row, Col, Table, Statistic, Button, Select, DatePicker, Badge, Empty, Modal, message } from 'antd';
 import {
   CheckCircleOutlined,
   CloseCircleOutlined,
@@ -34,21 +20,7 @@ import {
   FilePdfOutlined,
   FileExcelOutlined,
 } from '@ant-design/icons';
-import {
-  BarChart,
-  Bar,
-  LineChart,
-  Line,
-  PieChart,
-  Pie,
-  Cell,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from 'recharts';
+import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import dayjs from 'dayjs';
 
 const ValidationDashboard = () => {
@@ -112,12 +84,7 @@ const ValidationDashboard = () => {
       resolved: data.filter(v => v.status === 'resolved').length,
       pending: data.filter(v => v.status === 'pending').length,
       complianceRate:
-        data.length > 0
-          ? (
-              ((data.length - data.filter(v => v.severity === 'critical').length) / data.length) *
-              100
-            ).toFixed(2)
-          : 100,
+        data.length > 0 ? (((data.length - data.filter(v => v.severity === 'critical').length) / data.length) * 100).toFixed(2) : 100,
     };
     setStats(stats);
   };
@@ -187,7 +154,7 @@ const ValidationDashboard = () => {
     { name: 'منخفض', value: stats.low, fill: '#52c41a' },
   ];
 
-  const trendData = violations
+  const _trendData = violations
     .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
     .slice(-30)
     .map(v => ({
@@ -249,10 +216,7 @@ const ValidationDashboard = () => {
       dataIndex: 'status',
       key: 'status',
       render: status => (
-        <Badge
-          status={status === 'resolved' ? 'success' : 'processing'}
-          text={status === 'resolved' ? 'مَحلول' : 'معلق'}
-        />
+        <Badge status={status === 'resolved' ? 'success' : 'processing'} text={status === 'resolved' ? 'مَحلول' : 'معلق'} />
       ),
     },
     {
@@ -272,11 +236,7 @@ const ValidationDashboard = () => {
             تفاصيل
           </Button>
           {record.status === 'pending' && (
-            <Button
-              size="small"
-              onClick={() => resolveViolation(record.id)}
-              style={{ marginLeft: 8 }}
-            >
+            <Button size="small" onClick={() => resolveViolation(record.id)} style={{ marginLeft: 8 }}>
               حل
             </Button>
           )}
@@ -294,12 +254,7 @@ const ValidationDashboard = () => {
       <Row gutter={16} style={{ marginBottom: 24 }}>
         <Col xs={24} sm={12} md={6}>
           <Card>
-            <Statistic
-              title="إجمالي الانتهاكات"
-              value={stats.total}
-              prefix={<ExclamationOutlined />}
-              valueStyle={{ color: '#1890ff' }}
-            />
+            <Statistic title="إجمالي الانتهاكات" value={stats.total} prefix={<ExclamationOutlined />} valueStyle={{ color: '#1890ff' }} />
           </Card>
         </Col>
         <Col xs={24} sm={12} md={6}>
@@ -427,11 +382,7 @@ const ValidationDashboard = () => {
         title="تفاصيل الانتهاكات"
         extra={
           <div>
-            <Button
-              icon={<FilePdfOutlined />}
-              onClick={() => exportReport('pdf')}
-              style={{ marginRight: 8 }}
-            >
+            <Button icon={<FilePdfOutlined />} onClick={() => exportReport('pdf')} style={{ marginRight: 8 }}>
               PDF
             </Button>
             <Button icon={<FileExcelOutlined />} onClick={() => exportReport('excel')}>
@@ -467,11 +418,7 @@ const ValidationDashboard = () => {
             إغلاق
           </Button>,
           selectedViolation?.status === 'pending' && (
-            <Button
-              key="resolve"
-              type="primary"
-              onClick={() => resolveViolation(selectedViolation.id)}
-            >
+            <Button key="resolve" type="primary" onClick={() => resolveViolation(selectedViolation.id)}>
               حل الانتهاك
             </Button>
           ),
@@ -489,8 +436,7 @@ const ValidationDashboard = () => {
               <strong>الوصف:</strong> {selectedViolation.description}
             </p>
             <p>
-              <strong>التاريخ:</strong>{' '}
-              {dayjs(selectedViolation.createdAt).format('DD/MM/YYYY HH:mm')}
+              <strong>التاريخ:</strong> {dayjs(selectedViolation.createdAt).format('DD/MM/YYYY HH:mm')}
             </p>
             <p>
               <strong>التوصيات:</strong> {selectedViolation.recommendations}

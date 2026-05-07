@@ -50,24 +50,10 @@ function InventoryForm({ onAdd, initialData, editMode, user, notify }) {
           </option>
         ))}
       </select>{' '}
-      <input
-        name="quantity"
-        type="number"
-        min="0"
-        placeholder="الكمية"
-        value={form.quantity}
-        onChange={handleChange}
-        required
-      />{' '}
+      <input name="quantity" type="number" min="0" placeholder="الكمية" value={form.quantity} onChange={handleChange} required />{' '}
       <input name="location" placeholder="الموقع" value={form.location} onChange={handleChange} />{' '}
       <button type="submit" disabled={loading}>
-        {loading
-          ? editMode
-            ? 'جاري التعديل...'
-            : 'جاري الإضافة...'
-          : editMode
-            ? 'حفظ التعديلات'
-            : 'إضافة للمخزون'}
+        {loading ? (editMode ? 'جاري التعديل...' : 'جاري الإضافة...') : editMode ? 'حفظ التعديلات' : 'إضافة للمخزون'}
       </button>
     </form>
   );

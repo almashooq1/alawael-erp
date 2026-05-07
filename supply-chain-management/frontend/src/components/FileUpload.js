@@ -78,9 +78,7 @@ export default function FileUpload({
     setStatus({});
     // معاينة الصور
     const imgPreviews = selected.map(f => {
-      const isImage =
-        (f.type && f.type.startsWith('image/')) ||
-        /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(f.name || '');
+      const isImage = (f.type && f.type.startsWith('image/')) || /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(f.name || '');
       if (!isImage) return null;
       if (typeof URL !== 'undefined' && typeof URL.createObjectURL === 'function') {
         const url = URL.createObjectURL(f);
@@ -128,9 +126,7 @@ export default function FileUpload({
     setStatus({});
     // معاينة الصور
     const imgPreviews = dropped.map(f => {
-      const isImage =
-        (f.type && f.type.startsWith('image/')) ||
-        /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(f.name || '');
+      const isImage = (f.type && f.type.startsWith('image/')) || /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(f.name || '');
       if (!isImage) return null;
       if (typeof URL !== 'undefined' && typeof URL.createObjectURL === 'function') {
         const url = URL.createObjectURL(f);
@@ -160,8 +156,7 @@ export default function FileUpload({
         setStatus(s => ({ ...s, [i]: 'uploading' }));
         const res = await axios.post(url, formData, {
           headers: { 'Content-Type': 'multipart/form-data' },
-          onUploadProgress: e =>
-            setProgress(p => ({ ...p, [i]: Math.round((e.loaded * 100) / e.total) })),
+          onUploadProgress: e => setProgress(p => ({ ...p, [i]: Math.round((e.loaded * 100) / e.total) })),
         });
         setStatus(s => ({ ...s, [i]: 'success' }));
         results.push(res.data);
@@ -260,7 +255,7 @@ export default function FileUpload({
                       ×
                     </button>
                   </div>
-                ) : null
+                ) : null,
               )}
             </div>
           )}
@@ -278,12 +273,8 @@ export default function FileUpload({
                 <span>
                   {f.name} - {Math.round(f.size / 1024)} KB
                 </span>
-                {status[i] === 'uploading' && (
-                  <span style={{ marginLeft: 8 }}>{progress[i] || 0}%</span>
-                )}
-                {status[i] === 'success' && (
-                  <span style={{ color: 'green', marginLeft: 8 }}>✔️</span>
-                )}
+                {status[i] === 'uploading' && <span style={{ marginLeft: 8 }}>{progress[i] || 0}%</span>}
+                {status[i] === 'success' && <span style={{ color: 'green', marginLeft: 8 }}>✔️</span>}
                 {status[i] === 'error' && (
                   <>
                     <span style={{ color: 'red', marginLeft: 8 }}>❌</span>
@@ -342,12 +333,7 @@ export default function FileUpload({
       )}
       {error && <div style={{ color: 'red', margin: '4px 0' }}>{error}</div>}
       {successMsg && <div style={{ color: 'green', margin: '4px 0' }}>{successMsg}</div>}
-      <button
-        type="button"
-        onClick={upload}
-        disabled={!files.length || loading}
-        style={{ marginTop: 8 }}
-      >
+      <button type="button" onClick={upload} disabled={!files.length || loading} style={{ marginTop: 8 }}>
         {loading ? 'جاري الرفع...' : 'رفع'}
       </button>
       {loading && (

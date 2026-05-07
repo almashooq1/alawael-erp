@@ -47,9 +47,7 @@ const FeedbackDashboard = () => {
       const startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
       const endDate = new Date().toISOString();
 
-      const response = await fetch(
-        `/api/v1/customer-experience/feedback/analytics?startDate=${startDate}&endDate=${endDate}`
-      );
+      const response = await fetch(`/api/v1/customer-experience/feedback/analytics?startDate=${startDate}&endDate=${endDate}`);
       if (response.ok) {
         const data = await response.json();
         setAnalytics(data.data);
@@ -95,17 +93,14 @@ const FeedbackDashboard = () => {
     }
 
     try {
-      const response = await fetch(
-        `/api/v1/customer-experience/feedback/${selectedFeedback.id}/respond`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            message: responseText,
-            status: 'acknowledged',
-          }),
-        }
-      );
+      const response = await fetch(`/api/v1/customer-experience/feedback/${selectedFeedback.id}/respond`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: responseText,
+          status: 'acknowledged',
+        }),
+      });
 
       if (response.ok) {
         setResponseText('');
@@ -173,10 +168,7 @@ const FeedbackDashboard = () => {
           <div className="form-row">
             <div className="form-group">
               <label>Category</label>
-              <select
-                value={newFeedback.category}
-                onChange={e => setNewFeedback({ ...newFeedback, category: e.target.value })}
-              >
+              <select value={newFeedback.category} onChange={e => setNewFeedback({ ...newFeedback, category: e.target.value })}>
                 <option value="general">General</option>
                 <option value="product">Product</option>
                 <option value="service">Service</option>
@@ -190,10 +182,7 @@ const FeedbackDashboard = () => {
 
             <div className="form-group">
               <label>Rating (1-5)</label>
-              <select
-                value={newFeedback.rating}
-                onChange={e => setNewFeedback({ ...newFeedback, rating: parseInt(e.target.value) })}
-              >
+              <select value={newFeedback.rating} onChange={e => setNewFeedback({ ...newFeedback, rating: parseInt(e.target.value) })}>
                 <option value="1">⭐ 1 - Poor</option>
                 <option value="2">⭐⭐ 2 - Fair</option>
                 <option value="3">⭐⭐⭐ 3 - Good</option>
@@ -295,16 +284,10 @@ const FeedbackDashboard = () => {
                   <p className="feedback-text">{feedback.content}</p>
                 </div>
                 <div className="badges">
-                  <span
-                    className="badge sentiment"
-                    style={{ backgroundColor: getSentimentColor(feedback.sentiment) }}
-                  >
+                  <span className="badge sentiment" style={{ backgroundColor: getSentimentColor(feedback.sentiment) }}>
                     {feedback.sentiment}
                   </span>
-                  <span
-                    className="badge status"
-                    style={{ backgroundColor: getStatusBadge(feedback.status).color }}
-                  >
+                  <span className="badge status" style={{ backgroundColor: getStatusBadge(feedback.status).color }}>
                     {getStatusBadge(feedback.status).label}
                   </span>
                 </div>
@@ -329,12 +312,7 @@ const FeedbackDashboard = () => {
           <div className="modal" onClick={e => e.stopPropagation()}>
             <h3>Respond to Feedback</h3>
             <p className="original-feedback">{selectedFeedback.content}</p>
-            <textarea
-              placeholder="Your response..."
-              rows="5"
-              value={responseText}
-              onChange={e => setResponseText(e.target.value)}
-            />
+            <textarea placeholder="Your response..." rows="5" value={responseText} onChange={e => setResponseText(e.target.value)} />
             <div className="modal-actions">
               <button className="btn-primary" onClick={handleRespondToFeedback}>
                 ✓ Submit Response

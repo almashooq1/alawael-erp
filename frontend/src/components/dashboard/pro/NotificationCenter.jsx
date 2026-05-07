@@ -4,9 +4,26 @@
  */
 import React, { useState, useMemo, useCallback } from 'react';
 import {
-  Box, Paper, Typography, IconButton, Badge, Chip, TextField, Tabs, Tab,
-  List, ListItem, ListItemAvatar, ListItemText, Avatar, Tooltip, Button,
-  Collapse, InputAdornment, Divider, useTheme,
+  Box,
+  Paper,
+  Typography,
+  IconButton,
+  Badge,
+  Chip,
+  TextField,
+  Tabs,
+  Tab,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  Avatar,
+  Tooltip,
+  Button,
+  Collapse,
+  InputAdornment,
+  Divider,
+  useTheme,
 } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
 import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
@@ -36,25 +53,109 @@ const CATEGORIES = [
 ];
 
 const SEVERITY_CONFIG = {
-  critical: { color: statusColors.error, icon: <ErrorOutlineIcon />, label: 'حرج', gradient: gradients.danger },
-  warning: { color: statusColors.warning, icon: <WarningAmberIcon />, label: 'تحذير', gradient: gradients.warning },
-  info: { color: statusColors.info, icon: <InfoOutlinedIcon />, label: 'معلومة', gradient: gradients.info },
-  success: { color: statusColors.success, icon: <CheckCircleOutlineIcon />, label: 'نجاح', gradient: gradients.success },
+  critical: {
+    color: statusColors.error,
+    icon: <ErrorOutlineIcon />,
+    label: 'حرج',
+    gradient: gradients.danger,
+  },
+  warning: {
+    color: statusColors.warning,
+    icon: <WarningAmberIcon />,
+    label: 'تحذير',
+    gradient: gradients.warning,
+  },
+  info: {
+    color: statusColors.info,
+    icon: <InfoOutlinedIcon />,
+    label: 'معلومة',
+    gradient: gradients.info,
+  },
+  success: {
+    color: statusColors.success,
+    icon: <CheckCircleOutlineIcon />,
+    label: 'نجاح',
+    gradient: gradients.success,
+  },
 };
 
 // Sample notifications for demo
 const SAMPLE_NOTIFICATIONS = [
-  { id: 1, title: 'تحديث أمني مهم', message: 'تم تطبيق تحديث أمني جديد على النظام. يرجى مراجعة سياسات الأمان.', category: 'security', severity: 'critical', time: new Date(Date.now() - 300000), read: false },
-  { id: 2, title: 'فاتورة جديدة معلقة', message: 'فاتورة #INV-2026-0412 بقيمة 25,000 ر.س بانتظار الموافقة.', category: 'finance', severity: 'warning', time: new Date(Date.now() - 1800000), read: false },
-  { id: 3, title: 'موعد جلسة قادم', message: 'جلسة علاج طبيعي للمستفيد أحمد محمد خلال 30 دقيقة.', category: 'appointments', severity: 'info', time: new Date(Date.now() - 3600000), read: false },
-  { id: 4, title: 'نسخة احتياطية مكتملة', message: 'تمت النسخة الاحتياطية اليومية بنجاح. الحجم: 2.4 جيجا.', category: 'system', severity: 'success', time: new Date(Date.now() - 7200000), read: true },
-  { id: 5, title: 'طلب إجازة جديد', message: 'طلب إجازة من الموظف فاطمة العلي بانتظار الموافقة.', category: 'hr', severity: 'info', time: new Date(Date.now() - 10800000), read: true },
-  { id: 6, title: 'تنبيه حد الميزانية', message: 'اقتربت ميزانية قسم التأهيل من 85% من الحد المسموح.', category: 'finance', severity: 'warning', time: new Date(Date.now() - 14400000), read: false },
-  { id: 7, title: 'محاولة تسجيل دخول مشبوهة', message: 'تم رصد 3 محاولات فاشلة من عنوان IP غير معروف.', category: 'security', severity: 'critical', time: new Date(Date.now() - 18000000), read: false },
-  { id: 8, title: 'اكتمال تقرير الأداء', message: 'تم إنشاء تقرير الأداء الشهري لشهر فبراير 2026.', category: 'system', severity: 'success', time: new Date(Date.now() - 21600000), read: true },
+  {
+    id: 1,
+    title: 'تحديث أمني مهم',
+    message: 'تم تطبيق تحديث أمني جديد على النظام. يرجى مراجعة سياسات الأمان.',
+    category: 'security',
+    severity: 'critical',
+    time: new Date(Date.now() - 300000),
+    read: false,
+  },
+  {
+    id: 2,
+    title: 'فاتورة جديدة معلقة',
+    message: 'فاتورة #INV-2026-0412 بقيمة 25,000 ر.س بانتظار الموافقة.',
+    category: 'finance',
+    severity: 'warning',
+    time: new Date(Date.now() - 1800000),
+    read: false,
+  },
+  {
+    id: 3,
+    title: 'موعد جلسة قادم',
+    message: 'جلسة علاج طبيعي للمستفيد أحمد محمد خلال 30 دقيقة.',
+    category: 'appointments',
+    severity: 'info',
+    time: new Date(Date.now() - 3600000),
+    read: false,
+  },
+  {
+    id: 4,
+    title: 'نسخة احتياطية مكتملة',
+    message: 'تمت النسخة الاحتياطية اليومية بنجاح. الحجم: 2.4 جيجا.',
+    category: 'system',
+    severity: 'success',
+    time: new Date(Date.now() - 7200000),
+    read: true,
+  },
+  {
+    id: 5,
+    title: 'طلب إجازة جديد',
+    message: 'طلب إجازة من الموظف فاطمة العلي بانتظار الموافقة.',
+    category: 'hr',
+    severity: 'info',
+    time: new Date(Date.now() - 10800000),
+    read: true,
+  },
+  {
+    id: 6,
+    title: 'تنبيه حد الميزانية',
+    message: 'اقتربت ميزانية قسم التأهيل من 85% من الحد المسموح.',
+    category: 'finance',
+    severity: 'warning',
+    time: new Date(Date.now() - 14400000),
+    read: false,
+  },
+  {
+    id: 7,
+    title: 'محاولة تسجيل دخول مشبوهة',
+    message: 'تم رصد 3 محاولات فاشلة من عنوان IP غير معروف.',
+    category: 'security',
+    severity: 'critical',
+    time: new Date(Date.now() - 18000000),
+    read: false,
+  },
+  {
+    id: 8,
+    title: 'اكتمال تقرير الأداء',
+    message: 'تم إنشاء تقرير الأداء الشهري لشهر فبراير 2026.',
+    category: 'system',
+    severity: 'success',
+    time: new Date(Date.now() - 21600000),
+    read: true,
+  },
 ];
 
-const formatNotificationTime = (date) => {
+const formatNotificationTime = date => {
   const diff = Math.floor((Date.now() - date.getTime()) / 1000);
   if (diff < 60) return 'الآن';
   if (diff < 3600) return `منذ ${Math.floor(diff / 60)} دقيقة`;
@@ -89,8 +190,8 @@ const NotificationCenter = ({ alerts = [], onMarkAllRead }) => {
     if (activeTab !== 'all') result = result.filter(n => n.category === activeTab);
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
-      result = result.filter(n =>
-        n.title.toLowerCase().includes(q) || n.message.toLowerCase().includes(q)
+      result = result.filter(
+        n => n.title.toLowerCase().includes(q) || n.message.toLowerCase().includes(q)
       );
     }
     return result;
@@ -101,14 +202,18 @@ const NotificationCenter = ({ alerts = [], onMarkAllRead }) => {
     [allNotifications]
   );
 
-  const toggleItem = useCallback((id) => {
+  const toggleItem = useCallback(id => {
     setExpandedItems(prev => ({ ...prev, [id]: !prev[id] }));
   }, []);
 
   const isDark = theme.palette.mode === 'dark';
 
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }}>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: 0.1 }}
+    >
       <Paper
         elevation={0}
         sx={{
@@ -137,15 +242,26 @@ const NotificationCenter = ({ alerts = [], onMarkAllRead }) => {
               <Typography variant="h6" sx={{ color: '#fff', fontWeight: 700, fontSize: '1rem' }}>
                 مركز الإشعارات
               </Typography>
-              <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.7rem' }}>
+              <Typography
+                variant="caption"
+                sx={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.7rem' }}
+              >
                 {unreadCount} إشعار غير مقروء من أصل {allNotifications.length}
               </Typography>
             </Box>
           </Box>
           <Box sx={{ display: 'flex', gap: 0.5 }}>
             <Tooltip title={soundEnabled ? 'كتم الصوت' : 'تفعيل الصوت'}>
-              <IconButton size="small" sx={{ color: '#fff' }} onClick={() => setSoundEnabled(!soundEnabled)}>
-                {soundEnabled ? <VolumeUpIcon fontSize="small" /> : <VolumeOffIcon fontSize="small" />}
+              <IconButton
+                size="small"
+                sx={{ color: '#fff' }}
+                onClick={() => setSoundEnabled(!soundEnabled)}
+              >
+                {soundEnabled ? (
+                  <VolumeUpIcon fontSize="small" />
+                ) : (
+                  <VolumeOffIcon fontSize="small" />
+                )}
               </IconButton>
             </Tooltip>
             <Tooltip title="تعيين الكل كمقروء">
@@ -154,8 +270,16 @@ const NotificationCenter = ({ alerts = [], onMarkAllRead }) => {
               </IconButton>
             </Tooltip>
             <Tooltip title={expanded ? 'طي' : 'توسيع'}>
-              <IconButton size="small" sx={{ color: '#fff' }} onClick={() => setExpanded(!expanded)}>
-                {expanded ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
+              <IconButton
+                size="small"
+                sx={{ color: '#fff' }}
+                onClick={() => setExpanded(!expanded)}
+              >
+                {expanded ? (
+                  <ExpandLessIcon fontSize="small" />
+                ) : (
+                  <ExpandMoreIcon fontSize="small" />
+                )}
               </IconButton>
             </Tooltip>
           </Box>
@@ -210,7 +334,9 @@ const NotificationCenter = ({ alerts = [], onMarkAllRead }) => {
             <AnimatePresence>
               {filtered.length === 0 && (
                 <Box sx={{ p: 4, textAlign: 'center' }}>
-                  <Typography variant="body2" color="text.secondary">لا توجد إشعارات</Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    لا توجد إشعارات
+                  </Typography>
                 </Box>
               )}
               {filtered.map((notif, i) => {
@@ -229,9 +355,13 @@ const NotificationCenter = ({ alerts = [], onMarkAllRead }) => {
                       sx={{
                         cursor: 'pointer',
                         bgcolor: !notif.read
-                          ? isDark ? 'rgba(102, 126, 234, 0.08)' : 'rgba(102, 126, 234, 0.04)'
+                          ? isDark
+                            ? 'rgba(102, 126, 234, 0.08)'
+                            : 'rgba(102, 126, 234, 0.04)'
                           : 'transparent',
-                        borderRight: !notif.read ? `3px solid ${severity.color}` : '3px solid transparent',
+                        borderRight: !notif.read
+                          ? `3px solid ${severity.color}`
+                          : '3px solid transparent',
                         transition: 'all 0.2s',
                         '&:hover': {
                           bgcolor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)',
@@ -253,7 +383,10 @@ const NotificationCenter = ({ alerts = [], onMarkAllRead }) => {
                       <ListItemText
                         primary={
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.3 }}>
-                            <Typography variant="body2" sx={{ fontWeight: notif.read ? 500 : 700, fontSize: '0.85rem' }}>
+                            <Typography
+                              variant="body2"
+                              sx={{ fontWeight: notif.read ? 500 : 700, fontSize: '0.85rem' }}
+                            >
                               {notif.title}
                             </Typography>
                             <Chip
@@ -272,11 +405,17 @@ const NotificationCenter = ({ alerts = [], onMarkAllRead }) => {
                         secondary={
                           <>
                             <Collapse in={!!expandedItems[notif.id]}>
-                              <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 0.5 }}>
+                              <Typography
+                                variant="caption"
+                                sx={{ color: 'text.secondary', display: 'block', mb: 0.5 }}
+                              >
                                 {notif.message}
                               </Typography>
                             </Collapse>
-                            <Typography variant="caption" sx={{ color: 'text.disabled', fontSize: '0.65rem' }}>
+                            <Typography
+                              variant="caption"
+                              sx={{ color: 'text.disabled', fontSize: '0.65rem' }}
+                            >
                               {formatNotificationTime(notif.time)}
                             </Typography>
                           </>

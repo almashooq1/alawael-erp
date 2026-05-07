@@ -4,7 +4,9 @@
 import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
-const TreatmentAuthorizationDashboard = lazyWithRetry(() => import('../pages/treatmentAuthorization/TreatmentAuthorizationDashboard'));
+const TreatmentAuthorizationDashboard = lazyWithRetry(
+  () => import('../pages/treatmentAuthorization/TreatmentAuthorizationDashboard')
+);
 
 export default function TreatmentAuthRoutes() {
   return (

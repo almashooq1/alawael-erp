@@ -73,8 +73,7 @@ class RouteErrorBoundary extends Component {
               حدث خطأ غير متوقع
             </Typography>
             <Typography variant="body2" sx={{ color: 'text.secondary', mb: 3, lineHeight: 1.8 }}>
-              تعذّر عرض هذه الصفحة. يمكنك المحاولة مرة أخرى أو الانتقال
-              إلى الصفحة الرئيسية.
+              تعذّر عرض هذه الصفحة. يمكنك المحاولة مرة أخرى أو الانتقال إلى الصفحة الرئيسية.
             </Typography>
 
             {process.env.NODE_ENV === 'development' && this.state.error && (

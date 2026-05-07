@@ -11,6 +11,8 @@ const ESignatureCreate = lazyWithRetry(() => import('../pages/e-signature/ESigna
 const ESignatureTemplates = lazyWithRetry(() => import('../pages/e-signature/ESignatureTemplates'));
 const ESignatureVerify = lazyWithRetry(() => import('../pages/e-signature/ESignatureVerify'));
 const ESignatureSigning = lazyWithRetry(() => import('../pages/e-signature/ESignatureSigning'));
+// Nafath Signing Admin — إدارة توقيعات نفاذ (BC-10 Critical P1)
+const NafathSigningAdmin = lazyWithRetry(() => import('../pages/e-signature/NafathSigningAdmin'));
 
 /* ─── E-Stamp Pages ──────────────────────────────────────────────────────── */
 const EStamp = lazyWithRetry(() => import('../pages/e-signature/EStamp'));
@@ -31,6 +33,7 @@ export default function ESignatureRoutes() {
       <Route path="e-signature/verify" element={<ESignatureVerify />} />
       <Route path="e-signature/verify/:id" element={<ESignatureVerify />} />
       <Route path="e-signature/sign/:id" element={<ESignatureSigning />} />
+      <Route path="e-signature/nafath-signing" element={<NafathSigningAdmin />} />
 
       {/* ── الختم الإلكتروني ───────────────────────────────────── */}
       <Route path="e-stamp" element={<EStamp />} />

@@ -74,7 +74,7 @@ const ChatComponent = () => {
 
   const handleSend = () => {
     if (!newMessage.trim()) return;
-    setMessages((prev) => [
+    setMessages(prev => [
       ...prev,
       {
         id: Date.now(),
@@ -88,7 +88,7 @@ const ChatComponent = () => {
     setNewMessage('');
   };
 
-  const handleKeyPress = (e) => {
+  const handleKeyPress = e => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSend();
@@ -96,7 +96,15 @@ const ChatComponent = () => {
   };
 
   return (
-    <Box sx={{ display: 'flex', height: '100%', borderRadius: 2, overflow: 'hidden', border: `1px solid ${theme.palette.divider}` }}>
+    <Box
+      sx={{
+        display: 'flex',
+        height: '100%',
+        borderRadius: 2,
+        overflow: 'hidden',
+        border: `1px solid ${theme.palette.divider}`,
+      }}
+    >
       {/* Contacts Panel */}
       <Paper
         elevation={0}
@@ -108,7 +116,9 @@ const ChatComponent = () => {
         }}
       >
         <Box sx={{ p: 2, borderBottom: `1px solid ${theme.palette.divider}` }}>
-          <Typography variant="h6" sx={{ mb: 1 }}>جهات الاتصال</Typography>
+          <Typography variant="h6" sx={{ mb: 1 }}>
+            جهات الاتصال
+          </Typography>
           <TextField
             size="small"
             fullWidth
@@ -123,7 +133,7 @@ const ChatComponent = () => {
           />
         </Box>
         <List sx={{ flex: 1, overflow: 'auto' }}>
-          {DEMO_CONTACTS.map((contact) => (
+          {DEMO_CONTACTS.map(contact => (
             <ListItem
               key={contact.id}
               button
@@ -147,7 +157,12 @@ const ChatComponent = () => {
                       sx={{ height: 20, fontSize: '0.7rem' }}
                     />
                     {contact.online && (
-                      <Chip label="متصل" size="small" color="success" sx={{ height: 20, fontSize: '0.7rem' }} />
+                      <Chip
+                        label="متصل"
+                        size="small"
+                        color="success"
+                        sx={{ height: 20, fontSize: '0.7rem' }}
+                      />
                     )}
                   </Box>
                 }
@@ -193,7 +208,7 @@ const ChatComponent = () => {
             bgcolor: theme.palette.mode === 'dark' ? 'grey.900' : 'grey.50',
           }}
         >
-          {messages.map((msg) => (
+          {messages.map(msg => (
             <Box
               key={msg.id}
               sx={{
@@ -229,7 +244,15 @@ const ChatComponent = () => {
         <Divider />
 
         {/* Input Area */}
-        <Box sx={{ p: 2, bgcolor: theme.palette.background.paper, display: 'flex', gap: 1, alignItems: 'center' }}>
+        <Box
+          sx={{
+            p: 2,
+            bgcolor: theme.palette.background.paper,
+            display: 'flex',
+            gap: 1,
+            alignItems: 'center',
+          }}
+        >
           <IconButton size="small" color="primary" aria-label="إرفاق">
             <AttachIcon />
           </IconButton>
@@ -241,12 +264,17 @@ const ChatComponent = () => {
             size="small"
             placeholder="اكتب رسالة..."
             value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
+            onChange={e => setNewMessage(e.target.value)}
             onKeyPress={handleKeyPress}
             multiline
             maxRows={3}
           />
-          <IconButton color="primary" aria-label="إرسال" onClick={handleSend} disabled={!newMessage.trim()}>
+          <IconButton
+            color="primary"
+            aria-label="إرسال"
+            onClick={handleSend}
+            disabled={!newMessage.trim()}
+          >
             <SendIcon />
           </IconButton>
         </Box>

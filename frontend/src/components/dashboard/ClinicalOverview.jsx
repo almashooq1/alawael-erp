@@ -4,9 +4,25 @@
  */
 
 import React from 'react';
-import { Box, Paper, Typography, Grid, LinearProgress, Chip, useTheme, Tooltip as MuiTooltip } from '@mui/material';
+import {
+  Box,
+  Paper,
+  Typography,
+  Grid,
+  LinearProgress,
+  Chip,
+  useTheme,
+  Tooltip as MuiTooltip,
+} from '@mui/material';
 import { motion } from 'framer-motion';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, Legend } from 'recharts';
+import {
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  Tooltip as RechartsTooltip,
+  Legend,
+} from 'recharts';
 import { ChartTooltip } from './shared/ChartTooltip';
 import { chartColors, brandColors } from 'theme/palette';
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
@@ -39,7 +55,18 @@ const ClinicalCard = ({ icon, label, value, subtitle, color, progress, index = 0
       }}
     >
       {/* Decorative corner gradient */}
-      <Box sx={{ position: 'absolute', top: -20, right: -20, width: 60, height: 60, borderRadius: '50%', background: color, opacity: 0.06 }} />
+      <Box
+        sx={{
+          position: 'absolute',
+          top: -20,
+          right: -20,
+          width: 60,
+          height: 60,
+          borderRadius: '50%',
+          background: color,
+          opacity: 0.06,
+        }}
+      />
 
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
         <Box
@@ -58,7 +85,10 @@ const ClinicalCard = ({ icon, label, value, subtitle, color, progress, index = 0
           {icon}
         </Box>
         <Box sx={{ flex: 1 }}>
-          <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.7rem', display: 'block' }}>
+          <Typography
+            variant="caption"
+            sx={{ color: 'text.secondary', fontSize: '0.7rem', display: 'block' }}
+          >
             {label}
           </Typography>
           <Typography variant="h6" sx={{ fontWeight: 800, fontSize: '1.1rem', lineHeight: 1.2 }}>
@@ -89,7 +119,16 @@ const ClinicalCard = ({ icon, label, value, subtitle, color, progress, index = 0
               }}
             />
           </MuiTooltip>
-          <Typography variant="caption" sx={{ color: 'text.disabled', fontSize: '0.65rem', mt: 0.5, display: 'block', textAlign: 'left' }}>
+          <Typography
+            variant="caption"
+            sx={{
+              color: 'text.disabled',
+              fontSize: '0.65rem',
+              mt: 0.5,
+              display: 'block',
+              textAlign: 'left',
+            }}
+          >
             {progress}%
           </Typography>
         </Box>
@@ -159,12 +198,15 @@ const ClinicalOverview = ({ clinical = {}, charts = {}, delay = 0 }) => {
           p: 3,
           background: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.05)' : 'white',
           border: '1px solid',
-          borderColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
+          borderColor:
+            theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
           transition: 'box-shadow 0.3s',
           '&:hover': { boxShadow: '0 8px 32px rgba(0,0,0,0.08)' },
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2.5 }}>
+        <Box
+          sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2.5 }}
+        >
           <Box>
             <Typography variant="h6" sx={{ fontWeight: 700, fontSize: '1rem' }}>
               العمليات السريرية
@@ -230,8 +272,17 @@ const ClinicalOverview = ({ clinical = {}, charts = {}, delay = 0 }) => {
                 </PieChart>
               </ResponsiveContainer>
             ) : (
-              <Box sx={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Typography variant="body2" color="text.disabled">لا توجد بيانات</Typography>
+              <Box
+                sx={{
+                  height: 200,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <Typography variant="body2" color="text.disabled">
+                  لا توجد بيانات
+                </Typography>
               </Box>
             )}
           </Grid>

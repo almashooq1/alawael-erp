@@ -4,7 +4,16 @@
  */
 
 import React from 'react';
-import { Box, Paper, Typography, Grid, useTheme, LinearProgress, Tooltip, Chip } from '@mui/material';
+import {
+  Box,
+  Paper,
+  Typography,
+  Grid,
+  useTheme,
+  LinearProgress,
+  Tooltip,
+  Chip,
+} from '@mui/material';
 import { motion } from 'framer-motion';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
@@ -35,7 +44,10 @@ const SectionHeader = React.memo(({ icon, title, subtitle, color }) => (
       {icon}
     </Box>
     <Box>
-      <Typography variant="subtitle2" sx={{ fontWeight: 700, fontSize: '0.85rem', lineHeight: 1.2 }}>
+      <Typography
+        variant="subtitle2"
+        sx={{ fontWeight: 700, fontSize: '0.85rem', lineHeight: 1.2 }}
+      >
         {title}
       </Typography>
       <Typography variant="caption" sx={{ color: 'text.disabled', fontSize: '0.65rem' }}>
@@ -106,41 +118,44 @@ const StatItem = ({ label, value, alert, color, progress }) => {
             </Box>
           </Tooltip>
         )}
-        <Typography variant="body2" sx={{ fontWeight: 700, fontSize: '0.9rem', color: color || 'text.primary' }}>
+        <Typography
+          variant="body2"
+          sx={{ fontWeight: 700, fontSize: '0.9rem', color: color || 'text.primary' }}
+        >
           {formatNumber(value)}
         </Typography>
-        {alert && (
-          <WarningAmberIcon sx={{ fontSize: 14, color: statusColors.warning }} />
-        )}
+        {alert && <WarningAmberIcon sx={{ fontSize: 14, color: statusColors.warning }} />}
+      </Box>
     </Box>
-  </Box>
-);
+  );
 };
 
 /* ── Summary Chip Strip ──────────────────────────────────────── */
 const SummaryStrip = React.memo(({ supplyChain, fleet, operations }) => {
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
-  const totalOrders = (supplyChain.orders?.total || 0);
-  const pendingOrders = (supplyChain.orders?.pending || 0);
-  const openMaintenance = (operations.maintenance?.open || 0);
-  const openIncidents = (operations.incidents?.open || 0);
-  const totalVehicles = (fleet.vehicles?.total || 0);
+  const totalOrders = supplyChain.orders?.total || 0;
+  const pendingOrders = supplyChain.orders?.pending || 0;
+  const openMaintenance = operations.maintenance?.open || 0;
+  const openIncidents = operations.incidents?.open || 0;
+  const totalVehicles = fleet.vehicles?.total || 0;
   const alertCount = pendingOrders + openMaintenance + openIncidents;
 
   return (
-    <Box sx={{
-      display: 'flex',
-      gap: 1,
-      flexWrap: 'wrap',
-      mb: 2.5,
-      py: 1.2,
-      px: 1.5,
-      borderRadius: 2.5,
-      background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(102,126,234,0.03)',
-      border: '1px solid',
-      borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
-    }}>
+    <Box
+      sx={{
+        display: 'flex',
+        gap: 1,
+        flexWrap: 'wrap',
+        mb: 2.5,
+        py: 1.2,
+        px: 1.5,
+        borderRadius: 2.5,
+        background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(102,126,234,0.03)',
+        border: '1px solid',
+        borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
+      }}
+    >
       <Chip
         icon={<InventoryIcon sx={{ fontSize: '14px !important' }} />}
         label={`${formatNumber(totalOrders)} أمر شراء`}
@@ -157,7 +172,9 @@ const SummaryStrip = React.memo(({ supplyChain, fleet, operations }) => {
       />
       {alertCount > 0 && (
         <Chip
-          icon={<WarningAmberIcon sx={{ fontSize: '14px !important', color: 'white !important' }} />}
+          icon={
+            <WarningAmberIcon sx={{ fontSize: '14px !important', color: 'white !important' }} />
+          }
           label={`${alertCount} تنبيه نشط`}
           size="small"
           sx={{
@@ -201,7 +218,8 @@ const OperationsOverview = ({ supplyChain = {}, fleet = {}, operations = {}, del
           p: 3,
           background: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.05)' : 'white',
           border: '1px solid',
-          borderColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
+          borderColor:
+            theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
           transition: 'box-shadow 0.3s',
           '&:hover': { boxShadow: '0 8px 32px rgba(0,0,0,0.08)' },
         }}
@@ -227,14 +245,22 @@ const OperationsOverview = ({ supplyChain = {}, fleet = {}, operations = {}, del
               subtitle="الموردون والمخزون"
               color={brandColors.orangeGlow}
             />
-            <StatItem label="الموردون" value={supplyChain.suppliers?.total || 0} color={brandColors.orangeGlow} />
+            <StatItem
+              label="الموردون"
+              value={supplyChain.suppliers?.total || 0}
+              color={brandColors.orangeGlow}
+            />
             <StatItem label="أوامر الشراء" value={supplyChain.orders?.total || 0} />
             <StatItem
               label="أوامر معلقة"
               value={supplyChain.orders?.pending || 0}
               alert={supplyChain.orders?.pending > 0}
               color={statusColors.warning}
-              progress={supplyChain.orders?.total > 0 ? ((supplyChain.orders?.pending || 0) / supplyChain.orders.total) * 100 : 0}
+              progress={
+                supplyChain.orders?.total > 0
+                  ? ((supplyChain.orders?.pending || 0) / supplyChain.orders.total) * 100
+                  : 0
+              }
             />
             <StatItem label="المخزون" value={supplyChain.inventory?.total || 0} />
             <StatItem
@@ -242,14 +268,22 @@ const OperationsOverview = ({ supplyChain = {}, fleet = {}, operations = {}, del
               value={supplyChain.inventory?.lowStock || 0}
               alert={supplyChain.inventory?.lowStock > 0}
               color={statusColors.error}
-              progress={supplyChain.inventory?.total > 0 ? ((supplyChain.inventory?.lowStock || 0) / supplyChain.inventory.total) * 100 : 0}
+              progress={
+                supplyChain.inventory?.total > 0
+                  ? ((supplyChain.inventory?.lowStock || 0) / supplyChain.inventory.total) * 100
+                  : 0
+              }
             />
             <StatItem label="العقود" value={supplyChain.contracts?.total || 0} />
             <StatItem
               label="عقود نشطة"
               value={supplyChain.contracts?.active || 0}
               color={brandColors.accentGreen}
-              progress={supplyChain.contracts?.total > 0 ? ((supplyChain.contracts?.active || 0) / supplyChain.contracts.total) * 100 : 0}
+              progress={
+                supplyChain.contracts?.total > 0
+                  ? ((supplyChain.contracts?.active || 0) / supplyChain.contracts.total) * 100
+                  : 0
+              }
             />
             <StatItem label="المنتجات" value={supplyChain.products?.total || 0} />
           </Grid>
@@ -262,7 +296,11 @@ const OperationsOverview = ({ supplyChain = {}, fleet = {}, operations = {}, del
               subtitle="المركبات والرحلات"
               color={brandColors.accentRose}
             />
-            <StatItem label="المركبات" value={fleet.vehicles?.total || 0} color={brandColors.accentRose} />
+            <StatItem
+              label="المركبات"
+              value={fleet.vehicles?.total || 0}
+              color={brandColors.accentRose}
+            />
             <StatItem label="الرحلات" value={fleet.trips?.total || 0} />
             <StatItem label="السائقون" value={fleet.drivers?.total || 0} />
 
@@ -273,7 +311,11 @@ const OperationsOverview = ({ supplyChain = {}, fleet = {}, operations = {}, del
                 subtitle="إدارة الأصول"
                 color={brandColors.lavender}
               />
-              <StatItem label="إجمالي الأصول" value={operations.assets?.total || 0} color={brandColors.lavender} />
+              <StatItem
+                label="إجمالي الأصول"
+                value={operations.assets?.total || 0}
+                color={brandColors.lavender}
+              />
             </Box>
           </Grid>
 
@@ -297,7 +339,11 @@ const OperationsOverview = ({ supplyChain = {}, fleet = {}, operations = {}, del
               alert={operations.incidents?.open > 0}
               color={brandColors.accentAmber}
             />
-            <StatItem label="مواعيد اليوم" value={operations.schedules?.today || 0} color={brandColors.accentSky} />
+            <StatItem
+              label="مواعيد اليوم"
+              value={operations.schedules?.today || 0}
+              color={brandColors.accentSky}
+            />
 
             <Box sx={{ mt: 2 }}>
               <SectionHeader

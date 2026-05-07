@@ -26,9 +26,11 @@ const SearchInput = ({
   const [localValue, setLocalValue] = useState(value);
   const timerRef = useRef(null);
 
-  useEffect(() => { setLocalValue(value); }, [value]);
+  useEffect(() => {
+    setLocalValue(value);
+  }, [value]);
 
-  const handleChange = (e) => {
+  const handleChange = e => {
     const val = e.target.value;
     setLocalValue(val);
     if (timerRef.current) clearTimeout(timerRef.current);
@@ -56,7 +58,9 @@ const SearchInput = ({
         ),
         endAdornment: localValue ? (
           <InputAdornment position="end">
-            <IconButton size="small" onClick={handleClear}><ClearIcon fontSize="small" /></IconButton>
+            <IconButton size="small" onClick={handleClear}>
+              <ClearIcon fontSize="small" />
+            </IconButton>
           </InputAdornment>
         ) : null,
       }}

@@ -62,16 +62,16 @@ export const ToastProvider = ({ children, position, maxVisible }) => {
   const [toasts, setToasts] = useState([]);
   const timersRef = useRef({});
 
-  const removeToast = useCallback((id) => {
+  const removeToast = useCallback(id => {
     if (timersRef.current[id]) {
       clearTimeout(timersRef.current[id]);
       delete timersRef.current[id];
     }
-    setToasts((prev) => prev.filter((t) => t.id !== id));
+    setToasts(prev => prev.filter(t => t.id !== id));
   }, []);
 
   const addToast = useCallback(
-    (options) => {
+    options => {
       const id = ++toastIdCounter;
       const toast = {
         id,
@@ -84,7 +84,7 @@ export const ToastProvider = ({ children, position, maxVisible }) => {
         createdAt: Date.now(),
       };
 
-      setToasts((prev) => {
+      setToasts(prev => {
         const max = maxVisible || TOAST_DEFAULTS.maxVisible;
         const updated = [toast, ...prev];
         return updated.slice(0, max);
@@ -101,10 +101,23 @@ export const ToastProvider = ({ children, position, maxVisible }) => {
   );
 
   // Shorthand methods
-  const success = useCallback((title, message, opts = {}) => addToast({ type: 'success', title, message, ...opts }), [addToast]);
-  const error = useCallback((title, message, opts = {}) => addToast({ type: 'error', title, message, duration: 8000, ...opts }), [addToast]);
-  const warning = useCallback((title, message, opts = {}) => addToast({ type: 'warning', title, message, ...opts }), [addToast]);
-  const info = useCallback((title, message, opts = {}) => addToast({ type: 'info', title, message, ...opts }), [addToast]);
+  const success = useCallback(
+    (title, message, opts = {}) => addToast({ type: 'success', title, message, ...opts }),
+    [addToast]
+  );
+  const error = useCallback(
+    (title, message, opts = {}) =>
+      addToast({ type: 'error', title, message, duration: 8000, ...opts }),
+    [addToast]
+  );
+  const warning = useCallback(
+    (title, message, opts = {}) => addToast({ type: 'warning', title, message, ...opts }),
+    [addToast]
+  );
+  const info = useCallback(
+    (title, message, opts = {}) => addToast({ type: 'info', title, message, ...opts }),
+    [addToast]
+  );
 
   const clearAll = useCallback(() => {
     Object.values(timersRef.current).forEach(clearTimeout);
@@ -117,7 +130,11 @@ export const ToastProvider = ({ children, position, maxVisible }) => {
   return (
     <ToastContext.Provider value={contextValue}>
       {children}
-      <ToastContainer toasts={toasts} onDismiss={removeToast} position={position || TOAST_DEFAULTS.position} />
+      <ToastContainer
+        toasts={toasts}
+        onDismiss={removeToast}
+        position={position || TOAST_DEFAULTS.position}
+      />
     </ToastContext.Provider>
   );
 };
@@ -153,7 +170,7 @@ const ToastContainer = ({ toasts, onDismiss, position }) => {
       }}
     >
       <AnimatePresence mode="popLayout">
-        {toasts.map((toast) => (
+        {toasts.map(toast => (
           <ToastItem key={toast.id} toast={toast} onDismiss={onDismiss} />
         ))}
       </AnimatePresence>
@@ -190,9 +207,7 @@ const ToastItem = ({ toast, onDismiss }) => {
       >
         <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5, p: 2 }}>
           {/* Icon */}
-          <Box sx={{ color: palette.main, mt: 0.25, flexShrink: 0 }}>
-            {ICON_MAP[toast.type]}
-          </Box>
+          <Box sx={{ color: palette.main, mt: 0.25, flexShrink: 0 }}>{ICON_MAP[toast.type]}</Box>
 
           {/* Content */}
           <Box sx={{ flex: 1, minWidth: 0 }}>
@@ -210,7 +225,10 @@ const ToastItem = ({ toast, onDismiss }) => {
               <Button
                 size="small"
                 color={colorKey}
-                onClick={() => { toast.action.onClick?.(); onDismiss(toast.id); }}
+                onClick={() => {
+                  toast.action.onClick?.();
+                  onDismiss(toast.id);
+                }}
                 sx={{ mt: 1, fontWeight: 600 }}
               >
                 {toast.action.label}
@@ -219,7 +237,12 @@ const ToastItem = ({ toast, onDismiss }) => {
           </Box>
 
           {/* Close */}
-          <IconButton size="small" onClick={() => onDismiss(toast.id)} sx={{ mt: -0.5, mr: -0.5 }} aria-label="إغلاق الإشعار">
+          <IconButton
+            size="small"
+            onClick={() => onDismiss(toast.id)}
+            sx={{ mt: -0.5, mr: -0.5 }}
+            aria-label="إغلاق الإشعار"
+          >
             <CloseIcon sx={{ fontSize: 16 }} />
           </IconButton>
         </Box>

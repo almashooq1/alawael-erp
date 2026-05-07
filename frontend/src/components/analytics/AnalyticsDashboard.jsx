@@ -35,10 +35,38 @@ import logger from 'utils/logger';
 import { statusColors } from '../../theme/palette';
 
 const kpiCards = [
-  { label: 'إجمالي المستفيدين', value: '2,847', change: '+12%', icon: <PeopleIcon />, color: statusColors.primaryBlue, trend: 'up' },
-  { label: 'الجلسات هذا الشهر', value: '1,284', change: '+8%', icon: <AssessmentIcon />, color: statusColors.successDark, trend: 'up' },
-  { label: 'معدل التحسن', value: '76%', change: '+5%', icon: <TrendIcon />, color: statusColors.warningDark, trend: 'up' },
-  { label: 'رضا المستفيدين', value: '4.6/5', change: '+0.3', icon: <TimelineIcon />, color: statusColors.purpleDark, trend: 'up' },
+  {
+    label: 'إجمالي المستفيدين',
+    value: '2,847',
+    change: '+12%',
+    icon: <PeopleIcon />,
+    color: statusColors.primaryBlue,
+    trend: 'up',
+  },
+  {
+    label: 'الجلسات هذا الشهر',
+    value: '1,284',
+    change: '+8%',
+    icon: <AssessmentIcon />,
+    color: statusColors.successDark,
+    trend: 'up',
+  },
+  {
+    label: 'معدل التحسن',
+    value: '76%',
+    change: '+5%',
+    icon: <TrendIcon />,
+    color: statusColors.warningDark,
+    trend: 'up',
+  },
+  {
+    label: 'رضا المستفيدين',
+    value: '4.6/5',
+    change: '+0.3',
+    icon: <TimelineIcon />,
+    color: statusColors.purpleDark,
+    trend: 'up',
+  },
 ];
 
 const monthlyData = [
@@ -54,7 +82,7 @@ const AnalyticsDashboard = () => {
   const [period, setPeriod] = useState('month');
   const [activeTab, setActiveTab] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [analyticsData, setAnalyticsData] = useState(null);
+  const [_analyticsData, setAnalyticsData] = useState(null);
 
   useEffect(() => {
     const fetchAnalytics = async () => {
@@ -107,14 +135,23 @@ const AnalyticsDashboard = () => {
       <Grid container spacing={2} sx={{ mb: 3 }}>
         {kpiCards.map((kpi, i) => (
           <Grid item xs={12} sm={6} md={3} key={i}>
-            <Card sx={{ transition: 'all 0.2s', '&:hover': { transform: 'translateY(-2px)', boxShadow: 3 } }}>
+            <Card
+              sx={{
+                transition: 'all 0.2s',
+                '&:hover': { transform: 'translateY(-2px)', boxShadow: 3 },
+              }}
+            >
               <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                 <Avatar sx={{ bgcolor: kpi.color + '15', color: kpi.color, width: 48, height: 48 }}>
                   {kpi.icon}
                 </Avatar>
                 <Box sx={{ flex: 1 }}>
-                  <Typography variant="h5" fontWeight={700}>{kpi.value}</Typography>
-                  <Typography variant="caption" color="text.secondary">{kpi.label}</Typography>
+                  <Typography variant="h5" fontWeight={700}>
+                    {kpi.value}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {kpi.label}
+                  </Typography>
                 </Box>
                 <Chip
                   label={kpi.change}
@@ -146,7 +183,9 @@ const AnalyticsDashboard = () => {
         <CardContent>
           {activeTab === 0 && (
             <Box>
-              <Typography variant="h6" gutterBottom>إحصائيات الجلسات الشهرية</Typography>
+              <Typography variant="h6" gutterBottom>
+                إحصائيات الجلسات الشهرية
+              </Typography>
               <Grid container spacing={1} sx={{ mt: 2 }}>
                 {monthlyData.map((d, i) => (
                   <Grid item xs={2} key={i}>
@@ -162,7 +201,9 @@ const AnalyticsDashboard = () => {
                           transition: 'height 0.3s',
                         }}
                       />
-                      <Typography variant="caption" fontWeight={600}>{d.sessions}</Typography>
+                      <Typography variant="caption" fontWeight={600}>
+                        {d.sessions}
+                      </Typography>
                       <Typography variant="caption" display="block" color="text.secondary">
                         {d.month}
                       </Typography>
@@ -185,18 +226,14 @@ const AnalyticsDashboard = () => {
             <Box sx={{ py: 4, textAlign: 'center' }}>
               <TrendIcon sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
               <Typography variant="h6">اتجاهات الأداء</Typography>
-              <Typography color="text.secondary">
-                تحليل الاتجاهات والتوقعات المستقبلية
-              </Typography>
+              <Typography color="text.secondary">تحليل الاتجاهات والتوقعات المستقبلية</Typography>
             </Box>
           )}
           {activeTab === 3 && (
             <Box sx={{ py: 4, textAlign: 'center' }}>
               <CalendarIcon sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
               <Typography variant="h6">التقويم التحليلي</Typography>
-              <Typography color="text.secondary">
-                عرض البيانات حسب التقويم الزمني
-              </Typography>
+              <Typography color="text.secondary">عرض البيانات حسب التقويم الزمني</Typography>
             </Box>
           )}
         </CardContent>

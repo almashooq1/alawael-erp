@@ -7,7 +7,13 @@ import React, { useMemo } from 'react';
 import { Box, Paper, Typography, LinearProgress, Chip, useTheme, Tooltip } from '@mui/material';
 import { motion } from 'framer-motion';
 import {
-  BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, Tooltip as RechartsTooltip,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  ResponsiveContainer,
+  Cell,
+  Tooltip as RechartsTooltip,
 } from 'recharts';
 import { ChartTooltip } from './shared/ChartTooltip';
 import { chartColors, brandColors, statusColors, neutralColors } from 'theme/palette';
@@ -26,7 +32,7 @@ const MetricRow = ({ icon, label, value, badge, color, subtitle, index = 0 }) =>
     transition={{ delay: index * 0.06, duration: 0.35 }}
   >
     <Box
-      sx={(theme) => ({
+      sx={theme => ({
         display: 'flex',
         alignItems: 'center',
         gap: 1.5,
@@ -95,7 +101,8 @@ const HR_CHART_COLORS = chartColors.hr;
 
 const HROverview = ({ hr = {}, kpis = {}, delay = 0 }) => {
   const theme = useTheme();
-  const axisColor = theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.45)' : neutralColors.textMuted;
+  const axisColor =
+    theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.45)' : neutralColors.textMuted;
   const totalEmp = kpis.employees?.total || 0;
   const todayAttendance = kpis.attendance?.today || 0;
   const attendanceRate = totalEmp > 0 ? Math.round((todayAttendance / totalEmp) * 100) : 0;
@@ -109,11 +116,12 @@ const HROverview = ({ hr = {}, kpis = {}, delay = 0 }) => {
     const factors = [0.92, 0.88, 1.05, 0.95, 1.0];
     return weekDays.map((day, i) => ({
       day,
-      value: i <= todayIdx
-        ? i === todayIdx
-          ? todayAttendance
-          : Math.round(todayAttendance * factors[i])
-        : 0,
+      value:
+        i <= todayIdx
+          ? i === todayIdx
+            ? todayAttendance
+            : Math.round(todayAttendance * factors[i])
+          : 0,
     }));
   }, [todayAttendance]);
 
@@ -178,7 +186,8 @@ const HROverview = ({ hr = {}, kpis = {}, delay = 0 }) => {
           p: 3,
           background: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.05)' : '#fff',
           border: '1px solid',
-          borderColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
+          borderColor:
+            theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
           transition: 'box-shadow 0.3s',
           '&:hover': { boxShadow: '0 8px 32px rgba(0,0,0,0.08)' },
         }}
@@ -199,12 +208,18 @@ const HROverview = ({ hr = {}, kpis = {}, delay = 0 }) => {
               size="small"
               sx={{
                 fontWeight: 700,
-                background: attendanceRate >= 80
-                  ? 'rgba(76,175,80,0.1)'
-                  : attendanceRate >= 50
-                    ? 'rgba(255,152,0,0.1)'
-                    : 'rgba(244,67,54,0.1)',
-                color: attendanceRate >= 80 ? statusColors.success : attendanceRate >= 50 ? statusColors.warning : statusColors.error,
+                background:
+                  attendanceRate >= 80
+                    ? 'rgba(76,175,80,0.1)'
+                    : attendanceRate >= 50
+                      ? 'rgba(255,152,0,0.1)'
+                      : 'rgba(244,67,54,0.1)',
+                color:
+                  attendanceRate >= 80
+                    ? statusColors.success
+                    : attendanceRate >= 50
+                      ? statusColors.warning
+                      : statusColors.error,
               }}
             />
           )}
@@ -212,7 +227,11 @@ const HROverview = ({ hr = {}, kpis = {}, delay = 0 }) => {
 
         {/* Attendance progress bar */}
         {totalEmp > 0 && (
-          <Tooltip title={`${todayAttendance} من ${totalEmp} — ${attendanceRate}% نسبة الحضور`} arrow placement="top">
+          <Tooltip
+            title={`${todayAttendance} من ${totalEmp} — ${attendanceRate}% نسبة الحضور`}
+            arrow
+            placement="top"
+          >
             <Box sx={{ mb: 2 }}>
               <LinearProgress
                 variant="determinate"
@@ -223,11 +242,12 @@ const HROverview = ({ hr = {}, kpis = {}, delay = 0 }) => {
                   backgroundColor: 'rgba(0,0,0,0.06)',
                   '& .MuiLinearProgress-bar': {
                     borderRadius: 4,
-                    background: attendanceRate >= 80
-                      ? `linear-gradient(90deg, ${brandColors.accentGreen}, ${brandColors.accentTeal})`
-                      : attendanceRate >= 50
-                        ? `linear-gradient(90deg, ${chartColors.main[4]}, ${brandColors.goldenYellow})`
-                        : `linear-gradient(90deg, ${brandColors.accentPink}, ${brandColors.accentCoral})`,
+                    background:
+                      attendanceRate >= 80
+                        ? `linear-gradient(90deg, ${brandColors.accentGreen}, ${brandColors.accentTeal})`
+                        : attendanceRate >= 50
+                          ? `linear-gradient(90deg, ${chartColors.main[4]}, ${brandColors.goldenYellow})`
+                          : `linear-gradient(90deg, ${brandColors.accentPink}, ${brandColors.accentCoral})`,
                     transition: 'transform 1.5s cubic-bezier(0.4, 0, 0.2, 1)',
                   },
                 }}
@@ -251,7 +271,12 @@ const HROverview = ({ hr = {}, kpis = {}, delay = 0 }) => {
             </Typography>
             <ResponsiveContainer width="100%" height={140}>
               <BarChart data={attendanceTrend} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
-                <XAxis dataKey="day" tick={{ fontSize: 10, fill: axisColor }} axisLine={false} tickLine={false} />
+                <XAxis
+                  dataKey="day"
+                  tick={{ fontSize: 10, fill: axisColor }}
+                  axisLine={false}
+                  tickLine={false}
+                />
                 <YAxis tick={{ fontSize: 10, fill: axisColor }} axisLine={false} tickLine={false} />
                 <RechartsTooltip content={<ChartTooltip />} />
                 <Bar dataKey="value" name="الحضور" radius={[6, 6, 0, 0]} maxBarSize={28}>

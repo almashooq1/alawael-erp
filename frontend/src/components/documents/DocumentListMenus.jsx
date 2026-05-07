@@ -17,7 +17,7 @@ import { statusColors, surfaceColors, leaveColors } from 'theme/palette';
 
 /* ─── Context Menu ──────────────────────────────── */
 export const ContextMenu = ({ anchorEl, onClose, doc, actions, dialogs, onShare }) => {
-  const handleAction = (action) => {
+  const handleAction = action => {
     onClose();
     action(doc);
   };
@@ -73,7 +73,11 @@ export const ContextMenu = ({ anchorEl, onClose, doc, actions, dialogs, onShare 
       <Divider sx={{ my: 0.5 }} />
       <MenuItem
         onClick={() => handleAction(actions.handleDelete)}
-        sx={{ py: 1.5, color: 'error.main', '&:hover': { backgroundColor: surfaceColors.errorLight } }}
+        sx={{
+          py: 1.5,
+          color: 'error.main',
+          '&:hover': { backgroundColor: surfaceColors.errorLight },
+        }}
       >
         <DeleteIcon sx={{ mr: 1.5 }} />
         <Typography>حذف</Typography>
@@ -83,12 +87,14 @@ export const ContextMenu = ({ anchorEl, onClose, doc, actions, dialogs, onShare 
 };
 
 /* ─── Selection Menu ────────────────────────────── */
-export const SelectionMenu = ({ anchorEl, onClose, selectAllPage, selectAllFiltered, clearSelection }) => (
-  <Menu
-    anchorEl={anchorEl}
-    open={Boolean(anchorEl)}
-    onClose={onClose}
-  >
+export const SelectionMenu = ({
+  anchorEl,
+  onClose,
+  selectAllPage,
+  selectAllFiltered,
+  clearSelection,
+}) => (
+  <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={onClose}>
     <MenuItem onClick={selectAllPage}>
       <Typography>تحديد صفحة الحالية</Typography>
     </MenuItem>
@@ -104,11 +110,7 @@ export const SelectionMenu = ({ anchorEl, onClose, selectAllPage, selectAllFilte
 
 /* ─── Columns Menu ──────────────────────────────── */
 export const ColumnsMenu = ({ anchorEl, onClose, visibleCols, toggleColumn }) => (
-  <Menu
-    anchorEl={anchorEl}
-    open={Boolean(anchorEl)}
-    onClose={onClose}
-  >
+  <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={onClose}>
     {COLUMN_DEFINITIONS.map(item => (
       <MenuItem key={item.key} onClick={() => toggleColumn(item.key)}>
         <Checkbox checked={visibleCols[item.key]} />

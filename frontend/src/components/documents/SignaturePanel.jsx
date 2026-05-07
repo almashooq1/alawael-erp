@@ -25,8 +25,6 @@ import {
   Tooltip,
   Stack,
   Divider,
-  Card,
-  CardContent,
   List,
   ListItem,
   ListItemAvatar,
@@ -37,13 +35,10 @@ import {
   Draw as DrawIcon,
   TextFields as TextIcon,
   CheckCircle as CheckIcon,
-  Cancel as CancelIcon,
-  Delete as DeleteIcon,
   Undo as UndoIcon,
   VerifiedUser as VerifiedIcon,
   Warning as WarningIcon,
   Person as PersonIcon,
-  Schedule as ScheduleIcon,
   Send as SendIcon,
   Refresh as RefreshIcon,
 } from '@mui/icons-material';
@@ -55,7 +50,7 @@ function DrawingCanvas({ onSave, width = 400, height = 160 }) {
   const [isDrawing, setIsDrawing] = useState(false);
   const [hasContent, setHasContent] = useState(false);
 
-  const getCoords = useCallback((e) => {
+  const getCoords = useCallback(e => {
     const canvas = canvasRef.current;
     const rect = canvas.getBoundingClientRect();
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -67,7 +62,7 @@ function DrawingCanvas({ onSave, width = 400, height = 160 }) {
   }, []);
 
   const startDraw = useCallback(
-    (e) => {
+    e => {
       e.preventDefault();
       const canvas = canvasRef.current;
       const ctx = canvas.getContext('2d');
@@ -80,7 +75,7 @@ function DrawingCanvas({ onSave, width = 400, height = 160 }) {
   );
 
   const draw = useCallback(
-    (e) => {
+    e => {
       e.preventDefault();
       if (!isDrawing) return;
       const canvas = canvasRef.current;
@@ -171,19 +166,14 @@ function TypedSignature({ onSave, signerName = '' }) {
   const [text, setText] = useState(signerName);
   const [font, setFont] = useState(0);
 
-  const fonts = [
-    '"Noto Naskh Arabic", serif',
-    '"Amiri", serif',
-    'cursive',
-    '"Cairo", sans-serif',
-  ];
+  const fonts = ['"Noto Naskh Arabic", serif', '"Amiri", serif', 'cursive', '"Cairo", sans-serif'];
 
   return (
     <Box>
       <TextField
         fullWidth
         value={text}
-        onChange={(e) => setText(e.target.value)}
+        onChange={e => setText(e.target.value)}
         placeholder="اكتب توقيعك هنا..."
         variant="outlined"
         sx={{ mb: 2 }}
@@ -194,9 +184,7 @@ function TypedSignature({ onSave, signerName = '' }) {
         {fonts.map((f, i) => (
           <Chip
             key={i}
-            label={
-              <span style={{ fontFamily: f, fontSize: 16 }}>{text || 'نموذج'}</span>
-            }
+            label={<span style={{ fontFamily: f, fontSize: 16 }}>{text || 'نموذج'}</span>}
             variant={font === i ? 'filled' : 'outlined'}
             color={font === i ? 'primary' : 'default'}
             onClick={() => setFont(i)}
@@ -273,7 +261,12 @@ export default function SignaturePanel({
     if (!signatureData) return;
     setSigning(true);
     try {
-      if (onSign) await onSign({ documentId, signatureData, signatureType: signTab === 0 ? 'drawn' : 'electronic' });
+      if (onSign)
+        await onSign({
+          documentId,
+          signatureData,
+          signatureType: signTab === 0 ? 'drawn' : 'electronic',
+        });
       setSignDialogOpen(false);
       setSignatureData(null);
     } catch (err) {
@@ -342,8 +335,18 @@ export default function SignaturePanel({
                 }}
               >
                 <ListItemAvatar>
-                  <Avatar sx={{ bgcolor: sig.isValid !== false ? '#4CAF50' : '#F44336', width: 36, height: 36 }}>
-                    {sig.isValid !== false ? <VerifiedIcon sx={{ fontSize: 20 }} /> : <WarningIcon sx={{ fontSize: 20 }} />}
+                  <Avatar
+                    sx={{
+                      bgcolor: sig.isValid !== false ? '#4CAF50' : '#F44336',
+                      width: 36,
+                      height: 36,
+                    }}
+                  >
+                    {sig.isValid !== false ? (
+                      <VerifiedIcon sx={{ fontSize: 20 }} />
+                    ) : (
+                      <WarningIcon sx={{ fontSize: 20 }} />
+                    )}
                   </Avatar>
                 </ListItemAvatar>
                 <ListItemText
@@ -401,7 +404,11 @@ export default function SignaturePanel({
             {pendingSigners.map((signer, i) => (
               <Chip
                 key={i}
-                avatar={<Avatar><PersonIcon /></Avatar>}
+                avatar={
+                  <Avatar>
+                    <PersonIcon />
+                  </Avatar>
+                }
                 label={signer.name || signer.email || 'موقّع'}
                 variant="outlined"
                 color="warning"
@@ -440,15 +447,9 @@ export default function SignaturePanel({
             <Tab icon={<TextIcon />} label="كتابة التوقيع" />
           </Tabs>
 
-          {signTab === 0 && (
-            <DrawingCanvas
-              onSave={(data) => setSignatureData(data)}
-            />
-          )}
+          {signTab === 0 && <DrawingCanvas onSave={data => setSignatureData(data)} />}
 
-          {signTab === 1 && (
-            <TypedSignature onSave={(data) => setSignatureData(data)} />
-          )}
+          {signTab === 1 && <TypedSignature onSave={data => setSignatureData(data)} />}
 
           {signatureData && (
             <Alert severity="success" sx={{ mt: 2 }}>
@@ -490,7 +491,7 @@ export default function SignaturePanel({
             rows={3}
             label="رسالة (اختياري)"
             value={requestMessage}
-            onChange={(e) => setRequestMessage(e.target.value)}
+            onChange={e => setRequestMessage(e.target.value)}
             placeholder="أرجو التكرم بتوقيع المستند المرفق..."
           />
         </DialogContent>

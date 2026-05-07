@@ -13,8 +13,14 @@
 
 import { memo, useEffect, useRef, useState } from 'react';
 import {
-  Box, Card, Typography, Skeleton, Tooltip,
-  LinearProgress, useTheme, alpha,
+  Box,
+  Card,
+  Typography,
+  Skeleton,
+  Tooltip,
+  LinearProgress,
+  useTheme,
+  alpha,
 } from '@mui/material';
 import {
   TrendingUp,
@@ -57,13 +63,10 @@ function Sparkline({ data = [], color, height = 36, width = 80 }) {
   const H = height;
   const step = W / (data.length - 1);
 
-  const points = data.map((v, i) => [
-    i * step,
-    H - ((v - min) / range) * H * 0.8 - H * 0.1,
-  ]);
+  const points = data.map((v, i) => [i * step, H - ((v - min) / range) * H * 0.8 - H * 0.1]);
 
-  const polyline = points.map((p) => p.join(',')).join(' ');
-  const area = `M${points[0][0]},${H} ${points.map((p) => `L${p[0]},${p[1]}`).join(' ')} L${W},${H} Z`;
+  const polyline = points.map(p => p.join(',')).join(' ');
+  const area = `M${points[0][0]},${H} ${points.map(p => `L${p[0]},${p[1]}`).join(' ')} L${W},${H} Z`;
 
   // Unique gradient ID based on color
   const gradId = `sg_${color?.replace(/[^a-zA-Z0-9]/g, '') || 'def'}`;
@@ -101,15 +104,43 @@ function TrendBadge({ value, suffix = '%', label }) {
   const isPos = value > 0;
   const isFlat = value === 0;
   const clr = isFlat ? '#94A3B8' : isPos ? '#10B981' : '#F43F5E';
-  const bg  = isFlat ? 'rgba(148,163,184,0.12)' : isPos ? 'rgba(16,185,129,0.12)' : 'rgba(244,63,94,0.12)';
-  const border = isFlat ? 'rgba(148,163,184,0.2)' : isPos ? 'rgba(16,185,129,0.2)' : 'rgba(244,63,94,0.2)';
+  const bg = isFlat
+    ? 'rgba(148,163,184,0.12)'
+    : isPos
+      ? 'rgba(16,185,129,0.12)'
+      : 'rgba(244,63,94,0.12)';
+  const border = isFlat
+    ? 'rgba(148,163,184,0.2)'
+    : isPos
+      ? 'rgba(16,185,129,0.2)'
+      : 'rgba(244,63,94,0.2)';
 
   return (
     <Tooltip title={label || ''}>
-      <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.35, px: 0.75, py: 0.3, borderRadius: '100px', backgroundColor: bg, border: `1px solid ${border}`, color: clr }}>
-        {isFlat ? <TrendingFlat sx={{ fontSize: 12 }} /> : isPos ? <TrendingUp sx={{ fontSize: 12 }} /> : <TrendingDown sx={{ fontSize: 12 }} />}
+      <Box
+        sx={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 0.35,
+          px: 0.75,
+          py: 0.3,
+          borderRadius: '100px',
+          backgroundColor: bg,
+          border: `1px solid ${border}`,
+          color: clr,
+        }}
+      >
+        {isFlat ? (
+          <TrendingFlat sx={{ fontSize: 12 }} />
+        ) : isPos ? (
+          <TrendingUp sx={{ fontSize: 12 }} />
+        ) : (
+          <TrendingDown sx={{ fontSize: 12 }} />
+        )}
         <Typography sx={{ fontSize: '0.7rem', fontWeight: 700, lineHeight: 1, color: 'inherit' }}>
-          {isPos ? '+' : ''}{value}{suffix}
+          {isPos ? '+' : ''}
+          {value}
+          {suffix}
         </Typography>
       </Box>
     </Tooltip>
@@ -131,7 +162,9 @@ function TargetProgress({ current, target, color, label }) {
             {label || 'الهدف'}: {target.toLocaleString('ar-SA')}
           </Typography>
         </Box>
-        <Typography sx={{ fontSize: '0.7rem', fontWeight: 700, color: isComplete ? '#10B981' : color }}>
+        <Typography
+          sx={{ fontSize: '0.7rem', fontWeight: 700, color: isComplete ? '#10B981' : color }}
+        >
           {Math.round(pct)}%
         </Typography>
       </Box>
@@ -175,39 +208,51 @@ const KPICard = memo(function KPICard({
   // Phase 2 new props
   target,
   targetLabel,
-  comparison,       // { label, value }
+  comparison, // { label, value }
   size = 'md',
-  pulse = false,    // pulse animation for critical metrics
+  pulse = false, // pulse animation for critical metrics
   loading = false,
   onClick,
   sx = {},
 }) {
-  const theme   = useTheme();
-  const isDark  = theme.palette.mode === 'dark';
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
   const isClickable = Boolean(onClick);
 
   const s = SIZE[size] || SIZE.md;
 
   // Determine colors
-  const primaryColor  = color || theme.palette.primary.main;
-  const cardGradient  = gradient || `linear-gradient(135deg, ${primaryColor}, ${theme.palette.secondary?.main || '#7C3AED'})`;
-  const borderColor   = alpha(primaryColor, isDark ? 0.2 : 0.12);
+  const primaryColor = color || theme.palette.primary.main;
+  const cardGradient =
+    gradient ||
+    `linear-gradient(135deg, ${primaryColor}, ${theme.palette.secondary?.main || '#7C3AED'})`;
+  const borderColor = alpha(primaryColor, isDark ? 0.2 : 0.12);
 
   // Animate numeric values
-  const numericVal = typeof value === 'number' ? value : parseInt(String(value).replace(/[^0-9]/g, '')) || 0;
-  const animated   = useAnimatedValue(loading ? 0 : numericVal);
+  const numericVal =
+    typeof value === 'number' ? value : parseInt(String(value).replace(/[^0-9]/g, '')) || 0;
+  const animated = useAnimatedValue(loading ? 0 : numericVal);
   const displayVal = typeof value === 'number' ? animated.toLocaleString('ar-SA') : value;
 
   if (loading) {
     return (
       <Card sx={{ p: s.p, ...sx }}>
-        <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2 }}>
-          <Skeleton variant="rounded" width={s.iconSize} height={s.iconSize} sx={{ borderRadius: s.iconRadius }} />
+        <Box
+          sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2 }}
+        >
+          <Skeleton
+            variant="rounded"
+            width={s.iconSize}
+            height={s.iconSize}
+            sx={{ borderRadius: s.iconRadius }}
+          />
           <Skeleton variant="rounded" width={60} height={20} />
         </Box>
         <Skeleton variant="text" width="60%" height={40} />
         <Skeleton variant="text" width="40%" />
-        {target && <Skeleton variant="rounded" width="100%" height={4} sx={{ mt: 1.5, borderRadius: 2 }} />}
+        {target && (
+          <Skeleton variant="rounded" width="100%" height={4} sx={{ mt: 1.5, borderRadius: 2 }} />
+        )}
       </Card>
     );
   }
@@ -257,7 +302,9 @@ const KPICard = memo(function KPICard({
       />
 
       {/* Top row: icon + trend */}
-      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2 }}>
+      <Box
+        sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2 }}
+      >
         {/* Icon */}
         <Box
           sx={{
@@ -283,10 +330,14 @@ const KPICard = memo(function KPICard({
             <TrendBadge value={trend} suffix={trendSuffix} label={trendLabel} />
           )}
           {trendLabel && trend === undefined && (
-            <Typography variant="caption" color="text.secondary">{trendLabel}</Typography>
+            <Typography variant="caption" color="text.secondary">
+              {trendLabel}
+            </Typography>
           )}
           {isClickable && (
-            <ArrowForwardIos sx={{ fontSize: 13, color: 'text.disabled', transform: 'scaleX(-1)' }} />
+            <ArrowForwardIos
+              sx={{ fontSize: 13, color: 'text.disabled', transform: 'scaleX(-1)' }}
+            />
           )}
         </Box>
       </Box>
@@ -313,7 +364,9 @@ const KPICard = memo(function KPICard({
       </Box>
 
       {/* Title */}
-      <Typography sx={{ fontSize: '0.875rem', fontWeight: 500, color: 'text.secondary', lineHeight: 1.4 }}>
+      <Typography
+        sx={{ fontSize: '0.875rem', fontWeight: 500, color: 'text.secondary', lineHeight: 1.4 }}
+      >
         {title}
       </Typography>
 
@@ -324,7 +377,9 @@ const KPICard = memo(function KPICard({
             {comparison.label}:
           </Typography>
           <Typography sx={{ fontSize: '0.75rem', fontWeight: 600, color: 'text.secondary' }}>
-            {typeof comparison.value === 'number' ? comparison.value.toLocaleString('ar-SA') : comparison.value}
+            {typeof comparison.value === 'number'
+              ? comparison.value.toLocaleString('ar-SA')
+              : comparison.value}
           </Typography>
         </Box>
       )}
@@ -357,12 +412,7 @@ const KPICard = memo(function KPICard({
             </Typography>
           )}
           {sparkline?.length > 1 && (
-            <Sparkline
-              data={sparkline}
-              color={primaryColor}
-              height={32}
-              width={72}
-            />
+            <Sparkline data={sparkline} color={primaryColor} height={32} width={72} />
           )}
         </Box>
       )}

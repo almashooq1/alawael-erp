@@ -85,9 +85,7 @@ export const ProTextField = ({
         dir: dir || (type === 'email' || type === 'url' ? 'ltr' : undefined),
       }}
       InputProps={{
-        startAdornment: icon ? (
-          <InputAdornment position="start">{icon}</InputAdornment>
-        ) : undefined,
+        startAdornment: icon ? <InputAdornment position="start">{icon}</InputAdornment> : undefined,
         endAdornment: (
           <>
             {isPassword && (
@@ -98,7 +96,11 @@ export const ProTextField = ({
                   onClick={() => setShowPassword(!showPassword)}
                   edge="end"
                 >
-                  {showPassword ? <VisibilityOffIcon fontSize="small" /> : <VisibilityIcon fontSize="small" />}
+                  {showPassword ? (
+                    <VisibilityOffIcon fontSize="small" />
+                  ) : (
+                    <VisibilityIcon fontSize="small" />
+                  )}
                 </IconButton>
               </InputAdornment>
             )}
@@ -129,7 +131,7 @@ export const ProSelect = ({
   name,
   value,
   onChange,
-  options = [],     // [{ value, label, disabled, group }]
+  options = [], // [{ value, label, disabled, group }]
   error,
   helperText,
   required = false,
@@ -152,10 +154,10 @@ export const ProSelect = ({
         startAdornment={icon ? <InputAdornment position="start">{icon}</InputAdornment> : undefined}
         renderValue={
           multiple
-            ? (selected) => (
+            ? selected => (
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                  {selected.map((val) => {
-                    const opt = options.find((o) => o.value === val);
+                  {selected.map(val => {
+                    const opt = options.find(o => o.value === val);
                     return <Chip key={val} label={opt?.label || val} size="small" />;
                   })}
                 </Box>
@@ -167,10 +169,12 @@ export const ProSelect = ({
       >
         {!multiple && (
           <MenuItem value="" disabled>
-            <Typography variant="body2" color="text.secondary">{placeholder}</Typography>
+            <Typography variant="body2" color="text.secondary">
+              {placeholder}
+            </Typography>
           </MenuItem>
         )}
-        {options.map((opt) => (
+        {options.map(opt => (
           <MenuItem key={opt.value} value={opt.value} disabled={opt.disabled}>
             {opt.label}
           </MenuItem>
@@ -198,25 +202,25 @@ export const ProFileUpload = ({
   const [dragActive, setDragActive] = useState(false);
 
   const handleFiles = useCallback(
-    (fileList) => {
+    fileList => {
       const files = Array.from(fileList);
-      const valid = files.filter((f) => f.size <= maxSize);
+      const valid = files.filter(f => f.size <= maxSize);
       if (onChange) onChange(multiple ? [...value, ...valid] : valid.slice(0, 1));
     },
     [maxSize, multiple, onChange, value]
   );
 
-  const handleDrop = (e) => {
+  const handleDrop = e => {
     e.preventDefault();
     setDragActive(false);
     if (!disabled) handleFiles(e.dataTransfer.files);
   };
 
-  const handleRemove = (idx) => {
+  const handleRemove = idx => {
     if (onChange) onChange(value.filter((_, i) => i !== idx));
   };
 
-  const formatSize = (bytes) => {
+  const formatSize = bytes => {
     if (bytes < 1024) return `${bytes} B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
@@ -228,7 +232,10 @@ export const ProFileUpload = ({
         {label}
       </Typography>
       <Box
-        onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
+        onDragOver={e => {
+          e.preventDefault();
+          setDragActive(true);
+        }}
         onDragLeave={() => setDragActive(false)}
         onDrop={handleDrop}
         onClick={() => !disabled && inputRef.current?.click()}
@@ -237,16 +244,14 @@ export const ProFileUpload = ({
             error
               ? theme.palette.error.main
               : dragActive
-              ? theme.palette.primary.main
-              : theme.palette.divider
+                ? theme.palette.primary.main
+                : theme.palette.divider
           }`,
           borderRadius: '12px',
           p: 3,
           textAlign: 'center',
           cursor: disabled ? 'default' : 'pointer',
-          backgroundColor: dragActive
-            ? alpha(theme.palette.primary.main, 0.04)
-            : 'transparent',
+          backgroundColor: dragActive ? alpha(theme.palette.primary.main, 0.04) : 'transparent',
           transition: 'all 0.2s',
           '&:hover': disabled
             ? {}
@@ -262,7 +267,7 @@ export const ProFileUpload = ({
           accept={accept}
           multiple={multiple}
           hidden
-          onChange={(e) => handleFiles(e.target.files)}
+          onChange={e => handleFiles(e.target.files)}
           disabled={disabled}
         />
         <UploadIcon sx={{ fontSize: 36, color: 'text.secondary', mb: 1 }} />
@@ -326,9 +331,7 @@ export const ProFormSection = ({ title, description, children, divider = true })
           {description}
         </Typography>
       )}
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        {children}
-      </Box>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>{children}</Box>
     </Box>
   );
 };
@@ -381,12 +384,7 @@ export const ProFormActions = ({
         </Button>
       )}
       {onCancel && (
-        <Button
-          variant="outlined"
-          color="inherit"
-          onClick={onCancel}
-          disabled={loading}
-        >
+        <Button variant="outlined" color="inherit" onClick={onCancel} disabled={loading}>
           {cancelLabel}
         </Button>
       )}
@@ -414,28 +412,46 @@ export const useProForm = (initialValues = {}, validationSchema = {}) => {
   const [submitting, setSubmitting] = useState(false);
 
   const setValue = useCallback((name, val) => {
-    setValues((prev) => ({ ...prev, [name]: val }));
+    setValues(prev => ({ ...prev, [name]: val }));
     // Clear error on change
-    setErrors((prev) => {
-      if (prev[name]) { const next = { ...prev }; delete next[name]; return next; }
+    setErrors(prev => {
+      if (prev[name]) {
+        const next = { ...prev };
+        delete next[name];
+        return next;
+      }
       return prev;
     });
   }, []);
 
-  const handleChange = useCallback((e) => {
-    const { name, value, type, checked } = e.target;
-    setValue(name, type === 'checkbox' ? checked : value);
-  }, [setValue]);
+  const handleChange = useCallback(
+    e => {
+      const { name, value, type, checked } = e.target;
+      setValue(name, type === 'checkbox' ? checked : value);
+    },
+    [setValue]
+  );
 
-  const handleBlur = useCallback((e) => {
-    const { name } = e.target;
-    setTouched((prev) => ({ ...prev, [name]: true }));
-    // Validate single field
-    if (validationSchema[name]) {
-      const err = validationSchema[name](values[name], values);
-      setErrors((prev) => (err ? { ...prev, [name]: err } : (() => { const n = { ...prev }; delete n[name]; return n; })()));
-    }
-  }, [validationSchema, values]);
+  const handleBlur = useCallback(
+    e => {
+      const { name } = e.target;
+      setTouched(prev => ({ ...prev, [name]: true }));
+      // Validate single field
+      if (validationSchema[name]) {
+        const err = validationSchema[name](values[name], values);
+        setErrors(prev =>
+          err
+            ? { ...prev, [name]: err }
+            : (() => {
+                const n = { ...prev };
+                delete n[name];
+                return n;
+              })()
+        );
+      }
+    },
+    [validationSchema, values]
+  );
 
   const validate = useCallback(() => {
     const newErrors = {};
@@ -456,7 +472,7 @@ export const useProForm = (initialValues = {}, validationSchema = {}) => {
   }, [initialValues]);
 
   const handleSubmit = useCallback(
-    async (onSubmit) => {
+    async onSubmit => {
       if (!validate()) return false;
       setSubmitting(true);
       try {
@@ -472,7 +488,7 @@ export const useProForm = (initialValues = {}, validationSchema = {}) => {
     [validate, values]
   );
 
-  const getFieldProps = (name) => ({
+  const getFieldProps = name => ({
     name,
     value: values[name] || '',
     onChange: handleChange,
@@ -500,22 +516,33 @@ export const useProForm = (initialValues = {}, validationSchema = {}) => {
 
 // ─── VALIDATORS ──────────────────────────────────────────────────────────────
 export const validators = {
-  required: (msg = 'هذا الحقل مطلوب') => (val) => (!val && val !== 0 ? msg : null),
-  email: (msg = 'بريد إلكتروني غير صالح') => (val) =>
-    val && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val) ? msg : null,
-  minLength: (min, msg) => (val) =>
+  required:
+    (msg = 'هذا الحقل مطلوب') =>
+    val =>
+      !val && val !== 0 ? msg : null,
+  email:
+    (msg = 'بريد إلكتروني غير صالح') =>
+    val =>
+      val && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val) ? msg : null,
+  minLength: (min, msg) => val =>
     val && val.length < min ? msg || `الحد الأدنى ${min} أحرف` : null,
-  maxLength: (max, msg) => (val) =>
+  maxLength: (max, msg) => val =>
     val && val.length > max ? msg || `الحد الأقصى ${max} حرف` : null,
-  phone: (msg = 'رقم هاتف غير صالح') => (val) =>
-    val && !/^[+]?[\d\s-()]{7,15}$/.test(val) ? msg : null,
-  match: (fieldName, msg = 'القيم غير متطابقة') => (val, allValues) =>
-    val !== allValues[fieldName] ? msg : null,
-  compose: (...fns) => (val, all) => {
-    for (const fn of fns) {
-      const err = fn(val, all);
-      if (err) return err;
-    }
-    return null;
-  },
+  phone:
+    (msg = 'رقم هاتف غير صالح') =>
+    val =>
+      val && !/^[+]?[\d\s-()]{7,15}$/.test(val) ? msg : null,
+  match:
+    (fieldName, msg = 'القيم غير متطابقة') =>
+    (val, allValues) =>
+      val !== allValues[fieldName] ? msg : null,
+  compose:
+    (...fns) =>
+    (val, all) => {
+      for (const fn of fns) {
+        const err = fn(val, all);
+        if (err) return err;
+      }
+      return null;
+    },
 };

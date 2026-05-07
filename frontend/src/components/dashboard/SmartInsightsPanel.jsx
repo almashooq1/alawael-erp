@@ -5,12 +5,16 @@
 
 import React, { useState } from 'react';
 import {
-  Box, Paper, Typography, Chip, useTheme,
-  IconButton, Tooltip, Collapse,
+  Box,
+  Paper,
+  Typography,
+  Chip,
+  useTheme,
+  IconButton,
+  Tooltip,
+  Collapse,
 } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
-import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import WarningAmberRoundedIcon from '@mui/icons-material/WarningAmberRounded';
 import LightbulbRoundedIcon from '@mui/icons-material/LightbulbRounded';
 import PsychologyRoundedIcon from '@mui/icons-material/PsychologyRounded';
@@ -27,30 +31,30 @@ const INSIGHT_TYPES = {
   prediction: {
     icon: <ShowChartRoundedIcon />,
     gradient: 'linear-gradient(135deg,#667eea,#764ba2)',
-    glow:     '#667eea',
-    label:    'توقع',
-    bg:       'rgba(102,126,234,0.08)',
+    glow: '#667eea',
+    label: 'توقع',
+    bg: 'rgba(102,126,234,0.08)',
   },
   anomaly: {
     icon: <WarningAmberRoundedIcon />,
     gradient: 'linear-gradient(135deg,#f7971e,#ffd200)',
-    glow:     '#f7971e',
-    label:    'شذوذ',
-    bg:       'rgba(247,151,30,0.08)',
+    glow: '#f7971e',
+    label: 'شذوذ',
+    bg: 'rgba(247,151,30,0.08)',
   },
   recommendation: {
     icon: <LightbulbRoundedIcon />,
     gradient: 'linear-gradient(135deg,#43cea2,#185a9d)',
-    glow:     '#43cea2',
-    label:    'توصية',
-    bg:       'rgba(67,206,162,0.08)',
+    glow: '#43cea2',
+    label: 'توصية',
+    bg: 'rgba(67,206,162,0.08)',
   },
   alert: {
     icon: <NotificationsActiveRoundedIcon />,
     gradient: 'linear-gradient(135deg,#f5576c,#f093fb)',
-    glow:     '#f5576c',
-    label:    'تنبيه',
-    bg:       'rgba(245,87,108,0.08)',
+    glow: '#f5576c',
+    label: 'تنبيه',
+    bg: 'rgba(245,87,108,0.08)',
   },
 };
 
@@ -93,14 +97,13 @@ const DEMO_INSIGHTS = [
   },
 ];
 
-const CONFIDENCE_COLOR = (v) =>
-  v >= 90 ? '#4caf50' : v >= 70 ? '#ff9800' : '#f44336';
+const CONFIDENCE_COLOR = v => (v >= 90 ? '#4caf50' : v >= 70 ? '#ff9800' : '#f44336');
 
 const IMPACT_CONFIG = {
-  critical: { label: 'حرج',   color: '#f44336', bg: 'rgba(244,67,54,0.1)'   },
-  high:     { label: 'عالي',  color: '#ff9800', bg: 'rgba(255,152,0,0.1)'   },
-  medium:   { label: 'متوسط', color: '#2196f3', bg: 'rgba(33,150,243,0.1)'  },
-  low:      { label: 'منخفض', color: '#4caf50', bg: 'rgba(76,175,80,0.1)'   },
+  critical: { label: 'حرج', color: '#f44336', bg: 'rgba(244,67,54,0.1)' },
+  high: { label: 'عالي', color: '#ff9800', bg: 'rgba(255,152,0,0.1)' },
+  medium: { label: 'متوسط', color: '#2196f3', bg: 'rgba(33,150,243,0.1)' },
+  low: { label: 'منخفض', color: '#4caf50', bg: 'rgba(76,175,80,0.1)' },
 };
 
 /* ─────────────────────────────────────── */
@@ -138,24 +141,32 @@ const InsightCard = ({ insight, index, isDark }) => {
         }}
       >
         {/* Glow accent line */}
-        <Box sx={{
-          height: '2px',
-          background: cfg.gradient,
-          opacity: 0.8,
-        }} />
+        <Box
+          sx={{
+            height: '2px',
+            background: cfg.gradient,
+            opacity: 0.8,
+          }}
+        />
 
         <Box sx={{ p: 1.8 }}>
           {/* Header row */}
           <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.2 }}>
             {/* Icon */}
-            <Box sx={{
-              width: 36, height: 36, borderRadius: '10px',
-              background: cfg.gradient,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              flexShrink: 0,
-              boxShadow: `0 4px 12px ${cfg.glow}35`,
-              '& svg': { fontSize: 18, color: 'white' },
-            }}>
+            <Box
+              sx={{
+                width: 36,
+                height: 36,
+                borderRadius: '10px',
+                background: cfg.gradient,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+                boxShadow: `0 4px 12px ${cfg.glow}35`,
+                '& svg': { fontSize: 18, color: 'white' },
+              }}
+            >
               {cfg.icon}
             </Box>
 
@@ -166,7 +177,9 @@ const InsightCard = ({ insight, index, isDark }) => {
                   label={cfg.label}
                   size="small"
                   sx={{
-                    height: 18, fontSize: '0.58rem', fontWeight: 800,
+                    height: 18,
+                    fontSize: '0.58rem',
+                    fontWeight: 800,
                     background: cfg.bg,
                     color: cfg.glow,
                     border: `1px solid ${cfg.glow}30`,
@@ -176,65 +189,95 @@ const InsightCard = ({ insight, index, isDark }) => {
                   label={imp.label}
                   size="small"
                   sx={{
-                    height: 18, fontSize: '0.58rem', fontWeight: 800,
+                    height: 18,
+                    fontSize: '0.58rem',
+                    fontWeight: 800,
                     background: imp.bg,
                     color: imp.color,
                     border: `1px solid ${imp.color}30`,
                   }}
                 />
                 {/* Confidence bar */}
-                <Box sx={{
-                  display: 'flex', alignItems: 'center', gap: 0.5,
-                  px: 0.8, borderRadius: '6px',
-                  background: `${CONFIDENCE_COLOR(insight.confidence)}12`,
-                  border: `1px solid ${CONFIDENCE_COLOR(insight.confidence)}25`,
-                  height: 18,
-                }}>
-                  <Box sx={{
-                    width: 28, height: 4, borderRadius: 2,
-                    background: 'rgba(128,128,128,0.2)',
-                    overflow: 'hidden',
-                  }}>
-                    <Box sx={{
-                      width: `${insight.confidence}%`,
-                      height: '100%',
-                      background: CONFIDENCE_COLOR(insight.confidence),
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 0.5,
+                    px: 0.8,
+                    borderRadius: '6px',
+                    background: `${CONFIDENCE_COLOR(insight.confidence)}12`,
+                    border: `1px solid ${CONFIDENCE_COLOR(insight.confidence)}25`,
+                    height: 18,
+                  }}
+                >
+                  <Box
+                    sx={{
+                      width: 28,
+                      height: 4,
                       borderRadius: 2,
-                    }} />
+                      background: 'rgba(128,128,128,0.2)',
+                      overflow: 'hidden',
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        width: `${insight.confidence}%`,
+                        height: '100%',
+                        background: CONFIDENCE_COLOR(insight.confidence),
+                        borderRadius: 2,
+                      }}
+                    />
                   </Box>
-                  <Typography sx={{ fontSize: '0.58rem', fontWeight: 800, color: CONFIDENCE_COLOR(insight.confidence) }}>
+                  <Typography
+                    sx={{
+                      fontSize: '0.58rem',
+                      fontWeight: 800,
+                      color: CONFIDENCE_COLOR(insight.confidence),
+                    }}
+                  >
                     {insight.confidence}%
                   </Typography>
                 </Box>
               </Box>
 
-              <Typography sx={{
-                fontSize: '0.78rem',
-                fontWeight: 700,
-                lineHeight: 1.3,
-                color: isDark ? 'rgba(255,255,255,0.9)' : '#1a1a2e',
-              }}>
+              <Typography
+                sx={{
+                  fontSize: '0.78rem',
+                  fontWeight: 700,
+                  lineHeight: 1.3,
+                  color: isDark ? 'rgba(255,255,255,0.9)' : '#1a1a2e',
+                }}
+              >
                 {insight.title}
               </Typography>
             </Box>
 
-            <Box sx={{ color: isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)', flexShrink: 0, mt: 0.5 }}>
-              {expanded
-                ? <ExpandLessRoundedIcon sx={{ fontSize: 16 }} />
-                : <ExpandMoreRoundedIcon sx={{ fontSize: 16 }} />
-              }
+            <Box
+              sx={{
+                color: isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)',
+                flexShrink: 0,
+                mt: 0.5,
+              }}
+            >
+              {expanded ? (
+                <ExpandLessRoundedIcon sx={{ fontSize: 16 }} />
+              ) : (
+                <ExpandMoreRoundedIcon sx={{ fontSize: 16 }} />
+              )}
             </Box>
           </Box>
 
           {/* Expandable body */}
           <Collapse in={expanded}>
             <Box sx={{ mt: 1.5, pl: '48px' }}>
-              <Typography sx={{
-                fontSize: '0.72rem',
-                color: isDark ? 'rgba(255,255,255,0.55)' : 'rgba(0,0,0,0.55)',
-                lineHeight: 1.6,
-                mb: 1.2,
-              }}>
+              <Typography
+                sx={{
+                  fontSize: '0.72rem',
+                  color: isDark ? 'rgba(255,255,255,0.55)' : 'rgba(0,0,0,0.55)',
+                  lineHeight: 1.6,
+                  mb: 1.2,
+                }}
+              >
                 {insight.desc}
               </Typography>
 
@@ -244,8 +287,12 @@ const InsightCard = ({ insight, index, isDark }) => {
                   whileHover={{ x: -3 }}
                   whileTap={{ scale: 0.97 }}
                   sx={{
-                    display: 'inline-flex', alignItems: 'center', gap: 0.8,
-                    px: 1.5, py: 0.6, borderRadius: '10px',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 0.8,
+                    px: 1.5,
+                    py: 0.6,
+                    borderRadius: '10px',
                     background: cfg.gradient,
                     cursor: 'pointer',
                     boxShadow: `0 4px 12px ${cfg.glow}30`,
@@ -268,37 +315,50 @@ const InsightCard = ({ insight, index, isDark }) => {
 /* ─────────────────────────────────────── */
 /*  Brain animation header                 */
 /* ─────────────────────────────────────── */
-const BrainOrb = ({ isDark }) => (
-  <Box sx={{
-    position: 'relative',
-    width: 44, height: 44, flexShrink: 0,
-  }}>
+const BrainOrb = ({ _isDark }) => (
+  <Box
+    sx={{
+      position: 'relative',
+      width: 44,
+      height: 44,
+      flexShrink: 0,
+    }}
+  >
     {/* Rings */}
     {[0, 1, 2].map(i => (
-      <Box key={i} sx={{
-        position: 'absolute', inset: 0,
-        borderRadius: '50%',
-        border: '1px solid rgba(102,126,234,0.3)',
-        animation: `brainRing${i} ${2 + i * 0.6}s ease-in-out infinite`,
-        [`@keyframes brainRing${i}`]: {
-          '0%,100%': { transform: 'scale(1)', opacity: 0.3 },
-          '50%': { transform: `scale(${1.2 + i * 0.15})`, opacity: 0.1 },
-        },
-      }} />
+      <Box
+        key={i}
+        sx={{
+          position: 'absolute',
+          inset: 0,
+          borderRadius: '50%',
+          border: '1px solid rgba(102,126,234,0.3)',
+          animation: `brainRing${i} ${2 + i * 0.6}s ease-in-out infinite`,
+          [`@keyframes brainRing${i}`]: {
+            '0%,100%': { transform: 'scale(1)', opacity: 0.3 },
+            '50%': { transform: `scale(${1.2 + i * 0.15})`, opacity: 0.1 },
+          },
+        }}
+      />
     ))}
     {/* Core */}
-    <Box sx={{
-      position: 'absolute', inset: 4,
-      borderRadius: '50%',
-      background: 'linear-gradient(135deg,#667eea,#764ba2)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      boxShadow: '0 4px 16px rgba(102,126,234,0.5)',
-      animation: 'brainPulse 3s ease-in-out infinite',
-      '@keyframes brainPulse': {
-        '0%,100%': { boxShadow: '0 4px 16px rgba(102,126,234,0.5)' },
-        '50%': { boxShadow: '0 6px 24px rgba(102,126,234,0.8)' },
-      },
-    }}>
+    <Box
+      sx={{
+        position: 'absolute',
+        inset: 4,
+        borderRadius: '50%',
+        background: 'linear-gradient(135deg,#667eea,#764ba2)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        boxShadow: '0 4px 16px rgba(102,126,234,0.5)',
+        animation: 'brainPulse 3s ease-in-out infinite',
+        '@keyframes brainPulse': {
+          '0%,100%': { boxShadow: '0 4px 16px rgba(102,126,234,0.5)' },
+          '50%': { boxShadow: '0 6px 24px rgba(102,126,234,0.8)' },
+        },
+      }}
+    >
       <PsychologyRoundedIcon sx={{ color: 'white', fontSize: 20 }} />
     </Box>
   </Box>
@@ -314,16 +374,22 @@ const SmartInsightsPanel = ({ insights, onRefresh, loading = false }) => {
 
   const items = insights?.length ? insights : DEMO_INSIGHTS;
 
-  const filtered = activeFilter === 'all'
-    ? items
-    : items.filter(i => i.type === activeFilter);
+  const filtered = activeFilter === 'all' ? items : items.filter(i => i.type === activeFilter);
 
   const filters = [
-    { key: 'all',            label: 'الكل',    count: items.length },
-    { key: 'prediction',     label: 'توقعات',  count: items.filter(i => i.type === 'prediction').length },
-    { key: 'anomaly',        label: 'شذوذات',  count: items.filter(i => i.type === 'anomaly').length },
-    { key: 'recommendation', label: 'توصيات',  count: items.filter(i => i.type === 'recommendation').length },
-    { key: 'alert',          label: 'تنبيهات', count: items.filter(i => i.type === 'alert').length },
+    { key: 'all', label: 'الكل', count: items.length },
+    {
+      key: 'prediction',
+      label: 'توقعات',
+      count: items.filter(i => i.type === 'prediction').length,
+    },
+    { key: 'anomaly', label: 'شذوذات', count: items.filter(i => i.type === 'anomaly').length },
+    {
+      key: 'recommendation',
+      label: 'توصيات',
+      count: items.filter(i => i.type === 'recommendation').length,
+    },
+    { key: 'alert', label: 'تنبيهات', count: items.filter(i => i.type === 'alert').length },
   ].filter(f => f.count > 0 || f.key === 'all');
 
   return (
@@ -351,30 +417,46 @@ const SmartInsightsPanel = ({ insights, onRefresh, loading = false }) => {
         }}
       >
         {/* Gradient top bar */}
-        <Box sx={{
-          position: 'absolute', top: 0, left: 0, right: 0, height: '3px',
-          background: 'linear-gradient(90deg,#667eea,#764ba2,#f093fb,#667eea)',
-          backgroundSize: '200% auto',
-          animation: 'aiBar 3s linear infinite',
-          '@keyframes aiBar': {
-            '0%': { backgroundPosition: '0% center' },
-            '100%': { backgroundPosition: '200% center' },
-          },
-        }} />
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: '3px',
+            background: 'linear-gradient(90deg,#667eea,#764ba2,#f093fb,#667eea)',
+            backgroundSize: '200% auto',
+            animation: 'aiBar 3s linear infinite',
+            '@keyframes aiBar': {
+              '0%': { backgroundPosition: '0% center' },
+              '100%': { backgroundPosition: '200% center' },
+            },
+          }}
+        />
 
         {/* Background mesh pattern */}
-        <Box sx={{
-          position: 'absolute', inset: 0, pointerEvents: 'none',
-          backgroundImage: isDark
-            ? 'radial-gradient(circle at 20% 80%, rgba(102,126,234,0.05) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(240,147,251,0.04) 0%, transparent 50%)'
-            : 'radial-gradient(circle at 20% 80%, rgba(102,126,234,0.04) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(240,147,251,0.03) 0%, transparent 50%)',
-        }} />
+        <Box
+          sx={{
+            position: 'absolute',
+            inset: 0,
+            pointerEvents: 'none',
+            backgroundImage: isDark
+              ? 'radial-gradient(circle at 20% 80%, rgba(102,126,234,0.05) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(240,147,251,0.04) 0%, transparent 50%)'
+              : 'radial-gradient(circle at 20% 80%, rgba(102,126,234,0.04) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(240,147,251,0.03) 0%, transparent 50%)',
+          }}
+        />
 
         {/* ── Header ────────────────────── */}
-        <Box sx={{
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          mb: 2, position: 'relative', zIndex: 1,
-        }}>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            mb: 2,
+            position: 'relative',
+            zIndex: 1,
+          }}
+        >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
             <BrainOrb isDark={isDark} />
             <Box>
@@ -386,9 +468,12 @@ const SmartInsightsPanel = ({ insights, onRefresh, loading = false }) => {
                   label="AI"
                   size="small"
                   sx={{
-                    height: 18, fontSize: '0.58rem', fontWeight: 900,
+                    height: 18,
+                    fontSize: '0.58rem',
+                    fontWeight: 900,
                     background: 'linear-gradient(135deg,#667eea,#764ba2)',
-                    color: 'white', border: 'none',
+                    color: 'white',
+                    border: 'none',
                     boxShadow: '0 2px 8px rgba(102,126,234,0.4)',
                     letterSpacing: 0.5,
                   }}
@@ -405,7 +490,9 @@ const SmartInsightsPanel = ({ insights, onRefresh, loading = false }) => {
               onClick={onRefresh}
               size="small"
               sx={{
-                width: 32, height: 32, borderRadius: '10px',
+                width: 32,
+                height: 32,
+                borderRadius: '10px',
                 border: '1px solid rgba(102,126,234,0.2)',
                 background: 'rgba(102,126,234,0.08)',
                 '&:hover': { background: 'rgba(102,126,234,0.15)' },
@@ -419,10 +506,16 @@ const SmartInsightsPanel = ({ insights, onRefresh, loading = false }) => {
         </Box>
 
         {/* ── Filter Pills ──────────────── */}
-        <Box sx={{
-          display: 'flex', gap: 0.7, mb: 2, flexWrap: 'wrap',
-          position: 'relative', zIndex: 1,
-        }}>
+        <Box
+          sx={{
+            display: 'flex',
+            gap: 0.7,
+            mb: 2,
+            flexWrap: 'wrap',
+            position: 'relative',
+            zIndex: 1,
+          }}
+        >
           {filters.map(f => {
             const isActive = activeFilter === f.key;
             const cfg = f.key !== 'all' ? INSIGHT_TYPES[f.key] : null;
@@ -431,38 +524,61 @@ const SmartInsightsPanel = ({ insights, onRefresh, loading = false }) => {
                 <Box
                   onClick={() => setActiveFilter(f.key)}
                   sx={{
-                    display: 'flex', alignItems: 'center', gap: 0.6,
-                    px: 1.2, py: 0.4, borderRadius: '10px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 0.6,
+                    px: 1.2,
+                    py: 0.4,
+                    borderRadius: '10px',
                     cursor: 'pointer',
                     background: isActive
-                      ? (cfg ? cfg.gradient : 'linear-gradient(135deg,#667eea,#764ba2)')
-                      : (isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)'),
+                      ? cfg
+                        ? cfg.gradient
+                        : 'linear-gradient(135deg,#667eea,#764ba2)'
+                      : isDark
+                        ? 'rgba(255,255,255,0.05)'
+                        : 'rgba(0,0,0,0.04)',
                     border: '1px solid',
                     borderColor: isActive
                       ? 'transparent'
-                      : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)'),
+                      : isDark
+                        ? 'rgba(255,255,255,0.08)'
+                        : 'rgba(0,0,0,0.06)',
                     transition: 'all 0.2s',
-                    boxShadow: isActive
-                      ? `0 3px 10px ${cfg?.glow || '#667eea'}35`
-                      : 'none',
+                    boxShadow: isActive ? `0 3px 10px ${cfg?.glow || '#667eea'}35` : 'none',
                   }}
                 >
-                  <Typography sx={{
-                    fontSize: '0.68rem',
-                    fontWeight: 700,
-                    color: isActive ? 'white' : 'text.secondary',
-                  }}>
+                  <Typography
+                    sx={{
+                      fontSize: '0.68rem',
+                      fontWeight: 700,
+                      color: isActive ? 'white' : 'text.secondary',
+                    }}
+                  >
                     {f.label}
                   </Typography>
-                  <Box sx={{
-                    width: 16, height: 16, borderRadius: '50%',
-                    background: isActive ? 'rgba(255,255,255,0.25)' : (isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)'),
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  }}>
-                    <Typography sx={{
-                      fontSize: '0.55rem', fontWeight: 900,
-                      color: isActive ? 'white' : 'text.disabled',
-                    }}>
+                  <Box
+                    sx={{
+                      width: 16,
+                      height: 16,
+                      borderRadius: '50%',
+                      background: isActive
+                        ? 'rgba(255,255,255,0.25)'
+                        : isDark
+                          ? 'rgba(255,255,255,0.1)'
+                          : 'rgba(0,0,0,0.08)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <Typography
+                      sx={{
+                        fontSize: '0.55rem',
+                        fontWeight: 900,
+                        color: isActive ? 'white' : 'text.disabled',
+                      }}
+                    >
                       {f.count}
                     </Typography>
                   </Box>
@@ -473,25 +589,26 @@ const SmartInsightsPanel = ({ insights, onRefresh, loading = false }) => {
         </Box>
 
         {/* ── Insight Cards ─────────────── */}
-        <Box sx={{
-          display: 'flex', flexDirection: 'column', gap: 1,
-          position: 'relative', zIndex: 1,
-          maxHeight: 400, overflowY: 'auto',
-          '&::-webkit-scrollbar': { width: 4 },
-          '&::-webkit-scrollbar-track': { background: 'transparent' },
-          '&::-webkit-scrollbar-thumb': {
-            borderRadius: 4,
-            background: 'rgba(102,126,234,0.3)',
-          },
-        }}>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 1,
+            position: 'relative',
+            zIndex: 1,
+            maxHeight: 400,
+            overflowY: 'auto',
+            '&::-webkit-scrollbar': { width: 4 },
+            '&::-webkit-scrollbar-track': { background: 'transparent' },
+            '&::-webkit-scrollbar-thumb': {
+              borderRadius: 4,
+              background: 'rgba(102,126,234,0.3)',
+            },
+          }}
+        >
           <AnimatePresence mode="popLayout">
             {filtered.map((insight, i) => (
-              <InsightCard
-                key={insight.id}
-                insight={insight}
-                index={i}
-                isDark={isDark}
-              />
+              <InsightCard key={insight.id} insight={insight} index={i} isDark={isDark} />
             ))}
           </AnimatePresence>
           {filtered.length === 0 && (
@@ -505,24 +622,34 @@ const SmartInsightsPanel = ({ insights, onRefresh, loading = false }) => {
         </Box>
 
         {/* ── Footer: AI status ─────────── */}
-        <Box sx={{
-          mt: 2, pt: 1.5,
-          borderTop: '1px solid',
-          borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          position: 'relative', zIndex: 1,
-        }}>
+        <Box
+          sx={{
+            mt: 2,
+            pt: 1.5,
+            borderTop: '1px solid',
+            borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            position: 'relative',
+            zIndex: 1,
+          }}
+        >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8 }}>
-            <Box sx={{
-              width: 7, height: 7, borderRadius: '50%',
-              background: '#4caf50',
-              boxShadow: '0 0 8px rgba(76,175,80,0.6)',
-              animation: 'aiStatus 2s ease-in-out infinite',
-              '@keyframes aiStatus': {
-                '0%,100%': { opacity: 1 },
-                '50%': { opacity: 0.4 },
-              },
-            }} />
+            <Box
+              sx={{
+                width: 7,
+                height: 7,
+                borderRadius: '50%',
+                background: '#4caf50',
+                boxShadow: '0 0 8px rgba(76,175,80,0.6)',
+                animation: 'aiStatus 2s ease-in-out infinite',
+                '@keyframes aiStatus': {
+                  '0%,100%': { opacity: 1 },
+                  '50%': { opacity: 0.4 },
+                },
+              }}
+            />
             <Typography sx={{ fontSize: '0.65rem', color: 'text.disabled', fontWeight: 500 }}>
               نموذج الذكاء الاصطناعي نشط · يتعلم من بياناتك
             </Typography>

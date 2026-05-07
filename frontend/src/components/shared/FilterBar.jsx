@@ -13,13 +13,24 @@
 
 import { memo, useState, useCallback, useEffect, useRef } from 'react';
 import {
-  Box, InputBase, IconButton, Chip, Tooltip, Button,
-  Popover, Badge, Typography, Divider, useTheme, alpha,
-  Collapse, TextField, ToggleButtonGroup, ToggleButton,
+  Box,
+  InputBase,
+  IconButton,
+  Chip,
+  Tooltip,
+  Button,
+  Popover,
+  Badge,
+  Typography,
+  useTheme,
+  alpha,
+  Collapse,
+  TextField,
+  ToggleButtonGroup,
+  ToggleButton,
 } from '@mui/material';
 import {
   Search as SearchIcon,
-  FilterListOutlined,
   CloseOutlined,
   TuneOutlined,
   KeyboardArrowDown,
@@ -28,7 +39,6 @@ import {
   ViewListOutlined,
   ViewModuleOutlined,
   CalendarMonth as CalendarIcon,
-  BookmarkBorderOutlined,
 } from '@mui/icons-material';
 
 // ─── Debounce hook ────────────────────────────────────────────────────────────
@@ -43,23 +53,27 @@ function useDebounce(value, delay = 400) {
 
 // ─── Filter option chip ───────────────────────────────────────────────────────
 function FilterChip({ label, options = [], value, onChange, color = 'primary', multiple = false }) {
-  const theme  = useTheme();
+  const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
   const [anchor, setAnchor] = useState(null);
 
   // Support single and multiple selection
   const selectedValues = multiple ? (Array.isArray(value) ? value : []) : [];
-  const selectedOption = !multiple ? options.find((o) => o.value === value) : null;
+  const selectedOption = !multiple ? options.find(o => o.value === value) : null;
   const hasValue = multiple ? selectedValues.length > 0 : Boolean(value);
 
   const displayLabel = multiple
-    ? (selectedValues.length > 0 ? `${label} (${selectedValues.length})` : label)
-    : (selectedOption ? selectedOption.label : label);
+    ? selectedValues.length > 0
+      ? `${label} (${selectedValues.length})`
+      : label
+    : selectedOption
+      ? selectedOption.label
+      : label;
 
-  const handleSelect = (optValue) => {
+  const handleSelect = optValue => {
     if (multiple) {
       const next = selectedValues.includes(optValue)
-        ? selectedValues.filter((v) => v !== optValue)
+        ? selectedValues.filter(v => v !== optValue)
         : [...selectedValues, optValue];
       onChange(next.length > 0 ? next : null);
     } else {
@@ -74,11 +88,17 @@ function FilterChip({ label, options = [], value, onChange, color = 'primary', m
         label={
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
             <span>{displayLabel}</span>
-            <KeyboardArrowDown sx={{ fontSize: 14, transition: 'transform 0.2s', transform: anchor ? 'rotate(180deg)' : 'none' }} />
+            <KeyboardArrowDown
+              sx={{
+                fontSize: 14,
+                transition: 'transform 0.2s',
+                transform: anchor ? 'rotate(180deg)' : 'none',
+              }}
+            />
           </Box>
         }
         size="small"
-        onClick={(e) => setAnchor(e.currentTarget)}
+        onClick={e => setAnchor(e.currentTarget)}
         onDelete={hasValue ? () => onChange(null) : undefined}
         deleteIcon={hasValue ? <CloseOutlined sx={{ fontSize: 13 }} /> : undefined}
         sx={{
@@ -87,11 +107,13 @@ function FilterChip({ label, options = [], value, onChange, color = 'primary', m
           fontWeight: hasValue ? 600 : 400,
           cursor: 'pointer',
           borderRadius: '8px',
-          border: `1px solid ${hasValue ? alpha(theme.palette[color]?.main || '#6366F1', 0.4) : (isDark ? 'rgba(255,255,255,0.1)' : '#E2E8F0')}`,
+          border: `1px solid ${hasValue ? alpha(theme.palette[color]?.main || '#6366F1', 0.4) : isDark ? 'rgba(255,255,255,0.1)' : '#E2E8F0'}`,
           backgroundColor: hasValue
             ? alpha(theme.palette[color]?.main || '#6366F1', isDark ? 0.15 : 0.07)
-            : (isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC'),
-          color: hasValue ? (theme.palette[color]?.main || '#6366F1') : 'text.secondary',
+            : isDark
+              ? 'rgba(255,255,255,0.04)'
+              : '#F8FAFC',
+          color: hasValue ? theme.palette[color]?.main || '#6366F1' : 'text.secondary',
           '& .MuiChip-label': { px: 1.25 },
           transition: 'all 0.15s',
           '&:hover': {
@@ -106,12 +128,12 @@ function FilterChip({ label, options = [], value, onChange, color = 'primary', m
         onClose={() => setAnchor(null)}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-        slotProps={{ paper: { sx: { width: 220, mt: 0.75, py: 0.5, maxHeight: 320, overflow: 'auto' } } }}
+        slotProps={{
+          paper: { sx: { width: 220, mt: 0.75, py: 0.5, maxHeight: 320, overflow: 'auto' } },
+        }}
       >
-        {options.map((opt) => {
-          const isSelected = multiple
-            ? selectedValues.includes(opt.value)
-            : opt.value === value;
+        {options.map(opt => {
+          const isSelected = multiple ? selectedValues.includes(opt.value) : opt.value === value;
 
           return (
             <Box
@@ -128,7 +150,7 @@ function FilterChip({ label, options = [], value, onChange, color = 'primary', m
                 cursor: 'pointer',
                 fontSize: '0.8125rem',
                 fontWeight: isSelected ? 600 : 400,
-                color: isSelected ? (theme.palette[color]?.main || '#6366F1') : 'text.primary',
+                color: isSelected ? theme.palette[color]?.main || '#6366F1' : 'text.primary',
                 backgroundColor: isSelected
                   ? alpha(theme.palette[color]?.main || '#6366F1', 0.07)
                   : 'transparent',
@@ -139,10 +161,15 @@ function FilterChip({ label, options = [], value, onChange, color = 'primary', m
               }}
             >
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                {opt.icon && <Box sx={{ color: opt.color || 'inherit', display: 'flex' }}>{opt.icon}</Box>}
+                {opt.icon && (
+                  <Box sx={{ color: opt.color || 'inherit', display: 'flex' }}>{opt.icon}</Box>
+                )}
                 {opt.label}
                 {opt.count !== undefined && (
-                  <Typography component="span" sx={{ fontSize: '0.7rem', color: 'text.disabled', ml: 0.5 }}>
+                  <Typography
+                    component="span"
+                    sx={{ fontSize: '0.7rem', color: 'text.disabled', ml: 0.5 }}
+                  >
                     ({opt.count})
                   </Typography>
                 )}
@@ -167,13 +194,9 @@ function DateRangeChip({ label = 'التاريخ', value, onChange, color = 'pri
     <>
       <Chip
         icon={<CalendarIcon sx={{ fontSize: 14 }} />}
-        label={
-          hasValue
-            ? `${value.from || '...'} → ${value.to || '...'}`
-            : label
-        }
+        label={hasValue ? `${value.from || '...'} → ${value.to || '...'}` : label}
         size="small"
-        onClick={(e) => setAnchor(e.currentTarget)}
+        onClick={e => setAnchor(e.currentTarget)}
         onDelete={hasValue ? () => onChange(null) : undefined}
         deleteIcon={hasValue ? <CloseOutlined sx={{ fontSize: 13 }} /> : undefined}
         sx={{
@@ -182,11 +205,13 @@ function DateRangeChip({ label = 'التاريخ', value, onChange, color = 'pri
           fontWeight: hasValue ? 600 : 400,
           cursor: 'pointer',
           borderRadius: '8px',
-          border: `1px solid ${hasValue ? alpha(theme.palette[color]?.main || '#6366F1', 0.4) : (isDark ? 'rgba(255,255,255,0.1)' : '#E2E8F0')}`,
+          border: `1px solid ${hasValue ? alpha(theme.palette[color]?.main || '#6366F1', 0.4) : isDark ? 'rgba(255,255,255,0.1)' : '#E2E8F0'}`,
           backgroundColor: hasValue
             ? alpha(theme.palette[color]?.main || '#6366F1', isDark ? 0.15 : 0.07)
-            : (isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC'),
-          color: hasValue ? (theme.palette[color]?.main || '#6366F1') : 'text.secondary',
+            : isDark
+              ? 'rgba(255,255,255,0.04)'
+              : '#F8FAFC',
+          color: hasValue ? theme.palette[color]?.main || '#6366F1' : 'text.secondary',
           '& .MuiChip-icon': { color: 'inherit' },
           '& .MuiChip-label': { px: 1 },
           transition: 'all 0.15s',
@@ -201,7 +226,12 @@ function DateRangeChip({ label = 'التاريخ', value, onChange, color = 'pri
         transformOrigin={{ vertical: 'top', horizontal: 'right' }}
         slotProps={{ paper: { sx: { width: 260, p: 2, mt: 0.75 } } }}
       >
-        <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ mb: 1.5, display: 'block' }}>
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          fontWeight={600}
+          sx={{ mb: 1.5, display: 'block' }}
+        >
           نطاق التاريخ
         </Typography>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
@@ -210,7 +240,7 @@ function DateRangeChip({ label = 'التاريخ', value, onChange, color = 'pri
             type="date"
             size="small"
             value={value?.from || ''}
-            onChange={(e) => onChange({ ...value, from: e.target.value })}
+            onChange={e => onChange({ ...value, from: e.target.value })}
             InputLabelProps={{ shrink: true }}
             fullWidth
           />
@@ -219,12 +249,18 @@ function DateRangeChip({ label = 'التاريخ', value, onChange, color = 'pri
             type="date"
             size="small"
             value={value?.to || ''}
-            onChange={(e) => onChange({ ...value, to: e.target.value })}
+            onChange={e => onChange({ ...value, to: e.target.value })}
             InputLabelProps={{ shrink: true }}
             fullWidth
           />
           <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
-            <Button size="small" onClick={() => { onChange(null); setAnchor(null); }}>
+            <Button
+              size="small"
+              onClick={() => {
+                onChange(null);
+                setAnchor(null);
+              }}
+            >
               مسح
             </Button>
             <Button size="small" variant="contained" onClick={() => setAnchor(null)}>
@@ -249,14 +285,14 @@ const FilterBar = memo(function FilterBar({
   searchDebounce = 400,
   defaultExpanded = true,
   // Phase 2 new props
-  dateRange,          // { from, to } or null
-  onDateRangeChange,  // (range) => void
-  viewMode,           // 'list' | 'grid'
-  onViewModeChange,   // (mode) => void
-  resultCount,        // number — show result count
+  dateRange, // { from, to } or null
+  onDateRangeChange, // (range) => void
+  viewMode, // 'list' | 'grid'
+  onViewModeChange, // (mode) => void
+  resultCount, // number — show result count
   sx = {},
 }) {
-  const theme  = useTheme();
+  const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
 
   const [searchText, setSearchText] = useState('');
@@ -269,10 +305,11 @@ const FilterBar = memo(function FilterBar({
     onSearch?.(debouncedSearch);
   }, [debouncedSearch, onSearch]);
 
-  const activeFilterCount = Object.values(filterValues).filter((v) => {
-    if (Array.isArray(v)) return v.length > 0;
-    return Boolean(v);
-  }).length + (dateRange?.from || dateRange?.to ? 1 : 0);
+  const activeFilterCount =
+    Object.values(filterValues).filter(v => {
+      if (Array.isArray(v)) return v.length > 0;
+      return Boolean(v);
+    }).length + (dateRange?.from || dateRange?.to ? 1 : 0);
 
   const hasActiveFilters = activeFilterCount > 0 || searchText;
 
@@ -284,7 +321,7 @@ const FilterBar = memo(function FilterBar({
 
   // Phase 2: Keyboard shortcut — Ctrl+K to focus search
   useEffect(() => {
-    const handler = (e) => {
+    const handler = e => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
         e.preventDefault();
         inputRef.current?.focus();
@@ -322,7 +359,7 @@ const FilterBar = memo(function FilterBar({
           inputRef={inputRef}
           placeholder={placeholder}
           value={searchText}
-          onChange={(e) => setSearchText(e.target.value)}
+          onChange={e => setSearchText(e.target.value)}
           sx={{
             flex: 1,
             fontSize: '0.875rem',
@@ -352,7 +389,11 @@ const FilterBar = memo(function FilterBar({
         {/* Clear search */}
         {searchText && (
           <Tooltip title="مسح البحث">
-            <IconButton size="small" onClick={() => setSearchText('')} sx={{ p: 0.5, color: 'text.secondary' }}>
+            <IconButton
+              size="small"
+              onClick={() => setSearchText('')}
+              sx={{ p: 0.5, color: 'text.secondary' }}
+            >
               <CloseOutlined sx={{ fontSize: 15 }} />
             </IconButton>
           </Tooltip>
@@ -360,16 +401,27 @@ const FilterBar = memo(function FilterBar({
 
         {/* Divider */}
         {(filters.length > 0 || onDateRangeChange) && (
-          <Box sx={{ width: '1px', height: 20, backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : '#E2E8F0', flexShrink: 0 }} />
+          <Box
+            sx={{
+              width: '1px',
+              height: 20,
+              backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : '#E2E8F0',
+              flexShrink: 0,
+            }}
+          />
         )}
 
         {/* Filter toggle */}
         {(filters.length > 0 || onDateRangeChange) && (
           <Tooltip title={filtersOpen ? 'إخفاء الفلاتر' : 'إظهار الفلاتر'}>
-            <Badge badgeContent={activeFilterCount} color="primary" sx={{ '& .MuiBadge-badge': { fontSize: '0.6rem', height: 15, minWidth: 15 } }}>
+            <Badge
+              badgeContent={activeFilterCount}
+              color="primary"
+              sx={{ '& .MuiBadge-badge': { fontSize: '0.6rem', height: 15, minWidth: 15 } }}
+            >
               <IconButton
                 size="small"
-                onClick={() => setFiltersOpen((o) => !o)}
+                onClick={() => setFiltersOpen(o => !o)}
                 sx={{
                   p: 0.75,
                   color: activeFilterCount > 0 ? 'primary.main' : 'text.secondary',
@@ -390,7 +442,12 @@ const FilterBar = memo(function FilterBar({
             <IconButton
               size="small"
               onClick={handleReset}
-              sx={{ p: 0.75, color: 'text.secondary', '&:hover': { color: 'error.main' }, borderRadius: '8px' }}
+              sx={{
+                p: 0.75,
+                color: 'text.secondary',
+                '&:hover': { color: 'error.main' },
+                borderRadius: '8px',
+              }}
             >
               <RefreshOutlined sx={{ fontSize: 17 }} />
             </IconButton>
@@ -400,7 +457,14 @@ const FilterBar = memo(function FilterBar({
         {/* Phase 2: View mode toggle */}
         {onViewModeChange && (
           <>
-            <Box sx={{ width: '1px', height: 20, backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : '#E2E8F0', flexShrink: 0 }} />
+            <Box
+              sx={{
+                width: '1px',
+                height: 20,
+                backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : '#E2E8F0',
+                flexShrink: 0,
+              }}
+            />
             <ToggleButtonGroup
               value={viewMode || 'list'}
               exclusive
@@ -412,22 +476,25 @@ const FilterBar = memo(function FilterBar({
                   border: 'none',
                   borderRadius: '6px !important',
                   color: 'text.disabled',
-                  '&.Mui-selected': { color: 'primary.main', backgroundColor: alpha('#6366F1', 0.08) },
+                  '&.Mui-selected': {
+                    color: 'primary.main',
+                    backgroundColor: alpha('#6366F1', 0.08),
+                  },
                 },
               }}
             >
-              <ToggleButton value="list"><ViewListOutlined sx={{ fontSize: 17 }} /></ToggleButton>
-              <ToggleButton value="grid"><ViewModuleOutlined sx={{ fontSize: 17 }} /></ToggleButton>
+              <ToggleButton value="list">
+                <ViewListOutlined sx={{ fontSize: 17 }} />
+              </ToggleButton>
+              <ToggleButton value="grid">
+                <ViewModuleOutlined sx={{ fontSize: 17 }} />
+              </ToggleButton>
             </ToggleButtonGroup>
           </>
         )}
 
         {/* Extra actions slot */}
-        {actions && (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-            {actions}
-          </Box>
-        )}
+        {actions && <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>{actions}</Box>}
       </Box>
 
       {/* ── Filters row ────────────────────────────────────────────────── */}
@@ -445,29 +512,28 @@ const FilterBar = memo(function FilterBar({
               borderTop: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : '#F1F5F9'}`,
             }}
           >
-            <Typography variant="caption" color="text.disabled" sx={{ fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', mr: 0.5 }}>
+            <Typography
+              variant="caption"
+              color="text.disabled"
+              sx={{ fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', mr: 0.5 }}
+            >
               فلتر:
             </Typography>
 
-            {filters.map((f) => (
+            {filters.map(f => (
               <FilterChip
                 key={f.key}
                 label={f.label}
                 options={f.options || []}
                 value={filterValues[f.key]}
-                onChange={(val) => onFilterChange?.(f.key, val)}
+                onChange={val => onFilterChange?.(f.key, val)}
                 color={f.color}
                 multiple={f.multiple}
               />
             ))}
 
             {/* Phase 2: Date range filter */}
-            {onDateRangeChange && (
-              <DateRangeChip
-                value={dateRange}
-                onChange={onDateRangeChange}
-              />
-            )}
+            {onDateRangeChange && <DateRangeChip value={dateRange} onChange={onDateRangeChange} />}
 
             {/* Result count + clear */}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mr: 'auto' }}>

@@ -34,8 +34,8 @@ const ChildNavItem = memo(function ChildNavItem({ item, collapsed }) {
     item.badgeColor === 'success'
       ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20'
       : item.badgeColor === 'warning'
-      ? 'bg-amber-500/15 text-amber-300 border-amber-500/20'
-      : 'bg-rose-500/15 text-rose-300 border-rose-500/20';
+        ? 'bg-amber-500/15 text-amber-300 border-amber-500/20'
+        : 'bg-rose-500/15 text-rose-300 border-rose-500/20';
 
   const inner = (
     <button
@@ -70,7 +70,9 @@ const ChildNavItem = memo(function ChildNavItem({ item, collapsed }) {
           </span>
 
           {item.badge && (
-            <span className={`px-1.5 py-0.5 rounded-full text-[0.6rem] font-bold leading-none border ${badgeCls}`}>
+            <span
+              className={`px-1.5 py-0.5 rounded-full text-[0.6rem] font-bold leading-none border ${badgeCls}`}
+            >
               {item.badge}
             </span>
           )}
@@ -95,11 +97,11 @@ const NavItem = memo(function NavItem({ item, collapsed, depth = 0 }) {
   const isChildActive =
     hasChildren &&
     item.children.some(
-      (c) => location.pathname === c.path || (c.path && location.pathname.startsWith(c.path))
+      c => location.pathname === c.path || (c.path && location.pathname.startsWith(c.path))
     );
 
   const handleClick = useCallback(() => {
-    if (hasChildren) setOpen((o) => !o);
+    if (hasChildren) setOpen(o => !o);
     else if (item.path) navigate(item.path);
   }, [hasChildren, item.path, navigate]);
 
@@ -112,8 +114,8 @@ const NavItem = memo(function NavItem({ item, collapsed, depth = 0 }) {
     item.badgeColor === 'success'
       ? 'bg-emerald-500/12 text-emerald-300'
       : item.badgeColor === 'warning'
-      ? 'bg-amber-500/12 text-amber-300'
-      : 'bg-rose-500/12 text-rose-300';
+        ? 'bg-amber-500/12 text-amber-300'
+        : 'bg-rose-500/12 text-rose-300';
 
   const btn = (
     <button
@@ -176,7 +178,9 @@ const NavItem = memo(function NavItem({ item, collapsed, depth = 0 }) {
           )}
 
           {item.badge && !hasChildren && (
-            <span className={`mr-1.5 px-2 py-0.5 rounded-full text-[0.6rem] font-bold leading-none min-w-[18px] text-center relative z-10 ${badgeCls}`}>
+            <span
+              className={`mr-1.5 px-2 py-0.5 rounded-full text-[0.6rem] font-bold leading-none min-w-[18px] text-center relative z-10 ${badgeCls}`}
+            >
               {item.badge}
             </span>
           )}
@@ -203,11 +207,12 @@ const NavItem = memo(function NavItem({ item, collapsed, depth = 0 }) {
             className="absolute top-1 bottom-2 w-px"
             style={{
               insetInlineStart: 26,
-              background: 'linear-gradient(180deg, rgba(46,125,50,0.35) 0%, rgba(46,125,50,0.08) 100%)',
+              background:
+                'linear-gradient(180deg, rgba(46,125,50,0.35) 0%, rgba(46,125,50,0.08) 100%)',
             }}
           />
           <div className="py-1">
-            {item.children.map((child) => (
+            {item.children.map(child => (
               <NavItem key={child.id || child.path} item={child} collapsed={collapsed} depth={1} />
             ))}
           </div>
@@ -220,7 +225,9 @@ const NavItem = memo(function NavItem({ item, collapsed, depth = 0 }) {
 /* ─── Section title ──────────────────────────────────────────────────────── */
 function SectionTitle({ label, collapsed }) {
   if (collapsed) {
-    return <div className="mx-5 my-3.5 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />;
+    return (
+      <div className="mx-5 my-3.5 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+    );
   }
 
   return (
@@ -260,7 +267,7 @@ export default memo(function SidebarNavList({ items = [], collapsed }) {
         <div key={idx}>
           {group.title && <SectionTitle label={group.title} collapsed={collapsed} />}
           <div>
-            {group.items.map((item) => (
+            {group.items.map(item => (
               <NavItem key={item.id || item.path} item={item} collapsed={collapsed} depth={0} />
             ))}
           </div>

@@ -4,7 +4,13 @@
  */
 import { Search as SearchIcon, Close as CloseIcon } from '@mui/icons-material';
 
-export default function SidebarSearch({ collapsed, isMobile, searchQuery, onSearchChange, onClear }) {
+export default function SidebarSearch({
+  collapsed,
+  isMobile,
+  searchQuery,
+  onSearchChange,
+  onClear,
+}) {
   if (collapsed && !isMobile) {
     return (
       <div className="px-3 py-3 flex justify-center">
@@ -29,7 +35,7 @@ export default function SidebarSearch({ collapsed, isMobile, searchQuery, onSear
           type="text"
           placeholder="ابحث في القائمة..."
           value={searchQuery}
-          onChange={(e) => onSearchChange(e.target.value)}
+          onChange={e => onSearchChange(e.target.value)}
           className="flex-1 bg-transparent border-none outline-none text-[0.8rem] text-white/80 placeholder:text-white/20 p-0 font-cairo"
         />
         {searchQuery && (

@@ -217,7 +217,16 @@ function ActionCard({ action, index, isDark }) {
         )}
 
         {/* Content */}
-        <Box sx={{ p: 2, pt: 1.75, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 1.25 }}>
+        <Box
+          sx={{
+            p: 2,
+            pt: 1.75,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'flex-start',
+            gap: 1.25,
+          }}
+        >
           {/* Icon */}
           <Box
             className="action-icon-wrap"
@@ -299,9 +308,7 @@ const QuickActions = () => {
         sx={{
           borderRadius: '20px',
           p: 3,
-          background: isDark
-            ? 'rgba(15, 23, 42, 0.7)'
-            : '#FFFFFF',
+          background: isDark ? 'rgba(15, 23, 42, 0.7)' : '#FFFFFF',
           border: `1px solid ${isDark ? 'rgba(255,255,255,0.07)' : 'rgba(99,102,241,0.08)'}`,
           boxShadow: isDark
             ? '0 4px 24px rgba(0,0,0,0.3)'

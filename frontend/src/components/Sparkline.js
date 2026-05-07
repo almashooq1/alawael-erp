@@ -18,7 +18,14 @@ const Sparkline = ({ data = [], color = '#0f766e', height = 40, width = 100 }) =
   return (
     <Box sx={{ display: 'inline-block', verticalAlign: 'middle' }}>
       <svg width={width} height={height} style={{ display: 'block' }}>
-        <polyline fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" points={points} />
+        <polyline
+          fill="none"
+          stroke={color}
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          points={points}
+        />
       </svg>
     </Box>
   );

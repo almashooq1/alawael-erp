@@ -6,8 +6,12 @@ import React from 'react';
 import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
-const AIDiagnosticDashboard = lazyWithRetry(() => import('../pages/ai-diagnostic/AIDiagnosticDashboard'));
-const BeneficiaryAnalysis = lazyWithRetry(() => import('../pages/ai-diagnostic/BeneficiaryAnalysis'));
+const AIDiagnosticDashboard = lazyWithRetry(
+  () => import('../pages/ai-diagnostic/AIDiagnosticDashboard')
+);
+const BeneficiaryAnalysis = lazyWithRetry(
+  () => import('../pages/ai-diagnostic/BeneficiaryAnalysis')
+);
 
 export default function AIDiagnosticRoutes() {
   return (

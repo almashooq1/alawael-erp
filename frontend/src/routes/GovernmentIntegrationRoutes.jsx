@@ -6,14 +6,10 @@ import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 // مُدد — حماية الأجور
-const MudadDashboard = lazyWithRetry(
-  () => import('../pages/mudad/MudadDashboard')
-);
+const MudadDashboard = lazyWithRetry(() => import('../pages/mudad/MudadDashboard'));
 
 // طاقات — منصة التوظيف
-const TaqatDashboard = lazyWithRetry(
-  () => import('../pages/taqat/TaqatDashboard')
-);
+const TaqatDashboard = lazyWithRetry(() => import('../pages/taqat/TaqatDashboard'));
 
 // هيئة رعاية ذوي الإعاقة + سباهي
 const DisabilityAuthorityDashboard = lazyWithRetry(
@@ -31,9 +27,7 @@ const FamilySatisfactionDashboard = lazyWithRetry(
 );
 
 // نظام نور — وزارة التعليم
-const NoorDashboard = lazyWithRetry(
-  () => import('../pages/noor/NoorDashboard')
-);
+const NoorDashboard = lazyWithRetry(() => import('../pages/noor/NoorDashboard'));
 
 // بوابة ولي الأمر
 const GuardianPortalDashboard = lazyWithRetry(
@@ -41,14 +35,10 @@ const GuardianPortalDashboard = lazyWithRetry(
 );
 
 // التأمينات الاجتماعية (GOSI)
-const GosiDashboard = lazyWithRetry(
-  () => import('../pages/gosi/GosiDashboard')
-);
+const GosiDashboard = lazyWithRetry(() => import('../pages/gosi/GosiDashboard'));
 
 // منصة قوى — وزارة الموارد البشرية
-const QiwaDashboard = lazyWithRetry(
-  () => import('../pages/qiwa/QiwaDashboard')
-);
+const QiwaDashboard = lazyWithRetry(() => import('../pages/qiwa/QiwaDashboard'));
 
 // التدخل المبكر (0–3 سنوات)
 const EarlyInterventionDashboard = lazyWithRetry(

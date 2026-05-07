@@ -1,3 +1,4 @@
+/* eslint-disable no-console -- centralized logger wrapper */
 /**
  * Centralized logger utility.
  * - In development: logs to console normally

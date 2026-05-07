@@ -114,6 +114,7 @@ import {
   AuditLogsRoutes,
   EpisodesRoutes,
   Beneficiary360Routes,
+  DDDRoutes,
 } from './routes';
 
 // Pages
@@ -166,6 +167,38 @@ const AdminRateLimits = lazyWithRetry(() => import('./pages/Admin/AdminRateLimit
 const AdminAdapterAudit = lazyWithRetry(() => import('./pages/Admin/AdminAdapterAudit'));
 const AdminNphiesClaims = lazyWithRetry(() => import('./pages/Admin/AdminNphiesClaims'));
 const AdminNotifications = lazyWithRetry(() => import('./pages/Admin/AdminNotifications'));
+const RedFlagAdmin = lazyWithRetry(() => import('./pages/Admin/RedFlagAdmin'));
+const RehabDisciplinesTaxonomy = lazyWithRetry(
+  () => import('./pages/Rehab/RehabDisciplinesTaxonomy')
+);
+const RehabGoalSuggestions = lazyWithRetry(() => import('./pages/Rehab/RehabGoalSuggestions'));
+const BeneficiaryConsentAdmin = lazyWithRetry(
+  () => import('./pages/Beneficiaries/BeneficiaryConsentAdmin')
+);
+const BeneficiaryTransferAdmin = lazyWithRetry(
+  () => import('./pages/Beneficiaries/BeneficiaryTransferAdmin')
+);
+const BranchLicenseExpiryAdmin = lazyWithRetry(
+  () => import('./pages/branches/BranchLicenseExpiryAdmin')
+);
+const CapaAdmin = lazyWithRetry(() => import('./pages/Quality/CapaAdmin'));
+const PdplConsentsAdmin = lazyWithRetry(() => import('./pages/Quality/PdplConsentsAdmin'));
+const SessionAmendmentAudit = lazyWithRetry(() => import('./pages/Sessions/SessionAmendmentAudit'));
+const AlertsCenter = lazyWithRetry(() => import('./pages/AlertsCenter'));
+const ApprovalInbox = lazyWithRetry(() => import('./pages/ApprovalInbox'));
+const BranchAnalytics = lazyWithRetry(() => import('./pages/BranchAnalytics'));
+const BranchDashboard = lazyWithRetry(() => import('./pages/BranchDashboard'));
+const BreakGlassActivation = lazyWithRetry(() => import('./pages/BreakGlassActivation'));
+const ExecutiveSnapshot = lazyWithRetry(() => import('./pages/ExecutiveSnapshot'));
+const HQDashboard = lazyWithRetry(() => import('./pages/HQDashboard'));
+const ArticleList = lazyWithRetry(() => import('./pages/Articles/ArticleList'));
+const ArticleDetail = lazyWithRetry(() => import('./pages/Articles/ArticleDetail'));
+const ParentPortalManagement = lazyWithRetry(
+  () => import('./pages/ParentPortal/ParentPortalManagement')
+);
+const ReferralPortal = lazyWithRetry(() => import('./pages/referral/ReferralPortal'));
+const InsuranceTariffsAdmin = lazyWithRetry(() => import('./pages/finance/InsuranceTariffsAdmin'));
+const ZatcaCredentialsAdmin = lazyWithRetry(() => import('./pages/finance/ZatcaCredentialsAdmin'));
 const MyChildrenPortal = lazyWithRetry(() => import('./pages/ParentPortal/MyChildrenPortal'));
 const TherapistWorkbench = lazyWithRetry(() => import('./pages/Therapist/TherapistWorkbench'));
 const ChatV2 = lazyWithRetry(() => import('./pages/chat/ChatV2'));
@@ -309,6 +342,31 @@ export default function AuthenticatedShell() {
                   <Route path="admin/adapter-audit" element={<AdminAdapterAudit />} />
                   <Route path="admin/nphies-claims" element={<AdminNphiesClaims />} />
                   <Route path="admin/notifications" element={<AdminNotifications />} />
+                  <Route path="admin/red-flags" element={<RedFlagAdmin />} />
+                  <Route path="admin/capa" element={<CapaAdmin />} />
+                  <Route path="admin/pdpl-consents" element={<PdplConsentsAdmin />} />
+                  <Route path="admin/session-amendments" element={<SessionAmendmentAudit />} />
+                  <Route
+                    path="admin/branch-license-expiry"
+                    element={<BranchLicenseExpiryAdmin />}
+                  />
+                  <Route path="beneficiary-consents" element={<BeneficiaryConsentAdmin />} />
+                  <Route path="beneficiary-transfers" element={<BeneficiaryTransferAdmin />} />
+                  <Route path="admin/alerts" element={<AlertsCenter />} />
+                  <Route path="admin/break-glass" element={<BreakGlassActivation />} />
+                  <Route path="approvals" element={<ApprovalInbox />} />
+                  <Route path="branches/analytics" element={<BranchAnalytics />} />
+                  <Route path="branches/dashboard" element={<BranchDashboard />} />
+                  <Route path="executive-snapshot" element={<ExecutiveSnapshot />} />
+                  <Route path="hq-dashboard" element={<HQDashboard />} />
+                  <Route path="articles" element={<ArticleList />} />
+                  <Route path="articles/:id" element={<ArticleDetail />} />
+                  <Route path="parent-portal/management" element={<ParentPortalManagement />} />
+                  <Route path="referrals" element={<ReferralPortal />} />
+                  <Route path="rehab/disciplines" element={<RehabDisciplinesTaxonomy />} />
+                  <Route path="rehab/goal-suggestions" element={<RehabGoalSuggestions />} />
+                  <Route path="insurance-tariffs" element={<InsuranceTariffsAdmin />} />
+                  <Route path="zatca-credentials" element={<ZatcaCredentialsAdmin />} />
                   <Route path="my-children" element={<MyChildrenPortal />} />
                   <Route path="workbench" element={<TherapistWorkbench />} />
                   <Route path="chat" element={<ChatV2 />} />
@@ -485,6 +543,8 @@ export default function AuthenticatedShell() {
                   <Route path="clinical-trials-pro" element={<ClinicalTrialsProDashboard />} />
                   <Route path="patient-safety-pro" element={<PatientSafetyProDashboard />} />
                 </Route>
+                {/* DDD Platform — own layout, must be outside ProLayout */}
+                <Route path="platform/*" element={<DDDRoutes />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>

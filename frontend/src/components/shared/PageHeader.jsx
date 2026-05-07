@@ -11,15 +11,7 @@
  */
 
 import { memo } from 'react';
-import {
-  Box,
-  Typography,
-  Chip,
-  Divider,
-  Tooltip,
-  useTheme,
-  alpha,
-} from '@mui/material';
+import { Box, Typography, Chip, Divider, useTheme, alpha } from '@mui/material';
 
 // ─── Stat mini-card ───────────────────────────────────────────────────────────
 function StatItem({ label, value, color, icon }) {
@@ -41,11 +33,7 @@ function StatItem({ label, value, color, icon }) {
         gap: 0.25,
       }}
     >
-      {icon && (
-        <Box sx={{ color: color || 'primary.main', mb: 0.25 }}>
-          {icon}
-        </Box>
-      )}
+      {icon && <Box sx={{ color: color || 'primary.main', mb: 0.25 }}>{icon}</Box>}
       <Typography
         sx={{
           fontSize: '1.125rem',
@@ -87,8 +75,9 @@ const PageHeader = memo(function PageHeader({
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
 
-  const defaultGradient = theme.custom?.gradients?.brand || 'linear-gradient(135deg, #4F46E5, #7C3AED)';
-  const accentGradient  = gradient || defaultGradient;
+  const defaultGradient =
+    theme.custom?.gradients?.brand || 'linear-gradient(135deg, #4F46E5, #7C3AED)';
+  const accentGradient = gradient || defaultGradient;
 
   return (
     <Box sx={{ mb: compact ? 2 : 3, ...sx }}>

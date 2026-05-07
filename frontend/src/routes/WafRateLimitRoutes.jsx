@@ -8,17 +8,18 @@ import { Route } from 'react-router-dom';
 
 import { lazyWithRetry } from '../utils/lazyLoader';
 
-const WafRateLimit = lazyWithRetry(() =>
-  import('../pages/waf-ratelimit/WafRateLimit')
-);
+const WafRateLimit = lazyWithRetry(() => import('../pages/waf-ratelimit/WafRateLimit'));
 
 const WafRateLimitRoutes = () => (
   <>
-    <Route path="/waf-ratelimit" element={
-      <React.Suspense fallback={<div>جارٍ التحميل...</div>}>
-        <WafRateLimit />
-      </React.Suspense>
-    } />
+    <Route
+      path="/waf-ratelimit"
+      element={
+        <React.Suspense fallback={<div>جارٍ التحميل...</div>}>
+          <WafRateLimit />
+        </React.Suspense>
+      }
+    />
   </>
 );
 

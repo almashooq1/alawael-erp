@@ -6,10 +6,16 @@ import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const TelehealthDashboard = lazyWithRetry(() => import('../pages/telehealth/TelehealthDashboard'));
-const TelehealthSessionsPage = lazyWithRetry(() => import('../pages/telehealth/TelehealthSessionsPage'));
+const TelehealthSessionsPage = lazyWithRetry(
+  () => import('../pages/telehealth/TelehealthSessionsPage')
+);
 const TelehealthVideoRoom = lazyWithRetry(() => import('../pages/telehealth/TelehealthVideoRoom'));
-const TelehealthRecordingsPage = lazyWithRetry(() => import('../pages/telehealth/TelehealthRecordingsPage'));
-const TelehealthWaitingRoom = lazyWithRetry(() => import('../pages/telehealth/TelehealthWaitingRoom'));
+const TelehealthRecordingsPage = lazyWithRetry(
+  () => import('../pages/telehealth/TelehealthRecordingsPage')
+);
+const TelehealthWaitingRoom = lazyWithRetry(
+  () => import('../pages/telehealth/TelehealthWaitingRoom')
+);
 
 export default function TelehealthRoutes() {
   return (

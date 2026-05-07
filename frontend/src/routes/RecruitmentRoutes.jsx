@@ -4,7 +4,9 @@
 import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
-const RecruitmentDashboard = lazyWithRetry(() => import('../pages/Recruitment/RecruitmentDashboard'));
+const RecruitmentDashboard = lazyWithRetry(
+  () => import('../pages/Recruitment/RecruitmentDashboard')
+);
 const JobPostingsList = lazyWithRetry(() => import('../pages/Recruitment/JobPostingsList'));
 
 export default function RecruitmentRoutes() {

@@ -39,6 +39,10 @@ const PdplComplianceDashboard = lazyWithRetry(
 
 const PiiAccessAuditAdmin = lazyWithRetry(() => import('../pages/Quality/PiiAccessAuditAdmin'));
 
+const CapaAdmin = lazyWithRetry(() => import('../pages/Quality/CapaAdmin'));
+
+const PolicyLibraryAdmin = lazyWithRetry(() => import('../pages/Quality/PolicyLibraryAdmin'));
+
 export default function QualityManagementRoutes() {
   return (
     <>
@@ -70,6 +74,12 @@ export default function QualityManagementRoutes() {
 
       {/* PDPL مادة 13 — سجل وصول البيانات الشخصية (مَن نظر إلى ماذا؟) */}
       <Route path="/quality/pdpl/access-audit" element={<PiiAccessAuditAdmin />} />
+
+      {/* CAPA — الإجراءات التصحيحية والوقائية (ISO 9001 §10.2 / CBAHI) */}
+      <Route path="/quality/capa" element={<CapaAdmin />} />
+
+      {/* BC-08: مكتبة السياسات والإجراءات — دورة حياة كاملة + سير اعتماد + إقرار (CBAHI) */}
+      <Route path="/quality/policy-library" element={<PolicyLibraryAdmin />} />
     </>
   );
 }

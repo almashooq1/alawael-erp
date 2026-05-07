@@ -5,9 +5,7 @@
 import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
-const AuditLogsPage = lazyWithRetry(
-  () => import('../pages/AuditLogs/AuditLogsPage')
-);
+const AuditLogsPage = lazyWithRetry(() => import('../pages/AuditLogs/AuditLogsPage'));
 
 export default function AuditLogsRoutes() {
   return (

@@ -63,18 +63,24 @@ const FinancialApprovals = lazyWithRetry(() => import('../pages/finance/Financia
 const CompanyLoans = lazyWithRetry(() => import('../pages/finance/CompanyLoans'));
 
 // Ultimate Finance - الميزات المتقدمة النهائية
-const FinancialConsolidation = lazyWithRetry(() => import('../pages/finance/FinancialConsolidation'));
+const FinancialConsolidation = lazyWithRetry(
+  () => import('../pages/finance/FinancialConsolidation')
+);
 const RevenueRecognition = lazyWithRetry(() => import('../pages/finance/RevenueRecognition'));
 const LeaseAccounting = lazyWithRetry(() => import('../pages/finance/LeaseAccounting'));
 const InvestmentPortfolio = lazyWithRetry(() => import('../pages/finance/InvestmentPortfolio'));
 const CreditManagement = lazyWithRetry(() => import('../pages/finance/CreditManagement'));
 const FinancialPlanning = lazyWithRetry(() => import('../pages/finance/FinancialPlanning'));
 const ComplianceControls = lazyWithRetry(() => import('../pages/finance/ComplianceControls'));
-const IntercompanySettlement = lazyWithRetry(() => import('../pages/finance/IntercompanySettlement'));
+const IntercompanySettlement = lazyWithRetry(
+  () => import('../pages/finance/IntercompanySettlement')
+);
 
 // Elite Finance - الميزات الاستراتيجية المتقدمة
 const RiskManagement = lazyWithRetry(() => import('../pages/finance/RiskManagement'));
-const FinancialDashboardBuilder = lazyWithRetry(() => import('../pages/finance/FinancialDashboardBuilder'));
+const FinancialDashboardBuilder = lazyWithRetry(
+  () => import('../pages/finance/FinancialDashboardBuilder')
+);
 const TreasuryManagement = lazyWithRetry(() => import('../pages/finance/TreasuryManagement'));
 const DebtManagement = lazyWithRetry(() => import('../pages/finance/DebtManagement'));
 const CostAllocation = lazyWithRetry(() => import('../pages/finance/CostAllocation'));

@@ -46,10 +46,28 @@ const reportCategories = [
 ];
 
 const sampleReports = [
-  { id: 1, name: 'تقرير الإيرادات الشهري', category: 'financial', date: '2026-03-01', status: 'ready' },
+  {
+    id: 1,
+    name: 'تقرير الإيرادات الشهري',
+    category: 'financial',
+    date: '2026-03-01',
+    status: 'ready',
+  },
   { id: 2, name: 'تقرير الحضور الأسبوعي', category: 'hr', date: '2026-03-05', status: 'ready' },
-  { id: 3, name: 'تقرير تقدم المستفيدين', category: 'beneficiary', date: '2026-03-08', status: 'generating' },
-  { id: 4, name: 'تقرير المصروفات الربعي', category: 'financial', date: '2026-02-28', status: 'ready' },
+  {
+    id: 3,
+    name: 'تقرير تقدم المستفيدين',
+    category: 'beneficiary',
+    date: '2026-03-08',
+    status: 'generating',
+  },
+  {
+    id: 4,
+    name: 'تقرير المصروفات الربعي',
+    category: 'financial',
+    date: '2026-02-28',
+    status: 'ready',
+  },
   { id: 5, name: 'تقرير KPI الشهري', category: 'performance', date: '2026-03-01', status: 'ready' },
   { id: 6, name: 'تقرير الصيانة', category: 'operational', date: '2026-03-07', status: 'ready' },
 ];
@@ -144,7 +162,9 @@ const AdvancedReports = () => {
               <TableCell sx={{ fontWeight: 600 }}>التصنيف</TableCell>
               <TableCell sx={{ fontWeight: 600 }}>التاريخ</TableCell>
               <TableCell sx={{ fontWeight: 600 }}>الحالة</TableCell>
-              <TableCell sx={{ fontWeight: 600 }} align="center">إجراءات</TableCell>
+              <TableCell sx={{ fontWeight: 600 }} align="center">
+                إجراءات
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -161,7 +181,8 @@ const AdvancedReports = () => {
                     label={reportCategories.find(c => c.id === report.category)?.label}
                     size="small"
                     sx={{
-                      backgroundColor: reportCategories.find(c => c.id === report.category)?.color + '20',
+                      backgroundColor:
+                        reportCategories.find(c => c.id === report.category)?.color + '20',
                       color: reportCategories.find(c => c.id === report.category)?.color,
                     }}
                   />

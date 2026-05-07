@@ -6,7 +6,9 @@ import { lazyWithRetry } from '../utils/lazyLoader';
 
 const WarehouseDashboard = lazyWithRetry(() => import('../pages/Warehouse/WarehouseDashboard'));
 const WarehouseList = lazyWithRetry(() => import('../pages/Warehouse/WarehouseList'));
-const WarehouseTransactions = lazyWithRetry(() => import('../pages/Warehouse/WarehouseTransactions'));
+const WarehouseTransactions = lazyWithRetry(
+  () => import('../pages/Warehouse/WarehouseTransactions')
+);
 
 export default function WarehouseRoutes() {
   return (

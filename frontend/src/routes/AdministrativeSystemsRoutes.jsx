@@ -7,14 +7,26 @@ import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 // Pages
-const StrategicPlanningPage = lazyWithRetry(() => import('../pages/strategic-planning/StrategicPlanningPage'));
-const MeetingManagementPage = lazyWithRetry(() => import('../pages/meetings/MeetingManagementPage'));
-const VisitorManagementPage = lazyWithRetry(() => import('../pages/visitors/VisitorManagementPage'));
+const StrategicPlanningPage = lazyWithRetry(
+  () => import('../pages/strategic-planning/StrategicPlanningPage')
+);
+const MeetingManagementPage = lazyWithRetry(
+  () => import('../pages/meetings/MeetingManagementPage')
+);
+const VisitorManagementPage = lazyWithRetry(
+  () => import('../pages/visitors/VisitorManagementPage')
+);
 const KnowledgeCenterPage = lazyWithRetry(() => import('../pages/knowledge/KnowledgeCenterPage'));
-const ComplaintsManagementPage = lazyWithRetry(() => import('../pages/complaints/ComplaintsManagementPage'));
+const ComplaintsManagementPage = lazyWithRetry(
+  () => import('../pages/complaints/ComplaintsManagementPage')
+);
 const OrgStructurePage = lazyWithRetry(() => import('../pages/org-structure/OrgStructurePage'));
-const SuccessionPlanningPage = lazyWithRetry(() => import('../pages/succession/SuccessionPlanningPage'));
-const FacilityManagementPage = lazyWithRetry(() => import('../pages/facility/FacilityManagementPage'));
+const SuccessionPlanningPage = lazyWithRetry(
+  () => import('../pages/succession/SuccessionPlanningPage')
+);
+const FacilityManagementPage = lazyWithRetry(
+  () => import('../pages/facility/FacilityManagementPage')
+);
 
 export default function AdministrativeSystemsRoutes() {
   return (

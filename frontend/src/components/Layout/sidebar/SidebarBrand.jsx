@@ -2,10 +2,7 @@
  * SidebarBrand — شعار القائمة الجانبية (Enhanced)
  * Animated brand icon with glass effect + shimmer
  */
-import {
-  MenuOpen as MenuOpenIcon,
-  Menu as MenuIcon,
-} from '@mui/icons-material';
+import { MenuOpen as MenuOpenIcon, Menu as MenuIcon } from '@mui/icons-material';
 
 export default function SidebarBrand({ collapsed, onToggleCollapse }) {
   return (
@@ -80,11 +77,7 @@ export default function SidebarBrand({ collapsed, onToggleCollapse }) {
           collapsed ? 'absolute left-1/2 -translate-x-1/2 bottom-3' : ''
         }`}
       >
-        {collapsed ? (
-          <MenuIcon sx={{ fontSize: 16 }} />
-        ) : (
-          <MenuOpenIcon sx={{ fontSize: 16 }} />
-        )}
+        {collapsed ? <MenuIcon sx={{ fontSize: 16 }} /> : <MenuOpenIcon sx={{ fontSize: 16 }} />}
       </button>
     </div>
   );

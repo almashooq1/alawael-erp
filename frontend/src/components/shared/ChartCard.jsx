@@ -20,7 +20,6 @@ import {
   IconButton,
   Menu,
   MenuItem,
-  Chip,
   Tooltip,
   useTheme,
   alpha,
@@ -41,7 +40,7 @@ function TrendBadge({ value, suffix = '%' }) {
   if (value === undefined || value === null) return null;
 
   const isPositive = value > 0;
-  const isNeutral  = value === 0;
+  const isNeutral = value === 0;
 
   return (
     <Box
@@ -55,15 +54,15 @@ function TrendBadge({ value, suffix = '%' }) {
         backgroundColor: isNeutral
           ? 'rgba(148,163,184,0.12)'
           : isPositive
-          ? 'rgba(16,185,129,0.12)'
-          : 'rgba(244,63,94,0.12)',
+            ? 'rgba(16,185,129,0.12)'
+            : 'rgba(244,63,94,0.12)',
         color: isNeutral ? '#94A3B8' : isPositive ? '#10B981' : '#F43F5E',
         border: `1px solid ${
           isNeutral
             ? 'rgba(148,163,184,0.2)'
             : isPositive
-            ? 'rgba(16,185,129,0.2)'
-            : 'rgba(244,63,94,0.2)'
+              ? 'rgba(16,185,129,0.2)'
+              : 'rgba(244,63,94,0.2)'
         }`,
       }}
     >
@@ -75,7 +74,9 @@ function TrendBadge({ value, suffix = '%' }) {
         <TrendingDown sx={{ fontSize: 13 }} />
       )}
       <Typography sx={{ fontSize: '0.7rem', fontWeight: 700, lineHeight: 1 }}>
-        {isPositive ? '+' : ''}{value}{suffix}
+        {isPositive ? '+' : ''}
+        {value}
+        {suffix}
       </Typography>
     </Box>
   );
@@ -105,7 +106,8 @@ const ChartCard = memo(function ChartCard({
   const isDark = theme.palette.mode === 'dark';
   const [menuAnchor, setMenuAnchor] = useState(null);
 
-  const defaultGradient = gradient || theme.custom?.gradients?.brand || 'linear-gradient(135deg, #4F46E5, #7C3AED)';
+  const defaultGradient =
+    gradient || theme.custom?.gradients?.brand || 'linear-gradient(135deg, #4F46E5, #7C3AED)';
 
   return (
     <Card
@@ -117,9 +119,7 @@ const ChartCard = memo(function ChartCard({
         position: 'relative',
         transition: 'box-shadow 0.25s ease',
         '&:hover': {
-          boxShadow: isDark
-            ? '0 8px 24px rgba(0,0,0,0.5)'
-            : '0 8px 24px rgba(0,0,0,0.09)',
+          boxShadow: isDark ? '0 8px 24px rgba(0,0,0,0.5)' : '0 8px 24px rgba(0,0,0,0.09)',
         },
         ...sx,
       }}
@@ -171,9 +171,7 @@ const ChartCard = memo(function ChartCard({
                 {title}
               </Typography>
 
-              {trend !== undefined && (
-                <TrendBadge value={trend} />
-              )}
+              {trend !== undefined && <TrendBadge value={trend} />}
             </Box>
 
             {(subtitle || trendLabel) && (
@@ -216,7 +214,7 @@ const ChartCard = memo(function ChartCard({
             <Tooltip title="المزيد">
               <IconButton
                 size="small"
-                onClick={(e) => setMenuAnchor(e.currentTarget)}
+                onClick={e => setMenuAnchor(e.currentTarget)}
                 sx={{
                   color: 'text.secondary',
                   width: 28,
@@ -246,7 +244,12 @@ const ChartCard = memo(function ChartCard({
         {loading ? (
           // Loading skeleton
           <Box sx={{ width: '100%', height: height - 40 }}>
-            <Skeleton variant="rectangular" width="100%" height="60%" sx={{ borderRadius: 2, mb: 1.5 }} />
+            <Skeleton
+              variant="rectangular"
+              width="100%"
+              height="60%"
+              sx={{ borderRadius: 2, mb: 1.5 }}
+            />
             <Box sx={{ display: 'flex', gap: 1 }}>
               <Skeleton variant="rectangular" width="30%" height={20} sx={{ borderRadius: 1 }} />
               <Skeleton variant="rectangular" width="20%" height={20} sx={{ borderRadius: 1 }} />
@@ -304,13 +307,23 @@ const ChartCard = memo(function ChartCard({
         slotProps={{ paper: { sx: { width: 180, mt: 0.5 } } }}
       >
         {onRefresh && (
-          <MenuItem onClick={() => { setMenuAnchor(null); onRefresh(); }}>
+          <MenuItem
+            onClick={() => {
+              setMenuAnchor(null);
+              onRefresh();
+            }}
+          >
             <RefreshOutlined sx={{ fontSize: 16, mr: 1.5, color: 'text.secondary' }} />
             <Typography variant="body2">تحديث البيانات</Typography>
           </MenuItem>
         )}
         {onDownload && (
-          <MenuItem onClick={() => { setMenuAnchor(null); onDownload(); }}>
+          <MenuItem
+            onClick={() => {
+              setMenuAnchor(null);
+              onDownload();
+            }}
+          >
             <DownloadOutlined sx={{ fontSize: 16, mr: 1.5, color: 'text.secondary' }} />
             <Typography variant="body2">تحميل الرسم</Typography>
           </MenuItem>

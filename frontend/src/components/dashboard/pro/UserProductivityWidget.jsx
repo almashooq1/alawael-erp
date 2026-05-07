@@ -4,7 +4,17 @@
  */
 import React, { useMemo } from 'react';
 import {
-  Box, Paper, Typography, Grid, LinearProgress, Chip, Avatar, Tooltip, useTheme, Divider, Badge,
+  Box,
+  Paper,
+  Typography,
+  Grid,
+  LinearProgress,
+  Chip,
+  Avatar,
+  Tooltip,
+  useTheme,
+  Divider,
+  Badge,
 } from '@mui/material';
 import { motion } from 'framer-motion';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
@@ -19,17 +29,73 @@ import { useAuth } from 'contexts/AuthContext';
 import { gradients, statusColors, brandColors, rankColors } from 'theme/palette';
 
 const DAILY_GOALS = [
-  { id: 'sessions', label: 'الجلسات المنجزة', current: 8, target: 10, icon: '📋', color: brandColors.primaryStart },
-  { id: 'reports', label: 'التقارير المرسلة', current: 5, target: 5, icon: '📊', color: statusColors.success },
-  { id: 'calls', label: 'المكالمات', current: 12, target: 15, icon: '📞', color: brandColors.accentSky },
-  { id: 'reviews', label: 'المراجعات', current: 3, target: 4, icon: '✅', color: statusColors.warning },
+  {
+    id: 'sessions',
+    label: 'الجلسات المنجزة',
+    current: 8,
+    target: 10,
+    icon: '📋',
+    color: brandColors.primaryStart,
+  },
+  {
+    id: 'reports',
+    label: 'التقارير المرسلة',
+    current: 5,
+    target: 5,
+    icon: '📊',
+    color: statusColors.success,
+  },
+  {
+    id: 'calls',
+    label: 'المكالمات',
+    current: 12,
+    target: 15,
+    icon: '📞',
+    color: brandColors.accentSky,
+  },
+  {
+    id: 'reviews',
+    label: 'المراجعات',
+    current: 3,
+    target: 4,
+    icon: '✅',
+    color: statusColors.warning,
+  },
 ];
 
 const ACHIEVEMENTS = [
-  { id: 1, title: 'منجز الأسبوع', desc: 'أكمل جميع المهام لمدة 5 أيام متتالية', icon: <EmojiEventsIcon />, earned: true, color: rankColors?.gold || '#FFD700' },
-  { id: 2, title: 'نجم الفريق', desc: 'حقق أعلى إنتاجية في الفريق', icon: <StarIcon />, earned: true, color: brandColors.accentAmber },
-  { id: 3, title: 'سلسلة مشتعلة', desc: '30 يوم متواصل بدون انقطاع', icon: <WhatshotIcon />, earned: false, color: statusColors.error },
-  { id: 4, title: 'خبير التقارير', desc: 'أنشئ 100 تقرير هذا الشهر', icon: <WorkspacePremiumIcon />, earned: false, color: brandColors.primaryStart },
+  {
+    id: 1,
+    title: 'منجز الأسبوع',
+    desc: 'أكمل جميع المهام لمدة 5 أيام متتالية',
+    icon: <EmojiEventsIcon />,
+    earned: true,
+    color: rankColors?.gold || '#FFD700',
+  },
+  {
+    id: 2,
+    title: 'نجم الفريق',
+    desc: 'حقق أعلى إنتاجية في الفريق',
+    icon: <StarIcon />,
+    earned: true,
+    color: brandColors.accentAmber,
+  },
+  {
+    id: 3,
+    title: 'سلسلة مشتعلة',
+    desc: '30 يوم متواصل بدون انقطاع',
+    icon: <WhatshotIcon />,
+    earned: false,
+    color: statusColors.error,
+  },
+  {
+    id: 4,
+    title: 'خبير التقارير',
+    desc: 'أنشئ 100 تقرير هذا الشهر',
+    icon: <WorkspacePremiumIcon />,
+    earned: false,
+    color: brandColors.primaryStart,
+  },
 ];
 
 const WEEKLY_ACTIVITY = [
@@ -49,7 +115,9 @@ const GoalProgress = ({ goal }) => {
   return (
     <motion.div whileHover={{ scale: 1.01 }} transition={{ duration: 0.15 }}>
       <Box sx={{ mb: 1.5 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
+        <Box
+          sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}
+        >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Typography fontSize="1rem">{goal.icon}</Typography>
             <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.8rem' }}>
@@ -57,7 +125,10 @@ const GoalProgress = ({ goal }) => {
             </Typography>
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-            <Typography variant="caption" sx={{ fontWeight: 700, color: completed ? statusColors.success : 'text.primary' }}>
+            <Typography
+              variant="caption"
+              sx={{ fontWeight: 700, color: completed ? statusColors.success : 'text.primary' }}
+            >
               {goal.current}/{goal.target}
             </Typography>
             {completed && <TaskAltIcon sx={{ fontSize: 14, color: statusColors.success }} />}
@@ -72,7 +143,9 @@ const GoalProgress = ({ goal }) => {
             bgcolor: `${goal.color}15`,
             '& .MuiLinearProgress-bar': {
               borderRadius: 3,
-              background: completed ? gradients.success : `linear-gradient(90deg, ${goal.color}80, ${goal.color})`,
+              background: completed
+                ? gradients.success
+                : `linear-gradient(90deg, ${goal.color}80, ${goal.color})`,
             },
           }}
         />
@@ -84,7 +157,9 @@ const GoalProgress = ({ goal }) => {
 const ActivityBar = ({ day, hours, tasks, maxHours = 9 }) => {
   const theme = useTheme();
   const percent = Math.round((hours / maxHours) * 100);
-  const isToday = new Date().getDay() === ['أحد', 'اثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة', 'سبت'].indexOf(day);
+  const isToday =
+    new Date().getDay() ===
+    ['أحد', 'اثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة', 'سبت'].indexOf(day);
 
   return (
     <Tooltip title={`${day}: ${hours} ساعة، ${tasks} مهمة`}>
@@ -114,11 +189,14 @@ const ActivityBar = ({ day, hours, tasks, maxHours = 9 }) => {
             }}
           />
         </Box>
-        <Typography variant="caption" sx={{
-          fontSize: '0.6rem',
-          fontWeight: isToday ? 800 : 500,
-          color: isToday ? brandColors.primaryStart : 'text.secondary',
-        }}>
+        <Typography
+          variant="caption"
+          sx={{
+            fontSize: '0.6rem',
+            fontWeight: isToday ? 800 : 500,
+            color: isToday ? brandColors.primaryStart : 'text.secondary',
+          }}
+        >
           {day}
         </Typography>
       </Box>
@@ -141,7 +219,11 @@ const UserProductivityWidget = () => {
   const weeklyTasks = useMemo(() => WEEKLY_ACTIVITY.reduce((s, d) => s + d.tasks, 0), []);
 
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.3 }}>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: 0.3 }}
+    >
       <Paper
         elevation={0}
         sx={{
@@ -159,17 +241,30 @@ const UserProductivityWidget = () => {
               overlap="circular"
               anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
               badgeContent={
-                <Box sx={{
-                  width: 20, height: 20, borderRadius: '50%', bgcolor: rankColors?.gold || '#FFD700',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  border: '2px solid white',
-                }}>
+                <Box
+                  sx={{
+                    width: 20,
+                    height: 20,
+                    borderRadius: '50%',
+                    bgcolor: rankColors?.gold || '#FFD700',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    border: '2px solid white',
+                  }}
+                >
                   <Typography sx={{ fontSize: 10 }}>🔥</Typography>
                 </Box>
               }
             >
               <Avatar
-                sx={{ width: 50, height: 50, bgcolor: 'rgba(255,255,255,0.2)', fontWeight: 700, fontSize: '1.2rem' }}
+                sx={{
+                  width: 50,
+                  height: 50,
+                  bgcolor: 'rgba(255,255,255,0.2)',
+                  fontWeight: 700,
+                  fontSize: '1.2rem',
+                }}
               >
                 {currentUser?.name?.[0] || 'م'}
               </Avatar>
@@ -183,13 +278,23 @@ const UserProductivityWidget = () => {
                   size="small"
                   icon={<LocalFireDepartmentIcon sx={{ fontSize: 14, color: '#fff !important' }} />}
                   label="سلسلة 12 يوم"
-                  sx={{ height: 22, fontSize: '0.65rem', bgcolor: 'rgba(255,255,255,0.2)', color: '#fff' }}
+                  sx={{
+                    height: 22,
+                    fontSize: '0.65rem',
+                    bgcolor: 'rgba(255,255,255,0.2)',
+                    color: '#fff',
+                  }}
                 />
                 <Chip
                   size="small"
                   icon={<AutoGraphIcon sx={{ fontSize: 14, color: '#fff !important' }} />}
                   label={`إنتاجية ${overallProgress}%`}
-                  sx={{ height: 22, fontSize: '0.65rem', bgcolor: 'rgba(255,255,255,0.2)', color: '#fff' }}
+                  sx={{
+                    height: 22,
+                    fontSize: '0.65rem',
+                    bgcolor: 'rgba(255,255,255,0.2)',
+                    color: '#fff',
+                  }}
                 />
               </Box>
             </Box>
@@ -200,21 +305,50 @@ const UserProductivityWidget = () => {
           <Grid container spacing={2}>
             {/* Daily Goals */}
             <Grid item xs={12} md={6}>
-              <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1.5, fontSize: '0.85rem' }}>
+              <Typography
+                variant="subtitle2"
+                sx={{ fontWeight: 700, mb: 1.5, fontSize: '0.85rem' }}
+              >
                 🎯 الأهداف اليومية
               </Typography>
               {DAILY_GOALS.map(goal => (
                 <GoalProgress key={goal.id} goal={goal} />
               ))}
-              <Box sx={{
-                mt: 1, p: 1.5, borderRadius: 2,
-                bgcolor: overallProgress >= 100 ? `${statusColors.success}10` : `${brandColors.primaryStart}08`,
-                border: '1px solid',
-                borderColor: overallProgress >= 100 ? `${statusColors.success}30` : `${brandColors.primaryStart}15`,
-              }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
-                  <Typography variant="caption" sx={{ fontWeight: 700 }}>التقدم الإجمالي</Typography>
-                  <Typography variant="caption" sx={{ fontWeight: 800, color: overallProgress >= 100 ? statusColors.success : brandColors.primaryStart }}>
+              <Box
+                sx={{
+                  mt: 1,
+                  p: 1.5,
+                  borderRadius: 2,
+                  bgcolor:
+                    overallProgress >= 100
+                      ? `${statusColors.success}10`
+                      : `${brandColors.primaryStart}08`,
+                  border: '1px solid',
+                  borderColor:
+                    overallProgress >= 100
+                      ? `${statusColors.success}30`
+                      : `${brandColors.primaryStart}15`,
+                }}
+              >
+                <Box
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    mb: 0.5,
+                  }}
+                >
+                  <Typography variant="caption" sx={{ fontWeight: 700 }}>
+                    التقدم الإجمالي
+                  </Typography>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      fontWeight: 800,
+                      color:
+                        overallProgress >= 100 ? statusColors.success : brandColors.primaryStart,
+                    }}
+                  >
                     {overallProgress}%
                   </Typography>
                 </Box>
@@ -222,7 +356,8 @@ const UserProductivityWidget = () => {
                   variant="determinate"
                   value={Math.min(100, overallProgress)}
                   sx={{
-                    height: 8, borderRadius: 4,
+                    height: 8,
+                    borderRadius: 4,
                     bgcolor: 'rgba(0,0,0,0.05)',
                     '& .MuiLinearProgress-bar': {
                       borderRadius: 4,
@@ -235,33 +370,67 @@ const UserProductivityWidget = () => {
 
             {/* Weekly Activity */}
             <Grid item xs={12} md={6}>
-              <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1.5, fontSize: '0.85rem' }}>
+              <Typography
+                variant="subtitle2"
+                sx={{ fontWeight: 700, mb: 1.5, fontSize: '0.85rem' }}
+              >
                 📅 نشاط الأسبوع
               </Typography>
-              <Box sx={{ display: 'flex', justifyContent: 'space-around', alignItems: 'flex-end', mb: 2 }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-around',
+                  alignItems: 'flex-end',
+                  mb: 2,
+                }}
+              >
                 {WEEKLY_ACTIVITY.map((d, i) => (
                   <ActivityBar key={i} {...d} />
                 ))}
               </Box>
               <Grid container spacing={1}>
                 <Grid item xs={6}>
-                  <Box sx={{
-                    p: 1.5, borderRadius: 2, textAlign: 'center',
-                    bgcolor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
-                  }}>
-                    <AccessTimeIcon sx={{ fontSize: 20, color: brandColors.primaryStart, mb: 0.3 }} />
-                    <Typography variant="body2" sx={{ fontWeight: 800 }}>{weeklyHours} ساعة</Typography>
-                    <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.65rem' }}>إجمالي الساعات</Typography>
+                  <Box
+                    sx={{
+                      p: 1.5,
+                      borderRadius: 2,
+                      textAlign: 'center',
+                      bgcolor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
+                    }}
+                  >
+                    <AccessTimeIcon
+                      sx={{ fontSize: 20, color: brandColors.primaryStart, mb: 0.3 }}
+                    />
+                    <Typography variant="body2" sx={{ fontWeight: 800 }}>
+                      {weeklyHours} ساعة
+                    </Typography>
+                    <Typography
+                      variant="caption"
+                      sx={{ color: 'text.secondary', fontSize: '0.65rem' }}
+                    >
+                      إجمالي الساعات
+                    </Typography>
                   </Box>
                 </Grid>
                 <Grid item xs={6}>
-                  <Box sx={{
-                    p: 1.5, borderRadius: 2, textAlign: 'center',
-                    bgcolor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
-                  }}>
+                  <Box
+                    sx={{
+                      p: 1.5,
+                      borderRadius: 2,
+                      textAlign: 'center',
+                      bgcolor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
+                    }}
+                  >
                     <TaskAltIcon sx={{ fontSize: 20, color: statusColors.success, mb: 0.3 }} />
-                    <Typography variant="body2" sx={{ fontWeight: 800 }}>{weeklyTasks} مهمة</Typography>
-                    <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.65rem' }}>إجمالي المهام</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 800 }}>
+                      {weeklyTasks} مهمة
+                    </Typography>
+                    <Typography
+                      variant="caption"
+                      sx={{ color: 'text.secondary', fontSize: '0.65rem' }}
+                    >
+                      إجمالي المهام
+                    </Typography>
                   </Box>
                 </Grid>
               </Grid>
@@ -280,17 +449,30 @@ const UserProductivityWidget = () => {
                 <motion.div whileHover={{ scale: 1.03 }} transition={{ duration: 0.15 }}>
                   <Box
                     sx={{
-                      p: 1.5, borderRadius: 2.5, textAlign: 'center',
+                      p: 1.5,
+                      borderRadius: 2.5,
+                      textAlign: 'center',
                       border: '1px solid',
-                      borderColor: ach.earned ? `${ach.color}30` : isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.06)',
-                      bgcolor: ach.earned ? `${ach.color}08` : isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.01)',
+                      borderColor: ach.earned
+                        ? `${ach.color}30`
+                        : isDark
+                          ? 'rgba(255,255,255,0.05)'
+                          : 'rgba(0,0,0,0.06)',
+                      bgcolor: ach.earned
+                        ? `${ach.color}08`
+                        : isDark
+                          ? 'rgba(255,255,255,0.02)'
+                          : 'rgba(0,0,0,0.01)',
                       opacity: ach.earned ? 1 : 0.5,
                       transition: 'all 0.3s',
                     }}
                   >
                     <Avatar
                       sx={{
-                        width: 36, height: 36, mx: 'auto', mb: 0.5,
+                        width: 36,
+                        height: 36,
+                        mx: 'auto',
+                        mb: 0.5,
                         bgcolor: ach.earned ? `${ach.color}18` : 'rgba(0,0,0,0.05)',
                         color: ach.earned ? ach.color : 'text.disabled',
                         '& svg': { fontSize: 18 },
@@ -298,10 +480,21 @@ const UserProductivityWidget = () => {
                     >
                       {ach.icon}
                     </Avatar>
-                    <Typography variant="caption" sx={{ fontWeight: 700, display: 'block', fontSize: '0.7rem' }}>
+                    <Typography
+                      variant="caption"
+                      sx={{ fontWeight: 700, display: 'block', fontSize: '0.7rem' }}
+                    >
                       {ach.title}
                     </Typography>
-                    <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.55rem', display: 'block', lineHeight: 1.3 }}>
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        color: 'text.secondary',
+                        fontSize: '0.55rem',
+                        display: 'block',
+                        lineHeight: 1.3,
+                      }}
+                    >
                       {ach.desc}
                     </Typography>
                   </Box>

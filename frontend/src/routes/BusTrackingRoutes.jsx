@@ -3,11 +3,9 @@ import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const BusTrackingDashboard = lazyWithRetry(
-  () => import('../pages/bus-tracking/BusTrackingDashboard'),
+  () => import('../pages/bus-tracking/BusTrackingDashboard')
 );
-const ParentBusTracker = lazyWithRetry(
-  () => import('../pages/bus-tracking/ParentBusTracker'),
-);
+const ParentBusTracker = lazyWithRetry(() => import('../pages/bus-tracking/ParentBusTracker'));
 
 export default function BusTrackingRoutes() {
   return (

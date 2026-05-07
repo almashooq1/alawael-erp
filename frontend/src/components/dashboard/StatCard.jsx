@@ -34,14 +34,54 @@ const ICON_MAP = {
 
 // Color sets per card (gradient + icon bg + glow)
 const CARD_COLORS = [
-  { gradient: paletteGradients.primary,  glow: 'rgba(99,102,241,0.25)',  light: 'rgba(99,102,241,0.08)',  border: 'rgba(99,102,241,0.2)'  },
-  { gradient: paletteGradients.success,  glow: 'rgba(16,185,129,0.25)',  light: 'rgba(16,185,129,0.08)',  border: 'rgba(16,185,129,0.2)'  },
-  { gradient: paletteGradients.info,     glow: 'rgba(14,165,233,0.25)',  light: 'rgba(14,165,233,0.08)',  border: 'rgba(14,165,233,0.2)'  },
-  { gradient: paletteGradients.warning,  glow: 'rgba(245,158,11,0.25)',  light: 'rgba(245,158,11,0.08)',  border: 'rgba(245,158,11,0.2)'  },
-  { gradient: paletteGradients.ocean,    glow: 'rgba(14,165,233,0.25)',  light: 'rgba(14,165,233,0.08)',  border: 'rgba(14,165,233,0.2)'  },
-  { gradient: paletteGradients.orange,   glow: 'rgba(249,115,22,0.25)',  light: 'rgba(249,115,22,0.08)',  border: 'rgba(249,115,22,0.2)'  },
-  { gradient: paletteGradients.accent,   glow: 'rgba(245,158,11,0.25)',  light: 'rgba(245,158,11,0.08)',  border: 'rgba(245,158,11,0.2)'  },
-  { gradient: paletteGradients.fire,     glow: 'rgba(239,68,68,0.25)',   light: 'rgba(239,68,68,0.08)',   border: 'rgba(239,68,68,0.2)'   },
+  {
+    gradient: paletteGradients.primary,
+    glow: 'rgba(99,102,241,0.25)',
+    light: 'rgba(99,102,241,0.08)',
+    border: 'rgba(99,102,241,0.2)',
+  },
+  {
+    gradient: paletteGradients.success,
+    glow: 'rgba(16,185,129,0.25)',
+    light: 'rgba(16,185,129,0.08)',
+    border: 'rgba(16,185,129,0.2)',
+  },
+  {
+    gradient: paletteGradients.info,
+    glow: 'rgba(14,165,233,0.25)',
+    light: 'rgba(14,165,233,0.08)',
+    border: 'rgba(14,165,233,0.2)',
+  },
+  {
+    gradient: paletteGradients.warning,
+    glow: 'rgba(245,158,11,0.25)',
+    light: 'rgba(245,158,11,0.08)',
+    border: 'rgba(245,158,11,0.2)',
+  },
+  {
+    gradient: paletteGradients.ocean,
+    glow: 'rgba(14,165,233,0.25)',
+    light: 'rgba(14,165,233,0.08)',
+    border: 'rgba(14,165,233,0.2)',
+  },
+  {
+    gradient: paletteGradients.orange,
+    glow: 'rgba(249,115,22,0.25)',
+    light: 'rgba(249,115,22,0.08)',
+    border: 'rgba(249,115,22,0.2)',
+  },
+  {
+    gradient: paletteGradients.accent,
+    glow: 'rgba(245,158,11,0.25)',
+    light: 'rgba(245,158,11,0.08)',
+    border: 'rgba(245,158,11,0.2)',
+  },
+  {
+    gradient: paletteGradients.fire,
+    glow: 'rgba(239,68,68,0.25)',
+    light: 'rgba(239,68,68,0.08)',
+    border: 'rgba(239,68,68,0.2)',
+  },
 ];
 
 const NAV_PATHS = {
@@ -126,7 +166,9 @@ const StatCard = ({ title, value, subtitle, icon, index = 0, trend, onClick }) =
       role="button"
       tabIndex={0}
       aria-label={`${title}: ${formatNumber(value)}`}
-      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleClick(); }}
+      onKeyDown={e => {
+        if (e.key === 'Enter' || e.key === ' ') handleClick();
+      }}
     >
       <Paper
         elevation={0}
@@ -138,9 +180,7 @@ const StatCard = ({ title, value, subtitle, icon, index = 0, trend, onClick }) =
           minHeight: 152,
           display: 'flex',
           flexDirection: 'column',
-          background: isDark
-            ? 'rgba(15,23,42,0.8)'
-            : '#FFFFFF',
+          background: isDark ? 'rgba(15,23,42,0.8)' : '#FFFFFF',
           border: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : colors.border}`,
           boxShadow: isDark
             ? '0 2px 8px rgba(0,0,0,0.4)'
@@ -162,9 +202,24 @@ const StatCard = ({ title, value, subtitle, icon, index = 0, trend, onClick }) =
         <Box sx={{ height: 3, background: colors.gradient, flexShrink: 0 }} />
 
         {/* Main content */}
-        <Box sx={{ p: 2.5, flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+        <Box
+          sx={{
+            p: 2.5,
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+          }}
+        >
           {/* Top row: icon + trend */}
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1.5 }}>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'flex-start',
+              mb: 1.5,
+            }}
+          >
             {/* Icon */}
             <Box
               className="stat-icon-wrap"
@@ -184,14 +239,18 @@ const StatCard = ({ title, value, subtitle, icon, index = 0, trend, onClick }) =
                 '&::before': {
                   content: '""',
                   position: 'absolute',
-                  top: 0, left: 0, right: 0,
+                  top: 0,
+                  left: 0,
+                  right: 0,
                   height: '45%',
                   background: 'rgba(255,255,255,0.14)',
                   borderRadius: '14px 14px 0 0',
                 },
               }}
             >
-              <IconComponent sx={{ color: '#FFFFFF', fontSize: 24, position: 'relative', zIndex: 1 }} />
+              <IconComponent
+                sx={{ color: '#FFFFFF', fontSize: 24, position: 'relative', zIndex: 1 }}
+              />
             </Box>
 
             {/* Trend badge */}
@@ -204,19 +263,18 @@ const StatCard = ({ title, value, subtitle, icon, index = 0, trend, onClick }) =
                   px: 1,
                   py: 0.4,
                   borderRadius: '8px',
-                  background: isPositive
-                    ? 'rgba(16,185,129,0.1)'
-                    : 'rgba(244,63,94,0.1)',
+                  background: isPositive ? 'rgba(16,185,129,0.1)' : 'rgba(244,63,94,0.1)',
                   border: `1px solid ${isPositive ? 'rgba(16,185,129,0.2)' : 'rgba(244,63,94,0.2)'}`,
                   color: isPositive ? '#10B981' : '#F43F5E',
                   fontSize: '0.72rem',
                   fontWeight: 700,
                 }}
               >
-                {isPositive
-                  ? <TrendingUpIcon sx={{ fontSize: 14 }} />
-                  : <TrendingDownIcon sx={{ fontSize: 14 }} />
-                }
+                {isPositive ? (
+                  <TrendingUpIcon sx={{ fontSize: 14 }} />
+                ) : (
+                  <TrendingDownIcon sx={{ fontSize: 14 }} />
+                )}
                 {Math.abs(trend)}%
               </Box>
             )}
@@ -252,7 +310,14 @@ const StatCard = ({ title, value, subtitle, icon, index = 0, trend, onClick }) =
 
           {/* Subtitle + arrow */}
           {(subtitle || navPath) && (
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 1.25 }}>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                mt: 1.25,
+              }}
+            >
               {subtitle && (
                 <Typography
                   variant="caption"

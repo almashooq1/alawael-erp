@@ -4,14 +4,42 @@
  */
 import React, { useState, useMemo } from 'react';
 import {
-  Box, Paper, Typography, Grid, Chip, ToggleButton, ToggleButtonGroup,
-  IconButton, Tooltip, useTheme, Divider, Select, MenuItem,
+  Box,
+  Paper,
+  Typography,
+  Grid,
+  Chip,
+  ToggleButton,
+  ToggleButtonGroup,
+  IconButton,
+  Tooltip,
+  useTheme,
+  Divider,
+  Select,
+  MenuItem,
 } from '@mui/material';
 import { motion } from 'framer-motion';
 import {
-  AreaChart, Area, BarChart, Bar, LineChart, Line, PieChart, Pie, Cell,
-  XAxis, YAxis, CartesianGrid, Tooltip as ChartTooltip, Legend,
-  ResponsiveContainer, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as ChartTooltip,
+  Legend,
+  ResponsiveContainer,
+  RadarChart,
+  Radar,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
 } from 'recharts';
 import ShowChartIcon from '@mui/icons-material/ShowChart';
 import BarChartIcon from '@mui/icons-material/BarChart';
@@ -29,12 +57,30 @@ const PERIOD_OPTIONS = [
 ];
 
 // Sample analytics data
-const generateAnalyticsData = (period) => {
-  const months = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+const generateAnalyticsData = period => {
+  const months = [
+    'يناير',
+    'فبراير',
+    'مارس',
+    'أبريل',
+    'مايو',
+    'يونيو',
+    'يوليو',
+    'أغسطس',
+    'سبتمبر',
+    'أكتوبر',
+    'نوفمبر',
+    'ديسمبر',
+  ];
   const weeks = ['الأسبوع 1', 'الأسبوع 2', 'الأسبوع 3', 'الأسبوع 4'];
-  const labels = period === 'week' ? ['سبت', 'أحد', 'اثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة'] :
-                 period === 'month' ? weeks :
-                 period === 'quarter' ? months.slice(0, 3) : months;
+  const labels =
+    period === 'week'
+      ? ['سبت', 'أحد', 'اثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة']
+      : period === 'month'
+        ? weeks
+        : period === 'quarter'
+          ? months.slice(0, 3)
+          : months;
 
   return labels.map((name, _i) => ({
     name,
@@ -73,21 +119,30 @@ const MetricCard = ({ title, value, change, positive, icon, gradient }) => {
           p: 2,
           borderRadius: 3,
           border: '1px solid',
-          borderColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
+          borderColor:
+            theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
           position: 'relative',
           overflow: 'hidden',
         }}
       >
-        <Box sx={{
-          position: 'absolute', top: 0, left: 0, right: 0, height: 3,
-          background: gradient || gradients.primary,
-        }} />
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 3,
+            background: gradient || gradients.primary,
+          }}
+        />
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <Box>
             <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.7rem' }}>
               {title}
             </Typography>
-            <Typography variant="h5" sx={{ fontWeight: 800, my: 0.5 }}>{value}</Typography>
+            <Typography variant="h5" sx={{ fontWeight: 800, my: 0.5 }}>
+              {value}
+            </Typography>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
               {positive ? (
                 <TrendingUpIcon sx={{ fontSize: 14, color: statusColors.success }} />
@@ -96,7 +151,11 @@ const MetricCard = ({ title, value, change, positive, icon, gradient }) => {
               )}
               <Typography
                 variant="caption"
-                sx={{ color: positive ? statusColors.success : statusColors.error, fontWeight: 700, fontSize: '0.7rem' }}
+                sx={{
+                  color: positive ? statusColors.success : statusColors.error,
+                  fontWeight: 700,
+                  fontSize: '0.7rem',
+                }}
               >
                 {change}
               </Typography>
@@ -104,9 +163,13 @@ const MetricCard = ({ title, value, change, positive, icon, gradient }) => {
           </Box>
           <Box
             sx={{
-              width: 40, height: 40, borderRadius: 2,
+              width: 40,
+              height: 40,
+              borderRadius: 2,
               background: gradient || gradients.primary,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
               '& svg': { fontSize: 20, color: '#fff' },
             }}
           >
@@ -129,11 +192,18 @@ const AdvancedAnalyticsPanel = ({ _finance = {}, _charts = {} }) => {
   const totalRevenue = useMemo(() => data.reduce((s, d) => s + d.revenue, 0), [data]);
   const totalExpenses = useMemo(() => data.reduce((s, d) => s + d.expenses, 0), [data]);
   const totalSessions = useMemo(() => data.reduce((s, d) => s + d.sessions, 0), [data]);
-  const avgBeneficiaries = useMemo(() => Math.round(data.reduce((s, d) => s + d.beneficiaries, 0) / data.length), [data]);
+  const avgBeneficiaries = useMemo(
+    () => Math.round(data.reduce((s, d) => s + d.beneficiaries, 0) / data.length),
+    [data]
+  );
 
   const renderMainChart = () => {
     const commonProps = { data, margin: { top: 10, right: 10, left: 0, bottom: 0 } };
-    const colors = { revenue: brandColors.primaryStart, expenses: statusColors.error, target: statusColors.success };
+    const colors = {
+      revenue: brandColors.primaryStart,
+      expenses: statusColors.error,
+      target: statusColors.success,
+    };
 
     if (chartView === 'area') {
       return (
@@ -153,9 +223,31 @@ const AdvancedAnalyticsPanel = ({ _finance = {}, _charts = {} }) => {
           <YAxis fontSize={11} />
           <ChartTooltip contentStyle={{ borderRadius: 12, border: 'none', fontSize: 12 }} />
           <Legend wrapperStyle={{ fontSize: 11 }} />
-          <Area type="monotone" dataKey="revenue" name="الإيرادات" stroke={colors.revenue} fill="url(#gradRevenue)" strokeWidth={2} />
-          <Area type="monotone" dataKey="expenses" name="المصروفات" stroke={colors.expenses} fill="url(#gradExpenses)" strokeWidth={2} />
-          <Area type="monotone" dataKey="target" name="المستهدف" stroke={colors.target} fill="none" strokeWidth={1.5} strokeDasharray="5 5" />
+          <Area
+            type="monotone"
+            dataKey="revenue"
+            name="الإيرادات"
+            stroke={colors.revenue}
+            fill="url(#gradRevenue)"
+            strokeWidth={2}
+          />
+          <Area
+            type="monotone"
+            dataKey="expenses"
+            name="المصروفات"
+            stroke={colors.expenses}
+            fill="url(#gradExpenses)"
+            strokeWidth={2}
+          />
+          <Area
+            type="monotone"
+            dataKey="target"
+            name="المستهدف"
+            stroke={colors.target}
+            fill="none"
+            strokeWidth={1.5}
+            strokeDasharray="5 5"
+          />
         </AreaChart>
       );
     }
@@ -180,8 +272,22 @@ const AdvancedAnalyticsPanel = ({ _finance = {}, _charts = {} }) => {
           <YAxis fontSize={11} />
           <ChartTooltip contentStyle={{ borderRadius: 12, border: 'none', fontSize: 12 }} />
           <Legend wrapperStyle={{ fontSize: 11 }} />
-          <Line type="monotone" dataKey="sessions" name="الجلسات" stroke={brandColors.accentSky} strokeWidth={2} dot={{ r: 3 }} />
-          <Line type="monotone" dataKey="beneficiaries" name="المستفيدون" stroke={brandColors.accentGreen} strokeWidth={2} dot={{ r: 3 }} />
+          <Line
+            type="monotone"
+            dataKey="sessions"
+            name="الجلسات"
+            stroke={brandColors.accentSky}
+            strokeWidth={2}
+            dot={{ r: 3 }}
+          />
+          <Line
+            type="monotone"
+            dataKey="beneficiaries"
+            name="المستفيدون"
+            stroke={brandColors.accentGreen}
+            strokeWidth={2}
+            dot={{ r: 3 }}
+          />
         </LineChart>
       );
     }
@@ -189,7 +295,11 @@ const AdvancedAnalyticsPanel = ({ _finance = {}, _charts = {} }) => {
   };
 
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }}>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: 0.2 }}
+    >
       <Paper
         elevation={0}
         sx={{
@@ -201,7 +311,16 @@ const AdvancedAnalyticsPanel = ({ _finance = {}, _charts = {} }) => {
         }}
       >
         {/* Header */}
-        <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
+        <Box
+          sx={{
+            p: 2,
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: 1,
+          }}
+        >
           <Box>
             <Typography variant="h6" sx={{ fontWeight: 700, fontSize: '1rem' }}>
               📊 التحليلات المتقدمة
@@ -218,7 +337,9 @@ const AdvancedAnalyticsPanel = ({ _finance = {}, _charts = {} }) => {
               sx={{ borderRadius: 2, fontSize: '0.8rem', minWidth: 90 }}
             >
               {PERIOD_OPTIONS.map(opt => (
-                <MenuItem key={opt.value} value={opt.value} sx={{ fontSize: '0.8rem' }}>{opt.label}</MenuItem>
+                <MenuItem key={opt.value} value={opt.value} sx={{ fontSize: '0.8rem' }}>
+                  {opt.label}
+                </MenuItem>
               ))}
             </Select>
             <ToggleButtonGroup
@@ -227,12 +348,26 @@ const AdvancedAnalyticsPanel = ({ _finance = {}, _charts = {} }) => {
               onChange={(_, v) => v && setChartView(v)}
               size="small"
             >
-              <ToggleButton value="area"><Tooltip title="مخطط مساحي"><ShowChartIcon fontSize="small" /></Tooltip></ToggleButton>
-              <ToggleButton value="bar"><Tooltip title="مخطط أعمدة"><BarChartIcon fontSize="small" /></Tooltip></ToggleButton>
-              <ToggleButton value="line"><Tooltip title="مخطط خطي"><ShowChartIcon fontSize="small" /></Tooltip></ToggleButton>
+              <ToggleButton value="area">
+                <Tooltip title="مخطط مساحي">
+                  <ShowChartIcon fontSize="small" />
+                </Tooltip>
+              </ToggleButton>
+              <ToggleButton value="bar">
+                <Tooltip title="مخطط أعمدة">
+                  <BarChartIcon fontSize="small" />
+                </Tooltip>
+              </ToggleButton>
+              <ToggleButton value="line">
+                <Tooltip title="مخطط خطي">
+                  <ShowChartIcon fontSize="small" />
+                </Tooltip>
+              </ToggleButton>
             </ToggleButtonGroup>
             <Tooltip title="تصدير البيانات">
-              <IconButton size="small"><FileDownloadIcon fontSize="small" /></IconButton>
+              <IconButton size="small">
+                <FileDownloadIcon fontSize="small" />
+              </IconButton>
             </Tooltip>
           </Box>
         </Box>
@@ -311,18 +446,30 @@ const AdvancedAnalyticsPanel = ({ _finance = {}, _charts = {} }) => {
               <Paper
                 elevation={0}
                 sx={{
-                  p: 2, borderRadius: 3,
+                  p: 2,
+                  borderRadius: 3,
                   bgcolor: isDark ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.01)',
                   border: '1px solid',
                   borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
                 }}
               >
-                <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1, fontSize: '0.85rem' }}>
+                <Typography
+                  variant="subtitle2"
+                  sx={{ fontWeight: 700, mb: 1, fontSize: '0.85rem' }}
+                >
                   توزيع الأقسام
                 </Typography>
                 <ResponsiveContainer width="100%" height={200}>
                   <PieChart>
-                    <Pie data={departmentData} cx="50%" cy="50%" innerRadius={50} outerRadius={80} dataKey="value" paddingAngle={3}>
+                    <Pie
+                      data={departmentData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={50}
+                      outerRadius={80}
+                      dataKey="value"
+                      paddingAngle={3}
+                    >
                       {departmentData.map((entry, _i) => (
                         <Cell key={_i} fill={entry.color} />
                       ))}
@@ -330,15 +477,26 @@ const AdvancedAnalyticsPanel = ({ _finance = {}, _charts = {} }) => {
                     <ChartTooltip contentStyle={{ borderRadius: 8, fontSize: 11 }} />
                   </PieChart>
                 </ResponsiveContainer>
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, justifyContent: 'center', mt: 1 }}>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: 0.5,
+                    justifyContent: 'center',
+                    mt: 1,
+                  }}
+                >
                   {departmentData.map((d, _i) => (
                     <Chip
                       key={_i}
                       size="small"
                       label={`${d.name} ${d.value}%`}
                       sx={{
-                        fontSize: '0.65rem', height: 22,
-                        bgcolor: `${d.color}18`, color: d.color, fontWeight: 600,
+                        fontSize: '0.65rem',
+                        height: 22,
+                        bgcolor: `${d.color}18`,
+                        color: d.color,
+                        fontWeight: 600,
                       }}
                     />
                   ))}
@@ -351,19 +509,45 @@ const AdvancedAnalyticsPanel = ({ _finance = {}, _charts = {} }) => {
               <Paper
                 elevation={0}
                 sx={{
-                  p: 2, borderRadius: 3,
+                  p: 2,
+                  borderRadius: 3,
                   bgcolor: isDark ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.01)',
                   border: '1px solid',
                   borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
                 }}
               >
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    mb: 1,
+                  }}
+                >
                   <Typography variant="subtitle2" sx={{ fontWeight: 700, fontSize: '0.85rem' }}>
                     مقارنة الأداء — الشهر الحالي vs السابق
                   </Typography>
                   <Box sx={{ display: 'flex', gap: 1 }}>
-                    <Chip size="small" label="الشهر الحالي" sx={{ height: 20, fontSize: '0.6rem', bgcolor: `${brandColors.primaryStart}18`, color: brandColors.primaryStart }} />
-                    <Chip size="small" label="الشهر السابق" sx={{ height: 20, fontSize: '0.6rem', bgcolor: `${brandColors.accentGreen}18`, color: brandColors.accentGreen }} />
+                    <Chip
+                      size="small"
+                      label="الشهر الحالي"
+                      sx={{
+                        height: 20,
+                        fontSize: '0.6rem',
+                        bgcolor: `${brandColors.primaryStart}18`,
+                        color: brandColors.primaryStart,
+                      }}
+                    />
+                    <Chip
+                      size="small"
+                      label="الشهر السابق"
+                      sx={{
+                        height: 20,
+                        fontSize: '0.6rem',
+                        bgcolor: `${brandColors.accentGreen}18`,
+                        color: brandColors.accentGreen,
+                      }}
+                    />
                   </Box>
                 </Box>
                 <ResponsiveContainer width="100%" height={200}>
@@ -371,8 +555,20 @@ const AdvancedAnalyticsPanel = ({ _finance = {}, _charts = {} }) => {
                     <PolarGrid stroke={isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)'} />
                     <PolarAngleAxis dataKey="subject" tick={{ fontSize: 10 }} />
                     <PolarRadiusAxis tick={{ fontSize: 9 }} />
-                    <Radar name="الشهر الحالي" dataKey="A" stroke={brandColors.primaryStart} fill={brandColors.primaryStart} fillOpacity={0.2} />
-                    <Radar name="الشهر السابق" dataKey="B" stroke={brandColors.accentGreen} fill={brandColors.accentGreen} fillOpacity={0.15} />
+                    <Radar
+                      name="الشهر الحالي"
+                      dataKey="A"
+                      stroke={brandColors.primaryStart}
+                      fill={brandColors.primaryStart}
+                      fillOpacity={0.2}
+                    />
+                    <Radar
+                      name="الشهر السابق"
+                      dataKey="B"
+                      stroke={brandColors.accentGreen}
+                      fill={brandColors.accentGreen}
+                      fillOpacity={0.15}
+                    />
                     <ChartTooltip contentStyle={{ borderRadius: 8, fontSize: 11 }} />
                   </RadarChart>
                 </ResponsiveContainer>

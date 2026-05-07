@@ -4,23 +4,40 @@
  */
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Box, Paper, Typography, Grid, Button, TextField, Chip, Alert,
-  CircularProgress, Dialog, DialogTitle, DialogContent, DialogActions,
-  FormControl, InputLabel, Select, MenuItem, IconButton, Tooltip,
-  Table, TableHead, TableRow, TableCell, TableBody, Divider,
-  Stepper, Step, StepLabel, Card, CardContent, Switch, FormControlLabel,
+  Box,
+  Paper,
+  Typography,
+  Grid,
+  Button,
+  TextField,
+  Chip,
+  Alert,
+  CircularProgress,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Tooltip,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+  Divider,
+  Stepper,
+  Step,
+  StepLabel,
+  Card,
+  CardContent,
+  Switch,
+  FormControlLabel,
 } from '@mui/material';
 import {
   Assessment as ReportIcon,
   PlayArrow as RunIcon,
-  Download as DownloadIcon,
   Add as AddIcon,
   Schedule as ScheduleIcon,
-  FilterList as FilterIcon,
-  Save as SaveIcon,
-  Delete as DeleteIcon,
   BarChart as ChartIcon,
-  TableChart as TableChartIcon,
   PictureAsPdf as PdfIcon,
   Description as CsvIcon,
   Code as JsonIcon,
@@ -79,7 +96,7 @@ export default function ReportBuilder({ onReportGenerated }) {
   });
 
   // Dialog state
-  const [scheduleDialog, setScheduleDialog] = useState(false);
+  const [_scheduleDialog, setScheduleDialog] = useState(false);
 
   const loadTemplates = useCallback(async () => {
     try {
@@ -89,10 +106,12 @@ export default function ReportBuilder({ onReportGenerated }) {
       ]);
       setTemplates(tRes.data?.templates || []);
       setSchedules(sRes.data?.schedules || []);
-    } catch { }
+    } catch {}
   }, []);
 
-  useEffect(() => { loadTemplates(); }, [loadTemplates]);
+  useEffect(() => {
+    loadTemplates();
+  }, [loadTemplates]);
 
   const steps = ['اختيار القالب', 'تحديد الفلاتر', 'معاينة وتنفيذ'];
 
@@ -110,11 +129,11 @@ export default function ReportBuilder({ onReportGenerated }) {
       });
       setResult(r.data);
       onReportGenerated?.(r.data);
-    } catch { }
+    } catch {}
     setLoading(false);
   };
 
-  const handleRunTemplate = async (templateId) => {
+  const handleRunTemplate = async templateId => {
     setLoading(true);
     try {
       const r = await reportApi.runFromTemplate(templateId, {
@@ -123,17 +142,17 @@ export default function ReportBuilder({ onReportGenerated }) {
       });
       setResult(r.data);
       setStep(2);
-    } catch { }
+    } catch {}
     setLoading(false);
   };
 
   const handleExport = async (executionId, format) => {
     try {
       await reportApi.export(executionId, format);
-    } catch { }
+    } catch {}
   };
 
-  const handleCreateSchedule = async () => {
+  const _handleCreateSchedule = async () => {
     try {
       await reportApi.createSchedule({
         name: report.nameAr || 'جدول تقرير',
@@ -142,7 +161,7 @@ export default function ReportBuilder({ onReportGenerated }) {
       });
       setScheduleDialog(false);
       loadTemplates();
-    } catch { }
+    } catch {}
   };
 
   return (
@@ -153,8 +172,10 @@ export default function ReportBuilder({ onReportGenerated }) {
       </Typography>
 
       <Stepper activeStep={step} sx={{ mb: 3 }}>
-        {steps.map((label) => (
-          <Step key={label}><StepLabel>{label}</StepLabel></Step>
+        {steps.map(label => (
+          <Step key={label}>
+            <StepLabel>{label}</StepLabel>
+          </Step>
         ))}
       </Stepper>
 
@@ -182,7 +203,9 @@ export default function ReportBuilder({ onReportGenerated }) {
                       {t.category} {t.isSystem ? '• نظام' : ''}
                     </Typography>
                     {t.description && (
-                      <Typography variant="body2" sx={{ mt: 1 }}>{t.description}</Typography>
+                      <Typography variant="body2" sx={{ mt: 1 }}>
+                        {t.description}
+                      </Typography>
                     )}
                   </CardContent>
                 </Card>
@@ -203,7 +226,9 @@ export default function ReportBuilder({ onReportGenerated }) {
                 <CardContent sx={{ textAlign: 'center', py: 4 }}>
                   <AddIcon sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
                   <Typography fontWeight={600}>تقرير مخصص</Typography>
-                  <Typography variant="caption" color="text.secondary">أنشئ تقريراً بفلاتر مخصصة</Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    أنشئ تقريراً بفلاتر مخصصة
+                  </Typography>
                 </CardContent>
               </Card>
             </Grid>
@@ -217,19 +242,24 @@ export default function ReportBuilder({ onReportGenerated }) {
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
               <TextField
-                fullWidth label="اسم التقرير" value={report.nameAr}
-                onChange={(e) => setReport((r) => ({ ...r, nameAr: e.target.value }))}
+                fullWidth
+                label="اسم التقرير"
+                value={report.nameAr}
+                onChange={e => setReport(r => ({ ...r, nameAr: e.target.value }))}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth>
                 <InputLabel>الفئة</InputLabel>
                 <Select
-                  value={report.category} label="الفئة"
-                  onChange={(e) => setReport((r) => ({ ...r, category: e.target.value }))}
+                  value={report.category}
+                  label="الفئة"
+                  onChange={e => setReport(r => ({ ...r, category: e.target.value }))}
                 >
-                  {REPORT_CATEGORIES.map((c) => (
-                    <MenuItem key={c.value} value={c.value}>{c.label}</MenuItem>
+                  {REPORT_CATEGORIES.map(c => (
+                    <MenuItem key={c.value} value={c.value}>
+                      {c.label}
+                    </MenuItem>
                   ))}
                 </Select>
               </FormControl>
@@ -238,11 +268,14 @@ export default function ReportBuilder({ onReportGenerated }) {
               <FormControl fullWidth>
                 <InputLabel>الفترة الزمنية</InputLabel>
                 <Select
-                  value={report.dateRange} label="الفترة الزمنية"
-                  onChange={(e) => setReport((r) => ({ ...r, dateRange: e.target.value }))}
+                  value={report.dateRange}
+                  label="الفترة الزمنية"
+                  onChange={e => setReport(r => ({ ...r, dateRange: e.target.value }))}
                 >
-                  {DATE_RANGES.map((d) => (
-                    <MenuItem key={d.value} value={d.value}>{d.label}</MenuItem>
+                  {DATE_RANGES.map(d => (
+                    <MenuItem key={d.value} value={d.value}>
+                      {d.label}
+                    </MenuItem>
                   ))}
                 </Select>
               </FormControl>
@@ -251,10 +284,11 @@ export default function ReportBuilder({ onReportGenerated }) {
               <FormControl fullWidth>
                 <InputLabel>صيغة التصدير</InputLabel>
                 <Select
-                  value={report.format} label="صيغة التصدير"
-                  onChange={(e) => setReport((r) => ({ ...r, format: e.target.value }))}
+                  value={report.format}
+                  label="صيغة التصدير"
+                  onChange={e => setReport(r => ({ ...r, format: e.target.value }))}
                 >
-                  {EXPORT_FORMATS.map((f) => (
+                  {EXPORT_FORMATS.map(f => (
                     <MenuItem key={f.value} value={f.value}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         {f.icon} {f.label}
@@ -269,16 +303,22 @@ export default function ReportBuilder({ onReportGenerated }) {
               <>
                 <Grid item xs={12} sm={6}>
                   <TextField
-                    fullWidth type="date" label="من تاريخ" InputLabelProps={{ shrink: true }}
+                    fullWidth
+                    type="date"
+                    label="من تاريخ"
+                    InputLabelProps={{ shrink: true }}
                     value={report.dateFrom}
-                    onChange={(e) => setReport((r) => ({ ...r, dateFrom: e.target.value }))}
+                    onChange={e => setReport(r => ({ ...r, dateFrom: e.target.value }))}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <TextField
-                    fullWidth type="date" label="إلى تاريخ" InputLabelProps={{ shrink: true }}
+                    fullWidth
+                    type="date"
+                    label="إلى تاريخ"
+                    InputLabelProps={{ shrink: true }}
                     value={report.dateTo}
-                    onChange={(e) => setReport((r) => ({ ...r, dateTo: e.target.value }))}
+                    onChange={e => setReport(r => ({ ...r, dateTo: e.target.value }))}
                   />
                 </Grid>
               </>
@@ -290,7 +330,7 @@ export default function ReportBuilder({ onReportGenerated }) {
                 control={
                   <Switch
                     checked={report.scheduleEnabled}
-                    onChange={(e) => setReport((r) => ({ ...r, scheduleEnabled: e.target.checked }))}
+                    onChange={e => setReport(r => ({ ...r, scheduleEnabled: e.target.checked }))}
                   />
                 }
                 label="جدولة تلقائية"
@@ -299,8 +339,9 @@ export default function ReportBuilder({ onReportGenerated }) {
                 <FormControl sx={{ ml: 2, minWidth: 150 }} size="small">
                   <InputLabel>التكرار</InputLabel>
                   <Select
-                    value={report.scheduleFrequency} label="التكرار"
-                    onChange={(e) => setReport((r) => ({ ...r, scheduleFrequency: e.target.value }))}
+                    value={report.scheduleFrequency}
+                    label="التكرار"
+                    onChange={e => setReport(r => ({ ...r, scheduleFrequency: e.target.value }))}
                   >
                     <MenuItem value="daily">يومي</MenuItem>
                     <MenuItem value="weekly">أسبوعي</MenuItem>
@@ -314,7 +355,14 @@ export default function ReportBuilder({ onReportGenerated }) {
 
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
             <Button onClick={() => setStep(0)}>رجوع</Button>
-            <Button variant="contained" startIcon={<RunIcon />} onClick={() => { handleGenerate(); setStep(2); }}>
+            <Button
+              variant="contained"
+              startIcon={<RunIcon />}
+              onClick={() => {
+                handleGenerate();
+                setStep(2);
+              }}
+            >
               تنفيذ التقرير
             </Button>
           </Box>
@@ -337,10 +385,11 @@ export default function ReportBuilder({ onReportGenerated }) {
 
               {/* Export actions */}
               <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
-                {EXPORT_FORMATS.map((f) => (
+                {EXPORT_FORMATS.map(f => (
                   <Tooltip title={`تصدير ${f.label}`} key={f.value}>
                     <Button
-                      size="small" variant="outlined"
+                      size="small"
+                      variant="outlined"
                       startIcon={f.icon}
                       onClick={() => handleExport(result.executionId || result._id, f.value)}
                     >
@@ -356,19 +405,23 @@ export default function ReportBuilder({ onReportGenerated }) {
                   <Table size="small" stickyHeader>
                     <TableHead>
                       <TableRow>
-                        {Object.keys(result.data[0]).slice(0, 6).map((key) => (
-                          <TableCell key={key}>{key}</TableCell>
-                        ))}
+                        {Object.keys(result.data[0])
+                          .slice(0, 6)
+                          .map(key => (
+                            <TableCell key={key}>{key}</TableCell>
+                          ))}
                       </TableRow>
                     </TableHead>
                     <TableBody>
                       {result.data.slice(0, 20).map((row, ri) => (
                         <TableRow key={ri}>
-                          {Object.values(row).slice(0, 6).map((val, vi) => (
-                            <TableCell key={vi}>
-                              {typeof val === 'object' ? JSON.stringify(val) : String(val ?? '-')}
-                            </TableCell>
-                          ))}
+                          {Object.values(row)
+                            .slice(0, 6)
+                            .map((val, vi) => (
+                              <TableCell key={vi}>
+                                {typeof val === 'object' ? JSON.stringify(val) : String(val ?? '-')}
+                              </TableCell>
+                            ))}
                         </TableRow>
                       ))}
                     </TableBody>
@@ -381,7 +434,14 @@ export default function ReportBuilder({ onReportGenerated }) {
           )}
 
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
-            <Button onClick={() => { setStep(0); setResult(null); }}>تقرير جديد</Button>
+            <Button
+              onClick={() => {
+                setStep(0);
+                setResult(null);
+              }}
+            >
+              تقرير جديد
+            </Button>
           </Box>
         </Box>
       )}
@@ -398,11 +458,21 @@ export default function ReportBuilder({ onReportGenerated }) {
             {schedules.map((s, i) => (
               <Grid item xs={12} sm={6} md={4} key={i}>
                 <Card variant="outlined" sx={{ p: 1.5 }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Box
+                    sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                  >
                     <Box>
-                      <Typography variant="body2" fontWeight={600}>{s.name || `جدول ${i + 1}`}</Typography>
+                      <Typography variant="body2" fontWeight={600}>
+                        {s.name || `جدول ${i + 1}`}
+                      </Typography>
                       <Typography variant="caption" color="text.secondary">
-                        {s.frequency === 'daily' ? 'يومي' : s.frequency === 'weekly' ? 'أسبوعي' : s.frequency === 'monthly' ? 'شهري' : s.frequency}
+                        {s.frequency === 'daily'
+                          ? 'يومي'
+                          : s.frequency === 'weekly'
+                            ? 'أسبوعي'
+                            : s.frequency === 'monthly'
+                              ? 'شهري'
+                              : s.frequency}
                       </Typography>
                     </Box>
                     <Chip

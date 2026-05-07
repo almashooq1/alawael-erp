@@ -4,8 +4,17 @@
  */
 import React, { useState, useCallback, useMemo } from 'react';
 import {
-  Box, Grid, Typography, Fab, Tooltip, useTheme, Chip, Stack,
-  IconButton, Collapse, } from '@mui/material';
+  Box,
+  Grid,
+  Typography,
+  Fab,
+  Tooltip,
+  useTheme,
+  Chip,
+  Stack,
+  IconButton,
+  Collapse,
+} from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
 import DashboardCustomizeIcon from '@mui/icons-material/DashboardCustomize';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -37,8 +46,12 @@ const ProSection = ({ _id, title, icon, children, collapsed, onToggle, delay = 0
         tabIndex={0}
         aria-expanded={!collapsed}
         sx={{
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          cursor: 'pointer', mb: 1, px: 1,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          cursor: 'pointer',
+          mb: 1,
+          px: 1,
           '&:hover': { opacity: 0.85 },
         }}
       >
@@ -48,7 +61,8 @@ const ProSection = ({ _id, title, icon, children, collapsed, onToggle, delay = 0
             label={title}
             size="small"
             sx={{
-              fontWeight: 700, fontSize: '0.75rem',
+              fontWeight: 700,
+              fontSize: '0.75rem',
               background: `${brandColors.primaryStart}14`,
               color: brandColors.primaryStart,
               border: `1px solid ${brandColors.primaryStart}30`,
@@ -84,33 +98,39 @@ const ProDashboardLayout = () => {
   const [customizerOpen, setCustomizerOpen] = useState(false);
   const [collapsedSections, setCollapsedSections] = useState({});
 
-  const toggleSection = useCallback((sectionId) => {
+  const toggleSection = useCallback(sectionId => {
     setCollapsedSections(prev => ({ ...prev, [sectionId]: !prev[sectionId] }));
   }, []);
 
   const isWidgetVisible = useCallback(
-    (widgetId) => preferences.visibleWidgets.includes(widgetId),
-    [preferences.visibleWidgets],
+    widgetId => preferences.visibleWidgets.includes(widgetId),
+    [preferences.visibleWidgets]
   );
 
-  const handleSavePreferences = useCallback((newPrefs) => {
+  const handleSavePreferences = useCallback(newPrefs => {
     setPreferences(newPrefs);
   }, []);
 
   // Compute grid columns based on preference
   const gridCols = useMemo(() => {
     switch (preferences.columns) {
-      case 1: return 12;
-      case 3: return 4;
-      default: return 6;
+      case 1:
+        return 12;
+      case 3:
+        return 4;
+      default:
+        return 6;
     }
   }, [preferences.columns]);
 
   const spacing = useMemo(() => {
     switch (preferences.layout) {
-      case 'comfortable': return 3;
-      case 'compact': return 1;
-      default: return 2;
+      case 'comfortable':
+        return 3;
+      case 'compact':
+        return 1;
+      default:
+        return 2;
     }
   }, [preferences.layout]);
 
@@ -125,17 +145,28 @@ const ProDashboardLayout = () => {
       >
         {/* Pro Header Badge */}
         <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+          <Box
+            sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}
+          >
             <Stack direction="row" alignItems="center" spacing={1.5}>
-              <Box sx={{
-                width: 36, height: 36, borderRadius: '10px',
-                background: gradients.primary,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>
+              <Box
+                sx={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: '10px',
+                  background: gradients.primary,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
                 <AutoAwesomeIcon sx={{ color: '#fff', fontSize: 20 }} />
               </Box>
               <Box>
-                <Typography variant="h6" sx={{ fontWeight: 800, fontSize: '1rem', lineHeight: 1.2 }}>
+                <Typography
+                  variant="h6"
+                  sx={{ fontWeight: 800, fontSize: '1rem', lineHeight: 1.2 }}
+                >
                   الأدوات الاحترافية
                 </Typography>
                 <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.65rem' }}>

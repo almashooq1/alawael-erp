@@ -8,7 +8,7 @@ import { Checkbox, FormControlLabel, FormGroup, Button, Box } from '@mui/materia
  * @param {Function} onClose - دالة عند إغلاق نافذة الاختيار
  */
 const CustomColumnSelector = ({ columns, selected, onChange, onClose }) => {
-  const handleToggle = (id) => {
+  const handleToggle = id => {
     if (selected.includes(id)) {
       onChange(selected.filter(col => col !== id));
     } else {
@@ -34,7 +34,9 @@ const CustomColumnSelector = ({ columns, selected, onChange, onClose }) => {
         ))}
       </FormGroup>
       <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-        <Button variant="contained" color="primary" onClick={onClose}>تم</Button>
+        <Button variant="contained" color="primary" onClick={onClose}>
+          تم
+        </Button>
       </Box>
     </Box>
   );

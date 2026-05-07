@@ -68,7 +68,7 @@ const SmartReportsDashboard = () => {
     try {
       setLoading(true);
       // محاكاة تحميل البيانات
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       // بيانات نموذجية
       setReports([
@@ -114,7 +114,7 @@ const SmartReportsDashboard = () => {
     try {
       setLoading(true);
       // محاكاة حفظ التقرير
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       const newReportData = {
         id: reports.length + 1,
@@ -137,11 +137,11 @@ const SmartReportsDashboard = () => {
     }
   };
 
-  const handleDeleteReport = (id) => {
-    setReports(reports.filter((r) => r.id !== id));
+  const handleDeleteReport = id => {
+    setReports(reports.filter(r => r.id !== id));
   };
 
-  const handleExportReport = async (report) => {
+  const handleExportReport = async report => {
     try {
       setLoading(true);
       const fileName = `${report.name}-${new Date().toLocaleDateString('ar-SA')}`;
@@ -161,7 +161,7 @@ const SmartReportsDashboard = () => {
     }
   };
 
-  const _handlePrintReport = (report) => {
+  const _handlePrintReport = report => {
     exportService.print('report-content', {
       title: report.name,
     });
@@ -192,7 +192,7 @@ const SmartReportsDashboard = () => {
         <Card sx={{ background: gradients.success, color: 'white' }}>
           <CardContent sx={{ textAlign: 'center' }}>
             <Box sx={{ fontSize: 32, fontWeight: 'bold', mb: 1 }}>
-              {reports.filter((r) => r.status === 'completed').length}
+              {reports.filter(r => r.status === 'completed').length}
             </Box>
             <Box sx={{ fontSize: 14 }}>مكتملة</Box>
           </CardContent>
@@ -203,7 +203,7 @@ const SmartReportsDashboard = () => {
         <Card sx={{ background: gradients.accent, color: 'white' }}>
           <CardContent sx={{ textAlign: 'center' }}>
             <Box sx={{ fontSize: 32, fontWeight: 'bold', mb: 1 }}>
-              {reports.filter((r) => r.status === 'processing').length}
+              {reports.filter(r => r.status === 'processing').length}
             </Box>
             <Box sx={{ fontSize: 14 }}>قيد المعالجة</Box>
           </CardContent>
@@ -226,7 +226,7 @@ const SmartReportsDashboard = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {reports.slice(0, 5).map((report) => (
+                {reports.slice(0, 5).map(report => (
                   <TableRow key={report.id} hover>
                     <TableCell align="right">{report.name}</TableCell>
                     <TableCell align="right">{report.type}</TableCell>
@@ -237,7 +237,9 @@ const SmartReportsDashboard = () => {
                         size="small"
                       />
                     </TableCell>
-                    <TableCell align="right">{report.createdAt.toLocaleDateString('ar-SA')}</TableCell>
+                    <TableCell align="right">
+                      {report.createdAt.toLocaleDateString('ar-SA')}
+                    </TableCell>
                     <TableCell align="right">
                       <Button
                         size="small"
@@ -261,8 +263,8 @@ const SmartReportsDashboard = () => {
   const renderPerformanceAnalysis = () => (
     <Grid container spacing={3}>
       {reports
-        .filter((r) => r.type === 'performance')
-        .map((report) => (
+        .filter(r => r.type === 'performance')
+        .map(report => (
           <Grid item xs={12} md={6} key={report.id}>
             <Card>
               <CardHeader
@@ -273,7 +275,11 @@ const SmartReportsDashboard = () => {
                     <Button size="small" startIcon={<EditIcon />}>
                       تعديل
                     </Button>
-                    <Button size="small" startIcon={<DeleteIcon />} onClick={() => handleDeleteReport(report.id)}>
+                    <Button
+                      size="small"
+                      startIcon={<DeleteIcon />}
+                      onClick={() => handleDeleteReport(report.id)}
+                    >
                       حذف
                     </Button>
                   </Box>
@@ -286,7 +292,10 @@ const SmartReportsDashboard = () => {
                       <Box sx={{ fontWeight: 'bold' }}>{key}</Box>
                       <Box>{value}</Box>
                     </Box>
-                    <LinearProgress variant="determinate" value={typeof value === 'number' ? value : 0} />
+                    <LinearProgress
+                      variant="determinate"
+                      value={typeof value === 'number' ? value : 0}
+                    />
                   </Box>
                 ))}
               </CardContent>
@@ -300,8 +309,8 @@ const SmartReportsDashboard = () => {
   const renderTrendAnalysis = () => (
     <Grid container spacing={3}>
       {reports
-        .filter((r) => r.type === 'trends')
-        .map((report) => (
+        .filter(r => r.type === 'trends')
+        .map(report => (
           <Grid item xs={12} key={report.id}>
             <Card>
               <CardHeader title={report.name} />
@@ -310,7 +319,11 @@ const SmartReportsDashboard = () => {
                   {Object.entries(report.metrics).map(([key, value]) => (
                     <Box key={key}>
                       <Box sx={{ fontSize: 12, color: neutralColors.textSecondary }}>{key}</Box>
-                      <Box sx={{ fontSize: 24, fontWeight: 'bold', color: brandColors.primaryStart }}>{value}</Box>
+                      <Box
+                        sx={{ fontSize: 24, fontWeight: 'bold', color: brandColors.primaryStart }}
+                      >
+                        {value}
+                      </Box>
                     </Box>
                   ))}
                 </Box>
@@ -328,12 +341,16 @@ const SmartReportsDashboard = () => {
       {!loading && (
         <Box>
           {/* Header */}
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+          <Box
+            sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}
+          >
             <Box>
               <Box variant="h5" sx={{ fontSize: 24, fontWeight: 'bold', mb: 1 }}>
                 📊 لوحة التقارير الذكية
               </Box>
-              <Box sx={{ fontSize: 14, color: neutralColors.textSecondary }}>نظام متقدم للتحليلات والتقارير</Box>
+              <Box sx={{ fontSize: 14, color: neutralColors.textSecondary }}>
+                نظام متقدم للتحليلات والتقارير
+              </Box>
             </Box>
             <Button
               variant="contained"
@@ -379,13 +396,13 @@ const SmartReportsDashboard = () => {
                 fullWidth
                 label="اسم التقرير"
                 value={newReport.name}
-                onChange={(e) => setNewReport({ ...newReport, name: e.target.value })}
+                onChange={e => setNewReport({ ...newReport, name: e.target.value })}
                 margin="normal"
               />
               <Select
                 fullWidth
                 value={newReport.type}
-                onChange={(e) => setNewReport({ ...newReport, type: e.target.value })}
+                onChange={e => setNewReport({ ...newReport, type: e.target.value })}
                 margin="normal"
                 sx={{ mt: 2 }}
               >

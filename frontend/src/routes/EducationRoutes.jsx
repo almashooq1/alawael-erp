@@ -12,21 +12,13 @@ const EducationSystemDashboard = lazyWithRetry(
 const AcademicYearManagement = lazyWithRetry(
   () => import('../pages/EducationSystem/AcademicYearManagement')
 );
-const SubjectManagement = lazyWithRetry(
-  () => import('../pages/EducationSystem/SubjectManagement')
-);
-const TeacherManagement = lazyWithRetry(
-  () => import('../pages/EducationSystem/TeacherManagement')
-);
+const SubjectManagement = lazyWithRetry(() => import('../pages/EducationSystem/SubjectManagement'));
+const TeacherManagement = lazyWithRetry(() => import('../pages/EducationSystem/TeacherManagement'));
 const ClassroomManagement = lazyWithRetry(
   () => import('../pages/EducationSystem/ClassroomManagement')
 );
-const CurriculumBuilder = lazyWithRetry(
-  () => import('../pages/EducationSystem/CurriculumBuilder')
-);
-const TimetableBuilder = lazyWithRetry(
-  () => import('../pages/EducationSystem/TimetableBuilder')
-);
+const CurriculumBuilder = lazyWithRetry(() => import('../pages/EducationSystem/CurriculumBuilder'));
+const TimetableBuilder = lazyWithRetry(() => import('../pages/EducationSystem/TimetableBuilder'));
 const ExamManagement = lazyWithRetry(() => import('../pages/EducationSystem/ExamManagement'));
 const GradebookPage = lazyWithRetry(() => import('../pages/EducationSystem/GradebookPage'));
 
@@ -71,15 +63,9 @@ const ComprehensiveStudentReport = lazyWithRetry(
 const StudentReportsCenter = lazyWithRetry(
   () => import('../pages/StudentManagement/StudentReportsCenter')
 );
-const PeriodicStudentReport = lazyWithRetry(
-  () => import('../pages/PeriodicStudentReport')
-);
-const StudentComparisonReport = lazyWithRetry(
-  () => import('../pages/StudentComparisonReport')
-);
-const ParentStudentReport = lazyWithRetry(
-  () => import('../pages/ParentStudentReport')
-);
+const PeriodicStudentReport = lazyWithRetry(() => import('../pages/PeriodicStudentReport'));
+const StudentComparisonReport = lazyWithRetry(() => import('../pages/StudentComparisonReport'));
+const ParentStudentReport = lazyWithRetry(() => import('../pages/ParentStudentReport'));
 
 export default function EducationRoutes() {
   return (

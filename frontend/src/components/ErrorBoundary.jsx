@@ -64,7 +64,7 @@ class ErrorBoundary extends React.Component {
     if (this._retryTimer) clearInterval(this._retryTimer);
   }
 
-  startRetryCountdown = (seconds) => {
+  startRetryCountdown = seconds => {
     this.setState({ retryCountdown: seconds });
     this._retryTimer = setInterval(() => {
       this.setState(prev => {
@@ -80,7 +80,13 @@ class ErrorBoundary extends React.Component {
 
   handleReset = () => {
     if (this._retryTimer) clearInterval(this._retryTimer);
-    this.setState({ hasError: false, error: null, errorInfo: null, showDetails: false, retryCountdown: 0 });
+    this.setState({
+      hasError: false,
+      error: null,
+      errorInfo: null,
+      showDetails: false,
+      retryCountdown: 0,
+    });
   };
 
   toggleDetails = () => {
@@ -129,11 +135,7 @@ class ErrorBoundary extends React.Component {
               <Button variant="outlined" onClick={() => (window.location.href = '/')}>
                 العودة للرئيسية
               </Button>
-              <Button
-                variant="text"
-                size="small"
-                onClick={() => window.location.reload()}
-              >
+              <Button variant="text" size="small" onClick={() => window.location.reload()}>
                 تحديث الصفحة
               </Button>
             </Box>
@@ -168,7 +170,13 @@ class ErrorBoundary extends React.Component {
                       {error?.toString()}
                     </Typography>
                     {errorInfo?.componentStack && (
-                      <Typography variant="caption" component="pre" display="block" mt={1} color="text.secondary">
+                      <Typography
+                        variant="caption"
+                        component="pre"
+                        display="block"
+                        mt={1}
+                        color="text.secondary"
+                      >
                         {errorInfo.componentStack}
                       </Typography>
                     )}

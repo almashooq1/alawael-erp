@@ -4,7 +4,9 @@
 import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
-const ProcurementDashboard = lazyWithRetry(() => import('../pages/Procurement/ProcurementDashboard'));
+const ProcurementDashboard = lazyWithRetry(
+  () => import('../pages/Procurement/ProcurementDashboard')
+);
 const PurchaseOrdersList = lazyWithRetry(() => import('../pages/Procurement/PurchaseOrdersList'));
 
 export default function ProcurementRoutes() {

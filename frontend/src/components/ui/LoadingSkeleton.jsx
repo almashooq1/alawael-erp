@@ -10,7 +10,7 @@ export const DashboardSkeleton = () => (
   <Box sx={{ p: 3 }}>
     {/* Header */}
     <Skeleton variant="rectangular" height={120} sx={{ borderRadius: 4, mb: 4 }} />
-    
+
     {/* Stats Cards */}
     <Grid container spacing={3} sx={{ mb: 4 }}>
       {[1, 2, 3, 4].map(i => (
@@ -29,7 +29,7 @@ export const DashboardSkeleton = () => (
         </Grid>
       ))}
     </Grid>
-    
+
     {/* Charts */}
     <Grid container spacing={3}>
       <Grid item xs={12} md={8}>
@@ -47,10 +47,10 @@ export const ReportSkeleton = () => (
   <Box sx={{ p: 3 }}>
     {/* Header */}
     <Skeleton variant="rectangular" height={100} sx={{ borderRadius: 4, mb: 3 }} />
-    
+
     {/* Filters */}
     <Skeleton variant="rectangular" height={80} sx={{ borderRadius: 3, mb: 3 }} />
-    
+
     {/* Summary Cards */}
     <Grid container spacing={3} sx={{ mb: 4 }}>
       {[1, 2, 3, 4].map(i => (
@@ -59,7 +59,7 @@ export const ReportSkeleton = () => (
         </Grid>
       ))}
     </Grid>
-    
+
     {/* Charts */}
     <Grid container spacing={3} sx={{ mb: 4 }}>
       <Grid item xs={12} md={7}>

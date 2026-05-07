@@ -77,7 +77,7 @@ const scaleVariants = {
 
 export const PageTransition = ({ children, variant = 'fade' }) => {
   const location = useLocation();
-  
+
   const variantMap = {
     fade: pageVariants,
     slide: slideVariants,
@@ -143,11 +143,7 @@ export const StaggerItem = ({ children }) => (
 
 // Hover Scale Animation
 export const HoverScale = ({ children, scale = 1.05 }) => (
-  <motion.div
-    whileHover={{ scale }}
-    whileTap={{ scale: 0.98 }}
-    transition={{ duration: 0.2 }}
-  >
+  <motion.div whileHover={{ scale }} whileTap={{ scale: 0.98 }} transition={{ duration: 0.2 }}>
     {children}
   </motion.div>
 );

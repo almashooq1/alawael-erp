@@ -15,11 +15,8 @@ import {
   StepContent,
   Chip,
   Avatar,
-  IconButton,
-  Tooltip,
   CircularProgress,
   Alert,
-  Divider,
   Card,
   CardContent,
   Stack,
@@ -41,8 +38,18 @@ import {
 // ── ألوان الحالات ──────────────────────────────────
 const STATUS_CONFIG = {
   draft: { label: 'مسودة', color: '#9E9E9E', icon: <DescriptionIcon />, bg: '#F5F5F5' },
-  pending_review: { label: 'بانتظار المراجعة', color: '#FF9800', icon: <ScheduleIcon />, bg: '#FFF3E0' },
-  department_review: { label: 'مراجعة القسم', color: '#2196F3', icon: <PersonIcon />, bg: '#E3F2FD' },
+  pending_review: {
+    label: 'بانتظار المراجعة',
+    color: '#FF9800',
+    icon: <ScheduleIcon />,
+    bg: '#FFF3E0',
+  },
+  department_review: {
+    label: 'مراجعة القسم',
+    color: '#2196F3',
+    icon: <PersonIcon />,
+    bg: '#E3F2FD',
+  },
   approved: { label: 'معتمد', color: '#4CAF50', icon: <CheckCircleIcon />, bg: '#E8F5E9' },
   published: { label: 'منشور', color: '#00BCD4', icon: <CheckCircleIcon />, bg: '#E0F7FA' },
   archived: { label: 'مؤرشف', color: '#607D8B', icon: <DescriptionIcon />, bg: '#ECEFF1' },
@@ -62,7 +69,7 @@ const WORKFLOW_ORDER = [
 ];
 
 export default function WorkflowTimeline({
-  workflowData,
+  workflowData: _workflowData,
   history = [],
   currentState,
   onTransition,
@@ -181,7 +188,7 @@ export default function WorkflowTimeline({
           const config = STATUS_CONFIG[status] || {};
           const isCompleted = index < activeStep;
           const isCurrent = index === activeStep;
-          const historyEntry = history.find((h) => h.to === status || h.status === status);
+          const historyEntry = history.find(h => h.to === status || h.status === status);
 
           return (
             <Step key={status} completed={isCompleted}>
@@ -199,7 +206,9 @@ export default function WorkflowTimeline({
                     {isCompleted ? (
                       <CheckCircleIcon sx={{ fontSize: 20 }} />
                     ) : (
-                      React.cloneElement(config.icon || <DescriptionIcon />, { sx: { fontSize: 20 } })
+                      React.cloneElement(config.icon || <DescriptionIcon />, {
+                        sx: { fontSize: 20 },
+                      })
                     )}
                   </Avatar>
                 )}
@@ -296,9 +305,9 @@ export default function WorkflowTimeline({
       {currentState === 'rejected' && (
         <Alert severity="error" sx={{ mt: 2, direction: 'rtl' }}>
           <Typography variant="subtitle2">تم رفض المستند</Typography>
-          {history.find((h) => h.to === 'rejected')?.comment && (
+          {history.find(h => h.to === 'rejected')?.comment && (
             <Typography variant="body2">
-              السبب: {history.find((h) => h.to === 'rejected')?.comment}
+              السبب: {history.find(h => h.to === 'rejected')?.comment}
             </Typography>
           )}
         </Alert>

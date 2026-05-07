@@ -45,11 +45,8 @@ const LayoutWithTheme = ({ children }) => {
   const location = useLocation();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
-  const toggleDrawer = (open) => (event) => {
-    if (
-      event.type === 'keydown' &&
-      (event.key === 'Tab' || event.key === 'Shift')
-    ) {
+  const toggleDrawer = open => event => {
+    if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
       return;
     }
     setDrawerOpen(open);
@@ -89,7 +86,7 @@ const LayoutWithTheme = ({ children }) => {
           onKeyDown={toggleDrawer(false)}
         >
           <List>
-            {menuItems.map((item) => (
+            {menuItems.map(item => (
               <ListItem key={item.text} disablePadding>
                 <ListItemButton
                   component={Link}

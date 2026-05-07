@@ -27,9 +27,7 @@ export const ChartTooltip = ({ active, payload, label, formatValue }) => {
         backdropFilter: 'blur(12px)',
         borderRadius: 2.5,
         p: 1.5,
-        boxShadow: isDark
-          ? '0 8px 32px rgba(0,0,0,0.4)'
-          : '0 4px 20px rgba(0,0,0,0.1)',
+        boxShadow: isDark ? '0 8px 32px rgba(0,0,0,0.4)' : '0 4px 20px rgba(0,0,0,0.1)',
         border: '1px solid',
         borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)',
       }}
@@ -68,7 +66,7 @@ export const ChartTooltip = ({ active, payload, label, formatValue }) => {
 /**
  * Finance-specific tooltip: formats values as SAR currency.
  */
-export const FinanceChartTooltip = (props) => (
+export const FinanceChartTooltip = props => (
   <ChartTooltip {...props} formatValue={formatCurrency} />
 );
 

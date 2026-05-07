@@ -22,8 +22,14 @@
 
 import { useState, useCallback } from 'react';
 import {
-  Dialog, DialogTitle, DialogContent, DialogContentText,
-  DialogActions, Button, Box, Typography,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Button,
+  Box,
+  Typography,
 } from '@mui/material';
 import { Warning as WarningIcon } from '@mui/icons-material';
 
@@ -65,19 +71,22 @@ export default function ConfirmDialog({
         >
           {icon || <WarningIcon />}
         </Box>
-        <Typography variant="h6" fontWeight={600}>{title}</Typography>
+        <Typography variant="h6" fontWeight={600}>
+          {title}
+        </Typography>
       </DialogTitle>
       <DialogContent>
-        <DialogContentText sx={{ fontSize: '1rem' }}>
-          {message}
-        </DialogContentText>
+        <DialogContentText sx={{ fontSize: '1rem' }}>{message}</DialogContentText>
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 2 }}>
         <Button onClick={onClose} color="inherit" variant="outlined" sx={{ borderRadius: 2 }}>
           {cancelText}
         </Button>
         <Button
-          onClick={() => { onConfirm?.(); onClose?.(); }}
+          onClick={() => {
+            onConfirm?.();
+            onClose?.();
+          }}
           color={confirmColor}
           variant="contained"
           sx={{ borderRadius: 2 }}
@@ -112,7 +121,7 @@ export function useConfirmDialog() {
     onConfirm: null,
   });
 
-  const showConfirm = useCallback((options) => {
+  const showConfirm = useCallback(options => {
     setState({
       open: true,
       title: options.title || 'تأكيد',
@@ -126,7 +135,7 @@ export function useConfirmDialog() {
   }, []);
 
   const onClose = useCallback(() => {
-    setState((prev) => ({ ...prev, open: false }));
+    setState(prev => ({ ...prev, open: false }));
   }, []);
 
   return [{ ...state, onClose }, showConfirm];

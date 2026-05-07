@@ -7,8 +7,8 @@ import React from 'react';
 import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
-const LearningDevelopment = lazyWithRetry(() =>
-  import('../pages/learning-development/LearningDevelopment'),
+const LearningDevelopment = lazyWithRetry(
+  () => import('../pages/learning-development/LearningDevelopment')
 );
 
 export default function LearningDevelopmentRoutes() {

@@ -33,15 +33,29 @@ const AdminCorrespondence = lazyWithRetry(() => import('../pages/Admin/AdminCorr
 const AdminDelegations = lazyWithRetry(() => import('../pages/Admin/AdminDelegations'));
 
 // Administrative Communications Module — الاتصالات الإدارية
-const AdminCommDashboard = lazyWithRetry(() => import('../pages/admin-communications/AdminCommunicationsDashboard'));
-const AdminCommList = lazyWithRetry(() => import('../pages/admin-communications/CorrespondenceList'));
-const AdminCommCompose = lazyWithRetry(() => import('../pages/admin-communications/ComposeCorrespondence'));
-const AdminCommDetail = lazyWithRetry(() => import('../pages/admin-communications/CorrespondenceDetail'));
-const AdminCommTemplates = lazyWithRetry(() => import('../pages/admin-communications/TemplatesManagement'));
-const AdminCommEntities = lazyWithRetry(() => import('../pages/admin-communications/ExternalEntitiesManagement'));
+const AdminCommDashboard = lazyWithRetry(
+  () => import('../pages/admin-communications/AdminCommunicationsDashboard')
+);
+const AdminCommList = lazyWithRetry(
+  () => import('../pages/admin-communications/CorrespondenceList')
+);
+const AdminCommCompose = lazyWithRetry(
+  () => import('../pages/admin-communications/ComposeCorrespondence')
+);
+const AdminCommDetail = lazyWithRetry(
+  () => import('../pages/admin-communications/CorrespondenceDetail')
+);
+const AdminCommTemplates = lazyWithRetry(
+  () => import('../pages/admin-communications/TemplatesManagement')
+);
+const AdminCommEntities = lazyWithRetry(
+  () => import('../pages/admin-communications/ExternalEntitiesManagement')
+);
 
 // Electronic Directives Module — التوجيهات الإلكترونية
-const DirDashboard = lazyWithRetry(() => import('../pages/electronic-directives/DirectivesDashboard'));
+const DirDashboard = lazyWithRetry(
+  () => import('../pages/electronic-directives/DirectivesDashboard')
+);
 const DirList = lazyWithRetry(() => import('../pages/electronic-directives/DirectivesList'));
 const DirCompose = lazyWithRetry(() => import('../pages/electronic-directives/ComposeDirective'));
 const DirDetail = lazyWithRetry(() => import('../pages/electronic-directives/DirectiveDetail'));
@@ -51,6 +65,17 @@ const SystemSettingsPage = lazyWithRetry(() => import('../pages/SystemAdmin/Syst
 
 // User Management System — نظام إدارة المستخدمين المتقدم
 const UserManagement = lazyWithRetry(() => import('../pages/UserManagement'));
+
+// Branch Governance — حوكمة الفروع
+const BranchLicenseExpiryAdmin = lazyWithRetry(
+  () => import('../pages/branches/BranchLicenseExpiryAdmin')
+);
+// ZATCA Chain Integrity — سلامة سلسلة فواتير ZATCA (BC-06 Critical P1)
+const ZatcaChainIntegrityAdmin = lazyWithRetry(
+  () => import('../pages/finance/ZatcaChainIntegrityAdmin')
+);
+// MFA Compliance — امتثال المصادقة الثنائية (BC-01 High P1)
+const MfaComplianceAdmin = lazyWithRetry(() => import('../pages/Admin/MfaComplianceAdmin'));
 
 export default function AdminRoutes() {
   return (
@@ -126,6 +151,15 @@ export default function AdminRoutes() {
       <Route path="electronic-directives/list" element={<DirList />} />
       <Route path="electronic-directives/compose" element={<DirCompose />} />
       <Route path="electronic-directives/view/:id" element={<DirDetail />} />
+
+      {/* Branch Governance — حوكمة الفروع */}
+      <Route path="admin-portal/branch-license-expiry" element={<BranchLicenseExpiryAdmin />} />
+
+      {/* ZATCA Chain Integrity — سلامة سلسلة فواتير ZATCA (BC-06 Critical P1) */}
+      <Route path="admin-portal/zatca-chain-integrity" element={<ZatcaChainIntegrityAdmin />} />
+
+      {/* MFA Compliance — امتثال المصادقة الثنائية (BC-01 High P1) */}
+      <Route path="admin-portal/mfa-compliance" element={<MfaComplianceAdmin />} />
 
       {/* System Settings — إعدادات النظام */}
       <Route

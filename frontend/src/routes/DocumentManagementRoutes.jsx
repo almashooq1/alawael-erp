@@ -10,7 +10,9 @@ const SmartDocumentsPage = lazyWithRetry(() => import('../pages/documents/SmartD
 const DocumentAdvancedPage = lazyWithRetry(() => import('../pages/documents/DocumentAdvancedPage'));
 const ElectronicArchiving = lazyWithRetry(() => import('../pages/documents/ElectronicArchiving'));
 const DocumentsReports = lazyWithRetry(() => import('../pages/documents/DocumentsReports'));
-const DocumentsProDashboard = lazyWithRetry(() => import('../pages/documents/DocumentsProDashboard'));
+const DocumentsProDashboard = lazyWithRetry(
+  () => import('../pages/documents/DocumentsProDashboard')
+);
 const DocumentsProExtended = lazyWithRetry(() => import('../pages/documents/DocumentsProExtended'));
 const DocumentsProPhase3 = lazyWithRetry(() => import('../pages/documents/DocumentsProPhase3'));
 const DocumentsProPhase4 = lazyWithRetry(() => import('../pages/documents/DocumentsProPhase4'));

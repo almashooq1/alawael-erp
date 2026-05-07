@@ -7,14 +7,23 @@ import WifiOffIcon from '@mui/icons-material/WifiOff';
 import { motion } from 'framer-motion';
 import { brandColors, statusColors, chartColors, neutralColors } from 'theme/palette';
 
-const DashboardStatusBanners = ({ isOnline, refreshFlash, refreshProgress, refreshing: _refreshing }) => {
+const DashboardStatusBanners = ({
+  isOnline,
+  refreshFlash,
+  refreshProgress,
+  refreshing: _refreshing,
+}) => {
   const theme = useTheme();
 
   return (
     <>
       {/* ═══════════ OFFLINE CONNECTIVITY BANNER ═══════════ */}
       {!isOnline && (
-        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
           <Alert
             severity="warning"
             icon={<WifiOffIcon />}
@@ -23,7 +32,8 @@ const DashboardStatusBanners = ({ isOnline, refreshFlash, refreshProgress, refre
               borderRadius: 3,
               fontWeight: 600,
               fontSize: '0.82rem',
-              background: theme.palette.mode === 'dark' ? 'rgba(255,152,0,0.12)' : 'rgba(255,152,0,0.08)',
+              background:
+                theme.palette.mode === 'dark' ? 'rgba(255,152,0,0.12)' : 'rgba(255,152,0,0.08)',
               border: '1px solid rgba(255,152,0,0.25)',
             }}
           >
@@ -73,11 +83,12 @@ const DashboardStatusBanners = ({ isOnline, refreshFlash, refreshProgress, refre
           opacity: 0.5,
           backgroundColor: 'transparent',
           '& .MuiLinearProgress-bar': {
-            background: refreshProgress < 50
-              ? `linear-gradient(90deg, ${brandColors.accentGreen}, ${brandColors.accentTeal})`
-              : refreshProgress < 75
-              ? `linear-gradient(90deg, ${brandColors.accentAmber}, ${brandColors.accentPink})`
-              : `linear-gradient(90deg, ${statusColors.error}, ${chartColors.category[7]})`,
+            background:
+              refreshProgress < 50
+                ? `linear-gradient(90deg, ${brandColors.accentGreen}, ${brandColors.accentTeal})`
+                : refreshProgress < 75
+                  ? `linear-gradient(90deg, ${brandColors.accentAmber}, ${brandColors.accentPink})`
+                  : `linear-gradient(90deg, ${statusColors.error}, ${chartColors.category[7]})`,
             borderRadius: 1,
             transition: 'background 1s ease',
           },
@@ -103,10 +114,18 @@ const DashboardStatusBanners = ({ isOnline, refreshFlash, refreshProgress, refre
             نظام الأوائل — لوحة التحكم التنفيذية
           </Typography>
           <Typography variant="body2" sx={{ color: neutralColors.textSecondary }}>
-            تاريخ الطباعة: {new Date().toLocaleDateString('ar-SA', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' })}
+            تاريخ الطباعة:{' '}
+            {new Date().toLocaleDateString('ar-SA', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+              weekday: 'long',
+            })}
           </Typography>
         </Box>
-        <Typography variant="caption" sx={{ color: neutralColors.textMuted, fontStyle: 'italic' }}>v3.0</Typography>
+        <Typography variant="caption" sx={{ color: neutralColors.textMuted, fontStyle: 'italic' }}>
+          v3.0
+        </Typography>
       </Box>
     </>
   );

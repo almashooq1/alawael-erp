@@ -29,7 +29,8 @@ export default function DashboardFooter({
           pt: 3,
           pb: 2,
           borderTop: '1px solid',
-          borderColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)',
+          borderColor:
+            theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)',
           display: 'flex',
           alignItems: { xs: 'flex-start', sm: 'center' },
           justifyContent: 'space-between',
@@ -44,7 +45,11 @@ export default function DashboardFooter({
               width: 8,
               height: 8,
               borderRadius: '50%',
-              background: socketConnected ? brandColors.accentGreen : (!isOnline ? statusColors.error : statusColors.warning),
+              background: socketConnected
+                ? brandColors.accentGreen
+                : !isOnline
+                  ? statusColors.error
+                  : statusColors.warning,
               boxShadow: socketConnected
                 ? '0 0 8px rgba(67,233,123,0.4)'
                 : '0 0 8px rgba(255,152,0,0.4)',
@@ -59,39 +64,52 @@ export default function DashboardFooter({
             {!isOnline
               ? 'غير متصل بالإنترنت — وضع عدم الاتصال'
               : socketConnected
-              ? 'متصل مباشرة — جميع الأنظمة تعمل بشكل طبيعي'
-              : 'جميع الأنظمة تعمل — الاتصال المباشر غير نشط'}
+                ? 'متصل مباشرة — جميع الأنظمة تعمل بشكل طبيعي'
+                : 'جميع الأنظمة تعمل — الاتصال المباشر غير نشط'}
           </Typography>
         </Box>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 2 }, flexWrap: 'wrap' }}>
+        <Box
+          sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 2 }, flexWrap: 'wrap' }}
+        >
           {lastUpdated && (
             <Typography variant="caption" sx={{ color: 'text.disabled', fontSize: '0.7rem' }}>
-              آخر تحديث: {relativeTime || lastUpdated.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' })}
+              آخر تحديث:{' '}
+              {relativeTime ||
+                lastUpdated.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' })}
             </Typography>
           )}
           <Chip
             size="small"
             variant="outlined"
             label={
-              dataSource === 'socket' ? 'مباشر'
-              : dataSource === 'cache' ? 'ذاكرة مؤقتة'
-              : 'من الخادم'
+              dataSource === 'socket'
+                ? 'مباشر'
+                : dataSource === 'cache'
+                  ? 'ذاكرة مؤقتة'
+                  : 'من الخادم'
             }
             sx={{
               height: 20,
               fontSize: '0.6rem',
               fontWeight: 700,
               borderColor:
-                dataSource === 'socket' ? 'rgba(67,233,123,0.3)'
-                : dataSource === 'cache' ? 'rgba(255,152,0,0.3)'
-                : 'rgba(102,126,234,0.2)',
+                dataSource === 'socket'
+                  ? 'rgba(67,233,123,0.3)'
+                  : dataSource === 'cache'
+                    ? 'rgba(255,152,0,0.3)'
+                    : 'rgba(102,126,234,0.2)',
               color:
-                dataSource === 'socket' ? brandColors.accentGreen
-                : dataSource === 'cache' ? statusColors.warning
-                : 'text.disabled',
+                dataSource === 'socket'
+                  ? brandColors.accentGreen
+                  : dataSource === 'cache'
+                    ? statusColors.warning
+                    : 'text.disabled',
             }}
           />
-          <Typography variant="caption" sx={{ color: 'text.disabled', fontSize: '0.68rem', fontStyle: 'italic' }}>
+          <Typography
+            variant="caption"
+            sx={{ color: 'text.disabled', fontSize: '0.68rem', fontStyle: 'italic' }}
+          >
             لوحة التحكم التنفيذية — نظام الأوائل v3.0
           </Typography>
           {sessionDuration && (

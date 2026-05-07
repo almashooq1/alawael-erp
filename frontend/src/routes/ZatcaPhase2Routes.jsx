@@ -5,9 +5,7 @@
 import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
-const ZatcaPhase2Page = lazyWithRetry(
-  () => import('../pages/ZatcaPhase2/ZatcaPhase2Page')
-);
+const ZatcaPhase2Page = lazyWithRetry(() => import('../pages/ZatcaPhase2/ZatcaPhase2Page'));
 
 export default function ZatcaPhase2Routes() {
   return (

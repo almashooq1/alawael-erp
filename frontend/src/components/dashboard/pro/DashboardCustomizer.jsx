@@ -4,10 +4,25 @@
  */
 import React, { useState, useCallback } from 'react';
 import {
-  Box, Typography, Grid, Switch, FormControlLabel,
-  IconButton, useTheme, Divider, Button, Drawer,
-  List, ListItem, ListItemIcon, ListItemText, ListItemSecondaryAction,
-  Slider, ToggleButton, ToggleButtonGroup, Avatar,
+  Box,
+  Typography,
+  Grid,
+  Switch,
+  FormControlLabel,
+  IconButton,
+  useTheme,
+  Divider,
+  Button,
+  Drawer,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  ListItemSecondaryAction,
+  Slider,
+  ToggleButton,
+  ToggleButtonGroup,
+  Avatar,
 } from '@mui/material';
 import { motion } from 'framer-motion';
 import SettingsIcon from '@mui/icons-material/Settings';
@@ -32,14 +47,62 @@ import SecurityIcon from '@mui/icons-material/Security';
 import { gradients, brandColors } from 'theme/palette';
 
 const WIDGETS = [
-  { id: 'kpi', label: 'بطاقات KPI', icon: <SpeedIcon />, defaultVisible: true, description: 'مؤشرات الأداء الرئيسية' },
-  { id: 'analytics', label: 'التحليلات المتقدمة', icon: <AnalyticsIcon />, defaultVisible: true, description: 'رسوم بيانية وتحليلات شاملة' },
-  { id: 'notifications', label: 'مركز الإشعارات', icon: <NotificationsActiveIcon />, defaultVisible: true, description: 'إشعارات وتنبيهات النظام' },
-  { id: 'tasks', label: 'مدير المهام', icon: <TaskAltIcon />, defaultVisible: true, description: 'إدارة المهام والمشاريع' },
-  { id: 'calendar', label: 'التقويم والأحداث', icon: <CalendarMonthIcon />, defaultVisible: true, description: 'تقويم وجدول المواعيد' },
-  { id: 'productivity', label: 'الإنتاجية', icon: <PersonIcon />, defaultVisible: true, description: 'متابعة الإنتاجية الشخصية' },
-  { id: 'finance', label: 'الملخص المالي', icon: <BarChartIcon />, defaultVisible: true, description: 'الإيرادات والمصروفات' },
-  { id: 'security', label: 'الأمان', icon: <SecurityIcon />, defaultVisible: false, description: 'تنبيهات أمنية ومراقبة' },
+  {
+    id: 'kpi',
+    label: 'بطاقات KPI',
+    icon: <SpeedIcon />,
+    defaultVisible: true,
+    description: 'مؤشرات الأداء الرئيسية',
+  },
+  {
+    id: 'analytics',
+    label: 'التحليلات المتقدمة',
+    icon: <AnalyticsIcon />,
+    defaultVisible: true,
+    description: 'رسوم بيانية وتحليلات شاملة',
+  },
+  {
+    id: 'notifications',
+    label: 'مركز الإشعارات',
+    icon: <NotificationsActiveIcon />,
+    defaultVisible: true,
+    description: 'إشعارات وتنبيهات النظام',
+  },
+  {
+    id: 'tasks',
+    label: 'مدير المهام',
+    icon: <TaskAltIcon />,
+    defaultVisible: true,
+    description: 'إدارة المهام والمشاريع',
+  },
+  {
+    id: 'calendar',
+    label: 'التقويم والأحداث',
+    icon: <CalendarMonthIcon />,
+    defaultVisible: true,
+    description: 'تقويم وجدول المواعيد',
+  },
+  {
+    id: 'productivity',
+    label: 'الإنتاجية',
+    icon: <PersonIcon />,
+    defaultVisible: true,
+    description: 'متابعة الإنتاجية الشخصية',
+  },
+  {
+    id: 'finance',
+    label: 'الملخص المالي',
+    icon: <BarChartIcon />,
+    defaultVisible: true,
+    description: 'الإيرادات والمصروفات',
+  },
+  {
+    id: 'security',
+    label: 'الأمان',
+    icon: <SecurityIcon />,
+    defaultVisible: false,
+    description: 'تنبيهات أمنية ومراقبة',
+  },
 ];
 
 const COLOR_THEMES = [
@@ -77,7 +140,7 @@ const DashboardCustomizer = ({ open, onClose, preferences, onSave }) => {
   const isDark = theme.palette.mode === 'dark';
   const [prefs, setPrefs] = useState(preferences || DEFAULT_PREFERENCES);
 
-  const handleWidgetToggle = useCallback((widgetId) => {
+  const handleWidgetToggle = useCallback(widgetId => {
     setPrefs(prev => {
       const visible = prev.visibleWidgets.includes(widgetId)
         ? prev.visibleWidgets.filter(id => id !== widgetId)
@@ -89,7 +152,9 @@ const DashboardCustomizer = ({ open, onClose, preferences, onSave }) => {
   const handleSave = useCallback(() => {
     try {
       localStorage.setItem('dashboard_preferences', JSON.stringify(prefs));
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
     if (onSave) onSave(prefs);
     onClose();
   }, [prefs, onSave, onClose]);
@@ -119,7 +184,10 @@ const DashboardCustomizer = ({ open, onClose, preferences, onSave }) => {
               <Typography variant="h6" sx={{ color: '#fff', fontWeight: 700, fontSize: '1rem' }}>
                 تخصيص لوحة التحكم
               </Typography>
-              <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.65rem' }}>
+              <Typography
+                variant="caption"
+                sx={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.65rem' }}
+              >
                 تحكم في مظهر وتخطيط لوحة التحكم
               </Typography>
             </Box>
@@ -132,7 +200,10 @@ const DashboardCustomizer = ({ open, onClose, preferences, onSave }) => {
 
       <Box sx={{ overflow: 'auto', flex: 1, p: 2 }}>
         {/* Widgets Section */}
-        <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1.5, display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Typography
+          variant="subtitle2"
+          sx={{ fontWeight: 700, mb: 1.5, display: 'flex', alignItems: 'center', gap: 1 }}
+        >
           <GridViewIcon fontSize="small" /> الويدجات المرئية
         </Typography>
         <List dense sx={{ mb: 2 }}>
@@ -142,30 +213,49 @@ const DashboardCustomizer = ({ open, onClose, preferences, onSave }) => {
               <motion.div key={widget.id} layout whileHover={{ x: 3 }}>
                 <ListItem
                   sx={{
-                    borderRadius: 2, mb: 0.5,
+                    borderRadius: 2,
+                    mb: 0.5,
                     border: '1px solid',
                     borderColor: isVisible
-                      ? isDark ? 'rgba(102,126,234,0.2)' : 'rgba(102,126,234,0.15)'
+                      ? isDark
+                        ? 'rgba(102,126,234,0.2)'
+                        : 'rgba(102,126,234,0.15)'
                       : 'transparent',
                     bgcolor: isVisible
-                      ? isDark ? 'rgba(102,126,234,0.05)' : 'rgba(102,126,234,0.03)'
+                      ? isDark
+                        ? 'rgba(102,126,234,0.05)'
+                        : 'rgba(102,126,234,0.03)'
                       : 'transparent',
                     transition: 'all 0.2s',
                   }}
                 >
                   <ListItemIcon sx={{ minWidth: 36 }}>
-                    <Avatar sx={{
-                      width: 28, height: 28,
-                      bgcolor: isVisible ? `${brandColors.primaryStart}15` : 'rgba(0,0,0,0.05)',
-                      color: isVisible ? brandColors.primaryStart : 'text.disabled',
-                      '& svg': { fontSize: 14 },
-                    }}>
+                    <Avatar
+                      sx={{
+                        width: 28,
+                        height: 28,
+                        bgcolor: isVisible ? `${brandColors.primaryStart}15` : 'rgba(0,0,0,0.05)',
+                        color: isVisible ? brandColors.primaryStart : 'text.disabled',
+                        '& svg': { fontSize: 14 },
+                      }}
+                    >
                       {widget.icon}
                     </Avatar>
                   </ListItemIcon>
                   <ListItemText
-                    primary={<Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.8rem' }}>{widget.label}</Typography>}
-                    secondary={<Typography variant="caption" sx={{ fontSize: '0.6rem', color: 'text.secondary' }}>{widget.description}</Typography>}
+                    primary={
+                      <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.8rem' }}>
+                        {widget.label}
+                      </Typography>
+                    }
+                    secondary={
+                      <Typography
+                        variant="caption"
+                        sx={{ fontSize: '0.6rem', color: 'text.secondary' }}
+                      >
+                        {widget.description}
+                      </Typography>
+                    }
                   />
                   <ListItemSecondaryAction>
                     <Switch
@@ -184,7 +274,10 @@ const DashboardCustomizer = ({ open, onClose, preferences, onSave }) => {
         <Divider sx={{ my: 2 }} />
 
         {/* Color Theme */}
-        <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1.5, display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Typography
+          variant="subtitle2"
+          sx={{ fontWeight: 700, mb: 1.5, display: 'flex', alignItems: 'center', gap: 1 }}
+        >
           <PaletteIcon fontSize="small" /> نظام الألوان
         </Typography>
         <Grid container spacing={1} sx={{ mb: 2 }}>
@@ -194,17 +287,26 @@ const DashboardCustomizer = ({ open, onClose, preferences, onSave }) => {
                 <Box
                   onClick={() => setPrefs(prev => ({ ...prev, colorTheme: ct.id }))}
                   sx={{
-                    p: 1, borderRadius: 2, textAlign: 'center', cursor: 'pointer',
+                    p: 1,
+                    borderRadius: 2,
+                    textAlign: 'center',
+                    cursor: 'pointer',
                     border: '2px solid',
                     borderColor: prefs.colorTheme === ct.id ? ct.primary : 'transparent',
                     transition: 'all 0.2s',
                   }}
                 >
-                  <Box sx={{
-                    height: 30, borderRadius: 1.5, mb: 0.5,
-                    background: `linear-gradient(135deg, ${ct.primary}, ${ct.secondary})`,
-                  }} />
-                  <Typography variant="caption" sx={{ fontSize: '0.6rem', fontWeight: 600 }}>{ct.label}</Typography>
+                  <Box
+                    sx={{
+                      height: 30,
+                      borderRadius: 1.5,
+                      mb: 0.5,
+                      background: `linear-gradient(135deg, ${ct.primary}, ${ct.secondary})`,
+                    }}
+                  />
+                  <Typography variant="caption" sx={{ fontSize: '0.6rem', fontWeight: 600 }}>
+                    {ct.label}
+                  </Typography>
                 </Box>
               </motion.div>
             </Grid>
@@ -214,7 +316,10 @@ const DashboardCustomizer = ({ open, onClose, preferences, onSave }) => {
         <Divider sx={{ my: 2 }} />
 
         {/* Layout */}
-        <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1.5, display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Typography
+          variant="subtitle2"
+          sx={{ fontWeight: 700, mb: 1.5, display: 'flex', alignItems: 'center', gap: 1 }}
+        >
           <ViewModuleIcon fontSize="small" /> التخطيط
         </Typography>
         <ToggleButtonGroup
@@ -226,7 +331,11 @@ const DashboardCustomizer = ({ open, onClose, preferences, onSave }) => {
           sx={{ mb: 2 }}
         >
           {LAYOUT_OPTIONS.map(opt => (
-            <ToggleButton key={opt.id} value={opt.id} sx={{ fontSize: '0.75rem', textTransform: 'none' }}>
+            <ToggleButton
+              key={opt.id}
+              value={opt.id}
+              sx={{ fontSize: '0.75rem', textTransform: 'none' }}
+            >
               {opt.icon}
               <Box sx={{ ml: 0.5 }}>{opt.label}</Box>
             </ToggleButton>
@@ -240,7 +349,9 @@ const DashboardCustomizer = ({ open, onClose, preferences, onSave }) => {
         <Slider
           value={prefs.columns}
           onChange={(_, v) => setPrefs(prev => ({ ...prev, columns: v }))}
-          min={1} max={3} step={1}
+          min={1}
+          max={3}
+          step={1}
           marks={[
             { value: 1, label: '1' },
             { value: 2, label: '2' },
@@ -252,13 +363,18 @@ const DashboardCustomizer = ({ open, onClose, preferences, onSave }) => {
         <Divider sx={{ my: 2 }} />
 
         {/* Typography */}
-        <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1.5, display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Typography
+          variant="subtitle2"
+          sx={{ fontWeight: 700, mb: 1.5, display: 'flex', alignItems: 'center', gap: 1 }}
+        >
           <TextFieldsIcon fontSize="small" /> حجم الخط
         </Typography>
         <Slider
           value={prefs.fontSize}
           onChange={(_, v) => setPrefs(prev => ({ ...prev, fontSize: v }))}
-          min={12} max={18} step={1}
+          min={12}
+          max={18}
+          step={1}
           marks={[
             { value: 12, label: 'صغير' },
             { value: 14, label: 'عادي' },
@@ -271,29 +387,82 @@ const DashboardCustomizer = ({ open, onClose, preferences, onSave }) => {
         <Divider sx={{ my: 2 }} />
 
         {/* Toggle Settings */}
-        <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1.5, display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Typography
+          variant="subtitle2"
+          sx={{ fontWeight: 700, mb: 1.5, display: 'flex', alignItems: 'center', gap: 1 }}
+        >
           <SettingsIcon fontSize="small" /> إعدادات عامة
         </Typography>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
           <FormControlLabel
-            control={<Switch size="small" checked={prefs.animationsEnabled} onChange={e => setPrefs(prev => ({ ...prev, animationsEnabled: e.target.checked }))} />}
-            label={<Typography variant="body2" sx={{ fontSize: '0.8rem' }}>تأثيرات الحركة</Typography>}
+            control={
+              <Switch
+                size="small"
+                checked={prefs.animationsEnabled}
+                onChange={e => setPrefs(prev => ({ ...prev, animationsEnabled: e.target.checked }))}
+              />
+            }
+            label={
+              <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>
+                تأثيرات الحركة
+              </Typography>
+            }
           />
           <FormControlLabel
-            control={<Switch size="small" checked={prefs.autoRefresh} onChange={e => setPrefs(prev => ({ ...prev, autoRefresh: e.target.checked }))} />}
-            label={<Typography variant="body2" sx={{ fontSize: '0.8rem' }}>التحديث التلقائي</Typography>}
+            control={
+              <Switch
+                size="small"
+                checked={prefs.autoRefresh}
+                onChange={e => setPrefs(prev => ({ ...prev, autoRefresh: e.target.checked }))}
+              />
+            }
+            label={
+              <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>
+                التحديث التلقائي
+              </Typography>
+            }
           />
           <FormControlLabel
-            control={<Switch size="small" checked={prefs.compactMode} onChange={e => setPrefs(prev => ({ ...prev, compactMode: e.target.checked }))} />}
-            label={<Typography variant="body2" sx={{ fontSize: '0.8rem' }}>الوضع المضغوط</Typography>}
+            control={
+              <Switch
+                size="small"
+                checked={prefs.compactMode}
+                onChange={e => setPrefs(prev => ({ ...prev, compactMode: e.target.checked }))}
+              />
+            }
+            label={
+              <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>
+                الوضع المضغوط
+              </Typography>
+            }
           />
           <FormControlLabel
-            control={<Switch size="small" checked={prefs.showWelcome} onChange={e => setPrefs(prev => ({ ...prev, showWelcome: e.target.checked }))} />}
-            label={<Typography variant="body2" sx={{ fontSize: '0.8rem' }}>عرض ترويسة الترحيب</Typography>}
+            control={
+              <Switch
+                size="small"
+                checked={prefs.showWelcome}
+                onChange={e => setPrefs(prev => ({ ...prev, showWelcome: e.target.checked }))}
+              />
+            }
+            label={
+              <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>
+                عرض ترويسة الترحيب
+              </Typography>
+            }
           />
           <FormControlLabel
-            control={<Switch size="small" checked={prefs.showFooter} onChange={e => setPrefs(prev => ({ ...prev, showFooter: e.target.checked }))} />}
-            label={<Typography variant="body2" sx={{ fontSize: '0.8rem' }}>عرض شريط الحالة</Typography>}
+            control={
+              <Switch
+                size="small"
+                checked={prefs.showFooter}
+                onChange={e => setPrefs(prev => ({ ...prev, showFooter: e.target.checked }))}
+              />
+            }
+            label={
+              <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>
+                عرض شريط الحالة
+              </Typography>
+            }
           />
         </Box>
 
@@ -306,7 +475,9 @@ const DashboardCustomizer = ({ open, onClose, preferences, onSave }) => {
             <Slider
               value={prefs.refreshInterval}
               onChange={(_, v) => setPrefs(prev => ({ ...prev, refreshInterval: v }))}
-              min={15} max={300} step={15}
+              min={15}
+              max={300}
+              step={15}
               marks={[
                 { value: 15, label: '15ث' },
                 { value: 60, label: '1د' },
@@ -322,16 +493,27 @@ const DashboardCustomizer = ({ open, onClose, preferences, onSave }) => {
       <Divider />
       <Box sx={{ p: 2, display: 'flex', gap: 1 }}>
         <Button
-          fullWidth variant="outlined" size="small" startIcon={<RestoreIcon />}
+          fullWidth
+          variant="outlined"
+          size="small"
+          startIcon={<RestoreIcon />}
           onClick={handleReset}
           sx={{ borderRadius: 2, textTransform: 'none', fontSize: '0.8rem' }}
         >
           استعادة الافتراضي
         </Button>
         <Button
-          fullWidth variant="contained" size="small" startIcon={<SaveIcon />}
+          fullWidth
+          variant="contained"
+          size="small"
+          startIcon={<SaveIcon />}
           onClick={handleSave}
-          sx={{ borderRadius: 2, textTransform: 'none', fontSize: '0.8rem', background: gradients.primary }}
+          sx={{
+            borderRadius: 2,
+            textTransform: 'none',
+            fontSize: '0.8rem',
+            background: gradients.primary,
+          }}
         >
           حفظ التخصيص
         </Button>

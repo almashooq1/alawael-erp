@@ -76,14 +76,17 @@ const AdvancedChartsComponent = ({ data = [], title = 'التحليلات الم
   const [selectedMetrics, setSelectedMetrics] = useState(['value']);
 
   // بيانات نموذجية
-  const sampleData = data.length > 0 ? data : [
-    { name: 'يناير', value: 4000, target: 5000, actual: 4200, forecast: 4500 },
-    { name: 'فبراير', value: 3000, target: 4800, actual: 2800, forecast: 3200 },
-    { name: 'مارس', value: 2000, target: 5200, actual: 2200, forecast: 2800 },
-    { name: 'أبريل', value: 2780, target: 5000, actual: 3000, forecast: 3200 },
-    { name: 'مايو', value: 1890, target: 4800, actual: 2100, forecast: 2500 },
-    { name: 'يونيو', value: 2390, target: 5500, actual: 2800, forecast: 3100 },
-  ];
+  const sampleData =
+    data.length > 0
+      ? data
+      : [
+          { name: 'يناير', value: 4000, target: 5000, actual: 4200, forecast: 4500 },
+          { name: 'فبراير', value: 3000, target: 4800, actual: 2800, forecast: 3200 },
+          { name: 'مارس', value: 2000, target: 5200, actual: 2200, forecast: 2800 },
+          { name: 'أبريل', value: 2780, target: 5000, actual: 3000, forecast: 3200 },
+          { name: 'مايو', value: 1890, target: 4800, actual: 2100, forecast: 2500 },
+          { name: 'يونيو', value: 2390, target: 5500, actual: 2800, forecast: 3100 },
+        ];
 
   const handleExport = async () => {
     try {
@@ -111,12 +114,30 @@ const AdvancedChartsComponent = ({ data = [], title = 'التحليلات الم
         <YAxis stroke={brandColors.primaryStart} />
         <Tooltip {...TOOLTIP_STYLES} />
         <Legend />
-        <Line type="monotone" dataKey="value" stroke={brandColors.primaryStart} strokeWidth={2} dot={{ fill: brandColors.primaryStart, r: 5 }} />
+        <Line
+          type="monotone"
+          dataKey="value"
+          stroke={brandColors.primaryStart}
+          strokeWidth={2}
+          dot={{ fill: brandColors.primaryStart, r: 5 }}
+        />
         {selectedMetrics.includes('actual') && (
-          <Line type="monotone" dataKey="actual" stroke={brandColors.primaryEnd} strokeWidth={2} dot={{ fill: brandColors.primaryEnd, r: 5 }} />
+          <Line
+            type="monotone"
+            dataKey="actual"
+            stroke={brandColors.primaryEnd}
+            strokeWidth={2}
+            dot={{ fill: brandColors.primaryEnd, r: 5 }}
+          />
         )}
         {selectedMetrics.includes('forecast') && (
-          <Line type="monotone" dataKey="forecast" stroke={brandColors.accentPink} strokeWidth={2} strokeDasharray="5 5" />
+          <Line
+            type="monotone"
+            dataKey="forecast"
+            stroke={brandColors.accentPink}
+            strokeWidth={2}
+            strokeDasharray="5 5"
+          />
         )}
       </LineChart>
     </ResponsiveContainer>
@@ -132,7 +153,9 @@ const AdvancedChartsComponent = ({ data = [], title = 'التحليلات الم
         <Tooltip {...TOOLTIP_STYLES} />
         <Legend />
         <Bar dataKey="value" fill={brandColors.primaryStart} radius={[8, 8, 0, 0]} />
-        {selectedMetrics.includes('actual') && <Bar dataKey="actual" fill={brandColors.primaryEnd} radius={[8, 8, 0, 0]} />}
+        {selectedMetrics.includes('actual') && (
+          <Bar dataKey="actual" fill={brandColors.primaryEnd} radius={[8, 8, 0, 0]} />
+        )}
       </BarChart>
     </ResponsiveContainer>
   );
@@ -152,9 +175,21 @@ const AdvancedChartsComponent = ({ data = [], title = 'التحليلات الم
         <YAxis stroke={brandColors.primaryStart} />
         <Tooltip {...TOOLTIP_STYLES} />
         <Legend />
-        <Area type="monotone" dataKey="value" stroke={brandColors.primaryStart} fillOpacity={1} fill="url(#colorValue)" />
+        <Area
+          type="monotone"
+          dataKey="value"
+          stroke={brandColors.primaryStart}
+          fillOpacity={1}
+          fill="url(#colorValue)"
+        />
         {selectedMetrics.includes('actual') && (
-          <Area type="monotone" dataKey="actual" stroke={brandColors.primaryEnd} fillOpacity={0.3} fill={brandColors.primaryEnd} />
+          <Area
+            type="monotone"
+            dataKey="actual"
+            stroke={brandColors.primaryEnd}
+            fillOpacity={0.3}
+            fill={brandColors.primaryEnd}
+          />
         )}
       </AreaChart>
     </ResponsiveContainer>
@@ -182,9 +217,21 @@ const AdvancedChartsComponent = ({ data = [], title = 'التحليلات الم
         <PolarGrid />
         <PolarAngleAxis dataKey="name" />
         <PolarRadiusAxis />
-        <Radar name="القيمة" dataKey="value" stroke={brandColors.primaryStart} fill={brandColors.primaryStart} fillOpacity={0.6} />
+        <Radar
+          name="القيمة"
+          dataKey="value"
+          stroke={brandColors.primaryStart}
+          fill={brandColors.primaryStart}
+          fillOpacity={0.6}
+        />
         {selectedMetrics.includes('actual') && (
-          <Radar name="الفعلي" dataKey="actual" stroke={brandColors.primaryEnd} fill={brandColors.primaryEnd} fillOpacity={0.3} />
+          <Radar
+            name="الفعلي"
+            dataKey="actual"
+            stroke={brandColors.primaryEnd}
+            fill={brandColors.primaryEnd}
+            fillOpacity={0.3}
+          />
         )}
         <Legend />
         <Tooltip {...TOOLTIP_STYLES} />
@@ -204,7 +251,13 @@ const AdvancedChartsComponent = ({ data = [], title = 'التحليلات الم
         <Bar dataKey="value" fill={brandColors.primaryStart} radius={[8, 8, 0, 0]} />
         <Line type="monotone" dataKey="target" stroke={brandColors.accentPink} strokeWidth={2} />
         {selectedMetrics.includes('forecast') && (
-          <Line type="monotone" dataKey="forecast" stroke={brandColors.accentGreen} strokeWidth={2} strokeDasharray="5 5" />
+          <Line
+            type="monotone"
+            dataKey="forecast"
+            stroke={brandColors.accentGreen}
+            strokeWidth={2}
+            strokeDasharray="5 5"
+          />
         )}
       </ComposedChart>
     </ResponsiveContainer>
@@ -283,7 +336,7 @@ const AdvancedChartsComponent = ({ data = [], title = 'التحليلات الم
                 <Grid item xs={12} sm={6} md={3}>
                   <Select
                     value={chartType}
-                    onChange={(e) => setChartType(e.target.value)}
+                    onChange={e => setChartType(e.target.value)}
                     fullWidth
                     sx={{ borderRadius: '8px' }}
                   >
@@ -298,7 +351,7 @@ const AdvancedChartsComponent = ({ data = [], title = 'التحليلات الم
                 <Grid item xs={12} sm={6} md={3}>
                   <Select
                     value={dataRange}
-                    onChange={(e) => setDataRange(e.target.value)}
+                    onChange={e => setDataRange(e.target.value)}
                     fullWidth
                     sx={{ borderRadius: '8px' }}
                   >
@@ -311,17 +364,21 @@ const AdvancedChartsComponent = ({ data = [], title = 'التحليلات الم
 
                 <Grid item xs={12} md={6}>
                   <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                    {['value', 'actual', 'forecast'].map((metric) => (
+                    {['value', 'actual', 'forecast'].map(metric => (
                       <Chip
                         key={metric}
-                        label={{
-                          value: 'القيمة المتوقعة',
-                          actual: 'القيمة الفعلية',
-                          forecast: 'التنبؤ',
-                        }[metric]}
+                        label={
+                          {
+                            value: 'القيمة المتوقعة',
+                            actual: 'القيمة الفعلية',
+                            forecast: 'التنبؤ',
+                          }[metric]
+                        }
                         onClick={() => {
-                          setSelectedMetrics((prev) =>
-                            prev.includes(metric) ? prev.filter((m) => m !== metric) : [...prev, metric]
+                          setSelectedMetrics(prev =>
+                            prev.includes(metric)
+                              ? prev.filter(m => m !== metric)
+                              : [...prev, metric]
                           );
                         }}
                         color={selectedMetrics.includes(metric) ? 'primary' : 'default'}
@@ -347,8 +404,18 @@ const AdvancedChartsComponent = ({ data = [], title = 'التحليلات الم
               {/* Statistics */}
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={6} md={3}>
-                  <Paper sx={{ p: 2, textAlign: 'center', borderRadius: '8px', background: surfaceColors.brandTintLight }}>
-                    <Typography variant="h6" sx={{ color: brandColors.primaryStart, fontWeight: 'bold' }}>
+                  <Paper
+                    sx={{
+                      p: 2,
+                      textAlign: 'center',
+                      borderRadius: '8px',
+                      background: surfaceColors.brandTintLight,
+                    }}
+                  >
+                    <Typography
+                      variant="h6"
+                      sx={{ color: brandColors.primaryStart, fontWeight: 'bold' }}
+                    >
                       {sampleData.reduce((sum, item) => sum + item.value, 0)}
                     </Typography>
                     <Typography variant="caption" color="textSecondary">
@@ -358,9 +425,21 @@ const AdvancedChartsComponent = ({ data = [], title = 'التحليلات الم
                 </Grid>
 
                 <Grid item xs={12} sm={6} md={3}>
-                  <Paper sx={{ p: 2, textAlign: 'center', borderRadius: '8px', background: surfaceColors.purpleTint }}>
-                    <Typography variant="h6" sx={{ color: brandColors.primaryEnd, fontWeight: 'bold' }}>
-                      {(sampleData.reduce((sum, item) => sum + item.value, 0) / sampleData.length).toFixed(0)}
+                  <Paper
+                    sx={{
+                      p: 2,
+                      textAlign: 'center',
+                      borderRadius: '8px',
+                      background: surfaceColors.purpleTint,
+                    }}
+                  >
+                    <Typography
+                      variant="h6"
+                      sx={{ color: brandColors.primaryEnd, fontWeight: 'bold' }}
+                    >
+                      {(
+                        sampleData.reduce((sum, item) => sum + item.value, 0) / sampleData.length
+                      ).toFixed(0)}
                     </Typography>
                     <Typography variant="caption" color="textSecondary">
                       المتوسط
@@ -369,9 +448,19 @@ const AdvancedChartsComponent = ({ data = [], title = 'التحليلات الم
                 </Grid>
 
                 <Grid item xs={12} sm={6} md={3}>
-                  <Paper sx={{ p: 2, textAlign: 'center', borderRadius: '8px', background: surfaceColors.roseTint }}>
-                    <Typography variant="h6" sx={{ color: brandColors.accentCoral, fontWeight: 'bold' }}>
-                      {Math.max(...sampleData.map((d) => d.value))}
+                  <Paper
+                    sx={{
+                      p: 2,
+                      textAlign: 'center',
+                      borderRadius: '8px',
+                      background: surfaceColors.roseTint,
+                    }}
+                  >
+                    <Typography
+                      variant="h6"
+                      sx={{ color: brandColors.accentCoral, fontWeight: 'bold' }}
+                    >
+                      {Math.max(...sampleData.map(d => d.value))}
                     </Typography>
                     <Typography variant="caption" color="textSecondary">
                       أقصى قيمة
@@ -380,9 +469,19 @@ const AdvancedChartsComponent = ({ data = [], title = 'التحليلات الم
                 </Grid>
 
                 <Grid item xs={12} sm={6} md={3}>
-                  <Paper sx={{ p: 2, textAlign: 'center', borderRadius: '8px', background: surfaceColors.greenTint }}>
-                    <Typography variant="h6" sx={{ color: brandColors.accentGreen, fontWeight: 'bold' }}>
-                      {Math.min(...sampleData.map((d) => d.value))}
+                  <Paper
+                    sx={{
+                      p: 2,
+                      textAlign: 'center',
+                      borderRadius: '8px',
+                      background: surfaceColors.greenTint,
+                    }}
+                  >
+                    <Typography
+                      variant="h6"
+                      sx={{ color: brandColors.accentGreen, fontWeight: 'bold' }}
+                    >
+                      {Math.min(...sampleData.map(d => d.value))}
                     </Typography>
                     <Typography variant="caption" color="textSecondary">
                       أقل قيمة

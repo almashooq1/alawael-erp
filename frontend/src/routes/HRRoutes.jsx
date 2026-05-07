@@ -43,14 +43,22 @@ const RecruitmentDashboard = lazyWithRetry(() => import('../pages/hr/Recruitment
 // Employee Affairs Expanded — شؤون الموظفين الموسّعة
 const ComplaintsManagement = lazyWithRetry(() => import('../pages/hr/ComplaintsManagement'));
 const EmployeeLoansManagement = lazyWithRetry(() => import('../pages/hr/EmployeeLoansManagement'));
-const DisciplinaryActionsManagement = lazyWithRetry(() => import('../pages/hr/DisciplinaryActionsManagement'));
-const EmployeeLettersManagement = lazyWithRetry(() => import('../pages/hr/EmployeeLettersManagement'));
-const PromotionsTransfersManagement = lazyWithRetry(() => import('../pages/hr/PromotionsTransfersManagement'));
+const DisciplinaryActionsManagement = lazyWithRetry(
+  () => import('../pages/hr/DisciplinaryActionsManagement')
+);
+const EmployeeLettersManagement = lazyWithRetry(
+  () => import('../pages/hr/EmployeeLettersManagement')
+);
+const PromotionsTransfersManagement = lazyWithRetry(
+  () => import('../pages/hr/PromotionsTransfersManagement')
+);
 const OvertimeManagement = lazyWithRetry(() => import('../pages/hr/OvertimeManagement'));
 
 // Employee Affairs Phase 2 — شؤون الموظفين المرحلة الثانية
 const TaskManagement = lazyWithRetry(() => import('../pages/hr/TaskManagement'));
-const HousingTransportationManagement = lazyWithRetry(() => import('../pages/hr/HousingTransportationManagement'));
+const HousingTransportationManagement = lazyWithRetry(
+  () => import('../pages/hr/HousingTransportationManagement')
+);
 const CustodyManagement = lazyWithRetry(() => import('../pages/hr/CustodyManagement'));
 const WorkPermitsManagement = lazyWithRetry(() => import('../pages/hr/WorkPermitsManagement'));
 const RewardsManagement = lazyWithRetry(() => import('../pages/hr/RewardsManagement'));
@@ -58,11 +66,21 @@ const ShiftManagement = lazyWithRetry(() => import('../pages/hr/ShiftManagement'
 
 // Phase 3 — المرحلة الثالثة
 const ContractManagement = lazyWithRetry(() => import('../pages/hr/ContractManagement'));
-const VacationSettlementManagement = lazyWithRetry(() => import('../pages/hr/VacationSettlementManagement'));
-const EmployeeWarningsManagement = lazyWithRetry(() => import('../pages/hr/EmployeeWarningsManagement'));
-const EmployeeClearanceManagement = lazyWithRetry(() => import('../pages/hr/EmployeeClearanceManagement'));
-const ExitReentryVisaManagement = lazyWithRetry(() => import('../pages/hr/ExitReentryVisaManagement'));
+const VacationSettlementManagement = lazyWithRetry(
+  () => import('../pages/hr/VacationSettlementManagement')
+);
+const EmployeeWarningsManagement = lazyWithRetry(
+  () => import('../pages/hr/EmployeeWarningsManagement')
+);
+const EmployeeClearanceManagement = lazyWithRetry(
+  () => import('../pages/hr/EmployeeClearanceManagement')
+);
+const ExitReentryVisaManagement = lazyWithRetry(
+  () => import('../pages/hr/ExitReentryVisaManagement')
+);
 const BenefitsManagement = lazyWithRetry(() => import('../pages/hr/BenefitsManagement'));
+// BC-07: إدارة صلاحية اعتمادات الكوادر الصحية
+const CredentialExpiryAdmin = lazyWithRetry(() => import('../pages/hr/CredentialExpiryAdmin'));
 
 export default function HRRoutes() {
   return (
@@ -122,6 +140,8 @@ export default function HRRoutes() {
       <Route path="hr/clearance" element={<EmployeeClearanceManagement />} />
       <Route path="hr/exit-visas" element={<ExitReentryVisaManagement />} />
       <Route path="hr/benefits" element={<BenefitsManagement />} />
+      {/* BC-07: صلاحية اعتمادات الكوادر الصحية — SCFHS + إقامة + هوية وطنية */}
+      <Route path="hr/credential-expiry" element={<CredentialExpiryAdmin />} />
     </>
   );
 }

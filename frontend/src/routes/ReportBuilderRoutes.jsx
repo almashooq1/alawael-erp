@@ -3,11 +3,9 @@ import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const ReportBuilderDashboard = lazyWithRetry(
-  () => import('../pages/report-builder/ReportBuilderDashboard'),
+  () => import('../pages/report-builder/ReportBuilderDashboard')
 );
-const ReportViewer = lazyWithRetry(
-  () => import('../pages/report-builder/ReportViewer'),
-);
+const ReportViewer = lazyWithRetry(() => import('../pages/report-builder/ReportViewer'));
 
 export default function ReportBuilderRoutes() {
   return (

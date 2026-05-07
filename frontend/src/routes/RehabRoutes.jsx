@@ -57,8 +57,80 @@ const SmartAssessmentDashboard = lazyWithRetry(
   () => import('../pages/SmartAssessment/SmartAssessmentDashboard')
 );
 
+// Clinical Assessments CRUD — إدارة التقييمات السريرية
+const ClinicalAssessmentsPage = lazyWithRetry(
+  () => import('../pages/SmartAssessment/ClinicalAssessmentsPage')
+);
+
 // Group Therapy
 const GroupTherapyPage = lazyWithRetry(() => import('../pages/group-therapy/GroupTherapyPage'));
+
+// Therapeutic Goals — الأهداف العلاجية
+const GoalsPage = lazyWithRetry(() => import('../pages/goals/GoalsPage'));
+
+// Family Engagement — التواصل الأسري
+const FamilyEngagementPage = lazyWithRetry(() => import('../pages/family/FamilyEngagementPage'));
+
+// Tele-Rehabilitation — التأهيل عن بُعد
+const TeleRehabPage = lazyWithRetry(() => import('../pages/tele-rehab/TeleRehabPage'));
+
+// Field Training — التدريب الميداني
+const FieldTrainingPage = lazyWithRetry(() => import('../pages/field-training/FieldTrainingPage'));
+
+// AI Recommendations — التوصيات الذكية وتقييم المخاطر
+const AIRecommendationsPage = lazyWithRetry(
+  () => import('../pages/ai-recommendations/AIRecommendationsPage')
+);
+
+// Clinical Research — الأبحاث السريرية
+const ClinicalResearchPage = lazyWithRetry(
+  () => import('../pages/clinical-research/ClinicalResearchPage')
+);
+
+// AR/VR Rehabilitation — التأهيل بالواقع المعزز والافتراضي
+const ARVRRehabPage = lazyWithRetry(() => import('../pages/ar-vr-rehab/ARVRRehabPage'));
+
+// Rehab Programs (DDD) — البرامج التأهيلية (موحد)
+const RehabProgramsPage = lazyWithRetry(() => import('../pages/rehab-programs/RehabProgramsPage'));
+
+// Compliance Hub — مركز الامتثال المؤسسي
+const ComplianceHubPage = lazyWithRetry(() => import('../pages/compliance-hub/ComplianceHubPage'));
+
+// Patient Engagement — بوابة تفاعل المستفيدين
+const PatientEngagementPage = lazyWithRetry(
+  () => import('../pages/patient-engagement/PatientEngagementPage')
+);
+
+// Interoperability — مركز التشغيل البيني والتكامل
+const InteroperabilityPage = lazyWithRetry(
+  () => import('../pages/interoperability/InteroperabilityPage')
+);
+
+// Business Continuity — استمرارية الأعمال وإدارة الأزمات
+const BusinessContinuityPage = lazyWithRetry(
+  () => import('../pages/business-continuity/BusinessContinuityPage')
+);
+
+// HR Development — تطوير الكوادر البشرية
+const HRDevelopmentPage = lazyWithRetry(() => import('../pages/hr-development/HRDevelopmentPage'));
+
+// Equipment Lifecycle — دورة حياة المعدات والأجهزة
+const EquipmentLifecyclePage = lazyWithRetry(
+  () => import('../pages/equipment-lifecycle/EquipmentLifecyclePage')
+);
+
+// Facility Management — إدارة المرافق والبيئة
+const FacilityManagementPage = lazyWithRetry(
+  () => import('../pages/facility-management/FacilityManagementPage')
+);
+
+// Research Hub — مركز البحث العلمي والسريري
+const ResearchHubPage = lazyWithRetry(() => import('../pages/research-hub/ResearchHubPage'));
+
+// Community Engagement — الانخراط المجتمعي والتطوعي
+const CommunityEngagementPage = lazyWithRetry(
+  () => import('../pages/community-engagement/CommunityEngagementPage')
+);
 
 // Sessions
 const SessionsManagement = lazyWithRetry(() => import('../pages/Sessions'));
@@ -110,9 +182,63 @@ export default function RehabRoutes() {
       {/* Smart Clinical Assessment Engine — محرك التقييم الذكي */}
       <Route path="smart-assessment" element={<SmartAssessmentDashboard />} />
 
+      {/* Clinical Assessments CRUD — إدارة التقييمات السريرية */}
+      <Route path="clinical-assessments" element={<ClinicalAssessmentsPage />} />
+
       {/* Group Therapy — إدارة العلاج الجماعي */}
       <Route path="group-therapy" element={<GroupTherapyPage />} />
       <Route path="therapist-portal/group-therapy" element={<GroupTherapyPage />} />
+
+      {/* Therapeutic Goals — الأهداف العلاجية */}
+      <Route path="goals" element={<GoalsPage />} />
+
+      {/* Family Engagement — التواصل الأسري */}
+      <Route path="family-engagement" element={<FamilyEngagementPage />} />
+
+      {/* Tele-Rehabilitation — التأهيل عن بُعد */}
+      <Route path="tele-rehab" element={<TeleRehabPage />} />
+
+      {/* Field Training — التدريب الميداني */}
+      <Route path="field-training" element={<FieldTrainingPage />} />
+
+      {/* AI Recommendations — التوصيات الذكية وتقييم المخاطر */}
+      <Route path="ai-recommendations" element={<AIRecommendationsPage />} />
+
+      {/* Clinical Research — الأبحاث السريرية */}
+      <Route path="clinical-research" element={<ClinicalResearchPage />} />
+
+      {/* AR/VR Rehabilitation — التأهيل بالواقع المعزز والافتراضي */}
+      <Route path="ar-vr" element={<ARVRRehabPage />} />
+
+      {/* Rehab Programs (DDD unified) — البرامج التأهيلية الموحدة */}
+      <Route path="programs" element={<RehabProgramsPage />} />
+
+      {/* Compliance Hub — مركز الامتثال المؤسسي */}
+      <Route path="compliance-hub" element={<ComplianceHubPage />} />
+
+      {/* Patient Engagement — بوابة تفاعل المستفيدين */}
+      <Route path="patient-engagement" element={<PatientEngagementPage />} />
+
+      {/* Interoperability — مركز التشغيل البيني والتكامل */}
+      <Route path="interoperability" element={<InteroperabilityPage />} />
+
+      {/* Business Continuity — استمرارية الأعمال وإدارة الأزمات */}
+      <Route path="business-continuity" element={<BusinessContinuityPage />} />
+
+      {/* HR Development — تطوير الكوادر البشرية */}
+      <Route path="hr-development" element={<HRDevelopmentPage />} />
+
+      {/* Equipment Lifecycle — دورة حياة المعدات والأجهزة */}
+      <Route path="equipment-lifecycle" element={<EquipmentLifecyclePage />} />
+
+      {/* Facility Management — إدارة المرافق والبيئة */}
+      <Route path="facility-management" element={<FacilityManagementPage />} />
+
+      {/* Research Hub — مركز البحث العلمي والسريري */}
+      <Route path="research-hub" element={<ResearchHubPage />} />
+
+      {/* Community Engagement — الانخراط المجتمعي والتطوعي */}
+      <Route path="community-engagement" element={<CommunityEngagementPage />} />
     </>
   );
 }

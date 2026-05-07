@@ -22,15 +22,42 @@ import DashboardOverlays from './DashboardOverlays';
 const AdvancedDashboard = () => {
   const theme = useTheme();
   const {
-    data, loading, error, lastUpdated, refreshing, showScrollTop,
-    activeSection, refreshProgress, socketToast, dataSource,
-    collapsedSections, searchQuery,
-    kpis, charts, finance, clinical, hr, supplyChain, fleet, operations,
-    kpiCards, mergedAlerts, visibleSections, socketConnected,
-    refreshFlash, isOnline, relativeTime, sessionDuration,
-    showShortcuts, setShowShortcuts,
-    dispatch, fetchData, scrollToTop, isSectionVisible,
-    dashboardRef, exportData,
+    data,
+    loading,
+    error,
+    lastUpdated,
+    refreshing,
+    showScrollTop,
+    activeSection,
+    refreshProgress,
+    socketToast,
+    dataSource,
+    collapsedSections,
+    searchQuery,
+    kpis,
+    charts,
+    finance,
+    clinical,
+    hr,
+    supplyChain,
+    fleet,
+    operations,
+    kpiCards,
+    mergedAlerts,
+    visibleSections,
+    socketConnected,
+    refreshFlash,
+    isOnline,
+    relativeTime,
+    sessionDuration,
+    showShortcuts,
+    setShowShortcuts,
+    dispatch,
+    fetchData,
+    scrollToTop,
+    isSectionVisible,
+    dashboardRef,
+    exportData,
   } = useAdvancedDashboard();
 
   if (loading) return <DashboardSkeleton />;
@@ -47,9 +74,8 @@ const AdvancedDashboard = () => {
         sx={{
           p: { xs: 1.5, sm: 2, md: 3 },
           minHeight: '100vh',
-          background: theme.palette.mode === 'dark'
-            ? gradients.dashboardDark
-            : gradients.dashboardLight,
+          background:
+            theme.palette.mode === 'dark' ? gradients.dashboardDark : gradients.dashboardLight,
         }}
       >
         {/* 1. WELCOME HEADER */}
@@ -64,7 +90,10 @@ const AdvancedDashboard = () => {
           dataSource={dataSource}
           onMarkAllRead={() => {
             if (data?.alerts) {
-              dispatch({ type: 'SET_DATA', data: { ...data, alerts: data.alerts.map(a => ({ ...a, read: true })) } });
+              dispatch({
+                type: 'SET_DATA',
+                data: { ...data, alerts: data.alerts.map(a => ({ ...a, read: true })) },
+              });
             }
           }}
         />
@@ -73,13 +102,15 @@ const AdvancedDashboard = () => {
         <SectionNav
           activeSection={activeSection}
           collapsedSections={collapsedSections}
-          onToggleAll={() => dispatch({ type: 'TOGGLE_ALL_SECTIONS', sectionIds: SECTIONS.map(s => s.id) })}
+          onToggleAll={() =>
+            dispatch({ type: 'TOGGLE_ALL_SECTIONS', sectionIds: SECTIONS.map(s => s.id) })
+          }
         />
 
         {/* SEARCH / FILTER BAR */}
         <DashboardSearchBar
           searchQuery={searchQuery}
-          onSearchChange={(val) => dispatch({ type: 'SET_SEARCH', value: val })}
+          onSearchChange={val => dispatch({ type: 'SET_SEARCH', value: val })}
           visibleSections={visibleSections}
         />
 

@@ -7,8 +7,8 @@ import React from 'react';
 import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
-const WorkforceAnalytics = lazyWithRetry(() =>
-  import('../pages/workforce-analytics/WorkforceAnalytics'),
+const WorkforceAnalytics = lazyWithRetry(
+  () => import('../pages/workforce-analytics/WorkforceAnalytics')
 );
 
 export default function WorkforceAnalyticsRoutes() {

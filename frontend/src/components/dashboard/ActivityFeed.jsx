@@ -30,24 +30,64 @@ import AccessTimeRoundedIcon from '@mui/icons-material/AccessTimeRounded';
 
 /* ─────────────────────────────────────── */
 const ACTION_CONFIG = {
-  create:   { icon: <AddCircleRoundedIcon />,  gradient: 'linear-gradient(135deg,#43cea2,#185a9d)', glow: '#43cea2', label: 'إنشاء'         },
-  update:   { icon: <EditRoundedIcon />,        gradient: 'linear-gradient(135deg,#4facfe,#00f2fe)', glow: '#4facfe', label: 'تعديل'         },
-  delete:   { icon: <DeleteRoundedIcon />,      gradient: 'linear-gradient(135deg,#f5576c,#f093fb)', glow: '#f5576c', label: 'حذف'           },
-  login:    { icon: <LoginRoundedIcon />,       gradient: 'linear-gradient(135deg,#667eea,#764ba2)', glow: '#667eea', label: 'تسجيل دخول'   },
-  logout:   { icon: <LoginRoundedIcon />,       gradient: 'linear-gradient(135deg,#f7971e,#ffd200)', glow: '#f7971e', label: 'تسجيل خروج'   },
-  security: { icon: <SecurityRoundedIcon />,    gradient: 'linear-gradient(135deg,#a18cd1,#fbc2eb)', glow: '#a18cd1', label: 'أمان'          },
-  settings: { icon: <SettingsRoundedIcon />,    gradient: 'linear-gradient(135deg,#868f96,#596164)', glow: '#868f96', label: 'إعدادات'       },
-  default:  { icon: <PersonIcon />,             gradient: 'linear-gradient(135deg,#667eea,#764ba2)', glow: '#667eea', label: 'نشاط'          },
+  create: {
+    icon: <AddCircleRoundedIcon />,
+    gradient: 'linear-gradient(135deg,#43cea2,#185a9d)',
+    glow: '#43cea2',
+    label: 'إنشاء',
+  },
+  update: {
+    icon: <EditRoundedIcon />,
+    gradient: 'linear-gradient(135deg,#4facfe,#00f2fe)',
+    glow: '#4facfe',
+    label: 'تعديل',
+  },
+  delete: {
+    icon: <DeleteRoundedIcon />,
+    gradient: 'linear-gradient(135deg,#f5576c,#f093fb)',
+    glow: '#f5576c',
+    label: 'حذف',
+  },
+  login: {
+    icon: <LoginRoundedIcon />,
+    gradient: 'linear-gradient(135deg,#667eea,#764ba2)',
+    glow: '#667eea',
+    label: 'تسجيل دخول',
+  },
+  logout: {
+    icon: <LoginRoundedIcon />,
+    gradient: 'linear-gradient(135deg,#f7971e,#ffd200)',
+    glow: '#f7971e',
+    label: 'تسجيل خروج',
+  },
+  security: {
+    icon: <SecurityRoundedIcon />,
+    gradient: 'linear-gradient(135deg,#a18cd1,#fbc2eb)',
+    glow: '#a18cd1',
+    label: 'أمان',
+  },
+  settings: {
+    icon: <SettingsRoundedIcon />,
+    gradient: 'linear-gradient(135deg,#868f96,#596164)',
+    glow: '#868f96',
+    label: 'إعدادات',
+  },
+  default: {
+    icon: <PersonIcon />,
+    gradient: 'linear-gradient(135deg,#667eea,#764ba2)',
+    glow: '#667eea',
+    label: 'نشاط',
+  },
 };
 
 const FILTER_TABS = [
-  { key: 'all',    label: 'الكل'  },
-  { key: 'data',   label: 'بيانات' },
-  { key: 'auth',   label: 'تسجيل' },
-  { key: 'system', label: 'نظام'  },
+  { key: 'all', label: 'الكل' },
+  { key: 'data', label: 'بيانات' },
+  { key: 'auth', label: 'تسجيل' },
+  { key: 'system', label: 'نظام' },
 ];
 
-const getActionCategory = (action) => {
+const getActionCategory = action => {
   if (!action) return 'data';
   const key = action.toLowerCase();
   if (['login', 'logout'].some(a => key.includes(a))) return 'auth';
@@ -55,7 +95,7 @@ const getActionCategory = (action) => {
   return 'data';
 };
 
-const getActionConfig = (action) => {
+const getActionConfig = action => {
   if (!action) return ACTION_CONFIG.default;
   const key = action.toLowerCase();
   for (const [k, v] of Object.entries(ACTION_CONFIG)) {
@@ -64,7 +104,7 @@ const getActionConfig = (action) => {
   return ACTION_CONFIG.default;
 };
 
-const formatTimeAgo = (timestamp) => {
+const formatTimeAgo = timestamp => {
   if (!timestamp) return '';
   const diff = Date.now() - new Date(timestamp).getTime();
   const minutes = Math.floor(diff / 60000);
@@ -78,7 +118,7 @@ const formatTimeAgo = (timestamp) => {
 };
 
 const INITIAL_VISIBLE = 7;
-const LOAD_MORE_STEP  = 5;
+const LOAD_MORE_STEP = 5;
 
 /* ─────────────────────────────────────── */
 /*  Activity Row Item                      */
@@ -165,15 +205,23 @@ const ActivityItem = React.memo(({ activity, index, isDark }) => {
         </Box>
 
         {/* Timestamp */}
-        <Box sx={{
-          display: 'flex', alignItems: 'center', gap: 0.4,
-          flexShrink: 0,
-          background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)',
-          borderRadius: '8px',
-          px: 0.8, py: 0.3,
-        }}>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 0.4,
+            flexShrink: 0,
+            background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)',
+            borderRadius: '8px',
+            px: 0.8,
+            py: 0.3,
+          }}
+        >
           <AccessTimeRoundedIcon sx={{ fontSize: 10, color: 'text.disabled' }} />
-          <Typography variant="caption" sx={{ color: 'text.disabled', fontSize: '0.62rem', fontWeight: 600 }}>
+          <Typography
+            variant="caption"
+            sx={{ color: 'text.disabled', fontSize: '0.62rem', fontWeight: 600 }}
+          >
             {formatTimeAgo(activity.timestamp)}
           </Typography>
         </Box>
@@ -232,41 +280,69 @@ const ActivityFeed = ({ activities = [], maxItems = 30 }) => {
         }}
       >
         {/* Top accent bar */}
-        <Box sx={{
-          position: 'absolute', top: 0, left: 0, right: 0, height: '3px',
-          background: 'linear-gradient(90deg,#667eea,#f093fb,#43cea2,#667eea)',
-          backgroundSize: '200% auto',
-          animation: 'afBar 4s linear infinite',
-          '@keyframes afBar': {
-            '0%': { backgroundPosition: '0% center' },
-            '100%': { backgroundPosition: '200% center' },
-          },
-        }} />
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: '3px',
+            background: 'linear-gradient(90deg,#667eea,#f093fb,#43cea2,#667eea)',
+            backgroundSize: '200% auto',
+            animation: 'afBar 4s linear infinite',
+            '@keyframes afBar': {
+              '0%': { backgroundPosition: '0% center' },
+              '100%': { backgroundPosition: '200% center' },
+            },
+          }}
+        />
 
         {/* Background orb */}
-        <Box sx={{
-          position: 'absolute', bottom: -60, insetInlineEnd: -40,
-          width: 180, height: 180, borderRadius: '50%',
-          background: 'linear-gradient(135deg,#667eea,#764ba2)',
-          opacity: isDark ? 0.06 : 0.04,
-          filter: 'blur(40px)',
-          pointerEvents: 'none',
-        }} />
+        <Box
+          sx={{
+            position: 'absolute',
+            bottom: -60,
+            insetInlineEnd: -40,
+            width: 180,
+            height: 180,
+            borderRadius: '50%',
+            background: 'linear-gradient(135deg,#667eea,#764ba2)',
+            opacity: isDark ? 0.06 : 0.04,
+            filter: 'blur(40px)',
+            pointerEvents: 'none',
+          }}
+        />
 
         {/* ── Header ─────────────────────── */}
         <Box sx={{ px: 2.5, pt: 2.5, pb: 0, position: 'relative', zIndex: 1 }}>
-          <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 1.5 }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'flex-start',
+              justifyContent: 'space-between',
+              mb: 1.5,
+            }}
+          >
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-              <Box sx={{
-                width: 38, height: 38, borderRadius: '12px',
-                background: 'linear-gradient(135deg,#667eea,#764ba2)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                boxShadow: '0 6px 14px rgba(102,126,234,0.4)',
-              }}>
+              <Box
+                sx={{
+                  width: 38,
+                  height: 38,
+                  borderRadius: '12px',
+                  background: 'linear-gradient(135deg,#667eea,#764ba2)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 6px 14px rgba(102,126,234,0.4)',
+                }}
+              >
                 <DynamicFeedRoundedIcon sx={{ color: 'white', fontSize: 20 }} />
               </Box>
               <Box>
-                <Typography variant="h6" sx={{ fontWeight: 800, fontSize: '0.95rem', lineHeight: 1.2 }}>
+                <Typography
+                  variant="h6"
+                  sx={{ fontWeight: 800, fontSize: '0.95rem', lineHeight: 1.2 }}
+                >
                   آخر الأنشطة
                 </Typography>
                 <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.68rem' }}>
@@ -281,7 +357,9 @@ const ActivityFeed = ({ activities = [], maxItems = 30 }) => {
                 label={`${activities.length}`}
                 size="small"
                 sx={{
-                  height: 24, fontWeight: 800, fontSize: '0.72rem',
+                  height: 24,
+                  fontWeight: 800,
+                  fontSize: '0.72rem',
                   background: 'linear-gradient(135deg,#667eea,#764ba2)',
                   color: 'white',
                   border: 'none',
@@ -321,35 +399,50 @@ const ActivityFeed = ({ activities = [], maxItems = 30 }) => {
               },
             }}
           >
-            {FILTER_TABS.map((tab) => (
+            {FILTER_TABS.map(tab => (
               <Tab key={tab.key} label={tab.label} disableRipple={false} />
             ))}
           </Tabs>
         </Box>
 
         {/* ── Activity List ──────────────── */}
-        <Box sx={{
-          flex: 1,
-          overflowY: 'auto',
-          py: 0.5,
-          position: 'relative', zIndex: 1,
-          '&::-webkit-scrollbar': { width: 4 },
-          '&::-webkit-scrollbar-track': { background: 'transparent' },
-          '&::-webkit-scrollbar-thumb': {
-            borderRadius: 4,
-            background: 'rgba(102,126,234,0.25)',
-          },
-        }}>
+        <Box
+          sx={{
+            flex: 1,
+            overflowY: 'auto',
+            py: 0.5,
+            position: 'relative',
+            zIndex: 1,
+            '&::-webkit-scrollbar': { width: 4 },
+            '&::-webkit-scrollbar-track': { background: 'transparent' },
+            '&::-webkit-scrollbar-thumb': {
+              borderRadius: 4,
+              background: 'rgba(102,126,234,0.25)',
+            },
+          }}
+        >
           {filteredItems.length === 0 ? (
-            <Box sx={{
-              p: 5, textAlign: 'center',
-              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1.5,
-            }}>
-              <Box sx={{
-                width: 52, height: 52, borderRadius: '16px',
-                background: 'rgba(102,126,234,0.08)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>
+            <Box
+              sx={{
+                p: 5,
+                textAlign: 'center',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: 1.5,
+              }}
+            >
+              <Box
+                sx={{
+                  width: 52,
+                  height: 52,
+                  borderRadius: '16px',
+                  background: 'rgba(102,126,234,0.08)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
                 <HistoryRoundedIcon sx={{ fontSize: 26, color: 'text.disabled' }} />
               </Box>
               <Typography variant="body2" sx={{ color: 'text.disabled', fontWeight: 600 }}>
@@ -375,7 +468,9 @@ const ActivityFeed = ({ activities = [], maxItems = 30 }) => {
           <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}>
             <ButtonBase
               onClick={() => setVisibleCount(v => v + LOAD_MORE_STEP)}
-              onKeyDown={(e) => { if (e.key === 'Enter') setVisibleCount(v => v + LOAD_MORE_STEP); }}
+              onKeyDown={e => {
+                if (e.key === 'Enter') setVisibleCount(v => v + LOAD_MORE_STEP);
+              }}
               sx={{
                 width: '100%',
                 display: 'flex',
@@ -390,15 +485,19 @@ const ActivityFeed = ({ activities = [], maxItems = 30 }) => {
                 '&:hover': {
                   background: isDark ? 'rgba(102,126,234,0.1)' : 'rgba(102,126,234,0.07)',
                 },
-                position: 'relative', zIndex: 1,
+                position: 'relative',
+                zIndex: 1,
               }}
             >
               <ExpandMoreRoundedIcon sx={{ fontSize: 16, color: '#667eea' }} />
-              <Typography variant="caption" sx={{
-                fontWeight: 700,
-                color: '#667eea',
-                fontSize: '0.72rem',
-              }}>
+              <Typography
+                variant="caption"
+                sx={{
+                  fontWeight: 700,
+                  color: '#667eea',
+                  fontSize: '0.72rem',
+                }}
+              >
                 عرض المزيد ({allFiltered.length - visibleCount} متبقي)
               </Typography>
             </ButtonBase>

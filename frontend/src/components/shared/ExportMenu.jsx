@@ -1,5 +1,13 @@
 import { useState } from 'react';
-import { Button, Menu, MenuItem, ListItemIcon, ListItemText, Divider, CircularProgress } from '@mui/material';
+import {
+  Button,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  ListItemText,
+  Divider,
+  CircularProgress,
+} from '@mui/material';
 import {
   FileDownload as ExportIcon,
   PictureAsPdf as PdfIcon,
@@ -41,19 +49,39 @@ const ExportMenu = ({
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
-  const handleClick = (handler) => {
+  const handleClick = handler => {
     setAnchorEl(null);
     handler?.();
   };
 
   const items = [
     { key: 'pdf', icon: <PdfIcon sx={{ color: '#E53935' }} />, label: 'PDF', handler: onExportPDF },
-    { key: 'excel', icon: <ExcelIcon sx={{ color: '#43A047' }} />, label: 'Excel', handler: onExportExcel },
+    {
+      key: 'excel',
+      icon: <ExcelIcon sx={{ color: '#43A047' }} />,
+      label: 'Excel',
+      handler: onExportExcel,
+    },
     { key: 'csv', icon: <CsvIcon sx={{ color: '#1E88E5' }} />, label: 'CSV', handler: onExportCSV },
-    { key: 'docx', icon: <DocxIcon sx={{ color: '#2B579A' }} />, label: 'Word (DOCX)', handler: onExportDOCX },
+    {
+      key: 'docx',
+      icon: <DocxIcon sx={{ color: '#2B579A' }} />,
+      label: 'Word (DOCX)',
+      handler: onExportDOCX,
+    },
     { key: 'divider' },
-    { key: 'image', icon: <ImageIcon sx={{ color: '#FF9800' }} />, label: 'صورة', handler: onExportImage },
-    { key: 'print', icon: <PrintIcon sx={{ color: '#546E7A' }} />, label: 'طباعة', handler: onPrint },
+    {
+      key: 'image',
+      icon: <ImageIcon sx={{ color: '#FF9800' }} />,
+      label: 'صورة',
+      handler: onExportImage,
+    },
+    {
+      key: 'print',
+      icon: <PrintIcon sx={{ color: '#546E7A' }} />,
+      label: 'طباعة',
+      handler: onPrint,
+    },
   ].filter(item => item.key === 'divider' || item.handler);
 
   if (items.length === 0) return null;

@@ -4,7 +4,9 @@
 import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
-const CarePlansDashboard = lazyWithRetry(() => import('../pages/IntegratedCare/CarePlansDashboard'));
+const CarePlansDashboard = lazyWithRetry(
+  () => import('../pages/IntegratedCare/CarePlansDashboard')
+);
 const CreateCarePlan = lazyWithRetry(() => import('../pages/IntegratedCare/CreateCarePlan'));
 const RecordSession = lazyWithRetry(() => import('../pages/IntegratedCare/RecordSession'));
 

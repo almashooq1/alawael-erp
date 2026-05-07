@@ -1,8 +1,22 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Box, Typography, Card, CardContent, Stack, Chip, Avatar, IconButton, Button,
-  CircularProgress, Alert, Paper, Grid, List, ListItem, ListItemAvatar,
-  ListItemText, Divider, Tooltip, Badge,
+  Box,
+  Typography,
+  Stack,
+  Chip,
+  Avatar,
+  IconButton,
+  CircularProgress,
+  Alert,
+  Paper,
+  Grid,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  Divider,
+  Tooltip,
+  Badge,
 } from '@mui/material';
 import {
   CalendarMonth as CalendarIcon,
@@ -19,23 +33,27 @@ import logger from '../../utils/logger';
 
 const PRIORITY_COLORS = {
   critical: '#ef4444',
-  high:     '#f97316',
-  medium:   '#3b82f6',
-  low:      '#22c55e',
+  high: '#f97316',
+  medium: '#3b82f6',
+  low: '#22c55e',
 };
 
 const STATUS_ICONS = {
-  scheduled:   <ScheduleIcon />,
+  scheduled: <ScheduleIcon />,
   in_progress: <TimeIcon />,
-  completed:   <CheckIcon color="success" />,
-  overdue:     <WarningIcon color="error" />,
-  cancelled:   <ScheduleIcon color="disabled" />,
-  snoozed:     <SnoozeIcon color="warning" />,
+  completed: <CheckIcon color="success" />,
+  overdue: <WarningIcon color="error" />,
+  cancelled: <ScheduleIcon color="disabled" />,
+  snoozed: <SnoozeIcon color="warning" />,
 };
 
 const STATUS_LABELS = {
-  scheduled: 'مجدول', in_progress: 'قيد التنفيذ', completed: 'مكتمل',
-  overdue: 'متأخر', cancelled: 'ملغي', snoozed: 'مؤجل',
+  scheduled: 'مجدول',
+  in_progress: 'قيد التنفيذ',
+  completed: 'مكتمل',
+  overdue: 'متأخر',
+  cancelled: 'ملغي',
+  snoozed: 'مؤجل',
 };
 
 /**
@@ -53,10 +71,7 @@ export default function CalendarWidget({ documentId, compact = false }) {
     setLoading(true);
     setError(null);
     try {
-      const promises = [
-        calendarApi.getDeadlines({ days: 14 }),
-        calendarApi.getOverdue(),
-      ];
+      const promises = [calendarApi.getDeadlines({ days: 14 }), calendarApi.getOverdue()];
       if (documentId) promises.push(calendarApi.getTimeline(documentId));
 
       const results = await Promise.all(promises);
@@ -71,21 +86,27 @@ export default function CalendarWidget({ documentId, compact = false }) {
     }
   }, [documentId]);
 
-  useEffect(() => { loadData(); }, [loadData]);
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
-  const handleComplete = async (eventId) => {
+  const handleComplete = async eventId => {
     try {
       await calendarApi.completeEvent(eventId);
       loadData();
-    } catch (err) { logger.error(err); }
+    } catch (err) {
+      logger.error(err);
+    }
   };
 
-  const handleSnooze = async (eventId) => {
+  const handleSnooze = async eventId => {
     const tomorrow = new Date(Date.now() + 86400000).toISOString();
     try {
       await calendarApi.snoozeEvent(eventId, tomorrow);
       loadData();
-    } catch (err) { logger.error(err); }
+    } catch (err) {
+      logger.error(err);
+    }
   };
 
   if (loading) return <CircularProgress sx={{ display: 'block', mx: 'auto', my: 2 }} />;
@@ -95,15 +116,27 @@ export default function CalendarWidget({ documentId, compact = false }) {
       <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
         <Stack direction="row" spacing={1} alignItems="center">
           <CalendarIcon color="primary" />
-          <Typography variant={compact ? 'subtitle1' : 'h6'} fontWeight={600}>تقويم المستند</Typography>
+          <Typography variant={compact ? 'subtitle1' : 'h6'} fontWeight={600}>
+            تقويم المستند
+          </Typography>
           <Badge badgeContent={overdue.length} color="error">
-            <Chip label={`${deadlines.length + overdue.length} حدث`} size="small" variant="outlined" />
+            <Chip
+              label={`${deadlines.length + overdue.length} حدث`}
+              size="small"
+              variant="outlined"
+            />
           </Badge>
         </Stack>
-        <IconButton size="small" onClick={loadData}><RefreshIcon /></IconButton>
+        <IconButton size="small" onClick={loadData}>
+          <RefreshIcon />
+        </IconButton>
       </Stack>
 
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
 
       {/* Overdue Alert */}
       {overdue.length > 0 && (
@@ -117,14 +150,25 @@ export default function CalendarWidget({ documentId, compact = false }) {
         {overdue.length > 0 && (
           <Grid item xs={12}>
             <Paper variant="outlined" sx={{ borderColor: '#ef4444', p: 1.5 }}>
-              <Typography variant="subtitle2" color="error" gutterBottom>🔴 متأخرة</Typography>
+              <Typography variant="subtitle2" color="error" gutterBottom>
+                🔴 متأخرة
+              </Typography>
               <List dense>
-                {overdue.slice(0, compact ? 3 : 10).map((evt) => (
-                  <ListItem key={evt._id}
+                {overdue.slice(0, compact ? 3 : 10).map(evt => (
+                  <ListItem
+                    key={evt._id}
                     secondaryAction={
                       <Stack direction="row" spacing={0.5}>
-                        <Tooltip title="إكمال"><IconButton size="small" onClick={() => handleComplete(evt._id)}><CheckIcon /></IconButton></Tooltip>
-                        <Tooltip title="تأجيل يوم"><IconButton size="small" onClick={() => handleSnooze(evt._id)}><SnoozeIcon /></IconButton></Tooltip>
+                        <Tooltip title="إكمال">
+                          <IconButton size="small" onClick={() => handleComplete(evt._id)}>
+                            <CheckIcon />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="تأجيل يوم">
+                          <IconButton size="small" onClick={() => handleSnooze(evt._id)}>
+                            <SnoozeIcon />
+                          </IconButton>
+                        </Tooltip>
                       </Stack>
                     }
                   >
@@ -148,9 +192,13 @@ export default function CalendarWidget({ documentId, compact = false }) {
         {/* Upcoming Deadlines */}
         <Grid item xs={12}>
           <Paper variant="outlined" sx={{ p: 1.5 }}>
-            <Typography variant="subtitle2" gutterBottom>⏰ المواعيد القادمة (14 يوم)</Typography>
+            <Typography variant="subtitle2" gutterBottom>
+              ⏰ المواعيد القادمة (14 يوم)
+            </Typography>
             {deadlines.length === 0 ? (
-              <Typography color="text.secondary" textAlign="center" py={2} fontSize={13}>لا توجد مواعيد قادمة</Typography>
+              <Typography color="text.secondary" textAlign="center" py={2} fontSize={13}>
+                لا توجد مواعيد قادمة
+              </Typography>
             ) : (
               <List dense>
                 {deadlines.slice(0, compact ? 5 : 15).map((evt, i) => {
@@ -167,18 +215,30 @@ export default function CalendarWidget({ documentId, compact = false }) {
                         }
                       >
                         <ListItemAvatar>
-                          <Avatar sx={{
-                            bgcolor: (PRIORITY_COLORS[evt.priority] || '#3b82f6') + '20',
-                            width: 32, height: 32,
-                          }}>
+                          <Avatar
+                            sx={{
+                              bgcolor: (PRIORITY_COLORS[evt.priority] || '#3b82f6') + '20',
+                              width: 32,
+                              height: 32,
+                            }}
+                          >
                             {STATUS_ICONS[evt.status] || <EventIcon sx={{ fontSize: 18 }} />}
                           </Avatar>
                         </ListItemAvatar>
                         <ListItemText
                           primary={evt.titleAr || evt.title}
                           secondary={
-                            <Stack direction="row" spacing={0.5} component="span" alignItems="center">
-                              <Chip label={STATUS_LABELS[evt.status] || evt.status} size="small" sx={{ height: 18 }} />
+                            <Stack
+                              direction="row"
+                              spacing={0.5}
+                              component="span"
+                              alignItems="center"
+                            >
+                              <Chip
+                                label={STATUS_LABELS[evt.status] || evt.status}
+                                size="small"
+                                sx={{ height: 18 }}
+                              />
                               <span>{new Date(evt.startDate).toLocaleDateString('ar-SA')}</span>
                             </Stack>
                           }
@@ -198,20 +258,33 @@ export default function CalendarWidget({ documentId, compact = false }) {
         {timeline.length > 0 && (
           <Grid item xs={12}>
             <Paper variant="outlined" sx={{ p: 1.5 }}>
-              <Typography variant="subtitle2" gutterBottom>📅 الجدول الزمني للمستند</Typography>
+              <Typography variant="subtitle2" gutterBottom>
+                📅 الجدول الزمني للمستند
+              </Typography>
               <List dense>
                 {timeline.map((evt, i) => (
-                  <ListItem key={evt._id || i}
-                    sx={{ opacity: evt.isPast ? 0.6 : 1, bgcolor: evt.isCurrent ? '#eff6ff' : 'transparent' }}
+                  <ListItem
+                    key={evt._id || i}
+                    sx={{
+                      opacity: evt.isPast ? 0.6 : 1,
+                      bgcolor: evt.isCurrent ? '#eff6ff' : 'transparent',
+                    }}
                   >
                     <ListItemAvatar>
-                      <Avatar sx={{
-                        bgcolor: evt.isCurrent ? '#3b82f6' : evt.isPast ? '#e2e8f0' : '#f1f5f9',
-                        width: 28, height: 28,
-                      }}>
-                        {evt.isPast ? <CheckIcon sx={{ fontSize: 16, color: '#22c55e' }} /> :
-                         evt.isCurrent ? <TimeIcon sx={{ fontSize: 16, color: '#fff' }} /> :
-                         <ScheduleIcon sx={{ fontSize: 16, color: '#94a3b8' }} />}
+                      <Avatar
+                        sx={{
+                          bgcolor: evt.isCurrent ? '#3b82f6' : evt.isPast ? '#e2e8f0' : '#f1f5f9',
+                          width: 28,
+                          height: 28,
+                        }}
+                      >
+                        {evt.isPast ? (
+                          <CheckIcon sx={{ fontSize: 16, color: '#22c55e' }} />
+                        ) : evt.isCurrent ? (
+                          <TimeIcon sx={{ fontSize: 16, color: '#fff' }} />
+                        ) : (
+                          <ScheduleIcon sx={{ fontSize: 16, color: '#94a3b8' }} />
+                        )}
                       </Avatar>
                     </ListItemAvatar>
                     <ListItemText

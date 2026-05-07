@@ -16,7 +16,7 @@ const DashboardSearchBar = ({ searchQuery, onSearchChange, visibleSections }) =>
         size="small"
         placeholder="🔍 بحث في الأقسام... (مالية، موارد بشرية، عمليات...)"
         value={searchQuery}
-        onChange={(e) => onSearchChange(e.target.value)}
+        onChange={e => onSearchChange(e.target.value)}
         aria-label="بحث وتصفية أقسام لوحة التحكم"
         InputProps={{
           startAdornment: (
@@ -31,7 +31,8 @@ const DashboardSearchBar = ({ searchQuery, onSearchChange, visibleSections }) =>
           '& .MuiOutlinedInput-root': {
             borderRadius: 3,
             fontSize: '0.85rem',
-            background: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)',
+            background:
+              theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)',
           },
         }}
       />
@@ -43,10 +44,19 @@ const DashboardSearchBar = ({ searchQuery, onSearchChange, visibleSections }) =>
             fontWeight: 700,
             fontSize: '0.7rem',
             height: 26,
-            background: Object.keys(visibleSections).length > 0 ? 'rgba(67,233,123,0.1)' : 'rgba(244,67,54,0.1)',
-            color: Object.keys(visibleSections).length > 0 ? brandColors.accentGreen : statusColors.error,
+            background:
+              Object.keys(visibleSections).length > 0
+                ? 'rgba(67,233,123,0.1)'
+                : 'rgba(244,67,54,0.1)',
+            color:
+              Object.keys(visibleSections).length > 0
+                ? brandColors.accentGreen
+                : statusColors.error,
             border: '1px solid',
-            borderColor: Object.keys(visibleSections).length > 0 ? 'rgba(67,233,123,0.2)' : 'rgba(244,67,54,0.2)',
+            borderColor:
+              Object.keys(visibleSections).length > 0
+                ? 'rgba(67,233,123,0.2)'
+                : 'rgba(244,67,54,0.2)',
           }}
         />
       )}

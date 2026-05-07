@@ -46,7 +46,12 @@ import NightsStayRoundedIcon from '@mui/icons-material/NightsStayRounded';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from 'contexts/AuthContext';
-import { formatCurrency, formatNumber, getGreeting, getArabicDate } from 'services/dashboardService';
+import {
+  formatCurrency,
+  formatNumber,
+  getGreeting,
+  getArabicDate,
+} from 'services/dashboardService';
 import { statusColors } from '../../theme/palette';
 
 /* ─────────────────────────────────────────────────────────── */
@@ -78,9 +83,7 @@ const MiniStat = React.memo(({ icon, label, value, colorIdx = 0 }) => {
           px: 1.8,
           py: 1,
           borderRadius: '14px',
-          background: isDark
-            ? 'rgba(255,255,255,0.04)'
-            : 'rgba(255,255,255,0.7)',
+          background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.7)',
           border: '1px solid',
           borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.9)',
           backdropFilter: 'blur(12px)',
@@ -94,7 +97,8 @@ const MiniStat = React.memo(({ icon, label, value, colorIdx = 0 }) => {
           '&::before': {
             content: '""',
             position: 'absolute',
-            top: 0, left: 0,
+            top: 0,
+            left: 0,
             width: '3px',
             height: '100%',
             background: c.grad,
@@ -149,7 +153,15 @@ const MiniStat = React.memo(({ icon, label, value, colorIdx = 0 }) => {
 /* ─────────────────────────────────────────────────────────── */
 /*  Control Button                                             */
 /* ─────────────────────────────────────────────────────────── */
-const CtrlBtn = ({ children, onClick, tooltip, color = '#667eea', active = false, size = 'small', ...rest }) => (
+const CtrlBtn = ({
+  children,
+  onClick,
+  tooltip,
+  color = '#667eea',
+  active = false,
+  size = 'small',
+  ...rest
+}) => (
   <Tooltip title={tooltip} arrow>
     <IconButton
       onClick={onClick}
@@ -208,10 +220,10 @@ const WelcomeHeader = ({
   const closeBell = useCallback(() => setBellOpen(false), []);
 
   const SEVERITY_MAP = {
-    high:    { icon: <ErrorOutlineIcon fontSize="small" />,        color: statusColors.error   },
-    medium:  { icon: <WarningAmberIcon fontSize="small" />,        color: statusColors.warning },
-    low:     { icon: <InfoOutlinedIcon fontSize="small" />,        color: statusColors.info    },
-    success: { icon: <CheckCircleOutlineIcon fontSize="small" />,  color: statusColors.success },
+    high: { icon: <ErrorOutlineIcon fontSize="small" />, color: statusColors.error },
+    medium: { icon: <WarningAmberIcon fontSize="small" />, color: statusColors.warning },
+    low: { icon: <InfoOutlinedIcon fontSize="small" />, color: statusColors.info },
+    success: { icon: <CheckCircleOutlineIcon fontSize="small" />, color: statusColors.success },
   };
 
   const handleExport = useCallback(() => {
@@ -249,49 +261,66 @@ const WelcomeHeader = ({
         }}
       >
         {/* ── Top accent bar ─────────────────────────── */}
-        <Box sx={{
-          position: 'absolute',
-          top: 0, left: 0, right: 0,
-          height: '3px',
-          background: 'linear-gradient(90deg,#667eea,#764ba2,#f093fb,#4facfe)',
-          backgroundSize: '200% auto',
-          animation: 'shimmerBar 4s linear infinite',
-          '@keyframes shimmerBar': {
-            '0%': { backgroundPosition: '0% center' },
-            '100%': { backgroundPosition: '200% center' },
-          },
-        }} />
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: '3px',
+            background: 'linear-gradient(90deg,#667eea,#764ba2,#f093fb,#4facfe)',
+            backgroundSize: '200% auto',
+            animation: 'shimmerBar 4s linear infinite',
+            '@keyframes shimmerBar': {
+              '0%': { backgroundPosition: '0% center' },
+              '100%': { backgroundPosition: '200% center' },
+            },
+          }}
+        />
 
         {/* ── Decorative orbs ───────────────────────── */}
-        <Box sx={{
-          position: 'absolute', top: -80, insetInlineEnd: -60,
-          width: 260, height: 260, borderRadius: '50%',
-          background: 'linear-gradient(135deg,#667eea,#764ba2)',
-          opacity: isDark ? 0.07 : 0.05,
-          pointerEvents: 'none',
-          filter: 'blur(40px)',
-        }} />
-        <Box sx={{
-          position: 'absolute', bottom: -60, insetInlineStart: -40,
-          width: 200, height: 200, borderRadius: '50%',
-          background: 'linear-gradient(135deg,#43cea2,#4facfe)',
-          opacity: isDark ? 0.06 : 0.04,
-          pointerEvents: 'none',
-          filter: 'blur(40px)',
-        }} />
+        <Box
+          sx={{
+            position: 'absolute',
+            top: -80,
+            insetInlineEnd: -60,
+            width: 260,
+            height: 260,
+            borderRadius: '50%',
+            background: 'linear-gradient(135deg,#667eea,#764ba2)',
+            opacity: isDark ? 0.07 : 0.05,
+            pointerEvents: 'none',
+            filter: 'blur(40px)',
+          }}
+        />
+        <Box
+          sx={{
+            position: 'absolute',
+            bottom: -60,
+            insetInlineStart: -40,
+            width: 200,
+            height: 200,
+            borderRadius: '50%',
+            background: 'linear-gradient(135deg,#43cea2,#4facfe)',
+            opacity: isDark ? 0.06 : 0.04,
+            pointerEvents: 'none',
+            filter: 'blur(40px)',
+          }}
+        />
 
         {/* ══════════════ Top Row ══════════════ */}
-        <Box sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'flex-start',
-          flexWrap: 'wrap',
-          gap: 2,
-          mb: 2.5,
-          position: 'relative',
-          zIndex: 1,
-        }}>
-
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'flex-start',
+            flexWrap: 'wrap',
+            gap: 2,
+            mb: 2.5,
+            position: 'relative',
+            zIndex: 1,
+          }}
+        >
           {/* ── Left: Title & greeting ─────────── */}
           <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
             {/* Avatar / greeting icon */}
@@ -300,14 +329,19 @@ const WelcomeHeader = ({
               animate={{ scale: 1, rotate: 0 }}
               transition={{ delay: 0.2, type: 'spring', stiffness: 300, damping: 15 }}
             >
-              <Box sx={{
-                width: 52, height: 52,
-                borderRadius: '16px',
-                background: 'linear-gradient(135deg,#667eea,#764ba2)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                boxShadow: '0 8px 24px rgba(102,126,234,0.4)',
-                flexShrink: 0,
-              }}>
+              <Box
+                sx={{
+                  width: 52,
+                  height: 52,
+                  borderRadius: '16px',
+                  background: 'linear-gradient(135deg,#667eea,#764ba2)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 8px 24px rgba(102,126,234,0.4)',
+                  flexShrink: 0,
+                }}
+              >
                 <AutoAwesomeIcon sx={{ color: 'white', fontSize: 26 }} />
               </Box>
             </motion.div>
@@ -343,9 +377,15 @@ const WelcomeHeader = ({
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
                   {/* Greeting text */}
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                    <GreetIcon sx={{ fontSize: 16, color: hour >= 6 && hour < 20 ? '#FFB300' : '#7986cb' }} />
-                    <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500, fontSize: '0.82rem' }}>
-                      {greeting}{userName ? ` ${userName}` : ''}! إليك نظرة شاملة على النظام
+                    <GreetIcon
+                      sx={{ fontSize: 16, color: hour >= 6 && hour < 20 ? '#FFB300' : '#7986cb' }}
+                    />
+                    <Typography
+                      variant="body2"
+                      sx={{ color: 'text.secondary', fontWeight: 500, fontSize: '0.82rem' }}
+                    >
+                      {greeting}
+                      {userName ? ` ${userName}` : ''}! إليك نظرة شاملة على النظام
                     </Typography>
                   </Box>
 
@@ -371,14 +411,24 @@ const WelcomeHeader = ({
 
           {/* ── Right: Controls ───────────────── */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8, flexWrap: 'wrap' }}>
-
             {/* Live indicator */}
             <Chip
-              icon={<CircleIcon sx={{ fontSize: '9px !important', color: '#4caf50 !important', animation: 'livePulse 2s infinite', '@keyframes livePulse': { '0%,100%': { opacity: 1 }, '50%': { opacity: 0.3 } } }} />}
+              icon={
+                <CircleIcon
+                  sx={{
+                    fontSize: '9px !important',
+                    color: '#4caf50 !important',
+                    animation: 'livePulse 2s infinite',
+                    '@keyframes livePulse': { '0%,100%': { opacity: 1 }, '50%': { opacity: 0.3 } },
+                  }}
+                />
+              }
               label="مباشر"
               size="small"
               sx={{
-                height: 26, fontWeight: 700, fontSize: '0.7rem',
+                height: 26,
+                fontWeight: 700,
+                fontSize: '0.7rem',
                 background: 'rgba(76,175,80,0.1)',
                 border: '1px solid rgba(76,175,80,0.3)',
                 color: '#4caf50',
@@ -388,11 +438,15 @@ const WelcomeHeader = ({
             {/* Cache indicator */}
             {dataSource === 'cache' && (
               <Chip
-                icon={<CachedIcon sx={{ fontSize: '13px !important', color: '#ff9800 !important' }} />}
+                icon={
+                  <CachedIcon sx={{ fontSize: '13px !important', color: '#ff9800 !important' }} />
+                }
                 label="بيانات مؤقتة"
                 size="small"
                 sx={{
-                  height: 26, fontWeight: 700, fontSize: '0.68rem',
+                  height: 26,
+                  fontWeight: 700,
+                  fontSize: '0.68rem',
                   background: 'rgba(255,152,0,0.1)',
                   border: '1px solid rgba(255,152,0,0.3)',
                   color: '#ff9800',
@@ -403,9 +457,16 @@ const WelcomeHeader = ({
             {/* Revenue chip */}
             {finance.monthlyRevenue > 0 && (
               <Chip
-                icon={finance.revenueTrend >= 0
-                  ? <TrendingUpIcon sx={{ fontSize: '15px !important', color: 'white !important' }} />
-                  : <TrendingDownIcon sx={{ fontSize: '15px !important', color: 'white !important' }} />
+                icon={
+                  finance.revenueTrend >= 0 ? (
+                    <TrendingUpIcon
+                      sx={{ fontSize: '15px !important', color: 'white !important' }}
+                    />
+                  ) : (
+                    <TrendingDownIcon
+                      sx={{ fontSize: '15px !important', color: 'white !important' }}
+                    />
+                  )
                 }
                 label={`إيرادات الشهر: ${formatCurrency(finance.monthlyRevenue)}`}
                 size="small"
@@ -413,21 +474,30 @@ const WelcomeHeader = ({
                   height: 26,
                   fontWeight: 700,
                   fontSize: '0.7rem',
-                  background: finance.revenueTrend >= 0
-                    ? 'linear-gradient(135deg,#43cea2,#185a9d)'
-                    : 'linear-gradient(135deg,#f7971e,#ffd200)',
+                  background:
+                    finance.revenueTrend >= 0
+                      ? 'linear-gradient(135deg,#43cea2,#185a9d)'
+                      : 'linear-gradient(135deg,#f7971e,#ffd200)',
                   color: 'white',
                   border: 'none',
-                  boxShadow: finance.revenueTrend >= 0
-                    ? '0 3px 10px rgba(67,206,162,0.35)'
-                    : '0 3px 10px rgba(247,151,30,0.35)',
+                  boxShadow:
+                    finance.revenueTrend >= 0
+                      ? '0 3px 10px rgba(67,206,162,0.35)'
+                      : '0 3px 10px rgba(247,151,30,0.35)',
                 }}
               />
             )}
 
             {/* Last updated */}
             {lastUpdated && (
-              <Typography variant="caption" sx={{ color: 'text.disabled', fontSize: '0.68rem', display: { xs: 'none', sm: 'block' } }}>
+              <Typography
+                variant="caption"
+                sx={{
+                  color: 'text.disabled',
+                  fontSize: '0.68rem',
+                  display: { xs: 'none', sm: 'block' },
+                }}
+              >
                 آخر تحديث: {lastUpdated.toLocaleTimeString('ar-SA')}
               </Typography>
             )}
@@ -447,8 +517,10 @@ const WelcomeHeader = ({
                   max={99}
                   sx={{
                     '& .MuiBadge-badge': {
-                      fontSize: '0.6rem', fontWeight: 800,
-                      minWidth: 16, height: 16,
+                      fontSize: '0.6rem',
+                      fontWeight: 800,
+                      minWidth: 16,
+                      height: 16,
                       animation: unreadAlerts > 0 ? 'badgePop 2s infinite' : 'none',
                       '@keyframes badgePop': {
                         '0%,100%': { transform: 'scale(1) translate(50%,-50%)' },
@@ -457,16 +529,22 @@ const WelcomeHeader = ({
                     },
                   }}
                 >
-                  {unreadAlerts > 0
-                    ? <NotificationsActiveIcon sx={{ fontSize: 19, color: '#667eea' }} />
-                    : <NotificationsNoneIcon sx={{ fontSize: 19, color: '#667eea' }} />
-                  }
+                  {unreadAlerts > 0 ? (
+                    <NotificationsActiveIcon sx={{ fontSize: 19, color: '#667eea' }} />
+                  ) : (
+                    <NotificationsNoneIcon sx={{ fontSize: 19, color: '#667eea' }} />
+                  )}
                 </Badge>
               </CtrlBtn>
             </Box>
 
             {/* Export */}
-            <CtrlBtn tooltip="تصدير لوحة التحكم" onClick={handleExport} color="#43cea2" aria-label="تصدير">
+            <CtrlBtn
+              tooltip="تصدير لوحة التحكم"
+              onClick={handleExport}
+              color="#43cea2"
+              aria-label="تصدير"
+            >
               <GetAppIcon sx={{ fontSize: 19, color: '#43cea2' }} />
             </CtrlBtn>
 
@@ -492,17 +570,39 @@ const WelcomeHeader = ({
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3, duration: 0.5 }}
         >
-          <Box sx={{
-            display: 'flex',
-            gap: 1.2,
-            flexWrap: 'wrap',
-            position: 'relative',
-            zIndex: 1,
-          }}>
-            <MiniStat icon={<PeopleIcon />}              label="المستخدمون"  value={kpis.users?.total || 0}         colorIdx={0} />
-            <MiniStat icon={<AccessibilityNewIcon />}    label="المستفيدون" value={kpis.beneficiaries?.total || 0} colorIdx={1} />
-            <MiniStat icon={<EventNoteIcon />}           label="جلسات اليوم" value={kpis.sessions?.today || 0}      colorIdx={2} />
-            <MiniStat icon={<AccountBalanceWalletIcon />} label="المدفوعات"  value={kpis.payments?.total || 0}      colorIdx={3} />
+          <Box
+            sx={{
+              display: 'flex',
+              gap: 1.2,
+              flexWrap: 'wrap',
+              position: 'relative',
+              zIndex: 1,
+            }}
+          >
+            <MiniStat
+              icon={<PeopleIcon />}
+              label="المستخدمون"
+              value={kpis.users?.total || 0}
+              colorIdx={0}
+            />
+            <MiniStat
+              icon={<AccessibilityNewIcon />}
+              label="المستفيدون"
+              value={kpis.beneficiaries?.total || 0}
+              colorIdx={1}
+            />
+            <MiniStat
+              icon={<EventNoteIcon />}
+              label="جلسات اليوم"
+              value={kpis.sessions?.today || 0}
+              colorIdx={2}
+            />
+            <MiniStat
+              icon={<AccountBalanceWalletIcon />}
+              label="المدفوعات"
+              value={kpis.payments?.total || 0}
+              colorIdx={3}
+            />
           </Box>
         </motion.div>
       </Paper>
@@ -528,9 +628,7 @@ const WelcomeHeader = ({
                 border: '1px solid',
                 borderColor: isDark ? 'rgba(102,126,234,0.2)' : 'rgba(102,126,234,0.14)',
                 mt: 1,
-                background: isDark
-                  ? 'rgba(18,22,45,0.96)'
-                  : 'rgba(255,255,255,0.96)',
+                background: isDark ? 'rgba(18,22,45,0.96)' : 'rgba(255,255,255,0.96)',
                 backdropFilter: 'blur(20px) saturate(180%)',
                 boxShadow: isDark
                   ? '0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(102,126,234,0.1)'
@@ -540,35 +638,49 @@ const WelcomeHeader = ({
               <ClickAwayListener onClickAway={closeBell}>
                 <Box>
                   {/* Popper header */}
-                  <Box sx={{
-                    px: 2.5, py: 2,
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    background: 'linear-gradient(135deg,rgba(102,126,234,0.1),rgba(118,75,162,0.06))',
-                    borderBottom: '1px solid',
-                    borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)',
-                  }}>
+                  <Box
+                    sx={{
+                      px: 2.5,
+                      py: 2,
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      background:
+                        'linear-gradient(135deg,rgba(102,126,234,0.1),rgba(118,75,162,0.06))',
+                      borderBottom: '1px solid',
+                      borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)',
+                    }}
+                  >
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Box sx={{
-                        width: 28, height: 28, borderRadius: '8px',
-                        background: 'linear-gradient(135deg,#667eea,#764ba2)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      }}>
+                      <Box
+                        sx={{
+                          width: 28,
+                          height: 28,
+                          borderRadius: '8px',
+                          background: 'linear-gradient(135deg,#667eea,#764ba2)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
                         <NotificationsActiveIcon sx={{ fontSize: 16, color: 'white' }} />
                       </Box>
                       <Typography variant="subtitle2" sx={{ fontWeight: 700, fontSize: '0.85rem' }}>
                         الإشعارات
                         {unreadAlerts > 0 && (
-                          <Box component="span" sx={{
-                            ml: 0.8,
-                            px: 0.8, py: 0.1,
-                            borderRadius: '10px',
-                            background: 'linear-gradient(135deg,#667eea,#764ba2)',
-                            color: 'white',
-                            fontSize: '0.68rem',
-                            fontWeight: 800,
-                          }}>
+                          <Box
+                            component="span"
+                            sx={{
+                              ml: 0.8,
+                              px: 0.8,
+                              py: 0.1,
+                              borderRadius: '10px',
+                              background: 'linear-gradient(135deg,#667eea,#764ba2)',
+                              color: 'white',
+                              fontSize: '0.68rem',
+                              fontWeight: 800,
+                            }}
+                          >
                             {unreadAlerts}
                           </Box>
                         )}
@@ -581,7 +693,8 @@ const WelcomeHeader = ({
                           size="small"
                           onClick={onMarkAllRead}
                           sx={{
-                            fontSize: '0.65rem', fontWeight: 600,
+                            fontSize: '0.65rem',
+                            fontWeight: 600,
                             color: '#667eea',
                             borderRadius: '8px',
                             px: 1,
@@ -594,10 +707,15 @@ const WelcomeHeader = ({
                       <Button
                         size="small"
                         endIcon={<OpenInNewIcon sx={{ fontSize: '12px !important' }} />}
-                        onClick={() => { closeBell(); navigate('/notifications'); }}
+                        onClick={() => {
+                          closeBell();
+                          navigate('/notifications');
+                        }}
                         sx={{
-                          fontSize: '0.7rem', fontWeight: 600,
-                          borderRadius: '8px', px: 1,
+                          fontSize: '0.7rem',
+                          fontWeight: 600,
+                          borderRadius: '8px',
+                          px: 1,
                           '&:hover': { background: 'rgba(102,126,234,0.1)' },
                         }}
                       >
@@ -607,26 +725,39 @@ const WelcomeHeader = ({
                   </Box>
 
                   {/* Notification list */}
-                  <Box sx={{
-                    maxHeight: 360, overflowY: 'auto',
-                    '&::-webkit-scrollbar': { width: 4 },
-                    '&::-webkit-scrollbar-track': { background: 'transparent' },
-                    '&::-webkit-scrollbar-thumb': {
-                      borderRadius: 4,
-                      background: 'rgba(102,126,234,0.3)',
-                    },
-                  }}>
+                  <Box
+                    sx={{
+                      maxHeight: 360,
+                      overflowY: 'auto',
+                      '&::-webkit-scrollbar': { width: 4 },
+                      '&::-webkit-scrollbar-track': { background: 'transparent' },
+                      '&::-webkit-scrollbar-thumb': {
+                        borderRadius: 4,
+                        background: 'rgba(102,126,234,0.3)',
+                      },
+                    }}
+                  >
                     {alerts.length === 0 ? (
                       <Box sx={{ p: 5, textAlign: 'center' }}>
-                        <Box sx={{
-                          width: 56, height: 56, borderRadius: '16px',
-                          background: 'rgba(102,126,234,0.08)',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          mx: 'auto', mb: 1.5,
-                        }}>
+                        <Box
+                          sx={{
+                            width: 56,
+                            height: 56,
+                            borderRadius: '16px',
+                            background: 'rgba(102,126,234,0.08)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            mx: 'auto',
+                            mb: 1.5,
+                          }}
+                        >
                           <NotificationsNoneIcon sx={{ fontSize: 28, color: 'text.disabled' }} />
                         </Box>
-                        <Typography variant="body2" sx={{ color: 'text.disabled', fontWeight: 600 }}>
+                        <Typography
+                          variant="body2"
+                          sx={{ color: 'text.disabled', fontWeight: 600 }}
+                        >
                           لا توجد إشعارات حالياً
                         </Typography>
                       </Box>
@@ -645,7 +776,8 @@ const WelcomeHeader = ({
                               >
                                 <MenuItem
                                   sx={{
-                                    py: 1.2, px: 2,
+                                    py: 1.2,
+                                    px: 2,
                                     mx: 0.5,
                                     my: 0.3,
                                     borderRadius: '10px',
@@ -662,35 +794,48 @@ const WelcomeHeader = ({
                                     transition: 'all 0.2s',
                                   }}
                                 >
-                                  <ListItemIcon sx={{
-                                    color: sev.color, minWidth: 34,
-                                    '& svg': { fontSize: 18 },
-                                  }}>
+                                  <ListItemIcon
+                                    sx={{
+                                      color: sev.color,
+                                      minWidth: 34,
+                                      '& svg': { fontSize: 18 },
+                                    }}
+                                  >
                                     {sev.icon}
                                   </ListItemIcon>
                                   <ListItemText
                                     primary={
-                                      <Typography variant="body2" sx={{
-                                        fontWeight: alert.read ? 400 : 700,
-                                        fontSize: '0.8rem',
-                                        lineHeight: 1.4,
-                                      }}>
+                                      <Typography
+                                        variant="body2"
+                                        sx={{
+                                          fontWeight: alert.read ? 400 : 700,
+                                          fontSize: '0.8rem',
+                                          lineHeight: 1.4,
+                                        }}
+                                      >
                                         {alert.message || alert.title || 'إشعار جديد'}
                                       </Typography>
                                     }
                                     secondary={
-                                      <Typography variant="caption" sx={{ color: 'text.disabled', fontSize: '0.65rem' }}>
+                                      <Typography
+                                        variant="caption"
+                                        sx={{ color: 'text.disabled', fontSize: '0.65rem' }}
+                                      >
                                         {alert.time || 'الآن'}
                                       </Typography>
                                     }
                                   />
                                   {!alert.read && (
-                                    <Box sx={{
-                                      width: 7, height: 7, borderRadius: '50%',
-                                      background: 'linear-gradient(135deg,#667eea,#764ba2)',
-                                      flexShrink: 0,
-                                      boxShadow: '0 0 6px rgba(102,126,234,0.6)',
-                                    }} />
+                                    <Box
+                                      sx={{
+                                        width: 7,
+                                        height: 7,
+                                        borderRadius: '50%',
+                                        background: 'linear-gradient(135deg,#667eea,#764ba2)',
+                                        flexShrink: 0,
+                                        boxShadow: '0 0 6px rgba(102,126,234,0.6)',
+                                      }}
+                                    />
                                   )}
                                 </MenuItem>
                               </motion.div>

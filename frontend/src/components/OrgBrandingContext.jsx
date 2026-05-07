@@ -48,23 +48,28 @@ export const OrgBrandingProvider = ({ orgId, children }) => {
       }
     }
     fetchBranding();
-    return () => { ignore = true; };
+    return () => {
+      ignore = true;
+    };
   }, [orgId]);
 
   // تحديث الهوية المؤسسية
-  const updateBranding = useCallback(async (newData) => {
-    try {
-      const merged = { ...branding, ...newData };
-      setBranding(merged);
-      setOrgBranding(merged);
-      if (orgId) {
-        await orgBrandingService.update(orgId, newData);
+  const updateBranding = useCallback(
+    async newData => {
+      try {
+        const merged = { ...branding, ...newData };
+        setBranding(merged);
+        setOrgBranding(merged);
+        if (orgId) {
+          await orgBrandingService.update(orgId, newData);
+        }
+        return true;
+      } catch {
+        return false;
       }
-      return true;
-    } catch {
-      return false;
-    }
-  }, [branding, orgId]);
+    },
+    [branding, orgId]
+  );
 
   return (
     <OrgBrandingContext.Provider value={{ branding, loading, updateBranding, DEFAULT_BRANDING }}>

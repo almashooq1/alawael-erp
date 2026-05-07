@@ -5,7 +5,9 @@ import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const FacilityDashboard = lazyWithRetry(() => import('../pages/facility/FacilityDashboard'));
-const FacilityManagementPage = lazyWithRetry(() => import('../pages/facility/FacilityManagementPage'));
+const FacilityManagementPage = lazyWithRetry(
+  () => import('../pages/facility/FacilityManagementPage')
+);
 
 export default function FacilityRoutes() {
   return (

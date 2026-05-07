@@ -29,7 +29,6 @@ import {
   useTheme,
   alpha,
   Backdrop,
-  LinearProgress,
 } from '@mui/material';
 import {
   InboxRounded as EmptyIcon,
@@ -49,10 +48,22 @@ import { motion } from 'framer-motion';
 
 // ─── Illustration variants for EmptyState ─────────────────────────────────────
 const EMPTY_VARIANTS = {
-  default: { icon: <EmptyIcon />, title: 'لا توجد بيانات', subtitle: 'لم يتم العثور على نتائج مطابقة' },
-  search:  { icon: <SearchOffIcon />, title: 'لا توجد نتائج', subtitle: 'جرّب تعديل كلمات البحث أو الفلاتر' },
-  folder:  { icon: <FolderOffIcon />, title: 'المجلد فارغ', subtitle: 'لا توجد ملفات في هذا المجلد' },
-  list:    { icon: <EmptyIcon />, title: 'القائمة فارغة', subtitle: 'لم تتم إضافة أي عناصر بعد' },
+  default: {
+    icon: <EmptyIcon />,
+    title: 'لا توجد بيانات',
+    subtitle: 'لم يتم العثور على نتائج مطابقة',
+  },
+  search: {
+    icon: <SearchOffIcon />,
+    title: 'لا توجد نتائج',
+    subtitle: 'جرّب تعديل كلمات البحث أو الفلاتر',
+  },
+  folder: {
+    icon: <FolderOffIcon />,
+    title: 'المجلد فارغ',
+    subtitle: 'لا توجد ملفات في هذا المجلد',
+  },
+  list: { icon: <EmptyIcon />, title: 'القائمة فارغة', subtitle: 'لم تتم إضافة أي عناصر بعد' },
 };
 
 // ─── EMPTY STATE ─────────────────────────────────────────────────────────────
@@ -60,11 +71,11 @@ export const EmptyState = ({
   icon,
   title,
   subtitle,
-  action,         // { label, onClick, icon }
+  action, // { label, onClick, icon }
   secondaryAction, // Phase 2: optional secondary action
   variant = 'default', // default | search | folder | list
   compact = false,
-  illustration,   // Phase 2: custom illustration node
+  illustration, // Phase 2: custom illustration node
 }) => {
   const theme = useTheme();
   const v = EMPTY_VARIANTS[variant] || EMPTY_VARIANTS.default;
@@ -116,17 +127,13 @@ export const EmptyState = ({
         </Box>
       )}
 
-      <Typography
-        variant={compact ? 'subtitle2' : 'h6'}
-        fontWeight={700}
-        gutterBottom
-      >
+      <Typography variant={compact ? 'subtitle2' : 'h6'} fontWeight={700} gutterBottom>
         {displayTitle}
       </Typography>
       <Typography
         variant="body2"
         color="text.secondary"
-        sx={{ maxWidth: 400, mb: (action || secondaryAction) ? 3 : 0 }}
+        sx={{ maxWidth: 400, mb: action || secondaryAction ? 3 : 0 }}
       >
         {displaySubtitle}
       </Typography>
@@ -166,8 +173,8 @@ export const EmptyState = ({
 export const ErrorState = ({
   title = 'حدث خطأ',
   subtitle = 'تعذر تحميل البيانات. يرجى المحاولة مرة أخرى.',
-  errorCode,       // Phase 2: error code display
-  errorDetails,    // Phase 2: collapsible details
+  errorCode, // Phase 2: error code display
+  errorDetails, // Phase 2: collapsible details
   onRetry,
   compact = false,
 }) => {
@@ -210,7 +217,12 @@ export const ErrorState = ({
         <ErrorIcon sx={{ fontSize: compact ? 32 : 48, color: 'error.main' }} />
       </Box>
 
-      <Typography variant={compact ? 'subtitle2' : 'h6'} fontWeight={700} gutterBottom color="error">
+      <Typography
+        variant={compact ? 'subtitle2' : 'h6'}
+        fontWeight={700}
+        gutterBottom
+        color="error"
+      >
         {title}
       </Typography>
 
@@ -231,7 +243,11 @@ export const ErrorState = ({
         </Typography>
       )}
 
-      <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 400, mb: onRetry ? 3 : 0 }}>
+      <Typography
+        variant="body2"
+        color="text.secondary"
+        sx={{ maxWidth: 400, mb: onRetry ? 3 : 0 }}
+      >
         {subtitle}
       </Typography>
 
@@ -341,12 +357,21 @@ export const SuccessState = ({
         {title}
       </Typography>
       {subtitle && (
-        <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 400, mb: action ? 3 : 0 }}>
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{ maxWidth: 400, mb: action ? 3 : 0 }}
+        >
           {subtitle}
         </Typography>
       )}
       {action && (
-        <Button variant="contained" color="success" onClick={action.onClick} sx={{ borderRadius: '10px' }}>
+        <Button
+          variant="contained"
+          color="success"
+          onClick={action.onClick}
+          sx={{ borderRadius: '10px' }}
+        >
           {action.label}
         </Button>
       )}
@@ -399,7 +424,12 @@ export const NoPermissionState = ({
         {subtitle}
       </Typography>
       {action && (
-        <Button variant="outlined" color="warning" onClick={action.onClick} sx={{ borderRadius: '10px' }}>
+        <Button
+          variant="outlined"
+          color="warning"
+          onClick={action.onClick}
+          sx={{ borderRadius: '10px' }}
+        >
           {action.label}
         </Button>
       )}
@@ -448,11 +478,20 @@ export const OfflineState = ({
       <Typography variant="h6" fontWeight={700} gutterBottom>
         {title}
       </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 400, mb: onRetry ? 3 : 0 }}>
+      <Typography
+        variant="body2"
+        color="text.secondary"
+        sx={{ maxWidth: 400, mb: onRetry ? 3 : 0 }}
+      >
         {subtitle}
       </Typography>
       {onRetry && (
-        <Button variant="outlined" startIcon={<RefreshIcon />} onClick={onRetry} sx={{ borderRadius: '10px' }}>
+        <Button
+          variant="outlined"
+          startIcon={<RefreshIcon />}
+          onClick={onRetry}
+          sx={{ borderRadius: '10px' }}
+        >
           إعادة المحاولة
         </Button>
       )}
@@ -465,8 +504,8 @@ export const LoadingOverlay = ({
   open = true,
   message = 'جارٍ التحميل...',
   fullPage = false,
-  progress,           // Phase 2: determinate progress (0-100)
-  progressLabel,      // Phase 2: e.g. "3 من 10"
+  progress, // Phase 2: determinate progress (0-100)
+  progressLabel, // Phase 2: e.g. "3 من 10"
 }) => {
   const theme = useTheme();
 
@@ -483,15 +522,13 @@ export const LoadingOverlay = ({
     >
       {progress !== undefined ? (
         <Box sx={{ position: 'relative', display: 'inline-flex' }}>
-          <CircularProgress
-            variant="determinate"
-            value={progress}
-            size={52}
-            thickness={3}
-          />
+          <CircularProgress variant="determinate" value={progress} size={52} thickness={3} />
           <Box
             sx={{
-              top: 0, left: 0, bottom: 0, right: 0,
+              top: 0,
+              left: 0,
+              bottom: 0,
+              right: 0,
               position: 'absolute',
               display: 'flex',
               alignItems: 'center',
@@ -506,7 +543,11 @@ export const LoadingOverlay = ({
       ) : (
         <CircularProgress size={fullPage ? 48 : 40} thickness={3} />
       )}
-      <Typography variant={fullPage ? 'body1' : 'body2'} fontWeight={fullPage ? 600 : 400} color="text.secondary">
+      <Typography
+        variant={fullPage ? 'body1' : 'body2'}
+        fontWeight={fullPage ? 600 : 400}
+        color="text.secondary"
+      >
         {message}
       </Typography>
       {progressLabel && (
@@ -562,7 +603,7 @@ export const ProDialog = ({
 
   const variantConfig = {
     default: { color: 'primary', icon: null },
-    danger:  { color: 'error', icon: <DeleteIcon sx={{ fontSize: 32 }} /> },
+    danger: { color: 'error', icon: <DeleteIcon sx={{ fontSize: 32 }} /> },
     success: { color: 'success', icon: <SuccessIcon sx={{ fontSize: 32 }} /> },
     warning: { color: 'warning', icon: <WarningIcon sx={{ fontSize: 32 }} /> },
   };
@@ -644,11 +685,7 @@ export const ProDialog = ({
       )}
 
       {/* Content */}
-      {children && (
-        <DialogContent sx={{ pt: 1 }}>
-          {children}
-        </DialogContent>
-      )}
+      {children && <DialogContent sx={{ pt: 1 }}>{children}</DialogContent>}
 
       {/* Actions */}
       {!hideActions && (
@@ -669,7 +706,9 @@ export const ProDialog = ({
               color={displayColor}
               onClick={onConfirm}
               disabled={confirmLoading}
-              startIcon={confirmLoading ? <CircularProgress size={16} color="inherit" /> : undefined}
+              startIcon={
+                confirmLoading ? <CircularProgress size={16} color="inherit" /> : undefined
+              }
               sx={{ minWidth: 100 }}
             >
               {confirmLoading ? 'جارٍ...' : confirmLabel}

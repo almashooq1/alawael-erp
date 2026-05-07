@@ -7,14 +7,7 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
-import {
-  Box,
-  Typography,
-  Divider,
-  Chip,
-  Tooltip,
-  useTheme,
-} from '@mui/material';
+import { Box, Typography, Divider, Chip, Tooltip, useTheme } from '@mui/material';
 import UnfoldLessIcon from '@mui/icons-material/UnfoldLess';
 import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -31,7 +24,12 @@ export const SectionDivider = React.memo(({ label, id, collapsed, onToggle }) =>
     const el = ref.current;
     if (!el) return;
     const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) { setVisible(true); observer.disconnect(); } },
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+          observer.disconnect();
+        }
+      },
       { threshold: 0.15 }
     );
     observer.observe(el);
@@ -47,13 +45,25 @@ export const SectionDivider = React.memo(({ label, id, collapsed, onToggle }) =>
       transition={{ duration: 0.5 }}
     >
       <Box
-        sx={{ display: 'flex', alignItems: 'center', gap: 2, my: 3.5, cursor: 'pointer', userSelect: 'none' }}
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 2,
+          my: 3.5,
+          cursor: 'pointer',
+          userSelect: 'none',
+        }}
         onClick={onToggle}
         role="button"
         tabIndex={0}
         aria-expanded={!collapsed}
         aria-label={`${collapsed ? 'عرض' : 'إخفاء'} قسم ${label}`}
-        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onToggle?.(); } }}
+        onKeyDown={e => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onToggle?.();
+          }
+        }}
       >
         <Typography
           id={`${id}-heading`}
@@ -83,7 +93,7 @@ export const SectionNav = React.memo(({ activeSection, collapsedSections = {}, o
   const theme = useTheme();
   const allCollapsed = SECTIONS.every(s => collapsedSections[s.id]);
 
-  const scrollTo = (id) => {
+  const scrollTo = id => {
     const el = document.getElementById(`section-${id}`);
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
@@ -114,9 +124,8 @@ export const SectionNav = React.memo(({ activeSection, collapsedSections = {}, o
           mx: -0.5,
           borderRadius: 3,
           backdropFilter: 'blur(12px)',
-          background: theme.palette.mode === 'dark'
-            ? 'rgba(26,26,46,0.85)'
-            : 'rgba(248,249,252,0.85)',
+          background:
+            theme.palette.mode === 'dark' ? 'rgba(26,26,46,0.85)' : 'rgba(248,249,252,0.85)',
           '&::after': {
             content: '""',
             position: 'absolute',
@@ -132,9 +141,19 @@ export const SectionNav = React.memo(({ activeSection, collapsedSections = {}, o
       >
         {/* Expand/Collapse All toggle */}
         {onToggleAll && (
-          <Tooltip title={allCollapsed ? 'عرض جميع الأقسام' : 'طي جميع الأقسام'} arrow placement="bottom">
+          <Tooltip
+            title={allCollapsed ? 'عرض جميع الأقسام' : 'طي جميع الأقسام'}
+            arrow
+            placement="bottom"
+          >
             <Chip
-              icon={allCollapsed ? <UnfoldMoreIcon sx={{ fontSize: 16 }} /> : <UnfoldLessIcon sx={{ fontSize: 16 }} />}
+              icon={
+                allCollapsed ? (
+                  <UnfoldMoreIcon sx={{ fontSize: 16 }} />
+                ) : (
+                  <UnfoldLessIcon sx={{ fontSize: 16 }} />
+                )
+              }
               label={allCollapsed ? 'عرض الكل' : 'طي الكل'}
               size="small"
               onClick={onToggleAll}
@@ -154,7 +173,13 @@ export const SectionNav = React.memo(({ activeSection, collapsedSections = {}, o
           </Tooltip>
         )}
         {SECTIONS.map((sec, idx) => (
-          <Tooltip key={sec.id} title={`اضغط ${idx + 1} للتنقل`} arrow placement="bottom" enterDelay={600}>
+          <Tooltip
+            key={sec.id}
+            title={`اضغط ${idx + 1} للتنقل`}
+            arrow
+            placement="bottom"
+            enterDelay={600}
+          >
             <Chip
               icon={sec.icon}
               label={sec.label}

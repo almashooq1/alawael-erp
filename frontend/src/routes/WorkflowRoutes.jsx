@@ -9,7 +9,9 @@ import { lazyWithRetry } from '../utils/lazyLoader';
 const WorkflowDashboard = lazyWithRetry(() => import('../pages/workflow/WorkflowDashboard'));
 const WorkflowBuilder = lazyWithRetry(() => import('../pages/workflow/WorkflowBuilder'));
 const WorkflowMyTasks = lazyWithRetry(() => import('../pages/workflow/WorkflowMyTasks'));
-const WorkflowInstanceDetail = lazyWithRetry(() => import('../pages/workflow/WorkflowInstanceDetail'));
+const WorkflowInstanceDetail = lazyWithRetry(
+  () => import('../pages/workflow/WorkflowInstanceDetail')
+);
 const WorkflowInstances = lazyWithRetry(() => import('../pages/workflow/WorkflowInstances'));
 const WorkflowTemplates = lazyWithRetry(() => import('../pages/workflow/WorkflowTemplates'));
 const WorkflowAnalytics = lazyWithRetry(() => import('../pages/workflow/WorkflowAnalytics'));
@@ -33,14 +35,20 @@ const WorkflowFormBuilder = lazyWithRetry(() => import('../pages/workflow/Workfl
 const WorkflowEscalations = lazyWithRetry(() => import('../pages/workflow/WorkflowEscalations'));
 const WorkflowSLAPolicies = lazyWithRetry(() => import('../pages/workflow/WorkflowSLAPolicies'));
 const WorkflowKPIDashboard = lazyWithRetry(() => import('../pages/workflow/WorkflowKPIDashboard'));
-const WorkflowApprovalChains = lazyWithRetry(() => import('../pages/workflow/WorkflowApprovalChains'));
+const WorkflowApprovalChains = lazyWithRetry(
+  () => import('../pages/workflow/WorkflowApprovalChains')
+);
 const WorkflowAutomations = lazyWithRetry(() => import('../pages/workflow/WorkflowAutomations'));
 
 // Operations & Assets
 const OperationsDashboard = lazyWithRetry(() => import('../pages/Operations/OperationsDashboard'));
 const OperationsManagement = lazyWithRetry(() => import('../pages/Operations'));
-const InventoryManagement = lazyWithRetry(() => import('../pages/supply-chain/InventoryManagement'));
-const PurchasingManagement = lazyWithRetry(() => import('../pages/supply-chain/PurchasingManagement'));
+const InventoryManagement = lazyWithRetry(
+  () => import('../pages/supply-chain/InventoryManagement')
+);
+const PurchasingManagement = lazyWithRetry(
+  () => import('../pages/supply-chain/PurchasingManagement')
+);
 const EquipmentManagement = lazyWithRetry(() => import('../pages/Operations/EquipmentManagement'));
 const InternalAuditPage = lazyWithRetry(() => import('../pages/Operations/InternalAuditPage'));
 const IncidentManagement = lazyWithRetry(() => import('../pages/Operations/IncidentManagement'));
@@ -68,7 +76,9 @@ const QualityCompliance = lazyWithRetry(() => import('../pages/QualityCompliance
 
 // Contracts
 const ContractsDashboard = lazyWithRetry(() => import('../pages/supply-chain/ContractsDashboard'));
-const ContractsManagement = lazyWithRetry(() => import('../pages/supply-chain/ContractsManagement'));
+const ContractsManagement = lazyWithRetry(
+  () => import('../pages/supply-chain/ContractsManagement')
+);
 
 // CRM
 const CRMDashboard = lazyWithRetry(() => import('../pages/crm/CRMDashboard'));
@@ -89,7 +99,9 @@ const EStampApply = lazyWithRetry(() => import('../pages/e-signature/EStampApply
 const EStampVerify = lazyWithRetry(() => import('../pages/e-signature/EStampVerify'));
 
 // Phase 21 Features
-const SmartNotificationCenter = lazyWithRetry(() => import('../pages/common/SmartNotificationCenter'));
+const SmartNotificationCenter = lazyWithRetry(
+  () => import('../pages/common/SmartNotificationCenter')
+);
 const AdvancedTickets = lazyWithRetry(() => import('../pages/common/AdvancedTickets'));
 const EInvoicing = lazyWithRetry(() => import('../pages/finance/EInvoicing'));
 const MeetingsManagement = lazyWithRetry(() => import('../pages/common/MeetingsManagement'));
@@ -97,7 +109,9 @@ const VisitorRegistry = lazyWithRetry(() => import('../pages/Operations/VisitorR
 const FormTemplates = lazyWithRetry(() => import('../pages/common/FormTemplates'));
 
 // Phase 23 Modules
-const MaintenanceDashboard = lazyWithRetry(() => import('../pages/Operations/MaintenanceDashboard'));
+const MaintenanceDashboard = lazyWithRetry(
+  () => import('../pages/Operations/MaintenanceDashboard')
+);
 const VendorManagement = lazyWithRetry(() => import('../pages/supply-chain/VendorManagement'));
 const DonationsDashboard = lazyWithRetry(() => import('../pages/finance/DonationsDashboard'));
 const ComplaintsManagement = lazyWithRetry(() => import('../pages/common/ComplaintsManagement'));

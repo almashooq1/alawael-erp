@@ -11,9 +11,24 @@
  * - WelcomeCard: Personalized greeting banner
  */
 
-import { Box, Card, CardContent, Typography, Chip, Avatar,
-  List, ListItem, ListItemAvatar, ListItemText, LinearProgress,
-  useTheme, alpha, Grid, Button, Stack } from '@mui/material';
+import {
+  Box,
+  Card,
+  CardContent,
+  Typography,
+  Chip,
+  Avatar,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  LinearProgress,
+  useTheme,
+  alpha,
+  Grid,
+  Button,
+  Stack,
+} from '@mui/material';
 import {
   TrendingUp as TrendUpIcon,
   TrendingDown as TrendDownIcon,
@@ -29,7 +44,7 @@ export const StatCard = ({
   value,
   subtitle,
   icon,
-  trend,         // { value: +12, label: 'مقارنة بالشهر السابق' }
+  trend, // { value: +12, label: 'مقارنة بالشهر السابق' }
   color = 'primary', // primary | success | warning | error | info
   variant = 'gradient', // gradient | outlined | filled
   onClick,
@@ -38,13 +53,17 @@ export const StatCard = ({
   const theme = useTheme();
   const palette = theme.palette[color] || theme.palette.primary;
 
-  const trendIcon = trend?.value > 0
-    ? <TrendUpIcon sx={{ fontSize: 16 }} />
-    : trend?.value < 0
-    ? <TrendDownIcon sx={{ fontSize: 16 }} />
-    : <TrendFlatIcon sx={{ fontSize: 16 }} />;
+  const trendIcon =
+    trend?.value > 0 ? (
+      <TrendUpIcon sx={{ fontSize: 16 }} />
+    ) : trend?.value < 0 ? (
+      <TrendDownIcon sx={{ fontSize: 16 }} />
+    ) : (
+      <TrendFlatIcon sx={{ fontSize: 16 }} />
+    );
 
-  const trendColor = trend?.value > 0 ? 'success.main' : trend?.value < 0 ? 'error.main' : 'text.secondary';
+  const trendColor =
+    trend?.value > 0 ? 'success.main' : trend?.value < 0 ? 'error.main' : 'text.secondary';
 
   const cardSx = {
     gradient: {
@@ -81,7 +100,9 @@ export const StatCard = ({
     >
       <CardContent sx={{ p: 2.5, '&:last-child': { pb: 2.5 } }}>
         {/* Top Row */}
-        <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2 }}>
+        <Box
+          sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2 }}
+        >
           <Box
             className="stat-icon-bg"
             sx={{
@@ -107,8 +128,13 @@ export const StatCard = ({
                 fontSize: '0.75rem',
                 fontWeight: 700,
                 color: variant === 'gradient' ? 'rgba(255,255,255,0.9)' : trendColor,
-                backgroundColor: variant === 'gradient' ? 'rgba(255,255,255,0.15)' : alpha(
-                  trend.value > 0 ? theme.palette.success.main : theme.palette.error.main, 0.1),
+                backgroundColor:
+                  variant === 'gradient'
+                    ? 'rgba(255,255,255,0.15)'
+                    : alpha(
+                        trend.value > 0 ? theme.palette.success.main : theme.palette.error.main,
+                        0.1
+                      ),
                 '& .MuiChip-icon': {
                   color: 'inherit',
                 },
@@ -120,7 +146,10 @@ export const StatCard = ({
         {/* Value */}
         {loading ? (
           <Box sx={{ mb: 1 }}>
-            <LinearProgress color={variant === 'gradient' ? 'inherit' : color} sx={{ borderRadius: 2 }} />
+            <LinearProgress
+              color={variant === 'gradient' ? 'inherit' : color}
+              sx={{ borderRadius: 2 }}
+            />
           </Box>
         ) : (
           <Typography
@@ -133,13 +162,22 @@ export const StatCard = ({
         )}
 
         {/* Title */}
-        <Typography variant="body2" fontWeight={500} className="stat-subtitle" color={variant === 'gradient' ? undefined : 'text.secondary'}>
+        <Typography
+          variant="body2"
+          fontWeight={500}
+          className="stat-subtitle"
+          color={variant === 'gradient' ? undefined : 'text.secondary'}
+        >
           {title}
         </Typography>
 
         {/* Subtitle / Trend Label */}
         {(subtitle || trend?.label) && (
-          <Typography variant="caption" className="stat-subtitle" sx={{ mt: 0.5, display: 'block', opacity: 0.8 }}>
+          <Typography
+            variant="caption"
+            className="stat-subtitle"
+            sx={{ mt: 0.5, display: 'block', opacity: 0.8 }}
+          >
             {subtitle || trend?.label}
           </Typography>
         )}
@@ -152,17 +190,26 @@ export const StatCard = ({
 export const ChartCard = ({
   title,
   subtitle,
-  action,       // ReactNode: e.g., dropdown or button
-  children,     // Chart component
+  action, // ReactNode: e.g., dropdown or button
+  children, // Chart component
   height = 300,
   noPadding = false,
 }) => {
-  const theme = useTheme();
+  const _theme = useTheme();
 
   return (
     <Card sx={{ borderRadius: '16px', overflow: 'hidden' }}>
       {/* Header */}
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 2.5, pt: 2.5, pb: 1 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          px: 2.5,
+          pt: 2.5,
+          pb: 1,
+        }}
+      >
         <Box>
           <Typography variant="subtitle1" fontWeight={700}>
             {title}
@@ -177,9 +224,7 @@ export const ChartCard = ({
       </Box>
 
       {/* Chart Body */}
-      <Box sx={{ height, px: noPadding ? 0 : 2.5, pb: noPadding ? 0 : 2 }}>
-        {children}
-      </Box>
+      <Box sx={{ height, px: noPadding ? 0 : 2.5, pb: noPadding ? 0 : 2 }}>{children}</Box>
     </Card>
   );
 };
@@ -256,20 +301,30 @@ export const ProgressRing = ({
 };
 
 // ─── ACTIVITY FEED ───────────────────────────────────────────────────────────
-export const ActivityFeed = ({
-  title = 'آخر الأنشطة',
-  items = [],
-  maxItems = 6,
-  onViewAll,
-}) => {
+export const ActivityFeed = ({ title = 'آخر الأنشطة', items = [], maxItems = 6, onViewAll }) => {
   const theme = useTheme();
 
   return (
     <Card sx={{ borderRadius: '16px' }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 2.5, pt: 2.5, pb: 1 }}>
-        <Typography variant="subtitle1" fontWeight={700}>{title}</Typography>
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          px: 2.5,
+          pt: 2.5,
+          pb: 1,
+        }}
+      >
+        <Typography variant="subtitle1" fontWeight={700}>
+          {title}
+        </Typography>
         {onViewAll && (
-          <Button size="small" endIcon={<ArrowIcon sx={{ fontSize: 14, transform: 'rotate(180deg)' }} />} onClick={onViewAll}>
+          <Button
+            size="small"
+            endIcon={<ArrowIcon sx={{ fontSize: 14, transform: 'rotate(180deg)' }} />}
+            onClick={onViewAll}
+          >
             عرض الكل
           </Button>
         )}
@@ -301,18 +356,29 @@ export const ActivityFeed = ({
             </ListItemAvatar>
             <ListItemText
               primary={
-                <Typography variant="body2" fontWeight={500}>{item.title}</Typography>
+                <Typography variant="body2" fontWeight={500}>
+                  {item.title}
+                </Typography>
               }
               secondary={
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.25 }}>
-                  <Typography variant="caption" color="text.secondary">{item.subtitle}</Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {item.subtitle}
+                  </Typography>
                   <DotIcon sx={{ fontSize: 4, color: 'text.disabled' }} />
-                  <Typography variant="caption" color="text.disabled">{item.time}</Typography>
+                  <Typography variant="caption" color="text.disabled">
+                    {item.time}
+                  </Typography>
                 </Box>
               }
             />
             {item.badge && (
-              <Chip label={item.badge} size="small" color={item.color || 'default'} variant="outlined" />
+              <Chip
+                label={item.badge}
+                size="small"
+                color={item.color || 'default'}
+                variant="outlined"
+              />
             )}
           </ListItem>
         ))}
@@ -436,8 +502,12 @@ export const WelcomeCard = ({ userName, stats = [] }) => {
           <Stack direction="row" spacing={3} sx={{ flexWrap: 'wrap' }}>
             {stats.map((stat, idx) => (
               <Box key={idx}>
-                <Typography variant="h5" fontWeight={800}>{stat.value}</Typography>
-                <Typography variant="caption" sx={{ opacity: 0.75 }}>{stat.label}</Typography>
+                <Typography variant="h5" fontWeight={800}>
+                  {stat.value}
+                </Typography>
+                <Typography variant="caption" sx={{ opacity: 0.75 }}>
+                  {stat.label}
+                </Typography>
               </Box>
             ))}
           </Stack>

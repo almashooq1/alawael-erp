@@ -1,4 +1,14 @@
-import { Box, Typography, Avatar, List, ListItem, ListItemAvatar, ListItemText, Chip, alpha } from '@mui/material';
+import {
+  Box,
+  Typography,
+  Avatar,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  Chip,
+  alpha,
+} from '@mui/material';
 import { FiberManualRecord as DotIcon } from '@mui/icons-material';
 
 /**
@@ -20,15 +30,18 @@ const TimelineList = ({ items = [], maxItems }) => {
             mb: 1.5,
             position: 'relative',
             pl: 1,
-            '&::before': i < visibleItems.length - 1 ? {
-              content: '""',
-              position: 'absolute',
-              left: 23,
-              top: 42,
-              bottom: -12,
-              width: 2,
-              backgroundColor: alpha(item.color || '#1E88E5', 0.15),
-            } : {},
+            '&::before':
+              i < visibleItems.length - 1
+                ? {
+                    content: '""',
+                    position: 'absolute',
+                    left: 23,
+                    top: 42,
+                    bottom: -12,
+                    width: 2,
+                    backgroundColor: alpha(item.color || '#1E88E5', 0.15),
+                  }
+                : {},
           }}
         >
           <ListItemAvatar sx={{ minWidth: 44 }}>
@@ -46,14 +59,26 @@ const TimelineList = ({ items = [], maxItems }) => {
           <ListItemText
             primary={
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography variant="body2" sx={{ fontWeight: 500 }}>{item.title}</Typography>
-                {item.chip && <Chip label={item.chip} size="small" sx={{ fontSize: '0.65rem', height: 20 }} />}
+                <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                  {item.title}
+                </Typography>
+                {item.chip && (
+                  <Chip label={item.chip} size="small" sx={{ fontSize: '0.65rem', height: 20 }} />
+                )}
               </Box>
             }
             secondary={
               <Box sx={{ display: 'flex', gap: 1, mt: 0.3 }}>
-                {item.subtitle && <Typography variant="caption" color="text.secondary">{item.subtitle}</Typography>}
-                {item.time && <Typography variant="caption" sx={{ color: 'text.disabled' }}>• {item.time}</Typography>}
+                {item.subtitle && (
+                  <Typography variant="caption" color="text.secondary">
+                    {item.subtitle}
+                  </Typography>
+                )}
+                {item.time && (
+                  <Typography variant="caption" sx={{ color: 'text.disabled' }}>
+                    • {item.time}
+                  </Typography>
+                )}
               </Box>
             }
           />

@@ -39,7 +39,7 @@ const DashboardGlobalStyles = () => (
         height: '1px',
         overflow: 'hidden',
       }}
-      onFocus={(e) => {
+      onFocus={e => {
         e.target.style.position = 'fixed';
         e.target.style.left = '16px';
         e.target.style.top = '16px';
@@ -55,7 +55,7 @@ const DashboardGlobalStyles = () => (
         e.target.style.fontSize = '0.85rem';
         e.target.style.textDecoration = 'none';
       }}
-      onBlur={(e) => {
+      onBlur={e => {
         e.target.style.position = 'absolute';
         e.target.style.left = '-9999px';
         e.target.style.width = '1px';

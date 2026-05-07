@@ -8,17 +8,18 @@ import { Route } from 'react-router-dom';
 
 import { lazyWithRetry } from '../utils/lazyLoader';
 
-const AutomatedBackup = lazyWithRetry(() =>
-  import('../pages/automated-backup/AutomatedBackup')
-);
+const AutomatedBackup = lazyWithRetry(() => import('../pages/automated-backup/AutomatedBackup'));
 
 const AutomatedBackupRoutes = () => (
   <>
-    <Route path="/automated-backup" element={
-      <React.Suspense fallback={<div>جارٍ التحميل...</div>}>
-        <AutomatedBackup />
-      </React.Suspense>
-    } />
+    <Route
+      path="/automated-backup"
+      element={
+        <React.Suspense fallback={<div>جارٍ التحميل...</div>}>
+          <AutomatedBackup />
+        </React.Suspense>
+      }
+    />
   </>
 );
 

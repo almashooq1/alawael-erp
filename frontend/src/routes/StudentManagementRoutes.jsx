@@ -4,8 +4,12 @@
 import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
-const StudentsDashboard = lazyWithRetry(() => import('../pages/StudentManagement/StudentsDashboard'));
-const StudentManagementList = lazyWithRetry(() => import('../pages/StudentManagement/StudentManagementList'));
+const StudentsDashboard = lazyWithRetry(
+  () => import('../pages/StudentManagement/StudentsDashboard')
+);
+const StudentManagementList = lazyWithRetry(
+  () => import('../pages/StudentManagement/StudentManagementList')
+);
 const StudentRegistration = lazyWithRetry(() => import('../pages/StudentRegistration'));
 const StudentReports = lazyWithRetry(() => import('../pages/StudentReports'));
 const StudentReportsCenter = lazyWithRetry(() => import('../pages/StudentReportsCenter'));

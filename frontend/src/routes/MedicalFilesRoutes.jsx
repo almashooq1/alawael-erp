@@ -4,7 +4,9 @@
 import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
-const MedicalFilesDashboard = lazyWithRetry(() => import('../pages/medical-files/MedicalFilesDashboard'));
+const MedicalFilesDashboard = lazyWithRetry(
+  () => import('../pages/medical-files/MedicalFilesDashboard')
+);
 
 export default function MedicalFilesRoutes() {
   return (

@@ -44,10 +44,7 @@ async function runAxe(node, options = {}) {
 }
 
 function formatViolation(v) {
-  const lines = [
-    `[${v.impact}] ${v.id}: ${v.description}`,
-    `  help: ${v.helpUrl}`,
-  ];
+  const lines = [`[${v.impact}] ${v.id}: ${v.description}`, `  help: ${v.helpUrl}`];
   v.nodes.slice(0, 3).forEach((n, i) => {
     lines.push(`  node[${i}]: ${n.html}`);
     if (n.failureSummary) {

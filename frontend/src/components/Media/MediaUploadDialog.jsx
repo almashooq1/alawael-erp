@@ -11,10 +11,23 @@
 
 import React, { useState, useCallback, useRef } from 'react';
 import {
-  Dialog, DialogTitle, DialogContent, DialogActions,
-  Box, Typography, Button, IconButton, LinearProgress,
-  TextField, Select, MenuItem, FormControl, InputLabel,
-  Chip, Avatar, Divider,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Box,
+  Typography,
+  Button,
+  IconButton,
+  LinearProgress,
+  TextField,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Chip,
+  Avatar,
+  Divider,
 } from '@mui/material';
 import {
   CloudUpload as UploadIcon,
@@ -36,9 +49,18 @@ const MAX_FILES = 20;
 const MAX_SIZE = 100 * 1024 * 1024; // 100 MB per file
 
 const CATEGORIES = [
-  'عام', 'صور المؤسسة', 'صور الفعاليات', 'صور الموظفين',
-  'فيديوهات تعليمية', 'فيديوهات توعوية', 'تسجيلات صوتية',
-  'مستندات رسمية', 'عروض تقديمية', 'تصاميم', 'شعارات', 'أخرى',
+  'عام',
+  'صور المؤسسة',
+  'صور الفعاليات',
+  'صور الموظفين',
+  'فيديوهات تعليمية',
+  'فيديوهات توعوية',
+  'تسجيلات صوتية',
+  'مستندات رسمية',
+  'عروض تقديمية',
+  'تصاميم',
+  'شعارات',
+  'أخرى',
 ];
 
 const TYPE_ICONS = {
@@ -55,15 +77,34 @@ function getFileType(file) {
   if (mime.startsWith('image/')) return 'image';
   if (mime.startsWith('video/')) return 'video';
   if (mime.startsWith('audio/')) return 'audio';
-  if (mime.includes('pdf') || mime.includes('word') || mime.includes('spreadsheet') || mime.includes('document') || mime.includes('text'))
+  if (
+    mime.includes('pdf') ||
+    mime.includes('word') ||
+    mime.includes('spreadsheet') ||
+    mime.includes('document') ||
+    mime.includes('text')
+  )
     return 'document';
-  if (mime.includes('zip') || mime.includes('rar') || mime.includes('tar') || mime.includes('gzip') || mime.includes('7z'))
+  if (
+    mime.includes('zip') ||
+    mime.includes('rar') ||
+    mime.includes('tar') ||
+    mime.includes('gzip') ||
+    mime.includes('7z')
+  )
     return 'archive';
   return 'other';
 }
 
 function getFileTypeColor(type) {
-  const colors = { image: '#2196f3', video: '#f44336', audio: '#ff9800', document: '#4caf50', archive: '#9c27b0', other: '#607d8b' };
+  const colors = {
+    image: '#2196f3',
+    video: '#f44336',
+    audio: '#ff9800',
+    document: '#4caf50',
+    archive: '#9c27b0',
+    other: '#607d8b',
+  };
   return colors[type] || colors.other;
 }
 
@@ -77,16 +118,19 @@ export default function MediaUploadDialog({ open, onClose, onUploaded, albumId }
   const inputRef = useRef(null);
 
   /* ── Drag handlers ──────────────────────────────────────────────────── */
-  const handleDragOver = useCallback((e) => { e.preventDefault(); setDragOver(true); }, []);
+  const handleDragOver = useCallback(e => {
+    e.preventDefault();
+    setDragOver(true);
+  }, []);
   const handleDragLeave = useCallback(() => setDragOver(false), []);
-  const handleDrop = useCallback((e) => {
+  const handleDrop = useCallback(e => {
     e.preventDefault();
     setDragOver(false);
     const dropped = Array.from(e.dataTransfer.files);
     addFiles(dropped);
   }, []);
 
-  const addFiles = (newFiles) => {
+  const addFiles = newFiles => {
     setFiles(prev => {
       const combined = [...prev];
       for (const f of newFiles) {
@@ -99,7 +143,7 @@ export default function MediaUploadDialog({ open, onClose, onUploaded, albumId }
     });
   };
 
-  const removeFile = (index) => {
+  const removeFile = index => {
     setFiles(prev => prev.filter((_, i) => i !== index));
   };
 
@@ -122,7 +166,11 @@ export default function MediaUploadDialog({ open, onClose, onUploaded, albumId }
         });
         uploadResults.push({ name: file.name, status: 'success', message: 'تم الرفع بنجاح' });
       } catch (err) {
-        uploadResults.push({ name: file.name, status: 'error', message: err.message || 'خطأ في الرفع' });
+        uploadResults.push({
+          name: file.name,
+          status: 'error',
+          message: err.message || 'خطأ في الرفع',
+        });
       }
       setResults([...uploadResults]);
     }
@@ -132,7 +180,9 @@ export default function MediaUploadDialog({ open, onClose, onUploaded, albumId }
     // If all succeeded, auto-close after delay
     const allOk = uploadResults.every(r => r.status === 'success');
     if (allOk) {
-      setTimeout(() => { handleClose(true); }, 1200);
+      setTimeout(() => {
+        handleClose(true);
+      }, 1200);
     }
   };
 
@@ -154,7 +204,9 @@ export default function MediaUploadDialog({ open, onClose, onUploaded, albumId }
       <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <UploadIcon sx={{ color: brandColors.primary }} />
-          <Typography variant="h6" fontWeight={700}>رفع ملفات</Typography>
+          <Typography variant="h6" fontWeight={700}>
+            رفع ملفات
+          </Typography>
         </Box>
         <IconButton onClick={() => !uploading && handleClose()} disabled={uploading}>
           <CloseIcon />
@@ -179,10 +231,19 @@ export default function MediaUploadDialog({ open, onClose, onUploaded, albumId }
                 bgcolor: dragOver ? `${brandColors.primary}08` : surfaceColors.background,
                 transition: 'all 0.2s',
                 mb: 2,
-                '&:hover': { borderColor: brandColors.primary, bgcolor: `${brandColors.primary}05` },
+                '&:hover': {
+                  borderColor: brandColors.primary,
+                  bgcolor: `${brandColors.primary}05`,
+                },
               }}
             >
-              <UploadIcon sx={{ fontSize: 48, color: dragOver ? brandColors.primary : neutralColors.textSecondary, mb: 1 }} />
+              <UploadIcon
+                sx={{
+                  fontSize: 48,
+                  color: dragOver ? brandColors.primary : neutralColors.textSecondary,
+                  mb: 1,
+                }}
+              />
               <Typography variant="body1" fontWeight={600}>
                 اسحب الملفات هنا أو انقر للاختيار
               </Typography>
@@ -195,7 +256,10 @@ export default function MediaUploadDialog({ open, onClose, onUploaded, albumId }
                 hidden
                 multiple
                 accept={mediaService.getAcceptedTypes('all')}
-                onChange={(e) => { addFiles(Array.from(e.target.files)); e.target.value = ''; }}
+                onChange={e => {
+                  addFiles(Array.from(e.target.files));
+                  e.target.value = '';
+                }}
               />
             </Box>
 
@@ -206,9 +270,18 @@ export default function MediaUploadDialog({ open, onClose, onUploaded, albumId }
                   <Typography variant="body2" fontWeight={600}>
                     {files.length} ملف ({mediaService.formatFileSize(totalSize)})
                   </Typography>
-                  <Button size="small" color="error" onClick={() => setFiles([])}>مسح الكل</Button>
+                  <Button size="small" color="error" onClick={() => setFiles([])}>
+                    مسح الكل
+                  </Button>
                 </Box>
-                <Box sx={{ maxHeight: 200, overflowY: 'auto', border: `1px solid ${surfaceColors.border}`, borderRadius: 2 }}>
+                <Box
+                  sx={{
+                    maxHeight: 200,
+                    overflowY: 'auto',
+                    border: `1px solid ${surfaceColors.border}`,
+                    borderRadius: 2,
+                  }}
+                >
                   {files.map((file, i) => {
                     const type = getFileType(file);
                     const color = getFileTypeColor(type);
@@ -216,18 +289,28 @@ export default function MediaUploadDialog({ open, onClose, onUploaded, albumId }
                       <Box
                         key={`${file.name}-${i}`}
                         sx={{
-                          display: 'flex', alignItems: 'center', gap: 1.5, px: 2, py: 1,
-                          borderBottom: i < files.length - 1 ? `1px solid ${surfaceColors.border}` : 'none',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 1.5,
+                          px: 2,
+                          py: 1,
+                          borderBottom:
+                            i < files.length - 1 ? `1px solid ${surfaceColors.border}` : 'none',
                         }}
                       >
                         <Avatar sx={{ width: 32, height: 32, bgcolor: `${color}15`, color }}>
-                          {React.cloneElement(TYPE_ICONS[type] || TYPE_ICONS.other, { sx: { fontSize: 16 } })}
+                          {React.cloneElement(TYPE_ICONS[type] || TYPE_ICONS.other, {
+                            sx: { fontSize: 16 },
+                          })}
                         </Avatar>
                         <Box sx={{ flex: 1, minWidth: 0 }}>
                           <Typography variant="caption" fontWeight={600} noWrap display="block">
                             {file.name}
                           </Typography>
-                          <Typography variant="caption" sx={{ color: neutralColors.textSecondary, fontSize: '0.65rem' }}>
+                          <Typography
+                            variant="caption"
+                            sx={{ color: neutralColors.textSecondary, fontSize: '0.65rem' }}
+                          >
                             {mediaService.formatFileSize(file.size)}
                           </Typography>
                         </Box>
@@ -246,15 +329,23 @@ export default function MediaUploadDialog({ open, onClose, onUploaded, albumId }
             <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
               <FormControl size="small" sx={{ minWidth: 150 }}>
                 <InputLabel>التصنيف</InputLabel>
-                <Select value={category} label="التصنيف" onChange={(e) => setCategory(e.target.value)}>
-                  {CATEGORIES.map(c => <MenuItem key={c} value={c}>{c}</MenuItem>)}
+                <Select
+                  value={category}
+                  label="التصنيف"
+                  onChange={e => setCategory(e.target.value)}
+                >
+                  {CATEGORIES.map(c => (
+                    <MenuItem key={c} value={c}>
+                      {c}
+                    </MenuItem>
+                  ))}
                 </Select>
               </FormControl>
               <TextField
                 size="small"
                 label="الوسوم (مفصولة بفاصلة)"
                 value={tags}
-                onChange={(e) => setTags(e.target.value)}
+                onChange={e => setTags(e.target.value)}
                 placeholder="صورة, فعالية"
                 sx={{ flex: 1, minWidth: 180 }}
               />
@@ -265,38 +356,52 @@ export default function MediaUploadDialog({ open, onClose, onUploaded, albumId }
         {/* Upload Results */}
         {results.length > 0 && (
           <Box>
-            <Typography variant="body2" fontWeight={600} sx={{ mb: 1 }}>نتائج الرفع</Typography>
+            <Typography variant="body2" fontWeight={600} sx={{ mb: 1 }}>
+              نتائج الرفع
+            </Typography>
             {results.map((r, i) => (
               <Box
                 key={i}
                 sx={{
-                  display: 'flex', alignItems: 'center', gap: 1, py: 1,
-                  borderBottom: i < results.length - 1 ? `1px solid ${surfaceColors.border}` : 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                  py: 1,
+                  borderBottom:
+                    i < results.length - 1 ? `1px solid ${surfaceColors.border}` : 'none',
                 }}
               >
-                {r.status === 'success'
-                  ? <SuccessIcon sx={{ color: statusColors.success, fontSize: 20 }} />
-                  : <ErrorIcon sx={{ color: statusColors.error, fontSize: 20 }} />}
-                <Typography variant="body2" sx={{ flex: 1 }} noWrap>{r.name}</Typography>
+                {r.status === 'success' ? (
+                  <SuccessIcon sx={{ color: statusColors.success, fontSize: 20 }} />
+                ) : (
+                  <ErrorIcon sx={{ color: statusColors.error, fontSize: 20 }} />
+                )}
+                <Typography variant="body2" sx={{ flex: 1 }} noWrap>
+                  {r.name}
+                </Typography>
                 <Chip
                   size="small"
                   label={r.message}
                   sx={{
-                    bgcolor: r.status === 'success' ? `${statusColors.success}15` : `${statusColors.error}15`,
+                    bgcolor:
+                      r.status === 'success'
+                        ? `${statusColors.success}15`
+                        : `${statusColors.error}15`,
                     color: r.status === 'success' ? statusColors.success : statusColors.error,
                   }}
                 />
               </Box>
             ))}
-            {uploading && (
-              <LinearProgress sx={{ mt: 2, borderRadius: 2 }} />
-            )}
+            {uploading && <LinearProgress sx={{ mt: 2, borderRadius: 2 }} />}
           </Box>
         )}
       </DialogContent>
 
       <DialogActions>
-        <Button onClick={() => handleClose(results.some(r => r.status === 'success'))} disabled={uploading}>
+        <Button
+          onClick={() => handleClose(results.some(r => r.status === 'success'))}
+          disabled={uploading}
+        >
           {results.length > 0 ? 'إغلاق' : 'إلغاء'}
         </Button>
         {results.length === 0 && (

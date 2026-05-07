@@ -4,8 +4,21 @@
  */
 
 import {
-  Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Paper, Checkbox, IconButton, Chip, Typography, Tooltip, CircularProgress, Stack,
+  Box,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Checkbox,
+  IconButton,
+  Chip,
+  Typography,
+  Tooltip,
+  CircularProgress,
+  Stack,
 } from '@mui/material';
 import {
   MoreVert as MoreVertIcon,
@@ -62,8 +75,7 @@ const DocumentListTable = ({
           <TableCell padding="checkbox" sx={{ color: 'white' }}>
             <Checkbox
               indeterminate={
-                selection.selected.length > 0 &&
-                selection.selected.length < paginatedDocs.length
+                selection.selected.length > 0 && selection.selected.length < paginatedDocs.length
               }
               checked={
                 paginatedDocs.length > 0 && selection.selected.length === paginatedDocs.length

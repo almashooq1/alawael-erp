@@ -14,6 +14,10 @@ const BIOperationsAnalytics = lazyWithRetry(
 const BITrendExplorer = lazyWithRetry(() => import('../pages/BIDashboard/BITrendExplorer'));
 const BIReportBuilder = lazyWithRetry(() => import('../pages/BIDashboard/BIReportBuilder'));
 
+const KPIFrameworkDashboard = lazyWithRetry(
+  () => import('../pages/analytics/KPIFrameworkDashboard')
+);
+
 export default function BIDashboardRoutes() {
   return (
     <>
@@ -24,6 +28,8 @@ export default function BIDashboardRoutes() {
       <Route path="bi-dashboard/operations" element={<BIOperationsAnalytics />} />
       <Route path="bi-dashboard/trends" element={<BITrendExplorer />} />
       <Route path="bi-dashboard/reports" element={<BIReportBuilder />} />
+      {/* BC-13: إطار KPI الكانوني — مؤشرات الأداء المؤسسي */}
+      <Route path="kpi-framework" element={<KPIFrameworkDashboard />} />
     </>
   );
 }

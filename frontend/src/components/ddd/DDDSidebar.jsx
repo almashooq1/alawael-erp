@@ -44,6 +44,45 @@ import {
   ExpandLess,
   ExpandMore,
   ChevronRight as CollapseIcon,
+  // Phase 29 – Workforce
+  Analytics as AnalyticsIcon,
+  Badge as BadgeIcon,
+  Diversity3 as MentorshipIcon,
+  Route as RouteIcon,
+  // Phase 30 – Accreditation
+  Verified as VerifiedIcon,
+  FindInPage as FindInPageIcon,
+  Rule as RuleIcon,
+  CardMembership as LicenseIcon,
+  // Phase 31 – Patient Engagement
+  LocalHospital as PatientPortalIcon,
+  MenuBook as MenuBookIcon,
+  Monitor as MonitorIcon,
+  Forum as ForumIcon,
+  // Phase 32 – Interoperability
+  IntegrationInstructions as IntegrationIcon,
+  MarkEmailRead as MarkEmailReadIcon,
+  SwapHoriz as SwapHorizIcon,
+  Hub as HubIcon,
+  // Phase 33 – Disaster Recovery
+  Backup as BackupIcon,
+  Shield as ShieldIcon,
+  PowerSettingsNew as FailoverIcon,
+  ReportProblem as IncidentIcon,
+  // Phase 34 – Facility
+  Build as BuildIcon,
+  Thermostat as ThermostatIcon,
+  MeetingRoom as MeetingRoomIcon,
+  Inventory as InventoryIcon,
+  // Phase 35 – Research
+  Science as ScienceIcon,
+  TrendingUp as TrendingUpIcon,
+  Article as ArticleIcon,
+  // Phase 36 – Community
+  VolunteerActivism as VolunteerIcon,
+  Campaign as CampaignIcon,
+  Favorite as FavoriteIcon,
+  RecordVoiceOver as AdvocacyIcon,
 } from '@mui/icons-material';
 
 const DRAWER_WIDTH = 260;
@@ -69,6 +108,45 @@ const ICONS = {
   BarChart: <ReportIcon />,
   Biotech: <ResearchIcon />,
   ModelTraining: <TrainingIcon />,
+  // Phase 29
+  Analytics: <AnalyticsIcon />,
+  Badge: <BadgeIcon />,
+  Diversity3: <MentorshipIcon />,
+  Route: <RouteIcon />,
+  // Phase 30
+  Verified: <VerifiedIcon />,
+  FindInPage: <FindInPageIcon />,
+  Rule: <RuleIcon />,
+  CardMembership: <LicenseIcon />,
+  // Phase 31
+  LocalHospital: <PatientPortalIcon />,
+  MenuBook: <MenuBookIcon />,
+  Monitor: <MonitorIcon />,
+  Forum: <ForumIcon />,
+  // Phase 32
+  IntegrationInstructions: <IntegrationIcon />,
+  MarkEmailRead: <MarkEmailReadIcon />,
+  SwapHoriz: <SwapHorizIcon />,
+  Hub: <HubIcon />,
+  // Phase 33
+  Backup: <BackupIcon />,
+  Shield: <ShieldIcon />,
+  PowerSettingsNew: <FailoverIcon />,
+  ReportProblem: <IncidentIcon />,
+  // Phase 34
+  Build: <BuildIcon />,
+  Thermostat: <ThermostatIcon />,
+  MeetingRoom: <MeetingRoomIcon />,
+  Inventory: <InventoryIcon />,
+  // Phase 35
+  Science: <ScienceIcon />,
+  TrendingUp: <TrendingUpIcon />,
+  Article: <ArticleIcon />,
+  // Phase 36
+  VolunteerActivism: <VolunteerIcon />,
+  Campaign: <CampaignIcon />,
+  Favorite: <FavoriteIcon />,
+  RecordVoiceOver: <AdvocacyIcon />,
 };
 
 /* ── Navigation sections ── */
@@ -157,6 +235,254 @@ const NAV_SECTIONS = [
         icon: 'AutoAwesome',
       },
       { id: 'reports', title: 'التقارير', path: '/platform/reports', icon: 'BarChart' },
+    ],
+  },
+  // ── Phase 29: Workforce Development ──
+  {
+    title: 'تطوير القوى العاملة',
+    titleEn: 'Workforce Development',
+    items: [
+      {
+        id: 'workforce-analytics',
+        title: 'تحليلات القوى العاملة',
+        path: '/platform/workforce-analytics',
+        icon: 'Analytics',
+      },
+      {
+        id: 'credential-manager',
+        title: 'إدارة الشهادات',
+        path: '/platform/credential-manager',
+        icon: 'Badge',
+      },
+      {
+        id: 'mentorship-program',
+        title: 'التوجيه والإرشاد',
+        path: '/platform/mentorship-program',
+        icon: 'Diversity3',
+      },
+      {
+        id: 'career-pathway',
+        title: 'المسارات المهنية',
+        path: '/platform/career-pathway',
+        icon: 'Route',
+      },
+    ],
+  },
+  // ── Phase 30: Accreditation & Compliance ──
+  {
+    title: 'الاعتماد والامتثال',
+    titleEn: 'Accreditation & Compliance',
+    items: [
+      {
+        id: 'accreditation-manager',
+        title: 'الاعتماد المؤسسي',
+        path: '/platform/accreditation-manager',
+        icon: 'Verified',
+      },
+      {
+        id: 'inspection-tracker',
+        title: 'متابعة التفتيش',
+        path: '/platform/inspection-tracker',
+        icon: 'FindInPage',
+      },
+      {
+        id: 'standards-compliance',
+        title: 'الامتثال للمعايير',
+        path: '/platform/standards-compliance',
+        icon: 'Rule',
+      },
+      {
+        id: 'licensure-manager',
+        title: 'إدارة التراخيص',
+        path: '/platform/licensure-manager',
+        icon: 'CardMembership',
+      },
+    ],
+  },
+  // ── Phase 31: Patient Engagement ──
+  {
+    title: 'تفاعل المريض',
+    titleEn: 'Patient Engagement',
+    items: [
+      {
+        id: 'patient-portal',
+        title: 'بوابة المريض',
+        path: '/platform/patient-portal',
+        icon: 'LocalHospital',
+      },
+      {
+        id: 'health-education',
+        title: 'التثقيف الصحي',
+        path: '/platform/health-education',
+        icon: 'MenuBook',
+      },
+      {
+        id: 'remote-monitoring',
+        title: 'المراقبة عن بُعد',
+        path: '/platform/remote-monitoring',
+        icon: 'Monitor',
+      },
+      {
+        id: 'patient-community',
+        title: 'مجتمع المرضى',
+        path: '/platform/patient-community',
+        icon: 'Forum',
+      },
+    ],
+  },
+  // ── Phase 32: Interoperability ──
+  {
+    title: 'التشغيل البيني',
+    titleEn: 'Interoperability',
+    items: [
+      {
+        id: 'fhir-integration',
+        title: 'تكامل FHIR',
+        path: '/platform/fhir-integration',
+        icon: 'IntegrationInstructions',
+      },
+      {
+        id: 'hl7-messaging',
+        title: 'رسائل HL7',
+        path: '/platform/hl7-messaging',
+        icon: 'MarkEmailRead',
+      },
+      {
+        id: 'data-exchange',
+        title: 'تبادل البيانات',
+        path: '/platform/data-exchange',
+        icon: 'SwapHoriz',
+      },
+      {
+        id: 'interoperability-hub',
+        title: 'مركز التشغيل البيني',
+        path: '/platform/interoperability-hub',
+        icon: 'Hub',
+      },
+    ],
+  },
+  // ── Phase 33: Disaster Recovery ──
+  {
+    title: 'الاستمرارية والأمن',
+    titleEn: 'Business Continuity',
+    items: [
+      {
+        id: 'backup-manager',
+        title: 'النسخ الاحتياطي',
+        path: '/platform/backup-manager',
+        icon: 'Backup',
+      },
+      {
+        id: 'business-continuity',
+        title: 'استمرارية الأعمال',
+        path: '/platform/business-continuity',
+        icon: 'Shield',
+      },
+      {
+        id: 'system-failover',
+        title: 'تجاوز الأعطال',
+        path: '/platform/system-failover',
+        icon: 'PowerSettingsNew',
+      },
+      {
+        id: 'incident-response',
+        title: 'الاستجابة للحوادث',
+        path: '/platform/incident-response',
+        icon: 'ReportProblem',
+      },
+    ],
+  },
+  // ── Phase 34: Facility & Assets ──
+  {
+    title: 'المنشآت والأصول',
+    titleEn: 'Facility & Assets',
+    items: [
+      {
+        id: 'equipment-lifecycle',
+        title: 'دورة حياة المعدات',
+        path: '/platform/equipment-lifecycle',
+        icon: 'Build',
+      },
+      {
+        id: 'environmental-monitoring',
+        title: 'المراقبة البيئية',
+        path: '/platform/environmental-monitoring',
+        icon: 'Thermostat',
+      },
+      {
+        id: 'space-management',
+        title: 'إدارة المساحات',
+        path: '/platform/space-management',
+        icon: 'MeetingRoom',
+      },
+      {
+        id: 'asset-tracking',
+        title: 'تتبع الأصول',
+        path: '/platform/asset-tracking',
+        icon: 'Inventory',
+      },
+    ],
+  },
+  // ── Phase 35: Clinical Research ──
+  {
+    title: 'البحث والأدلة',
+    titleEn: 'Clinical Research',
+    items: [
+      {
+        id: 'clinical-research',
+        title: 'البحث السريري',
+        path: '/platform/clinical-research',
+        icon: 'Science',
+      },
+      {
+        id: 'clinical-trials',
+        title: 'التجارب السريرية',
+        path: '/platform/clinical-trials',
+        icon: 'Biotech',
+      },
+      {
+        id: 'outcome-research',
+        title: 'بحوث النتائج',
+        path: '/platform/outcome-research',
+        icon: 'TrendingUp',
+      },
+      {
+        id: 'publication-manager',
+        title: 'المنشورات العلمية',
+        path: '/platform/publication-manager',
+        icon: 'Article',
+      },
+    ],
+  },
+  // ── Phase 36: Community Engagement ──
+  {
+    title: 'المجتمع والمشاركة',
+    titleEn: 'Community Engagement',
+    items: [
+      {
+        id: 'volunteer-management',
+        title: 'إدارة المتطوعين',
+        path: '/platform/volunteer-management',
+        icon: 'VolunteerActivism',
+      },
+      {
+        id: 'community-outreach',
+        title: 'التواصل المجتمعي',
+        path: '/platform/community-outreach',
+        icon: 'Campaign',
+      },
+      {
+        id: 'donor-relations',
+        title: 'علاقات المانحين',
+        path: '/platform/donor-relations',
+        icon: 'Favorite',
+      },
+      {
+        id: 'advocacy-program',
+        title: 'برنامج المناصرة',
+        path: '/platform/advocacy-program',
+        icon: 'RecordVoiceOver',
+      },
     ],
   },
 ];
@@ -276,7 +602,7 @@ export default function DDDSidebar({ open = true, onToggle }) {
       {/* Footer */}
       <Box sx={{ p: 1.5, borderTop: 1, borderColor: 'divider', textAlign: 'center' }}>
         <Typography variant="caption" color="text.secondary">
-          20 مجال DDD • 34 نموذج بيانات
+          52 مجال DDD • 42 نموذج بيانات
         </Typography>
       </Box>
     </Box>

@@ -9,15 +9,9 @@ import { lazyWithRetry } from '../utils/lazyLoader';
 const MDTCoordinationDashboard = lazyWithRetry(
   () => import('../pages/mdt/MDTCoordinationDashboard')
 );
-const MDTMeetingsPage = lazyWithRetry(
-  () => import('../pages/mdt/MDTMeetingsPage')
-);
-const MDTPlansPage = lazyWithRetry(
-  () => import('../pages/mdt/MDTPlansPage')
-);
-const MDTReferralsPage = lazyWithRetry(
-  () => import('../pages/mdt/MDTReferralsPage')
-);
+const MDTMeetingsPage = lazyWithRetry(() => import('../pages/mdt/MDTMeetingsPage'));
+const MDTPlansPage = lazyWithRetry(() => import('../pages/mdt/MDTPlansPage'));
+const MDTReferralsPage = lazyWithRetry(() => import('../pages/mdt/MDTReferralsPage'));
 
 export default function MDTCoordinationRoutes() {
   return (

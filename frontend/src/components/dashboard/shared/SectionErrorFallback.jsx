@@ -17,14 +17,19 @@ class SectionErrorFallback extends Component {
   }
 
   static getDerivedStateFromError(error) {
-    return { hasError: true, errorTime: new Date(), errorMessage: error?.message || 'خطأ غير معروف' };
+    return {
+      hasError: true,
+      errorTime: new Date(),
+      errorMessage: error?.message || 'خطأ غير معروف',
+    };
   }
 
   componentDidCatch(error, info) {
     logger.warn(`[SectionError] ${this.props.label || 'Unknown'}:`, error, info);
   }
 
-  handleRetry = () => this.setState({ hasError: false, errorTime: null, errorMessage: '', showDetails: false });
+  handleRetry = () =>
+    this.setState({ hasError: false, errorTime: null, errorMessage: '', showDetails: false });
 
   toggleDetails = () => this.setState(prev => ({ showDetails: !prev.showDetails }));
 
@@ -54,7 +59,10 @@ class SectionErrorFallback extends Component {
             بقية الأقسام تعمل بشكل طبيعي
           </Typography>
           {this.state.errorTime && (
-            <Typography variant="caption" sx={{ color: 'text.disabled', display: 'block', mb: 1, fontSize: '0.65rem' }}>
+            <Typography
+              variant="caption"
+              sx={{ color: 'text.disabled', display: 'block', mb: 1, fontSize: '0.65rem' }}
+            >
               وقت الخطأ: {this.state.errorTime.toLocaleTimeString('ar-SA')}
             </Typography>
           )}
@@ -74,7 +82,14 @@ class SectionErrorFallback extends Component {
             </Button>
             <Button
               size="small"
-              endIcon={<ExpandMoreIcon sx={{ transform: this.state.showDetails ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.2s' }} />}
+              endIcon={
+                <ExpandMoreIcon
+                  sx={{
+                    transform: this.state.showDetails ? 'rotate(180deg)' : 'rotate(0)',
+                    transition: 'transform 0.2s',
+                  }}
+                />
+              }
               onClick={this.toggleDetails}
               sx={{
                 fontWeight: 600,
@@ -87,8 +102,24 @@ class SectionErrorFallback extends Component {
             </Button>
           </Box>
           <Collapse in={this.state.showDetails}>
-            <Box sx={{ mt: 1.5, p: 1.5, borderRadius: 2, background: 'rgba(0,0,0,0.03)', textAlign: 'right' }}>
-              <Typography variant="caption" sx={{ fontFamily: 'monospace', fontSize: '0.68rem', color: 'text.secondary', wordBreak: 'break-word' }}>
+            <Box
+              sx={{
+                mt: 1.5,
+                p: 1.5,
+                borderRadius: 2,
+                background: 'rgba(0,0,0,0.03)',
+                textAlign: 'right',
+              }}
+            >
+              <Typography
+                variant="caption"
+                sx={{
+                  fontFamily: 'monospace',
+                  fontSize: '0.68rem',
+                  color: 'text.secondary',
+                  wordBreak: 'break-word',
+                }}
+              >
                 {this.state.errorMessage}
               </Typography>
             </Box>

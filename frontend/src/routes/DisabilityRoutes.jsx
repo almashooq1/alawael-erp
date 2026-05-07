@@ -4,8 +4,12 @@
 import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
-const DisabilityAuthorityDashboard = lazyWithRetry(() => import('../pages/disabilityAuthority/DisabilityAuthorityDashboard'));
-const DisabilityAssessmentScales = lazyWithRetry(() => import('../pages/DisabilityAssessmentScales/DisabilityAssessmentScales'));
+const DisabilityAuthorityDashboard = lazyWithRetry(
+  () => import('../pages/disabilityAuthority/DisabilityAuthorityDashboard')
+);
+const DisabilityAssessmentScales = lazyWithRetry(
+  () => import('../pages/DisabilityAssessmentScales/DisabilityAssessmentScales')
+);
 const DisabilityAssessmentTests = lazyWithRetry(() => import('../pages/DisabilityAssessmentTests'));
 
 export default function DisabilityRoutes() {

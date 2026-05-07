@@ -5,9 +5,7 @@
 import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
-const MuqeemPage = lazyWithRetry(
-  () => import('../pages/muqeem/MuqeemPage')
-);
+const MuqeemPage = lazyWithRetry(() => import('../pages/muqeem/MuqeemPage'));
 
 export default function MuqeemRoutes() {
   return (

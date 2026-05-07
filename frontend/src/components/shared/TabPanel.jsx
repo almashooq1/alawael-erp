@@ -31,7 +31,7 @@ const TabPanel = ({ value, index, children, sx, keepMounted = false, ...rest }) 
  * a11yProps — Returns accessibility props for a Tab element.
  * @param {number} index — Tab index
  */
-export const a11yProps = (index) => ({
+export const a11yProps = index => ({
   id: `tab-${index}`,
   'aria-controls': `tabpanel-${index}`,
 });

@@ -7,12 +7,20 @@ import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 // ─── Enterprise Pro Plus Pages ───
-const TalentAcquisitionPage = lazyWithRetry(() => import('../pages/enterprise-plus/TalentAcquisitionPage'));
-const FacilityManagementPage = lazyWithRetry(() => import('../pages/enterprise-plus/FacilityManagementPage'));
-const VendorManagementPage = lazyWithRetry(() => import('../pages/enterprise-plus/VendorManagementPage'));
+const TalentAcquisitionPage = lazyWithRetry(
+  () => import('../pages/enterprise-plus/TalentAcquisitionPage')
+);
+const FacilityManagementPage = lazyWithRetry(
+  () => import('../pages/enterprise-plus/FacilityManagementPage')
+);
+const VendorManagementPage = lazyWithRetry(
+  () => import('../pages/enterprise-plus/VendorManagementPage')
+);
 const ITSMPage = lazyWithRetry(() => import('../pages/enterprise-plus/ITSMPage'));
 const EHSSafetyPage = lazyWithRetry(() => import('../pages/enterprise-plus/EHSSafetyPage'));
-const StrategicPlanningPage = lazyWithRetry(() => import('../pages/enterprise-plus/StrategicPlanningPage'));
+const StrategicPlanningPage = lazyWithRetry(
+  () => import('../pages/enterprise-plus/StrategicPlanningPage')
+);
 
 export default function EnterpriseProPlusRoutes() {
   return (

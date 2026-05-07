@@ -201,7 +201,7 @@ export const sanitizeFilename = filename => {
   if (!filename) return 'file';
   const ext = getFileExtension(filename);
   const name = filename.replace(/\.[^/.]+$/, '');
-  const sanitized = name.replace(/[^\u0600-\u06FFa-zA-Z0-9\s_\-]/g, '').trim();
+  const sanitized = name.replace(/[^\u0600-\u06FFa-zA-Z0-9\s_-]/g, '').trim();
   return ext ? `${sanitized || 'file'}.${ext}` : sanitized || 'file';
 };
 

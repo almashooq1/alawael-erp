@@ -4,9 +4,22 @@
  */
 
 import {
-  Box, Paper, Stack, TextField, InputAdornment, FormControl, InputLabel,
-  Select, MenuItem, Tooltip, IconButton, Collapse, Typography, Chip,
-  Button, Badge,
+  Box,
+  Paper,
+  Stack,
+  TextField,
+  InputAdornment,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Tooltip,
+  IconButton,
+  Collapse,
+  Typography,
+  Chip,
+  Button,
+  Badge,
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -143,11 +156,7 @@ const DocumentListToolbar = ({
               />
             </Box>
             <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
-              <Button
-                variant="outlined"
-                size="small"
-                onClick={() => filters.setShowFilters(false)}
-              >
+              <Button variant="outlined" size="small" onClick={() => filters.setShowFilters(false)}>
                 إغلاق
               </Button>
               <Button variant="contained" size="small" onClick={filters.handleResetFilters}>
@@ -174,11 +183,7 @@ const DocumentListToolbar = ({
                     );
                   })}
                   {filters.tagFilter.length > 0 && (
-                    <Button
-                      size="small"
-                      onClick={() => filters.setTagFilter([])}
-                      sx={{ ml: 1 }}
-                    >
+                    <Button size="small" onClick={() => filters.setTagFilter([])} sx={{ ml: 1 }}>
                       مسح الوسوم
                     </Button>
                   )}

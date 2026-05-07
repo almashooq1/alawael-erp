@@ -206,7 +206,6 @@ export function PreviewDialog({ dialogs, actions }) {
 
 /* ─── Edit Dialog ─── */
 export function EditDialog({ dialogs, actions, onRefresh }) {
-
   return (
     <Dialog
       open={dialogs.editOpen}
@@ -250,9 +249,7 @@ export function EditDialog({ dialogs, actions, onRefresh }) {
             <InputLabel>الفئة</InputLabel>
             <Select
               value={dialogs.editForm.category}
-              onChange={e =>
-                dialogs.setEditForm({ ...dialogs.editForm, category: e.target.value })
-              }
+              onChange={e => dialogs.setEditForm({ ...dialogs.editForm, category: e.target.value })}
               label="الفئة"
             >
               {CATEGORY_OPTIONS.map(cat => (
@@ -339,7 +336,10 @@ export function DetailsDialog({ dialogs, actions }) {
         {doc && (
           <Stack spacing={3}>
             {/* معلومات أساسية */}
-            <Paper elevation={0} sx={{ p: 2, backgroundColor: surfaceColors.brandTint, borderRadius: 2 }}>
+            <Paper
+              elevation={0}
+              sx={{ p: 2, backgroundColor: surfaceColors.brandTint, borderRadius: 2 }}
+            >
               <Typography variant="overline" color="primary" sx={{ fontWeight: 600 }}>
                 المعلومات الأساسية
               </Typography>
@@ -365,9 +365,7 @@ export function DetailsDialog({ dialogs, actions }) {
                   >
                     📝 الوصف
                   </Typography>
-                  <Typography variant="body2">
-                    {doc.description || 'لا يوجد وصف'}
-                  </Typography>
+                  <Typography variant="body2">{doc.description || 'لا يوجد وصف'}</Typography>
                 </Box>
                 <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
                   <Box sx={{ flex: 1, minWidth: 200 }}>
@@ -401,7 +399,10 @@ export function DetailsDialog({ dialogs, actions }) {
             </Paper>
 
             {/* معلومات الملف */}
-            <Paper elevation={0} sx={{ p: 2, backgroundColor: surfaceColors.warningTint, borderRadius: 2 }}>
+            <Paper
+              elevation={0}
+              sx={{ p: 2, backgroundColor: surfaceColors.warningTint, borderRadius: 2 }}
+            >
               <Typography variant="overline" color="warning.main" sx={{ fontWeight: 600 }}>
                 معلومات الملف
               </Typography>
@@ -443,7 +444,10 @@ export function DetailsDialog({ dialogs, actions }) {
             </Paper>
 
             {/* معلومات المستخدم */}
-            <Paper elevation={0} sx={{ p: 2, backgroundColor: surfaceColors.infoTint, borderRadius: 2 }}>
+            <Paper
+              elevation={0}
+              sx={{ p: 2, backgroundColor: surfaceColors.infoTint, borderRadius: 2 }}
+            >
               <Typography variant="overline" color="info.main" sx={{ fontWeight: 600 }}>
                 معلومات المستخدم
               </Typography>
@@ -473,7 +477,10 @@ export function DetailsDialog({ dialogs, actions }) {
 
             {/* الوسوم */}
             {doc.tags && doc.tags.length > 0 && (
-              <Paper elevation={0} sx={{ p: 2, backgroundColor: surfaceColors.successTint, borderRadius: 2 }}>
+              <Paper
+                elevation={0}
+                sx={{ p: 2, backgroundColor: surfaceColors.successTint, borderRadius: 2 }}
+              >
                 <Typography variant="overline" color="success.main" sx={{ fontWeight: 600 }}>
                   🏷️ الوسوم
                 </Typography>
@@ -487,7 +494,10 @@ export function DetailsDialog({ dialogs, actions }) {
             )}
 
             {/* الإحصائيات */}
-            <Paper elevation={0} sx={{ p: 2, backgroundColor: surfaceColors.pinkTint, borderRadius: 2 }}>
+            <Paper
+              elevation={0}
+              sx={{ p: 2, backgroundColor: surfaceColors.pinkTint, borderRadius: 2 }}
+            >
               <Typography variant="overline" color="error.main" sx={{ fontWeight: 600 }}>
                 📊 الإحصائيات
               </Typography>

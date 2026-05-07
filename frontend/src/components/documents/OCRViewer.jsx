@@ -4,9 +4,23 @@
  */
 import React, { useState, useEffect } from 'react';
 import {
-  Box, Paper, Typography, Grid, Chip, CircularProgress,
-  LinearProgress, Divider, Table, TableHead, TableRow,
-  TableCell, TableBody, IconButton, Tooltip, Alert, Tabs, Tab,
+  Box,
+  Paper,
+  Typography,
+  Grid,
+  Chip,
+  CircularProgress,
+  LinearProgress,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+  IconButton,
+  Tooltip,
+  Alert,
+  Tabs,
+  Tab,
 } from '@mui/material';
 import {
   DocumentScanner as OCRIcon,
@@ -20,7 +34,7 @@ import {
 
 import { ocrApi } from '../../services/documentProPhase6Service';
 
-export default function OCRViewer({ documentId, onClose }) {
+export default function OCRViewer({ documentId, onClose: _onClose }) {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState(0);
@@ -28,6 +42,7 @@ export default function OCRViewer({ documentId, onClose }) {
   useEffect(() => {
     if (!documentId) return;
     loadResult();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- loadResult is defined below and stable per render
   }, [documentId]);
 
   const loadResult = async () => {
@@ -41,7 +56,7 @@ export default function OCRViewer({ documentId, onClose }) {
     setLoading(false);
   };
 
-  const handleCopy = (text) => {
+  const handleCopy = text => {
     navigator.clipboard.writeText(text);
   };
 
@@ -49,7 +64,9 @@ export default function OCRViewer({ documentId, onClose }) {
     return (
       <Box sx={{ textAlign: 'center', py: 4 }}>
         <CircularProgress />
-        <Typography variant="body2" sx={{ mt: 2 }}>جاري تحميل نتائج OCR...</Typography>
+        <Typography variant="body2" sx={{ mt: 2 }}>
+          جاري تحميل نتائج OCR...
+        </Typography>
       </Box>
     );
   }
@@ -76,7 +93,13 @@ export default function OCRViewer({ documentId, onClose }) {
           {result.language && (
             <Chip
               icon={<LangIcon />}
-              label={result.language === 'arabic' ? 'عربي' : result.language === 'english' ? 'إنجليزي' : result.language}
+              label={
+                result.language === 'arabic'
+                  ? 'عربي'
+                  : result.language === 'english'
+                    ? 'إنجليزي'
+                    : result.language
+              }
               size="small"
               variant="outlined"
             />
@@ -88,7 +111,9 @@ export default function OCRViewer({ documentId, onClose }) {
             color={confidenceColor}
           />
           <Tooltip title="تحديث">
-            <IconButton size="small" onClick={loadResult}><RefreshIcon /></IconButton>
+            <IconButton size="small" onClick={loadResult}>
+              <RefreshIcon />
+            </IconButton>
           </Tooltip>
         </Box>
       </Box>
@@ -106,7 +131,11 @@ export default function OCRViewer({ documentId, onClose }) {
           <Tab icon={<OCRIcon />} label={`المناطق (${result.zones.length})`} iconPosition="start" />
         )}
         {result.tables?.length > 0 && (
-          <Tab icon={<TableIcon />} label={`جداول (${result.tables.length})`} iconPosition="start" />
+          <Tab
+            icon={<TableIcon />}
+            label={`جداول (${result.tables.length})`}
+            iconPosition="start"
+          />
         )}
       </Tabs>
 
@@ -115,7 +144,10 @@ export default function OCRViewer({ documentId, onClose }) {
         <Box>
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1 }}>
             <Tooltip title="نسخ النص">
-              <IconButton size="small" onClick={() => handleCopy(result.text || result.extractedText || '')}>
+              <IconButton
+                size="small"
+                onClick={() => handleCopy(result.text || result.extractedText || '')}
+              >
                 <CopyIcon />
               </IconButton>
             </Tooltip>
@@ -123,9 +155,14 @@ export default function OCRViewer({ documentId, onClose }) {
           <Paper
             variant="outlined"
             sx={{
-              p: 2, maxHeight: 400, overflowY: 'auto',
-              whiteSpace: 'pre-wrap', direction: result.language === 'arabic' ? 'rtl' : 'ltr',
-              fontFamily: 'Cairo, monospace', fontSize: '0.95rem', lineHeight: 1.8,
+              p: 2,
+              maxHeight: 400,
+              overflowY: 'auto',
+              whiteSpace: 'pre-wrap',
+              direction: result.language === 'arabic' ? 'rtl' : 'ltr',
+              fontFamily: 'Cairo, monospace',
+              fontSize: '0.95rem',
+              lineHeight: 1.8,
               bgcolor: 'grey.50',
             }}
           >
@@ -137,13 +174,20 @@ export default function OCRViewer({ documentId, onClose }) {
             {[
               { label: 'عدد الكلمات', value: result.wordCount || '-' },
               { label: 'عدد الأسطر', value: result.lineCount || '-' },
-              { label: 'زمن المعالجة', value: result.processingTime ? `${result.processingTime}ms` : '-' },
+              {
+                label: 'زمن المعالجة',
+                value: result.processingTime ? `${result.processingTime}ms` : '-',
+              },
               { label: 'الصفحات', value: result.pageCount || 1 },
             ].map((m, i) => (
               <Grid item xs={6} sm={3} key={i}>
                 <Paper variant="outlined" sx={{ p: 1, textAlign: 'center' }}>
-                  <Typography variant="h6" fontWeight={700}>{m.value}</Typography>
-                  <Typography variant="caption" color="text.secondary">{m.label}</Typography>
+                  <Typography variant="h6" fontWeight={700}>
+                    {m.value}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {m.label}
+                  </Typography>
                 </Paper>
               </Grid>
             ))}
@@ -169,7 +213,13 @@ export default function OCRViewer({ documentId, onClose }) {
                 <TableCell>
                   <Chip
                     size="small"
-                    label={z.type === 'paragraph' ? 'فقرة' : z.type === 'heading' ? 'عنوان' : z.type || 'نص'}
+                    label={
+                      z.type === 'paragraph'
+                        ? 'فقرة'
+                        : z.type === 'heading'
+                          ? 'عنوان'
+                          : z.type || 'نص'
+                    }
                     variant="outlined"
                   />
                 </TableCell>
@@ -180,7 +230,9 @@ export default function OCRViewer({ documentId, onClose }) {
                   <Chip
                     size="small"
                     label={`${((z.confidence || 0) * 100).toFixed(0)}%`}
-                    color={z.confidence > 0.8 ? 'success' : z.confidence > 0.5 ? 'warning' : 'error'}
+                    color={
+                      z.confidence > 0.8 ? 'success' : z.confidence > 0.5 ? 'warning' : 'error'
+                    }
                   />
                 </TableCell>
               </TableRow>
@@ -194,7 +246,9 @@ export default function OCRViewer({ documentId, onClose }) {
         <Box>
           {result.tables.map((tbl, ti) => (
             <Box key={ti} sx={{ mb: 2 }}>
-              <Typography variant="subtitle2" gutterBottom>جدول {ti + 1}</Typography>
+              <Typography variant="subtitle2" gutterBottom>
+                جدول {ti + 1}
+              </Typography>
               <Table size="small" sx={{ border: '1px solid', borderColor: 'divider' }}>
                 <TableBody>
                   {(tbl.rows || []).map((row, ri) => (

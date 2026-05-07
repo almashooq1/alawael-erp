@@ -6,13 +6,7 @@
 import { Button, IconButton, TextField, Chip } from '@mui/material';
 
 // Accessible Button with proper ARIA labels
-export const AccessibleButton = ({
-  children,
-  ariaLabel,
-  onClick,
-  disabled = false,
-  ...props
-}) => (
+export const AccessibleButton = ({ children, ariaLabel, onClick, disabled = false, ...props }) => (
   <Button
     onClick={onClick}
     disabled={disabled}
@@ -25,13 +19,7 @@ export const AccessibleButton = ({
 );
 
 // Accessible Icon Button
-export const AccessibleIconButton = ({
-  icon,
-  ariaLabel,
-  onClick,
-  disabled = false,
-  ...props
-}) => (
+export const AccessibleIconButton = ({ icon, ariaLabel, onClick, disabled = false, ...props }) => (
   <IconButton
     onClick={onClick}
     disabled={disabled}
@@ -44,13 +32,7 @@ export const AccessibleIconButton = ({
 );
 
 // Accessible Form Field
-export const AccessibleTextField = ({
-  label,
-  error,
-  helperText,
-  required = false,
-  ...props
-}) => (
+export const AccessibleTextField = ({ label, error, helperText, required = false, ...props }) => (
   <TextField
     label={label}
     error={error}
@@ -64,19 +46,8 @@ export const AccessibleTextField = ({
 );
 
 // Accessible Status Chip
-export const AccessibleChip = ({
-  label,
-  color,
-  ariaLabel,
-  ...props
-}) => (
-  <Chip
-    label={label}
-    color={color}
-    aria-label={ariaLabel || label}
-    role="status"
-    {...props}
-  />
+export const AccessibleChip = ({ label, color, ariaLabel, ...props }) => (
+  <Chip label={label} color={color} aria-label={ariaLabel || label} role="status" {...props} />
 );
 
 // Skip to Main Content Link (for keyboard navigation)
@@ -93,11 +64,11 @@ export const SkipLink = ({ targetId = 'main-content' }) => (
       textDecoration: 'none',
       borderRadius: '4px',
     }}
-    onFocus={(e) => {
+    onFocus={e => {
       e.target.style.left = '1rem';
       e.target.style.top = '1rem';
     }}
-    onBlur={(e) => {
+    onBlur={e => {
       e.target.style.left = '-9999px';
     }}
   >

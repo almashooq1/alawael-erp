@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -47,7 +46,7 @@ const FormDialog = ({
   extraActions,
   submitColor = 'primary',
 }) => {
-  const handleSubmit = (e) => {
+  const handleSubmit = e => {
     e?.preventDefault();
     onSubmit?.();
   };
@@ -60,10 +59,18 @@ const FormDialog = ({
       fullWidth={fullWidth}
       PaperProps={{ sx: { borderRadius: 2 } }}
     >
-      <DialogTitle sx={{ pb: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+      <DialogTitle
+        sx={{ pb: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}
+      >
         <Box>
-          <Typography variant="h6" sx={{ fontWeight: 'bold' }}>{title}</Typography>
-          {subtitle && <Typography variant="body2" color="text.secondary">{subtitle}</Typography>}
+          <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+            {title}
+          </Typography>
+          {subtitle && (
+            <Typography variant="body2" color="text.secondary">
+              {subtitle}
+            </Typography>
+          )}
         </Box>
         <IconButton onClick={onClose} disabled={loading} size="small" sx={{ mt: -0.5, mr: -1 }}>
           <CloseIcon />
@@ -71,9 +78,7 @@ const FormDialog = ({
       </DialogTitle>
       <Divider />
       <form onSubmit={handleSubmit}>
-        <DialogContent sx={{ pt: 2 }}>
-          {children}
-        </DialogContent>
+        <DialogContent sx={{ pt: 2 }}>{children}</DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
           {extraActions}
           <Button onClick={onClose} disabled={loading} color="inherit">

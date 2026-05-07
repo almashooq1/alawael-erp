@@ -26,7 +26,7 @@ export default function SidebarUserFooter({ collapsed }) {
 
   useEffect(() => {
     if (!menuOpen) return;
-    const handler = (e) => {
+    const handler = e => {
       if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false);
     };
     document.addEventListener('mousedown', handler);
@@ -35,7 +35,11 @@ export default function SidebarUserFooter({ collapsed }) {
 
   const handleLogout = async () => {
     setMenuOpen(false);
-    try { await logout?.(); } catch (_) { /* ignore */ }
+    try {
+      await logout?.();
+    } catch (_) {
+      /* ignore */
+    }
     navigate('/login');
   };
 
@@ -48,10 +52,15 @@ export default function SidebarUserFooter({ collapsed }) {
         className={`flex items-center min-h-[68px] transition-all duration-300 ${
           collapsed ? 'justify-center p-3 gap-0' : 'justify-start p-4 gap-3'
         }`}
-        style={{ background: 'linear-gradient(135deg, rgba(10,22,40,0.5) 0%, rgba(13,27,42,0.7) 100%)' }}
+        style={{
+          background: 'linear-gradient(135deg, rgba(10,22,40,0.5) 0%, rgba(13,27,42,0.7) 100%)',
+        }}
       >
         {/* Avatar with animated ring */}
-        <div className="relative flex-shrink-0 group" title={collapsed ? `${displayName} — ${displayRole}` : undefined}>
+        <div
+          className="relative flex-shrink-0 group"
+          title={collapsed ? `${displayName} — ${displayRole}` : undefined}
+        >
           <div
             className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold border-2 border-white/10 transition-all duration-300 group-hover:scale-105 group-hover:border-green-500/40"
             style={{
@@ -64,7 +73,8 @@ export default function SidebarUserFooter({ collapsed }) {
           {/* Animated online indicator */}
           <span className="absolute bottom-0 left-0">
             <span className="absolute inline-flex h-3 w-3 rounded-full bg-emerald-400 opacity-40 animate-ping" />
-            <span className="relative inline-flex h-3 w-3 rounded-full bg-emerald-500 border-2 border-navy-900"
+            <span
+              className="relative inline-flex h-3 w-3 rounded-full bg-emerald-500 border-2 border-navy-900"
               style={{ boxShadow: '0 0 8px rgba(16,185,129,0.5)' }}
             />
           </span>
@@ -85,7 +95,7 @@ export default function SidebarUserFooter({ collapsed }) {
             {/* Options button */}
             <div className="relative" ref={menuRef}>
               <button
-                onClick={() => setMenuOpen((v) => !v)}
+                onClick={() => setMenuOpen(v => !v)}
                 title="خيارات"
                 className={`flex-shrink-0 w-8 h-8 rounded-[10px] border border-white/[0.06] flex items-center justify-center bg-white/[0.03] cursor-pointer transition-all duration-200 hover:bg-white/[0.08] hover:border-green-500/30 hover:text-white active:scale-95 ${
                   menuOpen ? 'text-white bg-white/[0.08] border-green-500/30' : 'text-white/30'
@@ -119,23 +129,33 @@ export default function SidebarUserFooter({ collapsed }) {
                       {avatarLetter}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-[0.8rem] font-bold text-white truncate m-0">{displayName}</p>
+                      <p className="text-[0.8rem] font-bold text-white truncate m-0">
+                        {displayName}
+                      </p>
                       {displayEmail && (
-                        <p className="text-[0.65rem] text-white/30 mt-0.5 truncate m-0">{displayEmail}</p>
+                        <p className="text-[0.65rem] text-white/30 mt-0.5 truncate m-0">
+                          {displayEmail}
+                        </p>
                       )}
                     </div>
                   </div>
 
                   <div className="p-1.5 space-y-0.5">
                     <button
-                      onClick={() => { setMenuOpen(false); navigate('/profile'); }}
+                      onClick={() => {
+                        setMenuOpen(false);
+                        navigate('/profile');
+                      }}
                       className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[0.8rem] text-white/60 bg-transparent border-none cursor-pointer font-cairo hover:bg-white/[0.06] hover:text-white transition-all duration-150"
                     >
                       <AccountCircleOutlined sx={{ fontSize: 17 }} className="text-white/40" />
                       الملف الشخصي
                     </button>
                     <button
-                      onClick={() => { setMenuOpen(false); navigate('/settings'); }}
+                      onClick={() => {
+                        setMenuOpen(false);
+                        navigate('/settings');
+                      }}
                       className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[0.8rem] text-white/60 bg-transparent border-none cursor-pointer font-cairo hover:bg-white/[0.06] hover:text-white transition-all duration-150"
                     >
                       <SettingsOutlined sx={{ fontSize: 17 }} className="text-white/40" />

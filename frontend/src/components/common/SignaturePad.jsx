@@ -133,7 +133,7 @@ export default function SignaturePad({
   }, [paths]);
 
   /* ─── Drawing handlers ─────────────────────────────────────────────────── */
-  const getPos = (e) => {
+  const getPos = e => {
     const canvas = canvasRef.current;
     const rect = canvas.getBoundingClientRect();
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -144,7 +144,7 @@ export default function SignaturePad({
     };
   };
 
-  const startDrawing = (e) => {
+  const startDrawing = e => {
     if (disabled || mode !== 'draw') return;
     e.preventDefault();
     setIsDrawing(true);
@@ -160,7 +160,7 @@ export default function SignaturePad({
     ctx.moveTo(pos.x, pos.y);
   };
 
-  const draw = (e) => {
+  const draw = e => {
     if (!isDrawing || mode !== 'draw') return;
     e.preventDefault();
     const pos = getPos(e);
@@ -171,7 +171,7 @@ export default function SignaturePad({
     ctx.stroke();
   };
 
-  const stopDrawing = (e) => {
+  const stopDrawing = e => {
     if (!isDrawing) return;
     e?.preventDefault();
     setIsDrawing(false);
@@ -219,12 +219,12 @@ export default function SignaturePad({
   };
 
   /* ─── Upload handler ───────────────────────────────────────────────────── */
-  const handleUpload = (e) => {
+  const handleUpload = e => {
     const file = e.target.files[0];
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = (ev) => {
+    reader.onload = ev => {
       setUploadedImage(ev.target.result);
     };
     reader.readAsDataURL(file);
@@ -308,7 +308,12 @@ export default function SignaturePad({
               </IconButton>
             </Tooltip>
             <Tooltip title="مسح الكل">
-              <IconButton onClick={handleClear} disabled={paths.length === 0} size="small" color="error">
+              <IconButton
+                onClick={handleClear}
+                disabled={paths.length === 0}
+                size="small"
+                color="error"
+              >
                 <Delete />
               </IconButton>
             </Tooltip>
@@ -383,7 +388,7 @@ export default function SignaturePad({
               <InputLabel>نوع الخط</InputLabel>
               <Select
                 value={selectedFont}
-                onChange={(e) => setSelectedFont(e.target.value)}
+                onChange={e => setSelectedFont(e.target.value)}
                 label="نوع الخط"
               >
                 {SIGNATURE_FONTS.map(f => (
@@ -398,7 +403,7 @@ export default function SignaturePad({
               fullWidth
               placeholder="اكتب توقيعك هنا..."
               value={typedText}
-              onChange={(e) => setTypedText(e.target.value)}
+              onChange={e => setTypedText(e.target.value)}
               variant="outlined"
               inputProps={{
                 style: {
@@ -437,7 +442,9 @@ export default function SignaturePad({
 
             {/* Color picker */}
             <Stack direction="row" spacing={1} alignItems="center">
-              <Typography variant="body2" color="text.secondary">اللون:</Typography>
+              <Typography variant="body2" color="text.secondary">
+                اللون:
+              </Typography>
               {COLORS.map(c => (
                 <Box
                   key={c}

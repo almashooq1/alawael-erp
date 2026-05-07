@@ -585,9 +585,7 @@ export default function StatusBadge({
         },
         transition: 'all 0.2s ease',
         '&:hover': {
-          backgroundColor: isDark
-            ? `${config.darkBg}cc`
-            : `${config.bg}dd`,
+          backgroundColor: isDark ? `${config.darkBg}cc` : `${config.bg}dd`,
           boxShadow: `0 0 0 3px ${config.dot}22`,
         },
         ...sx,
@@ -595,13 +593,19 @@ export default function StatusBadge({
     />
   );
 
-  return tooltip ? <Tooltip title={tooltip} arrow>{chipEl}</Tooltip> : chipEl;
+  return tooltip ? (
+    <Tooltip title={tooltip} arrow>
+      {chipEl}
+    </Tooltip>
+  ) : (
+    chipEl
+  );
 }
 
 // ─── Named exports ─────────────────────────────────────────────────────────────
 
 /** Get the raw config object for a status key */
-export const getStatusConfig = (status) => STATUS_MAP[status] || STATUS_MAP.neutral;
+export const getStatusConfig = status => STATUS_MAP[status] || STATUS_MAP.neutral;
 
 /** List of all available status keys */
 export const statusKeys = Object.keys(STATUS_MAP);

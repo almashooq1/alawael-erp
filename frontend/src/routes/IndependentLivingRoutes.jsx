@@ -4,7 +4,9 @@
 import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
-const IndependentLivingDashboard = lazyWithRetry(() => import('../pages/independent-living/IndependentLivingDashboard'));
+const IndependentLivingDashboard = lazyWithRetry(
+  () => import('../pages/independent-living/IndependentLivingDashboard')
+);
 
 export default function IndependentLivingRoutes() {
   return (

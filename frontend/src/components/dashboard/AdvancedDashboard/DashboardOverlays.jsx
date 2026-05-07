@@ -3,8 +3,18 @@
  */
 import React from 'react';
 import {
-  Box, Typography, Fab, Zoom, Snackbar, Alert, Button,
-  Dialog, DialogTitle, DialogContent, IconButton, Chip,
+  Box,
+  Typography,
+  Fab,
+  Zoom,
+  Snackbar,
+  Alert,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  IconButton,
+  Chip,
 } from '@mui/material';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import CloseIcon from '@mui/icons-material/Close';
@@ -13,8 +23,14 @@ import { brandColors, gradients } from 'theme/palette';
 import { SECTIONS } from '../dashboardConstants';
 
 const DashboardOverlays = ({
-  showScrollTop, scrollToTop, error, dispatch, fetchData,
-  socketToast, showShortcuts, setShowShortcuts,
+  showScrollTop,
+  scrollToTop,
+  error,
+  dispatch,
+  fetchData,
+  socketToast,
+  showShortcuts,
+  setShowShortcuts,
 }) => (
   <>
     {/* ══════════════════ SCROLL TO TOP FAB ══════════════════ */}
@@ -29,7 +45,9 @@ const DashboardOverlays = ({
           left: 24,
           background: gradients.primary,
           color: '#fff',
-          '&:hover': { background: `linear-gradient(135deg, ${brandColors.primaryEnd} 0%, ${brandColors.primaryStart} 100%)` },
+          '&:hover': {
+            background: `linear-gradient(135deg, ${brandColors.primaryEnd} 0%, ${brandColors.primaryStart} 100%)`,
+          },
           boxShadow: '0 4px 20px rgba(102,126,234,0.4)',
         }}
       >
@@ -53,7 +71,10 @@ const DashboardOverlays = ({
           <Button
             color="inherit"
             size="small"
-            onClick={() => { dispatch({ type: 'CLEAR_ERROR' }); fetchData(true); }}
+            onClick={() => {
+              dispatch({ type: 'CLEAR_ERROR' });
+              fetchData(true);
+            }}
             sx={{ fontWeight: 700, fontSize: '0.72rem' }}
           >
             إعادة المحاولة
@@ -91,10 +112,14 @@ const DashboardOverlays = ({
       fullWidth
       PaperProps={{ sx: { borderRadius: 4, backdropFilter: 'blur(12px)' } }}
     >
-      <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pb: 1 }}>
+      <DialogTitle
+        sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pb: 1 }}
+      >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <KeyboardIcon sx={{ color: brandColors.primaryStart }} />
-          <Typography variant="h6" sx={{ fontWeight: 700, fontSize: '1rem' }}>اختصارات لوحة المفاتيح</Typography>
+          <Typography variant="h6" sx={{ fontWeight: 700, fontSize: '1rem' }}>
+            اختصارات لوحة المفاتيح
+          </Typography>
         </Box>
         <IconButton size="small" onClick={() => setShowShortcuts(false)} aria-label="إغلاق">
           <CloseIcon fontSize="small" />
@@ -107,14 +132,30 @@ const DashboardOverlays = ({
           { keys: 'Home', desc: 'التمرير إلى الأعلى' },
           ...SECTIONS.map((sec, i) => ({ keys: `${i + 1}`, desc: `الانتقال إلى ${sec.label}` })),
         ].map((shortcut, idx) => (
-          <Box key={idx} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', py: 0.8 }}>
-            <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.82rem' }}>{shortcut.desc}</Typography>
+          <Box
+            key={idx}
+            sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', py: 0.8 }}
+          >
+            <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.82rem' }}>
+              {shortcut.desc}
+            </Typography>
             <Box sx={{ display: 'flex', gap: 0.5 }}>
               {shortcut.keys.split(' + ').map((k, ki) => (
-                <Chip key={ki} label={k} size="small" variant="outlined" sx={{
-                  fontWeight: 700, fontSize: '0.7rem', height: 24, minWidth: 28,
-                  fontFamily: 'monospace', borderColor: 'rgba(102,126,234,0.3)', color: brandColors.primaryStart,
-                }} />
+                <Chip
+                  key={ki}
+                  label={k}
+                  size="small"
+                  variant="outlined"
+                  sx={{
+                    fontWeight: 700,
+                    fontSize: '0.7rem',
+                    height: 24,
+                    minWidth: 28,
+                    fontFamily: 'monospace',
+                    borderColor: 'rgba(102,126,234,0.3)',
+                    color: brandColors.primaryStart,
+                  }}
+                />
               ))}
             </Box>
           </Box>

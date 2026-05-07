@@ -10,27 +10,19 @@ import {
   TextField,
   Chip,
   Divider,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
   CircularProgress,
   Tooltip,
   Menu,
   MenuItem,
-  Badge,
   Collapse,
   Alert,
 } from '@mui/material';
 import {
   Comment as CommentIcon,
   Reply as ReplyIcon,
-  ThumbUp,
-  Favorite,
   EmojiEmotions,
   PushPin as PinIcon,
   CheckCircle,
-  Cancel,
   Send as SendIcon,
   ExpandMore,
   ExpandLess,
@@ -53,7 +45,16 @@ const REACTIONS = [
 /* ═══════════════════════════════════════════════════
  *  Single Comment component
  * ═══════════════════════════════════════════════════ */
-function CommentItem({ comment, onReply, onUpdate, onDelete, onReact, onResolve, onPin, depth = 0 }) {
+function CommentItem({
+  comment,
+  onReply,
+  onUpdate,
+  onDelete,
+  onReact,
+  onResolve,
+  onPin,
+  depth = 0,
+}) {
   const [showReplies, setShowReplies] = useState(true);
   const [replyText, setReplyText] = useState('');
   const [replying, setReplying] = useState(false);
@@ -77,7 +78,7 @@ function CommentItem({ comment, onReply, onUpdate, onDelete, onReact, onResolve,
 
   const replies = comment.replies || [];
   const reactionCounts = {};
-  (comment.reactions || []).forEach((r) => {
+  (comment.reactions || []).forEach(r => {
     reactionCounts[r.emoji] = (reactionCounts[r.emoji] || 0) + 1;
   });
 
@@ -87,7 +88,11 @@ function CommentItem({ comment, onReply, onUpdate, onDelete, onReact, onResolve,
         variant="outlined"
         sx={{
           p: 2,
-          borderRight: comment.isPinned ? '3px solid #f59e0b' : comment.isResolved ? '3px solid #22c55e' : 'none',
+          borderRight: comment.isPinned
+            ? '3px solid #f59e0b'
+            : comment.isResolved
+              ? '3px solid #22c55e'
+              : 'none',
           bgcolor: comment.isResolved ? 'rgba(34,197,94,0.04)' : 'transparent',
         }}
       >
@@ -105,27 +110,66 @@ function CommentItem({ comment, onReply, onUpdate, onDelete, onReact, onResolve,
               </Typography>
             </Box>
             {comment.isPinned && (
-              <Chip icon={<PinIcon />} label="مثبّت" size="small" color="warning" variant="outlined" />
+              <Chip
+                icon={<PinIcon />}
+                label="مثبّت"
+                size="small"
+                color="warning"
+                variant="outlined"
+              />
             )}
             {comment.isResolved && (
-              <Chip icon={<CheckCircle />} label="محلول" size="small" color="success" variant="outlined" />
+              <Chip
+                icon={<CheckCircle />}
+                label="محلول"
+                size="small"
+                color="success"
+                variant="outlined"
+              />
             )}
           </Stack>
-          <IconButton size="small" onClick={(e) => setMenuAnchor(e.currentTarget)}>
+          <IconButton size="small" onClick={e => setMenuAnchor(e.currentTarget)}>
             <MoreVert fontSize="small" />
           </IconButton>
-          <Menu anchorEl={menuAnchor} open={Boolean(menuAnchor)} onClose={() => setMenuAnchor(null)}>
-            <MenuItem onClick={() => { setEditing(true); setMenuAnchor(null); }}>
+          <Menu
+            anchorEl={menuAnchor}
+            open={Boolean(menuAnchor)}
+            onClose={() => setMenuAnchor(null)}
+          >
+            <MenuItem
+              onClick={() => {
+                setEditing(true);
+                setMenuAnchor(null);
+              }}
+            >
               <EditIcon fontSize="small" sx={{ ml: 1 }} /> تعديل
             </MenuItem>
-            <MenuItem onClick={() => { onPin(comment._id); setMenuAnchor(null); }}>
-              <PinIcon fontSize="small" sx={{ ml: 1 }} /> {comment.isPinned ? 'إلغاء التثبيت' : 'تثبيت'}
+            <MenuItem
+              onClick={() => {
+                onPin(comment._id);
+                setMenuAnchor(null);
+              }}
+            >
+              <PinIcon fontSize="small" sx={{ ml: 1 }} />{' '}
+              {comment.isPinned ? 'إلغاء التثبيت' : 'تثبيت'}
             </MenuItem>
-            <MenuItem onClick={() => { onResolve(comment._id, !comment.isResolved); setMenuAnchor(null); }}>
-              <CheckCircle fontSize="small" sx={{ ml: 1 }} /> {comment.isResolved ? 'إعادة فتح' : 'حل'}
+            <MenuItem
+              onClick={() => {
+                onResolve(comment._id, !comment.isResolved);
+                setMenuAnchor(null);
+              }}
+            >
+              <CheckCircle fontSize="small" sx={{ ml: 1 }} />{' '}
+              {comment.isResolved ? 'إعادة فتح' : 'حل'}
             </MenuItem>
             <Divider />
-            <MenuItem onClick={() => { onDelete(comment._id); setMenuAnchor(null); }} sx={{ color: 'error.main' }}>
+            <MenuItem
+              onClick={() => {
+                onDelete(comment._id);
+                setMenuAnchor(null);
+              }}
+              sx={{ color: 'error.main' }}
+            >
               <DeleteIcon fontSize="small" sx={{ ml: 1 }} /> حذف
             </MenuItem>
           </Menu>
@@ -135,11 +179,18 @@ function CommentItem({ comment, onReply, onUpdate, onDelete, onReact, onResolve,
         {editing ? (
           <Stack direction="row" spacing={1} mt={1}>
             <TextField
-              fullWidth size="small" multiline value={editText}
-              onChange={(e) => setEditText(e.target.value)}
+              fullWidth
+              size="small"
+              multiline
+              value={editText}
+              onChange={e => setEditText(e.target.value)}
             />
-            <Button size="small" onClick={handleSaveEdit}>حفظ</Button>
-            <Button size="small" color="inherit" onClick={() => setEditing(false)}>إلغاء</Button>
+            <Button size="small" onClick={handleSaveEdit}>
+              حفظ
+            </Button>
+            <Button size="small" color="inherit" onClick={() => setEditing(false)}>
+              إلغاء
+            </Button>
           </Stack>
         ) : (
           <Typography variant="body2" sx={{ mt: 1, whiteSpace: 'pre-line' }}>
@@ -160,17 +211,24 @@ function CommentItem({ comment, onReply, onUpdate, onDelete, onReact, onResolve,
             />
           ))}
           <Tooltip title="تفاعل">
-            <IconButton size="small" onClick={(e) => setReactionAnchor(e.currentTarget)}>
+            <IconButton size="small" onClick={e => setReactionAnchor(e.currentTarget)}>
               <EmojiEmotions fontSize="small" />
             </IconButton>
           </Tooltip>
-          <Menu anchorEl={reactionAnchor} open={Boolean(reactionAnchor)} onClose={() => setReactionAnchor(null)}>
+          <Menu
+            anchorEl={reactionAnchor}
+            open={Boolean(reactionAnchor)}
+            onClose={() => setReactionAnchor(null)}
+          >
             <Stack direction="row" spacing={0.5} sx={{ px: 1 }}>
-              {REACTIONS.map((r) => (
+              {REACTIONS.map(r => (
                 <Tooltip key={r.emoji} title={r.label}>
                   <IconButton
                     size="small"
-                    onClick={() => { onReact(comment._id, r.emoji); setReactionAnchor(null); }}
+                    onClick={() => {
+                      onReact(comment._id, r.emoji);
+                      setReactionAnchor(null);
+                    }}
                   >
                     {r.emoji}
                   </IconButton>
@@ -186,7 +244,11 @@ function CommentItem({ comment, onReply, onUpdate, onDelete, onReact, onResolve,
             رد
           </Button>
           {replies.length > 0 && (
-            <Button size="small" onClick={() => setShowReplies(!showReplies)} endIcon={showReplies ? <ExpandLess /> : <ExpandMore />}>
+            <Button
+              size="small"
+              onClick={() => setShowReplies(!showReplies)}
+              endIcon={showReplies ? <ExpandLess /> : <ExpandMore />}
+            >
               {replies.length} رد
             </Button>
           )}
@@ -200,8 +262,8 @@ function CommentItem({ comment, onReply, onUpdate, onDelete, onReact, onResolve,
               size="small"
               placeholder="اكتب رداً..."
               value={replyText}
-              onChange={(e) => setReplyText(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSubmitReply()}
+              onChange={e => setReplyText(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleSubmitReply()}
             />
             <IconButton color="primary" onClick={handleSubmitReply}>
               <SendIcon />
@@ -212,7 +274,7 @@ function CommentItem({ comment, onReply, onUpdate, onDelete, onReact, onResolve,
 
       {/* Nested replies */}
       <Collapse in={showReplies}>
-        {replies.map((reply) => (
+        {replies.map(reply => (
           <CommentItem
             key={reply._id}
             comment={reply}
@@ -259,7 +321,9 @@ export default function CommentsPanel({ documentId }) {
     }
   }, [documentId]);
 
-  useEffect(() => { loadComments(); }, [loadComments]);
+  useEffect(() => {
+    loadComments();
+  }, [loadComments]);
 
   const handleAddComment = async () => {
     if (!newComment.trim()) return;
@@ -279,28 +343,36 @@ export default function CommentsPanel({ documentId }) {
     try {
       await commentsApi.add({ documentId, content, parentId, type: 'reply' });
       loadComments();
-    } catch (err) { logger.error(err); }
+    } catch (err) {
+      logger.error(err);
+    }
   };
 
   const handleUpdate = async (commentId, data) => {
     try {
       await commentsApi.update(commentId, data);
       loadComments();
-    } catch (err) { logger.error(err); }
+    } catch (err) {
+      logger.error(err);
+    }
   };
 
-  const handleDelete = async (commentId) => {
+  const handleDelete = async commentId => {
     try {
       await commentsApi.delete(commentId);
       loadComments();
-    } catch (err) { logger.error(err); }
+    } catch (err) {
+      logger.error(err);
+    }
   };
 
   const handleReact = async (commentId, emoji) => {
     try {
       await commentsApi.addReaction(commentId, emoji);
       loadComments();
-    } catch (err) { logger.error(err); }
+    } catch (err) {
+      logger.error(err);
+    }
   };
 
   const handleResolve = async (commentId, resolve) => {
@@ -308,14 +380,18 @@ export default function CommentsPanel({ documentId }) {
       if (resolve) await commentsApi.resolve(commentId);
       else await commentsApi.unresolve(commentId);
       loadComments();
-    } catch (err) { logger.error(err); }
+    } catch (err) {
+      logger.error(err);
+    }
   };
 
-  const handlePin = async (commentId) => {
+  const handlePin = async commentId => {
     try {
       await commentsApi.togglePin(commentId);
       loadComments();
-    } catch (err) { logger.error(err); }
+    } catch (err) {
+      logger.error(err);
+    }
   };
 
   if (!documentId) return <Alert severity="info">اختر مستنداً لعرض التعليقات</Alert>;
@@ -328,12 +404,21 @@ export default function CommentsPanel({ documentId }) {
           <CommentIcon color="primary" />
           <Typography variant="h6">التعليقات</Typography>
           {stats && (
-            <Chip label={`${stats.totalComments ?? 0} تعليق`} size="small" color="primary" variant="outlined" />
+            <Chip
+              label={`${stats.totalComments ?? 0} تعليق`}
+              size="small"
+              color="primary"
+              variant="outlined"
+            />
           )}
         </Stack>
       </Stack>
 
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
 
       {/* New comment */}
       <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
@@ -343,7 +428,7 @@ export default function CommentsPanel({ documentId }) {
           minRows={2}
           placeholder="اكتب تعليقاً..."
           value={newComment}
-          onChange={(e) => setNewComment(e.target.value)}
+          onChange={e => setNewComment(e.target.value)}
           sx={{ mb: 1 }}
         />
         <Stack direction="row" justifyContent="flex-end">
@@ -362,7 +447,7 @@ export default function CommentsPanel({ documentId }) {
 
       {/* Comments list */}
       <Stack spacing={1}>
-        {comments.map((comment) => (
+        {comments.map(comment => (
           <CommentItem
             key={comment._id}
             comment={comment}

@@ -17,6 +17,7 @@ import logger from './utils/logger';
 const LandingPage = React.lazy(() => import('./pages/Landing/LandingPage'));
 const LoginPage = React.lazy(() => import('./pages/Landing/LoginPage'));
 const NafathLogin = React.lazy(() => import('./pages/Auth/NafathLogin'));
+const SimpleLogin = React.lazy(() => import('./pages/common/SimpleLogin'));
 const RegisterPage = React.lazy(() => import('./pages/Landing/RegisterPage'));
 const ArticleList = React.lazy(() => import('./pages/Articles/ArticleList'));
 const ArticleDetail = React.lazy(() => import('./pages/Articles/ArticleDetail'));
@@ -108,6 +109,18 @@ function AppRoutes() {
           !currentUser ? (
             <Suspense fallback={<div style={{ minHeight: '100vh' }} />}>
               <NafathLogin />
+            </Suspense>
+          ) : (
+            <Navigate to="/dashboard" replace />
+          )
+        }
+      />
+      <Route
+        path="/login/simple"
+        element={
+          !currentUser ? (
+            <Suspense fallback={<div style={{ minHeight: '100vh' }} />}>
+              <SimpleLogin />
             </Suspense>
           ) : (
             <Navigate to="/dashboard" replace />

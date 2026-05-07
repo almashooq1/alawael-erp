@@ -4,7 +4,9 @@
 import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
-const FamilySatisfactionDashboard = lazyWithRetry(() => import('../pages/familySatisfaction/FamilySatisfactionDashboard'));
+const FamilySatisfactionDashboard = lazyWithRetry(
+  () => import('../pages/familySatisfaction/FamilySatisfactionDashboard')
+);
 
 export default function FamilySatisfactionRoutes() {
   return (

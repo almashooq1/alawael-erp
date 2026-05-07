@@ -20,8 +20,6 @@ import {
   ListItemText,
   ListItemSecondaryAction,
   Divider,
-  Switch,
-  FormControlLabel,
   Select,
   MenuItem,
   InputLabel,
@@ -53,9 +51,19 @@ import logger from '../../utils/logger';
 
 const PERMISSIONS = [
   { value: 'view', label: 'عرض فقط', icon: <Visibility fontSize="small" />, color: 'info' },
-  { value: 'comment', label: 'عرض وتعليق', icon: <CommentIcon fontSize="small" />, color: 'primary' },
+  {
+    value: 'comment',
+    label: 'عرض وتعليق',
+    icon: <CommentIcon fontSize="small" />,
+    color: 'primary',
+  },
   { value: 'edit', label: 'تعديل', icon: <EditIcon fontSize="small" />, color: 'warning' },
-  { value: 'admin', label: 'إدارة كاملة', icon: <AdminPanelSettings fontSize="small" />, color: 'error' },
+  {
+    value: 'admin',
+    label: 'إدارة كاملة',
+    icon: <AdminPanelSettings fontSize="small" />,
+    color: 'error',
+  },
 ];
 
 /* ═══════════════════════════════════════════════════
@@ -185,7 +193,7 @@ export default function SharingDialog({ open, onClose, documentId, documentTitle
   };
 
   // ── Revoke share ────────────────────
-  const handleRevoke = async (shareId) => {
+  const handleRevoke = async shareId => {
     try {
       await sharingApi.revokeShare(shareId);
       loadShares();
@@ -195,7 +203,7 @@ export default function SharingDialog({ open, onClose, documentId, documentTitle
   };
 
   // ── Copy link ────────────────────
-  const copyToClipboard = (text) => {
+  const copyToClipboard = text => {
     navigator.clipboard.writeText(text);
     setSuccess('تم نسخ الرابط');
     setTimeout(() => setSuccess(null), 2000);
@@ -209,16 +217,28 @@ export default function SharingDialog({ open, onClose, documentId, documentTitle
             <ShareIcon color="primary" />
             <Typography variant="h6">مشاركة المستند</Typography>
           </Stack>
-          <IconButton onClick={onClose}><CloseIcon /></IconButton>
+          <IconButton onClick={onClose}>
+            <CloseIcon />
+          </IconButton>
         </Stack>
         {documentTitle && (
-          <Typography variant="body2" color="text.secondary">{documentTitle}</Typography>
+          <Typography variant="body2" color="text.secondary">
+            {documentTitle}
+          </Typography>
         )}
       </DialogTitle>
 
       <DialogContent dividers>
-        {error && <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>{error}</Alert>}
-        {success && <Alert severity="success" sx={{ mb: 2 }} onClose={() => setSuccess(null)}>{success}</Alert>}
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
+            {error}
+          </Alert>
+        )}
+        {success && (
+          <Alert severity="success" sx={{ mb: 2 }} onClose={() => setSuccess(null)}>
+            {success}
+          </Alert>
+        )}
 
         <Tabs value={tab} onChange={(_, v) => setTab(v)} variant="fullWidth">
           <Tab icon={<PersonIcon />} label="مشاركة مع مستخدم" />
@@ -233,19 +253,23 @@ export default function SharingDialog({ open, onClose, documentId, documentTitle
               fullWidth
               label="معرّف المستخدم"
               value={targetUserId}
-              onChange={(e) => setTargetUserId(e.target.value)}
+              onChange={e => setTargetUserId(e.target.value)}
               placeholder="أدخل معرّف المستخدم"
             />
             <TextField
               fullWidth
               label="اسم المستخدم (اختياري)"
               value={targetUserName}
-              onChange={(e) => setTargetUserName(e.target.value)}
+              onChange={e => setTargetUserName(e.target.value)}
             />
             <FormControl fullWidth>
               <InputLabel>الصلاحيات</InputLabel>
-              <Select value={permission} label="الصلاحيات" onChange={(e) => setPermission(e.target.value)}>
-                {PERMISSIONS.map((p) => (
+              <Select
+                value={permission}
+                label="الصلاحيات"
+                onChange={e => setPermission(e.target.value)}
+              >
+                {PERMISSIONS.map(p => (
                   <MenuItem key={p.value} value={p.value}>
                     <Stack direction="row" spacing={1} alignItems="center">
                       {p.icon}
@@ -261,7 +285,7 @@ export default function SharingDialog({ open, onClose, documentId, documentTitle
               multiline
               rows={2}
               value={message}
-              onChange={(e) => setMessage(e.target.value)}
+              onChange={e => setMessage(e.target.value)}
               placeholder="أرسل رسالة مع المشاركة..."
             />
             <Button
@@ -282,18 +306,22 @@ export default function SharingDialog({ open, onClose, documentId, documentTitle
               fullWidth
               label="معرّف القسم"
               value={departmentId}
-              onChange={(e) => setDepartmentId(e.target.value)}
+              onChange={e => setDepartmentId(e.target.value)}
             />
             <TextField
               fullWidth
               label="اسم القسم"
               value={departmentName}
-              onChange={(e) => setDepartmentName(e.target.value)}
+              onChange={e => setDepartmentName(e.target.value)}
             />
             <FormControl fullWidth>
               <InputLabel>الصلاحيات</InputLabel>
-              <Select value={deptPermission} label="الصلاحيات" onChange={(e) => setDeptPermission(e.target.value)}>
-                {PERMISSIONS.map((p) => (
+              <Select
+                value={deptPermission}
+                label="الصلاحيات"
+                onChange={e => setDeptPermission(e.target.value)}
+              >
+                {PERMISSIONS.map(p => (
                   <MenuItem key={p.value} value={p.value}>
                     <Stack direction="row" spacing={1} alignItems="center">
                       {p.icon}
@@ -322,9 +350,13 @@ export default function SharingDialog({ open, onClose, documentId, documentTitle
               label="كلمة مرور (اختياري)"
               type="password"
               value={linkPassword}
-              onChange={(e) => setLinkPassword(e.target.value)}
+              onChange={e => setLinkPassword(e.target.value)}
               InputProps={{
-                startAdornment: <InputAdornment position="start"><LockIcon /></InputAdornment>,
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <LockIcon />
+                  </InputAdornment>
+                ),
               }}
             />
             <TextField
@@ -332,9 +364,13 @@ export default function SharingDialog({ open, onClose, documentId, documentTitle
               label="مدة الصلاحية (أيام)"
               type="number"
               value={linkExpiry}
-              onChange={(e) => setLinkExpiry(parseInt(e.target.value) || 7)}
+              onChange={e => setLinkExpiry(parseInt(e.target.value) || 7)}
               InputProps={{
-                startAdornment: <InputAdornment position="start"><ScheduleIcon /></InputAdornment>,
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <ScheduleIcon />
+                  </InputAdornment>
+                ),
               }}
             />
             <TextField
@@ -342,7 +378,7 @@ export default function SharingDialog({ open, onClose, documentId, documentTitle
               label="الحد الأقصى للوصول (0 = غير محدود)"
               type="number"
               value={maxAccess}
-              onChange={(e) => setMaxAccess(parseInt(e.target.value) || 0)}
+              onChange={e => setMaxAccess(parseInt(e.target.value) || 0)}
             />
             <Button
               variant="contained"
@@ -356,7 +392,9 @@ export default function SharingDialog({ open, onClose, documentId, documentTitle
 
             {publicLink && (
               <Paper variant="outlined" sx={{ p: 2 }}>
-                <Typography variant="subtitle2" gutterBottom>🔗 الرابط العام</Typography>
+                <Typography variant="subtitle2" gutterBottom>
+                  🔗 الرابط العام
+                </Typography>
                 <Stack direction="row" spacing={1} alignItems="center">
                   <TextField
                     fullWidth
@@ -392,8 +430,23 @@ export default function SharingDialog({ open, onClose, documentId, documentTitle
               <React.Fragment key={share._id || i}>
                 <ListItem>
                   <ListItemAvatar>
-                    <Avatar sx={{ bgcolor: share.shareType === 'public' ? 'secondary.main' : share.shareType === 'department' ? 'info.main' : 'primary.main' }}>
-                      {share.shareType === 'public' ? <PublicIcon /> : share.shareType === 'department' ? <GroupIcon /> : <PersonIcon />}
+                    <Avatar
+                      sx={{
+                        bgcolor:
+                          share.shareType === 'public'
+                            ? 'secondary.main'
+                            : share.shareType === 'department'
+                              ? 'info.main'
+                              : 'primary.main',
+                      }}
+                    >
+                      {share.shareType === 'public' ? (
+                        <PublicIcon />
+                      ) : share.shareType === 'department' ? (
+                        <GroupIcon />
+                      ) : (
+                        <PersonIcon />
+                      )}
                     </Avatar>
                   </ListItemAvatar>
                   <ListItemText
@@ -403,13 +456,18 @@ export default function SharingDialog({ open, onClose, documentId, documentTitle
                           {share.shareType === 'public'
                             ? 'رابط عام'
                             : share.shareType === 'department'
-                            ? share.targetDepartmentName || share.targetDepartmentId
-                            : share.targetUserName || share.targetUserId}
+                              ? share.targetDepartmentName || share.targetDepartmentId
+                              : share.targetUserName || share.targetUserId}
                         </span>
                         <Chip
                           size="small"
-                          label={PERMISSIONS.find((p) => p.value === share.permission)?.label || share.permission}
-                          color={PERMISSIONS.find((p) => p.value === share.permission)?.color || 'default'}
+                          label={
+                            PERMISSIONS.find(p => p.value === share.permission)?.label ||
+                            share.permission
+                          }
+                          color={
+                            PERMISSIONS.find(p => p.value === share.permission)?.color || 'default'
+                          }
                           variant="outlined"
                         />
                       </Stack>
@@ -417,7 +475,11 @@ export default function SharingDialog({ open, onClose, documentId, documentTitle
                     secondary={
                       <Stack direction="row" spacing={1} component="span">
                         <span>{new Date(share.createdAt).toLocaleString('ar-SA')}</span>
-                        {share.expiresAt && <span>• ينتهي {new Date(share.expiresAt).toLocaleDateString('ar-SA')}</span>}
+                        {share.expiresAt && (
+                          <span>
+                            • ينتهي {new Date(share.expiresAt).toLocaleDateString('ar-SA')}
+                          </span>
+                        )}
                         {share.accessCount > 0 && <span>• {share.accessCount} زيارة</span>}
                       </Stack>
                     }

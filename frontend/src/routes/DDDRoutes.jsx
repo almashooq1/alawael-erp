@@ -20,8 +20,17 @@ const WorkflowPage = lazy(() => import('../pages/workflow/WorkflowPage'));
 const QualityPage = lazy(() => import('../pages/Quality/QualityPage'));
 const ReportsPage = lazy(() => import('../pages/Reports/ReportsPage'));
 
-/* Domain pages from factory */
-const _DomainPages = lazy(() => import('../pages/domains/DomainPages'));
+/* Dedicated full-featured domain pages */
+const GroupTherapyPage = lazy(() => import('../pages/group-therapy/GroupTherapyPage'));
+const TeleRehabPage = lazy(() => import('../pages/tele-rehab/TeleRehabPage'));
+const ARVRRehabPage = lazy(() => import('../pages/ar-vr-rehab/ARVRRehabPage'));
+const FieldTrainingPage = lazy(() => import('../pages/field-training/FieldTrainingPage'));
+const GoalsPage = lazy(() => import('../pages/goals/GoalsPage'));
+const CarePlanPage = lazy(() => import('../pages/care-plans/CarePlanPage'));
+const ResearchDashboard = lazy(() => import('../pages/research/ResearchDashboard'));
+const FamilyEngagementPage = lazy(() => import('../pages/family/FamilyEngagementPage'));
+
+/* Domain pages from factory (for domains without dedicated pages) */
 
 /* ── Loading fallback ── */
 const PageLoader = () => (
@@ -68,25 +77,22 @@ export default function DDDRoutes() {
           <Route path="quality" element={<QualityPage />} />
           <Route path="reports" element={<ReportsPage />} />
 
-          {/* Domain pages (factory-generated) */}
+          {/* Domain pages — dedicated full-featured pages where available */}
           <Route path="assessments" element={<DomainPageWrapper pageName="AssessmentsPage" />} />
-          <Route path="care-plans" element={<DomainPageWrapper pageName="CarePlansPage" />} />
-          <Route path="goals" element={<DomainPageWrapper pageName="GoalsPage" />} />
-          <Route path="group-therapy" element={<DomainPageWrapper pageName="GroupTherapyPage" />} />
-          <Route path="tele-rehab" element={<DomainPageWrapper pageName="TeleRehabPage" />} />
-          <Route path="ar-vr" element={<DomainPageWrapper pageName="ARVRPage" />} />
+          <Route path="care-plans" element={<CarePlanPage />} />
+          <Route path="goals" element={<GoalsPage />} />
+          <Route path="group-therapy" element={<GroupTherapyPage />} />
+          <Route path="tele-rehab" element={<TeleRehabPage />} />
+          <Route path="ar-vr" element={<ARVRRehabPage />} />
           <Route path="behavior" element={<DomainPageWrapper pageName="BehaviorPage" />} />
-          <Route path="family" element={<DomainPageWrapper pageName="FamilyPage" />} />
+          <Route path="family" element={<FamilyEngagementPage />} />
           <Route path="programs" element={<DomainPageWrapper pageName="ProgramsPage" />} />
           <Route
             path="ai-recommendations"
             element={<DomainPageWrapper pageName="AIRecommendationsPage" />}
           />
-          <Route path="research" element={<DomainPageWrapper pageName="ResearchPage" />} />
-          <Route
-            path="field-training"
-            element={<DomainPageWrapper pageName="FieldTrainingPage" />}
-          />
+          <Route path="research" element={<ResearchDashboard />} />
+          <Route path="field-training" element={<FieldTrainingPage />} />
 
           {/* Phase 29 – Workforce Development */}
           <Route

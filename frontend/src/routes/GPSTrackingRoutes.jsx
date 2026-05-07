@@ -4,7 +4,9 @@
 import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
-const GPSTrackingDashboard = lazyWithRetry(() => import('../pages/gps-tracking/GPSTrackingDashboard'));
+const GPSTrackingDashboard = lazyWithRetry(
+  () => import('../pages/gps-tracking/GPSTrackingDashboard')
+);
 
 export default function GPSTrackingRoutes() {
   return (

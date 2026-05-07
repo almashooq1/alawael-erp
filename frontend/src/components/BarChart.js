@@ -34,7 +34,10 @@ const BarChart = ({ data = [], labels = [], height = 200, color = '#0f766e' }) =
                 height: '100%',
               }}
             >
-              <Typography variant="caption" sx={{ mb: 0.5, fontWeight: 600, color: 'text.secondary' }}>
+              <Typography
+                variant="caption"
+                sx={{ mb: 0.5, fontWeight: 600, color: 'text.secondary' }}
+              >
                 {value}
               </Typography>
               <Box
@@ -51,7 +54,10 @@ const BarChart = ({ data = [], labels = [], height = 200, color = '#0f766e' }) =
                 }}
               />
               {labels[idx] && (
-                <Typography variant="caption" sx={{ mt: 1, color: 'text.secondary', fontSize: '0.7rem' }}>
+                <Typography
+                  variant="caption"
+                  sx={{ mt: 1, color: 'text.secondary', fontSize: '0.7rem' }}
+                >
                   {labels[idx]}
                 </Typography>
               )}

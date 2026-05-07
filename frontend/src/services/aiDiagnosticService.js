@@ -18,14 +18,14 @@ const aiDiagnosticService = {
 
   /* ── Beneficiaries ── */
   listBeneficiaries: (params = {}) => api.get(`${BASE}/beneficiaries`, { params }),
-  getBeneficiary: (id) => api.get(`${BASE}/beneficiaries/${id}`),
-  createBeneficiary: (data) => api.post(`${BASE}/beneficiaries`, data),
+  getBeneficiary: id => api.get(`${BASE}/beneficiaries/${id}`),
+  createBeneficiary: data => api.post(`${BASE}/beneficiaries`, data),
   updateBeneficiary: (id, data) => api.put(`${BASE}/beneficiaries/${id}`, data),
 
   /* ── Assessments ── */
   listAssessments: (beneficiaryId, params = {}) =>
     api.get(`${BASE}/beneficiaries/${beneficiaryId}/assessments`, { params }),
-  getAssessment: (id) => api.get(`${BASE}/assessments/${id}`),
+  getAssessment: id => api.get(`${BASE}/assessments/${id}`),
   createAssessment: (beneficiaryId, data) =>
     api.post(`${BASE}/beneficiaries/${beneficiaryId}/assessments`, data),
   compareAssessments: (beneficiaryId, id1, id2) =>
@@ -34,7 +34,7 @@ const aiDiagnosticService = {
   /* ── Sessions ── */
   listSessions: (beneficiaryId, params = {}) =>
     api.get(`${BASE}/beneficiaries/${beneficiaryId}/sessions`, { params }),
-  getSession: (id) => api.get(`${BASE}/sessions/${id}`),
+  getSession: id => api.get(`${BASE}/sessions/${id}`),
   createSession: (beneficiaryId, data) =>
     api.post(`${BASE}/beneficiaries/${beneficiaryId}/sessions`, data),
   completeSession: (id, outcomes) => api.put(`${BASE}/sessions/${id}/complete`, outcomes),
@@ -42,7 +42,7 @@ const aiDiagnosticService = {
   /* ── Goals ── */
   listGoals: (beneficiaryId, params = {}) =>
     api.get(`${BASE}/beneficiaries/${beneficiaryId}/goals`, { params }),
-  getGoal: (id) => api.get(`${BASE}/goals/${id}`),
+  getGoal: id => api.get(`${BASE}/goals/${id}`),
   createGoal: (beneficiaryId, data) =>
     api.post(`${BASE}/beneficiaries/${beneficiaryId}/goals`, data),
   updateGoalProgress: (id, progress, milestoneIndex) =>
@@ -50,24 +50,20 @@ const aiDiagnosticService = {
 
   /* ── Treatment Plans ── */
   listTreatmentPlans: (params = {}) => api.get(`${BASE}/treatment-plans`, { params }),
-  getTreatmentPlan: (id) => api.get(`${BASE}/treatment-plans/${id}`),
-  createTreatmentPlan: (data) => api.post(`${BASE}/treatment-plans`, data),
+  getTreatmentPlan: id => api.get(`${BASE}/treatment-plans/${id}`),
+  createTreatmentPlan: data => api.post(`${BASE}/treatment-plans`, data),
   updateTreatmentPlan: (id, data) => api.put(`${BASE}/treatment-plans/${id}`, data),
-  optimizeTreatmentPlan: (id) => api.post(`${BASE}/treatment-plans/${id}/optimize`),
+  optimizeTreatmentPlan: id => api.post(`${BASE}/treatment-plans/${id}/optimize`),
 
   /* ── AI Analysis ── */
-  analyzeProgress: (beneficiaryId) =>
-    api.get(`${BASE}/beneficiaries/${beneficiaryId}/analysis`),
-  getRecommendations: (beneficiaryId) =>
+  analyzeProgress: beneficiaryId => api.get(`${BASE}/beneficiaries/${beneficiaryId}/analysis`),
+  getRecommendations: beneficiaryId =>
     api.get(`${BASE}/beneficiaries/${beneficiaryId}/recommendations`),
   predictOutcome: (beneficiaryId, goalId) =>
     api.get(`${BASE}/beneficiaries/${beneficiaryId}/predictions/${goalId}`),
-  detectPatterns: (beneficiaryId) =>
-    api.get(`${BASE}/beneficiaries/${beneficiaryId}/patterns`),
-  assessRisk: (beneficiaryId) =>
-    api.get(`${BASE}/beneficiaries/${beneficiaryId}/risk`),
-  generateReport: (beneficiaryId) =>
-    api.get(`${BASE}/beneficiaries/${beneficiaryId}/report`),
+  detectPatterns: beneficiaryId => api.get(`${BASE}/beneficiaries/${beneficiaryId}/patterns`),
+  assessRisk: beneficiaryId => api.get(`${BASE}/beneficiaries/${beneficiaryId}/risk`),
+  generateReport: beneficiaryId => api.get(`${BASE}/beneficiaries/${beneficiaryId}/report`),
 
   /* ── Behavior Logs ── */
   listBehaviorLogs: (beneficiaryId, params = {}) =>
@@ -77,7 +73,7 @@ const aiDiagnosticService = {
 
   /* ── Alerts ── */
   listAlerts: (params = {}) => api.get(`${BASE}/alerts`, { params }),
-  resolveAlert: (id) => api.put(`${BASE}/alerts/${id}/resolve`),
+  resolveAlert: id => api.put(`${BASE}/alerts/${id}/resolve`),
 };
 
 export default aiDiagnosticService;

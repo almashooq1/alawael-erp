@@ -1,23 +1,66 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Box, Typography, Card, CardContent, Stack, Chip, Avatar, IconButton, Button,
-  CircularProgress, Alert, TextField, Dialog, DialogTitle, DialogContent,
-  DialogActions, Paper, Grid, Tooltip, InputAdornment, Autocomplete,
-  List, ListItem, ListItemAvatar, ListItemText, Divider, Menu, MenuItem,
+  Box,
+  Typography,
+  Card,
+  CardContent,
+  Stack,
+  Chip,
+  Avatar,
+  IconButton,
+  Button,
+  CircularProgress,
+  Alert,
+  TextField,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Paper,
+  Grid,
+  Tooltip,
+  InputAdornment,
+  Autocomplete,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  Divider,
+  Menu,
+  MenuItem,
 } from '@mui/material';
 import {
-  Label as TagIcon, Add as AddIcon, Refresh as RefreshIcon,
-  Edit as EditIcon, Delete as DeleteIcon, Search as SearchIcon,
-  Merge as MergeIcon, CloudQueue as CloudIcon,
-  Circle as CircleIcon, Category as CategoryIcon,
+  Label as TagIcon,
+  Add as AddIcon,
+  Refresh as RefreshIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Search as SearchIcon,
+  Merge as MergeIcon,
+  CloudQueue as CloudIcon,
+  Circle as CircleIcon,
+  Category as CategoryIcon,
 } from '@mui/icons-material';
 import { tagsApi } from '../../services/documentProPhase4Service';
 import logger from '../../utils/logger';
 
 const PRESET_COLORS = [
-  '#ef4444','#f97316','#f59e0b','#eab308','#84cc16','#22c55e',
-  '#14b8a6','#06b6d4','#3b82f6','#6366f1','#8b5cf6','#a855f7',
-  '#d946ef','#ec4899','#f43f5e','#64748b',
+  '#ef4444',
+  '#f97316',
+  '#f59e0b',
+  '#eab308',
+  '#84cc16',
+  '#22c55e',
+  '#14b8a6',
+  '#06b6d4',
+  '#3b82f6',
+  '#6366f1',
+  '#8b5cf6',
+  '#a855f7',
+  '#d946ef',
+  '#ec4899',
+  '#f43f5e',
+  '#64748b',
 ];
 
 /**
@@ -62,7 +105,9 @@ export default function TagsManager({ documentId, onTagsChange }) {
     }
   }, [documentId, searchTerm]);
 
-  useEffect(() => { loadData(); }, [loadData]);
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   // Tag CRUD
   const handleCreate = async () => {
@@ -77,7 +122,7 @@ export default function TagsManager({ documentId, onTagsChange }) {
     }
   };
 
-  const handleDelete = async (tagId) => {
+  const handleDelete = async tagId => {
     try {
       await tagsApi.delete(tagId);
       setMenuAnchor(null);
@@ -99,9 +144,9 @@ export default function TagsManager({ documentId, onTagsChange }) {
     }
   };
 
-  const handleToggleTag = async (tagId) => {
+  const handleToggleTag = async tagId => {
     if (!documentId) return;
-    const isAttached = docTags.some((t) => (t._id || t.id) === tagId);
+    const isAttached = docTags.some(t => (t._id || t.id) === tagId);
     try {
       if (isAttached) {
         await tagsApi.removeFromDocument(documentId, tagId);
@@ -115,8 +160,8 @@ export default function TagsManager({ documentId, onTagsChange }) {
     }
   };
 
-  const filteredTags = tags.filter((t) =>
-    !searchTerm || t.name?.includes(searchTerm) || t.nameAr?.includes(searchTerm)
+  const filteredTags = tags.filter(
+    t => !searchTerm || t.name?.includes(searchTerm) || t.nameAr?.includes(searchTerm)
   );
 
   return (
@@ -129,23 +174,49 @@ export default function TagsManager({ documentId, onTagsChange }) {
           <Chip label={`${tags.length} وسم`} size="small" variant="outlined" />
         </Stack>
         <Stack direction="row" spacing={1}>
-          <Button size="small" startIcon={<AddIcon />} variant="contained" onClick={() => setCreateOpen(true)}>
+          <Button
+            size="small"
+            startIcon={<AddIcon />}
+            variant="contained"
+            onClick={() => setCreateOpen(true)}
+          >
             وسم جديد
           </Button>
-          <Button size="small" startIcon={<MergeIcon />} variant="outlined" onClick={() => setMergeOpen(true)}>
+          <Button
+            size="small"
+            startIcon={<MergeIcon />}
+            variant="outlined"
+            onClick={() => setMergeOpen(true)}
+          >
             دمج
           </Button>
-          <IconButton size="small" onClick={loadData}><RefreshIcon /></IconButton>
+          <IconButton size="small" onClick={loadData}>
+            <RefreshIcon />
+          </IconButton>
         </Stack>
       </Stack>
 
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
 
       {/* Search */}
       <TextField
-        fullWidth size="small" placeholder="بحث في الوسوم..." value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)} sx={{ mb: 2 }}
-        InputProps={{ startAdornment: <InputAdornment position="start"><SearchIcon /></InputAdornment> }}
+        fullWidth
+        size="small"
+        placeholder="بحث في الوسوم..."
+        value={searchTerm}
+        onChange={e => setSearchTerm(e.target.value)}
+        sx={{ mb: 2 }}
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <SearchIcon />
+            </InputAdornment>
+          ),
+        }}
       />
 
       {loading && <CircularProgress sx={{ display: 'block', mx: 'auto', my: 2 }} />}
@@ -158,9 +229,9 @@ export default function TagsManager({ documentId, onTagsChange }) {
             <Typography variant="subtitle2">سحابة الوسوم</Typography>
           </Stack>
           <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
-            {cloud.map((tag) => {
+            {cloud.map(tag => {
               const size = Math.min(Math.max(tag.count || 1, 1), 5);
-              const isDocTag = docTags.some((dt) => (dt._id || dt.id) === (tag._id || tag.id));
+              const isDocTag = docTags.some(dt => (dt._id || dt.id) === (tag._id || tag.id));
               return (
                 <Tooltip key={tag._id || tag.id} title={`${tag.count || 0} مستند`}>
                   <Chip
@@ -192,11 +263,15 @@ export default function TagsManager({ documentId, onTagsChange }) {
             <Typography variant="subtitle2">التصنيفات</Typography>
           </Stack>
           <Grid container spacing={1}>
-            {categories.map((cat) => (
+            {categories.map(cat => (
               <Grid item xs={6} sm={4} md={3} key={cat._id || cat.id}>
                 <Card variant="outlined" sx={{ p: 1, textAlign: 'center' }}>
-                  <Typography variant="body2" fontWeight={600}>{cat.name}</Typography>
-                  <Typography variant="caption" color="text.secondary">{cat.tagCount ?? 0} وسم</Typography>
+                  <Typography variant="body2" fontWeight={600}>
+                    {cat.name}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {cat.tagCount ?? 0} وسم
+                  </Typography>
                 </Card>
               </Grid>
             ))}
@@ -211,31 +286,44 @@ export default function TagsManager({ documentId, onTagsChange }) {
             جميع الوسوم ({filteredTags.length})
           </Typography>
           {filteredTags.length === 0 ? (
-            <Typography color="text.secondary" textAlign="center" py={3}>لا توجد وسوم</Typography>
+            <Typography color="text.secondary" textAlign="center" py={3}>
+              لا توجد وسوم
+            </Typography>
           ) : (
             <List dense>
               {filteredTags.map((tag, i) => {
-                const isDocTag = docTags.some((dt) => (dt._id || dt.id) === (tag._id || tag.id));
+                const isDocTag = docTags.some(dt => (dt._id || dt.id) === (tag._id || tag.id));
                 return (
                   <React.Fragment key={tag._id || tag.id}>
                     <ListItem
                       secondaryAction={
                         <Stack direction="row" spacing={0.5}>
                           {documentId && (
-                            <Button size="small" variant={isDocTag ? 'contained' : 'outlined'}
+                            <Button
+                              size="small"
+                              variant={isDocTag ? 'contained' : 'outlined'}
                               onClick={() => handleToggleTag(tag._id || tag.id)}
-                              sx={{ minWidth: 50 }}>
+                              sx={{ minWidth: 50 }}
+                            >
                               {isDocTag ? 'إزالة' : 'إضافة'}
                             </Button>
                           )}
-                          <IconButton size="small" onClick={(e) => { setContextTag(tag); setMenuAnchor(e.currentTarget); }}>
+                          <IconButton
+                            size="small"
+                            onClick={e => {
+                              setContextTag(tag);
+                              setMenuAnchor(e.currentTarget);
+                            }}
+                          >
                             <EditIcon fontSize="small" />
                           </IconButton>
                         </Stack>
                       }
                     >
                       <ListItemAvatar>
-                        <Avatar sx={{ bgcolor: (tag.color || '#3b82f6') + '20', width: 32, height: 32 }}>
+                        <Avatar
+                          sx={{ bgcolor: (tag.color || '#3b82f6') + '20', width: 32, height: 32 }}
+                        >
                           <CircleIcon sx={{ color: tag.color || '#3b82f6', fontSize: 16 }} />
                         </Avatar>
                       </ListItemAvatar>
@@ -255,7 +343,11 @@ export default function TagsManager({ documentId, onTagsChange }) {
 
       {/* Context Menu */}
       <Menu anchorEl={menuAnchor} open={Boolean(menuAnchor)} onClose={() => setMenuAnchor(null)}>
-        <MenuItem onClick={() => { handleDelete(contextTag?._id || contextTag?.id); }}>
+        <MenuItem
+          onClick={() => {
+            handleDelete(contextTag?._id || contextTag?.id);
+          }}
+        >
           <DeleteIcon fontSize="small" sx={{ ml: 1 }} /> حذف الوسم
         </MenuItem>
       </Menu>
@@ -265,19 +357,36 @@ export default function TagsManager({ documentId, onTagsChange }) {
         <DialogTitle>إنشاء وسم جديد</DialogTitle>
         <DialogContent>
           <Stack spacing={2} mt={1}>
-            <TextField fullWidth label="اسم الوسم" size="small" value={newTag.name}
-              onChange={(e) => setNewTag({ ...newTag, name: e.target.value })} />
+            <TextField
+              fullWidth
+              label="اسم الوسم"
+              size="small"
+              value={newTag.name}
+              onChange={e => setNewTag({ ...newTag, name: e.target.value })}
+            />
             <Autocomplete
-              options={categories} getOptionLabel={(o) => o.name || ''} size="small"
+              options={categories}
+              getOptionLabel={o => o.name || ''}
+              size="small"
               onChange={(_, v) => setNewTag({ ...newTag, category: v?._id || '' })}
-              renderInput={(params) => <TextField {...params} label="التصنيف" />}
+              renderInput={params => <TextField {...params} label="التصنيف" />}
             />
             <Box>
-              <Typography variant="caption" gutterBottom>اللون</Typography>
+              <Typography variant="caption" gutterBottom>
+                اللون
+              </Typography>
               <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
-                {PRESET_COLORS.map((c) => (
-                  <IconButton key={c} size="small" onClick={() => setNewTag({ ...newTag, color: c })}
-                    sx={{ border: newTag.color === c ? '2px solid' : '2px solid transparent', borderColor: c, p: 0.5 }}>
+                {PRESET_COLORS.map(c => (
+                  <IconButton
+                    key={c}
+                    size="small"
+                    onClick={() => setNewTag({ ...newTag, color: c })}
+                    sx={{
+                      border: newTag.color === c ? '2px solid' : '2px solid transparent',
+                      borderColor: c,
+                      p: 0.5,
+                    }}
+                  >
                     <CircleIcon sx={{ color: c, fontSize: 20 }} />
                   </IconButton>
                 ))}
@@ -287,7 +396,9 @@ export default function TagsManager({ documentId, onTagsChange }) {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setCreateOpen(false)}>إلغاء</Button>
-          <Button onClick={handleCreate} variant="contained" disabled={!newTag.name.trim()}>إنشاء</Button>
+          <Button onClick={handleCreate} variant="contained" disabled={!newTag.name.trim()}>
+            إنشاء
+          </Button>
         </DialogActions>
       </Dialog>
 
@@ -300,21 +411,31 @@ export default function TagsManager({ documentId, onTagsChange }) {
           </Typography>
           <Stack spacing={2} mt={1}>
             <Autocomplete
-              options={tags} getOptionLabel={(o) => o.name || ''} size="small"
+              options={tags}
+              getOptionLabel={o => o.name || ''}
+              size="small"
               onChange={(_, v) => setMergeData({ ...mergeData, sourceId: v?._id || '' })}
-              renderInput={(params) => <TextField {...params} label="الوسم المصدر (سيُحذف)" />}
+              renderInput={params => <TextField {...params} label="الوسم المصدر (سيُحذف)" />}
             />
             <Autocomplete
-              options={tags} getOptionLabel={(o) => o.name || ''} size="small"
+              options={tags}
+              getOptionLabel={o => o.name || ''}
+              size="small"
               onChange={(_, v) => setMergeData({ ...mergeData, targetId: v?._id || '' })}
-              renderInput={(params) => <TextField {...params} label="الوسم الهدف (سيبقى)" />}
+              renderInput={params => <TextField {...params} label="الوسم الهدف (سيبقى)" />}
             />
           </Stack>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setMergeOpen(false)}>إلغاء</Button>
-          <Button onClick={handleMerge} variant="contained" color="warning"
-            disabled={!mergeData.sourceId || !mergeData.targetId}>دمج</Button>
+          <Button
+            onClick={handleMerge}
+            variant="contained"
+            color="warning"
+            disabled={!mergeData.sourceId || !mergeData.targetId}
+          >
+            دمج
+          </Button>
         </DialogActions>
       </Dialog>
     </Box>

@@ -53,7 +53,7 @@ import {
 
 // ─── DATA TABLE ──────────────────────────────────────────────────────────────
 const ProDataTable = ({
-  columns = [],           // [{ id, label, minWidth, align, sortable, render, hidden }]
+  columns = [], // [{ id, label, minWidth, align, sortable, render, hidden }]
   data = [],
   title,
   subtitle,
@@ -63,7 +63,7 @@ const ProDataTable = ({
   selectedRows = [],
   onSelectionChange,
   // Pagination
-  totalCount,             // Server-side total
+  totalCount, // Server-side total
   page = 0,
   rowsPerPage = 10,
   onPageChange,
@@ -77,9 +77,9 @@ const ProDataTable = ({
   searchPlaceholder = 'بحث...',
   onSearch,
   // Actions
-  actions,                // ReactNode: custom toolbar actions
-  rowActions = [],        // [{ icon, label, onClick, color, show }]
-  bulkActions = [],       // [{ icon, label, onClick, color }]
+  actions, // ReactNode: custom toolbar actions
+  rowActions = [], // [{ icon, label, onClick, color, show }]
+  bulkActions = [], // [{ icon, label, onClick, color }]
   onRefresh,
   onExport,
   // Empty state
@@ -103,7 +103,7 @@ const ProDataTable = ({
   const currentSortOrder = sortBy !== undefined ? sortOrder : localSortOrder;
 
   // Visible columns
-  const visibleColumns = useMemo(() => columns.filter((c) => !c.hidden), [columns]);
+  const visibleColumns = useMemo(() => columns.filter(c => !c.hidden), [columns]);
 
   // Client-side filtering + sorting + pagination
   const processedData = useMemo(() => {
@@ -114,8 +114,8 @@ const ProDataTable = ({
     // Search
     if (localSearch.trim()) {
       const q = localSearch.toLowerCase();
-      result = result.filter((row) =>
-        visibleColumns.some((col) => {
+      result = result.filter(row =>
+        visibleColumns.some(col => {
           const val = row[col.id];
           return val != null && String(val).toLowerCase().includes(q);
         })
@@ -144,54 +144,61 @@ const ProDataTable = ({
   const total = isServerSide ? totalCount : processedData.length;
 
   // Handlers
-  const handleSort = useCallback((colId) => {
-    if (onSortChange) {
-      onSortChange(colId, currentSortBy === colId && currentSortOrder === 'asc' ? 'desc' : 'asc');
-    } else {
-      setLocalSortOrder(currentSortBy === colId && localSortOrder === 'asc' ? 'desc' : 'asc');
-      setLocalSortBy(colId);
-    }
-  }, [currentSortBy, currentSortOrder, localSortOrder, onSortChange]);
+  const handleSort = useCallback(
+    colId => {
+      if (onSortChange) {
+        onSortChange(colId, currentSortBy === colId && currentSortOrder === 'asc' ? 'desc' : 'asc');
+      } else {
+        setLocalSortOrder(currentSortBy === colId && localSortOrder === 'asc' ? 'desc' : 'asc');
+        setLocalSortBy(colId);
+      }
+    },
+    [currentSortBy, currentSortOrder, localSortOrder, onSortChange]
+  );
 
   const handlePageChange = (e, newPage) => {
     if (onPageChange) onPageChange(newPage);
     else setLocalPage(newPage);
   };
 
-  const handleRowsPerPageChange = (e) => {
+  const handleRowsPerPageChange = e => {
     const val = parseInt(e.target.value, 10);
     if (onRowsPerPageChange) onRowsPerPageChange(val);
-    else { setLocalRowsPerPage(val); setLocalPage(0); }
+    else {
+      setLocalRowsPerPage(val);
+      setLocalPage(0);
+    }
   };
 
-  const handleSelectAll = (e) => {
+  const handleSelectAll = e => {
     if (!onSelectionChange) return;
     if (e.target.checked) {
-      onSelectionChange(paginatedData.map((r) => r.id || r._id));
+      onSelectionChange(paginatedData.map(r => r.id || r._id));
     } else {
       onSelectionChange([]);
     }
   };
 
-  const handleSelectRow = (id) => {
+  const handleSelectRow = id => {
     if (!onSelectionChange) return;
     const idx = selectedRows.indexOf(id);
     if (idx === -1) {
       onSelectionChange([...selectedRows, id]);
     } else {
-      onSelectionChange(selectedRows.filter((i) => i !== id));
+      onSelectionChange(selectedRows.filter(i => i !== id));
     }
   };
 
-  const handleSearch = (e) => {
+  const handleSearch = e => {
     const val = e.target.value;
     setLocalSearch(val);
     setLocalPage(0);
     onSearch?.(val);
   };
 
-  const allSelected = paginatedData.length > 0 && paginatedData.every((r) => selectedRows.includes(r.id || r._id));
-  const someSelected = paginatedData.some((r) => selectedRows.includes(r.id || r._id));
+  const allSelected =
+    paginatedData.length > 0 && paginatedData.every(r => selectedRows.includes(r.id || r._id));
+  const someSelected = paginatedData.some(r => selectedRows.includes(r.id || r._id));
   const hasSelection = selectedRows.length > 0;
 
   // ─── Render ────────────────────────────────────────────────────────────
@@ -220,8 +227,16 @@ const ProDataTable = ({
             </Typography>
           ) : (
             <>
-              {title && <Typography variant="subtitle1" fontWeight={700}>{title}</Typography>}
-              {subtitle && <Typography variant="caption" color="text.secondary">{subtitle}</Typography>}
+              {title && (
+                <Typography variant="subtitle1" fontWeight={700}>
+                  {title}
+                </Typography>
+              )}
+              {subtitle && (
+                <Typography variant="caption" color="text.secondary">
+                  {subtitle}
+                </Typography>
+              )}
             </>
           )}
         </Box>
@@ -229,19 +244,20 @@ const ProDataTable = ({
         {/* Right: Actions */}
         <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
           {/* Bulk Actions */}
-          {hasSelection && bulkActions.map((action, i) => (
-            <Button
-              key={i}
-              size="small"
-              startIcon={action.icon}
-              color={action.color || 'primary'}
-              variant="outlined"
-              onClick={() => action.onClick(selectedRows)}
-              sx={{ borderRadius: '8px' }}
-            >
-              {action.label}
-            </Button>
-          ))}
+          {hasSelection &&
+            bulkActions.map((action, i) => (
+              <Button
+                key={i}
+                size="small"
+                startIcon={action.icon}
+                color={action.color || 'primary'}
+                variant="outlined"
+                onClick={() => action.onClick(selectedRows)}
+                sx={{ borderRadius: '8px' }}
+              >
+                {action.label}
+              </Button>
+            ))}
 
           {/* Search */}
           {searchable && !hasSelection && (
@@ -273,14 +289,18 @@ const ProDataTable = ({
           {/* Refresh */}
           {onRefresh && (
             <Tooltip title="تحديث">
-              <IconButton size="small" aria-label="تحديث" onClick={onRefresh}><RefreshIcon fontSize="small" /></IconButton>
+              <IconButton size="small" aria-label="تحديث" onClick={onRefresh}>
+                <RefreshIcon fontSize="small" />
+              </IconButton>
             </Tooltip>
           )}
 
           {/* Export */}
           {onExport && (
             <Tooltip title="تصدير">
-              <IconButton size="small" aria-label="تصدير" onClick={onExport}><ExportIcon fontSize="small" /></IconButton>
+              <IconButton size="small" aria-label="تصدير" onClick={onExport}>
+                <ExportIcon fontSize="small" />
+              </IconButton>
             </Tooltip>
           )}
         </Stack>
@@ -292,7 +312,10 @@ const ProDataTable = ({
           <TableHead>
             <TableRow>
               {selectable && (
-                <TableCell padding="checkbox" sx={{ backgroundColor: theme.palette.background.paper }}>
+                <TableCell
+                  padding="checkbox"
+                  sx={{ backgroundColor: theme.palette.background.paper }}
+                >
                   <Checkbox
                     indeterminate={someSelected && !allSelected}
                     checked={allSelected}
@@ -301,7 +324,7 @@ const ProDataTable = ({
                   />
                 </TableCell>
               )}
-              {visibleColumns.map((col) => (
+              {visibleColumns.map(col => (
                 <TableCell
                   key={col.id}
                   align={col.align || 'right'}
@@ -327,7 +350,14 @@ const ProDataTable = ({
                 </TableCell>
               ))}
               {rowActions.length > 0 && (
-                <TableCell align="center" sx={{ width: 60, fontWeight: 700, backgroundColor: theme.palette.background.paper }}>
+                <TableCell
+                  align="center"
+                  sx={{
+                    width: 60,
+                    fontWeight: 700,
+                    backgroundColor: theme.palette.background.paper,
+                  }}
+                >
                   إجراءات
                 </TableCell>
               )}
@@ -338,11 +368,21 @@ const ProDataTable = ({
             {loading &&
               Array.from({ length: currentRowsPerPage }).map((_, i) => (
                 <TableRow key={`skel-${i}`}>
-                  {selectable && <TableCell padding="checkbox"><Skeleton variant="rectangular" width={18} height={18} /></TableCell>}
-                  {visibleColumns.map((col) => (
-                    <TableCell key={col.id}><Skeleton variant="text" width="80%" /></TableCell>
+                  {selectable && (
+                    <TableCell padding="checkbox">
+                      <Skeleton variant="rectangular" width={18} height={18} />
+                    </TableCell>
+                  )}
+                  {visibleColumns.map(col => (
+                    <TableCell key={col.id}>
+                      <Skeleton variant="text" width="80%" />
+                    </TableCell>
                   ))}
-                  {rowActions.length > 0 && <TableCell><Skeleton variant="circular" width={24} height={24} /></TableCell>}
+                  {rowActions.length > 0 && (
+                    <TableCell>
+                      <Skeleton variant="circular" width={24} height={24} />
+                    </TableCell>
+                  )}
                 </TableRow>
               ))}
 
@@ -364,10 +404,14 @@ const ProDataTable = ({
                   >
                     {selectable && (
                       <TableCell padding="checkbox">
-                        <Checkbox checked={isSelected} onChange={() => handleSelectRow(rowId)} size="small" />
+                        <Checkbox
+                          checked={isSelected}
+                          onChange={() => handleSelectRow(rowId)}
+                          size="small"
+                        />
                       </TableCell>
                     )}
-                    {visibleColumns.map((col) => (
+                    {visibleColumns.map(col => (
                       <TableCell key={col.id} align={col.align || 'right'}>
                         {col.render ? col.render(row[col.id], row) : row[col.id]}
                       </TableCell>
@@ -377,7 +421,10 @@ const ProDataTable = ({
                         <IconButton
                           size="small"
                           aria-label="المزيد من الخيارات"
-                          onClick={(e) => { setActionMenuAnchor(e.currentTarget); setActionMenuRow(row); }}
+                          onClick={e => {
+                            setActionMenuAnchor(e.currentTarget);
+                            setActionMenuRow(row);
+                          }}
                         >
                           <MoreIcon fontSize="small" />
                         </IconButton>
@@ -414,7 +461,12 @@ const ProDataTable = ({
             {typeof error === 'string' ? error : 'تعذر تحميل البيانات'}
           </Typography>
           {onRefresh && (
-            <Button variant="outlined" color="error" startIcon={<RefreshIcon />} onClick={onRefresh}>
+            <Button
+              variant="outlined"
+              color="error"
+              startIcon={<RefreshIcon />}
+              onClick={onRefresh}
+            >
               إعادة المحاولة
             </Button>
           )}
@@ -444,11 +496,14 @@ const ProDataTable = ({
       <Menu
         anchorEl={actionMenuAnchor}
         open={Boolean(actionMenuAnchor)}
-        onClose={() => { setActionMenuAnchor(null); setActionMenuRow(null); }}
+        onClose={() => {
+          setActionMenuAnchor(null);
+          setActionMenuRow(null);
+        }}
         PaperProps={{ sx: { borderRadius: '10px', minWidth: 160, boxShadow: theme.shadows[6] } }}
       >
         {rowActions
-          .filter((a) => !a.show || a.show(actionMenuRow))
+          .filter(a => !a.show || a.show(actionMenuRow))
           .map((action, i) => (
             <MenuItem
               key={i}

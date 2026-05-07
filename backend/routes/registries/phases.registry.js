@@ -500,6 +500,141 @@ module.exports = function registerPhaseRoutes(app, { safeRequire, dualMount, saf
 
   // ── Phase 34: Smart Attendance — الحضور الذكي ────────────────────────────
   // NOTE: smart-attendance is already mounted via dualMount (Wave 2) using smart_attendance.routes.js
+
+  // ── Phase 35: Previously Unmounted Routes ────────────────────────────────
+  // AI & Intelligence
+  // /api/ai-recommendations is registered via DDD domain (_registry.js → domains/ai-recommendations)
+  safeMount(
+    app,
+    ['/api/rehab-disciplines', '/api/v1/rehab-disciplines'],
+    '../routes/rehab-disciplines.routes'
+  );
+  safeMount(
+    app,
+    ['/api/rehab-goal-suggestions', '/api/v1/rehab-goal-suggestions'],
+    '../routes/rehab-goal-suggestions.routes'
+  );
+
+  // Beneficiary & Clinical
+  safeMount(
+    app,
+    ['/api/beneficiary-consents', '/api/v1/beneficiary-consents'],
+    '../routes/beneficiary-consents.routes'
+  );
+  safeMount(
+    app,
+    ['/api/beneficiary-red-flags', '/api/v1/beneficiary-red-flags'],
+    '../routes/beneficiary-red-flags.routes'
+  );
+  safeMount(
+    app,
+    ['/api/red-flag-admin', '/api/v1/red-flag-admin'],
+    '../routes/red-flag-admin.routes'
+  );
+  safeMount(
+    app,
+    ['/api/therapist-portal', '/api/v1/therapist-portal'],
+    '../routes/therapist-portal.routes'
+  );
+
+  // Dashboard & Analytics
+  safeMount(
+    app,
+    ['/api/dashboard-alerts', '/api/v1/dashboard-alerts'],
+    '../routes/dashboard-alerts.routes'
+  );
+  safeMount(
+    app,
+    ['/api/dashboard-saved-views', '/api/v1/dashboard-saved-views'],
+    '../routes/dashboard-saved-views.routes'
+  );
+  safeMount(
+    app,
+    ['/api/dashboards-platform', '/api/v1/dashboards-platform'],
+    '../routes/dashboards-platform.routes'
+  );
+  safeMount(app, ['/api/audit-reviews', '/api/v1/audit-reviews'], '../routes/audit-reviews.routes');
+
+  // Forms
+  safeMount(app, ['/api/forms-catalog', '/api/v1/forms-catalog'], '../routes/forms-catalog.routes');
+  safeMount(
+    app,
+    ['/api/forms-submission', '/api/v1/forms-submission'],
+    '../routes/forms-submission.routes'
+  );
+  safeMount(app, ['/api/public-forms', '/api/v1/public-forms'], '../routes/public-forms.routes');
+
+  // Reports
+  safeMount(app, ['/api/reports-inbox', '/api/v1/reports-inbox'], '../routes/reports-inbox.routes');
+  safeMount(app, ['/api/reports-ops', '/api/v1/reports-ops'], '../routes/reports-ops.routes');
+  safeMount(
+    app,
+    ['/api/reports-webhooks', '/api/v1/reports-webhooks'],
+    '../routes/reports-webhooks.routes'
+  );
+
+  // Integrations & External Services
+  safeMount(
+    app,
+    ['/api/integrations-health', '/api/v1/integrations-health'],
+    '../routes/integrations-health.routes'
+  );
+  safeMount(
+    app,
+    ['/api/integrations-metrics', '/api/v1/integrations-metrics'],
+    '../routes/integrations-metrics.routes'
+  );
+  safeMount(
+    app,
+    ['/api/nafath-signing', '/api/v1/nafath-signing'],
+    '../routes/nafath-signing.routes'
+  );
+  safeMount(app, ['/api/wasel-address', '/api/v1/wasel-address'], '../routes/wasel-address.routes');
+  safeMount(
+    app,
+    ['/api/yakeen-verification', '/api/v1/yakeen-verification'],
+    '../routes/yakeen-verification.routes'
+  );
+  safeMount(
+    app,
+    ['/api/nphies-webhook', '/api/v1/nphies-webhook'],
+    '../routes/nphies-webhook.routes'
+  );
+  safeMount(
+    app,
+    ['/api/openapi-integration', '/api/v1/openapi-integration'],
+    '../routes/openapi-integration.routes'
+  );
+
+  // Notifications & Push
+  safeMount(
+    app,
+    ['/api/notifications-log', '/api/v1/notifications-log'],
+    '../routes/notifications-log.routes'
+  );
+  safeMount(app, ['/api/push', '/api/v1/push'], '../routes/push.routes');
+
+  // Uploads & Files
+  safeMount(app, ['/api/uploads', '/api/v1/uploads'], '../routes/uploads.routes');
+  safeMount(
+    app,
+    ['/api/public-uploads', '/api/v1/public-uploads'],
+    '../routes/public-uploads.routes'
+  );
+
+  // System & Config
+  safeMount(app, ['/api/build-info', '/api/v1/build-info'], '../routes/build-info.routes');
+  safeMount(
+    app,
+    ['/api/landing-config', '/api/v1/landing-config'],
+    '../routes/landing-config.routes'
+  );
+  safeMount(app, ['/api/admin-ops-dlq', '/api/v1/admin-ops-dlq'], '../routes/admin-ops-dlq.routes');
+
+  // Visitor Auth
+  safeMount(app, ['/api/visitor-auth', '/api/v1/visitor-auth'], '../routes/visitor-auth.routes');
+
+  logger.info('Phase 35 mounted (32 previously unmounted route modules)');
   // The smart-attendance.routes.js (hyphen) provides additional CRUD sub-modules
   safeMount(
     app,

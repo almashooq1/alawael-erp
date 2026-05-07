@@ -21,16 +21,16 @@ const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 
 // ── Service Imports ──────────────────────────────────────────────────────────
-const favoritesService = require('../services/documentFavoritesService');
-const auditService = require('../services/documentAuditService');
-const watermarkService = require('../services/documentWatermarkService');
+const favoritesService = require('../services/documents/documentFavorites.service');
+const auditService = require('../services/documents/documentAudit.service');
+const watermarkService = require('../services/documents/documentWatermark.service');
 const approvalService = require('../services/documentApprovalService');
 const expiryService = require('../services/documentExpiryService');
 const trashService = require('../services/documentTrashService');
 const annotationService = require('../services/documentAnnotationService');
-const comparisonService = require('../services/documentComparisonService');
-const exportService = require('../services/documentExportService');
-const qrService = require('../services/documentQRService');
+const comparisonService = require('../services/documents/documentComparison.service');
+const exportService = require('../services/documents/documentImportExport.service');
+const qrService = require('../services/documents/documentQRCode.service');
 const safeError = require('../utils/safeError');
 
 // ── Helper ───────────────────────────────────────────────────────────────────

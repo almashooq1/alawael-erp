@@ -58,6 +58,8 @@ router.get('/', requireRole(STAFF_ROLES), async (req, res) => {
   try {
     const {
       beneficiary,
+      episodeOfCare,
+      carePlan,
       therapist,
       tool,
       category,
@@ -70,6 +72,9 @@ router.get('/', requireRole(STAFF_ROLES), async (req, res) => {
     } = req.query;
     let filter = {};
     if (beneficiary && mongoose.isValidObjectId(beneficiary)) filter.beneficiary = beneficiary;
+    if (episodeOfCare && mongoose.isValidObjectId(episodeOfCare))
+      filter.episodeOfCare = episodeOfCare;
+    if (carePlan && mongoose.isValidObjectId(carePlan)) filter.carePlan = carePlan;
     if (therapist && mongoose.isValidObjectId(therapist)) filter.therapist = therapist;
     if (tool) filter.tool = tool;
     if (category) filter.category = category;
@@ -96,6 +101,7 @@ router.get('/', requireRole(STAFF_ROLES), async (req, res) => {
       ClinicalAssessment.find(filter)
         .populate('beneficiary', 'firstName lastName firstName_ar lastName_ar beneficiaryNumber')
         .populate('therapist', 'firstName lastName fullName employeeNumber')
+        .populate('episodeOfCare', 'episodeNumber type status startDate')
         .sort({ assessmentDate: -1 })
         .skip((p - 1) * l)
         .limit(l)

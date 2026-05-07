@@ -35,7 +35,7 @@ const fs = require('fs');
 const crypto = require('crypto');
 
 const router = express.Router();
-const { authenticate, authorize } = require('../middleware/auth');
+const { authenticate } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const Document = require('../models/Document');
 const safeError = require('../utils/safeError');
@@ -312,11 +312,11 @@ router.post(
       return res.status(400).json({ success: false, message: 'عنوان المستند مطلوب' });
     }
 
-    const { hash, relativePath, fullPath } = saveToDisk(
-      req.file.buffer,
-      req.file.mimetype,
-      req.file.originalname
-    );
+    const {
+      hash,
+      relativePath: _relativePath,
+      fullPath,
+    } = saveToDisk(req.file.buffer, req.file.mimetype, req.file.originalname);
 
     const fileType = mimeToFileType(req.file.mimetype, req.file.originalname);
     const ext = extFor(req.file.mimetype, req.file.originalname);

@@ -29,7 +29,6 @@ const { validate } = require('../middleware/validate');
 const { authenticateToken, authorizeRole } = require('../middleware/auth');
 const AttendanceMgmt = require('../services/attendanceManagement.service');
 const Shift = require('../models/Shift');
-const logger = require('../utils/logger');
 
 // ── Auth shorthand ─────────────────────────────────────────────────────────
 const auth = authenticateToken;

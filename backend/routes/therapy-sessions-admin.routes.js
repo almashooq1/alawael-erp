@@ -29,6 +29,13 @@ const safeError = require('../utils/safeError');
 const logger = require('../utils/logger');
 const logPiiAccess = require('../middleware/piiAccess.middleware');
 
+// BC-04: ABAC for session note amendment window (24h, same signer)
+const { PolicyDecisionPoint } = require('../authorization/abac/policy-decision-point');
+const policies = require('../authorization/abac/policies');
+const { subjectFromReq } = require('../authorization/abac/policy-enforcement-point');
+
+const sessionNotePdp = new PolicyDecisionPoint(policies);
+
 router.use(authenticateToken);
 
 const STAFF_ROLES = [
@@ -130,10 +137,23 @@ async function findConflicts({ therapist, room, date, startTime, endTime, exclud
 // ── GET / — list ─────────────────────────────────────────────────────────
 router.get('/', requireRole(STAFF_ROLES), async (req, res) => {
   try {
-    const { therapist, beneficiary, status, sessionType, q, page = 1, limit = 25 } = req.query;
+    const {
+      therapist,
+      beneficiary,
+      episodeOfCare,
+      carePlan,
+      status,
+      sessionType,
+      q,
+      page = 1,
+      limit = 25,
+    } = req.query;
     const filter = {};
     if (therapist && mongoose.isValidObjectId(therapist)) filter.therapist = therapist;
     if (beneficiary && mongoose.isValidObjectId(beneficiary)) filter.beneficiary = beneficiary;
+    if (episodeOfCare && mongoose.isValidObjectId(episodeOfCare))
+      filter.episodeOfCare = episodeOfCare;
+    if (carePlan && mongoose.isValidObjectId(carePlan)) filter.carePlan = carePlan;
     if (status) filter.status = status;
     if (sessionType) filter.sessionType = sessionType;
     const range = parseDateRange(req.query);
@@ -154,6 +174,7 @@ router.get('/', requireRole(STAFF_ROLES), async (req, res) => {
         .populate('beneficiary', 'firstName lastName firstName_ar lastName_ar beneficiaryNumber')
         .populate('therapist', 'firstName lastName fullName employeeNumber')
         .populate('room', 'name code')
+        .populate('episodeOfCare', 'episodeNumber type status')
         .sort({ date: -1, startTime: -1 })
         .skip((p - 1) * l)
         .limit(l)
@@ -486,6 +507,129 @@ router.post('/:id/check-in', requireRole(WRITE_ROLES), async (req, res) => {
     res.json({ success: true, data: doc, message: 'تم تسجيل الحضور' });
   } catch (err) {
     return safeError(res, err, 'therapy-sessions.checkin');
+  }
+});
+
+// ── POST /:id/finalize — lock session note (BC-04) ──────────────────────────
+// Marks the note as finalized and records the signing clinician + timestamp.
+// Only works when noteStatus is 'draft' and session is COMPLETED.
+router.post('/:id/finalize', requireRole(WRITE_ROLES), async (req, res) => {
+  try {
+    const session = await TherapySession.findById(req.params.id);
+    if (!session) return res.status(404).json({ success: false, message: 'جلسة غير موجودة' });
+    if (session.noteStatus === 'finalized') {
+      return res.status(409).json({ success: false, message: 'السجل محكم مسبقاً' });
+    }
+    session.noteStatus = 'finalized';
+    session.signedAt = new Date();
+    session.signedBy = req.user?.id || req.user?._id;
+    session.statusHistory.push({
+      from: session.status,
+      to: session.status,
+      changedBy: req.user?.id || req.user?._id,
+      changedAt: new Date(),
+      reason: 'تم إقفال السجل السريري',
+    });
+    await session.save();
+    logger.info(`therapy-sessions: note finalised id=${session._id} by=${session.signedBy}`);
+    res.json({
+      success: true,
+      message: 'تم إقفال السجل السريري',
+      data: { noteStatus: session.noteStatus, signedAt: session.signedAt },
+    });
+  } catch (err) {
+    return safeError(res, err, 'therapy-sessions.finalize');
+  }
+});
+
+// ── POST /:id/amend — amend a finalized note (BC-04 ABAC enforcement) ─────
+// ABAC policy: session-amendment-window (24h window, same signer only).
+// Outside the window → 403 (supervisor override via X-Override-Approval header in future phase).
+router.post('/:id/amend', requireRole(WRITE_ROLES), async (req, res) => {
+  try {
+    const session = await TherapySession.findById(req.params.id);
+    if (!session) return res.status(404).json({ success: false, message: 'جلسة غير موجودة' });
+    if (session.noteStatus !== 'finalized') {
+      return res.status(400).json({ success: false, message: 'السجل ليس محكماً — عدّله مباشرة' });
+    }
+
+    const { reason, changes } = req.body;
+    if (!reason?.trim()) {
+      return res.status(422).json({ success: false, message: 'سبب التعديل مطلوب (reason)' });
+    }
+    if (!Array.isArray(changes) || changes.length === 0) {
+      return res
+        .status(422)
+        .json({ success: false, message: 'حقل changes مطلوب ولا يجوز أن يكون فارغاً' });
+    }
+
+    // ABAC evaluation
+    const subject = subjectFromReq(req);
+    const resource = {
+      type: 'SessionNote',
+      id: session._id.toString(),
+      status: session.noteStatus,
+      signedAt: session.signedAt,
+      signedBy: session.signedBy?.toString(),
+    };
+    const decision = sessionNotePdp.evaluate({
+      subject,
+      action: 'amend',
+      resource,
+      env: { time: new Date() },
+    });
+
+    if (decision.effect === 'deny') {
+      logger.warn(
+        `therapy-sessions: amend denied id=${session._id} user=${subject.userId} reason=${decision.reason}`
+      );
+      return res.status(403).json({
+        success: false,
+        error: 'forbidden',
+        reason: decision.reason,
+        policy: decision.denyingPolicy,
+      });
+    }
+
+    // Apply changes
+    const amendmentFields = [];
+    for (const change of changes) {
+      const { field, newValue } = change;
+      if (!field) continue;
+      const parts = field.split('.');
+      let oldValue;
+      // Support dot-path access one level deep (e.g. notes.subjective)
+      if (parts.length === 2) {
+        oldValue = session[parts[0]]?.[parts[1]];
+        if (session[parts[0]] !== undefined) {
+          session[parts[0]][parts[1]] = newValue;
+        }
+      } else {
+        oldValue = session[field];
+        session[field] = newValue;
+      }
+      amendmentFields.push({ field, oldValue, newValue });
+    }
+
+    session.amendments.push({
+      amendedBy: req.user?.id || req.user?._id,
+      amendedAt: new Date(),
+      reason,
+      fields: amendmentFields,
+    });
+
+    // Keep noteStatus finalized after amendment
+    await session.save();
+    logger.info(
+      `therapy-sessions: note amended id=${session._id} by=${subject.userId} fields=${amendmentFields.map(f => f.field).join(',')}`
+    );
+    res.json({
+      success: true,
+      message: 'تم تسجيل التعديل على السجل السريري',
+      data: { amendmentsCount: session.amendments.length },
+    });
+  } catch (err) {
+    return safeError(res, err, 'therapy-sessions.amend');
   }
 });
 

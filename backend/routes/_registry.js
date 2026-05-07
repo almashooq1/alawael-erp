@@ -120,6 +120,9 @@ const complianceCalendarRoutes = safeRequire('../routes/complianceCalendar.route
 const qualityControlsRoutes = safeRequire('../routes/qualityControls.routes');
 const qualityHealthScoreRoutes = safeRequire('../routes/qualityHealthScore.routes');
 const notificationLogRoutes = safeRequire('../routes/notificationLog.routes');
+// enterprise-risk → phases.registry.js; complaints-enhanced, kpi-dashboard, kpi-reports → features.registry.js
+const capaAdminRoutes = safeRequire('../routes/capa-admin.routes');
+const policyLibraryRoutes = safeRequire('../routes/policyRoutes');
 const slaEngineRoutes = safeRequire('../routes/operations/slaEngine.routes');
 const workOrderOpsRoutes = safeRequire('../routes/operations/workOrder.routes');
 const facilityOpsRoutes = safeRequire('../routes/operations/facility.routes');
@@ -350,6 +353,11 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   dualMount(app, 'quality-controls', qualityControlsRoutes);
   dualMount(app, 'quality/health-score', qualityHealthScoreRoutes);
   dualMount(app, 'quality/notifications', notificationLogRoutes);
+  // enterprise-risk is mounted in phases.registry.js
+  dualMount(app, 'admin/capa', capaAdminRoutes);
+  // complaints-enhanced, kpi-dashboard, kpi-reports are mounted in features.registry.js
+  // BC-08: Policy library + acknowledgement workflow (ISO 10002 / CBAHI)
+  dualMount(app, 'quality/policies', policyLibraryRoutes);
   // ── Phase 16 Commit 1 — Ops SLA engine ───────────────────────────────
   dualMount(app, 'ops/sla', slaEngineRoutes);
   // ── Phase 16 Commit 2 — Ops WO state machine ─────────────────────────

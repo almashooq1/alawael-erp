@@ -61,12 +61,10 @@ router.post(
   '/lifecycle/policies',
   authMiddleware,
   asyncHandler(async (req, res) => {
-    res
-      .status(201)
-      .json({
-        success: true,
-        data: await svc(lifecycleSvc).createPolicy(req.body, getUserId(req)),
-      });
+    res.status(201).json({
+      success: true,
+      data: await svc(lifecycleSvc).createPolicy(req.body, getUserId(req)),
+    });
   })
 );
 router.get(
@@ -117,16 +115,14 @@ router.post(
   '/lifecycle/assign',
   authMiddleware,
   asyncHandler(async (req, res) => {
-    res
-      .status(201)
-      .json({
-        success: true,
-        data: await svc(lifecycleSvc).assignLifecycle(
-          req.body.documentId,
-          req.body.policyId,
-          getUserId(req)
-        ),
-      });
+    res.status(201).json({
+      success: true,
+      data: await svc(lifecycleSvc).assignLifecycle(
+        req.body.documentId,
+        req.body.policyId,
+        getUserId(req)
+      ),
+    });
   })
 );
 router.get(
@@ -206,17 +202,15 @@ router.post(
   '/lifecycle/disposition',
   authMiddleware,
   asyncHandler(async (req, res) => {
-    res
-      .status(201)
-      .json({
-        success: true,
-        data: await svc(lifecycleSvc).requestDisposition(
-          req.body.documentId,
-          req.body.method,
-          req.body.reason,
-          getUserId(req)
-        ),
-      });
+    res.status(201).json({
+      success: true,
+      data: await svc(lifecycleSvc).requestDisposition(
+        req.body.documentId,
+        req.body.method,
+        req.body.reason,
+        getUserId(req)
+      ),
+    });
   })
 );
 router.get(
@@ -299,12 +293,10 @@ router.post(
   '/digital-cert/generate',
   authMiddleware,
   asyncHandler(async (req, res) => {
-    res
-      .status(201)
-      .json({
-        success: true,
-        data: await svc(digitalCertSvc).generateCertificate(getUserId(req), req.body),
-      });
+    res.status(201).json({
+      success: true,
+      data: await svc(digitalCertSvc).generateCertificate(getUserId(req), req.body),
+    });
   })
 );
 router.get(
@@ -354,17 +346,15 @@ router.post(
   '/digital-cert/sign',
   authMiddleware,
   asyncHandler(async (req, res) => {
-    res
-      .status(201)
-      .json({
-        success: true,
-        data: await svc(digitalCertSvc).signDocument(
-          req.body.documentId,
-          req.body.certificateId,
-          getUserId(req),
-          req.body
-        ),
-      });
+    res.status(201).json({
+      success: true,
+      data: await svc(digitalCertSvc).signDocument(
+        req.body.documentId,
+        req.body.certificateId,
+        getUserId(req),
+        req.body
+      ),
+    });
   })
 );
 router.get(
@@ -403,17 +393,15 @@ router.post(
   '/digital-cert/requests',
   authMiddleware,
   asyncHandler(async (req, res) => {
-    res
-      .status(201)
-      .json({
-        success: true,
-        data: await svc(digitalCertSvc).createSignatureRequest(
-          req.body.documentId,
-          req.body.signers,
-          req.body,
-          getUserId(req)
-        ),
-      });
+    res.status(201).json({
+      success: true,
+      data: await svc(digitalCertSvc).createSignatureRequest(
+        req.body.documentId,
+        req.body.signers,
+        req.body,
+        getUserId(req)
+      ),
+    });
   })
 );
 router.get(
@@ -458,12 +446,10 @@ router.post(
   '/classification/models',
   authMiddleware,
   asyncHandler(async (req, res) => {
-    res
-      .status(201)
-      .json({
-        success: true,
-        data: await svc(classificationSvc).createModel(req.body, getUserId(req)),
-      });
+    res.status(201).json({
+      success: true,
+      data: await svc(classificationSvc).createModel(req.body, getUserId(req)),
+    });
   })
 );
 router.get(
@@ -584,12 +570,10 @@ router.post(
   '/classification/clusters',
   authMiddleware,
   asyncHandler(async (req, res) => {
-    res
-      .status(201)
-      .json({
-        success: true,
-        data: await svc(classificationSvc).createCluster(req.body, getUserId(req)),
-      });
+    res.status(201).json({
+      success: true,
+      data: await svc(classificationSvc).createCluster(req.body, getUserId(req)),
+    });
   })
 );
 router.get(
@@ -672,12 +656,10 @@ router.post(
   '/workflow-orch/definitions',
   authMiddleware,
   asyncHandler(async (req, res) => {
-    res
-      .status(201)
-      .json({
-        success: true,
-        data: await svc(workflowOrchSvc).createDefinition(req.body, getUserId(req)),
-      });
+    res.status(201).json({
+      success: true,
+      data: await svc(workflowOrchSvc).createDefinition(req.body, getUserId(req)),
+    });
   })
 );
 router.get(
@@ -748,16 +730,14 @@ router.post(
   '/workflow-orch/start',
   authMiddleware,
   asyncHandler(async (req, res) => {
-    res
-      .status(201)
-      .json({
-        success: true,
-        data: await svc(workflowOrchSvc).startInstance(
-          req.body.definitionId,
-          req.body,
-          getUserId(req)
-        ),
-      });
+    res.status(201).json({
+      success: true,
+      data: await svc(workflowOrchSvc).startInstance(
+        req.body.definitionId,
+        req.body,
+        getUserId(req)
+      ),
+    });
   })
 );
 router.get(
@@ -983,12 +963,10 @@ router.post(
   '/forensics/policies',
   authMiddleware,
   asyncHandler(async (req, res) => {
-    res
-      .status(201)
-      .json({
-        success: true,
-        data: await svc(forensicsSvc).createPolicy(req.body, getUserId(req)),
-      });
+    res.status(201).json({
+      success: true,
+      data: await svc(forensicsSvc).createPolicy(req.body, getUserId(req)),
+    });
   })
 );
 router.get(

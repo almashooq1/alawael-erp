@@ -182,7 +182,7 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
       return res.status(400).json({ success: false, error: 'Invalid ID' });
     }
-    const { currentPhase, phaseHistory, ...rest } = req.body; // phase change handled separately
+    const { currentPhase: _currentPhase, phaseHistory: _phaseHistory, ...rest } = req.body; // phase change handled separately
     const episode = await EpisodeOfCare.findByIdAndUpdate(
       req.params.id,
       { $set: rest },

@@ -245,7 +245,7 @@ router.post(
   '/send/text',
   asyncHandler(async (req, res) => {
     validate(['to', 'text'], req.body);
-    const { to, text, beneficiaryId, familyMemberId, staffNote } = req.body;
+    const { to, text, beneficiaryId, familyMemberId, staffNote: _staffNote } = req.body;
     const staffId = req.user?._id || req.user?.id;
 
     const result = await whatsappService.sendText(to, text);

@@ -789,12 +789,10 @@ router.post('/approvals/:id/decide', authenticate, async (req, res) => {
         consent.revokedReason = null;
       } else {
         if (!trimmedNote || trimmedNote.length < 5) {
-          return res
-            .status(400)
-            .json({
-              error: 'InvalidBody',
-              message: 'reason (note) required on REJECT (>=5 chars)',
-            });
+          return res.status(400).json({
+            error: 'InvalidBody',
+            message: 'reason (note) required on REJECT (>=5 chars)',
+          });
         }
         consent.revokedAt = new Date();
         consent.revokedReason = trimmedNote;
@@ -952,12 +950,10 @@ router.post('/invoices/:id/pay', authenticate, async (req, res) => {
         .json({ error: 'AlreadyPaid', message: 'invoice is already fully paid' });
     }
     if (invoice.status === 'CANCELLED' || invoice.status === 'DRAFT') {
-      return res
-        .status(409)
-        .json({
-          error: 'NotPayable',
-          message: `invoice in status ${invoice.status} cannot be paid`,
-        });
+      return res.status(409).json({
+        error: 'NotPayable',
+        message: `invoice in status ${invoice.status} cannot be paid`,
+      });
     }
 
     const total = Number(invoice.totalAmount) || 0;

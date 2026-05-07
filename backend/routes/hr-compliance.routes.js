@@ -413,4 +413,12 @@ router.post(
   }
 );
 
+// ── BC-07: GET /credential-expiry ───────────────────────────────────────
+// تقرير صلاحية الاعتمادات — SCFHS + إقامة + هوية + جواز
+// يستخدمه CredentialExpiryAdmin.jsx لعرض الكوادر التي تنتهي صلاحيتها
+router.get('/credential-expiry', requireRole(READ_ROLES), async (req, res) => {
+  const { getExpiryReport } = require('../middleware/credentialExpiry.middleware');
+  return getExpiryReport(req, res);
+});
+
 module.exports = router;

@@ -288,6 +288,7 @@ const DEPARTMENT_LABEL_AR = {
   it: 'تقنية المعلومات',
 };
 
+// eslint-disable-next-line no-unused-vars -- scaffolded handler for unimplemented endpoints
 function notImplemented(contract) {
   return (_req, res) =>
     res.status(501).json({

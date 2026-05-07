@@ -194,4 +194,6 @@ programEffectivenessSchema.index({ programType: 1, status: 1 });
 programEffectivenessSchema.index({ 'evaluationPeriod.from': 1, 'evaluationPeriod.to': 1 });
 programEffectivenessSchema.index({ createdAt: -1 });
 
-module.exports = mongoose.models.ProgramEffectiveness || mongoose.model('ProgramEffectiveness', programEffectivenessSchema);
+module.exports =
+  mongoose.models.ProgramEffectiveness ||
+  mongoose.model('ProgramEffectiveness', programEffectivenessSchema);

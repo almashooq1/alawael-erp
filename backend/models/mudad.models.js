@@ -338,10 +338,13 @@ MudadComplianceReportSchema.index({ establishmentId: 1, reportMonth: 1 }, { uniq
 // ============================================================
 // التصدير
 // ============================================================
-const MudadSalaryRecord = mongoose.models.MudadSalaryRecord || mongoose.model('MudadSalaryRecord', MudadSalaryRecordSchema);
+const MudadSalaryRecord =
+  mongoose.models.MudadSalaryRecord || mongoose.model('MudadSalaryRecord', MudadSalaryRecordSchema);
 const MudadBatch = mongoose.models.MudadBatch || mongoose.model('MudadBatch', MudadBatchSchema);
 const MudadConfig = mongoose.models.MudadConfig || mongoose.model('MudadConfig', MudadConfigSchema);
-const MudadComplianceReport = mongoose.models.MudadComplianceReport || mongoose.model('MudadComplianceReport', MudadComplianceReportSchema);
+const MudadComplianceReport =
+  mongoose.models.MudadComplianceReport ||
+  mongoose.model('MudadComplianceReport', MudadComplianceReportSchema);
 
 module.exports = {
   MudadSalaryRecord,

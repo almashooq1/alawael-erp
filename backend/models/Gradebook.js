@@ -264,7 +264,8 @@ SemesterReportSchema.index({ student: 1, academicYear: 1, semester: 1 }, { uniqu
 
 module.exports = {
   Gradebook: mongoose.models.Gradebook || mongoose.model('Gradebook', GradebookSchema),
-  SemesterReport: mongoose.models.SemesterReport || mongoose.model('SemesterReport', SemesterReportSchema),
+  SemesterReport:
+    mongoose.models.SemesterReport || mongoose.model('SemesterReport', SemesterReportSchema),
   GradebookSchema,
   SemesterReportSchema,
   GradeEntrySchema,

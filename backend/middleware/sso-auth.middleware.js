@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Advanced SSO Authentication Middleware
  * Middleware متقدم لـ SSO مع دعم OAuth 2.0 و OpenID Connect

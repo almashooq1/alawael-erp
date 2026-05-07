@@ -29,7 +29,9 @@ const therapySessionSchema = new mongoose.Schema(
 
     // Clinical references (optional for simple scheduling)
     plan: { type: mongoose.Schema.Types.ObjectId, ref: 'TherapeuticPlan' },
-    beneficiary: { type: mongoose.Schema.Types.ObjectId, ref: 'Beneficiary' },
+    episodeOfCare: { type: mongoose.Schema.Types.ObjectId, ref: 'EpisodeOfCare', index: true },
+    carePlan: { type: mongoose.Schema.Types.ObjectId, ref: 'CarePlan', index: true },
+    beneficiary: { type: mongoose.Schema.Types.ObjectId, ref: 'Beneficiary', index: true },
     therapist: { type: mongoose.Schema.Types.ObjectId, ref: 'Employee' },
 
     // Scheduling
@@ -116,6 +118,33 @@ const therapySessionSchema = new mongoose.Schema(
         changedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
         changedAt: { type: Date, default: Date.now },
         reason: String,
+      },
+    ],
+
+    // ── Session Note Finalisation + Amendment Audit (BC-04) ──────────────
+    // Supports ABAC policy: session-amendment-window (24h window, same signer)
+    noteStatus: {
+      type: String,
+      enum: ['draft', 'finalized'],
+      default: 'draft',
+      index: true,
+    },
+    signedAt: { type: Date, index: true },
+    signedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', index: true },
+
+    amendments: [
+      {
+        amendedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+        amendedAt: { type: Date, default: Date.now },
+        reason: { type: String, required: true },
+        fields: [
+          {
+            field: String, // e.g. 'notes.subjective'
+            oldValue: mongoose.Schema.Types.Mixed,
+            newValue: mongoose.Schema.Types.Mixed,
+          },
+        ],
+        approvedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // set when outside 24h window
       },
     ],
 

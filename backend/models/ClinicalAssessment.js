@@ -21,6 +21,8 @@ const clinicalAssessmentSchema = new mongoose.Schema(
       required: true,
       index: true,
     },
+    episodeOfCare: { type: mongoose.Schema.Types.ObjectId, ref: 'EpisodeOfCare', index: true },
+    carePlan: { type: mongoose.Schema.Types.ObjectId, ref: 'CarePlan' },
     therapist: { type: mongoose.Schema.Types.ObjectId, ref: 'Employee' },
     reviewer: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     branchId: { type: mongoose.Schema.Types.ObjectId, ref: 'Branch', index: true },

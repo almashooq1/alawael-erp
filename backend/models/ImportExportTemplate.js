@@ -168,4 +168,6 @@ importExportTemplateSchema.statics.getSystemTemplates = async function () {
   });
 };
 
-module.exports = mongoose.models.ImportExportTemplate || mongoose.model('ImportExportTemplate', importExportTemplateSchema);
+module.exports =
+  mongoose.models.ImportExportTemplate ||
+  mongoose.model('ImportExportTemplate', importExportTemplateSchema);

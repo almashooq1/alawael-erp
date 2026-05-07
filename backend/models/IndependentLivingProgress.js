@@ -326,4 +326,6 @@ independentLivingProgressSchema.virtual('scoreChange').get(function () {
   return null;
 });
 
-module.exports = mongoose.models.IndependentLivingProgress || mongoose.model('IndependentLivingProgress', independentLivingProgressSchema);
+module.exports =
+  mongoose.models.IndependentLivingProgress ||
+  mongoose.model('IndependentLivingProgress', independentLivingProgressSchema);

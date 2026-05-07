@@ -24,7 +24,11 @@ const PurchaseOrderSchema = new mongoose.Schema({
   supplier: { type: mongoose.Schema.Types.ObjectId, ref: 'SCMSupplier' },
   items: [{ product: String, quantity: Number, price: Number }],
   totalAmount: { type: Number, default: 0 },
-  status: { type: String, enum: ['draft', 'sent', 'confirmed', 'delivered', 'cancelled'], default: 'draft' },
+  status: {
+    type: String,
+    enum: ['draft', 'sent', 'confirmed', 'delivered', 'cancelled'],
+    default: 'draft',
+  },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
@@ -32,7 +36,11 @@ const PurchaseOrderSchema = new mongoose.Schema({
 const ShipmentSchema = new mongoose.Schema({
   shipmentNumber: String,
   purchaseOrder: { type: mongoose.Schema.Types.ObjectId, ref: 'SCMPurchaseOrder' },
-  status: { type: String, enum: ['pending', 'in_transit', 'delivered', 'returned'], default: 'pending' },
+  status: {
+    type: String,
+    enum: ['pending', 'in_transit', 'delivered', 'returned'],
+    default: 'pending',
+  },
   trackingNumber: String,
   estimatedDelivery: Date,
   actualDelivery: Date,
@@ -40,28 +48,55 @@ const ShipmentSchema = new mongoose.Schema({
 });
 
 const Supplier = mongoose.models.SCMSupplier || mongoose.model('SCMSupplier', SupplierSchema);
-const PurchaseOrder = mongoose.models.SCMPurchaseOrder || mongoose.model('SCMPurchaseOrder', PurchaseOrderSchema);
+const PurchaseOrder =
+  mongoose.models.SCMPurchaseOrder || mongoose.model('SCMPurchaseOrder', PurchaseOrderSchema);
 const Shipment = mongoose.models.SCMShipment || mongoose.model('SCMShipment', ShipmentSchema);
 
 class SupplyChainRepository {
   // Suppliers
-  async createSupplier(data) { return Supplier.create(data); }
-  async findSupplierById(id) { return Supplier.findById(id); }
-  async findAllSuppliers(filter = {}) { return Supplier.find(filter); }
-  async updateSupplier(id, data) { return Supplier.findByIdAndUpdate(id, data, { new: true }); }
-  async deleteSupplier(id) { return Supplier.findByIdAndDelete(id); }
+  async createSupplier(data) {
+    return Supplier.create(data);
+  }
+  async findSupplierById(id) {
+    return Supplier.findById(id);
+  }
+  async findAllSuppliers(filter = {}) {
+    return Supplier.find(filter);
+  }
+  async updateSupplier(id, data) {
+    return Supplier.findByIdAndUpdate(id, data, { new: true });
+  }
+  async deleteSupplier(id) {
+    return Supplier.findByIdAndDelete(id);
+  }
 
   // Purchase Orders
-  async createPurchaseOrder(data) { return PurchaseOrder.create(data); }
-  async findPurchaseOrderById(id) { return PurchaseOrder.findById(id).populate('supplier'); }
-  async findAllPurchaseOrders(filter = {}) { return PurchaseOrder.find(filter).populate('supplier'); }
-  async updatePurchaseOrder(id, data) { return PurchaseOrder.findByIdAndUpdate(id, data, { new: true }); }
+  async createPurchaseOrder(data) {
+    return PurchaseOrder.create(data);
+  }
+  async findPurchaseOrderById(id) {
+    return PurchaseOrder.findById(id).populate('supplier');
+  }
+  async findAllPurchaseOrders(filter = {}) {
+    return PurchaseOrder.find(filter).populate('supplier');
+  }
+  async updatePurchaseOrder(id, data) {
+    return PurchaseOrder.findByIdAndUpdate(id, data, { new: true });
+  }
 
   // Shipments
-  async createShipment(data) { return Shipment.create(data); }
-  async findShipmentById(id) { return Shipment.findById(id); }
-  async findAllShipments(filter = {}) { return Shipment.find(filter); }
-  async updateShipment(id, data) { return Shipment.findByIdAndUpdate(id, data, { new: true }); }
+  async createShipment(data) {
+    return Shipment.create(data);
+  }
+  async findShipmentById(id) {
+    return Shipment.findById(id);
+  }
+  async findAllShipments(filter = {}) {
+    return Shipment.find(filter);
+  }
+  async updateShipment(id, data) {
+    return Shipment.findByIdAndUpdate(id, data, { new: true });
+  }
 
   // Analytics
   async getSupplierAnalytics() {

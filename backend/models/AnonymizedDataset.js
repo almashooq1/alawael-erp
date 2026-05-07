@@ -170,4 +170,5 @@ anonymizedDatasetSchema.index({ studyId: 1, status: 1 });
 anonymizedDatasetSchema.index({ sourceModule: 1 });
 anonymizedDatasetSchema.index({ createdAt: -1 });
 
-module.exports = mongoose.models.AnonymizedDataset || mongoose.model('AnonymizedDataset', anonymizedDatasetSchema);
+module.exports =
+  mongoose.models.AnonymizedDataset || mongoose.model('AnonymizedDataset', anonymizedDatasetSchema);

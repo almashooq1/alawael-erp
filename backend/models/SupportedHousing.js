@@ -349,4 +349,5 @@ supportedHousingSchema.virtual('activeServices').get(function () {
   return this.supportServices?.filter(s => s.isActive).length || 0;
 });
 
-module.exports = mongoose.models.SupportedHousing || mongoose.model('SupportedHousing', supportedHousingSchema);
+module.exports =
+  mongoose.models.SupportedHousing || mongoose.model('SupportedHousing', supportedHousingSchema);

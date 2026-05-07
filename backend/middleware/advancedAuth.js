@@ -72,13 +72,11 @@ const validateAPIKey = async (req, res, next) => {
 
 const requirePasswordChange = (req, res, next) => {
   if (req.user?.requirePasswordChange) {
-    return res
-      .status(403)
-      .json({
-        success: false,
-        message: 'Password change required',
-        code: 'PASSWORD_CHANGE_REQUIRED',
-      });
+    return res.status(403).json({
+      success: false,
+      message: 'Password change required',
+      code: 'PASSWORD_CHANGE_REQUIRED',
+    });
   }
   next();
 };

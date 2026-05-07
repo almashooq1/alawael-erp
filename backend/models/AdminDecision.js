@@ -246,4 +246,5 @@ adminDecisionSchema.statics.generateDecisionNumber = async function (type) {
   return `${prefix}-${year}-${String(count + 1).padStart(4, '0')}`;
 };
 
-module.exports = mongoose.models.AdminDecision || mongoose.model('AdminDecision', adminDecisionSchema);
+module.exports =
+  mongoose.models.AdminDecision || mongoose.model('AdminDecision', adminDecisionSchema);

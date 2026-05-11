@@ -168,6 +168,8 @@ __pycache__/
 **/extensions/*
 # Exception: our domains/extensions/ source code is not a browser extension
 !backend/domains/extensions/**
+# Exception: our database/plugins/ contains mongoose plugins, not browser plugins
+!backend/database/plugins/**
 
 # ───────────────────────────────────────────────────────────────
 # 11. Temp Scripts & Debug (ops/ directory)

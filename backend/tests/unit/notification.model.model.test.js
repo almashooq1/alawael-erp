@@ -82,7 +82,7 @@ jest.mock('mongoose', () => {
 });
 
 jest.mock('../../models/Notification', () => ({}));
-jest.mock('../../models/notification', () => ({}));
+jest.mock('../../models/Notification', () => ({}));
 
 let Model;
 try {

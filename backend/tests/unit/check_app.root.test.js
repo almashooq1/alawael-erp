@@ -11,13 +11,13 @@ jest.mock('../../app', () => {
   return mockApp;
 });
 
-jest.spyOn(console, 'log').mockImplementation(() => {});
-jest.spyOn(console, 'error').mockImplementation(() => {});
+const logSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
 describe('check_app.js', () => {
   afterAll(() => {
-    console.log.mockRestore();
-    console.error.mockRestore();
+    logSpy.mockRestore();
+    errorSpy.mockRestore();
   });
 
   test('should load without crashing', () => {

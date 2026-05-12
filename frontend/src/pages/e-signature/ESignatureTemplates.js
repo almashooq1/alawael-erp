@@ -109,7 +109,7 @@ export default function ESignatureTemplates() {
       const params = {};
       if (filterCategory) params.category = filterCategory;
       const res = await eSignatureService.getTemplates(params);
-      if (res?.data?.data) setTemplates(res.data.data);
+      if (Array.isArray(res?.data)) setTemplates(res.data);
     } catch {
       showSnackbar('خطأ في تحميل القوالب', 'error');
     } finally {
@@ -182,6 +182,11 @@ export default function ESignatureTemplates() {
       showSnackbar('الكود والاسم والتصنيف مطلوبون', 'warning');
       return;
     }
+    const invalidSigner = form.defaultSigners.find(s => !s.title_ar?.trim());
+    if (invalidSigner) {
+      showSnackbar('يرجى تعبئة اسم المنصب (عربي) لكل موقّع مضاف', 'warning');
+      return;
+    }
     setSubmitting(true);
     try {
       if (editing) {
@@ -194,7 +199,7 @@ export default function ESignatureTemplates() {
       setDialogOpen(false);
       loadTemplates();
     } catch (err) {
-      showSnackbar(err?.response?.data?.message || 'خطأ في حفظ القالب', 'error');
+      showSnackbar(err?.data?.message || err?.data?.error || 'خطأ في حفظ القالب', 'error');
     } finally {
       setSubmitting(false);
     }

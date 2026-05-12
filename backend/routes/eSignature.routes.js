@@ -150,13 +150,19 @@ router.post('/templates', authorize(['admin', 'super_admin']), async (req, res) 
   try {
     const tpl = await ESignatureTemplate.create({
       ...req.body,
-      createdBy: req.user.id,
+      createdBy: req.user.userId || req.user.id,
     });
     res.status(201).json({ success: true, data: tpl, message: 'تم إنشاء القالب بنجاح' });
   } catch (error) {
     logger.error('Error creating template:', error);
     if (error.code === 11000) {
       return res.status(400).json({ success: false, message: 'كود القالب مستخدم بالفعل' });
+    }
+    if (error.name === 'ValidationError') {
+      const msg = Object.values(error.errors)
+        .map(e => e.message)
+        .join('، ');
+      return res.status(400).json({ success: false, message: msg });
     }
     safeError(res, error, 'eSignature');
   }
@@ -174,6 +180,16 @@ router.put('/templates/:id', authorize(['admin', 'super_admin']), async (req, re
     await tpl.save();
     res.json({ success: true, data: tpl, message: 'تم تحديث القالب' });
   } catch (error) {
+    logger.error('Error updating template:', error);
+    if (error.code === 11000) {
+      return res.status(400).json({ success: false, message: 'كود القالب مستخدم بالفعل' });
+    }
+    if (error.name === 'ValidationError') {
+      const msg = Object.values(error.errors)
+        .map(e => e.message)
+        .join('، ');
+      return res.status(400).json({ success: false, message: msg });
+    }
     safeError(res, error, 'updating template');
   }
 });

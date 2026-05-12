@@ -5,12 +5,14 @@ import path from 'path';
 // CRA used .js files for JSX. Vite requires .jsx by default.
 // This pre-plugin tells esbuild to treat src/**/*.js as JSX so
 // vite:build-import-analysis can parse them before the React plugin runs.
+// Use a regex to match both Unix '/' and Windows '\' path separators.
+const srcJsPattern = /[/\\]src[/\\]/;
 const jsxInJsPlugin = {
   name: 'jsx-in-js',
   enforce: 'pre',
   async transform(code, id) {
     if (
-      id.includes('/src/') &&
+      srcJsPattern.test(id) &&
       id.endsWith('.js') &&
       !id.includes('node_modules')
     ) {

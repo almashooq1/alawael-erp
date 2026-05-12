@@ -8,6 +8,106 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [Unreleased] — 2026-05-12 — 17-commit cleanup + verified manual deploy + 11 real bugs caught
+
+A long session combining a Quality module expansion, frontend admin pages refresh,
+two repos (`66666` + `alawael-rehab-platform`), an end-to-end verified VPS deploy
+recipe, and 11 concrete bugs surfaced by re-enabling lint/typecheck/test gates that
+had been silently bypassed.
+
+### Added — Backend
+
+- **Management-Review service** rewrite — analytics + dashboard helpers,
+  action-status tracking, minutes, idempotent close/cancel, auto-schedule
+  next periodic review. 55 new unit tests using an in-memory fake model
+  (no DB required). `services/quality/managementReview.service.js` grew
+  from 489 → 675 lines.
+- **3 new Quality admin endpoints** — `managementReview.routes.js`
+  (analytics + action-status surfaces), `capa-admin.routes.js`,
+  `evidence.routes.js` (per-bucket distribution), `qualityHealthScore.routes.js`.
+- **eSignature template hardening** — return 400 on ValidationError
+  (not generic 500), surface 11000 dup-key with Arabic message,
+  fall back to `req.user.userId || req.user.id` for JWT payload variants.
+
+### Added — Frontend (66666)
+
+- **8 Quality admin pages expanded** (~3,500 lines) — ManagementReviewAdmin
+  (full vertical: agenda, attendees, inputs/outputs, decisions, actions,
+  minutes, approval, analytics), QualityDashboard (KPI tiles, charts,
+  branch health), QualityPage (hub with subject cards), CapaAdmin,
+  EvidenceVaultAdmin, ComplianceCalendarAdmin, PdplComplianceDashboard,
+  PolicyLibraryAdmin.
+- **Tele-Rehab + Equipment-Lifecycle routes** mounted in
+  `routes/index.js` + `AuthenticatedShell.js`.
+
+### Added — Platform repo (alawael-rehab-platform)
+
+- **Landing-config section types**: `branches` + `vision` body shapes +
+  renderers in `apps/web-admin/src/app/landing-preview/page.tsx`.
+  `ICON_GLYPH_MAP` turns common lucide icon names into unicode glyphs.
+- **Next.js ESLint config** (`apps/web-admin/.eslintrc.json` with
+  `next/core-web-vitals`) — was missing, so `next lint` blocked on
+  interactive prompt in CI.
+
+### Fixed — 11 real bugs surfaced
+
+1. **`react-hooks/rules-of-hooks` violation** in `appointments/[id]/page.tsx`:`StatusActions`
+   — 5 `useState` calls sat after an early-return. Would crash with
+   "Rendered fewer hooks than expected" once `transitions.length === 0`.
+2. **`useTemplate` callback** in `therapist-templates/page.tsx` tripped
+   rules-of-hooks. Plain clipboard-copy callback, not a hook. Renamed to `applyTemplate`.
+3. **`a11y/aria-progressbar-name`** — 8 MUI `<LinearProgress>` across 5 Quality pages
+   missing `aria-label`. Caught by axe-core in `management-review-admin.a11y.test.js`.
+4. **Jest config conflict** — both `jest.config.js` and `package.json[jest]` existed;
+   `npx jest <file>` failed with "Multiple configurations found".
+5. **`hr-app/Dashboard.js` duplicate declaration** — two `const Dashboard = () => ...`
+   blocks. Hard parse error. Collapsed to a single re-export.
+6. **6 unescaped JSX entity errors** in `landing-preview/page.tsx`,
+   `push-subscriptions/page.tsx`, `dynamic-form-renderer.tsx`.
+7. **`@alawael/core/intake.service.ts` — 2 TS errors** (`Intake | undefined`
+   under `noUncheckedIndexedAccess`). Unwrapped the transaction return.
+8. **`@alawael/core/lint` script referred to eslint** not in workspace.
+   Only 1/18 services had this stale script.
+9. **5 service packages with `"test": "jest"` + zero test files** —
+   added `--passWithNoTests` to unblock `pnpm turbo test`.
+10. **Stale `@typescript-eslint/no-unused-vars` eslint-disable** in `lib/api.ts`.
+11. **Critical deploy bug**: `chown -R www:www` after backend rsync clobbers
+    `.env` ownership; pm2 runs as `alawael` and can't read → env-validation
+    crash loop. Recovery: `chown alawael:alawael .env && chmod 600 .env`.
+    Documented in `memory/project_session_2026-05-12_full_deploy.md`.
+
+### Removed
+
+- `frontend/src/pages/Quality/_QualityPage_backup.jsx` (1-line deprecated stub).
+- `services/core/package.json` stale `lint` script.
+
+### Test totals
+
+- **Backend**: 25,115 passing (was 20,179 four weeks ago)
+- **Frontend**: 11,094 active + 19 skipped (DocumentList orchestrator; describe.skip
+  with TODO replaces a hidden regex in jest config)
+- **Mobile**: 113 passing
+- **Platform-core**: 295 passing (was 7 + 21 suites failing to compile because
+  Prisma client wasn't generated — `pnpm db:generate` is now part of the deploy recipe)
+- **Total**: 36,617 passing across 4 surfaces
+
+### Deployed manually (auto-deploy workflow stopped firing — root cause TBD)
+
+- alaweal.org:5000 (backend + CRA) — `/api/v1/management-review/dashboard` returns
+  401 (route mounted + auth-gated) — proves new code is live.
+- alaweal.org:3100 (web-admin Next.js) — `/admin/landing-preview` serves with
+  the new `branches` + `vision` renderers.
+- `build-info.commit` still reports stale `c48e304a` because GIT_SHA isn't
+  updated on rsync deploys (known issue from 2026-05-11 — trust file mtimes).
+
+### Incident
+
+- `/api` was 502 for ~3 minutes during backend deploy recovery when `.env`
+  ownership caused a pm2 crash loop. Restored by copying `.env` from
+  `.FAILED-` dir + `chown alawael:alawael` + `chmod 600`. No data loss.
+
+---
+
 ## [Unreleased] — 2026-05-02 — Operational hardening + 9 silent-failure fixes
 
 A 30-step session that closed three production-readiness gaps end-to-end

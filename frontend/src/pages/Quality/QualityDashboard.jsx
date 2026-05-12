@@ -305,6 +305,7 @@ function PillarCard({ pillar, delay = 0 }) {
             <LinearProgress
               variant={s != null ? 'determinate' : 'indeterminate'}
               value={s ?? 0}
+              aria-label={`${pillar.nameAr}: ${s != null ? `${s} من 100` : 'لا توجد بيانات'}`}
               sx={{
                 mt: 0.8,
                 height: 4,
@@ -703,6 +704,7 @@ export default function QualityDashboard() {
                     <LinearProgress
                       variant={p.score != null ? 'determinate' : 'indeterminate'}
                       value={p.score ?? 0}
+                      aria-label={`${p.nameAr}: ${p.score != null ? `${p.score} من 100` : 'لا توجد بيانات'}`}
                       sx={{
                         flex: 1,
                         height: 6,
@@ -760,7 +762,7 @@ export default function QualityDashboard() {
                 <Chip label={hotspots.length} size="small" color="error" sx={{ mr: 'auto' }} />
               )}
             </Stack>
-            {loading && <LinearProgress sx={{ mb: 2 }} />}
+            {loading && <LinearProgress sx={{ mb: 2 }} aria-label="جارٍ تحميل بيانات الجودة" />}
             {!loading && hotspots.length === 0 && (
               <Stack
                 direction="row"
@@ -828,6 +830,7 @@ export default function QualityDashboard() {
                   <LinearProgress
                     variant="determinate"
                     value={d.rate}
+                    aria-label={`${d.name}: ${d.rate}٪`}
                     sx={{
                       flex: 1,
                       height: 8,

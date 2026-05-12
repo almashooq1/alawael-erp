@@ -172,6 +172,7 @@ function TrendBar({ label, scheduled, closed }) {
         value={Math.min(pct, 100)}
         sx={{ height: 6, borderRadius: 3 }}
         color={pct >= 80 ? 'success' : pct >= 50 ? 'warning' : 'error'}
+        aria-label={`نسبة إغلاق المراجعات: ${Math.round(pct)}٪`}
       />
     </Box>
   );
@@ -491,7 +492,7 @@ export default function ManagementReviewAdmin() {
       {/* ══ TAB 0: DASHBOARD ══════════════════════════════════════ */}
       {tab === 0 && (
         <>
-          {dashLoading && <LinearProgress sx={{ mb: 2 }} />}
+          {dashLoading && <LinearProgress sx={{ mb: 2 }} aria-label="جارٍ تحميل لوحة المراجعات" />}
           {dashboard && (
             <Stack direction="row" spacing={2} flexWrap="wrap" useFlexGap sx={{ mb: 3 }}>
               <KpiCard label="الإجمالي" value={dashboard.total} color="primary.main" />
@@ -832,7 +833,7 @@ export default function ManagementReviewAdmin() {
         onClose={() => setDrawerOpen(false)}
         PaperProps={{ sx: { width: { xs: '100%', md: 700 }, p: 0 } }}
       >
-        {detailLoading && <LinearProgress />}
+        {detailLoading && <LinearProgress aria-label="جارٍ تحميل تفاصيل المراجعة" />}
         {detail && (
           <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
             {/* Drawer header */}

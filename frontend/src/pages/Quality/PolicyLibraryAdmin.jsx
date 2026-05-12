@@ -551,7 +551,12 @@ export default function PolicyLibraryAdmin() {
           <Typography variant="body2" fontWeight={700} sx={{ flex: 1 }}>
             {selected.size} سياسة محددة
           </Typography>
-          {bulkSending && <LinearProgress sx={{ width: 120, borderRadius: 2 }} />}
+          {bulkSending && (
+            <LinearProgress
+              sx={{ width: 120, borderRadius: 2 }}
+              aria-label="جارٍ إرسال السياسات بالجملة"
+            />
+          )}
           <Button
             variant="contained"
             size="small"

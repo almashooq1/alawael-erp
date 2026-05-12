@@ -370,6 +370,7 @@ export default function CapaAdmin() {
                           ? (analytics.aging[k] / analytics.activeCount) * 100
                           : 0
                       }
+                      aria-label={`${lbl}: ${analytics.aging[k]} من ${analytics.activeCount || 0}`}
                       sx={{
                         flex: 1,
                         height: 6,
@@ -418,6 +419,7 @@ export default function CapaAdmin() {
                       <LinearProgress
                         variant="determinate"
                         value={total ? (v / total) * 100 : 0}
+                        aria-label={`${STATUS_LABEL[k] || k}: ${v} من ${total}`}
                         sx={{ flex: 1, height: 5, borderRadius: 3 }}
                       />
                       <Typography

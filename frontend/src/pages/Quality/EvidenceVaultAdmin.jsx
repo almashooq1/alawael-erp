@@ -352,6 +352,7 @@ export default function EvidenceVaultAdmin() {
                     <LinearProgress
                       variant="determinate"
                       value={pct}
+                      aria-label={`${b.label}: ${pct}٪`}
                       sx={{
                         height: 10,
                         borderRadius: 5,

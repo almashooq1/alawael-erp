@@ -76,16 +76,6 @@
     ]
   },
   "proxy": "http://localhost:3001",
-  "jest": {
-    "coverageThreshold": {
-      "global": {
-        "statements": 40,
-        "branches": 25,
-        "functions": 30,
-        "lines": 40
-      }
-    }
-  },
   "overrides": {
     "uuid": ">=14.0.0",
     "nth-check": ">=2.1.1",

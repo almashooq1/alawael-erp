@@ -24,4 +24,7 @@ module.exports = {
     '^.+/components/services/api(\\.js)?$': '<rootDir>/src/services/api.js',
   },
   collectCoverageFrom: ['src/**/*.{js,jsx}', '!src/index.js', '!src/reportWebVitals.js'],
+  coverageThreshold: {
+    global: { statements: 40, branches: 25, functions: 30, lines: 40 },
+  },
 };

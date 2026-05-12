@@ -423,35 +423,89 @@ class ManagementReviewService {
   }
 
   /**
-   * Returns the compliance snapshot used by the executive dashboard
-   * (Commit 9 of Phase 13 will consume this).
+   * Returns the compliance snapshot used by the executive dashboard.
+   * Enhanced with completionRate, avgCycleTimeDays, dueThisMonth,
+   * totalOpenActions, and upcomingReviews.
    */
   async getDashboard({ branchId } = {}) {
     const q = { deleted_at: null };
     if (branchId) q.branchId = branchId;
 
-    const [total, open, closed, overdue] = await Promise.all([
+    const now = this.now();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+
+    const [total, open, closed, overdue, dueThisMonth] = await Promise.all([
       this.model.countDocuments(q),
       this.model.countDocuments({ ...q, status: { $nin: ['closed', 'cancelled'] } }),
       this.model.countDocuments({ ...q, status: 'closed' }),
       this.model.countDocuments({
         ...q,
         status: { $nin: ['closed', 'cancelled'] },
-        scheduledFor: { $lt: this.now() },
+        scheduledFor: { $lt: now },
+      }),
+      this.model.countDocuments({
+        ...q,
+        status: { $nin: ['closed', 'cancelled'] },
+        scheduledFor: { $gte: monthStart, $lte: monthEnd },
       }),
     ]);
 
-    const latest = await this.model
-      .findOne({ ...q, status: 'closed' })
-      .sort({ closedAt: -1 })
-      .select('reviewNumber closedAt nextReviewScheduledFor actions')
-      .lean();
+    const [latest, cycleTimeDocs, upcomingDocs, allActive] = await Promise.all([
+      this.model
+        .findOne({ ...q, status: 'closed' })
+        .sort({ closedAt: -1 })
+        .select('reviewNumber closedAt nextReviewScheduledFor actions')
+        .lean(),
+      this.model
+        .find({ ...q, status: 'closed', startedAt: { $ne: null }, closedAt: { $ne: null } })
+        .select('startedAt closedAt')
+        .limit(20)
+        .lean(),
+      this.model
+        .find({
+          ...q,
+          status: { $nin: ['closed', 'cancelled'] },
+          scheduledFor: { $gte: now },
+        })
+        .sort({ scheduledFor: 1 })
+        .limit(3)
+        .select('reviewNumber title scheduledFor type status')
+        .lean(),
+      this.model
+        .find({ ...q, status: { $nin: ['closed', 'cancelled'] } })
+        .select('actions')
+        .lean(),
+    ]);
+
+    // average cycle time in days
+    let avgCycleTimeDays = null;
+    if (cycleTimeDocs.length > 0) {
+      const totalMs = cycleTimeDocs.reduce((acc, d) => {
+        return acc + (new Date(d.closedAt) - new Date(d.startedAt));
+      }, 0);
+      avgCycleTimeDays = Math.round(totalMs / cycleTimeDocs.length / 86400000);
+    }
+
+    // total open actions across all active reviews
+    const totalOpenActions = allActive.reduce((acc, r) => {
+      return (
+        acc +
+        (r.actions || []).filter(a => ['open', 'in_progress', 'overdue'].includes(a.status)).length
+      );
+    }, 0);
+
+    const completionRate = total > 0 ? Math.round((closed / total) * 100) : 0;
 
     return {
       total,
       open,
       closed,
       overdue,
+      dueThisMonth,
+      completionRate,
+      avgCycleTimeDays,
+      totalOpenActions,
       latestClosed: latest
         ? {
             reviewNumber: latest.reviewNumber,
@@ -462,7 +516,121 @@ class ManagementReviewService {
             ).length,
           }
         : null,
+      upcoming: upcomingDocs,
     };
+  }
+
+  /**
+   * Monthly trend analytics for the last N months.
+   * Returns array of { month: 'YYYY-MM', scheduled, closed, cancelled, overdueAtEOM }.
+   */
+  async getAnalytics({ branchId, months = 12 } = {}) {
+    const q = { deleted_at: null };
+    if (branchId) q.branchId = branchId;
+
+    const now = this.now();
+    const result = [];
+
+    for (let i = months - 1; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const from = new Date(d.getFullYear(), d.getMonth(), 1);
+      const to = new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59);
+      const monthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+
+      const [scheduled, closed, cancelled] = await Promise.all([
+        this.model.countDocuments({ ...q, scheduledFor: { $gte: from, $lte: to } }),
+        this.model.countDocuments({ ...q, status: 'closed', closedAt: { $gte: from, $lte: to } }),
+        this.model.countDocuments({
+          ...q,
+          status: 'cancelled',
+          closedAt: { $gte: from, $lte: to },
+        }),
+      ]);
+
+      result.push({ month: monthKey, scheduled, closed, cancelled });
+    }
+
+    // action-completion rate across all closed reviews
+    const closedWithActions = await this.model
+      .find({ ...q, status: 'closed' })
+      .select('actions closedAt')
+      .sort({ closedAt: -1 })
+      .limit(50)
+      .lean();
+
+    let totalActions = 0;
+    let completedActions = 0;
+    for (const rev of closedWithActions) {
+      for (const a of rev.actions || []) {
+        totalActions++;
+        if (a.status === 'completed') completedActions++;
+      }
+    }
+
+    return {
+      trend: result,
+      actionCompletionRate:
+        totalActions > 0 ? Math.round((completedActions / totalActions) * 100) : null,
+      totalActionsInScope: totalActions,
+    };
+  }
+
+  /**
+   * Update an inline action's status / completion notes.
+   * Allowed transitions: open → in_progress → completed | cancelled
+   *                       in_progress → completed | cancelled
+   *                       overdue → completed | in_progress | cancelled
+   */
+  async updateActionStatus(reviewId, actionId, { status, completionNotes } = {}, userId) {
+    const VALID_STATUSES = ['open', 'in_progress', 'completed', 'overdue', 'cancelled'];
+    if (!VALID_STATUSES.includes(status)) {
+      throw Object.assign(new Error(`Invalid action status: ${status}`), { code: 'VALIDATION' });
+    }
+
+    const review = await this._loadActive(reviewId);
+    const action = (review.actions || []).id(actionId);
+    if (!action) {
+      throw Object.assign(new Error('Action not found'), { code: 'NOT_FOUND' });
+    }
+
+    action.status = status;
+    if (completionNotes) action.completionNotes = completionNotes;
+    if (status === 'completed') action.completedAt = this.now();
+
+    await review.save();
+
+    await this._emit('quality.review.action_status_updated', {
+      reviewId: String(review._id),
+      actionId: String(actionId),
+      status,
+      by: String(userId),
+    });
+    return review;
+  }
+
+  /**
+   * Set / update the narrative meeting minutes.
+   * Allowed when status is in_progress, decisions_recorded, actions_assigned, or closed.
+   */
+  async setMinutes(reviewId, minutes, userId) {
+    const review = await this._loadActive(reviewId);
+    const ALLOWED_PHASES = ['in_progress', 'decisions_recorded', 'actions_assigned', 'closed'];
+    if (!ALLOWED_PHASES.includes(review.status)) {
+      throw Object.assign(new Error('Minutes can only be set once the meeting has started'), {
+        code: 'INVALID_PHASE',
+      });
+    }
+    if (typeof minutes !== 'string') throw new Error('minutes must be a string');
+
+    review.minutes = minutes;
+    await review.save();
+
+    await this._emit('quality.review.minutes_updated', {
+      reviewId: String(review._id),
+      by: String(userId),
+      length: minutes.length,
+    });
+    return review;
   }
 
   // ── internals ────────────────────────────────────────────────────

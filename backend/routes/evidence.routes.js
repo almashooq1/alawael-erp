@@ -1,20 +1,22 @@
 'use strict';
 
 /**
- * evidence.routes.js — Phase 13 Commit 2 (4.0.56).
+ * evidence.routes.js — Phase 13 Commit 3.
  *
  * HTTP surface for the compliance-evidence vault.
  *
  * Mounted by `_registry.js` at `/api/evidence` and `/api/v1/evidence`.
  *
- * This commit deliberately does NOT wire multipart upload — raw
- * binary bodies go through the existing `/api/v1/documents`
- * uploader (which already has size limits + MIME sniffing) and the
- * caller passes the resulting storage key + sha256. A follow-up
- * commit can add a direct `/upload` endpoint if needed.
+ * Added in Commit 3: POST /upload — multipart evidence ingestion.
+ *   - max 20 MB per file
+ *   - allowed: PDF, common images, Office docs (docx/xlsx/pptx)
+ *   - file is stored in memory, sha256 computed here, then passed to
+ *     evidenceVault.service.ingest() as `buffer`
  */
 
 const express = require('express');
+const multer = require('multer');
+const crypto = require('crypto');
 const { body, param, query, validationResult } = require('express-validator');
 
 const { authenticate, authorize } = require('../middleware/auth');
@@ -25,7 +27,34 @@ const registry = require('../config/evidence.registry');
 
 const router = express.Router();
 
-// ── helpers ────────────────────────────────────────────────────────
+// ── multer — memory storage, 20 MB cap, evidence-grade MIME list ──────────
+
+const EVIDENCE_MIMES = new Set([
+  'application/pdf',
+  'image/jpeg',
+  'image/png',
+  'image/gif',
+  'image/webp',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.ms-excel',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'application/vnd.ms-powerpoint',
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+  'text/plain',
+  'text/csv',
+]);
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 20 * 1024 * 1024, files: 1 },
+  fileFilter: (_req, file, cb) => {
+    if (EVIDENCE_MIMES.has(file.mimetype)) return cb(null, true);
+    cb(
+      Object.assign(new Error(`نوع الملف غير مسموح به: ${file.mimetype}`), { code: 'MIME_BLOCKED' })
+    );
+  },
+});
 
 const wrap = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
@@ -47,8 +76,7 @@ function mapStatusError(err, res) {
   }
   return safeError(res, err);
 }
-
-// ── reference ──────────────────────────────────────────────────────
+// ── helpers ────────────────────────────────────────────────────────
 
 router.get(
   '/reference',
@@ -341,6 +369,64 @@ router.delete(
       res.json({ success: true, data: doc });
     } catch (err) {
       mapStatusError(err, res);
+    }
+  })
+);
+
+// ── multipart upload ────────────────────────────────────────────────────────
+//
+// POST /api/evidence/upload
+//
+// Form fields:
+//   file         (required)  — multipart file
+//   title        (optional)  — defaults to original filename
+//   type         (optional)  — evidence type key (see evidence.registry)
+//   sourceModule (optional)  — e.g. "capa", "compliance-calendar"
+//   expiresAt    (optional)  — ISO date string
+//
+// Returns: { success: true, data: <EvidenceItem> }
+
+router.post(
+  '/upload',
+  authenticate,
+  requireBranchAccess,
+  authorize('admin', 'quality_manager', 'compliance_officer', 'manager'),
+  upload.single('file'),
+  wrap(async (req, res) => {
+    if (!req.file) {
+      return res.status(400).json({ success: false, error: 'لم يتم رفع أي ملف' });
+    }
+
+    const { title, type, sourceModule, expiresAt } = req.body;
+
+    const input = {
+      title: title || req.file.originalname,
+      type: type || 'other',
+      sourceModule: sourceModule || 'evidence-vault',
+      buffer: req.file.buffer,
+      file: {
+        storageClass: 'inline',
+        mimeType: req.file.mimetype,
+        originalName: req.file.originalname,
+        sizeBytes: req.file.size,
+        hashAlgorithm: 'sha256',
+      },
+      validUntil: expiresAt ? new Date(expiresAt) : undefined,
+      branchId: req.user?.branchId || null,
+      tenantId: req.user?.tenantId || null,
+    };
+
+    // Compute sha256 here so the service doesn't duplicate
+    input.file.hash = crypto.createHash('sha256').update(req.file.buffer).digest('hex');
+    // Pass buffer so service also verifies + sets sizeBytes
+    try {
+      const doc = await getService().ingest(input, req.user._id);
+      res.status(201).json({ success: true, data: doc });
+    } catch (err) {
+      if (err.code === 'BAD_HASH' || err.code === 'NO_HASH') {
+        return res.status(422).json({ success: false, error: err.message });
+      }
+      return safeError(res, err);
     }
   })
 );

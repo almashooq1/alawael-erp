@@ -359,4 +359,73 @@ router.post(
   })
 );
 
+// ── analytics (trend + action-completion rate) ─────────────────────
+
+router.get(
+  '/analytics',
+  authenticate,
+  requireBranchAccess,
+  [query('months').optional().isInt({ min: 1, max: 24 })],
+  handleValidation,
+  wrap(async (req, res) => {
+    try {
+      const data = await getService().getAnalytics({
+        branchId: req.query.branchId,
+        months: req.query.months ? Number(req.query.months) : 12,
+      });
+      res.json({ success: true, data });
+    } catch (err) {
+      mapStatusError(err, res);
+    }
+  })
+);
+
+// ── action status update ───────────────────────────────────────────
+
+router.patch(
+  '/:id/actions/:actionId',
+  authenticate,
+  requireBranchAccess,
+  authorize('admin', 'quality_manager', 'ceo'),
+  [
+    param('id').isMongoId(),
+    param('actionId').isMongoId(),
+    body('status').isIn(['open', 'in_progress', 'completed', 'overdue', 'cancelled']),
+    body('completionNotes').optional().isString(),
+  ],
+  handleValidation,
+  wrap(async (req, res) => {
+    try {
+      const doc = await getService().updateActionStatus(
+        req.params.id,
+        req.params.actionId,
+        req.body,
+        req.user._id
+      );
+      res.json({ success: true, data: doc });
+    } catch (err) {
+      mapStatusError(err, res);
+    }
+  })
+);
+
+// ── minutes ────────────────────────────────────────────────────────
+
+router.patch(
+  '/:id/minutes',
+  authenticate,
+  requireBranchAccess,
+  authorize('admin', 'quality_manager'),
+  [param('id').isMongoId(), body('minutes').isString()],
+  handleValidation,
+  wrap(async (req, res) => {
+    try {
+      const doc = await getService().setMinutes(req.params.id, req.body.minutes, req.user._id);
+      res.json({ success: true, data: doc });
+    } catch (err) {
+      mapStatusError(err, res);
+    }
+  })
+);
+
 module.exports = router;

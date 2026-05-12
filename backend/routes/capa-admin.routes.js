@@ -19,6 +19,103 @@ const safeError = require('../utils/safeError');
 const getModel = () =>
   mongoose.models.CorrectiveAction || require('../domains/quality/models/CorrectiveAction');
 
+// ── Analytics ────────────────────────────────────────────────────────────────
+// GET /api/admin/capa/analytics
+// Must be declared BEFORE /:id to avoid the param-route swallowing "analytics"
+router.get(
+  '/analytics',
+  authenticate,
+  requireRole(['admin', 'quality_manager', 'manager']),
+  async (req, res) => {
+    try {
+      const CA = getModel();
+      const now = new Date();
+      const base = { isDeleted: false };
+
+      const [facets, aging] = await Promise.all([
+        // $facet: bySeverity, byStatus, byType
+        CA.aggregate([
+          { $match: base },
+          {
+            $facet: {
+              bySeverity: [{ $group: { _id: '$severity', count: { $sum: 1 } } }],
+              byStatus: [{ $group: { _id: '$status', count: { $sum: 1 } } }],
+              byType: [{ $group: { _id: '$type', count: { $sum: 1 } } }],
+            },
+          },
+        ]),
+        // Aging buckets for open items only
+        CA.aggregate([
+          {
+            $match: {
+              ...base,
+              status: { $nin: ['resolved', 'closed'] },
+            },
+          },
+          {
+            $addFields: {
+              ageInDays: {
+                $divide: [{ $subtract: [now, '$createdAt'] }, 86400000],
+              },
+            },
+          },
+          {
+            $bucket: {
+              groupBy: '$ageInDays',
+              boundaries: [0, 7, 30, 90],
+              default: '90+',
+              output: { count: { $sum: 1 } },
+            },
+          },
+        ]),
+      ]);
+
+      // Reshape facet arrays to plain objects
+      const reshape = arr =>
+        arr.reduce((acc, { _id, count }) => {
+          if (_id != null) acc[_id] = count;
+          return acc;
+        }, {});
+
+      const f = facets[0] || {};
+
+      // Overdue count
+      const overdueCount = await CA.countDocuments({
+        ...base,
+        dueDate: { $lt: now },
+        status: { $nin: ['resolved', 'closed'] },
+      });
+
+      // Total active (not resolved/closed)
+      const totalActive = await CA.countDocuments({
+        ...base,
+        status: { $nin: ['resolved', 'closed'] },
+      });
+
+      // Map aging buckets
+      const agingMap = {};
+      const labels = { 0: '0–6', 7: '7–29', 30: '30–89', '90+': '90+' };
+      aging.forEach(b => {
+        agingMap[labels[b._id] ?? String(b._id)] = b.count;
+      });
+
+      res.json({
+        success: true,
+        data: {
+          bySeverity: reshape(f.bySeverity || []),
+          byStatus: reshape(f.byStatus || []),
+          byType: reshape(f.byType || []),
+          aging: agingMap,
+          overdueCount,
+          totalActive,
+        },
+      });
+    } catch (err) {
+      safeError(res, err, 'capa-analytics');
+    }
+  }
+);
+
 // ── List ─────────────────────────────────────────────────────────────────────
 // GET /api/admin/capa
 router.get(

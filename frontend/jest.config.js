@@ -9,7 +9,7 @@ module.exports = {
   ],
   moduleFileExtensions: ['js', 'jsx', 'json', 'node'],
   moduleDirectories: ['node_modules', 'src'],
-  testPathIgnorePatterns: ['/node_modules/', '/cypress/', '/tests/tests/DocumentList\\.component\\.test\\.js$'],
+  testPathIgnorePatterns: ['/node_modules/', '/cypress/'],
   testMatch: [
     '<rootDir>/src/**/__tests__/**/*.{js,jsx}',
     '<rootDir>/src/**/*.{spec,test}.{js,jsx}',

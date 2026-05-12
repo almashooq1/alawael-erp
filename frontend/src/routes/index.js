@@ -154,3 +154,9 @@ export { default as Beneficiary360Routes } from './Beneficiary360Routes';
 // === DDD Unified Rehabilitation Platform (منصة التأهيل الموحدة) ===
 export { default as DDDRoutes } from './DDDRoutes';
 export { DDD_NAV_ITEMS } from './DDDRoutes';
+
+// === Tele-Rehabilitation (التأهيل عن بُعد) ===
+export { default as TeleRehabRoutes } from './TeleRehabRoutes';
+
+// === Equipment Lifecycle (دورة حياة المعدات) ===
+export { default as EquipmentLifecycleRoutes } from './EquipmentLifecycleRoutes';

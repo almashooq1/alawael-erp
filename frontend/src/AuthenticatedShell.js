@@ -115,6 +115,8 @@ import {
   EpisodesRoutes,
   Beneficiary360Routes,
   DDDRoutes,
+  TeleRehabRoutes,
+  EquipmentLifecycleRoutes,
 } from './routes';
 
 // Pages
@@ -472,6 +474,8 @@ export default function AuthenticatedShell() {
                   {safeRoutes(ZatcaPhase2Routes, 'ZatcaPhase2')}
                   {safeRoutes(NphiesRoutes, 'Nphies')}
                   {safeRoutes(AuditLogsRoutes, 'AuditLogs')}
+                  {safeRoutes(TeleRehabRoutes, 'TeleRehab')}
+                  {safeRoutes(EquipmentLifecycleRoutes, 'EquipmentLifecycle')}
 
                   {/* Shared Routes */}
                   <Route path="ai-assistant" element={<Navigate to="/ai-analytics" replace />} />

@@ -23,6 +23,7 @@
 #   scripts/deploy-vps.sh --backend-only
 #   scripts/deploy-vps.sh --frontend-only
 #   scripts/deploy-vps.sh --dry-run      # tar + scp + show diff, don't restart
+#   scripts/deploy-vps.sh --rollback     # swap back to most recent backend.before-* backup + restart
 #
 # Requires:
 #   • SSH key at $SSH_KEY (default: ~/.ssh-alaweal/alaweal_root_ed25519)
@@ -44,14 +45,16 @@ BUILD_INFO_URL="${BUILD_INFO_URL:-https://alaweal.org/api/v1/build-info}"
 DEPLOY_BACKEND=true
 DEPLOY_FRONTEND=true
 DRY_RUN=false
+ROLLBACK=false
 
 for arg in "$@"; do
   case "$arg" in
     --backend-only)  DEPLOY_FRONTEND=false ;;
     --frontend-only) DEPLOY_BACKEND=false ;;
     --dry-run)       DRY_RUN=true ;;
+    --rollback)      ROLLBACK=true ;;
     -h|--help)
-      sed -n '2,30p' "$0"
+      sed -n '2,31p' "$0"
       exit 0
       ;;
     *) echo "unknown arg: $arg" >&2; exit 2 ;;
@@ -65,6 +68,40 @@ warn() { printf '\033[1;33m!\033[0m %s\n' "$*"; }
 die()  { printf '\033[1;31m✗\033[0m %s\n' "$*" >&2; exit 1; }
 
 ssh_run() { ssh -i "$SSH_KEY" -o ConnectTimeout=15 "$VPS_HOST" "$@"; }
+
+# ─── Rollback path (short-circuits everything else) ─────────────────
+if $ROLLBACK; then
+  say "Rollback: find most recent backend.before-* on VPS"
+  [[ -f "$SSH_KEY" ]] || die "SSH key not found: $SSH_KEY"
+
+  LATEST=$(ssh_run "ls -dt $VPS_APP_DIR/backend.before-*/ 2>/dev/null | head -1 | tr -d '/'")
+  [[ -n "$LATEST" ]] || die "No backend.before-* backup found on VPS — cannot rollback"
+  ok "Latest backup: $LATEST"
+
+  CUR_SHA=$(curl -sf "$BUILD_INFO_URL" | sed -n 's/.*"commit":"\([^"]*\)".*/\1/p' || echo "?")
+  warn "Current production commit: ${CUR_SHA:0:8} — about to swap to $(basename "$LATEST")"
+  warn "Continue? [y/N]"
+  read -r ans
+  [[ "$ans" == "y" || "$ans" == "Y" ]] || die "Rollback cancelled"
+
+  STAMP=$(date +%Y%m%d-%H%M%S)
+  ssh_run "sudo -u $PM2_USER bash -c '
+    set -e
+    mv $VPS_APP_DIR/backend $VPS_APP_DIR/backend.rolled-back-$STAMP
+    mv $LATEST $VPS_APP_DIR/backend
+    pm2 restart $PM2_PROC
+  '"
+  sleep 7
+
+  HEALTH_STATUS=$(curl -sf -o /dev/null -w "%{http_code}" "$HEALTH_URL" || echo "0")
+  [[ "$HEALTH_STATUS" == "200" ]] || die "/health returned $HEALTH_STATUS after rollback"
+  ok "/health → 200 after rollback"
+
+  NEW_SHA=$(curl -sf "$BUILD_INFO_URL" | sed -n 's/.*"commit":"\([^"]*\)".*/\1/p')
+  ok "Rolled back: production now reports ${NEW_SHA:0:8} (was ${CUR_SHA:0:8})"
+  warn "The forward state is preserved at $VPS_APP_DIR/backend.rolled-back-$STAMP for forensics"
+  exit 0
+fi
 
 # ─── Pre-flight ─────────────────────────────────────────────────────
 say "Pre-flight checks"

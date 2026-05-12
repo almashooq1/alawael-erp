@@ -300,6 +300,14 @@ jobs:
             docs/alerts/ $SSH_TARGET:${{ env.APP_DIR }}/docs/alerts/ 2>&1 || echo "⚠️ docs/alerts rsync failed (non-fatal)"
 
           $SSH_CMD $SSH_TARGET "cd ${{ env.APP_DIR }}/backend && npm ci --production --no-audit --no-fund 2>&1 | tail -5"
+
+          # Write BUILD_SHA so /api/v1/build-info reports the deployed
+          # commit. backend/routes/build-info.routes.js reads this file
+          # as a fallback after process.env.GIT_SHA (the env var is set
+          # once at pm2 boot and never refreshed by rsync — see commit
+          # 039a3aed for the fallback chain).
+          echo "${{ github.sha }}" | $SSH_CMD $SSH_TARGET "cat > ${{ env.APP_DIR }}/backend/BUILD_SHA && chown www:www ${{ env.APP_DIR }}/backend/BUILD_SHA"
+
           echo "✅ Backend deployed"
 
       - name: Deploy frontend and find nginx root

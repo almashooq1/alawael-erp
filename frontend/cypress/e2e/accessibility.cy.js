@@ -116,8 +116,7 @@ describe('Accessibility - Authenticated Pages', () => {
       // Wait for page to fully load
       cy.get('body').should('be.visible');
       // Give lazy-loaded components time to render
-      // eslint-disable-next-line cypress/no-unnecessary-waiting
-      cy.wait(1000);
+      cy.wait(1000); // intentional wait for lazy-loaded components
 
       cy.checkA11y(null, A11Y_OPTIONS, violations => {
         const critical = violations.filter(v => v.impact === 'critical' || v.impact === 'serious');

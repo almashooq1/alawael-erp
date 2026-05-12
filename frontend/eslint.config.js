@@ -3,6 +3,7 @@ const globals = require('globals');
 const reactPlugin = require('eslint-plugin-react');
 const reactHooksPlugin = require('eslint-plugin-react-hooks');
 const importPlugin = require('eslint-plugin-import');
+const tsParser = require('@typescript-eslint/parser');
 // eslint-plugin-unused-imports@4.4.1 (latest) still calls context.getFilename(),
 // which ESLint 10 removed. Temporarily disabled until upstream releases a
 // compat build; covered in the interim by the built-in `no-unused-vars` rule
@@ -89,8 +90,24 @@ module.exports = [
       'no-unsafe-finally': 'warn',
     },
   },
+  // TypeScript files — use the TypeScript parser so type syntax is understood
   {
-    files: ['**/*.test.js', '**/*.test.jsx', '**/*.spec.js', '**/*.spec.jsx', '**/setupTests.js'],
+    files: ['**/*.ts', '**/*.tsx'],
+    languageOptions: {
+      parser: tsParser,
+      parserOptions: {
+        ecmaVersion: 2022,
+        sourceType: 'module',
+        ecmaFeatures: { jsx: true },
+      },
+    },
+    rules: {
+      // TypeScript handles these; disable JS-only no-undef for TS files
+      'no-undef': 'off',
+    },
+  },
+  {
+    files: ['**/*.test.js', '**/*.test.jsx', '**/*.spec.js', '**/*.spec.jsx', '**/setupTests.js', '**/jest.setup.js', '**/*.test.new.js', '**/tests/**/*.js'],
     languageOptions: {
       globals: {
         describe: 'readonly',
@@ -106,6 +123,40 @@ module.exports = [
     },
     rules: {
       'no-unused-vars': 'off',
+      'no-console': 'off',
+    },
+  },
+  // Playwright e2e test files — disable React-specific rules that don't apply
+  {
+    files: ['e2e/**/*.ts', 'e2e/**/*.tsx', 'e2e/**/*.js'],
+    rules: {
+      'react-hooks/rules-of-hooks': 'off',
+      'react-hooks/exhaustive-deps': 'off',
+      'no-unused-vars': 'off',
+      'no-console': 'off',
+    },
+  },
+  // Cypress files — add Cypress globals to silence no-undef warnings
+  {
+    files: ['cypress/**/*.js', 'cypress/**/*.ts', 'cypress/**/*.tsx'],
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+        Cypress: 'readonly',
+        cy: 'readonly',
+        describe: 'readonly',
+        it: 'readonly',
+        context: 'readonly',
+        before: 'readonly',
+        beforeEach: 'readonly',
+        after: 'readonly',
+        afterEach: 'readonly',
+        expect: 'readonly',
+      },
+    },
+    rules: {
+      'no-unused-vars': 'off',
+      'no-undef': 'off',
       'no-console': 'off',
     },
   },

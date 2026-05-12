@@ -113,7 +113,12 @@ jobs:
     runs-on: ubuntu-latest
     needs: preflight
     if: ${{ github.event.inputs.skip_tests != 'true' }}
-    timeout-minutes: 15
+    # 25 min: full backend suite is ~19 min locally on a fast machine,
+    # GitHub runners add ~30% on top. Raised from 15 after the 2026-05-12
+    # `add --rollback flag` run timed out the test job at exactly 15m04s
+    # — see memory entry "Deploy auto-fire + SSH-fail findings 2026-05-12"
+    # — even though all 25,115 tests pass locally and on a longer runner.
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
 
@@ -127,7 +132,9 @@ jobs:
 
       - name: Run backend tests
         working-directory: backend
-        run: npm test -- --forceExit --detectOpenHandles --passWithNoTests --no-coverage
+        # --maxWorkers=2 keeps memory usage under the runner's 7GB cap
+        # while still parallelizing two suites at a time.
+        run: npm test -- --forceExit --detectOpenHandles --passWithNoTests --no-coverage --maxWorkers=2
         env:
           NODE_ENV: test
           JWT_SECRET: test-jwt-secret-ci-only

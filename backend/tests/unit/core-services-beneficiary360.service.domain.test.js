@@ -11,9 +11,14 @@ jest.mock('../../utils/logger', () => ({
   debug: jest.fn(),
 }));
 
+// jest.config has resetModules: true — the mock factory runs again on every
+// fresh require, producing a different `model` instance each time. Pin the
+// fn at file scope so test setup + service share one reference.
+const mockMongooseModel = jest.fn();
+const mockMongooseObjectId = jest.fn(id => id);
 jest.mock('mongoose', () => ({
-  model: jest.fn(),
-  Types: { ObjectId: jest.fn(id => id) },
+  model: mockMongooseModel,
+  Types: { ObjectId: mockMongooseObjectId },
 }));
 
 const {
@@ -48,14 +53,13 @@ describe('domains/core/services/beneficiary360.service.js', () => {
   describe('Beneficiary360Service._model()', () => {
     test('returns the model when mongoose.model resolves', () => {
       const mockModel = { find: jest.fn() };
-      const { model } = require('mongoose');
-      model.mockReturnValue(mockModel);
+      // model from top-of-file mockMongooseModel
+      mockMongooseModel.mockReturnValue(mockModel);
       expect(service._model('Beneficiary')).toBe(mockModel);
     });
 
     test('returns null when mongoose.model throws', () => {
-      const { model } = require('mongoose');
-      model.mockImplementation(() => {
+      mockMongooseModel.mockImplementation(() => {
         throw new Error('Model not registered');
       });
       expect(service._model('NonExistentModel')).toBeNull();
@@ -243,12 +247,12 @@ describe('domains/core/services/beneficiary360.service.js', () => {
   // ─────────────────────────────────────────────────────────────────
   describe('Beneficiary360Service.getDashboard()', () => {
     function mockNotFound() {
-      const { model } = require('mongoose');
+      // model from top-of-file mockMongooseModel
       const chain = {
         populate: jest.fn().mockReturnThis(),
         lean: jest.fn().mockResolvedValue(null),
       };
-      model.mockReturnValue({ findById: jest.fn().mockReturnValue(chain) });
+      mockMongooseModel.mockReturnValue({ findById: jest.fn().mockReturnValue(chain) });
     }
 
     test('throws with message and statusCode 404 when beneficiary not found', async () => {
@@ -260,12 +264,12 @@ describe('domains/core/services/beneficiary360.service.js', () => {
     });
 
     test('calls findById with the provided beneficiaryId', async () => {
-      const { model } = require('mongoose');
+      // model from top-of-file mockMongooseModel
       const mockFindById = jest.fn().mockReturnValue({
         populate: jest.fn().mockReturnThis(),
         lean: jest.fn().mockResolvedValue(null),
       });
-      model.mockReturnValue({ findById: mockFindById });
+      mockMongooseModel.mockReturnValue({ findById: mockFindById });
 
       await service.getDashboard('bid-test').catch(() => {});
       expect(mockFindById).toHaveBeenCalledWith('bid-test');

@@ -4,7 +4,12 @@
  */
 'use strict';
 
-jest.mock('mongoose', () => ({ model: jest.fn() }));
+// jest.config has resetModules: true. A `jest.fn()` created inside the
+// mock factory would be a fresh instance every time the module gets
+// re-required (the service + the test setup would see different mocks).
+// Define the mock function at file scope so all consumers share one ref.
+const mockMongooseModel = jest.fn();
+jest.mock('mongoose', () => ({ model: mockMongooseModel }));
 jest.mock('../../utils/logger', () => ({ info: jest.fn(), warn: jest.fn(), error: jest.fn() }));
 
 const {
@@ -48,8 +53,8 @@ describe('ProgramsService.createProgram()', () => {
 
   beforeEach(() => {
     mockProgram = { _id: 'p1', code: 'PROG-001', name_ar: 'برنامج' };
-    const { model } = require('mongoose');
-    model.mockReturnValue({ create: jest.fn().mockResolvedValue(mockProgram) });
+    // model from top-of-file mockMongooseModel
+    mockMongooseModel.mockReturnValue({ create: jest.fn().mockResolvedValue(mockProgram) });
   });
 
   test('returns created program', async () => {
@@ -62,8 +67,8 @@ describe('ProgramsService.createProgram()', () => {
 
 describe('ProgramsService.updateProgram()', () => {
   test('throws 404 when program not found', async () => {
-    const { model } = require('mongoose');
-    model.mockReturnValue({ findByIdAndUpdate: jest.fn().mockResolvedValue(null) });
+    // model from top-of-file mockMongooseModel
+    mockMongooseModel.mockReturnValue({ findByIdAndUpdate: jest.fn().mockResolvedValue(null) });
 
     await expect(programsService.updateProgram('nonexistent-id', {})).rejects.toMatchObject({
       statusCode: 404,
@@ -72,8 +77,8 @@ describe('ProgramsService.updateProgram()', () => {
 
   test('returns updated program', async () => {
     const updated = { _id: 'p1', code: 'PROG-001', name_ar: 'updated' };
-    const { model } = require('mongoose');
-    model.mockReturnValue({ findByIdAndUpdate: jest.fn().mockResolvedValue(updated) });
+    // model from top-of-file mockMongooseModel
+    mockMongooseModel.mockReturnValue({ findByIdAndUpdate: jest.fn().mockResolvedValue(updated) });
 
     const result = await programsService.updateProgram('p1', { name_ar: 'updated' });
     expect(result).toEqual(updated);
@@ -84,8 +89,8 @@ describe('ProgramsService.updateProgram()', () => {
 
 describe('ProgramsService.listPrograms()', () => {
   beforeEach(() => {
-    const { model } = require('mongoose');
-    model.mockReturnValue({
+    // model from top-of-file mockMongooseModel
+    mockMongooseModel.mockReturnValue({
       find: jest.fn().mockReturnValue({
         sort: jest.fn().mockReturnThis(),
         skip: jest.fn().mockReturnThis(),
@@ -102,14 +107,17 @@ describe('ProgramsService.listPrograms()', () => {
   });
 
   test('filters by status when provided', async () => {
-    const { model } = require('mongoose');
+    // model from top-of-file mockMongooseModel
     const mockFind = jest.fn().mockReturnValue({
       sort: jest.fn().mockReturnThis(),
       skip: jest.fn().mockReturnThis(),
       limit: jest.fn().mockReturnThis(),
       lean: jest.fn().mockResolvedValue([]),
     });
-    model.mockReturnValue({ find: mockFind, countDocuments: jest.fn().mockResolvedValue(0) });
+    mockMongooseModel.mockReturnValue({
+      find: mockFind,
+      countDocuments: jest.fn().mockResolvedValue(0),
+    });
     await programsService.listPrograms({ status: 'active' });
     expect(mockFind).toHaveBeenCalledWith(expect.objectContaining({ status: 'active' }));
   });
@@ -120,8 +128,8 @@ describe('ProgramsService.listPrograms()', () => {
 describe('ProgramsService.getProgram()', () => {
   test('throws 404 when not found', async () => {
     const mockPopulate = { lean: jest.fn().mockResolvedValue(null) };
-    const { model } = require('mongoose');
-    model.mockReturnValue({
+    // model from top-of-file mockMongooseModel
+    mockMongooseModel.mockReturnValue({
       findById: jest.fn().mockReturnValue({ populate: jest.fn().mockReturnValue(mockPopulate) }),
     });
     await expect(programsService.getProgram('bad-id')).rejects.toMatchObject({ statusCode: 404 });
@@ -130,8 +138,8 @@ describe('ProgramsService.getProgram()', () => {
   test('returns program when found', async () => {
     const prog = { _id: 'p1', code: 'A', name_ar: 'Test' };
     const mockPopulate = { lean: jest.fn().mockResolvedValue(prog) };
-    const { model } = require('mongoose');
-    model.mockReturnValue({
+    // model from top-of-file mockMongooseModel
+    mockMongooseModel.mockReturnValue({
       findById: jest.fn().mockReturnValue({ populate: jest.fn().mockReturnValue(mockPopulate) }),
     });
     const result = await programsService.getProgram('p1');
@@ -143,8 +151,10 @@ describe('ProgramsService.getProgram()', () => {
 
 describe('ProgramsService._recordTimeline()', () => {
   test('silently swallows errors', async () => {
-    const { model } = require('mongoose');
-    model.mockReturnValue({ create: jest.fn().mockRejectedValue(new Error('DB error')) });
+    // model from top-of-file mockMongooseModel
+    mockMongooseModel.mockReturnValue({
+      create: jest.fn().mockRejectedValue(new Error('DB error')),
+    });
     // Should not throw
     await expect(
       programsService._recordTimeline({
@@ -158,8 +168,8 @@ describe('ProgramsService._recordTimeline()', () => {
 
   test('creates timeline event when DB works', async () => {
     const mockCreate = jest.fn().mockResolvedValue({});
-    const { model } = require('mongoose');
-    model.mockReturnValue({ create: mockCreate });
+    // model from top-of-file mockMongooseModel
+    mockMongooseModel.mockReturnValue({ create: mockCreate });
     await programsService._recordTimeline({
       beneficiaryId: 'b1',
       episodeId: 'e1',

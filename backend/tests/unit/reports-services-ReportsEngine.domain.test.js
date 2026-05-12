@@ -4,7 +4,15 @@
  */
 'use strict';
 
-jest.mock('mongoose', () => ({ model: jest.fn(), Types: { ObjectId: jest.fn(id => id) } }));
+// jest.config has resetModules: true — the mock factory runs again on every
+// fresh require, producing a different `model` instance each time. Pin the
+// fn at file scope so test setup + service share one reference.
+const mockMongooseModel = jest.fn();
+const mockMongooseObjectId = jest.fn(id => id);
+jest.mock('mongoose', () => ({
+  model: mockMongooseModel,
+  Types: { ObjectId: mockMongooseObjectId },
+}));
 jest.mock('../../utils/logger', () => ({ info: jest.fn(), warn: jest.fn(), error: jest.fn() }));
 
 const { ReportsEngine, reportsEngine } = require('../../domains/reports/services/ReportsEngine');
@@ -84,9 +92,9 @@ describe('builtinReports structure', () => {
 
 describe('ReportsEngine.generateReport() — unknown template', () => {
   beforeEach(() => {
-    const { model } = require('mongoose');
+    // model from top-of-file mockMongooseModel
     const nullChain = { lean: jest.fn().mockResolvedValue(null) };
-    model.mockReturnValue({
+    mockMongooseModel.mockReturnValue({
       findOne: jest.fn().mockReturnValue(nullChain),
       findById: jest.fn().mockReturnValue(nullChain),
       create: jest.fn().mockResolvedValue({ _id: 'r1', status: 'generating', save: jest.fn() }),
@@ -115,8 +123,8 @@ describe('ReportsEngine.listReports()', () => {
       find: jest.fn().mockReturnValue(mockFind),
       countDocuments: jest.fn().mockResolvedValue(0),
     };
-    const { model } = require('mongoose');
-    model.mockReturnValue(mockModel);
+    // model from top-of-file mockMongooseModel
+    mockMongooseModel.mockReturnValue(mockModel);
 
     const result = await reportsEngine.listReports({ page: 1, limit: 10 });
     expect(mockModel.find).toHaveBeenCalledWith(expect.objectContaining({ isDeleted: false }));
@@ -127,8 +135,8 @@ describe('ReportsEngine.listReports()', () => {
 describe('ReportsEngine.listTemplates()', () => {
   test('calls ReportTemplate.find with isDeleted:false and status', async () => {
     const mockFind = { sort: jest.fn().mockReturnThis(), lean: jest.fn().mockResolvedValue([]) };
-    const { model } = require('mongoose');
-    model.mockReturnValue({ find: jest.fn().mockReturnValue(mockFind) });
+    // model from top-of-file mockMongooseModel
+    mockMongooseModel.mockReturnValue({ find: jest.fn().mockReturnValue(mockFind) });
 
     const result = await reportsEngine.listTemplates({ status: 'active' });
     expect(Array.isArray(result)).toBe(true);

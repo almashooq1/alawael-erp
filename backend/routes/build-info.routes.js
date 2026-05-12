@@ -20,6 +20,8 @@
 
 const express = require('express');
 const { execSync } = require('child_process');
+const fs = require('fs');
+const path = require('path');
 const router = express.Router();
 
 function resolveGitSha() {
@@ -28,6 +30,17 @@ function resolveGitSha() {
   // they can't resolve the real SHA.
   if (process.env.GIT_SHA && process.env.GIT_SHA.trim()) {
     return process.env.GIT_SHA.trim();
+  }
+  // Rsync deploys (where the VPS dir has no .git) write the SHA to a
+  // plain-text BUILD_SHA file next to package.json. Try that next so the
+  // endpoint reports the deployed commit instead of falling through to
+  // a stale env var or 'unknown'.
+  try {
+    const buildShaPath = path.join(__dirname, '..', 'BUILD_SHA');
+    const sha = fs.readFileSync(buildShaPath, 'utf8').trim();
+    if (sha) return sha;
+  } catch {
+    // file absent — fine, fall through to git
   }
   try {
     return execSync('git rev-parse HEAD', {

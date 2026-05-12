@@ -50,6 +50,24 @@ describe('build-info helpers', () => {
       process.env.GIT_SHA = '  abcdef1234567890abcdef1234567890abcdef12  \n';
       expect(load().resolveGitSha()).toBe('abcdef1234567890abcdef1234567890abcdef12');
     });
+
+    it('falls back to BUILD_SHA file when env GIT_SHA is missing', () => {
+      const fs = require('fs');
+      const path = require('path');
+      const buildShaPath = path.join(__dirname, '..', 'BUILD_SHA');
+      const FAKE_SHA = '0123456789abcdef0123456789abcdef01234567';
+      // Write a fake BUILD_SHA and re-resolve. Restore afterwards so the
+      // file doesn't leak into other tests / commits.
+      const had = fs.existsSync(buildShaPath);
+      const prior = had ? fs.readFileSync(buildShaPath, 'utf8') : null;
+      try {
+        fs.writeFileSync(buildShaPath, FAKE_SHA + '\n');
+        expect(load().resolveGitSha()).toBe(FAKE_SHA);
+      } finally {
+        if (had) fs.writeFileSync(buildShaPath, prior);
+        else fs.unlinkSync(buildShaPath);
+      }
+    });
   });
 
   describe('resolveGitShaShort', () => {

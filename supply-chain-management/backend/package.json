@@ -20,7 +20,7 @@
   "dependencies": {
     "bcrypt": "^5.0.0",
     "bwip-js": "^4.8.0",
-    "canvas": "^3.2.1",
+    "canvas": "^3.2.3",
     "cors": "^2.8.5",
     "dayjs": "^1.11.13",
     "dotenv": "^16.0.0",

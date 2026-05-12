@@ -16,7 +16,8 @@ if (aiController && typeof aiController === 'object') {
   // Fallback
   const express = require('express');
   const router = express.Router();
-  router.all('*', (_req, res) => {
+  // Express 5 path-to-regexp v6 dropped bare '*' — use a catch-all middleware
+  router.use((_req, res) => {
     res.status(501).json({
       success: false,
       message: 'AI Recommendations routes not fully initialized',

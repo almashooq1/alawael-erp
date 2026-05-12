@@ -14,7 +14,10 @@
  */
 
 require('module-alias/register');
-require('express-async-errors');
+// Express 5 has built-in async error handling — `express-async-errors`
+// is no longer needed (and is incompatible because it monkey-patches
+// `express/lib/router/layer` which moved in v5). Removed alongside
+// the express 4 → 5 bump.
 const path = require('path');
 // Load backend/.env first; parent .env fills in gaps (override: false)
 require('dotenv').config({ path: path.resolve(__dirname, '.env') });

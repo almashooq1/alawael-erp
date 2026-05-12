@@ -29,8 +29,9 @@ if (tenantController && tenantController._router) {
     });
   });
 } else {
-  // Fallback: all routes return 501 (not implemented)
-  router.all('*', (_req, res) => {
+  // Fallback: all routes return 501 (not implemented). Express 5
+  // path-to-regexp v6 dropped bare '*' — use a catch-all middleware.
+  router.use((_req, res) => {
     res.status(501).json({
       success: false,
       message: 'Tenant routes not fully initialized',

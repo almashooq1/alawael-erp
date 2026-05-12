@@ -13,7 +13,7 @@
  *   GET /api/quality/policies/acknowledgements/reports
  *   GET /api/quality/policies/statistics
  */
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Box,
   Typography,
@@ -45,6 +45,8 @@ import {
   Card,
   CardContent,
   Collapse,
+  Checkbox,
+  LinearProgress,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
@@ -212,6 +214,10 @@ export default function PolicyLibraryAdmin() {
   const [filterCat, setFilterCat] = useState('all');
   const [expandAck, setExpandAck] = useState({});
 
+  // ── Bulk-acknowledge state ────────────────────────────────────────────────
+  const [selected, setSelected] = useState(new Set());
+  const [bulkSending, setBulkSending] = useState(false);
+
   // ── Load ──────────────────────────────────────────────────────────────────
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -342,6 +348,67 @@ export default function PolicyLibraryAdmin() {
     }
   };
 
+  // ── Bulk send-acknowledgement ─────────────────────────────────────────────
+  const bulkSendAck = useCallback(async () => {
+    if (selected.size === 0) return;
+    setBulkSending(true);
+    let ok = 0;
+    let fail = 0;
+    for (const id of selected) {
+      try {
+        await apiClient.post(`/api/quality/policies/${id}/send-acknowledgement`);
+        ok++;
+      } catch {
+        fail++;
+      }
+    }
+    setSelected(new Set());
+    setBulkSending(false);
+    setSnack({
+      open: true,
+      message: `أُرسل الإقرار لـ ${ok} سياسة${fail > 0 ? ` · فشل ${fail}` : ''}`,
+      severity: fail > 0 ? 'warning' : 'success',
+    });
+    loadData();
+  }, [selected, loadData]);
+
+  // Policies eligible for bulk ack (approved/active, not yet sent)
+  const bulkEligible = useMemo(
+    () =>
+      filtered
+        .filter(
+          p =>
+            (p.status === 'approved' || p.status === 'active') &&
+            p.acknowledgementStatus !== 'sent' &&
+            p.acknowledgementStatus !== 'acknowledged'
+        )
+        .map(p => p._id),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- filtered changes when policies/filters change
+    [policies, filterStatus, filterCat]
+  );
+
+  const allBulkSelected = bulkEligible.length > 0 && bulkEligible.every(id => selected.has(id));
+
+  const toggleSelectAll = () => {
+    if (allBulkSelected) {
+      setSelected(prev => {
+        const next = new Set(prev);
+        bulkEligible.forEach(id => next.delete(id));
+        return next;
+      });
+    } else {
+      setSelected(prev => new Set([...prev, ...bulkEligible]));
+    }
+  };
+
+  const toggleOne = id => {
+    setSelected(prev => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  };
+
   // ── Delete ────────────────────────────────────────────────────────────────
   const confirmDelete = async () => {
     setDeleting(true);
@@ -467,11 +534,55 @@ export default function PolicyLibraryAdmin() {
         </Box>
       </Paper>
 
+      {/* Bulk-action toolbar */}
+      {selected.size > 0 && (
+        <Paper
+          sx={{
+            p: 1.5,
+            mb: 1,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 2,
+            bgcolor: 'primary.50',
+            border: '1px solid',
+            borderColor: 'primary.200',
+          }}
+        >
+          <Typography variant="body2" fontWeight={700} sx={{ flex: 1 }}>
+            {selected.size} سياسة محددة
+          </Typography>
+          {bulkSending && <LinearProgress sx={{ width: 120, borderRadius: 2 }} />}
+          <Button
+            variant="contained"
+            size="small"
+            startIcon={<AssignmentTurnedInIcon />}
+            onClick={bulkSendAck}
+            disabled={bulkSending}
+          >
+            إرسال إقرار جماعي
+          </Button>
+          <Button size="small" onClick={() => setSelected(new Set())}>
+            إلغاء
+          </Button>
+        </Paper>
+      )}
+
       {/* Table */}
       <TableContainer component={Paper} elevation={2}>
         <Table size="small">
           <TableHead sx={{ bgcolor: 'grey.50' }}>
             <TableRow>
+              <TableCell padding="checkbox">
+                <Tooltip title="تحديد كل السياسات المؤهلة للإقرار">
+                  <Checkbox
+                    checked={allBulkSelected}
+                    indeterminate={selected.size > 0 && !allBulkSelected}
+                    onChange={toggleSelectAll}
+                    disabled={bulkEligible.length === 0}
+                    size="small"
+                  />
+                </Tooltip>
+              </TableCell>
               <TableCell>رقم السياسة</TableCell>
               <TableCell>الاسم</TableCell>
               <TableCell>الفئة</TableCell>
@@ -485,7 +596,7 @@ export default function PolicyLibraryAdmin() {
           <TableBody>
             {pageRows.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} align="center" sx={{ py: 4, color: 'text.secondary' }}>
+                <TableCell colSpan={9} align="center" sx={{ py: 4, color: 'text.secondary' }}>
                   لا توجد سياسات
                 </TableCell>
               </TableRow>
@@ -500,8 +611,18 @@ export default function PolicyLibraryAdmin() {
                   pol.totalStaff > 0
                     ? Math.round((pol.acknowledgedCount / pol.totalStaff) * 100)
                     : null;
+                const isBulkEligible = bulkEligible.includes(pol._id);
                 return (
-                  <TableRow key={pol._id} hover>
+                  <TableRow key={pol._id} hover selected={selected.has(pol._id)}>
+                    <TableCell padding="checkbox">
+                      {isBulkEligible && (
+                        <Checkbox
+                          checked={selected.has(pol._id)}
+                          onChange={() => toggleOne(pol._id)}
+                          size="small"
+                        />
+                      )}
+                    </TableCell>
                     <TableCell sx={{ fontWeight: 'bold', fontFamily: 'monospace' }}>
                       {pol.policyId}
                     </TableCell>

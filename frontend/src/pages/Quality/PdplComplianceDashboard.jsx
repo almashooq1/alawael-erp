@@ -21,7 +21,7 @@
  * processing-records).
  */
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import {
   Box,
   Paper,
@@ -31,14 +31,9 @@ import {
   CircularProgress,
   Grid,
   Alert,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   Button,
   LinearProgress,
+  Tooltip,
 } from '@mui/material';
 import {
   Gavel as PdplIcon,
@@ -52,6 +47,89 @@ import {
 import { useNavigate } from 'react-router-dom';
 import apiClient from '../../services/api.client';
 import { useSnackbar } from 'contexts/SnackbarContext';
+
+/**
+ * Attempt to extract a numeric "months" value from a period string like
+ * "5 سنوات", "10 سنة", "6 أشهر", "25 years", "2y", "24m".
+ * Returns null if unparseable.
+ */
+function parsePeriodMonths(period) {
+  if (!period) return null;
+  const s = String(period).trim();
+  // Arabic years: "5 سنوات" / "10 سنة" / "عشر سنوات"
+  const arYear = s.match(/^(\d+(?:\.\d+)?)\s*سن/);
+  if (arYear) return Math.round(parseFloat(arYear[1]) * 12);
+  // Arabic months
+  const arMonth = s.match(/^(\d+(?:\.\d+)?)\s*شهر/);
+  if (arMonth) return Math.round(parseFloat(arMonth[1]));
+  // English: "10 years", "25y", "6 months", "24m"
+  const enYear = s.match(/^(\d+(?:\.\d+)?)\s*(y|year)/i);
+  if (enYear) return Math.round(parseFloat(enYear[1]) * 12);
+  const enMonth = s.match(/^(\d+(?:\.\d+)?)\s*(m|month)/i);
+  if (enMonth) return Math.round(parseFloat(enMonth[1]));
+  // Plain number — assume years
+  const plain = s.match(/^(\d+(?:\.\d+)?)$/);
+  if (plain) return Math.round(parseFloat(plain[1]) * 12);
+  return null;
+}
+
+// Colour scale by duration
+function durationColor(months) {
+  if (months === null) return '#94a3b8';
+  if (months <= 12) return '#22c55e';
+  if (months <= 36) return '#3b82f6';
+  if (months <= 84) return '#f59e0b';
+  return '#ef4444';
+}
+
+/* ── RetentionChart ─────────────────────────────────────────────── */
+function RetentionChart({ rows }) {
+  const parsed = useMemo(
+    () =>
+      rows
+        .map(r => ({ ...r, months: parsePeriodMonths(r.period) }))
+        .sort((a, b) => (b.months ?? 0) - (a.months ?? 0)),
+    [rows]
+  );
+  const maxMonths = Math.max(...parsed.map(r => r.months ?? 0), 1);
+
+  return (
+    <Stack spacing={1.2}>
+      {parsed.map(r => {
+        const pct = r.months !== null ? Math.round((r.months / maxMonths) * 100) : 0;
+        const color = durationColor(r.months);
+        return (
+          <Box key={r.category}>
+            <Stack direction="row" justifyContent="space-between" sx={{ mb: 0.3 }}>
+              <Typography variant="body2" noWrap sx={{ maxWidth: '60%' }}>
+                {r.category}
+              </Typography>
+              <Tooltip title={r.months !== null ? `${r.months} شهراً` : 'غير محدد'} placement="top">
+                <Chip
+                  label={r.period}
+                  size="small"
+                  variant="outlined"
+                  sx={{ fontSize: '0.7rem' }}
+                />
+              </Tooltip>
+            </Stack>
+            <LinearProgress
+              variant="determinate"
+              value={pct}
+              sx={{
+                height: 8,
+                borderRadius: 4,
+                bgcolor: `${color}22`,
+                '& .MuiLinearProgress-bar': { bgcolor: color, borderRadius: 4 },
+              }}
+              aria-label={`${r.category}: ${r.period}`}
+            />
+          </Box>
+        );
+      })}
+    </Stack>
+  );
+}
 
 function scoreColor(score) {
   if (score >= 90) return 'success';
@@ -276,44 +354,23 @@ export default function PdplComplianceDashboard() {
             </Grid>
           </Grid>
 
-          {/* Retention reference */}
+          {/* Retention reference — visual bar chart */}
           <Paper sx={{ p: 2 }}>
-            <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 1.5 }}>
+            <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 0.5 }}>
               سياسات الاحتفاظ بالبيانات (PDPL مادة 31)
             </Typography>
-            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1.5 }}>
-              فترات الاحتفاظ المعتمدة لكل فئة بيانات. تعكس متطلبات قانون العمل وZATCA ووزارة الصحة
-              وCHI.
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
+              فترات الاحتفاظ المعتمدة لكل فئة. الشريط يعكس المدة النسبية (الحد الأقصى = قيمة الفئة
+              الأطول).
             </Typography>
-            <TableContainer>
-              <Table size="small" aria-label="جدول سياسات الاحتفاظ">
-                <TableHead>
-                  <TableRow>
-                    <TableCell>فئة البيانات</TableCell>
-                    <TableCell>فترة الاحتفاظ</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {retention.length === 0 && (
-                    <TableRow>
-                      <TableCell colSpan={2} align="center">
-                        <Typography variant="body2" color="text.secondary">
-                          —
-                        </Typography>
-                      </TableCell>
-                    </TableRow>
-                  )}
-                  {retention.map(r => (
-                    <TableRow key={r.category}>
-                      <TableCell>{r.category}</TableCell>
-                      <TableCell>
-                        <Chip size="small" label={r.period} variant="outlined" />
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
+
+            {retention.length === 0 ? (
+              <Typography variant="body2" color="text.secondary" align="center" sx={{ py: 2 }}>
+                لا توجد سياسات احتفاظ مسجّلة
+              </Typography>
+            ) : (
+              <RetentionChart rows={retention} />
+            )}
           </Paper>
         </Stack>
       )}

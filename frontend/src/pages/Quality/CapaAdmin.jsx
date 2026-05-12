@@ -15,7 +15,7 @@
  *                    ↘ escalated
  */
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import {
   Box,
   Paper,
@@ -40,6 +40,8 @@ import {
   CircularProgress,
   Alert,
   Grid,
+  LinearProgress,
+  Fade,
 } from '@mui/material';
 import {
   PlayArrow as StartIcon,
@@ -51,6 +53,8 @@ import {
   Close as CloseIcon,
   Assignment as CapaIcon,
   Warning as OverdueIcon,
+  Timeline as AgingIcon,
+  BoltOutlined as BulkIcon,
 } from '@mui/icons-material';
 import apiClient from '../../services/api.client';
 import { useSnackbar } from 'contexts/SnackbarContext';
@@ -130,6 +134,59 @@ export default function CapaAdmin() {
   const [resolutionNote, setResolutionNote] = useState('');
   const [escalateReason, setEscalateReason] = useState('');
   const [submitting, setSubmitting] = useState(false);
+
+  // ── derived analytics ──────────────────────────────────────────────────────
+  const analytics = useMemo(() => {
+    const now = Date.now();
+    const active = rows.filter(r => !['resolved', 'closed'].includes(r.status));
+
+    // Aging by days since createdAt
+    const aging = { '0-7': 0, '8-30': 0, '31-90': 0, '90+': 0 };
+    active.forEach(r => {
+      const age = Math.floor(
+        (now - new Date(r.createdAt || r._id ? parseInt(r._id?.substring(0, 8), 16) * 1000 : now)) /
+          86_400_000
+      );
+      if (age <= 7) aging['0-7']++;
+      else if (age <= 30) aging['8-30']++;
+      else if (age <= 90) aging['31-90']++;
+      else aging['90+']++;
+    });
+
+    // Status counts
+    const byStatus = Object.fromEntries(
+      Object.keys(STATUS_LABEL).map(k => [k, rows.filter(r => r.status === k).length])
+    );
+
+    // Severity counts for active items
+    const bySev = { critical: 0, high: 0, medium: 0, low: 0 };
+    active.forEach(r => {
+      if (r.severity && bySev[r.severity] !== undefined) bySev[r.severity]++;
+    });
+
+    return { aging, byStatus, bySev, activeCount: active.length };
+  }, [rows]);
+
+  const bulkEscalateOverdue = async () => {
+    const targets = rows.filter(
+      r =>
+        !['resolved', 'closed', 'escalated'].includes(r.status) && new Date(r.dueDate) < new Date()
+    );
+    if (!targets.length) {
+      showSnackbar('لا توجد إجراءات متأخرة للتصعيد', 'info');
+      return;
+    }
+    if (!window.confirm(`تصعيد ${targets.length} إجراء متأخر؟`)) return;
+    await Promise.allSettled(
+      targets.map(r =>
+        apiClient.post(`${BASE}/${r._id}/escalate`, {
+          reason: 'تصعيد تلقائي — تجاوز تاريخ الاستحقاق',
+        })
+      )
+    );
+    showSnackbar(`تم تصعيد ${targets.length} إجراء`, 'success');
+    fetchData();
+  };
 
   // ── fetch ──────────────────────────────────────────────────────────────────
   const fetchData = useCallback(async () => {
@@ -246,7 +303,7 @@ export default function CapaAdmin() {
       </Stack>
 
       {/* Summary chips */}
-      <Stack direction="row" spacing={1} mb={2} flexWrap="wrap">
+      <Stack direction="row" spacing={1} mb={2} flexWrap="wrap" alignItems="center">
         <Chip label={`الإجمالي: ${total}`} color="primary" variant="outlined" />
         <Chip
           label={`متأخرة: ${overdueCount}`}
@@ -255,7 +312,157 @@ export default function CapaAdmin() {
           onClick={() => setFilterOverdue(v => !v)}
           clickable
         />
+        {overdueCount > 0 && (
+          <Tooltip title="تصعيد جميع الإجراءات المتأخرة دفعة واحدة">
+            <Button
+              size="small"
+              variant="outlined"
+              color="error"
+              startIcon={<BulkIcon />}
+              onClick={bulkEscalateOverdue}
+            >
+              تصعيد المتأخرة
+            </Button>
+          </Tooltip>
+        )}
       </Stack>
+
+      {/* ── Analytics Panel ─────────────────────────────────────────────── */}
+      <Fade in timeout={600}>
+        <Paper
+          sx={{ p: 2, mb: 2, background: 'linear-gradient(135deg,#faf5ff,#eef2ff)' }}
+          elevation={0}
+          variant="outlined"
+        >
+          <Stack direction="row" spacing={1} alignItems="center" mb={1.5}>
+            <AgingIcon sx={{ color: '#8b5cf6', fontSize: 18 }} />
+            <Typography variant="subtitle2" fontWeight={700} color="#8b5cf6">
+              تحليلات دورة الحياة
+            </Typography>
+          </Stack>
+          <Grid container spacing={2}>
+            {/* Aging */}
+            <Grid item xs={12} sm={6} md={4}>
+              <Typography
+                variant="caption"
+                fontWeight={600}
+                color="text.secondary"
+                gutterBottom
+                display="block"
+              >
+                التقادم (الإجراءات النشطة)
+              </Typography>
+              <Stack spacing={0.8}>
+                {[
+                  ['0-7', '1-7 أيام', '#10b981'],
+                  ['8-30', '8-30 يوم', '#f59e0b'],
+                  ['31-90', '31-90 يوم', '#f97316'],
+                  ['90+', 'أكثر من 90 يوم', '#ef4444'],
+                ].map(([k, lbl, col]) => (
+                  <Stack key={k} direction="row" spacing={1} alignItems="center">
+                    <Typography variant="caption" sx={{ width: 90 }} color="text.secondary">
+                      {lbl}
+                    </Typography>
+                    <LinearProgress
+                      variant="determinate"
+                      value={
+                        analytics.activeCount
+                          ? (analytics.aging[k] / analytics.activeCount) * 100
+                          : 0
+                      }
+                      sx={{
+                        flex: 1,
+                        height: 6,
+                        borderRadius: 3,
+                        bgcolor: `${col}20`,
+                        '& .MuiLinearProgress-bar': { bgcolor: col, borderRadius: 3 },
+                      }}
+                    />
+                    <Typography
+                      variant="caption"
+                      fontWeight={700}
+                      color={col}
+                      sx={{ width: 20, textAlign: 'right' }}
+                    >
+                      {analytics.aging[k]}
+                    </Typography>
+                  </Stack>
+                ))}
+              </Stack>
+            </Grid>
+
+            {/* Status distribution */}
+            <Grid item xs={12} sm={6} md={4}>
+              <Typography
+                variant="caption"
+                fontWeight={600}
+                color="text.secondary"
+                gutterBottom
+                display="block"
+              >
+                توزيع الحالات
+              </Typography>
+              <Stack spacing={0.6}>
+                {Object.entries(analytics.byStatus)
+                  .filter(([, v]) => v > 0)
+                  .map(([k, v]) => (
+                    <Stack key={k} direction="row" spacing={1} alignItems="center">
+                      <Typography
+                        variant="caption"
+                        sx={{ width: 100 }}
+                        color="text.secondary"
+                        noWrap
+                      >
+                        {STATUS_LABEL[k] || k}
+                      </Typography>
+                      <LinearProgress
+                        variant="determinate"
+                        value={total ? (v / total) * 100 : 0}
+                        sx={{ flex: 1, height: 5, borderRadius: 3 }}
+                      />
+                      <Typography
+                        variant="caption"
+                        fontWeight={700}
+                        sx={{ width: 20, textAlign: 'right' }}
+                      >
+                        {v}
+                      </Typography>
+                    </Stack>
+                  ))}
+              </Stack>
+            </Grid>
+
+            {/* Severity distribution */}
+            <Grid item xs={12} sm={12} md={4}>
+              <Typography
+                variant="caption"
+                fontWeight={600}
+                color="text.secondary"
+                gutterBottom
+                display="block"
+              >
+                توزيع الخطورة (نشط)
+              </Typography>
+              <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                {[
+                  ['critical', 'حرجة', 'error'],
+                  ['high', 'عالية', 'warning'],
+                  ['medium', 'متوسطة', 'info'],
+                  ['low', 'منخفضة', 'default'],
+                ].map(([k, lbl, color]) => (
+                  <Chip
+                    key={k}
+                    size="small"
+                    color={color}
+                    label={`${lbl}: ${analytics.bySev[k]}`}
+                    variant={analytics.bySev[k] > 0 ? 'filled' : 'outlined'}
+                  />
+                ))}
+              </Stack>
+            </Grid>
+          </Grid>
+        </Paper>
+      </Fade>
 
       {/* Filters */}
       <Paper sx={{ p: 2, mb: 2 }}>

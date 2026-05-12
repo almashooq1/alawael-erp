@@ -21,7 +21,7 @@
  *   miss a renewal because nothing surfaces in the dashboard.
  */
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import {
   Box,
   Paper,
@@ -46,6 +46,10 @@ import {
   Alert,
   CircularProgress,
   Grid,
+  ToggleButtonGroup,
+  ToggleButton,
+  Fade,
+  Badge,
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -56,6 +60,10 @@ import {
   Close as CloseIcon,
   Save as SaveIcon,
   CalendarMonth as CalendarIcon,
+  ViewList as ListIcon,
+  CalendarViewMonth as GridIcon,
+  NavigateBefore as PrevIcon,
+  NavigateNext as NextIcon,
 } from '@mui/icons-material';
 import apiClient from '../../services/api.client';
 import { useSnackbar } from 'contexts/SnackbarContext';
@@ -111,6 +119,111 @@ function statusColor(s) {
   }
 }
 
+const SEV_DOT = {
+  critical: '#ef4444',
+  high: '#f97316',
+  medium: '#f59e0b',
+  low: '#3b82f6',
+};
+
+// ── MonthGrid component ───────────────────────────────────────────────────────
+// Pure display — receives `rows` (already filtered), `year`, `month`
+// and `onEventClick`. Renders a 7-column CSS grid with colored dots.
+
+function MonthGrid({ rows, year, month, onEventClick }) {
+  // Build a map: "YYYY-MM-DD" → event[]
+  const byDay = useMemo(() => {
+    const map = {};
+    rows.forEach(r => {
+      if (!r.dueDate) return;
+      const d = r.dueDate.slice(0, 10);
+      if (!map[d]) map[d] = [];
+      map[d].push(r);
+    });
+    return map;
+  }, [rows]);
+
+  // Cells for the grid
+  const firstDay = new Date(year, month, 1).getDay(); // 0=Sun
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const today = new Date().toISOString().slice(0, 10);
+
+  const DAY_NAMES = ['أحد', 'اثن', 'ثلا', 'أرب', 'خمي', 'جمع', 'سبت'];
+
+  // blank leading cells
+  const cells = Array(firstDay).fill(null);
+  for (let d = 1; d <= daysInMonth; d++) cells.push(d);
+
+  return (
+    <Box>
+      {/* Day header row */}
+      <Grid container columns={7} sx={{ mb: 0.5 }}>
+        {DAY_NAMES.map(n => (
+          <Grid item xs={1} key={n} sx={{ textAlign: 'center' }}>
+            <Typography variant="caption" fontWeight={700} color="text.secondary">
+              {n}
+            </Typography>
+          </Grid>
+        ))}
+      </Grid>
+
+      {/* Day cells */}
+      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: '4px' }}>
+        {cells.map((day, i) => {
+          if (day === null) return <Box key={`blank-${i}`} />;
+          const key = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+          const evs = byDay[key] || [];
+          const isToday = key === today;
+          return (
+            <Paper
+              key={key}
+              variant="outlined"
+              sx={{
+                minHeight: 72,
+                p: '4px 6px',
+                cursor: evs.length ? 'pointer' : 'default',
+                bgcolor: isToday ? 'primary.50' : 'background.paper',
+                border: isToday ? '2px solid' : '1px solid',
+                borderColor: isToday ? 'primary.main' : 'divider',
+                '&:hover': evs.length ? { boxShadow: 3 } : {},
+              }}
+              onClick={evs.length ? () => onEventClick(evs) : undefined}
+            >
+              <Typography
+                variant="caption"
+                fontWeight={isToday ? 800 : 500}
+                color={isToday ? 'primary.main' : 'text.primary'}
+              >
+                {day}
+              </Typography>
+              <Stack direction="row" flexWrap="wrap" gap="2px" mt={0.3}>
+                {evs.slice(0, 6).map((ev, ei) => (
+                  <Tooltip key={ei} title={ev.title}>
+                    <Box
+                      sx={{
+                        width: 8,
+                        height: 8,
+                        borderRadius: '50%',
+                        bgcolor: SEV_DOT[ev.severity] || '#9ca3af',
+                        flexShrink: 0,
+                      }}
+                    />
+                  </Tooltip>
+                ))}
+                {evs.length > 6 && (
+                  <Typography variant="caption" color="text.secondary" fontSize={9}>
+                    +{evs.length - 6}
+                  </Typography>
+                )}
+              </Stack>
+            </Paper>
+          );
+        })}
+      </Box>
+    </Box>
+  );
+}
+
 export default function ComplianceCalendarAdmin() {
   const { showSnackbar } = useSnackbar();
   const [rows, setRows] = useState([]);
@@ -137,6 +250,43 @@ export default function ComplianceCalendarAdmin() {
   const [snoozeTarget, setSnoozeTarget] = useState(null);
   const [snoozeDate, setSnoozeDate] = useState('');
   const [snoozeReason, setSnoozeReason] = useState('');
+
+  // view mode: 'list' | 'calendar'
+  const [viewMode, setViewMode] = useState('list');
+  const [gridYear, setGridYear] = useState(() => new Date().getFullYear());
+  const [gridMonth, setGridMonth] = useState(() => new Date().getMonth());
+  const [dayEventsOpen, setDayEventsOpen] = useState(false);
+  const [dayEvents, setDayEvents] = useState([]);
+
+  const shiftMonth = delta => {
+    setGridMonth(m => {
+      const next = m + delta;
+      if (next < 0) {
+        setGridYear(y => y - 1);
+        return 11;
+      }
+      if (next > 11) {
+        setGridYear(y => y + 1);
+        return 0;
+      }
+      return next;
+    });
+  };
+
+  const MONTH_NAMES_AR = [
+    'يناير',
+    'فبراير',
+    'مارس',
+    'أبريل',
+    'مايو',
+    'يونيو',
+    'يوليو',
+    'أغسطس',
+    'سبتمبر',
+    'أكتوبر',
+    'نوفمبر',
+    'ديسمبر',
+  ];
 
   // ── Reference ────────────────────────────────────────────────────
   useEffect(() => {
@@ -284,17 +434,46 @@ export default function ComplianceCalendarAdmin() {
             تقويم الامتثال
           </Typography>
         </Stack>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={() => {
-            setForm({ ...EMPTY_FORM });
-            setServerError(null);
-            setCreateOpen(true);
-          }}
-        >
-          إضافة حدث
-        </Button>
+        <Stack direction="row" spacing={1.5} alignItems="center">
+          <ToggleButtonGroup
+            size="small"
+            value={viewMode}
+            exclusive
+            onChange={(_, v) => v && setViewMode(v)}
+          >
+            <ToggleButton value="list" aria-label="عرض قائمة">
+              <Tooltip title="قائمة">
+                <ListIcon fontSize="small" />
+              </Tooltip>
+            </ToggleButton>
+            <ToggleButton value="calendar" aria-label="عرض تقويم">
+              <Tooltip title="تقويم شهري">
+                <Badge
+                  badgeContent={
+                    rows.filter(r => {
+                      const d = r.dueDate?.slice(0, 7);
+                      return d === `${gridYear}-${String(gridMonth + 1).padStart(2, '0')}`;
+                    }).length || null
+                  }
+                  color="error"
+                >
+                  <GridIcon fontSize="small" />
+                </Badge>
+              </Tooltip>
+            </ToggleButton>
+          </ToggleButtonGroup>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => {
+              setForm({ ...EMPTY_FORM });
+              setServerError(null);
+              setCreateOpen(true);
+            }}
+          >
+            إضافة حدث
+          </Button>
+        </Stack>
       </Stack>
 
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
@@ -393,103 +572,146 @@ export default function ComplianceCalendarAdmin() {
       </Paper>
 
       <TableContainer component={Paper}>
-        <Table size="small" aria-label="جدول أحداث الامتثال">
-          <TableHead>
-            <TableRow>
-              <TableCell>العنوان</TableCell>
-              <TableCell>النوع</TableCell>
-              <TableCell>الاستحقاق</TableCell>
-              <TableCell>الخطورة</TableCell>
-              <TableCell>الحالة</TableCell>
-              <TableCell>المصدر</TableCell>
-              <TableCell align="left">إجراءات</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {loading && (
+        {viewMode === 'calendar' && (
+          <Fade in>
+            <Box sx={{ p: 2 }}>
+              {/* Month nav */}
+              <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
+                <IconButton size="small" onClick={() => shiftMonth(-1)}>
+                  <PrevIcon />
+                </IconButton>
+                <Typography variant="h6" fontWeight={700} sx={{ flex: 1, textAlign: 'center' }}>
+                  {MONTH_NAMES_AR[gridMonth]} {gridYear}
+                </Typography>
+                <IconButton size="small" onClick={() => shiftMonth(1)}>
+                  <NextIcon />
+                </IconButton>
+              </Stack>
+
+              {/* Legend */}
+              <Stack direction="row" spacing={2} sx={{ mb: 1.5 }} flexWrap="wrap" useFlexGap>
+                {Object.entries(SEV_DOT).map(([sev, col]) => (
+                  <Stack key={sev} direction="row" spacing={0.5} alignItems="center">
+                    <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: col }} />
+                    <Typography variant="caption" color="text.secondary">
+                      {sev}
+                    </Typography>
+                  </Stack>
+                ))}
+              </Stack>
+
+              <MonthGrid
+                rows={rows}
+                year={gridYear}
+                month={gridMonth}
+                onEventClick={evs => {
+                  setDayEvents(evs);
+                  setDayEventsOpen(true);
+                }}
+              />
+            </Box>
+          </Fade>
+        )}
+
+        {viewMode === 'list' && (
+          <Table size="small" aria-label="جدول أحداث الامتثال">
+            <TableHead>
               <TableRow>
-                <TableCell colSpan={7} align="center">
-                  <CircularProgress size={24} aria-label="جاري التحميل" />
-                </TableCell>
+                <TableCell>العنوان</TableCell>
+                <TableCell>النوع</TableCell>
+                <TableCell>الاستحقاق</TableCell>
+                <TableCell>الخطورة</TableCell>
+                <TableCell>الحالة</TableCell>
+                <TableCell>المصدر</TableCell>
+                <TableCell align="left">إجراءات</TableCell>
               </TableRow>
-            )}
-            {!loading && rows.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={7} align="center">
-                  <Typography variant="body2" color="text.secondary">
-                    لا توجد أحداث في النافذة المحددة
-                  </Typography>
-                </TableCell>
-              </TableRow>
-            )}
-            {rows.map(row => (
-              <TableRow key={row._id || row.computedKey} hover>
-                <TableCell>{row.title}</TableCell>
-                <TableCell>{row.type || '—'}</TableCell>
-                <TableCell>{fmtDate(row.dueDate)}</TableCell>
-                <TableCell>
-                  {row.severity && (
-                    <Chip size="small" label={row.severity} color={severityColor(row.severity)} />
-                  )}
-                </TableCell>
-                <TableCell>
-                  <Chip size="small" label={row.status} color={statusColor(row.status)} />
-                </TableCell>
-                <TableCell>
-                  <Chip
-                    size="small"
-                    label={row.source || (row._id ? 'stored' : 'computed')}
-                    variant="outlined"
-                  />
-                </TableCell>
-                <TableCell align="left">
-                  {row._id && (
-                    <Tooltip title="عرض التفاصيل">
-                      <IconButton
-                        size="small"
-                        aria-label={`عرض ${row.title}`}
-                        onClick={() => openDetail(row)}
-                      >
-                        <ViewIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
-                  )}
-                  {row._id && row.status !== 'resolved' && row.status !== 'cancelled' && (
-                    <>
-                      <Tooltip title="تحديد كمُنجَز">
+            </TableHead>
+            <TableBody>
+              {loading && (
+                <TableRow>
+                  <TableCell colSpan={7} align="center">
+                    <CircularProgress size={24} aria-label="جاري التحميل" />
+                  </TableCell>
+                </TableRow>
+              )}
+              {!loading && rows.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={7} align="center">
+                    <Typography variant="body2" color="text.secondary">
+                      لا توجد أحداث في النافذة المحددة
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+              )}
+              {rows.map(row => (
+                <TableRow key={row._id || row.computedKey} hover>
+                  <TableCell>{row.title}</TableCell>
+                  <TableCell>{row.type || '—'}</TableCell>
+                  <TableCell>{fmtDate(row.dueDate)}</TableCell>
+                  <TableCell>
+                    {row.severity && (
+                      <Chip size="small" label={row.severity} color={severityColor(row.severity)} />
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <Chip size="small" label={row.status} color={statusColor(row.status)} />
+                  </TableCell>
+                  <TableCell>
+                    <Chip
+                      size="small"
+                      label={row.source || (row._id ? 'stored' : 'computed')}
+                      variant="outlined"
+                    />
+                  </TableCell>
+                  <TableCell align="left">
+                    {row._id && (
+                      <Tooltip title="عرض التفاصيل">
                         <IconButton
                           size="small"
-                          aria-label={`إنجاز ${row.title}`}
-                          onClick={() => handleResolve(row)}
+                          aria-label={`عرض ${row.title}`}
+                          onClick={() => openDetail(row)}
                         >
-                          <ResolveIcon fontSize="small" color="success" />
+                          <ViewIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
-                      <Tooltip title="تأجيل">
-                        <IconButton
-                          size="small"
-                          aria-label={`تأجيل ${row.title}`}
-                          onClick={() => openSnooze(row)}
-                        >
-                          <SnoozeIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="إلغاء">
-                        <IconButton
-                          size="small"
-                          aria-label={`إلغاء ${row.title}`}
-                          onClick={() => handleCancel(row)}
-                        >
-                          <CancelEventIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                    </>
-                  )}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+                    )}
+                    {row._id && row.status !== 'resolved' && row.status !== 'cancelled' && (
+                      <>
+                        <Tooltip title="تحديد كمُنجَز">
+                          <IconButton
+                            size="small"
+                            aria-label={`إنجاز ${row.title}`}
+                            onClick={() => handleResolve(row)}
+                          >
+                            <ResolveIcon fontSize="small" color="success" />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="تأجيل">
+                          <IconButton
+                            size="small"
+                            aria-label={`تأجيل ${row.title}`}
+                            onClick={() => openSnooze(row)}
+                          >
+                            <SnoozeIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="إلغاء">
+                          <IconButton
+                            size="small"
+                            aria-label={`إلغاء ${row.title}`}
+                            onClick={() => handleCancel(row)}
+                          >
+                            <CancelEventIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      </>
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
       </TableContainer>
 
       {/* ── Create dialog ──────────────────────────────────────────── */}
@@ -698,6 +920,85 @@ export default function ComplianceCalendarAdmin() {
           >
             تأجيل
           </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* ── Day events dialog (calendar grid click) ────────────────── */}
+      <Dialog open={dayEventsOpen} onClose={() => setDayEventsOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle sx={{ fontWeight: 700 }}>
+          <Stack direction="row" justifyContent="space-between" alignItems="center">
+            <span>أحداث اليوم المحدد ({dayEvents.length})</span>
+            <IconButton onClick={() => setDayEventsOpen(false)}>
+              <CloseIcon />
+            </IconButton>
+          </Stack>
+        </DialogTitle>
+        <DialogContent dividers>
+          <Stack spacing={1.5}>
+            {dayEvents.map((ev, i) => (
+              <Paper
+                key={i}
+                variant="outlined"
+                sx={{ p: 1.5, borderRight: `4px solid ${SEV_DOT[ev.severity] || '#9ca3af'}` }}
+              >
+                <Typography variant="body2" fontWeight={600}>
+                  {ev.title}
+                </Typography>
+                <Stack direction="row" spacing={1} mt={0.5} flexWrap="wrap" useFlexGap>
+                  <Chip size="small" label={ev.status} color={statusColor(ev.status)} />
+                  {ev.severity && (
+                    <Chip size="small" label={ev.severity} color={severityColor(ev.severity)} />
+                  )}
+                  {ev.type && <Chip size="small" label={ev.type} variant="outlined" />}
+                </Stack>
+                {ev._id && (
+                  <Stack direction="row" spacing={0.5} mt={0.5}>
+                    <Tooltip title="عرض التفاصيل">
+                      <IconButton
+                        size="small"
+                        onClick={() => {
+                          setDayEventsOpen(false);
+                          openDetail(ev);
+                        }}
+                      >
+                        <ViewIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                    {ev.status !== 'resolved' && ev.status !== 'cancelled' && (
+                      <>
+                        <Tooltip title="إنجاز">
+                          <IconButton
+                            size="small"
+                            color="success"
+                            onClick={() => {
+                              handleResolve(ev);
+                              setDayEventsOpen(false);
+                            }}
+                          >
+                            <ResolveIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="تأجيل">
+                          <IconButton
+                            size="small"
+                            onClick={() => {
+                              setDayEventsOpen(false);
+                              openSnooze(ev);
+                            }}
+                          >
+                            <SnoozeIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      </>
+                    )}
+                  </Stack>
+                )}
+              </Paper>
+            ))}
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDayEventsOpen(false)}>إغلاق</Button>
         </DialogActions>
       </Dialog>
     </Box>

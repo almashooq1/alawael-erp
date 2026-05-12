@@ -272,9 +272,10 @@ export default function ManagementReviewAdmin() {
   useEffect(() => {
     loadDashboard();
   }, [loadDashboard]);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+
   useEffect(() => {
     if (tab === 1) loadList();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- same reason: suppress dep-array warning
   }, [tab]);
 
   // ── Create review ───────────────────────────────────────────────

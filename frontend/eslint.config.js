@@ -13,8 +13,11 @@ const tsParser = require('@typescript-eslint/parser');
 // This flat config is used by ESLint v8+ when linting frontend files.
 // It mirrors the rules from .eslintrc.json but in flat config format.
 module.exports = [
+  // Global ignores — must be a standalone object (no other keys) in flat config
   {
-    ignores: ['node_modules/**', 'coverage/**', 'build/**', 'dist/**', '.git/**', '*.log'],
+    ignores: ['node_modules/**', 'coverage/**', 'build/**', 'dist/**', '.git/**', '*.log', '_archive/**', '_archived/**'],
+  },
+  {
     linterOptions: {
       reportUnusedDisableDirectives: 'warn',
     },
@@ -167,6 +170,16 @@ module.exports = [
       'no-unused-vars': 'off',
       'no-undef': 'off',
       'no-console': 'off',
+    },
+  },
+  // Root-level utility scripts and config files — console output is intentional
+  {
+    files: ['*.js', 'scripts/**/*.js', 'cypress.config.js', 'cypress.config.ts'],
+    rules: {
+      'no-console': 'off',
+      'no-unused-vars': 'off',
+      'prefer-const': 'off',
+      'no-useless-escape': 'off',
     },
   },
 ];

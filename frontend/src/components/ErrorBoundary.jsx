@@ -141,49 +141,47 @@ class ErrorBoundary extends React.Component {
             </Box>
 
             {/* Always show error details for debugging */}
-            {true && (
-              <>
-                <Button
-                  variant="text"
-                  size="small"
-                  onClick={this.toggleDetails}
-                  sx={{ textDecoration: 'underline' }}
+            <>
+              <Button
+                variant="text"
+                size="small"
+                onClick={this.toggleDetails}
+                sx={{ textDecoration: 'underline' }}
+              >
+                {showDetails ? 'إخفاء التفاصيل' : 'عرض التفاصيل'}
+              </Button>
+              <Collapse in={showDetails}>
+                <Box
+                  mt={2}
+                  p={2}
+                  sx={{
+                    backgroundColor: 'grey.100',
+                    borderRadius: 1,
+                    textAlign: 'left',
+                    direction: 'ltr',
+                    maxHeight: 300,
+                    overflow: 'auto',
+                    fontSize: 12,
+                    fontFamily: 'monospace',
+                  }}
                 >
-                  {showDetails ? 'إخفاء التفاصيل' : 'عرض التفاصيل'}
-                </Button>
-                <Collapse in={showDetails}>
-                  <Box
-                    mt={2}
-                    p={2}
-                    sx={{
-                      backgroundColor: 'grey.100',
-                      borderRadius: 1,
-                      textAlign: 'left',
-                      direction: 'ltr',
-                      maxHeight: 300,
-                      overflow: 'auto',
-                      fontSize: 12,
-                      fontFamily: 'monospace',
-                    }}
-                  >
-                    <Typography variant="caption" component="pre" display="block">
-                      {error?.toString()}
+                  <Typography variant="caption" component="pre" display="block">
+                    {error?.toString()}
+                  </Typography>
+                  {errorInfo?.componentStack && (
+                    <Typography
+                      variant="caption"
+                      component="pre"
+                      display="block"
+                      mt={1}
+                      color="text.secondary"
+                    >
+                      {errorInfo.componentStack}
                     </Typography>
-                    {errorInfo?.componentStack && (
-                      <Typography
-                        variant="caption"
-                        component="pre"
-                        display="block"
-                        mt={1}
-                        color="text.secondary"
-                      >
-                        {errorInfo.componentStack}
-                      </Typography>
-                    )}
-                  </Box>
-                </Collapse>
-              </>
-            )}
+                  )}
+                </Box>
+              </Collapse>
+            </>
           </Paper>
         </Box>
       );

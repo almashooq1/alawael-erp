@@ -1,6 +1,6 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Tailwind 4 uses a single import; the legacy `@tailwind base/components/utilities`
+   directives still resolve via the compat layer in @tailwindcss/postcss 4.x. */
+@import "tailwindcss";
 
 /* ═══════════════════════════════════════════════════
    Global Styles — Professional Enhancements

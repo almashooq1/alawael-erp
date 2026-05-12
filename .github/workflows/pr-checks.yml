@@ -172,7 +172,11 @@ jobs:
 
       - name: Run frontend tests
         working-directory: frontend
-        run: npx react-scripts test --watchAll=false --no-coverage --ci
+        # Frontend was migrated CRA → Vite + Jest. react-scripts is no
+        # longer in package.json; use the `test` script there which now
+        # points at bare jest. `--passWithNoTests` matches the package
+        # script and keeps a subset-run (npm test -- some.test.js) safe.
+        run: npm test -- --watchAll=false --no-coverage --ci --passWithNoTests
         env:
           CI: "true"
 

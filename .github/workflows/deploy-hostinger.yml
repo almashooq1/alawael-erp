@@ -113,12 +113,12 @@ jobs:
     runs-on: ubuntu-latest
     needs: preflight
     if: ${{ github.event.inputs.skip_tests != 'true' }}
-    # 25 min: full backend suite is ~19 min locally on a fast machine,
-    # GitHub runners add ~30% on top. Raised from 15 after the 2026-05-12
-    # `add --rollback flag` run timed out the test job at exactly 15m04s
-    # — see memory entry "Deploy auto-fire + SSH-fail findings 2026-05-12"
-    # — even though all 25,115 tests pass locally and on a longer runner.
-    timeout-minutes: 25
+    # 35 min: backend test count grew past 25,115 (jest 30 bump + new
+    # domain tests). Local: ~17 min on a fast box; GitHub runner ~50-100%
+    # slower → 25m kept hitting the cap on routine deploys (last one was
+    # the lockfile-refresh commit on 2026-05-13 timing out at exactly
+    # 25m16s, leaving production stale on e06a7667 for 11+ hours).
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
 

@@ -38,7 +38,7 @@ import {
   Search,
   Refresh,
   Mail,
-  MailOutline,
+  MailOutlined as MailOutline,
   MoreVert,
   Visibility,
   Forward,

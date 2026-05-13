@@ -31,7 +31,7 @@ import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import GroupsIcon from '@mui/icons-material/Groups';
 import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutlined';
 import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
 import AutoGraphIcon from '@mui/icons-material/AutoGraph';
 import PsychologyIcon from '@mui/icons-material/Psychology';

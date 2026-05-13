@@ -42,7 +42,7 @@ import {
   ReportProblem as IncidentIcon,
   CheckCircle as ResolvedIcon,
   Schedule as ReviewIcon,
-  ErrorOutline as CriticalIcon,
+  ErrorOutlineOutlined as CriticalIcon,
   Info as InfoIcon,
 } from '@mui/icons-material';
 import { therapistService } from 'services/therapistService';

@@ -47,7 +47,7 @@ import {
   Speed as KPIChartIcon,
   Handshake as CRMIcon,
   ModelTraining as TrainingIcon,
-  WorkOutline as RecruitmentIcon,
+  WorkOutlined as RecruitmentIcon,
   Build as MaintenanceIcon,
   Store as VendorIcon,
   VolunteerActivism as DonationsIcon,

@@ -34,7 +34,7 @@ import {
   CheckCircle as CheckCircleIcon,
   Add as AddIcon,
   ArrowForward as ArrowForwardIcon,
-  MailOutline,
+  MailOutlined as MailOutline,
   CallReceived,
   CallMade,
   Notifications,

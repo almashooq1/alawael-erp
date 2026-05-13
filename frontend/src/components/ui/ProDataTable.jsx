@@ -48,7 +48,7 @@ import {
   FileDownload as ExportIcon,
   Refresh as RefreshIcon,
   InboxRounded as EmptyIcon,
-  ErrorOutline as ErrorIcon,
+  ErrorOutlineOutlined as ErrorIcon,
 } from '@mui/icons-material';
 
 // ─── DATA TABLE ──────────────────────────────────────────────────────────────

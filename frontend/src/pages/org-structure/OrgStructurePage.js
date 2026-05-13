@@ -42,7 +42,7 @@ import {
   ExpandLess as CollapseIcon,
   Group as GroupIcon,
   Badge as PositionIcon,
-  WorkOutline as WorkIcon,
+  WorkOutlined as WorkIcon,
 } from '@mui/icons-material';
 import orgStructureService from '../../services/orgStructure.service';
 

@@ -18,7 +18,7 @@ export { Slideshow as PptIcon } from '@mui/icons-material';
 export { SmartToy as BotIcon } from '@mui/icons-material';
 export { Psychology as AIIcon } from '@mui/icons-material';
 export { TipsAndUpdates as TipIcon } from '@mui/icons-material';
-export { HelpOutline as QuestionIcon } from '@mui/icons-material';
+export { HelpOutlined as QuestionIcon } from '@mui/icons-material';
 export { Videocam as VideoIcon } from '@mui/icons-material';
 export { AudioFile as AudioIcon } from '@mui/icons-material';
 export { CheckCircle as ActiveIcon } from '@mui/icons-material';

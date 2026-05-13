@@ -52,7 +52,7 @@ import {
   CheckCircle,
   HourglassTop,
   Block,
-  ErrorOutline,
+  ErrorOutlineOutlined as ErrorOutline,
   Schedule,
 } from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';

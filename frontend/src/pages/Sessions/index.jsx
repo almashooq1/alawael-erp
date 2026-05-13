@@ -16,7 +16,12 @@ import {
   Alert,
   Paper,
 } from '@mui/material';
-import { Add as AddIcon, Event as EventIcon, Refresh, ErrorOutline } from '@mui/icons-material';
+import {
+  Add as AddIcon,
+  Event as EventIcon,
+  Refresh,
+  ErrorOutlined as ErrorOutline,
+} from '@mui/icons-material';
 
 import useSessionsManagement from './useSessionsManagement';
 import StatCards from './StatCards';

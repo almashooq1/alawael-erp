@@ -16,7 +16,7 @@ const LoadingSpinner = ({ message = 'جاري التحميل...', open = true })
         gap: 2,
       }}
     >
-      <CircularProgress color="inherit" size={56} thickness={4} />
+      <CircularProgress color="inherit" size={56} thickness={4} aria-label={message} />
       <Box sx={{ textAlign: 'center' }}>
         <Typography variant="body1" sx={{ color: '#fff', fontWeight: 500 }}>
           {message}

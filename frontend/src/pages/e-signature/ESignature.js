@@ -38,7 +38,7 @@ import {
   TrendingUp,
   Assignment,
   PendingActions,
-  CheckCircleOutline,
+  CheckCircleOutlined as CheckCircleOutline,
   CancelOutlined,
   Schedule,
   Description as TemplateIcon,

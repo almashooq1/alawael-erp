@@ -51,7 +51,7 @@ import {
   Memory,
   Dns,
   AddCircle,
-  DeleteOutline,
+  DeleteOutlined as DeleteOutline,
   Edit,
   PhotoCamera,
   VpnKey,

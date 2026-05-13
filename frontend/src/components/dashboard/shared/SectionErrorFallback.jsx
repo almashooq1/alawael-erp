@@ -6,7 +6,7 @@
 import { Component } from 'react';
 import { Box, Typography, Button, Collapse } from '@mui/material';
 import logger from '../../../utils/logger';
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutlineOutlined';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 

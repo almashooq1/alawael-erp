@@ -59,7 +59,7 @@ import ShieldIcon from '@mui/icons-material/Shield';
 import FactCheckIcon from '@mui/icons-material/FactCheck';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import StarIcon from '@mui/icons-material/Star';
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutlineOutlined';
 
 /* ═══════════════════════════════════════════════════════════════════ */
 /*  Constants                                                          */

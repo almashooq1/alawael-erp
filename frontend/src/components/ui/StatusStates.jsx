@@ -32,8 +32,8 @@ import {
 } from '@mui/material';
 import {
   InboxRounded as EmptyIcon,
-  ErrorOutline as ErrorIcon,
-  CheckCircleOutline as SuccessIcon,
+  ErrorOutlineOutlined as ErrorIcon,
+  CheckCircleOutlined as SuccessIcon,
   Refresh as RefreshIcon,
   Close as CloseIcon,
   WarningAmber as WarningIcon,
@@ -42,7 +42,7 @@ import {
   CloudOff as CloudOffIcon,
   LockOutlined as LockIcon,
   FolderOffOutlined as FolderOffIcon,
-  AddCircleOutline as AddIcon,
+  AddCircleOutlined as AddIcon,
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 

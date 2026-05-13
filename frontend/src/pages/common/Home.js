@@ -12,7 +12,7 @@ import {
   AccessTime as AccessTimeIcon,
   QueryStats as QueryStatsIcon,
   Home as HomeIcon,
-  ErrorOutline as ErrorOutlineIcon,
+  ErrorOutlineOutlined as ErrorOutlineIcon,
   CalendarMonth as CalendarIcon,
   Bolt as BoltIcon,
   AutoAwesome as SparkleIcon,

@@ -85,11 +85,11 @@ import {
   NotificationsActive,
   Close,
   History,
-  WorkOutline,
+  WorkOutlined as WorkOutline,
   AccountBalance,
   CalendarViewMonth,
   Speed,
-  ErrorOutline,
+  ErrorOutlineOutlined as ErrorOutline,
   WatchLater,
   ManageAccounts,
 } from '@mui/icons-material';

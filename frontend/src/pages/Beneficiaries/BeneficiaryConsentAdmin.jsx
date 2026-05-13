@@ -45,7 +45,7 @@ import {
   Block,
   CheckCircle,
   Close,
-  ErrorOutline,
+  ErrorOutlineOutlined as ErrorOutline,
   History,
   PersonAdd,
   Refresh,

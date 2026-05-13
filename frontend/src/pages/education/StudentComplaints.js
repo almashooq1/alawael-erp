@@ -40,7 +40,7 @@ import {
   Feedback as FeedbackIcon,
   Lightbulb as SuggestionIcon,
   BugReport as ComplaintIcon,
-  HelpOutline as InquiryIcon,
+  HelpOutlined as InquiryIcon,
   Send as SendIcon,
   Star as StarIcon,
   Close as CloseIcon,

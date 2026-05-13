@@ -51,7 +51,7 @@ import {
   TrackChanges as GoalIcon,
   CheckCircle as AchievedIcon,
   HourglassBottom as DraftIcon,
-  PlayCircleOutline as ActiveIcon,
+  PlayCircleOutlined as ActiveIcon,
   Cancel as DiscontinuedIcon,
   TrendingUp as ProgressIcon,
   FilterList as FilterIcon,

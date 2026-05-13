@@ -34,7 +34,7 @@ import {
   WarningAmber,
   ArrowForward,
   Gavel,
-  MailOutline,
+  MailOutlined as MailOutline,
   SwapHoriz,
 } from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';

@@ -63,7 +63,7 @@ import {
   BeachAccess as LeaveIcon,
   Today as TodayIcon,
   DateRange as DateRangeIcon,
-  CheckCircleOutline as ApproveIcon,
+  CheckCircleOutlined as ApproveIcon,
   HighlightOff as RejectIcon,
   BarChart as ChartIcon,
   Save as SaveIcon,

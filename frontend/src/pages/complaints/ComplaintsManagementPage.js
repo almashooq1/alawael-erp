@@ -46,7 +46,7 @@ import {
   Assignment as AssignIcon,
   Lightbulb as SuggestionIcon,
   Chat as ChatIcon,
-  PersonOutline as PersonIcon,
+  PersonOutlined as PersonIcon,
 } from '@mui/icons-material';
 import { complaintsService } from '../../services/complaintsService';
 

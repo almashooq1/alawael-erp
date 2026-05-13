@@ -15,7 +15,16 @@ const tsParser = require('@typescript-eslint/parser');
 module.exports = [
   // Global ignores — must be a standalone object (no other keys) in flat config
   {
-    ignores: ['node_modules/**', 'coverage/**', 'build/**', 'dist/**', '.git/**', '*.log', '_archive/**', '_archived/**'],
+    ignores: [
+      'node_modules/**',
+      'coverage/**',
+      'build/**',
+      'dist/**',
+      '.git/**',
+      '*.log',
+      '_archive/**',
+      '_archived/**',
+    ],
   },
   {
     linterOptions: {

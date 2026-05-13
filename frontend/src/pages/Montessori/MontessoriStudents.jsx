@@ -76,7 +76,7 @@ import {
   Print as PrintIcon,
   EmojiEvents as GradIcon,
   Block as SuspendIcon,
-  CheckCircleOutline as ActiveIcon,
+  CheckCircleOutlined as ActiveIcon,
   ContactEmergency as ContactIcon,
 } from '@mui/icons-material';
 import {

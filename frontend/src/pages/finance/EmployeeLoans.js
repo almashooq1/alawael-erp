@@ -26,7 +26,7 @@ import {
   LinearProgress,
 } from '@mui/material';
 import {
-  PersonOutline,
+  PersonOutlined as PersonOutline,
   Add,
   CheckCircle,
   AccountBalanceWallet,

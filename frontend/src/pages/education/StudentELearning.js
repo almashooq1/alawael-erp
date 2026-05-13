@@ -40,7 +40,7 @@ import {
   CheckCircle as CheckIcon,
   Close as CloseIcon,
   Timer as TimerIcon,
-  PersonOutline as InstructorIcon,
+  PersonOutlined as InstructorIcon,
   Lock as LockIcon,
   People as PeopleIcon,
   AttachFile as AttachIcon,

@@ -34,7 +34,7 @@ import {
 import {
   AccountBalance,
   CheckCircle,
-  ErrorOutline,
+  ErrorOutlineOutlined as ErrorOutline,
   Refresh,
   SyncAlt,
   Warning,

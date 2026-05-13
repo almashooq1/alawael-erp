@@ -45,7 +45,7 @@ import {
   CallMade,
   DoneAll,
   Mail,
-  MailOutline,
+  MailOutlined as MailOutline,
   ArrowBack,
 } from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';

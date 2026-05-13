@@ -51,7 +51,7 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import HourglassBottomIcon from '@mui/icons-material/HourglassBottom';
 import PendingIcon from '@mui/icons-material/Pending';
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutlineOutlined';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 
 // ─── Gradient + Glass helpers ──────────────────────────────────────────────────

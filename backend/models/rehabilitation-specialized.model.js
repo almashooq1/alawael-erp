@@ -1160,8 +1160,12 @@ module.exports = {
   ResidentialUnit:
     mongoose.models.ResidentialUnit || mongoose.model('ResidentialUnit', residentialUnitSchema),
 
-  // الأنشطة
-  Activity: mongoose.models.Activity || mongoose.model('Activity', activitySchema),
+  // الأنشطة — registered as `RehabSpecializedActivity` (was `Activity`,
+  // collided with models/Activity.js + ActivityLibrary.js + montessori.js).
+  // Export key stays `Activity` so consumers don't change.
+  Activity:
+    mongoose.models.RehabSpecializedActivity ||
+    mongoose.model('RehabSpecializedActivity', activitySchema),
 
   // التوثيق
   Document: mongoose.models.Document || mongoose.model('Document', documentSchema),

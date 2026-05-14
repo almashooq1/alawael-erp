@@ -147,7 +147,12 @@ module.exports = {
     mongoose.models.MontessoriPlan || mongoose.model('MontessoriPlan', MontessoriPlanSchema),
   Session: mongoose.models.MontessoriSession || mongoose.model('MontessoriSession', SessionSchema),
   Evaluation: mongoose.models.Evaluation || mongoose.model('Evaluation', EvaluationSchema),
-  Activity: mongoose.models.Activity || mongoose.model('Activity', ActivitySchema),
+  // Registered as `MontessoriActivity` (not `Activity`) to avoid the
+  // collision with models/Activity.js (which has a totally different
+  // program-related schema). The export key stays `Activity` so existing
+  // consumers (routes/montessori.js, montessori tests) don't change.
+  Activity:
+    mongoose.models.MontessoriActivity || mongoose.model('MontessoriActivity', ActivitySchema),
   TeamMember: mongoose.models.TeamMember || mongoose.model('TeamMember', TeamMemberSchema),
   Parent: mongoose.models.Parent || mongoose.model('Parent', ParentSchema),
   MediaFile: mongoose.models.MediaFile || mongoose.model('MediaFile', MediaFileSchema),

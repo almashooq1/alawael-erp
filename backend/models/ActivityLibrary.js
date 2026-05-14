@@ -106,6 +106,11 @@ activitySchema.index({ discipline: 1, target_domains: 1, difficulty: 1 });
 activitySchema.index({ tags: 1 });
 activitySchema.index({ name_ar: 'text', description_ar: 'text' });
 
-const Activity = mongoose.models.Activity || mongoose.model('Activity', activitySchema);
+// Registered as `ActivityLibraryEntry` (not `Activity`) to avoid the
+// collision with models/Activity.js which has a totally different
+// program-related schema. Export key stays `Activity` so existing
+// consumers (routes/activity-library.routes.js etc.) don't change.
+const Activity =
+  mongoose.models.ActivityLibraryEntry || mongoose.model('ActivityLibraryEntry', activitySchema);
 
 module.exports = { Activity, DISCIPLINES, DOMAINS, DIFFICULTY };

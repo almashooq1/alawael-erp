@@ -79,6 +79,34 @@ router.post('/revoke/:code', async (req, res) => {
   }
 });
 
+/**
+ * POST /api/v1/codes/admin/backfill
+ *   body: { entityTypes?: ['BNF', ...], dryRun?: true }
+ * Issues codes for entities that existed BEFORE the plugin was installed.
+ * Idempotent — already-issued codes are skipped. Admin-only.
+ */
+router.post('/admin/backfill', async (req, res) => {
+  try {
+    const userRole = req.user?.role || req.user?.roleCode;
+    if (userRole !== 'admin' && userRole !== 'super_admin') {
+      return res.status(403).json({ success: false, message: 'admin role required' });
+    }
+    const { runBackfill } = require('../services/universalCode/backfill');
+    const summary = await runBackfill({
+      entityTypes: Array.isArray(req.body?.entityTypes) ? req.body.entityTypes : undefined,
+      dryRun: !!req.body?.dryRun,
+    });
+    logger.info(
+      `[UniversalCode] backfill: scanned=${summary.totals.scanned} ` +
+        `issued=${summary.totals.issued} skipped=${summary.totals.skipped} ` +
+        `dryRun=${summary.dryRun}`
+    );
+    res.json({ success: true, data: summary });
+  } catch (error) {
+    safeError(res, error, 'universal-codes');
+  }
+});
+
 router.get('/render/:code.png', async (req, res) => {
   try {
     const code = req.params.code;

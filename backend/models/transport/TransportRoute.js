@@ -65,5 +65,8 @@ transportRouteSchema.index({ branch_id: 1, is_active: 1 });
 transportRouteSchema.index({ vehicle_id: 1 });
 transportRouteSchema.index({ deleted_at: 1 });
 
+// Registered as `TransportModuleRoute` to dodge the collision with the
+// canonical models/TransportRoute.js. Default export unchanged.
 module.exports =
-  mongoose.models.TransportRoute || mongoose.model('TransportRoute', transportRouteSchema);
+  mongoose.models.TransportModuleRoute ||
+  mongoose.model('TransportModuleRoute', transportRouteSchema);

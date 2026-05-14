@@ -92,7 +92,10 @@ const assessmentToolSchema = new Schema(
   { timestamps: true }
 );
 
+// Registered as `RehabCenterAssessmentTool` to dodge the collision with
+// models/assessmentScales/AssessmentTool.js. Default export unchanged.
 const AssessmentTool =
-  mongoose.models.AssessmentTool || mongoose.model('AssessmentTool', assessmentToolSchema);
+  mongoose.models.RehabCenterAssessmentTool ||
+  mongoose.model('RehabCenterAssessmentTool', assessmentToolSchema);
 
 module.exports = AssessmentTool;

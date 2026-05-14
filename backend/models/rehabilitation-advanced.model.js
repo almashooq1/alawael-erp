@@ -1674,10 +1674,13 @@ dischargePlanSchema.index({ beneficiary_id: 1, status: 1 });
 // تصدير النماذج
 // ============================================
 
+// All mongoose registrations below use `RehabAdvanced*` scoped names to
+// dodge collisions with sibling per-domain files (models/rehab-advanced/*)
+// AND the canonical top-level models (models/TherapySession.js etc.).
+// Export keys are left at their original camel-case names so existing
+// consumers don't need to change.
 module.exports = {
-  // نظام السلوك — scoped registrations to dodge collisions with the
-  // canonical/domain copies (export keys stay as `BehaviorIncident` and
-  // `BehaviorPlan` so consumers don't change).
+  // نظام السلوك
   BehaviorIncident:
     mongoose.models.AggregatedBehaviorIncident ||
     mongoose.model('AggregatedBehaviorIncident', behaviorIncidentSchema),
@@ -1687,38 +1690,49 @@ module.exports = {
 
   // نظام التدريب المهني
   VocationalProfile:
-    mongoose.models.VocationalProfile ||
-    mongoose.model('VocationalProfile', vocationalProfileSchema),
-  JobCoachLog: mongoose.models.JobCoachLog || mongoose.model('JobCoachLog', jobCoachLogSchema),
+    mongoose.models.RehabAdvancedVocationalProfile ||
+    mongoose.model('RehabAdvancedVocationalProfile', vocationalProfileSchema),
+  JobCoachLog:
+    mongoose.models.RehabAdvancedJobCoachLog ||
+    mongoose.model('RehabAdvancedJobCoachLog', jobCoachLogSchema),
 
   // نظام المتابعة المنزلية
-  HomeProgram: mongoose.models.HomeProgram || mongoose.model('HomeProgram', homeProgramSchema),
+  HomeProgram:
+    mongoose.models.RehabAdvancedHomeProgram ||
+    mongoose.model('RehabAdvancedHomeProgram', homeProgramSchema),
 
   // نظام الأدوية
   MedicationRecord:
-    mongoose.models.MedicationRecord || mongoose.model('MedicationRecord', medicationRecordSchema),
+    mongoose.models.RehabAdvancedMedicationRecord ||
+    mongoose.model('RehabAdvancedMedicationRecord', medicationRecordSchema),
 
   // نظام التوحد
   AutismProfile:
-    mongoose.models.AutismProfile || mongoose.model('AutismProfile', autismProfileSchema),
+    mongoose.models.RehabAdvancedAutismProfile ||
+    mongoose.model('RehabAdvancedAutismProfile', autismProfileSchema),
 
   // نظام العلاج
   TherapySession:
-    mongoose.models.TherapySession || mongoose.model('TherapySession', therapySessionSchema),
+    mongoose.models.AggregatedTherapySession ||
+    mongoose.model('AggregatedTherapySession', therapySessionSchema),
 
   // نظام التغذية
   NutritionPlan:
-    mongoose.models.NutritionPlan || mongoose.model('NutritionPlan', nutritionPlanSchema),
+    mongoose.models.RehabAdvancedNutritionPlan ||
+    mongoose.model('RehabAdvancedNutritionPlan', nutritionPlanSchema),
 
   // نظام غرف الموارد
-  ResourceRoom: mongoose.models.ResourceRoom || mongoose.model('ResourceRoom', resourceRoomSchema),
+  ResourceRoom:
+    mongoose.models.RehabAdvancedResourceRoom ||
+    mongoose.model('RehabAdvancedResourceRoom', resourceRoomSchema),
 
   // نظام الشهادات
   StaffCertification:
-    mongoose.models.StaffCertification ||
-    mongoose.model('StaffCertification', staffCertificationSchema),
+    mongoose.models.RehabAdvancedStaffCertification ||
+    mongoose.model('RehabAdvancedStaffCertification', staffCertificationSchema),
 
   // نظام الخروج
   DischargePlan:
-    mongoose.models.DischargePlan || mongoose.model('DischargePlan', dischargePlanSchema),
+    mongoose.models.RehabAdvancedDischargePlan ||
+    mongoose.model('RehabAdvancedDischargePlan', dischargePlanSchema),
 };

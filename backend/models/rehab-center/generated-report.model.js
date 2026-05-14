@@ -72,7 +72,10 @@ const generatedReportSchema = new Schema(
   { timestamps: true }
 );
 
+// Registered as `RehabCenterGeneratedReport` to dodge the collision
+// with domains/reports/models/GeneratedReport.js. Default export unchanged.
 const GeneratedReport =
-  mongoose.models.GeneratedReport || mongoose.model('GeneratedReport', generatedReportSchema);
+  mongoose.models.RehabCenterGeneratedReport ||
+  mongoose.model('RehabCenterGeneratedReport', generatedReportSchema);
 
 module.exports = GeneratedReport;

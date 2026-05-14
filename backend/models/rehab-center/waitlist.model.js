@@ -94,6 +94,9 @@ const waitlistSchema = new Schema(
 waitlistSchema.index({ status: 1, 'waitlist_info.priority_score': -1 });
 waitlistSchema.index({ requested_service: 1 });
 
-const Waitlist = mongoose.models.Waitlist || mongoose.model('Waitlist', waitlistSchema);
+// Registered as `RehabCenterWaitlist` to dodge the collision with the
+// canonical models/Waitlist.js. Default export unchanged.
+const Waitlist =
+  mongoose.models.RehabCenterWaitlist || mongoose.model('RehabCenterWaitlist', waitlistSchema);
 
 module.exports = Waitlist;

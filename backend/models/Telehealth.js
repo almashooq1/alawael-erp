@@ -360,8 +360,11 @@ teleconsultationParticipantSchema.index({ teleconsultation: 1, participantType: 
 module.exports = {
   Teleconsultation:
     mongoose.models.Teleconsultation || mongoose.model('Teleconsultation', teleconsultationSchema),
+  // Registered as `TelehealthVirtualSession` to dodge the collision with
+  // the canonical models/VirtualSession.js. Export key unchanged.
   VirtualSession:
-    mongoose.models.VirtualSession || mongoose.model('VirtualSession', virtualSessionSchema),
+    mongoose.models.TelehealthVirtualSession ||
+    mongoose.model('TelehealthVirtualSession', virtualSessionSchema),
   RemotePrescription:
     mongoose.models.RemotePrescription ||
     mongoose.model('RemotePrescription', remotePrescriptionSchema),

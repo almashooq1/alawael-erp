@@ -464,13 +464,23 @@ QualityIndicatorSchema.index({ category: 1, status: 1 });
 const Standard = mongoose.models.Standard || mongoose.model('Standard', StandardSchema);
 const Accreditation =
   mongoose.models.Accreditation || mongoose.model('Accreditation', AccreditationSchema);
+// Registered as `QualityManagementAudit` to dodge the collision with
+// the DDD canonical domains/quality/models/QualityAudit.js. Export key
+// unchanged.
 const QualityAudit =
-  mongoose.models.QualityAudit || mongoose.model('QualityAudit', QualityAuditSchema);
+  mongoose.models.QualityManagementAudit ||
+  mongoose.model('QualityManagementAudit', QualityAuditSchema);
 const ComplianceTracking =
   mongoose.models.ComplianceTracking ||
   mongoose.model('ComplianceTracking', ComplianceTrackingSchema);
+// Registered as `QualityManagementIndicator` to dodge the collision with
+// the canonical models/quality/QualityIndicator.js and the aggregator
+// in models/rehabilitation-intelligent.model.js. Export key stays
+// `QualityIndicator` so existing consumers (routes/quality.js etc.) don't
+// change.
 const QualityIndicator =
-  mongoose.models.QualityIndicator || mongoose.model('QualityIndicator', QualityIndicatorSchema);
+  mongoose.models.QualityManagementIndicator ||
+  mongoose.model('QualityManagementIndicator', QualityIndicatorSchema);
 
 module.exports = {
   Standard,

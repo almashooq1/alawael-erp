@@ -127,4 +127,7 @@ const driverSchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
-module.exports = mongoose.models.Driver || mongoose.model('Driver', driverSchema);
+// Registered as `TransportDriver` to dodge the collision with the
+// canonical models/Driver.js. Default export unchanged.
+module.exports =
+  mongoose.models.TransportDriver || mongoose.model('TransportDriver', driverSchema);

@@ -117,7 +117,11 @@ enrollmentSchema.virtual('is_overdue').get(function () {
   return new Date(this.expected_end_date) < new Date();
 });
 
+// Registered as `RehabilitationProgramEnrollment` to dodge the collision
+// with the DDD canonical domains/programs/models/ProgramEnrollment.js.
+// Default export unchanged.
 const ProgramEnrollment =
-  mongoose.models.ProgramEnrollment || mongoose.model('ProgramEnrollment', enrollmentSchema);
+  mongoose.models.RehabilitationProgramEnrollment ||
+  mongoose.model('RehabilitationProgramEnrollment', enrollmentSchema);
 
 module.exports = ProgramEnrollment;

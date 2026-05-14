@@ -84,7 +84,8 @@ const inventoryItemSchema = new mongoose.Schema(
 inventoryItemSchema.pre('save', async function (next) {
   if (!this.item_code) {
     const year = new Date().getFullYear();
-    const count = await mongoose.model('InventoryItem').countDocuments();
+    // Query the scoped model name so the counter is stable per-collection.
+    const count = await mongoose.model('InventoryModuleItem').countDocuments();
     this.item_code = `ITM-${year}-${String(count + 1).padStart(5, '0')}`;
   }
   // حساب الكمية المتاحة
@@ -98,5 +99,9 @@ inventoryItemSchema.index({ name_ar: 'text', name_en: 'text', barcode: 'text', i
 inventoryItemSchema.index({ branch_id: 1, category: 1 });
 inventoryItemSchema.index({ deleted_at: 1 });
 
+// Registered as `InventoryModuleItem` to dodge the collision with the
+// canonical models/InventoryItem.js (used by inventory-enhanced.routes.js).
+// Default export unchanged.
 module.exports =
-  mongoose.models.InventoryItem || mongoose.model('InventoryItem', inventoryItemSchema);
+  mongoose.models.InventoryModuleItem ||
+  mongoose.model('InventoryModuleItem', inventoryItemSchema);

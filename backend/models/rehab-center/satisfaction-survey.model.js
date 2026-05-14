@@ -58,8 +58,11 @@ const satisfactionSurveySchema = new Schema(
   { timestamps: true }
 );
 
+// Registered as `RehabCenterSatisfactionSurvey` to dodge the collision
+// with models/quality/SatisfactionSurvey.model.js. Default export
+// unchanged.
 const SatisfactionSurvey =
-  mongoose.models.SatisfactionSurvey ||
-  mongoose.model('SatisfactionSurvey', satisfactionSurveySchema);
+  mongoose.models.RehabCenterSatisfactionSurvey ||
+  mongoose.model('RehabCenterSatisfactionSurvey', satisfactionSurveySchema);
 
 module.exports = SatisfactionSurvey;

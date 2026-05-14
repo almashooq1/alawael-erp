@@ -36,7 +36,10 @@ const insuranceCompanySchema = new mongoose.Schema(
 insuranceCompanySchema.index({ status: 1 });
 // REMOVED DUPLICATE: insuranceCompanySchema.index({ nphiesId: 1 }); — field already has index:true
 
+// Registered as `NphiesInsuranceCompany` to dodge the collision with the
+// canonical models/InsuranceCompany.js. Default export unchanged.
 const InsuranceCompany =
-  mongoose.models.InsuranceCompany || mongoose.model('InsuranceCompany', insuranceCompanySchema);
+  mongoose.models.NphiesInsuranceCompany ||
+  mongoose.model('NphiesInsuranceCompany', insuranceCompanySchema);
 
 module.exports = InsuranceCompany;

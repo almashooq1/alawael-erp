@@ -172,5 +172,12 @@ const reportTemplateSchema = new mongoose.Schema(
   }
 );
 
+// Registered as `DddReportTemplate` to dodge the collision with the
+// legacy models/reports/ReportTemplate.js (which is actively consumed
+// by routes/reports-analytics-module.routes.js). This DDD variant
+// has a different schema shape (sections-based) and is loaded by
+// domains/reports/index.js. Default export unchanged so any DDD
+// consumers stay put.
 module.exports =
-  mongoose.models.ReportTemplate || mongoose.model('ReportTemplate', reportTemplateSchema);
+  mongoose.models.DddReportTemplate ||
+  mongoose.model('DddReportTemplate', reportTemplateSchema);

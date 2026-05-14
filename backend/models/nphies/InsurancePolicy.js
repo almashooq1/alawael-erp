@@ -68,7 +68,10 @@ insurancePolicySchema.virtual('isExpired').get(function () {
   return this.endDate < new Date();
 });
 
+// Registered as `NphiesInsurancePolicy` to dodge the collision with the
+// canonical models/InsurancePolicy.js. Default export unchanged.
 const InsurancePolicy =
-  mongoose.models.InsurancePolicy || mongoose.model('InsurancePolicy', insurancePolicySchema);
+  mongoose.models.NphiesInsurancePolicy ||
+  mongoose.model('NphiesInsurancePolicy', insurancePolicySchema);
 
 module.exports = InsurancePolicy;

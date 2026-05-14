@@ -206,7 +206,10 @@ crisisIncidentSchema.index({ center: 1, status: 1 });
 
 crisisIncidentSchema.pre('save', async function (next) {
   if (!this.incidentNumber) {
-    const count = await mongoose.model('CrisisIncident').countDocuments();
+    // Query against THIS model (CrisisCrisisIncident), not the canonical
+    // EnterpriseUltra CrisisIncident, so the auto-number counter doesn't
+    // drift across collections.
+    const count = await mongoose.model('CrisisCrisisIncident').countDocuments();
     this.incidentNumber = `INC-${String(count + 1).padStart(6, '0')}`;
   }
   next();
@@ -272,7 +275,9 @@ emergencyDrillSchema.index({ center: 1, type: 1 });
 
 emergencyDrillSchema.pre('save', async function (next) {
   if (!this.drillNumber) {
-    const count = await mongoose.model('EmergencyDrill').countDocuments();
+    // Query against this scoped model name, not the civilDefense.model.js
+    // EmergencyDrill, so the counter is stable per-collection.
+    const count = await mongoose.model('CrisisEmergencyDrill').countDocuments();
     this.drillNumber = `DRL-${String(count + 1).padStart(5, '0')}`;
   }
   next();
@@ -316,13 +321,21 @@ const emergencyContactSchema = new Schema(
 emergencyContactSchema.index({ category: 1, priority: 1 });
 emergencyContactSchema.index({ center: 1, isActive: 1 });
 
+// All three colliding names below are registered with `Crisis*` scoped
+// names. Export keys unchanged so consumers don't move.
+//   CrisisIncident   collides with models/EnterpriseUltra.js
+//   EmergencyDrill   collides with models/civilDefense.model.js
+//   EmergencyContact collides with models/EmergencyContact.js
 const EmergencyPlan =
   mongoose.models.EmergencyPlan || mongoose.model('EmergencyPlan', emergencyPlanSchema);
 const CrisisIncident =
-  mongoose.models.CrisisIncident || mongoose.model('CrisisIncident', crisisIncidentSchema);
+  mongoose.models.CrisisCrisisIncident ||
+  mongoose.model('CrisisCrisisIncident', crisisIncidentSchema);
 const EmergencyDrill =
-  mongoose.models.EmergencyDrill || mongoose.model('EmergencyDrill', emergencyDrillSchema);
+  mongoose.models.CrisisEmergencyDrill ||
+  mongoose.model('CrisisEmergencyDrill', emergencyDrillSchema);
 const EmergencyContact =
-  mongoose.models.EmergencyContact || mongoose.model('EmergencyContact', emergencyContactSchema);
+  mongoose.models.CrisisEmergencyContact ||
+  mongoose.model('CrisisEmergencyContact', emergencyContactSchema);
 
 module.exports = { EmergencyPlan, CrisisIncident, EmergencyDrill, EmergencyContact };

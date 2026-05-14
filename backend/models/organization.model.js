@@ -347,7 +347,11 @@ const BackupSchema = new mongoose.Schema(
 // ============================================
 module.exports = {
   Organization: mongoose.models.Organization || mongoose.model('Organization', OrganizationSchema),
-  Employee: mongoose.models.Employee || mongoose.model('Employee', EmployeeSchema),
+  // Registered as `OrganizationEmployee` to dodge the collision with
+  // the canonical models/HR/Employee.js. Export key unchanged.
+  Employee:
+    mongoose.models.OrganizationEmployee ||
+    mongoose.model('OrganizationEmployee', EmployeeSchema),
   AIPrediction: mongoose.models.AIPrediction || mongoose.model('AIPrediction', AIPredictionSchema),
   SystemLog: mongoose.models.SystemLog || mongoose.model('SystemLog', SystemLogSchema),
   Backup: mongoose.models.Backup || mongoose.model('Backup', BackupSchema),

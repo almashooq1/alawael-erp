@@ -268,7 +268,10 @@ const InventoryTransaction =
 const Supplier = mongoose.models.Supplier || mongoose.model('Supplier', supplierSchema);
 const PurchaseOrder =
   mongoose.models.PurchaseOrder || mongoose.model('PurchaseOrder', purchaseOrderSchema);
-const Asset = mongoose.models.Asset || mongoose.model('Asset', assetSchema);
+// Registered as `InventoryAsset` to dodge the collision with the
+// canonical models/Asset.js (used by asset-management.routes.js).
+// Export key unchanged.
+const Asset = mongoose.models.InventoryAsset || mongoose.model('InventoryAsset', assetSchema);
 const StockCount = mongoose.models.StockCount || mongoose.model('StockCount', stockCountSchema);
 
 module.exports = {

@@ -96,6 +96,9 @@ incidentSchema.index({ severity: 1, createdAt: -1 }); // incidentNumber already 
 incidentSchema.index({ beneficiaryIds: 1, status: 1 });
 incidentSchema.index({ beneficiaryIds: 1, type: 1, occurredAt: -1 });
 
-const Incident = mongoose.models.Incident || mongoose.model('Incident', incidentSchema);
+// Registered as `QualityIncident` to dodge the collision with the
+// canonical models/Incident.js. Default export unchanged.
+const Incident =
+  mongoose.models.QualityIncident || mongoose.model('QualityIncident', incidentSchema);
 
 module.exports = Incident;

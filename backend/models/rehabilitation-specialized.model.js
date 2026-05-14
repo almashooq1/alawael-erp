@@ -1154,11 +1154,15 @@ module.exports = {
   BillingRecord:
     mongoose.models.BillingRecord || mongoose.model('BillingRecord', billingRecordSchema),
 
-  // المتطوعين
-  Volunteer: mongoose.models.Volunteer || mongoose.model('Volunteer', volunteerSchema),
+  // المتطوعين — scoped to dodge models/Volunteer.js
+  Volunteer:
+    mongoose.models.RehabSpecializedVolunteer ||
+    mongoose.model('RehabSpecializedVolunteer', volunteerSchema),
 
-  // التبرعات
-  Donation: mongoose.models.Donation || mongoose.model('Donation', donationSchema),
+  // التبرعات — scoped to dodge models/Donation.js
+  Donation:
+    mongoose.models.RehabSpecializedDonation ||
+    mongoose.model('RehabSpecializedDonation', donationSchema),
 
   // الإقامة
   ResidentialUnit:
@@ -1171,12 +1175,16 @@ module.exports = {
     mongoose.models.RehabSpecializedActivity ||
     mongoose.model('RehabSpecializedActivity', activitySchema),
 
-  // التوثيق
-  Document: mongoose.models.Document || mongoose.model('Document', documentSchema),
+  // التوثيق — scoped to dodge models/Document.js
+  Document:
+    mongoose.models.RehabSpecializedDocument ||
+    mongoose.model('RehabSpecializedDocument', documentSchema),
 
   // التقويم
   Event: mongoose.models.Event || mongoose.model('Event', eventSchema),
 
-  // الملاحظات السريرية
-  ClinicalNote: mongoose.models.ClinicalNote || mongoose.model('ClinicalNote', clinicalNoteSchema),
+  // الملاحظات السريرية — scoped to dodge models/emr.model.js ClinicalNote
+  ClinicalNote:
+    mongoose.models.RehabSpecializedClinicalNote ||
+    mongoose.model('RehabSpecializedClinicalNote', clinicalNoteSchema),
 };

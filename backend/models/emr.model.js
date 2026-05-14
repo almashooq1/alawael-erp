@@ -524,11 +524,17 @@ AllergySchema.index({ 'allergen.type': 1 });
 // EXPORTS
 // ═══════════════════════════════════════════════════════════════════════════
 
+// VitalSign / ClinicalNote / Allergy registrations are scoped to `Emr*`
+// to dodge collisions with the canonical models/VitalSign.js, the
+// rehabilitation-specialized.model.js ClinicalNote, and models/Allergy.js.
+// Export keys are unchanged so consumers don't move.
 module.exports = {
   MedicalRecord:
     mongoose.models.MedicalRecord || mongoose.model('MedicalRecord', MedicalRecordSchema),
-  VitalSign: mongoose.models.VitalSign || mongoose.model('VitalSign', VitalSignSchema),
+  VitalSign:
+    mongoose.models.EmrVitalSign || mongoose.model('EmrVitalSign', VitalSignSchema),
   LabResult: mongoose.models.LabResult || mongoose.model('LabResult', LabResultSchema),
-  ClinicalNote: mongoose.models.ClinicalNote || mongoose.model('ClinicalNote', ClinicalNoteSchema),
-  Allergy: mongoose.models.Allergy || mongoose.model('Allergy', AllergySchema),
+  ClinicalNote:
+    mongoose.models.EmrClinicalNote || mongoose.model('EmrClinicalNote', ClinicalNoteSchema),
+  Allergy: mongoose.models.EmrAllergy || mongoose.model('EmrAllergy', AllergySchema),
 };

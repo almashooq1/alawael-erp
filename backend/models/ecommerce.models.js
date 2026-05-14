@@ -398,7 +398,9 @@ inventoryLogSchema.index({ productId: 1, createdAt: -1 });
 // ============================================
 
 module.exports = {
-  Product: mongoose.models.Product || mongoose.model('Product', productSchema),
+  // Registered as `EcommerceProduct` to dodge the collision with the
+  // canonical models/Product.js. Export key unchanged.
+  Product: mongoose.models.EcommerceProduct || mongoose.model('EcommerceProduct', productSchema),
   Cart: mongoose.models.Cart || mongoose.model('Cart', cartSchema),
   Checkout: mongoose.models.Checkout || mongoose.model('Checkout', checkoutSchema),
   Coupon: mongoose.models.Coupon || mongoose.model('Coupon', couponSchema),

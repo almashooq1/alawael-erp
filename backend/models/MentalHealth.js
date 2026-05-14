@@ -145,7 +145,9 @@ counselingSessionSchema.virtual('durationMinutes').get(function () {
 
 counselingSessionSchema.pre('save', async function () {
   if (!this.sessionNumber) {
-    const count = await mongoose.model('CounselingSession').countDocuments();
+    // Query against the scoped model name so the counter is stable
+    // per-collection.
+    const count = await mongoose.model('MentalHealthCounselingSession').countDocuments();
     this.sessionNumber = `CS-${String(count + 1).padStart(6, '0')}`;
   }
 });
@@ -693,8 +695,12 @@ supportGroupSchema.index({ 'members.beneficiary': 1 });
 // Export Models
 // ══════════════════════════════════════════════════════════════════════════════
 
+// Registered as `MentalHealthCounselingSession` to dodge the collision
+// with models/BeneficiaryManagement/CounselingSession.js. Default export
+// unchanged.
 const CounselingSession =
-  mongoose.models.CounselingSession || mongoose.model('CounselingSession', counselingSessionSchema);
+  mongoose.models.MentalHealthCounselingSession ||
+  mongoose.model('MentalHealthCounselingSession', counselingSessionSchema);
 
 const MentalHealthProgram =
   mongoose.models.MentalHealthProgram ||

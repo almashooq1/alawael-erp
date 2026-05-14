@@ -339,8 +339,12 @@ RehabilitationProgramSchema.index({ categoryId: 1, isActive: 1 });
 RehabilitationProgramSchema.index({ targetDisabilities: 1 });
 RehabilitationProgramSchema.index({ 'linkedMeasurements.measurementTypeId': 1 });
 
+// Registered as `RehabProgramRehabilitationProgram` to dodge the
+// collision with the canonical models/rehabilitation-program.model.js
+// (consumed by services/rehabilitation.service.js). Default export
+// unchanged.
 const RehabilitationProgram =
-  mongoose.models.RehabilitationProgram ||
-  mongoose.model('RehabilitationProgram', RehabilitationProgramSchema);
+  mongoose.models.RehabProgramRehabilitationProgram ||
+  mongoose.model('RehabProgramRehabilitationProgram', RehabilitationProgramSchema);
 
 module.exports = RehabilitationProgram;

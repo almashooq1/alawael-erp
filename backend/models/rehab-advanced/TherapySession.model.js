@@ -132,7 +132,11 @@ const therapySessionSchema = new Schema(
 
 therapySessionSchema.index({ beneficiary_id: 1, 'session_info.date': -1 });
 
+// Registered as `RehabAdvancedTherapySession` to dodge the collision
+// with the canonical models/TherapySession.js and the aggregator in
+// models/rehabilitation-advanced.model.js. Default export unchanged.
 const TherapySession =
-  mongoose.models.TherapySession || mongoose.model('TherapySession', therapySessionSchema);
+  mongoose.models.RehabAdvancedTherapySession ||
+  mongoose.model('RehabAdvancedTherapySession', therapySessionSchema);
 
 module.exports = TherapySession;

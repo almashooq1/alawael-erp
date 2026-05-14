@@ -91,7 +91,9 @@ OvertimeRequestSchema.index({ department: 1, date: -1 });
 
 OvertimeRequestSchema.pre('save', async function (next) {
   if (!this.requestNumber) {
-    const count = await mongoose.model('OvertimeRequest').countDocuments();
+    // Query against THIS scoped model so the counter is stable
+    // per-collection.
+    const count = await mongoose.model('HROvertimeRequest').countDocuments();
     this.requestNumber = `OT-${new Date().getFullYear()}-${String(count + 1).padStart(5, '0')}`;
   }
   // Auto-calculate multiplier based on type
@@ -105,5 +107,8 @@ OvertimeRequestSchema.pre('save', async function (next) {
   next();
 });
 
+// Registered as `HROvertimeRequest` to dodge the collision with the
+// canonical models/OvertimeRequest.js. Default export unchanged.
 module.exports =
-  mongoose.models.OvertimeRequest || mongoose.model('OvertimeRequest', OvertimeRequestSchema);
+  mongoose.models.HROvertimeRequest ||
+  mongoose.model('HROvertimeRequest', OvertimeRequestSchema);

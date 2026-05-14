@@ -72,4 +72,7 @@ paymentSchema.index({ branch_id: 1, payment_date: -1 });
 paymentSchema.index({ status: 1 });
 paymentSchema.index({ deleted_at: 1 });
 
-module.exports = mongoose.models.Payment || mongoose.model('Payment', paymentSchema);
+// Registered as `FinancePayment` to dodge the collision with the
+// canonical models/Payment.js. Default export unchanged.
+module.exports =
+  mongoose.models.FinancePayment || mongoose.model('FinancePayment', paymentSchema);

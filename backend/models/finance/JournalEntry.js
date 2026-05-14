@@ -62,4 +62,8 @@ journalEntrySchema.index({ status: 1 });
 journalEntrySchema.index({ reference_type: 1, reference_id: 1 });
 journalEntrySchema.index({ deleted_at: 1 });
 
-module.exports = mongoose.models.JournalEntry || mongoose.model('JournalEntry', journalEntrySchema);
+// Registered as `FinanceJournalEntry` to dodge the collision with the
+// canonical models/JournalEntry.js. Default export unchanged.
+module.exports =
+  mongoose.models.FinanceJournalEntry ||
+  mongoose.model('FinanceJournalEntry', journalEntrySchema);

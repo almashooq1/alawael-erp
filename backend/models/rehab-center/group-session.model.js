@@ -193,7 +193,10 @@ const groupSessionSchema = new Schema(
 groupSessionSchema.index({ group_type: 1, status: 1 });
 groupSessionSchema.index({ 'facilitators.facilitator_id': 1 });
 
+// Registered as `RehabCenterGroupSession` to dodge the collision with
+// domains/group-therapy/models/GroupSession.js. Default export unchanged.
 const GroupSession =
-  mongoose.models.GroupSession || mongoose.model('GroupSession', groupSessionSchema);
+  mongoose.models.RehabCenterGroupSession ||
+  mongoose.model('RehabCenterGroupSession', groupSessionSchema);
 
 module.exports = GroupSession;

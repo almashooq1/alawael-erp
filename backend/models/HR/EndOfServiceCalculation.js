@@ -111,7 +111,8 @@ endOfServiceSchema.index({ employee_id: 1 });
 endOfServiceSchema.index({ branch_id: 1, status: 1 });
 endOfServiceSchema.index({ deleted_at: 1 });
 
+// Registered as `HREndOfServiceCalculation` to dodge the collision with
+// models/gosi.models.js EndOfServiceCalculation. Default export unchanged.
 module.exports =
-  mongoose.models.EndOfServiceCalculation ||
-  mongoose.models.EndOfServiceCalculation ||
-  mongoose.model('EndOfServiceCalculation', endOfServiceSchema);
+  mongoose.models.HREndOfServiceCalculation ||
+  mongoose.model('HREndOfServiceCalculation', endOfServiceSchema);

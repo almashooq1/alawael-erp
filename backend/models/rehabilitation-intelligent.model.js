@@ -1198,23 +1198,35 @@ module.exports = {
     mongoose.models.PredictionResult || mongoose.model('PredictionResult', predictionResultSchema),
 
   // إدارة المخاطر
+  // Registered as `RehabIntelligentRiskAssessment` to dodge the collision
+  // with the canonical models/RiskAssessment.js. Export key unchanged.
   RiskAssessment:
-    mongoose.models.RiskAssessment || mongoose.model('RiskAssessment', riskAssessmentSchema),
+    mongoose.models.RehabIntelligentRiskAssessment ||
+    mongoose.model('RehabIntelligentRiskAssessment', riskAssessmentSchema),
 
   // الجودة والاعتماد
+  // Registered as `RehabIntelligentQualityIndicator` to dodge the collision
+  // with models/quality/QualityIndicator.js and models/qualityManagement.js.
+  // Export key unchanged.
   QualityIndicator:
-    mongoose.models.QualityIndicator || mongoose.model('QualityIndicator', qualityIndicatorSchema),
+    mongoose.models.RehabIntelligentQualityIndicator ||
+    mongoose.model('RehabIntelligentQualityIndicator', qualityIndicatorSchema),
+  // Registered as `RehabIntelligentAccreditationStandard` to dodge the
+  // collision with models/phase37.model.js. Export key unchanged.
   AccreditationStandard:
-    mongoose.models.AccreditationStandard ||
-    mongoose.model('AccreditationStandard', accreditationStandardSchema),
+    mongoose.models.RehabIntelligentAccreditationStandard ||
+    mongoose.model('RehabIntelligentAccreditationStandard', accreditationStandardSchema),
 
   // الأبحاث
   ResearchProject:
     mongoose.models.ResearchProject || mongoose.model('ResearchProject', researchProjectSchema),
 
   // التطوير المهني
+  // Registered as `RehabIntelligentTrainingProgram` to dodge the collision
+  // with domains/field-training/models/TrainingProgram.js. Export key unchanged.
   TrainingProgram:
-    mongoose.models.TrainingProgram || mongoose.model('TrainingProgram', trainingProgramSchema),
+    mongoose.models.RehabIntelligentTrainingProgram ||
+    mongoose.model('RehabIntelligentTrainingProgram', trainingProgramSchema),
   CompetencyAssessment:
     mongoose.models.CompetencyAssessment ||
     mongoose.model('CompetencyAssessment', competencyAssessmentSchema),

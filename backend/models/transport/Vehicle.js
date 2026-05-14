@@ -68,4 +68,7 @@ vehicleSchema.index({ branch_id: 1, status: 1 });
 vehicleSchema.index({ gps_device_id: 1 });
 vehicleSchema.index({ deleted_at: 1 });
 
-module.exports = mongoose.models.Vehicle || mongoose.model('Vehicle', vehicleSchema);
+// Registered as `TransportVehicle` to dodge the collision with the
+// canonical models/Vehicle.js. Default export unchanged.
+module.exports =
+  mongoose.models.TransportVehicle || mongoose.model('TransportVehicle', vehicleSchema);

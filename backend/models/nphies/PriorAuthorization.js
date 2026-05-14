@@ -99,9 +99,10 @@ priorAuthorizationSchema.virtual('remainingSessions').get(function () {
   return Math.max(0, (this.approvedSessions || 0) - this.usedSessions);
 });
 
+// Registered as `NphiesPriorAuthorization` to dodge the collision with
+// the canonical models/PriorAuthorization.js. Default export unchanged.
 const PriorAuthorization =
-  mongoose.models.PriorAuthorization ||
-  mongoose.models.PriorAuthorization ||
-  mongoose.model('PriorAuthorization', priorAuthorizationSchema);
+  mongoose.models.NphiesPriorAuthorization ||
+  mongoose.model('NphiesPriorAuthorization', priorAuthorizationSchema);
 
 module.exports = PriorAuthorization;

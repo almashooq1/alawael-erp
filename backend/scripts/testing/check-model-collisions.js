@@ -26,19 +26,14 @@ const path = require('path');
 const BACKEND_ROOT = path.resolve(__dirname, '..', '..');
 const SCAN_ROOTS = [path.join(BACKEND_ROOT, 'models'), path.join(BACKEND_ROOT, 'domains')];
 
-// Ratchet baseline — measured 2026-05-01, lowered repeatedly on 2026-05-14
-// as canonical models were promoted and the non-canonical registrations
-// were renamed to scoped names (export keys unchanged so consumers
-// stayed put):
-//   Activity 4-way → Activity / ActivityLibraryEntry / MontessoriActivity / RehabSpecializedActivity
-//   InsuranceClaim 4-way → InsuranceClaim / FinanceInsuranceClaim / NphiesInsuranceClaim / RehabSpecializedInsuranceClaim
-//   WaitlistEntry 3-way → WaitlistEntry / AppointmentWaitlistEntry / SchedulingWaitlistEntry
-//   AttendanceRecord 3-way → StaffAttendanceRecord / BeneficiaryAttendanceRecord / HRAttendanceRecord
-//   Leave 3-way → Leave / StaffLeave / HRLeave
-//   LeaveBalance 3-way → LeaveBalance / StaffLeaveBalance / HRLeaveBalance
-//   Schedule 3-way → Schedule / StaffSchedule / RehabCenterSchedule
-// Lower this number as duplicates are eliminated; never raise it.
-const MAX_COLLIDING_NAMES = 63;
+// Ratchet baseline — measured 2026-05-01, lowered repeatedly through
+// 2026-05-14 as canonical models were promoted and the non-canonical
+// registrations were renamed to scoped names (export keys unchanged so
+// consumers stayed put). Final session push (2026-05-14) closed the
+// last 63 collisions — every mongoose.model() registration in
+// backend/models/** and backend/domains/**/models/** is now uniquely
+// named. Lower this number as duplicates are eliminated; never raise it.
+const MAX_COLLIDING_NAMES = 0;
 
 const REGISTER_RE = /mongoose\.model\(\s*['"]([A-Za-z][A-Za-z0-9_]*)['"]\s*,/g;
 

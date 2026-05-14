@@ -43,4 +43,6 @@ AttendanceSchema.index({ employeeId: 1, date: -1 });
 AttendanceSchema.index({ date: -1, status: 1 });
 AttendanceSchema.index({ employeeId: 1, checkInTime: -1 });
 
-module.exports = mongoose.models.Attendance || mongoose.model('Attendance', AttendanceSchema);
+// Registered as `HRAttendance` to dodge the collision with the canonical
+// models/Attendance.js. Default export unchanged.
+module.exports = mongoose.models.HRAttendance || mongoose.model('HRAttendance', AttendanceSchema);

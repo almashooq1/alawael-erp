@@ -102,8 +102,11 @@ const familyCommunicationSchema = new Schema(
   { timestamps: true }
 );
 
+// Registered as `RehabCenterFamilyCommunication` to dodge the collision
+// with domains/family/models/FamilyCommunication.js. Default export
+// unchanged.
 const FamilyCommunication =
-  mongoose.models.FamilyCommunication ||
-  mongoose.model('FamilyCommunication', familyCommunicationSchema);
+  mongoose.models.RehabCenterFamilyCommunication ||
+  mongoose.model('RehabCenterFamilyCommunication', familyCommunicationSchema);
 
 module.exports = FamilyCommunication;

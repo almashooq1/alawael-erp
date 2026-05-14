@@ -122,4 +122,7 @@ invoiceSchema.index({ status: 1 });
 invoiceSchema.index({ zatca_status: 1 });
 invoiceSchema.index({ deleted_at: 1 });
 
-module.exports = mongoose.models.Invoice || mongoose.model('Invoice', invoiceSchema);
+// Registered as `FinanceInvoice` to dodge the collision with the
+// canonical models/Invoice.js. Default export unchanged.
+module.exports =
+  mongoose.models.FinanceInvoice || mongoose.model('FinanceInvoice', invoiceSchema);

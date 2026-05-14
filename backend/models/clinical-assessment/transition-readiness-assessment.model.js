@@ -167,8 +167,12 @@ TransitionReadinessSchema.statics.latestFor = function (beneficiaryId) {
 
 // ─── Export ───────────────────────────────────────────────────────────────────
 
+// Registered as `ClinicalAssessmentTransitionReadinessAssessment` to
+// dodge the collision with the canonical models/care/TransitionReadiness
+// Assessment.model.js (consumed by care/independence.routes.js).
+// Default export unchanged.
 const TransitionReadinessAssessment =
-  mongoose.models.TransitionReadinessAssessment ||
-  mongoose.model('TransitionReadinessAssessment', TransitionReadinessSchema);
+  mongoose.models.ClinicalAssessmentTransitionReadinessAssessment ||
+  mongoose.model('ClinicalAssessmentTransitionReadinessAssessment', TransitionReadinessSchema);
 
 module.exports = TransitionReadinessAssessment;

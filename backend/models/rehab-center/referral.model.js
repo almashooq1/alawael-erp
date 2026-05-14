@@ -147,6 +147,10 @@ const referralSchema = new Schema(
 referralSchema.index({ 'acceptance.status': 1, createdAt: 1 });
 referralSchema.index({ 'beneficiary.beneficiary_id': 1 });
 
-const Referral = mongoose.models.Referral || mongoose.model('Referral', referralSchema);
+// Registered as `RehabCenterReferral` to dodge the collision with the
+// canonical models/Referral.js. Default export unchanged.
+const Referral =
+  mongoose.models.RehabCenterReferral ||
+  mongoose.model('RehabCenterReferral', referralSchema);
 
 module.exports = Referral;

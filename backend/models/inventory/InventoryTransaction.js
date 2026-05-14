@@ -65,7 +65,8 @@ const inventoryTransactionSchema = new mongoose.Schema(
 inventoryTransactionSchema.pre('save', async function (next) {
   if (!this.transaction_number) {
     const year = new Date().getFullYear();
-    const count = await mongoose.model('InventoryTransaction').countDocuments();
+    // Query the scoped model name so the counter is stable per-collection.
+    const count = await mongoose.model('InventoryModuleTransaction').countDocuments();
     this.transaction_number = `TXN-${year}-${String(count + 1).padStart(7, '0')}`;
   }
   this.total_cost = this.quantity * (this.unit_cost || 0);
@@ -77,7 +78,9 @@ inventoryTransactionSchema.index({ transaction_type: 1, transaction_date: -1 });
 inventoryTransactionSchema.index({ branch_id: 1, transaction_date: -1 });
 inventoryTransactionSchema.index({ deleted_at: 1 });
 
+// Registered as `InventoryModuleTransaction` to dodge the collision
+// with the canonical models/InventoryStock.js InventoryTransaction export.
+// Default export unchanged.
 module.exports =
-  mongoose.models.InventoryTransaction ||
-  mongoose.models.InventoryTransaction ||
-  mongoose.model('InventoryTransaction', inventoryTransactionSchema);
+  mongoose.models.InventoryModuleTransaction ||
+  mongoose.model('InventoryModuleTransaction', inventoryTransactionSchema);

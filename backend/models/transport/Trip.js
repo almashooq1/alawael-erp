@@ -96,4 +96,6 @@ tripSchema.index({ branch_id: 1, trip_date: -1 });
 tripSchema.index({ status: 1 });
 tripSchema.index({ deleted_at: 1 });
 
-module.exports = mongoose.models.Trip || mongoose.model('Trip', tripSchema);
+// Registered as `TransportTrip` to dodge the collision with the canonical
+// models/Trip.js. Default export unchanged.
+module.exports = mongoose.models.TransportTrip || mongoose.model('TransportTrip', tripSchema);

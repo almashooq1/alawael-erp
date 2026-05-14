@@ -62,7 +62,10 @@ const notificationLogSchema = new mongoose.Schema(
 notificationLogSchema.index({ eventKey: 1, 'recipient.email': 1, channel: 1, createdAt: -1 });
 notificationLogSchema.index({ policyId: 1, createdAt: -1 });
 
+// Registered as `QualityNotificationLog` to dodge the collision with
+// models/communication/NotificationLog.js. Default export unchanged.
 const NotificationLog =
-  mongoose.models.NotificationLog || mongoose.model('NotificationLog', notificationLogSchema);
+  mongoose.models.QualityNotificationLog ||
+  mongoose.model('QualityNotificationLog', notificationLogSchema);
 
 module.exports = NotificationLog;

@@ -72,7 +72,8 @@ const purchaseOrderSchema = new mongoose.Schema(
 purchaseOrderSchema.pre('save', async function (next) {
   if (!this.po_number) {
     const year = new Date().getFullYear();
-    const count = await mongoose.model('PurchaseOrder').countDocuments();
+    // Query the scoped model name so the counter is stable per-collection.
+    const count = await mongoose.model('InventoryModulePurchaseOrder').countDocuments();
     this.po_number = `PO-${year}-${String(count + 1).padStart(6, '0')}`;
   }
   // حساب الإجماليات
@@ -92,5 +93,9 @@ purchaseOrderSchema.index({ supplier_id: 1, status: 1 });
 purchaseOrderSchema.index({ branch_id: 1, status: 1 });
 purchaseOrderSchema.index({ deleted_at: 1 });
 
+// Registered as `InventoryModulePurchaseOrder` to dodge the collision
+// with the canonical models/InventoryStock.js PurchaseOrder export.
+// Default export unchanged.
 module.exports =
-  mongoose.models.PurchaseOrder || mongoose.model('PurchaseOrder', purchaseOrderSchema);
+  mongoose.models.InventoryModulePurchaseOrder ||
+  mongoose.model('InventoryModulePurchaseOrder', purchaseOrderSchema);

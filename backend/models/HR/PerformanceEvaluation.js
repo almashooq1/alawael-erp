@@ -76,6 +76,8 @@ PerformanceEvaluationSchema.index({ employeeId: 1, 'evaluationPeriod.startDate':
 PerformanceEvaluationSchema.index({ status: 1 });
 PerformanceEvaluationSchema.index({ 'summary.overallRating': 1 });
 
+// Registered as `HRPerformanceEvaluation` to dodge the collision with
+// the canonical models/PerformanceEvaluation.js. Default export unchanged.
 module.exports =
-  mongoose.models.PerformanceEvaluation ||
-  mongoose.model('PerformanceEvaluation', PerformanceEvaluationSchema);
+  mongoose.models.HRPerformanceEvaluation ||
+  mongoose.model('HRPerformanceEvaluation', PerformanceEvaluationSchema);

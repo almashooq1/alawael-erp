@@ -79,4 +79,6 @@ const PayrollSchema = new mongoose.Schema(
 PayrollSchema.index({ employeeId: 1, month: 1 }, { unique: true });
 PayrollSchema.index({ month: 1, paymentStatus: 1 });
 
-module.exports = mongoose.models.Payroll || mongoose.model('Payroll', PayrollSchema);
+// Registered as `HRPayroll` to dodge the collision with the canonical
+// models/payroll.model.js. Default export unchanged.
+module.exports = mongoose.models.HRPayroll || mongoose.model('HRPayroll', PayrollSchema);

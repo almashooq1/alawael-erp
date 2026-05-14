@@ -68,7 +68,11 @@ const reportTemplateSchema = new Schema(
   { timestamps: true }
 );
 
+// Registered as `RehabCenterReportTemplate` to dodge the collision with
+// models/reports/ReportTemplate.js (canonical) and
+// domains/reports/models/ReportTemplate.js. Default export unchanged.
 const ReportTemplate =
-  mongoose.models.ReportTemplate || mongoose.model('ReportTemplate', reportTemplateSchema);
+  mongoose.models.RehabCenterReportTemplate ||
+  mongoose.model('RehabCenterReportTemplate', reportTemplateSchema);
 
 module.exports = ReportTemplate;

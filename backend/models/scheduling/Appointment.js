@@ -85,4 +85,8 @@ appointmentSchema.index({ status: 1 });
 appointmentSchema.index({ recurrence_id: 1 });
 appointmentSchema.index({ deleted_at: 1 });
 
-module.exports = mongoose.models.Appointment || mongoose.model('Appointment', appointmentSchema);
+// Registered as `SchedulingAppointment` to dodge the collision with the
+// canonical models/Appointment.js. Default export unchanged.
+module.exports =
+  mongoose.models.SchedulingAppointment ||
+  mongoose.model('SchedulingAppointment', appointmentSchema);

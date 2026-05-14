@@ -30,8 +30,11 @@ const satisfactionSurveySchema = new mongoose.Schema(
 satisfactionSurveySchema.index({ branchId: 1, createdAt: -1 });
 satisfactionSurveySchema.index({ npsScore: 1 });
 
+// Registered as `QualitySatisfactionSurvey` to keep it distinct from
+// models/rehab-center/satisfaction-survey.model.js (which is now
+// `RehabCenterSatisfactionSurvey`). Default export unchanged.
 const SatisfactionSurvey =
-  mongoose.models.SatisfactionSurvey ||
-  mongoose.model('SatisfactionSurvey', satisfactionSurveySchema);
+  mongoose.models.QualitySatisfactionSurvey ||
+  mongoose.model('QualitySatisfactionSurvey', satisfactionSurveySchema);
 
 module.exports = SatisfactionSurvey;

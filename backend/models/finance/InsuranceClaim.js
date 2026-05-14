@@ -101,5 +101,10 @@ insuranceClaimSchema.index({ branch_id: 1, status: 1 });
 insuranceClaimSchema.index({ insurance_company_id: 1 });
 insuranceClaimSchema.index({ deleted_at: 1 });
 
+// Registered as `FinanceInsuranceClaim` (not `InsuranceClaim`) so it
+// doesn't collide with models/insuranceClaim.model.js (the canonical
+// 400-line schema). The default export still resolves to a usable model
+// for any existing consumer.
 module.exports =
-  mongoose.models.InsuranceClaim || mongoose.model('InsuranceClaim', insuranceClaimSchema);
+  mongoose.models.FinanceInsuranceClaim ||
+  mongoose.model('FinanceInsuranceClaim', insuranceClaimSchema);

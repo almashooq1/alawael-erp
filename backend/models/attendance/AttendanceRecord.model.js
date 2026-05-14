@@ -180,7 +180,10 @@ attendanceRecordSchema.methods.calculateOvertimeAmount = function () {
   return 0;
 };
 
+// Registered as `StaffAttendanceRecord` (clock-in/out for employees) so
+// it doesn't collide with BeneficiaryManagement + HR attendance models.
 const AttendanceRecord =
-  mongoose.models.AttendanceRecord || mongoose.model('AttendanceRecord', attendanceRecordSchema);
+  mongoose.models.StaffAttendanceRecord ||
+  mongoose.model('StaffAttendanceRecord', attendanceRecordSchema);
 
 module.exports = AttendanceRecord;

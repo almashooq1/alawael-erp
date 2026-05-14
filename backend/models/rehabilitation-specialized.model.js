@@ -1146,7 +1146,11 @@ module.exports = {
 
   // التأمين والفوترة
   InsuranceClaim:
-    mongoose.models.InsuranceClaim || mongoose.model('InsuranceClaim', insuranceClaimSchema),
+    // Registered as `RehabSpecializedInsuranceClaim` (was `InsuranceClaim`,
+    // collided with insuranceClaim.model.js + finance/InsuranceClaim.js +
+    // nphies/InsuranceClaim.js). Export key stays `InsuranceClaim`.
+    mongoose.models.RehabSpecializedInsuranceClaim ||
+    mongoose.model('RehabSpecializedInsuranceClaim', insuranceClaimSchema),
   BillingRecord:
     mongoose.models.BillingRecord || mongoose.model('BillingRecord', billingRecordSchema),
 

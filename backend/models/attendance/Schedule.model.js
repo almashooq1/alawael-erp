@@ -37,6 +37,8 @@ const scheduleSchema = new mongoose.Schema({
   updatedAt: Date,
 });
 
-const Schedule = mongoose.models.Schedule || mongoose.model('Schedule', scheduleSchema);
+// Registered as `StaffSchedule` to dodge the collision with the
+// canonical models/Schedule.js and rehab-center variant.
+const Schedule = mongoose.models.StaffSchedule || mongoose.model('StaffSchedule', scheduleSchema);
 
 module.exports = Schedule;

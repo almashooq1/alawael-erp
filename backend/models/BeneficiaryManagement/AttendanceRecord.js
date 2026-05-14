@@ -224,7 +224,10 @@ attendanceRecordSchema.statics.findAbsencesInPeriod = function (beneficiaryId, s
   }).sort({ attendanceDate: -1 });
 };
 
+// Registered as `BeneficiaryAttendanceRecord` (session attendance for
+// rehab clients) so it doesn't collide with staff/HR attendance models.
 const AttendanceRecord =
-  mongoose.models.AttendanceRecord || mongoose.model('AttendanceRecord', attendanceRecordSchema);
+  mongoose.models.BeneficiaryAttendanceRecord ||
+  mongoose.model('BeneficiaryAttendanceRecord', attendanceRecordSchema);
 
 module.exports = AttendanceRecord;

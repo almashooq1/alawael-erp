@@ -130,6 +130,10 @@ scheduleSchema.index({ 'provider.provider_id': 1, 'appointment.date': 1 });
 scheduleSchema.index({ 'beneficiary.beneficiary_id': 1, 'appointment.date': 1 });
 scheduleSchema.index({ status: 1, 'appointment.date': 1 });
 
-const Schedule = mongoose.models.Schedule || mongoose.model('Schedule', scheduleSchema);
+// Registered as `RehabCenterSchedule` (beneficiary appointment schedule)
+// to dodge the collision with the canonical models/Schedule.js + the
+// staff-side attendance/Schedule.model.js.
+const Schedule =
+  mongoose.models.RehabCenterSchedule || mongoose.model('RehabCenterSchedule', scheduleSchema);
 
 module.exports = Schedule;

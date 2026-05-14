@@ -45,7 +45,9 @@ const leaveBalanceSchema = new mongoose.Schema({
   updatedAt: Date,
 });
 
+// Registered as `StaffLeaveBalance` to dodge the collision with
+// HR/LeaveBalance.js and the canonical models/LeaveBalance.js.
 const LeaveBalance =
-  mongoose.models.LeaveBalance || mongoose.model('LeaveBalance', leaveBalanceSchema);
+  mongoose.models.StaffLeaveBalance || mongoose.model('StaffLeaveBalance', leaveBalanceSchema);
 
 module.exports = LeaveBalance;

@@ -145,7 +145,12 @@ insuranceClaimSchema.virtual('approvalRate').get(function () {
   return ((this.approvedAmount / this.totalAmount) * 100).toFixed(1);
 });
 
+// Registered as `NphiesInsuranceClaim` (not `InsuranceClaim`) so it
+// doesn't collide with models/insuranceClaim.model.js (the canonical
+// 400-line schema). The default export still resolves to a usable
+// model for any existing NPHIES consumer.
 const InsuranceClaim =
-  mongoose.models.InsuranceClaim || mongoose.model('InsuranceClaim', insuranceClaimSchema);
+  mongoose.models.NphiesInsuranceClaim ||
+  mongoose.model('NphiesInsuranceClaim', insuranceClaimSchema);
 
 module.exports = InsuranceClaim;

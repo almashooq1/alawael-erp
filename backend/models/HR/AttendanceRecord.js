@@ -47,5 +47,8 @@ attendanceRecordSchema.index({ branch_id: 1, date: -1 });
 attendanceRecordSchema.index({ status: 1 });
 attendanceRecordSchema.index({ deleted_at: 1 });
 
+// Registered as `HRAttendanceRecord` (HR-specific, 51-line slim variant)
+// so it doesn't collide with the larger staff/beneficiary attendance models.
 module.exports =
-  mongoose.models.AttendanceRecord || mongoose.model('AttendanceRecord', attendanceRecordSchema);
+  mongoose.models.HRAttendanceRecord ||
+  mongoose.model('HRAttendanceRecord', attendanceRecordSchema);

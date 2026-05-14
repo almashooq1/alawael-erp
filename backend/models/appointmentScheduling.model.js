@@ -226,8 +226,12 @@ const TimeSlot = mongoose.models.TimeSlot || mongoose.model('TimeSlot', timeSlot
 const AppointmentReminder =
   mongoose.models.AppointmentReminder ||
   mongoose.model('AppointmentReminder', appointmentReminderSchema);
+// Registered as `AppointmentWaitlistEntry` (was `WaitlistEntry`,
+// collided with models/WaitlistEntry.js + models/scheduling/WaitlistEntry.js).
+// Export key stays `WaitlistEntry`.
 const WaitlistEntry =
-  mongoose.models.WaitlistEntry || mongoose.model('WaitlistEntry', waitlistEntrySchema);
+  mongoose.models.AppointmentWaitlistEntry ||
+  mongoose.model('AppointmentWaitlistEntry', waitlistEntrySchema);
 
 module.exports = {
   ScheduleTemplate,

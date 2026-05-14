@@ -58,6 +58,8 @@ const leaveSchema = new mongoose.Schema({
 leaveSchema.index({ employeeId: 1, startDate: -1 });
 leaveSchema.index({ status: 1, startDate: -1 });
 
-const Leave = mongoose.models.Leave || mongoose.model('Leave', leaveSchema);
+// Registered as `StaffLeave` to dodge the collision with HR/Leave.js
+// and the canonical models/leave.model.js.
+const Leave = mongoose.models.StaffLeave || mongoose.model('StaffLeave', leaveSchema);
 
 module.exports = Leave;

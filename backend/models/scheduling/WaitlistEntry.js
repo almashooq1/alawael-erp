@@ -66,5 +66,8 @@ waitlistEntrySchema.index({ status: 1 });
 waitlistEntrySchema.index({ registration_date: 1 });
 waitlistEntrySchema.index({ deleted_at: 1 });
 
+// Registered as `SchedulingWaitlistEntry` (was `WaitlistEntry`,
+// collided with the canonical models/WaitlistEntry.js).
 module.exports =
-  mongoose.models.WaitlistEntry || mongoose.model('WaitlistEntry', waitlistEntrySchema);
+  mongoose.models.SchedulingWaitlistEntry ||
+  mongoose.model('SchedulingWaitlistEntry', waitlistEntrySchema);

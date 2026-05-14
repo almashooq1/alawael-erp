@@ -78,4 +78,6 @@ leaveSchema.index({ branch_id: 1, status: 1 });
 leaveSchema.index({ leave_type: 1 });
 leaveSchema.index({ deleted_at: 1 });
 
-module.exports = mongoose.models.Leave || mongoose.model('Leave', leaveSchema);
+// Registered as `HRLeave` to dodge the collision with attendance/Leave.model.js
+// and the canonical models/leave.model.js.
+module.exports = mongoose.models.HRLeave || mongoose.model('HRLeave', leaveSchema);

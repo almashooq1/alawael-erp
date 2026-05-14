@@ -38,7 +38,7 @@ const SCAN_ROOTS = [path.join(BACKEND_ROOT, 'models'), path.join(BACKEND_ROOT, '
 //   LeaveBalance 3-way → LeaveBalance / StaffLeaveBalance / HRLeaveBalance
 //   Schedule 3-way → Schedule / StaffSchedule / RehabCenterSchedule
 // Lower this number as duplicates are eliminated; never raise it.
-const MAX_COLLIDING_NAMES = 67;
+const MAX_COLLIDING_NAMES = 63;
 
 const REGISTER_RE = /mongoose\.model\(\s*['"]([A-Za-z][A-Za-z0-9_]*)['"]\s*,/g;
 

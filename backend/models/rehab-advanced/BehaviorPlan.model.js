@@ -195,7 +195,11 @@ const behaviorPlanSchema = new Schema(
 
 behaviorPlanSchema.index({ beneficiary_id: 1, status: 1 });
 
+// Registered as `RehabAdvancedBehaviorPlan` to dodge the collision with
+// domains/behavior/models/BehaviorPlan.js (DDD-layer canonical) and the
+// rehabilitation-advanced.model.js aggregator.
 const BehaviorPlan =
-  mongoose.models.BehaviorPlan || mongoose.model('BehaviorPlan', behaviorPlanSchema);
+  mongoose.models.RehabAdvancedBehaviorPlan ||
+  mongoose.model('RehabAdvancedBehaviorPlan', behaviorPlanSchema);
 
 module.exports = BehaviorPlan;

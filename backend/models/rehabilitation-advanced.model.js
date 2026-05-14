@@ -1675,10 +1675,15 @@ dischargePlanSchema.index({ beneficiary_id: 1, status: 1 });
 // ============================================
 
 module.exports = {
-  // نظام السلوك
+  // نظام السلوك — scoped registrations to dodge collisions with the
+  // canonical/domain copies (export keys stay as `BehaviorIncident` and
+  // `BehaviorPlan` so consumers don't change).
   BehaviorIncident:
-    mongoose.models.BehaviorIncident || mongoose.model('BehaviorIncident', behaviorIncidentSchema),
-  BehaviorPlan: mongoose.models.BehaviorPlan || mongoose.model('BehaviorPlan', behaviorPlanSchema),
+    mongoose.models.AggregatedBehaviorIncident ||
+    mongoose.model('AggregatedBehaviorIncident', behaviorIncidentSchema),
+  BehaviorPlan:
+    mongoose.models.AggregatedBehaviorPlan ||
+    mongoose.model('AggregatedBehaviorPlan', behaviorPlanSchema),
 
   // نظام التدريب المهني
   VocationalProfile:

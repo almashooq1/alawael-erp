@@ -63,7 +63,8 @@ employmentContractSchema.index({ branch_id: 1 });
 employmentContractSchema.index({ end_date: 1 });
 employmentContractSchema.index({ deleted_at: 1 });
 
+// Registered as `HREmploymentContract` to dodge the collision with the
+// canonical models/EmploymentContract.js + nitaqat.models.js.
 module.exports =
-  mongoose.models.EmploymentContract ||
-  mongoose.models.EmploymentContract ||
-  mongoose.model('EmploymentContract', employmentContractSchema);
+  mongoose.models.HREmploymentContract ||
+  mongoose.model('HREmploymentContract', employmentContractSchema);

@@ -200,9 +200,11 @@ const employmentContractSchema = new Schema(
 employmentContractSchema.index({ employee: 1, status: 1 });
 employmentContractSchema.index({ organization: 1, status: 1 });
 
+// Registered as `NitaqatEmploymentContract` to dodge the collision with
+// the canonical models/EmploymentContract.js + HR/EmploymentContract.js.
 const EmploymentContract =
-  mongoose.models.EmploymentContract ||
-  mongoose.model('EmploymentContract', employmentContractSchema);
+  mongoose.models.NitaqatEmploymentContract ||
+  mongoose.model('NitaqatEmploymentContract', employmentContractSchema);
 
 /* ═══════════════════════════════════════════════════════
  * 4) NitaqatActivityParam — معاملات المعادلة اللوغاريتمية

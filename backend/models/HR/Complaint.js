@@ -101,10 +101,15 @@ ComplaintSchema.index({ status: 1, priority: 1 });
 
 ComplaintSchema.pre('save', async function (next) {
   if (!this.complaintNumber) {
-    const count = await mongoose.model('Complaint').countDocuments();
+    // Query against THIS model (HRComplaint), not the canonical
+    // models/Complaint.js, so the auto-number counter doesn't drift
+    // across collections.
+    const count = await mongoose.model('HRComplaint').countDocuments();
     this.complaintNumber = `CMP-${new Date().getFullYear()}-${String(count + 1).padStart(5, '0')}`;
   }
   next();
 });
 
-module.exports = mongoose.models.Complaint || mongoose.model('Complaint', ComplaintSchema);
+// Registered as `HRComplaint` to dodge the collision with the canonical
+// models/Complaint.js and quality/Complaint.model.js.
+module.exports = mongoose.models.HRComplaint || mongoose.model('HRComplaint', ComplaintSchema);

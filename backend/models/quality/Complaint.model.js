@@ -53,6 +53,9 @@ const complaintSchema = new mongoose.Schema(
 
 complaintSchema.index({ branchId: 1, status: 1 }); // complaintNumber already indexed via unique:true
 
-const Complaint = mongoose.models.Complaint || mongoose.model('Complaint', complaintSchema);
+// Registered as `QualityComplaint` to dodge the collision with the
+// canonical models/Complaint.js and HR/Complaint.js.
+const Complaint =
+  mongoose.models.QualityComplaint || mongoose.model('QualityComplaint', complaintSchema);
 
 module.exports = Complaint;

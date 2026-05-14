@@ -108,7 +108,11 @@ const behaviorIncidentSchema = new Schema(
 
 behaviorIncidentSchema.index({ beneficiary_id: 1, 'incident_info.date': -1 });
 
+// Registered as `RehabAdvancedBehaviorIncident` to dodge the collision
+// with the canonical models/BehaviorIncident.js and the mega aggregator
+// models/rehabilitation-advanced.model.js.
 const BehaviorIncident =
-  mongoose.models.BehaviorIncident || mongoose.model('BehaviorIncident', behaviorIncidentSchema);
+  mongoose.models.RehabAdvancedBehaviorIncident ||
+  mongoose.model('RehabAdvancedBehaviorIncident', behaviorIncidentSchema);
 
 module.exports = BehaviorIncident;

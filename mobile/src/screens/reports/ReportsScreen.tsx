@@ -3,8 +3,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { View, StyleSheet, ActivityIndicator, TouchableOpacity, ScrollView } from 'react-native';
-import { Text } from 'react-native';
+import { View, StyleSheet, ActivityIndicator, TouchableOpacity, ScrollView, Text } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useAppDispatch, useAppSelector } from '../../store';
 import { fetchReports, generateReport } from '../../store/slices/reportsSlice';

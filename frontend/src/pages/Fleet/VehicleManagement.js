@@ -70,8 +70,7 @@ import {
 import { gradients, statusColors, surfaceColors, chartColors } from '../../theme/palette';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RTooltip } from 'recharts';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import { useConfirmDialog } from '../../components/common/ConfirmDialog';
-import ConfirmDialog from '../../components/common/ConfirmDialog';
+import ConfirmDialog, { useConfirmDialog } from '../../components/common/ConfirmDialog';
 import vehicleService from '../../services/vehicleManagement.service';
 import logger from '../../utils/logger';
 

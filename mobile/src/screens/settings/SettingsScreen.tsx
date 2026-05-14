@@ -3,8 +3,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { View, ScrollView, StyleSheet, TouchableOpacity, Switch, Alert } from 'react-native';
-import { Text } from 'react-native';
+import { View, ScrollView, StyleSheet, TouchableOpacity, Switch, Alert, Text } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useAppDispatch, useAppSelector } from '../../store';
 import { logout } from '../../store/slices/authSlice';

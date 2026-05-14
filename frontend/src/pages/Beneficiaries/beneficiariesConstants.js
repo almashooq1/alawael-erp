@@ -3,8 +3,7 @@
  * Constants & styled components for Beneficiaries page
  */
 
-import { Card } from '@mui/material';
-import { Box } from '@mui/material';
+import { Card, Box } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { gradients, statusColors, neutralColors } from 'theme/palette';
 

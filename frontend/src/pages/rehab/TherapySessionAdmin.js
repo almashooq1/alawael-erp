@@ -46,13 +46,11 @@ import {
   Timer as TimerIcon,
   Close as CloseIcon,
   Save as SaveIcon,
-} from '@mui/icons-material';
-import { useSnackbar } from 'contexts/SnackbarContext';
-import { therapySessionService } from 'services/disabilityRehabService';
-import {
   ReceiptLong as ReceiptLongIcon,
   PlaylistAddCheck as PlaylistAddCheckIcon,
 } from '@mui/icons-material';
+import { useSnackbar } from 'contexts/SnackbarContext';
+import { therapySessionService } from 'services/disabilityRehabService';
 import CreateClaimDialog from 'components/nphies/CreateClaimDialog';
 import BulkCreateClaimsDialog from 'components/nphies/BulkCreateClaimsDialog';
 

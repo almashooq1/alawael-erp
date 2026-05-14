@@ -33,6 +33,12 @@ import {
   TableHead,
   TableRow,
   CircularProgress,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  ListItemAvatar,
+  ListItemText,
 } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import PersonIcon from '@mui/icons-material/Person';
@@ -48,14 +54,6 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import DownloadIcon from '@mui/icons-material/Download';
 import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
 import QrCode2Icon from '@mui/icons-material/QrCode2';
-import {
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  ListItemAvatar,
-  ListItemText,
-} from '@mui/material';
 import api from '../../services/api.client';
 import ParentComplaintsPanel from './ParentComplaintsPanel';
 

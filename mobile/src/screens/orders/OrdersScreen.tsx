@@ -3,8 +3,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { View, FlatList, StyleSheet, ActivityIndicator, TouchableOpacity, TextInput } from 'react-native';
-import { Text } from 'react-native';
+import { View, FlatList, StyleSheet, ActivityIndicator, TouchableOpacity, TextInput, Text } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useAppDispatch, useAppSelector } from '../../store';
 import { fetchOrders, setStatusFilter, clearFilters } from '../../store/slices/ordersSlice';

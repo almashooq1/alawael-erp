@@ -301,6 +301,15 @@ try {
   logger.warn('[Push] mount skipped:', err.message);
 }
 
+// Universal scannable codes (QR + Code-128) — one catalog across every entity.
+try {
+  const universalCodes = require('./routes/universal-codes.routes');
+  app.use('/api/v1/codes', universalCodes);
+  logger.info('[UniversalCode] ✓ mounted at /api/v1/codes');
+} catch (err) {
+  logger.warn('[UniversalCode] mount skipped:', err.message);
+}
+
 // Phase 30 — Audit log of submission reviews (chronological feed).
 try {
   app.use('/api/v1/admin/audit', require('./routes/audit-reviews.routes'));
@@ -973,6 +982,68 @@ try {
   }
 } catch (err) {
   logger.warn('[RedFlag] bootstrap skipped:', err.message);
+}
+
+// ─── Therapist Portal ─────────────────────────────────────────────────────────
+try {
+  app.use('/api/v1/therapist', require('./routes/therapist-portal.routes'));
+  logger.info('[TherapistPortal] ✓ routes mounted at /api/v1/therapist');
+} catch (err) {
+  logger.warn('[TherapistPortal] routes skipped:', err.message);
+}
+
+// ─── Parent Portal v1 ─────────────────────────────────────────────────────────
+try {
+  app.use('/api/v1/portal', require('./routes/parent-portal-v1.routes'));
+  logger.info('[ParentPortal] ✓ routes mounted at /api/v1/portal');
+} catch (err) {
+  logger.warn('[ParentPortal] routes skipped:', err.message);
+}
+
+// ─── BI Dashboard ─────────────────────────────────────────────────────────────
+try {
+  app.use('/api/v1/bi', require('./routes/bi-dashboard.routes'));
+  logger.info('[BIDashboard] ✓ routes mounted at /api/v1/bi');
+} catch (err) {
+  logger.warn('[BIDashboard] routes skipped:', err.message);
+}
+
+// ─── AI Recommendations ───────────────────────────────────────────────────────
+try {
+  app.use('/api/v1/ai/recommendations', require('./routes/ai.recommendations.routes'));
+  logger.info('[AIRecommendations] ✓ routes mounted at /api/v1/ai/recommendations');
+} catch (err) {
+  logger.warn('[AIRecommendations] routes skipped:', err.message);
+}
+
+// ─── Admin Ops — Dead Letter Queue ────────────────────────────────────────────
+try {
+  app.use('/api/v1/admin/ops', require('./routes/admin-ops-dlq.routes'));
+  logger.info('[AdminOpsDLQ] ✓ routes mounted at /api/v1/admin/ops');
+} catch (err) {
+  logger.warn('[AdminOpsDLQ] routes skipped:', err.message);
+}
+
+// ─── Reports Inbox ────────────────────────────────────────────────────────────
+try {
+  const { buildRouter: buildReportsInboxRouter } = require('./routes/reports-inbox.routes');
+  const ReportDelivery = require('./models/ReportDelivery');
+  app.use(
+    '/api/v1/reports/inbox',
+    require('./middleware/auth').authenticate,
+    buildReportsInboxRouter({ DeliveryModel: ReportDelivery, logger })
+  );
+  logger.info('[ReportsInbox] ✓ routes mounted at /api/v1/reports/inbox');
+} catch (err) {
+  logger.warn('[ReportsInbox] routes skipped:', err.message);
+}
+
+// ─── ZATCA Credentials Admin ──────────────────────────────────────────────────
+try {
+  app.use('/api/v1/admin/zatca-credentials', require('./routes/zatca-credentials-admin.routes'));
+  logger.info('[ZATCACredAdmin] ✓ routes mounted at /api/v1/admin/zatca-credentials');
+} catch (err) {
+  logger.warn('[ZATCACredAdmin] routes skipped:', err.message);
 }
 
 // ─── Error Handling (MUST be after all routes) ───────────────────────────────

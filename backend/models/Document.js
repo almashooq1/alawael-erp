@@ -518,4 +518,18 @@ DocumentSchema.virtual('isExpiringSoon').get(function () {
   return daysUntilExpiry <= 30 && daysUntilExpiry >= 0;
 });
 
+// Auto-issue a UniversalCode (`RH-DOC-XXXXXX`) for every document —
+// powers print-back verification (scan the QR on a printed form to land
+// on the digital original). Distinct from the existing documentQR
+// service that handles per-section signing-style QRs.
+try {
+  const universalCodePlugin = require('../services/universalCode/plugin');
+  DocumentSchema.plugin(universalCodePlugin, {
+    entityType: 'DOC',
+    labelFrom: doc => doc.title || doc.filename || doc.documentNumber || null,
+  });
+} catch (e) {
+  /* loaded before services exist — skip silently */
+}
+
 module.exports = mongoose.models.Document || mongoose.model('Document', DocumentSchema);

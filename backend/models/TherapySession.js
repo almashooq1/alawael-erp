@@ -196,5 +196,18 @@ therapySessionSchema.index({ room: 1, date: 1, startTime: 1 }); // Room conflict
 therapySessionSchema.index({ status: 1, date: 1 }); // Status queries
 therapySessionSchema.index({ recurrenceParent: 1 }); // Recurring series lookup
 
+// Auto-issue a UniversalCode (`RH-SES-XXXXXX`) for every therapy session —
+// therapist can scan the session card on arrival to confirm and start.
+try {
+  const universalCodePlugin = require('../services/universalCode/plugin');
+  therapySessionSchema.plugin(universalCodePlugin, {
+    entityType: 'SES',
+    labelFrom: doc =>
+      doc.sessionCode || (doc.date ? new Date(doc.date).toISOString().slice(0, 10) : null),
+  });
+} catch (e) {
+  /* loaded before services exist — skip silently */
+}
+
 module.exports =
   mongoose.models.TherapySession || mongoose.model('TherapySession', therapySessionSchema);

@@ -661,4 +661,18 @@ fixedAssetSchema.pre('save', function () {
 // MODEL CREATION
 // ===================================================================
 
+// Auto-issue a UniversalCode (`RH-AST-XXXXXX`) for every fixed asset —
+// powers physical-asset audits + equipment tagging (overlaps with the
+// existing `barcode` field which is vendor-printed; the UniversalCode
+// is our own canonical scheme).
+try {
+  const universalCodePlugin = require('../services/universalCode/plugin');
+  fixedAssetSchema.plugin(universalCodePlugin, {
+    entityType: 'AST',
+    labelFrom: doc => doc.assetName || doc.nameAr || doc.serialNumber || doc.assetTag || null,
+  });
+} catch (e) {
+  /* loaded before services exist — skip silently */
+}
+
 module.exports = mongoose.models.FixedAsset || mongoose.model('FixedAsset', fixedAssetSchema);

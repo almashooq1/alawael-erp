@@ -64,6 +64,19 @@ itemSchema.index({ barcode: 1 }, { sparse: true });
 itemSchema.index({ categoryId: 1, isActive: 1 });
 itemSchema.index({ reorderPoint: 1 });
 
+// Auto-issue a UniversalCode (`RH-ITM-XXXXXX`) for every inventory item —
+// powers stock-count scanning + cross-referencing with the legacy `barcode`
+// field (which stays for compatibility with vendor barcodes on packaging).
+try {
+  const universalCodePlugin = require('../services/universalCode/plugin');
+  itemSchema.plugin(universalCodePlugin, {
+    entityType: 'ITM',
+    labelFrom: doc => doc.name || doc.nameAr || doc.sku || null,
+  });
+} catch (e) {
+  /* loaded before services exist — skip silently */
+}
+
 const ItemCategory =
   mongoose.models.ItemCategory || mongoose.model('ItemCategory', itemCategorySchema);
 const InventoryItem = mongoose.models.InventoryItem || mongoose.model('InventoryItem', itemSchema);

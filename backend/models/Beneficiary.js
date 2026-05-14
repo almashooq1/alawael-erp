@@ -655,4 +655,21 @@ beneficiarySchema.statics.getStatistics = async function () {
   };
 };
 
+// Auto-issue a UniversalCode (`RH-BNF-XXXXXX`) for every beneficiary —
+// powers QR badges, attendance scanning, parent-pickup verification.
+try {
+  const universalCodePlugin = require('../services/universalCode/plugin');
+  beneficiarySchema.plugin(universalCodePlugin, {
+    entityType: 'BNF',
+    labelFrom: doc =>
+      [doc.firstName, doc.middleName, doc.lastName].filter(Boolean).join(' ') ||
+      doc.fullName ||
+      doc.nameAr ||
+      null,
+  });
+} catch (e) {
+  // Plugin module may be loaded BEFORE service deps are installed in
+  // CI bootstrap — silently skip so the model still registers.
+}
+
 module.exports = mongoose.models.Beneficiary || mongoose.model('Beneficiary', beneficiarySchema);

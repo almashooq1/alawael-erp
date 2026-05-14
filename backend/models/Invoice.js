@@ -129,4 +129,18 @@ invoiceSchema.index({ status: 1, dueDate: 1 });
 // Insurance claim tracking
 invoiceSchema.index({ 'insurance.status': 1, 'insurance.provider': 1 });
 
+// Auto-issue a UniversalCode (`RH-INV-XXXXXX`) for every invoice —
+// for AR/customer-facing lookup. Does NOT replace the ZATCA TLV QR
+// (`qrCode` field above) which is mandated by Saudi e-invoicing and
+// carries a tax-specific encoded payload.
+try {
+  const universalCodePlugin = require('../services/universalCode/plugin');
+  invoiceSchema.plugin(universalCodePlugin, {
+    entityType: 'INV',
+    labelFrom: doc => doc.invoiceNumber || doc.number || null,
+  });
+} catch (e) {
+  /* loaded before services exist — skip silently */
+}
+
 module.exports = mongoose.models.Invoice || mongoose.model('Invoice', invoiceSchema);

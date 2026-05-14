@@ -302,4 +302,16 @@ employeeSchema.statics.findExpiringDocuments = function (days = 90) {
   });
 };
 
+// Auto-issue a UniversalCode (`RH-EMP-XXXXXX`) for every employee —
+// powers staff ID badges, time-clock check-in, building-access logs.
+try {
+  const universalCodePlugin = require('../../services/universalCode/plugin');
+  employeeSchema.plugin(universalCodePlugin, {
+    entityType: 'EMP',
+    labelFrom: doc => doc.full_name_ar || doc.full_name_en || doc.employee_id || null,
+  });
+} catch (e) {
+  /* loaded before services exist — skip silently */
+}
+
 module.exports = mongoose.models.Employee || mongoose.model('Employee', employeeSchema);

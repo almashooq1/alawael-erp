@@ -197,4 +197,17 @@ appointmentSchema.index({ bookedBy: 1 });
 appointmentSchema.index({ recurrenceParent: 1 });
 appointmentSchema.index({ branchId: 1, date: 1 });
 
+// Auto-issue a UniversalCode (`RH-APT-XXXXXX`) for every appointment —
+// SMS / parent-portal link can include the QR for one-tap check-in.
+try {
+  const universalCodePlugin = require('../services/universalCode/plugin');
+  appointmentSchema.plugin(universalCodePlugin, {
+    entityType: 'APT',
+    labelFrom: doc =>
+      doc.appointmentNumber || (doc.date ? new Date(doc.date).toISOString().slice(0, 10) : null),
+  });
+} catch (e) {
+  /* loaded before services exist — skip silently */
+}
+
 module.exports = mongoose.models.Appointment || mongoose.model('Appointment', appointmentSchema);

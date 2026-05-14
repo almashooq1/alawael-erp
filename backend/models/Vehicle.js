@@ -474,4 +474,17 @@ VehicleSchema.index({ 'inspection.nextInspectionDate': 1 });
 // Location Tracking Index
 VehicleSchema.index({ 'tracking.lastLocation.timestamp': -1 });
 
+// Auto-issue a UniversalCode (`RH-VEH-XXXXXX`) for every vehicle —
+// QR sticker on the vehicle for inspection check-in + driver hand-off
+// scanning. Plate number is the human-readable id, this is our digital one.
+try {
+  const universalCodePlugin = require('../services/universalCode/plugin');
+  VehicleSchema.plugin(universalCodePlugin, {
+    entityType: 'VEH',
+    labelFrom: doc => doc.plateNumber || doc.vin || doc.assetCode || null,
+  });
+} catch (e) {
+  /* loaded before services exist — skip silently */
+}
+
 module.exports = mongoose.models.Vehicle || mongoose.model('Vehicle', VehicleSchema);

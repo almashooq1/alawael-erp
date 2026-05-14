@@ -383,7 +383,7 @@ DocumentSchema.index({ 'sharedWith.userId': 1 });
 DocumentSchema.index({ folder: 1 });
 DocumentSchema.index({ status: 1 });
 DocumentSchema.index({ expiryDate: 1 });
-DocumentSchema.index({ contentFingerprint: 1 }, { sparse: true });
+// REMOVED DUPLICATE: contentFingerprint already has `index: true, sparse: true` at the field level
 DocumentSchema.index({ workflowStatus: 1 });
 DocumentSchema.index({ 'smartClassification.securityLevel': 1 });
 DocumentSchema.index({ 'smartClassification.priority': 1 });

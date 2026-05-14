@@ -46,6 +46,6 @@ const kpiScorecardSchema = new Schema(
 
 kpiScorecardSchema.index({ branchId: 1, periodType: 1, periodYear: 1, periodNumber: 1 });
 kpiScorecardSchema.index({ overallScore: 1 });
-kpiScorecardSchema.index({ rating: 1 });
+// REMOVED DUPLICATE: rating already has field-level index:true
 
 module.exports = mongoose.models.KpiScorecard || mongoose.model('KpiScorecard', kpiScorecardSchema);

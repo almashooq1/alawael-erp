@@ -52,6 +52,6 @@ const kpiAlertSchema = new Schema(
 
 kpiAlertSchema.index({ status: 1, severity: 1 });
 kpiAlertSchema.index({ branchId: 1, status: 1 });
-kpiAlertSchema.index({ isRead: 1 });
+// REMOVED DUPLICATE: isRead already has field-level index:true
 
 module.exports = mongoose.models.KpiAlert || mongoose.model('KpiAlert', kpiAlertSchema);

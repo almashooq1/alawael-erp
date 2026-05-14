@@ -52,7 +52,7 @@ const EmergencyContactSchema = new mongoose.Schema(
 
 EmergencyContactSchema.index({ beneficiary: 1 });
 EmergencyContactSchema.index({ beneficiary: 1, priority: 1 });
-EmergencyContactSchema.index({ branchId: 1 });
+// REMOVED DUPLICATE: branchId already has field-level index:true
 
 module.exports =
   mongoose.models.EmergencyContact || mongoose.model('EmergencyContact', EmergencyContactSchema);

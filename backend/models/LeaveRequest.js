@@ -52,6 +52,6 @@ const leaveRequestSchema = new Schema(
 
 leaveRequestSchema.index({ employeeId: 1, status: 1 });
 leaveRequestSchema.index({ startDate: 1, endDate: 1 });
-leaveRequestSchema.index({ status: 1 });
+// REMOVED DUPLICATE: status already has field-level index:true
 
 module.exports = mongoose.models.LeaveRequest || mongoose.model('LeaveRequest', leaveRequestSchema);

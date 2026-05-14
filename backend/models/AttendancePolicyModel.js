@@ -36,8 +36,7 @@ const attendancePolicySchema = new Schema(
   { timestamps: true }
 );
 
-attendancePolicySchema.index({ isDefault: 1 });
-attendancePolicySchema.index({ isActive: 1 });
+// REMOVED DUPLICATES: isDefault / isActive already have field-level index:true
 
 module.exports =
   mongoose.models.AttendancePolicyModel ||

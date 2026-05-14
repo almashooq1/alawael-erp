@@ -53,10 +53,8 @@ const attendanceLogSchema = new Schema(
 );
 
 attendanceLogSchema.index({ employeeId: 1, punchTime: 1 });
-attendanceLogSchema.index({ punchTime: 1 });
-attendanceLogSchema.index({ punchType: 1 });
+// REMOVED DUPLICATES: punchTime / punchType / isSynced already have field-level index:true
 attendanceLogSchema.index({ deviceId: 1, punchTime: 1 });
-attendanceLogSchema.index({ isSynced: 1 });
 
 module.exports =
   mongoose.models.AttendanceLog || mongoose.model('AttendanceLog', attendanceLogSchema);

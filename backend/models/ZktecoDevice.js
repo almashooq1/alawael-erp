@@ -66,8 +66,6 @@ const zktecoDeviceSchema = new Schema(
   { timestamps: true }
 );
 
-zktecoDeviceSchema.index({ status: 1 });
-zktecoDeviceSchema.index({ ipAddress: 1 });
-zktecoDeviceSchema.index({ serialNumber: 1 });
+// REMOVED DUPLICATES: status / ipAddress / serialNumber already have field-level index:true
 
 module.exports = mongoose.models.ZktecoDevice || mongoose.model('ZktecoDevice', zktecoDeviceSchema);

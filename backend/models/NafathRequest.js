@@ -50,7 +50,8 @@ const NafathRequestSchema = new mongoose.Schema(
     expiresAt: {
       type: Date,
       required: true,
-      index: true,
+      // NOTE: TTL index defined below via NafathRequestSchema.index() so we
+      // can set expireAfterSeconds:0 — don't duplicate at field-level.
     },
 
     // Resolved attributes from Nafath (populated on approval)

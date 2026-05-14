@@ -93,7 +93,7 @@ const notificationPreferencesSchema = new mongoose.Schema(
   { timestamps: true, collection: 'notification_preferences' }
 );
 
-notificationPreferencesSchema.index({ dndUntil: 1 });
+// REMOVED DUPLICATE: dndUntil already has field-level index:true
 
 const NotificationPreferences =
   mongoose.models.NotificationPreferences ||

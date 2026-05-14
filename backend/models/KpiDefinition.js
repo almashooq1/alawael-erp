@@ -55,8 +55,7 @@ const kpiDefinitionSchema = new Schema(
 );
 
 kpiDefinitionSchema.index({ categoryId: 1, isActive: 1 });
-// REMOVED DUPLICATE: code already has unique:true + index:true in schema
-kpiDefinitionSchema.index({ showOnDashboard: 1 });
+// REMOVED DUPLICATES: code has unique:true; showOnDashboard has field-level index:true
 
 module.exports =
   mongoose.models.KpiDefinition || mongoose.model('KpiDefinition', kpiDefinitionSchema);

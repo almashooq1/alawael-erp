@@ -180,7 +180,7 @@ careTimelineSchema.index({ beneficiaryId: 1, occurredAt: -1 });
 careTimelineSchema.index({ beneficiaryId: 1, eventType: 1, occurredAt: -1 });
 careTimelineSchema.index({ episodeId: 1, occurredAt: -1 });
 careTimelineSchema.index({ beneficiaryId: 1, category: 1, occurredAt: -1 });
-careTimelineSchema.index({ occurredAt: -1 });
+// REMOVED DUPLICATE: occurredAt already has field-level index:true
 careTimelineSchema.index({ 'relatedEntity.type': 1, 'relatedEntity.id': 1 });
 
 // ─── Static Methods ─────────────────────────────────────────────────────────

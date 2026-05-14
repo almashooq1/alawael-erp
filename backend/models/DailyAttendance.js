@@ -74,8 +74,7 @@ const dailyAttendanceSchema = new Schema(
 dailyAttendanceSchema.index({ employeeId: 1, workDate: 1 }, { unique: true });
 dailyAttendanceSchema.index({ workDate: 1, status: 1 });
 dailyAttendanceSchema.index({ employeeId: 1, workDate: 1 });
-dailyAttendanceSchema.index({ status: 1 });
-dailyAttendanceSchema.index({ isProcessed: 1 });
+// REMOVED DUPLICATES: status / isProcessed already have field-level index:true
 
 module.exports =
   mongoose.models.DailyAttendance || mongoose.model('DailyAttendance', dailyAttendanceSchema);

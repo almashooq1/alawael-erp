@@ -60,7 +60,6 @@ kpiValueSchema.index({
   periodYear: 1,
   periodNumber: 1,
 });
-kpiValueSchema.index({ periodDate: 1 });
-kpiValueSchema.index({ status: 1 });
+// REMOVED DUPLICATES: periodDate / status already have field-level index:true
 
 module.exports = mongoose.models.KpiValue || mongoose.model('KpiValue', kpiValueSchema);

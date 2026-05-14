@@ -84,7 +84,7 @@ const maintenanceWorkOrderSchema = new mongoose.Schema(
 );
 
 maintenanceWorkOrderSchema.index({ workOrderNumber: 1 });
-maintenanceWorkOrderSchema.index({ status: 1 });
+// REMOVED DUPLICATE: status already has field-level index:true
 maintenanceWorkOrderSchema.index({ type: 1 });
 maintenanceWorkOrderSchema.index({ scheduledDate: 1 });
 maintenanceWorkOrderSchema.index({ assetId: 1 });

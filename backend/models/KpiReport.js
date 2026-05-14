@@ -45,7 +45,7 @@ const kpiReportSchema = new Schema(
 );
 
 kpiReportSchema.index({ reportType: 1, status: 1 });
-kpiReportSchema.index({ periodFrom: 1 });
+// REMOVED DUPLICATE: periodFrom already has field-level index:true
 kpiReportSchema.index({ branchId: 1, reportType: 1 });
 
 module.exports = mongoose.models.KpiReport || mongoose.model('KpiReport', kpiReportSchema);

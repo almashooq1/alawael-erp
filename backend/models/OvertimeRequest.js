@@ -48,7 +48,7 @@ const overtimeRequestSchema = new Schema(
 );
 
 overtimeRequestSchema.index({ employeeId: 1, overtimeDate: 1 });
-overtimeRequestSchema.index({ status: 1 });
+// REMOVED DUPLICATE: status already has field-level index:true
 
 module.exports =
   mongoose.models.OvertimeRequest || mongoose.model('OvertimeRequest', overtimeRequestSchema);

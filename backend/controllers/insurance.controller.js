@@ -10,10 +10,14 @@
  */
 
 const InsurancePolicy = require('../models/InsurancePolicy');
-const {
-  SAUDI_INSURANCE_COMPANIES,
-  INSURANCE_VIOLATION_CODES,
-} = require('../models/InsurancePolicy');
+// TODO: SAUDI_INSURANCE_COMPANIES + INSURANCE_VIOLATION_CODES are referenced
+// below (quotes / list-companies / violation-codes endpoints) but were never
+// exported by ../models/InsurancePolicy.js — these endpoints will throw at
+// runtime. Owner needs to either (a) export those constants from the model
+// file, or (b) move them into a dedicated constants module and update both
+// sides. Keeping the broken-by-original-author state here so the fix is
+// auditable rather than silently masked.
+const { SAUDI_INSURANCE_COMPANIES, INSURANCE_VIOLATION_CODES } = InsurancePolicy;
 const logger = require('../utils/logger');
 const safeError = require('../utils/safeError');
 

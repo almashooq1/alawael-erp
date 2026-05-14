@@ -6,7 +6,7 @@
  */
 
 const express = require('express');
-const { stripUpdateMeta } = require('../utils/sanitize');
+const { stripUpdateMeta, escapeRegex } = require('../utils/sanitize');
 const router = express.Router();
 
 // ── Helpers ──────────────────────────────────────────────────────
@@ -25,7 +25,6 @@ function safeModel(name) {
 // ── Auth ─────────────────────────────────────────────────────────
 const { authenticate } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
-const { escapeRegex } = require('../utils/sanitize');
 const safeError = require('../utils/safeError');
 router.use(authenticate);
 router.use(requireBranchAccess);

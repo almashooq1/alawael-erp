@@ -14,10 +14,9 @@ const Beneficiary = require('../models/Beneficiary');
 const BeneficiaryProgress = require('../models/BeneficiaryProgress');
 const logger = require('../utils/logger');
 const { authenticate } = require('../middleware/auth');
-const { escapeRegex } = require('../utils/sanitize');
+const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
 const validateObjectId = require('../middleware/validateObjectId');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
-const { stripUpdateMeta } = require('../utils/sanitize');
 const safeError = require('../utils/safeError');
 // All beneficiary routes require authentication + branch scope
 router.use(authenticate);

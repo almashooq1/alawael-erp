@@ -38,8 +38,7 @@
 const express = require('express');
 const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
-const { escapeRegex } = require('../utils/sanitize');
-const { stripUpdateMeta } = require('../utils/sanitize');
+const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
 
 const router = express.Router();
 

@@ -1,20 +1,37 @@
 # MUI 5 → 9 migration playbook
 
-**Status:** held — needs dedicated migration session(s)
-**Why this doc exists:** A naive codemod attempt on 2026-05-12 surfaced
-real obstacles. This playbook captures what was learned so the next
-attempt can budget realistically and avoid the same dead-ends.
+**Status:** ✅ DONE 2026-05-13 — `@mui/material@^9.0.0` + `@mui/icons-material@^9.0.0` live in main.
+**Why this doc still exists:** Reference for the next time someone needs to step a MUI codebase through a multi-major jump. The pitfalls and verification recipe below are still accurate.
 
-## The current state (2026-05-12)
+## How it actually landed (vs the 2026-05-12 plan)
+
+The playbook expected a 20-25 hour multi-session migration. Reality was
+much smaller because MUI v6/v7/v8 keep deprecated APIs working
+(warnings, not removals) for one major past their introduction. So the
+codebase compiled clean against each major without applying any
+codemod — just version bumps:
+
+- `618190fe` feat(frontend): bump @mui/material + @mui/icons-material 5 → 6
+- `f64acee1` feat(frontend): bump @mui 6 → 7
+- `42657302` feat(frontend): bump @mui 7 → 9 + fix 9 removed icon names + 1 a11y guard
+
+The only manual fix was at the v7 → v9 jump (skipped v8): MUI 9 removed
+the bare `*Outline` filled-variant icon exports, so 9 import names had to be
+renamed to `*OutlineOutlined`/`*OutlineRounded` equivalents.
+
+The v6 codemod attempt that originally motivated this playbook (2729
+transforms with the buggy `list-item-button-prop` rewrite) was NOT
+needed — `<ListItem button>` still works as a deprecated prop through
+v9 with console warnings only.
+
+## The current state (post-migration)
 
 - `frontend/` is on:
-  - `@mui/material@^5.15.0`
-  - `@mui/icons-material@^5.15.0`
+  - `@mui/material@^9.0.0`
+  - `@mui/icons-material@^9.0.0`
   - `@emotion/{cache,react,styled}@^11.11.0`
-- Dependabot PR `#11` ("the mui group across 1 directory with 2 updates")
-  proposes jumping directly to `@mui/material@9.0.1` + `@mui/icons-material@9.0.1`.
-- That PR has been **held** — direct 5→9 is four major versions of
-  breaking changes; auto-merging is not safe.
+- Dependabot PR `#11` (the original v5 → v9 proposal) was closed during
+  the dependabot triage session (2026-05-12 entry).
 
 ## What was tried + what failed
 

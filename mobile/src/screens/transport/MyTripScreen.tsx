@@ -40,11 +40,10 @@ export default function MyTripScreen() {
     try {
       const result = await TransportApi.myTripToday();
       setData(result);
-    } catch (e) {
+    } catch {
       setError('تعذر تحميل الرحلة');
-      if (data === undefined) setData(null);
+      setData(prev => (prev === undefined ? null : prev));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

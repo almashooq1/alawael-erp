@@ -183,6 +183,9 @@ const registerPhaseRoutes = require('./registries/phases.registry');
 
 // Features / Prompt Modules (~25 modules) — delegated to registries/features.registry.js
 const registerFeatureRoutes = require('./registries/features.registry');
+
+// CCTV Surveillance (Phase 27) — Hikvision integration + AI analytics
+const registerCctvRoutes = require('./registries/cctv.registry');
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 /**
@@ -281,6 +284,13 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   // ── Finance (delegated to registries/finance.registry.js) ─────────────
   registerFinanceRoutes(app, { safeRequire, dualMount, safeMount, logger });
   dualMount(app, 'integrations', integrationRoutes);
+
+  // ── CCTV Surveillance Platform — Phase 27 ─────────────────────────────
+  try {
+    registerCctvRoutes(app, { logger });
+  } catch (err) {
+    logger.warn(`[cctv] registry failed: ${err.message}`);
+  }
 
   // ── Dashboard (multiple sub-routers merged) ─────────────────────────────
   dualMount(app, 'dashboard', require('../routes/dashboard.stats'));

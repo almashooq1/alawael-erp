@@ -8,6 +8,188 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [Unreleased] — 2026-05-15 — Phase 27 CCTV Surveillance Platform (Hikvision) backend
+
+A new vertical: central CCTV monitoring for all branches over Hikvision
+ISAPI + RTSP, with an AI analytics layer on top of native smart events
+and a PDPL-compliant access + audit model.
+
+### Added — Backend
+
+- **12 CCTV models** under `backend/models/cctv/`: `CctvCamera`,
+  `CctvNvr`, `CctvEvent`, `CctvRecording`, `CctvAlert`, `CctvViewAudit`,
+  `CctvAccessGrant`, `CctvFaceIdentity`, `CctvAnpr`, `CctvZone`,
+  `CctvStreamSession`, `CctvHealthCheck`. All `Cctv*` prefixed to keep
+  the model-collision baseline at 0.
+- **Hikvision ISAPI adapter** at `backend/services/cctv/adapter/`:
+  - `hikvisionISAPIAdapter.js` — real client (Digest auth RFC 7616,
+    XML/JSON, deviceInfo, channels, snapshot, RTSP URL builder,
+    playback search, PTZ continuous/preset, line/field detection,
+    face library add/delete, event poll, ping).
+  - `hikvisionMockAdapter.js` — deterministic mock for tests/dev.
+  - `digestAuth.js` — pure helper.
+  - `index.js` — selector by `HIKVISION_MODE`, wraps every call with
+    `adapterCircuitBreaker` + rate limit + metrics + audit.
+- **Core services**: `cameraService`, `nvrService`, `eventService`
+  (normalises 23 Hikvision event codes into our internal type set,
+  dedups by camera+type+second-bucket, emits `qualityEventBus`),
+  `alertService` (10 default rules incl. fall/fight/fire/intrusion/
+  tampering/disk_failure as single-shot critical), `streamService`
+  (HLS session lifecycle, grant check, audit, idle reaper),
+  `healthMonitor.service` (round-robin probe with online/offline
+  state transitions).
+- **AI analytics layer**: 8 detectors (face / intrusion / loitering /
+  fall / ANPR / crowd / PPE / behavior) + orchestrator that fans an
+  event out to applicable detectors and runs alert evaluation.
+- **11 route modules** mounted under `/api/v1/cctv/` via the new
+  `routes/registries/cctv.registry.js`: cameras, nvrs, events,
+  alerts, streams, recordings, webhooks (HMAC-verified Hikvision push),
+  ai (faces/anpr/zones), audit (+ grants), parent-portal, admin.
+- **3 schedulers** auto-started from the registry on boot: health
+  tick (60s), NVR tick (5m), idle stream reaper (30s). All can be
+  disabled with `CCTV_DISABLE_SCHEDULERS=1`.
+
+### Added — Tests
+
+- 48 unit tests across 7 new suites under `backend/__tests__/cctv-*`:
+  adapter, event normalisation, webhook HMAC, AI helpers, alert rules,
+  grant time window, model registration (incl. TTL index check).
+
+### Added — Docs
+
+- `docs/blueprint/27-cctv-platform.md` — architecture, modules, env
+  vars, PDPL compliance, smoke checks, next-commit roadmap.
+- 18 new entries in `.env.example` covering the full CCTV config.
+
+### Wired
+
+- `routes/_registry.js` now imports `registries/cctv.registry.js` and
+  invokes it in `mountAllRoutes` alongside Finance.
+
+### Known gotcha
+
+- Top-level `parseFloat(process.env.X)` reads can throw under Dynatrace
+  OneAgent instrumentation depending on the module chain. All CCTV
+  services use lazy env reads (`function _env() { return (typeof
+process !== 'undefined' && process.env) || {}; }`) and getters on
+  `module.exports` for the legacy names. Apply this pattern to any new
+  service module that reads env at top level.
+
+### Added — Web-admin UI (Phase 27 C8 — same session)
+
+Lives in the `alawael-rehab-platform/` repo, mounted under
+`/security/cctv/` in the Next.js admin app.
+
+- `src/lib/types/cctv.ts` — 14 typed surfaces mirroring backend models
+  (camera, NVR, event, alert, grant, audit, face, ANPR, zone…).
+- `src/lib/cctvApi.ts` — typed fetch client. Standalone file (not
+  appended to the already-4700-line `api.ts`).
+- 9 admin pages under `src/app/(dashboard)/security/cctv/`:
+  - **hub** — KPIs (online/offline/degraded/alerts), adapter-mode
+    banner, branch grid, recent-alerts table, 8 quick-nav tiles
+  - **cameras** — grouped-by-branch grid with live snapshot tiles +
+    status badge + capability chips
+  - **camera detail** — HLS player + PTZ 8-way d-pad + snapshot
+    refresh + properties + recent-events feed + watermark overlay
+  - **events** — filterable timeline (type / severity / branch),
+    auto-refresh every 30s
+  - **alerts** — queue with acknowledge / resolve / false-positive
+    actions, auto-refresh every 15s
+  - **AI / faces** — identity registry with add + disable
+  - **AI / ANPR** — plate registry with allowlist / denylist /
+    schedule / autoOpenGate
+  - **audit** — PDPL view-audit log (filtered for DPO + admin)
+  - **audit / grants** — access grants management with revoke
+  - **ops** — health dashboard with manual probe trigger + adapter
+    status + per-branch availability %
+- Sidebar group "مراقبة CCTV" with 8 children (lucide icons:
+  Video / Activity / AlertOctagon / ScanEye / Car / History / Gauge).
+- `tsc --noEmit`: **0 errors** across 14,000+ TypeScript files in
+  the workspace.
+
+### Added — Parent portal (Phase 27 C10 — same session)
+
+Lives in the `alawael-rehab-platform/` web-admin, mounted under the
+existing `(parent)/parent/` route group (role-gated to GUARDIAN/PARENT).
+
+- `(parent)/parent/cctv/page.tsx` — list of cameras the logged-in
+  parent is **allowed to view right now** (calls
+  `parentCctvApi.myCameras` → `/api/v1/cctv/parent-portal/my-cameras`).
+  PDPL notice card always rendered.
+- `(parent)/parent/cctv/[cameraId]/page.tsx` — live viewer with:
+  - **consent gate** persisted in localStorage; viewer button is
+    disabled until the parent explicitly accepts 5 PDPL clauses.
+  - 4-overlay live watermark on the HLS `<video>`: user email +
+    timestamp (top-start), "● مباشر — مسجَّل في سجل PDPL"
+    (bottom-end), viewing-duration counter (bottom-start).
+  - 10s heartbeat to central; automatic stop on unmount.
+  - `controls={false}` + `playsInline` to discourage save-as.
+- `parent-sidebar.tsx` gets a new "مشاهدة طفلي" nav entry (Video icon).
+- `parentCctvApi` added to `src/lib/cctvApi.ts` (myCameras / startLive /
+  heartbeat / stop).
+
+### Added — Edge gateway service (Phase 27 C11 — same session)
+
+New Node.js service at `services/cctv-edge-gateway/` designed to run
+**one per branch**. Bridges the local Hikvision NVR to central:
+
+- `eventPoller.js` — long-polls
+  `/ISAPI/Event/notification/alertStream` with RFC 7616 Digest auth,
+  parses each multipart XML chunk, forwards to central via
+  HMAC-signed webhook.
+- `centralClient.js` — `sha256=…` HMAC over raw body + exponential
+  backoff retry (5 attempts).
+- `queue.js` — Redis FIFO (`cctv:edge:events`) with in-memory ring
+  fallback when Redis is unreachable.
+- `replayWorker.js` — drains the queue once `centralClient.ping`
+  succeeds; re-queues anything that still fails.
+- `healthProber.js` — TCP-ping every camera (30s) and the NVR (60s),
+  ships reachability + latency to central.
+- `hlsManager.js` — spawns one ffmpeg per live session for RTSP → HLS,
+  serves manifest + segments, idle reaper at 60s.
+- `server.js` — Express on `:3291` (configurable) with `/health`,
+  `/sessions`, `/hls/start|heartbeat|stop`, plus static manifest +
+  segment routes.
+- `config.local.example.json` — per-branch config template (NVR
+  password is `passwordRef` → `process.env[X]`, never on disk).
+- 6 unit tests covering ISAPI chunk parsing, Digest header build, and
+  HMAC signing (`node --test`, all pass).
+- Runbook in `services/cctv-edge-gateway/README.md`.
+
+### Added — Mobile screens (Phase 27 C9 — same session)
+
+React Native + Expo, in the `mobile/` workspace.
+
+- `src/services/modules/cctv.ts` — typed CCTV client mirroring the web
+  `cctvApi`. `snapshotUrl()` reads `EXPO_PUBLIC_API_URL` because
+  `ApiService` keeps its axios instance private.
+- Four screens under `src/screens/cctv/`:
+  - **CctvBranchesScreen** — KPI row (total / online / offline) +
+    alerts banner + scrollable branch cards with availability %.
+  - **CctvCamerasScreen** — per-branch FlatList with status chip and
+    capability chips (PTZ / Face / ANPR).
+  - **CctvCameraDetailScreen** — auto-refreshing snapshot (every 5s)
+    on `Image`, PTZ 8-way d-pad, 10s heartbeat once a live session
+    starts, recent-events feed. Carries a comment for the future
+    `expo-av Video` upgrade for real HLS playback.
+  - **CctvAlertsScreen** — alert queue with severity-colored
+    border-left, one-tap detail sheet (Alert.alert) offering
+    استلام / إنذار كاذب / تم الحل, 15s auto-refresh.
+- `SprintAppNavigator` gets a new **SecurityTabs** (red theme,
+  Branches + Alerts) routed for roles `security_officer`, `security`,
+  `admin`, `manager`. Plus root-stack `CctvCameras`,
+  `CctvCameraDetail`, `CctvAlerts` so other roles can navigate by id.
+- `services/modules/index.ts` re-exports the new cctv module.
+
+TypeScript: 0 errors. ESLint: clean.
+
+### Phase 27 status
+
+All 11 slices shipped: backend (C1–C7) + admin web UI (C8) +
+mobile (C9) + parent portal (C10) + edge gateway (C11).
+
+---
+
 ## [Unreleased] — 2026-05-12 — 17-commit cleanup + verified manual deploy + 11 real bugs caught
 
 A long session combining a Quality module expansion, frontend admin pages refresh,

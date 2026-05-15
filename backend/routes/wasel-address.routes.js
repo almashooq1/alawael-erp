@@ -20,6 +20,7 @@ const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const idempotency = require('../middleware/idempotency.middleware');
 const wasel = require('../services/waselAdapter');
+const nas = require('../services/nationalAddressService');
 const safeError = require('../utils/safeError');
 
 router.use(authenticate);
@@ -68,6 +69,41 @@ router.post('/search-by-id', waselIdempotency, authorize(WRITE_ROLES), async (re
     res.json({ success: true, ...result });
   } catch (err) {
     return safeError(res, err, 'wasel.searchByNationalId');
+  }
+});
+
+/**
+ * POST /verify-and-stamp
+ *
+ * UI-friendly endpoint. Accepts a partial address payload, runs the
+ * Wasel verification, and returns the fully-stamped subdocument in the
+ * exact shape that domain models embed as `nationalAddress`. The
+ * client can store the returned object verbatim on the entity it is
+ * editing — no reshaping required.
+ *
+ * Response: { success, address, verified }
+ */
+router.post('/verify-and-stamp', waselIdempotency, authorize(WRITE_ROLES), async (req, res) => {
+  try {
+    const coerced = nas.coerceFromPayload(req.body || {});
+    if (!coerced.shortCode) {
+      return res.status(400).json({
+        success: false,
+        code: 'MISSING_SHORT_CODE',
+        message: 'shortCode مطلوب',
+      });
+    }
+    const stamped = await nas.verifyAndStamp(coerced, {
+      actorId: req.user && req.user.id,
+      nationalId: req.body && (req.body.nationalId || req.body.national_id),
+    });
+    res.json({
+      success: true,
+      verified: stamped.verification.verified === true,
+      address: stamped,
+    });
+  } catch (err) {
+    return safeError(res, err, 'wasel.verifyAndStamp');
   }
 });
 

@@ -49,6 +49,7 @@ import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import VerifiedIcon from '@mui/icons-material/Verified';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import api from '../../services/api.client';
+import NationalAddressField from '../../components/NationalAddressField';
 
 const STATUS_OPTIONS = [
   { value: '', label: 'كل الحالات' },
@@ -98,6 +99,7 @@ const EMPTY_FORM = {
   settings: { allow_online_booking: true, has_transport: true },
   balady_license_number: '',
   wasel_short_code: '',
+  nationalAddress: undefined,
 };
 
 export default function AdminBranches() {
@@ -158,6 +160,10 @@ export default function AdminBranches() {
   };
 
   const handleSave = async () => {
+    if (form.nationalAddress && form.nationalAddress.verification?.verified !== true) {
+      setError('يجب التحقق من العنوان الوطني عبر وَصِل قبل الحفظ، أو إفراغ الحقل بالكامل.');
+      return;
+    }
     setSaving(true);
     setError('');
     try {
@@ -659,12 +665,28 @@ export default function AdminBranches() {
               <TextField
                 fullWidth
                 size="small"
-                label="الرمز القصير (Wasel)"
+                label="الرمز القصير (Wasel — legacy)"
                 value={form.wasel_short_code || ''}
                 onChange={e => setForm({ ...form, wasel_short_code: e.target.value.toUpperCase() })}
                 inputProps={{ dir: 'ltr', style: { textTransform: 'uppercase' } }}
                 placeholder="RFYA1234"
-                helperText="4 أحرف + 4 أرقام من العنوان الوطني"
+                helperText="حقل قديم — استخدم النموذج الجديد أدناه للتحقق الفوري"
+              />
+            </Grid>
+
+            <Grid item xs={12}>
+              <NationalAddressField
+                value={form.nationalAddress}
+                onChange={addr =>
+                  setForm({
+                    ...form,
+                    nationalAddress: addr,
+                    // mirror short code into the legacy field so the
+                    // existing /verify-balady + /verify-wasel admin
+                    // pipeline keeps working unchanged.
+                    wasel_short_code: addr?.shortCode || form.wasel_short_code,
+                  })
+                }
               />
             </Grid>
 

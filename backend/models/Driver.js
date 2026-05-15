@@ -10,6 +10,10 @@
 
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+const {
+  nationalAddressSubschema,
+  attachNationalAddressGuard,
+} = require('./_shared/nationalAddress.subschema');
 
 const DriverSchema = new Schema(
   {
@@ -28,6 +32,8 @@ const DriverSchema = new Schema(
       email: String,
       address: String,
     },
+    // العنوان الوطني السعودي — strict-verified via وَصِل when provided.
+    nationalAddress: nationalAddressSubschema,
 
     // بيانات الترخيص
     license: {
@@ -244,5 +250,7 @@ DriverSchema.methods.getLicenseStatus = function () {
   }
   return 'صحيحة';
 };
+
+attachNationalAddressGuard(DriverSchema);
 
 module.exports = mongoose.models.Driver || mongoose.model('Driver', DriverSchema);

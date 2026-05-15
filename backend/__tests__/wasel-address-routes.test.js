@@ -78,4 +78,36 @@ describe('Wasel national address routes', () => {
     expect(res.body.connection).toBeTruthy();
     expect(res.body.config.provider).toBe('wasel');
   });
+
+  it('verify-and-stamp returns a UI-ready subdocument', async () => {
+    const res = await request(app)
+      .post('/api/v1/wasel/address/verify-and-stamp')
+      .send({ shortCode: 'rfya1234' })
+      .expect(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.verified).toBe(true);
+    expect(res.body.address.shortCode).toBe('RFYA1234');
+    expect(res.body.address.verification.verified).toBe(true);
+    expect(res.body.address.verification.status).toBe('match');
+    expect(res.body.address.verification.verifiedAt).toBeTruthy();
+    expect(res.body.address.city).toBeTruthy();
+  });
+
+  it('verify-and-stamp marks unverified when Wasel returns not_found', async () => {
+    const res = await request(app)
+      .post('/api/v1/wasel/address/verify-and-stamp')
+      .send({ shortCode: 'RFYA1200' })
+      .expect(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.verified).toBe(false);
+    expect(res.body.address.verification.status).toBe('not_found');
+  });
+
+  it('verify-and-stamp rejects missing shortCode with 400', async () => {
+    const res = await request(app)
+      .post('/api/v1/wasel/address/verify-and-stamp')
+      .send({})
+      .expect(400);
+    expect(res.body.code).toBe('MISSING_SHORT_CODE');
+  });
 });

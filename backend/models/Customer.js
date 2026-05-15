@@ -1,4 +1,8 @@
 const mongoose = require('mongoose');
+const {
+  nationalAddressSubschema,
+  attachNationalAddressGuard,
+} = require('./_shared/nationalAddress.subschema');
 
 /**
  * Customer Model
@@ -25,6 +29,8 @@ const customerSchema = new mongoose.Schema(
       region: String,
       postalCode: String,
     },
+    // العنوان الوطني السعودي — strict-verified via وَصِل when provided.
+    nationalAddress: nationalAddressSubschema,
     status: {
       type: String,
       enum: ['active', 'inactive', 'blocked'],
@@ -51,5 +57,7 @@ const customerSchema = new mongoose.Schema(
 
 customerSchema.index({ email: 1 });
 customerSchema.index({ status: 1, lastOrderDate: -1 });
+
+attachNationalAddressGuard(customerSchema);
 
 module.exports = mongoose.models.Customer || mongoose.model('Customer', customerSchema);

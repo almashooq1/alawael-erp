@@ -3,6 +3,10 @@
  * النظام 35: إدارة العقود والاتفاقيات
  */
 const mongoose = require('mongoose');
+const {
+  nationalAddressSubschema,
+  attachNationalAddressGuard,
+} = require('./_shared/nationalAddress.subschema');
 
 const contractPartySchema = new mongoose.Schema(
   {
@@ -38,6 +42,8 @@ const contractPartySchema = new mongoose.Schema(
     email: { type: String, trim: true, lowercase: true },
     phone: { type: String, trim: true },
     address: { type: String },
+    // العنوان الوطني السعودي — strict-verified via وَصِل when provided.
+    nationalAddress: nationalAddressSubschema,
     representativeName: { type: String },
     representativeTitle: { type: String },
     signatureStatus: {
@@ -63,6 +69,8 @@ const contractPartySchema = new mongoose.Schema(
 contractPartySchema.index({ contractId: 1 });
 contractPartySchema.index({ role: 1 });
 contractPartySchema.index({ signatureStatus: 1 });
+
+attachNationalAddressGuard(contractPartySchema);
 
 module.exports =
   mongoose.models.ContractParty || mongoose.model('ContractParty', contractPartySchema);

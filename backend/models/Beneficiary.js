@@ -14,6 +14,10 @@
 
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
+const {
+  nationalAddressSubschema,
+  attachNationalAddressGuard,
+} = require('./_shared/nationalAddress.subschema');
 
 // ─── Sub-Schemas ────────────────────────────────────────────────────────────
 
@@ -184,6 +188,10 @@ const beneficiarySchema = new mongoose.Schema(
 
     // ── Address ────────────────────────────────────────────
     address: addressSchema,
+    // ── Saudi National Address (SPL / Wasel) ───────────────
+    // The authoritative postal address. When provided it must be
+    // verified via وَصِل (see services/nationalAddressService.js).
+    nationalAddress: nationalAddressSubschema,
 
     // ── Family & Emergency ─────────────────────────────────
     familyMembers: [familyMemberSchema],
@@ -655,6 +663,13 @@ beneficiarySchema.statics.getStatistics = async function () {
   };
 };
 
+// Saudi National Address — strict guard. If `nationalAddress` is
+// provided it must include a valid Wasel shortCode AND have already
+// passed verification (verification.verified === true).
+// Old records without any nationalAddress are accepted as-is so this
+// rollout doesn't retro-invalidate the existing dataset.
+attachNationalAddressGuard(beneficiarySchema, { path: 'nationalAddress', strict: true });
+
 // Auto-issue a UniversalCode (`RH-BNF-XXXXXX`) for every beneficiary —
 // powers QR badges, attendance scanning, parent-pickup verification.
 try {
@@ -667,7 +682,7 @@ try {
       doc.nameAr ||
       null,
   });
-} catch (e) {
+} catch (_e) {
   // Plugin module may be loaded BEFORE service deps are installed in
   // CI bootstrap — silently skip so the model still registers.
 }

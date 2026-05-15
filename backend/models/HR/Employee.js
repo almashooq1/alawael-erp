@@ -7,6 +7,10 @@
 
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
+const {
+  nationalAddressSubschema,
+  attachNationalAddressGuard,
+} = require('../_shared/nationalAddress.subschema');
 
 const employeeSchema = new Schema(
   {
@@ -36,6 +40,8 @@ const employeeSchema = new Schema(
     address: String,
     city: String,
     postal_code: String,
+    // العنوان الوطني السعودي — strict-verified via وَصِل when provided.
+    nationalAddress: nationalAddressSubschema,
     emergency_contact: {
       name: String,
       phone: String,
@@ -310,8 +316,10 @@ try {
     entityType: 'EMP',
     labelFrom: doc => doc.full_name_ar || doc.full_name_en || doc.employee_id || null,
   });
-} catch (e) {
+} catch (_e) {
   /* loaded before services exist — skip silently */
 }
+
+attachNationalAddressGuard(employeeSchema);
 
 module.exports = mongoose.models.Employee || mongoose.model('Employee', employeeSchema);

@@ -5,6 +5,10 @@
 
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
+const {
+  nationalAddressSubschema,
+  attachNationalAddressGuard,
+} = require('./_shared/nationalAddress.subschema');
 
 const GuardianSchema = new Schema(
   {
@@ -96,6 +100,8 @@ const GuardianSchema = new Schema(
       zipCode: String,
       country: String,
     },
+    // العنوان الوطني السعودي — strict-verified via وَصِل when provided.
+    nationalAddress: nationalAddressSubschema,
     homePhone: String,
 
     // Identity معلومات الهوية
@@ -418,5 +424,7 @@ GuardianSchema.methods.activateAccount = async function () {
 GuardianSchema.pre('save', function () {
   this.updatedAt = new Date();
 });
+
+attachNationalAddressGuard(GuardianSchema);
 
 module.exports = mongoose.models.Guardian || mongoose.model('Guardian', GuardianSchema);

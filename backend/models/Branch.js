@@ -4,6 +4,10 @@
  * 12 Branches + HQ Riyadh
  */
 const mongoose = require('mongoose');
+const {
+  nationalAddressSubschema,
+  attachNationalAddressGuard,
+} = require('./_shared/nationalAddress.subschema');
 
 const locationSchema = new mongoose.Schema(
   {
@@ -136,6 +140,11 @@ const branchSchema = new mongoose.Schema(
       remainingDays: Number,
       message: String,
     },
+    // ── Legacy Wasel fields (deprecated — use `nationalAddress`) ──────
+    // Kept for backward compatibility with records seeded before the
+    // 2026-05-15 sweep. New writes should populate `nationalAddress`
+    // (see models/_shared/nationalAddress.subschema.js). A migration
+    // script can copy these into the new shape.
     wasel_short_code: { type: String },
     wasel_verification: {
       verified: { type: Boolean, default: false },
@@ -152,6 +161,9 @@ const branchSchema = new mongoose.Schema(
       isDeliverable: Boolean,
       message: String,
     },
+    // ── Canonical Saudi National Address (SPL / Wasel) ────────────────
+    // Strict-verified via وَصِل when provided. See subschema docs.
+    nationalAddress: nationalAddressSubschema,
   },
   {
     timestamps: true,
@@ -180,5 +192,7 @@ branchSchema.statics.getAllActiveCodes = async function () {
 branchSchema.statics.findByCode = async function (code) {
   return this.findOne({ code: code.toUpperCase() });
 };
+
+attachNationalAddressGuard(branchSchema);
 
 module.exports = mongoose.models.Branch || mongoose.model('Branch', branchSchema);

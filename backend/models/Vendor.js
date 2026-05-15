@@ -2,6 +2,10 @@
  * Vendor Model — نموذج الموردين
  */
 const mongoose = require('mongoose');
+const {
+  nationalAddressSubschema,
+  attachNationalAddressGuard,
+} = require('./_shared/nationalAddress.subschema');
 
 const vendorSchema = new mongoose.Schema(
   {
@@ -11,6 +15,8 @@ const vendorSchema = new mongoose.Schema(
     phone: { type: String, trim: true },
     email: { type: String, trim: true },
     address: { type: String, trim: true },
+    // العنوان الوطني السعودي — strict-verified via وَصِل when provided.
+    nationalAddress: nationalAddressSubschema,
     rating: { type: Number, min: 0, max: 5, default: 0 },
     status: {
       type: String,
@@ -32,5 +38,7 @@ const vendorSchema = new mongoose.Schema(
 vendorSchema.index({ name: 1 });
 vendorSchema.index({ status: 1 });
 vendorSchema.index({ category: 1 });
+
+attachNationalAddressGuard(vendorSchema);
 
 module.exports = mongoose.models.Vendor || mongoose.model('Vendor', vendorSchema);

@@ -8,6 +8,70 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [Unreleased] — 2026-05-15 — Phase 28 extended rollout (Supplier UI + RN + ops scripts)
+
+### Added — UI rollout extension
+
+- **Supplier edit page** (`apps/web-admin/src/app/(dashboard)/inventory/suppliers/[id]/edit/page.tsx`) — `<NationalAddressField/>` wired with client-side strict guard; `CreateSupplierPayload` extended with `nationalAddress`.
+- **Employee form + Vehicle form** — both gain `<NationalAddressField/>` with `verification.verified` enforcement before submit. Payload types extended in `lib/api.ts`.
+- **Legacy admin Branches** (`frontend/src/pages/Admin/AdminBranches.jsx`) — `<NationalAddressField/>` added inside the create/edit dialog; the field mirrors `shortCode` into the legacy `wasel_short_code` so the existing `/verify-balady` + `/verify-wasel` admin pipeline keeps working unchanged.
+- **Mobile RN component** — `mobile/src/components/NationalAddressField.tsx` (real RN widget, not just typed client) + demo screen `mobile/src/screens/settings/NationalAddressScreen.tsx`. Drop into any stack navigator for parent/therapist/driver self-service.
+
+### Added — Operational scripts
+
+- `backend/scripts/backfill-branch-national-address.js` — projects legacy `Branch.wasel_short_code` + `Branch.wasel_verification` into the unified `nationalAddress` subdocument. Idempotent. Dry-run flag. 7-test pure-helper coverage at `__tests__/backfill-branch-national-address.test.js` (`projectLegacyToNationalAddress`, `isAddressMeaningful`).
+- `backend/scripts/wasel-live-smoke.js` — pre-flight check before flipping `WASEL_MODE=live`. Exercises every adapter path against the real وَصِل endpoint and reports 5 checks (config / connection / verifyShortCode / verifyAndStamp pipeline / invalid-format handling) with exit codes 0/1/2.
+- npm aliases: `npm run wasel:smoke`, `npm run wasel:backfill`, `npm run wasel:backfill:dry`.
+
+### Updated
+
+- Runbook `docs/blueprint/28-national-address-platform.md` — adds operational-scripts section, production-flip 6-step checklist.
+
+### Tests
+
+- All 6 existing national-address suites still green: **71/71 ✅**.
+- web-admin TypeScript: **0 errors**.
+
+---
+
+## [Unreleased] — 2026-05-15 — Phase 28 Saudi National Address (وَصِل / SPL) — platform-wide rollout
+
+### Added
+
+- **Backend foundation** — single source of truth for the Saudi National Address embedded subdocument.
+  - `backend/models/_shared/nationalAddress.subschema.js` — reusable Mongoose subdocument + `attachNationalAddressGuard(schema, opts)` strict `pre('validate')` hook.
+  - `backend/services/nationalAddressService.js` — `coerceFromPayload`, `verifyAndStamp`, `requireVerified` (HTTP-mappable codes: `NATIONAL_ADDRESS_REQUIRED` 400, `NATIONAL_ADDRESS_INVALID_FORMAT` 400, `NATIONAL_ADDRESS_UNVERIFIED` 422).
+- **Domain-model sweep** — 8 models now carry `nationalAddress` with the strict guard attached: Beneficiary, Customer, Vendor, Driver, Guardian, ContractParty, Employee (`HR/Employee.js`), Branch. Branch keeps its legacy `wasel_short_code` + `wasel_verification` fields for backward compatibility.
+- **HTTP** — `POST /api/v1/wasel/address/verify-and-stamp` (in `routes/wasel-address.routes.js`) returns a UI-ready subdocument; idempotent via the existing middleware.
+- **Next.js web-admin** (`alawael-rehab-platform/apps/web-admin`):
+  - `src/lib/types/national-address.ts` — shared `NationalAddress` shape.
+  - `nationalAddressApi.verifyAndStamp` / `searchByNationalId` added to `src/lib/api.ts`.
+  - `<NationalAddressField />` drop-in form widget at `src/components/ui/national-address-field.tsx`.
+  - Beneficiary form wired with strict client-side guard refusing submit when an address is present but unverified.
+- **Legacy frontend** — `frontend/src/components/NationalAddressField.jsx` (drop-in for pages still under `frontend/src/pages/Admin`).
+- **Mobile RN** — typed service client `mobile/src/services/modules/nationalAddress.ts` (`verifyAndStamp`, `searchByNationalId`).
+- **Prisma** — `Branch.nationalAddress`, `Beneficiary.nationalAddress`, `Guardian.nationalAddress`, `Employee.nationalAddress` JSON columns + migration `20260515120000_add_national_address`.
+- **Runbook** — `docs/blueprint/28-national-address-platform.md`.
+
+### Tests
+
+- `__tests__/national-address-subschema.test.js` — 12 ✅
+- `__tests__/national-address-service.test.js` — 13 ✅
+- `__tests__/beneficiary-national-address-guard.test.js` — 5 ✅
+- `__tests__/national-address-models-sweep.test.js` — 24 ✅ (every model in the rollout)
+- `__tests__/wasel-address-routes.test.js` — 9 ✅ (extended with `/verify-and-stamp` contract)
+- **Total: 63 new tests** — all green.
+
+### Why
+
+Closes the gap where only Branch carried a verified national address and other entities used free-text or ad-hoc structured fields. PDPL, CBAHI, and Vision 2030 e-Government targets require a Wasel-verified address on beneficiary, employee, and payment-touching records. The wave applies the strict-verification policy: when an address is provided it must be Wasel-verified, but records without any address remain valid (preserves existing data).
+
+### Operating note
+
+Defaults to `WASEL_MODE=mock` (CI + local dev — `...00` short codes simulate `not_found`, `...99` simulates `invalid_format`). Flip to `WASEL_MODE=live` with `WASEL_BASE_URL` + `WASEL_API_KEY` for production.
+
+---
+
 ## [Unreleased] — 2026-05-15 — Phase 27 CCTV Surveillance Platform (Hikvision) backend
 
 A new vertical: central CCTV monitoring for all branches over Hikvision

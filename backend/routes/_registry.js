@@ -125,6 +125,7 @@ const spcRoutes = safeRequire('../routes/spc.routes'); // Phase 29 (Statistical 
 const paretoA3Routes = safeRequire('../routes/paretoA3.routes'); // Phase 29 (Pareto + A3)
 const standardsRoutes = safeRequire('../routes/standardsTraceability.routes'); // Phase 29 (Standards traceability)
 const controlledDocumentRoutes = safeRequire('../routes/controlledDocument.routes'); // Phase 29 (21 CFR Part 11 docs)
+const supplierQualityRoutes = safeRequire('../routes/supplierQuality.routes'); // Phase 29 (Supplier SCARs + scorecards)
 const notificationLogRoutes = safeRequire('../routes/notificationLog.routes');
 // enterprise-risk → phases.registry.js; complaints-enhanced, kpi-dashboard, kpi-reports → features.registry.js
 const capaAdminRoutes = safeRequire('../routes/capa-admin.routes');
@@ -375,6 +376,7 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   dualMount(app, 'pareto-a3', paretoA3Routes); // Phase 29 — Pareto + A3 problem-solving
   dualMount(app, 'standards', standardsRoutes); // Phase 29 — Standards traceability (ISO 9001, JCI, CBAHI)
   dualMount(app, 'controlled-documents', controlledDocumentRoutes); // Phase 29 — 21 CFR Part 11 docs
+  dualMount(app, 'supplier-quality', supplierQualityRoutes); // Phase 29 — Supplier SCARs + scorecards
   // enterprise-risk is mounted in phases.registry.js
   dualMount(app, 'admin/capa', capaAdminRoutes);
   // complaints-enhanced, kpi-dashboard, kpi-reports are mounted in features.registry.js

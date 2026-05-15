@@ -1,0 +1,22 @@
+{
+  "name": "alawael-cctv-edge-gateway",
+  "version": "1.0.0",
+  "description": "بوابة طرفية CCTV — تعمل في كل فرع، تربط NVR Hikvision بالمركز",
+  "main": "server.js",
+  "scripts": {
+    "dev": "nodemon server.js",
+    "start": "node server.js",
+    "test": "node --test tests/"
+  },
+  "dependencies": {
+    "axios": "^1.15.0",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "ioredis": "^5.3.2",
+    "winston": "^3.11.0",
+    "ws": "^8.16.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}

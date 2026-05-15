@@ -1,0 +1,22 @@
+{
+  "branchCode": "RY-MAIN",
+  "central": {
+    "url": "https://alaweal.org",
+    "hmacSecret": "set-via-CENTRAL_HMAC_SECRET-env-var-do-not-commit"
+  },
+  "redis": {
+    "url": "redis://127.0.0.1:6379/11"
+  },
+  "nvr": {
+    "code": "RY-MAIN-NVR-01",
+    "ip": "10.10.20.5",
+    "port": 80,
+    "username": "admin",
+    "passwordRef": "NVR_RY_MAIN_01_PASSWORD"
+  },
+  "cameras": [
+    { "code": "RY-MAIN-CH01", "ip": "10.10.20.11", "port": 554 },
+    { "code": "RY-MAIN-CH02", "ip": "10.10.20.12", "port": 554 },
+    { "code": "RY-MAIN-CH03", "ip": "10.10.20.13", "port": 554 }
+  ]
+}

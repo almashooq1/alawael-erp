@@ -116,6 +116,10 @@ const {
   GEOFENCE_RADIUS_METERS,
 } = require('../services/transport/smartTransport.service');
 const { computeDriverScore, rankDrivers } = require('../services/transport/driverSafety.service');
+const {
+  getPreTripChecklist,
+  validatePreTripInspection,
+} = require('../services/transport/routeOptimization.service');
 const escapeRegex = require('../utils/escapeRegex');
 
 const TRACKING_TOKEN_SECRET =
@@ -582,7 +586,7 @@ router.post(
         .json({ success: false, message: 'الرحلة غير موجودة أو لا يمكن بدؤها' });
 
     // التحقق من فحص ما قبل الرحلة
-    if (req.body.skip_inspection !== true && !trip.pre_trip_inspection?.is_cleared) {
+    if (req.body.skip_inspection !== true && !trip.pre_trip_inspection?.completed) {
       return res.status(400).json({ success: false, message: 'يجب إكمال فحص ما قبل الرحلة أولاً' });
     }
 
@@ -660,6 +664,14 @@ router.post(
   })
 );
 
+// GET /transport-module/inspection/checklist — قالب بنود الفحص (مرفقات + داخلي + أمان)
+router.get(
+  '/inspection/checklist',
+  asyncHandler(async (_req, res) => {
+    res.json({ success: true, data: getPreTripChecklist() });
+  })
+);
+
 // POST /transport-module/trips/:id/inspection — فحص ما قبل الرحلة
 router.post(
   '/trips/:id/inspection',
@@ -668,24 +680,58 @@ router.post(
     const trip = await Trip.findOne({ _id: req.params.id, deleted_at: null });
     if (!trip) return res.status(404).json({ success: false, message: 'الرحلة غير موجودة' });
 
-    const { checklist_results, notes } = req.body;
-    const inspectionResult = inspectionService.processInspection(checklist_results);
+    // Caller must be the driver assigned to this trip (or admin role)
+    const role = String(req.user?.role || req.user?.roleCode || '').toUpperCase();
+    const isAdmin = GPS_ADMIN_ROLES.has(role);
+    if (!isAdmin && String(trip.driver_id) !== String(req.user?._id || req.user?.id)) {
+      return res.status(403).json({ success: false, message: 'غير مصرح: هذه الرحلة ليست لك' });
+    }
+
+    const { results, notes, odometer_start, fuel_level } = req.body;
+    if (!results || typeof results !== 'object') {
+      return res
+        .status(400)
+        .json({ success: false, message: 'يجب إرسال نتائج الفحص (results: {key: boolean})' });
+    }
+
+    let validated;
+    try {
+      validated = validatePreTripInspection(results);
+    } catch (e) {
+      return res.status(400).json({ success: false, message: e.message });
+    }
 
     trip.pre_trip_inspection = {
-      performed_at: new Date(),
-      performed_by: req.user?._id,
-      checklist: checklist_results || [],
-      is_cleared: inspectionResult.isCleared,
-      critical_failures: inspectionResult.criticalFailures,
+      completed: validated.passed,
+      completed_at: new Date(),
+      fuel_level: fuel_level || undefined,
+      odometer_start: odometer_start || undefined,
       notes,
+      // Persist the boolean snapshot per checklist key — schema accepts these
+      tire_condition: results.tires_condition ?? results.tire_condition,
+      lights_working: results.lights_working,
+      brakes_ok: results.brakes,
+      first_aid_kit: results.first_aid_kit,
+      fire_extinguisher: results.fire_extinguisher,
+      seat_belts_ok: results.seat_belts,
+      wheelchair_lock_ok: results.wheelchair_locks,
+      ac_working: results.ac_working,
+      cleanliness_ok: results.clean_interior,
     };
 
     await trip.save();
 
     res.json({
       success: true,
-      data: { trip, inspection: inspectionResult },
-      message: inspectionResult.isCleared
+      data: {
+        trip,
+        inspection: {
+          passed: validated.passed,
+          failedRequired: validated.failedRequired,
+          failedOptional: validated.failedOptional,
+        },
+      },
+      message: validated.passed
         ? 'الفحص مكتمل — الرحلة مسموح بها'
         : 'الفحص غير ناجح — يوجد بنود إلزامية فاشلة',
     });

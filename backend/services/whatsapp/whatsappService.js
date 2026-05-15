@@ -100,6 +100,52 @@ async function withRetry(fn, { retries = 3, baseDelayMs = 500 } = {}) {
 // the public API stable.
 
 // ═══════════════════════════════════════════════════════════════════════════
+// Consent gate (Meta policy + PDPL Art.13)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Throw an HTTP-4xx-shaped error if the phone is NOT cleared to receive
+ * a message of the given mode. Routes should call this before fanning out
+ * a marketing / notification send. For inbound 1:1 replies use
+ * `assertCanReply`.
+ *
+ * Modes:
+ *   - 'any'   — requires explicit opt-in OR an open 24h service window.
+ *                Use for templates / scheduled notifications.
+ *   - 'reply' — requires only the 24h service window. Use for free-form
+ *                responses to a message the user just sent.
+ *
+ * Returns the reason string ('opted_in' / 'in_service_window') on
+ * success. Throws a 403-shaped error with `code: 'CONSENT_REQUIRED'` on
+ * failure so route handlers can `res.status(err.statusCode).json(...)`.
+ */
+async function assertCanMessage(phone, mode = 'any') {
+  let WhatsAppConsent;
+  try {
+    WhatsAppConsent = require('../../models/WhatsAppConsent');
+  } catch {
+    return 'consent_model_unavailable'; // dev/test bootstrap order — open-fail
+  }
+  const normalized = normalizePhone(phone);
+  if (mode === 'reply') {
+    const ok = await WhatsAppConsent.canReply(normalized);
+    if (ok) return 'in_service_window';
+    throw Object.assign(new Error('Outside 24-hour customer-service window'), {
+      statusCode: 403,
+      code: 'CONSENT_REQUIRED',
+      details: { phone: maskPhone(normalized), mode: 'reply' },
+    });
+  }
+  const { allowed, reason } = await WhatsAppConsent.canMessage(normalized);
+  if (allowed) return reason;
+  throw Object.assign(new Error(`Cannot message ${maskPhone(normalized)}: ${reason}`), {
+    statusCode: 403,
+    code: 'CONSENT_REQUIRED',
+    details: { phone: maskPhone(normalized), reason, mode: 'any' },
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // Core Sending Methods
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -450,6 +496,7 @@ const whatsappService = {
   getTemplates,
   getMediaUrl,
   downloadMedia,
+  assertCanMessage,
   normalizePhone,
   maskPhone,
   isEnabled: () => cfg().enabled,

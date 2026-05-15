@@ -22,6 +22,7 @@
 
 const express = require('express');
 const request = require('supertest');
+const mongoose = require('mongoose');
 
 // ─── Mock WhatsApp services ──────────────────────────────────────────────────
 const mockVerifyWebhook = jest.fn();
@@ -116,12 +117,16 @@ const MockConversationModel = {
   findOneAndUpdate: jest.fn().mockResolvedValue(null),
 };
 
-// Prevent mongoose.model() lookup from throwing — inject our mock
-const mongoose = require('mongoose');
-jest.spyOn(mongoose, 'model').mockImplementation(name => {
-  if (name === 'WhatsAppConversation') return MockConversationModel;
-  throw new Error(`Model ${name} not registered`);
-});
+// Mock the model module directly so jest.mock() persists across resetModules
+jest.mock('../../models/WhatsAppConversation', () => ({
+  find: mockConversationFind,
+  findById: mockConversationFindById,
+  countDocuments: mockConversationCountDocuments,
+  findPendingReview: mockConversationFindPendingReview,
+  getAnalytics: mockConversationGetAnalytics,
+  findByIdAndUpdate: jest.fn().mockResolvedValue(null),
+  findOneAndUpdate: jest.fn().mockResolvedValue(null),
+}));
 
 // ─── App factory ─────────────────────────────────────────────────────────────
 function makeApp() {
@@ -134,6 +139,13 @@ function makeApp() {
 // ─── Reset mocks between tests ────────────────────────────────────────────────
 beforeEach(() => {
   jest.clearAllMocks();
+  // whatsapp.routes.js calls mongoose.model('WhatsAppConversation') first in
+  // getConversationModel() — spy on it to return the mock model so jest.mock()
+  // for the model file is never bypassed.
+  jest.spyOn(mongoose, 'model').mockImplementation(name => {
+    if (name === 'WhatsAppConversation') return MockConversationModel;
+    throw new Error(`Model ${name} not registered in test`);
+  });
   mockIsEnabled.mockReturnValue(true);
   mockIsAIEnabled.mockReturnValue(true);
   mockListTemplates.mockReturnValue(TEMPLATE_LIST);
@@ -282,7 +294,11 @@ describe('POST /send/text', () => {
     const app = makeApp();
     const res = await request(app)
       .post('/api/v1/whatsapp/send/text')
-      .send({ to: '+966501234567', text: 'مرحباً' });
+      // skipConsentCheck = true bypasses the new consent gate added in
+      // commit 9a621bc2+. This test exercises the route plumbing only;
+      // separate suites in `__tests__/whatsapp-consent-gate.test.js`
+      // cover the consent gate itself.
+      .send({ to: '+966501234567', text: 'مرحباً', skipConsentCheck: true });
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
     expect(mockSendText).toHaveBeenCalledWith('+966501234567', 'مرحباً');

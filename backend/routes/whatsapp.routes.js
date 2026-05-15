@@ -245,8 +245,31 @@ router.post(
   '/send/text',
   asyncHandler(async (req, res) => {
     validate(['to', 'text'], req.body);
-    const { to, text, beneficiaryId, familyMemberId, staffNote: _staffNote } = req.body;
+    const {
+      to,
+      text,
+      beneficiaryId,
+      familyMemberId,
+      staffNote: _staffNote,
+      skipConsentCheck,
+    } = req.body;
     const staffId = req.user?._id || req.user?.id;
+
+    // Consent gate — free-form text needs the 24h service window OR opt-in.
+    // `skipConsentCheck` is an admin override (e.g. staff sending a manual
+    // reply they know is in-window but the consent record predates tracking).
+    if (!skipConsentCheck) {
+      try {
+        await whatsappService.assertCanMessage(to, 'any');
+      } catch (err) {
+        return res.status(err.statusCode || 403).json({
+          success: false,
+          code: err.code,
+          message: err.message,
+          details: err.details,
+        });
+      }
+    }
 
     const result = await whatsappService.sendText(to, text);
 
@@ -288,7 +311,19 @@ router.post(
   '/send/template',
   asyncHandler(async (req, res) => {
     validate(['to', 'templateName'], req.body);
-    const { to, templateName, language, components } = req.body;
+    const { to, templateName, language, components, skipConsentCheck } = req.body;
+    if (!skipConsentCheck) {
+      try {
+        await whatsappService.assertCanMessage(to, 'any');
+      } catch (err) {
+        return res.status(err.statusCode || 403).json({
+          success: false,
+          code: err.code,
+          message: err.message,
+          details: err.details,
+        });
+      }
+    }
     const result = await whatsappService.sendTemplate(to, templateName, language, components);
     res.json({ success: result.success, data: result });
   })
@@ -299,7 +334,19 @@ router.post(
   '/send/document',
   asyncHandler(async (req, res) => {
     validate(['to', 'url'], req.body);
-    const { to, url, caption, filename } = req.body;
+    const { to, url, caption, filename, skipConsentCheck } = req.body;
+    if (!skipConsentCheck) {
+      try {
+        await whatsappService.assertCanMessage(to, 'any');
+      } catch (err) {
+        return res.status(err.statusCode || 403).json({
+          success: false,
+          code: err.code,
+          message: err.message,
+          details: err.details,
+        });
+      }
+    }
     const result = await whatsappService.sendDocument(to, url, caption, { filename });
     res.json({ success: result.success, data: result });
   })

@@ -136,6 +136,13 @@ const PROBES = [
   mountedRoute('phase29-benchmarks', '/api/v1/benchmarks'),
   mountedRoute('phase29-command-center', '/api/v1/quality/command-center'),
 
+  // ── Phase 30 Intelligent HR Platform (shipped 2026-05-15) ─────────
+  // Workflow Automation Engine + LLM Copilot. Auth-required so we
+  // accept 401 (not mounted = 404 = real failure).
+  mountedRoute('phase30-hr-workflow-rules', '/api/v1/hr/workflow/rules'),
+  mountedRoute('phase30-hr-copilot-status', '/api/v1/hr/copilot/status'),
+  mountedRoute('phase30-hr-smart-analytics', '/api/v1/hr/smart-analytics/overview'),
+
   // ── Auth-gated diagnostics (non-critical without a token) ────────
   {
     name: 'integration-health-aggregator',

@@ -8,6 +8,54 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [Unreleased] — 2026-05-15 — Phase 30: Intelligent HR Platform
+
+Closed the gap between a feature-rich HR backend (Phase 11, 564 tests) and a
+near-empty admin UI. Added the intelligent layer: predictive analytics
+exposure, rule-driven workflow automation, and an LLM-backed copilot — all
+PII-redacted and audit-logged.
+
+### Added — Backend (66666/)
+
+- **HR Workflow Automation Engine** (`services/hr/hrWorkflowEngine.js`) with 5 curated built-in rules:
+
+  - `leave-pending-too-long` — escalate stale pending requests
+  - `license-expiring-soon` — tiered severity at 14/30/60 days for SCFHS licenses
+  - `contract-ending-soon` — 90-day window on fixed-term contracts
+  - `excessive-late-arrivals` — flag patterns over `windowDays`
+  - `grievance-unanswered` — escalate open grievances past threshold
+    Routes at `/api/v1/hr/workflow/{rules,run,dry-run,rules/:id/run}` (admin-only). Notifications via `unifiedNotifier` fallback chain; audit trail via `AuditLog`. **9 unit tests**.
+
+- **HR Copilot** (`services/hr/hrCopilot.service.js`) — Claude Haiku 4.5 backed assistant:
+
+  - `summarizeEmployee` — bilingual 3-paragraph executive brief
+  - `draftLetter` — bilingual drafts (warning/promotion/recommendation/appreciation/probation-extension/termination-offer)
+  - `answerQuestion` — grounded Q&A bounded to supplied policy context
+  - `suggestImprovements` — SMART coaching plan from a performance evaluation
+    Routes at `/api/v1/hr/copilot/{status,summarize/:id,draft-letter,q-and-a,suggest/:id}`. SDK injected (`@anthropic-ai/sdk` optional). PII redaction mandatory, prompt caching on system prompt, LRU result cache (200 entries, 5 min TTL), audit trail on every call. **10 unit tests**.
+
+- **Smoke probes** — 3 new entries in `post-deploy-smoke.js`:
+  `phase30-hr-workflow-rules` · `phase30-hr-copilot-status` · `phase30-hr-smart-analytics`
+
+### Added — Web-admin (alawael-rehab-platform/)
+
+- **13 new admin pages** under `/hr/*` + ESS portal + intelligence center:
+  - Attendance: dashboard (`/hr/attendance`), pending approvals with bulk actions, shifts CRUD
+  - Leaves: admin queue + balances matrix
+  - Payroll: monthly view + full payslip detail
+  - Performance: evaluation queue + criteria detail + succession plans
+  - ESS: `/me/hr` (snapshot + check-in/out)
+  - Intelligence center: `/hr/intelligence` (workflow runner + last-run findings)
+  - Copilot UI: `/hr/copilot` (3-tab: Q&A / Summarize / Letter)
+- **New API client**: `lib/hr-api.ts` (attendance/leave/payroll/performance/ess/workflow/copilot/smart-analytics)
+- **7 new sidebar entries** under "الموارد البشرية" group
+
+### Runbook
+
+`docs/blueprint/30-intelligent-hr-platform.md` documents the full surface, enable steps (`ANTHROPIC_API_KEY` to activate copilot), deferred items, and compliance notes (PII redaction + audit trail).
+
+---
+
 ## [Unreleased] — 2026-05-15 — Phase 29: World-Class QMS + Executive Command Center
 
 ### Added — Phase 29 (17 vertical slices, 4 pillars)

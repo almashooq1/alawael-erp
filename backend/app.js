@@ -740,6 +740,101 @@ try {
           logger.warn('[HrInbox] routes skipped:', inboxErr.message);
         }
       }
+
+      // HR Smart Analytics — تحليلات ذكية شاملة
+      try {
+        const { createHrSmartAnalyticsRouter } = require('./routes/hr/hr-smart-analytics.routes');
+        app.use(
+          '/api/v1/hr/smart-analytics',
+          authenticate,
+          createHrSmartAnalyticsRouter({ logger })
+        );
+        logger.info('[HrSmartAnalytics] ✓ /api/v1/hr/smart-analytics mounted');
+      } catch (saErr) {
+        logger.warn('[HrSmartAnalytics] routes skipped:', saErr.message);
+      }
+
+      // HR Workflow Automation Engine — Phase 30 (Intelligent HR Platform)
+      try {
+        const { createHrWorkflowRouter } = require('./routes/hr/hr-workflow.routes');
+        let workflowNotifier = null;
+        let workflowAudit = null;
+        try {
+          workflowNotifier = require('./services/unifiedNotifier');
+        } catch {
+          /* optional */
+        }
+        try {
+          const AuditLog = require('./models/AuditLog');
+          workflowAudit = {
+            async log(entry) {
+              try {
+                await AuditLog.create(entry);
+              } catch (e) {
+                logger.warn('[hr-workflow audit]', e.message);
+              }
+            },
+          };
+        } catch {
+          /* optional */
+        }
+        app.use(
+          '/api/v1/hr/workflow',
+          authenticate,
+          createHrWorkflowRouter({ logger, notifier: workflowNotifier, auditLogger: workflowAudit })
+        );
+        logger.info('[HrWorkflow] ✓ /api/v1/hr/workflow mounted');
+      } catch (wfErr) {
+        logger.warn('[HrWorkflow] routes skipped:', wfErr.message);
+      }
+
+      // HR Copilot (LLM) — Phase 30
+      try {
+        const { createHrCopilot } = require('./services/hr/hrCopilot.service');
+        const { createHrCopilotRouter } = require('./routes/hr/hr-copilot.routes');
+
+        // Anthropic SDK is INJECTED. We try to wire it from the shared
+        // platform client (Phase 18 dashboard narrative). If unavailable,
+        // every copilot call returns { available: false } gracefully.
+        let anthropicClient = null;
+        try {
+          // Reuse the same client builder the dashboard narrative uses, if present.
+          const Anthropic = require('@anthropic-ai/sdk');
+          if (Anthropic && process.env.ANTHROPIC_API_KEY) {
+            anthropicClient = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+          }
+        } catch {
+          /* SDK is optional */
+        }
+
+        let copilotAudit = null;
+        try {
+          const AuditLog = require('./models/AuditLog');
+          copilotAudit = {
+            async log(entry) {
+              try {
+                await AuditLog.create(entry);
+              } catch (e) {
+                logger.warn('[hr-copilot audit]', e.message);
+              }
+            },
+          };
+        } catch {
+          /* optional */
+        }
+
+        const copilot = createHrCopilot({ anthropicClient, logger });
+        app.use(
+          '/api/v1/hr/copilot',
+          authenticate,
+          createHrCopilotRouter({ logger, copilot, auditLogger: copilotAudit })
+        );
+        logger.info(
+          `[HrCopilot] ✓ /api/v1/hr/copilot mounted (available=${copilot.isAvailable()})`
+        );
+      } catch (cpErr) {
+        logger.warn('[HrCopilot] routes skipped:', cpErr.message);
+      }
     } catch (adminErr) {
       logger.warn(`[HrEmployeeAdmin] routes skipped: ${adminErr.message}`, {
         stack: adminErr.stack,
@@ -1044,6 +1139,249 @@ try {
   logger.info('[ZATCACredAdmin] ✓ routes mounted at /api/v1/admin/zatca-credentials');
 } catch (err) {
   logger.warn('[ZATCACredAdmin] routes skipped:', err.message);
+}
+
+// ─── HR Performance Evaluations & Succession Planning ────────────────────────
+try {
+  const { createHrPerformanceRouter } = require('./routes/hr/hr-performance.routes');
+  const { authenticate: _authPerfMw } = require('./middleware/auth');
+  app.use('/api/v1/hr/performance', _authPerfMw, createHrPerformanceRouter({ logger }));
+  logger.info('[HrPerformance] ✓ /api/v1/hr/performance mounted');
+} catch (perfErr) {
+  logger.warn('[HrPerformance] routes skipped:', perfErr.message);
+}
+
+// ─── Payroll & Compensation ───────────────────────────────────────────────────
+try {
+  const payrollRouter = require('./routes/payroll.routes');
+  app.use('/api/v1/payroll', payrollRouter);
+  logger.info('[Payroll] ✓ /api/v1/payroll mounted');
+} catch (payrollErr) {
+  logger.warn('[Payroll] routes skipped:', payrollErr.message);
+}
+
+// ─── Recruitment & Hiring ─────────────────────────────────────────────────────
+try {
+  const recruitmentRouter = require('./routes/recruitment.routes');
+  app.use('/api/v1/recruitment', recruitmentRouter);
+  logger.info('[Recruitment] ✓ /api/v1/recruitment mounted');
+} catch (recruitErr) {
+  logger.warn('[Recruitment] routes skipped:', recruitErr.message);
+}
+
+// ─── General Insurance ──────────────────────────────────────────────────────
+try {
+  const insuranceRouter = require('./routes/insurance.routes');
+  app.use('/api/v1/insurance', insuranceRouter);
+  logger.info('[Insurance] ✓ /api/v1/insurance mounted');
+} catch (insuranceErr) {
+  logger.warn('[Insurance] routes skipped:', insuranceErr.message);
+}
+
+// ─── Employee Portal (Self-Service) ──────────────────────────────────────────
+try {
+  const employeePortalRouter = require('./routes/employeePortal.routes');
+  app.use('/api/v1/employee-portal', employeePortalRouter);
+  logger.info('[EmployeePortal] ✓ /api/v1/employee-portal mounted');
+} catch (empPortalErr) {
+  logger.warn('[EmployeePortal] routes skipped:', empPortalErr.message);
+}
+
+// ─── Employee Affairs (Phase 1 / Phase 2 / Phase 3 / Expanded) ───────────────
+try {
+  const empAffairsRouter = require('./routes/employeeAffairs.routes');
+  app.use('/api/v1/employee-affairs', empAffairsRouter);
+  logger.info('[EmployeeAffairs] ✓ /api/v1/employee-affairs mounted');
+} catch (e) {
+  logger.warn('[EmployeeAffairs] routes skipped:', e.message);
+}
+
+try {
+  const empAffairsP2Router = require('./routes/employee-affairs-phase2.routes');
+  app.use('/api/v1/employee-affairs-phase2', empAffairsP2Router);
+  logger.info('[EmployeeAffairsP2] ✓ /api/v1/employee-affairs-phase2 mounted');
+} catch (e) {
+  logger.warn('[EmployeeAffairsP2] routes skipped:', e.message);
+}
+
+try {
+  const empAffairsP3Router = require('./routes/employee-affairs-phase3.routes');
+  app.use('/api/v1/employee-affairs-phase3', empAffairsP3Router);
+  logger.info('[EmployeeAffairsP3] ✓ /api/v1/employee-affairs-phase3 mounted');
+} catch (e) {
+  logger.warn('[EmployeeAffairsP3] routes skipped:', e.message);
+}
+
+try {
+  const empAffairsExpandedRouter = require('./routes/employee-affairs-expanded.routes');
+  app.use('/api/v1/employee-affairs-expanded', empAffairsExpandedRouter);
+  logger.info('[EmployeeAffairsExpanded] ✓ /api/v1/employee-affairs-expanded mounted');
+} catch (e) {
+  logger.warn('[EmployeeAffairsExpanded] routes skipped:', e.message);
+}
+
+// ─── Training & Development ───────────────────────────────────────────────────
+try {
+  const trainingRouter = require('./routes/training.routes');
+  app.use('/api/v1/training', trainingRouter);
+  logger.info('[Training] ✓ /api/v1/training mounted');
+} catch (trainingErr) {
+  logger.warn('[Training] routes skipped:', trainingErr.message);
+}
+
+// ─── HR Insurance ─────────────────────────────────────────────────────────────
+try {
+  const hrInsuranceRouter = require('./routes/hr-insurance.routes');
+  app.use('/api/v1/hr/insurance', hrInsuranceRouter);
+  logger.info('[HrInsurance] ✓ /api/v1/hr/insurance mounted');
+} catch (hrInsuranceErr) {
+  logger.warn('[HrInsurance] routes skipped:', hrInsuranceErr.message);
+}
+
+// ─── HR Attendance ────────────────────────────────────────────────────────────
+try {
+  const hrAttendanceRouter = require('./routes/hr-attendance.routes');
+  app.use('/api/v1/hr-attendance', hrAttendanceRouter);
+  logger.info('[HrAttendance] ✓ /api/v1/hr-attendance mounted');
+} catch (e) {
+  logger.warn('[HrAttendance] routes skipped:', e.message);
+}
+
+// ─── ZKTeco Biometric ─────────────────────────────────────────────────────────
+try {
+  const zktecoRouter = require('./routes/zkteco.routes');
+  app.use('/api/v1/zkteco', zktecoRouter);
+  logger.info('[ZKTeco] ✓ /api/v1/zkteco mounted');
+} catch (e) {
+  logger.warn('[ZKTeco] routes skipped:', e.message);
+}
+
+// ─── Leave Requests ───────────────────────────────────────────────────────────
+try {
+  const leaveRequestsRouter = require('./routes/leave-requests.routes');
+  app.use('/api/v1/leave-requests', leaveRequestsRouter);
+  logger.info('[LeaveRequests] ✓ /api/v1/leave-requests mounted');
+} catch (e) {
+  logger.warn('[LeaveRequests] routes skipped:', e.message);
+}
+
+// ─── KPI Dashboard ────────────────────────────────────────────────────────────
+try {
+  const kpiDashboardRouter = require('./routes/kpi-dashboard.routes');
+  app.use('/api/v1/kpi-dashboard', kpiDashboardRouter);
+  logger.info('[KpiDashboard] ✓ /api/v1/kpi-dashboard mounted');
+} catch (kpiErr) {
+  logger.warn('[KpiDashboard] routes skipped:', kpiErr.message);
+}
+
+// ─── Work Shifts & Schedules ──────────────────────────────────────────────────
+try {
+  const workShiftsRouter = require('./routes/work-shifts.routes');
+  app.use('/api/v1/work-shifts', workShiftsRouter);
+  logger.info('[WorkShifts] ✓ /api/v1/work-shifts mounted');
+} catch (workShiftsErr) {
+  logger.warn('[WorkShifts] routes skipped:', workShiftsErr.message);
+}
+
+// ─── Compensation & Benefits ──────────────────────────────────────────────────
+try {
+  const compensationRouter = require('./routes/compensationBenefits.routes');
+  app.use('/api/v1/compensation-benefits', compensationRouter);
+  logger.info('[CompensationBenefits] ✓ /api/v1/compensation-benefits mounted');
+} catch (compensationErr) {
+  logger.warn('[CompensationBenefits] routes skipped:', compensationErr.message);
+}
+
+// ─── HR System (Attendance / Leaves / Payroll core) ───────────────────────────
+try {
+  const hrSystemRouter = require('./routes/hrSystem.routes');
+  app.use('/api/v1/hr-system', hrSystemRouter);
+  logger.info('[HrSystem] ✓ /api/v1/hr-system mounted');
+} catch (e) {
+  logger.warn('[HrSystem] routes skipped:', e.message);
+}
+
+// ─── Contract Management ──────────────────────────────────────────────────────
+try {
+  const contractMgmtRouter = require('./routes/contract-management.routes');
+  app.use('/api/v1/contract-management', contractMgmtRouter);
+  logger.info('[ContractManagement] ✓ /api/v1/contract-management mounted');
+} catch (contractMgmtErr) {
+  logger.warn('[ContractManagement] routes skipped:', contractMgmtErr.message);
+}
+
+// ─── Complaints & Suggestions ─────────────────────────────────────────────────
+try {
+  const complaintsRouter = require('./routes/complaints.routes');
+  app.use('/api/v1/complaints', complaintsRouter);
+  logger.info('[Complaints] ✓ /api/v1/complaints mounted');
+} catch (complaintsErr) {
+  logger.warn('[Complaints] routes skipped:', complaintsErr.message);
+}
+
+// ─── Auto-mount all remaining route files ────────────────────────────────────
+// Mounts every routes/*.js file not already individually registered above.
+// Filename → /api/v1/<kebab-case> (e.g. academicYear.routes.js → /api/v1/academic-year)
+try {
+  const { autoMountRoutes } = require('./utils/autoRouteLoader');
+  const routesDir = require('path').join(__dirname, 'routes');
+  // Files already required individually above — skip to avoid double-mount
+  const alreadyMounted = [
+    '_registry',
+    'admin-ops-dlq.routes',
+    'ai.recommendations.routes',
+    'audit-reviews.routes',
+    'beneficiary-consents.routes',
+    'bi-dashboard.routes',
+    'compensationBenefits.routes',
+    'complaints.routes',
+    'contract-management.routes',
+    'dashboard-alerts.routes',
+    'dashboard-saved-views.routes',
+    'dashboards-platform.routes',
+    'employee-affairs-expanded.routes',
+    'employee-affairs-phase2.routes',
+    'employee-affairs-phase3.routes',
+    'employeeAffairs.routes',
+    'employeePortal.routes',
+    'forms-catalog.routes',
+    'forms-submission.routes',
+    'hr-attendance.routes',
+    'hr-insurance.routes',
+    'hrSystem.routes',
+    'insurance.routes',
+    'kpi-dashboard.routes',
+    'landing-config.routes',
+    'leave-requests.routes',
+    'nafath-signing.routes',
+    'notifications-log.routes',
+    'nphies-webhook.routes',
+    'openapi-integration.routes',
+    'parent-portal-v1.routes',
+    'payroll.routes',
+    'public-forms.routes',
+    'public-uploads.routes',
+    'push.routes',
+    'recruitment.routes',
+    'rehab-disciplines.routes',
+    'rehab-goal-suggestions.routes',
+    'reports-inbox.routes',
+    'reports-ops.routes',
+    'student-portal.routes',
+    'therapist-portal.routes',
+    'training.routes',
+    'universal-codes.routes',
+    'uploads.routes',
+    'visitor-auth.routes',
+    'wasel-address.routes',
+    'work-shifts.routes',
+    'yakeen-verification.routes',
+    'zatca-credentials-admin.routes',
+    'zkteco.routes',
+  ];
+  autoMountRoutes(app, routesDir, alreadyMounted);
+} catch (autoErr) {
+  logger.warn('[AutoRouter] failed to initialize:', autoErr.message);
 }
 
 // ─── Error Handling (MUST be after all routes) ───────────────────────────────

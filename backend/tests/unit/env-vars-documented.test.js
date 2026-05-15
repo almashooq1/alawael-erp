@@ -167,7 +167,14 @@ describe('env-vars-documented', () => {
   // (BACKUP_ENCRYPTION_KEY, ENABLE_AUTO_BACKUP, DB_BACKUP_KEEP_DAYS,
   //  OPS_ALERT_EMAIL, OPS_ALERT_PHONE, NPHIES_RECON_ENABLED) that
   // are documented for operators but only consumed by scripts/seeds.
-  const DEAD_CEILING = 172;
+  // 2026-05-15: bumped 172→175 to admit 3 Phase 30 operator flags
+  // documented for the Intelligent HR Platform (HR_WORKFLOW_CRON,
+  // HR_WORKFLOW_DISABLED, ANTHROPIC_API_KEY). The HR_WORKFLOW_* pair
+  // is read in startup/schedulers.js (in REVERSE_SCAN) but the
+  // ANTHROPIC_API_KEY read lives in app.js (outside REVERSE_SCAN by
+  // design — boot-time config). Documented so operators can wire
+  // Copilot without spelunking the codebase.
+  const DEAD_CEILING = 175;
 
   test(`dead documented vars stay at-or-below baseline (${DEAD_CEILING})`, () => {
     const allRefs = new Set();

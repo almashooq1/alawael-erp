@@ -1,5 +1,13 @@
 'use strict';
 
+// Bump the file-level timeout. When no service deps are injected, the
+// command-center falls back to lazy `require()` of Phase 29 module
+// services, which immediately call `mongoose.model('X').aggregate(...)`.
+// Without a real Mongo connection these calls buffer for the mongoose
+// default (10s) before rejecting; `_safe` catches the error correctly
+// but the test would have already timed out at the 5s default.
+jest.setTimeout(30000);
+
 const { createCommandCenterService } = require('../services/quality/commandCenter.service');
 
 function makeDashStub(payload) {

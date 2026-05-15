@@ -139,6 +139,11 @@ describe('admin-routes-have-probes', () => {
         const m = probePath.match(/^\/api\/((?:admin\/)?[^/]+)/);
         if (!m) continue;
         const mountKey = m[1];
+        // Skip /api/v1/* paths — those are versioned routes mounted via
+        // `app.use('/api/v1/...')` (Phase 29 QMS + Phase 30 HR), not
+        // through the dualMount registry. Their mount integrity is
+        // covered by the smoke probe itself returning non-404.
+        if (mountKey === 'v1') continue;
         if (!mounted.has(mountKey)) dead.push({ probePath, mountKey });
       }
       if (dead.length > 0) {

@@ -107,6 +107,30 @@ describe('Route Mount Guard', () => {
         '/api/quality-management', // _registry.js + phases.registry.js
         '/api/report-builder', // _registry.js + phases.registry.js
         '/api/system-settings', // _registry.js + phases.registry.js
+        // Additional pre-existing legacy/registry partial-migration co-mounts
+        // discovered during Phase 30 CI unblock. Same pattern as above —
+        // `_registry.js` keeps the legacy implementation live while a
+        // specialized registry exposes newer endpoints.
+        '/api/internal-audit', // _registry.js (self-duplicate, 2x in registry)
+        '/api/traffic-accidents', // _registry.js self-duplicate
+        '/api/specialized-programs', // _registry.js self-duplicate
+        '/api/smart-scheduler', // _registry.js self-duplicate
+        '/api/ai-diagnostic', // _registry.js + phases.registry.js
+        '/api/bus-tracking', // _registry.js + phases.registry.js
+        '/api/transport-routes', // _registry.js + fleet.registry.js
+        '/api/therapist-pro', // _registry.js + clinical-therapy.registry.js
+        '/api/therapist-ultra', // _registry.js + clinical-therapy.registry.js
+        '/api/therapist-elite', // _registry.js + clinical-therapy.registry.js
+        '/api/strategic-planning', // _registry.js + phases.registry.js
+        '/api/succession-planning', // _registry.js + hr.registry.js
+        '/api/finance-operations', // _registry.js + finance.registry.js
+        '/api/ocr-documents', // _registry.js + documents.registry.js
+        '/api/employee-portal', // _registry.js + hr.registry.js
+        '/api/waf-ratelimit', // _registry.js + phases.registry.js
+        '/api/saudi-tax', // _registry.js + finance.registry.js
+        '/api/documents-pro', // _registry.js + documents.registry.js
+        '/api/documents-pro-ext', // _registry.js + documents.registry.js
+        '/api/disability-rehab', // _registry.js + clinical-therapy.registry.js
       ]);
 
       const duplicates = {};

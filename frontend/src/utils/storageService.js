@@ -20,6 +20,7 @@ const KEYS = {
   USER_PORTAL: 'userPortal',
   PORTAL: 'portal',
   THEME_MODE: 'themeMode',
+  CALENDAR_TYPE: 'calendarType',
   NOTIFICATION_PREFS: 'notificationPreferences',
   DOCUMENT_LIST_PREFS: 'documentListPrefs',
   ORG_NAME: 'orgName',
@@ -114,6 +115,16 @@ export function getThemeMode() {
 }
 export function setThemeMode(mode) {
   setRaw(KEYS.THEME_MODE, mode);
+}
+
+// ---------------------------------------------------------------------------
+// Public API — Calendar Type ('gregorian' | 'hijri')
+// ---------------------------------------------------------------------------
+export function getCalendarType() {
+  return getRaw(KEYS.CALENDAR_TYPE) || 'gregorian';
+}
+export function setCalendarType(type) {
+  setRaw(KEYS.CALENDAR_TYPE, type);
 }
 
 // ---------------------------------------------------------------------------

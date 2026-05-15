@@ -141,6 +141,82 @@ function setupSchedulers({ isTestEnv }) {
       logger.warn('⚠️  Care bootstrap failed', { error: err.message });
     }
   }, 55000);
+
+  // ── Phase 30 HR Workflow Engine scheduler ───────────────────────────────
+  //
+  // Runs the rule-driven HR workflow engine on a cron. Default cadence
+  // is every 2 hours (override with `HR_WORKFLOW_CRON`). Set
+  // `HR_WORKFLOW_DISABLED=true` to skip in dev/test. The engine itself
+  // is built lazily on first call so a missing model degrades a single
+  // rule rather than blocking the cron.
+  setTimeout(() => {
+    if (process.env.HR_WORKFLOW_DISABLED === 'true') {
+      logger.info('[HrWorkflowScheduler] disabled via HR_WORKFLOW_DISABLED');
+      return;
+    }
+    try {
+      const { createHrWorkflowEngine } = require('../services/hr/hrWorkflowEngine');
+      const { createHrWorkflowScheduler } = require('../services/hr/hrWorkflowScheduler');
+
+      // Build models — match the route-side resolver in hr-workflow.routes.js
+      const models = {};
+      const tryModel = (key, path) => {
+        try {
+          models[key] = require(path);
+        } catch (e) {
+          logger.warn(`[HrWorkflowScheduler] model ${key} unavailable: ${e.message}`);
+        }
+      };
+      tryModel('Employee', '../models/Employee');
+      tryModel('LeaveRequest', '../models/LeaveRequest');
+      tryModel('Grievance', '../models/HR/Grievance');
+      tryModel('EmploymentContract', '../models/HR/EmploymentContract');
+      tryModel('SmartAttendance', '../models/smart-attendance');
+      tryModel('User', '../models/user.model');
+
+      let notifier = null;
+      try {
+        notifier = require('../services/unifiedNotifier');
+      } catch {
+        /* optional */
+      }
+
+      let auditLogger = null;
+      try {
+        const AuditLog = require('../models/AuditLog');
+        auditLogger = {
+          async log(entry) {
+            try {
+              await AuditLog.create(entry);
+            } catch (e) {
+              logger.warn('[HrWorkflowScheduler audit]', e.message);
+            }
+          },
+        };
+      } catch {
+        /* optional */
+      }
+
+      const engine = createHrWorkflowEngine({ models, notifier, auditLogger, logger });
+
+      let cron = null;
+      try {
+        cron = require('node-cron');
+      } catch (e) {
+        logger.warn(
+          '[HrWorkflowScheduler] node-cron not installed, scheduler not started: ' + e.message
+        );
+        return;
+      }
+
+      const scheduler = createHrWorkflowScheduler({ engine, cron, logger });
+      scheduler.start();
+      registerShutdownHook('HrWorkflowScheduler', scheduler.stop);
+      logger.info('✅ Phase 30 HR Workflow scheduler ticking');
+    } catch (err) {
+      logger.warn('⚠️  HR Workflow scheduler failed to start', { error: err.message });
+    }
+  }, 60000);
 }
 
 module.exports = { setupSchedulers };

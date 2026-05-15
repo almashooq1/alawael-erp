@@ -92,6 +92,21 @@ describe('Route Mount Guard', () => {
         '/api/episodes', // legacy (238 lines) + DDD domain (204 lines, partial)
         '/api/quality', // legacy (file missing, null handler) + DDD domain
         '/api/reports', // legacy (1844 lines) + DDD domain (86 lines, partial)
+        // Legacy registry vs specialized-registry co-mounts. The specialized
+        // registries (phases/features/clinical-therapy/clinical-assessment/hr)
+        // expose newer endpoints while `_registry.js` keeps the legacy
+        // implementations live for backward compatibility. Each pair is
+        // documented in the phase commits.
+        '/api/therapist-extended', // _registry.js + clinical-therapy.registry.js
+        '/api/icf-assessments', // _registry.js + clinical-assessment.registry.js
+        '/api/referrals', // _registry.js + features.registry.js
+        '/api/incidents', // _registry.js + phases.registry.js
+        '/api/ceo-dashboard', // _registry.js + phases.registry.js
+        '/api/compensation-benefits', // _registry.js + hr.registry.js
+        '/api/knowledge-center', // _registry.js + phases.registry.js
+        '/api/quality-management', // _registry.js + phases.registry.js
+        '/api/report-builder', // _registry.js + phases.registry.js
+        '/api/system-settings', // _registry.js + phases.registry.js
       ]);
 
       const duplicates = {};

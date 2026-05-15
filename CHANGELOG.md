@@ -8,6 +8,56 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [Unreleased] — 2026-05-15 — Phase 29: World-Class QMS + Executive Command Center
+
+### Added — Phase 29 (17 vertical slices, 4 pillars)
+
+**Pillar 1 — Analysis tooling**: FMEA/HFMEA (6 flavours, 2 scales, 15 tests), Structured RCA (Ishikawa + 5-Whys, 15 tests), SPC (7 chart types + Cp/Cpk + 8 Western Electric rules, 25 tests), Pareto + Toyota A3 (13 tests).
+
+**Pillar 2 — International standards**: ISO 9001:2015 / JCI 7th ed. / CBAHI HC 4th ed. traceability matrix (21 tests). 21 CFR Part 11 controlled documents with cryptographic hash-chain e-signatures + `verifyIntegrity()` tamper detection (13 tests).
+
+**Pillar 3 — Operations**: Supplier SCARs + 5-dim scorecard (11 tests), Calibration management ISO/IEC 17025 (10 tests), Change Control with CAB voting (8 tests), Internal Audit auto-scheduler ISO 19011 (8 tests), Cost of Quality ASQ PAF (9 tests).
+
+**Pillar 4 — Analytical intelligence**: Predictive risk score from 10 signals (9 tests), Trend forecasting OLS + CUSUM (13 tests), Bilingual LLM narratives with mandatory PII redactor (14 tests), Mobile inspector backend offline-first (8 tests), 11-metric industry benchmarks (9 tests).
+
+**Frontend**: 28 Next.js pages, 19 sidebar entries grouped under "الجودة".
+
+### Added — Same-day follow-up (6 hardening additions)
+
+- **Cross-module subscribers** auto-draft CAPA items for SPC special-cause / FMEA H-band / Audit NC / Calibration failure events. Severity-mapped. Opt-out via `PHASE29_SUBSCRIBERS_ENABLED=false`. 11 tests.
+- **ISO 13485:2016 + ISO 14971:2019** plug-in registries (5 standards total now). 5 new tests.
+- **Phase 29 demo seed** populates ~32 demo records across 12 modules. CLI: `node backend/scripts/seed-phase29-demo.js`. 3 tests.
+- **Mobile Inspector PWA** at `/inspector` with IndexedDB offline queue, 3 checklist templates, auto-sync every 30s.
+- **Executive QMS Command Center** — `/api/v1/quality/command-center` aggregator + `/quality` landing page. Prioritised "attention NOW" list across 10 kinds. 7 tests.
+- **Post-deploy smoke probes** for all 17 Phase 29 endpoints. Same regression-class as the May 2026 ZATCA-bug. 17 tests (was 13).
+
+### Aggregate
+
+- **227 backend tests** (201 + 26 follow-up)
+- **18 backend modules**, **20 HTTP routes**, **29 front-end pages**, **5 international standards**, **4 auto-CAPA triggers**, **17 smoke probes**
+
+### Runbook
+
+`docs/blueprint/29-world-class-qms.md` — canonical entry point with per-module API surface, capabilities, worked examples, test counts.
+
+### Commits pushed to origin/main
+
+```
+055ce36c  Pillar 1 backend — analysis tooling
+424b8efc  Pillar 2 backend — standards compliance
+14c091a9  Pillar 3.1 backend — Supplier SCARs
+cfa48fef  Pillars 3.2-4.5 backend — operations + intelligence
+6dc00be7  chore(frontend): unblock pre-push lint
+d4442864  Phase 29 follow-up — subscribers + ISO 13485/14971 + seed
+04f56f3c  Allowlist 10 legacy registry partial-migration co-mounts
+2a92bcd8  Executive QMS Command Center aggregator
+20850372  Post-deploy smoke probes for Phase 29 (17 endpoints)
+```
+
+Frontend repo (no remote — bundle-backed): `2a81c8a`, `bf9b…`, `469fb32`, `931f08c`, `1b20b05`, `05ddacc`.
+
+---
+
 ## [Unreleased] — 2026-05-15 — Phase 28 extended rollout (Supplier UI + RN + ops scripts)
 
 ### Added — UI rollout extension

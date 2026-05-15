@@ -431,4 +431,72 @@ Offline-first ingestion. Client-generated UUID enables idempotent re-submission.
 | 4 — Analytical intelligence | 5      | 53            | Predictive risk, Trend forecast, LLM narratives, Mobile inspector, Benchmarks          |
 | **Total**                   | **17** | **201**       | **17 backend modules + 19 routes + 19 services + many models**                         |
 
-Standards now natively supported: AIAG-VDA 2019, VA NCPS HFMEA, IEC 60812, JCAHO PR.5, ASQ / IHI / TJC sentinel-event, AIAG SPC 2nd ed., ISO 7870, Western Electric + Nelson rules, Pareto Principle, Toyota A3 / Lean PDCA, ISO 9001:2015 §4-§10, JCI 7th ed. (IPSG / ACC / PCC / AOP / COP / MMU / PFE / QPS / PCI / GLD / FMS / SQE / MOI), CBAHI HC 4th ed. (LD / QM / PR / AC / AS / MM / IC / FS / HR / IM / ESR), FDA 21 CFR §11.10 / §11.50 / §11.70 / §11.200, ISO/IEC 17025, ISO 9001 §7.1.5 / §8.4 / §8.5.6, FDA 21 CFR §820.30, ISO 19011:2018, ASQ PAF model.
+Standards now natively supported: AIAG-VDA 2019, VA NCPS HFMEA, IEC 60812, JCAHO PR.5, ASQ / IHI / TJC sentinel-event, AIAG SPC 2nd ed., ISO 7870, Western Electric + Nelson rules, Pareto Principle, Toyota A3 / Lean PDCA, ISO 9001:2015 §4-§10, JCI 7th ed. (IPSG / ACC / PCC / AOP / COP / MMU / PFE / QPS / PCI / GLD / FMS / SQE / MOI), CBAHI HC 4th ed. (LD / QM / PR / AC / AS / MM / IC / FS / HR / IM / ESR), FDA 21 CFR §11.10 / §11.50 / §11.70 / §11.200, ISO/IEC 17025, ISO 9001 §7.1.5 / §8.4 / §8.5.6, FDA 21 CFR §820.30, ISO 19011:2018, ASQ PAF model, **ISO 13485:2016 (Medical-device QMS)**, **ISO 14971:2019 (Medical-device risk management)**.
+
+---
+
+## Phase 29 follow-up (same day — 6 hardening additions)
+
+### 1. Cross-module subscribers — `phase29-subscribers.js`
+
+Wired at `backend/server.js` boot behind `PHASE29_SUBSCRIBERS_ENABLED=false` opt-out. Listens on `qualityEventBus` and auto-creates `CorrectivePreventiveAction` records when producers fire:
+
+| Event                                             | Auto-CAPA     | Severity                           |
+| ------------------------------------------------- | ------------- | ---------------------------------- |
+| `quality.spc.special_cause_detected`              | corrective    | rule_1 → critical, else major      |
+| `quality.fmea.high_priority_detected`             | preventive    | critical                           |
+| `quality.audit.nc_recorded`                       | corrective    | major_nc → critical, minor → major |
+| `quality.calibration.failed`                      | corrective    | major                              |
+| `quality.supplier.scar_overdue`                   | notifier only | —                                  |
+| `quality.standard.clause_status_changed` (lapsed) | notifier      | —                                  |
+| `quality.doc.signature_revoked`                   | notifier      | —                                  |
+| `quality.predictive_risk.computed` (critical)     | notifier      | —                                  |
+| `quality.inspection.fail_detected`                | notifier      | —                                  |
+
+Tests: 11/11.
+
+### 2. ISO 13485 + ISO 14971 registries
+
+Plug-in only — no code change to `StandardsTraceability`. New files:
+`backend/config/standards/iso-13485-2016.registry.js`, `iso-14971-2019.registry.js`. Tests: 26/26.
+
+### 3. Phase 29 demo seed
+
+CLI: `node backend/scripts/seed-phase29-demo.js [--reset|--dry-run]`. Populates ~32 demo records across 12 modules. `DEMO-Q29-*` marker on every record. Tests: 3/3.
+
+### 4. Mobile Inspector PWA
+
+`apps/web-admin/src/app/inspector/page.tsx` + `lib/inspector/queue.ts` (alawael-rehab-platform repo). IndexedDB offline queue + auto-sync every 30s + idempotent UUID submission. Existing `/admin/sw.js` + `/admin/manifest.webmanifest` make it installable.
+
+### 5. Executive QMS Command Center
+
+| Layer   | Path                                                                               |
+| ------- | ---------------------------------------------------------------------------------- |
+| Service | `backend/services/quality/commandCenter.service.js`                                |
+| Route   | `backend/routes/qualityCommandCenter.routes.js` → `/api/v1/quality/command-center` |
+| Tests   | 7/7                                                                                |
+| Page    | `apps/web-admin/src/app/(dashboard)/quality/page.tsx`                              |
+| Sidebar | "🎯 مركز القيادة" at top of Quality group                                          |
+
+Aggregates 12 module dashboards + predictive risk + 5-standard coverage. Computes prioritised "attention NOW" list across 10 kinds. Defensive — silently omits broken modules; never throws.
+
+### 6. Post-deploy smoke-probes
+
+Added 17 critical mount probes to `backend/scripts/post-deploy-smoke.js` (one per Phase 29 endpoint + command-center). Catches the same regression class as the ZATCA-bug. Tests: 17/17.
+
+---
+
+## Aggregate metrics — after all follow-ups
+
+| Concern                     | Count                                              |
+| --------------------------- | -------------------------------------------------- |
+| Vertical slices shipped     | **17**                                             |
+| Backend tests               | **227**                                            |
+| Backend modules             | **18** (17 modules + command-center aggregator)    |
+| HTTP routes mounted         | **20**                                             |
+| Front-end Next.js pages     | **29** (28 module pages + `/quality` root)         |
+| Mobile Inspector PWA        | **1** offline-first page + IndexedDB queue         |
+| Supported standards         | **5** (ISO 9001, JCI, CBAHI, ISO 13485, ISO 14971) |
+| Auto-CAPA event triggers    | **4** (SPC, FMEA, Audit NC, Calibration)           |
+| Smoke-probe critical mounts | **17**                                             |
+| Demo records (seed)         | **~32** across 12 modules                          |

@@ -23,3 +23,6 @@ export * from './nafath';
 
 export { default as notify } from './notify';
 export * from './notify';
+
+export { default as cctv } from './cctv';
+export * from './cctv';

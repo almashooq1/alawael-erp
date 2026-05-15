@@ -34,6 +34,11 @@ import ChatListScreen from '../screens/chat/ChatListScreen';
 import ChatThreadScreen from '../screens/chat/ChatThreadScreen';
 import NafathLoginScreen from '../screens/auth/NafathLoginScreen';
 
+import CctvBranchesScreen from '../screens/cctv/CctvBranchesScreen';
+import CctvCamerasScreen from '../screens/cctv/CctvCamerasScreen';
+import CctvCameraDetailScreen from '../screens/cctv/CctvCameraDetailScreen';
+import CctvAlertsScreen from '../screens/cctv/CctvAlertsScreen';
+
 type ParentTabsParamList = {
   MyChildren: undefined;
   Telehealth: undefined;
@@ -46,11 +51,20 @@ type TherapistTabsParamList = {
   ChatList: undefined;
 };
 
+type SecurityTabsParamList = {
+  CctvBranches: undefined;
+  CctvAlerts: undefined;
+};
+
 type RootParamList = {
   NafathLogin: undefined;
   ParentTabs: undefined;
   TherapistTabs: undefined;
+  SecurityTabs: undefined;
   ChatThread: { conversationId: string; otherName?: string };
+  CctvCameras: { branchCode: string };
+  CctvCameraDetail: { cameraId: string };
+  CctvAlerts: undefined;
 };
 
 type SessionUser = { id: string; email: string; role: string; name?: string };
@@ -58,12 +72,16 @@ type SessionUser = { id: string; email: string; role: string; name?: string };
 const RootStack = createNativeStackNavigator<RootParamList>();
 const ParentTab = createBottomTabNavigator<ParentTabsParamList>();
 const TherapistTab = createBottomTabNavigator<TherapistTabsParamList>();
+const SecurityTab = createBottomTabNavigator<SecurityTabsParamList>();
 
 function isParent(role: string) {
   return ['parent', 'guardian'].includes((role || '').toLowerCase());
 }
 function isTherapist(role: string) {
   return ['therapist', 'specialist', 'clinical_supervisor'].includes((role || '').toLowerCase());
+}
+function isSecurity(role: string) {
+  return ['security_officer', 'security', 'admin', 'manager'].includes((role || '').toLowerCase());
 }
 
 // ── Tab navigators ───────────────────────────────────────────────────────
@@ -103,6 +121,21 @@ function TherapistTabs({ navigation }: any) {
   );
 }
 
+function SecurityTabs() {
+  return (
+    <SecurityTab.Navigator
+      screenOptions={{
+        headerShown: false,
+        tabBarActiveTintColor: '#dc2626',
+        tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
+      }}
+    >
+      <SecurityTab.Screen name="CctvBranches" component={CctvBranchesScreen} options={{ tabBarLabel: 'الفروع' }} />
+      <SecurityTab.Screen name="CctvAlerts" component={CctvAlertsScreen} options={{ tabBarLabel: 'التنبيهات' }} />
+    </SecurityTab.Navigator>
+  );
+}
+
 // ── Root navigator ───────────────────────────────────────────────────────
 export default function SprintAppNavigator({
   embedded = false,
@@ -135,11 +168,13 @@ export default function SprintAppNavigator({
 
   const initialRoute: keyof RootParamList = !user
     ? 'NafathLogin'
-    : isParent(user.role)
-      ? 'ParentTabs'
-      : isTherapist(user.role)
-        ? 'TherapistTabs'
-        : 'ParentTabs'; // admin/default falls back to parent view
+    : isSecurity(user.role)
+      ? 'SecurityTabs'
+      : isParent(user.role)
+        ? 'ParentTabs'
+        : isTherapist(user.role)
+          ? 'TherapistTabs'
+          : 'ParentTabs'; // default falls back to parent view
 
   const tree = (
     <RootStack.Navigator
@@ -158,6 +193,10 @@ export default function SprintAppNavigator({
       </RootStack.Screen>
       <RootStack.Screen name="ParentTabs" component={ParentTabs} />
       <RootStack.Screen name="TherapistTabs" component={TherapistTabs} />
+      <RootStack.Screen name="SecurityTabs" component={SecurityTabs} />
+      <RootStack.Screen name="CctvCameras" component={CctvCamerasScreen} />
+      <RootStack.Screen name="CctvCameraDetail" component={CctvCameraDetailScreen} />
+      <RootStack.Screen name="CctvAlerts" component={CctvAlertsScreen} />
       <RootStack.Screen
         name="ChatThread"
         options={{
@@ -188,7 +227,7 @@ export default function SprintAppNavigator({
   return embedded ? tree : <NavigationContainer>{tree}</NavigationContainer>;
 }
 
-export { ParentTabs, TherapistTabs, isParent, isTherapist };
+export { ParentTabs, TherapistTabs, SecurityTabs, isParent, isTherapist, isSecurity };
 
 const styles = StyleSheet.create({
   splash: {

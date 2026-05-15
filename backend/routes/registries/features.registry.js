@@ -30,6 +30,7 @@ module.exports = function registerFeatureRoutes(
   const guardiansRoutes = safeRequire('../routes/guardians.routes');
   const beneficiaryTransfersRoutes = safeRequire('../routes/beneficiary-transfers.routes');
   const transportModuleRoutes = safeRequire('../routes/transport-module.routes');
+  const transportPublicTrackRoutes = safeRequire('../routes/transport-public-track.routes');
   const schedulingModuleRoutes = safeRequire('../routes/scheduling-module.routes');
   const inventoryModuleRoutes = safeRequire('../routes/inventory-module.routes');
   const qualityModuleRoutes = safeRequire('../routes/quality-module.routes');
@@ -69,8 +70,13 @@ module.exports = function registerFeatureRoutes(
   // ─── prompt_07: الوحدات التشغيلية — HR + Transport + Scheduling ────
   dualMount(app, 'transport-module', transportModuleRoutes);
   dualMount(app, 'scheduling-module', schedulingModuleRoutes);
+  // Public parent-tracking endpoint (no auth, HMAC-signed token, 6h TTL)
+  if (transportPublicTrackRoutes) {
+    safeMount(app, '/api/v1/track', transportPublicTrackRoutes);
+    safeMount(app, '/api/track', transportPublicTrackRoutes);
+  }
   logger.info(
-    '✅ prompt_07 Operational Modules mounted: transport-module, scheduling-module (hr-module in hr.registry.js, finance-module in finance.registry.js) — 120+ endpoints'
+    '✅ prompt_07 Operational Modules mounted: transport-module, scheduling-module + public /track/:token (hr-module in hr.registry.js, finance-module in finance.registry.js) — 120+ endpoints'
   );
 
   // ─── prompt_08: التواصل + الملفات + المخزون + الجودة ────────────────────
@@ -227,6 +233,41 @@ module.exports = function registerFeatureRoutes(
 
   logger.info(
     '🎉 البرومبت 23 مُثبّت بالكامل: إدارة المتطوعين (41) + الخدمة المجتمعية (42) + التوظيف الداخلي (43)'
+  );
+
+  // ─── Beneficiary Core — نواة المستفيد الموحدة ─────────────────────────────
+  const beneficiaryCoreRoutes = safeRequire('../routes/beneficiary-core.routes');
+  dualMount(app, 'beneficiary-core', beneficiaryCoreRoutes);
+  logger.info(
+    '✅ Beneficiary Core routes mounted: dashboard, list (search/filter/paginate), 360° profile (9 parallel data sources), timeline, stats, episodes, sessions, assessments, documents, care-plan, progress, alerts — الملف الطولي الموحد للمستفيد (15+ endpoints)'
+  );
+
+  // ─── Episode Center — مركز الحلقة العلاجية الموحدة ────────────────────────
+  const episodeCenterRoutes = safeRequire('../routes/episode-center.routes');
+  dualMount(app, 'episode-center', episodeCenterRoutes);
+  logger.info(
+    '✅ Episode Center routes mounted: dashboard (phase/type/priority distribution), list (multi-filter), full episode (care-plan + sessions + assessments + phase-progress), advance-phase (12-step lifecycle), update-status, team-member management, beneficiary episodes — مركز الحلقة العلاجية (10+ endpoints)'
+  );
+
+  // ─── Measures Library — مكتبة المقاييس الموحدة ────────────────────────────
+  const measuresLibraryRoutes = safeRequire('../routes/measures-library.routes');
+  dualMount(app, 'measures-library', measuresLibraryRoutes);
+  logger.info(
+    '✅ Measures Library routes mounted: dashboard (stats/category/type), list (search/filter/paginate), create, get detail + usage stats, update, scoring guide, smart suggest (by disability/age) — مكتبة المقاييس السريرية (7 endpoints)'
+  );
+
+  // ─── Session Center — مركز الجلسات العلاجية الموحد ───────────────────────
+  const sessionCenterRoutes = safeRequire('../routes/session-center.routes');
+  dualMount(app, 'session-center', sessionCenterRoutes);
+  logger.info(
+    '✅ Session Center routes mounted: dashboard (KPIs/trends/distributions), calendar, therapist-load, attendance report, episode sessions, beneficiary timeline, goals progress, SOAP summary — مركز الجلسات العلاجية (8 endpoints)'
+  );
+
+  // ─── Report Center — مركز التقارير السريرية الموحد ────────────────────────
+  const reportCenterRoutes = safeRequire('../routes/report-center.routes');
+  dualMount(app, 'report-center', reportCenterRoutes);
+  logger.info(
+    '✅ Report Center routes mounted: executive summary, clinical KPIs, beneficiaries report, sessions report, outcomes, quality indicators, discharge report — مركز التقارير السريرية (7 endpoints)'
   );
 
   // ── Setup & Admin Init — إعداد أولي (محمي بـ secret key) ──────────────

@@ -14,12 +14,56 @@
 const express = require('express');
 const { authenticate } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+let createCustomLimiter;
+try {
+  ({ createCustomLimiter } = require('../middleware/rateLimiter'));
+} catch {
+  createCustomLimiter = () => (_req, _res, next) => next();
+}
 const router = express.Router();
 const mongoose = require('mongoose');
 
 // 🔒 All transport routes require authentication
 router.use(authenticate);
 router.use(requireBranchAccess);
+
+// Rate-limiter for GPS endpoints: 600 single-point uploads / minute / device
+// (1 ping every 100ms upper bound — well above the 10s typical cadence)
+const gpsLimiter = createCustomLimiter({
+  windowMs: 60 * 1000,
+  max: 600,
+  prefix: 'rl:gps:',
+  message: { error: 'تجاوز معدل تحديثات GPS المسموح' },
+  keyGenerator: req => req.body?.vehicle_id || req.user?.id || req.ip || 'anon',
+});
+
+// Rate-limiter for batch GPS uploads: 60 batches / minute / device
+const gpsBatchLimiter = createCustomLimiter({
+  windowMs: 60 * 1000,
+  max: 60,
+  prefix: 'rl:gps-batch:',
+  message: { error: 'تجاوز معدل رفع دفعات GPS المسموح' },
+  keyGenerator: req => req.body?.vehicle_id || req.user?.id || req.ip || 'anon',
+});
+
+// ─── GPS payload validation ──────────────────────────────────────────────────
+const MAX_GPS_BATCH = 100;
+function validateGpsPoint(p) {
+  if (!p || typeof p !== 'object') return 'بيانات GPS غير صالحة';
+  if (typeof p.latitude !== 'number' || p.latitude < -90 || p.latitude > 90) {
+    return 'خط العرض (latitude) غير صالح';
+  }
+  if (typeof p.longitude !== 'number' || p.longitude < -180 || p.longitude > 180) {
+    return 'خط الطول (longitude) غير صالح';
+  }
+  if (p.speed !== undefined && (typeof p.speed !== 'number' || p.speed < 0 || p.speed > 300)) {
+    return 'السرعة غير منطقية';
+  }
+  if (p.heading !== undefined && (p.heading < 0 || p.heading > 360)) {
+    return 'الاتجاه غير صالح (يجب 0-360)';
+  }
+  return null;
+}
 // ─── Models ──────────────────────────────────────────────────────────────────
 const Vehicle = require('../models/transport/Vehicle');
 const TransportRoute = require('../models/transport/TransportRoute');
@@ -33,7 +77,21 @@ const {
   PreTripInspectionService,
   ParentNotificationService,
 } = require('../services/transport/TransportService');
+const {
+  nearestUnvisitedWaypoint,
+  buildNavigationLinks,
+  buildMultiStopGoogleMapsUrl,
+  computeLiveEta,
+  signTrackingToken,
+  verifyTrackingToken,
+  haversineDistanceMeters,
+  GEOFENCE_RADIUS_METERS,
+} = require('../services/transport/smartTransport.service');
+const { computeDriverScore, rankDrivers } = require('../services/transport/driverSafety.service');
 const escapeRegex = require('../utils/escapeRegex');
+
+const TRACKING_TOKEN_SECRET =
+  process.env.TRANSPORT_TRACKING_SECRET || 'transport-tracking-default-rotate-me';
 
 const routeOptimizer = new RouteOptimizationService();
 const inspectionService = new PreTripInspectionService();
@@ -87,7 +145,7 @@ router.get(
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const total = await Vehicle.countDocuments(filter);
     const vehicles = await Vehicle.find(filter)
-      .populate('assigned_driver_id', 'name phone')
+      .populate('current_driver_id', 'name phone')
       .populate('branch_id', 'name_ar')
       .sort({ vehicle_number: 1 })
       .skip(skip)
@@ -119,7 +177,7 @@ router.get(
   validateObjectId(),
   asyncHandler(async (req, res) => {
     const vehicle = await Vehicle.findOne({ _id: req.params.id, deleted_at: null })
-      .populate('assigned_driver_id', 'name phone license_number')
+      .populate('current_driver_id', 'name phone license_number')
       .populate('branch_id', 'name_ar');
     if (!vehicle) return res.status(404).json({ success: false, message: 'المركبة غير موجودة' });
     res.json({ success: true, data: vehicle });
@@ -190,9 +248,9 @@ router.post(
     const { driver_id } = req.body;
     const vehicle = await Vehicle.findOneAndUpdate(
       { _id: req.params.id, deleted_at: null },
-      { assigned_driver_id: driver_id, updated_at: new Date() },
+      { current_driver_id: driver_id, updated_at: new Date() },
       { new: true }
-    ).populate('assigned_driver_id', 'name phone');
+    ).populate('current_driver_id', 'name phone');
     if (!vehicle) return res.status(404).json({ success: false, message: 'المركبة غير موجودة' });
     res.json({ success: true, data: vehicle, message: 'تم تعيين السائق' });
   })
@@ -690,37 +748,115 @@ router.get(
 // POST /transport-module/gps — رفع نقطة GPS (من التطبيق في المركبة)
 router.post(
   '/gps',
+  gpsLimiter,
   asyncHandler(async (req, res) => {
-    const { vehicle_id, latitude, longitude, speed, heading, altitude, accuracy, trip_id } =
-      req.body;
+    const { vehicle_id, trip_id, ...point } = req.body;
 
-    if (!vehicle_id || !latitude || !longitude) {
-      return res.status(400).json({ success: false, message: 'بيانات GPS ناقصة' });
+    if (!vehicle_id || !mongoose.Types.ObjectId.isValid(vehicle_id)) {
+      return res.status(400).json({ success: false, message: 'معرّف المركبة غير صالح' });
+    }
+    const err = validateGpsPoint(point);
+    if (err) return res.status(400).json({ success: false, message: err });
+
+    const speedLimit = point.speed_limit || 120;
+    const gpsPoint = await GpsTracking.create({
+      vehicle_id,
+      trip_id: trip_id && mongoose.Types.ObjectId.isValid(trip_id) ? trip_id : null,
+      timestamp: point.timestamp ? new Date(point.timestamp) : new Date(),
+      latitude: point.latitude,
+      longitude: point.longitude,
+      speed: point.speed || 0,
+      heading: point.heading,
+      altitude: point.altitude,
+      accuracy: point.accuracy,
+      engine_on: point.engine_on !== false,
+      speed_limit: speedLimit,
+      is_speeding: (point.speed || 0) > speedLimit,
+      odometer: point.odometer,
+      fuel_level: point.fuel_level,
+    });
+
+    // تحديث آخر موقع معروف للمركبة (الحقول الصحيحة في موديل Vehicle)
+    await Vehicle.findByIdAndUpdate(vehicle_id, {
+      last_known_lat: point.latitude,
+      last_known_lng: point.longitude,
+      last_gps_update: new Date(),
+    });
+
+    res
+      .status(201)
+      .json({ success: true, data: { _id: gpsPoint._id }, message: 'تم تسجيل الموقع' });
+  })
+);
+
+// POST /transport-module/gps/batch — رفع دفعة GPS (للأجهزة بدون شبكة مستقرة)
+router.post(
+  '/gps/batch',
+  gpsBatchLimiter,
+  asyncHandler(async (req, res) => {
+    const { vehicle_id, trip_id, points } = req.body;
+
+    if (!vehicle_id || !mongoose.Types.ObjectId.isValid(vehicle_id)) {
+      return res.status(400).json({ success: false, message: 'معرّف المركبة غير صالح' });
+    }
+    if (!Array.isArray(points) || points.length === 0) {
+      return res.status(400).json({ success: false, message: 'الدفعة فارغة' });
+    }
+    if (points.length > MAX_GPS_BATCH) {
+      return res
+        .status(413)
+        .json({ success: false, message: `الحد الأقصى ${MAX_GPS_BATCH} نقطة في الدفعة` });
     }
 
-    const gpsPoint = new GpsTracking({
-      vehicle_id,
-      latitude,
-      longitude,
-      speed: speed || 0,
-      heading: heading || 0,
-      altitude: altitude || 0,
-      accuracy: accuracy || 0,
-      trip_id: trip_id || null,
-      timestamp: new Date(),
-    });
+    const docs = [];
+    const errors = [];
+    for (let i = 0; i < points.length; i++) {
+      const err = validateGpsPoint(points[i]);
+      if (err) {
+        errors.push({ index: i, error: err });
+        continue;
+      }
+      const p = points[i];
+      const speedLimit = p.speed_limit || 120;
+      docs.push({
+        vehicle_id,
+        trip_id: trip_id && mongoose.Types.ObjectId.isValid(trip_id) ? trip_id : null,
+        timestamp: p.timestamp ? new Date(p.timestamp) : new Date(),
+        latitude: p.latitude,
+        longitude: p.longitude,
+        speed: p.speed || 0,
+        heading: p.heading,
+        altitude: p.altitude,
+        accuracy: p.accuracy,
+        engine_on: p.engine_on !== false,
+        speed_limit: speedLimit,
+        is_speeding: (p.speed || 0) > speedLimit,
+        odometer: p.odometer,
+        fuel_level: p.fuel_level,
+      });
+    }
 
-    await gpsPoint.save();
+    if (docs.length === 0) {
+      return res.status(400).json({ success: false, message: 'لا توجد نقاط صالحة', errors });
+    }
 
-    // تحديث بيانات المركبة
+    const inserted = await GpsTracking.insertMany(docs, { ordered: false });
+    const latest = docs.reduce((acc, p) =>
+      !acc || new Date(p.timestamp) > new Date(acc.timestamp) ? p : acc
+    );
     await Vehicle.findByIdAndUpdate(vehicle_id, {
-      'current_location.latitude': latitude,
-      'current_location.longitude': longitude,
-      'current_location.updated_at': new Date(),
-      'current_location.speed': speed || 0,
+      last_known_lat: latest.latitude,
+      last_known_lng: latest.longitude,
+      last_gps_update: new Date(latest.timestamp),
     });
 
-    res.status(201).json({ success: true, message: 'تم تسجيل الموقع' });
+    res.status(201).json({
+      success: true,
+      inserted: inserted.length,
+      rejected: errors.length,
+      errors,
+      message: 'تم رفع الدفعة',
+    });
   })
 );
 
@@ -987,6 +1123,509 @@ router.get(
     };
 
     res.json({ success: true, data: { trips, summary } });
+  })
+);
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 7. SMART DRIVER — رحلة السائق الذكية
+// ══════════════════════════════════════════════════════════════════════════════
+
+function startOfToday() {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+function endOfToday() {
+  const d = new Date();
+  d.setHours(23, 59, 59, 999);
+  return d;
+}
+
+// GET /transport-module/driver/my-trip-today
+// السائق المسجّل دخوله يحصل على رحلته اليوم مع ترتيب المحطات + روابط ملاحة
+router.get(
+  '/driver/my-trip-today',
+  asyncHandler(async (req, res) => {
+    const driverId = req.user?._id || req.user?.id;
+    if (!driverId) {
+      return res.status(401).json({ success: false, message: 'يجب تسجيل الدخول كسائق' });
+    }
+
+    const trip = await Trip.findOne({
+      driver_id: driverId,
+      deleted_at: null,
+      trip_date: { $gte: startOfToday(), $lte: endOfToday() },
+      status: { $in: ['scheduled', 'in_progress', 'delayed'] },
+    })
+      .populate(
+        'vehicle_id',
+        'license_plate vehicle_type capacity make model last_known_lat last_known_lng'
+      )
+      .populate(
+        'passengers.beneficiary_id',
+        'full_name_ar file_number guardian_name guardian_phone address national_address'
+      )
+      .populate({
+        path: 'route_id',
+        select: 'route_number route_name_ar waypoints total_distance_km estimated_duration_minutes',
+        populate: { path: 'waypoints.beneficiary_id', select: 'full_name_ar guardian_phone' },
+      })
+      .sort({ scheduled_departure: 1 });
+
+    if (!trip) {
+      return res.json({
+        success: true,
+        data: null,
+        message: 'لا توجد رحلة مجدولة لك اليوم',
+      });
+    }
+
+    // آخر موقع للمركبة
+    const lastGps = trip.vehicle_id
+      ? await GpsTracking.findOne({ vehicle_id: trip.vehicle_id._id })
+          .sort({ timestamp: -1 })
+          .select('latitude longitude speed heading timestamp')
+      : null;
+
+    // ركاب تم استلامهم / توصيلهم
+    const visitedIds = (trip.passengers || [])
+      .filter(p => p.status === 'picked_up' || p.status === 'dropped_off')
+      .map(p => p.beneficiary_id?._id || p.beneficiary_id);
+
+    const orderedWaypoints = [...(trip.route_id?.waypoints || [])].sort(
+      (a, b) => (a.order || 0) - (b.order || 0)
+    );
+
+    const navigationLinks = buildNavigationLinks(orderedWaypoints);
+
+    // multi-stop link من الموقع الحالي للمركبة
+    const origin = lastGps
+      ? { latitude: lastGps.latitude, longitude: lastGps.longitude }
+      : trip.vehicle_id?.last_known_lat
+        ? { latitude: trip.vehicle_id.last_known_lat, longitude: trip.vehicle_id.last_known_lng }
+        : null;
+    const fullRouteUrl = origin ? buildMultiStopGoogleMapsUrl(origin, orderedWaypoints) : null;
+
+    // ETA حي إذا توفر GPS
+    const liveEta = lastGps
+      ? computeLiveEta(
+          { latitude: lastGps.latitude, longitude: lastGps.longitude },
+          orderedWaypoints,
+          visitedIds.map(String)
+        )
+      : [];
+
+    // المحطة التالية + هل السائق داخل geofence؟
+    const nextStop = lastGps
+      ? nearestUnvisitedWaypoint(
+          { latitude: lastGps.latitude, longitude: lastGps.longitude },
+          orderedWaypoints,
+          visitedIds.map(String)
+        )
+      : null;
+
+    res.json({
+      success: true,
+      data: {
+        trip: {
+          _id: trip._id,
+          trip_number: trip.trip_number,
+          trip_type: trip.trip_type,
+          status: trip.status,
+          scheduled_departure: trip.scheduled_departure,
+          actual_departure: trip.actual_departure,
+          pre_trip_inspection_completed: trip.pre_trip_inspection?.completed || false,
+          total_passengers: trip.total_passengers,
+          picked_up_count: trip.picked_up_count,
+          absent_count: trip.absent_count,
+        },
+        vehicle: trip.vehicle_id,
+        route: {
+          _id: trip.route_id?._id,
+          route_number: trip.route_id?.route_number,
+          route_name_ar: trip.route_id?.route_name_ar,
+          total_distance_km: trip.route_id?.total_distance_km,
+          estimated_duration_minutes: trip.route_id?.estimated_duration_minutes,
+          waypoints: orderedWaypoints,
+        },
+        passengers: trip.passengers,
+        gps: lastGps,
+        nextStop,
+        liveEta,
+        navigationLinks,
+        fullRouteUrl,
+        geofence_radius_meters: GEOFENCE_RADIUS_METERS,
+      },
+    });
+  })
+);
+
+// POST /transport-module/driver/trips/:id/pickup-at
+// السائق يضغط "وصلت" — يتم التحقق من GPS وتسجيل الاستلام تلقائياً
+router.post(
+  '/driver/trips/:id/pickup-at',
+  validateObjectId(),
+  asyncHandler(async (req, res) => {
+    const driverId = req.user?._id || req.user?.id;
+    const { latitude, longitude, beneficiary_id, force } = req.body;
+    if (typeof latitude !== 'number' || typeof longitude !== 'number') {
+      return res.status(400).json({ success: false, message: 'إحداثيات GPS مطلوبة' });
+    }
+
+    const trip = await Trip.findOne({ _id: req.params.id, deleted_at: null }).populate({
+      path: 'route_id',
+      select: 'waypoints',
+    });
+    if (!trip) return res.status(404).json({ success: false, message: 'الرحلة غير موجودة' });
+    if (String(trip.driver_id) !== String(driverId)) {
+      return res.status(403).json({ success: false, message: 'غير مصرح: هذه الرحلة ليست لك' });
+    }
+
+    let passenger;
+    if (beneficiary_id) {
+      passenger = trip.passengers.find(p => String(p.beneficiary_id) === String(beneficiary_id));
+    } else {
+      // اختر المستفيد الأقرب جغرافياً ضمن المحطات غير المزارة
+      const unvisited = (trip.route_id?.waypoints || []).filter(wp => {
+        if (!wp.beneficiary_id || wp.lat == null) return false;
+        const p = trip.passengers.find(
+          pp => String(pp.beneficiary_id) === String(wp.beneficiary_id)
+        );
+        return p && p.status === 'scheduled';
+      });
+      const nearest = nearestUnvisitedWaypoint({ latitude, longitude }, unvisited);
+      if (nearest) {
+        passenger = trip.passengers.find(
+          p => String(p.beneficiary_id) === String(nearest.waypoint.beneficiary_id)
+        );
+      }
+    }
+
+    if (!passenger) {
+      return res
+        .status(404)
+        .json({ success: false, message: 'لا يوجد مستفيد قريب من موقعك ضمن قائمة الرحلة' });
+    }
+
+    // تحقق من القرب الجغرافي مع المحطة
+    const wp = trip.route_id?.waypoints?.find(
+      w => String(w.beneficiary_id) === String(passenger.beneficiary_id)
+    );
+    let distanceMeters = null;
+    if (wp && wp.lat != null && wp.lng != null) {
+      distanceMeters = Math.round(haversineDistanceMeters(latitude, longitude, wp.lat, wp.lng));
+      if (distanceMeters > GEOFENCE_RADIUS_METERS && !force) {
+        return res.status(409).json({
+          success: false,
+          message: `أنت ${distanceMeters}م من المستفيد. اقترب أو أعد المحاولة مع force=true`,
+          distanceMeters,
+          geofence_radius_meters: GEOFENCE_RADIUS_METERS,
+          beneficiary_id: passenger.beneficiary_id,
+        });
+      }
+    }
+
+    passenger.status = 'picked_up';
+    passenger.pickup_time_actual = new Date();
+    passenger.pickup_lat = latitude;
+    passenger.pickup_lng = longitude;
+    await trip.save();
+
+    res.json({
+      success: true,
+      data: {
+        beneficiary_id: passenger.beneficiary_id,
+        status: passenger.status,
+        distanceMeters,
+        pickup_time: passenger.pickup_time_actual,
+      },
+      message: 'تم تسجيل استلام المستفيد',
+    });
+  })
+);
+
+// POST /transport-module/driver/trips/:id/dropoff-at
+router.post(
+  '/driver/trips/:id/dropoff-at',
+  validateObjectId(),
+  asyncHandler(async (req, res) => {
+    const driverId = req.user?._id || req.user?.id;
+    const { latitude, longitude, beneficiary_id } = req.body;
+    if (typeof latitude !== 'number' || typeof longitude !== 'number' || !beneficiary_id) {
+      return res
+        .status(400)
+        .json({ success: false, message: 'إحداثيات GPS و beneficiary_id مطلوبة' });
+    }
+
+    const trip = await Trip.findOne({ _id: req.params.id, deleted_at: null });
+    if (!trip) return res.status(404).json({ success: false, message: 'الرحلة غير موجودة' });
+    if (String(trip.driver_id) !== String(driverId)) {
+      return res.status(403).json({ success: false, message: 'غير مصرح: هذه الرحلة ليست لك' });
+    }
+
+    const passenger = trip.passengers.find(
+      p => String(p.beneficiary_id) === String(beneficiary_id)
+    );
+    if (!passenger) {
+      return res.status(404).json({ success: false, message: 'المستفيد غير موجود في الرحلة' });
+    }
+
+    passenger.status = 'dropped_off';
+    passenger.dropoff_time_actual = new Date();
+    await trip.save();
+
+    res.json({
+      success: true,
+      data: {
+        beneficiary_id,
+        status: passenger.status,
+        dropoff_time: passenger.dropoff_time_actual,
+      },
+      message: 'تم تسجيل توصيل المستفيد',
+    });
+  })
+);
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 8. DISPATCHER LIVE — لوحة المراقبة الحية
+// ══════════════════════════════════════════════════════════════════════════════
+
+// GET /transport-module/live-fleet — كل المركبات النشطة + موقعها الحالي
+router.get(
+  '/live-fleet',
+  asyncHandler(async (req, res) => {
+    const { branch_id } = req.query;
+    const vehicleFilter = { deleted_at: null, status: 'active' };
+    if (branch_id) vehicleFilter.branch_id = branch_id;
+
+    const vehicles = await Vehicle.find(vehicleFilter)
+      .select(
+        'license_plate vehicle_number vehicle_type make model last_known_lat last_known_lng last_gps_update branch_id current_driver_id'
+      )
+      .populate('current_driver_id', 'name phone')
+      .populate('branch_id', 'name_ar')
+      .lean();
+
+    const vehicleIds = vehicles.map(v => v._id);
+    const activeTrips = await Trip.find({
+      vehicle_id: { $in: vehicleIds },
+      status: 'in_progress',
+      deleted_at: null,
+    })
+      .select('trip_number trip_type vehicle_id route_id picked_up_count total_passengers')
+      .populate('route_id', 'route_name_ar route_number')
+      .lean();
+    const tripByVehicle = new Map(activeTrips.map(t => [String(t.vehicle_id), t]));
+
+    // تنبيهات: مركبات بدون GPS لأكثر من 10 دقائق
+    const tenMinAgo = Date.now() - 10 * 60 * 1000;
+    const fleet = vehicles.map(v => {
+      const stale = !v.last_gps_update || new Date(v.last_gps_update).getTime() < tenMinAgo;
+      return {
+        _id: v._id,
+        license_plate: v.license_plate,
+        vehicle_number: v.vehicle_number,
+        vehicle_type: v.vehicle_type,
+        make: v.make,
+        model: v.model,
+        branch: v.branch_id,
+        driver: v.current_driver_id,
+        latitude: v.last_known_lat ?? null,
+        longitude: v.last_known_lng ?? null,
+        last_gps_update: v.last_gps_update,
+        gps_stale: stale,
+        active_trip: tripByVehicle.get(String(v._id)) || null,
+      };
+    });
+
+    res.json({
+      success: true,
+      data: fleet,
+      summary: {
+        total: fleet.length,
+        with_gps: fleet.filter(f => f.latitude != null).length,
+        on_active_trip: fleet.filter(f => f.active_trip).length,
+        stale_gps: fleet.filter(f => f.gps_stale && f.latitude != null).length,
+      },
+    });
+  })
+);
+
+// GET /transport-module/trips/:id/live-eta — حساب ETA الحي للرحلة من آخر GPS
+router.get(
+  '/trips/:id/live-eta',
+  validateObjectId(),
+  asyncHandler(async (req, res) => {
+    const trip = await Trip.findOne({ _id: req.params.id, deleted_at: null })
+      .populate({ path: 'route_id', select: 'waypoints' })
+      .select('vehicle_id route_id passengers');
+
+    if (!trip) return res.status(404).json({ success: false, message: 'الرحلة غير موجودة' });
+
+    const lastGps = await GpsTracking.findOne({ vehicle_id: trip.vehicle_id })
+      .sort({ timestamp: -1 })
+      .select('latitude longitude speed timestamp');
+    if (!lastGps) {
+      return res.json({ success: true, data: { eta: [], message: 'لا تتوفر بيانات GPS' } });
+    }
+
+    const visitedIds = (trip.passengers || [])
+      .filter(p => p.status === 'picked_up' || p.status === 'dropped_off')
+      .map(p => String(p.beneficiary_id));
+
+    const eta = computeLiveEta(
+      { latitude: lastGps.latitude, longitude: lastGps.longitude },
+      trip.route_id?.waypoints || [],
+      visitedIds
+    );
+
+    res.json({
+      success: true,
+      data: {
+        gps: lastGps,
+        eta,
+        computed_at: new Date(),
+      },
+    });
+  })
+);
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 9. PARENT TRACKING — تتبع أولياء الأمور (Public, signed token)
+// ══════════════════════════════════════════════════════════════════════════════
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 10. DRIVER SAFETY SCORE — Phase F
+// ══════════════════════════════════════════════════════════════════════════════
+
+function periodFilter(query) {
+  const days = parseInt(query.days || '7', 10);
+  const since = new Date();
+  since.setDate(since.getDate() - Math.max(1, Math.min(90, days)));
+  return { since, days };
+}
+
+// GET /transport-module/safety/drivers/:driverId — نقاط سائق واحد
+router.get(
+  '/safety/drivers/:driverId',
+  validateObjectId('driverId'),
+  asyncHandler(async (req, res) => {
+    const { since, days } = periodFilter(req.query);
+    const driverTrips = await Trip.find({
+      driver_id: req.params.driverId,
+      deleted_at: null,
+      trip_date: { $gte: since },
+    })
+      .select('vehicle_id status trip_date')
+      .lean();
+
+    const vehicleIds = [...new Set(driverTrips.map(t => String(t.vehicle_id)))];
+    const points = vehicleIds.length
+      ? await GpsTracking.find({
+          vehicle_id: { $in: vehicleIds },
+          timestamp: { $gte: since },
+        })
+          .sort({ timestamp: 1 })
+          .select('speed is_speeding is_outside_geofence engine_on timestamp')
+          .lean()
+      : [];
+
+    const result = computeDriverScore(points, driverTrips);
+    res.json({
+      success: true,
+      data: { driverId: req.params.driverId, period_days: days, ...result },
+    });
+  })
+);
+
+// GET /transport-module/safety/leaderboard — ترتيب السائقين
+router.get(
+  '/safety/leaderboard',
+  asyncHandler(async (req, res) => {
+    const { since, days } = periodFilter(req.query);
+    const limit = parseInt(req.query.limit || '50', 10);
+
+    // اجمع كل السائقين الذين قادوا في الفترة
+    const trips = await Trip.find({
+      deleted_at: null,
+      trip_date: { $gte: since },
+    })
+      .select('driver_id vehicle_id status')
+      .lean();
+
+    const byDriver = new Map();
+    for (const t of trips) {
+      const key = String(t.driver_id);
+      if (!byDriver.has(key))
+        byDriver.set(key, { driverId: key, vehicleIds: new Set(), trips: [] });
+      byDriver.get(key).vehicleIds.add(String(t.vehicle_id));
+      byDriver.get(key).trips.push(t);
+    }
+
+    const items = [];
+    for (const [driverId, entry] of byDriver) {
+      const points = await GpsTracking.find({
+        vehicle_id: { $in: [...entry.vehicleIds] },
+        timestamp: { $gte: since },
+      })
+        .sort({ timestamp: 1 })
+        .select('speed is_speeding is_outside_geofence engine_on timestamp')
+        .lean();
+      const result = computeDriverScore(points, entry.trips);
+      items.push({
+        driverId,
+        score: result.score,
+        grade: result.grade,
+        samples: result.samples,
+        trips: result.trips,
+        speedingIncidents: result.breakdown.speeding.incidents,
+        harshEvents: result.breakdown.harsh.accel + result.breakdown.harsh.brake,
+      });
+    }
+
+    const ranked = rankDrivers(items).slice(0, limit);
+
+    // Populate names
+    const Employee = mongoose.models.Employee || mongoose.models.HREmployee;
+    let driverNames = new Map();
+    if (Employee) {
+      const employees = await Employee.find({
+        _id: { $in: ranked.map(r => r.driverId) },
+      })
+        .select('name phone')
+        .lean();
+      driverNames = new Map(employees.map(e => [String(e._id), e]));
+    }
+
+    res.json({
+      success: true,
+      data: ranked.map(r => ({
+        ...r,
+        name: driverNames.get(r.driverId)?.name || null,
+        phone: driverNames.get(r.driverId)?.phone || null,
+      })),
+      period_days: days,
+    });
+  })
+);
+
+// POST /transport-module/trips/:id/tracking-token — توليد رابط تتبع لولي الأمر
+router.post(
+  '/trips/:id/tracking-token',
+  validateObjectId(),
+  asyncHandler(async (req, res) => {
+    const trip = await Trip.findOne({ _id: req.params.id, deleted_at: null });
+    if (!trip) return res.status(404).json({ success: false, message: 'الرحلة غير موجودة' });
+
+    const token = signTrackingToken(String(trip._id), TRACKING_TOKEN_SECRET);
+    res.json({
+      success: true,
+      data: {
+        token,
+        track_url: `/track/${token}`,
+        expires_in_hours: 6,
+      },
+    });
   })
 );
 

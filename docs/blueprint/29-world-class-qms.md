@@ -17,11 +17,11 @@ Four pillars, each delivered as full vertical slices (model + service + routes +
 
 ### Pillar 2 — International-Standards Compliance
 
-| Slice                                                | Status | Standard                       |
-| ---------------------------------------------------- | ------ | ------------------------------ |
-| 2.1 — ISO 9001:2015 clause-by-clause traceability    | ⏳     | ISO 9001:2015                  |
-| 2.2 — JCI + CBAHI standards matrix                   | ⏳     | JCI 7th ed. / CBAHI HC 4th ed. |
-| 2.3 — 21 CFR Part 11 e-signatures + Document Control | ⏳     | FDA 21 CFR §11.10              |
+| Slice                                                | Status     | Standard                                   |
+| ---------------------------------------------------- | ---------- | ------------------------------------------ |
+| 2.1 — ISO 9001:2015 clause-by-clause traceability    | ✅ shipped | ISO 9001:2015                              |
+| 2.2 — JCI + CBAHI standards matrix                   | ✅ shipped | JCI 7th ed. / CBAHI HC 4th ed.             |
+| 2.3 — 21 CFR Part 11 e-signatures + Document Control | ✅ shipped | FDA 21 CFR §11.10, §11.50, §11.70, §11.200 |
 
 ### Pillar 3 — Professional Operations
 
@@ -268,6 +268,111 @@ POST   /api/v1/pareto-a3/a3/:id/cancel
 
 ---
 
-## Pillar 2.1-2.3, 3.1-3.5, 4.1-4.5
+## Pillar 2.1 + 2.2 — Standards traceability (shipped)
+
+### Files
+
+| Concern                | Path                                                                                                                     |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| ISO 9001 registry      | `backend/config/standards/iso-9001-2015.registry.js` (sections 4-10, 36 clauses)                                         |
+| JCI 7th ed. registry   | `backend/config/standards/jci-7th-ed.registry.js` (16 chapters + key IPSG/ACC/COP/MMU/QPS/GLD/FMS/SQE/MOI/PCI standards) |
+| CBAHI 4th ed. registry | `backend/config/standards/cbahi-hc-4th-ed.registry.js` (LD/QM/PR/AC/AS/MM/IC/FS/HR/IM/ESR chapters + key standards)      |
+| Standards index        | `backend/config/standards/index.js` (pluggable lookup)                                                                   |
+| Model                  | `backend/models/quality/StandardsTraceability.model.js` (one record per standard+clause+branch tuple)                    |
+| Service                | `backend/services/quality/standardsTraceability.service.js`                                                              |
+| Routes                 | `backend/routes/standardsTraceability.routes.js` (`/api/v1/standards`)                                                   |
+| Tests                  | `backend/__tests__/standards-traceability.test.js` (21 tests)                                                            |
+| Frontend API           | `apps/web-admin/src/lib/api.ts` (`standardsApi`)                                                                         |
+| Pages                  | `apps/web-admin/src/app/(dashboard)/quality/standards/{page.tsx,[code]/page.tsx}`                                        |
+
+### Capabilities
+
+- **Generic matrix engine** — one model + service + UI handles every standard. Plug-in registry pattern means adding a new standard (e.g. ISO 13485, ISO 14971) is purely a data exercise.
+- **Six clause statuses**: `not_started → in_progress → evidence_attached → audit_passed` (plus `lapsed` and `not_applicable` with reason).
+- **Evidence linking**: each clause can carry typed evidence links (SOP, training record, internal audit, CAPA, FMEA, RCA, management review, etc.) — first link auto-promotes status to `evidence_attached`; removing the last link drops back to `in_progress`.
+- **Review history** — every status change is recorded with reviewer + timestamp + optional note.
+- **Coverage % per standard** + per-branch + global rollup dashboard.
+- **Gap list** — clauses that are required but still `not_started`/`lapsed`/`in_progress` are surfaced first to focus auditor attention.
+- **Idempotent initialisation** — clicking "Initialise all clauses" creates one record per evidence-required clause for the current branch; re-running is a no-op.
+
+### API surface
+
+```
+GET    /api/v1/standards
+GET    /api/v1/standards/dashboard?branchId=
+GET    /api/v1/standards/:code/reference
+GET    /api/v1/standards/:code/matrix?branchId=
+POST   /api/v1/standards/:code/initialise
+PUT    /api/v1/standards/:code/clauses/:clauseCode/status
+POST   /api/v1/standards/:code/clauses/:clauseCode/evidence
+DELETE /api/v1/standards/:code/clauses/:clauseCode/evidence/:linkId
+```
+
+### Test summary
+
+`npx jest backend/__tests__/standards-traceability.test.js` — 21 tests in ~1.5 s. Covers all three registries (clause count, unique codes, parent integrity, IPSG completeness, CBAHI chapter headers, bilingual labels), standards index lookup, initialise-idempotence, status transitions with event-bus emissions, attach/remove evidence + auto-status-promotion, gap reporting, and dashboard aggregation across all three standards.
+
+---
+
+## Pillar 2.3 — Controlled documents with 21 CFR Part 11 e-signatures (shipped)
+
+### Files
+
+| Concern      | Path                                                                                                              |
+| ------------ | ----------------------------------------------------------------------------------------------------------------- |
+| Registry     | `backend/config/controlled-document.registry.js`                                                                  |
+| Model        | `backend/models/quality/ControlledDocument.model.js` (with `computeContentHash` + `computeSignatureHash` helpers) |
+| Service      | `backend/services/quality/controlledDocument.service.js`                                                          |
+| Routes       | `backend/routes/controlledDocument.routes.js` (`/api/v1/controlled-documents`)                                    |
+| Tests        | `backend/__tests__/controlled-document-service.test.js` (13 tests, green)                                         |
+| Frontend API | `apps/web-admin/src/lib/api.ts` (`controlledDocApi`)                                                              |
+| Pages        | `apps/web-admin/src/app/(dashboard)/quality/documents/{page.tsx,new/page.tsx,[id]/page.tsx}`                      |
+
+### 21 CFR Part 11 conformance checklist
+
+| §        | Requirement             | How we comply                                                                                                                                                                    |
+| -------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 11.10(a) | Validation              | Documented release lifecycle (`draft → in_review → approved → effective → superseded → retired`) plus tamper-evident audit trail.                                                |
+| 11.10(c) | Protection              | Each signature stores its _meaning_ (authored / reviewed / approved / witnessed / acknowledged) and is bound to a specific `versionNumber`.                                      |
+| 11.10(e) | Audit trails            | `auditTrail[]` is append-only at the API layer; revoking a signature does NOT delete it — it appends a forward-pointing revocation entry.                                        |
+| 11.50    | Signature manifestation | Every signature carries `printedName`, `signedAt`, `meaning`, `role`, `ipAddress`, `userAgent`.                                                                                  |
+| 11.70    | Linking                 | Cryptographic hash chain (`prevHash → currentHash`) bound to the version's `contentHash`. Tampering any field breaks the chain — `verifyIntegrity(doc)` reports the first break. |
+| 11.200   | Non-biometric e-sig     | Service requires `reAuthConfirmed: true`; the route layer is responsible for verifying the user re-entered credentials before calling sign.                                      |
+
+### Lifecycle
+
+- `draft → in_review`: triggered automatically on first non-acknowledgement signature.
+- `in_review → approved`: triggered when all three required meanings (authored + reviewed + approved) are present.
+- `approved → effective`: explicit transition; service refuses if required signatures are missing. Activating a new version automatically supersedes any other effective version.
+- `effective → superseded`: implicit when a new version is activated.
+- `effective → retired`: explicit (e.g. policy decommissioned).
+- Cancellation is available from any non-terminal state with a reason.
+
+### API surface
+
+```
+GET    /api/v1/controlled-documents/reference
+GET    /api/v1/controlled-documents/dashboard?branchId=
+GET    /api/v1/controlled-documents?branchId=&type=&q=
+GET    /api/v1/controlled-documents/:id            # also returns { meta: { integrity } }
+POST   /api/v1/controlled-documents
+POST   /api/v1/controlled-documents/:id/versions
+POST   /api/v1/controlled-documents/:id/versions/:vn/sign
+POST   /api/v1/controlled-documents/:id/versions/:vn/revoke-signature/:sigId
+POST   /api/v1/controlled-documents/:id/versions/:vn/transition
+POST   /api/v1/controlled-documents/:id/versions/:vn/acknowledge
+```
+
+### Test summary
+
+`npx jest backend/__tests__/controlled-document-service.test.js` — 13 tests in ~1.9 s. Covers create + version increment + content-hash; signing happy path + re-auth refusal + role/meaning enforcement; auto-advance through draft → in_review → approved; transition guard against missing signatures; supersede-on-activate; **tampered hash detection**; read-acknowledge gating + idempotence; revocation appends counter-entry.
+
+---
+
+**Pillar 2 status: 3/3 slices shipped.** Aggregate Pillar 1-2 backend tests: **68 + 21 + 13 = 102**.
+
+---
+
+## Pillar 3.1-3.5, 4.1-4.5
 
 Each slice will land as a self-contained section appended to this document.

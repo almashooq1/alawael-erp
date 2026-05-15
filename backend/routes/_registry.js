@@ -123,6 +123,8 @@ const fmeaRoutes = safeRequire('../routes/fmea.routes'); // Phase 29 (world-clas
 const rcaRoutes = safeRequire('../routes/rca.routes'); // Phase 29 (structured RCA)
 const spcRoutes = safeRequire('../routes/spc.routes'); // Phase 29 (Statistical Process Control)
 const paretoA3Routes = safeRequire('../routes/paretoA3.routes'); // Phase 29 (Pareto + A3)
+const standardsRoutes = safeRequire('../routes/standardsTraceability.routes'); // Phase 29 (Standards traceability)
+const controlledDocumentRoutes = safeRequire('../routes/controlledDocument.routes'); // Phase 29 (21 CFR Part 11 docs)
 const notificationLogRoutes = safeRequire('../routes/notificationLog.routes');
 // enterprise-risk → phases.registry.js; complaints-enhanced, kpi-dashboard, kpi-reports → features.registry.js
 const capaAdminRoutes = safeRequire('../routes/capa-admin.routes');
@@ -371,6 +373,8 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   dualMount(app, 'rca', rcaRoutes); // Phase 29 — Structured RCA (Ishikawa + 5 Whys)
   dualMount(app, 'spc', spcRoutes); // Phase 29 — SPC charts (X-bar/R/S, I-MR, p/np/c/u)
   dualMount(app, 'pareto-a3', paretoA3Routes); // Phase 29 — Pareto + A3 problem-solving
+  dualMount(app, 'standards', standardsRoutes); // Phase 29 — Standards traceability (ISO 9001, JCI, CBAHI)
+  dualMount(app, 'controlled-documents', controlledDocumentRoutes); // Phase 29 — 21 CFR Part 11 docs
   // enterprise-risk is mounted in phases.registry.js
   dualMount(app, 'admin/capa', capaAdminRoutes);
   // complaints-enhanced, kpi-dashboard, kpi-reports are mounted in features.registry.js

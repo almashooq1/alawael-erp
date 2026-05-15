@@ -25,23 +25,23 @@ Four pillars, each delivered as full vertical slices (model + service + routes +
 
 ### Pillar 3 — Professional Operations
 
-| Slice                                      | Status | Standard                             |
-| ------------------------------------------ | ------ | ------------------------------------ |
-| 3.1 — Supplier Quality (SCAR + scorecards) | ⏳     | ISO 9001 §8.4                        |
-| 3.2 — Calibration management               | ⏳     | ISO/IEC 17025 / ISO 9001 §7.1.5      |
-| 3.3 — Change Control workflow              | ⏳     | ISO 9001 §8.5.6 / FDA 21 CFR §820.30 |
-| 3.4 — Internal-audit auto-scheduler        | ⏳     | ISO 19011                            |
-| 3.5 — Cost of Quality (CoQ) tracking       | ⏳     | ASQ PAF model                        |
+| Slice                                      | Status     | Standard                             |
+| ------------------------------------------ | ---------- | ------------------------------------ |
+| 3.1 — Supplier Quality (SCAR + scorecards) | ✅ shipped | ISO 9001 §8.4                        |
+| 3.2 — Calibration management               | ✅ shipped | ISO/IEC 17025 / ISO 9001 §7.1.5      |
+| 3.3 — Change Control workflow              | ✅ shipped | ISO 9001 §8.5.6 / FDA 21 CFR §820.30 |
+| 3.4 — Internal-audit auto-scheduler        | ✅ shipped | ISO 19011                            |
+| 3.5 — Cost of Quality (CoQ) tracking       | ✅ shipped | ASQ PAF model                        |
 
 ### Pillar 4 — Analytical Intelligence
 
-| Slice                                  | Status |
-| -------------------------------------- | ------ |
-| 4.1 — Predictive risk analytics        | ⏳     |
-| 4.2 — Trend forecasting on QIs         | ⏳     |
-| 4.3 — LLM-generated quality narratives | ⏳     |
-| 4.4 — Mobile inspector PWA             | ⏳     |
-| 4.5 — Benchmark dashboards             | ⏳     |
+| Slice                                  | Status     |
+| -------------------------------------- | ---------- |
+| 4.1 — Predictive risk analytics        | ✅ shipped |
+| 4.2 — Trend forecasting on QIs         | ✅ shipped |
+| 4.3 — LLM-generated quality narratives | ✅ shipped |
+| 4.4 — Mobile inspector PWA             | ✅ shipped |
+| 4.5 — Benchmark dashboards             | ✅ shipped |
 
 ---
 
@@ -373,6 +373,62 @@ POST   /api/v1/controlled-documents/:id/versions/:vn/acknowledge
 
 ---
 
-## Pillar 3.1-3.5, 4.1-4.5
+## Pillar 3 — Professional Operations (shipped)
 
-Each slice will land as a self-contained section appended to this document.
+### 3.1 Supplier Quality — `backend/{config,models/quality,services/quality,routes,__tests__}/*supplier*`
+
+SCAR full lifecycle (open → acknowledged → in_progress → response_received → verifying → verified → closed). 5-dimension weighted scorecard (on-time delivery, quality acceptance, SCAR performance, responsiveness, commercial) with re-normalisation when dimensions are missing. Grade bands preferred/approved/conditional/probation/disqualified. **11 tests.**
+
+### 3.2 Calibration — `backend/{config/calibration,models/quality/CalibrationAsset,services/quality/calibration,routes/calibration}.{js,routes.js}`
+
+Equipment registry with traceability to national standards, calibration records with pass / pass-with-adjustment / fail outcomes, scheduled sweep that flags overdue assets, 6 lifecycle statuses, support for days/weeks/months/years frequency. **10 tests.**
+
+### 3.3 Change Control — `backend/{config/change-control,models/quality/ChangeRequest,services/quality/changeControl,routes/changeControl}.{js,routes.js}`
+
+ISO §8.5.6 + FDA §820.30 workflow: draft → submitted → impact_assessment → cab_review → approved → in_implementation → verification → closed. CAB voting with simple majority + vote-replacement semantics. Risk-based CAB gating (low risk skips CAB). Implementation steps with status tracking. Verification outcome decides closure vs return-to-implementation. **8 tests.**
+
+### 3.4 Internal Audit Scheduler — `backend/{config/audit-schedule,models/quality/AuditScope,models/quality/AuditOccurrence,services/quality/auditScheduler,routes/auditScheduler}.{js,routes.js}`
+
+ISO 19011-compliant generator. Audit-scope registry with risk levels; cycle frequency derived from risk (critical=3mo, high=6mo, medium=12mo, low=24mo). Idempotent generator (`generateUpcoming`) creates planned occurrences. Findings classified per ISO (major_nc / minor_nc / OFI / observation / commendation). Overall outcome auto-computed at close. **8 tests.**
+
+### 3.5 Cost of Quality — `backend/{config/coq,models/quality/CoqEntry,services/quality/coq,routes/coq}.{js,routes.js}`
+
+ASQ PAF model. Categories: prevention / appraisal / internal_failure / external_failure. Monthly + yearly reports with shift-left detection (P+A > IF+EF). Grade bands world_class (≤4%) / acceptable (≤10%) / poor (≤20%) / critical. **9 tests.**
+
+---
+
+## Pillar 4 — Analytical Intelligence (shipped)
+
+### 4.1 Predictive Risk Analytics — `backend/{config/predictive-risk,services/quality/predictiveRisk,routes/predictiveRisk}.{js,routes.js}`
+
+Combines lagging (recent incidents, complaints, open + overdue CAPAs, critical SCARs) and leading (overdue audits, overdue calibrations, lapsed standards clauses) signals. Logistic-dampened weighted score (0-100) with bands low/moderate/high/critical. Tolerant of missing data sources. **9 tests.**
+
+### 4.2 Trend Forecasting — `backend/{config/trend-forecast,services/quality/trendForecast,routes/trendForecast}.{js,routes.js}`
+
+OLS linear regression + R² + Holt-Winters single-exponential smoothing + Page-1954 CUSUM level-shift detection. Forecast with 95% confidence band on residuals. Indicator history pull when QualityMeasurement model is wired. **13 tests.**
+
+### 4.3 LLM Quality Narratives — `backend/{config/quality-narrative,services/quality/qualityNarrative,routes/qualityNarrative}.{js,routes.js}`
+
+Dual-path generator: rule-based (deterministic + auditable) plus optional LLM client. **Mandatory PII redaction** on both paths covers Saudi national IDs, KSA phone numbers, emails, SA IBANs, and long numeric IDs. Six narrative kinds: executive_summary / monthly_report / incident_brief / audit_finding_summary / risk_outlook / capa_status. Falls back to rule-based when LLM fails. **14 tests.**
+
+### 4.4 Mobile Inspector PWA — `backend/{models/quality/InspectionSubmission,services/quality/inspectionSubmission,routes/inspectionSubmission}.{js,routes.js}`
+
+Offline-first ingestion. Client-generated UUID enables idempotent re-submission. Bulk endpoint accepts up to 200 queued submissions. Auto-scoring (pass / pass_with_actions / fail) from item answers with N/A exclusion. Tracks offline duration + device info for diagnostic. **8 tests.**
+
+### 4.5 Benchmark Dashboards — `backend/{config/benchmark,services/quality/benchmark,routes/benchmark}.{js,routes.js}`
+
+11 industry benchmarks (hand-hygiene, falls/1000, NPS, medication errors, CAPA on-time, incident response, training compliance, CoQ ratio, audit recurrence, calibration on-time, supplier OTD). Direction-aware classification (higher / lower is better) into world_class / top_quartile / industry_median / below_median bands. Bulk-compare endpoint for executive dashboards. **9 tests.**
+
+---
+
+## Aggregate metrics
+
+| Pillar                      | Slices | Backend tests | Modules                                                                                |
+| --------------------------- | ------ | ------------- | -------------------------------------------------------------------------------------- |
+| 1 — Analysis tooling        | 4      | 68            | FMEA, RCA, SPC, Pareto/A3                                                              |
+| 2 — Standards compliance    | 3      | 34            | Standards traceability (ISO 9001 + JCI + CBAHI), Controlled Documents (21 CFR Part 11) |
+| 3 — Professional operations | 5      | 46            | Supplier, Calibration, Change Control, Audit Scheduler, CoQ                            |
+| 4 — Analytical intelligence | 5      | 53            | Predictive risk, Trend forecast, LLM narratives, Mobile inspector, Benchmarks          |
+| **Total**                   | **17** | **201**       | **17 backend modules + 19 routes + 19 services + many models**                         |
+
+Standards now natively supported: AIAG-VDA 2019, VA NCPS HFMEA, IEC 60812, JCAHO PR.5, ASQ / IHI / TJC sentinel-event, AIAG SPC 2nd ed., ISO 7870, Western Electric + Nelson rules, Pareto Principle, Toyota A3 / Lean PDCA, ISO 9001:2015 §4-§10, JCI 7th ed. (IPSG / ACC / PCC / AOP / COP / MMU / PFE / QPS / PCI / GLD / FMS / SQE / MOI), CBAHI HC 4th ed. (LD / QM / PR / AC / AS / MM / IC / FS / HR / IM / ESR), FDA 21 CFR §11.10 / §11.50 / §11.70 / §11.200, ISO/IEC 17025, ISO 9001 §7.1.5 / §8.4 / §8.5.6, FDA 21 CFR §820.30, ISO 19011:2018, ASQ PAF model.

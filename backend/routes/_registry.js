@@ -126,6 +126,15 @@ const paretoA3Routes = safeRequire('../routes/paretoA3.routes'); // Phase 29 (Pa
 const standardsRoutes = safeRequire('../routes/standardsTraceability.routes'); // Phase 29 (Standards traceability)
 const controlledDocumentRoutes = safeRequire('../routes/controlledDocument.routes'); // Phase 29 (21 CFR Part 11 docs)
 const supplierQualityRoutes = safeRequire('../routes/supplierQuality.routes'); // Phase 29 (Supplier SCARs + scorecards)
+const calibrationRoutes = safeRequire('../routes/calibration.routes'); // Phase 29 (Calibration management)
+const changeControlRoutes = safeRequire('../routes/changeControl.routes'); // Phase 29 (Change Control)
+const auditSchedulerRoutes = safeRequire('../routes/auditScheduler.routes'); // Phase 29 (Audit Scheduler)
+const coqRoutes = safeRequire('../routes/coq.routes'); // Phase 29 (Cost of Quality)
+const predictiveRiskRoutes = safeRequire('../routes/predictiveRisk.routes'); // Phase 29 (Predictive risk)
+const trendForecastRoutes = safeRequire('../routes/trendForecast.routes'); // Phase 29 (Trend forecasting)
+const qualityNarrativeRoutes = safeRequire('../routes/qualityNarrative.routes'); // Phase 29 (LLM narratives)
+const inspectionSubmissionRoutes = safeRequire('../routes/inspectionSubmission.routes'); // Phase 29 (Mobile inspector PWA)
+const benchmarkRoutes = safeRequire('../routes/benchmark.routes'); // Phase 29 (Industry benchmarks)
 const notificationLogRoutes = safeRequire('../routes/notificationLog.routes');
 // enterprise-risk → phases.registry.js; complaints-enhanced, kpi-dashboard, kpi-reports → features.registry.js
 const capaAdminRoutes = safeRequire('../routes/capa-admin.routes');
@@ -377,6 +386,15 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   dualMount(app, 'standards', standardsRoutes); // Phase 29 — Standards traceability (ISO 9001, JCI, CBAHI)
   dualMount(app, 'controlled-documents', controlledDocumentRoutes); // Phase 29 — 21 CFR Part 11 docs
   dualMount(app, 'supplier-quality', supplierQualityRoutes); // Phase 29 — Supplier SCARs + scorecards
+  dualMount(app, 'calibration', calibrationRoutes); // Phase 29 — Calibration management
+  dualMount(app, 'change-control', changeControlRoutes); // Phase 29 — Change Control
+  dualMount(app, 'audit-scheduler', auditSchedulerRoutes); // Phase 29 — Internal audit scheduler
+  dualMount(app, 'coq', coqRoutes); // Phase 29 — Cost of Quality
+  dualMount(app, 'predictive-risk', predictiveRiskRoutes); // Phase 29 — Predictive risk analytics
+  dualMount(app, 'trend-forecast', trendForecastRoutes); // Phase 29 — Trend forecasting
+  dualMount(app, 'quality-narrative', qualityNarrativeRoutes); // Phase 29 — LLM-generated narratives
+  dualMount(app, 'inspection-submissions', inspectionSubmissionRoutes); // Phase 29 — Mobile inspector PWA ingestion
+  dualMount(app, 'benchmarks', benchmarkRoutes); // Phase 29 — Industry benchmarks
   // enterprise-risk is mounted in phases.registry.js
   dualMount(app, 'admin/capa', capaAdminRoutes);
   // complaints-enhanced, kpi-dashboard, kpi-reports are mounted in features.registry.js

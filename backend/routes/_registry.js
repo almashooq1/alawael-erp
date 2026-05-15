@@ -119,6 +119,10 @@ const evidenceRoutes = safeRequire('../routes/evidence.routes');
 const complianceCalendarRoutes = safeRequire('../routes/complianceCalendar.routes');
 const qualityControlsRoutes = safeRequire('../routes/qualityControls.routes');
 const qualityHealthScoreRoutes = safeRequire('../routes/qualityHealthScore.routes');
+const fmeaRoutes = safeRequire('../routes/fmea.routes'); // Phase 29 (world-class QMS)
+const rcaRoutes = safeRequire('../routes/rca.routes'); // Phase 29 (structured RCA)
+const spcRoutes = safeRequire('../routes/spc.routes'); // Phase 29 (Statistical Process Control)
+const paretoA3Routes = safeRequire('../routes/paretoA3.routes'); // Phase 29 (Pareto + A3)
 const notificationLogRoutes = safeRequire('../routes/notificationLog.routes');
 // enterprise-risk → phases.registry.js; complaints-enhanced, kpi-dashboard, kpi-reports → features.registry.js
 const capaAdminRoutes = safeRequire('../routes/capa-admin.routes');
@@ -363,6 +367,10 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   dualMount(app, 'quality-controls', qualityControlsRoutes);
   dualMount(app, 'quality/health-score', qualityHealthScoreRoutes);
   dualMount(app, 'quality/notifications', notificationLogRoutes);
+  dualMount(app, 'fmea', fmeaRoutes); // Phase 29 — FMEA / HFMEA worksheets
+  dualMount(app, 'rca', rcaRoutes); // Phase 29 — Structured RCA (Ishikawa + 5 Whys)
+  dualMount(app, 'spc', spcRoutes); // Phase 29 — SPC charts (X-bar/R/S, I-MR, p/np/c/u)
+  dualMount(app, 'pareto-a3', paretoA3Routes); // Phase 29 — Pareto + A3 problem-solving
   // enterprise-risk is mounted in phases.registry.js
   dualMount(app, 'admin/capa', capaAdminRoutes);
   // complaints-enhanced, kpi-dashboard, kpi-reports are mounted in features.registry.js
@@ -577,6 +585,16 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   dualMount(app, 'quality', safeRequire('../domains/quality/routes/quality.routes'));
   // Reports Engine (محرك التقارير)
   dualMount(app, 'reports', safeRequire('../domains/reports/routes/reports.routes'));
+  // Rehab Measures Library & Smart Assessment Engine (مكتبة المقاييس التأهيلية والتقييم الذكي)
+  dualMount(app, 'rehab-measures', safeRequire('../routes/rehab-measures.routes'));
+  // Rehab Program Templates Engine (محرك قوالب برامج التأهيل)
+  dualMount(app, 'rehab-templates', safeRequire('../routes/rehab-templates.routes'));
+  // Activity Library — Phase 27 (مكتبة الأنشطة التأهيلية)
+  dualMount(
+    app,
+    'activity-library',
+    safeRequire('../rehabilitation-services/activity-library-routes')
+  );
   // Clinical Assessments (تقييمات سريرية)
   dualMount(app, 'assessments', safeRequire('../domains/assessments/routes/assessments.routes'));
   // Clinical Sessions (جلسات علاجية)

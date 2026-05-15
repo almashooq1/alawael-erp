@@ -126,6 +126,53 @@ describe('JCI 7th ed. registry', () => {
   });
 });
 
+describe('ISO 13485:2016 registry', () => {
+  const iso13485 = require('../config/standards/iso-13485-2016.registry');
+
+  test('covers device-specific clauses 7.5.5, 7.5.6, 7.5.9, 8.2.3', () => {
+    const codes = iso13485.CLAUSES.map(c => c.code);
+    expect(codes).toEqual(expect.arrayContaining(['7.5.5', '7.5.6', '7.5.9', '8.2.3']));
+  });
+
+  test('every parent code resolves', () => {
+    const codes = new Set(iso13485.CLAUSES.map(c => c.code));
+    for (const c of iso13485.CLAUSES) {
+      if (c.parentCode) expect(codes.has(c.parentCode)).toBe(true);
+    }
+  });
+});
+
+describe('ISO 14971:2019 registry', () => {
+  const iso14971 = require('../config/standards/iso-14971-2019.registry');
+
+  test('includes lifecycle sections 4-10', () => {
+    const tops = iso14971.CLAUSES.filter(c => c.parentCode === null).map(c => c.code);
+    expect(tops).toEqual(expect.arrayContaining(['4', '5', '6', '7', '8', '9', '10']));
+  });
+
+  test('risk-management plan + file are evidence-required', () => {
+    const plan = iso14971.CLAUSES.find(c => c.code === '4.4');
+    const file = iso14971.CLAUSES.find(c => c.code === '4.5');
+    expect(plan.evidenceRequired).toBe(true);
+    expect(file.evidenceRequired).toBe(true);
+  });
+});
+
+describe('Standards index — full set', () => {
+  test('all 5 standards registered', () => {
+    const codes = standards.listStandards().map(s => s.code);
+    expect(codes).toEqual(
+      expect.arrayContaining([
+        'iso_9001_2015',
+        'jci_7th_ed',
+        'cbahi_hc_4th_ed',
+        'iso_13485_2016',
+        'iso_14971_2019',
+      ])
+    );
+  });
+});
+
 describe('CBAHI 4th ed. registry', () => {
   const cbahi = require('../config/standards/cbahi-hc-4th-ed.registry');
 

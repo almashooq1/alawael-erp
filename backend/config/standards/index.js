@@ -12,11 +12,15 @@
 const iso9001 = require('./iso-9001-2015.registry');
 const jci = require('./jci-7th-ed.registry');
 const cbahi = require('./cbahi-hc-4th-ed.registry');
+const iso13485 = require('./iso-13485-2016.registry');
+const iso14971 = require('./iso-14971-2019.registry');
 
 const REGISTRIES = Object.freeze({
   [iso9001.STANDARD.code]: iso9001,
   [jci.STANDARD.code]: jci,
   [cbahi.STANDARD.code]: cbahi,
+  [iso13485.STANDARD.code]: iso13485,
+  [iso14971.STANDARD.code]: iso14971,
 });
 
 function getStandard(code) {

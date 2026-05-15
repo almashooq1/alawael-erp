@@ -338,6 +338,21 @@ const shouldSkipDBInit = isTestEnv && process.env.SMART_TEST_MODE === 'true';
     }
   }
 
+  // Phase 29 — Cross-module subscribers (SPC + FMEA + Audit NC + Calibration
+  // failures → auto-draft CAPA; supplier/standards/inspection events → notifier).
+  // Opt-out via PHASE29_SUBSCRIBERS_ENABLED=false.
+  if (process.env.PHASE29_SUBSCRIBERS_ENABLED !== 'false') {
+    try {
+      const qualityEventBus = require('./services/quality/qualityEventBus.service').getDefault();
+      const { wirePhase29Subscribers } = require('./services/quality/phase29-subscribers');
+      const handle = wirePhase29Subscribers(qualityEventBus, { logger });
+      logger.info(`Phase 29 quality subscribers wired (${handle.listenerCount} listeners)`);
+      server._phase29Subscribers = handle;
+    } catch (err) {
+      logger.warn('Phase 29 subscribers setup skipped:', err.message);
+    }
+  }
+
   // Schedule log cleanup — daily at startup, then every 24h
   try {
     const { cleanupOldLogs } = require('./config/logging.advanced');

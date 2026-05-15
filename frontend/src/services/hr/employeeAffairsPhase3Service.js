@@ -6,7 +6,7 @@
  */
 import { safeFetch } from './safeFetch';
 
-const BASE = '/api/employee-affairs-phase3';
+const BASE = '/api/v1/employee-affairs-phase3';
 
 /* ═══════════════════ helpers ═══════════════════ */
 const qs = params => {

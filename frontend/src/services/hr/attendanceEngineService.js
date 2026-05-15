@@ -9,7 +9,7 @@
 import apiClient from '../api.client';
 import logger from '../../utils/logger';
 
-const BASE = '/hr-attendance';
+const BASE = '/api/v1/hr-attendance';
 
 /**
  * Wrapper آمن للاتصال — بدون بيانات تجريبية

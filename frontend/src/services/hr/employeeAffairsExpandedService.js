@@ -6,7 +6,7 @@
  */
 import { safeFetch } from './safeFetch';
 
-const BASE = '/api/employee-affairs-expanded';
+const BASE = '/api/v1/employee-affairs-expanded';
 
 // ─── Demo Data ───────────────────────────────────────────────────────────────
 
@@ -311,33 +311,44 @@ export const approvePromotionTransferStep = (id, data) =>
 export const executePromotionTransfer = id =>
   safeFetch(`${BASE}/promotions/${id}/execute`, { method: 'POST' }, DEMO_PROMOTIONS[0]);
 
-// Overtime
+// Overtime — all routes go through the canonical attendance-mgmt base
+const ATTENDANCE_BASE = '/api/v1/attendance-mgmt';
+
 export const getOvertimeRequests = (params = {}) =>
   safeFetch(
-    `${BASE}/overtime`,
+    `${ATTENDANCE_BASE}/overtime/requests`,
     { params },
     { requests: DEMO_OVERTIME, total: 2, page: 1, pages: 1 }
   );
 
 export const getOvertimeRequestById = id =>
-  safeFetch(`${BASE}/overtime/${id}`, {}, DEMO_OVERTIME[0]);
+  safeFetch(`${ATTENDANCE_BASE}/overtime/requests`, { params: { id } }, DEMO_OVERTIME[0]);
 
 export const createOvertimeRequest = data =>
-  safeFetch(`${BASE}/overtime`, { method: 'POST', data }, DEMO_OVERTIME[0]);
+  safeFetch(`${ATTENDANCE_BASE}/overtime/request`, { method: 'POST', data }, DEMO_OVERTIME[0]);
 
-export const approveOvertimeStep = (id, data) =>
-  safeFetch(`${BASE}/overtime/${id}/approve`, { method: 'PATCH', data }, DEMO_OVERTIME[0]);
+/**
+ * approveOvertimeStep — maps UI boolean `approved` to Arabic decision string
+ * expected by PATCH /attendance-mgmt/overtime/:id/decision.
+ * This route also syncs Attendance.overtimeHours so payroll picks it up.
+ */
+export const approveOvertimeStep = (id, { approved, notes } = {}) =>
+  safeFetch(
+    `${ATTENDANCE_BASE}/overtime/${id}/decision`,
+    { method: 'PATCH', data: { decision: approved ? 'معتمد' : 'مرفوض', notes } },
+    DEMO_OVERTIME[0]
+  );
 
 export const getOvertimeStats = () =>
   safeFetch(
-    `${BASE}/overtime/stats`,
+    `${ATTENDANCE_BASE}/overtime/stats`,
     {},
     { total: 15, byStatus: [], byType: [], approved: { totalHours: 120, totalAmount: 9000 } }
   );
 
 export const getOvertimeMonthlyReport = (month, year) =>
   safeFetch(
-    `${BASE}/overtime/monthly-report`,
+    `${ATTENDANCE_BASE}/overtime/monthly-report`,
     { params: { month, year } },
     { month, year, employees: [], summary: { totalHours: 0, totalAmount: 0, totalRequests: 0 } }
   );

@@ -96,6 +96,7 @@ import {
 } from '@mui/icons-material';
 import { motion, AnimatePresence } from 'framer-motion';
 import apiClient from '../../services/api.client';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 import {
   getEmployeePatterns,
   getLeaveBalance,
@@ -1689,8 +1690,7 @@ function CheckInOutTab({ _currentUser }) {
                     {ot.employeeId?.name_ar || 'موظف'}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
-                    {ot.type} — {ot.totalHours} ساعة —{' '}
-                    {ot.date ? new Date(ot.date).toLocaleDateString('ar-SA') : ''}
+                    {ot.type} — {ot.totalHours} ساعة — {ot.date ? _fmtDate(ot.date) : ''}
                   </Typography>
                   {ot.reason && (
                     <Typography
@@ -2404,14 +2404,10 @@ function LeavesTab() {
                         <Typography variant="caption">{leaveTypeLabel}</Typography>
                       </TableCell>
                       <TableCell>
-                        <Typography variant="caption">
-                          {new Date(l.startDate).toLocaleDateString('ar-SA')}
-                        </Typography>
+                        <Typography variant="caption">{_fmtDate(l.startDate)}</Typography>
                       </TableCell>
                       <TableCell>
-                        <Typography variant="caption">
-                          {new Date(l.endDate).toLocaleDateString('ar-SA')}
-                        </Typography>
+                        <Typography variant="caption">{_fmtDate(l.endDate)}</Typography>
                       </TableCell>
                       <TableCell>
                         <Chip label={`${l.days} أيام`} size="small" />
@@ -3689,8 +3685,7 @@ function EmployeeRecordTab() {
                       >
                         <TableCell>
                           <Typography variant="caption">
-                            {r.dateFormatted ||
-                              new Date(r.date || r.checkInTime).toLocaleDateString('ar-SA')}
+                            {r.dateFormatted || _fmtDate(r.date || r.checkInTime)}
                           </Typography>
                         </TableCell>
                         <TableCell>

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Attendance Service — Check-in/out, reports, history, corrections
  * خدمات الحضور والانصراف - التسجيل والتقارير والتعديلات
  */
@@ -17,11 +17,11 @@ export const getAttendance = date => {
 
 /** تسجيل حضور */
 export const checkIn = (location = { lat: 0, lng: 0 }) =>
-  safeFetch('/hr-system/attendance/checkin', null, { method: 'POST', body: { location } });
+  safeFetch('/api/v1/hr-system/attendance/checkin', null, { method: 'POST', body: { location } });
 
 /** تسجيل انصراف */
 export const checkOut = (location = { lat: 0, lng: 0 }) =>
-  safeFetch('/hr-system/attendance/checkout', null, { method: 'POST', body: { location } });
+  safeFetch('/api/v1/hr-system/attendance/checkout', null, { method: 'POST', body: { location } });
 
 // ══════════════════════════════════════════════════════════════
 //  التقارير الشهرية

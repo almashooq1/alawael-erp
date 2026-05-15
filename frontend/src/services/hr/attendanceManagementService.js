@@ -120,6 +120,21 @@ export const getOvertimeRequests = ({ status, page, limit } = {}) => {
 export const processOvertimeDecision = (overtimeId, decision) =>
   call('PATCH', `/overtime/${overtimeId}/decision`, { decision });
 
+/* ─── Employee search ───────────────────────────────────────────────────── */
+export const searchEmployees = q => call('GET', `/employee/search?q=${encodeURIComponent(q)}`);
+
+/* ─── Attendance Correction ─────────────────────────────────────────────── */
+export const submitCorrectionRequest = payload => call('POST', '/correction/request', payload);
+
+export const getCorrectionRequests = ({ status, page = 1, limit = 20 } = {}) => {
+  const p = new URLSearchParams({ page, limit });
+  if (status) p.set('status', status);
+  return call('GET', `/correction/requests?${p}`);
+};
+
+export const processCorrectionDecision = (correctionId, decision, reviewNotes = '') =>
+  call('PATCH', `/correction/${correctionId}/decision`, { decision, reviewNotes });
+
 export default {
   getDashboard,
   getToday,
@@ -139,4 +154,8 @@ export default {
   submitOvertimeRequest,
   getOvertimeRequests,
   processOvertimeDecision,
+  searchEmployees,
+  submitCorrectionRequest,
+  getCorrectionRequests,
+  processCorrectionDecision,
 };

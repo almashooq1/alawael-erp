@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Leave Service — Leave requests and approvals
  * خدمات الإجازات والطلبات
  */
@@ -17,4 +17,4 @@ export const rejectLeave = (id, reason) =>
   safeFetch(`/hr-advanced/leaves/${id}/reject`, null, { method: 'POST', body: { reason } });
 
 export const createLeaveRequest = data =>
-  safeFetch('/hr-system/leaves', null, { method: 'POST', body: data });
+  safeFetch('/api/v1/hr-system/leaves', null, { method: 'POST', body: data });

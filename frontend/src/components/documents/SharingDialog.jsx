@@ -47,7 +47,28 @@ import {
   Close as CloseIcon,
 } from '@mui/icons-material';
 import { sharingApi } from '../../services/documentProPhase3Service';
+import { formatDateTime } from 'utils/dateUtils';
 import logger from '../../utils/logger';
+
+// Local helpers — short date/time renderings used in the share-list
+// secondary lines. `_fmtDT` is the long timestamp; `_fmtDate` is the
+// date-only variant for expiry display.
+const _fmtDT = d => {
+  if (!d) return '';
+  try {
+    return new Date(d).toLocaleString('ar-SA');
+  } catch {
+    return formatDateTime(d);
+  }
+};
+const _fmtDate = d => {
+  if (!d) return '';
+  try {
+    return new Date(d).toLocaleDateString('ar-SA');
+  } catch {
+    return formatDateTime(d);
+  }
+};
 
 const PERMISSIONS = [
   { value: 'view', label: 'عرض فقط', icon: <Visibility fontSize="small" />, color: 'info' },
@@ -474,12 +495,8 @@ export default function SharingDialog({ open, onClose, documentId, documentTitle
                     }
                     secondary={
                       <Stack direction="row" spacing={1} component="span">
-                        <span>{new Date(share.createdAt).toLocaleString('ar-SA')}</span>
-                        {share.expiresAt && (
-                          <span>
-                            • ينتهي {new Date(share.expiresAt).toLocaleDateString('ar-SA')}
-                          </span>
-                        )}
+                        <span>{_fmtDT(share.createdAt)}</span>
+                        {share.expiresAt && <span>• ينتهي {_fmtDate(share.expiresAt)}</span>}
                         {share.accessCount > 0 && <span>• {share.accessCount} زيارة</span>}
                       </Stack>
                     }

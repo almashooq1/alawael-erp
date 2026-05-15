@@ -4,7 +4,20 @@
  * مكون شامل للتوقيع الإلكتروني مع دعم الرسم والطباعة
  */
 
+import { formatDateTime } from 'utils/dateUtils';
 import React, { useState, useRef, useCallback } from 'react';
+
+// Local helper — calendar-agnostic, accepts a `toLocaleString` options
+// bag. Falls back to the project-wide `formatDateTime` when the input
+// is not parseable as a Date.
+const _fmtDate = (d, opts) => {
+  if (!d) return '';
+  try {
+    return new Date(d).toLocaleString('ar-SA', opts || {});
+  } catch {
+    return formatDateTime(d);
+  }
+};
 import {
   Box,
   Paper,
@@ -365,7 +378,7 @@ export default function SignaturePanel({
                   }
                   secondary={
                     sig.signedAt
-                      ? new Date(sig.signedAt).toLocaleDateString('ar-SA', {
+                      ? _fmtDate(sig.signedAt, {
                           year: 'numeric',
                           month: 'short',
                           day: 'numeric',

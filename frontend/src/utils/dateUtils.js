@@ -3,18 +3,58 @@
  * مكتبة أدوات التاريخ — التنسيق، التحويل الهجري، والتاريخ النسبي
  */
 
+// ---------------------------------------------------------------------------
+// Internal helpers shared by calendar-aware APIs
+// ---------------------------------------------------------------------------
+
 /**
- * Format a date to Arabic locale string.
- * @param {string|Date} date — Date to format
- * @param {object} [options] — Intl.DateTimeFormat options
+ * Resolve a raw date input (string | Date | null | undefined) to a valid Date
+ * object, or null if the value is empty / invalid.
+ * @param {string|Date|null|undefined} date
+ * @returns {Date|null}
+ */
+function _resolve(date) {
+  if (!date) return null;
+  const d = typeof date === 'string' ? new Date(date) : date;
+  return isNaN(d.getTime()) ? null : d;
+}
+
+// Hijri locale tag used by Intl.DateTimeFormat
+const HIJRI_LOCALE = 'ar-SA-u-ca-islamic-umalqura';
+const GREGORIAN_LOCALE = 'ar-SA';
+
+/**
+ * Read the active calendar preference directly from localStorage.
+ * Fallback: 'gregorian'. Safe to call outside React (services, utils, etc.).
+ * @returns {'gregorian'|'hijri'}
+ */
+function _getActiveCalendar() {
+  try {
+    return localStorage.getItem('calendarType') || 'gregorian';
+  } catch {
+    return 'gregorian';
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Calendar-aware formatting — accept calendarType directly (no hook dependency)
+// ---------------------------------------------------------------------------
+
+/**
+ * Format a date according to the given calendarType.
+ * Safe to call from anywhere (no hook required).
+ *
+ * @param {string|Date} date
+ * @param {'gregorian'|'hijri'} calendarType
+ * @param {Intl.DateTimeFormatOptions} [options]
  * @returns {string}
  */
-export const formatDate = (date, options = {}) => {
-  if (!date) return '—';
+export const formatDateByCalendar = (date, calendarType = 'gregorian', options = {}) => {
+  const d = _resolve(date);
+  if (!d) return '—';
   try {
-    const d = typeof date === 'string' ? new Date(date) : date;
-    if (isNaN(d.getTime())) return '—';
-    return d.toLocaleDateString('ar-SA', {
+    const locale = calendarType === 'hijri' ? HIJRI_LOCALE : GREGORIAN_LOCALE;
+    return d.toLocaleDateString(locale, {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
@@ -26,38 +66,18 @@ export const formatDate = (date, options = {}) => {
 };
 
 /**
- * Format a date to Hijri calendar.
+ * Format a date + time according to the given calendarType.
+ *
  * @param {string|Date} date
- * @param {object} [options]
+ * @param {'gregorian'|'hijri'} calendarType
  * @returns {string}
  */
-export const formatHijri = (date, options = {}) => {
-  if (!date) return '—';
+export const formatDateTimeByCalendar = (date, calendarType = 'gregorian') => {
+  const d = _resolve(date);
+  if (!d) return '—';
   try {
-    const d = typeof date === 'string' ? new Date(date) : date;
-    if (isNaN(d.getTime())) return '—';
-    return d.toLocaleDateString('ar-SA-u-ca-islamic', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      ...options,
-    });
-  } catch {
-    return '—';
-  }
-};
-
-/**
- * Format a date with time.
- * @param {string|Date} date
- * @returns {string}
- */
-export const formatDateTime = date => {
-  if (!date) return '—';
-  try {
-    const d = typeof date === 'string' ? new Date(date) : date;
-    if (isNaN(d.getTime())) return '—';
-    return d.toLocaleString('ar-SA', {
+    const locale = calendarType === 'hijri' ? HIJRI_LOCALE : GREGORIAN_LOCALE;
+    return d.toLocaleString(locale, {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
@@ -68,6 +88,82 @@ export const formatDateTime = date => {
     return '—';
   }
 };
+
+/**
+ * Return both Gregorian and Hijri representations for a dual-display label.
+ * e.g. "15 مايو 2026 | 17 ذو القعدة 1447"
+ *
+ * @param {string|Date} date
+ * @returns {string}
+ */
+export const formatDateDual = date => {
+  const d = _resolve(date);
+  if (!d) return '—';
+  try {
+    const greg = d.toLocaleDateString(GREGORIAN_LOCALE, {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+    const hijri = d.toLocaleDateString(HIJRI_LOCALE, {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+    return `${greg} | ${hijri}`;
+  } catch {
+    return '—';
+  }
+};
+
+// ---------------------------------------------------------------------------
+// Hook re-export — use useDateFormatter() inside React components for
+// auto re-render when the user toggles the calendar.
+// ---------------------------------------------------------------------------
+
+/**
+ * React hook — returns calendar-aware formatting functions bound to the
+ * current CalendarContext preference.
+ * Must be used inside a React component.
+ *
+ * @returns {{ fmt: Function, fmtDT: Function, fmtDual: Function, calendarType: string, isHijri: boolean }}
+ */
+export { useDateFormatter } from '../contexts/CalendarContext';
+
+// ---------------------------------------------------------------------------
+// Auto calendar-aware shorthands (read localStorage, no hook required)
+// ---------------------------------------------------------------------------
+
+/**
+ * Format a date — automatically uses the active calendar type (Hijri or Gregorian)
+ * as stored in localStorage. No hook required; safe to call from anywhere.
+ * @param {string|Date} date
+ * @param {object} [options] — Intl.DateTimeFormat options
+ * @returns {string}
+ */
+export const formatDate = (date, options = {}) =>
+  formatDateByCalendar(date, _getActiveCalendar(), options);
+
+/**
+ * Format a date to Hijri calendar (always Hijri, regardless of preference).
+ * Use this when you explicitly need the Hijri representation.
+ * @param {string|Date} date
+ * @param {object} [options]
+ * @returns {string}
+ */
+export const formatHijri = (date, options = {}) =>
+  formatDateByCalendar(date, 'hijri', { month: 'long', ...options });
+
+/**
+ * Format a date with time — automatically uses the active calendar type.
+ * @param {string|Date} date
+ * @returns {string}
+ */
+export const formatDateTime = date => formatDateTimeByCalendar(date, _getActiveCalendar());
+
+// ---------------------------------------------------------------------------
+// Relative time helpers
+// ---------------------------------------------------------------------------
 
 /**
  * Format time only (HH:MM).
@@ -86,7 +182,7 @@ export const formatTime = date => {
 };
 
 /**
- * Relative time string (e.g., "منذ 5 دقائق").
+ * Return a relative Arabic time string ("منذ 3 أيام", "منذ ساعة", etc.).
  * @param {string|Date} date
  * @returns {string}
  */
@@ -94,26 +190,23 @@ export const timeAgo = date => {
   if (!date) return '';
   try {
     const d = typeof date === 'string' ? new Date(date) : date;
-    const now = new Date();
-    const diffMs = now - d;
-    const diffSec = Math.floor(diffMs / 1000);
-    const diffMin = Math.floor(diffSec / 60);
+    if (isNaN(d.getTime())) return '';
+    const diffMs = Date.now() - d.getTime();
+    const diffMin = Math.floor(diffMs / 60000);
     const diffHour = Math.floor(diffMin / 60);
     const diffDay = Math.floor(diffHour / 24);
-    const diffWeek = Math.floor(diffDay / 7);
     const diffMonth = Math.floor(diffDay / 30);
-
-    if (diffSec < 60) return 'الآن';
+    const diffYear = Math.floor(diffDay / 365);
+    if (diffMin < 1) return 'الآن';
     if (diffMin < 60)
       return `منذ ${diffMin} ${diffMin === 1 ? 'دقيقة' : diffMin <= 10 ? 'دقائق' : 'دقيقة'}`;
     if (diffHour < 24)
       return `منذ ${diffHour} ${diffHour === 1 ? 'ساعة' : diffHour <= 10 ? 'ساعات' : 'ساعة'}`;
-    if (diffDay < 7)
+    if (diffDay < 30)
       return `منذ ${diffDay} ${diffDay === 1 ? 'يوم' : diffDay <= 10 ? 'أيام' : 'يوم'}`;
-    if (diffWeek < 5) return `منذ ${diffWeek} ${diffWeek === 1 ? 'أسبوع' : 'أسابيع'}`;
     if (diffMonth < 12)
       return `منذ ${diffMonth} ${diffMonth === 1 ? 'شهر' : diffMonth <= 10 ? 'أشهر' : 'شهر'}`;
-    return formatDate(d);
+    return `منذ ${diffYear} ${diffYear === 1 ? 'سنة' : diffYear <= 10 ? 'سنوات' : 'سنة'}`;
   } catch {
     return '';
   }
@@ -121,10 +214,6 @@ export const timeAgo = date => {
 
 /**
  * Get start and end of a date (midnight to 23:59:59).
- * @param {Date} date
- * @returns {{ start: Date, end: Date }}
- */
-export const getDayRange = date => {
   const d = new Date(date);
   const start = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0);
   const end = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59);
@@ -242,7 +331,6 @@ export default {
   formatDateTime,
   formatTime,
   timeAgo,
-  getDayRange,
   daysBetween,
   isToday,
   isPast,

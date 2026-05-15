@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, Fragment } from 'react';
+import { formatDateTime } from 'utils/dateUtils';
 import {
   Box,
   Grid,
@@ -24,15 +25,35 @@ import {
 } from '@mui/material';
 import {
   Email as EmailIcon,
-  Inbox as InboxIcon,
+  Inbox as _InboxIcon,
   Send as SendIcon,
-  Drafts as DraftsIcon,
+  Drafts as _DraftsIcon,
   Delete as DeleteIcon,
   Star as StarIcon,
   Reply as ReplyIcon,
   Forward as ForwardIcon,
   AttachFile as AttachIcon,
 } from '@mui/icons-material';
+
+// Sidebar folder list. The render loop reads this; the values must
+// stay in sync with the `folder` state's allowed strings.
+const folders = [
+  { value: 'inbox', label: 'البريد الوارد', icon: <_InboxIcon /> },
+  { value: 'sent', label: 'المرسلة', icon: <SendIcon /> },
+  { value: 'drafts', label: 'المسودات', icon: <_DraftsIcon /> },
+  { value: 'starred', label: 'المميزة', icon: <StarIcon /> },
+];
+
+// Local short-form timestamp helper — delegates to the calendar-aware
+// formatter exposed by `utils/dateUtils`.
+const formatTimestamp = d => {
+  if (!d) return '';
+  try {
+    return new Date(d).toLocaleString('ar-SA');
+  } catch {
+    return formatDateTime(d);
+  }
+};
 import { useOrgBranding } from 'components/OrgBrandingContext';
 import logger from 'utils/logger';
 import { useSnackbar } from 'contexts/SnackbarContext';
@@ -49,7 +70,7 @@ const EmailPanel = () => {
   const [selectedEmail, setSelectedEmail] = useState(null);
   const [composeOpen, setComposeOpen] = useState(false);
   const [folder, setFolder] = useState('inbox');
-  const [emailStats, setEmailStats] = useState({
+  const [_emailStats, setEmailStats] = useState({
     inbox: 0,
     sent: 0,
     drafts: 0,
@@ -193,23 +214,6 @@ const EmailPanel = () => {
         return 'default';
     }
   };
-
-  const formatTimestamp = timestamp => {
-    const date = new Date(timestamp);
-    return date.toLocaleString('ar-SA', {
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
-
-  const folders = [
-    { value: 'inbox', label: 'البريد الوارد', icon: <InboxIcon />, count: emailStats.inbox },
-    { value: 'sent', label: 'المرسل', icon: <SendIcon />, count: emailStats.sent },
-    { value: 'drafts', label: 'المسودات', icon: <DraftsIcon />, count: emailStats.drafts },
-    { value: 'starred', label: 'المميز', icon: <StarIcon />, count: emailStats.starred },
-  ];
 
   return (
     <Box sx={{ height: '600px' }}>

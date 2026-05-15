@@ -5,6 +5,19 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { formatDateTime } from 'utils/dateUtils';
+
+// Local helper used by historyEntry rendering — accepts an options
+// bag so call sites can specify granular `toLocaleString` formatting
+// without depending on the calendar-aware export.
+const _fmtDate = (d, opts) => {
+  if (!d) return '';
+  try {
+    return new Date(d).toLocaleString('ar-SA', opts || {});
+  } catch {
+    return formatDateTime(d);
+  }
+};
 import {
   Box,
   Paper,
@@ -240,7 +253,7 @@ export default function WorkflowTimeline({
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                             <ScheduleIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
                             <Typography variant="body2" color="text.secondary">
-                              {new Date(historyEntry.timestamp).toLocaleDateString('ar-SA', {
+                              {_fmtDate(historyEntry.timestamp, {
                                 year: 'numeric',
                                 month: 'long',
                                 day: 'numeric',

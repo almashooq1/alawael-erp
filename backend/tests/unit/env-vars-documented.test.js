@@ -47,6 +47,7 @@ const ALLOW_LIST = new Set([
   // Node + npm conventions
   'NODE_ENV',
   'NODE_OPTIONS',
+  'NODE_PATH',
   'TZ',
   'PORT',
   'HOST',

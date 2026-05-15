@@ -43,6 +43,10 @@ const DEFAULT_OK = {
   '/api/v1/inspection-submissions': { status: 401, body: '' }, // auth-gated
   '/api/v1/benchmarks': { status: 200, body: '[]' },
   '/api/v1/quality/command-center': { status: 200, body: '{}' },
+  // Phase 30 Intelligent HR Platform — workflow + copilot + smart-analytics
+  '/api/v1/hr/workflow/rules': { status: 401, body: '' }, // admin-only
+  '/api/v1/hr/copilot/status': { status: 200, body: '{"data":{"available":false}}' },
+  '/api/v1/hr/smart-analytics/dashboard': { status: 401, body: '' }, // auth-gated
 };
 
 // Build a fake fetcher we drive per-test. The runner threads it through
@@ -129,6 +133,24 @@ describe('scripts/post-deploy-smoke', () => {
         expect(probe.expect({ status: 500 })).toBe(false);
         expect(probe.expect({ status: 200 })).toBe(true);
         expect(probe.expect({ status: 401 })).toBe(true);
+      }
+    });
+
+    test('every Phase 30 HR intelligence module has a mount probe', () => {
+      const expectedPhase30Probes = [
+        'phase30-hr-workflow-rules',
+        'phase30-hr-copilot-status',
+        'phase30-hr-smart-analytics',
+      ];
+      for (const name of expectedPhase30Probes) {
+        const probe = PROBES.find(p => p.name === name);
+        expect(probe).toBeDefined();
+        expect(probe.path.startsWith('/api/v1/hr/')).toBe(true);
+        // Each probe accepts 200 or 401, rejects 404 (unmounted) and 500 (crash).
+        expect(probe.expect({ status: 200 })).toBe(true);
+        expect(probe.expect({ status: 401 })).toBe(true);
+        expect(probe.expect({ status: 404 })).toBe(false);
+        expect(probe.expect({ status: 500 })).toBe(false);
       }
     });
 

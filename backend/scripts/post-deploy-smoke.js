@@ -141,7 +141,7 @@ const PROBES = [
   // accept 401 (not mounted = 404 = real failure).
   mountedRoute('phase30-hr-workflow-rules', '/api/v1/hr/workflow/rules'),
   mountedRoute('phase30-hr-copilot-status', '/api/v1/hr/copilot/status'),
-  mountedRoute('phase30-hr-smart-analytics', '/api/v1/hr/smart-analytics/overview'),
+  mountedRoute('phase30-hr-smart-analytics', '/api/v1/hr/smart-analytics/dashboard'),
 
   // ── Auth-gated diagnostics (non-critical without a token) ────────
   {

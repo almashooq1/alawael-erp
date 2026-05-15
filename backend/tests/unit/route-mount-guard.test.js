@@ -131,6 +131,7 @@ describe('Route Mount Guard', () => {
         '/api/documents-pro', // _registry.js + documents.registry.js
         '/api/documents-pro-ext', // _registry.js + documents.registry.js
         '/api/disability-rehab', // _registry.js + clinical-therapy.registry.js
+        '/api/activity-library', // _registry.js + clinical-assessment.registry.js
       ]);
 
       const duplicates = {};

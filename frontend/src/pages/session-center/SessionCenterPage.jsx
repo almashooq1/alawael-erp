@@ -580,7 +580,7 @@ function AttendanceTab() {
 /* ════════════════════════════════════════════════════════════════════════
  * Root Page
  * ════════════════════════════════════════════════════════════════════════ */
-const _CheckCircleIcon = AttendanceIcon; // alias (kept for back-compat callers)
+const CheckCircleIcon = AttendanceIcon; // alias
 
 export default function SessionCenterPage() {
   const [tab, setTab] = useState(0);

@@ -120,6 +120,7 @@ const {
   getPreTripChecklist,
   validatePreTripInspection,
 } = require('../services/transport/routeOptimization.service');
+const parentNotifications = require('../services/transport/parentNotifications.service');
 const escapeRegex = require('../utils/escapeRegex');
 
 const TRACKING_TOKEN_SECRET =
@@ -579,28 +580,54 @@ router.post(
   '/trips/:id/start',
   validateObjectId(),
   asyncHandler(async (req, res) => {
-    const trip = await Trip.findOne({ _id: req.params.id, deleted_at: null, status: 'scheduled' });
+    const trip = await Trip.findOne({ _id: req.params.id, deleted_at: null, status: 'scheduled' })
+      .populate('vehicle_id', 'license_plate vehicle_type')
+      .populate('route_id', 'route_name_ar');
     if (!trip)
       return res
         .status(404)
         .json({ success: false, message: 'الرحلة غير موجودة أو لا يمكن بدؤها' });
 
-    // التحقق من فحص ما قبل الرحلة
     if (req.body.skip_inspection !== true && !trip.pre_trip_inspection?.completed) {
       return res.status(400).json({ success: false, message: 'يجب إكمال فحص ما قبل الرحلة أولاً' });
     }
 
     trip.status = 'in_progress';
-    trip.actual_departure_time = new Date();
+    trip.actual_departure = new Date();
     await trip.save();
 
-    // إشعار أولياء الأمور بالبدء
-    const notifs = await notificationService.notifyPickup(trip);
+    // ── Phase J: notify all guardians with a live tracking link ──
+    const trackingToken = signTrackingToken(String(trip._id), TRACKING_TOKEN_SECRET);
+    const baseUrl = process.env.PUBLIC_BASE_URL || '';
+    const trackingUrl = baseUrl ? `${baseUrl}/track/${trackingToken}` : `/track/${trackingToken}`;
+    const startMessage = parentNotifications.buildTripStartedMessage({
+      trip,
+      route: trip.route_id,
+      vehicle: trip.vehicle_id,
+      trackingUrl,
+    });
+    const BeneficiaryM = mongoose.models.Beneficiary;
+    if (BeneficiaryM && trip.passengers?.length) {
+      const benIds = trip.passengers.map(p => p.beneficiary_id).filter(Boolean);
+      BeneficiaryM.find({ _id: { $in: benIds } })
+        .populate('guardians', 'phone alternatePhone name')
+        .lean()
+        .then(beneficiaries => {
+          for (const ben of beneficiaries) {
+            parentNotifications.sendAsync({
+              beneficiary: ben,
+              body: startMessage,
+              templateKey: 'transport.trip_started',
+              metadata: { tripId: String(trip._id), trackingUrl },
+            });
+          }
+        })
+        .catch(() => {});
+    }
 
     res.json({
       success: true,
       data: trip,
-      notifications_sent: notifs.length,
       message: 'تم بدء الرحلة',
     });
   })
@@ -1425,6 +1452,32 @@ router.post(
     passenger.pickup_lng = longitude;
     await trip.save();
 
+    // ── Phase J: notify the guardian (fire-and-forget) ──
+    const BeneficiaryM = mongoose.models.Beneficiary;
+    const VehicleM = mongoose.models.TransportVehicle || mongoose.models.Vehicle;
+    if (BeneficiaryM) {
+      Promise.all([
+        BeneficiaryM.findById(passenger.beneficiary_id)
+          .populate('guardians', 'phone alternatePhone name')
+          .lean(),
+        VehicleM ? VehicleM.findById(trip.vehicle_id).select('license_plate').lean() : null,
+      ])
+        .then(([ben, veh]) => {
+          if (!ben) return;
+          parentNotifications.sendAsync({
+            beneficiary: ben,
+            body: parentNotifications.buildPickupMessage({
+              beneficiary: ben,
+              vehicle: veh,
+              when: passenger.pickup_time_actual,
+            }),
+            templateKey: 'transport.pickup',
+            metadata: { tripId: String(trip._id), beneficiaryId: String(ben._id) },
+          });
+        })
+        .catch(() => {});
+    }
+
     // Audit: any pickup with force=true OR distance > geofence is a
     // bypass that operations needs visibility into.
     const isBypass =
@@ -1499,6 +1552,27 @@ router.post(
     passenger.status = 'dropped_off';
     passenger.dropoff_time_actual = new Date();
     await trip.save();
+
+    // ── Phase J: notify the guardian (fire-and-forget) ──
+    const BeneficiaryDropoff = mongoose.models.Beneficiary;
+    if (BeneficiaryDropoff) {
+      BeneficiaryDropoff.findById(passenger.beneficiary_id)
+        .populate('guardians', 'phone alternatePhone name')
+        .lean()
+        .then(ben => {
+          if (!ben) return;
+          parentNotifications.sendAsync({
+            beneficiary: ben,
+            body: parentNotifications.buildDropoffMessage({
+              beneficiary: ben,
+              when: passenger.dropoff_time_actual,
+            }),
+            templateKey: 'transport.dropoff',
+            metadata: { tripId: String(trip._id), beneficiaryId: String(ben._id) },
+          });
+        })
+        .catch(() => {});
+    }
 
     res.json({
       success: true,

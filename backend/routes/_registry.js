@@ -135,6 +135,7 @@ const trendForecastRoutes = safeRequire('../routes/trendForecast.routes'); // Ph
 const qualityNarrativeRoutes = safeRequire('../routes/qualityNarrative.routes'); // Phase 29 (LLM narratives)
 const inspectionSubmissionRoutes = safeRequire('../routes/inspectionSubmission.routes'); // Phase 29 (Mobile inspector PWA)
 const benchmarkRoutes = safeRequire('../routes/benchmark.routes'); // Phase 29 (Industry benchmarks)
+const qualityCommandCenterRoutes = safeRequire('../routes/qualityCommandCenter.routes'); // Phase 29 — Executive QMS Command Center
 const notificationLogRoutes = safeRequire('../routes/notificationLog.routes');
 // enterprise-risk → phases.registry.js; complaints-enhanced, kpi-dashboard, kpi-reports → features.registry.js
 const capaAdminRoutes = safeRequire('../routes/capa-admin.routes');
@@ -395,6 +396,7 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   dualMount(app, 'quality-narrative', qualityNarrativeRoutes); // Phase 29 — LLM-generated narratives
   dualMount(app, 'inspection-submissions', inspectionSubmissionRoutes); // Phase 29 — Mobile inspector PWA ingestion
   dualMount(app, 'benchmarks', benchmarkRoutes); // Phase 29 — Industry benchmarks
+  dualMount(app, 'quality/command-center', qualityCommandCenterRoutes); // Phase 29 — Executive aggregator
   // enterprise-risk is mounted in phases.registry.js
   dualMount(app, 'admin/capa', capaAdminRoutes);
   // complaints-enhanced, kpi-dashboard, kpi-reports are mounted in features.registry.js
@@ -623,6 +625,51 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   dualMount(app, 'assessments', safeRequire('../domains/assessments/routes/assessments.routes'));
   // Clinical Sessions (جلسات علاجية)
   dualMount(app, 'sessions', safeRequire('../domains/sessions/routes/sessions.routes'));
+  // Therapy Sessions — extended CRUD + documentation + bulk ops (maps frontend /therapy-sessions/*)
+  dualMount(app, 'therapy-sessions', safeRequire('../routes/therapy-sessions.routes'));
+  // Therapy Sessions Analytics — KPIs, trends, calendar, billing (maps frontend /therapy-sessions-analytics/*)
+  dualMount(
+    app,
+    'therapy-sessions-analytics',
+    safeRequire('../routes/therapy-sessions-analytics.routes')
+  );
+  // Therapist Extended — treatment plans, assessments, prescriptions, professional-dev, analytics, consultations
+  dualMount(app, 'therapist-extended', safeRequire('../routes/therapist-extended.routes'));
+  // ICF Assessments — التصنيف الدولي للأداء الوظيفي
+  dualMount(app, 'icf-assessments', safeRequire('../routes/icf-assessments.routes'));
+  // Task Management — إدارة المهام
+  dualMount(app, 'tasks', safeRequire('../routes/tasks.routes'));
+  // Referral Portal — بوابة التحويلات
+  dualMount(app, 'referrals', safeRequire('../routes/referrals.routes'));
+  // Rehab Disciplines & Goal Suggestions — تخصصات التأهيل ومقترحات الأهداف
+  dualMount(app, 'rehab', safeRequire('../routes/rehab.routes'));
+
+  // ── Phase-12 Gap-Fill Mounts ───────────────────────────────────────────
+  // Incidents — الحوادث والبلاغات
+  dualMount(app, 'incidents', safeRequire('../routes/incidentRoutes'));
+  // CEO Dashboard — لوحة قيادة الرئيس التنفيذي
+  dualMount(app, 'ceo-dashboard', safeRequire('../routes/ceoDashboard.routes'));
+  // Compensation & Benefits — الرواتب والمزايا
+  dualMount(app, 'compensation-benefits', safeRequire('../routes/compensationBenefits.routes'));
+  // CRM — إدارة علاقات العملاء
+  dualMount(app, 'crm', safeRequire('../routes/crm-enhanced.routes'));
+  // Knowledge Center — مركز المعرفة
+  dualMount(app, 'knowledge-center', safeRequire('../routes/knowledgeCenter.routes'));
+  // Quality Management — إدارة الجودة
+  dualMount(app, 'quality-management', safeRequire('../routes/qualityManagement.routes'));
+  // Purchasing — المشتريات
+  dualMount(app, 'purchasing', safeRequire('../routes/purchasing.routes'));
+  // Fuel Management — إدارة الوقود
+  dualMount(app, 'fuel', safeRequire('../routes/fuel.routes'));
+  // Transport Overview — نظرة عامة على النقل
+  dualMount(app, 'transport', safeRequire('../routes/transport.routes'));
+  // Form Templates — النماذج الجاهزة
+  dualMount(app, 'form-templates', safeRequire('../routes/form-templates.routes'));
+  // Report Builder — منشئ التقارير
+  dualMount(app, 'report-builder', safeRequire('../routes/report-builder.routes'));
+  // System Settings — إعدادات النظام
+  dualMount(app, 'system-settings', safeRequire('../routes/system-settings.routes'));
+
   // Unified Care Plans (خطط الرعاية الموحدة)
   dualMount(app, 'care-plans', safeRequire('../domains/care-plans/routes/care-plans.routes'));
   // Care Timeline (الخط الزمني الطولي)

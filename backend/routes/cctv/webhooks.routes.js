@@ -20,9 +20,19 @@ const cameraService = require('../../services/cctv/cameraService');
 const eventService = require('../../services/cctv/eventService');
 const aiDispatcher = require('../../services/cctv/ai');
 
+const eventQueue = require('../../services/cctv/eventQueue.service');
+
 const router = express.Router();
 
 router.use(express.raw({ type: '*/*', limit: '5mb' }));
+
+// Backpressure cutoff: refuse new events when the queue is this full.
+// Hikvision retries on 429, so dropping a small % under burst is fine.
+function _backpressure() {
+  const depth = eventQueue.depth();
+  const cap = eventQueue.capacity();
+  return depth >= cap * 0.95 ? { open: true, depth, cap } : null;
+}
 
 function verifyHmac(secret, raw, sigHeader) {
   if (!sigHeader || !secret) return false;
@@ -60,6 +70,15 @@ function parseHikvisionBody(buf, contentType = '') {
 }
 
 router.post('/nvr/:nvrCode', async (req, res) => {
+  const bp = _backpressure();
+  if (bp) {
+    res.setHeader('Retry-After', '1');
+    return res.status(429).json({
+      success: false,
+      code: 'QUEUE_FULL',
+      message: `ingestion saturated (${bp.depth}/${bp.cap})`,
+    });
+  }
   const nvr = await CctvNvr.findOne({ code: String(req.params.nvrCode).toUpperCase() });
   if (!nvr) return res.status(404).json({ success: false, message: 'NVR_NOT_FOUND' });
 
@@ -86,13 +105,25 @@ router.post('/nvr/:nvrCode', async (req, res) => {
   nvr.eventPush.lastPushAt = new Date();
   await nvr.save().catch(() => {});
 
-  if (ingest.ok && ingest.data) {
+  // AI dispatch now happens inside eventQueue.flush — no need to call
+  // dispatcher synchronously on the hot path. Fall back only if the
+  // queue is disabled (CCTV_QUEUE_DISABLE=1).
+  if (ingest.ok && ingest.data && !ingest.queued) {
     aiDispatcher.dispatch(ingest.data).catch(() => {});
   }
   res.status(ingest.ok ? 202 : 422).json({ success: ingest.ok, ...ingest });
 });
 
 router.post('/camera/:code', async (req, res) => {
+  const bp = _backpressure();
+  if (bp) {
+    res.setHeader('Retry-After', '1');
+    return res.status(429).json({
+      success: false,
+      code: 'QUEUE_FULL',
+      message: `ingestion saturated (${bp.depth}/${bp.cap})`,
+    });
+  }
   const parsed = parseHikvisionBody(req.body, req.headers['content-type']);
   const r = await eventService.ingestFromHikvision({
     cameraCode: req.params.code,
@@ -100,7 +131,8 @@ router.post('/camera/:code', async (req, res) => {
     dateTime: parsed.dateTime,
     raw: parsed,
   });
-  if (r.ok && r.data) aiDispatcher.dispatch(r.data).catch(() => {});
+  // Same as above: queue handles AI fan-out, only the direct path needs it.
+  if (r.ok && r.data && !r.queued) aiDispatcher.dispatch(r.data).catch(() => {});
   res.status(r.ok ? 202 : 422).json({ success: r.ok, ...r });
 });
 

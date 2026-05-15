@@ -20,35 +20,35 @@ const http = require('http');
 const https = require('https');
 const { URL } = require('url');
 const { parseChallenge, buildResponse } = require('./digestAuth');
+const httpAgentPool = require('./httpAgentPool');
 
-const DEFAULT_TIMEOUT_MS = parseInt(process.env.HIKVISION_TIMEOUT_MS, 10) || 8000;
+function defaultTimeoutMs() {
+  return parseInt(process.env.HIKVISION_TIMEOUT_MS, 10) || 8000;
+}
 
 function joinUrl(base, path) {
   return base.replace(/\/+$/, '') + (path.startsWith('/') ? path : `/${path}`);
 }
 
-function rawRequest({
-  method,
-  url,
-  headers = {},
-  body,
-  timeoutMs = DEFAULT_TIMEOUT_MS,
-  expectBinary = false,
-}) {
+function rawRequest({ method, url, headers = {}, body, timeoutMs, expectBinary = false }) {
   return new Promise((resolve, reject) => {
     const u = new URL(url);
-    const lib = u.protocol === 'https:' ? https : http;
+    const secure = u.protocol === 'https:';
+    const lib = secure ? https : http;
+    const port = u.port || (secure ? 443 : 80);
     const opts = {
       method,
       hostname: u.hostname,
-      port: u.port || (u.protocol === 'https:' ? 443 : 80),
+      port,
       path: `${u.pathname}${u.search}`,
       headers: {
         Accept: 'application/json, application/xml, text/xml;q=0.9, */*;q=0.5',
         ...headers,
       },
       rejectUnauthorized: false,
+      agent: httpAgentPool.for(u.hostname, port, secure),
     };
+    const effectiveTimeout = timeoutMs || defaultTimeoutMs();
     if (body && !opts.headers['Content-Length']) {
       opts.headers['Content-Length'] = Buffer.byteLength(body);
     }
@@ -65,8 +65,8 @@ function rawRequest({
       });
     });
     req.on('error', reject);
-    req.setTimeout(timeoutMs, () =>
-      req.destroy(new Error(`hikvision request timeout after ${timeoutMs}ms`))
+    req.setTimeout(effectiveTimeout, () =>
+      req.destroy(new Error(`hikvision request timeout after ${effectiveTimeout}ms`))
     );
     if (body) req.write(body);
     req.end();

@@ -24,6 +24,9 @@ function probeSize() {
 function failThreshold() {
   return parseInt(process.env.CCTV_FAIL_THRESHOLD, 10) || 3;
 }
+function probeConcurrency() {
+  return parseInt(process.env.CCTV_PROBE_CONCURRENCY, 10) || 16;
+}
 
 let cursor = 0;
 
@@ -101,27 +104,73 @@ async function probeOne(target, kind) {
   return doc;
 }
 
+// Per-branch cursor map so a sluggish branch can't starve other branches.
+const branchCursors = new Map();
+
+async function _probeBranchSlice(branchCode, batchPerBranch) {
+  const skip = branchCursors.get(branchCode) || 0;
+  const cams = await CctvCamera.find({
+    branchCode,
+    isDeleted: { $ne: true },
+    status: { $ne: 'retired' },
+  })
+    .sort({ _id: 1 })
+    .skip(skip)
+    .limit(batchPerBranch)
+    .lean();
+  if (cams.length === 0) {
+    branchCursors.set(branchCode, 0);
+  } else {
+    branchCursors.set(branchCode, skip + cams.length);
+  }
+  return cams;
+}
+
 async function tick() {
   const batch = probeSize();
-  const cameras = await CctvCamera.find({ isDeleted: { $ne: true }, status: { $ne: 'retired' } })
-    .sort({ _id: 1 })
-    .skip(cursor)
-    .limit(batch)
-    .lean();
-  if (cameras.length === 0) {
-    cursor = 0;
+  const branches = await CctvCamera.distinct('branchCode', {
+    isDeleted: { $ne: true },
+    status: { $ne: 'retired' },
+  });
+  let cameras = [];
+  if (branches.length === 0) {
+    // fallback to legacy round-robin if no branches discovered
+    cameras = await CctvCamera.find({ isDeleted: { $ne: true }, status: { $ne: 'retired' } })
+      .sort({ _id: 1 })
+      .skip(cursor)
+      .limit(batch)
+      .lean();
+    if (cameras.length === 0) cursor = 0;
+    else cursor += cameras.length;
   } else {
-    cursor += cameras.length;
+    // Fair share: each branch gets ceil(batch / branchCount) per tick
+    const perBranch = Math.max(1, Math.ceil(batch / branches.length));
+    const slices = await Promise.all(branches.map(b => _probeBranchSlice(b, perBranch)));
+    cameras = slices.flat();
   }
+  if (cameras.length === 0) return { ok: true, data: { probed: 0, branches: branches.length } };
+
+  // Parallel probing with concurrency cap so 1000 cameras don't open
+  // 1000 sockets simultaneously.
+  const conc = probeConcurrency();
   const results = [];
-  for (const cam of cameras) {
-    try {
-      results.push(await probeOne(cam, 'camera'));
-    } catch (err) {
-      results.push({ error: err.message, cameraId: cam._id });
+  let i = 0;
+  async function worker() {
+    while (i < cameras.length) {
+      const idx = i++;
+      const cam = cameras[idx];
+      try {
+        results.push(await probeOne(cam, 'camera'));
+      } catch (err) {
+        results.push({ error: err.message, cameraId: cam._id });
+      }
     }
   }
-  return { ok: true, data: { probed: results.length, cursor, batch } };
+  await Promise.all(Array.from({ length: Math.min(conc, cameras.length) }, () => worker()));
+  return {
+    ok: true,
+    data: { probed: results.length, branches: branches.length, concurrency: conc, batch },
+  };
 }
 
 async function tickNvrs() {
@@ -159,10 +208,15 @@ module.exports = {
   summary,
   probeSize,
   failThreshold,
+  probeConcurrency,
+  branchCursors,
   get PROBE_SIZE() {
     return probeSize();
   },
   get FAIL_THRESHOLD() {
     return failThreshold();
+  },
+  get PROBE_CONCURRENCY() {
+    return probeConcurrency();
   },
 };

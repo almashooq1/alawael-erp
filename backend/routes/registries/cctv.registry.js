@@ -32,14 +32,26 @@ function startSchedulers(logger) {
   started = true;
   let healthMonitor;
   let streamService;
+  let eventQueue;
   try {
     healthMonitor = require('../../services/cctv/healthMonitor.service');
     streamService = require('../../services/cctv/streamService');
+    eventQueue = require('../../services/cctv/eventQueue.service');
   } catch (err) {
     if (logger) logger.warn(`[cctv] schedulers not started: ${err.message}`);
     return;
   }
   if (process.env.CCTV_DISABLE_SCHEDULERS === '1') return;
+
+  // Boot the batched event ingestion flusher. Single biggest scale lever
+  // — without this, the webhook hot path does one Mongo write per event.
+  try {
+    eventQueue.start();
+    if (logger)
+      logger.info(`[cctv] event queue flusher started (depth cap ${eventQueue.capacity()})`);
+  } catch (err) {
+    if (logger) logger.warn(`[cctv] event queue start failed: ${err.message}`);
+  }
 
   const h1 = setInterval(() => {
     healthMonitor.tick().catch(err => logger?.debug(`[cctv] health tick: ${err.message}`));
@@ -66,6 +78,11 @@ function stopSchedulers() {
   for (const h of handles) clearInterval(h);
   handles.length = 0;
   started = false;
+  try {
+    require('../../services/cctv/eventQueue.service').stop();
+  } catch {
+    // ignore
+  }
 }
 
 function safeMount(app, base, modulePath, logger) {

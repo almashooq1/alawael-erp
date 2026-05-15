@@ -190,6 +190,74 @@ mobile (C9) + parent portal (C10) + edge gateway (C11).
 
 ---
 
+## [Unreleased] — 2026-05-15 — Phase 27 scale-up to 50K cameras
+
+Same-day follow-up: the platform was already complete end-to-end, but
+hot-path bottlenecks limited it to ~5K cameras. These four levers
+raise the ceiling to ~50K cameras and isolate per-NVR failures.
+
+### Added — Scale infrastructure
+
+- **`backend/services/cctv/eventQueue.service.js`** — batched ingestion
+  buffer with `insertMany` bulk write + capped AI fan-out. Webhook now
+  pushes in microseconds; flusher does the Mongo write in batches of
+  500 every 250ms. Backpressure: returns `{ok:false, code:'QUEUE_FULL'}`
+  at 95% capacity so the webhook returns `429 + Retry-After: 1`.
+- **`backend/services/cctv/adapter/perTargetBreaker.js`** — multi-tenant
+  circuit-breaker wrapper. Each NVR/IP gets its own breaker. Failing
+  one NVR can no longer cascade-open a global "hikvision" breaker and
+  knock out the other 99. Idle breakers GC'd after 10 min.
+- **`backend/services/cctv/adapter/httpAgentPool.js`** — lazy
+  keep-alive Node http.Agent per `(host:port:scheme)`. The ISAPI
+  adapter now reuses sockets instead of doing TCP+TLS handshake per
+  call. Per-origin socket cap prevents a misbehaving NVR from
+  starving the pool.
+
+### Changed — Hot path
+
+- **`webhooks.routes.js`** — both `/nvr/:nvrCode` and `/camera/:code`
+  now check backpressure first and return 429 when saturated. AI
+  dispatch removed from the inline path (queue handles it).
+- **`eventService.ingestFromHikvision`** — default path is now
+  enqueue + return. Synchronous insert path retained for
+  `CCTV_QUEUE_DISABLE=1` (tests).
+- **`healthMonitor.tick`** — now shards by branch (each branch has its
+  own cursor + fair share) and probes with `CCTV_PROBE_CONCURRENCY`
+  parallel workers. One sluggish branch can no longer starve probing
+  on the others.
+- **`hikvisionISAPIAdapter.rawRequest`** — every HTTP call now goes
+  through `httpAgentPool.for(host, port, secure)`. Lazy timeout
+  resolution so env var changes apply immediately.
+- **`adapter/index.js`** — the global breaker was replaced with
+  `perTargetBreaker.get(opts.ip)`. `getConfig()` now reports
+  per-target breaker snapshots + agent pool stats.
+
+### Added — Ops endpoints
+
+- `GET  /api/v1/cctv/admin/queue` — depth, high-water-mark, drops, errors
+- `POST /api/v1/cctv/admin/queue/flush` — force-flush (debug)
+- `POST /api/v1/cctv/admin/breakers/reset/:target?` — reset one or all
+
+### Added — Tests
+
+- `cctv-event-queue.test.js` (5 tests) — push/depth/capacity/dropped/
+  drain
+- `cctv-per-target-breaker.test.js` (5 tests) — isolation between
+  targets + reset
+- `cctv-http-agent-pool.test.js` (5 tests) — same-origin reuse,
+  scheme/port separation, keep-alive flag
+
+Total CCTV test count: **63 passing** across 10 suites.
+
+### Added — Docs
+
+- `docs/blueprint/27-cctv-scale-guide.md` — tier matrix (S/M/L/XL),
+  per-tier deploy checklist, env knob reference, ops endpoints,
+  load-test recipe, symptom → fix table.
+- 14 new entries in `.env.example` covering the scale knobs.
+
+---
+
 ## [Unreleased] — 2026-05-12 — 17-commit cleanup + verified manual deploy + 11 real bugs caught
 
 A long session combining a Quality module expansion, frontend admin pages refresh,

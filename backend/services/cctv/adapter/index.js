@@ -10,21 +10,20 @@
  */
 'use strict';
 
-const CircuitBreaker = require('../../adapterCircuitBreaker');
 const rateLimiter = require('../../adapterRateLimiter');
 const metricsRegistry = require('../../adapterMetricsRegistry');
 const adapterAuditLogger = require('../../adapterAuditLogger');
+const perTargetBreaker = require('./perTargetBreaker');
+const httpAgentPool = require('./httpAgentPool');
 
 const live = require('./hikvisionISAPIAdapter');
 const mock = require('./hikvisionMockAdapter');
 
 const MODE = (process.env.HIKVISION_MODE || 'mock').toLowerCase();
 
-const breaker = CircuitBreaker.create({
-  name: 'hikvision',
-  maxFailures: parseInt(process.env.HIKVISION_BREAKER_MAX_FAILURES, 10) || 5,
-  cooldownMs: parseInt(process.env.HIKVISION_BREAKER_COOLDOWN_MS, 10) || 60_000,
-});
+function _targetKey(opts) {
+  return opts?.ip || 'global';
+}
 
 function selectImpl() {
   if (MODE === 'live') return live;
@@ -50,8 +49,15 @@ function wrap(name) {
         return { ok: false, code: 'RATE_LIMITED', message: 'too many calls', mode: impl.mode };
       }
     }
+    const breaker = perTargetBreaker.get(_targetKey(opts));
     if (breaker.isOpen()) {
-      return { ok: false, code: 'CIRCUIT_OPEN', message: breaker.openMessage, mode: impl.mode };
+      return {
+        ok: false,
+        code: 'CIRCUIT_OPEN',
+        message: `circuit open for target ${_targetKey(opts)}`,
+        mode: impl.mode,
+        target: _targetKey(opts),
+      };
     }
     const start = Date.now();
     try {
@@ -88,6 +94,7 @@ function wrap(name) {
         message: err.message,
         mode: impl.mode,
         latencyMs,
+        target: _targetKey(opts),
       };
     }
   };
@@ -117,11 +124,14 @@ for (const fn of surface) adapter[fn] = wrap(fn);
 adapter.getConfig = () => ({
   mode: MODE,
   surface,
-  breaker: breaker.snapshot ? breaker.snapshot() : { name: 'hikvision' },
+  breakers: perTargetBreaker.snapshot(),
+  agents: httpAgentPool.snapshot(),
 });
 
+adapter.resetBreaker = key => perTargetBreaker.reset(key);
 adapter._live = live;
 adapter._mock = mock;
-adapter._breaker = breaker;
+adapter._breaker = perTargetBreaker;
+adapter._agents = httpAgentPool;
 
 module.exports = adapter;

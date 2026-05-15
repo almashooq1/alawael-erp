@@ -14,6 +14,7 @@ const healthMonitor = require('../../services/cctv/healthMonitor.service');
 const streamService = require('../../services/cctv/streamService');
 const cameraService = require('../../services/cctv/cameraService');
 const adapter = require('../../services/cctv/adapter');
+const eventQueue = require('../../services/cctv/eventQueue.service');
 const { authenticateToken, requireRole } = require('../../middleware/auth');
 
 const router = express.Router();
@@ -39,6 +40,20 @@ router.get('/config', (req, res) => {
 
 router.post('/reap-streams', async (req, res) => {
   res.json({ success: true, data: await streamService.reapIdle() });
+});
+
+router.get('/queue', (req, res) => {
+  res.json({ success: true, data: eventQueue.snapshot() });
+});
+
+router.post('/queue/flush', async (req, res) => {
+  const r = await eventQueue.flush();
+  res.json({ success: true, data: r });
+});
+
+router.post('/breakers/reset/:target?', (req, res) => {
+  adapter.resetBreaker?.(req.params.target);
+  res.json({ success: true, data: adapter.getConfig().breakers });
 });
 
 module.exports = router;

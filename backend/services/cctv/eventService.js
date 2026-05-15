@@ -13,12 +13,17 @@
 const crypto = require('crypto');
 const { CctvEvent, CctvCamera } = require('../../models/cctv');
 const cameraService = require('./cameraService');
+const eventQueue = require('./eventQueue.service');
 
 let eventBus = null;
 try {
   eventBus = require('../quality/qualityEventBus.service');
 } catch (_) {
   eventBus = null;
+}
+
+function _useQueue() {
+  return (process.env.CCTV_QUEUE_DISABLE || '0') !== '1';
 }
 
 const HIKVISION_TYPE_MAP = {
@@ -146,6 +151,13 @@ async function ingestFromHikvision(payload) {
     snapshot: payload.snapshot,
     retainUntil: new Date(Date.now() + (camera.pdpl?.retentionDays || 30) * 86400 * 1000),
   };
+  // Fast path: drop into the batched queue. Flusher does bulk insert +
+  // AI fan-out async, so the webhook returns in ~µs.
+  if (_useQueue()) {
+    const q = eventQueue.push(doc);
+    if (!q.ok) return { ok: false, code: q.code, queueDepth: q.depth };
+    return { ok: true, queued: true, eventId: doc.eventId, queueDepth: q.depth };
+  }
   const saved = await _persist(doc);
   return { ok: true, data: saved };
 }

@@ -116,6 +116,7 @@ const {
   GEOFENCE_RADIUS_METERS,
 } = require('../services/transport/smartTransport.service');
 const { computeDriverScore, rankDrivers } = require('../services/transport/driverSafety.service');
+const { analyzeDriver: analyzeFatigue } = require('../services/transport/driverFatigue.service');
 const {
   getPreTripChecklist,
   validatePreTripInspection,
@@ -1738,6 +1739,44 @@ router.get(
   })
 );
 
+// GET /transport-module/safety/drivers/:driverId/fatigue — حالة إرهاق السائق اليوم
+router.get(
+  '/safety/drivers/:driverId/fatigue',
+  validateObjectId('driverId'),
+  asyncHandler(async (req, res) => {
+    // Find vehicles the driver has trips on today (fatigue resets each day)
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const todayTrips = await Trip.find({
+      driver_id: req.params.driverId,
+      deleted_at: null,
+      trip_date: { $gte: startOfDay },
+    })
+      .select('vehicle_id')
+      .lean();
+
+    const vehicleIds = [...new Set(todayTrips.map(t => String(t.vehicle_id)))];
+
+    let points = [];
+    if (vehicleIds.length > 0) {
+      points = await GpsTracking.find({
+        vehicle_id: { $in: vehicleIds.map(id => new mongoose.Types.ObjectId(id)) },
+        timestamp: { $gte: startOfDay },
+      })
+        .sort({ timestamp: 1 })
+        .select('timestamp speed')
+        .lean();
+    }
+
+    const result = analyzeFatigue({ points, trips: todayTrips });
+    res.json({
+      success: true,
+      data: { driverId: req.params.driverId, ...result },
+    });
+  })
+);
+
 // GET /transport-module/safety/leaderboard — ترتيب السائقين
 router.get(
   '/safety/leaderboard',
@@ -1829,6 +1868,60 @@ router.get(
         phone: driverNames.get(r.driverId)?.phone || null,
       })),
       period_days: days,
+    });
+  })
+);
+
+// GET /transport-module/notifications/logs — سجل الإشعارات المرسلة (admin)
+router.get(
+  '/notifications/logs',
+  asyncHandler(async (req, res) => {
+    const role = String(req.user?.role || req.user?.roleCode || '').toUpperCase();
+    if (!GPS_ADMIN_ROLES.has(role)) {
+      return res.status(403).json({ success: false, message: 'صلاحية المدير مطلوبة' });
+    }
+
+    const { channel, status, page = 1, limit = 50 } = req.query;
+    const filter = {};
+    // Only transport-tagged entries (templateKey starts with "transport.")
+    filter.templateKey = { $regex: '^transport\\.' };
+    if (channel) filter.channel = channel;
+    if (status) filter.status = status;
+
+    const NotificationLog =
+      mongoose.models.NotificationLog ||
+      (() => {
+        try {
+          return require('../services/unifiedNotifier').NotificationLog;
+        } catch {
+          return null;
+        }
+      })();
+    if (!NotificationLog) {
+      return res.json({
+        success: true,
+        data: [],
+        pagination: { total: 0, page: 1, limit, pages: 0 },
+      });
+    }
+
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const total = await NotificationLog.countDocuments(filter);
+    const logs = await NotificationLog.find(filter)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit))
+      .lean();
+
+    res.json({
+      success: true,
+      data: logs,
+      pagination: {
+        total,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        pages: Math.ceil(total / parseInt(limit)),
+      },
     });
   })
 );

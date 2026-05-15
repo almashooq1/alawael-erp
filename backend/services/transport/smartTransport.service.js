@@ -32,6 +32,32 @@ const TRACKING_TOKEN_TTL_HOURS = 6;
  * @param {Array<string>} visitedBeneficiaryIds - ids already picked/dropped
  * @param {number} [radiusMeters=GEOFENCE_RADIUS_METERS]
  */
+/**
+ * Whitelist the fields we expose for a waypoint, so mongoose subdoc
+ * internals (_id, __v, parent ref) don't leak in API responses.
+ */
+function pickWaypoint(wp) {
+  if (!wp) return null;
+  // Handle both plain objects and mongoose subdocs (which have .toObject())
+  const o = typeof wp.toObject === 'function' ? wp.toObject() : wp;
+  return {
+    order: o.order,
+    lat: o.lat,
+    lng: o.lng,
+    address: o.address ?? null,
+    pickup_time: o.pickup_time ?? null,
+    dropoff_time: o.dropoff_time ?? null,
+    waypoint_type: o.waypoint_type ?? 'pickup',
+    beneficiary_id:
+      o.beneficiary_id && typeof o.beneficiary_id === 'object' && o.beneficiary_id._id
+        ? String(o.beneficiary_id._id)
+        : o.beneficiary_id
+          ? String(o.beneficiary_id)
+          : null,
+    notes: o.notes ?? null,
+  };
+}
+
 function nearestUnvisitedWaypoint(
   gps,
   waypoints,
@@ -44,10 +70,16 @@ function nearestUnvisitedWaypoint(
   let best = null;
   for (const wp of waypoints) {
     if (wp.lat == null || wp.lng == null) continue;
-    if (wp.beneficiary_id && visited.has(String(wp.beneficiary_id))) continue;
+    const benId =
+      wp.beneficiary_id && typeof wp.beneficiary_id === 'object' && wp.beneficiary_id._id
+        ? String(wp.beneficiary_id._id)
+        : wp.beneficiary_id
+          ? String(wp.beneficiary_id)
+          : null;
+    if (benId && visited.has(benId)) continue;
     const meters = haversineDistanceMeters(gps.latitude, gps.longitude, wp.lat, wp.lng);
     if (!best || meters < best.distanceMeters) {
-      best = { waypoint: wp, distanceMeters: Math.round(meters) };
+      best = { waypoint: pickWaypoint(wp), distanceMeters: Math.round(meters) };
     }
   }
 

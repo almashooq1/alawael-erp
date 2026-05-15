@@ -95,6 +95,14 @@ tripSchema.index({ driver_id: 1, trip_date: -1 });
 tripSchema.index({ branch_id: 1, trip_date: -1 });
 tripSchema.index({ status: 1 });
 tripSchema.index({ deleted_at: 1 });
+// Hot path: /driver/my-trip-today queries (driver_id, deleted_at:null, trip_date in today, status in [scheduled,in_progress,delayed]).
+// Composite + partial filter on deleted_at makes the query an index-only scan.
+tripSchema.index(
+  { driver_id: 1, trip_date: -1, status: 1 },
+  { partialFilterExpression: { deleted_at: null } }
+);
+// /live-fleet active-trip lookup (status: 'in_progress' across vehicles)
+tripSchema.index({ status: 1, vehicle_id: 1 }, { partialFilterExpression: { deleted_at: null } });
 
 // Registered as `TransportTrip` to dodge the collision with the canonical
 // models/Trip.js. Default export unchanged.

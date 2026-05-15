@@ -46,6 +46,34 @@ const gpsBatchLimiter = createCustomLimiter({
   keyGenerator: req => req.body?.vehicle_id || req.user?.id || req.ip || 'anon',
 });
 
+// ─── GPS write authorization ─────────────────────────────────────────────────
+const GPS_ADMIN_ROLES = new Set(['SUPER_ADMIN', 'ADMIN', 'DISPATCHER', 'FLEET_MANAGER']);
+async function authorizeVehicleWrite(req, res, next) {
+  try {
+    const vehicleId = req.body?.vehicle_id;
+    if (!vehicleId || !mongoose.Types.ObjectId.isValid(vehicleId)) {
+      return res.status(400).json({ success: false, message: 'معرّف المركبة غير صالح' });
+    }
+    const role = String(req.user?.role || req.user?.roleCode || '').toUpperCase();
+    if (GPS_ADMIN_ROLES.has(role)) return next();
+
+    // Otherwise: caller must be the vehicle's current driver
+    // (lazy-require to avoid circular deps at module load)
+
+    const VehicleM = require('../models/transport/Vehicle');
+    const v = await VehicleM.findById(vehicleId).select('current_driver_id').lean();
+    if (!v) return res.status(404).json({ success: false, message: 'المركبة غير موجودة' });
+    if (String(v.current_driver_id) !== String(req.user?._id || req.user?.id)) {
+      return res
+        .status(403)
+        .json({ success: false, message: 'غير مصرح: لست السائق المسجّل لهذه المركبة' });
+    }
+    next();
+  } catch (e) {
+    next(e);
+  }
+}
+
 // ─── GPS payload validation ──────────────────────────────────────────────────
 const MAX_GPS_BATCH = 100;
 function validateGpsPoint(p) {
@@ -92,6 +120,24 @@ const escapeRegex = require('../utils/escapeRegex');
 
 const TRACKING_TOKEN_SECRET =
   process.env.TRANSPORT_TRACKING_SECRET || 'transport-tracking-default-rotate-me';
+
+let _AuditLog = null;
+function getAuditLog() {
+  if (_AuditLog) return _AuditLog;
+  try {
+    _AuditLog = require('../models/auditLog.model').AuditLog;
+  } catch {
+    _AuditLog = null;
+  }
+  return _AuditLog;
+}
+
+// Fire-and-forget audit logger — never throws
+function auditAsync(entry) {
+  const M = getAuditLog();
+  if (!M) return;
+  M.create(entry).catch(() => {});
+}
 
 const routeOptimizer = new RouteOptimizationService();
 const inspectionService = new PreTripInspectionService();
@@ -749,6 +795,7 @@ router.get(
 router.post(
   '/gps',
   gpsLimiter,
+  authorizeVehicleWrite,
   asyncHandler(async (req, res) => {
     const { vehicle_id, trip_id, ...point } = req.body;
 
@@ -793,6 +840,7 @@ router.post(
 router.post(
   '/gps/batch',
   gpsBatchLimiter,
+  authorizeVehicleWrite,
   asyncHandler(async (req, res) => {
     const { vehicle_id, trip_id, points } = req.body;
 
@@ -1331,6 +1379,37 @@ router.post(
     passenger.pickup_lng = longitude;
     await trip.save();
 
+    // Audit: any pickup with force=true OR distance > geofence is a
+    // bypass that operations needs visibility into.
+    const isBypass =
+      force === true || (distanceMeters != null && distanceMeters > GEOFENCE_RADIUS_METERS);
+    if (isBypass) {
+      auditAsync({
+        eventType: 'security.suspicious_activity',
+        eventCategory: 'security',
+        severity: 'medium',
+        status: 'success',
+        userId: req.user?._id || req.user?.id,
+        userRole: req.user?.role || req.user?.roleCode,
+        ipAddress: req.ip,
+        resource: `trip:${trip._id}`,
+        message: `تسجيل استلام خارج النطاق الجغرافي (${distanceMeters ?? '?'}م)`,
+        metadata: {
+          custom: {
+            tripId: String(trip._id),
+            beneficiaryId: String(passenger.beneficiary_id),
+            distanceMeters,
+            geofenceRadiusMeters: GEOFENCE_RADIUS_METERS,
+            forceFlag: force === true,
+            lat: latitude,
+            lng: longitude,
+          },
+        },
+        flags: { requiresReview: true, isSuspicious: true },
+        tags: ['transport', 'geofence-bypass'],
+      });
+    }
+
     res.json({
       success: true,
       data: {
@@ -1338,6 +1417,7 @@ router.post(
         status: passenger.status,
         distanceMeters,
         pickup_time: passenger.pickup_time_actual,
+        audited_bypass: isBypass,
       },
       message: 'تم تسجيل استلام المستفيد',
     });
@@ -1553,25 +1633,49 @@ router.get(
       .select('driver_id vehicle_id status')
       .lean();
 
+    if (trips.length === 0) {
+      return res.json({ success: true, data: [], period_days: days });
+    }
+
     const byDriver = new Map();
+    const allVehicleIds = new Set();
     for (const t of trips) {
       const key = String(t.driver_id);
+      const vKey = String(t.vehicle_id);
       if (!byDriver.has(key))
         byDriver.set(key, { driverId: key, vehicleIds: new Set(), trips: [] });
-      byDriver.get(key).vehicleIds.add(String(t.vehicle_id));
+      byDriver.get(key).vehicleIds.add(vKey);
       byDriver.get(key).trips.push(t);
+      allVehicleIds.add(vKey);
     }
+
+    // ─── single Mongo query for ALL GPS points across the fleet ─────────────
+    // Avoids the N+1 fan-out (one query per driver) the previous version had.
+    const pointsByVehicle = new Map();
+    const objIds = [...allVehicleIds].map(id => new mongoose.Types.ObjectId(id));
+    await GpsTracking.find({
+      vehicle_id: { $in: objIds },
+      timestamp: { $gte: since },
+    })
+      .sort({ vehicle_id: 1, timestamp: 1 })
+      .select('vehicle_id speed is_speeding is_outside_geofence engine_on timestamp')
+      .lean()
+      .cursor()
+      .eachAsync(p => {
+        const v = String(p.vehicle_id);
+        if (!pointsByVehicle.has(v)) pointsByVehicle.set(v, []);
+        pointsByVehicle.get(v).push(p);
+      });
 
     const items = [];
     for (const [driverId, entry] of byDriver) {
-      const points = await GpsTracking.find({
-        vehicle_id: { $in: [...entry.vehicleIds] },
-        timestamp: { $gte: since },
-      })
-        .sort({ timestamp: 1 })
-        .select('speed is_speeding is_outside_geofence engine_on timestamp')
-        .lean();
-      const result = computeDriverScore(points, entry.trips);
+      const merged = [];
+      for (const vId of entry.vehicleIds) {
+        const pts = pointsByVehicle.get(vId);
+        if (pts) merged.push(...pts);
+      }
+      merged.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+      const result = computeDriverScore(merged, entry.trips);
       items.push({
         driverId,
         score: result.score,

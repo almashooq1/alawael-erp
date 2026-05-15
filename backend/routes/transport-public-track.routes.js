@@ -34,12 +34,21 @@ const TRACKING_TOKEN_SECRET =
 
 const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
-// 30 reads / minute / token — enough for a 2s polling page
-const publicTrackLimiter = createCustomLimiter({
+// Two-layer rate-limit so a single bad actor can't burn through
+// thousands of fresh tokens to scrape the fleet.
+//   Layer 1 — per token: 30/min (enough for 2s polling)
+//   Layer 2 — per IP:    120/min across all tokens
+const publicTrackTokenLimiter = createCustomLimiter({
   windowMs: 60 * 1000,
   max: 30,
-  prefix: 'rl:track:',
+  prefix: 'rl:track:tok:',
   keyGenerator: req => req.params?.token || req.ip || 'anon',
+});
+const publicTrackIpLimiter = createCustomLimiter({
+  windowMs: 60 * 1000,
+  max: 120,
+  prefix: 'rl:track:ip:',
+  keyGenerator: req => req.ip || 'anon',
 });
 
 function initialsOnly(fullName) {
@@ -53,7 +62,8 @@ function initialsOnly(fullName) {
 
 router.get(
   '/:token',
-  publicTrackLimiter,
+  publicTrackIpLimiter,
+  publicTrackTokenLimiter,
   asyncHandler(async (req, res) => {
     const claims = verifyTrackingToken(req.params.token, TRACKING_TOKEN_SECRET);
     if (!claims) {

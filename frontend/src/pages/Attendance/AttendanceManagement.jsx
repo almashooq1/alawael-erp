@@ -92,6 +92,7 @@ import {
   ErrorOutlineOutlined as ErrorOutline,
   WatchLater,
   ManageAccounts,
+  EditNote,
 } from '@mui/icons-material';
 import { motion, AnimatePresence } from 'framer-motion';
 import apiClient from '../../services/api.client';
@@ -100,6 +101,11 @@ import {
   getLeaveBalance,
   submitOvertimeRequest,
   getOvertimeRequests,
+  processOvertimeDecision,
+  searchEmployees,
+  submitCorrectionRequest,
+  getCorrectionRequests as _getCorrectionRequests,
+  processCorrectionDecision as _processCorrectionDecision,
 } from '../../services/hr/attendanceManagementService';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1163,6 +1169,23 @@ function CheckInOutTab({ _currentUser }) {
   const [overtimeLoading, setOvertimeLoading] = useState(false);
   const [overtimeList, setOvertimeList] = useState([]);
   const [_overtimeListLoading, setOvertimeListLoading] = useState(false);
+
+  // Correction request state
+  const [correctionDialog, setCorrectionDialog] = useState(false);
+  const [correctionForm, setCorrectionForm] = useState({
+    date: new Date().toISOString().split('T')[0],
+    correctionType: 'checkIn',
+    requestedCheckIn: '',
+    requestedCheckOut: '',
+    requestedStatus: '',
+    reason: '',
+  });
+  const [correctionLoading, setCorrectionLoading] = useState(false);
+
+  // Overtime approval panel (manager/HR)
+  const [pendingOvertimeList, setPendingOvertimeList] = useState([]);
+  const [approvalLoading, setApprovalLoading] = useState({});
+
   const now = new Date();
 
   const getLocation = () => {
@@ -1256,9 +1279,61 @@ function CheckInOutTab({ _currentUser }) {
     }
   }, []);
 
+  const loadPendingOvertimes = useCallback(async () => {
+    try {
+      const r = await getOvertimeRequests({ status: 'مقدم', limit: 20 });
+      setPendingOvertimeList(r.data || []);
+    } catch {
+      setPendingOvertimeList([]);
+    }
+  }, []);
+
+  const doOvertimeApproval = async (overtimeId, decision) => {
+    setApprovalLoading(prev => ({ ...prev, [overtimeId]: true }));
+    try {
+      await processOvertimeDecision(overtimeId, decision);
+      await loadPendingOvertimes();
+      await loadOvertimeList();
+    } catch (e) {
+      setResult({ type: 'error', message: e.message || 'خطأ في معالجة الطلب' });
+    } finally {
+      setApprovalLoading(prev => ({ ...prev, [overtimeId]: false }));
+    }
+  };
+
+  const doCorrectionRequest = async () => {
+    setCorrectionLoading(true);
+    try {
+      const r = await submitCorrectionRequest({
+        ...correctionForm,
+        employeeId: _currentUser?.employeeId,
+      });
+      if (r.success) {
+        setCorrectionDialog(false);
+        setResult({ type: 'success', message: 'تم تقديم طلب التصحيح بنجاح' });
+        setCorrectionForm({
+          date: new Date().toISOString().split('T')[0],
+          correctionType: 'checkIn',
+          requestedCheckIn: '',
+          requestedCheckOut: '',
+          requestedStatus: '',
+          reason: '',
+        });
+      } else {
+        setResult({ type: 'warning', message: r.message });
+      }
+    } catch (e) {
+      setResult({ type: 'error', message: e.message || 'خطأ في تقديم طلب التصحيح' });
+    } finally {
+      setCorrectionLoading(false);
+    }
+  };
+
   useEffect(() => {
     loadOvertimeList();
-  }, [loadOvertimeList]);
+    loadPendingOvertimes();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <Box>
@@ -1486,6 +1561,36 @@ function CheckInOutTab({ _currentUser }) {
               تقديم طلب عمل إضافي
             </Button>
 
+            <Divider sx={{ my: 2 }} />
+
+            {/* Correction request */}
+            <Typography
+              fontWeight={700}
+              sx={{ mb: 1.5, display: 'flex', alignItems: 'center', gap: 1 }}
+            >
+              <EditNote sx={{ color: '#8b5cf6' }} /> طلب تصحيح حضور
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              هل هناك خطأ في سجل حضورك؟ قدّم طلب تصحيح ليراجعه المشرف.
+            </Typography>
+            <Button
+              variant="outlined"
+              fullWidth
+              size="large"
+              onClick={() => setCorrectionDialog(true)}
+              startIcon={<EditNote />}
+              sx={{
+                borderRadius: 3,
+                height: 48,
+                fontWeight: 700,
+                borderColor: '#8b5cf6',
+                color: '#8b5cf6',
+                '&:hover': { bgcolor: 'rgba(139,92,246,0.05)', borderColor: '#7c3aed' },
+              }}
+            >
+              تقديم طلب تصحيح
+            </Button>
+
             {/* Last overtime requests */}
             {overtimeList.length > 0 && (
               <Box sx={{ mt: 2.5 }}>
@@ -1547,6 +1652,96 @@ function CheckInOutTab({ _currentUser }) {
           </Glass>
         </Grid>
       </Grid>
+
+      {/* Overtime Approval Panel — visible to managers/HR */}
+      {pendingOvertimeList.length > 0 && (
+        <Glass sx={{ p: 3, mt: 3 }}>
+          <Typography
+            fontWeight={800}
+            sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}
+          >
+            <WatchLater sx={{ color: '#f59e0b' }} /> طلبات العمل الإضافي المعلّقة
+            <Chip
+              label={pendingOvertimeList.length}
+              size="small"
+              color="warning"
+              sx={{ fontWeight: 800, ml: 1 }}
+            />
+          </Typography>
+          <Stack spacing={1.5}>
+            {pendingOvertimeList.map(ot => (
+              <Box
+                key={ot._id}
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  p: 2,
+                  borderRadius: 2,
+                  bgcolor: 'rgba(245,158,11,0.04)',
+                  border: '1px solid rgba(245,158,11,0.15)',
+                  flexWrap: 'wrap',
+                  gap: 1.5,
+                }}
+              >
+                <Box>
+                  <Typography variant="body2" fontWeight={700}>
+                    {ot.employeeId?.name_ar || 'موظف'}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {ot.type} — {ot.totalHours} ساعة —{' '}
+                    {ot.date ? new Date(ot.date).toLocaleDateString('ar-SA') : ''}
+                  </Typography>
+                  {ot.reason && (
+                    <Typography
+                      variant="caption"
+                      display="block"
+                      sx={{ mt: 0.25, fontStyle: 'italic' }}
+                    >
+                      {ot.reason}
+                    </Typography>
+                  )}
+                </Box>
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                  <Button
+                    size="small"
+                    variant="contained"
+                    disabled={!!approvalLoading[ot._id]}
+                    onClick={() => doOvertimeApproval(ot._id, 'معتمد')}
+                    sx={{
+                      borderRadius: 2,
+                      fontWeight: 700,
+                      background: 'linear-gradient(135deg,#10b981,#059669)',
+                      minWidth: 72,
+                    }}
+                  >
+                    {approvalLoading[ot._id] ? (
+                      <CircularProgress size={14} color="inherit" />
+                    ) : (
+                      'اعتماد'
+                    )}
+                  </Button>
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    disabled={!!approvalLoading[ot._id]}
+                    onClick={() => doOvertimeApproval(ot._id, 'مرفوض')}
+                    sx={{
+                      borderRadius: 2,
+                      fontWeight: 700,
+                      borderColor: '#ef4444',
+                      color: '#ef4444',
+                      minWidth: 72,
+                    }}
+                  >
+                    رفض
+                  </Button>
+                </Box>
+              </Box>
+            ))}
+          </Stack>
+        </Glass>
+      )}
 
       {/* Manual Record Dialog */}
       <Dialog
@@ -1784,6 +1979,151 @@ function CheckInOutTab({ _currentUser }) {
             }}
           >
             {overtimeLoading ? <CircularProgress size={20} color="inherit" /> : 'تقديم الطلب'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* ── Correction Request Dialog ─────────────────────────────────────── */}
+      <Dialog
+        open={correctionDialog}
+        onClose={() => setCorrectionDialog(false)}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{ sx: { borderRadius: 4 } }}
+      >
+        <DialogTitle
+          sx={{
+            fontWeight: 800,
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            background: 'linear-gradient(135deg,rgba(139,92,246,0.08),rgba(124,58,237,0.04))',
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <EditNote sx={{ color: '#8b5cf6' }} /> طلب تصحيح حضور
+          </Box>
+          <IconButton onClick={() => setCorrectionDialog(false)}>
+            <Close />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent>
+          <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
+            سيتم مراجعة طلبك من قِبل المشرف المباشر وتحديث السجل عند الموافقة.
+          </Typography>
+          <Grid container spacing={2} sx={{ mt: 0.5 }}>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                type="date"
+                label="تاريخ السجل المطلوب تصحيحه"
+                value={correctionForm.date}
+                onChange={e => setCorrectionForm({ ...correctionForm, date: e.target.value })}
+                size="small"
+                InputLabelProps={{ shrink: true }}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth size="small">
+                <InputLabel>نوع التصحيح</InputLabel>
+                <Select
+                  value={correctionForm.correctionType}
+                  onChange={e =>
+                    setCorrectionForm({ ...correctionForm, correctionType: e.target.value })
+                  }
+                  label="نوع التصحيح"
+                >
+                  <MenuItem value="checkIn">تصحيح وقت الحضور</MenuItem>
+                  <MenuItem value="checkOut">تصحيح وقت الانصراف</MenuItem>
+                  <MenuItem value="status">تصحيح الحالة (غائب/حاضر...)</MenuItem>
+                  <MenuItem value="missingRecord">إضافة سجل مفقود</MenuItem>
+                  <MenuItem value="other">أخرى</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            {(correctionForm.correctionType === 'checkIn' ||
+              correctionForm.correctionType === 'missingRecord') && (
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  type="time"
+                  label="وقت الحضور الصحيح"
+                  value={correctionForm.requestedCheckIn}
+                  onChange={e =>
+                    setCorrectionForm({ ...correctionForm, requestedCheckIn: e.target.value })
+                  }
+                  size="small"
+                  InputLabelProps={{ shrink: true }}
+                />
+              </Grid>
+            )}
+            {(correctionForm.correctionType === 'checkOut' ||
+              correctionForm.correctionType === 'missingRecord') && (
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  type="time"
+                  label="وقت الانصراف الصحيح"
+                  value={correctionForm.requestedCheckOut}
+                  onChange={e =>
+                    setCorrectionForm({ ...correctionForm, requestedCheckOut: e.target.value })
+                  }
+                  size="small"
+                  InputLabelProps={{ shrink: true }}
+                />
+              </Grid>
+            )}
+            {correctionForm.correctionType === 'status' && (
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth size="small">
+                  <InputLabel>الحالة الصحيحة</InputLabel>
+                  <Select
+                    value={correctionForm.requestedStatus}
+                    onChange={e =>
+                      setCorrectionForm({ ...correctionForm, requestedStatus: e.target.value })
+                    }
+                    label="الحالة الصحيحة"
+                  >
+                    {Object.entries(STATUS_MAP).map(([k, v]) => (
+                      <MenuItem key={k} value={k}>
+                        {v.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+            )}
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                multiline
+                rows={3}
+                label="سبب طلب التصحيح *"
+                value={correctionForm.reason}
+                onChange={e => setCorrectionForm({ ...correctionForm, reason: e.target.value })}
+                size="small"
+                placeholder="اشرح سبب طلب تصحيح السجل بالتفصيل..."
+                inputProps={{ maxLength: 600 }}
+                helperText={`${correctionForm.reason.length}/600`}
+              />
+            </Grid>
+          </Grid>
+        </DialogContent>
+        <DialogActions sx={{ p: 2.5, gap: 1 }}>
+          <Button onClick={() => setCorrectionDialog(false)} sx={{ borderRadius: 2 }}>
+            إلغاء
+          </Button>
+          <Button
+            variant="contained"
+            onClick={doCorrectionRequest}
+            disabled={correctionLoading || !correctionForm.reason.trim()}
+            sx={{
+              borderRadius: 2,
+              background: 'linear-gradient(135deg,#8b5cf6,#7c3aed)',
+              fontWeight: 700,
+            }}
+          >
+            {correctionLoading ? <CircularProgress size={20} color="inherit" /> : 'تقديم الطلب'}
           </Button>
         </DialogActions>
       </Dialog>
@@ -2847,20 +3187,46 @@ const CAL_STATUS_COLOR = {
 };
 
 function EmployeeRecordTab() {
-  const [employeeId, setEmployeeId] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [month, setMonth] = useState(new Date().getMonth() + 1);
   const [year, setYear] = useState(new Date().getFullYear());
   const [history, setHistory] = useState(null);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
+  const searchTimer = useRef(null);
+
+  // Debounced employee search
+  const handleSearchInput = useCallback(value => {
+    setSearchQuery(value);
+    setSelectedEmployee(null);
+    if (searchTimer.current) clearTimeout(searchTimer.current);
+    if (value.trim().length < 2) {
+      setSearchResults([]);
+      return;
+    }
+    searchTimer.current = setTimeout(async () => {
+      setSearchLoading(true);
+      try {
+        const r = await searchEmployees(value);
+        setSearchResults(r?.data || r || []);
+      } catch {
+        setSearchResults([]);
+      } finally {
+        setSearchLoading(false);
+      }
+    }, 350);
+  }, []);
 
   const doSearch = useCallback(async () => {
-    if (!employeeId.trim()) return;
+    if (!selectedEmployee?._id) return;
     setLoading(true);
     setSearched(true);
     try {
       const r = await apiFetch(
-        `/employee/${employeeId.trim()}/history?month=${month}&year=${year}`
+        `/employee/${selectedEmployee._id}/history?month=${month}&year=${year}`
       );
       setHistory(r);
     } catch {
@@ -2868,7 +3234,13 @@ function EmployeeRecordTab() {
     } finally {
       setLoading(false);
     }
-  }, [employeeId, month, year]);
+  }, [selectedEmployee, month, year]);
+
+  // Re-fetch when month/year change while an employee is already selected
+  useEffect(() => {
+    if (selectedEmployee && searched) doSearch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [month, year]);
 
   // Build a calendar grid for the selected month
   const calendarDays = React.useMemo(() => {
@@ -2900,23 +3272,98 @@ function EmployeeRecordTab() {
           <ManageAccounts sx={{ color: '#6366f1' }} /> سجل الموظف
         </Typography>
         <Grid container spacing={2} alignItems="flex-end">
-          <Grid item xs={12} sm={4}>
-            <TextField
-              fullWidth
-              label="معرّف الموظف (ID)"
-              value={employeeId}
-              onChange={e => setEmployeeId(e.target.value)}
-              size="small"
-              placeholder="أدخل Mongo ID للموظف..."
-              onKeyDown={e => e.key === 'Enter' && doSearch()}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Search sx={{ fontSize: 18, color: '#94a3b8' }} />
-                  </InputAdornment>
-                ),
-              }}
-            />
+          {/* Employee search with autocomplete */}
+          <Grid item xs={12} sm={5}>
+            <Box sx={{ position: 'relative' }}>
+              <TextField
+                fullWidth
+                label="البحث عن موظف"
+                value={searchQuery}
+                onChange={e => handleSearchInput(e.target.value)}
+                size="small"
+                placeholder="اسم الموظف أو رقمه الوظيفي..."
+                onKeyDown={e => e.key === 'Enter' && selectedEmployee && doSearch()}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      {searchLoading ? (
+                        <CircularProgress size={16} />
+                      ) : (
+                        <Search sx={{ fontSize: 18, color: '#94a3b8' }} />
+                      )}
+                    </InputAdornment>
+                  ),
+                }}
+              />
+              {/* Dropdown results */}
+              {searchResults.length > 0 && !selectedEmployee && (
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    top: '100%',
+                    left: 0,
+                    right: 0,
+                    zIndex: 1300,
+                    bgcolor: '#fff',
+                    borderRadius: 2,
+                    boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+                    border: '1px solid rgba(0,0,0,0.08)',
+                    maxHeight: 240,
+                    overflowY: 'auto',
+                    mt: 0.5,
+                  }}
+                >
+                  {searchResults.map(emp => (
+                    <Box
+                      key={emp._id}
+                      onClick={() => {
+                        setSelectedEmployee(emp);
+                        setSearchQuery(`${emp.name_ar} (${emp.employee_number})`);
+                        setSearchResults([]);
+                      }}
+                      sx={{
+                        px: 2,
+                        py: 1.2,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        '&:hover': { bgcolor: 'rgba(99,102,241,0.06)' },
+                        borderBottom: '1px solid rgba(0,0,0,0.04)',
+                      }}
+                    >
+                      <Box>
+                        <Typography variant="body2" fontWeight={700}>
+                          {emp.name_ar}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {DEPT_MAP[emp.department] || emp.department}
+                        </Typography>
+                      </Box>
+                      <Chip
+                        label={emp.employee_number}
+                        size="small"
+                        sx={{
+                          fontSize: '10px',
+                          fontWeight: 700,
+                          bgcolor: 'rgba(99,102,241,0.08)',
+                          color: '#6366f1',
+                        }}
+                      />
+                    </Box>
+                  ))}
+                </Box>
+              )}
+            </Box>
+            {selectedEmployee && (
+              <Typography
+                variant="caption"
+                sx={{ color: '#10b981', fontWeight: 700, mt: 0.5, display: 'block' }}
+              >
+                ✓ {selectedEmployee.name_ar} —{' '}
+                {selectedEmployee.job_title_ar || DEPT_MAP[selectedEmployee.department]}
+              </Typography>
+            )}
           </Grid>
           <Grid item xs={6} sm={2}>
             <TextField
@@ -2963,13 +3410,13 @@ function EmployeeRecordTab() {
               ))}
             </TextField>
           </Grid>
-          <Grid item xs={12} sm={4}>
+          <Grid item xs={12} sm={3}>
             <Button
               fullWidth
               variant="contained"
               size="medium"
               onClick={doSearch}
-              disabled={loading || !employeeId.trim()}
+              disabled={loading || !selectedEmployee}
               startIcon={loading ? <CircularProgress size={16} color="inherit" /> : <History />}
               sx={{
                 borderRadius: 2,
@@ -2988,7 +3435,7 @@ function EmployeeRecordTab() {
         <Box sx={{ textAlign: 'center', py: 8, color: 'text.secondary' }}>
           <CalendarViewMonth sx={{ fontSize: 64, opacity: 0.15, mb: 2 }} />
           <Typography fontWeight={600} color="text.secondary">
-            أدخل معرّف الموظف للاطلاع على سجل حضوره
+            ابحث عن موظف بالاسم أو الرقم الوظيفي للاطلاع على سجل حضوره
           </Typography>
         </Box>
       )}

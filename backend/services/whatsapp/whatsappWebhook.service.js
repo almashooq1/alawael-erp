@@ -41,9 +41,24 @@ function getFamilyMemberModel() {
   }
 }
 
+function getConsentModel() {
+  try {
+    return require('../../models/WhatsAppConsent');
+  } catch {
+    return null;
+  }
+}
+
 // ─── HMAC signature verification ─────────────────────────────────────────
 /**
  * Verify Meta webhook X-Hub-Signature-256 header.
+ *
+ * Returns false (NEVER throws) for: missing/empty signature, length
+ * mismatch with the computed expected value, or any encoding error.
+ * `crypto.timingSafeEqual` throws on unequal-length buffers — guard
+ * against that BEFORE the call so a malformed signature can't crash
+ * the webhook handler.
+ *
  * @param {string} rawBody - raw request body string
  * @param {string} signature - value of X-Hub-Signature-256 header
  * @returns {boolean}
@@ -54,9 +69,18 @@ function verifySignature(rawBody, signature) {
     logger.warn('[WhatsApp] WHATSAPP_WEBHOOK_SECRET not set — skipping signature check');
     return true;
   }
-  if (!signature) return false;
+  if (!signature || typeof signature !== 'string') return false;
+
   const expected = `sha256=${crypto.createHmac('sha256', secret).update(rawBody).digest('hex')}`;
-  return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected));
+
+  const sigBuf = Buffer.from(signature);
+  const expectedBuf = Buffer.from(expected);
+  if (sigBuf.length !== expectedBuf.length) return false;
+  try {
+    return crypto.timingSafeEqual(sigBuf, expectedBuf);
+  } catch {
+    return false;
+  }
 }
 
 // ─── Extract messages from Meta payload ──────────────────────────────────
@@ -220,6 +244,16 @@ async function handleIncomingMessage(msg, contact, _phoneNumberId) {
       isDeleted: false,
     }).lean();
     beneficiaryId = familyMember?.beneficiaryId || null;
+  }
+
+  // Record consent — first-time inbound = implicit opt-in, every inbound
+  // extends the 24-hour customer-service window. Never throws.
+  const Consent = getConsentModel();
+  if (Consent) {
+    await Consent.recordInbound(whatsappService.normalizePhone(fromPhone), {
+      familyMemberId: familyMember?._id,
+      beneficiaryId,
+    }).catch(err => logger.warn(`[WhatsApp] consent record failed: ${err.message}`));
   }
 
   // AI classification

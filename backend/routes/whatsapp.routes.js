@@ -583,4 +583,70 @@ router.get(
   })
 );
 
+// ═══════════════════════════════════════════════════════════════════════════
+// CONSENT — opt-in / opt-out tracking (Meta policy + PDPL Art.13)
+// ═══════════════════════════════════════════════════════════════════════════
+
+function getConsentModel() {
+  return require('../models/WhatsAppConsent');
+}
+
+/** GET /consent/:phone — read consent state for a phone. */
+router.get(
+  '/consent/:phone',
+  asyncHandler(async (req, res) => {
+    const phone = whatsappService.normalizePhone(req.params.phone);
+    const doc = await getConsentModel().findOne({ phone }).lean();
+    if (!doc) {
+      return res.json({
+        success: true,
+        data: { phone, optedIn: false, history: [], _exists: false },
+      });
+    }
+    res.json({ success: true, data: doc });
+  })
+);
+
+/** POST /consent/:phone/opt-in  — record opt-in. */
+router.post(
+  '/consent/:phone/opt-in',
+  asyncHandler(async (req, res) => {
+    const phone = whatsappService.normalizePhone(req.params.phone);
+    const doc = await getConsentModel().setConsent(phone, true, {
+      reason: req.body?.reason || 'admin_action',
+      channel: req.body?.channel || 'admin_ui',
+      note: req.body?.note || null,
+      actorUserId: req.user?.userId || req.user?.id || null,
+      ip: req.ip,
+    });
+    res.json({ success: true, data: doc });
+  })
+);
+
+/** POST /consent/:phone/opt-out — record opt-out (right-to-be-forgotten lite). */
+router.post(
+  '/consent/:phone/opt-out',
+  asyncHandler(async (req, res) => {
+    const phone = whatsappService.normalizePhone(req.params.phone);
+    const doc = await getConsentModel().setConsent(phone, false, {
+      reason: req.body?.reason || 'user_request',
+      channel: req.body?.channel || 'admin_ui',
+      note: req.body?.note || null,
+      actorUserId: req.user?.userId || req.user?.id || null,
+      ip: req.ip,
+    });
+    res.json({ success: true, data: doc });
+  })
+);
+
+/** GET /consent/:phone/can-message — pre-flight check before sending. */
+router.get(
+  '/consent/:phone/can-message',
+  asyncHandler(async (req, res) => {
+    const phone = whatsappService.normalizePhone(req.params.phone);
+    const result = await getConsentModel().canMessage(phone);
+    res.json({ success: true, data: { phone, ...result } });
+  })
+);
+
 module.exports = router;

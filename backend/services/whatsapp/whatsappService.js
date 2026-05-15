@@ -19,6 +19,7 @@
 
 const https = require('https');
 const logger = require('../../utils/logger');
+const { normalizePhone, maskPhone } = require('./phone');
 
 // ─── Config ─────────────────────────────────────────────────────────────────
 function cfg() {
@@ -94,17 +95,9 @@ async function withRetry(fn, { retries = 3, baseDelayMs = 500 } = {}) {
   throw lastErr;
 }
 
-// ─── Sanitize phone number (E.164) ───────────────────────────────────────────
-function normalizePhone(phone) {
-  if (!phone) throw new Error('Phone number required');
-  const digits = String(phone).replace(/\D/g, '');
-  if (digits.length < 7) throw new Error(`Invalid phone: ${phone}`);
-  // Saudi numbers: 05xx → 9665xx
-  if (digits.startsWith('05') && digits.length === 10) {
-    return `966${digits.slice(1)}`;
-  }
-  return digits.startsWith('0') ? digits.slice(1) : digits;
-}
+// Phone normalization lives in `./phone.js` for testability + GCC + intl
+// support. Re-exported below as `whatsappService.normalizePhone` to keep
+// the public API stable.
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Core Sending Methods
@@ -118,7 +111,7 @@ function normalizePhone(phone) {
  */
 async function sendText(to, text, meta = {}) {
   if (!cfg().enabled) {
-    logger.info(`[WhatsApp:stub] sendText → ${to}: ${text.slice(0, 80)}`);
+    logger.info(`[WhatsApp:stub] sendText → ${maskPhone(to)}: ${text.slice(0, 80)}`);
     return { success: true, stub: true, messageId: `stub-${Date.now()}` };
   }
 
@@ -150,7 +143,7 @@ async function sendText(to, text, meta = {}) {
  */
 async function sendTemplate(to, templateName, language = 'ar', components = []) {
   if (!cfg().enabled) {
-    logger.info(`[WhatsApp:stub] sendTemplate → ${to}: ${templateName}`);
+    logger.info(`[WhatsApp:stub] sendTemplate → ${maskPhone(to)}: ${templateName}`);
     return { success: true, stub: true, messageId: `stub-tmpl-${Date.now()}` };
   }
 
@@ -183,7 +176,7 @@ async function sendTemplate(to, templateName, language = 'ar', components = []) 
  */
 async function sendDocument(to, url, caption = '', opts = {}) {
   if (!cfg().enabled) {
-    logger.info(`[WhatsApp:stub] sendDocument → ${to}: ${url}`);
+    logger.info(`[WhatsApp:stub] sendDocument → ${maskPhone(to)}: ${url}`);
     return { success: true, stub: true, messageId: `stub-doc-${Date.now()}` };
   }
 
@@ -215,7 +208,7 @@ async function sendDocument(to, url, caption = '', opts = {}) {
  */
 async function sendImage(to, url, caption = '') {
   if (!cfg().enabled) {
-    logger.info(`[WhatsApp:stub] sendImage → ${to}: ${url}`);
+    logger.info(`[WhatsApp:stub] sendImage → ${maskPhone(to)}: ${url}`);
     return { success: true, stub: true, messageId: `stub-img-${Date.now()}` };
   }
 
@@ -245,7 +238,7 @@ async function sendImage(to, url, caption = '') {
  */
 async function sendInteractiveButtons(to, bodyText, buttons, headerText = '', footerText = '') {
   if (!cfg().enabled) {
-    logger.info(`[WhatsApp:stub] sendInteractiveButtons → ${to}`);
+    logger.info(`[WhatsApp:stub] sendInteractiveButtons → ${maskPhone(to)}`);
     return { success: true, stub: true, messageId: `stub-btn-${Date.now()}` };
   }
 
@@ -288,7 +281,7 @@ async function sendInteractiveButtons(to, bodyText, buttons, headerText = '', fo
  */
 async function sendInteractiveList(to, bodyText, buttonLabel, items, sectionTitle = 'الخيارات') {
   if (!cfg().enabled) {
-    logger.info(`[WhatsApp:stub] sendInteractiveList → ${to}`);
+    logger.info(`[WhatsApp:stub] sendInteractiveList → ${maskPhone(to)}`);
     return { success: true, stub: true, messageId: `stub-list-${Date.now()}` };
   }
 
@@ -379,6 +372,68 @@ async function getTemplates() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// Media Download — fetch inbound photos / documents / audio
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Resolve a Meta media ID to a temporary download URL (valid ~5 minutes).
+ * Inbound messages give us only `mediaId`; this endpoint converts it.
+ * @param {string} mediaId
+ * @returns {Promise<{ url:string, mime_type?:string, sha256?:string, file_size?:number, id:string }>}
+ */
+async function getMediaUrl(mediaId) {
+  if (!cfg().enabled) {
+    return { stub: true, url: `stub://media/${mediaId}`, id: mediaId };
+  }
+  if (!mediaId) throw new Error('mediaId required');
+  return request('GET', `/${mediaId}`);
+}
+
+/**
+ * Download media bytes by media-id. Two-step: first resolve URL, then
+ * GET the URL with the bearer token (Meta requires auth on media URLs).
+ * @param {string} mediaId
+ * @returns {Promise<Buffer>}
+ */
+async function downloadMedia(mediaId) {
+  if (!cfg().enabled) {
+    // Return a minimal PNG placeholder buffer so callers don't crash in stub mode.
+    return Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+  }
+  const meta = await getMediaUrl(mediaId);
+  if (!meta?.url) throw new Error('Media URL missing in Meta response');
+  return await downloadBinary(meta.url);
+}
+
+function downloadBinary(url) {
+  return new Promise((resolve, reject) => {
+    const parsed = new URL(url);
+    const opts = {
+      hostname: parsed.hostname,
+      path: parsed.pathname + parsed.search,
+      method: 'GET',
+      headers: { Authorization: `Bearer ${cfg().token}` },
+    };
+    https
+      .request(opts, res => {
+        if (res.statusCode === 302 || res.statusCode === 301) {
+          // Follow one redirect (Meta sometimes 302s to S3).
+          return downloadBinary(res.headers.location).then(resolve, reject);
+        }
+        if (res.statusCode >= 400) {
+          return reject(new Error(`Media download HTTP ${res.statusCode}`));
+        }
+        const chunks = [];
+        res.on('data', c => chunks.push(c));
+        res.on('end', () => resolve(Buffer.concat(chunks)));
+        res.on('error', reject);
+      })
+      .on('error', reject)
+      .end();
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // Exports
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -393,7 +448,10 @@ const whatsappService = {
   verifyWebhook,
   getPhoneInfo,
   getTemplates,
+  getMediaUrl,
+  downloadMedia,
   normalizePhone,
+  maskPhone,
   isEnabled: () => cfg().enabled,
 };
 

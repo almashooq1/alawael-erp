@@ -113,6 +113,29 @@ const PROBES = [
   // ── BC-08: CAPA (mounted 2026-05-03) ──
   adminMounted('capa-admin', '/api/admin/capa'),
 
+  // ── Phase 29 World-Class QMS (shipped 2026-05-15) ──
+  // 17 module endpoints + 1 aggregator. Each one is one _registry.js
+  // entry away from regressing — protect them all with mount probes.
+  // Use the /reference sub-path where available since it's authless on
+  // most modules and gives a quick 200; otherwise fall back to root.
+  mountedRoute('phase29-fmea', '/api/v1/fmea/reference'),
+  mountedRoute('phase29-rca', '/api/v1/rca/reference'),
+  mountedRoute('phase29-spc', '/api/v1/spc/reference'),
+  mountedRoute('phase29-pareto-a3', '/api/v1/pareto-a3/reference'),
+  mountedRoute('phase29-standards', '/api/v1/standards'),
+  mountedRoute('phase29-controlled-documents', '/api/v1/controlled-documents/reference'),
+  mountedRoute('phase29-supplier-quality', '/api/v1/supplier-quality/reference'),
+  mountedRoute('phase29-calibration', '/api/v1/calibration/reference'),
+  mountedRoute('phase29-change-control', '/api/v1/change-control/reference'),
+  mountedRoute('phase29-audit-scheduler', '/api/v1/audit-scheduler/reference'),
+  mountedRoute('phase29-coq', '/api/v1/coq/reference'),
+  mountedRoute('phase29-predictive-risk', '/api/v1/predictive-risk/reference'),
+  mountedRoute('phase29-trend-forecast', '/api/v1/trend-forecast/forecast'),
+  mountedRoute('phase29-quality-narrative', '/api/v1/quality-narrative/kinds'),
+  mountedRoute('phase29-inspections', '/api/v1/inspection-submissions'),
+  mountedRoute('phase29-benchmarks', '/api/v1/benchmarks'),
+  mountedRoute('phase29-command-center', '/api/v1/quality/command-center'),
+
   // ── Auth-gated diagnostics (non-critical without a token) ────────
   {
     name: 'integration-health-aggregator',

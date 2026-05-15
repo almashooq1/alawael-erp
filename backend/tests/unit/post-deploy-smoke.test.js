@@ -25,6 +25,24 @@ const DEFAULT_OK = {
   '/api/v1/admin/ops/integration-health': { status: 200, body: '{}' },
   '/api/v1/admin/ops/dlq': { status: 200, body: '{}' },
   '/api/docs/integration.json': { status: 200, body: '{"openapi":"3.1.0"}' },
+  // Phase 29 World-Class QMS — 17 module endpoints
+  '/api/v1/fmea/reference': { status: 200, body: '{}' },
+  '/api/v1/rca/reference': { status: 200, body: '{}' },
+  '/api/v1/spc/reference': { status: 200, body: '{}' },
+  '/api/v1/pareto-a3/reference': { status: 200, body: '{}' },
+  '/api/v1/standards': { status: 200, body: '[]' },
+  '/api/v1/controlled-documents/reference': { status: 200, body: '{}' },
+  '/api/v1/supplier-quality/reference': { status: 200, body: '{}' },
+  '/api/v1/calibration/reference': { status: 200, body: '{}' },
+  '/api/v1/change-control/reference': { status: 200, body: '{}' },
+  '/api/v1/audit-scheduler/reference': { status: 200, body: '{}' },
+  '/api/v1/coq/reference': { status: 200, body: '{}' },
+  '/api/v1/predictive-risk/reference': { status: 200, body: '{}' },
+  '/api/v1/trend-forecast/forecast': { status: 400, body: '{}' }, // POST-only — 400 on GET is "mounted"
+  '/api/v1/quality-narrative/kinds': { status: 200, body: '[]' },
+  '/api/v1/inspection-submissions': { status: 401, body: '' }, // auth-gated
+  '/api/v1/benchmarks': { status: 200, body: '[]' },
+  '/api/v1/quality/command-center': { status: 200, body: '{}' },
 };
 
 // Build a fake fetcher we drive per-test. The runner threads it through
@@ -77,6 +95,40 @@ describe('scripts/post-deploy-smoke', () => {
         expect(probe).toBeDefined();
         expect(probe.critical).toBe(true);
         expect(probe.path.startsWith('/api/admin/')).toBe(true);
+      }
+    });
+
+    test('every Phase 29 module has a critical mount probe', () => {
+      const expectedPhase29Probes = [
+        'phase29-fmea',
+        'phase29-rca',
+        'phase29-spc',
+        'phase29-pareto-a3',
+        'phase29-standards',
+        'phase29-controlled-documents',
+        'phase29-supplier-quality',
+        'phase29-calibration',
+        'phase29-change-control',
+        'phase29-audit-scheduler',
+        'phase29-coq',
+        'phase29-predictive-risk',
+        'phase29-trend-forecast',
+        'phase29-quality-narrative',
+        'phase29-inspections',
+        'phase29-benchmarks',
+        'phase29-command-center',
+      ];
+      for (const name of expectedPhase29Probes) {
+        const probe = PROBES.find(p => p.name === name);
+        expect(probe).toBeDefined();
+        expect(probe.critical).toBe(true);
+        // All Phase 29 endpoints live under /api/v1/
+        expect(probe.path.startsWith('/api/v1/')).toBe(true);
+        // Reject 404 (unmounted) + 5xx (boot failure); accept everything else.
+        expect(probe.expect({ status: 404 })).toBe(false);
+        expect(probe.expect({ status: 500 })).toBe(false);
+        expect(probe.expect({ status: 200 })).toBe(true);
+        expect(probe.expect({ status: 401 })).toBe(true);
       }
     });
 

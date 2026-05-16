@@ -797,14 +797,20 @@ try {
         // platform client (Phase 18 dashboard narrative). If unavailable,
         // every copilot call returns { available: false } gracefully.
         let anthropicClient = null;
-        try {
-          // Reuse the same client builder the dashboard narrative uses, if present.
-          const Anthropic = require('@anthropic-ai/sdk');
-          if (Anthropic && process.env.ANTHROPIC_API_KEY) {
-            anthropicClient = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+        if (process.env.ANTHROPIC_API_KEY) {
+          try {
+            // SDK 0.30+ exports both .default and named .Anthropic; older
+            // versions exported the constructor directly. Handle all three.
+            const mod = require('@anthropic-ai/sdk');
+            const Anthropic = mod.Anthropic || mod.default || mod;
+            if (typeof Anthropic === 'function') {
+              anthropicClient = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+            } else {
+              logger.warn('[HrCopilot] SDK shape not recognized; copilot will degrade');
+            }
+          } catch (sdkErr) {
+            logger.warn('[HrCopilot] @anthropic-ai/sdk not installed:', sdkErr.message);
           }
-        } catch {
-          /* SDK is optional */
         }
 
         let copilotAudit = null;

@@ -187,6 +187,7 @@
     "@routes": "routes"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "0.96.0",
     "@sendgrid/mail": "^8.1.6",
     "archiver": "7.0.1",
     "axios": "^1.13.2",

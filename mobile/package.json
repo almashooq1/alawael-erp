@@ -47,7 +47,7 @@
     "@react-navigation/bottom-tabs": "^6.5.8",
     "@react-navigation/native": "^7.2.4",
     "@react-navigation/native-stack": "^6.9.13",
-    "@reduxjs/toolkit": "^1.9.6",
+    "@reduxjs/toolkit": "^2.12.0",
     "@types/react": "^18.2.0",
     "@types/react-native": "^0.72.0",
     "axios": "^1.16.0",

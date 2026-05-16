@@ -74,6 +74,17 @@ const AuditEventTypes = {
   NOTIFICATION_FAILED: 'notification.failed',
   EMAIL_SENT: 'email.sent',
   SMS_SENT: 'sms.sent',
+
+  // ─── Phase 30 — Intelligent HR Platform ─────────────────────────────
+  // Workflow engine — written whenever a rule emits a finding via
+  // unifiedNotifier. dedupeKey + ruleId live in metadata.
+  HR_WORKFLOW_RULE_FIRED: 'hr.workflow.rule_fired',
+  // LLM Copilot — written on every call regardless of outcome, so we
+  // can answer "who asked what" for compliance + bill auditing.
+  HR_COPILOT_SUMMARIZE: 'hr.copilot.summarize_employee',
+  HR_COPILOT_DRAFT_LETTER: 'hr.copilot.draft_letter',
+  HR_COPILOT_Q_AND_A: 'hr.copilot.q_and_a',
+  HR_COPILOT_SUGGEST: 'hr.copilot.suggest',
 };
 
 // مستويات الخطورة
@@ -116,6 +127,7 @@ const auditLogSchema = new mongoose.Schema(
         'file',
         'report',
         'notification',
+        'hr', // Phase 30 — workflow engine + LLM Copilot
       ],
       index: true,
     },

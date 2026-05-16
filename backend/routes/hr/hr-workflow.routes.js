@@ -91,6 +91,83 @@ function createHrWorkflowRouter({ logger, notifier = null, auditLogger = null, c
     }
   });
 
+  // GET /audit — paginated list of recent rule firings + scheduled runs
+  // Surfaces the AuditLog rows the engine writes whenever a rule emits a
+  // finding. Useful for the intelligence-center history view.
+  router.get('/audit', authorize(ADMIN_ROLES), async (req, res) => {
+    try {
+      const AuditLog = (() => {
+        try {
+          return require('../../models/AuditLog');
+        } catch {
+          return null;
+        }
+      })();
+      if (!AuditLog) {
+        return res.json({ success: true, data: { items: [], total: 0 } });
+      }
+
+      const limit = Math.min(parseInt(req.query.limit, 10) || 50, 200);
+      const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
+      const skip = (page - 1) * limit;
+
+      const filter = {
+        eventType: {
+          $in: [
+            'hr.workflow.rule_fired',
+            'hr.copilot.summarize_employee',
+            'hr.copilot.draft_letter',
+            'hr.copilot.q_and_a',
+            'hr.copilot.suggest',
+          ],
+        },
+      };
+
+      if (
+        req.query.severity &&
+        ['low', 'medium', 'high', 'critical', 'info'].includes(req.query.severity)
+      ) {
+        filter.severity = req.query.severity;
+      }
+      if (req.query.kind === 'workflow') {
+        filter.eventType = 'hr.workflow.rule_fired';
+      } else if (req.query.kind === 'copilot') {
+        filter.eventType = { $regex: /^hr\.copilot\./ };
+      }
+      if (req.query.ruleId) {
+        filter['metadata.ruleId'] = req.query.ruleId;
+      }
+      if (req.query.since) {
+        const d = new Date(req.query.since);
+        if (!isNaN(d.getTime())) filter.timestamp = { $gte: d };
+      }
+
+      const [items, total] = await Promise.all([
+        AuditLog.find(filter).sort({ timestamp: -1 }).skip(skip).limit(limit).lean(),
+        AuditLog.countDocuments(filter),
+      ]);
+
+      res.json({
+        success: true,
+        data: {
+          items: items.map(d => ({
+            _id: String(d._id),
+            eventType: d.eventType,
+            severity: d.severity,
+            timestamp: d.timestamp,
+            actorUserId: d.userId ? String(d.userId) : null,
+            resource: d.resource || null,
+            metadata: d.metadata || {},
+          })),
+          total,
+          pagination: { page, pages: Math.ceil(total / limit), limit },
+        },
+      });
+    } catch (err) {
+      safeError(res, err, 'hr-workflow audit');
+    }
+  });
+
   return router;
 }
 

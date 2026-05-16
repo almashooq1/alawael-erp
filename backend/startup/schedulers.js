@@ -186,8 +186,22 @@ function setupSchedulers({ isTestEnv }) {
         const AuditLog = require('../models/AuditLog');
         auditLogger = {
           async log(entry) {
+            // Translate the engine's natural shape ({action, entityType, ...})
+            // into the canonical AuditLog schema ({eventType, eventCategory,
+            // ...}). Without this translation the writes fail mongoose
+            // validation silently — caught here previously and logged as
+            // generic warnings, drowning the boot log.
             try {
-              await AuditLog.create(entry);
+              await AuditLog.create({
+                eventType: entry.action || 'hr.workflow.rule_fired',
+                eventCategory: 'hr',
+                severity: entry.severity || 'info',
+                status: 'success',
+                action: entry.action || 'hr.workflow.rule_fired',
+                resource: { type: entry.entityType, id: entry.entityId || null },
+                metadata: entry.metadata || {},
+                timestamp: new Date(),
+              });
             } catch (e) {
               logger.warn('[HrWorkflowScheduler audit]', e.message);
             }

@@ -769,7 +769,16 @@ try {
           workflowAudit = {
             async log(entry) {
               try {
-                await AuditLog.create(entry);
+                await AuditLog.create({
+                  eventType: entry.action || 'hr.workflow.rule_fired',
+                  eventCategory: 'hr',
+                  severity: entry.severity || 'info',
+                  status: 'success',
+                  action: entry.action || 'hr.workflow.rule_fired',
+                  resource: { type: entry.entityType, id: entry.entityId || null },
+                  metadata: entry.metadata || {},
+                  timestamp: new Date(),
+                });
               } catch (e) {
                 logger.warn('[hr-workflow audit]', e.message);
               }
@@ -818,8 +827,22 @@ try {
           const AuditLog = require('./models/AuditLog');
           copilotAudit = {
             async log(entry) {
+              // Translate router's natural shape into the canonical
+              // AuditLog schema. Without this the writes fail mongoose
+              // validation (no `eventType` field, no `eventCategory`).
               try {
-                await AuditLog.create(entry);
+                await AuditLog.create({
+                  eventType: entry.action || 'hr.copilot.q_and_a',
+                  eventCategory: 'hr',
+                  userId: entry.actorUserId || null,
+                  severity: 'info',
+                  status: 'success',
+                  action: entry.action || 'hr.copilot.q_and_a',
+                  resource: { type: entry.entityType || 'hr_copilot' },
+                  metadata: entry.metadata || {},
+                  ipAddress: entry.ipAddress || null,
+                  timestamp: new Date(),
+                });
               } catch (e) {
                 logger.warn('[hr-copilot audit]', e.message);
               }

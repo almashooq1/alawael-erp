@@ -226,6 +226,15 @@ function setupSchedulers({ isTestEnv }) {
       const scheduler = createHrWorkflowScheduler({ engine, cron, logger });
       scheduler.start();
       registerShutdownHook('HrWorkflowScheduler', scheduler.stop);
+
+      // Stash the running scheduler so /scheduler/status can surface
+      // last-run summary without re-instantiating the engine.
+      try {
+        require('../services/hr/hrSchedulerRegistry').setScheduler(scheduler);
+      } catch (e) {
+        logger.warn('[HrWorkflowScheduler] registry write failed:', e.message);
+      }
+
       logger.info('✅ Phase 30 HR Workflow scheduler ticking');
     } catch (err) {
       logger.warn('⚠️  HR Workflow scheduler failed to start', { error: err.message });

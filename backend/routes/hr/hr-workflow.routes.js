@@ -237,6 +237,35 @@ function createHrWorkflowRouter({ logger, notifier = null, auditLogger = null, c
     }
   });
 
+  // GET /scheduler/status — surface the cron scheduler's last-run summary
+  // + the next scheduled tick. Useful for "is the engine alive?" checks.
+  router.get('/scheduler/status', authorize(ADMIN_ROLES), (_req, res) => {
+    try {
+      const registry = tryLoad('hrSchedulerRegistry', '../../services/hr/hrSchedulerRegistry');
+      const scheduler = registry?.getScheduler ? registry.getScheduler() : null;
+      if (!scheduler) {
+        return res.json({
+          success: true,
+          data: {
+            running: false,
+            reason: 'scheduler not registered (boot order, or HR_WORKFLOW_DISABLED=true)',
+          },
+        });
+      }
+      const lastRun = scheduler.getLastRunSummary ? scheduler.getLastRunSummary() : null;
+      res.json({
+        success: true,
+        data: {
+          running: true,
+          cronExpression: process.env.HR_WORKFLOW_CRON || '0 */2 * * *',
+          lastRun,
+        },
+      });
+    } catch (err) {
+      safeError(res, err, 'hr-workflow scheduler/status');
+    }
+  });
+
   // GET /audit — paginated list of recent rule firings + scheduled runs
   // Surfaces the AuditLog rows the engine writes whenever a rule emits a
   // finding. Useful for the intelligence-center history view.

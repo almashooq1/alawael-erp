@@ -256,6 +256,151 @@ const RULES = [
   },
 
   {
+    id: 'performance-review-overdue',
+    labelAr: 'تقييم أداء متأخر',
+    labelEn: 'Performance review overdue',
+    trigger: 'schedule',
+    default: { enabled: true, params: { monthsOverdue: 13 } },
+    requires: ['Employee', 'PerformanceEvaluation'],
+    async evaluate({ models, now, params }) {
+      const { Employee, PerformanceEvaluation } = models;
+      const overdueCutoff = new Date(now.getTime() - (params.monthsOverdue ?? 13) * 30 * DAY_MS);
+
+      // Find each employee's most recent finalized evaluation.
+      const latestEvals = await PerformanceEvaluation.aggregate([
+        { $match: { status: { $in: ['finalized', 'archived'] } } },
+        { $sort: { finalizedAt: -1 } },
+        { $group: { _id: '$employeeId', lastFinalizedAt: { $first: '$finalizedAt' } } },
+      ]).catch(() => []);
+
+      const lastById = new Map(latestEvals.map(e => [String(e._id), e.lastFinalizedAt]));
+
+      const actives = await Employee.find({ status: 'active' })
+        .select('fullName name nameAr employeeNumber managerId hireDate hire_date')
+        .limit(500)
+        .lean();
+
+      const findings = [];
+      for (const emp of actives) {
+        const last = lastById.get(String(emp._id));
+        const hire = emp.hireDate || emp.hire_date;
+        // Skip employees hired less than 6 months ago — they're not eligible yet.
+        if (hire && new Date(hire).getTime() > now.getTime() - 6 * 30 * DAY_MS) continue;
+        const lastEvalAge = last ? (now.getTime() - new Date(last).getTime()) / DAY_MS : null;
+        const overdueByDays =
+          lastEvalAge !== null
+            ? lastEvalAge - (params.monthsOverdue ?? 13) * 30
+            : (params.monthsOverdue ?? 13) * 30; // never reviewed
+        if (last && new Date(last) > overdueCutoff) continue;
+
+        const empName = emp.fullName || emp.nameAr || emp.name || emp.employeeNumber || 'موظف';
+        findings.push({
+          ruleId: 'performance-review-overdue',
+          severity: overdueByDays > 90 ? 'high' : 'medium',
+          dedupeKey: `perf-review-overdue:${emp._id}`,
+          subject: { kind: 'employee', id: String(emp._id), name: empName },
+          message: last
+            ? `${empName} لم يُقيَّم منذ ${Math.floor(lastEvalAge / 30)} شهر (متأخر ${Math.floor(overdueByDays)} يوماً).`
+            : `${empName} لم يُقيَّم أبداً منذ تعيينه.`,
+          recipients: [
+            { kind: 'user', id: emp.managerId ? String(emp.managerId) : null, role: 'manager' },
+            { kind: 'role', role: 'hr_manager' },
+          ].filter(r => r.id || r.role),
+          actions: [],
+        });
+        if (findings.length >= 100) break; // cap per-run output
+      }
+      return findings;
+    },
+  },
+
+  {
+    id: 'probation-ending-soon',
+    labelAr: 'انتهاء قريب لفترة التجربة',
+    labelEn: 'Probation period ending soon',
+    trigger: 'schedule',
+    default: { enabled: true, params: { warnDays: 14, probationMonths: 3 } },
+    requires: ['Employee'],
+    async evaluate({ models, now, params }) {
+      const { Employee } = models;
+      const probationDays = (params.probationMonths ?? 3) * 30;
+      const warnDays = params.warnDays ?? 14;
+      // Hired between (probationDays - warnDays) and probationDays ago
+      const minHireDate = new Date(now.getTime() - probationDays * DAY_MS);
+      const maxHireDate = new Date(now.getTime() - (probationDays - warnDays) * DAY_MS);
+
+      const candidates = await Employee.find({
+        status: 'active',
+        $or: [
+          { hireDate: { $gte: minHireDate, $lte: maxHireDate } },
+          { hire_date: { $gte: minHireDate, $lte: maxHireDate } },
+        ],
+      })
+        .select('fullName name nameAr employeeNumber managerId hireDate hire_date department')
+        .limit(200)
+        .lean();
+
+      return candidates.map(emp => {
+        const hire = emp.hireDate || emp.hire_date;
+        const probationEnd = new Date(new Date(hire).getTime() + probationDays * DAY_MS);
+        const daysLeft = Math.ceil((probationEnd.getTime() - now.getTime()) / DAY_MS);
+        const empName = emp.fullName || emp.nameAr || emp.name || emp.employeeNumber || 'موظف';
+        return {
+          ruleId: 'probation-ending-soon',
+          severity: daysLeft <= 7 ? 'high' : 'medium',
+          dedupeKey: `probation-end:${emp._id}`,
+          subject: { kind: 'employee', id: String(emp._id), name: empName },
+          message: `فترة تجربة ${empName} (${emp.department ?? '—'}) تنتهي خلال ${daysLeft} يوماً — يحتاج قرار تثبيت/إنهاء.`,
+          recipients: [
+            { kind: 'user', id: emp.managerId ? String(emp.managerId) : null, role: 'manager' },
+            { kind: 'role', role: 'hr_manager' },
+          ].filter(r => r.id || r.role),
+          actions: [],
+        };
+      });
+    },
+  },
+
+  {
+    id: 'iqama-expiring-soon',
+    labelAr: 'انتهاء قريب للإقامة (لغير السعوديين)',
+    labelEn: 'Iqama expiring soon (non-Saudi staff)',
+    trigger: 'schedule',
+    default: { enabled: true, params: { warnDays: 90, alertDays: 30 } },
+    requires: ['Employee'],
+    async evaluate({ models, now, params }) {
+      const { Employee } = models;
+      const warn = new Date(now.getTime() + (params.warnDays ?? 90) * DAY_MS);
+      const employees = await Employee.find({
+        iqamaExpiry: { $exists: true, $ne: null, $lte: warn, $gte: now },
+        nationality: { $ne: 'SA' },
+      })
+        .select('fullName name nameAr employeeNumber iqamaExpiry iqamaNumber managerId')
+        .limit(500)
+        .lean();
+
+      return employees.map(emp => {
+        const daysLeft = Math.ceil((new Date(emp.iqamaExpiry).getTime() - now.getTime()) / DAY_MS);
+        const sev =
+          daysLeft <= (params.alertDays ?? 30) ? 'critical' : daysLeft <= 60 ? 'high' : 'medium';
+        const empName = emp.fullName || emp.nameAr || emp.name || emp.employeeNumber || 'موظف';
+        return {
+          ruleId: 'iqama-expiring-soon',
+          severity: sev,
+          dedupeKey: `iqama-expiry:${emp._id}:${emp.iqamaExpiry}`,
+          subject: { kind: 'employee', id: String(emp._id), name: empName },
+          message: `إقامة ${empName} تنتهي خلال ${daysLeft} يوماً (رقم ${emp.iqamaNumber ?? '—'}). تجديد ضروري قبل الانتهاء.`,
+          recipients: [
+            { kind: 'user', id: String(emp._id), role: 'employee' },
+            { kind: 'role', role: 'hr_manager' },
+          ],
+          actions: [],
+        };
+      });
+    },
+  },
+
+  {
     id: 'grievance-unanswered',
     labelAr: 'تظلم بدون استجابة',
     labelEn: 'Grievance unanswered for too long',

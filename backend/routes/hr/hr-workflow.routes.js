@@ -22,6 +22,18 @@ const { createHrWorkflowEngine } = require('../../services/hr/hrWorkflowEngine')
 
 const ADMIN_ROLES = ['admin', 'super_admin', 'hr_manager'];
 
+/** Mask phone / email for the notifications viewer — PDPL principle. */
+function maskRecipient(to) {
+  if (!to || typeof to !== 'string') return '';
+  if (to.includes('@')) {
+    const [local, domain] = to.split('@');
+    if (!local || !domain) return '***';
+    return `${local.slice(0, 2)}***@${domain}`;
+  }
+  if (to.length <= 4) return '***';
+  return `${to.slice(0, 3)}***${to.slice(-2)}`;
+}
+
 /**
  * @param {{ logger: object, notifier?: object, auditLogger?: object, config?: object }} opts
  */
@@ -240,6 +252,78 @@ function createHrWorkflowRouter({ logger, notifier = null, auditLogger = null, c
         return res.status(404).json({ success: false, message: err.message });
       }
       safeError(res, err, 'hr-workflow runRule');
+    }
+  });
+
+  // GET /notifications — recent HR notification sends from unifiedNotifier
+  router.get('/notifications', authorize(ADMIN_ROLES), async (req, res) => {
+    try {
+      const NotificationLog = (() => {
+        try {
+          return require('../../services/unifiedNotifier').NotificationLog;
+        } catch {
+          return null;
+        }
+      })();
+      if (!NotificationLog) {
+        return res.json({ success: true, data: { items: [], total: 0, available: false } });
+      }
+      const limit = Math.min(parseInt(req.query.limit, 10) || 50, 200);
+      const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
+      const skip = (page - 1) * limit;
+
+      const filter = { templateKey: { $regex: /^hr\./ } };
+      if (req.query.status && ['pending', 'sent', 'failed', 'skipped'].includes(req.query.status)) {
+        filter.status = req.query.status;
+      }
+      if (
+        req.query.channel &&
+        ['whatsapp', 'sms', 'email', 'push', 'in-app'].includes(req.query.channel)
+      ) {
+        filter.channel = req.query.channel;
+      }
+      if (req.query.ruleId) {
+        filter.templateKey = `hr.workflow.${req.query.ruleId}`;
+      }
+
+      const [items, total] = await Promise.all([
+        NotificationLog.find(filter)
+          .sort({ createdAt: -1 })
+          .skip(skip)
+          .limit(limit)
+          .select(
+            'channel to subject status priority templateKey attempts lastError providerMessageId userId sentAt createdAt metadata'
+          )
+          .lean(),
+        NotificationLog.countDocuments(filter),
+      ]);
+
+      res.json({
+        success: true,
+        data: {
+          items: items.map(d => ({
+            _id: String(d._id),
+            channel: d.channel,
+            to: maskRecipient(d.to),
+            subject: d.subject,
+            status: d.status,
+            priority: d.priority,
+            templateKey: d.templateKey,
+            attempts: d.attempts,
+            lastError: d.lastError || null,
+            providerMessageId: d.providerMessageId || null,
+            sentAt: d.sentAt,
+            createdAt: d.createdAt,
+            ruleId: d.metadata?.ruleId || null,
+            severity: d.metadata?.subject?.severity || null,
+          })),
+          total,
+          pagination: { page, pages: Math.ceil(total / limit), limit },
+          available: true,
+        },
+      });
+    } catch (err) {
+      safeError(res, err, 'hr-workflow notifications');
     }
   });
 

@@ -8,6 +8,138 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [Unreleased] — 2026-05-16 — ALAWAEL Command Center: 9-Wave Rollout
+
+End-to-end transformation of the platform from "feature-complete but
+disconnected" to "operator-facing Command Center" — closes the gap
+between rich backend infrastructure (alerts engine, KPI registry,
+Beneficiary-360, LLM services) and the daily UX of branch managers,
+therapists, and guardians. Nine sequential waves; every change opt-in
+via env flags or feature toggles so existing deploys stay untouched.
+
+### Added — Backend (66666/) — 18 new files, +74 tests
+
+- **Smart Alerts coverage** expanded from 5 to **19 active rules** across
+  `backend/alerts/rules/`:
+
+  - **Wave 3** (13 rules): `document-expiring-30d`, `document-expired`,
+    `pdpl-dsar-approaching-sla`, `pdpl-dsar-sla-breach`,
+    `care-plan-unsigned-14d`, `care-plan-review-overdue`,
+    `goal-stalled-30d`, `vaccination-overdue`, `credential-expired`,
+    `employment-contract-expiring-60d`, `employment-contract-expired`,
+    `invoice-overdue-90d-critical`, `incident-critical-open-24h`.
+    Covers compliance (PDPL Art.27), HR escalation, clinical safety, and
+    write-off risk tiers. **+16 tests** in `alerts.rules.wave3.test.js`.
+  - **Wave 5** (1 rule): `kpi-anomaly-detected` — bridges the dormant
+    EWMA detector (`services/anomalyDetector.service.js`, Phase 18 C6)
+    into the alerts engine via `ctx.kpiHistoryStore`. **+10 tests**.
+
+- **Smart Alerts engine wiring** (Wave 7) — `backend/alerts/bootstrap.js`
+  composes engine + dispatcher + scheduler in one call. App-level boot
+  in `app.js` behind `ALERTS_ENGINE_ENABLED=true`; reuses the dashboard
+  platform's `kpiHistoryStore` so the EWMA bridge sees the same series
+  as the Phase-18 anomaly detector — single source of truth. **+9 tests**.
+
+- **AI Briefing service** (Wave 4) — `backend/services/briefing.service.js`
+  mirrors `hrCopilot.service.js`: Claude Haiku 4.5, prompt caching
+  (`ephemeral`), PII redaction, LRU cache (12h morning / 30min NBA),
+  rule-based fallback when no API key. Routes at
+  `/api/v1/ai/briefing/{status,morning,next-best-action}` wired in
+  `app.js` next to the HR Copilot block, sharing the same Anthropic
+  client. Audit trail via `AuditLog` (PDPL Art.13). **+16 + 7 tests**.
+
+- **Parent Nafath signing** (Wave 8) — `parent-portal-v2.routes.js` gains
+  `POST /children/:id/care-plan/:planId/sign-request` and `/mark-signed`.
+  Reuses the existing `nafathSigningService` with `signerRole='guardian'`.
+  Triple-check on `mark-signed`: status=APPROVED, documentId matches,
+  signerUserId matches. Idempotent. **+11 tests**.
+
+- **Parent Home Programs** (Wave 6) — same router gets
+  `GET /children/:id/home-programs` (with 14-day compliance window) and
+  `POST .../log` (append-only, status DONE/PARTIAL/SKIPPED, 1000-char
+  note cap, ACTIVE-only).
+
+- **6 healthcare roles** added to `config/constants/roles.constants.js`:
+  `nurse`, `nursing_supervisor`, `head_nurse`, `patient_relations_officer`,
+  `crm_supervisor`, `dpo`. DPO added to `CROSS_BRANCH_ROLES` for PDPL
+  Art.30 oversight. Levels: L2 (DPO), L4 (supervisors), L5 (line staff).
+
+- **Integration test suite** (Wave 9) — `backend/__tests__/waves-integration.test.js`
+  locks the data contract between Waves 4 + 5 + 7. Catches the
+  "unit-tests-green-but-shape-mismatch" class of regressions that
+  individual suites can't detect. **+5 tests**.
+
+### Added — Frontend (alawael-rehab-platform/, web-admin)
+
+- **RBAC primitives** (Wave 0):
+
+  - `Session`/`JwtPayload` extended with optional `branchIds[]`,
+    `roles[]`, `permissions[]`, `activeBranchId` (backward-compatible
+    with pre-Wave-0 JWTs).
+  - `useAuth().switchBranch(id)` + `switchRole(code)` with localStorage
+    persistence validated against JWT claims (no privilege escalation
+    via tampered storage).
+  - `<PermissionGate>` HOC + `useHasPermission()` hook supporting
+    `require` / `requireRole` / `requireLevel` (1=highest → 6=lowest).
+  - `<BranchSwitcher>` + `<RoleSwitcher>` rendered in Topbar; self-hide
+    for single-branch / single-role users.
+  - `<DataFreshnessChip>` (live / recent / stale / outdated / unknown)
+    integrated into `<KpiCard>`.
+
+- **Sidebar V2** (Wave 1) — `nav-types.ts` + `nav-items.v1.tsx` (legacy
+  175 hrefs verbatim) + `nav-items.v2.tsx` (7 IA sections, same 175
+  hrefs reorganized, `authz` descriptors). `use-nav-items.ts` selector
+  hook (precedence: `?sidebar=v1|v2` → localStorage → env default → V1).
+  `check-nav-coverage.mjs` updated to scan both files.
+
+- **Widget renderers** (Wave 2) — 4 zero-dependency, SVG-only components:
+
+  - `<TrendChart>` — time-series with target line, optional band,
+    direction-aware coloring, x/y axes
+  - `<AlertCard>` — extracted from the dashboards/alerts page; reusable
+    with `compact` mode for embedding in widget grids
+  - `<DrillTable>` — generic typed table with per-column sort
+    (3-state), free-text filter, client pagination
+  - `<ParetoChart>` — bars + cumulative line with 80% reference
+  - `<WidgetRenderer>` dispatcher; falls back to `<WidgetPlaceholder>`
+    for shapes whose renderer hasn't shipped
+
+- **AI Briefing drawer** (Wave 4) — `<BriefingDrawer>` slide-in panel
+  with morning briefing (5 bullets + focus) + Next-Best-Action list.
+  `<BriefingPill>` in Topbar gradient indigo→violet. Explicit `AI` vs
+  `Rules` source badge for transparency.
+
+- **Parent Home Program tab** (Wave 6) — new tab in
+  `/parent/children/[id]` with per-card 14-day compliance bar, inline
+  status logging (DONE/PARTIAL/SKIPPED + note), recent submissions
+  list with therapist feedback.
+
+- **Parent Nafath signing** (Wave 8) — `<ParentCarePlanSignSection>`
+  3-state component embedded in the care-plan tab: already-signed
+  (green badge), requires-signature (amber CTA), in-flight (Nafath
+  randomNumber + 15min countdown + 2.5s polling). Final APPROVED auto
+  triggers `mark-signed` and refreshes the plan.
+
+### Operational notes
+
+- All changes are opt-in:
+  - `ALERTS_ENGINE_ENABLED=true` — starts the 19-rule scheduler
+  - `ANTHROPIC_API_KEY=sk-ant-...` — enables LLM briefing (rule-based fallback otherwise)
+  - `NEXT_PUBLIC_SIDEBAR_V2_DEFAULT=true` — flips default sidebar to V2
+  - `NAFATH_BASE_URL`/`NAFATH_CLIENT_ID`/`NAFATH_CLIENT_SECRET` — live
+    Nafath signing (mock mode otherwise)
+- `kpiHistoryStore` is shared with the Phase-18 dashboard platform —
+  no double-recording, no extra cron jobs.
+- Frontend nav-coverage script scans both V1 + V2 module sources; all
+  175 admin + 7 parent hrefs resolve to real `page.tsx` files.
+
+### Test summary
+
+- 220/220 backend tests across 17 suites; 0 frontend lint regressions;
+  `tsc --noEmit` clean; `pnpm validate` exit 0.
+
+---
+
 ## [Unreleased] — 2026-05-15 — Phase 30: Intelligent HR Platform
 
 Closed the gap between a feature-rich HR backend (Phase 11, 564 tests) and a

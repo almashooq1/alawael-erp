@@ -34,6 +34,12 @@ const CarePlan = require('../models/CarePlan');
 const ClinicalAssessment = require('../models/ClinicalAssessment');
 const Complaint = require('../models/Complaint');
 const PortalNotification = require('../models/PortalNotification');
+// HomeAssignment is the model the therapist uses today to send
+// at-home tasks to the family. Wave 6 surfaces it on the parent
+// side + lets the parent log execution per submission row. The
+// model already supports `submissions: [{ status, parentNote,
+// mediaUrl, ... }]` so we only add routes + UI, no schema change.
+const HomeAssignment = require('../models/HomeAssignment');
 const parentReportService = require('../services/parentReportService');
 const { BlockchainCertificate } = require('../models/blockchain.model');
 const { generateCertificatePdf } = require('../services/blockchainPdfService');
@@ -698,6 +704,340 @@ router.post('/notifications/read-all', async (req, res) => {
     });
   } catch (err) {
     return safeError(res, err, 'parent-v2.notifications.readAll');
+  }
+});
+
+// ── Wave 8: Parent Nafath Care-Plan Signing ─────────────────────────────
+//
+// Surfaces the existing nafathSigningService (services/nafathSigningService.js)
+// to guardians for care-plan acknowledgement. The plan must already be marked
+// `requiresSignature=true` by the therapist; this endpoint is the parent-side
+// counterpart that issues a Nafath request scoped to `signerRole='guardian'`.
+//
+// Flow:
+//   1. POST /children/:id/care-plan/:planId/sign-request
+//      → creates NafathSignatureRequest, returns randomNumber + transactionId
+//   2. Parent's mobile app matches randomNumber in Nafath app
+//   3. Frontend polls /api/v1/nafath/signing/:requestId/status (shared route)
+//   4. On APPROVED, the care plan can be marked parent-signed via
+//      POST /children/:id/care-plan/:planId/mark-signed (idempotent;
+//      verifies the Nafath request status before flipping `signedAt`).
+
+// Heavy modules — lazily required so the route file stays cheap to load
+// when these aren't installed (mock dev environment).
+let nafathSigningServiceCache = null;
+function getNafathService() {
+  if (nafathSigningServiceCache) return nafathSigningServiceCache;
+  try {
+    const mod = require('../services/nafathSigningService');
+    nafathSigningServiceCache = mod.createService ? mod.createService() : mod;
+  } catch {
+    nafathSigningServiceCache = null;
+  }
+  return nafathSigningServiceCache;
+}
+
+// POST /children/:id/care-plan/:planId/sign-request
+// Body: { documentHash: string }
+//   - documentHash is the SHA-256 of the rendered care-plan PDF/text the
+//     parent sees on screen. Required so the signed evidence can be
+//     re-verified later (Nafath JWS is bound to this hash).
+router.post('/children/:id/care-plan/:planId/sign-request', async (req, res) => {
+  try {
+    const access = await assertChildAccess(req, req.params.id);
+    if (!access.ok) return res.status(access.status).json({ success: false, message: access.msg });
+
+    if (!mongoose.isValidObjectId(req.params.planId))
+      return res.status(400).json({ success: false, message: 'معرّف الخطة غير صالح' });
+
+    const { documentHash } = req.body || {};
+    if (typeof documentHash !== 'string' || documentHash.length < 32) {
+      return res.status(400).json({ success: false, message: 'documentHash مطلوب (SHA-256 hex)' });
+    }
+
+    // Confirm the plan actually belongs to the asserted child + is marked
+    // for signature. A parent shouldn't be able to spin up a Nafath flow
+    // on someone else's plan or on a plan that doesn't expect signature.
+    const plan = await CarePlan.findOne({
+      _id: req.params.planId,
+      beneficiary: req.params.id,
+    }).lean();
+    if (!plan) return res.status(404).json({ success: false, message: 'الخطة غير موجودة' });
+    if (!plan.requiresSignature) {
+      return res.status(400).json({ success: false, message: 'هذه الخطة لا تتطلب توقيعاً' });
+    }
+    if (plan.signedAt) {
+      return res.status(409).json({ success: false, message: 'تم توقيع الخطة مسبقاً' });
+    }
+
+    // Guardian national ID is the legal anchor. Without it Nafath can't
+    // bind the signature to a verifiable identity.
+    const guardian = access.guardian || (await getMyGuardian(req));
+    const nationalId = guardian?.nationalId || guardian?.identityNumber || null;
+    if (!nationalId) {
+      return res.status(400).json({
+        success: false,
+        message: 'لا يوجد رقم هوية وطنية مسجل لولي الأمر — يرجى تحديث الملف الشخصي',
+      });
+    }
+
+    const svc = getNafathService();
+    if (!svc) {
+      return res.status(503).json({
+        success: false,
+        message: 'خدمة نفاذ غير متوفرة حالياً',
+      });
+    }
+
+    let signatureRequest;
+    try {
+      signatureRequest = await svc.requestSignature({
+        documentType: 'IRP',
+        documentId: String(plan._id),
+        documentHash,
+        purpose: 'acknowledge',
+        signerNationalId: nationalId,
+        signerRole: 'guardian',
+        signerUserId: req.user?.id || null,
+        initiatedBy: req.user?.id || null,
+        ip: req.ip,
+        userAgent: req.get('user-agent'),
+      });
+    } catch (err) {
+      // Map service-level error codes onto helpful HTTP responses.
+      if (err.code === 'INVALID_ID') {
+        return res.status(400).json({ success: false, message: err.message });
+      }
+      return safeError(res, err, 'parent-v2.carePlan.signRequest');
+    }
+
+    res.status(201).json({
+      success: true,
+      data: {
+        requestId: signatureRequest._id || signatureRequest.requestId,
+        transactionId: signatureRequest.transactionId,
+        randomNumber: signatureRequest.randomNumber,
+        expiresAt: signatureRequest.expiresAt,
+        status: signatureRequest.status,
+        mode: signatureRequest.mode,
+        reused: !!signatureRequest.reused,
+      },
+    });
+  } catch (err) {
+    return safeError(res, err, 'parent-v2.carePlan.signRequest.outer');
+  }
+});
+
+// POST /children/:id/care-plan/:planId/mark-signed
+// Body: { requestId: string }
+//   - Verifies the Nafath request is APPROVED before flipping the plan to
+//     signed. Idempotent: if already signed (with a matching request ID),
+//     returns 200 with no change.
+router.post('/children/:id/care-plan/:planId/mark-signed', async (req, res) => {
+  try {
+    const access = await assertChildAccess(req, req.params.id);
+    if (!access.ok) return res.status(access.status).json({ success: false, message: access.msg });
+
+    const { requestId } = req.body || {};
+    if (!requestId || !mongoose.isValidObjectId(requestId)) {
+      return res.status(400).json({ success: false, message: 'requestId مطلوب وصالح' });
+    }
+
+    const svc = getNafathService();
+    if (!svc) {
+      return res.status(503).json({ success: false, message: 'خدمة نفاذ غير متوفرة' });
+    }
+
+    // Poll the service so a previously-PENDING request that completed
+    // between requests gets its state advanced server-side before we
+    // trust it. The service is idempotent on terminal states.
+    let signatureRequest;
+    try {
+      signatureRequest = await svc.pollSignature(requestId);
+    } catch (err) {
+      return safeError(res, err, 'parent-v2.carePlan.markSigned.poll');
+    }
+
+    if (!signatureRequest || signatureRequest.status !== 'APPROVED') {
+      return res.status(409).json({
+        success: false,
+        message: 'لم يكتمل التوقيع بعد عبر نفاذ',
+        status: signatureRequest?.status || 'UNKNOWN',
+      });
+    }
+
+    // Ensure the signed document points at THIS plan + THIS child. A
+    // parent shouldn't be able to re-use a sibling's signature.
+    if (
+      signatureRequest.documentId !== String(req.params.planId) ||
+      signatureRequest.signerUserId?.toString() !== req.user?.id
+    ) {
+      return res
+        .status(403)
+        .json({ success: false, message: 'التوقيع غير مطابق للخطة أو المستخدم' });
+    }
+
+    const updated = await CarePlan.findOneAndUpdate(
+      { _id: req.params.planId, beneficiary: req.params.id, signedAt: null },
+      {
+        $set: {
+          signedAt: signatureRequest.approvedAt || new Date(),
+          signedBy: req.user?.id || null,
+        },
+      },
+      { new: true }
+    ).lean();
+
+    // If updated is null, the plan was already signed by a prior call —
+    // treat as success (idempotency keeps the UX simple).
+    res.json({
+      success: true,
+      data: {
+        planId: req.params.planId,
+        signedAt: (updated && updated.signedAt) || new Date(),
+        requestId,
+        idempotent: !updated,
+      },
+    });
+  } catch (err) {
+    return safeError(res, err, 'parent-v2.carePlan.markSigned.outer');
+  }
+});
+
+// ── Wave 6: Home Program endpoints ──────────────────────────────────────
+//
+// Why this lives here and not in the rehab routes: the therapist-facing
+// CRUD already exists at `/api/v1/rehab/home-assignments` (admin/staff
+// only). Wave 6 just exposes a read + log-execution surface scoped to
+// the authenticated guardian, with the same `assertChildAccess` gate
+// that protects every other parent-v2 endpoint.
+
+// GET /children/:id/home-programs
+// Returns active + recently-completed home assignments for the child.
+// Sorted newest-first. Each item carries the latest 5 submissions so
+// the parent can scan compliance history without a second round trip.
+router.get('/children/:id/home-programs', async (req, res) => {
+  try {
+    const access = await assertChildAccess(req, req.params.id);
+    if (!access.ok) return res.status(access.status).json({ success: false, message: access.msg });
+
+    const rows = await HomeAssignment.find({
+      beneficiary: req.params.id,
+      status: { $in: ['ACTIVE', 'COMPLETED'] },
+    })
+      .sort({ status: 1, updatedAt: -1 }) // ACTIVE first, then COMPLETED
+      .limit(50)
+      .lean();
+
+    const items = rows.map(r => {
+      const submissions = Array.isArray(r.submissions) ? r.submissions : [];
+      // Keep only the last 5 submissions in the list response —
+      // older entries are lazily fetched if the parent opens detail.
+      const recent = submissions
+        .slice()
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+        .slice(0, 5);
+
+      // Compliance summary across the last 14 days. Helps the parent
+      // gauge "how am I doing?" without scrolling through entries.
+      const fourteenDaysAgo = Date.now() - 14 * 24 * 60 * 60 * 1000;
+      const recentWindow = submissions.filter(s => new Date(s.date).getTime() >= fourteenDaysAgo);
+      const done = recentWindow.filter(s => s.status === 'DONE').length;
+      const partial = recentWindow.filter(s => s.status === 'PARTIAL').length;
+      const skipped = recentWindow.filter(s => s.status === 'SKIPPED').length;
+
+      return {
+        id: r._id,
+        title: r.title,
+        description: r.description,
+        videoUrl: r.videoUrl || null,
+        frequency: r.frequency,
+        startDate: r.startDate,
+        endDate: r.endDate || null,
+        status: r.status,
+        recentSubmissions: recent.map(s => ({
+          date: s.date,
+          status: s.status,
+          parentNote: s.parentNote || null,
+          mediaUrl: s.mediaUrl || null,
+          feedbackFromTherapist: s.feedbackFromTherapist || null,
+        })),
+        complianceLast14d: { done, partial, skipped, total: recentWindow.length },
+        updatedAt: r.updatedAt,
+      };
+    });
+
+    res.json({ success: true, items, total: items.length });
+  } catch (err) {
+    return safeError(res, err, 'parent-v2.homePrograms.list');
+  }
+});
+
+// POST /children/:id/home-programs/:programId/log
+// Body: { status: 'DONE' | 'PARTIAL' | 'SKIPPED', parentNote?, mediaUrl? }
+// Appends a new submission to the assignment. We do NOT update an
+// existing submission for the same calendar day — therapists rely on
+// the audit trail of every parent click, and overwrite would erase
+// the original timestamp. If the parent really wants to revise their
+// note, they submit a new entry; the therapist sees both.
+router.post('/children/:id/home-programs/:programId/log', async (req, res) => {
+  try {
+    const access = await assertChildAccess(req, req.params.id);
+    if (!access.ok) return res.status(access.status).json({ success: false, message: access.msg });
+
+    const programId = req.params.programId;
+    if (!mongoose.isValidObjectId(programId))
+      return res.status(400).json({ success: false, message: 'معرّف البرنامج غير صالح' });
+
+    const { status, parentNote, mediaUrl } = req.body || {};
+    const ALLOWED_STATUSES = ['DONE', 'PARTIAL', 'SKIPPED'];
+    if (!ALLOWED_STATUSES.includes(status)) {
+      return res
+        .status(400)
+        .json({ success: false, message: 'status يجب أن يكون DONE أو PARTIAL أو SKIPPED' });
+    }
+
+    // Defensive caps on user-supplied strings so a malicious parent
+    // (or a confused one) can't bloat the parent submission with a
+    // multi-megabyte note that would blow up the array doc-size.
+    const safeNote = typeof parentNote === 'string' ? parentNote.slice(0, 1000) : undefined;
+    const safeMedia = typeof mediaUrl === 'string' ? mediaUrl.slice(0, 500) : undefined;
+
+    const updated = await HomeAssignment.findOneAndUpdate(
+      { _id: programId, beneficiary: req.params.id, status: 'ACTIVE' },
+      {
+        $push: {
+          submissions: {
+            date: new Date(),
+            status,
+            ...(safeNote !== undefined ? { parentNote: safeNote } : {}),
+            ...(safeMedia !== undefined ? { mediaUrl: safeMedia } : {}),
+          },
+        },
+      },
+      { new: true }
+    ).lean();
+
+    if (!updated) {
+      return res.status(404).json({ success: false, message: 'البرنامج غير موجود أو غير نشط' });
+    }
+
+    const last = updated.submissions[updated.submissions.length - 1];
+    res.status(201).json({
+      success: true,
+      data: {
+        programId: updated._id,
+        submission: {
+          date: last.date,
+          status: last.status,
+          parentNote: last.parentNote || null,
+          mediaUrl: last.mediaUrl || null,
+        },
+        totalSubmissions: updated.submissions.length,
+      },
+    });
+  } catch (err) {
+    return safeError(res, err, 'parent-v2.homePrograms.log');
   }
 });
 

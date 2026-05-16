@@ -29,6 +29,16 @@ const ROLES = {
   TEACHER: 'teacher',
   RECEPTIONIST: 'receptionist',
   DATA_ENTRY: 'data_entry',
+  // ── Healthcare-specific roles (Wave 0, 2026-05-16) ───────────────
+  // Closes audit gap: a rehab center cannot operate without nursing
+  // and patient-relations roles. DPO is a PDPL Art.30 requirement.
+  NURSE: 'nurse',
+  NURSING_SUPERVISOR: 'nursing_supervisor',
+  HEAD_NURSE: 'head_nurse',
+  PATIENT_RELATIONS_OFFICER: 'patient_relations_officer',
+  CRM_SUPERVISOR: 'crm_supervisor',
+  DPO: 'dpo',
+  // ─────────────────────────────────────────────────────────────────
   PARENT: 'parent',
   STUDENT: 'student',
   VIEWER: 'viewer',
@@ -104,6 +114,7 @@ const CROSS_BRANCH_ROLES = [
   'compliance_officer',
   'internal_auditor',
   'it_admin',
+  'dpo',
 ];
 
 /**
@@ -146,6 +157,10 @@ const ROLE_LEVELS = {
 
   [ROLES.SUPERVISOR]: 4,
   [ROLES.FINANCE]: 4,
+  [ROLES.NURSING_SUPERVISOR]: 4,
+  [ROLES.HEAD_NURSE]: 4,
+  [ROLES.CRM_SUPERVISOR]: 4,
+  [ROLES.DPO]: 2,
 
   [ROLES.DOCTOR]: 5,
   [ROLES.THERAPIST]: 5,
@@ -153,6 +168,8 @@ const ROLE_LEVELS = {
   [ROLES.RECEPTIONIST]: 5,
   [ROLES.DATA_ENTRY]: 5,
   [ROLES.HR]: 5,
+  [ROLES.NURSE]: 5,
+  [ROLES.PATIENT_RELATIONS_OFFICER]: 5,
 
   [ROLES.PARENT]: 6,
   [ROLES.STUDENT]: 6,

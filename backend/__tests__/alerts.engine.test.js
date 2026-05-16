@@ -107,10 +107,14 @@ describe('AlertsEngine — evaluation', () => {
 });
 
 describe('buildEngine() with bundled rules', () => {
-  test('registers all 5 rules', () => {
-    expect(rules.length).toBe(5);
+  // Wave 3 (2026-05-16) added 13 rules on top of the Phase 11
+  // baseline of 5. Wave 5 (2026-05-16) added the EWMA anomaly
+  // bridge. Pin the exact total so accidental rule removal shows
+  // up as a test regression rather than a silent gap.
+  test('registers all 19 bundled rules (5 baseline + 13 wave-3 + 1 wave-5)', () => {
+    expect(rules.length).toBe(19);
     const eng = buildEngine();
-    expect(eng.rules.size).toBe(5);
+    expect(eng.rules.size).toBe(19);
   });
 
   test('credential-expiry-30d fires on near-expiry records', async () => {

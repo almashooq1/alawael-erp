@@ -883,6 +883,81 @@ try {
         logger.info(
           `[HrCopilot] ✓ /api/v1/hr/copilot mounted (available=${copilot.isAvailable()})`
         );
+
+        // ── AI Briefing (Wave 4 — Morning Briefing + Next Best Action) ──
+        // Reuses the same Anthropic client. When the key isn't set,
+        // the service falls back to a deterministic rule-based output
+        // built from active Wave-3 alerts so the UX stays consistent.
+        try {
+          const { createBriefingService } = require('./services/briefing.service');
+          const { createAiBriefingRouter } = require('./routes/ai-briefing.routes');
+
+          const briefing = createBriefingService({ anthropicClient, logger });
+
+          // The `getAlerts` callback pulls live alert findings from the
+          // persisted Alert model (populated by the alerts engine +
+          // dispatcher). Defensive try/catch + lean queries keep the
+          // route resilient when Mongo is briefly unavailable.
+          let AlertDocModel = null;
+          try {
+            AlertDocModel = require('./alerts/alert.model');
+          } catch (modelErr) {
+            logger.warn('[AiBriefing] alert.model unavailable:', modelErr.message);
+          }
+
+          async function getAlerts(req) {
+            if (!AlertDocModel) return [];
+            try {
+              const branchId = req.user?.activeBranchId || req.user?.branchId || null;
+              const query = { status: { $in: ['open', 'active'] } };
+              if (branchId) query.branchId = branchId;
+              const rows = await AlertDocModel.find(query).sort({ createdAt: -1 }).limit(25).lean();
+              return rows.map(r => ({
+                ruleId: r.ruleId,
+                key: `${r.ruleId}::${r.key || ''}`,
+                severity: r.severity || 'warning',
+                category: r.category || 'operational',
+                headlineAr: r.message || null,
+                headlineEn: r.message || null,
+                firstFiredAt: r.createdAt ? new Date(r.createdAt).getTime() : null,
+                branchId: r.branchId || null,
+              }));
+            } catch (err) {
+              logger.warn('[AiBriefing] getAlerts query failed: ' + err.message);
+              return [];
+            }
+          }
+
+          // Reuse the HR-copilot audit logger pattern — same eventCategory
+          // ('hr') is wrong; mark these as 'security' since they cover
+          // PDPL Art.13 (audit of automated processing).
+          const briefingAudit = copilotAudit
+            ? {
+                async log(entry) {
+                  return copilotAudit.log({
+                    ...entry,
+                    action: entry.action || 'ai.briefing.morning',
+                  });
+                },
+              }
+            : null;
+
+          app.use(
+            '/api/v1/ai/briefing',
+            authenticate,
+            createAiBriefingRouter({
+              logger,
+              briefing,
+              getAlerts,
+              auditLogger: briefingAudit,
+            })
+          );
+          logger.info(
+            `[AiBriefing] ✓ /api/v1/ai/briefing mounted (available=${briefing.isAvailable()})`
+          );
+        } catch (briefingErr) {
+          logger.warn('[AiBriefing] routes skipped:', briefingErr.message);
+        }
       } catch (cpErr) {
         logger.warn('[HrCopilot] routes skipped:', cpErr.message);
       }
@@ -1128,6 +1203,76 @@ try {
   }
 } catch (err) {
   logger.warn('[RedFlag] bootstrap skipped:', err.message);
+}
+
+// ─── Smart Alerts Engine (Wave 7) ─────────────────────────────────────────────
+// Bridges the 19 rules in `backend/alerts/rules/` (5 baseline +
+// 13 Wave-3 + 1 Wave-5 EWMA) into a live scheduler. Until this
+// hook landed, the rules were authored and tested but never
+// evaluated in production — every alert came from the Phase-18
+// dashboardAlertCoordinator only.
+//
+// Opt-in via `ALERTS_ENGINE_ENABLED=true`. Disabled by default so
+// existing deployments that haven't reviewed recipient routing
+// don't suddenly start emailing operators. Test env is excluded
+// regardless of the flag because a live tick interval would flake
+// the suite.
+try {
+  const alertsEnabled = String(process.env['ALERTS_ENGINE_ENABLED'] || '').toLowerCase() === 'true';
+  const isTestEnvAlerts = process.env['NODE_ENV'] === 'test';
+  if (alertsEnabled && !isTestEnvAlerts && !app._smartAlertsStack) {
+    const { buildAlertsStack } = require('./alerts/bootstrap');
+
+    // Reuse the dashboard's kpiHistoryStore so the EWMA bridge sees
+    // the same series the dashboard already records. Falls back to
+    // `null` when the dashboard platform wasn't built — the bridge
+    // rule degrades to a no-op in that case.
+    const sharedHistoryStore = app._dashboardHistoryStore || null;
+
+    // Lazy model loader — each rule defensively checks `ctx.models.X`,
+    // so a missing model just means that rule yields []. We only
+    // surface models that Wave 3 rules actually reference.
+    const modelNames = [
+      'Credential',
+      'IRP',
+      'Invoice',
+      'Incident',
+      'Document',
+      'PdplRequest',
+      'CarePlan',
+      'Goal',
+      'Vaccination',
+      'EmploymentContract',
+    ];
+    const liveModels = {};
+    for (const name of modelNames) {
+      try {
+        liveModels[name] = require(`./models/${name}`);
+      } catch (modelErr) {
+        logger.warn(`[SmartAlerts] model ${name} unavailable: ${modelErr.message}`);
+      }
+    }
+
+    const intervalMs = Number(process.env['ALERTS_ENGINE_INTERVAL_MS']) || undefined;
+
+    const stack = buildAlertsStack({
+      models: liveModels,
+      kpiHistoryStore: sharedHistoryStore,
+      ...(intervalMs ? { intervalMs } : {}),
+      logger,
+    });
+    stack.scheduler.start(stack.ctxFactory);
+    app._smartAlertsStack = stack;
+    logger.info(
+      `[SmartAlerts] ✓ engine started — ${stack.rules.length} rules, ` +
+        `kpiHistoryStore=${sharedHistoryStore ? 'on' : 'off'}, ` +
+        `interval=${intervalMs || '5min'}`
+    );
+  } else if (!alertsEnabled) {
+    logger.info('[SmartAlerts] engine disabled — set ALERTS_ENGINE_ENABLED=true to activate');
+  }
+} catch (saErr) {
+  logger.warn('[SmartAlerts] bootstrap skipped:', saErr.message);
 }
 
 // ─── Therapist Portal ─────────────────────────────────────────────────────────

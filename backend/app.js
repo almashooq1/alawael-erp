@@ -754,6 +754,17 @@ try {
         logger.warn('[HrSmartAnalytics] routes skipped:', saErr.message);
       }
 
+      // HR Extensions — Phase 30 follow-up (Document Vault + OKRs + Recruitment + Saudi Compliance)
+      try {
+        const { createHrExtensionsRouter } = require('./routes/hr/hr-extensions.routes');
+        app.use('/api/v1/hr', authenticate, createHrExtensionsRouter({ logger }));
+        logger.info(
+          '[HrExtensions] ✓ /api/v1/hr/(documents|goals|vacancies|saudi-compliance) mounted'
+        );
+      } catch (extErr) {
+        logger.warn('[HrExtensions] routes skipped:', extErr.message);
+      }
+
       // HR Workflow Automation Engine — Phase 30 (Intelligent HR Platform)
       try {
         const { createHrWorkflowRouter } = require('./routes/hr/hr-workflow.routes');

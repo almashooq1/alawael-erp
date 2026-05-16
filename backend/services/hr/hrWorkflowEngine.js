@@ -401,6 +401,215 @@ const RULES = [
   },
 
   {
+    id: 'certification-expiring-soon',
+    labelAr: 'انتهاء قريب لشهادة احترافية',
+    labelEn: 'Professional certification expiring soon',
+    trigger: 'schedule',
+    default: { enabled: true, params: { warnDays: 60, alertDays: 14 } },
+    requires: ['Employee', 'Certification'],
+    async evaluate({ models, now, params }) {
+      const { Employee, Certification } = models;
+      const warn = new Date(now.getTime() + (params.warnDays ?? 60) * DAY_MS);
+      const certs = await Certification.find({
+        expiryDate: { $exists: true, $ne: null, $lte: warn, $gte: now },
+        status: { $ne: 'archived' },
+      })
+        .select('employeeId expiryDate name issuingAuthority')
+        .limit(500)
+        .lean();
+
+      if (!certs.length) return [];
+
+      const empIds = [...new Set(certs.map(c => String(c.employeeId)).filter(Boolean))];
+      const employees = await Employee.find({ _id: { $in: empIds } })
+        .select('fullName name nameAr employeeNumber managerId email')
+        .lean();
+      const empById = new Map(employees.map(e => [String(e._id), e]));
+
+      return certs.map(cert => {
+        const emp = empById.get(String(cert.employeeId)) || {};
+        const daysLeft = Math.ceil((new Date(cert.expiryDate).getTime() - now.getTime()) / DAY_MS);
+        const sev =
+          daysLeft <= (params.alertDays ?? 14) ? 'critical' : daysLeft <= 30 ? 'high' : 'medium';
+        const empName = emp.fullName || emp.nameAr || emp.name || emp.employeeNumber || 'موظف';
+        return {
+          ruleId: 'certification-expiring-soon',
+          severity: sev,
+          dedupeKey: `cert-expiry:${cert._id}`,
+          subject: { kind: 'certification', id: String(cert._id), name: empName },
+          message: `شهادة ${cert.name ?? 'احترافية'} لـ ${empName} تنتهي خلال ${daysLeft} يوماً (${cert.issuingAuthority ?? '—'}).`,
+          recipients: [
+            { kind: 'user', id: String(cert.employeeId), role: 'employee' },
+            { kind: 'role', role: 'hr_manager' },
+          ],
+          actions: [],
+        };
+      });
+    },
+  },
+
+  {
+    id: 'birthday-this-week',
+    labelAr: 'أعياد ميلاد هذا الأسبوع',
+    labelEn: 'Employee birthdays this week',
+    trigger: 'schedule',
+    default: { enabled: true, params: { windowDays: 7 } },
+    requires: ['Employee'],
+    async evaluate({ models, now, params }) {
+      const { Employee } = models;
+      const winDays = params.windowDays ?? 7;
+      // Match by month + day, ignoring year (DOB anniversaries each year).
+      const today = new Date(now);
+      const targetDays = [];
+      for (let d = 0; d <= winDays; d++) {
+        const date = new Date(today.getTime() + d * DAY_MS);
+        targetDays.push({ month: date.getMonth() + 1, day: date.getDate() });
+      }
+
+      // Light-weight: pull active employees with a birthDate, filter client-side.
+      // This avoids needing a MongoDB $expr on $dayOfMonth/$month aggregation.
+      const employees = await Employee.find({
+        status: 'active',
+        $or: [{ birthDate: { $exists: true, $ne: null } }, { dob: { $exists: true, $ne: null } }],
+      })
+        .select('fullName name nameAr employeeNumber managerId birthDate dob department')
+        .limit(2000)
+        .lean();
+
+      const findings = [];
+      for (const emp of employees) {
+        const dob = emp.birthDate || emp.dob;
+        if (!dob) continue;
+        const d = new Date(dob);
+        if (isNaN(d.getTime())) continue;
+        const match = targetDays.find(t => t.month === d.getMonth() + 1 && t.day === d.getDate());
+        if (!match) continue;
+        const empName = emp.fullName || emp.nameAr || emp.name || emp.employeeNumber || 'موظف';
+        findings.push({
+          ruleId: 'birthday-this-week',
+          severity: 'info',
+          dedupeKey: `bday:${emp._id}:${now.getFullYear()}-${match.month}-${match.day}`,
+          subject: { kind: 'employee', id: String(emp._id), name: empName },
+          message: `عيد ميلاد ${empName} (${emp.department ?? '—'}) في ${match.day}/${match.month}.`,
+          recipients: [
+            { kind: 'user', id: emp.managerId ? String(emp.managerId) : null, role: 'manager' },
+          ].filter(r => r.id),
+          actions: [],
+        });
+      }
+      return findings.slice(0, 100);
+    },
+  },
+
+  {
+    id: 'work-anniversary-this-week',
+    labelAr: 'ذكريات تعيين هذا الأسبوع',
+    labelEn: 'Work anniversaries this week',
+    trigger: 'schedule',
+    default: { enabled: true, params: { windowDays: 7 } },
+    requires: ['Employee'],
+    async evaluate({ models, now, params }) {
+      const { Employee } = models;
+      const winDays = params.windowDays ?? 7;
+      const today = new Date(now);
+      const targetDays = [];
+      for (let d = 0; d <= winDays; d++) {
+        const date = new Date(today.getTime() + d * DAY_MS);
+        targetDays.push({ month: date.getMonth() + 1, day: date.getDate() });
+      }
+
+      const employees = await Employee.find({
+        status: 'active',
+        $or: [
+          { hireDate: { $exists: true, $ne: null } },
+          { hire_date: { $exists: true, $ne: null } },
+        ],
+      })
+        .select('fullName name nameAr employeeNumber managerId hireDate hire_date department')
+        .limit(2000)
+        .lean();
+
+      const findings = [];
+      for (const emp of employees) {
+        const hire = emp.hireDate || emp.hire_date;
+        if (!hire) continue;
+        const d = new Date(hire);
+        if (isNaN(d.getTime())) continue;
+        const match = targetDays.find(t => t.month === d.getMonth() + 1 && t.day === d.getDate());
+        if (!match) continue;
+        const years = today.getFullYear() - d.getFullYear();
+        if (years < 1) continue; // first year only counts as "hire", not anniversary
+        const empName = emp.fullName || emp.nameAr || emp.name || emp.employeeNumber || 'موظف';
+        const sev = years >= 10 ? 'high' : years >= 5 ? 'medium' : 'info';
+        findings.push({
+          ruleId: 'work-anniversary-this-week',
+          severity: sev,
+          dedupeKey: `anniv:${emp._id}:${now.getFullYear()}`,
+          subject: { kind: 'employee', id: String(emp._id), name: empName },
+          message: `${empName} (${emp.department ?? '—'}) يكمل ${years} سنة في الشركة هذا الأسبوع.`,
+          recipients: [
+            { kind: 'user', id: emp.managerId ? String(emp.managerId) : null, role: 'manager' },
+            { kind: 'role', role: 'hr_manager' },
+          ].filter(r => r.id || r.role),
+          actions: [],
+        });
+      }
+      return findings.slice(0, 100);
+    },
+  },
+
+  {
+    id: 'gosi-unregistered',
+    labelAr: 'موظف سعودي بدون تسجيل GOSI',
+    labelEn: 'Saudi employee missing GOSI registration',
+    trigger: 'schedule',
+    default: { enabled: true, params: { tolerantDays: 30 } },
+    requires: ['Employee'],
+    async evaluate({ models, now, params }) {
+      const { Employee } = models;
+      const tolerantDays = params.tolerantDays ?? 30;
+      const tolerantCutoff = new Date(now.getTime() - tolerantDays * DAY_MS);
+
+      const employees = await Employee.find({
+        status: 'active',
+        nationality: 'SA',
+        $or: [
+          { gosiNumber: { $exists: false } },
+          { gosiNumber: null },
+          { gosiNumber: '' },
+          { gosi_number: { $exists: false } },
+          { gosi_number: null },
+        ],
+      })
+        .select('fullName name nameAr employeeNumber managerId hireDate hire_date')
+        .limit(500)
+        .lean();
+
+      return employees
+        .filter(emp => {
+          const hire = emp.hireDate || emp.hire_date;
+          // Tolerate the first N days — registration legitimately takes time.
+          return !hire || new Date(hire) < tolerantCutoff;
+        })
+        .map(emp => {
+          const empName = emp.fullName || emp.nameAr || emp.name || emp.employeeNumber || 'موظف';
+          return {
+            ruleId: 'gosi-unregistered',
+            severity: 'high',
+            dedupeKey: `gosi-missing:${emp._id}`,
+            subject: { kind: 'employee', id: String(emp._id), name: empName },
+            message: `${empName} (سعودي) غير مسجل في التأمينات الاجتماعية بعد ${tolerantDays} يوماً من التعيين — مخالفة قانونية.`,
+            recipients: [
+              { kind: 'role', role: 'hr_manager' },
+              { kind: 'role', role: 'admin' },
+            ],
+            actions: [],
+          };
+        });
+    },
+  },
+
+  {
     id: 'grievance-unanswered',
     labelAr: 'تظلم بدون استجابة',
     labelEn: 'Grievance unanswered for too long',

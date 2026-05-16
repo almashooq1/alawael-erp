@@ -54,7 +54,9 @@ function createHrWorkflowRouter({ logger, notifier = null, auditLogger = null, c
     set('LeaveRequest', '../../models/LeaveRequest');
     set('Grievance', '../../models/HR/Grievance');
     set('EmploymentContract', '../../models/HR/EmploymentContract');
+    set('Certification', '../../models/HR/Certification');
     set('SmartAttendance', '../../models/smart-attendance');
+    set('PerformanceEvaluation', '../../models/PerformanceEvaluation');
     set('User', '../../models/user.model');
     return engineModels;
   }

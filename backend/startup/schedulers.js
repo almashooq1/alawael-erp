@@ -171,7 +171,9 @@ function setupSchedulers({ isTestEnv }) {
       tryModel('LeaveRequest', '../models/LeaveRequest');
       tryModel('Grievance', '../models/HR/Grievance');
       tryModel('EmploymentContract', '../models/HR/EmploymentContract');
+      tryModel('Certification', '../models/HR/Certification');
       tryModel('SmartAttendance', '../models/smart-attendance');
+      tryModel('PerformanceEvaluation', '../models/PerformanceEvaluation');
       tryModel('User', '../models/user.model');
 
       let notifier = null;

@@ -23,7 +23,7 @@
     "canvas": "^3.2.3",
     "cors": "^2.8.5",
     "dayjs": "^1.11.13",
-    "dotenv": "^16.0.0",
+    "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "express-rate-limit": "^6.11.2",
     "express-validator": "^7.3.2",

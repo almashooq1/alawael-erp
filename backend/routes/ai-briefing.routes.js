@@ -37,6 +37,10 @@ function createAiBriefingRouter({
   briefing,
   getAlerts = null,
   getKpis = null,
+  // Wave 16 — when supplied, NBA prefers the *assigned-to-me* slice
+  // over the whole branch list. Morning briefing keeps using the
+  // wider getAlerts so the operator still gets the big picture.
+  getOwnedAlerts = null,
   auditLogger = null,
   authenticate = null,
 } = {}) {
@@ -116,6 +120,17 @@ function createAiBriefingRouter({
     }
   });
 
+  async function safeGetOwnedAlerts(req) {
+    if (typeof getOwnedAlerts !== 'function') return null;
+    try {
+      const result = await getOwnedAlerts(req);
+      return Array.isArray(result) ? result : null;
+    } catch (err) {
+      logger.warn('[ai-briefing] getOwnedAlerts failed: ' + (err.message || err));
+      return null;
+    }
+  }
+
   router.get('/next-best-action', async (req, res) => {
     try {
       const role = req.user?.role || req.user?.roleCode || 'unknown';
@@ -123,16 +138,24 @@ function createAiBriefingRouter({
         req.user?.activeBranchId ||
         req.user?.branchId ||
         (req.query && typeof req.query.branchId === 'string' ? req.query.branchId : null);
-      const alerts = await safeGetAlerts(req);
+
+      // Wave 16 — prefer the operator's *owned* alerts when the
+      // resolver is wired. NBA is "what should I do?", not "what's
+      // happening in the org" — assignment scope is the right cut.
+      const owned = await safeGetOwnedAlerts(req);
+      const alerts = owned && owned.length > 0 ? owned : await safeGetAlerts(req);
+      const usedScope = owned && owned.length > 0 ? 'assigned' : 'branch';
+
       const result = await briefing.nextBestActions({ role, branchId, alerts });
       await audit('ai.briefing.next_best_action', req, {
         role,
         branchId: branchId || null,
         alertCount: alerts.length,
+        scope: usedScope,
         source: result.source || null,
         cached: !!result.cached,
       });
-      res.json({ success: true, data: result });
+      res.json({ success: true, data: { ...result, scope: usedScope } });
     } catch (err) {
       safeError(res, err, 'ai-briefing next-best-action');
     }

@@ -48,6 +48,7 @@ function mountApp({
   briefing,
   getAlerts = null,
   getKpis = null,
+  getOwnedAlerts = null,
   auditLogger = null,
   user = { role: 'admin', branchId: 'br-1' },
 }) {
@@ -65,6 +66,7 @@ function mountApp({
       briefing,
       ...(getAlerts ? { getAlerts } : {}),
       ...(getKpis ? { getKpis } : {}),
+      ...(getOwnedAlerts ? { getOwnedAlerts } : {}),
       ...(auditLogger ? { auditLogger } : {}),
       logger: { warn() {} },
     })
@@ -180,6 +182,90 @@ describe('ai-briefing routes — /next-best-action', () => {
     expect(res.status).toBe(200);
     expect(res.body.data.data.actions).toHaveLength(1);
     expect(briefing.nextBestActions).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('ai-briefing routes — Wave 16 NBA scope', () => {
+  test('NBA uses owned alerts when getOwnedAlerts returns rows', async () => {
+    const briefing = makeBriefingStub({
+      nbaResult: {
+        available: true,
+        source: 'rule',
+        data: { actions: [] },
+      },
+    });
+    const getAlerts = jest.fn(async () => [
+      { ruleId: 'r1', severity: 'warning', headlineAr: 'wide' },
+    ]);
+    const getOwnedAlerts = jest.fn(async () => [
+      { ruleId: 'r2', severity: 'critical', headlineAr: 'owned' },
+    ]);
+    const app = mountApp({ briefing, getAlerts, getOwnedAlerts });
+    const res = await request(app).get('/api/v1/ai/briefing/next-best-action');
+    expect(res.status).toBe(200);
+    expect(res.body.data.scope).toBe('assigned');
+    expect(briefing.nextBestActions).toHaveBeenCalledWith(
+      expect.objectContaining({
+        alerts: expect.arrayContaining([expect.objectContaining({ ruleId: 'r2' })]),
+      })
+    );
+    expect(getAlerts).not.toHaveBeenCalled(); // owned path skips wide fallback
+  });
+
+  test('NBA falls back to wide alerts when owned is empty', async () => {
+    const briefing = makeBriefingStub({
+      nbaResult: { available: true, source: 'rule', data: { actions: [] } },
+    });
+    const getAlerts = jest.fn(async () => [
+      { ruleId: 'r-wide', severity: 'warning', headlineAr: 'wide' },
+    ]);
+    const getOwnedAlerts = jest.fn(async () => []);
+    const app = mountApp({ briefing, getAlerts, getOwnedAlerts });
+    const res = await request(app).get('/api/v1/ai/briefing/next-best-action');
+    expect(res.status).toBe(200);
+    expect(res.body.data.scope).toBe('branch');
+    expect(briefing.nextBestActions).toHaveBeenCalledWith(
+      expect.objectContaining({
+        alerts: expect.arrayContaining([expect.objectContaining({ ruleId: 'r-wide' })]),
+      })
+    );
+  });
+
+  test('NBA scope=branch when getOwnedAlerts is not wired', async () => {
+    const briefing = makeBriefingStub({
+      nbaResult: { available: true, source: 'rule', data: { actions: [] } },
+    });
+    const getAlerts = jest.fn(async () => [{ ruleId: 'r-wide', severity: 'warning' }]);
+    const app = mountApp({ briefing, getAlerts }); // no getOwnedAlerts
+    const res = await request(app).get('/api/v1/ai/briefing/next-best-action');
+    expect(res.status).toBe(200);
+    expect(res.body.data.scope).toBe('branch');
+  });
+
+  test('getOwnedAlerts throwing degrades to wide fallback', async () => {
+    const briefing = makeBriefingStub({
+      nbaResult: { available: true, source: 'rule', data: { actions: [] } },
+    });
+    const getAlerts = jest.fn(async () => [{ ruleId: 'r-wide', severity: 'warning' }]);
+    const getOwnedAlerts = jest.fn(async () => {
+      throw new Error('mongo down');
+    });
+    const app = mountApp({ briefing, getAlerts, getOwnedAlerts });
+    const res = await request(app).get('/api/v1/ai/briefing/next-best-action');
+    expect(res.status).toBe(200);
+    expect(res.body.data.scope).toBe('branch');
+  });
+
+  test('audit envelope includes scope metadata', async () => {
+    const briefing = makeBriefingStub();
+    const auditLogger = { log: jest.fn(async () => {}) };
+    const getAlerts = jest.fn(async () => [{ ruleId: 'r', severity: 'warning' }]);
+    const app = mountApp({ briefing, getAlerts, auditLogger });
+    await request(app).get('/api/v1/ai/briefing/next-best-action');
+    expect(auditLogger.log).toHaveBeenCalled();
+    const entry = auditLogger.log.mock.calls[0][0];
+    expect(entry.action).toBe('ai.briefing.next_best_action');
+    expect(entry.metadata.scope).toBe('branch');
   });
 });
 

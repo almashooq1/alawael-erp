@@ -942,6 +942,39 @@ try {
               }
             : null;
 
+          // Wave 16 — owned-alerts callback for Next-Best-Action
+          // scope tightening. Falls back to broader getAlerts() when
+          // the user has no assignments yet (so a freshly-onboarded
+          // operator still gets something useful in their briefing).
+          async function getOwnedAlerts(req) {
+            if (!AlertDocModel) return [];
+            try {
+              const userId = req.user?.id || req.user?._id;
+              if (!userId) return [];
+              const rows = await AlertDocModel.find({
+                resolvedAt: null,
+                'ownership.assignedTo': userId,
+                'escalation.currentTier': { $lt: 3 },
+              })
+                .sort({ severity: -1, firstSeenAt: 1 })
+                .limit(25)
+                .lean();
+              return rows.map(r => ({
+                ruleId: r.ruleId,
+                key: `${r.ruleId}::${r.key || ''}`,
+                severity: r.severity || 'warning',
+                category: r.category || 'operational',
+                headlineAr: r.message || null,
+                headlineEn: r.message || null,
+                firstFiredAt: r.createdAt ? new Date(r.createdAt).getTime() : null,
+                branchId: r.branchId || null,
+              }));
+            } catch (err) {
+              logger.warn('[AiBriefing] getOwnedAlerts query failed: ' + err.message);
+              return [];
+            }
+          }
+
           app.use(
             '/api/v1/ai/briefing',
             authenticate,
@@ -949,6 +982,7 @@ try {
               logger,
               briefing,
               getAlerts,
+              getOwnedAlerts,
               auditLogger: briefingAudit,
             })
           );
@@ -1273,6 +1307,136 @@ try {
   }
 } catch (saErr) {
   logger.warn('[SmartAlerts] bootstrap skipped:', saErr.message);
+}
+
+// ─── Alert & Priority Engine HTTP surface (Wave 15) ───────────────────────────
+// Independent of `ALERTS_ENGINE_ENABLED` — operators can still triage
+// historical / manually-created alerts through these endpoints even
+// when the scheduler is off. The router doesn't trigger any rule
+// evaluation; it only acts on existing Alert documents.
+try {
+  const { createAlertWorkflow } = require('./alerts/workflow.service');
+  const { createAlertsWorkflowRouter } = require('./routes/alerts-workflow.routes');
+  const { createAlertsDashboardRouter } = require('./routes/alerts-dashboard.routes');
+
+  // Reuse the HrCopilot audit logger pattern — same AuditLog target,
+  // distinct action namespace (`alert.*`).
+  let alertAudit = null;
+  try {
+    const AuditLog = require('./models/AuditLog');
+    alertAudit = {
+      async log(entry) {
+        try {
+          await AuditLog.create({
+            eventType: entry.action || 'alert.workflow',
+            eventCategory: 'security',
+            userId: entry.actorUserId || null,
+            severity: 'info',
+            status: 'success',
+            action: entry.action || 'alert.workflow',
+            resource: { type: entry.entityType || 'Alert', id: entry.entityId || null },
+            metadata: entry.metadata || {},
+            ipAddress: entry.ipAddress || null,
+            timestamp: new Date(),
+          });
+        } catch (e) {
+          logger.warn('[alert-workflow audit]', e.message);
+        }
+      },
+    };
+  } catch {
+    /* AuditLog model optional */
+  }
+
+  const workflow = createAlertWorkflow({ auditLogger: alertAudit, logger });
+  // Require the auth middleware inline — `authenticate` is only
+  // in scope inside the bootstrap closures higher up the file, so
+  // outer top-level wiring resolves it through the module directly.
+  const { authenticate: alertsAuthMw } = require('./middleware/auth');
+  app.use('/api/v1/alerts', alertsAuthMw, createAlertsWorkflowRouter({ workflow, logger }));
+  app.use('/api/v1/alerts/dashboard', alertsAuthMw, createAlertsDashboardRouter());
+  logger.info('[AlertEngine] ✓ workflow + dashboard routes mounted at /api/v1/alerts');
+
+  // ── Wave 13 — Escalation scheduler (separate opt-in flag) ───
+  // Off by default. When ALERTS_ESCALATION_ENABLED=true the
+  // coordinator runs every 5 minutes and promotes tier 1→2→3 based
+  // on the rule's declared (or default) thresholds.
+  const escEnabled =
+    String(process.env['ALERTS_ESCALATION_ENABLED'] || '').toLowerCase() === 'true';
+  const isTestEnvEsc = process.env['NODE_ENV'] === 'test';
+  if (escEnabled && !isTestEnvEsc && !app._escalationTimer) {
+    const { createEscalationCoordinator } = require('./alerts/escalation.service');
+    const escalationIntervalMs =
+      Number(process.env['ALERTS_ESCALATION_INTERVAL_MS']) || 5 * 60 * 1000;
+
+    // Wave 16 — bind notifyTier to unifiedNotifier when the
+    // recipient resolver is configured. Otherwise fall back to
+    // the log-only stub from Wave 13. The recipient resolver
+    // lives on `app._resolveAlertRecipients` (set externally by
+    // ops integration code).
+    let notifyTier;
+    const resolveUsersForRole = app._resolveUsersForRole;
+    if (typeof resolveUsersForRole === 'function') {
+      try {
+        const unifiedNotifier = require('./services/unifiedNotifier');
+        const { buildTierNotifier } = require('./alerts/tier-notifier.service');
+        notifyTier = buildTierNotifier({
+          notify: unifiedNotifier.notify,
+          resolveUsersForRole,
+          logger,
+        });
+        logger.info('[AlertEngine] ✓ tier notifier wired to unifiedNotifier');
+      } catch (notifyErr) {
+        logger.warn(
+          '[AlertEngine] tier notifier wiring failed, falling back to log-only: ' +
+            notifyErr.message
+        );
+      }
+    }
+    if (!notifyTier) {
+      // Log-only fallback — keeps the escalation chain visible in
+      // app logs and `alert.state.transitions` even without paging.
+      notifyTier = async ({ tier, roles, alert }) => {
+        logger.info(
+          `[escalation] alert ${alert._id} promoted to tier ${tier}, ` +
+            `roles: ${roles.join(', ')} (notifier not wired — set app._resolveUsersForRole)`
+        );
+      };
+    }
+
+    const escCoord = createEscalationCoordinator({
+      notifyTier,
+      auditLogger: alertAudit,
+      logger,
+    });
+    app._escalationTimer = setInterval(() => {
+      // Fire-and-forget; the coordinator never throws.
+      escCoord
+        .processEscalations()
+        .then(summary => {
+          if (summary.errors.length || summary.promotedTo2 || summary.promotedTo3) {
+            logger.info(
+              `[escalation] tick: checked=${summary.checked}, ` +
+                `promotedTo2=${summary.promotedTo2}, promotedTo3=${summary.promotedTo3}, ` +
+                `errors=${summary.errors.length}`
+            );
+          }
+        })
+        .catch(e => logger.warn(`[escalation] tick crashed: ${e.message}`));
+    }, escalationIntervalMs);
+    // Keep-alive timer must not pin Node when the rest of the app
+    // shuts down (e.g. graceful test exit).
+    if (app._escalationTimer.unref) app._escalationTimer.unref();
+    logger.info(
+      `[AlertEngine] ✓ escalation scheduler started — interval=${escalationIntervalMs}ms`
+    );
+  } else if (!escEnabled) {
+    logger.info(
+      '[AlertEngine] escalation disabled — set ALERTS_ESCALATION_ENABLED=true to activate'
+    );
+  }
+} catch (apiErr) {
+  logger.warn('[AlertEngine] routes skipped:', apiErr.message);
 }
 
 // ─── Therapist Portal ─────────────────────────────────────────────────────────

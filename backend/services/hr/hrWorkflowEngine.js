@@ -786,6 +786,167 @@ const RULES = [
   },
 
   {
+    id: 'leave-balance-low',
+    labelAr: 'رصيد إجازة منخفض',
+    labelEn: 'Leave balance running low',
+    trigger: 'schedule',
+    default: { enabled: true, params: { thresholdDays: 5, leaveType: 'annual' } },
+    requires: ['LeaveBalance', 'Employee'],
+    async evaluate({ models, now, params }) {
+      const { LeaveBalance, Employee } = models;
+      const year = now.getFullYear();
+      const balances = await LeaveBalance.find({
+        leaveType: params.leaveType ?? 'annual',
+        year,
+        remaining: { $lte: params.thresholdDays ?? 5, $gte: 0 },
+      })
+        .select('employeeId remaining entitled used')
+        .limit(300)
+        .lean();
+      if (!balances.length) return [];
+      const empIds = [...new Set(balances.map(b => String(b.employeeId)).filter(Boolean))];
+      const employees = await Employee.find({ _id: { $in: empIds }, status: 'active' })
+        .select('fullName name nameAr employeeNumber managerId')
+        .lean();
+      const empById = new Map(employees.map(e => [String(e._id), e]));
+      return balances
+        .filter(b => empById.has(String(b.employeeId)))
+        .map(b => {
+          const emp = empById.get(String(b.employeeId));
+          const empName = emp.fullName || emp.nameAr || emp.name || emp.employeeNumber || 'موظف';
+          return {
+            ruleId: 'leave-balance-low',
+            severity: b.remaining === 0 ? 'high' : 'medium',
+            dedupeKey: `leave-balance-low:${b.employeeId}:${year}`,
+            subject: { kind: 'employee', id: String(b.employeeId), name: empName },
+            message: `رصيد إجازة ${empName} منخفض: ${b.remaining} يوم متبقي من ${b.entitled}.`,
+            recipients: [{ kind: 'user', id: String(b.employeeId), role: 'employee' }],
+            actions: [],
+          };
+        });
+    },
+  },
+
+  {
+    id: 'payroll-not-run-monthly',
+    labelAr: 'لم يُنفَّذ كشف الرواتب الشهري',
+    labelEn: 'Monthly payroll not executed',
+    trigger: 'schedule',
+    default: { enabled: true, params: { warnDayOfMonth: 25 } },
+    requires: ['PayrollRun'],
+    async evaluate({ models, now, params }) {
+      const { PayrollRun } = models;
+      if (now.getDate() < (params.warnDayOfMonth ?? 25)) return [];
+      const month = now.getMonth() + 1;
+      const year = now.getFullYear();
+      const existing = await PayrollRun.findOne({ month, year, status: { $ne: 'cancelled' } })
+        .select('_id status')
+        .lean()
+        .catch(() => null);
+      if (existing) return [];
+      return [
+        {
+          ruleId: 'payroll-not-run-monthly',
+          severity: 'critical',
+          dedupeKey: `payroll-not-run:${year}-${month}`,
+          subject: { kind: 'payroll_period', id: `${year}-${month}` },
+          message: `كشف رواتب ${month}/${year} لم يُنفَّذ بعد — اليوم ${now.getDate()} من الشهر، الموظفون قد يتأخر صرفهم.`,
+          recipients: [
+            { kind: 'role', role: 'hr_manager' },
+            { kind: 'role', role: 'admin' },
+            { kind: 'role', role: 'finance' },
+          ],
+          actions: [],
+        },
+      ];
+    },
+  },
+
+  {
+    id: 'employee-onboarding-incomplete',
+    labelAr: 'استكمال التعيين متأخر',
+    labelEn: 'Employee onboarding incomplete',
+    trigger: 'schedule',
+    default: { enabled: true, params: { thresholdDays: 14 } },
+    requires: ['Employee'],
+    async evaluate({ models, now, params }) {
+      const { Employee } = models;
+      const cutoff = new Date(now.getTime() - (params.thresholdDays ?? 14) * DAY_MS);
+      const employees = await Employee.find({
+        status: 'active',
+        $or: [{ hireDate: { $lte: cutoff } }, { hire_date: { $lte: cutoff } }],
+        $and: [
+          {
+            $or: [{ onboardingCompleted: { $ne: true } }, { onboarding_completed: { $ne: true } }],
+          },
+        ],
+      })
+        .select('fullName name nameAr employeeNumber managerId hireDate hire_date department')
+        .limit(100)
+        .lean();
+      return employees.map(emp => {
+        const hire = emp.hireDate || emp.hire_date;
+        const daysSince = Math.floor((now.getTime() - new Date(hire).getTime()) / DAY_MS);
+        const empName = emp.fullName || emp.nameAr || emp.name || emp.employeeNumber || 'موظف';
+        return {
+          ruleId: 'employee-onboarding-incomplete',
+          severity: daysSince > 30 ? 'high' : 'medium',
+          dedupeKey: `onboarding:${emp._id}`,
+          subject: { kind: 'employee', id: String(emp._id), name: empName },
+          message: `${empName} (${emp.department ?? '—'}) عيَّن قبل ${daysSince} يوماً ولم يكمل خطوات الاستقبال (مستندات/تدريب/تعيينات).`,
+          recipients: [
+            { kind: 'role', role: 'hr_manager' },
+            { kind: 'user', id: emp.managerId ? String(emp.managerId) : null, role: 'manager' },
+          ].filter(r => r.id || r.role),
+          actions: [],
+        };
+      });
+    },
+  },
+
+  {
+    id: 'high-absence-rate-team',
+    labelAr: 'معدّل غياب مرتفع للفريق',
+    labelEn: 'High team absence rate',
+    trigger: 'schedule',
+    default: { enabled: true, params: { windowDays: 30, thresholdPercent: 10 } },
+    requires: ['Employee'],
+    async evaluate({ models, now, params }) {
+      const SmartAttendance =
+        models.SmartAttendance || safeRequire('../../models/smart-attendance');
+      if (!SmartAttendance) return [];
+      const since = new Date(now.getTime() - (params.windowDays ?? 30) * DAY_MS);
+      const stats = await SmartAttendance.aggregate([
+        { $match: { date: { $gte: since }, isDeleted: { $ne: true } } },
+        {
+          $group: {
+            _id: '$departmentAtTimeOfAttendance',
+            total: { $sum: 1 },
+            absent: { $sum: { $cond: [{ $eq: ['$attendanceStatus', 'absent'] }, 1, 0] } },
+          },
+        },
+        { $match: { total: { $gte: 20 } } },
+      ]).catch(() => []);
+      const threshold = params.thresholdPercent ?? 10;
+      const findings = [];
+      for (const dept of stats) {
+        const rate = (dept.absent / dept.total) * 100;
+        if (rate < threshold) continue;
+        findings.push({
+          ruleId: 'high-absence-rate-team',
+          severity: rate >= threshold * 2 ? 'high' : 'medium',
+          dedupeKey: `absence-rate:${dept._id}:${since.toISOString().slice(0, 10)}`,
+          subject: { kind: 'department', id: String(dept._id ?? 'unknown'), name: dept._id ?? '—' },
+          message: `قسم ${dept._id ?? '—'}: معدّل غياب ${rate.toFixed(1)}% خلال ${params.windowDays ?? 30} يوماً (الحد ${threshold}%).`,
+          recipients: [{ kind: 'role', role: 'hr_manager' }],
+          actions: [],
+        });
+      }
+      return findings;
+    },
+  },
+
+  {
     id: 'grievance-unanswered',
     labelAr: 'تظلم بدون استجابة',
     labelEn: 'Grievance unanswered for too long',

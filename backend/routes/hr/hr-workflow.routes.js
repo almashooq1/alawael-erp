@@ -57,6 +57,8 @@ function createHrWorkflowRouter({ logger, notifier = null, auditLogger = null, c
     set('Certification', '../../models/HR/Certification');
     set('TrainingPlan', '../../models/HR/TrainingPlan');
     set('DisciplinaryAction', '../../models/HR/DisciplinaryAction');
+    set('LeaveBalance', '../../models/LeaveBalance');
+    set('PayrollRun', '../../models/HR/PayrollRun');
     set('SmartAttendance', '../../models/smart-attendance');
     set('PerformanceEvaluation', '../../models/PerformanceEvaluation');
     set('User', '../../models/user.model');

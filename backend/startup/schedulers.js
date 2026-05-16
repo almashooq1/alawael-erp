@@ -174,6 +174,8 @@ function setupSchedulers({ isTestEnv }) {
       tryModel('Certification', '../models/HR/Certification');
       tryModel('TrainingPlan', '../models/HR/TrainingPlan');
       tryModel('DisciplinaryAction', '../models/HR/DisciplinaryAction');
+      tryModel('LeaveBalance', '../models/LeaveBalance');
+      tryModel('PayrollRun', '../models/HR/PayrollRun');
       tryModel('SmartAttendance', '../models/smart-attendance');
       tryModel('PerformanceEvaluation', '../models/PerformanceEvaluation');
       tryModel('User', '../models/user.model');

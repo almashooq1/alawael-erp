@@ -47,6 +47,9 @@ const DEFAULT_OK = {
   '/api/v1/hr/workflow/rules': { status: 401, body: '' }, // admin-only
   '/api/v1/hr/copilot/status': { status: 200, body: '{"data":{"available":false}}' },
   '/api/v1/hr/smart-analytics/dashboard': { status: 401, body: '' }, // auth-gated
+  '/api/v1/hr/workflow/audit': { status: 401, body: '' }, // auth-gated
+  '/api/v1/hr/workflow/config': { status: 401, body: '' }, // auth-gated
+  '/api/v1/hr/workflow/scheduler/status': { status: 401, body: '' }, // auth-gated
 };
 
 // Build a fake fetcher we drive per-test. The runner threads it through
@@ -141,6 +144,10 @@ describe('scripts/post-deploy-smoke', () => {
         'phase30-hr-workflow-rules',
         'phase30-hr-copilot-status',
         'phase30-hr-smart-analytics',
+        // Round 4-5 additions
+        'phase30-hr-workflow-audit',
+        'phase30-hr-workflow-config',
+        'phase30-hr-scheduler-status',
       ];
       for (const name of expectedPhase30Probes) {
         const probe = PROBES.find(p => p.name === name);

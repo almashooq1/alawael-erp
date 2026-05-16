@@ -164,6 +164,138 @@ means a route silently unmounted.
 
 ## Health snapshot
 
-- Backend tests: **19/19 green** (`hr-workflow-engine.test.js` + `hr-copilot-service.test.js`)
+- Backend tests: **26/26 green** (hr-workflow-engine + hr-workflow-scheduler + hr-copilot-service)
 - Web-admin: TS-clean across the full Phase 30 surface
-- Smoke probes: 3 new mount-guard entries
+- Smoke probes: **6 new mount-guard entries** (rules/config/audit/scheduler-status + copilot-status + smart-analytics)
+
+## Rounds 2–5 follow-ups (shipped 2026-05-16)
+
+After the initial Phase 30 launch, five hardening + capability rounds
+landed on top of the original scope. Each round shipped to production
+verified.
+
+### Round 2 — Operations & Activation
+
+- **Cron scheduler wired** (`backend/services/hr/hrWorkflowScheduler.js`)
+  ticks every 2 hours by default (`HR_WORKFLOW_CRON`, opt-out via
+  `HR_WORKFLOW_DISABLED=true`). 7 unit tests cover lifecycle + concurrency
+  suppression + failure paths.
+- **Anthropic SDK installed** (`@anthropic-ai/sdk@0.96.0`) + app.js boot
+  block fixed to handle the SDK's module shape
+  (`mod.Anthropic || mod.default || mod`). Copilot activates the moment
+  an operator adds `ANTHROPIC_API_KEY` to `backend/.env` + `pm2 restart
+--update-env`.
+- **Smart Analytics UI** at `/hr/smart-analytics` surfaces the existing
+  Phase 11 service: turnover risk scoring + compliance dashboard +
+  workforce KPIs + smart recommendations.
+
+### Round 3 — Manager workflow
+
+- **Manager Portal** at `/me/team` — hub page that aggregates pending
+  leave approvals + pending attendance corrections + today's team
+  attendance into one view. Zero new backend; relies on the auth-context
+  scoping that existing endpoints already perform.
+
+### Round 4 — Audit + Editor
+
+- **Audit-write bug fix** — every workflow + copilot audit write had
+  been failing mongoose validation silently. Fixed three audit wrappers
+  (startup/schedulers.js scheduler boot, app.js workflow router boot,
+  app.js copilot router boot) to translate the engine's natural
+  `{action, entityType, ...}` shape into the canonical AuditLog schema
+  (`{eventType, eventCategory, ...}`). Added 5 HR event types +
+  `'hr'` event category to the AuditLog model.
+- **Workflow audit viewer** at `/hr/intelligence/history` —
+  paginated table with filters (kind: workflow|copilot, severity).
+  Surfaces `GET /api/v1/hr/workflow/audit`.
+- **Workflow rule editor** at `/hr/intelligence/rules` — admins can
+  enable/disable rules + edit JSON params + add audit notes from the
+  UI. Backed by new model
+  `models/HR/HrWorkflowRuleConfig` (one doc per ruleId) and three
+  endpoints (`GET /config`, `PATCH /config/:ruleId`, `DELETE
+/config/:ruleId`). Engine is rebuilt in-memory on every override so
+  the next /run uses fresh config — no pm2 restart needed.
+
+### Round 5 — Observability + rule expansion
+
+- **Scheduler heartbeat** — `GET /api/v1/hr/workflow/scheduler/status`
+  returns the cron expression + last-run summary + per-rule details
+  (rulesEvaluated, totalFindings, totalFired, skipped/error breakdown).
+  Surfaces `getLastRunSummary()` from the scheduler instance, stashed
+  in a tiny singleton (`hrSchedulerRegistry`) at boot.
+- **Scheduler widget on `/hr/intelligence`** — shows running badge +
+  cron expression + last-run timestamp + duration + per-rule expandable
+  detail.
+- **3 new built-in rules** (curated set grew 5 → 8):
+  - `performance-review-overdue` — no finalized review in 13+ months
+    (skips employees with < 6 months tenure)
+  - `probation-ending-soon` — probation period ending in ≤ warnDays
+    (defaults: 3 months total, 14-day warning)
+  - `iqama-expiring-soon` — non-Saudi staff iqama expires inside
+    warnDays (default 90); severity escalates: critical ≤ 30d,
+    high ≤ 60d, medium ≤ 90d
+
+## Endpoint reference (full Phase 30 surface)
+
+```
+# Workflow Automation
+GET    /api/v1/hr/workflow/rules                — list rules + readiness
+POST   /api/v1/hr/workflow/run                  — execute every enabled rule
+POST   /api/v1/hr/workflow/dry-run              — evaluate without side effects
+POST   /api/v1/hr/workflow/rules/:id/run        — execute one rule
+GET    /api/v1/hr/workflow/audit                — paginated AuditLog filter
+GET    /api/v1/hr/workflow/scheduler/status     — heartbeat + last-run summary
+GET    /api/v1/hr/workflow/config               — current overrides
+PATCH  /api/v1/hr/workflow/config/:ruleId       — upsert override
+DELETE /api/v1/hr/workflow/config/:ruleId       — revert to defaults
+
+# HR Copilot (LLM)
+GET    /api/v1/hr/copilot/status                — { available, model }
+POST   /api/v1/hr/copilot/summarize/:id         — executive brief
+POST   /api/v1/hr/copilot/draft-letter          — bilingual letter draft
+POST   /api/v1/hr/copilot/q-and-a               — policy Q&A
+POST   /api/v1/hr/copilot/suggest/:id           — coaching plan
+
+# Smart Analytics (existing Phase 11, surfaced)
+GET    /api/v1/hr/smart-analytics/dashboard     — full executive bundle
+GET    /api/v1/hr/smart-analytics/intelligence  — workforce KPIs
+GET    /api/v1/hr/smart-analytics/compliance    — GOSI/SCFHS/iqama/contracts
+GET    /api/v1/hr/smart-analytics/risk-scores   — top turnover risks
+GET    /api/v1/hr/smart-analytics/recommendations — smart actions
+
+# ESS / Manager
+GET    /api/v1/hr/me                            — self-service snapshot
+PATCH  /api/v1/hr/me                            — self-update whitelisted fields
+GET    /api/v1/hr/me/access-log                 — PDPL Art. 18 DSAR
+```
+
+## UI surface (23 pages under /hr/_ + /me/_)
+
+```
+/hr/employees                     — list + new + [id]
+/hr/departments                   — read-only registry
+/hr/attendance                    — daily dashboard
+/hr/attendance/approvals          — pending bulk approval
+/hr/attendance/shifts             — shift CRUD
+/hr/leaves                        — admin queue
+/hr/leaves/balances               — matrix per-employee × type
+/hr/payroll                       — monthly run
+/hr/payroll/[id]                  — payslip detail
+/hr/performance                   — evaluation queue
+/hr/performance/[id]              — criteria + approve
+/hr/performance/succession        — succession plans
+/hr/training                      — courses + sessions + plans
+/hr/contracts                     — contract queue + expiry warnings
+/hr/disciplinary                  — disciplinary actions + resolve
+/hr/grievances                    — grievance queue + respond
+/hr/career                        — promotions + transfers
+/hr/benefits                      — benefits packages
+/hr/smart-analytics               — turnover risk + compliance + recs
+/hr/intelligence                  — workflow runner + KPIs + heartbeat
+/hr/intelligence/history          — audit trail viewer
+/hr/intelligence/rules            — rule editor
+/hr/copilot                       — LLM 3-tab (Q&A / Summarize / Letter)
+
+/me/hr                            — ESS snapshot + check-in/out
+/me/team                          — Manager Portal hub
+```

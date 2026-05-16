@@ -149,6 +149,10 @@ const PROBES = [
   mountedRoute('phase30-hr-workflow-rules', '/api/v1/hr/workflow/rules'),
   mountedRoute('phase30-hr-copilot-status', '/api/v1/hr/copilot/status'),
   mountedRoute('phase30-hr-smart-analytics', '/api/v1/hr/smart-analytics/dashboard'),
+  // Phase 30 Round 4-5 endpoints (audit viewer + rule editor + scheduler heartbeat)
+  mountedRoute('phase30-hr-workflow-audit', '/api/v1/hr/workflow/audit'),
+  mountedRoute('phase30-hr-workflow-config', '/api/v1/hr/workflow/config'),
+  mountedRoute('phase30-hr-scheduler-status', '/api/v1/hr/workflow/scheduler/status'),
 
   // ── Auth-gated diagnostics (non-critical without a token) ────────
   {

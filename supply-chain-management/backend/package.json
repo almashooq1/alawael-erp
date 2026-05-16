@@ -25,7 +25,7 @@
     "dayjs": "^1.11.13",
     "dotenv": "^16.0.0",
     "express": "^5.2.1",
-    "express-rate-limit": "^6.11.2",
+    "express-rate-limit": "^8.5.2",
     "express-validator": "^7.3.2",
     "jsbarcode": "^3.12.3",
     "jsonwebtoken": "^9.0.0",

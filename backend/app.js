@@ -765,6 +765,17 @@ try {
         logger.warn('[HrExtensions] routes skipped:', extErr.message);
       }
 
+      // HR Modules — Round 10 mega-router (onboarding + loans + travel + insurance
+      // + bands + positions + surveys + assets + kudos + policies + shift-swaps
+      // + visas + org-chart + time-off-calendar + WPS export)
+      try {
+        const { createHrModulesRouter } = require('./routes/hr/hr-modules.routes');
+        app.use('/api/v1/hr', authenticate, createHrModulesRouter({ logger }));
+        logger.info('[HrModules] ✓ /api/v1/hr/(onboarding|loans|travel|...|wps) mounted');
+      } catch (modErr) {
+        logger.warn('[HrModules] routes skipped:', modErr.message);
+      }
+
       // HR Workflow Automation Engine — Phase 30 (Intelligent HR Platform)
       try {
         const { createHrWorkflowRouter } = require('./routes/hr/hr-workflow.routes');

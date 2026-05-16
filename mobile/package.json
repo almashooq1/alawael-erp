@@ -52,7 +52,7 @@
     "@types/react-native": "^0.72.0",
     "axios": "^1.16.0",
     "date-fns": "^2.30.0",
-    "expo": "^49.0.0",
+    "expo": "^55.0.24",
     "expo-device": "^5.4.0",
     "expo-font": "^11.4.0",
     "expo-notifications": "^0.20.0",

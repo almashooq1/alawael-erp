@@ -82,9 +82,10 @@ const PROBES = [
     name: 'zatca-phase2-mounted',
     path: '/api/zatca-phase2/status',
     critical: true,
-    // The service returns 200 on mock OR live mode — either is fine here.
-    // What matters is that the route is REGISTERED (i.e. not 404).
-    expect: r => r.status === 200,
+    // The status endpoint now requires auth (added between Phase 2
+    // hardening waves). Accept 200 OR 401 — what we're catching is
+    // 404 (route unmounted) or 5xx (boot failure).
+    expect: r => r.status === 200 || r.status === 401,
   },
 
   // ── Admin routes shipped this session ────────────────────────────
@@ -130,7 +131,13 @@ const PROBES = [
   mountedRoute('phase29-audit-scheduler', '/api/v1/audit-scheduler/reference'),
   mountedRoute('phase29-coq', '/api/v1/coq/reference'),
   mountedRoute('phase29-predictive-risk', '/api/v1/predictive-risk/reference'),
-  mountedRoute('phase29-trend-forecast', '/api/v1/trend-forecast/forecast'),
+  // trend-forecast only exposes POST endpoints + a GET that needs an ID.
+  // Probe the GET-with-bogus-ID path — Express returns 400 (validation
+  // fail) which is mounted-evidence; 404 means the route isn't there.
+  mountedRoute(
+    'phase29-trend-forecast',
+    '/api/v1/trend-forecast/indicators/000000000000000000000000/forecast'
+  ),
   mountedRoute('phase29-quality-narrative', '/api/v1/quality-narrative/kinds'),
   mountedRoute('phase29-inspections', '/api/v1/inspection-submissions'),
   mountedRoute('phase29-benchmarks', '/api/v1/benchmarks'),

@@ -38,7 +38,7 @@ const DEFAULT_OK = {
   '/api/v1/audit-scheduler/reference': { status: 200, body: '{}' },
   '/api/v1/coq/reference': { status: 200, body: '{}' },
   '/api/v1/predictive-risk/reference': { status: 200, body: '{}' },
-  '/api/v1/trend-forecast/forecast': { status: 400, body: '{}' }, // POST-only — 400 on GET is "mounted"
+  '/api/v1/trend-forecast/indicators/000000000000000000000000/forecast': { status: 401, body: '' }, // auth-gated
   '/api/v1/quality-narrative/kinds': { status: 200, body: '[]' },
   '/api/v1/inspection-submissions': { status: 401, body: '' }, // auth-gated
   '/api/v1/benchmarks': { status: 200, body: '[]' },

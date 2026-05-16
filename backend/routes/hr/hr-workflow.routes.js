@@ -31,33 +31,179 @@ function createHrWorkflowRouter({ logger, notifier = null, auditLogger = null, c
   // Lazy DI — models are loaded on first request so a missing model degrades
   // the dependent rule without crashing the router at boot.
   let engine;
-  function getEngine() {
-    if (engine) return engine;
-    const models = {};
-    const tryModel = (key, path) => {
-      try {
-        models[key] = require(path);
-      } catch (err) {
-        logger.warn(`[hr-workflow] model ${key} unavailable: ${err.message}`);
-      }
-    };
-    tryModel('Employee', '../../models/Employee');
-    tryModel('LeaveRequest', '../../models/LeaveRequest');
-    tryModel('Grievance', '../../models/HR/Grievance');
-    tryModel('EmploymentContract', '../../models/HR/EmploymentContract');
-    tryModel('SmartAttendance', '../../models/smart-attendance');
-    tryModel('User', '../../models/user.model');
+  let engineModels = null;
+  let activeConfig = { ...config }; // merged: static config from factory + DB overrides
 
-    engine = createHrWorkflowEngine({ models, notifier, auditLogger, logger, config });
+  function tryLoad(key, path) {
+    try {
+      return require(path);
+    } catch (err) {
+      logger.warn(`[hr-workflow] ${key} unavailable: ${err.message}`);
+      return null;
+    }
+  }
+
+  function loadEngineModels() {
+    if (engineModels) return engineModels;
+    engineModels = {};
+    const set = (k, p) => {
+      const m = tryLoad(k, p);
+      if (m) engineModels[k] = m;
+    };
+    set('Employee', '../../models/Employee');
+    set('LeaveRequest', '../../models/LeaveRequest');
+    set('Grievance', '../../models/HR/Grievance');
+    set('EmploymentContract', '../../models/HR/EmploymentContract');
+    set('SmartAttendance', '../../models/smart-attendance');
+    set('User', '../../models/user.model');
+    return engineModels;
+  }
+
+  function buildEngine() {
+    return createHrWorkflowEngine({
+      models: loadEngineModels(),
+      notifier,
+      auditLogger,
+      logger,
+      config: activeConfig,
+    });
+  }
+
+  function getEngine() {
+    if (!engine) engine = buildEngine();
     return engine;
   }
 
-  router.get('/rules', authorize(ADMIN_ROLES), (_req, res) => {
+  // Re-read DB overrides + rebuild the engine so the next call uses them.
+  // Called from /config PATCH/DELETE; also exposed for tests.
+  async function refreshEngineConfig() {
+    const HrWorkflowRuleConfig = tryLoad(
+      'HrWorkflowRuleConfig',
+      '../../models/HR/HrWorkflowRuleConfig'
+    );
+    if (!HrWorkflowRuleConfig) return; // model not available — keep current
     try {
+      const dbConfig = await HrWorkflowRuleConfig.loadAsConfigMap();
+      activeConfig = { ...config, ...dbConfig };
+      engine = buildEngine();
+    } catch (err) {
+      logger.warn(`[hr-workflow] config refresh failed: ${err.message}`);
+    }
+  }
+
+  // Warm-up on first request — non-blocking on subsequent calls.
+  let warmedUp = false;
+  router.use(async (_req, _res, next) => {
+    if (!warmedUp) {
+      warmedUp = true;
+      refreshEngineConfig().catch(err => logger.warn(`[hr-workflow] warmup: ${err.message}`));
+    }
+    next();
+  });
+
+  router.get('/rules', authorize(ADMIN_ROLES), async (_req, res) => {
+    try {
+      // Refresh DB config before listing so the UI reflects any change
+      // an admin made via /config without waiting for the next cron tick.
+      await refreshEngineConfig();
       const rules = getEngine().listRules();
       res.json({ success: true, data: rules });
     } catch (err) {
       safeError(res, err, 'hr-workflow listRules');
+    }
+  });
+
+  // GET /config — every persisted rule override (sparse — rules without
+  // overrides are absent from the response).
+  router.get('/config', authorize(ADMIN_ROLES), async (_req, res) => {
+    try {
+      const HrWorkflowRuleConfig = tryLoad(
+        'HrWorkflowRuleConfig',
+        '../../models/HR/HrWorkflowRuleConfig'
+      );
+      if (!HrWorkflowRuleConfig) {
+        return res.json({ success: true, data: { configs: {}, available: false } });
+      }
+      const configs = await HrWorkflowRuleConfig.loadAsConfigMap();
+      res.json({ success: true, data: { configs, available: true } });
+    } catch (err) {
+      safeError(res, err, 'hr-workflow getConfig');
+    }
+  });
+
+  // PATCH /config/:ruleId — upsert an override for a single rule.
+  // Body: { enabled?: boolean, params?: object, notes?: string }
+  router.patch('/config/:ruleId', authorize(ADMIN_ROLES), async (req, res) => {
+    try {
+      const HrWorkflowRuleConfig = tryLoad(
+        'HrWorkflowRuleConfig',
+        '../../models/HR/HrWorkflowRuleConfig'
+      );
+      if (!HrWorkflowRuleConfig) {
+        return res
+          .status(503)
+          .json({ success: false, message: 'HrWorkflowRuleConfig model unavailable' });
+      }
+
+      const { ruleId } = req.params;
+      const allowedRuleIds = getEngine()
+        .listRules()
+        .map(r => r.id);
+      if (!allowedRuleIds.includes(ruleId)) {
+        return res.status(404).json({ success: false, message: `unknown rule: ${ruleId}` });
+      }
+
+      const update = {};
+      if (typeof req.body.enabled === 'boolean') update.enabled = req.body.enabled;
+      if (
+        req.body.params &&
+        typeof req.body.params === 'object' &&
+        !Array.isArray(req.body.params)
+      ) {
+        update.params = req.body.params;
+      }
+      if (typeof req.body.notes === 'string') update.notes = req.body.notes.slice(0, 500);
+      update.updatedByUserId = req.user?._id || null;
+      update.updatedByName = req.user?.name || req.user?.email || null;
+
+      if (Object.keys(update).length <= 2) {
+        return res
+          .status(400)
+          .json({ success: false, message: 'nothing to update (expected enabled and/or params)' });
+      }
+
+      const doc = await HrWorkflowRuleConfig.findOneAndUpdate(
+        { ruleId },
+        { $set: update },
+        { upsert: true, new: true, setDefaultsOnInsert: true }
+      ).lean();
+
+      // Bust the engine's in-memory config + refresh.
+      await refreshEngineConfig();
+
+      res.json({ success: true, data: doc });
+    } catch (err) {
+      safeError(res, err, 'hr-workflow setConfig');
+    }
+  });
+
+  // DELETE /config/:ruleId — remove the override (rule reverts to defaults).
+  router.delete('/config/:ruleId', authorize(ADMIN_ROLES), async (req, res) => {
+    try {
+      const HrWorkflowRuleConfig = tryLoad(
+        'HrWorkflowRuleConfig',
+        '../../models/HR/HrWorkflowRuleConfig'
+      );
+      if (!HrWorkflowRuleConfig) {
+        return res
+          .status(503)
+          .json({ success: false, message: 'HrWorkflowRuleConfig model unavailable' });
+      }
+      await HrWorkflowRuleConfig.deleteOne({ ruleId: req.params.ruleId });
+      await refreshEngineConfig();
+      res.json({ success: true, message: 'override cleared — rule reverts to defaults' });
+    } catch (err) {
+      safeError(res, err, 'hr-workflow deleteConfig');
     }
   });
 

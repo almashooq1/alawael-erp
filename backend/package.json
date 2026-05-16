@@ -189,7 +189,7 @@
   "dependencies": {
     "@anthropic-ai/sdk": "0.96.0",
     "@sendgrid/mail": "^8.1.6",
-    "archiver": "7.0.1",
+    "archiver": "8.0.0",
     "axios": "^1.13.2",
     "bcryptjs": "^3.0.3",
     "bwip-js": "4.10.1",

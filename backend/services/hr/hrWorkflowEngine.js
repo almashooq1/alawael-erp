@@ -610,6 +610,182 @@ const RULES = [
   },
 
   {
+    id: 'training-due-soon',
+    labelAr: 'تدريب إلزامي قارب موعد انتهائه',
+    labelEn: 'Mandatory training due soon',
+    trigger: 'schedule',
+    default: { enabled: true, params: { warnDays: 30 } },
+    requires: ['Employee', 'TrainingPlan'],
+    async evaluate({ models, now, params }) {
+      const { Employee, TrainingPlan } = models;
+      const warn = new Date(now.getTime() + (params.warnDays ?? 30) * DAY_MS);
+      const plans = await TrainingPlan.find({
+        isMandatory: true,
+        dueDate: { $exists: true, $ne: null, $lte: warn, $gte: now },
+        status: { $nin: ['completed', 'archived'] },
+      })
+        .select('employeeId dueDate title courseId')
+        .limit(500)
+        .lean();
+      if (!plans.length) return [];
+      const empIds = [...new Set(plans.map(p => String(p.employeeId)).filter(Boolean))];
+      const employees = await Employee.find({ _id: { $in: empIds } })
+        .select('fullName name nameAr employeeNumber managerId')
+        .lean();
+      const empById = new Map(employees.map(e => [String(e._id), e]));
+      return plans.map(p => {
+        const emp = empById.get(String(p.employeeId)) || {};
+        const days = Math.ceil((new Date(p.dueDate).getTime() - now.getTime()) / DAY_MS);
+        const sev = days <= 7 ? 'high' : 'medium';
+        const empName = emp.fullName || emp.nameAr || emp.name || emp.employeeNumber || 'موظف';
+        return {
+          ruleId: 'training-due-soon',
+          severity: sev,
+          dedupeKey: `training-due:${p._id}`,
+          subject: { kind: 'training_plan', id: String(p._id), name: empName },
+          message: `${empName} لم يكمل تدريب ${p.title ?? '—'} المُلزم — متبقي ${days} يوماً.`,
+          recipients: [
+            { kind: 'user', id: String(p.employeeId), role: 'employee' },
+            { kind: 'user', id: emp.managerId ? String(emp.managerId) : null, role: 'manager' },
+          ].filter(r => r.id),
+          actions: [],
+        };
+      });
+    },
+  },
+
+  {
+    id: 'excessive-overtime',
+    labelAr: 'ساعات إضافية مفرطة',
+    labelEn: 'Excessive overtime accumulation',
+    trigger: 'schedule',
+    default: { enabled: true, params: { monthlyHoursThreshold: 40 } },
+    requires: ['Employee'],
+    async evaluate({ models, now, params }) {
+      const SmartAttendance =
+        models.SmartAttendance || safeRequire('../../models/smart-attendance');
+      if (!SmartAttendance) return [];
+      const { Employee } = models;
+      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+      const grouped = await SmartAttendance.aggregate([
+        { $match: { date: { $gte: monthStart }, isDeleted: { $ne: true } } },
+        { $group: { _id: '$employeeId', overtimeMinutes: { $sum: '$overtime.minutes' } } },
+        { $match: { overtimeMinutes: { $gte: (params.monthlyHoursThreshold ?? 40) * 60 } } },
+        { $sort: { overtimeMinutes: -1 } },
+        { $limit: 100 },
+      ]).catch(() => []);
+      if (!grouped.length) return [];
+      const empIds = grouped.map(g => g._id).filter(Boolean);
+      const employees = await Employee.find({ _id: { $in: empIds } })
+        .select('fullName name nameAr employeeNumber managerId')
+        .lean();
+      const empById = new Map(employees.map(e => [String(e._id), e]));
+      return grouped.map(g => {
+        const emp = empById.get(String(g._id)) || {};
+        const hours = Math.round(g.overtimeMinutes / 60);
+        const empName = emp.fullName || emp.nameAr || emp.name || emp.employeeNumber || 'موظف';
+        return {
+          ruleId: 'excessive-overtime',
+          severity: hours >= 80 ? 'high' : 'medium',
+          dedupeKey: `overtime:${g._id}:${monthStart.toISOString().slice(0, 7)}`,
+          subject: { kind: 'employee', id: String(g._id), name: empName },
+          message: `${empName} عمل ${hours} ساعة إضافية في الشهر — مؤشر إنهاك أو سوء توزيع.`,
+          recipients: [
+            { kind: 'user', id: emp.managerId ? String(emp.managerId) : null, role: 'manager' },
+            { kind: 'role', role: 'hr_manager' },
+          ].filter(r => r.id || r.role),
+          actions: [],
+        };
+      });
+    },
+  },
+
+  {
+    id: 'inactive-employee',
+    labelAr: 'موظف بدون نشاط',
+    labelEn: 'Employee inactive for an extended period',
+    trigger: 'schedule',
+    default: { enabled: true, params: { inactiveDays: 30 } },
+    requires: ['Employee'],
+    async evaluate({ models, now, params }) {
+      const SmartAttendance =
+        models.SmartAttendance || safeRequire('../../models/smart-attendance');
+      if (!SmartAttendance) return [];
+      const { Employee } = models;
+      const cutoff = new Date(now.getTime() - (params.inactiveDays ?? 30) * DAY_MS);
+      const actives = await Employee.find({ status: 'active' })
+        .select('fullName name nameAr employeeNumber managerId')
+        .limit(2000)
+        .lean();
+      if (!actives.length) return [];
+      const empIds = actives.map(e => e._id);
+      const recent = await SmartAttendance.aggregate([
+        {
+          $match: { employeeId: { $in: empIds }, date: { $gte: cutoff }, isDeleted: { $ne: true } },
+        },
+        { $group: { _id: '$employeeId', latest: { $max: '$date' } } },
+      ]).catch(() => []);
+      const recentSet = new Set(recent.map(r => String(r._id)));
+      const findings = [];
+      for (const emp of actives) {
+        if (recentSet.has(String(emp._id))) continue;
+        const empName = emp.fullName || emp.nameAr || emp.name || emp.employeeNumber || 'موظف';
+        findings.push({
+          ruleId: 'inactive-employee',
+          severity: 'medium',
+          dedupeKey: `inactive:${emp._id}:${cutoff.toISOString().slice(0, 10)}`,
+          subject: { kind: 'employee', id: String(emp._id), name: empName },
+          message: `${empName} لم يُسجَّل له حضور خلال ${params.inactiveDays ?? 30} يوماً — يحتاج فحص حالة (إجازة طويلة؟ غياب بدون عذر؟).`,
+          recipients: [
+            { kind: 'user', id: emp.managerId ? String(emp.managerId) : null, role: 'manager' },
+            { kind: 'role', role: 'hr_manager' },
+          ].filter(r => r.id || r.role),
+          actions: [],
+        });
+        if (findings.length >= 50) break;
+      }
+      return findings;
+    },
+  },
+
+  {
+    id: 'pending-disciplinary',
+    labelAr: 'إجراء تأديبي معلَّق',
+    labelEn: 'Pending disciplinary action',
+    trigger: 'schedule',
+    default: { enabled: true, params: { thresholdDays: 7 } },
+    requires: ['DisciplinaryAction'],
+    async evaluate({ models, now, params }) {
+      const { DisciplinaryAction } = models;
+      const cutoff = new Date(now.getTime() - (params.thresholdDays ?? 7) * DAY_MS);
+      const open = await DisciplinaryAction.find({
+        status: 'open',
+        actionDate: { $lte: cutoff },
+      })
+        .select('_id employeeId type actionDate reason')
+        .limit(100)
+        .lean();
+      if (!open.length) return [];
+      return open.map(a => {
+        const daysOpen = Math.floor((now.getTime() - new Date(a.actionDate).getTime()) / DAY_MS);
+        const sev = daysOpen > 30 ? 'high' : 'medium';
+        return {
+          ruleId: 'pending-disciplinary',
+          severity: sev,
+          dedupeKey: `disciplinary-open:${a._id}`,
+          subject: { kind: 'disciplinary_action', id: String(a._id), name: a.type ?? 'إجراء' },
+          message: `إجراء تأديبي (${a.type ?? '—'}) معلَّق منذ ${daysOpen} يوماً — يحتاج قراراً.`,
+          recipients: [
+            { kind: 'role', role: 'hr_manager' },
+            { kind: 'role', role: 'admin' },
+          ],
+          actions: [],
+        };
+      });
+    },
+  },
+
+  {
     id: 'grievance-unanswered',
     labelAr: 'تظلم بدون استجابة',
     labelEn: 'Grievance unanswered for too long',

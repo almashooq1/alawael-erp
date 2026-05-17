@@ -1486,6 +1486,57 @@ try {
   logger.warn('[Intelligence] routes skipped:', insightsErr.message);
 }
 
+// ─── Drill-Down Architecture (Wave 21) ────────────────────────────────────────
+// Always-on. Read-mostly endpoints; owner resolution reuses the same
+// _resolveUsersForRole callback the Alert engine uses for tier-notify.
+try {
+  const { createDrilldownService } = require('./intelligence/drilldown.service');
+  const { createDrilldownRouter } = require('./routes/drilldown.routes');
+
+  let drilldownAudit = null;
+  try {
+    const AuditLog = require('./models/AuditLog');
+    drilldownAudit = {
+      async log(entry) {
+        try {
+          await AuditLog.create({
+            eventType: entry.action || 'drilldown.action.invoke',
+            eventCategory: 'security',
+            userId: entry.actorUserId || null,
+            severity: 'info',
+            status: 'success',
+            action: entry.action || 'drilldown.action.invoke',
+            resource: { type: entry.entityType || 'KPI', id: entry.entityId || null },
+            metadata: entry.metadata || {},
+            ipAddress: entry.ipAddress || null,
+            timestamp: new Date(),
+          });
+        } catch (e) {
+          logger.warn('[drilldown audit]', e.message);
+        }
+      },
+    };
+  } catch {
+    /* AuditLog model optional */
+  }
+
+  const drilldownService = createDrilldownService({ logger });
+  const { authenticate: drillAuthMw } = require('./middleware/auth');
+  app.use(
+    '/api/v1/drilldown',
+    drillAuthMw,
+    createDrilldownRouter({
+      drilldown: drilldownService,
+      resolveUsersForRole: app._resolveUsersForRole || null,
+      auditLogger: drilldownAudit,
+      logger,
+    })
+  );
+  logger.info('[Drilldown] ✓ drilldown routes mounted at /api/v1/drilldown');
+} catch (drillErr) {
+  logger.warn('[Drilldown] routes skipped:', drillErr.message);
+}
+
 // ─── Therapist Portal ─────────────────────────────────────────────────────────
 try {
   app.use('/api/v1/therapist', require('./routes/therapist-portal.routes'));

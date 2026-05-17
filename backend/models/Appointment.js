@@ -206,7 +206,7 @@ try {
     labelFrom: doc =>
       doc.appointmentNumber || (doc.date ? new Date(doc.date).toISOString().slice(0, 10) : null),
   });
-} catch (e) {
+} catch (_e) {
   /* loaded before services exist — skip silently */
 }
 

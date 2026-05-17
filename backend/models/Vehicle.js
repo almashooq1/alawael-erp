@@ -483,7 +483,7 @@ try {
     entityType: 'VEH',
     labelFrom: doc => doc.plateNumber || doc.vin || doc.assetCode || null,
   });
-} catch (e) {
+} catch (_e) {
   /* loaded before services exist — skip silently */
 }
 

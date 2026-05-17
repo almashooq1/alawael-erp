@@ -96,5 +96,91 @@ insurancePolicySchema.virtual('daysUntilExpiry').get(function () {
   return Math.max(0, Math.floor(diff / (1000 * 60 * 60 * 24)));
 });
 
-module.exports =
+const InsurancePolicy =
   mongoose.models.InsurancePolicy || mongoose.model('InsurancePolicy', insurancePolicySchema);
+
+// ─── شركات التأمين السعودية المرخصة من مؤسسة النقد (SAMA) ─────────────────
+const SAUDI_INSURANCE_COMPANIES = {
+  TAWUNIYA: { nameAr: 'الشركة التعاونية للتأمين', nameEn: 'Tawuniya', code: 'TAWUNIYA' },
+  BUPA_ARABIA: { nameAr: 'بوبا العربية للتأمين التعاوني', nameEn: 'Bupa Arabia', code: 'BUPA' },
+  WALAA: { nameAr: 'ولاء للتأمين التعاوني', nameEn: 'Walaa Insurance', code: 'WALAA' },
+  MALATH: { nameAr: 'ملاذ للتأمين التعاوني', nameEn: 'Malath Insurance', code: 'MALATH' },
+  GULF_UNION: {
+    nameAr: 'الاتحاد الخليجي للتأمين',
+    nameEn: 'Gulf Union Insurance',
+    code: 'GULF_UNION',
+  },
+  ALRAJHI_TAKAFUL: {
+    nameAr: 'الراجحي للتكافل',
+    nameEn: 'Al Rajhi Takaful',
+    code: 'ALRAJHI_TAKAFUL',
+  },
+  MEDGULF: {
+    nameAr: 'الشركة المتوسطة الخليجية للتأمين',
+    nameEn: 'MedGulf Insurance',
+    code: 'MEDGULF',
+  },
+  ALAHLEIA: {
+    nameAr: 'الأهلية للتأمين التعاوني',
+    nameEn: 'AlAhleia Insurance',
+    code: 'ALAHLEIA',
+  },
+  BURUJ: { nameAr: 'البروج للتأمين التعاوني', nameEn: 'Buruj Insurance', code: 'BURUJ' },
+  CHUBB: { nameAr: 'شركة شب للتأمين التعاوني', nameEn: 'Chubb Saudi Arabia', code: 'CHUBB' },
+  ALLIANZ_SF: {
+    nameAr: 'أليانز السعودية الفرنسية للتأمين',
+    nameEn: 'Allianz SF Insurance',
+    code: 'ALLIANZ_SF',
+  },
+  TRADE_UNION: {
+    nameAr: 'الاتحاد التجاري للتأمين التعاوني',
+    nameEn: 'Trade Union Insurance',
+    code: 'TRADE_UNION',
+  },
+};
+
+// ─── رموز مخالفات التأمين (نجم) ────────────────────────────────────────────
+const INSURANCE_VIOLATION_CODES = [
+  { code: 'V001', nameAr: 'قيادة بدون تأمين', nameEn: 'Driving without insurance', fine: 500 },
+  {
+    code: 'V002',
+    nameAr: 'تأمين منتهي الصلاحية',
+    nameEn: 'Expired insurance policy',
+    fine: 500,
+  },
+  {
+    code: 'V003',
+    nameAr: 'عدم إبلاغ عن حادث',
+    nameEn: 'Failure to report accident',
+    fine: 1000,
+  },
+  {
+    code: 'V004',
+    nameAr: 'تقديم معلومات خاطئة',
+    nameEn: 'Providing false information',
+    fine: 2000,
+  },
+  {
+    code: 'V005',
+    nameAr: 'رفض دفع التعويض المستحق',
+    nameEn: 'Refusing to pay due compensation',
+    fine: 5000,
+  },
+  {
+    code: 'V006',
+    nameAr: 'مخالفة شروط الوثيقة',
+    nameEn: 'Policy terms violation',
+    fine: 1500,
+  },
+  { code: 'V007', nameAr: 'التأمين المزدوج', nameEn: 'Duplicate insurance', fine: 300 },
+  {
+    code: 'V008',
+    nameAr: 'عدم تجديد الوثيقة',
+    nameEn: 'Failure to renew policy',
+    fine: 500,
+  },
+];
+
+module.exports = InsurancePolicy;
+module.exports.SAUDI_INSURANCE_COMPANIES = SAUDI_INSURANCE_COMPANIES;
+module.exports.INSURANCE_VIOLATION_CODES = INSURANCE_VIOLATION_CODES;

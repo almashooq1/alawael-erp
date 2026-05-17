@@ -139,7 +139,7 @@ try {
     entityType: 'INV',
     labelFrom: doc => doc.invoiceNumber || doc.number || null,
   });
-} catch (e) {
+} catch (_e) {
   /* loaded before services exist — skip silently */
 }
 

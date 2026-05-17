@@ -528,7 +528,7 @@ try {
     entityType: 'DOC',
     labelFrom: doc => doc.title || doc.filename || doc.documentNumber || null,
   });
-} catch (e) {
+} catch (_e) {
   /* loaded before services exist — skip silently */
 }
 

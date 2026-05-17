@@ -73,7 +73,7 @@ try {
     entityType: 'ITM',
     labelFrom: doc => doc.name || doc.nameAr || doc.sku || null,
   });
-} catch (e) {
+} catch (_e) {
   /* loaded before services exist — skip silently */
 }
 

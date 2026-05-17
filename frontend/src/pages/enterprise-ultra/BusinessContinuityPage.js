@@ -43,6 +43,7 @@ import {
   PriorityHigh as HighIcon,
 } from '@mui/icons-material';
 import * as bcpService from '../../services/enterpriseUltra.service';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const statusColors = {
   draft: 'default',
@@ -260,7 +261,7 @@ export default function BusinessContinuityPage() {
                         color={new Date(p.nextReviewDate) < new Date() ? 'error' : 'text.secondary'}
                         sx={{ display: 'block', mt: 1 }}
                       >
-                        المراجعة القادمة: {new Date(p.nextReviewDate).toLocaleDateString('ar-SA')}
+                        المراجعة القادمة: {_fmtDate(p.nextReviewDate)}
                       </Typography>
                     )}
                   </CardContent>
@@ -401,7 +402,7 @@ export default function BusinessContinuityPage() {
                         label={c.status?.replace(/_/g, ' ')}
                       />
                     </TableCell>
-                    <TableCell>{new Date(c.detectedAt).toLocaleDateString('ar-SA')}</TableCell>
+                    <TableCell>{_fmtDate(c.detectedAt)}</TableCell>
                     <TableCell>{c.impactedAreas?.length || 0} مناطق</TableCell>
                   </TableRow>
                 ))}
@@ -452,7 +453,7 @@ export default function BusinessContinuityPage() {
                     <TableCell>
                       <Chip size="small" label={d.drillType?.replace(/_/g, ' ')} />
                     </TableCell>
-                    <TableCell>{new Date(d.scheduledDate).toLocaleDateString('ar-SA')}</TableCell>
+                    <TableCell>{_fmtDate(d.scheduledDate)}</TableCell>
                     <TableCell>
                       <Chip
                         size="small"
@@ -518,10 +519,7 @@ export default function BusinessContinuityPage() {
                     <Typography variant="caption">RPO: {d.rpo || '—'}</Typography>
                     <br />
                     <Typography variant="caption">
-                      آخر اختبار:{' '}
-                      {d.lastTestedDate
-                        ? new Date(d.lastTestedDate).toLocaleDateString('ar-SA')
-                        : 'لم يختبر'}
+                      آخر اختبار: {d.lastTestedDate ? _fmtDate(d.lastTestedDate) : 'لم يختبر'}
                     </Typography>
                     <Chip
                       size="small"

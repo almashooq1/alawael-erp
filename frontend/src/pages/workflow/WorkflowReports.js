@@ -55,6 +55,7 @@ import {
 } from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import workflowService from '../../services/workflow.service';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const REPORT_TYPES = [
   {
@@ -347,9 +348,7 @@ export default function WorkflowReports() {
                           '—'
                         )}
                       </TableCell>
-                      <TableCell>
-                        {r.lastRun ? new Date(r.lastRun).toLocaleDateString('ar') : '—'}
-                      </TableCell>
+                      <TableCell>{r.lastRun ? _fmtDate(r.lastRun) : '—'}</TableCell>
                       <TableCell>
                         <Box sx={{ display: 'flex', gap: 0.5 }}>
                           <Tooltip title="تشغيل التقرير">

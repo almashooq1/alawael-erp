@@ -45,7 +45,7 @@ const userManagementService = {
    */
   async getStats() {
     try {
-      const data = await apiClient.get('/user-management/stats');
+      const data = await apiClient.get('/api/v1/user-management/stats');
       return data?.data || data || mockStats;
     } catch (err) {
       logger.warn('User stats API unavailable:', err?.message);
@@ -71,7 +71,7 @@ const userManagementService = {
       if (params.dateFrom) query.set('dateFrom', params.dateFrom);
       if (params.dateTo) query.set('dateTo', params.dateTo);
 
-      const data = await apiClient.get(`/user-management?${query.toString()}`);
+      const data = await apiClient.get(`/api/v1/user-management?${query.toString()}`);
       return {
         users: data?.data || [],
         pagination: data?.pagination || { page: 1, limit: 20, total: 0, pages: 0 },
@@ -87,7 +87,7 @@ const userManagementService = {
    */
   async getRoles() {
     try {
-      const data = await apiClient.get('/user-management/roles');
+      const data = await apiClient.get('/api/v1/user-management/roles');
       return data?.data || mockRoles;
     } catch (err) {
       logger.warn('Roles API unavailable:', err?.message);
@@ -100,7 +100,7 @@ const userManagementService = {
    */
   async getUserById(id) {
     try {
-      const data = await apiClient.get(`/user-management/${id}`);
+      const data = await apiClient.get(`/api/v1/user-management/${id}`);
       return data?.data || data;
     } catch (err) {
       logger.error('Get user detail error:', err?.message);
@@ -112,7 +112,7 @@ const userManagementService = {
    * إنشاء مستخدم
    */
   async createUser(userData) {
-    const data = await apiClient.post('/user-management', userData);
+    const data = await apiClient.post('/api/v1/user-management', userData);
     return data?.data || data;
   },
 
@@ -120,7 +120,7 @@ const userManagementService = {
    * تحديث مستخدم
    */
   async updateUser(id, userData) {
-    const data = await apiClient.put(`/user-management/${id}`, userData);
+    const data = await apiClient.put(`/api/v1/user-management/${id}`, userData);
     return data?.data || data;
   },
 
@@ -128,14 +128,14 @@ const userManagementService = {
    * حذف مستخدم (تعطيل)
    */
   async deleteUser(id) {
-    return apiClient.delete(`/user-management/${id}`);
+    return apiClient.delete(`/api/v1/user-management/${id}`);
   },
 
   /**
    * تبديل حالة المستخدم
    */
   async toggleUserStatus(id) {
-    const data = await apiClient.patch(`/user-management/${id}/toggle-status`);
+    const data = await apiClient.patch(`/api/v1/user-management/${id}/toggle-status`);
     return data?.data || data;
   },
 
@@ -143,7 +143,7 @@ const userManagementService = {
    * إعادة تعيين كلمة المرور
    */
   async resetPassword(id, newPassword = null) {
-    const data = await apiClient.post(`/user-management/${id}/reset-password`, {
+    const data = await apiClient.post(`/api/v1/user-management/${id}/reset-password`, {
       newPassword,
     });
     return data;
@@ -153,14 +153,14 @@ const userManagementService = {
    * فك قفل الحساب
    */
   async unlockUser(id) {
-    return apiClient.post(`/user-management/${id}/unlock`);
+    return apiClient.post(`/api/v1/user-management/${id}/unlock`);
   },
 
   /**
    * تحديث الصلاحيات
    */
   async updatePermissions(id, permissions) {
-    const data = await apiClient.put(`/user-management/${id}/permissions`, permissions);
+    const data = await apiClient.put(`/api/v1/user-management/${id}/permissions`, permissions);
     return data?.data || data;
   },
 
@@ -168,7 +168,7 @@ const userManagementService = {
    * عمليات جماعية
    */
   async bulkAction(action, userIds, extra = {}) {
-    const data = await apiClient.post('/user-management/bulk-action', {
+    const data = await apiClient.post('/api/v1/user-management/bulk-action', {
       action,
       userIds,
       ...extra,
@@ -184,7 +184,9 @@ const userManagementService = {
       const query = new URLSearchParams();
       if (params.page) query.set('page', params.page);
       if (params.limit) query.set('limit', params.limit);
-      const data = await apiClient.get(`/user-management/${id}/activity?${query.toString()}`);
+      const data = await apiClient.get(
+        `/api/v1/user-management/${id}/activity?${query.toString()}`
+      );
       return {
         logs: data?.data || [],
         pagination: data?.pagination || { page: 1, limit: 20, total: 0 },
@@ -203,7 +205,7 @@ const userManagementService = {
       const query = new URLSearchParams();
       if (filters.role) query.set('role', filters.role);
       if (filters.isActive !== undefined) query.set('isActive', filters.isActive);
-      const data = await apiClient.get(`/user-management/export/all?${query.toString()}`);
+      const data = await apiClient.get(`/api/v1/user-management/export/all?${query.toString()}`);
       return data?.data || [];
     } catch (err) {
       logger.error('Export users error:', err?.message);
@@ -215,7 +217,7 @@ const userManagementService = {
    * استيراد مستخدمين
    */
   async importUsers(usersData) {
-    const data = await apiClient.post('/user-management/import', { users: usersData });
+    const data = await apiClient.post('/api/v1/user-management/import', { users: usersData });
     return data;
   },
 
@@ -224,7 +226,7 @@ const userManagementService = {
    */
   async getBranches() {
     try {
-      const data = await apiClient.get('/user-management/branches');
+      const data = await apiClient.get('/api/v1/user-management/branches');
       return data?.data || [];
     } catch (err) {
       logger.warn('Branches API unavailable:', err?.message);
@@ -240,7 +242,9 @@ const userManagementService = {
       const query = new URLSearchParams();
       if (params.page) query.set('page', params.page);
       if (params.limit) query.set('limit', params.limit);
-      const data = await apiClient.get(`/user-management/${id}/login-history?${query.toString()}`);
+      const data = await apiClient.get(
+        `/api/v1/user-management/${id}/login-history?${query.toString()}`
+      );
       return {
         history: data?.data || [],
         pagination: data?.pagination || { page: 1, limit: 20, total: 0 },
@@ -255,7 +259,7 @@ const userManagementService = {
    * إعادة تعيين المصادقة الثنائية
    */
   async resetMfa(id) {
-    const data = await apiClient.patch(`/user-management/${id}/mfa/reset`);
+    const data = await apiClient.patch(`/api/v1/user-management/${id}/mfa/reset`);
     return data;
   },
 
@@ -263,7 +267,7 @@ const userManagementService = {
    * تحديث حالة التحقق (بريد/هاتف)
    */
   async verifyUser(id, { emailVerified, phoneVerified }) {
-    const data = await apiClient.patch(`/user-management/${id}/verify`, {
+    const data = await apiClient.patch(`/api/v1/user-management/${id}/verify`, {
       emailVerified,
       phoneVerified,
     });

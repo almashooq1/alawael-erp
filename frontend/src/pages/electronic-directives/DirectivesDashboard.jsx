@@ -40,6 +40,7 @@ import {
 } from '@mui/icons-material';
 import electronicDirectivesService from '../../services/electronicDirectives.service';
 import { DIRECTIVE_TYPES, DIRECTIVE_PRIORITIES, DIRECTIVE_STATUS } from './constants';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 /* ═══ Stat Card ════════════════════════════════════════════════ */
 function StatCard({ title, value, icon, color, onClick, loading }) {
@@ -284,7 +285,7 @@ export default function DirectivesDashboard() {
                             {d.referenceNumber}
                           </Typography>
                           <Typography variant="caption" color="text.secondary">
-                            • {d.createdAt ? new Date(d.createdAt).toLocaleDateString('ar-SA') : ''}
+                            • {d.createdAt ? _fmtDate(d.createdAt) : ''}
                           </Typography>
                         </Box>
                       }

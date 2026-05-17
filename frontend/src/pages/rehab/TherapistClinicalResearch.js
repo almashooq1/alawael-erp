@@ -45,6 +45,7 @@ import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const FIELDS = [
   { id: 'physical-rehab', label: 'التأهيل البدني', color: '#3b82f6', icon: '🏃' },
@@ -470,7 +471,7 @@ const TherapistClinicalResearch = () => {
                       {r.startDate && (
                         <Chip
                           icon={<DateIcon sx={{ fontSize: '14px !important' }} />}
-                          label={new Date(r.startDate).toLocaleDateString('ar-SA')}
+                          label={_fmtDate(r.startDate)}
                           size="small"
                           variant="outlined"
                           sx={{ fontSize: '0.65rem' }}

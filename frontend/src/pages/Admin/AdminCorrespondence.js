@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import administrationService from '../../services/administration.service';
+import { formatDate as _fmtDateUtil, formatDateTime as _fmtDT } from 'utils/dateUtils';
 import {
   Box,
   Typography,
@@ -579,9 +580,7 @@ export default function AdminCorrespondence() {
                         </TableCell>
                         <TableCell>
                           {item.receivedDate || item.sentDate || item.createdAt
-                            ? new Date(
-                                item.receivedDate || item.sentDate || item.createdAt
-                              ).toLocaleDateString('ar-SA')
+                            ? _fmtDateUtil(item.receivedDate || item.sentDate || item.createdAt)
                             : '—'}
                         </TableCell>
                         <TableCell onClick={e => e.stopPropagation()}>

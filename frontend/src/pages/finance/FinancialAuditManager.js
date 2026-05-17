@@ -37,6 +37,7 @@ import {
   Gavel,
 } from '@mui/icons-material';
 import { surfaceColors, neutralColors, brandColors } from 'theme/palette';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const API = process.env.REACT_APP_API_URL || '/api';
 
@@ -497,7 +498,7 @@ const FinancialAuditManager = () => {
                         <Gavel sx={{ fontSize: 16, color: neutralColors.textSecondary, mr: 0.5 }} />
                         <Typography variant="caption" sx={{ color: neutralColors.textSecondary }}>
                           {eng.auditOpinion.issuedDate
-                            ? new Date(eng.auditOpinion.issuedDate).toLocaleDateString('ar-SA')
+                            ? _fmtDate(eng.auditOpinion.issuedDate)
                             : 'لم يصدر بعد'}
                         </Typography>
                       </Box>

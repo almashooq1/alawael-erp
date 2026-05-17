@@ -37,6 +37,7 @@ import {
   VerifiedUser,
 } from '@mui/icons-material';
 import { surfaceColors, neutralColors, brandColors } from 'theme/palette';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const API = process.env.REACT_APP_API_URL || '/api';
 
@@ -326,7 +327,7 @@ const BankGuarantees = () => {
                         {g.marginPercent ? `${g.marginPercent}%` : '-'}
                       </TableCell>
                       <TableCell sx={{ textAlign: 'right' }}>
-                        {g.expiryDate ? new Date(g.expiryDate).toLocaleDateString('ar-SA') : '-'}
+                        {g.expiryDate ? _fmtDate(g.expiryDate) : '-'}
                         {daysLeft !== null && daysLeft <= 30 && (
                           <Chip
                             label={`${daysLeft} يوم`}

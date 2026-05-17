@@ -41,6 +41,7 @@ import {
   Weekend as WeekendIcon,
   Celebration as HolidayIcon,
 } from '@mui/icons-material';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 import {
   getOvertimeRequests,
   createOvertimeRequest,
@@ -50,22 +51,34 @@ import {
 } from '../../services/hr/employeeAffairsExpandedService';
 
 const OVERTIME_TYPES = [
-  { value: 'عادي', label: 'عادي (×1.5)', multiplier: 1.5, icon: <ClockIcon />, color: '#1976d2' },
   {
-    value: 'يوم راحة',
+    value: 'عمل إضافي عادي',
+    label: 'عادي (×1.5)',
+    multiplier: 1.5,
+    icon: <ClockIcon />,
+    color: '#1976d2',
+  },
+  {
+    value: 'عمل يوم راحة',
     label: 'يوم راحة (×2.0)',
     multiplier: 2.0,
     icon: <WeekendIcon />,
     color: '#ed6c02',
   },
   {
-    value: 'إجازة رسمية',
+    value: 'عمل يوم عطلة رسمية',
     label: 'إجازة رسمية (×2.5)',
     multiplier: 2.5,
     icon: <HolidayIcon />,
     color: '#d32f2f',
   },
-  { value: 'ليلي', label: 'ليلي (×1.75)', multiplier: 1.75, icon: <NightIcon />, color: '#7b1fa2' },
+  {
+    value: 'عمل عمل ليلي',
+    label: 'ليلي (×1.75)',
+    multiplier: 1.75,
+    icon: <NightIcon />,
+    color: '#7b1fa2',
+  },
 ];
 
 const statusColor = {
@@ -324,9 +337,7 @@ export default function OvertimeManagement() {
                           }}
                         />
                       </TableCell>
-                      <TableCell>
-                        {r.date && new Date(r.date).toLocaleDateString('ar-SA')}
-                      </TableCell>
+                      <TableCell>{r.date && _fmtDate(r.date)}</TableCell>
                       <TableCell>
                         <Typography fontWeight="bold">{r.hours} ساعة</Typography>
                       </TableCell>
@@ -495,8 +506,7 @@ export default function OvertimeManagement() {
               </Grid>
               <Grid item xs={6}>
                 <Typography>
-                  <strong>التاريخ:</strong>{' '}
-                  {viewDialog.date && new Date(viewDialog.date).toLocaleDateString('ar-SA')}
+                  <strong>التاريخ:</strong> {viewDialog.date && _fmtDate(viewDialog.date)}
                 </Typography>
               </Grid>
               <Grid item xs={6}>

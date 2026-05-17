@@ -63,6 +63,7 @@ import {
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import ocrDocumentService from '../../services/ocrDocumentService';
+import { formatDate as _fmtDate, formatDateTime as _fmtDT } from 'utils/dateUtils';
 
 /* ── labels ── */
 const statusLabel = {
@@ -706,7 +707,7 @@ export default function DocumentProcessor() {
                             </ListItemIcon>
                             <ListItemText
                               primary={`${c.field}: ${c.oldValue} → ${c.newValue}`}
-                              secondary={`${c.reason || ''} — ${new Date(c.correctedAt).toLocaleDateString('ar-SA')}`}
+                              secondary={`${c.reason || ''} — ${_fmtDate(c.correctedAt)}`}
                             />
                           </ListItem>
                         ))}
@@ -733,7 +734,7 @@ export default function DocumentProcessor() {
                             </ListItemIcon>
                             <ListItemText
                               primary={a.details}
-                              secondary={`${a.action} — ${new Date(a.timestamp).toLocaleString('ar-SA')}`}
+                              secondary={`${a.action} — ${_fmtDT(a.timestamp)}`}
                             />
                           </ListItem>
                         ))}

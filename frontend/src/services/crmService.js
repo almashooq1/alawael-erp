@@ -22,32 +22,32 @@ const safe =
 // ═══════════════════════════════════════════
 export const contactsService = {
   getAll: safe(async (params = {}) => {
-    const r = await apiClient.get('/crm/contacts', { params });
+    const r = await apiClient.get('/api/v1/crm/contacts', { params });
     const d = r.data;
     return Array.isArray(d) ? d : d?.data || d;
   }),
   getById: safe(async id => {
-    const r = await apiClient.get(`/crm/contacts/${id}`);
+    const r = await apiClient.get(`/api/v1/crm/contacts/${id}`);
     return r.data;
   }),
   create: safe(async data => {
-    const r = await apiClient.post('/crm/contacts', data);
+    const r = await apiClient.post('/api/v1/crm/contacts', data);
     return r.data;
   }),
   update: safe(async (id, data) => {
-    const r = await apiClient.put(`/crm/contacts/${id}`, data);
+    const r = await apiClient.put(`/api/v1/crm/contacts/${id}`, data);
     return r.data;
   }),
   remove: safe(async id => {
-    const r = await apiClient.delete(`/crm/contacts/${id}`);
+    const r = await apiClient.delete(`/api/v1/crm/contacts/${id}`);
     return r.data;
   }),
   getStats: safe(async () => {
-    const r = await apiClient.get('/crm/contacts/stats');
+    const r = await apiClient.get('/api/v1/crm/contacts/stats');
     return r.data;
   }),
   addInteraction: safe(async (id, data) => {
-    const r = await apiClient.post(`/crm/contacts/${id}/interactions`, data);
+    const r = await apiClient.post(`/api/v1/crm/contacts/${id}/interactions`, data);
     return r.data;
   }),
 };
@@ -57,36 +57,36 @@ export const contactsService = {
 // ═══════════════════════════════════════════
 export const leadsService = {
   getAll: safe(async (params = {}) => {
-    const r = await apiClient.get('/crm/leads', { params });
+    const r = await apiClient.get('/api/v1/crm/leads', { params });
     const d = r.data;
     return Array.isArray(d) ? d : d?.data || d;
   }),
   getById: safe(async id => {
-    const r = await apiClient.get(`/crm/leads/${id}`);
+    const r = await apiClient.get(`/api/v1/crm/leads/${id}`);
     return r.data;
   }),
   create: safe(async data => {
-    const r = await apiClient.post('/crm/leads', data);
+    const r = await apiClient.post('/api/v1/crm/leads', data);
     return r.data;
   }),
   update: safe(async (id, data) => {
-    const r = await apiClient.put(`/crm/leads/${id}`, data);
+    const r = await apiClient.put(`/api/v1/crm/leads/${id}`, data);
     return r.data;
   }),
   remove: safe(async id => {
-    const r = await apiClient.delete(`/crm/leads/${id}`);
+    const r = await apiClient.delete(`/api/v1/crm/leads/${id}`);
     return r.data;
   }),
   updateStage: safe(async (id, stage) => {
-    const r = await apiClient.patch(`/crm/leads/${id}/stage`, { stage });
+    const r = await apiClient.patch(`/api/v1/crm/leads/${id}/stage`, { stage });
     return r.data;
   }),
   convertToContact: safe(async id => {
-    const r = await apiClient.post(`/crm/leads/${id}/convert`);
+    const r = await apiClient.post(`/api/v1/crm/leads/${id}/convert`);
     return r.data;
   }),
   getPipeline: safe(async () => {
-    const r = await apiClient.get('/crm/leads/pipeline');
+    const r = await apiClient.get('/api/v1/crm/leads/pipeline');
     return r.data;
   }),
 };
@@ -96,32 +96,32 @@ export const leadsService = {
 // ═══════════════════════════════════════════
 export const dealsService = {
   getAll: safe(async (params = {}) => {
-    const r = await apiClient.get('/crm/deals', { params });
+    const r = await apiClient.get('/api/v1/crm/deals', { params });
     const d = r.data;
     return Array.isArray(d) ? d : d?.data || d;
   }),
   getById: safe(async id => {
-    const r = await apiClient.get(`/crm/deals/${id}`);
+    const r = await apiClient.get(`/api/v1/crm/deals/${id}`);
     return r.data;
   }),
   create: safe(async data => {
-    const r = await apiClient.post('/crm/deals', data);
+    const r = await apiClient.post('/api/v1/crm/deals', data);
     return r.data;
   }),
   update: safe(async (id, data) => {
-    const r = await apiClient.put(`/crm/deals/${id}`, data);
+    const r = await apiClient.put(`/api/v1/crm/deals/${id}`, data);
     return r.data;
   }),
   remove: safe(async id => {
-    const r = await apiClient.delete(`/crm/deals/${id}`);
+    const r = await apiClient.delete(`/api/v1/crm/deals/${id}`);
     return r.data;
   }),
   updateStage: safe(async (id, stage) => {
-    const r = await apiClient.patch(`/crm/deals/${id}/stage`, { stage });
+    const r = await apiClient.patch(`/api/v1/crm/deals/${id}/stage`, { stage });
     return r.data;
   }),
   getPipeline: safe(async () => {
-    const r = await apiClient.get('/crm/pipeline');
+    const r = await apiClient.get('/api/v1/crm/pipeline');
     return r.data;
   }),
 };
@@ -131,28 +131,28 @@ export const dealsService = {
 // ═══════════════════════════════════════════
 export const followUpService = {
   getAll: safe(async (params = {}) => {
-    const r = await apiClient.get('/crm/follow-ups', { params });
+    const r = await apiClient.get('/api/v1/crm/follow-ups', { params });
     const d = r.data;
     return Array.isArray(d) ? d : d?.data || d;
   }),
   create: safe(async data => {
-    const r = await apiClient.post('/crm/follow-ups', data);
+    const r = await apiClient.post('/api/v1/crm/follow-ups', data);
     return r.data;
   }),
   update: safe(async (id, data) => {
-    const r = await apiClient.put(`/crm/follow-ups/${id}`, data);
+    const r = await apiClient.put(`/api/v1/crm/follow-ups/${id}`, data);
     return r.data;
   }),
   complete: safe(async (id, notes, result) => {
-    const r = await apiClient.patch(`/crm/follow-ups/${id}/complete`, { notes, result });
+    const r = await apiClient.patch(`/api/v1/crm/follow-ups/${id}/complete`, { notes, result });
     return r.data;
   }),
   getUpcoming: safe(async (days = 7) => {
-    const r = await apiClient.get('/crm/follow-ups/upcoming', { params: { days } });
+    const r = await apiClient.get('/api/v1/crm/follow-ups/upcoming', { params: { days } });
     return r.data;
   }),
   getOverdue: safe(async () => {
-    const r = await apiClient.get('/crm/follow-ups/overdue');
+    const r = await apiClient.get('/api/v1/crm/follow-ups/overdue');
     return r.data;
   }),
 };
@@ -162,7 +162,7 @@ export const followUpService = {
 // ═══════════════════════════════════════════
 export const activitiesService = {
   getAll: safe(async (params = {}) => {
-    const r = await apiClient.get('/crm/activities', { params });
+    const r = await apiClient.get('/api/v1/crm/activities', { params });
     return r.data;
   }),
 };
@@ -172,19 +172,19 @@ export const activitiesService = {
 // ═══════════════════════════════════════════
 export const crmReportsService = {
   getDashboardStats: safe(async () => {
-    const r = await apiClient.get('/crm/reports/dashboard');
+    const r = await apiClient.get('/api/v1/crm/reports/dashboard');
     return r.data;
   }),
   getConversionReport: safe(async (params = {}) => {
-    const r = await apiClient.get('/crm/reports/conversion', { params });
+    const r = await apiClient.get('/api/v1/crm/reports/conversion', { params });
     return r.data;
   }),
   getActivityReport: safe(async (params = {}) => {
-    const r = await apiClient.get('/crm/reports/activity', { params });
+    const r = await apiClient.get('/api/v1/crm/reports/activity', { params });
     return r.data;
   }),
   getRevenueReport: safe(async (params = {}) => {
-    const r = await apiClient.get('/crm/reports/revenue', { params });
+    const r = await apiClient.get('/api/v1/crm/reports/revenue', { params });
     return r.data;
   }),
 };
@@ -194,7 +194,7 @@ export const crmReportsService = {
 // ═══════════════════════════════════════════
 export const seedService = {
   seedDemoData: safe(async () => {
-    const r = await apiClient.post('/crm/seed');
+    const r = await apiClient.post('/api/v1/crm/seed');
     return r.data;
   }),
 };

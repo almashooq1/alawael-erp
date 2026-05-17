@@ -40,6 +40,7 @@ import {
 import RefreshIcon from '@mui/icons-material/Refresh';
 import SendIcon from '@mui/icons-material/Send';
 import api from '../../services/api.client';
+import { formatDateTime as _fmtDT } from 'utils/dateUtils';
 
 const CHANNEL_COLORS = {
   whatsapp: 'success',
@@ -440,7 +441,7 @@ export default function AdminNotifications() {
                   )}
                   {logs.map(r => (
                     <TableRow key={r._id} hover>
-                      <TableCell>{new Date(r.createdAt).toLocaleString('ar-SA')}</TableCell>
+                      <TableCell>{_fmtDT(r.createdAt)}</TableCell>
                       <TableCell>
                         <Chip
                           size="small"

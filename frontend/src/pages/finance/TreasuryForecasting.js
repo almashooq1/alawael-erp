@@ -37,6 +37,7 @@ import {
   ShowChart,
 } from '@mui/icons-material';
 import { surfaceColors, neutralColors, brandColors } from 'theme/palette';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const API = process.env.REACT_APP_API_URL || '/api';
 
@@ -301,7 +302,7 @@ const TreasuryForecasting = () => {
                         />
                       </TableCell>
                       <TableCell sx={{ textAlign: 'right' }}>
-                        {f.periodStart ? new Date(f.periodStart).toLocaleDateString('ar-SA') : '-'}
+                        {f.periodStart ? _fmtDate(f.periodStart) : '-'}
                       </TableCell>
                       <TableCell sx={{ textAlign: 'right' }}>{fmt(f.openingBalance)}</TableCell>
                       <TableCell sx={{ textAlign: 'right', color: '#4CAF50' }}>
@@ -380,9 +381,7 @@ const TreasuryForecasting = () => {
                         {fmt(t.amount)}
                       </TableCell>
                       <TableCell sx={{ textAlign: 'right' }}>
-                        {t.transferDate
-                          ? new Date(t.transferDate).toLocaleDateString('ar-SA')
-                          : '-'}
+                        {t.transferDate ? _fmtDate(t.transferDate) : '-'}
                       </TableCell>
                       <TableCell sx={{ textAlign: 'right' }}>
                         <Chip

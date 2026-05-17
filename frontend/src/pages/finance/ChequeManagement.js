@@ -39,6 +39,7 @@ import {
   FilterList,
 } from '@mui/icons-material';
 import { surfaceColors, neutralColors, brandColors } from 'theme/palette';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const API = process.env.REACT_APP_API_URL || '/api';
 
@@ -319,9 +320,7 @@ const ChequeManagement = () => {
                     <TableCell>{c.payee}</TableCell>
                     <TableCell>
                       <Box>
-                        <Typography variant="body2">
-                          {new Date(c.dueDate).toLocaleDateString('ar-SA')}
-                        </Typography>
+                        <Typography variant="body2">{_fmtDate(c.dueDate)}</Typography>
                         {isOverdue && (
                           <Typography variant="caption" sx={{ color: '#F44336', fontWeight: 600 }}>
                             متأخر!

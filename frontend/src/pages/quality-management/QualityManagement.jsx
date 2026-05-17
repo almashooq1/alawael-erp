@@ -42,6 +42,7 @@ import {
   LocalHospital as LocalHospitalIcon,
 } from '@mui/icons-material';
 import qualityManagementService from '../../services/qualityManagementService';
+import { formatDateTime as _fmtDT } from 'utils/dateUtils';
 
 /* ═══ Helper — severity chip ═══ */
 const severityColor = sev => {
@@ -729,7 +730,7 @@ export default function QualityManagement() {
                             display="block"
                             sx={{ mt: 1, color: 'text.disabled' }}
                           >
-                            {new Date(rpt.generatedAt).toLocaleString('ar-SA')}
+                            {_fmtDT(rpt.generatedAt)}
                           </Typography>
                         </CardContent>
                       </Card>

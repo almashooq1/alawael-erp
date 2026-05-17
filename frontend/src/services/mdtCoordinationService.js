@@ -4,7 +4,7 @@
  */
 import api from './api';
 
-const BASE = '/api/mdt-coordination';
+const BASE = '/api/v1/mdt-coordination';
 
 // ── Meetings ──
 export const meetingsService = {

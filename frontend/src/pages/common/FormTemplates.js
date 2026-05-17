@@ -70,6 +70,7 @@ import {
 } from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import formTemplatesService from '../../services/formTemplatesService';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 /* ═══ Category icon map ═══ */
 const CATEGORY_ICONS = {
@@ -860,9 +861,7 @@ export default function FormTemplates() {
                       </Typography>
                     </TableCell>
                     <TableCell>{sub.templateName || '—'}</TableCell>
-                    <TableCell>
-                      {sub.createdAt ? new Date(sub.createdAt).toLocaleDateString('ar-SA') : '—'}
-                    </TableCell>
+                    <TableCell>{sub.createdAt ? _fmtDate(sub.createdAt) : '—'}</TableCell>
                     <TableCell>
                       <Chip
                         label={formTemplatesService.getStatusLabel(sub.status)}
@@ -1192,7 +1191,7 @@ export default function FormTemplates() {
                       </Typography>
                       <br />
                       <Typography variant="caption" color="text.disabled">
-                        {sub.createdAt ? new Date(sub.createdAt).toLocaleDateString('ar-SA') : ''}
+                        {sub.createdAt ? _fmtDate(sub.createdAt) : ''}
                       </Typography>
                     </Box>
                   </Box>

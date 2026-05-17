@@ -90,6 +90,7 @@ import clinicalAssessmentsService, {
   STATUSES,
 } from '../../services/clinicalAssessments.service';
 import { useSnackbar } from '../../contexts/SnackbarContext';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 // ── Constants ────────────────────────────────────────────────────────────────
 const CHART_COLORS = ['#1976d2', '#4caf50', '#ff9800', '#f44336', '#9c27b0', '#00bcd4'];
@@ -556,7 +557,7 @@ export default function ClinicalAssessmentsPage() {
                               secondary={
                                 <Typography variant="caption" color="text.secondary">
                                   {item.beneficiary?.firstName} {item.beneficiary?.lastName} •{' '}
-                                  {new Date(item.assessmentDate).toLocaleDateString('ar-SA')}
+                                  {_fmtDate(item.assessmentDate)}
                                 </Typography>
                               }
                             />
@@ -752,9 +753,7 @@ export default function ClinicalAssessmentsPage() {
                           </Typography>
                         </TableCell>
                         <TableCell>
-                          <Typography variant="body2">
-                            {new Date(item.assessmentDate).toLocaleDateString('ar-SA')}
-                          </Typography>
+                          <Typography variant="body2">{_fmtDate(item.assessmentDate)}</Typography>
                         </TableCell>
                         <TableCell sx={{ minWidth: 120 }}>
                           <ScoreBar score={item.score} />
@@ -891,14 +890,11 @@ export default function ClinicalAssessmentsPage() {
                 <ResponsiveContainer width="100%" height={280}>
                   <LineChart data={trendData}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis
-                      dataKey="date"
-                      tickFormatter={d => new Date(d).toLocaleDateString('ar-SA')}
-                    />
+                    <XAxis dataKey="date" tickFormatter={d => _fmtDate(d)} />
                     <YAxis domain={[0, 100]} tickFormatter={v => `${v}%`} />
                     <ChartTip
                       formatter={v => [`${v}%`, 'النتيجة']}
-                      labelFormatter={d => new Date(d).toLocaleDateString('ar-SA')}
+                      labelFormatter={d => _fmtDate(d)}
                     />
                     <Line
                       type="monotone"
@@ -1265,9 +1261,7 @@ export default function ClinicalAssessmentsPage() {
                 <Typography variant="caption" color="text.secondary">
                   التاريخ
                 </Typography>
-                <Typography variant="body2">
-                  {new Date(viewItem.assessmentDate).toLocaleDateString('ar-SA')}
-                </Typography>
+                <Typography variant="body2">{_fmtDate(viewItem.assessmentDate)}</Typography>
               </Grid>
               <Grid item xs={6}>
                 <Typography variant="caption" color="text.secondary">

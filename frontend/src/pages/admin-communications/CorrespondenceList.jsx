@@ -52,6 +52,7 @@ import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients } from '../../theme/palette';
 import adminCommunicationsService from '../../services/adminCommunications.service';
 import { CORRESPONDENCE_TYPES, CORRESPONDENCE_STATUS, PRIORITY_LEVELS } from './constants';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 /* ═══ View Modes ═════════════════════════════════════════════════════════ */
 const VIEW_MODES = {
@@ -536,9 +537,7 @@ export default function CorrespondenceList({ viewMode = 'all' }) {
                       </TableCell>
                       <TableCell>
                         <Typography variant="caption" color="text.secondary">
-                          {item.createdAt
-                            ? new Date(item.createdAt).toLocaleDateString('ar-SA')
-                            : '-'}
+                          {item.createdAt ? _fmtDate(item.createdAt) : '-'}
                         </Typography>
                       </TableCell>
                       <TableCell>

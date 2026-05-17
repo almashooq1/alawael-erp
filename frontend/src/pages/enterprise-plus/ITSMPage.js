@@ -48,6 +48,7 @@ import {
 } from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import * as svc from '../../services/enterpriseProPlus.service';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const ASSET_TYPES = {
   laptop: 'حاسب محمول',
@@ -528,11 +529,7 @@ export default function ITSMPage() {
                         }
                       />
                     </TableCell>
-                    <TableCell>
-                      {c.scheduledDate
-                        ? new Date(c.scheduledDate).toLocaleDateString('ar-SA')
-                        : '-'}
-                    </TableCell>
+                    <TableCell>{c.scheduledDate ? _fmtDate(c.scheduledDate) : '-'}</TableCell>
                     <TableCell>
                       <IconButton
                         size="small"

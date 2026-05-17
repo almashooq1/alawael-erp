@@ -44,6 +44,7 @@ import {
   CheckCircle as CheckIcon,
 } from '@mui/icons-material';
 import * as govService from '../../services/enterpriseUltra.service';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const statusColors = {
   scheduled: 'info',
@@ -237,7 +238,7 @@ export default function CorporateGovernancePage() {
                     <TableCell>
                       <Chip size="small" label={m.meetingType?.replace(/_/g, ' ')} />
                     </TableCell>
-                    <TableCell>{new Date(m.scheduledDate).toLocaleDateString('ar-SA')}</TableCell>
+                    <TableCell>{_fmtDate(m.scheduledDate)}</TableCell>
                     <TableCell>
                       <Chip
                         size="small"
@@ -377,9 +378,7 @@ export default function CorporateGovernancePage() {
                         '—'
                       )}
                     </TableCell>
-                    <TableCell>
-                      {r.decisionDate ? new Date(r.decisionDate).toLocaleDateString('ar-SA') : '—'}
-                    </TableCell>
+                    <TableCell>{r.decisionDate ? _fmtDate(r.decisionDate) : '—'}</TableCell>
                   </TableRow>
                 ))}
                 {!resolutions.length && (
@@ -442,7 +441,7 @@ export default function CorporateGovernancePage() {
                         sx={{ display: 'block', mt: 1 }}
                         color={new Date(p.nextReviewDate) < new Date() ? 'error' : 'text.secondary'}
                       >
-                        المراجعة القادمة: {new Date(p.nextReviewDate).toLocaleDateString('ar-SA')}
+                        المراجعة القادمة: {_fmtDate(p.nextReviewDate)}
                       </Typography>
                     )}
                   </CardContent>
@@ -495,11 +494,7 @@ export default function CorporateGovernancePage() {
                         label={r.status?.replace(/_/g, ' ')}
                       />
                     </TableCell>
-                    <TableCell>
-                      {r.submissionDate
-                        ? new Date(r.submissionDate).toLocaleDateString('ar-SA')
-                        : '—'}
-                    </TableCell>
+                    <TableCell>{r.submissionDate ? _fmtDate(r.submissionDate) : '—'}</TableCell>
                   </TableRow>
                 ))}
                 {!reports.length && (

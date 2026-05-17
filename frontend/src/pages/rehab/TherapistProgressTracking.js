@@ -44,6 +44,7 @@ import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { statusColors, neutralColors } from '../../theme/palette';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const DOMAINS = [
   { value: 'motor', label: 'حركي', color: '#3b82f6' },
@@ -313,7 +314,7 @@ const TherapistProgressTracking = () => {
                         />
                         <Typography variant="caption" color="textSecondary">
                           <CalendarIcon sx={{ fontSize: 14, mr: 0.5, verticalAlign: 'middle' }} />
-                          {new Date(record.sessionDate).toLocaleDateString('ar')}
+                          {_fmtDate(record.sessionDate)}
                         </Typography>
                       </Box>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
@@ -398,7 +399,7 @@ const TherapistProgressTracking = () => {
                       {pct.toFixed(0)}%
                     </Typography>
                     <Typography variant="caption" color="textSecondary" sx={{ minWidth: 80 }}>
-                      {new Date(r.sessionDate).toLocaleDateString('ar')}
+                      {_fmtDate(r.sessionDate)}
                     </Typography>
                     <IconButton size="small" color="error" onClick={() => handleDelete(r.id)}>
                       <DeleteIcon fontSize="small" />

@@ -43,6 +43,7 @@ import {
 } from '@mui/icons-material';
 import { gradients } from '../../theme/palette';
 import adminCommunicationsService from '../../services/adminCommunications.service';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 /* ═══ Stat Card Component ══════════════════════════════════════════════════ */
 function StatCard({ title, value, icon, color, gradient, onClick, subtitle, loading }) {
@@ -426,7 +427,7 @@ export default function AdminCommunicationsDashboard() {
                     </ListItemIcon>
                     <ListItemText
                       primary={item.subject || 'مراسلة متأخرة'}
-                      secondary={`الرقم المرجعي: ${item.referenceNumber || '-'} — مستحقة: ${item.dueDate ? new Date(item.dueDate).toLocaleDateString('ar-SA') : '-'}`}
+                      secondary={`الرقم المرجعي: ${item.referenceNumber || '-'} — مستحقة: ${item.dueDate ? _fmtDate(item.dueDate) : '-'}`}
                     />
                     <Chip label="متأخرة" color="error" size="small" />
                   </ListItem>

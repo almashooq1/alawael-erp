@@ -56,6 +56,7 @@ import {
   SignalCellularAlt as QualityIcon,
 } from '@mui/icons-material';
 import { teleRehabAPI } from '../../services/ddd';
+import { formatDate as _fmtDate, formatDateTime as _fmtDT } from 'utils/dateUtils';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 const PLATFORMS = [
@@ -107,8 +108,8 @@ const INITIAL_QUALITY_FORM = {
   notes: '',
 };
 
-const fmtDate = d => (d ? new Date(d).toLocaleString('ar-SA') : '—');
-const _fmtDateShort = d => (d ? new Date(d).toLocaleDateString('ar-SA') : '—');
+const fmtDate = d => (d ? _fmtDT(d) : '—');
+const _fmtDateShort = d => (d ? _fmtDate(d) : '—');
 
 // ── KPI Card ──────────────────────────────────────────────────────────────────
 function KpiCard({ label, value, icon, color, loading: busy }) {

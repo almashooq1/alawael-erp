@@ -31,6 +31,7 @@ import {
   Paper,
 } from '@mui/material';
 import { getActiveAlerts, acknowledgeAlert, snoozeAlert } from '../services/alerts.service';
+import { formatDateTime } from 'utils/dateUtils';
 
 const severityColor = {
   info: 'default',
@@ -206,9 +207,7 @@ export default function AlertsCenter() {
                   <TableCell sx={{ fontFamily: 'monospace', fontSize: 12 }}>{a.ruleId}</TableCell>
                   <TableCell>{a.message}</TableCell>
                   <TableCell>{a.branchId || '—'}</TableCell>
-                  <TableCell>
-                    {a.firstSeenAt ? new Date(a.firstSeenAt).toLocaleString('ar-SA') : '—'}
-                  </TableCell>
+                  <TableCell>{formatDateTime(a.firstSeenAt)}</TableCell>
                   <TableCell align="center">
                     <Stack direction="row" spacing={1} justifyContent="center">
                       <Button size="small" onClick={() => openDialog(a, 'ack')}>

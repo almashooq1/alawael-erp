@@ -49,6 +49,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { gradients } from '../../theme/palette';
 import educationSystemService from '../../services/educationSystem.service';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const { academicYearService } = educationSystemService;
 
@@ -466,9 +467,7 @@ const AcademicYearManagement = () => {
                         تاريخ البداية
                       </Typography>
                       <Typography fontWeight={600}>
-                        {selectedYear.startDate
-                          ? new Date(selectedYear.startDate).toLocaleDateString('ar-SA')
-                          : '—'}
+                        {selectedYear.startDate ? _fmtDate(selectedYear.startDate) : '—'}
                       </Typography>
                     </Grid>
                     <Grid item xs={6} sm={3}>
@@ -476,9 +475,7 @@ const AcademicYearManagement = () => {
                         تاريخ النهاية
                       </Typography>
                       <Typography fontWeight={600}>
-                        {selectedYear.endDate
-                          ? new Date(selectedYear.endDate).toLocaleDateString('ar-SA')
-                          : '—'}
+                        {selectedYear.endDate ? _fmtDate(selectedYear.endDate) : '—'}
                       </Typography>
                     </Grid>
                     <Grid item xs={6} sm={3}>
@@ -537,16 +534,8 @@ const AcademicYearManagement = () => {
                           {selectedYear.semesters.map((sem, idx) => (
                             <TableRow key={idx}>
                               <TableCell>{sem.name}</TableCell>
-                              <TableCell>
-                                {sem.startDate
-                                  ? new Date(sem.startDate).toLocaleDateString('ar-SA')
-                                  : '—'}
-                              </TableCell>
-                              <TableCell>
-                                {sem.endDate
-                                  ? new Date(sem.endDate).toLocaleDateString('ar-SA')
-                                  : '—'}
-                              </TableCell>
+                              <TableCell>{sem.startDate ? _fmtDate(sem.startDate) : '—'}</TableCell>
+                              <TableCell>{sem.endDate ? _fmtDate(sem.endDate) : '—'}</TableCell>
                               <TableCell>
                                 <Chip
                                   size="small"

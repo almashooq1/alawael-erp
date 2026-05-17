@@ -77,6 +77,7 @@ import {
 } from '@mui/icons-material';
 
 import documentAdvancedService from '../../services/documentAdvancedService';
+import { formatDate as _fmtDate, formatDateTime as _fmtDT } from 'utils/dateUtils';
 
 // ── Tab Panel ────────────────────────────────────────────────────────────────
 function TabPanel({ children, value, index, ...props }) {
@@ -700,9 +701,7 @@ function AuditTab({ showMsg }) {
                   <TableCell sx={{ maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {evt.details || '—'}
                   </TableCell>
-                  <TableCell dir="ltr">
-                    {evt.timestamp ? new Date(evt.timestamp).toLocaleString('ar-SA') : '—'}
-                  </TableCell>
+                  <TableCell dir="ltr">{evt.timestamp ? _fmtDT(evt.timestamp) : '—'}</TableCell>
                 </TableRow>
               ))}
               {activity.length === 0 && (
@@ -1003,7 +1002,7 @@ function ApprovalsTab({ showMsg }) {
                     النوع: {wf.type} | المرحلة: {wf.currentStepIndex + 1}/{wf.steps?.length}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
-                    تاريخ الإنشاء: {new Date(wf.createdAt).toLocaleString('ar-SA')}
+                    تاريخ الإنشاء: {_fmtDT(wf.createdAt)}
                   </Typography>
                 </Box>
                 <Box sx={{ display: 'flex', gap: 1 }}>
@@ -1232,7 +1231,7 @@ function ExpiryTab({ showMsg }) {
               </ListItemIcon>
               <ListItemText
                 primary={doc.documentId}
-                secondary={`تنتهي في: ${new Date(doc.expiresAt).toLocaleDateString('ar-SA')} | ${doc.daysRemaining} يوم متبقي`}
+                secondary={`تنتهي في: ${_fmtDate(doc.expiresAt)} | ${doc.daysRemaining} يوم متبقي`}
               />
               <ListItemSecondaryAction>
                 <Button
@@ -1455,14 +1454,11 @@ function TrashTab({ showMsg }) {
                   <Box>
                     <Typography fontWeight="bold">{item.documentId}</Typography>
                     <Typography variant="body2" color="text.secondary">
-                      حُذف بواسطة: {item.deletedByName || '—'} |{' '}
-                      {new Date(item.deletedAt).toLocaleString('ar-SA')}
+                      حُذف بواسطة: {item.deletedByName || '—'} | {_fmtDT(item.deletedAt)}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
                       السبب: {item.reason || 'غير محدد'} | الحذف التلقائي:{' '}
-                      {item.autoPurgeAt
-                        ? new Date(item.autoPurgeAt).toLocaleDateString('ar-SA')
-                        : '—'}
+                      {item.autoPurgeAt ? _fmtDate(item.autoPurgeAt) : '—'}
                     </Typography>
                   </Box>
                 </Box>
@@ -1641,8 +1637,7 @@ function AnnotationsTab({ showMsg }) {
                   </Box>
                   <Typography>{ann.text || ann.content}</Typography>
                   <Typography variant="caption" color="text.secondary">
-                    {ann.userName} —{' '}
-                    {ann.createdAt ? new Date(ann.createdAt).toLocaleString('ar-SA') : ''}
+                    {ann.userName} — {ann.createdAt ? _fmtDT(ann.createdAt) : ''}
                   </Typography>
 
                   {/* Comments */}
@@ -1929,7 +1924,7 @@ function ComparisonTab({ showMsg }) {
             </ListItemIcon>
             <ListItemText
               primary={`${h.documentIdA} ↔ ${h.documentIdB}`}
-              secondary={`التشابه: ${h.similarity}% | ${new Date(h.comparedAt).toLocaleString('ar-SA')}`}
+              secondary={`التشابه: ${h.similarity}% | ${_fmtDT(h.comparedAt)}`}
             />
           </ListItem>
         ))}
@@ -2089,9 +2084,7 @@ function ExportImportTab({ showMsg }) {
                     <Typography variant="caption">{job.progress || 0}%</Typography>
                   </TableCell>
                   <TableCell>{job.documentIds?.length || 0}</TableCell>
-                  <TableCell dir="ltr">
-                    {job.createdAt ? new Date(job.createdAt).toLocaleString('ar-SA') : '—'}
-                  </TableCell>
+                  <TableCell dir="ltr">{job.createdAt ? _fmtDT(job.createdAt) : '—'}</TableCell>
                 </TableRow>
               ))}
               {jobs.length === 0 && (
@@ -2319,7 +2312,7 @@ function QRCodesTab({ showMsg }) {
                   </Box>
                   {qr.expiresAt && (
                     <Typography variant="caption" color="text.secondary">
-                      ينتهي: {new Date(qr.expiresAt).toLocaleDateString('ar-SA')}
+                      ينتهي: {_fmtDate(qr.expiresAt)}
                     </Typography>
                   )}
                   <Box sx={{ mt: 1 }}>

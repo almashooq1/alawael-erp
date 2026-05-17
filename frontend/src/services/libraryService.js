@@ -1,5 +1,5 @@
 import api from './api';
-const BASE = '/library';
+const BASE = '/api/v1/library';
 
 const libraryService = {
   // ── Dashboard & Stats ──

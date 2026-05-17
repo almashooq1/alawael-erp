@@ -47,6 +47,7 @@ import {
   TrendingUp as TrendUpIcon,
 } from '@mui/icons-material';
 import * as cxService from '../../services/enterpriseUltra.service';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const statusColors = {
   draft: 'default',
@@ -355,7 +356,7 @@ export default function CustomerExperiencePage() {
                       <Rating value={f.rating || 0} readOnly size="small" max={5} />
                     </TableCell>
                     <TableCell>{f.category?.replace(/_/g, ' ') || '—'}</TableCell>
-                    <TableCell>{new Date(f.createdAt).toLocaleDateString('ar-SA')}</TableCell>
+                    <TableCell>{_fmtDate(f.createdAt)}</TableCell>
                   </TableRow>
                 ))}
                 {!feedback.length && (

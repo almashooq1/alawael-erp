@@ -45,13 +45,14 @@ import {
   EventRepeat as NextServiceIcon,
 } from '@mui/icons-material';
 import { equipmentLifecycleAPI } from '../../services/ddd';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 /* ── palette ───────────────────────────────────────────── */
 const PRIMARY = '#33691e';
 const BG = '#f9fbe7';
 
 /* ── helpers ───────────────────────────────────────────── */
-const fmt = d => (d ? new Date(d).toLocaleDateString('ar-SA') : '—');
+const fmt = d => (d ? _fmtDate(d) : '—');
 const daysUntil = d => {
   if (!d) return null;
   return Math.ceil((new Date(d) - Date.now()) / 86400000);

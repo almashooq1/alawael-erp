@@ -54,6 +54,7 @@ import {
   Send as SendIcon,
 } from '@mui/icons-material';
 import axios from 'axios';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 // ─── الثوابت ─────────────────────────────────────────────────────────────────
 
@@ -369,7 +370,7 @@ export default function ParentPortalManagement() {
 
   const formatDate = dateStr => {
     if (!dateStr) return '—';
-    return new Date(dateStr).toLocaleDateString('ar-SA', {
+    return _fmtDate(dateStr, {
       year: 'numeric',
       month: 'short',
       day: 'numeric',

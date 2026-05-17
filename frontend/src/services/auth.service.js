@@ -9,14 +9,15 @@ import { getPortal, removePortal } from 'utils/storageService';
 
 const authService = {
   // ==================== المصادقة ====================
-  login: (email, password, portal) => apiClient.post('/auth/login', { email, password, portal }),
+  login: (email, password, portal) =>
+    apiClient.post('/api/v1/auth/login', { email, password, portal }),
 
   logout: async () => {
     // Best-effort: tell backend to blacklist the current token
     try {
       const token = getToken();
       if (token) {
-        await apiClient.post('/auth/logout').catch(_err => {
+        await apiClient.post('/api/v1/auth/logout').catch(_err => {
           // Logout API call failed — continuing with local cleanup
         });
       }
@@ -28,24 +29,24 @@ const authService = {
     return Promise.resolve();
   },
 
-  register: userData => apiClient.post('/auth/register', userData),
+  register: userData => apiClient.post('/api/v1/auth/register', userData),
 
   // ==================== التحقق ====================
-  verifyEmail: token => apiClient.post('/auth/verify-email', { token }),
+  verifyEmail: token => apiClient.post('/api/v1/auth/verify-email', { token }),
 
-  resendVerificationEmail: email => apiClient.post('/auth/resend-verification', { email }),
+  resendVerificationEmail: email => apiClient.post('/api/v1/auth/resend-verification', { email }),
 
-  sendPasswordResetEmail: email => apiClient.post('/auth/forgot-password', { email }),
+  sendPasswordResetEmail: email => apiClient.post('/api/v1/auth/forgot-password', { email }),
 
   resetPassword: (token, newPassword) =>
-    apiClient.post('/auth/reset-password', { token, newPassword }),
+    apiClient.post('/api/v1/auth/reset-password', { token, newPassword }),
 
   // ==================== التحقق الثنائي ====================
-  enableTwoFactor: () => apiClient.post('/auth/2fa/enable'),
+  enableTwoFactor: () => apiClient.post('/api/v1/auth/2fa/enable'),
 
-  disableTwoFactor: password => apiClient.post('/auth/2fa/disable', { password }),
+  disableTwoFactor: password => apiClient.post('/api/v1/auth/2fa/disable', { password }),
 
-  verifyTwoFactor: code => apiClient.post('/auth/2fa/verify', { code }),
+  verifyTwoFactor: code => apiClient.post('/api/v1/auth/2fa/verify', { code }),
 
   // ==================== الجلسة ====================
   getCurrentUser: () => {
@@ -59,18 +60,18 @@ const authService = {
   getPortal: () => getPortal(),
 
   // ==================== تحديث البيانات ====================
-  refreshToken: () => apiClient.post('/auth/refresh'),
+  refreshToken: () => apiClient.post('/api/v1/auth/refresh'),
 
   // ==================== الأمان ====================
-  getSecuritySettings: () => apiClient.get('/account/security'),
+  getSecuritySettings: () => apiClient.get('/api/v1/account/security'),
 
-  updateSecuritySettings: settings => apiClient.put('/account/security', settings),
+  updateSecuritySettings: settings => apiClient.put('/api/v1/account/security', settings),
 
-  getSessions: () => apiClient.get('/account/sessions'),
+  getSessions: () => apiClient.get('/api/v1/account/sessions'),
 
-  logoutSession: sessionId => apiClient.delete(`/account/sessions/${sessionId}`),
+  logoutSession: sessionId => apiClient.delete(`/api/v1/account/sessions/${sessionId}`),
 
-  logoutAllOtherSessions: () => apiClient.post('/account/sessions/logout-all'),
+  logoutAllOtherSessions: () => apiClient.post('/api/v1/account/sessions/logout-all'),
 };
 
 export default authService;

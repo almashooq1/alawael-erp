@@ -55,6 +55,7 @@ import {
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import apiClient from '../../services/api.client';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 // ── constants ─────────────────────────────────────────────────────
 
@@ -125,7 +126,7 @@ function pillarScore2Color(s) {
 function fmtDate(v) {
   if (!v) return '—';
   try {
-    return new Date(v).toLocaleDateString('ar-SA', {
+    return _fmtDate(v, {
       year: 'numeric',
       month: 'short',
       day: 'numeric',

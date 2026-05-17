@@ -44,6 +44,7 @@ import {
   overviewApi,
 } from '../../services/documentProPhase5Service';
 import logger from '../../utils/logger';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 function TabPanel({ children, value, index }) {
   return value === index ? <Box py={2}>{children}</Box> : null;
@@ -453,7 +454,7 @@ function CalendarTab() {
                   <ListItem key={d._id}>
                     <ListItemText
                       primary={d.titleAr || d.title}
-                      secondary={new Date(d.startDate).toLocaleDateString('ar-SA')}
+                      secondary={_fmtDate(d.startDate)}
                     />
                     <Chip
                       label={d.priority}
@@ -486,7 +487,7 @@ function CalendarTab() {
                     </ListItemAvatar>
                     <ListItemText
                       primary={o.titleAr || o.title}
-                      secondary={`كان مستحقاً في ${new Date(o.startDate).toLocaleDateString('ar-SA')}`}
+                      secondary={`كان مستحقاً في ${_fmtDate(o.startDate)}`}
                     />
                   </ListItem>
                 ))}

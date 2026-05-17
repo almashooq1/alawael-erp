@@ -55,6 +55,7 @@ import { ChartTooltip } from '../../components/dashboard/shared/ChartTooltip';
 import EmptyState from '../../components/dashboard/shared/EmptyState';
 import DashboardErrorBoundary from '../../components/dashboard/shared/DashboardErrorBoundary';
 import logger from '../../utils/logger';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const useCounter = (end, dur = 1000) => {
   const [v, setV] = useState(0);
@@ -626,7 +627,7 @@ export default function PerformanceDashboard() {
                         </TableCell>
                         <TableCell>
                           <Typography variant="body2" sx={{ fontSize: 12 }}>
-                            {r.date ? new Date(r.date).toLocaleDateString('ar') : '-'}
+                            {r.date ? _fmtDate(r.date) : '-'}
                           </Typography>
                         </TableCell>
                         <TableCell>

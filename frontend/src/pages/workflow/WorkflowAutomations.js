@@ -61,6 +61,7 @@ import {
 } from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import workflowService from '../../services/workflow.service';
+import { formatDateTime as _fmtDT } from 'utils/dateUtils';
 
 const EVENT_LABELS = {
   task_created: 'إنشاء مهمة',
@@ -535,9 +536,7 @@ export default function WorkflowAutomations() {
                       />
                     </TableCell>
                     <TableCell>{ACTION_LABELS[log.actionType] || log.actionType || '—'}</TableCell>
-                    <TableCell>
-                      {log.executedAt ? new Date(log.executedAt).toLocaleString('ar-SA') : '—'}
-                    </TableCell>
+                    <TableCell>{log.executedAt ? _fmtDT(log.executedAt) : '—'}</TableCell>
                     <TableCell>{log.duration ? `${log.duration}ms` : '—'}</TableCell>
                   </TableRow>
                 ))

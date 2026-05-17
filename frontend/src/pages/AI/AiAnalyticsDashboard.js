@@ -3,6 +3,7 @@
  * البرومبت 20: AI & Predictive Analytics Module
  */
 import React, { useState, useEffect, useCallback } from 'react';
+import { formatDate as _formatDate } from 'utils/dateUtils';
 import {
   Box,
   Grid,
@@ -79,10 +80,7 @@ const alertIcon = type =>
     pattern_detected: '🔍',
   })[type] || '⚠️';
 
-const fmt = v =>
-  v
-    ? new Date(v).toLocaleDateString('ar-SA', { year: 'numeric', month: 'short', day: 'numeric' })
-    : '—';
+const fmt = v => (v ? _formatDate(v, { year: 'numeric', month: 'short', day: 'numeric' }) : '—');
 const fmtCur = v => (v ? `${Number(v).toLocaleString('ar-SA')} ر.س` : '0 ر.س');
 const fmtPct = v => (v !== null && v !== undefined ? `${Math.round(v * 100)}%` : 'N/A');
 const progressColor = v => (v >= 0.7 ? 'success' : v >= 0.4 ? 'warning' : 'error');

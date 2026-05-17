@@ -55,6 +55,7 @@ import DateRangeIcon from '@mui/icons-material/DateRange';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import api from '../../services/api.client';
 import BeneficiaryTypeahead from '../../components/BeneficiaryTypeahead';
+import { formatDate as _fmtDate, formatDateTime as _fmtDT } from 'utils/dateUtils';
 
 const STATUS_OPTIONS = [
   { value: '', label: 'كل الحالات' },
@@ -99,7 +100,7 @@ const EMPTY = {
 function formatDate(v) {
   if (!v) return '—';
   try {
-    return new Date(v).toLocaleDateString('ar-SA');
+    return _fmtDate(v);
   } catch {
     return '—';
   }
@@ -649,7 +650,7 @@ export default function AdminTherapySessions() {
                 <Paper key={day} sx={{ overflow: 'hidden' }}>
                   <Box sx={{ bgcolor: 'primary.main', color: 'white', px: 2, py: 1 }}>
                     <Typography fontWeight="bold">
-                      {new Date(day).toLocaleDateString('ar-SA', {
+                      {_fmtDate(day, {
                         weekday: 'long',
                         day: 'numeric',
                         month: 'long',
@@ -972,8 +973,7 @@ export default function AdminTherapySessions() {
                   {detailSession.statusHistory.map((h, i) => (
                     <Typography key={i} variant="body2">
                       {STATUS_LABELS[h.from] || h.from || '—'} → {STATUS_LABELS[h.to] || h.to}
-                      {h.reason ? ` · ${h.reason}` : ''} ·{' '}
-                      {h.changedAt ? new Date(h.changedAt).toLocaleString('ar-SA') : ''}
+                      {h.reason ? ` · ${h.reason}` : ''} · {h.changedAt ? _fmtDT(h.changedAt) : ''}
                     </Typography>
                   ))}
                 </Grid>

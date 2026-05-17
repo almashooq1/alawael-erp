@@ -36,6 +36,7 @@ import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients, statusColors, neutralColors, surfaceColors } from '../../theme/palette';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const TherapistAssessments = () => {
   const { currentUser } = useAuth();
@@ -317,7 +318,7 @@ const TherapistAssessments = () => {
                           size="small"
                         />
                       </TableCell>
-                      <TableCell>{new Date(a.createdAt).toLocaleDateString('ar')}</TableCell>
+                      <TableCell>{_fmtDate(a.createdAt)}</TableCell>
                       <TableCell>
                         <Tooltip title="حذف">
                           <IconButton

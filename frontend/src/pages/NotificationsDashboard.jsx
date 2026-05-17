@@ -21,6 +21,7 @@ import {
 import { useTheme } from '@mui/material/styles';
 import { motion, AnimatePresence } from 'framer-motion';
 import apiClient from '../services/api';
+import { formatDateTime as _fmtDT } from 'utils/dateUtils';
 
 /* ─── Glass ─── */
 const Glass = memo(({ children, sx, ...rest }) => {
@@ -672,7 +673,7 @@ export default function NotificationsDashboard() {
               type: n.type || 'معلومة',
               icon: '🔔',
               source: n.source || n.module || 'النظام',
-              time: n.createdAt ? new Date(n.createdAt).toLocaleString('ar-SA') : '',
+              time: n.createdAt ? _fmtDT(n.createdAt) : '',
               read: n.isRead ?? n.read ?? false,
               priority: n.priority || 'عادي',
             }))

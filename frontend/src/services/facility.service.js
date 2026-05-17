@@ -4,7 +4,7 @@
  */
 import api from './api.client';
 
-const BASE = '/facilities';
+const BASE = '/api/v1/facilities';
 
 const facilityService = {
   getRooms: params => api.get(`${BASE}/rooms`, { params }),

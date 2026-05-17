@@ -23,6 +23,7 @@ import {
   Alert as MuiAlert,
 } from '@mui/material';
 import { getExecutiveSnapshot } from '../services/dashboard.service';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const categoryLabels = {
   clinical: 'إكلينيكي',
@@ -128,8 +129,7 @@ export default function ExecutiveSnapshot() {
       {!loading && data && (
         <>
           <Typography variant="caption" color="text.secondary" display="block" mb={2}>
-            الفترة: {new Date(data.period.from).toLocaleDateString('ar-SA')} —{' '}
-            {new Date(data.period.to).toLocaleDateString('ar-SA')}
+            الفترة: {_fmtDate(data.period.from)} — {_fmtDate(data.period.to)}
           </Typography>
 
           {categories.map(cat => (

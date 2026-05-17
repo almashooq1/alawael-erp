@@ -24,6 +24,7 @@ import {
   alpha,
 } from '@mui/material';
 import { Refresh, CheckCircle } from '@mui/icons-material';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 import {
   getTransactions,
   approveTransaction,
@@ -219,9 +220,7 @@ export default function WarehouseTransactions() {
                       color={STATUS_COLOR[tx.status] || 'default'}
                     />
                   </TableCell>
-                  <TableCell>
-                    {tx.createdAt ? new Date(tx.createdAt).toLocaleDateString('ar-SA') : '—'}
-                  </TableCell>
+                  <TableCell>{tx.createdAt ? _fmtDate(tx.createdAt) : '—'}</TableCell>
                   <TableCell align="center">
                     {tx.status === 'pending' && (
                       <Tooltip title="اعتماد">

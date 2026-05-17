@@ -46,6 +46,7 @@ import { gradients } from 'theme/palette';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import api from 'services/api';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const typeConfig = {
   رياضي: {
@@ -258,7 +259,7 @@ const StudentEvents = () => {
   };
 
   const formatDate = d =>
-    new Date(d).toLocaleDateString('ar-SA', {
+    _fmtDate(d, {
       weekday: 'long',
       year: 'numeric',
       month: 'long',

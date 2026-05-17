@@ -33,6 +33,7 @@ import {
   Visibility as ViewIcon,
   ThumbUp as ApproveIcon,
 } from '@mui/icons-material';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 import {
   getDisciplinaryActions,
   createDisciplinaryAction,
@@ -292,7 +293,7 @@ export default function DisciplinaryActionsManagement() {
                         size="small"
                       />
                     </TableCell>
-                    <TableCell>{new Date(a.createdAt).toLocaleDateString('ar-SA')}</TableCell>
+                    <TableCell>{_fmtDate(a.createdAt)}</TableCell>
                     <TableCell>
                       <Tooltip title="عرض">
                         <IconButton size="small" onClick={() => handleView(a._id)}>
@@ -454,8 +455,7 @@ export default function DisciplinaryActionsManagement() {
               <Grid item xs={6}>
                 <Typography>
                   <strong>تاريخ المخالفة:</strong>{' '}
-                  {viewDialog.violation?.date &&
-                    new Date(viewDialog.violation.date).toLocaleDateString('ar-SA')}
+                  {viewDialog.violation?.date && _fmtDate(viewDialog.violation.date)}
                 </Typography>
               </Grid>
               <Grid item xs={12}>

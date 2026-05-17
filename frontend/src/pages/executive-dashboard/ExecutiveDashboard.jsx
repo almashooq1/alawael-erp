@@ -44,6 +44,7 @@ import {
   Psychology as AIIcon,
 } from '@mui/icons-material';
 import { dashboardsAPI } from '../../services/ddd';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 /* ── Severity colors ── */
 const SEVERITY_COLORS = {
@@ -167,7 +168,7 @@ function AlertItem({ alert }) {
       </ListItemIcon>
       <ListItemText
         primary={alert.titleAr || alert.title}
-        secondary={`${alert.category} · ${new Date(alert.createdAt).toLocaleDateString('ar-SA')}`}
+        secondary={`${alert.category} · ${_fmtDate(alert.createdAt)}`}
         primaryTypographyProps={{ variant: 'body2', noWrap: true }}
         secondaryTypographyProps={{ variant: 'caption' }}
       />

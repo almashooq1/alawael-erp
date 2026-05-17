@@ -49,13 +49,14 @@ import {
   BarChart as ChartIcon,
 } from '@mui/icons-material';
 import { mentorshipProgramAPI, careerPathwayAPI } from '../../services/ddd';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 /* ── palette ───────────────────────────────────────────── */
 const PRIMARY = '#1a237e';
 const BG = '#e8eaf6';
 
 /* ── helpers ───────────────────────────────────────────── */
-const fmt = d => (d ? new Date(d).toLocaleDateString('ar-SA') : '—');
+const fmt = d => (d ? _fmtDate(d) : '—');
 const STATUS_MAP = {
   active: { label: 'نشط', color: 'success' },
   inactive: { label: 'غير نشط', color: 'default' },

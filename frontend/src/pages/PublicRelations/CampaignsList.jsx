@@ -30,6 +30,7 @@ import {
   alpha,
 } from '@mui/material';
 import { Refresh, Add, Edit, Campaign } from '@mui/icons-material';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 import {
   getCampaigns,
   createCampaign,
@@ -225,9 +226,7 @@ export default function CampaignsList() {
                       color={STATUS_COLORS[c.status] || 'default'}
                     />
                   </TableCell>
-                  <TableCell>
-                    {c.createdAt ? new Date(c.createdAt).toLocaleDateString('ar-SA') : '—'}
-                  </TableCell>
+                  <TableCell>{c.createdAt ? _fmtDate(c.createdAt) : '—'}</TableCell>
                   <TableCell align="center">
                     <Tooltip title="تعديل">
                       <IconButton size="small" color="primary" onClick={() => openEdit(c)}>

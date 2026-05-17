@@ -45,6 +45,7 @@ import {
 } from '@mui/icons-material';
 import { useParams, useNavigate } from 'react-router-dom';
 import libraryService from '../../services/libraryService';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const TYPE_LABELS = {
   book: 'كتاب',
@@ -380,7 +381,7 @@ export default function LibraryDetail() {
                   <Typography fontWeight="bold">{rv.userName}</Typography>
                   <Rating value={rv.rating} readOnly size="small" />
                   <Typography variant="caption" color="text.secondary">
-                    {new Date(rv.createdAt).toLocaleDateString('ar-SA')}
+                    {_fmtDate(rv.createdAt)}
                   </Typography>
                 </Box>
                 {rv.comment && (
@@ -421,7 +422,7 @@ export default function LibraryDetail() {
                       <TableCell>{m.description}</TableCell>
                       <TableCell>{m.cost > 0 ? `${m.cost} ر.س` : '—'}</TableCell>
                       <TableCell>{m.performedBy || '—'}</TableCell>
-                      <TableCell>{new Date(m.performedAt).toLocaleDateString('ar-SA')}</TableCell>
+                      <TableCell>{_fmtDate(m.performedAt)}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

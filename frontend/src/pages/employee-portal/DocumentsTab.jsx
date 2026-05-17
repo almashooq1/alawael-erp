@@ -21,6 +21,7 @@ import {
 } from '@mui/icons-material';
 import { statusColors } from '../../theme/palette';
 import documentService from 'services/documentService';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 export default function DocumentsTab({ documents, loading }) {
   const handleDownload = async doc => {
@@ -84,8 +85,7 @@ export default function DocumentsTab({ documents, loading }) {
                       {doc.name || doc.title}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
-                      {doc.uploadDate ||
-                        (doc.createdAt && new Date(doc.createdAt).toLocaleDateString('ar-SA'))}
+                      {doc.uploadDate || (doc.createdAt && _fmtDate(doc.createdAt))}
                       {doc.size
                         ? ` • ${doc.size}`
                         : doc.fileSize

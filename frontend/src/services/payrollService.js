@@ -275,15 +275,16 @@ const MOCK_EOS = [
 const payrollService = {
   /* Monthly payroll list */
   getMonthlyPayroll: (month, year) =>
-    safe(() => apiClient.get(`/payroll/monthly/${month}/${year}`), MOCK_EMPLOYEES_PAYROLL),
+    safe(() => apiClient.get(`/api/v1/payroll/monthly/${month}/${year}`), MOCK_EMPLOYEES_PAYROLL),
 
   /* Single payroll / salary slip */
-  getSalarySlip: payrollId => safe(() => apiClient.get(`/payroll/${payrollId}`), MOCK_SALARY_SLIP),
+  getSalarySlip: payrollId =>
+    safe(() => apiClient.get(`/api/v1/payroll/${payrollId}`), MOCK_SALARY_SLIP),
 
   /* Employee annual history */
   getEmployeePayrollHistory: (employeeId, year) =>
     safe(
-      () => apiClient.get(`/payroll/employee/${employeeId}/year/${year}`),
+      () => apiClient.get(`/api/v1/payroll/employee/${employeeId}/year/${year}`),
       Array.from({ length: 12 }, (_, i) => ({
         ...MOCK_SALARY_SLIP,
         month: `${year}-${String(i + 1).padStart(2, '0')}`,
@@ -296,7 +297,7 @@ const payrollService = {
 
   /* Create single payroll */
   createPayroll: data =>
-    safe(() => apiClient.post('/payroll/create', data), {
+    safe(() => apiClient.post('/api/v1/payroll/create', data), {
       ...data,
       _id: Date.now().toString(),
       status: 'draft',
@@ -304,7 +305,7 @@ const payrollService = {
 
   /* Process monthly batch */
   processMonthlyBatch: (month, year) =>
-    safe(() => apiClient.post('/payroll/process-monthly', { month, year }), {
+    safe(() => apiClient.post('/api/v1/payroll/process-monthly', { month, year }), {
       processed: MOCK_EMPLOYEES_PAYROLL.length,
       month,
       year,
@@ -313,21 +314,21 @@ const payrollService = {
 
   /* Approval workflow */
   submitForApproval: payrollId =>
-    safe(() => apiClient.put(`/payroll/${payrollId}/submit-approval`), {
+    safe(() => apiClient.put(`/api/v1/payroll/${payrollId}/submit-approval`), {
       status: 'pending-approval',
     }),
   approvePayroll: payrollId =>
-    safe(() => apiClient.put(`/payroll/${payrollId}/approve`), { status: 'approved' }),
+    safe(() => apiClient.put(`/api/v1/payroll/${payrollId}/approve`), { status: 'approved' }),
   processPayroll: payrollId =>
-    safe(() => apiClient.put(`/payroll/${payrollId}/process`), { status: 'processed' }),
+    safe(() => apiClient.put(`/api/v1/payroll/${payrollId}/process`), { status: 'processed' }),
   transferPayroll: payrollId =>
-    safe(() => apiClient.put(`/payroll/${payrollId}/transfer`), { status: 'transferred' }),
+    safe(() => apiClient.put(`/api/v1/payroll/${payrollId}/transfer`), { status: 'transferred' }),
   confirmPayment: payrollId =>
-    safe(() => apiClient.put(`/payroll/${payrollId}/confirm-payment`), { status: 'paid' }),
+    safe(() => apiClient.put(`/api/v1/payroll/${payrollId}/confirm-payment`), { status: 'paid' }),
 
   /* Payroll stats */
   getPayrollStats: (month, year) =>
-    safe(() => apiClient.get(`/payroll/stats/${month}/${year}`), {
+    safe(() => apiClient.get(`/api/v1/payroll/stats/${month}/${year}`), {
       totalEmployees: MOCK_EMPLOYEES_PAYROLL.length,
       totalGross: MOCK_EMPLOYEES_PAYROLL.reduce(
         (s, p) => s + (p.baseSalary + p.totalAllowances + p.totalIncentives),
@@ -346,18 +347,22 @@ const payrollService = {
     }),
 
   /* Settings */
-  getPayrollSettings: () => safe(() => apiClient.get('/payroll/settings'), MOCK_PAYROLL_SETTINGS),
+  getPayrollSettings: () =>
+    safe(() => apiClient.get('/api/v1/payroll/settings'), MOCK_PAYROLL_SETTINGS),
   updatePayrollSettings: data =>
-    safe(() => apiClient.put('/payroll/settings', data), { ...MOCK_PAYROLL_SETTINGS, ...data }),
+    safe(() => apiClient.put('/api/v1/payroll/settings', data), {
+      ...MOCK_PAYROLL_SETTINGS,
+      ...data,
+    }),
 
   /* End of Service */
   calculateEOS: data =>
-    safe(() => apiClient.post('/payroll/end-of-service/calculate', data), MOCK_EOS[0]),
-  getEOSHistory: () => safe(() => apiClient.get('/payroll/end-of-service'), MOCK_EOS),
+    safe(() => apiClient.post('/api/v1/payroll/end-of-service/calculate', data), MOCK_EOS[0]),
+  getEOSHistory: () => safe(() => apiClient.get('/api/v1/payroll/end-of-service'), MOCK_EOS),
 
   /* Reports */
   generateWPSReport: (month, year) =>
-    safe(() => apiClient.get(`/payroll/reports/wps/${month}/${year}`), {
+    safe(() => apiClient.get(`/api/v1/payroll/reports/wps/${month}/${year}`), {
       type: 'WPS',
       reportName: 'تقرير حماية الأجور',
       month,
@@ -384,7 +389,7 @@ const payrollService = {
       format: 'SIF',
     }),
   generateGOSIReport: (month, year) =>
-    safe(() => apiClient.get(`/payroll/reports/gosi/${month}/${year}`), {
+    safe(() => apiClient.get(`/api/v1/payroll/reports/gosi/${month}/${year}`), {
       type: 'GOSI',
       reportName: 'تقرير التأمينات الاجتماعية',
       month,
@@ -413,7 +418,7 @@ const payrollService = {
       generatedAt: new Date().toISOString(),
     }),
   generateBankTransferFile: (month, year) =>
-    safe(() => apiClient.get(`/payroll/reports/bank-transfer/${month}/${year}`), {
+    safe(() => apiClient.get(`/api/v1/payroll/reports/bank-transfer/${month}/${year}`), {
       type: 'BankTransfer',
       reportName: 'ملف التحويل البنكي',
       month,
@@ -435,7 +440,7 @@ const payrollService = {
       generatedAt: new Date().toISOString(),
     }),
   generateDepartmentComparison: (month, year) =>
-    safe(() => apiClient.get(`/payroll/reports/department-comparison/${month}/${year}`), {
+    safe(() => apiClient.get(`/api/v1/payroll/reports/department-comparison/${month}/${year}`), {
       type: 'DepartmentComparison',
       reportName: 'تقرير مقارنة الأقسام',
       month,
@@ -498,7 +503,7 @@ const payrollService = {
       generatedAt: new Date().toISOString(),
     }),
   generateAnnualSummary: year =>
-    safe(() => apiClient.get(`/payroll/reports/annual-summary/${year}`), {
+    safe(() => apiClient.get(`/api/v1/payroll/reports/annual-summary/${year}`), {
       type: 'AnnualSummary',
       reportName: 'التقرير السنوي للرواتب',
       year,
@@ -546,7 +551,7 @@ const payrollService = {
       generatedAt: new Date().toISOString(),
     }),
   generateVarianceReport: (month, year) =>
-    safe(() => apiClient.get(`/payroll/reports/variance/${month}/${year}`), {
+    safe(() => apiClient.get(`/api/v1/payroll/reports/variance/${month}/${year}`), {
       type: 'Variance',
       reportName: 'تقرير الفروقات الشهرية',
       currentPeriod: { month, year },
@@ -579,7 +584,7 @@ const payrollService = {
       generatedAt: new Date().toISOString(),
     }),
   generateDeductionsReport: (month, year) =>
-    safe(() => apiClient.get(`/payroll/reports/deductions/${month}/${year}`), {
+    safe(() => apiClient.get(`/api/v1/payroll/reports/deductions/${month}/${year}`), {
       type: 'Deductions',
       reportName: 'تقرير الخصومات التفصيلي',
       month,
@@ -604,7 +609,14 @@ const payrollService = {
       generatedAt: new Date().toISOString(),
     }),
   generateEmployeeCostReport: (employeeId, year) =>
-    safe(() => apiClient.get(`/payroll/reports/employee-cost/${employeeId}/${year}`), null),
+    safe(() => apiClient.get(`/api/v1/payroll/reports/employee-cost/${employeeId}/${year}`), null),
+
+  /* Re-fetch real attendance/leave data and recalculate deductions for a payroll */
+  recalculateAttendance: payrollId =>
+    safe(() => apiClient.put(`/api/v1/payroll/${payrollId}/recalculate-attendance`), {
+      status: 'draft',
+      message: 'تم إعادة احتساب بيانات الحضور',
+    }),
 
   /* Mock getters for direct access */
   getMockPayroll: () => MOCK_EMPLOYEES_PAYROLL,

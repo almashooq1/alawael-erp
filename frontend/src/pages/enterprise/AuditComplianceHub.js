@@ -51,6 +51,7 @@ import {
 } from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import enterpriseProService from '../../services/enterprisePro.service';
+import { formatDateTime as _fmtDT } from 'utils/dateUtils';
 
 const SEVERITY_COLORS = { low: '#4CAF50', medium: '#FF9800', high: '#F44336', critical: '#9C27B0' };
 const ACTION_COLORS = {
@@ -354,9 +355,7 @@ export default function AuditComplianceHub() {
               <TableBody>
                 {trail.map(entry => (
                   <TableRow key={entry._id} hover>
-                    <TableCell sx={{ fontSize: '0.8rem' }}>
-                      {new Date(entry.createdAt).toLocaleString('ar-SA')}
-                    </TableCell>
+                    <TableCell sx={{ fontSize: '0.8rem' }}>{_fmtDT(entry.createdAt)}</TableCell>
                     <TableCell>
                       <Chip label={entry.module} size="small" variant="outlined" />
                     </TableCell>
@@ -569,9 +568,7 @@ export default function AuditComplianceHub() {
               <TableBody>
                 {alerts.map(a => (
                   <TableRow key={a._id} hover>
-                    <TableCell sx={{ fontSize: '0.8rem' }}>
-                      {new Date(a.createdAt).toLocaleString('ar-SA')}
-                    </TableCell>
+                    <TableCell sx={{ fontSize: '0.8rem' }}>{_fmtDT(a.createdAt)}</TableCell>
                     <TableCell>
                       <Chip label={a.alertType?.replace(/_/g, ' ')} size="small" />
                     </TableCell>
@@ -638,7 +635,7 @@ export default function AuditComplianceHub() {
                 { label: 'المستخدم', value: selectedEntry.performedBy?.name || '—' },
                 {
                   label: 'التاريخ',
-                  value: new Date(selectedEntry.createdAt).toLocaleString('ar-SA'),
+                  value: _fmtDT(selectedEntry.createdAt),
                 },
                 { label: 'IP', value: selectedEntry.metadata?.ipAddress || '—' },
               ].map((f, i) => (

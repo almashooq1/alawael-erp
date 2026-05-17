@@ -3,7 +3,7 @@
  */
 import apiClient from './api.client';
 
-const BASE = '/api/helpdesk';
+const BASE = '/api/v1/helpdesk';
 
 export const getDashboard = async () => {
   try {

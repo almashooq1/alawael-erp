@@ -44,6 +44,7 @@ import {
   Warning,
 } from '@mui/icons-material';
 import { surfaceColors, neutralColors } from 'theme/palette';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const API = process.env.REACT_APP_API_URL || '/api';
 
@@ -407,7 +408,7 @@ const FinancialApprovals = () => {
                         {a.currentStep}/{a.totalSteps}
                       </TableCell>
                       <TableCell sx={{ textAlign: 'right' }}>
-                        {a.createdAt ? new Date(a.createdAt).toLocaleDateString('ar-SA') : '-'}
+                        {a.createdAt ? _fmtDate(a.createdAt) : '-'}
                       </TableCell>
                     </TableRow>
                   );

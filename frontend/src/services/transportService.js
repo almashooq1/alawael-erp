@@ -283,124 +283,124 @@ const transportService = {
   /* — Routes — */
   getRoutes: () =>
     safe(async () => {
-      const r = await apiClient.get('/transport-routes');
+      const r = await apiClient.get('/api/v1/transport-routes');
       return r.data?.data || r.data || r;
     }, MOCK_ROUTES),
   getRoute: id =>
     safe(async () => {
-      const r = await apiClient.get(`/transport-routes/${id}`);
+      const r = await apiClient.get(`/api/v1/transport-routes/${id}`);
       return r.data?.data || r.data || r;
     }),
   createRoute: data =>
     safe(async () => {
-      const r = await apiClient.post('/transport-routes', data);
+      const r = await apiClient.post('/api/v1/transport-routes', data);
       return r.data?.data || r.data || r;
     }),
   updateRoute: (id, data) =>
     safe(async () => {
-      const r = await apiClient.put(`/transport-routes/${id}`, data);
+      const r = await apiClient.put(`/api/v1/transport-routes/${id}`, data);
       return r.data?.data || r.data || r;
     }),
   deleteRoute: id =>
     safe(async () => {
-      await apiClient.delete(`/transport-routes/${id}`);
+      await apiClient.delete(`/api/v1/transport-routes/${id}`);
       return true;
     }, false),
   optimizeRoute: id =>
     safe(async () => {
-      const r = await apiClient.post(`/transport-routes/${id}/optimize`);
+      const r = await apiClient.post(`/api/v1/transport-routes/${id}/optimize`);
       return r.data?.data || r.data || r;
     }),
   getRouteStatistics: () =>
     safe(async () => {
-      const r = await apiClient.get('/transport-routes/statistics');
+      const r = await apiClient.get('/api/v1/transport-routes/statistics');
       return r.data?.data || r.data || r;
     }),
 
   /* — Trips — */
   getTrips: () =>
     safe(async () => {
-      const r = await apiClient.get('/trips');
+      const r = await apiClient.get('/api/v1/trips');
       return r.data?.data || r.data || r;
     }, MOCK_TRIPS),
   createTrip: data =>
     safe(async () => {
-      const r = await apiClient.post('/trips', data);
+      const r = await apiClient.post('/api/v1/trips', data);
       return r.data?.data || r.data || r;
     }),
   updateTrip: (id, data) =>
     safe(async () => {
-      const r = await apiClient.put(`/trips/${id}`, data);
+      const r = await apiClient.put(`/api/v1/trips/${id}`, data);
       return r.data?.data || r.data || r;
     }),
   deleteTrip: id =>
     safe(async () => {
-      await apiClient.delete(`/trips/${id}`);
+      await apiClient.delete(`/api/v1/trips/${id}`);
       return true;
     }, false),
 
   /* — Drivers — */
   getDrivers: () =>
     safe(async () => {
-      const r = await apiClient.get('/drivers');
+      const r = await apiClient.get('/api/v1/drivers');
       return r.data?.data || r.data || r;
     }, MOCK_DRIVERS),
   createDriver: data =>
     safe(async () => {
-      const r = await apiClient.post('/drivers', data);
+      const r = await apiClient.post('/api/v1/drivers', data);
       return r.data?.data || r.data || r;
     }),
   updateDriver: (id, data) =>
     safe(async () => {
-      const r = await apiClient.put(`/drivers/${id}`, data);
+      const r = await apiClient.put(`/api/v1/drivers/${id}`, data);
       return r.data?.data || r.data || r;
     }),
 
   /* — Fuel — */
   getFuelRecords: () =>
     safe(async () => {
-      const r = await apiClient.get('/fuel');
+      const r = await apiClient.get('/api/v1/fuel');
       return r.data?.data || r.data || r;
     }, MOCK_FUEL),
   createFuelRecord: data =>
     safe(async () => {
-      const r = await apiClient.post('/fuel', data);
+      const r = await apiClient.post('/api/v1/fuel', data);
       return r.data?.data || r.data || r;
     }),
 
   /* — Accidents — */
   getAccidents: () =>
     safe(async () => {
-      const r = await apiClient.get('/traffic-accidents');
+      const r = await apiClient.get('/api/v1/traffic-accidents');
       return r.data?.data || r.data || r;
     }, MOCK_ACCIDENTS),
   createAccident: data =>
     safe(async () => {
-      const r = await apiClient.post('/traffic-accidents', data);
+      const r = await apiClient.post('/api/v1/traffic-accidents', data);
       return r.data?.data || r.data || r;
     }),
   updateAccident: (id, data) =>
     safe(async () => {
-      const r = await apiClient.put(`/traffic-accidents/${id}`, data);
+      const r = await apiClient.put(`/api/v1/traffic-accidents/${id}`, data);
       return r.data?.data || r.data || r;
     }),
 
   /* — GPS — */
   getGPSLocations: () =>
     safe(async () => {
-      const r = await apiClient.get('/gps/locations');
+      const r = await apiClient.get('/api/v1/gps/locations');
       return r.data?.data || r.data || r;
     }, []),
 
   /* — Analytics / Dashboard — */
   getMonthlyStats: () =>
     safe(async () => {
-      const r = await apiClient.get('/transport/analytics/monthly');
+      const r = await apiClient.get('/api/v1/transport/analytics/monthly');
       return r.data?.data || r.data || r;
     }, MOCK_MONTHLY_STATS),
   getDashboardSummary: () =>
     safe(async () => {
-      const r = await apiClient.get('/transport/dashboard');
+      const r = await apiClient.get('/api/v1/transport/dashboard');
       return r.data?.data || r.data || r;
     }, null),
 };

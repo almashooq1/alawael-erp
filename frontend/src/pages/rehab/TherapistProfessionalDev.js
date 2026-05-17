@@ -43,6 +43,7 @@ import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { statusColors, neutralColors, surfaceColors } from '../../theme/palette';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const categoryIcons = {
   courses: <SchoolIcon />,
@@ -308,7 +309,7 @@ const TherapistProfessionalDev = () => {
                             {activity.date && (
                               <Typography variant="caption">
                                 {' '}
-                                • {new Date(activity.date).toLocaleDateString('ar')}
+                                • {_fmtDate(activity.date)}
                               </Typography>
                             )}
                             {activity.hours > 0 && (
@@ -366,7 +367,7 @@ const TherapistProfessionalDev = () => {
                     />
                   </Box>
                   <Typography variant="caption" color="error" sx={{ display: 'block', mt: 1 }}>
-                    الموعد النهائي: {new Date(rec.deadline).toLocaleDateString('ar')}
+                    الموعد النهائي: {_fmtDate(rec.deadline)}
                   </Typography>
                 </Paper>
               ))}

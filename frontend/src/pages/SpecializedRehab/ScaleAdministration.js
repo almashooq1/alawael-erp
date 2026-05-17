@@ -51,6 +51,7 @@ import {
   specializedScalesService,
 } from 'services/specializedRehab.service';
 import { useSnackbar } from 'contexts/SnackbarContext';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const SEVERITY_COLORS = {
   normal: '#4CAF50',
@@ -645,9 +646,7 @@ export default function ScaleAdministration() {
                       sx={{ cursor: 'pointer' }}
                       onClick={() => setResultDetail(r)}
                     >
-                      <TableCell>
-                        {r.createdAt ? new Date(r.createdAt).toLocaleDateString('ar-SA') : '—'}
-                      </TableCell>
+                      <TableCell>{r.createdAt ? _fmtDate(r.createdAt) : '—'}</TableCell>
                       <TableCell>
                         <Chip label={r.scaleCode || r.scale?.scaleCode || '—'} size="small" />
                       </TableCell>

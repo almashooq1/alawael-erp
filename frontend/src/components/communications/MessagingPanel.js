@@ -29,6 +29,7 @@ import {
   Group as GroupIcon,
 } from '@mui/icons-material';
 import { getStatusColor } from 'utils/statusColors';
+import { formatDate } from 'utils/dateUtils';
 import logger from 'utils/logger';
 import { gradients } from 'theme/palette';
 
@@ -142,7 +143,7 @@ const MessagingPanel = ({
     if (diff < 60000) return 'الآن';
     if (diff < 3600000) return `${Math.floor(diff / 60000)} د`;
     if (diff < 86400000) return `${Math.floor(diff / 3600000)} س`;
-    return date.toLocaleDateString('ar-SA', { month: 'short', day: 'numeric' });
+    return formatDate(date, { month: 'short', day: 'numeric' });
   };
 
   return (

@@ -30,6 +30,7 @@ import {
   Settings,
 } from '@mui/icons-material';
 import { surfaceColors, neutralColors, brandColors } from 'theme/palette';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const API = process.env.REACT_APP_API_URL || '/api';
 
@@ -260,7 +261,7 @@ const AuditTrail = () => {
                 <TableRow key={log._id || idx} hover sx={{ '&:hover': { bgcolor: '#f5f5f5' } }}>
                   <TableCell sx={{ whiteSpace: 'nowrap' }}>
                     <Typography variant="body2" fontWeight={600}>
-                      {new Date(log.timestamp || log.createdAt).toLocaleDateString('ar-SA')}
+                      {_fmtDate(log.timestamp || log.createdAt)}
                     </Typography>
                     <Typography variant="caption" sx={{ color: neutralColors.textSecondary }}>
                       {new Date(log.timestamp || log.createdAt).toLocaleTimeString('ar-SA')}

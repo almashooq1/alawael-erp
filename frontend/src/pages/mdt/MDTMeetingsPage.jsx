@@ -51,6 +51,7 @@ import {
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { meetingsService, minutesService } from '../../services/mdtCoordinationService';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const TYPES = [
   { value: 'REGULAR', label: 'دوري' },
@@ -599,9 +600,7 @@ export default function MDTMeetingsPage() {
                         size="small"
                       />
                     </TableCell>
-                    <TableCell>
-                      {m.date ? new Date(m.date).toLocaleDateString('ar') : '-'}
-                    </TableCell>
+                    <TableCell>{m.date ? _fmtDate(m.date) : '-'}</TableCell>
                     <TableCell>
                       {m.startTime || '-'}
                       {m.endTime ? ` - ${m.endTime}` : ''}
@@ -791,8 +790,7 @@ export default function MDTMeetingsPage() {
                 <Box>
                   <Typography variant="h6">{detail.title}</Typography>
                   <Typography variant="caption" color="text.secondary">
-                    {detail.meetingNumber} —{' '}
-                    {detail.date ? new Date(detail.date).toLocaleDateString('ar') : ''}
+                    {detail.meetingNumber} — {detail.date ? _fmtDate(detail.date) : ''}
                   </Typography>
                 </Box>
                 <Chip
@@ -1122,7 +1120,7 @@ export default function MDTMeetingsPage() {
                           )}
                           {a.dueDate && (
                             <Typography variant="caption" color="text.secondary">
-                              الموعد: {new Date(a.dueDate).toLocaleDateString('ar')}
+                              الموعد: {_fmtDate(a.dueDate)}
                             </Typography>
                           )}
                         </Box>

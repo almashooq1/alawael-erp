@@ -44,6 +44,7 @@ import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
 import PeopleIcon from '@mui/icons-material/People';
 import CachedIcon from '@mui/icons-material/Cached';
 import api from '../../services/api.client';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const GOSI_COLORS = {
   active: 'success',
@@ -79,7 +80,7 @@ function fullName(x) {
 function formatDate(v) {
   if (!v) return '—';
   try {
-    return new Date(v).toLocaleDateString('ar-SA');
+    return _fmtDate(v);
   } catch {
     return '—';
   }

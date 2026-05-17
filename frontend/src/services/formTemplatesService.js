@@ -577,20 +577,21 @@ const formTemplatesService = {
 
   getTemplate: id =>
     safe(
-      () => apiClient.get(`/form-templates/${id}`).then(r => r?.template || r),
+      () => apiClient.get(`/api/v1/form-templates/${id}`).then(r => r?.template || r),
       FALLBACK_TEMPLATES.find(t => t.templateId === id) || null
     ),
 
   createTemplate: data =>
-    safe(() => apiClient.post('/form-templates', data), {
+    safe(() => apiClient.post('/api/v1/form-templates', data), {
       success: true,
       template: { ...data, templateId: `custom-${Date.now()}` },
     }),
 
   updateTemplate: (id, data) =>
-    safe(() => apiClient.put(`/form-templates/${id}`, data), { success: true }),
+    safe(() => apiClient.put(`/api/v1/form-templates/${id}`, data), { success: true }),
 
-  deleteTemplate: id => safe(() => apiClient.delete(`/form-templates/${id}`), { success: true }),
+  deleteTemplate: id =>
+    safe(() => apiClient.delete(`/api/v1/form-templates/${id}`), { success: true }),
 
   // ─── Categories ───
   getCategories: () =>
@@ -604,36 +605,43 @@ const formTemplatesService = {
 
   // ─── Stats ───
   getStats: () =>
-    safe(() => apiClient.get('/form-templates/stats'), {
+    safe(() => apiClient.get('/api/v1/form-templates/stats'), {
       stats: FALLBACK_STATS,
       recentSubmissions: [],
     }),
 
   // ─── Submissions ───
   submitForm: (templateId, data) =>
-    safe(() => apiClient.post(`/form-templates/${templateId}/submit`, data), {
+    safe(() => apiClient.post(`/api/v1/form-templates/${templateId}/submit`, data), {
       success: true,
       submission: { submissionNumber: `SUB-${Date.now()}`, status: 'submitted' },
     }),
 
   getMySubmissions: (params = {}) =>
-    safe(() => apiClient.get('/form-templates/submissions/my', { params }), {
+    safe(() => apiClient.get('/api/v1/form-templates/submissions/my', { params }), {
       submissions: [],
       pagination: { total: 0 },
     }),
 
   getPendingSubmissions: () =>
-    safe(() => apiClient.get('/form-templates/submissions/pending'), { submissions: [] }),
+    safe(() => apiClient.get('/api/v1/form-templates/submissions/pending'), { submissions: [] }),
 
   approveSubmission: (submissionId, comment) =>
-    safe(() => apiClient.put(`/form-templates/submissions/${submissionId}/approve`, { comment }), {
-      success: true,
-    }),
+    safe(
+      () =>
+        apiClient.put(`/api/v1/form-templates/submissions/${submissionId}/approve`, { comment }),
+      {
+        success: true,
+      }
+    ),
 
   rejectSubmission: (submissionId, comment) =>
-    safe(() => apiClient.put(`/form-templates/submissions/${submissionId}/reject`, { comment }), {
-      success: true,
-    }),
+    safe(
+      () => apiClient.put(`/api/v1/form-templates/submissions/${submissionId}/reject`, { comment }),
+      {
+        success: true,
+      }
+    ),
 
   // ─── Helpers ───
   getStatusLabel: status => {

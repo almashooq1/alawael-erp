@@ -82,6 +82,9 @@ const BenefitsManagement = lazyWithRetry(() => import('../pages/hr/BenefitsManag
 // BC-07: إدارة صلاحية اعتمادات الكوادر الصحية
 const CredentialExpiryAdmin = lazyWithRetry(() => import('../pages/hr/CredentialExpiryAdmin'));
 
+// مركز قيادة الموارد البشرية الذكي
+const HRCommandCenter = lazyWithRetry(() => import('../pages/hr/HRCommandCenter'));
+
 export default function HRRoutes() {
   return (
     <>
@@ -142,6 +145,8 @@ export default function HRRoutes() {
       <Route path="hr/benefits" element={<BenefitsManagement />} />
       {/* BC-07: صلاحية اعتمادات الكوادر الصحية — SCFHS + إقامة + هوية وطنية */}
       <Route path="hr/credential-expiry" element={<CredentialExpiryAdmin />} />
+      {/* مركز قيادة الموارد البشرية الذكي — Smart HR Command Center */}
+      <Route path="hr/command-center" element={<HRCommandCenter />} />
     </>
   );
 }

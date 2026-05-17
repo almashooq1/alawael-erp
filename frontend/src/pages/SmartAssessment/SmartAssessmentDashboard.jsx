@@ -59,6 +59,7 @@ import {
   FormControlLabel,
 } from '@mui/material';
 
+import { formatDate as _fmtDate, formatDateTime as _fmtDT } from 'utils/dateUtils';
 import {
   Psychology as PsychologyIcon,
   Assessment as AssessmentIcon,
@@ -2590,9 +2591,7 @@ export default function SmartAssessmentDashboard() {
                             '—'}
                         </TableCell>
                         <TableCell align="center">
-                          {item.createdAt
-                            ? new Date(item.createdAt).toLocaleDateString('ar-SA')
-                            : '—'}
+                          {item.createdAt ? _fmtDate(item.createdAt) : '—'}
                         </TableCell>
                         <TableCell align="center">
                           <Chip
@@ -2701,9 +2700,7 @@ export default function SmartAssessmentDashboard() {
                       التاريخ
                     </Typography>
                     <Typography>
-                      {viewDetail.createdAt
-                        ? new Date(viewDetail.createdAt).toLocaleString('ar-SA')
-                        : '—'}
+                      {viewDetail.createdAt ? _fmtDT(viewDetail.createdAt) : '—'}
                     </Typography>
                   </Grid>
                   <Grid item xs={6}>

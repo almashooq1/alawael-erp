@@ -4,7 +4,7 @@
  */
 import api from './api.client';
 
-const BASE = '/knowledge-center';
+const BASE = '/api/v1/knowledge-center';
 
 const knowledgeCenterService = {
   // ── Articles CRUD ────────────────────────────────────────────────

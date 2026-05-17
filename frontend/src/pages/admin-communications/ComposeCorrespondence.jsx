@@ -48,6 +48,7 @@ import {
 import { gradients } from '../../theme/palette';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import adminCommunicationsService from '../../services/adminCommunications.service';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 import {
   CORRESPONDENCE_TYPES,
   PRIORITY_LEVELS,
@@ -828,7 +829,7 @@ export default function ComposeCorrespondence() {
                     الاستحقاق:
                   </Typography>
                   <Typography variant="body2">
-                    {form.dueDate ? new Date(form.dueDate).toLocaleDateString('ar-SA') : 'غير محدد'}
+                    {form.dueDate ? _fmtDate(form.dueDate) : 'غير محدد'}
                   </Typography>
                 </Box>
                 <Box display="flex" justifyContent="space-between">

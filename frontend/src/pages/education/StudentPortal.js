@@ -36,6 +36,7 @@ import logger from 'utils/logger';
 import { gradients } from 'theme/palette';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const StudentPortal = () => {
   const { currentUser } = useAuth();
@@ -538,7 +539,7 @@ const StudentPortal = () => {
                 return (
                   <Box
                     key={e.id || i}
-                    title={`${e.date ? new Date(e.date).toLocaleDateString('ar') : ''} • ${m}/5`}
+                    title={`${e.date ? _fmtDate(e.date) : ''} • ${m}/5`}
                     sx={{
                       width: 14,
                       flexShrink: 0,

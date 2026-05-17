@@ -43,6 +43,7 @@ import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const SERVICE_TYPES = [
   { value: 'speech-therapy', label: 'علاج نطق', icon: '🗣️' },
@@ -423,7 +424,7 @@ const TherapistWaitingList = () => {
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                           <DateIcon sx={{ fontSize: 14, color: 'text.secondary' }} />
                           <Typography variant="caption" color="text.secondary">
-                            الإحالة: {new Date(w.referralDate).toLocaleDateString('ar-SA')}
+                            الإحالة: {_fmtDate(w.referralDate)}
                           </Typography>
                         </Box>
                       )}

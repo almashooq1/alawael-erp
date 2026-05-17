@@ -57,6 +57,7 @@ import {
 } from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import workflowService from '../../services/workflow.service';
+import { formatDateTime as _fmtDT } from 'utils/dateUtils';
 
 const PRIORITY_MAP = { critical: 'حرج', high: 'عالي', medium: 'متوسط', low: 'منخفض' };
 const PRIORITY_COLORS = { critical: '#D32F2F', high: '#F57C00', medium: '#FFC107', low: '#4CAF50' };
@@ -466,11 +467,7 @@ export default function WorkflowSLAPolicies() {
                                   size="small"
                                 />
                               </TableCell>
-                              <TableCell>
-                                {b.breachedAt
-                                  ? new Date(b.breachedAt).toLocaleString('ar-SA')
-                                  : '—'}
-                              </TableCell>
+                              <TableCell>{b.breachedAt ? _fmtDT(b.breachedAt) : '—'}</TableCell>
                             </TableRow>
                           ))}
                         </TableBody>

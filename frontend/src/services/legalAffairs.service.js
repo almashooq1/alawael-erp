@@ -19,7 +19,7 @@ const MOCK_DASHBOARD = {
 
 export async function getLegalDashboard() {
   try {
-    const { data } = await apiClient.get('/legal-affairs/dashboard');
+    const { data } = await apiClient.get('/api/v1/legal-affairs/dashboard');
     return data?.data || MOCK_DASHBOARD;
   } catch {
     return MOCK_DASHBOARD;
@@ -28,7 +28,7 @@ export async function getLegalDashboard() {
 
 export async function getLegalCases(params = {}) {
   try {
-    const { data } = await apiClient.get('/legal-affairs/cases', { params });
+    const { data } = await apiClient.get('/api/v1/legal-affairs/cases', { params });
     return data?.data || [];
   } catch {
     return [];
@@ -37,7 +37,7 @@ export async function getLegalCases(params = {}) {
 
 export async function getLegalCase(id) {
   try {
-    const { data } = await apiClient.get(`/legal-affairs/cases/${id}`);
+    const { data } = await apiClient.get(`/api/v1/legal-affairs/cases/${id}`);
     return data?.data;
   } catch {
     return null;
@@ -45,23 +45,23 @@ export async function getLegalCase(id) {
 }
 
 export async function createLegalCase(payload) {
-  const { data } = await apiClient.post('/legal-affairs/cases', payload);
+  const { data } = await apiClient.post('/api/v1/legal-affairs/cases', payload);
   return data?.data;
 }
 
 export async function updateLegalCase(id, payload) {
-  const { data } = await apiClient.put(`/legal-affairs/cases/${id}`, payload);
+  const { data } = await apiClient.put(`/api/v1/legal-affairs/cases/${id}`, payload);
   return data?.data;
 }
 
 export async function deleteLegalCase(id) {
-  const { data } = await apiClient.delete(`/legal-affairs/cases/${id}`);
+  const { data } = await apiClient.delete(`/api/v1/legal-affairs/cases/${id}`);
   return data?.data;
 }
 
 export async function getConsultations(params = {}) {
   try {
-    const { data } = await apiClient.get('/legal-affairs/consultations', { params });
+    const { data } = await apiClient.get('/api/v1/legal-affairs/consultations', { params });
     return data?.data || [];
   } catch {
     return [];
@@ -69,18 +69,18 @@ export async function getConsultations(params = {}) {
 }
 
 export async function createConsultation(payload) {
-  const { data } = await apiClient.post('/legal-affairs/consultations', payload);
+  const { data } = await apiClient.post('/api/v1/legal-affairs/consultations', payload);
   return data?.data;
 }
 
 export async function updateConsultation(id, payload) {
-  const { data } = await apiClient.put(`/legal-affairs/consultations/${id}`, payload);
+  const { data } = await apiClient.put(`/api/v1/legal-affairs/consultations/${id}`, payload);
   return data?.data;
 }
 
 export async function getLegalCalendar(params = {}) {
   try {
-    const { data } = await apiClient.get('/legal-affairs/calendar', { params });
+    const { data } = await apiClient.get('/api/v1/legal-affairs/calendar', { params });
     return data?.data || [];
   } catch {
     return [];

@@ -26,6 +26,7 @@ import {
   CloseOutlined,
 } from '@mui/icons-material';
 import { useAuth } from 'contexts/AuthContext';
+import CalendarToggle from '../ui/CalendarToggle';
 
 /* ─── Breadcrumb map ─────────────────────────────────────────────────────── */
 const routeLabels = {
@@ -383,6 +384,11 @@ export default function ProHeader({
               <DarkModeOutlined sx={{ fontSize: 18 }} />
             )}
           </HBtn>
+
+          {/* Calendar toggle — Hijri / Gregorian */}
+          <div className="hidden sm:flex items-center mx-0.5">
+            <CalendarToggle compact />
+          </div>
 
           <HBtn
             title={fullscreen ? 'خروج من ملء الشاشة' : 'ملء الشاشة'}

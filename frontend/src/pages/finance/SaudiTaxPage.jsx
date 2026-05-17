@@ -39,6 +39,7 @@ import {
   Event as DeadlineIcon,
 } from '@mui/icons-material';
 import saudiTaxService from '../../services/saudiTaxService';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const STATUS_MAP = {
   DRAFT: { label: 'مسودة', color: 'default' },
@@ -232,9 +233,7 @@ export default function SaudiTaxPage() {
                 {deadlines.map((d, i) => (
                   <TableRow key={i}>
                     <TableCell>{d.type || '—'}</TableCell>
-                    <TableCell>
-                      {d.dueDate ? new Date(d.dueDate).toLocaleDateString('ar-SA') : '—'}
-                    </TableCell>
+                    <TableCell>{d.dueDate ? _fmtDate(d.dueDate) : '—'}</TableCell>
                     <TableCell>{d.description || '—'}</TableCell>
                   </TableRow>
                 ))}

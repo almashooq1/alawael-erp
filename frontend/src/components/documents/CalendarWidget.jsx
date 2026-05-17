@@ -30,6 +30,7 @@ import {
 } from '@mui/icons-material';
 import { calendarApi } from '../../services/documentProPhase5Service';
 import logger from '../../utils/logger';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const PRIORITY_COLORS = {
   critical: '#ef4444',
@@ -179,7 +180,7 @@ export default function CalendarWidget({ documentId, compact = false }) {
                     </ListItemAvatar>
                     <ListItemText
                       primary={evt.titleAr || evt.title}
-                      secondary={new Date(evt.startDate).toLocaleDateString('ar-SA')}
+                      secondary={_fmtDate(evt.startDate)}
                       primaryTypographyProps={{ fontSize: 13 }}
                     />
                   </ListItem>
@@ -239,7 +240,7 @@ export default function CalendarWidget({ documentId, compact = false }) {
                                 size="small"
                                 sx={{ height: 18 }}
                               />
-                              <span>{new Date(evt.startDate).toLocaleDateString('ar-SA')}</span>
+                              <span>{_fmtDate(evt.startDate)}</span>
                             </Stack>
                           }
                           primaryTypographyProps={{ fontSize: 13 }}
@@ -289,7 +290,7 @@ export default function CalendarWidget({ documentId, compact = false }) {
                     </ListItemAvatar>
                     <ListItemText
                       primary={evt.titleAr || evt.title}
-                      secondary={`${new Date(evt.startDate).toLocaleDateString('ar-SA')} — ${evt.daysUntil > 0 ? `بعد ${evt.daysUntil} يوم` : evt.daysUntil === 0 ? 'اليوم' : `قبل ${Math.abs(evt.daysUntil)} يوم`}`}
+                      secondary={`${_fmtDate(evt.startDate)} — ${evt.daysUntil > 0 ? `بعد ${evt.daysUntil} يوم` : evt.daysUntil === 0 ? 'اليوم' : `قبل ${Math.abs(evt.daysUntil)} يوم`}`}
                       primaryTypographyProps={{ fontSize: 12 }}
                       secondaryTypographyProps={{ fontSize: 11 }}
                     />

@@ -44,6 +44,7 @@ import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { statusColors, neutralColors } from '../../theme/palette';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const MESSAGE_TYPES = [
   { value: 'general', label: 'عام', color: '#3b82f6' },
@@ -319,7 +320,7 @@ const TherapistParentComm = () => {
                         {!msg.read && <Chip label="جديدة" size="small" color="primary" />}
                       </Box>
                       <Typography variant="caption" color="textSecondary">
-                        {new Date(msg.createdAt).toLocaleDateString('ar')}
+                        {_fmtDate(msg.createdAt)}
                       </Typography>
                     </Box>
                     <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 0.5 }}>

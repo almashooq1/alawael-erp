@@ -97,6 +97,7 @@ import { gradients, chartColors, statusColors } from '../../theme/palette';
 import logger from '../../utils/logger';
 import studentManagementService from '../../services/studentManagementService';
 import DashboardErrorBoundary from '../../components/dashboard/shared/DashboardErrorBoundary';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 /* ──────── Helper Components ──────── */
 const SectionHeader = ({ icon, title, subtitle, action }) => (
@@ -1250,7 +1251,7 @@ export default function StudentReportsCenter() {
                             <TableCell>
                               <Typography variant="body2">
                                 {sub.nextExecutionAt
-                                  ? new Date(sub.nextExecutionAt).toLocaleDateString('ar-SA', {
+                                  ? _fmtDate(sub.nextExecutionAt, {
                                       month: 'short',
                                       day: 'numeric',
                                       hour: '2-digit',
@@ -1263,7 +1264,7 @@ export default function StudentReportsCenter() {
                               {sub.lastExecutedAt ? (
                                 <Box>
                                   <Typography variant="body2">
-                                    {new Date(sub.lastExecutedAt).toLocaleDateString('ar-SA', {
+                                    {_fmtDate(sub.lastExecutedAt, {
                                       month: 'short',
                                       day: 'numeric',
                                     })}
@@ -1437,7 +1438,7 @@ export default function StudentReportsCenter() {
                   {subStats.upcomingExecutions.map((exec, i) => (
                     <Chip
                       key={i}
-                      label={`${exec.reportTitle} — ${new Date(exec.nextExecutionAt).toLocaleDateString('ar-SA', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}`}
+                      label={`${exec.reportTitle} — ${_fmtDate(exec.nextExecutionAt, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}`}
                       icon={
                         exec.channels?.email?.enabled ? (
                           <EmailIcon sx={{ fontSize: 16 }} />
@@ -2154,7 +2155,7 @@ export default function StudentReportsCenter() {
                       <TableRow key={log._id} hover>
                         <TableCell>
                           <Typography variant="body2">
-                            {new Date(log.executedAt).toLocaleDateString('ar-SA', {
+                            {_fmtDate(log.executedAt, {
                               year: 'numeric',
                               month: 'short',
                               day: 'numeric',

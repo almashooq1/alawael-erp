@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 📋 إدارة الشكاوى والاقتراحات — Complaints & Suggestions Service
  * AlAwael ERP
  */
@@ -271,66 +271,83 @@ export const MOCK_COMPLAINTS_DASHBOARD = {
 // Services
 // ═══════════════════════════════════════════
 export const complaintsService = {
-  getAll: () => safe(() => apiClient.get('/complaints').then(r => r.data), MOCK_COMPLAINTS),
+  getAll: () => safe(() => apiClient.get('/api/v1/complaints').then(r => r.data), MOCK_COMPLAINTS),
   getById: id =>
     safe(
-      () => apiClient.get(`/complaints/${id}`).then(r => r.data),
+      () => apiClient.get(`/api/v1/complaints/${id}`).then(r => r.data),
       MOCK_COMPLAINTS.find(c => c._id === id)
     ),
-  create: data => safe(() => apiClient.post('/complaints', data).then(r => r.data)),
-  update: (id, data) => safe(() => apiClient.put(`/complaints/${id}`, data).then(r => r.data)),
-  remove: id => safe(() => apiClient.delete(`/complaints/${id}`).then(r => r.data)),
+  create: data => safe(() => apiClient.post('/api/v1/complaints', data).then(r => r.data)),
+  update: (id, data) =>
+    safe(() => apiClient.put(`/api/v1/complaints/${id}`, data).then(r => r.data)),
+  remove: id => safe(() => apiClient.delete(`/api/v1/complaints/${id}`).then(r => r.data)),
   resolve: (id, resolution) =>
-    safe(() => apiClient.post(`/complaints/${id}/resolve`, { resolution }).then(r => r.data)),
+    safe(() =>
+      apiClient.post(`/api/v1/complaints/${id}/resolve`, { resolution }).then(r => r.data)
+    ),
   rate: (id, rating) =>
-    safe(() => apiClient.post(`/complaints/${id}/rate`, { rating }).then(r => r.data)),
+    safe(() => apiClient.post(`/api/v1/complaints/${id}/rate`, { rating }).then(r => r.data)),
 
   // ── Actions (merged from complaints.service.js) ──────────────
   respond: (id, data) =>
-    safe(() => apiClient.post(`/complaints/${id}/respond`, data).then(r => r.data)),
+    safe(() => apiClient.post(`/api/v1/complaints/${id}/respond`, data).then(r => r.data)),
   escalate: (id, data) =>
-    safe(() => apiClient.post(`/complaints/${id}/escalate`, data).then(r => r.data)),
+    safe(() => apiClient.post(`/api/v1/complaints/${id}/escalate`, data).then(r => r.data)),
 
   // ── Stats ─────────────────────────────────────────────────────
-  getStats: () => safe(() => apiClient.get('/complaints/stats').then(r => r.data)),
+  getStats: () => safe(() => apiClient.get('/api/v1/complaints/stats').then(r => r.data)),
 
   // ── Source-filtered shortcuts ─────────────────────────────────
   getEmployeeComplaints: params =>
     safe(() =>
-      apiClient.get('/complaints', { params: { ...params, source: 'employee' } }).then(r => r.data)
+      apiClient
+        .get('/api/v1/complaints', { params: { ...params, source: 'employee' } })
+        .then(r => r.data)
     ),
   getStudentComplaints: params =>
     safe(() =>
-      apiClient.get('/complaints', { params: { ...params, source: 'student' } }).then(r => r.data)
+      apiClient
+        .get('/api/v1/complaints', { params: { ...params, source: 'student' } })
+        .then(r => r.data)
     ),
   getCustomerComplaints: params =>
     safe(() =>
-      apiClient.get('/complaints', { params: { ...params, source: 'customer' } }).then(r => r.data)
+      apiClient
+        .get('/api/v1/complaints', { params: { ...params, source: 'customer' } })
+        .then(r => r.data)
     ),
   getParentComplaints: params =>
     safe(() =>
-      apiClient.get('/complaints', { params: { ...params, source: 'parent' } }).then(r => r.data)
+      apiClient
+        .get('/api/v1/complaints', { params: { ...params, source: 'parent' } })
+        .then(r => r.data)
     ),
 
   // ── Legacy aliases (backward compat) ──────────────────────────
   createEmployeeComplaint: data =>
-    safe(() => apiClient.post('/complaints', { ...data, source: 'employee' }).then(r => r.data)),
+    safe(() =>
+      apiClient.post('/api/v1/complaints', { ...data, source: 'employee' }).then(r => r.data)
+    ),
   createStudentComplaint: data =>
-    safe(() => apiClient.post('/complaints', { ...data, source: 'student' }).then(r => r.data)),
+    safe(() =>
+      apiClient.post('/api/v1/complaints', { ...data, source: 'student' }).then(r => r.data)
+    ),
   createCustomerComplaint: data =>
-    safe(() => apiClient.post('/complaints', { ...data, source: 'customer' }).then(r => r.data)),
+    safe(() =>
+      apiClient.post('/api/v1/complaints', { ...data, source: 'customer' }).then(r => r.data)
+    ),
   updateEmployeeComplaint: (id, data) =>
-    safe(() => apiClient.put(`/complaints/${id}`, data).then(r => r.data)),
+    safe(() => apiClient.put(`/api/v1/complaints/${id}`, data).then(r => r.data)),
   updateStudentComplaint: (id, data) =>
-    safe(() => apiClient.put(`/complaints/${id}`, data).then(r => r.data)),
+    safe(() => apiClient.put(`/api/v1/complaints/${id}`, data).then(r => r.data)),
   resolveComplaint: (id, data) =>
-    safe(() => apiClient.post(`/complaints/${id}/resolve`, data).then(r => r.data)),
+    safe(() => apiClient.post(`/api/v1/complaints/${id}/resolve`, data).then(r => r.data)),
 };
 
 export const complaintsReportsService = {
   getDashboardStats: () =>
     safe(
-      () => apiClient.get('/complaints/dashboard/stats').then(r => r.data),
+      () => apiClient.get('/api/v1/complaints/dashboard/stats').then(r => r.data),
       MOCK_COMPLAINTS_DASHBOARD
     ),
 };

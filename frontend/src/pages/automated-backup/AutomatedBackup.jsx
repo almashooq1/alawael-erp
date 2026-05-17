@@ -62,9 +62,10 @@ import {
   NetworkCheck,
 } from '@mui/icons-material';
 import automatedBackupService from '../../services/automatedBackupService';
+import { formatDateTime as _fmtDT } from 'utils/dateUtils';
 
 /* ━━━ helpers ━━━ */
-const fmtDate = d => (d ? new Date(d).toLocaleString('ar-SA') : '—');
+const fmtDate = d => (d ? _fmtDT(d) : '—');
 const fmtSize = bytes => {
   if (!bytes) return '0 B';
   const u = ['B', 'KB', 'MB', 'GB', 'TB'];

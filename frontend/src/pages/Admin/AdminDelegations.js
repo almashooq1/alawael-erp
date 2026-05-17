@@ -54,6 +54,7 @@ import {
 } from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients } from '../../theme/palette';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 /* ═══ Helpers ════════════════════════════════════════════════════════════════ */
 const statusConfig = {
@@ -578,12 +579,10 @@ export default function AdminDelegations() {
                         <TableCell>
                           <Box>
                             <Typography variant="caption" display="block">
-                              {d.startDate
-                                ? new Date(d.startDate).toLocaleDateString('ar-SA')
-                                : '—'}
+                              {d.startDate ? _fmtDate(d.startDate) : '—'}
                             </Typography>
                             <Typography variant="caption" display="block" color="text.secondary">
-                              → {d.endDate ? new Date(d.endDate).toLocaleDateString('ar-SA') : '—'}
+                              → {d.endDate ? _fmtDate(d.endDate) : '—'}
                             </Typography>
                             {nearExpiry && (
                               <Chip

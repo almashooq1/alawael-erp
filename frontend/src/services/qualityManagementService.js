@@ -5,7 +5,7 @@
 
 import api from './api';
 
-const BASE = '/api/quality-management';
+const BASE = '/api/v1/quality-management';
 
 const qualityManagementService = {
   /* ── Dashboard & Reference ── */

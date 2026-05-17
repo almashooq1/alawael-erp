@@ -32,6 +32,7 @@ import {
 } from '@mui/icons-material';
 import { commentsApi } from '../../services/documentProPhase3Service';
 import logger from '../../utils/logger';
+import { formatDateTime as _fmtDT } from 'utils/dateUtils';
 
 const REACTIONS = [
   { emoji: '👍', label: 'إعجاب' },
@@ -105,7 +106,7 @@ function CommentItem({
             <Box>
               <Typography variant="subtitle2">{comment.authorName || 'مستخدم'}</Typography>
               <Typography variant="caption" color="text.secondary">
-                {new Date(comment.createdAt).toLocaleString('ar-SA')}
+                {_fmtDT(comment.createdAt)}
                 {comment.isEdited && ' (معدّل)'}
               </Typography>
             </Box>

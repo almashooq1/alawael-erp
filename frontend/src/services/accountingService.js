@@ -480,7 +480,7 @@ const accountingService = {
   // Dashboard
   async getDashboard() {
     try {
-      const res = await apiClient.get('/finance');
+      const res = await apiClient.get('/api/v1/finance');
       return res?.data || res || mockDashboardData;
     } catch {
       return mockDashboardData;
@@ -491,7 +491,7 @@ const accountingService = {
   async getChartOfAccounts(filters) {
     try {
       const params = new URLSearchParams(filters).toString();
-      const res = await apiClient.get(`/finance/accounts?${params}`);
+      const res = await apiClient.get(`/api/v1/finance/accounts?${params}`);
       return res?.data || res;
     } catch {
       return mockChartOfAccounts;
@@ -499,7 +499,7 @@ const accountingService = {
   },
   async createAccount(data) {
     try {
-      const res = await apiClient.post('/finance/accounts', data);
+      const res = await apiClient.post('/api/v1/finance/accounts', data);
       return res?.data || res;
     } catch {
       throw new Error('فشل إنشاء الحساب');
@@ -507,7 +507,7 @@ const accountingService = {
   },
   async updateAccount(id, data) {
     try {
-      const res = await apiClient.put(`/finance/accounts/${id}`, data);
+      const res = await apiClient.put(`/api/v1/finance/accounts/${id}`, data);
       return res?.data || res;
     } catch {
       throw new Error('فشل تحديث الحساب');
@@ -518,7 +518,7 @@ const accountingService = {
   async getJournalEntries(filters) {
     try {
       const params = new URLSearchParams(filters).toString();
-      const res = await apiClient.get(`/finance/journal-entries?${params}`);
+      const res = await apiClient.get(`/api/v1/finance/journal-entries?${params}`);
       return res?.data || res;
     } catch {
       return mockJournalEntries;
@@ -526,7 +526,7 @@ const accountingService = {
   },
   async createJournalEntry(data) {
     try {
-      const res = await apiClient.post('/finance/journal-entries', data);
+      const res = await apiClient.post('/api/v1/finance/journal-entries', data);
       return res?.data || res;
     } catch {
       throw new Error('فشل إنشاء القيد');
@@ -534,7 +534,7 @@ const accountingService = {
   },
   async postJournalEntry(id) {
     try {
-      const res = await apiClient.put(`/finance/journal-entries/${id}/post`);
+      const res = await apiClient.put(`/api/v1/finance/journal-entries/${id}/post`);
       return res?.data || res;
     } catch {
       throw new Error('فشل ترحيل القيد');
@@ -545,7 +545,7 @@ const accountingService = {
   async getInvoices(filters) {
     try {
       const params = filters ? new URLSearchParams(filters).toString() : '';
-      const res = await apiClient.get(`/finance/invoices?${params}`);
+      const res = await apiClient.get(`/api/v1/finance/invoices?${params}`);
       return res?.data || res;
     } catch {
       return mockInvoices;
@@ -553,7 +553,7 @@ const accountingService = {
   },
   async createInvoice(data) {
     try {
-      const res = await apiClient.post('/finance/invoices', data);
+      const res = await apiClient.post('/api/v1/finance/invoices', data);
       return res?.data || res;
     } catch {
       throw new Error('فشل إنشاء الفاتورة');
@@ -561,7 +561,7 @@ const accountingService = {
   },
   async updateInvoice(id, data) {
     try {
-      const res = await apiClient.put(`/finance/invoices/${id}`, data);
+      const res = await apiClient.put(`/api/v1/finance/invoices/${id}`, data);
       return res?.data || res;
     } catch {
       throw new Error('فشل تحديث الفاتورة');
@@ -572,7 +572,7 @@ const accountingService = {
   async getExpenses(filters) {
     try {
       const params = filters ? new URLSearchParams(filters).toString() : '';
-      const res = await apiClient.get(`/finance/expenses?${params}`);
+      const res = await apiClient.get(`/api/v1/finance/expenses?${params}`);
       return res?.data || res;
     } catch {
       return mockExpenses;
@@ -580,7 +580,7 @@ const accountingService = {
   },
   async createExpense(data) {
     try {
-      const res = await apiClient.post('/finance/expenses', data);
+      const res = await apiClient.post('/api/v1/finance/expenses', data);
       return res?.data || res;
     } catch {
       throw new Error('فشل إنشاء المصروف');
@@ -588,7 +588,7 @@ const accountingService = {
   },
   async approveExpense(id) {
     try {
-      const res = await apiClient.put(`/finance/expenses/${id}/approve`);
+      const res = await apiClient.put(`/api/v1/finance/expenses/${id}/approve`);
       return res?.data || res;
     } catch {
       throw new Error('فشل اعتماد المصروف');
@@ -598,7 +598,7 @@ const accountingService = {
   // Budgets
   async getBudgets() {
     try {
-      const res = await apiClient.get('/finance/budgets');
+      const res = await apiClient.get('/api/v1/finance/budgets');
       return res?.data || res;
     } catch {
       return mockBudgets;
@@ -606,7 +606,7 @@ const accountingService = {
   },
   async createBudget(data) {
     try {
-      const res = await apiClient.post('/finance/budgets', data);
+      const res = await apiClient.post('/api/v1/finance/budgets', data);
       return res?.data || res;
     } catch {
       throw new Error('فشل إنشاء الميزانية');
@@ -616,7 +616,7 @@ const accountingService = {
   // Financial Reports
   async getFinancialReports(type) {
     try {
-      const res = await apiClient.get(`/finance/financial-reports?type=${type || 'all'}`);
+      const res = await apiClient.get(`/api/v1/finance/financial-reports?type=${type || 'all'}`);
       return res?.data || res;
     } catch {
       return mockFinancialReports;
@@ -624,7 +624,7 @@ const accountingService = {
   },
   async getBalanceSheet() {
     try {
-      const res = await apiClient.get('/finance/financial-reports?type=balance-sheet');
+      const res = await apiClient.get('/api/v1/finance/financial-reports?type=balance-sheet');
       return res?.data || res;
     } catch {
       return mockFinancialReports.balanceSheet;
@@ -632,7 +632,7 @@ const accountingService = {
   },
   async getIncomeStatement() {
     try {
-      const res = await apiClient.get('/finance/financial-reports?type=income-statement');
+      const res = await apiClient.get('/api/v1/finance/financial-reports?type=income-statement');
       return res?.data || res;
     } catch {
       return mockFinancialReports.incomeStatement;
@@ -643,7 +643,7 @@ const accountingService = {
   async getPayments(filters) {
     try {
       const params = filters ? new URLSearchParams(filters).toString() : '';
-      const res = await apiClient.get(`/finance/payments?${params}`);
+      const res = await apiClient.get(`/api/v1/finance/payments?${params}`);
       return res?.data || res;
     } catch {
       return [];
@@ -651,7 +651,7 @@ const accountingService = {
   },
   async createPayment(data) {
     try {
-      const res = await apiClient.post('/finance/payments', data);
+      const res = await apiClient.post('/api/v1/finance/payments', data);
       return res?.data || res;
     } catch {
       throw new Error('فشل تسجيل الدفعة');
@@ -661,7 +661,7 @@ const accountingService = {
   // Summary
   async getFinancialSummary() {
     try {
-      const res = await apiClient.get('/finance/summary');
+      const res = await apiClient.get('/api/v1/finance/summary');
       return res?.data || res;
     } catch {
       return mockDashboardData.summary;
@@ -672,7 +672,7 @@ const accountingService = {
   async getGeneralLedger(params) {
     try {
       const query = params ? new URLSearchParams(params).toString() : '';
-      const res = await apiClient.get(`/finance/general-ledger?${query}`);
+      const res = await apiClient.get(`/api/v1/finance/general-ledger?${query}`);
       return res?.data || res;
     } catch {
       return { accounts: [] };
@@ -682,7 +682,7 @@ const accountingService = {
   // Cost Centers - مراكز التكلفة
   async getCostCenters() {
     try {
-      const res = await apiClient.get('/finance/cost-centers');
+      const res = await apiClient.get('/api/v1/finance/cost-centers');
       return res?.data || res;
     } catch {
       return [];
@@ -690,7 +690,7 @@ const accountingService = {
   },
   async createCostCenter(data) {
     try {
-      const res = await apiClient.post('/finance/cost-centers', data);
+      const res = await apiClient.post('/api/v1/finance/cost-centers', data);
       return res?.data || res;
     } catch {
       throw new Error('فشل إنشاء مركز التكلفة');
@@ -698,7 +698,7 @@ const accountingService = {
   },
   async updateCostCenter(id, data) {
     try {
-      const res = await apiClient.put(`/finance/cost-centers/${id}`, data);
+      const res = await apiClient.put(`/api/v1/finance/cost-centers/${id}`, data);
       return res?.data || res;
     } catch {
       throw new Error('فشل تحديث مركز التكلفة');
@@ -708,7 +708,7 @@ const accountingService = {
   // Fixed Assets - الأصول الثابتة
   async getFixedAssets() {
     try {
-      const res = await apiClient.get('/finance/fixed-assets');
+      const res = await apiClient.get('/api/v1/finance/fixed-assets');
       return res?.data || res;
     } catch {
       return [];
@@ -716,7 +716,7 @@ const accountingService = {
   },
   async createFixedAsset(data) {
     try {
-      const res = await apiClient.post('/finance/fixed-assets', data);
+      const res = await apiClient.post('/api/v1/finance/fixed-assets', data);
       return res?.data || res;
     } catch {
       throw new Error('فشل إنشاء الأصل الثابت');
@@ -724,7 +724,7 @@ const accountingService = {
   },
   async updateFixedAsset(id, data) {
     try {
-      const res = await apiClient.put(`/finance/fixed-assets/${id}`, data);
+      const res = await apiClient.put(`/api/v1/finance/fixed-assets/${id}`, data);
       return res?.data || res;
     } catch {
       throw new Error('فشل تحديث الأصل الثابت');
@@ -735,7 +735,7 @@ const accountingService = {
   async getCashFlow(params) {
     try {
       const query = params ? new URLSearchParams(params).toString() : '';
-      const res = await apiClient.get(`/finance/cash-flow?${query}`);
+      const res = await apiClient.get(`/api/v1/finance/cash-flow?${query}`);
       return res?.data || res;
     } catch {
       return null;
@@ -745,7 +745,7 @@ const accountingService = {
   // VAT Returns - إقرارات ضريبة القيمة المضافة
   async getVATReturns() {
     try {
-      const res = await apiClient.get('/finance/vat-returns');
+      const res = await apiClient.get('/api/v1/finance/vat-returns');
       return res?.data || res;
     } catch {
       return [];
@@ -753,7 +753,7 @@ const accountingService = {
   },
   async fileVATReturn(id) {
     try {
-      const res = await apiClient.put(`/finance/vat-returns/${id}/file`);
+      const res = await apiClient.put(`/api/v1/finance/vat-returns/${id}/file`);
       return res?.data || res;
     } catch {
       throw new Error('فشل تقديم إقرار الضريبة');
@@ -763,7 +763,7 @@ const accountingService = {
   // Zakat - الزكاة
   async getZakatData() {
     try {
-      const res = await apiClient.get('/finance/zakat');
+      const res = await apiClient.get('/api/v1/finance/zakat');
       return res?.data || res;
     } catch {
       return null;

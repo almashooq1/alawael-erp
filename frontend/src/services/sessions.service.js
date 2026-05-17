@@ -10,7 +10,7 @@ const sessionsService = {
   /** Fetch all sessions from the smart scheduler */
   getAll: async () => {
     try {
-      const res = await apiClient.get('/smart-scheduler');
+      const res = await apiClient.get('/api/v1/smart-scheduler');
       return res?.data || res || [];
     } catch (err) {
       logger.warn('sessionsService.getAll', err);
@@ -21,7 +21,7 @@ const sessionsService = {
   /** Fetch session statistics summary */
   getStats: async () => {
     try {
-      const res = await apiClient.get('/smart-scheduler/stats');
+      const res = await apiClient.get('/api/v1/smart-scheduler/stats');
       return res?.data || res || null;
     } catch (err) {
       logger.warn('sessionsService.getStats', err);

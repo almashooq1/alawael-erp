@@ -5,7 +5,7 @@
 
 import apiClient from './api.client';
 
-const BASE = '/rehab-licenses';
+const BASE = '/api/v1/rehab-licenses';
 
 const rehabLicenseService = {
   // ==================== أنواع التراخيص ====================

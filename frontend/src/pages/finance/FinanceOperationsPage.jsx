@@ -33,6 +33,7 @@ import {
   Refresh as RefreshIcon,
 } from '@mui/icons-material';
 import financeOperationsService from '../../services/financeOperationsService';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const STATUS_MAP = {
   DRAFT: { label: 'مسودة', color: 'default' },
@@ -128,9 +129,7 @@ export default function FinanceOperationsPage() {
                       <TableCell>{item.invoiceNumber || '—'}</TableCell>
                       <TableCell>{item.customer?.name || item.customerName || '—'}</TableCell>
                       <TableCell>{item.totalAmount?.toLocaleString('ar-SA')} ر.س</TableCell>
-                      <TableCell>
-                        {item.dueDate ? new Date(item.dueDate).toLocaleDateString('ar-SA') : '—'}
-                      </TableCell>
+                      <TableCell>{item.dueDate ? _fmtDate(item.dueDate) : '—'}</TableCell>
                       <TableCell>{getStatusChip(item.status)}</TableCell>
                     </>
                   )}
@@ -148,9 +147,7 @@ export default function FinanceOperationsPage() {
                       <TableCell>{item.voucherNumber || '—'}</TableCell>
                       <TableCell>{item.purpose || '—'}</TableCell>
                       <TableCell>{item.amount?.toLocaleString('ar-SA')} ر.س</TableCell>
-                      <TableCell>
-                        {item.date ? new Date(item.date).toLocaleDateString('ar-SA') : '—'}
-                      </TableCell>
+                      <TableCell>{item.date ? _fmtDate(item.date) : '—'}</TableCell>
                       <TableCell>{getStatusChip(item.status)}</TableCell>
                     </>
                   )}
@@ -165,9 +162,7 @@ export default function FinanceOperationsPage() {
                         />
                       </TableCell>
                       <TableCell>{item.amount?.toLocaleString('ar-SA')} ر.س</TableCell>
-                      <TableCell>
-                        {item.date ? new Date(item.date).toLocaleDateString('ar-SA') : '—'}
-                      </TableCell>
+                      <TableCell>{item.date ? _fmtDate(item.date) : '—'}</TableCell>
                       <TableCell>{item.category || '—'}</TableCell>
                     </>
                   )}
@@ -176,9 +171,7 @@ export default function FinanceOperationsPage() {
                       <TableCell>{item.chequeNumber || '—'}</TableCell>
                       <TableCell>{item.payee || '—'}</TableCell>
                       <TableCell>{item.amount?.toLocaleString('ar-SA')} ر.س</TableCell>
-                      <TableCell>
-                        {item.dueDate ? new Date(item.dueDate).toLocaleDateString('ar-SA') : '—'}
-                      </TableCell>
+                      <TableCell>{item.dueDate ? _fmtDate(item.dueDate) : '—'}</TableCell>
                       <TableCell>{getStatusChip(item.status)}</TableCell>
                     </>
                   )}

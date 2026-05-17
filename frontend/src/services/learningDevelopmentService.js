@@ -6,7 +6,7 @@
  */
 import api from './api';
 
-const BASE = '/api/learning-development';
+const BASE = '/api/v1/learning-development';
 
 const learningDevelopmentService = {
   // ── Programs ──

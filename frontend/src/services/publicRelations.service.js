@@ -5,7 +5,7 @@ import apiClient from './api';
 
 export const getPRDashboard = async () => {
   try {
-    const { data } = await apiClient.get('/api/public-relations/dashboard');
+    const { data } = await apiClient.get('/api/v1/public-relations/dashboard');
     return data.data;
   } catch {
     return {
@@ -30,55 +30,55 @@ export const getPRDashboard = async () => {
 
 export const getMediaList = async params => {
   try {
-    const { data } = await apiClient.get('/api/public-relations/media', { params });
+    const { data } = await apiClient.get('/api/v1/public-relations/media', { params });
     return data.data;
   } catch {
     return [];
   }
 };
 export const createMedia = async body => {
-  const { data } = await apiClient.post('/api/public-relations/media', body);
+  const { data } = await apiClient.post('/api/v1/public-relations/media', body);
   return data.data;
 };
 export const updateMedia = async (id, body) => {
-  const { data } = await apiClient.put(`/api/public-relations/media/${id}`, body);
+  const { data } = await apiClient.put(`/api/v1/public-relations/media/${id}`, body);
   return data.data;
 };
 export const deleteMedia = async id => {
-  const { data } = await apiClient.delete(`/api/public-relations/media/${id}`);
+  const { data } = await apiClient.delete(`/api/v1/public-relations/media/${id}`);
   return data.data;
 };
 
 export const getCampaigns = async params => {
   try {
-    const { data } = await apiClient.get('/api/public-relations/campaigns', { params });
+    const { data } = await apiClient.get('/api/v1/public-relations/campaigns', { params });
     return data.data;
   } catch {
     return [];
   }
 };
 export const createCampaign = async body => {
-  const { data } = await apiClient.post('/api/public-relations/campaigns', body);
+  const { data } = await apiClient.post('/api/v1/public-relations/campaigns', body);
   return data.data;
 };
 export const updateCampaign = async (id, body) => {
-  const { data } = await apiClient.put(`/api/public-relations/campaigns/${id}`, body);
+  const { data } = await apiClient.put(`/api/v1/public-relations/campaigns/${id}`, body);
   return data.data;
 };
 
 export const getPartnerships = async () => {
   try {
-    const { data } = await apiClient.get('/api/public-relations/partnerships');
+    const { data } = await apiClient.get('/api/v1/public-relations/partnerships');
     return data.data;
   } catch {
     return [];
   }
 };
 export const createPartnership = async body => {
-  const { data } = await apiClient.post('/api/public-relations/partnerships', body);
+  const { data } = await apiClient.post('/api/v1/public-relations/partnerships', body);
   return data.data;
 };
 export const updatePartnership = async (id, body) => {
-  const { data } = await apiClient.put(`/api/public-relations/partnerships/${id}`, body);
+  const { data } = await apiClient.put(`/api/v1/public-relations/partnerships/${id}`, body);
   return data.data;
 };

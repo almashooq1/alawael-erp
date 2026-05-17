@@ -46,6 +46,7 @@ import {
   Cancel as CancelIcon,
 } from '@mui/icons-material';
 import axios from 'axios';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const API = axios.create({ baseURL: '/api/nphies', withCredentials: true });
 
@@ -813,9 +814,7 @@ export default function NphiesPage() {
                       <Typography variant="body2" color="text.secondary">
                         صالحة حتى
                       </Typography>
-                      <Typography>
-                        {new Date(authResult.expiryDate).toLocaleDateString('ar-SA')}
-                      </Typography>
+                      <Typography>{_fmtDate(authResult.expiryDate)}</Typography>
                     </Box>
                   )}
                   {authResult.approvedServices?.length > 0 && (
@@ -910,13 +909,11 @@ export default function NphiesPage() {
                             ['الحالة', <ClaimStatusChip key="s" status={statusResult.status} />],
                             [
                               'تاريخ التقديم',
-                              statusResult.submittedAt &&
-                                new Date(statusResult.submittedAt).toLocaleDateString('ar-SA'),
+                              statusResult.submittedAt && _fmtDate(statusResult.submittedAt),
                             ],
                             [
                               'آخر تحديث',
-                              statusResult.updatedAt &&
-                                new Date(statusResult.updatedAt).toLocaleDateString('ar-SA'),
+                              statusResult.updatedAt && _fmtDate(statusResult.updatedAt),
                             ],
                             [
                               'المبلغ الموافق عليه',

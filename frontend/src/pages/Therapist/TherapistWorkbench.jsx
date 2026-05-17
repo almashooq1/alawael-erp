@@ -47,6 +47,7 @@ import DateRangeIcon from '@mui/icons-material/DateRange';
 import PeopleIcon from '@mui/icons-material/People';
 import EventIcon from '@mui/icons-material/Event';
 import api from '../../services/api.client';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const SESSION_STATUS = {
   SCHEDULED: { label: 'مجدولة', color: 'info' },
@@ -66,7 +67,7 @@ function fullName(x) {
 function formatDate(v) {
   if (!v) return '—';
   try {
-    return new Date(v).toLocaleDateString('ar-SA');
+    return _fmtDate(v);
   } catch {
     return '—';
   }
@@ -377,7 +378,7 @@ export default function TherapistWorkbench() {
               <Paper key={day}>
                 <Box sx={{ bgcolor: 'primary.main', color: 'white', px: 2, py: 1 }}>
                   <Typography fontWeight="bold">
-                    {new Date(day).toLocaleDateString('ar-SA', {
+                    {_fmtDate(day, {
                       weekday: 'long',
                       day: 'numeric',
                       month: 'long',

@@ -56,6 +56,7 @@ import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
 import QrCode2Icon from '@mui/icons-material/QrCode2';
 import api from '../../services/api.client';
 import ParentComplaintsPanel from './ParentComplaintsPanel';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const ACTIVE_CHILD_KEY = 'parent-portal.activeChildId';
 
@@ -101,7 +102,7 @@ function fullName(x) {
 function formatDate(v) {
   if (!v) return '—';
   try {
-    return new Date(v).toLocaleDateString('ar-SA');
+    return _fmtDate(v);
   } catch {
     return '—';
   }
@@ -849,7 +850,7 @@ function CertificatesTab({ childId, certificates }) {
   const fmt = d => {
     if (!d) return '—';
     try {
-      return new Date(d).toLocaleDateString('ar-SA-u-ca-gregory');
+      return _fmtDate(d);
     } catch {
       return String(d).slice(0, 10);
     }

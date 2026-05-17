@@ -50,6 +50,7 @@ import {
 } from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients } from '../../theme/palette';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 /* ═══ Status & Type Mappings ═══════════════════════════════════════════════ */
 const statusMap = {
@@ -448,7 +449,7 @@ export default function ESignature() {
                   </TableCell>
                   <TableCell>
                     <Typography variant="caption">
-                      {r.createdAt ? new Date(r.createdAt).toLocaleDateString('ar-SA') : '-'}
+                      {r.createdAt ? _fmtDate(r.createdAt) : '-'}
                     </Typography>
                   </TableCell>
                   <TableCell onClick={e => e.stopPropagation()}>

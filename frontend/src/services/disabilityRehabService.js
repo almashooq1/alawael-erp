@@ -22,49 +22,55 @@ const safe =
 // ═══════════════════════════════════════════
 export const rehabProgramService = {
   getAll: safe(async (params = {}) => {
-    const r = await apiClient.get('/disability-rehab/programs', { params });
+    const r = await apiClient.get('/api/v1/disability-rehab/programs', { params });
     return r.data;
   }),
   getById: safe(async id => {
-    const r = await apiClient.get(`/disability-rehab/programs/${id}`);
+    const r = await apiClient.get(`/api/v1/disability-rehab/programs/${id}`);
     return r.data;
   }),
   create: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/programs', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/programs', data);
     return r.data;
   }),
   update: safe(async (id, data) => {
-    const r = await apiClient.put(`/disability-rehab/programs/${id}`, data);
+    const r = await apiClient.put(`/api/v1/disability-rehab/programs/${id}`, data);
     return r.data;
   }),
   remove: safe(async id => {
-    const r = await apiClient.delete(`/disability-rehab/programs/${id}`);
+    const r = await apiClient.delete(`/api/v1/disability-rehab/programs/${id}`);
     return r.data;
   }),
   complete: safe(async id => {
-    const r = await apiClient.put(`/disability-rehab/programs/${id}/complete`);
+    const r = await apiClient.put(`/api/v1/disability-rehab/programs/${id}/complete`);
     return r.data;
   }),
   getReport: safe(async id => {
-    const r = await apiClient.get(`/disability-rehab/programs/${id}/report`);
+    const r = await apiClient.get(`/api/v1/disability-rehab/programs/${id}/report`);
     return r.data;
   }),
 
   // Sessions within a program
   addSession: safe(async (programId, data) => {
-    const r = await apiClient.post(`/disability-rehab/programs/${programId}/sessions`, data);
+    const r = await apiClient.post(`/api/v1/disability-rehab/programs/${programId}/sessions`, data);
     return r.data;
   }),
 
   // Goals within a program
   updateGoal: safe(async (programId, goalId, data) => {
-    const r = await apiClient.put(`/disability-rehab/programs/${programId}/goals/${goalId}`, data);
+    const r = await apiClient.put(
+      `/api/v1/disability-rehab/programs/${programId}/goals/${goalId}`,
+      data
+    );
     return r.data;
   }),
 
   // Assessments within a program
   addAssessment: safe(async (programId, data) => {
-    const r = await apiClient.post(`/disability-rehab/programs/${programId}/assessments`, data);
+    const r = await apiClient.post(
+      `/api/v1/disability-rehab/programs/${programId}/assessments`,
+      data
+    );
     return r.data;
   }),
 
@@ -77,19 +83,19 @@ export const rehabProgramService = {
 // ═══════════════════════════════════════════
 export const therapySessionService = {
   getAll: safe(async (params = {}) => {
-    const r = await apiClient.get('/therapist/sessions', { params });
+    const r = await apiClient.get('/api/v1/therapist/sessions', { params });
     return r.data;
   }),
   create: safe(async data => {
-    const r = await apiClient.post('/therapist/sessions', data);
+    const r = await apiClient.post('/api/v1/therapist/sessions', data);
     return r.data;
   }),
   getSchedule: safe(async (params = {}) => {
-    const r = await apiClient.get('/therapist/schedule', { params });
+    const r = await apiClient.get('/api/v1/therapist/schedule', { params });
     return r.data;
   }),
   createSchedule: safe(async data => {
-    const r = await apiClient.post('/therapist/schedule', data);
+    const r = await apiClient.post('/api/v1/therapist/schedule', data);
     return r.data;
   }),
 
@@ -103,39 +109,39 @@ export const therapySessionService = {
 // ═══════════════════════════════════════════
 export const specializedProgramService = {
   getAll: safe(async (params = {}) => {
-    const r = await apiClient.get('/specialized-programs', { params });
+    const r = await apiClient.get('/api/v1/specialized-programs', { params });
     return r.data;
   }),
   getById: safe(async id => {
-    const r = await apiClient.get(`/specialized-programs/${id}`);
+    const r = await apiClient.get(`/api/v1/specialized-programs/${id}`);
     return r.data;
   }),
   create: safe(async data => {
-    const r = await apiClient.post('/specialized-programs', data);
+    const r = await apiClient.post('/api/v1/specialized-programs', data);
     return r.data;
   }),
   update: safe(async (id, data) => {
-    const r = await apiClient.put(`/specialized-programs/${id}`, data);
+    const r = await apiClient.put(`/api/v1/specialized-programs/${id}`, data);
     return r.data;
   }),
   remove: safe(async id => {
-    const r = await apiClient.delete(`/specialized-programs/${id}`);
+    const r = await apiClient.delete(`/api/v1/specialized-programs/${id}`);
     return r.data;
   }),
   activate: safe(async id => {
-    const r = await apiClient.post(`/specialized-programs/${id}/activate`);
+    const r = await apiClient.post(`/api/v1/specialized-programs/${id}/activate`);
     return r.data;
   }),
   getByDisability: safe(async type => {
-    const r = await apiClient.get(`/specialized-programs/by-disability/${type}`);
+    const r = await apiClient.get(`/api/v1/specialized-programs/by-disability/${type}`);
     return r.data;
   }),
   getDisabilityTypes: safe(async () => {
-    const r = await apiClient.get('/specialized-programs/disability-types');
+    const r = await apiClient.get('/api/v1/specialized-programs/disability-types');
     return r.data;
   }),
   getStatistics: safe(async id => {
-    const r = await apiClient.get(`/specialized-programs/${id}/statistics`);
+    const r = await apiClient.get(`/api/v1/specialized-programs/${id}/statistics`);
     return r.data;
   }),
 
@@ -147,31 +153,31 @@ export const specializedProgramService = {
 // ═══════════════════════════════════════════
 export const assistiveDeviceService = {
   getAll: safe(async (params = {}) => {
-    const r = await apiClient.get('/rehab-equipment', { params });
+    const r = await apiClient.get('/api/v1/rehab-equipment', { params });
     return r.data;
   }),
   getById: safe(async id => {
-    const r = await apiClient.get(`/rehab-equipment/${id}`);
+    const r = await apiClient.get(`/api/v1/rehab-equipment/${id}`);
     return r.data;
   }),
   create: safe(async data => {
-    const r = await apiClient.post('/rehab-equipment', data);
+    const r = await apiClient.post('/api/v1/rehab-equipment', data);
     return r.data;
   }),
   update: safe(async (id, data) => {
-    const r = await apiClient.put(`/rehab-equipment/${id}`, data);
+    const r = await apiClient.put(`/api/v1/rehab-equipment/${id}`, data);
     return r.data;
   }),
   assign: safe(async (id, data) => {
-    const r = await apiClient.post(`/rehab-equipment/${id}/assign`, data);
+    const r = await apiClient.post(`/api/v1/rehab-equipment/${id}/assign`, data);
     return r.data;
   }),
   returnDevice: safe(async id => {
-    const r = await apiClient.post(`/rehab-equipment/${id}/return`);
+    const r = await apiClient.post(`/api/v1/rehab-equipment/${id}/return`);
     return r.data;
   }),
   maintenance: safe(async (id, data) => {
-    const r = await apiClient.post(`/rehab-equipment/${id}/maintenance`, data);
+    const r = await apiClient.post(`/api/v1/rehab-equipment/${id}/maintenance`, data);
     return r.data;
   }),
 
@@ -184,15 +190,15 @@ export const assistiveDeviceService = {
 // ═══════════════════════════════════════════
 export const rehabReportService = {
   getStatistics: safe(async () => {
-    const r = await apiClient.get('/disability-rehab/statistics');
+    const r = await apiClient.get('/api/v1/disability-rehab/statistics');
     return r.data;
   }),
   getPerformance: safe(async (year, month) => {
-    const r = await apiClient.get(`/disability-rehab/performance/${year}/${month}`);
+    const r = await apiClient.get(`/api/v1/disability-rehab/performance/${year}/${month}`);
     return r.data;
   }),
   getInfo: safe(async () => {
-    const r = await apiClient.get('/disability-rehab/info');
+    const r = await apiClient.get('/api/v1/disability-rehab/info');
     return r.data;
   }),
 
@@ -887,35 +893,35 @@ const MOCK_PERFORMANCE = {
 // ═══════════════════════════════════════════
 export const artTherapyService = {
   assess: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/art-therapy/assess', {
+    const r = await apiClient.post('/api/v1/disability-rehab/art-therapy/assess', {
       beneficiaryId,
       assessmentData: data,
     });
     return r.data;
   }),
   createPlan: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/art-therapy/plan', {
+    const r = await apiClient.post('/api/v1/disability-rehab/art-therapy/plan', {
       beneficiaryId,
       assessmentData: data,
     });
     return r.data;
   }),
   recordSession: safe(async (beneficiaryId, sessionData) => {
-    const r = await apiClient.post('/disability-rehab/art-therapy/session', {
+    const r = await apiClient.post('/api/v1/disability-rehab/art-therapy/session', {
       beneficiaryId,
       sessionData,
     });
     return r.data;
   }),
   recordArtwork: safe(async (beneficiaryId, artworkData) => {
-    const r = await apiClient.post('/disability-rehab/art-therapy/artwork', {
+    const r = await apiClient.post('/api/v1/disability-rehab/art-therapy/artwork', {
       beneficiaryId,
       artworkData,
     });
     return r.data;
   }),
   getProgress: safe(async beneficiaryId => {
-    const r = await apiClient.get(`/disability-rehab/art-therapy/progress/${beneficiaryId}`);
+    const r = await apiClient.get(`/api/v1/disability-rehab/art-therapy/progress/${beneficiaryId}`);
     return r.data;
   }),
 };
@@ -925,28 +931,30 @@ export const artTherapyService = {
 // ═══════════════════════════════════════════
 export const musicTherapyService = {
   assess: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/music-therapy/assess', {
+    const r = await apiClient.post('/api/v1/disability-rehab/music-therapy/assess', {
       beneficiaryId,
       assessmentData: data,
     });
     return r.data;
   }),
   createPlan: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/music-therapy/plan', {
+    const r = await apiClient.post('/api/v1/disability-rehab/music-therapy/plan', {
       beneficiaryId,
       assessmentData: data,
     });
     return r.data;
   }),
   recordSession: safe(async (beneficiaryId, sessionData) => {
-    const r = await apiClient.post('/disability-rehab/music-therapy/session', {
+    const r = await apiClient.post('/api/v1/disability-rehab/music-therapy/session', {
       beneficiaryId,
       sessionData,
     });
     return r.data;
   }),
   getProgress: safe(async beneficiaryId => {
-    const r = await apiClient.get(`/disability-rehab/music-therapy/progress/${beneficiaryId}`);
+    const r = await apiClient.get(
+      `/api/v1/disability-rehab/music-therapy/progress/${beneficiaryId}`
+    );
     return r.data;
   }),
 };
@@ -956,28 +964,30 @@ export const musicTherapyService = {
 // ═══════════════════════════════════════════
 export const hydrotherapyService = {
   assess: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/hydrotherapy/assess', {
+    const r = await apiClient.post('/api/v1/disability-rehab/hydrotherapy/assess', {
       beneficiaryId,
       assessmentData: data,
     });
     return r.data;
   }),
   createPlan: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/hydrotherapy/plan', {
+    const r = await apiClient.post('/api/v1/disability-rehab/hydrotherapy/plan', {
       beneficiaryId,
       assessmentData: data,
     });
     return r.data;
   }),
   recordSession: safe(async (beneficiaryId, sessionData) => {
-    const r = await apiClient.post('/disability-rehab/hydrotherapy/session', {
+    const r = await apiClient.post('/api/v1/disability-rehab/hydrotherapy/session', {
       beneficiaryId,
       sessionData,
     });
     return r.data;
   }),
   getProgress: safe(async beneficiaryId => {
-    const r = await apiClient.get(`/disability-rehab/hydrotherapy/progress/${beneficiaryId}`);
+    const r = await apiClient.get(
+      `/api/v1/disability-rehab/hydrotherapy/progress/${beneficiaryId}`
+    );
     return r.data;
   }),
 };
@@ -987,35 +997,35 @@ export const hydrotherapyService = {
 // ═══════════════════════════════════════════
 export const abaTherapyService = {
   assess: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/aba-therapy/assess', {
+    const r = await apiClient.post('/api/v1/disability-rehab/aba-therapy/assess', {
       beneficiaryId,
       assessmentData: data,
     });
     return r.data;
   }),
   createPlan: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/aba-therapy/plan', {
+    const r = await apiClient.post('/api/v1/disability-rehab/aba-therapy/plan', {
       beneficiaryId,
       assessmentData: data,
     });
     return r.data;
   }),
   recordSession: safe(async (beneficiaryId, sessionData) => {
-    const r = await apiClient.post('/disability-rehab/aba-therapy/session', {
+    const r = await apiClient.post('/api/v1/disability-rehab/aba-therapy/session', {
       beneficiaryId,
       sessionData,
     });
     return r.data;
   }),
   recordDailyBehavior: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/aba-therapy/daily-behavior', {
+    const r = await apiClient.post('/api/v1/disability-rehab/aba-therapy/daily-behavior', {
       beneficiaryId,
       data,
     });
     return r.data;
   }),
   getProgress: safe(async beneficiaryId => {
-    const r = await apiClient.get(`/disability-rehab/aba-therapy/progress/${beneficiaryId}`);
+    const r = await apiClient.get(`/api/v1/disability-rehab/aba-therapy/progress/${beneficiaryId}`);
     return r.data;
   }),
 };
@@ -1025,35 +1035,37 @@ export const abaTherapyService = {
 // ═══════════════════════════════════════════
 export const cognitiveRehabService = {
   assess: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/cognitive-rehab/assess', {
+    const r = await apiClient.post('/api/v1/disability-rehab/cognitive-rehab/assess', {
       beneficiaryId,
       assessmentData: data,
     });
     return r.data;
   }),
   createPlan: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/cognitive-rehab/plan', {
+    const r = await apiClient.post('/api/v1/disability-rehab/cognitive-rehab/plan', {
       beneficiaryId,
       assessmentData: data,
     });
     return r.data;
   }),
   recordSession: safe(async (beneficiaryId, sessionData) => {
-    const r = await apiClient.post('/disability-rehab/cognitive-rehab/session', {
+    const r = await apiClient.post('/api/v1/disability-rehab/cognitive-rehab/session', {
       beneficiaryId,
       sessionData,
     });
     return r.data;
   }),
   recordHomeExercise: safe(async (beneficiaryId, exerciseData) => {
-    const r = await apiClient.post('/disability-rehab/cognitive-rehab/home-exercise', {
+    const r = await apiClient.post('/api/v1/disability-rehab/cognitive-rehab/home-exercise', {
       beneficiaryId,
       exerciseData,
     });
     return r.data;
   }),
   getProgress: safe(async beneficiaryId => {
-    const r = await apiClient.get(`/disability-rehab/cognitive-rehab/progress/${beneficiaryId}`);
+    const r = await apiClient.get(
+      `/api/v1/disability-rehab/cognitive-rehab/progress/${beneficiaryId}`
+    );
     return r.data;
   }),
 };
@@ -1063,28 +1075,28 @@ export const cognitiveRehabService = {
 // ═══════════════════════════════════════════
 export const sensoryIntegrationService = {
   assess: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/sensory-integration/assess', {
+    const r = await apiClient.post('/api/v1/disability-rehab/sensory-integration/assess', {
       beneficiaryId,
       assessmentData: data,
     });
     return r.data;
   }),
   createPlan: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/sensory-integration/plan', {
+    const r = await apiClient.post('/api/v1/disability-rehab/sensory-integration/plan', {
       beneficiaryId,
       assessmentData: data,
     });
     return r.data;
   }),
   recordSession: safe(async (beneficiaryId, sessionData) => {
-    const r = await apiClient.post('/disability-rehab/sensory-integration/session', {
+    const r = await apiClient.post('/api/v1/disability-rehab/sensory-integration/session', {
       beneficiaryId,
       sessionData,
     });
     return r.data;
   }),
   updateSensoryDiet: safe(async (beneficiaryId, dietData) => {
-    const r = await apiClient.post('/disability-rehab/sensory-integration/sensory-diet', {
+    const r = await apiClient.post('/api/v1/disability-rehab/sensory-integration/sensory-diet', {
       beneficiaryId,
       dietData,
     });
@@ -1103,28 +1115,30 @@ export const sensoryIntegrationService = {
 // ═══════════════════════════════════════════
 export const animalTherapyService = {
   assess: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/animal-therapy/assess', {
+    const r = await apiClient.post('/api/v1/disability-rehab/animal-therapy/assess', {
       beneficiaryId,
       assessmentData: data,
     });
     return r.data;
   }),
   createPlan: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/animal-therapy/plan', {
+    const r = await apiClient.post('/api/v1/disability-rehab/animal-therapy/plan', {
       beneficiaryId,
       assessmentData: data,
     });
     return r.data;
   }),
   recordSession: safe(async (beneficiaryId, sessionData) => {
-    const r = await apiClient.post('/disability-rehab/animal-therapy/session', {
+    const r = await apiClient.post('/api/v1/disability-rehab/animal-therapy/session', {
       beneficiaryId,
       sessionData,
     });
     return r.data;
   }),
   getProgress: safe(async beneficiaryId => {
-    const r = await apiClient.get(`/disability-rehab/animal-therapy/progress/${beneficiaryId}`);
+    const r = await apiClient.get(
+      `/api/v1/disability-rehab/animal-therapy/progress/${beneficiaryId}`
+    );
     return r.data;
   }),
 };
@@ -1134,28 +1148,28 @@ export const animalTherapyService = {
 // ═══════════════════════════════════════════
 export const therapeuticNutritionService = {
   assess: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/therapeutic-nutrition/assess', {
+    const r = await apiClient.post('/api/v1/disability-rehab/therapeutic-nutrition/assess', {
       beneficiaryId,
       assessmentData: data,
     });
     return r.data;
   }),
   createPlan: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/therapeutic-nutrition/plan', {
+    const r = await apiClient.post('/api/v1/disability-rehab/therapeutic-nutrition/plan', {
       beneficiaryId,
       assessmentData: data,
     });
     return r.data;
   }),
   recordSession: safe(async (beneficiaryId, sessionData) => {
-    const r = await apiClient.post('/disability-rehab/therapeutic-nutrition/session', {
+    const r = await apiClient.post('/api/v1/disability-rehab/therapeutic-nutrition/session', {
       beneficiaryId,
       sessionData,
     });
     return r.data;
   }),
   recordDailyFeeding: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/therapeutic-nutrition/daily-feeding', {
+    const r = await apiClient.post('/api/v1/disability-rehab/therapeutic-nutrition/daily-feeding', {
       beneficiaryId,
       data,
     });
@@ -1174,39 +1188,41 @@ export const therapeuticNutritionService = {
 // ═══════════════════════════════════════════
 export const vrTherapyService = {
   assess: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/vr-therapy/assess', {
+    const r = await apiClient.post('/api/v1/disability-rehab/vr-therapy/assess', {
       beneficiaryId,
       assessmentData: data,
     });
     return r.data;
   }),
   createPlan: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/vr-therapy/plan', {
+    const r = await apiClient.post('/api/v1/disability-rehab/vr-therapy/plan', {
       beneficiaryId,
       planData: data,
     });
     return r.data;
   }),
   recordSession: safe(async (beneficiaryId, sessionData) => {
-    const r = await apiClient.post('/disability-rehab/vr-therapy/session', {
+    const r = await apiClient.post('/api/v1/disability-rehab/vr-therapy/session', {
       beneficiaryId,
       sessionData,
     });
     return r.data;
   }),
   createEnvironment: safe(async (beneficiaryId, envData) => {
-    const r = await apiClient.post('/disability-rehab/vr-therapy/environment', {
+    const r = await apiClient.post('/api/v1/disability-rehab/vr-therapy/environment', {
       beneficiaryId,
       environmentData: envData,
     });
     return r.data;
   }),
   getEnvironments: safe(async beneficiaryId => {
-    const r = await apiClient.get(`/disability-rehab/vr-therapy/environments/${beneficiaryId}`);
+    const r = await apiClient.get(
+      `/api/v1/disability-rehab/vr-therapy/environments/${beneficiaryId}`
+    );
     return r.data;
   }),
   getProgress: safe(async beneficiaryId => {
-    const r = await apiClient.get(`/disability-rehab/vr-therapy/progress/${beneficiaryId}`);
+    const r = await apiClient.get(`/api/v1/disability-rehab/vr-therapy/progress/${beneficiaryId}`);
     return r.data;
   }),
 };
@@ -1216,35 +1232,37 @@ export const vrTherapyService = {
 // ═══════════════════════════════════════════
 export const playTherapyService = {
   assess: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/play-therapy/assess', {
+    const r = await apiClient.post('/api/v1/disability-rehab/play-therapy/assess', {
       beneficiaryId,
       assessmentData: data,
     });
     return r.data;
   }),
   createPlan: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/play-therapy/plan', {
+    const r = await apiClient.post('/api/v1/disability-rehab/play-therapy/plan', {
       beneficiaryId,
       planData: data,
     });
     return r.data;
   }),
   recordSession: safe(async (beneficiaryId, sessionData) => {
-    const r = await apiClient.post('/disability-rehab/play-therapy/session', {
+    const r = await apiClient.post('/api/v1/disability-rehab/play-therapy/session', {
       beneficiaryId,
       sessionData,
     });
     return r.data;
   }),
   updateProfile: safe(async (beneficiaryId, profileData) => {
-    const r = await apiClient.post('/disability-rehab/play-therapy/profile', {
+    const r = await apiClient.post('/api/v1/disability-rehab/play-therapy/profile', {
       beneficiaryId,
       profileData,
     });
     return r.data;
   }),
   getProgress: safe(async beneficiaryId => {
-    const r = await apiClient.get(`/disability-rehab/play-therapy/progress/${beneficiaryId}`);
+    const r = await apiClient.get(
+      `/api/v1/disability-rehab/play-therapy/progress/${beneficiaryId}`
+    );
     return r.data;
   }),
 };
@@ -1254,32 +1272,34 @@ export const playTherapyService = {
 // ═══════════════════════════════════════════
 export const roboticTherapyService = {
   assess: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/robotic-therapy/assess', {
+    const r = await apiClient.post('/api/v1/disability-rehab/robotic-therapy/assess', {
       beneficiaryId,
       assessmentData: data,
     });
     return r.data;
   }),
   createPlan: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/robotic-therapy/plan', {
+    const r = await apiClient.post('/api/v1/disability-rehab/robotic-therapy/plan', {
       beneficiaryId,
       planData: data,
     });
     return r.data;
   }),
   recordSession: safe(async (beneficiaryId, sessionData) => {
-    const r = await apiClient.post('/disability-rehab/robotic-therapy/session', {
+    const r = await apiClient.post('/api/v1/disability-rehab/robotic-therapy/session', {
       beneficiaryId,
       sessionData,
     });
     return r.data;
   }),
   getDevices: safe(async () => {
-    const r = await apiClient.get('/disability-rehab/robotic-therapy/devices');
+    const r = await apiClient.get('/api/v1/disability-rehab/robotic-therapy/devices');
     return r.data;
   }),
   getProgress: safe(async beneficiaryId => {
-    const r = await apiClient.get(`/disability-rehab/robotic-therapy/progress/${beneficiaryId}`);
+    const r = await apiClient.get(
+      `/api/v1/disability-rehab/robotic-therapy/progress/${beneficiaryId}`
+    );
     return r.data;
   }),
 };
@@ -1289,35 +1309,37 @@ export const roboticTherapyService = {
 // ═══════════════════════════════════════════
 export const adaptiveSportsService = {
   assess: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/adaptive-sports/assess', {
+    const r = await apiClient.post('/api/v1/disability-rehab/adaptive-sports/assess', {
       beneficiaryId,
       assessmentData: data,
     });
     return r.data;
   }),
   createPlan: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/adaptive-sports/plan', {
+    const r = await apiClient.post('/api/v1/disability-rehab/adaptive-sports/plan', {
       beneficiaryId,
       planData: data,
     });
     return r.data;
   }),
   recordSession: safe(async (beneficiaryId, sessionData) => {
-    const r = await apiClient.post('/disability-rehab/adaptive-sports/session', {
+    const r = await apiClient.post('/api/v1/disability-rehab/adaptive-sports/session', {
       beneficiaryId,
       sessionData,
     });
     return r.data;
   }),
   recordAchievement: safe(async (beneficiaryId, achievementData) => {
-    const r = await apiClient.post('/disability-rehab/adaptive-sports/achievement', {
+    const r = await apiClient.post('/api/v1/disability-rehab/adaptive-sports/achievement', {
       beneficiaryId,
       achievementData,
     });
     return r.data;
   }),
   getProgress: safe(async beneficiaryId => {
-    const r = await apiClient.get(`/disability-rehab/adaptive-sports/progress/${beneficiaryId}`);
+    const r = await apiClient.get(
+      `/api/v1/disability-rehab/adaptive-sports/progress/${beneficiaryId}`
+    );
     return r.data;
   }),
 };
@@ -1327,31 +1349,34 @@ export const adaptiveSportsService = {
 // ═══════════════════════════════════════════
 export const learningDisabilitiesService = {
   assess: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/learning-disabilities/assess', {
+    const r = await apiClient.post('/api/v1/disability-rehab/learning-disabilities/assess', {
       beneficiaryId,
       assessmentData: data,
     });
     return r.data;
   }),
   createPlan: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/learning-disabilities/plan', {
+    const r = await apiClient.post('/api/v1/disability-rehab/learning-disabilities/plan', {
       beneficiaryId,
       planData: data,
     });
     return r.data;
   }),
   recordSession: safe(async (beneficiaryId, sessionData) => {
-    const r = await apiClient.post('/disability-rehab/learning-disabilities/session', {
+    const r = await apiClient.post('/api/v1/disability-rehab/learning-disabilities/session', {
       beneficiaryId,
       sessionData,
     });
     return r.data;
   }),
   quickAssessment: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/learning-disabilities/quick-assessment', {
-      beneficiaryId,
-      ...data,
-    });
+    const r = await apiClient.post(
+      '/api/v1/disability-rehab/learning-disabilities/quick-assessment',
+      {
+        beneficiaryId,
+        ...data,
+      }
+    );
     return r.data;
   }),
   getProgress: safe(async beneficiaryId => {
@@ -1367,27 +1392,27 @@ export const learningDisabilitiesService = {
 // ═══════════════════════════════════════════
 export const teleRehabService = {
   createSession: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/tele-rehab/session', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/tele-rehab/session', data);
     return r.data;
   }),
   startSession: safe(async sessionId => {
-    const r = await apiClient.post(`/disability-rehab/tele-rehab/start/${sessionId}`);
+    const r = await apiClient.post(`/api/v1/disability-rehab/tele-rehab/start/${sessionId}`);
     return r.data;
   }),
   endSession: safe(async (sessionId, data) => {
-    const r = await apiClient.post(`/disability-rehab/tele-rehab/end/${sessionId}`, data);
+    const r = await apiClient.post(`/api/v1/disability-rehab/tele-rehab/end/${sessionId}`, data);
     return r.data;
   }),
   createPrescription: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/tele-rehab/prescription', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/tele-rehab/prescription', data);
     return r.data;
   }),
   recordExerciseProgress: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/tele-rehab/exercise-progress', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/tele-rehab/exercise-progress', data);
     return r.data;
   }),
   getReport: safe(async beneficiaryId => {
-    const r = await apiClient.get(`/disability-rehab/tele-rehab/report/${beneficiaryId}`);
+    const r = await apiClient.get(`/api/v1/disability-rehab/tele-rehab/report/${beneficiaryId}`);
     return r.data;
   }),
 };
@@ -1397,23 +1422,23 @@ export const teleRehabService = {
 // ═══════════════════════════════════════════
 export const earlyInterventionService = {
   register: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/early-intervention/register', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/early-intervention/register', data);
     return r.data;
   }),
   screening: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/early-intervention/screening', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/early-intervention/screening', data);
     return r.data;
   }),
   createPlan: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/early-intervention/plan', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/early-intervention/plan', data);
     return r.data;
   }),
   recordSession: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/early-intervention/session', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/early-intervention/session', data);
     return r.data;
   }),
   getReport: safe(async caseId => {
-    const r = await apiClient.get(`/disability-rehab/early-intervention/report/${caseId}`);
+    const r = await apiClient.get(`/api/v1/disability-rehab/early-intervention/report/${caseId}`);
     return r.data;
   }),
 };
@@ -1423,19 +1448,19 @@ export const earlyInterventionService = {
 // ═══════════════════════════════════════════
 export const familySupportService = {
   register: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/family-support/register', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/family-support/register', data);
     return r.data;
   }),
   assess: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/family-support/assess', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/family-support/assess', data);
     return r.data;
   }),
   counseling: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/family-support/counseling', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/family-support/counseling', data);
     return r.data;
   }),
   training: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/family-support/training', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/family-support/training', data);
     return r.data;
   }),
   getResources: safe(async familyId => {
@@ -1451,19 +1476,22 @@ export const familySupportService = {
 // ═══════════════════════════════════════════
 export const communityIntegrationService = {
   createProgram: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/community-integration/program', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/community-integration/program', data);
     return r.data;
   }),
   enroll: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/community-integration/enroll', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/community-integration/enroll', data);
     return r.data;
   }),
   recordAttendance: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/community-integration/attendance', data);
+    const r = await apiClient.post(
+      '/api/v1/disability-rehab/community-integration/attendance',
+      data
+    );
     return r.data;
   }),
   assess: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/community-integration/assess', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/community-integration/assess', data);
     return r.data;
   }),
   getReport: safe(async beneficiaryId => {
@@ -1479,27 +1507,29 @@ export const communityIntegrationService = {
 // ═══════════════════════════════════════════
 export const assistiveTechApiService = {
   assess: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/assistive-tech/assess', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/assistive-tech/assess', data);
     return r.data;
   }),
   allocate: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/assistive-tech/allocate', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/assistive-tech/allocate', data);
     return r.data;
   }),
   training: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/assistive-tech/training', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/assistive-tech/training', data);
     return r.data;
   }),
   maintenance: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/assistive-tech/maintenance', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/assistive-tech/maintenance', data);
     return r.data;
   }),
   getDevices: safe(async () => {
-    const r = await apiClient.get('/disability-rehab/assistive-tech/devices');
+    const r = await apiClient.get('/api/v1/disability-rehab/assistive-tech/devices');
     return r.data;
   }),
   getReport: safe(async beneficiaryId => {
-    const r = await apiClient.get(`/disability-rehab/assistive-tech/report/${beneficiaryId}`);
+    const r = await apiClient.get(
+      `/api/v1/disability-rehab/assistive-tech/report/${beneficiaryId}`
+    );
     return r.data;
   }),
 };
@@ -1509,27 +1539,27 @@ export const assistiveTechApiService = {
 // ═══════════════════════════════════════════
 export const caseManagementService = {
   create: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/case-management/create', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/case-management/create', data);
     return r.data;
   }),
   assignTeam: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/case-management/assign-team', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/case-management/assign-team', data);
     return r.data;
   }),
   updateStatus: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/case-management/update-status', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/case-management/update-status', data);
     return r.data;
   }),
   addNote: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/case-management/note', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/case-management/note', data);
     return r.data;
   }),
   getReport: safe(async caseId => {
-    const r = await apiClient.get(`/disability-rehab/case-management/report/${caseId}`);
+    const r = await apiClient.get(`/api/v1/disability-rehab/case-management/report/${caseId}`);
     return r.data;
   }),
   getDashboard: safe(async () => {
-    const r = await apiClient.get('/disability-rehab/case-management/dashboard');
+    const r = await apiClient.get('/api/v1/disability-rehab/case-management/dashboard');
     return r.data;
   }),
 };
@@ -1539,27 +1569,32 @@ export const caseManagementService = {
 // ═══════════════════════════════════════════
 export const specialEducationService = {
   enroll: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/special-education/enroll', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/special-education/enroll', data);
     return r.data;
   }),
   createIEP: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/special-education/iep', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/special-education/iep', data);
     return r.data;
   }),
   addGoal: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/special-education/goal', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/special-education/goal', data);
     return r.data;
   }),
   recordProgress: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/special-education/progress', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/special-education/progress', data);
     return r.data;
   }),
   createTransitionPlan: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/special-education/transition-plan', data);
+    const r = await apiClient.post(
+      '/api/v1/disability-rehab/special-education/transition-plan',
+      data
+    );
     return r.data;
   }),
   getIEPReport: safe(async studentId => {
-    const r = await apiClient.get(`/disability-rehab/special-education/iep-report/${studentId}`);
+    const r = await apiClient.get(
+      `/api/v1/disability-rehab/special-education/iep-report/${studentId}`
+    );
     return r.data;
   }),
 };
@@ -1569,31 +1604,36 @@ export const specialEducationService = {
 // ═══════════════════════════════════════════
 export const residentialRehabService = {
   admission: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/residential-rehab/admission', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/residential-rehab/admission', data);
     return r.data;
   }),
   assess: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/residential-rehab/assess', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/residential-rehab/assess', data);
     return r.data;
   }),
   createCarePlan: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/residential-rehab/care-plan', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/residential-rehab/care-plan', data);
     return r.data;
   }),
   recordDailyActivity: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/residential-rehab/daily-activity', data);
+    const r = await apiClient.post(
+      '/api/v1/disability-rehab/residential-rehab/daily-activity',
+      data
+    );
     return r.data;
   }),
   recordIncident: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/residential-rehab/incident', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/residential-rehab/incident', data);
     return r.data;
   }),
   recordFamilyVisit: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/residential-rehab/family-visit', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/residential-rehab/family-visit', data);
     return r.data;
   }),
   getReport: safe(async beneficiaryId => {
-    const r = await apiClient.get(`/disability-rehab/residential-rehab/report/${beneficiaryId}`);
+    const r = await apiClient.get(
+      `/api/v1/disability-rehab/residential-rehab/report/${beneficiaryId}`
+    );
     return r.data;
   }),
 };
@@ -1607,7 +1647,7 @@ export const residentialRehabService = {
 // ═══════════════════════════════════════════
 export const smartSchedulingService = {
   createAppointment: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/scheduling/appointment', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/scheduling/appointment', data);
     return r.data;
   }),
   updateAppointment: safe(async (appointmentId, data) => {
@@ -1618,27 +1658,30 @@ export const smartSchedulingService = {
     return r.data;
   }),
   cancelAppointment: safe(async appointmentId => {
-    const r = await apiClient.post(`/disability-rehab/scheduling/cancel/${appointmentId}`);
+    const r = await apiClient.post(`/api/v1/disability-rehab/scheduling/cancel/${appointmentId}`);
     return r.data;
   }),
   getTherapistSchedule: safe(async (therapistId, params = {}) => {
-    const r = await apiClient.get(`/disability-rehab/scheduling/therapist/${therapistId}`, {
+    const r = await apiClient.get(`/api/v1/disability-rehab/scheduling/therapist/${therapistId}`, {
       params,
     });
     return r.data;
   }),
   getBeneficiarySchedule: safe(async (beneficiaryId, params = {}) => {
-    const r = await apiClient.get(`/disability-rehab/scheduling/beneficiary/${beneficiaryId}`, {
-      params,
-    });
+    const r = await apiClient.get(
+      `/api/v1/disability-rehab/scheduling/beneficiary/${beneficiaryId}`,
+      {
+        params,
+      }
+    );
     return r.data;
   }),
   addToWaitlist: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/scheduling/waitlist', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/scheduling/waitlist', data);
     return r.data;
   }),
   getStats: safe(async () => {
-    const r = await apiClient.get('/disability-rehab/scheduling/stats');
+    const r = await apiClient.get('/api/v1/disability-rehab/scheduling/stats');
     return r.data;
   }),
 };
@@ -1648,31 +1691,37 @@ export const smartSchedulingService = {
 // ═══════════════════════════════════════════
 export const satisfactionService = {
   sendSurvey: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/satisfaction/survey', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/satisfaction/survey', data);
     return r.data;
   }),
   submitResponse: safe(async (surveyId, data) => {
-    const r = await apiClient.post(`/disability-rehab/satisfaction/response/${surveyId}`, data);
+    const r = await apiClient.post(
+      `/api/v1/disability-rehab/satisfaction/response/${surveyId}`,
+      data
+    );
     return r.data;
   }),
   submitComplaint: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/satisfaction/complaint', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/satisfaction/complaint', data);
     return r.data;
   }),
   updateComplaint: safe(async (complaintId, data) => {
-    const r = await apiClient.put(`/disability-rehab/satisfaction/complaint/${complaintId}`, data);
+    const r = await apiClient.put(
+      `/api/v1/disability-rehab/satisfaction/complaint/${complaintId}`,
+      data
+    );
     return r.data;
   }),
   submitSuggestion: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/satisfaction/suggestion', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/satisfaction/suggestion', data);
     return r.data;
   }),
   getReport: safe(async (params = {}) => {
-    const r = await apiClient.get('/disability-rehab/satisfaction/report', { params });
+    const r = await apiClient.get('/api/v1/disability-rehab/satisfaction/report', { params });
     return r.data;
   }),
   getDashboard: safe(async () => {
-    const r = await apiClient.get('/disability-rehab/satisfaction/dashboard');
+    const r = await apiClient.get('/api/v1/disability-rehab/satisfaction/dashboard');
     return r.data;
   }),
 };
@@ -1682,23 +1731,23 @@ export const satisfactionService = {
 // ═══════════════════════════════════════════
 export const aiAssessmentService = {
   conduct: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/ai-assessment/conduct', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/ai-assessment/conduct', data);
     return r.data;
   }),
   predict: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/ai-assessment/predict', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/ai-assessment/predict', data);
     return r.data;
   }),
   getRisk: safe(async beneficiaryId => {
-    const r = await apiClient.get(`/disability-rehab/ai-assessment/risk/${beneficiaryId}`);
+    const r = await apiClient.get(`/api/v1/disability-rehab/ai-assessment/risk/${beneficiaryId}`);
     return r.data;
   }),
   getTrends: safe(async beneficiaryId => {
-    const r = await apiClient.get(`/disability-rehab/ai-assessment/trends/${beneficiaryId}`);
+    const r = await apiClient.get(`/api/v1/disability-rehab/ai-assessment/trends/${beneficiaryId}`);
     return r.data;
   }),
   getReport: safe(async beneficiaryId => {
-    const r = await apiClient.get(`/disability-rehab/ai-assessment/report/${beneficiaryId}`);
+    const r = await apiClient.get(`/api/v1/disability-rehab/ai-assessment/report/${beneficiaryId}`);
     return r.data;
   }),
 };
@@ -1708,39 +1757,39 @@ export const aiAssessmentService = {
 // ═══════════════════════════════════════════
 export const alertsService = {
   create: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/alerts/create', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/alerts/create', data);
     return r.data;
   }),
   analyzeSession: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/alerts/analyze-session', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/alerts/analyze-session', data);
     return r.data;
   }),
   checkAbsence: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/alerts/check-absence', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/alerts/check-absence', data);
     return r.data;
   }),
   getAll: safe(async (params = {}) => {
-    const r = await apiClient.get('/disability-rehab/alerts', { params });
+    const r = await apiClient.get('/api/v1/disability-rehab/alerts', { params });
     return r.data;
   }),
   markRead: safe(async alertId => {
-    const r = await apiClient.put(`/disability-rehab/alerts/read/${alertId}`);
+    const r = await apiClient.put(`/api/v1/disability-rehab/alerts/read/${alertId}`);
     return r.data;
   }),
   dismiss: safe(async alertId => {
-    const r = await apiClient.put(`/disability-rehab/alerts/dismiss/${alertId}`);
+    const r = await apiClient.put(`/api/v1/disability-rehab/alerts/dismiss/${alertId}`);
     return r.data;
   }),
   resolve: safe(async (alertId, data) => {
-    const r = await apiClient.put(`/disability-rehab/alerts/resolve/${alertId}`, data);
+    const r = await apiClient.put(`/api/v1/disability-rehab/alerts/resolve/${alertId}`, data);
     return r.data;
   }),
   setPreferences: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/alerts/preferences', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/alerts/preferences', data);
     return r.data;
   }),
   getReport: safe(async (params = {}) => {
-    const r = await apiClient.get('/disability-rehab/alerts/report', { params });
+    const r = await apiClient.get('/api/v1/disability-rehab/alerts/report', { params });
     return r.data;
   }),
 };
@@ -1750,31 +1799,37 @@ export const alertsService = {
 // ═══════════════════════════════════════════
 export const therapistDashboardService = {
   register: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/therapist-dashboard/register', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/therapist-dashboard/register', data);
     return r.data;
   }),
   assignBeneficiary: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/therapist-dashboard/assign', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/therapist-dashboard/assign', data);
     return r.data;
   }),
   recordPerformance: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/therapist-dashboard/performance', data);
+    const r = await apiClient.post(
+      '/api/v1/disability-rehab/therapist-dashboard/performance',
+      data
+    );
     return r.data;
   }),
   getDashboard: safe(async therapistId => {
-    const r = await apiClient.get(`/disability-rehab/therapist-dashboard/${therapistId}`);
+    const r = await apiClient.get(`/api/v1/disability-rehab/therapist-dashboard/${therapistId}`);
     return r.data;
   }),
   getTeamReport: safe(async () => {
-    const r = await apiClient.get('/disability-rehab/therapist-dashboard/team/report');
+    const r = await apiClient.get('/api/v1/disability-rehab/therapist-dashboard/team/report');
     return r.data;
   }),
   setGoal: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/therapist-dashboard/goal', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/therapist-dashboard/goal', data);
     return r.data;
   }),
   updateGoalProgress: safe(async (goalId, data) => {
-    const r = await apiClient.put(`/disability-rehab/therapist-dashboard/goal/${goalId}`, data);
+    const r = await apiClient.put(
+      `/api/v1/disability-rehab/therapist-dashboard/goal/${goalId}`,
+      data
+    );
     return r.data;
   }),
 };
@@ -1788,15 +1843,20 @@ export const therapistDashboardService = {
 // ═══════════════════════════════════════════
 export const advancedPhysicalTherapyService = {
   createPlan: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/advanced-physical-therapy/plan', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/advanced-physical-therapy/plan', data);
     return r.data;
   }),
   recordSession: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/advanced-physical-therapy/session', data);
+    const r = await apiClient.post(
+      '/api/v1/disability-rehab/advanced-physical-therapy/session',
+      data
+    );
     return r.data;
   }),
   getPlan: safe(async planId => {
-    const r = await apiClient.get(`/disability-rehab/advanced-physical-therapy/plan/${planId}`);
+    const r = await apiClient.get(
+      `/api/v1/disability-rehab/advanced-physical-therapy/plan/${planId}`
+    );
     return r.data;
   }),
   updatePlan: safe(async (planId, data) => {
@@ -1819,19 +1879,22 @@ export const advancedPhysicalTherapyService = {
 // ═══════════════════════════════════════════
 export const advancedPsychologicalService = {
   assess: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/advanced-psychological/assess', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/advanced-psychological/assess', data);
     return r.data;
   }),
   recordSession: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/advanced-psychological/session', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/advanced-psychological/session', data);
     return r.data;
   }),
   createGroupSession: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/advanced-psychological/group-session', data);
+    const r = await apiClient.post(
+      '/api/v1/disability-rehab/advanced-psychological/group-session',
+      data
+    );
     return r.data;
   }),
   handleCrisis: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/advanced-psychological/crisis', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/advanced-psychological/crisis', data);
     return r.data;
   }),
   getProgress: safe(async beneficiaryId => {
@@ -1847,19 +1910,21 @@ export const advancedPsychologicalService = {
 // ═══════════════════════════════════════════
 export const advancedSpeechService = {
   assess: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/advanced-speech/assess', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/advanced-speech/assess', data);
     return r.data;
   }),
   recordSession: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/advanced-speech/session', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/advanced-speech/session', data);
     return r.data;
   }),
   setupAAC: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/advanced-speech/aac', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/advanced-speech/aac', data);
     return r.data;
   }),
   getProgress: safe(async beneficiaryId => {
-    const r = await apiClient.get(`/disability-rehab/advanced-speech/progress/${beneficiaryId}`);
+    const r = await apiClient.get(
+      `/api/v1/disability-rehab/advanced-speech/progress/${beneficiaryId}`
+    );
     return r.data;
   }),
 };
@@ -1869,19 +1934,22 @@ export const advancedSpeechService = {
 // ═══════════════════════════════════════════
 export const advancedVocationalService = {
   assess: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/advanced-vocational/assess', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/advanced-vocational/assess', data);
     return r.data;
   }),
   createPlan: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/advanced-vocational/plan', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/advanced-vocational/plan', data);
     return r.data;
   }),
   recommendAccommodations: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/advanced-vocational/accommodations', data);
+    const r = await apiClient.post(
+      '/api/v1/disability-rehab/advanced-vocational/accommodations',
+      data
+    );
     return r.data;
   }),
   trackProgress: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/advanced-vocational/progress', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/advanced-vocational/progress', data);
     return r.data;
   }),
 };
@@ -1891,7 +1959,10 @@ export const advancedVocationalService = {
 // ═══════════════════════════════════════════
 export const advancedEarlyInterventionService = {
   screening: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/advanced-early-intervention/screening', data);
+    const r = await apiClient.post(
+      '/api/v1/disability-rehab/advanced-early-intervention/screening',
+      data
+    );
     return r.data;
   }),
   familyTraining: safe(async data => {
@@ -1902,7 +1973,10 @@ export const advancedEarlyInterventionService = {
     return r.data;
   }),
   recordProgress: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/advanced-early-intervention/progress', data);
+    const r = await apiClient.post(
+      '/api/v1/disability-rehab/advanced-early-intervention/progress',
+      data
+    );
     return r.data;
   }),
   getReport: safe(async childId => {
@@ -1918,11 +1992,17 @@ export const advancedEarlyInterventionService = {
 // ═══════════════════════════════════════════
 export const advancedFamilySupportService = {
   createProfile: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/advanced-family-support/profile', data);
+    const r = await apiClient.post(
+      '/api/v1/disability-rehab/advanced-family-support/profile',
+      data
+    );
     return r.data;
   }),
   counseling: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/advanced-family-support/counseling', data);
+    const r = await apiClient.post(
+      '/api/v1/disability-rehab/advanced-family-support/counseling',
+      data
+    );
     return r.data;
   }),
   caregiverTraining: safe(async data => {
@@ -1933,11 +2013,17 @@ export const advancedFamilySupportService = {
     return r.data;
   }),
   respiteCare: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/advanced-family-support/respite-care', data);
+    const r = await apiClient.post(
+      '/api/v1/disability-rehab/advanced-family-support/respite-care',
+      data
+    );
     return r.data;
   }),
   supportGroup: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/advanced-family-support/support-group', data);
+    const r = await apiClient.post(
+      '/api/v1/disability-rehab/advanced-family-support/support-group',
+      data
+    );
     return r.data;
   }),
   assessBurden: safe(async data => {
@@ -1948,7 +2034,9 @@ export const advancedFamilySupportService = {
     return r.data;
   }),
   getReport: safe(async familyId => {
-    const r = await apiClient.get(`/disability-rehab/advanced-family-support/report/${familyId}`);
+    const r = await apiClient.get(
+      `/api/v1/disability-rehab/advanced-family-support/report/${familyId}`
+    );
     return r.data;
   }),
 };
@@ -1958,19 +2046,25 @@ export const advancedFamilySupportService = {
 // ═══════════════════════════════════════════
 export const disabilityCertificationService = {
   request: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/disability-certification/request', data);
+    const r = await apiClient.post(
+      '/api/v1/disability-rehab/disability-certification/request',
+      data
+    );
     return r.data;
   }),
   assess: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/disability-certification/assess', data);
+    const r = await apiClient.post(
+      '/api/v1/disability-rehab/disability-certification/assess',
+      data
+    );
     return r.data;
   }),
   issue: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/disability-certification/issue', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/disability-certification/issue', data);
     return r.data;
   }),
   renew: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/disability-certification/renew', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/disability-certification/renew', data);
     return r.data;
   }),
   verify: safe(async certificateNumber => {
@@ -1986,35 +2080,41 @@ export const disabilityCertificationService = {
 // ═══════════════════════════════════════════
 export const rehabilitationPlanService = {
   create: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/rehabilitation-plan/create', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/rehabilitation-plan/create', data);
     return r.data;
   }),
   addGoal: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/rehabilitation-plan/goal', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/rehabilitation-plan/goal', data);
     return r.data;
   }),
   updateGoalProgress: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/rehabilitation-plan/goal-progress', data);
+    const r = await apiClient.post(
+      '/api/v1/disability-rehab/rehabilitation-plan/goal-progress',
+      data
+    );
     return r.data;
   }),
   addService: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/rehabilitation-plan/service', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/rehabilitation-plan/service', data);
     return r.data;
   }),
   recordServiceSession: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/rehabilitation-plan/service-session', data);
+    const r = await apiClient.post(
+      '/api/v1/disability-rehab/rehabilitation-plan/service-session',
+      data
+    );
     return r.data;
   }),
   getReport: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/rehabilitation-plan/report', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/rehabilitation-plan/report', data);
     return r.data;
   }),
   review: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/rehabilitation-plan/review', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/rehabilitation-plan/review', data);
     return r.data;
   }),
   getPlan: safe(async planId => {
-    const r = await apiClient.get(`/disability-rehab/rehabilitation-plan/${planId}`);
+    const r = await apiClient.get(`/api/v1/disability-rehab/rehabilitation-plan/${planId}`);
     return r.data;
   }),
   getByBeneficiary: safe(async beneficiaryId => {
@@ -2024,15 +2124,20 @@ export const rehabilitationPlanService = {
     return r.data;
   }),
   getTemplates: safe(async () => {
-    const r = await apiClient.get('/disability-rehab/rehabilitation-plan/templates/list');
+    const r = await apiClient.get('/api/v1/disability-rehab/rehabilitation-plan/templates/list');
     return r.data;
   }),
   getGoalsBank: safe(async (params = {}) => {
-    const r = await apiClient.get('/disability-rehab/rehabilitation-plan/goals-bank', { params });
+    const r = await apiClient.get('/api/v1/disability-rehab/rehabilitation-plan/goals-bank', {
+      params,
+    });
     return r.data;
   }),
   customizeGoal: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/rehabilitation-plan/customize-goal', data);
+    const r = await apiClient.post(
+      '/api/v1/disability-rehab/rehabilitation-plan/customize-goal',
+      data
+    );
     return r.data;
   }),
 };
@@ -2042,19 +2147,19 @@ export const rehabilitationPlanService = {
 // ═══════════════════════════════════════════
 export const rehabMetricsService = {
   administer: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/rehab-metrics/administer', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/rehab-metrics/administer', data);
     return r.data;
   }),
   getAvailable: safe(async (params = {}) => {
-    const r = await apiClient.get('/disability-rehab/rehab-metrics/available', { params });
+    const r = await apiClient.get('/api/v1/disability-rehab/rehab-metrics/available', { params });
     return r.data;
   }),
   compare: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/rehab-metrics/compare', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/rehab-metrics/compare', data);
     return r.data;
   }),
   createProfile: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/rehab-metrics/profile', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/rehab-metrics/profile', data);
     return r.data;
   }),
 };
@@ -2064,31 +2169,33 @@ export const rehabMetricsService = {
 // ═══════════════════════════════════════════
 export const rehabReportsService = {
   getIndividual: safe(async beneficiaryId => {
-    const r = await apiClient.get(`/disability-rehab/rehab-reports/individual/${beneficiaryId}`);
+    const r = await apiClient.get(
+      `/api/v1/disability-rehab/rehab-reports/individual/${beneficiaryId}`
+    );
     return r.data;
   }),
   getCenter: safe(async centerId => {
-    const r = await apiClient.get(`/disability-rehab/rehab-reports/center/${centerId}`);
+    const r = await apiClient.get(`/api/v1/disability-rehab/rehab-reports/center/${centerId}`);
     return r.data;
   }),
   getOutcomes: safe(async (params = {}) => {
-    const r = await apiClient.get('/disability-rehab/rehab-reports/outcomes', { params });
+    const r = await apiClient.get('/api/v1/disability-rehab/rehab-reports/outcomes', { params });
     return r.data;
   }),
   getCompliance: safe(async (params = {}) => {
-    const r = await apiClient.get('/disability-rehab/rehab-reports/compliance', { params });
+    const r = await apiClient.get('/api/v1/disability-rehab/rehab-reports/compliance', { params });
     return r.data;
   }),
   createCustom: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/rehab-reports/custom', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/rehab-reports/custom', data);
     return r.data;
   }),
   exportReport: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/rehab-reports/export', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/rehab-reports/export', data);
     return r.data;
   }),
   list: safe(async (params = {}) => {
-    const r = await apiClient.get('/disability-rehab/rehab-reports/list', { params });
+    const r = await apiClient.get('/api/v1/disability-rehab/rehab-reports/list', { params });
     return r.data;
   }),
 };
@@ -2098,31 +2205,35 @@ export const rehabReportsService = {
 // ═══════════════════════════════════════════
 export const saudiBenefitsService = {
   checkEligibility: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/saudi-benefits/eligibility', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/saudi-benefits/eligibility', data);
     return r.data;
   }),
   apply: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/saudi-benefits/apply', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/saudi-benefits/apply', data);
     return r.data;
   }),
   review: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/saudi-benefits/review', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/saudi-benefits/review', data);
     return r.data;
   }),
   processPayment: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/saudi-benefits/payment', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/saudi-benefits/payment', data);
     return r.data;
   }),
   getActive: safe(async beneficiaryId => {
-    const r = await apiClient.get(`/disability-rehab/saudi-benefits/active/${beneficiaryId}`);
+    const r = await apiClient.get(
+      `/api/v1/disability-rehab/saudi-benefits/active/${beneficiaryId}`
+    );
     return r.data;
   }),
   renew: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/saudi-benefits/renew', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/saudi-benefits/renew', data);
     return r.data;
   }),
   getMonthlyReport: safe(async (params = {}) => {
-    const r = await apiClient.get('/disability-rehab/saudi-benefits/monthly-report', { params });
+    const r = await apiClient.get('/api/v1/disability-rehab/saudi-benefits/monthly-report', {
+      params,
+    });
     return r.data;
   }),
 };
@@ -2132,23 +2243,25 @@ export const saudiBenefitsService = {
 // ═══════════════════════════════════════════
 export const speechActivitiesService = {
   consonants: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/speech-activities/consonants', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/speech-activities/consonants', data);
     return r.data;
   }),
   vowels: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/speech-activities/vowels', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/speech-activities/vowels', data);
     return r.data;
   }),
   articulation: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/speech-activities/articulation', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/speech-activities/articulation', data);
     return r.data;
   }),
   getActivity: safe(async activityId => {
-    const r = await apiClient.get(`/disability-rehab/speech-activities/activity/${activityId}`);
+    const r = await apiClient.get(
+      `/api/v1/disability-rehab/speech-activities/activity/${activityId}`
+    );
     return r.data;
   }),
   recordPerformance: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/speech-activities/performance', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/speech-activities/performance', data);
     return r.data;
   }),
   getRecommended: safe(async beneficiaryId => {
@@ -2158,7 +2271,9 @@ export const speechActivitiesService = {
     return r.data;
   }),
   getProgress: safe(async beneficiaryId => {
-    const r = await apiClient.get(`/disability-rehab/speech-activities/progress/${beneficiaryId}`);
+    const r = await apiClient.get(
+      `/api/v1/disability-rehab/speech-activities/progress/${beneficiaryId}`
+    );
     return r.data;
   }),
 };
@@ -2168,15 +2283,17 @@ export const speechActivitiesService = {
 // ═══════════════════════════════════════════
 export const unifiedAssessmentService = {
   initial: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/unified-assessment/initial', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/unified-assessment/initial', data);
     return r.data;
   }),
   followUp: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/unified-assessment/follow-up', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/unified-assessment/follow-up', data);
     return r.data;
   }),
   getReport: safe(async assessmentId => {
-    const r = await apiClient.get(`/disability-rehab/unified-assessment/report/${assessmentId}`);
+    const r = await apiClient.get(
+      `/api/v1/disability-rehab/unified-assessment/report/${assessmentId}`
+    );
     return r.data;
   }),
 };
@@ -2186,11 +2303,11 @@ export const unifiedAssessmentService = {
 // ═══════════════════════════════════════════
 export const rehabServicesCatalog = {
   getServicesCatalog: safe(async () => {
-    const r = await apiClient.get('/disability-rehab/services-catalog');
+    const r = await apiClient.get('/api/v1/disability-rehab/services-catalog');
     return r.data;
   }),
   getComprehensiveReport: safe(async beneficiaryId => {
-    const r = await apiClient.get(`/disability-rehab/comprehensive-report/${beneficiaryId}`);
+    const r = await apiClient.get(`/api/v1/disability-rehab/comprehensive-report/${beneficiaryId}`);
     return r.data;
   }),
 };
@@ -2202,42 +2319,44 @@ export const rehabServicesCatalog = {
 // 45. العلاج السلوكي
 export const behavioralTherapyService = {
   conductFBA: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/behavioral-therapy/fba', {
+    const r = await apiClient.post('/api/v1/disability-rehab/behavioral-therapy/fba', {
       beneficiaryId,
       ...data,
     });
     return r.data;
   }),
   createBIP: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/behavioral-therapy/bip', {
+    const r = await apiClient.post('/api/v1/disability-rehab/behavioral-therapy/bip', {
       beneficiaryId,
       ...data,
     });
     return r.data;
   }),
   recordSession: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/behavioral-therapy/session', {
+    const r = await apiClient.post('/api/v1/disability-rehab/behavioral-therapy/session', {
       beneficiaryId,
       ...data,
     });
     return r.data;
   }),
   recordIncident: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/behavioral-therapy/incident', {
+    const r = await apiClient.post('/api/v1/disability-rehab/behavioral-therapy/incident', {
       beneficiaryId,
       ...data,
     });
     return r.data;
   }),
   manageReward: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/behavioral-therapy/reward', {
+    const r = await apiClient.post('/api/v1/disability-rehab/behavioral-therapy/reward', {
       beneficiaryId,
       ...data,
     });
     return r.data;
   }),
   getProgress: safe(async beneficiaryId => {
-    const r = await apiClient.get(`/disability-rehab/behavioral-therapy/progress/${beneficiaryId}`);
+    const r = await apiClient.get(
+      `/api/v1/disability-rehab/behavioral-therapy/progress/${beneficiaryId}`
+    );
     return r.data;
   }),
 };
@@ -2245,35 +2364,37 @@ export const behavioralTherapyService = {
 // 46. إدارة الألم
 export const painManagementService = {
   assessPain: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/pain-management/assess', {
+    const r = await apiClient.post('/api/v1/disability-rehab/pain-management/assess', {
       beneficiaryId,
       ...data,
     });
     return r.data;
   }),
   createPlan: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/pain-management/plan', {
+    const r = await apiClient.post('/api/v1/disability-rehab/pain-management/plan', {
       beneficiaryId,
       ...data,
     });
     return r.data;
   }),
   recordSession: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/pain-management/session', {
+    const r = await apiClient.post('/api/v1/disability-rehab/pain-management/session', {
       beneficiaryId,
       ...data,
     });
     return r.data;
   }),
   logDiary: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/pain-management/diary', {
+    const r = await apiClient.post('/api/v1/disability-rehab/pain-management/diary', {
       beneficiaryId,
       ...data,
     });
     return r.data;
   }),
   getReport: safe(async beneficiaryId => {
-    const r = await apiClient.get(`/disability-rehab/pain-management/report/${beneficiaryId}`);
+    const r = await apiClient.get(
+      `/api/v1/disability-rehab/pain-management/report/${beneficiaryId}`
+    );
     return r.data;
   }),
 };
@@ -2281,35 +2402,35 @@ export const painManagementService = {
 // 47. علاج اضطرابات النوم
 export const sleepTherapyService = {
   assessSleep: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/sleep-therapy/assess', {
+    const r = await apiClient.post('/api/v1/disability-rehab/sleep-therapy/assess', {
       beneficiaryId,
       ...data,
     });
     return r.data;
   }),
   createPlan: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/sleep-therapy/plan', {
+    const r = await apiClient.post('/api/v1/disability-rehab/sleep-therapy/plan', {
       beneficiaryId,
       ...data,
     });
     return r.data;
   }),
   logDiary: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/sleep-therapy/diary', {
+    const r = await apiClient.post('/api/v1/disability-rehab/sleep-therapy/diary', {
       beneficiaryId,
       ...data,
     });
     return r.data;
   }),
   recordSession: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/sleep-therapy/session', {
+    const r = await apiClient.post('/api/v1/disability-rehab/sleep-therapy/session', {
       beneficiaryId,
       ...data,
     });
     return r.data;
   }),
   getReport: safe(async beneficiaryId => {
-    const r = await apiClient.get(`/disability-rehab/sleep-therapy/report/${beneficiaryId}`);
+    const r = await apiClient.get(`/api/v1/disability-rehab/sleep-therapy/report/${beneficiaryId}`);
     return r.data;
   }),
 };
@@ -2317,32 +2438,34 @@ export const sleepTherapyService = {
 // 48. تدريب المهارات الاجتماعية
 export const socialSkillsService = {
   assess: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/social-skills/assess', {
+    const r = await apiClient.post('/api/v1/disability-rehab/social-skills/assess', {
       beneficiaryId,
       ...data,
     });
     return r.data;
   }),
   createProgram: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/social-skills/program', {
+    const r = await apiClient.post('/api/v1/disability-rehab/social-skills/program', {
       beneficiaryId,
       ...data,
     });
     return r.data;
   }),
   recordSession: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/social-skills/session', {
+    const r = await apiClient.post('/api/v1/disability-rehab/social-skills/session', {
       beneficiaryId,
       ...data,
     });
     return r.data;
   }),
   createGroup: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/social-skills/group', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/social-skills/group', data);
     return r.data;
   }),
   getProgress: safe(async beneficiaryId => {
-    const r = await apiClient.get(`/disability-rehab/social-skills/progress/${beneficiaryId}`);
+    const r = await apiClient.get(
+      `/api/v1/disability-rehab/social-skills/progress/${beneficiaryId}`
+    );
     return r.data;
   }),
 };
@@ -2350,40 +2473,42 @@ export const socialSkillsService = {
 // 49. تدريب الوالدين
 export const parentalTrainingService = {
   enroll: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/parental-training/enroll', {
+    const r = await apiClient.post('/api/v1/disability-rehab/parental-training/enroll', {
       beneficiaryId,
       ...data,
     });
     return r.data;
   }),
   recordSession: safe(async (enrollmentId, data) => {
-    const r = await apiClient.post('/disability-rehab/parental-training/session', {
+    const r = await apiClient.post('/api/v1/disability-rehab/parental-training/session', {
       enrollmentId,
       ...data,
     });
     return r.data;
   }),
   assess: safe(async (enrollmentId, data) => {
-    const r = await apiClient.post('/disability-rehab/parental-training/assess', {
+    const r = await apiClient.post('/api/v1/disability-rehab/parental-training/assess', {
       enrollmentId,
       ...data,
     });
     return r.data;
   }),
   issueCertificate: safe(async enrollmentId => {
-    const r = await apiClient.post('/disability-rehab/parental-training/certificate', {
+    const r = await apiClient.post('/api/v1/disability-rehab/parental-training/certificate', {
       enrollmentId,
     });
     return r.data;
   }),
   getModules: safe(async category => {
-    const r = await apiClient.get('/disability-rehab/parental-training/modules', {
+    const r = await apiClient.get('/api/v1/disability-rehab/parental-training/modules', {
       params: { category },
     });
     return r.data;
   }),
   getReport: safe(async enrollmentId => {
-    const r = await apiClient.get(`/disability-rehab/parental-training/report/${enrollmentId}`);
+    const r = await apiClient.get(
+      `/api/v1/disability-rehab/parental-training/report/${enrollmentId}`
+    );
     return r.data;
   }),
 };
@@ -2391,35 +2516,35 @@ export const parentalTrainingService = {
 // 50. التخطيط الانتقالي
 export const transitionPlanningService = {
   assessReadiness: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/transition-planning/assess', {
+    const r = await apiClient.post('/api/v1/disability-rehab/transition-planning/assess', {
       beneficiaryId,
       ...data,
     });
     return r.data;
   }),
   createPlan: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/transition-planning/plan', {
+    const r = await apiClient.post('/api/v1/disability-rehab/transition-planning/plan', {
       beneficiaryId,
       ...data,
     });
     return r.data;
   }),
   recordMilestone: safe(async (planId, data) => {
-    const r = await apiClient.post('/disability-rehab/transition-planning/milestone', {
+    const r = await apiClient.post('/api/v1/disability-rehab/transition-planning/milestone', {
       planId,
       ...data,
     });
     return r.data;
   }),
   reviewPlan: safe(async (planId, data) => {
-    const r = await apiClient.post('/disability-rehab/transition-planning/review', {
+    const r = await apiClient.post('/api/v1/disability-rehab/transition-planning/review', {
       planId,
       ...data,
     });
     return r.data;
   }),
   getReport: safe(async id => {
-    const r = await apiClient.get(`/disability-rehab/transition-planning/report/${id}`);
+    const r = await apiClient.get(`/api/v1/disability-rehab/transition-planning/report/${id}`);
     return r.data;
   }),
 };
@@ -2427,27 +2552,27 @@ export const transitionPlanningService = {
 // 51. ضمان الجودة
 export const qualityAssuranceService = {
   conductAudit: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/quality-assurance/audit', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/quality-assurance/audit', data);
     return r.data;
   }),
   reportIncident: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/quality-assurance/incident', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/quality-assurance/incident', data);
     return r.data;
   }),
   createImprovement: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/quality-assurance/improvement', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/quality-assurance/improvement', data);
     return r.data;
   }),
   recordKPI: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/quality-assurance/kpi', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/quality-assurance/kpi', data);
     return r.data;
   }),
   getStandards: safe(async () => {
-    const r = await apiClient.get('/disability-rehab/quality-assurance/standards');
+    const r = await apiClient.get('/api/v1/disability-rehab/quality-assurance/standards');
     return r.data;
   }),
   getReport: safe(async params => {
-    const r = await apiClient.get('/disability-rehab/quality-assurance/report', { params });
+    const r = await apiClient.get('/api/v1/disability-rehab/quality-assurance/report', { params });
     return r.data;
   }),
 };
@@ -2455,7 +2580,7 @@ export const qualityAssuranceService = {
 // 52. بوابة المستفيد
 export const beneficiaryPortalService = {
   manageProfile: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/beneficiary-portal/profile', {
+    const r = await apiClient.post('/api/v1/disability-rehab/beneficiary-portal/profile', {
       beneficiaryId,
       ...data,
     });
@@ -2468,35 +2593,35 @@ export const beneficiaryPortalService = {
     return r.data;
   }),
   requestAppointment: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/beneficiary-portal/appointment', {
+    const r = await apiClient.post('/api/v1/disability-rehab/beneficiary-portal/appointment', {
       beneficiaryId,
       ...data,
     });
     return r.data;
   }),
   sendMessage: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/beneficiary-portal/message', {
+    const r = await apiClient.post('/api/v1/disability-rehab/beneficiary-portal/message', {
       beneficiaryId,
       ...data,
     });
     return r.data;
   }),
   uploadDocument: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/beneficiary-portal/document', {
+    const r = await apiClient.post('/api/v1/disability-rehab/beneficiary-portal/document', {
       beneficiaryId,
       ...data,
     });
     return r.data;
   }),
   trackGoal: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/beneficiary-portal/goal', {
+    const r = await apiClient.post('/api/v1/disability-rehab/beneficiary-portal/goal', {
       beneficiaryId,
       ...data,
     });
     return r.data;
   }),
   submitFeedback: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/beneficiary-portal/feedback', {
+    const r = await apiClient.post('/api/v1/disability-rehab/beneficiary-portal/feedback', {
       beneficiaryId,
       ...data,
     });
@@ -2515,35 +2640,37 @@ export const beneficiaryPortalService = {
 // 53. خدمات الكراسي المتحركة والتنقل
 export const wheelchairMobilityService = {
   assessMobilityNeeds: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/wheelchair-mobility/assess', {
+    const r = await apiClient.post('/api/v1/disability-rehab/wheelchair-mobility/assess', {
       beneficiaryId,
       ...data,
     });
     return r.data;
   }),
   prescribeDevice: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/wheelchair-mobility/prescribe', {
+    const r = await apiClient.post('/api/v1/disability-rehab/wheelchair-mobility/prescribe', {
       beneficiaryId,
       ...data,
     });
     return r.data;
   }),
   recordTraining: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/wheelchair-mobility/training', {
+    const r = await apiClient.post('/api/v1/disability-rehab/wheelchair-mobility/training', {
       beneficiaryId,
       ...data,
     });
     return r.data;
   }),
   logMaintenance: safe(async (deviceId, data) => {
-    const r = await apiClient.post('/disability-rehab/wheelchair-mobility/maintenance', {
+    const r = await apiClient.post('/api/v1/disability-rehab/wheelchair-mobility/maintenance', {
       deviceId,
       ...data,
     });
     return r.data;
   }),
   getReport: safe(async beneficiaryId => {
-    const r = await apiClient.get(`/disability-rehab/wheelchair-mobility/report/${beneficiaryId}`);
+    const r = await apiClient.get(
+      `/api/v1/disability-rehab/wheelchair-mobility/report/${beneficiaryId}`
+    );
     return r.data;
   }),
 };
@@ -2551,35 +2678,35 @@ export const wheelchairMobilityService = {
 // 54. التأهيل السمعي
 export const hearingRehabService = {
   assessHearing: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/hearing-rehab/assess', {
+    const r = await apiClient.post('/api/v1/disability-rehab/hearing-rehab/assess', {
       beneficiaryId,
       ...data,
     });
     return r.data;
   }),
   prescribeHearingAid: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/hearing-rehab/prescribe', {
+    const r = await apiClient.post('/api/v1/disability-rehab/hearing-rehab/prescribe', {
       beneficiaryId,
       ...data,
     });
     return r.data;
   }),
   recordSession: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/hearing-rehab/session', {
+    const r = await apiClient.post('/api/v1/disability-rehab/hearing-rehab/session', {
       beneficiaryId,
       ...data,
     });
     return r.data;
   }),
   createCommunicationPlan: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/hearing-rehab/communication-plan', {
+    const r = await apiClient.post('/api/v1/disability-rehab/hearing-rehab/communication-plan', {
       beneficiaryId,
       ...data,
     });
     return r.data;
   }),
   getReport: safe(async beneficiaryId => {
-    const r = await apiClient.get(`/disability-rehab/hearing-rehab/report/${beneficiaryId}`);
+    const r = await apiClient.get(`/api/v1/disability-rehab/hearing-rehab/report/${beneficiaryId}`);
     return r.data;
   }),
 };
@@ -2587,35 +2714,35 @@ export const hearingRehabService = {
 // 55. التأهيل البصري
 export const visualRehabService = {
   assessVision: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/visual-rehab/assess', {
+    const r = await apiClient.post('/api/v1/disability-rehab/visual-rehab/assess', {
       beneficiaryId,
       ...data,
     });
     return r.data;
   }),
   prescribeVisualAid: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/visual-rehab/prescribe', {
+    const r = await apiClient.post('/api/v1/disability-rehab/visual-rehab/prescribe', {
       beneficiaryId,
       ...data,
     });
     return r.data;
   }),
   recordOrientation: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/visual-rehab/orientation', {
+    const r = await apiClient.post('/api/v1/disability-rehab/visual-rehab/orientation', {
       beneficiaryId,
       ...data,
     });
     return r.data;
   }),
   recordDailyLiving: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/visual-rehab/daily-living', {
+    const r = await apiClient.post('/api/v1/disability-rehab/visual-rehab/daily-living', {
       beneficiaryId,
       ...data,
     });
     return r.data;
   }),
   getReport: safe(async beneficiaryId => {
-    const r = await apiClient.get(`/disability-rehab/visual-rehab/report/${beneficiaryId}`);
+    const r = await apiClient.get(`/api/v1/disability-rehab/visual-rehab/report/${beneficiaryId}`);
     return r.data;
   }),
 };
@@ -2623,35 +2750,37 @@ export const visualRehabService = {
 // 56. تأهيل الأمراض المزمنة
 export const chronicDiseaseService = {
   assessChronic: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/chronic-disease/assess', {
+    const r = await apiClient.post('/api/v1/disability-rehab/chronic-disease/assess', {
       beneficiaryId,
       ...data,
     });
     return r.data;
   }),
   createProgram: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/chronic-disease/program', {
+    const r = await apiClient.post('/api/v1/disability-rehab/chronic-disease/program', {
       beneficiaryId,
       ...data,
     });
     return r.data;
   }),
   recordSession: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/chronic-disease/session', {
+    const r = await apiClient.post('/api/v1/disability-rehab/chronic-disease/session', {
       beneficiaryId,
       ...data,
     });
     return r.data;
   }),
   recordVitals: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/chronic-disease/vitals', {
+    const r = await apiClient.post('/api/v1/disability-rehab/chronic-disease/vitals', {
       beneficiaryId,
       ...data,
     });
     return r.data;
   }),
   getReport: safe(async beneficiaryId => {
-    const r = await apiClient.get(`/disability-rehab/chronic-disease/report/${beneficiaryId}`);
+    const r = await apiClient.get(
+      `/api/v1/disability-rehab/chronic-disease/report/${beneficiaryId}`
+    );
     return r.data;
   }),
 };
@@ -2659,26 +2788,32 @@ export const chronicDiseaseService = {
 // 57. إدارة العلاج الجماعي
 export const groupTherapyService = {
   createGroup: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/group-therapy/create', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/group-therapy/create', data);
     return r.data;
   }),
   enrollMember: safe(async (groupId, data) => {
-    const r = await apiClient.post('/disability-rehab/group-therapy/enroll', { groupId, ...data });
+    const r = await apiClient.post('/api/v1/disability-rehab/group-therapy/enroll', {
+      groupId,
+      ...data,
+    });
     return r.data;
   }),
   recordSession: safe(async (groupId, data) => {
-    const r = await apiClient.post('/disability-rehab/group-therapy/session', { groupId, ...data });
+    const r = await apiClient.post('/api/v1/disability-rehab/group-therapy/session', {
+      groupId,
+      ...data,
+    });
     return r.data;
   }),
   recordInteraction: safe(async (groupId, data) => {
-    const r = await apiClient.post('/disability-rehab/group-therapy/interaction', {
+    const r = await apiClient.post('/api/v1/disability-rehab/group-therapy/interaction', {
       groupId,
       ...data,
     });
     return r.data;
   }),
   getReport: safe(async groupId => {
-    const r = await apiClient.get(`/disability-rehab/group-therapy/report/${groupId}`);
+    const r = await apiClient.get(`/api/v1/disability-rehab/group-therapy/report/${groupId}`);
     return r.data;
   }),
 };
@@ -2686,42 +2821,42 @@ export const groupTherapyService = {
 // 58. التأهيل المنزلي
 export const homeRehabService = {
   assessHomeEnvironment: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/home-rehab/assess', {
+    const r = await apiClient.post('/api/v1/disability-rehab/home-rehab/assess', {
       beneficiaryId,
       ...data,
     });
     return r.data;
   }),
   scheduleVisit: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/home-rehab/visit', {
+    const r = await apiClient.post('/api/v1/disability-rehab/home-rehab/visit', {
       beneficiaryId,
       ...data,
     });
     return r.data;
   }),
   recordVisitResults: safe(async (visitId, data) => {
-    const r = await apiClient.post('/disability-rehab/home-rehab/visit-results', {
+    const r = await apiClient.post('/api/v1/disability-rehab/home-rehab/visit-results', {
       visitId,
       ...data,
     });
     return r.data;
   }),
   requestModification: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/home-rehab/modification', {
+    const r = await apiClient.post('/api/v1/disability-rehab/home-rehab/modification', {
       beneficiaryId,
       ...data,
     });
     return r.data;
   }),
   createProgram: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/home-rehab/program', {
+    const r = await apiClient.post('/api/v1/disability-rehab/home-rehab/program', {
       beneficiaryId,
       ...data,
     });
     return r.data;
   }),
   getReport: safe(async beneficiaryId => {
-    const r = await apiClient.get(`/disability-rehab/home-rehab/report/${beneficiaryId}`);
+    const r = await apiClient.get(`/api/v1/disability-rehab/home-rehab/report/${beneficiaryId}`);
     return r.data;
   }),
 };
@@ -2729,32 +2864,34 @@ export const homeRehabService = {
 // 59. التأهيل الطارئ
 export const emergencyRehabService = {
   triageEmergency: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/emergency-rehab/triage', {
+    const r = await apiClient.post('/api/v1/disability-rehab/emergency-rehab/triage', {
       beneficiaryId,
       ...data,
     });
     return r.data;
   }),
   recordSession: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/emergency-rehab/session', {
+    const r = await apiClient.post('/api/v1/disability-rehab/emergency-rehab/session', {
       beneficiaryId,
       ...data,
     });
     return r.data;
   }),
   getProtocols: safe(async () => {
-    const r = await apiClient.get('/disability-rehab/emergency-rehab/protocols');
+    const r = await apiClient.get('/api/v1/disability-rehab/emergency-rehab/protocols');
     return r.data;
   }),
   createReferral: safe(async (beneficiaryId, data) => {
-    const r = await apiClient.post('/disability-rehab/emergency-rehab/referral', {
+    const r = await apiClient.post('/api/v1/disability-rehab/emergency-rehab/referral', {
       beneficiaryId,
       ...data,
     });
     return r.data;
   }),
   getReport: safe(async beneficiaryId => {
-    const r = await apiClient.get(`/disability-rehab/emergency-rehab/report/${beneficiaryId}`);
+    const r = await apiClient.get(
+      `/api/v1/disability-rehab/emergency-rehab/report/${beneficiaryId}`
+    );
     return r.data;
   }),
 };
@@ -2762,33 +2899,39 @@ export const emergencyRehabService = {
 // 60. إدارة المتطوعين
 export const volunteerService = {
   registerVolunteer: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/volunteers/register', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/volunteers/register', data);
     return r.data;
   }),
   assignTask: safe(async (volunteerId, data) => {
-    const r = await apiClient.post('/disability-rehab/volunteers/assign', { volunteerId, ...data });
+    const r = await apiClient.post('/api/v1/disability-rehab/volunteers/assign', {
+      volunteerId,
+      ...data,
+    });
     return r.data;
   }),
   logHours: safe(async (volunteerId, data) => {
-    const r = await apiClient.post('/disability-rehab/volunteers/hours', { volunteerId, ...data });
+    const r = await apiClient.post('/api/v1/disability-rehab/volunteers/hours', {
+      volunteerId,
+      ...data,
+    });
     return r.data;
   }),
   evaluateVolunteer: safe(async (volunteerId, data) => {
-    const r = await apiClient.post('/disability-rehab/volunteers/evaluate', {
+    const r = await apiClient.post('/api/v1/disability-rehab/volunteers/evaluate', {
       volunteerId,
       ...data,
     });
     return r.data;
   }),
   issueCertificate: safe(async (volunteerId, data) => {
-    const r = await apiClient.post('/disability-rehab/volunteers/certificate', {
+    const r = await apiClient.post('/api/v1/disability-rehab/volunteers/certificate', {
       volunteerId,
       ...data,
     });
     return r.data;
   }),
   getReport: safe(async volunteerId => {
-    const r = await apiClient.get(`/disability-rehab/volunteers/report/${volunteerId}`);
+    const r = await apiClient.get(`/api/v1/disability-rehab/volunteers/report/${volunteerId}`);
     return r.data;
   }),
 };
@@ -2796,27 +2939,33 @@ export const volunteerService = {
 // 61. الدراسات والأبحاث
 export const researchStudiesService = {
   createStudy: safe(async data => {
-    const r = await apiClient.post('/disability-rehab/research/study', data);
+    const r = await apiClient.post('/api/v1/disability-rehab/research/study', data);
     return r.data;
   }),
   enrollParticipant: safe(async (studyId, data) => {
-    const r = await apiClient.post('/disability-rehab/research/participant', { studyId, ...data });
+    const r = await apiClient.post('/api/v1/disability-rehab/research/participant', {
+      studyId,
+      ...data,
+    });
     return r.data;
   }),
   recordData: safe(async (studyId, data) => {
-    const r = await apiClient.post('/disability-rehab/research/data', { studyId, ...data });
+    const r = await apiClient.post('/api/v1/disability-rehab/research/data', { studyId, ...data });
     return r.data;
   }),
   analyzeStudy: safe(async studyId => {
-    const r = await apiClient.get(`/disability-rehab/research/analyze/${studyId}`);
+    const r = await apiClient.get(`/api/v1/disability-rehab/research/analyze/${studyId}`);
     return r.data;
   }),
   createPublication: safe(async (studyId, data) => {
-    const r = await apiClient.post('/disability-rehab/research/publication', { studyId, ...data });
+    const r = await apiClient.post('/api/v1/disability-rehab/research/publication', {
+      studyId,
+      ...data,
+    });
     return r.data;
   }),
   getReport: safe(async studyId => {
-    const r = await apiClient.get(`/disability-rehab/research/report/${studyId}`);
+    const r = await apiClient.get(`/api/v1/disability-rehab/research/report/${studyId}`);
     return r.data;
   }),
 };

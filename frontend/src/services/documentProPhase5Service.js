@@ -4,7 +4,7 @@
  */
 import apiClient from './api.client';
 
-const BASE = '/api/documents-pro-v5';
+const BASE = '/api/v1/documents-pro-v5';
 
 /* ═══════ QR Code & Barcode ═══════ */
 export const qrApi = {

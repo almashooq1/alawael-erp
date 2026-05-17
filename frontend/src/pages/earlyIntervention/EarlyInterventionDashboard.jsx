@@ -45,6 +45,7 @@ import {
   Error as DelayIcon,
 } from '@mui/icons-material';
 import eisApi from '../../services/earlyIntervention.service';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 function TabPanel({ children, value, index }) {
   return value === index ? <Box py={2}>{children}</Box> : null;
@@ -309,9 +310,7 @@ export default function EarlyInterventionDashboard() {
                 children.map(c => (
                   <TableRow key={c._id || c.id}>
                     <TableCell>{`${c.firstName || ''} ${c.lastName || ''}`}</TableCell>
-                    <TableCell>
-                      {c.dateOfBirth ? new Date(c.dateOfBirth).toLocaleDateString('ar-SA') : '—'}
-                    </TableCell>
+                    <TableCell>{c.dateOfBirth ? _fmtDate(c.dateOfBirth) : '—'}</TableCell>
                     <TableCell>{genderMap[c.gender] || c.gender || '—'}</TableCell>
                     <TableCell>{c.disabilityType || '—'}</TableCell>
                     <TableCell>{getChip(c.status)}</TableCell>
@@ -356,11 +355,7 @@ export default function EarlyInterventionDashboard() {
                   <TableRow key={s._id || s.id}>
                     <TableCell>{s.childName || s.child?.firstName || '—'}</TableCell>
                     <TableCell>{s.screeningType || '—'}</TableCell>
-                    <TableCell>
-                      {s.screeningDate
-                        ? new Date(s.screeningDate).toLocaleDateString('ar-SA')
-                        : '—'}
-                    </TableCell>
+                    <TableCell>{s.screeningDate ? _fmtDate(s.screeningDate) : '—'}</TableCell>
                     <TableCell>{getChip(s.overallResult)}</TableCell>
                     <TableCell>{getChip(s.status)}</TableCell>
                   </TableRow>
@@ -400,9 +395,7 @@ export default function EarlyInterventionDashboard() {
                     <TableCell>
                       {p.serviceCoordinatorName || p.serviceCoordinator?.name || '—'}
                     </TableCell>
-                    <TableCell>
-                      {p.startDate ? new Date(p.startDate).toLocaleDateString('ar-SA') : '—'}
-                    </TableCell>
+                    <TableCell>{p.startDate ? _fmtDate(p.startDate) : '—'}</TableCell>
                     <TableCell>{p.goals?.length || 0}</TableCell>
                     <TableCell>{getChip(p.status)}</TableCell>
                   </TableRow>
@@ -456,9 +449,7 @@ export default function EarlyInterventionDashboard() {
                       />
                     </TableCell>
                     <TableCell>{getChip(r.status)}</TableCell>
-                    <TableCell>
-                      {r.createdAt ? new Date(r.createdAt).toLocaleDateString('ar-SA') : '—'}
-                    </TableCell>
+                    <TableCell>{r.createdAt ? _fmtDate(r.createdAt) : '—'}</TableCell>
                   </TableRow>
                 ))
               )}
@@ -549,9 +540,7 @@ export default function EarlyInterventionDashboard() {
                 <Grid item xs={4}>
                   <Typography variant="caption">تاريخ الميلاد</Typography>
                   <Typography>
-                    {profile.child?.dateOfBirth
-                      ? new Date(profile.child.dateOfBirth).toLocaleDateString('ar-SA')
-                      : '—'}
+                    {profile.child?.dateOfBirth ? _fmtDate(profile.child.dateOfBirth) : '—'}
                   </Typography>
                 </Grid>
                 <Grid item xs={4}>

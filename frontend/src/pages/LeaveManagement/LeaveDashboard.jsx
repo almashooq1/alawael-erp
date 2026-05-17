@@ -54,6 +54,7 @@ import { ChartTooltip } from '../../components/dashboard/shared/ChartTooltip';
 import EmptyState from '../../components/dashboard/shared/EmptyState';
 import DashboardErrorBoundary from '../../components/dashboard/shared/DashboardErrorBoundary';
 import logger from '../../utils/logger';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const useCounter = (end, dur = 1000) => {
   const [v, setV] = useState(0);
@@ -601,12 +602,12 @@ export default function LeaveDashboard() {
                         </TableCell>
                         <TableCell>
                           <Typography variant="body2" sx={{ fontSize: 12 }}>
-                            {r.startDate ? new Date(r.startDate).toLocaleDateString('ar') : '—'}
+                            {r.startDate ? _fmtDate(r.startDate) : '—'}
                           </Typography>
                         </TableCell>
                         <TableCell>
                           <Typography variant="body2" sx={{ fontSize: 12 }}>
-                            {r.endDate ? new Date(r.endDate).toLocaleDateString('ar') : '—'}
+                            {r.endDate ? _fmtDate(r.endDate) : '—'}
                           </Typography>
                         </TableCell>
                         <TableCell>

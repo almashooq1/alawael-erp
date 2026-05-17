@@ -45,9 +45,10 @@ import {
 } from '@mui/icons-material';
 import { lifecycleApi } from '../../services/documentProPhase9Service';
 import logger from '../../utils/logger';
+import { formatDate as _fmtDate, formatDateTime as _fmtDT } from 'utils/dateUtils';
 
-const fmtDateTime = d => (d ? new Date(d).toLocaleString('ar-SA') : '—');
-const fmtDate = d => (d ? new Date(d).toLocaleDateString('ar-SA') : '—');
+const fmtDateTime = d => (d ? _fmtDT(d) : '—');
+const fmtDate = d => (d ? _fmtDate(d) : '—');
 const fmtDuration = mins => {
   if (!mins) return '—';
   if (mins < 60) return `${mins} دقيقة`;

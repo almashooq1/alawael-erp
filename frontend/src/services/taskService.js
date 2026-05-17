@@ -270,22 +270,25 @@ export const MOCK_TASK_DASHBOARD = {
 // Services
 // ═══════════════════════════════════════════
 export const tasksService = {
-  getAll: () => safe(() => apiClient.get('/tasks').then(r => r.data), MOCK_TASKS),
+  getAll: () => safe(() => apiClient.get('/api/v1/tasks').then(r => r.data), MOCK_TASKS),
   getById: id =>
     safe(
-      () => apiClient.get(`/tasks/${id}`).then(r => r.data),
+      () => apiClient.get(`/api/v1/tasks/${id}`).then(r => r.data),
       MOCK_TASKS.find(t => t._id === id)
     ),
-  create: data => safe(() => apiClient.post('/tasks', data).then(r => r.data)),
-  update: (id, data) => safe(() => apiClient.put(`/tasks/${id}`, data).then(r => r.data)),
-  remove: id => safe(() => apiClient.delete(`/tasks/${id}`).then(r => r.data)),
+  create: data => safe(() => apiClient.post('/api/v1/tasks', data).then(r => r.data)),
+  update: (id, data) => safe(() => apiClient.put(`/api/v1/tasks/${id}`, data).then(r => r.data)),
+  remove: id => safe(() => apiClient.delete(`/api/v1/tasks/${id}`).then(r => r.data)),
   updateStatus: (id, status) =>
-    safe(() => apiClient.patch(`/tasks/${id}/status`, { status }).then(r => r.data)),
+    safe(() => apiClient.patch(`/api/v1/tasks/${id}/status`, { status }).then(r => r.data)),
   updateProgress: (id, progress) =>
-    safe(() => apiClient.patch(`/tasks/${id}/progress`, { progress }).then(r => r.data)),
+    safe(() => apiClient.patch(`/api/v1/tasks/${id}/progress`, { progress }).then(r => r.data)),
 };
 
 export const taskReportsService = {
   getDashboardStats: () =>
-    safe(() => apiClient.get('/tasks/dashboard/stats').then(r => r.data), MOCK_TASK_DASHBOARD),
+    safe(
+      () => apiClient.get('/api/v1/tasks/dashboard/stats').then(r => r.data),
+      MOCK_TASK_DASHBOARD
+    ),
 };

@@ -3,6 +3,7 @@
  * Aligned with backend TherapySession model (UPPERCASE statuses)
  */
 import { statusColors, neutralColors } from 'theme/palette';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 export const SESSION_TYPES = [
   { value: 'علاج طبيعي', label: 'علاج طبيعي', color: statusColors.indigo },
@@ -150,7 +151,7 @@ export const getTypeColor = type => {
 export const formatDate = iso => {
   if (!iso) return '—';
   try {
-    return new Date(iso).toLocaleDateString('ar-SA', {
+    return _fmtDate(iso, {
       year: 'numeric',
       month: 'short',
       day: 'numeric',

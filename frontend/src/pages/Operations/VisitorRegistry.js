@@ -71,6 +71,7 @@ import {
 } from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients, statusColors, neutralColors } from '../../theme/palette';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 /* ═══════════════ Constants ═══════════════ */
 const defaultStats = {
@@ -100,7 +101,7 @@ const purposeMap = {
 };
 const purposeOptions = Object.entries(purposeMap).map(([v, l]) => ({ value: v, label: l }));
 
-const fmtDate = d => (d ? new Date(d).toLocaleDateString('ar-SA') : '-');
+const fmtDate = d => (d ? _fmtDate(d) : '-');
 const fmtTime = d =>
   d ? new Date(d).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' }) : '-';
 const fmtDateTime = d => (d ? `${fmtDate(d)} ${fmtTime(d)}` : '-');

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 import {
   getReferrals,
   getReferralAnalytics,
@@ -533,7 +534,7 @@ export default function ReferralPortal() {
                       )}
                     </td>
                     <td className="px-4 py-3 text-xs text-gray-500">
-                      {ref.createdAt ? new Date(ref.createdAt).toLocaleDateString('ar-SA') : '—'}
+                      {ref.createdAt ? _fmtDate(ref.createdAt) : '—'}
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1">

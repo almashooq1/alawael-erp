@@ -45,6 +45,7 @@ import {
   Article as ArticleIcon,
   Shield as ShieldIcon,
 } from '@mui/icons-material';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 import {
   signatureApi,
   templateApi,
@@ -643,7 +644,7 @@ export default function DocumentsProExtended() {
                       </ListItemAvatar>
                       <ListItemText
                         primary={job.jobTypeLabel || job.jobType}
-                        secondary={`${job.successCount || 0}/${job.totalDocuments || 0} نجاح • ${new Date(job.createdAt).toLocaleDateString('ar-SA')}`}
+                        secondary={`${job.successCount || 0}/${job.totalDocuments || 0} نجاح • ${_fmtDate(job.createdAt)}`}
                       />
                       <ListItemSecondaryAction>
                         <Chip

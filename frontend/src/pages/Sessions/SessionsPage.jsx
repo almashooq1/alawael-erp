@@ -5,7 +5,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Box,
   Card,
@@ -57,9 +57,12 @@ import {
   PlayCircle as InProgressIcon,
   Videocam as VideoIcon,
   Groups as GroupIcon,
+  AccountTree as EpisodeIcon,
+  ArrowBack as BackIcon,
 } from '@mui/icons-material';
 
 import { sessionsAPI } from '../../services/ddd';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 /* ── Session types ── */
 const SESSION_TYPES = [
@@ -89,6 +92,12 @@ const TIME_SLOTS = Array.from({ length: 12 }, (_, i) => {
 
 export default function SessionsPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  // Context from URL workflow
+  const ctxEpisodeId = searchParams.get('episodeId') || '';
+  const ctxBeneficiaryId = searchParams.get('beneficiaryId') || '';
+
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -115,6 +124,8 @@ export default function SessionsPage() {
         ...(statusFilter && { status: statusFilter }),
         ...(typeFilter && { sessionType: typeFilter }),
         ...(view === 1 && dateFilter && { date: dateFilter }),
+        ...(ctxBeneficiaryId && { beneficiaryId: ctxBeneficiaryId }),
+        ...(ctxEpisodeId && { episodeId: ctxEpisodeId }),
       };
       const res = await sessionsAPI.list(params);
       const data = res?.data;
@@ -130,7 +141,7 @@ export default function SessionsPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, search, statusFilter, typeFilter, dateFilter, view]);
+  }, [page, search, statusFilter, typeFilter, dateFilter, view, ctxBeneficiaryId, ctxEpisodeId]);
 
   useEffect(() => {
     loadSessions();
@@ -152,6 +163,32 @@ export default function SessionsPage() {
 
   return (
     <Box sx={{ p: 3, direction: 'rtl' }}>
+      {/* Context Banner */}
+      {(ctxEpisodeId || ctxBeneficiaryId) && (
+        <Alert
+          severity="info"
+          sx={{ mb: 2 }}
+          action={
+            <Stack direction="row" spacing={1}>
+              {ctxEpisodeId && (
+                <Button
+                  size="small"
+                  startIcon={<EpisodeIcon />}
+                  onClick={() => navigate('/platform/episodes')}
+                >
+                  الحلقة
+                </Button>
+              )}
+              <Button size="small" startIcon={<BackIcon />} onClick={() => navigate(-1)}>
+                رجوع
+              </Button>
+            </Stack>
+          }
+        >
+          {ctxBeneficiaryId && `جلسات المستفيد: ${ctxBeneficiaryId}`}
+          {ctxEpisodeId && ` | الحلقة: ${ctxEpisodeId}`}
+        </Alert>
+      )}
       {/* ── Header ── */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Box>
@@ -335,9 +372,7 @@ export default function SessionsPage() {
                       </TableCell>
                       <TableCell>
                         <Typography variant="body2">
-                          {s.scheduledDate
-                            ? new Date(s.scheduledDate).toLocaleDateString('ar-SA')
-                            : '-'}
+                          {s.scheduledDate ? _fmtDate(s.scheduledDate) : '-'}
                         </Typography>
                       </TableCell>
                       <TableCell>
@@ -388,7 +423,7 @@ export default function SessionsPage() {
         <Card variant="outlined">
           <CardContent>
             <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 2 }}>
-              {new Date(dateFilter).toLocaleDateString('ar-SA', {
+              {_fmtDate(dateFilter, {
                 weekday: 'long',
                 year: 'numeric',
                 month: 'long',
@@ -486,12 +521,7 @@ export default function SessionsPage() {
                     {[
                       ['المستفيد', s.beneficiary?.name?.full || s.beneficiaryName || '-'],
                       ['نوع الجلسة', s.sessionType || s.type || '-'],
-                      [
-                        'التاريخ',
-                        s.scheduledDate
-                          ? new Date(s.scheduledDate).toLocaleDateString('ar-SA')
-                          : '-',
-                      ],
+                      ['التاريخ', s.scheduledDate ? _fmtDate(s.scheduledDate) : '-'],
                       [
                         'الوقت',
                         s.scheduledDate

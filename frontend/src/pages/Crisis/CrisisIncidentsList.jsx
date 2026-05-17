@@ -24,6 +24,7 @@ import {
   CircularProgress,
 } from '@mui/material';
 import { Add, Edit, Delete, Refresh } from '@mui/icons-material';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 import {
   getIncidents,
   createIncident,
@@ -196,9 +197,7 @@ export default function CrisisIncidentsList() {
                       />
                     </TableCell>
                     <TableCell>{r.location?.building || '—'}</TableCell>
-                    <TableCell>
-                      {r.reportedAt ? new Date(r.reportedAt).toLocaleDateString('ar-SA') : '—'}
-                    </TableCell>
+                    <TableCell>{r.reportedAt ? _fmtDate(r.reportedAt) : '—'}</TableCell>
                     <TableCell>
                       <IconButton size="small" onClick={() => handleEdit(r)}>
                         <Edit fontSize="small" />

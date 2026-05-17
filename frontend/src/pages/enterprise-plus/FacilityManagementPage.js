@@ -44,6 +44,7 @@ import {
 } from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import * as svc from '../../services/enterpriseProPlus.service';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const FACILITY_TYPES = {
   building: 'مبنى',
@@ -380,12 +381,8 @@ export default function FacilityManagementPage() {
                     <TableCell>
                       <Chip size="small" label={BOOKING_PURPOSES[b.purpose] || b.purpose} />
                     </TableCell>
-                    <TableCell>
-                      {b.startTime ? new Date(b.startTime).toLocaleDateString('ar-SA') : '-'}
-                    </TableCell>
-                    <TableCell>
-                      {b.endTime ? new Date(b.endTime).toLocaleDateString('ar-SA') : '-'}
-                    </TableCell>
+                    <TableCell>{b.startTime ? _fmtDate(b.startTime) : '-'}</TableCell>
+                    <TableCell>{b.endTime ? _fmtDate(b.endTime) : '-'}</TableCell>
                     <TableCell>
                       <Chip
                         size="small"
@@ -474,8 +471,8 @@ export default function FacilityManagementPage() {
                       </Typography>
                     )}
                     <Typography variant="body2" color="text.secondary">
-                      من {l.startDate ? new Date(l.startDate).toLocaleDateString('ar-SA') : '-'} إلى{' '}
-                      {l.endDate ? new Date(l.endDate).toLocaleDateString('ar-SA') : '-'}
+                      من {l.startDate ? _fmtDate(l.startDate) : '-'} إلى{' '}
+                      {l.endDate ? _fmtDate(l.endDate) : '-'}
                     </Typography>
                     {l.landlord?.name && (
                       <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
@@ -537,9 +534,7 @@ export default function FacilityManagementPage() {
                         }}
                       />
                     </TableCell>
-                    <TableCell>
-                      {u.readingDate ? new Date(u.readingDate).toLocaleDateString('ar-SA') : '-'}
-                    </TableCell>
+                    <TableCell>{u.readingDate ? _fmtDate(u.readingDate) : '-'}</TableCell>
                     <TableCell>{u.currentReading}</TableCell>
                     <TableCell>{u.consumption || '-'}</TableCell>
                     <TableCell>

@@ -37,6 +37,7 @@ import {
   Payment as PayIcon,
   EmojiEvents as TrophyIcon,
 } from '@mui/icons-material';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 import {
   getRewards,
   createReward,
@@ -495,8 +496,7 @@ export default function RewardsManagement() {
               {viewDialog.disbursedDate && (
                 <Grid item xs={6}>
                   <Typography>
-                    <strong>تاريخ الصرف:</strong>{' '}
-                    {new Date(viewDialog.disbursedDate).toLocaleDateString('ar-SA')}
+                    <strong>تاريخ الصرف:</strong> {_fmtDate(viewDialog.disbursedDate)}
                   </Typography>
                 </Grid>
               )}

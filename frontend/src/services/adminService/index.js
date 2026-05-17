@@ -19,7 +19,7 @@ export const adminService = {
   // Get Admin Dashboard Data
   async getAdminDashboard() {
     try {
-      const data = await apiClient.get('/admin/overview');
+      const data = await apiClient.get('/api/v1/admin/overview');
       const result = data?.data || data || mockDashboard;
       // Normalize array fields — API may return non-array values
       if (result && typeof result === 'object') {
@@ -39,7 +39,7 @@ export const adminService = {
   // Get Admin Users
   async getAdminUsers() {
     try {
-      const data = await apiClient.get('/admin/users');
+      const data = await apiClient.get('/api/v1/admin/users');
       return Array.isArray(data) ? data : data?.data || mockUsers;
     } catch (err) {
       logger.warn('Admin users API unavailable — using local data:', err?.message);
@@ -50,7 +50,7 @@ export const adminService = {
   // Get Admin Settings
   async getAdminSettings() {
     try {
-      const data = await apiClient.get('/admin/settings');
+      const data = await apiClient.get('/api/v1/admin/settings');
       return data?.data || data || mockSettings;
     } catch (err) {
       logger.warn('Admin settings API unavailable — using local data:', err?.message);
@@ -61,7 +61,7 @@ export const adminService = {
   // Save all settings (bulk update)
   async saveAdminSettings(settingsData) {
     try {
-      const data = await apiClient.put('/admin/settings', settingsData);
+      const data = await apiClient.put('/api/v1/admin/settings', settingsData);
       return data?.data || data;
     } catch (err) {
       logger.warn('Admin settings save error:', err?.message);
@@ -72,7 +72,7 @@ export const adminService = {
   // Update a specific settings section
   async updateSettingsSection(section, sectionData) {
     try {
-      const data = await apiClient.put(`/admin/settings/${section}`, sectionData);
+      const data = await apiClient.put(`/api/v1/admin/settings/${section}`, sectionData);
       return data?.data || data;
     } catch (err) {
       logger.warn(`Admin settings section "${section}" update error:`, err?.message);
@@ -83,7 +83,7 @@ export const adminService = {
   // Reset all settings to defaults
   async resetAllSettings() {
     try {
-      const data = await apiClient.post('/admin/settings/reset');
+      const data = await apiClient.post('/api/v1/admin/settings/reset');
       return data?.data || data;
     } catch (err) {
       logger.warn('Admin settings reset error:', err?.message);
@@ -94,7 +94,7 @@ export const adminService = {
   // Reset a specific section to defaults
   async resetSettingsSection(section) {
     try {
-      const data = await apiClient.post(`/admin/settings/reset/${section}`);
+      const data = await apiClient.post(`/api/v1/admin/settings/reset/${section}`);
       return data?.data || data;
     } catch (err) {
       logger.warn(`Admin settings section "${section}" reset error:`, err?.message);
@@ -105,7 +105,7 @@ export const adminService = {
   // Export settings as JSON
   async exportSettings() {
     try {
-      const data = await apiClient.post('/admin/settings/export');
+      const data = await apiClient.post('/api/v1/admin/settings/export');
       return data?.data || data;
     } catch (err) {
       logger.warn('Admin settings export error:', err?.message);
@@ -116,7 +116,7 @@ export const adminService = {
   // Import settings from JSON
   async importSettings(jsonData) {
     try {
-      const data = await apiClient.post('/admin/settings/import', jsonData);
+      const data = await apiClient.post('/api/v1/admin/settings/import', jsonData);
       return data?.data || data;
     } catch (err) {
       logger.warn('Admin settings import error:', err?.message);
@@ -127,7 +127,7 @@ export const adminService = {
   // Get settings change history
   async getSettingsHistory(limit = 50) {
     try {
-      const data = await apiClient.get(`/admin/settings/history?limit=${limit}`);
+      const data = await apiClient.get(`/api/v1/admin/settings/history?limit=${limit}`);
       return data?.data || data || [];
     } catch (err) {
       logger.warn('Admin settings history error:', err?.message);
@@ -138,7 +138,7 @@ export const adminService = {
   // Toggle maintenance mode
   async toggleMaintenance(enabled, message) {
     try {
-      const data = await apiClient.post('/admin/settings/maintenance', { enabled, message });
+      const data = await apiClient.post('/api/v1/admin/settings/maintenance', { enabled, message });
       return data?.data || data;
     } catch (err) {
       logger.warn('Admin maintenance toggle error:', err?.message);
@@ -149,7 +149,7 @@ export const adminService = {
   // Test email configuration
   async testEmailConfig() {
     try {
-      const data = await apiClient.post('/admin/settings/test-email');
+      const data = await apiClient.post('/api/v1/admin/settings/test-email');
       return data;
     } catch (err) {
       logger.warn('Admin test email error:', err?.message);
@@ -160,7 +160,7 @@ export const adminService = {
   // Trigger manual backup
   async triggerBackup() {
     try {
-      const data = await apiClient.post('/admin/settings/backup');
+      const data = await apiClient.post('/api/v1/admin/settings/backup');
       return data;
     } catch (err) {
       logger.warn('Admin trigger backup error:', err?.message);
@@ -171,7 +171,7 @@ export const adminService = {
   // Get Admin Reports
   async getAdminReports() {
     try {
-      const data = await apiClient.get('/admin/reports');
+      const data = await apiClient.get('/api/v1/admin/reports');
       return data?.data || data || mockReports;
     } catch (err) {
       logger.warn('Admin reports API unavailable — using local data:', err?.message);
@@ -182,7 +182,7 @@ export const adminService = {
   // Get Audit Logs
   async getAdminAuditLogs() {
     try {
-      const data = await apiClient.get('/admin/audit-logs');
+      const data = await apiClient.get('/api/v1/admin/audit-logs');
       return Array.isArray(data) ? data : data?.data || mockLogs;
     } catch (err) {
       logger.warn('Admin audit logs API unavailable — using local data:', err?.message);
@@ -193,7 +193,7 @@ export const adminService = {
   // Get Clinics
   async getAdminClinics() {
     try {
-      const data = await apiClient.get('/admin/clinics');
+      const data = await apiClient.get('/api/v1/admin/clinics');
       return Array.isArray(data) ? data : data?.data || mockClinics;
     } catch (err) {
       logger.warn('Admin clinics API unavailable — using local data:', err?.message);
@@ -204,7 +204,7 @@ export const adminService = {
   // Get Payments
   async getAdminPayments() {
     try {
-      const data = await apiClient.get('/payments/all');
+      const data = await apiClient.get('/api/v1/payments/all');
       if (data?.success && data?.data?.length > 0) {
         return data.data.map(p => ({
           id: p._id,
@@ -232,7 +232,7 @@ export const adminService = {
   // Get Notifications
   async getAdminNotifications() {
     try {
-      const data = await apiClient.get('/admin/notifications');
+      const data = await apiClient.get('/api/v1/admin/notifications');
       return Array.isArray(data) ? data : data?.data || mockNotifications;
     } catch (err) {
       logger.warn('Admin notifications API unavailable — using local data:', err?.message);
@@ -242,21 +242,21 @@ export const adminService = {
 
   // Create user
   async createUser(userData) {
-    return apiClient.post('/admin/users', userData);
+    return apiClient.post('/api/v1/admin/users', userData);
   },
 
   // Update user
   async updateUser(userId, userData) {
-    return apiClient.put(`/admin/users/${userId}`, userData);
+    return apiClient.put(`/api/v1/admin/users/${userId}`, userData);
   },
 
   // Delete user
   async deleteUser(userId) {
-    return apiClient.delete(`/admin/users/${userId}`);
+    return apiClient.delete(`/api/v1/admin/users/${userId}`);
   },
 
   // Delete payment
   async deletePayment(paymentId) {
-    return apiClient.delete(`/admin/payments/${paymentId}`);
+    return apiClient.delete(`/api/v1/admin/payments/${paymentId}`);
   },
 };

@@ -56,6 +56,7 @@ import {
 } from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import enterpriseProService from '../../services/enterprisePro.service';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const TRANSFER_STATUSES = {
   draft: { label: 'مسودة', color: '#757575', step: 0 },
@@ -515,9 +516,7 @@ export default function WarehouseIntelPage() {
                         }
                       />
                     </TableCell>
-                    <TableCell sx={{ fontSize: '0.75rem' }}>
-                      {new Date(a.createdAt).toLocaleDateString('ar-SA')}
-                    </TableCell>
+                    <TableCell sx={{ fontSize: '0.75rem' }}>{_fmtDate(a.createdAt)}</TableCell>
                     <TableCell>
                       {!a.resolved && (
                         <Button size="small" color="success" onClick={() => resolveAlert(a._id)}>

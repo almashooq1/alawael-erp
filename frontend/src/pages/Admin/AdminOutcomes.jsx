@@ -40,6 +40,7 @@ import TrendingFlatIcon from '@mui/icons-material/TrendingFlat';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutlined';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import api from '../../services/api.client';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const TREND_LABEL = {
   improving: 'تحسُّن',
@@ -72,7 +73,7 @@ const INTERP_LABEL = {
 function formatDate(v) {
   if (!v) return '—';
   try {
-    return new Date(v).toLocaleDateString('ar-SA');
+    return _fmtDate(v);
   } catch {
     return '—';
   }

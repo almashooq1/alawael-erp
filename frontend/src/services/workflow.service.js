@@ -7,7 +7,7 @@
 
 import api from './api.client';
 
-const BASE = '/workflow';
+const BASE = '/api/v1/workflow';
 const ENH = '/workflow-enhanced';
 const PRO = '/workflow-pro';
 

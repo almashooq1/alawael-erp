@@ -6,6 +6,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { formatDate as _fmtDateUtil } from 'utils/dateUtils';
 import {
   Box,
   Container,
@@ -65,10 +66,11 @@ function formatBytes(n) {
   }
   return `${v.toFixed(1)} ${units[i]}`;
 }
+
 function formatDate(v) {
   if (!v) return '—';
   try {
-    return new Date(v).toLocaleDateString('ar-SA');
+    return _fmtDateUtil(v);
   } catch {
     return '—';
   }

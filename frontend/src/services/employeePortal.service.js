@@ -1,15 +1,17 @@
 import api from './api.client';
 
+const BASE = '/api/v1/employee-portal';
+
 const employeePortalService = {
-  getProfile: () => api.get('/employee-portal/profile'),
-  updateProfile: data => api.put('/employee-portal/profile', data),
-  getLeaveBalance: () => api.get('/employee-portal/leaves/balance'),
-  requestLeave: data => api.post('/employee-portal/leaves', data),
-  getLeaves: params => api.get('/employee-portal/leaves', { params }),
-  getPayslips: params => api.get('/employee-portal/payslips', { params }),
-  getDocuments: params => api.get('/employee-portal/documents', { params }),
-  submitRequest: data => api.post('/employee-portal/requests', data),
-  getRequests: params => api.get('/employee-portal/requests', { params }),
+  getProfile: () => api.get(`${BASE}/profile`),
+  updateProfile: data => api.put(`${BASE}/profile`, data),
+  getLeaveBalance: () => api.get(`${BASE}/leaves/balance`),
+  requestLeave: data => api.post(`${BASE}/leaves`, data),
+  getLeaves: params => api.get(`${BASE}/leaves`, { params }),
+  getPayslips: params => api.get(`${BASE}/payslips`, { params }),
+  getDocuments: params => api.get(`${BASE}/documents`, { params }),
+  submitRequest: data => api.post(`${BASE}/requests`, data),
+  getRequests: params => api.get(`${BASE}/requests`, { params }),
 };
 
 export default employeePortalService;

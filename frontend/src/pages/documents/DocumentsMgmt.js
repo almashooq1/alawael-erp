@@ -92,6 +92,7 @@ import DocumentScanner from 'components/documents/DocumentScanner';
 import logger from 'utils/logger';
 import { gradients, brandColors } from 'theme/palette';
 import { useSnackbar } from '../../contexts/SnackbarContext';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 /* ──── helpers ──── */
 const formatFileSize = bytes => {
@@ -135,7 +136,7 @@ const getFileIcon = type => {
 
 const formatDate = d => {
   if (!d) return '—';
-  return new Date(d).toLocaleDateString('ar-SA', {
+  return _fmtDate(d, {
     year: 'numeric',
     month: 'short',
     day: 'numeric',

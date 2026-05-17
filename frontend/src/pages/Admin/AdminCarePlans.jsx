@@ -6,6 +6,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { formatDate as _fmtDateUtil } from 'utils/dateUtils';
 import {
   Box,
   Container,
@@ -524,12 +525,8 @@ export default function AdminCarePlans() {
               <TableRow key={p._id} hover>
                 <TableCell>{p.planNumber || '—'}</TableCell>
                 <TableCell>{beneficiaryMap[p.beneficiary] || '—'}</TableCell>
-                <TableCell>
-                  {p.startDate ? new Date(p.startDate).toLocaleDateString('ar-SA') : '—'}
-                </TableCell>
-                <TableCell>
-                  {p.reviewDate ? new Date(p.reviewDate).toLocaleDateString('ar-SA') : '—'}
-                </TableCell>
+                <TableCell>{p.startDate ? _fmtDateUtil(p.startDate) : '—'}</TableCell>
+                <TableCell>{p.reviewDate ? _fmtDateUtil(p.reviewDate) : '—'}</TableCell>
                 <TableCell>
                   <Stack direction="row" spacing={0.5}>
                     {p.educational?.enabled && (
@@ -820,9 +817,7 @@ export default function AdminCarePlans() {
                                       />
                                     </TableCell>
                                     <TableCell>
-                                      {g.targetDate
-                                        ? new Date(g.targetDate).toLocaleDateString('ar-SA')
-                                        : '—'}
+                                      {g.targetDate ? _fmtDateUtil(g.targetDate) : '—'}
                                     </TableCell>
                                     <TableCell>
                                       <IconButton

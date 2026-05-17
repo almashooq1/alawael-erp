@@ -63,6 +63,7 @@ import {
 } from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients } from '../../theme/palette';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 /* ── Constants ──────────────────────────────────────────────────────── */
 const STATUS_MAP = {
@@ -1062,7 +1063,7 @@ export default function KnowledgeCenter() {
                     </IconButton>
                   </Box>
                   <Typography variant="caption" color="text.secondary">
-                    {c.createdAt ? new Date(c.createdAt).toLocaleDateString('ar-SA') : ''}
+                    {c.createdAt ? _fmtDate(c.createdAt) : ''}
                   </Typography>
                 </Paper>
               ))}

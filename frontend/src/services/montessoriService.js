@@ -14,7 +14,7 @@
 import apiClient from './api.client';
 import logger from 'utils/logger';
 
-const BASE = '/montessori';
+const BASE = '/api/v1/montessori';
 
 // ─── Helper: safe extract ────────────────────────────────────────────
 const extract = (res, fallback = []) => res?.data?.data ?? res?.data ?? fallback;

@@ -30,6 +30,7 @@ import PersonIcon from '@mui/icons-material/Person';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import api from '../../services/api.client';
+import { formatDate as _fmtDate, formatDateTime as _fmtDT } from 'utils/dateUtils';
 
 function fullName(x) {
   if (!x) return '';
@@ -38,7 +39,7 @@ function fullName(x) {
 function formatDate(v) {
   if (!v) return '—';
   try {
-    return new Date(v).toLocaleDateString('ar-SA');
+    return _fmtDate(v);
   } catch {
     return '—';
   }
@@ -388,16 +389,16 @@ export default function TelehealthRoom() {
                 حالة الاتصال
               </Typography>
               <Typography variant="caption" color="text.secondary" display="block">
-                انضمام المعالج: {new Date(th.hostJoinedAt).toLocaleString('ar-SA')}
+                انضمام المعالج: {_fmtDT(th.hostJoinedAt)}
               </Typography>
               {th.guestJoinedAt && (
                 <Typography variant="caption" color="text.secondary" display="block">
-                  انضمام المستفيد: {new Date(th.guestJoinedAt).toLocaleString('ar-SA')}
+                  انضمام المستفيد: {_fmtDT(th.guestJoinedAt)}
                 </Typography>
               )}
               {th.endedAt && (
                 <Typography variant="caption" color="success.main" display="block">
-                  انتهت: {new Date(th.endedAt).toLocaleString('ar-SA')}
+                  انتهت: {_fmtDT(th.endedAt)}
                   {th.durationSeconds
                     ? ` · المدة ${Math.round(th.durationSeconds / 60)} دقيقة`
                     : ''}

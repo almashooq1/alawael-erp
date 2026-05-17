@@ -51,6 +51,7 @@ import {
   PersonAdd as ShareUserIcon,
 } from '@mui/icons-material';
 import reportBuilderService from '../../services/reportBuilderService';
+import { formatDateTime as _fmtDT } from 'utils/dateUtils';
 
 /* ═══════════════════════════════════════════════════════════
    Report Viewer — Execute & View Results
@@ -575,7 +576,7 @@ export default function ReportViewer() {
                   <HistoryIcon />
                 </ListItemIcon>
                 <ListItemText
-                  primary={`${new Date(e.executedAt).toLocaleString('ar-SA')} — ${e.rowCount} صف`}
+                  primary={`${_fmtDT(e.executedAt)} — ${e.rowCount} صف`}
                   secondary={`المدة: ${e.duration}ms • المستخدم: ${e.executedBy || '—'}`}
                 />
               </ListItem>

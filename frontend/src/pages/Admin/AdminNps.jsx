@@ -28,11 +28,12 @@ import {
 } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import api from '../../services/api.client';
+import { formatDate as _fmtDateUtil } from 'utils/dateUtils';
 
 function formatDate(v) {
   if (!v) return '—';
   try {
-    return new Date(v).toLocaleDateString('ar-SA');
+    return _fmtDateUtil(v);
   } catch {
     return '—';
   }

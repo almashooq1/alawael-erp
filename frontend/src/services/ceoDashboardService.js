@@ -4,7 +4,7 @@
  */
 import api from './api';
 
-const BASE = '/ceo-dashboard';
+const BASE = '/api/v1/ceo-dashboard';
 
 const ceoDashboardService = {
   /* ── Executive Dashboard ── */

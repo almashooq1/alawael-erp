@@ -96,6 +96,7 @@ import EmptyState from '../../components/dashboard/shared/EmptyState';
 import DashboardErrorBoundary from '../../components/dashboard/shared/DashboardErrorBoundary';
 import logger from '../../utils/logger';
 import montessoriService from '../../services/montessoriService';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 /* ─── Animated counter ─────────────────────────────────────────── */
 const useAnimatedCounter = (endValue, duration = 1200) => {
@@ -954,7 +955,7 @@ const MontessoriStudents = () => {
                       {
                         label: 'تاريخ الميلاد',
                         value: selectedStudent.birthDate
-                          ? new Date(selectedStudent.birthDate).toLocaleDateString('ar-SA')
+                          ? _fmtDate(selectedStudent.birthDate)
                           : '-',
                       },
                       { label: 'العمر', value: calcAge(selectedStudent.birthDate) },
@@ -966,7 +967,7 @@ const MontessoriStudents = () => {
                       {
                         label: 'تاريخ الانتساب',
                         value: selectedStudent.enrollmentDate
-                          ? new Date(selectedStudent.enrollmentDate).toLocaleDateString('ar-SA')
+                          ? _fmtDate(selectedStudent.enrollmentDate)
                           : '-',
                       },
                     ].map(row => (
@@ -1365,7 +1366,7 @@ const MontessoriStudents = () => {
                                   />
                                 </TableCell>
                                 <TableCell sx={{ fontSize: 12, color: 'text.secondary' }}>
-                                  {ev.date ? new Date(ev.date).toLocaleDateString('ar-SA') : '-'}
+                                  {ev.date ? _fmtDate(ev.date) : '-'}
                                 </TableCell>
                               </TableRow>
                             ))}
@@ -1441,7 +1442,7 @@ const MontessoriStudents = () => {
                         {studentSessions.map((s, i) => (
                           <TableRow key={s._id || i} hover>
                             <TableCell sx={{ fontWeight: 500 }}>
-                              {s.date ? new Date(s.date).toLocaleDateString('ar-SA') : '-'}
+                              {s.date ? _fmtDate(s.date) : '-'}
                             </TableCell>
                             <TableCell>{s.type || '-'}</TableCell>
                             <TableCell>{s.duration ? `${s.duration} دقيقة` : '-'}</TableCell>

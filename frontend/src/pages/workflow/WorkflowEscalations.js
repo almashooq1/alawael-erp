@@ -55,6 +55,7 @@ import {
 } from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import workflowService from '../../services/workflow.service';
+import { formatDateTime as _fmtDT } from 'utils/dateUtils';
 
 const TRIGGER_LABELS = {
   deadline_approaching: 'اقتراب الموعد النهائي',
@@ -427,9 +428,7 @@ export default function WorkflowEscalations() {
                       </TableCell>
                       <TableCell>{log.ruleId?.nameAr || log.ruleId?.name || '—'}</TableCell>
                       <TableCell>المستوى {log.currentLevel || 1}</TableCell>
-                      <TableCell>
-                        {log.triggeredAt ? new Date(log.triggeredAt).toLocaleString('ar-SA') : '—'}
-                      </TableCell>
+                      <TableCell>{log.triggeredAt ? _fmtDT(log.triggeredAt) : '—'}</TableCell>
                       <TableCell>
                         {log.status !== 'resolved' && (
                           <Button

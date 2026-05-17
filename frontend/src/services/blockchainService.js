@@ -4,7 +4,7 @@
  */
 import api from './api';
 
-const BASE = '/api/blockchain';
+const BASE = '/api/v1/blockchain';
 
 // ── Templates ──
 export const templatesService = {

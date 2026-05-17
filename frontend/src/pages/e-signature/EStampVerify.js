@@ -26,6 +26,7 @@ import {
 } from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients } from '../../theme/palette';
+import { formatDateTime as _fmtDT } from 'utils/dateUtils';
 
 const typeLabels = {
   official: 'رسمي',
@@ -274,9 +275,7 @@ export default function EStampVerify() {
                   ['طُبّق بواسطة', result.application?.appliedByName],
                   [
                     'التاريخ',
-                    result.application?.appliedAt
-                      ? new Date(result.application.appliedAt).toLocaleString('ar-SA')
-                      : null,
+                    result.application?.appliedAt ? _fmtDT(result.application.appliedAt) : null,
                   ],
                 ].map(
                   ([k, v]) =>

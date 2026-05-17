@@ -4,7 +4,7 @@
  */
 import apiClient from 'services/api.client';
 
-const BASE = '/group-programs';
+const BASE = '/api/v1/group-therapy';
 
 const groupTherapyService = {
   // ── Programs ────────────────────────────────────────────────

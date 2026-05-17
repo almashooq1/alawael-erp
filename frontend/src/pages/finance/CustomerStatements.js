@@ -27,6 +27,7 @@ import {
   TrendingDown,
 } from '@mui/icons-material';
 import { surfaceColors, neutralColors, brandColors } from 'theme/palette';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const API = process.env.REACT_APP_API_URL || '/api';
 
@@ -253,8 +254,7 @@ const CustomerStatements = () => {
                   كشف حساب: {partyName}
                 </Typography>
                 <Typography variant="caption" sx={{ color: neutralColors.textSecondary }}>
-                  من {new Date(dateFrom).toLocaleDateString('ar-SA')} إلى{' '}
-                  {new Date(dateTo).toLocaleDateString('ar-SA')}
+                  من {_fmtDate(dateFrom)} إلى {_fmtDate(dateTo)}
                 </Typography>
               </Box>
               <Box sx={{ display: 'flex', gap: 1 }}>
@@ -304,7 +304,7 @@ const CustomerStatements = () => {
                   {transactions.map((tx, idx) => (
                     <TableRow key={tx._id || idx} hover>
                       <TableCell>{idx + 1}</TableCell>
-                      <TableCell>{new Date(tx.date).toLocaleDateString('ar-SA')}</TableCell>
+                      <TableCell>{_fmtDate(tx.date)}</TableCell>
                       <TableCell sx={{ fontFamily: 'monospace', fontWeight: 600 }}>
                         {tx.reference || '-'}
                       </TableCell>

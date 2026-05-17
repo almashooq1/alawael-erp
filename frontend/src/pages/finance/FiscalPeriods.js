@@ -21,6 +21,7 @@ import {
 } from '@mui/material';
 import { CalendarMonth, Lock, LockOpen, CheckCircle } from '@mui/icons-material';
 import { surfaceColors, neutralColors, brandColors, statusColors } from 'theme/palette';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const API = process.env.REACT_APP_API_URL || '/api';
 
@@ -202,8 +203,8 @@ const FiscalPeriods = () => {
                     {period.code}
                   </TableCell>
                   <TableCell sx={{ fontWeight: 600 }}>{period.name}</TableCell>
-                  <TableCell>{new Date(period.startDate).toLocaleDateString('ar-SA')}</TableCell>
-                  <TableCell>{new Date(period.endDate).toLocaleDateString('ar-SA')}</TableCell>
+                  <TableCell>{_fmtDate(period.startDate)}</TableCell>
+                  <TableCell>{_fmtDate(period.endDate)}</TableCell>
                   <TableCell align="center">{period.transactionCount || 0}</TableCell>
                   <TableCell align="center">{period.journalEntryCount || 0}</TableCell>
                   <TableCell>

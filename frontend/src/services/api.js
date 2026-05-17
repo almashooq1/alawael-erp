@@ -33,66 +33,67 @@ export const withMockFallback = async (apiFn, fallback) => {
 // ==================== Dashboard API ====================
 
 export const dashboardAPI = {
-  getHealth: () => apiClient.get('/dashboard/health'),
-  getSummary: () => apiClient.get('/dashboard/summary'),
-  getSummarySystems: () => apiClient.get('/dashboard/summary-systems'),
-  getServices: () => apiClient.get('/dashboard/services'),
-  getTopKPIs: (limit = 4) => apiClient.get(`/dashboard/top-kpis?limit=${limit}`),
+  getHealth: () => apiClient.get('/api/v1/dashboard/health'),
+  getSummary: () => apiClient.get('/api/v1/dashboard/summary'),
+  getSummarySystems: () => apiClient.get('/api/v1/dashboard/summary-systems'),
+  getServices: () => apiClient.get('/api/v1/dashboard/services'),
+  getTopKPIs: (limit = 4) => apiClient.get(`/api/v1/dashboard/top-kpis?limit=${limit}`),
 };
 
 // ==================== Modules API ====================
 
 export const modulesAPI = {
-  getModuleData: moduleKey => apiClient.get(`/modules/${moduleKey}`),
-  getModules: () => apiClient.get('/modules'),
+  getModuleData: moduleKey => apiClient.get(`/api/v1/modules/${moduleKey}`),
+  getModules: () => apiClient.get('/api/v1/modules'),
 };
 
 // ==================== Search API ====================
 
 export const searchAPI = {
-  fullText: query => apiClient.get('/search', { params: { q: query, type: 'full-text' } }),
-  fuzzy: query => apiClient.get('/search', { params: { q: query, type: 'fuzzy' } }),
-  suggestions: query => apiClient.get('/search/suggestions', { params: { q: query } }),
+  fullText: query => apiClient.get('/api/v1/search', { params: { q: query, type: 'full-text' } }),
+  fuzzy: query => apiClient.get('/api/v1/search', { params: { q: query, type: 'fuzzy' } }),
+  suggestions: query => apiClient.get('/api/v1/search/suggestions', { params: { q: query } }),
 };
 
 // ==================== Validation API ====================
 
 export const validationAPI = {
-  email: value => apiClient.get('/validate/email', { params: { value } }),
-  phone: value => apiClient.get('/validate/phone', { params: { value } }),
-  url: value => apiClient.get('/validate/url', { params: { value } }),
-  schema: value => apiClient.post('/validate/schema', value),
+  email: value => apiClient.get('/api/v1/validate/email', { params: { value } }),
+  phone: value => apiClient.get('/api/v1/validate/phone', { params: { value } }),
+  url: value => apiClient.get('/api/v1/validate/url', { params: { value } }),
+  schema: value => apiClient.post('/api/v1/validate/schema', value),
 };
 
 // ==================== Admin API ====================
 
 export const adminAPI = {
-  getOverview: () => apiClient.get('/admin/overview'),
-  getUsers: () => apiClient.get('/admin/users'),
-  getAlerts: () => apiClient.get('/admin/alerts'),
+  getOverview: () => apiClient.get('/api/v1/admin/overview'),
+  getUsers: () => apiClient.get('/api/v1/admin/users'),
+  getAlerts: () => apiClient.get('/api/v1/admin/alerts'),
 };
 
 // ==================== RBAC API ====================
 
 export const rbacAPI = {
   /** Get all roles with labels, levels, hierarchy */
-  getRoles: () => apiClient.get('/rbac-admin/roles'),
+  getRoles: () => apiClient.get('/api/v1/rbac-admin/roles'),
 
   /** Get a single role's details + effective permissions */
-  getRoleDetail: role => apiClient.get(`/rbac-admin/roles/${role}`),
+  getRoleDetail: role => apiClient.get(`/api/v1/rbac-admin/roles/${role}`),
 
   /** Get all available resources & actions */
-  getPermissions: () => apiClient.get('/rbac-admin/permissions'),
+  getPermissions: () => apiClient.get('/api/v1/rbac-admin/permissions'),
 
   /** Get a user's effective permissions */
-  getUserPermissions: userId => apiClient.get(`/rbac-admin/users/${userId}/permissions`),
+  getUserPermissions: userId => apiClient.get(`/api/v1/rbac-admin/users/${userId}/permissions`),
 
   /** Change a user's role */
-  updateUserRole: (userId, role) => apiClient.put(`/rbac-admin/users/${userId}/role`, { role }),
+  updateUserRole: (userId, role) =>
+    apiClient.put(`/api/v1/rbac-admin/users/${userId}/role`, { role }),
 
   /** Update a user's custom / denied permissions */
   updateUserPermissions: (userId, customPermissions, deniedPermissions) =>
-    apiClient.put(`/rbac-admin/users/${userId}/permissions`, {
+    apiClient.put(`/api/v1/rbac-admin/users/${userId}/permissions`, {
       customPermissions,
       deniedPermissions,
     }),

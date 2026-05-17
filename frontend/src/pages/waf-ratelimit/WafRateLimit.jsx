@@ -51,6 +51,7 @@ import {
   CheckCircle as CheckIcon,
 } from '@mui/icons-material';
 import wafService from '../../services/wafRateLimitService';
+import { formatDateTime as _fmtDT } from 'utils/dateUtils';
 
 /* ── helper ── */
 const safe =
@@ -722,7 +723,7 @@ export default function WafRateLimit() {
                       size="small"
                     />
                   </TableCell>
-                  <TableCell>{new Date(inc.createdAt).toLocaleString('ar-SA')}</TableCell>
+                  <TableCell>{_fmtDT(inc.createdAt)}</TableCell>
                   <TableCell>
                     {inc.status === 'active' && (
                       <Button
@@ -773,7 +774,7 @@ export default function WafRateLimit() {
                     {b.path}
                   </TableCell>
                   <TableCell>{b.reason}</TableCell>
-                  <TableCell>{new Date(b.timestamp).toLocaleString('ar-SA')}</TableCell>
+                  <TableCell>{_fmtDT(b.timestamp)}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

@@ -114,9 +114,15 @@ import {
   AuditLogsRoutes,
   EpisodesRoutes,
   Beneficiary360Routes,
+  MeasuresLibraryRoutes,
   DDDRoutes,
   TeleRehabRoutes,
   EquipmentLifecycleRoutes,
+  SocialMediaRoutes,
+  CDSSRoutes,
+  GroupTherapyRoutes,
+  FamilyEngagementRoutes,
+  PostRehabRoutes,
 } from './routes';
 
 // Pages
@@ -476,6 +482,12 @@ export default function AuthenticatedShell() {
                   {safeRoutes(AuditLogsRoutes, 'AuditLogs')}
                   {safeRoutes(TeleRehabRoutes, 'TeleRehab')}
                   {safeRoutes(EquipmentLifecycleRoutes, 'EquipmentLifecycle')}
+                  {safeRoutes(MeasuresLibraryRoutes, 'MeasuresLibrary')}
+                  {safeRoutes(SocialMediaRoutes, 'SocialMedia')}
+                  {safeRoutes(CDSSRoutes, 'CDSS')}
+                  {safeRoutes(GroupTherapyRoutes, 'GroupTherapy')}
+                  {safeRoutes(FamilyEngagementRoutes, 'FamilyEngagement')}
+                  {safeRoutes(PostRehabRoutes, 'PostRehab')}
 
                   {/* Shared Routes */}
                   <Route path="ai-assistant" element={<Navigate to="/ai-analytics" replace />} />

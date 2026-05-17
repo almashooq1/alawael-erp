@@ -1,8 +1,9 @@
-/**
+﻿/**
  * Care Plan Management Page — إدارة خطط الرعاية
  * AlAwael ERP — Full rebuild with Dashboard + Plans + Goals
  */
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Box,
   Container,
@@ -57,7 +58,8 @@ import {
   DirectionsWalk as MotorIcon,
   Groups as SocialIcon,
   SelfImprovement as LifeSkillIcon,
-  TrackChanges as TargetIcon,
+  TrackChanges as GoalsNavIcon,
+  AccountTree as EpisodeIcon,
   ExpandMore as ExpandIcon,
   ExpandLess as CollapseIcon,
   CheckCircleOutlined as AchievedIcon,
@@ -81,6 +83,7 @@ import {
   CartesianGrid,
 } from 'recharts';
 import carePlanService from '../../services/carePlanService';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 // ── Constants ────────────────────────────────────────────────────────────────
 const STATUS_CONFIG = {
@@ -104,7 +107,7 @@ const GOAL_TYPE_LABELS = {
   SPEECH: { label: 'نطق', Icon: SpeechIcon, color: '#00838f' },
   SOCIAL: { label: 'اجتماعي', Icon: SocialIcon, color: '#e65100' },
   LIFE_SKILL: { label: 'مهارات حياة', Icon: LifeSkillIcon, color: '#558b2f' },
-  OTHER: { label: 'أخرى', Icon: TargetIcon, color: '#546e7a' },
+  OTHER: { label: 'أخرى', Icon: GoalsNavIcon, color: '#546e7a' },
 };
 
 const SECTION_DOMAINS = {
@@ -142,7 +145,7 @@ const SECTION_DOMAINS = {
 };
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
-const fmtDate = d => (d ? new Date(d).toLocaleDateString('ar-SA') : '—');
+const fmtDate = d => (d ? _fmtDate(d) : '—');
 
 const collectGoals = plan => {
   const goals = [];
@@ -290,16 +293,36 @@ function SectionPanel({ sectionKey, plan, onGoalClick }) {
   );
 }
 
-function CreatePlanDialog({ open, onClose, onSave, error: extErr }) {
+function CreatePlanDialog({
+  open,
+  onClose,
+  onSave,
+  error: extErr,
+  initialBeneficiaryId,
+  initialEpisodeId,
+}) {
   const [form, setForm] = useState({
     planNumber: '',
-    beneficiary: '',
+    beneficiary: initialBeneficiaryId || '',
+    episode: initialEpisodeId || '',
     startDate: '',
     reviewDate: '',
     requiresSignature: false,
   });
   const [saving, setSaving] = useState(false);
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  // Re-sync when pre-fill props change
+  useEffect(() => {
+    if (open) {
+      setForm(f => ({
+        ...f,
+        beneficiary: f.beneficiary || initialBeneficiaryId || '',
+        episode: f.episode || initialEpisodeId || '',
+      }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only on dialog open
+  }, [open]);
 
   const handleSave = async () => {
     setSaving(true);
@@ -308,6 +331,7 @@ function CreatePlanDialog({ open, onClose, onSave, error: extErr }) {
     setForm({
       planNumber: '',
       beneficiary: '',
+      episode: '',
       startDate: '',
       reviewDate: '',
       requiresSignature: false,
@@ -325,6 +349,13 @@ function CreatePlanDialog({ open, onClose, onSave, error: extErr }) {
             value={form.planNumber}
             onChange={e => set('planNumber', e.target.value)}
             fullWidth
+          />
+          <TextField
+            label="معرّف الحلقة العلاجية (Episode)"
+            value={form.episode}
+            onChange={e => set('episode', e.target.value)}
+            fullWidth
+            helperText="اختياري — يربط الخطة بمسار علاجي محدد"
           />
           <TextField
             label="معرّف المستفيد"
@@ -796,6 +827,8 @@ function PlansTab({ plans, loading, onActivate, onArchive, onSelect, selectedId 
 
 // ── Plan Detail Panel ────────────────────────────────────────────────────────
 function PlanDetailPanel({ plan, onClose, onGoalClick, loading }) {
+  const navigate = useNavigate();
+
   if (!plan) {
     return (
       <Box sx={{ p: 4, textAlign: 'center', color: 'text.secondary' }}>
@@ -834,9 +867,25 @@ function PlanDetailPanel({ plan, onClose, onGoalClick, loading }) {
             {plan.beneficiary?.name || plan.beneficiary?.fullName || '—'}
           </Typography>
         </Box>
-        <IconButton size="small" onClick={onClose}>
-          <CloseIcon />
-        </IconButton>
+        <Stack direction="row" alignItems="center" spacing={0.5}>
+          <Tooltip title="الأهداف">
+            <IconButton
+              size="small"
+              color="primary"
+              onClick={() => {
+                const bid = plan.beneficiary?._id || plan.beneficiary;
+                navigate(
+                  `/platform/goals?carePlanId=${plan._id}${bid ? `&beneficiaryId=${bid}` : ''}`
+                );
+              }}
+            >
+              <GoalsNavIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <IconButton size="small" onClick={onClose}>
+            <CloseIcon />
+          </IconButton>
+        </Stack>
       </Stack>
 
       {/* Meta */}
@@ -904,6 +953,11 @@ function PlanDetailPanel({ plan, onClose, onGoalClick, loading }) {
 }
 
 export default function CarePlanPage() {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const episodeIdFromUrl = searchParams.get('episodeId') || '';
+  const beneficiaryIdFromUrl = searchParams.get('beneficiaryId') || '';
+
   const [plans, setPlans] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -942,6 +996,14 @@ export default function CarePlanPage() {
   useEffect(() => {
     fetchAll();
   }, [fetchAll]);
+
+  // Auto-open create dialog when arriving from Episodes page
+  useEffect(() => {
+    if (beneficiaryIdFromUrl && !dialogOpen) {
+      setDialogOpen(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- run once on mount
+  }, []);
 
   // ── Select plan → load full detail ────────────────────────────────────
   const handleSelectPlan = useCallback(async plan => {
@@ -1048,6 +1110,30 @@ export default function CarePlanPage() {
         </Alert>
       )}
 
+      {/* Episode context banner */}
+      {episodeIdFromUrl && (
+        <Alert
+          severity="info"
+          icon={<EpisodeIcon />}
+          sx={{ mb: 2 }}
+          action={
+            <Button
+              size="small"
+              startIcon={<GoalsNavIcon />}
+              onClick={() =>
+                navigate(
+                  `/platform/goals?episodeId=${episodeIdFromUrl}&beneficiaryId=${beneficiaryIdFromUrl}`
+                )
+              }
+            >
+              انتقال للأهداف
+            </Button>
+          }
+        >
+          سياق الحلقة العلاجية — الحلقة: <strong>{episodeIdFromUrl.slice(-8)}</strong>
+        </Alert>
+      )}
+
       {/* Main Tabs */}
       <Tabs
         value={tab}
@@ -1107,6 +1193,8 @@ export default function CarePlanPage() {
         }}
         onSave={handleCreate}
         error={createError}
+        initialBeneficiaryId={beneficiaryIdFromUrl}
+        initialEpisodeId={episodeIdFromUrl}
       />
 
       {/* Goal Progress Dialog */}

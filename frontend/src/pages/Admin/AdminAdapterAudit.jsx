@@ -59,6 +59,7 @@ import ClearIcon from '@mui/icons-material/Clear';
 import SecurityIcon from '@mui/icons-material/Security';
 import HubIcon from '@mui/icons-material/Hub';
 import api from '../../services/api.client';
+import { formatDateTime as _fmtDT } from 'utils/dateUtils';
 
 const PROVIDERS = [
   'gosi',
@@ -402,9 +403,7 @@ function LogTab({ rows, total, page, limit, filters, loading, onPage, onLimit, o
               {rows.map(r => (
                 <TableRow key={r._id} hover>
                   <TableCell>
-                    <Typography variant="caption">
-                      {new Date(r.createdAt).toLocaleString('ar-SA')}
-                    </Typography>
+                    <Typography variant="caption">{_fmtDT(r.createdAt)}</Typography>
                   </TableCell>
                   <TableCell>
                     <Chip

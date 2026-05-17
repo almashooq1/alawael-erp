@@ -81,6 +81,7 @@ import {
   leaveColors,
 } from '../../theme/palette';
 import { DEPT_COLORS } from '../../constants/departmentColors';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 /* ═══════════════════════════════════════════════
    Constants & Configuration
@@ -188,7 +189,7 @@ const getDeptColor = dept => DEPT_COLORS[dept] || neutralColors.fallback;
 
 const formatArabicDate = dateStr => {
   try {
-    return new Date(dateStr).toLocaleDateString('ar-SA', {
+    return _fmtDate(dateStr, {
       weekday: 'short',
       year: 'numeric',
       month: 'short',

@@ -22,49 +22,49 @@ const safe =
 // ═══════════════════════════════════════════
 export const branchService = {
   getAll: safe(async (params = {}) => {
-    const r = await apiClient.get('/branches', { params });
+    const r = await apiClient.get('/api/v1/branches', { params });
     return r.data;
   }),
   getById: safe(async id => {
-    const r = await apiClient.get(`/branches/${id}`);
+    const r = await apiClient.get(`/api/v1/branches/${id}`);
     return r.data;
   }),
   create: safe(async data => {
-    const r = await apiClient.post('/branches', data);
+    const r = await apiClient.post('/api/v1/branches', data);
     return r.data;
   }),
   update: safe(async (id, data) => {
-    const r = await apiClient.put(`/branches/${id}`, data);
+    const r = await apiClient.put(`/api/v1/branches/${id}`, data);
     return r.data;
   }),
   remove: safe(async id => {
-    const r = await apiClient.delete(`/branches/${id}`);
+    const r = await apiClient.delete(`/api/v1/branches/${id}`);
     return r.data;
   }),
 
   // Branch integration endpoints
   getKPIs: safe(async id => {
-    const r = await apiClient.get(`/integration/branches/${id}/kpis`);
+    const r = await apiClient.get(`/api/v1/integration/branches/${id}/kpis`);
     return r.data;
   }),
   getInventorySync: safe(async id => {
-    const r = await apiClient.get(`/integration/branches/${id}/inventory-sync`);
+    const r = await apiClient.get(`/api/v1/integration/branches/${id}/inventory-sync`);
     return r.data;
   }),
   getDashboard: safe(async id => {
-    const r = await apiClient.get(`/integration/branches/${id}/dashboard`);
+    const r = await apiClient.get(`/api/v1/integration/branches/${id}/dashboard`);
     return r.data;
   }),
   getReports: safe(async (id, type) => {
-    const r = await apiClient.get(`/integration/branches/${id}/reports/${type}`);
+    const r = await apiClient.get(`/api/v1/integration/branches/${id}/reports/${type}`);
     return r.data;
   }),
   getForecasts: safe(async id => {
-    const r = await apiClient.get(`/integration/branches/${id}/forecasts`);
+    const r = await apiClient.get(`/api/v1/integration/branches/${id}/forecasts`);
     return r.data;
   }),
   syncAll: safe(async () => {
-    const r = await apiClient.post('/integration/sync/branches');
+    const r = await apiClient.post('/api/v1/integration/sync/branches');
     return r.data;
   }),
 
@@ -77,23 +77,23 @@ export const branchService = {
 // ═══════════════════════════════════════════
 export const warehouseService = {
   getAll: safe(async (params = {}) => {
-    const r = await apiClient.get('/inventory/warehouses', { params });
+    const r = await apiClient.get('/api/v1/inventory/warehouses', { params });
     return r.data;
   }),
   getById: safe(async id => {
-    const r = await apiClient.get(`/inventory/warehouses/${id}`);
+    const r = await apiClient.get(`/api/v1/inventory/warehouses/${id}`);
     return r.data;
   }),
   create: safe(async data => {
-    const r = await apiClient.post('/inventory/warehouses', data);
+    const r = await apiClient.post('/api/v1/inventory/warehouses', data);
     return r.data;
   }),
   update: safe(async (id, data) => {
-    const r = await apiClient.put(`/inventory/warehouses/${id}`, data);
+    const r = await apiClient.put(`/api/v1/inventory/warehouses/${id}`, data);
     return r.data;
   }),
   getStock: safe(async (id, params = {}) => {
-    const r = await apiClient.get(`/inventory/warehouses/${id}/stock`, { params });
+    const r = await apiClient.get(`/api/v1/inventory/warehouses/${id}/stock`, { params });
     return r.data;
   }),
 
@@ -106,32 +106,32 @@ export const warehouseService = {
 // ═══════════════════════════════════════════
 export const stockTransferService = {
   getAll: safe(async (params = {}) => {
-    const r = await apiClient.get('/inventory/transfers', { params });
+    const r = await apiClient.get('/api/v1/inventory/transfers', { params });
     return r.data;
   }),
   getById: safe(async id => {
-    const r = await apiClient.get(`/inventory/transfers/${id}`);
+    const r = await apiClient.get(`/api/v1/inventory/transfers/${id}`);
     return r.data;
   }),
   create: safe(async data => {
-    const r = await apiClient.post('/inventory/transfers', data);
+    const r = await apiClient.post('/api/v1/inventory/transfers', data);
     return r.data;
   }),
   update: safe(async (id, data) => {
-    const r = await apiClient.put(`/inventory/transfers/${id}`, data);
+    const r = await apiClient.put(`/api/v1/inventory/transfers/${id}`, data);
     return r.data;
   }),
 
   ship: safe(async (id, data = {}) => {
-    const r = await apiClient.post(`/inventory/transfers/${id}/ship`, data);
+    const r = await apiClient.post(`/api/v1/inventory/transfers/${id}/ship`, data);
     return r.data;
   }),
   receive: safe(async (id, data = {}) => {
-    const r = await apiClient.post(`/inventory/transfers/${id}/receive`, data);
+    const r = await apiClient.post(`/api/v1/inventory/transfers/${id}/receive`, data);
     return r.data;
   }),
   cancel: safe(async id => {
-    const r = await apiClient.post(`/inventory/transfers/${id}/cancel`);
+    const r = await apiClient.post(`/api/v1/inventory/transfers/${id}/cancel`);
     return r.data;
   }),
 
@@ -144,19 +144,19 @@ export const stockTransferService = {
 // ═══════════════════════════════════════════
 export const stockMovementService = {
   getAll: safe(async (params = {}) => {
-    const r = await apiClient.get('/inventory/movements', { params });
+    const r = await apiClient.get('/api/v1/inventory/movements', { params });
     return r.data;
   }),
   createIn: safe(async data => {
-    const r = await apiClient.post('/inventory/movements/in', data);
+    const r = await apiClient.post('/api/v1/inventory/movements/in', data);
     return r.data;
   }),
   createOut: safe(async data => {
-    const r = await apiClient.post('/inventory/movements/out', data);
+    const r = await apiClient.post('/api/v1/inventory/movements/out', data);
     return r.data;
   }),
   createAdjustment: safe(async data => {
-    const r = await apiClient.post('/inventory/movements/adjustment', data);
+    const r = await apiClient.post('/api/v1/inventory/movements/adjustment', data);
     return r.data;
   }),
 
@@ -168,19 +168,19 @@ export const stockMovementService = {
 // ═══════════════════════════════════════════
 export const stockTakeService = {
   getAll: safe(async (params = {}) => {
-    const r = await apiClient.get('/inventory/stock-takes', { params });
+    const r = await apiClient.get('/api/v1/inventory/stock-takes', { params });
     return r.data;
   }),
   create: safe(async data => {
-    const r = await apiClient.post('/inventory/stock-takes', data);
+    const r = await apiClient.post('/api/v1/inventory/stock-takes', data);
     return r.data;
   }),
   recordCount: safe(async (id, data) => {
-    const r = await apiClient.put(`/inventory/stock-takes/${id}/count`, data);
+    const r = await apiClient.put(`/api/v1/inventory/stock-takes/${id}/count`, data);
     return r.data;
   }),
   complete: safe(async id => {
-    const r = await apiClient.post(`/inventory/stock-takes/${id}/complete`);
+    const r = await apiClient.post(`/api/v1/inventory/stock-takes/${id}/complete`);
     return r.data;
   }),
 
@@ -192,31 +192,31 @@ export const stockTakeService = {
 // ═══════════════════════════════════════════
 export const purchaseRequestService = {
   getAll: safe(async (params = {}) => {
-    const r = await apiClient.get('/purchasing/requests', { params });
+    const r = await apiClient.get('/api/v1/purchasing/requests', { params });
     return r.data;
   }),
   getById: safe(async id => {
-    const r = await apiClient.get(`/purchasing/requests/${id}`);
+    const r = await apiClient.get(`/api/v1/purchasing/requests/${id}`);
     return r.data;
   }),
   create: safe(async data => {
-    const r = await apiClient.post('/purchasing/requests', data);
+    const r = await apiClient.post('/api/v1/purchasing/requests', data);
     return r.data;
   }),
   update: safe(async (id, data) => {
-    const r = await apiClient.put(`/purchasing/requests/${id}`, data);
+    const r = await apiClient.put(`/api/v1/purchasing/requests/${id}`, data);
     return r.data;
   }),
   submit: safe(async id => {
-    const r = await apiClient.post(`/purchasing/requests/${id}/submit`);
+    const r = await apiClient.post(`/api/v1/purchasing/requests/${id}/submit`);
     return r.data;
   }),
   approve: safe(async id => {
-    const r = await apiClient.post(`/purchasing/requests/${id}/approve`);
+    const r = await apiClient.post(`/api/v1/purchasing/requests/${id}/approve`);
     return r.data;
   }),
   reject: safe(async (id, data) => {
-    const r = await apiClient.post(`/purchasing/requests/${id}/reject`, data);
+    const r = await apiClient.post(`/api/v1/purchasing/requests/${id}/reject`, data);
     return r.data;
   }),
 
@@ -229,15 +229,15 @@ export const purchaseRequestService = {
 // ═══════════════════════════════════════════
 export const purchaseReceiptService = {
   getAll: safe(async (params = {}) => {
-    const r = await apiClient.get('/purchasing/receipts', { params });
+    const r = await apiClient.get('/api/v1/purchasing/receipts', { params });
     return r.data;
   }),
   create: safe(async data => {
-    const r = await apiClient.post('/purchasing/receipts', data);
+    const r = await apiClient.post('/api/v1/purchasing/receipts', data);
     return r.data;
   }),
   getById: safe(async id => {
-    const r = await apiClient.get(`/purchasing/receipts/${id}`);
+    const r = await apiClient.get(`/api/v1/purchasing/receipts/${id}`);
     return r.data;
   }),
 
@@ -249,15 +249,15 @@ export const purchaseReceiptService = {
 // ═══════════════════════════════════════════
 export const vendorContractService = {
   getAll: safe(async (params = {}) => {
-    const r = await apiClient.get('/purchasing/contracts', { params });
+    const r = await apiClient.get('/api/v1/purchasing/contracts', { params });
     return r.data;
   }),
   create: safe(async data => {
-    const r = await apiClient.post('/purchasing/contracts', data);
+    const r = await apiClient.post('/api/v1/purchasing/contracts', data);
     return r.data;
   }),
   getExpiring: safe(async () => {
-    const r = await apiClient.get('/purchasing/contracts/expiring');
+    const r = await apiClient.get('/api/v1/purchasing/contracts/expiring');
     return r.data;
   }),
 

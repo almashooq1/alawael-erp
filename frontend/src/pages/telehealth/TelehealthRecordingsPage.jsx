@@ -43,6 +43,7 @@ import {
   Psychology as AIIcon,
 } from '@mui/icons-material';
 import telehealthService from '../../services/telehealthService';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 export default function TelehealthRecordingsPage() {
   const [loading, setLoading] = useState(true);
@@ -209,9 +210,7 @@ export default function TelehealthRecordingsPage() {
                   <TableCell>{s.title}</TableCell>
                   <TableCell>{s.patientName}</TableCell>
                   <TableCell>{s.therapistName}</TableCell>
-                  <TableCell dir="ltr">
-                    {new Date(s.completedAt || s.scheduledDate).toLocaleDateString('ar-SA')}
-                  </TableCell>
+                  <TableCell dir="ltr">{_fmtDate(s.completedAt || s.scheduledDate)}</TableCell>
                   <TableCell>{s.duration} د</TableCell>
                   <TableCell>
                     {s.rating ? <Rating value={s.rating} readOnly size="small" /> : '—'}
@@ -261,8 +260,7 @@ export default function TelehealthRecordingsPage() {
                 </Grid>
                 <Grid item xs={6}>
                   <Typography variant="body2">
-                    <strong>التاريخ:</strong>{' '}
-                    {new Date(report.scheduledDate).toLocaleDateString('ar-SA')}
+                    <strong>التاريخ:</strong> {_fmtDate(report.scheduledDate)}
                   </Typography>
                 </Grid>
                 <Grid item xs={6}>

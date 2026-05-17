@@ -73,6 +73,7 @@ import {
   NotificationsActive as AlertIcon,
 } from '@mui/icons-material';
 import insuranceService from '../../services/insurance.service';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 /* ─── Constants ──────────────────────────────────────────────────────── */
 const TABS = [
@@ -193,7 +194,7 @@ const EMPTY_QUOTE = {
 
 const fmt = n => (n ?? 0).toLocaleString('ar-SA');
 const fmtSAR = n => `${fmt(n)} ر.س`;
-const fmtDate = d => (d ? new Date(d).toLocaleDateString('ar-SA') : '—');
+const fmtDate = d => (d ? _fmtDate(d) : '—');
 
 /* ═══════════════════════════════════════════════════════════════════════ */
 export default function InsuranceManagement() {

@@ -4,7 +4,7 @@
  */
 import apiClient from 'services/api.client';
 
-const BASE = '/system-settings';
+const BASE = '/api/v1/system-settings';
 
 const systemSettingsService = {
   // ── Get current settings ────────────────────────────────────────────────

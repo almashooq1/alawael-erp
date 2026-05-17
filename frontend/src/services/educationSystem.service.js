@@ -4,7 +4,7 @@
  */
 import api from './api';
 
-const BASE = '/api';
+const BASE = '/api/v1/api';
 
 // ══════════════════════════════════════════════════════════════
 //  ACADEMIC YEAR  العام الدراسي

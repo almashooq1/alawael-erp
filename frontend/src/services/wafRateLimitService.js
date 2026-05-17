@@ -5,7 +5,7 @@
 
 import api from './api';
 
-const BASE = '/api/waf-ratelimit';
+const BASE = '/api/v1/waf-ratelimit';
 
 const wafRateLimitService = {
   /* ── Dashboard & Analytics ── */

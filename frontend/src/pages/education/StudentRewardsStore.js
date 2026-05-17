@@ -40,6 +40,7 @@ import {
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import api from 'services/api';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const levelColors = {
   مبتدئ: '#95a5a6',
@@ -600,7 +601,7 @@ const StudentRewardsStore = () => {
                         {tx.reason}
                       </Typography>
                       <Typography variant="caption" color="textSecondary">
-                        {new Date(tx.createdAt).toLocaleDateString('ar-SA')}
+                        {_fmtDate(tx.createdAt)}
                       </Typography>
                     </Box>
                   </Box>

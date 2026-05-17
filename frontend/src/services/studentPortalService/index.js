@@ -65,8 +65,8 @@ const studentPortalService = {
   async getStudentDashboard(_studentId) {
     try {
       const [today, me] = await Promise.all([
-        apiClient.get('/student/today').catch(() => null),
-        apiClient.get('/student/me').catch(() => null),
+        apiClient.get('/api/v1/student/today').catch(() => null),
+        apiClient.get('/api/v1/student/me').catch(() => null),
       ]);
       if (!today && !me) return getMockDashboardData();
       return mergeRealIntoDashboard(today, me);
@@ -81,28 +81,31 @@ const studentPortalService = {
    * الحصول على ملف الطالب الحالي
    */
   async getMyProfile() {
-    return apiClient.get('/student/me');
+    return apiClient.get('/api/v1/student/me');
   },
 
   /**
    * Get the "today" snapshot — next session + activities + mood status.
    */
   async getStudentToday() {
-    return apiClient.get('/student/today');
+    return apiClient.get('/api/v1/student/today');
   },
 
   /**
    * Activities assigned for today (StudentActivity collection — Phase 17).
    */
   async getStudentActivities() {
-    return apiClient.get('/student/activities');
+    return apiClient.get('/api/v1/student/activities');
   },
 
   /**
    * Mark an activity complete and receive XP / level-up payload.
    */
   async completeStudentActivity(activityId) {
-    return apiClient.post(`/student/activities/${encodeURIComponent(activityId)}/complete`, {});
+    return apiClient.post(
+      `/api/v1/student/activities/${encodeURIComponent(activityId)}/complete`,
+      {}
+    );
   },
 
   /**
@@ -110,14 +113,14 @@ const studentPortalService = {
    * the trailing pattern is worrisome.
    */
   async submitMood(mood, note) {
-    return apiClient.post('/student/mood', { mood, note: note || null });
+    return apiClient.post('/api/v1/student/mood', { mood, note: note || null });
   },
 
   /**
    * Achievements snapshot — level, xp, badges, lifetime stats.
    */
   async getAchievements() {
-    return apiClient.get('/student/achievements');
+    return apiClient.get('/api/v1/student/achievements');
   },
 
   /**
@@ -127,7 +130,7 @@ const studentPortalService = {
    */
   async getMoodHistory(limit = 30) {
     try {
-      return await apiClient.get(`/student/mood/history?limit=${encodeURIComponent(limit)}`);
+      return await apiClient.get(`/api/v1/student/mood/history?limit=${encodeURIComponent(limit)}`);
     } catch (error) {
       logger.error('Error fetching mood history:', error);
       return { entries: [], summary: { count: 0, average: null, counts: {}, worrisome: false } };
@@ -145,7 +148,7 @@ const studentPortalService = {
    */
   async getStudentSchedule(_studentId) {
     try {
-      const real = await apiClient.get('/student/schedule');
+      const real = await apiClient.get('/api/v1/student/schedule');
       if (!Array.isArray(real) || real.length === 0) return getMockScheduleData();
 
       const dayNames = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
@@ -182,7 +185,7 @@ const studentPortalService = {
    */
   async getStudentGrades(studentId) {
     try {
-      return await apiClient.get(`/students/${studentId}/grades`);
+      return await apiClient.get(`/api/v1/students/${studentId}/grades`);
     } catch (error) {
       logger.error('Error fetching student grades:', error);
       return getMockGradesData();
@@ -195,7 +198,7 @@ const studentPortalService = {
    */
   async getStudentAttendance(studentId) {
     try {
-      return await apiClient.get(`/students/${studentId}/attendance`);
+      return await apiClient.get(`/api/v1/students/${studentId}/attendance`);
     } catch (error) {
       logger.error('Error fetching student attendance:', error);
       return getMockAttendanceData();
@@ -208,7 +211,7 @@ const studentPortalService = {
    */
   async getStudentAssignments(studentId) {
     try {
-      return await apiClient.get(`/students/${studentId}/assignments`);
+      return await apiClient.get(`/api/v1/students/${studentId}/assignments`);
     } catch (error) {
       logger.error('Error fetching student assignments:', error);
       return getMockAssignmentsData();
@@ -221,7 +224,7 @@ const studentPortalService = {
    */
   async getAnnouncements(studentId) {
     try {
-      return await apiClient.get(`/students/${studentId}/announcements`);
+      return await apiClient.get(`/api/v1/students/${studentId}/announcements`);
     } catch (error) {
       logger.error('Error fetching announcements:', error);
       return getMockAnnouncementsData();
@@ -241,7 +244,7 @@ const studentPortalService = {
       if (filters.reportType) params.append('report_type', filters.reportType);
       if (filters.focusArea) params.append('focus_area', filters.focusArea);
 
-      return await apiClient.get(`/reports/student-advanced?${params}`);
+      return await apiClient.get(`/api/v1/reports/student-advanced?${params}`);
     } catch (error) {
       logger.error('Error fetching student advanced report:', error);
       return getMockStudentAdvancedReport(filters);

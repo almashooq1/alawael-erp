@@ -50,6 +50,7 @@ import {
   Visibility as ViewIcon,
   BarChart as ChartIcon,
 } from '@mui/icons-material';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 import {
   patientPortalAPI,
   healthEducationAPI,
@@ -62,7 +63,7 @@ const PRIMARY = '#01579b';
 const BG = '#e3f2fd';
 
 /* ── helpers ───────────────────────────────────────────── */
-const fmt = d => (d ? new Date(d).toLocaleDateString('ar-SA') : '—');
+const fmt = d => (d ? _fmtDate(d) : '—');
 
 /* ── KPI Card ───────────────────────────────────────────── */
 function KpiCard({ label, value, icon, color, sub }) {

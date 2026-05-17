@@ -100,7 +100,7 @@ const MOCK_HR = {
  */
 export const getOverview = async (period = 'month') => {
   try {
-    const res = await apiClient.get('/bi-dashboard/overview', { params: { period } });
+    const res = await apiClient.get('/api/v1/bi-dashboard/overview', { params: { period } });
     return res.data || MOCK_OVERVIEW;
   } catch {
     return MOCK_OVERVIEW;
@@ -112,7 +112,7 @@ export const getOverview = async (period = 'month') => {
  */
 export const getKPIs = async (params = {}) => {
   try {
-    const res = await apiClient.get('/bi-dashboard/kpis', { params });
+    const res = await apiClient.get('/api/v1/bi-dashboard/kpis', { params });
     return res.data || MOCK_KPIS;
   } catch {
     return MOCK_KPIS;
@@ -124,7 +124,7 @@ export const getKPIs = async (params = {}) => {
  */
 export const getKPIDetail = async code => {
   try {
-    const res = await apiClient.get(`/bi-dashboard/kpis/${code}`);
+    const res = await apiClient.get(`/api/v1/bi-dashboard/kpis/${code}`);
     return res.data;
   } catch {
     return null;
@@ -135,7 +135,7 @@ export const getKPIDetail = async code => {
  * Create a new KPI
  */
 export const createKPI = async data => {
-  const res = await apiClient.post('/bi-dashboard/kpis', data);
+  const res = await apiClient.post('/api/v1/bi-dashboard/kpis', data);
   return res.data;
 };
 
@@ -143,7 +143,7 @@ export const createKPI = async data => {
  * Update KPI
  */
 export const updateKPI = async (code, data) => {
-  const res = await apiClient.put(`/bi-dashboard/kpis/${code}`, data);
+  const res = await apiClient.put(`/api/v1/bi-dashboard/kpis/${code}`, data);
   return res.data;
 };
 
@@ -152,7 +152,7 @@ export const updateKPI = async (code, data) => {
  */
 export const getFinanceAnalytics = async (params = {}) => {
   try {
-    const res = await apiClient.get('/bi-dashboard/finance/analytics', { params });
+    const res = await apiClient.get('/api/v1/bi-dashboard/finance/analytics', { params });
     return res.data || MOCK_FINANCE;
   } catch {
     return MOCK_FINANCE;
@@ -164,7 +164,9 @@ export const getFinanceAnalytics = async (params = {}) => {
  */
 export const getCashflow = async (months = 6) => {
   try {
-    const res = await apiClient.get('/bi-dashboard/finance/cashflow', { params: { months } });
+    const res = await apiClient.get('/api/v1/bi-dashboard/finance/cashflow', {
+      params: { months },
+    });
     return res.data || { cashflow: [] };
   } catch {
     return { cashflow: [] };
@@ -176,7 +178,7 @@ export const getCashflow = async (months = 6) => {
  */
 export const getHRAnalytics = async () => {
   try {
-    const res = await apiClient.get('/bi-dashboard/hr/analytics');
+    const res = await apiClient.get('/api/v1/bi-dashboard/hr/analytics');
     return res.data || MOCK_HR;
   } catch {
     return MOCK_HR;
@@ -188,7 +190,7 @@ export const getHRAnalytics = async () => {
  */
 export const getOperationsAnalytics = async () => {
   try {
-    const res = await apiClient.get('/bi-dashboard/operations/analytics');
+    const res = await apiClient.get('/api/v1/bi-dashboard/operations/analytics');
     return res.data || { sessions: {}, complaints: {}, maintenance: {}, fleet: {} };
   } catch {
     return { sessions: {}, complaints: {}, maintenance: {}, fleet: {} };
@@ -200,7 +202,7 @@ export const getOperationsAnalytics = async () => {
  */
 export const getTrends = async (metric = 'revenue', months = 12) => {
   try {
-    const res = await apiClient.get('/bi-dashboard/trends', { params: { metric, months } });
+    const res = await apiClient.get('/api/v1/bi-dashboard/trends', { params: { metric, months } });
     return res.data || { points: [], trend: {} };
   } catch {
     return { points: [], trend: { direction: 'stable' }, summary: {} };
@@ -212,7 +214,7 @@ export const getTrends = async (metric = 'revenue', months = 12) => {
  */
 export const getDepartmentComparison = async () => {
   try {
-    const res = await apiClient.get('/bi-dashboard/departments/comparison');
+    const res = await apiClient.get('/api/v1/bi-dashboard/departments/comparison');
     return res.data || [];
   } catch {
     return [];
@@ -224,7 +226,7 @@ export const getDepartmentComparison = async () => {
  */
 export const getRealtime = async () => {
   try {
-    const res = await apiClient.get('/bi-dashboard/realtime');
+    const res = await apiClient.get('/api/v1/bi-dashboard/realtime');
     return res.data || {};
   } catch {
     return { todaySessions: 0, todayAttendance: 0, onlineUsers: 0, pendingTasks: 0 };
@@ -236,7 +238,7 @@ export const getRealtime = async () => {
  */
 export const getReports = async (params = {}) => {
   try {
-    const res = await apiClient.get('/bi-dashboard/reports', { params });
+    const res = await apiClient.get('/api/v1/bi-dashboard/reports', { params });
     return res.data || [];
   } catch {
     return [];
@@ -248,7 +250,7 @@ export const getReports = async (params = {}) => {
  */
 export const getReport = async id => {
   try {
-    const res = await apiClient.get(`/bi-dashboard/reports/${id}`);
+    const res = await apiClient.get(`/api/v1/bi-dashboard/reports/${id}`);
     return res.data;
   } catch {
     return null;
@@ -259,7 +261,7 @@ export const getReport = async id => {
  * Create report
  */
 export const createReport = async data => {
-  const res = await apiClient.post('/bi-dashboard/reports', data);
+  const res = await apiClient.post('/api/v1/bi-dashboard/reports', data);
   return res.data;
 };
 
@@ -267,7 +269,7 @@ export const createReport = async data => {
  * Update report
  */
 export const updateReport = async (id, data) => {
-  const res = await apiClient.put(`/bi-dashboard/reports/${id}`, data);
+  const res = await apiClient.put(`/api/v1/bi-dashboard/reports/${id}`, data);
   return res.data;
 };
 
@@ -275,7 +277,7 @@ export const updateReport = async (id, data) => {
  * Delete (archive) report
  */
 export const deleteReport = async id => {
-  const res = await apiClient.delete(`/bi-dashboard/reports/${id}`);
+  const res = await apiClient.delete(`/api/v1/bi-dashboard/reports/${id}`);
   return res.data;
 };
 

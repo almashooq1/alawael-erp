@@ -44,6 +44,7 @@ import { useSnackbar } from 'contexts/SnackbarContext';
 import { gradients, surfaceColors } from 'theme/palette';
 import { useAuth } from 'contexts/AuthContext';
 import ConfirmDialog, { useConfirmDialog } from 'components/common/ConfirmDialog';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const AdminPaymentsBilling = () => {
   const { currentUser } = useAuth();
@@ -309,9 +310,7 @@ const AdminPaymentsBilling = () => {
                     />
                   </TableCell>
                   <TableCell>
-                    <Typography variant="caption">
-                      {new Date(payment.date).toLocaleDateString('ar-SA')}
-                    </Typography>
+                    <Typography variant="caption">{_fmtDate(payment.date)}</Typography>
                   </TableCell>
                   <TableCell sx={{ textAlign: 'center' }}>
                     <Tooltip title="عرض">

@@ -353,40 +353,41 @@ export const MOCK_DONATIONS_DASHBOARD = {
 // Services
 // ═══════════════════════════════════════════
 export const campaignsService = {
-  getAll: () => safe(() => apiClient.get('/campaigns').then(r => r.data), MOCK_CAMPAIGNS),
+  getAll: () => safe(() => apiClient.get('/api/v1/campaigns').then(r => r.data), MOCK_CAMPAIGNS),
   getById: id =>
     safe(
-      () => apiClient.get(`/campaigns/${id}`).then(r => r.data),
+      () => apiClient.get(`/api/v1/campaigns/${id}`).then(r => r.data),
       MOCK_CAMPAIGNS.find(c => c._id === id)
     ),
-  create: data => safe(() => apiClient.post('/campaigns', data).then(r => r.data)),
-  update: (id, data) => safe(() => apiClient.put(`/campaigns/${id}`, data).then(r => r.data)),
-  remove: id => safe(() => apiClient.delete(`/campaigns/${id}`).then(r => r.data)),
+  create: data => safe(() => apiClient.post('/api/v1/campaigns', data).then(r => r.data)),
+  update: (id, data) =>
+    safe(() => apiClient.put(`/api/v1/campaigns/${id}`, data).then(r => r.data)),
+  remove: id => safe(() => apiClient.delete(`/api/v1/campaigns/${id}`).then(r => r.data)),
 };
 
 export const donorsService = {
-  getAll: () => safe(() => apiClient.get('/donors').then(r => r.data), MOCK_DONORS),
+  getAll: () => safe(() => apiClient.get('/api/v1/donors').then(r => r.data), MOCK_DONORS),
   getById: id =>
     safe(
-      () => apiClient.get(`/donors/${id}`).then(r => r.data),
+      () => apiClient.get(`/api/v1/donors/${id}`).then(r => r.data),
       MOCK_DONORS.find(d => d._id === id)
     ),
-  create: data => safe(() => apiClient.post('/donors', data).then(r => r.data)),
-  update: (id, data) => safe(() => apiClient.put(`/donors/${id}`, data).then(r => r.data)),
-  remove: id => safe(() => apiClient.delete(`/donors/${id}`).then(r => r.data)),
+  create: data => safe(() => apiClient.post('/api/v1/donors', data).then(r => r.data)),
+  update: (id, data) => safe(() => apiClient.put(`/api/v1/donors/${id}`, data).then(r => r.data)),
+  remove: id => safe(() => apiClient.delete(`/api/v1/donors/${id}`).then(r => r.data)),
 };
 
 export const donationsListService = {
-  getAll: () => safe(() => apiClient.get('/donations').then(r => r.data), MOCK_DONATIONS),
-  create: data => safe(() => apiClient.post('/donations', data).then(r => r.data)),
+  getAll: () => safe(() => apiClient.get('/api/v1/donations').then(r => r.data), MOCK_DONATIONS),
+  create: data => safe(() => apiClient.post('/api/v1/donations', data).then(r => r.data)),
   getByDonor: donorId =>
     safe(
-      () => apiClient.get(`/donations/donor/${donorId}`).then(r => r.data),
+      () => apiClient.get(`/api/v1/donations/donor/${donorId}`).then(r => r.data),
       MOCK_DONATIONS.filter(d => d.donorId === donorId)
     ),
   getByCampaign: campaignId =>
     safe(
-      () => apiClient.get(`/donations/campaign/${campaignId}`).then(r => r.data),
+      () => apiClient.get(`/api/v1/donations/campaign/${campaignId}`).then(r => r.data),
       MOCK_DONATIONS.filter(d => d.campaignId === campaignId)
     ),
 };
@@ -394,7 +395,7 @@ export const donationsListService = {
 export const donationsReportsService = {
   getDashboardStats: () =>
     safe(
-      () => apiClient.get('/donations/dashboard/stats').then(r => r.data),
+      () => apiClient.get('/api/v1/donations/dashboard/stats').then(r => r.data),
       MOCK_DONATIONS_DASHBOARD
     ),
 };

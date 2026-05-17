@@ -53,6 +53,7 @@ import {
 } from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import enterpriseProService from '../../services/enterprisePro.service';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const STATUS_COLUMNS = [
   { key: 'backlog', label: 'قائمة الانتظار', color: '#9E9E9E' },
@@ -397,7 +398,7 @@ export default function ProjectProPage() {
                           البداية
                         </Typography>
                         <Typography variant="body2">
-                          {p.startDate ? new Date(p.startDate).toLocaleDateString('ar-SA') : '—'}
+                          {p.startDate ? _fmtDate(p.startDate) : '—'}
                         </Typography>
                       </Grid>
                       <Grid item xs={6}>
@@ -405,7 +406,7 @@ export default function ProjectProPage() {
                           النهاية
                         </Typography>
                         <Typography variant="body2">
-                          {p.endDate ? new Date(p.endDate).toLocaleDateString('ar-SA') : '—'}
+                          {p.endDate ? _fmtDate(p.endDate) : '—'}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -581,7 +582,7 @@ export default function ProjectProPage() {
                                   color="text.secondary"
                                   sx={{ mt: 0.5, display: 'block' }}
                                 >
-                                  {new Date(task.dueDate).toLocaleDateString('ar-SA')}
+                                  {_fmtDate(task.dueDate)}
                                 </Typography>
                               )}
                               {/* Quick status move */}
@@ -713,9 +714,7 @@ export default function ProjectProPage() {
                           sx={{ bgcolor: alpha(pI?.color || '#999', 0.1) }}
                         />
                       </TableCell>
-                      <TableCell>
-                        {t.dueDate ? new Date(t.dueDate).toLocaleDateString('ar-SA') : '—'}
-                      </TableCell>
+                      <TableCell>{t.dueDate ? _fmtDate(t.dueDate) : '—'}</TableCell>
                       <TableCell>
                         {t.actualHours || 0}/{t.estimatedHours || '—'}
                       </TableCell>

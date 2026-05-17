@@ -42,6 +42,7 @@ import {
 } from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import workflowService from '../../services/workflow.service';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const typeConfig = {
   instance: { label: 'سير العمل', color: '#6366f1', icon: <Description fontSize="small" /> },
@@ -294,7 +295,7 @@ export default function WorkflowSearch() {
                       </TableCell>
                       <TableCell>
                         <Typography variant="caption">
-                          {item.createdAt ? new Date(item.createdAt).toLocaleDateString('ar') : '—'}
+                          {item.createdAt ? _fmtDate(item.createdAt) : '—'}
                         </Typography>
                       </TableCell>
                       <TableCell>

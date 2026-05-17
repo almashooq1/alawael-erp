@@ -41,9 +41,12 @@ import {
   Refresh as RefreshIcon,
   Person as PersonIcon,
   SkipNext as AdvanceIcon,
+  Assignment as CarePlanIcon,
+  TrackChanges as GoalsIcon,
 } from '@mui/icons-material';
 
 import { episodesAPI } from '../../services/ddd';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 /* ── Phase definitions — backend-aligned enum ── */
 const PHASES = [
@@ -586,7 +589,7 @@ export default function EpisodesPage() {
                         ep.type ||
                         'رعاية شاملة'}
                       {' • '}
-                      {ep.startDate ? new Date(ep.startDate).toLocaleDateString('ar-SA') : ''}
+                      {ep.startDate ? _fmtDate(ep.startDate) : ''}
                     </Typography>
 
                     {/* Phase progress */}
@@ -706,10 +709,7 @@ export default function EpisodesPage() {
                         'الأولوية',
                         PRIORITIES.find(p => p.value === ep.priority)?.label || ep.priority || '-',
                       ],
-                      [
-                        'تاريخ البدء',
-                        ep.startDate ? new Date(ep.startDate).toLocaleDateString('ar-SA') : '-',
-                      ],
+                      ['تاريخ البدء', ep.startDate ? _fmtDate(ep.startDate) : '-'],
                       ['الأخصائي المسؤول', ep.primaryTherapist?.name || ep.leadTherapist || '-'],
                       ['التشخيص الأولي', ep.primaryDiagnosis || '-'],
                       [
@@ -777,9 +777,59 @@ export default function EpisodesPage() {
                     </Button>
                   )}
                   <Button
+                    variant="outlined"
+                    color="secondary"
+                    startIcon={<CarePlanIcon />}
                     onClick={() => {
                       setSelectedEpisode(null);
-                      navigate(`/beneficiaries/${ep.beneficiaryId || ep.beneficiary?._id}`);
+                      const bid = ep.beneficiaryId?._id || ep.beneficiaryId || ep.beneficiary?._id;
+                      navigate(`/platform/care-plans?episodeId=${ep._id}&beneficiaryId=${bid}`);
+                    }}
+                  >
+                    خطة الرعاية
+                  </Button>
+                  <Button
+                    startIcon={<GoalsIcon />}
+                    onClick={() => {
+                      setSelectedEpisode(null);
+                      const bid = ep.beneficiaryId?._id || ep.beneficiaryId || ep.beneficiary?._id;
+                      navigate(`/platform/goals?episodeId=${ep._id}&beneficiaryId=${bid}`);
+                    }}
+                  >
+                    الأهداف
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setSelectedEpisode(null);
+                      const bid = ep.beneficiaryId?._id || ep.beneficiaryId || ep.beneficiary?._id;
+                      navigate(`/platform/sessions?episodeId=${ep._id}&beneficiaryId=${bid}`);
+                    }}
+                  >
+                    الجلسات
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setSelectedEpisode(null);
+                      const bid = ep.beneficiaryId?._id || ep.beneficiaryId || ep.beneficiary?._id;
+                      navigate(`/platform/behavior?beneficiaryId=${bid}&episodeId=${ep._id}`);
+                    }}
+                  >
+                    إدارة السلوك
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setSelectedEpisode(null);
+                      const bid = ep.beneficiaryId?._id || ep.beneficiaryId || ep.beneficiary?._id;
+                      navigate(`/platform/assessments?episodeId=${ep._id}&beneficiaryId=${bid}`);
+                    }}
+                  >
+                    التقييمات
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setSelectedEpisode(null);
+                      const bid = ep.beneficiaryId?._id || ep.beneficiaryId || ep.beneficiary?._id;
+                      navigate(`/platform/beneficiaries/${bid}`);
                     }}
                   >
                     عرض ملف المستفيد

@@ -5,7 +5,7 @@
 
 import api from './api';
 
-const BASE = '/api/workforce-analytics';
+const BASE = '/api/v1/workforce-analytics';
 
 const workforceAnalyticsService = {
   /* ── Dashboard & Health ── */

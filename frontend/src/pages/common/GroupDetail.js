@@ -19,6 +19,7 @@ import {
 } from '@mui/material';
 import { Group as GroupIcon, Person as PersonIcon } from '@mui/icons-material';
 import groupsService from 'services/groupsService';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 function GroupDetail() {
   const { id } = useParams();
@@ -102,7 +103,7 @@ function GroupDetail() {
                   تاريخ الإنشاء
                 </Typography>
                 <Typography fontWeight="bold">
-                  {group.createdAt ? new Date(group.createdAt).toLocaleDateString('ar-SA') : '—'}
+                  {group.createdAt ? _fmtDate(group.createdAt) : '—'}
                 </Typography>
               </CardContent>
             </Card>

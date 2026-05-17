@@ -41,6 +41,7 @@ import {
   Send,
 } from '@mui/icons-material';
 import { surfaceColors, neutralColors, brandColors } from 'theme/palette';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const API = process.env.REACT_APP_API_URL || '/api';
 
@@ -297,8 +298,8 @@ const TaxFilingTracker = () => {
                         />
                       </TableCell>
                       <TableCell sx={{ textAlign: 'right' }}>
-                        {f.periodStart ? new Date(f.periodStart).toLocaleDateString('ar-SA') : '-'}{' '}
-                        — {f.periodEnd ? new Date(f.periodEnd).toLocaleDateString('ar-SA') : '-'}
+                        {f.periodStart ? _fmtDate(f.periodStart) : '-'} —{' '}
+                        {f.periodEnd ? _fmtDate(f.periodEnd) : '-'}
                       </TableCell>
                       <TableCell
                         sx={{
@@ -307,7 +308,7 @@ const TaxFilingTracker = () => {
                           fontWeight: overdue ? 700 : 400,
                         }}
                       >
-                        {f.dueDate ? new Date(f.dueDate).toLocaleDateString('ar-SA') : '-'}
+                        {f.dueDate ? _fmtDate(f.dueDate) : '-'}
                         {overdue && (
                           <Warning
                             fontSize="small"

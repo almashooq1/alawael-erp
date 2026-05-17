@@ -36,6 +36,7 @@ import {
   Visibility as ViewIcon,
   ThumbUp as ApproveIcon,
 } from '@mui/icons-material';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 import {
   getLoans,
   createLoan,
@@ -290,7 +291,7 @@ export default function EmployeeLoansManagement() {
                         size="small"
                       />
                     </TableCell>
-                    <TableCell>{new Date(l.createdAt).toLocaleDateString('ar-SA')}</TableCell>
+                    <TableCell>{_fmtDate(l.createdAt)}</TableCell>
                     <TableCell>
                       <Tooltip title="عرض">
                         <IconButton size="small" onClick={() => handleView(l._id)}>

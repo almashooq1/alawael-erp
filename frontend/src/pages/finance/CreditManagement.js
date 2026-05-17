@@ -41,6 +41,7 @@ import {
   TrendingUp,
 } from '@mui/icons-material';
 import { surfaceColors, neutralColors, brandColors } from 'theme/palette';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const API = process.env.REACT_APP_API_URL || '/api';
 const fmt = v =>
@@ -436,7 +437,7 @@ const CreditManagement = () => {
                         />
                       </TableCell>
                       <TableCell sx={{ textAlign: 'right' }}>
-                        {a.createdAt ? new Date(a.createdAt).toLocaleDateString('ar-SA') : '-'}
+                        {a.createdAt ? _fmtDate(a.createdAt) : '-'}
                       </TableCell>
                       <TableCell sx={{ textAlign: 'right' }}>
                         {(a.status === 'pending' || a.status === 'under_review') && (

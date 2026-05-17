@@ -4,7 +4,7 @@
 
 import apiClient from './api.client';
 
-const base = '/approvals';
+const base = '/api/v1/approvals';
 
 export const listChains = async () => (await apiClient.get(`${base}/chains`)).data;
 export const listInbox = async () => (await apiClient.get(`${base}/inbox`)).data;

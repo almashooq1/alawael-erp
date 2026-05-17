@@ -1154,12 +1154,13 @@ const smartDocumentsService = {
   /* ─── Templates ─── */
   getTemplates: () =>
     safe(
-      () => apiClient.get('/documents-smart/templates').then(r => r.data?.data || r.data),
+      () => apiClient.get('/api/v1/documents-smart/templates').then(r => r.data?.data || r.data),
       MOCK_TEMPLATES
     ),
   getTemplateById: id =>
     safe(
-      () => apiClient.get(`/documents-smart/templates/${id}`).then(r => r.data?.data || r.data),
+      () =>
+        apiClient.get(`/api/v1/documents-smart/templates/${id}`).then(r => r.data?.data || r.data),
       MOCK_TEMPLATES.find(t => t.id === id) || null
     ),
   searchTemplates: query => {
@@ -1178,7 +1179,8 @@ const smartDocumentsService = {
   /* ─── Document Generation ─── */
   generate: data =>
     safe(
-      () => apiClient.post('/documents-smart/generate', data).then(r => r.data?.data || r.data),
+      () =>
+        apiClient.post('/api/v1/documents-smart/generate', data).then(r => r.data?.data || r.data),
       {
         success: true,
         data: {
@@ -1197,36 +1199,41 @@ const smartDocumentsService = {
   /* ─── Generated Documents ─── */
   getGeneratedDocuments: () =>
     safe(
-      () => apiClient.get('/documents-smart/generated').then(r => r.data?.data || r.data),
+      () => apiClient.get('/api/v1/documents-smart/generated').then(r => r.data?.data || r.data),
       MOCK_GENERATED_DOCS
     ),
   getGeneratedDocument: id =>
     safe(
-      () => apiClient.get(`/documents-smart/generated/${id}`).then(r => r.data?.data || r.data),
+      () =>
+        apiClient.get(`/api/v1/documents-smart/generated/${id}`).then(r => r.data?.data || r.data),
       MOCK_GENERATED_DOCS.find(d => d._id === id) || null
     ),
   updateDocumentStatus: (id, status) =>
-    safe(() => apiClient.patch(`/documents-smart/generated/${id}/status`, { status }), {
+    safe(() => apiClient.patch(`/api/v1/documents-smart/generated/${id}/status`, { status }), {
       success: true,
     }),
   deleteGeneratedDocument: id =>
-    safe(() => apiClient.delete(`/documents-smart/generated/${id}`), { success: true }),
+    safe(() => apiClient.delete(`/api/v1/documents-smart/generated/${id}`), { success: true }),
 
   /* ─── Workflows ─── */
   getWorkflows: () =>
     safe(
-      () => apiClient.get('/documents-smart/workflows').then(r => r.data?.data || r.data),
+      () => apiClient.get('/api/v1/documents-smart/workflows').then(r => r.data?.data || r.data),
       MOCK_WORKFLOWS
     ),
   advanceWorkflow: (wfId, stageId, action) =>
-    safe(() => apiClient.post(`/documents-smart/workflows/${wfId}/advance`, { stageId, action }), {
-      success: true,
-    }),
+    safe(
+      () =>
+        apiClient.post(`/api/v1/documents-smart/workflows/${wfId}/advance`, { stageId, action }),
+      {
+        success: true,
+      }
+    ),
 
   /* ─── Analytics ─── */
   getAnalytics: () =>
     safe(
-      () => apiClient.get('/documents-smart/analytics').then(r => r.data?.data || r.data),
+      () => apiClient.get('/api/v1/documents-smart/analytics').then(r => r.data?.data || r.data),
       MOCK_ANALYTICS
     ),
 

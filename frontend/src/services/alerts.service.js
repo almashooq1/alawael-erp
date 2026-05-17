@@ -4,7 +4,7 @@
 
 import apiClient from './api.client';
 
-const base = '/alerts';
+const base = '/api/v1/alerts';
 
 export async function getActiveAlerts(params = {}) {
   const { data } = await apiClient.get(`${base}/active`, { params });

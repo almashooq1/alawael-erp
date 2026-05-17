@@ -33,6 +33,7 @@ import {
   Send as TransferIcon,
   AccountBalanceWallet as PayIcon,
   Description as SheetIcon,
+  Refresh as RefreshIcon,
 } from '@mui/icons-material';
 import payrollService from 'services/payrollService';
 import logger from 'utils/logger';
@@ -104,6 +105,26 @@ const PayrollProcessing = () => {
       setProcessing(false);
     }
   }, [month, year, showSnackbar]);
+
+  const handleRecalculateAttendance = useCallback(async () => {
+    if (selectedIds.length === 0) return;
+    setProcessing(true);
+    let updated = 0;
+    try {
+      for (const id of selectedIds) {
+        await payrollService.recalculateAttendance(id);
+        updated++;
+      }
+      // Reload fresh data
+      const data = await payrollService.getMonthlyPayroll(month, year);
+      setPayrollData(Array.isArray(data) ? data : payrollService.getMockPayroll());
+      showSnackbar(`تم إعادة احتساب الحضور لـ ${updated} كشف راتب`, 'success');
+    } catch (err) {
+      showSnackbar('فشل في إعادة احتساب بيانات الحضور', 'error');
+    } finally {
+      setProcessing(false);
+    }
+  }, [selectedIds, month, year, showSnackbar]);
 
   const handleBulkAction = useCallback(
     async (action, nextStep, label) => {
@@ -353,18 +374,30 @@ const PayrollProcessing = () => {
           {/* Action Buttons based on step */}
           <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2 }}>
             {activeStep === 1 && (
-              <Button
-                variant="contained"
-                size="large"
-                startIcon={<DoneIcon />}
-                disabled={processing || selectedIds.length === 0}
-                onClick={() =>
-                  handleBulkAction(payrollService.submitForApproval, 2, 'تقديم للاعتماد')
-                }
-                sx={{ borderRadius: 2 }}
-              >
-                تقديم للاعتماد ({selectedIds.length})
-              </Button>
+              <>
+                <Button
+                  variant="outlined"
+                  size="large"
+                  startIcon={<RefreshIcon />}
+                  disabled={processing || selectedIds.length === 0}
+                  onClick={handleRecalculateAttendance}
+                  sx={{ borderRadius: 2 }}
+                >
+                  إعادة احتساب الحضور ({selectedIds.length})
+                </Button>
+                <Button
+                  variant="contained"
+                  size="large"
+                  startIcon={<DoneIcon />}
+                  disabled={processing || selectedIds.length === 0}
+                  onClick={() =>
+                    handleBulkAction(payrollService.submitForApproval, 2, 'تقديم للاعتماد')
+                  }
+                  sx={{ borderRadius: 2 }}
+                >
+                  تقديم للاعتماد ({selectedIds.length})
+                </Button>
+              </>
             )}
             {activeStep === 2 && (
               <Button

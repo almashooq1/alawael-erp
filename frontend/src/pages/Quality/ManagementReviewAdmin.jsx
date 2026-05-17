@@ -69,6 +69,7 @@ import {
 } from '@mui/icons-material';
 import apiClient from '../../services/api.client';
 import { useSnackbar } from 'contexts/SnackbarContext';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 // ── Constants ─────────────────────────────────────────────────────
 
@@ -98,7 +99,7 @@ const EMPTY_FORM = { title: '', scheduledFor: '', type: '', cycleLabel: '' };
 function fmtDate(v) {
   if (!v) return '—';
   try {
-    return new Date(v).toLocaleDateString('ar-SA', {
+    return _fmtDate(v, {
       year: 'numeric',
       month: 'short',
       day: 'numeric',

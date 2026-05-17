@@ -56,6 +56,7 @@ import { ChartTooltip } from '../../components/dashboard/shared/ChartTooltip';
 import EmptyState from '../../components/dashboard/shared/EmptyState';
 import DashboardErrorBoundary from '../../components/dashboard/shared/DashboardErrorBoundary';
 import logger from '../../utils/logger';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const useCounter = (end, dur = 1000) => {
   const [v, setV] = useState(0);
@@ -690,7 +691,7 @@ export default function TrainingDashboard() {
                         </TableCell>
                         <TableCell>
                           <Typography variant="body2" sx={{ fontSize: 12 }}>
-                            {p.startDate ? new Date(p.startDate).toLocaleDateString('ar') : '-'}
+                            {p.startDate ? _fmtDate(p.startDate) : '-'}
                           </Typography>
                         </TableCell>
                         <TableCell sx={{ minWidth: 100 }}>

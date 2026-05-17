@@ -1,5 +1,5 @@
 import api from './api';
-const BASE = '/chat';
+const BASE = '/api/v1/chat';
 
 const chatService = {
   // ── Dashboard ──

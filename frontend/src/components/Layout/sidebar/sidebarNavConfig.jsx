@@ -97,6 +97,8 @@ import {
   VideoCall as TelehealthIcon,
   // ─── Print Center (مركز الطباعة) ───
   LocalPrintshop as PrintCenterIcon,
+  Share as SocialShareIcon,
+  Psychology as CDSSIcon,
 } from '@mui/icons-material';
 
 const getNavigationItems = () => [
@@ -210,6 +212,20 @@ const getNavigationItems = () => [
         path: '/episodes',
         badge: 'جديد',
         badgeColor: 'primary',
+      },
+      {
+        id: 'episode-center',
+        label: 'مركز الحلقة الموحدة',
+        path: '/episode-center',
+        badge: 'جديد',
+        badgeColor: 'success',
+      },
+      {
+        id: 'session-center',
+        label: 'مركز الجلسات العلاجية',
+        path: '/session-center',
+        badge: 'جديد',
+        badgeColor: 'info',
       },
       {
         id: 'care-plans-manage',
@@ -373,6 +389,25 @@ const getNavigationItems = () => [
         badge: 'جديد',
         badgeColor: 'success',
       },
+      {
+        id: 'rehab-measures',
+        label: 'مقاييس التأهيل الشاملة',
+        path: '/rehab-measures',
+        badge: 'AI',
+        badgeColor: '#1565c0',
+      },
+      {
+        id: 'rehab-templates',
+        label: 'القوالب التأهيلية الذكية',
+        path: '/rehab-templates',
+        badge: 'جديد',
+        badgeColor: 'success',
+      },
+      {
+        id: 'rehab-progress-tracker',
+        label: 'متتبع التقدم التأهيلي',
+        path: '/rehab-progress-tracker',
+      },
     ],
   },
   {
@@ -506,6 +541,12 @@ const getNavigationItems = () => [
     icon: <PeopleIcon />,
     roles: ['admin', 'super_admin', 'hr_manager'],
     children: [
+      {
+        id: 'hr-command-center',
+        label: '🧠 مركز القيادة الذكي',
+        path: '/hr/command-center',
+        roles: ['admin', 'super_admin', 'hr_manager', 'manager'],
+      },
       { id: 'hr-main', label: 'لوحة الموارد البشرية', path: '/hr' },
       { id: 'hr-employees', label: 'إدارة الموظفين', path: '/hr/employees' },
       { id: 'hr-attendance', label: 'الحضور والانصراف', path: '/hr/attendance' },
@@ -825,6 +866,39 @@ const getNavigationItems = () => [
     path: '/public-relations',
     roles: ['admin', 'super_admin', 'manager', 'pr_officer'],
   },
+  {
+    id: 'social-media',
+    label: 'إدارة السوشل ميديا',
+    icon: <SocialShareIcon />,
+    path: '/social-media',
+    roles: ['admin', 'super_admin', 'manager', 'pr_officer'],
+    badge: 'جديد',
+    badgeColor: 'primary',
+    children: [
+      { id: 'sm-dashboard', label: 'لوحة التحكم', path: '/social-media' },
+      { id: 'sm-posts', label: 'المنشورات', path: '/social-media' },
+      { id: 'sm-analytics', label: 'التحليلات', path: '/social-media' },
+      { id: 'sm-audience', label: 'الجمهور', path: '/social-media' },
+      { id: 'sm-campaigns', label: 'الحملات', path: '/social-media' },
+    ],
+  },
+  {
+    id: 'cdss',
+    label: 'دعم القرار السريري',
+    icon: <CDSSIcon />,
+    path: '/cdss',
+    roles: ['admin', 'super_admin', 'clinical_director', 'therapist'],
+    badge: 'ذكاء',
+    badgeColor: 'error',
+    children: [
+      { id: 'cdss-overview', label: 'لوحة المراقبة', path: '/cdss' },
+      { id: 'cdss-alerts', label: 'التنبيهات السريرية', path: '/cdss' },
+      { id: 'cdss-rules', label: 'قواعد القرار', path: '/cdss' },
+      { id: 'cdss-suggestions', label: 'اقتراحات الذكاء', path: '/cdss' },
+      { id: 'cdss-drugs', label: 'مكتبة الأدوية', path: '/cdss' },
+      { id: 'cdss-log', label: 'سجل القرارات', path: '/cdss' },
+    ],
+  },
 
   // ─── المستندات والأرشفة (ضمن قسم التواصل والمعلومات) ───
   {
@@ -833,6 +907,12 @@ const getNavigationItems = () => [
     icon: <DocumentIcon />,
     roles: ['*'],
     children: [
+      {
+        id: 'docs-center',
+        label: 'مركز الوثائق الموحد',
+        path: '/document-management',
+        badge: 'جديد',
+      },
       { id: 'docs-main', label: 'المستندات', path: '/documents' },
       { id: 'docs-smart', label: 'المستندات الذكية', path: '/smart-documents' },
       { id: 'docs-archive', label: 'الأرشفة الإلكترونية', path: '/archiving' },
@@ -1685,6 +1765,14 @@ const getNavigationItems = () => [
     roles: ['admin', 'super_admin'],
     children: [
       { id: 'security-settings', label: 'إعدادات الأمان', path: '/security' },
+      {
+        id: 'access-control-dashboard',
+        label: 'لوحة الصلاحيات والوصول',
+        path: '/access-control',
+        roles: ['admin', 'super_admin', 'it_admin'],
+        badge: 'جديد',
+        badgeColor: 'primary',
+      },
       {
         id: 'admin-break-glass',
         label: 'الوصول الطارئ (Break-Glass)',

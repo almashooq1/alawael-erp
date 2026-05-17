@@ -41,6 +41,7 @@ import {
   Warning as OverdueIcon,
 } from '@mui/icons-material';
 import postRehabApi from '../../services/postRehab.service';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 function TabPanel({ children, value, index }) {
   return value === index ? <Box py={2}>{children}</Box> : null;
@@ -328,9 +329,7 @@ export default function PostRehabFollowupDashboard() {
                   <TableRow key={c._id || c.id}>
                     <TableCell>{c.beneficiaryName || c.beneficiaryId || '—'}</TableCell>
                     <TableCell>{c.programCompleted || '—'}</TableCell>
-                    <TableCell>
-                      {c.createdAt ? new Date(c.createdAt).toLocaleDateString('ar-SA') : '—'}
-                    </TableCell>
+                    <TableCell>{c.createdAt ? _fmtDate(c.createdAt) : '—'}</TableCell>
                     <TableCell>{getChip(c.status, caseStatusMap)}</TableCell>
                     <TableCell>{c.alerts?.length || 0}</TableCell>
                   </TableRow>
@@ -379,11 +378,7 @@ export default function PostRehabFollowupDashboard() {
                             ? 'هاتفية'
                             : v.type || '—'}
                     </TableCell>
-                    <TableCell>
-                      {v.scheduledDate
-                        ? new Date(v.scheduledDate).toLocaleDateString('ar-SA')
-                        : '—'}
-                    </TableCell>
+                    <TableCell>{v.scheduledDate ? _fmtDate(v.scheduledDate) : '—'}</TableCell>
                     <TableCell>{getChip(v.status, visitStatusMap)}</TableCell>
                     <TableCell>{v.notes?.substring(0, 50) || '—'}</TableCell>
                   </TableRow>
@@ -427,11 +422,7 @@ export default function PostRehabFollowupDashboard() {
                             ? 'سنتان'
                             : m.period || '—'}
                     </TableCell>
-                    <TableCell>
-                      {m.assessmentDate
-                        ? new Date(m.assessmentDate).toLocaleDateString('ar-SA')
-                        : '—'}
-                    </TableCell>
+                    <TableCell>{m.assessmentDate ? _fmtDate(m.assessmentDate) : '—'}</TableCell>
                     <TableCell>{m.overallScore ?? '—'}</TableCell>
                     <TableCell>
                       {m.improvement !== null ? (
@@ -482,9 +473,7 @@ export default function PostRehabFollowupDashboard() {
                         draft: { label: 'مسودة', color: 'default' },
                       })}
                     </TableCell>
-                    <TableCell>
-                      {s.createdAt ? new Date(s.createdAt).toLocaleDateString('ar-SA') : '—'}
-                    </TableCell>
+                    <TableCell>{s.createdAt ? _fmtDate(s.createdAt) : '—'}</TableCell>
                     <TableCell>{s.score ?? '—'}</TableCell>
                   </TableRow>
                 ))
@@ -530,9 +519,7 @@ export default function PostRehabFollowupDashboard() {
                     <TableCell>{r.reason?.substring(0, 60) || '—'}</TableCell>
                     <TableCell>{r.requestedProgram || '—'}</TableCell>
                     <TableCell>{getChip(r.status, enrollStatusMap)}</TableCell>
-                    <TableCell>
-                      {r.createdAt ? new Date(r.createdAt).toLocaleDateString('ar-SA') : '—'}
-                    </TableCell>
+                    <TableCell>{r.createdAt ? _fmtDate(r.createdAt) : '—'}</TableCell>
                   </TableRow>
                 ))
               )}

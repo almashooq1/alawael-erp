@@ -3,7 +3,7 @@
  */
 import apiClient from './api';
 
-const BASE = '/api/crisis';
+const BASE = '/api/v1/crisis';
 
 export const getDashboard = async () => {
   try {

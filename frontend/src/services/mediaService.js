@@ -8,7 +8,7 @@
 import apiClient from './api.client';
 import logger from 'utils/logger';
 
-const BASE = '/media';
+const BASE = '/api/v1/media';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 const formatFileSize = bytes => {

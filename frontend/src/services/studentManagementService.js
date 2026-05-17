@@ -8,7 +8,7 @@
 
 import api from './api.client';
 
-const BASE = '/student-management';
+const BASE = '/api/v1/student-management';
 
 const studentManagementService = {
   // ==================== CONFIG ====================

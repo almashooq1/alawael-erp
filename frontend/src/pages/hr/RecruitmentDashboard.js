@@ -72,6 +72,7 @@ import {
   MOCK_RECRUITMENT_DASHBOARD,
 } from 'services/recruitmentService';
 import { useSnackbar } from 'contexts/SnackbarContext';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const COLORS = ['#1565C0', '#00897B', '#F4511E', '#8E24AA', '#43A047', '#FF8F00', '#5C6BC0'];
 
@@ -883,7 +884,7 @@ export default function RecruitmentDashboard() {
                 { label: 'التعليم', value: selectedApplicant.education },
                 {
                   label: 'تاريخ التقديم',
-                  value: new Date(selectedApplicant.appliedDate).toLocaleDateString('ar-SA'),
+                  value: _fmtDate(selectedApplicant.appliedDate),
                 },
               ].map((f, i) => (
                 <Grid item xs={6} key={i}>

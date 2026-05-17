@@ -55,7 +55,7 @@ export const therapistService = {
   // ─── Dashboard ─────────────────────────────────────────────────────────
   async getTherapistDashboard(therapistId) {
     try {
-      const res = await apiClient.get('/therapist/dashboard', { params: { therapistId } });
+      const res = await apiClient.get('/api/v1/therapist/dashboard', { params: { therapistId } });
       return res?.data?.data || res?.data || MOCK_DASHBOARD;
     } catch (err) {
       logger.warn('therapistService.getDashboard fallback:', err?.message);
@@ -66,7 +66,9 @@ export const therapistService = {
   // ─── Patients ──────────────────────────────────────────────────────────
   async getTherapistPatients(therapistId, query = {}) {
     try {
-      const res = await apiClient.get('/therapist/patients', { params: { therapistId, ...query } });
+      const res = await apiClient.get('/api/v1/therapist/patients', {
+        params: { therapistId, ...query },
+      });
       return res?.data?.data || res?.data || [];
     } catch (err) {
       logger.warn('therapistService.getPatients fallback:', err?.message);
@@ -76,7 +78,7 @@ export const therapistService = {
 
   async getPatientDetails(therapistId, patientId) {
     try {
-      const res = await apiClient.get(`/therapist/patients/${patientId}`, {
+      const res = await apiClient.get(`/api/v1/therapist/patients/${patientId}`, {
         params: { therapistId },
       });
       return res?.data?.data || res?.data || null;
@@ -89,7 +91,9 @@ export const therapistService = {
   // ─── Schedule ──────────────────────────────────────────────────────────
   async getTherapistSchedule(therapistId, query = {}) {
     try {
-      const res = await apiClient.get('/therapist/schedule', { params: { therapistId, ...query } });
+      const res = await apiClient.get('/api/v1/therapist/schedule', {
+        params: { therapistId, ...query },
+      });
       return res?.data?.data || res?.data || [];
     } catch (err) {
       logger.warn('therapistService.getSchedule fallback:', err?.message);
@@ -99,7 +103,10 @@ export const therapistService = {
 
   async addScheduleSession(therapistId, sessionData) {
     try {
-      const res = await apiClient.post('/therapist/schedule', { therapistId, ...sessionData });
+      const res = await apiClient.post('/api/v1/therapist/schedule', {
+        therapistId,
+        ...sessionData,
+      });
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('therapistService.addScheduleSession error:', err?.message);
@@ -110,7 +117,9 @@ export const therapistService = {
   // ─── Availability ──────────────────────────────────────────────────────
   async getTherapistAvailability(therapistId) {
     try {
-      const res = await apiClient.get('/therapist/availability', { params: { therapistId } });
+      const res = await apiClient.get('/api/v1/therapist/availability', {
+        params: { therapistId },
+      });
       return res?.data?.data || res?.data || null;
     } catch (err) {
       logger.warn('therapistService.getAvailability fallback:', err?.message);
@@ -120,7 +129,7 @@ export const therapistService = {
 
   async updateAvailability(therapistId, availabilityData) {
     try {
-      const res = await apiClient.put('/therapist/availability', {
+      const res = await apiClient.put('/api/v1/therapist/availability', {
         therapistId,
         ...availabilityData,
       });
@@ -134,7 +143,9 @@ export const therapistService = {
   // ─── Sessions ──────────────────────────────────────────────────────────
   async getTherapistSessions(therapistId, query = {}) {
     try {
-      const res = await apiClient.get('/therapist/sessions', { params: { therapistId, ...query } });
+      const res = await apiClient.get('/api/v1/therapist/sessions', {
+        params: { therapistId, ...query },
+      });
       return res?.data?.data || res?.data || [];
     } catch (err) {
       logger.warn('therapistService.getSessions fallback:', err?.message);
@@ -144,7 +155,10 @@ export const therapistService = {
 
   async addSessionNotes(sessionId, notes) {
     try {
-      const res = await apiClient.post(`/therapy-sessions/${sessionId}/documentation`, notes);
+      const res = await apiClient.post(
+        `/api/v1/therapy-sessions/${sessionId}/documentation`,
+        notes
+      );
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('therapistService.addSessionNotes error:', err?.message);
@@ -155,7 +169,9 @@ export const therapistService = {
   // ─── Cases ─────────────────────────────────────────────────────────────
   async getTherapistCases(therapistId, query = {}) {
     try {
-      const res = await apiClient.get('/therapist/cases', { params: { therapistId, ...query } });
+      const res = await apiClient.get('/api/v1/therapist/cases', {
+        params: { therapistId, ...query },
+      });
       return res?.data?.data || res?.data || [];
     } catch (err) {
       logger.warn('therapistService.getCases fallback:', err?.message);
@@ -166,7 +182,7 @@ export const therapistService = {
   // ─── Documents ─────────────────────────────────────────────────────────
   async getTherapistDocuments(therapistId, query = {}) {
     try {
-      const res = await apiClient.get('/therapist/documents', {
+      const res = await apiClient.get('/api/v1/therapist/documents', {
         params: { therapistId, ...query },
       });
       return res?.data?.data || res?.data || [];
@@ -178,7 +194,7 @@ export const therapistService = {
 
   async uploadDocument(therapistId, formData) {
     try {
-      const res = await apiClient.post('/therapist/documents', formData, {
+      const res = await apiClient.post('/api/v1/therapist/documents', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
         params: { therapistId },
       });
@@ -192,7 +208,9 @@ export const therapistService = {
   // ─── Reports ───────────────────────────────────────────────────────────
   async getTherapistReports(therapistId, query = {}) {
     try {
-      const res = await apiClient.get('/therapist/reports', { params: { therapistId, ...query } });
+      const res = await apiClient.get('/api/v1/therapist/reports', {
+        params: { therapistId, ...query },
+      });
       return res?.data?.data || res?.data || MOCK_REPORTS;
     } catch (err) {
       logger.warn('therapistService.getReports fallback:', err?.message);
@@ -202,7 +220,7 @@ export const therapistService = {
 
   async getTherapistPerformance(therapistId) {
     try {
-      const res = await apiClient.get('/therapist/performance', { params: { therapistId } });
+      const res = await apiClient.get('/api/v1/therapist/performance', { params: { therapistId } });
       return res?.data?.data || res?.data || null;
     } catch (err) {
       logger.warn('therapistService.getPerformance fallback:', err?.message);
@@ -212,7 +230,7 @@ export const therapistService = {
 
   async getTherapistWorkload(therapistId) {
     try {
-      const res = await apiClient.get('/therapist/workload', { params: { therapistId } });
+      const res = await apiClient.get('/api/v1/therapist/workload', { params: { therapistId } });
       return res?.data?.data || res?.data || null;
     } catch (err) {
       logger.warn('therapistService.getWorkload fallback:', err?.message);
@@ -223,7 +241,9 @@ export const therapistService = {
   // ─── Messages ──────────────────────────────────────────────────────────
   async getTherapistMessages(therapistId, query = {}) {
     try {
-      const res = await apiClient.get('/therapist/messages', { params: { therapistId, ...query } });
+      const res = await apiClient.get('/api/v1/therapist/messages', {
+        params: { therapistId, ...query },
+      });
       return res?.data?.data || res?.data || [];
     } catch (err) {
       logger.warn('therapistService.getMessages fallback:', err?.message);
@@ -233,7 +253,10 @@ export const therapistService = {
 
   async sendMessage(therapistId, messageData) {
     try {
-      const res = await apiClient.post('/therapist/messages', { therapistId, ...messageData });
+      const res = await apiClient.post('/api/v1/therapist/messages', {
+        therapistId,
+        ...messageData,
+      });
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('therapistService.sendMessage error:', err?.message);
@@ -243,7 +266,7 @@ export const therapistService = {
 
   async getTherapistCommunications(therapistId, query = {}) {
     try {
-      const res = await apiClient.get('/therapist/communications', {
+      const res = await apiClient.get('/api/v1/therapist/communications', {
         params: { therapistId, ...query },
       });
       return res?.data?.data || res?.data || [];
@@ -256,7 +279,9 @@ export const therapistService = {
   // ─── Plans ─────────────────────────────────────────────────────────────
   async getTherapistPlans(therapistId, query = {}) {
     try {
-      const res = await apiClient.get('/therapist/plans', { params: { therapistId, ...query } });
+      const res = await apiClient.get('/api/v1/therapist/plans', {
+        params: { therapistId, ...query },
+      });
       return res?.data?.data || res?.data || [];
     } catch (err) {
       logger.warn('therapistService.getPlans fallback:', err?.message);
@@ -270,7 +295,7 @@ export const therapistService = {
 
   async getAnalyticsOverview(query = {}) {
     try {
-      const res = await apiClient.get('/therapy-sessions-analytics/analytics/overview', {
+      const res = await apiClient.get('/api/v1/therapy-sessions-analytics/analytics/overview', {
         params: query,
       });
       return res?.data?.data || res?.data || null;
@@ -282,7 +307,7 @@ export const therapistService = {
 
   async getSessionTrends(query = {}) {
     try {
-      const res = await apiClient.get('/therapy-sessions-analytics/analytics/trends', {
+      const res = await apiClient.get('/api/v1/therapy-sessions-analytics/analytics/trends', {
         params: query,
       });
       return res?.data?.data || res?.data || null;
@@ -307,9 +332,12 @@ export const therapistService = {
 
   async getRoomUtilization(query = {}) {
     try {
-      const res = await apiClient.get('/therapy-sessions-analytics/analytics/room-utilization', {
-        params: query,
-      });
+      const res = await apiClient.get(
+        '/api/v1/therapy-sessions-analytics/analytics/room-utilization',
+        {
+          params: query,
+        }
+      );
       return res?.data?.data || res?.data || null;
     } catch (err) {
       logger.warn('therapistService.getRoomUtilization fallback:', err?.message);
@@ -319,7 +347,7 @@ export const therapistService = {
 
   async getAttendanceReport(query = {}) {
     try {
-      const res = await apiClient.get('/therapy-sessions-analytics/analytics/attendance', {
+      const res = await apiClient.get('/api/v1/therapy-sessions-analytics/analytics/attendance', {
         params: query,
       });
       return res?.data?.data || res?.data || null;
@@ -331,7 +359,7 @@ export const therapistService = {
 
   async getBillingSummary(query = {}) {
     try {
-      const res = await apiClient.get('/therapy-sessions-analytics/analytics/billing', {
+      const res = await apiClient.get('/api/v1/therapy-sessions-analytics/analytics/billing', {
         params: query,
       });
       return res?.data?.data || res?.data || null;
@@ -343,9 +371,12 @@ export const therapistService = {
 
   async getGoalProgress(query = {}) {
     try {
-      const res = await apiClient.get('/therapy-sessions-analytics/analytics/goal-progress', {
-        params: query,
-      });
+      const res = await apiClient.get(
+        '/api/v1/therapy-sessions-analytics/analytics/goal-progress',
+        {
+          params: query,
+        }
+      );
       return res?.data?.data || res?.data || null;
     } catch (err) {
       logger.warn('therapistService.getGoalProgress fallback:', err?.message);
@@ -355,9 +386,12 @@ export const therapistService = {
 
   async getCancellationAnalysis(query = {}) {
     try {
-      const res = await apiClient.get('/therapy-sessions-analytics/analytics/cancellations', {
-        params: query,
-      });
+      const res = await apiClient.get(
+        '/api/v1/therapy-sessions-analytics/analytics/cancellations',
+        {
+          params: query,
+        }
+      );
       return res?.data?.data || res?.data || null;
     } catch (err) {
       logger.warn('therapistService.getCancellationAnalysis fallback:', err?.message);
@@ -367,7 +401,9 @@ export const therapistService = {
 
   async getCalendarSessions(query = {}) {
     try {
-      const res = await apiClient.get('/therapy-sessions-analytics/calendar', { params: query });
+      const res = await apiClient.get('/api/v1/therapy-sessions-analytics/calendar', {
+        params: query,
+      });
       return res?.data?.data || res?.data || { events: [], total: 0 };
     } catch (err) {
       logger.warn('therapistService.getCalendarSessions fallback:', err?.message);
@@ -377,7 +413,7 @@ export const therapistService = {
 
   async exportReport(query = {}) {
     try {
-      const res = await apiClient.post('/therapy-sessions-analytics/export/report', query);
+      const res = await apiClient.post('/api/v1/therapy-sessions-analytics/export/report', query);
       return res?.data?.data || res?.data || res;
     } catch (err) {
       logger.warn('therapistService.exportReport error:', err?.message);
@@ -387,7 +423,9 @@ export const therapistService = {
 
   async getWaitlist(query = {}) {
     try {
-      const res = await apiClient.get('/therapy-sessions-analytics/waitlist', { params: query });
+      const res = await apiClient.get('/api/v1/therapy-sessions-analytics/waitlist', {
+        params: query,
+      });
       return res?.data?.data || res?.data || { availableSlots: [], totalAvailable: 0 };
     } catch (err) {
       logger.warn('therapistService.getWaitlist fallback:', err?.message);
@@ -410,7 +448,7 @@ export const therapistService = {
 
   async bulkUpdateBilling(sessionIds, isBilled = true, invoiceId = null) {
     try {
-      const res = await apiClient.post('/therapy-sessions-analytics/billing/bulk', {
+      const res = await apiClient.post('/api/v1/therapy-sessions-analytics/billing/bulk', {
         sessionIds,
         isBilled,
         invoiceId,
@@ -429,7 +467,7 @@ export const therapistService = {
   // ─── Treatment Plans (الخطط العلاجية) ──────────
   async getTreatmentPlans(params = {}) {
     try {
-      const res = await apiClient.get('/therapist-extended/treatment-plans', { params });
+      const res = await apiClient.get('/api/v1/therapist-extended/treatment-plans', { params });
       return res?.data?.data || res?.data || { plans: [], total: 0 };
     } catch (err) {
       logger.warn('therapistService.getTreatmentPlans fallback:', err?.message);
@@ -438,7 +476,7 @@ export const therapistService = {
   },
   async createTreatmentPlan(data) {
     try {
-      const res = await apiClient.post('/therapist-extended/treatment-plans', data);
+      const res = await apiClient.post('/api/v1/therapist-extended/treatment-plans', data);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('therapistService.createTreatmentPlan error:', err?.message);
@@ -447,7 +485,7 @@ export const therapistService = {
   },
   async getTreatmentPlanDetail(planId) {
     try {
-      const res = await apiClient.get(`/therapist-extended/treatment-plans/${planId}`);
+      const res = await apiClient.get(`/api/v1/therapist-extended/treatment-plans/${planId}`);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('therapistService.getTreatmentPlanDetail error:', err?.message);
@@ -456,7 +494,7 @@ export const therapistService = {
   },
   async updateTreatmentPlan(planId, data) {
     try {
-      const res = await apiClient.put(`/therapist-extended/treatment-plans/${planId}`, data);
+      const res = await apiClient.put(`/api/v1/therapist-extended/treatment-plans/${planId}`, data);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('therapistService.updateTreatmentPlan error:', err?.message);
@@ -479,7 +517,7 @@ export const therapistService = {
   // ─── Assessments (التقييمات) ──────────
   async getAssessments(params = {}) {
     try {
-      const res = await apiClient.get('/therapist-extended/assessments', { params });
+      const res = await apiClient.get('/api/v1/therapist-extended/assessments', { params });
       return res?.data?.data || res?.data || { assessments: [], total: 0 };
     } catch (err) {
       logger.warn('therapistService.getAssessments fallback:', err?.message);
@@ -488,7 +526,7 @@ export const therapistService = {
   },
   async createAssessment(data) {
     try {
-      const res = await apiClient.post('/therapist-extended/assessments', data);
+      const res = await apiClient.post('/api/v1/therapist-extended/assessments', data);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('therapistService.createAssessment error:', err?.message);
@@ -497,7 +535,7 @@ export const therapistService = {
   },
   async getAssessmentDetail(id) {
     try {
-      const res = await apiClient.get(`/therapist-extended/assessments/${id}`);
+      const res = await apiClient.get(`/api/v1/therapist-extended/assessments/${id}`);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('therapistService.getAssessmentDetail error:', err?.message);
@@ -506,7 +544,7 @@ export const therapistService = {
   },
   async deleteAssessment(id) {
     try {
-      const res = await apiClient.delete(`/therapist-extended/assessments/${id}`);
+      const res = await apiClient.delete(`/api/v1/therapist-extended/assessments/${id}`);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('therapistService.deleteAssessment error:', err?.message);
@@ -517,7 +555,7 @@ export const therapistService = {
   // ─── Prescriptions (الوصفات العلاجية) ──────────
   async getPrescriptions(params = {}) {
     try {
-      const res = await apiClient.get('/therapist-extended/prescriptions', { params });
+      const res = await apiClient.get('/api/v1/therapist-extended/prescriptions', { params });
       return res?.data?.data || res?.data || { prescriptions: [], total: 0 };
     } catch (err) {
       logger.warn('therapistService.getPrescriptions fallback:', err?.message);
@@ -526,7 +564,7 @@ export const therapistService = {
   },
   async createPrescription(data) {
     try {
-      const res = await apiClient.post('/therapist-extended/prescriptions', data);
+      const res = await apiClient.post('/api/v1/therapist-extended/prescriptions', data);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('therapistService.createPrescription error:', err?.message);
@@ -535,7 +573,7 @@ export const therapistService = {
   },
   async updatePrescription(id, data) {
     try {
-      const res = await apiClient.put(`/therapist-extended/prescriptions/${id}`, data);
+      const res = await apiClient.put(`/api/v1/therapist-extended/prescriptions/${id}`, data);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('therapistService.updatePrescription error:', err?.message);
@@ -544,7 +582,7 @@ export const therapistService = {
   },
   async deletePrescription(id) {
     try {
-      const res = await apiClient.delete(`/therapist-extended/prescriptions/${id}`);
+      const res = await apiClient.delete(`/api/v1/therapist-extended/prescriptions/${id}`);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('therapistService.deletePrescription error:', err?.message);
@@ -555,7 +593,7 @@ export const therapistService = {
   // ─── Professional Development (التطوير المهني) ──────────
   async getProfessionalDev(params = {}) {
     try {
-      const res = await apiClient.get('/therapist-extended/professional-dev', { params });
+      const res = await apiClient.get('/api/v1/therapist-extended/professional-dev', { params });
       return res?.data?.data || res?.data || { activities: [], cpdPoints: {} };
     } catch (err) {
       logger.warn('therapistService.getProfessionalDev fallback:', err?.message);
@@ -564,7 +602,7 @@ export const therapistService = {
   },
   async addProfessionalDev(data) {
     try {
-      const res = await apiClient.post('/therapist-extended/professional-dev', data);
+      const res = await apiClient.post('/api/v1/therapist-extended/professional-dev', data);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('therapistService.addProfessionalDev error:', err?.message);
@@ -573,7 +611,7 @@ export const therapistService = {
   },
   async updateProfessionalDev(id, data) {
     try {
-      const res = await apiClient.put(`/therapist-extended/professional-dev/${id}`, data);
+      const res = await apiClient.put(`/api/v1/therapist-extended/professional-dev/${id}`, data);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('therapistService.updateProfessionalDev error:', err?.message);
@@ -582,7 +620,7 @@ export const therapistService = {
   },
   async deleteProfessionalDev(id) {
     try {
-      const res = await apiClient.delete(`/therapist-extended/professional-dev/${id}`);
+      const res = await apiClient.delete(`/api/v1/therapist-extended/professional-dev/${id}`);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('therapistService.deleteProfessionalDev error:', err?.message);
@@ -593,7 +631,7 @@ export const therapistService = {
   // ─── Advanced Analytics (التحليلات المتقدمة) ──────────
   async getAdvancedAnalytics(params = {}) {
     try {
-      const res = await apiClient.get('/therapist-extended/analytics', { params });
+      const res = await apiClient.get('/api/v1/therapist-extended/analytics', { params });
       return (
         res?.data?.data ||
         res?.data || {
@@ -619,7 +657,9 @@ export const therapistService = {
   },
   async getProductivityReport(params = {}) {
     try {
-      const res = await apiClient.get('/therapist-extended/analytics/productivity', { params });
+      const res = await apiClient.get('/api/v1/therapist-extended/analytics/productivity', {
+        params,
+      });
       return res?.data?.data || res?.data || {};
     } catch (err) {
       logger.warn('therapistService.getProductivityReport fallback:', err?.message);
@@ -638,7 +678,7 @@ export const therapistService = {
   // ─── Consultations (الاستشارات) ──────────
   async getConsultations(params = {}) {
     try {
-      const res = await apiClient.get('/therapist-extended/consultations', { params });
+      const res = await apiClient.get('/api/v1/therapist-extended/consultations', { params });
       return res?.data?.data || res?.data || { consultations: [], total: 0 };
     } catch (err) {
       logger.warn('therapistService.getConsultations fallback:', err?.message);
@@ -647,7 +687,7 @@ export const therapistService = {
   },
   async createConsultation(data) {
     try {
-      const res = await apiClient.post('/therapist-extended/consultations', data);
+      const res = await apiClient.post('/api/v1/therapist-extended/consultations', data);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('therapistService.createConsultation error:', err?.message);
@@ -656,7 +696,10 @@ export const therapistService = {
   },
   async respondToConsultation(id, data) {
     try {
-      const res = await apiClient.post(`/therapist-extended/consultations/${id}/respond`, data);
+      const res = await apiClient.post(
+        `/api/v1/therapist-extended/consultations/${id}/respond`,
+        data
+      );
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('therapistService.respondToConsultation error:', err?.message);
@@ -665,7 +708,7 @@ export const therapistService = {
   },
   async updateConsultationStatus(id, status) {
     try {
-      const res = await apiClient.patch(`/therapist-extended/consultations/${id}/status`, {
+      const res = await apiClient.patch(`/api/v1/therapist-extended/consultations/${id}/status`, {
         status,
       });
       return res?.data?.data || res?.data;
@@ -676,7 +719,7 @@ export const therapistService = {
   },
   async deleteConsultation(id) {
     try {
-      const res = await apiClient.delete(`/therapist-extended/consultations/${id}`);
+      const res = await apiClient.delete(`/api/v1/therapist-extended/consultations/${id}`);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('therapistService.deleteConsultation error:', err?.message);
@@ -691,7 +734,7 @@ export const therapistService = {
   // ── Daily Tasks ────────────────────────────────────────
   async getDailyTasks() {
     try {
-      const res = await apiClient.get('/therapist-pro/tasks');
+      const res = await apiClient.get('/api/v1/therapist-pro/tasks');
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('getDailyTasks error:', err?.message);
@@ -700,7 +743,7 @@ export const therapistService = {
   },
   async createTask(data) {
     try {
-      const res = await apiClient.post('/therapist-pro/tasks', data);
+      const res = await apiClient.post('/api/v1/therapist-pro/tasks', data);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('createTask error:', err?.message);
@@ -709,7 +752,7 @@ export const therapistService = {
   },
   async updateTask(id, data) {
     try {
-      const res = await apiClient.put(`/therapist-pro/tasks/${id}`, data);
+      const res = await apiClient.put(`/api/v1/therapist-pro/tasks/${id}`, data);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('updateTask error:', err?.message);
@@ -718,7 +761,7 @@ export const therapistService = {
   },
   async deleteTask(id) {
     try {
-      const res = await apiClient.delete(`/therapist-pro/tasks/${id}`);
+      const res = await apiClient.delete(`/api/v1/therapist-pro/tasks/${id}`);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('deleteTask error:', err?.message);
@@ -729,7 +772,7 @@ export const therapistService = {
   // ── Progress Tracking ─────────────────────────────────
   async getProgressRecords() {
     try {
-      const res = await apiClient.get('/therapist-pro/progress');
+      const res = await apiClient.get('/api/v1/therapist-pro/progress');
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('getProgressRecords error:', err?.message);
@@ -738,7 +781,7 @@ export const therapistService = {
   },
   async addProgressRecord(data) {
     try {
-      const res = await apiClient.post('/therapist-pro/progress', data);
+      const res = await apiClient.post('/api/v1/therapist-pro/progress', data);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('addProgressRecord error:', err?.message);
@@ -747,7 +790,7 @@ export const therapistService = {
   },
   async deleteProgressRecord(id) {
     try {
-      const res = await apiClient.delete(`/therapist-pro/progress/${id}`);
+      const res = await apiClient.delete(`/api/v1/therapist-pro/progress/${id}`);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('deleteProgressRecord error:', err?.message);
@@ -758,7 +801,7 @@ export const therapistService = {
   // ── Clinical Library ──────────────────────────────────
   async getLibraryItems() {
     try {
-      const res = await apiClient.get('/therapist-pro/library');
+      const res = await apiClient.get('/api/v1/therapist-pro/library');
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('getLibraryItems error:', err?.message);
@@ -767,7 +810,7 @@ export const therapistService = {
   },
   async getLibraryItem(id) {
     try {
-      const res = await apiClient.get(`/therapist-pro/library/${id}`);
+      const res = await apiClient.get(`/api/v1/therapist-pro/library/${id}`);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('getLibraryItem error:', err?.message);
@@ -776,7 +819,7 @@ export const therapistService = {
   },
   async addLibraryItem(data) {
     try {
-      const res = await apiClient.post('/therapist-pro/library', data);
+      const res = await apiClient.post('/api/v1/therapist-pro/library', data);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('addLibraryItem error:', err?.message);
@@ -785,7 +828,7 @@ export const therapistService = {
   },
   async deleteLibraryItem(id) {
     try {
-      const res = await apiClient.delete(`/therapist-pro/library/${id}`);
+      const res = await apiClient.delete(`/api/v1/therapist-pro/library/${id}`);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('deleteLibraryItem error:', err?.message);
@@ -796,7 +839,7 @@ export const therapistService = {
   // ── Documentation Templates ───────────────────────────
   async getTemplates() {
     try {
-      const res = await apiClient.get('/therapist-pro/templates');
+      const res = await apiClient.get('/api/v1/therapist-pro/templates');
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('getTemplates error:', err?.message);
@@ -805,7 +848,7 @@ export const therapistService = {
   },
   async getTemplateById(id) {
     try {
-      const res = await apiClient.get(`/therapist-pro/templates/${id}`);
+      const res = await apiClient.get(`/api/v1/therapist-pro/templates/${id}`);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('getTemplateById error:', err?.message);
@@ -814,7 +857,7 @@ export const therapistService = {
   },
   async createTemplate(data) {
     try {
-      const res = await apiClient.post('/therapist-pro/templates', data);
+      const res = await apiClient.post('/api/v1/therapist-pro/templates', data);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('createTemplate error:', err?.message);
@@ -823,7 +866,7 @@ export const therapistService = {
   },
   async updateTemplate(id, data) {
     try {
-      const res = await apiClient.put(`/therapist-pro/templates/${id}`, data);
+      const res = await apiClient.put(`/api/v1/therapist-pro/templates/${id}`, data);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('updateTemplate error:', err?.message);
@@ -832,7 +875,7 @@ export const therapistService = {
   },
   async useTemplate(id) {
     try {
-      const res = await apiClient.post(`/therapist-pro/templates/${id}/use`);
+      const res = await apiClient.post(`/api/v1/therapist-pro/templates/${id}/use`);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('useTemplate error:', err?.message);
@@ -841,7 +884,7 @@ export const therapistService = {
   },
   async deleteTemplate(id) {
     try {
-      const res = await apiClient.delete(`/therapist-pro/templates/${id}`);
+      const res = await apiClient.delete(`/api/v1/therapist-pro/templates/${id}`);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('deleteTemplate error:', err?.message);
@@ -852,7 +895,7 @@ export const therapistService = {
   // ── Parent Communication ──────────────────────────────
   async getParentMessages() {
     try {
-      const res = await apiClient.get('/therapist-pro/parent-comms');
+      const res = await apiClient.get('/api/v1/therapist-pro/parent-comms');
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('getParentMessages error:', err?.message);
@@ -861,7 +904,7 @@ export const therapistService = {
   },
   async sendParentMessage(data) {
     try {
-      const res = await apiClient.post('/therapist-pro/parent-comms', data);
+      const res = await apiClient.post('/api/v1/therapist-pro/parent-comms', data);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('sendParentMessage error:', err?.message);
@@ -870,7 +913,7 @@ export const therapistService = {
   },
   async markMessageRead(id) {
     try {
-      const res = await apiClient.patch(`/therapist-pro/parent-comms/${id}/read`);
+      const res = await apiClient.patch(`/api/v1/therapist-pro/parent-comms/${id}/read`);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('markMessageRead error:', err?.message);
@@ -879,7 +922,7 @@ export const therapistService = {
   },
   async deleteParentMessage(id) {
     try {
-      const res = await apiClient.delete(`/therapist-pro/parent-comms/${id}`);
+      const res = await apiClient.delete(`/api/v1/therapist-pro/parent-comms/${id}`);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('deleteParentMessage error:', err?.message);
@@ -890,7 +933,7 @@ export const therapistService = {
   // ── SMART Goals ────────────────────────────────────────
   async getSmartGoals() {
     try {
-      const res = await apiClient.get('/therapist-pro/smart-goals');
+      const res = await apiClient.get('/api/v1/therapist-pro/smart-goals');
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('getSmartGoals error:', err?.message);
@@ -899,7 +942,7 @@ export const therapistService = {
   },
   async createSmartGoal(data) {
     try {
-      const res = await apiClient.post('/therapist-pro/smart-goals', data);
+      const res = await apiClient.post('/api/v1/therapist-pro/smart-goals', data);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('createSmartGoal error:', err?.message);
@@ -908,7 +951,7 @@ export const therapistService = {
   },
   async updateSmartGoal(id, data) {
     try {
-      const res = await apiClient.put(`/therapist-pro/smart-goals/${id}`, data);
+      const res = await apiClient.put(`/api/v1/therapist-pro/smart-goals/${id}`, data);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('updateSmartGoal error:', err?.message);
@@ -928,7 +971,7 @@ export const therapistService = {
   },
   async deleteSmartGoal(id) {
     try {
-      const res = await apiClient.delete(`/therapist-pro/smart-goals/${id}`);
+      const res = await apiClient.delete(`/api/v1/therapist-pro/smart-goals/${id}`);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('deleteSmartGoal error:', err?.message);
@@ -939,7 +982,7 @@ export const therapistService = {
   // ─── Therapist Ultra: Referrals ───
   async getReferrals(params) {
     try {
-      const res = await apiClient.get('/therapist-ultra/referrals', { params });
+      const res = await apiClient.get('/api/v1/therapist-ultra/referrals', { params });
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('getReferrals error:', err?.message);
@@ -948,7 +991,7 @@ export const therapistService = {
   },
   async createReferral(data) {
     try {
-      const res = await apiClient.post('/therapist-ultra/referrals', data);
+      const res = await apiClient.post('/api/v1/therapist-ultra/referrals', data);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('createReferral error:', err?.message);
@@ -957,7 +1000,7 @@ export const therapistService = {
   },
   async updateReferral(id, data) {
     try {
-      const res = await apiClient.put(`/therapist-ultra/referrals/${id}`, data);
+      const res = await apiClient.put(`/api/v1/therapist-ultra/referrals/${id}`, data);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('updateReferral error:', err?.message);
@@ -966,7 +1009,9 @@ export const therapistService = {
   },
   async updateReferralStatus(id, status) {
     try {
-      const res = await apiClient.patch(`/therapist-ultra/referrals/${id}/status`, { status });
+      const res = await apiClient.patch(`/api/v1/therapist-ultra/referrals/${id}/status`, {
+        status,
+      });
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('updateReferralStatus error:', err?.message);
@@ -975,7 +1020,7 @@ export const therapistService = {
   },
   async deleteReferral(id) {
     try {
-      const res = await apiClient.delete(`/therapist-ultra/referrals/${id}`);
+      const res = await apiClient.delete(`/api/v1/therapist-ultra/referrals/${id}`);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('deleteReferral error:', err?.message);
@@ -986,7 +1031,7 @@ export const therapistService = {
   // ─── Therapist Ultra: Group Therapy ───
   async getGroups(params) {
     try {
-      const res = await apiClient.get('/therapist-ultra/groups', { params });
+      const res = await apiClient.get('/api/v1/therapist-ultra/groups', { params });
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('getGroups error:', err?.message);
@@ -995,7 +1040,7 @@ export const therapistService = {
   },
   async createGroup(data) {
     try {
-      const res = await apiClient.post('/therapist-ultra/groups', data);
+      const res = await apiClient.post('/api/v1/therapist-ultra/groups', data);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('createGroup error:', err?.message);
@@ -1004,7 +1049,7 @@ export const therapistService = {
   },
   async updateGroup(id, data) {
     try {
-      const res = await apiClient.put(`/therapist-ultra/groups/${id}`, data);
+      const res = await apiClient.put(`/api/v1/therapist-ultra/groups/${id}`, data);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('updateGroup error:', err?.message);
@@ -1013,7 +1058,7 @@ export const therapistService = {
   },
   async addGroupParticipant(id, data) {
     try {
-      const res = await apiClient.post(`/therapist-ultra/groups/${id}/participants`, data);
+      const res = await apiClient.post(`/api/v1/therapist-ultra/groups/${id}/participants`, data);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('addGroupParticipant error:', err?.message);
@@ -1033,7 +1078,7 @@ export const therapistService = {
   },
   async deleteGroup(id) {
     try {
-      const res = await apiClient.delete(`/therapist-ultra/groups/${id}`);
+      const res = await apiClient.delete(`/api/v1/therapist-ultra/groups/${id}`);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('deleteGroup error:', err?.message);
@@ -1044,7 +1089,7 @@ export const therapistService = {
   // ─── Therapist Ultra: Equipment ───
   async getEquipment(params) {
     try {
-      const res = await apiClient.get('/therapist-ultra/equipment', { params });
+      const res = await apiClient.get('/api/v1/therapist-ultra/equipment', { params });
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('getEquipment error:', err?.message);
@@ -1053,7 +1098,7 @@ export const therapistService = {
   },
   async createEquipment(data) {
     try {
-      const res = await apiClient.post('/therapist-ultra/equipment', data);
+      const res = await apiClient.post('/api/v1/therapist-ultra/equipment', data);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('createEquipment error:', err?.message);
@@ -1062,7 +1107,7 @@ export const therapistService = {
   },
   async updateEquipment(id, data) {
     try {
-      const res = await apiClient.put(`/therapist-ultra/equipment/${id}`, data);
+      const res = await apiClient.put(`/api/v1/therapist-ultra/equipment/${id}`, data);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('updateEquipment error:', err?.message);
@@ -1071,7 +1116,7 @@ export const therapistService = {
   },
   async bookEquipment(id) {
     try {
-      const res = await apiClient.patch(`/therapist-ultra/equipment/${id}/book`);
+      const res = await apiClient.patch(`/api/v1/therapist-ultra/equipment/${id}/book`);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('bookEquipment error:', err?.message);
@@ -1080,7 +1125,7 @@ export const therapistService = {
   },
   async returnEquipment(id) {
     try {
-      const res = await apiClient.patch(`/therapist-ultra/equipment/${id}/return`);
+      const res = await apiClient.patch(`/api/v1/therapist-ultra/equipment/${id}/return`);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('returnEquipment error:', err?.message);
@@ -1089,7 +1134,7 @@ export const therapistService = {
   },
   async deleteEquipment(id) {
     try {
-      const res = await apiClient.delete(`/therapist-ultra/equipment/${id}`);
+      const res = await apiClient.delete(`/api/v1/therapist-ultra/equipment/${id}`);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('deleteEquipment error:', err?.message);
@@ -1100,7 +1145,7 @@ export const therapistService = {
   // ─── Therapist Ultra: KPIs ───
   async getKPIs(params) {
     try {
-      const res = await apiClient.get('/therapist-ultra/kpis', { params });
+      const res = await apiClient.get('/api/v1/therapist-ultra/kpis', { params });
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('getKPIs error:', err?.message);
@@ -1109,7 +1154,7 @@ export const therapistService = {
   },
   async createKPI(data) {
     try {
-      const res = await apiClient.post('/therapist-ultra/kpis', data);
+      const res = await apiClient.post('/api/v1/therapist-ultra/kpis', data);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('createKPI error:', err?.message);
@@ -1118,7 +1163,7 @@ export const therapistService = {
   },
   async updateKPI(id, data) {
     try {
-      const res = await apiClient.put(`/therapist-ultra/kpis/${id}`, data);
+      const res = await apiClient.put(`/api/v1/therapist-ultra/kpis/${id}`, data);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('updateKPI error:', err?.message);
@@ -1127,7 +1172,7 @@ export const therapistService = {
   },
   async deleteKPI(id) {
     try {
-      const res = await apiClient.delete(`/therapist-ultra/kpis/${id}`);
+      const res = await apiClient.delete(`/api/v1/therapist-ultra/kpis/${id}`);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('deleteKPI error:', err?.message);
@@ -1138,7 +1183,7 @@ export const therapistService = {
   // ─── Therapist Ultra: Safety Protocols ───
   async getSafetyProtocols(params) {
     try {
-      const res = await apiClient.get('/therapist-ultra/safety', { params });
+      const res = await apiClient.get('/api/v1/therapist-ultra/safety', { params });
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('getSafetyProtocols error:', err?.message);
@@ -1147,7 +1192,7 @@ export const therapistService = {
   },
   async createSafetyProtocol(data) {
     try {
-      const res = await apiClient.post('/therapist-ultra/safety', data);
+      const res = await apiClient.post('/api/v1/therapist-ultra/safety', data);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('createSafetyProtocol error:', err?.message);
@@ -1156,7 +1201,7 @@ export const therapistService = {
   },
   async updateSafetyProtocol(id, data) {
     try {
-      const res = await apiClient.put(`/therapist-ultra/safety/${id}`, data);
+      const res = await apiClient.put(`/api/v1/therapist-ultra/safety/${id}`, data);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('updateSafetyProtocol error:', err?.message);
@@ -1165,7 +1210,7 @@ export const therapistService = {
   },
   async reportSafetyIncident(id, data) {
     try {
-      const res = await apiClient.post(`/therapist-ultra/safety/${id}/incidents`, data);
+      const res = await apiClient.post(`/api/v1/therapist-ultra/safety/${id}/incidents`, data);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('reportSafetyIncident error:', err?.message);
@@ -1185,7 +1230,7 @@ export const therapistService = {
   },
   async deleteSafetyProtocol(id) {
     try {
-      const res = await apiClient.delete(`/therapist-ultra/safety/${id}`);
+      const res = await apiClient.delete(`/api/v1/therapist-ultra/safety/${id}`);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('deleteSafetyProtocol error:', err?.message);
@@ -1196,7 +1241,7 @@ export const therapistService = {
   // ─── Therapist Ultra: Clinical Research ───
   async getResearch(params) {
     try {
-      const res = await apiClient.get('/therapist-ultra/research', { params });
+      const res = await apiClient.get('/api/v1/therapist-ultra/research', { params });
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('getResearch error:', err?.message);
@@ -1205,7 +1250,7 @@ export const therapistService = {
   },
   async createResearch(data) {
     try {
-      const res = await apiClient.post('/therapist-ultra/research', data);
+      const res = await apiClient.post('/api/v1/therapist-ultra/research', data);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('createResearch error:', err?.message);
@@ -1214,7 +1259,7 @@ export const therapistService = {
   },
   async updateResearch(id, data) {
     try {
-      const res = await apiClient.put(`/therapist-ultra/research/${id}`, data);
+      const res = await apiClient.put(`/api/v1/therapist-ultra/research/${id}`, data);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('updateResearch error:', err?.message);
@@ -1223,7 +1268,7 @@ export const therapistService = {
   },
   async addResearchPublication(id, publication) {
     try {
-      const res = await apiClient.post(`/therapist-ultra/research/${id}/publications`, {
+      const res = await apiClient.post(`/api/v1/therapist-ultra/research/${id}/publications`, {
         publication,
       });
       return res?.data?.data || res?.data;
@@ -1234,7 +1279,7 @@ export const therapistService = {
   },
   async deleteResearch(id) {
     try {
-      const res = await apiClient.delete(`/therapist-ultra/research/${id}`);
+      const res = await apiClient.delete(`/api/v1/therapist-ultra/research/${id}`);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('deleteResearch error:', err?.message);
@@ -1247,7 +1292,7 @@ export const therapistService = {
   // --- Telehealth ---
   async getTelehealthSessions() {
     try {
-      const res = await apiClient.get('/therapist-elite/telehealth');
+      const res = await apiClient.get('/api/v1/therapist-elite/telehealth');
       return res?.data;
     } catch (err) {
       logger.warn('getTelehealthSessions error:', err?.message);
@@ -1256,7 +1301,7 @@ export const therapistService = {
   },
   async createTelehealthSession(data) {
     try {
-      const res = await apiClient.post('/therapist-elite/telehealth', data);
+      const res = await apiClient.post('/api/v1/therapist-elite/telehealth', data);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('createTelehealthSession error:', err?.message);
@@ -1265,7 +1310,7 @@ export const therapistService = {
   },
   async updateTelehealthSession(id, data) {
     try {
-      const res = await apiClient.put(`/therapist-elite/telehealth/${id}`, data);
+      const res = await apiClient.put(`/api/v1/therapist-elite/telehealth/${id}`, data);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('updateTelehealthSession error:', err?.message);
@@ -1274,7 +1319,9 @@ export const therapistService = {
   },
   async updateTelehealthStatus(id, status) {
     try {
-      const res = await apiClient.patch(`/therapist-elite/telehealth/${id}/status`, { status });
+      const res = await apiClient.patch(`/api/v1/therapist-elite/telehealth/${id}/status`, {
+        status,
+      });
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('updateTelehealthStatus error:', err?.message);
@@ -1283,7 +1330,7 @@ export const therapistService = {
   },
   async deleteTelehealthSession(id) {
     try {
-      const res = await apiClient.delete(`/therapist-elite/telehealth/${id}`);
+      const res = await apiClient.delete(`/api/v1/therapist-elite/telehealth/${id}`);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('deleteTelehealthSession error:', err?.message);
@@ -1294,7 +1341,7 @@ export const therapistService = {
   // --- Field Training ---
   async getFieldTraining() {
     try {
-      const res = await apiClient.get('/therapist-elite/field-training');
+      const res = await apiClient.get('/api/v1/therapist-elite/field-training');
       return res?.data;
     } catch (err) {
       logger.warn('getFieldTraining error:', err?.message);
@@ -1303,7 +1350,7 @@ export const therapistService = {
   },
   async createFieldTraining(data) {
     try {
-      const res = await apiClient.post('/therapist-elite/field-training', data);
+      const res = await apiClient.post('/api/v1/therapist-elite/field-training', data);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('createFieldTraining error:', err?.message);
@@ -1312,7 +1359,7 @@ export const therapistService = {
   },
   async updateFieldTraining(id, data) {
     try {
-      const res = await apiClient.put(`/therapist-elite/field-training/${id}`, data);
+      const res = await apiClient.put(`/api/v1/therapist-elite/field-training/${id}`, data);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('updateFieldTraining error:', err?.message);
@@ -1321,7 +1368,7 @@ export const therapistService = {
   },
   async addTrainingEvaluation(id, evaluation) {
     try {
-      const res = await apiClient.post(`/therapist-elite/field-training/${id}/evaluations`, {
+      const res = await apiClient.post(`/api/v1/therapist-elite/field-training/${id}/evaluations`, {
         evaluation,
       });
       return res?.data?.data || res?.data;
@@ -1332,7 +1379,9 @@ export const therapistService = {
   },
   async logTrainingHours(id, hours) {
     try {
-      const res = await apiClient.patch(`/therapist-elite/field-training/${id}/hours`, { hours });
+      const res = await apiClient.patch(`/api/v1/therapist-elite/field-training/${id}/hours`, {
+        hours,
+      });
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('logTrainingHours error:', err?.message);
@@ -1341,7 +1390,7 @@ export const therapistService = {
   },
   async deleteFieldTraining(id) {
     try {
-      const res = await apiClient.delete(`/therapist-elite/field-training/${id}`);
+      const res = await apiClient.delete(`/api/v1/therapist-elite/field-training/${id}`);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('deleteFieldTraining error:', err?.message);
@@ -1352,7 +1401,7 @@ export const therapistService = {
   // --- Consents ---
   async getConsents() {
     try {
-      const res = await apiClient.get('/therapist-elite/consents');
+      const res = await apiClient.get('/api/v1/therapist-elite/consents');
       return res?.data;
     } catch (err) {
       logger.warn('getConsents error:', err?.message);
@@ -1361,7 +1410,7 @@ export const therapistService = {
   },
   async createConsent(data) {
     try {
-      const res = await apiClient.post('/therapist-elite/consents', data);
+      const res = await apiClient.post('/api/v1/therapist-elite/consents', data);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('createConsent error:', err?.message);
@@ -1370,7 +1419,7 @@ export const therapistService = {
   },
   async updateConsent(id, data) {
     try {
-      const res = await apiClient.put(`/therapist-elite/consents/${id}`, data);
+      const res = await apiClient.put(`/api/v1/therapist-elite/consents/${id}`, data);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('updateConsent error:', err?.message);
@@ -1379,7 +1428,7 @@ export const therapistService = {
   },
   async signConsent(id, data) {
     try {
-      const res = await apiClient.patch(`/therapist-elite/consents/${id}/sign`, data);
+      const res = await apiClient.patch(`/api/v1/therapist-elite/consents/${id}/sign`, data);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('signConsent error:', err?.message);
@@ -1388,7 +1437,7 @@ export const therapistService = {
   },
   async revokeConsent(id) {
     try {
-      const res = await apiClient.patch(`/therapist-elite/consents/${id}/revoke`);
+      const res = await apiClient.patch(`/api/v1/therapist-elite/consents/${id}/revoke`);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('revokeConsent error:', err?.message);
@@ -1397,7 +1446,7 @@ export const therapistService = {
   },
   async deleteConsent(id) {
     try {
-      const res = await apiClient.delete(`/therapist-elite/consents/${id}`);
+      const res = await apiClient.delete(`/api/v1/therapist-elite/consents/${id}`);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('deleteConsent error:', err?.message);
@@ -1408,7 +1457,7 @@ export const therapistService = {
   // --- Quality Reports ---
   async getQualityReports() {
     try {
-      const res = await apiClient.get('/therapist-elite/quality-reports');
+      const res = await apiClient.get('/api/v1/therapist-elite/quality-reports');
       return res?.data;
     } catch (err) {
       logger.warn('getQualityReports error:', err?.message);
@@ -1417,7 +1466,7 @@ export const therapistService = {
   },
   async createQualityReport(data) {
     try {
-      const res = await apiClient.post('/therapist-elite/quality-reports', data);
+      const res = await apiClient.post('/api/v1/therapist-elite/quality-reports', data);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('createQualityReport error:', err?.message);
@@ -1426,7 +1475,7 @@ export const therapistService = {
   },
   async updateQualityReport(id, data) {
     try {
-      const res = await apiClient.put(`/therapist-elite/quality-reports/${id}`, data);
+      const res = await apiClient.put(`/api/v1/therapist-elite/quality-reports/${id}`, data);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('updateQualityReport error:', err?.message);
@@ -1435,7 +1484,7 @@ export const therapistService = {
   },
   async addQualityFinding(id, finding) {
     try {
-      const res = await apiClient.post(`/therapist-elite/quality-reports/${id}/findings`, {
+      const res = await apiClient.post(`/api/v1/therapist-elite/quality-reports/${id}/findings`, {
         finding,
       });
       return res?.data?.data || res?.data;
@@ -1446,7 +1495,7 @@ export const therapistService = {
   },
   async deleteQualityReport(id) {
     try {
-      const res = await apiClient.delete(`/therapist-elite/quality-reports/${id}`);
+      const res = await apiClient.delete(`/api/v1/therapist-elite/quality-reports/${id}`);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('deleteQualityReport error:', err?.message);
@@ -1457,7 +1506,7 @@ export const therapistService = {
   // --- Waiting List ---
   async getWaitingList() {
     try {
-      const res = await apiClient.get('/therapist-elite/waiting-list');
+      const res = await apiClient.get('/api/v1/therapist-elite/waiting-list');
       return res?.data;
     } catch (err) {
       logger.warn('getWaitingList error:', err?.message);
@@ -1466,7 +1515,7 @@ export const therapistService = {
   },
   async addToWaitingList(data) {
     try {
-      const res = await apiClient.post('/therapist-elite/waiting-list', data);
+      const res = await apiClient.post('/api/v1/therapist-elite/waiting-list', data);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('addToWaitingList error:', err?.message);
@@ -1475,7 +1524,7 @@ export const therapistService = {
   },
   async updateWaitingListItem(id, data) {
     try {
-      const res = await apiClient.put(`/therapist-elite/waiting-list/${id}`, data);
+      const res = await apiClient.put(`/api/v1/therapist-elite/waiting-list/${id}`, data);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('updateWaitingListItem error:', err?.message);
@@ -1484,7 +1533,9 @@ export const therapistService = {
   },
   async updateWaitingStatus(id, status) {
     try {
-      const res = await apiClient.patch(`/therapist-elite/waiting-list/${id}/status`, { status });
+      const res = await apiClient.patch(`/api/v1/therapist-elite/waiting-list/${id}/status`, {
+        status,
+      });
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('updateWaitingStatus error:', err?.message);
@@ -1493,7 +1544,7 @@ export const therapistService = {
   },
   async removeFromWaitingList(id) {
     try {
-      const res = await apiClient.delete(`/therapist-elite/waiting-list/${id}`);
+      const res = await apiClient.delete(`/api/v1/therapist-elite/waiting-list/${id}`);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('removeFromWaitingList error:', err?.message);
@@ -1504,7 +1555,7 @@ export const therapistService = {
   // --- Achievements ---
   async getAchievements() {
     try {
-      const res = await apiClient.get('/therapist-elite/achievements');
+      const res = await apiClient.get('/api/v1/therapist-elite/achievements');
       return res?.data;
     } catch (err) {
       logger.warn('getAchievements error:', err?.message);
@@ -1513,7 +1564,7 @@ export const therapistService = {
   },
   async createAchievement(data) {
     try {
-      const res = await apiClient.post('/therapist-elite/achievements', data);
+      const res = await apiClient.post('/api/v1/therapist-elite/achievements', data);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('createAchievement error:', err?.message);
@@ -1522,7 +1573,7 @@ export const therapistService = {
   },
   async updateAchievement(id, data) {
     try {
-      const res = await apiClient.put(`/therapist-elite/achievements/${id}`, data);
+      const res = await apiClient.put(`/api/v1/therapist-elite/achievements/${id}`, data);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('updateAchievement error:', err?.message);
@@ -1531,7 +1582,7 @@ export const therapistService = {
   },
   async deleteAchievement(id) {
     try {
-      const res = await apiClient.delete(`/therapist-elite/achievements/${id}`);
+      const res = await apiClient.delete(`/api/v1/therapist-elite/achievements/${id}`);
       return res?.data?.data || res?.data;
     } catch (err) {
       logger.warn('deleteAchievement error:', err?.message);

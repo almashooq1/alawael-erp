@@ -26,6 +26,7 @@ import {
   Typography,
 } from '@mui/material';
 import { listInbox, approveRequest, rejectRequest } from '../services/approvals.service';
+import { formatDateTime } from 'utils/dateUtils';
 
 const statusColor = {
   pending_approval: 'warning',
@@ -127,9 +128,7 @@ export default function ApprovalInbox() {
                       label={r.status}
                     />
                   </TableCell>
-                  <TableCell>
-                    {r.slaDeadline ? new Date(r.slaDeadline).toLocaleString('ar-SA') : '—'}
-                  </TableCell>
+                  <TableCell>{formatDateTime(r.slaDeadline)}</TableCell>
                   <TableCell align="center">
                     <Stack direction="row" spacing={1} justifyContent="center">
                       <Button size="small" color="success" onClick={() => openDialog(r, 'approve')}>

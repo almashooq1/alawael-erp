@@ -49,6 +49,7 @@ import {
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients } from '../../theme/palette';
 import SignaturePad from '../../components/common/SignaturePad';
+import { formatDate as _fmtDate, formatDateTime as _fmtDT } from 'utils/dateUtils';
 
 /* ═══ Status Map ═════════════════════════════════════════════════════════ */
 const statusMap = {
@@ -507,15 +508,11 @@ export default function ESignatureSigning() {
                     { label: 'القسم', value: doc.department || '-' },
                     {
                       label: 'تاريخ الإنشاء',
-                      value: doc.createdAt
-                        ? new Date(doc.createdAt).toLocaleDateString('ar-SA')
-                        : '-',
+                      value: doc.createdAt ? _fmtDate(doc.createdAt) : '-',
                     },
                     {
                       label: 'تاريخ الانتهاء',
-                      value: doc.expiresAt
-                        ? new Date(doc.expiresAt).toLocaleDateString('ar-SA')
-                        : '-',
+                      value: doc.expiresAt ? _fmtDate(doc.expiresAt) : '-',
                     },
                     { label: 'الحالة', value: statusMap[doc.status]?.label },
                     { label: 'رمز التحقق', value: doc.verificationCode || '-' },
@@ -733,7 +730,7 @@ export default function ESignatureSigning() {
                       <Typography variant="caption">{s.email}</Typography>
                       {s.signedAt && (
                         <Typography variant="caption" display="block" color="success.main">
-                          وقّع في: {new Date(s.signedAt).toLocaleString('ar-SA')}
+                          وقّع في: {_fmtDT(s.signedAt)}
                           {s.signatureType &&
                             ` (${s.signatureType === 'draw' ? 'رسم' : s.signatureType === 'type' ? 'كتابة' : s.signatureType === 'upload' ? 'رفع' : s.signatureType})`}
                         </Typography>
@@ -814,7 +811,7 @@ export default function ESignatureSigning() {
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
                       {entry.performerName || 'النظام'} •{' '}
-                      {entry.timestamp ? new Date(entry.timestamp).toLocaleString('ar-SA') : ''}
+                      {entry.timestamp ? _fmtDT(entry.timestamp) : ''}
                     </Typography>
                     {entry.details && (
                       <Typography variant="caption" display="block" color="text.secondary">
@@ -877,7 +874,7 @@ export default function ESignatureSigning() {
                       <>
                         <Typography variant="body2">{c.text}</Typography>
                         <Typography variant="caption" color="text.secondary">
-                          {c.createdAt ? new Date(c.createdAt).toLocaleString('ar-SA') : ''}
+                          {c.createdAt ? _fmtDT(c.createdAt) : ''}
                         </Typography>
                       </>
                     }

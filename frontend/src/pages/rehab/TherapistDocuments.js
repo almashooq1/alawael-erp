@@ -44,6 +44,7 @@ import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients, statusColors, surfaceColors, neutralColors } from '../../theme/palette';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const TherapistDocuments = () => {
   const { currentUser } = useAuth();
@@ -505,8 +506,7 @@ const TherapistDocuments = () => {
                       variant="caption"
                       sx={{ color: neutralColors.textMuted, display: 'block', mb: 0.5 }}
                     >
-                      {doc.date ||
-                        (doc.createdAt && new Date(doc.createdAt).toLocaleDateString('ar-SA'))}
+                      {doc.date || (doc.createdAt && _fmtDate(doc.createdAt))}
                     </Typography>
                     <Chip
                       label={doc.type || doc.fileType || 'مستند'}

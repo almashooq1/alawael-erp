@@ -85,6 +85,7 @@ import {
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients, statusColors, chartColors } from '../../theme/palette';
 import hrInsuranceService from '../../services/hrInsuranceService';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 // ─── Status & Class Config ───────────────────────────────────────────────────
 const STATUS_CONFIG = {
@@ -742,8 +743,7 @@ export default function HRInsuranceDashboard() {
                   </Typography>
                   {expiringPolicies.slice(0, 5).map(p => (
                     <Typography key={p._id} variant="body2">
-                      • {p.employeeName} — {p.policyNumber} — تنتهي في{' '}
-                      {new Date(p.endDate).toLocaleDateString('ar-SA')}
+                      • {p.employeeName} — {p.policyNumber} — تنتهي في {_fmtDate(p.endDate)}
                     </Typography>
                   ))}
                 </Alert>
@@ -973,7 +973,7 @@ export default function HRInsuranceDashboard() {
                         </TableCell>
                         <TableCell>
                           <Typography variant="body2">
-                            {p.endDate ? new Date(p.endDate).toLocaleDateString('ar-SA') : '—'}
+                            {p.endDate ? _fmtDate(p.endDate) : '—'}
                           </Typography>
                         </TableCell>
                         <TableCell>
@@ -1185,9 +1185,7 @@ export default function HRInsuranceDashboard() {
                                 />
                               </TableCell>
                               <TableCell>
-                                {c.submittedDate
-                                  ? new Date(c.submittedDate).toLocaleDateString('ar-SA')
-                                  : '—'}
+                                {c.submittedDate ? _fmtDate(c.submittedDate) : '—'}
                               </TableCell>
                             </TableRow>
                           );
@@ -1623,11 +1621,8 @@ export default function HRInsuranceDashboard() {
                     الصلاحية
                   </Typography>
                   <Typography variant="body2">
-                    {selectedPolicy.startDate &&
-                      new Date(selectedPolicy.startDate).toLocaleDateString('ar-SA')}{' '}
-                    —{' '}
-                    {selectedPolicy.endDate &&
-                      new Date(selectedPolicy.endDate).toLocaleDateString('ar-SA')}
+                    {selectedPolicy.startDate && _fmtDate(selectedPolicy.startDate)} —{' '}
+                    {selectedPolicy.endDate && _fmtDate(selectedPolicy.endDate)}
                   </Typography>
                 </Grid>
                 <Grid item xs={6} sm={4}>

@@ -24,6 +24,7 @@ import {
   CircularProgress,
 } from '@mui/material';
 import { Add, Edit, Delete, Refresh, Autorenew } from '@mui/icons-material';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 import {
   getContracts,
   createContract,
@@ -186,12 +187,8 @@ export default function ContractsList() {
                     <TableCell>
                       {(r.contractValue?.estimatedAnnualValue || 0).toLocaleString()} ر.س
                     </TableCell>
-                    <TableCell>
-                      {r.startDate ? new Date(r.startDate).toLocaleDateString('ar-SA') : '—'}
-                    </TableCell>
-                    <TableCell>
-                      {r.endDate ? new Date(r.endDate).toLocaleDateString('ar-SA') : '—'}
-                    </TableCell>
+                    <TableCell>{r.startDate ? _fmtDate(r.startDate) : '—'}</TableCell>
+                    <TableCell>{r.endDate ? _fmtDate(r.endDate) : '—'}</TableCell>
                     <TableCell>
                       <IconButton size="small" onClick={() => handleEdit(r)}>
                         <Edit fontSize="small" />

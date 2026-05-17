@@ -5,7 +5,7 @@ import apiClient from './api';
 
 export const getRiskDashboard = async () => {
   try {
-    const { data } = await apiClient.get('/api/enterprise-risk/dashboard');
+    const { data } = await apiClient.get('/api/v1/enterprise-risk/dashboard');
     return data.data;
   } catch {
     return {
@@ -40,42 +40,45 @@ export const getRiskDashboard = async () => {
 
 export const getRisks = async params => {
   try {
-    const { data } = await apiClient.get('/api/enterprise-risk/risks', { params });
+    const { data } = await apiClient.get('/api/v1/enterprise-risk/risks', { params });
     return data.data;
   } catch {
     return [];
   }
 };
 export const createRisk = async body => {
-  const { data } = await apiClient.post('/api/enterprise-risk/risks', body);
+  const { data } = await apiClient.post('/api/v1/enterprise-risk/risks', body);
   return data.data;
 };
 export const updateRisk = async (id, body) => {
-  const { data } = await apiClient.put(`/api/enterprise-risk/risks/${id}`, body);
+  const { data } = await apiClient.put(`/api/v1/enterprise-risk/risks/${id}`, body);
   return data.data;
 };
 export const deleteRisk = async id => {
-  const { data } = await apiClient.delete(`/api/enterprise-risk/risks/${id}`);
+  const { data } = await apiClient.delete(`/api/v1/enterprise-risk/risks/${id}`);
   return data.data;
 };
 export const addMitigation = async (riskId, body) => {
-  const { data } = await apiClient.post(`/api/enterprise-risk/risks/${riskId}/mitigations`, body);
+  const { data } = await apiClient.post(
+    `/api/v1/enterprise-risk/risks/${riskId}/mitigations`,
+    body
+  );
   return data.data;
 };
 
 export const getAssessments = async () => {
   try {
-    const { data } = await apiClient.get('/api/enterprise-risk/assessments');
+    const { data } = await apiClient.get('/api/v1/enterprise-risk/assessments');
     return data.data;
   } catch {
     return [];
   }
 };
 export const createAssessment = async body => {
-  const { data } = await apiClient.post('/api/enterprise-risk/assessments', body);
+  const { data } = await apiClient.post('/api/v1/enterprise-risk/assessments', body);
   return data.data;
 };
 export const updateAssessment = async (id, body) => {
-  const { data } = await apiClient.put(`/api/enterprise-risk/assessments/${id}`, body);
+  const { data } = await apiClient.put(`/api/v1/enterprise-risk/assessments/${id}`, body);
   return data.data;
 };

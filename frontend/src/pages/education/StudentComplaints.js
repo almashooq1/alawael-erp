@@ -49,6 +49,7 @@ import { gradients } from 'theme/palette';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import api from 'services/api';
+import { formatDate as _fmtDate, formatDateTime as _fmtDT } from 'utils/dateUtils';
 
 const typeConfig = {
   شكوى: {
@@ -367,8 +368,7 @@ const StudentComplaints = () => {
                         {complaint.subject}
                       </Typography>
                       <Typography variant="caption" color="textSecondary">
-                        {complaint.referenceNumber} •{' '}
-                        {new Date(complaint.createdAt).toLocaleDateString('ar-SA')}
+                        {complaint.referenceNumber} • {_fmtDate(complaint.createdAt)}
                       </Typography>
                     </Box>
                   </Box>
@@ -562,9 +562,7 @@ const StudentComplaints = () => {
                           <>
                             {r.message}
                             <br />
-                            <Typography variant="caption">
-                              {new Date(r.createdAt).toLocaleString('ar-SA')}
-                            </Typography>
+                            <Typography variant="caption">{_fmtDT(r.createdAt)}</Typography>
                           </>
                         }
                       />

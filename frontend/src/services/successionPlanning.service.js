@@ -4,7 +4,7 @@
  */
 import api from './api.client';
 
-const BASE = '/succession-planning';
+const BASE = '/api/v1/succession-planning';
 
 const successionPlanningService = {
   getPlans: params => api.get(`${BASE}`, { params }),

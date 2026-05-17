@@ -11,7 +11,7 @@ const MOCK_DASHBOARD = {
 
 export async function getWarehouseDashboard() {
   try {
-    const { data } = await apiClient.get('/warehouse/dashboard');
+    const { data } = await apiClient.get('/api/v1/warehouse/dashboard');
     return data?.data || MOCK_DASHBOARD;
   } catch {
     return MOCK_DASHBOARD;
@@ -20,7 +20,7 @@ export async function getWarehouseDashboard() {
 
 export async function getWarehouses(params = {}) {
   try {
-    const { data } = await apiClient.get('/warehouse', { params });
+    const { data } = await apiClient.get('/api/v1/warehouse', { params });
     return data?.data || [];
   } catch {
     return [];
@@ -29,7 +29,7 @@ export async function getWarehouses(params = {}) {
 
 export async function getWarehouse(id) {
   try {
-    const { data } = await apiClient.get(`/warehouse/${id}`);
+    const { data } = await apiClient.get(`/api/v1/warehouse/${id}`);
     return data?.data || null;
   } catch {
     return null;
@@ -37,23 +37,23 @@ export async function getWarehouse(id) {
 }
 
 export async function createWarehouse(payload) {
-  const { data } = await apiClient.post('/warehouse', payload);
+  const { data } = await apiClient.post('/api/v1/warehouse', payload);
   return data?.data;
 }
 
 export async function updateWarehouse(id, payload) {
-  const { data } = await apiClient.put(`/warehouse/${id}`, payload);
+  const { data } = await apiClient.put(`/api/v1/warehouse/${id}`, payload);
   return data?.data;
 }
 
 export async function deleteWarehouse(id) {
-  const { data } = await apiClient.delete(`/warehouse/${id}`);
+  const { data } = await apiClient.delete(`/api/v1/warehouse/${id}`);
   return data?.data;
 }
 
 export async function getWarehouseItems(warehouseId, params = {}) {
   try {
-    const { data } = await apiClient.get(`/warehouse/${warehouseId}/items`, { params });
+    const { data } = await apiClient.get(`/api/v1/warehouse/${warehouseId}/items`, { params });
     return data?.data || [];
   } catch {
     return [];
@@ -61,18 +61,18 @@ export async function getWarehouseItems(warehouseId, params = {}) {
 }
 
 export async function createWarehouseItem(warehouseId, payload) {
-  const { data } = await apiClient.post(`/warehouse/${warehouseId}/items`, payload);
+  const { data } = await apiClient.post(`/api/v1/warehouse/${warehouseId}/items`, payload);
   return data?.data;
 }
 
 export async function updateWarehouseItem(id, payload) {
-  const { data } = await apiClient.put(`/warehouse/items/${id}`, payload);
+  const { data } = await apiClient.put(`/api/v1/warehouse/items/${id}`, payload);
   return data?.data;
 }
 
 export async function getTransactions(params = {}) {
   try {
-    const { data } = await apiClient.get('/warehouse/transactions/list', { params });
+    const { data } = await apiClient.get('/api/v1/warehouse/transactions/list', { params });
     return data?.data || [];
   } catch {
     return [];
@@ -80,23 +80,23 @@ export async function getTransactions(params = {}) {
 }
 
 export async function createTransaction(payload) {
-  const { data } = await apiClient.post('/warehouse/transactions', payload);
+  const { data } = await apiClient.post('/api/v1/warehouse/transactions', payload);
   return data?.data;
 }
 
 export async function approveTransaction(id) {
-  const { data } = await apiClient.put(`/warehouse/transactions/${id}/approve`);
+  const { data } = await apiClient.put(`/api/v1/warehouse/transactions/${id}/approve`);
   return data?.data;
 }
 
 export async function completeTransaction(id) {
-  const { data } = await apiClient.put(`/warehouse/transactions/${id}/complete`);
+  const { data } = await apiClient.put(`/api/v1/warehouse/transactions/${id}/complete`);
   return data?.data;
 }
 
 export async function getLowStockAlerts() {
   try {
-    const { data } = await apiClient.get('/warehouse/alerts/low-stock');
+    const { data } = await apiClient.get('/api/v1/warehouse/alerts/low-stock');
     return data?.data || [];
   } catch {
     return [];

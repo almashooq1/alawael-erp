@@ -52,6 +52,7 @@ import AddIcon from '@mui/icons-material/Add';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import EditIcon from '@mui/icons-material/EditOutlined';
 import api from '../../services/api.client';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const CATEGORY_LABELS = {
   1: 'الفئة 1 — مؤتمرات ودورات معتمدة',
@@ -62,7 +63,7 @@ const CATEGORY_LABELS = {
 function formatDate(v) {
   if (!v) return '—';
   try {
-    return new Date(v).toLocaleDateString('ar-SA');
+    return _fmtDate(v);
   } catch {
     return '—';
   }

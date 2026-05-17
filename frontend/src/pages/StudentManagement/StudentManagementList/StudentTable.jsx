@@ -27,6 +27,7 @@ import {
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { gradients } from 'theme/palette';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 import {
   STATUS_MAP,
   SEVERITY_MAP,
@@ -237,7 +238,7 @@ const StudentTable = ({
                     </TableCell>
                     <TableCell>
                       <Typography variant="body2">
-                        {enrollDate ? new Date(enrollDate).toLocaleDateString('ar-SA') : '—'}
+                        {enrollDate ? _fmtDate(enrollDate) : '—'}
                       </Typography>
                     </TableCell>
                     <TableCell>

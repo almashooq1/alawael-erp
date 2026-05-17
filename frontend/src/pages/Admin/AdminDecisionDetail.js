@@ -54,6 +54,7 @@ import {
   Lock,
 } from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
+import { formatDate as _fmtDate, formatDateTime as _fmtDT } from 'utils/dateUtils';
 
 /* ═══ Helpers ════════════════════════════════════════════════════════════════ */
 const docTypeLabels = {
@@ -520,9 +521,7 @@ export default function AdminDecisionDetail() {
                 <Typography variant="caption" color="text.secondary">
                   تاريخ السريان
                 </Typography>
-                <Typography variant="body2">
-                  {new Date(decision.effectiveDate).toLocaleDateString('ar-SA')}
-                </Typography>
+                <Typography variant="body2">{_fmtDate(decision.effectiveDate)}</Typography>
               </Grid>
             )}
             {decision.expiryDate && (
@@ -530,9 +529,7 @@ export default function AdminDecisionDetail() {
                 <Typography variant="caption" color="text.secondary">
                   تاريخ الانتهاء
                 </Typography>
-                <Typography variant="body2">
-                  {new Date(decision.expiryDate).toLocaleDateString('ar-SA')}
-                </Typography>
+                <Typography variant="body2">{_fmtDate(decision.expiryDate)}</Typography>
               </Grid>
             )}
           </Grid>
@@ -609,11 +606,7 @@ export default function AdminDecisionDetail() {
                           color={r.acknowledged ? 'success' : 'default'}
                         />
                       </TableCell>
-                      <TableCell>
-                        {r.acknowledgedAt
-                          ? new Date(r.acknowledgedAt).toLocaleDateString('ar-SA')
-                          : '—'}
-                      </TableCell>
+                      <TableCell>{r.acknowledgedAt ? _fmtDate(r.acknowledgedAt) : '—'}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -654,8 +647,7 @@ export default function AdminDecisionDetail() {
                     }
                     secondary={
                       <Typography variant="caption" color="text.secondary">
-                        {c.authorName || 'مستخدم'} •{' '}
-                        {c.createdAt ? new Date(c.createdAt).toLocaleDateString('ar-SA') : ''}
+                        {c.authorName || 'مستخدم'} • {c.createdAt ? _fmtDate(c.createdAt) : ''}
                       </Typography>
                     }
                   />
@@ -691,9 +683,7 @@ export default function AdminDecisionDetail() {
                         <Chip label={a.action} size="small" variant="outlined" />
                       </TableCell>
                       <TableCell>{a.userName || '—'}</TableCell>
-                      <TableCell>
-                        {a.timestamp ? new Date(a.timestamp).toLocaleString('ar-SA') : '—'}
-                      </TableCell>
+                      <TableCell>{a.timestamp ? _fmtDT(a.timestamp) : '—'}</TableCell>
                       <TableCell>{a.notes || '—'}</TableCell>
                     </TableRow>
                   ))}

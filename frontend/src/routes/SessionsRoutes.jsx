@@ -13,6 +13,7 @@ const SessionsPage = lazyWithRetry(() => import('../pages/Sessions'));
 const SessionAmendmentAudit = lazyWithRetry(
   () => import('../pages/Sessions/SessionAmendmentAudit')
 );
+const SessionCenterPage = lazyWithRetry(() => import('../pages/sessions/SessionCenterPage'));
 
 export default function SessionsRoutes() {
   return (
@@ -22,6 +23,8 @@ export default function SessionsRoutes() {
       <Route path="sessions/analytics" element={<SessionAnalyticsDashboard />} />
       {/* BC-04: سجل تعديلات السجلات السريرية (CARF‑MH 3.A) */}
       <Route path="sessions/amendment-audit" element={<SessionAmendmentAudit />} />
+      {/* Session Center — تحليلات موحدة */}
+      <Route path="session-center" element={<SessionCenterPage />} />
     </>
   );
 }

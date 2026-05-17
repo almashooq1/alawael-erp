@@ -41,6 +41,7 @@ import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { statusColors, neutralColors } from '../../theme/palette';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const CATEGORIES = [
   { value: 'session_prep', label: 'تحضير جلسة', color: '#3b82f6' },
@@ -350,7 +351,7 @@ const TherapistDailyTasks = () => {
                       color="textSecondary"
                       sx={{ alignSelf: 'center' }}
                     >
-                      {new Date(task.dueDate).toLocaleDateString('ar')}
+                      {_fmtDate(task.dueDate)}
                     </Typography>
                   </Box>
                 </Box>

@@ -39,6 +39,7 @@ import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients, statusColors, neutralColors } from '../../theme/palette';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const TherapistTreatmentPlans = () => {
   const { currentUser } = useAuth();
@@ -236,8 +237,8 @@ const TherapistTreatmentPlans = () => {
                 </Typography>
                 <Typography variant="body2" color="textSecondary" sx={{ mt: 0.5 }}>
                   {plan.beneficiary?.name || 'مستفيد'} •{' '}
-                  {plan.startDate ? new Date(plan.startDate).toLocaleDateString('ar') : ''}
-                  {plan.endDate ? ` - ${new Date(plan.endDate).toLocaleDateString('ar')}` : ''}
+                  {plan.startDate ? _fmtDate(plan.startDate) : ''}
+                  {plan.endDate ? ` - ${_fmtDate(plan.endDate)}` : ''}
                 </Typography>
               </Box>
               <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>

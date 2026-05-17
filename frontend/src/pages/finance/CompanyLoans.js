@@ -40,6 +40,7 @@ import {
   Warning,
 } from '@mui/icons-material';
 import { surfaceColors, neutralColors, brandColors } from 'theme/palette';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const API = process.env.REACT_APP_API_URL || '/api';
 
@@ -547,7 +548,7 @@ const CompanyLoans = () => {
                           <TableCell sx={{ textAlign: 'right' }}>{u.loanNumber}</TableCell>
                           <TableCell sx={{ textAlign: 'right' }}>{u.lender}</TableCell>
                           <TableCell sx={{ textAlign: 'right' }}>
-                            {u.dueDate ? new Date(u.dueDate).toLocaleDateString('ar-SA') : '-'}
+                            {u.dueDate ? _fmtDate(u.dueDate) : '-'}
                           </TableCell>
                           <TableCell sx={{ textAlign: 'right', fontWeight: 700, color: '#F44336' }}>
                             {fmt(u.totalDue)}
@@ -796,9 +797,7 @@ const CompanyLoans = () => {
                             {inst.installmentNumber || i + 1}
                           </TableCell>
                           <TableCell sx={{ textAlign: 'right' }}>
-                            {inst.dueDate
-                              ? new Date(inst.dueDate).toLocaleDateString('ar-SA')
-                              : '-'}
+                            {inst.dueDate ? _fmtDate(inst.dueDate) : '-'}
                           </TableCell>
                           <TableCell sx={{ textAlign: 'right' }}>
                             {fmt(inst.principalAmount)}

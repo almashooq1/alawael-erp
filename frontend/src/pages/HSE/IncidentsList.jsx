@@ -24,6 +24,7 @@ import {
   CircularProgress,
 } from '@mui/material';
 import { Add, Edit, Delete, Refresh } from '@mui/icons-material';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 import {
   getIncidents,
   createIncident,
@@ -190,9 +191,7 @@ export default function IncidentsList() {
                         color={statusOptions.find(o => o.value === r.status)?.color || 'default'}
                       />
                     </TableCell>
-                    <TableCell>
-                      {r.incidentDate ? new Date(r.incidentDate).toLocaleDateString('ar-SA') : '—'}
-                    </TableCell>
+                    <TableCell>{r.incidentDate ? _fmtDate(r.incidentDate) : '—'}</TableCell>
                     <TableCell>
                       <IconButton size="small" onClick={() => handleEdit(r)}>
                         <Edit fontSize="small" />

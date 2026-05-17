@@ -32,6 +32,7 @@ import AddIcon from '@mui/icons-material/Add';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import FeedbackIcon from '@mui/icons-material/Feedback';
 import api from '../../services/api.client';
+import { formatDateTime as _fmtDT } from 'utils/dateUtils';
 
 const TYPE_OPTIONS = [
   { value: 'complaint', label: 'شكوى' },
@@ -67,7 +68,7 @@ const STATUS_COLORS = {
 function formatDateTime(v) {
   if (!v) return '—';
   try {
-    return new Date(v).toLocaleString('ar-SA');
+    return _fmtDT(v);
   } catch {
     return '—';
   }

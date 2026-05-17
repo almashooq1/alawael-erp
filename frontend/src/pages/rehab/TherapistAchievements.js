@@ -37,6 +37,7 @@ import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const BADGE_TYPES = [
   {
@@ -446,7 +447,7 @@ const TherapistAchievements = () => {
                       >
                         <DateIcon sx={{ fontSize: 12, color: 'text.secondary' }} />
                         <Typography variant="caption" color="text.secondary">
-                          {new Date(a.earnedDate).toLocaleDateString('ar-SA')}
+                          {_fmtDate(a.earnedDate)}
                         </Typography>
                       </Box>
                     )}

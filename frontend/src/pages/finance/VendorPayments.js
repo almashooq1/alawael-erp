@@ -21,6 +21,7 @@ import {
 } from '@mui/material';
 import { LocalShipping, Warning, Refresh, TrendingDown, CalendarMonth } from '@mui/icons-material';
 import { surfaceColors, neutralColors, brandColors } from 'theme/palette';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const API = process.env.REACT_APP_API_URL || '/api';
 
@@ -234,10 +235,10 @@ const VendorPayments = () => {
                         </TableCell>
                         <TableCell>
                           {p.dueDate ? (
-                            <Tooltip title={new Date(p.dueDate).toLocaleDateString('ar-SA')}>
+                            <Tooltip title={_fmtDate(p.dueDate)}>
                               <Chip
                                 size="small"
-                                label={new Date(p.dueDate).toLocaleDateString('ar-SA')}
+                                label={_fmtDate(p.dueDate)}
                                 sx={{
                                   fontWeight: 600,
                                   bgcolor: isOverdue ? '#F4433615' : '#4CAF5015',

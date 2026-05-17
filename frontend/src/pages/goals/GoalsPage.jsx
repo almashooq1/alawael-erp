@@ -6,6 +6,7 @@
  */
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import {
   Box,
   Card,
@@ -59,6 +60,8 @@ import {
   ExpandMore as ExpandIcon,
   ExpandLess as CollapseIcon,
   Update as UpdateIcon,
+  Assignment as CarePlanNavIcon,
+  AccountTree as EpisodeNavIcon,
 } from '@mui/icons-material';
 import {
   BarChart,
@@ -74,6 +77,7 @@ import {
   Legend,
 } from 'recharts';
 import { goalsAPI, episodesAPI } from '../../services/ddd';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 // ── Constants ────────────────────────────────────────────────────────────────
 const GOAL_TYPES = [
@@ -160,7 +164,7 @@ const INITIAL_FORM = {
   targetDate: '',
 };
 
-const fmtDate = d => (d ? new Date(d).toLocaleDateString('ar-SA') : '—');
+const fmtDate = d => (d ? _fmtDate(d) : '—');
 const getDomainLabel = v => GOAL_DOMAINS.find(d => d.value === v)?.label || v;
 const getTypeLabel = v => GOAL_TYPES.find(t => t.value === v)?.label || v;
 
@@ -205,6 +209,14 @@ function ProgressBar({ value, color = '#4caf50' }) {
 
 // ── Main Component ────────────────────────────────────────────────────────────
 export default function GoalsPage() {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+
+  // Context from Episode→CarePlan→Goals workflow
+  const ctxEpisodeId = searchParams.get('episodeId') || '';
+  const ctxCarePlanId = searchParams.get('carePlanId') || '';
+  const ctxBeneficiaryId = searchParams.get('beneficiaryId') || '';
+
   const [tab, setTab] = useState(0);
   const [goals, setGoals] = useState([]);
   const [episodes, setEpisodes] = useState([]);
@@ -247,6 +259,9 @@ export default function GoalsPage() {
         ...(filterStatus && { status: filterStatus }),
         ...(filterType && { type: filterType }),
         ...(filterDomain && { domain: filterDomain }),
+        ...(ctxEpisodeId && { episodeId: ctxEpisodeId }),
+        ...(ctxCarePlanId && { carePlanId: ctxCarePlanId }),
+        ...(ctxBeneficiaryId && { beneficiaryId: ctxBeneficiaryId }),
       };
       const res = await goalsAPI.list(params);
       const items = res?.data?.data || res?.data?.goals || res?.data || [];
@@ -257,7 +272,7 @@ export default function GoalsPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, filterStatus, filterType, filterDomain]);
+  }, [page, filterStatus, filterType, filterDomain, ctxEpisodeId, ctxCarePlanId, ctxBeneficiaryId]);
 
   // ── Fetch Episodes ──────────────────────────────────────────────────────────
   useEffect(() => {
@@ -326,7 +341,12 @@ export default function GoalsPage() {
   // ── Handlers ────────────────────────────────────────────────────────────────
   const handleOpenCreate = () => {
     setEditingGoal(null);
-    setForm(INITIAL_FORM);
+    setForm({
+      ...INITIAL_FORM,
+      episodeId: ctxEpisodeId,
+      carePlanId: ctxCarePlanId,
+      beneficiaryId: ctxBeneficiaryId,
+    });
     setFormError('');
     setOpenDialog(true);
   };
@@ -496,6 +516,46 @@ export default function GoalsPage() {
           {error}
         </Alert>
       )}
+
+      {/* Workflow context banner */}
+      {(ctxEpisodeId || ctxCarePlanId) && (
+        <Alert
+          severity="info"
+          icon={ctxCarePlanId ? <CarePlanNavIcon /> : <EpisodeNavIcon />}
+          sx={{ mb: 2 }}
+          action={
+            <Stack direction="row" spacing={1}>
+              {ctxCarePlanId && (
+                <Button
+                  size="small"
+                  startIcon={<CarePlanNavIcon />}
+                  onClick={() =>
+                    navigate(
+                      `/platform/care-plans?episodeId=${ctxEpisodeId}&beneficiaryId=${ctxBeneficiaryId}`
+                    )
+                  }
+                >
+                  خطة الرعاية
+                </Button>
+              )}
+              {ctxEpisodeId && (
+                <Button
+                  size="small"
+                  startIcon={<EpisodeNavIcon />}
+                  onClick={() => navigate('/platform/episodes')}
+                >
+                  الحلقة العلاجية
+                </Button>
+              )}
+            </Stack>
+          }
+        >
+          {ctxCarePlanId
+            ? `سياق خطة الرعاية — ${ctxCarePlanId.slice(-8)}`
+            : `سياق الحلقة العلاجية — ${ctxEpisodeId.slice(-8)}`}
+        </Alert>
+      )}
+
       {loading && <LinearProgress sx={{ mb: 2, borderRadius: 1 }} />}
 
       {/* Tabs */}

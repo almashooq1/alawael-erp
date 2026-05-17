@@ -34,6 +34,7 @@ import {
   Autorenew as RenewIcon,
   Cancel as CancelIcon,
 } from '@mui/icons-material';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 import {
   fetchContracts,
   createContract,
@@ -271,12 +272,8 @@ export default function ContractManagement() {
                     {c.employeeId?.firstName} {c.employeeId?.lastName}
                   </TableCell>
                   <TableCell>{c.contractType}</TableCell>
-                  <TableCell>
-                    {c.startDate ? new Date(c.startDate).toLocaleDateString('ar-SA') : '-'}
-                  </TableCell>
-                  <TableCell>
-                    {c.endDate ? new Date(c.endDate).toLocaleDateString('ar-SA') : 'مفتوح'}
-                  </TableCell>
+                  <TableCell>{c.startDate ? _fmtDate(c.startDate) : '-'}</TableCell>
+                  <TableCell>{c.endDate ? _fmtDate(c.endDate) : 'مفتوح'}</TableCell>
                   <TableCell>{c.basicSalary?.toLocaleString()} ر.س</TableCell>
                   <TableCell>
                     <Chip
@@ -338,7 +335,7 @@ export default function ContractManagement() {
                     <TableCell>
                       {c.employeeId?.firstName} {c.employeeId?.lastName}
                     </TableCell>
-                    <TableCell>{new Date(c.endDate).toLocaleDateString('ar-SA')}</TableCell>
+                    <TableCell>{_fmtDate(c.endDate)}</TableCell>
                     <TableCell>
                       <Chip
                         label={`${days} يوم`}

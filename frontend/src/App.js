@@ -9,6 +9,7 @@ import rtlPlugin from 'stylis-plugin-rtl';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { SnackbarProvider } from './contexts/SnackbarContext';
 import { ThemeModeProvider, useThemeMode } from './contexts/ThemeContext';
+import { CalendarProvider } from './contexts/CalendarContext';
 import { DashboardSkeleton } from './components/ui/LoadingSkeleton';
 import ErrorBoundary from './components/ErrorBoundary';
 import logger from './utils/logger';
@@ -46,7 +47,9 @@ function createRtlCache() {
 function App() {
   return (
     <ThemeModeProvider>
-      <AppContent />
+      <CalendarProvider>
+        <AppContent />
+      </CalendarProvider>
     </ThemeModeProvider>
   );
 }

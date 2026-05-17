@@ -110,6 +110,7 @@ import {
   Feedback as ComplaintIcon,
 } from '@mui/icons-material';
 import rehabLicenseService from '../../services/rehabLicense.service';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 // ==================== ثوابت ====================
 const CATEGORY_CONFIG = {
@@ -1606,9 +1607,7 @@ const RehabCenterLicenses = () => {
                           </TableCell>
                           <TableCell>
                             <Typography variant="body2">
-                              {lic.dates?.expiry
-                                ? new Date(lic.dates.expiry).toLocaleDateString('ar-SA')
-                                : '-'}
+                              {lic.dates?.expiry ? _fmtDate(lic.dates.expiry) : '-'}
                             </Typography>
                           </TableCell>
                           <TableCell>
@@ -1950,9 +1949,7 @@ const RehabCenterLicenses = () => {
                     <TableCell>{r.licenseType}</TableCell>
                     <TableCell>{r.center?.name || '-'}</TableCell>
                     <TableCell>
-                      {r.dates?.lastRenewal
-                        ? new Date(r.dates.lastRenewal).toLocaleDateString('ar-SA')
-                        : '-'}
+                      {r.dates?.lastRenewal ? _fmtDate(r.dates.lastRenewal) : '-'}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -2021,10 +2018,7 @@ const RehabCenterLicenses = () => {
                           المركز: {alert.centerName || '-'}
                         </Typography>
                         <Typography variant="caption" color="text.secondary">
-                          انتهاء:{' '}
-                          {alert.expiryDate
-                            ? new Date(alert.expiryDate).toLocaleDateString('ar-SA')
-                            : '-'}
+                          انتهاء: {alert.expiryDate ? _fmtDate(alert.expiryDate) : '-'}
                         </Typography>
                       </Box>
                     </Box>
@@ -2078,11 +2072,7 @@ const RehabCenterLicenses = () => {
                       </TableCell>
                       <TableCell>{lic.licenseType}</TableCell>
                       <TableCell>{lic.center?.name}</TableCell>
-                      <TableCell>
-                        {lic.dates?.expiry
-                          ? new Date(lic.dates.expiry).toLocaleDateString('ar-SA')
-                          : '-'}
-                      </TableCell>
+                      <TableCell>{lic.dates?.expiry ? _fmtDate(lic.dates.expiry) : '-'}</TableCell>
                       <TableCell>
                         <Typography sx={{ fontWeight: 'bold', color: getDaysColor(days) }}>
                           {days === null ? '-' : days < 0 ? `منتهي` : `${days} يوم`}
@@ -2211,11 +2201,7 @@ const RehabCenterLicenses = () => {
                             }
                           />
                         </TableCell>
-                        <TableCell>
-                          {pen.issuedDate
-                            ? new Date(pen.issuedDate).toLocaleDateString('ar-SA')
-                            : '-'}
-                        </TableCell>
+                        <TableCell>{pen.issuedDate ? _fmtDate(pen.issuedDate) : '-'}</TableCell>
                       </TableRow>
                     ))
                   )}
@@ -2333,11 +2319,7 @@ const RehabCenterLicenses = () => {
                           size="small"
                         />
                       </TableCell>
-                      <TableCell>
-                        {lic.dates?.expiry
-                          ? new Date(lic.dates.expiry).toLocaleDateString('ar-SA')
-                          : '-'}
-                      </TableCell>
+                      <TableCell>{lic.dates?.expiry ? _fmtDate(lic.dates.expiry) : '-'}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -2574,11 +2556,7 @@ const RehabCenterLicenses = () => {
                       </TableCell>
                       <TableCell>{lic.licenseTypeLabel || lic.licenseType}</TableCell>
                       <TableCell>{lic.center?.name || '-'}</TableCell>
-                      <TableCell>
-                        {lic.archivedAt
-                          ? new Date(lic.archivedAt).toLocaleDateString('ar-SA')
-                          : '-'}
-                      </TableCell>
+                      <TableCell>{lic.archivedAt ? _fmtDate(lic.archivedAt) : '-'}</TableCell>
                       <TableCell>{lic.archivedReason || '-'}</TableCell>
                       <TableCell>
                         <Button
@@ -2750,9 +2728,7 @@ const RehabCenterLicenses = () => {
                           </TableCell>
                           <TableCell>
                             <Typography variant="body2" color="error.main" fontWeight="bold">
-                              {task.dueDate
-                                ? new Date(task.dueDate).toLocaleDateString('ar-SA')
-                                : '-'}
+                              {task.dueDate ? _fmtDate(task.dueDate) : '-'}
                             </Typography>
                           </TableCell>
                           <TableCell>{task.assignedTo || '-'}</TableCell>
@@ -2814,9 +2790,7 @@ const RehabCenterLicenses = () => {
                           </TableCell>
                           <TableCell>{comm.subject || '-'}</TableCell>
                           <TableCell>{comm.withAuthority || '-'}</TableCell>
-                          <TableCell>
-                            {comm.date ? new Date(comm.date).toLocaleDateString('ar-SA') : '-'}
-                          </TableCell>
+                          <TableCell>{comm.date ? _fmtDate(comm.date) : '-'}</TableCell>
                         </TableRow>
                       ))
                   )}
@@ -2926,14 +2900,14 @@ const RehabCenterLicenses = () => {
                       <Box sx={{ textAlign: 'center', minWidth: 80 }}>
                         <Typography variant="h6" color="primary" fontWeight="bold">
                           {event.startDate
-                            ? new Date(event.startDate).toLocaleDateString('ar-SA', {
+                            ? _fmtDate(event.startDate, {
                                 day: 'numeric',
                               })
                             : '-'}
                         </Typography>
                         <Typography variant="caption" color="text.secondary">
                           {event.startDate
-                            ? new Date(event.startDate).toLocaleDateString('ar-SA', {
+                            ? _fmtDate(event.startDate, {
                                 month: 'long',
                               })
                             : ''}
@@ -3129,7 +3103,7 @@ const RehabCenterLicenses = () => {
                       </TableCell>
                       <TableCell>
                         {lic.healthScore?.lastCalculated
-                          ? new Date(lic.healthScore.lastCalculated).toLocaleDateString('ar-SA')
+                          ? _fmtDate(lic.healthScore.lastCalculated)
                           : '-'}
                       </TableCell>
                     </TableRow>
@@ -4036,9 +4010,7 @@ const RehabCenterLicenses = () => {
                           variant="body2"
                           sx={{ color: getDaysColor(doc.daysUntilExpiry) }}
                         >
-                          {doc.expiryDate
-                            ? new Date(doc.expiryDate).toLocaleDateString('ar-SA')
-                            : '-'}
+                          {doc.expiryDate ? _fmtDate(doc.expiryDate) : '-'}
                           {doc.daysUntilExpiry !== null && ` (${doc.daysUntilExpiry} يوم)`}
                         </Typography>
                       </TableCell>
@@ -4353,9 +4325,7 @@ const RehabCenterLicenses = () => {
                         <Chip label={m.meetingType || 'مراجعة'} size="small" />
                       </TableCell>
                       <TableCell>{m.center?.name || '-'}</TableCell>
-                      <TableCell>
-                        {m.date ? new Date(m.date).toLocaleDateString('ar-SA') : '-'}
-                      </TableCell>
+                      <TableCell>{m.date ? _fmtDate(m.date) : '-'}</TableCell>
                       <TableCell>{(m.attendees || []).length} حاضر</TableCell>
                       <TableCell>
                         <Chip
@@ -4970,9 +4940,7 @@ const RehabCenterLicenses = () => {
               <Alert severity="info" sx={{ mb: 2 }}>
                 الترخيص الحالي ينتهي بتاريخ:{' '}
                 <strong>
-                  {renewDialog?.dates?.expiry
-                    ? new Date(renewDialog.dates.expiry).toLocaleDateString('ar-SA')
-                    : '-'}
+                  {renewDialog?.dates?.expiry ? _fmtDate(renewDialog.dates.expiry) : '-'}
                 </strong>
               </Alert>
             </Grid>
@@ -5094,17 +5062,13 @@ const RehabCenterLicenses = () => {
               <Grid item xs={6}>
                 <Typography variant="body2">
                   <strong>تاريخ الإصدار:</strong>{' '}
-                  {viewDialog.dates?.issued
-                    ? new Date(viewDialog.dates.issued).toLocaleDateString('ar-SA')
-                    : '-'}
+                  {viewDialog.dates?.issued ? _fmtDate(viewDialog.dates.issued) : '-'}
                 </Typography>
               </Grid>
               <Grid item xs={6}>
                 <Typography variant="body2">
                   <strong>تاريخ الانتهاء:</strong>{' '}
-                  {viewDialog.dates?.expiry
-                    ? new Date(viewDialog.dates.expiry).toLocaleDateString('ar-SA')
-                    : '-'}
+                  {viewDialog.dates?.expiry ? _fmtDate(viewDialog.dates.expiry) : '-'}
                 </Typography>
               </Grid>
               <Grid item xs={6}>
@@ -5196,8 +5160,7 @@ const RehabCenterLicenses = () => {
                     {viewDialog.renewalHistory.map((r, i) => (
                       <Paper key={i} sx={{ p: 1, mb: 1, bgcolor: '#f9f9f9' }}>
                         <Typography variant="body2">
-                          {new Date(r.renewalDate).toLocaleDateString('ar-SA')} - حتى{' '}
-                          {new Date(r.newExpiryDate).toLocaleDateString('ar-SA')}
+                          {_fmtDate(r.renewalDate)} - حتى {_fmtDate(r.newExpiryDate)}
                           {r.renewalCost ? ` (${r.renewalCost} ر.س)` : ''}
                         </Typography>
                       </Paper>
@@ -5523,8 +5486,7 @@ const RehabCenterLicenses = () => {
                         >
                           <Typography variant="body2">{c.content}</Typography>
                           <Typography variant="caption" color="text.secondary">
-                            {c.authorName || '-'} -{' '}
-                            {c.createdAt ? new Date(c.createdAt).toLocaleDateString('ar-SA') : ''}
+                            {c.authorName || '-'} - {c.createdAt ? _fmtDate(c.createdAt) : ''}
                           </Typography>
                         </Paper>
                       ))}
@@ -6911,11 +6873,7 @@ const RehabCenterLicenses = () => {
                 <TableBody>
                   {changeLogData.map((entry, idx) => (
                     <TableRow key={idx} hover>
-                      <TableCell>
-                        {entry.changeDate
-                          ? new Date(entry.changeDate).toLocaleDateString('ar-SA')
-                          : '-'}
-                      </TableCell>
+                      <TableCell>{entry.changeDate ? _fmtDate(entry.changeDate) : '-'}</TableCell>
                       <TableCell>
                         <Chip label={entry.changeType || '-'} size="small" />
                       </TableCell>

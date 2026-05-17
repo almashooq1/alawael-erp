@@ -40,6 +40,7 @@ import { gradients } from 'theme/palette';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import api from 'services/api';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const statusConfig = {
   'قيد الطلب': { color: 'info', icon: <PendingIcon /> },
@@ -373,11 +374,11 @@ const StudentCertificates = () => {
                     الرقم: {cert.certificateNumber}
                   </Typography>
                   <Typography variant="caption" color="textSecondary">
-                    تاريخ الطلب: {new Date(cert.createdAt).toLocaleDateString('ar-SA')}
+                    تاريخ الطلب: {_fmtDate(cert.createdAt)}
                   </Typography>
                   {cert.issuedAt && (
                     <Typography variant="caption" color="success.main">
-                      تاريخ الإصدار: {new Date(cert.issuedAt).toLocaleDateString('ar-SA')}
+                      تاريخ الإصدار: {_fmtDate(cert.issuedAt)}
                     </Typography>
                   )}
                 </Stack>

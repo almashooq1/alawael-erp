@@ -19,6 +19,7 @@ import {
 } from '@mui/icons-material';
 import apiClient from 'services/api.client';
 import { gradients } from 'theme/palette';
+import { formatDateTime as _fmtDT } from 'utils/dateUtils';
 
 const iconMap = {
   success: <DoneIcon color="success" />,
@@ -77,9 +78,7 @@ function Activity() {
                 <ListItemIcon>{iconMap[a.type] || <InfoIcon color="action" />}</ListItemIcon>
                 <ListItemText
                   primary={a.title || a.message || a.description}
-                  secondary={
-                    a.timestamp ? new Date(a.timestamp).toLocaleString('ar-SA') : a.user || ''
-                  }
+                  secondary={a.timestamp ? _fmtDT(a.timestamp) : a.user || ''}
                 />
                 {a.type && <Chip label={a.type} size="small" variant="outlined" />}
               </ListItem>

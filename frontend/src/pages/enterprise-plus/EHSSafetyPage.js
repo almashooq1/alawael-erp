@@ -45,6 +45,7 @@ import {
 } from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import * as svc from '../../services/enterpriseProPlus.service';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const INCIDENT_TYPES = {
   injury: 'إصابة',
@@ -354,9 +355,7 @@ export default function EHSSafetyPage() {
                         display="block"
                         sx={{ mt: 1 }}
                       >
-                        {inc.incidentDate
-                          ? new Date(inc.incidentDate).toLocaleDateString('ar-SA')
-                          : ''}
+                        {inc.incidentDate ? _fmtDate(inc.incidentDate) : ''}
                       </Typography>
                       <Box sx={{ mt: 1 }}>
                         <IconButton
@@ -418,11 +417,7 @@ export default function EHSSafetyPage() {
                       <Chip size="small" label={INSPECTION_TYPES[ins.type] || ins.type} />
                     </TableCell>
                     <TableCell>{ins.area || '-'}</TableCell>
-                    <TableCell>
-                      {ins.inspectionDate
-                        ? new Date(ins.inspectionDate).toLocaleDateString('ar-SA')
-                        : '-'}
-                    </TableCell>
+                    <TableCell>{ins.inspectionDate ? _fmtDate(ins.inspectionDate) : '-'}</TableCell>
                     <TableCell>{ins.findings?.length || 0} ملاحظة</TableCell>
                     <TableCell>
                       <Chip
@@ -573,12 +568,8 @@ export default function EHSSafetyPage() {
                         ))}
                       </Stack>
                     </TableCell>
-                    <TableCell>
-                      {p.issueDate ? new Date(p.issueDate).toLocaleDateString('ar-SA') : '-'}
-                    </TableCell>
-                    <TableCell>
-                      {p.expiryDate ? new Date(p.expiryDate).toLocaleDateString('ar-SA') : '-'}
-                    </TableCell>
+                    <TableCell>{p.issueDate ? _fmtDate(p.issueDate) : '-'}</TableCell>
+                    <TableCell>{p.expiryDate ? _fmtDate(p.expiryDate) : '-'}</TableCell>
                     <TableCell>
                       <Chip
                         size="small"
@@ -651,9 +642,7 @@ export default function EHSSafetyPage() {
                       {t.completionRate !== null && ` | نسبة الإتمام: ${t.completionRate}%`}
                     </Typography>
                     {t.scheduledDate && (
-                      <Typography variant="body2">
-                        التاريخ: {new Date(t.scheduledDate).toLocaleDateString('ar-SA')}
-                      </Typography>
+                      <Typography variant="body2">التاريخ: {_fmtDate(t.scheduledDate)}</Typography>
                     )}
                     {t.duration && (
                       <Typography variant="body2">المدة: {t.duration} ساعة</Typography>

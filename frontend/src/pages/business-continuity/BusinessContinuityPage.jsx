@@ -53,6 +53,7 @@ import {
   Warning as WarnIcon,
   BarChart as ChartIcon,
 } from '@mui/icons-material';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 import {
   backupManagerAPI,
   businessContinuityAPI,
@@ -65,7 +66,7 @@ const PRIMARY = '#b71c1c';
 const BG = '#ffebee';
 
 /* ── helpers ───────────────────────────────────────────── */
-const fmt = d => (d ? new Date(d).toLocaleDateString('ar-SA') : '—');
+const fmt = d => (d ? _fmtDate(d) : '—');
 const fmtTime = d => {
   if (!d) return '—';
   return new Date(d).toLocaleString('ar-SA', { hour: '2-digit', minute: '2-digit', hour12: true });

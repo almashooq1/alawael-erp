@@ -48,6 +48,7 @@ import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { statusColors, neutralColors, surfaceColors } from '../../theme/palette';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const CONSULTATION_TYPES = [
   { value: 'medical_opinion', label: 'رأي طبي', icon: <MedicalIcon />, color: statusColors.info },
@@ -386,7 +387,7 @@ const TherapistConsultations = () => {
                         color="textSecondary"
                         sx={{ alignSelf: 'center' }}
                       >
-                        {new Date(consultation.createdAt).toLocaleDateString('ar')}
+                        {_fmtDate(consultation.createdAt)}
                       </Typography>
                     </Box>
                     <Box>
@@ -456,7 +457,7 @@ const TherapistConsultations = () => {
                         >
                           <Typography variant="body2">{r.response}</Typography>
                           <Typography variant="caption" color="textSecondary">
-                            {r.respondedBy} - {new Date(r.respondedAt).toLocaleDateString('ar')}
+                            {r.respondedBy} - {_fmtDate(r.respondedAt)}
                           </Typography>
                         </Box>
                       ))}

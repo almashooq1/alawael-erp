@@ -39,6 +39,7 @@ import {
   ThumbUp as ApproveIcon,
   PlayArrow as ExecuteIcon,
 } from '@mui/icons-material';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 import {
   getPromotionTransfers,
   createPromotionTransfer,
@@ -299,9 +300,7 @@ export default function PromotionsTransfersManagement() {
                         {r.proposed?.position}
                       </Typography>
                     </TableCell>
-                    <TableCell>
-                      {r.effectiveDate && new Date(r.effectiveDate).toLocaleDateString('ar-SA')}
-                    </TableCell>
+                    <TableCell>{r.effectiveDate && _fmtDate(r.effectiveDate)}</TableCell>
                     <TableCell>
                       <Chip
                         label={r.status}

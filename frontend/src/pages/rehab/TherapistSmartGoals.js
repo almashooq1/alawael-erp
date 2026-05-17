@@ -45,6 +45,7 @@ import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { statusColors, neutralColors } from '../../theme/palette';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const DOMAINS = [
   { value: 'motor', label: 'حركي', color: '#3b82f6', icon: '🏃' },
@@ -389,7 +390,7 @@ const TherapistSmartGoals = () => {
                           color="textSecondary"
                           sx={{ alignSelf: 'center' }}
                         >
-                          📅 {new Date(goal.targetDate).toLocaleDateString('ar')}
+                          📅 {_fmtDate(goal.targetDate)}
                         </Typography>
                       )}
                     </Box>

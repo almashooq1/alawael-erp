@@ -25,6 +25,7 @@ import {
   ArrowDownward,
 } from '@mui/icons-material';
 import { surfaceColors, neutralColors, brandColors } from 'theme/palette';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const API = process.env.REACT_APP_API_URL || '/api';
 
@@ -229,8 +230,7 @@ const ProfitLoss = () => {
           >
             <Typography variant="h6" fontWeight={700}>
               <CalendarMonth sx={{ fontSize: 20, verticalAlign: 'middle', mr: 1 }} />
-              قائمة الدخل للفترة من {new Date(startDate).toLocaleDateString('ar-SA')} إلى{' '}
-              {new Date(endDate).toLocaleDateString('ar-SA')}
+              قائمة الدخل للفترة من {_fmtDate(startDate)} إلى {_fmtDate(endDate)}
             </Typography>
           </Box>
           <TableContainer>

@@ -47,6 +47,7 @@ import {
   ContentCopy,
 } from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
+import { formatDate as _fmtDate, formatDateTime as _fmtDT } from 'utils/dateUtils';
 
 /* ═══ Helpers ════════════════════════════════════════════════════════════════ */
 const typeLabels = {
@@ -436,7 +437,7 @@ export default function EStampDetail() {
               <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                 <Typography variant="body2">آخر استخدام</Typography>
                 <Typography variant="body2">
-                  {stamp.lastUsedAt ? new Date(stamp.lastUsedAt).toLocaleDateString('ar-SA') : '—'}
+                  {stamp.lastUsedAt ? _fmtDate(stamp.lastUsedAt) : '—'}
                 </Typography>
               </Box>
             </Paper>
@@ -459,21 +460,15 @@ export default function EStampDetail() {
                   { label: 'أنشأه', value: stamp.createdByName || '—' },
                   {
                     label: 'تاريخ الإنشاء',
-                    value: stamp.createdAt
-                      ? new Date(stamp.createdAt).toLocaleDateString('ar-SA')
-                      : '—',
+                    value: stamp.createdAt ? _fmtDate(stamp.createdAt) : '—',
                   },
                   {
                     label: 'صالح من',
-                    value: stamp.validFrom
-                      ? new Date(stamp.validFrom).toLocaleDateString('ar-SA')
-                      : '—',
+                    value: stamp.validFrom ? _fmtDate(stamp.validFrom) : '—',
                   },
                   {
                     label: 'صالح حتى',
-                    value: stamp.validUntil
-                      ? new Date(stamp.validUntil).toLocaleDateString('ar-SA')
-                      : 'غير محدود',
+                    value: stamp.validUntil ? _fmtDate(stamp.validUntil) : 'غير محدود',
                   },
                   { label: 'اعتمده', value: stamp.approvedByName || '—' },
                 ].map((item, i) => (
@@ -576,9 +571,7 @@ export default function EStampDetail() {
                       </TableCell>
                       <TableCell>{u.documentType || '—'}</TableCell>
                       <TableCell>{u.appliedByName || '—'}</TableCell>
-                      <TableCell>
-                        {u.appliedAt ? new Date(u.appliedAt).toLocaleString('ar-SA') : '—'}
-                      </TableCell>
+                      <TableCell>{u.appliedAt ? _fmtDT(u.appliedAt) : '—'}</TableCell>
                       <TableCell>
                         {u.verificationCode && (
                           <Chip
@@ -708,7 +701,7 @@ export default function EStampDetail() {
                         <Typography variant="body2">{entry.details}</Typography>
                       </Box>
                     }
-                    secondary={`${entry.performerName || 'النظام'} — ${entry.timestamp ? new Date(entry.timestamp).toLocaleString('ar-SA') : ''}`}
+                    secondary={`${entry.performerName || 'النظام'} — ${entry.timestamp ? _fmtDT(entry.timestamp) : ''}`}
                   />
                 </ListItem>
               ))}

@@ -49,6 +49,7 @@ import {
 } from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import workflowService from '../../services/workflow.service';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const statusConfig = {
   active: { label: 'نشط', color: 'success' },
@@ -260,8 +261,7 @@ export default function WorkflowDelegation() {
                       </TableCell>
                       <TableCell>
                         <Typography variant="caption">
-                          {new Date(d.startDate).toLocaleDateString('ar')} –{' '}
-                          {new Date(d.endDate).toLocaleDateString('ar')}
+                          {_fmtDate(d.startDate)} – {_fmtDate(d.endDate)}
                         </Typography>
                       </TableCell>
                       <TableCell>
@@ -336,8 +336,7 @@ export default function WorkflowDelegation() {
                         {d.delegateTo?.name || d.delegateToName || d.delegateTo}
                       </TableCell>
                       <TableCell>
-                        {new Date(d.startDate).toLocaleDateString('ar')} –{' '}
-                        {new Date(d.endDate).toLocaleDateString('ar')}
+                        {_fmtDate(d.startDate)} – {_fmtDate(d.endDate)}
                       </TableCell>
                       <TableCell>
                         <Chip

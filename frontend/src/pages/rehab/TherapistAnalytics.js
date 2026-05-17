@@ -33,6 +33,7 @@ import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { statusColors, neutralColors, surfaceColors } from '../../theme/palette';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const TherapistAnalytics = () => {
   const { currentUser } = useAuth();
@@ -202,7 +203,7 @@ const TherapistAnalytics = () => {
                       variant="caption"
                       sx={{ minWidth: 80, color: neutralColors.textMuted }}
                     >
-                      {new Date(week.week).toLocaleDateString('ar', {
+                      {_fmtDate(week.week, {
                         month: 'short',
                         day: 'numeric',
                       })}

@@ -27,6 +27,7 @@ import {
   Typography,
 } from '@mui/material';
 import { activate, coSign, listMine, listPending } from '../services/break-glass.service';
+import { formatDateTime } from 'utils/dateUtils';
 
 const scopeLabels = {
   clinical_read: 'قراءة إكلينيكية (طارئة)',
@@ -101,8 +102,7 @@ export default function BreakGlassActivation() {
       )}
       {activated && (
         <MuiAlert severity="success" sx={{ mb: 2 }}>
-          تم التفعيل. الرقم {activated._id} · تنتهي في{' '}
-          {new Date(activated.expiresAt).toLocaleString('ar-SA')}
+          {formatDateTime(activated.expiresAt)}
         </MuiAlert>
       )}
 
@@ -180,9 +180,8 @@ export default function BreakGlassActivation() {
                 <TableRow key={s._id}>
                   <TableCell>{String(s.userId)}</TableCell>
                   <TableCell>{scopeLabels[s.scope] || s.scope}</TableCell>
-                  <TableCell>{s.purpose}</TableCell>
-                  <TableCell>{new Date(s.expiresAt).toLocaleString('ar-SA')}</TableCell>
-                  <TableCell>{new Date(s.coSignRequiredBy).toLocaleString('ar-SA')}</TableCell>
+                  <TableCell>{formatDateTime(s.expiresAt)}</TableCell>
+                  <TableCell>{formatDateTime(s.coSignRequiredBy)}</TableCell>
                   <TableCell align="center">
                     <Button size="small" variant="outlined" onClick={() => handleCoSign(s._id)}>
                       توقيع ثانوي
@@ -216,9 +215,8 @@ export default function BreakGlassActivation() {
               {mine.map(s => (
                 <TableRow key={s._id}>
                   <TableCell>{scopeLabels[s.scope] || s.scope}</TableCell>
-                  <TableCell>{s.purpose}</TableCell>
-                  <TableCell>{new Date(s.activatedAt).toLocaleString('ar-SA')}</TableCell>
-                  <TableCell>{new Date(s.expiresAt).toLocaleString('ar-SA')}</TableCell>
+                  <TableCell>{formatDateTime(s.activatedAt)}</TableCell>
+                  <TableCell>{formatDateTime(s.expiresAt)}</TableCell>
                   <TableCell>
                     {s.coSignedAt ? '✅' : s.flaggedForReview ? '⚠️ متجاوز' : '⏳'}
                   </TableCell>

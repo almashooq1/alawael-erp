@@ -33,6 +33,7 @@ import {
   Assessment as SettlementIcon,
   RateReview as InterviewIcon,
 } from '@mui/icons-material';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 import {
   fetchClearances,
   initiateClearance,
@@ -274,9 +275,7 @@ export default function EmployeeClearanceManagement() {
                   {c.employeeId?.firstName} {c.employeeId?.lastName}
                 </TableCell>
                 <TableCell>{c.departureType}</TableCell>
-                <TableCell>
-                  {c.lastWorkingDay ? new Date(c.lastWorkingDay).toLocaleDateString('ar-SA') : '-'}
-                </TableCell>
+                <TableCell>{c.lastWorkingDay ? _fmtDate(c.lastWorkingDay) : '-'}</TableCell>
                 <TableCell>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <LinearProgress
@@ -409,11 +408,7 @@ export default function EmployeeClearanceManagement() {
                       color={itemStatusColors[item.status] || 'default'}
                     />
                   </TableCell>
-                  <TableCell>
-                    {item.clearedDate
-                      ? new Date(item.clearedDate).toLocaleDateString('ar-SA')
-                      : '-'}
-                  </TableCell>
+                  <TableCell>{item.clearedDate ? _fmtDate(item.clearedDate) : '-'}</TableCell>
                   <TableCell>
                     {item.status !== 'مُخلى' && (
                       <Button

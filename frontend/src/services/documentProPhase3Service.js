@@ -5,7 +5,7 @@
  */
 import apiClient from './api.client';
 
-const BASE = '/api/documents-pro-v3';
+const BASE = '/api/v1/documents-pro-v3';
 
 // ── التعليقات ──────────────────────────────────
 export const commentsApi = {

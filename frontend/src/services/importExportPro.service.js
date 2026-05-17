@@ -8,7 +8,7 @@
 import apiClient from './api.client';
 
 import { getToken } from '../utils/tokenStorage';
-const BASE = '/import-export-pro';
+const BASE = '/api/v1/import-export-pro';
 
 const importExportProService = {
   // ─── INFO ───

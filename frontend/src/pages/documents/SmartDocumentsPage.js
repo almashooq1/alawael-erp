@@ -99,12 +99,10 @@ import logger from 'utils/logger';
 import { gradients } from '../../theme/palette';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { useAuth } from 'contexts/AuthContext';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 /* ═══ Helpers ═══ */
-const fmtDate = d =>
-  d
-    ? new Date(d).toLocaleDateString('ar-SA', { year: 'numeric', month: 'short', day: 'numeric' })
-    : '—';
+const fmtDate = d => (d ? _fmtDate(d, { year: 'numeric', month: 'short', day: 'numeric' }) : '—');
 const fmtDateTime = d =>
   d
     ? new Date(d).toLocaleString('ar-SA', {

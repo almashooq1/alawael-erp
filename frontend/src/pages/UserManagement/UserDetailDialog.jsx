@@ -52,11 +52,12 @@ import {
 } from '@mui/icons-material';
 import { getRoleColor, getRoleLabel } from './constants';
 import userManagementService from 'services/userManagementService';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const formatDate = date => {
   if (!date) return '—';
   try {
-    return new Date(date).toLocaleDateString('ar-SA', {
+    return _fmtDate(date, {
       year: 'numeric',
       month: 'long',
       day: 'numeric',

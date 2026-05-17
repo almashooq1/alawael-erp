@@ -22,6 +22,7 @@ import {
 import { useTheme } from '@mui/material/styles';
 import { motion, AnimatePresence } from 'framer-motion';
 import apiClient from '../services/api';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 /* ─── Glass Component ─── */
 const Glass = memo(({ children, sx, ...rest }) => {
@@ -698,7 +699,7 @@ export default function ReportsDashboard() {
               : j.status === 'failed'
                 ? 'فشل'
                 : j.status,
-        date: new Date(j.createdAt).toLocaleDateString('ar-SA'),
+        date: _fmtDate(j.createdAt),
         size: j.file_size_bytes ? `${(j.file_size_bytes / 1024).toFixed(0)} KB` : '—',
       }));
 

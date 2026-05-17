@@ -13,6 +13,7 @@ import {
   ListItemIcon,
   ListItemText,
 } from '@mui/material';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 import {
   Person as PersonIcon,
   Badge as BadgeIcon,
@@ -46,7 +47,7 @@ export default function ProfileTab({
     {
       icon: <CalendarIcon />,
       label: 'تاريخ الالتحاق',
-      value: profile.joinDate ? new Date(profile.joinDate).toLocaleDateString('ar-SA') : '—',
+      value: profile.joinDate ? _fmtDate(profile.joinDate) : '—',
     },
   ];
 

@@ -55,6 +55,7 @@ import {
   BarChart as ChartIcon,
   GppMaybe as ComplianceIcon,
 } from '@mui/icons-material';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 import {
   accreditationManagerAPI,
   inspectionTrackerAPI,
@@ -68,7 +69,7 @@ const PRIMARY = '#4a148c';
 const BG = '#f3e5f5';
 
 /* ── helpers ───────────────────────────────────────────── */
-const fmt = d => (d ? new Date(d).toLocaleDateString('ar-SA') : '—');
+const fmt = d => (d ? _fmtDate(d) : '—');
 
 const statusChip = (s, map) => {
   const cfg = map[s] || { label: s || '—', color: 'default' };

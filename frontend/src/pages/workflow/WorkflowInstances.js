@@ -44,6 +44,7 @@ import {
 } from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import workflowService from '../../services/workflow.service';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 const INSTANCE_STATUS = {
@@ -58,7 +59,7 @@ const TAB_STATUSES = ['', 'running', 'completed', 'cancelled,suspended'];
 
 const fmtDate = d =>
   d
-    ? new Date(d).toLocaleDateString('ar-SA', {
+    ? _fmtDate(d, {
         year: 'numeric',
         month: 'short',
         day: 'numeric',

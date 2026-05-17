@@ -49,6 +49,7 @@ import {
   Refresh as RefreshIcon,
   BarChart as ChartIcon,
 } from '@mui/icons-material';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 import {
   clinicalResearchAPI,
   clinicalTrialsAPI,
@@ -59,7 +60,7 @@ import {
 const PRIMARY = '#1a237e';
 const BG = '#e8eaf6';
 
-const fmt = d => (d ? new Date(d).toLocaleDateString('ar-SA') : '—');
+const fmt = d => (d ? _fmtDate(d) : '—');
 const chip = (s, map) => {
   const cfg = map[s] || { label: s || '—', color: 'default' };
   return <Chip size="small" label={cfg.label} color={cfg.color} />;

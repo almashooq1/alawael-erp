@@ -36,6 +36,7 @@ import {
   Star,
 } from '@mui/icons-material';
 import familySatisfactionService from '../../services/familySatisfaction.service';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const npsColors = { promoter: 'success', passive: 'warning', detractor: 'error' };
 const npsLabels = { promoter: 'مروّج', passive: 'محايد', detractor: 'منتقد' };
@@ -340,9 +341,7 @@ export default function FamilySatisfactionDashboard() {
                             </Typography>
                           )}
                         </TableCell>
-                        <TableCell>
-                          {new Date(resp.createdAt).toLocaleDateString('ar-SA')}
-                        </TableCell>
+                        <TableCell>{_fmtDate(resp.createdAt)}</TableCell>
                       </TableRow>
                     ))
                   )}

@@ -64,6 +64,7 @@ import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients, brandColors, statusColors } from '../../theme/palette';
 import beneficiaryService from '../../services/beneficiaryService';
 import logger from '../../utils/logger';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const STATUS_LABELS = {
   active: 'نشط',
@@ -604,7 +605,7 @@ export default function BeneficiaryProfilePage() {
                 <InfoField label="الجنس" value={GENDER_LABELS[b.gender] || b.gender} />
                 <InfoField
                   label="تاريخ الميلاد"
-                  value={b.dateOfBirth ? new Date(b.dateOfBirth).toLocaleDateString('ar-SA') : null}
+                  value={b.dateOfBirth ? _fmtDate(b.dateOfBirth) : null}
                 />
                 <InfoField label="العمر" value={age ? `${age} سنة` : null} />
                 <InfoField label="رقم الهوية" value={b.nationalId} />
@@ -703,11 +704,7 @@ export default function BeneficiaryProfilePage() {
                 <InfoField label="الوصف" value={b.disability?.description} />
                 <InfoField
                   label="تاريخ التشخيص"
-                  value={
-                    b.disability?.diagnosisDate
-                      ? new Date(b.disability.diagnosisDate).toLocaleDateString('ar-SA')
-                      : null
-                  }
+                  value={b.disability?.diagnosisDate ? _fmtDate(b.disability.diagnosisDate) : null}
                 />
                 <InfoField label="جهة التشخيص" value={b.disability?.diagnosedBy} />
               </Paper>
@@ -1271,7 +1268,7 @@ export default function BeneficiaryProfilePage() {
                     label="انتهاء التغطية"
                     value={
                       b.insuranceInfo?.coverageEndDate
-                        ? new Date(b.insuranceInfo.coverageEndDate).toLocaleDateString('ar-SA')
+                        ? _fmtDate(b.insuranceInfo.coverageEndDate)
                         : null
                     }
                   />
@@ -1409,8 +1406,7 @@ export default function BeneficiaryProfilePage() {
                         variant="caption"
                         sx={{ color: 'text.secondary', fontWeight: 500 }}
                       >
-                        {doc.category || ''} —{' '}
-                        {doc.uploadDate ? new Date(doc.uploadDate).toLocaleDateString('ar-SA') : ''}
+                        {doc.category || ''} — {doc.uploadDate ? _fmtDate(doc.uploadDate) : ''}
                       </Typography>
                     </Box>
                   </Paper>

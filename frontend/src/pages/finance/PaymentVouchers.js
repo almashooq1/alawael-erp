@@ -39,6 +39,7 @@ import {
   TrendingDown,
 } from '@mui/icons-material';
 import { surfaceColors, neutralColors, brandColors } from 'theme/palette';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const API = process.env.REACT_APP_API_URL || '/api';
 
@@ -315,7 +316,7 @@ const PaymentVouchers = () => {
                       }}
                     />
                   </TableCell>
-                  <TableCell>{new Date(v.date).toLocaleDateString('ar-SA')}</TableCell>
+                  <TableCell>{_fmtDate(v.date)}</TableCell>
                   <TableCell>
                     <Box>
                       <Typography variant="body2" fontWeight={600}>

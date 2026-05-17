@@ -46,6 +46,7 @@ import {
   Star as StarIcon,
 } from '@mui/icons-material';
 import guardianApi from '../../services/guardianPortal.service';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 export default function GuardianPortalDashboard() {
   const [tab, setTab] = useState(0);
@@ -301,9 +302,7 @@ export default function GuardianPortalDashboard() {
                         <TableCell>
                           {p.amount !== null ? `${p.amount.toLocaleString()} ر.س` : '—'}
                         </TableCell>
-                        <TableCell>
-                          {p.dueDate ? new Date(p.dueDate).toLocaleDateString('ar-SA') : '—'}
-                        </TableCell>
+                        <TableCell>{p.dueDate ? _fmtDate(p.dueDate) : '—'}</TableCell>
                         <TableCell>
                           <Chip
                             label={
@@ -358,7 +357,7 @@ export default function GuardianPortalDashboard() {
                       </ListItemAvatar>
                       <ListItemText
                         primary={a.title || a.type || 'موعد'}
-                        secondary={`${a.date ? new Date(a.date).toLocaleDateString('ar-SA') : '—'} — ${a.time || ''} — ${a.status === 'confirmed' ? 'مؤكد' : a.status === 'pending' ? 'بانتظار التأكيد' : a.status || ''}`}
+                        secondary={`${a.date ? _fmtDate(a.date) : '—'} — ${a.time || ''} — ${a.status === 'confirmed' ? 'مؤكد' : a.status === 'pending' ? 'بانتظار التأكيد' : a.status || ''}`}
                       />
                       <Chip
                         label={a.status === 'confirmed' ? 'مؤكد' : 'معلق'}
@@ -405,7 +404,7 @@ export default function GuardianPortalDashboard() {
                             </Typography>
                             <br />
                             <Typography component="span" variant="caption" color="text.secondary">
-                              {m.createdAt ? new Date(m.createdAt).toLocaleDateString('ar-SA') : ''}
+                              {m.createdAt ? _fmtDate(m.createdAt) : ''}
                             </Typography>
                           </>
                         }

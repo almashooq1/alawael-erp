@@ -40,6 +40,7 @@ import {
 } from '@mui/icons-material';
 import { certificatesService, verificationService } from '../../services/blockchainService';
 import logger from '../../utils/logger';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const STATUS_COLORS = {
   draft: 'default',
@@ -60,7 +61,7 @@ const STATUS_LABELS = {
 function fmt(d) {
   if (!d) return '—';
   try {
-    return new Date(d).toLocaleDateString('ar-SA-u-ca-gregory');
+    return _fmtDate(d);
   } catch {
     return String(d);
   }

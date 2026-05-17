@@ -37,6 +37,7 @@ import {
   Star,
 } from '@mui/icons-material';
 import disabilityAuthorityService from '../../services/disabilityAuthority.service';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const reportStatusLabels = {
   draft: 'مسودة',
@@ -433,13 +434,9 @@ export default function DisabilityAuthorityDashboard() {
                                 : r.reportType}
                         </TableCell>
                         <TableCell>
-                          {r.period?.startDate
-                            ? new Date(r.period.startDate).toLocaleDateString('ar-SA')
-                            : '—'}
+                          {r.period?.startDate ? _fmtDate(r.period.startDate) : '—'}
                           {' — '}
-                          {r.period?.endDate
-                            ? new Date(r.period.endDate).toLocaleDateString('ar-SA')
-                            : '—'}
+                          {r.period?.endDate ? _fmtDate(r.period.endDate) : '—'}
                         </TableCell>
                         <TableCell align="center">
                           {r.data?.beneficiaryStats?.totalActive || 0}
@@ -454,7 +451,7 @@ export default function DisabilityAuthorityDashboard() {
                             size="small"
                           />
                         </TableCell>
-                        <TableCell>{new Date(r.createdAt).toLocaleDateString('ar-SA')}</TableCell>
+                        <TableCell>{_fmtDate(r.createdAt)}</TableCell>
                       </TableRow>
                     ))
                   )}
@@ -567,9 +564,7 @@ export default function DisabilityAuthorityDashboard() {
                           تقييم {assess.assessmentType || ''}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          {assess.assessmentDate
-                            ? new Date(assess.assessmentDate).toLocaleDateString('ar-SA')
-                            : '—'}
+                          {assess.assessmentDate ? _fmtDate(assess.assessmentDate) : '—'}
                         </Typography>
                       </Box>
                       <Box textAlign="center">

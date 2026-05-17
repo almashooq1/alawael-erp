@@ -22,59 +22,59 @@ const safe =
 // ═══════════════════════════════════════════
 export const inventoryService = {
   getProducts: safe(async (params = {}) => {
-    const r = await apiClient.get('/inventory/products', { params });
+    const r = await apiClient.get('/api/v1/inventory/products', { params });
     return r.data;
   }),
   getProduct: safe(async id => {
-    const r = await apiClient.get(`/inventory/products/${id}`);
+    const r = await apiClient.get(`/api/v1/inventory/products/${id}`);
     return r.data;
   }),
   createProduct: safe(async data => {
-    const r = await apiClient.post('/inventory/products', data);
+    const r = await apiClient.post('/api/v1/inventory/products', data);
     return r.data;
   }),
   updateProduct: safe(async (id, data) => {
-    const r = await apiClient.put(`/inventory/products/${id}`, data);
+    const r = await apiClient.put(`/api/v1/inventory/products/${id}`, data);
     return r.data;
   }),
   deleteProduct: safe(async id => {
-    const r = await apiClient.delete(`/inventory/products/${id}`);
+    const r = await apiClient.delete(`/api/v1/inventory/products/${id}`);
     return r.data;
   }),
 
   getCategories: safe(async () => {
-    const r = await apiClient.get('/inventory/categories');
+    const r = await apiClient.get('/api/v1/inventory/categories');
     return r.data;
   }),
   createCategory: safe(async data => {
-    const r = await apiClient.post('/inventory/categories', data);
+    const r = await apiClient.post('/api/v1/inventory/categories', data);
     return r.data;
   }),
 
   getWarehouses: safe(async () => {
-    const r = await apiClient.get('/inventory/warehouses');
+    const r = await apiClient.get('/api/v1/inventory/warehouses');
     return r.data;
   }),
   createWarehouse: safe(async data => {
-    const r = await apiClient.post('/inventory/warehouses', data);
+    const r = await apiClient.post('/api/v1/inventory/warehouses', data);
     return r.data;
   }),
 
   getMovements: safe(async (params = {}) => {
-    const r = await apiClient.get('/inventory/movements', { params });
+    const r = await apiClient.get('/api/v1/inventory/movements', { params });
     return r.data;
   }),
   createMovement: safe(async data => {
-    const r = await apiClient.post('/inventory/movements', data);
+    const r = await apiClient.post('/api/v1/inventory/movements', data);
     return r.data;
   }),
 
   getStockAlerts: safe(async () => {
-    const r = await apiClient.get('/inventory/alerts');
+    const r = await apiClient.get('/api/v1/inventory/alerts');
     return r.data;
   }),
   getStats: safe(async () => {
-    const r = await apiClient.get('/inventory/stats');
+    const r = await apiClient.get('/api/v1/inventory/stats');
     return r.data;
   }),
 
@@ -88,54 +88,54 @@ export const inventoryService = {
 // ═══════════════════════════════════════════
 export const purchasingService = {
   getVendors: safe(async (params = {}) => {
-    const r = await apiClient.get('/purchasing/vendors', { params });
+    const r = await apiClient.get('/api/v1/purchasing/vendors', { params });
     return r.data;
   }),
   getVendor: safe(async id => {
-    const r = await apiClient.get(`/purchasing/vendors/${id}`);
+    const r = await apiClient.get(`/api/v1/purchasing/vendors/${id}`);
     return r.data;
   }),
   createVendor: safe(async data => {
-    const r = await apiClient.post('/purchasing/vendors', data);
+    const r = await apiClient.post('/api/v1/purchasing/vendors', data);
     return r.data;
   }),
   updateVendor: safe(async (id, data) => {
-    const r = await apiClient.put(`/purchasing/vendors/${id}`, data);
+    const r = await apiClient.put(`/api/v1/purchasing/vendors/${id}`, data);
     return r.data;
   }),
 
   getPurchaseRequests: safe(async (params = {}) => {
-    const r = await apiClient.get('/purchasing/requests', { params });
+    const r = await apiClient.get('/api/v1/purchasing/requests', { params });
     return r.data;
   }),
   createPurchaseRequest: safe(async data => {
-    const r = await apiClient.post('/purchasing/requests', data);
+    const r = await apiClient.post('/api/v1/purchasing/requests', data);
     return r.data;
   }),
   approvePR: safe(async id => {
-    const r = await apiClient.patch(`/purchasing/requests/${id}/approve`);
+    const r = await apiClient.patch(`/api/v1/purchasing/requests/${id}/approve`);
     return r.data;
   }),
 
   getPurchaseOrders: safe(async (params = {}) => {
-    const r = await apiClient.get('/purchasing/orders', { params });
+    const r = await apiClient.get('/api/v1/purchasing/orders', { params });
     return r.data;
   }),
   createPurchaseOrder: safe(async data => {
-    const r = await apiClient.post('/purchasing/orders', data);
+    const r = await apiClient.post('/api/v1/purchasing/orders', data);
     return r.data;
   }),
   approvePO: safe(async id => {
-    const r = await apiClient.patch(`/purchasing/orders/${id}/approve`);
+    const r = await apiClient.patch(`/api/v1/purchasing/orders/${id}/approve`);
     return r.data;
   }),
   receivePO: safe(async (id, data) => {
-    const r = await apiClient.patch(`/purchasing/orders/${id}/receive`, data);
+    const r = await apiClient.patch(`/api/v1/purchasing/orders/${id}/receive`, data);
     return r.data;
   }),
 
   getStats: safe(async () => {
-    const r = await apiClient.get('/purchasing/stats');
+    const r = await apiClient.get('/api/v1/purchasing/stats');
     return r.data;
   }),
 
@@ -149,37 +149,37 @@ export const purchasingService = {
 // ═══════════════════════════════════════════
 export const equipmentService = {
   getAll: safe(async (params = {}) => {
-    const r = await apiClient.get('/equipment', { params });
+    const r = await apiClient.get('/api/v1/equipment', { params });
     return r.data;
   }),
   getById: safe(async id => {
-    const r = await apiClient.get(`/equipment/${id}`);
+    const r = await apiClient.get(`/api/v1/equipment/${id}`);
     return r.data;
   }),
   create: safe(async data => {
-    const r = await apiClient.post('/equipment', data);
+    const r = await apiClient.post('/api/v1/equipment', data);
     return r.data;
   }),
   update: safe(async (id, data) => {
-    const r = await apiClient.put(`/equipment/${id}`, data);
+    const r = await apiClient.put(`/api/v1/equipment/${id}`, data);
     return r.data;
   }),
   remove: safe(async id => {
-    const r = await apiClient.delete(`/equipment/${id}`);
+    const r = await apiClient.delete(`/api/v1/equipment/${id}`);
     return r.data;
   }),
 
   getMaintenance: safe(async id => {
-    const r = await apiClient.get(`/equipment/${id}/maintenance`);
+    const r = await apiClient.get(`/api/v1/equipment/${id}/maintenance`);
     return r.data;
   }),
   scheduleMaintenance: safe(async (id, data) => {
-    const r = await apiClient.post(`/equipment/${id}/maintenance`, data);
+    const r = await apiClient.post(`/api/v1/equipment/${id}/maintenance`, data);
     return r.data;
   }),
 
   getStats: safe(async () => {
-    const r = await apiClient.get('/equipment/stats');
+    const r = await apiClient.get('/api/v1/equipment/stats');
     return r.data;
   }),
 
@@ -192,43 +192,43 @@ export const equipmentService = {
 // ═══════════════════════════════════════════
 export const auditService = {
   getPlans: safe(async (params = {}) => {
-    const r = await apiClient.get('/internal-audit/audit-plans', { params });
+    const r = await apiClient.get('/api/v1/internal-audit/audit-plans', { params });
     return r.data;
   }),
   createPlan: safe(async data => {
-    const r = await apiClient.post('/internal-audit/audit-plans', data);
+    const r = await apiClient.post('/api/v1/internal-audit/audit-plans', data);
     return r.data;
   }),
   updatePlan: safe(async (id, data) => {
-    const r = await apiClient.put(`/internal-audit/audit-plans/${id}`, data);
+    const r = await apiClient.put(`/api/v1/internal-audit/audit-plans/${id}`, data);
     return r.data;
   }),
 
   getNCRs: safe(async (params = {}) => {
-    const r = await apiClient.get('/internal-audit/ncrs', { params });
+    const r = await apiClient.get('/api/v1/internal-audit/ncrs', { params });
     return r.data;
   }),
   createNCR: safe(async data => {
-    const r = await apiClient.post('/internal-audit/ncrs', data);
+    const r = await apiClient.post('/api/v1/internal-audit/ncrs', data);
     return r.data;
   }),
 
   getCAPAs: safe(async (params = {}) => {
-    const r = await apiClient.get('/internal-audit/capas', { params });
+    const r = await apiClient.get('/api/v1/internal-audit/capas', { params });
     return r.data;
   }),
   createCAPA: safe(async data => {
-    const r = await apiClient.post('/internal-audit/capas', data);
+    const r = await apiClient.post('/api/v1/internal-audit/capas', data);
     return r.data;
   }),
 
   getSurpriseAudits: safe(async () => {
-    const r = await apiClient.get('/internal-audit/surprise-audits');
+    const r = await apiClient.get('/api/v1/internal-audit/surprise-audits');
     return r.data;
   }),
 
   getStats: safe(async () => {
-    const r = await apiClient.get('/internal-audit/stats');
+    const r = await apiClient.get('/api/v1/internal-audit/stats');
     return r.data;
   }),
 
@@ -242,53 +242,53 @@ export const auditService = {
 // ═══════════════════════════════════════════
 export const incidentService = {
   getAll: safe(async (params = {}) => {
-    const r = await apiClient.get('/incidents', { params });
+    const r = await apiClient.get('/api/v1/incidents', { params });
     return r.data;
   }),
   getById: safe(async id => {
-    const r = await apiClient.get(`/incidents/${id}`);
+    const r = await apiClient.get(`/api/v1/incidents/${id}`);
     return r.data;
   }),
   create: safe(async data => {
-    const r = await apiClient.post('/incidents', data);
+    const r = await apiClient.post('/api/v1/incidents', data);
     return r.data;
   }),
   update: safe(async (id, data) => {
-    const r = await apiClient.put(`/incidents/${id}`, data);
+    const r = await apiClient.put(`/api/v1/incidents/${id}`, data);
     return r.data;
   }),
   remove: safe(async id => {
-    const r = await apiClient.delete(`/incidents/${id}`);
+    const r = await apiClient.delete(`/api/v1/incidents/${id}`);
     return r.data;
   }),
 
   updateStatus: safe(async (id, status) => {
-    const r = await apiClient.patch(`/incidents/${id}/status`, { status });
+    const r = await apiClient.patch(`/api/v1/incidents/${id}/status`, { status });
     return r.data;
   }),
   assign: safe(async (id, data) => {
-    const r = await apiClient.post(`/incidents/${id}/assign`, data);
+    const r = await apiClient.post(`/api/v1/incidents/${id}/assign`, data);
     return r.data;
   }),
   escalate: safe(async id => {
-    const r = await apiClient.post(`/incidents/${id}/escalate`);
+    const r = await apiClient.post(`/api/v1/incidents/${id}/escalate`);
     return r.data;
   }),
   resolve: safe(async (id, data) => {
-    const r = await apiClient.post(`/incidents/${id}/resolve`, data);
+    const r = await apiClient.post(`/api/v1/incidents/${id}/resolve`, data);
     return r.data;
   }),
   close: safe(async id => {
-    const r = await apiClient.post(`/incidents/${id}/close`);
+    const r = await apiClient.post(`/api/v1/incidents/${id}/close`);
     return r.data;
   }),
 
   getStatistics: safe(async () => {
-    const r = await apiClient.get('/incidents/statistics');
+    const r = await apiClient.get('/api/v1/incidents/statistics');
     return r.data;
   }),
   getCritical: safe(async () => {
-    const r = await apiClient.get('/incidents/critical');
+    const r = await apiClient.get('/api/v1/incidents/critical');
     return r.data;
   }),
 
@@ -301,32 +301,32 @@ export const incidentService = {
 // ═══════════════════════════════════════════
 export const licenseService = {
   getAll: safe(async (params = {}) => {
-    const r = await apiClient.get('/licenses', { params });
+    const r = await apiClient.get('/api/v1/licenses', { params });
     return r.data;
   }),
   getById: safe(async id => {
-    const r = await apiClient.get(`/licenses/${id}`);
+    const r = await apiClient.get(`/api/v1/licenses/${id}`);
     return r.data;
   }),
   create: safe(async data => {
-    const r = await apiClient.post('/licenses', data);
+    const r = await apiClient.post('/api/v1/licenses', data);
     return r.data;
   }),
   update: safe(async (id, data) => {
-    const r = await apiClient.put(`/licenses/${id}`, data);
+    const r = await apiClient.put(`/api/v1/licenses/${id}`, data);
     return r.data;
   }),
   renew: safe(async (id, data) => {
-    const r = await apiClient.patch(`/licenses/${id}/renew`, data);
+    const r = await apiClient.patch(`/api/v1/licenses/${id}/renew`, data);
     return r.data;
   }),
 
   getExpiring: safe(async (days = 30) => {
-    const r = await apiClient.get('/licenses', { params: { expiringWithin: days } });
+    const r = await apiClient.get('/api/v1/licenses', { params: { expiringWithin: days } });
     return r.data;
   }),
   getStats: safe(async () => {
-    const r = await apiClient.get('/licenses/stats');
+    const r = await apiClient.get('/api/v1/licenses/stats');
     return r.data;
   }),
 

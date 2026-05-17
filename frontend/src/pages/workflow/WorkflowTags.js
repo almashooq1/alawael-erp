@@ -35,6 +35,7 @@ import {
 import { ArrowBack, Refresh, Add, Label, Edit, Delete, LocalOffer, Tag } from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import workflowService from '../../services/workflow.service';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const PRESET_COLORS = [
   '#ef4444',
@@ -293,7 +294,7 @@ export default function WorkflowTags() {
                     </TableCell>
                     <TableCell>
                       <Typography variant="caption">
-                        {tag.createdAt ? new Date(tag.createdAt).toLocaleDateString('ar') : '—'}
+                        {tag.createdAt ? _fmtDate(tag.createdAt) : '—'}
                       </Typography>
                     </TableCell>
                     <TableCell>

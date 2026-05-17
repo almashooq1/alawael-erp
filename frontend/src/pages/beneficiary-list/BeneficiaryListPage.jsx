@@ -50,6 +50,7 @@ import {
 } from '@mui/icons-material';
 
 import { coreAPI } from '../../services/ddd';
+import { formatDate } from 'utils/dateUtils';
 
 /* ── Status map ── */
 const STATUS_MAP = {
@@ -366,7 +367,7 @@ export default function BeneficiaryListPage() {
                       </TableCell>
                       <TableCell>
                         <Typography variant="caption" color="text.secondary">
-                          {b.updatedAt ? new Date(b.updatedAt).toLocaleDateString('ar-SA') : '-'}
+                          {formatDate(b.updatedAt)}
                         </Typography>
                       </TableCell>
                       <TableCell align="center">

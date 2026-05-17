@@ -9,7 +9,7 @@
 import apiClient from './api.client';
 import _logger from 'utils/logger';
 
-const BASE = '/cdss';
+const BASE = '/api/v1/cdss';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 

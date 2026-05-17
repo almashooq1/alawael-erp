@@ -66,6 +66,9 @@ const SystemSettingsPage = lazyWithRetry(() => import('../pages/SystemAdmin/Syst
 // User Management System — نظام إدارة المستخدمين المتقدم
 const UserManagement = lazyWithRetry(() => import('../pages/UserManagement'));
 
+// Access Control Dashboard — لوحة تحكم الصلاحيات والوصول
+const AccessControlDashboard = lazyWithRetry(() => import('../pages/AccessControl'));
+
 // Branch Governance — حوكمة الفروع
 const BranchLicenseExpiryAdmin = lazyWithRetry(
   () => import('../pages/branches/BranchLicenseExpiryAdmin')
@@ -193,6 +196,24 @@ export default function AdminRoutes() {
         element={
           <RoleGuard allowedRoles={['admin', 'super_admin', 'hr', 'hr_manager', 'manager']}>
             <UserManagement />
+          </RoleGuard>
+        }
+      />
+
+      {/* Access Control Dashboard — لوحة تحكم الصلاحيات والوصول */}
+      <Route
+        path="access-control"
+        element={
+          <RoleGuard allowedRoles={['admin', 'super_admin', 'it_admin']}>
+            <AccessControlDashboard />
+          </RoleGuard>
+        }
+      />
+      <Route
+        path="admin-portal/access-control"
+        element={
+          <RoleGuard allowedRoles={['admin', 'super_admin', 'it_admin']}>
+            <AccessControlDashboard />
           </RoleGuard>
         }
       />

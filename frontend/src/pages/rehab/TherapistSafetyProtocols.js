@@ -49,6 +49,7 @@ import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const CATEGORIES = [
   { id: 'fall-prevention', label: 'الوقاية من السقوط', color: '#3b82f6', icon: '🛡️' },
@@ -433,7 +434,7 @@ const TherapistSafetyProtocols = () => {
                       {p.lastReview && (
                         <Chip
                           icon={<ReviewIcon sx={{ fontSize: '14px !important' }} />}
-                          label={`آخر مراجعة: ${new Date(p.lastReview).toLocaleDateString('ar-SA')}`}
+                          label={`آخر مراجعة: ${_fmtDate(p.lastReview)}`}
                           size="small"
                           variant="outlined"
                           sx={{ fontSize: '0.65rem' }}
@@ -683,7 +684,7 @@ const TherapistSafetyProtocols = () => {
                         </ListItemIcon>
                         <ListItemText
                           primary={inc.description}
-                          secondary={`${inc.action || 'لا يوجد إجراء'} • ${inc.date ? new Date(inc.date).toLocaleDateString('ar-SA') : ''}`}
+                          secondary={`${inc.action || 'لا يوجد إجراء'} • ${inc.date ? _fmtDate(inc.date) : ''}`}
                         />
                       </ListItem>
                     ))}

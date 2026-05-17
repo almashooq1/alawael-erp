@@ -3,7 +3,7 @@
  */
 import apiClient from './api.client';
 
-const BASE = '/api/internal-audit';
+const BASE = '/api/v1/internal-audit';
 
 /* ── Dashboard ────────────────────────── */
 export const getDashboard = async () => {

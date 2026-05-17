@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { formatDateTime as _fmtDT } from 'utils/dateUtils';
 import {
   Box,
   Container,
@@ -397,9 +398,7 @@ const AdminAuditLogs = () => {
                     </Typography>
                   </TableCell>
                   <TableCell>
-                    <Typography variant="caption">
-                      {new Date(log.timestamp).toLocaleString('ar-SA')}
-                    </Typography>
+                    <Typography variant="caption">{_fmtDT(log.timestamp)}</Typography>
                   </TableCell>
                   <TableCell sx={{ textAlign: 'center' }}>
                     <Button
@@ -482,9 +481,7 @@ const AdminAuditLogs = () => {
                 >
                   الوقت:
                 </Typography>
-                <Typography variant="body2">
-                  {new Date(selectedLog.timestamp).toLocaleString('ar-SA')}
-                </Typography>
+                <Typography variant="body2">{_fmtDT(selectedLog.timestamp)}</Typography>
               </Box>
 
               {selectedLog.status && (

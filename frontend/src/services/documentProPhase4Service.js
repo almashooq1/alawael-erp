@@ -5,7 +5,7 @@
  */
 import apiClient from './api.client';
 
-const BASE = '/api/documents-pro-v4';
+const BASE = '/api/v1/documents-pro-v4';
 
 // ── ربط المستندات ──────────────────────────────────
 export const linkingApi = {

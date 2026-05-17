@@ -5,7 +5,7 @@ import apiClient from './api';
 
 export const getEventsDashboard = async () => {
   try {
-    const { data } = await apiClient.get('/api/events-management/dashboard');
+    const { data } = await apiClient.get('/api/v1/events-management/dashboard');
     return data.data;
   } catch {
     return {
@@ -25,29 +25,29 @@ export const getEventsDashboard = async () => {
 
 export const getEvents = async params => {
   try {
-    const { data } = await apiClient.get('/api/events-management', { params });
+    const { data } = await apiClient.get('/api/v1/events-management', { params });
     return data.data;
   } catch {
     return [];
   }
 };
 export const createEvent = async body => {
-  const { data } = await apiClient.post('/api/events-management', body);
+  const { data } = await apiClient.post('/api/v1/events-management', body);
   return data.data;
 };
 export const updateEvent = async (id, body) => {
-  const { data } = await apiClient.put(`/api/events-management/${id}`, body);
+  const { data } = await apiClient.put(`/api/v1/events-management/${id}`, body);
   return data.data;
 };
 export const deleteEvent = async id => {
-  const { data } = await apiClient.delete(`/api/events-management/${id}`);
+  const { data } = await apiClient.delete(`/api/v1/events-management/${id}`);
   return data.data;
 };
 export const getRegistrations = async eventId => {
-  const { data } = await apiClient.get(`/api/events-management/${eventId}/registrations`);
+  const { data } = await apiClient.get(`/api/v1/events-management/${eventId}/registrations`);
   return data.data;
 };
 export const createRegistration = async (eventId, body) => {
-  const { data } = await apiClient.post(`/api/events-management/${eventId}/registrations`, body);
+  const { data } = await apiClient.post(`/api/v1/events-management/${eventId}/registrations`, body);
   return data.data;
 };

@@ -40,6 +40,7 @@ import {
   Lock as LockedIcon,
 } from '@mui/icons-material';
 import { getRoleColor, getRoleLabel } from './constants';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const COLUMNS = [
   { id: 'fullName', label: 'المستخدم', sortable: true },
@@ -55,7 +56,7 @@ const COLUMNS = [
 const formatDate = date => {
   if (!date) return '—';
   try {
-    return new Date(date).toLocaleDateString('ar-SA', {
+    return _fmtDate(date, {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
@@ -68,7 +69,7 @@ const formatDate = date => {
 const formatDateTime = date => {
   if (!date) return 'لم يسجل دخول';
   try {
-    return new Date(date).toLocaleDateString('ar-SA', {
+    return _fmtDate(date, {
       year: 'numeric',
       month: 'short',
       day: 'numeric',

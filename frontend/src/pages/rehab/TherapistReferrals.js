@@ -40,6 +40,7 @@ import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const PRIORITIES = [
   { value: 'low', label: 'منخفضة', color: '#6b7280' },
@@ -443,7 +444,7 @@ const TherapistReferrals = () => {
                           color="text.secondary"
                           sx={{ alignSelf: 'center', ml: 1 }}
                         >
-                          {r.createdAt ? new Date(r.createdAt).toLocaleDateString('ar-SA') : ''}
+                          {r.createdAt ? _fmtDate(r.createdAt) : ''}
                         </Typography>
                       </Box>
                       <Box>

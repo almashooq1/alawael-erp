@@ -45,6 +45,7 @@ import {
   TrendingUp as TrendUpIcon,
 } from '@mui/icons-material';
 import * as dtService from '../../services/enterpriseUltra.service';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const statusColors = {
   draft: 'default',
@@ -410,9 +411,7 @@ export default function DigitalTransformationPage() {
                         <Typography variant="caption">{p.progress || 0}%</Typography>
                       </Stack>
                     </TableCell>
-                    <TableCell>
-                      {p.deadline ? new Date(p.deadline).toLocaleDateString('ar-SA') : '—'}
-                    </TableCell>
+                    <TableCell>{p.deadline ? _fmtDate(p.deadline) : '—'}</TableCell>
                   </TableRow>
                 ))}
                 {!projects.length && (

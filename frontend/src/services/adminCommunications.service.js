@@ -6,7 +6,7 @@
 
 import api from './api.client';
 
-const BASE = '/admin-communications';
+const BASE = '/api/v1/admin-communications';
 
 const adminCommunicationsService = {
   // ==================== ENUMS ====================

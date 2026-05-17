@@ -75,11 +75,11 @@ import {
 import FormDesigner from '../../components/documents/FormDesigner';
 import ApprovalChainVisualizer from '../../components/documents/ApprovalChainVisualizer';
 import logger from '../../utils/logger';
+import { formatDate as _fmtDate, formatDateTime as _fmtDT } from 'utils/dateUtils';
 
 const cardSx = { borderRadius: 3, transition: 'box-shadow .2s', '&:hover': { boxShadow: 6 } };
 const statCard = c => ({ ...cardSx, borderTop: `4px solid ${c}`, textAlign: 'center' });
-const _fmtDate = d => (d ? new Date(d).toLocaleDateString('ar-SA') : '—');
-const fmtDateTime = d => (d ? new Date(d).toLocaleString('ar-SA') : '—');
+const fmtDateTime = d => (d ? _fmtDT(d) : '—');
 const fmtSize = b => {
   if (!b) return '0';
   if (b < 1024) return `${b} B`;

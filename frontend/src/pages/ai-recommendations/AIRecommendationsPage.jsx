@@ -48,15 +48,18 @@ import {
   Person as PersonIcon,
   AutoAwesome as SparkIcon,
   Pending as PendingIcon,
+  PriorityHigh as PriorityIcon,
+  Visibility as ViewIcon,
 } from '@mui/icons-material';
 import { aiRecommendationsAPI } from '../../services/ddd';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 /* ── colour palette ───────────────────────────────────────── */
 const PRIMARY = '#7b1fa2';
 const BG = '#f8f4fc';
 
 /* ── helpers ──────────────────────────────────────────────── */
-const fmt = d => (d ? new Date(d).toLocaleDateString('ar-SA') : '—');
+const fmt = d => (d ? _fmtDate(d) : '—');
 
 const riskColor = level => {
   const map = { critical: 'error', high: 'warning', medium: 'info', low: 'success' };
@@ -115,6 +118,12 @@ export default function AIRecommendationsPage() {
   const [recs, setRecs] = useState([]);
   const [recsLoading, setRecsLoading] = useState(false);
   const [recsError, setRecsError] = useState(null);
+
+  /* ── therapist priorities state ── */
+  const [prioSearch, setPrioSearch] = useState('');
+  const [priorities, setPriorities] = useState([]);
+  const [prioLoading, setPrioLoading] = useState(false);
+  const [prioError, setPrioError] = useState(null);
 
   /* ── dismiss dialog ── */
   const [dismissTarget, setDismissTarget] = useState(null);
@@ -194,9 +203,26 @@ export default function AIRecommendationsPage() {
     }
   };
 
+  /* ── load therapist priorities ── */
+  const loadPriorities = async () => {
+    if (!prioSearch.trim()) return;
+    setPrioLoading(true);
+    setPrioError(null);
+    try {
+      const res = await aiRecommendationsAPI.getTherapistPriorities(prioSearch.trim());
+      const data = res?.data?.data || res?.data;
+      setPriorities(Array.isArray(data) ? data : data?.priorities || []);
+    } catch (e) {
+      setPrioError(e.message);
+    } finally {
+      setPrioLoading(false);
+    }
+  };
+
   /* ── accept recommendation ── */
   const handleAccept = async id => {
     try {
+      await aiRecommendationsAPI.markViewed(id).catch(() => {});
       await aiRecommendationsAPI.accept(id);
       toast('تم قبول التوصية');
       setRecs(prev => prev.map(r => (r._id === id ? { ...r, status: 'accepted' } : r)));
@@ -293,6 +319,7 @@ export default function AIRecommendationsPage() {
         <Tab icon={<ChartIcon />} iconPosition="start" label="لوحة المتابعة" />
         <Tab icon={<HighRiskIcon />} iconPosition="start" label="عاليو المخاطر" />
         <Tab icon={<SparkIcon />} iconPosition="start" label="التوصيات السريرية" />
+        <Tab icon={<PriorityIcon />} iconPosition="start" label="أولويات الأخصائي" />
       </Tabs>
 
       {/* ════════════════════════════════════════
@@ -671,6 +698,129 @@ export default function AIRecommendationsPage() {
               </Typography>
               <Typography variant="caption" color="text.disabled">
                 يمكنك نسخ معرف المستفيد من ملفه الشخصي
+              </Typography>
+            </Box>
+          )}
+        </Box>
+      )}
+
+      {/* ════════════════════════════════════════
+          TAB 3 — Therapist Priorities
+      ════════════════════════════════════════ */}
+      {tab === 3 && (
+        <Box>
+          <Card variant="outlined" sx={{ mb: 2 }}>
+            <CardContent sx={{ py: 1.5, '&:last-child': { pb: 1.5 } }}>
+              <Stack direction="row" spacing={1} alignItems="center">
+                <TextField
+                  size="small"
+                  placeholder="أدخل معرف الأخصائي لعرض أولويات اليوم..."
+                  value={prioSearch}
+                  onChange={e => setPrioSearch(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && loadPriorities()}
+                  sx={{ flexGrow: 1 }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <PersonIcon fontSize="small" />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+                <Button
+                  variant="contained"
+                  size="small"
+                  onClick={loadPriorities}
+                  sx={{ bgcolor: PRIMARY, '&:hover': { bgcolor: '#6a1b9a' } }}
+                  startIcon={<PriorityIcon />}
+                >
+                  عرض الأولويات
+                </Button>
+              </Stack>
+            </CardContent>
+          </Card>
+
+          {prioError && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {prioError}
+            </Alert>
+          )}
+          {prioLoading && <LinearProgress sx={{ mb: 2, borderRadius: 1 }} />}
+
+          {priorities.length > 0 && (
+            <Stack spacing={1.5}>
+              {priorities.map((item, i) => {
+                const urgency = item.urgency || item.priority || 'medium';
+                const urgencyColor =
+                  { urgent: '#d32f2f', high: '#f57c00', medium: '#1976d2', low: '#388e3c' }[
+                    urgency
+                  ] || '#616161';
+                const urgencyLabel =
+                  { urgent: 'عاجل', high: 'عالية', medium: 'متوسطة', low: 'منخفضة' }[urgency] ||
+                  urgency;
+                return (
+                  <Card
+                    key={item._id || i}
+                    variant="outlined"
+                    sx={{ borderRight: `4px solid ${urgencyColor}` }}
+                  >
+                    <CardContent sx={{ py: 1.5, '&:last-child': { pb: 1.5 } }}>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                        }}
+                      >
+                        <Box>
+                          <Typography variant="subtitle2" fontWeight="bold">
+                            {item.beneficiaryName || item.title || `مستفيد #${i + 1}`}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {item.actionRequired || item.description || '—'}
+                          </Typography>
+                        </Box>
+                        <Stack direction="row" spacing={1} alignItems="center">
+                          <Chip
+                            size="small"
+                            label={urgencyLabel}
+                            sx={{
+                              bgcolor: `${urgencyColor}18`,
+                              color: urgencyColor,
+                              fontWeight: 600,
+                            }}
+                          />
+                          {item.dueTime && (
+                            <Typography variant="caption" color="text.secondary">
+                              {fmt(item.dueTime)}
+                            </Typography>
+                          )}
+                        </Stack>
+                      </Box>
+                      {item.recommendation && (
+                        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                          {item.recommendation}
+                        </Typography>
+                      )}
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </Stack>
+          )}
+
+          {!prioLoading && priorities.length === 0 && prioSearch && (
+            <Box sx={{ textAlign: 'center', py: 6 }}>
+              <PriorityIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 1 }} />
+              <Typography color="text.secondary">لا توجد أولويات لهذا الأخصائي اليوم</Typography>
+            </Box>
+          )}
+
+          {!prioSearch && (
+            <Box sx={{ textAlign: 'center', py: 6 }}>
+              <ViewIcon sx={{ fontSize: 56, color: '#ce93d8', mb: 1 }} />
+              <Typography color="text.secondary" variant="h6">
+                أدخل معرف الأخصائي لعرض أولويات جلسات اليوم
               </Typography>
             </Box>
           )}

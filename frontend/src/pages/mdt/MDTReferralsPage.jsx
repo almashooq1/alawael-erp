@@ -45,6 +45,7 @@ import {
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { referralsService } from '../../services/mdtCoordinationService';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const STATUS_LABELS = {
   PENDING: 'معلق',
@@ -434,9 +435,7 @@ export default function MDTReferralsPage() {
                         {r.reason || '-'}
                       </Typography>
                     </TableCell>
-                    <TableCell>
-                      {r.createdAt ? new Date(r.createdAt).toLocaleDateString('ar') : '-'}
-                    </TableCell>
+                    <TableCell>{r.createdAt ? _fmtDate(r.createdAt) : '-'}</TableCell>
                     <TableCell onClick={e => e.stopPropagation()}>
                       <Tooltip title="عرض">
                         <IconButton size="small" onClick={() => openDetail(r)}>
@@ -680,9 +679,7 @@ export default function MDTReferralsPage() {
                     <Typography variant="caption" color="text.secondary">
                       تاريخ الإنشاء
                     </Typography>
-                    <Typography>
-                      {detail.createdAt ? new Date(detail.createdAt).toLocaleDateString('ar') : '-'}
-                    </Typography>
+                    <Typography>{detail.createdAt ? _fmtDate(detail.createdAt) : '-'}</Typography>
                   </Grid>
                   <Grid item xs={6}>
                     <Typography variant="caption" color="text.secondary">
@@ -738,7 +735,7 @@ export default function MDTReferralsPage() {
                             </Typography>
                             <Typography>
                               {detail.response.respondedAt
-                                ? new Date(detail.response.respondedAt).toLocaleDateString('ar')
+                                ? _fmtDate(detail.response.respondedAt)
                                 : '-'}
                             </Typography>
                           </Grid>

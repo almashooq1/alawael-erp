@@ -44,6 +44,7 @@ import {
   CheckCircle as AvailableIcon,
 } from '@mui/icons-material';
 import facilityService from '../../services/facility.service';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const DEMO_ROOMS = [
   {
@@ -489,7 +490,7 @@ export default function FacilityManagementPage() {
                       </Typography>
                     </TableCell>
                     <TableCell>{b.bookedBy}</TableCell>
-                    <TableCell>{new Date(b.date).toLocaleDateString('ar-SA')}</TableCell>
+                    <TableCell>{_fmtDate(b.date)}</TableCell>
                     <TableCell>
                       {b.startTime} — {b.endTime}
                     </TableCell>

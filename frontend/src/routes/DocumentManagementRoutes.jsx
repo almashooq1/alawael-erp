@@ -4,6 +4,9 @@
 import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
+// مركز الوثائق الموحد — نقطة الدخول الرئيسية الجديدة
+const DocumentCenter = lazyWithRetry(() => import('../pages/documents/DocumentCenter'));
+
 const DocumentsDashboard = lazyWithRetry(() => import('../pages/documents/DocumentsDashboard'));
 const DocumentsMgmt = lazyWithRetry(() => import('../pages/DocumentsMgmt'));
 const SmartDocumentsPage = lazyWithRetry(() => import('../pages/documents/SmartDocumentsPage'));
@@ -25,7 +28,12 @@ const DocumentsProPhase9 = lazyWithRetry(() => import('../pages/documents/Docume
 export default function DocumentManagementRoutes() {
   return (
     <>
-      <Route path="document-management" element={<DocumentsDashboard />} />
+      {/* ═══ مركز الوثائق الموحد — نقطة الدخول الرئيسية ═══ */}
+      <Route path="document-management" element={<DocumentCenter />} />
+      <Route path="document-management/center" element={<DocumentCenter />} />
+
+      {/* ═══ الصفحات الكلاسيكية (محتفظ بها للتوافق) ═══ */}
+      <Route path="document-management/dashboard" element={<DocumentsDashboard />} />
       <Route path="document-management/list" element={<DocumentsMgmt />} />
       <Route path="document-management/smart" element={<SmartDocumentsPage />} />
       <Route path="document-management/advanced" element={<DocumentAdvancedPage />} />

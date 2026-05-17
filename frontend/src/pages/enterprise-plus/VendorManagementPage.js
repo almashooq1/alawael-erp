@@ -46,6 +46,7 @@ import {
 } from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import * as svc from '../../services/enterpriseProPlus.service';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const VENDOR_STATUSES = {
   pending: 'معلق',
@@ -376,8 +377,7 @@ export default function VendorManagementPage() {
                       </Typography>
                     )}
                     <Typography variant="body2">
-                      الموعد النهائي:{' '}
-                      {r.deadline ? new Date(r.deadline).toLocaleDateString('ar-SA') : '-'}
+                      الموعد النهائي: {r.deadline ? _fmtDate(r.deadline) : '-'}
                     </Typography>
                     <Typography variant="body2">عدد العروض: {r.responses?.length || 0}</Typography>
                     <Box sx={{ mt: 1.5, display: 'flex', gap: 1 }}>
@@ -539,9 +539,7 @@ export default function VendorManagementPage() {
                     <TableCell>
                       {po.totalAmount ? `${po.totalAmount.toLocaleString()} ر.س` : '-'}
                     </TableCell>
-                    <TableCell>
-                      {po.createdAt ? new Date(po.createdAt).toLocaleDateString('ar-SA') : '-'}
-                    </TableCell>
+                    <TableCell>{po.createdAt ? _fmtDate(po.createdAt) : '-'}</TableCell>
                     <TableCell>
                       <Chip
                         size="small"

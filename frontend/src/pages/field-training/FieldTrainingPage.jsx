@@ -56,6 +56,7 @@ import {
   Star as EvalIcon,
 } from '@mui/icons-material';
 import { fieldTrainingAPI } from '../../services/ddd';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 const PROGRAM_TYPES = [
@@ -146,7 +147,7 @@ const INITIAL_EVAL_FORM = {
   recommendations: '',
 };
 
-const fmtDate = d => (d ? new Date(d).toLocaleDateString('ar-SA') : '—');
+const fmtDate = d => (d ? _fmtDate(d) : '—');
 
 // ── KPI Card ──────────────────────────────────────────────────────────────────
 function KpiCard({ label, value, icon, color, loading: busy }) {

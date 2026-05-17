@@ -44,6 +44,7 @@ import { gradients } from 'theme/palette';
 import { useAuth } from 'contexts/AuthContext';
 import ConfirmDialog, { useConfirmDialog } from 'components/common/ConfirmDialog';
 import { useSnackbar } from '../../contexts/SnackbarContext';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const AdminNotifications = () => {
   const showSnackbar = useSnackbar();
@@ -310,9 +311,7 @@ const AdminNotifications = () => {
                     />
                   </TableCell>
                   <TableCell>
-                    <Typography variant="caption">
-                      {new Date(notification.sendDate).toLocaleDateString('ar-SA')}
-                    </Typography>
+                    <Typography variant="caption">{_fmtDate(notification.sendDate)}</Typography>
                   </TableCell>
                   <TableCell sx={{ textAlign: 'center' }}>
                     <Tooltip title="تعديل">

@@ -49,6 +49,7 @@ import {
 } from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients } from '../../theme/palette';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 /* ═══ Helpers ════════════════════════════════════════════════════════════════ */
 const docTypeLabels = {
@@ -509,9 +510,7 @@ export default function AdminDecisions() {
                         <TableCell>
                           <Chip label={sc.label} color={sc.color} size="small" />
                         </TableCell>
-                        <TableCell>
-                          {d.createdAt ? new Date(d.createdAt).toLocaleDateString('ar-SA') : '—'}
-                        </TableCell>
+                        <TableCell>{d.createdAt ? _fmtDate(d.createdAt) : '—'}</TableCell>
                         <TableCell onClick={e => e.stopPropagation()}>
                           <IconButton size="small" onClick={e => openMenu(e, d)}>
                             <MoreVert />

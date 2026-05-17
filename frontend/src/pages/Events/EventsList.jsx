@@ -31,6 +31,7 @@ import {
 } from '@mui/material';
 import { Refresh, Add, Edit, Delete, Event as EventIcon } from '@mui/icons-material';
 import { getEvents, createEvent, updateEvent, deleteEvent } from '../../services/events.service';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const TYPE_LABELS = {
   conference: 'مؤتمر',
@@ -247,9 +248,7 @@ export default function EventsList() {
                     <Chip label={TYPE_LABELS[e.type] || e.type} size="small" variant="outlined" />
                   </TableCell>
                   <TableCell>{CAT_LABELS[e.category] || e.category}</TableCell>
-                  <TableCell>
-                    {e.startDate ? new Date(e.startDate).toLocaleDateString('ar-SA') : '—'}
-                  </TableCell>
+                  <TableCell>{e.startDate ? _fmtDate(e.startDate) : '—'}</TableCell>
                   <TableCell>
                     <Chip
                       label={STATUS_LABELS[e.status] || e.status}

@@ -100,6 +100,7 @@ import documentService from 'services/documentService';
 import logger from 'utils/logger';
 import { gradients, brandColors } from 'theme/palette';
 import { useSnackbar } from '../../contexts/SnackbarContext';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 /* ──── Constants ──── */
 const CATEGORY_COLORS = {
@@ -1623,7 +1624,7 @@ const Documents = () => {
                       </Box>
                       <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
                         {act.performedAt
-                          ? new Date(act.performedAt).toLocaleDateString('ar-SA', {
+                          ? _fmtDate(act.performedAt, {
                               year: 'numeric',
                               month: 'short',
                               day: 'numeric',

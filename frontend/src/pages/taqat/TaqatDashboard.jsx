@@ -33,6 +33,7 @@ import {
   HourglassEmpty,
 } from '@mui/icons-material';
 import taqatService from '../../services/taqat.service';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const applicationStatusLabels = {
   submitted: 'مقدّم',
@@ -352,7 +353,7 @@ export default function TaqatDashboard() {
                       <TableRow key={a._id} hover>
                         <TableCell>{a.jobSeeker?.personalInfo?.fullNameAr || '—'}</TableCell>
                         <TableCell>{a.jobOpportunity?.title || '—'}</TableCell>
-                        <TableCell>{new Date(a.createdAt).toLocaleDateString('ar-SA')}</TableCell>
+                        <TableCell>{_fmtDate(a.createdAt)}</TableCell>
                         <TableCell align="center">{a.matchScore || 0}%</TableCell>
                         <TableCell align="center">
                           <Chip

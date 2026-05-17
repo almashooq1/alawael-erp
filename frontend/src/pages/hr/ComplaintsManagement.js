@@ -31,6 +31,7 @@ import {
   CircularProgress,
 } from '@mui/material';
 import { Add as AddIcon, Visibility as ViewIcon } from '@mui/icons-material';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 import {
   getComplaints,
   createComplaint,
@@ -301,7 +302,7 @@ export default function ComplaintsManagement() {
                         size="small"
                       />
                     </TableCell>
-                    <TableCell>{new Date(c.createdAt).toLocaleDateString('ar-SA')}</TableCell>
+                    <TableCell>{_fmtDate(c.createdAt)}</TableCell>
                     <TableCell>
                       <Tooltip title="عرض التفاصيل">
                         <IconButton size="small" onClick={() => handleView(c._id)}>

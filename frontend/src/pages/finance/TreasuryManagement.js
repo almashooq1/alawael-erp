@@ -36,6 +36,7 @@ import {
   CheckCircle,
 } from '@mui/icons-material';
 import { surfaceColors, neutralColors, brandColors } from 'theme/palette';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const API = process.env.REACT_APP_API_URL || '/api';
 const fmt = v =>
@@ -316,12 +317,10 @@ const TreasuryManagement = () => {
                         {fmt(op.amounts?.baseAmount)}
                       </TableCell>
                       <TableCell sx={{ textAlign: 'right' }}>
-                        {op.tradeDate ? new Date(op.tradeDate).toLocaleDateString('ar-SA') : '-'}
+                        {op.tradeDate ? _fmtDate(op.tradeDate) : '-'}
                       </TableCell>
                       <TableCell sx={{ textAlign: 'right' }}>
-                        {op.maturityDate
-                          ? new Date(op.maturityDate).toLocaleDateString('ar-SA')
-                          : '-'}
+                        {op.maturityDate ? _fmtDate(op.maturityDate) : '-'}
                       </TableCell>
                       <TableCell sx={{ textAlign: 'right' }}>
                         <Chip

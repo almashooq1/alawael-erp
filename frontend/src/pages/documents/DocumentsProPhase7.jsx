@@ -84,6 +84,7 @@ import {
 import WatermarkDesigner from '../../components/documents/WatermarkDesigner';
 import AutomationBuilder from '../../components/documents/AutomationBuilder';
 import logger from '../../utils/logger';
+import { formatDate as _fmtDate, formatDateTime as _fmtDT } from 'utils/dateUtils';
 
 /* ─── Style ──────────────────────────────────────────────── */
 const cardSx = {
@@ -98,8 +99,7 @@ const statCard = color => ({
 });
 
 /* ─── Helper ─────────────────────────────────────────────── */
-const _fmtDate = d => (d ? new Date(d).toLocaleDateString('ar-SA') : '—');
-const fmtDateTime = d => (d ? new Date(d).toLocaleString('ar-SA') : '—');
+const fmtDateTime = d => (d ? _fmtDT(d) : '—');
 
 const severityColor = {
   critical: 'error',

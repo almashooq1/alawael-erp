@@ -27,6 +27,7 @@ import HistoryRoundedIcon from '@mui/icons-material/HistoryRounded';
 import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded';
 import DynamicFeedRoundedIcon from '@mui/icons-material/DynamicFeedRounded';
 import AccessTimeRoundedIcon from '@mui/icons-material/AccessTimeRounded';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 /* ─────────────────────────────────────── */
 const ACTION_CONFIG = {
@@ -114,7 +115,7 @@ const formatTimeAgo = timestamp => {
   if (hours < 24) return `${hours} س`;
   const days = Math.floor(hours / 24);
   if (days < 7) return `${days} ي`;
-  return new Date(timestamp).toLocaleDateString('ar-SA');
+  return _fmtDate(timestamp);
 };
 
 const INITIAL_VISIBLE = 7;

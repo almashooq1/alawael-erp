@@ -52,6 +52,7 @@ import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 import MonitorHeartIcon from '@mui/icons-material/MonitorHeart';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import apiClient from '../services/api';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 /* ─── Glass ─── */
 const Glass = memo(({ children, sx = {}, ...rest }) => {
@@ -845,9 +846,7 @@ export default function PatientsDashboard() {
               status: STATUS_MAP[p.status] || 'نشط',
               progress: p.goalAchievementRate ?? 50,
               branch: p.branch || 'الرياض',
-              lastVisit: p.lastSessionDate
-                ? new Date(p.lastSessionDate).toLocaleDateString('ar-SA')
-                : 'اليوم',
+              lastVisit: p.lastSessionDate ? _fmtDate(p.lastSessionDate) : 'اليوم',
             }))
           : D.patients;
       const appointments =

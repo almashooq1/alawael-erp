@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 🎓 خدمة التدريب والتطوير — Training & Development Service
  * AlAwael ERP — Unified Frontend Service
  * Covers: Training Programs, Courses, Certifications, Reports
@@ -22,27 +22,27 @@ const safe =
 // ═══════════════════════════════════════════
 export const programsService = {
   getAll: safe(async (params = {}) => {
-    const r = await apiClient.get('/training/programs', { params });
+    const r = await apiClient.get('/api/v1/training/programs', { params });
     return r.data;
   }),
   getById: safe(async id => {
-    const r = await apiClient.get(`/training/programs/${id}`);
+    const r = await apiClient.get(`/api/v1/training/programs/${id}`);
     return r.data;
   }),
   create: safe(async data => {
-    const r = await apiClient.post('/training/programs', data);
+    const r = await apiClient.post('/api/v1/training/programs', data);
     return r.data;
   }),
   update: safe(async (id, data) => {
-    const r = await apiClient.put(`/training/programs/${id}`, data);
+    const r = await apiClient.put(`/api/v1/training/programs/${id}`, data);
     return r.data;
   }),
   remove: safe(async id => {
-    const r = await apiClient.delete(`/training/programs/${id}`);
+    const r = await apiClient.delete(`/api/v1/training/programs/${id}`);
     return r.data;
   }),
   enroll: safe(async (id, employeeId) => {
-    const r = await apiClient.post(`/training/programs/${id}/enroll`, { employeeId });
+    const r = await apiClient.post(`/api/v1/training/programs/${id}/enroll`, { employeeId });
     return r.data;
   }),
 };
@@ -52,27 +52,27 @@ export const programsService = {
 // ═══════════════════════════════════════════
 export const coursesService = {
   getAll: safe(async (params = {}) => {
-    const r = await apiClient.get('/training/courses', { params });
+    const r = await apiClient.get('/api/v1/training/courses', { params });
     return r.data;
   }),
   getById: safe(async id => {
-    const r = await apiClient.get(`/training/courses/${id}`);
+    const r = await apiClient.get(`/api/v1/training/courses/${id}`);
     return r.data;
   }),
   create: safe(async data => {
-    const r = await apiClient.post('/training/courses', data);
+    const r = await apiClient.post('/api/v1/training/courses', data);
     return r.data;
   }),
   update: safe(async (id, data) => {
-    const r = await apiClient.put(`/training/courses/${id}`, data);
+    const r = await apiClient.put(`/api/v1/training/courses/${id}`, data);
     return r.data;
   }),
   remove: safe(async id => {
-    const r = await apiClient.delete(`/training/courses/${id}`);
+    const r = await apiClient.delete(`/api/v1/training/courses/${id}`);
     return r.data;
   }),
   complete: safe(async (id, result) => {
-    const r = await apiClient.patch(`/training/courses/${id}/complete`, result);
+    const r = await apiClient.patch(`/api/v1/training/courses/${id}/complete`, result);
     return r.data;
   }),
 };
@@ -82,15 +82,15 @@ export const coursesService = {
 // ═══════════════════════════════════════════
 export const certificationsService = {
   getAll: safe(async (params = {}) => {
-    const r = await apiClient.get('/training/certifications', { params });
+    const r = await apiClient.get('/api/v1/training/certifications', { params });
     return r.data;
   }),
   issue: safe(async data => {
-    const r = await apiClient.post('/training/certifications', data);
+    const r = await apiClient.post('/api/v1/training/certifications', data);
     return r.data;
   }),
   revoke: safe(async id => {
-    const r = await apiClient.delete(`/training/certifications/${id}`);
+    const r = await apiClient.delete(`/api/v1/training/certifications/${id}`);
     return r.data;
   }),
 };
@@ -100,23 +100,23 @@ export const certificationsService = {
 // ═══════════════════════════════════════════
 export const sessionsService = {
   getAll: safe(async (params = {}) => {
-    const r = await apiClient.get('/training/sessions', { params });
+    const r = await apiClient.get('/api/v1/training/sessions', { params });
     return r.data;
   }),
   getById: safe(async id => {
-    const r = await apiClient.get(`/training/sessions/${id}`);
+    const r = await apiClient.get(`/api/v1/training/sessions/${id}`);
     return r.data;
   }),
   create: safe(async data => {
-    const r = await apiClient.post('/training/sessions', data);
+    const r = await apiClient.post('/api/v1/training/sessions', data);
     return r.data;
   }),
   update: safe(async (id, data) => {
-    const r = await apiClient.put(`/training/sessions/${id}`, data);
+    const r = await apiClient.put(`/api/v1/training/sessions/${id}`, data);
     return r.data;
   }),
   remove: safe(async id => {
-    const r = await apiClient.delete(`/training/sessions/${id}`);
+    const r = await apiClient.delete(`/api/v1/training/sessions/${id}`);
     return r.data;
   }),
 };
@@ -126,23 +126,23 @@ export const sessionsService = {
 // ═══════════════════════════════════════════
 export const plansService = {
   getAll: safe(async () => {
-    const r = await apiClient.get('/training/plans');
+    const r = await apiClient.get('/api/v1/training/plans');
     return r.data;
   }),
   getById: safe(async id => {
-    const r = await apiClient.get(`/training/plans/${id}`);
+    const r = await apiClient.get(`/api/v1/training/plans/${id}`);
     return r.data;
   }),
   create: safe(async data => {
-    const r = await apiClient.post('/training/plans', data);
+    const r = await apiClient.post('/api/v1/training/plans', data);
     return r.data;
   }),
   update: safe(async (id, data) => {
-    const r = await apiClient.put(`/training/plans/${id}`, data);
+    const r = await apiClient.put(`/api/v1/training/plans/${id}`, data);
     return r.data;
   }),
   remove: safe(async id => {
-    const r = await apiClient.delete(`/training/plans/${id}`);
+    const r = await apiClient.delete(`/api/v1/training/plans/${id}`);
     return r.data;
   }),
 };
@@ -152,15 +152,15 @@ export const plansService = {
 // ═══════════════════════════════════════════
 export const trainingReportsService = {
   getDashboardStats: safe(async () => {
-    const r = await apiClient.get('/training/reports/dashboard');
+    const r = await apiClient.get('/api/v1/training/reports/dashboard');
     return r.data;
   }),
   getCompletionReport: safe(async (params = {}) => {
-    const r = await apiClient.get('/training/reports/completion', { params });
+    const r = await apiClient.get('/api/v1/training/reports/completion', { params });
     return r.data;
   }),
   getSkillGapReport: safe(async () => {
-    const r = await apiClient.get('/training/reports/skill-gap');
+    const r = await apiClient.get('/api/v1/training/reports/skill-gap');
     return r.data;
   }),
 };

@@ -1,5 +1,5 @@
 import api from './api';
-const BASE = '/bus-tracking';
+const BASE = '/api/v1/bus-tracking';
 
 const busTrackingService = {
   // ── Dashboard ──

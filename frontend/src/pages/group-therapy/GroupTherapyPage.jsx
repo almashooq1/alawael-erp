@@ -75,6 +75,7 @@ import {
   CartesianGrid,
 } from 'recharts';
 import groupTherapyService from 'services/groupTherapyService';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 // ── Constants ──────────────────────────────────────────────────────────────────
 const PROGRAM_TYPES = {
@@ -682,7 +683,7 @@ function ProgramDetailPanel({ program, onClose, onEdit, onSessionLogged }) {
                       const total = (s.attendance || []).length;
                       return (
                         <TableRow key={i} hover>
-                          <TableCell>{new Date(s.date).toLocaleDateString('ar-SA')}</TableCell>
+                          <TableCell>{_fmtDate(s.date)}</TableCell>
                           <TableCell>{s.topic || '—'}</TableCell>
                           <TableCell>
                             <Box display="flex" alignItems="center" gap={0.5}>
@@ -1168,9 +1169,7 @@ function SessionsTab({ programs }) {
                 return (
                   <TableRow key={i} hover>
                     <TableCell>
-                      <Typography variant="body2">
-                        {new Date(s.date).toLocaleDateString('ar-SA')}
-                      </Typography>
+                      <Typography variant="body2">{_fmtDate(s.date)}</Typography>
                     </TableCell>
                     <TableCell>
                       <Box display="flex" alignItems="center" gap={1}>

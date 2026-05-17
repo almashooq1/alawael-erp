@@ -30,6 +30,7 @@ import {
 import documentService from 'services/documentService';
 import { gradients, surfaceColors, brandColors, neutralColors } from 'theme/palette';
 import { getCategoryColor } from './documentListConstants';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const DocumentListTable = ({
   paginatedDocs,
@@ -200,7 +201,7 @@ const DocumentListTable = ({
                 {visibleCols.date && (
                   <TableCell>
                     <Typography variant="body2">
-                      {new Date(doc.createdAt).toLocaleDateString('ar-SA', {
+                      {_fmtDate(doc.createdAt, {
                         year: 'numeric',
                         month: 'short',
                         day: 'numeric',

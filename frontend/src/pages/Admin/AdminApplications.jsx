@@ -40,6 +40,7 @@ import {
 import RefreshIcon from '@mui/icons-material/Refresh';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import api from '../../services/api.client';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const STATUS_OPTIONS = [
   { value: '', label: 'كل الحالات' },
@@ -200,7 +201,7 @@ export default function AdminApplications() {
                   <TableCell>
                     <code style={{ direction: 'ltr' }}>{row.referenceNumber}</code>
                   </TableCell>
-                  <TableCell>{new Date(row.createdAt).toLocaleDateString('ar-SA')}</TableCell>
+                  <TableCell>{_fmtDate(row.createdAt)}</TableCell>
                   <TableCell>
                     {row.fullName}
                     <Typography variant="caption" color="text.secondary" display="block" dir="ltr">

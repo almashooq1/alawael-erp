@@ -39,6 +39,7 @@ import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const QUALITY_CATEGORIES = [
   { value: 'clinical', label: 'سريري', icon: '🏥', color: '#3b82f6' },
@@ -419,7 +420,7 @@ const TherapistQualityReports = () => {
                       />
                       {r.auditDate && (
                         <Chip
-                          label={`التدقيق: ${new Date(r.auditDate).toLocaleDateString('ar-SA')}`}
+                          label={`التدقيق: ${_fmtDate(r.auditDate)}`}
                           size="small"
                           variant="outlined"
                           sx={{ fontSize: '0.65rem' }}
@@ -427,7 +428,7 @@ const TherapistQualityReports = () => {
                       )}
                       {r.dueDate && (
                         <Chip
-                          label={`الموعد: ${new Date(r.dueDate).toLocaleDateString('ar-SA')}`}
+                          label={`الموعد: ${_fmtDate(r.dueDate)}`}
                           size="small"
                           sx={{ bgcolor: '#fef2f2', fontSize: '0.65rem' }}
                         />

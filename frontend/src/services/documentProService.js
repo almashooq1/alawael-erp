@@ -7,7 +7,7 @@
 
 import apiClient from './api.client';
 
-const BASE = '/api/documents-pro';
+const BASE = '/api/v1/documents-pro';
 
 // ── مساعد الطلبات ─────────────────────────────────────────
 async function request(method, url, data = null, params = null) {

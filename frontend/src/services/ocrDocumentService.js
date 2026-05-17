@@ -4,7 +4,7 @@
  */
 import api from './api';
 
-const BASE = '/ocr-documents';
+const BASE = '/api/v1/ocr-documents';
 
 const ocrDocumentService = {
   /* ── Dashboard ── */

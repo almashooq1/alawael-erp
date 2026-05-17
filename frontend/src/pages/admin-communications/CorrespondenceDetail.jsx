@@ -61,6 +61,7 @@ import {
 import { gradients } from '../../theme/palette';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import adminCommunicationsService from '../../services/adminCommunications.service';
+import { formatDate as _fmtDate, formatDateTime as _fmtDT } from 'utils/dateUtils';
 import {
   CORRESPONDENCE_TYPES,
   CORRESPONDENCE_STATUS,
@@ -504,7 +505,7 @@ export default function CorrespondenceDetail() {
                         </ListItemIcon>
                         <ListItemText
                           primary={d.instructions}
-                          secondary={`من: ${d.fromUserName || '-'} — إلى: ${d.toUser || d.toDepartment || '-'} — ${d.dueDate ? new Date(d.dueDate).toLocaleDateString('ar-SA') : ''}`}
+                          secondary={`من: ${d.fromUserName || '-'} — إلى: ${d.toUser || d.toDepartment || '-'} — ${d.dueDate ? _fmtDate(d.dueDate) : ''}`}
                         />
                       </ListItem>
                     ))}
@@ -583,9 +584,7 @@ export default function CorrespondenceDetail() {
                           <>
                             {action.performedBy?.nameAr || action.performedBy?.name || '-'}
                             {' — '}
-                            {action.performedAt
-                              ? new Date(action.performedAt).toLocaleString('ar-SA')
-                              : ''}
+                            {action.performedAt ? _fmtDT(action.performedAt) : ''}
                             {action.comments && (
                               <Typography variant="caption" display="block">
                                 {action.comments}
@@ -635,7 +634,7 @@ export default function CorrespondenceDetail() {
                             {t._id === id && ' (الحالية)'}
                           </Typography>
                         }
-                        secondary={`${t.referenceNumber || '-'} — ${t.createdAt ? new Date(t.createdAt).toLocaleDateString('ar-SA') : ''}`}
+                        secondary={`${t.referenceNumber || '-'} — ${t.createdAt ? _fmtDate(t.createdAt) : ''}`}
                       />
                     </ListItem>
                   ))}
@@ -717,7 +716,7 @@ export default function CorrespondenceDetail() {
                     تاريخ الإنشاء
                   </Typography>
                   <Typography variant="body2">
-                    {item.createdAt ? new Date(item.createdAt).toLocaleString('ar-SA') : '-'}
+                    {item.createdAt ? _fmtDT(item.createdAt) : '-'}
                   </Typography>
                 </Box>
                 {item.dueDate && (
@@ -731,7 +730,7 @@ export default function CorrespondenceDetail() {
                       color={new Date(item.dueDate) < new Date() ? 'error.main' : 'text.primary'}
                       fontWeight="bold"
                     >
-                      {new Date(item.dueDate).toLocaleDateString('ar-SA')}
+                      {_fmtDate(item.dueDate)}
                     </Typography>
                   </Box>
                 )}

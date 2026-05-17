@@ -46,6 +46,7 @@ import {
   EventNote as EventIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 import {
   meetingsService,
   dashboardService,
@@ -398,9 +399,7 @@ export default function MDTCoordinationDashboard() {
                         size="small"
                       />
                     </TableCell>
-                    <TableCell>
-                      {m.date ? new Date(m.date).toLocaleDateString('ar') : '-'}
-                    </TableCell>
+                    <TableCell>{m.date ? _fmtDate(m.date) : '-'}</TableCell>
                     <TableCell>
                       <Chip label={m.attendees?.length || 0} size="small" icon={<MeetingIcon />} />
                     </TableCell>
@@ -550,9 +549,7 @@ export default function MDTCoordinationDashboard() {
                         size="small"
                       />
                     </TableCell>
-                    <TableCell>
-                      {r.createdAt ? new Date(r.createdAt).toLocaleDateString('ar') : '-'}
-                    </TableCell>
+                    <TableCell>{r.createdAt ? _fmtDate(r.createdAt) : '-'}</TableCell>
                   </TableRow>
                 ))}
                 {recentReferrals.length === 0 && (
@@ -594,11 +591,7 @@ export default function MDTCoordinationDashboard() {
                           </ListItemAvatar>
                           <ListItemText
                             primary={r.planNumber || r.beneficiaryName}
-                            secondary={
-                              r.reviewDate
-                                ? `المراجعة: ${new Date(r.reviewDate).toLocaleDateString('ar')}`
-                                : ''
-                            }
+                            secondary={r.reviewDate ? `المراجعة: ${_fmtDate(r.reviewDate)}` : ''}
                           />
                         </ListItem>
                       ))}
@@ -678,7 +671,7 @@ export default function MDTCoordinationDashboard() {
                     </Typography>
                     <Box display="flex" gap={2} mt={0.5}>
                       <Typography variant="caption" color="text.secondary">
-                        {m.date ? new Date(m.date).toLocaleDateString('ar') : '-'}
+                        {m.date ? _fmtDate(m.date) : '-'}
                       </Typography>
                       <Typography variant="caption" color="text.secondary">
                         {m.startTime || '-'}

@@ -32,6 +32,7 @@ import {
   Card,
   CardContent,
 } from '@mui/material';
+import { formatDateTime as _fmtDT } from 'utils/dateUtils';
 import {
   Add as AddIcon,
   Delete as DeleteIcon,
@@ -492,9 +493,7 @@ function ChainPreview({ chain }) {
                       <Box mt={1}>
                         <Typography variant="caption" color="text.secondary">
                           القرار: {result.decision} | التاريخ:{' '}
-                          {result.completedAt
-                            ? new Date(result.completedAt).toLocaleString('ar-SA')
-                            : '—'}
+                          {result.completedAt ? _fmtDT(result.completedAt) : '—'}
                         </Typography>
                       </Box>
                     )}

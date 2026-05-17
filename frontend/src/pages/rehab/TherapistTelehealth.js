@@ -45,6 +45,7 @@ import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
+import { formatDateTime as _fmtDT } from 'utils/dateUtils';
 
 const PLATFORMS = [
   { value: 'zoom', label: 'Zoom', icon: '📹' },
@@ -342,7 +343,7 @@ const TherapistTelehealth = () => {
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                         <ScheduleIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
                         <Typography variant="body2" color="text.secondary">
-                          {new Date(s.scheduledDate).toLocaleString('ar-SA')}
+                          {_fmtDT(s.scheduledDate)}
                         </Typography>
                         <Chip
                           label={`${s.duration} دقيقة`}

@@ -44,6 +44,7 @@ import {
   Work as OccupationIcon,
 } from '@mui/icons-material';
 import axios from 'axios';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const API = axios.create({ baseURL: '/api/muqeem', withCredentials: true });
 
@@ -316,9 +317,7 @@ export default function MuqeemPage() {
                     <Typography
                       color={residenceInfo.daysToExpiry <= 90 ? 'error.main' : 'text.primary'}
                     >
-                      {residenceInfo.expiryDate
-                        ? new Date(residenceInfo.expiryDate).toLocaleDateString('ar-SA')
-                        : '—'}
+                      {residenceInfo.expiryDate ? _fmtDate(residenceInfo.expiryDate) : '—'}
                     </Typography>
                   </Grid>
                   <Grid item xs={12} sm={6} md={4}>
@@ -414,11 +413,7 @@ export default function MuqeemPage() {
                           <TableCell dir="ltr">{w.iqamaNumber || '—'}</TableCell>
                           <TableCell>{w.nationality || '—'}</TableCell>
                           <TableCell>{w.occupation || w.jobTitle || '—'}</TableCell>
-                          <TableCell>
-                            {w.expiryDate
-                              ? new Date(w.expiryDate).toLocaleDateString('ar-SA')
-                              : '—'}
-                          </TableCell>
+                          <TableCell>{w.expiryDate ? _fmtDate(w.expiryDate) : '—'}</TableCell>
                           <TableCell>
                             <Chip
                               label={w.status === 'active' ? 'نشط' : w.status || '—'}
@@ -492,11 +487,7 @@ export default function MuqeemPage() {
                           <TableRow key={e.iqamaNumber || i} hover>
                             <TableCell>{e.name || e.fullName || '—'}</TableCell>
                             <TableCell dir="ltr">{e.iqamaNumber || '—'}</TableCell>
-                            <TableCell>
-                              {e.expiryDate
-                                ? new Date(e.expiryDate).toLocaleDateString('ar-SA')
-                                : '—'}
-                            </TableCell>
+                            <TableCell>{e.expiryDate ? _fmtDate(e.expiryDate) : '—'}</TableCell>
                             <TableCell>
                               <Chip
                                 label={`${e.daysToExpiry || '—'} يوم`}
@@ -632,9 +623,7 @@ export default function MuqeemPage() {
                 <Typography>رقم التأشيرة: {visaResult.visaNumber}</Typography>
               )}
               {visaResult.expiryDate && (
-                <Typography>
-                  تنتهي في: {new Date(visaResult.expiryDate).toLocaleDateString('ar-SA')}
-                </Typography>
+                <Typography>تنتهي في: {_fmtDate(visaResult.expiryDate)}</Typography>
               )}
             </Box>
           )}

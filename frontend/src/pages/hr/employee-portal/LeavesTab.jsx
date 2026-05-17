@@ -17,6 +17,7 @@ import {
   Paper,
 } from '@mui/material';
 import { Add as AddIcon } from '@mui/icons-material';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const LEAVE_TYPE_LABELS = {
   annual: 'سنوية',
@@ -137,8 +138,8 @@ export default function LeavesTab({ leaveBalances = {}, leaveHistory = [], onOpe
                         }}
                       />
                     </TableCell>
-                    <TableCell>{new Date(lv.startDate).toLocaleDateString('ar-SA')}</TableCell>
-                    <TableCell>{new Date(lv.endDate).toLocaleDateString('ar-SA')}</TableCell>
+                    <TableCell>{_fmtDate(lv.startDate)}</TableCell>
+                    <TableCell>{_fmtDate(lv.endDate)}</TableCell>
                     <TableCell align="center">{lv.days}</TableCell>
                     <TableCell>{lv.reason}</TableCell>
                     <TableCell align="center">

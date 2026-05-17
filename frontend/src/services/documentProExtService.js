@@ -6,7 +6,7 @@
 
 import apiClient from './api.client';
 
-const BASE = '/api/documents-pro-ext';
+const BASE = '/api/v1/documents-pro-ext';
 
 async function request(method, url, data = null, params = null) {
   try {

@@ -53,6 +53,7 @@ import {
   Notifications as AlertIcon,
 } from '@mui/icons-material';
 import ceoDashboardService from '../../services/ceoDashboardService';
+import { formatDate as _fmtDate, formatDateTime as _fmtDT } from 'utils/dateUtils';
 
 /* ════════════════════════════════════════════════════════════════════
    HELPERS
@@ -156,7 +157,7 @@ export default function CEODashboard() {
               لوحة تحكم الإدارة التنفيذية
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              آخر تحديث: {new Date(lastUpdated).toLocaleString('ar-SA')}
+              آخر تحديث: {_fmtDT(lastUpdated)}
             </Typography>
           </Box>
         </Box>
@@ -377,7 +378,7 @@ export default function CEODashboard() {
                       )}
                     </TableCell>
                     <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>
-                      {new Date(a.createdAt).toLocaleDateString('ar-SA')}
+                      {_fmtDate(a.createdAt)}
                     </TableCell>
                   </TableRow>
                 ))}

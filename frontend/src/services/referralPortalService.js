@@ -5,7 +5,7 @@
 
 import api from './api';
 
-const BASE = '/referrals';
+const BASE = '/api/v1/referrals';
 
 // ─── Analytics ────────────────────────────────────────────────────────────────
 

@@ -46,6 +46,7 @@ import {
 } from '@mui/icons-material';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getToken } from '../utils/tokenStorage';
+import { formatDate as _fmtDate, formatDateTime as _fmtDT } from 'utils/dateUtils';
 
 // ─── API ──────────────────────────────────────────────────────────────────────
 const API_BASE = '/api/rehab-plans';
@@ -1008,9 +1009,7 @@ function RehabDashboardInner() {
                                 {s.beneficiaryName || `جلسة ${i + 1}`}
                               </Typography>
                               <Typography sx={{ fontSize: '0.68rem', color: 'text.secondary' }}>
-                                {s.scheduledAt
-                                  ? new Date(s.scheduledAt).toLocaleString('ar-SA')
-                                  : 'قيد الجدولة'}
+                                {s.scheduledAt ? _fmtDT(s.scheduledAt) : 'قيد الجدولة'}
                               </Typography>
                             </Box>
                             <Box
@@ -1397,7 +1396,7 @@ function RehabDashboardInner() {
                                   borderBottom: `1px solid ${theme.palette.divider}`,
                                 }}
                               >
-                                {sess.date ? new Date(sess.date).toLocaleDateString('ar-SA') : '—'}
+                                {sess.date ? _fmtDate(sess.date) : '—'}
                               </Box>
                               <Box
                                 component="td"
@@ -1803,7 +1802,7 @@ function RehabDashboardInner() {
                               borderBottom: `1px solid ${theme.palette.divider}`,
                             }}
                           >
-                            {s.scheduledAt ? new Date(s.scheduledAt).toLocaleString('ar-SA') : '—'}
+                            {s.scheduledAt ? _fmtDT(s.scheduledAt) : '—'}
                           </Box>
                           <Box
                             component="td"

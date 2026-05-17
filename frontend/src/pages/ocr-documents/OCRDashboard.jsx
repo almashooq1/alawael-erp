@@ -52,6 +52,7 @@ import {
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import ocrDocumentService from '../../services/ocrDocumentService';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 /* ── helpers ── */
 const statusColor = status => {
@@ -405,7 +406,7 @@ export default function OCRDashboard() {
                   <TableCell align="right">{doc.pageCount || '—'}</TableCell>
                   <TableCell align="right">
                     <Typography variant="caption">
-                      {doc.uploadedAt ? new Date(doc.uploadedAt).toLocaleDateString('ar-SA') : '—'}
+                      {doc.uploadedAt ? _fmtDate(doc.uploadedAt) : '—'}
                     </Typography>
                   </TableCell>
                   <TableCell align="center">

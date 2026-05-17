@@ -61,6 +61,7 @@ import {
   Legend,
 } from 'recharts';
 import { MOCK_CRM_DASHBOARD, crmReportsService, seedService } from 'services/crmService';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const COLORS = ['#4FC3F7', '#81C784', '#FFB74D', '#E57373', '#BA68C8', '#4DB6AC'];
 
@@ -706,9 +707,7 @@ export default function CRMDashboard() {
                               <>
                                 {f.contactName && <span>العميل: {f.contactName} • </span>}
                                 {f.scheduledDate && (
-                                  <span>
-                                    الموعد: {new Date(f.scheduledDate).toLocaleDateString('ar-SA')}
-                                  </span>
+                                  <span>الموعد: {_fmtDate(f.scheduledDate)}</span>
                                 )}
                               </>
                             }

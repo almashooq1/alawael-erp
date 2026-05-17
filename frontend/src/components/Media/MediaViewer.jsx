@@ -55,6 +55,7 @@ import {
   Storage as SizeIcon,
 } from '@mui/icons-material';
 import { statusColors, surfaceColors, neutralColors } from '../../theme/palette';
+import { formatDate } from 'utils/dateUtils';
 import mediaService from '../../services/mediaService';
 
 const TYPE_CONFIG = {
@@ -406,7 +407,7 @@ export default function MediaViewer({
                 {
                   icon: <DateIcon sx={{ fontSize: 18 }} />,
                   label: 'تاريخ الرفع',
-                  value: new Date(item.createdAt).toLocaleDateString('ar-SA'),
+                  value: formatDate(item.createdAt),
                 },
                 {
                   icon: <ViewsIcon sx={{ fontSize: 18 }} />,
@@ -473,7 +474,7 @@ export default function MediaViewer({
                             variant="caption"
                             sx={{ color: neutralColors.textSecondary, whiteSpace: 'nowrap' }}
                           >
-                            {new Date(log.timestamp).toLocaleDateString('ar-SA')}
+                            {formatDate(log.timestamp)}
                           </Typography>
                           <Typography variant="caption">{log.action}</Typography>
                         </Box>

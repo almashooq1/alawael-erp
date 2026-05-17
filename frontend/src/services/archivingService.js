@@ -241,13 +241,15 @@ const archivingService = {
   getDocuments: (params = {}) =>
     safe(
       () =>
-        apiClient.get('/api/archive/documents', { params }).then(r => r.data?.documents || r.data),
+        apiClient
+          .get('/api/v1/archive/documents', { params })
+          .then(r => r.data?.documents || r.data),
       MOCK_DOCUMENTS
     ),
 
   getDocument: id =>
     safe(
-      () => apiClient.get(`/api/archive/documents/${id}`).then(r => r.data?.document || r.data),
+      () => apiClient.get(`/api/v1/archive/documents/${id}`).then(r => r.data?.document || r.data),
       MOCK_DOCUMENTS.find(d => d._id === id) || null
     ),
 
@@ -264,23 +266,23 @@ const archivingService = {
     ),
 
   updateDocument: (id, data) =>
-    safe(() => apiClient.put(`/api/archive/documents/${id}`, data).then(r => r.data), {
+    safe(() => apiClient.put(`/api/v1/archive/documents/${id}`, data).then(r => r.data), {
       success: true,
     }),
 
   deleteDocument: id =>
-    safe(() => apiClient.delete(`/api/archive/documents/${id}`).then(r => r.data), {
+    safe(() => apiClient.delete(`/api/v1/archive/documents/${id}`).then(r => r.data), {
       success: true,
     }),
 
   archiveDocument: id =>
-    safe(() => apiClient.post(`/api/archive/documents/${id}/archive`).then(r => r.data), {
+    safe(() => apiClient.post(`/api/v1/archive/documents/${id}/archive`).then(r => r.data), {
       success: true,
     }),
 
   downloadDocument: id =>
     safe(
-      () => apiClient.get(`/api/archive/documents/${id}/download`, { responseType: 'blob' }),
+      () => apiClient.get(`/api/v1/archive/documents/${id}/download`, { responseType: 'blob' }),
       null
     ),
 
@@ -318,17 +320,17 @@ const archivingService = {
 
   // ─── Analytics & Stats ───
   getStorageStats: () =>
-    safe(() => apiClient.get('/api/archive/stats').then(r => r.data), MOCK_STORAGE_STATS),
+    safe(() => apiClient.get('/api/v1/archive/stats').then(r => r.data), MOCK_STORAGE_STATS),
 
   getActivityLog: () =>
     safe(
-      () => apiClient.get('/api/archive/activity').then(r => r.data?.activities || r.data),
+      () => apiClient.get('/api/v1/archive/activity').then(r => r.data?.activities || r.data),
       MOCK_ACTIVITY_LOG
     ),
 
   // ─── Retention ───
   getRetentionReport: () =>
-    safe(() => apiClient.get('/api/archive/retention-report').then(r => r.data), {
+    safe(() => apiClient.get('/api/v1/archive/retention-report').then(r => r.data), {
       expiringSoon: MOCK_DOCUMENTS.filter((_, i) => i % 7 === 0).map(d => ({
         ...d,
         daysLeft: Math.floor(Math.random() * 30),

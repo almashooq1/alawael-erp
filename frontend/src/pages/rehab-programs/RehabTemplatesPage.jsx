@@ -50,6 +50,7 @@ import {
   Refresh as RefreshIcon,
   ContentCopy as CopyIcon,
   GetApp as _DownloadIcon,
+  Print as PrintIcon,
 } from '@mui/icons-material';
 import { rehabTemplatesAPI } from '../../services/ddd';
 
@@ -394,6 +395,71 @@ export default function RehabTemplatesPage() {
     });
   };
 
+  const printPlan = () => {
+    if (!builtPlan) return;
+    const plan = builtPlan;
+    const phases = plan.phases || plan.sessionPlan?.phases || [];
+    const goals = plan.goals || [];
+    const exits = plan.exitCriteria || [];
+    const triggers = plan.escalationTriggers || [];
+
+    const phaseHtml = phases
+      .map(
+        (ph, i) => `
+          <div class="phase">
+            <h4>المرحلة ${i + 1}: ${ph.name_ar || ph.name || ''} — ${ph.weeks || ph.durationWeeks || ''} أسبوع</h4>
+            ${(ph.activitiesDetail || ph.activities || [])
+              .map(
+                a =>
+                  `<div class="activity">• ${a.name_ar || a.name || a.id || a} ${a.duration ? '(' + a.duration + ' دقيقة)' : ''}</div>`
+              )
+              .join('')}
+          </div>`
+      )
+      .join('');
+
+    const html = `<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>خطة تأهيل — ${plan.template?.name_ar || ''}</title>
+<style>
+  body { font-family: 'Segoe UI', Arial, sans-serif; margin: 20px; color: #111; direction: rtl; }
+  h1 { color: #1565c0; font-size: 20px; border-bottom: 2px solid #1565c0; padding-bottom: 6px; }
+  h2 { font-size: 16px; color: #333; margin-top: 18px; }
+  h4 { font-size: 14px; color: #1565c0; margin: 10px 0 4px; }
+  .meta { display: flex; gap: 24px; background: #e8f0fe; padding: 10px 14px; border-radius: 6px; margin: 12px 0; font-size: 13px; }
+  .meta span { font-weight: 700; }
+  .phase { border: 1px solid #cfd8dc; border-radius: 6px; padding: 10px 14px; margin-bottom: 10px; }
+  .activity { font-size: 13px; padding: 2px 0; }
+  .goal-item, .exit-item, .trigger-item { font-size: 13px; padding: 2px 0; }
+  @media print { body { margin: 10px; } }
+</style>
+</head>
+<body>
+<h1>الخطة التأهيلية المخصصة — ${plan.template?.name_ar || ''}</h1>
+<div class="meta">
+  <div>المستفيد: <span>${plan.beneficiary?.name_ar || plan.beneficiary?.name || plan.beneficiaryName || '—'}</span></div>
+  <div>تاريخ البداية: <span>${plan.startDate || '—'}</span></div>
+  <div>تاريخ الانتهاء: <span>${plan.endDate || '—'}</span></div>
+  <div>إجمالي الجلسات المقدرة: <span>${plan.totalEstimatedSessions || '—'}</span></div>
+</div>
+${goals.length ? `<h2>الأهداف العلاجية</h2>${goals.map(g => `<div class="goal-item">✓ ${g.goal_ar || g.goal || g}</div>`).join('')}` : ''}
+${phases.length ? `<h2>مراحل التدخل (${phases.length} مراحل)</h2>${phaseHtml}` : ''}
+${exits.length ? `<h2>معايير الخروج</h2>${exits.map(c => `<div class="exit-item">✓ ${c}</div>`).join('')}` : ''}
+${triggers.length ? `<h2>مؤشرات التصعيد</h2>${triggers.map(t => `<div class="trigger-item">⚠ ${t}</div>`).join('')}` : ''}
+</body></html>`;
+
+    const win = window.open('', '_blank', 'width=900,height=700');
+    if (!win) return;
+    win.document.write(html);
+    win.document.close();
+    win.focus();
+    setTimeout(() => {
+      win.print();
+    }, 300);
+  };
+
   /* ─── Filtered catalog ──────────────────── */
   const filtered = templates.filter(
     t => !filterDx || t.targetDiagnoses?.some(d => d.includes(filterDx))
@@ -642,6 +708,11 @@ export default function RehabTemplatesPage() {
                     الخطة التأهيلية المخصصة جاهزة
                   </Typography>
                   <Box flexGrow={1} />
+                  <Tooltip title="طباعة الخطة">
+                    <IconButton onClick={printPlan} size="small" color="primary">
+                      <PrintIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
                   <Tooltip title={copied ? 'تم النسخ!' : 'نسخ JSON'}>
                     <IconButton onClick={copyPlan} size="small">
                       <CopyIcon fontSize="small" />

@@ -55,6 +55,7 @@ import {
 } from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import authHeader from '../../utils/authHeader';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 /* ─── API ────────────────────────────────────────────────────────────────── */
 const BASE_USERS = '/api/admin/users';
@@ -274,7 +275,7 @@ export default function MfaComplianceAdmin() {
   };
 
   const allRoles = [...new Set(users.map(u => u.role))].sort();
-  const fmt = d => (d ? new Date(d).toLocaleDateString('ar-SA') : '—');
+  const fmt = d => (d ? _fmtDate(d) : '—');
 
   return (
     <Box sx={{ p: { xs: 1, md: 3 } }} dir="rtl">

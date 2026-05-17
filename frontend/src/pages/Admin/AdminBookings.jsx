@@ -13,6 +13,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { formatDate as _fmtDateUtil, formatDateTime as _fmtDT } from 'utils/dateUtils';
 import {
   Box,
   Container,
@@ -276,7 +277,7 @@ export default function AdminBookings() {
                   <TableCell>
                     <code style={{ direction: 'ltr' }}>{row.confirmationNumber}</code>
                   </TableCell>
-                  <TableCell>{new Date(row.createdAt).toLocaleDateString('ar-SA')}</TableCell>
+                  <TableCell>{_fmtDateUtil(row.createdAt)}</TableCell>
                   <TableCell>{row.parentName}</TableCell>
                   <TableCell dir="ltr">
                     <a
@@ -382,19 +383,9 @@ export default function AdminBookings() {
               <Row label="الفترة المفضّلة" value={detail.preferredTime} />
               {detail.notes && <Row label="ملاحظات" value={detail.notes} />}
               <Divider />
-              <Row label="تم الاستلام" value={new Date(detail.createdAt).toLocaleString('ar-SA')} />
-              {detail.contactedAt && (
-                <Row
-                  label="تم التواصل"
-                  value={new Date(detail.contactedAt).toLocaleString('ar-SA')}
-                />
-              )}
-              {detail.convertedAt && (
-                <Row
-                  label="تم التحويل"
-                  value={new Date(detail.convertedAt).toLocaleString('ar-SA')}
-                />
-              )}
+              <Row label="تم الاستلام" value={_fmtDT(detail.createdAt)} />
+              {detail.contactedAt && <Row label="تم التواصل" value={_fmtDT(detail.contactedAt)} />}
+              {detail.convertedAt && <Row label="تم التحويل" value={_fmtDT(detail.convertedAt)} />}
 
               <FormControl fullWidth size="small" sx={{ mt: 1 }}>
                 <InputLabel>تحديث الحالة</InputLabel>

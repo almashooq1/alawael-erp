@@ -39,6 +39,7 @@ import AddIcon from '@mui/icons-material/Add';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import { behaviorAPI, coreAPI } from '../../services/ddd';
+import { formatDateTime as _fmtDT } from 'utils/dateUtils';
 
 /* ── Constants ───────────────────────────────────────────────── */
 const BEHAVIOR_TYPES = [
@@ -423,9 +424,7 @@ export default function BehaviorManagement() {
                     <TableCell>
                       {getBeneficiaryName(inc.beneficiary_id || inc.beneficiaryId)}
                     </TableCell>
-                    <TableCell>
-                      {inc.observedAt ? new Date(inc.observedAt).toLocaleString('ar-SA') : '-'}
-                    </TableCell>
+                    <TableCell>{inc.observedAt ? _fmtDT(inc.observedAt) : '-'}</TableCell>
                     <TableCell>{typeLabel(inc.behaviorType)}</TableCell>
                     <TableCell align="center">
                       <Chip label={sev.label} color={sev.color} size="small" />

@@ -31,6 +31,7 @@ import {
   CircularProgress,
 } from '@mui/material';
 import { Add as AddIcon, Visibility as ViewIcon, Print as PrintIcon } from '@mui/icons-material';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 import {
   getLetters,
   createLetterRequest,
@@ -262,7 +263,7 @@ export default function EmployeeLettersManagement() {
                         size="small"
                       />
                     </TableCell>
-                    <TableCell>{new Date(l.createdAt).toLocaleDateString('ar-SA')}</TableCell>
+                    <TableCell>{_fmtDate(l.createdAt)}</TableCell>
                     <TableCell>
                       <Tooltip title="عرض">
                         <IconButton size="small" onClick={() => handleView(l._id)}>

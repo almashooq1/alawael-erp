@@ -60,6 +60,7 @@ import {
 } from '@mui/icons-material';
 import zktecoService from 'services/zktecoService';
 import { gradients } from '../../theme/palette';
+import { formatDateTime as _fmtDT } from 'utils/dateUtils';
 
 /* ═══════════════════════════════════════════════
    Constants
@@ -537,7 +538,7 @@ const ZKTecoDeviceManagement = () => {
                         sx={{ mb: 1.5 }}
                       >
                         <TimeIcon sx={{ fontSize: 12, verticalAlign: 'middle', mr: 0.5 }} />
-                        آخر مزامنة: {new Date(device.syncSettings.lastSync).toLocaleString('ar-SA')}
+                        آخر مزامنة: {_fmtDT(device.syncSettings.lastSync)}
                       </Typography>
                     )}
 
@@ -1013,9 +1014,7 @@ const ZKTecoDeviceManagement = () => {
                 <TableBody>
                   {syncHistoryDialog.logs.map((log, i) => (
                     <TableRow key={i}>
-                      <TableCell>
-                        {log.startedAt ? new Date(log.startedAt).toLocaleString('ar-SA') : '-'}
-                      </TableCell>
+                      <TableCell>{log.startedAt ? _fmtDT(log.startedAt) : '-'}</TableCell>
                       <TableCell>
                         <Chip
                           label={

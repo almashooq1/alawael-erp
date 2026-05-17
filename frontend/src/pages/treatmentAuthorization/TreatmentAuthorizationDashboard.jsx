@@ -43,6 +43,7 @@ import {
   WarningAmber,
 } from '@mui/icons-material';
 import treatmentAuthorizationService from '../../services/treatmentAuthorization.service';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const statusLabels = {
   draft: 'مسودة',
@@ -300,7 +301,7 @@ export default function TreatmentAuthorizationDashboard() {
                           size="small"
                         />
                       </TableCell>
-                      <TableCell>{new Date(req.createdAt).toLocaleDateString('ar-SA')}</TableCell>
+                      <TableCell>{_fmtDate(req.createdAt)}</TableCell>
                       <TableCell align="center">
                         {req.status === 'draft' && (
                           <Tooltip title="إرسال للمراجعة">

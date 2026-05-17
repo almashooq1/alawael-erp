@@ -26,6 +26,7 @@ import {
 } from '@mui/material';
 import { Add, Summarize, Delete } from '@mui/icons-material';
 import { surfaceColors, neutralColors, brandColors } from 'theme/palette';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const API = process.env.REACT_APP_API_URL || '/api';
 
@@ -309,9 +310,7 @@ const WithholdingTaxPage = () => {
                       }}
                     />
                   </TableCell>
-                  <TableCell>
-                    {new Date(r.date || r.createdAt).toLocaleDateString('ar-SA')}
-                  </TableCell>
+                  <TableCell>{_fmtDate(r.date || r.createdAt)}</TableCell>
                   <TableCell>
                     <Tooltip title="حذف">
                       <IconButton

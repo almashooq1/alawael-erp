@@ -52,6 +52,7 @@ import {
 } from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import workflowService from '../../services/workflow.service';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 const INSTANCE_STATUS = {
@@ -100,7 +101,7 @@ const PRIORITY_CONFIG = {
 
 const fmtDate = d =>
   d
-    ? new Date(d).toLocaleDateString('ar-SA', {
+    ? _fmtDate(d, {
         year: 'numeric',
         month: 'short',
         day: 'numeric',

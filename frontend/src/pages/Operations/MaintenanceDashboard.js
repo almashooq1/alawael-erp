@@ -70,6 +70,7 @@ import {
   MOCK_MAINTENANCE_DASHBOARD,
 } from 'services/maintenanceService';
 import { useSnackbar } from 'contexts/SnackbarContext';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const COLORS = ['#E53935', '#FB8C00', '#43A047', '#1E88E5', '#8E24AA', '#6D4C41'];
 const categories = [
@@ -522,7 +523,7 @@ export default function MaintenanceDashboard() {
                               {o.title}
                             </Typography>
                             <Typography variant="caption" color="text.secondary">
-                              {new Date(o.createdAt).toLocaleDateString('ar-SA')}
+                              {_fmtDate(o.createdAt)}
                             </Typography>
                           </Box>
                         </Box>
@@ -633,7 +634,7 @@ export default function MaintenanceDashboard() {
                             fontSize="small"
                             color={p.status === 'متأخر' ? 'error' : 'action'}
                           />
-                          {new Date(p.nextDue).toLocaleDateString('ar-SA')}
+                          {_fmtDate(p.nextDue)}
                         </Box>
                       </TableCell>
                       <TableCell>{p.assignedTo}</TableCell>
@@ -824,7 +825,7 @@ export default function MaintenanceDashboard() {
                 },
                 {
                   label: 'التاريخ',
-                  value: new Date(selected.createdAt).toLocaleDateString('ar-SA'),
+                  value: _fmtDate(selected.createdAt),
                 },
               ].map((f, i) => (
                 <Grid item xs={6} key={i}>

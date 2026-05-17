@@ -49,6 +49,7 @@ import {
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import telehealthService from '../../services/telehealthService';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const statusOptions = [
   { value: '', label: 'الكل' },
@@ -344,7 +345,7 @@ export default function TelehealthSessionsPage() {
                   <TableCell>{s.patientName}</TableCell>
                   <TableCell>{s.therapistName}</TableCell>
                   <TableCell dir="ltr">
-                    {new Date(s.scheduledDate).toLocaleDateString('ar-SA')}
+                    {_fmtDate(s.scheduledDate)}
                     <br />
                     <Typography variant="caption">
                       {new Date(s.scheduledDate).toLocaleTimeString('ar-SA', {

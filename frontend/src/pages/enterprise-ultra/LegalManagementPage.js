@@ -42,6 +42,7 @@ import {
   Refresh as RefreshIcon,
 } from '@mui/icons-material';
 import * as legalService from '../../services/enterpriseUltra.service';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const statusColors = {
   open: 'info',
@@ -273,11 +274,7 @@ export default function LegalManagementPage() {
                       />
                     </TableCell>
                     <TableCell>{c.court?.name || '—'}</TableCell>
-                    <TableCell>
-                      {c.nextHearingDate
-                        ? new Date(c.nextHearingDate).toLocaleDateString('ar-SA')
-                        : '—'}
-                    </TableCell>
+                    <TableCell>{c.nextHearingDate ? _fmtDate(c.nextHearingDate) : '—'}</TableCell>
                     <TableCell>
                       {c.claimAmount ? `${c.claimAmount.toLocaleString()} ر.س` : '—'}
                     </TableCell>
@@ -323,7 +320,7 @@ export default function LegalManagementPage() {
                 {hearings.map(h => (
                   <TableRow key={h._id} hover>
                     <TableCell>{h.case?.caseNumber || h.case}</TableCell>
-                    <TableCell>{new Date(h.hearingDate).toLocaleDateString('ar-SA')}</TableCell>
+                    <TableCell>{_fmtDate(h.hearingDate)}</TableCell>
                     <TableCell>
                       <Chip size="small" label={h.hearingType?.replace(/_/g, ' ')} />
                     </TableCell>
@@ -397,7 +394,7 @@ export default function LegalManagementPage() {
                         color={new Date(p.expiryDate) < new Date() ? 'error' : 'text.secondary'}
                         sx={{ mt: 1, display: 'block' }}
                       >
-                        الانتهاء: {new Date(p.expiryDate).toLocaleDateString('ar-SA')}
+                        الانتهاء: {_fmtDate(p.expiryDate)}
                       </Typography>
                     )}
                   </CardContent>
@@ -458,9 +455,7 @@ export default function LegalManagementPage() {
                         label={o.priority}
                       />
                     </TableCell>
-                    <TableCell>
-                      {o.deliveryDate ? new Date(o.deliveryDate).toLocaleDateString('ar-SA') : '—'}
-                    </TableCell>
+                    <TableCell>{o.deliveryDate ? _fmtDate(o.deliveryDate) : '—'}</TableCell>
                   </TableRow>
                 ))}
                 {!opinions.length && (
@@ -525,7 +520,7 @@ export default function LegalManagementPage() {
                         label={f.status?.replace(/_/g, ' ')}
                       />
                     </TableCell>
-                    <TableCell>{new Date(f.dueDate).toLocaleDateString('ar-SA')}</TableCell>
+                    <TableCell>{_fmtDate(f.dueDate)}</TableCell>
                   </TableRow>
                 ))}
                 {!filings.length && (

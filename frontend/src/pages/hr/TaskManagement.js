@@ -32,6 +32,7 @@ import {
   LinearProgress,
 } from '@mui/material';
 import { Add as AddIcon, Visibility as ViewIcon, Flag as FlagIcon } from '@mui/icons-material';
+import { formatDate as _fmtDate, formatDateTime as _fmtDT } from 'utils/dateUtils';
 import {
   getTasks,
   createTask,
@@ -313,7 +314,7 @@ export default function TaskManagement() {
                           isOverdue(t.dueDate) && t.status !== 'مكتملة' ? 'error' : 'text.primary'
                         }
                       >
-                        {t.dueDate && new Date(t.dueDate).toLocaleDateString('ar-SA')}
+                        {t.dueDate && _fmtDate(t.dueDate)}
                       </Typography>
                     </TableCell>
                     <TableCell>
@@ -478,8 +479,7 @@ export default function TaskManagement() {
               </Grid>
               <Grid item xs={6}>
                 <Typography>
-                  <strong>الموعد:</strong>{' '}
-                  {viewDialog.dueDate && new Date(viewDialog.dueDate).toLocaleDateString('ar-SA')}
+                  <strong>الموعد:</strong> {viewDialog.dueDate && _fmtDate(viewDialog.dueDate)}
                 </Typography>
               </Grid>
               <Grid item xs={12}>
@@ -520,7 +520,7 @@ export default function TaskManagement() {
                   <Paper key={i} sx={{ p: 1, mb: 1, bgcolor: '#f5f5f5' }}>
                     <Typography variant="body2">{c.text}</Typography>
                     <Typography variant="caption" color="text.secondary">
-                      {c.author?.firstName} — {new Date(c.createdAt).toLocaleString('ar-SA')}
+                      {c.author?.firstName} — {_fmtDT(c.createdAt)}
                     </Typography>
                   </Paper>
                 ))}

@@ -41,6 +41,7 @@ import {
   Assessment,
 } from '@mui/icons-material';
 import { surfaceColors, neutralColors, brandColors } from 'theme/palette';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const API = process.env.REACT_APP_API_URL || '/api';
 
@@ -371,9 +372,7 @@ const ComplianceControls = () => {
                         />
                       </TableCell>
                       <TableCell sx={{ textAlign: 'right' }}>
-                        {c.lastTestDate
-                          ? new Date(c.lastTestDate).toLocaleDateString('ar-SA')
-                          : 'لم يُختبر'}
+                        {c.lastTestDate ? _fmtDate(c.lastTestDate) : 'لم يُختبر'}
                       </TableCell>
                       <TableCell sx={{ textAlign: 'right' }}>
                         <Chip
@@ -487,7 +486,7 @@ const ComplianceControls = () => {
                       <TableCell
                         sx={{ textAlign: 'right', color: overdue ? '#F44336' : 'inherit' }}
                       >
-                        {ci.dueDate ? new Date(ci.dueDate).toLocaleDateString('ar-SA') : '-'}
+                        {ci.dueDate ? _fmtDate(ci.dueDate) : '-'}
                         {overdue && ' ⚠️'}
                       </TableCell>
                       <TableCell sx={{ textAlign: 'right' }}>

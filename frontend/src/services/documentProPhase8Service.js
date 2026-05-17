@@ -4,7 +4,7 @@
  */
 import apiClient from './api.client';
 
-const BASE = '/api/documents-pro-v8';
+const BASE = '/api/v1/documents-pro-v8';
 
 /* ══════════════════════════════════════════════════════════════
    Translation — ترجمة المستندات

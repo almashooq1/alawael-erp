@@ -19,7 +19,7 @@ export const parentService = {
   // ==================== BASIC PARENT ROUTES ====================
   async getParentDashboard(parentId) {
     try {
-      const data = await apiClient.get(`/parents/${parentId || 'me'}/dashboard`);
+      const data = await apiClient.get(`/api/v1/parents/${parentId || 'me'}/dashboard`);
       return data?.data || data;
     } catch {
       return getMockParentDashboard();
@@ -28,7 +28,7 @@ export const parentService = {
 
   async getChildrenProgress(parentId) {
     try {
-      const data = await apiClient.get(`/parents/${parentId || 'me'}/children-progress`);
+      const data = await apiClient.get(`/api/v1/parents/${parentId || 'me'}/children-progress`);
       return data?.data || data;
     } catch {
       return getMockChildrenProgress();
@@ -37,7 +37,7 @@ export const parentService = {
 
   async getAttendanceReports(parentId) {
     try {
-      const data = await apiClient.get(`/parents/${parentId || 'me'}/attendance`);
+      const data = await apiClient.get(`/api/v1/parents/${parentId || 'me'}/attendance`);
       return data?.data || data;
     } catch {
       return getMockAttendanceReports();
@@ -46,7 +46,7 @@ export const parentService = {
 
   async getTherapistCommunications(_parentId) {
     try {
-      const data = await apiClient.get('/communications/therapist');
+      const data = await apiClient.get('/api/v1/communications/therapist');
       return data?.data || data;
     } catch {
       return getMockTherapistCommunications();
@@ -55,7 +55,7 @@ export const parentService = {
 
   async getPaymentsHistory(parentId) {
     try {
-      const data = await apiClient.get(`/parents/${parentId || 'me'}/payments`);
+      const data = await apiClient.get(`/api/v1/parents/${parentId || 'me'}/payments`);
       return data?.data || data;
     } catch {
       return getMockPaymentsHistory();
@@ -64,7 +64,7 @@ export const parentService = {
 
   async getDocumentsReports(parentId) {
     try {
-      const data = await apiClient.get(`/parents/${parentId || 'me'}/documents`);
+      const data = await apiClient.get(`/api/v1/parents/${parentId || 'me'}/documents`);
       return data?.data || data;
     } catch {
       return getMockDocumentsReports();
@@ -73,7 +73,7 @@ export const parentService = {
 
   async getAppointmentsScheduling(parentId) {
     try {
-      const data = await apiClient.get(`/parents/${parentId || 'me'}/appointments`);
+      const data = await apiClient.get(`/api/v1/parents/${parentId || 'me'}/appointments`);
       return data?.data || data;
     } catch {
       return getMockAppointmentsScheduling();
@@ -82,7 +82,7 @@ export const parentService = {
 
   async getParentMessages(parentId) {
     try {
-      const data = await apiClient.get(`/parents/${parentId || 'me'}/messages`);
+      const data = await apiClient.get(`/api/v1/parents/${parentId || 'me'}/messages`);
       return data?.data || data;
     } catch {
       return getMockParentMessages();
@@ -93,7 +93,7 @@ export const parentService = {
   // Dashboard
   async getGuardianDashboard() {
     try {
-      const data = await apiClient.get('/guardian/dashboard');
+      const data = await apiClient.get('/api/v1/guardian/dashboard');
       return data?.data || data;
     } catch {
       return getMockParentDashboard();
@@ -102,7 +102,7 @@ export const parentService = {
 
   async getDashboardSummary() {
     try {
-      const data = await apiClient.get('/guardian/dashboard/summary');
+      const data = await apiClient.get('/api/v1/guardian/dashboard/summary');
       return data?.data || data;
     } catch {
       return null;
@@ -112,7 +112,7 @@ export const parentService = {
   // Profile
   async getProfile() {
     try {
-      const data = await apiClient.get('/guardian/profile');
+      const data = await apiClient.get('/api/v1/guardian/profile');
       return data?.data || data;
     } catch {
       return null;
@@ -120,14 +120,14 @@ export const parentService = {
   },
 
   async updateProfile(profileData) {
-    const data = await apiClient.put('/guardian/profile', profileData);
+    const data = await apiClient.put('/api/v1/guardian/profile', profileData);
     return data?.data || data;
   },
 
   // Beneficiaries
   async getBeneficiaries() {
     try {
-      const data = await apiClient.get('/guardian/beneficiaries');
+      const data = await apiClient.get('/api/v1/guardian/beneficiaries');
       return data?.data || data;
     } catch {
       return [];
@@ -136,7 +136,7 @@ export const parentService = {
 
   async getBeneficiaryDetail(id) {
     try {
-      const data = await apiClient.get(`/guardian/beneficiaries/${id}`);
+      const data = await apiClient.get(`/api/v1/guardian/beneficiaries/${id}`);
       return data?.data || data;
     } catch {
       return null;
@@ -145,7 +145,7 @@ export const parentService = {
 
   async getBeneficiaryProgress(id) {
     try {
-      const data = await apiClient.get(`/guardian/beneficiaries/${id}/progress`);
+      const data = await apiClient.get(`/api/v1/guardian/beneficiaries/${id}/progress`);
       return data?.data || data;
     } catch {
       return null;
@@ -154,7 +154,7 @@ export const parentService = {
 
   async getBeneficiaryProgressTrend(id) {
     try {
-      const data = await apiClient.get(`/guardian/beneficiaries/${id}/progress/trend`);
+      const data = await apiClient.get(`/api/v1/guardian/beneficiaries/${id}/progress/trend`);
       return data?.data || data;
     } catch {
       return [];
@@ -164,7 +164,7 @@ export const parentService = {
   // Grades
   async getBeneficiaryGrades(id) {
     try {
-      const data = await apiClient.get(`/guardian/beneficiaries/${id}/grades`);
+      const data = await apiClient.get(`/api/v1/guardian/beneficiaries/${id}/grades`);
       return data?.data || data;
     } catch {
       return [];
@@ -173,7 +173,7 @@ export const parentService = {
 
   async getGradesComparison() {
     try {
-      const data = await apiClient.get('/guardian/grades/comparison');
+      const data = await apiClient.get('/api/v1/guardian/grades/comparison');
       return data?.data || data;
     } catch {
       return null;
@@ -183,7 +183,7 @@ export const parentService = {
   // Attendance (Guardian Portal)
   async getBeneficiaryAttendance(id) {
     try {
-      const data = await apiClient.get(`/guardian/beneficiaries/${id}/attendance`);
+      const data = await apiClient.get(`/api/v1/guardian/beneficiaries/${id}/attendance`);
       return data?.data || data;
     } catch {
       return [];
@@ -192,7 +192,7 @@ export const parentService = {
 
   async getBeneficiaryAttendanceReport(id) {
     try {
-      const data = await apiClient.get(`/guardian/beneficiaries/${id}/attendance/report`);
+      const data = await apiClient.get(`/api/v1/guardian/beneficiaries/${id}/attendance/report`);
       return data?.data || data;
     } catch {
       return null;
@@ -202,7 +202,7 @@ export const parentService = {
   // Financial
   async getFinancialSummary() {
     try {
-      const data = await apiClient.get('/guardian/financial/summary');
+      const data = await apiClient.get('/api/v1/guardian/financial/summary');
       return data?.data || data;
     } catch {
       return null;
@@ -210,14 +210,14 @@ export const parentService = {
   },
 
   async makePayment(paymentData) {
-    const data = await apiClient.post('/guardian/payments', paymentData);
+    const data = await apiClient.post('/api/v1/guardian/payments', paymentData);
     return data?.data || data;
   },
 
   // Messages (Guardian Portal)
   async getGuardianMessages() {
     try {
-      const data = await apiClient.get('/guardian/messages');
+      const data = await apiClient.get('/api/v1/guardian/messages');
       return data?.data || data;
     } catch {
       return [];
@@ -225,14 +225,14 @@ export const parentService = {
   },
 
   async sendGuardianMessage(messageData) {
-    const data = await apiClient.post('/guardian/messages', messageData);
+    const data = await apiClient.post('/api/v1/guardian/messages', messageData);
     return data?.data || data;
   },
 
   // Notifications
   async getNotifications() {
     try {
-      const data = await apiClient.get('/guardian/notifications');
+      const data = await apiClient.get('/api/v1/guardian/notifications');
       return data?.data || data;
     } catch {
       return [];
@@ -240,19 +240,19 @@ export const parentService = {
   },
 
   async markNotificationRead(id) {
-    const data = await apiClient.put(`/guardian/notifications/${id}/read`);
+    const data = await apiClient.put(`/api/v1/guardian/notifications/${id}/read`);
     return data?.data || data;
   },
 
   async markAllNotificationsRead() {
-    const data = await apiClient.put('/guardian/notifications/read-all');
+    const data = await apiClient.put('/api/v1/guardian/notifications/read-all');
     return data?.data || data;
   },
 
   // Reports
   async getReports() {
     try {
-      const data = await apiClient.get('/guardian/reports');
+      const data = await apiClient.get('/api/v1/guardian/reports');
       return data?.data || data;
     } catch {
       return [];
@@ -260,7 +260,7 @@ export const parentService = {
   },
 
   async generateReport(reportConfig) {
-    const data = await apiClient.post('/guardian/reports/generate', reportConfig);
+    const data = await apiClient.post('/api/v1/guardian/reports/generate', reportConfig);
     return data?.data || data;
   },
 };

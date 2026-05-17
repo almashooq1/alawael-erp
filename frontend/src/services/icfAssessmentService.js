@@ -4,7 +4,7 @@
  */
 import api from './api';
 
-const BASE = '/api/icf-assessments';
+const BASE = '/api/v1/icf-assessments';
 
 // ── Assessments CRUD ──
 export const assessmentsService = {

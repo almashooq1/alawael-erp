@@ -44,6 +44,7 @@ import {
 } from '@mui/icons-material';
 
 import { reportsAPI } from '../../services/ddd';
+import { formatDateTime as _fmtDT } from 'utils/dateUtils';
 
 const REPORT_CATEGORIES = [
   { value: '', label: 'الكل' },
@@ -236,11 +237,7 @@ export default function ReportsPage() {
                   />
                 </Box>
                 <Typography variant="caption" color="text.secondary">
-                  {r.generatedAt
-                    ? new Date(r.generatedAt).toLocaleString('ar-SA')
-                    : r.createdAt
-                      ? new Date(r.createdAt).toLocaleString('ar-SA')
-                      : ''}
+                  {r.generatedAt ? _fmtDT(r.generatedAt) : r.createdAt ? _fmtDT(r.createdAt) : ''}
                 </Typography>
               </CardContent>
               <CardActions>

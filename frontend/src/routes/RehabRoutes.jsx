@@ -93,6 +93,34 @@ const ARVRRehabPage = lazyWithRetry(() => import('../pages/ar-vr-rehab/ARVRRehab
 // Rehab Programs (DDD) — البرامج التأهيلية (موحد)
 const RehabProgramsPage = lazyWithRetry(() => import('../pages/rehab-programs/RehabProgramsPage'));
 
+// Rehab Templates — مكتبة القوالب التأهيلية الذكية
+const RehabTemplatesPage = lazyWithRetry(
+  () => import('../pages/rehab-programs/RehabTemplatesPage')
+);
+
+// Activity Library — مكتبة الأنشطة التأهيلية (المرحلة 27)
+const ActivityLibraryPage = lazyWithRetry(
+  () => import('../pages/activity-library/ActivityLibraryPage')
+);
+
+// Session Center — مركز الجلسات العلاجية
+const SessionCenterPage = lazyWithRetry(() => import('../pages/session-center/SessionCenterPage'));
+
+// Episode Center — مركز الحلقة العلاجية الموحدة
+const EpisodeCenterPage = lazyWithRetry(() => import('../pages/episode-center/EpisodeCenterPage'));
+
+// Goal Bank — بنك الأهداف التأهيلية الذكية
+const GoalBankPage = lazyWithRetry(() => import('../pages/goal-bank/GoalBankPage'));
+
+// Report Center — مركز التقارير السريرية الموحدة
+const ReportCenterPage = lazyWithRetry(() => import('../pages/report-center/ReportCenterPage'));
+
+// Smart Measures Assessment — محرك مقاييس التأهيل الشاملة
+const SmartMeasuresPage = lazyWithRetry(() => import('../pages/assessments/SmartAssessmentPage'));
+
+// Rehab Progress Tracker — متتبع التقدم التأهيلي
+const RehabProgressTrackerPage = lazyWithRetry(() => import('../pages/rehab/RehabProgressTracker'));
+
 // Compliance Hub — مركز الامتثال المؤسسي
 const ComplianceHubPage = lazyWithRetry(() => import('../pages/compliance-hub/ComplianceHubPage'));
 
@@ -213,6 +241,24 @@ export default function RehabRoutes() {
       {/* Rehab Programs (DDD unified) — البرامج التأهيلية الموحدة */}
       <Route path="programs" element={<RehabProgramsPage />} />
 
+      {/* Rehab Program Templates — مكتبة القوالب التأهيلية الذكية */}
+      <Route path="rehab-templates" element={<RehabTemplatesPage />} />
+
+      {/* Activity Library — مكتبة الأنشطة التأهيلية */}
+      <Route path="activity-library" element={<ActivityLibraryPage />} />
+
+      {/* Session Center — مركز الجلسات العلاجية */}
+      <Route path="session-center" element={<SessionCenterPage />} />
+
+      {/* Episode Center — مركز الحلقة العلاجية الموحدة */}
+      <Route path="episode-center" element={<EpisodeCenterPage />} />
+
+      {/* Smart Measures Assessment — مقاييس التأهيل الشاملة */}
+      <Route path="rehab-measures" element={<SmartMeasuresPage />} />
+
+      {/* Rehab Progress Tracker — متتبع التقدم */}
+      <Route path="rehab-progress-tracker" element={<RehabProgressTrackerPage />} />
+
       {/* Compliance Hub — مركز الامتثال المؤسسي */}
       <Route path="compliance-hub" element={<ComplianceHubPage />} />
 
@@ -239,6 +285,12 @@ export default function RehabRoutes() {
 
       {/* Community Engagement — الانخراط المجتمعي والتطوعي */}
       <Route path="community-engagement" element={<CommunityEngagementPage />} />
+
+      {/* Goal Bank — بنك الأهداف التأهيلية الذكية */}
+      <Route path="goal-bank" element={<GoalBankPage />} />
+
+      {/* Report Center — مركز التقارير السريرية الموحدة */}
+      <Route path="report-center" element={<ReportCenterPage />} />
     </>
   );
 }

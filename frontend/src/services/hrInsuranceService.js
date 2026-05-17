@@ -1,4 +1,4 @@
-/**
+﻿/**
  * hrInsuranceService.js — خدمة تأمين الموظفين الصحي
  * HR Employee Health Insurance API Service
  *
@@ -14,7 +14,7 @@
  */
 import api from './api.client';
 
-const BASE = '/hr-insurance';
+const BASE = '/api/v1/hr/insurance';
 
 const hrInsuranceService = {
   // ─── البيانات المرجعية ────────────────────────────────────────────────

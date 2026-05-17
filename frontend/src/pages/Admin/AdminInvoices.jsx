@@ -53,6 +53,7 @@ import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import WarningIcon from '@mui/icons-material/Warning';
 import api from '../../services/api.client';
 import BeneficiaryTypeahead from '../../components/BeneficiaryTypeahead';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const STATUS_OPTIONS = [
   { value: '', label: 'كل الحالات' },
@@ -95,7 +96,7 @@ function formatSAR(n) {
 function formatDate(v) {
   if (!v) return '—';
   try {
-    return new Date(v).toLocaleDateString('ar-SA');
+    return _fmtDate(v);
   } catch {
     return '—';
   }

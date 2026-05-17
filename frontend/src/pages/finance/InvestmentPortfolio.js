@@ -40,6 +40,7 @@ import {
   MonetizationOn,
 } from '@mui/icons-material';
 import { surfaceColors, neutralColors, brandColors } from 'theme/palette';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const API = process.env.REACT_APP_API_URL || '/api';
 const fmt = v =>
@@ -437,7 +438,7 @@ const InvestmentPortfolio = () => {
                 {(selected.transactions || []).map((tx, i) => (
                   <TableRow key={i}>
                     <TableCell sx={{ textAlign: 'right' }}>
-                      {tx.date ? new Date(tx.date).toLocaleDateString('ar-SA') : '-'}
+                      {tx.date ? _fmtDate(tx.date) : '-'}
                     </TableCell>
                     <TableCell sx={{ textAlign: 'right' }}>
                       <Chip

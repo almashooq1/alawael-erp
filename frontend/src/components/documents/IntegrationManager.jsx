@@ -43,6 +43,7 @@ import {
 } from '@mui/icons-material';
 import { integrationsApi } from '../../services/documentProPhase5Service';
 import logger from '../../utils/logger';
+import { formatDate as _fmtDate, formatDateTime as _fmtDT } from 'utils/dateUtils';
 
 const STATUS_COLORS = {
   active: '#22c55e',
@@ -284,11 +285,7 @@ export default function IntegrationManager() {
                           <span>✅ {intg.stats?.successRuns ?? 0}</span>
                           <span>❌ {intg.stats?.failedRuns ?? 0}</span>
                           <span>📊 {intg.stats?.totalRuns ?? 0} إجمالي</span>
-                          {intg.lastRun && (
-                            <span>
-                              آخر تشغيل: {new Date(intg.lastRun).toLocaleDateString('ar-SA')}
-                            </span>
-                          )}
+                          {intg.lastRun && <span>آخر تشغيل: {_fmtDate(intg.lastRun)}</span>}
                         </Stack>
                       }
                     />
@@ -392,7 +389,7 @@ export default function IntegrationManager() {
                   </ListItemAvatar>
                   <ListItemText
                     primary={`${log.event} — ${log.status}`}
-                    secondary={`${new Date(log.createdAt).toLocaleString('ar-SA')} • ${log.responseTime}ms • HTTP ${log.response?.statusCode || '?'}`}
+                    secondary={`${_fmtDT(log.createdAt)} • ${log.responseTime}ms • HTTP ${log.response?.statusCode || '?'}`}
                     primaryTypographyProps={{ fontSize: 13 }}
                   />
                 </ListItem>

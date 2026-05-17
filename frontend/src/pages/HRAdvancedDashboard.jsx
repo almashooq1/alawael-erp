@@ -53,6 +53,7 @@ import HealthAndSafetyIcon from '@mui/icons-material/HealthAndSafety';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import apiClient from '../services/api';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 /* ─── Glass component ─── */
 const Glass = memo(({ children, sx = {}, ...rest }) => {
@@ -733,7 +734,7 @@ export default function HRAdvancedDashboard() {
               dept: e.department || 'عام',
               score: e.performance?.currentRating || 85,
               status: e.status === 'active' ? 'نشط' : e.status === 'on-leave' ? 'إجازة' : 'نشط',
-              joinDate: e.hireDate ? new Date(e.hireDate).toLocaleDateString('ar-SA') : '',
+              joinDate: e.hireDate ? _fmtDate(e.hireDate) : '',
             }))
           : D.employees;
       setD(prev => ({ ...prev, kpis, employees }));

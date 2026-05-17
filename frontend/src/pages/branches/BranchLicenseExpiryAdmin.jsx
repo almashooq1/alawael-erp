@@ -40,6 +40,7 @@ import {
   Warning,
 } from '@mui/icons-material';
 import { getToken } from '../../utils/tokenStorage';
+import { formatDate } from 'utils/dateUtils';
 
 const API = process.env.REACT_APP_API_URL || '/api';
 
@@ -370,7 +371,7 @@ export default function BranchLicenseExpiryAdmin() {
                           <Stack alignItems="center" spacing={0.5}>
                             {expiryChip(days)}
                             <Typography variant="caption" color="text.secondary">
-                              {new Date(br.baladyExpiry).toLocaleDateString('ar-SA')}
+                              {formatDate(br.baladyExpiry)}
                             </Typography>
                           </Stack>
                         ) : (

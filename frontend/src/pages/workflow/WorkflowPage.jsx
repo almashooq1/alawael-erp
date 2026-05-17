@@ -49,6 +49,7 @@ import {
 } from '@mui/icons-material';
 
 import { workflowAPI } from '../../services/ddd';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 /* ── Priority config ── */
 const PRIORITY = {
@@ -349,7 +350,7 @@ export default function WorkflowPage() {
                                   variant="caption"
                                   color={isOverdue ? 'error' : 'text.secondary'}
                                 >
-                                  {new Date(task.dueDate).toLocaleDateString('ar-SA')}
+                                  {_fmtDate(task.dueDate)}
                                 </Typography>
                               )}
                             </Stack>
@@ -425,8 +426,7 @@ export default function WorkflowPage() {
                           <>
                             {task.description || ''}
                             {task.assignedTo?.name && ` • ${task.assignedTo.name}`}
-                            {task.dueDate &&
-                              ` • ${new Date(task.dueDate).toLocaleDateString('ar-SA')}`}
+                            {task.dueDate && ` • ${_fmtDate(task.dueDate)}`}
                           </>
                         }
                       />

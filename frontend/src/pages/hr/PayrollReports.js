@@ -51,6 +51,7 @@ import payrollService from 'services/payrollService';
 import logger from 'utils/logger';
 import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from 'theme/palette';
 import { useSnackbar } from '../../contexts/SnackbarContext';
+import { formatDateTime as _fmtDT } from 'utils/dateUtils';
 
 // ─── Report Type Definitions ───
 const REPORT_TYPES = [
@@ -1265,8 +1266,7 @@ const PayrollReports = () => {
                   {reportData.reportName || REPORT_TYPES.find(r => r.id === selectedReport)?.label}
                 </Typography>
                 <Typography variant="caption" sx={{ color: neutralColors.textSecondary }}>
-                  {reportData.generatedAt &&
-                    new Date(reportData.generatedAt).toLocaleString('ar-SA')}
+                  {reportData.generatedAt && _fmtDT(reportData.generatedAt)}
                 </Typography>
               </Box>
               <Box sx={{ display: 'flex', gap: 1 }}>

@@ -3,7 +3,7 @@
  */
 import apiClient from './api.client';
 
-const BASE = '/api/assets';
+const BASE = '/api/v1/assets';
 
 /* ── Dashboard ────────────────────────── */
 export const getDashboard = async () => {

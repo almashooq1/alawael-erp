@@ -13,6 +13,7 @@ import {
   Typography,
 } from '@mui/material';
 import { Add as AddIcon, Assignment as AssignmentIcon } from '@mui/icons-material';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const TYPE_LABELS = {
   salary_certificate: 'شهادة راتب',
@@ -79,9 +80,7 @@ export default function RequestsTab({ requests = [], onOpenDialog }) {
                       />
                     </TableCell>
                     <TableCell>{req.description}</TableCell>
-                    <TableCell>
-                      {req.createdAt ? new Date(req.createdAt).toLocaleDateString('ar-SA') : '—'}
-                    </TableCell>
+                    <TableCell>{req.createdAt ? _fmtDate(req.createdAt) : '—'}</TableCell>
                     <TableCell align="center">
                       <Chip label={st.label} color={st.color} size="small" />
                     </TableCell>

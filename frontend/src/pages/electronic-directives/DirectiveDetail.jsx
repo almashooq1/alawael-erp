@@ -59,6 +59,7 @@ import {
   Edit as EditIcon,
 } from '@mui/icons-material';
 import electronicDirectivesService from '../../services/electronicDirectives.service';
+import { formatDate as _fmtDate, formatDateTime as _fmtDT } from 'utils/dateUtils';
 import {
   DIRECTIVE_TYPES,
   DIRECTIVE_PRIORITIES,
@@ -439,13 +440,7 @@ export default function DirectiveDetail() {
                         <TableCell>{r.name || r.targetId || '—'}</TableCell>
                         <TableCell>
                           {r.readStatus?.read ? (
-                            <Tooltip
-                              title={
-                                r.readStatus.readAt
-                                  ? new Date(r.readStatus.readAt).toLocaleString('ar-SA')
-                                  : ''
-                              }
-                            >
+                            <Tooltip title={r.readStatus.readAt ? _fmtDT(r.readStatus.readAt) : ''}>
                               <CheckIcon color="success" fontSize="small" />
                             </Tooltip>
                           ) : (
@@ -550,12 +545,12 @@ export default function DirectiveDetail() {
                             />
                             {action.deadline && (
                               <Typography variant="caption" color="text.secondary">
-                                الموعد: {new Date(action.deadline).toLocaleDateString('ar-SA')}
+                                الموعد: {_fmtDate(action.deadline)}
                               </Typography>
                             )}
                             {action.completedAt && (
                               <Typography variant="caption" color="success.main">
-                                أُكمل: {new Date(action.completedAt).toLocaleDateString('ar-SA')}
+                                أُكمل: {_fmtDate(action.completedAt)}
                               </Typography>
                             )}
                           </Box>
@@ -607,7 +602,7 @@ export default function DirectiveDetail() {
                         att.size
                           ? `${(att.size / 1024).toFixed(1)} KB`
                           : att.uploadedAt
-                            ? new Date(att.uploadedAt).toLocaleDateString('ar-SA')
+                            ? _fmtDate(att.uploadedAt)
                             : ''
                       }
                     />
@@ -681,9 +676,7 @@ export default function DirectiveDetail() {
                 تاريخ السريان
               </Typography>
               <Typography variant="body2">
-                {directive.effectiveFrom
-                  ? new Date(directive.effectiveFrom).toLocaleDateString('ar-SA')
-                  : '—'}
+                {directive.effectiveFrom ? _fmtDate(directive.effectiveFrom) : '—'}
               </Typography>
             </Box>
 
@@ -692,9 +685,7 @@ export default function DirectiveDetail() {
                 <Typography variant="caption" color="text.secondary">
                   تاريخ الانتهاء
                 </Typography>
-                <Typography variant="body2">
-                  {new Date(directive.effectiveUntil).toLocaleDateString('ar-SA')}
-                </Typography>
+                <Typography variant="body2">{_fmtDate(directive.effectiveUntil)}</Typography>
               </Box>
             )}
 
@@ -703,9 +694,7 @@ export default function DirectiveDetail() {
                 <Typography variant="caption" color="text.secondary">
                   تاريخ الإصدار
                 </Typography>
-                <Typography variant="body2">
-                  {new Date(directive.issuedAt).toLocaleString('ar-SA')}
-                </Typography>
+                <Typography variant="body2">{_fmtDT(directive.issuedAt)}</Typography>
               </Box>
             )}
 
@@ -714,7 +703,7 @@ export default function DirectiveDetail() {
                 تاريخ الإنشاء
               </Typography>
               <Typography variant="body2">
-                {directive.createdAt ? new Date(directive.createdAt).toLocaleString('ar-SA') : '—'}
+                {directive.createdAt ? _fmtDT(directive.createdAt) : '—'}
               </Typography>
             </Box>
 
@@ -723,7 +712,7 @@ export default function DirectiveDetail() {
                 <Chip label="يتطلب إقراراً" size="small" color="warning" />
                 {directive.acknowledgmentDeadline && (
                   <Typography variant="caption" display="block" color="text.secondary" mt={0.5}>
-                    الموعد: {new Date(directive.acknowledgmentDeadline).toLocaleDateString('ar-SA')}
+                    الموعد: {_fmtDate(directive.acknowledgmentDeadline)}
                   </Typography>
                 )}
               </Box>

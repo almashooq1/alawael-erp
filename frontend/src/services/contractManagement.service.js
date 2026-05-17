@@ -1,9 +1,9 @@
 /**
  * خدمة إدارة العقود — Contract Management Service
  */
-import apiClient from './api';
+import apiClient from './api.client';
 
-const BASE = '/api/contracts';
+const BASE = '/api/v1/contract-management';
 
 export const getDashboard = async () => {
   try {

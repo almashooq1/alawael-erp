@@ -63,6 +63,7 @@ import logger from '../../utils/logger';
 import { gradients, brandColors, statusColors } from '../../theme/palette';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
+import { formatDateTime as _fmtDT } from 'utils/dateUtils';
 
 // ─── Tab Panel ───────────────────────────────────────────────
 function TabPanel({ children, value, index, ...other }) {
@@ -1366,8 +1367,7 @@ const AdminSystemSettings = () => {
                   }
                   sx={{ mb: 2 }}
                 >
-                  آخر نسخ احتياطي:{' '}
-                  {new Date(settings.backup.lastBackupDate).toLocaleString('ar-SA')} — الحالة:{' '}
+                  آخر نسخ احتياطي: {_fmtDT(settings.backup.lastBackupDate)} — الحالة:{' '}
                   {settings.backup.lastBackupStatus === 'success' ? 'ناجح' : 'فشل'}
                 </Alert>
               ) : (
@@ -1872,7 +1872,7 @@ const AdminSystemSettings = () => {
                         <Typography variant="body2">{entry.changes?.action || 'تحديث'}</Typography>
                       </Box>
                     }
-                    secondary={new Date(entry.changedAt).toLocaleString('ar-SA')}
+                    secondary={_fmtDT(entry.changedAt)}
                   />
                 </ListItem>
               ))}

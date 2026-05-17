@@ -66,6 +66,7 @@ import {
   ScatterPlot as ScatterIcon,
 } from '@mui/icons-material';
 import reportBuilderService from '../../services/reportBuilderService';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 /* ═══════════════════════════════════════════════════════════
    KPI Card
@@ -943,11 +944,7 @@ export default function ReportBuilderDashboard() {
                       />
                     </TableCell>
                     <TableCell>{r.columns?.length || 0}</TableCell>
-                    <TableCell>
-                      {r.lastExecutedAt
-                        ? new Date(r.lastExecutedAt).toLocaleDateString('ar-SA')
-                        : '—'}
-                    </TableCell>
+                    <TableCell>{r.lastExecutedAt ? _fmtDate(r.lastExecutedAt) : '—'}</TableCell>
                     <TableCell>
                       <Tooltip title="تصميم">
                         <IconButton

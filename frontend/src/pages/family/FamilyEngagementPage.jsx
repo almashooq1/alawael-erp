@@ -67,6 +67,7 @@ import {
   Dashboard as DashboardIcon,
 } from '@mui/icons-material';
 import { familyAPI } from '../../services/ddd';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 // ── Constants ────────────────────────────────────────────────────────────────
 const RELATIONSHIP_OPTIONS = [
@@ -148,7 +149,7 @@ const INITIAL_HOMEWORK_FORM = {
   instructions: '',
 };
 
-const fmtDate = d => (d ? new Date(d).toLocaleDateString('ar-SA') : '—');
+const fmtDate = d => (d ? _fmtDate(d) : '—');
 const getCommType = v => COMM_TYPES.find(c => c.value === v);
 
 // ── KPI Card ─────────────────────────────────────────────────────────────────

@@ -36,6 +36,7 @@ import {
 import logger from 'utils/logger';
 import { gradients } from '../../theme/palette';
 import { useSnackbar } from '../../contexts/SnackbarContext';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 // بيانات تجريبية
 const demoHistory = [
@@ -136,9 +137,7 @@ function PaymentDashboard() {
           setStats(prev => ({
             ...prev,
             activePlan: res.data.plan || prev.activePlan,
-            nextBill: res.data.nextBillingDate
-              ? new Date(res.data.nextBillingDate).toLocaleDateString('ar')
-              : prev.nextBill,
+            nextBill: res.data.nextBillingDate ? _fmtDate(res.data.nextBillingDate) : prev.nextBill,
           }));
         }
       } catch {
@@ -242,9 +241,7 @@ function PaymentDashboard() {
               <Typography color="textSecondary">تاريخ آخر دفعة</Typography>
             </Box>
             <Typography variant="h6">
-              {history.length > 0
-                ? new Date(history[0].createdAt).toLocaleDateString('ar')
-                : 'لا توجد مدفوعات'}
+              {history.length > 0 ? _fmtDate(history[0].createdAt) : 'لا توجد مدفوعات'}
             </Typography>
           </CardContent>
         </Card>

@@ -43,6 +43,7 @@ import {
   Refresh as RefreshIcon,
 } from '@mui/icons-material';
 import electronicDirectivesService from '../../services/electronicDirectives.service';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 import {
   DIRECTIVE_TYPES,
   DIRECTIVE_PRIORITIES,
@@ -416,9 +417,9 @@ export default function DirectivesList() {
                     <TableCell>
                       <Typography variant="body2">
                         {d.issuedAt
-                          ? new Date(d.issuedAt).toLocaleDateString('ar-SA')
+                          ? _fmtDate(d.issuedAt)
                           : d.createdAt
-                            ? new Date(d.createdAt).toLocaleDateString('ar-SA')
+                            ? _fmtDate(d.createdAt)
                             : '—'}
                       </Typography>
                     </TableCell>

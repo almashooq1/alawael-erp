@@ -161,37 +161,52 @@ export const MOCK_RECRUITMENT_DASHBOARD = {
 
 /* ─── API Wrappers ─── */
 export const jobPostingsService = {
-  getAll: () => safe(() => apiClient.get('/recruitment/jobs').then(r => r.data), MOCK_JOB_POSTINGS),
-  getById: id => safe(() => apiClient.get(`/recruitment/jobs/${id}`).then(r => r.data)),
-  create: d => safe(() => apiClient.post('/recruitment/jobs', d).then(r => r.data), d),
-  update: (id, d) => safe(() => apiClient.put(`/recruitment/jobs/${id}`, d).then(r => r.data), d),
+  getAll: () =>
+    safe(() => apiClient.get('/api/v1/recruitment/postings').then(r => r.data), MOCK_JOB_POSTINGS),
+  getById: id => safe(() => apiClient.get(`/api/v1/recruitment/postings/${id}`).then(r => r.data)),
+  create: d => safe(() => apiClient.post('/api/v1/recruitment/postings', d).then(r => r.data), d),
+  update: (id, d) =>
+    safe(() => apiClient.put(`/api/v1/recruitment/postings/${id}`, d).then(r => r.data), d),
   remove: id =>
-    safe(() => apiClient.delete(`/recruitment/jobs/${id}`).then(r => r.data), { success: true }),
+    safe(() => apiClient.delete(`/api/v1/recruitment/postings/${id}`).then(r => r.data), {
+      success: true,
+    }),
   close: id =>
-    safe(() => apiClient.patch(`/recruitment/jobs/${id}/close`).then(r => r.data), {
+    safe(() => apiClient.patch(`/api/v1/recruitment/postings/${id}/close`).then(r => r.data), {
       success: true,
     }),
 };
 
 export const applicantsService = {
   getAll: () =>
-    safe(() => apiClient.get('/recruitment/applicants').then(r => r.data), MOCK_APPLICANTS),
-  getById: id => safe(() => apiClient.get(`/recruitment/applicants/${id}`).then(r => r.data)),
-  create: d => safe(() => apiClient.post('/recruitment/applicants', d).then(r => r.data), d),
+    safe(
+      () => apiClient.get('/api/v1/recruitment/applications').then(r => r.data),
+      MOCK_APPLICANTS
+    ),
+  getById: id =>
+    safe(() => apiClient.get(`/api/v1/recruitment/applications/${id}`).then(r => r.data)),
+  create: d =>
+    safe(() => apiClient.post('/api/v1/recruitment/applications', d).then(r => r.data), d),
   update: (id, d) =>
-    safe(() => apiClient.put(`/recruitment/applicants/${id}`, d).then(r => r.data), d),
+    safe(() => apiClient.put(`/api/v1/recruitment/applications/${id}`, d).then(r => r.data), d),
   updateStage: (id, stage) =>
     safe(
-      () => apiClient.patch(`/recruitment/applicants/${id}/stage`, { stage }).then(r => r.data),
+      () =>
+        apiClient
+          .patch(`/api/v1/recruitment/applications/${id}/status`, { stage })
+          .then(r => r.data),
       { stage }
     ),
   reject: (id, reason) =>
     safe(
-      () => apiClient.patch(`/recruitment/applicants/${id}/reject`, { reason }).then(r => r.data),
+      () =>
+        apiClient
+          .patch(`/api/v1/recruitment/applications/${id}/status`, { status: 'rejected', reason })
+          .then(r => r.data),
       { success: true }
     ),
   hire: id =>
-    safe(() => apiClient.patch(`/recruitment/applicants/${id}/hire`).then(r => r.data), {
+    safe(() => apiClient.patch(`/api/v1/recruitment/applications/${id}/offer`).then(r => r.data), {
       success: true,
     }),
 };
@@ -199,7 +214,7 @@ export const applicantsService = {
 export const recruitmentReportsService = {
   getDashboardStats: () =>
     safe(
-      () => apiClient.get('/recruitment/dashboard').then(r => r.data),
+      () => apiClient.get('/api/v1/recruitment/stats').then(r => r.data),
       MOCK_RECRUITMENT_DASHBOARD
     ),
 };

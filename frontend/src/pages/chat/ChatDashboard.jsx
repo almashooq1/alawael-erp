@@ -63,6 +63,7 @@ import {
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import chatService from '../../services/chatService';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 // ── Status Colors ──
 const STATUS_COLORS = { online: '#4caf50', away: '#ff9800', busy: '#f44336', offline: '#9e9e9e' };
@@ -896,7 +897,7 @@ export default function ChatDashboard() {
                   </ListItemAvatar>
                   <ListItemText
                     primary={msg.content}
-                    secondary={`${msg.senderName} — ${msg.conversationName} — ${new Date(msg.createdAt).toLocaleDateString('ar-SA')}`}
+                    secondary={`${msg.senderName} — ${msg.conversationName} — ${_fmtDate(msg.createdAt)}`}
                   />
                 </ListItem>
               ))}

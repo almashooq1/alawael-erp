@@ -49,6 +49,7 @@ import {
   Warning,
 } from '@mui/icons-material';
 import authHeader from '../../utils/authHeader';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 /* ─── API ────────────────────────────────────────────────────────────────── */
 const BASE = '/api/admin/invoices';
@@ -181,7 +182,7 @@ export default function ZatcaChainIntegrityAdmin() {
     inv => inv.zatca?.submissionStatus === 'submitted'
   ).length;
 
-  const fmt = d => (d ? new Date(d).toLocaleDateString('ar-SA') : '—');
+  const fmt = d => (d ? _fmtDate(d) : '—');
 
   const truncateHash = h => (h ? `${h.slice(0, 16)}…` : '—');
 

@@ -64,6 +64,7 @@ import { ChartTooltip } from '../../components/dashboard/shared/ChartTooltip';
 import EmptyState from '../../components/dashboard/shared/EmptyState';
 import DashboardErrorBoundary from '../../components/dashboard/shared/DashboardErrorBoundary';
 import logger from '../../utils/logger';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const useCounter = (end, dur = 1000) => {
   const [v, setV] = useState(0);
@@ -258,7 +259,7 @@ export default function BlockchainDashboard() {
     const hdr = 'رقم الشهادة,المستلم,النوع,الحالة,التاريخ';
     const rows = certs.map(c => {
       const date = c.issueDate || c.issuedAt || c.createdAt;
-      return `${c.certificateNumber || '-'},"${recipientName(c)}","${c.title?.ar || c.title?.en || c.template?.name || '-'}",${certStatusLabels[c.status] || '-'},${date ? new Date(date).toLocaleDateString('ar') : '-'}`;
+      return `${c.certificateNumber || '-'},"${recipientName(c)}","${c.title?.ar || c.title?.en || c.template?.name || '-'}",${certStatusLabels[c.status] || '-'},${date ? _fmtDate(date) : '-'}`;
     });
     const blob = new Blob(['\uFEFF' + [hdr, ...rows].join('\n')], {
       type: 'text/csv;charset=utf-8;',
@@ -744,7 +745,7 @@ export default function BlockchainDashboard() {
                           </TableCell>
                           <TableCell>
                             <Typography variant="body2" sx={{ fontSize: 12 }}>
-                              {date ? new Date(date).toLocaleDateString('ar') : '—'}
+                              {date ? _fmtDate(date) : '—'}
                             </Typography>
                           </TableCell>
                           <TableCell>

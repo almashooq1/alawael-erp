@@ -1,5 +1,6 @@
 import React from 'react';
 import { Box, Card, CardContent, Chip, Grid, Typography } from '@mui/material';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 import {
   Description as ContractIcon,
   VerifiedUser as CertIcon,
@@ -87,7 +88,7 @@ export default function DocumentsTab({ documents = [] }) {
                   }}
                 >
                   <Typography variant="caption" color="text.secondary">
-                    {doc.uploadDate ? new Date(doc.uploadDate).toLocaleDateString('ar-SA') : '—'}
+                    {doc.uploadDate ? _fmtDate(doc.uploadDate) : '—'}
                     {doc.size ? ` • ${doc.size}` : ''}
                   </Typography>
                   <Chip label={st.label} color={st.color} size="small" />

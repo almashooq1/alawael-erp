@@ -38,6 +38,7 @@ import {
   EventBusy,
 } from '@mui/icons-material';
 import { surfaceColors, neutralColors, brandColors } from 'theme/palette';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const API = process.env.REACT_APP_API_URL || '/api';
 
@@ -321,16 +322,13 @@ const TaxCalendar = () => {
                     <TableCell>
                       {item.periodStart && item.periodEnd ? (
                         <Typography variant="caption">
-                          {new Date(item.periodStart).toLocaleDateString('ar-SA')} -{' '}
-                          {new Date(item.periodEnd).toLocaleDateString('ar-SA')}
+                          {_fmtDate(item.periodStart)} - {_fmtDate(item.periodEnd)}
                         </Typography>
                       ) : (
                         '-'
                       )}
                     </TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>
-                      {new Date(item.dueDate).toLocaleDateString('ar-SA')}
-                    </TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>{_fmtDate(item.dueDate)}</TableCell>
                     <TableCell>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         {['paid', 'filed', 'cancelled'].includes(item.status) ? (

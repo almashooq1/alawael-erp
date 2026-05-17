@@ -58,6 +58,7 @@ import {
 } from '@mui/icons-material';
 import { useParams, useNavigate } from 'react-router-dom';
 import aiDiagnosticService from '../../services/aiDiagnosticService';
+import { formatDateTime as _fmtDT } from 'utils/dateUtils';
 
 /* ── helpers ── */
 const priorityColor = p => ({ high: 'error', medium: 'warning', low: 'success' })[p] || 'default';
@@ -725,7 +726,7 @@ export default function BeneficiaryAnalysis() {
           ) : (
             <Box>
               <Alert severity="success" sx={{ mb: 2 }}>
-                تم إنشاء التقرير بتاريخ: {new Date(report.generatedAt).toLocaleString('ar-SA')}
+                تم إنشاء التقرير بتاريخ: {_fmtDT(report.generatedAt)}
               </Alert>
 
               {/* Summary */}

@@ -6,7 +6,7 @@
 
 import api from './api.client';
 
-const BASE = '/electronic-directives';
+const BASE = '/api/v1/electronic-directives';
 
 const electronicDirectivesService = {
   // ==================== CRUD ====================

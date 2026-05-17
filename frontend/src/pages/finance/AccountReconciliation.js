@@ -28,6 +28,7 @@ import {
 } from '@mui/material';
 import { CompareArrows, Refresh, Add, AccountBalance, SwapHoriz } from '@mui/icons-material';
 import { surfaceColors, neutralColors, brandColors } from 'theme/palette';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const API = process.env.REACT_APP_API_URL || '/api';
 
@@ -231,8 +232,8 @@ const AccountReconciliation = () => {
                         {r.accountName || r.accountId || '-'}
                       </TableCell>
                       <TableCell sx={{ textAlign: 'right' }}>
-                        {r.periodStart ? new Date(r.periodStart).toLocaleDateString('ar-SA') : '-'}{' '}
-                        — {r.periodEnd ? new Date(r.periodEnd).toLocaleDateString('ar-SA') : '-'}
+                        {r.periodStart ? _fmtDate(r.periodStart) : '-'} —{' '}
+                        {r.periodEnd ? _fmtDate(r.periodEnd) : '-'}
                       </TableCell>
                       <TableCell sx={{ textAlign: 'right' }}>{fmt(r.openingBalance)}</TableCell>
                       <TableCell sx={{ textAlign: 'right' }}>{fmt(r.closingBalance)}</TableCell>

@@ -4,7 +4,7 @@
  */
 import api from './api';
 
-const BASE = '/ai-diagnostic';
+const BASE = '/api/v1/ai-diagnostic';
 
 const aiDiagnosticService = {
   /* ── Dashboard ── */

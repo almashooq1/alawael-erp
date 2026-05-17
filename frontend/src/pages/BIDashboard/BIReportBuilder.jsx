@@ -40,6 +40,7 @@ import {
   updateReport,
   deleteReport,
 } from '../../services/biDashboard.service';
+import { formatDate } from 'utils/dateUtils';
 
 const CATEGORIES = [
   { value: '', label: 'الكل' },
@@ -287,9 +288,7 @@ export default function BIReportBuilder() {
                       <Chip label={st.label} size="small" color={st.color} />
                     </TableCell>
                     <TableCell>
-                      <Typography variant="body2">
-                        {r.updatedAt ? new Date(r.updatedAt).toLocaleDateString('ar-SA') : '—'}
-                      </Typography>
+                      <Typography variant="body2">{formatDate(r.updatedAt)}</Typography>
                     </TableCell>
                     <TableCell align="center">
                       <Tooltip title="تعديل">

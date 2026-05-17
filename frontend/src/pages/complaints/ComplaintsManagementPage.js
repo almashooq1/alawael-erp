@@ -49,6 +49,7 @@ import {
   PersonOutlined as PersonIcon,
 } from '@mui/icons-material';
 import { complaintsService } from '../../services/complaintsService';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const DEMO_COMPLAINTS = [
   {
@@ -426,7 +427,7 @@ export default function ComplaintsManagementPage() {
                       color={STATUS_CONFIG[c.status]?.color}
                     />
                   </TableCell>
-                  <TableCell>{new Date(c.createdAt).toLocaleDateString('ar-SA')}</TableCell>
+                  <TableCell>{_fmtDate(c.createdAt)}</TableCell>
                   <TableCell onClick={e => e.stopPropagation()}>
                     <IconButton
                       size="small"

@@ -36,6 +36,7 @@ import {
   AssignmentReturn as ReturnIcon,
   ReportProblem as IssueIcon,
 } from '@mui/icons-material';
+import { formatDate as _fmtDate, formatDateTime as _fmtDT } from 'utils/dateUtils';
 import {
   getCustodies,
   createCustody,
@@ -482,8 +483,7 @@ export default function CustodyManagement() {
               <Grid item xs={6}>
                 <Typography>
                   <strong>تاريخ التسليم:</strong>{' '}
-                  {viewDialog.assignedDate &&
-                    new Date(viewDialog.assignedDate).toLocaleDateString('ar-SA')}
+                  {viewDialog.assignedDate && _fmtDate(viewDialog.assignedDate)}
                 </Typography>
               </Grid>
               <Grid item xs={6}>
@@ -502,7 +502,7 @@ export default function CustodyManagement() {
                         <strong>{h.action}</strong> — {h.condition && `الحالة: ${h.condition}`}
                       </Typography>
                       <Typography variant="caption" color="text.secondary">
-                        {new Date(h.date).toLocaleString('ar-SA')} — {h.notes}
+                        {_fmtDT(h.date)} — {h.notes}
                       </Typography>
                     </Paper>
                   ))}

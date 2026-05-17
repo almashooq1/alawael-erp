@@ -70,6 +70,7 @@ import {
   dashboardApi,
 } from '../../services/documentProPhase4Service';
 import logger from '../../utils/logger';
+import { formatDateTime as _fmtDT } from 'utils/dateUtils';
 
 /* ═══════════════════════════════════════════
  *  Helpers
@@ -787,9 +788,7 @@ export default function DocumentsProPhase4() {
                             <TableCell align="right">
                               {job.result?.processingTime ? `${job.result.processingTime}ms` : '—'}
                             </TableCell>
-                            <TableCell align="right">
-                              {new Date(job.createdAt).toLocaleString('ar-SA')}
-                            </TableCell>
+                            <TableCell align="right">{_fmtDT(job.createdAt)}</TableCell>
                           </TableRow>
                         ))}
                       </TableBody>

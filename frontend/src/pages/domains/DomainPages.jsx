@@ -42,6 +42,7 @@ import {
   Visibility as ViewIcon,
 } from '@mui/icons-material';
 
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 import {
   assessmentsAPI,
   carePlansAPI,
@@ -336,7 +337,7 @@ function createDomainPage({
    (imports hoisted to top of file — ESLint/import-first compliant)
    ══════════════════════════════════════════════════════════════ */
 
-const fmtDate = d => (d ? new Date(d).toLocaleDateString('ar-SA') : '-');
+const fmtDate = d => (d ? _fmtDate(d) : '-');
 
 /* ── Assessments ── */
 export const AssessmentsPage = createDomainPage({

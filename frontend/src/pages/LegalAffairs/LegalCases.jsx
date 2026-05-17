@@ -31,6 +31,7 @@ import {
 } from '@mui/material';
 import { Refresh, Add, Edit, Gavel } from '@mui/icons-material';
 import { motion } from 'framer-motion';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 import {
   getLegalCases,
   createLegalCase,
@@ -247,9 +248,7 @@ export default function LegalCases() {
                       color={STATUS_COLORS[c.status] || 'default'}
                     />
                   </TableCell>
-                  <TableCell>
-                    {c.nextHearing ? new Date(c.nextHearing).toLocaleDateString('ar-SA') : '—'}
-                  </TableCell>
+                  <TableCell>{c.nextHearing ? _fmtDate(c.nextHearing) : '—'}</TableCell>
                   <TableCell align="center">
                     <Tooltip title="تعديل">
                       <IconButton size="small" color="primary" onClick={() => openEdit(c)}>

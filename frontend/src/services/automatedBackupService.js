@@ -8,7 +8,7 @@
 
 import apiClient from './api.client';
 
-const BASE = '/api/automated-backup';
+const BASE = '/api/v1/automated-backup';
 
 const automatedBackupService = {
   /* ── Backups ── */

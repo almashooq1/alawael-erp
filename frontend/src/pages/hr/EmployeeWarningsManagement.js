@@ -33,6 +33,7 @@ import {
   ThumbUp as AckIcon,
   AppRegistration as AppealIcon,
 } from '@mui/icons-material';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 import {
   fetchWarnings,
   createWarning,
@@ -296,9 +297,7 @@ export default function EmployeeWarningsManagement() {
                     }
                   />
                 </TableCell>
-                <TableCell>
-                  {w.violationDate ? new Date(w.violationDate).toLocaleDateString('ar-SA') : '-'}
-                </TableCell>
+                <TableCell>{w.violationDate ? _fmtDate(w.violationDate) : '-'}</TableCell>
                 <TableCell>
                   <Chip label={w.status} size="small" color={statusColors[w.status] || 'default'} />
                 </TableCell>

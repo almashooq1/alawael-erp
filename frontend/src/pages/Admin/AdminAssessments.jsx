@@ -52,6 +52,7 @@ import EventIcon from '@mui/icons-material/Event';
 import ScoreIcon from '@mui/icons-material/Score';
 import api from '../../services/api.client';
 import BeneficiaryTypeahead from '../../components/BeneficiaryTypeahead';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const CATEGORIES = [
   { value: '', label: 'كل الفئات' },
@@ -556,9 +557,7 @@ export default function AdminAssessments() {
             )}
             {items.map(a => (
               <TableRow key={a._id} hover>
-                <TableCell>
-                  {a.assessmentDate ? new Date(a.assessmentDate).toLocaleDateString('ar-SA') : '—'}
-                </TableCell>
+                <TableCell>{a.assessmentDate ? _fmtDate(a.assessmentDate) : '—'}</TableCell>
                 <TableCell>{fullName(a.beneficiary) || '—'}</TableCell>
                 <TableCell>
                   <Typography variant="body2" fontWeight={500}>
@@ -967,9 +966,7 @@ export default function AdminAssessments() {
                   التاريخ
                 </Typography>
                 <Typography>
-                  {detailItem.assessmentDate
-                    ? new Date(detailItem.assessmentDate).toLocaleDateString('ar-SA')
-                    : '—'}
+                  {detailItem.assessmentDate ? _fmtDate(detailItem.assessmentDate) : '—'}
                 </Typography>
               </Grid>
               <Grid item xs={6}>
@@ -1117,9 +1114,7 @@ export default function AdminAssessments() {
                     <TableBody>
                       {rows.map((r, i) => (
                         <TableRow key={i}>
-                          <TableCell>
-                            {r.date ? new Date(r.date).toLocaleDateString('ar-SA') : '—'}
-                          </TableCell>
+                          <TableCell>{r.date ? _fmtDate(r.date) : '—'}</TableCell>
                           <TableCell>{r.score != null ? `${r.score}/100` : '—'}</TableCell>
                           <TableCell>{r.rawScore ?? '—'}</TableCell>
                           <TableCell>

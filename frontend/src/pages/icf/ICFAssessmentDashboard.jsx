@@ -59,6 +59,7 @@ import { ChartTooltip } from '../../components/dashboard/shared/ChartTooltip';
 import EmptyState from '../../components/dashboard/shared/EmptyState';
 import DashboardErrorBoundary from '../../components/dashboard/shared/DashboardErrorBoundary';
 import logger from '../../utils/logger';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 /* ─── Animated counter ─────────────────────────────────── */
 const useCounter = (end, dur = 1000) => {
@@ -303,7 +304,7 @@ export default function ICFAssessmentDashboard() {
     const hdr = 'المستفيد,المقيّم,المجال,الحالة,التاريخ,الدرجة';
     const rows = assessments.map(
       a =>
-        `"${a.beneficiaryName || '-'}","${a.assessorName || '-'}","${a.domain || '-'}",${statusLabels[a.status] || '-'},${a.assessmentDate ? new Date(a.assessmentDate).toLocaleDateString('ar') : '-'},${a.totalScore ?? '-'}`
+        `"${a.beneficiaryName || '-'}","${a.assessorName || '-'}","${a.domain || '-'}",${statusLabels[a.status] || '-'},${a.assessmentDate ? _fmtDate(a.assessmentDate) : '-'},${a.totalScore ?? '-'}`
     );
     const blob = new Blob(['\uFEFF' + [hdr, ...rows].join('\n')], {
       type: 'text/csv;charset=utf-8;',
@@ -749,9 +750,7 @@ export default function ICFAssessmentDashboard() {
                           </TableCell>
                           <TableCell>
                             <Typography variant="body2" sx={{ fontSize: 12 }}>
-                              {a.assessmentDate
-                                ? new Date(a.assessmentDate).toLocaleDateString('ar')
-                                : '-'}
+                              {a.assessmentDate ? _fmtDate(a.assessmentDate) : '-'}
                             </Typography>
                           </TableCell>
                           <TableCell>

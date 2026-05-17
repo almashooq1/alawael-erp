@@ -22,7 +22,7 @@ const MOCK_AI_INSIGHTS = {
 class AnalyticsService {
   async getHRMetrics() {
     try {
-      return await apiClient.get('/analytics/hr');
+      return await apiClient.get('/api/v1/analytics/hr');
     } catch (error) {
       logger.warn('Analytics HR metrics unavailable, using defaults:', error.message);
       return MOCK_HR_METRICS;
@@ -31,7 +31,7 @@ class AnalyticsService {
 
   async getSystemHealth() {
     try {
-      return await apiClient.get('/analytics/system');
+      return await apiClient.get('/api/v1/analytics/system');
     } catch (error) {
       logger.warn('Analytics system health unavailable, using defaults:', error.message);
       return MOCK_SYSTEM_HEALTH;
@@ -40,7 +40,7 @@ class AnalyticsService {
 
   async getAIInsights() {
     try {
-      return await apiClient.get('/analytics/insights');
+      return await apiClient.get('/api/v1/analytics/insights');
     } catch (error) {
       logger.warn('Analytics AI insights unavailable, using defaults:', error.message);
       return MOCK_AI_INSIGHTS;

@@ -62,6 +62,7 @@ import {
   Dashboard as DashIcon,
 } from '@mui/icons-material';
 
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 import {
   ocrApi,
   archiveApi,
@@ -350,9 +351,7 @@ function OCRTab({ showSnack }) {
                       <TableCell>
                         {j.confidence ? `${(j.confidence * 100).toFixed(0)}%` : '-'}
                       </TableCell>
-                      <TableCell>
-                        {j.createdAt ? new Date(j.createdAt).toLocaleDateString('ar-SA') : '-'}
-                      </TableCell>
+                      <TableCell>{j.createdAt ? _fmtDate(j.createdAt) : '-'}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -633,9 +632,7 @@ function ReportTab({ showSnack }) {
                         />
                       </TableCell>
                       <TableCell>{h.resultCount || 0}</TableCell>
-                      <TableCell>
-                        {h.createdAt ? new Date(h.createdAt).toLocaleDateString('ar-SA') : '-'}
-                      </TableCell>
+                      <TableCell>{h.createdAt ? _fmtDate(h.createdAt) : '-'}</TableCell>
                       <TableCell>
                         <Tooltip title="تصدير">
                           <IconButton size="small">

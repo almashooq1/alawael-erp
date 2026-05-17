@@ -53,6 +53,7 @@ import {
 } from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import enterpriseProService from '../../services/enterprisePro.service';
+import { formatDateTime as _fmtDT } from 'utils/dateUtils';
 
 const REPORT_TYPES = [
   { value: 'table', label: 'جدول', icon: <TableChartIcon /> },
@@ -403,9 +404,7 @@ export default function ReportBuilderPage() {
               <TableBody>
                 {executions.map(ex => (
                   <TableRow key={ex._id} hover>
-                    <TableCell sx={{ fontSize: '0.8rem' }}>
-                      {new Date(ex.createdAt).toLocaleString('ar-SA')}
-                    </TableCell>
+                    <TableCell sx={{ fontSize: '0.8rem' }}>{_fmtDT(ex.createdAt)}</TableCell>
                     <TableCell>{ex.template?.nameAr || ex.template?.name || '—'}</TableCell>
                     <TableCell>
                       <Chip label={ex.template?.module} size="small" />

@@ -46,6 +46,7 @@ import {
 } from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients } from '../../theme/palette';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 /* ═══ Helpers ════════════════════════════════════════════════════════════════ */
 const typeLabels = {
@@ -531,11 +532,7 @@ export default function EStamp() {
                         <TableCell align="center">
                           <Chip label={stamp.usageCount || 0} size="small" variant="outlined" />
                         </TableCell>
-                        <TableCell>
-                          {stamp.lastUsedAt
-                            ? new Date(stamp.lastUsedAt).toLocaleDateString('ar-SA')
-                            : '—'}
-                        </TableCell>
+                        <TableCell>{stamp.lastUsedAt ? _fmtDate(stamp.lastUsedAt) : '—'}</TableCell>
                         <TableCell onClick={e => e.stopPropagation()}>
                           <IconButton size="small" onClick={e => openMenu(e, stamp)}>
                             <MoreVert />

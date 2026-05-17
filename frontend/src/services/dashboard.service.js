@@ -4,7 +4,7 @@
 
 import apiClient from './api.client';
 
-const base = '/dashboard';
+const base = '/api/v1/dashboard';
 
 export async function getKpiDefinitions() {
   const { data } = await apiClient.get(`${base}/kpi-definitions`);

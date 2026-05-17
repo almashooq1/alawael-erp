@@ -63,6 +63,7 @@ import {
   dashboardApi,
 } from '../../services/documentProPhase3Service';
 import logger from '../../utils/logger';
+import { formatDateTime as _fmtDT } from 'utils/dateUtils';
 
 /* ═══════════════════════════════════════════════════════
  *  TabPanel helper
@@ -331,11 +332,7 @@ export default function DocumentsProPhase3() {
                             </ListItemAvatar>
                             <ListItemText
                               primary={doc.title || doc.name || 'مستند'}
-                              secondary={
-                                doc.lastAccessedAt
-                                  ? new Date(doc.lastAccessedAt).toLocaleString('ar-SA')
-                                  : ''
-                              }
+                              secondary={doc.lastAccessedAt ? _fmtDT(doc.lastAccessedAt) : ''}
                             />
                           </ListItem>
                           {i < dashboard.recentDocuments.length - 1 && <Divider />}
@@ -412,7 +409,7 @@ export default function DocumentsProPhase3() {
                           </ListItemAvatar>
                           <ListItemText
                             primary={fav.document?.title || fav.documentId || 'مستند'}
-                            secondary={fav.note || new Date(fav.createdAt).toLocaleString('ar-SA')}
+                            secondary={fav.note || _fmtDT(fav.createdAt)}
                           />
                         </ListItem>
                         {i < favorites.length - 1 && <Divider />}
@@ -446,9 +443,7 @@ export default function DocumentsProPhase3() {
                               </Typography>
                             </Stack>
                             <Typography variant="caption" color="text.secondary">
-                              {doc.lastAccessedAt
-                                ? new Date(doc.lastAccessedAt).toLocaleString('ar-SA')
-                                : ''}
+                              {doc.lastAccessedAt ? _fmtDT(doc.lastAccessedAt) : ''}
                             </Typography>
                           </CardContent>
                         </Card>

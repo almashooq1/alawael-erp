@@ -4,7 +4,7 @@
  */
 import api from './api';
 
-const BASE = '/administration';
+const BASE = '/api/v1/administration';
 
 const administrationService = {
   /* ── Dashboard ──────────────────────────────────────────────────────────── */

@@ -42,6 +42,7 @@ import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients, statusColors, neutralColors, surfaceColors } from '../../theme/palette';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const prescriptionTypes = [
   { value: 'physical_therapy', label: 'علاج طبيعي', icon: <ExerciseIcon /> },
@@ -272,8 +273,7 @@ const TherapistPrescriptions = () => {
                           )}
                           {rx.followUpDate && (
                             <Typography variant="caption">
-                              <strong>متابعة:</strong>{' '}
-                              {new Date(rx.followUpDate).toLocaleDateString('ar')}
+                              <strong>متابعة:</strong> {_fmtDate(rx.followUpDate)}
                             </Typography>
                           )}
                         </Box>

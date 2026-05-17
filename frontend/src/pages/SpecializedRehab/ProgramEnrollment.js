@@ -53,6 +53,7 @@ import {
   rehabProgramTemplatesService,
 } from 'services/specializedRehab.service';
 import { useSnackbar } from 'contexts/SnackbarContext';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 /* ── helpers ── */
 const STATUS_MAP = {
@@ -408,11 +409,7 @@ export default function ProgramEnrollment() {
                         <Stack direction="row" spacing={1} mb={1}>
                           <Chip
                             icon={<CalendarIcon />}
-                            label={
-                              enr.startDate
-                                ? new Date(enr.startDate).toLocaleDateString('ar-SA')
-                                : '—'
-                            }
+                            label={enr.startDate ? _fmtDate(enr.startDate) : '—'}
                             size="small"
                           />
                           <Chip

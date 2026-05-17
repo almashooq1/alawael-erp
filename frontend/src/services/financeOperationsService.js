@@ -6,7 +6,7 @@
  */
 import apiClient from 'services/api.client';
 
-const BASE = '/finance-operations';
+const BASE = '/api/v1/finance-operations';
 
 const financeOperationsService = {
   // ── Invoices (الفواتير) ─────────────────────────────────────────────────

@@ -56,14 +56,15 @@ import {
   Person as PersonIcon,
 } from '@mui/icons-material';
 import { arVrAPI } from '../../services/ddd';
+import { formatDate, formatDateTime } from 'utils/dateUtils';
 
 /* ── constants ─────────────────────────────────────────── */
 const PRIMARY = '#1565c0';
 const BG = '#f3f7fc';
 
 /* ── helpers ───────────────────────────────────────────── */
-const fmt = d => (d ? new Date(d).toLocaleString('ar-SA') : '—');
-const fmtDate = d => (d ? new Date(d).toLocaleDateString('ar-SA') : '—');
+const fmt = d => formatDateTime(d);
+const fmtDate = d => formatDate(d);
 const minsToStr = m => (m != null ? `${m} دقيقة` : '—');
 
 const sessionTypeLabel = t => {

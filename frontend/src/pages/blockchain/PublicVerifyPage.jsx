@@ -12,6 +12,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { publicVerificationService } from '../../services/blockchainService';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const COLORS = {
   green: '#0a7d3a',
@@ -99,7 +100,7 @@ function CheckRow({ ok, label }) {
 function fmt(d) {
   if (!d) return '—';
   try {
-    return new Date(d).toLocaleDateString('ar-SA-u-ca-gregory');
+    return _fmtDate(d);
   } catch {
     return String(d).slice(0, 10);
   }

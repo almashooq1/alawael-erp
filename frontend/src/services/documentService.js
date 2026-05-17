@@ -21,7 +21,7 @@ const documentService = {
 
       // IMPORTANT: Do NOT set Content-Type manually for FormData.
       // The browser must auto-set it with the multipart boundary parameter.
-      return await apiClient.post('/documents/upload', formData, {
+      return await apiClient.post('/api/v1/documents/upload', formData, {
         headers: { 'Content-Type': undefined },
       });
     } catch (error) {
@@ -42,7 +42,7 @@ const documentService = {
       if (filters.page) params.page = filters.page;
       if (filters.limit) params.limit = filters.limit;
 
-      return await apiClient.get('/documents', { params });
+      return await apiClient.get('/api/v1/documents', { params });
     } catch (error) {
       logger.error('خطأ في جلب المستندات:', error);
       return { documents: [] };
@@ -52,7 +52,7 @@ const documentService = {
   // 📄 الحصول على مستند واحد
   getDocument: async id => {
     try {
-      return await apiClient.get(`/documents/${id}`);
+      return await apiClient.get(`/api/v1/documents/${id}`);
     } catch (error) {
       logger.error('خطأ في جلب المستند:', error);
       throw error;
@@ -62,7 +62,7 @@ const documentService = {
   // ✏️ تحديث المستند
   updateDocument: async (id, updates) => {
     try {
-      return await apiClient.put(`/documents/${id}`, updates);
+      return await apiClient.put(`/api/v1/documents/${id}`, updates);
     } catch (error) {
       logger.error('خطأ في تحديث المستند:', error);
       throw error;
@@ -72,7 +72,7 @@ const documentService = {
   // 📥 تنزيل المستند — يستخدم apiClient لضمان الـ interceptors
   downloadDocument: async (id, fileName) => {
     try {
-      const data = await apiClient.get(`/documents/${id}/download`, {
+      const data = await apiClient.get(`/api/v1/documents/${id}/download`, {
         responseType: 'blob',
       });
       triggerBlobDownload(data, fileName);
@@ -85,7 +85,7 @@ const documentService = {
   // 🔗 مشاركة المستند
   shareDocument: async (id, email, permission) => {
     try {
-      return await apiClient.post(`/documents/${id}/share`, { email, permission });
+      return await apiClient.post(`/api/v1/documents/${id}/share`, { email, permission });
     } catch (error) {
       logger.error('خطأ في مشاركة المستند:', error);
       throw error;
@@ -95,7 +95,7 @@ const documentService = {
   // 🚫 إزالة الوصول
   revokeAccess: async (id, shareId) => {
     try {
-      return await apiClient.delete(`/documents/${id}/share/${shareId}`);
+      return await apiClient.delete(`/api/v1/documents/${id}/share/${shareId}`);
     } catch (error) {
       logger.error('خطأ في إزالة الوصول:', error);
       throw error;
@@ -105,7 +105,7 @@ const documentService = {
   // 🗑️ حذف المستند
   deleteDocument: async id => {
     try {
-      return await apiClient.delete(`/documents/${id}`);
+      return await apiClient.delete(`/api/v1/documents/${id}`);
     } catch (error) {
       logger.error('خطأ في حذف المستند:', error);
       throw error;
@@ -115,7 +115,7 @@ const documentService = {
   // ♻️ استرجاع المستند
   restoreDocument: async id => {
     try {
-      return await apiClient.post(`/documents/${id}/restore`);
+      return await apiClient.post(`/api/v1/documents/${id}/restore`);
     } catch (error) {
       logger.error('خطأ في استرجاع المستند:', error);
       throw error;
@@ -125,7 +125,7 @@ const documentService = {
   // 📊 الحصول على الإحصائيات
   getStats: async () => {
     try {
-      return await apiClient.get('/documents/stats');
+      return await apiClient.get('/api/v1/documents/stats');
     } catch (error) {
       logger.error('خطأ في جلب الإحصائيات:', error);
       return { totalDocuments: 0, totalSize: 0, byCategory: [] };
@@ -140,7 +140,7 @@ const documentService = {
       if (filters.dateFrom) params.dateFrom = filters.dateFrom;
       if (filters.dateTo) params.dateTo = filters.dateTo;
 
-      return await apiClient.get('/documents/search', { params });
+      return await apiClient.get('/api/v1/documents/search', { params });
     } catch (error) {
       logger.error('خطأ في البحث:', error);
       throw error;
@@ -150,7 +150,7 @@ const documentService = {
   // 📁 الحصول على المجلدات
   getFolders: async () => {
     try {
-      return await apiClient.get('/documents/folders');
+      return await apiClient.get('/api/v1/documents/folders');
     } catch (error) {
       logger.error('خطأ في جلب المجلدات:', error);
       return [];
@@ -160,7 +160,7 @@ const documentService = {
   // 📊 لوحة المعلومات
   getDashboard: async () => {
     try {
-      return await apiClient.get('/documents/dashboard');
+      return await apiClient.get('/api/v1/documents/dashboard');
     } catch (error) {
       logger.error('خطأ في جلب لوحة المعلومات:', error);
       return { data: { stats: {}, categories: [] } };
@@ -170,7 +170,7 @@ const documentService = {
   // 📈 التحليلات
   getAnalytics: async () => {
     try {
-      return await apiClient.get('/documents/reports/analytics');
+      return await apiClient.get('/api/v1/documents/reports/analytics');
     } catch (error) {
       logger.error('خطأ في جلب التحليلات:', error);
       return { data: {} };
@@ -254,7 +254,7 @@ const documentService = {
   // 📜 الحصول على إصدارات المستند
   getVersions: async id => {
     try {
-      return await apiClient.get(`/documents/${id}/versions`);
+      return await apiClient.get(`/api/v1/documents/${id}/versions`);
     } catch (error) {
       logger.error('خطأ في جلب الإصدارات:', error);
       return { versions: [] };
@@ -270,7 +270,7 @@ const documentService = {
 
       // IMPORTANT: Do NOT set Content-Type manually for FormData.
       // The browser must auto-set it with the multipart boundary parameter.
-      return await apiClient.post(`/documents/${id}/upload-version`, formData, {
+      return await apiClient.post(`/api/v1/documents/${id}/upload-version`, formData, {
         headers: { 'Content-Type': undefined },
       });
     } catch (error) {
@@ -282,7 +282,7 @@ const documentService = {
   // ↩️ استرجاع إصدار سابق
   restoreVersion: async (id, versionId) => {
     try {
-      return await apiClient.post(`/documents/${id}/versions/${versionId}/restore`);
+      return await apiClient.post(`/api/v1/documents/${id}/versions/${versionId}/restore`);
     } catch (error) {
       logger.error('خطأ في استرجاع الإصدار:', error);
       throw error;
@@ -292,7 +292,7 @@ const documentService = {
   // � عمليات جماعية (حذف/أرشفة/استرجاع)
   bulkOperation: async (action, ids) => {
     try {
-      return await apiClient.post('/documents/bulk', { action, ids });
+      return await apiClient.post('/api/v1/documents/bulk', { action, ids });
     } catch (error) {
       logger.error('خطأ في العملية الجماعية:', error);
       throw error;
@@ -302,7 +302,7 @@ const documentService = {
   // 🗄️ أرشفة مستند
   archiveDocument: async id => {
     try {
-      return await apiClient.post(`/documents/${id}/archive`);
+      return await apiClient.post(`/api/v1/documents/${id}/archive`);
     } catch (error) {
       logger.error('خطأ في أرشفة المستند:', error);
       throw error;

@@ -69,11 +69,12 @@ import {
 import LifecycleTimeline from '../../components/documents/LifecycleTimeline';
 import WorkflowOrchestrator from '../../components/documents/WorkflowOrchestrator';
 import logger from '../../utils/logger';
+import { formatDate as _fmtDate, formatDateTime as _fmtDT } from 'utils/dateUtils';
 
 const cardSx = { borderRadius: 3, transition: 'box-shadow .2s', '&:hover': { boxShadow: 6 } };
 const statCard = c => ({ ...cardSx, borderTop: `4px solid ${c}`, textAlign: 'center' });
-const fmtDate = d => (d ? new Date(d).toLocaleDateString('ar-SA') : '—');
-const fmtDateTime = d => (d ? new Date(d).toLocaleString('ar-SA') : '—');
+const fmtDate = d => (d ? _fmtDate(d) : '—');
+const fmtDateTime = d => (d ? _fmtDT(d) : '—');
 
 /* ══════════════════════════════════════════════════════════
    TAB 0 — دورة حياة المستند

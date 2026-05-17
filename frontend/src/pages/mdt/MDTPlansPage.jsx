@@ -48,6 +48,7 @@ import {
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { plansService } from '../../services/mdtCoordinationService';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const STATUS_LABELS = {
   DRAFT: 'مسودة',
@@ -483,9 +484,7 @@ export default function MDTPlansPage() {
                     <TableCell>
                       <Chip label={p.goals?.length || 0} size="small" />
                     </TableCell>
-                    <TableCell>
-                      {p.startDate ? new Date(p.startDate).toLocaleDateString('ar') : '-'}
-                    </TableCell>
+                    <TableCell>{p.startDate ? _fmtDate(p.startDate) : '-'}</TableCell>
                     <TableCell onClick={e => e.stopPropagation()}>
                       <Tooltip title="تعديل">
                         <IconButton size="small" onClick={() => handleEdit(p)}>
@@ -628,7 +627,7 @@ export default function MDTPlansPage() {
                   <Typography variant="h6">{detail.title}</Typography>
                   <Typography variant="caption" color="text.secondary">
                     {detail.planNumber} — {detail.beneficiary?.name || ''} —{' '}
-                    {detail.startDate ? new Date(detail.startDate).toLocaleDateString('ar') : ''}
+                    {detail.startDate ? _fmtDate(detail.startDate) : ''}
                   </Typography>
                 </Box>
                 <Box display="flex" gap={1} alignItems="center">
@@ -691,19 +690,13 @@ export default function MDTPlansPage() {
                     <Typography variant="caption" color="text.secondary">
                       تاريخ النهاية
                     </Typography>
-                    <Typography>
-                      {detail.endDate ? new Date(detail.endDate).toLocaleDateString('ar') : '-'}
-                    </Typography>
+                    <Typography>{detail.endDate ? _fmtDate(detail.endDate) : '-'}</Typography>
                   </Grid>
                   <Grid item xs={6}>
                     <Typography variant="caption" color="text.secondary">
                       تاريخ المراجعة القادمة
                     </Typography>
-                    <Typography>
-                      {detail.reviewDate
-                        ? new Date(detail.reviewDate).toLocaleDateString('ar')
-                        : '-'}
-                    </Typography>
+                    <Typography>{detail.reviewDate ? _fmtDate(detail.reviewDate) : '-'}</Typography>
                   </Grid>
                   <Grid item xs={12}>
                     <Typography variant="caption" color="text.secondary">
@@ -748,8 +741,7 @@ export default function MDTPlansPage() {
                             size="small"
                           />
                           <Typography variant="caption">
-                            {a.approverName || ''} —{' '}
-                            {a.date ? new Date(a.date).toLocaleDateString('ar') : ''}
+                            {a.approverName || ''} — {a.date ? _fmtDate(a.date) : ''}
                           </Typography>
                           {a.notes && (
                             <Typography variant="caption" color="text.secondary">
@@ -909,7 +901,7 @@ export default function MDTPlansPage() {
                             {g.progressNotes.slice(-2).map((n, ni) => (
                               <Typography key={ni} variant="caption" display="block" sx={{ pr: 2 }}>
                                 • {n.note || n.description || ''}{' '}
-                                {n.date ? `(${new Date(n.date).toLocaleDateString('ar')})` : ''}
+                                {n.date ? `(${_fmtDate(n.date)})` : ''}
                               </Typography>
                             ))}
                           </Box>
@@ -942,8 +934,7 @@ export default function MDTPlansPage() {
                       <CardContent>
                         <Box display="flex" justifyContent="space-between">
                           <Typography variant="subtitle2">
-                            {r.reviewerName || 'مراجع'} —{' '}
-                            {r.date ? new Date(r.date).toLocaleDateString('ar') : ''}
+                            {r.reviewerName || 'مراجع'} — {r.date ? _fmtDate(r.date) : ''}
                           </Typography>
                           <Chip
                             label={

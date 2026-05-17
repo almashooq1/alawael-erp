@@ -351,29 +351,32 @@ export const MOCK_VENDOR_DASHBOARD = {
 // Vendor Service
 // ═══════════════════════════════════════════
 export const vendorsService = {
-  getAll: () => safe(() => apiClient.get('/vendors').then(r => r.data), MOCK_VENDORS),
+  getAll: () => safe(() => apiClient.get('/api/v1/vendors').then(r => r.data), MOCK_VENDORS),
   getById: id =>
     safe(
-      () => apiClient.get(`/vendors/${id}`).then(r => r.data),
+      () => apiClient.get(`/api/v1/vendors/${id}`).then(r => r.data),
       MOCK_VENDORS.find(v => v._id === id)
     ),
-  create: data => safe(() => apiClient.post('/vendors', data).then(r => r.data)),
-  update: (id, data) => safe(() => apiClient.put(`/vendors/${id}`, data).then(r => r.data)),
-  remove: id => safe(() => apiClient.delete(`/vendors/${id}`).then(r => r.data)),
+  create: data => safe(() => apiClient.post('/api/v1/vendors', data).then(r => r.data)),
+  update: (id, data) => safe(() => apiClient.put(`/api/v1/vendors/${id}`, data).then(r => r.data)),
+  remove: id => safe(() => apiClient.delete(`/api/v1/vendors/${id}`).then(r => r.data)),
 };
 
 export const evaluationsService = {
   getAll: () =>
-    safe(() => apiClient.get('/vendor-evaluations').then(r => r.data), MOCK_EVALUATIONS),
-  create: data => safe(() => apiClient.post('/vendor-evaluations', data).then(r => r.data)),
+    safe(() => apiClient.get('/api/v1/vendor-evaluations').then(r => r.data), MOCK_EVALUATIONS),
+  create: data => safe(() => apiClient.post('/api/v1/vendor-evaluations', data).then(r => r.data)),
   getByVendor: vendorId =>
     safe(
-      () => apiClient.get(`/vendor-evaluations/vendor/${vendorId}`).then(r => r.data),
+      () => apiClient.get(`/api/v1/vendor-evaluations/vendor/${vendorId}`).then(r => r.data),
       MOCK_EVALUATIONS.filter(e => e.vendorId === vendorId)
     ),
 };
 
 export const vendorReportsService = {
   getDashboardStats: () =>
-    safe(() => apiClient.get('/vendors/dashboard/stats').then(r => r.data), MOCK_VENDOR_DASHBOARD),
+    safe(
+      () => apiClient.get('/api/v1/vendors/dashboard/stats').then(r => r.data),
+      MOCK_VENDOR_DASHBOARD
+    ),
 };

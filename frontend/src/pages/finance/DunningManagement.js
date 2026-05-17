@@ -41,6 +41,7 @@ import {
   Gavel,
 } from '@mui/icons-material';
 import { surfaceColors, neutralColors } from 'theme/palette';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const API = process.env.REACT_APP_API_URL || '/api';
 
@@ -381,7 +382,7 @@ const DunningManagement = () => {
                         />
                       </TableCell>
                       <TableCell sx={{ textAlign: 'right' }}>
-                        {h.sentAt ? new Date(h.sentAt).toLocaleDateString('ar-SA') : '-'}
+                        {h.sentAt ? _fmtDate(h.sentAt) : '-'}
                       </TableCell>
                     </TableRow>
                   );

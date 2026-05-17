@@ -11,6 +11,7 @@ import { useEffect, useMemo } from 'react';
 import { Link, useParams, Navigate } from 'react-router-dom';
 import articles, { CATEGORIES } from '../../data/articlesContent';
 import content from '../../data/landingContent';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 export default function ArticleDetail() {
   const { slug } = useParams();
@@ -78,7 +79,7 @@ export default function ArticleDetail() {
   if (!article) return <Navigate to="/articles" replace />;
 
   const category = CATEGORIES.find(c => c.id === article.category);
-  const publishedDate = new Date(article.date).toLocaleDateString('ar-SA', {
+  const publishedDate = _fmtDate(article.date, {
     year: 'numeric',
     month: 'long',
     day: 'numeric',

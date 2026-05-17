@@ -55,13 +55,14 @@ import {
   PlayArrow as ActivateIcon,
 } from '@mui/icons-material';
 import { researchAPI } from '../../services/ddd';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 /* ── colour palette ───────────────────────────────────────── */
 const PRIMARY = '#00695c';
 const BG = '#f1f8f7';
 
 /* ── helpers ──────────────────────────────────────────────── */
-const fmt = d => (d ? new Date(d).toLocaleDateString('ar-SA') : '—');
+const fmt = d => (d ? _fmtDate(d) : '—');
 
 const statusColor = s => {
   const map = {

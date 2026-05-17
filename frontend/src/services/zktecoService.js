@@ -5,7 +5,7 @@
 import apiClient from './api.client';
 import logger from '../utils/logger';
 
-const BASE = '/zkteco';
+const BASE = '/api/v1/zkteco';
 
 /**
  * Wrapper آمن للاتصال بالخادم — بدون بيانات تجريبية

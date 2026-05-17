@@ -45,6 +45,7 @@ import {
   Nature as NatureIcon,
 } from '@mui/icons-material';
 import * as susService from '../../services/enterpriseUltra.service';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const statusColors = {
   draft: 'default',
@@ -258,7 +259,7 @@ export default function SustainabilityPage() {
                     <TableCell>{e.consumption?.toLocaleString() || '—'}</TableCell>
                     <TableCell>{e.cost ? `${e.cost.toLocaleString()} ر.س` : '—'}</TableCell>
                     <TableCell>{e.period}</TableCell>
-                    <TableCell>{new Date(e.readingDate).toLocaleDateString('ar-SA')}</TableCell>
+                    <TableCell>{_fmtDate(e.readingDate)}</TableCell>
                   </TableRow>
                 ))}
                 {!energy.length && (
@@ -386,7 +387,7 @@ export default function SustainabilityPage() {
                       )}
                     </TableCell>
                     <TableCell>{w.facility || '—'}</TableCell>
-                    <TableCell>{new Date(w.recordDate).toLocaleDateString('ar-SA')}</TableCell>
+                    <TableCell>{_fmtDate(w.recordDate)}</TableCell>
                   </TableRow>
                 ))}
                 {!waste.length && (
@@ -543,7 +544,7 @@ export default function SustainabilityPage() {
                         color={new Date(g.deadline) < new Date() ? 'error' : 'text.secondary'}
                         sx={{ display: 'block', mt: 1 }}
                       >
-                        الموعد النهائي: {new Date(g.deadline).toLocaleDateString('ar-SA')}
+                        الموعد النهائي: {_fmtDate(g.deadline)}
                       </Typography>
                     )}
                   </CardContent>

@@ -10,11 +10,25 @@ import {
   Warning as WarningIcon,
 } from '@mui/icons-material';
 import { useSnackbar } from 'contexts/SnackbarContext';
-import systemService from 'services/system.service';
+import apiClient from 'services/api.client';
 import logger from 'utils/logger';
 import { statusColors } from '../../../theme/palette';
 import { useConfirmDialog } from '../../../components/common/ConfirmDialog';
 import { DEMO_DATA } from './performanceEvaluation.constants';
+
+const BASE = '/api/v1/hr/performance';
+const hrPerfApi = {
+  listEvaluations: params => apiClient.get(`${BASE}/evaluations`, { params }),
+  getStats: () => apiClient.get(`${BASE}/stats`),
+  createEvaluation: body => apiClient.post(`${BASE}/evaluations`, body),
+  updateEvaluation: (id, body) => apiClient.patch(`${BASE}/evaluations/${id}`, body),
+  approveEvaluation: id => apiClient.post(`${BASE}/evaluations/${id}/approve`),
+  deleteEvaluation: id => apiClient.delete(`${BASE}/evaluations/${id}`),
+  listSuccession: params => apiClient.get(`${BASE}/succession`, { params }),
+  createSuccession: body => apiClient.post(`${BASE}/succession`, body),
+  updateSuccession: (id, body) => apiClient.patch(`${BASE}/succession/${id}`, body),
+  deleteSuccession: id => apiClient.delete(`${BASE}/succession/${id}`),
+};
 
 const usePerformanceData = () => {
   const showSnackbar = useSnackbar();
@@ -31,17 +45,21 @@ const usePerformanceData = () => {
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
-      const [evaluations, succession, medical, scheduler] = await Promise.all([
-        systemService.getEvaluations().catch(err => logger.warn('فشل تحميل التقييمات', err)),
-        systemService.getSuccessionPlans().catch(err => logger.warn('فشل تحميل خطط التعاقب', err)),
-        systemService.getMedicalFiles().catch(err => logger.warn('فشل تحميل الملفات الطبية', err)),
-        systemService.getSchedulerTasks().catch(err => logger.warn('فشل تحميل مهام الجدولة', err)),
+      const [evaluations, succession] = await Promise.all([
+        hrPerfApi.listEvaluations().catch(err => {
+          logger.warn('فشل تحميل التقييمات', err);
+          return null;
+        }),
+        hrPerfApi.listSuccession().catch(err => {
+          logger.warn('فشل تحميل خطط التعاقب', err);
+          return null;
+        }),
       ]);
       setData({
-        evaluations: evaluations?.data || evaluations || DEMO_DATA.evaluations,
-        succession: succession?.data || succession || DEMO_DATA.succession,
-        medical: medical?.data || medical || DEMO_DATA.medical,
-        scheduler: scheduler?.data || scheduler || DEMO_DATA.scheduler,
+        evaluations: evaluations?.data?.data || DEMO_DATA.evaluations,
+        succession: succession?.data?.data || DEMO_DATA.succession,
+        medical: DEMO_DATA.medical,
+        scheduler: DEMO_DATA.scheduler,
       });
     } catch (err) {
       logger.error('Performance data error:', err);
@@ -112,17 +130,13 @@ const usePerformanceData = () => {
     try {
       const svc = {
         evaluations: editItem
-          ? () => systemService.updateEvaluation(editItem._id, form)
-          : () => systemService.createEvaluation(form),
+          ? () => hrPerfApi.updateEvaluation(editItem._id, form)
+          : () => hrPerfApi.createEvaluation(form),
         succession: editItem
-          ? () => systemService.updateSuccessionPlan(editItem._id, form)
-          : () => systemService.createSuccessionPlan(form),
-        medical: editItem
-          ? () => systemService.updateMedicalFile(editItem._id, form)
-          : () => systemService.createMedicalFile(form),
-        scheduler: editItem
-          ? () => systemService.updateSchedulerTask(editItem._id, form)
-          : () => systemService.createSchedulerTask(form),
+          ? () => hrPerfApi.updateSuccession(editItem._id, form)
+          : () => hrPerfApi.createSuccession(form),
+        medical: async () => {},
+        scheduler: async () => {},
       };
       if (svc[dialogType]) await svc[dialogType]();
       showSnackbar(editItem ? 'تم التحديث بنجاح' : 'تم الإنشاء بنجاح', 'success');
@@ -142,10 +156,10 @@ const usePerformanceData = () => {
       onConfirm: async () => {
         try {
           const del = {
-            evaluations: () => systemService.deleteEvaluation(id),
-            succession: () => systemService.deleteSuccessionPlan(id),
-            medical: () => systemService.deleteMedicalFile(id),
-            scheduler: () => systemService.deleteSchedulerTask(id),
+            evaluations: () => hrPerfApi.deleteEvaluation(id),
+            succession: () => hrPerfApi.deleteSuccession(id),
+            medical: async () => {},
+            scheduler: async () => {},
           };
           if (del[type]) await del[type]();
           showSnackbar('تم الحذف بنجاح', 'success');

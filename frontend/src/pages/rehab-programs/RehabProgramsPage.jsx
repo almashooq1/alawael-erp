@@ -55,15 +55,18 @@ import {
   People as GroupIcon,
   AccessTime as DurationIcon,
   EmojiEvents as GoalIcon,
+  ShowChart as TrackerIcon,
 } from '@mui/icons-material';
 import { programsAPI } from '../../services/ddd';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
+import RehabProgressTracker from '../rehab/RehabProgressTracker';
 
 /* ── palette ───────────────────────────────────────────── */
 const PRIMARY = '#1b5e20';
 const BG = '#f1f8e9';
 
 /* ── helpers ───────────────────────────────────────────── */
-const fmt = d => (d ? new Date(d).toLocaleDateString('ar-SA') : '—');
+const fmt = d => (d ? _fmtDate(d) : '—');
 
 const difficultyLabel = d =>
   ({ beginner: 'مبتدئ', intermediate: 'متوسط', advanced: 'متقدم' })[d] || d || '—';
@@ -419,6 +422,7 @@ export default function RehabProgramsPage() {
         <Tab icon={<ProgramIcon />} iconPosition="start" label="البرامج" />
         <Tab icon={<EnrollIcon />} iconPosition="start" label="التسجيل والتقدم" />
         <Tab icon={<RecommendIcon />} iconPosition="start" label="التوصيات" />
+        <Tab icon={<TrackerIcon />} iconPosition="start" label="متابعة التقدم" />
       </Tabs>
 
       {/* ════════════════════════════════
@@ -915,6 +919,33 @@ export default function RehabProgramsPage() {
                 </Grid>
               ))}
             </Grid>
+          )}
+        </Box>
+      )}
+
+      {/* ════════════════════════════════
+          TAB 4 — Progress Tracker
+      ════════════════════════════════ */}
+      {tab === 4 && (
+        <Box>
+          {enrollments.length === 0 ? (
+            <Alert severity="info">اختر مستفيدًا مسجلاً من تبويب «التسجيل والتقدم» أولاً.</Alert>
+          ) : (
+            <RehabProgressTracker
+              programData={{
+                measures: [],
+                goals: enrollments
+                  .filter(e => e.status === 'active')
+                  .map(e => ({
+                    text: e.program?.name || e.programName || 'برنامج تأهيل',
+                    progress: e.progressPercentage ?? e.progress ?? 0,
+                    target: 100,
+                  })),
+              }}
+              programName={
+                enrollments.find(e => e.status === 'active')?.program?.name || 'البرنامج التأهيلي'
+              }
+            />
           )}
         </Box>
       )}

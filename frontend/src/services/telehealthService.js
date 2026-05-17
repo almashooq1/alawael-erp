@@ -5,7 +5,7 @@
 
 import api from './api';
 
-const BASE = '/telehealth';
+const BASE = '/api/v1/telehealth';
 
 // ─── Stats ────────────────────────────────────────────────────────────────────
 

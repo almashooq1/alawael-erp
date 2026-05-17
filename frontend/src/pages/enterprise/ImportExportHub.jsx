@@ -110,6 +110,7 @@ import {
 } from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import importExportProService from '../../services/importExportPro.service';
+import { formatDate as _fmtDate, formatDateTime as _fmtDT } from 'utils/dateUtils';
 
 // ─────────────────────────────────────────────────
 // Constants
@@ -1146,9 +1147,7 @@ function DashboardTab({ stats }) {
                         </Box>
                       </TableCell>
                       <TableCell>
-                        <Typography variant="caption">
-                          {new Date(job.createdAt).toLocaleDateString('ar-SA')}
-                        </Typography>
+                        <Typography variant="caption">{_fmtDate(job.createdAt)}</Typography>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -1407,9 +1406,7 @@ function JobsTab({ jobs, filters, onFilterChange, onCancel, onRetry, onDelete, o
                     </Typography>
                   </TableCell>
                   <TableCell>
-                    <Typography variant="caption">
-                      {new Date(job.createdAt).toLocaleString('ar-SA')}
-                    </Typography>
+                    <Typography variant="caption">{_fmtDT(job.createdAt)}</Typography>
                   </TableCell>
                   <TableCell align="center">
                     <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'center' }}>
@@ -1794,7 +1791,7 @@ function ScheduledExportsTab({
                   </Typography>
                   {job.schedule?.lastRunAt && (
                     <Typography variant="caption" color="text.secondary" display="block">
-                      آخر تنفيذ: {new Date(job.schedule.lastRunAt).toLocaleString('ar-SA')}
+                      آخر تنفيذ: {_fmtDT(job.schedule.lastRunAt)}
                     </Typography>
                   )}
                   {job.schedule?.nextRunAt && (
@@ -1804,7 +1801,7 @@ function ScheduledExportsTab({
                       display="block"
                       fontWeight="bold"
                     >
-                      التنفيذ القادم: {new Date(job.schedule.nextRunAt).toLocaleString('ar-SA')}
+                      التنفيذ القادم: {_fmtDT(job.schedule.nextRunAt)}
                     </Typography>
                   )}
                 </CardContent>

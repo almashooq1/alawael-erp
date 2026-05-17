@@ -43,6 +43,7 @@ import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const CONSENT_TYPES = [
   { value: 'treatment', label: 'علاج', icon: '💊', color: '#3b82f6' },
@@ -416,7 +417,7 @@ const TherapistConsentManagement = () => {
                       {c.signedDate && (
                         <Chip
                           icon={<DateIcon sx={{ fontSize: '14px !important' }} />}
-                          label={`التوقيع: ${new Date(c.signedDate).toLocaleDateString('ar-SA')}`}
+                          label={`التوقيع: ${_fmtDate(c.signedDate)}`}
                           size="small"
                           variant="outlined"
                           sx={{ fontSize: '0.65rem' }}
@@ -424,7 +425,7 @@ const TherapistConsentManagement = () => {
                       )}
                       {c.expiryDate && (
                         <Chip
-                          label={`الانتهاء: ${new Date(c.expiryDate).toLocaleDateString('ar-SA')}`}
+                          label={`الانتهاء: ${_fmtDate(c.expiryDate)}`}
                           size="small"
                           sx={{
                             bgcolor: expired ? '#fef2f2' : '#f8fafc',

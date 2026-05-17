@@ -25,6 +25,7 @@ import {
 } from '@mui/material';
 import { Add, CurrencyExchange, SwapHoriz, Delete, Refresh } from '@mui/icons-material';
 import { surfaceColors, neutralColors, brandColors } from 'theme/palette';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const API = process.env.REACT_APP_API_URL || '/api';
 
@@ -305,9 +306,7 @@ const MultiCurrency = () => {
                     >
                       {r.rate?.toFixed(4)}
                     </TableCell>
-                    <TableCell>
-                      {new Date(r.effectiveDate || r.createdAt).toLocaleDateString('ar-SA')}
-                    </TableCell>
+                    <TableCell>{_fmtDate(r.effectiveDate || r.createdAt)}</TableCell>
                     <TableCell>
                       <Chip
                         size="small"

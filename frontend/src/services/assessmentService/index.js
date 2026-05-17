@@ -45,7 +45,7 @@ const assessmentService = {
 
   async getBeneficiaries() {
     try {
-      const response = await apiClient.get('/disability/beneficiaries');
+      const response = await apiClient.get('/api/v1/disability/beneficiaries');
       if (response?.data?.length) return response.data;
       if (Array.isArray(response) && response.length) return response;
       logger.info('Beneficiaries API returned empty — using local data');
@@ -64,7 +64,7 @@ const assessmentService = {
 
   async getScaleResults(filters = {}) {
     try {
-      const response = await apiClient.get('/disability/assessment/scale-results', {
+      const response = await apiClient.get('/api/v1/disability/assessment/scale-results', {
         params: filters,
       });
       return response;
@@ -83,7 +83,7 @@ const assessmentService = {
 
   async submitScaleResult(payload) {
     try {
-      return await apiClient.post('/disability/assessment/scale-results', payload);
+      return await apiClient.post('/api/v1/disability/assessment/scale-results', payload);
     } catch (err) {
       logger.error('Scale result submit failed:', err?.message);
       throw new Error('فشل حفظ نتيجة المقياس — تحقق من الاتصال بالخادم');
@@ -94,7 +94,7 @@ const assessmentService = {
 
   async getTestResults(filters = {}) {
     try {
-      const response = await apiClient.get('/disability/assessment/test-results', {
+      const response = await apiClient.get('/api/v1/disability/assessment/test-results', {
         params: filters,
       });
       return response;
@@ -113,7 +113,7 @@ const assessmentService = {
 
   async submitTestResult(payload) {
     try {
-      return await apiClient.post('/disability/assessment/test-results', payload);
+      return await apiClient.post('/api/v1/disability/assessment/test-results', payload);
     } catch (err) {
       logger.error('Test result submit failed:', err?.message);
       throw new Error('فشل حفظ نتيجة الاختبار — تحقق من الاتصال بالخادم');
@@ -124,7 +124,7 @@ const assessmentService = {
 
   async getStatistics() {
     try {
-      const data = await apiClient.get('/disability/statistics');
+      const data = await apiClient.get('/api/v1/disability/statistics');
       return data;
     } catch (err) {
       logger.warn('Statistics API unavailable — using cached data:', err?.message);
@@ -152,7 +152,7 @@ const assessmentService = {
 
   async getAvailableScales() {
     try {
-      const response = await apiClient.get('/disability/assessment/scales');
+      const response = await apiClient.get('/api/v1/disability/assessment/scales');
       return response;
     } catch (err) {
       logger.warn('Available scales API error — using static list:', err?.message);
@@ -172,7 +172,7 @@ const assessmentService = {
 
   async getScaleDetails(scaleKey) {
     try {
-      const response = await apiClient.get(`/disability/assessment/scales/${scaleKey}`);
+      const response = await apiClient.get(`/api/v1/disability/assessment/scales/${scaleKey}`);
       return response;
     } catch (err) {
       logger.warn('Scale details API error — using static:', err?.message);
@@ -199,7 +199,7 @@ const assessmentService = {
 
   async performAssessment({ beneficiaryId, scaleKey, domainScores, metadata }) {
     try {
-      return await apiClient.post('/disability/assessment/perform', {
+      return await apiClient.post('/api/v1/disability/assessment/perform', {
         beneficiaryId,
         scaleKey,
         domainScores,
@@ -215,7 +215,7 @@ const assessmentService = {
 
   async performBatchAssessment({ beneficiaryId, scaleAssessments, metadata }) {
     try {
-      return await apiClient.post('/disability/assessment/batch', {
+      return await apiClient.post('/api/v1/disability/assessment/batch', {
         beneficiaryId,
         scaleAssessments,
         metadata,
@@ -244,7 +244,9 @@ const assessmentService = {
 
   async getAssessmentProfile(beneficiaryId) {
     try {
-      const response = await apiClient.get(`/disability/assessment/profile/${beneficiaryId}`);
+      const response = await apiClient.get(
+        `/api/v1/disability/assessment/profile/${beneficiaryId}`
+      );
       return response;
     } catch (err) {
       logger.warn('Assessment profile API error:', err?.message);
@@ -256,7 +258,7 @@ const assessmentService = {
 
   async getAnalytics() {
     try {
-      const response = await apiClient.get('/disability/assessment/analytics');
+      const response = await apiClient.get('/api/v1/disability/assessment/analytics');
       return response;
     } catch (err) {
       logger.warn('Analytics API error:', err?.message);
@@ -268,7 +270,9 @@ const assessmentService = {
 
   async compareAssessments(beneficiaryId) {
     try {
-      const response = await apiClient.get(`/disability/assessment/compare/${beneficiaryId}`);
+      const response = await apiClient.get(
+        `/api/v1/disability/assessment/compare/${beneficiaryId}`
+      );
       return response;
     } catch (err) {
       logger.warn('Compare assessments API error:', err?.message);
@@ -289,7 +293,7 @@ const assessmentService = {
       if (filters.startDate) params.append('startDate', filters.startDate);
       if (filters.endDate) params.append('endDate', filters.endDate);
       const qs = params.toString();
-      const response = await apiClient.get(`/measurements/dashboard${qs ? `?${qs}` : ''}`);
+      const response = await apiClient.get(`/api/v1/measurements/dashboard${qs ? `?${qs}` : ''}`);
       return response;
     } catch (err) {
       logger.warn('Dashboard stats API error:', err?.message);
@@ -315,7 +319,9 @@ const assessmentService = {
 
   async getQuickAssessmentStats(beneficiaryId) {
     try {
-      const response = await apiClient.get(`/measurements/quick-assessment/stats/${beneficiaryId}`);
+      const response = await apiClient.get(
+        `/api/v1/measurements/quick-assessment/stats/${beneficiaryId}`
+      );
       return response;
     } catch (err) {
       logger.warn('Quick assessment stats API error:', err?.message);
@@ -327,7 +333,9 @@ const assessmentService = {
 
   async batchMeasurementAssessment(assessments) {
     try {
-      const response = await apiClient.post('/measurements/batch-assessment', { assessments });
+      const response = await apiClient.post('/api/v1/measurements/batch-assessment', {
+        assessments,
+      });
       return response;
     } catch (err) {
       logger.error('Batch measurement assessment failed:', err?.message);
@@ -339,7 +347,9 @@ const assessmentService = {
 
   async getRehabPlanProgress(beneficiaryId) {
     try {
-      const response = await apiClient.get(`/measurements/rehab-plan/${beneficiaryId}/progress`);
+      const response = await apiClient.get(
+        `/api/v1/measurements/rehab-plan/${beneficiaryId}/progress`
+      );
       return response;
     } catch (err) {
       logger.warn('Rehab plan progress API error:', err?.message);
@@ -439,7 +449,9 @@ const assessmentService = {
 
   async getSelfCareIndependence(beneficiaryId) {
     try {
-      const response = await apiClient.get(`/disability/assessment/self-care/${beneficiaryId}`);
+      const response = await apiClient.get(
+        `/api/v1/disability/assessment/self-care/${beneficiaryId}`
+      );
       return response;
     } catch (err) {
       logger.warn('Self-care independence API error:', err?.message);
@@ -451,7 +463,9 @@ const assessmentService = {
 
   async getICFSummary(beneficiaryId) {
     try {
-      const response = await apiClient.get(`/disability/assessment/icf-summary/${beneficiaryId}`);
+      const response = await apiClient.get(
+        `/api/v1/disability/assessment/icf-summary/${beneficiaryId}`
+      );
       return response;
     } catch (err) {
       logger.warn('ICF summary API error:', err?.message);
@@ -463,7 +477,9 @@ const assessmentService = {
 
   async getRiskAnalysis(beneficiaryId) {
     try {
-      const response = await apiClient.get(`/disability/assessment/risk-analysis/${beneficiaryId}`);
+      const response = await apiClient.get(
+        `/api/v1/disability/assessment/risk-analysis/${beneficiaryId}`
+      );
       return response;
     } catch (err) {
       logger.warn('Risk analysis API error:', err?.message);
@@ -475,7 +491,7 @@ const assessmentService = {
 
   async getDisabilityDistribution() {
     try {
-      const response = await apiClient.get('/disability/distribution');
+      const response = await apiClient.get('/api/v1/disability/distribution');
       return response;
     } catch (err) {
       logger.warn('Disability distribution API error:', err?.message);
@@ -487,7 +503,7 @@ const assessmentService = {
 
   async getFunctionalSummary() {
     try {
-      const response = await apiClient.get('/disability/functional-summary');
+      const response = await apiClient.get('/api/v1/disability/functional-summary');
       return response;
     } catch (err) {
       logger.warn('Functional summary API error:', err?.message);
@@ -499,7 +515,7 @@ const assessmentService = {
 
   async getRehabReadinessOverview() {
     try {
-      const response = await apiClient.get('/disability/rehab-readiness');
+      const response = await apiClient.get('/api/v1/disability/rehab-readiness');
       return response;
     } catch (err) {
       logger.warn('Rehab readiness API error:', err?.message);
@@ -511,7 +527,7 @@ const assessmentService = {
 
   async getRiskOverview() {
     try {
-      const response = await apiClient.get('/disability/risk-overview');
+      const response = await apiClient.get('/api/v1/disability/risk-overview');
       return response;
     } catch (err) {
       logger.warn('Risk overview API error:', err?.message);
@@ -523,7 +539,7 @@ const assessmentService = {
 
   async getADLAssessments(beneficiaryId) {
     try {
-      const response = await apiClient.get(`/disability/adl/${beneficiaryId}`);
+      const response = await apiClient.get(`/api/v1/disability/adl/${beneficiaryId}`);
       return response;
     } catch (err) {
       logger.warn('ADL assessments API error:', err?.message);
@@ -533,7 +549,7 @@ const assessmentService = {
 
   async createADLAssessment(payload) {
     try {
-      return await apiClient.post('/disability/adl', payload);
+      return await apiClient.post('/api/v1/disability/adl', payload);
     } catch (err) {
       logger.error('Create ADL assessment failed:', err?.message);
       throw new Error('فشل إنشاء تقييم أنشطة الحياة اليومية');
@@ -542,7 +558,7 @@ const assessmentService = {
 
   async getADLProgress(beneficiaryId) {
     try {
-      const response = await apiClient.get(`/disability/adl/${beneficiaryId}/progress`);
+      const response = await apiClient.get(`/api/v1/disability/adl/${beneficiaryId}/progress`);
       return response;
     } catch (err) {
       logger.warn('ADL progress API error:', err?.message);
@@ -552,7 +568,7 @@ const assessmentService = {
 
   async getADLStatistics() {
     try {
-      const response = await apiClient.get('/disability/adl-statistics');
+      const response = await apiClient.get('/api/v1/disability/adl-statistics');
       return response;
     } catch (err) {
       logger.warn('ADL statistics API error:', err?.message);
@@ -562,7 +578,7 @@ const assessmentService = {
 
   async getADLTrainingPlan(beneficiaryId) {
     try {
-      const response = await apiClient.get(`/disability/adl/${beneficiaryId}/training-plan`);
+      const response = await apiClient.get(`/api/v1/disability/adl/${beneficiaryId}/training-plan`);
       return response;
     } catch (err) {
       logger.warn('ADL training plan API error:', err?.message);

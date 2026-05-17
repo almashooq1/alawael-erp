@@ -4,7 +4,7 @@
 
 import apiClient from './api.client';
 
-const base = '/break-glass';
+const base = '/api/v1/break-glass';
 
 export const listMine = async () => (await apiClient.get(`${base}/my`)).data;
 export const listPending = async () => (await apiClient.get(`${base}/pending`)).data;

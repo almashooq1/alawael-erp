@@ -35,6 +35,7 @@ import PendingIcon from '@mui/icons-material/Pending';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import { specializedScalesService } from '../../services/specializedRehab.service';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 /* ── Fallback data ── */
 const DATA_METRICS = [
@@ -346,11 +347,7 @@ export default function RehabProgressTracking() {
                           />
                         )}
                       </TableCell>
-                      <TableCell>
-                        {r.administeredAt
-                          ? new Date(r.administeredAt).toLocaleDateString('ar-SA')
-                          : '—'}
-                      </TableCell>
+                      <TableCell>{r.administeredAt ? _fmtDate(r.administeredAt) : '—'}</TableCell>
                     </TableRow>
                   );
                 })}

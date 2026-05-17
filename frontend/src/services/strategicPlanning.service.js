@@ -4,7 +4,7 @@
  */
 import api from './api.client';
 
-const BASE = '/strategic-planning';
+const BASE = '/api/v1/strategic-planning';
 
 const strategicPlanningService = {
   // ── Goals (الأهداف الاستراتيجية) ──────────────────────────────

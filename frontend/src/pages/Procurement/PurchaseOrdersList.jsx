@@ -24,6 +24,7 @@ import {
 } from '@mui/material';
 import { Add, Refresh } from '@mui/icons-material';
 import { getPurchaseOrders, createPurchaseOrder } from '../../services/procurement.service';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const statusOptions = [
   { value: 'draft', label: 'مسودة', color: 'default' },
@@ -118,9 +119,7 @@ export default function PurchaseOrdersList() {
                 {rows.map(r => (
                   <TableRow key={r._id} hover>
                     <TableCell>{r.orderNumber}</TableCell>
-                    <TableCell>
-                      {r.date ? new Date(r.date).toLocaleDateString('ar-SA') : '—'}
-                    </TableCell>
+                    <TableCell>{r.date ? _fmtDate(r.date) : '—'}</TableCell>
                     <TableCell>{r.vendor?.name}</TableCell>
                     <TableCell>{(r.total || 0).toLocaleString()} ر.س</TableCell>
                     <TableCell>

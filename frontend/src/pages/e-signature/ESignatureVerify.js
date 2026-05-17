@@ -38,6 +38,7 @@ import {
 } from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients } from '../../theme/palette';
+import { formatDate as _fmtDate, formatDateTime as _fmtDT } from 'utils/dateUtils';
 
 /* ═══ Audit Action Labels ════════════════════════════════════════════════ */
 const auditActionMap = {
@@ -253,15 +254,11 @@ export default function ESignatureVerify() {
                     { label: 'المنشئ', value: result.createdByName || '-' },
                     {
                       label: 'تاريخ الإنشاء',
-                      value: result.createdAt
-                        ? new Date(result.createdAt).toLocaleDateString('ar-SA')
-                        : '-',
+                      value: result.createdAt ? _fmtDate(result.createdAt) : '-',
                     },
                     {
                       label: 'تاريخ الإتمام',
-                      value: result.completedAt
-                        ? new Date(result.completedAt).toLocaleDateString('ar-SA')
-                        : '-',
+                      value: result.completedAt ? _fmtDate(result.completedAt) : '-',
                     },
                   ].map((item, i) => (
                     <Box
@@ -411,7 +408,7 @@ export default function ESignatureVerify() {
                         {s.signedAt && (
                           <Typography variant="caption" color="success.main">
                             <Schedule sx={{ fontSize: 12, verticalAlign: 'middle', ml: 0.5 }} />
-                            {new Date(s.signedAt).toLocaleString('ar-SA')}
+                            {_fmtDT(s.signedAt)}
                             {s.signatureType &&
                               ` • طريقة التوقيع: ${s.signatureType === 'draw' ? 'رسم' : s.signatureType === 'type' ? 'كتابة' : s.signatureType === 'upload' ? 'رفع' : s.signatureType}`}
                           </Typography>
@@ -472,7 +469,7 @@ export default function ESignatureVerify() {
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
                       {entry.performerName || 'النظام'} •{' '}
-                      {entry.timestamp ? new Date(entry.timestamp).toLocaleString('ar-SA') : ''}
+                      {entry.timestamp ? _fmtDT(entry.timestamp) : ''}
                     </Typography>
                     {entry.details && (
                       <Typography variant="caption" display="block">

@@ -4,7 +4,7 @@
  */
 import api from './api';
 
-const BASE = '/api/ar-rehab';
+const BASE = '/api/v1/ar-vr';
 
 // ── Sessions ──
 export const sessionsService = {

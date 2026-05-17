@@ -121,7 +121,7 @@ const therapySessionsService = {
    */
   async getSessions(params = {}) {
     try {
-      const res = await apiClient.get('/therapy-sessions', { params });
+      const res = await apiClient.get('/api/v1/therapy-sessions', { params });
       return res?.data || res;
     } catch (err) {
       logger.warn('therapySessionsService.getSessions fallback', err?.message);
@@ -151,7 +151,7 @@ const therapySessionsService = {
    */
   async getSession(id) {
     try {
-      const res = await apiClient.get(`/therapy-sessions/${id}`);
+      const res = await apiClient.get(`/api/v1/therapy-sessions/${id}`);
       return res?.data || res;
     } catch (err) {
       logger.warn('therapySessionsService.getSession', err?.message);
@@ -164,7 +164,7 @@ const therapySessionsService = {
    */
   async createSession(data) {
     try {
-      const res = await apiClient.post('/therapy-sessions', data);
+      const res = await apiClient.post('/api/v1/therapy-sessions', data);
       return res?.data || res;
     } catch (err) {
       logger.warn('therapySessionsService.createSession', err?.message);
@@ -177,7 +177,7 @@ const therapySessionsService = {
    */
   async updateSession(id, data) {
     try {
-      const res = await apiClient.put(`/therapy-sessions/${id}`, data);
+      const res = await apiClient.put(`/api/v1/therapy-sessions/${id}`, data);
       return res?.data || res;
     } catch (err) {
       logger.warn('therapySessionsService.updateSession', err?.message);
@@ -190,7 +190,7 @@ const therapySessionsService = {
    */
   async deleteSession(id) {
     try {
-      const res = await apiClient.delete(`/therapy-sessions/${id}`);
+      const res = await apiClient.delete(`/api/v1/therapy-sessions/${id}`);
       return res?.data || res;
     } catch (err) {
       logger.warn('therapySessionsService.deleteSession', err?.message);
@@ -203,7 +203,7 @@ const therapySessionsService = {
    */
   async updateStatus(id, status) {
     try {
-      const res = await apiClient.patch(`/therapy-sessions/${id}/status`, { status });
+      const res = await apiClient.patch(`/api/v1/therapy-sessions/${id}/status`, { status });
       return res?.data || res;
     } catch (err) {
       logger.warn('therapySessionsService.updateStatus', err?.message);
@@ -216,7 +216,7 @@ const therapySessionsService = {
    */
   async cancelSession(id, reason, cancelledBy = 'CENTER') {
     try {
-      const res = await apiClient.post(`/therapy-sessions/${id}/cancel`, {
+      const res = await apiClient.post(`/api/v1/therapy-sessions/${id}/cancel`, {
         reason,
         cancelledBy,
       });
@@ -232,7 +232,7 @@ const therapySessionsService = {
    */
   async markAttendance(id, data = {}) {
     try {
-      const res = await apiClient.post(`/therapy-sessions/${id}/attend`, data);
+      const res = await apiClient.post(`/api/v1/therapy-sessions/${id}/attend`, data);
       return res?.data || res;
     } catch (err) {
       logger.warn('therapySessionsService.markAttendance', err?.message);
@@ -245,7 +245,7 @@ const therapySessionsService = {
    */
   async markNoShow(id, reason) {
     try {
-      const res = await apiClient.post(`/therapy-sessions/${id}/no-show`, { reason });
+      const res = await apiClient.post(`/api/v1/therapy-sessions/${id}/no-show`, { reason });
       return res?.data || res;
     } catch (err) {
       logger.warn('therapySessionsService.markNoShow', err?.message);
@@ -258,7 +258,7 @@ const therapySessionsService = {
    */
   async rescheduleSession(id, date, startTime, endTime) {
     try {
-      const res = await apiClient.patch(`/therapy-sessions/${id}/reschedule`, {
+      const res = await apiClient.patch(`/api/v1/therapy-sessions/${id}/reschedule`, {
         date,
         startTime,
         endTime,
@@ -275,7 +275,7 @@ const therapySessionsService = {
    */
   async getDocumentation(sessionId) {
     try {
-      const res = await apiClient.get(`/therapy-sessions/${sessionId}/documentation`);
+      const res = await apiClient.get(`/api/v1/therapy-sessions/${sessionId}/documentation`);
       return res?.data || res;
     } catch (err) {
       logger.warn('therapySessionsService.getDocumentation', err?.message);
@@ -288,7 +288,7 @@ const therapySessionsService = {
    */
   async saveDocumentation(sessionId, data) {
     try {
-      const res = await apiClient.post(`/therapy-sessions/${sessionId}/documentation`, data);
+      const res = await apiClient.post(`/api/v1/therapy-sessions/${sessionId}/documentation`, data);
       return res?.data || res;
     } catch (err) {
       logger.warn('therapySessionsService.saveDocumentation', err?.message);
@@ -301,7 +301,7 @@ const therapySessionsService = {
    */
   async getStats() {
     try {
-      const res = await apiClient.get('/therapy-sessions/stats');
+      const res = await apiClient.get('/api/v1/therapy-sessions/stats');
       return res?.data?.data || res?.data || MOCK_STATS;
     } catch (err) {
       logger.warn('therapySessionsService.getStats fallback', err?.message);
@@ -314,7 +314,7 @@ const therapySessionsService = {
    */
   async checkAvailability(therapistId, date, startTime, endTime) {
     try {
-      const res = await apiClient.get(`/therapy-sessions/availability/${therapistId}`, {
+      const res = await apiClient.get(`/api/v1/therapy-sessions/availability/${therapistId}`, {
         params: { date, startTime, endTime },
       });
       return res?.data || res;
@@ -329,7 +329,7 @@ const therapySessionsService = {
    */
   async getUpcoming(beneficiaryId, daysAhead = 30) {
     try {
-      const res = await apiClient.get(`/therapy-sessions/upcoming/${beneficiaryId}`, {
+      const res = await apiClient.get(`/api/v1/therapy-sessions/upcoming/${beneficiaryId}`, {
         params: { daysAhead },
       });
       return res?.data || res;
@@ -344,7 +344,7 @@ const therapySessionsService = {
    */
   async bulkReschedule(sessionIds, newDate, newStartTime, newEndTime) {
     try {
-      const res = await apiClient.post('/therapy-sessions/bulk-reschedule', {
+      const res = await apiClient.post('/api/v1/therapy-sessions/bulk-reschedule', {
         sessionIds,
         newDate,
         newStartTime,

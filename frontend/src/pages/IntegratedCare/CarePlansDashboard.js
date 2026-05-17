@@ -37,6 +37,7 @@ import { useNavigate } from 'react-router-dom';
 import apiClient from 'services/api.client';
 import { gradients } from '../../theme/palette';
 import { useSnackbar } from '../../contexts/SnackbarContext';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 // --- Sub-components with real API integration ---
 const IntegratedCareStats = ({ plans, sessions: _sessions }) => {
@@ -166,9 +167,7 @@ const StudentPlansList = ({ plans, loading }) => {
               <TableRow key={p._id}>
                 <TableCell>{p.beneficiary?.name || p.studentName || '—'}</TableCell>
                 <TableCell>{p.planType || 'فردي'}</TableCell>
-                <TableCell>
-                  {p.createdAt ? new Date(p.createdAt).toLocaleDateString('ar') : '—'}
-                </TableCell>
+                <TableCell>{p.createdAt ? _fmtDate(p.createdAt) : '—'}</TableCell>
                 <TableCell>
                   <Chip
                     label={p.status || 'مسودة'}
@@ -251,7 +250,7 @@ const RecentSessionsList = ({ sessions, loading }) => {
         <ListItem key={s._id} divider>
           <ListItemText
             primary={s.title || s.type || 'جلسة'}
-            secondary={`${s.therapist?.name || '—'} • ${s.createdAt ? new Date(s.createdAt).toLocaleDateString('ar') : '—'}`}
+            secondary={`${s.therapist?.name || '—'} • ${s.createdAt ? _fmtDate(s.createdAt) : '—'}`}
           />
           <Chip label={s.status || 'مكتمل'} size="small" color="primary" />
         </ListItem>

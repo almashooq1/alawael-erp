@@ -151,6 +151,9 @@ export { default as EpisodesRoutes } from './EpisodesRoutes';
 // === Beneficiary 360° (الملف الشامل للمستفيد) ===
 export { default as Beneficiary360Routes } from './Beneficiary360Routes';
 
+// === Measures Library (مكتبة المقاييس السريرية) ===
+export { default as MeasuresLibraryRoutes } from './MeasuresLibraryRoutes';
+
 // === DDD Unified Rehabilitation Platform (منصة التأهيل الموحدة) ===
 export { default as DDDRoutes } from './DDDRoutes';
 export { DDD_NAV_ITEMS } from './DDDRoutes';
@@ -160,3 +163,16 @@ export { default as TeleRehabRoutes } from './TeleRehabRoutes';
 
 // === Equipment Lifecycle (دورة حياة المعدات) ===
 export { default as EquipmentLifecycleRoutes } from './EquipmentLifecycleRoutes';
+
+// === Group Therapy (العلاج الجماعي) ===
+export { default as GroupTherapyRoutes } from './GroupTherapyRoutes';
+
+// === Family Engagement (التواصل الأسري) ===
+export { default as FamilyEngagementRoutes } from './FamilyEngagementRoutes';
+
+// === Post-Rehab Follow-Up (متابعة ما بعد التأهيل) ===
+export { default as PostRehabRoutes } from './PostRehabRoutes';
+
+// === Social Media Management (إدارة منصات التواصل الاجتماعي) ===
+export { default as SocialMediaRoutes } from './SocialMediaRoutes';
+export { default as CDSSRoutes } from './CDSSRoutes';

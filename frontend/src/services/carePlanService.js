@@ -4,7 +4,7 @@
  */
 import apiClient from 'services/api.client';
 
-const BASE = '/care-plans';
+const BASE = '/api/v1/care-plans';
 
 const carePlanService = {
   // ── CRUD ────────────────────────────────────────────────────────────────

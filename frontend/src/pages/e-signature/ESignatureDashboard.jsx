@@ -49,6 +49,7 @@ import {
 } from 'recharts';
 import eSignatureService from '../../services/eSignature.service';
 import eStampService from '../../services/eStamp.service';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 const COLORS = ['#4caf50', '#ff9800', '#f44336', '#2196f3', '#9c27b0', '#607d8b'];
 const MONTH_NAMES = [
@@ -186,7 +187,7 @@ export default function ESignatureDashboard() {
     title: d.documentTitle || d.requestId,
     creator: d.createdByName || '-',
     status: d.status,
-    date: d.updatedAt ? new Date(d.updatedAt).toLocaleDateString('ar-SA') : '-',
+    date: d.updatedAt ? _fmtDate(d.updatedAt) : '-',
     priority: d.priority,
   }));
 

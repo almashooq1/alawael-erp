@@ -4,7 +4,7 @@
  */
 import apiClient from './api.client';
 
-const BASE = '/security';
+const BASE = '/api/v1/security';
 
 const securityService = {
   /* ── Security Profile ── */

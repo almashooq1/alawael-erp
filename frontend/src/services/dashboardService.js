@@ -102,7 +102,7 @@ const DASHBOARD_MOCK = {
  */
 export const getDashboardStats = async () => {
   try {
-    const response = await apiClient.get('/dashboard/stats');
+    const response = await apiClient.get('/api/v1/dashboard/stats');
     // api.client interceptor already unwraps response.data,
     // so response = { success, data: { kpis, finance, ... } }
     return response?.data || response || DASHBOARD_MOCK;
@@ -117,7 +117,7 @@ export const getDashboardStats = async () => {
  */
 export const getQuickStats = async () => {
   try {
-    const response = await apiClient.get('/dashboard/stats/quick');
+    const response = await apiClient.get('/api/v1/dashboard/stats/quick');
     return (
       response?.data ||
       response || { users: 0, beneficiaries: 0, todaySessions: 0, unreadNotifs: 0 }
@@ -132,7 +132,7 @@ export const getQuickStats = async () => {
  */
 export const getModuleStats = async () => {
   try {
-    const response = await apiClient.get('/dashboard/stats/modules');
+    const response = await apiClient.get('/api/v1/dashboard/stats/modules');
     return response?.data || response || {};
   } catch {
     return {};

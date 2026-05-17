@@ -80,6 +80,7 @@ import { ChartTooltip } from '../../components/dashboard/shared/ChartTooltip';
 import EmptyState from '../../components/dashboard/shared/EmptyState';
 import DashboardErrorBoundary from '../../components/dashboard/shared/DashboardErrorBoundary';
 import montessoriService from '../../services/montessoriService';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 /* ─── Animated counter ─── */
 const useAnimatedCounter = (endValue, duration = 1200) => {
@@ -846,9 +847,7 @@ const MontessoriSessions = () => {
                               {s.student?.fullName || '-'}
                             </Typography>
                           </TableCell>
-                          <TableCell>
-                            {s.date ? new Date(s.date).toLocaleDateString('ar-SA') : '-'}
-                          </TableCell>
+                          <TableCell>{s.date ? _fmtDate(s.date) : '-'}</TableCell>
                           <TableCell>
                             <Chip
                               label={s.type}
@@ -1010,9 +1009,7 @@ const MontessoriSessions = () => {
                               }}
                             />
                           </TableCell>
-                          <TableCell>
-                            {ev.date ? new Date(ev.date).toLocaleDateString('ar-SA') : '-'}
-                          </TableCell>
+                          <TableCell>{ev.date ? _fmtDate(ev.date) : '-'}</TableCell>
                           <TableCell align="center">
                             <Tooltip title="تعديل">
                               <IconButton

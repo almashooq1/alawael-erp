@@ -43,6 +43,7 @@ import {
   Search as SearchIcon,
 } from '@mui/icons-material';
 import qiwaApi from '../../services/qiwa.service';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 /* ── Tab panels ─────────────────────────── */
 function TabPanel({ children, value, index, ...other }) {
@@ -346,9 +347,7 @@ export default function QiwaDashboard() {
                         size="small"
                       />
                     </TableCell>
-                    <TableCell>
-                      {c.startDate ? new Date(c.startDate).toLocaleDateString('ar-SA') : '—'}
-                    </TableCell>
+                    <TableCell>{c.startDate ? _fmtDate(c.startDate) : '—'}</TableCell>
                   </TableRow>
                 ))
               )}

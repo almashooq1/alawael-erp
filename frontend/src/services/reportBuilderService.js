@@ -1,5 +1,5 @@
 import api from './api';
-const BASE = '/report-builder';
+const BASE = '/api/v1/report-builder';
 
 const reportBuilderService = {
   // ── Dashboard ──

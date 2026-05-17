@@ -81,6 +81,7 @@ import {
 } from '../../theme/palette';
 import logger from '../../utils/logger';
 import mediaService from '../../services/mediaService';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 
 /* ─── Constants ────────────────────────────────────────────────────────────── */
 const TYPE_CONFIG = {
@@ -1078,7 +1079,7 @@ export default function MediaLibrary() {
                           variant="caption"
                           sx={{ color: neutralColors.textSecondary, mx: 1 }}
                         >
-                          {new Date(item.createdAt).toLocaleDateString('ar-SA')}
+                          {_fmtDate(item.createdAt)}
                         </Typography>
                         <IconButton
                           size="small"
@@ -1329,7 +1330,7 @@ export default function MediaLibrary() {
                   { label: 'رفع بواسطة', value: previewItem.uploadedBy?.name || '-' },
                   {
                     label: 'تاريخ الرفع',
-                    value: new Date(previewItem.createdAt).toLocaleDateString('ar-SA'),
+                    value: _fmtDate(previewItem.createdAt),
                   },
                   { label: 'التصنيف', value: previewItem.category || 'عام' },
                 ].map((info, i) => (

@@ -38,6 +38,7 @@ import {
   Warning as WarningIcon,
   GppGood as ValidIcon,
 } from '@mui/icons-material';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 import {
   getWorkPermits,
   createWorkPermit,
@@ -68,7 +69,7 @@ const statusColor = {
   'قيد المعالجة': 'info',
 };
 const fmtCurrency = v => (v !== null && v > 0 ? `${Number(v).toLocaleString('ar-SA')} ر.س` : '-');
-const fmtDate = d => (d ? new Date(d).toLocaleDateString('ar-SA') : '-');
+const fmtDate = d => (d ? _fmtDate(d) : '-');
 
 const daysUntilExpiry = d => {
   if (!d) return null;

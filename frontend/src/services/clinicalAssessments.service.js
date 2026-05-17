@@ -7,7 +7,7 @@
 
 import apiClient from './api.client';
 
-const BASE = '/admin/assessments';
+const BASE = '/api/v1/admin/assessments';
 
 // ── أدوات التقييم المتاحة ───────────────────────────────────────────────────
 export const ASSESSMENT_TOOLS = [

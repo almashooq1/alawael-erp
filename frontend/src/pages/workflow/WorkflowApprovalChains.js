@@ -66,6 +66,7 @@ import {
 } from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import workflowService from '../../services/workflow.service';
+import { formatDateTime as _fmtDT } from 'utils/dateUtils';
 
 const STATUS_CONFIG = {
   pending: { label: 'في الانتظار', color: '#FF9800', icon: <PendingIcon /> },
@@ -486,9 +487,7 @@ export default function WorkflowApprovalChains() {
                     <TableCell>
                       <Chip label={`الخطوة ${p.currentStep || 1}`} size="small" color="warning" />
                     </TableCell>
-                    <TableCell>
-                      {p.createdAt ? new Date(p.createdAt).toLocaleString('ar-SA') : '—'}
-                    </TableCell>
+                    <TableCell>{p.createdAt ? _fmtDT(p.createdAt) : '—'}</TableCell>
                     <TableCell>
                       <Box sx={{ display: 'flex', gap: 0.5 }}>
                         <Button
@@ -570,12 +569,8 @@ export default function WorkflowApprovalChains() {
                       </TableCell>
                       <TableCell>{inst.chainId?.nameAr || inst.chainId?.name || '—'}</TableCell>
                       <TableCell>الخطوة {inst.currentStep || '—'}</TableCell>
-                      <TableCell>
-                        {inst.createdAt ? new Date(inst.createdAt).toLocaleString('ar-SA') : '—'}
-                      </TableCell>
-                      <TableCell>
-                        {inst.updatedAt ? new Date(inst.updatedAt).toLocaleString('ar-SA') : '—'}
-                      </TableCell>
+                      <TableCell>{inst.createdAt ? _fmtDT(inst.createdAt) : '—'}</TableCell>
+                      <TableCell>{inst.updatedAt ? _fmtDT(inst.updatedAt) : '—'}</TableCell>
                       <TableCell>
                         <Tooltip title="التسلسل الزمني">
                           <IconButton size="small" onClick={() => viewTimeline(inst._id)}>
@@ -829,9 +824,7 @@ export default function WorkflowApprovalChains() {
                         {event.approverName || '—'}
                       </Typography>
                       <Typography variant="caption" color="text.secondary">
-                        {event.decidedAt
-                          ? new Date(event.decidedAt).toLocaleString('ar-SA')
-                          : 'في الانتظار'}
+                        {event.decidedAt ? _fmtDT(event.decidedAt) : 'في الانتظار'}
                       </Typography>
                       {event.comment && (
                         <Typography

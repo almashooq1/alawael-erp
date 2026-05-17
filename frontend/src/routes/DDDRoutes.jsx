@@ -29,6 +29,37 @@ const GoalsPage = lazy(() => import('../pages/goals/GoalsPage'));
 const CarePlanPage = lazy(() => import('../pages/care-plans/CarePlanPage'));
 const ResearchDashboard = lazy(() => import('../pages/research/ResearchDashboard'));
 const FamilyEngagementPage = lazy(() => import('../pages/family/FamilyEngagementPage'));
+const MeasuresLibraryPage = lazy(() => import('../pages/measures-library/MeasuresLibraryPage'));
+const AIRecommendationsPage = lazy(
+  () => import('../pages/ai-recommendations/AIRecommendationsPage')
+);
+const AssessmentsPage = lazy(() => import('../pages/assessments/AssessmentsPage'));
+const BehaviorManagementPage = lazy(() => import('../pages/behavior/BehaviorManagementPage'));
+const ProgramsPage = lazy(() => import('../pages/programs/ProgramsPage'));
+const TimelinePage = lazy(() => import('../pages/timeline/TimelinePage'));
+const WorkforceDevelopmentPage = lazy(() => import('../pages/workforce/WorkforceDevelopmentPage'));
+
+/* Phase 30-36 dedicated pages */
+const AccreditationCompliancePage = lazy(
+  () => import('../pages/accreditation/AccreditationCompliancePage')
+);
+const PatientEngagementPage = lazy(
+  () => import('../pages/patient-engagement/PatientEngagementPage')
+);
+const InteroperabilityPage = lazy(() => import('../pages/interoperability/InteroperabilityPage'));
+const BusinessContinuityPage = lazy(
+  () => import('../pages/business-continuity/BusinessContinuityPage')
+);
+const EquipmentLifecyclePage = lazy(
+  () => import('../pages/equipment-lifecycle/EquipmentLifecyclePage')
+);
+const FacilityManagementPage = lazy(
+  () => import('../pages/facility-management/FacilityManagementPage')
+);
+const ResearchHubPage = lazy(() => import('../pages/research-hub/ResearchHubPage'));
+const CommunityEngagementPage = lazy(
+  () => import('../pages/community-engagement/CommunityEngagementPage')
+);
 
 /* Domain pages from factory (for domains without dedicated pages) */
 
@@ -38,18 +69,6 @@ const PageLoader = () => (
     <CircularProgress />
   </Box>
 );
-
-/* ── Wrapper to extract named export from DomainPages ── */
-function DomainPageWrapper({ pageName }) {
-  const LazyPage = lazy(() =>
-    import('../pages/domains/DomainPages').then(mod => ({ default: mod[pageName] }))
-  );
-  return (
-    <Suspense fallback={<PageLoader />}>
-      <LazyPage />
-    </Suspense>
-  );
-}
 
 /**
  * DDDRoutes — يُضاف داخل Router الرئيسي
@@ -78,159 +97,69 @@ export default function DDDRoutes() {
           <Route path="reports" element={<ReportsPage />} />
 
           {/* Domain pages — dedicated full-featured pages where available */}
-          <Route path="assessments" element={<DomainPageWrapper pageName="AssessmentsPage" />} />
+          <Route path="assessments" element={<AssessmentsPage />} />
           <Route path="care-plans" element={<CarePlanPage />} />
           <Route path="goals" element={<GoalsPage />} />
+          <Route path="measures-library" element={<MeasuresLibraryPage />} />
+          <Route path="beneficiaries/:beneficiaryId/measures" element={<MeasuresLibraryPage />} />
           <Route path="group-therapy" element={<GroupTherapyPage />} />
           <Route path="tele-rehab" element={<TeleRehabPage />} />
           <Route path="ar-vr" element={<ARVRRehabPage />} />
-          <Route path="behavior" element={<DomainPageWrapper pageName="BehaviorPage" />} />
+          <Route path="behavior" element={<BehaviorManagementPage />} />
           <Route path="family" element={<FamilyEngagementPage />} />
-          <Route path="programs" element={<DomainPageWrapper pageName="ProgramsPage" />} />
-          <Route
-            path="ai-recommendations"
-            element={<DomainPageWrapper pageName="AIRecommendationsPage" />}
-          />
+          <Route path="programs" element={<ProgramsPage />} />
+          <Route path="timeline" element={<TimelinePage />} />
+          <Route path="ai-recommendations" element={<AIRecommendationsPage />} />
           <Route path="research" element={<ResearchDashboard />} />
           <Route path="field-training" element={<FieldTrainingPage />} />
 
           {/* Phase 29 – Workforce Development */}
-          <Route
-            path="workforce-analytics"
-            element={<DomainPageWrapper pageName="WorkforceAnalyticsPage" />}
-          />
-          <Route
-            path="credential-manager"
-            element={<DomainPageWrapper pageName="CredentialManagerPage" />}
-          />
-          <Route
-            path="mentorship-program"
-            element={<DomainPageWrapper pageName="MentorshipProgramPage" />}
-          />
-          <Route
-            path="career-pathway"
-            element={<DomainPageWrapper pageName="CareerPathwayPage" />}
-          />
+          <Route path="workforce-analytics" element={<WorkforceDevelopmentPage />} />
+          <Route path="credential-manager" element={<WorkforceDevelopmentPage />} />
+          <Route path="mentorship-program" element={<WorkforceDevelopmentPage />} />
+          <Route path="career-pathway" element={<WorkforceDevelopmentPage />} />
 
           {/* Phase 30 – Accreditation & Compliance */}
-          <Route
-            path="accreditation-manager"
-            element={<DomainPageWrapper pageName="AccreditationManagerPage" />}
-          />
-          <Route
-            path="inspection-tracker"
-            element={<DomainPageWrapper pageName="InspectionTrackerPage" />}
-          />
-          <Route
-            path="standards-compliance"
-            element={<DomainPageWrapper pageName="StandardsCompliancePage" />}
-          />
-          <Route
-            path="licensure-manager"
-            element={<DomainPageWrapper pageName="LicensureManagerPage" />}
-          />
+          <Route path="accreditation-manager" element={<AccreditationCompliancePage />} />
+          <Route path="inspection-tracker" element={<AccreditationCompliancePage />} />
+          <Route path="standards-compliance" element={<AccreditationCompliancePage />} />
+          <Route path="licensure-manager" element={<AccreditationCompliancePage />} />
 
           {/* Phase 31 – Patient Engagement */}
-          <Route
-            path="patient-portal"
-            element={<DomainPageWrapper pageName="PatientPortalPage" />}
-          />
-          <Route
-            path="health-education"
-            element={<DomainPageWrapper pageName="HealthEducationPage" />}
-          />
-          <Route
-            path="remote-monitoring"
-            element={<DomainPageWrapper pageName="RemoteMonitoringPage" />}
-          />
-          <Route
-            path="patient-community"
-            element={<DomainPageWrapper pageName="PatientCommunityPage" />}
-          />
+          <Route path="patient-portal" element={<PatientEngagementPage />} />
+          <Route path="health-education" element={<PatientEngagementPage />} />
+          <Route path="remote-monitoring" element={<PatientEngagementPage />} />
+          <Route path="patient-community" element={<PatientEngagementPage />} />
 
           {/* Phase 32 – Interoperability */}
-          <Route
-            path="fhir-integration"
-            element={<DomainPageWrapper pageName="FhirIntegrationPage" />}
-          />
-          <Route path="hl7-messaging" element={<DomainPageWrapper pageName="HL7MessagingPage" />} />
-          <Route path="data-exchange" element={<DomainPageWrapper pageName="DataExchangePage" />} />
-          <Route
-            path="interoperability-hub"
-            element={<DomainPageWrapper pageName="InteroperabilityHubPage" />}
-          />
+          <Route path="fhir-integration" element={<InteroperabilityPage />} />
+          <Route path="hl7-messaging" element={<InteroperabilityPage />} />
+          <Route path="data-exchange" element={<InteroperabilityPage />} />
+          <Route path="interoperability-hub" element={<InteroperabilityPage />} />
 
           {/* Phase 33 – Disaster Recovery */}
-          <Route
-            path="backup-manager"
-            element={<DomainPageWrapper pageName="BackupManagerPage" />}
-          />
-          <Route
-            path="business-continuity"
-            element={<DomainPageWrapper pageName="BusinessContinuityPage" />}
-          />
-          <Route
-            path="system-failover"
-            element={<DomainPageWrapper pageName="SystemFailoverPage" />}
-          />
-          <Route
-            path="incident-response"
-            element={<DomainPageWrapper pageName="IncidentResponsePage" />}
-          />
+          <Route path="backup-manager" element={<BusinessContinuityPage />} />
+          <Route path="business-continuity" element={<BusinessContinuityPage />} />
+          <Route path="system-failover" element={<BusinessContinuityPage />} />
+          <Route path="incident-response" element={<BusinessContinuityPage />} />
 
           {/* Phase 34 – Facility & Asset */}
-          <Route
-            path="equipment-lifecycle"
-            element={<DomainPageWrapper pageName="EquipmentLifecyclePage" />}
-          />
-          <Route
-            path="environmental-monitoring"
-            element={<DomainPageWrapper pageName="EnvironmentalMonitoringPage" />}
-          />
-          <Route
-            path="space-management"
-            element={<DomainPageWrapper pageName="SpaceManagementPage" />}
-          />
-          <Route
-            path="asset-tracking"
-            element={<DomainPageWrapper pageName="AssetTrackingPage" />}
-          />
+          <Route path="equipment-lifecycle" element={<EquipmentLifecyclePage />} />
+          <Route path="environmental-monitoring" element={<FacilityManagementPage />} />
+          <Route path="space-management" element={<FacilityManagementPage />} />
+          <Route path="asset-tracking" element={<FacilityManagementPage />} />
 
           {/* Phase 35 – Clinical Research */}
-          <Route
-            path="clinical-research"
-            element={<DomainPageWrapper pageName="ClinicalResearchPage" />}
-          />
-          <Route
-            path="clinical-trials"
-            element={<DomainPageWrapper pageName="ClinicalTrialsPage" />}
-          />
-          <Route
-            path="outcome-research"
-            element={<DomainPageWrapper pageName="OutcomeResearchPage" />}
-          />
-          <Route
-            path="publication-manager"
-            element={<DomainPageWrapper pageName="PublicationManagerPage" />}
-          />
+          <Route path="clinical-research" element={<ResearchHubPage />} />
+          <Route path="clinical-trials" element={<ResearchHubPage />} />
+          <Route path="outcome-research" element={<ResearchHubPage />} />
+          <Route path="publication-manager" element={<ResearchHubPage />} />
 
           {/* Phase 36 – Community Engagement */}
-          <Route
-            path="volunteer-management"
-            element={<DomainPageWrapper pageName="VolunteerManagementPage" />}
-          />
-          <Route
-            path="community-outreach"
-            element={<DomainPageWrapper pageName="CommunityOutreachPage" />}
-          />
-          <Route
-            path="donor-relations"
-            element={<DomainPageWrapper pageName="DonorRelationsPage" />}
-          />
-          <Route
-            path="advocacy-program"
-            element={<DomainPageWrapper pageName="AdvocacyProgramPage" />}
-          />
+          <Route path="volunteer-management" element={<CommunityEngagementPage />} />
+          <Route path="community-outreach" element={<CommunityEngagementPage />} />
+          <Route path="donor-relations" element={<CommunityEngagementPage />} />
+          <Route path="advocacy-program" element={<CommunityEngagementPage />} />
 
           {/* Fallback */}
           <Route path="*" element={<ExecutiveDashboard />} />

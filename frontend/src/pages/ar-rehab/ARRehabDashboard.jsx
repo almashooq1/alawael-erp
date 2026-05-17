@@ -3,6 +3,7 @@
  * AR/VR/XR — هولوجرام، BCI، تعاون عن بعد
  */
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { formatDate } from 'utils/dateUtils';
 import {
   Box,
   Grid,
@@ -724,7 +725,7 @@ export default function ARRehabDashboard() {
                           </TableCell>
                           <TableCell>
                             <Typography variant="body2" sx={{ fontSize: 12 }}>
-                              {s.startTime ? new Date(s.startTime).toLocaleDateString('ar') : '-'}
+                              {s.startTime ? formatDate(s.startTime) : '-'}
                             </Typography>
                           </TableCell>
                           <TableCell>

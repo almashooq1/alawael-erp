@@ -187,13 +187,18 @@ export const MOCK_MAINTENANCE_DASHBOARD = {
 /* ─── API Wrappers ─── */
 export const workOrdersService = {
   getAll: () =>
-    safe(() => apiClient.get('/maintenance/work-orders').then(r => r.data), MOCK_WORK_ORDERS),
-  getById: id => safe(() => apiClient.get(`/maintenance/work-orders/${id}`).then(r => r.data)),
-  create: d => safe(() => apiClient.post('/maintenance/work-orders', d).then(r => r.data), d),
+    safe(
+      () => apiClient.get('/api/v1/maintenance/work-orders').then(r => r.data),
+      MOCK_WORK_ORDERS
+    ),
+  getById: id =>
+    safe(() => apiClient.get(`/api/v1/maintenance/work-orders/${id}`).then(r => r.data)),
+  create: d =>
+    safe(() => apiClient.post('/api/v1/maintenance/work-orders', d).then(r => r.data), d),
   update: (id, d) =>
-    safe(() => apiClient.put(`/maintenance/work-orders/${id}`, d).then(r => r.data), d),
+    safe(() => apiClient.put(`/api/v1/maintenance/work-orders/${id}`, d).then(r => r.data), d),
   remove: id =>
-    safe(() => apiClient.delete(`/maintenance/work-orders/${id}`).then(r => r.data), {
+    safe(() => apiClient.delete(`/api/v1/maintenance/work-orders/${id}`).then(r => r.data), {
       success: true,
     }),
   complete: (id, cost) =>
@@ -209,14 +214,14 @@ export const workOrdersService = {
 export const preventiveService = {
   getAll: () =>
     safe(
-      () => apiClient.get('/maintenance/preventive').then(r => r.data),
+      () => apiClient.get('/api/v1/maintenance/preventive').then(r => r.data),
       MOCK_PREVENTIVE_SCHEDULE
     ),
-  create: d => safe(() => apiClient.post('/maintenance/preventive', d).then(r => r.data), d),
+  create: d => safe(() => apiClient.post('/api/v1/maintenance/preventive', d).then(r => r.data), d),
   update: (id, d) =>
-    safe(() => apiClient.put(`/maintenance/preventive/${id}`, d).then(r => r.data), d),
+    safe(() => apiClient.put(`/api/v1/maintenance/preventive/${id}`, d).then(r => r.data), d),
   complete: id =>
-    safe(() => apiClient.patch(`/maintenance/preventive/${id}/complete`).then(r => r.data), {
+    safe(() => apiClient.patch(`/api/v1/maintenance/preventive/${id}/complete`).then(r => r.data), {
       success: true,
     }),
 };
@@ -224,7 +229,7 @@ export const preventiveService = {
 export const maintenanceReportsService = {
   getDashboardStats: () =>
     safe(
-      () => apiClient.get('/maintenance/dashboard').then(r => r.data),
+      () => apiClient.get('/api/v1/maintenance/dashboard').then(r => r.data),
       MOCK_MAINTENANCE_DASHBOARD
     ),
 };

@@ -36,6 +36,7 @@ import {
   FlightLand as ReturnIcon,
   Print as IssueIcon,
 } from '@mui/icons-material';
+import { formatDate as _fmtDate } from 'utils/dateUtils';
 import {
   fetchVisaRequests,
   createVisaRequest,
@@ -296,9 +297,7 @@ export default function ExitReentryVisaManagement() {
                   </TableCell>
                   <TableCell>{v.visaType}</TableCell>
                   <TableCell>{v.destination}</TableCell>
-                  <TableCell>
-                    {v.departureDate ? new Date(v.departureDate).toLocaleDateString('ar-SA') : '-'}
-                  </TableCell>
+                  <TableCell>{v.departureDate ? _fmtDate(v.departureDate) : '-'}</TableCell>
                   <TableCell>
                     <Chip
                       label={v.status}
@@ -377,7 +376,7 @@ export default function ExitReentryVisaManagement() {
                     <TableCell>
                       {v.employeeId?.firstName} {v.employeeId?.lastName}
                     </TableCell>
-                    <TableCell>{new Date(v.expiryDate).toLocaleDateString('ar-SA')}</TableCell>
+                    <TableCell>{_fmtDate(v.expiryDate)}</TableCell>
                     <TableCell>
                       <Chip
                         label={`${days} يوم`}

@@ -6,7 +6,7 @@
  */
 import apiClient from 'services/api.client';
 
-const BASE = '/saudi-tax';
+const BASE = '/api/v1/saudi-tax';
 
 const saudiTaxService = {
   // ── VAT Returns (إقرارات ضريبة القيمة المضافة) ─────────────────────────

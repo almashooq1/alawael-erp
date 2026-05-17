@@ -113,6 +113,16 @@ function createAuthzService({
   function computeScopedBranchIds(actor) {
     const roles = Array.isArray(actor.roles) ? actor.roles : [];
     const broadest = authzRegistry.broadestScope(roles);
+
+    // Defense in depth — Wave 33: when NO role resolves to a known
+    // scope (all of actor.roles are unknown), DON'T fall back to the
+    // actor's branchId. Treat as "no scope" so withBranchScope
+    // injects MATCH_NOTHING. The identity middleware should have
+    // already rejected such actors; this is the second wall.
+    if (!broadest) {
+      return { isGlobalScope: false, scopedBranchIds: [], scopeLevel: null };
+    }
+
     if (broadest === 'GLOBAL') {
       return { isGlobalScope: true, scopedBranchIds: [], scopeLevel: 'GLOBAL' };
     }

@@ -67,6 +67,42 @@ function kpiSeriesLoader({ models = {}, kpiSeriesOpts = {}, logger = console } =
   });
 }
 
+// ─── Reference loader: end-of-day (Wave 32) ────────────────────
+// Aggregates per-branch daily activity (alerts resolved/snoozed,
+// open follow-ups). Returns null when branchIds aren't configured
+// — the orchestrator boot wires this from Branch.find().
+
+const { createEndOfDayLoader } = require('./loaders/end-of-day.loader');
+
+function endOfDayLoader({ models = {}, endOfDayOpts = {}, logger = console } = {}) {
+  if (!Array.isArray(endOfDayOpts.branchIds) || endOfDayOpts.branchIds.length === 0) return null;
+  return createEndOfDayLoader({
+    Alert: models.Alert || null,
+    FollowUp: models.FollowUp || null,
+    branchIds: endOfDayOpts.branchIds,
+    roleGroup: endOfDayOpts.roleGroup || 'branch_manager',
+    logger,
+  });
+}
+
+// ─── Reference loader: executive-digest (Wave 32) ──────────────
+// Week-vs-week comparisons for strategic KPIs. Requires both
+// KpiValue model AND a configured `metrics` list (which KPIs to
+// include in the digest).
+
+const { createExecutiveDigestLoader } = require('./loaders/executive-digest.loader');
+
+function executiveDigestLoader({ models = {}, digestOpts = {}, logger = console } = {}) {
+  if (!models.KpiValue) return null;
+  if (!Array.isArray(digestOpts.metrics) || digestOpts.metrics.length === 0) return null;
+  return createExecutiveDigestLoader({
+    KpiValue: models.KpiValue,
+    metrics: digestOpts.metrics,
+    aggregatorDefault: digestOpts.aggregatorDefault || 'avg',
+    logger,
+  });
+}
+
 // ─── Reference loader: data-quality.v1 ─────────────────────────
 // data-quality generator wants `{ snapshots: [...] }` where each
 // snapshot has the per-dataset diagnostic numbers. In a real
@@ -163,6 +199,8 @@ function buildLoaders({ deps = {}, realLoaders = {}, logger = console } = {}) {
     'care-gap.v1': careGapLoader(deps),
     'anomaly.v1': kpiSeries,
     'trend-deviation.v1': kpiSeries,
+    'end-of-day.v1': endOfDayLoader(deps),
+    'executive-digest.v1': executiveDigestLoader(deps),
   };
 
   const stubs = {

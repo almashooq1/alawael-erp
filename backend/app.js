@@ -1568,16 +1568,38 @@ if (orchestratorEnabled && !isTestEnvOrch && app._insightsService) {
       // Wave 30 — kpi-series loader (anomaly + trend-deviation)
       ['KpiValue', './models/KpiValue'],
       ['KpiDefinition', './models/KpiDefinition'],
+      // Wave 32 — end-of-day loader
+      ['Alert', './alerts/alert.model'],
     ]) {
       try {
-        loaderModels[key] = require(path);
+        const mod = require(path);
+        // alert.model exports an object with `{ model }` getter; the
+        // other models export the model directly.
+        loaderModels[key] = mod && mod.model ? mod.model : mod;
       } catch {
         /* model not loadable in this build — loader will skip */
       }
     }
+    // FollowUp comes from the productivity models bundle (Wave 27)
+    try {
+      const productivityModels = require('./models/Productivity');
+      if (productivityModels?.FollowUp) loaderModels.FollowUp = productivityModels.FollowUp;
+    } catch {
+      /* productivity persistence optional */
+    }
+
+    // Wave 32 — caller-supplied loader options. Production wires
+    // `endOfDayOpts.branchIds` from Branch.find() at boot time. Until
+    // that's wired, the loader silently returns null → stub remains.
+    // `digestOpts.metrics` should list the 6 strategic KPIs the
+    // executive digest covers (with their KpiDefinition ids).
+    const endOfDayOpts = process.env.INTELLIGENCE_EOD_BRANCH_IDS
+      ? { branchIds: process.env.INTELLIGENCE_EOD_BRANCH_IDS.split(',').map(s => s.trim()) }
+      : {};
+    const digestOpts = {}; // wired in a follow-up; metrics list TBD per deployment
 
     const { loaders, stubbedGeneratorIds } = buildLoaders({
-      deps: { dqRegistry, models: loaderModels, logger },
+      deps: { dqRegistry, models: loaderModels, endOfDayOpts, digestOpts, logger },
       // realLoaders: {} — additional caller-supplied overrides
       logger,
     });

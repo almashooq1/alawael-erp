@@ -720,6 +720,56 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
     'advocacy-program',
   ].forEach(slug => dualMount(app, slug, makeGenericCrudRouter(slug)));
 
+  // ── Phase-13 Gap-Fill Mounts ───────────────────────────────────────────
+  // Routes that existed as camelCase files but were missing kebab-case mounts
+  // that the frontend services expect at /api/v1/<kebab-path>.
+
+  // AI & Diagnostics
+  dualMount(app, 'ai-diagnostic', safeRequire('../routes/aiDiagnostic.routes'));
+  // Bus / Transport Tracking
+  dualMount(app, 'bus-tracking', safeRequire('../routes/busTracking.routes'));
+  dualMount(app, 'transport-routes', safeRequire('../routes/transportRoutes'));
+  dualMount(app, 'traffic-accidents', safeRequire('../routes/trafficAccidents'));
+  // Therapist Tier Plans
+  dualMount(app, 'therapist-pro', safeRequire('../routes/therapistPro.routes'));
+  dualMount(app, 'therapist-ultra', safeRequire('../routes/therapistUltra.routes'));
+  dualMount(app, 'therapist-elite', safeRequire('../routes/therapistElite.routes'));
+  // Strategic & Succession Planning
+  dualMount(app, 'strategic-planning', safeRequire('../routes/strategicPlanning.routes'));
+  dualMount(app, 'succession-planning', safeRequire('../routes/successionPlanning.routes'));
+  // Finance Operations
+  dualMount(app, 'finance-operations', safeRequire('../routes/financeOperations.routes'));
+  // OCR / Document Intelligence
+  dualMount(app, 'ocr-documents', safeRequire('../routes/ocrDocument.routes'));
+  // Employee Self-Service Portal
+  dualMount(app, 'employee-portal', safeRequire('../routes/employeePortal.routes'));
+  // WAF / Rate-Limit management UI
+  dualMount(app, 'waf-ratelimit', safeRequire('../routes/rate-limit-waf.routes'));
+  // Saudi Tax (ZATCA integration)
+  dualMount(app, 'saudi-tax', safeRequire('../routes/saudiTax.routes'));
+  // Smart Scheduler
+  dualMount(app, 'smart-scheduler', safeRequire('../routes/smartScheduler.routes'));
+  // Smart Documents
+  dualMount(app, 'documents-smart', safeRequire('../routes/documents.smart.routes'));
+  // Advanced/Pro Documents — main + versioned phases + extended
+  dualMount(app, 'documents-pro', safeRequire('../routes/documentAdvanced.routes'));
+  dualMount(app, 'documents-pro-ext', safeRequire('../routes/documentAdvanced.routes'));
+  ['v3', 'v4', 'v5', 'v6', 'v7', 'v8', 'v9'].forEach(v =>
+    dualMount(app, `documents-pro-${v}`, safeRequire('../routes/documentAdvanced.routes'))
+  );
+  // Internal Audit — التدقيق الداخلي
+  dualMount(app, 'internal-audit', safeRequire('../routes/internalAudit'));
+  // Specialized Programs — البرامج المتخصصة
+  dualMount(app, 'specialized-programs', safeRequire('../routes/specializedPrograms.routes'));
+  // Disability Rehabilitation (maps to specialized rehab domain)
+  dualMount(app, 'disability-rehab', safeRequire('../routes/rehabilitation-specialized.routes'));
+  // Rehabilitation Equipment
+  dualMount(app, 'rehab-equipment', safeRequire('../routes/medicalEquipment.routes'));
+  // Social Media Management — إدارة وسائل التواصل الاجتماعي
+  dualMount(app, 'social-media', safeRequire('../routes/social-media.routes'));
+  // Break-Glass Emergency Access — الوصول الطارئ
+  dualMount(app, 'break-glass', safeRequire('../routes/break-glass.routes'));
+
   logger.info(
     'New frontend-backend integration routes mounted (8 new + 4 dual-mounted + 17 DDD + 32 extension modules)'
   );

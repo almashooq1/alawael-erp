@@ -1872,6 +1872,88 @@ try {
   logger.warn('[MFA] routes skipped:', mfaErr.message);
 }
 
+// ─── Beneficiary 360 Phase 2 — Lifecycle Routes (Wave 40) ────────────────────
+// HTTP surface for the Wave-39 lifecycle state machine + workflow
+// orchestrator. Every endpoint gates on a `beneficiary.lifecycle.*`
+// permission registered in governance.registry. The service performs
+// deeper guards (self-approval, Nafath, reasonCode allowlist, reversal
+// window). No side-effect handlers wired here — Phase 3 (Wave 41+).
+try {
+  const {
+    createBeneficiaryLifecycleService,
+  } = require('./intelligence/beneficiary-lifecycle.service');
+  const createBeneficiaryLifecycleRouter = require('./routes/beneficiary-lifecycle.routes');
+
+  let transitionModel = null;
+  try {
+    transitionModel = require('./models/BeneficiaryLifecycleTransition');
+  } catch {
+    /* model optional in test/dev — router fails gracefully without it */
+  }
+
+  let beneficiaryModel = null;
+  try {
+    beneficiaryModel = require('./models/Beneficiary');
+  } catch {
+    /* same */
+  }
+
+  let auditLogger = null;
+  try {
+    const { auditLogService } = require('./services/auditLog.service');
+    if (auditLogService && typeof auditLogService.log === 'function') {
+      auditLogger = auditLogService;
+    }
+  } catch {
+    /* audit optional */
+  }
+
+  if (transitionModel) {
+    const lifecycleSvc = createBeneficiaryLifecycleService({
+      transitionLog: transitionModel,
+      beneficiaryModel,
+      // No side-effect handlers wired in Wave 40 — those land in Wave 41+
+      // alongside scheduler / care-team / notification wiring.
+      sideEffectHandlers: {},
+      auditLogger,
+      logger,
+    });
+
+    let governanceSvc = null;
+    try {
+      const { createGovernanceService } = require('./intelligence/governance.service');
+      governanceSvc = createGovernanceService({ logger });
+    } catch {
+      /* governance service should always load; logged at top */
+    }
+
+    if (governanceSvc) {
+      const { authenticate: blAuthMw } = require('./middleware/auth');
+      app.use(
+        '/api/v1/beneficiary-lifecycle',
+        blAuthMw,
+        createBeneficiaryLifecycleRouter({
+          service: lifecycleSvc,
+          governance: governanceSvc,
+          logger,
+        })
+      );
+      app._beneficiaryLifecycleService = lifecycleSvc;
+      logger.info(
+        '[BeneficiaryLifecycle] ✓ Phase 2 routes mounted at /api/v1/beneficiary-lifecycle'
+      );
+    } else {
+      logger.warn('[BeneficiaryLifecycle] routes skipped: governance service unavailable');
+    }
+  } else {
+    logger.warn(
+      '[BeneficiaryLifecycle] routes skipped: BeneficiaryLifecycleTransition model not loaded'
+    );
+  }
+} catch (blErr) {
+  logger.warn('[BeneficiaryLifecycle] routes skipped:', blErr.message);
+}
+
 // ─── Therapist Portal ─────────────────────────────────────────────────────────
 try {
   app.use('/api/v1/therapist', require('./routes/therapist-portal.routes'));

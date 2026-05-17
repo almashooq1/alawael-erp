@@ -145,6 +145,58 @@ const PERMISSIONS = Object.freeze({
   // Wave 31 — bulk branch-data ops (gated by SoD + step-up MFA + audit)
   'branch-data.export': ['executive_leadership', 'head_office', 'quality_compliance'],
   'branch-data.delete': ['executive_leadership'],
+
+  // Wave 40 — Beneficiary 360 Phase 2 (Lifecycle HTTP)
+  'beneficiary.lifecycle.transitions.read': [
+    'branch_manager',
+    'clinical_supervisor',
+    'quality_compliance',
+    'executive_leadership',
+    'head_office',
+  ],
+  'beneficiary.lifecycle.transitions.list-allowed': 'all-authenticated',
+
+  // Per-transition request permissions (12)
+  'beneficiary.lifecycle.admit.request': ['branch_manager', 'clinical_supervisor'],
+  'beneficiary.lifecycle.suspend.request': ['branch_manager', 'clinical_supervisor'],
+  'beneficiary.lifecycle.reactivate.request': ['branch_manager', 'clinical_supervisor'],
+  'beneficiary.lifecycle.initiate_transfer.request': [
+    'branch_manager',
+    'quality_compliance',
+    'head_office',
+  ],
+  'beneficiary.lifecycle.complete_transfer.request': ['branch_manager'],
+  'beneficiary.lifecycle.reverse_transfer.request': ['branch_manager', 'quality_compliance'],
+  'beneficiary.lifecycle.discharge.request': ['clinical_supervisor', 'branch_manager'],
+  'beneficiary.lifecycle.archive.request': ['branch_manager', 'quality_compliance'],
+  'beneficiary.lifecycle.restore.request': ['quality_compliance', 'clinical_supervisor'],
+  'beneficiary.lifecycle.request_deletion.request': ['quality_compliance'],
+  'beneficiary.lifecycle.approve_deletion.request': ['quality_compliance', 'executive_leadership'],
+  'beneficiary.lifecycle.cancel_deletion.request': ['quality_compliance'],
+
+  // Workflow-step permissions
+  'beneficiary.lifecycle.transition.approve': [
+    'branch_manager',
+    'clinical_supervisor',
+    'quality_compliance',
+    'executive_leadership',
+    'head_office',
+  ],
+  'beneficiary.lifecycle.transition.execute': [
+    'branch_manager',
+    'clinical_supervisor',
+    'quality_compliance',
+    'executive_leadership',
+    'head_office',
+  ],
+  'beneficiary.lifecycle.transition.cancel-own': 'all-authenticated',
+  'beneficiary.lifecycle.transition.cancel-any': ['quality_compliance', 'executive_leadership'],
+  'beneficiary.lifecycle.transition.reverse': [
+    'branch_manager',
+    'clinical_supervisor',
+    'quality_compliance',
+    'executive_leadership',
+  ],
 });
 
 // ─── API ────────────────────────────────────────────────────────

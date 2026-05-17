@@ -1439,6 +1439,53 @@ try {
   logger.warn('[AlertEngine] routes skipped:', apiErr.message);
 }
 
+// ─── Intelligence Layer HTTP surface (Wave 18-19) ─────────────────────────────
+// Always-on (no env flag). The generators don't run automatically here
+// — they're invoked by a separate orchestrator (Wave 20). These routes
+// expose the read/feedback surface for whatever insights already exist.
+try {
+  const { createInsightsService } = require('./intelligence/insights.service');
+  const { createInsightsRouter } = require('./routes/insights.routes');
+
+  let insightAudit = null;
+  try {
+    const AuditLog = require('./models/AuditLog');
+    insightAudit = {
+      async log(entry) {
+        try {
+          await AuditLog.create({
+            eventType: entry.action || 'insight.feedback',
+            eventCategory: 'security',
+            userId: entry.actorUserId || null,
+            severity: 'info',
+            status: 'success',
+            action: entry.action || 'insight.feedback',
+            resource: { type: entry.entityType || 'Insight', id: entry.entityId || null },
+            metadata: entry.metadata || {},
+            ipAddress: entry.ipAddress || null,
+            timestamp: new Date(),
+          });
+        } catch (e) {
+          logger.warn('[insights audit]', e.message);
+        }
+      },
+    };
+  } catch {
+    /* AuditLog model optional */
+  }
+
+  const insightsService = createInsightsService({ auditLogger: insightAudit, logger });
+  const { authenticate: insightsAuthMw } = require('./middleware/auth');
+  app.use(
+    '/api/v1/insights',
+    insightsAuthMw,
+    createInsightsRouter({ insights: insightsService, logger })
+  );
+  logger.info('[Intelligence] ✓ insights routes mounted at /api/v1/insights');
+} catch (insightsErr) {
+  logger.warn('[Intelligence] routes skipped:', insightsErr.message);
+}
+
 // ─── Therapist Portal ─────────────────────────────────────────────────────────
 try {
   app.use('/api/v1/therapist', require('./routes/therapist-portal.routes'));

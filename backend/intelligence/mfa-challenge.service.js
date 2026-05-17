@@ -41,6 +41,17 @@ const DEFAULT_TIER_2_EXPIRY_MS = 5 * 60 * 1000;
 const DEFAULT_TIER_3_EXPIRY_MS = 90 * 1000;
 const MAX_VERIFY_ATTEMPTS = 5;
 
+// ─── Wave 37 — Brute-force protections ─────────────────────────────
+// Red-team finding #4: per-challenge MAX_VERIFY_ATTEMPTS resets when
+// the attacker creates a fresh challenge. These per-USER ceilings
+// close that gap.
+const DEFAULT_USER_MAX_FAILED_PER_24H = 10;
+const DEFAULT_MAX_CHALLENGES_PER_HOUR = 6;
+const DEFAULT_USER_LOCKOUT_MS = 30 * 60 * 1000; // 30 min
+const DEFAULT_BACKOFF_BASE_MS = 2000; // 2s × 2^(attempt-1) → 2/4/8/16s
+const WINDOW_24H_MS = 24 * 60 * 60 * 1000;
+const WINDOW_1H_MS = 60 * 60 * 1000;
+
 // Reason codes (kept in sync with decide() reasons from Wave 31)
 const REASON = Object.freeze({
   CHALLENGE_REQUIRED: 'CHALLENGE_REQUIRED',
@@ -52,6 +63,10 @@ const REASON = Object.freeze({
   CHALLENGE_ALREADY_VERIFIED: 'CHALLENGE_ALREADY_VERIFIED',
   CHALLENGE_LOCKED: 'CHALLENGE_LOCKED',
   OTP_INVALID: 'OTP_INVALID',
+  // Wave 37
+  USER_TEMP_LOCKED: 'USER_TEMP_LOCKED',
+  CHALLENGE_RATE_LIMITED: 'CHALLENGE_RATE_LIMITED',
+  VERIFY_TOO_SOON: 'VERIFY_TOO_SOON',
 });
 
 function nowDate() {
@@ -88,11 +103,23 @@ function createMfaChallengeService({
   auditLogger = null,
   logger = console,
   now = nowDate,
+  // Wave 37 — brute-force protections. Tests can disable each by
+  // passing Infinity / 0.
+  userMaxFailedPer24h = DEFAULT_USER_MAX_FAILED_PER_24H,
+  maxChallengesPerHour = DEFAULT_MAX_CHALLENGES_PER_HOUR,
+  userLockoutMs = DEFAULT_USER_LOCKOUT_MS,
+  backoffBaseMs = DEFAULT_BACKOFF_BASE_MS,
 } = {}) {
   void logger;
 
   // In-memory store: challengeId → challenge
   const store = new Map();
+
+  // Wave 37 — per-user state, keyed by userId.
+  //   failed:      [Date]  sliding 24h window of failed-verify timestamps
+  //   challenges:  [Date]  sliding  1h window of challenge-create timestamps
+  //   lockedUntil: Date|null
+  const userStats = new Map();
 
   // Default TOTP verifier — prefer speakeasy when present, else stub
   // that always fails. Tests pass their own deterministic verifier.
@@ -119,6 +146,39 @@ function createMfaChallengeService({
 
   function _expiryFor(tier) {
     return tier >= 3 ? DEFAULT_TIER_3_EXPIRY_MS : DEFAULT_TIER_2_EXPIRY_MS;
+  }
+
+  // ─── Wave 37 — per-user state helpers ─────────────────────
+
+  function _getUserStats(userId) {
+    let s = userStats.get(userId);
+    if (!s) {
+      s = { failed: [], challenges: [], lockedUntil: null };
+      userStats.set(userId, s);
+    }
+    return s;
+  }
+
+  function _pruneOlder(arr, cutoffMs) {
+    while (arr.length && arr[0].getTime() < cutoffMs) arr.shift();
+  }
+
+  function _checkUserLockout(userId) {
+    const stats = _getUserStats(userId);
+    const nowMs = now().getTime();
+    _pruneOlder(stats.failed, nowMs - WINDOW_24H_MS);
+    if (stats.lockedUntil && now() < stats.lockedUntil) {
+      return {
+        locked: true,
+        lockedUntil: stats.lockedUntil,
+        retryAfterMs: stats.lockedUntil.getTime() - nowMs,
+      };
+    }
+    if (stats.lockedUntil && now() >= stats.lockedUntil) {
+      // Lockout window passed — clear it. Failure history still slides.
+      stats.lockedUntil = null;
+    }
+    return { locked: false };
   }
 
   async function _loadEnrollment(userId) {
@@ -153,6 +213,41 @@ function createMfaChallengeService({
     if (![2, 3].includes(requiredTier)) {
       return { ok: false, reason: REASON.INVALID_TIER };
     }
+
+    // Wave 37 — refuse if user is currently locked out
+    const lockState = _checkUserLockout(userId);
+    if (lockState.locked) {
+      await _audit('mfa.challenge.user_locked', actor, {
+        targetUserId: userId,
+        lockedUntil: lockState.lockedUntil,
+      });
+      return {
+        ok: false,
+        reason: REASON.USER_TEMP_LOCKED,
+        lockedUntil: lockState.lockedUntil,
+        retryAfterMs: lockState.retryAfterMs,
+      };
+    }
+
+    // Wave 37 — challenge-creation rate limit (sliding 1h window)
+    const stats = _getUserStats(userId);
+    const nowMs = now().getTime();
+    _pruneOlder(stats.challenges, nowMs - WINDOW_1H_MS);
+    if (stats.challenges.length >= maxChallengesPerHour) {
+      const oldest = stats.challenges[0];
+      const retryAfterMs = oldest.getTime() + WINDOW_1H_MS - nowMs;
+      await _audit('mfa.challenge.rate_limited', actor, {
+        targetUserId: userId,
+        windowCount: stats.challenges.length,
+        retryAfterMs,
+      });
+      return {
+        ok: false,
+        reason: REASON.CHALLENGE_RATE_LIMITED,
+        retryAfterMs,
+      };
+    }
+    stats.challenges.push(now());
 
     const enrollment = await _loadEnrollment(userId);
     // Optional enrollment check — when no mfaSettingsModel is wired
@@ -235,11 +330,37 @@ function createMfaChallengeService({
     const c = store.get(challengeId);
     if (!c) return { ok: false, reason: REASON.CHALLENGE_NOT_FOUND };
     if (c.verifiedAt) return { ok: false, reason: REASON.CHALLENGE_ALREADY_VERIFIED };
-    if (new Date() > c.expiresAt) {
+    if (now() > c.expiresAt) {
       return { ok: false, reason: REASON.CHALLENGE_EXPIRED };
     }
     if (c.attemptCount >= MAX_VERIFY_ATTEMPTS) {
       return { ok: false, reason: REASON.CHALLENGE_LOCKED, attemptCount: c.attemptCount };
+    }
+
+    // Wave 37 — user-level lockout (spans across challenges)
+    const lockState = _checkUserLockout(c.userId);
+    if (lockState.locked) {
+      return {
+        ok: false,
+        reason: REASON.USER_TEMP_LOCKED,
+        lockedUntil: lockState.lockedUntil,
+        retryAfterMs: lockState.retryAfterMs,
+      };
+    }
+
+    // Wave 37 — exponential backoff between failed attempts on the same
+    // challenge. attemptCount has not been incremented yet, so on the
+    // 2nd verify call (after 1 failure) required delay = base × 2^0.
+    if (c.lastFailedAt && backoffBaseMs > 0 && c.attemptCount > 0) {
+      const requiredDelayMs = backoffBaseMs * Math.pow(2, c.attemptCount - 1);
+      const elapsedMs = now().getTime() - c.lastFailedAt.getTime();
+      if (elapsedMs < requiredDelayMs) {
+        return {
+          ok: false,
+          reason: REASON.VERIFY_TOO_SOON,
+          retryAfterMs: requiredDelayMs - elapsedMs,
+        };
+      }
     }
 
     c.attemptCount += 1;
@@ -259,16 +380,50 @@ function createMfaChallengeService({
     }
 
     if (!pass) {
+      // Wave 37 — record failure on both the challenge AND the user.
+      c.lastFailedAt = now();
+      const stats = _getUserStats(c.userId);
+      stats.failed.push(now());
+      _pruneOlder(stats.failed, now().getTime() - WINDOW_24H_MS);
+
+      let userLockedNow = false;
+      if (stats.failed.length >= userMaxFailedPer24h) {
+        stats.lockedUntil = new Date(now().getTime() + userLockoutMs);
+        userLockedNow = true;
+        await _audit('mfa.user.locked', actor, {
+          targetUserId: c.userId,
+          lockedUntil: stats.lockedUntil,
+          failedCount: stats.failed.length,
+        });
+      }
+
       await _audit('mfa.challenge.failed', actor, {
         challengeId,
         attempt: c.attemptCount,
+        userFailedCount: stats.failed.length,
       });
+
+      if (userLockedNow) {
+        return {
+          ok: false,
+          reason: REASON.USER_TEMP_LOCKED,
+          lockedUntil: stats.lockedUntil,
+          retryAfterMs: userLockoutMs,
+        };
+      }
+
       return {
         ok: false,
         reason: REASON.OTP_INVALID,
         attemptsRemaining: MAX_VERIFY_ATTEMPTS - c.attemptCount,
       };
     }
+
+    // Wave 37 — successful verify clears the per-user failure counter
+    // so a legitimate login resets the slate.
+    const successStats = _getUserStats(c.userId);
+    successStats.failed = [];
+    successStats.lockedUntil = null;
 
     // Success — mark + upgrade session
     c.verifiedAt = now();
@@ -302,7 +457,7 @@ function createMfaChallengeService({
   function getChallengeStatus(challengeId) {
     const c = store.get(challengeId);
     if (!c) return { ok: false, reason: REASON.CHALLENGE_NOT_FOUND };
-    const expired = new Date() > c.expiresAt;
+    const expired = now() > c.expiresAt;
     const locked = c.attemptCount >= MAX_VERIFY_ATTEMPTS;
     return {
       ok: true,
@@ -358,14 +513,59 @@ function createMfaChallengeService({
     };
   }
 
+  // ─── Wave 37 — admin unlock + read-only state inspector ────
+
+  /**
+   * Clear a user's lockout + failed-attempt history. Intended for
+   * admin/help-desk use after out-of-band identity confirmation.
+   * The CALLER is responsible for permission gating — this service
+   * trusts that whoever calls it has already passed an authz decide().
+   */
+  async function unlockUser({ userId, actor = {} } = {}) {
+    if (!userId) return { ok: false, reason: REASON.USER_REQUIRED };
+    const stats = userStats.get(userId);
+    if (stats) {
+      stats.failed = [];
+      stats.lockedUntil = null;
+    }
+    await _audit('mfa.user.unlocked', actor, { targetUserId: userId });
+    return { ok: true };
+  }
+
+  function getUserState(userId) {
+    const stats = userStats.get(userId);
+    if (!stats) {
+      return {
+        userId,
+        failedCount: 0,
+        challengeCount: 0,
+        locked: false,
+        lockedUntil: null,
+      };
+    }
+    const nowMs = now().getTime();
+    _pruneOlder(stats.failed, nowMs - WINDOW_24H_MS);
+    _pruneOlder(stats.challenges, nowMs - WINDOW_1H_MS);
+    return {
+      userId,
+      failedCount: stats.failed.length,
+      challengeCount: stats.challenges.length,
+      locked: !!(stats.lockedUntil && now() < stats.lockedUntil),
+      lockedUntil: stats.lockedUntil,
+    };
+  }
+
   return {
     createChallenge,
     verifyChallenge,
     getChallengeStatus,
     requireMfa,
+    unlockUser,
+    getUserState,
     REASON,
     // Test seam
     _store: store,
+    _userStats: userStats,
   };
 }
 
@@ -405,4 +605,11 @@ module.exports = {
   DEFAULT_TIER_2_EXPIRY_MS,
   DEFAULT_TIER_3_EXPIRY_MS,
   MAX_VERIFY_ATTEMPTS,
+  // Wave 37
+  DEFAULT_USER_MAX_FAILED_PER_24H,
+  DEFAULT_MAX_CHALLENGES_PER_HOUR,
+  DEFAULT_USER_LOCKOUT_MS,
+  DEFAULT_BACKOFF_BASE_MS,
+  WINDOW_24H_MS,
+  WINDOW_1H_MS,
 };

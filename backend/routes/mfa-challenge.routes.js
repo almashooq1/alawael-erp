@@ -52,6 +52,10 @@ const REASON_TO_STATUS = Object.freeze({
   CHALLENGE_ALREADY_VERIFIED: 409,
   CHALLENGE_LOCKED: 401,
   OTP_INVALID: 401,
+  // Wave 37 — brute-force protections
+  USER_TEMP_LOCKED: 429,
+  CHALLENGE_RATE_LIMITED: 429,
+  VERIFY_TOO_SOON: 429,
 });
 
 function actorFrom(req) {
@@ -77,6 +81,14 @@ function respond(res, result) {
   }
   if (typeof result?.attemptCount === 'number') {
     body.attemptCount = result.attemptCount;
+  }
+  // Wave 37 — surface retry hints + Retry-After header on rate-limit denials.
+  if (typeof result?.retryAfterMs === 'number') {
+    body.retryAfterMs = result.retryAfterMs;
+    res.set('Retry-After', String(Math.max(1, Math.ceil(result.retryAfterMs / 1000))));
+  }
+  if (result?.lockedUntil) {
+    body.lockedUntil = result.lockedUntil;
   }
   return res.status(status).json(body);
 }

@@ -58,6 +58,11 @@ function makeService(opts = {}) {
     totpVerifier: async ({ token }) => token === '123456',
     auditLogger: { log: jest.fn(async () => {}) },
     logger: { warn: () => {}, info: () => {} },
+    // Wave 36 baseline tests run with Wave-37 protections disabled.
+    // Wave 37 has its own test suite that opts in to each ceiling.
+    userMaxFailedPer24h: Infinity,
+    maxChallengesPerHour: Infinity,
+    backoffBaseMs: 0,
     ...opts,
   });
 }

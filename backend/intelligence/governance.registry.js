@@ -141,6 +141,10 @@ const PERMISSIONS = Object.freeze({
   // Strategic
   'strategy.forecast.view': ['executive_leadership', 'head_office'],
   'strategy.board-pack.generate': ['executive_leadership', 'head_office'],
+
+  // Wave 31 — bulk branch-data ops (gated by SoD + step-up MFA + audit)
+  'branch-data.export': ['executive_leadership', 'head_office', 'quality_compliance'],
+  'branch-data.delete': ['executive_leadership'],
 });
 
 // ─── API ────────────────────────────────────────────────────────

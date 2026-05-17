@@ -39,7 +39,13 @@ function createGovernanceService({
     if (!holders) return false;
     if (holders === 'all') return true;
     if (holders === 'all-authenticated') return !!canonicalRole;
-    const groupKey = resolveRoleGroup(canonicalRole);
+    let groupKey = resolveRoleGroup(canonicalRole);
+    // Wave 31 — the authz layer + tests pass role-group keys directly
+    // (e.g. 'branch_manager', 'executive_leadership'). When the input
+    // isn't a canonical role but IS a known group key, use it directly.
+    if (!groupKey && canonicalRole && roleRegistry.getProfile(canonicalRole)) {
+      groupKey = canonicalRole;
+    }
     if (!groupKey) return false;
     return holders.includes(groupKey);
   }

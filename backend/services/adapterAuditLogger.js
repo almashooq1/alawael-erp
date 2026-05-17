@@ -34,6 +34,7 @@ const crypto = require('crypto');
 const logger = require('../utils/logger');
 const rateLimiter = require('./adapterRateLimiter');
 const metricsRegistry = require('./adapterMetricsRegistry');
+const AdapterAudit = require('../models/AdapterAudit');
 
 class RateLimitError extends Error {
   constructor(details) {
@@ -68,7 +69,6 @@ async function record(entry) {
   });
 
   try {
-    const AdapterAudit = require('../models/AdapterAudit');
     const row = {
       actorUserId: entry.actor?.id || entry.actor?._id,
       actorEmail: entry.actor?.email,

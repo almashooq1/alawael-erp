@@ -109,7 +109,7 @@ async function backfillType(entityType, opts = {}) {
   return { entityType, modelName: cfg.modelName, scanned, issued, skipped, total };
 }
 
-function projectionForLabel(labelFn) {
+function projectionForLabel(__labelFn) {
   // We pull a generous projection so labelFrom() can read whichever
   // fields it wants. Cheap to include — these are all small strings.
   return {

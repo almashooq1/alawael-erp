@@ -145,6 +145,21 @@ function classifyRow(mapped, existing) {
 }
 
 async function main() {
+  // Validate --confirm BEFORE any DB I/O so the flag check is instant
+  // even when MongoDB is unreachable. This is the primary guard against
+  // accidental writes; the same check is repeated after plan-building
+  // for clarity, but an early exit here prevents 8s+ connection delays
+  // in test environments that use unreachable MongoDB URIs.
+  if (EXECUTE && (!confirmFlag || confirmFlag.split('=')[1] !== CONFIRM_REQUIRED)) {
+    const msg = `refusing to execute — pass --confirm=${CONFIRM_REQUIRED}`;
+    if (JSON_MODE) {
+      process.stdout.write(JSON.stringify({ error: msg }) + '\n');
+    } else {
+      console.error(`${c.red}${msg}${c.reset}`);
+    }
+    process.exit(2);
+  }
+
   const mongoose = require('mongoose');
 
   // Registering BOTH models in the same process so we can read from

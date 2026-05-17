@@ -448,7 +448,7 @@ async function downloadMedia(mediaId) {
   }
   const meta = await getMediaUrl(mediaId);
   if (!meta?.url) throw new Error('Media URL missing in Meta response');
-  return await downloadBinary(meta.url);
+  return downloadBinary(meta.url);
 }
 
 function downloadBinary(url) {

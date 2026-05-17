@@ -1554,16 +1554,20 @@ if (orchestratorEnabled && !isTestEnvOrch && app._insightsService) {
       require('./intelligence/generators/executive-digest.generator'),
     ];
 
-    // Wave 29 — collect the Mongoose models loaders may need.
+    // Wave 29-30 — collect the Mongoose models loaders may need.
     // Each model is optional (loader gracefully falls back to stub
     // when missing). Try-require so a missing model file doesn't
     // crash boot.
     const loaderModels = {};
     for (const [key, path] of [
+      // Wave 29 — care-gap loader
       ['Beneficiary', './models/Beneficiary'],
       ['CarePlan', './models/CarePlan'],
       ['SmartGoal', './models/SmartGoal'],
       ['Vaccination', './models/Vaccination'],
+      // Wave 30 — kpi-series loader (anomaly + trend-deviation)
+      ['KpiValue', './models/KpiValue'],
+      ['KpiDefinition', './models/KpiDefinition'],
     ]) {
       try {
         loaderModels[key] = require(path);

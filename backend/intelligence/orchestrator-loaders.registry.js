@@ -47,6 +47,26 @@ function careGapLoader({ models = {}, logger = console } = {}) {
   });
 }
 
+// ─── Reference loader: kpi-series (Wave 30) ────────────────────
+// Single factory powers BOTH anomaly.v1 + trend-deviation.v1 — both
+// consume the same { series: [...] } shape. Reads KpiValue + (optionally)
+// KpiDefinition for label hydration.
+//
+// Returns null when KpiValue model is missing → both generators fall
+// back to their stubs.
+
+const { createKpiSeriesLoader } = require('./loaders/kpi-series.loader');
+
+function kpiSeriesLoader({ models = {}, kpiSeriesOpts = {}, logger = console } = {}) {
+  if (!models.KpiValue) return null;
+  return createKpiSeriesLoader({
+    KpiValue: models.KpiValue,
+    KpiDefinition: models.KpiDefinition || null,
+    ...kpiSeriesOpts, // caller can pass metrics list, windowDays, etc.
+    logger,
+  });
+}
+
 // ─── Reference loader: data-quality.v1 ─────────────────────────
 // data-quality generator wants `{ snapshots: [...] }` where each
 // snapshot has the per-dataset diagnostic numbers. In a real
@@ -132,9 +152,17 @@ function buildLoaders({ deps = {}, realLoaders = {}, logger = console } = {}) {
   // e.g. Beneficiary model not loaded in this Mongo-less context).
   // `null` values are filtered out below so the generator simply
   // doesn't run.
+  //
+  // Wave 30: anomaly + trend-deviation share ONE factory call (same
+  // ctx shape). Memoize the result so we don't double-query KpiValue
+  // on every tick — both generators run off the same loader function.
+  const kpiSeries = kpiSeriesLoader(deps);
+
   const reference = {
     'data-quality.v1': dataQualityLoader(deps),
     'care-gap.v1': careGapLoader(deps),
+    'anomaly.v1': kpiSeries,
+    'trend-deviation.v1': kpiSeries,
   };
 
   const stubs = {

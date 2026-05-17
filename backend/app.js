@@ -1595,6 +1595,26 @@ try {
   logger.warn('[LayoutPolicy] routes skipped:', lpErr.message);
 }
 
+// ─── Premium Productivity Features (Wave 25) ─────────────────────────────────
+// Annotations + handoffs + follow-ups + watchlists + user preferences.
+// In-memory store by default; wire real Mongo models in Wave 26+.
+try {
+  const {
+    createProductivityFeaturesService,
+  } = require('./intelligence/productivity-features.service');
+  const { createProductivityFeaturesRouter } = require('./routes/productivity-features.routes');
+  const productivitySvc = createProductivityFeaturesService({ logger });
+  const { authenticate: pfAuthMw } = require('./middleware/auth');
+  app.use(
+    '/api/v1/productivity',
+    pfAuthMw,
+    createProductivityFeaturesRouter({ productivity: productivitySvc, logger })
+  );
+  logger.info('[Productivity] ✓ productivity routes mounted at /api/v1/productivity');
+} catch (pfErr) {
+  logger.warn('[Productivity] routes skipped:', pfErr.message);
+}
+
 // ─── Therapist Portal ─────────────────────────────────────────────────────────
 try {
   app.use('/api/v1/therapist', require('./routes/therapist-portal.routes'));

@@ -1491,6 +1491,9 @@ try {
   }
 
   const insightsService = createInsightsService({ auditLogger: insightAudit, logger });
+  // Expose so Wave 28 orchestrator boot can reuse the same service
+  // (and so admin tools can introspect).
+  app._insightsService = insightsService;
   const { authenticate: insightsAuthMw } = require('./middleware/auth');
   // Wave 27 — late-binding hook (same pattern as alerts).
   const insightsAfterSuccessfulAction = async args => {
@@ -1511,6 +1514,83 @@ try {
   logger.info('[Intelligence] ✓ insights routes mounted at /api/v1/insights');
 } catch (insightsErr) {
   logger.warn('[Intelligence] routes skipped:', insightsErr.message);
+}
+
+// ─── Intelligence Orchestrator Scheduler (Wave 28) ────────────────────────────
+// Boots the Wave-20 orchestrator on a scheduler (cron-like, KSA-aware).
+// Opt-in via INTELLIGENCE_ORCHESTRATOR_ENABLED=true so tests/dev stay quiet.
+//
+// Cadences (default, overridable per-generator):
+//   anomaly.v1            every 15 min
+//   care-gap.v1           every 30 min
+//   trend-deviation.v1    every 60 min
+//   data-quality.v1       every 60 min
+//   end-of-day.v1         daily 16:30 KSA
+//   executive-digest.v1   weekly Monday 07:00 KSA
+//
+// Each generator needs a data-loader to supply its ctx. Wave 28 ships ONE
+// reference loader (data-quality.v1) + stub loaders for the other 5 — the
+// stubs return empty contexts so generators emit zero payloads until each
+// domain's real loader is wired in Wave 29.
+const orchestratorEnabled =
+  String(process.env['INTELLIGENCE_ORCHESTRATOR_ENABLED'] || '').toLowerCase() === 'true';
+const isTestEnvOrch = process.env['NODE_ENV'] === 'test';
+if (orchestratorEnabled && !isTestEnvOrch && app._insightsService) {
+  try {
+    const { createOrchestrator } = require('./intelligence/orchestrator.service');
+    const {
+      createOrchestratorScheduler,
+    } = require('./intelligence/orchestrator-scheduler.service');
+    const { buildLoaders } = require('./intelligence/orchestrator-loaders.registry');
+    const dqRegistry = require('./intelligence/data-quality.registry');
+
+    // Register the 6 ready generators.
+    const generators = [
+      require('./intelligence/generators/care-gap.generator'),
+      require('./intelligence/generators/anomaly.generator'),
+      require('./intelligence/generators/trend-deviation.generator'),
+      require('./intelligence/generators/data-quality.generator'),
+      require('./intelligence/generators/end-of-day.generator'),
+      require('./intelligence/generators/executive-digest.generator'),
+    ];
+
+    const { loaders, stubbedGeneratorIds } = buildLoaders({
+      deps: { dqRegistry, logger },
+      // realLoaders: {} — Wave 29 will populate these
+      logger,
+    });
+
+    const orchestrator = createOrchestrator({
+      generators,
+      dataLoaders: loaders,
+      insightsService: app._insightsService,
+      logger,
+    });
+
+    const intervalMs = Number(process.env['INTELLIGENCE_TICK_INTERVAL_MS']) || 60_000;
+    const scheduler = createOrchestratorScheduler({
+      orchestrator,
+      tickIntervalMs: intervalMs,
+      logger,
+    });
+    scheduler.start();
+
+    app._intelligenceOrchestrator = orchestrator;
+    app._intelligenceScheduler = scheduler;
+
+    logger.info(
+      `[Intelligence] ✓ orchestrator scheduler started — ` +
+        `${generators.length} generators registered, ` +
+        `${stubbedGeneratorIds.length} on stub loaders ` +
+        `(${stubbedGeneratorIds.join(', ')})`
+    );
+  } catch (orchErr) {
+    logger.warn('[Intelligence] orchestrator boot failed:', orchErr.message);
+  }
+} else if (!orchestratorEnabled) {
+  logger.info(
+    '[Intelligence] orchestrator disabled — set INTELLIGENCE_ORCHESTRATOR_ENABLED=true to activate'
+  );
 }
 
 // ─── Drill-Down Architecture (Wave 21) ────────────────────────────────────────

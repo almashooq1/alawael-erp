@@ -183,6 +183,51 @@ function createInsightsRouter({
     }
   });
 
+  // GET /orchestrator/status — Wave 28 admin view of the scheduler.
+  // Reports per-generator next/last run, run count, failures.
+  // Returns 503 + a clear message when the orchestrator isn't booted
+  // (env flag off OR scheduler not wired) — lets the UI tell the
+  // operator instead of silently 404'ing.
+  router.get('/orchestrator/status', async (req, res) => {
+    try {
+      // Defer to the scheduler attached to the express app instance.
+      // App.js sets `req.app._intelligenceScheduler` when orchestrator
+      // boot succeeds (Wave 28).
+      const scheduler = req.app?._intelligenceScheduler || null;
+      if (!scheduler) {
+        return res.status(503).json({
+          success: false,
+          message: 'ORCHESTRATOR_NOT_RUNNING',
+          reason: 'ORCHESTRATOR_NOT_RUNNING',
+          hint: 'Set INTELLIGENCE_ORCHESTRATOR_ENABLED=true to boot the scheduler',
+        });
+      }
+      const status = scheduler.getStatus();
+      return res.json({ success: true, data: status });
+    } catch (err) {
+      return safeError(res, err, 'insights.orchestrator.status');
+    }
+  });
+
+  // POST /orchestrator/run-now/:generatorId — admin "fire now" trigger.
+  // Useful for diagnostics: confirm a generator emits when you expect.
+  router.post('/orchestrator/run-now/:generatorId', async (req, res) => {
+    try {
+      const scheduler = req.app?._intelligenceScheduler || null;
+      if (!scheduler) {
+        return res.status(503).json({
+          success: false,
+          message: 'ORCHESTRATOR_NOT_RUNNING',
+          reason: 'ORCHESTRATOR_NOT_RUNNING',
+        });
+      }
+      const result = await scheduler.runNow(req.params.generatorId);
+      return res.json({ success: true, data: result });
+    } catch (err) {
+      return safeError(res, err, 'insights.orchestrator.runNow');
+    }
+  });
+
   // GET /:id — fetch one insight (with all G-bound fields visible).
   router.get('/:id', async (req, res) => {
     try {

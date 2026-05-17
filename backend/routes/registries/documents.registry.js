@@ -113,5 +113,15 @@ module.exports = function registerDocumentRoutes(
   safeMount(app, ['/api/ocr-documents', '/api/v1/ocr-documents'], '../routes/ocrDocument.routes');
   logger.info('[Docs] OCR Document Processing mounted (Phase 18)');
 
-  logger.info('[Docs] All ~15 documents/archive/media modules mounted successfully');
+  // ══════════════════════════════════════════════════════════════════════════
+  // ── Document Center — Unified Professional Entry Point (مركز الوثائق) ──
+  // ══════════════════════════════════════════════════════════════════════════
+  const documentCenterRoutes = safeRequire('../routes/document-center.routes');
+  dualMount(app, 'document-center', documentCenterRoutes);
+  logger.info('[Docs] Document Center (Unified) mounted — /api/v1/document-center');
+  logger.info(
+    '[Docs] Endpoints: dashboard, library, search, workflow, AI, reports, expiry-radar, beneficiary-link'
+  );
+
+  logger.info('[Docs] All ~16 documents/archive/media modules mounted successfully');
 };

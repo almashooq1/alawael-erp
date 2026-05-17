@@ -93,16 +93,6 @@ module.exports = function registerClinicalAssessmentRoutes(
     'Smart IEP routes mounted (Goals Bank 200+, SMART IEP, Session Logs, ABC Tracking, Mastery Detection)'
   );
 
-  // Phase 27: Activity Library (rehab activity catalogue + seed)
-  safeMount(
-    app,
-    ['/api/activity-library', '/api/v1/activity-library'],
-    '../rehabilitation-services/activity-library-routes'
-  );
-  logger.info(
-    'Activity Library routes mounted (Phase 27 — 36 built-in activities, 10 disciplines)'
-  );
-
   // Priority 3: Early Warning System (Plateau, Regression, Attendance)
   // The service file's default export is `{ router, EarlyWarningService, ... }`
   // — pre-resolve to the .router so safeMount gets a real Router.
@@ -211,6 +201,6 @@ module.exports = function registerClinicalAssessmentRoutes(
   );
 
   logger.info(
-    '[Clinical-Assessment] All ~21 assessment/specialized clinical modules mounted successfully'
+    '[Clinical-Assessment] All assessment/specialized clinical modules mounted successfully'
   );
 };

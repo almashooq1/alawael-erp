@@ -144,5 +144,5 @@ module.exports = function registerClinicalTherapyRoutes(
     'Rehab Plans routes mounted (16 endpoints: CRUD plans, SMART goals, AI assessment, outcome prediction, tele-sessions, progress reports, quality metrics, goal bank, templates)'
   );
 
-  logger.info('[Clinical-Therapy] All ~22 therapy/rehabilitation modules mounted successfully');
+  logger.info('[Clinical-Therapy] All therapy/rehabilitation modules mounted successfully');
 };

@@ -25,18 +25,18 @@ module.exports = function registerHrRoutes(app, { safeRequire, dualMount, safeMo
   // ── Imports (all via safeRequire) ───────────────────────────────────────
   // ══════════════════════════════════════════════════════════════════════════
   const hrSystemRouter = safeRequire('../routes/hrSystem.routes');
-  // PHANTOM: const hrAdvancedRoutes = safeRequire('../routes/hrAdvanced.routes');
-  // PHANTOM: const hrUnifiedRoutes = safeRequire('../routes/hrUnified.routes');
+  const hrAdvancedRoutes = safeRequire('../routes/hrAdvanced.routes');
+  const hrUnifiedRoutes = safeRequire('../routes/hrUnified.routes');
   const hrAttendanceRoutes = safeRequire('../routes/hr-attendance.routes');
   const hrInsuranceRoutes = safeRequire('../routes/hr-insurance.routes');
-  // PHANTOM: const hrSmartRoutes = safeRequire('../routes/hr-smart.routes');
+  const hrSmartRoutes = safeRequire('../routes/hr-smart.routes');
   const hrModuleRoutes = safeRequire('../routes/hr-module.routes');
   const employeeAffairsRoutes = safeRequire('../routes/employeeAffairs.routes');
-  // PHANTOM: const employeeAffairsExpandedRoutes = safeRequire('../routes/employee-affairs-expanded.routes');
-  // PHANTOM: const employeeAffairsPhase2Routes = safeRequire('../routes/employee-affairs-phase2.routes');
-  // PHANTOM: const employeeAffairsPhase3Routes = safeRequire('../routes/employee-affairs-phase3.routes');
+  const employeeAffairsExpandedRoutes = safeRequire('../routes/employee-affairs-expanded.routes');
+  const employeeAffairsPhase2Routes = safeRequire('../routes/employee-affairs-phase2.routes');
+  const employeeAffairsPhase3Routes = safeRequire('../routes/employee-affairs-phase3.routes');
   const compensationRouter = safeRequire('../routes/compensation.routes');
-  // PHANTOM: const compensationBenefitsRoutes = safeRequire('../routes/compensationBenefits.routes');
+  const compensationBenefitsRoutes = safeRequire('../routes/compensationBenefits.routes');
   const gratuityRoutes = safeRequire('../routes/gratuity.routes');
   const successionPlanningRoutes = safeRequire('../routes/successionPlanning.routes');
   const attendanceRoutes = safeRequire('../routes/attendance.routes');
@@ -47,14 +47,14 @@ module.exports = function registerHrRoutes(app, { safeRequire, dualMount, safeMo
   // ── Core HR System ─────────────────────────────────────────────────────
   // ══════════════════════════════════════════════════════════════════════════
   dualMount(app, 'hr-system', hrSystemRouter);
-  // PHANTOM-FIX: dualMount(app, 'hr-advanced', hrAdvancedRoutes);
-  // PHANTOM-FIX: dualMount(app, 'hr-unified', hrUnifiedRoutes);
+  dualMount(app, 'hr-advanced', hrAdvancedRoutes);
+  dualMount(app, 'hr-unified', hrUnifiedRoutes);
   dualMount(app, 'compensation', compensationRouter);
-  // PHANTOM-FIX: dualMount(app, 'compensation-benefits', compensationBenefitsRoutes);
+  dualMount(app, 'compensation-benefits', compensationBenefitsRoutes);
   dualMount(app, 'gratuity', gratuityRoutes);
   dualMount(app, 'succession-planning', successionPlanningRoutes);
   logger.info(
-    '[HR] Core HR mounted (hr-system, compensation, gratuity, succession-planning — hr-advanced, hr-unified, compensation-benefits skipped: phantom)'
+    '[HR] Core HR mounted (hr-system, hr-advanced, hr-unified, compensation, compensation-benefits, gratuity, succession-planning)'
   );
 
   // ══════════════════════════════════════════════════════════════════════════
@@ -77,18 +77,18 @@ module.exports = function registerHrRoutes(app, { safeRequire, dualMount, safeMo
   // ══════════════════════════════════════════════════════════════════════════
   // ── HR Smart System — AI, Analytics, Onboarding, Documents ─────────────
   // ══════════════════════════════════════════════════════════════════════════
-  // PHANTOM-FIX: dualMount(app, 'hr-smart', hrSmartRoutes);
-  logger.info('[HR] HR Smart routes SKIPPED (phantom import)');
+  dualMount(app, 'hr-smart', hrSmartRoutes);
+  logger.info('[HR] HR Smart routes mounted');
 
   // ══════════════════════════════════════════════════════════════════════════
   // ── Employee Affairs (4 phases — شؤون الموظفين) ─────────────────────────
   // ══════════════════════════════════════════════════════════════════════════
   dualMount(app, 'employee-affairs', employeeAffairsRoutes);
-  // PHANTOM-FIX: dualMount(app, 'employee-affairs-expanded', employeeAffairsExpandedRoutes);
-  // PHANTOM-FIX: dualMount(app, 'employee-affairs-phase2', employeeAffairsPhase2Routes);
-  // PHANTOM-FIX: dualMount(app, 'employee-affairs-phase3', employeeAffairsPhase3Routes);
+  dualMount(app, 'employee-affairs-expanded', employeeAffairsExpandedRoutes);
+  dualMount(app, 'employee-affairs-phase2', employeeAffairsPhase2Routes);
+  dualMount(app, 'employee-affairs-phase3', employeeAffairsPhase3Routes);
   logger.info(
-    '[HR] Employee Affairs mounted (base only — expanded, phase2, phase3 skipped: phantom)'
+    '[HR] Employee Affairs mounted (base, expanded, phase2, phase3 — all 4 phases active)'
   );
 
   // ══════════════════════════════════════════════════════════════════════════

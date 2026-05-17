@@ -32,18 +32,18 @@ module.exports = function registerGovernmentRoutes(app, { safeRequire, dualMount
   const gosiFullRoutes = safeRequire('../routes/gosi-full.routes');
   const zatcaPhase2Routes = safeRequire('../routes/zatca-phase2.routes');
   const nphiesRoutes = safeRequire('../routes/nphies.routes');
-  // Enhanced Audit — uses a special export pattern (.router from middleware).
-  // Path is two levels up because this file lives at routes/registries/.
-  let enhancedAuditRouter;
-  try {
-    const auditModule = require('../../middleware/enhancedAudit.middleware');
-    enhancedAuditRouter = auditModule.router || auditModule;
-    // If it's still not a function/router, create an empty one
-    if (typeof enhancedAuditRouter !== 'function' && !enhancedAuditRouter.use) {
+  // Enhanced Audit Logs — proper route file (queryAuditLogs from middleware).
+  let enhancedAuditRouter = safeRequire('../routes/audit-logs.routes');
+  if (!enhancedAuditRouter) {
+    try {
+      const auditModule = require('../../middleware/enhancedAudit.middleware');
+      enhancedAuditRouter = auditModule.router || auditModule;
+      if (typeof enhancedAuditRouter !== 'function' && !enhancedAuditRouter.use) {
+        enhancedAuditRouter = require('express').Router();
+      }
+    } catch {
       enhancedAuditRouter = require('express').Router();
     }
-  } catch {
-    enhancedAuditRouter = require('express').Router();
   }
   const nitaqatRoutes = safeRequire('../routes/nitaqat.routes');
   const pdplRoutes = safeRequire('../routes/pdpl.routes');

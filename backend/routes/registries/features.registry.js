@@ -274,5 +274,11 @@ module.exports = function registerFeatureRoutes(
   dualMount(app, 'setup', setupRoutes);
   logger.info('✅ Setup routes mounted (/api/setup/status, /api/setup/init-admin)');
 
+  // ── Gap-fill: alerts, approvals, rehab-licenses ──────────────────────
+  dualMount(app, 'alerts', safeRequire('../routes/alerts.routes'));
+  dualMount(app, 'approvals', safeRequire('../routes/approvals.routes'));
+  dualMount(app, 'rehab-licenses', safeRequire('../routes/rehab-licenses.routes'));
+  logger.info('✅ Gap-fill routes mounted: alerts, approvals, rehab-licenses');
+
   logger.info('[Features] All prompt feature modules mounted successfully');
 };

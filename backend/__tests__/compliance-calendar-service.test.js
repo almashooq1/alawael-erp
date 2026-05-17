@@ -13,14 +13,16 @@ jest.resetModules();
 process.env.NODE_ENV = 'test';
 
 const mongoose = require('mongoose');
-const { MongoMemoryServer } = require('mongodb-memory-server');
+const fs = require('fs');
+const path = require('path');
+const URI_FILE = path.join(__dirname, '..', '.test-mongo-uri');
 
 const {
   createComplianceCalendarService,
 } = require('../services/quality/complianceCalendar.service');
 const { DEFAULT_ALERT_WINDOWS } = require('../config/compliance-calendar.registry');
 
-let mongoServer;
+let ownServer = null;
 let ComplianceCalendarEvent;
 
 const userA = new mongoose.Types.ObjectId();
@@ -38,7 +40,14 @@ function makeDispatcher() {
 }
 
 beforeAll(async () => {
-  mongoServer = await MongoMemoryServer.create();
+  let uri;
+  if (fs.existsSync(URI_FILE)) {
+    uri = fs.readFileSync(URI_FILE, 'utf-8').trim();
+  } else {
+    const { MongoMemoryServer } = require('mongodb-memory-server');
+    ownServer = await MongoMemoryServer.create();
+    uri = ownServer.getUri();
+  }
   if (mongoose.connection.readyState !== 0) {
     try {
       await mongoose.disconnect();
@@ -46,13 +55,13 @@ beforeAll(async () => {
       /* ignore */
     }
   }
-  await mongoose.connect(mongoServer.getUri(), { dbName: 'calendar-test' });
+  await mongoose.connect(uri, { dbName: 'calendar-test' });
   ComplianceCalendarEvent = require('../models/quality/ComplianceCalendarEvent.model');
 });
 
 afterAll(async () => {
   await mongoose.disconnect();
-  if (mongoServer) await mongoServer.stop();
+  if (ownServer) await ownServer.stop();
 });
 
 afterEach(async () => {

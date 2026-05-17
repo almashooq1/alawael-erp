@@ -16,19 +16,20 @@ process.env.NODE_ENV = 'test';
 const express = require('express');
 const request = require('supertest');
 const mongoose = require('mongoose');
-const { MongoMemoryServer } = require('mongodb-memory-server');
 
 const { createEmployeeSelfServiceRouter } = require('../routes/hr/employee-self-service.routes');
 const { createEmployeeSelfServiceService } = require('../services/hr/employeeSelfServiceService');
 const { createHrAccessAuditService } = require('../services/hr/hrAccessAuditService');
 const { ROLES } = require('../config/rbac.config');
 
-let mongoServer;
+let ownServer = null;
 let Employee;
 let AuditLog;
 
 beforeAll(async () => {
-  mongoServer = await MongoMemoryServer.create();
+  const { MongoMemoryServer } = require('mongodb-memory-server');
+  ownServer = await MongoMemoryServer.create();
+  const uri = ownServer.getUri();
   if (mongoose.connection.readyState !== 0) {
     try {
       await mongoose.disconnect();
@@ -36,7 +37,7 @@ beforeAll(async () => {
       /* ignore */
     }
   }
-  await mongoose.connect(mongoServer.getUri(), { dbName: 'access-log-test' });
+  await mongoose.connect(uri, { dbName: 'access-log-test' });
   Employee = require('../models/HR/Employee');
   AuditLog = require('../models/auditLog.model').AuditLog;
 }, 60_000);
@@ -47,7 +48,7 @@ afterAll(async () => {
   } catch {
     /* ignore */
   }
-  if (mongoServer) await mongoServer.stop();
+  if (ownServer) await ownServer.stop();
 }, 60_000);
 
 beforeEach(async () => {

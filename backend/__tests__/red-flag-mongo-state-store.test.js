@@ -19,7 +19,9 @@ jest.unmock('mongoose');
 jest.resetModules();
 
 const mongoose = require('mongoose');
-const { MongoMemoryServer } = require('mongodb-memory-server');
+const fs = require('fs');
+const path = require('path');
+const URI_FILE = path.join(__dirname, '..', '.test-mongo-uri');
 
 const { createMongoStateStore } = require('../services/redFlagMongoStateStore');
 const RedFlagStateModel = require('../models/RedFlagState');
@@ -30,10 +32,17 @@ const {
   verdict,
 } = require('./helpers/red-flag-store-contract');
 
-let mongoServer;
+let ownServer = null;
 
 beforeAll(async () => {
-  mongoServer = await MongoMemoryServer.create();
+  let uri;
+  if (fs.existsSync(URI_FILE)) {
+    uri = fs.readFileSync(URI_FILE, 'utf-8').trim();
+  } else {
+    const { MongoMemoryServer } = require('mongodb-memory-server');
+    ownServer = await MongoMemoryServer.create();
+    uri = ownServer.getUri();
+  }
   if (mongoose.connection.readyState !== 0) {
     try {
       await mongoose.disconnect();
@@ -41,7 +50,7 @@ beforeAll(async () => {
       /* ignore */
     }
   }
-  await mongoose.connect(mongoServer.getUri(), { dbName: 'red-flag-test' });
+  await mongoose.connect(uri, { dbName: 'red-flag-test' });
   // Ensure indexes (unique compound) are built before the contract
   // suite starts — otherwise the race-handling test can be flaky.
   await RedFlagStateModel.syncIndexes();
@@ -53,7 +62,7 @@ afterAll(async () => {
   } catch {
     /* ignore */
   }
-  if (mongoServer) await mongoServer.stop();
+  if (ownServer) await ownServer.stop();
 }, 60_000);
 
 // ─── Shared contract ────────────────────────────────────────────

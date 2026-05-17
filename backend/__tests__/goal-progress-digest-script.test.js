@@ -17,7 +17,7 @@ const run = (args = [], env = {}) =>
       ...env,
     },
     encoding: 'utf8',
-    timeout: 25000,
+    timeout: 35000,
   });
 
 describe('goal-progress-digest CLI', () => {

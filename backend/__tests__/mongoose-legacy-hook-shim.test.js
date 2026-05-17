@@ -36,17 +36,26 @@ jest.resetModules();
 process.env.NODE_ENV = 'test';
 
 const mongoose = require('mongoose');
-const { MongoMemoryServer } = require('mongodb-memory-server');
+const fs = require('fs');
+const path = require('path');
+const URI_FILE = path.join(__dirname, '..', '.test-mongo-uri');
 
 // Loading the plugins module patches Schema.prototype.pre/post. It is
 // idempotent — re-loading after the test runner mounted the global
 // jest.setup mock won't re-shim.
 require('../config/mongoose.plugins');
 
-let server;
+let ownServer = null;
 
 beforeAll(async () => {
-  server = await MongoMemoryServer.create();
+  let uri;
+  if (fs.existsSync(URI_FILE)) {
+    uri = fs.readFileSync(URI_FILE, 'utf-8').trim();
+  } else {
+    const { MongoMemoryServer } = require('mongodb-memory-server');
+    ownServer = await MongoMemoryServer.create();
+    uri = ownServer.getUri();
+  }
   if (mongoose.connection.readyState !== 0) {
     try {
       await mongoose.disconnect();
@@ -54,7 +63,7 @@ beforeAll(async () => {
       /* ignore */
     }
   }
-  await mongoose.connect(server.getUri(), { dbName: 'mongoose-shim-test' });
+  await mongoose.connect(uri, { dbName: 'mongoose-shim-test' });
 }, 60_000);
 
 afterAll(async () => {
@@ -63,7 +72,7 @@ afterAll(async () => {
   } catch {
     /* ignore */
   }
-  if (server) await server.stop();
+  if (ownServer) await ownServer.stop();
 }, 60_000);
 
 afterEach(() => {

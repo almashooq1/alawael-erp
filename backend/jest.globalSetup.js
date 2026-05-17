@@ -13,6 +13,15 @@ const fs = require('fs');
 const URI_FILE = path.join(__dirname, '.test-mongo-uri');
 
 module.exports = async () => {
+  // Always delete any stale URI file from a previous interrupted run FIRST.
+  // If MMS creation below fails (try/catch), the file won't exist and tests
+  // that read it will correctly fall back to creating their own MMS.
+  try {
+    fs.unlinkSync(URI_FILE);
+  } catch {
+    // file didn't exist — that's fine
+  }
+
   // Skip MongoMemoryServer in CI - tests use mocked mongoose
   if (process.env.CI === 'true') {
     return;

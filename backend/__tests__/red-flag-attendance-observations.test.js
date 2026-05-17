@@ -16,7 +16,9 @@ jest.unmock('mongoose');
 jest.resetModules();
 
 const mongoose = require('mongoose');
-const { MongoMemoryServer } = require('mongodb-memory-server');
+const fs = require('fs');
+const path = require('path');
+const URI_FILE = path.join(__dirname, '..', '.test-mongo-uri');
 
 const {
   createSessionAttendanceObservations,
@@ -24,11 +26,18 @@ const {
 const { createLocator } = require('../services/redFlagServiceLocator');
 const { createEngine } = require('../services/redFlagEngine');
 
-let mongoServer;
+let ownServer = null;
 let SessionAttendance;
 
 beforeAll(async () => {
-  mongoServer = await MongoMemoryServer.create();
+  let uri;
+  if (fs.existsSync(URI_FILE)) {
+    uri = fs.readFileSync(URI_FILE, 'utf-8').trim();
+  } else {
+    const { MongoMemoryServer } = require('mongodb-memory-server');
+    ownServer = await MongoMemoryServer.create();
+    uri = ownServer.getUri();
+  }
   if (mongoose.connection.readyState !== 0) {
     try {
       await mongoose.disconnect();
@@ -36,7 +45,7 @@ beforeAll(async () => {
       /* ignore */
     }
   }
-  await mongoose.connect(mongoServer.getUri(), { dbName: 'attendance-obs-test' });
+  await mongoose.connect(uri, { dbName: 'attendance-obs-test' });
   SessionAttendance = require('../models/SessionAttendance');
 }, 60_000);
 
@@ -46,7 +55,7 @@ afterAll(async () => {
   } catch {
     /* ignore */
   }
-  if (mongoServer) await mongoServer.stop();
+  if (ownServer) await ownServer.stop();
 }, 60_000);
 
 beforeEach(async () => {

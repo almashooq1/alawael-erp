@@ -6,6 +6,7 @@
 'use strict';
 
 const registry = require('../services/adapterMetricsRegistry');
+const audit = require('../services/adapterAuditLogger');
 
 beforeEach(() => registry._resetAll());
 
@@ -65,7 +66,6 @@ describe('latency histogram', () => {
 
 describe('integration with audit logger', () => {
   it('adapterAuditLogger.record() bumps the registry', async () => {
-    const audit = require('../services/adapterAuditLogger');
     await audit.record({
       provider: 'scfhs',
       operation: 'verify',

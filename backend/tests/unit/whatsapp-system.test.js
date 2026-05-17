@@ -32,6 +32,7 @@ const mockGetPhoneInfo = jest
   .fn()
   .mockResolvedValue({ id: '123', displayPhoneNumber: '+966501234567' });
 const mockIsEnabled = jest.fn().mockReturnValue(true);
+const mockAssertCanMessage = jest.fn().mockResolvedValue(undefined);
 
 jest.mock('../../services/whatsapp/whatsappService', () => ({
   verifyWebhook: (...args) => mockVerifyWebhook(...args),
@@ -39,6 +40,7 @@ jest.mock('../../services/whatsapp/whatsappService', () => ({
   getTemplates: (...args) => mockGetTemplates(...args),
   getPhoneInfo: (...args) => mockGetPhoneInfo(...args),
   isEnabled: (...args) => mockIsEnabled(...args),
+  assertCanMessage: (...args) => mockAssertCanMessage(...args),
   normalizePhone: jest.fn(phone => phone),
 }));
 
@@ -147,6 +149,7 @@ beforeEach(() => {
     throw new Error(`Model ${name} not registered in test`);
   });
   mockIsEnabled.mockReturnValue(true);
+  mockAssertCanMessage.mockResolvedValue(undefined);
   mockIsAIEnabled.mockReturnValue(true);
   mockListTemplates.mockReturnValue(TEMPLATE_LIST);
   mockConversationFind.mockReturnValue(mockFindReturn);

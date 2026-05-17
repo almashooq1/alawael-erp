@@ -15,7 +15,9 @@ jest.unmock('mongoose');
 jest.resetModules();
 
 const mongoose = require('mongoose');
-const { MongoMemoryServer } = require('mongodb-memory-server');
+const fs = require('fs');
+const path = require('path');
+const URI_FILE = path.join(__dirname, '..', '.test-mongo-uri');
 
 const { createOverrideLog } = require('../services/redFlagOverrideLog');
 
@@ -182,11 +184,18 @@ describe('createOverrideLog — record + query (fake model)', () => {
 // ─── Integration: real Mongoose model ──────────────────────────
 
 describe('createOverrideLog — integration with real Mongoose model', () => {
-  let mongoServer;
+  let ownServer = null;
   let RedFlagOverride;
 
   beforeAll(async () => {
-    mongoServer = await MongoMemoryServer.create();
+    let uri;
+    if (fs.existsSync(URI_FILE)) {
+      uri = fs.readFileSync(URI_FILE, 'utf-8').trim();
+    } else {
+      const { MongoMemoryServer } = require('mongodb-memory-server');
+      ownServer = await MongoMemoryServer.create();
+      uri = ownServer.getUri();
+    }
     if (mongoose.connection.readyState !== 0) {
       try {
         await mongoose.disconnect();
@@ -194,7 +203,7 @@ describe('createOverrideLog — integration with real Mongoose model', () => {
         /* ignore */
       }
     }
-    await mongoose.connect(mongoServer.getUri(), { dbName: 'override-log-test' });
+    await mongoose.connect(uri, { dbName: 'override-log-test' });
     RedFlagOverride = require('../models/RedFlagOverride');
     await RedFlagOverride.syncIndexes();
   }, 60_000);
@@ -205,7 +214,7 @@ describe('createOverrideLog — integration with real Mongoose model', () => {
     } catch {
       /* ignore */
     }
-    if (mongoServer) await mongoServer.stop();
+    if (ownServer) await ownServer.stop();
   }, 60_000);
 
   beforeEach(async () => {

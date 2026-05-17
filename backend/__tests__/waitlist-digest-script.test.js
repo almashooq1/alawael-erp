@@ -8,7 +8,7 @@ const run = (args = [], env = {}) =>
   spawnSync('node', [SCRIPT, ...args], {
     env: { ...process.env, MONGODB_URI: 'mongodb://127.0.0.1:1/nope', ...env },
     encoding: 'utf8',
-    timeout: 20000,
+    timeout: 35000,
   });
 
 describe('waitlist-digest CLI', () => {

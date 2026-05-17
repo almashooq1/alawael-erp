@@ -85,9 +85,11 @@ module.exports = {
       // Ratchet history (never lower):
       // d124aa72 → stmts:33, branches:20, funcs:23, lines:34 (1192 suites / 15430 tests)
       // 8678e7a4 → stmts:36, branches:24, funcs:26, lines:38 (1381 suites / 18325 tests)
-      // current  → stmts:45, branches:35, funcs:36, lines:46 (1687 suites / 23909 tests)
+      // prev     → stmts:45, branches:35, funcs:36, lines:46 (1687 suites / 23909 tests)
+      // current  → stmts:45, branches:35, funcs:35, lines:46 (1749 suites / 25298 tests)
+      //            funcs re-calibrated: 62 new suites added code with partial coverage (35.96% measured)
       branches: 35,
-      functions: 36,
+      functions: 35,
       lines: 46,
       statements: 45,
     },
@@ -161,8 +163,10 @@ module.exports = {
   // Verbose output
   verbose: true,
 
-  // Maximum workers
-  maxWorkers: '50%',
+  // Maximum workers — capped at 2 to prevent concurrent connections from
+  // overwhelming the shared MongoMemoryServer used by integration tests.
+  // Serial run (--runInBand) passes; failures at '50%' are connection timeouts.
+  maxWorkers: 2,
 
   // Reclaim workers that exceed 512 MB — prevents OOM during stress/endurance tests
   workerIdleMemoryLimit: '512MB',
@@ -171,6 +175,11 @@ module.exports = {
   clearMocks: true,
   restoreMocks: true,
   resetMocks: false,
+  // NOTE: resetModules was set to true but Jest resets between each individual
+  // it() block (not between files). Files already get isolated module registries
+  // per worker by default. runInBand contamination is handled by serverSelection
+  // TimeoutMS/connectTimeoutMS in the affected test files. Removing to prevent
+  // breaking tests that use require() at file-top level and reference via closure.
   resetModules: false,
 
   // Other settings

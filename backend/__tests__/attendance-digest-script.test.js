@@ -18,7 +18,7 @@ function run(args = [], env = {}) {
       ...env,
     },
     encoding: 'utf8',
-    timeout: 20000,
+    timeout: 35000,
   });
 }
 

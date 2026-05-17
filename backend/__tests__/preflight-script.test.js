@@ -24,6 +24,7 @@ function runPreflight(extraEnv = {}, args = []) {
   const result = spawnSync('node', [SCRIPT, ...args], {
     env: { ...baseEnv, ...extraEnv },
     encoding: 'utf8',
+    timeout: 35000,
   });
   return result;
 }

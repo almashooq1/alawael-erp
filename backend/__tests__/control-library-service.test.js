@@ -15,7 +15,6 @@ jest.resetModules();
 process.env.NODE_ENV = 'test';
 
 const mongoose = require('mongoose');
-const { MongoMemoryServer } = require('mongodb-memory-server');
 
 const {
   createControlLibraryService,
@@ -23,7 +22,7 @@ const {
 } = require('../services/quality/controlLibrary.service');
 const { CONTROL_LIBRARY, summarizeByFramework } = require('../config/control-library.registry');
 
-let mongoServer;
+let ownServer = null;
 let QualityControl;
 
 const userA = new mongoose.Types.ObjectId();
@@ -31,7 +30,9 @@ const branch1 = new mongoose.Types.ObjectId();
 const branch2 = new mongoose.Types.ObjectId();
 
 beforeAll(async () => {
-  mongoServer = await MongoMemoryServer.create();
+  const { MongoMemoryServer } = require('mongodb-memory-server');
+  ownServer = await MongoMemoryServer.create();
+  const uri = ownServer.getUri();
   if (mongoose.connection.readyState !== 0) {
     try {
       await mongoose.disconnect();
@@ -39,13 +40,13 @@ beforeAll(async () => {
       /* ignore */
     }
   }
-  await mongoose.connect(mongoServer.getUri(), { dbName: 'control-lib-test' });
+  await mongoose.connect(uri, { dbName: 'control-lib-test' });
   QualityControl = require('../models/quality/QualityControl.model');
 });
 
 afterAll(async () => {
   await mongoose.disconnect();
-  if (mongoServer) await mongoServer.stop();
+  if (ownServer) await ownServer.stop();
 });
 
 afterEach(async () => {

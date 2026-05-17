@@ -21,3 +21,6 @@ process.env.CSRF_DISABLE = 'true';
 process.env.DISABLE_REDIS = 'true';
 // Use fewer bcrypt rounds in tests (4 vs 12 = 256x faster, prevents CI slowness)
 process.env.BCRYPT_ROUNDS = '4';
+// Allow MongoMemoryServer up to 30 s to start its mongod process.
+// The default 10 s is too tight when the full 1700+ suite runs in parallel.
+process.env.MONGOMS_STARTUP_TIMEOUT = process.env.MONGOMS_STARTUP_TIMEOUT || '30000';

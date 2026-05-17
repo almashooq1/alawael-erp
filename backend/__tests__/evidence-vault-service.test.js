@@ -16,7 +16,9 @@ process.env.NODE_ENV = 'test';
 
 const crypto = require('crypto');
 const mongoose = require('mongoose');
-const { MongoMemoryServer } = require('mongodb-memory-server');
+const fs = require('fs');
+const path = require('path');
+const URI_FILE = path.join(__dirname, '..', '.test-mongo-uri');
 
 const { createEvidenceVaultService } = require('../services/quality/evidenceVault.service');
 const {
@@ -25,7 +27,7 @@ const {
   RETENTION_POLICIES,
 } = require('../config/evidence.registry');
 
-let mongoServer;
+let ownServer = null;
 let EvidenceItem;
 
 const userA = new mongoose.Types.ObjectId();
@@ -49,7 +51,14 @@ function makeDispatcher() {
 // ── setup ──────────────────────────────────────────────────────────
 
 beforeAll(async () => {
-  mongoServer = await MongoMemoryServer.create();
+  let uri;
+  if (fs.existsSync(URI_FILE)) {
+    uri = fs.readFileSync(URI_FILE, 'utf-8').trim();
+  } else {
+    const { MongoMemoryServer } = require('mongodb-memory-server');
+    ownServer = await MongoMemoryServer.create();
+    uri = ownServer.getUri();
+  }
   if (mongoose.connection.readyState !== 0) {
     try {
       await mongoose.disconnect();
@@ -57,13 +66,13 @@ beforeAll(async () => {
       /* ignore */
     }
   }
-  await mongoose.connect(mongoServer.getUri(), { dbName: 'evidence-vault-test' });
+  await mongoose.connect(uri, { dbName: 'evidence-vault-test' });
   EvidenceItem = require('../models/quality/EvidenceItem.model');
 });
 
 afterAll(async () => {
   await mongoose.disconnect();
-  if (mongoServer) await mongoServer.stop();
+  if (ownServer) await ownServer.stop();
 });
 
 afterEach(async () => {

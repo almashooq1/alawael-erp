@@ -14,7 +14,6 @@ jest.resetModules();
 process.env.NODE_ENV = 'test';
 
 const mongoose = require('mongoose');
-const { MongoMemoryServer } = require('mongodb-memory-server');
 
 const { createManagementReviewService } = require('../services/quality/managementReview.service');
 const {
@@ -23,7 +22,7 @@ const {
   REQUIRED_ATTENDEE_ROLES,
 } = require('../config/management-review.registry');
 
-let mongoServer;
+let ownServer = null;
 let ManagementReview;
 
 const userA = new mongoose.Types.ObjectId();
@@ -58,7 +57,9 @@ function addAllRequiredOutputs(svc, id, userId) {
 // ── setup ──────────────────────────────────────────────────────────
 
 beforeAll(async () => {
-  mongoServer = await MongoMemoryServer.create();
+  const { MongoMemoryServer } = require('mongodb-memory-server');
+  ownServer = await MongoMemoryServer.create();
+  const uri = ownServer.getUri();
   if (mongoose.connection.readyState !== 0) {
     try {
       await mongoose.disconnect();
@@ -66,13 +67,17 @@ beforeAll(async () => {
       /* ignore */
     }
   }
-  await mongoose.connect(mongoServer.getUri(), { dbName: 'mgmt-review-test' });
+  await mongoose.connect(uri, {
+    dbName: 'mgmt-review-test',
+    serverSelectionTimeoutMS: 10000,
+    connectTimeoutMS: 10000,
+  });
   ManagementReview = require('../models/quality/ManagementReview.model');
-});
+}, 60_000);
 
 afterAll(async () => {
   await mongoose.disconnect();
-  if (mongoServer) await mongoServer.stop();
+  if (ownServer) await ownServer.stop();
 });
 
 afterEach(async () => {

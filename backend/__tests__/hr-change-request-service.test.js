@@ -13,18 +13,22 @@ jest.resetModules();
 process.env.NODE_ENV = 'test';
 
 const mongoose = require('mongoose');
-const { MongoMemoryServer } = require('mongodb-memory-server');
 
 const { createHrChangeRequestService } = require('../services/hr/hrChangeRequestService');
 const { createEmployeeAdminService } = require('../services/hr/employeeAdminService');
 const { ROLES } = require('../config/rbac.config');
 
-let mongoServer;
+let ownServer = null;
 let HrChangeRequest;
 let Employee;
 
 beforeAll(async () => {
-  mongoServer = await MongoMemoryServer.create();
+  // Always start a dedicated MMS for this suite rather than relying on the
+  // shared URI file: the shared global MMS can die after ~20 min of
+  // continuous load, causing ECONNREFUSED for late-running suites.
+  const { MongoMemoryServer } = require('mongodb-memory-server');
+  ownServer = await MongoMemoryServer.create();
+  const uri = ownServer.getUri();
   if (mongoose.connection.readyState !== 0) {
     try {
       await mongoose.disconnect();
@@ -32,7 +36,7 @@ beforeAll(async () => {
       /* ignore */
     }
   }
-  await mongoose.connect(mongoServer.getUri(), { dbName: 'hr-change-test' });
+  await mongoose.connect(uri, { dbName: 'hr-change-test' });
   HrChangeRequest = require('../models/HR/HrChangeRequest');
   Employee = require('../models/HR/Employee');
 }, 60_000);
@@ -43,12 +47,20 @@ afterAll(async () => {
   } catch {
     /* ignore */
   }
-  if (mongoServer) await mongoServer.stop();
+  if (ownServer) await ownServer.stop();
 }, 60_000);
 
 beforeEach(async () => {
-  await HrChangeRequest.deleteMany({});
-  await Employee.deleteMany({});
+  // Guard: if the shared MMS was recycled mid-run (ECONNREFUSED), skip
+  // cleanup silently so individual tests fail on their own terms rather
+  // than cascading 5 failures from a beforeEach error.
+  if (mongoose.connection.readyState !== 1) return;
+  try {
+    await HrChangeRequest.deleteMany({});
+    await Employee.deleteMany({});
+  } catch {
+    /* MMS connection dropped mid-cleanup — individual tests will surface errors */
+  }
 });
 
 let empCounter = 1;

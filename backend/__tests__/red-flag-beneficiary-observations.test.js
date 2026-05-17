@@ -15,7 +15,9 @@ jest.unmock('mongoose');
 jest.resetModules();
 
 const mongoose = require('mongoose');
-const { MongoMemoryServer } = require('mongodb-memory-server');
+const fs = require('fs');
+const path = require('path');
+const URI_FILE = path.join(__dirname, '..', '.test-mongo-uri');
 
 const {
   createBeneficiaryObservations,
@@ -61,11 +63,18 @@ describe('_computeAge', () => {
 // ─── Integration: real Beneficiary model ───────────────────────
 
 describe('createBeneficiaryObservations — against live Beneficiary model', () => {
-  let mongoServer;
+  let ownServer = null;
   let Beneficiary;
 
   beforeAll(async () => {
-    mongoServer = await MongoMemoryServer.create();
+    let uri;
+    if (fs.existsSync(URI_FILE)) {
+      uri = fs.readFileSync(URI_FILE, 'utf-8').trim();
+    } else {
+      const { MongoMemoryServer } = require('mongodb-memory-server');
+      ownServer = await MongoMemoryServer.create();
+      uri = ownServer.getUri();
+    }
     if (mongoose.connection.readyState !== 0) {
       try {
         await mongoose.disconnect();
@@ -73,7 +82,7 @@ describe('createBeneficiaryObservations — against live Beneficiary model', () 
         /* ignore */
       }
     }
-    await mongoose.connect(mongoServer.getUri(), { dbName: 'beneficiary-obs-test' });
+    await mongoose.connect(uri, { dbName: 'beneficiary-obs-test' });
     Beneficiary = require('../models/Beneficiary');
   }, 60_000);
 
@@ -83,7 +92,7 @@ describe('createBeneficiaryObservations — against live Beneficiary model', () 
     } catch {
       /* ignore */
     }
-    if (mongoServer) await mongoServer.stop();
+    if (ownServer) await ownServer.stop();
   }, 60_000);
 
   beforeEach(async () => {

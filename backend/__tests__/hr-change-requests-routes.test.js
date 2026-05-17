@@ -18,18 +18,27 @@ process.env.NODE_ENV = 'test';
 const express = require('express');
 const request = require('supertest');
 const mongoose = require('mongoose');
-const { MongoMemoryServer } = require('mongodb-memory-server');
+const fs = require('fs');
+const path = require('path');
+const URI_FILE = path.join(__dirname, '..', '.test-mongo-uri');
 
 const { createHrChangeRequestsRouter } = require('../routes/hr/hr-change-requests.routes');
 const { createHrChangeRequestService } = require('../services/hr/hrChangeRequestService');
 const { ROLES } = require('../config/rbac.config');
 
-let mongoServer;
+let ownServer = null;
 let HrChangeRequest;
 let Employee;
 
 beforeAll(async () => {
-  mongoServer = await MongoMemoryServer.create();
+  let uri;
+  if (fs.existsSync(URI_FILE)) {
+    uri = fs.readFileSync(URI_FILE, 'utf-8').trim();
+  } else {
+    const { MongoMemoryServer } = require('mongodb-memory-server');
+    ownServer = await MongoMemoryServer.create();
+    uri = ownServer.getUri();
+  }
   if (mongoose.connection.readyState !== 0) {
     try {
       await mongoose.disconnect();
@@ -37,7 +46,7 @@ beforeAll(async () => {
       /* ignore */
     }
   }
-  await mongoose.connect(mongoServer.getUri(), { dbName: 'cr-routes-test' });
+  await mongoose.connect(uri, { dbName: 'cr-routes-test' });
   HrChangeRequest = require('../models/HR/HrChangeRequest');
   Employee = require('../models/HR/Employee');
 }, 60_000);
@@ -48,7 +57,7 @@ afterAll(async () => {
   } catch {
     /* ignore */
   }
-  if (mongoServer) await mongoServer.stop();
+  if (ownServer) await ownServer.stop();
 }, 60_000);
 
 beforeEach(async () => {

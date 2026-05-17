@@ -19,17 +19,26 @@ jest.unmock('mongoose');
 jest.resetModules();
 
 const mongoose = require('mongoose');
-const { MongoMemoryServer } = require('mongodb-memory-server');
+const fs = require('fs');
+const path = require('path');
+const URI_FILE = path.join(__dirname, '..', '.test-mongo-uri');
 
 const { createConsentRouter } = require('../routes/beneficiary-consents.routes');
 
-let mongoServer;
+let ownServer = null;
 let Consent;
 let Beneficiary;
 let CONSENT_TYPES;
 
 beforeAll(async () => {
-  mongoServer = await MongoMemoryServer.create();
+  let uri;
+  if (fs.existsSync(URI_FILE)) {
+    uri = fs.readFileSync(URI_FILE, 'utf-8').trim();
+  } else {
+    const { MongoMemoryServer } = require('mongodb-memory-server');
+    ownServer = await MongoMemoryServer.create();
+    uri = ownServer.getUri();
+  }
   if (mongoose.connection.readyState !== 0) {
     try {
       await mongoose.disconnect();
@@ -37,7 +46,7 @@ beforeAll(async () => {
       /* ignore */
     }
   }
-  await mongoose.connect(mongoServer.getUri(), { dbName: 'consent-routes-test' });
+  await mongoose.connect(uri, { dbName: 'consent-routes-test' });
   const exports_ = require('../models/Consent');
   Consent = exports_.Consent;
   CONSENT_TYPES = exports_.CONSENT_TYPES;
@@ -50,7 +59,7 @@ afterAll(async () => {
   } catch {
     /* ignore */
   }
-  if (mongoServer) await mongoServer.stop();
+  if (ownServer) await ownServer.stop();
 }, 60_000);
 
 beforeEach(async () => {

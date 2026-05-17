@@ -52,13 +52,20 @@ jest.unmock('mongoose');
 jest.resetModules();
 
 const mongoose = require('mongoose');
-const { MongoMemoryServer } = require('mongodb-memory-server');
 const app = require('../app');
+const audit = require('../services/adapterAuditLogger');
 
-let mongoServer;
+let ownServer = null;
 
 beforeAll(async () => {
-  mongoServer = await MongoMemoryServer.create();
+  // Always create a private MongoMemoryServer — do NOT read the shared
+  // .test-mongo-uri file. That file is written by parallel test workers
+  // and the server it points to may be torn down before our route tests
+  // run, causing mongoose queries to hang indefinitely.
+  const { MongoMemoryServer } = require('mongodb-memory-server');
+  ownServer = await MongoMemoryServer.create();
+  const uri = ownServer.getUri();
+
   if (mongoose.connection.readyState !== 0) {
     try {
       await mongoose.disconnect();
@@ -66,7 +73,11 @@ beforeAll(async () => {
       /* ignore */
     }
   }
-  await mongoose.connect(mongoServer.getUri(), { dbName: 'api-test' });
+  await mongoose.connect(uri, {
+    dbName: 'api-test',
+    serverSelectionTimeoutMS: 10000,
+    socketTimeoutMS: 10000,
+  });
 }, 60_000);
 
 afterAll(async () => {
@@ -75,7 +86,7 @@ afterAll(async () => {
   } catch {
     /* ignore */
   }
-  if (mongoServer) await mongoServer.stop();
+  if (ownServer) await ownServer.stop();
 }, 60_000);
 
 function token(role = 'admin') {
@@ -336,7 +347,6 @@ describe('/api/health/metrics/integrations (Prometheus scrape)', () => {
 
   it('calls_total counter is emitted with status label for each provider', async () => {
     // Seed a call so the counter is non-zero
-    const audit = require('../services/adapterAuditLogger');
     await audit.record({
       provider: 'gosi',
       operation: 'verify',
@@ -593,7 +603,6 @@ describe('/api/admin/adapter-audit', () => {
   });
 
   it('records written with correlationId surface via /by-correlation', async () => {
-    const audit = require('../services/adapterAuditLogger');
     const CID = 'test-cid-' + Date.now();
     await audit.record({
       provider: 'gosi',

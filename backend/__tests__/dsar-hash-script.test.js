@@ -20,6 +20,7 @@ function runHash(id, env = {}) {
   const result = spawnSync('node', [SCRIPT, id], {
     env: { ...process.env, ...env },
     encoding: 'utf8',
+    timeout: 35000,
   });
   return result;
 }
@@ -59,13 +60,13 @@ describe('dsar-hash CLI', () => {
   });
 
   it('no-arg invocation prints usage and exits 1', () => {
-    const r = spawnSync('node', [SCRIPT], { encoding: 'utf8' });
+    const r = spawnSync('node', [SCRIPT], { encoding: 'utf8', timeout: 35000 });
     expect(r.status).toBe(1);
     expect(r.stdout).toMatch(/Usage:/);
   });
 
   it('--help exits 0 with usage', () => {
-    const r = spawnSync('node', [SCRIPT, '--help'], { encoding: 'utf8' });
+    const r = spawnSync('node', [SCRIPT, '--help'], { encoding: 'utf8', timeout: 35000 });
     expect(r.status).toBe(0);
     expect(r.stdout).toMatch(/Usage:/);
   });

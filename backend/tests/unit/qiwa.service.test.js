@@ -51,6 +51,8 @@ const QiwaService = require('../../services/qiwa.service');
 const { instance } = require('../../services/qiwa.service');
 const EventEmitter = require('events');
 const axios = require('axios');
+const crypto = require('crypto');
+const logger = require('../../utils/logger');
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -1505,7 +1507,6 @@ describe('QiwaService', () => {
     });
 
     it('should call logger.error for error level', () => {
-      const logger = require('../../utils/logger');
       service._log('error', 'oops');
       expect(logger.error).toHaveBeenCalledWith(
         expect.stringContaining('oops'),
@@ -1514,7 +1515,6 @@ describe('QiwaService', () => {
     });
 
     it('should call logger.info for non-error levels', () => {
-      const logger = require('../../utils/logger');
       service._log('info', 'ok');
       expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('ok'), expect.any(Object));
     });
@@ -1538,7 +1538,6 @@ describe('QiwaService', () => {
     });
 
     it('should call crypto.createHash with sha256', () => {
-      const crypto = require('crypto');
       service._generateSignature({});
       expect(crypto.createHash).toHaveBeenCalledWith('sha256');
     });

@@ -57,13 +57,16 @@ jest.unmock('mongoose');
 jest.resetModules();
 
 const mongoose = require('mongoose');
-const { MongoMemoryServer } = require('mongodb-memory-server');
+const fs = require('fs');
+const path = require('path');
 const app = require('../app');
 
-let mongoServer;
+let ownServer = null;
 
 beforeAll(async () => {
-  mongoServer = await MongoMemoryServer.create();
+  const { MongoMemoryServer } = require('mongodb-memory-server');
+  ownServer = await MongoMemoryServer.create();
+  const uri = ownServer.getUri();
   if (mongoose.connection.readyState !== 0) {
     try {
       await mongoose.disconnect();
@@ -71,7 +74,11 @@ beforeAll(async () => {
       /* ignore */
     }
   }
-  await mongoose.connect(mongoServer.getUri(), { dbName: 'parent-v2-test' });
+  await mongoose.connect(uri, {
+    dbName: 'parent-v2-test',
+    serverSelectionTimeoutMS: 10000,
+    connectTimeoutMS: 10000,
+  });
 }, 60_000);
 
 afterAll(async () => {
@@ -80,7 +87,7 @@ afterAll(async () => {
   } catch {
     /* ignore */
   }
-  if (mongoServer) await mongoServer.stop();
+  if (ownServer) await ownServer.stop();
 }, 60_000);
 
 function token(role = 'admin', id = '000000000000000000000001') {

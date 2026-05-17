@@ -39,7 +39,11 @@ describe('exponentialSmooth', () => {
 
 describe('detectLevelShift (CUSUM)', () => {
   test('detects upward step change', () => {
-    const stable = Array.from({ length: 20 }, () => 5 + (Math.random() - 0.5) * 0.5);
+    // Deterministic alternating noise around 5 (was Math.random — flaky on CI:
+    // attempt 4 deploy failed because the random sometimes pushed CUSUM past
+    // the threshold before the actual step at index 20, breaking the
+    // `index >= 20` assertion).
+    const stable = Array.from({ length: 20 }, (_, i) => 5 + (i % 2 === 0 ? 0.25 : -0.25));
     const shifted = Array.from({ length: 10 }, () => 15);
     const series = [...stable, ...shifted];
     const r = registry.detectLevelShift(series);

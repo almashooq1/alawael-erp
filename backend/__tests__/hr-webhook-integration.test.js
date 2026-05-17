@@ -23,18 +23,27 @@ jest.resetModules();
 process.env.NODE_ENV = 'test';
 
 const mongoose = require('mongoose');
-const { MongoMemoryServer } = require('mongodb-memory-server');
+const fs = require('fs');
+const path = require('path');
+const URI_FILE = path.join(__dirname, '..', '.test-mongo-uri');
 
 const { createHrAnomalyDetectorService } = require('../services/hr/hrAnomalyDetectorService');
 const { createHrChangeRequestService } = require('../services/hr/hrChangeRequestService');
 
-let mongoServer;
+let ownServer = null;
 let AuditLog;
 let HrChangeRequest;
 let Employee;
 
 beforeAll(async () => {
-  mongoServer = await MongoMemoryServer.create();
+  let uri;
+  if (fs.existsSync(URI_FILE)) {
+    uri = fs.readFileSync(URI_FILE, 'utf-8').trim();
+  } else {
+    const { MongoMemoryServer } = require('mongodb-memory-server');
+    ownServer = await MongoMemoryServer.create();
+    uri = ownServer.getUri();
+  }
   if (mongoose.connection.readyState !== 0) {
     try {
       await mongoose.disconnect();
@@ -42,7 +51,7 @@ beforeAll(async () => {
       /* ignore */
     }
   }
-  await mongoose.connect(mongoServer.getUri(), { dbName: 'hr-webhook-int' });
+  await mongoose.connect(uri, { dbName: 'hr-webhook-int' });
   AuditLog = require('../models/AuditLog');
   HrChangeRequest = require('../models/HR/HrChangeRequest');
   Employee = require('../models/HR/Employee');
@@ -54,7 +63,7 @@ afterAll(async () => {
   } catch {
     /* ignore */
   }
-  if (mongoServer) await mongoServer.stop();
+  if (ownServer) await ownServer.stop();
 }, 60_000);
 
 beforeEach(async () => {

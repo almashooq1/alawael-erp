@@ -14,11 +14,10 @@ jest.resetModules();
 process.env.NODE_ENV = 'test';
 
 const mongoose = require('mongoose');
-const { MongoMemoryServer } = require('mongodb-memory-server');
 
 const { createHrDashboardService, HR_FLAG_IDS } = require('../services/hr/hrDashboardService');
 
-let mongoServer;
+let ownServer = null;
 let Certification;
 let EmploymentContract;
 let Employee;
@@ -29,7 +28,9 @@ let HrChangeRequest;
 let AuditLog;
 
 beforeAll(async () => {
-  mongoServer = await MongoMemoryServer.create();
+  const { MongoMemoryServer } = require('mongodb-memory-server');
+  ownServer = await MongoMemoryServer.create();
+  const uri = ownServer.getUri();
   if (mongoose.connection.readyState !== 0) {
     try {
       await mongoose.disconnect();
@@ -37,7 +38,11 @@ beforeAll(async () => {
       /* ignore */
     }
   }
-  await mongoose.connect(mongoServer.getUri(), { dbName: 'hr-dashboard-test' });
+  await mongoose.connect(uri, {
+    dbName: 'hr-dashboard-test',
+    serverSelectionTimeoutMS: 10000,
+    connectTimeoutMS: 10000,
+  });
   Certification = require('../models/HR/Certification');
   EmploymentContract = require('../models/HR/EmploymentContract');
   Employee = require('../models/HR/Employee');
@@ -54,7 +59,7 @@ afterAll(async () => {
   } catch {
     /* ignore */
   }
-  if (mongoServer) await mongoServer.stop();
+  if (ownServer) await ownServer.stop();
 }, 60_000);
 
 beforeEach(async () => {

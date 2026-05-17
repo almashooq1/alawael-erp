@@ -1615,6 +1615,33 @@ try {
   logger.warn('[Productivity] routes skipped:', pfErr.message);
 }
 
+// ─── Governance & Auditability (Wave 26) ─────────────────────────────────────
+// Permissions catalog + compliance banners + unified audit-trail timeline.
+// Reads from AuditLog (existing collection) when available; pure registry
+// resolution otherwise.
+try {
+  const { createGovernanceService } = require('./intelligence/governance.service');
+  const { createGovernanceRouter } = require('./routes/governance.routes');
+  const governanceSvc = createGovernanceService({ logger });
+
+  let auditModel = null;
+  try {
+    auditModel = require('./models/AuditLog');
+  } catch {
+    /* AuditLog model optional — endpoints still work, return empty audit rows */
+  }
+
+  const { authenticate: gvAuthMw } = require('./middleware/auth');
+  app.use(
+    '/api/v1/governance',
+    gvAuthMw,
+    createGovernanceRouter({ governance: governanceSvc, auditModel, logger })
+  );
+  logger.info('[Governance] ✓ governance routes mounted at /api/v1/governance');
+} catch (gvErr) {
+  logger.warn('[Governance] routes skipped:', gvErr.message);
+}
+
 // ─── Therapist Portal ─────────────────────────────────────────────────────────
 try {
   app.use('/api/v1/therapist', require('./routes/therapist-portal.routes'));

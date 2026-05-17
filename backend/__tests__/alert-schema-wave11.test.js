@@ -38,14 +38,17 @@ const {
   COOLDOWN_DEFAULTS,
 } = require('../alerts/rule-introspection');
 
-// Use the canonical Alert model (alertModelExports.model). When this
-// test suite ran in isolation it minted a fresh model from the shared
-// AlertSchema — fine locally — but in CI other suites register the
-// canonical `Alert` model first, then re-registering the same schema
-// under a different name re-runs the index() calls, which Mongoose
-// 9 rejects as duplicate compound-index registration. Reusing the
-// already-registered canonical model bypasses that.
-const TestAlert = alertModelExports.model;
+// Use the canonical Alert model. When this suite ran in isolation it
+// minted a fresh model from the shared AlertSchema — fine locally —
+// but in CI other suites register the canonical `Alert` model first,
+// then re-registering the same schema under a different name re-runs
+// the index() calls, which Mongoose 9 rejects as duplicate compound-
+// index registration. We resolve the model here inline (instead of
+// relying on a getter or model export) so this file owns the
+// registration lifecycle deterministically — preventing the CI-only
+// "TestAlert is not a constructor" failure where the cross-module
+// getter resolved to a non-constructor under some load orders.
+const TestAlert = mongoose.models.Alert || mongoose.model('Alert', AlertSchema);
 
 // Helper — build the minimum valid Alert payload Wave 0-9 already
 // emitted. The Wave 11 extensions should be invisible to such docs.

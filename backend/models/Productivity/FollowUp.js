@@ -79,6 +79,12 @@ FollowUpSchema.path('__invariants').validate(function () {
   return true;
 });
 
+// Wave 35 — adopt branchScopePlugin (requireActor: false for back-compat;
+// FollowUp.branchId is nullable for org-level follow-ups, so the scope
+// check passes them through when actor is GLOBAL).
+const branchScopePlugin = require('../../intelligence/branchScopePlugin');
+FollowUpSchema.plugin(branchScopePlugin, { requireActor: false });
+
 module.exports =
   mongoose.models.ProductivityFollowUp || mongoose.model('ProductivityFollowUp', FollowUpSchema);
 

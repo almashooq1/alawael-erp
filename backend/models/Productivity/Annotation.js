@@ -51,6 +51,13 @@ AnnotationSchema.path('__invariants').validate(function () {
   return true;
 });
 
+// Wave 35 — adopt branchScopePlugin (requireActor: false for back-compat
+// with existing callers; the hook still scopes when actor IS passed,
+// preventing IDOR. Future wave will flip to requireActor: true once
+// every caller has been migrated to pass req.actor via setOptions.)
+const branchScopePlugin = require('../../intelligence/branchScopePlugin');
+AnnotationSchema.plugin(branchScopePlugin, { requireActor: false });
+
 module.exports =
   mongoose.models.ProductivityAnnotation ||
   mongoose.model('ProductivityAnnotation', AnnotationSchema);

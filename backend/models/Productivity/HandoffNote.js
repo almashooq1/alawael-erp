@@ -76,6 +76,11 @@ HandoffNoteSchema.path('__invariants').validate(function () {
   return ok;
 });
 
+// Wave 35 — adopt branchScopePlugin (requireActor: false for back-compat;
+// flips to true after caller migration).
+const branchScopePlugin = require('../../intelligence/branchScopePlugin');
+HandoffNoteSchema.plugin(branchScopePlugin, { requireActor: false });
+
 module.exports =
   mongoose.models.ProductivityHandoffNote ||
   mongoose.model('ProductivityHandoffNote', HandoffNoteSchema);

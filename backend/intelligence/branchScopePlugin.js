@@ -132,11 +132,19 @@ function applyAggregateScope(aggregate, { branchField = 'branchId', requireActor
   aggregate.__branchScoped = true;
 }
 
+// Sentinel attached to schemas that have the plugin — the drift
+// test reads this to verify adoption (Wave 35).
+const APPLIED_MARKER = Symbol.for('branchScopePlugin.applied');
+
 function branchScopePlugin(schema, opts = {}) {
   const branchField = opts.branchField || 'branchId';
   const requireActor = opts.requireActor !== false; // default true
   const strict = !!opts.strict;
   const cfg = { branchField, requireActor };
+
+  // Mark the schema as plugin-protected (idempotent — re-running
+  // schema.plugin() updates the same marker).
+  schema[APPLIED_MARKER] = { branchField, requireActor, strict };
 
   schema.pre(['find', 'findOne', 'count', 'countDocuments', 'distinct'], function () {
     applyReadScope(this, cfg);
@@ -168,5 +176,28 @@ branchScopePlugin.SYSTEM_BYPASS = SYSTEM_BYPASS;
 branchScopePlugin.applyReadScope = applyReadScope;
 branchScopePlugin.applyWriteScope = applyWriteScope;
 branchScopePlugin.applyAggregateScope = applyAggregateScope;
+
+/**
+ * Wave 35 — Introspection. Returns true when the plugin has been
+ * applied to a Mongoose schema OR model. Used by the drift test
+ * (`branch-scope-adoption-wave35.test.js`) to enforce that every
+ * model listed in BRANCH_SCOPED_MODELS_REGISTRY actually has the
+ * plugin wired.
+ */
+function isAppliedTo(schemaOrModel) {
+  if (!schemaOrModel) return false;
+  const schema = schemaOrModel.schema || schemaOrModel;
+  return !!schema[APPLIED_MARKER];
+}
+
+function getAppliedConfig(schemaOrModel) {
+  if (!schemaOrModel) return null;
+  const schema = schemaOrModel.schema || schemaOrModel;
+  return schema[APPLIED_MARKER] || null;
+}
+
+branchScopePlugin.isAppliedTo = isAppliedTo;
+branchScopePlugin.getAppliedConfig = getAppliedConfig;
+branchScopePlugin.APPLIED_MARKER = APPLIED_MARKER;
 
 module.exports = branchScopePlugin;

@@ -249,6 +249,33 @@ function createProductivityFeaturesService({
   }) {
     if (!ownerUserId) return { ok: false, reason: 'OWNER_REQUIRED' };
     if (!titleAr && !titleEn) return { ok: false, reason: 'TITLE_REQUIRED' };
+
+    // Dedup: if a non-manual source already has an OPEN follow-up for
+    // this owner, don't double-queue. Manual entries always create
+    // fresh (operator may want multiple).
+    if (sourceType !== 'manual' && sourceId) {
+      if (models?.FollowUp) {
+        const existing = await models.FollowUp.findOne({
+          ownerUserId,
+          sourceType,
+          sourceId,
+          status: 'open',
+        });
+        if (existing) return { ok: true, followUp: existing, deduped: true, noop: true };
+      } else {
+        for (const f of stores.followUps.values()) {
+          if (
+            String(f.ownerUserId) === String(ownerUserId) &&
+            f.sourceType === sourceType &&
+            String(f.sourceId) === String(sourceId) &&
+            f.status === 'open'
+          ) {
+            return { ok: true, followUp: f, deduped: true, noop: true };
+          }
+        }
+      }
+    }
+
     const id = uid();
     const doc = {
       _id: id,
@@ -272,6 +299,51 @@ function createProductivityFeaturesService({
     }
     stores.followUps.set(id, doc);
     return { ok: true, followUp: doc };
+  }
+
+  /**
+   * Auto-create a follow-up from an event (alert.acknowledge,
+   * insight.confirm). Wired by Wave 27 into the alerts/insights
+   * service factories — they call this with the actor + source info.
+   *
+   * Dedup: if there's already an open follow-up for the same source,
+   * we return that existing one (no double-queue).
+   *
+   * No-op if `ownerUserId` is missing (no actor → no accountability).
+   */
+  async function createFollowUpFromEvent({
+    eventKind, // 'alert.acknowledge' | 'insight.confirm' | 'kpi.annotation' | ...
+    ownerUserId,
+    ownerRole = null,
+    branchId = null,
+    sourceType, // 'alert' | 'insight' | 'kpi-annotation'
+    sourceId,
+    titleAr,
+    titleEn,
+    dueByHours = DEFAULT_FOLLOWUP_HOURS,
+  }) {
+    if (!ownerUserId) {
+      return { ok: false, reason: 'OWNER_REQUIRED', auto: true };
+    }
+    if (!sourceType || !sourceId) {
+      return { ok: false, reason: 'SOURCE_REQUIRED', auto: true };
+    }
+    if (!titleAr && !titleEn) {
+      // Default title if caller didn't supply one
+      titleAr = titleAr || `متابعة ${eventKind || sourceType}`;
+      titleEn = titleEn || `Follow-up: ${eventKind || sourceType}`;
+    }
+    return createFollowUp({
+      ownerUserId,
+      ownerRole,
+      branchId,
+      sourceType,
+      sourceId,
+      titleAr,
+      titleEn,
+      dueByHours,
+      actor: { userId: ownerUserId, role: ownerRole },
+    });
   }
 
   async function listFollowUpsForUser({ ownerUserId, status = 'open' }) {
@@ -523,6 +595,7 @@ function createProductivityFeaturesService({
     acknowledgeHandoff,
     // Follow-ups
     createFollowUp,
+    createFollowUpFromEvent,
     listFollowUpsForUser,
     completeFollowUp,
     snoozeFollowUp,

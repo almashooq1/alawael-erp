@@ -91,11 +91,37 @@ function actorFrom(req) {
  *                   read paths that don't go through the service)
  *   - logger:       console-compatible
  */
-function createInsightsRouter({ insights, insightModel = null, logger = console } = {}) {
+function createInsightsRouter({
+  insights,
+  insightModel = null,
+  // Wave 27 — fire-and-forget hook invoked after a successful confirm.
+  // App.js wires this to productivityService.createFollowUpFromEvent.
+  afterSuccessfulAction = null,
+  logger = console,
+} = {}) {
   if (!insights || typeof insights.confirmInsight !== 'function') {
     throw new Error('insights.routes: insights service is required');
   }
   void logger;
+
+  // Wave 27 — fire-and-forget so hook failure never breaks the action.
+  async function fireHook(eventKind, result, req) {
+    if (typeof afterSuccessfulAction !== 'function') return;
+    if (!result?.ok || result?.noop) return;
+    try {
+      const insight = result.insight || {};
+      await afterSuccessfulAction({
+        eventKind,
+        ownerUserId: req.user?.id || req.user?._id || null,
+        ownerRole: req.user?.role || req.user?.roleCode || null,
+        branchId: insight.branchId || null,
+        sourceType: 'insight',
+        sourceId: req.params.id,
+      });
+    } catch (err) {
+      logger.warn && logger.warn(`[insights] ${eventKind} hook failed: ${err.message}`);
+    }
+  }
 
   function modelFor() {
     if (
@@ -176,6 +202,8 @@ function createInsightsRouter({ insights, insightModel = null, logger = console 
         insightId: req.params.id,
         actor: actorFrom(req),
       });
+      // Wave 27 — auto-create a follow-up for the confirmed insight.
+      void fireHook('insight.confirm', result, req);
       return respond(res, result);
     } catch (err) {
       return safeError(res, err, 'insights.confirm');

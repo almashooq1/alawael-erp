@@ -1353,7 +1353,23 @@ try {
   // in scope inside the bootstrap closures higher up the file, so
   // outer top-level wiring resolves it through the module directly.
   const { authenticate: alertsAuthMw } = require('./middleware/auth');
-  app.use('/api/v1/alerts', alertsAuthMw, createAlertsWorkflowRouter({ workflow, logger }));
+  // Wave 27 — late-binding so app._productivityService is resolved at
+  // call-time (productivity wiring lives further down in this file).
+  const alertsAfterSuccessfulAction = async args => {
+    if (typeof app._productivityService?.createFollowUpFromEvent === 'function') {
+      return app._productivityService.createFollowUpFromEvent(args);
+    }
+    return null;
+  };
+  app.use(
+    '/api/v1/alerts',
+    alertsAuthMw,
+    createAlertsWorkflowRouter({
+      workflow,
+      afterSuccessfulAction: alertsAfterSuccessfulAction,
+      logger,
+    })
+  );
   app.use('/api/v1/alerts/dashboard', alertsAuthMw, createAlertsDashboardRouter());
   logger.info('[AlertEngine] ✓ workflow + dashboard routes mounted at /api/v1/alerts');
 
@@ -1476,10 +1492,21 @@ try {
 
   const insightsService = createInsightsService({ auditLogger: insightAudit, logger });
   const { authenticate: insightsAuthMw } = require('./middleware/auth');
+  // Wave 27 — late-binding hook (same pattern as alerts).
+  const insightsAfterSuccessfulAction = async args => {
+    if (typeof app._productivityService?.createFollowUpFromEvent === 'function') {
+      return app._productivityService.createFollowUpFromEvent(args);
+    }
+    return null;
+  };
   app.use(
     '/api/v1/insights',
     insightsAuthMw,
-    createInsightsRouter({ insights: insightsService, logger })
+    createInsightsRouter({
+      insights: insightsService,
+      afterSuccessfulAction: insightsAfterSuccessfulAction,
+      logger,
+    })
   );
   logger.info('[Intelligence] ✓ insights routes mounted at /api/v1/insights');
 } catch (insightsErr) {
@@ -1595,21 +1622,38 @@ try {
   logger.warn('[LayoutPolicy] routes skipped:', lpErr.message);
 }
 
-// ─── Premium Productivity Features (Wave 25) ─────────────────────────────────
+// ─── Premium Productivity Features (Wave 25 + Wave 27 persistence) ──────────
 // Annotations + handoffs + follow-ups + watchlists + user preferences.
-// In-memory store by default; wire real Mongo models in Wave 26+.
+// Wave 27: wired to real Mongoose models when available; falls back to
+// in-memory store otherwise (test/local-dev).
+let productivitySvc = null;
 try {
   const {
     createProductivityFeaturesService,
   } = require('./intelligence/productivity-features.service');
   const { createProductivityFeaturesRouter } = require('./routes/productivity-features.routes');
-  const productivitySvc = createProductivityFeaturesService({ logger });
+
+  let productivityModels = null;
+  try {
+    productivityModels = require('./models/Productivity');
+    logger.info('[Productivity] ✓ Mongoose models loaded (Wave 27 persistence)');
+  } catch {
+    /* models optional — service falls back to in-memory */
+  }
+
+  productivitySvc = createProductivityFeaturesService({
+    models: productivityModels,
+    logger,
+  });
   const { authenticate: pfAuthMw } = require('./middleware/auth');
   app.use(
     '/api/v1/productivity',
     pfAuthMw,
     createProductivityFeaturesRouter({ productivity: productivitySvc, logger })
   );
+  // Expose for the auto-creation hook (Wave 27) — alerts/insights routes
+  // call this when an actor acknowledges or confirms.
+  app._productivityService = productivitySvc;
   logger.info('[Productivity] ✓ productivity routes mounted at /api/v1/productivity');
 } catch (pfErr) {
   logger.warn('[Productivity] routes skipped:', pfErr.message);

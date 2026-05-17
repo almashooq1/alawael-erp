@@ -99,13 +99,40 @@ function requireMutePermission(req, res, next) {
  *   - alertModel: defaults to canonical model (used for /timeline only)
  *   - logger:    console-compatible
  */
-function createAlertsWorkflowRouter({ workflow, alertModel = null, logger = console } = {}) {
+function createAlertsWorkflowRouter({
+  workflow,
+  alertModel = null,
+  // Wave 27 — fire-and-forget hook invoked after a successful action.
+  // App.js wires this to productivityService.createFollowUpFromEvent
+  // so an acknowledge/resolve automatically creates a FollowUp.
+  afterSuccessfulAction = null,
+  logger = console,
+} = {}) {
   if (!workflow || typeof workflow.acknowledgeAlert !== 'function') {
     throw new Error('alerts-workflow.routes: workflow service is required');
   }
-  // `logger` is captured for future use (route-level diagnostics);
-  // referenced via void to satisfy the lint rule.
   void logger;
+
+  // Wave 27 helper — fire-and-forget so a hook failure never breaks
+  // the workflow action itself.
+  async function fireHook(eventKind, result, req) {
+    if (typeof afterSuccessfulAction !== 'function') return;
+    if (!result?.ok || result?.noop) return;
+    try {
+      const actor = actorFrom(req);
+      const alert = result.alert || {};
+      await afterSuccessfulAction({
+        eventKind,
+        ownerUserId: actor.userId,
+        ownerRole: actor.role,
+        branchId: alert.branchId || null,
+        sourceType: 'alert',
+        sourceId: req.params.id,
+      });
+    } catch (err) {
+      logger.warn && logger.warn(`[alerts-workflow] ${eventKind} hook failed: ${err.message}`);
+    }
+  }
 
   const router = express.Router();
 
@@ -116,6 +143,9 @@ function createAlertsWorkflowRouter({ workflow, alertModel = null, logger = cons
         alertId: req.params.id,
         actor: actorFrom(req),
       });
+      // Wave 27 — auto-create a follow-up so the operator's "I'll
+      // come back to this" promise becomes accountable.
+      void fireHook('alert.acknowledge', result, req);
       return respond(res, result);
     } catch (err) {
       return safeError(res, err, 'alerts.acknowledge');

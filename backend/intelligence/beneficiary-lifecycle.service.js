@@ -1,0 +1,523 @@
+'use strict';
+
+/**
+ * beneficiary-lifecycle.service.js — Wave 39 (Beneficiary 360 Phase 1).
+ *
+ * Workflow orchestration for beneficiary lifecycle transitions. Each
+ * transition is a multi-stage workflow with collected approvals:
+ *
+ *   requestTransition()  → status: pending  (audit row + side-effects deferred)
+ *   approveTransition()  → status: pending | approved | rejected
+ *   executeTransition()  → status: approved → executed (side-effects run)
+ *   cancelTransition()   → status: cancelled
+ *   reverseTransition()  → status: reversed (within reversal window)
+ *
+ * The service is the CHOKEPOINT — no caller should mutate
+ * Beneficiary.status directly. Always go through requestTransition().
+ *
+ * Side-effects are dispatched to INJECTED callbacks
+ * (`sideEffectHandlers`). The service does not know what
+ * "pause-schedule" or "create-care-team" means; it just looks up the
+ * handler by name and calls it. Wave 40 will wire real handlers.
+ *
+ * The service is otherwise PURE — no global state, no module-level
+ * mongoose imports. Mongoose models are injected for testability.
+ */
+
+const reg = require('./beneficiary-lifecycle.registry');
+
+const REASON = Object.freeze({
+  UNKNOWN_TRANSITION: 'UNKNOWN_TRANSITION',
+  INVALID_FROM_STATE: 'INVALID_FROM_STATE',
+  REASON_REQUIRED: 'REASON_REQUIRED',
+  INVALID_REASON_CODE: 'INVALID_REASON_CODE',
+  BENEFICIARY_NOT_FOUND: 'BENEFICIARY_NOT_FOUND',
+  TRANSITION_NOT_FOUND: 'TRANSITION_NOT_FOUND',
+  ALREADY_FINAL: 'ALREADY_FINAL',
+  NOT_APPROVED: 'NOT_APPROVED',
+  ALREADY_EXECUTED: 'ALREADY_EXECUTED',
+  REVERSAL_WINDOW_EXPIRED: 'REVERSAL_WINDOW_EXPIRED',
+  NOT_REVERSIBLE: 'NOT_REVERSIBLE',
+  SELF_APPROVAL: 'SELF_APPROVAL',
+  DUPLICATE_APPROVAL: 'DUPLICATE_APPROVAL',
+  ACTOR_REQUIRED: 'ACTOR_REQUIRED',
+  NAFATH_REQUIRED: 'NAFATH_REQUIRED',
+});
+
+const FINAL_STATES = new Set([
+  reg.LIFECYCLE_STATES.DELETED,
+  // 'transferred' is also final at the source branch but the destination
+  // sees the record as active — not blocked at the source-side service
+  // because cross-branch operations are coordinated separately.
+]);
+
+const FINAL_STATUSES = new Set([
+  reg.TRANSITION_STATUS.EXECUTED,
+  reg.TRANSITION_STATUS.REJECTED,
+  reg.TRANSITION_STATUS.CANCELLED,
+  reg.TRANSITION_STATUS.REVERSED,
+  reg.TRANSITION_STATUS.FAILED,
+]);
+
+/**
+ * @param {object} opts
+ *   - beneficiaryModel        — Mongoose model for Beneficiary
+ *   - transitionLog           — Mongoose model for BeneficiaryLifecycleTransition
+ *   - sideEffectHandlers      — Map<sideEffectName, async fn(ctx)>
+ *   - notifier                — async fn({ event, payload, actor })
+ *   - auditLogger             — { log({ action, ... }) } from Wave 26
+ *   - anchorLedger            — { commit({ payload, type }) → txId } (Wave 17)
+ *   - logger                  — console-compatible
+ *   - now                     — clock injection
+ */
+function createBeneficiaryLifecycleService({
+  beneficiaryModel = null,
+  transitionLog = null,
+  sideEffectHandlers = {},
+  notifier = null,
+  auditLogger = null,
+  anchorLedger = null,
+  logger = console,
+  now = () => new Date(),
+} = {}) {
+  if (!transitionLog) {
+    throw new Error('beneficiary-lifecycle.service: transitionLog model is required');
+  }
+
+  async function _audit(action, actor, metadata) {
+    if (!auditLogger || typeof auditLogger.log !== 'function') return;
+    try {
+      await auditLogger.log({
+        action,
+        actorUserId: actor?.userId || null,
+        actorRole: actor?.role || null,
+        entityType: 'BeneficiaryLifecycleTransition',
+        entityId: metadata?.transitionRecordId || null,
+        metadata: metadata || {},
+      });
+    } catch (err) {
+      logger.warn && logger.warn(`[lifecycle] audit ${action} failed: ${err.message}`);
+    }
+  }
+
+  // ─── requestTransition ──────────────────────────────────────
+
+  /**
+   * Open a transition workflow. Returns a `pending` record OR an
+   * `executed` record if the transition required zero approvers
+   * (none exist today, but the shape allows it).
+   *
+   * Returns: { ok, transitionRecord, reason? }
+   */
+  async function requestTransition({
+    beneficiaryId,
+    branchId,
+    destinationBranchId = null,
+    transitionId,
+    actor,
+    reason = null,
+    reasonCode = null,
+    evidenceLinks = [],
+    correlationId = null,
+    metadata = {},
+  } = {}) {
+    if (!actor || !actor.userId) {
+      return { ok: false, reason: REASON.ACTOR_REQUIRED };
+    }
+    const t = reg.findTransition(transitionId);
+    if (!t) return { ok: false, reason: REASON.TRANSITION_NOT_FOUND };
+
+    // Look up current state. If no beneficiaryModel injected (tests),
+    // caller must pass `metadata.currentState` so we can validate.
+    let currentState = metadata.currentState || null;
+    if (!currentState && beneficiaryModel) {
+      try {
+        const b = await beneficiaryModel.findById(beneficiaryId).select('status branchId').lean();
+        if (!b) return { ok: false, reason: REASON.BENEFICIARY_NOT_FOUND };
+        currentState = b.status;
+      } catch (err) {
+        logger.warn && logger.warn(`[lifecycle] beneficiary lookup failed: ${err.message}`);
+      }
+    }
+    if (!currentState) {
+      return { ok: false, reason: REASON.BENEFICIARY_NOT_FOUND };
+    }
+    if (FINAL_STATES.has(currentState)) {
+      return { ok: false, reason: REASON.ALREADY_FINAL };
+    }
+
+    const validity = reg.validateTransitionRequest({
+      fromState: currentState,
+      transitionId,
+    });
+    if (!validity.valid) {
+      return { ok: false, reason: validity.reason, allowed: validity.allowed };
+    }
+
+    if (t.requiresReason && !reason && !reasonCode) {
+      return { ok: false, reason: REASON.REASON_REQUIRED };
+    }
+    if (reasonCode && !reg.isValidReasonCode(transitionId, reasonCode)) {
+      return { ok: false, reason: REASON.INVALID_REASON_CODE };
+    }
+
+    const record = await transitionLog.create({
+      beneficiaryId,
+      sourceBranchId: branchId,
+      destinationBranchId,
+      transitionId,
+      fromState: currentState,
+      toState: t.to,
+      requestedBy: actor.userId,
+      requestedAt: now(),
+      approvals: [],
+      reason,
+      reasonCode,
+      evidenceLinks,
+      status: reg.TRANSITION_STATUS.PENDING,
+      correlationId,
+      metadata,
+    });
+
+    await _audit('beneficiary.lifecycle.transition.requested', actor, {
+      transitionRecordId: record._id,
+      transitionId,
+      beneficiaryId,
+      fromState: currentState,
+      toState: t.to,
+    });
+
+    return { ok: true, transitionRecord: record };
+  }
+
+  // ─── approveTransition ──────────────────────────────────────
+
+  /**
+   * Collect an approval signature. If all required approvers have
+   * approved, status flips to `approved`. If any approver rejects,
+   * status becomes `rejected` and the workflow is closed.
+   */
+  async function approveTransition({
+    transitionRecordId,
+    actor,
+    approverRole,
+    decision = 'approve',
+    nafathSignatureId = null,
+    comment = null,
+  } = {}) {
+    if (!actor || !actor.userId) {
+      return { ok: false, reason: REASON.ACTOR_REQUIRED };
+    }
+    const record = await transitionLog.findById(transitionRecordId);
+    if (!record) return { ok: false, reason: REASON.TRANSITION_NOT_FOUND };
+    if (FINAL_STATUSES.has(record.status)) {
+      return { ok: false, reason: REASON.ALREADY_EXECUTED, status: record.status };
+    }
+
+    const t = reg.findTransition(record.transitionId);
+    if (!t) return { ok: false, reason: REASON.TRANSITION_NOT_FOUND };
+
+    // Self-approval guard
+    if (String(actor.userId) === String(record.requestedBy)) {
+      return { ok: false, reason: REASON.SELF_APPROVAL };
+    }
+    // Duplicate-approval guard (same role + same userId already signed)
+    const alreadySigned = (record.approvals || []).some(
+      a => String(a.approverUserId) === String(actor.userId) && a.approverRole === approverRole
+    );
+    if (alreadySigned) {
+      return { ok: false, reason: REASON.DUPLICATE_APPROVAL };
+    }
+
+    if (t.requiresNafath && decision === 'approve' && !nafathSignatureId) {
+      return { ok: false, reason: REASON.NAFATH_REQUIRED };
+    }
+
+    record.approvals.push({
+      approverUserId: actor.userId,
+      approverRole,
+      decision,
+      signedAt: now(),
+      nafathSignatureId,
+      comment,
+    });
+
+    // If rejected, close the workflow now
+    if (decision === 'reject') {
+      record.status = reg.TRANSITION_STATUS.REJECTED;
+      await record.save();
+      await _audit('beneficiary.lifecycle.transition.rejected', actor, {
+        transitionRecordId: record._id,
+        transitionId: record.transitionId,
+      });
+      return { ok: true, transitionRecord: record, statusChanged: true };
+    }
+
+    // Check if all required approvers have approved
+    const approvedRoles = new Set(
+      record.approvals.filter(a => a.decision === 'approve').map(a => a.approverRole)
+    );
+    const allApproved = t.requiredApproverRoles.every(r => approvedRoles.has(r));
+    let statusChanged = false;
+    if (allApproved) {
+      record.status = reg.TRANSITION_STATUS.APPROVED;
+      statusChanged = true;
+    }
+
+    await record.save();
+
+    await _audit('beneficiary.lifecycle.transition.approved', actor, {
+      transitionRecordId: record._id,
+      transitionId: record.transitionId,
+      collectedRoles: Array.from(approvedRoles),
+      stillMissing: t.requiredApproverRoles.filter(r => !approvedRoles.has(r)),
+      allApproved,
+    });
+
+    return { ok: true, transitionRecord: record, statusChanged };
+  }
+
+  // ─── executeTransition ──────────────────────────────────────
+
+  /**
+   * Run side-effects, flip beneficiary.status, anchor on the ledger
+   * (for HIGH-sensitivity), notify stakeholders.
+   *
+   * Idempotent — calling twice on an already-executed record returns
+   * the existing result.
+   */
+  async function executeTransition({ transitionRecordId, actor } = {}) {
+    if (!actor || !actor.userId) {
+      return { ok: false, reason: REASON.ACTOR_REQUIRED };
+    }
+    const record = await transitionLog.findById(transitionRecordId);
+    if (!record) return { ok: false, reason: REASON.TRANSITION_NOT_FOUND };
+    if (record.status === reg.TRANSITION_STATUS.EXECUTED) {
+      return { ok: true, transitionRecord: record, idempotent: true };
+    }
+    if (record.status !== reg.TRANSITION_STATUS.APPROVED) {
+      return { ok: false, reason: REASON.NOT_APPROVED, status: record.status };
+    }
+
+    const t = reg.findTransition(record.transitionId);
+
+    // Dispatch side-effects
+    const sideEffectsAudit = [];
+    for (const op of t.sideEffects) {
+      const handler = sideEffectHandlers[op];
+      if (!handler) {
+        sideEffectsAudit.push({
+          operation: op,
+          status: 'skipped',
+          completedAt: now(),
+          metadata: { reason: 'no handler wired' },
+        });
+        continue;
+      }
+      try {
+        const result = await handler({
+          beneficiaryId: record.beneficiaryId,
+          sourceBranchId: record.sourceBranchId,
+          destinationBranchId: record.destinationBranchId,
+          transitionId: record.transitionId,
+          fromState: record.fromState,
+          toState: record.toState,
+          correlationId: record.correlationId,
+          metadata: record.metadata,
+          actor,
+        });
+        sideEffectsAudit.push({
+          operation: op,
+          status: 'ok',
+          completedAt: now(),
+          metadata: result || null,
+        });
+      } catch (err) {
+        sideEffectsAudit.push({
+          operation: op,
+          status: 'failed',
+          completedAt: now(),
+          error: err.message,
+        });
+        logger.warn && logger.warn(`[lifecycle] side-effect ${op} failed: ${err.message}`);
+      }
+    }
+
+    // Flip beneficiary status (if model wired)
+    if (beneficiaryModel) {
+      try {
+        await beneficiaryModel.updateOne(
+          { _id: record.beneficiaryId },
+          { $set: { status: record.toState, lastLifecycleAt: now() } }
+        );
+      } catch (err) {
+        logger.warn && logger.warn(`[lifecycle] beneficiary update failed: ${err.message}`);
+      }
+    }
+
+    // Anchor on the ledger for HIGH-sensitivity transitions
+    let anchorTxId = null;
+    if (
+      reg.isHighSensitivity(record.transitionId) &&
+      anchorLedger &&
+      typeof anchorLedger.commit === 'function'
+    ) {
+      try {
+        const payload = {
+          recordId: String(record._id),
+          beneficiaryId: String(record.beneficiaryId),
+          transitionId: record.transitionId,
+          fromState: record.fromState,
+          toState: record.toState,
+          executedAt: now().toISOString(),
+        };
+        const res = await anchorLedger.commit({
+          payload,
+          type: 'beneficiary.lifecycle',
+        });
+        anchorTxId = res?.txId || null;
+      } catch (err) {
+        logger.warn && logger.warn(`[lifecycle] anchor commit failed: ${err.message}`);
+      }
+    }
+
+    record.status = reg.TRANSITION_STATUS.EXECUTED;
+    record.executedAt = now();
+    record.sideEffectsAudit = sideEffectsAudit;
+    if (anchorTxId) record.anchorTxId = anchorTxId;
+    await record.save();
+
+    // Notify
+    if (notifier && typeof notifier === 'function') {
+      try {
+        await notifier({
+          event: 'beneficiary.lifecycle.executed',
+          payload: {
+            transitionRecordId: record._id,
+            transitionId: record.transitionId,
+            beneficiaryId: record.beneficiaryId,
+            fromState: record.fromState,
+            toState: record.toState,
+          },
+          actor,
+        });
+      } catch (err) {
+        logger.warn && logger.warn(`[lifecycle] notifier failed: ${err.message}`);
+      }
+    }
+
+    await _audit('beneficiary.lifecycle.transition.executed', actor, {
+      transitionRecordId: record._id,
+      transitionId: record.transitionId,
+      sideEffectsCount: sideEffectsAudit.length,
+      sideEffectsFailed: sideEffectsAudit.filter(s => s.status === 'failed').length,
+      anchorTxId,
+    });
+
+    return { ok: true, transitionRecord: record, sideEffectsAudit };
+  }
+
+  // ─── cancelTransition ──────────────────────────────────────
+
+  async function cancelTransition({ transitionRecordId, actor, reason = null } = {}) {
+    if (!actor || !actor.userId) {
+      return { ok: false, reason: REASON.ACTOR_REQUIRED };
+    }
+    const record = await transitionLog.findById(transitionRecordId);
+    if (!record) return { ok: false, reason: REASON.TRANSITION_NOT_FOUND };
+    if (FINAL_STATUSES.has(record.status)) {
+      return { ok: false, reason: REASON.ALREADY_EXECUTED, status: record.status };
+    }
+    record.status = reg.TRANSITION_STATUS.CANCELLED;
+    record.cancelledAt = now();
+    if (reason) {
+      record.metadata = { ...(record.metadata || {}), cancellationReason: reason };
+    }
+    await record.save();
+
+    await _audit('beneficiary.lifecycle.transition.cancelled', actor, {
+      transitionRecordId: record._id,
+      transitionId: record.transitionId,
+      reason,
+    });
+
+    return { ok: true, transitionRecord: record };
+  }
+
+  // ─── reverseTransition ──────────────────────────────────────
+
+  async function reverseTransition({ transitionRecordId, actor, reason = null } = {}) {
+    if (!actor || !actor.userId) {
+      return { ok: false, reason: REASON.ACTOR_REQUIRED };
+    }
+    const record = await transitionLog.findById(transitionRecordId);
+    if (!record) return { ok: false, reason: REASON.TRANSITION_NOT_FOUND };
+    if (record.status !== reg.TRANSITION_STATUS.EXECUTED) {
+      return { ok: false, reason: REASON.NOT_APPROVED, status: record.status };
+    }
+
+    const t = reg.findTransition(record.transitionId);
+    if (!t.reversalWindowDays) {
+      return { ok: false, reason: REASON.NOT_REVERSIBLE };
+    }
+    const ageDays = (now() - record.executedAt) / (24 * 60 * 60 * 1000);
+    if (ageDays > t.reversalWindowDays) {
+      return { ok: false, reason: REASON.REVERSAL_WINDOW_EXPIRED, ageDays };
+    }
+
+    record.status = reg.TRANSITION_STATUS.REVERSED;
+    record.reversedAt = now();
+    if (reason) {
+      record.metadata = { ...(record.metadata || {}), reversalReason: reason };
+    }
+    await record.save();
+
+    // Flip beneficiary status back
+    if (beneficiaryModel) {
+      try {
+        await beneficiaryModel.updateOne(
+          { _id: record.beneficiaryId },
+          { $set: { status: record.fromState, lastLifecycleAt: now() } }
+        );
+      } catch (err) {
+        logger.warn && logger.warn(`[lifecycle] reversal status update failed: ${err.message}`);
+      }
+    }
+
+    await _audit('beneficiary.lifecycle.transition.reversed', actor, {
+      transitionRecordId: record._id,
+      transitionId: record.transitionId,
+      reason,
+    });
+
+    return { ok: true, transitionRecord: record };
+  }
+
+  // ─── Read helpers ──────────────────────────────────────────
+
+  function getAllowedTransitionsFor({ currentState }) {
+    return reg.getAllowedTransitionsFrom(currentState);
+  }
+
+  async function getTransitionHistory(beneficiaryId) {
+    if (!beneficiaryId) return [];
+    const docs = await transitionLog.find({ beneficiaryId }).sort({ requestedAt: -1 }).lean();
+    return docs;
+  }
+
+  return {
+    requestTransition,
+    approveTransition,
+    executeTransition,
+    cancelTransition,
+    reverseTransition,
+    getAllowedTransitionsFor,
+    getTransitionHistory,
+    REASON,
+  };
+}
+
+module.exports = {
+  createBeneficiaryLifecycleService,
+  REASON,
+};

@@ -1,0 +1,754 @@
+{
+  "info": {
+    "name": "Care Planning Engine",
+    "_postman_id": "alawael-1779035925337",
+    "description": "AlAwael Rehab Platform — Care Planning Engine HTTP API.\n\nGenerated from `docs/api/openapi-care-planning.yaml` via\n`backend/scripts/generate-care-plan-postman.js`.\n\nAuth: set the `bearerToken` collection variable to a valid JWT from\nPOST /api/v1/auth/login. The `baseUrl` defaults to the production host;\noverride per-environment.\n\nCoverage: 25 endpoints across 9 tags (lifecycle / review / family / recommendations / progress / reports / library / groups / audit + ops).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "/api/v1/care-plans",
+      "type": "string"
+    },
+    {
+      "key": "bearerToken",
+      "value": "",
+      "type": "string",
+      "description": "JWT issued by /api/v1/auth/login"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{bearerToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "lifecycle",
+      "item": [
+        {
+          "name": "Create draft plan version",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"planId\": \"\",\n  \"planType\": \"individual_therapy\",\n  \"specialty\": \"\",\n  \"beneficiaryId\": \"\",\n  \"branchId\": \"\",\n  \"reasonForPlan\": \"initial\",\n  \"baselineSummary\": {},\n  \"goals\": [\n    {\n      \"goalId\": \"\",\n      \"domain\": \"\",\n      \"statement\": \"\",\n      \"priorityScore\": 0,\n      \"targetValue\": \"\",\n      \"targetUnit\": \"\",\n      \"targetHorizonWeeks\": 0,\n      \"baselineLink\": \"\",\n      \"assessmentLink\": \"\",\n      \"measureLink\": \"\",\n      \"evidenceRefs\": [\n        {\n          \"kind\": \"assessment\",\n          \"refId\": \"\",\n          \"capturedAt\": \"2026-05-17T16:38:45.336Z\"\n        }\n      ],\n      \"confidence\": 0,\n      \"successCriterion\": \"\"\n    }\n  ],\n  \"programs\": [\n    {\n      \"programId\": \"\",\n      \"name\": \"\",\n      \"modality\": \"\",\n      \"frequencyPerWeek\": 0,\n      \"durationMin\": 0,\n      \"goalRefs\": [\n        \"\"\n      ]\n    }\n  ],\n  \"measures\": [\n    {}\n  ],\n  \"tests\": [\n    {}\n  ],\n  \"supportServices\": [\n    {}\n  ],\n  \"familyRole\": {},\n  \"barriers\": [\n    {}\n  ],\n  \"safetyFlags\": [\n    {}\n  ],\n  \"sessionsPerWeekCap\": 0,\n  \"reviewSchedule\": {},\n  \"correlationId\": \"\",\n  \"metadata\": {}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/",
+              "host": ["{{baseUrl}}"],
+              "path": [""]
+            }
+          }
+        },
+        {
+          "name": "Run validator + compute readiness score",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"beneficiaryAge\": 0,\n  \"branchSessionCap\": 0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/:id/validate",
+              "host": ["{{baseUrl}}"],
+              "path": [":id", "validate"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Drive the state-machine",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"transitionId\": \"submit_for_validation\",\n  \"nafathSignatureId\": \"\",\n  \"metadata\": {}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/:id/transitions",
+              "host": ["{{baseUrl}}"],
+              "path": [":id", "transitions"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create new version (revision)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reasonForRevision\": \"\",\n  \"changes\": {}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/:id/versions",
+              "host": ["{{baseUrl}}"],
+              "path": [":id", "versions"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Apply controlled non-structural amendment to approved version",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"field\": \"\",\n  \"before\": {},\n  \"after\": {},\n  \"reason\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/:id/amendments",
+              "host": ["{{baseUrl}}"],
+              "path": [":id", "amendments"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Version history for a planId",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/plan/:planId/versions",
+              "host": ["{{baseUrl}}"],
+              "path": ["plan", ":planId", "versions"],
+              "variable": [
+                {
+                  "key": "planId",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "UI helper — transitions allowed from current status",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/:id/allowed-transitions",
+              "host": ["{{baseUrl}}"],
+              "path": [":id", "allowed-transitions"],
+              "query": [
+                {
+                  "key": "currentStatus",
+                  "value": "",
+                  "disabled": true
+                }
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Fetch single plan version",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/:id",
+              "host": ["{{baseUrl}}"],
+              "path": [":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "review",
+      "item": [
+        {
+          "name": "Structured rejection capture",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"primaryReason\": \"evidence_gap\",\n  \"requiredFixes\": [\n    {\n      \"elementId\": \"\",\n      \"fix\": \"\",\n      \"priority\": 0,\n      \"severity\": \"must_fix\"\n    }\n  ],\n  \"rewriteGuidance\": \"\",\n  \"urgency\": \"immediate\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/:id/reject",
+              "host": ["{{baseUrl}}"],
+              "path": [":id", "reject"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Record supervisor scorecard",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"scorecard\": {\n    \"quality\": 0,\n    \"compliance\": 0,\n    \"clarity\": 0,\n    \"measurability\": 0,\n    \"familyReadiness\": 0,\n    \"safety\": 0\n  },\n  \"notes\": [\n    {}\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/:id/scorecard",
+              "host": ["{{baseUrl}}"],
+              "path": [":id", "scorecard"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "family",
+      "item": [
+        {
+          "name": "Set/preview family-friendly body manually",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"body\": \"\",\n  \"readabilityGrade\": 0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/:id/family-version",
+              "host": ["{{baseUrl}}"],
+              "path": [":id", "family-version"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Auto-generate family-friendly Markdown from approved plan",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"centerName\": \"\",\n  \"contactPhone\": \"\",\n  \"contactEmail\": \"\",\n  \"beneficiaryFirstName\": \"\",\n  \"maxGoals\": 0,\n  \"persist\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/:id/family-version/generate",
+              "host": ["{{baseUrl}}"],
+              "path": [":id", "family-version", "generate"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "recommendations",
+      "item": [
+        {
+          "name": "Build the System+User LLM prompt + schema contract",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"beneficiary\": {},\n  \"assessments\": [\n    {}\n  ],\n  \"baselines\": [\n    {}\n  ],\n  \"previousPlan\": {},\n  \"progressHistory\": [\n    {}\n  ],\n  \"transportRisk\": {},\n  \"familyNotes\": [\n    \"\"\n  ],\n  \"teacherNotes\": [\n    \"\"\n  ],\n  \"therapistNotes\": [\n    \"\"\n  ],\n  \"supportServices\": {},\n  \"branchContext\": {},\n  \"safetyFlags\": [\n    \"\"\n  ],\n  \"constraints\": {}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/recommendations/build-prompt",
+              "host": ["{{baseUrl}}"],
+              "path": ["recommendations", "build-prompt"]
+            }
+          }
+        },
+        {
+          "name": "Validate LLM proposal (schema + post-validator)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/recommendations/validate",
+              "host": ["{{baseUrl}}"],
+              "path": ["recommendations", "validate"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "progress",
+      "item": [
+        {
+          "name": "Run deterministic progress reviewer on plan",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"goalSignals\": [\n    {\n      \"goalId\": \"\",\n      \"measureSeries\": [\n        {\n          \"date\": \"2026-05-17T16:38:45.336Z\",\n          \"value\": 0,\n          \"source\": \"\"\n        }\n      ],\n      \"attendance\": 0,\n      \"safetyEventLinked\": false,\n      \"targetValue\": 0,\n      \"successCriterion\": \"\"\n    }\n  ],\n  \"planReviewDueAt\": \"2026-05-17T16:38:45.336Z\",\n  \"aggregateAttendance\": 0,\n  \"now\": \"2026-05-17T16:38:45.336Z\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/:id/progress-review",
+              "host": ["{{baseUrl}}"],
+              "path": [":id", "progress-review"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "reports",
+      "item": [
+        {
+          "name": "Generate one of 6 internal report kinds",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"goalSignals\": [\n    {\n      \"goalId\": \"\",\n      \"measureSeries\": [\n        {\n          \"date\": \"2026-05-17T16:38:45.336Z\",\n          \"value\": 0,\n          \"source\": \"\"\n        }\n      ],\n      \"attendance\": 0,\n      \"safetyEventLinked\": false,\n      \"targetValue\": 0,\n      \"successCriterion\": \"\"\n    }\n  ],\n  \"aggregateAttendance\": 0,\n  \"now\": \"2026-05-17T16:38:45.336Z\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/:id/reports/:kind",
+              "host": ["{{baseUrl}}"],
+              "path": [":id", "reports", ":kind"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                },
+                {
+                  "key": "kind",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "library",
+      "item": [
+        {
+          "name": "Browse programs library",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/library/programs",
+              "host": ["{{baseUrl}}"],
+              "path": ["library", "programs"],
+              "query": [
+                {
+                  "key": "domain",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "age",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "indication",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Browse assessments/tests library",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/library/tests",
+              "host": ["{{baseUrl}}"],
+              "path": ["library", "tests"],
+              "query": [
+                {
+                  "key": "domain",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "age",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "indication",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Ranked program + test recommendations (eligibility-aware)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"domain\": \"\",\n  \"age\": 0,\n  \"indications\": [\n    \"\"\n  ],\n  \"safetyFlags\": [\n    \"\"\n  ],\n  \"k\": 0,\n  \"kTests\": 0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/library/recommend-programs",
+              "host": ["{{baseUrl}}"],
+              "path": ["library", "recommend-programs"]
+            }
+          }
+        },
+        {
+          "name": "Interpret a standardized test score into band label",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"testId\": \"\",\n  \"score\": 0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/library/interpret-score",
+              "host": ["{{baseUrl}}"],
+              "path": ["library", "interpret-score"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "groups",
+      "item": [
+        {
+          "name": "Build a group plan candidate (cohort + adaptations + ratios)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"identity\": {},\n  \"targetCohort\": {\n    \"ageRange\": [\n      0\n    ],\n    \"diagnosisFilters\": [\n      \"\"\n    ],\n    \"skillLevelRange\": [\n      0\n    ],\n    \"safetyExclusions\": [\n      \"\"\n    ]\n  },\n  \"candidates\": [\n    {\n      \"beneficiaryId\": \"\",\n      \"age\": 0,\n      \"diagnosis\": \"\",\n      \"skillLevel\": 0,\n      \"safetyFlags\": [\n        \"\"\n      ],\n      \"individualPlanRef\": \"\"\n    }\n  ],\n  \"sharedGoals\": [\n    {}\n  ],\n  \"groupProgramId\": \"\",\n  \"staffPool\": [\n    {}\n  ],\n  \"options\": {}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/group-plans/build",
+              "host": ["{{baseUrl}}"],
+              "path": ["group-plans", "build"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "audit",
+      "item": [
+        {
+          "name": "Chronological audit trail (transitions + signatures + amendments + family sends)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/:id/audit-trail",
+              "host": ["{{baseUrl}}"],
+              "path": [":id", "audit-trail"],
+              "query": [
+                {
+                  "key": "redactFor",
+                  "value": "",
+                  "disabled": true
+                }
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "ops",
+      "item": [
+        {
+          "name": "Health probe (no auth required at mount level)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/_health",
+              "host": ["{{baseUrl}}"],
+              "path": ["_health"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

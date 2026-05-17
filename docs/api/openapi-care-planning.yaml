@@ -1,0 +1,954 @@
+openapi: 3.1.0
+info:
+  title: Care Planning Engine API
+  version: 1.0.0
+  description: |
+    HTTP surface for the Care Planning Engine (Waves 41–50).
+
+    Covers individual + group plan generation, validation, supervisor
+    review, structured rejection, role-specific views, 6 report kinds,
+    family-version generation (PDPL-redacted), progress review with
+    plateau detection, audit-trail aggregation, programs library, and
+    Prometheus metrics.
+
+    Every endpoint mounts under `/api/v1/care-plans/` behind the
+    `authenticate` middleware. Permissions enforced by the
+    `governance.registry` (see `care-plan.*` codes).
+
+    Status-code mapping (per `REASON_TO_STATUS`):
+      400 — invalid input / bad transition id
+      401 — ACTOR_REQUIRED
+      403 — PERMISSION_DENIED / AMENDMENT_FORBIDDEN / SELF_APPROVAL_FORBIDDEN
+      404 — PLAN_NOT_FOUND
+      409 — INVALID_FROM_STATUS / IS_TERMINAL / MUST_ESCALATE
+      412 — READINESS_TOO_LOW / HARD_FAILURES_PRESENT / FAMILY_VERSION_MISSING
+      422 — PROPOSAL_REJECTED / GROUP_PLAN_BUILD_FAILED
+  contact:
+    name: Care Planning Engineering
+  license:
+    name: Proprietary
+
+servers:
+  - url: /api/v1/care-plans
+    description: Production mount point (behind authenticate)
+
+tags:
+  - name: lifecycle
+    description: State machine + plan-version operations
+  - name: review
+    description: Supervisor scorecard + rejection
+  - name: family
+    description: Family-version generation + dispatch
+  - name: recommendations
+    description: LLM-driven proposal prompt + validator
+  - name: progress
+    description: Plateau detection + per-goal review
+  - name: reports
+    description: 6 internal report formats
+  - name: library
+    description: Programs + assessments library (read-only registry)
+  - name: groups
+    description: Group plan cohort + builder
+  - name: audit
+    description: Audit trail aggregator
+  - name: ops
+    description: Health + metrics
+
+paths:
+  # ─── lifecycle ───────────────────────────────────────────────────
+  /:
+    post:
+      tags: [lifecycle]
+      summary: Create draft plan version
+      operationId: createDraft
+      security: [{ bearerAuth: [] }]
+      x-permission: care-plan.draft.create
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateDraftRequest' }
+      responses:
+        '200':
+          description: Draft created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PlanVersionEnvelope' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /{id}/validate:
+    post:
+      tags: [lifecycle]
+      summary: Run validator + compute readiness score
+      operationId: runValidation
+      security: [{ bearerAuth: [] }]
+      x-permission: care-plan.validation.run
+      parameters: [ { $ref: '#/components/parameters/PlanVersionId' } ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                beneficiaryAge: { type: integer }
+                branchSessionCap: { type: integer }
+      responses:
+        '200':
+          description: Validation snapshot
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ValidationSnapshot' }
+        '404': { $ref: '#/components/responses/PlanNotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /{id}/transitions:
+    post:
+      tags: [lifecycle]
+      summary: Drive the state-machine
+      operationId: transition
+      security: [{ bearerAuth: [] }]
+      x-permission-mapping: 'see TRANSITION_TO_PERMISSION'
+      parameters: [ { $ref: '#/components/parameters/PlanVersionId' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TransitionRequest' }
+      responses:
+        '200':
+          description: Transition applied
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PlanVersionEnvelope'
+                  - type: object
+                    properties:
+                      fromStatus: { type: string }
+                      toStatus: { type: string }
+                      anchorTxId: { type: string, nullable: true }
+        '400':
+          description: UNKNOWN_TRANSITION
+        '403':
+          description: SELF_APPROVAL_FORBIDDEN / ACTOR_ROLE_NOT_ALLOWED
+        '409':
+          description: INVALID_FROM_STATUS / IS_TERMINAL / MUST_ESCALATE
+        '412':
+          description: READINESS_TOO_LOW / HARD_FAILURES_PRESENT / VALIDATION_MISSING / FAMILY_VERSION_MISSING
+
+  /{id}/reject:
+    post:
+      tags: [review]
+      summary: Structured rejection capture
+      operationId: reject
+      security: [{ bearerAuth: [] }]
+      x-permission: care-plan.reject
+      parameters: [ { $ref: '#/components/parameters/PlanVersionId' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RejectionDetails' }
+      responses:
+        '200':
+          description: Rejection committed
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PlanVersionEnvelope' }
+        '400':
+          description: REJECTION_MISSING_REASON
+
+  /{id}/scorecard:
+    post:
+      tags: [review]
+      summary: Record supervisor scorecard
+      operationId: recordScorecard
+      security: [{ bearerAuth: [] }]
+      x-permission: care-plan.review.scorecard
+      parameters: [ { $ref: '#/components/parameters/PlanVersionId' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [scorecard]
+              properties:
+                scorecard: { $ref: '#/components/schemas/Scorecard' }
+                notes: { type: array, items: { type: object } }
+      responses:
+        '200':
+          description: Scorecard recorded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  overall: { type: number, minimum: 0, maximum: 10 }
+
+  /{id}/versions:
+    post:
+      tags: [lifecycle]
+      summary: Create new version (revision)
+      operationId: createNewVersion
+      security: [{ bearerAuth: [] }]
+      x-permission: care-plan.version.create
+      parameters: [ { $ref: '#/components/parameters/PlanVersionId' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reasonForRevision]
+              properties:
+                reasonForRevision: { type: string }
+                changes: { type: object }
+      responses:
+        '200':
+          description: New version drafted; parent superseded if approved
+        '404': { $ref: '#/components/responses/PlanNotFound' }
+
+  /{id}/amendments:
+    post:
+      tags: [lifecycle]
+      summary: Apply controlled non-structural amendment to approved version
+      operationId: applyAmendment
+      security: [{ bearerAuth: [] }]
+      x-permission: care-plan.amendment.apply
+      parameters: [ { $ref: '#/components/parameters/PlanVersionId' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AmendmentRequest' }
+      responses:
+        '200':
+          description: Amendment applied
+        '403':
+          description: AMENDMENT_FORBIDDEN (structural field / non-bm / not approved)
+
+  # ─── family ──────────────────────────────────────────────────────
+  /{id}/family-version:
+    post:
+      tags: [family]
+      summary: Set/preview family-friendly body manually
+      operationId: setFamilyVersion
+      security: [{ bearerAuth: [] }]
+      x-permission: care-plan.family-version.preview
+      parameters: [ { $ref: '#/components/parameters/PlanVersionId' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [body]
+              properties:
+                body: { type: string, minLength: 20 }
+                readabilityGrade: { type: integer, minimum: 1, maximum: 20 }
+      responses:
+        '200': { description: Family version persisted }
+        '400': { description: FAMILY_BODY_TOO_SHORT / FAMILY_BODY_TOO_LONG }
+        '412': { description: FAMILY_READABILITY_TOO_HIGH }
+
+  /{id}/family-version/generate:
+    post:
+      tags: [family]
+      summary: Auto-generate family-friendly Markdown from approved plan
+      operationId: generateFamilyVersion
+      security: [{ bearerAuth: [] }]
+      x-permission: care-plan.family-version.preview
+      parameters: [ { $ref: '#/components/parameters/PlanVersionId' } ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                centerName: { type: string }
+                contactPhone: { type: string }
+                contactEmail: { type: string }
+                beneficiaryFirstName: { type: string }
+                maxGoals: { type: integer, default: 5 }
+                persist: { type: boolean, default: true }
+      responses:
+        '200':
+          description: Family version generated + persisted
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FamilyVersionOutput' }
+        '412':
+          description: FAMILY_VERSION_REQUIRES_REWRITE (readability/forbidden-term/length)
+
+  # ─── recommendations ─────────────────────────────────────────────
+  /recommendations/build-prompt:
+    post:
+      tags: [recommendations]
+      summary: Build the System+User LLM prompt + schema contract
+      operationId: buildRecommendationPrompt
+      security: [{ bearerAuth: [] }]
+      x-permission: care-plan.recommendation.preview
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/InputBundle' }
+      responses:
+        '200':
+          description: Prompt assembled (no LLM called)
+
+  /recommendations/validate:
+    post:
+      tags: [recommendations]
+      summary: Validate LLM proposal (schema + post-validator)
+      operationId: validateProposal
+      security: [{ bearerAuth: [] }]
+      x-permission: care-plan.recommendation.preview
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - type: object
+                  properties:
+                    rawJson: { type: string }
+                - type: object
+                  properties:
+                    proposal: { type: object }
+      responses:
+        '200': { description: Proposal accepted }
+        '400': { description: NO_PROPOSAL_PROVIDED }
+        '422':
+          description: PROPOSAL_REJECTED — schema or evidence-ref unresolvable
+
+  # ─── progress ────────────────────────────────────────────────────
+  /{id}/progress-review:
+    post:
+      tags: [progress]
+      summary: Run deterministic progress reviewer on plan
+      operationId: progressReview
+      security: [{ bearerAuth: [] }]
+      x-permission: care-plan.progress-review.run
+      parameters: [ { $ref: '#/components/parameters/PlanVersionId' } ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                goalSignals:
+                  type: array
+                  items: { $ref: '#/components/schemas/GoalSignal' }
+                planReviewDueAt: { type: string, format: date-time }
+                aggregateAttendance: { type: number }
+                now: { type: string, format: date-time }
+      responses:
+        '200':
+          description: Holistic verdict + per-goal verdicts + triggers
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProgressReview' }
+        '400': { description: NO_GOAL_SIGNALS }
+
+  # ─── reports ─────────────────────────────────────────────────────
+  /{id}/reports/{kind}:
+    post:
+      tags: [reports]
+      summary: Generate one of 6 internal report kinds
+      operationId: generateReport
+      security: [{ bearerAuth: [] }]
+      x-permission-mapping: care-plan.report.<kind>
+      parameters:
+        - { $ref: '#/components/parameters/PlanVersionId' }
+        - in: path
+          name: kind
+          required: true
+          schema:
+            type: string
+            enum:
+              - clinician_draft
+              - supervisor_review
+              - final_approved_plan
+              - rejection
+              - monthly_progress
+              - end_of_cycle_closure
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                goalSignals:
+                  type: array
+                  items: { $ref: '#/components/schemas/GoalSignal' }
+                aggregateAttendance: { type: number }
+                now: { type: string, format: date-time }
+      responses:
+        '200':
+          description: Report markdown + plainText
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ReportOutput' }
+        '400': { description: UNKNOWN_REPORT_KIND }
+        '404': { $ref: '#/components/responses/PlanNotFound' }
+
+  # ─── library ─────────────────────────────────────────────────────
+  /library/programs:
+    get:
+      tags: [library]
+      summary: Browse programs library
+      operationId: listPrograms
+      security: [{ bearerAuth: [] }]
+      x-permission: care-plan.programs-library.read
+      parameters:
+        - { in: query, name: domain, schema: { type: string } }
+        - { in: query, name: age, schema: { type: integer } }
+        - { in: query, name: indication, schema: { type: string } }
+      responses:
+        '200': { description: Programs list }
+
+  /library/tests:
+    get:
+      tags: [library]
+      summary: Browse assessments/tests library
+      operationId: listTests
+      security: [{ bearerAuth: [] }]
+      x-permission: care-plan.tests-library.read
+      parameters:
+        - { in: query, name: domain, schema: { type: string } }
+        - { in: query, name: age, schema: { type: integer } }
+        - { in: query, name: indication, schema: { type: string } }
+      responses:
+        '200': { description: Tests list }
+
+  /library/recommend-programs:
+    post:
+      tags: [library]
+      summary: Ranked program + test recommendations (eligibility-aware)
+      operationId: recommendPrograms
+      security: [{ bearerAuth: [] }]
+      x-permission: care-plan.programs-library.read
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                domain: { type: string }
+                age: { type: integer }
+                indications: { type: array, items: { type: string } }
+                safetyFlags: { type: array, items: { type: string } }
+                k: { type: integer, default: 3 }
+                kTests: { type: integer, default: 2 }
+      responses:
+        '200': { description: Ranked programs + tests }
+
+  /library/interpret-score:
+    post:
+      tags: [library]
+      summary: Interpret a standardized test score into band label
+      operationId: interpretScore
+      security: [{ bearerAuth: [] }]
+      x-permission: care-plan.tests-library.read
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [testId, score]
+              properties:
+                testId: { type: string }
+                score: { type: number }
+      responses:
+        '200': { description: Band + range + validityScore }
+        '400': { description: UNKNOWN_TEST / INVALID_SCORE / SCORE_OUT_OF_RANGE }
+
+  # ─── groups ──────────────────────────────────────────────────────
+  /group-plans/build:
+    post:
+      tags: [groups]
+      summary: Build a group plan candidate (cohort + adaptations + ratios)
+      operationId: buildGroupPlan
+      security: [{ bearerAuth: [] }]
+      x-permission: care-plan.group-plan.build
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/GroupPlanBuildRequest' }
+      responses:
+        '200': { description: Group plan + rejected candidates }
+        '422': { description: NO_CANDIDATES / COHORT_TOO_SMALL / STAFF_INSUFFICIENT / PROGRAM_NOT_GROUP_MODALITY / UNKNOWN_PROGRAM / AGE_BAND_INCOMPATIBLE / CONTRAINDICATION_PRESENT }
+
+  /group-plans/validate:
+    post:
+      tags: [groups]
+      summary: Validate an existing group plan
+      operationId: validateGroupPlan
+      security: [{ bearerAuth: [] }]
+      x-permission: care-plan.group-plan.validate
+
+  /group-plans/cohort-suggest:
+    post:
+      tags: [groups]
+      summary: Suggest cohort from candidate pool (filters + capacity + safety pairs)
+      operationId: suggestCohort
+      security: [{ bearerAuth: [] }]
+      x-permission: care-plan.group-plan.build
+
+  # ─── audit ───────────────────────────────────────────────────────
+  /{id}/audit-trail:
+    get:
+      tags: [audit]
+      summary: Chronological audit trail (transitions + signatures + amendments + family sends)
+      operationId: auditTrail
+      security: [{ bearerAuth: [] }]
+      x-permission: care-plan.audit-trail.read
+      parameters:
+        - { $ref: '#/components/parameters/PlanVersionId' }
+        - in: query
+          name: redactFor
+          schema:
+            type: string
+            enum: [clinical, executive, family]
+            default: clinical
+      responses:
+        '200':
+          description: Audit trail
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuditTrail' }
+
+  # ─── read endpoints (must come AFTER /:id/* in routing order) ───
+  /plan/{planId}/versions:
+    get:
+      tags: [lifecycle]
+      summary: Version history for a planId
+      operationId: getVersionHistory
+      security: [{ bearerAuth: [] }]
+      x-permission: care-plan.list
+      parameters:
+        - in: path
+          name: planId
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Versions sorted descending
+
+  /{id}/allowed-transitions:
+    get:
+      tags: [lifecycle]
+      summary: UI helper — transitions allowed from current status
+      operationId: allowedTransitions
+      security: [{ bearerAuth: [] }]
+      x-permission: care-plan.read
+      parameters:
+        - { $ref: '#/components/parameters/PlanVersionId' }
+        - in: query
+          name: currentStatus
+          schema:
+            type: string
+            enum: [draft, validation_pending, ready_for_submission, submitted_to_supervisor, under_review, revision_requested, escalated_to_branch_manager, approved, rejected, archived, superseded, saved_to_record, family_notification_sent]
+      responses:
+        '200': { description: Allowed transitions list }
+
+  /{id}:
+    get:
+      tags: [lifecycle]
+      summary: Fetch single plan version
+      operationId: getPlanVersion
+      security: [{ bearerAuth: [] }]
+      x-permission: care-plan.read
+      parameters: [ { $ref: '#/components/parameters/PlanVersionId' } ]
+      responses:
+        '200': { description: Plan version }
+        '404': { $ref: '#/components/responses/PlanNotFound' }
+
+  # ─── ops ─────────────────────────────────────────────────────────
+  /_health:
+    get:
+      tags: [ops]
+      summary: Health probe (no auth required at mount level)
+      operationId: health
+      security: []
+      responses:
+        '200':
+          description: Engine surface counts
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  wave: { type: integer, example: 42 }
+                  planTypes: { type: integer, example: 8 }
+                  statuses: { type: integer, example: 13 }
+                  transitions: { type: integer, example: 13 }
+                  hardRules: { type: integer, example: 12 }
+                  softRules: { type: integer, example: 5 }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    PlanVersionId:
+      in: path
+      name: id
+      required: true
+      description: Plan version Mongo ObjectId
+      schema: { type: string, pattern: '^[a-f0-9]{24}$' }
+
+  responses:
+    Unauthorized:
+      description: ACTOR_REQUIRED
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Forbidden:
+      description: PERMISSION_DENIED
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Conflict:
+      description: State machine conflict
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    PlanNotFound:
+      description: PLAN_NOT_FOUND
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        success: { type: boolean, default: false }
+        message: { type: string }
+        reason: { type: string }
+        requiredPermission: { type: string, nullable: true }
+
+    CreateDraftRequest:
+      type: object
+      required: [planId, planType, beneficiaryId, branchId]
+      properties:
+        planId: { type: string }
+        planType:
+          type: string
+          enum: [individual_therapy, individual_education, behavioral, family_support, group, multidisciplinary, review, intensive]
+        specialty: { type: string, nullable: true }
+        beneficiaryId: { type: string }
+        branchId: { type: string }
+        reasonForPlan:
+          type: string
+          enum: [initial, revision, post_incident, annual_review, discharge_prep]
+          default: initial
+        baselineSummary: { type: object }
+        goals: { type: array, items: { $ref: '#/components/schemas/Goal' } }
+        programs: { type: array, items: { $ref: '#/components/schemas/Program' } }
+        measures: { type: array, items: { type: object } }
+        tests: { type: array, items: { type: object } }
+        supportServices: { type: array, items: { type: object } }
+        familyRole: { type: object }
+        barriers: { type: array, items: { type: object } }
+        safetyFlags: { type: array, items: { type: object } }
+        sessionsPerWeekCap: { type: integer, default: 5 }
+        reviewSchedule: { type: object }
+        correlationId: { type: string, nullable: true }
+        metadata: { type: object }
+
+    Goal:
+      type: object
+      required: [goalId, domain, statement, priorityScore]
+      properties:
+        goalId: { type: string }
+        domain: { type: string }
+        statement: { type: string }
+        priorityScore: { type: number, minimum: 0, maximum: 1 }
+        targetValue: { type: string, nullable: true }
+        targetUnit: { type: string, nullable: true }
+        targetHorizonWeeks: { type: integer, minimum: 1, maximum: 104 }
+        baselineLink: { type: string, nullable: true }
+        assessmentLink: { type: string, nullable: true }
+        measureLink: { type: string, nullable: true }
+        evidenceRefs:
+          type: array
+          items:
+            type: object
+            properties:
+              kind: { type: string, enum: [assessment, baseline, note, measure, incident, family_note] }
+              refId: { type: string }
+              capturedAt: { type: string, format: date-time }
+        confidence: { type: number, minimum: 0, maximum: 1, nullable: true }
+        successCriterion: { type: string, nullable: true }
+
+    Program:
+      type: object
+      required: [programId, frequencyPerWeek, durationMin, goalRefs]
+      properties:
+        programId: { type: string }
+        name: { type: string }
+        modality: { type: string }
+        frequencyPerWeek: { type: number, minimum: 0, maximum: 14 }
+        durationMin: { type: integer, minimum: 5, maximum: 240 }
+        goalRefs: { type: array, items: { type: string } }
+
+    PlanVersionEnvelope:
+      type: object
+      properties:
+        success: { type: boolean, default: true }
+        data:
+          type: object
+          properties:
+            ok: { type: boolean }
+            planVersion: { type: object }
+
+    ValidationSnapshot:
+      type: object
+      properties:
+        readinessScore: { type: number, minimum: 0, maximum: 100 }
+        band: { type: string, enum: [ready, pending, draft_only] }
+        hardFailures: { type: array, items: { type: object } }
+        softWarnings: { type: array, items: { type: object } }
+        blocking: { type: boolean }
+        verdict: { type: string, enum: [ready_for_submission, needs_revision, draft_only] }
+
+    TransitionRequest:
+      type: object
+      required: [transitionId]
+      properties:
+        transitionId:
+          type: string
+          enum:
+            - submit_for_validation
+            - mark_ready
+            - submit_to_supervisor
+            - begin_review
+            - request_revision
+            - resubmit_after_revision
+            - escalate
+            - approve
+            - reject
+            - archive_rejected
+            - save_to_record
+            - notify_family
+            - supersede
+        nafathSignatureId: { type: string, nullable: true }
+        metadata: { type: object }
+
+    Scorecard:
+      type: object
+      properties:
+        quality: { type: number, minimum: 0, maximum: 10 }
+        compliance: { type: number, minimum: 0, maximum: 10 }
+        clarity: { type: number, minimum: 0, maximum: 10 }
+        measurability: { type: number, minimum: 0, maximum: 10 }
+        familyReadiness: { type: number, minimum: 0, maximum: 10 }
+        safety: { type: number, minimum: 0, maximum: 10 }
+
+    RejectionDetails:
+      type: object
+      required: [primaryReason]
+      properties:
+        primaryReason:
+          type: string
+          enum: [evidence_gap, unclear_goal, weak_baseline, missing_program_logic, missing_measure, missing_family_role, safety_concern, scope_misalignment]
+        requiredFixes:
+          type: array
+          items:
+            type: object
+            properties:
+              elementId: { type: string, nullable: true }
+              fix: { type: string }
+              priority: { type: integer, minimum: 1, maximum: 3 }
+              severity: { type: string, enum: [must_fix, nice_to_fix] }
+        rewriteGuidance: { type: string }
+        urgency:
+          type: string
+          enum: [immediate, within_3_days, within_7_days]
+          default: within_7_days
+
+    AmendmentRequest:
+      type: object
+      required: [field, reason]
+      properties:
+        field:
+          type: string
+          description: |
+            Non-structural field only. Structural fields (goals, programs,
+            measures, tests, safetyFlags, supportServices, status,
+            evidenceHash, signatureChain, authorId, reviewerId, approverId)
+            are forbidden — use createNewVersion instead.
+        before: { type: object, nullable: true }
+        after: { type: object, nullable: true }
+        reason: { type: string, minLength: 5 }
+
+    InputBundle:
+      type: object
+      description: Sanitised inputs for the recommendation prompt builder
+      properties:
+        beneficiary: { type: object }
+        assessments: { type: array, items: { type: object } }
+        baselines: { type: array, items: { type: object } }
+        previousPlan: { type: object, nullable: true }
+        progressHistory: { type: array, items: { type: object } }
+        transportRisk: { type: object, nullable: true }
+        familyNotes: { type: array, items: { type: string } }
+        teacherNotes: { type: array, items: { type: string } }
+        therapistNotes: { type: array, items: { type: string } }
+        supportServices: { type: object }
+        branchContext: { type: object }
+        safetyFlags: { type: array, items: { type: string } }
+        constraints: { type: object }
+
+    GoalSignal:
+      type: object
+      properties:
+        goalId: { type: string }
+        measureSeries:
+          type: array
+          items:
+            type: object
+            properties:
+              date: { type: string, format: date-time }
+              value: { type: number }
+              source: { type: string }
+        attendance: { type: number, minimum: 0, maximum: 1 }
+        safetyEventLinked: { type: boolean }
+        targetValue: { type: number }
+        successCriterion: { type: string }
+
+    ProgressReview:
+      type: object
+      properties:
+        perGoal:
+          type: array
+          items:
+            type: object
+            properties:
+              goalId: { type: string }
+              verdict: { type: string, enum: [continue, revise, close, escalate] }
+              trend: { type: string, enum: [improving, plateau, regressing, insufficient_data] }
+              plateauWeeks: { type: number }
+              regressionWeeks: { type: number }
+        holisticVerdict:
+          type: string
+          enum: [continue_plan, revise_plan, new_plan, discharge_readiness]
+        triggers:
+          type: array
+          items:
+            type: object
+            properties:
+              kind: { type: string }
+              goalId: { type: string, nullable: true }
+              action: { type: string }
+        dischargeReadiness: { type: object }
+        nextReviewDate: { type: string, format: date-time }
+
+    ReportOutput:
+      type: object
+      properties:
+        ok: { type: boolean }
+        kind: { type: string }
+        markdown: { type: string }
+        plainText: { type: string }
+        warnings: { type: array, items: { type: object } }
+        generatedAt: { type: string, format: date-time }
+
+    FamilyVersionOutput:
+      type: object
+      properties:
+        success: { type: boolean }
+        data:
+          type: object
+          properties:
+            markdown: { type: string }
+            readability:
+              type: object
+              properties:
+                grade: { type: integer, maximum: 6 }
+                wordCount: { type: integer }
+                confidence: { type: string, enum: [low, medium, high] }
+            redactedFields: { type: array, items: { type: string } }
+            persisted: { type: boolean }
+
+    GroupPlanBuildRequest:
+      type: object
+      required: [candidates, sharedGoals, groupProgramId]
+      properties:
+        identity: { type: object }
+        targetCohort:
+          type: object
+          properties:
+            ageRange: { type: array, items: { type: integer }, minItems: 2, maxItems: 2 }
+            diagnosisFilters: { type: array, items: { type: string } }
+            skillLevelRange: { type: array, items: { type: integer } }
+            safetyExclusions: { type: array, items: { type: string } }
+        candidates:
+          type: array
+          minItems: 3
+          items:
+            type: object
+            properties:
+              beneficiaryId: { type: string }
+              age: { type: integer }
+              diagnosis: { type: string }
+              skillLevel: { type: integer }
+              safetyFlags: { type: array, items: { type: string } }
+              individualPlanRef: { type: string }
+        sharedGoals: { type: array, items: { type: object } }
+        groupProgramId: { type: string }
+        staffPool: { type: array, items: { type: object } }
+        options: { type: object }
+
+    AuditTrail:
+      type: object
+      properties:
+        ok: { type: boolean }
+        planVersionId: { type: string }
+        planId: { type: string }
+        versionNumber: { type: integer }
+        status: { type: string }
+        events:
+          type: array
+          items:
+            type: object
+            properties:
+              at: { type: string, format: date-time }
+              kind: { type: string }
+              actorUserId: { type: string, nullable: true }
+              actorRole: { type: string }
+              detail: { type: object }
+        counts:
+          type: object
+          properties:
+            transitions: { type: integer }
+            signatures: { type: integer }
+            amendments: { type: integer }
+            familySends: { type: integer }
+            rejections: { type: integer }
+        integrity:
+          type: object
+          properties:
+            signatureChainOk: { type: boolean }
+            brokenAt: { type: integer, nullable: true }
+            evidenceHash: { type: string, nullable: true }
+            reason: { type: string }
+        redactFor: { type: string, enum: [clinical, executive, family] }

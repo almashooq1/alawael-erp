@@ -1,0 +1,319 @@
+asyncapi: 3.0.0
+info:
+  title: Care Planning Engine Events
+  version: 1.0.0
+  description: |
+    Event catalog emitted by the Care Planning Engine (Waves 41–50).
+
+    Two transport classes:
+
+      1. Internal notifier bus    — every workflow transition + worker outcome
+      2. AnchorLedger commits     — HIGH-sensitivity transitions only
+
+    Every notifier event carries a `dedupeKey` to prevent duplicate
+    delivery when retrying. Format: `<event>.<planVersionId>`.
+
+defaultContentType: application/json
+
+servers:
+  notifier:
+    host: internal
+    protocol: in-process
+    description: Unified Notifier (Wave 11–16 alert engine integration)
+  anchor:
+    host: internal
+    protocol: in-process
+    description: AnchorLedger tamper-evident commit log
+
+channels:
+  # ─── Lifecycle transitions ─────────────────────────────────────
+  care-plan.draft.created:
+    address: care-plan.draft.created
+    messages:
+      created: { $ref: '#/components/messages/PlanTransitionEvent' }
+
+  care-plan.submit-for-validation:
+    address: care-plan.submit-for-validation
+    messages:
+      submitted: { $ref: '#/components/messages/PlanTransitionEvent' }
+
+  care-plan.mark-ready:
+    address: care-plan.mark-ready
+    messages:
+      readied: { $ref: '#/components/messages/PlanTransitionEvent' }
+
+  care-plan.submit-to-supervisor:
+    address: care-plan.submit-to-supervisor
+    messages:
+      submitted: { $ref: '#/components/messages/PlanTransitionEvent' }
+
+  care-plan.begin-review:
+    address: care-plan.begin-review
+    messages:
+      began: { $ref: '#/components/messages/PlanTransitionEvent' }
+
+  care-plan.request-revision:
+    address: care-plan.request-revision
+    messages:
+      requested: { $ref: '#/components/messages/PlanTransitionEvent' }
+
+  care-plan.resubmit:
+    address: care-plan.resubmit
+    messages:
+      resubmitted: { $ref: '#/components/messages/PlanTransitionEvent' }
+
+  care-plan.escalate:
+    address: care-plan.escalate
+    messages:
+      escalated: { $ref: '#/components/messages/EscalationEvent' }
+    description: HIGH-sensitivity — commits to AnchorLedger
+
+  care-plan.approve:
+    address: care-plan.approve
+    messages:
+      approved: { $ref: '#/components/messages/ApprovalEvent' }
+    description: HIGH-sensitivity — commits to AnchorLedger + evidenceHash sealed
+
+  care-plan.reject:
+    address: care-plan.reject
+    messages:
+      rejected: { $ref: '#/components/messages/RejectionEvent' }
+    description: HIGH-sensitivity — commits to AnchorLedger
+
+  care-plan.rejected.repeated:
+    address: care-plan.rejected.repeated
+    messages:
+      repeatedRejection: { $ref: '#/components/messages/RepeatedRejectionEvent' }
+    description: Emitted when rejectionCount reaches 3 — notifies branch_manager
+
+  care-plan.archive:
+    address: care-plan.archive
+    messages:
+      archived: { $ref: '#/components/messages/PlanTransitionEvent' }
+
+  care-plan.save-to-record:
+    address: care-plan.save-to-record
+    messages:
+      saved: { $ref: '#/components/messages/PlanTransitionEvent' }
+
+  care-plan.notify-family:
+    address: care-plan.notify-family
+    messages:
+      notified: { $ref: '#/components/messages/FamilyNotificationEvent' }
+
+  care-plan.supersede:
+    address: care-plan.supersede
+    messages:
+      superseded: { $ref: '#/components/messages/SupersedeEvent' }
+    description: HIGH-sensitivity — commits to AnchorLedger
+
+  # ─── Workers ────────────────────────────────────────────────────
+  care-plan.review.overdue:
+    address: care-plan.review.overdue
+    messages:
+      overdue: { $ref: '#/components/messages/OverdueReviewEvent' }
+    description: 3 severity tiers (info / warning / critical) per spec §22
+
+  care-plan.plateau-detector.action_required:
+    address: care-plan.plateau-detector.action_required
+    messages:
+      plateau: { $ref: '#/components/messages/PlateauDetectedEvent' }
+
+operations:
+  # Lifecycle senders (the service is the producer)
+  publishDraftCreated:
+    action: send
+    channel: { $ref: '#/channels/care-plan.draft.created' }
+  publishApproved:
+    action: send
+    channel: { $ref: '#/channels/care-plan.approve' }
+  publishRejected:
+    action: send
+    channel: { $ref: '#/channels/care-plan.reject' }
+  publishRepeatedRejection:
+    action: send
+    channel: { $ref: '#/channels/care-plan.rejected.repeated' }
+  publishEscalated:
+    action: send
+    channel: { $ref: '#/channels/care-plan.escalate' }
+  publishFamilyNotified:
+    action: send
+    channel: { $ref: '#/channels/care-plan.notify-family' }
+  publishSaveToRecord:
+    action: send
+    channel: { $ref: '#/channels/care-plan.save-to-record' }
+  publishSuperseded:
+    action: send
+    channel: { $ref: '#/channels/care-plan.supersede' }
+  publishOverdueReview:
+    action: send
+    channel: { $ref: '#/channels/care-plan.review.overdue' }
+  publishPlateauDetected:
+    action: send
+    channel: { $ref: '#/channels/care-plan.plateau-detector.action_required' }
+
+components:
+  messages:
+    PlanTransitionEvent:
+      name: PlanTransitionEvent
+      title: Generic plan-version transition event
+      payload:
+        type: object
+        required: [planVersionId, fromStatus, toStatus, dedupeKey]
+        properties:
+          planVersionId: { type: string }
+          planId: { type: string }
+          versionNumber: { type: integer }
+          fromStatus: { type: string }
+          toStatus: { type: string }
+          actor:
+            type: object
+            properties:
+              userId: { type: string }
+              role: { type: string }
+          dedupeKey: { type: string }
+          anchorTxId: { type: string, nullable: true }
+          at: { type: string, format: date-time }
+
+    ApprovalEvent:
+      name: ApprovalEvent
+      title: Plan approved — evidenceHash sealed
+      payload:
+        type: object
+        required: [planVersionId, evidenceHash, dedupeKey]
+        properties:
+          planVersionId: { type: string }
+          planId: { type: string }
+          versionNumber: { type: integer }
+          planType: { type: string }
+          approvedAt: { type: string, format: date-time }
+          evidenceHash: { type: string, pattern: '^[a-f0-9]{64}$' }
+          reviewOverall: { type: number, minimum: 0, maximum: 10 }
+          anchorTxId: { type: string, nullable: true }
+          dedupeKey: { type: string }
+
+    RejectionEvent:
+      name: RejectionEvent
+      title: Plan rejected — structured fixes attached
+      payload:
+        type: object
+        required: [planVersionId, primaryReason, dedupeKey]
+        properties:
+          planVersionId: { type: string }
+          planId: { type: string }
+          primaryReason:
+            type: string
+            enum:
+              - evidence_gap
+              - unclear_goal
+              - weak_baseline
+              - missing_program_logic
+              - missing_measure
+              - missing_family_role
+              - safety_concern
+              - scope_misalignment
+          rejectionCount: { type: integer, minimum: 1 }
+          requiredFixesCount: { type: integer }
+          urgency: { type: string, enum: [immediate, within_3_days, within_7_days] }
+          dedupeKey: { type: string }
+
+    RepeatedRejectionEvent:
+      name: RepeatedRejectionEvent
+      title: Plan rejected ≥ 3 times — informational escalation to branch_manager
+      payload:
+        type: object
+        required: [planVersionId, rejectionCount, dedupeKey]
+        properties:
+          planVersionId: { type: string }
+          planId: { type: string }
+          rejectionCount: { type: integer, minimum: 3 }
+          dedupeKey: { type: string }
+
+    EscalationEvent:
+      name: EscalationEvent
+      title: Plan escalated to branch_manager
+      payload:
+        type: object
+        required: [planVersionId, planType, dedupeKey]
+        properties:
+          planVersionId: { type: string }
+          planType: { type: string }
+          escalationReason:
+            type: string
+            enum: [plan_type_requires_escalation, rejection_count_threshold, critical_safety_flag, manual_escalation]
+          reviewScore: { type: number, nullable: true }
+          rejectionCount: { type: integer }
+          dedupeKey: { type: string }
+
+    FamilyNotificationEvent:
+      name: FamilyNotificationEvent
+      title: Family-version dispatch attempt
+      payload:
+        type: object
+        required: [planVersionId, channel, outcome, dedupeKey]
+        properties:
+          planVersionId: { type: string }
+          channel: { type: string, enum: [email, sms, whatsapp, portal, manual] }
+          outcome: { type: string, enum: [sent, failed, manual_override] }
+          attempt: { type: integer, minimum: 0 }
+          retries: { type: integer }
+          nextRetryAtOffsetMs: { type: integer, nullable: true }
+          failureReason: { type: string, nullable: true }
+          dedupeKey: { type: string }
+
+    SupersedeEvent:
+      name: SupersedeEvent
+      title: Plan version superseded by newer version
+      payload:
+        type: object
+        required: [planVersionId, supersededBy, dedupeKey]
+        properties:
+          planVersionId: { type: string }
+          planId: { type: string }
+          versionNumber: { type: integer }
+          supersededBy: { type: string }
+          dedupeKey: { type: string }
+
+    OverdueReviewEvent:
+      name: OverdueReviewEvent
+      title: Plan review past its due date
+      payload:
+        type: object
+        required: [planVersionId, severity, daysOverdue, dedupeKey]
+        properties:
+          planVersionId: { type: string }
+          planId: { type: string }
+          severity:
+            type: string
+            enum: [info, warning, critical]
+            description: |
+              info     — 0-1 days overdue
+              warning  — 2-13 days overdue
+              critical — 14+ days overdue (paged to branch_manager + SMS)
+          daysOverdue: { type: integer }
+          nextReviewAt: { type: string, format: date-time }
+          dedupeKey: { type: string }
+
+    PlateauDetectedEvent:
+      name: PlateauDetectedEvent
+      title: Plateau / regression detected by periodic scheduler
+      payload:
+        type: object
+        required: [planVersionId, holisticVerdict, dedupeKey]
+        properties:
+          planVersionId: { type: string }
+          planId: { type: string }
+          holisticVerdict:
+            type: string
+            enum: [continue_plan, revise_plan, new_plan, discharge_readiness]
+          triggerCount: { type: integer }
+          atRiskGoalCount: { type: integer }
+          dischargeReady: { type: boolean }
+          dedupeKey: { type: string }
+
+  schemas:
+    Actor:
+      type: object
+      properties:
+        userId: { type: string }
+        role: { type: string }

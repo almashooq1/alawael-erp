@@ -1,0 +1,193 @@
+groups:
+  - name: care-plan-engine
+    interval: 30s
+    rules:
+
+      # ─── Approval / Rejection signals ──────────────────────────
+      - alert: CarePlanHighRejectionRate
+        expr: |
+          sum(rate(care_plan_rejections_total[1h])) /
+          clamp_min(sum(rate(care_plan_transitions_total{transition="approve"}[1h]))
+                  + sum(rate(care_plan_rejections_total[1h])), 1)
+          > 0.20
+        for: 15m
+        labels:
+          severity: warning
+          team: clinical-operations
+          component: care-plan
+        annotations:
+          summary: "More than 20% of plan reviews are ending in rejection over the past hour"
+          description: |
+            Rejection rate exceeds 20% (rejections / (rejections + approvals)) for 15 minutes.
+            This usually indicates author-side training gap or library mismatch — investigate
+            top primary_reason via the dashboard and consider scheduling a clinical review session.
+          runbook_url: docs/blueprint/19-care-planning-engine.md#high-rejection-rate
+
+      - alert: CarePlanRepeatedRejectionSpike
+        expr: |
+          sum(rate(care_plan_rejections_total{primary_reason="missing_program_logic"}[6h])) > 0.05
+        for: 30m
+        labels:
+          severity: warning
+          team: clinical-operations
+          component: care-plan
+        annotations:
+          summary: "Sustained 'missing_program_logic' rejections — likely library/age mismatch"
+          description: |
+            Authors are repeatedly selecting programs outside their age band or contraindicated.
+            Action: review programs library usage. Consider mandatory `lib.recommendPrograms`
+            helper in author UI.
+
+      # ─── Family-send health ────────────────────────────────────
+      - alert: CarePlanFamilySendFailureSpike
+        expr: |
+          sum(rate(care_plan_family_send_total{outcome="failed"}[15m])) /
+          clamp_min(sum(rate(care_plan_family_send_total[15m])), 1)
+          > 0.10
+        for: 10m
+        labels:
+          severity: warning
+          team: integration
+          component: care-plan-family
+        annotations:
+          summary: "Family-send failure rate exceeds 10%"
+          description: |
+            Family notifications are failing dispatch (timeout / rejected / no_route).
+            Check channel client health (WhatsApp / SMS / Email). Retry worker will
+            backoff (5m → 30m → 3h); after 3 attempts entries are marked
+            `manual_override`.
+
+      - alert: CarePlanFamilyRetryBacklog
+        expr: care_plan_family_send_pending_retries > 100
+        for: 30m
+        labels:
+          severity: warning
+          team: integration
+          component: care-plan-family
+        annotations:
+          summary: "Family-send retry queue exceeds 100 entries"
+          description: |
+            Retry worker is not draining the backlog. Check the worker schedule
+            (should run every 5 minutes) and the underlying channel client.
+
+      # ─── Overdue reviews ───────────────────────────────────────
+      - alert: CarePlanCriticalOverdueReviews
+        expr: sum(rate(care_plan_overdue_review_total{severity="critical"}[1h])) > 0
+        for: 1h
+        labels:
+          severity: critical
+          team: clinical-operations
+          component: care-plan
+        annotations:
+          summary: "{{ $value }} plans have a critically-overdue review (≥14 days past due)"
+          description: |
+            Branch managers should be receiving SMS notifications. If they aren't,
+            check the unifiedNotifier SMS provider and the resolveAudienceForRole helper.
+
+      - alert: CarePlanOverdueReviewVolumeRising
+        expr: |
+          sum(increase(care_plan_overdue_review_total[24h])) /
+          clamp_min(sum(care_plan_active_plans), 1)
+          > 0.10
+        for: 1h
+        labels:
+          severity: warning
+          team: clinical-operations
+          component: care-plan
+        annotations:
+          summary: "More than 10% of active plans are overdue"
+          description: |
+            The therapist / supervisor cohort is falling behind on reviews.
+            Consider re-balancing workload or reducing cadenceWeeks across the
+            board temporarily.
+
+      # ─── Quality signals ───────────────────────────────────────
+      - alert: CarePlanReadinessScoreDegraded
+        expr: |
+          histogram_quantile(0.50, sum by (le) (rate(care_plan_readiness_score_bucket[30m]))) < 70
+        for: 30m
+        labels:
+          severity: warning
+          team: clinical-operations
+          component: care-plan
+        annotations:
+          summary: "Median readiness score below 70 — authors submitting incomplete plans"
+          description: |
+            More than half of plans in the last 30 minutes scored below 70/100 in the
+            validation pass. Indicates authors skipping baseline/measure linkage or
+            SMART criteria. Schedule a refresher.
+
+      - alert: CarePlanReviewScoreDegraded
+        expr: |
+          histogram_quantile(0.50, sum by (le) (rate(care_plan_review_overall_bucket[1h]))) < 7
+        for: 1h
+        labels:
+          severity: warning
+          team: clinical-operations
+          component: care-plan
+        annotations:
+          summary: "Median supervisor scorecard below 7.0 (approval threshold)"
+          description: |
+            Supervisors are scoring plans below the approval threshold consistently.
+            Combined with high rejection rate, this signals systemic quality drift.
+
+      # ─── Plateau & progress signals ────────────────────────────
+      - alert: CarePlanHighAtRiskGoalRate
+        expr: |
+          histogram_quantile(0.90, sum by (le) (rate(care_plan_goals_at_risk_bucket[6h]))) > 3
+        for: 6h
+        labels:
+          severity: warning
+          team: clinical-operations
+          component: care-plan
+        annotations:
+          summary: "p90 of at-risk goals per plateau review exceeds 3"
+          description: |
+            Across plateau-review cycles, 10% of plans have ≥ 3 goals at risk.
+            Could indicate population shift or program drift; recommend cohort
+            audit.
+
+      - alert: CarePlanPlateauDetectorIdle
+        expr: |
+          sum(rate(care_plan_plateau_outcome_total[24h])) == 0
+        for: 25h
+        labels:
+          severity: info
+          team: integration
+          component: care-plan-workers
+        annotations:
+          summary: "Plateau detector hasn't emitted any verdict in 24h"
+          description: |
+            Either no approved plans (check active_plans gauge) or the worker
+            scheduler isn't firing. Verify the cron job for plateau-detector.
+
+      # ─── Engine liveness ──────────────────────────────────────
+      - alert: CarePlanEngineNoTransitions
+        expr: sum(rate(care_plan_transitions_total[1h])) == 0
+        for: 1h
+        labels:
+          severity: critical
+          team: integration
+          component: care-plan
+        annotations:
+          summary: "No care-plan transitions recorded in the last hour"
+          description: |
+            The engine is either deployed without traffic, or the metrics
+            recorder is broken. Verify `/api/v1/care-plans/_health` returns 200
+            and traffic is reaching the service.
+
+      - alert: CarePlanEscalationSpike
+        expr: |
+          sum(rate(care_plan_escalations_total[1h])) > 0.05
+        for: 30m
+        labels:
+          severity: warning
+          team: clinical-operations
+          component: care-plan
+        annotations:
+          summary: "Escalation rate above 0.05/s for 30 minutes"
+          description: |
+            Sustained escalations to branch_manager. Inspect trigger_kind:
+              - plan_type:        change in intake mix (more intensive cases)
+              - rejection_count:  authors looping on the same plan
+              - manual:           supervisor judgement call

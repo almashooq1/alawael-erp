@@ -1,0 +1,286 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "Care Planning Engine — production observability (Waves 41–50). 12 panels covering transition flow, approval/rejection rates, family-send health, plateau detection, and SLA-breach signals.",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "title": "Transitions per second (by type)",
+      "type": "timeseries",
+      "datasource": "Prometheus",
+      "id": 1,
+      "gridPos": { "h": 7, "w": 12, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum by (transition) (rate(care_plan_transitions_total[5m]))",
+          "legendFormat": "{{transition}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "ops", "custom": { "drawStyle": "line", "lineInterpolation": "smooth", "fillOpacity": 10 } },
+        "overrides": []
+      }
+    },
+    {
+      "title": "Approval rate (last 24h) by plan type",
+      "type": "barchart",
+      "datasource": "Prometheus",
+      "id": 2,
+      "gridPos": { "h": 7, "w": 12, "x": 12, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum by (plan_type) (increase(care_plan_approvals_total[24h]))",
+          "legendFormat": "{{plan_type}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "title": "Rejection rate by primary reason (rolling 1h)",
+      "type": "timeseries",
+      "datasource": "Prometheus",
+      "id": 3,
+      "gridPos": { "h": 7, "w": 12, "x": 0, "y": 7 },
+      "targets": [
+        {
+          "expr": "sum by (primary_reason) (rate(care_plan_rejections_total[1h]))",
+          "legendFormat": "{{primary_reason}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "title": "Escalations by trigger (cumulative 24h)",
+      "type": "piechart",
+      "datasource": "Prometheus",
+      "id": 4,
+      "gridPos": { "h": 7, "w": 12, "x": 12, "y": 7 },
+      "targets": [
+        {
+          "expr": "sum by (trigger_kind) (increase(care_plan_escalations_total[24h]))",
+          "legendFormat": "{{trigger_kind}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "title": "Readiness score distribution",
+      "type": "heatmap",
+      "datasource": "Prometheus",
+      "id": 5,
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 14 },
+      "targets": [
+        {
+          "expr": "sum by (le) (rate(care_plan_readiness_score_bucket[10m]))",
+          "format": "heatmap",
+          "legendFormat": "{{le}}",
+          "refId": "A"
+        }
+      ],
+      "options": { "calculate": false, "yAxis": { "unit": "short" } }
+    },
+    {
+      "title": "Supervisor scorecard overall (p50 / p90 / p99)",
+      "type": "timeseries",
+      "datasource": "Prometheus",
+      "id": 6,
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 14 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.50, sum by (le) (rate(care_plan_review_overall_bucket[10m])))",
+          "legendFormat": "p50",
+          "refId": "A"
+        },
+        {
+          "expr": "histogram_quantile(0.90, sum by (le) (rate(care_plan_review_overall_bucket[10m])))",
+          "legendFormat": "p90",
+          "refId": "B"
+        },
+        {
+          "expr": "histogram_quantile(0.99, sum by (le) (rate(care_plan_review_overall_bucket[10m])))",
+          "legendFormat": "p99",
+          "refId": "C"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "min": 0,
+          "max": 10,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "value": null, "color": "red" },
+              { "value": 7, "color": "green" }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "title": "Family send success rate",
+      "type": "stat",
+      "datasource": "Prometheus",
+      "id": 7,
+      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 22 },
+      "targets": [
+        {
+          "expr": "sum(rate(care_plan_family_send_total{outcome=\"sent\"}[15m])) / sum(rate(care_plan_family_send_total[15m]))",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "value": null, "color": "red" },
+              { "value": 0.85, "color": "yellow" },
+              { "value": 0.95, "color": "green" }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "title": "Pending family-send retries",
+      "type": "stat",
+      "datasource": "Prometheus",
+      "id": 8,
+      "gridPos": { "h": 6, "w": 6, "x": 6, "y": 22 },
+      "targets": [
+        {
+          "expr": "care_plan_family_send_pending_retries",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "value": null, "color": "green" },
+              { "value": 50, "color": "yellow" },
+              { "value": 100, "color": "red" }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "title": "Days to approval (p50 / p90)",
+      "type": "timeseries",
+      "datasource": "Prometheus",
+      "id": 9,
+      "gridPos": { "h": 6, "w": 12, "x": 12, "y": 22 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.50, sum by (le) (rate(care_plan_days_to_approval_bucket[1h])))",
+          "legendFormat": "p50",
+          "refId": "A"
+        },
+        {
+          "expr": "histogram_quantile(0.90, sum by (le) (rate(care_plan_days_to_approval_bucket[1h])))",
+          "legendFormat": "p90",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "d", "min": 0 }
+      }
+    },
+    {
+      "title": "Overdue reviews by severity",
+      "type": "timeseries",
+      "datasource": "Prometheus",
+      "id": 10,
+      "gridPos": { "h": 7, "w": 12, "x": 0, "y": 28 },
+      "targets": [
+        {
+          "expr": "sum by (severity) (rate(care_plan_overdue_review_total[15m]))",
+          "legendFormat": "{{severity}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "ops" },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "critical" },
+            "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "red" } }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "warning" },
+            "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "orange" } }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "info" },
+            "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "blue" } }]
+          }
+        ]
+      }
+    },
+    {
+      "title": "Plateau detector outcomes (15m rate)",
+      "type": "timeseries",
+      "datasource": "Prometheus",
+      "id": 11,
+      "gridPos": { "h": 7, "w": 12, "x": 12, "y": 28 },
+      "targets": [
+        {
+          "expr": "sum by (holistic_verdict) (rate(care_plan_plateau_outcome_total[15m]))",
+          "legendFormat": "{{holistic_verdict}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "title": "Active plans by status",
+      "type": "stat",
+      "datasource": "Prometheus",
+      "id": 12,
+      "gridPos": { "h": 7, "w": 24, "x": 0, "y": 35 },
+      "targets": [
+        {
+          "expr": "care_plan_active_plans",
+          "legendFormat": "{{status}}",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "orientation": "horizontal",
+        "textMode": "value_and_name"
+      }
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["care-plan", "rehab", "engine"],
+  "templating": { "list": [] },
+  "time": { "from": "now-6h", "to": "now" },
+  "timepicker": {},
+  "timezone": "Asia/Riyadh",
+  "title": "Care Planning Engine — Production",
+  "uid": "care-plan-engine",
+  "version": 1,
+  "weekStart": ""
+}

@@ -1555,6 +1555,26 @@ try {
   logger.warn('[DataQuality] routes skipped:', dqErr.message);
 }
 
+// ─── Role-Based Decision Support (Wave 23) ───────────────────────────────────
+// Always-on. Resolves the current user's role → role group → decision-support
+// profile (goals, KPIs, alerts, quick actions, restricted data, density,
+// landing). The UI uses /me/dashboard at login to know where to land + what
+// to render.
+try {
+  const { createRoleProfilesService } = require('./intelligence/role-profiles.service');
+  const { createRoleProfilesRouter } = require('./routes/role-profiles.routes');
+  const roleProfilesSvc = createRoleProfilesService({ logger });
+  const { authenticate: rpAuthMw } = require('./middleware/auth');
+  app.use(
+    '/api/v1/role-profiles',
+    rpAuthMw,
+    createRoleProfilesRouter({ roleProfiles: roleProfilesSvc, logger })
+  );
+  logger.info('[RoleProfiles] ✓ role-profiles routes mounted at /api/v1/role-profiles');
+} catch (rpErr) {
+  logger.warn('[RoleProfiles] routes skipped:', rpErr.message);
+}
+
 // ─── Therapist Portal ─────────────────────────────────────────────────────────
 try {
   app.use('/api/v1/therapist', require('./routes/therapist-portal.routes'));

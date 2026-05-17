@@ -1537,6 +1537,24 @@ try {
   logger.warn('[Drilldown] routes skipped:', drillErr.message);
 }
 
+// ─── Data Trust & Quality Layer (Wave 22) ────────────────────────────────────
+// Always-on. Read-mostly: GET endpoints + POST compute (caller supplies
+// snapshot in the body — no Mongo work in the route layer).
+try {
+  const { createDataQualityService } = require('./intelligence/data-quality.service');
+  const { createDataQualityRouter } = require('./routes/data-quality.routes');
+  const dqService = createDataQualityService({ logger });
+  const { authenticate: dqAuthMw } = require('./middleware/auth');
+  app.use(
+    '/api/v1/data-quality',
+    dqAuthMw,
+    createDataQualityRouter({ dataQuality: dqService, logger })
+  );
+  logger.info('[DataQuality] ✓ data-quality routes mounted at /api/v1/data-quality');
+} catch (dqErr) {
+  logger.warn('[DataQuality] routes skipped:', dqErr.message);
+}
+
 // ─── Therapist Portal ─────────────────────────────────────────────────────────
 try {
   app.use('/api/v1/therapist', require('./routes/therapist-portal.routes'));

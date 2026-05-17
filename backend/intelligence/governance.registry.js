@@ -197,6 +197,113 @@ const PERMISSIONS = Object.freeze({
     'quality_compliance',
     'executive_leadership',
   ],
+
+  // Wave 41 — Care Planning Phase 1 (registry + validator + service)
+  'care-plan.read': [
+    'therapist',
+    'teacher',
+    'clinical_supervisor',
+    'branch_manager',
+    'quality_compliance',
+    'executive_leadership',
+    'head_office',
+  ],
+  'care-plan.list': [
+    'therapist',
+    'teacher',
+    'clinical_supervisor',
+    'branch_manager',
+    'quality_compliance',
+    'executive_leadership',
+    'head_office',
+  ],
+  'care-plan.draft.create': ['therapist', 'teacher'],
+  'care-plan.draft.edit-own': ['therapist', 'teacher'],
+  'care-plan.validation.run': ['therapist', 'teacher', 'clinical_supervisor'],
+  'care-plan.submit-to-supervisor': ['therapist', 'teacher'],
+  'care-plan.begin-review': ['clinical_supervisor'],
+  'care-plan.request-revision': ['clinical_supervisor', 'branch_manager'],
+  'care-plan.review.scorecard': ['clinical_supervisor', 'branch_manager'],
+  'care-plan.escalate': ['clinical_supervisor'],
+  'care-plan.approve': ['clinical_supervisor', 'branch_manager'],
+  'care-plan.reject': ['clinical_supervisor', 'branch_manager'],
+  'care-plan.archive': ['clinical_supervisor', 'branch_manager', 'quality_compliance'],
+  'care-plan.save-to-record': ['clinical_supervisor', 'branch_manager'],
+  'care-plan.notify-family': ['clinical_supervisor', 'branch_manager'],
+  'care-plan.supersede': ['branch_manager'],
+  'care-plan.amendment.apply': ['branch_manager'],
+  'care-plan.version.create': ['therapist', 'teacher'],
+  'care-plan.family-version.preview': [
+    'clinical_supervisor',
+    'branch_manager',
+    'therapist',
+    'teacher',
+  ],
+  'care-plan.audit-trail.read': [
+    'clinical_supervisor',
+    'branch_manager',
+    'quality_compliance',
+    'executive_leadership',
+  ],
+
+  // Wave 44 — Care Planning Phase 4 (Recommendations + Progress)
+  'care-plan.recommendation.preview': ['therapist', 'teacher', 'clinical_supervisor'],
+  'care-plan.recommendation.apply': ['therapist', 'teacher'],
+  'care-plan.progress-review.run': [
+    'therapist',
+    'teacher',
+    'clinical_supervisor',
+    'branch_manager',
+  ],
+  'care-plan.progress-review.read': [
+    'therapist',
+    'teacher',
+    'clinical_supervisor',
+    'branch_manager',
+    'quality_compliance',
+    'executive_leadership',
+  ],
+
+  // Wave 46 — Programs Library + Group Plans
+  'care-plan.programs-library.read': 'all-authenticated',
+  'care-plan.tests-library.read': 'all-authenticated',
+  'care-plan.group-plan.build': ['therapist', 'teacher', 'clinical_supervisor'],
+  'care-plan.group-plan.validate': [
+    'therapist',
+    'teacher',
+    'clinical_supervisor',
+    'branch_manager',
+  ],
+  'care-plan.group-plan.read': [
+    'therapist',
+    'teacher',
+    'clinical_supervisor',
+    'branch_manager',
+    'quality_compliance',
+    'executive_leadership',
+  ],
+
+  // Wave 47 — Report Generation
+  'care-plan.report.clinician_draft': ['therapist', 'teacher', 'clinical_supervisor'],
+  'care-plan.report.supervisor_review': ['clinical_supervisor', 'branch_manager'],
+  'care-plan.report.final_approved_plan': [
+    'clinical_supervisor',
+    'branch_manager',
+    'quality_compliance',
+    'executive_leadership',
+  ],
+  'care-plan.report.rejection': ['clinical_supervisor', 'branch_manager', 'therapist', 'teacher'],
+  'care-plan.report.monthly_progress': [
+    'therapist',
+    'teacher',
+    'clinical_supervisor',
+    'branch_manager',
+  ],
+  'care-plan.report.end_of_cycle_closure': [
+    'clinical_supervisor',
+    'branch_manager',
+    'quality_compliance',
+  ],
 });
 
 // ─── API ────────────────────────────────────────────────────────

@@ -8,6 +8,78 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [Unreleased] — 2026-05-17 — Care Planning Engine: Waves 41–60
+
+End-to-end build of the **Care Planning Intelligence & Governance Engine**
+— canonical chokepoint for creating, validating, approving, executing,
+monitoring, and amending individual + group care plans across Saudi
+rehab centers. **20 waves; 490/490 tests across 14 suites**; backend +
+frontend + docs + workers + metrics + alerts + seed all delivered.
+
+### Architecture
+
+Draft-first, evidence-bound, human-in-the-loop: AI proposes → validator
+gates → supervisor reviews + scores → approval seals `evidenceHash` +
+appends to hash-linked `signatureChain` → side-effects file the plan +
+dispatch a redacted family version → workers monitor for plateau /
+overdue / family-send failures + emit Insights or escalations. No AI
+output is final. No clinical detail leaks to the family. No plan
+modification escapes the audit trail.
+
+### Added — Backend (20 new files, +490 tests)
+
+| Wave | Surface                                                                      | Tests |
+| ---- | ---------------------------------------------------------------------------- | ----- |
+| 41   | Foundations — registry + model + validator + service + 44 governance codes   | 62    |
+| 42   | HTTP — 15 endpoints + REASON_TO_STATUS + TRANSITION_TO_PERMISSION            | 43    |
+| 43   | Family Communication — Arabic readability + PDPL-redacted generator          | 30    |
+| 44   | Recommendations + Progress — 11-layer LLM validator + deterministic reviewer | 53    |
+| 45   | Side Effects + Audit — 6 handlers + signature-chain integrity verifier       | 36    |
+| 46   | Programs Library + Group Plans — 10 programs + 8 tests + cohort builder      | 53    |
+| 47   | Report Generation — 6 internal report kinds                                  | 38    |
+| 48   | Explanation + Role Views + LLM Caller + Bootstrap composition root           | 31    |
+| 49   | Production Integration + 9 E2E tests against real Mongoose                   | 9     |
+| 50   | Workers + Metrics — family-retry / overdue / plateau + 15 Prom metrics       | 28    |
+| 51   | Documentation — OpenAPI 3.1 + AsyncAPI 3.0 + Grafana + alerts + runbook      | 26    |
+| 54   | List endpoint + branch-scope safety + 5-plan demo seed                       | 23    |
+| 60   | Edit drafts — `updateDraft` + 4 editable states + field whitelist            | 16    |
+
+### Added — Frontend (alawael-rehab-platform/apps/web-admin)
+
+| Wave | Page / component                                                               |
+| ---- | ------------------------------------------------------------------------------ |
+| 52   | Types + API client + list + new + detail (4-tab) pages                         |
+| 53   | BeneficiaryPicker component + library browser + reports viewer + sidebar entry |
+| 60   | Editable goals/programs/measures `/care-planning/[id]/edit`                    |
+
+Frontend: TypeScript `--noEmit` clean across all 7 pages.
+
+### Anti-patterns blocked at engine level
+
+- Self-approval (reviewer === author) — Wave 41 invariant + service guard
+- Approve below scorecard 7.0 — service `REVIEW_SCORE_TOO_LOW`
+- Approve with readinessScore < 85 — model invariant + service guard
+- Mutate approved version `goals` — amendment whitelist (non-structural only)
+- Notify family with grade > 6 — route guard + invariant
+- Notify family with ICD code in body — forbidden-term tripwire
+- Approve `intensive` without escalation — ALWAYS_ESCALATE_TYPES
+- Approve after 2 rejections — ESCALATE_AFTER_REJECTIONS
+- LLM proposal with unresolvable evidenceRef — Wave 44 post-validator
+- Bypass signatureChain integrity — Mongoose validator + audit-trail verifier
+- Family receives non-approved version — status-gated send
+- Plan with group program age-mismatch — `lib.matchEligibility()` in builder
+- Branch A user reading Branch B plans — service `listPlans` safety belt
+
+### Configuration
+
+Engine activates when `CarePlanVersion` model + governance load. Optional
+deps degrade gracefully — missing `ANTHROPIC_API_KEY` disables LLM caller
+without crashing boot. Workers scheduled by host (cron / queue / interval).
+
+See `docs/blueprint/19-care-planning-engine.md` for the canonical reference.
+
+---
+
 ## [Unreleased] — 2026-05-16 — ALAWAEL Command Center: 9-Wave Rollout
 
 End-to-end transformation of the platform from "feature-complete but

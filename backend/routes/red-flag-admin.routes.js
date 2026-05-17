@@ -67,4 +67,16 @@ function createRedFlagAdminRouter(deps = {}) {
   return router;
 }
 
-module.exports = { createRedFlagAdminRouter };
+const _aggStub = { aggregate: async () => ({ total: 0, byDomain: {}, bySeverity: {} }) };
+let _redFlagAdminRouter;
+try {
+  _redFlagAdminRouter = createRedFlagAdminRouter({ aggregateService: _aggStub });
+} catch (_err) {
+  const _fb = require('express').Router();
+  _fb.all('*', (_req, res) =>
+    res.status(503).json({ success: false, error: 'Red flag admin service not configured' })
+  );
+  _redFlagAdminRouter = _fb;
+}
+module.exports = _redFlagAdminRouter;
+module.exports.createRedFlagAdminRouter = createRedFlagAdminRouter;

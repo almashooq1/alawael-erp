@@ -18,6 +18,10 @@ const mongoose = require('mongoose');
 const _logger = require('../utils/logger');
 const { stripUpdateMeta } = require('../utils/sanitize');
 
+// Register BI-specific models so safeModel() can resolve them.
+require('../models/BIKPI');
+require('../models/BIReport');
+
 // ── Safe model loader ─────────────────────────────────────────────
 function safeModel(name) {
   try {

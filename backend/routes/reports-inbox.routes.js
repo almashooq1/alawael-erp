@@ -192,4 +192,22 @@ function buildRouter({ DeliveryModel, artifactStore, urlSigner, logger = console
   return router;
 }
 
-module.exports = { buildRouter, assertCanAccess, asyncWrap };
+const _deliveryStub = {
+  find: async () => [],
+  findById: async () => null,
+  countDocuments: async () => 0,
+};
+let _reportsInboxRouter;
+try {
+  _reportsInboxRouter = buildRouter({ DeliveryModel: _deliveryStub });
+} catch (_err) {
+  const _fb = require('express').Router();
+  _fb.all('*', (_req, res) =>
+    res.status(503).json({ success: false, error: 'Reports inbox not configured' })
+  );
+  _reportsInboxRouter = _fb;
+}
+module.exports = _reportsInboxRouter;
+module.exports.buildRouter = buildRouter;
+module.exports.assertCanAccess = assertCanAccess;
+module.exports.asyncWrap = asyncWrap;

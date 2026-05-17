@@ -166,4 +166,5 @@ function createRehabDisciplinesRouter() {
   return router;
 }
 
-module.exports = { createRehabDisciplinesRouter };
+module.exports = createRehabDisciplinesRouter();
+module.exports.createRehabDisciplinesRouter = createRehabDisciplinesRouter;

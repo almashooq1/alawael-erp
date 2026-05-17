@@ -220,12 +220,11 @@ function buildRouter({ platform, DeliveryModel, ApprovalModel, catalog, _logger 
   return router;
 }
 
-module.exports = {
-  buildRouter,
-  // Exposed for tests:
-  aggregateDeliveries,
-  aggregateApprovals,
-  schedulerSnapshot,
-  catalogSnapshot,
-  rateLimiterSnapshot,
-};
+module.exports = buildRouter();
+module.exports.buildRouter = buildRouter;
+// Exposed for tests:
+module.exports.aggregateDeliveries = aggregateDeliveries;
+module.exports.aggregateApprovals = aggregateApprovals;
+module.exports.schedulerSnapshot = schedulerSnapshot;
+module.exports.catalogSnapshot = catalogSnapshot;
+module.exports.rateLimiterSnapshot = rateLimiterSnapshot;

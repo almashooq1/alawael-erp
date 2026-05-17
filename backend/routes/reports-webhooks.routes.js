@@ -146,4 +146,17 @@ function buildRouter({ handler, verifiers = {}, logger = console } = {}) {
   return router;
 }
 
-module.exports = { buildRouter, asyncWrap };
+const _handlerStub = { handleEvents: async () => ({ processed: 0 }) };
+let _reportsWebhooksRouter;
+try {
+  _reportsWebhooksRouter = buildRouter({ handler: _handlerStub });
+} catch (_err) {
+  const _fb = require('express').Router();
+  _fb.all('*', (_req, res) =>
+    res.status(503).json({ success: false, error: 'Reports webhooks not configured' })
+  );
+  _reportsWebhooksRouter = _fb;
+}
+module.exports = _reportsWebhooksRouter;
+module.exports.buildRouter = buildRouter;
+module.exports.asyncWrap = asyncWrap;

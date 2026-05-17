@@ -187,4 +187,6 @@ function buildRouter({ kpiResolver, narrativeService } = {}) {
   return router;
 }
 
-module.exports = { buildRouter, _defaults: { defaultKpiResolver } };
+module.exports = buildRouter();
+module.exports.buildRouter = buildRouter;
+module.exports._defaults = { defaultKpiResolver };

@@ -146,4 +146,5 @@ function buildRouter() {
   return router;
 }
 
-module.exports = { buildRouter };
+module.exports = buildRouter();
+module.exports.buildRouter = buildRouter;

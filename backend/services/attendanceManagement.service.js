@@ -1,4 +1,4 @@
-'use strict';
+﻿'use strict';
 
 /**
  * Attendance Management Service — نظام الحضور والانصراف الذكي
@@ -22,7 +22,7 @@ dayjs.extend(isBetween);
 dayjs.extend(isSameOrBefore);
 
 // ── Model imports (lazy to avoid circular-dep issues at startup) ──────────
-let _Attendance, _Employee, _Shift, _Leave, _User;
+let _Attendance, _Employee, _Shift, _Leave, _Correction;
 const Attendance = () => {
   if (!_Attendance) _Attendance = require('../models/Attendance');
   return _Attendance;
@@ -38,6 +38,10 @@ const Shift = () => {
 const Leave = () => {
   if (!_Leave) _Leave = require('../models/leave.model');
   return _Leave;
+};
+const Correction = () => {
+  if (!_Correction) _Correction = require('../models/HR/AttendanceCorrection');
+  return _Correction;
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -827,70 +831,210 @@ class AttendanceManagementService {
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // PRIVATE HELPERS
+  // 11. ATTENDANCE CORRECTION REQUESTS
   // ═══════════════════════════════════════════════════════════════════════════
 
-  static async _findEmployeeShift(employeeId) {
-    return Shift().findOne({ assignedStaff: employeeId, isActive: true }).lean();
-  }
+  /**
+   * Submit a correction request for a past attendance record.
+   * Employees can request fixes for wrong check-in time, wrong status, missing record, etc.
+   */
+  static async submitCorrectionRequest(
+    employeeId,
+    {
+      date,
+      correctionType,
+      requestedCheckIn,
+      requestedCheckOut,
+      requestedStatus,
+      reason,
+      attendanceRecordId,
+    }
+  ) {
+    const day = new Date(date);
+    day.setHours(0, 0, 0, 0);
 
-  static async _getWeeklyTrend(_branchId, _department) {
-    const days = [];
-    for (let i = 6; i >= 0; i--) {
-      const d = new Date();
-      d.setDate(d.getDate() - i);
-      d.setHours(0, 0, 0, 0);
-      days.push(d);
+    // Prevent duplicate pending request for same employee+date+type
+    const existing = await Correction().findOne({
+      employeeId,
+      date: day,
+      correctionType,
+      status: 'pending',
+    });
+    if (existing) {
+      return {
+        success: false,
+        code: 'DUPLICATE',
+        message: 'يوجد طلب تصحيح معلّق لنفس اليوم والنوع',
+      };
     }
 
-    const results = [];
-    for (const day of days) {
-      const end = new Date(day);
-      end.setHours(23, 59, 59, 999);
-      const recs = await Attendance()
-        .find({ date: { $gte: day, $lte: end } })
-        .lean();
-      results.push({
-        day: ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'][
-          day.getDay()
-        ],
-        date: dayjs(day).format('MM/DD'),
-        present: recs.filter(r => r.status === 'present').length,
-        late: recs.filter(r => r.status === 'late').length,
-        absent: recs.filter(r => r.status === 'absent').length,
-        total: recs.length,
-      });
-    }
-    return results;
+    const requestNumber = `COR-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+    const correction = await Correction().create({
+      requestNumber,
+      employeeId,
+      date: day,
+      correctionType,
+      requestedCheckIn: requestedCheckIn || null,
+      requestedCheckOut: requestedCheckOut || null,
+      requestedStatus: requestedStatus || null,
+      reason,
+      attendanceRecordId: attendanceRecordId || null,
+      status: 'pending',
+    });
+
+    return { success: true, message: 'تم تقديم طلب التصحيح بنجاح', correction };
   }
 
-  static async _getDepartmentBreakdown(start, end) {
-    return Attendance().aggregate([
-      { $match: { date: { $gte: start, $lte: end } } },
-      { $lookup: { from: 'employees', localField: 'employeeId', foreignField: '_id', as: 'emp' } },
-      { $unwind: { path: '$emp', preserveNullAndEmptyArrays: true } },
-      { $group: { _id: { dept: '$emp.department', status: '$status' }, count: { $sum: 1 } } },
-      {
-        $group: {
-          _id: '$_id.dept',
-          statuses: { $push: { status: '$_id.status', count: '$count' } },
-          total: { $sum: '$count' },
-        },
-      },
-      { $project: { department: '$_id', statuses: 1, total: 1, _id: 0 } },
-      { $sort: { total: -1 } },
+  /**
+   * List correction requests — employees see their own, HR/admin see all.
+   */
+  static async getCorrectionRequests({ employeeId, status, page = 1, limit = 20 } = {}) {
+    const filter = {};
+    if (employeeId) filter.employeeId = employeeId;
+    if (status) filter.status = status;
+
+    const skip = (page - 1) * limit;
+    const [corrections, total] = await Promise.all([
+      Correction()
+        .find(filter)
+        .populate('employeeId', 'name_ar name_en employee_number department')
+        .populate('reviewedBy', 'name_ar name_en')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      Correction().countDocuments(filter),
     ]);
+
+    return { corrections, pagination: { page, limit, total, pages: Math.ceil(total / limit) } };
   }
 
+  /**
+   * HR/manager approves or rejects a correction request.
+   * On approval, the linked attendance record is updated automatically.
+   */
+  static async processCorrectionRequest(correctionId, { decision, reviewedBy, reviewNotes }) {
+    const correction = await Correction().findById(correctionId);
+    if (!correction) return { success: false, message: 'طلب التصحيح غير موجود' };
+    if (correction.status !== 'pending')
+      return { success: false, message: 'الطلب تمت معالجته مسبقاً' };
+
+    correction.status = decision; // 'approved' | 'rejected'
+    correction.reviewedBy = reviewedBy;
+    correction.reviewNotes = reviewNotes;
+    correction.reviewedAt = new Date();
+    await correction.save();
+
+    if (decision === 'approved') {
+      const day = new Date(correction.date);
+      day.setHours(0, 0, 0, 0);
+
+      const updateFields = {};
+      if (correction.requestedStatus) updateFields.status = correction.requestedStatus;
+      if (correction.requestedCheckIn) {
+        updateFields.checkIn = new Date(
+          `${dayjs(correction.date).format('YYYY-MM-DD')}T${correction.requestedCheckIn}:00`
+        );
+      }
+      if (correction.requestedCheckOut) {
+        updateFields.checkOut = new Date(
+          `${dayjs(correction.date).format('YYYY-MM-DD')}T${correction.requestedCheckOut}:00`
+        );
+      }
+      if (updateFields.checkIn && updateFields.checkOut) {
+        updateFields.workingHours = calcWorkingHours(updateFields.checkIn, updateFields.checkOut);
+      }
+      updateFields.source = 'correction';
+      updateFields.notes = `تم التصحيح بناءً على طلب #${correction.requestNumber}`;
+
+      await Attendance().findOneAndUpdate(
+        { employeeId: correction.employeeId, date: day },
+        { $set: updateFields },
+        { upsert: true }
+      );
+    }
+
+    return {
+      success: true,
+      message:
+        decision === 'approved'
+          ? 'تمت الموافقة على طلب التصحيح وتحديث السجل'
+          : 'تم رفض طلب التصحيح',
+      correction,
+    };
+  }
+
+  /**
+   * Search employees by name or employee_number (for EmployeeRecordTab).
+   */
+  static async searchEmployees(query, limit = 15) {
+    if (!query || query.trim().length < 2) return [];
+
+    const q = query.trim();
+    const employees = await Employee()
+      .find({
+        status: 'active',
+        $or: [
+          { name_ar: { $regex: q, $options: 'i' } },
+          { name_en: { $regex: q, $options: 'i' } },
+          { employee_number: { $regex: q, $options: 'i' } },
+        ],
+      })
+      .select('name_ar name_en employee_number department job_title_ar')
+      .limit(limit)
+      .lean();
+
+    return employees;
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // 12. PAYROLL BRIDGE
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  /**
+   * Count Mon–Fri working days between two dates (inclusive).
+   * Used internally by getMonthlyReport and getEmployeeMonthlyStats.
+   */
   static _countWorkingDays(start, end) {
     let count = 0;
-    const current = new Date(start);
-    while (current <= end) {
-      const day = current.getDay();
-      if (day !== 5 && day !== 6) count++; // Friday=5, Saturday=6 are weekends in SA
-      current.setDate(current.getDate() + 1);
+    const cur = new Date(start);
+    while (cur <= end) {
+      const day = cur.getDay(); // 0=Sun, 6=Sat
+      if (day !== 0 && day !== 6) count++;
+      cur.setDate(cur.getDate() + 1);
     }
     return count;
+  }
+
+  /**
+   * Aggregate a single employee's attendance stats for a given month/year.
+   * This is the canonical source for payroll calculations — replaces the
+   * broken Attendance.findOne({month,year}) query in payrollCalculationService.
+   *
+   * @param {string|ObjectId} employeeId
+   * @param {number}          month  1-12
+   * @param {number}          year   e.g. 2025
+   * @returns {{ presentDays, absentDays, lateDays, leaveDays, workingDays, overtimeHours }}
+   */
+  static async getEmployeeMonthlyStats(employeeId, month, year) {
+    const { start, end } = monthRange(Number(month), Number(year));
+    const workingDays = AttendanceManagementService._countWorkingDays(start, end);
+
+    const records = await Attendance()
+      .find({ employeeId, date: { $gte: start, $lte: end } })
+      .lean();
+
+    const presentDays = records.filter(r =>
+      ['present', 'late', 'remote'].includes(r.status)
+    ).length;
+    const absentDays = Math.max(0, workingDays - presentDays);
+    const lateDays = records.filter(r => r.status === 'late').length;
+    const leaveDays = records.filter(r => r.status === 'leave').length;
+    const overtimeHours = parseFloat(
+      records.reduce((s, r) => s + (r.overtimeHours || 0), 0).toFixed(2)
+    );
+
+    return { presentDays, absentDays, lateDays, leaveDays, workingDays, overtimeHours };
   }
 }
 

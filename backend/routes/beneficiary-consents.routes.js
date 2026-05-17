@@ -272,4 +272,17 @@ function createConsentRouter(deps = {}) {
   return router;
 }
 
-module.exports = { createConsentRouter };
+let _consentRouter;
+try {
+  const Consent = require('../models/Consent');
+  const Beneficiary = require('../models/Beneficiary');
+  _consentRouter = createConsentRouter({ consentModel: Consent, beneficiaryModel: Beneficiary });
+} catch (_err) {
+  const _fb = express.Router();
+  _fb.all('*', (_req, res) =>
+    res.status(503).json({ success: false, error: 'Consent service not configured' })
+  );
+  _consentRouter = _fb;
+}
+module.exports = _consentRouter;
+module.exports.createConsentRouter = createConsentRouter;

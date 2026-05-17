@@ -177,4 +177,5 @@ function createRehabGoalSuggestionsRouter() {
   return router;
 }
 
-module.exports = { createRehabGoalSuggestionsRouter };
+module.exports = createRehabGoalSuggestionsRouter();
+module.exports.createRehabGoalSuggestionsRouter = createRehabGoalSuggestionsRouter;

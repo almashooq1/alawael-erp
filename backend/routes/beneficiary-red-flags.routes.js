@@ -267,4 +267,16 @@ function createRedFlagRouter(deps = {}) {
   return router;
 }
 
-module.exports = { createRedFlagRouter };
+const _rfStub = { evaluateBeneficiary: async () => [], applyVerdicts: async () => [] };
+let _redFlagRouter;
+try {
+  _redFlagRouter = createRedFlagRouter({ engine: _rfStub, store: _rfStub });
+} catch (_err) {
+  const _fb = express.Router();
+  _fb.all('*', (_req, res) =>
+    res.status(503).json({ success: false, error: 'Red flag engine not configured' })
+  );
+  _redFlagRouter = _fb;
+}
+module.exports = _redFlagRouter;
+module.exports.createRedFlagRouter = createRedFlagRouter;

@@ -153,65 +153,67 @@ class PayrollCalculationService {
   }
 
   /**
-   * حساب بيانات الحضور والعمل الإضافي
+   * جلب إحصاءات الحضور الشهرية لموظف — Bridge إلى AttendanceManagementService.
+   * استبدل الاستعلام المعطوب Attendance.findOne({month,year}) بتجميع حقيقي
+   * من السجلات اليومية.
    */
   static async getAttendanceData(employeeId, month, year) {
     try {
-      const attendance = await Attendance.findOne({
+      // Lazy require to avoid circular dependency
+      const AttendanceManagementService = require('./attendanceManagement.service');
+      const stats = await AttendanceManagementService.getEmployeeMonthlyStats(
         employeeId,
         month,
-        year,
-      });
-
-      if (!attendance) {
-        return {
-          presentDays: 0,
-          absentDays: 0,
-          leaveDays: 0,
-          workingDays: 22,
-          overtime: 0,
-        };
-      }
-
-      return {
-        presentDays: attendance.presentDays || 0,
-        absentDays: attendance.absentDays || 0,
-        leaveDays: attendance.leaveDays || 0,
-        workingDays: attendance.workingDays || 22,
-        overtime: attendance.overtime || 0,
-      };
+        year
+      );
+      return stats;
     } catch (error) {
       logger.error('خطأ في جلب بيانات الحضور:', error);
-      return {};
+      return {
+        presentDays: 0,
+        absentDays: 0,
+        lateDays: 0,
+        leaveDays: 0,
+        workingDays: 22,
+        overtimeHours: 0,
+      };
     }
   }
 
   /**
-   * جلب بيانات الإجازات
+   * جلب بيانات الإجازات للشهر المحدد.
+   * يعتمد على نموذج leave.model.js (حقل type: 'unpaid' = غير مدفوعة).
+   * يحسب الأيام من startDate/endDate بدلاً من حقل days المفقود.
    */
   static async getLeaveData(employeeId, month, year) {
     try {
+      const m = parseInt(month, 10);
+      const y = parseInt(year, 10);
+      const rangeStart = new Date(y, m - 1, 1); // أول الشهر
+      const rangeEnd = new Date(y, m, 0, 23, 59, 59); // آخر الشهر
+
       const leaves = await Leave.find({
         employeeId,
-        startDate: {
-          $gte: new Date(`${year}-${month}-01`),
-          $lt: new Date(
-            `${year}-${parseInt(month) === 12 ? parseInt(month) : parseInt(month) + 1}-01`
-          ),
-        },
         status: 'approved',
+        startDate: { $lte: rangeEnd },
+        endDate: { $gte: rangeStart },
       });
 
-      const leaveDays = {
-        paid: 0,
-        unpaid: 0,
+      const leaveDays = { paid: 0, unpaid: 0 };
+
+      const countDays = (start, end) => {
+        const s = new Date(Math.max(start.getTime(), rangeStart.getTime()));
+        const e = new Date(Math.min(end.getTime(), rangeEnd.getTime()));
+        if (e < s) return 0;
+        return Math.round((e - s) / (1000 * 60 * 60 * 24)) + 1;
       };
 
       leaves.forEach(leave => {
-        if (leave.isPaid) {
-          leaveDays.paid += leave.days || 0;
+        const days = countDays(new Date(leave.startDate), new Date(leave.endDate));
+        if (leave.type === 'unpaid') {
+          leaveDays.unpaid += days;
         } else {
-          leaveDays.unpaid += leave.days || 0;
+          leaveDays.paid += days;
         }
       });
 
@@ -223,22 +225,68 @@ class PayrollCalculationService {
   }
 
   /**
-   * حساب الحضور والعمل الإضافي
+   * حساب الحضور والعمل الإضافي وتطبيق الخصومات والإضافات على كشف الراتب.
+   *
+   * attendanceData: { presentDays, absentDays, lateDays, leaveDays, workingDays, overtimeHours }
+   * leaveData:      { paid, unpaid }
    */
   static calculateAttendance(payroll, attendanceData, leaveData) {
+    const workingDays = attendanceData.workingDays || 22;
+    const presentDays = attendanceData.presentDays || 0;
+    const absentDays = attendanceData.absentDays || 0;
+    const lateDays = attendanceData.lateDays || 0;
+    // Support both flat (overtimeHours) and nested (overtime.regular) shapes
+    const regularOvertime = attendanceData.overtimeHours ?? attendanceData.overtime?.regular ?? 0;
+    const weekendOvertime = attendanceData.overtime?.weekend ?? 0;
+    const holidayOvertime = attendanceData.overtime?.holiday ?? 0;
+    const paidLeave = leaveData?.paid || 0;
+    const unpaidLeave = leaveData?.unpaid || 0;
+
+    // ── Attendance summary (stored on payroll doc) ────────────────────────
     payroll.attendance = {
-      presentDays: attendanceData.presentDays || 0,
-      absentDays: attendanceData.absentDays || 0,
-      leaveDays: (leaveData?.paid || 0) + (leaveData?.unpaid || 0),
-      unpaidLeaveDays: leaveData?.unpaid || 0,
-      workingDays: attendanceData.workingDays || 22,
-      actualWorkingDays: (attendanceData.presentDays || 0) + (leaveData?.paid || 0),
+      presentDays,
+      absentDays,
+      leaveDays: paidLeave + unpaidLeave,
+      unpaidLeaveDays: unpaidLeave,
+      workingDays,
+      actualWorkingDays: presentDays + paidLeave,
+      lateArrivals: lateDays,
+      earlyDepartures: 0,
       overtime: {
-        regularOvertime: attendanceData.overtime?.regular || 0,
-        weekendOvertime: attendanceData.overtime?.weekend || 0,
-        holidayOvertime: attendanceData.overtime?.holiday || 0,
+        regularOvertime,
+        weekendOvertime,
+        holidayOvertime,
       },
     };
+
+    // ── Financial impact ─────────────────────────────────────────────────
+    const baseSalary = payroll.baseSalary || 0;
+    const dailyRate = workingDays > 0 ? baseSalary / workingDays : 0;
+
+    // Absence deduction: each absent/unpaid-leave day → full daily rate
+    const absenceDeduction = (absentDays + unpaidLeave) * dailyRate;
+
+    // Late deduction: each late day → 25% of daily rate (configurable)
+    const lateDeduction = lateDays * dailyRate * 0.25;
+
+    // Add to attendance penalty bucket (feeds into calculateTotalPenalties)
+    payroll.penalties.attendance =
+      (payroll.penalties.attendance || 0) + absenceDeduction + lateDeduction;
+
+    const overtimeHours = regularOvertime;
+    // Overtime pay: regular overtime at 150% per-hour rate (labour-law minimum)
+    if (overtimeHours > 0) {
+      const hourlyRate = dailyRate / 8; // standard 8-hr day
+      const overtimePay = parseFloat((overtimeHours * hourlyRate * 1.5).toFixed(2));
+      payroll.allowances = payroll.allowances || [];
+      payroll.allowances.push({
+        _id: new mongoose.Types.ObjectId(),
+        name: 'other',
+        amount: overtimePay,
+        isFixed: false,
+        description: `عمل إضافي — ${overtimeHours} ساعة`,
+      });
+    }
   }
 
   /**

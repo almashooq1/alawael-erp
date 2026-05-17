@@ -34,6 +34,9 @@ const Shift = require('../models/Shift');
 const auth = authenticateToken;
 const adminOrHR = [authenticateToken, authorizeRole(['admin', 'hr', 'manager'])];
 
+// ── Async error propagation (Express 4 — no automatic async support) ──────
+const wrapAsync = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
+
 // ── Validation helpers ─────────────────────────────────────────────────────
 const v = {
   objectId: field => param(field).isMongoId().withMessage(`${field} غير صالح`),
@@ -51,11 +54,15 @@ const v = {
  * GET /attendance-mgmt/dashboard
  * Returns today's KPIs, weekly trend, department breakdown.
  */
-router.get('/dashboard', auth, async (req, res) => {
-  const { branchId, department } = req.query;
-  const data = await AttendanceMgmt.getDashboardStats({ branchId, department });
-  res.json({ success: true, data });
-});
+router.get(
+  '/dashboard',
+  auth,
+  wrapAsync(async (req, res) => {
+    const { branchId, department } = req.query;
+    const data = await AttendanceMgmt.getDashboardStats({ branchId, department });
+    res.json({ success: true, data });
+  })
+);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 2. CHECK-IN
@@ -75,7 +82,7 @@ router.post(
     body('source').optional().isIn(['manual', 'biometric', 'mobile', 'zkteco', 'camera', 'system']),
   ],
   validate,
-  async (req, res) => {
+  wrapAsync(async (req, res) => {
     const employeeId = req.body.employeeId || req.user?.employeeId;
     if (!employeeId) return res.status(400).json({ success: false, message: 'employeeId مطلوب' });
 
@@ -90,7 +97,7 @@ router.post(
 
     const code = result.success ? 200 : 409;
     res.status(code).json(result);
-  }
+  })
 );
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -105,7 +112,7 @@ router.post(
   auth,
   [body('notes').optional().isString().isLength({ max: 500 })],
   validate,
-  async (req, res) => {
+  wrapAsync(async (req, res) => {
     const employeeId = req.body.employeeId || req.user?.employeeId;
     if (!employeeId) return res.status(400).json({ success: false, message: 'employeeId مطلوب' });
 
@@ -115,7 +122,7 @@ router.post(
 
     const code = result.success ? 200 : 409;
     res.status(code).json(result);
-  }
+  })
 );
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -135,7 +142,7 @@ router.get(
     query('status').optional().isIn(['present', 'absent', 'late', 'half_day', 'leave', 'remote']),
   ],
   validate,
-  async (req, res) => {
+  wrapAsync(async (req, res) => {
     const { status, department, branchId, page, limit } = req.query;
     const data = await AttendanceMgmt.getTodayAttendance({
       status,
@@ -145,7 +152,7 @@ router.get(
       limit,
     });
     res.json({ success: true, ...data });
-  }
+  })
 );
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -161,10 +168,10 @@ router.get(
   auth,
   [v.objectId('employeeId'), v.month, v.year],
   validate,
-  async (req, res) => {
+  wrapAsync(async (req, res) => {
     const data = await AttendanceMgmt.getEmployeeHistory(req.params.employeeId, req.query);
     res.json({ success: true, ...data });
-  }
+  })
 );
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -180,7 +187,7 @@ router.get(
   adminOrHR,
   [v.month, v.year, v.page, v.limit],
   validate,
-  async (req, res) => {
+  wrapAsync(async (req, res) => {
     const { month, year, department, branchId, page, limit } = req.query;
     const data = await AttendanceMgmt.getMonthlyReport({
       month,
@@ -191,7 +198,7 @@ router.get(
       limit,
     });
     res.json({ success: true, ...data });
-  }
+  })
 );
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -221,7 +228,7 @@ router.post(
       .withMessage('صيغة وقت الانصراف غير صحيحة (HH:MM)'),
   ],
   validate,
-  async (req, res) => {
+  wrapAsync(async (req, res) => {
     const { employeeId, date, status, checkIn, checkOut, notes, source } = req.body;
     const result = await AttendanceMgmt.createManualRecord(employeeId, {
       date,
@@ -233,7 +240,7 @@ router.post(
       recordedBy: req.user?._id,
     });
     res.json(result);
-  }
+  })
 );
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -253,14 +260,14 @@ router.post(
     body('reason').notEmpty().isLength({ max: 500 }).withMessage('السبب مطلوب'),
   ],
   validate,
-  async (req, res) => {
+  wrapAsync(async (req, res) => {
     const employeeId = req.body.employeeId || req.user?.employeeId;
     if (!employeeId) return res.status(400).json({ success: false, message: 'employeeId مطلوب' });
 
     const result = await AttendanceMgmt.submitLeaveRequest(employeeId, req.body);
     const code = result.success ? 201 : 409;
     res.status(code).json(result);
-  }
+  })
 );
 
 /**
@@ -278,7 +285,7 @@ router.get(
     query('status').optional().isIn(['pending', 'approved', 'rejected']),
   ],
   validate,
-  async (req, res) => {
+  wrapAsync(async (req, res) => {
     const { status, employeeId, month, year, page, limit } = req.query;
     const data = await AttendanceMgmt.getLeaveRequests({
       status,
@@ -289,7 +296,7 @@ router.get(
       limit,
     });
     res.json({ success: true, ...data });
-  }
+  })
 );
 
 /**
@@ -306,14 +313,14 @@ router.patch(
       .withMessage('القرار يجب أن يكون approved أو rejected'),
   ],
   validate,
-  async (req, res) => {
+  wrapAsync(async (req, res) => {
     const result = await AttendanceMgmt.processLeaveRequest(req.params.leaveId, {
       decision: req.body.decision,
       managerId: req.user?._id,
       managerNotes: req.body.managerNotes,
     });
     res.json(result);
-  }
+  })
 );
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -329,11 +336,11 @@ router.get(
   adminOrHR,
   [query('period').optional().isInt({ min: 7, max: 365 }).toInt()],
   validate,
-  async (req, res) => {
+  wrapAsync(async (req, res) => {
     const { period, branchId, department } = req.query;
     const data = await AttendanceMgmt.getAnalytics({ period, branchId, department });
     res.json({ success: true, data });
-  }
+  })
 );
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -349,11 +356,11 @@ router.get(
   adminOrHR,
   [v.objectId('employeeId'), query('months').optional().isInt({ min: 1, max: 12 }).toInt()],
   validate,
-  async (req, res) => {
+  wrapAsync(async (req, res) => {
     const { months } = req.query;
     const data = await AttendanceMgmt.analyzePatterns(req.params.employeeId, months || 3);
     res.json({ success: true, data });
-  }
+  })
 );
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -365,12 +372,18 @@ router.get(
  * Returns JSON rows ready for CSV conversion by frontend.
  * Query: month, year, department
  */
-router.get('/export/monthly', adminOrHR, [v.month, v.year], validate, async (req, res) => {
-  const m = req.query.month || new Date().getMonth() + 1;
-  const y = req.query.year || new Date().getFullYear();
-  const rows = await AttendanceMgmt.exportMonthlyData(m, y, req.query);
-  res.json({ success: true, count: rows.length, data: rows });
-});
+router.get(
+  '/export/monthly',
+  adminOrHR,
+  [v.month, v.year],
+  validate,
+  wrapAsync(async (req, res) => {
+    const m = req.query.month || new Date().getMonth() + 1;
+    const y = req.query.year || new Date().getFullYear();
+    const rows = await AttendanceMgmt.exportMonthlyData(m, y, req.query);
+    res.json({ success: true, count: rows.length, data: rows });
+  })
+);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 12. SHIFTS REFERENCE
@@ -379,10 +392,14 @@ router.get('/export/monthly', adminOrHR, [v.month, v.year], validate, async (req
 /**
  * GET /attendance-mgmt/shifts
  */
-router.get('/shifts', auth, async (req, res) => {
-  const shifts = await Shift.find({ isActive: true }).lean();
-  res.json({ success: true, data: shifts });
-});
+router.get(
+  '/shifts',
+  auth,
+  wrapAsync(async (req, res) => {
+    const shifts = await Shift.find({ isActive: true }).lean();
+    res.json({ success: true, data: shifts });
+  })
+);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 13. LEAVE BALANCE
@@ -403,7 +420,7 @@ router.get(
     query('employeeId').optional().isMongoId(),
   ],
   validate,
-  async (req, res) => {
+  wrapAsync(async (req, res) => {
     const year = req.query.year || new Date().getFullYear();
     const employeeId =
       req.user?.role === 'admin' || req.user?.role === 'hr'
@@ -430,7 +447,7 @@ router.get(
         carried_over_from_last_year: balance.carried_over_from_last_year,
       },
     });
-  }
+  })
 );
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -457,7 +474,7 @@ router.post(
     body('reason').notEmpty().isLength({ max: 500 }).withMessage('السبب مطلوب'),
   ],
   validate,
-  async (req, res) => {
+  wrapAsync(async (req, res) => {
     const employeeId = req.body.employeeId || req.user?.employeeId;
     if (!employeeId) return res.status(400).json({ success: false, message: 'employeeId مطلوب' });
 
@@ -479,7 +496,7 @@ router.post(
       message: 'تم تقديم طلب العمل الإضافي بنجاح',
       data: overtime,
     });
-  }
+  })
 );
 
 /**
@@ -497,7 +514,7 @@ router.get(
       .isIn(['مقدم', 'موافقة المدير', 'موافقة الموارد البشرية', 'معتمد', 'مرفوض', 'ملغي']),
   ],
   validate,
-  async (req, res) => {
+  wrapAsync(async (req, res) => {
     const { status, page = 1, limit = 20 } = req.query;
     const filter = {};
     if (status) filter.status = status;
@@ -526,12 +543,14 @@ router.get(
         pages: Math.ceil(total / Number(limit)),
       },
     });
-  }
+  })
 );
 
 /**
  * PATCH /attendance-mgmt/overtime/:overtimeId/decision
  * Body: { decision: 'معتمد'|'مرفوض', notes? }
+ * عند الاعتماد: يُحدّث سجل الحضور اليومي بساعات العمل الإضافي المعتمدة
+ * حتى تنعكس في getEmployeeMonthlyStats → payroll bridge.
  */
 router.patch(
   '/overtime/:overtimeId/decision',
@@ -541,19 +560,136 @@ router.patch(
     body('decision').isIn(['معتمد', 'مرفوض']).withMessage('القرار غير صالح'),
   ],
   validate,
-  async (req, res) => {
+  wrapAsync(async (req, res) => {
+    const Attendance = require('../models/Attendance');
     const ot = await OvertimeRequest.findByIdAndUpdate(
       req.params.overtimeId,
       { status: req.body.decision },
       { new: true }
     );
     if (!ot) return res.status(404).json({ success: false, message: 'الطلب غير موجود' });
+
+    // عند الاعتماد — سجّل ساعات العمل الإضافي في سجل الحضور اليومي
+    if (req.body.decision === 'معتمد' && ot.totalHours > 0) {
+      const day = new Date(ot.date);
+      day.setHours(0, 0, 0, 0);
+      await Attendance.findOneAndUpdate(
+        { employeeId: ot.employeeId, date: day },
+        { $set: { overtimeHours: ot.totalHours } },
+        { upsert: false } // لا تنشئ سجلاً جديداً — الموظف يجب أن يكون قد سجّل حضوراً
+      );
+    }
+
     res.json({
       success: true,
       message: `تم ${req.body.decision === 'معتمد' ? 'اعتماد' : 'رفض'} طلب العمل الإضافي`,
       data: ot,
     });
-  }
+  })
+);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 15. EMPLOYEE SEARCH (for EmployeeRecordTab & autocomplete)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * GET /attendance-mgmt/employee/search
+ * Query: q (name or employee_number, min 2 chars)
+ */
+router.get(
+  '/employee/search',
+  auth,
+  [query('q').notEmpty().isLength({ min: 2, max: 100 }).withMessage('كلمة البحث قصيرة جداً')],
+  validate,
+  wrapAsync(async (req, res) => {
+    const employees = await AttendanceMgmt.searchEmployees(req.query.q);
+    res.json({ success: true, data: employees });
+  })
+);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 16. ATTENDANCE CORRECTION REQUESTS
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * POST /attendance-mgmt/correction/request
+ * Body: { date, correctionType, requestedCheckIn?, requestedCheckOut?,
+ *         requestedStatus?, reason, attendanceRecordId? }
+ */
+router.post(
+  '/correction/request',
+  auth,
+  [
+    body('date').isISO8601().withMessage('التاريخ غير صالح'),
+    body('correctionType')
+      .isIn(['checkIn', 'checkOut', 'status', 'missingRecord', 'other'])
+      .withMessage('نوع التصحيح غير صالح'),
+    body('requestedCheckIn')
+      .optional({ nullable: true })
+      .matches(/^\d{2}:\d{2}$/)
+      .withMessage('صيغة الوقت غير صحيحة'),
+    body('requestedCheckOut')
+      .optional({ nullable: true })
+      .matches(/^\d{2}:\d{2}$/)
+      .withMessage('صيغة الوقت غير صحيحة'),
+    body('requestedStatus')
+      .optional({ nullable: true })
+      .isIn(['present', 'absent', 'late', 'half_day', 'leave', 'remote', 'holiday']),
+    body('reason').notEmpty().isLength({ max: 600 }).withMessage('السبب مطلوب'),
+  ],
+  validate,
+  wrapAsync(async (req, res) => {
+    const employeeId = req.body.employeeId || req.user?.employeeId;
+    if (!employeeId) return res.status(400).json({ success: false, message: 'employeeId مطلوب' });
+
+    const result = await AttendanceMgmt.submitCorrectionRequest(employeeId, req.body);
+    res.status(result.success ? 201 : 409).json(result);
+  })
+);
+
+/**
+ * GET /attendance-mgmt/correction/requests
+ * Query: status (pending|approved|rejected), page, limit
+ * Employees see their own. HR/admin see all.
+ */
+router.get(
+  '/correction/requests',
+  auth,
+  [v.page, v.limit, query('status').optional().isIn(['pending', 'approved', 'rejected'])],
+  validate,
+  wrapAsync(async (req, res) => {
+    const { status, page, limit } = req.query;
+    const employeeId =
+      req.user?.role === 'admin' || req.user?.role === 'hr' || req.user?.role === 'manager'
+        ? req.query.employeeId || undefined
+        : req.user?.employeeId;
+
+    const data = await AttendanceMgmt.getCorrectionRequests({ employeeId, status, page, limit });
+    res.json({ success: true, ...data });
+  })
+);
+
+/**
+ * PATCH /attendance-mgmt/correction/:correctionId/decision
+ * Body: { decision: 'approved'|'rejected', reviewNotes? }
+ */
+router.patch(
+  '/correction/:correctionId/decision',
+  adminOrHR,
+  [
+    v.objectId('correctionId'),
+    body('decision').isIn(['approved', 'rejected']).withMessage('القرار غير صالح'),
+    body('reviewNotes').optional().isLength({ max: 500 }),
+  ],
+  validate,
+  wrapAsync(async (req, res) => {
+    const result = await AttendanceMgmt.processCorrectionRequest(req.params.correctionId, {
+      decision: req.body.decision,
+      reviewedBy: req.user?._id,
+      reviewNotes: req.body.reviewNotes,
+    });
+    res.json(result);
+  })
 );
 
 module.exports = router;

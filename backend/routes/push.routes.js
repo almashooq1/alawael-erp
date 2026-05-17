@@ -188,6 +188,15 @@ authRouter.post('/test', async (req, res) => {
 
 module.exports = { publicRouter, authRouter, sendToAdmins };
 
+// Combined router for safeMount (mounts public + auth routes on the same prefix)
+const _combined = require('express').Router();
+_combined.use(publicRouter);
+_combined.use(authRouter);
+module.exports = _combined;
+module.exports.publicRouter = publicRouter;
+module.exports.authRouter = authRouter;
+module.exports.sendToAdmins = sendToAdmins;
+
 /**
  * Helper for other routes to push a notification to all admins with active
  * subscriptions. Called best-effort from public-forms on new submission.

@@ -23,7 +23,7 @@ const router = express.Router();
 const isValidObjectId = id => mongoose.Types.ObjectId.isValid(String(id));
 
 // Lazy requires so a missing dep never crashes module load.
-let _authenticate, _Guardian, _Beneficiary, _Appointment, _Invoice, _Consent;
+let _authenticate, _Guardian, _Beneficiary, _Appointment, _Invoice, _Consent, _User, _generateToken;
 function authenticate(req, res, next) {
   if (!_authenticate) _authenticate = require('../middleware/auth').authenticate;
   return _authenticate(req, res, next);
@@ -47,6 +47,14 @@ function Beneficiary() {
 function Appointment() {
   if (!_Appointment) _Appointment = require('../models/Appointment');
   return _Appointment;
+}
+function User() {
+  if (!_User) _User = require('../models/User');
+  return _User;
+}
+function generateToken(...args) {
+  if (!_generateToken) _generateToken = require('../middleware/auth').generateToken;
+  return _generateToken(...args);
 }
 
 /**
@@ -107,7 +115,7 @@ const RELATIONSHIP_LABEL_AR = {
   other: 'أخرى',
 };
 
-function notImplemented(contract) {
+function _notImplemented(contract) {
   return (_req, res) =>
     res.status(501).json({
       error: 'NotImplemented',
@@ -117,18 +125,70 @@ function notImplemented(contract) {
 }
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
-router.post(
-  '/auth/login',
-  notImplemented({
-    request: { phone: 'string', password: 'string' },
-    response: {
-      accessToken: 'string',
-      guardianId: 'string',
-      beneficiaryId: 'string',
-      nameAr: 'string',
-    },
-  })
-);
+router.post('/auth/login', async (req, res) => {
+  try {
+    const { phone, password } = req.body || {};
+    if (!phone || typeof phone !== 'string' || !password || typeof password !== 'string') {
+      return res
+        .status(400)
+        .json({ error: 'InvalidBody', message: 'phone and password are required' });
+    }
+
+    const user = await User()
+      .findOne({ phone: phone.trim() })
+      .select('+password +role +phone +isActive');
+
+    if (!user || (typeof user.isActive === 'boolean' && user.isActive === false)) {
+      return res
+        .status(401)
+        .json({ error: 'InvalidCredentials', message: 'رقم الجوال أو كلمة المرور غير صحيحة' });
+    }
+
+    const ok =
+      typeof user.comparePassword === 'function' ? await user.comparePassword(password) : false;
+    if (!ok) {
+      return res
+        .status(401)
+        .json({ error: 'InvalidCredentials', message: 'رقم الجوال أو كلمة المرور غير صحيحة' });
+    }
+
+    // Resolve the Guardian record linked to this user.
+    const guardian = await Guardian()
+      .findOne({ userId: user._id })
+      .populate('beneficiaries', '_id')
+      .select('_id firstName_ar lastName_ar beneficiaries')
+      .lean();
+
+    if (!guardian) {
+      return res.status(403).json({
+        error: 'GuardianNotFound',
+        message: 'الحساب غير مرتبط بسجل ولي أمر. يرجى التواصل بالمركز.',
+      });
+    }
+
+    const token = generateToken(
+      { id: String(user._id), phone: user.phone, role: user.role || 'guardian', permissions: [] },
+      '8h'
+    );
+
+    const primaryBeneficiary =
+      Array.isArray(guardian.beneficiaries) && guardian.beneficiaries.length > 0
+        ? guardian.beneficiaries[0]
+        : null;
+
+    return res.json({
+      accessToken: token,
+      guardianId: String(guardian._id),
+      beneficiaryId: primaryBeneficiary ? String(primaryBeneficiary._id) : null,
+      nameAr: [guardian.firstName_ar, guardian.lastName_ar].filter(Boolean).join(' ').trim() || '—',
+    });
+  } catch (err) {
+    return res.status(500).json({
+      error: 'InternalError',
+      message: err instanceof Error ? err.message : 'login failed',
+    });
+  }
+});
 
 // ── Identity & Beneficiary ────────────────────────────────────────────────────
 router.get('/me', authenticate, async (req, res) => {
@@ -551,14 +611,100 @@ router.get('/home', authenticate, async (req, res) => {
 });
 
 // ── Appointments ──────────────────────────────────────────────────────────────
-router.get('/beneficiaries/:id/appointments', notImplemented({ response: '[PortalAppointment]' }));
-router.post(
-  '/appointments/:appointmentId/reschedule-request',
-  notImplemented({
-    request: { reason: 'string' },
-    response: { ok: true },
-  })
-);
+router.get('/beneficiaries/:id/appointments', authenticate, async (req, res) => {
+  try {
+    const userId = req.user?.id || req.user?._id || req.user?.userId;
+    if (!(await guardianOwnsBeneficiary(userId, req.params.id))) {
+      return res
+        .status(403)
+        .json({ error: 'Forbidden', message: 'beneficiary not linked to this guardian' });
+    }
+
+    const { status, from, to, limit = '50' } = req.query;
+    const filter = { beneficiary: req.params.id };
+    if (status) filter.status = String(status).toUpperCase();
+    if (from || to) {
+      filter.date = {};
+      if (from) filter.date.$gte = new Date(from);
+      if (to) filter.date.$lte = new Date(to);
+    }
+
+    const lim = Math.min(200, parseInt(limit, 10) || 50);
+    const appts = await Appointment()
+      .find(filter)
+      .sort({ date: -1 })
+      .limit(lim)
+      .populate('therapistId', 'name_ar specialization')
+      .lean();
+
+    const data = appts.map(a => ({
+      id: String(a._id),
+      date: composeDateTimeISO(a.date, a.startTime),
+      endDate: composeDateTimeISO(a.date, a.endTime),
+      status: APPT_STATUS_PUBLIC[a.status] || a.status || 'SCHEDULED',
+      therapistName: a.therapistId?.name_ar || '—',
+      discipline: a.therapistId?.specialization || a.discipline || '—',
+      location: a.location || a.room || null,
+      notes: null, // clinical notes not exposed in parent portal
+    }));
+
+    return res.json({ count: data.length, appointments: data });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ error: 'InternalError', message: err instanceof Error ? err.message : 'failed' });
+  }
+});
+
+router.post('/appointments/:appointmentId/reschedule-request', authenticate, async (req, res) => {
+  try {
+    const userId = req.user?.id || req.user?._id || req.user?.userId;
+    if (!isValidObjectId(req.params.appointmentId)) {
+      return res.status(400).json({ error: 'BadRequest', message: 'invalid appointment id' });
+    }
+
+    const appt = await Appointment().findById(req.params.appointmentId).lean();
+    if (!appt) {
+      return res.status(404).json({ error: 'NotFound', message: 'appointment not found' });
+    }
+
+    // Ownership: the guardian must own the beneficiary on this appointment.
+    const beneficiaryId = appt.beneficiary || appt.beneficiaryId;
+    if (!(await guardianOwnsBeneficiary(userId, beneficiaryId))) {
+      return res
+        .status(403)
+        .json({ error: 'Forbidden', message: 'appointment not linked to this guardian' });
+    }
+
+    const { reason } = req.body || {};
+    if (!reason || typeof reason !== 'string' || reason.trim().length < 3) {
+      return res
+        .status(400)
+        .json({ error: 'BadRequest', message: 'reason is required (min 3 chars)' });
+    }
+
+    // Record the reschedule request as a note on the appointment.
+    // The clinic staff sees it via the admin appointment panel and handles it
+    // manually. A dedicated reschedule-request model can replace this in v2.
+    await Appointment().findByIdAndUpdate(req.params.appointmentId, {
+      $push: {
+        internalNotes: JSON.stringify({
+          type: 'RESCHEDULE_REQUEST',
+          requestedAt: new Date().toISOString(),
+          requestedBy: String(userId),
+          reason: reason.trim(),
+        }),
+      },
+      rescheduleRequested: true,
+    });
+
+    return res.json({ ok: true, appointmentId: req.params.appointmentId });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ error: 'InternalError', message: err instanceof Error ? err.message : 'failed' });
+  }
+});
 
 // ── Reports ───────────────────────────────────────────────────────────────────
 /**

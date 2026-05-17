@@ -310,6 +310,66 @@ router.put(
 );
 
 /**
+ * إعادة احتساب الحضور على كشف راتب قائم
+ * PUT /api/payroll/:payrollId/recalculate-attendance
+ * يُعيد جلب بيانات الحضور والإجازات من المصدر الحقيقي ويُعيد حساب الخصومات والإضافات.
+ */
+router.put(
+  '/:payrollId/recalculate-attendance',
+  authenticateToken,
+  requireBranchAccess,
+  requireRole('hr', 'admin', 'payroll'),
+  async (req, res) => {
+    try {
+      const payroll = await Payroll.findById(req.params.payrollId);
+      if (!payroll) {
+        return res.status(404).json({ success: false, error: 'الراتب غير موجود' });
+      }
+      if (payroll.payment?.status === 'paid') {
+        return res.status(409).json({ success: false, error: 'لا يمكن تعديل راتب مدفوع' });
+      }
+
+      // جلب بيانات الحضور والإجازات الحالية
+      const attendanceData = await PayrollCalculationService.getAttendanceData(
+        payroll.employeeId,
+        payroll.month,
+        payroll.year
+      );
+      const leaveData = await PayrollCalculationService.getLeaveData(
+        payroll.employeeId,
+        payroll.month,
+        payroll.year
+      );
+
+      // إعادة تصفير خصومات الحضور والسجلات المرتبطة
+      payroll.penalties.attendance = 0;
+      payroll.allowances = (payroll.allowances || []).filter(
+        a => a.description == null || !a.description.startsWith('عمل إضافي')
+      );
+
+      // إعادة الحساب
+      PayrollCalculationService.calculateAttendance(payroll, attendanceData, leaveData);
+      payroll.recalculateAll();
+      await payroll.save();
+
+      res.json({
+        success: true,
+        data: payroll,
+        message: 'تم إعادة احتساب بيانات الحضور بنجاح',
+        attendanceSummary: attendanceData,
+      });
+    } catch (error) {
+      const status = error.name === 'ValidationError' || error.name === 'CastError' ? 400 : 500;
+      logger.error('Payroll recalculate error:', { message: error.message });
+      res.status(status).json({
+        success: false,
+        error: status === 400 ? 'خطأ في البيانات المدخلة' : 'خطأ في الخادم',
+      });
+    }
+  }
+);
+
+/**
  * معالجة الراتب للدفع
  * PUT /api/payroll/:payrollId/process
  */

@@ -333,8 +333,8 @@ export default function Beneficiary360Page() {
         color: alertsWgt.critical > 0 ? '#f44336' : '#607d8b',
         subtitle: alertsWgt.critical > 0 ? `${alertsWgt.critical} حرجة` : undefined,
       },
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [dashboard]
   );
 

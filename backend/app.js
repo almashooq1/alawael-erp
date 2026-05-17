@@ -1575,6 +1575,26 @@ try {
   logger.warn('[RoleProfiles] routes skipped:', rpErr.message);
 }
 
+// ─── Layout Policy / Cognitive Load Framework (Wave 24) ──────────────────────
+// Always-on. Encodes the cognitive-load contract (tier 1/2/3 elements,
+// above-the-fold budgets, smart defaults, auto-save profiles, section
+// ordering) so the UI consumes a validated layout and CI fails any
+// layout that violates the rules.
+try {
+  const { createLayoutPolicyService } = require('./intelligence/layout-policy.service');
+  const { createLayoutPolicyRouter } = require('./routes/layout-policy.routes');
+  const layoutPolicySvc = createLayoutPolicyService({ logger });
+  const { authenticate: lpAuthMw } = require('./middleware/auth');
+  app.use(
+    '/api/v1/layout-policy',
+    lpAuthMw,
+    createLayoutPolicyRouter({ layoutPolicy: layoutPolicySvc, logger })
+  );
+  logger.info('[LayoutPolicy] ✓ layout-policy routes mounted at /api/v1/layout-policy');
+} catch (lpErr) {
+  logger.warn('[LayoutPolicy] routes skipped:', lpErr.message);
+}
+
 // ─── Therapist Portal ─────────────────────────────────────────────────────────
 try {
   app.use('/api/v1/therapist', require('./routes/therapist-portal.routes'));

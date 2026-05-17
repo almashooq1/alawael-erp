@@ -29,6 +29,24 @@
  *   generator's evaluate() expects.
  */
 
+// ─── Reference loader: care-gap.v1 (Wave 29) ───────────────────
+// Pulls active beneficiaries + their care-plan/goal/vaccination data.
+// Returns null when Beneficiary model is missing — registry will skip
+// the generator entirely.
+
+const { createCareGapLoader } = require('./loaders/care-gap.loader');
+
+function careGapLoader({ models = {}, logger = console } = {}) {
+  if (!models.Beneficiary) return null;
+  return createCareGapLoader({
+    Beneficiary: models.Beneficiary,
+    CarePlan: models.CarePlan || null,
+    SmartGoal: models.SmartGoal || null,
+    Vaccination: models.Vaccination || null,
+    logger,
+  });
+}
+
 // ─── Reference loader: data-quality.v1 ─────────────────────────
 // data-quality generator wants `{ snapshots: [...] }` where each
 // snapshot has the per-dataset diagnostic numbers. In a real
@@ -109,8 +127,14 @@ function executiveDigestStub() {
 function buildLoaders({ deps = {}, realLoaders = {}, logger = console } = {}) {
   void logger;
 
+  // Reference loaders — real implementations. Each factory returns
+  // either a loader or `null` (when its required deps are missing,
+  // e.g. Beneficiary model not loaded in this Mongo-less context).
+  // `null` values are filtered out below so the generator simply
+  // doesn't run.
   const reference = {
     'data-quality.v1': dataQualityLoader(deps),
+    'care-gap.v1': careGapLoader(deps),
   };
 
   const stubs = {
@@ -121,16 +145,20 @@ function buildLoaders({ deps = {}, realLoaders = {}, logger = console } = {}) {
     'executive-digest.v1': executiveDigestStub(),
   };
 
-  const merged = { ...stubs, ...reference, ...realLoaders };
-  const stubbedGeneratorIds = Object.keys(stubs).filter(
-    gid => !realLoaders[gid] && !reference[gid]
-  );
-
-  // Drop any entries that are null (loader factory said "I can't run
-  // without my deps") — scheduler will skip those generators.
-  for (const k of Object.keys(merged)) {
-    if (merged[k] == null) delete merged[k];
+  // Filter null reference loaders (factories that returned null
+  // because their required deps were missing — e.g. care-gap loader
+  // needs the Beneficiary model). Those fall back to the stub.
+  const liveReference = {};
+  for (const [gid, loader] of Object.entries(reference)) {
+    if (loader) liveReference[gid] = loader;
   }
+
+  const merged = { ...stubs, ...liveReference, ...realLoaders };
+  // `stubbedGeneratorIds` = stub entries that were NOT overridden by
+  // either a real reference or a caller-supplied real loader.
+  const stubbedGeneratorIds = Object.keys(stubs).filter(
+    gid => !realLoaders[gid] && !liveReference[gid]
+  );
 
   return { loaders: merged, stubbedGeneratorIds };
 }

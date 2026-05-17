@@ -1954,6 +1954,80 @@ try {
   logger.warn('[BeneficiaryLifecycle] routes skipped:', blErr.message);
 }
 
+// ─── Access Review (Wave 72 — closes red-team #12) ───────────────────────────
+// Mounts /api/v1/access-review behind authenticate. Wires the Wave-72 service
+// (workflow + hash chain + cycle status + chain verification) on top of the
+// Wave-38 foundations (registry + simulator + AccessReviewAttestation model).
+// Every endpoint gates on an `access-review.*` permission code added to
+// governance.registry in this wave. Graceful degradation: if the attestation
+// model is unavailable in the test/dev environment, the router is skipped
+// with a warning instead of crashing boot.
+try {
+  const { createAccessReviewService } = require('./intelligence/access-review.service');
+  const { createAccessReviewSimulator } = require('./intelligence/access-review-simulator.service');
+  const createAccessReviewRouter = require('./routes/access-review.routes');
+
+  let attestationModel = null;
+  try {
+    attestationModel = require('./models/AccessReviewAttestation');
+  } catch {
+    /* model optional in test/dev — router skipped if absent */
+  }
+
+  if (attestationModel) {
+    let anchorLedger = null;
+    try {
+      const { anchorLedgerService } = require('./services/anchorLedger.service');
+      if (anchorLedgerService && typeof anchorLedgerService.commit === 'function') {
+        anchorLedger = anchorLedgerService;
+      }
+    } catch {
+      /* anchor optional — HIGH-sensitivity attestations skip the ledger commit */
+    }
+
+    const simulator = createAccessReviewSimulator({ logger });
+    const accessReviewSvc = createAccessReviewService({
+      attestationModel,
+      simulator,
+      anchorLedger,
+      logger,
+    });
+
+    let governanceSvc = null;
+    try {
+      const { createGovernanceService } = require('./intelligence/governance.service');
+      governanceSvc = createGovernanceService({ logger });
+    } catch {
+      /* governance must load — top-level boot already logged the failure */
+    }
+
+    if (governanceSvc) {
+      const { authenticate: arAuthMw } = require('./middleware/auth');
+      app.use(
+        '/api/v1/access-review',
+        arAuthMw,
+        createAccessReviewRouter({
+          service: accessReviewSvc,
+          simulator,
+          governance: governanceSvc,
+          logger,
+        })
+      );
+      app._accessReviewService = accessReviewSvc;
+      app._accessReviewSimulator = simulator;
+      logger.info(
+        '[AccessReview] ✓ Wave 72 routes mounted at /api/v1/access-review (closes red-team #12)'
+      );
+    } else {
+      logger.warn('[AccessReview] routes skipped: governance service unavailable');
+    }
+  } else {
+    logger.warn('[AccessReview] routes skipped: AccessReviewAttestation model not loaded');
+  }
+} catch (arErr) {
+  logger.warn('[AccessReview] routes skipped:', arErr.message);
+}
+
 // ─── Care Planning Engine (Waves 41–48) ───────────────────────────────────────
 // Mounts /api/v1/care-plans behind authenticate. The bootstrap helper wires:
 //   • CarePlanVersion model        (Wave 41)

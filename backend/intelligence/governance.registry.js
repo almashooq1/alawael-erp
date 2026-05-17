@@ -304,6 +304,66 @@ const PERMISSIONS = Object.freeze({
     'branch_manager',
     'quality_compliance',
   ],
+
+  // Wave 72 — Access Review (User Access Recertification Program)
+  // Closes red-team #12. Backed by Wave-38 foundations (registry +
+  // simulator + AccessReviewAttestation model).
+  'access-review.attestation.create': [
+    'dpo',
+    'ciso',
+    'compliance_officer',
+    'audit_admin',
+    'branch_manager',
+    'branch_director',
+    'regional_manager',
+    'chro',
+    'hr_director',
+  ],
+  'access-review.attestation.read': [
+    'dpo',
+    'ciso',
+    'compliance_officer',
+    'audit_admin',
+    'auditor',
+    'audit_committee_chair',
+    'executive_leadership',
+    'quality_compliance',
+  ],
+  'access-review.attestation.list': [
+    'dpo',
+    'ciso',
+    'compliance_officer',
+    'audit_admin',
+    'auditor',
+    'audit_committee_chair',
+    'executive_leadership',
+    'quality_compliance',
+  ],
+  'access-review.cycle.read': [
+    'dpo',
+    'ciso',
+    'compliance_officer',
+    'audit_admin',
+    'audit_committee_chair',
+    'executive_leadership',
+    'quality_compliance',
+  ],
+  'access-review.chain.verify': [
+    'dpo',
+    'ciso',
+    'audit_admin',
+    'auditor',
+    'audit_committee_chair',
+    'security_architect',
+  ],
+  'access-review.simulate': [
+    'dpo',
+    'ciso',
+    'compliance_officer',
+    'security_architect',
+    'iam.role_granter',
+    'iam.role_matrix_editor',
+  ],
 });
 
 // ─── API ────────────────────────────────────────────────────────

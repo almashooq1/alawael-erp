@@ -24,13 +24,8 @@
 'use strict';
 
 const mongoose = require('mongoose');
-const {
-  AlertSchema,
-  ALERT_STATES,
-  ARCHETYPES,
-  TIME_PRESSURES,
-  SCOPES,
-} = require('../alerts/alert.model');
+const alertModelExports = require('../alerts/alert.model');
+const { AlertSchema, ALERT_STATES, ARCHETYPES, TIME_PRESSURES, SCOPES } = alertModelExports;
 const {
   getOwnership,
   getNextAction,
@@ -43,10 +38,14 @@ const {
   COOLDOWN_DEFAULTS,
 } = require('../alerts/rule-introspection');
 
-// We mint a unique model name per test run so re-runs in the same
-// process don't clash with mongoose's model cache.
-const TestAlert =
-  mongoose.models.__TestAlertWave11 || mongoose.model('__TestAlertWave11', AlertSchema);
+// Use the canonical Alert model (alertModelExports.model). When this
+// test suite ran in isolation it minted a fresh model from the shared
+// AlertSchema — fine locally — but in CI other suites register the
+// canonical `Alert` model first, then re-registering the same schema
+// under a different name re-runs the index() calls, which Mongoose
+// 9 rejects as duplicate compound-index registration. Reusing the
+// already-registered canonical model bypasses that.
+const TestAlert = alertModelExports.model;
 
 // Helper — build the minimum valid Alert payload Wave 0-9 already
 // emitted. The Wave 11 extensions should be invisible to such docs.

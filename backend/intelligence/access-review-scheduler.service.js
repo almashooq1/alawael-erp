@@ -33,6 +33,7 @@
  */
 
 const reg = require('./access-review.registry');
+const reviewerQueue = require('./reviewer-queue.lib');
 
 const DEFAULT_DORMANT_DAYS = 90;
 const DEFAULT_EXPIRED_DAYS = 180;
@@ -91,8 +92,10 @@ function createAccessReviewScheduler({
       return { ok: false, reason: 'SIMULATOR_REQUIRED' };
     }
 
-    const queuesByReviewerRole = new Map();
-
+    // Wave 92 — build tasks first, then delegate routing/sort/count
+    // to reviewer-queue.lib. The lib is domain-agnostic so each task
+    // carries its own _reviewerRoles[] derived from the registry.
+    const tasks = [];
     for (const actor of actors) {
       let report;
       try {
@@ -105,7 +108,7 @@ function createAccessReviewScheduler({
       const primaryRole = (actor.roles && actor.roles[0]) || null;
       const reviewerRoles = primaryRole ? reg.getReviewersFor(primaryRole) : ['branch_manager'];
 
-      const task = {
+      tasks.push({
         cycleId,
         targetUserId: actor.userId,
         targetRole: primaryRole,
@@ -118,27 +121,28 @@ function createAccessReviewScheduler({
         recommendations: report.recommendations,
         cadence: report.requiredCadence,
         branchId: actor.branchId || null,
-      };
-
-      for (const role of reviewerRoles) {
-        if (!queuesByReviewerRole.has(role)) queuesByReviewerRole.set(role, []);
-        queuesByReviewerRole.get(role).push(task);
-      }
+        _reviewerRoles: reviewerRoles,
+      });
     }
 
-    // DESC by riskScore within each queue
-    for (const list of queuesByReviewerRole.values()) {
-      list.sort((a, b) => b.riskScore - a.riskScore);
-    }
+    const grouped = reviewerQueue.buildQueueByRouting({
+      items: tasks,
+      resolveQueueKeys: t => t._reviewerRoles,
+      sortBy: (a, b) => b.riskScore - a.riskScore,
+      isHighPriority: t => t.riskScore >= 70,
+    });
 
+    // Preserve the existing public shape (queues[].tasks, taskCount,
+    // highRiskCount) — strip the internal _reviewerRoles helper field
+    // so consumers don't see the routing artifact.
     return {
       ok: true,
       cycleId,
-      queues: Array.from(queuesByReviewerRole.entries()).map(([reviewerRole, tasks]) => ({
-        reviewerRole,
-        tasks,
-        taskCount: tasks.length,
-        highRiskCount: tasks.filter(t => t.riskScore >= 70).length,
+      queues: grouped.queues.map(q => ({
+        reviewerRole: q.reviewerRole,
+        tasks: q.items.map(({ _reviewerRoles, ...rest }) => rest),
+        taskCount: q.itemCount,
+        highRiskCount: q.highPriorityCount,
       })),
       totalActors: actors.length,
     };

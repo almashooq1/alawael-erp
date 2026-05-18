@@ -18,6 +18,8 @@
  * This keeps the service shape stable across the persistence cutover.
  */
 
+const reviewerQueue = require('./reviewer-queue.lib');
+
 const DEFAULT_FOLLOWUP_HOURS = 24;
 const MAX_PINNED_WIDGETS = 6;
 
@@ -253,6 +255,10 @@ function createProductivityFeaturesService({
     // Dedup: if a non-manual source already has an OPEN follow-up for
     // this owner, don't double-queue. Manual entries always create
     // fresh (operator may want multiple).
+    //
+    // Wave 92 — dedup logic delegated to reviewer-queue.lib.dedupBySource.
+    // The Mongo path is left untouched (it's an indexed point-lookup —
+    // the lib's in-memory walk would force loading every row).
     if (sourceType !== 'manual' && sourceId) {
       if (models?.FollowUp) {
         const existing = await models.FollowUp.findOne({
@@ -263,15 +269,12 @@ function createProductivityFeaturesService({
         });
         if (existing) return { ok: true, followUp: existing, deduped: true, noop: true };
       } else {
-        for (const f of stores.followUps.values()) {
-          if (
-            String(f.ownerUserId) === String(ownerUserId) &&
-            f.sourceType === sourceType &&
-            String(f.sourceId) === String(sourceId) &&
-            f.status === 'open'
-          ) {
-            return { ok: true, followUp: f, deduped: true, noop: true };
-          }
+        const { isDuplicate, match } = reviewerQueue.dedupBySource({
+          existing: stores.followUps.values(),
+          candidate: { ownerUserId, sourceType, sourceId },
+        });
+        if (isDuplicate) {
+          return { ok: true, followUp: match, deduped: true, noop: true };
         }
       }
     }

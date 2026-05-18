@@ -68,6 +68,28 @@ const DECISIONS_REQUIRING_JUSTIFICATION = new Set([
   reg.DECISION.ROTATE,
 ]);
 
+// Wave 87 — encoding-version tag for compute/verify backwards-compat.
+// The legacy encoding used `signedAt.toISOString()` which round-trips
+// through JSON / Mongoose Date with millisecond precision in practice
+// BUT loses information if a deploy ever rolls back to a system clock
+// that's only second-precision, and breaks under naive (Date(s)).toISOString()
+// re-encoding if `s` is already a Date with sub-millisecond ticks (some
+// platforms). Epoch ms is a single number, stable across serialise/
+// deserialise paths, immune to timezone/format drift.
+const HASH_ENCODING_VERSIONS = Object.freeze({
+  EPOCH_MS: 'epoch-ms', // Wave 87 default — `new Date(s).getTime()`
+  ISO_STRING: 'iso', // Legacy — `new Date(s).toISOString()`
+});
+
+const DEFAULT_ENCODING = HASH_ENCODING_VERSIONS.EPOCH_MS;
+
+function _encodeSignedAt(signedAt, version) {
+  const d = new Date(signedAt);
+  if (version === HASH_ENCODING_VERSIONS.ISO_STRING) return d.toISOString();
+  // EPOCH_MS default
+  return String(d.getTime());
+}
+
 function computeHash({
   cycleId,
   reviewType,
@@ -77,6 +99,7 @@ function computeHash({
   decision,
   signedAt,
   priorHash,
+  encodingVersion = DEFAULT_ENCODING,
 }) {
   const payload = [
     String(cycleId),
@@ -85,7 +108,7 @@ function computeHash({
     String(targetUserId),
     String(targetRole),
     String(decision),
-    new Date(signedAt).toISOString(),
+    _encodeSignedAt(signedAt, encodingVersion),
     priorHash || 'GENESIS',
   ].join('|');
   return crypto.createHash('sha256').update(payload).digest('hex');
@@ -329,9 +352,16 @@ function createAccessReviewService({
     if (!targetUserId) return { ok: false, reason: 'TARGET_REQUIRED' };
     const rows = await attestationModel.find({ targetUserId }).sort({ signedAt: 1 }).lean();
     const broken = [];
+    const legacyRows = []; // Wave 87 — attestations still on ISO encoding
     let priorHash = null;
     for (const r of rows) {
-      const expected = computeHash({
+      // Wave 87 — try the canonical EPOCH_MS encoding first. If it
+      // doesn't match, fall back to the legacy ISO_STRING encoding
+      // before declaring the row broken. Records minted before Wave 87
+      // were hashed with toISOString — they're still genuine, just
+      // pre-format-stability. We accept them but flag them for the
+      // caller so a one-shot migration script can rehash + persist.
+      const expectedNew = computeHash({
         cycleId: r.cycleId,
         reviewType: r.reviewType,
         reviewerId: r.reviewerId,
@@ -340,13 +370,45 @@ function createAccessReviewService({
         decision: r.decision,
         signedAt: r.signedAt,
         priorHash,
+        encodingVersion: HASH_ENCODING_VERSIONS.EPOCH_MS,
       });
-      if (expected !== r.currentHash) {
-        broken.push({ attestationId: String(r._id), expected, actual: r.currentHash });
+      let matchedEncoding = null;
+      if (expectedNew === r.currentHash) {
+        matchedEncoding = HASH_ENCODING_VERSIONS.EPOCH_MS;
+      } else {
+        const expectedLegacy = computeHash({
+          cycleId: r.cycleId,
+          reviewType: r.reviewType,
+          reviewerId: r.reviewerId,
+          targetUserId: r.targetUserId,
+          targetRole: r.targetRole,
+          decision: r.decision,
+          signedAt: r.signedAt,
+          priorHash,
+          encodingVersion: HASH_ENCODING_VERSIONS.ISO_STRING,
+        });
+        if (expectedLegacy === r.currentHash) {
+          matchedEncoding = HASH_ENCODING_VERSIONS.ISO_STRING;
+          legacyRows.push(String(r._id));
+        } else {
+          broken.push({
+            attestationId: String(r._id),
+            expected: expectedNew,
+            actual: r.currentHash,
+            triedEncodings: [HASH_ENCODING_VERSIONS.EPOCH_MS, HASH_ENCODING_VERSIONS.ISO_STRING],
+          });
+        }
       }
+      void matchedEncoding;
       priorHash = r.currentHash;
     }
-    return { ok: true, broken, chainLength: rows.length };
+    return {
+      ok: true,
+      broken,
+      chainLength: rows.length,
+      legacyEncodingCount: legacyRows.length,
+      legacyAttestationIds: legacyRows,
+    };
   }
 
   return {
@@ -363,4 +425,5 @@ function createAccessReviewService({
 module.exports = {
   createAccessReviewService,
   computeHash,
+  HASH_ENCODING_VERSIONS,
 };

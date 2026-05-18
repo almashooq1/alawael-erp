@@ -312,6 +312,20 @@ const HIGH_SENSITIVITY_TRANSITIONS = Object.freeze(
 
 // ─── Helpers ───────────────────────────────────────────────────────
 
+// Wave 94 — state-machine primitives delegated to workflow.lib so the
+// platform's 5 parallel workflows can share one validator. We preserve
+// findTransition + getAllowedTransitionsFrom over the local TRANSITIONS
+// array so callers that compare transition object identity (e.g., the
+// service's `reg.findTransition(id) === t` patterns) continue to work
+// — the lib's frozen copy would be a different reference.
+const { defineWorkflow } = require('./workflow.lib');
+const _workflow = defineWorkflow({
+  id: 'beneficiary-lifecycle',
+  states: [...STATES],
+  transitions: TRANSITIONS.map(t => ({ id: t.id, from: [...t.from], to: t.to })),
+  finalStates: [LIFECYCLE_STATES.DELETED],
+});
+
 function findTransition(transitionId) {
   return TRANSITION_BY_ID[transitionId] || null;
 }
@@ -321,17 +335,13 @@ function getAllowedTransitionsFrom(currentState) {
 }
 
 function validateTransitionRequest({ fromState, transitionId }) {
-  const t = findTransition(transitionId);
-  if (!t) return { valid: false, reason: 'UNKNOWN_TRANSITION' };
-  if (!t.from.includes(fromState)) {
-    return {
-      valid: false,
-      reason: 'INVALID_FROM_STATE',
-      allowed: t.from,
-      requested: fromState,
-    };
-  }
-  return { valid: true, transition: t };
+  const r = _workflow.validateTransition({ fromState, transitionId });
+  if (!r.valid) return r;
+  // The lib returned its frozen copy; swap to the registry's original
+  // transition object so existing callers that read transition.severity /
+  // .mfaTier / .sideEffects / etc. (fields beyond the state-machine
+  // contract) keep working unchanged.
+  return { valid: true, transition: TRANSITION_BY_ID[transitionId] };
 }
 
 function requiresNafath(transitionId) {

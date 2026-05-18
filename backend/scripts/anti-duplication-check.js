@@ -108,6 +108,21 @@ const PATTERNS = [
     ],
   },
   {
+    id: 'new_validate_transition_request',
+    why: 'State-machine validation belongs in workflow.lib.defineWorkflow().validateTransition (Wave 94). Per-registry validators drift apart.',
+    // Matches a NEW DECLARATION of validateTransitionRequest only — not call-sites.
+    // The negative lookbehind (?<![.\w]) excludes `.validateTransitionRequest`
+    // (method call) and `myValidateTransitionRequest` (similar names).
+    regex:
+      /(?<![.\w])(function\s+validateTransitionRequest\s*\(|const\s+validateTransitionRequest\s*=)/,
+    allowedFiles: [
+      'intelligence/workflow.lib.js', // canonical
+      'intelligence/beneficiary-lifecycle.registry.js', // Wave 94 — delegates to workflow.lib but keeps public API
+      'intelligence/care-planning.registry.js', // U4 candidate — pre-existing, awaiting migration in future wave
+      'intelligence/care-plan.service.js', // U4 candidate — pre-existing, awaiting migration in future wave
+    ],
+  },
+  {
     id: 'new_hash_chain_compute',
     why: 'Hash-chain compute helpers belong in intelligence/hash-chain.lib (Wave 88). External cert chains under services/blockchain are out of scope.',
     // Match `function computeHash(` or `const computeHash =` as a declaration

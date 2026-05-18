@@ -641,6 +641,120 @@ router.post(
   })
 );
 
+/**
+ * POST /api/ai-analytics/schedule/optimize/v2
+ * Wave 117 / P3.5 — Risk-aware schedule optimization.
+ *
+ * Runs the v1 greedy + constraint-satisfaction optimizer, then
+ * enriches each scheduled appointment with a Wave-115 no-show
+ * risk score + recommended interventions, computes aggregate
+ * "expected attended" metrics, and surfaces swap suggestions that
+ * trade safe slots between high- and low-risk beneficiaries.
+ *
+ * Self-disables gracefully when the no-show predictor isn't wired
+ * (returns v1 schedule with no_show_band='unknown' per slot).
+ */
+router.post(
+  '/schedule/optimize/v2',
+  asyncHandler(async (req, res) => {
+    const { branch_id, week_start, constraints = {}, max_swap_suggestions = 5 } = req.body;
+    if (!branch_id || !week_start) {
+      return res.status(400).json({ message: 'branch_id و week_start مطلوبان' });
+    }
+    const weekStartDate = new Date(week_start);
+    if (isNaN(weekStartDate.getTime())) {
+      return res.status(400).json({ message: 'تنسيق التاريخ غير صحيح' });
+    }
+
+    const Beneficiary = require('../models/Beneficiary');
+    const Appointment = require('../models/Appointment');
+    const User = (() => {
+      try {
+        return require('../models/User');
+      } catch {
+        return null;
+      }
+    })();
+
+    const weekEnd = new Date(weekStartDate);
+    weekEnd.setDate(weekEnd.getDate() + 7);
+
+    const [activeBeneficiaries, existingAppointments, specialists] = await Promise.all([
+      Beneficiary.find({ branch_id, status: 'active', deleted_at: null })
+        .select(
+          '_id name_ar full_name disability_severity disability_type status branch_id preferred_time required_specialty'
+        )
+        .lean(),
+      Appointment.find({
+        branch_id,
+        appointment_date: { $gte: weekStartDate, $lte: weekEnd },
+        status: { $ne: 'cancelled' },
+      }).lean(),
+      User
+        ? User.find({ branch_id, is_active: true, deleted_at: null })
+            .select('_id name_ar name specialties availability max_caseload current_caseload')
+            .lean()
+        : Promise.resolve([]),
+    ]);
+
+    // Pull 90-day history per beneficiary so the no-show extractor
+    // can compute its features. Single Mongo query keyed by beneficiary.
+    const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 3600 * 1000);
+    const benIds = activeBeneficiaries.map(b => b._id);
+    const historyRows = await Appointment.find({
+      beneficiary: { $in: benIds },
+      date: { $gte: ninetyDaysAgo, $lt: weekStartDate },
+    })
+      .select('_id beneficiary date startTime status')
+      .lean();
+    const historyByBeneficiary = {};
+    for (const h of historyRows) {
+      const k = String(h.beneficiary);
+      (historyByBeneficiary[k] = historyByBeneficiary[k] || []).push(h);
+    }
+
+    const {
+      optimizeWeeklySchedule: optimizeV1,
+    } = require('../services/ai/scheduleOptimizer.service');
+    const { enrichScheduleWithRisk } = require('../services/ai/scheduleOptimizerV2.service');
+
+    const v1Result = optimizeV1({
+      branchId: branch_id,
+      weekStart: weekStartDate,
+      beneficiaries: activeBeneficiaries,
+      specialists,
+      existingAppointments,
+      constraints,
+    });
+
+    // Pull the no-show predictor from app — it's optional. If missing,
+    // enrichment marks every slot as band='unknown' and the rest of
+    // the v2 surface still works (no swap suggestions, score = v1).
+    const noShowService =
+      req.app && req.app._noShowPredictionService ? req.app._noShowPredictionService : null;
+
+    const enriched = enrichScheduleWithRisk({
+      v1Result,
+      historyByBeneficiary,
+      noShowService,
+      maxSuggestions: Number(max_swap_suggestions) || 5,
+    });
+
+    if (!enriched.ok) {
+      return res.status(500).json({ message: 'v2 enrichment failed', reason: enriched.reason });
+    }
+
+    res.json({
+      data: {
+        v2: enriched.v2Result,
+        comparison: enriched.comparison,
+        swapSuggestions: enriched.swapSuggestions,
+        riskPredictorAvailable: Boolean(noShowService),
+      },
+    });
+  })
+);
+
 // ═══════════════════════════════════════════════════════════════════════════
 // SMART PLAN SUGGESTION — اقتراح الخطة العلاجية الذكية
 // ═══════════════════════════════════════════════════════════════════════════

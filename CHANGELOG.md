@@ -8,6 +8,75 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [Unreleased] — 2026-05-19 — Wave 117: Schedule Optimizer V2 (closes P3.5)
+
+Closes **P3.5** from `docs/blueprint/09-roadmap.md §5`. V1 schedule
+optimizer already existed; V2 enriches the v1 output with Wave-115
+no-show risk scoring so the optimizer no longer treats every slot as
+equally likely to be attended. Brings P3 closure from 4/6 to **5/6**.
+
+### Architecture
+
+V2 composes over v1's existing greedy + constraint-satisfaction
+algorithm rather than replacing it — small blast radius, easy to
+revert. Reuses Wave-115 `extractFeatures` + `scoreFromFeatures` so
+risk scores are calibrated against the same model operators see
+elsewhere. Soft penalties: risk costs up to 30 of 100 base points,
+time-of-day stability adds up to 8; v1 base score still dominates.
+Graceful: when the no-show service isn't wired, V2 returns the v1
+schedule with `no_show_band: 'unknown'` per slot.
+
+### Added — Backend (2 new + 1 mod, +23 tests)
+
+- **`services/ai/scheduleOptimizerV2.service.js`** (339 lines) —
+  composes over `scheduleOptimizer.service.js`. Public API:
+
+  - `enrichScheduleWithRisk({v1Result, historyByBeneficiary,
+noShowService, maxSuggestions?, now?})` — pure; returns
+    `{ok, v2Result, comparison, swapSuggestions}`.
+  - `optimizeWeeklyScheduleV2({...v1 params, historyByBeneficiary,
+noShowService})` — convenience wrapper that runs v1 + enrichment.
+  - Internal helpers exported for tests: `_scoreSlotRisk`,
+    `_computeComparison`, `_findSwapSuggestions`, `_riskPenalty`,
+    `_slotStabilityBonus`.
+
+  Swap suggestion logic identifies (high|critical)-risk appointments
+  sitting in stable mid-morning slots (9-12) where a same-day low-risk
+  appointment is in an unstable slot (<9 or ≥14). Up to 5 swaps per
+  call (configurable).
+
+- **`__tests__/wave117-schedule-optimizer-v2.test.js`** (329 lines) —
+  23 tests covering: penalty/bonus curves, `_scoreSlotRisk` happy +
+  degradation paths, `_computeComparison` aggregate metrics,
+  `_findSwapSuggestions` matching logic + same-beneficiary exclusion +
+  cross-day exclusion, `enrichScheduleWithRisk` end-to-end including
+  graceful unknown-band when the service is absent,
+  `optimizeWeeklyScheduleV2` integration. **23/23 pass in 0.42s.**
+
+### Modified — Backend
+
+- **`routes/ai-analytics.routes.js`** — new endpoint:
+  `POST /api/ai-analytics/schedule/optimize/v2` (+120 lines). Loads
+  active beneficiaries + existing appointments + specialists + the
+  90-day appointment history map needed for risk scoring, instantiates
+  the Wave-115 no-show service, runs `optimizeWeeklyScheduleV2`, and
+  returns the enriched result + comparison + swap suggestions.
+
+### Verification
+
+- **Tests: 392/392 pass across 16 suites** in 9.4s (Hikvision 309 +
+  Wave 115 43 + Wave 116 17 + Wave 117 23; 0 regressions).
+- **Lint: clean** across all 3 touched/added files.
+- **Anti-duplication (Wave 93 / G1): clean** across 2039 files.
+
+### Phase 3 progress
+
+P3.1 ✅ · P3.2 ✅ · P3.3 ⚠️ · **P3.4 ✅** · **P3.5 ✅ (Wave 117)** ·
+P3.6 ❌. **5 of 6 deliverables closed.** Only P3.6 (Parent Chatbot)
+remains — a bigger greenfield wave (LLM + KB + portal UI).
+
+---
+
 ## [Unreleased] — 2026-05-19 — Wave 116: No-Show Operationalization (P3.4 cycle complete)
 
 Closes the operational loop on Wave 115 — predictions now run on a

@@ -56,10 +56,30 @@ const REASON = Object.freeze({
 // baseline lives in one place. Local map kept as a derived index so
 // the lookup-by-tier shape (used by checkMfaTier below) stays the same.
 const sensitivityGrade = require('./sensitivity-grade.lib');
+const evidenceSnapshot = require('./evidence-snapshot.lib');
 const MFA_FRESHNESS_MIN = Object.freeze({
   2: Math.round(sensitivityGrade.SENSITIVITY_GRADES.HIGH.mfaFreshnessMs / 60_000),
   3: Math.round(sensitivityGrade.SENSITIVITY_GRADES.CRITICAL.mfaFreshnessMs / 60_000),
 });
+
+// Wave 91 — fields captured in the subject snapshot for lifecycle
+// transitions. These are the fields a reasonable auditor would expect
+// to see when re-creating "what did the approver know at decision time?"
+// for any HIGH/CRITICAL transition (transfer-branch, archive, deletion).
+//
+// Kept narrow on purpose — PHI is NOT captured (no diagnoses, no
+// clinical notes); the snapshot only proves identity + administrative
+// state. Clinical evidence lives in CarePlanVersion.evidenceHash which
+// is its own per-version snapshot.
+const LIFECYCLE_SUBJECT_FIELDS = Object.freeze([
+  'status',
+  'branchId',
+  'name',
+  'primaryGuardianId',
+  'dateOfBirth',
+  'updatedAt',
+]);
+const LIFECYCLE_SUBJECT_DATA_KINDS = Object.freeze(['beneficiary-identity', 'beneficiary-admin']);
 
 const FINAL_STATES = new Set([
   reg.LIFECYCLE_STATES.DELETED,
@@ -213,12 +233,22 @@ function createBeneficiaryLifecycleService({
 
     // Look up current state. If no beneficiaryModel injected (tests),
     // caller must pass `metadata.currentState` so we can validate.
+    // Wave 91 — also fetch the wider field set when the grade requires
+    // a subject snapshot (HIGH/CRITICAL); cheaper than re-fetching.
+    const grade = sensitivityGrade.gradeForLifecycleTransition(t);
+    const needsSnapshot = grade.requiresLedgerAnchor;
+
     let currentState = metadata.currentState || null;
-    if (!currentState && beneficiaryModel) {
+    let snapshotSource = metadata.subjectForSnapshot || null;
+    if ((!currentState || (needsSnapshot && !snapshotSource)) && beneficiaryModel) {
       try {
-        const b = await beneficiaryModel.findById(beneficiaryId).select('status branchId').lean();
+        const projection = needsSnapshot
+          ? `status branchId name primaryGuardianId dateOfBirth updatedAt`
+          : 'status branchId';
+        const b = await beneficiaryModel.findById(beneficiaryId).select(projection).lean();
         if (!b) return { ok: false, reason: REASON.BENEFICIARY_NOT_FOUND };
-        currentState = b.status;
+        if (!currentState) currentState = b.status;
+        if (needsSnapshot && !snapshotSource) snapshotSource = b;
       } catch (err) {
         logger.warn && logger.warn(`[lifecycle] beneficiary lookup failed: ${err.message}`);
       }
@@ -245,6 +275,25 @@ function createBeneficiaryLifecycleService({
       return { ok: false, reason: REASON.INVALID_REASON_CODE };
     }
 
+    // Wave 91 — capture a tamper-evident snapshot for HIGH/CRITICAL
+    // transitions. Falls back gracefully when no beneficiaryModel +
+    // no snapshotSource (test contexts that pass currentState directly
+    // but don't supply the rest of the record); in that case the
+    // snapshot is omitted rather than synthesising an empty record.
+    let subjectSnapshot = null;
+    if (needsSnapshot && snapshotSource) {
+      try {
+        subjectSnapshot = evidenceSnapshot.captureSnapshot({
+          entity: snapshotSource,
+          dataKinds: LIFECYCLE_SUBJECT_DATA_KINDS,
+          fields: LIFECYCLE_SUBJECT_FIELDS,
+          takenAt: now(),
+        });
+      } catch (err) {
+        logger.warn && logger.warn(`[lifecycle] snapshot capture failed: ${err.message}`);
+      }
+    }
+
     const record = await transitionLog.create({
       beneficiaryId,
       sourceBranchId: branchId,
@@ -260,6 +309,7 @@ function createBeneficiaryLifecycleService({
       evidenceLinks,
       status: reg.TRANSITION_STATUS.PENDING,
       correlationId,
+      subjectSnapshot,
       metadata,
     });
 

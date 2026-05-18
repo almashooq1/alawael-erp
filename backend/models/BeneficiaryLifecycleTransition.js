@@ -42,6 +42,20 @@ const ApprovalSchema = new mongoose.Schema(
   { _id: false }
 );
 
+// Wave 91 — subject-state snapshot captured at request time for
+// HIGH/CRITICAL transitions. Closes U6 from the Wave-87 canonical
+// analysis (lifecycle had no proof of what the approver saw).
+const SubjectSnapshotSchema = new mongoose.Schema(
+  {
+    takenAt: { type: Date, required: true },
+    dataKinds: { type: [{ type: String, maxlength: 100 }], default: () => [] },
+    payload: { type: mongoose.Schema.Types.Mixed, required: true },
+    payloadHash: { type: String, required: true, maxlength: 128 },
+    hashEncodingVersion: { type: String, default: 'epoch-ms', maxlength: 20 },
+  },
+  { _id: false }
+);
+
 const SideEffectAuditSchema = new mongoose.Schema(
   {
     operation: { type: String, required: true, maxlength: 100 },
@@ -101,6 +115,9 @@ const BeneficiaryLifecycleTransitionSchema = new mongoose.Schema(
     correlationId: { type: String, default: null, maxlength: 100, index: true },
     sideEffectsAudit: { type: [SideEffectAuditSchema], default: () => [] },
     anchorTxId: { type: String, default: null, maxlength: 200 },
+    // Wave 91 — null for LOW/MEDIUM transitions, populated for HIGH/CRITICAL
+    // via evidence-snapshot.lib at request time.
+    subjectSnapshot: { type: SubjectSnapshotSchema, default: null },
     metadata: { type: mongoose.Schema.Types.Mixed, default: () => ({}) },
   },
   { timestamps: true, collection: 'beneficiary_lifecycle_transitions' }

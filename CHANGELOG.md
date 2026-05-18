@@ -8,6 +8,105 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [Unreleased] — 2026-05-19 — Wave 116: No-Show Operationalization (P3.4 cycle complete)
+
+Closes the operational loop on Wave 115 — predictions now run on a
+daily cron, get validated against actual outcomes once the appointment
+reaches a terminal state, and feed accuracy back into the summary
+endpoint. P3.4 is no longer just "the model exists" — it's a running
+feedback cycle.
+
+### Added — Backend (2 new + 2 mod, +17 tests)
+
+- **`scripts/no-show-scan.js`** — daily-cron entry point. Runs
+  `dailyScanAllBranches` (which delegates to `predictBatch` with no
+  branchId), emits AiPrediction documents for every PENDING/CONFIRMED
+  appointment in the look-ahead window. Supports `--json`, `--quiet`,
+  `--dry-run`, `--horizon=H`, `--branch=ID`, `--help`. Exit 0 on
+  success, 1 on failure. Mirrors `attendance-digest.js` shape so it
+  drops cleanly into the same cron harness.
+
+- **`scripts/no-show-validate.js`** — end-of-day sweeper. Runs
+  `validatePending`, which scans active attendance predictions with
+  past `target_date` + null `actual_value`, looks up the appointment,
+  and writes `actual_value` if the appointment reached a terminal
+  state. Supports `--json`, `--quiet`, `--since=ISO`, `--limit=N`,
+  `--help`. Same exit-code contract.
+
+- **`intelligence/no-show-prediction.service.js`** — 3 new methods:
+
+  - `validateActualOutcome({appointmentId, finalStatus, actualValue?})`
+    — finds latest active attendance prediction for the appointment,
+    sets `actual_value` (from `STATUS_TO_ACTUAL_VALUE` map or explicit
+    override, clamped to [0,1]), writes `deviation` + `validated_at` +
+    `status='expired'`. Uses the model's `validatePrediction()` method
+    when available, falls back to direct save / `updateOne` for lean
+    documents. **Idempotent**: returns `alreadyValidated:true` without
+    re-writing if `actual_value` already populated.
+  - `validatePending({since?, limit?})` — sweeper called by the CLI.
+    Returns `{ok, generatedAt, since, stats: {total, validated,
+accurate, skippedNotTerminal, skippedAppointmentMissing, failed},
+accuracy, results[]}`.
+  - `dailyScanAllBranches({horizonHours?, dryRun?})` — thin wrapper
+    around `predictBatch({branchId:null, ...})`.
+
+- **`intelligence/no-show-prediction.registry.js`** — additions:
+
+  - `TERMINAL_STATUSES` — `COMPLETED / CHECKED_IN / IN_PROGRESS /
+NO_SHOW / CANCELLED` (RESCHEDULED intentionally excluded — the
+    outcome moved to a new appointment row).
+  - `STATUS_TO_ACTUAL_VALUE` — `COMPLETED|CHECKED_IN|IN_PROGRESS → 0`,
+    `NO_SHOW → 1`, `CANCELLED → 0.5` (soft no-show: appointment didn't
+    happen but the patient gave notice; the 0.15 accuracy tolerance
+    keeps medium-band predictions accurate against this).
+  - `REASON.NO_SHOW_NO_ACTIVE_PREDICTION` (validateActualOutcome
+    couldn't find a matching prediction) +
+    `REASON.NO_SHOW_NOT_TERMINAL_STATUS` (caller passed a status that
+    isn't in `TERMINAL_STATUSES`).
+
+- **`__tests__/no-show-prediction-wave116.test.js`** — 17 tests across
+  5 sections. **17/17 pass in 0.68s.**
+
+### Modified — Backend
+
+- **`package.json` (backend)** — 4 new npm scripts:
+  `no-show:scan(:json)` + `no-show:validate(:json)`.
+- **`package.json` (root)** — matching 4 proxy scripts that cd into
+  `backend/`.
+
+### Verification
+
+- **Tests: 369/369 pass across 15 suites** in 6.7s (Hikvision 309 +
+  Wave 115 43 + Wave 116 17; 0 regressions).
+- **Lint: clean** across all 5 touched/added JS files.
+- **Anti-duplication (Wave 93 / G1): clean** across 2038 files.
+- **`--help` smoke-test**: both CLI scripts print usage and exit 0
+  without touching the DB.
+- One drift test (`no-broken-requires.test.js`) fails on 6 unrelated
+  paths in app.js (auditLog.service / anchorLedger.service /
+  BeneficiaryFile) — **pre-existing failure verified by stash + re-run
+  on pre-Wave-116 state**. Not introduced by this wave.
+
+### Operational cycle (now fully closed for P3.4)
+
+1. Morning cron: `npm run no-show:scan` → predictions for next 48h.
+2. UI reads `/api/v1/ai/no-show/summary` (Wave 115) for per-branch
+   risk view; reception can request fresh predictions via
+   `/predict/appointment/:id`.
+3. Evening cron: `npm run no-show:validate` → writes `actual_value`
+   for any prediction whose appointment hit a terminal state.
+4. Next morning: `summarizeByBranch` returns an `accuracy` metric
+   based on yesterday's validations — feeds the decision on whether
+   to keep the heuristic v1 or upgrade to ML (future wave).
+
+### Phase 3 progress
+
+P3.1 ✅ · P3.2 ✅ · P3.3 ⚠️ · **P3.4 ✅ (Wave 115) + fully operational
+(Wave 116)** · P3.5 ⚠️ · P3.6 ❌. Still 4 of 6 deliverables closed but
+P3.4 now has a running feedback cycle, not just code on disk.
+
+---
+
 ## [Unreleased] — 2026-05-18 — Wave 115: No-Show Prediction (P3.4 ✅)
 
 Closes **P3.4** from `docs/blueprint/09-roadmap.md §5` — the cleanest

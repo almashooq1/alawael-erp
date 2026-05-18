@@ -1,7 +1,7 @@
 # Phase P3 — Intelligence & Automation | خطة المرحلة الثالثة
 
 > **هذا الملف tracker تنفيذي يربط الـ deliverables التعاقدية في blueprint/09-roadmap.md بالموجات الفعلية المُسلَّمة في git log.**
-> آخر مزامنة: 2026-05-18 (بعد Wave 115).
+> آخر مزامنة: 2026-05-19 (بعد Wave 116).
 
 ---
 
@@ -49,6 +49,7 @@
 | 96-113 | **Hikvision vertical** (workforce surveillance + face library + recognition + reconciliation + payroll + fraud detection + sync + scheduler + stream + branch-config + ops aggregator + org summary + **anomaly detector**) | **P3.1 application + new vertical** |
 | 114    | **Hikvision Anomaly History** — snapshot persistence + trend chart on top of Wave 113                                                                                                                                       | P3.7 (Hikvision continuation)       |
 | 115    | **No-Show Prediction** — 9-feature heuristic + 4 risk bands + 6 interventions + AiPrediction persistence + 3 endpoints                                                                                                      | **P3.4 — مُغلق**                    |
+| 116    | **No-Show Operationalization** — validateActualOutcome + validatePending sweeper + dailyScanAllBranches + 2 CLI scripts + accuracy tracking                                                                                 | **P3.4 — تشغيلي**                   |
 
 ---
 
@@ -110,11 +111,32 @@
 - `AiPrediction` reuse — لا schema migration؛ `prediction_type:'attendance'` موجود بالفعل في الـ enum، `prediction_details.{band, contributions, interventions}` يحمل التفاصيل.
 - Graceful degradation: feature يتعطّل بصمت إن لم تُحمَّل نماذج Appointment أو AiPrediction.
 
-## 7. Wave 116+ — ما تبقّى في P3
+## 7. Wave 116 — مُسلَّم: P3.4 Operationalization ✅
 
-### بدائل Wave 116:
+**التسليم الفعلي:**
 
-- **(أ) P3.4 UI** — badge على صفحة المواعيد + لوحة per-branch + scheduler يومي. تكملة طبيعية.
+| Artifact | المسار                                                                       | الحجم                                                                      |
+| -------- | ---------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| Registry | `intelligence/no-show-prediction.registry.js`                                | إضافة `TERMINAL_STATUSES` + `STATUS_TO_ACTUAL_VALUE` + 2 REASON            |
+| Service  | `intelligence/no-show-prediction.service.js`                                 | إضافة `validateActualOutcome` + `validatePending` + `dailyScanAllBranches` |
+| Tests    | `__tests__/no-show-prediction-wave116.test.js`                               | جديد، 17/17 يمر                                                            |
+| Scripts  | `scripts/no-show-scan.js` + `scripts/no-show-validate.js`                    | جديد — CLI داعم لـ --json/--quiet/--dry-run/--horizon/--branch             |
+| npm      | `no-show:scan(:json)` + `no-show:validate(:json)` في backend + proxy في root | إضافة                                                                      |
+
+**الفحوصات:** 369/369 عبر 15 suites (Hikvision 309 + Wave 115 43 + Wave 116 17). Lint نظيف. Anti-duplication نظيف عبر 2038 ملف.
+
+**سيناريو التشغيل الكامل لدورة P3.4:**
+
+1. **Cron يومي صباحي** → `npm run no-show:scan` → ينشئ تنبؤات لكل مواعيد الـ 48 ساعة القادمة، 4 bands + تدخلات مقترحة.
+2. **خلال اليوم** → Frontend يقرأ من `GET /api/v1/ai/no-show/summary` للوحات per-branch، أو `POST /api/v1/ai/no-show/predict/appointment/:id` لتنبؤ فوري.
+3. **Cron مسائي/ليلي** → `npm run no-show:validate` → يقارن predictions بالنتائج الفعلية، يكتب `actual_value` + `deviation` + accuracy.
+4. **مراقبة الدقة** → استعلام `summarizeByBranch` يعطي accuracy% — أساس قرار الترقية لـ ML model في موجة لاحقة.
+
+## 8. Wave 117+ — ما تبقّى في P3
+
+### بدائل Wave 117:
+
+- **(أ) P3.4 UI** — badge على صفحة المواعيد + لوحة per-branch تقرأ من `/summary`. تكملة UX طبيعية.
 - **(ب) P3.5 v2 confirmation + upgrade** — راجع scheduleOptimizer الحالي، رفعه لـ CP-SAT إن كان بسيطًا.
 - **(ج) Smart Alerts cross-domain harmonization** — تعميم نمط Wave 113 anomaly registry على alertEvaluator القديم.
 - **(د) Hikvision Anomaly History UI** — صفحة trend chart فوق Wave 114 (داخل الـ vertical نفسها).

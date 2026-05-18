@@ -82,6 +82,41 @@ const INTERVENTIONS_BY_BAND = Object.freeze({
 //                                       to the new appointment row
 const PREDICTABLE_STATUSES = Object.freeze(['PENDING', 'CONFIRMED']);
 
+// Statuses that close the loop on a prediction — at this point we
+// can compare predicted_value against actual outcome and feed the
+// AiPrediction.actual_value field. RESCHEDULED is intentionally
+// EXCLUDED: the outcome moved to a new appointment row, so neither
+// the old prediction nor a hard outcome applies.
+const TERMINAL_STATUSES = Object.freeze([
+  'COMPLETED',
+  'CHECKED_IN',
+  'IN_PROGRESS',
+  'NO_SHOW',
+  'CANCELLED',
+]);
+
+// Outcome value emitted into AiPrediction.actual_value when a
+// prediction's appointment reaches a terminal state. Score is on
+// the same [0,1] scale as predicted_value so the existing accuracy
+// tolerance (|actual - predicted| ≤ ACCURACY_TOLERANCE) just works.
+//
+//   COMPLETED / CHECKED_IN / IN_PROGRESS → attended (0)
+//   NO_SHOW                              → no-show (1)
+//   CANCELLED                            → soft no-show (0.5)
+//                                          — same person, different signal:
+//                                          appointment didn't happen but
+//                                          the patient gave notice. The
+//                                          0.15 accuracy tolerance keeps
+//                                          medium-band predictions accurate
+//                                          against these.
+const STATUS_TO_ACTUAL_VALUE = Object.freeze({
+  COMPLETED: 0,
+  CHECKED_IN: 0,
+  IN_PROGRESS: 0,
+  NO_SHOW: 1,
+  CANCELLED: 0.5,
+});
+
 // Default look-ahead horizon for batch scans.
 const DEFAULT_BATCH_HORIZON_HOURS = 48;
 
@@ -100,6 +135,9 @@ const REASON = Object.freeze({
   NO_SHOW_BENEFICIARY_REQUIRED: 'NO_SHOW_BENEFICIARY_REQUIRED',
   NO_SHOW_PERSIST_FAILED: 'NO_SHOW_PERSIST_FAILED',
   NO_SHOW_VALIDATION_FAILED: 'NO_SHOW_VALIDATION_FAILED',
+  // ─── Wave 116 — operationalization ─────────────────────────
+  NO_SHOW_NO_ACTIVE_PREDICTION: 'NO_SHOW_NO_ACTIVE_PREDICTION',
+  NO_SHOW_NOT_TERMINAL_STATUS: 'NO_SHOW_NOT_TERMINAL_STATUS',
   PERMISSION_DENIED: 'PERMISSION_DENIED',
 });
 
@@ -128,6 +166,8 @@ module.exports = {
   INTERVENTIONS,
   INTERVENTIONS_BY_BAND,
   PREDICTABLE_STATUSES,
+  TERMINAL_STATUSES,
+  STATUS_TO_ACTUAL_VALUE,
   DEFAULT_BATCH_HORIZON_HOURS,
   BASELINE_CONFIDENCE,
   ACCURACY_TOLERANCE,

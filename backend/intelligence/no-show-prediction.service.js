@@ -408,6 +408,252 @@ function createNoShowPredictionService({
     };
   }
 
+  // ─── Wave 116 — operationalization ───────────────────────────────
+
+  /**
+   * Closes the loop on a single prediction. Given an appointment that
+   * has reached a terminal state, finds the latest active attendance
+   * prediction for that appointment and writes actual_value + deviation
+   * + validated_at + status='expired'.
+   *
+   * `finalStatus` MUST be a value in `TERMINAL_STATUSES`. RESCHEDULED
+   * is intentionally NOT terminal — the outcome moved.
+   *
+   * Idempotent: if the prediction is already validated, returns ok:true
+   * with `alreadyValidated:true` and does not re-write.
+   */
+  async function validateActualOutcome({ appointmentId, finalStatus, actualValue } = {}) {
+    if (!appointmentId) {
+      return { ok: false, reason: reg.REASON.NO_SHOW_APPOINTMENT_NOT_FOUND };
+    }
+    if (!reg.TERMINAL_STATUSES.includes(finalStatus)) {
+      return {
+        ok: false,
+        reason: reg.REASON.NO_SHOW_NOT_TERMINAL_STATUS,
+        details: { finalStatus, terminal: reg.TERMINAL_STATUSES },
+      };
+    }
+
+    const resolvedActual = Number.isFinite(actualValue)
+      ? Math.max(0, Math.min(1, actualValue))
+      : reg.STATUS_TO_ACTUAL_VALUE[finalStatus];
+    if (!Number.isFinite(resolvedActual)) {
+      // Defensive — STATUS_TO_ACTUAL_VALUE is exhaustive over TERMINAL_STATUSES.
+      return {
+        ok: false,
+        reason: reg.REASON.NO_SHOW_VALIDATION_FAILED,
+        message: `No actual_value mapped for status ${finalStatus}`,
+      };
+    }
+
+    let pred;
+    try {
+      const cursor = predictionModel.findOne
+        ? predictionModel.findOne({
+            prediction_type: 'attendance',
+            status: 'active',
+            'prediction_details.appointment_id': String(appointmentId),
+          })
+        : predictionModel.find({
+            prediction_type: 'attendance',
+            status: 'active',
+            'prediction_details.appointment_id': String(appointmentId),
+          });
+      pred = await (cursor && typeof cursor.then === 'function'
+        ? cursor
+        : cursor && typeof cursor.lean === 'function'
+          ? cursor.lean()
+          : Array.isArray(cursor)
+            ? cursor[0]
+            : cursor);
+      if (Array.isArray(pred)) pred = pred[0];
+    } catch (err) {
+      logger.warn(`[no-show] validateActualOutcome lookup failed: ${err.message}`);
+      return {
+        ok: false,
+        reason: reg.REASON.NO_SHOW_VALIDATION_FAILED,
+        message: err.message,
+      };
+    }
+
+    if (!pred) {
+      return {
+        ok: false,
+        reason: reg.REASON.NO_SHOW_NO_ACTIVE_PREDICTION,
+        details: { appointmentId: String(appointmentId) },
+      };
+    }
+    if (pred.actual_value !== null && pred.actual_value !== undefined) {
+      return {
+        ok: true,
+        alreadyValidated: true,
+        prediction: pred,
+      };
+    }
+
+    const deviation = resolvedActual - (pred.predicted_value || 0);
+    const accurate = Math.abs(deviation) <= reg.ACCURACY_TOLERANCE;
+
+    try {
+      // Mongoose document path: use validatePrediction() if available
+      // (model.js method); otherwise fall back to direct field
+      // updates + save() (testing mock path).
+      if (typeof pred.validatePrediction === 'function') {
+        await pred.validatePrediction(resolvedActual);
+      } else if (typeof pred.save === 'function') {
+        pred.actual_value = resolvedActual;
+        pred.deviation = deviation;
+        pred.validated_at = now();
+        pred.status = 'expired';
+        await pred.save();
+      } else {
+        // Plain object (lean()) — write back via updateOne if available
+        if (typeof predictionModel.updateOne === 'function' && pred._id) {
+          await predictionModel.updateOne(
+            { _id: pred._id },
+            {
+              $set: {
+                actual_value: resolvedActual,
+                deviation,
+                validated_at: now(),
+                status: 'expired',
+              },
+            }
+          );
+          pred.actual_value = resolvedActual;
+          pred.deviation = deviation;
+          pred.validated_at = now();
+          pred.status = 'expired';
+        } else {
+          throw new Error('prediction has no save/validatePrediction method');
+        }
+      }
+    } catch (err) {
+      logger.warn(`[no-show] validateActualOutcome save failed: ${err.message}`);
+      return {
+        ok: false,
+        reason: reg.REASON.NO_SHOW_VALIDATION_FAILED,
+        message: err.message,
+      };
+    }
+
+    return {
+      ok: true,
+      appointmentId: String(appointmentId),
+      finalStatus,
+      actualValue: resolvedActual,
+      predictedValue: pred.predicted_value || 0,
+      deviation: round4(deviation),
+      accurate,
+      prediction: pred,
+    };
+  }
+
+  /**
+   * Sweeper: scans active attendance predictions whose target_date is
+   * in the past + have no actual_value yet, looks up the underlying
+   * appointment, and validates if the appointment reached a terminal
+   * state.
+   *
+   * Designed to be called from a daily cron (after the day's
+   * appointments have wrapped) — see scripts/no-show-validate.js.
+   */
+  async function validatePending({ since = null, limit = 500 } = {}) {
+    const sinceDate = since ? new Date(since) : new Date(now().getTime() - 30 * DAY_MS);
+
+    let preds;
+    try {
+      const cursor = predictionModel.find({
+        prediction_type: 'attendance',
+        status: 'active',
+        target_date: { $lte: now() },
+        actual_value: null,
+        prediction_date: { $gte: sinceDate },
+      });
+      preds = await _resolveCursor(cursor);
+    } catch (err) {
+      logger.warn(`[no-show] validatePending load failed: ${err.message}`);
+      return { ok: false, reason: reg.REASON.NO_SHOW_PREDICTION_UNAVAILABLE };
+    }
+    preds = Array.isArray(preds) ? preds.slice(0, limit) : [];
+
+    const stats = {
+      total: preds.length,
+      validated: 0,
+      accurate: 0,
+      skippedNotTerminal: 0,
+      skippedAppointmentMissing: 0,
+      failed: 0,
+    };
+    const results = [];
+
+    for (const p of preds) {
+      const appointmentId = p.prediction_details && p.prediction_details.appointment_id;
+      if (!appointmentId) {
+        stats.skippedAppointmentMissing++;
+        continue;
+      }
+      let appointment;
+      try {
+        const q = appointmentModel.findById(appointmentId);
+        appointment = await (q && typeof q.lean === 'function' ? q.lean() : q);
+      } catch (err) {
+        logger.warn(`[no-show] validatePending lookup ${appointmentId}: ${err.message}`);
+        stats.failed++;
+        continue;
+      }
+      if (!appointment) {
+        stats.skippedAppointmentMissing++;
+        continue;
+      }
+      if (!reg.TERMINAL_STATUSES.includes(appointment.status)) {
+        // Appointment is still pending in the future (e.g. rescheduled);
+        // leave the prediction active.
+        stats.skippedNotTerminal++;
+        continue;
+      }
+      const r = await validateActualOutcome({
+        appointmentId,
+        finalStatus: appointment.status,
+      });
+      if (r.ok && !r.alreadyValidated) {
+        stats.validated++;
+        if (r.accurate) stats.accurate++;
+        results.push({
+          appointmentId: r.appointmentId,
+          finalStatus: r.finalStatus,
+          actualValue: r.actualValue,
+          predictedValue: r.predictedValue,
+          deviation: r.deviation,
+          accurate: r.accurate,
+        });
+      } else if (!r.ok) {
+        stats.failed++;
+      }
+    }
+
+    return {
+      ok: true,
+      generatedAt: now().toISOString(),
+      since: sinceDate.toISOString(),
+      stats,
+      accuracy: stats.validated > 0 ? round4(stats.accurate / stats.validated) : null,
+      results,
+    };
+  }
+
+  /**
+   * Convenience wrapper around predictBatch with no branchId filter
+   * — used by the daily cron script. Returns the same shape as
+   * predictBatch.
+   */
+  async function dailyScanAllBranches({
+    horizonHours = reg.DEFAULT_BATCH_HORIZON_HOURS,
+    dryRun = false,
+  } = {}) {
+    return predictBatch({ branchId: null, horizonHours, dryRun });
+  }
+
   return {
     extractFeatures,
     scoreFromFeatures,
@@ -415,6 +661,9 @@ function createNoShowPredictionService({
     predictForAppointment,
     predictBatch,
     summarizeByBranch,
+    validateActualOutcome,
+    validatePending,
+    dailyScanAllBranches,
   };
 }
 

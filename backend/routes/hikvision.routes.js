@@ -107,6 +107,9 @@ const REASON_TO_STATUS = Object.freeze({
   BRANCH_CONFIG_INVALID_KEY: 400,
   BRANCH_CONFIG_NO_BRANCH: 400,
 
+  // ── Wave 113 — Anomaly Detector
+  ANOMALY_DETECTOR_UNAVAILABLE: 503,
+
   // ── Wave 100 Phase 5 — Fraud Detection
   FRAUD_FLAG_NOT_FOUND: 404,
   FRAUD_FLAG_NOT_OPEN: 409,
@@ -233,6 +236,7 @@ function createHikvisionRouter({
   branchConfigService = null,
   branchOperationsService = null,
   orgSummaryService = null,
+  anomalyDetector = null,
   governance,
   webhookHmac = null,
   logger = console,
@@ -1605,6 +1609,22 @@ function createHikvisionRouter({
         return res.json({ success: true, data: r });
       } catch (err) {
         return safeError(res, err, 'hikvision.org-summary');
+      }
+    });
+  }
+
+  // ─── Wave 113 — Anomaly Detector ───────────────────────────
+  //   GET /anomalies                — cached anomaly list (30s TTL)
+  //   GET /anomalies?skipCache=1    — force re-detect
+  if (anomalyDetector) {
+    router.get('/anomalies', requirePerm('hikvision.anomalies.read'), async (req, res) => {
+      try {
+        const skipCache = req.query?.skipCache === '1' || req.query?.skipCache === 'true';
+        const r = await anomalyDetector.detect({ skipCache });
+        if (!r.ok) return respond(res, r);
+        return res.json({ success: true, data: r });
+      } catch (err) {
+        return safeError(res, err, 'hikvision.anomalies');
       }
     });
   }

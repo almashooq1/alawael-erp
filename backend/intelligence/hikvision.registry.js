@@ -289,6 +289,9 @@ const REASON = Object.freeze({
   BRANCH_CONFIG_INVALID_KEY: 'BRANCH_CONFIG_INVALID_KEY',
   BRANCH_CONFIG_NO_BRANCH: 'BRANCH_CONFIG_NO_BRANCH',
 
+  // ─── Wave 113 — Anomaly Detector ──────────────────────────────
+  ANOMALY_DETECTOR_UNAVAILABLE: 'ANOMALY_DETECTOR_UNAVAILABLE',
+
   // Generic
   PERMISSION_DENIED: 'PERMISSION_DENIED',
   VALIDATION_FAILED: 'VALIDATION_FAILED',
@@ -1471,6 +1474,42 @@ function computeStreamExternalEventId({
   return 'stream-' + crypto.createHash('sha1').update(seed).digest('hex').slice(0, 24);
 }
 
+// ─── Wave 113 — Anomaly Detector ───────────────────────────────
+//
+// Detector emits anomalies, not alerts. Each anomaly is keyed by a
+// deterministic dedup string so re-running the detector returns
+// the same id for the same underlying issue — the alerts subsystem
+// (or future webhook integration) can collapse repeats.
+
+const ANOMALY_KIND = Object.freeze({
+  CIRCUIT_OPEN_CLUSTER: 'circuit-open-cluster',
+  STREAM_ERRORS_SPIKE: 'stream-errors-spike',
+  SYNC_DRIFT_HIGH: 'sync-drift-high',
+  FRAUD_CRITICAL: 'fraud-critical',
+  REVIEW_QUEUE_STALE: 'review-queue-stale',
+  RECONCILIATION_BACKLOG: 'reconciliation-backlog',
+  SCHEDULER_FAILURE: 'scheduler-failure',
+  NO_STREAM_DEVICES: 'no-stream-devices',
+});
+const ANOMALY_KINDS = Object.freeze(Object.values(ANOMALY_KIND));
+
+const ANOMALY_SEVERITY = Object.freeze({
+  INFO: 'info',
+  WARNING: 'warning',
+  CRITICAL: 'critical',
+});
+const ANOMALY_SEVERITIES = Object.freeze(Object.values(ANOMALY_SEVERITY));
+
+// Thresholds the detector consults. Kept here (not embedded in the
+// service) so they're discoverable + testable.
+const ANOMALY_THRESHOLDS = Object.freeze({
+  CIRCUIT_OPEN_CLUSTER_MIN: 3, // ≥ N devices circuit-open at once
+  STREAM_ERRORS_SPIKE_MIN: 25, // any single device with ≥ N parse errors
+  SYNC_DRIFT_PCT_HIGH: 0.5, // ≥ 50% of libraries with drift
+  REVIEW_QUEUE_STALE_HOURS: 24, // oldest open review older than N hours
+  RECONCILIATION_BACKLOG_MIN: 25, // ≥ N open cases
+});
+
 /**
  * Pure helper: given (templates, devicePersonIds), compute the diff plan.
  *   templates      — array of HikvisionFaceTemplateLink (active state)
@@ -1627,6 +1666,12 @@ module.exports = {
   BRANCH_CONFIG_BOUNDS,
   mergeBranchConfig,
   validateBranchConfigPatch,
+  // Wave 113 — anomaly detector
+  ANOMALY_KIND,
+  ANOMALY_KINDS,
+  ANOMALY_SEVERITY,
+  ANOMALY_SEVERITIES,
+  ANOMALY_THRESHOLDS,
   // helpers
   isValidIPv4,
   isAttendanceEligibleKind,

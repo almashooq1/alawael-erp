@@ -1134,6 +1134,25 @@ const PERMISSIONS = Object.freeze({
     'executive_leadership',
     'head_office',
   ],
+
+  // ─── Wave 113 — Anomaly Detector ───────────────────────────
+  // Wide read — anyone who'd act on an operational alert should
+  // be able to see it. Includes branch managers/directors so
+  // they can act on issues in their branch immediately.
+  'hikvision.anomalies.read': [
+    'security_architect',
+    'security.officer',
+    'iam.role_granter',
+    'hr_admin',
+    'hr_director',
+    'branch_manager',
+    'branch_director',
+    'compliance_officer',
+    'auditor',
+    'dpo',
+    'executive_leadership',
+    'head_office',
+  ],
 });
 
 // ─── API ────────────────────────────────────────────────────────

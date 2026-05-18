@@ -2658,6 +2658,10 @@ try {
         branchOpsSvc = null;
       }
 
+      // Wave 113 anomaly detector is built AFTER the org-summary
+      // (declared below) since it depends on it. Forward declaration
+      // here just so the variable is in scope.
+
       // Wave 112 — Org-Wide Executive Summary (graceful)
       // Same pattern as Wave 111 but rolls UP rather than slicing by
       // branch. 60s cache because executive dashboards refresh on a
@@ -2691,6 +2695,26 @@ try {
       } catch (osErr) {
         logger.warn('[Hikvision] Wave 112 org-summary failed to wire:', osErr.message);
         orgSummarySvc = null;
+      }
+
+      // Wave 113 — Anomaly Detector (graceful)
+      // Depends on the org-summary service (re-uses its snapshot)
+      // + streamSupervisor for per-device parse-error scan.
+      let anomalyDetectorSvc = null;
+      if (orgSummarySvc) {
+        try {
+          const {
+            createHikvisionAnomalyDetector,
+          } = require('./intelligence/hikvision-anomaly-detector.service');
+          anomalyDetectorSvc = createHikvisionAnomalyDetector({
+            orgSummaryService: orgSummarySvc,
+            streamSupervisor,
+            logger,
+          });
+        } catch (adErr) {
+          logger.warn('[Hikvision] Wave 113 anomaly-detector failed to wire:', adErr.message);
+          anomalyDetectorSvc = null;
+        }
       }
 
       // Optional HMAC middleware for the device webhook. If the
@@ -2755,6 +2779,7 @@ try {
           branchConfigService: branchConfigSvc,
           branchOperationsService: branchOpsSvc,
           orgSummaryService: orgSummarySvc,
+          anomalyDetector: anomalyDetectorSvc,
           governance: governanceSvc,
           webhookHmac,
           logger,
@@ -2777,6 +2802,7 @@ try {
       if (branchConfigSvc) app._hikvisionBranchConfigService = branchConfigSvc;
       if (branchOpsSvc) app._hikvisionBranchOperationsService = branchOpsSvc;
       if (orgSummarySvc) app._hikvisionOrgSummaryService = orgSummarySvc;
+      if (anomalyDetectorSvc) app._hikvisionAnomalyDetector = anomalyDetectorSvc;
       const phases = ['Wave 96 Phase 1'];
       if (libraryService && enrollmentService) phases.push('Wave 97 Phase 2');
       if (parserService && attendanceSourceSvc) phases.push('Wave 98 Phase 3');
@@ -2788,6 +2814,7 @@ try {
       if (branchConfigSvc) phases.push('Wave 110 Branch-Config');
       if (branchOpsSvc) phases.push('Wave 111 Branch-Ops');
       if (orgSummarySvc) phases.push('Wave 112 Org-Summary');
+      if (anomalyDetectorSvc) phases.push('Wave 113 Anomalies');
       logger.info(`[Hikvision] ✓ ${phases.join(' + ')} routes mounted at /api/v1/hikvision`);
     } else {
       logger.warn('[Hikvision] routes skipped: governance service unavailable');

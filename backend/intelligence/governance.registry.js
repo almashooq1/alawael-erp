@@ -922,6 +922,87 @@ const PERMISSIONS = Object.freeze({
     'audit_admin',
     'dpo',
   ],
+
+  // ─── Wave 100 Phase 5 — Fraud Detection ────────────────────
+  'fraud.detection.run': [
+    // Cron-driven primarily. Operators (security architect / DPO) may
+    // force a re-scan after a tuning change.
+    'security_architect',
+    'iam.role_granter',
+    'ciso',
+    'dpo',
+  ],
+  'fraud.flag.read': [
+    'security_architect',
+    'security.officer',
+    'ciso',
+    'hr_director',
+    'chro',
+    'compliance_officer',
+    'auditor',
+    'audit_admin',
+    'audit_committee_chair',
+    'dpo',
+  ],
+  'fraud.flag.list': [
+    'security_architect',
+    'security.officer',
+    'ciso',
+    'hr_director',
+    'chro',
+    'branch_manager',
+    'branch_director',
+    'regional_manager',
+    'compliance_officer',
+    'auditor',
+    'audit_admin',
+    'dpo',
+  ],
+  'fraud.flag.acknowledge': [
+    // Operator confirms the flag is real — kept on score.
+    'security_architect',
+    'security.officer',
+    'ciso',
+    'hr_director',
+    'chro',
+    'compliance_officer',
+    'dpo',
+  ],
+  'fraud.flag.dismiss': [
+    // Operator confirms false positive — removed from score.
+    // Narrower than acknowledge — dismiss has tamper risk so we
+    // restrict to senior + DPO/audit.
+    'security_architect',
+    'ciso',
+    'hr_director',
+    'chro',
+    'dpo',
+    'audit_committee_chair',
+  ],
+  'fraud.flag.escalate': [
+    'security_architect',
+    'security.officer',
+    'ciso',
+    'compliance_officer',
+    'auditor',
+    'dpo',
+  ],
+  'fraud.score.read': [
+    'security_architect',
+    'security.officer',
+    'ciso',
+    'hr_director',
+    'chro',
+    'branch_manager',
+    'branch_director',
+    'regional_manager',
+    'compliance_officer',
+    'auditor',
+    'audit_admin',
+    'audit_committee_chair',
+    'dpo',
+  ],
+  'fraud.score.recompute': ['security_architect', 'iam.role_granter', 'ciso', 'dpo'],
 });
 
 // ─── API ────────────────────────────────────────────────────────

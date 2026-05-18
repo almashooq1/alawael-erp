@@ -2150,6 +2150,16 @@ try {
     /* Phase 4 models optional — reconciliation/payroll routes skipped if absent */
   }
 
+  // Wave 100 Phase 5 — fraud detection models (optional)
+  let HikvisionFraudFlag = null;
+  let HikvisionFraudScore = null;
+  try {
+    HikvisionFraudFlag = require('./models/HikvisionFraudFlag');
+    HikvisionFraudScore = require('./models/HikvisionFraudScore');
+  } catch {
+    /* Phase 5 models optional — fraud routes skipped if absent */
+  }
+
   if (HikvisionDevice && HikvisionCameraChannel && HikvisionRawEvent && HikvisionDeviceHealthLog) {
     let governanceSvc = null;
     try {
@@ -2363,6 +2373,53 @@ try {
         );
       }
 
+      // Wave 100 Phase 5 — fraud detection (graceful)
+      // Wires detection + score services. Score service is constructed
+      // FIRST so it can be injected into detection (detection emits
+      // flags and incrementally applies score impact).
+      let fraudScoreSvc = null;
+      let fraudDetectionSvc = null;
+      if (HikvisionFraudFlag && HikvisionFraudScore && HikvisionProcessedEvent) {
+        try {
+          const {
+            createHikvisionFraudScoreService,
+          } = require('./intelligence/hikvision-fraud-score.service');
+          const {
+            createHikvisionFraudDetectionService,
+          } = require('./intelligence/hikvision-fraud-detection.service');
+          let branchModelForFraud = null;
+          try {
+            branchModelForFraud = require('./models/Branch');
+          } catch {
+            /* off-hours detector skips if branch model unavailable */
+          }
+          fraudScoreSvc = createHikvisionFraudScoreService({
+            scoreModel: HikvisionFraudScore,
+            flagModel: HikvisionFraudFlag,
+            logger,
+          });
+          fraudDetectionSvc = createHikvisionFraudDetectionService({
+            flagModel: HikvisionFraudFlag,
+            processedEventModel: HikvisionProcessedEvent,
+            templateModel: HikvisionFaceTemplateLink || null,
+            branchModel: branchModelForFraud,
+            scoreService: fraudScoreSvc,
+            logger,
+          });
+        } catch (p5err) {
+          logger.warn(
+            '[Hikvision] Phase 5 fraud detection services failed to wire:',
+            p5err.message
+          );
+          fraudScoreSvc = null;
+          fraudDetectionSvc = null;
+        }
+      } else if (HikvisionFraudFlag || HikvisionFraudScore) {
+        logger.info(
+          '[Hikvision] Phase 5 partial models found — full Phase 5 wiring requires Flag + Score + ProcessedEvent (from Phase 3)'
+        );
+      }
+
       // Optional HMAC middleware for the device webhook. If the
       // secret env var isn't set, the webhook is omitted but the
       // operator-replay endpoint stays available.
@@ -2417,6 +2474,8 @@ try {
           attendanceSourceService: attendanceSourceSvc,
           reconciliationService: reconciliationSvc,
           payrollPeriodService: payrollPeriodSvc,
+          fraudDetectionService: fraudDetectionSvc,
+          fraudScoreService: fraudScoreSvc,
           governance: governanceSvc,
           webhookHmac,
           logger,
@@ -2431,10 +2490,13 @@ try {
       if (attendanceSourceSvc) app._attendanceSourceService = attendanceSourceSvc;
       if (reconciliationSvc) app._attendanceReconciliationService = reconciliationSvc;
       if (payrollPeriodSvc) app._payrollPeriodService = payrollPeriodSvc;
+      if (fraudDetectionSvc) app._hikvisionFraudDetectionService = fraudDetectionSvc;
+      if (fraudScoreSvc) app._hikvisionFraudScoreService = fraudScoreSvc;
       const phases = ['Wave 96 Phase 1'];
       if (libraryService && enrollmentService) phases.push('Wave 97 Phase 2');
       if (parserService && attendanceSourceSvc) phases.push('Wave 98 Phase 3');
       if (reconciliationSvc && payrollPeriodSvc) phases.push('Wave 99 Phase 4');
+      if (fraudDetectionSvc && fraudScoreSvc) phases.push('Wave 100 Phase 5');
       logger.info(`[Hikvision] ✓ ${phases.join(' + ')} routes mounted at /api/v1/hikvision`);
     } else {
       logger.warn('[Hikvision] routes skipped: governance service unavailable');

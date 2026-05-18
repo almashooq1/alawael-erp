@@ -74,6 +74,18 @@ const REASON_TO_STATUS = Object.freeze({
   HEALTH_DEVICE_REQUIRED: 400,
   HEALTH_INVALID_DRIFT: 400,
 
+  // ── Wave 100 Phase 5 — Fraud Detection
+  FRAUD_FLAG_NOT_FOUND: 404,
+  FRAUD_FLAG_NOT_OPEN: 409,
+  FRAUD_FLAG_RESOLUTION_REASON_REQUIRED: 400,
+  FRAUD_SCORE_NOT_FOUND: 404,
+  INVALID_FRAUD_KIND: 400,
+  INVALID_FRAUD_SEVERITY: 400,
+  EVIDENCE_REQUIRED: 400,
+  PROCESSED_EVENT_LACKS_EMPLOYEE: 422,
+  TEMPLATE_REQUIRED: 400,
+  FRAUD_DETECTION_NOTHING_TO_FLAG: 200,
+
   // ── Wave 99 Phase 4 — Attendance Integration
   RECONCILIATION_CASE_NOT_FOUND: 404,
   RECONCILIATION_NOTHING_TO_MERGE: 200,
@@ -180,6 +192,8 @@ function createHikvisionRouter({
   attendanceSourceService = null,
   reconciliationService = null,
   payrollPeriodService = null,
+  fraudDetectionService = null,
+  fraudScoreService = null,
   governance,
   webhookHmac = null,
   logger = console,
@@ -1080,6 +1094,187 @@ function createHikvisionRouter({
     });
   }
 
+  // ─── Wave 100 Phase 5 — Fraud Detection ─────────────────────
+  // Mounted only when both Phase 5 services are supplied.
+  if (fraudDetectionService && fraudScoreService) {
+    // Detection runners
+    router.post('/fraud/scan/templates', requirePerm('fraud.detection.run'), async (req, res) => {
+      try {
+        const r = await fraudDetectionService.scanTemplates({
+          since: req.body?.since,
+          templateIds: req.body?.templateIds,
+        });
+        return respond(res, r);
+      } catch (err) {
+        return safeError(res, err, 'fraud.scan.templates');
+      }
+    });
+
+    router.post(
+      '/fraud/scan/unregistered',
+      requirePerm('fraud.detection.run'),
+      async (req, res) => {
+        try {
+          const r = await fraudDetectionService.scanUnregisteredFaces({
+            since: req.body?.since,
+          });
+          return respond(res, r);
+        } catch (err) {
+          return safeError(res, err, 'fraud.scan.unregistered');
+        }
+      }
+    );
+
+    router.post('/fraud/sweep-expired', requirePerm('fraud.detection.run'), async (req, res) => {
+      try {
+        const r = await fraudDetectionService.sweepExpiredFlags({});
+        return respond(res, r);
+      } catch (err) {
+        return safeError(res, err, 'fraud.sweep');
+      }
+    });
+
+    // Flag CRUD + actions
+    router.get('/fraud/flags', requirePerm('fraud.flag.list'), async (req, res) => {
+      try {
+        const r = await fraudDetectionService.listFlags({
+          employeeId: req.query.employeeId || undefined,
+          templateId: req.query.templateId || undefined,
+          branchId: req.query.branchId || undefined,
+          kind: req.query.kind || undefined,
+          severity: req.query.severity || undefined,
+          state: req.query.state || undefined,
+          since: req.query.since || undefined,
+          until: req.query.until || undefined,
+          limit: req.query.limit ? Number(req.query.limit) : undefined,
+          skip: req.query.skip ? Number(req.query.skip) : undefined,
+        });
+        return respond(res, r);
+      } catch (err) {
+        return safeError(res, err, 'fraud.flag.list');
+      }
+    });
+
+    router.get('/fraud/flags/:id', requirePerm('fraud.flag.read'), async (req, res) => {
+      try {
+        const r = await fraudDetectionService.getFlag(req.params.id);
+        return respond(res, r);
+      } catch (err) {
+        return safeError(res, err, 'fraud.flag.read');
+      }
+    });
+
+    router.post(
+      '/fraud/flags/:id/acknowledge',
+      requirePerm('fraud.flag.acknowledge'),
+      async (req, res) => {
+        try {
+          const r = await fraudDetectionService.acknowledgeFlag(req.params.id, {
+            actor: actorFrom(req),
+            note: req.body?.note,
+          });
+          return respond(res, r);
+        } catch (err) {
+          return safeError(res, err, 'fraud.flag.acknowledge');
+        }
+      }
+    );
+
+    router.post('/fraud/flags/:id/dismiss', requirePerm('fraud.flag.dismiss'), async (req, res) => {
+      try {
+        const r = await fraudDetectionService.dismissFlag(req.params.id, {
+          actor: actorFrom(req),
+          note: req.body?.note,
+        });
+        return respond(res, r);
+      } catch (err) {
+        return safeError(res, err, 'fraud.flag.dismiss');
+      }
+    });
+
+    router.post(
+      '/fraud/flags/:id/escalate',
+      requirePerm('fraud.flag.escalate'),
+      async (req, res) => {
+        try {
+          const r = await fraudDetectionService.escalateFlag(req.params.id, {
+            actor: actorFrom(req),
+            note: req.body?.note,
+            escalatedToRole: req.body?.escalatedToRole,
+          });
+          return respond(res, r);
+        } catch (err) {
+          return safeError(res, err, 'fraud.flag.escalate');
+        }
+      }
+    );
+
+    // Score read + recompute
+    router.get('/fraud/scores', requirePerm('fraud.score.read'), async (req, res) => {
+      try {
+        const r = await fraudScoreService.listScores({
+          band: req.query.band || undefined,
+          primaryBranchId: req.query.branchId || undefined,
+          minScore: req.query.minScore !== undefined ? Number(req.query.minScore) : undefined,
+          maxScore: req.query.maxScore !== undefined ? Number(req.query.maxScore) : undefined,
+          limit: req.query.limit ? Number(req.query.limit) : undefined,
+          skip: req.query.skip ? Number(req.query.skip) : undefined,
+        });
+        return respond(res, r);
+      } catch (err) {
+        return safeError(res, err, 'fraud.score.list');
+      }
+    });
+
+    router.get(
+      '/fraud/scores/branch/:branchId/summary',
+      requirePerm('fraud.score.read'),
+      async (req, res) => {
+        try {
+          const r = await fraudScoreService.getBranchSummary(req.params.branchId);
+          return respond(res, r);
+        } catch (err) {
+          return safeError(res, err, 'fraud.score.branch-summary');
+        }
+      }
+    );
+
+    router.get('/fraud/scores/:employeeId', requirePerm('fraud.score.read'), async (req, res) => {
+      try {
+        const r = await fraudScoreService.getScore(req.params.employeeId);
+        return respond(res, r);
+      } catch (err) {
+        return safeError(res, err, 'fraud.score.read');
+      }
+    });
+
+    router.post(
+      '/fraud/scores/:employeeId/recompute',
+      requirePerm('fraud.score.recompute'),
+      async (req, res) => {
+        try {
+          const r = await fraudScoreService.recomputeScore(req.params.employeeId);
+          return respond(res, r);
+        } catch (err) {
+          return safeError(res, err, 'fraud.score.recompute');
+        }
+      }
+    );
+
+    router.post(
+      '/fraud/scores/decay-all',
+      requirePerm('fraud.score.recompute'),
+      async (_req, res) => {
+        try {
+          const r = await fraudScoreService.decayAllScores({});
+          return respond(res, r);
+        } catch (err) {
+          return safeError(res, err, 'fraud.score.decay-all');
+        }
+      }
+    );
+  }
+
   // ─── Registry passthrough (no perm gate — public catalog) ───
   router.get('/registry', (_req, res) => {
     return res.json({
@@ -1119,6 +1314,12 @@ function createHikvisionRouter({
         shiftClassifications: reg.SHIFT_CLASSIFICATIONS,
         payrollOverrideApprovals: reg.PAYROLL_OVERRIDE_APPROVALS,
         reconciliationDefaults: reg.RECONCILIATION_DEFAULTS,
+        // Wave 100 Phase 5 additions
+        fraudKinds: reg.FRAUD_KINDS,
+        fraudSeverities: reg.FRAUD_SEVERITIES,
+        fraudFlagStates: reg.FRAUD_FLAG_STATES,
+        fraudScoreImpact: reg.FRAUD_SCORE_IMPACT,
+        fraudDefaults: reg.FRAUD_DEFAULTS,
       },
     });
   });

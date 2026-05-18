@@ -244,6 +244,18 @@ const REASON = Object.freeze({
   SHIFT_CALENDAR_MISSING: 'SHIFT_CALENDAR_MISSING',
   SHIFT_DATE_REQUIRED: 'SHIFT_DATE_REQUIRED',
 
+  // ─── Wave 100 Phase 5 — Fraud Detection ────────────────────────
+  FRAUD_FLAG_NOT_FOUND: 'FRAUD_FLAG_NOT_FOUND',
+  FRAUD_FLAG_NOT_OPEN: 'FRAUD_FLAG_NOT_OPEN',
+  FRAUD_FLAG_RESOLUTION_REASON_REQUIRED: 'FRAUD_FLAG_RESOLUTION_REASON_REQUIRED',
+  FRAUD_SCORE_NOT_FOUND: 'FRAUD_SCORE_NOT_FOUND',
+  INVALID_FRAUD_KIND: 'INVALID_FRAUD_KIND',
+  INVALID_FRAUD_SEVERITY: 'INVALID_FRAUD_SEVERITY',
+  EVIDENCE_REQUIRED: 'EVIDENCE_REQUIRED',
+  PROCESSED_EVENT_LACKS_EMPLOYEE: 'PROCESSED_EVENT_LACKS_EMPLOYEE',
+  TEMPLATE_REQUIRED: 'TEMPLATE_REQUIRED',
+  FRAUD_DETECTION_NOTHING_TO_FLAG: 'FRAUD_DETECTION_NOTHING_TO_FLAG',
+
   // Generic
   PERMISSION_DENIED: 'PERMISSION_DENIED',
   VALIDATION_FAILED: 'VALIDATION_FAILED',
@@ -891,6 +903,181 @@ function dedupByZoneWindow(
   });
 }
 
+// ─── Wave 100 Phase 5 — Fraud Detection ─────────────────────────
+
+// Kind of fraud signal detected. The detection service emits exactly
+// one of these per HikvisionFraudFlag. Severity is derived per kind
+// + per pattern strength.
+const FRAUD_KIND = Object.freeze({
+  REPEAT_MISMATCH: 'repeat-mismatch', // ≥3 confidence-fail events on a template in window
+  SHARED_IDENTITY: 'shared-identity', // template active in mutually-exclusive places (≥2 impossible-travel in 7d)
+  OFF_HOURS_ACCESS: 'off-hours-access', // employee at gate well outside duty hours
+  BURST_ACCESS: 'burst-access', // many events same employee in tiny window (DoS / tailgate)
+  IMPOSSIBLE_TRAVEL: 'impossible-travel', // SINGLE occurrence (one-off, vs SHARED_IDENTITY repeating)
+  ANTI_SPOOF_TREND: 'anti-spoof-trend', // ≥2 anti-spoof failures within 24h for same template
+  TEMPLATE_INACTIVE_USED: 'template-inactive-used', // suspended template still matching
+  UNREGISTERED_REPEAT: 'unregistered-repeat', // same unregistered face seen ≥3 times
+});
+const FRAUD_KINDS = Object.freeze(Object.values(FRAUD_KIND));
+
+const FRAUD_SEVERITY = Object.freeze({
+  LOW: 'low',
+  MEDIUM: 'medium',
+  HIGH: 'high',
+  CRITICAL: 'critical',
+});
+const FRAUD_SEVERITIES = Object.freeze(Object.values(FRAUD_SEVERITY));
+
+// Score impact per (kind, severity) — used by the score service to
+// compute the rolling employee fraud score. Lower bound 0, upper 100.
+const FRAUD_SCORE_IMPACT = Object.freeze({
+  low: 5,
+  medium: 15,
+  high: 30,
+  critical: 50,
+});
+
+// Lifecycle of a fraud flag.
+//   open         → newly detected, awaiting operator action
+//   acknowledged → operator confirmed the flag is real (kept on score)
+//   dismissed    → operator confirmed false-positive (removed from score)
+//   escalated    → flag bumped to security/DPO
+//   expired      → time-based decay (older than retention window)
+const FRAUD_FLAG_STATE = Object.freeze({
+  OPEN: 'open',
+  ACKNOWLEDGED: 'acknowledged',
+  DISMISSED: 'dismissed',
+  ESCALATED: 'escalated',
+  EXPIRED: 'expired',
+});
+const FRAUD_FLAG_STATES = Object.freeze(Object.values(FRAUD_FLAG_STATE));
+
+// Engine tunables. Per-branch override is the same pattern used in
+// confidence thresholds (Wave 98).
+const FRAUD_DEFAULTS = Object.freeze({
+  REPEAT_MISMATCH_THRESHOLD: 3, // ≥3 fails in window
+  REPEAT_MISMATCH_WINDOW_MS: 24 * 60 * 60_000, // 24h
+  SHARED_IDENTITY_WINDOW_MS: 7 * 24 * 60 * 60_000, // 7d for pattern detection
+  SHARED_IDENTITY_THRESHOLD: 2, // ≥2 impossible-travel occurrences in 7d
+  BURST_WINDOW_MS: 5 * 60_000, // 5 min
+  BURST_THRESHOLD: 5, // ≥5 events in 5 min
+  OFF_HOURS_BUFFER_HOURS: 3, // event outside shift window by >3h triggers
+  ANTI_SPOOF_TREND_THRESHOLD: 2, // ≥2 anti-spoof failures in 24h
+  ANTI_SPOOF_TREND_WINDOW_MS: 24 * 60 * 60_000,
+  UNREGISTERED_REPEAT_THRESHOLD: 3,
+  UNREGISTERED_REPEAT_WINDOW_MS: 7 * 24 * 60 * 60_000,
+  // Score decay: flag's contribution halves after this window.
+  SCORE_DECAY_HALF_LIFE_MS: 30 * 24 * 60 * 60_000, // 30d
+  // Hard expire — flag won't contribute past this age.
+  SCORE_HARD_EXPIRE_MS: 90 * 24 * 60 * 60_000, // 90d
+  // Score bands for traffic-light UI.
+  SCORE_BAND_LOW_MAX: 20,
+  SCORE_BAND_MEDIUM_MAX: 50,
+  SCORE_BAND_HIGH_MAX: 80,
+});
+
+/**
+ * Pure helper: detect repeat-mismatch.
+ *   - `events` is an array of processed events for the SAME templateId
+ *     within the inspection window.
+ *   - Returns null if threshold not met; otherwise a flag spec
+ *     { kind, severity, scoreImpact, evidenceProcessedEventIds[], summary }.
+ */
+function detectRepeatMismatchInWindow(events, opts = {}) {
+  const threshold = opts.threshold || FRAUD_DEFAULTS.REPEAT_MISMATCH_THRESHOLD;
+  const fails = (events || []).filter(
+    e =>
+      e.decision === GATE_DECISION.REJECT &&
+      (e.reviewReason === REVIEW_REASON.LOW_CONFIDENCE ||
+        e.reviewReason === REVIEW_REASON.MISMATCH ||
+        e.reviewReason === REVIEW_REASON.REPEAT_MISMATCH)
+  );
+  if (fails.length < threshold) return null;
+  // Severity escalates with how many fails — 3 = HIGH (already triggered),
+  // 5+ = CRITICAL.
+  let severity = FRAUD_SEVERITY.HIGH;
+  if (fails.length >= 5) severity = FRAUD_SEVERITY.CRITICAL;
+  return {
+    kind: FRAUD_KIND.REPEAT_MISMATCH,
+    severity,
+    scoreImpact: FRAUD_SCORE_IMPACT[severity],
+    evidenceProcessedEventIds: fails.map(e => String(e._id)),
+    summary: `${fails.length} mismatch events in inspection window`,
+  };
+}
+
+/**
+ * Pure helper: detect burst access (DoS-like or tailgating attempt).
+ *   - `events` are processed events for the SAME employee.
+ *   - Threshold: ≥5 events in a 5-min sliding window.
+ */
+function detectBurstPattern(events, opts = {}) {
+  const threshold = opts.threshold || FRAUD_DEFAULTS.BURST_THRESHOLD;
+  const windowMs = opts.windowMs || FRAUD_DEFAULTS.BURST_WINDOW_MS;
+  if (!Array.isArray(events) || events.length < threshold) return null;
+  const sorted = events.slice().sort((a, b) => {
+    const at = a.capturedAt instanceof Date ? a.capturedAt.getTime() : Date.parse(a.capturedAt);
+    const bt = b.capturedAt instanceof Date ? b.capturedAt.getTime() : Date.parse(b.capturedAt);
+    return at - bt;
+  });
+  for (let i = 0; i + threshold - 1 < sorted.length; i += 1) {
+    const start = sorted[i];
+    const end = sorted[i + threshold - 1];
+    const st =
+      start.capturedAt instanceof Date ? start.capturedAt.getTime() : Date.parse(start.capturedAt);
+    const et =
+      end.capturedAt instanceof Date ? end.capturedAt.getTime() : Date.parse(end.capturedAt);
+    if (et - st <= windowMs) {
+      const burstEvents = sorted.slice(i, i + threshold);
+      return {
+        kind: FRAUD_KIND.BURST_ACCESS,
+        severity: FRAUD_SEVERITY.HIGH,
+        scoreImpact: FRAUD_SCORE_IMPACT[FRAUD_SEVERITY.HIGH],
+        evidenceProcessedEventIds: burstEvents.map(e => String(e._id)),
+        summary: `${threshold} events within ${Math.round((et - st) / 1000)}s`,
+      };
+    }
+  }
+  return null;
+}
+
+/**
+ * Pure helper: compute current score from a set of flags. Each flag
+ * contributes `scoreImpact * decayFactor` where decayFactor halves
+ * every SCORE_DECAY_HALF_LIFE_MS and goes to 0 after SCORE_HARD_EXPIRE_MS.
+ *
+ * Returns a number in [0, 100].
+ */
+function computeScoreFromFlags(flags, { now = Date.now() } = {}) {
+  let score = 0;
+  for (const f of flags || []) {
+    if (f.state === FRAUD_FLAG_STATE.DISMISSED || f.state === FRAUD_FLAG_STATE.EXPIRED) {
+      continue;
+    }
+    const detectedAt =
+      f.detectedAt instanceof Date ? f.detectedAt.getTime() : Date.parse(f.detectedAt);
+    if (!Number.isFinite(detectedAt)) continue;
+    const age = now - detectedAt;
+    if (age >= FRAUD_DEFAULTS.SCORE_HARD_EXPIRE_MS) continue;
+    // Half-life decay
+    const halfLives = age / FRAUD_DEFAULTS.SCORE_DECAY_HALF_LIFE_MS;
+    const decayFactor = Math.pow(0.5, halfLives);
+    score += (f.scoreImpact || 0) * decayFactor;
+  }
+  return Math.min(100, Math.round(score * 100) / 100);
+}
+
+/**
+ * Pure helper: classify a score into one of the 4 traffic-light bands.
+ */
+function classifyScoreBand(score) {
+  const s = Number(score) || 0;
+  if (s <= FRAUD_DEFAULTS.SCORE_BAND_LOW_MAX) return FRAUD_SEVERITY.LOW;
+  if (s <= FRAUD_DEFAULTS.SCORE_BAND_MEDIUM_MAX) return FRAUD_SEVERITY.MEDIUM;
+  if (s <= FRAUD_DEFAULTS.SCORE_BAND_HIGH_MAX) return FRAUD_SEVERITY.HIGH;
+  return FRAUD_SEVERITY.CRITICAL;
+}
+
 module.exports = {
   DEVICE_KIND,
   DEVICE_KINDS,
@@ -953,6 +1140,15 @@ module.exports = {
   PAYROLL_OVERRIDE_APPROVAL,
   PAYROLL_OVERRIDE_APPROVALS,
   RECONCILIATION_DEFAULTS,
+  // Wave 100 Phase 5 — fraud detection
+  FRAUD_KIND,
+  FRAUD_KINDS,
+  FRAUD_SEVERITY,
+  FRAUD_SEVERITIES,
+  FRAUD_SCORE_IMPACT,
+  FRAUD_FLAG_STATE,
+  FRAUD_FLAG_STATES,
+  FRAUD_DEFAULTS,
   // helpers
   isValidIPv4,
   isAttendanceEligibleKind,
@@ -968,4 +1164,9 @@ module.exports = {
   classifyCheckOut,
   findCorroborationPairs,
   dedupByZoneWindow,
+  // Wave 100 Phase 5 — fraud detection helpers
+  detectRepeatMismatchInWindow,
+  detectBurstPattern,
+  computeScoreFromFlags,
+  classifyScoreBand,
 };

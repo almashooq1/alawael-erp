@@ -232,6 +232,7 @@ function createHikvisionRouter({
   streamSupervisor = null,
   branchConfigService = null,
   branchOperationsService = null,
+  orgSummaryService = null,
   governance,
   webhookHmac = null,
   logger = console,
@@ -1590,6 +1591,22 @@ function createHikvisionRouter({
         }
       }
     );
+  }
+
+  // ─── Wave 112 — Org-Wide Executive Summary ────────────────
+  // Mounted iff the service is supplied. One route:
+  //   GET /org-summary               — cached snapshot (60s TTL)
+  //   GET /org-summary?skipCache=1   — force refresh
+  if (orgSummaryService) {
+    router.get('/org-summary', requirePerm('hikvision.org-summary.read'), async (req, res) => {
+      try {
+        const skipCache = req.query?.skipCache === '1' || req.query?.skipCache === 'true';
+        const r = await orgSummaryService.snapshot({ skipCache });
+        return res.json({ success: true, data: r });
+      } catch (err) {
+        return safeError(res, err, 'hikvision.org-summary');
+      }
+    });
   }
 
   // ─── Registry passthrough (no perm gate — public catalog) ───

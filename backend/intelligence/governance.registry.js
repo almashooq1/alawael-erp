@@ -1120,6 +1120,20 @@ const PERMISSIONS = Object.freeze({
     'auditor',
     'dpo',
   ],
+
+  // ─── Wave 112 — Org-Wide Executive Summary ─────────────────
+  // Narrower than branch-ops.read because the snapshot exposes
+  // top-employees and cross-branch fraud rankings — sensitive
+  // signals reserved for executive leadership + sec architects.
+  'hikvision.org-summary.read': [
+    'security_architect',
+    'security.officer',
+    'compliance_officer',
+    'auditor',
+    'dpo',
+    'executive_leadership',
+    'head_office',
+  ],
 });
 
 // ─── API ────────────────────────────────────────────────────────

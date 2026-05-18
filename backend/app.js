@@ -2658,6 +2658,41 @@ try {
         branchOpsSvc = null;
       }
 
+      // Wave 112 — Org-Wide Executive Summary (graceful)
+      // Same pattern as Wave 111 but rolls UP rather than slicing by
+      // branch. 60s cache because executive dashboards refresh on a
+      // slower cadence than branch ops.
+      let orgSummarySvc = null;
+      try {
+        const {
+          createHikvisionOrgSummaryService,
+        } = require('./intelligence/hikvision-org-summary.service');
+        // Optional Branch model — when present, lets us compute the
+        // override-coverage % for the branchConfig section.
+        let BranchModel = null;
+        try {
+          BranchModel = require('./models/Branch');
+        } catch {
+          /* optional */
+        }
+        orgSummarySvc = createHikvisionOrgSummaryService({
+          deviceService,
+          streamSupervisor,
+          attendanceSourceService: attendanceSourceSvc,
+          reconciliationService: reconciliationSvc,
+          fraudScoreService: fraudScoreSvc,
+          syncWorker: syncWorkerSvc,
+          schedulerService: schedulerSvc,
+          branchConfigService: branchConfigSvc,
+          branchModel: BranchModel,
+          libraryModel: HikvisionFaceLibrary || null,
+          logger,
+        });
+      } catch (osErr) {
+        logger.warn('[Hikvision] Wave 112 org-summary failed to wire:', osErr.message);
+        orgSummarySvc = null;
+      }
+
       // Optional HMAC middleware for the device webhook. If the
       // secret env var isn't set, the webhook is omitted but the
       // operator-replay endpoint stays available.
@@ -2719,6 +2754,7 @@ try {
           streamSupervisor,
           branchConfigService: branchConfigSvc,
           branchOperationsService: branchOpsSvc,
+          orgSummaryService: orgSummarySvc,
           governance: governanceSvc,
           webhookHmac,
           logger,
@@ -2740,6 +2776,7 @@ try {
       if (streamSupervisor) app._hikvisionStreamSupervisor = streamSupervisor;
       if (branchConfigSvc) app._hikvisionBranchConfigService = branchConfigSvc;
       if (branchOpsSvc) app._hikvisionBranchOperationsService = branchOpsSvc;
+      if (orgSummarySvc) app._hikvisionOrgSummaryService = orgSummarySvc;
       const phases = ['Wave 96 Phase 1'];
       if (libraryService && enrollmentService) phases.push('Wave 97 Phase 2');
       if (parserService && attendanceSourceSvc) phases.push('Wave 98 Phase 3');
@@ -2750,6 +2787,7 @@ try {
       if (streamSupervisor) phases.push('Wave 109 Stream');
       if (branchConfigSvc) phases.push('Wave 110 Branch-Config');
       if (branchOpsSvc) phases.push('Wave 111 Branch-Ops');
+      if (orgSummarySvc) phases.push('Wave 112 Org-Summary');
       logger.info(`[Hikvision] ✓ ${phases.join(' + ')} routes mounted at /api/v1/hikvision`);
     } else {
       logger.warn('[Hikvision] routes skipped: governance service unavailable');

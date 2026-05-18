@@ -679,6 +679,127 @@ const DASHBOARDS = {
       },
     ],
   },
+
+  // ─── Beneficiary-360 ─────────────────────────────────────────
+  // The deep-dive viewer for ONE beneficiary. Different intent
+  // from the `care` supervisor dashboard above — this surface is
+  // a record viewer, not a daily-triage list. Documents the layout
+  // formalised by Waves 65/66/70/71/76 (lifecycle panel + episodes
+  // panel + embedded audit-trail timeline).
+  'beneficiary-360': {
+    titleAr: 'الملف الشامل للمستفيد',
+    titleEn: 'Beneficiary 360',
+    targetRoleGroups: ['clinical_supervisor', 'therapist', 'branch_manager', 'quality_compliance'],
+    // Viewer page — many sections justify medium-high density;
+    // tier-1 budget = 10 / tier-1+2 budget = 24.
+    density: 'medium-high',
+    smartDefaults: {
+      beneficiaryId: ':beneficiaryId',
+    },
+    autoSave: {
+      filters: 'worklist_toggles',
+    },
+    sections: [
+      // Position 0 MUST be critical-signals (Wave 24 contract).
+      // The attention queue surfaces red-flags + follow-ups
+      // requiring same-day intervention.
+      {
+        id: 'b360-attention',
+        kind: 'critical-signals',
+        position: 0,
+        taskAr: 'مراجعة بنود الانتباه العاجلة لهذا المستفيد',
+        taskEn: 'Review urgent attention items for this beneficiary',
+        elements: [
+          {
+            id: 'b360-attention-queue',
+            kind: 'alert-stream',
+            intentAr: 'كشف الإشارات السريرية والإدارية التي تتطلب إجراء فوري',
+            intentEn: 'Surface clinical/operational signals needing immediate action',
+            tier: 1,
+            aboveTheFold: true,
+            revealOn: 'always',
+            refAlertSurface: 'clinical',
+          },
+        ],
+      },
+      {
+        id: 'b360-pulse',
+        kind: 'operational-pulse',
+        position: 1,
+        taskAr: 'قراءة الحالة الصحية والتعريف الموجز',
+        taskEn: 'Read health-score band + summary card',
+        elements: [
+          {
+            id: 'b360-health-score',
+            kind: 'kpi',
+            intentAr: 'تقييم مؤشر صحة المستفيد الإجمالي (band: concerning/watch/stable/thriving)',
+            intentEn: 'Assess composite health band',
+            tier: 1,
+            aboveTheFold: true,
+            revealOn: 'always',
+          },
+          {
+            id: 'b360-summary',
+            kind: 'kpi',
+            intentAr: 'لمحة سريعة عن البيانات الديموغرافية وحالة الملف',
+            intentEn: 'At-a-glance demographics + record status',
+            tier: 1,
+            aboveTheFold: true,
+            revealOn: 'always',
+          },
+        ],
+      },
+      // Deep-dive sections: lifecycle + episodes + audit + timeline.
+      // Tier 2 elements that render above-the-fold (panels are
+      // visible immediately); the in-panel item lists themselves
+      // are tier-3 reveal='click' for per-row drill-in.
+      {
+        id: 'b360-deep',
+        kind: 'deep-dive',
+        position: 2,
+        taskAr: 'استعراض دورة حياة المستفيد وحلقات الرعاية وسجل التدقيق',
+        taskEn: 'Inspect lifecycle, episodes, and unified audit trail',
+        elements: [
+          {
+            id: 'b360-lifecycle-panel',
+            kind: 'list',
+            intentAr: 'الحالة الراهنة لدورة الحياة + آخر 3 انتقالات (Wave 66)',
+            intentEn: 'Current lifecycle state + last 3 transitions (Wave 66)',
+            tier: 2,
+            aboveTheFold: true,
+            revealOn: 'always',
+          },
+          {
+            id: 'b360-episodes-panel',
+            kind: 'list',
+            intentAr: 'حلقات الرعاية النشطة + الحديثة مع روابط عميقة (Wave 71)',
+            intentEn: 'Active + recent episodes of care with deep links (Wave 71)',
+            tier: 2,
+            aboveTheFold: true,
+            revealOn: 'always',
+          },
+          {
+            id: 'b360-timeline',
+            kind: 'list',
+            intentAr: 'الجدول الزمني الكرونولوجي للأحداث عبر المسارات',
+            intentEn: 'Chronological event timeline across subjects',
+            tier: 2,
+            aboveTheFold: true,
+            revealOn: 'always',
+          },
+          {
+            id: 'b360-audit-trail',
+            kind: 'list',
+            intentAr: 'السجل الموحد من Wave 26 لاسترداد سلسلة التغييرات (Wave 76)',
+            intentEn: 'Unified Wave-26 audit trail for change attribution (Wave 76)',
+            tier: 3,
+            aboveTheFold: false,
+            revealOn: 'click',
+          },
+        ],
+      },
+    ],
+  },
 };
 
 Object.freeze(DASHBOARDS);

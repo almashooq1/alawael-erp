@@ -2502,6 +2502,81 @@ try {
         }
       }
 
+      // Wave 109 — Real-Time Event Stream (graceful, env-gated)
+      // HIKVISION_STREAM_MODE = off (default) | mock | real
+      //   • off  → supervisor never starts. Webhook + replay remain.
+      //   • mock → in-process mock transport (dev/test only).
+      //   • real → live HTTP/HTTPS connections to devices.
+      let streamSupervisor = null;
+      try {
+        const streamMode = (process.env.HIKVISION_STREAM_MODE || 'off').toLowerCase();
+        if (streamMode !== 'off' && ingestionService) {
+          const {
+            createMockHttpStreamer,
+            createRealHttpStreamer,
+          } = require('./intelligence/hikvision-stream-http');
+          const {
+            createEventStreamSupervisor,
+          } = require('./intelligence/hikvision-stream-supervisor.service');
+          let streamTransport = null;
+          if (streamMode === 'real') {
+            try {
+              const credentialsResolver = async () => ({
+                username:
+                  process.env.HIKVISION_DEVICE_USERNAME ||
+                  (() => {
+                    throw new Error('HIKVISION_DEVICE_USERNAME not set');
+                  })(),
+                password:
+                  process.env.HIKVISION_DEVICE_PASSWORD ||
+                  (() => {
+                    throw new Error('HIKVISION_DEVICE_PASSWORD not set');
+                  })(),
+              });
+              streamTransport = createRealHttpStreamer({ logger, credentialsResolver });
+              logger.info('[Hikvision stream] real transport wired');
+            } catch (realErr) {
+              logger.warn(
+                `[Hikvision stream] real transport unavailable, falling back to mock: ${realErr.message}`
+              );
+              streamTransport = createMockHttpStreamer();
+            }
+          } else {
+            streamTransport = createMockHttpStreamer();
+            logger.info('[Hikvision stream] mock transport wired (dev mode)');
+          }
+
+          // Optional device-code filter from env.
+          let deviceFilter = null;
+          const rawFilter = process.env.HIKVISION_STREAM_DEVICE_FILTER;
+          if (rawFilter && rawFilter.trim()) {
+            deviceFilter = new Set(
+              rawFilter
+                .split(',')
+                .map(s => s.trim())
+                .filter(Boolean)
+            );
+          }
+
+          streamSupervisor = createEventStreamSupervisor({
+            deviceModel: HikvisionDevice,
+            ingestionService,
+            transport: streamTransport,
+            reviewQueueService: null, // wired by Wave 109C if/when fastEnqueue exposed
+            healthService,
+            logger,
+            config: { deviceFilter },
+          });
+          // Best-effort autostart — failures degrade to status="not running".
+          streamSupervisor.start().catch(err => {
+            logger.warn(`[Hikvision stream] supervisor.start failed: ${err.message}`);
+          });
+        }
+      } catch (streamErr) {
+        logger.warn('[Hikvision] Wave 109 stream failed to wire:', streamErr.message);
+        streamSupervisor = null;
+      }
+
       // Wave 108 — Operational Scheduler (graceful)
       // Wires the JobRegistry to whichever services were instantiated
       // above. Each handler is "available" iff its source service was
@@ -2585,6 +2660,7 @@ try {
           fraudScoreService: fraudScoreSvc,
           syncWorker: syncWorkerSvc,
           scheduler: schedulerSvc,
+          streamSupervisor,
           governance: governanceSvc,
           webhookHmac,
           logger,
@@ -2603,6 +2679,7 @@ try {
       if (fraudScoreSvc) app._hikvisionFraudScoreService = fraudScoreSvc;
       if (syncWorkerSvc) app._hikvisionSyncWorker = syncWorkerSvc;
       if (schedulerSvc) app._hikvisionScheduler = schedulerSvc;
+      if (streamSupervisor) app._hikvisionStreamSupervisor = streamSupervisor;
       const phases = ['Wave 96 Phase 1'];
       if (libraryService && enrollmentService) phases.push('Wave 97 Phase 2');
       if (parserService && attendanceSourceSvc) phases.push('Wave 98 Phase 3');
@@ -2610,6 +2687,7 @@ try {
       if (fraudDetectionSvc && fraudScoreSvc) phases.push('Wave 100 Phase 5');
       if (syncWorkerSvc) phases.push('Wave 106 Phase F');
       if (schedulerSvc) phases.push('Wave 108 Scheduler');
+      if (streamSupervisor) phases.push('Wave 109 Stream');
       logger.info(`[Hikvision] ✓ ${phases.join(' + ')} routes mounted at /api/v1/hikvision`);
     } else {
       logger.warn('[Hikvision] routes skipped: governance service unavailable');

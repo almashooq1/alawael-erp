@@ -92,6 +92,15 @@ const REASON_TO_STATUS = Object.freeze({
   JOB_DISABLED: 409,
   JOB_HANDLER_THREW: 500,
 
+  // ── Wave 109 — Real-Time Event Stream
+  STREAM_NOT_RUNNING: 503,
+  STREAM_DEVICE_INCAPABLE: 422,
+  STREAM_TRANSPORT_FAILED: 502,
+  STREAM_PARSE_FAILED: 422,
+  STREAM_CIRCUIT_OPEN: 503,
+  STREAM_TIME_DRIFT: 200, // informational
+  STREAM_BACKPRESSURE: 429,
+
   // ── Wave 100 Phase 5 — Fraud Detection
   FRAUD_FLAG_NOT_FOUND: 404,
   FRAUD_FLAG_NOT_OPEN: 409,
@@ -214,6 +223,7 @@ function createHikvisionRouter({
   fraudScoreService = null,
   syncWorker = null,
   scheduler = null,
+  streamSupervisor = null,
   governance,
   webhookHmac = null,
   logger = console,
@@ -1403,6 +1413,48 @@ function createHikvisionRouter({
         return res.json({ success: true, data: r });
       } catch (err) {
         return safeError(res, err, 'hikvision.jobs.run');
+      }
+    });
+  }
+
+  // ─── Wave 109 — Real-Time Event Stream ─────────────────────
+  // Mounted only when the supervisor is supplied. 3 routes:
+  //   GET  /stream                  — aggregate + per-device status
+  //   GET  /stream/devices/:code    — single-device drilldown
+  //   POST /stream/refresh          — re-read registry (attach/detach)
+  if (streamSupervisor) {
+    router.get('/stream', requirePerm('hikvision.stream.read'), async (_req, res) => {
+      try {
+        const r = streamSupervisor.getStatus();
+        return res.json({ success: true, data: r });
+      } catch (err) {
+        return safeError(res, err, 'hikvision.stream.status');
+      }
+    });
+
+    router.get('/stream/devices/:code', requirePerm('hikvision.stream.read'), async (req, res) => {
+      try {
+        const r = streamSupervisor.getDeviceStatus(req.params.code);
+        if (!r) {
+          return res.status(404).json({
+            success: false,
+            reason: reg.REASON.DEVICE_NOT_FOUND,
+            message: 'DEVICE_NOT_FOUND',
+          });
+        }
+        return res.json({ success: true, data: r });
+      } catch (err) {
+        return safeError(res, err, 'hikvision.stream.device.status');
+      }
+    });
+
+    router.post('/stream/refresh', requirePerm('hikvision.stream.control'), async (_req, res) => {
+      try {
+        const r = await streamSupervisor.refresh();
+        if (!r.ok) return respond(res, r);
+        return res.json({ success: true, data: r });
+      } catch (err) {
+        return safeError(res, err, 'hikvision.stream.refresh');
       }
     });
   }

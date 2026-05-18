@@ -1067,6 +1067,24 @@ const PERMISSIONS = Object.freeze({
     'auditor',
     'dpo',
   ],
+
+  // ─── Wave 109 — Real-Time Event Stream ─────────────────────
+  // Read aggregate + per-device stream status.
+  'hikvision.stream.read': [
+    'security_architect',
+    'security.officer',
+    'iam.role_granter',
+    'hr_admin',
+    'hr_director',
+    'branch_manager',
+    'branch_director',
+    'compliance_officer',
+    'auditor',
+    'dpo',
+  ],
+  // Trigger a refresh of the device list (attach new / detach
+  // retired). Narrow because it mutates running connections.
+  'hikvision.stream.control': ['security_architect', 'iam.role_granter', 'dpo'],
 });
 
 // ─── API ────────────────────────────────────────────────────────

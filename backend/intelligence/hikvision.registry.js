@@ -274,6 +274,15 @@ const REASON = Object.freeze({
   JOB_DISABLED: 'JOB_DISABLED',
   JOB_HANDLER_THREW: 'JOB_HANDLER_THREW',
 
+  // ─── Wave 109 — Real-Time Event Stream ────────────────────────
+  STREAM_NOT_RUNNING: 'STREAM_NOT_RUNNING',
+  STREAM_DEVICE_INCAPABLE: 'STREAM_DEVICE_INCAPABLE',
+  STREAM_TRANSPORT_FAILED: 'STREAM_TRANSPORT_FAILED',
+  STREAM_PARSE_FAILED: 'STREAM_PARSE_FAILED',
+  STREAM_CIRCUIT_OPEN: 'STREAM_CIRCUIT_OPEN',
+  STREAM_TIME_DRIFT: 'STREAM_TIME_DRIFT',
+  STREAM_BACKPRESSURE: 'STREAM_BACKPRESSURE',
+
   // Generic
   PERMISSION_DENIED: 'PERMISSION_DENIED',
   VALIDATION_FAILED: 'VALIDATION_FAILED',
@@ -1186,6 +1195,111 @@ const JOB_DEFAULTS = Object.freeze({
   HISTORY_RETAIN_RUNS: 50, // recent runs kept per job
 });
 
+// ─── Wave 109 — Real-Time Event Stream ─────────────────────────
+//
+// Per-device state machine for the ISAPI alert-stream client. The
+// transitions are driven by network events (connect/disconnect/data)
+// and the watchdog timer (silence > MAX_SILENCE_MS).
+const STREAM_STATE = Object.freeze({
+  IDLE: 'idle', // never connected since boot
+  CONNECTING: 'connecting', // request in flight
+  CONNECTED: 'connected', // bytes flowing
+  RECONNECTING: 'reconnecting', // between attempts in backoff
+  CIRCUIT_OPEN: 'circuit-open', // halted after repeated failures
+  HALF_OPEN: 'half-open', // single probe to test recovery
+  STOPPED: 'stopped', // operator-disabled
+});
+const STREAM_STATES = Object.freeze(Object.values(STREAM_STATE));
+
+// Operating mode for the supervisor. Default 'off' so dev/test envs
+// never open real network connections by accident.
+const STREAM_MODE = Object.freeze({
+  OFF: 'off',
+  MOCK: 'mock',
+  REAL: 'real',
+});
+const STREAM_MODES = Object.freeze(Object.values(STREAM_MODE));
+
+const STREAM_DEFAULTS = Object.freeze({
+  // Reconnect backoff schedule (ms). After the last entry the value
+  // stays capped at the final element.
+  BACKOFF_MS: Object.freeze([1_000, 3_000, 8_000, 20_000, 60_000]),
+  // After this many consecutive failures, open the circuit.
+  CIRCUIT_OPEN_AFTER_FAILURES: 5,
+  // How long to stay in circuit-open before probing with half-open.
+  CIRCUIT_HALF_OPEN_AFTER_MS: 5 * 60_000,
+  // Per-connection idle timeout. Hikvision keep-alive packets land
+  // every ~30s; we tolerate up to 90s before treating as half-open
+  // TCP and forcing a reconnect.
+  IDLE_TIMEOUT_MS: 90_000,
+  // Watchdog cadence — checks lastBytesAt every WATCHDOG_INTERVAL_MS.
+  WATCHDOG_INTERVAL_MS: 30_000,
+  // Maximum gap between bytes before reconnect.
+  MAX_SILENCE_MS: 90_000,
+  // Batch insert window: collect events for this long or until the
+  // batch size is reached, then ingestBatch().
+  BATCH_WINDOW_MS: 50,
+  BATCH_SIZE: 50,
+  // Per-device LRU dedup cache (L1).
+  DEDUP_LRU_SIZE: 256,
+  // Per-device bounded queue. Older events dropped under pressure.
+  BOUNDED_QUEUE_SIZE: 1_000,
+  // Global rate limit across all clients (events/sec).
+  MAX_INGEST_PER_SEC: 500,
+  // If device.dateTime is more than this many ms away from server
+  // clock, tag time-drift and exclude from reconciliation.
+  MAX_ACCEPTABLE_DRIFT_MS: 300_000,
+});
+
+/**
+ * normalizeStreamTimestamp(deviceDateTime, serverNow):
+ * Pure helper. Returns:
+ *   { capturedAt, driftMs, driftFlag }
+ * driftFlag === 'time-drift' iff |driftMs| > MAX_ACCEPTABLE_DRIFT_MS.
+ * capturedAt is ALWAYS deviceDateTime (we don't rewrite history); the
+ * caller decides whether to tag/suppress the event.
+ */
+function normalizeStreamTimestamp(deviceDateTime, serverNow) {
+  const server = serverNow instanceof Date ? serverNow : new Date();
+  if (!deviceDateTime) {
+    return { capturedAt: server, driftMs: 0, driftFlag: null };
+  }
+  const captured = deviceDateTime instanceof Date ? deviceDateTime : new Date(deviceDateTime);
+  if (Number.isNaN(captured.getTime())) {
+    return { capturedAt: server, driftMs: 0, driftFlag: 'parse-failed' };
+  }
+  const driftMs = server.getTime() - captured.getTime();
+  const driftFlag =
+    Math.abs(driftMs) > STREAM_DEFAULTS.MAX_ACCEPTABLE_DRIFT_MS ? 'time-drift' : null;
+  return { capturedAt: captured, driftMs, driftFlag };
+}
+
+/**
+ * computeStreamExternalEventId(parts):
+ * Deterministic key for cross-source dedup. Same event arriving via
+ * webhook + stream produces the same key, so the unique index on
+ * (deviceId, externalEventId) collapses duplicates.
+ *
+ * Inputs: { deviceCode, dateTime, channelID, fpid, eventType }
+ */
+function computeStreamExternalEventId({
+  deviceCode,
+  dateTime,
+  channelID = '',
+  fpid = '',
+  eventType = '',
+} = {}) {
+  const crypto = require('crypto');
+  const seed = [
+    String(deviceCode || ''),
+    String(dateTime || ''),
+    String(channelID || ''),
+    String(fpid || ''),
+    String(eventType || ''),
+  ].join('|');
+  return 'stream-' + crypto.createHash('sha1').update(seed).digest('hex').slice(0, 24);
+}
+
 /**
  * Pure helper: given (templates, devicePersonIds), compute the diff plan.
  *   templates      — array of HikvisionFaceTemplateLink (active state)
@@ -1328,6 +1442,14 @@ module.exports = {
   JOB_IDS,
   JOB_CRON_DEFAULTS,
   JOB_DEFAULTS,
+  // Wave 109 — real-time event stream
+  STREAM_STATE,
+  STREAM_STATES,
+  STREAM_MODE,
+  STREAM_MODES,
+  STREAM_DEFAULTS,
+  normalizeStreamTimestamp,
+  computeStreamExternalEventId,
   // helpers
   isValidIPv4,
   isAttendanceEligibleKind,

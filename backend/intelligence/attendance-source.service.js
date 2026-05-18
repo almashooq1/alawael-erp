@@ -30,6 +30,7 @@ function createAttendanceSourceService({
   sourceEventModel = null,
   reviewModel = null,
   processedEventModel = null,
+  payrollPeriodService = null, // Wave 99 — guards against locked periods
   logger = console,
   now = () => new Date(),
 } = {}) {
@@ -41,6 +42,8 @@ function createAttendanceSourceService({
   }
   // processedEventModel optional — only needed by approveReview to
   // back-link the resulting source event into the processed event row.
+  // payrollPeriodService optional — when wired (Wave 99), createSourceEvent
+  // refuses to write into a closed payroll period.
 
   // ─── Source events ──────────────────────────────────────────
 
@@ -77,6 +80,35 @@ function createAttendanceSourceService({
         reason: reg.REASON.VALIDATION_FAILED,
         errors: { trustTier: 'invalid' },
       };
+    }
+
+    // Wave 99 — payroll period lock guard. Refuse to write into a
+    // closed period; this protects payroll integrity end-to-end.
+    if (payrollPeriodService && typeof payrollPeriodService.findLockingPeriod === 'function') {
+      try {
+        const locking = await payrollPeriodService.findLockingPeriod({
+          eventTime: eventTime || now(),
+          branchId,
+        });
+        if (locking) {
+          return {
+            ok: false,
+            reason: reg.REASON.PAYROLL_PERIOD_LOCKED,
+            errors: {
+              payrollPeriodId: String(locking._id),
+              periodCode: locking.periodCode,
+            },
+          };
+        }
+      } catch (err) {
+        // Fail-open on lock-check error would be unsafe — fail-closed.
+        logger.error('[Attendance Source] lock-check failed:', err.message);
+        return {
+          ok: false,
+          reason: reg.REASON.PAYROLL_PERIOD_LOCKED,
+          errors: { check: 'payroll lock probe failed; refusing event' },
+        };
+      }
     }
 
     const doc = new sourceEventModel({

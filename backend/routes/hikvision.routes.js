@@ -74,6 +74,21 @@ const REASON_TO_STATUS = Object.freeze({
   HEALTH_DEVICE_REQUIRED: 400,
   HEALTH_INVALID_DRIFT: 400,
 
+  // ── Wave 99 Phase 4 — Attendance Integration
+  RECONCILIATION_CASE_NOT_FOUND: 404,
+  RECONCILIATION_NOTHING_TO_MERGE: 200,
+  RECONCILIATION_ALREADY_LOCKED: 409,
+  PAYROLL_PERIOD_NOT_FOUND: 404,
+  PAYROLL_PERIOD_ALREADY_CLOSED: 409,
+  PAYROLL_PERIOD_NOT_CLOSED: 409,
+  PAYROLL_PERIOD_LOCKED: 409,
+  PAYROLL_PERIOD_OVERLAP: 409,
+  PAYROLL_OVERRIDE_REASON_REQUIRED: 400,
+  PAYROLL_OVERRIDE_APPROVER_CHAIN_INCOMPLETE: 409,
+  PAYROLL_OVERRIDE_NAFATH_REQUIRED: 401,
+  SHIFT_CALENDAR_MISSING: 422,
+  SHIFT_DATE_REQUIRED: 400,
+
   // ── Wave 98 Phase 3 — Recognition + Confidence Review
   RAW_EVENT_NOT_FOUND: 404,
   RAW_EVENT_NOT_PENDING: 409,
@@ -163,6 +178,8 @@ function createHikvisionRouter({
   enrollmentService = null,
   parserService = null,
   attendanceSourceService = null,
+  reconciliationService = null,
+  payrollPeriodService = null,
   governance,
   webhookHmac = null,
   logger = console,
@@ -824,6 +841,245 @@ function createHikvisionRouter({
     );
   }
 
+  // ─── Wave 99 Phase 4 — Attendance Integration ───────────────
+  // Mounted only when both Phase 4 services are supplied.
+  if (reconciliationService && payrollPeriodService) {
+    // Reconciliation
+    router.post(
+      '/reconciliation/run/employee',
+      requirePerm('attendance.reconciliation.run'),
+      async (req, res) => {
+        try {
+          const r = await reconciliationService.reconcileEmployeeDay({
+            employeeId: req.body?.employeeId,
+            shiftDate: req.body?.shiftDate,
+            shiftHint: req.body?.shiftHint,
+            branchId: req.body?.branchId,
+          });
+          return respond(res, r);
+        } catch (err) {
+          return safeError(res, err, 'attendance.reconciliation.run.employee');
+        }
+      }
+    );
+
+    router.post(
+      '/reconciliation/run/branch',
+      requirePerm('attendance.reconciliation.run'),
+      async (req, res) => {
+        try {
+          const r = await reconciliationService.reconcileBranchDay({
+            branchId: req.body?.branchId,
+            shiftDate: req.body?.shiftDate,
+            employeeIds: req.body?.employeeIds,
+          });
+          return respond(res, r);
+        } catch (err) {
+          return safeError(res, err, 'attendance.reconciliation.run.branch');
+        }
+      }
+    );
+
+    router.get(
+      '/reconciliation/cases',
+      requirePerm('attendance.reconciliation.list'),
+      async (req, res) => {
+        try {
+          const r = await reconciliationService.listCases({
+            employeeId: req.query.employeeId || undefined,
+            branchId: req.query.branchId || undefined,
+            conflictType: req.query.conflictType || undefined,
+            status: req.query.status || undefined,
+            shiftDate: req.query.shiftDate || undefined,
+            since: req.query.since || undefined,
+            until: req.query.until || undefined,
+            lockedByPayrollPeriodId: req.query.lockedByPayrollPeriodId || undefined,
+            limit: req.query.limit ? Number(req.query.limit) : undefined,
+            skip: req.query.skip ? Number(req.query.skip) : undefined,
+          });
+          return respond(res, r);
+        } catch (err) {
+          return safeError(res, err, 'attendance.reconciliation.list');
+        }
+      }
+    );
+
+    router.get(
+      '/reconciliation/cases/:id',
+      requirePerm('attendance.reconciliation.read'),
+      async (req, res) => {
+        try {
+          const r = await reconciliationService.getCase(req.params.id);
+          return respond(res, r);
+        } catch (err) {
+          return safeError(res, err, 'attendance.reconciliation.read');
+        }
+      }
+    );
+
+    router.post(
+      '/reconciliation/cases/:id/resolve',
+      requirePerm('attendance.reconciliation.resolve'),
+      async (req, res) => {
+        try {
+          const r = await reconciliationService.resolveConflict(req.params.id, {
+            actor: actorFrom(req),
+            finalCheckIn: req.body?.finalCheckIn,
+            finalCheckOut: req.body?.finalCheckOut,
+            note: req.body?.note,
+          });
+          return respond(res, r);
+        } catch (err) {
+          return safeError(res, err, 'attendance.reconciliation.resolve');
+        }
+      }
+    );
+
+    // Payroll periods
+    router.post('/payroll/periods', requirePerm('payroll.period.create'), async (req, res) => {
+      try {
+        const r = await payrollPeriodService.createPeriod(req.body || {});
+        return respond(res, r);
+      } catch (err) {
+        return safeError(res, err, 'payroll.period.create');
+      }
+    });
+
+    router.get('/payroll/periods', requirePerm('payroll.period.list'), async (req, res) => {
+      try {
+        const r = await payrollPeriodService.listPeriods({
+          branchId: req.query.branchId !== undefined ? req.query.branchId : undefined,
+          status: req.query.status || undefined,
+          limit: req.query.limit ? Number(req.query.limit) : undefined,
+          skip: req.query.skip ? Number(req.query.skip) : undefined,
+        });
+        return respond(res, r);
+      } catch (err) {
+        return safeError(res, err, 'payroll.period.list');
+      }
+    });
+
+    router.get(
+      '/payroll/periods/:idOrCode',
+      requirePerm('payroll.period.read'),
+      async (req, res) => {
+        try {
+          const r = await payrollPeriodService.getPeriod(req.params.idOrCode);
+          return respond(res, r);
+        } catch (err) {
+          return safeError(res, err, 'payroll.period.read');
+        }
+      }
+    );
+
+    router.post(
+      '/payroll/periods/:id/close',
+      requirePerm('payroll.period.close'),
+      async (req, res) => {
+        try {
+          const r = await payrollPeriodService.closePeriod(req.params.id, {
+            actor: actorFrom(req),
+          });
+          return respond(res, r);
+        } catch (err) {
+          return safeError(res, err, 'payroll.period.close');
+        }
+      }
+    );
+
+    router.post(
+      '/payroll/periods/:id/reopen',
+      requirePerm('payroll.period.reopen'),
+      async (req, res) => {
+        try {
+          const r = await payrollPeriodService.reopenPeriod(req.params.id, {
+            actor: actorFrom(req),
+            reason: req.body?.reason,
+          });
+          return respond(res, r);
+        } catch (err) {
+          return safeError(res, err, 'payroll.period.reopen');
+        }
+      }
+    );
+
+    // Payroll overrides
+    router.post('/payroll/overrides', requirePerm('payroll.override.create'), async (req, res) => {
+      try {
+        const r = await payrollPeriodService.draftOverride({
+          payrollPeriodId: req.body?.payrollPeriodId,
+          reconciliationCaseId: req.body?.reconciliationCaseId,
+          afterSnapshot: req.body?.afterSnapshot,
+          reason: req.body?.reason,
+          actor: actorFrom(req),
+        });
+        return respond(res, r);
+      } catch (err) {
+        return safeError(res, err, 'payroll.override.create');
+      }
+    });
+
+    router.post(
+      '/payroll/overrides/:id/approvals',
+      requirePerm('payroll.override.create'),
+      async (req, res) => {
+        try {
+          const r = await payrollPeriodService.addApprover(req.params.id, {
+            step: req.body?.step,
+            actor: actorFrom(req),
+            decision: req.body?.decision,
+            note: req.body?.note,
+            nafathSignatureId: req.body?.nafathSignatureId,
+          });
+          return respond(res, r);
+        } catch (err) {
+          return safeError(res, err, 'payroll.override.approvals');
+        }
+      }
+    );
+
+    router.post(
+      '/payroll/overrides/:id/execute',
+      requirePerm('payroll.override.create'),
+      async (req, res) => {
+        try {
+          const r = await payrollPeriodService.executeOverride(req.params.id, {
+            actor: actorFrom(req),
+            nafathSignatureId: req.body?.nafathSignatureId,
+            appliedToNextPeriodId: req.body?.appliedToNextPeriodId,
+          });
+          return respond(res, r);
+        } catch (err) {
+          return safeError(res, err, 'payroll.override.execute');
+        }
+      }
+    );
+
+    router.get('/payroll/overrides', requirePerm('payroll.override.list'), async (req, res) => {
+      try {
+        const r = await payrollPeriodService.listOverrides({
+          payrollPeriodId: req.query.payrollPeriodId || undefined,
+          employeeId: req.query.employeeId || undefined,
+          state: req.query.state || undefined,
+          limit: req.query.limit ? Number(req.query.limit) : undefined,
+          skip: req.query.skip ? Number(req.query.skip) : undefined,
+        });
+        return respond(res, r);
+      } catch (err) {
+        return safeError(res, err, 'payroll.override.list');
+      }
+    });
+
+    router.get('/payroll/overrides/:id', requirePerm('payroll.override.read'), async (req, res) => {
+      try {
+        const r = await payrollPeriodService.getOverride(req.params.id);
+        return respond(res, r);
+      } catch (err) {
+        return safeError(res, err, 'payroll.override.read');
+      }
+    });
+  }
+
   // ─── Registry passthrough (no perm gate — public catalog) ───
   router.get('/registry', (_req, res) => {
     return res.json({
@@ -857,6 +1113,12 @@ function createHikvisionRouter({
         attendanceSources: reg.ATTENDANCE_SOURCES,
         impossibleTravelWindowMs: reg.IMPOSSIBLE_TRAVEL_WINDOW_MS,
         reviewSlaMs: reg.REVIEW_SLA_MS,
+        // Wave 99 Phase 4 additions
+        payrollPeriodStatuses: reg.PAYROLL_PERIOD_STATUSES,
+        reconciliationConflicts: reg.RECONCILIATION_CONFLICTS,
+        shiftClassifications: reg.SHIFT_CLASSIFICATIONS,
+        payrollOverrideApprovals: reg.PAYROLL_OVERRIDE_APPROVALS,
+        reconciliationDefaults: reg.RECONCILIATION_DEFAULTS,
       },
     });
   });

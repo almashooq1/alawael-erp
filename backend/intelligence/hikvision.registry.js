@@ -229,6 +229,21 @@ const REASON = Object.freeze({
   TEMPLATE_INACTIVE_FOR_MATCH: 'TEMPLATE_INACTIVE_FOR_MATCH',
   CONFIDENCE_OUT_OF_RANGE: 'CONFIDENCE_OUT_OF_RANGE',
 
+  // ─── Wave 99 Phase 4 — Attendance Integration ──────────────────
+  RECONCILIATION_CASE_NOT_FOUND: 'RECONCILIATION_CASE_NOT_FOUND',
+  RECONCILIATION_NOTHING_TO_MERGE: 'RECONCILIATION_NOTHING_TO_MERGE',
+  RECONCILIATION_ALREADY_LOCKED: 'RECONCILIATION_ALREADY_LOCKED',
+  PAYROLL_PERIOD_NOT_FOUND: 'PAYROLL_PERIOD_NOT_FOUND',
+  PAYROLL_PERIOD_ALREADY_CLOSED: 'PAYROLL_PERIOD_ALREADY_CLOSED',
+  PAYROLL_PERIOD_NOT_CLOSED: 'PAYROLL_PERIOD_NOT_CLOSED',
+  PAYROLL_PERIOD_LOCKED: 'PAYROLL_PERIOD_LOCKED',
+  PAYROLL_PERIOD_OVERLAP: 'PAYROLL_PERIOD_OVERLAP',
+  PAYROLL_OVERRIDE_REASON_REQUIRED: 'PAYROLL_OVERRIDE_REASON_REQUIRED',
+  PAYROLL_OVERRIDE_APPROVER_CHAIN_INCOMPLETE: 'PAYROLL_OVERRIDE_APPROVER_CHAIN_INCOMPLETE',
+  PAYROLL_OVERRIDE_NAFATH_REQUIRED: 'PAYROLL_OVERRIDE_NAFATH_REQUIRED',
+  SHIFT_CALENDAR_MISSING: 'SHIFT_CALENDAR_MISSING',
+  SHIFT_DATE_REQUIRED: 'SHIFT_DATE_REQUIRED',
+
   // Generic
   PERMISSION_DENIED: 'PERMISSION_DENIED',
   VALIDATION_FAILED: 'VALIDATION_FAILED',
@@ -677,6 +692,205 @@ function classifyHealth({ lastHeartbeatAt, timeOffsetMs, now = Date.now() } = {}
   return DEVICE_STATUS.ONLINE;
 }
 
+// ─── Wave 99 Phase 4 — Attendance Integration ───────────────────
+
+// Lifecycle of a payroll period.
+//   open    — events flow in, modifications allowed
+//   closing — snapshot in progress; new events still blocked
+//   closed  — immutable; corrections only via override ledger
+const PAYROLL_PERIOD_STATUS = Object.freeze({
+  OPEN: 'open',
+  CLOSING: 'closing',
+  CLOSED: 'closed',
+});
+const PAYROLL_PERIOD_STATUSES = Object.freeze(Object.values(PAYROLL_PERIOD_STATUS));
+
+// Reconciliation conflict types — drives the UI badge + which queue
+// (HR / supervisor) sees the case for resolution.
+const RECONCILIATION_CONFLICT = Object.freeze({
+  NONE: 'none', // multiple sources agreed, no conflict
+  MULTI_SOURCE_DISAGREEMENT: 'multi-source-disagreement',
+  MISSING_CHECKOUT: 'missing-checkout',
+  MISSING_CHECKIN: 'missing-checkin',
+  SHIFT_BRIDGE: 'shift-bridge', // crosses midnight
+  IMPOSSIBLE_TRAVEL: 'impossible-travel',
+  NO_EVENTS: 'no-events', // employee on roster, zero source events
+});
+const RECONCILIATION_CONFLICTS = Object.freeze(Object.values(RECONCILIATION_CONFLICT));
+
+// Resolved in/out classification a reconciler emits to the ledger.
+const SHIFT_CLASSIFICATION = Object.freeze({
+  ON_TIME: 'on-time',
+  LATE: 'late',
+  EARLY: 'early-arrival',
+  EARLY_OUT: 'early-out',
+  OVERTIME: 'overtime',
+  NO_SHOW: 'no-show',
+  ON_LEAVE: 'on-leave', // shouldn't have been on roster — reconciler ignores
+});
+const SHIFT_CLASSIFICATIONS = Object.freeze(Object.values(SHIFT_CLASSIFICATION));
+
+// Approver chain required for a payroll override. Order matters —
+// HR first, then finance, then ceo for amounts above the threshold.
+const PAYROLL_OVERRIDE_APPROVAL = Object.freeze({
+  HR_MANAGER: 'hr_manager',
+  FINANCE: 'finance',
+  CEO: 'ceo',
+});
+const PAYROLL_OVERRIDE_APPROVALS = Object.freeze(Object.values(PAYROLL_OVERRIDE_APPROVAL));
+
+// Reconciliation engine tunables.
+const RECONCILIATION_DEFAULTS = Object.freeze({
+  GRACE_PERIOD_MIN: 10, // ±10 min around expected shift bounds
+  OVERTIME_THRESHOLD_MIN: 15, // anything >15 min beyond shift end = OT
+  NO_SHOW_GRACE_MIN: 60, // employee not seen within 60 min of shift start
+  CROSS_MIDNIGHT_WINDOW_HOURS: 14, // any shift spanning <14h is valid same-shift
+});
+
+/**
+ * Pure helper: classify a check-in time against a shift's expected
+ * window. Returns one of SHIFT_CLASSIFICATIONS plus the delta in
+ * minutes (positive = late / over, negative = early / before).
+ */
+function classifyCheckIn(
+  checkInAt,
+  shift,
+  { grace = RECONCILIATION_DEFAULTS.GRACE_PERIOD_MIN } = {}
+) {
+  if (!checkInAt || !shift || !shift.startAt) {
+    return { classification: SHIFT_CLASSIFICATION.NO_SHOW, deltaMin: null };
+  }
+  const inT = checkInAt instanceof Date ? checkInAt.getTime() : Date.parse(checkInAt);
+  const expT = shift.startAt instanceof Date ? shift.startAt.getTime() : Date.parse(shift.startAt);
+  if (!Number.isFinite(inT) || !Number.isFinite(expT)) {
+    return { classification: SHIFT_CLASSIFICATION.NO_SHOW, deltaMin: null };
+  }
+  const deltaMin = Math.round((inT - expT) / 60_000);
+  if (deltaMin < -grace) return { classification: SHIFT_CLASSIFICATION.EARLY, deltaMin };
+  if (deltaMin > grace) return { classification: SHIFT_CLASSIFICATION.LATE, deltaMin };
+  return { classification: SHIFT_CLASSIFICATION.ON_TIME, deltaMin };
+}
+
+/**
+ * Pure helper: classify a check-out time against a shift's expected
+ * window. Returns OVERTIME / ON_TIME / EARLY_OUT.
+ */
+function classifyCheckOut(
+  checkOutAt,
+  shift,
+  {
+    grace = RECONCILIATION_DEFAULTS.GRACE_PERIOD_MIN,
+    overtimeThreshold = RECONCILIATION_DEFAULTS.OVERTIME_THRESHOLD_MIN,
+  } = {}
+) {
+  if (!checkOutAt || !shift || !shift.endAt) {
+    return { classification: SHIFT_CLASSIFICATION.NO_SHOW, deltaMin: null };
+  }
+  const outT = checkOutAt instanceof Date ? checkOutAt.getTime() : Date.parse(checkOutAt);
+  const expT = shift.endAt instanceof Date ? shift.endAt.getTime() : Date.parse(shift.endAt);
+  if (!Number.isFinite(outT) || !Number.isFinite(expT)) {
+    return { classification: SHIFT_CLASSIFICATION.NO_SHOW, deltaMin: null };
+  }
+  const deltaMin = Math.round((outT - expT) / 60_000);
+  if (deltaMin > overtimeThreshold) {
+    return { classification: SHIFT_CLASSIFICATION.OVERTIME, deltaMin };
+  }
+  if (deltaMin < -grace) {
+    return { classification: SHIFT_CLASSIFICATION.EARLY_OUT, deltaMin };
+  }
+  return { classification: SHIFT_CLASSIFICATION.ON_TIME, deltaMin };
+}
+
+/**
+ * Pure helper: pair events within the corroboration window. Returns
+ * the pairs found + the un-paired remainders.
+ *   - events of TIER-2 source (fingerprint OR face-terminal) that
+ *     fall within CORROBORATION_WINDOW_MS of each other AND differ
+ *     in `source` are merged into a TIER-1 pair.
+ *
+ * Used by the reconciler step that emits the "ledger" check-in/out.
+ */
+function findCorroborationPairs(
+  events,
+  { windowMs = DEFAULT_CONFIDENCE_THRESHOLDS.CORROBORATION_WINDOW_MS } = {}
+) {
+  const sorted = (events || []).slice().sort((a, b) => {
+    const at = a.eventTime instanceof Date ? a.eventTime.getTime() : Date.parse(a.eventTime);
+    const bt = b.eventTime instanceof Date ? b.eventTime.getTime() : Date.parse(b.eventTime);
+    return at - bt;
+  });
+  const pairs = [];
+  const used = new Set();
+  for (let i = 0; i < sorted.length; i += 1) {
+    if (used.has(i)) continue;
+    const a = sorted[i];
+    const at = a.eventTime instanceof Date ? a.eventTime.getTime() : Date.parse(a.eventTime);
+    for (let j = i + 1; j < sorted.length; j += 1) {
+      if (used.has(j)) continue;
+      const b = sorted[j];
+      const bt = b.eventTime instanceof Date ? b.eventTime.getTime() : Date.parse(b.eventTime);
+      if (bt - at > windowMs) break;
+      if (a.source !== b.source) {
+        pairs.push({ primary: a, corroborator: b });
+        used.add(i);
+        used.add(j);
+        break;
+      }
+    }
+  }
+  const unpaired = sorted.filter((_, idx) => !used.has(idx));
+  return { pairs, unpaired };
+}
+
+/**
+ * Pure helper: dedup events within the same zone using the
+ * DUPLICATE_SUPPRESSION_WINDOW_MS. The kept event is the one with
+ * the highest trust tier; ties broken by earliest time.
+ */
+function dedupByZoneWindow(
+  events,
+  { windowMs = DEFAULT_CONFIDENCE_THRESHOLDS.DUPLICATE_SUPPRESSION_WINDOW_MS } = {}
+) {
+  const byZone = new Map();
+  for (const ev of events || []) {
+    const zoneKey = String(ev.zoneId || '__nozone__');
+    const arr = byZone.get(zoneKey) || [];
+    arr.push(ev);
+    byZone.set(zoneKey, arr);
+  }
+  const kept = [];
+  for (const [, arr] of byZone) {
+    arr.sort((a, b) => {
+      const at = a.eventTime instanceof Date ? a.eventTime.getTime() : Date.parse(a.eventTime);
+      const bt = b.eventTime instanceof Date ? b.eventTime.getTime() : Date.parse(b.eventTime);
+      return at - bt;
+    });
+    const seenKept = [];
+    for (const ev of arr) {
+      const evT = ev.eventTime instanceof Date ? ev.eventTime.getTime() : Date.parse(ev.eventTime);
+      const recent = seenKept.find(k => {
+        const kT = k.eventTime instanceof Date ? k.eventTime.getTime() : Date.parse(k.eventTime);
+        return Math.abs(evT - kT) <= windowMs;
+      });
+      if (!recent) {
+        seenKept.push(ev);
+        continue;
+      }
+      // Same window — keep higher tier (lower number = higher trust).
+      if ((ev.trustTier || 99) < (recent.trustTier || 99)) {
+        const idx = seenKept.indexOf(recent);
+        if (idx >= 0) seenKept[idx] = ev;
+      }
+    }
+    kept.push(...seenKept);
+  }
+  return kept.sort((a, b) => {
+    const at = a.eventTime instanceof Date ? a.eventTime.getTime() : Date.parse(a.eventTime);
+    const bt = b.eventTime instanceof Date ? b.eventTime.getTime() : Date.parse(b.eventTime);
+    return at - bt;
+  });
+}
+
 module.exports = {
   DEVICE_KIND,
   DEVICE_KINDS,
@@ -729,6 +943,16 @@ module.exports = {
   ATTENDANCE_SOURCES,
   IMPOSSIBLE_TRAVEL_WINDOW_MS,
   REVIEW_SLA_MS,
+  // Wave 99 Phase 4 — attendance integration
+  PAYROLL_PERIOD_STATUS,
+  PAYROLL_PERIOD_STATUSES,
+  RECONCILIATION_CONFLICT,
+  RECONCILIATION_CONFLICTS,
+  SHIFT_CLASSIFICATION,
+  SHIFT_CLASSIFICATIONS,
+  PAYROLL_OVERRIDE_APPROVAL,
+  PAYROLL_OVERRIDE_APPROVALS,
+  RECONCILIATION_DEFAULTS,
   // helpers
   isValidIPv4,
   isAttendanceEligibleKind,
@@ -739,4 +963,9 @@ module.exports = {
   applyConfidenceGate,
   isImpossibleTravel,
   slaForQueue,
+  // Wave 99 Phase 4 — attendance integration helpers
+  classifyCheckIn,
+  classifyCheckOut,
+  findCorroborationPairs,
+  dedupByZoneWindow,
 };

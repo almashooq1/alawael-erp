@@ -2138,6 +2138,18 @@ try {
     /* Phase 3 models optional — parser/review routes skipped if absent */
   }
 
+  // Wave 99 Phase 4 — attendance integration models (optional)
+  let AttendanceReconciliationCase = null;
+  let PayrollPeriod = null;
+  let AttendancePayrollOverride = null;
+  try {
+    AttendanceReconciliationCase = require('./models/AttendanceReconciliationCase');
+    PayrollPeriod = require('./models/PayrollPeriod');
+    AttendancePayrollOverride = require('./models/AttendancePayrollOverride');
+  } catch {
+    /* Phase 4 models optional — reconciliation/payroll routes skipped if absent */
+  }
+
   if (HikvisionDevice && HikvisionCameraChannel && HikvisionRawEvent && HikvisionDeviceHealthLog) {
     let governanceSvc = null;
     try {
@@ -2260,6 +2272,97 @@ try {
         );
       }
 
+      // Wave 99 Phase 4 — attendance integration (graceful)
+      // Wires reconciliation + payroll-period + override services.
+      // attendance-source service is RE-CONSTRUCTED here when Phase 4
+      // models are present so it can receive the payrollPeriodService
+      // (gives it the lock-protection guard).
+      let reconciliationSvc = null;
+      let payrollPeriodSvc = null;
+      if (
+        AttendanceReconciliationCase &&
+        PayrollPeriod &&
+        AttendancePayrollOverride &&
+        attendanceSourceSvc &&
+        AttendanceSourceEvent &&
+        AttendanceConfidenceReview
+      ) {
+        try {
+          const {
+            createAttendanceReconciliationService,
+          } = require('./intelligence/attendance-reconciliation.service');
+          const { createPayrollPeriodService } = require('./intelligence/payroll-period.service');
+          // Optional Branch model — reconciler reads shift calendars
+          let branchModel = null;
+          try {
+            branchModel = require('./models/Branch');
+          } catch {
+            /* shift-calendar lookup skipped if model unavailable */
+          }
+          reconciliationSvc = createAttendanceReconciliationService({
+            caseModel: AttendanceReconciliationCase,
+            sourceEventModel: AttendanceSourceEvent,
+            branchModel,
+            logger,
+          });
+          payrollPeriodSvc = createPayrollPeriodService({
+            periodModel: PayrollPeriod,
+            caseModel: AttendanceReconciliationCase,
+            overrideModel: AttendancePayrollOverride,
+            sourceEventModel: AttendanceSourceEvent,
+            reconcilerService: reconciliationSvc,
+            logger,
+          });
+          // Re-construct attendance-source service with the
+          // payrollPeriodService so future createSourceEvent calls
+          // honour the locked-period guard. We replace the existing
+          // reference so the router gets the lock-aware version.
+          const {
+            createAttendanceSourceService: createAttendanceSourceServiceWithLock,
+          } = require('./intelligence/attendance-source.service');
+          attendanceSourceSvc = createAttendanceSourceServiceWithLock({
+            sourceEventModel: AttendanceSourceEvent,
+            reviewModel: AttendanceConfidenceReview,
+            processedEventModel: HikvisionProcessedEvent,
+            payrollPeriodService: payrollPeriodSvc,
+            logger,
+          });
+          // The parser holds the OLD reference; re-wire it to the
+          // new lock-aware service so its AUTO_ACCEPT path also
+          // honours the lock.
+          if (parserService) {
+            const {
+              createHikvisionEventParserService: createParserWithLock,
+            } = require('./intelligence/hikvision-event-parser.service');
+            const {
+              createHikvisionConfidenceGateService,
+            } = require('./intelligence/hikvision-confidence-gate.service');
+            const newGate = createHikvisionConfidenceGateService({});
+            parserService = createParserWithLock({
+              rawEventModel: HikvisionRawEvent,
+              processedEventModel: HikvisionProcessedEvent,
+              deviceModel: HikvisionDevice,
+              channelModel: HikvisionCameraChannel,
+              templateModel: HikvisionFaceTemplateLink || null,
+              gateService: newGate,
+              attendanceSourceService: attendanceSourceSvc,
+              logger,
+            });
+          }
+        } catch (p4err) {
+          logger.warn(
+            '[Hikvision] Phase 4 reconciliation/payroll services failed to wire:',
+            p4err.message
+          );
+          reconciliationSvc = null;
+          payrollPeriodSvc = null;
+        }
+      } else if (AttendanceReconciliationCase || PayrollPeriod || AttendancePayrollOverride) {
+        logger.info(
+          '[Hikvision] Phase 4 partial models found — full Phase 4 wiring requires all three (Case/Period/Override) + Phase 3 services'
+        );
+      }
+
       // Optional HMAC middleware for the device webhook. If the
       // secret env var isn't set, the webhook is omitted but the
       // operator-replay endpoint stays available.
@@ -2312,6 +2415,8 @@ try {
           enrollmentService,
           parserService,
           attendanceSourceService: attendanceSourceSvc,
+          reconciliationService: reconciliationSvc,
+          payrollPeriodService: payrollPeriodSvc,
           governance: governanceSvc,
           webhookHmac,
           logger,
@@ -2324,9 +2429,12 @@ try {
       if (enrollmentService) app._hikvisionFaceEnrollmentService = enrollmentService;
       if (parserService) app._hikvisionEventParserService = parserService;
       if (attendanceSourceSvc) app._attendanceSourceService = attendanceSourceSvc;
+      if (reconciliationSvc) app._attendanceReconciliationService = reconciliationSvc;
+      if (payrollPeriodSvc) app._payrollPeriodService = payrollPeriodSvc;
       const phases = ['Wave 96 Phase 1'];
       if (libraryService && enrollmentService) phases.push('Wave 97 Phase 2');
       if (parserService && attendanceSourceSvc) phases.push('Wave 98 Phase 3');
+      if (reconciliationSvc && payrollPeriodSvc) phases.push('Wave 99 Phase 4');
       logger.info(`[Hikvision] ✓ ${phases.join(' + ')} routes mounted at /api/v1/hikvision`);
     } else {
       logger.warn('[Hikvision] routes skipped: governance service unavailable');

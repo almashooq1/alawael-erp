@@ -179,6 +179,13 @@ function createGovernanceService({
   }) {
     if (!auditLogger || typeof auditLogger.log !== 'function') return { logged: 0 };
     const actions = shouldRecordAccess({ dataKinds });
+    // Wave 84 — write the compound `resource` key the canonical
+    // AuditLog model expects (String scalar, not nested object).
+    // Same encoding the getAuditTrail filter reads: `entityType#entityId`.
+    // entityType + entityId are also kept on the entry so audit
+    // loggers that emit to other sinks (events, metrics, files)
+    // can still pick them up by name.
+    const resourceKey = entityType && entityId ? `${entityType}#${String(entityId)}` : null;
     for (const action of actions) {
       try {
         await auditLogger.log({
@@ -187,6 +194,7 @@ function createGovernanceService({
           actorRole: viewer.role || null,
           entityType: entityType || null,
           entityId: entityId || null,
+          resource: resourceKey,
           ipAddress: viewer.ip || null,
           metadata: { dataKinds, accessAt: new Date() },
         });
@@ -226,12 +234,20 @@ function createGovernanceService({
     const events = [];
 
     // 1. AuditLog entries
+    //
+    // Wave 84 — schema-aligned compound key (closes critical-review
+    // blocker B1). The canonical AuditLog model
+    // (backend/models/auditLog.model.js) stores `resource` as a
+    // String scalar — earlier versions of this filter queried
+    // `'resource.type'` against a nested-object schema that doesn't
+    // exist, so every AuditTrail UI surface returned 200 OK with
+    // an empty events list. The convention is now to encode entity
+    // identity as a compound `entityType#entityId` string, which
+    // matches the wave-84 auditLogger bridge contract.
     if (auditModel && typeof auditModel.find === 'function') {
       try {
-        const filter = {
-          'resource.type': entityType,
-          'resource.id': String(entityId),
-        };
+        const resourceKey = `${entityType}#${String(entityId)}`;
+        const filter = { resource: resourceKey };
         if (!viewerCanReadAll) {
           filter.userId = viewer.userId;
         }

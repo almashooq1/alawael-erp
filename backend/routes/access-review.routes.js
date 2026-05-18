@@ -82,6 +82,14 @@ const REASON_TO_STATUS = Object.freeze({
   MODEL_VALIDATION_FAILED: 422,
   SAVE_FAILED: 500,
   CYCLE_ID_REQUIRED: 400,
+  // Wave 74 — scheduler reasons
+  ACTORS_MUST_BE_ARRAY: 400,
+  EVENTS_MUST_BE_ARRAY: 400,
+  USERS_MUST_BE_ARRAY: 400,
+  SIMULATOR_REQUIRED: 503,
+  NOTIFIER_UNAVAILABLE: 503,
+  SERVICE_REQUIRED: 503,
+  STATUS_LOOKUP_FAILED: 500,
 });
 
 function actorFrom(req) {
@@ -112,10 +120,18 @@ function respond(res, result) {
  * @param {object} opts
  *   - service    — Wave-72 access-review service
  *   - simulator  — Wave-38 simulator (createAccessReviewSimulator output)
+ *   - scheduler  — Wave-74 scheduler (optional; when present, exposes
+ *                  /cycles + /events/* endpoints)
  *   - governance — Wave-26 governance service (hasPermission)
  *   - logger
  */
-function createAccessReviewRouter({ service, simulator, governance, logger = console } = {}) {
+function createAccessReviewRouter({
+  service,
+  simulator,
+  scheduler = null,
+  governance,
+  logger = console,
+} = {}) {
   if (!service || typeof service.createAttestation !== 'function') {
     throw new Error('access-review.routes: service is required');
   }
@@ -268,6 +284,117 @@ function createAccessReviewRouter({ service, simulator, governance, logger = con
       return res.json({ success: true, data: result });
     } catch (err) {
       return safeError(res, err, 'access-review.simulate.grant');
+    }
+  });
+
+  // ─── Wave 74 — Scheduler endpoints (only wired if scheduler provided) ─
+
+  function ensureScheduler(res) {
+    if (!scheduler || typeof scheduler.openCycle !== 'function') {
+      res.status(503).json({
+        success: false,
+        message: 'SCHEDULER_UNAVAILABLE',
+        reason: 'SCHEDULER_UNAVAILABLE',
+      });
+      return false;
+    }
+    return true;
+  }
+
+  // POST /cycles  — open a new cycle (manual or cron-triggered)
+  router.post('/cycles', requirePerm('access-review.cycle.open'), (req, res) => {
+    try {
+      if (!ensureScheduler(res)) return undefined;
+      const result = scheduler.openCycle({
+        cycleId: req.body?.cycleId,
+        scope: req.body?.scope ?? null,
+        openedBy: req.user?.id || req.user?._id || null,
+        openedAt: req.body?.openedAt ?? null,
+      });
+      return respond(res, result);
+    } catch (err) {
+      return safeError(res, err, 'access-review.cycle.open');
+    }
+  });
+
+  // POST /cycles/:cycleId/build  — build reviewer queues
+  router.post('/cycles/:cycleId/build', requirePerm('access-review.cycle.build'), (req, res) => {
+    try {
+      if (!ensureScheduler(res)) return undefined;
+      const result = scheduler.buildReviewerQueues({
+        cycleId: req.params.cycleId,
+        actors: Array.isArray(req.body?.actors) ? req.body.actors : [],
+      });
+      return respond(res, result);
+    } catch (err) {
+      return safeError(res, err, 'access-review.cycle.build');
+    }
+  });
+
+  // POST /cycles/:cycleId/notify  — fan out notifications via unifiedNotifier
+  router.post(
+    '/cycles/:cycleId/notify',
+    requirePerm('access-review.cycle.notify'),
+    async (req, res) => {
+      try {
+        if (!ensureScheduler(res)) return undefined;
+        const result = await scheduler.notifyReviewers({
+          cycleId: req.params.cycleId,
+          queues: Array.isArray(req.body?.queues) ? req.body.queues : [],
+        });
+        return respond(res, result);
+      } catch (err) {
+        return safeError(res, err, 'access-review.cycle.notify');
+      }
+    }
+  );
+
+  // POST /cycles/:cycleId/close  — seal the cycle and return the report
+  router.post(
+    '/cycles/:cycleId/close',
+    requirePerm('access-review.cycle.close'),
+    async (req, res) => {
+      try {
+        if (!ensureScheduler(res)) return undefined;
+        const result = await scheduler.closeCycle({
+          cycleId: req.params.cycleId,
+          closedBy: req.user?.id || req.user?._id || null,
+          expectedAttestations:
+            req.body?.expectedAttestations != null ? Number(req.body.expectedAttestations) : null,
+        });
+        return respond(res, result);
+      } catch (err) {
+        return safeError(res, err, 'access-review.cycle.close');
+      }
+    }
+  );
+
+  // POST /events/mover  — event-driven MOVER review trigger
+  router.post('/events/mover', requirePerm('access-review.event.mover'), (req, res) => {
+    try {
+      if (!ensureScheduler(res)) return undefined;
+      const result = scheduler.detectMovers({
+        cycleId: req.body?.cycleId,
+        moverEvents: Array.isArray(req.body?.moverEvents) ? req.body.moverEvents : [],
+      });
+      return respond(res, result);
+    } catch (err) {
+      return safeError(res, err, 'access-review.event.mover');
+    }
+  });
+
+  // POST /events/dormancy-scan  — cron-callable DORMANT scan
+  router.post('/events/dormancy-scan', requirePerm('access-review.event.dormancy'), (req, res) => {
+    try {
+      if (!ensureScheduler(res)) return undefined;
+      const result = scheduler.detectDormantAccounts({
+        cycleId: req.body?.cycleId,
+        users: Array.isArray(req.body?.users) ? req.body.users : [],
+        thresholds: req.body?.thresholds || {},
+      });
+      return respond(res, result);
+    } catch (err) {
+      return safeError(res, err, 'access-review.event.dormancy');
     }
   });
 

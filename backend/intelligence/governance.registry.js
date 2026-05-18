@@ -364,6 +364,20 @@ const PERMISSIONS = Object.freeze({
     'iam.role_granter',
     'iam.role_matrix_editor',
   ],
+
+  // Wave 74 — Access Review Scheduler (operationalisation)
+  'access-review.cycle.open': ['dpo', 'ciso', 'audit_admin', 'compliance_officer'],
+  'access-review.cycle.build': [
+    'dpo',
+    'ciso',
+    'audit_admin',
+    'compliance_officer',
+    'security_architect',
+  ],
+  'access-review.cycle.notify': ['dpo', 'ciso', 'audit_admin'],
+  'access-review.cycle.close': ['dpo', 'audit_admin', 'audit_committee_chair'],
+  'access-review.event.mover': ['hr_admin', 'hr_director', 'chro', 'dpo', 'ciso'],
+  'access-review.event.dormancy': ['dpo', 'ciso', 'audit_admin', 'security_architect'],
 });
 
 // ─── API ────────────────────────────────────────────────────────

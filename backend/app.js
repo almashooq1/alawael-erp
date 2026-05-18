@@ -1993,6 +1993,37 @@ try {
       logger,
     });
 
+    // Wave 74 — operational scheduler. Wires unifiedNotifier when
+    // available so reviewer queues can ship inbox notifications;
+    // otherwise notifyReviewers returns NOTIFIER_UNAVAILABLE 503.
+    let arNotifier = null;
+    try {
+      const unified = require('./services/unifiedNotifier');
+      if (unified && typeof unified.send === 'function') arNotifier = unified;
+    } catch {
+      /* optional */
+    }
+    const arResolveAudience = async (role, branchId) => {
+      if (typeof app._resolveUsersForRole === 'function') {
+        try {
+          return await app._resolveUsersForRole(role, branchId);
+        } catch {
+          return [];
+        }
+      }
+      return [];
+    };
+    const {
+      createAccessReviewScheduler,
+    } = require('./intelligence/access-review-scheduler.service');
+    const accessReviewScheduler = createAccessReviewScheduler({
+      service: accessReviewSvc,
+      simulator,
+      notifier: arNotifier,
+      resolveAudienceForRole: arResolveAudience,
+      logger,
+    });
+
     let governanceSvc = null;
     try {
       const { createGovernanceService } = require('./intelligence/governance.service');
@@ -2009,14 +2040,16 @@ try {
         createAccessReviewRouter({
           service: accessReviewSvc,
           simulator,
+          scheduler: accessReviewScheduler,
           governance: governanceSvc,
           logger,
         })
       );
       app._accessReviewService = accessReviewSvc;
       app._accessReviewSimulator = simulator;
+      app._accessReviewScheduler = accessReviewScheduler;
       logger.info(
-        '[AccessReview] ✓ Wave 72 routes mounted at /api/v1/access-review (closes red-team #12)'
+        '[AccessReview] ✓ Wave 72+74 routes mounted at /api/v1/access-review (closes red-team #12; scheduler ready)'
       );
     } else {
       logger.warn('[AccessReview] routes skipped: governance service unavailable');

@@ -2160,6 +2160,14 @@ try {
     /* Phase 5 models optional — fraud routes skipped if absent */
   }
 
+  // Wave 108 — scheduler run history (optional)
+  let HikvisionJobRun = null;
+  try {
+    HikvisionJobRun = require('./models/HikvisionJobRun');
+  } catch {
+    /* scheduler model optional — scheduler routes skipped if absent */
+  }
+
   if (HikvisionDevice && HikvisionCameraChannel && HikvisionRawEvent && HikvisionDeviceHealthLog) {
     let governanceSvc = null;
     try {
@@ -2494,6 +2502,31 @@ try {
         }
       }
 
+      // Wave 108 — Operational Scheduler (graceful)
+      // Wires the JobRegistry to whichever services were instantiated
+      // above. Each handler is "available" iff its source service was
+      // wired; missing services produce SKIPPED runs (not failures).
+      let schedulerSvc = null;
+      if (HikvisionJobRun) {
+        try {
+          const {
+            createHikvisionScheduler,
+          } = require('./intelligence/hikvision-scheduler.service');
+          schedulerSvc = createHikvisionScheduler({
+            syncWorker: syncWorkerSvc,
+            fraudDetection: fraudDetectionSvc,
+            fraudScore: fraudScoreSvc,
+            eventParser: parserService,
+            healthMonitor: healthService,
+            runModel: HikvisionJobRun,
+            logger,
+          });
+        } catch (schErr) {
+          logger.warn('[Hikvision] Wave 108 scheduler failed to wire:', schErr.message);
+          schedulerSvc = null;
+        }
+      }
+
       // Optional HMAC middleware for the device webhook. If the
       // secret env var isn't set, the webhook is omitted but the
       // operator-replay endpoint stays available.
@@ -2551,6 +2584,7 @@ try {
           fraudDetectionService: fraudDetectionSvc,
           fraudScoreService: fraudScoreSvc,
           syncWorker: syncWorkerSvc,
+          scheduler: schedulerSvc,
           governance: governanceSvc,
           webhookHmac,
           logger,
@@ -2568,12 +2602,14 @@ try {
       if (fraudDetectionSvc) app._hikvisionFraudDetectionService = fraudDetectionSvc;
       if (fraudScoreSvc) app._hikvisionFraudScoreService = fraudScoreSvc;
       if (syncWorkerSvc) app._hikvisionSyncWorker = syncWorkerSvc;
+      if (schedulerSvc) app._hikvisionScheduler = schedulerSvc;
       const phases = ['Wave 96 Phase 1'];
       if (libraryService && enrollmentService) phases.push('Wave 97 Phase 2');
       if (parserService && attendanceSourceSvc) phases.push('Wave 98 Phase 3');
       if (reconciliationSvc && payrollPeriodSvc) phases.push('Wave 99 Phase 4');
       if (fraudDetectionSvc && fraudScoreSvc) phases.push('Wave 100 Phase 5');
       if (syncWorkerSvc) phases.push('Wave 106 Phase F');
+      if (schedulerSvc) phases.push('Wave 108 Scheduler');
       logger.info(`[Hikvision] ✓ ${phases.join(' + ')} routes mounted at /api/v1/hikvision`);
     } else {
       logger.warn('[Hikvision] routes skipped: governance service unavailable');

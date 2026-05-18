@@ -267,6 +267,13 @@ const REASON = Object.freeze({
   ISAPI_REQUEST_FAILED: 'ISAPI_REQUEST_FAILED',
   ISAPI_RESPONSE_INVALID: 'ISAPI_RESPONSE_INVALID',
 
+  // ─── Wave 108 — Operational Scheduler ──────────────────────────
+  JOB_NOT_FOUND: 'JOB_NOT_FOUND',
+  JOB_HANDLER_UNAVAILABLE: 'JOB_HANDLER_UNAVAILABLE',
+  JOB_ALREADY_RUNNING: 'JOB_ALREADY_RUNNING',
+  JOB_DISABLED: 'JOB_DISABLED',
+  JOB_HANDLER_THREW: 'JOB_HANDLER_THREW',
+
   // Generic
   PERMISSION_DENIED: 'PERMISSION_DENIED',
   VALIDATION_FAILED: 'VALIDATION_FAILED',
@@ -1122,6 +1129,63 @@ const SYNC_DEFAULTS = Object.freeze({
   RETRY_BACKOFF_MS: [1_000, 3_000],
 });
 
+// ─── Wave 108 — Operational Scheduler ──────────────────────────
+//
+// Job lifecycle: pending → running → (succeeded | failed). 'skipped'
+// covers the case where the lock holder bailed out because of an
+// upstream precondition (e.g. handler unavailable, job disabled).
+const JOB_STATUS = Object.freeze({
+  PENDING: 'pending',
+  RUNNING: 'running',
+  SUCCEEDED: 'succeeded',
+  FAILED: 'failed',
+  SKIPPED: 'skipped',
+});
+const JOB_STATUSES = Object.freeze(Object.values(JOB_STATUS));
+
+const JOB_TRIGGER = Object.freeze({
+  CRON: 'cron', // scheduled tick
+  MANUAL: 'manual', // operator-initiated via UI/CLI
+  STARTUP: 'startup', // one-shot on boot
+});
+const JOB_TRIGGERS = Object.freeze(Object.values(JOB_TRIGGER));
+
+// Canonical job ids. Lookup is by string id; the actual handler is
+// resolved from the JobRegistry at run-time so missing handlers throw
+// JOB_HANDLER_UNAVAILABLE rather than silently no-op.
+const JOB_ID = Object.freeze({
+  SYNC_ALL: 'hikvision.sync-all',
+  DRIFT_DETECT_ALL: 'hikvision.drift-detect-all',
+  FRAUD_SCAN_TEMPLATES: 'hikvision.fraud.scan-templates',
+  FRAUD_SCAN_UNREGISTERED: 'hikvision.fraud.scan-unregistered',
+  FRAUD_SWEEP_EXPIRED: 'hikvision.fraud.sweep-expired',
+  FRAUD_DECAY_ALL: 'hikvision.fraud.decay-all',
+  RAW_EVENT_PARSE: 'hikvision.recognition.parse-pending',
+  HEALTH_SWEEP: 'hikvision.health.sweep',
+});
+const JOB_IDS = Object.freeze(Object.values(JOB_ID));
+
+// Recommended cron expressions per job. Operators can override per
+// environment; these are the safe defaults.
+const JOB_CRON_DEFAULTS = Object.freeze({
+  [JOB_ID.SYNC_ALL]: '0 3 * * *', // 03:00 daily
+  [JOB_ID.DRIFT_DETECT_ALL]: '*/30 * * * *', // every 30 min
+  [JOB_ID.FRAUD_SCAN_TEMPLATES]: '0 2 * * *', // 02:00 daily
+  [JOB_ID.FRAUD_SCAN_UNREGISTERED]: '0 */6 * * *', // every 6 hours
+  [JOB_ID.FRAUD_SWEEP_EXPIRED]: '0 1 * * 0', // 01:00 every Sunday
+  [JOB_ID.FRAUD_DECAY_ALL]: '0 0 * * *', // 00:00 daily
+  [JOB_ID.RAW_EVENT_PARSE]: '*/2 * * * *', // every 2 min
+  [JOB_ID.HEALTH_SWEEP]: '*/5 * * * *', // every 5 min
+});
+
+// Sensible upper bound on how long a single job run may take. Lock
+// is force-released after this so a crashed process can't wedge the
+// system permanently. Per-job override is allowed.
+const JOB_DEFAULTS = Object.freeze({
+  LOCK_TIMEOUT_MS: 15 * 60 * 1000, // 15 minutes
+  HISTORY_RETAIN_RUNS: 50, // recent runs kept per job
+});
+
 /**
  * Pure helper: given (templates, devicePersonIds), compute the diff plan.
  *   templates      — array of HikvisionFaceTemplateLink (active state)
@@ -1255,6 +1319,15 @@ module.exports = {
   DIFF_OPERATION,
   DIFF_OPERATIONS,
   SYNC_DEFAULTS,
+  // Wave 108 — operational scheduler
+  JOB_STATUS,
+  JOB_STATUSES,
+  JOB_TRIGGER,
+  JOB_TRIGGERS,
+  JOB_ID,
+  JOB_IDS,
+  JOB_CRON_DEFAULTS,
+  JOB_DEFAULTS,
   // helpers
   isValidIPv4,
   isAttendanceEligibleKind,

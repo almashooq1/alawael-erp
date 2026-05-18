@@ -1039,6 +1039,34 @@ const PERMISSIONS = Object.freeze({
     'auditor',
     'dpo',
   ],
+
+  // ─── Wave 108 — Operational Scheduler ─────────────────────
+  // Read-only status of all registered jobs + latest run per job.
+  // Wide read (same readers as sync.status.read).
+  'hikvision.jobs.read': [
+    'security_architect',
+    'security.officer',
+    'iam.role_granter',
+    'hr_admin',
+    'hr_director',
+    'branch_manager',
+    'branch_director',
+    'compliance_officer',
+    'auditor',
+    'dpo',
+  ],
+  // Manually run a job (override cron) — only senior ops because
+  // these jobs write to the DB and emit AuditLog entries.
+  'hikvision.jobs.run': ['security_architect', 'iam.role_granter', 'dpo', 'hr_director'],
+  // History of past runs (full payloads for audit replay).
+  'hikvision.jobs.history.read': [
+    'security_architect',
+    'security.officer',
+    'iam.role_granter',
+    'compliance_officer',
+    'auditor',
+    'dpo',
+  ],
 });
 
 // ─── API ────────────────────────────────────────────────────────

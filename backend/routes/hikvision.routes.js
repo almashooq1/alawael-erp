@@ -85,6 +85,13 @@ const REASON_TO_STATUS = Object.freeze({
   ISAPI_REQUEST_FAILED: 502,
   ISAPI_RESPONSE_INVALID: 502,
 
+  // ── Wave 108 — Operational Scheduler
+  JOB_NOT_FOUND: 404,
+  JOB_HANDLER_UNAVAILABLE: 503,
+  JOB_ALREADY_RUNNING: 409,
+  JOB_DISABLED: 409,
+  JOB_HANDLER_THREW: 500,
+
   // ── Wave 100 Phase 5 — Fraud Detection
   FRAUD_FLAG_NOT_FOUND: 404,
   FRAUD_FLAG_NOT_OPEN: 409,
@@ -206,6 +213,7 @@ function createHikvisionRouter({
   fraudDetectionService = null,
   fraudScoreService = null,
   syncWorker = null,
+  scheduler = null,
   governance,
   webhookHmac = null,
   logger = console,
@@ -1348,6 +1356,53 @@ function createHikvisionRouter({
         return res.json({ success: true, data: r });
       } catch (err) {
         return safeError(res, err, 'hikvision.sync.drift.all');
+      }
+    });
+  }
+
+  // ─── Wave 108 — Operational Scheduler ───────────────────────
+  // Mounted only when the scheduler is supplied. 3 routes:
+  //   GET  /jobs                   — registry + latest run per job
+  //   GET  /jobs/:id/history       — recent runs
+  //   POST /jobs/:id/run           — manual override
+  if (scheduler) {
+    router.get('/jobs', requirePerm('hikvision.jobs.read'), async (_req, res) => {
+      try {
+        const r = await scheduler.listJobs();
+        return res.json({ success: true, data: r });
+      } catch (err) {
+        return safeError(res, err, 'hikvision.jobs.list');
+      }
+    });
+
+    router.get(
+      '/jobs/:id/history',
+      requirePerm('hikvision.jobs.history.read'),
+      async (req, res) => {
+        try {
+          const limit = req.query?.limit ? Number(req.query.limit) : 20;
+          const r = await scheduler.listRuns({ jobId: req.params.id, limit });
+          if (!r.ok) return respond(res, r);
+          return res.json({ success: true, data: r });
+        } catch (err) {
+          return safeError(res, err, 'hikvision.jobs.history');
+        }
+      }
+    );
+
+    router.post('/jobs/:id/run', requirePerm('hikvision.jobs.run'), async (req, res) => {
+      try {
+        const initiator = req.user?._id ? String(req.user._id) : 'manual';
+        const r = await scheduler.runJob({
+          jobId: req.params.id,
+          trigger: reg.JOB_TRIGGER.MANUAL,
+          initiator,
+          args: req.body?.args || {},
+        });
+        if (!r.ok) return respond(res, r);
+        return res.json({ success: true, data: r });
+      } catch (err) {
+        return safeError(res, err, 'hikvision.jobs.run');
       }
     });
   }

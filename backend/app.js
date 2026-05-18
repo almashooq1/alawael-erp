@@ -2090,6 +2090,254 @@ try {
   logger.warn('[AccessReview] routes skipped:', arErr.message);
 }
 
+// ─── Hikvision Workforce Surveillance & Attendance — Wave 96 Phase 1 ──────────
+// Foundation: device registry + raw event ingestion + device health monitoring.
+// Phases 2-5 (face library, recognition, attendance integration, fraud) extend
+// these services additively without breaking this wiring.
+//
+// Mounts /api/v1/hikvision behind authenticate. The /webhooks/events sub-route
+// uses HMAC verification (HIKVISION_WEBHOOK_SECRET) and BYPASSES authenticate —
+// devices cannot present a user bearer. If the secret is unset, the webhook
+// route is silently skipped (manual replay endpoint stays available).
+//
+// Graceful degradation:
+//   • Any missing model ⇒ skip mount + warn
+//   • Missing governance ⇒ skip mount (consistent with Wave 72)
+try {
+  let HikvisionDevice = null;
+  let HikvisionCameraChannel = null;
+  let HikvisionRawEvent = null;
+  let HikvisionDeviceHealthLog = null;
+  let HikvisionFaceLibrary = null;
+  let HikvisionFaceTemplateLink = null;
+  try {
+    HikvisionDevice = require('./models/HikvisionDevice');
+    HikvisionCameraChannel = require('./models/HikvisionCameraChannel');
+    HikvisionRawEvent = require('./models/HikvisionRawEvent');
+    HikvisionDeviceHealthLog = require('./models/HikvisionDeviceHealthLog');
+  } catch {
+    /* models optional in test/dev — router skipped if any are absent */
+  }
+  // Wave 97 Phase 2 — face library + template models (optional)
+  try {
+    HikvisionFaceLibrary = require('./models/HikvisionFaceLibrary');
+    HikvisionFaceTemplateLink = require('./models/HikvisionFaceTemplateLink');
+  } catch {
+    /* Phase 2 models optional — library/template routes skipped if absent */
+  }
+
+  // Wave 98 Phase 3 — recognition + confidence review models (optional)
+  let HikvisionProcessedEvent = null;
+  let AttendanceSourceEvent = null;
+  let AttendanceConfidenceReview = null;
+  try {
+    HikvisionProcessedEvent = require('./models/HikvisionProcessedEvent');
+    AttendanceSourceEvent = require('./models/AttendanceSourceEvent');
+    AttendanceConfidenceReview = require('./models/AttendanceConfidenceReview');
+  } catch {
+    /* Phase 3 models optional — parser/review routes skipped if absent */
+  }
+
+  if (HikvisionDevice && HikvisionCameraChannel && HikvisionRawEvent && HikvisionDeviceHealthLog) {
+    let governanceSvc = null;
+    try {
+      const { createGovernanceService } = require('./intelligence/governance.service');
+      governanceSvc = createGovernanceService({ logger });
+    } catch {
+      /* governance must load — top-level boot already logged the failure */
+    }
+
+    if (governanceSvc) {
+      const { createHikvisionDeviceService } = require('./intelligence/hikvision-device.service');
+      const {
+        createHikvisionEventIngestionService,
+      } = require('./intelligence/hikvision-event-ingestion.service');
+      const { createHikvisionHealthService } = require('./intelligence/hikvision-health.service');
+      const hikRoutesMod = require('./routes/hikvision.routes');
+      const createHikvisionRouter = hikRoutesMod.createHikvisionRouter || hikRoutesMod;
+      const { createHikvisionWebhookRouter } = hikRoutesMod;
+
+      const deviceService = createHikvisionDeviceService({
+        deviceModel: HikvisionDevice,
+        channelModel: HikvisionCameraChannel,
+        logger,
+      });
+      const ingestionService = createHikvisionEventIngestionService({
+        deviceModel: HikvisionDevice,
+        channelModel: HikvisionCameraChannel,
+        rawEventModel: HikvisionRawEvent,
+        logger,
+      });
+      const healthService = createHikvisionHealthService({
+        deviceModel: HikvisionDevice,
+        healthLogModel: HikvisionDeviceHealthLog,
+        logger,
+      });
+
+      // Wave 97 Phase 2 — face library + enrollment (graceful)
+      let libraryService = null;
+      let enrollmentService = null;
+      if (HikvisionFaceLibrary && HikvisionFaceTemplateLink) {
+        try {
+          const {
+            createHikvisionFaceLibraryService,
+          } = require('./intelligence/hikvision-face-library.service');
+          const {
+            createHikvisionFaceEnrollmentService,
+          } = require('./intelligence/hikvision-face-enrollment.service');
+          libraryService = createHikvisionFaceLibraryService({
+            libraryModel: HikvisionFaceLibrary,
+            templateModel: HikvisionFaceTemplateLink,
+            deviceModel: HikvisionDevice,
+            logger,
+          });
+          let employeeModel = null;
+          try {
+            employeeModel = require('./models/HR/Employee');
+          } catch {
+            /* HR Employee model optional — enrollment tolerates absence */
+          }
+          enrollmentService = createHikvisionFaceEnrollmentService({
+            templateModel: HikvisionFaceTemplateLink,
+            libraryModel: HikvisionFaceLibrary,
+            employeeModel,
+            logger,
+          });
+        } catch (p2err) {
+          logger.warn(
+            '[Hikvision] Phase 2 face library/enrollment services failed to wire:',
+            p2err.message
+          );
+          libraryService = null;
+          enrollmentService = null;
+        }
+      } else {
+        logger.info(
+          '[Hikvision] Phase 2 face library/template models not loaded; library routes skipped'
+        );
+      }
+
+      // Wave 98 Phase 3 — recognition + confidence review (graceful)
+      let parserService = null;
+      let attendanceSourceSvc = null;
+      if (HikvisionProcessedEvent && AttendanceSourceEvent && AttendanceConfidenceReview) {
+        try {
+          const {
+            createHikvisionConfidenceGateService,
+          } = require('./intelligence/hikvision-confidence-gate.service');
+          const {
+            createAttendanceSourceService,
+          } = require('./intelligence/attendance-source.service');
+          const {
+            createHikvisionEventParserService,
+          } = require('./intelligence/hikvision-event-parser.service');
+
+          const gateService = createHikvisionConfidenceGateService({});
+          attendanceSourceSvc = createAttendanceSourceService({
+            sourceEventModel: AttendanceSourceEvent,
+            reviewModel: AttendanceConfidenceReview,
+            processedEventModel: HikvisionProcessedEvent,
+            logger,
+          });
+          parserService = createHikvisionEventParserService({
+            rawEventModel: HikvisionRawEvent,
+            processedEventModel: HikvisionProcessedEvent,
+            deviceModel: HikvisionDevice,
+            channelModel: HikvisionCameraChannel,
+            templateModel: HikvisionFaceTemplateLink || null,
+            gateService,
+            attendanceSourceService: attendanceSourceSvc,
+            logger,
+          });
+        } catch (p3err) {
+          logger.warn('[Hikvision] Phase 3 parser/review services failed to wire:', p3err.message);
+          parserService = null;
+          attendanceSourceSvc = null;
+        }
+      } else {
+        logger.info(
+          '[Hikvision] Phase 3 processed/review models not loaded; recognition routes skipped'
+        );
+      }
+
+      // Optional HMAC middleware for the device webhook. If the
+      // secret env var isn't set, the webhook is omitted but the
+      // operator-replay endpoint stays available.
+      let webhookHmac = null;
+      const hikSecret = process.env.HIKVISION_WEBHOOK_SECRET;
+      if (hikSecret) {
+        try {
+          const { verifyWebhookHmac } = require('./middleware/webhookHmac.middleware');
+          webhookHmac = verifyWebhookHmac({
+            secret: hikSecret,
+            header: 'x-hikvision-signature',
+            algo: 'sha256',
+            encoding: 'hex',
+            timestampHeader: 'x-hikvision-timestamp',
+            toleranceSec: 300,
+          });
+        } catch (hmacErr) {
+          logger.warn(
+            '[Hikvision] webhookHmac unavailable; /webhooks/events skipped:',
+            hmacErr.message
+          );
+        }
+      } else {
+        logger.info(
+          '[Hikvision] HIKVISION_WEBHOOK_SECRET not set; device webhook route skipped (manual replay still available)'
+        );
+      }
+
+      const { authenticate: hikAuthMw } = require('./middleware/auth');
+
+      // CRITICAL ORDER: the unauthenticated webhook router must be
+      // registered BEFORE the auth-protected one so its path matches
+      // first. Devices cannot present a bearer token; they sign the
+      // body with the shared secret instead.
+      if (webhookHmac) {
+        app.use(
+          '/api/v1/hikvision/webhooks',
+          createHikvisionWebhookRouter({ ingestionService, webhookHmac, logger })
+        );
+      }
+
+      app.use(
+        '/api/v1/hikvision',
+        hikAuthMw,
+        createHikvisionRouter({
+          deviceService,
+          ingestionService,
+          healthService,
+          libraryService,
+          enrollmentService,
+          parserService,
+          attendanceSourceService: attendanceSourceSvc,
+          governance: governanceSvc,
+          webhookHmac,
+          logger,
+        })
+      );
+      app._hikvisionDeviceService = deviceService;
+      app._hikvisionIngestionService = ingestionService;
+      app._hikvisionHealthService = healthService;
+      if (libraryService) app._hikvisionFaceLibraryService = libraryService;
+      if (enrollmentService) app._hikvisionFaceEnrollmentService = enrollmentService;
+      if (parserService) app._hikvisionEventParserService = parserService;
+      if (attendanceSourceSvc) app._attendanceSourceService = attendanceSourceSvc;
+      const phases = ['Wave 96 Phase 1'];
+      if (libraryService && enrollmentService) phases.push('Wave 97 Phase 2');
+      if (parserService && attendanceSourceSvc) phases.push('Wave 98 Phase 3');
+      logger.info(`[Hikvision] ✓ ${phases.join(' + ')} routes mounted at /api/v1/hikvision`);
+    } else {
+      logger.warn('[Hikvision] routes skipped: governance service unavailable');
+    }
+  } else {
+    logger.warn('[Hikvision] routes skipped: one or more Hikvision models not loaded');
+  }
+} catch (hikErr) {
+  logger.warn('[Hikvision] routes skipped:', hikErr.message);
+}
+
 // ─── Care Planning Engine (Waves 41–48) ───────────────────────────────────────
 // Mounts /api/v1/care-plans behind authenticate. The bootstrap helper wires:
 //   • CarePlanVersion model        (Wave 41)

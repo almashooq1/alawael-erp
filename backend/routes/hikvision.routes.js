@@ -1,0 +1,917 @@
+'use strict';
+
+/**
+ * hikvision.routes.js — Wave 96 Phase 1.
+ *
+ * HTTP surface for the Hikvision device registry, raw event
+ * ingestion, and device-health monitor. Mounted at /api/v1/hikvision
+ * behind the `authenticate` middleware EXCEPT the webhook ingest
+ * route, which uses HMAC verification (verifyWebhookHmac) instead —
+ * Hikvision devices cannot present a user bearer token.
+ *
+ * Routes:
+ *   POST   /devices                                  ← create
+ *   GET    /devices/:idOrCode                        ← read
+ *   GET    /devices                                  ← list (filters)
+ *   PATCH  /devices/:id                              ← partial update
+ *   POST   /devices/:id/retire                       ← soft retire
+ *
+ *   POST   /devices/:deviceId/channels               ← create channel
+ *   GET    /channels                                 ← list (filters)
+ *   PATCH  /channels/:id                             ← update channel
+ *
+ *   POST   /webhooks/events           (HMAC-only)    ← device push
+ *   POST   /events/manual             (perm-gated)   ← operator replay
+ *   GET    /events                    (perm-gated)   ← list raw events
+ *   GET    /events/:id                (perm-gated)   ← read raw event
+ *
+ *   POST   /health/heartbeat          (perm-gated)   ← operator probe
+ *   POST   /health/sweep              (perm-gated)   ← cron trigger
+ *   GET    /health/devices/:id        (perm-gated)   ← latest probes
+ *   GET    /health/branches/:branchId (perm-gated)   ← branch summary
+ *
+ * Status-code map (REASON_TO_STATUS) follows the conventions used by
+ * Wave 72 access-review.routes — clients can rely on consistent
+ * codes for every shipped wave.
+ */
+
+const express = require('express');
+const safeError = require('../utils/safeError');
+const reg = require('../intelligence/hikvision.registry');
+
+const REASON_TO_STATUS = Object.freeze({
+  // Permission / not-found
+  PERMISSION_DENIED: 403,
+  DEVICE_NOT_FOUND: 404,
+  CHANNEL_NOT_FOUND: 404,
+  DEVICE_RETIRED: 410,
+
+  // Bad-request shape
+  DEVICE_CODE_REQUIRED: 400,
+  DEVICE_CODE_TAKEN: 409,
+  INVALID_DEVICE_KIND: 400,
+  INVALID_CAPABILITY: 400,
+  INVALID_ENROLLMENT_ROLE: 400,
+  INVALID_CHANNEL_DIRECTION: 400,
+  INVALID_RECOGNITION_MODE: 400,
+  BRANCH_REQUIRED: 400,
+  IP_REQUIRED: 400,
+  IP_INVALID: 400,
+  CAPABILITIES_REQUIRED: 400,
+  CHANNEL_DEVICE_MISMATCH: 400,
+  ATTENDANCE_REQUIRES_FACE: 400,
+
+  // Event ingestion
+  EVENT_DEVICE_UNKNOWN: 404,
+  EVENT_DUPLICATE: 200, // handled as ok+duplicate, never an error
+  EVENT_PAYLOAD_REQUIRED: 400,
+  EVENT_PAYLOAD_TOO_LARGE: 413,
+  EVENT_SIGNATURE_INVALID: 401,
+  EVENT_TIMESTAMP_INVALID: 401,
+  EVENT_REPLAY: 401,
+
+  // Health
+  HEALTH_DEVICE_REQUIRED: 400,
+  HEALTH_INVALID_DRIFT: 400,
+
+  // ── Wave 98 Phase 3 — Recognition + Confidence Review
+  RAW_EVENT_NOT_FOUND: 404,
+  RAW_EVENT_NOT_PENDING: 409,
+  PROCESSED_EVENT_NOT_FOUND: 404,
+  REVIEW_NOT_FOUND: 404,
+  REVIEW_NOT_OPEN: 409,
+  REVIEW_RESOLUTION_REASON_REQUIRED: 400,
+  SOURCE_EVENT_NOT_FOUND: 404,
+  EVENT_KIND_NOT_PROCESSABLE: 422,
+  TEMPLATE_INACTIVE_FOR_MATCH: 422,
+  CONFIDENCE_OUT_OF_RANGE: 400,
+
+  // ── Wave 97 Phase 2 — Face library + templates
+  LIBRARY_CODE_REQUIRED: 400,
+  LIBRARY_CODE_TAKEN: 409,
+  LIBRARY_NOT_FOUND: 404,
+  LIBRARY_ARCHIVED: 410,
+  LIBRARY_FULL: 409,
+  LIBRARY_BRANCH_MISMATCH: 400,
+  INVALID_SYNC_STRATEGY: 400,
+  INVALID_LIBRARY_STATUS: 400,
+  DEVICE_ALREADY_SUBSCRIBED: 409,
+  DEVICE_NOT_SUBSCRIBED: 404,
+  DEVICE_NOT_FACE_CAPABLE: 400,
+  EMPLOYEE_REQUIRED: 400,
+  TEMPLATE_NOT_FOUND: 404,
+  TEMPLATE_DUPLICATE: 409,
+  TEMPLATE_NOT_PENDING: 409,
+  TEMPLATE_NOT_ACTIVE: 409,
+  INVALID_TEMPLATE_STATUS: 400,
+  IMAGES_REQUIRED: 400,
+  FRONT_IMAGE_REQUIRED: 400,
+  IMAGE_QUALITY_TOO_LOW: 400,
+  INVALID_IMAGE_ANGLE: 400,
+  PERSON_ID_REQUIRED: 400,
+  CHECKSUM_REQUIRED: 400,
+  SUSPENSION_REASON_REQUIRED: 400,
+
+  // Generic
+  VALIDATION_FAILED: 422,
+  SAVE_FAILED: 500,
+});
+
+function actorFrom(req) {
+  return {
+    userId: req.user?.id || req.user?._id || null,
+    role: req.user?.role || req.user?.roleCode || null,
+    ip: req.ip,
+  };
+}
+
+function respond(res, result) {
+  if (result && result.ok) {
+    const { ok: _ok, ...data } = result;
+    void _ok;
+    return res.json({ success: true, data });
+  }
+  const status = (result && REASON_TO_STATUS[result.reason]) || 400;
+  return res.status(status).json({
+    success: false,
+    message: result?.reason || 'HIKVISION_REJECTED',
+    reason: result?.reason,
+    ...(result?.errors ? { errors: result.errors } : {}),
+  });
+}
+
+/**
+ * @param {object} opts
+ *   - deviceService     — createHikvisionDeviceService(...)
+ *   - ingestionService  — createHikvisionEventIngestionService(...)
+ *   - healthService     — createHikvisionHealthService(...)
+ *   - libraryService    — createHikvisionFaceLibraryService(...)  [Phase 2 — optional]
+ *   - enrollmentService — createHikvisionFaceEnrollmentService(...) [Phase 2 — optional]
+ *   - governance        — Wave-26 governance service (hasPermission)
+ *   - webhookHmac       — pre-built middleware (verifyWebhookHmac).
+ *                         If omitted, the webhook route is NOT mounted.
+ *   - logger
+ *
+ * Phase 2 routes (libraries / templates) only mount when both Phase 2
+ * services are supplied. This keeps Phase 1 deployable on its own.
+ */
+function createHikvisionRouter({
+  deviceService,
+  ingestionService,
+  healthService,
+  libraryService = null,
+  enrollmentService = null,
+  parserService = null,
+  attendanceSourceService = null,
+  governance,
+  webhookHmac = null,
+  logger = console,
+} = {}) {
+  if (!deviceService || typeof deviceService.registerDevice !== 'function') {
+    throw new Error('hikvision.routes: deviceService is required');
+  }
+  if (!ingestionService || typeof ingestionService.ingest !== 'function') {
+    throw new Error('hikvision.routes: ingestionService is required');
+  }
+  if (!healthService || typeof healthService.recordHeartbeat !== 'function') {
+    throw new Error('hikvision.routes: healthService is required');
+  }
+  if (!governance || typeof governance.hasPermission !== 'function') {
+    throw new Error('hikvision.routes: governance service is required');
+  }
+  void logger;
+
+  const router = express.Router();
+
+  function requirePerm(code) {
+    return (req, res, next) => {
+      const actor = actorFrom(req);
+      if (!actor.userId) {
+        return res
+          .status(401)
+          .json({ success: false, message: 'AUTH_REQUIRED', reason: 'AUTH_REQUIRED' });
+      }
+      if (!governance.hasPermission(actor.role, code)) {
+        return res.status(403).json({
+          success: false,
+          message: 'PERMISSION_DENIED',
+          reason: 'PERMISSION_DENIED',
+          requiredPermission: code,
+        });
+      }
+      return next();
+    };
+  }
+
+  // ─── Devices ────────────────────────────────────────────────
+
+  router.post('/devices', requirePerm('hikvision.device.create'), async (req, res) => {
+    try {
+      const result = await deviceService.registerDevice(req.body || {});
+      return respond(res, result);
+    } catch (err) {
+      return safeError(res, err, 'hikvision.device.create');
+    }
+  });
+
+  router.get('/devices/:idOrCode', requirePerm('hikvision.device.read'), async (req, res) => {
+    try {
+      const result = await deviceService.getDevice(req.params.idOrCode);
+      return respond(res, result);
+    } catch (err) {
+      return safeError(res, err, 'hikvision.device.read');
+    }
+  });
+
+  router.get('/devices', requirePerm('hikvision.device.list'), async (req, res) => {
+    try {
+      const filter = {
+        branchId: req.query.branchId || undefined,
+        kind: req.query.kind || undefined,
+        status: req.query.status || undefined,
+        includeRetired: req.query.includeRetired === 'true',
+        limit: req.query.limit ? Number(req.query.limit) : undefined,
+        skip: req.query.skip ? Number(req.query.skip) : undefined,
+      };
+      const result = await deviceService.listDevices(filter);
+      return respond(res, result);
+    } catch (err) {
+      return safeError(res, err, 'hikvision.device.list');
+    }
+  });
+
+  router.patch('/devices/:id', requirePerm('hikvision.device.update'), async (req, res) => {
+    try {
+      const result = await deviceService.updateDevice(req.params.id, req.body || {});
+      return respond(res, result);
+    } catch (err) {
+      return safeError(res, err, 'hikvision.device.update');
+    }
+  });
+
+  router.post('/devices/:id/retire', requirePerm('hikvision.device.retire'), async (req, res) => {
+    try {
+      const result = await deviceService.retireDevice(req.params.id, req.body?.reason);
+      return respond(res, result);
+    } catch (err) {
+      return safeError(res, err, 'hikvision.device.retire');
+    }
+  });
+
+  // ─── Channels ───────────────────────────────────────────────
+
+  router.post(
+    '/devices/:deviceId/channels',
+    requirePerm('hikvision.channel.create'),
+    async (req, res) => {
+      try {
+        const result = await deviceService.registerChannel({
+          ...(req.body || {}),
+          deviceId: req.params.deviceId,
+        });
+        return respond(res, result);
+      } catch (err) {
+        return safeError(res, err, 'hikvision.channel.create');
+      }
+    }
+  );
+
+  router.get('/channels', requirePerm('hikvision.channel.list'), async (req, res) => {
+    try {
+      const filter = {
+        deviceId: req.query.deviceId || undefined,
+        zoneId: req.query.zoneId || undefined,
+        attendanceEligible:
+          req.query.attendanceEligible === 'true'
+            ? true
+            : req.query.attendanceEligible === 'false'
+              ? false
+              : undefined,
+        limit: req.query.limit ? Number(req.query.limit) : undefined,
+        skip: req.query.skip ? Number(req.query.skip) : undefined,
+      };
+      const result = await deviceService.listChannels(filter);
+      return respond(res, result);
+    } catch (err) {
+      return safeError(res, err, 'hikvision.channel.list');
+    }
+  });
+
+  router.patch('/channels/:id', requirePerm('hikvision.channel.update'), async (req, res) => {
+    try {
+      const result = await deviceService.updateChannel(req.params.id, req.body || {});
+      return respond(res, result);
+    } catch (err) {
+      return safeError(res, err, 'hikvision.channel.update');
+    }
+  });
+
+  // Note: the device-push webhook lives on a SEPARATE unauthenticated
+  // router (createHikvisionWebhookRouter below) — see app.js wiring.
+  // Devices can't carry a bearer token, so they authenticate via HMAC.
+  void webhookHmac;
+
+  // Manual replay — operator drops an event from a CSV or a logged
+  // outage buffer. Gated by `hikvision.event.ingest`.
+  router.post('/events/manual', requirePerm('hikvision.event.ingest'), async (req, res) => {
+    try {
+      const body = req.body || {};
+      const result = await ingestionService.ingest({
+        deviceCode: body.deviceCode,
+        externalEventId: body.externalEventId,
+        eventKind: body.eventKind,
+        capturedAt: body.capturedAt,
+        rawPayload: body.rawPayload || body,
+        channelNo: body.channelNo,
+        sourceIp: req.ip,
+        requestId: req.get('x-request-id') || null,
+        signatureVerified: false, // operator-injected
+      });
+      return respond(res, result);
+    } catch (err) {
+      return safeError(res, err, 'hikvision.event.manual');
+    }
+  });
+
+  router.get('/events', requirePerm('hikvision.event.list'), async (req, res) => {
+    try {
+      const filter = {
+        deviceId: req.query.deviceId || undefined,
+        eventKind: req.query.eventKind || undefined,
+        parseStatus: req.query.parseStatus || undefined,
+        signatureVerified:
+          req.query.signatureVerified === 'true'
+            ? true
+            : req.query.signatureVerified === 'false'
+              ? false
+              : undefined,
+        since: req.query.since || undefined,
+        until: req.query.until || undefined,
+        limit: req.query.limit ? Number(req.query.limit) : undefined,
+        skip: req.query.skip ? Number(req.query.skip) : undefined,
+      };
+      const result = await ingestionService.listEvents(filter);
+      return respond(res, result);
+    } catch (err) {
+      return safeError(res, err, 'hikvision.event.list');
+    }
+  });
+
+  router.get('/events/:id', requirePerm('hikvision.event.read'), async (req, res) => {
+    try {
+      const result = await ingestionService.getEvent(req.params.id);
+      return respond(res, result);
+    } catch (err) {
+      return safeError(res, err, 'hikvision.event.read');
+    }
+  });
+
+  // ─── Health ─────────────────────────────────────────────────
+
+  router.post('/health/heartbeat', requirePerm('hikvision.health.record'), async (req, res) => {
+    try {
+      const result = await healthService.recordHeartbeat(req.body || {});
+      return respond(res, result);
+    } catch (err) {
+      return safeError(res, err, 'hikvision.health.heartbeat');
+    }
+  });
+
+  router.post('/health/sweep', requirePerm('hikvision.health.record'), async (req, res) => {
+    try {
+      const result = await healthService.sweepStaleDevices(req.body || {});
+      return respond(res, result);
+    } catch (err) {
+      return safeError(res, err, 'hikvision.health.sweep');
+    }
+  });
+
+  router.get('/health/devices/:id', requirePerm('hikvision.health.read'), async (req, res) => {
+    try {
+      const limit = req.query.limit ? Number(req.query.limit) : 10;
+      const result = await healthService.getLatest(req.params.id, limit);
+      return respond(res, result);
+    } catch (err) {
+      return safeError(res, err, 'hikvision.health.read');
+    }
+  });
+
+  router.get(
+    '/health/branches/:branchId',
+    requirePerm('hikvision.health.read'),
+    async (req, res) => {
+      try {
+        const result = await healthService.getBranchSummary(req.params.branchId);
+        return respond(res, result);
+      } catch (err) {
+        return safeError(res, err, 'hikvision.health.branch');
+      }
+    }
+  );
+
+  // ─── Wave 97 Phase 2 — Face Library + Template Enrolment ────
+  // Only mounted when both services are supplied. Keeps Phase 1
+  // deployable on its own; routes simply 404 if Phase 2 is off.
+  if (libraryService && enrollmentService) {
+    // Libraries
+    router.post('/libraries', requirePerm('hikvision.library.create'), async (req, res) => {
+      try {
+        const r = await libraryService.createLibrary(req.body || {});
+        return respond(res, r);
+      } catch (err) {
+        return safeError(res, err, 'hikvision.library.create');
+      }
+    });
+
+    router.get('/libraries/:idOrCode', requirePerm('hikvision.library.read'), async (req, res) => {
+      try {
+        const r = await libraryService.getLibrary(req.params.idOrCode);
+        return respond(res, r);
+      } catch (err) {
+        return safeError(res, err, 'hikvision.library.read');
+      }
+    });
+
+    router.get('/libraries', requirePerm('hikvision.library.list'), async (req, res) => {
+      try {
+        const r = await libraryService.listLibraries({
+          branchId: req.query.branchId || undefined,
+          status: req.query.status || undefined,
+          syncStrategy: req.query.syncStrategy || undefined,
+          limit: req.query.limit ? Number(req.query.limit) : undefined,
+          skip: req.query.skip ? Number(req.query.skip) : undefined,
+        });
+        return respond(res, r);
+      } catch (err) {
+        return safeError(res, err, 'hikvision.library.list');
+      }
+    });
+
+    router.patch('/libraries/:id', requirePerm('hikvision.library.update'), async (req, res) => {
+      try {
+        const r = await libraryService.updateLibrary(req.params.id, req.body || {});
+        return respond(res, r);
+      } catch (err) {
+        return safeError(res, err, 'hikvision.library.update');
+      }
+    });
+
+    router.post(
+      '/libraries/:id/archive',
+      requirePerm('hikvision.library.archive'),
+      async (req, res) => {
+        try {
+          const r = await libraryService.archiveLibrary(req.params.id, req.body?.reason);
+          return respond(res, r);
+        } catch (err) {
+          return safeError(res, err, 'hikvision.library.archive');
+        }
+      }
+    );
+
+    router.post(
+      '/libraries/:id/subscribe-device',
+      requirePerm('hikvision.library.subscribe'),
+      async (req, res) => {
+        try {
+          const r = await libraryService.subscribeDevice(req.params.id, req.body?.deviceId);
+          return respond(res, r);
+        } catch (err) {
+          return safeError(res, err, 'hikvision.library.subscribe');
+        }
+      }
+    );
+
+    router.post(
+      '/libraries/:id/unsubscribe-device',
+      requirePerm('hikvision.library.subscribe'),
+      async (req, res) => {
+        try {
+          const r = await libraryService.unsubscribeDevice(req.params.id, req.body?.deviceId);
+          return respond(res, r);
+        } catch (err) {
+          return safeError(res, err, 'hikvision.library.unsubscribe');
+        }
+      }
+    );
+
+    router.get(
+      '/libraries/:id/integrity-hash',
+      requirePerm('hikvision.library.read'),
+      async (req, res) => {
+        try {
+          const r = await libraryService.computeIntegrityHash({ libraryId: req.params.id });
+          return respond(res, r);
+        } catch (err) {
+          return safeError(res, err, 'hikvision.library.integrity');
+        }
+      }
+    );
+
+    router.post(
+      '/libraries/:id/sync-result',
+      requirePerm('hikvision.library.subscribe'),
+      async (req, res) => {
+        try {
+          const r = await libraryService.recordSyncResult({
+            libraryId: req.params.id,
+            hash: req.body?.hash,
+            error: req.body?.error,
+          });
+          return respond(res, r);
+        } catch (err) {
+          return safeError(res, err, 'hikvision.library.sync-result');
+        }
+      }
+    );
+
+    // Templates
+    router.post(
+      '/libraries/:libraryId/templates',
+      requirePerm('hikvision.template.enroll'),
+      async (req, res) => {
+        try {
+          const body = req.body || {};
+          const r = await enrollmentService.enrollEmployee({
+            libraryId: req.params.libraryId,
+            employeeId: body.employeeId,
+            images: body.images,
+            allowMultiPerAngle: !!body.allowMultiPerAngle,
+            actor: actorFrom(req),
+          });
+          return respond(res, r);
+        } catch (err) {
+          return safeError(res, err, 'hikvision.template.enroll');
+        }
+      }
+    );
+
+    router.post(
+      '/templates/:id/confirm',
+      requirePerm('hikvision.template.confirm'),
+      async (req, res) => {
+        try {
+          const body = req.body || {};
+          const r = await enrollmentService.confirmEnrollment({
+            templateId: req.params.id,
+            hikvisionPersonId: body.hikvisionPersonId,
+            templateChecksum: body.templateChecksum,
+          });
+          return respond(res, r);
+        } catch (err) {
+          return safeError(res, err, 'hikvision.template.confirm');
+        }
+      }
+    );
+
+    router.post(
+      '/templates/:id/suspend',
+      requirePerm('hikvision.template.suspend'),
+      async (req, res) => {
+        try {
+          const body = req.body || {};
+          const r = await enrollmentService.suspendTemplate({
+            templateId: req.params.id,
+            reason: body.reason,
+            cascadeReason: body.cascadeReason,
+            actor: actorFrom(req),
+          });
+          return respond(res, r);
+        } catch (err) {
+          return safeError(res, err, 'hikvision.template.suspend');
+        }
+      }
+    );
+
+    router.post(
+      '/templates/:id/reenroll',
+      requirePerm('hikvision.template.reenroll'),
+      async (req, res) => {
+        try {
+          const body = req.body || {};
+          const r = await enrollmentService.reEnroll({
+            templateId: req.params.id,
+            images: body.images,
+            allowMultiPerAngle: !!body.allowMultiPerAngle,
+            actor: actorFrom(req),
+          });
+          return respond(res, r);
+        } catch (err) {
+          return safeError(res, err, 'hikvision.template.reenroll');
+        }
+      }
+    );
+
+    router.post(
+      '/templates/exit-cascade',
+      requirePerm('hikvision.template.cascade'),
+      async (req, res) => {
+        try {
+          const body = req.body || {};
+          const r = await enrollmentService.deactivateOnExit({
+            employeeId: body.employeeId,
+            exitDate: body.exitDate,
+            exitReason: body.exitReason,
+            actor: actorFrom(req),
+          });
+          return respond(res, r);
+        } catch (err) {
+          return safeError(res, err, 'hikvision.template.exit-cascade');
+        }
+      }
+    );
+
+    router.get('/templates/:id', requirePerm('hikvision.template.read'), async (req, res) => {
+      try {
+        const r = await enrollmentService.getTemplate(req.params.id);
+        return respond(res, r);
+      } catch (err) {
+        return safeError(res, err, 'hikvision.template.read');
+      }
+    });
+
+    router.get('/templates', requirePerm('hikvision.template.list'), async (req, res) => {
+      try {
+        const r = await enrollmentService.listTemplates({
+          libraryId: req.query.libraryId || undefined,
+          employeeId: req.query.employeeId || undefined,
+          status: req.query.status || undefined,
+          hikvisionPersonId: req.query.hikvisionPersonId || undefined,
+          excludeDeleted: req.query.excludeDeleted === 'true',
+          limit: req.query.limit ? Number(req.query.limit) : undefined,
+          skip: req.query.skip ? Number(req.query.skip) : undefined,
+        });
+        return respond(res, r);
+      } catch (err) {
+        return safeError(res, err, 'hikvision.template.list');
+      }
+    });
+  }
+
+  // ─── Wave 98 Phase 3 — Recognition + Confidence Review ──────
+  // Mounted only when both Phase 3 services are supplied. Phases 1+2
+  // remain deployable without these.
+  if (parserService && attendanceSourceService) {
+    // Parser
+    router.post(
+      '/events/:rawEventId/process',
+      requirePerm('hikvision.event.process'),
+      async (req, res) => {
+        try {
+          const r = await parserService.processRawEvent(req.params.rawEventId);
+          return respond(res, r);
+        } catch (err) {
+          return safeError(res, err, 'hikvision.event.process');
+        }
+      }
+    );
+
+    router.post(
+      '/events/process-batch',
+      requirePerm('hikvision.event.process'),
+      async (req, res) => {
+        try {
+          const r = await parserService.processBatch({
+            limit: req.body?.limit,
+            since: req.body?.since,
+          });
+          return respond(res, r);
+        } catch (err) {
+          return safeError(res, err, 'hikvision.event.process-batch');
+        }
+      }
+    );
+
+    router.post(
+      '/events/reprocess-failed',
+      requirePerm('hikvision.event.process'),
+      async (req, res) => {
+        try {
+          const r = await parserService.reprocessFailed({ limit: req.body?.limit });
+          return respond(res, r);
+        } catch (err) {
+          return safeError(res, err, 'hikvision.event.reprocess-failed');
+        }
+      }
+    );
+
+    // Review queue
+    router.get('/reviews', requirePerm('hikvision.review.list'), async (req, res) => {
+      try {
+        const r = await attendanceSourceService.listReviews({
+          queue: req.query.queue || undefined,
+          state: req.query.state || undefined,
+          branchId: req.query.branchId || undefined,
+          employeeId: req.query.employeeId || undefined,
+          reason: req.query.reason || undefined,
+          limit: req.query.limit ? Number(req.query.limit) : undefined,
+          skip: req.query.skip ? Number(req.query.skip) : undefined,
+        });
+        return respond(res, r);
+      } catch (err) {
+        return safeError(res, err, 'hikvision.review.list');
+      }
+    });
+
+    router.get('/reviews/:id', requirePerm('hikvision.review.read'), async (req, res) => {
+      try {
+        const r = await attendanceSourceService.getReview(req.params.id);
+        return respond(res, r);
+      } catch (err) {
+        return safeError(res, err, 'hikvision.review.read');
+      }
+    });
+
+    router.post(
+      '/reviews/:id/approve',
+      requirePerm('hikvision.review.approve'),
+      async (req, res) => {
+        try {
+          const r = await attendanceSourceService.approveReview(req.params.id, {
+            actor: actorFrom(req),
+            note: req.body?.note,
+          });
+          return respond(res, r);
+        } catch (err) {
+          return safeError(res, err, 'hikvision.review.approve');
+        }
+      }
+    );
+
+    router.post('/reviews/:id/reject', requirePerm('hikvision.review.reject'), async (req, res) => {
+      try {
+        const r = await attendanceSourceService.rejectReview(req.params.id, {
+          actor: actorFrom(req),
+          note: req.body?.note,
+        });
+        return respond(res, r);
+      } catch (err) {
+        return safeError(res, err, 'hikvision.review.reject');
+      }
+    });
+
+    router.post(
+      '/reviews/:id/escalate',
+      requirePerm('hikvision.review.escalate'),
+      async (req, res) => {
+        try {
+          const r = await attendanceSourceService.escalateReview(req.params.id, {
+            actor: actorFrom(req),
+            note: req.body?.note,
+            toQueue: req.body?.toQueue,
+          });
+          return respond(res, r);
+        } catch (err) {
+          return safeError(res, err, 'hikvision.review.escalate');
+        }
+      }
+    );
+
+    router.post(
+      '/reviews/sweep-expired',
+      requirePerm('hikvision.event.process'),
+      async (req, res) => {
+        try {
+          const r = await attendanceSourceService.sweepExpiredReviews({
+            limit: req.body?.limit,
+          });
+          return respond(res, r);
+        } catch (err) {
+          return safeError(res, err, 'hikvision.review.sweep');
+        }
+      }
+    );
+
+    // Attendance source events (read-only — writes are parser-driven)
+    router.get(
+      '/attendance/source-events',
+      requirePerm('attendance.source.list'),
+      async (req, res) => {
+        try {
+          const r = await attendanceSourceService.listSourceEvents({
+            employeeId: req.query.employeeId || undefined,
+            branchId: req.query.branchId || undefined,
+            source: req.query.source || undefined,
+            accepted:
+              req.query.accepted === 'true'
+                ? true
+                : req.query.accepted === 'false'
+                  ? false
+                  : undefined,
+            since: req.query.since || undefined,
+            until: req.query.until || undefined,
+            limit: req.query.limit ? Number(req.query.limit) : undefined,
+            skip: req.query.skip ? Number(req.query.skip) : undefined,
+          });
+          return respond(res, r);
+        } catch (err) {
+          return safeError(res, err, 'attendance.source.list');
+        }
+      }
+    );
+
+    router.get(
+      '/attendance/source-events/:id',
+      requirePerm('attendance.source.read'),
+      async (req, res) => {
+        try {
+          const r = await attendanceSourceService.getSourceEvent(req.params.id);
+          return respond(res, r);
+        } catch (err) {
+          return safeError(res, err, 'attendance.source.read');
+        }
+      }
+    );
+  }
+
+  // ─── Registry passthrough (no perm gate — public catalog) ───
+  router.get('/registry', (_req, res) => {
+    return res.json({
+      success: true,
+      data: {
+        deviceKinds: reg.DEVICE_KINDS,
+        capabilities: reg.CAPABILITIES,
+        enrollmentRoles: reg.ENROLLMENT_ROLES,
+        deviceStatuses: reg.DEVICE_STATUSES,
+        channelDirections: reg.CHANNEL_DIRECTIONS,
+        recognitionModes: reg.RECOGNITION_MODES,
+        rawEventKinds: reg.RAW_EVENT_KINDS,
+        parseStatuses: reg.PARSE_STATUSES,
+        trustTiers: reg.TRUST_TIERS,
+        thresholds: reg.DEFAULT_CONFIDENCE_THRESHOLDS,
+        // Wave 97 Phase 2 additions
+        libraryStatuses: reg.LIBRARY_STATUSES,
+        syncStrategies: reg.SYNC_STRATEGIES,
+        templateStatuses: reg.TEMPLATE_STATUSES,
+        imageAngles: reg.IMAGE_ANGLES,
+        imageQuality: reg.IMAGE_QUALITY,
+        templateDefaults: reg.TEMPLATE_DEFAULTS,
+        cascadeReasons: reg.CASCADE_REASONS,
+        // Wave 98 Phase 3 additions
+        gateDecisions: reg.GATE_DECISIONS,
+        antiSpoofResults: reg.ANTI_SPOOF_RESULTS,
+        reviewStates: reg.REVIEW_STATES,
+        reviewQueues: reg.REVIEW_QUEUES,
+        reviewReasons: reg.REVIEW_REASONS,
+        attendanceEventKinds: reg.ATTENDANCE_EVENT_KINDS,
+        attendanceSources: reg.ATTENDANCE_SOURCES,
+        impossibleTravelWindowMs: reg.IMPOSSIBLE_TRAVEL_WINDOW_MS,
+        reviewSlaMs: reg.REVIEW_SLA_MS,
+      },
+    });
+  });
+
+  return router;
+}
+
+/**
+ * createHikvisionWebhookRouter — standalone router for the device push
+ * webhook. Authentication is HMAC-only (verifyWebhookHmac). Mount this
+ * BEFORE the authenticated router so its path matches first:
+ *
+ *   app.use('/api/v1/hikvision/webhooks', createHikvisionWebhookRouter({...}));
+ *   app.use('/api/v1/hikvision', authenticate, createHikvisionRouter({...}));
+ *
+ * @param {object} opts
+ *   - ingestionService — createHikvisionEventIngestionService(...)
+ *   - webhookHmac      — verifyWebhookHmac({...}) middleware
+ *   - logger
+ */
+function createHikvisionWebhookRouter({ ingestionService, webhookHmac, logger = console } = {}) {
+  if (!ingestionService || typeof ingestionService.ingest !== 'function') {
+    throw new Error('hikvision.webhook: ingestionService is required');
+  }
+  if (typeof webhookHmac !== 'function') {
+    throw new Error('hikvision.webhook: webhookHmac middleware is required');
+  }
+  void logger;
+
+  const router = express.Router();
+
+  router.post('/events', webhookHmac, async (req, res) => {
+    try {
+      const body = req.body || {};
+      const result = await ingestionService.ingest({
+        deviceCode: body.deviceCode,
+        externalEventId: body.externalEventId,
+        eventKind: body.eventKind,
+        capturedAt: body.capturedAt,
+        rawPayload: body.rawPayload || body,
+        channelNo: body.channelNo,
+        sourceIp: req.ip,
+        requestId: req.get('x-request-id') || null,
+        signatureVerified: true, // verifyWebhookHmac would have 401'd otherwise
+      });
+      return respond(res, result);
+    } catch (err) {
+      return safeError(res, err, 'hikvision.event.webhook');
+    }
+  });
+
+  return router;
+}
+
+module.exports = createHikvisionRouter;
+module.exports.createHikvisionRouter = createHikvisionRouter;
+module.exports.createHikvisionWebhookRouter = createHikvisionWebhookRouter;
+module.exports.REASON_TO_STATUS = REASON_TO_STATUS;

@@ -112,8 +112,19 @@ export function AuthProvider({ children }) {
           dataMsg || err?.response?.data?.message || 'فشل تسجيل الدخول. حاول مرة أخرى.';
       }
 
+      // Surface retryAfter (seconds) for rate-limited responses so the UI can show a countdown
+      const retryAfter =
+        (typeof err?.data === 'object' && Number(err?.data?.retryAfter)) ||
+        Number(err?.response?.data?.retryAfter) ||
+        0;
+
       setError(errorMessage);
-      return { success: false, error: errorMessage };
+      return {
+        success: false,
+        error: errorMessage,
+        status: err?.status,
+        retryAfter: Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter : 0,
+      };
     }
   }, []);
 

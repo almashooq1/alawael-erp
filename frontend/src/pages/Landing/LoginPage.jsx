@@ -55,6 +55,8 @@ export default function LoginPage() {
   const [remember, setRemember] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [rateLimitUntil, setRateLimitUntil] = useState(0); // epoch ms
+  const [now, setNow] = useState(() => Date.now());
   const [mounted, setMounted] = useState(false);
   const [focusedField, setFocusedField] = useState('');
 
@@ -66,6 +68,22 @@ export default function LoginPage() {
     return () => clearTimeout(t);
   }, []);
 
+  // 1-second ticker while rate-limited so the countdown updates live
+  useEffect(() => {
+    if (rateLimitUntil <= 0) return undefined;
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, [rateLimitUntil]);
+
+  const remainingSec = Math.max(0, Math.ceil((rateLimitUntil - now) / 1000));
+  const isRateLimited = remainingSec > 0;
+
+  const formatRemaining = sec => {
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return m > 0 ? `${m} د ${s.toString().padStart(2, '0')} ث` : `${s} ث`;
+  };
+
   const handleChange = e => {
     setForm(f => ({ ...f, [e.target.name]: e.target.value }));
     if (error) setError('');
@@ -73,6 +91,7 @@ export default function LoginPage() {
 
   const handleSubmit = async e => {
     e.preventDefault();
+    if (isRateLimited) return; // hard guard against spamming when locked out
     if (!form.email || !form.password) {
       setError('يرجى إدخال البريد الإلكتروني وكلمة المرور');
       return;
@@ -85,6 +104,15 @@ export default function LoginPage() {
         showSnackbar?.('مرحباً بك في نظام مراكز الأوائل', 'success');
         return;
       }
+
+      // Rate-limited (429) — surface countdown UI
+      if (result?.status === 429 && result?.retryAfter > 0) {
+        setRateLimitUntil(Date.now() + result.retryAfter * 1000);
+        setNow(Date.now());
+        setError('');
+        return;
+      }
+
       const msg = result?.error || '';
       if (
         msg.includes('Invalid') ||
@@ -251,8 +279,42 @@ export default function LoginPage() {
               <p className="text-gray-500 text-sm">أدخل بياناتك للوصول إلى لوحة التحكم</p>
             </div>
 
+            {/* Rate limit banner with live countdown */}
+            {isRateLimited && (
+              <div className="mb-5 flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-2xl p-4 shadow-sm animate-fade-in">
+                <div className="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center shrink-0">
+                  <svg
+                    className="w-5 h-5 text-amber-600"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-amber-900">
+                    تم تجاوز عدد محاولات تسجيل الدخول المسموح بها
+                  </p>
+                  <p className="text-xs text-amber-800 mt-1 leading-relaxed">
+                    لأسباب أمنية تم إيقاف المحاولات مؤقتاً من عنوانك. يمكنك المحاولة بعد:{' '}
+                    <span className="font-bold tabular-nums">{formatRemaining(remainingSec)}</span>
+                  </p>
+                  <p className="text-[11px] text-amber-700 mt-2">
+                    💡 نصيحة: تأكد من البريد وكلمة المرور قبل المحاولة التالية، أو راجع المسؤول
+                    لإعادة تعيين كلمة المرور.
+                  </p>
+                </div>
+              </div>
+            )}
+
             {/* Error */}
-            {error && (
+            {error && !isRateLimited && (
               <div className="mb-5 flex items-center gap-3 bg-red-50 border border-red-100 rounded-2xl p-4 animate-fade-in shadow-sm">
                 <div className="w-9 h-9 rounded-xl bg-red-100 flex items-center justify-center shrink-0">
                   <svg
@@ -418,11 +480,15 @@ export default function LoginPage() {
               {/* Submit */}
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || isRateLimited}
                 className="group w-full relative flex items-center justify-center gap-2.5 py-4 bg-gradient-to-l from-primary-600 to-primary-700 text-white rounded-2xl font-semibold text-sm shadow-xl shadow-primary-600/25 hover:shadow-2xl hover:shadow-primary-600/30 hover:-translate-y-0.5 transition-all duration-500 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-xl overflow-hidden"
               >
                 <div className="absolute inset-0 bg-gradient-to-l from-primary-700 to-primary-800 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                {loading ? (
+                {isRateLimited ? (
+                  <span className="relative z-10 flex items-center gap-2 tabular-nums">
+                    المحاولة متاحة بعد {formatRemaining(remainingSec)}
+                  </span>
+                ) : loading ? (
                   <span className="relative z-10 flex items-center gap-2">
                     <svg
                       className="animate-spin h-5 w-5 text-white"

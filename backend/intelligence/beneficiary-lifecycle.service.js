@@ -51,7 +51,15 @@ const REASON = Object.freeze({
 // (privileged) must be re-asserted every 5 min; tier 2 every 15.
 // Tier 1 has no enforced freshness (it's the baseline session
 // auth — covered by JWT TTL, not by MFA challenge).
-const MFA_FRESHNESS_MIN = Object.freeze({ 2: 15, 3: 5 });
+//
+// Wave 90 — values now come from sensitivity-grade.lib so the security
+// baseline lives in one place. Local map kept as a derived index so
+// the lookup-by-tier shape (used by checkMfaTier below) stays the same.
+const sensitivityGrade = require('./sensitivity-grade.lib');
+const MFA_FRESHNESS_MIN = Object.freeze({
+  2: Math.round(sensitivityGrade.SENSITIVITY_GRADES.HIGH.mfaFreshnessMs / 60_000),
+  3: Math.round(sensitivityGrade.SENSITIVITY_GRADES.CRITICAL.mfaFreshnessMs / 60_000),
+});
 
 const FINAL_STATES = new Set([
   reg.LIFECYCLE_STATES.DELETED,

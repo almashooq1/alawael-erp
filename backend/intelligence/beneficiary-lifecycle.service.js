@@ -42,7 +42,16 @@ const REASON = Object.freeze({
   DUPLICATE_APPROVAL: 'DUPLICATE_APPROVAL',
   ACTOR_REQUIRED: 'ACTOR_REQUIRED',
   NAFATH_REQUIRED: 'NAFATH_REQUIRED',
+  // Wave 86 — backend-side MFA tier enforcement
+  MFA_TIER_REQUIRED: 'MFA_TIER_REQUIRED',
+  MFA_FRESHNESS_REQUIRED: 'MFA_FRESHNESS_REQUIRED',
 });
+
+// Wave 86 — MFA freshness window per tier (minutes). Tier 3
+// (privileged) must be re-asserted every 5 min; tier 2 every 15.
+// Tier 1 has no enforced freshness (it's the baseline session
+// auth — covered by JWT TTL, not by MFA challenge).
+const MFA_FRESHNESS_MIN = Object.freeze({ 2: 15, 3: 5 });
 
 const FINAL_STATES = new Set([
   reg.LIFECYCLE_STATES.DELETED,
@@ -50,6 +59,63 @@ const FINAL_STATES = new Set([
   // sees the record as active — not blocked at the source-side service
   // because cross-branch operations are coordinated separately.
 ]);
+
+/**
+ * Wave 86 — backend-side MFA tier enforcement (closes critical-review
+ * blocker B3 "UI gating = security theater").
+ *
+ * Returns { ok: true } when the actor's mfaLevel + mfaAssertedAt are
+ * sufficient for the transition. Returns { ok: false, reason } when
+ * not — caller propagates the rejection.
+ *
+ * The check is OPT-IN per call site:
+ *   • When enforceMfa flag is false (default in tests + old callers),
+ *     the guard short-circuits to { ok: true }. This keeps backward
+ *     compat — existing tests that don't simulate MFA state still pass.
+ *   • Real production routes pass enforceMfa=true after wiring the
+ *     Wave-86 loadMfaActor middleware to populate actor.mfaLevel.
+ *
+ * Calling code looks like:
+ *   const mfaCheck = checkMfaTier({ transitionId: t.id, actor, now,
+ *                                   enforceMfa: true });
+ *   if (!mfaCheck.ok) return mfaCheck;
+ */
+function checkMfaTier({ transitionId, actor = {}, now = new Date(), enforceMfa = false }) {
+  if (!enforceMfa) return { ok: true };
+  const requiredTier = reg.getMfaTier(transitionId);
+  if (!requiredTier || requiredTier <= 1) return { ok: true };
+  const actorLevel = typeof actor.mfaLevel === 'number' ? actor.mfaLevel : 0;
+  if (actorLevel < requiredTier) {
+    return {
+      ok: false,
+      reason: REASON.MFA_TIER_REQUIRED,
+      requiredTier,
+      actorTier: actorLevel,
+    };
+  }
+  const freshnessMin = MFA_FRESHNESS_MIN[requiredTier];
+  if (freshnessMin && actor.mfaAssertedAt) {
+    const ageMin = (new Date(now).getTime() - new Date(actor.mfaAssertedAt).getTime()) / 60_000;
+    if (ageMin > freshnessMin) {
+      return {
+        ok: false,
+        reason: REASON.MFA_FRESHNESS_REQUIRED,
+        requiredTier,
+        maxAgeMin: freshnessMin,
+        ageMin: Math.round(ageMin),
+      };
+    }
+  } else if (freshnessMin && !actor.mfaAssertedAt) {
+    // Strict: tier ≥2 requires an explicit assertion timestamp.
+    return {
+      ok: false,
+      reason: REASON.MFA_FRESHNESS_REQUIRED,
+      requiredTier,
+      maxAgeMin: freshnessMin,
+    };
+  }
+  return { ok: true };
+}
 
 const FINAL_STATUSES = new Set([
   reg.TRANSITION_STATUS.EXECUTED,
@@ -79,6 +145,10 @@ function createBeneficiaryLifecycleService({
   anchorLedger = null,
   logger = console,
   now = () => new Date(),
+  // Wave 86 — backend MFA-tier enforcement. Off by default for
+  // backward compat (Wave 39 tests construct the service without
+  // MFA wiring); production callers (app.js) flip it on.
+  enforceMfa = false,
 } = {}) {
   if (!transitionLog) {
     throw new Error('beneficiary-lifecycle.service: transitionLog model is required');
@@ -126,6 +196,12 @@ function createBeneficiaryLifecycleService({
     }
     const t = reg.findTransition(transitionId);
     if (!t) return { ok: false, reason: REASON.TRANSITION_NOT_FOUND };
+
+    // Wave 86 — MFA tier gate at REQUEST time. Cheaper to fail
+    // here than to write a pending record only to fail on
+    // approve/execute later.
+    const mfaCheck = checkMfaTier({ transitionId, actor, now: now(), enforceMfa });
+    if (!mfaCheck.ok) return mfaCheck;
 
     // Look up current state. If no beneficiaryModel injected (tests),
     // caller must pass `metadata.currentState` so we can validate.
@@ -217,6 +293,18 @@ function createBeneficiaryLifecycleService({
     const t = reg.findTransition(record.transitionId);
     if (!t) return { ok: false, reason: REASON.TRANSITION_NOT_FOUND };
 
+    // Wave 86 — MFA tier gate on approval. The approver, not the
+    // requester, must hold a valid tier. Defense in depth: even if
+    // the UI's MfaChallengeDialog (Waves 67/73) was bypassed, the
+    // backend rejects here.
+    const mfaCheck = checkMfaTier({
+      transitionId: record.transitionId,
+      actor,
+      now: now(),
+      enforceMfa,
+    });
+    if (!mfaCheck.ok) return mfaCheck;
+
     // Self-approval guard
     if (String(actor.userId) === String(record.requestedBy)) {
       return { ok: false, reason: REASON.SELF_APPROVAL };
@@ -298,6 +386,18 @@ function createBeneficiaryLifecycleService({
     if (record.status !== reg.TRANSITION_STATUS.APPROVED) {
       return { ok: false, reason: REASON.NOT_APPROVED, status: record.status };
     }
+
+    // Wave 86 — MFA tier gate on execute. Execution is when the
+    // side-effects fire (notify family, freeze record, mark
+    // discharged, etc.) — any tier-3 transition must re-assert
+    // freshness even after approval.
+    const mfaCheck = checkMfaTier({
+      transitionId: record.transitionId,
+      actor,
+      now: now(),
+      enforceMfa,
+    });
+    if (!mfaCheck.ok) return mfaCheck;
 
     const t = reg.findTransition(record.transitionId);
 
@@ -455,6 +555,17 @@ function createBeneficiaryLifecycleService({
     if (record.status !== reg.TRANSITION_STATUS.EXECUTED) {
       return { ok: false, reason: REASON.NOT_APPROVED, status: record.status };
     }
+
+    // Wave 86 — MFA tier gate on reverse. Reversal undoes side-
+    // effects + restores prior state; treated with the same tier
+    // as the original transition.
+    const mfaCheck = checkMfaTier({
+      transitionId: record.transitionId,
+      actor,
+      now: now(),
+      enforceMfa,
+    });
+    if (!mfaCheck.ok) return mfaCheck;
 
     const t = reg.findTransition(record.transitionId);
     if (!t.reversalWindowDays) {

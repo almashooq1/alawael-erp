@@ -121,6 +121,19 @@ function createMfaChallengeService({
   //   lockedUntil: Date|null
   const userStats = new Map();
 
+  // Wave 86 — per-user MFA assertion state, keyed by userId.
+  //   mfaLevel:        Number — highest tier reached in this process lifetime
+  //   mfaAssertedAt:   Date   — when the last successful verify happened
+  //
+  // Ephemeral by design — process restart clears it, forcing every
+  // privileged action through a fresh challenge. This is the source
+  // the `loadMfaActor` middleware reads, and the source the
+  // requireMfa middleware enforces against. The sessionUpdater hook
+  // (if wired) can ALSO persist to a session store; this map is just
+  // the in-process fast path so middleware doesn't have to hit Mongo
+  // on every authenticated request.
+  const userMfaState = new Map();
+
   // Default TOTP verifier — prefer speakeasy when present, else stub
   // that always fails. Tests pass their own deterministic verifier.
   const verifier = totpVerifier || _defaultTotpVerifier(logger);
@@ -433,6 +446,18 @@ function createMfaChallengeService({
       mfaAssertedAt: c.verifiedAt,
     };
 
+    // Wave 86 — in-process fast path. The `loadMfaActor` middleware
+    // reads from here on every authenticated request to populate
+    // `req.actor.mfaLevel` / `mfaAssertedAt`. Take the MAX so a
+    // higher previously-asserted tier isn't downgraded by a lower
+    // re-assertion that happened more recently.
+    const existing = userMfaState.get(c.userId);
+    const nextLevel = Math.max(existing?.mfaLevel || 0, c.requiredTier);
+    userMfaState.set(c.userId, {
+      mfaLevel: nextLevel,
+      mfaAssertedAt: c.verifiedAt,
+    });
+
     if (typeof sessionUpdater === 'function') {
       try {
         await sessionUpdater(sessionUpgrade);
@@ -555,6 +580,30 @@ function createMfaChallengeService({
     };
   }
 
+  /**
+   * Wave 86 — read-only inspector for the in-process MFA state.
+   * Returns the highest tier the user has reached + when it was
+   * asserted. Used by the `loadMfaActor` middleware to populate
+   * `req.actor.mfaLevel` on every authenticated request.
+   *
+   * Returns { mfaLevel: 0, mfaAssertedAt: null } when the user has
+   * never asserted MFA in this process lifetime.
+   */
+  function getUserMfaState(userId) {
+    if (!userId) return { mfaLevel: 0, mfaAssertedAt: null };
+    const s = userMfaState.get(userId);
+    if (!s) return { mfaLevel: 0, mfaAssertedAt: null };
+    return { mfaLevel: s.mfaLevel, mfaAssertedAt: s.mfaAssertedAt };
+  }
+
+  /**
+   * Wave 86 — clears in-process MFA state (logout, admin reset).
+   * Caller is responsible for the authz check on admin resets.
+   */
+  function clearUserMfaState(userId) {
+    if (userId) userMfaState.delete(userId);
+  }
+
   return {
     createChallenge,
     verifyChallenge,
@@ -562,10 +611,14 @@ function createMfaChallengeService({
     requireMfa,
     unlockUser,
     getUserState,
+    // Wave 86
+    getUserMfaState,
+    clearUserMfaState,
     REASON,
     // Test seam
     _store: store,
     _userStats: userStats,
+    _userMfaState: userMfaState,
   };
 }
 

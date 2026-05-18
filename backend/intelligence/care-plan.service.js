@@ -32,6 +32,7 @@
  */
 
 const reg = require('./care-planning.registry');
+const sod = require('./sod.lib');
 
 const REASON = Object.freeze({
   PLAN_NOT_FOUND: 'PLAN_NOT_FOUND',
@@ -445,9 +446,15 @@ function createCarePlanService({
       });
     }
 
-    // Self-distinct guards
+    // Self-distinct guards — Wave 89 via canonical sod.lib.
+    // Local REASON.SELF_APPROVAL_FORBIDDEN already matches the canonical
+    // code from reason-codes.registry, so no translation needed.
     if (t.requiresSelfDistinctApprover) {
-      if (pv.authorId && String(pv.authorId) === String(actor.userId)) {
+      const sodCheck = sod.checkSeparationOfDuties({
+        actorId: actor.userId,
+        priorActorIds: [pv.authorId],
+      });
+      if (!sodCheck.ok && sodCheck.reason === 'SELF_APPROVAL_FORBIDDEN') {
         return fail(REASON.SELF_APPROVAL_FORBIDDEN);
       }
     }

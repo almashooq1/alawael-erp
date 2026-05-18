@@ -55,6 +55,8 @@
  *      wires real.
  */
 
+const sod = require('../../intelligence/sod.lib');
+
 function createHrChangeRequestService(deps = {}) {
   const HrChangeRequest = deps.changeRequestModel;
   const Employee = deps.employeeModel;
@@ -136,7 +138,15 @@ function createHrChangeRequestService(deps = {}) {
     if (doc.status !== 'pending') {
       return { result: 'invalid_state', currentStatus: doc.status };
     }
-    if (String(doc.requestor_user_id) === String(approverUserId)) {
+    // Wave 89 — SoD check via canonical sod.lib. The audit log keeps the
+    // legacy snake_case spelling for back-compat with existing dashboards
+    // and the public denial reason is also unchanged so HTTP callers see
+    // no diff. The lib is the single source of truth for the actual check.
+    const sodCheck = sod.checkSeparationOfDuties({
+      actorId: approverUserId,
+      priorActorIds: [doc.requestor_user_id],
+    });
+    if (!sodCheck.ok && sodCheck.reason === 'SELF_APPROVAL_FORBIDDEN') {
       fireAudit({
         method: 'logHrAccessDenied',
         payload: {

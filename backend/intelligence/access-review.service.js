@@ -54,6 +54,7 @@
 
 const reg = require('./access-review.registry');
 const hashChain = require('./hash-chain.lib');
+const sod = require('./sod.lib');
 
 const TYPES_REQUIRING_COSIGNERS = new Set([
   reg.REVIEW_TYPE.PRIVILEGED,
@@ -151,7 +152,15 @@ function createAccessReviewService({
 
     if (!reviewerId) return { ok: false, reason: 'REVIEWER_REQUIRED' };
     if (!targetUserId) return { ok: false, reason: 'TARGET_REQUIRED' };
-    if (String(reviewerId) === String(targetUserId)) {
+    // Wave 89 — SoD check via canonical lib. We preserve the legacy
+    // SELF_ATTESTATION reason so existing HTTP handlers + tests keep
+    // working (reason-codes.registry maps it back to the canonical
+    // SELF_APPROVAL_FORBIDDEN for any consumer that normalises).
+    const sodCheck = sod.checkSeparationOfDuties({
+      actorId: reviewerId,
+      priorActorIds: [targetUserId],
+    });
+    if (!sodCheck.ok) {
       return { ok: false, reason: 'SELF_ATTESTATION' };
     }
     if (!reg.REVIEW_TYPES.includes(reviewType)) {

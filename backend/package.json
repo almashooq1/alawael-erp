@@ -53,6 +53,8 @@
     "no-show:scan:json": "node scripts/no-show-scan.js --json",
     "no-show:validate": "node scripts/no-show-validate.js",
     "no-show:validate:json": "node scripts/no-show-validate.js --json",
+    "progress:validate": "node scripts/progress-validate.js",
+    "progress:validate:json": "node scripts/progress-validate.js --json",
     "outcomes:digest": "node scripts/outcomes-digest.js",
     "outcomes:digest:json": "node scripts/outcomes-digest.js --json",
     "goal-progress:digest": "node scripts/goal-progress-digest.js",

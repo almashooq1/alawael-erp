@@ -1,7 +1,7 @@
 # Phase P3 — Intelligence & Automation | خطة المرحلة الثالثة
 
 > **هذا الملف tracker تنفيذي يربط الـ deliverables التعاقدية في blueprint/09-roadmap.md بالموجات الفعلية المُسلَّمة في git log.**
-> آخر مزامنة: 2026-05-19 (بعد Wave 117).
+> آخر مزامنة: 2026-05-19 (بعد Wave 118).
 
 ---
 
@@ -24,12 +24,12 @@
 | -------- | ------------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
 | **P3.1** | Smart Alerts Engine       | ✅ **مُسلَّم جوهريًا**     | Waves 11-16 (alert engine complete) + Wave 19 (anomaly generators) + Wave 30 (kpi-series loader) + Wave 113 (Hikvision anomaly detector). موجود [alertEvaluator.service.js](../backend/services/alertEvaluator.service.js) + [dashboardAlertCoordinator.service.js](../backend/services/dashboardAlertCoordinator.service.js) + [alerts/](../backend/alerts/)                               | rule-builder UI عام (موجود لـ Hikvision فقط)، توحيد register patterns عبر النطاقات |
 | **P3.2** | AI Assessment Assistant   | ✅ **مُسلَّم**             | Waves 41-60 (Care Planning vertical) + Wave 48 (LLM-explain views) + [care-plan-llm-caller.service.js](../backend/intelligence/care-plan-llm-caller.service.js) + [aiDiagnostic.service.js](../backend/services/aiDiagnostic.service.js)                                                                                                                                                    | قياس وفر الوقت (KPI: 30%)، توسعة عن care-plan إلى تقييمات أخرى                     |
-| **P3.3** | Progress Prediction Model | ⚠️ **موجود — يحتاج تقييم** | [services/ai/progressPrediction.service.js](../backend/services/ai/progressPrediction.service.js) (Prompt 20)، يستدعي ML service خارجي عبر `ML_SERVICE_URL`                                                                                                                                                                                                                                 | تحقق دقة 75% على بيانات تاريخية، نشر prod، تكامل في UI                             |
+| **P3.3** | Progress Prediction Model | ✅ **مُسلَّم في Wave 118** | [services/ai/progressPrediction.service.js](../backend/services/ai/progressPrediction.service.js) (Prompt 20) — يستدعي ML خارجي عبر `ML_SERVICE_URL` مع fallback heuristic. Wave 118 أضاف 23 اختبار + CLI `progress-validate.js` + AiModelConfig accuracy tracking                                                                                                                          | نشر ML service خارجي + UI integration                                              |
 | **P3.4** | No-Show Prediction        | ✅ **مُسلَّم في Wave 115** | [intelligence/no-show-prediction.registry.js](../backend/intelligence/no-show-prediction.registry.js) + [intelligence/no-show-prediction.service.js](../backend/intelligence/no-show-prediction.service.js) + [routes/no-show-prediction.routes.js](../backend/routes/no-show-prediction.routes.js). 43/43 tests pass. 9 features، 4 risk bands، 6 intervention tiers، 3 perms، 3 endpoints | تثبيت دقة على بيانات حقيقية، UI badge في صفحة المواعيد (Wave 116+)                 |
 | **P3.5** | Schedule Optimization v2  | ✅ **مُسلَّم في Wave 117** | [services/ai/scheduleOptimizerV2.service.js](../backend/services/ai/scheduleOptimizerV2.service.js) — risk-aware enrichment فوق V1، يدمج Wave-115 no-show + يُولّد swap suggestions + expected attended metrics + POST /api/ai-analytics/schedule/optimize/v2. 23/23 tests pass                                                                                                             | نشر prod + ربط UI                                                                  |
 | **P3.6** | Parent Chatbot            | ❌ **فجوة كاملة**          | لا يوجد إلا template بريد، لا خدمة chatbot ولا KB                                                                                                                                                                                                                                                                                                                                           | يحتاج موجة كبيرة (LLM + KB + UI portal)                                            |
 
-**خلاصة:** 5/6 مُسلَّمة جوهريًا (بعد Wave 117)، 1/6 موجودة جزئيًا (P3.3)، 1/6 فجوة كاملة (P3.6).
+**خلاصة:** 5/6 مُسلَّمة جوهريًا (P3.1-P3.5 — بعد Wave 118)، 1/6 فجوة كاملة (P3.6).
 
 ---
 
@@ -51,6 +51,7 @@
 | 115    | **No-Show Prediction** — 9-feature heuristic + 4 risk bands + 6 interventions + AiPrediction persistence + 3 endpoints                                                                                                      | **P3.4 — مُغلق**                    |
 | 116    | **No-Show Operationalization** — validateActualOutcome + validatePending sweeper + dailyScanAllBranches + 2 CLI scripts + accuracy tracking                                                                                 | **P3.4 — تشغيلي**                   |
 | 117    | **Schedule Optimizer V2** — risk-aware enrichment فوق V1، swap suggestions، expected attended metrics، route /schedule/optimize/v2                                                                                          | **P3.5 — مُغلق**                    |
+| 118    | **Progress Prediction validation** — 23 jest tests على progressPrediction service + CLI `progress-validate` + AiModelConfig accuracy persistence                                                                            | **P3.3 — مُغلق**                    |
 
 ---
 

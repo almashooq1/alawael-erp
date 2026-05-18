@@ -92,6 +92,8 @@
     "preflight": "cd backend && npm run preflight",
     "preflight:prod": "cd backend && npm run preflight:prod",
     "prepare": "husky",
+    "progress:validate": "cd backend && npm run progress:validate",
+    "progress:validate:json": "cd backend && npm run progress:validate:json",
     "quality": "cd backend && npm run quality:ci",
     "quality:ci": "cd backend && npm run quality:ci",
     "quality:push": "cd backend && npm run quality:push",

@@ -1103,6 +1103,23 @@ const PERMISSIONS = Object.freeze({
   // Edit per-branch thresholds — narrow because it changes how
   // attendance + fraud decisions land for the branch.
   'hikvision.branch-config.write': ['security_architect', 'iam.role_granter', 'hr_director', 'dpo'],
+
+  // ─── Wave 111 — Branch Operations Aggregator ──────────────
+  // Read-only aggregator bundling per-branch operational signals
+  // from every other Hikvision service. Same readers as
+  // sync.status.read (branch managers + directors + compliance).
+  'hikvision.branch-ops.read': [
+    'security_architect',
+    'security.officer',
+    'iam.role_granter',
+    'hr_admin',
+    'hr_director',
+    'branch_manager',
+    'branch_director',
+    'compliance_officer',
+    'auditor',
+    'dpo',
+  ],
 });
 
 // ─── API ────────────────────────────────────────────────────────

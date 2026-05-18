@@ -2632,6 +2632,32 @@ try {
         }
       }
 
+      // Wave 111 — Branch Operations Aggregator (graceful)
+      // Read-only fan-out over the services that were wired above.
+      // Never fails wiring — leaf services may be null and the
+      // aggregator surfaces per-section unavailability.
+      let branchOpsSvc = null;
+      try {
+        const {
+          createHikvisionBranchOperationsService,
+        } = require('./intelligence/hikvision-branch-operations.service');
+        branchOpsSvc = createHikvisionBranchOperationsService({
+          healthService,
+          streamSupervisor,
+          attendanceSourceService: attendanceSourceSvc,
+          reconciliationService: reconciliationSvc,
+          fraudScoreService: fraudScoreSvc,
+          branchConfigService: branchConfigSvc,
+          syncWorker: syncWorkerSvc,
+          deviceModel: HikvisionDevice,
+          libraryModel: HikvisionFaceLibrary || null,
+          logger,
+        });
+      } catch (boErr) {
+        logger.warn('[Hikvision] Wave 111 branch-ops failed to wire:', boErr.message);
+        branchOpsSvc = null;
+      }
+
       // Optional HMAC middleware for the device webhook. If the
       // secret env var isn't set, the webhook is omitted but the
       // operator-replay endpoint stays available.
@@ -2692,6 +2718,7 @@ try {
           scheduler: schedulerSvc,
           streamSupervisor,
           branchConfigService: branchConfigSvc,
+          branchOperationsService: branchOpsSvc,
           governance: governanceSvc,
           webhookHmac,
           logger,
@@ -2712,6 +2739,7 @@ try {
       if (schedulerSvc) app._hikvisionScheduler = schedulerSvc;
       if (streamSupervisor) app._hikvisionStreamSupervisor = streamSupervisor;
       if (branchConfigSvc) app._hikvisionBranchConfigService = branchConfigSvc;
+      if (branchOpsSvc) app._hikvisionBranchOperationsService = branchOpsSvc;
       const phases = ['Wave 96 Phase 1'];
       if (libraryService && enrollmentService) phases.push('Wave 97 Phase 2');
       if (parserService && attendanceSourceSvc) phases.push('Wave 98 Phase 3');
@@ -2721,6 +2749,7 @@ try {
       if (schedulerSvc) phases.push('Wave 108 Scheduler');
       if (streamSupervisor) phases.push('Wave 109 Stream');
       if (branchConfigSvc) phases.push('Wave 110 Branch-Config');
+      if (branchOpsSvc) phases.push('Wave 111 Branch-Ops');
       logger.info(`[Hikvision] ✓ ${phases.join(' + ')} routes mounted at /api/v1/hikvision`);
     } else {
       logger.warn('[Hikvision] routes skipped: governance service unavailable');

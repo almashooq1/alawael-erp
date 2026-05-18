@@ -231,6 +231,7 @@ function createHikvisionRouter({
   scheduler = null,
   streamSupervisor = null,
   branchConfigService = null,
+  branchOperationsService = null,
   governance,
   webhookHmac = null,
   logger = console,
@@ -1560,6 +1561,32 @@ function createHikvisionRouter({
           return res.json({ success: true, data: r });
         } catch (err) {
           return safeError(res, err, 'hikvision.branch-config.reset');
+        }
+      }
+    );
+  }
+
+  // ─── Wave 111 — Branch Operations Aggregator ──────────────
+  // Mounted iff the aggregator service is supplied. Single route:
+  //   GET /branches/:branchId/operations
+  // Bundles health + stream + reviews + reconciliation + fraud +
+  // thresholds + sync + devices into one snapshot for the UI.
+  if (branchOperationsService) {
+    router.get(
+      '/branches/:branchId/operations',
+      requirePerm('hikvision.branch-ops.read'),
+      async (req, res) => {
+        try {
+          const r = await branchOperationsService.snapshot(req.params.branchId, {
+            openReviewLimit: req.query?.openReviewLimit
+              ? Number(req.query.openReviewLimit)
+              : undefined,
+            openCaseLimit: req.query?.openCaseLimit ? Number(req.query.openCaseLimit) : undefined,
+          });
+          if (!r.ok) return respond(res, r);
+          return res.json({ success: true, data: r });
+        } catch (err) {
+          return safeError(res, err, 'hikvision.branch-ops');
         }
       }
     );

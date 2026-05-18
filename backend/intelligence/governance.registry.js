@@ -1003,6 +1003,42 @@ const PERMISSIONS = Object.freeze({
     'dpo',
   ],
   'fraud.score.recompute': ['security_architect', 'iam.role_granter', 'ciso', 'dpo'],
+
+  // ─── Wave 106 Phase F — ISAPI Sync Worker ─────────────────
+  'hikvision.sync.run': [
+    // Cron-driven primarily; operators may force-run after enrollments.
+    'security_architect',
+    'iam.role_granter',
+    'hr_admin',
+    'hr_director',
+    'dpo',
+  ],
+  'hikvision.sync.run.all': [
+    // Whole-org sync — heavier, narrower auth.
+    'security_architect',
+    'iam.role_granter',
+    'dpo',
+  ],
+  'hikvision.sync.drift.detect': [
+    'security_architect',
+    'security.officer',
+    'iam.role_granter',
+    'compliance_officer',
+    'auditor',
+    'dpo',
+  ],
+  'hikvision.sync.status.read': [
+    'security_architect',
+    'security.officer',
+    'iam.role_granter',
+    'hr_admin',
+    'hr_director',
+    'branch_manager',
+    'branch_director',
+    'compliance_officer',
+    'auditor',
+    'dpo',
+  ],
 });
 
 // ─── API ────────────────────────────────────────────────────────

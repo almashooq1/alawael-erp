@@ -2420,6 +2420,80 @@ try {
         );
       }
 
+      // Wave 106 Phase F — ISAPI Sync Worker (graceful)
+      // Depends on libraryService + enrollmentService + adapter.
+      // Adapter selection: HIKVISION_ISAPI_MODE = 'mock' (default) | 'real'
+      //   • mock → in-memory adapter (safe for dev + integration tests)
+      //   • real → live ISAPI client (requires HTTP client + credentials resolver)
+      let syncWorkerSvc = null;
+      if (
+        libraryService &&
+        enrollmentService &&
+        HikvisionDevice &&
+        HikvisionFaceTemplateLink &&
+        HikvisionFaceLibrary
+      ) {
+        try {
+          const {
+            createMockIsapiAdapter,
+            createIsapiAdapter,
+          } = require('./intelligence/hikvision-isapi-adapter');
+          const {
+            createHikvisionSyncWorker,
+          } = require('./intelligence/hikvision-sync-worker.service');
+
+          const mode = process.env.HIKVISION_ISAPI_MODE || 'mock';
+          let adapter = null;
+          if (mode === 'real') {
+            try {
+              const axios = require('axios');
+              // credentialsResolver MUST be provided by the org's secrets layer.
+              // For now we expect HIKVISION_DEVICE_USERNAME + HIKVISION_DEVICE_PASSWORD
+              // as fallback when credentialsRef is null.
+              const credentialsResolver = async () => ({
+                username:
+                  process.env.HIKVISION_DEVICE_USERNAME ||
+                  (() => {
+                    throw new Error('HIKVISION_DEVICE_USERNAME not set');
+                  })(),
+                password:
+                  process.env.HIKVISION_DEVICE_PASSWORD ||
+                  (() => {
+                    throw new Error('HIKVISION_DEVICE_PASSWORD not set');
+                  })(),
+              });
+              adapter = createIsapiAdapter({
+                httpClient: axios,
+                credentialsResolver,
+                logger,
+              });
+              logger.info('[Hikvision sync] real ISAPI adapter wired');
+            } catch (realErr) {
+              logger.warn(
+                `[Hikvision sync] real adapter unavailable, falling back to mock: ${realErr.message}`
+              );
+              adapter = createMockIsapiAdapter({ logger });
+            }
+          } else {
+            adapter = createMockIsapiAdapter({ logger });
+            logger.info('[Hikvision sync] mock ISAPI adapter wired (dev mode)');
+          }
+
+          syncWorkerSvc = createHikvisionSyncWorker({
+            libraryService,
+            enrollmentService,
+            deviceModel: HikvisionDevice,
+            templateModel: HikvisionFaceTemplateLink,
+            libraryModel: HikvisionFaceLibrary,
+            isapiAdapter: adapter,
+            logger,
+          });
+        } catch (p6err) {
+          logger.warn('[Hikvision] Phase F sync worker failed to wire:', p6err.message);
+          syncWorkerSvc = null;
+        }
+      }
+
       // Optional HMAC middleware for the device webhook. If the
       // secret env var isn't set, the webhook is omitted but the
       // operator-replay endpoint stays available.
@@ -2476,6 +2550,7 @@ try {
           payrollPeriodService: payrollPeriodSvc,
           fraudDetectionService: fraudDetectionSvc,
           fraudScoreService: fraudScoreSvc,
+          syncWorker: syncWorkerSvc,
           governance: governanceSvc,
           webhookHmac,
           logger,
@@ -2492,11 +2567,13 @@ try {
       if (payrollPeriodSvc) app._payrollPeriodService = payrollPeriodSvc;
       if (fraudDetectionSvc) app._hikvisionFraudDetectionService = fraudDetectionSvc;
       if (fraudScoreSvc) app._hikvisionFraudScoreService = fraudScoreSvc;
+      if (syncWorkerSvc) app._hikvisionSyncWorker = syncWorkerSvc;
       const phases = ['Wave 96 Phase 1'];
       if (libraryService && enrollmentService) phases.push('Wave 97 Phase 2');
       if (parserService && attendanceSourceSvc) phases.push('Wave 98 Phase 3');
       if (reconciliationSvc && payrollPeriodSvc) phases.push('Wave 99 Phase 4');
       if (fraudDetectionSvc && fraudScoreSvc) phases.push('Wave 100 Phase 5');
+      if (syncWorkerSvc) phases.push('Wave 106 Phase F');
       logger.info(`[Hikvision] ✓ ${phases.join(' + ')} routes mounted at /api/v1/hikvision`);
     } else {
       logger.warn('[Hikvision] routes skipped: governance service unavailable');

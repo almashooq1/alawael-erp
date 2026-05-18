@@ -74,6 +74,17 @@ const REASON_TO_STATUS = Object.freeze({
   HEALTH_DEVICE_REQUIRED: 400,
   HEALTH_INVALID_DRIFT: 400,
 
+  // ── Wave 106 Phase F — Sync Worker
+  SYNC_ADAPTER_REQUIRED: 503,
+  SYNC_DEVICE_UNREACHABLE: 503,
+  SYNC_DEVICE_NOT_SUBSCRIBED: 409,
+  SYNC_LIBRARY_ARCHIVED: 410,
+  SYNC_PARTIAL_FAILURE: 207, // multi-status
+  SYNC_DRIFT_DETECTED: 200, // not an error — informational
+  SYNC_CREDENTIALS_MISSING: 401,
+  ISAPI_REQUEST_FAILED: 502,
+  ISAPI_RESPONSE_INVALID: 502,
+
   // ── Wave 100 Phase 5 — Fraud Detection
   FRAUD_FLAG_NOT_FOUND: 404,
   FRAUD_FLAG_NOT_OPEN: 409,
@@ -194,6 +205,7 @@ function createHikvisionRouter({
   payrollPeriodService = null,
   fraudDetectionService = null,
   fraudScoreService = null,
+  syncWorker = null,
   governance,
   webhookHmac = null,
   logger = console,
@@ -1275,6 +1287,71 @@ function createHikvisionRouter({
     );
   }
 
+  // ─── Wave 106 Phase F — Sync Worker ─────────────────────────
+  // Mounted only when the sync worker is supplied. Routes wrap the
+  // result objects directly (no envelope unwrap on the worker side —
+  // the result IS the body).
+  if (syncWorker) {
+    router.post(
+      '/sync/library/:libraryId/device/:deviceId',
+      requirePerm('hikvision.sync.run'),
+      async (req, res) => {
+        try {
+          const r = await syncWorker.syncLibraryToDevice(
+            req.params.libraryId,
+            req.params.deviceId,
+            req.body || {}
+          );
+          return res.json({ success: true, data: r });
+        } catch (err) {
+          return safeError(res, err, 'hikvision.sync.pair');
+        }
+      }
+    );
+
+    router.post('/sync/library/:libraryId', requirePerm('hikvision.sync.run'), async (req, res) => {
+      try {
+        const r = await syncWorker.syncLibrary(req.params.libraryId, req.body || {});
+        if (!r.ok) return respond(res, r);
+        return res.json({ success: true, data: r });
+      } catch (err) {
+        return safeError(res, err, 'hikvision.sync.library');
+      }
+    });
+
+    router.post('/sync/all', requirePerm('hikvision.sync.run.all'), async (req, res) => {
+      try {
+        const r = await syncWorker.syncAll(req.body || {});
+        return res.json({ success: true, data: r });
+      } catch (err) {
+        return safeError(res, err, 'hikvision.sync.all');
+      }
+    });
+
+    router.get(
+      '/sync/drift/:libraryId',
+      requirePerm('hikvision.sync.drift.detect'),
+      async (req, res) => {
+        try {
+          const r = await syncWorker.detectDrift(req.params.libraryId);
+          if (!r.ok) return respond(res, r);
+          return res.json({ success: true, data: r });
+        } catch (err) {
+          return safeError(res, err, 'hikvision.sync.drift');
+        }
+      }
+    );
+
+    router.get('/sync/drift', requirePerm('hikvision.sync.drift.detect'), async (_req, res) => {
+      try {
+        const r = await syncWorker.detectDriftAll();
+        return res.json({ success: true, data: r });
+      } catch (err) {
+        return safeError(res, err, 'hikvision.sync.drift.all');
+      }
+    });
+  }
+
   // ─── Registry passthrough (no perm gate — public catalog) ───
   router.get('/registry', (_req, res) => {
     return res.json({
@@ -1320,6 +1397,10 @@ function createHikvisionRouter({
         fraudFlagStates: reg.FRAUD_FLAG_STATES,
         fraudScoreImpact: reg.FRAUD_SCORE_IMPACT,
         fraudDefaults: reg.FRAUD_DEFAULTS,
+        // Wave 106 Phase F additions
+        syncResults: reg.SYNC_RESULTS,
+        diffOperations: reg.DIFF_OPERATIONS,
+        syncDefaults: reg.SYNC_DEFAULTS,
       },
     });
   });

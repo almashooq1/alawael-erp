@@ -256,6 +256,17 @@ const REASON = Object.freeze({
   TEMPLATE_REQUIRED: 'TEMPLATE_REQUIRED',
   FRAUD_DETECTION_NOTHING_TO_FLAG: 'FRAUD_DETECTION_NOTHING_TO_FLAG',
 
+  // ─── Wave 106 Phase F — ISAPI Sync Worker ──────────────────────
+  SYNC_ADAPTER_REQUIRED: 'SYNC_ADAPTER_REQUIRED',
+  SYNC_DEVICE_UNREACHABLE: 'SYNC_DEVICE_UNREACHABLE',
+  SYNC_DEVICE_NOT_SUBSCRIBED: 'SYNC_DEVICE_NOT_SUBSCRIBED',
+  SYNC_LIBRARY_ARCHIVED: 'SYNC_LIBRARY_ARCHIVED',
+  SYNC_PARTIAL_FAILURE: 'SYNC_PARTIAL_FAILURE',
+  SYNC_DRIFT_DETECTED: 'SYNC_DRIFT_DETECTED',
+  SYNC_CREDENTIALS_MISSING: 'SYNC_CREDENTIALS_MISSING',
+  ISAPI_REQUEST_FAILED: 'ISAPI_REQUEST_FAILED',
+  ISAPI_RESPONSE_INVALID: 'ISAPI_RESPONSE_INVALID',
+
   // Generic
   PERMISSION_DENIED: 'PERMISSION_DENIED',
   VALIDATION_FAILED: 'VALIDATION_FAILED',
@@ -1078,6 +1089,95 @@ function classifyScoreBand(score) {
   return FRAUD_SEVERITY.CRITICAL;
 }
 
+// ─── Wave 106 Phase F — ISAPI Sync Worker ───────────────────────
+
+// Outcome of a single library × device sync run.
+const SYNC_RESULT = Object.freeze({
+  SUCCESS: 'success', // every push + delete succeeded
+  PARTIAL: 'partial', // some operations failed; retry next run
+  FAILED: 'failed', // device unreachable / catastrophic error
+  NO_OP: 'no-op', // DB matched device, nothing to do
+  SKIPPED: 'skipped', // archived library / unsubscribed device / retired
+});
+const SYNC_RESULTS = Object.freeze(Object.values(SYNC_RESULT));
+
+// How a template ended up in the diff plan.
+const DIFF_OPERATION = Object.freeze({
+  PUSH: 'push', // template in DB but missing on device
+  DELETE: 'delete', // personId on device but not in DB (or DB marked deleted)
+  VERIFY: 'verify', // both sides agree — just refresh lastSyncedAt
+});
+const DIFF_OPERATIONS = Object.freeze(Object.values(DIFF_OPERATION));
+
+const SYNC_DEFAULTS = Object.freeze({
+  // Hikvision NVRs throttle face-library writes — cap concurrent ops per device.
+  MAX_OPS_PER_DEVICE_PER_RUN: 50,
+  // ISAPI request timeout. Anything slower means the device is degraded.
+  REQUEST_TIMEOUT_MS: 10_000,
+  // Per-template push retry policy (transient failures).
+  MAX_PUSH_RETRIES: 2,
+  // Drift detection — how many syncs in a row can leave drift before raising alert.
+  DRIFT_TOLERANCE_RUNS: 1,
+  // Backoff between retries.
+  RETRY_BACKOFF_MS: [1_000, 3_000],
+});
+
+/**
+ * Pure helper: given (templates, devicePersonIds), compute the diff plan.
+ *   templates      — array of HikvisionFaceTemplateLink (active state)
+ *   devicePersonIds — set/array of personIds currently on the device
+ *
+ * Returns:
+ *   { toPush:   [{ template, op:'push' }],
+ *     toDelete: [{ personId, op:'delete' }],
+ *     toVerify: [{ template, op:'verify' }],
+ *     stats: { totalTemplates, devicePersonsCount } }
+ */
+function computeSyncDiff(templates, devicePersonIds) {
+  const deviceSet = new Set((devicePersonIds || []).map(p => String(p)));
+  const dbActivePersonIds = new Set();
+
+  const toPush = [];
+  const toVerify = [];
+
+  for (const t of templates || []) {
+    if (t.status !== TEMPLATE_STATUS.ACTIVE && t.status !== TEMPLATE_STATUS.PENDING) {
+      // suspended/deleted templates handled by toDelete loop below
+      continue;
+    }
+    if (!t.hikvisionPersonId) {
+      // pending without device personId → must push
+      toPush.push({ template: t, op: DIFF_OPERATION.PUSH });
+      continue;
+    }
+    dbActivePersonIds.add(String(t.hikvisionPersonId));
+    if (deviceSet.has(String(t.hikvisionPersonId))) {
+      toVerify.push({ template: t, op: DIFF_OPERATION.VERIFY });
+    } else {
+      // active in DB but missing from device → re-push
+      toPush.push({ template: t, op: DIFF_OPERATION.PUSH });
+    }
+  }
+
+  // Anything on device that isn't claimed by an active DB template gets deleted.
+  const toDelete = [];
+  for (const pid of deviceSet) {
+    if (!dbActivePersonIds.has(pid)) {
+      toDelete.push({ personId: pid, op: DIFF_OPERATION.DELETE });
+    }
+  }
+
+  return {
+    toPush,
+    toDelete,
+    toVerify,
+    stats: {
+      totalTemplates: (templates || []).length,
+      devicePersonsCount: deviceSet.size,
+    },
+  };
+}
+
 module.exports = {
   DEVICE_KIND,
   DEVICE_KINDS,
@@ -1149,6 +1249,12 @@ module.exports = {
   FRAUD_FLAG_STATE,
   FRAUD_FLAG_STATES,
   FRAUD_DEFAULTS,
+  // Wave 106 Phase F — sync worker
+  SYNC_RESULT,
+  SYNC_RESULTS,
+  DIFF_OPERATION,
+  DIFF_OPERATIONS,
+  SYNC_DEFAULTS,
   // helpers
   isValidIPv4,
   isAttendanceEligibleKind,
@@ -1169,4 +1275,6 @@ module.exports = {
   detectBurstPattern,
   computeScoreFromFlags,
   classifyScoreBand,
+  // Wave 106 Phase F — sync worker helpers
+  computeSyncDiff,
 };

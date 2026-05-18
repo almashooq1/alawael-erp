@@ -8,6 +8,119 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [Unreleased] — 2026-05-18 — Wave 115: No-Show Prediction (P3.4 ✅)
+
+Closes **P3.4** from `docs/blueprint/09-roadmap.md §5` — the cleanest
+remaining gap in Phase 3 (Intelligence & Automation). Heuristic risk
+scorer over the existing `Appointment` + `AiPrediction` models — no
+schema migration, no external ML dependency. Brings P3 closure from
+3/6 to 4/6.
+
+### Architecture
+
+- **Heuristic over ML for v1.** Rule-based weighted score over 9
+  features (beneficiary 90-day history + appointment metadata +
+  branch baseline). Pure functions for `extractFeatures` /
+  `scoreFromFeatures` / `deriveContributions` — trivially unit-testable
+  and tunable without redeploy. ML model can swap in via the same
+  service interface in a future wave (Prompt-20-style).
+- **AiPrediction reuse.** `prediction_type` enum already includes
+  `'attendance'`. No model change. `prediction_details.{band,
+contributions, interventions, appointment_id}` carries the diagnostic
+  payload.
+- **Status-gated.** Only `PENDING` + `CONFIRMED` appointments are
+  predictable — `COMPLETED` / `CANCELLED` / `NO_SHOW` return
+  `NO_SHOW_APPOINTMENT_INVALID_STATUS` (outcome already known).
+
+### Added — Backend (4 new files, +43 tests)
+
+- **`intelligence/no-show-prediction.registry.js`** — frozen catalogue
+  of 4 `RISK_BAND`s with monotone `BAND_THRESHOLDS` (0.30 / 0.55 / 0.75),
+  9-entry `FEATURE_WEIGHTS` (noShowRate90d strongest at 0.45,
+  cancellation at 0.15, recent-streak / days-since-attended at 0.10
+  each, reschedule / first-appointment at 0.05, hour-of-day at 0.03,
+  no-insurance at 0.02, branch-baseline at 0.05), 6-tier `INTERVENTION`
+  catalogue with `INTERVENTIONS_BY_BAND` mapping, 6 `REASON` codes,
+  `MODEL_VERSION='no-show-rule-based-v1'`, and pure helpers
+  `bandForScore(score)` / `interventionsForBand(band)`.
+
+- **`intelligence/no-show-prediction.service.js`** — factory
+  `createNoShowPredictionService({appointmentModel, predictionModel,
+logger, now})`. Public API:
+
+  - `extractFeatures(appointment, history, branchStats)` — pure;
+    filters history to past + 90-day window, computes 13 raw fields
+    - normalized derivatives. Tolerates missing `startTime`,
+      out-of-range `branchStats.noShowRate90d`, and unfiltered history.
+  - `scoreFromFeatures(features)` — pure; weighted sum → clamp [0,1] →
+    4 decimal places. Monotonic in every signal.
+  - `deriveContributions(features)` — pure; per-feature contribution
+    map for explainability (sums to score within rounding tolerance).
+  - `predictForAppointment(appointmentId, {dryRun?})` — loads
+    appointment + 90-day beneficiary history + 90-day branch stats,
+    extracts features, scores, bands, derives intervention list,
+    persists `AiPrediction` (skipped when `dryRun`).
+  - `predictBatch({branchId?, horizonHours?, dryRun?})` — fans out
+    over upcoming `PENDING`/`CONFIRMED` appointments in the window,
+    returns `byBand` counts + per-appointment results.
+  - `summarizeByBranch({branchId?, since?})` — aggregates persisted
+    predictions, computes accuracy from `actual_value` when populated
+    (within `±0.15` tolerance).
+
+- **`routes/no-show-prediction.routes.js`** — `createNoShowPredictionRouter`
+  factory. 3 endpoints mounted at `/api/v1/ai/no-show`:
+
+  - `POST /predict/appointment/:id` — perm `ai.no-show.predict`; `?dryRun=1` supported.
+  - `POST /predict/batch` — perm `ai.no-show.batch`; body or query `{branchId, horizonHours, dryRun}`.
+  - `GET /summary` — perm `ai.no-show.read`; `?branchId=&since=ISO`.
+
+  `REASON_TO_STATUS` mirrors the Hikvision routes convention
+  (404 / 409 / 400 / 500 / 503 / 422).
+
+- **`__tests__/no-show-prediction.test.js`** — 43 tests across 8
+  sections: registry boundaries (5), `extractFeatures` (12 — empty
+  history, all-no-show, mixed, day-clamp, future-filter, status-history
+  reschedules, early/late hour edges, missing `startTime`, branch
+  baseline clamping), `scoreFromFeatures` (6 — zero / monotonicity ×2 /
+  extreme clamp / insurance flip / null), `deriveContributions` (1 —
+  sums to score), `predictForAppointment` failures (6), happy path
+  (4 — persistence, dryRun, CRITICAL with phone-call interventions,
+  LOW with clean history), `predictBatch` (4 — horizon + branchId
+  filters + non-predictable exclusion + dryRun), `summarizeByBranch`
+  (2 — band aggregation + accuracy + null when unvalidated), factory
+  guards (2). **43/43 pass in 0.62s.**
+
+### Modified — Backend (2 files)
+
+- **`intelligence/governance.registry.js`** — 3 new perms:
+  - `ai.no-show.read` — broad (operations + clinical leads + reception
+    supervisor + compliance/audit/exec).
+  - `ai.no-show.predict` — handler-tier (adds reception + therapist
+    for per-appointment requests).
+  - `ai.no-show.batch` — supervisor-and-above (writes ~10-100 records
+    per call).
+- **`app.js`** — graceful wiring block right after the Hikvision block.
+  Skips silently when `Appointment` or `AiPrediction` model isn't
+  loaded, or when governance isn't available.
+
+### Verification
+
+- **Tests: 352/352 pass across 14 suites** in 6.4s (Hikvision 309 +
+  no-show 43; 0 regressions vs Wave 114).
+- **Lint: clean** across all 6 touched files (`--max-warnings=0`).
+- **Anti-duplication (Wave 93 / G1): clean** across 2038 scanned files.
+
+### Phase 3 progress
+
+- P3.1 ✅ (Smart Alerts) · P3.2 ✅ (AI Assessment) · P3.3 ⚠️ (Progress
+  Prediction — exists, needs validation) · **P3.4 ✅ (Wave 115 — closed)**
+  · P3.5 ⚠️ (Schedule Optimizer v2 — needs CP-SAT check) · P3.6 ❌
+  (Parent Chatbot — open). **4 of 6 deliverables closed.**
+
+See [`docs/PHASE3_PLAN.md`](docs/PHASE3_PLAN.md) for the live tracker.
+
+---
+
 ## [Unreleased] — 2026-05-18 — Wave 114: Hikvision Anomaly History
 
 Continuation of Wave 113 (anomaly detector). Persists each detector run

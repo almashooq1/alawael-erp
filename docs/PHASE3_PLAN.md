@@ -1,7 +1,7 @@
 # Phase P3 — Intelligence & Automation | خطة المرحلة الثالثة
 
 > **هذا الملف tracker تنفيذي يربط الـ deliverables التعاقدية في blueprint/09-roadmap.md بالموجات الفعلية المُسلَّمة في git log.**
-> آخر مزامنة: 2026-05-18 (بعد Wave 113).
+> آخر مزامنة: 2026-05-18 (بعد Wave 115).
 
 ---
 
@@ -20,16 +20,16 @@
 
 ## 2. حالة كل deliverable من P3
 
-| #        | Deliverable               | الحالة                        | الدليل                                                                                                                                                                                                                                                                                                                                                        | الفجوات المتبقية                                                                   |
-| -------- | ------------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| **P3.1** | Smart Alerts Engine       | ✅ **مُسلَّم جوهريًا**        | Waves 11-16 (alert engine complete) + Wave 19 (anomaly generators) + Wave 30 (kpi-series loader) + Wave 113 (Hikvision anomaly detector). موجود [alertEvaluator.service.js](../backend/services/alertEvaluator.service.js) + [dashboardAlertCoordinator.service.js](../backend/services/dashboardAlertCoordinator.service.js) + [alerts/](../backend/alerts/) | rule-builder UI عام (موجود لـ Hikvision فقط)، توحيد register patterns عبر النطاقات |
-| **P3.2** | AI Assessment Assistant   | ✅ **مُسلَّم**                | Waves 41-60 (Care Planning vertical) + Wave 48 (LLM-explain views) + [care-plan-llm-caller.service.js](../backend/intelligence/care-plan-llm-caller.service.js) + [aiDiagnostic.service.js](../backend/services/aiDiagnostic.service.js)                                                                                                                      | قياس وفر الوقت (KPI: 30%)، توسعة عن care-plan إلى تقييمات أخرى                     |
-| **P3.3** | Progress Prediction Model | ⚠️ **موجود — يحتاج تقييم**    | [services/ai/progressPrediction.service.js](../backend/services/ai/progressPrediction.service.js) (Prompt 20)، يستدعي ML service خارجي عبر `ML_SERVICE_URL`                                                                                                                                                                                                   | تحقق دقة 75% على بيانات تاريخية، نشر prod، تكامل في UI                             |
-| **P3.4** | No-Show Prediction        | ❌ **فجوة نظيفة**             | لا توجد خدمة prediction للـ no-show؛ الكلمة تظهر فقط في reporting/scheduling كنص حالة                                                                                                                                                                                                                                                                         | **مرشّح Wave 114 المُوصى به**                                                      |
-| **P3.5** | Schedule Optimization v2  | ⚠️ **موجود — لم يُسمَّ "v2"** | [tests/unit/scheduleOptimizer.service.test.js](../backend/tests/unit/scheduleOptimizer.service.test.js) — يشير لخدمة موجودة، لا توجد موجة باسم optimization v2                                                                                                                                                                                                | تأكيد إن كانت v2 (CP-SAT) أم v1 بسيط                                               |
-| **P3.6** | Parent Chatbot            | ❌ **فجوة كاملة**             | لا يوجد إلا template بريد، لا خدمة chatbot ولا KB                                                                                                                                                                                                                                                                                                             | يحتاج موجة كبيرة (LLM + KB + UI portal)                                            |
+| #        | Deliverable               | الحالة                        | الدليل                                                                                                                                                                                                                                                                                                                                                                                      | الفجوات المتبقية                                                                   |
+| -------- | ------------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| **P3.1** | Smart Alerts Engine       | ✅ **مُسلَّم جوهريًا**        | Waves 11-16 (alert engine complete) + Wave 19 (anomaly generators) + Wave 30 (kpi-series loader) + Wave 113 (Hikvision anomaly detector). موجود [alertEvaluator.service.js](../backend/services/alertEvaluator.service.js) + [dashboardAlertCoordinator.service.js](../backend/services/dashboardAlertCoordinator.service.js) + [alerts/](../backend/alerts/)                               | rule-builder UI عام (موجود لـ Hikvision فقط)، توحيد register patterns عبر النطاقات |
+| **P3.2** | AI Assessment Assistant   | ✅ **مُسلَّم**                | Waves 41-60 (Care Planning vertical) + Wave 48 (LLM-explain views) + [care-plan-llm-caller.service.js](../backend/intelligence/care-plan-llm-caller.service.js) + [aiDiagnostic.service.js](../backend/services/aiDiagnostic.service.js)                                                                                                                                                    | قياس وفر الوقت (KPI: 30%)، توسعة عن care-plan إلى تقييمات أخرى                     |
+| **P3.3** | Progress Prediction Model | ⚠️ **موجود — يحتاج تقييم**    | [services/ai/progressPrediction.service.js](../backend/services/ai/progressPrediction.service.js) (Prompt 20)، يستدعي ML service خارجي عبر `ML_SERVICE_URL`                                                                                                                                                                                                                                 | تحقق دقة 75% على بيانات تاريخية، نشر prod، تكامل في UI                             |
+| **P3.4** | No-Show Prediction        | ✅ **مُسلَّم في Wave 115**    | [intelligence/no-show-prediction.registry.js](../backend/intelligence/no-show-prediction.registry.js) + [intelligence/no-show-prediction.service.js](../backend/intelligence/no-show-prediction.service.js) + [routes/no-show-prediction.routes.js](../backend/routes/no-show-prediction.routes.js). 43/43 tests pass. 9 features، 4 risk bands، 6 intervention tiers، 3 perms، 3 endpoints | تثبيت دقة على بيانات حقيقية، UI badge في صفحة المواعيد (Wave 116+)                 |
+| **P3.5** | Schedule Optimization v2  | ⚠️ **موجود — لم يُسمَّ "v2"** | [tests/unit/scheduleOptimizer.service.test.js](../backend/tests/unit/scheduleOptimizer.service.test.js) — يشير لخدمة موجودة، لا توجد موجة باسم optimization v2                                                                                                                                                                                                                              | تأكيد إن كانت v2 (CP-SAT) أم v1 بسيط                                               |
+| **P3.6** | Parent Chatbot            | ❌ **فجوة كاملة**             | لا يوجد إلا template بريد، لا خدمة chatbot ولا KB                                                                                                                                                                                                                                                                                                                                           | يحتاج موجة كبيرة (LLM + KB + UI portal)                                            |
 
-**خلاصة:** 3/6 مُسلَّمة جوهريًا، 2/6 موجودة جزئيًا، 1/6 فجوة كاملة (P3.6).
+**خلاصة:** 4/6 مُسلَّمة جوهريًا، 1/6 موجودة جزئيًا (P3.5)، 1/6 فجوة كاملة (P3.6).
 
 ---
 
@@ -47,6 +47,8 @@
 | 72-82  | Access Review + role-profiles توسعة                                                                                                                                                                                         | governance                          |
 | 83-95  | Security hardening (audit chain + MFA enforcement + هندسة موحَّدة)                                                                                                                                                          | infrastructure                      |
 | 96-113 | **Hikvision vertical** (workforce surveillance + face library + recognition + reconciliation + payroll + fraud detection + sync + scheduler + stream + branch-config + ops aggregator + org summary + **anomaly detector**) | **P3.1 application + new vertical** |
+| 114    | **Hikvision Anomaly History** — snapshot persistence + trend chart on top of Wave 113                                                                                                                                       | P3.7 (Hikvision continuation)       |
+| 115    | **No-Show Prediction** — 9-feature heuristic + 4 risk bands + 6 interventions + AiPrediction persistence + 3 endpoints                                                                                                      | **P3.4 — مُغلق**                    |
 
 ---
 
@@ -85,28 +87,34 @@
 
 **يُكمل**: Wave 113 (detector) → Wave 114 (history + trend chart) — يجيب على سؤال "هل تحسّن الوضع بعد التدخل؟".
 
-## 6. Wave 115 — التوصية: P3.4 No-Show Prediction (الفجوة الحقيقية)
+## 6. Wave 115 — مُسلَّم: P3.4 No-Show Prediction ✅
 
-P3.4 (No-Show Prediction) يبقى أولوية Phase 3 الأولى:
+**التسليم الفعلي (commit pending):**
 
-**لماذا:**
+| Artifact | المسار                                                                               | الحجم                                      |
+| -------- | ------------------------------------------------------------------------------------ | ------------------------------------------ |
+| Registry | `backend/intelligence/no-show-prediction.registry.js`                                | جديد — 9 أوزان + 4 bands + 6 تدخلات        |
+| Service  | `backend/intelligence/no-show-prediction.service.js`                                 | جديد — 5 دوال عامة، نقية، قابلة للضبط      |
+| Routes   | `backend/routes/no-show-prediction.routes.js`                                        | جديد — 3 endpoints (predict/batch/summary) |
+| Tests    | `backend/__tests__/no-show-prediction.test.js`                                       | جديد، 43/43 يمر                            |
+| Perms    | `ai.no-show.read` + `ai.no-show.predict` + `ai.no-show.batch` في governance.registry | إضافة                                      |
+| Wiring   | `app.js` — wiring graceful (يتعطّل إن غاب Appointment أو AiPrediction)               | تعديل                                      |
 
-1. **فجوة نظيفة في P3** — لا توجد خدمة prediction للـ no-show حاليًا.
-2. **بنية تحتية جاهزة** — يستفيد من نمط [services/ai/progressPrediction.service.js](../backend/services/ai/progressPrediction.service.js) (feature extraction + `AiPrediction` model — enum يدعم `'attendance'` بالفعل، لا schema migration).
-3. **حجم منضبط** — service + registry + scheduler + 2-3 endpoints + اختبارات. ~600-900 سطر.
-4. **قيمة أعمال عالية** — exit-criteria في roadmap: تقليل no-show ≥ 20%.
-5. **يُغلِق deliverable كامل في P3** — يرفع نسبة الإنجاز من 3/6 إلى 4/6.
+**الفحوصات:** 395/395 عبر 15 suites (Hikvision 309 + no-show 43 + scheduler 14 + ...). Lint نظيف. Anti-duplication نظيف عبر 2038 ملف.
 
-**نطاق Wave 115 المقترح:**
+**ميزات Wave 115:**
 
-- `intelligence/no-show-prediction.registry.js` — BAND_THRESHOLDS + FEATURE_WEIGHTS + INTERVENTIONS_BY_BAND + REASON codes
-- `intelligence/no-show-prediction.service.js` — extractFeatures + fallbackPrediction (weighted heuristic) + predictNoShow (يحفظ `AiPrediction` بـ `prediction_type:'attendance'`) + predictBatch + summarizeByBranch
-- جدولة يومية: تنبؤ على مواعيد الـ 48 ساعة القادمة
-- intervention hook: زيادة تذكيرات للمواعيد عالية الخطورة (HIGH/CRITICAL)
-- اختبارات: 20+ على feature extraction، monotonicity، band edges، intervention emission، persistence
+- 9 features: `noShowRate90d` (0.45 weight — أقوى إشارة)، `cancellationRate90d` (0.15)، `recentStreak` (0.10)، `daysSinceLastAttended` (0.10)، `rescheduleCount` (0.05)، `isFirstAppointment` (0.05)، `earlyOrLateHour` (0.03)، `noInsuranceApproval` (0.02)، `branchBaseline` (0.05).
+- 4 risk bands: `low` < 0.30، `medium` 0.30-0.55، `high` 0.55-0.75، `critical` ≥ 0.75.
+- 6 intervention tiers: `standard_reminder` → `sms_24h_before` → `sms_2h_before` → `phone_call_task` → `phone_call_required` → `therapist_alert`. كل band يحدد قائمة تدخلات تصاعدية.
+- `AiPrediction` reuse — لا schema migration؛ `prediction_type:'attendance'` موجود بالفعل في الـ enum، `prediction_details.{band, contributions, interventions}` يحمل التفاصيل.
+- Graceful degradation: feature يتعطّل بصمت إن لم تُحمَّل نماذج Appointment أو AiPrediction.
 
-### بدائل (إن لم يعجبك):
+## 7. Wave 116+ — ما تبقّى في P3
 
+### بدائل Wave 116:
+
+- **(أ) P3.4 UI** — badge على صفحة المواعيد + لوحة per-branch + scheduler يومي. تكملة طبيعية.
 - **(ب) P3.5 v2 confirmation + upgrade** — راجع scheduleOptimizer الحالي، رفعه لـ CP-SAT إن كان بسيطًا.
 - **(ج) Smart Alerts cross-domain harmonization** — تعميم نمط Wave 113 anomaly registry على alertEvaluator القديم.
 - **(د) Hikvision Anomaly History UI** — صفحة trend chart فوق Wave 114 (داخل الـ vertical نفسها).

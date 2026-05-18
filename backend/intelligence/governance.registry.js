@@ -1171,6 +1171,42 @@ const PERMISSIONS = Object.freeze({
     'executive_leadership',
     'head_office',
   ],
+
+  // ─── Wave 115 — No-Show Prediction (P3.4) ──────────────────
+  // Read perm — broad: operations needs aggregate risk views.
+  'ai.no-show.read': [
+    'branch_manager',
+    'branch_director',
+    'clinical_director',
+    'therapist_coordinator',
+    'reception_supervisor',
+    'compliance_officer',
+    'auditor',
+    'executive_leadership',
+    'head_office',
+  ],
+  // Predict perm — operators who handle a specific appointment can
+  // request a fresh prediction (reception + therapist + supervisors).
+  'ai.no-show.predict': [
+    'branch_manager',
+    'branch_director',
+    'clinical_director',
+    'therapist_coordinator',
+    'reception_supervisor',
+    'reception',
+    'therapist',
+    'head_office',
+  ],
+  // Batch perm — narrower: persists ~10-100 predictions per call so
+  // gated to supervisors + planners only.
+  'ai.no-show.batch': [
+    'branch_manager',
+    'branch_director',
+    'clinical_director',
+    'therapist_coordinator',
+    'reception_supervisor',
+    'head_office',
+  ],
 });
 
 // ─── API ────────────────────────────────────────────────────────

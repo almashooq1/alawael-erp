@@ -2886,6 +2886,59 @@ try {
   logger.warn('[Hikvision] routes skipped:', hikErr.message);
 }
 
+// ─── No-Show Prediction (Wave 115 / P3.4) ────────────────────────────────────
+// Heuristic risk scorer + intervention catalogue over the existing
+// Appointment + AiPrediction models. Mounts /api/v1/ai/no-show behind
+// authenticate. Closes P3.4 from blueprint/09-roadmap.md §5.
+try {
+  let Appointment = null;
+  let AiPrediction = null;
+  try {
+    Appointment = require('./models/Appointment');
+  } catch {
+    /* model missing — feature self-disables */
+  }
+  try {
+    AiPrediction = require('./models/AiPrediction');
+  } catch {
+    /* model missing — feature self-disables */
+  }
+  let nsGovernance = null;
+  try {
+    const { createGovernanceService } = require('./intelligence/governance.service');
+    nsGovernance = createGovernanceService({ logger });
+  } catch {
+    /* governance optional — top-level boot already logged */
+  }
+  if (nsGovernance && Appointment && AiPrediction) {
+    const { createNoShowPredictionService } = require('./intelligence/no-show-prediction.service');
+    const { createNoShowPredictionRouter } = require('./routes/no-show-prediction.routes');
+    const noShowService = createNoShowPredictionService({
+      appointmentModel: Appointment,
+      predictionModel: AiPrediction,
+      logger,
+    });
+    const { authenticate: nsAuthMw } = require('./middleware/auth');
+    app.use(
+      '/api/v1/ai/no-show',
+      nsAuthMw,
+      createNoShowPredictionRouter({
+        predictionService: noShowService,
+        governance: nsGovernance,
+        logger,
+      })
+    );
+    app._noShowPredictionService = noShowService;
+    logger.info('[NoShow] ✓ Wave 115 (P3.4) routes mounted at /api/v1/ai/no-show');
+  } else {
+    logger.info(
+      '[NoShow] routes skipped: governance or Appointment/AiPrediction models unavailable'
+    );
+  }
+} catch (nsErr) {
+  logger.warn('[NoShow] routes skipped:', nsErr.message);
+}
+
 // ─── Care Planning Engine (Waves 41–48) ───────────────────────────────────────
 // Mounts /api/v1/care-plans behind authenticate. The bootstrap helper wires:
 //   • CarePlanVersion model        (Wave 41)

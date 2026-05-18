@@ -2168,6 +2168,14 @@ try {
     /* scheduler model optional — scheduler routes skipped if absent */
   }
 
+  // Wave 110 — per-branch config overrides (optional)
+  let HikvisionBranchConfig = null;
+  try {
+    HikvisionBranchConfig = require('./models/HikvisionBranchConfig');
+  } catch {
+    /* branch-config model optional — overrides skipped if absent */
+  }
+
   if (HikvisionDevice && HikvisionCameraChannel && HikvisionRawEvent && HikvisionDeviceHealthLog) {
     let governanceSvc = null;
     try {
@@ -2247,6 +2255,26 @@ try {
         );
       }
 
+      // Wave 110 — per-branch config overrides (graceful). Built
+      // BEFORE Phase 3 so the parser can consult it for effective
+      // thresholds. Falls back to defaults when the model isn't
+      // loaded — no per-branch overrides applied in that case.
+      let branchConfigSvc = null;
+      if (HikvisionBranchConfig) {
+        try {
+          const {
+            createHikvisionBranchConfigService,
+          } = require('./intelligence/hikvision-branch-config.service');
+          branchConfigSvc = createHikvisionBranchConfigService({
+            configModel: HikvisionBranchConfig,
+            logger,
+          });
+        } catch (bcErr) {
+          logger.warn('[Hikvision] Wave 110 branch-config failed to wire:', bcErr.message);
+          branchConfigSvc = null;
+        }
+      }
+
       // Wave 98 Phase 3 — recognition + confidence review (graceful)
       let parserService = null;
       let attendanceSourceSvc = null;
@@ -2277,6 +2305,7 @@ try {
             templateModel: HikvisionFaceTemplateLink || null,
             gateService,
             attendanceSourceService: attendanceSourceSvc,
+            branchConfigService: branchConfigSvc, // Wave 110
             logger,
           });
         } catch (p3err) {
@@ -2364,6 +2393,7 @@ try {
               templateModel: HikvisionFaceTemplateLink || null,
               gateService: newGate,
               attendanceSourceService: attendanceSourceSvc,
+              branchConfigService: branchConfigSvc, // Wave 110
               logger,
             });
           }
@@ -2661,6 +2691,7 @@ try {
           syncWorker: syncWorkerSvc,
           scheduler: schedulerSvc,
           streamSupervisor,
+          branchConfigService: branchConfigSvc,
           governance: governanceSvc,
           webhookHmac,
           logger,
@@ -2680,6 +2711,7 @@ try {
       if (syncWorkerSvc) app._hikvisionSyncWorker = syncWorkerSvc;
       if (schedulerSvc) app._hikvisionScheduler = schedulerSvc;
       if (streamSupervisor) app._hikvisionStreamSupervisor = streamSupervisor;
+      if (branchConfigSvc) app._hikvisionBranchConfigService = branchConfigSvc;
       const phases = ['Wave 96 Phase 1'];
       if (libraryService && enrollmentService) phases.push('Wave 97 Phase 2');
       if (parserService && attendanceSourceSvc) phases.push('Wave 98 Phase 3');
@@ -2688,6 +2720,7 @@ try {
       if (syncWorkerSvc) phases.push('Wave 106 Phase F');
       if (schedulerSvc) phases.push('Wave 108 Scheduler');
       if (streamSupervisor) phases.push('Wave 109 Stream');
+      if (branchConfigSvc) phases.push('Wave 110 Branch-Config');
       logger.info(`[Hikvision] ✓ ${phases.join(' + ')} routes mounted at /api/v1/hikvision`);
     } else {
       logger.warn('[Hikvision] routes skipped: governance service unavailable');

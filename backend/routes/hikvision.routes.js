@@ -101,6 +101,12 @@ const REASON_TO_STATUS = Object.freeze({
   STREAM_TIME_DRIFT: 200, // informational
   STREAM_BACKPRESSURE: 429,
 
+  // ── Wave 110 — Per-Branch Config Overrides
+  BRANCH_CONFIG_NOT_FOUND: 404,
+  BRANCH_CONFIG_INVALID_THRESHOLD: 400,
+  BRANCH_CONFIG_INVALID_KEY: 400,
+  BRANCH_CONFIG_NO_BRANCH: 400,
+
   // ── Wave 100 Phase 5 — Fraud Detection
   FRAUD_FLAG_NOT_FOUND: 404,
   FRAUD_FLAG_NOT_OPEN: 409,
@@ -224,6 +230,7 @@ function createHikvisionRouter({
   syncWorker = null,
   scheduler = null,
   streamSupervisor = null,
+  branchConfigService = null,
   governance,
   webhookHmac = null,
   logger = console,
@@ -1457,6 +1464,105 @@ function createHikvisionRouter({
         return safeError(res, err, 'hikvision.stream.refresh');
       }
     });
+  }
+
+  // ─── Wave 110 — Per-Branch Config Overrides ───────────────
+  // Mounted only when the service is supplied. 5 routes:
+  //   GET    /branch-configs             — list (paged)
+  //   GET    /branch-configs/defaults    — global defaults + bounds
+  //   GET    /branch-configs/:branchId   — single (null if absent)
+  //   PUT    /branch-configs/:branchId   — upsert (partial patch)
+  //   DELETE /branch-configs/:branchId   — reset to defaults
+  // Plus a read-only effective resolver for diagnostics:
+  //   GET    /branch-configs/:branchId/effective
+  if (branchConfigService) {
+    router.get('/branch-configs', requirePerm('hikvision.branch-config.read'), async (req, res) => {
+      try {
+        const r = await branchConfigService.list({
+          skip: req.query?.skip ? Number(req.query.skip) : 0,
+          limit: req.query?.limit ? Number(req.query.limit) : 50,
+        });
+        return res.json({ success: true, data: r });
+      } catch (err) {
+        return safeError(res, err, 'hikvision.branch-config.list');
+      }
+    });
+
+    router.get(
+      '/branch-configs/defaults',
+      requirePerm('hikvision.branch-config.read'),
+      async (_req, res) => {
+        try {
+          const d = branchConfigService.getDefaults();
+          return res.json({ success: true, data: d });
+        } catch (err) {
+          return safeError(res, err, 'hikvision.branch-config.defaults');
+        }
+      }
+    );
+
+    router.get(
+      '/branch-configs/:branchId',
+      requirePerm('hikvision.branch-config.read'),
+      async (req, res) => {
+        try {
+          const r = await branchConfigService.get(req.params.branchId);
+          if (!r.ok) return respond(res, r);
+          return res.json({ success: true, data: r });
+        } catch (err) {
+          return safeError(res, err, 'hikvision.branch-config.get');
+        }
+      }
+    );
+
+    router.get(
+      '/branch-configs/:branchId/effective',
+      requirePerm('hikvision.branch-config.read'),
+      async (req, res) => {
+        try {
+          const r = await branchConfigService.resolveEffective(req.params.branchId);
+          if (!r.ok) return respond(res, r);
+          return res.json({ success: true, data: r });
+        } catch (err) {
+          return safeError(res, err, 'hikvision.branch-config.effective');
+        }
+      }
+    );
+
+    router.put(
+      '/branch-configs/:branchId',
+      requirePerm('hikvision.branch-config.write'),
+      async (req, res) => {
+        try {
+          const actorId = req.user?._id ? String(req.user._id) : null;
+          const r = await branchConfigService.upsert({
+            branchId: req.params.branchId,
+            patch: req.body || {},
+            actorId,
+            notes: req.body?.notes,
+          });
+          if (!r.ok) return respond(res, r);
+          return res.json({ success: true, data: r });
+        } catch (err) {
+          return safeError(res, err, 'hikvision.branch-config.upsert');
+        }
+      }
+    );
+
+    router.delete(
+      '/branch-configs/:branchId',
+      requirePerm('hikvision.branch-config.write'),
+      async (req, res) => {
+        try {
+          const actorId = req.user?._id ? String(req.user._id) : null;
+          const r = await branchConfigService.reset(req.params.branchId, actorId);
+          if (!r.ok) return respond(res, r);
+          return res.json({ success: true, data: r });
+        } catch (err) {
+          return safeError(res, err, 'hikvision.branch-config.reset');
+        }
+      }
+    );
   }
 
   // ─── Registry passthrough (no perm gate — public catalog) ───

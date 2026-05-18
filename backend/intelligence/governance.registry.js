@@ -1085,6 +1085,24 @@ const PERMISSIONS = Object.freeze({
   // Trigger a refresh of the device list (attach new / detach
   // retired). Narrow because it mutates running connections.
   'hikvision.stream.control': ['security_architect', 'iam.role_granter', 'dpo'],
+
+  // ─── Wave 110 — Per-Branch Config Overrides ───────────────
+  // Read per-branch thresholds + effective resolution.
+  'hikvision.branch-config.read': [
+    'security_architect',
+    'security.officer',
+    'iam.role_granter',
+    'hr_admin',
+    'hr_director',
+    'branch_manager',
+    'branch_director',
+    'compliance_officer',
+    'auditor',
+    'dpo',
+  ],
+  // Edit per-branch thresholds — narrow because it changes how
+  // attendance + fraud decisions land for the branch.
+  'hikvision.branch-config.write': ['security_architect', 'iam.role_granter', 'hr_director', 'dpo'],
 });
 
 // ─── API ────────────────────────────────────────────────────────

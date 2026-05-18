@@ -36,6 +36,7 @@ function createHikvisionEventParserService({
   // Services
   gateService = null,
   attendanceSourceService = null,
+  branchConfigService = null, // Wave 110 — optional per-branch overrides
   logger = console,
   now = () => new Date(),
 } = {}) {
@@ -176,6 +177,21 @@ function createHikvisionEventParserService({
         flags: ['unregistered'],
       };
     } else {
+      // Wave 110 — resolve per-branch overrides (graceful: defaults
+      // when service absent or branchId unknown). Fail-open inside
+      // the service means we never lose events because the overrides
+      // table is briefly unavailable.
+      let resolvedThresholds;
+      if (branchConfigService && typeof branchConfigService.resolveEffective === 'function') {
+        try {
+          const r = await branchConfigService.resolveEffective(branchId);
+          if (r && r.ok && r.effective && r.effective.confidenceThresholds) {
+            resolvedThresholds = r.effective.confidenceThresholds;
+          }
+        } catch (err) {
+          logger.warn(`[Hikvision Parser] branchConfig resolve failed: ${err.message}`);
+        }
+      }
       gateOutput = gateService.evaluate({
         confidence,
         antiSpoofResult,
@@ -186,6 +202,7 @@ function createHikvisionEventParserService({
         employeeId: matchedEmployeeId,
         branchId,
         capturedAt: raw.capturedAt || now(),
+        ...(resolvedThresholds ? { thresholds: resolvedThresholds } : {}),
       });
     }
 

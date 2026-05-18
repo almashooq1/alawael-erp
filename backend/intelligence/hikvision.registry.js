@@ -283,6 +283,12 @@ const REASON = Object.freeze({
   STREAM_TIME_DRIFT: 'STREAM_TIME_DRIFT',
   STREAM_BACKPRESSURE: 'STREAM_BACKPRESSURE',
 
+  // ─── Wave 110 — Per-Branch Config Overrides ───────────────────
+  BRANCH_CONFIG_NOT_FOUND: 'BRANCH_CONFIG_NOT_FOUND',
+  BRANCH_CONFIG_INVALID_THRESHOLD: 'BRANCH_CONFIG_INVALID_THRESHOLD',
+  BRANCH_CONFIG_INVALID_KEY: 'BRANCH_CONFIG_INVALID_KEY',
+  BRANCH_CONFIG_NO_BRANCH: 'BRANCH_CONFIG_NO_BRANCH',
+
   // Generic
   PERMISSION_DENIED: 'PERMISSION_DENIED',
   VALIDATION_FAILED: 'VALIDATION_FAILED',
@@ -1274,6 +1280,171 @@ function normalizeStreamTimestamp(deviceDateTime, serverNow) {
   return { capturedAt: captured, driftMs, driftFlag };
 }
 
+// ─── Wave 110 — Per-Branch Config Overrides ─────────────────
+//
+// Each branch may override a narrow subset of operational
+// thresholds. Anything not overridden falls back to the global
+// DEFAULT_CONFIDENCE_THRESHOLDS / FRAUD_DEFAULTS. The override is
+// applied at evaluation time by branchConfigService.resolveEffective().
+//
+// Allow-list of overridable keys per category — anything outside
+// these sets is rejected at write time with BRANCH_CONFIG_INVALID_KEY.
+// We deliberately keep the surface small: only the dials operators
+// actually need to tune per-branch. Adding a new key requires a code
+// change so the audit trail covers it.
+const BRANCH_CONFIG_OVERRIDABLE_CONFIDENCE_KEYS = Object.freeze([
+  'FACE_TERMINAL_AUTO_ACCEPT',
+  'FACE_TERMINAL_REVIEW_FLOOR',
+  'CAMERA_GATE_AUTO_ACCEPT',
+  'CAMERA_GATE_REVIEW_FLOOR',
+  'CAMERA_CORRIDOR_REVIEW_FLOOR',
+  'DUPLICATE_SUPPRESSION_WINDOW_MS',
+  'CORROBORATION_WINDOW_MS',
+]);
+
+const BRANCH_CONFIG_OVERRIDABLE_FRAUD_KEYS = Object.freeze([
+  'REPEAT_MISMATCH_THRESHOLD',
+  'REPEAT_MISMATCH_WINDOW_MS',
+  'BURST_THRESHOLD',
+  'BURST_WINDOW_MS',
+  'SHARED_IDENTITY_THRESHOLD',
+  'SHARED_IDENTITY_WINDOW_MS',
+]);
+
+// Validation rules per key. All thresholds are numeric; the bounds
+// are policy decisions, not arbitrary — straying outside them
+// produces nonsense results downstream (e.g. auto-accept below 50%
+// false-acceptance-rate, or burst window above 1 hour).
+const BRANCH_CONFIG_BOUNDS = Object.freeze({
+  // confidence (% 0..100, but tighter floors per key)
+  FACE_TERMINAL_AUTO_ACCEPT: { min: 50, max: 100 },
+  FACE_TERMINAL_REVIEW_FLOOR: { min: 0, max: 99 },
+  CAMERA_GATE_AUTO_ACCEPT: { min: 60, max: 100 },
+  CAMERA_GATE_REVIEW_FLOOR: { min: 0, max: 99 },
+  CAMERA_CORRIDOR_REVIEW_FLOOR: { min: 0, max: 100 },
+  // windows (ms)
+  DUPLICATE_SUPPRESSION_WINDOW_MS: { min: 1_000, max: 600_000 }, // 1s..10min
+  CORROBORATION_WINDOW_MS: { min: 5_000, max: 300_000 }, // 5s..5min
+  // fraud
+  REPEAT_MISMATCH_THRESHOLD: { min: 1, max: 50 },
+  REPEAT_MISMATCH_WINDOW_MS: { min: 60_000, max: 7 * 24 * 60 * 60_000 }, // 1min..7d
+  BURST_THRESHOLD: { min: 2, max: 100 },
+  BURST_WINDOW_MS: { min: 1_000, max: 3 * 60 * 60_000 }, // 1s..3h
+  SHARED_IDENTITY_THRESHOLD: { min: 2, max: 50 },
+  SHARED_IDENTITY_WINDOW_MS: { min: 60_000, max: 7 * 24 * 60 * 60_000 },
+});
+
+/**
+ * mergeBranchConfig(globalConfidence, globalFraud, override):
+ * Pure helper. Returns a frozen {confidenceThresholds, fraudDefaults}
+ * with override keys layered on top of the globals.
+ *
+ *   override.confidenceThresholds — partial subset of overridable keys
+ *   override.fraudDefaults        — partial subset of overridable keys
+ *
+ * Unknown / unauthorised keys are SILENTLY dropped from the merged
+ * result so a stale DB row can't sneak in a key removed from the
+ * allow-list. Write-time validation catches them earlier.
+ */
+function mergeBranchConfig(globalConfidence, globalFraud, override) {
+  const ct = { ...globalConfidence };
+  const fd = { ...globalFraud };
+  if (override && override.confidenceThresholds) {
+    for (const k of BRANCH_CONFIG_OVERRIDABLE_CONFIDENCE_KEYS) {
+      const v = override.confidenceThresholds[k];
+      if (typeof v === 'number' && Number.isFinite(v)) ct[k] = v;
+    }
+  }
+  if (override && override.fraudDefaults) {
+    for (const k of BRANCH_CONFIG_OVERRIDABLE_FRAUD_KEYS) {
+      const v = override.fraudDefaults[k];
+      if (typeof v === 'number' && Number.isFinite(v)) fd[k] = v;
+    }
+  }
+  return Object.freeze({
+    confidenceThresholds: Object.freeze(ct),
+    fraudDefaults: Object.freeze(fd),
+  });
+}
+
+/**
+ * validateBranchConfigPatch(patch):
+ * Pure helper used by the service before save. Returns
+ *   { ok: true, normalized: { confidenceThresholds?, fraudDefaults? } }
+ *   { ok: false, reason, errors }
+ *
+ * - Unknown keys → BRANCH_CONFIG_INVALID_KEY
+ * - Out-of-bounds values → BRANCH_CONFIG_INVALID_THRESHOLD
+ * - Non-numeric → BRANCH_CONFIG_INVALID_THRESHOLD
+ */
+function validateBranchConfigPatch(patch) {
+  if (!patch || typeof patch !== 'object') {
+    return { ok: false, reason: REASON.VALIDATION_FAILED, errors: { patch: 'object required' } };
+  }
+  const errors = {};
+  const out = {};
+
+  if (patch.confidenceThresholds !== undefined) {
+    if (typeof patch.confidenceThresholds !== 'object' || patch.confidenceThresholds === null) {
+      errors.confidenceThresholds = 'object required';
+    } else {
+      const ct = {};
+      for (const [k, v] of Object.entries(patch.confidenceThresholds)) {
+        if (!BRANCH_CONFIG_OVERRIDABLE_CONFIDENCE_KEYS.includes(k)) {
+          errors[`confidenceThresholds.${k}`] = REASON.BRANCH_CONFIG_INVALID_KEY;
+          continue;
+        }
+        if (typeof v !== 'number' || !Number.isFinite(v)) {
+          errors[`confidenceThresholds.${k}`] = REASON.BRANCH_CONFIG_INVALID_THRESHOLD;
+          continue;
+        }
+        const b = BRANCH_CONFIG_BOUNDS[k];
+        if (b && (v < b.min || v > b.max)) {
+          errors[`confidenceThresholds.${k}`] =
+            `${REASON.BRANCH_CONFIG_INVALID_THRESHOLD}:${b.min}..${b.max}`;
+          continue;
+        }
+        ct[k] = v;
+      }
+      // Always emit the bucket when the caller sent it — even if empty,
+      // so the service can distinguish "clear all overrides" from
+      // "leave bucket alone". Operator intent.
+      out.confidenceThresholds = ct;
+    }
+  }
+
+  if (patch.fraudDefaults !== undefined) {
+    if (typeof patch.fraudDefaults !== 'object' || patch.fraudDefaults === null) {
+      errors.fraudDefaults = 'object required';
+    } else {
+      const fd = {};
+      for (const [k, v] of Object.entries(patch.fraudDefaults)) {
+        if (!BRANCH_CONFIG_OVERRIDABLE_FRAUD_KEYS.includes(k)) {
+          errors[`fraudDefaults.${k}`] = REASON.BRANCH_CONFIG_INVALID_KEY;
+          continue;
+        }
+        if (typeof v !== 'number' || !Number.isFinite(v)) {
+          errors[`fraudDefaults.${k}`] = REASON.BRANCH_CONFIG_INVALID_THRESHOLD;
+          continue;
+        }
+        const b = BRANCH_CONFIG_BOUNDS[k];
+        if (b && (v < b.min || v > b.max)) {
+          errors[`fraudDefaults.${k}`] =
+            `${REASON.BRANCH_CONFIG_INVALID_THRESHOLD}:${b.min}..${b.max}`;
+          continue;
+        }
+        fd[k] = v;
+      }
+      out.fraudDefaults = fd;
+    }
+  }
+
+  if (Object.keys(errors).length > 0) {
+    return { ok: false, reason: REASON.VALIDATION_FAILED, errors };
+  }
+  return { ok: true, normalized: out };
+}
+
 /**
  * computeStreamExternalEventId(parts):
  * Deterministic key for cross-source dedup. Same event arriving via
@@ -1450,6 +1621,12 @@ module.exports = {
   STREAM_DEFAULTS,
   normalizeStreamTimestamp,
   computeStreamExternalEventId,
+  // Wave 110 — per-branch config overrides
+  BRANCH_CONFIG_OVERRIDABLE_CONFIDENCE_KEYS,
+  BRANCH_CONFIG_OVERRIDABLE_FRAUD_KEYS,
+  BRANCH_CONFIG_BOUNDS,
+  mergeBranchConfig,
+  validateBranchConfigPatch,
   // helpers
   isValidIPv4,
   isAttendanceEligibleKind,

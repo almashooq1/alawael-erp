@@ -2607,10 +2607,15 @@ try {
         streamSupervisor = null;
       }
 
-      // Wave 108 — Operational Scheduler (graceful)
-      // Wires the JobRegistry to whichever services were instantiated
-      // above. Each handler is "available" iff its source service was
-      // wired; missing services produce SKIPPED runs (not failures).
+      // Wave 108 — Operational Scheduler (graceful).
+      // First pass: build with whatever services are wired NOW. The
+      // org-summary's scheduler section captures this reference at
+      // construction time. After Wave-113 detector + Wave-114 history
+      // are built below, we rebuild with the ANOMALY_SCAN job
+      // included and overwrite app._hikvisionScheduler — routes use
+      // the final instance. Both instances share runModel so there's
+      // no state collision, and the scheduler has no cron daemon
+      // (jobs are pulled via routes).
       let schedulerSvc = null;
       if (HikvisionJobRun) {
         try {
@@ -2717,6 +2722,58 @@ try {
         }
       }
 
+      // Wave 114 — Anomaly History (graceful)
+      // Persists detector outputs into HikvisionAnomalySnapshot +
+      // exposes time-series queries for the UI trend chart. Optional
+      // model: if not loaded, history routes are skipped but the
+      // detector keeps working in pull mode.
+      let HikvisionAnomalySnapshot = null;
+      try {
+        HikvisionAnomalySnapshot = require('./models/HikvisionAnomalySnapshot');
+      } catch {
+        /* optional */
+      }
+      let anomalyHistorySvc = null;
+      if (HikvisionAnomalySnapshot) {
+        try {
+          const {
+            createHikvisionAnomalyHistoryService,
+          } = require('./intelligence/hikvision-anomaly-history.service');
+          anomalyHistorySvc = createHikvisionAnomalyHistoryService({
+            snapshotModel: HikvisionAnomalySnapshot,
+            logger,
+          });
+        } catch (ahErr) {
+          logger.warn('[Hikvision] Wave 114 anomaly-history failed to wire:', ahErr.message);
+          anomalyHistorySvc = null;
+        }
+      }
+
+      // Re-build the scheduler now that the detector + history are
+      // available, so the ANOMALY_SCAN job is "available" in its
+      // registry. Routes use this final instance; org-summary still
+      // holds the earlier reference but both share runModel.
+      if (HikvisionJobRun && anomalyDetectorSvc && anomalyHistorySvc) {
+        try {
+          const {
+            createHikvisionScheduler,
+          } = require('./intelligence/hikvision-scheduler.service');
+          schedulerSvc = createHikvisionScheduler({
+            syncWorker: syncWorkerSvc,
+            fraudDetection: fraudDetectionSvc,
+            fraudScore: fraudScoreSvc,
+            eventParser: parserService,
+            healthMonitor: healthService,
+            anomalyDetector: anomalyDetectorSvc,
+            anomalyHistory: anomalyHistorySvc,
+            runModel: HikvisionJobRun,
+            logger,
+          });
+        } catch (schErr) {
+          logger.warn('[Hikvision] Wave 114 scheduler rebuild failed:', schErr.message);
+        }
+      }
+
       // Optional HMAC middleware for the device webhook. If the
       // secret env var isn't set, the webhook is omitted but the
       // operator-replay endpoint stays available.
@@ -2780,6 +2837,7 @@ try {
           branchOperationsService: branchOpsSvc,
           orgSummaryService: orgSummarySvc,
           anomalyDetector: anomalyDetectorSvc,
+          anomalyHistory: anomalyHistorySvc,
           governance: governanceSvc,
           webhookHmac,
           logger,
@@ -2803,6 +2861,7 @@ try {
       if (branchOpsSvc) app._hikvisionBranchOperationsService = branchOpsSvc;
       if (orgSummarySvc) app._hikvisionOrgSummaryService = orgSummarySvc;
       if (anomalyDetectorSvc) app._hikvisionAnomalyDetector = anomalyDetectorSvc;
+      if (anomalyHistorySvc) app._hikvisionAnomalyHistoryService = anomalyHistorySvc;
       const phases = ['Wave 96 Phase 1'];
       if (libraryService && enrollmentService) phases.push('Wave 97 Phase 2');
       if (parserService && attendanceSourceSvc) phases.push('Wave 98 Phase 3');
@@ -2815,6 +2874,7 @@ try {
       if (branchOpsSvc) phases.push('Wave 111 Branch-Ops');
       if (orgSummarySvc) phases.push('Wave 112 Org-Summary');
       if (anomalyDetectorSvc) phases.push('Wave 113 Anomalies');
+      if (anomalyHistorySvc) phases.push('Wave 114 Anomaly-History');
       logger.info(`[Hikvision] ✓ ${phases.join(' + ')} routes mounted at /api/v1/hikvision`);
     } else {
       logger.warn('[Hikvision] routes skipped: governance service unavailable');

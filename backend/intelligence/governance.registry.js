@@ -1153,6 +1153,24 @@ const PERMISSIONS = Object.freeze({
     'executive_leadership',
     'head_office',
   ],
+
+  // ─── Wave 114 — Anomaly History ────────────────────────────
+  // Same readers as anomalies.read — operators who can see current
+  // anomalies should also see how often they recur.
+  'hikvision.anomalies.history.read': [
+    'security_architect',
+    'security.officer',
+    'iam.role_granter',
+    'hr_admin',
+    'hr_director',
+    'branch_manager',
+    'branch_director',
+    'compliance_officer',
+    'auditor',
+    'dpo',
+    'executive_leadership',
+    'head_office',
+  ],
 });
 
 // ─── API ────────────────────────────────────────────────────────

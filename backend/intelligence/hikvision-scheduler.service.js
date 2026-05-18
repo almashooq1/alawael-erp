@@ -59,6 +59,9 @@ function createHikvisionScheduler({
   fraudScore = null,
   eventParser = null,
   healthMonitor = null,
+  // Wave 114 — anomaly scan job needs both detector + history writer.
+  anomalyDetector = null,
+  anomalyHistory = null,
 
   // Persistence
   runModel = null, // HikvisionJobRun
@@ -157,6 +160,36 @@ function createHikvisionScheduler({
       handler: async () => {
         if (!healthMonitor) throw new Error('healthMonitor not wired');
         return healthMonitor.sweepUnresponsive();
+      },
+    },
+    // Wave 114 — periodic anomaly detection + history record.
+    // Available iff BOTH the detector AND the history writer are
+    // wired; either alone is half a job.
+    [reg.JOB_ID.ANOMALY_SCAN]: {
+      id: reg.JOB_ID.ANOMALY_SCAN,
+      labelAr: 'فحص الانحرافات + تسجيل التاريخ',
+      defaultCron: reg.JOB_CRON_DEFAULTS[reg.JOB_ID.ANOMALY_SCAN],
+      available: !!(anomalyDetector && anomalyHistory),
+      handler: async () => {
+        if (!anomalyDetector) throw new Error('anomalyDetector not wired');
+        if (!anomalyHistory) throw new Error('anomalyHistory not wired');
+        const startedAt = Date.now();
+        // skipCache so we ALWAYS see fresh signal at cron time.
+        const detection = await anomalyDetector.detect({ skipCache: true });
+        const durationMs = Date.now() - startedAt;
+        const persisted = await anomalyHistory.recordSnapshot({
+          detectionResult: detection,
+          source: 'scheduler',
+          durationMs,
+        });
+        // Surface the persistence outcome on the job run row so
+        // operators can see "detect ok but save failed" cases.
+        return {
+          detected: detection.summary || { total: 0 },
+          persisted: persisted.ok,
+          persistReason: persisted.ok ? null : persisted.reason || null,
+          durationMs,
+        };
       },
     },
   });

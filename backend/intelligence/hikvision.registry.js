@@ -292,6 +292,10 @@ const REASON = Object.freeze({
   // ─── Wave 113 — Anomaly Detector ──────────────────────────────
   ANOMALY_DETECTOR_UNAVAILABLE: 'ANOMALY_DETECTOR_UNAVAILABLE',
 
+  // ─── Wave 114 — Anomaly History ───────────────────────────────
+  ANOMALY_HISTORY_NOT_FOUND: 'ANOMALY_HISTORY_NOT_FOUND',
+  ANOMALY_SCAN_FAILED: 'ANOMALY_SCAN_FAILED',
+
   // Generic
   PERMISSION_DENIED: 'PERMISSION_DENIED',
   VALIDATION_FAILED: 'VALIDATION_FAILED',
@@ -1180,6 +1184,8 @@ const JOB_ID = Object.freeze({
   FRAUD_DECAY_ALL: 'hikvision.fraud.decay-all',
   RAW_EVENT_PARSE: 'hikvision.recognition.parse-pending',
   HEALTH_SWEEP: 'hikvision.health.sweep',
+  // Wave 114 — periodic anomaly scan + history record
+  ANOMALY_SCAN: 'hikvision.anomaly.scan',
 });
 const JOB_IDS = Object.freeze(Object.values(JOB_ID));
 
@@ -1194,6 +1200,7 @@ const JOB_CRON_DEFAULTS = Object.freeze({
   [JOB_ID.FRAUD_DECAY_ALL]: '0 0 * * *', // 00:00 daily
   [JOB_ID.RAW_EVENT_PARSE]: '*/2 * * * *', // every 2 min
   [JOB_ID.HEALTH_SWEEP]: '*/5 * * * *', // every 5 min
+  [JOB_ID.ANOMALY_SCAN]: '*/10 * * * *', // every 10 min — fine grain for trend chart
 });
 
 // Sensible upper bound on how long a single job run may take. Lock

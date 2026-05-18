@@ -110,6 +110,10 @@ const REASON_TO_STATUS = Object.freeze({
   // ── Wave 113 — Anomaly Detector
   ANOMALY_DETECTOR_UNAVAILABLE: 503,
 
+  // ── Wave 114 — Anomaly History
+  ANOMALY_HISTORY_NOT_FOUND: 404,
+  ANOMALY_SCAN_FAILED: 502,
+
   // ── Wave 100 Phase 5 — Fraud Detection
   FRAUD_FLAG_NOT_FOUND: 404,
   FRAUD_FLAG_NOT_OPEN: 409,
@@ -237,6 +241,7 @@ function createHikvisionRouter({
   branchOperationsService = null,
   orgSummaryService = null,
   anomalyDetector = null,
+  anomalyHistory = null,
   governance,
   webhookHmac = null,
   logger = console,
@@ -1627,6 +1632,67 @@ function createHikvisionRouter({
         return safeError(res, err, 'hikvision.anomalies');
       }
     });
+  }
+
+  // ─── Wave 114 — Anomaly History ───────────────────────────
+  //   GET /anomalies/history?since=ISO&limit=N&source=scheduler|manual
+  //   GET /anomalies/trend?hours=24&bucketMinutes=30
+  //   POST /anomalies/scan   — manual scan + record (records to
+  //                            history.source='manual')
+  if (anomalyHistory) {
+    router.get(
+      '/anomalies/history',
+      requirePerm('hikvision.anomalies.history.read'),
+      async (req, res) => {
+        try {
+          const r = await anomalyHistory.listRecent({
+            limit: req.query?.limit ? Number(req.query.limit) : 50,
+            since: req.query?.since || null,
+            source: req.query?.source || null,
+          });
+          return res.json({ success: true, data: r });
+        } catch (err) {
+          return safeError(res, err, 'hikvision.anomalies.history');
+        }
+      }
+    );
+
+    router.get(
+      '/anomalies/trend',
+      requirePerm('hikvision.anomalies.history.read'),
+      async (req, res) => {
+        try {
+          const r = await anomalyHistory.getTrend({
+            hours: req.query?.hours ? Number(req.query.hours) : 24,
+            bucketMinutes: req.query?.bucketMinutes ? Number(req.query.bucketMinutes) : 30,
+          });
+          return res.json({ success: true, data: r });
+        } catch (err) {
+          return safeError(res, err, 'hikvision.anomalies.trend');
+        }
+      }
+    );
+
+    // Manual scan is gated by the anomalies.read perm (read-shaped
+    // operation; the persisted side-effect is intentional + benign).
+    if (anomalyDetector) {
+      router.post('/anomalies/scan', requirePerm('hikvision.anomalies.read'), async (_req, res) => {
+        try {
+          const startedAt = Date.now();
+          const detection = await anomalyDetector.detect({ skipCache: true });
+          const durationMs = Date.now() - startedAt;
+          const persisted = await anomalyHistory.recordSnapshot({
+            detectionResult: detection,
+            source: 'manual',
+            durationMs,
+          });
+          if (!persisted.ok) return respond(res, persisted);
+          return res.json({ success: true, data: { detection, snapshot: persisted.snapshot } });
+        } catch (err) {
+          return safeError(res, err, 'hikvision.anomalies.scan');
+        }
+      });
+    }
   }
 
   // ─── Registry passthrough (no perm gate — public catalog) ───

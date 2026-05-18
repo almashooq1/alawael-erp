@@ -143,7 +143,7 @@ function makeClock(initial = 1_700_000_000_000) {
 // ─── 1. Registry constants ─────────────────────────────────────
 
 describe('hikvision.registry — scheduler constants', () => {
-  test('JOB_IDS covers all 8 expected ids', () => {
+  test('JOB_IDS covers the expected ids (Wave 108 + 114)', () => {
     expect(reg.JOB_IDS).toEqual(
       expect.arrayContaining([
         'hikvision.sync-all',
@@ -154,9 +154,12 @@ describe('hikvision.registry — scheduler constants', () => {
         'hikvision.fraud.decay-all',
         'hikvision.recognition.parse-pending',
         'hikvision.health.sweep',
+        'hikvision.anomaly.scan', // Wave 114
       ])
     );
-    expect(reg.JOB_IDS.length).toBe(8);
+    // Wave 108 shipped 8 ids; Wave 114 added 1 — guard against
+    // accidental drift in either direction.
+    expect(reg.JOB_IDS.length).toBe(9);
   });
 
   test('JOB_STATUSES has the 5 lifecycle states', () => {
@@ -187,7 +190,7 @@ describe('scheduler.listJobs', () => {
     const runModel = buildRunModel();
     const s = createHikvisionScheduler({ runModel, logger: SILENT });
     const r = await s.listJobs();
-    expect(r.items).toHaveLength(8);
+    expect(r.items).toHaveLength(9);
     for (const it of r.items) {
       expect(it.available).toBe(false);
       expect(it.latest).toBeNull();

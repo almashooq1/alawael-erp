@@ -8,6 +8,87 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [Unreleased] — 2026-05-18 — Wave 114: Hikvision Anomaly History
+
+Continuation of Wave 113 (anomaly detector). Persists each detector run
+as a compact snapshot (kind + severity + id only) so operators can answer
+"did the situation improve after we acted?" without re-running detect()
+across long windows. Time-series trend chart + a scheduled scan keep the
+collection populated automatically.
+
+### Added — Backend (3 new files, +14 tests)
+
+- **`models/HikvisionAnomalySnapshot.js`** — append-only snapshot model.
+  Schema: `recordedAt` (indexed), `source` (`scheduler|manual|startup`),
+  `items[]` (compact `{id, kind, severity}` — diagnostic payload dropped
+  to keep collection bounded), `summary` (cached counts), `durationMs`,
+  `meta`. **Wave-18 invariants**: `summary.total === items.length` +
+  severity-sum invariant + every `items[].id` non-empty (deterministic
+  dedup key from Wave 113). **TTL: 30 days** via Mongo TTL index. Sized
+  for ~10-min scan cadence ≈ 4.3MB/month uncompressed.
+
+- **`intelligence/hikvision-anomaly-history.service.js`** — three-call
+  service: `recordSnapshot({detectionResult, source, meta, durationMs})`
+  (only writer; refuses to persist failed detector results — surfaces
+  `ANOMALY_SCAN_FAILED` instead), `listRecent({limit, since, source?})`
+  (recent-first with optional source filter), `getTrend({hours,
+bucketMinutes})` (JS bucketing with gauge semantics — empty buckets
+  carry-forward, range > 7 days auto-coarsens bucket).
+
+- **`__tests__/hikvision-wave114-anomaly-history.test.js`** — 14 tests
+  across 7 sections: happy-path persist + summary derivation, validation
+  rejection, failed-detector handling, recent listing with filters,
+  trend bucketing + empty buckets, scheduler `ANOMALY_SCAN` wiring +
+  graceful degradation when either service is absent. **14/14 pass.**
+
+### Modified — Backend (6 files)
+
+- **`intelligence/hikvision.registry.js`** — 2 new `REASON` codes
+  (`ANOMALY_HISTORY_NOT_FOUND`, `ANOMALY_SCAN_FAILED`) + new
+  `JOB_ID.ANOMALY_SCAN` with default cron `*/10 * * * *` (10-min cadence
+  matches the 30-min trend bucket nicely).
+- **`intelligence/governance.registry.js`** — 1 new perm
+  `hikvision.anomalies.history.read`. Same readers as `anomalies.read`
+  (operators who see current anomalies should see recurrence trends).
+- **`intelligence/hikvision-scheduler.service.js`** — `ANOMALY_SCAN`
+  handler wired in. Pulls `detect()` → `recordSnapshot(source:
+'scheduler')`. Skips gracefully when either dependency is absent
+  (continues Wave 108's "available iff source service wired" pattern).
+- **`routes/hikvision.routes.js`** — 3 new routes:
+  `GET /anomalies/history`, `GET /anomalies/trend` (both gated on the
+  new perm), `POST /anomalies/scan` (manual scan + persist; gated on
+  `anomalies.read` since it's read-shaped — the persisted side-effect
+  is intentional + benign). `REASON_TO_STATUS` extended for the 2 new
+  reasons (404 / 502).
+- **`app.js`** — wires `HikvisionAnomalySnapshot` model + history
+  service + passes `anomalyHistory` into the Hikvision router + scheduler.
+- **`__tests__/hikvision-wave108-scheduler.test.js`** — extended to
+  cover the new `ANOMALY_SCAN` job registration + degradation paths.
+
+### Verification
+
+- **Tests: 309/309 pass across 13 Hikvision suites in 6.4s** (was 295 in
+  12 suites after Wave 113; +14 new tests, 0 regressions).
+- **Lint: clean** across all 8 touched files (`--max-warnings=0`).
+- **Anti-duplication (Wave 93 / G1): clean** across 2035 scanned files
+  — no canonical-pattern regressions.
+
+### Phase 3 mapping
+
+This wave belongs to the **Hikvision vertical (de-facto P3.7)**, not to
+one of the original P3.1–P3.6 deliverables. See `docs/PHASE3_PLAN.md`
+for the live Phase-3 tracker — Wave 115 will be **P3.4 No-Show Prediction**,
+the cleanest remaining P3 gap.
+
+### Added — Docs
+
+- **`docs/PHASE3_PLAN.md`** — new tracker mapping `blueprint/09-roadmap.md`
+  P3 deliverables (P3.1–P3.6) to actual wave deliveries. Documents what's
+  shipped (P3.1+P3.2+P3.3), what's missing (P3.4+P3.6), and recommends
+  Wave 115 = P3.4 No-Show Prediction.
+
+---
+
 ## [Unreleased] — 2026-05-17 — Care Planning Engine: Waves 41–60
 
 End-to-end build of the **Care Planning Intelligence & Governance Engine**

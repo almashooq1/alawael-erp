@@ -680,6 +680,212 @@ const DASHBOARDS = {
     ],
   },
 
+  // ─── Beneficiary Lifecycle (Wave 65 list page) ───────────────
+  // The DPO/branch_manager surface that picks one beneficiary and
+  // sees current state + allowed transitions + history.
+  'beneficiary-lifecycle': {
+    titleAr: 'دورة حياة المستفيد',
+    titleEn: 'Beneficiary Lifecycle',
+    targetRoleGroups: [
+      'branch_manager',
+      'clinical_supervisor',
+      'quality_compliance',
+      'executive_leadership',
+    ],
+    density: 'medium',
+    smartDefaults: {
+      beneficiaryId: ':beneficiaryId',
+    },
+    autoSave: {
+      filters: 'worklist_toggles',
+    },
+    sections: [
+      {
+        id: 'bl-current-state',
+        kind: 'critical-signals',
+        position: 0,
+        taskAr: 'رؤية الحالة الراهنة لدورة حياة المستفيد',
+        taskEn: 'See current lifecycle state of the beneficiary',
+        elements: [
+          {
+            id: 'bl-state-pill',
+            kind: 'status-pill',
+            intentAr: 'تحديد المرحلة الحالية (نشط / معلَّق / منقول / مُخرَج ...)',
+            intentEn: 'Identify current state (active/suspended/transferred/discharged/...)',
+            tier: 1,
+            aboveTheFold: true,
+            revealOn: 'always',
+          },
+        ],
+      },
+      {
+        id: 'bl-allowed',
+        kind: 'task-group',
+        position: 1,
+        taskAr: 'الانتقالات المسموح بها من الحالة الراهنة',
+        taskEn: 'Allowed transitions from current state',
+        elements: [
+          {
+            id: 'bl-transition-chips',
+            kind: 'action-tile',
+            intentAr: 'بدء طلب انتقال مناسب (admit / suspend / transfer / discharge ...)',
+            intentEn: 'Initiate appropriate transition request',
+            tier: 1,
+            aboveTheFold: true,
+            revealOn: 'always',
+          },
+        ],
+      },
+      {
+        id: 'bl-history',
+        kind: 'deep-dive',
+        position: 2,
+        taskAr: 'استعراض سجل الانتقالات السابقة',
+        taskEn: 'Inspect prior transition history',
+        elements: [
+          {
+            id: 'bl-history-list',
+            kind: 'list',
+            intentAr: 'سرد كل الانتقالات السابقة مع روابط للتفاصيل والأحداث',
+            intentEn: 'Chronological transition history with detail deep-links',
+            tier: 2,
+            aboveTheFold: true,
+            revealOn: 'always',
+          },
+        ],
+      },
+    ],
+  },
+
+  // ─── Episodes of Care (Wave 70 list page) ────────────────────
+  'episodes-of-care': {
+    titleAr: 'حلقات الرعاية',
+    titleEn: 'Episodes of Care',
+    targetRoleGroups: ['clinical_supervisor', 'therapist', 'branch_manager', 'quality_compliance'],
+    density: 'medium-high',
+    smartDefaults: {
+      status: 'active',
+    },
+    autoSave: {
+      filters: 'dashboard_filters',
+    },
+    sections: [
+      {
+        id: 'ep-filters',
+        kind: 'critical-signals',
+        position: 0,
+        taskAr: 'تحديد الحلقات التي تحتاج تركيز اليوم',
+        taskEn: 'Focus on episodes requiring attention',
+        elements: [
+          {
+            id: 'ep-filter-chips',
+            kind: 'status-pill',
+            intentAr: 'فلترة فورية حسب الحالة (نشط / معلَّق / مكتمل) والمرحلة',
+            intentEn: 'Instant filter by status + phase',
+            tier: 1,
+            aboveTheFold: true,
+            revealOn: 'always',
+          },
+        ],
+      },
+      {
+        id: 'ep-list',
+        kind: 'operational-pulse',
+        position: 1,
+        taskAr: 'استعراض قائمة الحلقات الحالية',
+        taskEn: 'Browse current episodes',
+        elements: [
+          {
+            id: 'ep-rows',
+            kind: 'list',
+            intentAr: 'سرد الحلقات مع المستفيد + النوع + المرحلة + الأولوية + المعالج الرئيسي',
+            intentEn: 'Episode rows with beneficiary + type + phase + priority + lead therapist',
+            tier: 1,
+            aboveTheFold: true,
+            revealOn: 'always',
+          },
+        ],
+      },
+      {
+        id: 'ep-create',
+        kind: 'task-group',
+        position: 2,
+        taskAr: 'إنشاء حلقة جديدة',
+        taskEn: 'Create a new episode',
+        elements: [
+          {
+            id: 'ep-new-cta',
+            kind: 'action-tile',
+            intentAr: 'فتح نموذج إنشاء حلقة جديدة (مرتبطة بمستفيد)',
+            intentEn: 'Open new-episode form (beneficiary-linked)',
+            tier: 2,
+            aboveTheFold: true,
+            revealOn: 'always',
+          },
+        ],
+      },
+    ],
+  },
+
+  // ─── Access Review (Wave 73 list page) ───────────────────────
+  'access-review': {
+    titleAr: 'مراجعة الصلاحيات',
+    titleEn: 'Access Review',
+    targetRoleGroups: ['quality_compliance', 'executive_leadership', 'audit_admin'],
+    density: 'medium',
+    smartDefaults: {},
+    autoSave: {
+      filters: 'dashboard_filters',
+    },
+    sections: [
+      {
+        id: 'ar-attestations-queue',
+        kind: 'critical-signals',
+        position: 0,
+        taskAr: 'مراجعة اعتمادات الصلاحيات الأخيرة وكشف REVOKE',
+        taskEn: 'Review recent attestations + spot REVOKEs',
+        elements: [
+          {
+            id: 'ar-list',
+            kind: 'list',
+            intentAr: 'سرد كل سجلات الاعتماد مع فلتر الدورة والنوع والقرار',
+            intentEn: 'All attestation records with cycle/type/decision filter',
+            tier: 1,
+            aboveTheFold: true,
+            revealOn: 'always',
+          },
+        ],
+      },
+      {
+        id: 'ar-quick-actions',
+        kind: 'task-group',
+        position: 1,
+        taskAr: 'إجراءات سريعة (اعتماد جديد / محاكي / لوحة الدورة)',
+        taskEn: 'Quick actions (new attestation / simulator / cycle dashboard)',
+        elements: [
+          {
+            id: 'ar-new-cta',
+            kind: 'action-tile',
+            intentAr: 'فتح نموذج تسجيل اعتماد جديد (MFA tier-aware)',
+            intentEn: 'Open new attestation form (MFA tier-gated)',
+            tier: 1,
+            aboveTheFold: true,
+            revealOn: 'always',
+          },
+          {
+            id: 'ar-simulate-cta',
+            kind: 'action-tile',
+            intentAr: 'فتح محاكي الصلاحيات للكشف الوقائي عن SoD',
+            intentEn: 'Open simulator for preventative SoD check',
+            tier: 1,
+            aboveTheFold: true,
+            revealOn: 'always',
+          },
+        ],
+      },
+    ],
+  },
+
   // ─── Beneficiary-360 ─────────────────────────────────────────
   // The deep-dive viewer for ONE beneficiary. Different intent
   // from the `care` supervisor dashboard above — this surface is

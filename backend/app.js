@@ -1917,6 +1917,12 @@ try {
       sideEffectHandlers: {},
       auditLogger,
       logger,
+      // Wave 95 — production routes now enforce the Wave-86 MFA tier
+      // guard. Off by default for unit tests that construct the
+      // service without an actor; the route layer below loads
+      // req.actor via loadMfaActor middleware so the guard sees a
+      // real mfaLevel + mfaAssertedAt.
+      enforceMfa: true,
     });
 
     let governanceSvc = null;
@@ -1929,9 +1935,24 @@ try {
 
     if (governanceSvc) {
       const { authenticate: blAuthMw } = require('./middleware/auth');
+      // Wave 95 — Layered MFA enforcement on lifecycle routes:
+      //   authenticate → loadMfaActor(mfaSvc) → router → service guard
+      // The middleware populates req.actor with mfaLevel + mfaAssertedAt
+      // from the in-process MFA state map (Wave 86). The actorFrom()
+      // helper in the router copies those fields into the actor object
+      // the service uses for its tier check. If the MFA service didn't
+      // load (try/catch above), we skip the middleware and the service
+      // guard sees mfaLevel=0 — which means HIGH/CRITICAL transitions
+      // fail closed with MFA_TIER_REQUIRED until the operator fixes MFA.
+      const mfaActorMiddlewares = [];
+      if (app._mfaChallengeService) {
+        const { loadMfaActor } = require('./middleware/mfa-actor');
+        mfaActorMiddlewares.push(loadMfaActor(app._mfaChallengeService));
+      }
       app.use(
         '/api/v1/beneficiary-lifecycle',
         blAuthMw,
+        ...mfaActorMiddlewares,
         createBeneficiaryLifecycleRouter({
           service: lifecycleSvc,
           governance: governanceSvc,

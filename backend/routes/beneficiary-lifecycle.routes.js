@@ -77,13 +77,23 @@ const REASON_TO_STATUS = Object.freeze({
   DUPLICATE_APPROVAL: 409,
   NAFATH_REQUIRED: 412,
   UNKNOWN_TRANSITION: 400,
+  // Wave 95 — MFA-tier enforcement (route-wiring of Wave 86 service guard)
+  MFA_TIER_REQUIRED: 403,
+  MFA_FRESHNESS_REQUIRED: 403,
 });
 
 function actorFrom(req) {
+  // Wave 95 — propagate MFA tier + freshness from the Wave-86
+  // loadMfaActor middleware into the actor object the service uses
+  // to enforce its tier guard. Falls back to {0, null} when the
+  // middleware isn't mounted (test contexts that bypass it).
+  const fromMfa = req.actor || {};
   return {
-    userId: req.user?.id || req.user?._id || null,
-    role: req.user?.role || req.user?.roleCode || null,
-    ip: req.ip,
+    userId: req.user?.id || req.user?._id || fromMfa.userId || null,
+    role: req.user?.role || req.user?.roleCode || fromMfa.role || null,
+    ip: req.ip || fromMfa.ip || null,
+    mfaLevel: typeof fromMfa.mfaLevel === 'number' ? fromMfa.mfaLevel : 0,
+    mfaAssertedAt: fromMfa.mfaAssertedAt || null,
   };
 }
 
@@ -99,6 +109,12 @@ function respond(res, result) {
     ...(result?.allowed ? { allowed: result.allowed } : {}),
     ...(result?.status ? { currentWorkflowStatus: result.status } : {}),
     ...(result?.ageDays !== undefined ? { ageDays: result.ageDays } : {}),
+    // Wave 95 — surface the MFA-tier guard's diagnostic fields so the
+    // web-admin can render an actionable "step-up to tier N" prompt.
+    ...(result?.requiredTier !== undefined ? { requiredTier: result.requiredTier } : {}),
+    ...(result?.actorTier !== undefined ? { actorTier: result.actorTier } : {}),
+    ...(result?.maxAgeMin !== undefined ? { maxAgeMin: result.maxAgeMin } : {}),
+    ...(result?.ageMin !== undefined ? { ageMin: result.ageMin } : {}),
   });
 }
 

@@ -123,6 +123,16 @@ const PATTERNS = [
     ],
   },
   {
+    id: 'lifecycle_mfa_disabled',
+    why: 'Beneficiary-lifecycle service in app.js must be constructed with enforceMfa:true (Wave 95). Disabling MFA in production opens HIGH/CRITICAL transitions to bypassed step-up.',
+    // Catch literal `enforceMfa: false` in app.js. Tests + back-compat
+    // callers that opt out are allow-listed below.
+    regex: /enforceMfa\s*:\s*false/,
+    allowedFiles: [
+      'intelligence/beneficiary-lifecycle.service.js', // default in factory signature (back-compat for unit tests)
+    ],
+  },
+  {
     id: 'new_hash_chain_compute',
     why: 'Hash-chain compute helpers belong in intelligence/hash-chain.lib (Wave 88). External cert chains under services/blockchain are out of scope.',
     // Match `function computeHash(` or `const computeHash =` as a declaration

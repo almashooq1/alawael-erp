@@ -90,6 +90,9 @@ const REASON_TO_STATUS = Object.freeze({
   NOTIFIER_UNAVAILABLE: 503,
   SERVICE_REQUIRED: 503,
   STATUS_LOOKUP_FAILED: 500,
+  // Wave 80 — templates reasons
+  TEMPLATE_NOT_FOUND: 404,
+  TEMPLATES_SERVICE_UNAVAILABLE: 503,
 });
 
 function actorFrom(req) {
@@ -129,6 +132,7 @@ function createAccessReviewRouter({
   service,
   simulator,
   scheduler = null,
+  templatesService = null,
   governance,
   logger = console,
 } = {}) {
@@ -397,6 +401,50 @@ function createAccessReviewRouter({
       return safeError(res, err, 'access-review.event.dormancy');
     }
   });
+
+  // ─── Wave 80 — Template endpoints ─────────────────────────────
+
+  function ensureTemplates(res) {
+    if (!templatesService || typeof templatesService.listTemplates !== 'function') {
+      res.status(503).json({
+        success: false,
+        message: 'TEMPLATES_SERVICE_UNAVAILABLE',
+        reason: 'TEMPLATES_SERVICE_UNAVAILABLE',
+      });
+      return false;
+    }
+    return true;
+  }
+
+  // GET /templates  — list all available cycle templates
+  router.get('/templates', requirePerm('access-review.template.read'), (_req, res) => {
+    try {
+      if (!ensureTemplates(res)) return undefined;
+      const items = templatesService.listTemplates();
+      return res.json({ success: true, data: { items, total: items.length } });
+    } catch (err) {
+      return safeError(res, err, 'access-review.templates.list');
+    }
+  });
+
+  // POST /templates/:id/resolve  — narrow an actor list using a template
+  router.post(
+    '/templates/:id/resolve',
+    requirePerm('access-review.template.resolve'),
+    (req, res) => {
+      try {
+        if (!ensureTemplates(res)) return undefined;
+        const actors = Array.isArray(req.body?.actors) ? req.body.actors : [];
+        const result = templatesService.resolveTemplate({
+          templateId: req.params.id,
+          actors,
+        });
+        return respond(res, result);
+      } catch (err) {
+        return safeError(res, err, 'access-review.templates.resolve');
+      }
+    }
+  );
 
   // GET /registry  — exposes the static Wave-38 maps for UI rendering
   router.get('/registry', (_req, res) => {

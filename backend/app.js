@@ -2024,6 +2024,12 @@ try {
       logger,
     });
 
+    // Wave 80 — Cycle templates resolver (pure registry passthrough).
+    const {
+      createAccessReviewTemplatesService,
+    } = require('./intelligence/access-review-templates.service');
+    const accessReviewTemplates = createAccessReviewTemplatesService({ logger });
+
     let governanceSvc = null;
     try {
       const { createGovernanceService } = require('./intelligence/governance.service');
@@ -2041,6 +2047,7 @@ try {
           service: accessReviewSvc,
           simulator,
           scheduler: accessReviewScheduler,
+          templatesService: accessReviewTemplates,
           governance: governanceSvc,
           logger,
         })
@@ -2048,8 +2055,9 @@ try {
       app._accessReviewService = accessReviewSvc;
       app._accessReviewSimulator = simulator;
       app._accessReviewScheduler = accessReviewScheduler;
+      app._accessReviewTemplates = accessReviewTemplates;
       logger.info(
-        '[AccessReview] ✓ Wave 72+74 routes mounted at /api/v1/access-review (closes red-team #12; scheduler ready)'
+        '[AccessReview] ✓ Wave 72+74+80 routes mounted at /api/v1/access-review (closes red-team #12; scheduler + templates ready)'
       );
     } else {
       logger.warn('[AccessReview] routes skipped: governance service unavailable');

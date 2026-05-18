@@ -378,6 +378,27 @@ const PERMISSIONS = Object.freeze({
   'access-review.cycle.close': ['dpo', 'audit_admin', 'audit_committee_chair'],
   'access-review.event.mover': ['hr_admin', 'hr_director', 'chro', 'dpo', 'ciso'],
   'access-review.event.dormancy': ['dpo', 'ciso', 'audit_admin', 'security_architect'],
+
+  // Wave 80 — Cycle Templates (static catalog + resolver)
+  'access-review.template.read': [
+    'dpo',
+    'ciso',
+    'compliance_officer',
+    'audit_admin',
+    'security_architect',
+    'iam.role_granter',
+    'iam.role_matrix_editor',
+    'hr_admin',
+    'hr_director',
+    'chro',
+  ],
+  'access-review.template.resolve': [
+    'dpo',
+    'ciso',
+    'audit_admin',
+    'compliance_officer',
+    'security_architect',
+  ],
 });
 
 // ─── API ────────────────────────────────────────────────────────

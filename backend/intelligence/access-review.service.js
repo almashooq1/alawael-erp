@@ -52,8 +52,8 @@
  * The route layer maps these to 4xx codes.
  */
 
-const crypto = require('crypto');
 const reg = require('./access-review.registry');
+const hashChain = require('./hash-chain.lib');
 
 const TYPES_REQUIRING_COSIGNERS = new Set([
   reg.REVIEW_TYPE.PRIVILEGED,
@@ -69,26 +69,11 @@ const DECISIONS_REQUIRING_JUSTIFICATION = new Set([
 ]);
 
 // Wave 87 — encoding-version tag for compute/verify backwards-compat.
-// The legacy encoding used `signedAt.toISOString()` which round-trips
-// through JSON / Mongoose Date with millisecond precision in practice
-// BUT loses information if a deploy ever rolls back to a system clock
-// that's only second-precision, and breaks under naive (Date(s)).toISOString()
-// re-encoding if `s` is already a Date with sub-millisecond ticks (some
-// platforms). Epoch ms is a single number, stable across serialise/
-// deserialise paths, immune to timezone/format drift.
-const HASH_ENCODING_VERSIONS = Object.freeze({
-  EPOCH_MS: 'epoch-ms', // Wave 87 default — `new Date(s).getTime()`
-  ISO_STRING: 'iso', // Legacy — `new Date(s).toISOString()`
-});
-
-const DEFAULT_ENCODING = HASH_ENCODING_VERSIONS.EPOCH_MS;
-
-function _encodeSignedAt(signedAt, version) {
-  const d = new Date(signedAt);
-  if (version === HASH_ENCODING_VERSIONS.ISO_STRING) return d.toISOString();
-  // EPOCH_MS default
-  return String(d.getTime());
-}
+// Wave 88 — extracted into intelligence/hash-chain.lib.js; this module
+// now re-exports HASH_ENCODING_VERSIONS for back-compat (Wave 87 tests
+// + any external caller importing it from here keep working).
+const HASH_ENCODING_VERSIONS = hashChain.HASH_ENCODING_VERSIONS;
+const DEFAULT_ENCODING = hashChain.DEFAULT_ENCODING;
 
 function computeHash({
   cycleId,
@@ -108,10 +93,9 @@ function computeHash({
     String(targetUserId),
     String(targetRole),
     String(decision),
-    _encodeSignedAt(signedAt, encodingVersion),
-    priorHash || 'GENESIS',
+    hashChain.encodeTemporal(signedAt, encodingVersion),
   ].join('|');
-  return crypto.createHash('sha256').update(payload).digest('hex');
+  return hashChain.hashLinkedPayload(payload, priorHash);
 }
 
 /**
@@ -347,36 +331,19 @@ function createAccessReviewService({
    * Replay the hash chain for one target. Returns the broken links
    * (each as { attestationId, expected, actual }) — empty array
    * means the chain is intact.
+   *
+   * Wave 88 — delegates to the canonical hash-chain.lib walker;
+   * preserves the original return shape so all Wave-72/87 tests
+   * + HTTP callers keep working unchanged.
    */
   async function verifyHashChain(targetUserId) {
     if (!targetUserId) return { ok: false, reason: 'TARGET_REQUIRED' };
     const rows = await attestationModel.find({ targetUserId }).sort({ signedAt: 1 }).lean();
-    const broken = [];
-    const legacyRows = []; // Wave 87 — attestations still on ISO encoding
-    let priorHash = null;
-    for (const r of rows) {
-      // Wave 87 — try the canonical EPOCH_MS encoding first. If it
-      // doesn't match, fall back to the legacy ISO_STRING encoding
-      // before declaring the row broken. Records minted before Wave 87
-      // were hashed with toISOString — they're still genuine, just
-      // pre-format-stability. We accept them but flag them for the
-      // caller so a one-shot migration script can rehash + persist.
-      const expectedNew = computeHash({
-        cycleId: r.cycleId,
-        reviewType: r.reviewType,
-        reviewerId: r.reviewerId,
-        targetUserId: r.targetUserId,
-        targetRole: r.targetRole,
-        decision: r.decision,
-        signedAt: r.signedAt,
-        priorHash,
-        encodingVersion: HASH_ENCODING_VERSIONS.EPOCH_MS,
-      });
-      let matchedEncoding = null;
-      if (expectedNew === r.currentHash) {
-        matchedEncoding = HASH_ENCODING_VERSIONS.EPOCH_MS;
-      } else {
-        const expectedLegacy = computeHash({
+
+    const result = hashChain.verifyHashChain({
+      entries: rows,
+      computeEntryHash: (r, { previousHash, encodingVersion }) =>
+        computeHash({
           cycleId: r.cycleId,
           reviewType: r.reviewType,
           reviewerId: r.reviewerId,
@@ -384,30 +351,26 @@ function createAccessReviewService({
           targetRole: r.targetRole,
           decision: r.decision,
           signedAt: r.signedAt,
-          priorHash,
-          encodingVersion: HASH_ENCODING_VERSIONS.ISO_STRING,
-        });
-        if (expectedLegacy === r.currentHash) {
-          matchedEncoding = HASH_ENCODING_VERSIONS.ISO_STRING;
-          legacyRows.push(String(r._id));
-        } else {
-          broken.push({
-            attestationId: String(r._id),
-            expected: expectedNew,
-            actual: r.currentHash,
-            triedEncodings: [HASH_ENCODING_VERSIONS.EPOCH_MS, HASH_ENCODING_VERSIONS.ISO_STRING],
-          });
-        }
-      }
-      void matchedEncoding;
-      priorHash = r.currentHash;
-    }
+          priorHash: previousHash,
+          encodingVersion,
+        }),
+      getCurrentHash: r => r.currentHash,
+      getEntryId: r => String(r._id),
+      primaryEncoding: HASH_ENCODING_VERSIONS.EPOCH_MS,
+      fallbackEncodings: [HASH_ENCODING_VERSIONS.ISO_STRING],
+    });
+
     return {
       ok: true,
-      broken,
-      chainLength: rows.length,
-      legacyEncodingCount: legacyRows.length,
-      legacyAttestationIds: legacyRows,
+      broken: result.broken.map(b => ({
+        attestationId: b.entryId,
+        expected: b.expected,
+        actual: b.actual,
+        triedEncodings: b.triedEncodings,
+      })),
+      chainLength: result.chainLength,
+      legacyEncodingCount: result.legacyEncodingCount,
+      legacyAttestationIds: result.legacyEntryIds,
     };
   }
 

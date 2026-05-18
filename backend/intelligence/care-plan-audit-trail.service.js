@@ -235,6 +235,8 @@ function fromFamilyNotifications(plan, push) {
 
 // ─── Signature chain verification ────────────────────────────────
 
+const hashChainLib = require('./hash-chain.lib');
+
 /**
  * Re-compute every signature hash from prevHash + payload and confirm
  * the chain is intact. Returns { ok, brokenAt } where brokenAt is the
@@ -242,33 +244,41 @@ function fromFamilyNotifications(plan, push) {
  *
  * `computeSignatureHash` is injected (Wave-41 model exports it) so this
  * stays pure — no Mongoose import.
+ *
+ * Wave 88 — delegates to intelligence/hash-chain.lib's canonical walker.
+ * Preserves the exact existing return shape ({ ok, brokenAt } when intact;
+ * adds `reason` only when ok === false) so the Wave-45 tests and route
+ * callers don't break. The lib handles both chain-link integrity (entry.
+ * prevHash === prior.hash) and recomputation in one pass.
  */
 function verifySignatureChain(signatureChain, computeSignatureHash) {
   const chain = Array.isArray(signatureChain) ? signatureChain : [];
   if (chain.length === 0) return { ok: true, brokenAt: null };
 
-  for (let i = 0; i < chain.length; i++) {
-    const cur = chain[i];
-    const prev = i === 0 ? null : chain[i - 1];
-    const expectedPrev = prev ? prev.hash : null;
+  const hasComputer = typeof computeSignatureHash === 'function';
 
-    if (cur.prevHash !== expectedPrev) {
-      return { ok: false, brokenAt: i, reason: 'PREV_HASH_MISMATCH' };
-    }
-    if (typeof computeSignatureHash === 'function') {
-      const expected = computeSignatureHash({
-        userId: cur.userId,
-        role: cur.role,
-        action: cur.action,
-        signedAt: cur.signedAt,
-        prevHash: cur.prevHash,
-      });
-      if (expected !== cur.hash) {
-        return { ok: false, brokenAt: i, reason: 'HASH_MISMATCH' };
-      }
-    }
-  }
-  return { ok: true, brokenAt: null };
+  const result = hashChainLib.verifyHashChain({
+    entries: chain,
+    enforcePriorHashLink: true,
+    getCurrentHash: e => e.hash,
+    getPriorHashRef: e => e.prevHash,
+    getEntryId: (_, idx) => String(idx),
+    primaryEncoding: hashChainLib.HASH_ENCODING_VERSIONS.ISO_STRING,
+    fallbackEncodings: [],
+    computeEntryHash: hasComputer
+      ? (entry, { previousHash }) =>
+          computeSignatureHash({
+            userId: entry.userId,
+            role: entry.role,
+            action: entry.action,
+            signedAt: entry.signedAt,
+            prevHash: previousHash,
+          })
+      : null,
+  });
+
+  if (result.ok) return { ok: true, brokenAt: null };
+  return { ok: false, brokenAt: result.brokenAt, reason: result.reason };
 }
 
 // ─── Public API ──────────────────────────────────────────────────

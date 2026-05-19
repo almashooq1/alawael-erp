@@ -613,6 +613,7 @@ module.exports = async function seedDemoShowcase({ dryRun = false, reset = false
     bump('beneficiaries');
   }
 
+  step('therapy-sessions');
   // ── Therapy sessions (18 — past/today/upcoming mix) ───────────────────
   const sessionTypes = ['علاج طبيعي', 'علاج وظيفي', 'نطق وتخاطب', 'علاج سلوكي', 'علاج نفسي'];
   const now = new Date();
@@ -668,6 +669,7 @@ module.exports = async function seedDemoShowcase({ dryRun = false, reset = false
     bump('sessions');
   }
 
+  step('session-attendance');
   // ── Session attendance — 3 risk profiles across beneficiaries ──────────
   //   Benef-0: clean attendance (18× present)
   //   Benef-1: occasional late (14 present, 3 late, 1 absent)
@@ -740,6 +742,7 @@ module.exports = async function seedDemoShowcase({ dryRun = false, reset = false
     }
   }
 
+  step('clinical-assessments');
   // ── Clinical assessments (8) ──────────────────────────────────────────
   const assessmentSpecs = [
     { tool: 'CARS-2', category: 'autism_screening', score: 32, interpretation: 'moderate' },
@@ -784,6 +787,7 @@ module.exports = async function seedDemoShowcase({ dryRun = false, reset = false
     bump('assessments');
   }
 
+  step('care-plans');
   // ── Care plans (4, with goals) ────────────────────────────────────────
   for (let i = 0; i < 4; i++) {
     const ben = beneficiaries[i];
@@ -871,6 +875,7 @@ module.exports = async function seedDemoShowcase({ dryRun = false, reset = false
     bump('carePlans');
   }
 
+  step('invoices');
   // ── Invoices (5: draft/issued/paid + ZATCA submitted) ─────────────────
   const invoiceSpecs = [
     { ben: 0, amount: 1500, status: 'DRAFT', issue: false, submit: false },
@@ -935,6 +940,7 @@ module.exports = async function seedDemoShowcase({ dryRun = false, reset = false
     bump('invoices');
   }
 
+  step('nphies-claims');
   // ── Nphies claims (4) ─────────────────────────────────────────────────
   const claimSpecs = [
     { ben: 0, memberId: 'BUPA001', amount: 500, submit: true }, // → APPROVED
@@ -1016,6 +1022,7 @@ module.exports = async function seedDemoShowcase({ dryRun = false, reset = false
     bump('nphiesClaims');
   }
 
+  step('adapter-audit');
   // ── Seed AdapterAudit rows ────────────────────────────────────────────
   // So /admin/adapter-audit and the Grafana dashboards have real-looking
   // data on first demo load instead of empty state. Spread over the past

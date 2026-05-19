@@ -34,6 +34,7 @@ const reg = require('./parent-chatbot.registry');
 
 function createParentChatbotService({
   sessionModel = null,
+  contextService = null, // Wave 122: optional context resolver
   logger = console,
   now = () => new Date(),
 } = {}) {
@@ -82,23 +83,61 @@ function createParentChatbotService({
   // ─── Pure: response generator ───────────────────────────────────
 
   /**
-   * Phase-1 returns the template VERBATIM (placeholders intact).
-   * Phase-2 will accept a context object and substitute tokens with
-   * authorized DB-derived values.
+   * Resolves the canned template for an intent and, when a `tokens`
+   * map is provided, substitutes `{TOKEN}` placeholders. Wave 120
+   * (Phase 1) returned templates verbatim; Wave 122 (Phase 2a) accepts
+   * a pre-resolved token map (typically from the context service) and
+   * fills them. Missing tokens are left as `{TOKEN}` so QA can spot
+   * unfilled placeholders.
+   *
+   * Token filling is delegated to `contextService.fillTemplate` when
+   * available (single source of truth for the substitution pattern);
+   * a local fallback preserves Phase-1 behavior when the service
+   * isn't wired.
    */
-  function generateResponse(intent, _context = null) {
+  function generateResponse(intent, tokens = null) {
     const template = reg.RESPONSE_TEMPLATES[intent] || reg.RESPONSE_TEMPLATES[reg.INTENT.UNKNOWN];
     const forbidden = reg.forbiddenTokenInTemplate(template);
     if (forbidden) {
-      // Phase-1 templates are author-controlled, so this is a guard
-      // against future template edits sneaking forbidden tokens in.
+      // Templates are author-controlled, so this is a guard against
+      // future template edits sneaking forbidden tokens in.
       return {
         ok: false,
         reason: reg.REASON.RESPONSE_FORBIDDEN_CONTENT,
         details: { forbidden, intent },
       };
     }
-    return { ok: true, text: template, intent };
+    if (tokens && typeof tokens === 'object') {
+      const filled =
+        contextService && typeof contextService.fillTemplate === 'function'
+          ? contextService.fillTemplate(template, tokens)
+          : _localFillTemplate(template, tokens);
+      // Re-check the filled text for forbidden content — a token VALUE
+      // could carry a banned word (e.g. a free-text branch address).
+      const filledForbidden = reg.forbiddenTokenInTemplate(filled);
+      if (filledForbidden) {
+        return {
+          ok: false,
+          reason: reg.REASON.RESPONSE_FORBIDDEN_CONTENT,
+          details: { forbidden: filledForbidden, intent, source: 'token-value' },
+        };
+      }
+      return { ok: true, text: filled, intent, filled: true };
+    }
+    return { ok: true, text: template, intent, filled: false };
+  }
+
+  function _localFillTemplate(template, tokens) {
+    if (!template || typeof template !== 'string') return '';
+    if (!tokens || typeof tokens !== 'object') return template;
+    return template.replace(/\{([A-Z_][A-Z0-9_]*)\}/g, (match, name) => {
+      if (Object.prototype.hasOwnProperty.call(tokens, name)) {
+        const val = tokens[name];
+        if (val === null || val === undefined) return match;
+        return String(val);
+      }
+      return match;
+    });
   }
 
   // ─── ID helpers ─────────────────────────────────────────────────
@@ -148,7 +187,40 @@ function createParentChatbotService({
       intentToRespond = reg.INTENT.UNKNOWN; // emit UNKNOWN template + clarification context
     }
 
-    const gen = generateResponse(intentToRespond, context);
+    // Wave 122: if a context service is wired, resolve token values
+    // from DB for the chosen intent. Caller-supplied `context` (a raw
+    // token map) takes precedence — useful for testing + future LLM
+    // wave that may build its own token graph.
+    let resolvedTokens = context && typeof context === 'object' ? { ...context } : null;
+    let contextStatus = 'unresolved';
+    if (
+      !resolvedTokens &&
+      contextService &&
+      typeof contextService.resolveContext === 'function' &&
+      intentToRespond !== reg.INTENT.UNKNOWN
+    ) {
+      try {
+        const r = await contextService.resolveContext({
+          intent: intentToRespond,
+          userId,
+          beneficiaryId,
+          branchId,
+        });
+        if (r && r.ok) {
+          resolvedTokens = r.tokens || {};
+          contextStatus = 'resolved';
+        } else {
+          contextStatus = r && r.reason ? `degraded:${r.reason}` : 'degraded';
+        }
+      } catch (err) {
+        logger.warn(`[parent-chatbot] contextService threw: ${err.message}`);
+        contextStatus = 'degraded:threw';
+      }
+    } else if (resolvedTokens) {
+      contextStatus = 'caller-supplied';
+    }
+
+    const gen = generateResponse(intentToRespond, resolvedTokens);
     if (!gen.ok) {
       return gen;
     }
@@ -210,6 +282,8 @@ function createParentChatbotService({
       intent: classified.intent,
       confidence: classified.confidence,
       response: gen.text,
+      contextStatus,
+      filled: Boolean(gen.filled),
       turnIndex: session.turnCount - 1,
       clarification: clarification || null,
       escalated: classified.intent === reg.INTENT.ESCALATE_HUMAN,

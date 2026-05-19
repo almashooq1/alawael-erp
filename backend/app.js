@@ -2907,8 +2907,65 @@ try {
   if (pcGovernance && ParentChatbotSession) {
     const { createParentChatbotService } = require('./intelligence/parent-chatbot.service');
     const { createParentChatbotRouter } = require('./routes/parent-chatbot.routes');
+    // Wave 122: optionally wire the context resolver. Each model
+    // is loaded defensively — missing models degrade specific
+    // intents to "unfilled template" rather than crashing setup.
+    let pcContextService = null;
+    try {
+      const {
+        createParentChatbotContextService,
+      } = require('./intelligence/parent-chatbot-context.service');
+      let appointmentM = null;
+      let invoiceM = null;
+      let benefM = null;
+      let carePlanM = null;
+      let branchM = null;
+      let employeeM = null;
+      try {
+        appointmentM = require('./models/Appointment');
+      } catch {
+        /* skip */
+      }
+      try {
+        invoiceM = require('./models/AccountingInvoice');
+      } catch {
+        /* skip */
+      }
+      try {
+        benefM = require('./models/Beneficiary');
+      } catch {
+        /* skip */
+      }
+      try {
+        carePlanM = require('./models/CarePlanVersion');
+      } catch {
+        /* skip */
+      }
+      try {
+        branchM = require('./models/Branch');
+      } catch {
+        /* skip */
+      }
+      try {
+        employeeM = require('./models/HR/Employee');
+      } catch {
+        /* skip */
+      }
+      pcContextService = createParentChatbotContextService({
+        appointmentModel: appointmentM,
+        invoiceModel: invoiceM,
+        beneficiaryModel: benefM,
+        carePlanModel: carePlanM,
+        branchModel: branchM,
+        employeeModel: employeeM,
+        logger,
+      });
+    } catch (ctxErr) {
+      logger.warn('[ParentChatbot] context resolver failed to wire:', ctxErr.message);
+    }
     const chatbotService = createParentChatbotService({
       sessionModel: ParentChatbotSession,
+      contextService: pcContextService,
       logger,
     });
     const { authenticate: pcAuthMw } = require('./middleware/auth');

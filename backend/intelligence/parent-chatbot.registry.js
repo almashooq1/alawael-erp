@@ -33,12 +33,17 @@ const INTENT = Object.freeze({
   APPOINTMENT_NEXT: 'appointment.next',
   APPOINTMENT_HISTORY: 'appointment.history',
   APPOINTMENT_CANCEL: 'appointment.cancel',
+  APPOINTMENT_BOOK: 'appointment.book',
   INVOICE_BALANCE: 'invoice.balance',
   INVOICE_HISTORY: 'invoice.history',
+  PAYMENT_METHODS: 'payment.methods',
   PROGRESS_SUMMARY: 'progress.summary',
   TEAM_THERAPIST: 'team.therapist',
   CLINIC_HOURS: 'clinic.hours',
   CLINIC_ADDRESS: 'clinic.address',
+  CLINIC_HOLIDAYS: 'clinic.holidays',
+  DOCUMENT_REQUEST: 'document.request',
+  TRANSPORT_INFO: 'transport.info',
   ESCALATE_HUMAN: 'escalate.human',
   UNKNOWN: 'unknown',
 });
@@ -64,6 +69,16 @@ const INTENT_KEYWORDS = Object.freeze({
     ar: Object.freeze(['إلغاء الموعد', 'الغاء موعدي', 'لن أستطيع الحضور']),
     en: Object.freeze(['cancel appointment', 'cancel my appointment', 'cannot attend']),
   }),
+  [INTENT.APPOINTMENT_BOOK]: Object.freeze({
+    ar: Object.freeze(['حجز موعد', 'أريد موعد', 'موعد جديد', 'احجز لي', 'طلب موعد']),
+    en: Object.freeze([
+      'book appointment',
+      'book an appointment',
+      'schedule appointment',
+      'new appointment',
+      'reserve a slot',
+    ]),
+  }),
   [INTENT.INVOICE_BALANCE]: Object.freeze({
     ar: Object.freeze(['رصيدي', 'كم علي', 'الرصيد المستحق', 'كم المبلغ المتبقي']),
     en: Object.freeze(['balance', 'outstanding balance', 'how much do i owe']),
@@ -71,6 +86,24 @@ const INTENT_KEYWORDS = Object.freeze({
   [INTENT.INVOICE_HISTORY]: Object.freeze({
     ar: Object.freeze(['فواتيري', 'سجل الفواتير', 'كل الفواتير']),
     en: Object.freeze(['invoices', 'invoice history', 'past invoices']),
+  }),
+  [INTENT.PAYMENT_METHODS]: Object.freeze({
+    ar: Object.freeze([
+      'طرق الدفع',
+      'كيف أدفع',
+      'كيف ادفع',
+      'وسيلة الدفع',
+      'الدفع الإلكتروني',
+      'تحويل بنكي',
+    ]),
+    en: Object.freeze([
+      'payment methods',
+      'how to pay',
+      'how can i pay',
+      'pay online',
+      'bank transfer',
+      'pay my invoice',
+    ]),
   }),
   [INTENT.PROGRESS_SUMMARY]: Object.freeze({
     ar: Object.freeze(['تقدم ابني', 'تقدم ابنتي', 'كيف يتقدم', 'تقدمه', 'حالته الآن']),
@@ -87,6 +120,35 @@ const INTENT_KEYWORDS = Object.freeze({
   [INTENT.CLINIC_ADDRESS]: Object.freeze({
     ar: Object.freeze(['عنوان المركز', 'وين المركز', 'موقع', 'العنوان']),
     en: Object.freeze(['address', 'location', 'where is the clinic']),
+  }),
+  [INTENT.CLINIC_HOLIDAYS]: Object.freeze({
+    ar: Object.freeze([
+      'الإجازات',
+      'الأعياد',
+      'إجازة العيد',
+      'إجازة وطنية',
+      'مفتوح في العيد',
+      'مفتوحون في العيد',
+      'العيد',
+    ]),
+    en: Object.freeze(['holidays', 'holiday schedule', 'open on eid', 'national day']),
+  }),
+  [INTENT.DOCUMENT_REQUEST]: Object.freeze({
+    ar: Object.freeze(['طلب تقرير', 'تقرير طبي', 'شهادة', 'مستند', 'إفادة', 'طلب وثيقة']),
+    en: Object.freeze(['request report', 'medical report', 'certificate', 'document request']),
+  }),
+  [INTENT.TRANSPORT_INFO]: Object.freeze({
+    ar: Object.freeze([
+      'التوصيل',
+      'توصيل',
+      'الباص',
+      'باص',
+      'المواصلات',
+      'النقل',
+      'الحافلة',
+      'حافلة',
+    ]),
+    en: Object.freeze(['transport', 'bus service', 'shuttle', 'pick up']),
   }),
   [INTENT.ESCALATE_HUMAN]: Object.freeze({
     ar: Object.freeze(['أريد التحدث مع شخص', 'موظف', 'إنسان', 'تكلم مع موظف', 'مساعدة بشرية']),
@@ -114,15 +176,25 @@ const RESPONSE_TEMPLATES = Object.freeze({
     'لديك {APPOINTMENT_COUNT} مواعيد في الـ 90 يومًا الماضية. آخرها كان {LAST_APPOINTMENT_DATE}.',
   [INTENT.APPOINTMENT_CANCEL]:
     'لإلغاء الموعد، يرجى الاتصال بالاستقبال على {CLINIC_PHONE} قبل 24 ساعة من الموعد.',
+  [INTENT.APPOINTMENT_BOOK]:
+    'لحجز موعد جديد، يرجى الاتصال بالاستقبال على {CLINIC_PHONE} أو زيارة بوابة الأهالي.',
   [INTENT.INVOICE_BALANCE]:
     'رصيدك المستحق حاليًا هو {BALANCE_SAR} ريال. يمكنك السداد عبر {PAYMENT_LINK}.',
   [INTENT.INVOICE_HISTORY]:
     'لديك {INVOICE_COUNT} فاتورة في السجل. لعرض التفاصيل، يرجى زيارة صفحة الفواتير.',
+  [INTENT.PAYMENT_METHODS]:
+    'وسائل الدفع المتاحة: تحويل بنكي، مدى، بطاقة ائتمان، Apple Pay. لمزيد من التفاصيل: {PAYMENT_LINK}.',
   [INTENT.PROGRESS_SUMMARY]:
     'يتلقى {CHILD_NAME} {SESSION_COUNT} جلسة شهريًا، وقد حقق {GOALS_COMPLETED} من {GOALS_TOTAL} أهداف.',
   [INTENT.TEAM_THERAPIST]: 'المعالج الأساسي لـ {CHILD_NAME} هو {THERAPIST_NAME}، تخصص {SPECIALTY}.',
   [INTENT.CLINIC_HOURS]: 'ساعات عمل المركز: {CLINIC_HOURS}.',
   [INTENT.CLINIC_ADDRESS]: 'عنوان المركز: {CLINIC_ADDRESS}.',
+  [INTENT.CLINIC_HOLIDAYS]:
+    'المركز يتبع جدول الإجازات الرسمية في المملكة العربية السعودية. لمعرفة جدول إجازات محدد، يرجى التواصل مع الاستقبال.',
+  [INTENT.DOCUMENT_REQUEST]:
+    'لطلب تقرير أو شهادة، يرجى تعبئة طلب وثيقة عبر بوابة الأهالي أو الاتصال بالاستقبال. المدة المتوقعة للإصدار: 3-5 أيام عمل.',
+  [INTENT.TRANSPORT_INFO]:
+    'خدمة النقل متوفرة حسب توافر الباصات في فرعك. للاستفسار عن المسارات والمواعيد، يرجى الاتصال بالاستقبال.',
   [INTENT.ESCALATE_HUMAN]:
     'سأقوم بتحويلك إلى أحد موظفي الاستقبال. سيتواصل معك أحدهم خلال {ETA_MINUTES} دقيقة.',
   [INTENT.UNKNOWN]:

@@ -23,6 +23,11 @@
 
 'use strict';
 
+// Global jest setup mocks `mongoose` — this suite exercises real schema/plugin
+// internals (Symbol-keyed APPLIED_MARKER), so the mock makes getAppliedConfig
+// return null. Unmock to use the real module.
+jest.unmock('mongoose');
+
 const mongoose = require('mongoose');
 const branchScopePlugin = require('../intelligence/branchScopePlugin');
 const {

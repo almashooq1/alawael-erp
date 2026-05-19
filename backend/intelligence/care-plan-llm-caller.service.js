@@ -104,6 +104,8 @@ function createCarePlanLLMCaller({
   telemetryMaxCalls = 10_000,
   inputUsdPer1M = 15.0,
   outputUsdPer1M = 75.0,
+  // Wave 134: optional persistent telemetry model
+  telemetryPersistModel = null,
   now = () => Date.now(),
   logger = console,
 } = {}) {
@@ -112,6 +114,9 @@ function createCarePlanLLMCaller({
     maxCalls: telemetryMaxCalls,
     inputUsdPer1M,
     outputUsdPer1M,
+    persistModel: telemetryPersistModel,
+    serviceName: telemetryPersistModel ? 'care-plan' : null,
+    logger,
     now,
   });
 
@@ -297,6 +302,7 @@ function createCarePlanLLMCaller({
     recommend,
     getTelemetry,
     resetTelemetry,
+    getPersistedTelemetry: opts => telemetry.getPersistedTelemetry(opts),
     REASON,
   });
 }

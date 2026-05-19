@@ -2975,8 +2975,16 @@ try {
         const {
           createParentChatbotLlmService,
         } = require('./intelligence/parent-chatbot-llm.service');
+        // Wave 134: optionally persist telemetry (Mongo TTL 30d).
+        let llmTelemetryModel = null;
+        try {
+          llmTelemetryModel = require('./models/LlmTelemetryCall');
+        } catch {
+          /* model missing — telemetry stays in-memory only */
+        }
         pcLlmClassifier = createParentChatbotLlmService({
           client: anthropicClient,
+          telemetryPersistModel: llmTelemetryModel,
           logger,
         });
         logger.info('[ParentChatbot] ✓ LLM classifier enabled (Wave 123)');

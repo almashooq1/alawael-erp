@@ -68,12 +68,25 @@ function createLlmTelemetry({
   maxCalls = DEFAULTS.maxCalls,
   inputUsdPer1M = DEFAULTS.inputUsdPer1M,
   outputUsdPer1M = DEFAULTS.outputUsdPer1M,
+  // Wave 134: optional Mongoose model. When provided, every
+  // recordCall ALSO writes to it (fire-and-forget). The
+  // `serviceName` label is required when persisting so cross-
+  // service queries can distinguish call origin.
+  persistModel = null,
+  serviceName = null,
   now = () => Date.now(),
+  logger = console,
 } = {}) {
   const buffer = [];
 
+  function _costOfCall(tokensIn, tokensOut) {
+    return _round6(
+      (tokensIn * inputUsdPer1M) / 1_000_000 + (tokensOut * outputUsdPer1M) / 1_000_000
+    );
+  }
+
   function recordCall(rec = {}) {
-    buffer.push({
+    const entry = {
       at: now(),
       source: rec.source || 'unknown',
       intent: rec.intent || null,
@@ -82,16 +95,46 @@ function createLlmTelemetry({
       elapsedMs: Number.isFinite(rec.elapsedMs) ? rec.elapsedMs : 0,
       success: Boolean(rec.success),
       reason: rec.reason || null,
-    });
+    };
+    buffer.push(entry);
     while (buffer.length > maxCalls) buffer.shift();
     const cutoff = now() - windowMs;
     while (buffer.length > 0 && buffer[0].at < cutoff) buffer.shift();
+
+    // Wave 134: write-through to persistent collection. Fire-and-
+    // forget — never blocks the LLM call's response path.
+    if (persistModel && serviceName) {
+      const cost = _costOfCall(entry.tokensIn, entry.tokensOut);
+      const doc = {
+        at: new Date(entry.at),
+        serviceName,
+        source: ['llm', 'cache', 'reject', 'unknown'].includes(entry.source)
+          ? entry.source
+          : 'unknown',
+        intent: entry.intent,
+        tokensIn: entry.tokensIn,
+        tokensOut: entry.tokensOut,
+        elapsedMs: entry.elapsedMs,
+        success: entry.success,
+        reason: entry.reason,
+        costUsd: cost,
+      };
+      // Use Model.create rather than `new Model(...).save()` — same
+      // result, but skips a Mongoose-version-related thenable bug
+      // some installs hit on fresh documents.
+      const p = persistModel.create ? persistModel.create(doc) : new persistModel(doc).save();
+      if (p && typeof p.catch === 'function') {
+        p.catch(err => {
+          if (logger && typeof logger.warn === 'function') {
+            logger.warn(`[llm-telemetry] persist failed for ${serviceName}: ${err.message}`);
+          }
+        });
+      }
+    }
   }
 
   function _costOf(tokensIn, tokensOut) {
-    return _round6(
-      (tokensIn * inputUsdPer1M) / 1_000_000 + (tokensOut * outputUsdPer1M) / 1_000_000
-    );
+    return _costOfCall(tokensIn, tokensOut);
   }
 
   function getTelemetry({ since = null, bucketHours = DEFAULTS.bucketHours } = {}) {
@@ -193,7 +236,138 @@ function createLlmTelemetry({
     return buffer.length;
   }
 
-  return { recordCall, getTelemetry, reset, size };
+  /**
+   * Wave 134: aggregate from the persistent collection. Same
+   * response shape as in-memory `getTelemetry()` but reads from
+   * `persistModel` directly. Useful for windows > the in-memory
+   * `windowMs` (default 7d).
+   *
+   * Returns `{ok:false, reason:'PERSIST_UNAVAILABLE'}` when no
+   * model is configured.
+   */
+  async function getPersistedTelemetry({
+    since = null,
+    until = null,
+    bucketHours = DEFAULTS.bucketHours,
+  } = {}) {
+    if (!persistModel || !serviceName) {
+      return { ok: false, reason: 'PERSIST_UNAVAILABLE' };
+    }
+    const sinceMs = since ? new Date(since).getTime() : now() - windowMs;
+    const untilMs = until ? new Date(until).getTime() : now();
+    const q = {
+      serviceName,
+      at: { $gte: new Date(sinceMs), $lte: new Date(untilMs) },
+    };
+    let rows;
+    try {
+      const cursor = persistModel.find(q);
+      rows = await (cursor && typeof cursor.lean === 'function' ? cursor.lean() : cursor);
+    } catch (err) {
+      if (logger && typeof logger.warn === 'function') {
+        logger.warn(`[llm-telemetry] persisted query failed: ${err.message}`);
+      }
+      return { ok: false, reason: 'PERSIST_QUERY_FAILED', message: err.message };
+    }
+    rows = Array.isArray(rows) ? rows : [];
+    return _aggregate(rows, sinceMs, untilMs, bucketHours);
+  }
+
+  // Shared aggregator over an array of normalized call records.
+  // Used by both in-memory getTelemetry and persisted query.
+  function _aggregate(calls, sinceMs, untilMs, bucketHours) {
+    const totals = {
+      calls: calls.length,
+      llmCalls: 0,
+      cacheHits: 0,
+      rejects: 0,
+      failures: 0,
+      tokensIn: 0,
+      tokensOut: 0,
+    };
+    const byReason = {};
+    const byIntent = {};
+    let latencySum = 0;
+    let latencyN = 0;
+
+    for (const c of calls) {
+      const atMs = c.at instanceof Date ? c.at.getTime() : Number(c.at) || 0;
+      if (atMs < sinceMs || atMs > untilMs) continue;
+      if (c.source === 'llm' && c.success) {
+        totals.llmCalls++;
+        totals.tokensIn += c.tokensIn || 0;
+        totals.tokensOut += c.tokensOut || 0;
+        if ((c.elapsedMs || 0) > 0) {
+          latencySum += c.elapsedMs;
+          latencyN++;
+        }
+      } else if (c.source === 'cache' && c.success) {
+        totals.cacheHits++;
+      } else if (c.source === 'reject') {
+        totals.rejects++;
+      } else if (!c.success) {
+        totals.failures++;
+      }
+      if (c.intent) byIntent[c.intent] = (byIntent[c.intent] || 0) + 1;
+      if (c.reason) byReason[c.reason] = (byReason[c.reason] || 0) + 1;
+    }
+
+    const denom = totals.calls || 1;
+    const cacheHitRate = _round4(totals.cacheHits / denom);
+    const fallbackRate = _round4((totals.rejects + totals.failures) / denom);
+    const failureRate = _round4(totals.failures / denom);
+    const avgLatencyMs = latencyN > 0 ? Math.round(latencySum / latencyN) : 0;
+
+    const bucketMs = Math.max(1, Number(bucketHours)) * 3600 * 1000;
+    const bucketsMap = new Map();
+    for (const c of calls) {
+      const atMs = c.at instanceof Date ? c.at.getTime() : Number(c.at) || 0;
+      if (atMs < sinceMs || atMs > untilMs) continue;
+      const bucketStart = Math.floor(atMs / bucketMs) * bucketMs;
+      if (!bucketsMap.has(bucketStart)) {
+        bucketsMap.set(bucketStart, {
+          at: new Date(bucketStart).toISOString(),
+          calls: 0,
+          llmCalls: 0,
+          cacheHits: 0,
+          tokensIn: 0,
+          tokensOut: 0,
+        });
+      }
+      const b = bucketsMap.get(bucketStart);
+      b.calls++;
+      if (c.source === 'llm' && c.success) {
+        b.llmCalls++;
+        b.tokensIn += c.tokensIn || 0;
+        b.tokensOut += c.tokensOut || 0;
+      } else if (c.source === 'cache' && c.success) {
+        b.cacheHits++;
+      }
+    }
+    const buckets = Array.from(bucketsMap.values())
+      .sort((a, b) => new Date(a.at).getTime() - new Date(b.at).getTime())
+      .map(b => ({ ...b, costUsd: _costOf(b.tokensIn, b.tokensOut) }));
+
+    return {
+      ok: true,
+      since: new Date(sinceMs).toISOString(),
+      until: new Date(untilMs).toISOString(),
+      windowMs: untilMs - sinceMs,
+      totals: {
+        ...totals,
+        costUsd: _costOf(totals.tokensIn, totals.tokensOut),
+        cacheHitRate,
+        fallbackRate,
+        failureRate,
+        avgLatencyMs,
+      },
+      byReason,
+      byIntent,
+      buckets,
+    };
+  }
+
+  return { recordCall, getTelemetry, getPersistedTelemetry, reset, size };
 }
 
 module.exports = {

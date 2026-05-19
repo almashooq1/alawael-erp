@@ -146,6 +146,96 @@ function createLlmRegistry({ logger = console } = {}) {
     };
   }
 
+  /**
+   * Wave 134: cross-service aggregation from PERSISTENT storage.
+   * Same merging semantics as getAllTelemetry but each service's
+   * `getPersistedTelemetry(opts)` is awaited. Services that lack
+   * persistence surface as `{ok:false, reason:'PERSIST_UNAVAILABLE'}`
+   * in their slot and skip the merge.
+   */
+  async function getAllPersistedTelemetry({ since = null, until = null, bucketHours = 1 } = {}) {
+    const perService = {};
+    const merged = {
+      calls: 0,
+      llmCalls: 0,
+      cacheHits: 0,
+      rejects: 0,
+      failures: 0,
+      tokensIn: 0,
+      tokensOut: 0,
+      costUsd: 0,
+    };
+    let latencySum = 0;
+    let latencyN = 0;
+    const byReason = {};
+    const byIntent = {};
+
+    for (const [name, service] of services.entries()) {
+      let result;
+      if (typeof service.getPersistedTelemetry !== 'function') {
+        perService[name] = { ok: false, reason: 'PERSIST_UNAVAILABLE' };
+        continue;
+      }
+      try {
+        result = await service.getPersistedTelemetry({ since, until, bucketHours });
+      } catch (err) {
+        logger.warn &&
+          logger.warn(`[llm-registry] ${name}.getPersistedTelemetry threw: ${err.message}`);
+        perService[name] = {
+          ok: false,
+          reason: 'TELEMETRY_THREW',
+          message: err.message,
+        };
+        continue;
+      }
+      perService[name] = result;
+      if (!result || !result.ok) continue;
+      const t = result.totals || {};
+      merged.calls += t.calls || 0;
+      merged.llmCalls += t.llmCalls || 0;
+      merged.cacheHits += t.cacheHits || 0;
+      merged.rejects += t.rejects || 0;
+      merged.failures += t.failures || 0;
+      merged.tokensIn += t.tokensIn || 0;
+      merged.tokensOut += t.tokensOut || 0;
+      merged.costUsd = _round6(merged.costUsd + (t.costUsd || 0));
+      if (t.avgLatencyMs > 0 && t.llmCalls > 0) {
+        latencySum += t.avgLatencyMs * t.llmCalls;
+        latencyN += t.llmCalls;
+      }
+      const r = result.byReason || {};
+      for (const key of Object.keys(r)) {
+        byReason[key] = (byReason[key] || 0) + r[key];
+      }
+      const i = result.byIntent || {};
+      for (const key of Object.keys(i)) {
+        byIntent[key] = (byIntent[key] || 0) + i[key];
+      }
+    }
+
+    const denom = merged.calls || 1;
+    const mergedTotals = {
+      ...merged,
+      cacheHitRate: _round4(merged.cacheHits / denom),
+      fallbackRate: _round4((merged.rejects + merged.failures) / denom),
+      failureRate: _round4(merged.failures / denom),
+      avgLatencyMs: latencyN > 0 ? Math.round(latencySum / latencyN) : 0,
+    };
+
+    return {
+      ok: true,
+      generatedAt: new Date().toISOString(),
+      source: 'persisted',
+      serviceCount: services.size,
+      services: perService,
+      merged: {
+        totals: mergedTotals,
+        byReason,
+        byIntent,
+      },
+    };
+  }
+
   function reset() {
     services.clear();
   }
@@ -160,6 +250,7 @@ function createLlmRegistry({ logger = console } = {}) {
     list,
     getService,
     getAllTelemetry,
+    getAllPersistedTelemetry,
     reset,
     _size,
   };

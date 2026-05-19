@@ -63,14 +63,25 @@ function createLlmTelemetryRouter({
     };
   }
 
-  router.get('/llm-telemetry', requirePerm('ai.telemetry.read'), (req, res) => {
+  router.get('/llm-telemetry', requirePerm('ai.telemetry.read'), async (req, res) => {
     try {
       const q = req.query || {};
-      const result = llmRegistry.getAllTelemetry({
+      // Wave 134: `?source=persisted` reads from the Mongo TTL
+      // collection (windows up to 30 days). Default `memory` reads
+      // from the in-process rolling buffer (sub-window queries).
+      const source = q.source === 'persisted' ? 'persisted' : 'memory';
+      const params = {
         since: q.since || null,
         bucketHours: q.bucketHours ? Number(q.bucketHours) : 1,
-      });
-      return res.json({ success: true, data: result });
+      };
+      let result;
+      if (source === 'persisted') {
+        params.until = q.until || null;
+        result = await llmRegistry.getAllPersistedTelemetry(params);
+      } else {
+        result = llmRegistry.getAllTelemetry(params);
+      }
+      return res.json({ success: true, data: { ...result, source } });
     } catch (err) {
       return safeError(res, err, 'ai.llm-telemetry');
     }

@@ -231,6 +231,8 @@ function createParentChatbotLlmService({
   telemetryMaxCalls = DEFAULTS.telemetryMaxCalls,
   inputUsdPer1M = DEFAULT_COSTS.inputUsdPer1M,
   outputUsdPer1M = DEFAULT_COSTS.outputUsdPer1M,
+  // Wave 134: optional persistent telemetry model
+  telemetryPersistModel = null,
   logger = console,
   now = () => Date.now(),
 } = {}) {
@@ -238,13 +240,16 @@ function createParentChatbotLlmService({
   const systemPrompt = _buildSystemPrompt();
 
   // Wave 128: telemetry delegated to the shared llm-telemetry lib.
-  // Same in-memory rolling-buffer semantics as Wave 126, now reusable
-  // across all LLM services.
+  // Wave 134: optionally persists to Mongo when `telemetryPersistModel`
+  // is provided + `serviceName='parent-chatbot'` is the per-row label.
   const telemetry = createLlmTelemetry({
     windowMs: telemetryWindowMs,
     maxCalls: telemetryMaxCalls,
     inputUsdPer1M,
     outputUsdPer1M,
+    persistModel: telemetryPersistModel,
+    serviceName: telemetryPersistModel ? 'parent-chatbot' : null,
+    logger,
     now,
   });
   const _recordCall = telemetry.recordCall;
@@ -404,6 +409,8 @@ function createParentChatbotLlmService({
     getTelemetry,
     resetTelemetry,
     _telemetrySize: () => telemetry.size(),
+    // Wave 134: persistent-storage reader
+    getPersistedTelemetry: opts => telemetry.getPersistedTelemetry(opts),
     // Exposed for tests:
     _parseLlmResponse,
     _coerceIntent,

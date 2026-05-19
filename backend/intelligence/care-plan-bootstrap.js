@@ -154,12 +154,20 @@ function bootstrapCarePlanning(opts = {}) {
   // 4. LLM caller (optional)
   let llmCaller = null;
   if (anthropicClient) {
+    // Wave 134: optionally persist telemetry (TTL 30d).
+    let llmTelemetryModel = null;
+    try {
+      llmTelemetryModel = require('../models/LlmTelemetryCall');
+    } catch {
+      /* model missing — telemetry stays in-memory only */
+    }
     llmCaller = createCarePlanLLMCaller({
       client: anthropicClient,
       validator: {
         isGoalSmart: validator.isGoalSmart,
         resolveEvidenceRef: opts.resolveEvidenceRef || null,
       },
+      telemetryPersistModel: llmTelemetryModel,
       logger,
     });
     // Wave 131: register in the cross-service LLM telemetry registry

@@ -324,8 +324,11 @@ router.post('/refresh', async (req, res) => {
     // Verify refresh token
     const decoded = jwt.verify(refreshToken, JWT_REFRESH_SECRET);
 
-    // Check if refresh token has been blacklisted (token rotation)
-    const isBlacklisted = await tokenBlacklist.has(refreshToken);
+    // Check if refresh token has been blacklisted (token rotation).
+    // The blacklist module exposes `isBlacklisted`, not `has` — the old
+    // `has` call crashed every refresh with TypeError → 500, which
+    // silently logged users out after the 1h access-token expiry.
+    const isBlacklisted = await tokenBlacklist.isBlacklisted(refreshToken);
     if (isBlacklisted) {
       logger.warn('Attempted reuse of rotated refresh token', { userId: decoded.userId });
       return res.status(401).json({

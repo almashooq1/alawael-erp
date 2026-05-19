@@ -283,6 +283,138 @@ const DEFAULTS = Object.freeze({
   MAX_TIME_DRIFT_MS: 5 * 60_000, // 5 min drift → tag time-drift
 });
 
+// ─── Wave 123 — Exception kinds ────────────────────────────────
+
+const EXCEPTION_KIND = Object.freeze({
+  MISSING_CHECKOUT: 'missing-checkout',
+  MISSING_CHECKIN: 'missing-checkin',
+  LATE_ARRIVAL_PATTERN: 'late-arrival-pattern',
+  ABSENCE_WITHOUT_LEAVE: 'absence-without-leave',
+  IMPOSSIBLE_TRAVEL: 'impossible-travel',
+  TAILGATE_FLAG: 'tailgate-flag',
+  DEVICE_SPOOF_SUSPECTED: 'device-spoof-suspected',
+  POST_LOCK_CORRECTION: 'post-lock-correction',
+  GEOFENCE_OUTSIDE: 'geofence-outside',
+  CARELESS_CLOCKING: 'careless-clocking',
+  BRANCH_LATENESS: 'branch-lateness',
+});
+const EXCEPTION_KINDS = Object.freeze(Object.values(EXCEPTION_KIND));
+
+const EXCEPTION_SEVERITY = Object.freeze({
+  LOW: 'low',
+  MEDIUM: 'medium',
+  HIGH: 'high',
+  CRITICAL: 'critical',
+});
+const EXCEPTION_SEVERITIES = Object.freeze(Object.values(EXCEPTION_SEVERITY));
+
+const EXCEPTION_OWNER = Object.freeze({
+  BRANCH_MANAGER: 'branch_manager',
+  HR_ADMIN: 'hr_admin',
+  HR_DIRECTOR: 'hr_director',
+  SECURITY: 'security',
+  DPO: 'dpo',
+});
+
+// kind → {severity, owner} — owner is the role that should triage.
+const EXCEPTION_METADATA = Object.freeze({
+  [EXCEPTION_KIND.MISSING_CHECKOUT]: {
+    severity: EXCEPTION_SEVERITY.LOW,
+    owner: EXCEPTION_OWNER.BRANCH_MANAGER,
+    labelAr: 'لم يسجِّل خروجاً',
+  },
+  [EXCEPTION_KIND.MISSING_CHECKIN]: {
+    severity: EXCEPTION_SEVERITY.HIGH,
+    owner: EXCEPTION_OWNER.HR_ADMIN,
+    labelAr: 'لم يسجِّل دخولاً',
+  },
+  [EXCEPTION_KIND.LATE_ARRIVAL_PATTERN]: {
+    severity: EXCEPTION_SEVERITY.MEDIUM,
+    owner: EXCEPTION_OWNER.HR_ADMIN,
+    labelAr: 'نمط تأخّر متكرّر',
+  },
+  [EXCEPTION_KIND.ABSENCE_WITHOUT_LEAVE]: {
+    severity: EXCEPTION_SEVERITY.HIGH,
+    owner: EXCEPTION_OWNER.HR_DIRECTOR,
+    labelAr: 'غياب بدون إذن',
+  },
+  [EXCEPTION_KIND.IMPOSSIBLE_TRAVEL]: {
+    severity: EXCEPTION_SEVERITY.CRITICAL,
+    owner: EXCEPTION_OWNER.SECURITY,
+    labelAr: 'سفر مستحيل بين فرعين',
+  },
+  [EXCEPTION_KIND.TAILGATE_FLAG]: {
+    severity: EXCEPTION_SEVERITY.CRITICAL,
+    owner: EXCEPTION_OWNER.SECURITY,
+    labelAr: 'شخصان بطاقة واحدة (tailgate)',
+  },
+  [EXCEPTION_KIND.DEVICE_SPOOF_SUSPECTED]: {
+    severity: EXCEPTION_SEVERITY.CRITICAL,
+    owner: EXCEPTION_OWNER.SECURITY,
+    labelAr: 'اشتباه انتحال جهاز',
+  },
+  [EXCEPTION_KIND.POST_LOCK_CORRECTION]: {
+    severity: EXCEPTION_SEVERITY.CRITICAL,
+    owner: EXCEPTION_OWNER.DPO,
+    labelAr: 'تعديل بعد قفل الراتب',
+  },
+  [EXCEPTION_KIND.GEOFENCE_OUTSIDE]: {
+    severity: EXCEPTION_SEVERITY.HIGH,
+    owner: EXCEPTION_OWNER.BRANCH_MANAGER,
+    labelAr: 'تسجيل خارج النطاق الجغرافي',
+  },
+  [EXCEPTION_KIND.CARELESS_CLOCKING]: {
+    severity: EXCEPTION_SEVERITY.MEDIUM,
+    owner: EXCEPTION_OWNER.HR_ADMIN,
+    labelAr: 'إهمال في تسجيل الحضور',
+  },
+  [EXCEPTION_KIND.BRANCH_LATENESS]: {
+    severity: EXCEPTION_SEVERITY.HIGH,
+    owner: EXCEPTION_OWNER.HR_DIRECTOR,
+    labelAr: 'نسبة تأخّر مرتفعة على مستوى الفرع',
+  },
+});
+
+const EXCEPTION_STATUS = Object.freeze({
+  OPEN: 'open',
+  ACKNOWLEDGED: 'acknowledged',
+  RESOLVED: 'resolved',
+  DISMISSED: 'dismissed',
+  ESCALATED: 'escalated',
+});
+const EXCEPTION_STATUSES = Object.freeze(Object.values(EXCEPTION_STATUS));
+
+const PATTERN_THRESHOLDS = Object.freeze({
+  LATE_PATTERN_MIN_EVENTS: 3, // ≥3 late events
+  LATE_PATTERN_WINDOW_DAYS: 7,
+  CARELESS_PATTERN_MIN_EVENTS: 3, // ≥3 missing-checkouts
+  CARELESS_PATTERN_WINDOW_DAYS: 30,
+  BRANCH_LATENESS_PCT: 0.2, // ≥20% of employees late on a day
+});
+
+function exceptionMeta(kind) {
+  return (
+    EXCEPTION_METADATA[kind] || {
+      severity: EXCEPTION_SEVERITY.MEDIUM,
+      owner: EXCEPTION_OWNER.BRANCH_MANAGER,
+      labelAr: kind,
+    }
+  );
+}
+
+// Deterministic dedup id for an exception. Same (kind, employee,
+// shiftDate) yields the same id so re-runs don't multiply.
+function exceptionDedupKey({ kind, employeeId, branchId = null, shiftDate = null, extra = '' }) {
+  const parts = [
+    String(kind || ''),
+    String(employeeId || ''),
+    String(branchId || ''),
+    shiftDate ? new Date(shiftDate).toISOString().slice(0, 10) : '',
+    String(extra || ''),
+  ];
+  return parts.join('|');
+}
+
 module.exports = {
   SOURCE_KIND,
   SOURCE_KINDS,
@@ -297,6 +429,18 @@ module.exports = {
   EVENT_FLAGS,
   REASON,
   DEFAULTS,
+  // Wave 123 — exceptions
+  EXCEPTION_KIND,
+  EXCEPTION_KINDS,
+  EXCEPTION_SEVERITY,
+  EXCEPTION_SEVERITIES,
+  EXCEPTION_OWNER,
+  EXCEPTION_METADATA,
+  EXCEPTION_STATUS,
+  EXCEPTION_STATUSES,
+  PATTERN_THRESHOLDS,
+  exceptionMeta,
+  exceptionDedupKey,
   // helpers
   inferTrustTier,
   inferEffectiveConfidence,

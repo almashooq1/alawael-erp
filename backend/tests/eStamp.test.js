@@ -19,9 +19,11 @@ const FAKE_TOKEN = 'Bearer test-invalid-token';
 /* ═══════════════════════════════════════════════════════════════════════════
    Route Availability — all e-stamp routes should be mounted
    ═══════════════════════════════════════════════════════════════════════════ */
-// ⚠️ SKIPPED: Supertest integration tests require full server + DB/Redis.
-// Routes return 404 in isolated Jest env (safeMount fails silently). Priority #25 backlog.
-describe.skip('E-Stamp Routes — Route Availability', () => {
+// Routes are mounted; under mocked-mongoose Jest env the model queries
+// fail and safeError translates them to 503. The static-routes branch
+// only asserts !=404 (mounted), so 503 passes naturally. The id-routes
+// branch widens its allow-list to include 503 for the same reason.
+describe('E-Stamp Routes — Route Availability', () => {
   // Routes that don't depend on a real document existing
   const staticRoutes = [
     ['GET', '/api/e-stamp/stats'],
@@ -68,8 +70,9 @@ describe.skip('E-Stamp Routes — Route Availability', () => {
       const fn = method === 'DELETE' ? 'delete' : method.toLowerCase();
       const res = await request(app)[fn](url).set('Accept', 'application/json').timeout(15000);
 
-      // Route handler responds — status can be anything valid including 404 (stamp not found)
-      expect([200, 400, 401, 403, 404, 500].includes(res.status)).toBe(true);
+      // Route handler responds — status can be anything valid including 404
+      // (stamp not found) and 503 (mocked-mongoose query failure)
+      expect([200, 400, 401, 403, 404, 500, 503].includes(res.status)).toBe(true);
       // The response should be JSON (our handler, not Express default)
       expect(res.headers['content-type']).toMatch(/json/);
     },

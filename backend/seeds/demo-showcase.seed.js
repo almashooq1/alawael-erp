@@ -888,8 +888,12 @@ module.exports = async function seedDemoShowcase({ dryRun = false, reset = false
     const s = invoiceSpecs[i];
     const ben = beneficiaries[s.ben];
     const invoiceNumber = `DEMO-INV-202604-${String(i + 1).padStart(4, '0')}`;
+    step(`  invoice ${i + 1}/${invoiceSpecs.length} ${invoiceNumber}`);
     const existing = await Invoice.findOne({ invoiceNumber });
-    if (existing) continue;
+    if (existing) {
+      step(`    already exists, skip`);
+      continue;
+    }
     const subTotal = s.amount;
     const taxAmount = Math.round(subTotal * 0.15 * 100) / 100;
     const totalAmount = Math.round((subTotal + taxAmount) * 100) / 100;
@@ -953,8 +957,12 @@ module.exports = async function seedDemoShowcase({ dryRun = false, reset = false
     const s = claimSpecs[i];
     const ben = beneficiaries[s.ben];
     const claimNumber = `DEMO-CLM-202604-${String(i + 1).padStart(4, '0')}`;
+    step(`  claim ${i + 1}/${claimSpecs.length} ${claimNumber}`);
     const existing = await NphiesClaim.findOne({ claimNumber });
-    if (existing) continue;
+    if (existing) {
+      step(`    already exists, skip`);
+      continue;
+    }
     const claim = await NphiesClaim.create({
       claimNumber,
       beneficiary: ben._id,

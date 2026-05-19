@@ -59,7 +59,7 @@ cd ../../alawael-rehab-platform/apps/web-admin && npm run dev
 
 ## Don'ts (from prior incidents)
 
-- **Don't push to alawael-rehab-platform** — no remote. Commit + bundle to `_backups/` instead.
+- **alawael-rehab-platform DOES have a remote** (private `github.com/almashooq1/alawael-rehab-platform`, created 2026-05-19) — `git push` works. Periodic bundles to `_backups/*.bundle` still exist as a redundancy.
 - **Don't claim "improvements" without running** `npm run typecheck` + `npx jest` for the affected area. Test counts in commit messages are verifiable.
 - **Don't add `enforceMfa: false`** outside the service factory default — `lint:duplication` catches this. Wave 95 wired tier enforcement; bypassing it = security regression.
 - **Don't bypass `loadMfaActor` middleware** on routes that touch beneficiary lifecycle, care-plan transitions, access-review attestations, or payroll override.

@@ -1172,6 +1172,23 @@ const PERMISSIONS = Object.freeze({
     'head_office',
   ],
 
+  // ─── Wave 140 — Progress Prediction admin ──────────────────
+  // Read-only access to AiPrediction (prediction_type='progress') +
+  // AiModelConfig accuracy snapshot. Operational tier (branch
+  // managers + clinical leads + audit) — read enough to monitor
+  // model drift but not write.
+  'ai.progress.read': [
+    'branch_manager',
+    'branch_director',
+    'clinical_director',
+    'therapist_coordinator',
+    'compliance_officer',
+    'auditor',
+    'dpo',
+    'executive_leadership',
+    'head_office',
+  ],
+
   // ─── Wave 131 — Cross-service LLM telemetry ────────────────
   // Wider scope than admin.chatbot.read — covers every LLM service
   // registered via llm-registry (chatbot, care-plan, future).

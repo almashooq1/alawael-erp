@@ -3055,6 +3055,55 @@ try {
   logger.warn('[ParentChatbot] routes skipped:', pcErr.message);
 }
 
+// ─── Progress Prediction admin (Wave 140 / P3.3) ─────────────────────────────
+// Read-only HTTP surface on top of services/ai/progressPrediction.service.js
+// (Prompt 20). Closes the "P3.3 has no admin UI" gap from the closure
+// session. Mounts at /api/v1/ai/progress.
+try {
+  let AiPrediction = null;
+  let AiModelConfig = null;
+  try {
+    AiPrediction = require('./models/AiPrediction');
+  } catch {
+    /* model missing — feature self-disables */
+  }
+  try {
+    AiModelConfig = require('./models/AiModelConfig');
+  } catch {
+    /* model missing — feature self-disables */
+  }
+  let ppGovernance = null;
+  try {
+    const { createGovernanceService } = require('./intelligence/governance.service');
+    ppGovernance = createGovernanceService({ logger });
+  } catch {
+    /* governance optional */
+  }
+  if (ppGovernance && AiPrediction && AiModelConfig) {
+    const { createProgressPredictionRouter } = require('./routes/progress-prediction.routes');
+    const { authenticate: ppAuthMw } = require('./middleware/auth');
+    app.use(
+      '/api/v1/ai/progress',
+      ppAuthMw,
+      createProgressPredictionRouter({
+        predictionModel: AiPrediction,
+        modelConfigModel: AiModelConfig,
+        governance: ppGovernance,
+        logger,
+      })
+    );
+    logger.info(
+      '[ProgressPrediction] ✓ Wave 140 (P3.3 admin) routes mounted at /api/v1/ai/progress'
+    );
+  } else {
+    logger.info(
+      '[ProgressPrediction] routes skipped: governance or AiPrediction/AiModelConfig models unavailable'
+    );
+  }
+} catch (ppErr) {
+  logger.warn('[ProgressPrediction] routes skipped:', ppErr.message);
+}
+
 // ─── No-Show Prediction (Wave 115 / P3.4) ────────────────────────────────────
 // Heuristic risk scorer + intervention catalogue over the existing
 // Appointment + AiPrediction models. Mounts /api/v1/ai/no-show behind

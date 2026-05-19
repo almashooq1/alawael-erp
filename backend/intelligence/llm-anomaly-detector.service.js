@@ -69,6 +69,10 @@ const ANOMALY_THRESHOLDS = Object.freeze({
 
 const REASON = Object.freeze({
   DETECTOR_UNAVAILABLE: 'LLM_ANOMALY_DETECTOR_UNAVAILABLE',
+  // Wave 144 — shared with llm-anomaly-history.service.js
+  ANOMALY_SCAN_FAILED: 'LLM_ANOMALY_SCAN_FAILED',
+  SAVE_FAILED: 'LLM_ANOMALY_HISTORY_SAVE_FAILED',
+  VALIDATION_FAILED: 'LLM_ANOMALY_HISTORY_VALIDATION_FAILED',
 });
 
 function createLlmAnomalyDetector({

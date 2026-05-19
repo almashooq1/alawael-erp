@@ -3047,28 +3047,77 @@ try {
       logger.warn('[LLM-Telemetry] routes skipped:', telErr.message);
     }
 
-    // Wave 142: LLM anomaly detector — rule-based alerts over the same
-    // cross-service telemetry. Mounts at /api/v1/ai/llm-anomalies and
-    // reuses ai.telemetry.read since the payload exposes the same data.
+    // Wave 142+144: LLM anomaly detector + history. Mounts at
+    // /api/v1/ai/llm-anomalies and reuses ai.telemetry.read since the
+    // payload exposes the same data. Wave 144 adds history list,
+    // trend chart, and manual scan endpoints; the snapshot model is
+    // optional — if missing, the live /llm-anomalies endpoint still
+    // works and the history endpoints return 503.
     try {
       const { getDefaultRegistry } = require('./intelligence/llm-registry.lib');
       const { createLlmAnomalyDetector } = require('./intelligence/llm-anomaly-detector.service');
+      const {
+        createLlmAnomalyHistoryService,
+      } = require('./intelligence/llm-anomaly-history.service');
       const { createLlmAnomaliesRouter } = require('./routes/llm-anomalies.routes');
+
       const llmAnomalyDetector = createLlmAnomalyDetector({
         llmRegistry: getDefaultRegistry({ logger }),
         logger,
       });
+
+      // Wave 144 — persistence layer. Defensive load so missing model
+      // file doesn't break the live detector route.
+      let llmAnomalyHistory = null;
+      try {
+        const LlmAnomalySnapshot = require('./models/LlmAnomalySnapshot');
+        llmAnomalyHistory = createLlmAnomalyHistoryService({
+          snapshotModel: LlmAnomalySnapshot,
+          logger,
+        });
+      } catch (histErr) {
+        logger.warn('[LLM-Anomalies] history layer skipped (model missing):', histErr.message);
+      }
+
       app.use(
         '/api/v1/ai',
         pcAuthMw,
         createLlmAnomaliesRouter({
           detector: llmAnomalyDetector,
+          history: llmAnomalyHistory,
           governance: pcGovernance,
           logger,
         })
       );
       app._llmAnomalyDetector = llmAnomalyDetector;
-      logger.info('[LLM-Anomalies] ✓ Wave 142 detector routes mounted at /api/v1/ai/llm-anomalies');
+      app._llmAnomalyHistory = llmAnomalyHistory;
+      logger.info('[LLM-Anomalies] ✓ Wave 142+144 routes mounted at /api/v1/ai/llm-anomalies');
+
+      // Wave 144 — periodic background scan. 10-min cadence mirrors
+      // the Hikvision Wave 114 ANOMALY_SCAN cron. Skipped entirely
+      // when the history layer is unavailable (no point running).
+      if (llmAnomalyHistory && process.env.LLM_ANOMALY_SCAN_DISABLED !== '1') {
+        const SCAN_INTERVAL_MS = 10 * 60 * 1000;
+        const scanTimer = setInterval(async () => {
+          try {
+            const start = Date.now();
+            const detection = llmAnomalyDetector.detect({ skipCache: true });
+            const durationMs = Date.now() - start;
+            if (detection.ok) {
+              await llmAnomalyHistory.recordSnapshot({
+                detectionResult: detection,
+                source: 'scheduler',
+                durationMs,
+              });
+            }
+          } catch (scanErr) {
+            logger.warn('[LLM-Anomalies] periodic scan failed:', scanErr.message);
+          }
+        }, SCAN_INTERVAL_MS);
+        if (typeof scanTimer.unref === 'function') scanTimer.unref();
+        app._llmAnomalyScanTimer = scanTimer;
+        logger.info('[LLM-Anomalies] ✓ periodic 10-min scan armed');
+      }
     } catch (anomErr) {
       logger.warn('[LLM-Anomalies] routes skipped:', anomErr.message);
     }

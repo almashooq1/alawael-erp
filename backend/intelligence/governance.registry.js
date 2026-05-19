@@ -1172,6 +1172,30 @@ const PERMISSIONS = Object.freeze({
     'head_office',
   ],
 
+  // ─── Wave 120 — Parent Chatbot (P3.6 Phase 1) ──────────────
+  // ask — guardians of any beneficiary. parent_portal_user covers
+  // the public parent portal account; guardian is the in-system
+  // role assigned to a primary caregiver.
+  'parent.chatbot.ask': ['parent_portal_user', 'guardian'],
+  // read own session — same audience as ask.
+  'parent.chatbot.read': ['parent_portal_user', 'guardian'],
+  // admin override — support staff who can inspect any session for
+  // troubleshooting. Narrow on purpose: reception + branch managers,
+  // not therapists.
+  'admin.chatbot.read': [
+    'reception_supervisor',
+    'reception',
+    'branch_manager',
+    'branch_director',
+    'compliance_officer',
+    'auditor',
+    'head_office',
+  ],
+  // config — tune templates / keyword catalogues. Tighter: only
+  // platform owners + DPO (templates are surfaced verbatim to
+  // parents, so changes need a privacy review).
+  'admin.chatbot.config': ['head_office', 'dpo', 'security_architect'],
+
   // ─── Wave 115 — No-Show Prediction (P3.4) ──────────────────
   // Read perm — broad: operations needs aggregate risk views.
   'ai.no-show.read': [

@@ -2886,6 +2886,54 @@ try {
   logger.warn('[Hikvision] routes skipped:', hikErr.message);
 }
 
+// ─── Parent Chatbot (Wave 120 / P3.6 Phase 1) ────────────────────────────────
+// Rule-based intent classifier + canned response templates +
+// conversation persistence. Closes the last P3 deliverable.
+// Self-disables when ParentChatbotSession model isn't loaded.
+try {
+  let ParentChatbotSession = null;
+  try {
+    ParentChatbotSession = require('./models/ParentChatbotSession');
+  } catch {
+    /* model missing — feature self-disables */
+  }
+  let pcGovernance = null;
+  try {
+    const { createGovernanceService } = require('./intelligence/governance.service');
+    pcGovernance = createGovernanceService({ logger });
+  } catch {
+    /* governance optional */
+  }
+  if (pcGovernance && ParentChatbotSession) {
+    const { createParentChatbotService } = require('./intelligence/parent-chatbot.service');
+    const { createParentChatbotRouter } = require('./routes/parent-chatbot.routes');
+    const chatbotService = createParentChatbotService({
+      sessionModel: ParentChatbotSession,
+      logger,
+    });
+    const { authenticate: pcAuthMw } = require('./middleware/auth');
+    app.use(
+      '/api/v1/parent/chatbot',
+      pcAuthMw,
+      createParentChatbotRouter({
+        chatbotService,
+        governance: pcGovernance,
+        logger,
+      })
+    );
+    app._parentChatbotService = chatbotService;
+    logger.info(
+      '[ParentChatbot] ✓ Wave 120 (P3.6 Phase 1) routes mounted at /api/v1/parent/chatbot'
+    );
+  } else {
+    logger.info(
+      '[ParentChatbot] routes skipped: governance or ParentChatbotSession model unavailable'
+    );
+  }
+} catch (pcErr) {
+  logger.warn('[ParentChatbot] routes skipped:', pcErr.message);
+}
+
 // ─── No-Show Prediction (Wave 115 / P3.4) ────────────────────────────────────
 // Heuristic risk scorer + intervention catalogue over the existing
 // Appointment + AiPrediction models. Mounts /api/v1/ai/no-show behind

@@ -71,6 +71,10 @@ pids/
 *.seed
 *.pid.lock
 
+# Seed runner outputs (backend/seed.out, backend/seed.err)
+seed.out
+seed.err
+
 # ───────────────────────────────────────────────────────────────
 # 5. Temp & Cache
 # ───────────────────────────────────────────────────────────────

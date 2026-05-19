@@ -94,7 +94,11 @@ describe('workflow constants', () => {
 //  createWorkflow
 // ═══════════════════════════════════════
 describe('workflow.createWorkflow', () => {
-  it.skip('creates workflow and emits event (needs constructor mock)', async () => {
+  // SKIPPED — verified 2026-05-19: source captures `WorkflowInstance = mongoose.model('WorkflowInstance')`
+  // at module load (line 30), so overriding mongoose.model AFTER load has no effect (TypeError:
+  // WorkflowInstance is not a constructor). To re-enable: either jest.mock the model module before
+  // require, or refactor the engine to lookup the model lazily inside each method.
+  it.skip('creates workflow and emits event', async () => {
     Model.findOne.mockResolvedValue(null); // no existing
     const saved = fakeWorkflow();
     const mockInstance = { ...saved, save: jest.fn().mockResolvedValue(saved) };
@@ -230,7 +234,7 @@ describe('workflow.getPendingTasks', () => {
 //  escalateOverdue
 // ═══════════════════════════════════════
 describe('workflow.escalateOverdue', () => {
-  it.skip('marks overdue and saves (source has ReferenceError: escalatedTo)', async () => {
+  it('marks overdue and saves', async () => {
     const wf = fakeWorkflow();
     Model.findById.mockResolvedValue(wf);
 

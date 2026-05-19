@@ -1069,7 +1069,7 @@ module.exports = async function seedDemoShowcase({ dryRun = false, reset = false
       { provider: 'balady', op: 'verify', kind: 'licenseNumber', weight: 6 },
       { provider: 'nafath', op: 'initiate', kind: 'nationalId', weight: 6 },
       { provider: 'nphies', op: 'eligibility', kind: 'memberId', weight: 5 },
-      { provider: 'fatoora', op: 'submit', kind: 'uuid', weight: 2 },
+      { provider: 'fatoora', op: 'submit', kind: 'other', weight: 2 },
     ];
     const pool = [];
     providerWeights.forEach(p => {

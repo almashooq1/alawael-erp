@@ -13,11 +13,16 @@ const app = require('../server');
 /* ═══════════════════════════════════════════════════════════════════════════
    Public Verification — /api/e-signature-pdf/public/verify/:code
    ═══════════════════════════════════════════════════════════════════════════ */
-// SKIPPED — original claim "safeMount fails silently" is wrong (verified 2026-05-19,
-// safeMount logs at error level). When un-skipped, routes ARE mounted but responses
-// fall outside the asserted [200, 404, 500] range — likely 401 because the test does
-// not authenticate. Fix path: either add a test JWT to the supertest request OR widen
-// the status allow-list to include 401/403. Until then keeping skip avoids red CI.
+// SKIPPED — three-step investigation 2026-05-19:
+//   1. Original comment blamed safeMount: WRONG (safeMount logs at error level).
+//   2. Suspected unauthenticated request returning 401: WRONG (it would have been
+//      handled if it were just an auth issue).
+//   3. Actual response status is 503 Service Unavailable — the route handler
+//      itself throws because the test env has USE_MOCK_DB=true + DISABLE_REDIS=true,
+//      so the underlying EStamp / EDocument Mongoose queries fail and safeError
+//      returns 503. Fix requires real DB+Redis in the test harness OR mocking the
+//      models at module level (jest.mock pre-require). Neither is a 5-min change.
+// JWT helper would NOT fix this — the public route is unauthenticated by design.
 describe.skip('GET /api/e-signature-pdf/public/verify/:code', () => {
   it('should return 404 for a non-existent verification code', async () => {
     const res = await request(app)

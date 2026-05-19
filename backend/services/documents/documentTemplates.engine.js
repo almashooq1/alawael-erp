@@ -487,7 +487,11 @@ class DocumentTemplatesEngine {
       for (const tmpl of DEFAULT_TEMPLATES) {
         const exists = await DocumentTemplate.findOne({ slug: tmpl.slug });
         if (!exists) {
-          await new DocumentTemplate({ ...tmpl, isSystem: true, isActive: true }).save();
+          await new (mongoose.model('DocumentTemplate'))({
+            ...tmpl,
+            isSystem: true,
+            isActive: true,
+          }).save();
           logger.info(`[Templates] تم إنشاء قالب: ${tmpl.name}`);
         }
       }
@@ -575,7 +579,10 @@ class DocumentTemplatesEngine {
           '-' +
           Date.now().toString(36);
 
-      const template = new DocumentTemplate({
+      // Lazy lookup via mongoose.model so unit tests can mock the constructor.
+      // Static methods used elsewhere keep using the captured ref above.
+      const DocumentTemplateCtor = mongoose.model('DocumentTemplate');
+      const template = new DocumentTemplateCtor({
         ...data,
         slug,
         createdBy: userId,
@@ -758,7 +765,9 @@ class DocumentTemplatesEngine {
       delete original.createdAt;
       delete original.updatedAt;
 
-      const dup = new DocumentTemplate({
+      // Lazy lookup via mongoose.model so unit tests can mock the constructor.
+      const DocumentTemplateCtor = mongoose.model('DocumentTemplate');
+      const dup = new DocumentTemplateCtor({
         ...original,
         name: `نسخة من ${original.name}`,
         slug: `${original.slug}-copy-${Date.now().toString(36)}`,

@@ -94,11 +94,7 @@ describe('workflow constants', () => {
 //  createWorkflow
 // ═══════════════════════════════════════
 describe('workflow.createWorkflow', () => {
-  // SKIPPED — verified 2026-05-19: source captures `WorkflowInstance = mongoose.model('WorkflowInstance')`
-  // at module load (line 30), so overriding mongoose.model AFTER load has no effect (TypeError:
-  // WorkflowInstance is not a constructor). To re-enable: either jest.mock the model module before
-  // require, or refactor the engine to lookup the model lazily inside each method.
-  it.skip('creates workflow and emits event', async () => {
+  it('creates workflow and emits event', async () => {
     Model.findOne.mockResolvedValue(null); // no existing
     const saved = fakeWorkflow();
     const mockInstance = { ...saved, save: jest.fn().mockResolvedValue(saved) };

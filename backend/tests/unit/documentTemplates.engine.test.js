@@ -121,11 +121,7 @@ describe('documentTemplates.getTemplate', () => {
 //  createTemplate
 // ═══════════════════════════════════════
 describe('documentTemplates.createTemplate', () => {
-  // SKIPPED — verified 2026-05-19: source captures `DocumentTemplate = mongoose.model(...)` at
-  // module load, so overriding mongoose.model AFTER load has no effect. Same fix path as
-  // workflow.createWorkflow above: jest.mock the model module before require, or refactor for
-  // lazy model lookup.
-  it.skip('creates and returns success', async () => {
+  it('creates and returns success', async () => {
     const saved = fakeTemplate();
     // DocumentTemplate constructor is called internally via `new DocumentTemplate(...)`
     // The mock model from jest.setup.js returns a constructor that produces mock instances
@@ -260,7 +256,7 @@ describe('documentTemplates.previewTemplate', () => {
 //  duplicateTemplate
 // ═══════════════════════════════════════
 describe('documentTemplates.duplicateTemplate', () => {
-  it.skip('creates a copy with modified name', async () => {
+  it('creates a copy with modified name', async () => {
     const tpl = fakeTemplate();
     Model.findById.mockReturnValue(mockChain(tpl));
 

@@ -308,7 +308,13 @@ class DocumentWorkflowEngine extends EventEmitter {
       const dueDate = new Date(Date.now() + slaHours * 60 * 60 * 1000);
       const warningDate = new Date(Date.now() + slaHours * 0.75 * 60 * 60 * 1000);
 
-      const workflow = new WorkflowInstance({
+      // Lazy lookup via mongoose.model so unit tests can mock the constructor
+      // by replacing mongoose.model.mockImplementation('WorkflowInstance', ...).
+      // The static methods used elsewhere (findById/find/aggregate) still hit
+      // the captured `WorkflowInstance` ref above — tests already mock those
+      // via `Model.X.mockResolvedValue(...)` on that same reference.
+      const WorkflowInstanceCtor = mongoose.model('WorkflowInstance');
+      const workflow = new WorkflowInstanceCtor({
         documentId,
         templateId,
         currentStatus: 'draft',

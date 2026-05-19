@@ -24,3 +24,12 @@ process.env.BCRYPT_ROUNDS = '4';
 // Allow MongoMemoryServer up to 30 s to start its mongod process.
 // The default 10 s is too tight when the full 1700+ suite runs in parallel.
 process.env.MONGOMS_STARTUP_TIMEOUT = process.env.MONGOMS_STARTUP_TIMEOUT || '30000';
+
+// Disable background workers that schedule timers via setInterval. Without
+// these, importing server.js (or any module that boots a scheduler) leaks a
+// timer that fires after Jest tears down the test environment and crashes
+// with "You are trying to require a file after the Jest environment has been
+// torn down." The workers themselves are tested directly in their own suites.
+process.env.CCTV_QUEUE_DISABLE = process.env.CCTV_QUEUE_DISABLE || '1';
+process.env.HIKVISION_STREAM_MODE = process.env.HIKVISION_STREAM_MODE || 'off';
+process.env.LLM_ANOMALY_SCAN_DISABLED = process.env.LLM_ANOMALY_SCAN_DISABLED || '1';

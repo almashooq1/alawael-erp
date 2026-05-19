@@ -136,6 +136,21 @@ function createParentChatbotRouter({
     }
   });
 
+  // Wave 126: GET /llm-stats — admin-only LLM telemetry
+  // (calls / cache hit rate / fallback rate / token cost).
+  router.get('/llm-stats', requirePerm('admin.chatbot.read'), async (req, res) => {
+    try {
+      const q = req.query || {};
+      const result = chatbotService.getLlmStats({
+        since: q.since || null,
+        bucketHours: q.bucketHours ? Number(q.bucketHours) : 1,
+      });
+      return respond(res, result);
+    } catch (err) {
+      return safeError(res, err, 'admin.chatbot.llm-stats');
+    }
+  });
+
   // Wave 124: GET /stats — admin-only aggregate analytics
   // (intents distribution, escalation rate, avg confidence).
   router.get('/stats', requirePerm('admin.chatbot.read'), async (req, res) => {

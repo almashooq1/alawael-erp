@@ -567,8 +567,21 @@ function createParentChatbotService({
     return doc;
   }
 
+  /**
+   * Wave 126: surfaces the LLM classifier's rolling telemetry to the
+   * admin endpoint. Returns ok:false with LLM_UNAVAILABLE when the
+   * classifier isn't wired (env without ANTHROPIC_API_KEY).
+   */
+  function getLlmStats(opts = {}) {
+    if (!llmClassifier || typeof llmClassifier.getTelemetry !== 'function') {
+      return { ok: false, reason: 'LLM_UNAVAILABLE' };
+    }
+    return llmClassifier.getTelemetry(opts);
+  }
+
   return {
     classifyIntent,
+    getLlmStats,
     listSessions,
     getStats,
     generateResponse,

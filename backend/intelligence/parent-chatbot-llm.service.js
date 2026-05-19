@@ -57,9 +57,29 @@ const DEFAULTS = Object.freeze({
   maxRetries: 1,
   cacheTtlMs: 5 * 60 * 1000,
   cacheMaxEntries: 256,
+  // Wave 126: telemetry rolling window (7 days) + per-call retention cap.
+  telemetryWindowMs: 7 * 24 * 60 * 60 * 1000,
+  telemetryMaxCalls: 10_000,
+});
+
+// Wave 126: Claude Haiku 4.5 cost approximation (USD per million tokens).
+// Tunable per environment via factory params. Used by `getTelemetry`
+// to surface estimated spend — not authoritative; reconcile against
+// Anthropic invoicing for billing.
+const DEFAULT_COSTS = Object.freeze({
+  inputUsdPer1M: 0.8,
+  outputUsdPer1M: 4.0,
 });
 
 // ─── Pure helpers ──────────────────────────────────────────────────
+
+function _round4(n) {
+  return Math.round(Number(n) * 10000) / 10000;
+}
+
+function _round6(n) {
+  return Math.round(Number(n) * 1_000_000) / 1_000_000;
+}
 
 function _isRetriable(err) {
   if (!err) return false;
@@ -206,11 +226,41 @@ function createParentChatbotLlmService({
   maxRetries = DEFAULTS.maxRetries,
   cacheTtlMs = DEFAULTS.cacheTtlMs,
   cacheMaxEntries = DEFAULTS.cacheMaxEntries,
+  telemetryWindowMs = DEFAULTS.telemetryWindowMs,
+  telemetryMaxCalls = DEFAULTS.telemetryMaxCalls,
+  inputUsdPer1M = DEFAULT_COSTS.inputUsdPer1M,
+  outputUsdPer1M = DEFAULT_COSTS.outputUsdPer1M,
   logger = console,
   now = () => Date.now(),
 } = {}) {
   const cache = _createLruCache(cacheMaxEntries, cacheTtlMs, now);
   const systemPrompt = _buildSystemPrompt();
+
+  // ─── Wave 126: telemetry ────────────────────────────────────────
+  // In-memory rolling buffer of call records. Bounded by both time
+  // (telemetryWindowMs) and count (telemetryMaxCalls — soft cap that
+  // drops the oldest entries via shift()). For long-term billing
+  // reconciliation, fold this into a persistent collection in a
+  // future wave.
+  const telemetry = [];
+
+  function _recordCall(rec) {
+    telemetry.push({
+      at: now(),
+      source: rec.source || 'unknown',
+      intent: rec.intent || null,
+      tokensIn: Number.isFinite(rec.tokensIn) ? rec.tokensIn : 0,
+      tokensOut: Number.isFinite(rec.tokensOut) ? rec.tokensOut : 0,
+      elapsedMs: Number.isFinite(rec.elapsedMs) ? rec.elapsedMs : 0,
+      success: Boolean(rec.success),
+      reason: rec.reason || null,
+    });
+    // Prune by count
+    while (telemetry.length > telemetryMaxCalls) telemetry.shift();
+    // Prune by age
+    const cutoff = now() - telemetryWindowMs;
+    while (telemetry.length > 0 && telemetry[0].at < cutoff) telemetry.shift();
+  }
 
   function available() {
     return Boolean(client && typeof client?.messages?.create === 'function');
@@ -292,30 +342,183 @@ function createParentChatbotLlmService({
   /**
    * Public entry. Validates input, checks cache, calls the LLM,
    * normalizes the response, and caches successful classifications.
+   * Wave 126: records telemetry for every outcome (cache hit / LLM
+   * success / each error class).
    */
   async function classify(message) {
     if (!message || typeof message !== 'string' || !message.trim()) {
+      _recordCall({
+        source: 'reject',
+        success: false,
+        reason: REASON.MESSAGE_REQUIRED,
+      });
       return { ok: false, reason: REASON.MESSAGE_REQUIRED };
     }
     if (!available()) {
+      _recordCall({
+        source: 'reject',
+        success: false,
+        reason: REASON.CLIENT_MISSING,
+      });
       return { ok: false, reason: REASON.CLIENT_MISSING };
     }
     const cacheKey = reg.normalizeText(message);
     const hit = cache.get(cacheKey);
     if (hit) {
+      _recordCall({
+        source: 'cache',
+        intent: hit.intent,
+        success: true,
+      });
       return { ...hit, source: 'cache' };
     }
     const result = await _classifyViaLlm(message);
     if (result.ok) {
-      // Cache the canonical fields only (no `raw`, no `usage`) to
-      // keep entries small.
       cache.set(cacheKey, {
         ok: true,
         intent: result.intent,
         confidence: result.confidence,
       });
+      _recordCall({
+        source: 'llm',
+        intent: result.intent,
+        tokensIn: result.usage ? Number(result.usage.input_tokens || 0) : 0,
+        tokensOut: result.usage ? Number(result.usage.output_tokens || 0) : 0,
+        elapsedMs: result.elapsedMs || 0,
+        success: true,
+      });
+    } else {
+      _recordCall({
+        source: 'llm',
+        success: false,
+        reason: result.reason,
+      });
     }
     return result;
+  }
+
+  /**
+   * Wave 126: aggregate telemetry over a rolling window.
+   *
+   *   getTelemetry({since?, bucketHours?}) → {
+   *     ok: true,
+   *     since, until, windowMs,
+   *     totals: { calls, llmCalls, cacheHits, rejects, failures,
+   *               tokensIn, tokensOut, costUsd,
+   *               cacheHitRate, fallbackRate, avgLatencyMs,
+   *               failureRate },
+   *     byReason: { CLIENT_MISSING: N, TIMEOUT: N, ... },
+   *     byIntent: { greeting: N, ... },
+   *     buckets: [{ at, calls, llmCalls, cacheHits, costUsd }],
+   *   }
+   *
+   * `fallbackRate` here = (rejects + failures) / total — fraction of
+   * calls that would degrade to rule-based at the service layer.
+   */
+  function getTelemetry({ since = null, bucketHours = 1 } = {}) {
+    const sinceMs = since ? new Date(since).getTime() : now() - telemetryWindowMs;
+    const calls = telemetry.filter(c => c.at >= sinceMs);
+    const totals = {
+      calls: calls.length,
+      llmCalls: 0,
+      cacheHits: 0,
+      rejects: 0,
+      failures: 0,
+      tokensIn: 0,
+      tokensOut: 0,
+    };
+    const byReason = {};
+    const byIntent = {};
+    let latencySum = 0;
+    let latencyN = 0;
+    for (const c of calls) {
+      if (c.source === 'llm' && c.success) {
+        totals.llmCalls++;
+        totals.tokensIn += c.tokensIn;
+        totals.tokensOut += c.tokensOut;
+        if (c.elapsedMs > 0) {
+          latencySum += c.elapsedMs;
+          latencyN++;
+        }
+      } else if (c.source === 'cache' && c.success) {
+        totals.cacheHits++;
+      } else if (c.source === 'reject') {
+        totals.rejects++;
+      } else if (!c.success) {
+        totals.failures++;
+      }
+      if (c.intent) {
+        byIntent[c.intent] = (byIntent[c.intent] || 0) + 1;
+      }
+      if (c.reason) {
+        byReason[c.reason] = (byReason[c.reason] || 0) + 1;
+      }
+    }
+    const costUsd = _round6(
+      (totals.tokensIn * inputUsdPer1M) / 1_000_000 +
+        (totals.tokensOut * outputUsdPer1M) / 1_000_000
+    );
+    const denom = totals.calls || 1;
+    const cacheHitRate = _round4(totals.cacheHits / denom);
+    const fallbackRate = _round4((totals.rejects + totals.failures) / denom);
+    const failureRate = _round4(totals.failures / denom);
+    const avgLatencyMs = latencyN > 0 ? Math.round(latencySum / latencyN) : 0;
+
+    // Buckets
+    const bucketMs = Math.max(1, Number(bucketHours)) * 3600 * 1000;
+    const bucketsMap = new Map();
+    for (const c of calls) {
+      const bucketStart = Math.floor(c.at / bucketMs) * bucketMs;
+      if (!bucketsMap.has(bucketStart)) {
+        bucketsMap.set(bucketStart, {
+          at: new Date(bucketStart).toISOString(),
+          calls: 0,
+          llmCalls: 0,
+          cacheHits: 0,
+          tokensIn: 0,
+          tokensOut: 0,
+        });
+      }
+      const b = bucketsMap.get(bucketStart);
+      b.calls++;
+      if (c.source === 'llm' && c.success) {
+        b.llmCalls++;
+        b.tokensIn += c.tokensIn;
+        b.tokensOut += c.tokensOut;
+      } else if (c.source === 'cache' && c.success) {
+        b.cacheHits++;
+      }
+    }
+    const buckets = Array.from(bucketsMap.values())
+      .sort((a, b) => new Date(a.at).getTime() - new Date(b.at).getTime())
+      .map(b => ({
+        ...b,
+        costUsd: _round6(
+          (b.tokensIn * inputUsdPer1M) / 1_000_000 + (b.tokensOut * outputUsdPer1M) / 1_000_000
+        ),
+      }));
+
+    return {
+      ok: true,
+      since: new Date(sinceMs).toISOString(),
+      until: new Date(now()).toISOString(),
+      windowMs: now() - sinceMs,
+      totals: {
+        ...totals,
+        costUsd,
+        cacheHitRate,
+        fallbackRate,
+        avgLatencyMs,
+        failureRate,
+      },
+      byReason,
+      byIntent,
+      buckets,
+    };
+  }
+
+  function resetTelemetry() {
+    telemetry.length = 0;
   }
 
   return {
@@ -323,6 +526,10 @@ function createParentChatbotLlmService({
     available,
     resetCache: () => cache.clear(),
     _cacheSize: () => cache.size(),
+    // Wave 126:
+    getTelemetry,
+    resetTelemetry,
+    _telemetrySize: () => telemetry.length,
     // Exposed for tests:
     _parseLlmResponse,
     _coerceIntent,

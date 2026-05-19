@@ -291,6 +291,35 @@ module.exports = async function seedDemoShowcase({ dryRun = false, reset = false
       bump('employees');
     }
 
+    // Create matching User account so the employee can log into the admin.
+    // Maps clinical specializations to platform role enum:
+    const roleBySpec = {
+      pt: 'therapist_pt',
+      ot: 'therapist_ot',
+      speech: 'therapist_slp',
+      psychology: 'therapist_psych',
+      nursing: 'therapy_assistant',
+      aba: 'therapist',
+    };
+    const userRole = roleBySpec[spec.specialization] || 'therapist';
+    let empUser = await User.findOne({ email: spec.email });
+    if (!empUser) {
+      empUser = await User.create({
+        fullName: `${spec.first} ${spec.last}`,
+        firstName: spec.first,
+        lastName: spec.last,
+        email: spec.email,
+        password: 'Demo@2026',
+        role: userRole,
+        nationalId: spec.nid,
+        phone: `+96650000${String(i).padStart(4, '0')}`,
+      });
+      bump('users');
+    }
+    if (!emp.user_id) {
+      emp.user_id = empUser._id;
+    }
+
     // Run all applicable mock verifications
     const gResult = await gosi.verify({ nationalId: emp.national_id });
     emp.gosi_verification = {

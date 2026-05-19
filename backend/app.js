@@ -3047,18 +3047,26 @@ try {
       logger.warn('[LLM-Telemetry] routes skipped:', telErr.message);
     }
 
-    // Wave 142+144: LLM anomaly detector + history. Mounts at
-    // /api/v1/ai/llm-anomalies and reuses ai.telemetry.read since the
-    // payload exposes the same data. Wave 144 adds history list,
-    // trend chart, and manual scan endpoints; the snapshot model is
-    // optional — if missing, the live /llm-anomalies endpoint still
-    // works and the history endpoints return 503.
+    // Wave 142+144+146: LLM anomaly detector + history + dispatcher.
+    // Mounts at /api/v1/ai/llm-anomalies and reuses ai.telemetry.read.
+    // Wave 144 adds history list/trend/manual-scan endpoints. Wave 146
+    // adds a diff-based dispatcher that delivers anomaly-fired/
+    // anomaly-resolved events to channels (log + optional webhook).
     try {
       const { getDefaultRegistry } = require('./intelligence/llm-registry.lib');
       const { createLlmAnomalyDetector } = require('./intelligence/llm-anomaly-detector.service');
       const {
         createLlmAnomalyHistoryService,
       } = require('./intelligence/llm-anomaly-history.service');
+      const {
+        createLlmAnomalyDispatcher,
+      } = require('./intelligence/llm-anomaly-dispatcher.service');
+      const {
+        createLlmAnomalyLogChannel,
+      } = require('./intelligence/channels/llm-anomaly-log-channel');
+      const {
+        createLlmAnomalyWebhookChannel,
+      } = require('./intelligence/channels/llm-anomaly-webhook-channel');
       const { createLlmAnomaliesRouter } = require('./routes/llm-anomalies.routes');
 
       const llmAnomalyDetector = createLlmAnomalyDetector({
@@ -3079,6 +3087,16 @@ try {
         logger.warn('[LLM-Anomalies] history layer skipped (model missing):', histErr.message);
       }
 
+      // Wave 146 — diff dispatcher + channels. Log channel always on.
+      // Webhook channel auto-disabled when LLM_ANOMALY_WEBHOOK_URL unset.
+      const dispatchChannels = [createLlmAnomalyLogChannel({ logger, name: 'log' })];
+      const webhookCh = createLlmAnomalyWebhookChannel({ logger });
+      if (webhookCh) dispatchChannels.push(webhookCh);
+      const llmAnomalyDispatcher = createLlmAnomalyDispatcher({
+        channels: dispatchChannels,
+        logger,
+      });
+
       app.use(
         '/api/v1/ai',
         pcAuthMw,
@@ -3091,11 +3109,14 @@ try {
       );
       app._llmAnomalyDetector = llmAnomalyDetector;
       app._llmAnomalyHistory = llmAnomalyHistory;
-      logger.info('[LLM-Anomalies] ✓ Wave 142+144 routes mounted at /api/v1/ai/llm-anomalies');
+      app._llmAnomalyDispatcher = llmAnomalyDispatcher;
+      logger.info(
+        `[LLM-Anomalies] ✓ Wave 142+144+146 routes + dispatcher (${dispatchChannels.length} channels) mounted at /api/v1/ai/llm-anomalies`
+      );
 
-      // Wave 144 — periodic background scan. 10-min cadence mirrors
-      // the Hikvision Wave 114 ANOMALY_SCAN cron. Skipped entirely
-      // when the history layer is unavailable (no point running).
+      // Wave 144+146 — periodic background scan + dispatch. 10-min
+      // cadence mirrors the Hikvision Wave 114 ANOMALY_SCAN cron.
+      // Skipped entirely when the history layer is unavailable.
       if (llmAnomalyHistory && process.env.LLM_ANOMALY_SCAN_DISABLED !== '1') {
         const SCAN_INTERVAL_MS = 10 * 60 * 1000;
         const scanTimer = setInterval(async () => {
@@ -3109,6 +3130,13 @@ try {
                 source: 'scheduler',
                 durationMs,
               });
+              // Wave 146 — diff against previous detection and emit
+              // fired/resolved events. Independent of persistence
+              // success because dispatcher has its own state.
+              await llmAnomalyDispatcher.dispatch({
+                detectionResult: detection,
+                source: 'scheduler',
+              });
             }
           } catch (scanErr) {
             logger.warn('[LLM-Anomalies] periodic scan failed:', scanErr.message);
@@ -3116,7 +3144,7 @@ try {
         }, SCAN_INTERVAL_MS);
         if (typeof scanTimer.unref === 'function') scanTimer.unref();
         app._llmAnomalyScanTimer = scanTimer;
-        logger.info('[LLM-Anomalies] ✓ periodic 10-min scan armed');
+        logger.info('[LLM-Anomalies] ✓ periodic 10-min scan + dispatch armed');
       }
     } catch (anomErr) {
       logger.warn('[LLM-Anomalies] routes skipped:', anomErr.message);

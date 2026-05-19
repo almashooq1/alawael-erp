@@ -34,6 +34,7 @@ function actorFrom(req) {
 function createLlmAnomaliesRouter({
   detector = null,
   history = null,
+  ack = null,
   governance = null,
   logger = console,
 } = {}) {
@@ -43,7 +44,7 @@ function createLlmAnomaliesRouter({
   if (!governance || typeof governance.hasPermission !== 'function') {
     throw new Error('llm-anomalies.routes: governance service is required');
   }
-  // history is optional — when absent, the Wave 144 routes self-disable.
+  // history + ack are optional — when absent, the dependent routes self-disable.
   void logger;
 
   const router = express.Router();
@@ -157,6 +158,91 @@ function createLlmAnomaliesRouter({
       });
     } catch (err) {
       return safeError(res, err, 'ai.llm-anomalies.scan');
+    }
+  });
+
+  // ─── Wave 147 — ack / unack / list ──────────────────────────
+
+  function requireAck(res) {
+    if (!ack) {
+      res.status(503).json({
+        success: false,
+        reason: 'LLM_ANOMALY_ACK_UNAVAILABLE',
+        message: 'acknowledgement layer is not configured',
+      });
+      return false;
+    }
+    return true;
+  }
+
+  router.post('/llm-anomalies/ack', requirePerm('ai.telemetry.read'), async (req, res) => {
+    try {
+      if (!requireAck(res)) return;
+      const body = req.body || {};
+      const actor = actorFrom(req);
+
+      // The live detection results carry the anomaly metadata so we
+      // can persist a snapshot for the ack list UI. Look up the
+      // anomaly in the current detection (cached); fallback to
+      // anomalyId-only ack when not found.
+      let anomaly = null;
+      try {
+        const det = detector.detect({ skipCache: false });
+        if (det.ok && Array.isArray(det.items)) {
+          anomaly = det.items.find(a => a.id === body.anomalyId) || null;
+        }
+      } catch {
+        /* fall through — ack without snapshot */
+      }
+
+      const r = await ack.ack({
+        anomalyId: body.anomalyId,
+        durationMs: Number(body.durationMs),
+        actor: actor.userId,
+        role: actor.role,
+        reason: body.reason,
+        anomaly,
+      });
+      if (!r.ok) {
+        return res.status(r.errors ? 422 : 500).json({
+          success: false,
+          reason: r.reason,
+          errors: r.errors,
+        });
+      }
+      return res.json({ success: true, data: { ack: r.ack } });
+    } catch (err) {
+      return safeError(res, err, 'ai.llm-anomalies.ack');
+    }
+  });
+
+  router.delete(
+    '/llm-anomalies/ack/:anomalyId',
+    requirePerm('ai.telemetry.read'),
+    async (req, res) => {
+      try {
+        if (!requireAck(res)) return;
+        const r = await ack.unack({ anomalyId: req.params.anomalyId });
+        if (!r.ok) {
+          return res.status(r.reason === 'LLM_ANOMALY_ACK_NOT_FOUND' ? 404 : 500).json({
+            success: false,
+            reason: r.reason,
+          });
+        }
+        return res.json({ success: true, data: r });
+      } catch (err) {
+        return safeError(res, err, 'ai.llm-anomalies.unack');
+      }
+    }
+  );
+
+  router.get('/llm-anomalies/acks', requirePerm('ai.telemetry.read'), async (req, res) => {
+    try {
+      if (!requireAck(res)) return;
+      const r = await ack.listActive();
+      return res.json({ success: true, data: r });
+    } catch (err) {
+      return safeError(res, err, 'ai.llm-anomalies.acks');
     }
   });
 

@@ -3067,6 +3067,7 @@ try {
       const {
         createLlmAnomalyWebhookChannel,
       } = require('./intelligence/channels/llm-anomaly-webhook-channel');
+      const { createLlmAnomalyAckService } = require('./intelligence/llm-anomaly-ack.service');
       const { createLlmAnomaliesRouter } = require('./routes/llm-anomalies.routes');
 
       const llmAnomalyDetector = createLlmAnomalyDetector({
@@ -3087,6 +3088,17 @@ try {
         logger.warn('[LLM-Anomalies] history layer skipped (model missing):', histErr.message);
       }
 
+      // Wave 147 — ack/silencing layer. Defensive load. When the
+      // model is missing the dispatcher just doesn't get an ackService
+      // and the ack endpoints return 503.
+      let llmAnomalyAck = null;
+      try {
+        const LlmAnomalyAck = require('./models/LlmAnomalyAck');
+        llmAnomalyAck = createLlmAnomalyAckService({ ackModel: LlmAnomalyAck, logger });
+      } catch (ackErr) {
+        logger.warn('[LLM-Anomalies] ack layer skipped (model missing):', ackErr.message);
+      }
+
       // Wave 146 — diff dispatcher + channels. Log channel always on.
       // Webhook channel auto-disabled when LLM_ANOMALY_WEBHOOK_URL unset.
       const dispatchChannels = [createLlmAnomalyLogChannel({ logger, name: 'log' })];
@@ -3094,6 +3106,7 @@ try {
       if (webhookCh) dispatchChannels.push(webhookCh);
       const llmAnomalyDispatcher = createLlmAnomalyDispatcher({
         channels: dispatchChannels,
+        ackService: llmAnomalyAck, // Wave 147 — fired events for acked ids are skipped
         logger,
       });
 
@@ -3103,15 +3116,17 @@ try {
         createLlmAnomaliesRouter({
           detector: llmAnomalyDetector,
           history: llmAnomalyHistory,
+          ack: llmAnomalyAck,
           governance: pcGovernance,
           logger,
         })
       );
       app._llmAnomalyDetector = llmAnomalyDetector;
       app._llmAnomalyHistory = llmAnomalyHistory;
+      app._llmAnomalyAck = llmAnomalyAck;
       app._llmAnomalyDispatcher = llmAnomalyDispatcher;
       logger.info(
-        `[LLM-Anomalies] ✓ Wave 142+144+146 routes + dispatcher (${dispatchChannels.length} channels) mounted at /api/v1/ai/llm-anomalies`
+        `[LLM-Anomalies] ✓ Wave 142+144+146+147 routes + dispatcher (${dispatchChannels.length} channels${llmAnomalyAck ? ' + ack' : ''}) mounted at /api/v1/ai/llm-anomalies`
       );
 
       // Wave 144+146 — periodic background scan + dispatch. 10-min

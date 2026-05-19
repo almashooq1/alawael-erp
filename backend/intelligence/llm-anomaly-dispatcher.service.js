@@ -51,6 +51,8 @@ function createLlmAnomalyDispatcher({
   logger = console,
   now = () => new Date(),
   rateLimitMs = 60_000,
+  ackService = null, // Wave 147 — optional. If provided, fired events
+  // for acknowledged anomaly ids are suppressed.
 } = {}) {
   // Per-channel sanity check — a bad channel registration crashes
   // immediately rather than mysteriously dropping events.
@@ -130,6 +132,24 @@ function createLlmAnomalyDispatcher({
           cooldownRemainsMs: rateLimitMs - (nowMs - last),
         });
         continue;
+      }
+      // Wave 147 — ack gate. Operators silence a noisy anomaly via
+      // POST /llm-anomalies/:id/ack; fired events for that id are
+      // suppressed until the ack expires (resolves still fire).
+      if (ackService && typeof ackService.isAcked === 'function') {
+        let acked = false;
+        try {
+          acked = await ackService.isAcked(id);
+        } catch (err) {
+          // fail-open per ack service convention — better a noisy
+          // page than a silent miss.
+          logger.warn &&
+            logger.warn(`[llm-anomaly-dispatcher] ackService.isAcked threw: ${err.message}`);
+        }
+        if (acked) {
+          skipped.push({ id, reason: 'acknowledged' });
+          continue;
+        }
       }
       fired.push(anomaly);
       lastFiredAt.set(id, nowMs);

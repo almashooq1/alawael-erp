@@ -73,13 +73,19 @@ const FALSE_POSITIVE_ALLOWLIST = new Set([
 //
 // Each entry needs a one-line "why" comment.
 const OPTIONAL_REQUIRES_ALLOWLIST = new Set([
-  // app.js wires three optional services with explicit try/catch +
-  // "/* optional */" comments. Features (audit logging, anchor-ledger
-  // commit for HIGH-sensitivity care-plan attestations, beneficiary
-  // file-model registration) degrade gracefully when the modules don't
-  // exist on disk. P1 work to implement real backing services; until
-  // then the require() targets are allowed to miss.
-  'app.js::./services/auditLog.service',
+  // app.js wires two optional features with explicit try/catch +
+  // "/* optional */" comments. Both degrade gracefully when missing:
+  //   - anchorLedger commits HIGH-sensitivity care-plan attestations
+  //     to the blockchain audit chain
+  //   - BeneficiaryFile registers an optional file-model for care-plan
+  //     attachments
+  // P1 work to implement real backing modules; until then the
+  // require() targets are allowed to miss.
+  //
+  // Was three entries — `auditLog.service` shipped 2026-05-19 (commit
+  // adding services/auditLog.service.js) and was removed from this
+  // list. The broken-requires guard now actively verifies that file
+  // continues to exist.
   'app.js::./services/anchorLedger.service',
   'app.js::./models/BeneficiaryFile',
 ]);

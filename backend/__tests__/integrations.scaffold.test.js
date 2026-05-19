@@ -1,17 +1,20 @@
 /**
- * Smoke tests for the 5 scaffolded Saudi gov integration adapters.
- * Verifies each adapter module loads, exports the expected public API,
- * and that madaa.buildPayload produces a valid file format.
+ * Smoke tests for the scaffolded Saudi gov integration adapters.
+ *
+ * History (2026-05-19): the original 5-adapter suite covered nafath /
+ * absher / yakeen / wasel / madaa stub-only index.js files. The first
+ * 4 have been superseded by real implementations elsewhere and their
+ * unused index.js stubs deleted:
+ *   - nafath   -> services/nafathSigningService.js + services/nafathAdapter.js
+ *   - yakeen   -> services/yakeenVerificationService.js + routes/yakeen-verification.routes.js
+ *   - wasel    -> services/waselAdapter.js + routes/wasel-address.routes.js
+ *   - absher   -> services/absherAdapter.js
+ * madaa keeps its index.js because buildPayload (asserted below) is
+ * the real implementation; only its uploadPayload remains a P1 stub.
  */
 
 describe('integrations scaffold — public API shape', () => {
-  const adapters = [
-    ['nafath', ['createSignatureRequest', 'verifySignature', 'exchangeAuthCode']],
-    ['absher', ['verifyIdentity']],
-    ['yakeen', ['lookupPerson', 'verifyGuardianship']],
-    ['wasel', ['checkCoverage', 'submitClaim', 'getClaimStatus']],
-    ['madaa', ['buildPayload', 'uploadPayload']],
-  ];
+  const adapters = [['madaa', ['buildPayload', 'uploadPayload']]];
 
   test.each(adapters)('%s exports expected functions', (name, fnNames) => {
     const mod = require(`../integrations/${name}`);

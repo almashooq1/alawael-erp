@@ -162,6 +162,18 @@ function bootstrapCarePlanning(opts = {}) {
       },
       logger,
     });
+    // Wave 131: register in the cross-service LLM telemetry registry
+    // so /api/v1/ai/llm-telemetry can aggregate care-plan alongside
+    // parent-chatbot. Best-effort — registry failures don't block
+    // care-plan bootstrap.
+    try {
+      const { getDefaultRegistry } = require('./llm-registry.lib');
+      getDefaultRegistry({ logger }).register('care-plan', llmCaller);
+    } catch (regErr) {
+      if (logger && typeof logger.warn === 'function') {
+        logger.warn(`[care-plan] llm-registry registration failed: ${regErr.message}`);
+      }
+    }
   }
 
   // 6. Background workers (caller is responsible for scheduling)

@@ -2980,6 +2980,15 @@ try {
           logger,
         });
         logger.info('[ParentChatbot] ✓ LLM classifier enabled (Wave 123)');
+        // Wave 131: register the chatbot LLM in the cross-service
+        // telemetry registry so the /llm-telemetry admin endpoint
+        // can aggregate it alongside care-plan + future services.
+        try {
+          const { getDefaultRegistry } = require('./intelligence/llm-registry.lib');
+          getDefaultRegistry({ logger }).register('parent-chatbot', pcLlmClassifier);
+        } catch (regErr) {
+          logger.warn('[ParentChatbot] llm-registry registration failed:', regErr.message);
+        }
       } catch (llmErr) {
         logger.warn('[ParentChatbot] LLM classifier failed to wire:', llmErr.message);
       }
@@ -3007,6 +3016,28 @@ try {
     logger.info(
       '[ParentChatbot] ✓ Wave 120 (P3.6 Phase 1) routes mounted at /api/v1/parent/chatbot'
     );
+
+    // Wave 131: cross-service LLM telemetry routes. Mounts at
+    // /api/v1/ai — aggregates every service registered in the
+    // default llm-registry (chatbot + care-plan + future).
+    try {
+      const { getDefaultRegistry } = require('./intelligence/llm-registry.lib');
+      const { createLlmTelemetryRouter } = require('./routes/llm-telemetry.routes');
+      app.use(
+        '/api/v1/ai',
+        pcAuthMw,
+        createLlmTelemetryRouter({
+          llmRegistry: getDefaultRegistry({ logger }),
+          governance: pcGovernance,
+          logger,
+        })
+      );
+      logger.info(
+        '[LLM-Telemetry] ✓ Wave 131 cross-service routes mounted at /api/v1/ai/llm-telemetry'
+      );
+    } catch (telErr) {
+      logger.warn('[LLM-Telemetry] routes skipped:', telErr.message);
+    }
   } else {
     logger.info(
       '[ParentChatbot] routes skipped: governance or ParentChatbotSession model unavailable'

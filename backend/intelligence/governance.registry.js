@@ -1172,6 +1172,20 @@ const PERMISSIONS = Object.freeze({
     'head_office',
   ],
 
+  // ─── Wave 131 — Cross-service LLM telemetry ────────────────
+  // Wider scope than admin.chatbot.read — covers every LLM service
+  // registered via llm-registry (chatbot, care-plan, future).
+  // Narrow audience by design: only platform owners + executives +
+  // DPO see token-by-token cost data.
+  'ai.telemetry.read': [
+    'head_office',
+    'executive_leadership',
+    'dpo',
+    'compliance_officer',
+    'auditor',
+    'security_architect',
+  ],
+
   // ─── Wave 120 — Parent Chatbot (P3.6 Phase 1) ──────────────
   // ask — guardians of any beneficiary. parent_portal_user covers
   // the public parent portal account; guardian is the in-system

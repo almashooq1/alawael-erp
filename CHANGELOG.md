@@ -8,6 +8,182 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [Unreleased] — 2026-05-19 — Test-infra hygiene + audit hooks activated
+
+Multi-thread test-infrastructure session. Headline numbers:
+
+- **561 silent test failures** rescued — 11 wave-intelligence test
+  files (415 tests) + 5 care-plan wave files (146 tests) were all
+  failing with "X is not a constructor" because they were missing
+  `jest.unmock('mongoose')` but no one knew, because `test:sprint`
+  runs an explicit file enumeration that didn't include them.
+- **3 silent frontend failures** rescued — `kpiDashboard.service.js`
+  had a UTF-8 BOM that broke the auto-generated meta-test's
+  `^import` regex; `utils/dateUtils.getDayRange` was missing entirely
+  but the test still imported it. Frontend now 11,094 / 11,094.
+- **36 UTF-8 BOM-prefixed source files** purged + permanent guard
+  test added (`__tests__/no-utf8-bom.test.js`).
+- **5 dead integration stubs** deleted (~190 LOC) — Nafath / Yakeen /
+  Wasel / Absher index.js files threw "not implemented (P1)" but
+  were superseded by real services elsewhere; one even broke the
+  scaffold smoke test it was meant to satisfy.
+- **2 optional services activated** — `services/auditLog.service.js`
+  - `services/anchorLedger.service.js` shipped as minimal-forwarder
+    implementations. App.js try/catch hooks that previously degraded
+    to null now emit structured `audit:` / `anchor:` log lines for
+    5 callers (mfa challenge, access-review attestation, care-plan
+    bootstrap, lifecycle high-sensitivity, access-review cosigner).
+- **`test:sprint` expanded 87 → 103 files** and a new drift guard
+  (`wave-tests-in-sprint.test.js`) catches future `*-waveNN.test.js`
+  files that call `jest.unmock('mongoose')` but aren't enumerated.
+- **CI gate gap closed** — frontend tests were only running on PR
+  (`pr-checks.yml::frontend-tests`); ci.yml's push job did lint +
+  build only. Added a mirror `frontend-tests` job to ci.yml so direct
+  pushes to main/develop/feature branches also gate on the full
+  ~11K-test suite.
+
+### Architecture
+
+The recurring pattern across all 6 threads was **silent test exclusion**:
+infrastructure existed (mocks, guards, route mounts) but specific files
+or call sites slipped through the seams. The fix template per thread:
+
+1. **Discover the gap** by running a broader scope than CI does (full
+   backend suite, all wave-\* files, all source-file extensions).
+2. **Verify the root cause empirically** — never trust the existing
+   skip comment; e.g. the eStamp test's "safeMount fails silently"
+   comment was wrong (safeMount logs at `error` level — the real
+   blocker was 503 from mocked-Mongoose queries).
+3. **Fix the surface gap** plus **add a drift guard** that catches
+   the same class of failure when it next tries to recur.
+
+Three new drift guards: `no-utf8-bom`, `no-broken-requires` per-
+(file, target) allow-list, and `wave-tests-in-sprint` (scoped to files
+that `jest.unmock('mongoose')` — wave files passing under the global
+mock are intentionally not gated to keep sprint runtime contained).
+
+### Added
+
+- **`services/auditLog.service.js`** + 6 unit tests — minimal log-forwarder
+  with stable shape: `{action, actorUserId, actorRole, entityType,
+entityId, resource, ipAddress, metadata}`. NOT DB-backed (the
+  existing AuditLog Mongoose model has a fixed eventType enum that
+  doesn't fit the freeform action strings 13+ callers pass). P1 to
+  swap to DB persistence after schema discussion.
+- **`services/anchorLedger.service.js`** + 9 unit tests — minimal
+  no-op forwarder that returns `{txId: null, anchored: false, …}`.
+  **Critical invariant test**: txId must always be null until a real
+  blockchain client is wired (a forged sha256 would silently masquerade
+  as an on-chain reference — audit/compliance hazard).
+- **`backend/__tests__/no-utf8-bom.test.js`** — walks the backend tree
+  and fails CI with a precise file list if any `.js/.cjs/.mjs/.ts/.tsx/.jsx`
+  starts with EF BB BF.
+- **`backend/__tests__/wave-tests-in-sprint.test.js`** — drift guard
+  that auto-discovers any `__tests__/*-waveNN*.test.js` calling
+  `jest.unmock('mongoose')` and asserts it's in `scripts.test:sprint`
+  (ALLOWLIST mechanism for documented exceptions).
+- **Per-(file, target) allow-list mechanism** in `no-broken-requires.test.js` —
+  for the legitimate case where a single try/catch require should be
+  exempted without disabling the whole file's drift check.
+- **`CLAUDE.md` at project root** — agent onboarding doc covering the
+  two-repo layout, test surface map, 6 active drift guards, critical
+  conventions (wave numbering, atomic commit, Wave-18 invariants),
+  6 open known issues with precise diagnoses + remediation hints.
+- **`.github/workflows/ci.yml` frontend-tests job** — mirrors
+  pr-checks.yml so push events also gate on full frontend suite.
+
+### Fixed
+
+- **`frontend/src/utils/dateUtils.js`**: added missing `getDayRange(date)`
+  export (returns `{start, end}` for the day in local time). The test
+  imported the name but the function didn't exist — `undefined()` threw
+  on every test run.
+- **`frontend/src/services/kpiDashboard.service.js`**: stripped UTF-8
+  BOM that pushed the literal `import` keyword off column 0 of line 1
+  and broke the auto-generated meta-test's `/^import\s+/gm` regex.
+- **36 backend + 7 frontend source files**: BOM bytes stripped with
+  `sed -i '1s/^\xEF\xBB\xBF//'`. Behaviour unchanged; Node and bundlers
+  accept files with or without BOM.
+- **`backend/services/documents/documentWorkflow.engine.js`** +
+  **`documentTemplates.engine.js`**: 4 `new X(...)` sites switched to
+  `new (mongoose.model('X'))(...)` so jest tests can intercept the
+  constructor via `mongoose.model.mockImplementation`. Re-enabled 4
+  previously-skipped tests (escalateOverdue + createWorkflow +
+  createTemplate + duplicateTemplate).
+- **16 wave test files**: added `jest.unmock('mongoose');` so the
+  global mongoose mock from jest.setup.js:19 stops returning a stubbed
+  constructor. 561 silently-failing tests now actively gated.
+- **`backend/jest.env.js`**: added defaults for
+  `CCTV_QUEUE_DISABLE=1`, `HIKVISION_STREAM_MODE=off`,
+  `LLM_ANOMALY_SCAN_DISABLED=1`. Stops the "you are trying to require
+  a file after the Jest environment has been torn down" post-teardown
+  ReferenceError that fired on every test importing server.js (a
+  CCTV `setInterval` survived Jest's lifecycle).
+
+### Changed
+
+- **`backend/package.json` scripts.test:sprint**: 87 → 103 enumerated
+  files. Added 11 wave-intelligence + 5 care-plan tests that
+  `jest.unmock('mongoose')` and therefore need real gating.
+- **`MEMORY.md`** (agent memory index): 91KB → 26KB (-71%). Each
+  per-wave entry compressed from a paragraph to a one-line link;
+  detail preserved in the individual topic files.
+
+### Removed
+
+- **`backend/integrations/nafath/index.js`** (-63 LOC) — 3 stub
+  functions threw "not implemented (P1)" but were already implemented
+  in `services/nafathSigningService.js` + `services/nafathAdapter.js`
+  (34/34 tests passing). Zero importers.
+- **`backend/integrations/yakeen/index.js`** (-38 LOC) — superseded by
+  `services/yakeenVerificationService.js` + `routes/yakeen-verification.routes.js`.
+- **`backend/integrations/wasel/index.js`** (-45 LOC) — superseded by
+  `services/waselAdapter.js` + `routes/wasel-address.routes.js`.
+- **`backend/integrations/absher/index.js`** (-29 LOC) — superseded
+  by `services/absherAdapter.js`.
+
+### Verification
+
+- **CI sprint gate**: 1,569 / 1,569 tests across 87 suites pass in 712s
+  (was passing before; the +16 sprint additions add ~9s ≈ 1.3% runtime).
+- **Full frontend Jest**: 11,094 / 11,094 passing across 1,304 suites
+  (was 11,091 / 3 failing).
+- **`lint:duplication`** (Wave 93 G1 guard): 2,101 source files
+  scanned, no violations.
+- **`preflight`**: pass — safe to deploy.
+- **`gov:status`**: 10 / 10 Saudi gov providers all-green (mock mode).
+- **`web-admin typecheck`**: clean (`tsc --noEmit`, exit 0).
+- **`web-admin lint`**: 5 pre-existing warnings (3× `<img>` on CCTV
+  pages, 1× root-layout font load, 1× Next workspace-root notice) —
+  unchanged. The 6 page-level font-link duplicates flagged previously
+  were removed in companion commits to alawael-rehab-platform/master.
+
+### Audit corrections to CLAUDE.md
+
+Six false alarms from the initial repo audit were verified and
+documented as such, so future agents don't re-investigate the same
+dead ends:
+
+1. ".env files committed" → all actually gitignored; tracked ones
+   contain only public `REACT_APP_*` config.
+2. "386 skipped tests = 12% disabled" → actually 19 (0.6%), 18 with
+   documented rationale + 1 stale skip removed.
+3. "Nafath endpoint not wired" → e-signature flow has been live since
+   v4.0.95; only SSO `exchangeAuthCode` is a genuine gap.
+4. "migration-runner rollback is TODO" → fully implemented + 8/8 unit
+   tests pass. The TODOs the audit picked up live inside the
+   _generated migration template_ (placeholder for new migrations),
+   not in the runner.
+5. "5 monolithic 100KB+ route files" → 4 confirmed
+   (app.js, importExportPro.service, students/student-service,
+   workflowEnhanced.routes); the 5th (`rehabilitation-routes.js`)
+   does not exist on disk.
+6. "safeMount fails silently" (eStamp test skip comment) → wrong;
+   safeMount logs at error level. Real blocker is 503 from mocked-
+   Mongoose queries in the test env, not the mount layer.
+
+---
+
 ## [Unreleased] — 2026-05-19 — Wave 117: Schedule Optimizer V2 (closes P3.5)
 
 Closes **P3.5** from `docs/blueprint/09-roadmap.md §5`. V1 schedule

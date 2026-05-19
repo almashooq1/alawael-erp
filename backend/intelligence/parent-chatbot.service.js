@@ -354,6 +354,168 @@ function createParentChatbotService({
     };
   }
 
+  // ─── Wave 124: Admin visibility ─────────────────────────────────
+
+  /**
+   * Admin-only: list recent sessions across all users. Filters are
+   * optional and AND-composed. Supports pagination via limit + offset.
+   * Returns lightweight summaries (sessionId, ownership, timestamps,
+   * turnCount, last intent + escalated flag); full turns are fetched
+   * via getSession.
+   */
+  async function listSessions({
+    userId = null,
+    beneficiaryId = null,
+    branchId = null,
+    since = null,
+    intent = null,
+    escalatedOnly = false,
+    limit = 50,
+    offset = 0,
+  } = {}) {
+    const q = {};
+    if (userId) q.userId = userId;
+    if (beneficiaryId) q.beneficiaryId = beneficiaryId;
+    if (branchId) q.branchId = branchId;
+    if (since) q.lastActivityAt = { $gte: new Date(since) };
+
+    let items;
+    try {
+      const cursor = sessionModel.find(q);
+      const chained =
+        cursor && typeof cursor.sort === 'function' ? cursor.sort({ lastActivityAt: -1 }) : cursor;
+      items = await _resolveCursor(chained);
+    } catch (err) {
+      logger.warn(`[parent-chatbot] listSessions failed: ${err.message}`);
+      return { ok: false, reason: reg.REASON.CHATBOT_UNAVAILABLE, message: err.message };
+    }
+    items = Array.isArray(items) ? items : [];
+
+    // Post-filter on intent (substring match against turns) + escalated
+    if (intent || escalatedOnly) {
+      items = items.filter(s => {
+        const turns = Array.isArray(s.turns) ? s.turns : [];
+        if (intent) {
+          const hasIntent = turns.some(t => t && t.intent === intent);
+          if (!hasIntent) return false;
+        }
+        if (escalatedOnly) {
+          const wasEscalated = turns.some(t => t && t.intent === reg.INTENT.ESCALATE_HUMAN);
+          if (!wasEscalated) return false;
+        }
+        return true;
+      });
+    }
+
+    const total = items.length;
+    const slice = items.slice(offset, offset + limit);
+    const summaries = slice.map(s => {
+      const turns = Array.isArray(s.turns) ? s.turns : [];
+      const lastTurn = turns[turns.length - 1] || null;
+      return {
+        sessionId: s.sessionId,
+        userId: s.userId ? String(s.userId) : null,
+        beneficiaryId: s.beneficiaryId ? String(s.beneficiaryId) : null,
+        branchId: s.branchId ? String(s.branchId) : null,
+        startedAt: s.startedAt,
+        lastActivityAt: s.lastActivityAt,
+        turnCount: s.turnCount || turns.length,
+        lastIntent: lastTurn ? lastTurn.intent : null,
+        lastAskedAt: lastTurn ? lastTurn.askedAt : null,
+        escalated: turns.some(t => t && t.intent === reg.INTENT.ESCALATE_HUMAN),
+      };
+    });
+
+    return {
+      ok: true,
+      total,
+      limit,
+      offset,
+      sessions: summaries,
+    };
+  }
+
+  /**
+   * Admin-only: aggregate stats over the rolling window.
+   *   - byIntent: count per intent across all turns
+   *   - byClassifierSource: rule / llm / llm-cache hit counts (when
+   *     the turn payload preserved that — Wave 123+ writes preserve
+   *     `intent` per turn; classifier source is not in the schema yet)
+   *   - escalationRate: turns with intent=ESCALATE_HUMAN / total turns
+   *   - avgConfidence: mean of turn confidences (skips zero/null)
+   *   - sessionCount, turnCount
+   *   - oldestSessionAt, newestSessionAt
+   */
+  async function getStats({ since = null, branchId = null } = {}) {
+    const sinceDate = since ? new Date(since) : new Date(now().getTime() - 7 * 24 * 3600 * 1000);
+    const q = { lastActivityAt: { $gte: sinceDate } };
+    if (branchId) q.branchId = branchId;
+
+    let items;
+    try {
+      const cursor = sessionModel.find(q);
+      items = await _resolveCursor(cursor);
+    } catch (err) {
+      logger.warn(`[parent-chatbot] getStats failed: ${err.message}`);
+      return { ok: false, reason: reg.REASON.CHATBOT_UNAVAILABLE };
+    }
+    items = Array.isArray(items) ? items : [];
+
+    const byIntent = {};
+    let turnCount = 0;
+    let escalatedCount = 0;
+    let confidenceSum = 0;
+    let confidenceN = 0;
+    let oldestSessionAt = null;
+    let newestSessionAt = null;
+
+    for (const s of items) {
+      if (s.startedAt) {
+        const t = new Date(s.startedAt).getTime();
+        if (oldestSessionAt === null || t < oldestSessionAt) oldestSessionAt = t;
+        if (newestSessionAt === null || t > newestSessionAt) newestSessionAt = t;
+      }
+      const turns = Array.isArray(s.turns) ? s.turns : [];
+      turnCount += turns.length;
+      for (const t of turns) {
+        if (!t) continue;
+        if (t.intent) {
+          byIntent[t.intent] = (byIntent[t.intent] || 0) + 1;
+        }
+        if (t.intent === reg.INTENT.ESCALATE_HUMAN) escalatedCount++;
+        if (Number.isFinite(t.confidence) && t.confidence > 0) {
+          confidenceSum += t.confidence;
+          confidenceN++;
+        }
+      }
+    }
+
+    return {
+      ok: true,
+      branchId: branchId ? String(branchId) : null,
+      since: sinceDate.toISOString(),
+      sessionCount: items.length,
+      turnCount,
+      escalationRate: turnCount > 0 ? round4(escalatedCount / turnCount) : 0,
+      avgConfidence: confidenceN > 0 ? round4(confidenceSum / confidenceN) : null,
+      byIntent,
+      oldestSessionAt: oldestSessionAt ? new Date(oldestSessionAt).toISOString() : null,
+      newestSessionAt: newestSessionAt ? new Date(newestSessionAt).toISOString() : null,
+    };
+  }
+
+  async function _resolveCursor(cursor) {
+    if (cursor == null) return [];
+    if (Array.isArray(cursor)) return cursor;
+    if (typeof cursor.lean === 'function') return cursor.lean();
+    if (typeof cursor.then === 'function') return cursor;
+    return cursor;
+  }
+
+  function round4(n) {
+    return Math.round(Number(n) * 10000) / 10000;
+  }
+
   // ─── Internal model helpers ─────────────────────────────────────
 
   async function _loadSession(sessionId) {
@@ -407,6 +569,8 @@ function createParentChatbotService({
 
   return {
     classifyIntent,
+    listSessions,
+    getStats,
     generateResponse,
     ask,
     getSession,

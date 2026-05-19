@@ -114,6 +114,43 @@ function createParentChatbotRouter({
     }
   });
 
+  // Wave 124: GET /sessions — admin-only list across all parents.
+  // Filters: userId, beneficiaryId, branchId, since, intent,
+  // escalatedOnly, limit, offset.
+  router.get('/sessions', requirePerm('admin.chatbot.read'), async (req, res) => {
+    try {
+      const q = req.query || {};
+      const result = await chatbotService.listSessions({
+        userId: q.userId || null,
+        beneficiaryId: q.beneficiaryId || null,
+        branchId: q.branchId || null,
+        since: q.since || null,
+        intent: q.intent || null,
+        escalatedOnly: q.escalatedOnly === 'true' || q.escalatedOnly === '1',
+        limit: q.limit ? Number(q.limit) : 50,
+        offset: q.offset ? Number(q.offset) : 0,
+      });
+      return respond(res, result);
+    } catch (err) {
+      return safeError(res, err, 'admin.chatbot.list');
+    }
+  });
+
+  // Wave 124: GET /stats — admin-only aggregate analytics
+  // (intents distribution, escalation rate, avg confidence).
+  router.get('/stats', requirePerm('admin.chatbot.read'), async (req, res) => {
+    try {
+      const q = req.query || {};
+      const result = await chatbotService.getStats({
+        since: q.since || null,
+        branchId: q.branchId || null,
+      });
+      return respond(res, result);
+    } catch (err) {
+      return safeError(res, err, 'admin.chatbot.stats');
+    }
+  });
+
   // GET /sessions/:sessionId
   router.get('/sessions/:sessionId', requirePerm('parent.chatbot.read'), async (req, res) => {
     try {

@@ -22,7 +22,7 @@
     "noUnusedLocals": true,
     "noUnusedParameters": false,
     "forceConsistentCasingInFileNames": true,
-    "ignoreDeprecations": "6.0"
+    "ignoreDeprecations": "5.0"
   },
   "include": ["**/*.js"],
   "exclude": ["node_modules", "coverage", "dist", "logs", ".jest-cache", "_archived"]

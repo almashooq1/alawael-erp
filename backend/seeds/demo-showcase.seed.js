@@ -897,7 +897,7 @@ module.exports = async function seedDemoShowcase({ dryRun = false, reset = false
     const subTotal = s.amount;
     const taxAmount = Math.round(subTotal * 0.15 * 100) / 100;
     const totalAmount = Math.round((subTotal + taxAmount) * 100) / 100;
-    const invoice = await Invoice.create({
+    const invoicePayload = {
       invoiceNumber,
       beneficiary: ben._id,
       issueDate: new Date(Date.now() - (i + 1) * 7 * 24 * 3600 * 1000),
@@ -905,6 +905,7 @@ module.exports = async function seedDemoShowcase({ dryRun = false, reset = false
       items: [
         {
           description: `جلسة ${sessionTypes[i % sessionTypes.length]} (10 جلسات)`,
+          name: `جلسة ${sessionTypes[i % sessionTypes.length]}`,
           quantity: 10,
           unitPrice: subTotal / 10,
           total: subTotal,
@@ -914,7 +915,16 @@ module.exports = async function seedDemoShowcase({ dryRun = false, reset = false
       taxAmount,
       totalAmount,
       status: s.status,
-    });
+    };
+    let invoice;
+    try {
+      invoice = await Invoice.create(invoicePayload);
+    } catch (err) {
+      step(`    ✗ Invoice.create failed: ${err.message}`);
+      step(`    payload items: ${JSON.stringify(invoicePayload.items)}`);
+      step(`    model file: ${require.resolve('../models/Invoice')}`);
+      throw err;
+    }
 
     if (s.issue) {
       const env = buildEnvelope(invoice.toObject(), {

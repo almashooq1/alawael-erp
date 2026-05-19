@@ -35,18 +35,36 @@ scripts/      Repo-wide deploy + digest scripts
 ## Commands you'll need
 
 ```bash
-# Backend dev / test
-cd backend && npm run dev                  # nodemon API
-cd backend && npx jest <path-or-pattern>   # run specific test
-cd backend && npm run test:sprint          # main test gate
-cd backend && npm run lint:duplication     # CI guard (Wave 93)
-cd backend && npm run preflight            # deploy gate
+# Backend dev / test  (jest is not in backend/node_modules — use --config flag)
+cd backend && npm run dev                                   # nodemon API
+cd backend && npx jest --config=jest.config.js <pattern>    # run specific test
+cd backend && npm run test:sprint                           # main test gate (103 files, ~12 min)
+cd backend && npm run lint:duplication                      # CI guard (Wave 93)
+cd backend && npm run preflight                             # deploy gate
+cd backend && npm run gov:status                            # 10 Saudi provider health
 
 # Web-admin (other repo)
 cd ../../alawael-rehab-platform/apps/web-admin && npm run typecheck
 cd ../../alawael-rehab-platform/apps/web-admin && npm run lint
 cd ../../alawael-rehab-platform/apps/web-admin && npm run dev
 ```
+
+## Test surface map (as of 2026-05-19)
+
+- `backend/__tests__/` — 523 .test.js files. Sprint enumeration covers 103 of these.
+- `backend/tests/` — 26 .test.js files. Included via `roots:['__tests__','tests']` in jest.config.
+- `backend/tests/unit/` — 1,384 .test.js files. Auto-generated model/route/service smoke tests.
+- `frontend/src/__tests__/` — 1,303 .test.js files. ~11,094 tests. CI gates on full suite in both `ci.yml` (push) and `pr-checks.yml::frontend-tests` (PR).
+- `alawael-rehab-platform/` — zero tests. Health = `npm run typecheck` + `npm run lint` only.
+
+## Drift guards in **tests**/ (catch silent regressions)
+
+- `no-broken-requires.test.js` — every relative `require()` resolves. Supports per-(file,target) allow-list for legitimate optional loads.
+- `no-utf8-bom.test.js` — no source file starts with EF BB BF (BOM bytes broke regex-based meta-tests).
+- `no-it-only-or-skip.test.js` — sprint files don't ship with `.only` or `.skip` leaks.
+- `wave-tests-in-sprint.test.js` — any `__tests__/*-waveNN*.test.js` that calls `jest.unmock('mongoose')` must be in `test:sprint` (else CI silently misses it; see the 2026-05-19 561-test rescue thread).
+- `sprint-test-files-exist.test.js` — every sprint enumeration entry resolves to a real file.
+- `test-script-dedupe.test.js` — no duplicate entries in `test:sprint`.
 
 ## Critical conventions
 

@@ -45,11 +45,71 @@ router.get('/departments', (_req, res) => {
   res.json({ success: true, statusCode: 200, message: 'OK', ...emptyList() });
 });
 
+// ── Reports module — summary shapes the dashboard reads ────────────
+router.get('/reports/beneficiaries/summary', (_req, res) => {
+  res.json({
+    success: true,
+    statusCode: 200,
+    message: 'OK',
+    data: { total: 0, byStatus: [] },
+    total: 0,
+    byStatus: [],
+  });
+});
+
+router.get('/reports/care-plans/summary', (_req, res) => {
+  res.json({
+    success: true,
+    statusCode: 200,
+    message: 'OK',
+    data: { total: 0, byStatus: [] },
+    total: 0,
+    byStatus: [],
+  });
+});
+
+router.get('/reports/assessments/summary', (_req, res) => {
+  res.json({
+    success: true,
+    statusCode: 200,
+    message: 'OK',
+    data: { total: 0, byStatus: [] },
+    total: 0,
+    byStatus: [],
+  });
+});
+
+router.get('/reports/sessions/volume', (req, res) => {
+  const { from, to } = req.query;
+  res.json({
+    success: true,
+    statusCode: 200,
+    message: 'OK',
+    data: { total: 0, period: { from: from || '', to: to || '' }, byStatus: [] },
+    total: 0,
+    period: { from: from || '', to: to || '' },
+    byStatus: [],
+  });
+});
+
 // ── Notifications unread-count: declared as a top-level path because
 //    the existing /api/v1/notifications router matches '/:id' before
 //    '/unread-count' and rejects it as an invalid ObjectId.
 router.get('/notifications/unread-count', (_req, res) => {
   res.json({ success: true, statusCode: 200, message: 'OK', data: { count: 0 }, count: 0 });
+});
+
+// Same route-order bug — `/:id` swallows `/read-all` and `/goals` etc.
+router.post('/notifications/read-all', (_req, res) => {
+  res.json({ success: true, statusCode: 200, message: 'OK', data: { marked: 0 } });
+});
+
+router.get('/care-plans/goals', (_req, res) => {
+  res.json({ success: true, statusCode: 200, message: 'OK', data: [], total: 0 });
+});
+
+router.get('/dashboards/alerts/policies', (_req, res) => {
+  res.json({ success: true, statusCode: 200, message: 'OK', data: [], total: 0 });
 });
 
 module.exports = router;

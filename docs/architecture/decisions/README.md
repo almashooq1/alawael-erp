@@ -36,6 +36,8 @@ What becomes easier or more difficult to do because of this change?
 
 ## Index
 
+### Foundation (Waves 1-89, dated 2026-01-18 → 2026-04-17)
+
 1. [Monolithic Architecture](001-monolithic-architecture.md)
 2. [Technology Stack Selection](002-technology-stack.md)
 3. [Bilingual Support Strategy](003-bilingual-support.md)
@@ -46,6 +48,16 @@ What becomes easier or more difficult to do because of this change?
 8. [Nafath as Primary E-Signature Provider](008-nafath-e-signature.md)
 9. [Audit Trail Standard](009-audit-trail-standard.md)
 
+### P3 — Intelligence & Automation (Waves 90-137, dated 2026-05-18/19)
+
+10. [Sensitivity-Grade Library](010-sensitivity-grade-library.md) — single LEVEL→guarantees mapping (Wave 90)
+11. [Heuristic-First Predictions; ML Optional](011-heuristic-first-ml-optional.md) — rule-based scoring as the shipped path (Wave 115)
+12. [LLM-Primary with Silent Rule-Based Fallback](012-llm-primary-rule-fallback.md) — chatbot classifier hybrid (Wave 123)
+13. [Shared LLM Telemetry Library + Cross-Service Registry](013-llm-telemetry-shared-lib.md) — single source of truth for LLM observability (Waves 128+131)
+14. [Telemetry Persistence with Mongo TTL](014-telemetry-persistence-ttl.md) — hybrid in-memory + 30d persistent (Wave 134)
+15. [Forbidden-Content Guard Runs on Filled Output](015-forbidden-content-runtime-guard.md) — PHI block at substitution boundary (Wave 122)
+16. [Atomic Stage-Commit Pattern for Cross-Agent Concurrency](016-atomic-commit-cross-agent-race.md) — git workflow lesson (Wave 137)
+
 ---
 
-**Last Updated:** April 17, 2026
+**Last Updated:** May 19, 2026 (ADRs 10-16 added in P3 closure session)

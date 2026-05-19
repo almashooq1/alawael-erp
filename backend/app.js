@@ -3046,6 +3046,32 @@ try {
     } catch (telErr) {
       logger.warn('[LLM-Telemetry] routes skipped:', telErr.message);
     }
+
+    // Wave 142: LLM anomaly detector — rule-based alerts over the same
+    // cross-service telemetry. Mounts at /api/v1/ai/llm-anomalies and
+    // reuses ai.telemetry.read since the payload exposes the same data.
+    try {
+      const { getDefaultRegistry } = require('./intelligence/llm-registry.lib');
+      const { createLlmAnomalyDetector } = require('./intelligence/llm-anomaly-detector.service');
+      const { createLlmAnomaliesRouter } = require('./routes/llm-anomalies.routes');
+      const llmAnomalyDetector = createLlmAnomalyDetector({
+        llmRegistry: getDefaultRegistry({ logger }),
+        logger,
+      });
+      app.use(
+        '/api/v1/ai',
+        pcAuthMw,
+        createLlmAnomaliesRouter({
+          detector: llmAnomalyDetector,
+          governance: pcGovernance,
+          logger,
+        })
+      );
+      app._llmAnomalyDetector = llmAnomalyDetector;
+      logger.info('[LLM-Anomalies] ✓ Wave 142 detector routes mounted at /api/v1/ai/llm-anomalies');
+    } catch (anomErr) {
+      logger.warn('[LLM-Anomalies] routes skipped:', anomErr.message);
+    }
   } else {
     logger.info(
       '[ParentChatbot] routes skipped: governance or ParentChatbotSession model unavailable'

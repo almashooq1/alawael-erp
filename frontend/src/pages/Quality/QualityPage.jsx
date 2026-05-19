@@ -1,4 +1,4 @@
-﻿/**
+/**
  * QualityPage.jsx — بوابة إدارة الجودة والامتثال
  *
  * Modernized navigation hub that links to all quality sub-modules.

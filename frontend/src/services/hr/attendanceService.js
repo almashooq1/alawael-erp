@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Attendance Service — Check-in/out, reports, history, corrections
  * خدمات الحضور والانصراف - التسجيل والتقارير والتعديلات
  */

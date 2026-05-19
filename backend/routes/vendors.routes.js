@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Vendors Routes — إدارة الموردين
  * Handles: /api/vendors
  */

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * 🔐 Security Routes — واجهة أمان API الشاملة
  * Mount: /api/security
  */

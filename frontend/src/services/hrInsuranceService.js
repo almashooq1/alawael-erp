@@ -1,4 +1,4 @@
-﻿/**
+/**
  * hrInsuranceService.js — خدمة تأمين الموظفين الصحي
  * HR Employee Health Insurance API Service
  *

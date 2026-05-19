@@ -1,4 +1,4 @@
-﻿/**
+/**
  * AL-AWAEL ERP — AUTOMATED BACKUP ROUTES
  * Phase 23 — نظام النسخ الاحتياطي التلقائي
  *

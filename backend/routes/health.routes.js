@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Health & Monitoring Routes - Phase 4
  * Comprehensive health checks and system monitoring endpoints
  */

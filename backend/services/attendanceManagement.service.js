@@ -1,4 +1,4 @@
-﻿'use strict';
+'use strict';
 
 /**
  * Attendance Management Service — نظام الحضور والانصراف الذكي

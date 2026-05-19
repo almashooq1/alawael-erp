@@ -1,4 +1,4 @@
-﻿/**
+/**
  * 📋 إدارة الشكاوى والاقتراحات — Complaints & Suggestions Service
  * AlAwael ERP
  */

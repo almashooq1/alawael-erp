@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Vendor Evaluations Routes — تقييمات الموردين
  * Handles: /api/vendor-evaluations
  */

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Care Plan Management Page — إدارة خطط الرعاية
  * AlAwael ERP — Full rebuild with Dashboard + Plans + Goals
  */

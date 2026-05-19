@@ -1,4 +1,4 @@
-﻿/**
+/**
  * 🎓 خدمة التدريب والتطوير — Training & Development Service
  * AlAwael ERP — Unified Frontend Service
  * Covers: Training Programs, Courses, Certifications, Reports

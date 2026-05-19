@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Field-Level Encryption Plugin - Al-Awael ERP
  * إضافة تشفير البيانات على مستوى الحقول
  *

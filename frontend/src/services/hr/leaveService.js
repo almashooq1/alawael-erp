@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Leave Service — Leave requests and approvals
  * خدمات الإجازات والطلبات
  */

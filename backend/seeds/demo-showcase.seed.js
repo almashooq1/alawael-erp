@@ -181,6 +181,10 @@ module.exports = async function seedDemoShowcase({ dryRun = false, reset = false
       scfhs: '12345',
       email: 'therapist.ahmed@demo.alawael.com',
       role: 'therapist',
+      gender: 'male',
+      dob: '1988-03-12',
+      specialization: 'pt',
+      job_title_ar: 'أخصائي علاج طبيعي',
     },
     {
       first: 'نورة',
@@ -189,6 +193,10 @@ module.exports = async function seedDemoShowcase({ dryRun = false, reset = false
       scfhs: '23456',
       email: 'therapist.noura@demo.alawael.com',
       role: 'therapist',
+      gender: 'female',
+      dob: '1990-07-04',
+      specialization: 'ot',
+      job_title_ar: 'أخصائية علاج وظيفي',
     },
     {
       first: 'خالد',
@@ -197,6 +205,10 @@ module.exports = async function seedDemoShowcase({ dryRun = false, reset = false
       scfhs: '34560', // ends 0 → scfhs expired
       email: 'therapist.khaled@demo.alawael.com',
       role: 'specialist',
+      gender: 'male',
+      dob: '1985-11-22',
+      specialization: 'speech',
+      job_title_ar: 'أخصائي تخاطب',
     },
     {
       first: 'منى',
@@ -205,6 +217,10 @@ module.exports = async function seedDemoShowcase({ dryRun = false, reset = false
       scfhs: '45679', // ends 9 → scfhs suspended
       email: 'therapist.mona@demo.alawael.com',
       role: 'specialist',
+      gender: 'female',
+      dob: '1991-05-18',
+      specialization: 'aba',
+      job_title_ar: 'أخصائية تحليل سلوك تطبيقي',
     },
     {
       first: 'Anjali',
@@ -215,6 +231,10 @@ module.exports = async function seedDemoShowcase({ dryRun = false, reset = false
       email: 'therapist.anjali@demo.alawael.com',
       role: 'therapist',
       isSaudi: false,
+      gender: 'female',
+      dob: '1989-09-30',
+      specialization: 'psychology',
+      job_title_ar: 'أخصائية نفسية',
     },
     {
       first: 'Mariam',
@@ -225,6 +245,10 @@ module.exports = async function seedDemoShowcase({ dryRun = false, reset = false
       email: 'nurse.mariam@demo.alawael.com',
       role: 'specialist',
       isSaudi: false,
+      gender: 'female',
+      dob: '1986-02-14',
+      specialization: 'nursing',
+      job_title_ar: 'ممرضة',
     },
   ];
 
@@ -237,15 +261,16 @@ module.exports = async function seedDemoShowcase({ dryRun = false, reset = false
       emp = existing;
     } else {
       emp = await Employee.create({
-        employee_code: `DEMO-EMP-${i + 1}`,
-        firstName: spec.first,
-        lastName: spec.last,
-        firstName_ar: spec.first,
-        lastName_ar: spec.last,
+        employee_number: `DEMO-EMP-${i + 1}`,
+        name_ar: `${spec.first} ${spec.last}`,
+        name_en: `${spec.first} ${spec.last}`,
+        gender: spec.gender,
+        date_of_birth: new Date(spec.dob),
         email: spec.email,
         phone: `+96650000${String(i).padStart(4, '0')}`,
         national_id: spec.nid,
         national_id_expiry: new Date('2030-01-01'),
+        nationality: spec.isSaudi === false ? 'IN' : 'SA',
         scfhs_number: spec.scfhs || undefined,
         iqama_number: spec.iqama,
         iqama_expiry: spec.iqama ? new Date('2027-01-01') : undefined,
@@ -253,7 +278,9 @@ module.exports = async function seedDemoShowcase({ dryRun = false, reset = false
         contract_type: 'indefinite',
         basic_salary: 8000 + i * 500,
         branch_id: branches[i % branches.length]._id,
-        is_saudi: spec.isSaudi !== false,
+        job_title_ar: spec.job_title_ar,
+        department: 'clinical',
+        specialization: spec.specialization,
         status: 'active',
       });
       bump('employees');
@@ -472,7 +499,7 @@ module.exports = async function seedDemoShowcase({ dryRun = false, reset = false
     let user = await User.findOne({ email: g.email });
     if (!user) {
       user = await User.create({
-        name: `${g.first} ${g.last}`,
+        fullName: `${g.first} ${g.last}`,
         firstName: g.first,
         lastName: g.last,
         email: g.email,

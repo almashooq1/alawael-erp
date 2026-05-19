@@ -19,6 +19,14 @@
 
 'use strict';
 
+// Opt out of the global mongoose mock (jest.setup.js:19) so that
+// `mongoose.model('Insight', InsightSchema)` returns a real
+// constructor — without this, `new Insight(...)` throws
+// "Insight is not a constructor" because the global mock returns a
+// plain object instead of a Model class. Documented pattern, see
+// jest.setup.js:420 + the unmock callsites in __tests__/*-wave*.test.js.
+jest.unmock('mongoose');
+
 const mongoose = require('mongoose');
 const insightModelExports = require('../intelligence/insight.model');
 const { InsightSchema, INSIGHT_KINDS, INSIGHT_SEVERITIES } = insightModelExports;

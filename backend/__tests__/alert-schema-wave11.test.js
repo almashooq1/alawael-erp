@@ -23,6 +23,10 @@
 
 'use strict';
 
+// Opt out of global mongoose mock (jest.setup.js:19) — required so
+// new Model(...) returns a real constructor. See insight-foundation-wave18.test.js.
+jest.unmock('mongoose');
+
 const mongoose = require('mongoose');
 const alertModelExports = require('../alerts/alert.model');
 const { AlertSchema, ALERT_STATES, ARCHETYPES, TIME_PRESSURES, SCOPES } = alertModelExports;

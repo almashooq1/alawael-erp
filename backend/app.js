@@ -96,6 +96,9 @@ setupAdminEndpoints(app, { isProd });
 // ═══════════════════════════════════════════════════════════════════════════
 // 4. ROUTE MOUNTING (centralised in routes/_registry.js)
 // ═══════════════════════════════════════════════════════════════════════════
+// Stubs FIRST so they win over conflicting catch-alls (e.g. the notifications
+// router's `:id` handler that otherwise swallows `/notifications/unread-count`).
+app.use('/api/v1', require('./routes/stub-missing.routes'));
 try {
   mountAllRoutes(app, { authRateLimiter });
 } catch (err) {

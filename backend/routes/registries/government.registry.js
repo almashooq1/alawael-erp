@@ -19,7 +19,10 @@
  * @param {Express.Application} app
  * @param {object} helpers – { safeRequire, dualMount, logger }
  */
-module.exports = function registerGovernmentRoutes(app, { safeRequire, dualMount, logger }) {
+module.exports = function registerGovernmentRoutes(
+  app,
+  { safeRequire, dualMount, dualMountAuth, logger, authenticate }
+) {
   // ── Imports ──────────────────────────────────────────────────────────────
   const mudadRoutes = safeRequire('../routes/mudad.routes');
   const taqatRoutes = safeRequire('../routes/taqat.routes');
@@ -95,9 +98,9 @@ module.exports = function registerGovernmentRoutes(app, { safeRequire, dualMount
     '✅ NPHIES routes mounted (6 endpoints: eligibility-check, claim-submit, prior-auth, claim-status, cancel-claim, status)'
   );
 
-  dualMount(app, 'audit-logs', enhancedAuditRouter);
+  dualMountAuth(app, 'audit-logs', enhancedAuditRouter);
   logger.info(
-    '✅ Enhanced Audit Logs routes mounted (3 endpoints: list with filters, stats, user-audit)'
+    '✅ Enhanced Audit Logs routes mounted (3 endpoints: list with filters, stats, user-audit) [auth required]'
   );
 
   logger.info('🇸🇦 Saudi Integrations Complete: Muqeem + ZATCA Phase 2 + NPHIES + Enhanced Audit');

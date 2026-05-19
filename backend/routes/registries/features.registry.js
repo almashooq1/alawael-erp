@@ -23,7 +23,7 @@
  */
 module.exports = function registerFeatureRoutes(
   app,
-  { safeRequire, dualMount, safeMount, logger }
+  { safeRequire, dualMount, dualMountAuth, safeMount, logger, authenticate }
 ) {
   // ── Route Imports ─────────────────────────────────────────────────────────
   const missingModelsRoutes = safeRequire('../routes/missing-models.routes');
@@ -108,7 +108,11 @@ module.exports = function registerFeatureRoutes(
   );
 
   // ─── prompt_23: سجل التدقيق الشامل المحسّن — Audit Trail Enhanced ─────────
+  // Mounted at both `/audit-trail-enhanced` (original) and `/audit-trail`
+  // (matching the alawael-rehab-platform web-admin client expectation —
+  // see apps/web-admin/src/lib/types/audit.ts header).
   dualMount(app, 'audit-trail-enhanced', auditTrailEnhancedRoutes);
+  dualMount(app, 'audit-trail', auditTrailEnhancedRoutes);
   logger.info(
     '✅ prompt_23 Audit Trail Enhanced mounted: advanced search+filters, statistics (by-action/module/user/hourly), for-model history, user-activity, sensitive-access log, login-attempts analysis, export (JSON/10k records), cleanup with dry-run, 3yr/7yr retention policy (20+ endpoints)'
   );
@@ -274,9 +278,9 @@ module.exports = function registerFeatureRoutes(
   dualMount(app, 'setup', setupRoutes);
   logger.info('✅ Setup routes mounted (/api/setup/status, /api/setup/init-admin)');
 
-  // ── Gap-fill: alerts, approvals, rehab-licenses ──────────────────────
+  // ── Gap-fill: alerts, approvals, rehab-licenses — auth required ──────
   dualMount(app, 'alerts', safeRequire('../routes/alerts.routes'));
-  dualMount(app, 'approvals', safeRequire('../routes/approvals.routes'));
+  dualMountAuth(app, 'approvals', safeRequire('../routes/approvals.routes'));
   dualMount(app, 'rehab-licenses', safeRequire('../routes/rehab-licenses.routes'));
   logger.info('✅ Gap-fill routes mounted: alerts, approvals, rehab-licenses');
 

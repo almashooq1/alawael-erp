@@ -19,7 +19,7 @@
  */
 module.exports = function registerClinicalAssessmentRoutes(
   app,
-  { safeRequire, dualMount, safeMount, logger }
+  { safeRequire, dualMount, dualMountAuth, safeMount, logger, authenticate }
 ) {
   // ══════════════════════════════════════════════════════════════════════════
   // ── Specialized Clinical Services — التخصصات السريرية المتقدمة ──────────
@@ -32,9 +32,9 @@ module.exports = function registerClinicalAssessmentRoutes(
     'Early Intervention routes mounted (30+ endpoints — 5 modules: children 0-3, developmental screenings, milestones, IFSP plans, hospital referrals & national screening integration)'
   );
 
-  // ICF Functional Assessment System (نظام التقييم الوظيفي وفق ICF)
+  // ICF Functional Assessment System (نظام التقييم الوظيفي وفق ICF) — auth required (clinical PII)
   const icfAssessmentRoutes = safeRequire('../routes/icfAssessment.routes');
-  dualMount(app, 'icf-assessments', icfAssessmentRoutes);
+  dualMountAuth(app, 'icf-assessments', icfAssessmentRoutes);
   logger.info(
     'ICF Assessment routes mounted (20+ endpoints — WHO ICF-based functional assessment: body functions, body structures, activities & participation, environmental factors, benchmarking, comparative reports, gap analysis)'
   );

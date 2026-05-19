@@ -33,7 +33,10 @@ const registerCommunicationRoutes = require('./communication.registry');
 const registerStudentParentRoutes = require('./student-parent.registry');
 const registerGovernmentRoutes = require('./government.registry');
 
-module.exports = function registerPhaseRoutes(app, { safeRequire, dualMount, safeMount, logger }) {
+module.exports = function registerPhaseRoutes(
+  app,
+  { safeRequire, dualMount, dualMountAuth, safeMount, logger, authenticate }
+) {
   // Route variables (safeRequire resolves from _registry.js directory)
   const webhooksRoutes = safeRequire('../routes/webhooks');
   const analyticsRoutes = safeRequire('../routes/analytics');
@@ -131,23 +134,58 @@ module.exports = function registerPhaseRoutes(app, { safeRequire, dualMount, saf
   );
 
   // ── Saudi Government Integrations — delegated to registries/government.registry.js ──
-  registerGovernmentRoutes(app, { safeRequire, dualMount, logger });
+  registerGovernmentRoutes(app, { safeRequire, dualMount, dualMountAuth, logger, authenticate });
 
   // ── Clinical/Rehab/Therapy (~43 modules) — split into therapy (~22) + assessment (~21) registries ──
-  registerClinicalTherapyRoutes(app, { safeRequire, dualMount, safeMount, logger });
-  registerClinicalAssessmentRoutes(app, { safeRequire, dualMount, safeMount, logger });
+  registerClinicalTherapyRoutes(app, {
+    safeRequire,
+    dualMount,
+    dualMountAuth,
+    safeMount,
+    logger,
+    authenticate,
+  });
+  registerClinicalAssessmentRoutes(app, {
+    safeRequire,
+    dualMount,
+    dualMountAuth,
+    safeMount,
+    logger,
+    authenticate,
+  });
 
   // ── HR/Employee/Workforce (~25 modules) — delegated to registries/hr.registry.js ──
-  registerHrRoutes(app, { safeRequire, dualMount, safeMount, logger });
+  registerHrRoutes(app, { safeRequire, dualMount, dualMountAuth, safeMount, logger, authenticate });
 
   // ── Documents/Archive/Media (~15 modules) — delegated to registries/documents.registry.js ──
-  registerDocumentRoutes(app, { safeRequire, dualMount, safeMount, logger });
+  registerDocumentRoutes(app, {
+    safeRequire,
+    dualMount,
+    dualMountAuth,
+    safeMount,
+    logger,
+    authenticate,
+  });
 
   // ── Communication/Messaging (~12 modules) — delegated to registries/communication.registry.js ──
-  registerCommunicationRoutes(app, { safeRequire, dualMount, safeMount, logger });
+  registerCommunicationRoutes(app, {
+    safeRequire,
+    dualMount,
+    dualMountAuth,
+    safeMount,
+    logger,
+    authenticate,
+  });
 
   // ── Student/Parent Portal (~12 modules) — delegated to registries/student-parent.registry.js ──
-  registerStudentParentRoutes(app, { safeRequire, dualMount, safeMount, logger });
+  registerStudentParentRoutes(app, {
+    safeRequire,
+    dualMount,
+    dualMountAuth,
+    safeMount,
+    logger,
+    authenticate,
+  });
 
   // ── Administrative Systems (الأنظمة الإدارية) ─────────────────────────
   dualMount(app, 'strategic-planning', strategicPlanningRoutes);

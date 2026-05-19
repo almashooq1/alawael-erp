@@ -1012,9 +1012,15 @@ try {
   // Goal-suggestion engine — Phase 9 Commit 8. Returns ranked SMART
   // goal templates + first-line interventions from the registry given
   // a beneficiary context (disciplines, age, existing goals).
+  // Mounted at both `/rehab/goal-suggestions` (original) and the
+  // shorter `/goal-suggestions` (matching the alawael-rehab-platform
+  // web-admin client — see apps/web-admin/src/lib/api.ts ::
+  // goalSuggestionsApi).
   try {
     const { createRehabGoalSuggestionsRouter } = require('./routes/rehab-goal-suggestions.routes');
-    app.use('/api/v1/rehab/goal-suggestions', authenticate, createRehabGoalSuggestionsRouter());
+    const goalSuggestionsRouter = createRehabGoalSuggestionsRouter();
+    app.use('/api/v1/rehab/goal-suggestions', authenticate, goalSuggestionsRouter);
+    app.use('/api/v1/goal-suggestions', authenticate, goalSuggestionsRouter);
     logger.info('[RehabGoalSuggestions] ✓ suggestion routes mounted');
   } catch (suggErr) {
     logger.warn('[RehabGoalSuggestions] routes skipped:', suggErr.message);

@@ -40,6 +40,7 @@
  */
 
 const reg = require('./parent-chatbot.registry');
+const { createLlmTelemetry } = require('./llm-telemetry.lib');
 
 const REASON = Object.freeze({
   CLIENT_MISSING: 'CLIENT_MISSING',
@@ -236,31 +237,17 @@ function createParentChatbotLlmService({
   const cache = _createLruCache(cacheMaxEntries, cacheTtlMs, now);
   const systemPrompt = _buildSystemPrompt();
 
-  // ─── Wave 126: telemetry ────────────────────────────────────────
-  // In-memory rolling buffer of call records. Bounded by both time
-  // (telemetryWindowMs) and count (telemetryMaxCalls — soft cap that
-  // drops the oldest entries via shift()). For long-term billing
-  // reconciliation, fold this into a persistent collection in a
-  // future wave.
-  const telemetry = [];
-
-  function _recordCall(rec) {
-    telemetry.push({
-      at: now(),
-      source: rec.source || 'unknown',
-      intent: rec.intent || null,
-      tokensIn: Number.isFinite(rec.tokensIn) ? rec.tokensIn : 0,
-      tokensOut: Number.isFinite(rec.tokensOut) ? rec.tokensOut : 0,
-      elapsedMs: Number.isFinite(rec.elapsedMs) ? rec.elapsedMs : 0,
-      success: Boolean(rec.success),
-      reason: rec.reason || null,
-    });
-    // Prune by count
-    while (telemetry.length > telemetryMaxCalls) telemetry.shift();
-    // Prune by age
-    const cutoff = now() - telemetryWindowMs;
-    while (telemetry.length > 0 && telemetry[0].at < cutoff) telemetry.shift();
-  }
+  // Wave 128: telemetry delegated to the shared llm-telemetry lib.
+  // Same in-memory rolling-buffer semantics as Wave 126, now reusable
+  // across all LLM services.
+  const telemetry = createLlmTelemetry({
+    windowMs: telemetryWindowMs,
+    maxCalls: telemetryMaxCalls,
+    inputUsdPer1M,
+    outputUsdPer1M,
+    now,
+  });
+  const _recordCall = telemetry.recordCall;
 
   function available() {
     return Boolean(client && typeof client?.messages?.create === 'function');
@@ -398,127 +385,14 @@ function createParentChatbotLlmService({
   }
 
   /**
-   * Wave 126: aggregate telemetry over a rolling window.
-   *
-   *   getTelemetry({since?, bucketHours?}) → {
-   *     ok: true,
-   *     since, until, windowMs,
-   *     totals: { calls, llmCalls, cacheHits, rejects, failures,
-   *               tokensIn, tokensOut, costUsd,
-   *               cacheHitRate, fallbackRate, avgLatencyMs,
-   *               failureRate },
-   *     byReason: { CLIENT_MISSING: N, TIMEOUT: N, ... },
-   *     byIntent: { greeting: N, ... },
-   *     buckets: [{ at, calls, llmCalls, cacheHits, costUsd }],
-   *   }
-   *
-   * `fallbackRate` here = (rejects + failures) / total — fraction of
-   * calls that would degrade to rule-based at the service layer.
+   * Wave 128: delegates to the shared llm-telemetry lib.
    */
-  function getTelemetry({ since = null, bucketHours = 1 } = {}) {
-    const sinceMs = since ? new Date(since).getTime() : now() - telemetryWindowMs;
-    const calls = telemetry.filter(c => c.at >= sinceMs);
-    const totals = {
-      calls: calls.length,
-      llmCalls: 0,
-      cacheHits: 0,
-      rejects: 0,
-      failures: 0,
-      tokensIn: 0,
-      tokensOut: 0,
-    };
-    const byReason = {};
-    const byIntent = {};
-    let latencySum = 0;
-    let latencyN = 0;
-    for (const c of calls) {
-      if (c.source === 'llm' && c.success) {
-        totals.llmCalls++;
-        totals.tokensIn += c.tokensIn;
-        totals.tokensOut += c.tokensOut;
-        if (c.elapsedMs > 0) {
-          latencySum += c.elapsedMs;
-          latencyN++;
-        }
-      } else if (c.source === 'cache' && c.success) {
-        totals.cacheHits++;
-      } else if (c.source === 'reject') {
-        totals.rejects++;
-      } else if (!c.success) {
-        totals.failures++;
-      }
-      if (c.intent) {
-        byIntent[c.intent] = (byIntent[c.intent] || 0) + 1;
-      }
-      if (c.reason) {
-        byReason[c.reason] = (byReason[c.reason] || 0) + 1;
-      }
-    }
-    const costUsd = _round6(
-      (totals.tokensIn * inputUsdPer1M) / 1_000_000 +
-        (totals.tokensOut * outputUsdPer1M) / 1_000_000
-    );
-    const denom = totals.calls || 1;
-    const cacheHitRate = _round4(totals.cacheHits / denom);
-    const fallbackRate = _round4((totals.rejects + totals.failures) / denom);
-    const failureRate = _round4(totals.failures / denom);
-    const avgLatencyMs = latencyN > 0 ? Math.round(latencySum / latencyN) : 0;
-
-    // Buckets
-    const bucketMs = Math.max(1, Number(bucketHours)) * 3600 * 1000;
-    const bucketsMap = new Map();
-    for (const c of calls) {
-      const bucketStart = Math.floor(c.at / bucketMs) * bucketMs;
-      if (!bucketsMap.has(bucketStart)) {
-        bucketsMap.set(bucketStart, {
-          at: new Date(bucketStart).toISOString(),
-          calls: 0,
-          llmCalls: 0,
-          cacheHits: 0,
-          tokensIn: 0,
-          tokensOut: 0,
-        });
-      }
-      const b = bucketsMap.get(bucketStart);
-      b.calls++;
-      if (c.source === 'llm' && c.success) {
-        b.llmCalls++;
-        b.tokensIn += c.tokensIn;
-        b.tokensOut += c.tokensOut;
-      } else if (c.source === 'cache' && c.success) {
-        b.cacheHits++;
-      }
-    }
-    const buckets = Array.from(bucketsMap.values())
-      .sort((a, b) => new Date(a.at).getTime() - new Date(b.at).getTime())
-      .map(b => ({
-        ...b,
-        costUsd: _round6(
-          (b.tokensIn * inputUsdPer1M) / 1_000_000 + (b.tokensOut * outputUsdPer1M) / 1_000_000
-        ),
-      }));
-
-    return {
-      ok: true,
-      since: new Date(sinceMs).toISOString(),
-      until: new Date(now()).toISOString(),
-      windowMs: now() - sinceMs,
-      totals: {
-        ...totals,
-        costUsd,
-        cacheHitRate,
-        fallbackRate,
-        avgLatencyMs,
-        failureRate,
-      },
-      byReason,
-      byIntent,
-      buckets,
-    };
+  function getTelemetry(opts = {}) {
+    return telemetry.getTelemetry(opts);
   }
 
   function resetTelemetry() {
-    telemetry.length = 0;
+    telemetry.reset();
   }
 
   return {
@@ -529,7 +403,7 @@ function createParentChatbotLlmService({
     // Wave 126:
     getTelemetry,
     resetTelemetry,
-    _telemetrySize: () => telemetry.length,
+    _telemetrySize: () => telemetry.size(),
     // Exposed for tests:
     _parseLlmResponse,
     _coerceIntent,

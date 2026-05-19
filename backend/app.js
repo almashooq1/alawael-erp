@@ -2963,9 +2963,34 @@ try {
     } catch (ctxErr) {
       logger.warn('[ParentChatbot] context resolver failed to wire:', ctxErr.message);
     }
+
+    // Wave 123: optionally wire the LLM-backed classifier. Gated on
+    // ANTHROPIC_API_KEY — when unset, the service falls back to the
+    // rule-based classifier from Wave 120.
+    let pcLlmClassifier = null;
+    if (process.env.ANTHROPIC_API_KEY) {
+      try {
+        const Anthropic = require('@anthropic-ai/sdk');
+        const anthropicClient = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+        const {
+          createParentChatbotLlmService,
+        } = require('./intelligence/parent-chatbot-llm.service');
+        pcLlmClassifier = createParentChatbotLlmService({
+          client: anthropicClient,
+          logger,
+        });
+        logger.info('[ParentChatbot] ✓ LLM classifier enabled (Wave 123)');
+      } catch (llmErr) {
+        logger.warn('[ParentChatbot] LLM classifier failed to wire:', llmErr.message);
+      }
+    } else {
+      logger.info('[ParentChatbot] LLM classifier disabled (ANTHROPIC_API_KEY not set)');
+    }
+
     const chatbotService = createParentChatbotService({
       sessionModel: ParentChatbotSession,
       contextService: pcContextService,
+      llmClassifier: pcLlmClassifier,
       logger,
     });
     const { authenticate: pcAuthMw } = require('./middleware/auth');

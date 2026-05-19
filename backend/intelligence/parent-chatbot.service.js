@@ -35,6 +35,7 @@ const reg = require('./parent-chatbot.registry');
 function createParentChatbotService({
   sessionModel = null,
   contextService = null, // Wave 122: optional context resolver
+  llmClassifier = null, // Wave 123: optional LLM classifier
   logger = console,
   now = () => new Date(),
 } = {}) {
@@ -167,7 +168,34 @@ function createParentChatbotService({
       };
     }
 
-    const classified = classifyIntent(message);
+    // Wave 123: prefer LLM classifier when wired, fall back to the
+    // rule-based one. The LLM call is async + best-effort; any
+    // degraded path (CLIENT_MISSING / TIMEOUT / INVALID_RESPONSE /
+    // CLIENT_THREW) silently falls through to the rule-based
+    // classifier. The `classifierSource` field on the response
+    // exposes which path won.
+    let classified = null;
+    let classifierSource = 'rule';
+    if (llmClassifier && typeof llmClassifier.classify === 'function') {
+      try {
+        const llmResult = await llmClassifier.classify(message);
+        if (llmResult && llmResult.ok) {
+          classified = {
+            intent: llmResult.intent,
+            confidence: llmResult.confidence,
+            matchedKeywords: [],
+            runnerUp: null,
+          };
+          classifierSource = llmResult.source === 'cache' ? 'llm-cache' : 'llm';
+        }
+      } catch (err) {
+        logger.warn(`[parent-chatbot] llmClassifier threw: ${err.message}`);
+      }
+    }
+    if (!classified) {
+      classified = classifyIntent(message);
+      classifierSource = 'rule';
+    }
     const askedAt = now();
 
     // Decide whether to auto-respond, clarify, or escalate.
@@ -284,6 +312,7 @@ function createParentChatbotService({
       response: gen.text,
       contextStatus,
       filled: Boolean(gen.filled),
+      classifierSource,
       turnIndex: session.turnCount - 1,
       clarification: clarification || null,
       escalated: classified.intent === reg.INTENT.ESCALATE_HUMAN,

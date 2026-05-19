@@ -20,6 +20,9 @@ const mongoose = require('mongoose');
 require('dotenv').config({ path: path.join(__dirname, '../..', '.env') });
 require('dotenv').config({ path: path.join(__dirname, '..', '.env'), override: false });
 
+// Load the legacy hook shim BEFORE any model is required (mongoose 9 compat).
+require('../config/mongoose.plugins');
+
 const args = process.argv.slice(2);
 const dryRun = args.includes('--dry-run');
 const reset = args.includes('--reset');

@@ -482,15 +482,40 @@ module.exports = async function seedDemoShowcase({ dryRun = false, reset = false
 
   // ── Guardian users + Guardian records ─────────────────────────────────
   const guardianSpecs = [
-    { first: 'محمد', last: 'الراشد', email: 'parent.mohammed@demo.alawael.com', nid: '1100000001' },
-    { first: 'سارة', last: 'البدري', email: 'parent.sara@demo.alawael.com', nid: '2100000002' },
-    { first: 'فهد', last: 'العنزي', email: 'parent.fahad@demo.alawael.com', nid: '1100000003' },
-    { first: 'هند', last: 'السعيد', email: 'parent.hind@demo.alawael.com', nid: '2100000004' },
+    {
+      first: 'محمد',
+      last: 'الراشد',
+      email: 'parent.mohammed@demo.alawael.com',
+      nid: '1100000001',
+      relationship: 'father',
+    },
+    {
+      first: 'سارة',
+      last: 'البدري',
+      email: 'parent.sara@demo.alawael.com',
+      nid: '2100000002',
+      relationship: 'mother',
+    },
+    {
+      first: 'فهد',
+      last: 'العنزي',
+      email: 'parent.fahad@demo.alawael.com',
+      nid: '1100000003',
+      relationship: 'father',
+    },
+    {
+      first: 'هند',
+      last: 'السعيد',
+      email: 'parent.hind@demo.alawael.com',
+      nid: '2100000004',
+      relationship: 'mother',
+    },
     {
       first: 'عبدالله',
       last: 'الحربي',
       email: 'parent.abdullah@demo.alawael.com',
       nid: '1100000005',
+      relationship: 'father',
     },
   ];
 
@@ -520,7 +545,8 @@ module.exports = async function seedDemoShowcase({ dryRun = false, reset = false
         email: g.email,
         phone: `+9665${g.nid.slice(-7)}`,
         userId: user._id,
-        nationalId: g.nid,
+        idNumber: g.nid,
+        relationship: g.relationship,
         accountStatus: 'verified',
       });
       bump('guardians');
@@ -544,7 +570,10 @@ module.exports = async function seedDemoShowcase({ dryRun = false, reset = false
   const beneficiaries = [];
   for (let i = 0; i < 10; i++) {
     const number = `DEMO-${String(10001 + i).padStart(5, '0')}`;
-    const existing = await Beneficiary.findOne({ beneficiaryNumber: number });
+    const nid = `1${String(200000000 + i).padStart(9, '0')}`;
+    const existing = await Beneficiary.findOne({
+      $or: [{ beneficiaryNumber: number }, { nationalId: nid }],
+    });
     if (existing) {
       beneficiaries.push(existing);
       continue;
@@ -561,14 +590,14 @@ module.exports = async function seedDemoShowcase({ dryRun = false, reset = false
       lastName_ar: guardian.lastName_ar,
       dateOfBirth: dob,
       gender: i % 2 === 0 ? 'male' : 'female',
-      nationalId: `1${String(200000000 + i).padStart(9, '0')}`,
+      nationalId: nid,
       disability: { primaryType: disabilityTypes[i] },
       guardians: [guardian._id],
       contact: {
         primaryPhone: `+9665${String(20000000 + i).padStart(7, '0')}`,
         email: `${number.toLowerCase()}@demo.alawael.com`,
       },
-      status: i === 9 ? 'waiting' : 'active',
+      status: i === 9 ? 'pending' : 'active',
       enrollmentDate: new Date(Date.now() - (i + 1) * 30 * 24 * 3600 * 1000),
       branchId: branches[i % branches.length]._id,
     });

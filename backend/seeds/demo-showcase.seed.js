@@ -52,6 +52,9 @@ module.exports = async function seedDemoShowcase({ dryRun = false, reset = false
   const bump = (k, delta = 1) => {
     report.created[k] = (report.created[k] || 0) + delta;
   };
+  const step = label => {
+    process.stdout.write(`   → ${label}\n`);
+  };
 
   // ── Clear if reset ─────────────────────────────────────────────────────
   if (reset && !dryRun) {
@@ -73,6 +76,7 @@ module.exports = async function seedDemoShowcase({ dryRun = false, reset = false
     return { dryRun: true, message: 'سيتم إنشاء ~60 سجلاً للعرض التجريبي.' };
   }
 
+  step('branches');
   // ── Branches ──────────────────────────────────────────────────────────
   // Using balady codes that hit different adapter branches:
   //  DEMO-HQ  → 12345678 → active
@@ -165,6 +169,7 @@ module.exports = async function seedDemoShowcase({ dryRun = false, reset = false
     branches.push(branch);
   }
 
+  step('employees');
   // ── Employees ─────────────────────────────────────────────────────────
   // Mix of states:
   //  emp-0: SCFHS active + GOSI active + Qiwa compliant — green star
@@ -347,6 +352,7 @@ module.exports = async function seedDemoShowcase({ dryRun = false, reset = false
     employees.push(emp);
   }
 
+  step('cpe-records');
   // ── CPE records — spread three compliance verdicts across the roster ─
   //   emp-1 Ahmed (scfhs 12345): compliant (all mins met + total 105)
   //   emp-2 Noura (scfhs 23456): needs-attention (cat-2 short by 10, 4 months left)
@@ -480,6 +486,7 @@ module.exports = async function seedDemoShowcase({ dryRun = false, reset = false
     bump('cpeRecords');
   }
 
+  step('guardians');
   // ── Guardian users + Guardian records ─────────────────────────────────
   const guardianSpecs = [
     {
@@ -554,6 +561,7 @@ module.exports = async function seedDemoShowcase({ dryRun = false, reset = false
     guardians.push(guardian);
   }
 
+  step('beneficiaries');
   // ── Beneficiaries (10, distributed across guardians + branches) ───────
   const disabilityTypes = [
     'autism',

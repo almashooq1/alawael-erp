@@ -325,12 +325,26 @@ export const HIJRI_MONTHS = [
   'ذو الحجة',
 ];
 
+/**
+ * Returns the start (midnight) and end (23:59:59.999) of the given day
+ * in local time. Used for day-bounded queries / range filters.
+ * @param {Date|string} input
+ * @returns {{ start: Date, end: Date }}
+ */
+export const getDayRange = input => {
+  const d = input instanceof Date ? input : new Date(input);
+  const start = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0);
+  const end = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999);
+  return { start, end };
+};
+
 export default {
   formatDate,
   formatHijri,
   formatDateTime,
   formatTime,
   timeAgo,
+  getDayRange,
   daysBetween,
   isToday,
   isPast,

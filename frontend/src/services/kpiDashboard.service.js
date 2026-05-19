@@ -1,4 +1,4 @@
-﻿import api from './api.client';
+import api from './api.client';
 
 const kpiDashboardService = {
   getAll: params => api.get('/api/v1/kpi-dashboard', { params }),

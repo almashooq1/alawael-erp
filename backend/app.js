@@ -440,6 +440,26 @@ try {
     logger.warn('[StagnantGoals] sweeper skipped:', stagnantErr.message);
   }
 
+  // W197b — daily Document Archive auto-recommendation scan. Reads
+  // signals already on Document (lastViewedAt, expiryDate, workflowStatus,
+  // viewCount, downloadCount) and writes `archiveRecommendation` so the
+  // admin UI can surface candidates. Never archives autonomously — admins
+  // must POST /api/v1/archive/recommendations/:id/ack to actually archive.
+  try {
+    const createArchiveScheduler = require('./services/documentArchiveScheduler');
+    const archiveScheduler = createArchiveScheduler({ logger });
+    app.locals.documentArchiveScheduler = archiveScheduler;
+    if (process.env.NODE_ENV !== 'test') {
+      archiveScheduler.start();
+    } else {
+      logger.info(
+        '[ArchiveScheduler] ✓ available via app.locals.documentArchiveScheduler.runOnce()'
+      );
+    }
+  } catch (archiveSchedErr) {
+    logger.warn('[ArchiveScheduler] skipped:', archiveSchedErr.message);
+  }
+
   // Consent capture surface — the HTTP side of the Consent model
   // (Commit 19). Without these routes, the CRITICAL consent flags
   // stay dormant because nothing writes records.

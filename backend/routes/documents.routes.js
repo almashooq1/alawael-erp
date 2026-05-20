@@ -702,8 +702,13 @@ router.get(
     );
     if (!doc) return res.status(404).json({ success: false, message: 'المستند غير موجود' });
 
-    // Increment view count
-    await Document.findByIdAndUpdate(req.params.id, { $inc: { viewCount: 1 } });
+    // Increment view count + touch lastViewedAt (W197b — keeps the smart
+    // archive recommender's idle signal honest; previously it could only
+    // see updatedAt which never moves on pure reads).
+    await Document.findByIdAndUpdate(req.params.id, {
+      $inc: { viewCount: 1 },
+      $set: { lastViewedAt: new Date() },
+    });
 
     res.json({ success: true, document: doc });
   })

@@ -1,3 +1,13 @@
+// Load .env BEFORE the apps[].env block is evaluated, so process.env.*
+// references below resolve to real values (Redis password, DB URI, etc.).
+// PM2 itself does NOT auto-load .env; without this, secrets are empty
+// strings and the app boots in `degraded` mode (Wave 195 deploy postmortem).
+try {
+  require('dotenv').config({ path: __dirname + '/.env' });
+} catch (_e) {
+  // dotenv is a regular dep; if missing, fall through and rely on shell env.
+}
+
 module.exports = {
   apps: [
     {

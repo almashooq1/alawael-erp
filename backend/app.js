@@ -467,6 +467,35 @@ try {
     logger.warn('[StagnantGoals] sweeper skipped:', stagnantErr.message);
   }
 
+  // W206g — daily re-assessment sweeper. Companion to the stagnant-goal
+  // sweeper above: flags SmartGoals whose timeBoundDate has passed without
+  // completion AND beneficiaries whose last engine bundle is >90 days old.
+  // Read-only signal — UI surfaces via /api/v1/assessment-engine/reassessment-due.
+  try {
+    const createReassessmentSweeper = require('./services/assessmentReassessmentSweeper.service');
+    const SmartGoalModel = require('./models/SmartGoal');
+    const BundleModel = require('./models/AssessmentRecommendationBundle');
+    const reassessmentSweeper = createReassessmentSweeper({
+      SmartGoal: SmartGoalModel,
+      AssessmentRecommendationBundle: BundleModel,
+      logger,
+    });
+    app.locals.reassessmentSweeper = reassessmentSweeper;
+    if (cronDep && process.env.NODE_ENV !== 'test' && process.env.REASSESSMENT_SWEEPER !== 'off') {
+      reassessmentSweeper.start({
+        schedule: process.env.REASSESSMENT_SCHEDULE || '0 4 * * *',
+        cron: cronDep,
+      });
+      logger.info('[ReassessmentSweeper] ✓ sweeper scheduled (daily 04:00)');
+    } else {
+      logger.info(
+        '[ReassessmentSweeper] ✓ sweeper available via app.locals.reassessmentSweeper.runOnce()'
+      );
+    }
+  } catch (reassessErr) {
+    logger.warn('[ReassessmentSweeper] skipped:', reassessErr.message);
+  }
+
   // W197b — daily Document Archive auto-recommendation scan. Reads
   // signals already on Document (lastViewedAt, expiryDate, workflowStatus,
   // viewCount, downloadCount) and writes `archiveRecommendation` so the

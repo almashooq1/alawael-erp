@@ -441,6 +441,25 @@ router.get('/analytics', async (req, res) => {
   }
 });
 
+// ─── GET /reassessment-due/count — Wave 206g ──────────────────
+//
+// Lightweight summary-only endpoint for sidebar badges. Returns
+// just the counts; no per-beneficiary detail. Use when polling
+// frequently from a UI widget.
+
+router.get('/reassessment-due/count', async (req, res) => {
+  try {
+    const sweeper = getSweeper();
+    if (!sweeper) {
+      return res.status(503).json({ success: false, message: 'reassessment_sweeper_unavailable' });
+    }
+    const result = await sweeper.runOnce({ now: new Date() });
+    return res.json({ success: true, data: result.summary });
+  } catch (err) {
+    return safeError(res, err, 'reassessment_count_failed');
+  }
+});
+
 // ─── GET /reassessment-due — Wave 206e ────────────────────────
 //
 // Returns the live list of beneficiaries whose goals have passed

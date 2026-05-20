@@ -110,7 +110,7 @@ describe('E-Stamp Routes — Role-Restricted Endpoints', () => {
 /* ═══════════════════════════════════════════════════════════════════════════
    Verify endpoint — should be accessible and return structured response
    ═══════════════════════════════════════════════════════════════════════════ */
-describe.skip('GET /api/e-stamp/verify/:code', () => {
+describe('GET /api/e-stamp/verify/:code', () => {
   it('should return structured response for a non-existent verification code', async () => {
     const res = await request(app)
       .get('/api/e-stamp/verify/STAMP-FAKE-000-abcdef12')
@@ -119,7 +119,7 @@ describe.skip('GET /api/e-stamp/verify/:code', () => {
       .timeout(15000);
 
     // 200 with valid:false, 401 (bad token), or 500 (DB not connected)
-    expect([200, 401, 403, 500].includes(res.status)).toBe(true);
+    expect([200, 401, 403, 500, 503].includes(res.status)).toBe(true);
 
     if (res.status === 200) {
       expect(res.body).toHaveProperty('success', true);
@@ -145,7 +145,7 @@ describe.skip('GET /api/e-stamp/verify/:code', () => {
 /* ═══════════════════════════════════════════════════════════════════════════
    Upload Stamp Image — POST /:id/upload-image
    ═══════════════════════════════════════════════════════════════════════════ */
-describe.skip('POST /api/e-stamp/:id/upload-image', () => {
+describe('POST /api/e-stamp/:id/upload-image', () => {
   it('should be mounted and respond (not 404)', async () => {
     const res = await request(app)
       .post(`/api/e-stamp/${FAKE_ID}/upload-image`)
@@ -164,14 +164,14 @@ describe.skip('POST /api/e-stamp/:id/upload-image', () => {
 
     // 400 (no file), 401 (bad token), 403, or 500 — but NOT 404
     expect(res.status).not.toBe(404);
-    expect([200, 400, 401, 403, 500].includes(res.status)).toBe(true);
+    expect([200, 400, 401, 403, 500, 503].includes(res.status)).toBe(true);
   }, 20000);
 });
 
 /* ═══════════════════════════════════════════════════════════════════════════
    Stats endpoint
    ═══════════════════════════════════════════════════════════════════════════ */
-describe.skip('GET /api/e-stamp/stats', () => {
+describe('GET /api/e-stamp/stats', () => {
   it('should return stats or reject unauthenticated', async () => {
     const res = await request(app)
       .get('/api/e-stamp/stats')
@@ -179,7 +179,7 @@ describe.skip('GET /api/e-stamp/stats', () => {
       .set('Accept', 'application/json')
       .timeout(15000);
 
-    expect([200, 401, 403, 500].includes(res.status)).toBe(true);
+    expect([200, 401, 403, 500, 503].includes(res.status)).toBe(true);
 
     if (res.status === 200) {
       expect(res.body).toHaveProperty('success', true);
@@ -191,7 +191,7 @@ describe.skip('GET /api/e-stamp/stats', () => {
 /* ═══════════════════════════════════════════════════════════════════════════
    List stamps — GET /api/e-stamp
    ═══════════════════════════════════════════════════════════════════════════ */
-describe.skip('GET /api/e-stamp', () => {
+describe('GET /api/e-stamp', () => {
   it('should list stamps or reject unauthenticated', async () => {
     const res = await request(app)
       .get('/api/e-stamp')
@@ -199,7 +199,7 @@ describe.skip('GET /api/e-stamp', () => {
       .set('Accept', 'application/json')
       .timeout(15000);
 
-    expect([200, 401, 403, 500].includes(res.status)).toBe(true);
+    expect([200, 401, 403, 500, 503].includes(res.status)).toBe(true);
 
     if (res.status === 200) {
       expect(res.body).toHaveProperty('success', true);
@@ -214,14 +214,14 @@ describe.skip('GET /api/e-stamp', () => {
       .set('Accept', 'application/json')
       .timeout(15000);
 
-    expect([200, 401, 403, 500].includes(res.status)).toBe(true);
+    expect([200, 401, 403, 500, 503].includes(res.status)).toBe(true);
   }, 20000);
 });
 
 /* ═══════════════════════════════════════════════════════════════════════════
    Get single stamp — verificationSecret should be excluded
    ═══════════════════════════════════════════════════════════════════════════ */
-describe.skip('GET /api/e-stamp/:id', () => {
+describe('GET /api/e-stamp/:id', () => {
   it('should not expose verificationSecret in response', async () => {
     const res = await request(app)
       .get(`/api/e-stamp/${FAKE_ID}`)
@@ -229,7 +229,7 @@ describe.skip('GET /api/e-stamp/:id', () => {
       .set('Accept', 'application/json')
       .timeout(15000);
 
-    expect([200, 401, 403, 404, 500].includes(res.status)).toBe(true);
+    expect([200, 401, 403, 404, 500, 503].includes(res.status)).toBe(true);
 
     if (res.status === 200 && res.body.data) {
       expect(res.body.data).not.toHaveProperty('verificationSecret');
@@ -240,7 +240,7 @@ describe.skip('GET /api/e-stamp/:id', () => {
 /* ═══════════════════════════════════════════════════════════════════════════
    Stamped PDF Download — GET /api/e-signature-pdf/stamped/:stampId
    ═══════════════════════════════════════════════════════════════════════════ */
-describe.skip('GET /api/e-signature-pdf/stamped/:stampId', () => {
+describe('GET /api/e-signature-pdf/stamped/:stampId', () => {
   it('should respond (route is mounted)', async () => {
     const res = await request(app)
       .get('/api/e-signature-pdf/stamped/STM-2026-00001')
@@ -248,7 +248,7 @@ describe.skip('GET /api/e-signature-pdf/stamped/:stampId', () => {
       .timeout(15000);
 
     // Route exists — 401 (no token), 404 (not found), or 500
-    expect([401, 403, 404, 500].includes(res.status)).toBe(true);
+    expect([401, 403, 404, 500, 503].includes(res.status)).toBe(true);
   }, 20000);
 
   it('should respond for non-existent stamp', async () => {
@@ -259,14 +259,14 @@ describe.skip('GET /api/e-signature-pdf/stamped/:stampId', () => {
       .timeout(15000);
 
     // 401/403 (bad token), 404 (not found), or 500
-    expect([401, 403, 404, 500].includes(res.status)).toBe(true);
+    expect([401, 403, 404, 500, 503].includes(res.status)).toBe(true);
   }, 20000);
 });
 
 /* ═══════════════════════════════════════════════════════════════════════════
    EStamp Model — generateStampId
    ═══════════════════════════════════════════════════════════════════════════ */
-describe.skip('EStamp Model — generateStampId', () => {
+describe('EStamp Model — generateStampId', () => {
   let EStamp;
 
   beforeAll(() => {

@@ -26,6 +26,7 @@ const mongoose = require('mongoose');
 const engine = require('../services/assessmentRecommendationEngine.service');
 const llmModule = require('../services/assessmentRecommendationLlm.service');
 const createReassessmentSweeper = require('../services/assessmentReassessmentSweeper.service');
+const createBundleAnalytics = require('../services/assessmentBundleAnalytics.service');
 const safeError = require('../utils/safeError');
 
 // Register the bundle model so `mongoose.model('AssessmentRecommendationBundle')`
@@ -43,6 +44,19 @@ function getSweeper() {
       AssessmentRecommendationBundle: mongoose.model('AssessmentRecommendationBundle'),
     });
     return cachedSweeper;
+  } catch {
+    return null;
+  }
+}
+
+let cachedAnalytics = null;
+function getAnalytics() {
+  if (cachedAnalytics) return cachedAnalytics;
+  try {
+    cachedAnalytics = createBundleAnalytics({
+      AssessmentRecommendationBundle: mongoose.model('AssessmentRecommendationBundle'),
+    });
+    return cachedAnalytics;
   } catch {
     return null;
   }
@@ -397,6 +411,33 @@ router.get('/history/:beneficiaryId', async (req, res) => {
     });
   } catch (err) {
     return safeError(res, err, 'assessment_history_failed');
+  }
+});
+
+// ─── GET /analytics — Wave 206f ───────────────────────────────
+//
+// Aggregations over persisted bundles. Supports ?from + ?to ISO
+// dates, ?therapistId, ?branchId filters. Defaults to last 30 days.
+
+router.get('/analytics', async (req, res) => {
+  try {
+    const analytics = getAnalytics();
+    if (!analytics) {
+      return res.status(503).json({ success: false, message: 'analytics_unavailable' });
+    }
+    const opts = {};
+    if (req.query.from) opts.from = req.query.from;
+    if (req.query.to) opts.to = req.query.to;
+    if (req.query.therapistId && mongoose.Types.ObjectId.isValid(req.query.therapistId)) {
+      opts.therapistId = new mongoose.Types.ObjectId(req.query.therapistId);
+    }
+    if (req.query.branchId && mongoose.Types.ObjectId.isValid(req.query.branchId)) {
+      opts.branchId = new mongoose.Types.ObjectId(req.query.branchId);
+    }
+    const report = await analytics.getReport(opts);
+    return res.json({ success: true, data: report });
+  } catch (err) {
+    return safeError(res, err, 'assessment_analytics_failed');
   }
 });
 

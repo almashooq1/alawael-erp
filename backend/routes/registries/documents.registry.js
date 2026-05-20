@@ -28,6 +28,7 @@ module.exports = function registerDocumentRoutes(
   const documentsRoutes = safeRequire('../routes/documents.routes');
   // PHANTOM: const documentsSmartRouter = safeRequire('../routes/documents.smart.routes');
   const documentAdvancedRoutes = safeRequire('../routes/documentAdvanced.routes');
+  const documentExpiryAdminRoutes = safeRequire('../routes/document-expiry-admin.routes');
   // PHANTOM: const archiveRoutes = safeRequire('../routes/archive.routes');
   // PHANTOM: const formTemplateRoutes = safeRequire('../routes/formTemplate.routes');
   const mediaRoutes = safeRequire('../routes/media.routes');
@@ -54,6 +55,15 @@ module.exports = function registerDocumentRoutes(
   // ── Document Advanced Services (خدمات المستندات المتقدمة) ──────────────
   // ══════════════════════════════════════════════════════════════════════════
   dualMount(app, 'documents-advanced', documentAdvancedRoutes);
+  // W184: document expiry radar admin surface
+  if (documentExpiryAdminRoutes) {
+    safeMount(
+      app,
+      ['/api/admin/document-expiry', '/api/v1/admin/document-expiry'],
+      '../routes/document-expiry-admin.routes'
+    );
+    logger.info('[Docs] Document Expiry Radar mounted at /api/(v1/)?admin/document-expiry');
+  }
   logger.info('[Docs] Document Advanced routes mounted (10 services, 60+ endpoints)');
 
   // ══════════════════════════════════════════════════════════════════════════

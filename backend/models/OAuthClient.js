@@ -15,6 +15,7 @@
 
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 
 const OAuthClientSchema = new mongoose.Schema(
   {
@@ -46,6 +47,10 @@ const OAuthClientSchema = new mongoose.Schema(
     contacts: { type: [String], default: [] },
     isActive: { type: Boolean, default: true, index: true },
 
+    // Rotation bookkeeping (W205g)
+    secretRotatedAt: Date,
+    secretRotationCount: { type: Number, default: 0 },
+
     // Bookkeeping
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     lastUsedAt: Date,
@@ -65,6 +70,30 @@ OAuthClientSchema.methods.verifyClientSecret = async function (candidate) {
 
 OAuthClientSchema.methods.touchLastUsed = function () {
   return this.updateOne({ $set: { lastUsedAt: new Date() } });
+};
+
+/**
+ * Mint a new clientSecret, bcrypt-hash it, and persist. Returns the
+ * plaintext secret ONCE — caller must surface it to the operator
+ * immediately and discard.
+ *
+ * For public clients (tokenEndpointAuthMethod:'none') rotation is a
+ * no-op and returns null; PKCE is the credential.
+ */
+OAuthClientSchema.methods.rotateSecret = async function () {
+  if (this.tokenEndpointAuthMethod === 'none') {
+    return null;
+  }
+  const newSecret = crypto.randomBytes(32).toString('hex');
+  const hash = await bcrypt.hash(newSecret, 12);
+  await this.updateOne({
+    $set: {
+      clientSecretHash: hash,
+      secretRotatedAt: new Date(),
+    },
+    $inc: { secretRotationCount: 1 },
+  });
+  return newSecret;
 };
 
 const OAuthClient = mongoose.models.OAuthClient || mongoose.model('OAuthClient', OAuthClientSchema);

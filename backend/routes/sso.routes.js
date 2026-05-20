@@ -20,6 +20,8 @@ const SSOService = require('../services/sso.service');
 const OAuthService = require('../services/oauth.service');
 const ssoKeys = require('../services/ssoKeys.service');
 const OAuthClient = require('../models/OAuthClient');
+const SsoAuditEvent = require('../models/SsoAuditEvent');
+const { recordAudit, recordAuditFailure } = require('../services/ssoAudit.service');
 const { verifySSOToken, requireRole } = require('../middleware/sso-auth.middleware');
 
 const ADMIN_ROLES = ['super_admin', 'head_office_admin', 'ceo', 'it_admin', 'admin'];
@@ -858,15 +860,74 @@ router.post('/admin/oauth-clients', verifySSOToken(), adminOnly, async (req, res
       tokenEndpointAuthMethod,
       createdBy: req.user.userId,
     });
+    await recordAudit(req, {
+      action: 'sso.oauth-client.register',
+      targetType: 'oauth_client',
+      targetId: client.clientId,
+      metadata: { clientName: client.clientName, tokenEndpointAuthMethod },
+    });
     res.status(201).json({
       success: true,
       data: { ...client, clientSecret },
       message: 'Save the clientSecret now — it cannot be retrieved later',
     });
   } catch (error) {
+    await recordAuditFailure(
+      req,
+      { action: 'sso.oauth-client.register', targetType: 'oauth_client' },
+      error
+    );
     safeError(res, error, 'Failed to register OAuth client');
   }
 });
+
+/**
+ * POST /api/sso/admin/oauth-clients/:clientId/rotate-secret  (W205g)
+ * Returns the new plaintext clientSecret ONCE — never retrievable again.
+ * No-op for public clients (returns 204).
+ */
+router.post(
+  '/admin/oauth-clients/:clientId/rotate-secret',
+  verifySSOToken(),
+  adminOnly,
+  async (req, res) => {
+    try {
+      const client = await OAuthClient.findOne({ clientId: req.params.clientId }).select(
+        '+clientSecretHash'
+      );
+      if (!client) {
+        return res.status(404).json({ success: false, error: 'not_found' });
+      }
+      const newSecret = await client.rotateSecret();
+      await recordAudit(req, {
+        action: 'sso.oauth-client.rotate-secret',
+        targetType: 'oauth_client',
+        targetId: client.clientId,
+        metadata: { tokenEndpointAuthMethod: client.tokenEndpointAuthMethod },
+      });
+      if (newSecret === null) {
+        return res.status(204).end();
+      }
+      logger.info(`[admin] OAuth client secret rotated by ${req.user.userId}: ${client.clientId}`);
+      res.json({
+        success: true,
+        data: { clientId: client.clientId, clientSecret: newSecret },
+        message: 'Save the new clientSecret now — it cannot be retrieved later',
+      });
+    } catch (error) {
+      await recordAuditFailure(
+        req,
+        {
+          action: 'sso.oauth-client.rotate-secret',
+          targetType: 'oauth_client',
+          targetId: req.params.clientId,
+        },
+        error
+      );
+      safeError(res, error, 'Failed to rotate OAuth client secret');
+    }
+  }
+);
 
 /**
  * DELETE /api/sso/admin/oauth-clients/:clientId  (soft delete → isActive=false)
@@ -880,8 +941,22 @@ router.delete('/admin/oauth-clients/:clientId', verifySSOToken(), adminOnly, asy
     if (!result.matchedCount) {
       return res.status(404).json({ success: false, error: 'not_found' });
     }
+    await recordAudit(req, {
+      action: 'sso.oauth-client.deactivate',
+      targetType: 'oauth_client',
+      targetId: req.params.clientId,
+    });
     res.json({ success: true });
   } catch (error) {
+    await recordAuditFailure(
+      req,
+      {
+        action: 'sso.oauth-client.deactivate',
+        targetType: 'oauth_client',
+        targetId: req.params.clientId,
+      },
+      error
+    );
     safeError(res, error, 'Failed to deactivate OAuth client');
   }
 });
@@ -922,11 +997,22 @@ router.delete('/admin/sessions/:sessionId', verifySSOToken(), adminOnly, async (
       return res.status(404).json({ success: false, error: 'not_found' });
     }
     await ssoService.endSession(req.params.sessionId);
+    await recordAudit(req, {
+      action: 'sso.session.end',
+      targetType: 'session',
+      targetId: req.params.sessionId,
+      metadata: { ownerUserId: info.userId, source: info.metadata?.source },
+    });
     logger.info(
       `[admin] session forced-end by ${req.user.userId}: ${req.params.sessionId} (owner=${info.userId})`
     );
     res.json({ success: true });
   } catch (error) {
+    await recordAuditFailure(
+      req,
+      { action: 'sso.session.end', targetType: 'session', targetId: req.params.sessionId },
+      error
+    );
     safeError(res, error, 'Failed to end session');
   }
 });
@@ -938,12 +1024,70 @@ router.delete('/admin/sessions/:sessionId', verifySSOToken(), adminOnly, async (
 router.post('/admin/users/:userId/logout-all', verifySSOToken(), adminOnly, async (req, res) => {
   try {
     const result = await ssoService.endAllUserSessions(req.params.userId);
+    await recordAudit(req, {
+      action: 'sso.session.logout-all',
+      targetType: 'user',
+      targetId: req.params.userId,
+      metadata: { sessionsEnded: result.sessionsEnded },
+    });
     logger.info(
       `[admin] all sessions ended for ${req.params.userId} by ${req.user.userId} (count=${result.sessionsEnded})`
     );
     res.json({ success: true, sessionsEnded: result.sessionsEnded });
   } catch (error) {
+    await recordAuditFailure(
+      req,
+      { action: 'sso.session.logout-all', targetType: 'user', targetId: req.params.userId },
+      error
+    );
     safeError(res, error, 'Failed to end all user sessions');
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────
+// Admin: SSO audit trail query (W205h)
+// ─────────────────────────────────────────────────────────────────────────
+
+/**
+ * GET /api/sso/admin/audit
+ *
+ * Query params (all optional):
+ *   action       — exact match (e.g. 'sso.session.end')
+ *   actorUserId  — events by this admin
+ *   targetType   — 'session' | 'oauth_client' | 'user'
+ *   targetId     — events about this specific target
+ *   outcome      — 'success' | 'failure'
+ *   since        — ISO date, inclusive
+ *   until        — ISO date, exclusive
+ *   limit        — default 100, max 500
+ *   skip         — default 0
+ */
+router.get('/admin/audit', verifySSOToken(), adminOnly, async (req, res) => {
+  try {
+    const { action, actorUserId, targetType, targetId, outcome, since, until } = req.query;
+    const limit = Math.min(Number(req.query.limit) || 100, 500);
+    const skip = Math.max(Number(req.query.skip) || 0, 0);
+
+    const filter = {};
+    if (action) filter.action = String(action);
+    if (actorUserId) filter.actorUserId = String(actorUserId);
+    if (targetType) filter.targetType = String(targetType);
+    if (targetId) filter.targetId = String(targetId);
+    if (outcome) filter.outcome = String(outcome);
+    if (since || until) {
+      filter.createdAt = {};
+      if (since) filter.createdAt.$gte = new Date(String(since));
+      if (until) filter.createdAt.$lt = new Date(String(until));
+    }
+
+    const [rows, total] = await Promise.all([
+      SsoAuditEvent.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
+      SsoAuditEvent.countDocuments(filter),
+    ]);
+
+    res.json({ success: true, data: rows, total, limit, skip });
+  } catch (error) {
+    safeError(res, error, 'Failed to query audit log');
   }
 });
 

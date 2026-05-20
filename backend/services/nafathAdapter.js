@@ -93,6 +93,45 @@ function normalizePrivateKey(pem) {
   return pem.replace(/\\n/g, '\n').trim();
 }
 
+function normalizePublicKey(pem) {
+  if (!pem) return null;
+  return pem.replace(/\\n/g, '\n').trim();
+}
+
+/**
+ * Verify a JWS signature Nafath places on its response payload.
+ * Returns the decoded claims on success; throws on failure.
+ *
+ * Inputs:
+ *   - response.signedPayload — compact JWS string (Nafath returns this in
+ *     `signedResponse` or `data.signed` depending on endpoint)
+ *   - process.env.NAFATH_RESPONSE_PUBLIC_KEY — PEM, accepts \n-escaped.
+ *
+ * If NAFATH_RESPONSE_PUBLIC_KEY is not configured, returns null (caller
+ * decides whether to treat that as an error). This keeps mock-mode tests
+ * green without needing key material.
+ */
+function verifyNafathResponseJws(signedPayload) {
+  if (!signedPayload || typeof signedPayload !== 'string') {
+    throw Object.assign(new Error('signedPayload missing or not a string'), {
+      code: 'NAFATH_BAD_RESPONSE',
+    });
+  }
+  const publicKeyPem = normalizePublicKey(process.env.NAFATH_RESPONSE_PUBLIC_KEY);
+  if (!publicKeyPem) {
+    return null; // unconfigured — caller decides
+  }
+  try {
+    const opts = { algorithms: ['RS256'] };
+    if (process.env.NAFATH_APP_ID) opts.audience = process.env.NAFATH_APP_ID;
+    return getJwt().verify(signedPayload, publicKeyPem, opts);
+  } catch (err) {
+    throw Object.assign(new Error(`Nafath response signature invalid: ${err.message}`), {
+      code: 'NAFATH_BAD_SIGNATURE',
+    });
+  }
+}
+
 /**
  * Build a JWS-signed bearer token per Nafath spec — RS256, short TTL,
  * iss=appId, aud=serviceId. The body is a JSON object the server hashes
@@ -204,7 +243,25 @@ async function liveStatus({ transactionId, nationalId }) {
     }
   );
   if (!resp.ok) return { status: 'ERROR', message: `HTTP ${resp.status}` };
-  const data = await resp.json();
+  let data = await resp.json();
+
+  // W205i: if the response carries a signed payload, verify it BEFORE
+  // trusting any field. The signed payload supersedes the unsigned fields.
+  const signedPayload = data.signedResponse || data.signed || data.signedToken;
+  if (signedPayload) {
+    try {
+      const verified = verifyNafathResponseJws(signedPayload);
+      if (verified) {
+        // Verified payload wins. Some integrations nest under `data`/`body`.
+        data = verified.body || verified.data || verified;
+      }
+    } catch (err) {
+      // Treat signature failure as a hard ERROR — never fall back to the
+      // unsigned fields if Nafath claimed to sign and the signature is bad.
+      return { status: 'ERROR', message: err.message };
+    }
+  }
+
   const statusMap = {
     WAITING: 'PENDING',
     REQUESTED: 'PENDING',
@@ -237,5 +294,6 @@ module.exports = {
   checkStatus,
   validateNationalId,
   signNafathJws,
+  verifyNafathResponseJws,
   TRANSACTION_TTL_MS,
 };

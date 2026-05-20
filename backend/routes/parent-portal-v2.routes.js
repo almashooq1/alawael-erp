@@ -41,6 +41,8 @@ const PortalNotification = require('../models/PortalNotification');
 const DailyCommunicationLog = require('../models/DailyCommunicationLog');
 // Day-rehab attendance (W174 model). Parent gets a 30-day window via W193b.
 const BeneficiaryDayAttendance = require('../models/BeneficiaryDayAttendance');
+// Morning health check (W177 model). Parent gets a 30-day window via W195b.
+const MorningHealthCheck = require('../models/MorningHealthCheck');
 // HomeAssignment is the model the therapist uses today to send
 // at-home tasks to the family. Wave 6 surfaces it on the parent
 // side + lets the parent log execution per submission row. The
@@ -164,8 +166,6 @@ router.get('/today', async (req, res) => {
     todayStart.setHours(0, 0, 0, 0);
     const todayEnd = new Date(todayStart);
     todayEnd.setDate(todayEnd.getDate() + 1);
-
-    const MorningHealthCheck = require('../models/MorningHealthCheck');
 
     const [rollcalls, healthChecks, recentComm] = await Promise.all([
       BeneficiaryDayAttendance.find({
@@ -531,6 +531,48 @@ router.get('/children/:id/day-attendance', async (req, res) => {
     });
   } catch (err) {
     return safeError(res, err, 'parent-v2.dayAttendance');
+  }
+});
+
+// ── GET /children/:id/health-checks — Wave 195b ──────────────────────────
+// Parent-scoped view onto MorningHealthCheck. Returns last N days of
+// morning checks for one child + a summary breakdown by decision.
+//
+// Privacy: returns the full check shape (temp / symptoms / mood / decision /
+// reason). The morning check is performed AT the center and the parent has
+// a legitimate interest in knowing if their kid was sent home, observed,
+// or ran a fever — same surface they'd see on a paper handoff.
+router.get('/children/:id/health-checks', async (req, res) => {
+  try {
+    const check = await assertChildAccess(req, req.params.id);
+    if (!check.ok) return res.status(check.status).json({ success: false, message: check.msg });
+    const days = Math.min(90, Math.max(1, parseInt(req.query.days, 10) || 30));
+    const since = new Date();
+    since.setDate(since.getDate() - days);
+    since.setHours(0, 0, 0, 0);
+
+    const items = await MorningHealthCheck.find({
+      beneficiaryId: req.params.id,
+      date: { $gte: since },
+    })
+      .sort({ date: -1, checkTime: -1 })
+      .lean();
+
+    const summary = { allow: 0, observe: 0, send_home: 0, fever: 0 };
+    for (const r of items) {
+      if (summary[r.decision] != null) summary[r.decision] += 1;
+      if (typeof r.temperatureC === 'number' && r.temperatureC >= 38) summary.fever += 1;
+    }
+
+    res.json({
+      success: true,
+      windowDays: days,
+      total: items.length,
+      summary,
+      items,
+    });
+  } catch (err) {
+    return safeError(res, err, 'parent-v2.healthChecks');
   }
 });
 

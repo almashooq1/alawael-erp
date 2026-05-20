@@ -39,6 +39,8 @@ const PortalNotification = require('../models/PortalNotification');
 // 'parent' read role, but the parent-portal-v2 router is the canonical
 // surface the parent app talks to, so we re-expose with assertChildAccess.
 const DailyCommunicationLog = require('../models/DailyCommunicationLog');
+// Day-rehab attendance (W174 model). Parent gets a 30-day window via W193b.
+const BeneficiaryDayAttendance = require('../models/BeneficiaryDayAttendance');
 // HomeAssignment is the model the therapist uses today to send
 // at-home tasks to the family. Wave 6 surfaces it on the parent
 // side + lets the parent log execution per submission row. The
@@ -379,6 +381,54 @@ router.post('/children/:id/communication-book/:entryId/seen', async (req, res) =
     res.json({ success: true, data: updated });
   } catch (err) {
     return safeError(res, err, 'parent-v2.commSeen');
+  }
+});
+
+// ── GET /children/:id/day-attendance — Wave 193b ─────────────────────────
+// Returns the kid's last 30 days of BeneficiaryDayAttendance records +
+// a summary breakdown. Day-rehab attendance is distinct from session
+// attendance (TherapySession) — this answers "did the kid show up at
+// the day-program today / this week / this month?" rather than "did
+// they make their PT session?".
+router.get('/children/:id/day-attendance', async (req, res) => {
+  try {
+    const check = await assertChildAccess(req, req.params.id);
+    if (!check.ok) return res.status(check.status).json({ success: false, message: check.msg });
+    const days = Math.min(90, Math.max(1, parseInt(req.query.days, 10) || 30));
+    const since = new Date();
+    since.setDate(since.getDate() - days);
+    since.setHours(0, 0, 0, 0);
+
+    const items = await BeneficiaryDayAttendance.find({
+      beneficiaryId: req.params.id,
+      date: { $gte: since },
+    })
+      .sort({ date: -1 })
+      .lean();
+
+    const summary = { present: 0, absent: 0, late: 0, excused: 0, sent_home: 0 };
+    for (const r of items) {
+      if (summary[r.status] != null) summary[r.status] += 1;
+    }
+    const presentish = summary.present + summary.late;
+    const presentRate = items.length > 0 ? Math.round((presentish / items.length) * 100) : null;
+
+    // Today's record (if any) for the "are they here right now?" tile.
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    const today = items.find(r => r.date && new Date(r.date).getTime() >= todayStart.getTime());
+
+    res.json({
+      success: true,
+      windowDays: days,
+      total: items.length,
+      summary,
+      presentRate,
+      today: today || null,
+      items,
+    });
+  } catch (err) {
+    return safeError(res, err, 'parent-v2.dayAttendance');
   }
 });
 

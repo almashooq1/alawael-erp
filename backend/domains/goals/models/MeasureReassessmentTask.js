@@ -32,6 +32,20 @@ const mongoose = require('mongoose');
 
 const TASK_STATUSES = ['pending', 'acknowledged', 'completed', 'cancelled'];
 
+// W220 — Clinical event codes that can trigger a reassessment outside
+// the normal cadence. Frozen here so the model + service + tests share
+// one source of truth.
+const EVENT_TRIGGER_CODES = Object.freeze({
+  POST_BOTOX: 'POST_BOTOX',
+  POST_SURGERY: 'POST_SURGERY',
+  POST_HOSPITALIZATION: 'POST_HOSPITALIZATION',
+  FALL_EVENT: 'FALL_EVENT',
+  MEDICATION_CHANGE_MAJOR: 'MEDICATION_CHANGE_MAJOR',
+  PARENT_RAISED_CONCERN: 'PARENT_RAISED_CONCERN',
+  THERAPIST_REQUEST: 'THERAPIST_REQUEST',
+  BRANCH_TRANSFER: 'BRANCH_TRANSFER',
+});
+
 const measureReassessmentTaskSchema = new mongoose.Schema(
   {
     // ── Subject ───────────────────────────────────────────────────
@@ -95,6 +109,26 @@ const measureReassessmentTaskSchema = new mongoose.Schema(
     cancelledAt: Date,
     cancelledBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     cancellationReason: String,
+
+    // ── Event-trigger context (W220) ──────────────────────────────
+    // Populated when this task was created by a clinical event
+    // (POST_BOTOX, FALL_EVENT, etc.) rather than by the regular W214
+    // cadence scheduler. Frozen for audit.
+    eventTriggerCode: {
+      type: String,
+      enum: Object.values(EVENT_TRIGGER_CODES),
+      index: true,
+    },
+    eventTriggerPayload: mongoose.Schema.Types.Mixed,
+    eventTriggeredAt: Date,
+    eventFiredBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+
+    // Bypass justification — required when the event arrives within
+    // the measure's minIntervalDays cooldown window and the caller
+    // asks for an override. Approver SHOULD be a different actor than
+    // the firer (caller-side SoD).
+    cooldownBypassedJustification: String,
+    cooldownBypassedApprovedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 
     // ── Free-form context ─────────────────────────────────────────
     notes: String,
@@ -171,4 +205,5 @@ module.exports = {
   MeasureReassessmentTask,
   measureReassessmentTaskSchema,
   TASK_STATUSES,
+  EVENT_TRIGGER_CODES,
 };

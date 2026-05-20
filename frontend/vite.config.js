@@ -15,6 +15,7 @@ const jsxInJsPlugin = {
       return transformWithEsbuild(code, id, {
         loader: 'jsx',
         jsx: 'automatic',
+        jsxDev: false,
       });
     }
   },
@@ -25,21 +26,28 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
 
   // Build process.env shim: REACT_APP_* → process.env.REACT_APP_*
-  // This keeps all source files unchanged during migration
+  // Also build a full process.env object so dynamic lookups (process.env[key])
+  // resolve at runtime — Vite's `define` only does literal string replacement.
   const envDefines = {};
+  const processEnvObj = {
+    NODE_ENV: mode === 'production' ? 'production' : 'development',
+  };
   for (const [key, val] of Object.entries(env)) {
     if (key.startsWith('REACT_APP_')) {
       envDefines[`process.env.${key}`] = JSON.stringify(val);
+      processEnvObj[key] = val;
     }
   }
+  envDefines['process.env'] = JSON.stringify(processEnvObj);
 
   return {
     plugins: [jsxInJsPlugin, react()],
 
-    // esbuild settings (handles dep pre-bundling)
+    // esbuild settings — control JSX transform for any pass that touches src.
+    // jsxDev:false ensures jsx-runtime (not jsx-dev-runtime) is used in prod builds.
     esbuild: {
-      loader: 'jsx',
-      include: /src\/.*\.(js|jsx)$/,
+      jsx: 'automatic',
+      jsxDev: false,
     },
 
     optimizeDeps: {
@@ -47,6 +55,8 @@ export default defineConfig(({ mode }) => {
         loader: {
           '.js': 'jsx',
         },
+        jsx: 'automatic',
+        jsxDev: false,
       },
     },
 
@@ -154,17 +164,16 @@ export default defineConfig(({ mode }) => {
               if (id.includes('i18next') || id.includes('react-i18next')) {
                 return 'i18n';
               }
-              // Core React vendor
+              // Core React + react-dom + scheduler + jsx-runtime MUST be in the
+              // same chunk — they share internal state (ReactSharedInternals,
+              // Scheduler). Splitting causes "Cannot set properties of undefined
+              // (setting 'Children')" at runtime in production.
               if (
-                id.includes('react/') ||
+                /[\\/]node_modules[\\/](react|react-dom|scheduler)[\\/]/.test(id) ||
                 id.includes('react-router-dom') ||
-                id.includes('react-router/')
+                /[\\/]node_modules[\\/]react-router[\\/]/.test(id)
               ) {
                 return 'vendor';
-              }
-              // react-dom is large on its own (~450 kB) — separate chunk so browsers cache it independently
-              if (id.includes('react-dom')) {
-                return 'react-dom';
               }
             }
 

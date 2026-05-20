@@ -233,7 +233,20 @@ class ApiService {
   }
 
   /**
-   * Refresh authentication token
+   * Refresh authentication token.
+   *
+   * Backend `/api/v1/auth/refresh` blacklists the old refresh token on
+   * every refresh; the SSO equivalent `/api/sso/refresh-token` (W205j)
+   * goes further and ENDS THE WHOLE SESSION if the same refresh is
+   * presented twice. Either way, the rotated `refreshToken` returned
+   * in the response MUST be persisted, or the next 401-triggered
+   * refresh will re-send a now-invalid token and the user gets
+   * silently logged out.
+   *
+   * Tolerates three response shapes:
+   *   { token, refreshToken }                       (mobile-legacy)
+   *   { accessToken, refreshToken }                 (current backend)
+   *   { data: { accessToken, refreshToken } }       (W205 SSO envelope)
    */
   private async refreshToken(): Promise<{ success: boolean; token?: string }> {
     try {
@@ -246,11 +259,41 @@ class ApiService {
         refreshToken,
       });
 
-      const newToken = response.data.token;
+      const body = response.data ?? {};
+      const payload = body.data ?? body;
+      const newToken: string | undefined = payload.token ?? payload.accessToken;
+      const newRefresh: string | undefined = payload.refreshToken;
+
+      if (!newToken) {
+        return { success: false };
+      }
+
       await SecureStore.setItemAsync('authToken', newToken);
+      if (newRefresh) {
+        // W205j: persist the rotated refresh — re-sending the old one
+        // will be detected as reuse and revoke the whole session.
+        await SecureStore.setItemAsync('refreshToken', newRefresh);
+      }
 
       return { success: true, token: newToken };
     } catch (error) {
+      // refresh_reuse / revoked / expired → session is irrecoverable.
+      // Caller (response interceptor) will trigger handleAuthError.
+      const status = (error as AxiosError)?.response?.status;
+      const body = ((error as AxiosError)?.response?.data || {}) as {
+        error?: string;
+        message?: string;
+      };
+      if (status === 401 && (body.error === 'refresh_reuse' || /revoked|reuse|invalid or expired/i.test(String(body.message || '')))) {
+        // Tear down both tokens immediately so a subsequent retry
+        // can't loop on the same bad refresh.
+        try {
+          await SecureStore.deleteItemAsync('authToken');
+          await SecureStore.deleteItemAsync('refreshToken');
+        } catch {
+          /* SecureStore unavailable in some test contexts */
+        }
+      }
       return { success: false };
     }
   }

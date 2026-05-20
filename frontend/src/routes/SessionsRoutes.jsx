@@ -13,7 +13,7 @@ const SessionsPage = lazyWithRetry(() => import('../pages/Sessions'));
 const SessionAmendmentAudit = lazyWithRetry(
   () => import('../pages/Sessions/SessionAmendmentAudit')
 );
-const SessionCenterPage = lazyWithRetry(() => import('../pages/sessions/SessionCenterPage'));
+const SessionCenterPage = lazyWithRetry(() => import('../pages/Sessions/SessionCenterPage'));
 
 export default function SessionsRoutes() {
   return (

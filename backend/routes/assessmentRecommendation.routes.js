@@ -1,0 +1,310 @@
+'use strict';
+
+/**
+ * assessmentRecommendation.routes.js — Wave 206
+ *
+ * Endpoints for the assessment→program smart engine:
+ *
+ *   POST /recommend         — dry-run: returns the recommendation
+ *                             bundle without writing anything
+ *   POST /recommend/accept  — creates SmartGoal docs + CarePlan
+ *                             from a previously-generated bundle
+ *
+ * Both routes are authenticated upstream via dualMountAuth in
+ * routes/_registry.js. They touch beneficiary clinical data and
+ * must never run unauthenticated.
+ *
+ * The engine is deterministic; the LLM refiner is opt-in (env
+ * ASSESSMENT_LLM_ENABLED=true + a bound Anthropic client at app
+ * startup). When disabled, /recommend returns the raw engine output.
+ */
+
+const express = require('express');
+const router = express.Router();
+const mongoose = require('mongoose');
+
+const engine = require('../services/assessmentRecommendationEngine.service');
+const llmModule = require('../services/assessmentRecommendationLlm.service');
+const safeError = require('../utils/safeError');
+
+// LLM refiner is bound once at module load. If no Anthropic client
+// has been registered on the global app context, the factory returns
+// null and we serve deterministic-only output.
+let cachedRefiner = null;
+function getRefiner() {
+  if (cachedRefiner !== null) return cachedRefiner;
+  // Look up the client from a known mount point — apps wire this at
+  // boot via `app.locals.anthropicClient = ...`. Fall back to null.
+  const client = router.__anthropicClient || null;
+  if (!client) {
+    cachedRefiner = false; // sentinel: tried, no client available
+    return null;
+  }
+  cachedRefiner = llmModule.buildLlmRefiner({ anthropicClient: client });
+  return cachedRefiner || null;
+}
+
+/**
+ * Test hook — allow integration tests to inject a mock client.
+ * Not used in production code.
+ */
+router.__setAnthropicClient = function (client) {
+  router.__anthropicClient = client;
+  cachedRefiner = null;
+};
+
+// ─── Validation helpers ────────────────────────────────────────
+
+const ALLOWED_MEASURE_KEYS = new Set([
+  'GMFCS',
+  'FIM',
+  'WeeFIM',
+  'MACS',
+  'BergBalance',
+  'CFCS',
+  'SCQ',
+  'CARS2',
+  'Vineland3',
+  'PedsQL',
+  'CSI',
+]);
+
+function validateBody(body) {
+  const errors = [];
+  if (!body || typeof body !== 'object') {
+    return { ok: false, errors: ['body_required'] };
+  }
+  const beneficiary = body.beneficiary || {};
+  const scores = Array.isArray(body.scores) ? body.scores : [];
+
+  if (typeof beneficiary.age !== 'number' || beneficiary.age < 0 || beneficiary.age > 120) {
+    errors.push('beneficiary.age must be a number between 0 and 120');
+  }
+  if (!Array.isArray(scores) || scores.length === 0) {
+    errors.push('scores must be a non-empty array');
+  }
+  for (const [i, s] of scores.entries()) {
+    if (!s || typeof s !== 'object') {
+      errors.push(`scores[${i}] must be an object`);
+      continue;
+    }
+    if (!ALLOWED_MEASURE_KEYS.has(s.measureKey)) {
+      errors.push(`scores[${i}].measureKey "${s.measureKey}" not supported`);
+    }
+  }
+  return errors.length === 0 ? { ok: true } : { ok: false, errors };
+}
+
+// ─── POST /recommend (dry-run) ────────────────────────────────
+
+router.post('/recommend', async (req, res) => {
+  try {
+    const v = validateBody(req.body);
+    if (!v.ok) {
+      return res.status(400).json({
+        success: false,
+        message: 'invalid_input',
+        details: v.errors,
+      });
+    }
+
+    const bundle = engine.recommend({
+      beneficiary: req.body.beneficiary,
+      scores: req.body.scores,
+    });
+
+    // Optionally polish Arabic phrasing through Claude Haiku
+    const refiner = getRefiner();
+    if (refiner && bundle.suggestedGoals.length > 0 && req.body.refine !== false) {
+      try {
+        bundle.suggestedGoals = await refiner.refineGoals(bundle.suggestedGoals);
+        bundle.refinedByLlm = true;
+      } catch (err) {
+        // Fail-open — refiner never throws but be paranoid
+        bundle.refinedByLlm = false;
+        bundle.refinerError = err.message;
+      }
+    } else {
+      bundle.refinedByLlm = false;
+    }
+
+    return res.json({ success: true, data: bundle });
+  } catch (err) {
+    return safeError(res, err, 'assessment_recommend_failed');
+  }
+});
+
+// ─── POST /recommend/accept (materialise into SmartGoal + CarePlan) ──
+
+/**
+ * Accepts a recommendation bundle + a beneficiaryId. Persists:
+ *
+ *   1. One SmartGoal doc per accepted goal (status='active')
+ *   2. One CarePlan doc with goals grouped into therapeutic domains
+ *
+ * The bundle is NOT re-generated server-side — the client passes
+ * back the bundle they saw, possibly after pruning some goals.
+ * This preserves user agency: therapist reviews + selects, never
+ * a black-box auto-apply.
+ *
+ * Body shape:
+ *   {
+ *     beneficiaryId: "...",
+ *     therapistId:   "...",     // optional — defaults to req.user
+ *     acceptedGoals: [...],     // subset of bundle.suggestedGoals
+ *     acceptedPrograms: [...],  // subset of bundle.suggestedPrograms
+ *     planNumber:    "...",     // optional; auto-generated otherwise
+ *     branchId:      "..."
+ *   }
+ */
+router.post('/recommend/accept', async (req, res) => {
+  try {
+    const {
+      beneficiaryId,
+      therapistId,
+      acceptedGoals = [],
+      acceptedPrograms = [],
+      planNumber,
+      branchId,
+    } = req.body || {};
+
+    if (!beneficiaryId || !mongoose.Types.ObjectId.isValid(beneficiaryId)) {
+      return res.status(400).json({ success: false, message: 'beneficiaryId required (ObjectId)' });
+    }
+    if (!Array.isArray(acceptedGoals) || acceptedGoals.length === 0) {
+      return res
+        .status(400)
+        .json({ success: false, message: 'acceptedGoals must be a non-empty array' });
+    }
+
+    const SmartGoal = mongoose.model('SmartGoal');
+    const CarePlan = mongoose.model('CarePlan');
+
+    const effectiveTherapist =
+      therapistId && mongoose.Types.ObjectId.isValid(therapistId)
+        ? new mongoose.Types.ObjectId(therapistId)
+        : req.user && req.user._id
+          ? req.user._id
+          : null;
+
+    // 1. Create one SmartGoal per accepted goal
+    const goalDocs = acceptedGoals.map(g => ({
+      therapist: effectiveTherapist,
+      beneficiary: new mongoose.Types.ObjectId(beneficiaryId),
+      branch:
+        branchId && mongoose.Types.ObjectId.isValid(branchId)
+          ? new mongoose.Types.ObjectId(branchId)
+          : null,
+      title: g.title,
+      specific: g.specific,
+      measurable: g.measurable,
+      achievable: g.achievable,
+      relevant: g.relevant,
+      timeBoundDate: g.timeBoundDays
+        ? new Date(Date.now() + g.timeBoundDays * 24 * 60 * 60 * 1000)
+        : null,
+      status: 'active',
+    }));
+    const createdGoals = await SmartGoal.insertMany(goalDocs);
+
+    // 2. Build a CarePlan grouping the goals by domain → therapeutic section
+    const domainToSection = {
+      motor: 'physical',
+      self_care: 'occupational',
+      communication: 'speech',
+      cognitive: 'psychological',
+      behavior: 'behavioral',
+      social: 'psychological',
+      adaptive: 'occupational',
+    };
+
+    const therapeuticDomains = {};
+    for (const g of acceptedGoals) {
+      const section = domainToSection[g.domain] || 'psychological';
+      if (!therapeuticDomains[section]) {
+        therapeuticDomains[section] = {
+          assessments: g.evidence ? [...new Set(g.evidence.map(e => e.measureKey))] : [],
+          goals: [],
+          frequency: null,
+          notes: null,
+        };
+      }
+      therapeuticDomains[section].goals.push({
+        title: g.title,
+        description: `${g.specific}\n${g.measurable}`,
+        type: mapDomainToCarePlanGoalType(g.domain),
+        baseline: g.baseline,
+        target: g.specific,
+        criteria: g.measurable,
+        startDate: new Date(),
+        targetDate: g.timeBoundDays
+          ? new Date(Date.now() + g.timeBoundDays * 24 * 60 * 60 * 1000)
+          : null,
+        status: 'IN_PROGRESS',
+        progress: 0,
+      });
+    }
+
+    // Attach session frequencies from accepted programs by modality
+    const modalityToSection = {
+      pt: 'physical',
+      ot: 'occupational',
+      slp: 'speech',
+      aba: 'behavioral',
+      psych: 'psychological',
+      aac: 'speech',
+      group: 'psychological',
+      parent_training: 'psychological',
+    };
+    for (const p of acceptedPrograms) {
+      const section = modalityToSection[p.modality] || 'psychological';
+      if (therapeuticDomains[section]) {
+        const sessions = p.recommendedSessionsPerWeek;
+        therapeuticDomains[section].frequency = therapeuticDomains[section].frequency
+          ? `${therapeuticDomains[section].frequency} + ${sessions}/أسبوع (${p.nameAr})`
+          : `${sessions} جلسات/أسبوع — ${p.nameAr}`;
+      }
+    }
+
+    const carePlanDoc = new CarePlan({
+      beneficiary: new mongoose.Types.ObjectId(beneficiaryId),
+      planNumber: planNumber || `CP-W206-${Date.now()}`,
+      startDate: new Date(),
+      reviewDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
+      status: 'DRAFT',
+      requiresSignature: true,
+      therapeutic: {
+        enabled: true,
+        domains: therapeuticDomains,
+      },
+    });
+    await carePlanDoc.save();
+
+    return res.json({
+      success: true,
+      data: {
+        createdGoalIds: createdGoals.map(g => g._id),
+        carePlanId: carePlanDoc._id,
+        carePlanNumber: carePlanDoc.planNumber,
+        goalCount: createdGoals.length,
+      },
+    });
+  } catch (err) {
+    return safeError(res, err, 'assessment_recommend_accept_failed');
+  }
+});
+
+function mapDomainToCarePlanGoalType(domain) {
+  const map = {
+    motor: 'MOTOR',
+    self_care: 'LIFE_SKILL',
+    communication: 'COMMUNICATION',
+    cognitive: 'ACADEMIC',
+    behavior: 'BEHAVIORAL',
+    social: 'SOCIAL',
+    adaptive: 'LIFE_SKILL',
+  };
+  return map[domain] || 'OTHER';
+}
+
+module.exports = router;

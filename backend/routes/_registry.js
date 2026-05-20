@@ -496,6 +496,8 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   dualMount(app, 'admin/assessments', require('../routes/assessments-admin.routes'));
   // ── Disability Assessment Tests (اختبارات تقييم الإعاقة) ─────────────────
   dualMount(app, 'disability', safeRequire('../routes/disability-assessment.routes'));
+  // ── W206 Smart Rehab Engine — assessment→goals+programs+schedule ────────
+  dualMountAuth(app, 'assessment-engine', require('../routes/assessmentRecommendation.routes'));
   dualMount(app, 'admin/care-plans', require('../routes/care-plans-admin.routes'));
   dualMount(app, 'episodes', require('../routes/episodes.routes'));
   // rehabilitation-advanced is now registered via clinical-therapy.registry.js (via phases.registry.js)

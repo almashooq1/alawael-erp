@@ -32,6 +32,19 @@ const mongoose = require('mongoose');
 
 const TASK_STATUSES = ['pending', 'acknowledged', 'completed', 'cancelled'];
 
+// W222 — Lifecycle phase derived from dueAt + clock. Distinct from
+// `status` (which tracks clinician action). One task has both: e.g.
+// status='pending' AND phase='OVERDUE' is the same task waiting for
+// clinician action while time has elapsed past dueAt.
+const TASK_PHASES = Object.freeze({
+  SCHEDULED: 'SCHEDULED', //   dueAt - ∞       ...   dueAt - 7d
+  DUE_SOON: 'DUE_SOON', //     dueAt - 7d      ...   dueAt - 1d
+  DUE_NOW: 'DUE_NOW', //       dueAt - 1d      ...   dueAt + 1d
+  OVERDUE: 'OVERDUE', //       dueAt + 1d      ...   dueAt + 7d
+  ESCALATED: 'ESCALATED', //   dueAt + 7d      ...   dueAt + 14d
+  BREACHED: 'BREACHED', //     dueAt + 14d     ...   ∞
+});
+
 // W220 — Clinical event codes that can trigger a reassessment outside
 // the normal cadence. Frozen here so the model + service + tests share
 // one source of truth.
@@ -130,6 +143,38 @@ const measureReassessmentTaskSchema = new mongoose.Schema(
     cooldownBypassedJustification: String,
     cooldownBypassedApprovedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 
+    // ── Lifecycle phase (W222) ────────────────────────────────────
+    // Computed from dueAt + clock by reassessmentLifecycle.tick().
+    // Independent of `status` (clinician-action axis).
+    phase: {
+      type: String,
+      enum: Object.values(TASK_PHASES),
+      default: TASK_PHASES.SCHEDULED,
+      index: true,
+    },
+    // Append-only audit: one entry per phase transition. Never edit
+    // past entries — the trail is evidence for CBAHI breach reviews.
+    phaseHistory: [
+      {
+        phase: { type: String, enum: Object.values(TASK_PHASES), required: true },
+        enteredAt: { type: Date, required: true },
+        transitionedBy: { type: String, default: 'system' }, // 'system' | userId-string
+        _id: false,
+      },
+    ],
+    // Set when lifecycle.tick() moves the task to ESCALATED. The
+    // notification dispatcher reads this to know who got the alert.
+    escalatedAt: Date,
+    escalatedToUserId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    // Set when lifecycle.tick() moves the task to BREACHED.
+    breachedAt: Date,
+    // Manual breach acknowledgment by a reviewer (e.g. QA lead). The
+    // task can stay BREACHED, but the audit shows someone has eyes
+    // on it.
+    breachReviewedAt: Date,
+    breachReviewedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    breachReviewNotes: String,
+
     // ── Free-form context ─────────────────────────────────────────
     notes: String,
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
@@ -206,4 +251,5 @@ module.exports = {
   measureReassessmentTaskSchema,
   TASK_STATUSES,
   EVENT_TRIGGER_CODES,
+  TASK_PHASES,
 };

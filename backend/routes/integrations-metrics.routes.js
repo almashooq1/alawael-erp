@@ -85,7 +85,53 @@ function metric(lines, name, help, type, samples) {
   }
 }
 
-router.get('/', (req, res) => {
+// W211 — Interop Operations Center gauges. Read lazily so a Mongo outage
+// doesn't take the metrics endpoint down (cardinal sin: monitoring the
+// monitor must not require the monitored system to be healthy). Each read
+// has its own try/catch; on failure the gauge is simply absent and
+// Prometheus handles missing series gracefully via absent() / rate().
+async function _readInteropMetrics() {
+  const out = {
+    openAlerts: [], // { integration, ruleCode, severity, count }
+    latestSampleAt: null, // Date | null
+    error: null,
+  };
+  try {
+    const IntegrationAlert = require('../models/IntegrationAlert');
+    // Aggregate open alerts by (integration, ruleCode, severity). Index
+    // (status: 1, lastObservedAt: -1) makes this O(open_alerts).
+    const rows = await IntegrationAlert.aggregate([
+      { $match: { status: 'open' } },
+      {
+        $group: {
+          _id: { integration: '$integration', ruleCode: '$ruleCode', severity: '$severity' },
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+    out.openAlerts = rows.map(r => ({
+      integration: r._id.integration,
+      ruleCode: r._id.ruleCode,
+      severity: r._id.severity,
+      count: r.count,
+    }));
+  } catch (err) {
+    out.error = err && err.message;
+  }
+  try {
+    const IntegrationTrendSample = require('../models/IntegrationTrendSample');
+    const latest = await IntegrationTrendSample.findOne({})
+      .sort({ capturedAt: -1 })
+      .select('capturedAt')
+      .lean();
+    out.latestSampleAt = latest ? new Date(latest.capturedAt) : null;
+  } catch (err) {
+    out.error = out.error || (err && err.message);
+  }
+  return out;
+}
+
+router.get('/', async (req, res) => {
   const lines = [];
 
   const rl = ADAPTERS.map(p => ({ name: p, snap: rateLimiter.status(p) }));
@@ -243,6 +289,35 @@ router.get('/', (req, res) => {
       'Monotonic counter of idempotency middleware outcomes per route (hit/miss/pending_reject/invalid_key).',
       'counter',
       idemRows.map(r => ({ labels: { route: r.route, outcome: r.outcome }, value: r.value }))
+    );
+  }
+
+  // ─── Interop Operations Center (W211) ───────────────────────────────
+  // Open-alert gauge (per integration × ruleCode × severity) + age of the
+  // latest trend sample. Both are derived from Mongo, which means metrics
+  // becomes async — but only adds <5ms when indexes are warm. On Mongo
+  // failure these series are simply omitted, never failing the response.
+  const interop = await _readInteropMetrics();
+  if (interop.openAlerts.length > 0) {
+    metric(
+      lines,
+      'integration_alerts_open',
+      'Number of open integration alerts grouped by integration, ruleCode, and severity.',
+      'gauge',
+      interop.openAlerts.map(r => ({
+        labels: { integration: r.integration, rule_code: r.ruleCode, severity: r.severity },
+        value: r.count,
+      }))
+    );
+  }
+  if (interop.latestSampleAt) {
+    const ageSec = Math.max(0, Math.round((Date.now() - interop.latestSampleAt.getTime()) / 1000));
+    metric(
+      lines,
+      'integration_trend_sample_age_seconds',
+      'Seconds since the most recent IntegrationTrendSample was recorded. Alert if > 900 (3× the 5-min bucket).',
+      'gauge',
+      [{ labels: {}, value: ageSec }]
     );
   }
 

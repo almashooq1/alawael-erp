@@ -489,6 +489,193 @@ paths:
                   ok:    { type: boolean }
                   entry: { $ref: '#/components/schemas/DlqEntry' }
 
+  # ─── W211 — Interop Operations Center: trends + alerts ──────────────────
+  /api/v1/admin/ops/integration-health/trends/{integration}:
+    get:
+      tags: [Admin Ops — Interop Center]
+      summary: Time-series trend samples for one Saudi gov-adapter
+      description: |
+        Returns up to `limit` IntegrationTrendSample rows (5-min buckets)
+        between `since` and `until`, plus server-side per-bucket deltas
+        for call counters and DLQ parking. Process restarts are detected
+        via negative raw deltas and clamped to 0 (Prometheus resets()
+        semantics). Retention: 30 days.
+      parameters:
+        - name: integration
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [gosi, scfhs, absher, qiwa, nafath, fatoora, muqeem, nphies, wasel, balady]
+        - name: since
+          in: query
+          description: |
+            ISO timestamp OR shorthand `30m` / `24h` / `7d` / `30d`.
+            Default: 24h ago.
+          schema: { type: string, example: 24h }
+        - name: until
+          in: query
+          schema: { type: string, format: date-time }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 288, maximum: 2000 }
+      responses:
+        '200':
+          description: Time series + computed deltas.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/IntegrationTrendSeries' }
+
+  /api/v1/admin/ops/integration-health/sample:
+    post:
+      tags: [Admin Ops — Interop Center]
+      summary: Operator-triggered ad-hoc trend sample capture
+      description: |
+        Inserts one IntegrationTrendSample per adapter immediately,
+        outside the scheduler tick. Useful for surfacing the very
+        latest counters in the UI after a fix. Source is stamped
+        `manual` for filtering.
+      responses:
+        '200':
+          description: Capture summary.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:      { type: boolean }
+                  summary:
+                    type: object
+                    properties:
+                      capturedAt: { type: string, format: date-time }
+                      written:    { type: integer }
+                      deduped:    { type: integer }
+                      errors:     { type: integer }
+
+  /api/v1/admin/ops/integration-health/alerts:
+    get:
+      tags: [Admin Ops — Interop Center]
+      summary: List integration alerts
+      description: |
+        Returns alerts in lifecycle `open` / `acknowledged` / `resolved`,
+        sorted by `lastObservedAt` descending. Retention: 90 days.
+      parameters:
+        - name: status
+          in: query
+          schema: { type: string, enum: [open, acknowledged, resolved] }
+        - name: integration
+          in: query
+          schema: { type: string }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 100, maximum: 500 }
+        - name: offset
+          in: query
+          schema: { type: integer, default: 0 }
+      responses:
+        '200':
+          description: Paginated list of alerts.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:    { type: boolean }
+                  total: { type: integer }
+                  limit: { type: integer }
+                  offset: { type: integer }
+                  items:
+                    type: array
+                    items: { $ref: '#/components/schemas/IntegrationAlert' }
+
+  /api/v1/admin/ops/integration-health/alerts/{id}/ack:
+    post:
+      tags: [Admin Ops — Interop Center]
+      summary: Acknowledge an open alert
+      description: |
+        Transitions an `open` alert to `acknowledged`. The alert remains
+        active (eligible for auto-resolve) until either resolved manually
+        or the engine's auto-resolve window (15 min of non-firing) elapses.
+        Returns 404 if the alert is not currently `open`.
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      responses:
+        '200':
+          description: Updated alert.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:    { type: boolean }
+                  alert: { $ref: '#/components/schemas/IntegrationAlert' }
+        '404':
+          description: Alert not found OR no longer open.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:    { type: boolean, example: false }
+                  error: { type: string, example: NOT_FOUND_OR_NOT_OPEN }
+
+  /api/v1/admin/ops/integration-health/alerts/{id}/resolve:
+    post:
+      tags: [Admin Ops — Interop Center]
+      summary: Manually resolve an alert
+      description: |
+        Transitions an `open` OR `acknowledged` alert to `resolved` with
+        `resolvedReason='manual'`. Already-resolved alerts return 404.
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      responses:
+        '200':
+          description: Updated alert.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:    { type: boolean }
+                  alert: { $ref: '#/components/schemas/IntegrationAlert' }
+        '404':
+          description: Alert not found OR already resolved.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:    { type: boolean, example: false }
+                  error: { type: string, example: NOT_FOUND_OR_RESOLVED }
+
+  /api/v1/admin/ops/integration-health/alerts/evaluate:
+    post:
+      tags: [Admin Ops — Interop Center]
+      summary: Trigger the alert engine immediately
+      description: |
+        Runs one alert-engine evaluation outside the scheduler tick. Useful
+        for confirming alert state right after a fix is deployed, and in
+        integration tests. Returns the evaluation summary.
+      responses:
+        '200':
+          description: Engine summary.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:      { type: boolean }
+                  summary:
+                    type: object
+                    properties:
+                      ranAt:        { type: string, format: date-time }
+                      evaluated:    { type: integer }
+                      fired:        { type: integer }
+                      opened:       { type: integer }
+                      refreshed:    { type: integer }
+                      autoResolved: { type: integer }
+                      errors:       { type: integer }
+
   # ─── Phase 21 — Session→Claim Bridge ────────────────────────────────────
   /api/admin/therapy-sessions/{id}/create-claim:
     post:
@@ -1278,3 +1465,81 @@ components:
           items: { $ref: '#/components/schemas/BulkCreateClaimFailure' }
         durationMs:     { type: integer }
         dryRun:         { type: boolean }
+
+    # ─── W211 — Interop Operations Center ─────────────────────────────────
+    IntegrationAlert:
+      type: object
+      description: |
+        Operator-visible alert fired by the integrationAlertEngine. One
+        `open` alert per (integration, ruleCode); the engine bumps
+        `observedCount` and `lastObservedAt` on re-fire instead of
+        inserting duplicates.
+      properties:
+        _id:              { type: string }
+        integration:
+          type: string
+          enum: [gosi, scfhs, absher, qiwa, nafath, fatoora, muqeem, nphies, wasel, balady, system]
+        ruleCode:
+          type: string
+          enum:
+            - CIRCUIT_OPEN
+            - DLQ_BUILDUP
+            - UNCONFIGURED_LIVE
+            - HIGH_FAILURE_RATE
+            - RATE_LIMIT_SATURATION
+            - SCHEDULER_STALLED
+        severity:         { type: string, enum: [info, warning, critical] }
+        status:           { type: string, enum: [open, acknowledged, resolved] }
+        title_ar:         { type: string }
+        title_en:         { type: string }
+        observed:         { type: object, description: Rule-specific snapshot at fire time. }
+        threshold:        { type: object, description: Rule-specific threshold that was crossed. }
+        firstObservedAt:  { type: string, format: date-time }
+        lastObservedAt:   { type: string, format: date-time }
+        acknowledgedAt:   { type: string, format: date-time, nullable: true }
+        acknowledgedBy:   { type: string, nullable: true }
+        resolvedAt:       { type: string, format: date-time, nullable: true }
+        resolvedBy:       { type: string, nullable: true }
+        resolvedReason:   { type: string, enum: [auto, manual], nullable: true }
+        observedCount:
+          type: integer
+          description: How many evaluation ticks observed this rule while the alert was open.
+
+    IntegrationTrendSample:
+      type: object
+      description: |
+        One 5-minute bucket-aligned snapshot of a gov-adapter. Counter
+        fields are PROCESS-CUMULATIVE — diff adjacent samples for the
+        per-interval rate (Prometheus rate() semantics). Negative deltas
+        indicate a process restart and should be treated as no-data.
+      properties:
+        capturedAt:                { type: string, format: date-time }
+        mode:                      { type: string, enum: [live, mock, unknown] }
+        configured:                { type: boolean }
+        circuitOpen:               { type: boolean }
+        circuitFailures:           { type: integer }
+        callsSuccessCumul:         { type: integer }
+        callsFailedCumul:          { type: integer }
+        callsRateLimitedCumul:     { type: integer }
+        latencyP50Ms:              { type: number, nullable: true }
+        latencyP95Ms:              { type: number, nullable: true }
+        latencyP99Ms:              { type: number, nullable: true }
+        dlqParkedNet:              { type: integer }
+        rateLimitUtilizationPct:   { type: number, nullable: true }
+        # Server-computed per-bucket deltas (null on first sample of window)
+        deltaSuccess:              { type: integer, nullable: true }
+        deltaFailed:               { type: integer, nullable: true }
+        deltaRateLimited:          { type: integer, nullable: true }
+        deltaDlqParked:            { type: integer, nullable: true }
+
+    IntegrationTrendSeries:
+      type: object
+      properties:
+        ok:          { type: boolean }
+        integration: { type: string }
+        since:       { type: string, format: date-time }
+        until:       { type: string, format: date-time }
+        count:       { type: integer }
+        series:
+          type: array
+          items: { $ref: '#/components/schemas/IntegrationTrendSample' }

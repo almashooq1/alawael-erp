@@ -128,6 +128,108 @@ router.get('/children', async (req, res) => {
   }
 });
 
+// ── GET /today — Wave 194b ───────────────────────────────────────────────
+// Bulk dashboard endpoint: returns today's day-rehab status for every
+// child the caller has access to, in ONE round-trip. Used by the parent
+// landing page to render "today pills" without N+1 fetches.
+//
+// Per-child fields:
+//   childId, name (firstName_ar/lastName_ar)
+//   attendance.status — 'present'|'absent'|'late'|'excused'|'sent_home'|null
+//   attendance.checkInTime / arrivedByBus
+//   health.decision — 'allow'|'observe'|'send_home'|null (today's check)
+//   health.feverFlag — true if temperatureC >= 38
+//   commUnseen — count of published comm-book entries unseen by parent (recent)
+router.get('/today', async (req, res) => {
+  try {
+    // Resolve children list (same logic as GET /children, scoped).
+    let filter;
+    if (['admin', 'superadmin', 'super_admin'].includes(req.user?.role)) {
+      filter = {};
+    } else {
+      const guardian = await getMyGuardian(req);
+      if (!guardian)
+        return res
+          .status(404)
+          .json({ success: false, message: 'لا يوجد سجل ولي أمر مرتبط بحسابك' });
+      filter = { guardians: guardian._id };
+    }
+    const children = await Beneficiary.find(filter)
+      .select('firstName lastName firstName_ar lastName_ar beneficiaryNumber')
+      .lean();
+    if (children.length === 0) return res.json({ success: true, items: [] });
+
+    const childIds = children.map(c => c._id);
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    const todayEnd = new Date(todayStart);
+    todayEnd.setDate(todayEnd.getDate() + 1);
+
+    const MorningHealthCheck = require('../models/MorningHealthCheck');
+
+    const [rollcalls, healthChecks, recentComm] = await Promise.all([
+      BeneficiaryDayAttendance.find({
+        beneficiaryId: { $in: childIds },
+        date: { $gte: todayStart, $lt: todayEnd },
+      }).lean(),
+      MorningHealthCheck.find({
+        beneficiaryId: { $in: childIds },
+        date: { $gte: todayStart, $lt: todayEnd },
+      }).lean(),
+      DailyCommunicationLog.find({
+        beneficiaryId: { $in: childIds },
+        status: { $in: ['published', 'amended'] },
+        parentSeen: false,
+      })
+        .select('beneficiaryId')
+        .lean(),
+    ]);
+
+    const rcByChild = new Map(rollcalls.map(r => [String(r.beneficiaryId), r]));
+    const hcByChild = new Map(healthChecks.map(h => [String(h.beneficiaryId), h]));
+    const commUnseenByChild = recentComm.reduce((acc, c) => {
+      const k = String(c.beneficiaryId);
+      acc.set(k, (acc.get(k) || 0) + 1);
+      return acc;
+    }, new Map());
+
+    const items = children.map(c => {
+      const id = String(c._id);
+      const r = rcByChild.get(id);
+      const h = hcByChild.get(id);
+      const name =
+        [c.firstName_ar, c.lastName_ar].filter(Boolean).join(' ') ||
+        [c.firstName, c.lastName].filter(Boolean).join(' ') ||
+        c.beneficiaryNumber ||
+        id;
+      return {
+        childId: id,
+        name,
+        attendance: r
+          ? {
+              status: r.status,
+              checkInTime: r.checkInTime || null,
+              checkOutTime: r.checkOutTime || null,
+              arrivedByBus: !!r.arrivedByBus,
+            }
+          : { status: null, checkInTime: null, checkOutTime: null, arrivedByBus: false },
+        health: h
+          ? {
+              decision: h.decision,
+              feverFlag: typeof h.temperatureC === 'number' && h.temperatureC >= 38,
+              temperatureC: h.temperatureC ?? null,
+            }
+          : { decision: null, feverFlag: false, temperatureC: null },
+        commUnseen: commUnseenByChild.get(id) || 0,
+      };
+    });
+
+    res.json({ success: true, items, date: todayStart.toISOString().slice(0, 10) });
+  } catch (err) {
+    return safeError(res, err, 'parent-v2.today');
+  }
+});
+
 // ── GET /children/:id/overview ───────────────────────────────────────────
 router.get('/children/:id/overview', async (req, res) => {
   try {

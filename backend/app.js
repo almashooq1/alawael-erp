@@ -210,6 +210,21 @@ try {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// 7.064 NAFATH SSO LOGIN — Saudi national identity → SSO session (W205b)
+// ═══════════════════════════════════════════════════════════════════════════
+try {
+  const nafathRoutes = require('./routes/nafath.routes');
+  app.use('/api/auth/nafath', nafathRoutes);
+  app.use('/api/v1/auth/nafath', nafathRoutes);
+  app.use('/api/sso/nafath', nafathRoutes);
+  logger.info(
+    '[Nafath-SSO] ✓ routes mounted at /api/auth/nafath, /api/v1/auth/nafath, /api/sso/nafath'
+  );
+} catch (err) {
+  logger.warn('[Nafath-SSO] routes skipped:', err.message);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // 7.065 OPENAPI — hand-crafted spec for the integration surface + Swagger UI
 // ═══════════════════════════════════════════════════════════════════════════
 try {

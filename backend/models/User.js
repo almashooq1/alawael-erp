@@ -24,6 +24,16 @@ const userSchema = new mongoose.Schema({
     sparse: true,
     trim: true,
   },
+  // Saudi national ID — required for Nafath SSO linkage (W205b).
+  // sparse so users without one don't collide on null.
+  nationalId: {
+    type: String,
+    unique: true,
+    sparse: true,
+    trim: true,
+    match: [/^[12]\d{9}$/, 'الهوية الوطنية يجب أن تبدأ بـ 1 أو 2 و10 أرقام'],
+    index: true,
+  },
   password: {
     type: String,
     minlength: [8, 'Password must be at least 8 characters long'],

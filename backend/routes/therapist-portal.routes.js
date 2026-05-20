@@ -1,22 +1,17 @@
 /**
- * Therapist Portal — API Routes Skeleton (v1)
+ * Therapist Portal — API Routes (v1)
  *
  * Contract mirrors apps/web-therapist/src/lib/api.ts exactly.
- * Each endpoint returns 501 Not Implemented until wired to the domain layer.
- * The DEMO fixtures in the frontend produce the same shapes returned here,
- * so this file is the canonical schema reference.
+ * All endpoints are wired to the domain layer (sessions, schedule, red-flags,
+ * goals, assessments, credentials). The DEMO fixtures in the frontend produce
+ * the same shapes returned here, so this file remains the canonical schema
+ * reference.
  *
- * To activate: mount in backend/app.js via
+ * Mounted in backend/app.js via
  *   app.use('/api/v1/therapist', require('./routes/therapist-portal.routes'));
- * and implement each handler by delegating to:
- *   - existing therapist-workbench/services for sessions/schedule
- *   - beneficiary-red-flags.service for red-flags
- *   - CarePlan + GoalProgress models for goals
- *   - assessments-admin.service for assessments
- *   - employeeCredentials.service + cpe.service for credentials
  *
  * Auth: every route (except /auth/login) requires authenticate + requireRole('therapist')
- * Scope: responses must be scoped to req.user.employeeId — never return data for other therapists.
+ * Scope: responses are scoped to req.user.employeeId — never return data for other therapists.
  */
 
 const express = require('express');
@@ -229,7 +224,7 @@ function composeDateTimeISO(date, timeStr) {
  * but the Appointment.status is still active (IN_PROGRESS), we surface
  * COMPLETED_DRAFT so the UI shows a "pending documentation" badge.
  */
-function mapAppointmentToSession(appt) {
+function mapAppointmentToSession(appt, { includeSoap = false } = {}) {
   const startISO = composeDateTimeISO(appt.date, appt.startTime);
   const endISO = composeDateTimeISO(appt.date, appt.endTime || appt.startTime);
 
@@ -238,13 +233,13 @@ function mapAppointmentToSession(appt) {
   // Promote IN_PROGRESS → COMPLETED_DRAFT when a SOAP envelope exists but
   // hasn't been signed yet. COMPLETED appointments with a signed envelope
   // already map to COMPLETED_SIGNED via the enum map above.
-  if (status === 'IN_PROGRESS') {
-    const env =
-      typeof parseSoapEnvelope === 'function' ? parseSoapEnvelope(appt.internalNotes) : null;
-    if (env && env.soap && !env.signedAt) status = 'COMPLETED_DRAFT';
+  const env =
+    typeof parseSoapEnvelope === 'function' ? parseSoapEnvelope(appt.internalNotes) : null;
+  if (status === 'IN_PROGRESS' && env && env.soap && !env.signedAt) {
+    status = 'COMPLETED_DRAFT';
   }
 
-  return {
+  const out = {
     id: String(appt._id),
     beneficiaryId: appt.beneficiary ? String(appt.beneficiary) : '',
     beneficiaryNameAr: appt.beneficiaryName || '—',
@@ -257,6 +252,22 @@ function mapAppointmentToSession(appt) {
     isGroup: false,
     groupSize: 0,
   };
+
+  // Expose SOAP envelope on the single-session read so the documentation
+  // dialog can pre-populate from any prior draft. List endpoints (/today,
+  // /schedule) skip this — clients should fetch the single session to edit.
+  if (includeSoap && env && env.soap) {
+    out.soap = {
+      subjective: String(env.soap.subjective || ''),
+      objective: String(env.soap.objective || ''),
+      assessment: String(env.soap.assessment || ''),
+      plan: String(env.soap.plan || ''),
+    };
+    out.signedAt = env.signedAt || null;
+    out.lastDraftAt = env.lastDraftAt || null;
+  }
+
+  return out;
 }
 
 // ── Label maps for enum → Arabic label mapping ──────────────────────────────
@@ -287,16 +298,6 @@ const DEPARTMENT_LABEL_AR = {
   transport: 'النقل',
   it: 'تقنية المعلومات',
 };
-
-// eslint-disable-next-line no-unused-vars -- scaffolded handler for unimplemented endpoints
-function notImplemented(contract) {
-  return (_req, res) =>
-    res.status(501).json({
-      error: 'NotImplemented',
-      message: 'This endpoint is scaffolded but not yet wired.',
-      contract,
-    });
-}
 
 // ── Cross-cutting middleware ──────────────────────────────────────────────────
 // 1. mutationIdAdapter copies x-client-mutation-id → Idempotency-Key so the
@@ -608,7 +609,7 @@ router.get('/sessions/:id', authenticate, requireTherapistRole, async (req, res)
         .json({ error: 'Forbidden', message: 'session belongs to another therapist' });
     }
 
-    return res.json(mapAppointmentToSession(appt));
+    return res.json(mapAppointmentToSession(appt, { includeSoap: true }));
   } catch (err) {
     return res.status(500).json({
       error: 'InternalError',

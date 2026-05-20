@@ -768,6 +768,17 @@ try {
         logger.warn('[HrExtensions] routes skipped:', extErr.message);
       }
 
+      // SCFHS CPE admin — Saudi license-renewal credit tracking. Self-auths
+      // via its own router-level authenticateToken + requireRole gates, so
+      // the surrounding authenticate middleware is NOT re-applied here.
+      try {
+        const cpeAdminRouter = require('./routes/cpe-admin.routes');
+        app.use('/api/admin/hr/cpe', cpeAdminRouter);
+        logger.info('[CpeAdmin] ✓ /api/admin/hr/cpe mounted');
+      } catch (cpeErr) {
+        logger.warn('[CpeAdmin] routes skipped:', cpeErr.message);
+      }
+
       // HR Modules — Round 10 mega-router (onboarding + loans + travel + insurance
       // + bands + positions + surveys + assets + kudos + policies + shift-swaps
       // + visas + org-chart + time-off-calendar + WPS export)

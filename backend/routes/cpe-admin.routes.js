@@ -233,7 +233,7 @@ router.get('/overview', requireRole(READ_ROLES), async (req, res) => {
       scfhs_number: { $exists: true, $ne: '' },
       status: { $ne: 'terminated' },
     })
-      .select('firstName_ar lastName_ar scfhs_number scfhs_expiry')
+      .select('name_ar name_en employee_number specialization scfhs_number scfhs_expiry')
       .lean();
 
     // One $in query instead of N per-employee lookups. Group records by
@@ -268,7 +268,11 @@ router.get('/overview', requireRole(READ_ROLES), async (req, res) => {
         attention += 1;
         soonExpiring.push({
           employeeId: e._id,
-          name: [e.firstName_ar, e.lastName_ar].filter(Boolean).join(' '),
+          name: e.name_ar || e.name_en || e.employee_number || String(e._id),
+          employeeNumber: e.employee_number || null,
+          specialization: e.specialization || null,
+          scfhsNumber: e.scfhs_number || null,
+          scfhsExpiry: e.scfhs_expiry || null,
           daysUntilDeadline: days,
           deficit: summary.totalStatus.deficit,
         });
@@ -330,7 +334,7 @@ router.get('/export.csv', requireRole(READ_ROLES), async (req, res) => {
     const empIds = [...new Set(items.map(r => String(r.employeeId)).filter(Boolean))];
     const emps = empIds.length
       ? await Employee.find({ _id: { $in: empIds } })
-          .select('firstName_ar lastName_ar scfhs_number')
+          .select('name_ar name_en scfhs_number')
           .lean()
       : [];
     const empMap = new Map(emps.map(e => [String(e._id), e]));
@@ -359,7 +363,7 @@ router.get('/export.csv', requireRole(READ_ROLES), async (req, res) => {
       const e = empMap.get(String(r.employeeId));
       return [
         r.activityDate?.toISOString()?.slice(0, 10),
-        e ? [e.firstName_ar, e.lastName_ar].filter(Boolean).join(' ') : '',
+        e ? e.name_ar || e.name_en || '' : '',
         e?.scfhs_number || '',
         r.category,
         r.creditHours,

@@ -189,6 +189,12 @@ const ADMIN_FIELDS = Object.freeze({
   scfhs_classification: { tier: 'officer', validate: noopValid },
   scfhs_expiry: { tier: 'officer', validate: validateDateLike },
 
+  // ───── Clinical caseload cap (OFFICER) ─────
+  // Therapist beneficiary cap (default 15 in Mongoose Employee schema).
+  // Must be a positive integer. Validator is light because the Mongoose
+  // schema clamps the field type to Number — anything coercible passes.
+  max_caseload: { tier: 'officer', validate: validateNonNegativeNumber },
+
   // ───── Compensation (MANAGER) ─────
   basic_salary: { tier: 'manager', validate: validateNonNegativeNumber },
   housing_allowance: { tier: 'manager', validate: validateNonNegativeNumber },

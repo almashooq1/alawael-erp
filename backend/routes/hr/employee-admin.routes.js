@@ -21,6 +21,30 @@ const express = require('express');
 const mongoose = require('mongoose');
 const logPiiAccess = require('../../middleware/piiAccess.middleware');
 
+// ── camel → snake key adapter for incoming patch payloads ────────────────────
+// The web-admin EmployeeForm submits camelCase (scfhsNumber, scfhsExpiry,
+// maxCaseload, ...) to match the Prisma model shape the rest of the app uses.
+// The Mongoose Employee schema stores these as snake_case (scfhs_number, ...).
+// This map covers the SCFHS + caseload fields added when the web-admin form
+// was extended; the rest of the patch keys pass through unchanged so existing
+// snake_case callers (cron jobs, internal tools) keep working.
+const CAMEL_TO_SNAKE = Object.freeze({
+  scfhsNumber: 'scfhs_number',
+  scfhsClassification: 'scfhs_classification',
+  scfhsExpiry: 'scfhs_expiry',
+  maxCaseload: 'max_caseload',
+  // `specialization` is the same in both — no mapping needed; falls through.
+});
+
+function camelKeysToSnake(patch) {
+  if (patch == null || typeof patch !== 'object' || Array.isArray(patch)) return patch;
+  const out = {};
+  for (const [k, v] of Object.entries(patch)) {
+    out[CAMEL_TO_SNAKE[k] || k] = v;
+  }
+  return out;
+}
+
 function createEmployeeAdminRouter({
   service,
   auditService = null,
@@ -108,7 +132,7 @@ function createEmployeeAdminRouter({
         role: ctx.role,
         callerUserId: ctx.callerUserId,
         callerBranchId: ctx.callerBranchId,
-        patch: req.body,
+        patch: camelKeysToSnake(req.body),
         ipAddress: ctx.ipAddress,
       });
 

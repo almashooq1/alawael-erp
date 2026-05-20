@@ -483,10 +483,37 @@ describe('Wave 206 — assessmentRecommendationEngine', () => {
       // All three axes contribute goals
       const domains = new Set(result.suggestedGoals.map(g => g.domain));
       expect(domains.size).toBeGreaterThanOrEqual(2);
-      // 'medium' is honest: the programs library has only pgm.pt.gross_motor
-      // for G80 (CP). Confidence rises to 'high' once we also have an autism
-      // ICD or MACS/CFCS get matching ABA/AAC programs added.
-      expect(['high', 'medium']).toContain(result.overallConfidence);
+      // W206c added 5 G80-indicated programs (OT × 2, AAC, SLP, parent) so
+      // CP triple-measure now reaches actionable program coverage.
+      expect(result.overallConfidence).toBe('high');
+      // At least PT + OT + (AAC or SLP) selected
+      const modalities = new Set(result.suggestedPrograms.map(p => p.modality));
+      expect(modalities.has('pt')).toBe(true);
+      expect(modalities.has('ot')).toBe(true);
+    });
+  });
+
+  // ─── W206c — CP program coverage ─────────────────────────────
+  describe('W206c — G80 program library coverage', () => {
+    test('GMFCS-4 child (age 6) → PT + OT + AAC programs selected', () => {
+      const result = engine.recommend({
+        beneficiary: { age: 6, indications: ['G80'] },
+        scores: [{ measureKey: 'GMFCS', level: 4 }],
+      });
+      const ids = result.suggestedPrograms.map(p => p.programId);
+      expect(ids).toContain('pgm.pt.gross_motor');
+      expect(ids.some(id => id.startsWith('pgm.ot.cp_'))).toBe(true);
+    });
+
+    test('CFCS-4 alone with G80 → AAC + SLP CP programs selected', () => {
+      const result = engine.recommend({
+        beneficiary: { age: 7, indications: ['G80'] },
+        scores: [{ measureKey: 'CFCS', level: 4 }],
+      });
+      const ids = result.suggestedPrograms.map(p => p.programId);
+      expect(ids).toContain('pgm.aac.cp');
+      // SLP CP program offers expressive_language coverage for CFCS
+      expect(ids.some(id => id === 'pgm.slp.cp' || id === 'pgm.aac.cp')).toBe(true);
     });
   });
 });

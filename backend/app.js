@@ -496,6 +496,61 @@ try {
     logger.warn('[ReassessmentSweeper] skipped:', reassessErr.message);
   }
 
+  // W211 — Interop Operations Center tick. Every 5 minutes (matching the
+  // IntegrationTrendSample bucket size), record one trend sample per Saudi
+  // gov-adapter, then run the alert engine. Both halves are fail-isolated.
+  // No-op when INTEROP_SCHEDULER=off or in test env (tests drive runOnce
+  // directly via app.locals.interopScheduler).
+  try {
+    const aggregatorModule = require('./services/integrationHealthAggregator');
+    const metricsRegistry = require('./services/adapterMetricsRegistry');
+    let rateLimiter = null;
+    try {
+      rateLimiter = require('./services/adapterRateLimiter');
+    } catch {
+      /* optional */
+    }
+    const createTrendRecorder = require('./services/integrationTrendRecorder.service');
+    const createAlertEngine = require('./services/integrationAlertEngine.service');
+    const createInteropScheduler = require('./services/interopOperationsScheduler');
+    const IntegrationTrendSample = require('./models/IntegrationTrendSample');
+    const IntegrationAlert = require('./models/IntegrationAlert');
+
+    const trendRecorder = createTrendRecorder({
+      IntegrationTrendSample,
+      aggregator: aggregatorModule,
+      metricsRegistry,
+      rateLimiter,
+      logger,
+    });
+    const alertEngine = createAlertEngine({
+      IntegrationAlert,
+      IntegrationTrendSample,
+      aggregator: aggregatorModule,
+      logger,
+    });
+    const interopScheduler = createInteropScheduler({
+      recorder: trendRecorder,
+      alertEngine,
+      logger,
+    });
+    app.locals.interopOpsScheduler = interopScheduler;
+    app.locals.interopTrendRecorder = trendRecorder;
+    app.locals.interopAlertEngine = alertEngine;
+
+    if (cronDep && process.env.NODE_ENV !== 'test' && process.env.INTEROP_SCHEDULER !== 'off') {
+      interopScheduler.start({
+        schedule: process.env.INTEROP_SCHEDULE || '*/5 * * * *',
+        cron: cronDep,
+      });
+      logger.info('[InteropOps] ✓ scheduler started (every 5 minutes)');
+    } else {
+      logger.info('[InteropOps] ✓ available via app.locals.interopOpsScheduler.runOnce()');
+    }
+  } catch (interopErr) {
+    logger.warn('[InteropOps] scheduler skipped:', interopErr.message);
+  }
+
   // W197b — daily Document Archive auto-recommendation scan. Reads
   // signals already on Document (lastViewedAt, expiryDate, workflowStatus,
   // viewCount, downloadCount) and writes `archiveRecommendation` so the

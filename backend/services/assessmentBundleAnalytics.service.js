@@ -221,6 +221,8 @@ function createBundleAnalytics(deps = {}) {
   async function getTherapistBreakdown(opts = {}) {
     const { fromDate, toDate } = resolveRange(opts);
     const match = baseMatch({ fromDate, toDate, ...opts });
+    // W209: $lookup against Employee for name_ar so the UI doesn't
+    // have to display raw ObjectIds. Employee model lives in HR/.
     return BundleModel.aggregate([
       { $match: match },
       {
@@ -243,9 +245,24 @@ function createBundleAnalytics(deps = {}) {
         },
       },
       {
+        $lookup: {
+          from: 'employees',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'therapistDoc',
+          pipeline: [{ $project: { name_ar: 1, name_en: 1, _id: 0 } }],
+        },
+      },
+      {
         $project: {
           _id: 0,
           therapistId: '$_id',
+          therapistName: {
+            $ifNull: [
+              { $arrayElemAt: ['$therapistDoc.name_ar', 0] },
+              { $arrayElemAt: ['$therapistDoc.name_en', 0] },
+            ],
+          },
           bundles: 1,
           acceptedGoals: 1,
           suggestedGoals: 1,

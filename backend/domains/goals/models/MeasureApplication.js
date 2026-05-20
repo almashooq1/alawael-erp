@@ -619,6 +619,37 @@ measureApplicationSchema.statics.cooldownCheck = async function (
   };
 };
 
+// ─── W214: Auto-close reassessment tasks on new admin ──────────────
+// When a new completed administration lands for a (beneficiary, measure)
+// pair, any open MeasureReassessmentTask for that pair is auto-closed
+// with mode='auto'. Best-effort — never blocks the primary save.
+//
+// Critical: only fires on INSERT, not on update. Otherwise the
+// W211b baseline-title-transfer save inside correct() (which re-saves
+// the locked original to clear isBaseline) would incorrectly close
+// the task. pre-save captures the isNew flag; post-save reads it.
+measureApplicationSchema.pre('save', function () {
+  this._w214WasNew = this.isNew;
+});
+measureApplicationSchema.post('save', async function (doc) {
+  try {
+    if (!doc._w214WasNew) return;
+    if (doc.correctionOf) return;
+    if (!['completed', 'locked'].includes(doc.status)) return;
+    if (!doc.beneficiaryId || !doc.measureId) return;
+    // Lazy-require to avoid circular load at module init.
+
+    const scheduler = require('../../../services/measureReassessmentScheduler.service');
+    await scheduler.autoCloseFor({
+      beneficiaryId: doc.beneficiaryId,
+      measureId: doc.measureId,
+      newApplicationId: doc._id,
+    });
+  } catch (_err) {
+    // Never propagate — audit-trail failures must not break primary writes.
+  }
+});
+
 const MeasureApplication =
   mongoose.models.MeasureApplication ||
   mongoose.model('MeasureApplication', measureApplicationSchema);

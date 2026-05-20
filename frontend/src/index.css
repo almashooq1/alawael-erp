@@ -1,4 +1,8 @@
-/* Tailwind v4 in v3-compat mode (tailwind.config.js present) — use legacy directives */
+/* Tailwind v4 in v3-compat mode (tailwind.config.js present) — use legacy directives.
+   v4 does NOT auto-discover tailwind.config.js, so we point at it explicitly
+   with @config; without this, theme.extend (font-cairo, accent-*, navy-*,
+   bg-gradient-*, etc.) is silently dropped and the page renders unstyled. */
+@config "../tailwind.config.js";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

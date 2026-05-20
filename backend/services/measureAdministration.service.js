@@ -42,6 +42,12 @@
 const mongoose = require('mongoose');
 const logger = require('../utils/logger');
 
+// Lazy-required to avoid hard-coupling at module init — keeps tests
+// that mock the registry isolated.
+function _scoringEngine() {
+  return require('./measureScoringEngine.service');
+}
+
 const M = {
   Measure: () => {
     try {
@@ -135,22 +141,111 @@ function _freezeSdc(measure) {
   return { value: sdc.value, ci: sdc.ci };
 }
 
+/**
+ * Find the most recent prior administration's derived value for this
+ * (beneficiary, measure). Used to feed scoringEngine.score() so the
+ * delta block in the envelope is meaningful. Returns null when no
+ * prior admin exists. Excludes corrected-superseded records — they're
+ * historically authoritative but the latest correction takes precedence.
+ */
+async function _resolvePrevDerived(beneficiaryId, measureId) {
+  const MeasureApplication = M.MeasureApplication();
+  if (!MeasureApplication || !beneficiaryId || !measureId) return null;
+  const prior = await MeasureApplication.findOne({
+    beneficiaryId,
+    measureId,
+    status: { $in: ['completed', 'locked'] },
+  })
+    .sort({ applicationDate: -1 })
+    .select('totalRawScore applicationDate')
+    .lean()
+    .catch(() => null);
+  return prior && typeof prior.totalRawScore === 'number' ? prior.totalRawScore : null;
+}
+
+/**
+ * Run the W212 scoring engine for this (measure, rawItems) pair and
+ * return both the envelope and a flat `totals`-shaped projection that
+ * matches the MeasureApplication schema. Centralises the mapping so
+ * administer() + previewScore() stay in sync.
+ */
+async function _autoScore(measure, rawItems, ctx, prevDerived) {
+  if (!Array.isArray(rawItems)) return null;
+  const engine = _scoringEngine();
+  if (!engine.hasModule(measure.code)) {
+    // No scoring module yet — caller must supply totals manually.
+    return null;
+  }
+  const envelope = await engine.score({
+    measure,
+    rawItems,
+    ctx,
+    prevDerived: typeof prevDerived === 'number' ? prevDerived : undefined,
+  });
+  // Map envelope.interpretation → flat severity/interpretation fields.
+  const interp = envelope.interpretation || {};
+  return {
+    envelope,
+    totals: {
+      totalRawScore: envelope.derived.value,
+      overallInterpretation: interp.label_en,
+      overallInterpretation_ar: interp.label_ar,
+      overallSeverity: interp.severity,
+      matchedRule: interp.band
+        ? {
+            rangeLabel: interp.band,
+            rangeLabel_ar: interp.label_ar,
+            color: interp.color,
+          }
+        : undefined,
+    },
+    comparison: envelope.delta
+      ? {
+          previousScore: typeof prevDerived === 'number' ? prevDerived : null,
+          changeFromPrevious: envelope.delta.absolute,
+          changeFromPreviousPercent:
+            envelope.delta.relative != null ? Math.round(envelope.delta.relative * 100) : null,
+          isClinicallySignificant: envelope.delta.mcidMet === true,
+          trend:
+            envelope.delta.direction === 'improving'
+              ? 'improving'
+              : envelope.delta.direction === 'declining'
+                ? 'declining'
+                : envelope.delta.direction === 'stable'
+                  ? 'stable'
+                  : 'insufficient_data',
+        }
+      : undefined,
+  };
+}
+
 // ─── Service ────────────────────────────────────────────────────────────
 
 class MeasureAdministrationSvc {
   /**
-   * Administer a measure. Composes eligibility + cooldown + version
-   * pinning + persistence. Returns the saved MeasureApplication.
+   * Administer a measure. Composes eligibility + cooldown + auto-scoring
+   * (W215) + version pinning + persistence. Returns the saved
+   * MeasureApplication.
+   *
+   * Scoring resolution (W215):
+   *   • If `input.rawItems` is provided AND a scoring module exists
+   *     for measure.code, the W212 scoring engine derives the totals
+   *     + interpretation + delta. The auto-fetched prior administration
+   *     supplies prevDerived so delta/MCID are computed against history.
+   *   • Otherwise (no rawItems OR no module), falls back to caller-
+   *     supplied `input.totals` (legacy path).
    *
    * @param {Object} input
    * @param {string|ObjectId} input.measureRef — measureId or code
    * @param {Object} input.beneficiary — { _id, ageMonths|dateOfBirth, icd10[] }
    * @param {string} input.purpose — baseline | progress | discharge | screening | periodic | research
-   * @param {Array}  [input.domainScores]
-   * @param {Object} [input.totals] — { totalRawScore, totalStandardScore, ... }
+   * @param {Array}  [input.rawItems] — raw per-item responses; triggers auto-scoring
+   * @param {Array}  [input.domainScores] — legacy per-domain breakdown
+   * @param {Object} [input.totals] — { totalRawScore, ... } legacy fallback
    * @param {Object} [input.context] — { raterCertifications[], administeredMeasureCodes[], cooldownJustification, cooldownApprovedBy }
    * @param {Object} [input.adminDetails] — { assessorId, episodeId, setting, duration, notes, applicationDate }
    * @param {boolean} [input.allowIneligible=false] — bypass eligibility (logs warning)
+   * @param {boolean} [input.dryRun=false] — score+validate but don't persist
    */
   async administer(input) {
     const MeasureApplication = M.MeasureApplication();
@@ -214,6 +309,37 @@ class MeasureAdministrationSvc {
       measureId: measure._id,
     });
 
+    // ─── Auto-scoring (W215) ──────────────────────────────────────
+    // When rawItems are provided AND a scoring module is registered,
+    // the W212 engine derives totals + interpretation + delta. The
+    // caller's input.totals is treated as a fallback (legacy path)
+    // and is shallow-merged UNDER the engine output so engine values
+    // win when both exist. Auto-fetched prevDerived feeds the delta
+    // block so MCID checks are computed against actual history.
+    let scoringResult = null;
+    if (Array.isArray(input.rawItems) && input.rawItems.length > 0) {
+      const prevDerived = await _resolvePrevDerived(beneficiary._id, measure._id);
+      try {
+        scoringResult = await _autoScore(measure, input.rawItems, ctx, prevDerived);
+      } catch (err) {
+        // INVALID_RAW should reach the caller as-is — these are user-input
+        // errors with a structured `errors[]` payload. Other failures get
+        // wrapped with measure context for debuggability.
+        if (err.code === 'INVALID_RAW') throw err;
+        const wrapped = new Error(
+          `Auto-scoring failed for measure=${measure.code}: ${err.message}`
+        );
+        wrapped.code = 'SCORING_FAILED';
+        wrapped.cause = err;
+        throw wrapped;
+      }
+    }
+
+    const totals = scoringResult ? scoringResult.totals : input.totals || {};
+    const comparison = scoringResult ? scoringResult.comparison : undefined;
+    // Allow legacy fields to fill gaps in the auto-scored totals.
+    const mergedTotals = scoringResult ? { ...(input.totals || {}), ...totals } : totals;
+
     // ─── Build the record ─────────────────────────────────────────
     const adminDetails = input.adminDetails || {};
     const doc = new MeasureApplication({
@@ -226,16 +352,17 @@ class MeasureAdministrationSvc {
       isBaseline: input.purpose === 'baseline',
 
       domainScores: input.domainScores || [],
-      totalRawScore: input.totals?.totalRawScore,
-      totalStandardScore: input.totals?.totalStandardScore,
-      totalPercentile: input.totals?.totalPercentile,
-      compositeScore: input.totals?.compositeScore,
-      ageEquivalent: input.totals?.ageEquivalent,
+      totalRawScore: mergedTotals.totalRawScore,
+      totalStandardScore: mergedTotals.totalStandardScore,
+      totalPercentile: mergedTotals.totalPercentile,
+      compositeScore: mergedTotals.compositeScore,
+      ageEquivalent: mergedTotals.ageEquivalent,
 
-      overallInterpretation: input.totals?.overallInterpretation,
-      overallInterpretation_ar: input.totals?.overallInterpretation_ar,
-      overallSeverity: input.totals?.overallSeverity,
-      matchedRule: input.totals?.matchedRule,
+      overallInterpretation: mergedTotals.overallInterpretation,
+      overallInterpretation_ar: mergedTotals.overallInterpretation_ar,
+      overallSeverity: mergedTotals.overallSeverity,
+      matchedRule: mergedTotals.matchedRule,
+      comparison,
 
       assessorId: adminDetails.assessorId,
       setting: adminDetails.setting,
@@ -259,8 +386,71 @@ class MeasureAdministrationSvc {
       createdBy: adminDetails.assessorId,
     });
 
+    // ─── Dry-run (W215) ───────────────────────────────────────────
+    // Validate everything without persisting. Useful for the UI's
+    // "save preview" affordance before the therapist commits.
+    if (input.dryRun) {
+      const err = doc.validateSync();
+      if (err) throw err;
+      return {
+        dryRun: true,
+        scoring: scoringResult ? scoringResult.envelope : null,
+        wouldPersist: doc.toObject(),
+      };
+    }
+
     await doc.save();
-    return doc.toObject();
+    const result = doc.toObject();
+    if (scoringResult) result._scoring = scoringResult.envelope;
+    return result;
+  }
+
+  /**
+   * Score raw items without persisting. Runs the same eligibility
+   * check + auto-scoring as administer() but stops before insert.
+   * Powers the UI's "preview your score" affordance.
+   *
+   * @param {Object} input — same shape as administer({ ...rawItems, ...})
+   */
+  async previewScore(input) {
+    if (!Array.isArray(input?.rawItems) || input.rawItems.length === 0) {
+      throw new Error('previewScore: rawItems array is required');
+    }
+    const measure = await _resolveMeasure(input.measureRef);
+    if (!measure) {
+      throw new Error(`previewScore: measure not found: ${input.measureRef}`);
+    }
+
+    const ctx = input.context || {};
+    const beneficiary = input.beneficiary || {};
+
+    // Eligibility note (informational only — preview never refuses).
+    let eligibilityNote = null;
+    if (typeof measure.isEligibleFor === 'function') {
+      const elig = measure.isEligibleFor(beneficiary, ctx);
+      if (!elig.eligible) {
+        eligibilityNote = { eligible: false, ...elig };
+      }
+    }
+
+    const prevDerived = beneficiary._id
+      ? await _resolvePrevDerived(beneficiary._id, measure._id)
+      : null;
+
+    const scoringResult = await _autoScore(measure, input.rawItems, ctx, prevDerived);
+    if (!scoringResult) {
+      throw new Error(`previewScore: no scoring module registered for measure ${measure.code}`);
+    }
+
+    return {
+      measureCode: measure.code,
+      measureVersion: measure.version,
+      scoring: scoringResult.envelope,
+      totals: scoringResult.totals,
+      comparison: scoringResult.comparison || null,
+      prevDerived,
+      eligibilityNote,
+    };
   }
 
   /**

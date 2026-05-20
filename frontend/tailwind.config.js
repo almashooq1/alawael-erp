@@ -3,7 +3,14 @@ const plugin = require('tailwindcss/plugin');
 
 module.exports = {
   content: ['./src/**/*.{js,jsx,ts,tsx}'],
-  important: '#tailwind-scope',
+  // NOTE: previously `important: '#tailwind-scope'` was set to win over MUI's
+  // specificity. In Tailwind v4 this rewrites every utility as a descendant
+  // selector (`#tailwind-scope .flex`) which means utilities placed on the
+  // scope element itself silently do not apply, AND default theme colors
+  // like text-gray-900 don't get emitted. The site rendered unstyled because
+  // of this. We now rely on Tailwind's CSS layer ordering + MUI's own
+  // CssBaseline ordering (MUI is loaded before our index.css import).
+  important: true,
   theme: {
     extend: {
       fontFamily: {

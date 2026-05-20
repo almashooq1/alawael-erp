@@ -69,6 +69,13 @@ module.exports = function registerClinicalAssessmentRoutes(
     'MDT Coordination routes mounted (65+ endpoints — 5 modules: MDT meetings with agenda/cases/attendance, unified rehabilitation plans with multi-therapist goals & reviews, internal referral tickets between departments, shared beneficiary/team/department dashboards, meeting minutes & decisions tracker with action items)'
   );
 
+  // Measures Workflow Surface (W226) — selection / triggers / lifecycle / readiness / reminders
+  const measuresWorkflowRoutes = safeRequire('../routes/measures-workflow.routes');
+  dualMount(app, 'measures-workflow', measuresWorkflowRoutes);
+  logger.info(
+    'Measures Workflow routes mounted (9 endpoints — W218 strategist + W220 triggers + W222 lifecycle + W223 readiness gates + W225 reminders read-side)'
+  );
+
   // ══════════════════════════════════════════════════════════════════════════
   // ── Al-Awael Smart Rehabilitation System — الأولويات العشر الاحترافية ──
   // ══════════════════════════════════════════════════════════════════════════

@@ -40,6 +40,7 @@ module.exports = function registerFeatureRoutes(
   const marRoutes = safeRequire('../routes/mar.routes');
   const restraintSeclusionRoutes = safeRequire('../routes/restraint-seclusion.routes');
   const pickupAuthorizationRoutes = safeRequire('../routes/pickup-authorization.routes');
+  const portfolioRoutes = safeRequire('../routes/portfolio.routes');
   const transportModuleRoutes = safeRequire('../routes/transport-module.routes');
   const transportPublicTrackRoutes = safeRequire('../routes/transport-public-track.routes');
   const schedulingModuleRoutes = safeRequire('../routes/scheduling-module.routes');
@@ -96,6 +97,8 @@ module.exports = function registerFeatureRoutes(
   dualMountAuth(app, 'restraint-seclusion', restraintSeclusionRoutes, authenticate);
   // Wave 196b: Pickup authorization w/ e-sig scaffolding (تصاريح الاستلام)
   dualMountAuth(app, 'pickup-authorization', pickupAuthorizationRoutes, authenticate);
+  // Wave 199b: Child portfolio (بورتفوليو الطفل) — photos/videos/artwork/achievements
+  dualMountAuth(app, 'portfolio', portfolioRoutes, authenticate);
   logger.info(
     '✅ prompt_04 Beneficiary Management routes mounted: guardians (8 endpoints), disability-assessments (7 endpoints), beneficiary-transfers workflow (6 endpoints), beneficiary-day-attendance rollcall (9 endpoints), beneficiary-sections (7 endpoints), daily-communication (9 endpoints), morning-health-check (7 endpoints), toileting (6 endpoints), beneficiary-meals (6 endpoints), day-rehab-bus-routes (10 endpoints)'
   );

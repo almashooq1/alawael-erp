@@ -29,7 +29,7 @@ module.exports = function registerDocumentRoutes(
   // PHANTOM: const documentsSmartRouter = safeRequire('../routes/documents.smart.routes');
   const documentAdvancedRoutes = safeRequire('../routes/documentAdvanced.routes');
   const documentExpiryAdminRoutes = safeRequire('../routes/document-expiry-admin.routes');
-  // PHANTOM: const archiveRoutes = safeRequire('../routes/archive.routes');
+  const archiveRoutes = safeRequire('../routes/archive.routes');
   // PHANTOM: const formTemplateRoutes = safeRequire('../routes/formTemplate.routes');
   const mediaRoutes = safeRequire('../routes/media.routes');
   // PHANTOM: const documentEnhancedRoutes = safeRequire('../api/routes/document-enhanced.routes');
@@ -69,8 +69,15 @@ module.exports = function registerDocumentRoutes(
   // ══════════════════════════════════════════════════════════════════════════
   // ── Electronic Archive System (نظام الأرشفة الإلكتروني) ────────────────
   // ══════════════════════════════════════════════════════════════════════════
-  // PHANTOM-FIX: dualMount(app, 'archive', archiveRoutes);
-  logger.info('[Docs] Archive routes SKIPPED (phantom import)');
+  if (archiveRoutes) {
+    dualMount(app, 'archive', archiveRoutes);
+    logger.info(
+      '[Docs] Archive routes mounted at /api/(v1/)?archive — 14 endpoints ' +
+        '(archive/restore/purge/retention/bulk/smart-recommendations) [W197]'
+    );
+  } else {
+    logger.warn('[Docs] Archive routes module not found — skipped');
+  }
 
   // ══════════════════════════════════════════════════════════════════════════
   // ── Form Templates System (نظام النماذج الجاهزة) ──────────────────────

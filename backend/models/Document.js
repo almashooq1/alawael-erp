@@ -226,6 +226,29 @@ const DocumentSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
     },
+    archiveReason: { type: String, trim: true, default: '' },
+
+    // سياسة الاحتفاظ (Retention) — للأرشفة الإلكترونية الذكية
+    retentionYears: { type: Number, min: 1, max: 100, default: 7 },
+    retentionExpiry: { type: Date, index: true, sparse: true },
+    retentionUpdatedAt: Date,
+    retentionUpdatedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+
+    // الاسترجاع من الأرشيف
+    restoredAt: Date,
+    restoredBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+
+    // توصية أرشفة تلقائية (Auto-Archive Recommender)
+    archiveRecommendation: {
+      score: { type: Number, min: 0, max: 1 },
+      reasons: [String],
+      suggestedAt: Date,
+      acknowledged: { type: Boolean, default: false },
+      acknowledgedAt: Date,
+      acknowledgedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+      dismissed: { type: Boolean, default: false },
+    },
+    lastViewedAt: { type: Date, index: true, sparse: true },
 
     // البيانات الوصفية
     metadata: {

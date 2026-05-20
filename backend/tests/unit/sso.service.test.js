@@ -148,9 +148,9 @@ describe('SSOService', () => {
       expect(result.tokenType).toBe('Bearer');
     });
 
-    test('non-existent session throws', async () => {
+    test('invalid refresh token is rejected before DB lookup (W205)', async () => {
       await expect(sso.refreshAccessToken('nonexistent', 'tok')).rejects.toThrow(
-        'Session not found'
+        /Invalid or expired refresh token/
       );
     });
   });

@@ -198,6 +198,18 @@ try {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// 7.063 SSO — single sign-on surface (login/logout/sessions/OAuth2/OIDC) — W205
+// ═══════════════════════════════════════════════════════════════════════════
+try {
+  const ssoRoutes = require('./routes/sso.routes');
+  app.use('/api/sso', ssoRoutes);
+  app.use('/api/v1/sso', ssoRoutes);
+  logger.info('[SSO] ✓ routes mounted at /api/sso and /api/v1/sso');
+} catch (err) {
+  logger.warn('[SSO] routes skipped:', err.message);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // 7.065 OPENAPI — hand-crafted spec for the integration surface + Swagger UI
 // ═══════════════════════════════════════════════════════════════════════════
 try {

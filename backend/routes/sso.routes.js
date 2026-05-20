@@ -1,20 +1,24 @@
 /**
  * SSO Routes - Single Sign-On Endpoints
  * نقاط نهاية تسجيل الدخول الموحد
+ *
+ * W205 hardening:
+ *  - /login enforces isActive + isLocked + incLoginAttempts + resetLoginAttempts,
+ *    and short-circuits to a 2-step MFA flow when the user has MFA enabled.
+ *  - /oauth2/authorize requires a valid SSO session (no more pre-login codes),
+ *    accepts code_challenge + code_challenge_method (PKCE).
+ *  - /oauth2/token forwards code_verifier so PKCE is enforced end-to-end.
+ *  - /me re-reads the user from the DB so role/permissions can't go stale.
+ *  - /mfa/verify completes the 2-step login flow.
  */
 
 const express = require('express');
+const crypto = require('crypto');
 
 const router = express.Router();
 const SSOService = require('../services/sso.service');
 const OAuthService = require('../services/oauth.service');
-const {
-  verifySSOToken,
-  _requireRole,
-  _requirePermission,
-  _verifyOptionalSSO,
-  _auditLog,
-} = require('../middleware/sso-auth.middleware');
+const { verifySSOToken } = require('../middleware/sso-auth.middleware');
 const logger = require('../utils/logger');
 const User = require('../models/User');
 const { loginLimiter, sensitiveOperationLimiter } = require('../middleware/rateLimiter');
@@ -23,42 +27,70 @@ const safeError = require('../utils/safeError');
 const ssoService = new SSOService();
 const oAuthService = new OAuthService();
 
+// ─────────────────────────────────────────────────────────────────────────────
+// helpers
+// ─────────────────────────────────────────────────────────────────────────────
+
+function buildUserPayload(user) {
+  return {
+    userId: user._id.toString(),
+    email: user.email,
+    fullName: user.fullName,
+    role: user.role,
+    permissions: user.customPermissions || [],
+    branchId: user.branchId ? user.branchId.toString() : null,
+    regionIds: (user.regionIds || []).map(r => r.toString()),
+    mfaEnabled: !!user.mfa?.enabled,
+  };
+}
+
+/**
+ * Sanitised public profile — never includes password / mfa secret / reset
+ * fields. Safe to return to /me callers.
+ */
+function buildPublicProfile(user) {
+  const obj = user.toJSON ? user.toJSON() : user;
+  delete obj.password;
+  delete obj.passwordHistory;
+  delete obj.resetPasswordToken;
+  delete obj.resetPasswordExpires;
+  if (obj.mfa) {
+    delete obj.mfa.secret;
+    delete obj.mfa.backupCodes;
+    delete obj.mfa.smsCode;
+    delete obj.mfa.smsCodeExpires;
+    delete obj.mfa.trustedDevices;
+  }
+  return obj;
+}
+
 // ============================================
 // SSO Health & Status Endpoint
 // ============================================
 
-/**
- * GET /api/sso/status
- * Get SSO system status
- */
-router.get('/status', async (_req, res) => {
-  try {
-    res.json({
-      success: true,
-      status: 'operational',
-      message: 'SSO system is operational',
-      features: {
-        sessions: true,
-        oauth2: true,
-        openid_connect: true,
-        mfa: true,
-        audit_logging: true,
-      },
-      endpoints: {
-        login: '/api/sso/login',
-        logout: '/api/sso/logout',
-        oauth2: '/api/sso/oauth2',
-        userinfo: '/api/sso/oauth2/userinfo',
-      },
-    });
-  } catch (error) {
-    logger.error('SSO status check failed:', error);
-    res.status(503).json({
-      success: false,
-      status: 'error',
-      message: 'حدث خطأ في الخادم',
-    });
-  }
+router.get('/status', (_req, res) => {
+  res.json({
+    success: true,
+    status: 'operational',
+    message: 'SSO system is operational',
+    features: {
+      sessions: true,
+      oauth2: true,
+      openid_connect: true,
+      mfa: true,
+      audit_logging: true,
+      pkce: true,
+    },
+    endpoints: {
+      login: '/api/sso/login',
+      mfaVerify: '/api/sso/mfa/verify',
+      logout: '/api/sso/logout',
+      sessions: '/api/sso/sessions',
+      oauth2: '/api/sso/oauth2',
+      userinfo: '/api/sso/oauth2/userinfo',
+      openidConfig: '/api/sso/.well-known/openid-configuration',
+    },
+  });
 });
 
 // ============================================
@@ -68,12 +100,15 @@ router.get('/status', async (_req, res) => {
 /**
  * POST /api/sso/login
  * تسجيل دخول المستخدم وإنشاء جلسة SSO
+ *
+ * If the user has MFA enabled, we DO NOT create a full session. Instead we
+ * issue a short-lived `mfaChallengeToken` the client must present to
+ * /api/sso/mfa/verify together with the code.
  */
 router.post('/login', loginLimiter, async (req, res) => {
   try {
     const { email, password, deviceId, userAgent } = req.body;
 
-    // Validate credentials (implementation depends on your auth system)
     if (!email || !password) {
       return res.status(400).json({
         success: false,
@@ -82,7 +117,6 @@ router.post('/login', loginLimiter, async (req, res) => {
       });
     }
 
-    // Authenticate user from database
     const user = await User.findOne({ email }).select('+password');
     if (!user) {
       return res.status(401).json({
@@ -92,8 +126,31 @@ router.post('/login', loginLimiter, async (req, res) => {
       });
     }
 
+    // Lockout check BEFORE password compare so attackers can't enumerate
+    if (user.isLocked) {
+      logger.warn(`Login rejected (locked): ${user.email}`);
+      return res.status(423).json({
+        success: false,
+        error: 'account_locked',
+        message: 'Account temporarily locked due to too many failed attempts',
+        lockUntil: user.lockUntil,
+      });
+    }
+    if (user.isActive === false) {
+      return res.status(403).json({
+        success: false,
+        error: 'account_disabled',
+        message: 'Account is disabled',
+      });
+    }
+
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
+      try {
+        await user.incLoginAttempts();
+      } catch (e) {
+        logger.warn('incLoginAttempts failed:', e.message);
+      }
       return res.status(401).json({
         success: false,
         error: 'invalid_credentials',
@@ -101,22 +158,47 @@ router.post('/login', loginLimiter, async (req, res) => {
       });
     }
 
-    const userPayload = {
-      userId: user._id.toString(),
-      email: user.email,
-      role: user.role,
-      permissions: ['read'],
-      organizationId: 'org_1',
-    };
+    // Successful auth → reset the failure counter regardless of MFA outcome
+    try {
+      await user.resetLoginAttempts();
+    } catch (e) {
+      logger.warn('resetLoginAttempts failed:', e.message);
+    }
 
-    // Create SSO session
+    // ── MFA branch ─────────────────────────────────────────────────────────
+    if (user.mfa?.enabled) {
+      const challengeId = crypto.randomBytes(24).toString('hex');
+      const challenge = {
+        challengeId,
+        userId: user._id.toString(),
+        deviceId: deviceId || 'default',
+        userAgent: userAgent || req.get('user-agent') || 'unknown',
+        ipAddress: req.ip,
+        createdAt: Date.now(),
+      };
+      // Reuse SSO store; 5-minute window
+      await ssoService._store(`mfa:challenge:${challengeId}`, challenge, 300);
+
+      return res.json({
+        success: true,
+        mfaRequired: true,
+        data: {
+          mfaChallengeToken: challengeId,
+          expiresIn: 300,
+        },
+      });
+    }
+
+    // ── Direct session issuance (no MFA) ───────────────────────────────────
+    const userPayload = buildUserPayload(user);
     const session = await ssoService.createSession(userPayload.userId, userPayload, {
       deviceId: deviceId || 'default',
       userAgent: userAgent || req.get('user-agent'),
       ipAddress: req.ip,
     });
+    user.lastLogin = new Date();
+    await user.save();
 
-    // Log activity
     logger.info(`User logged in via SSO: ${userPayload.userId}`);
 
     res.json({
@@ -136,21 +218,120 @@ router.post('/login', loginLimiter, async (req, res) => {
 });
 
 /**
- * POST /api/sso/logout
- * تسجيل الخروج وإنهاء الجلسة
+ * POST /api/sso/mfa/verify
+ * Completes a 2-step login that was paused for MFA.
+ * Body: { mfaChallengeToken, code }
  */
-router.post('/logout', verifySSOToken(), async (req, res) => {
+router.post('/mfa/verify', loginLimiter, async (req, res) => {
   try {
-    const sessionId = req.sessionId;
+    const { mfaChallengeToken, code } = req.body;
+    if (!mfaChallengeToken || !code) {
+      return res.status(400).json({
+        success: false,
+        error: 'validation_error',
+        message: 'mfaChallengeToken and code are required',
+      });
+    }
 
-    await ssoService.endSession(sessionId);
+    const challenge = await ssoService._get(`mfa:challenge:${mfaChallengeToken}`);
+    if (!challenge) {
+      return res.status(401).json({
+        success: false,
+        error: 'invalid_challenge',
+        message: 'MFA challenge expired or invalid',
+      });
+    }
 
-    logger.info(`User logged out: ${req.user.userId}`);
+    const user = await User.findById(challenge.userId).select(
+      '+mfa.secret +mfa.backupCodes +mfa.smsCode +mfa.smsCodeExpires'
+    );
+    if (!user) {
+      await ssoService._del(`mfa:challenge:${mfaChallengeToken}`);
+      return res.status(401).json({
+        success: false,
+        error: 'invalid_challenge',
+        message: 'User not found',
+      });
+    }
+
+    // Try TOTP first (via speakeasy), then SMS code, then backup codes.
+    let mfaOk = false;
+    const trimmed = String(code).trim();
+    if (user.mfa?.secret) {
+      try {
+        const speakeasy = require('speakeasy');
+        mfaOk = speakeasy.totp.verify({
+          secret: user.mfa.secret,
+          encoding: 'base32',
+          token: trimmed,
+          window: 1,
+        });
+      } catch (e) {
+        logger.warn('TOTP verification failed:', e.message);
+      }
+    }
+    if (!mfaOk) {
+      if (
+        user.mfa?.smsCode &&
+        user.mfa.smsCode === trimmed &&
+        user.mfa.smsCodeExpires &&
+        new Date(user.mfa.smsCodeExpires).getTime() > Date.now()
+      ) {
+        user.mfa.smsCode = undefined;
+        user.mfa.smsCodeExpires = undefined;
+        await user.save();
+        mfaOk = true;
+      } else if (Array.isArray(user.mfa?.backupCodes) && user.mfa.backupCodes.includes(trimmed)) {
+        user.mfa.backupCodes = user.mfa.backupCodes.filter(c => c !== trimmed);
+        await user.save();
+        mfaOk = true;
+      }
+    }
+
+    if (!mfaOk) {
+      return res.status(401).json({
+        success: false,
+        error: 'invalid_mfa_code',
+        message: 'Invalid MFA code',
+      });
+    }
+
+    await ssoService._del(`mfa:challenge:${mfaChallengeToken}`);
+
+    const userPayload = buildUserPayload(user);
+    const session = await ssoService.createSession(userPayload.userId, userPayload, {
+      deviceId: challenge.deviceId,
+      userAgent: challenge.userAgent,
+      ipAddress: challenge.ipAddress,
+      mfa: true,
+    });
+    user.lastLogin = new Date();
+    await user.save();
 
     res.json({
       success: true,
-      message: 'Logged out successfully',
+      data: {
+        sessionId: session.sessionId,
+        accessToken: session.accessToken,
+        refreshToken: session.refreshToken,
+        idToken: session.idToken,
+        expiresIn: session.expiresIn,
+        user: userPayload,
+      },
     });
+  } catch (error) {
+    safeError(res, error, 'MFA verification failed');
+  }
+});
+
+/**
+ * POST /api/sso/logout
+ */
+router.post('/logout', verifySSOToken(), async (req, res) => {
+  try {
+    await ssoService.endSession(req.sessionId);
+    logger.info(`User logged out: ${req.user.userId}`);
+    res.json({ success: true, message: 'Logged out successfully' });
   } catch (error) {
     safeError(res, error, 'SSO logout failed');
   }
@@ -158,16 +339,11 @@ router.post('/logout', verifySSOToken(), async (req, res) => {
 
 /**
  * POST /api/sso/logout-all
- * تسجيل الخروج من جميع الأجهزة
  */
-router.post('/logout-all', verifySSOToken(), async (req, res, _next) => {
+router.post('/logout-all', verifySSOToken(), async (req, res) => {
   try {
-    const userId = req.user.userId;
-
-    const result = await ssoService.endAllUserSessions(userId);
-
-    logger.info(`User logged out from all devices: ${userId}`);
-
+    const result = await ssoService.endAllUserSessions(req.user.userId);
+    logger.info(`User logged out from all devices: ${req.user.userId}`);
     res.json({
       success: true,
       message: 'Logged out from all devices',
@@ -180,16 +356,16 @@ router.post('/logout-all', verifySSOToken(), async (req, res, _next) => {
 
 /**
  * GET /api/sso/sessions
- * الحصول على جميع جلسات المستخدم النشطة
  */
-router.get('/sessions', verifySSOToken(), async (req, res, _next) => {
+router.get('/sessions', verifySSOToken(), async (req, res) => {
   try {
-    const userId = req.user.userId;
-    const sessions = await ssoService.getUserActiveSessions(userId);
-
+    const sessions = await ssoService.getUserActiveSessions(req.user.userId);
     res.json({
       success: true,
-      data: sessions,
+      data: sessions.map(s => ({
+        ...s,
+        current: s.sessionId === req.sessionId,
+      })),
     });
   } catch (error) {
     safeError(res, error, 'Failed to fetch sessions');
@@ -198,33 +374,20 @@ router.get('/sessions', verifySSOToken(), async (req, res, _next) => {
 
 /**
  * DELETE /api/sso/sessions/:sessionId
- * إنهاء جلسة محددة
  */
-router.delete('/sessions/:sessionId', verifySSOToken(), async (req, res, _next) => {
+router.delete('/sessions/:sessionId', verifySSOToken(), async (req, res) => {
   try {
     const { sessionId } = req.params;
-    const userId = req.user.userId;
-
-    // Verify user owns this session
-    const sessions = await ssoService.getUserActiveSessions(userId);
-    const sessionExists = sessions.find(s => s.sessionId === sessionId);
-
-    if (!sessionExists) {
+    const sessions = await ssoService.getUserActiveSessions(req.user.userId);
+    if (!sessions.find(s => s.sessionId === sessionId)) {
       return res.status(404).json({
         success: false,
         error: 'not_found',
         message: 'Session not found',
       });
     }
-
     await ssoService.endSession(sessionId);
-
-    logger.info(`Session ended: ${sessionId}`);
-
-    res.json({
-      success: true,
-      message: 'Session ended',
-    });
+    res.json({ success: true, message: 'Session ended' });
   } catch (error) {
     safeError(res, error, 'Failed to end session');
   }
@@ -236,44 +399,35 @@ router.delete('/sessions/:sessionId', verifySSOToken(), async (req, res, _next) 
 
 /**
  * POST /api/sso/refresh-token
- * تحديث Access Token
  */
 router.post('/refresh-token', async (req, res) => {
   try {
     const { sessionId, refreshToken } = req.body;
-
-    if (!sessionId || !refreshToken) {
+    if (!refreshToken) {
       return res.status(400).json({
         success: false,
         error: 'validation_error',
-        message: 'Session ID and refresh token are required',
+        message: 'refresh token is required',
       });
     }
-
     const result = await ssoService.refreshAccessToken(sessionId, refreshToken);
-
-    res.json({
-      success: true,
-      data: result,
-    });
+    res.json({ success: true, data: result });
   } catch (error) {
-    logger.error('Token refresh failed:', error);
+    logger.warn('Token refresh failed:', error.message);
     res.status(401).json({
       success: false,
       error: 'unauthorized',
-      message: 'خطأ في البيانات المدخلة',
+      message: error.message,
     });
   }
 });
 
 /**
  * POST /api/sso/verify-token
- * التحقق من صحة التوكن
  */
 router.post('/verify-token', async (req, res) => {
   try {
     const { token, sessionId } = req.body;
-
     if (!token || !sessionId) {
       return res.status(400).json({
         success: false,
@@ -281,9 +435,7 @@ router.post('/verify-token', async (req, res) => {
         message: 'Token and session ID are required',
       });
     }
-
     const verification = await ssoService.verifySession(sessionId, token);
-
     res.json({
       success: true,
       data: {
@@ -293,34 +445,27 @@ router.post('/verify-token', async (req, res) => {
       },
     });
   } catch (error) {
-    logger.error('Token verification failed:', error);
     res.status(400).json({
       success: false,
       error: 'verification_failed',
-      message: 'خطأ في البيانات المدخلة',
+      message: error.message,
     });
   }
 });
 
 /**
  * GET /api/sso/introspect
- * فحص التوكن (Token Introspection)
  */
-router.get('/introspect', verifySSOToken(), async (req, res, _next) => {
+router.get('/introspect', verifySSOToken(), async (req, res) => {
   try {
     const token = req.headers.authorization?.split(' ')[1];
     const introspection = await ssoService.introspectToken(token);
-
-    res.json({
-      success: true,
-      data: introspection,
-    });
+    res.json({ success: true, data: introspection });
   } catch (error) {
-    logger.error('Token introspection failed:', error);
     res.status(400).json({
       success: false,
       error: 'introspection_failed',
-      message: 'خطأ في البيانات المدخلة',
+      message: error.message,
     });
   }
 });
@@ -331,11 +476,26 @@ router.get('/introspect', verifySSOToken(), async (req, res, _next) => {
 
 /**
  * GET /api/sso/oauth2/authorize
- * OAuth 2.0 Authorization endpoint
+ *
+ * Requires an authenticated SSO session (verifySSOToken). If the client is a
+ * browser without a session, the front-end should redirect to the SSO login
+ * page first and bounce back here.
+ *
+ * Accepts: client_id, redirect_uri, scope, state, response_type, nonce,
+ *          code_challenge, code_challenge_method
  */
-router.get('/oauth2/authorize', sensitiveOperationLimiter, async (req, res) => {
+router.get('/oauth2/authorize', sensitiveOperationLimiter, verifySSOToken(), async (req, res) => {
   try {
-    const { client_id, redirect_uri, scope, state, response_type, nonce } = req.query;
+    const {
+      client_id,
+      redirect_uri,
+      scope,
+      state,
+      response_type,
+      nonce,
+      code_challenge,
+      code_challenge_method,
+    } = req.query;
 
     if (!client_id || !redirect_uri || !response_type) {
       return res.status(400).json({
@@ -345,7 +505,7 @@ router.get('/oauth2/authorize', sensitiveOperationLimiter, async (req, res) => {
       });
     }
 
-    // Early redirect_uri scheme validation (defense-in-depth)
+    // Defence-in-depth: scheme + host allow-list
     try {
       const parsed = new URL(redirect_uri);
       if (!['http:', 'https:'].includes(parsed.protocol)) {
@@ -353,6 +513,28 @@ router.get('/oauth2/authorize', sensitiveOperationLimiter, async (req, res) => {
           success: false,
           error: 'invalid_request',
           message: 'redirect_uri must use http or https',
+        });
+      }
+      const allowedRedirectHosts = (
+        process.env.OAUTH_ALLOWED_REDIRECT_HOSTS ||
+        process.env.CORS_ORIGINS ||
+        process.env.FRONTEND_URL ||
+        'localhost'
+      )
+        .split(',')
+        .map(s => {
+          try {
+            return new URL(s.trim().startsWith('http') ? s.trim() : `https://${s.trim()}`).hostname;
+          } catch {
+            return s.trim();
+          }
+        })
+        .filter(Boolean);
+      if (!allowedRedirectHosts.includes(parsed.hostname) && parsed.hostname !== 'localhost') {
+        return res.status(400).json({
+          success: false,
+          error: 'invalid_request',
+          message: 'redirect_uri hostname is not in the allowed list',
         });
       }
     } catch {
@@ -363,58 +545,40 @@ router.get('/oauth2/authorize', sensitiveOperationLimiter, async (req, res) => {
       });
     }
 
-    // Open-redirect prevention: validate redirect_uri against allowed origins
-    const allowedRedirectHosts = (
-      process.env.OAUTH_ALLOWED_REDIRECT_HOSTS ||
-      process.env.CORS_ORIGINS ||
-      process.env.FRONTEND_URL ||
-      'localhost'
-    )
-      .split(',')
-      .map(s => {
-        try {
-          return new URL(s.trim().startsWith('http') ? s.trim() : `https://${s.trim()}`).hostname;
-        } catch {
-          return s.trim();
+    const pkce = code_challenge
+      ? {
+          codeChallenge: code_challenge,
+          codeChallengeMethod: (code_challenge_method || 'S256').toUpperCase(),
         }
-      })
-      .filter(Boolean);
-    try {
-      const parsedRedirect = new URL(redirect_uri);
-      if (
-        !allowedRedirectHosts.includes(parsedRedirect.hostname) &&
-        parsedRedirect.hostname !== 'localhost'
-      ) {
-        return res.status(400).json({
-          success: false,
-          error: 'invalid_request',
-          message: 'redirect_uri hostname is not in the allowed list',
-        });
-      }
-    } catch {
-      /* already validated above */
+      : null;
+    if (pkce && !['S256', 'PLAIN'].includes(pkce.codeChallengeMethod)) {
+      return res.status(400).json({
+        success: false,
+        error: 'invalid_request',
+        message: 'Unsupported code_challenge_method',
+      });
+    }
+    if (pkce && pkce.codeChallengeMethod === 'PLAIN') {
+      pkce.codeChallengeMethod = 'plain';
     }
 
-    // For demonstration, redirect to login with oauth params
-    const _result = await oAuthService.initiateAuthorizationCodeFlow(
+    const result = await oAuthService.initiateAuthorizationCodeFlow(
+      req.user.userId,
       client_id,
       redirect_uri,
       scope || 'openid profile email',
       state,
-      nonce
+      nonce,
+      pkce
     );
 
-    // In production, would redirect to login page
+    // Return the redirect URL — caller decides whether to 302 or surface
     res.json({
       success: true,
       data: {
-        authUrl: `${req.baseUrl}/oauth2/login?${new URLSearchParams({
-          client_id,
-          redirect_uri,
-          scope,
-          state,
-          nonce,
-        }).toString()}`,
+        code: result.authCode,
+        state: result.state,
+        redirectUrl: result.redirectUri,
       },
     });
   } catch (error) {
@@ -422,14 +586,13 @@ router.get('/oauth2/authorize', sensitiveOperationLimiter, async (req, res) => {
     res.status(400).json({
       success: false,
       error: 'invalid_request',
-      message: 'خطأ في البيانات المدخلة',
+      message: error.message,
     });
   }
 });
 
 /**
  * POST /api/sso/oauth2/token
- * OAuth 2.0 Token endpoint
  */
 router.post('/oauth2/token', sensitiveOperationLimiter, async (req, res) => {
   try {
@@ -443,6 +606,7 @@ router.post('/oauth2/token', sensitiveOperationLimiter, async (req, res) => {
       username,
       password,
       scope,
+      code_verifier,
     } = req.body;
 
     if (!grant_type) {
@@ -462,59 +626,63 @@ router.post('/oauth2/token', sensitiveOperationLimiter, async (req, res) => {
       username,
       password,
       scope,
+      codeVerifier: code_verifier,
     });
 
-    res.json({
-      success: true,
-      data: tokens,
-    });
+    res.json({ success: true, data: tokens });
   } catch (error) {
-    logger.error('OAuth token request failed:', error);
+    logger.warn('OAuth token request failed:', error.message);
     res.status(400).json({
       success: false,
       error: 'invalid_grant',
-      message: 'خطأ في البيانات المدخلة',
+      message: error.message,
     });
   }
 });
 
 /**
  * GET /api/sso/oauth2/userinfo
- * OpenID Connect UserInfo endpoint
  */
-router.get('/oauth2/userinfo', verifySSOToken(), async (req, res, _next) => {
+router.get('/oauth2/userinfo', verifySSOToken(), async (req, res) => {
   try {
-    const accessToken = req.headers.authorization?.split(' ')[1];
-    const userInfo = await oAuthService.getUserInfo(accessToken);
-
-    res.json(userInfo);
+    const user = await User.findById(req.user.userId);
+    if (!user) {
+      return res.status(404).json({ success: false, error: 'user_not_found' });
+    }
+    res.json({
+      sub: user._id.toString(),
+      name: user.fullName,
+      email: user.email,
+      email_verified: user.emailVerified,
+      phone_number: user.phone,
+      phone_number_verified: user.phoneVerified,
+      role: user.role,
+      iss: process.env.SSO_BASE_URL || 'https://sso.yourdomain.com',
+      aud: 'sso-client',
+    });
   } catch (error) {
     logger.error('UserInfo request failed:', error);
     res.status(401).json({
       success: false,
       error: 'invalid_token',
-      message: 'خطأ في البيانات المدخلة',
+      message: error.message,
     });
   }
 });
 
 /**
  * GET /api/sso/.well-known/openid-configuration
- * OpenID Connect Configuration
  */
-router.get('/.well-known/openid-configuration', (req, res) => {
-  const config = oAuthService.getOpenIDConfiguration();
-  res.json(config);
+router.get('/.well-known/openid-configuration', (_req, res) => {
+  res.json(oAuthService.getOpenIDConfiguration());
 });
 
 /**
  * POST /api/sso/oauth2/revoke
- * Token revocation endpoint
  */
 router.post('/oauth2/revoke', async (req, res) => {
   try {
     const { token, token_type_hint } = req.body;
-
     if (!token) {
       return res.status(400).json({
         success: false,
@@ -522,32 +690,23 @@ router.post('/oauth2/revoke', async (req, res) => {
         message: 'Token is required',
       });
     }
-
     await oAuthService.revokeToken(token, token_type_hint);
-
     res.json({ success: true });
   } catch (error) {
-    logger.error('Token revocation failed:', error);
     res.status(400).json({
       success: false,
       error: 'invalid_request',
-      message: 'خطأ في البيانات المدخلة',
+      message: error.message,
     });
   }
 });
 
-// ============================================
-// OpenID Connect Endpoints
-// ============================================
-
 /**
- * POST /api/sso/oauth2/register
- * Dynamic Client Registration
+ * POST /api/sso/oauth2/register — Dynamic Client Registration
  */
-router.post('/oauth2/register', sensitiveOperationLimiter, async (req, res, _next) => {
+router.post('/oauth2/register', sensitiveOperationLimiter, async (req, res) => {
   try {
     const { client_name, redirect_uris, response_types, grant_types, scopes } = req.body;
-
     const { client, clientSecret } = await oAuthService.registerClient({
       clientName: client_name,
       redirectUris: redirect_uris,
@@ -555,7 +714,6 @@ router.post('/oauth2/register', sensitiveOperationLimiter, async (req, res, _nex
       grantTypes: grant_types,
       scopes,
     });
-
     res.status(201).json({
       success: true,
       data: {
@@ -565,52 +723,57 @@ router.post('/oauth2/register', sensitiveOperationLimiter, async (req, res, _nex
         redirect_uris: client.redirectUris,
         response_types: client.responseTypes,
         grant_types: client.grantTypes,
-        registration_access_token: 'registration_token', // Would be generated
-        registration_client_uri: `${req.baseUrl}/oauth2/register/${client.clientId}`,
       },
     });
   } catch (error) {
-    logger.error('Client registration failed:', error);
     res.status(400).json({
       success: false,
       error: 'invalid_request',
-      message: 'خطأ في البيانات المدخلة',
+      message: error.message,
     });
   }
 });
 
 // ============================================
-// Session Management Endpoints
+// Current user
 // ============================================
 
 /**
  * GET /api/sso/me
- * الحصول على معلومات المستخدم الحالي
+ * Re-reads the user from the DB so role/permissions can't go stale.
  */
-router.get('/me', verifySSOToken(), (req, res) => {
-  res.json({
-    success: true,
-    data: req.user,
-  });
+router.get('/me', verifySSOToken(), async (req, res) => {
+  try {
+    const user = await User.findById(req.user.userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: 'user_not_found',
+        message: 'User no longer exists',
+      });
+    }
+    res.json({
+      success: true,
+      data: {
+        ...buildPublicProfile(user),
+        sessionId: req.sessionId,
+      },
+    });
+  } catch (error) {
+    safeError(res, error, 'Failed to load profile');
+  }
 });
 
 /**
- * PUT /api/sso/me
- * تحديث معلومات المستخدم
+ * PUT /api/sso/me — update session metadata only (NOT user profile)
  */
-router.put('/me', verifySSOToken(), async (req, res, _next) => {
+router.put('/me', verifySSOToken(), async (req, res) => {
   try {
     const { metadata } = req.body;
-    const sessionId = req.sessionId;
-
-    const updatedSession = await ssoService.updateSessionMetadata(sessionId, metadata);
-
-    res.json({
-      success: true,
-      data: updatedSession,
-    });
+    const updatedSession = await ssoService.updateSessionMetadata(req.sessionId, metadata);
+    res.json({ success: true, data: updatedSession });
   } catch (error) {
-    safeError(res, error, 'Failed to update user');
+    safeError(res, error, 'Failed to update session metadata');
   }
 });
 

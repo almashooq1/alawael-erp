@@ -33,49 +33,52 @@ class OAuthService {
   }
 
   /**
-   * OAuth 2.0 Authorization Code Flow
-   * إنشاء طلب تفويض جديد
+   * OAuth 2.0 Authorization Code Flow — issues a code bound to an
+   * already-authenticated user. Caller (route layer) MUST gate this with
+   * an SSO session check; we refuse to mint a code without a userId.
    */
-  async initiateAuthorizationCodeFlow(clientId, redirectUri, scope, state, nonce = null) {
+  async initiateAuthorizationCodeFlow(
+    userId,
+    clientId,
+    redirectUri,
+    scope,
+    state,
+    nonce = null,
+    pkce = null
+  ) {
     this._ensureEnabled();
     try {
-      // Validate OAuth request
       const validation = await this.ssoService.validateOAuthRequest(
         clientId,
         redirectUri,
         scope,
         state
       );
-
       if (!validation.valid) {
-        throw new Error('Invalid OAuth request');
+        throw new Error(validation.error || 'Invalid OAuth request');
+      }
+      if (!userId) {
+        throw new Error('initiateAuthorizationCodeFlow requires an authenticated userId');
       }
 
-      // Generate state if not provided
       const authState = state || crypto.randomBytes(32).toString('hex');
 
-      // Store OAuth state for CSRF protection
-      const stateData = {
-        clientId,
-        redirectUri,
-        scope,
-        nonce,
-        createdAt: Date.now(),
-        expiresAt: Date.now() + 600000, // 10 minutes
-      };
-
-      // Store in Redis (implementation in SSOService)
       const authCode = await this.ssoService.generateAuthorizationCode(
-        null, // userId will be set after login
+        userId,
         clientId,
         scope,
-        redirectUri
+        redirectUri,
+        pkce
       );
+
+      const sep = redirectUri.includes('?') ? '&' : '?';
+      const redirectParams = new URLSearchParams({ code: authCode, state: authState });
+      if (nonce) redirectParams.append('nonce', nonce);
 
       return {
         authCode,
         state: authState,
-        redirectUri: `${redirectUri}?code=${authCode}&state=${authState}`,
+        redirectUri: `${redirectUri}${sep}${redirectParams.toString()}`,
       };
     } catch (error) {
       logger.error('Authorization code flow initiation failed:', error);
@@ -84,26 +87,29 @@ class OAuthService {
   }
 
   /**
-   * Exchange authorization code for tokens
-   * تبديل رمز التفويض بالتوكنات
+   * Exchange authorization code for tokens. Supports PKCE via codeVerifier
+   * and validates redirectUri matches the one bound to the code.
    */
-  async exchangeAuthorizationCode(code, clientId, clientSecret, redirectUri) {
+  async exchangeAuthorizationCode(code, clientId, clientSecret, redirectUri, codeVerifier = null) {
     this._ensureEnabled();
     try {
-      // Verify client credentials
       if (clientSecret !== this.OAUTH_CLIENT_SECRET) {
         throw new Error('Invalid client credentials');
       }
 
-      // Exchange code for tokens
-      const session = await this.ssoService.exchangeAuthorizationCode(code, clientId, clientSecret);
+      const session = await this.ssoService.exchangeAuthorizationCode(
+        code,
+        clientId,
+        clientSecret,
+        { redirectUri, codeVerifier }
+      );
 
       return {
         accessToken: session.accessToken,
         refreshToken: session.refreshToken,
         idToken: session.idToken,
         tokenType: 'Bearer',
-        expiresIn: 3600,
+        expiresIn: session.expiresIn || 3600,
         scope: 'openid profile email',
       };
     } catch (error) {
@@ -263,7 +269,8 @@ class OAuthService {
             params.code,
             params.clientId,
             params.clientSecret,
-            params.redirectUri
+            params.redirectUri,
+            params.codeVerifier
           );
 
         case 'refresh_token':

@@ -102,11 +102,12 @@ describe('OAuthService', () => {
   // ── initiateAuthorizationCodeFlow ────────────────────────────────
 
   describe('initiateAuthorizationCodeFlow', () => {
-    it('returns authCode, state, redirectUri on success', async () => {
+    it('returns authCode, state, redirectUri on success (W205: requires userId)', async () => {
       mockSSOInstance.validateOAuthRequest.mockResolvedValue({ valid: true });
       mockSSOInstance.generateAuthorizationCode.mockResolvedValue('code123');
 
       const result = await service.initiateAuthorizationCodeFlow(
+        'u-1',
         'client1',
         'https://cb.com',
         'openid',
@@ -125,6 +126,7 @@ describe('OAuthService', () => {
       mockSSOInstance.generateAuthorizationCode.mockResolvedValue('code456');
 
       const result = await service.initiateAuthorizationCodeFlow(
+        'u-1',
         'client1',
         'https://cb.com',
         'openid',
@@ -134,19 +136,26 @@ describe('OAuthService', () => {
       expect(result.state).toBeTruthy();
     });
 
+    it('W205: refuses to mint a code without an authenticated userId', async () => {
+      mockSSOInstance.validateOAuthRequest.mockResolvedValue({ valid: true });
+      await expect(
+        service.initiateAuthorizationCodeFlow(null, 'client1', 'https://cb.com', 'openid', 'st')
+      ).rejects.toThrow(/requires an authenticated userId/);
+    });
+
     it('throws when validation fails', async () => {
       mockSSOInstance.validateOAuthRequest.mockResolvedValue({ valid: false });
 
-      await expect(service.initiateAuthorizationCodeFlow('c', 'u', 's', 'st')).rejects.toThrow(
-        'Invalid OAuth request'
-      );
+      await expect(
+        service.initiateAuthorizationCodeFlow('u-1', 'c', 'https://x.test/cb', 's', 'st')
+      ).rejects.toThrow(/Invalid OAuth request/);
     });
 
     it('throws when disabled', async () => {
       service._disabled = true;
-      await expect(service.initiateAuthorizationCodeFlow('c', 'u', 's', 'st')).rejects.toThrow(
-        'OAuth service is not configured'
-      );
+      await expect(
+        service.initiateAuthorizationCodeFlow('u-1', 'c', 'https://x.test/cb', 's', 'st')
+      ).rejects.toThrow('OAuth service is not configured');
     });
   });
 

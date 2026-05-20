@@ -2,36 +2,51 @@
  * SSO (Single Sign-On) Service
  * نظام تسجيل الدخول الموحد المركزي
  * يدعم OAuth 2.0, OpenID Connect, SAML 2.0
+ *
+ * W205 hardening:
+ *  - Unified storage layer (_store/_get/_del/_addToSet/_removeFromSet/_members)
+ *    so the service works with or without Redis.
+ *  - JWT iat/exp now in seconds (RFC 7519). Verification delegated to
+ *    jsonwebtoken's built-in `exp` enforcement; no more duplicate ms checks.
+ *  - PKCE: code_challenge + method stored at authorize-time, verified at
+ *    exchange-time when the request supplies a code_verifier.
+ *  - createSession enforces a session-per-user cap when SSO_MAX_SESSIONS_PER_USER is set.
+ *  - exchangeAuthorizationCode rejects codes whose userId is still null
+ *    (was the W205 "pre-login auth code" hole).
  */
 
-const _jsonwebtoken = require('jsonwebtoken');
-const jwt = {
-  encode: (payload, secret) => _jsonwebtoken.sign(payload, secret),
-  decode: (token, secret) => _jsonwebtoken.verify(token, secret),
-};
+const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const Redis = require('ioredis');
 const logger = require('../utils/logger');
+
+const SECONDS = 1000;
 
 class SSOService {
   constructor() {
     this.useMockCache =
       process.env.USE_MOCK_CACHE === 'true' || process.env.DISABLE_REDIS === 'true';
     this.mockStore = new Map();
+    this.mockExpires = new Map();
+    this.redisClient = null;
 
-    // Try to connect to Redis if not using mock
     if (!this.useMockCache) {
-      this.redisClient = new Redis({
-        host: process.env.REDIS_HOST || 'localhost',
-        port: parseInt(process.env.REDIS_PORT) || 6379,
-        password: process.env.REDIS_PASSWORD,
-      });
-
-      this.redisClient.on('error', err => {
-        logger.error('Redis connection error:', err);
-        // Fallback to mock cache
+      try {
+        this.redisClient = new Redis({
+          host: process.env.REDIS_HOST || 'localhost',
+          port: parseInt(process.env.REDIS_PORT, 10) || 6379,
+          password: process.env.REDIS_PASSWORD,
+          lazyConnect: true,
+          maxRetriesPerRequest: 1,
+        });
+        this.redisClient.on('error', err => {
+          logger.warn('Redis connection error, falling back to in-process store:', err.message);
+          this.useMockCache = true;
+        });
+      } catch (err) {
+        logger.warn('Redis init failed, using in-process store:', err.message);
         this.useMockCache = true;
-      });
+      }
     }
 
     if (!process.env.JWT_SECRET && process.env.NODE_ENV !== 'test') {
@@ -41,79 +56,144 @@ class SSOService {
     this.JWT_SECRET =
       process.env.JWT_SECRET ||
       (process.env.NODE_ENV === 'test' ? 'test-sso-secret-key' : undefined);
-    this.SESSION_TIMEOUT = parseInt(process.env.SESSION_TIMEOUT || 3600000); // 1 hour
-    this.REFRESH_TOKEN_TIMEOUT = parseInt(process.env.REFRESH_TOKEN_TIMEOUT || 604800000); // 7 days
+    // ms-based for setTimeout / cookie maxAge ergonomics
+    this.SESSION_TIMEOUT = parseInt(process.env.SESSION_TIMEOUT, 10) || 3600000;
+    this.REFRESH_TOKEN_TIMEOUT = parseInt(process.env.REFRESH_TOKEN_TIMEOUT, 10) || 604800000;
+    this.MAX_SESSIONS_PER_USER = parseInt(process.env.SSO_MAX_SESSIONS_PER_USER, 10) || 0; // 0 = unlimited
   }
 
-  /**
-   * Helper: Store data (Redis or Mock)
-   */
-  async _store(key, value, ttl) {
+  // ─────────────────────────────────────────────────────────────────────────
+  // Storage abstraction — Redis when available, in-process Map otherwise
+  // ─────────────────────────────────────────────────────────────────────────
+
+  _expireMockIfDue(key) {
+    const expAt = this.mockExpires.get(key);
+    if (expAt && expAt <= Date.now()) {
+      this.mockStore.delete(key);
+      this.mockExpires.delete(key);
+      return true;
+    }
+    return false;
+  }
+
+  async _store(key, value, ttlSeconds) {
+    if (this.useMockCache || !this.redisClient) {
+      this.mockStore.set(key, value);
+      if (ttlSeconds) this.mockExpires.set(key, Date.now() + ttlSeconds * SECONDS);
+      return;
+    }
     try {
-      if (this.useMockCache) {
-        this.mockStore.set(key, value);
-        if (ttl) {
-          setTimeout(() => this.mockStore.delete(key), ttl * 1000);
-        }
-      } else if (this.redisClient) {
-        await this.redisClient.setex(key, ttl, JSON.stringify(value));
+      const payload = typeof value === 'string' ? value : JSON.stringify(value);
+      if (ttlSeconds) {
+        await this.redisClient.setex(key, ttlSeconds, payload);
+      } else {
+        await this.redisClient.set(key, payload);
       }
-    } catch (error) {
-      logger.warn('Store failed, falling back to mock:', error.message);
+    } catch (err) {
+      logger.warn('Redis _store failed, switching to mock:', err.message);
       this.useMockCache = true;
       this.mockStore.set(key, value);
+      if (ttlSeconds) this.mockExpires.set(key, Date.now() + ttlSeconds * SECONDS);
     }
   }
 
-  /**
-   * Helper: Get stored data (Redis or Mock)
-   */
   async _get(key) {
+    if (this.useMockCache || !this.redisClient) {
+      if (this._expireMockIfDue(key)) return null;
+      const v = this.mockStore.get(key);
+      return v === undefined ? null : v;
+    }
     try {
-      if (this.useMockCache) {
-        return this.mockStore.get(key);
-      } else if (this.redisClient) {
-        const value = await this.redisClient.get(key);
-        return value ? JSON.parse(value) : null;
+      const raw = await this.redisClient.get(key);
+      if (raw == null) return null;
+      try {
+        return JSON.parse(raw);
+      } catch {
+        return raw;
       }
-    } catch (error) {
-      logger.warn('Get failed, falling back to mock:', error.message);
+    } catch (err) {
+      logger.warn('Redis _get failed, switching to mock:', err.message);
       this.useMockCache = true;
-      return this.mockStore.get(key);
+      return this.mockStore.get(key) ?? null;
     }
   }
 
-  /**
-   * Helper: Add to set (Redis or Mock)
-   */
-  async _addToSet(key, member) {
+  async _del(key) {
+    if (this.useMockCache || !this.redisClient) {
+      this.mockStore.delete(key);
+      this.mockExpires.delete(key);
+      return;
+    }
     try {
-      if (this.useMockCache) {
-        const set = this.mockStore.get(key) || new Set();
-        set.add(member);
-        this.mockStore.set(key, set);
-      } else if (this.redisClient) {
-        await this.redisClient.sadd(key, member);
-      }
-    } catch (error) {
-      logger.warn('AddToSet failed, falling back to mock:', error.message);
+      await this.redisClient.del(key);
+    } catch (err) {
+      logger.warn('Redis _del failed, switching to mock:', err.message);
       this.useMockCache = true;
-      const set = this.mockStore.get(key) || new Set();
+      this.mockStore.delete(key);
+    }
+  }
+
+  async _addToSet(key, member) {
+    if (this.useMockCache || !this.redisClient) {
+      const set = this.mockStore.get(key) instanceof Set ? this.mockStore.get(key) : new Set();
+      set.add(member);
+      this.mockStore.set(key, set);
+      return;
+    }
+    try {
+      await this.redisClient.sadd(key, member);
+    } catch (err) {
+      logger.warn('Redis _addToSet failed, switching to mock:', err.message);
+      this.useMockCache = true;
+      const set = this.mockStore.get(key) instanceof Set ? this.mockStore.get(key) : new Set();
       set.add(member);
       this.mockStore.set(key, set);
     }
   }
 
+  async _removeFromSet(key, member) {
+    if (this.useMockCache || !this.redisClient) {
+      const set = this.mockStore.get(key);
+      if (set instanceof Set) set.delete(member);
+      return;
+    }
+    try {
+      await this.redisClient.srem(key, member);
+    } catch (err) {
+      logger.warn('Redis _removeFromSet failed, switching to mock:', err.message);
+      this.useMockCache = true;
+      const set = this.mockStore.get(key);
+      if (set instanceof Set) set.delete(member);
+    }
+  }
+
+  async _members(key) {
+    if (this.useMockCache || !this.redisClient) {
+      const set = this.mockStore.get(key);
+      return set instanceof Set ? [...set] : [];
+    }
+    try {
+      return await this.redisClient.smembers(key);
+    } catch (err) {
+      logger.warn('Redis _members failed, switching to mock:', err.message);
+      this.useMockCache = true;
+      const set = this.mockStore.get(key);
+      return set instanceof Set ? [...set] : [];
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Session lifecycle
+  // ─────────────────────────────────────────────────────────────────────────
+
   /**
-   * إنشاء جلسة SSO جديدة
-   * Create a new SSO session
+   * Create a new SSO session and issue access/refresh/id tokens.
    */
   async createSession(userId, userPayload, metadata = {}) {
     try {
       const sessionId = crypto.randomBytes(32).toString('hex');
       const now = Date.now();
 
-      // Create session object
       const session = {
         sessionId,
         userId,
@@ -126,23 +206,24 @@ class SSOService {
           ipAddress: metadata.ipAddress || 'unknown',
           deviceId: metadata.deviceId || crypto.randomUUID(),
         },
-        tokens: {
-          accessToken: null,
-          refreshToken: null,
-          idToken: null,
-        },
+        tokens: { accessToken: null, refreshToken: null, idToken: null },
         status: 'active',
       };
 
-      // Generate tokens
       const tokens = this.generateTokens(userId, userPayload, sessionId);
       session.tokens = tokens;
 
-      // Store session with TTL
-      await this._store(`session:${sessionId}`, session, Math.floor(this.SESSION_TIMEOUT / 1000));
-
-      // Index session by userId for quick lookup
+      await this._store(
+        `session:${sessionId}`,
+        session,
+        Math.floor(this.SESSION_TIMEOUT / SECONDS)
+      );
       await this._addToSet(`user:${userId}:sessions`, sessionId);
+
+      // Enforce per-user session cap if configured
+      if (this.MAX_SESSIONS_PER_USER > 0) {
+        await this._enforceSessionCap(userId, sessionId);
+      }
 
       logger.info(`SSO Session created: ${sessionId} for user: ${userId}`);
 
@@ -151,7 +232,7 @@ class SSOService {
         accessToken: tokens.accessToken,
         refreshToken: tokens.refreshToken,
         idToken: tokens.idToken,
-        expiresIn: this.SESSION_TIMEOUT,
+        expiresIn: Math.floor(this.SESSION_TIMEOUT / SECONDS),
         tokenType: 'Bearer',
       };
     } catch (error) {
@@ -160,53 +241,57 @@ class SSOService {
     }
   }
 
+  async _enforceSessionCap(userId, justCreatedSessionId) {
+    const sessionIds = await this._members(`user:${userId}:sessions`);
+    if (sessionIds.length <= this.MAX_SESSIONS_PER_USER) return;
+
+    // Build [{ sessionId, createdAt }] and evict oldest until at the cap
+    const enriched = [];
+    for (const sid of sessionIds) {
+      if (sid === justCreatedSessionId) continue;
+      const s = await this._get(`session:${sid}`);
+      if (s) enriched.push({ sid, createdAt: s.createdAt || 0 });
+      else await this._removeFromSet(`user:${userId}:sessions`, sid);
+    }
+    enriched.sort((a, b) => a.createdAt - b.createdAt);
+    const toEvict = enriched.slice(0, enriched.length + 1 - this.MAX_SESSIONS_PER_USER);
+    for (const { sid } of toEvict) {
+      await this.endSession(sid);
+    }
+  }
+
   /**
-   * التحقق من جلسة SSO
-   * Verify SSO session
+   * Verify an SSO session by sessionId + access token.
    */
   async verifySession(sessionId, accessToken) {
     try {
-      // Get session from storage
-      const sessionData = await this._get(`session:${sessionId}`);
-
-      if (!sessionData) {
-        logger.warn(`Session not found: ${sessionId}`);
+      const session = await this._get(`session:${sessionId}`);
+      if (!session) {
         return { valid: false, error: 'Session expired or invalid' };
       }
-
-      const session = typeof sessionData === 'string' ? JSON.parse(sessionData) : sessionData;
-
-      // Verify access token
-      try {
-        const decoded = jwt.decode(accessToken, this.JWT_SECRET);
-
-        if (decoded.sessionId !== sessionId) {
-          logger.warn('Session mismatch for token');
-          return { valid: false, error: 'Session mismatch' };
-        }
-
-        if (decoded.exp && decoded.exp < Date.now()) {
-          logger.warn(`Token expired for session: ${sessionId}`);
-          return { valid: false, error: 'Token expired' };
-        }
-
-        // Update last activity
-        session.lastActivity = Date.now();
-        await this.redisClient.setex(
-          `session:${sessionId}`,
-          Math.floor(this.SESSION_TIMEOUT / 1000),
-          JSON.stringify(session)
-        );
-
-        return {
-          valid: true,
-          session,
-          user: decoded,
-        };
-      } catch (tokenError) {
-        logger.error(`Token verification failed: ${tokenError.message}`);
-        return { valid: false, error: 'Invalid token' };
+      if (session.status && session.status !== 'active') {
+        return { valid: false, error: 'Session not active' };
       }
+
+      let decoded;
+      try {
+        decoded = jwt.verify(accessToken, this.JWT_SECRET);
+      } catch (_err) {
+        return { valid: false, error: 'Invalid or expired token' };
+      }
+
+      if (decoded.sessionId !== sessionId) {
+        return { valid: false, error: 'Session mismatch' };
+      }
+
+      session.lastActivity = Date.now();
+      await this._store(
+        `session:${sessionId}`,
+        session,
+        Math.floor(this.SESSION_TIMEOUT / SECONDS)
+      );
+
+      return { valid: true, session, user: decoded };
     } catch (error) {
       logger.error('Session verification failed:', error);
       return { valid: false, error: 'Session verification failed' };
@@ -214,89 +299,68 @@ class SSOService {
   }
 
   /**
-   * تحديث Access Token
-   * Refresh access token
+   * Refresh access token using a valid refresh token.
    */
   async refreshAccessToken(sessionId, refreshToken) {
+    let decoded;
     try {
-      // Get session from Redis
-      const sessionData = await this.redisClient.get(`session:${sessionId}`);
-
-      if (!sessionData) {
-        throw new Error('Session not found');
-      }
-
-      const session = JSON.parse(sessionData);
-
-      // Verify refresh token
-      try {
-        const decoded = jwt.decode(refreshToken, this.JWT_SECRET);
-
-        if (decoded.type !== 'refresh') {
-          throw new Error('Invalid token type');
-        }
-
-        if (decoded.exp && decoded.exp < Date.now()) {
-          throw new Error('Refresh token expired');
-        }
-      } catch (error) {
-        logger.error(`Refresh token verification failed: ${error.message}`);
-        throw new Error('Invalid refresh token');
-      }
-
-      // Generate new access token
-      const newAccessToken = this.generateAccessToken(
-        session.userId,
-        session.userPayload,
-        sessionId
-      );
-
-      session.tokens.accessToken = newAccessToken;
-      session.lastActivity = Date.now();
-
-      // Update session in Redis
-      await this.redisClient.setex(
-        `session:${sessionId}`,
-        Math.floor(this.SESSION_TIMEOUT / 1000),
-        JSON.stringify(session)
-      );
-
-      logger.info(`Access token refreshed for session: ${sessionId}`);
-
-      return {
-        accessToken: newAccessToken,
-        expiresIn: this.SESSION_TIMEOUT,
-        tokenType: 'Bearer',
-      };
-    } catch (error) {
-      logger.error('Failed to refresh access token:', error);
-      throw error;
+      decoded = jwt.verify(refreshToken, this.JWT_SECRET);
+    } catch (_err) {
+      throw new Error('Invalid or expired refresh token');
     }
+    if (decoded.type !== 'refresh') {
+      throw new Error('Invalid token type');
+    }
+
+    // If caller didn't pass sessionId, fall back to the one inside the token
+    const effectiveSessionId = sessionId || decoded.sessionId;
+    if (!effectiveSessionId) {
+      throw new Error('Session id missing');
+    }
+    if (decoded.sessionId !== effectiveSessionId) {
+      throw new Error('Session mismatch');
+    }
+
+    const session = await this._get(`session:${effectiveSessionId}`);
+    if (!session) {
+      throw new Error('Session not found');
+    }
+
+    const newAccessToken = this.generateAccessToken(
+      session.userId,
+      session.userPayload,
+      effectiveSessionId
+    );
+    session.tokens.accessToken = newAccessToken;
+    session.lastActivity = Date.now();
+    await this._store(
+      `session:${effectiveSessionId}`,
+      session,
+      Math.floor(this.SESSION_TIMEOUT / SECONDS)
+    );
+
+    logger.info(`Access token refreshed for session: ${effectiveSessionId}`);
+    return {
+      accessToken: newAccessToken,
+      expiresIn: Math.floor(this.SESSION_TIMEOUT / SECONDS),
+      tokenType: 'Bearer',
+    };
   }
 
-  /**
-   * إنهاء الجلسة
-   * End SSO session
-   */
+  /** End a single session. */
   async endSession(sessionId) {
     try {
-      const sessionData = await this.redisClient.get(`session:${sessionId}`);
-
-      if (sessionData) {
-        const session = JSON.parse(sessionData);
-
-        // Mark session as ended
+      const session = await this._get(`session:${sessionId}`);
+      if (session) {
         session.status = 'ended';
         session.endedAt = Date.now();
-
-        // Store ended session for audit trail (24 hours)
-        await this.redisClient.setex(`session:ended:${sessionId}`, 86400, JSON.stringify(session));
-
-        // Remove active session
-        await this.redisClient.del(`session:${sessionId}`);
-        await this.redisClient.srem(`user:${session.userId}:sessions`, sessionId);
+        // Retain ended session for 24h audit trail
+        await this._store(`session:ended:${sessionId}`, session, 86400);
+        await this._del(`session:${sessionId}`);
+        if (session.userId) {
+          await this._removeFromSet(`user:${session.userId}:sessions`, sessionId);
+        }
       }
-
       logger.info(`Session ended: ${sessionId}`);
       return { success: true };
     } catch (error) {
@@ -305,21 +369,15 @@ class SSOService {
     }
   }
 
-  /**
-   * إنهاء جميع جلسات المستخدم (Logout everywhere)
-   * End all user sessions
-   */
+  /** End every session belonging to a user. */
   async endAllUserSessions(userId) {
     try {
-      const sessionIds = await this.redisClient.smembers(`user:${userId}:sessions`);
-
+      const sessionIds = await this._members(`user:${userId}:sessions`);
       for (const sessionId of sessionIds) {
         await this.endSession(sessionId);
       }
-
-      await this.redisClient.del(`user:${userId}:sessions`);
-
-      logger.info(`All sessions ended for user: ${userId}`);
+      await this._del(`user:${userId}:sessions`);
+      logger.info(`All sessions ended for user: ${userId} (count=${sessionIds.length})`);
       return { success: true, sessionsEnded: sessionIds.length };
     } catch (error) {
       logger.error('Failed to end all user sessions:', error);
@@ -327,300 +385,222 @@ class SSOService {
     }
   }
 
-  /**
-   * الحصول على جميع جلسات النشطة للمستخدم
-   * Get all active sessions for user
-   */
+  /** Return all active sessions for a user (sans tokens). */
   async getUserActiveSessions(userId) {
     try {
-      const sessionIds = await this.redisClient.smembers(`user:${userId}:sessions`);
-      const sessions = [];
-
+      const sessionIds = await this._members(`user:${userId}:sessions`);
+      const out = [];
       for (const sessionId of sessionIds) {
-        const sessionData = await this.redisClient.get(`session:${sessionId}`);
-        if (sessionData) {
-          const session = JSON.parse(sessionData);
-          sessions.push({
+        const session = await this._get(`session:${sessionId}`);
+        if (session) {
+          out.push({
             sessionId,
             createdAt: session.createdAt,
             lastActivity: session.lastActivity,
             metadata: session.metadata,
             status: session.status,
           });
+        } else {
+          // Stale set member — clean up
+          await this._removeFromSet(`user:${userId}:sessions`, sessionId);
         }
       }
-
-      return sessions;
+      return out;
     } catch (error) {
       logger.error('Failed to get user sessions:', error);
       throw error;
     }
   }
 
-  /**
-   * توليد التوكنات (Access, Refresh, ID)
-   * Generate JWT tokens
-   */
+  // ─────────────────────────────────────────────────────────────────────────
+  // Token generation
+  // ─────────────────────────────────────────────────────────────────────────
+
   generateTokens(userId, userPayload, sessionId) {
-    const now = Date.now();
+    const accessToken = this.generateAccessToken(userId, userPayload, sessionId);
 
-    // Access Token (valid for 1 hour)
-    const accessToken = jwt.encode(
-      {
-        ...userPayload,
-        userId,
-        sessionId,
-        type: 'access',
-        iat: now,
-        exp: now + this.SESSION_TIMEOUT,
-      },
-      this.JWT_SECRET
-    );
+    const refreshExpiresInSec = Math.floor(this.REFRESH_TOKEN_TIMEOUT / SECONDS);
+    const refreshToken = jwt.sign({ userId, sessionId, type: 'refresh' }, this.JWT_SECRET, {
+      expiresIn: refreshExpiresInSec,
+      algorithm: 'HS256',
+    });
 
-    // Refresh Token (valid for 7 days)
-    const refreshToken = jwt.encode(
-      {
-        userId,
-        sessionId,
-        type: 'refresh',
-        iat: now,
-        exp: now + this.REFRESH_TOKEN_TIMEOUT,
-      },
-      this.JWT_SECRET
-    );
-
-    // ID Token (for client identity)
-    const idToken = jwt.encode(
-      {
-        sub: userId,
-        aud: 'sso-client',
-        iss: 'sso-server',
-        iat: now,
-        exp: now + this.SESSION_TIMEOUT,
-      },
-      this.JWT_SECRET
+    const accessExpiresInSec = Math.floor(this.SESSION_TIMEOUT / SECONDS);
+    const idToken = jwt.sign(
+      { sub: userId, aud: 'sso-client', iss: 'sso-server' },
+      this.JWT_SECRET,
+      { expiresIn: accessExpiresInSec, algorithm: 'HS256' }
     );
 
     return { accessToken, refreshToken, idToken };
   }
 
-  /**
-   * توليد Access Token فقط
-   * Generate access token only
-   */
   generateAccessToken(userId, userPayload, sessionId) {
-    const now = Date.now();
-
-    return jwt.encode(
-      {
-        ...userPayload,
-        userId,
-        sessionId,
-        type: 'access',
-        iat: now,
-        exp: now + this.SESSION_TIMEOUT,
-      },
-      this.JWT_SECRET
-    );
+    const expiresInSec = Math.floor(this.SESSION_TIMEOUT / SECONDS);
+    return jwt.sign({ ...userPayload, userId, sessionId, type: 'access' }, this.JWT_SECRET, {
+      expiresIn: expiresInSec,
+      algorithm: 'HS256',
+    });
   }
 
-  /**
-   * تحديث بيانات الجلسة
-   * Update session metadata
-   */
+  /** Update mutable session metadata. */
   async updateSessionMetadata(sessionId, metadata) {
-    try {
-      const sessionData = await this.redisClient.get(`session:${sessionId}`);
-
-      if (!sessionData) {
-        throw new Error('Session not found');
-      }
-
-      const session = JSON.parse(sessionData);
-      session.metadata = { ...session.metadata, ...metadata };
-      session.lastActivity = Date.now();
-
-      await this.redisClient.setex(
-        `session:${sessionId}`,
-        Math.floor(this.SESSION_TIMEOUT / 1000),
-        JSON.stringify(session)
-      );
-
-      logger.info(`Session metadata updated: ${sessionId}`);
-      return session;
-    } catch (error) {
-      logger.error('Failed to update session metadata:', error);
-      throw error;
-    }
+    const session = await this._get(`session:${sessionId}`);
+    if (!session) throw new Error('Session not found');
+    session.metadata = { ...session.metadata, ...metadata };
+    session.lastActivity = Date.now();
+    await this._store(`session:${sessionId}`, session, Math.floor(this.SESSION_TIMEOUT / SECONDS));
+    return session;
   }
 
-  /**
-   * الحصول على معلومات الجلسة
-   * Get session info
-   */
   async getSessionInfo(sessionId) {
-    try {
-      const sessionData = await this.redisClient.get(`session:${sessionId}`);
-
-      if (!sessionData) {
-        return null;
-      }
-
-      return JSON.parse(sessionData);
-    } catch (error) {
-      logger.error('Failed to get session info:', error);
-      throw error;
-    }
+    return this._get(`session:${sessionId}`);
   }
 
+  // ─────────────────────────────────────────────────────────────────────────
+  // OAuth 2.0 / OIDC helpers
+  // ─────────────────────────────────────────────────────────────────────────
+
   /**
-   * التحقق من طلب SSO OAuth 2.0
-   * Validate OAuth 2.0 request
+   * Validate redirect_uri + clientId — defense-in-depth for the route layer.
    */
   async validateOAuthRequest(clientId, redirectUri, scope, state) {
-    try {
-      // --- redirect_uri validation ---
-      if (!redirectUri || typeof redirectUri !== 'string') {
-        return { valid: false, error: 'redirect_uri is required' };
-      }
-
-      let parsed;
-      try {
-        parsed = new URL(redirectUri);
-      } catch {
-        return { valid: false, error: 'redirect_uri is not a valid URL' };
-      }
-
-      // Block dangerous URI schemes
-      const allowedSchemes = ['https:', 'http:'];
-      if (!allowedSchemes.includes(parsed.protocol)) {
-        logger.warn(`Blocked OAuth redirect with scheme: ${parsed.protocol}`);
-        return { valid: false, error: 'redirect_uri must use http or https' };
-      }
-
-      // In production, require HTTPS (except localhost for dev testing)
-      const isLocalhost = parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1';
-      if (process.env.NODE_ENV === 'production' && parsed.protocol !== 'https:' && !isLocalhost) {
-        return { valid: false, error: 'redirect_uri must use HTTPS in production' };
-      }
-
-      // Block fragment in redirect_uri (OAuth 2.0 spec §3.1.2)
-      if (parsed.hash) {
-        return { valid: false, error: 'redirect_uri must not contain a fragment' };
-      }
-
-      // Validate clientId is present
-      if (!clientId || typeof clientId !== 'string') {
-        return { valid: false, error: 'client_id is required' };
-      }
-
-      return {
-        valid: true,
-        clientId,
-        redirectUri,
-        scope: scope ? scope.split(' ') : [],
-        state,
-      };
-    } catch (error) {
-      logger.error('OAuth request validation failed:', error);
-      return { valid: false, error: 'حدث خطأ داخلي' };
+    if (!redirectUri || typeof redirectUri !== 'string') {
+      return { valid: false, error: 'redirect_uri is required' };
     }
+    let parsed;
+    try {
+      parsed = new URL(redirectUri);
+    } catch {
+      return { valid: false, error: 'redirect_uri is not a valid URL' };
+    }
+    const allowedSchemes = ['https:', 'http:'];
+    if (!allowedSchemes.includes(parsed.protocol)) {
+      return { valid: false, error: 'redirect_uri must use http or https' };
+    }
+    const isLocalhost = parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1';
+    if (process.env.NODE_ENV === 'production' && parsed.protocol !== 'https:' && !isLocalhost) {
+      return { valid: false, error: 'redirect_uri must use HTTPS in production' };
+    }
+    if (parsed.hash) {
+      return { valid: false, error: 'redirect_uri must not contain a fragment' };
+    }
+    if (!clientId || typeof clientId !== 'string') {
+      return { valid: false, error: 'client_id is required' };
+    }
+    return {
+      valid: true,
+      clientId,
+      redirectUri,
+      scope: scope ? scope.split(' ') : [],
+      state,
+    };
   }
 
   /**
-   * إنشاء Authorization Code
-   * Generate authorization code
+   * Generate an authorization code bound to (userId, clientId, redirectUri, scope)
+   * and optional PKCE challenge. userId MUST be non-null — callers must
+   * authenticate the user before requesting a code.
    */
-  async generateAuthorizationCode(userId, clientId, scope, redirectUri) {
-    try {
-      const code = crypto.randomBytes(32).toString('hex');
-      const now = Date.now();
-
-      const authCode = {
-        code,
-        userId,
-        clientId,
-        scope,
-        redirectUri,
-        createdAt: now,
-        expiresAt: now + 600000, // 10 minutes
-      };
-
-      await this.redisClient.setex(`oauth:code:${code}`, 600, JSON.stringify(authCode));
-
-      logger.info(`Authorization code generated for user: ${userId}, client: ${clientId}`);
-      return code;
-    } catch (error) {
-      logger.error('Failed to generate authorization code:', error);
-      throw error;
+  async generateAuthorizationCode(userId, clientId, scope, redirectUri, pkce = null) {
+    if (!userId) {
+      // W205 fix: pre-login code issuance was a security hole — refuse.
+      throw new Error('generateAuthorizationCode requires an authenticated userId');
     }
+    const code = crypto.randomBytes(32).toString('hex');
+    const now = Date.now();
+    const authCode = {
+      code,
+      userId,
+      clientId,
+      scope,
+      redirectUri,
+      pkce: pkce
+        ? {
+            codeChallenge: pkce.codeChallenge,
+            codeChallengeMethod: pkce.codeChallengeMethod || 'S256',
+          }
+        : null,
+      createdAt: now,
+      expiresAt: now + 600000, // 10 minutes
+    };
+    await this._store(`oauth:code:${code}`, authCode, 600);
+    logger.info(`Authorization code generated for user: ${userId}, client: ${clientId}`);
+    return code;
   }
 
   /**
-   * تبديل Authorization Code بـ Access Token
-   * Exchange authorization code for access token
+   * Exchange an authorization code for a session.
+   * Verifies clientSecret + redirect_uri match + PKCE (if originally bound).
    */
-  async exchangeAuthorizationCode(code, clientId, clientSecret) {
-    try {
-      const authCodeData = await this.redisClient.get(`oauth:code:${code}`);
+  async exchangeAuthorizationCode(code, clientId, clientSecret, opts = {}) {
+    const authCode = await this._get(`oauth:code:${code}`);
+    if (!authCode) {
+      throw new Error('Invalid or expired authorization code');
+    }
+    if (authCode.clientId !== clientId) {
+      throw new Error('Client ID mismatch');
+    }
+    if (!authCode.userId) {
+      // Defense in depth: refuse codes that lack an authenticated subject.
+      throw new Error('Authorization code is not bound to a user');
+    }
+    if (clientSecret !== process.env.OAUTH_CLIENT_SECRET) {
+      throw new Error('Invalid client secret');
+    }
+    if (authCode.expiresAt < Date.now()) {
+      await this._del(`oauth:code:${code}`);
+      throw new Error('Authorization code expired');
+    }
+    if (opts.redirectUri && authCode.redirectUri !== opts.redirectUri) {
+      throw new Error('redirect_uri mismatch');
+    }
 
-      if (!authCodeData) {
-        throw new Error('Invalid or expired authorization code');
+    // PKCE: if the code was issued with a challenge, the exchange MUST verify.
+    if (authCode.pkce) {
+      const verifier = opts.codeVerifier;
+      if (!verifier) {
+        throw new Error('code_verifier is required for this code');
       }
-
-      const authCode = JSON.parse(authCodeData);
-
-      if (authCode.clientId !== clientId) {
-        throw new Error('Client ID mismatch');
-      }
-
-      // In production, verify clientSecret against your client registry
-      if (clientSecret !== process.env.OAUTH_CLIENT_SECRET) {
-        throw new Error('Invalid client secret');
-      }
-
-      if (authCode.expiresAt < Date.now()) {
-        throw new Error('Authorization code expired');
-      }
-
-      // Delete used authorization code
-      await this.redisClient.del(`oauth:code:${code}`);
-
-      // Create session and generate tokens
-      const session = await this.createSession(
-        authCode.userId,
-        {
-          scope: authCode.scope,
-          clientId,
-        },
-        {
-          source: 'oauth',
-        }
+      const ok = SSOService.verifyPkce(
+        verifier,
+        authCode.pkce.codeChallenge,
+        authCode.pkce.codeChallengeMethod
       );
-
-      logger.info(`Authorization code exchanged for user: ${authCode.userId}`);
-      return session;
-    } catch (error) {
-      logger.error('Failed to exchange authorization code:', error);
-      throw error;
+      if (!ok) {
+        throw new Error('PKCE verification failed');
+      }
     }
+
+    await this._del(`oauth:code:${code}`);
+
+    const session = await this.createSession(
+      authCode.userId,
+      { scope: authCode.scope, clientId },
+      { source: 'oauth' }
+    );
+    logger.info(`Authorization code exchanged for user: ${authCode.userId}`);
+    return session;
+  }
+
+  static verifyPkce(codeVerifier, codeChallenge, method = 'S256') {
+    if (method === 'plain') {
+      return codeVerifier === codeChallenge;
+    }
+    if (method === 'S256') {
+      const hash = crypto.createHash('sha256').update(codeVerifier).digest('base64');
+      const computed = hash.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+      return computed === codeChallenge;
+    }
+    return false;
   }
 
   /**
-   * التحقق من Token أثناء المكالمات البينية
-   * Introspect token (for service-to-service verification)
+   * Introspect an access token for service-to-service verification.
    */
   async introspectToken(token) {
     try {
-      const decoded = jwt.decode(token, this.JWT_SECRET);
-
-      if (decoded.exp && decoded.exp < Date.now()) {
-        return {
-          active: false,
-          reason: 'Token expired',
-        };
-      }
-
+      const decoded = jwt.verify(token, this.JWT_SECRET);
       return {
         active: true,
         sub: decoded.userId,
@@ -630,21 +610,19 @@ class SSOService {
         iat: decoded.iat,
       };
     } catch (error) {
-      logger.error('Token introspection failed:', error);
-      return { active: false, reason: 'Invalid token' };
+      const reason = error.name === 'TokenExpiredError' ? 'Token expired' : 'Invalid token';
+      return { active: false, reason };
     }
   }
 
-  /**
-   * إغلاق الاتصال مع Redis
-   * Disconnect Redis
-   */
   async disconnect() {
-    try {
-      await this.redisClient.disconnect();
-      logger.info('Redis connection closed');
-    } catch (error) {
-      logger.error('Error closing Redis connection:', error);
+    if (this.redisClient) {
+      try {
+        await this.redisClient.disconnect();
+        logger.info('Redis connection closed');
+      } catch (error) {
+        logger.error('Error closing Redis connection:', error);
+      }
     }
   }
 }

@@ -33,6 +33,7 @@ module.exports = function registerFeatureRoutes(
   const beneficiarySectionsRoutes = safeRequire('../routes/beneficiary-sections.routes');
   const dailyCommunicationRoutes = safeRequire('../routes/daily-communication.routes');
   const morningHealthCheckRoutes = safeRequire('../routes/morning-health-check.routes');
+  const toiletingRoutes = safeRequire('../routes/toileting.routes');
   const transportModuleRoutes = safeRequire('../routes/transport-module.routes');
   const transportPublicTrackRoutes = safeRequire('../routes/transport-public-track.routes');
   const schedulingModuleRoutes = safeRequire('../routes/scheduling-module.routes');
@@ -75,8 +76,10 @@ module.exports = function registerFeatureRoutes(
   dualMountAuth(app, 'daily-communication', dailyCommunicationRoutes, authenticate);
   // Wave 177: Morning health check (الفحص الصحي الصباحي)
   dualMountAuth(app, 'morning-health-check', morningHealthCheckRoutes, authenticate);
+  // Wave 178: Toileting log (سجل الحفاضات والحمام)
+  dualMountAuth(app, 'toileting', toiletingRoutes, authenticate);
   logger.info(
-    '✅ prompt_04 Beneficiary Management routes mounted: guardians (8 endpoints), disability-assessments (7 endpoints), beneficiary-transfers workflow (6 endpoints), beneficiary-day-attendance rollcall (9 endpoints), beneficiary-sections (7 endpoints), daily-communication (9 endpoints), morning-health-check (7 endpoints)'
+    '✅ prompt_04 Beneficiary Management routes mounted: guardians (8 endpoints), disability-assessments (7 endpoints), beneficiary-transfers workflow (6 endpoints), beneficiary-day-attendance rollcall (9 endpoints), beneficiary-sections (7 endpoints), daily-communication (9 endpoints), morning-health-check (7 endpoints), toileting (6 endpoints)'
   );
 
   // ─── prompt_07: الوحدات التشغيلية — HR + Transport + Scheduling ────

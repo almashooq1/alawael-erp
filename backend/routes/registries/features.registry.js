@@ -37,6 +37,7 @@ module.exports = function registerFeatureRoutes(
   const beneficiaryMealsRoutes = safeRequire('../routes/beneficiary-meals.routes');
   const dayRehabBusRoutesRoutes = safeRequire('../routes/day-rehab-bus-routes.routes');
   const ministryReportRoutes = safeRequire('../routes/ministry-report.routes');
+  const marRoutes = safeRequire('../routes/mar.routes');
   const transportModuleRoutes = safeRequire('../routes/transport-module.routes');
   const transportPublicTrackRoutes = safeRequire('../routes/transport-public-track.routes');
   const schedulingModuleRoutes = safeRequire('../routes/scheduling-module.routes');
@@ -87,6 +88,8 @@ module.exports = function registerFeatureRoutes(
   dualMountAuth(app, 'day-rehab-bus-routes', dayRehabBusRoutesRoutes, authenticate);
   // Wave 187b: Monthly ministry report aggregation (التقرير الشهري للوزارة)
   dualMountAuth(app, 'ministry-report', ministryReportRoutes, authenticate);
+  // Wave 191b: MAR — medication administration record (سجل تعاطي الأدوية اليومي)
+  dualMountAuth(app, 'mar', marRoutes, authenticate);
   logger.info(
     '✅ prompt_04 Beneficiary Management routes mounted: guardians (8 endpoints), disability-assessments (7 endpoints), beneficiary-transfers workflow (6 endpoints), beneficiary-day-attendance rollcall (9 endpoints), beneficiary-sections (7 endpoints), daily-communication (9 endpoints), morning-health-check (7 endpoints), toileting (6 endpoints), beneficiary-meals (6 endpoints), day-rehab-bus-routes (10 endpoints)'
   );

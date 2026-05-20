@@ -29,6 +29,7 @@ module.exports = function registerFeatureRoutes(
   const missingModelsRoutes = safeRequire('../routes/missing-models.routes');
   const guardiansRoutes = safeRequire('../routes/guardians.routes');
   const beneficiaryTransfersRoutes = safeRequire('../routes/beneficiary-transfers.routes');
+  const beneficiaryDayAttendanceRoutes = safeRequire('../routes/beneficiary-day-attendance.routes');
   const transportModuleRoutes = safeRequire('../routes/transport-module.routes');
   const transportPublicTrackRoutes = safeRequire('../routes/transport-public-track.routes');
   const schedulingModuleRoutes = safeRequire('../routes/scheduling-module.routes');
@@ -63,8 +64,10 @@ module.exports = function registerFeatureRoutes(
   // ─── prompt_04: وحدة إدارة المستفيدين — Beneficiary Management Module ─────────
   dualMount(app, 'guardians', guardiansRoutes);
   dualMount(app, 'beneficiary-transfers', beneficiaryTransfersRoutes);
+  // Wave 174: Daily rollcall (مركز تأهيل نهاري) — distinct from session attendance
+  dualMountAuth(app, 'beneficiary-day-attendance', beneficiaryDayAttendanceRoutes, authenticate);
   logger.info(
-    '✅ prompt_04 Beneficiary Management routes mounted: guardians (8 endpoints), disability-assessments (7 endpoints), beneficiary-transfers workflow (6 endpoints)'
+    '✅ prompt_04 Beneficiary Management routes mounted: guardians (8 endpoints), disability-assessments (7 endpoints), beneficiary-transfers workflow (6 endpoints), beneficiary-day-attendance rollcall (9 endpoints)'
   );
 
   // ─── prompt_07: الوحدات التشغيلية — HR + Transport + Scheduling ────

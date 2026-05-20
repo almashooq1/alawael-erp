@@ -36,9 +36,7 @@ function createDocumentArchiveScheduler({ logger, smartService, intervalMs } = {
   }
 
   const cadence =
-    Number(intervalMs) ||
-    Number(process.env.ARCHIVE_SCAN_INTERVAL_MS) ||
-    DEFAULT_INTERVAL_MS;
+    Number(intervalMs) || Number(process.env.ARCHIVE_SCAN_INTERVAL_MS) || DEFAULT_INTERVAL_MS;
   const idleMonths = Number(process.env.ARCHIVE_SCAN_IDLE_MONTHS) || 6;
   const minScore = Number(process.env.ARCHIVE_SCAN_MIN_SCORE) || 0.5;
 

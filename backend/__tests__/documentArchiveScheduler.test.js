@@ -19,7 +19,7 @@ describe('documentArchiveScheduler', () => {
 
   test('runOnce invokes smart service with env-driven thresholds', async () => {
     const smartService = {
-      scanAndRecommend: jest.fn(async (opts) => ({
+      scanAndRecommend: jest.fn(async opts => ({
         scanned: 10,
         recommended: 3,
         byBand: { strong: 1, moderate: 2, weak: 7 },
@@ -48,7 +48,9 @@ describe('documentArchiveScheduler', () => {
 
   test('start() arms a single timer; second start() is a no-op', () => {
     jest.useFakeTimers();
-    const smartService = { scanAndRecommend: jest.fn(async () => ({ scanned: 0, recommended: 0, byBand: {} })) };
+    const smartService = {
+      scanAndRecommend: jest.fn(async () => ({ scanned: 0, recommended: 0, byBand: {} })),
+    };
     const sched = createScheduler({
       logger: silentLogger(),
       smartService,

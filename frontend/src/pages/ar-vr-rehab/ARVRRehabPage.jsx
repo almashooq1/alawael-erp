@@ -78,13 +78,21 @@ const sessionTypeLabel = t => {
   return map[t] || t || '—';
 };
 
+// Backend may return either the canonical status (`scheduled`,
+// `in_progress`, ...) or the UI alias mirror (`pending`, `active`).
+// Cover both so we don't render raw enum strings on the chip.
 const statusLabel = s => {
   const map = {
     pending: 'معلقة',
+    scheduled: 'معلقة',
+    preparing: 'تحضير',
     active: 'نشطة',
+    in_progress: 'نشطة',
     paused: 'موقوفة',
     completed: 'مكتملة',
+    cancelled: 'ملغاة',
     aborted: 'ملغاة',
+    technical_failure: 'عطل تقني',
   };
   return map[s] || s || '—';
 };
@@ -92,6 +100,9 @@ const statusLabel = s => {
 const statusColor = s => {
   const map = {
     pending: 'warning',
+    scheduled: 'warning',
+    preparing: 'info',
+    in_progress: 'success',
     active: 'success',
     paused: 'info',
     completed: 'primary',
@@ -567,9 +578,17 @@ export default function ARVRRehabPage() {
                   </TableRow>
                 ) : (
                   sessions.map((sess, i) => {
+                    const ben = sess.beneficiaryId;
                     const benName =
-                      sess.beneficiaryId?.name?.full || sess.beneficiaryName || `مستفيد #${i + 1}`;
-                    const status = sess.status;
+                      (ben && typeof ben === 'object'
+                        ? [ben.firstName, ben.lastName].filter(Boolean).join(' ')
+                        : null) ||
+                      ben?.name?.full ||
+                      sess.beneficiaryName ||
+                      `مستفيد #${i + 1}`;
+                    // Backend returns canonical status; uiStatus is the alias
+                    // we map onto the same buttons the UI's switch reads.
+                    const status = sess.uiStatus || sess.status;
                     return (
                       <TableRow key={sess._id || i} hover>
                         <TableCell>

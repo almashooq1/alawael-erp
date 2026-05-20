@@ -16,7 +16,12 @@ const arvrSessionSchema = new Schema(
     branchId: { type: Schema.Types.ObjectId, ref: 'Branch', index: true },
 
     // Session type
-    technologyType: { type: String, enum: ['vr', 'ar', 'mr', 'xr'], required: true },
+    technologyType: {
+      type: String,
+      enum: ['vr', 'ar', 'mr', 'xr', 'mixed', 'hologram', 'bci'],
+      required: true,
+      index: true,
+    },
     specialty: {
       type: String,
       enum: [
@@ -81,6 +86,7 @@ const arvrSessionSchema = new Schema(
     scheduledAt: Date,
     startedAt: Date,
     endedAt: Date,
+    plannedDurationMinutes: { type: Number, min: 1, max: 240 },
     activeDurationSeconds: Number,
     pauseDurationSeconds: { type: Number, default: 0 },
     pauseCount: { type: Number, default: 0 },

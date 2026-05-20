@@ -25,11 +25,28 @@ const mongoose = require('mongoose');
 
 const engine = require('../services/assessmentRecommendationEngine.service');
 const llmModule = require('../services/assessmentRecommendationLlm.service');
+const createReassessmentSweeper = require('../services/assessmentReassessmentSweeper.service');
 const safeError = require('../utils/safeError');
 
 // Register the bundle model so `mongoose.model('AssessmentRecommendationBundle')`
 // resolves regardless of which path first touches the route.
 require('../models/AssessmentRecommendationBundle');
+
+// Lazy-built sweeper — needs models registered, which happens by the
+// time the first request fires.
+let cachedSweeper = null;
+function getSweeper() {
+  if (cachedSweeper) return cachedSweeper;
+  try {
+    cachedSweeper = createReassessmentSweeper({
+      SmartGoal: mongoose.model('SmartGoal'),
+      AssessmentRecommendationBundle: mongoose.model('AssessmentRecommendationBundle'),
+    });
+    return cachedSweeper;
+  } catch {
+    return null;
+  }
+}
 
 // LLM refiner is bound once at module load. If no Anthropic client
 // has been registered on the global app context, the factory returns
@@ -380,6 +397,32 @@ router.get('/history/:beneficiaryId', async (req, res) => {
     });
   } catch (err) {
     return safeError(res, err, 'assessment_history_failed');
+  }
+});
+
+// ─── GET /reassessment-due — Wave 206e ────────────────────────
+//
+// Returns the live list of beneficiaries whose goals have passed
+// their timeBoundDate without completion (and/or whose last
+// recommendation bundle is older than 90 days). Read-only;
+// idempotent; safe for repeated calls from a dashboard badge.
+
+router.get('/reassessment-due', async (req, res) => {
+  try {
+    const sweeper = getSweeper();
+    if (!sweeper) {
+      return res.status(503).json({ success: false, message: 'reassessment_sweeper_unavailable' });
+    }
+    const result = await sweeper.runOnce({ now: new Date() });
+    return res.json({
+      success: true,
+      data: {
+        summary: result.summary,
+        findingsByBeneficiary: result.findingsByBeneficiary,
+      },
+    });
+  } catch (err) {
+    return safeError(res, err, 'reassessment_due_failed');
   }
 });
 

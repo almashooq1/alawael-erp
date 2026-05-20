@@ -342,4 +342,151 @@ describe('Wave 206 — assessmentRecommendationEngine', () => {
       }
     });
   });
+
+  // ─── Wave 206b — extended measure coverage ───────────────────
+  describe('W206b — FIM adult coverage', () => {
+    test('FIM total 30 → severe tier + self-care + motor goals', () => {
+      const result = engine.recommend({
+        beneficiary: { age: 25, indications: [] },
+        scores: [{ measureKey: 'FIM', totalScore: 30 }],
+      });
+      const interp = result.scoreInterpretations[0];
+      expect(interp.ok).toBe(true);
+      expect(interp.tier).toBe('severe');
+      const domains = result.suggestedGoals.map(g => g.domain);
+      expect(domains).toContain('self_care');
+      expect(domains).toContain('motor');
+    });
+
+    test('FIM total 120 → independent tier + community participation goal', () => {
+      const result = engine.recommend({
+        beneficiary: { age: 30, indications: [] },
+        scores: [{ measureKey: 'FIM', totalScore: 120 }],
+      });
+      expect(result.scoreInterpretations[0].tier).toBe('independent');
+      expect(result.suggestedGoals.some(g => g.domain === 'social')).toBe(true);
+    });
+
+    test('FIM moderate (60) → 1 self-care goal', () => {
+      const result = engine.recommend({
+        beneficiary: { age: 25, indications: [] },
+        scores: [{ measureKey: 'FIM', totalScore: 60 }],
+      });
+      expect(result.scoreInterpretations[0].tier).toBe('moderate');
+      expect(result.suggestedGoals.length).toBeGreaterThanOrEqual(1);
+    });
+  });
+
+  describe('W206b — MACS coverage', () => {
+    test('MACS level 4 → AAC communication goal', () => {
+      const result = engine.recommend({
+        beneficiary: { age: 8, indications: ['G80'] },
+        scores: [{ measureKey: 'MACS', level: 4 }],
+      });
+      expect(result.scoreInterpretations[0].ok).toBe(true);
+      const titles = result.suggestedGoals.map(g => g.title);
+      expect(titles.some(t => t.includes('AAC'))).toBe(true);
+    });
+
+    test('MACS level 1 → advanced fine-motor goal', () => {
+      const result = engine.recommend({
+        beneficiary: { age: 10, indications: ['G80'] },
+        scores: [{ measureKey: 'MACS', level: 1 }],
+      });
+      expect(result.suggestedGoals.length).toBeGreaterThan(0);
+      expect(result.suggestedGoals[0].domain).toBe('self_care');
+    });
+  });
+
+  describe('W206b — CFCS coverage', () => {
+    test('CFCS level 4 → AAC assessment goal', () => {
+      const result = engine.recommend({
+        beneficiary: { age: 7, indications: ['G80'] },
+        scores: [{ measureKey: 'CFCS', level: 4 }],
+      });
+      expect(result.scoreInterpretations[0].ok).toBe(true);
+      const goals = result.suggestedGoals;
+      expect(goals.length).toBeGreaterThan(0);
+      expect(goals.some(g => g.title.includes('AAC'))).toBe(true);
+    });
+
+    test('CFCS level 5 → caregiver training goal', () => {
+      const result = engine.recommend({
+        beneficiary: { age: 9, indications: ['G80'] },
+        scores: [{ measureKey: 'CFCS', level: 5 }],
+      });
+      expect(result.suggestedGoals.some(g => g.domain === 'social')).toBe(true);
+    });
+  });
+
+  describe('W206b — SCQ binary cutoff', () => {
+    test('SCQ above cutoff (20) → tier above_cutoff + referral goal within 14 days', () => {
+      const result = engine.recommend({
+        beneficiary: { age: 5, indications: [] },
+        scores: [{ measureKey: 'SCQ', totalScore: 20 }],
+      });
+      const interp = result.scoreInterpretations[0];
+      expect(interp.ok).toBe(true);
+      expect(interp.tier).toBe('above_cutoff');
+      expect(interp.severity).toBe('severe');
+      // Referral goal has 14-day deadline
+      expect(result.suggestedGoals.some(g => g.timeBoundDays <= 14)).toBe(true);
+    });
+
+    test('SCQ below cutoff (10) → tier below_cutoff + minimal severity', () => {
+      const result = engine.recommend({
+        beneficiary: { age: 5, indications: [] },
+        scores: [{ measureKey: 'SCQ', totalScore: 10 }],
+      });
+      const interp = result.scoreInterpretations[0];
+      expect(interp.ok).toBe(true);
+      expect(interp.tier).toBe('below_cutoff');
+      expect(interp.severity).toBe('minimal');
+    });
+  });
+
+  describe('W206b — Berg balance coverage', () => {
+    test('Berg total 15 → high_fall_risk + environmental safety goal', () => {
+      const result = engine.recommend({
+        beneficiary: { age: 65, indications: [] },
+        scores: [{ measureKey: 'BergBalance', totalScore: 15 }],
+      });
+      const interp = result.scoreInterpretations[0];
+      expect(interp.ok).toBe(true);
+      expect(interp.tier).toBe('high_fall_risk');
+      expect(interp.severity).toBe('severe');
+      expect(result.suggestedGoals.length).toBeGreaterThan(0);
+    });
+
+    test('Berg total 50 → low_fall_risk + maintenance goal', () => {
+      const result = engine.recommend({
+        beneficiary: { age: 50, indications: [] },
+        scores: [{ measureKey: 'BergBalance', totalScore: 50 }],
+      });
+      expect(result.scoreInterpretations[0].tier).toBe('low_fall_risk');
+      expect(result.scoreInterpretations[0].severity).toBe('minimal');
+    });
+  });
+
+  describe('W206b — multi-measure CP profile (GMFCS+MACS+CFCS)', () => {
+    test('triple CP measure assessment combines all axes', () => {
+      const result = engine.recommend({
+        beneficiary: { age: 8, indications: ['G80'] },
+        scores: [
+          { measureKey: 'GMFCS', level: 4 },
+          { measureKey: 'MACS', level: 4 },
+          { measureKey: 'CFCS', level: 4 },
+        ],
+      });
+      expect(result.scoreInterpretations.every(i => i.ok)).toBe(true);
+      expect(result.suggestedGoals.length).toBeGreaterThanOrEqual(3);
+      // All three axes contribute goals
+      const domains = new Set(result.suggestedGoals.map(g => g.domain));
+      expect(domains.size).toBeGreaterThanOrEqual(2);
+      // 'medium' is honest: the programs library has only pgm.pt.gross_motor
+      // for G80 (CP). Confidence rises to 'high' once we also have an autism
+      // ICD or MACS/CFCS get matching ABA/AAC programs added.
+      expect(['high', 'medium']).toContain(result.overallConfidence);
+    });
+  });
 });

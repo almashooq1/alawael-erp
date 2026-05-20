@@ -333,6 +333,290 @@ const GOAL_TEMPLATES = Object.freeze({
       },
     ],
   },
+
+  // ─── FIM (adults/teens 7+, total 18-126) ──────────────────
+  FIM: {
+    severe: [
+      {
+        domain: DOMAINS.SELF_CARE,
+        title: 'تحسين الاستقلالية في أنشطة الحياة اليومية الأساسية',
+        specific:
+          'الانتقال من الاعتماد الكلي إلى مساعدة بسيطة في 2 من مهام العناية بالذات (الأكل/الاستحمام/ارتداء الملابس) خلال 90 يوماً',
+        measurable: 'متوسط درجة FIM لمهام العناية بالذات (هدف: زيادة ≥10 نقاط)',
+        achievable: 'تأهيل مكثف يومي متعدد التخصصات',
+        relevant: 'الاستقلالية الأساسية تخفف عبء مقدم الرعاية وتعيد الكرامة',
+        timeBoundDays: 90,
+        domainLabel_ar: 'أنشطة الحياة اليومية',
+      },
+      {
+        domain: DOMAINS.MOTOR,
+        title: 'تحقيق انتقال آمن بين الأسطح',
+        specific:
+          'إنجاز الانتقال من السرير إلى الكرسي المتحرك بمساعدة 1 شخص فقط في 80% من المحاولات',
+        measurable: 'مستوى FIM للانتقالات + عدد الانتقالات الآمنة في اليوم',
+        achievable: 'مع تدريب علاج طبيعي + معدات تكيفية',
+        relevant: 'الانتقالات شرط للوصول لكل النشاطات الأخرى',
+        timeBoundDays: 120,
+        domainLabel_ar: 'الانتقالات',
+      },
+    ],
+    moderate: [
+      {
+        domain: DOMAINS.SELF_CARE,
+        title: 'الاستقلالية في الاستحمام وارتداء الملابس',
+        specific: 'الاستحمام مع إعداد البيئة فقط (FIM 5) بدون مساعدة جسدية خلال 60 يوماً',
+        measurable: 'الانتقال من FIM 3-4 إلى FIM 5 في الاستحمام',
+        achievable: 'علاج وظيفي يومي + معدات الحمام التكيفية',
+        relevant: 'النظافة الشخصية المستقلة محورية لجودة الحياة',
+        timeBoundDays: 60,
+        domainLabel_ar: 'العناية بالذات',
+      },
+    ],
+    mild: [
+      {
+        domain: DOMAINS.ADAPTIVE,
+        title: 'العودة إلى الأدوار المنزلية والمجتمعية',
+        specific: 'استئناف 3 أدوار حياتية أساسية (إعداد وجبة بسيطة، تسوّق محدود، التنقل المحلي)',
+        measurable: 'عدد الأدوار المُستأنَفة + استبيان رضا',
+        achievable: 'FIM خفيف — قاعدة قوية للتعميم',
+        relevant: 'إعادة الاندماج الكامل في الحياة',
+        timeBoundDays: 90,
+        domainLabel_ar: 'إعادة الاندماج',
+      },
+    ],
+    modified: [
+      {
+        domain: DOMAINS.MOTOR,
+        title: 'الحفاظ على الاستقلالية مع التكيف البيئي',
+        specific: 'الاستخدام المنتظم للمعدات التكيفية الموصى بها في 90% من الأنشطة المستهدفة',
+        measurable: 'سجل استخدام المعدات + تقييم سلامة دوري',
+        achievable: 'مرحلة صيانة',
+        relevant: 'تجنب التراجع الوظيفي',
+        timeBoundDays: 90,
+        domainLabel_ar: 'الصيانة',
+      },
+    ],
+    independent: [
+      {
+        domain: DOMAINS.SOCIAL,
+        title: 'تعزيز المشاركة المجتمعية والعمل',
+        specific: 'الانخراط في نشاط مجتمعي أو عمل بنسبة ≥80% من الأيام لمدة 12 أسبوعاً',
+        measurable: 'نسبة الحضور + رضا المستفيد',
+        achievable: 'FIM مستقل — جودة حياة هي الهدف',
+        relevant: 'الانتقال من العيادة إلى الحياة الكاملة',
+        timeBoundDays: 90,
+        domainLabel_ar: 'المشاركة المجتمعية',
+      },
+    ],
+  },
+
+  // ─── MACS (Manual Ability levels 1-5 for CP) ──────────────
+  MACS: {
+    1: [
+      {
+        domain: DOMAINS.SELF_CARE,
+        title: 'تعزيز الدقة والسرعة في المهارات اليدوية المتقدمة',
+        specific: 'إنجاز 5 مهام دقيقة جديدة (كتابة، ربط أزرار، استخدام أدوات صغيرة) باستقلالية',
+        measurable: 'عدد المهام المُتقَنة + الوقت اللازم',
+        achievable: 'MACS 1 يدعم كل المهارات اليدوية',
+        relevant: 'بناء مهارات ما قبل المهنية',
+        timeBoundDays: 60,
+        domainLabel_ar: 'الحركة الدقيقة',
+      },
+    ],
+    2: [
+      {
+        domain: DOMAINS.SELF_CARE,
+        title: 'تحسين السرعة وجودة المهام اليدوية',
+        specific: 'إنجاز مهمة كتابة من 3 جمل خلال 5 دقائق بجودة مقروءة (80% من الكلمات واضحة)',
+        measurable: 'نسبة الكلمات الواضحة + الزمن',
+        achievable: 'MACS 2 — كفاءة مع تأخر طفيف',
+        relevant: 'المهارات المدرسية محورية',
+        timeBoundDays: 60,
+        domainLabel_ar: 'الكتابة والتلوين',
+      },
+    ],
+    3: [
+      {
+        domain: DOMAINS.SELF_CARE,
+        title: 'الاستقلالية مع أدوات تكيفية',
+        specific:
+          'استخدام الملعقة المُكيَّفة وأدوات الكتابة السميكة لإنجاز مهام الأكل والكتابة باستقلالية في 70% من المحاولات',
+        measurable: 'نسبة المحاولات الناجحة',
+        achievable: 'MACS 3 يستفيد من التكيّفات',
+        relevant: 'استقلالية يومية محورية',
+        timeBoundDays: 90,
+        domainLabel_ar: 'الأدوات التكيفية',
+      },
+    ],
+    4: [
+      {
+        domain: DOMAINS.COMMUNICATION,
+        title: 'استخدام جهاز AAC للتواصل اليومي',
+        specific: 'تشغيل جهاز AAC والإشارة إلى 5 خيارات أساسية بدون مساعدة في 70% من المحاولات',
+        measurable: 'عدد التواصلات الناجحة يومياً',
+        achievable: 'MACS 4 — وظيفة يدوية محدودة لكنها كافية لـ AAC',
+        relevant: 'التواصل ضرورة لا اختيار',
+        timeBoundDays: 90,
+        domainLabel_ar: 'التواصل البديل',
+      },
+    ],
+    5: [
+      {
+        domain: DOMAINS.SOCIAL,
+        title: 'تأسيس قناة تواصل بديلة (نظرة، إشارة، مفتاح)',
+        specific: 'استخدام نظرة العين أو حركة الرأس للإجابة بنعم/لا على 10 أسئلة يومية',
+        measurable: 'دقة الإجابات وتكرارها',
+        achievable: 'MACS 5 — قدرة يدوية شديدة المحدودية',
+        relevant: 'يحفظ الكرامة ويمنع العزل',
+        timeBoundDays: 120,
+        domainLabel_ar: 'تواصل بديل أساسي',
+      },
+    ],
+  },
+
+  // ─── CFCS (Communication Function levels 1-5 for CP) ──────
+  CFCS: {
+    1: [
+      {
+        domain: DOMAINS.SOCIAL,
+        title: 'توسيع المهارات التواصلية في السياقات المعقدة',
+        specific: 'إجراء محادثة قيادية في موقف اجتماعي جديد (لقاء عائلي، طلب في متجر) لمدة 5 دقائق',
+        measurable: 'مدة المحادثة + نوعية التعبيرات',
+        achievable: 'CFCS 1 يدعم التواصل الكامل',
+        relevant: 'يبني الثقة الاجتماعية المستقبلية',
+        timeBoundDays: 60,
+        domainLabel_ar: 'التواصل المتقدم',
+      },
+    ],
+    2: [
+      {
+        domain: DOMAINS.COMMUNICATION,
+        title: 'تعميم التواصل مع المخاطبين الجدد',
+        specific:
+          'بدء محادثة مع 3 أشخاص غير مألوفين كل أسبوع داخل المركز (موظف جديد، زائر، أخصائي زائر)',
+        measurable: 'عدد المحاولات + معدل النجاح',
+        achievable: 'CFCS 2 يجيد التواصل مع المألوفين فقط',
+        relevant: 'كسر دائرة التواصل مع المألوفين فقط',
+        timeBoundDays: 60,
+        domainLabel_ar: 'تعميم التواصل',
+      },
+    ],
+    3: [
+      {
+        domain: DOMAINS.COMMUNICATION,
+        title: 'تحسين اتساق التواصل وسرعته',
+        specific: 'تقليل زمن الاستجابة من 10 ثوان إلى 4 ثوان في 70% من تفاعلات الجلسة',
+        measurable: 'زمن الاستجابة المتوسط',
+        achievable: 'CFCS 3 — اتساق متقطع',
+        relevant: 'التواصل السريع يفتح فرص اجتماعية ومهنية',
+        timeBoundDays: 90,
+        domainLabel_ar: 'اتساق التواصل',
+      },
+    ],
+    4: [
+      {
+        domain: DOMAINS.COMMUNICATION,
+        title: 'تقييم وتأسيس نظام AAC مناسب',
+        specific: 'استخدام تطبيق AAC على جهاز لوحي للتعبير عن 8 رسائل أساسية باستقلالية',
+        measurable: 'عدد الرسائل المُتقَنة + معدل الاستخدام التلقائي',
+        achievable: 'CFCS 4 — عدم اتساق مع المألوفين يبرر AAC',
+        relevant: 'يثبت التواصل ويرفع المشاركة',
+        timeBoundDays: 120,
+        domainLabel_ar: 'تواصل بديل',
+      },
+    ],
+    5: [
+      {
+        domain: DOMAINS.SOCIAL,
+        title: 'تدريب الأسرة ومقدمي الرعاية على فك شيفرة التواصل',
+        specific:
+          'تدريب 3 من المحيطين (الأم، الأب، المعلمة) على التعرّف على 10 إشارات تواصلية فردية للمستفيد',
+        measurable: 'اختبار قبل/بعد + سجل الاستجابات الناجحة',
+        achievable: 'CFCS 5 — تواصل نادر يستلزم تدريب المحيط',
+        relevant: 'بدون فك الشيفرة، يصبح المستفيد منعزلاً تماماً',
+        timeBoundDays: 60,
+        domainLabel_ar: 'تدريب المحيطين',
+      },
+    ],
+  },
+
+  // ─── SCQ (Social Communication Questionnaire — autism cutoff) ──
+  SCQ: {
+    above_cutoff: [
+      {
+        domain: DOMAINS.SOCIAL,
+        title: 'إحالة فورية لتقييم تشخيصي شامل (ADOS-2 أو ADI-R)',
+        specific: 'إنجاز تحويل لطبيب نفسي/نمائي مختص خلال 14 يوماً مع كل التوثيق الداعم',
+        measurable: 'تاريخ الموعد المُنجَز + التقرير المُستلَم',
+        achievable: 'SCQ ≥15 يستوجب تأكيد تشخيصي',
+        relevant: 'التأخر في التشخيص يفوّت نافذة التدخل المبكر',
+        timeBoundDays: 14,
+        domainLabel_ar: 'تحويل تشخيصي',
+      },
+      {
+        domain: DOMAINS.ADAPTIVE,
+        title: 'بدء برنامج دعم أسري وتثقيفي فوري',
+        specific: 'حضور الأسرة لـ 4 جلسات تثقيفية حول طيف التوحد خلال 30 يوماً',
+        measurable: 'عدد الجلسات + استبيان فهم قبل/بعد',
+        achievable: 'الدعم الأسري المبكر يُحسّن النواتج',
+        relevant: 'الأسرة هي البيئة العلاجية الأساسية',
+        timeBoundDays: 30,
+        domainLabel_ar: 'دعم أسري',
+      },
+    ],
+  },
+
+  // ─── Berg Balance Scale (adults, fall-risk tiers) ─────────
+  BergBalance: {
+    high_fall_risk: [
+      {
+        domain: DOMAINS.MOTOR,
+        title: 'تقليل خطر السقوط الفوري وتأمين البيئة',
+        specific:
+          'إكمال تقييم سلامة المنزل + تركيب مقابض في الحمام + إزالة 3 مخاطر بيئية محددة خلال 14 يوماً',
+        measurable: 'قائمة فحص سلامة المنزل + عدد السقطات شهرياً',
+        achievable: 'Berg ≤20 يستوجب تدخل بيئي عاجل',
+        relevant: 'منع كسور الورك وغيرها — أعلى أولوية',
+        timeBoundDays: 14,
+        domainLabel_ar: 'سلامة بيئية',
+      },
+      {
+        domain: DOMAINS.MOTOR,
+        title: 'تأسيس برنامج توازن مكثف',
+        specific: '5 جلسات أسبوعياً لتدريب التوازن (Otago program) لمدة 12 أسبوعاً',
+        measurable: 'إعادة قياس Berg كل 4 أسابيع',
+        achievable: 'مع التزام الجلسات والمتابعة',
+        relevant: 'استعادة التوازن يخفض خطر السقوط',
+        timeBoundDays: 84,
+        domainLabel_ar: 'تدريب التوازن',
+      },
+    ],
+    medium_fall_risk: [
+      {
+        domain: DOMAINS.MOTOR,
+        title: 'تحسين التوازن المتوسط والمشي الآمن',
+        specific: 'المشي 100 متر باستخدام جهاز مساعد مناسب بدون فقدان التوازن',
+        measurable: 'المسافة + عدد التعثرات',
+        achievable: 'Berg 21-40 يدعم المشي المساعَد',
+        relevant: 'الاستقلالية في التنقل اليومي',
+        timeBoundDays: 60,
+        domainLabel_ar: 'المشي الآمن',
+      },
+    ],
+    low_fall_risk: [
+      {
+        domain: DOMAINS.MOTOR,
+        title: 'الحفاظ على التوازن عبر نشاط بدني منتظم',
+        specific: 'ممارسة نشاط بدني (مشي، يوغا، سباحة) 3 مرات أسبوعياً لمدة 30 دقيقة',
+        measurable: 'سجل النشاط الأسبوعي',
+        achievable: 'Berg ≥41 يدعم النشاط الكامل',
+        relevant: 'الوقاية من التراجع المرتبط بالعمر',
+        timeBoundDays: 90,
+        domainLabel_ar: 'برنامج صيانة',
+      },
+    ],
+  },
 });
 
 // ─── Score → tier mapping helpers ───────────────────────────────
@@ -453,13 +737,26 @@ function interpretScore(score) {
     }
     const bands = measure.interpretation || [];
     const band = bands.find(b => total >= b.range[0] && total <= b.range[1]);
+    // Binary bands in the library don't carry a tier field — derive from
+    // the band index: 1st band = below_cutoff, later bands = above_cutoff /
+    // tiered above. CSI has its own tier values ('low' / 'high'), use those
+    // when present.
+    let tier;
+    if (band && band.tier) {
+      tier = band.tier;
+    } else if (band) {
+      const idx = bands.indexOf(band);
+      tier = idx === 0 ? 'below_cutoff' : 'above_cutoff';
+    } else {
+      tier = 'below_cutoff';
+    }
     return {
       ok: true,
       measureKey: score.measureKey,
       measureNameAr: measure.name_ar,
-      tier: band ? band.tier || 'flagged' : 'below_cutoff',
+      tier,
       tierLabel_ar: band ? band.label_ar : 'تحت الحد',
-      severity: deriveSeverityFromTier(band ? band.tier : null),
+      severity: deriveSeverityFromTier(tier),
       score: total,
     };
   }
@@ -477,10 +774,11 @@ function mapVinelandTier(label_ar) {
 function deriveSeverityFromTier(tier) {
   if (!tier) return 'unknown';
   const s = String(tier).toLowerCase();
-  if (['severe', 'high', 'very_low', '4', '5'].includes(s)) return 'severe';
+  if (['severe', 'high', 'very_low', '4', '5', 'high_fall_risk', 'above_cutoff'].includes(s))
+    return 'severe';
   if (['moderate', 'mild_moderate', 'low', '3', 'medium_fall_risk'].includes(s)) return 'moderate';
   if (['mild', 'modified', 'below_average', '2'].includes(s)) return 'mild';
-  if (['independent', 'minimal', 'average_above', '1', 'low_fall_risk'].includes(s))
+  if (['independent', 'minimal', 'average_above', '1', 'low_fall_risk', 'below_cutoff'].includes(s))
     return 'minimal';
   return 'unknown';
 }
@@ -558,6 +856,20 @@ const TIER_TO_INDICATIONS = Object.freeze({
   'GMFCS::3': ['G80'],
   'GMFCS::4': ['G80'],
   'GMFCS::5': ['G80'],
+  // MACS — manual ability classification for CP
+  'MACS::1': ['G80'],
+  'MACS::2': ['G80'],
+  'MACS::3': ['G80'],
+  'MACS::4': ['G80'],
+  'MACS::5': ['G80'],
+  // CFCS — communication function for CP
+  'CFCS::1': ['G80'],
+  'CFCS::2': ['G80'],
+  'CFCS::3': ['G80'],
+  'CFCS::4': ['G80'],
+  'CFCS::5': ['G80'],
+  // SCQ — autism screening (above cutoff → autism workup)
+  'SCQ::above_cutoff': ['F84.0', 'F84.9'],
 });
 
 function gatherIndications(interpretations, beneficiaryIndications = []) {

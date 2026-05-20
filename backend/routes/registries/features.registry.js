@@ -43,6 +43,7 @@ module.exports = function registerFeatureRoutes(
   const portfolioRoutes = safeRequire('../routes/portfolio.routes');
   const iepRoutes = safeRequire('../routes/iep.routes');
   const familyVisitsRoutes = safeRequire('../routes/family-visits.routes');
+  const fieldTripsRoutes = safeRequire('../routes/field-trips.routes');
   const transportModuleRoutes = safeRequire('../routes/transport-module.routes');
   const transportPublicTrackRoutes = safeRequire('../routes/transport-public-track.routes');
   const schedulingModuleRoutes = safeRequire('../routes/scheduling-module.routes');
@@ -107,6 +108,8 @@ module.exports = function registerFeatureRoutes(
   dualMountAuth(app, 'iep-plan', iepRoutes, authenticate);
   // Wave 201b: Family visit booking (حجز زيارة الأهل لمشاهدة جلسة)
   dualMountAuth(app, 'family-visits', familyVisitsRoutes, authenticate);
+  // Wave 202b: Field trips (الرحلات الميدانية) — consents + ratio enforcement
+  dualMountAuth(app, 'field-trips', fieldTripsRoutes, authenticate);
   logger.info(
     '✅ prompt_04 Beneficiary Management routes mounted: guardians (8 endpoints), disability-assessments (7 endpoints), beneficiary-transfers workflow (6 endpoints), beneficiary-day-attendance rollcall (9 endpoints), beneficiary-sections (7 endpoints), daily-communication (9 endpoints), morning-health-check (7 endpoints), toileting (6 endpoints), beneficiary-meals (6 endpoints), day-rehab-bus-routes (10 endpoints)'
   );

@@ -34,6 +34,11 @@ const CarePlan = require('../models/CarePlan');
 const ClinicalAssessment = require('../models/ClinicalAssessment');
 const Complaint = require('../models/Complaint');
 const PortalNotification = require('../models/PortalNotification');
+// Day-rehab logs the parent gets a parent-scoped view onto (Wave 192). The
+// admin /api/v1/daily-communication routes already serve these via the
+// 'parent' read role, but the parent-portal-v2 router is the canonical
+// surface the parent app talks to, so we re-expose with assertChildAccess.
+const DailyCommunicationLog = require('../models/DailyCommunicationLog');
 // HomeAssignment is the model the therapist uses today to send
 // at-home tasks to the family. Wave 6 surfaces it on the parent
 // side + lets the parent log execution per submission row. The
@@ -327,6 +332,53 @@ router.get('/children/:id/attendance', async (req, res) => {
     });
   } catch (err) {
     return safeError(res, err, 'parent-v2.attendance');
+  }
+});
+
+// ── GET /children/:id/communication-book — Wave 192 ──────────────────────
+// Lists the kid's recent daily-communication entries (دفتر التواصل اليومي).
+// Parent role: scoped via assertChildAccess; only published entries
+// surface (drafts/amended drafts stay internal).
+router.get('/children/:id/communication-book', async (req, res) => {
+  try {
+    const check = await assertChildAccess(req, req.params.id);
+    if (!check.ok) return res.status(check.status).json({ success: false, message: check.msg });
+    const limit = Math.min(60, Math.max(1, parseInt(req.query.limit, 10) || 30));
+    const items = await DailyCommunicationLog.find({
+      beneficiaryId: req.params.id,
+      status: { $in: ['published', 'amended'] },
+    })
+      .sort({ date: -1, createdAt: -1 })
+      .limit(limit)
+      .lean();
+    const unseenCount = items.filter(it => !it.parentSeen).length;
+    res.json({ success: true, items, count: items.length, unseenCount });
+  } catch (err) {
+    return safeError(res, err, 'parent-v2.communicationBook');
+  }
+});
+
+// ── POST /children/:id/communication-book/:entryId/seen — Wave 192 ───────
+// Parent marks a comm-book entry as seen. Mirrors admin /parent-seen but
+// constrains the entry to belong to this child.
+router.post('/children/:id/communication-book/:entryId/seen', async (req, res) => {
+  try {
+    const check = await assertChildAccess(req, req.params.id);
+    if (!check.ok) return res.status(check.status).json({ success: false, message: check.msg });
+    if (!mongoose.isValidObjectId(req.params.entryId)) {
+      return res.status(400).json({ success: false, message: 'معرّف المدخل غير صالح' });
+    }
+    const updated = await DailyCommunicationLog.findOneAndUpdate(
+      { _id: req.params.entryId, beneficiaryId: req.params.id },
+      { parentSeen: true, parentSeenAt: new Date() },
+      { new: true }
+    ).lean();
+    if (!updated) {
+      return res.status(404).json({ success: false, message: 'لم يتم العثور على المدخل' });
+    }
+    res.json({ success: true, data: updated });
+  } catch (err) {
+    return safeError(res, err, 'parent-v2.commSeen');
   }
 });
 

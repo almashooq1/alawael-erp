@@ -221,7 +221,9 @@ therapeuticGoalSchema.virtual('childGoals', {
 
 // ─── Pre-save ───────────────────────────────────────────────────────────────
 
-therapeuticGoalSchema.pre('save', function (next) {
+// Mongoose-9 throw-style pre-save (next param not reliably passed
+// in all paths under modern Kareem); same fix pattern as W210 hooks.
+therapeuticGoalSchema.pre('save', function () {
   if (!this.goalNumber && this.isNew) {
     const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
     const random = Math.random().toString(36).substring(2, 6).toUpperCase();
@@ -254,8 +256,6 @@ therapeuticGoalSchema.pre('save', function (next) {
       this.trend.daysToTarget = Math.ceil((remaining / delta) * daysBetween);
     }
   }
-
-  next();
 });
 
 // ─── Instance Methods ───────────────────────────────────────────────────────

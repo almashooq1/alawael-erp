@@ -645,6 +645,20 @@ measureApplicationSchema.post('save', async function (doc) {
       measureId: doc.measureId,
       newApplicationId: doc._id,
     });
+
+    // W216: auto-update goal currentProgress when a measure with a
+    // numeric score lands. Best-effort, same contract as W214 above.
+    if (typeof doc.totalRawScore === 'number' && Number.isFinite(doc.totalRawScore)) {
+      const goalUpdater = require('../../../services/measureGoalUpdater.service');
+      await goalUpdater.updateGoalsForAdmin({
+        beneficiaryId: doc.beneficiaryId,
+        measureId: doc.measureId,
+        totalRawScore: doc.totalRawScore,
+        applicationId: doc._id,
+        applicationDate: doc.applicationDate,
+        assessorId: doc.assessorId,
+      });
+    }
   } catch (_err) {
     // Never propagate — audit-trail failures must not break primary writes.
   }

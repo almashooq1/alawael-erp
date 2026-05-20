@@ -182,6 +182,21 @@ const measureReassessmentTaskSchema = new mongoose.Schema(
     // migration). Audit-only — does NOT change downstream behavior.
     discoveredLate: { type: Boolean, default: false, index: true },
 
+    // ── Reminder cascade fired-flags (W225) ───────────────────────
+    // Append-only set of phase codes for which reassessmentReminder-
+    // Cascade.dispatch() has already fired the notification. Prevents
+    // duplicate reminders when the cron re-runs over the same task.
+    // Phase transition resets nothing — each phase fires once per task
+    // lifetime.
+    remindersSent: [
+      {
+        phase: { type: String, required: true },
+        sentAt: { type: Date, required: true },
+        recipientCount: Number,
+        _id: false,
+      },
+    ],
+
     // ── Free-form context ─────────────────────────────────────────
     notes: String,
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },

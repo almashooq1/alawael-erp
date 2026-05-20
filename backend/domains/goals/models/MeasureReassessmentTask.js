@@ -175,6 +175,13 @@ const measureReassessmentTaskSchema = new mongoose.Schema(
     breachReviewedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     breachReviewNotes: String,
 
+    // ── Retroactive gap-auditor flag (W224) ───────────────────────
+    // True when the task was created by reassessmentGapAuditor — the
+    // retroactive scanner that catches misses the regular scheduler
+    // didn't generate (e.g. scheduler downtime, data backfill, branch
+    // migration). Audit-only — does NOT change downstream behavior.
+    discoveredLate: { type: Boolean, default: false, index: true },
+
     // ── Free-form context ─────────────────────────────────────────
     notes: String,
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },

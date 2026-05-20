@@ -50,7 +50,7 @@ describe('Wave 206 — assessmentRecommendation routes (HTTP surface)', () => {
 
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
-      expect(res.body.data.engineVersion).toBe('w206.1');
+      expect(res.body.data.engineVersion).toBe('w208.1');
       expect(res.body.data.suggestedGoals.length).toBeGreaterThan(0);
       expect(res.body.data.suggestedPrograms.length).toBeGreaterThan(0);
       expect(res.body.data.refinedByLlm).toBe(false);

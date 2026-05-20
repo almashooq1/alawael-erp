@@ -282,7 +282,7 @@ describe('Wave 206 — assessmentRecommendationEngine', () => {
       expect(result.suggestedSchedule).toBeTruthy();
       expect(result.overallConfidence).toBe('high');
       expect(result.evidenceTrace.length).toBeGreaterThan(0);
-      expect(result.engineVersion).toBe('w206.1');
+      expect(result.engineVersion).toBe('w208.1');
     });
 
     test('empty scores → needs_therapist_review', () => {

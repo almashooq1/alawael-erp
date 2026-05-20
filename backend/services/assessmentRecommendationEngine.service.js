@@ -33,6 +33,7 @@
 
 const measuresLib = require('../rehabilitation-services/rehab-measures-library');
 const programsLib = require('../intelligence/care-plan-programs-library.registry');
+const combinationRules = require('./assessmentCombinationRules.service');
 
 // ─── Domain taxonomy ─────────────────────────────────────────────
 // 7-axis taxonomy used by both goal-generation and schedule-building.
@@ -1119,7 +1120,12 @@ function recommend(input) {
 
   // 2. Build goals from each ok interpretation
   const rawGoals = interpretations.flatMap(buildGoalsFromInterpretation);
-  const goals = deduplicateGoals(rawGoals);
+  // 2b. W208 — combination rules layer: cross-measure goals that
+  //     only fire when interpretations intersect in clinically
+  //     meaningful ways (e.g. GMFCS-5 + CFCS-5 → urgent AAC).
+  const combinationResult = combinationRules.applyCombinationRules(interpretations);
+  const allRawGoals = [...rawGoals, ...combinationResult.goals];
+  const goals = deduplicateGoals(allRawGoals);
 
   // 3. Select programs based on indications + safety + age
   const programs = selectPrograms({ interpretations, beneficiary });
@@ -1147,8 +1153,9 @@ function recommend(input) {
     flags,
     overallConfidence,
     evidenceTrace,
+    matchedCombinationRules: combinationResult.matchedRules,
     generatedAt: new Date().toISOString(),
-    engineVersion: 'w206.1',
+    engineVersion: 'w208.1',
   };
 }
 

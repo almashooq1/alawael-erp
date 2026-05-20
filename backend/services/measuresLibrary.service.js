@@ -24,8 +24,20 @@ const M = {
       return mongoose.model('Measure');
     } catch {
       try {
-        const schema = require('../domains/goals/models/Measure');
+        require('../domains/goals/models/Measure');
         return mongoose.model('Measure');
+      } catch {
+        return null;
+      }
+    }
+  },
+  MeasureRevision: () => {
+    try {
+      return mongoose.model('MeasureRevision');
+    } catch {
+      try {
+        require('../domains/goals/models/MeasureRevision');
+        return mongoose.model('MeasureRevision');
       } catch {
         return null;
       }
@@ -162,7 +174,83 @@ class MeasuresLibrarySvc {
 
     const doc = new Measure({ ...data, createdBy: actorId });
     await doc.save();
+
+    // W210: write a 'create' revision (post-save hook only handles edits)
+    const MeasureRevision = M.MeasureRevision();
+    if (MeasureRevision) {
+      try {
+        await MeasureRevision.create({
+          measureCode: doc.code,
+          toVersion: doc.version || null,
+          changeType: 'create',
+          revisedBy: actorId || null,
+          revisedAt: new Date(),
+        });
+      } catch (err) {
+        logger.warn('[MeasuresLibrary] revision write failed on create: %s', err.message);
+      }
+    }
     return doc.toObject();
+  }
+
+  // ───────────────────────────────────────────────────────────────
+  // W210: Lifecycle — publish / deprecate / retire
+  // ───────────────────────────────────────────────────────────────
+
+  async publish(id, actorId) {
+    const Measure = M.Measure();
+    if (!Measure) throw new Error('Measure model unavailable');
+    const filter = mongoose.Types.ObjectId.isValid(id) ? { _id: id } : { code: id };
+    const doc = await Measure.findOne(filter);
+    if (!doc) return null;
+    await doc.publish(actorId);
+    return doc.toObject();
+  }
+
+  async deprecate(id, actorId, { supersededBy, reason } = {}) {
+    const Measure = M.Measure();
+    if (!Measure) throw new Error('Measure model unavailable');
+    const filter = mongoose.Types.ObjectId.isValid(id) ? { _id: id } : { code: id };
+    const doc = await Measure.findOne(filter);
+    if (!doc) return null;
+    await doc.deprecate(actorId, { supersededBy, reason });
+    return doc.toObject();
+  }
+
+  async retire(id, actorId, { reason } = {}) {
+    const Measure = M.Measure();
+    if (!Measure) throw new Error('Measure model unavailable');
+    const filter = mongoose.Types.ObjectId.isValid(id) ? { _id: id } : { code: id };
+    const doc = await Measure.findOne(filter);
+    if (!doc) return null;
+    await doc.retire(actorId, { reason });
+    return doc.toObject();
+  }
+
+  // ───────────────────────────────────────────────────────────────
+  // W210: Eligibility — for Smart Engine + UI selectors
+  // ───────────────────────────────────────────────────────────────
+
+  async eligibleFor(beneficiary, opts = {}) {
+    const Measure = M.Measure();
+    if (!Measure) return [];
+    return Measure.findEligibleFor(beneficiary, opts);
+  }
+
+  async listRevisions(measureCode, { limit = 50 } = {}) {
+    const MeasureRevision = M.MeasureRevision();
+    if (!MeasureRevision) return [];
+    return MeasureRevision.find({ measureCode })
+      .sort({ revisedAt: -1 })
+      .limit(limit)
+      .lean()
+      .catch(() => []);
+  }
+
+  async dueForReview() {
+    const Measure = M.Measure();
+    if (!Measure) return [];
+    return Measure.findDueForReview();
   }
 
   // ───────────────────────────────────────────────────────────────

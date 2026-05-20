@@ -17,7 +17,7 @@ module.exports = {
       exec_mode: 'fork',
       env: {
         NODE_ENV: 'production',
-        PORT: 3001,
+        PORT: 5000,
         DISABLE_REDIS: 'false',
         REDIS_ENABLED: 'true',
         // Redis credentials MUST be set via .env or secrets manager — never hardcode

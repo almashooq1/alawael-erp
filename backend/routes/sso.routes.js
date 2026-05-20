@@ -417,10 +417,22 @@ router.post('/refresh-token', async (req, res) => {
         message: 'refresh token is required',
       });
     }
+    // W205j: result now includes a rotated refreshToken — clients MUST
+    // store the new one and discard the old. Reusing the old will trigger
+    // reuse detection and kill the session.
     const result = await ssoService.refreshAccessToken(sessionId, refreshToken);
     res.json({ success: true, data: result });
   } catch (error) {
     logger.warn('Token refresh failed:', error.message);
+    // W205j: refresh-reuse gets a stronger error code so clients can
+    // surface "please log in again" rather than retrying.
+    if (error.code === 'REFRESH_REUSE') {
+      return res.status(401).json({
+        success: false,
+        error: 'refresh_reuse',
+        message: 'Refresh token reuse detected — please log in again',
+      });
+    }
     res.status(401).json({
       success: false,
       error: 'unauthorized',
@@ -683,6 +695,120 @@ router.get('/oauth2/userinfo', verifySSOToken(), async (req, res) => {
 router.get('/.well-known/openid-configuration', (_req, res) => {
   res.json(oAuthService.getOpenIDConfiguration());
 });
+
+/**
+ * GET/POST /api/sso/oauth2/logout — OIDC RP-initiated logout (W205k).
+ *
+ * Per OIDC spec § "RP-Initiated Logout":
+ *   - `id_token_hint` (required for safe redirect): a previously-issued
+ *     id_token. We use it to identify the session to terminate.
+ *   - `post_logout_redirect_uri` (optional): where to send the user
+ *     after logout. Must be in the allow-list to prevent open-redirect.
+ *   - `state` (optional): echoed back on the redirect.
+ *
+ * Implementation: verify id_token, extract sub (=userId) + sessionId
+ * (we include sessionId in our id_tokens — non-standard but useful),
+ * end the session, then 302 to post_logout_redirect_uri or return JSON.
+ */
+async function handleOidcLogout(req, res) {
+  try {
+    const idTokenHint = req.query.id_token_hint || req.body?.id_token_hint;
+    const postLogoutRedirectUri =
+      req.query.post_logout_redirect_uri || req.body?.post_logout_redirect_uri;
+    const state = req.query.state || req.body?.state;
+
+    let userId = null;
+    let sessionIdToEnd = null;
+    if (idTokenHint) {
+      try {
+        const decoded = ssoService._verifyTokenAnyAlg(idTokenHint);
+        userId = decoded.sub || decoded.userId || null;
+        sessionIdToEnd = decoded.sessionId || null;
+      } catch (e) {
+        // id_token_hint is OPTIONAL on logout per OIDC spec; we don't
+        // hard-fail here. If the caller has an SSO session cookie we
+        // can still use that.
+        logger.debug('[oidc-logout] id_token_hint invalid:', e.message);
+      }
+    }
+
+    // If we couldn't get a sessionId from the hint, fall back to the
+    // current authenticated session (when present).
+    if (!sessionIdToEnd && req.headers.authorization) {
+      try {
+        const token = req.headers.authorization.replace(/^Bearer\s+/, '');
+        const decoded = ssoService._verifyTokenAnyAlg(token);
+        sessionIdToEnd = decoded.sessionId || null;
+        userId = userId || decoded.userId || decoded.sub || null;
+      } catch (_e) {
+        /* no current session — that's fine, treat as no-op logout */
+      }
+    }
+
+    if (sessionIdToEnd) {
+      try {
+        await ssoService.endSession(sessionIdToEnd);
+        logger.info(`[oidc-logout] session ${sessionIdToEnd} ended (user=${userId})`);
+      } catch (e) {
+        logger.warn('[oidc-logout] endSession failed:', e.message);
+      }
+    }
+
+    // Resolve post-logout redirect against the allow-list
+    if (postLogoutRedirectUri) {
+      try {
+        const parsed = new URL(String(postLogoutRedirectUri));
+        if (!['http:', 'https:'].includes(parsed.protocol)) {
+          return res.status(400).json({
+            success: false,
+            error: 'invalid_request',
+            message: 'post_logout_redirect_uri must use http or https',
+          });
+        }
+        const allowedHosts = (
+          process.env.OAUTH_ALLOWED_REDIRECT_HOSTS ||
+          process.env.CORS_ORIGINS ||
+          process.env.FRONTEND_URL ||
+          'localhost'
+        )
+          .split(',')
+          .map(s => {
+            try {
+              return new URL(s.trim().startsWith('http') ? s.trim() : `https://${s.trim()}`)
+                .hostname;
+            } catch {
+              return s.trim();
+            }
+          })
+          .filter(Boolean);
+        if (!allowedHosts.includes(parsed.hostname) && parsed.hostname !== 'localhost') {
+          return res.status(400).json({
+            success: false,
+            error: 'invalid_request',
+            message: 'post_logout_redirect_uri hostname is not allowed',
+          });
+        }
+        if (state) {
+          parsed.searchParams.set('state', String(state));
+        }
+        return res.redirect(parsed.toString());
+      } catch {
+        return res.status(400).json({
+          success: false,
+          error: 'invalid_request',
+          message: 'post_logout_redirect_uri is not a valid URL',
+        });
+      }
+    }
+
+    res.json({ success: true, message: 'Logged out' });
+  } catch (error) {
+    safeError(res, error, 'OIDC logout failed');
+  }
+}
+
+router.get('/oauth2/logout', handleOidcLogout);
+router.post('/oauth2/logout', handleOidcLogout);
 
 /**
  * GET /api/sso/.well-known/jwks.json

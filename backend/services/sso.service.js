@@ -236,6 +236,11 @@ class SSOService {
       const tokens = this.generateTokens(userId, userPayload, sessionId);
       session.tokens = tokens;
 
+      // W205j: track the active refresh-token jti for rotation. We persist
+      // just the latest jti on the session — old jtis become invalid.
+      const refreshDecoded = jwt.decode(tokens.refreshToken);
+      session.activeRefreshJti = refreshDecoded?.jti || null;
+
       await this._store(
         `session:${sessionId}`,
         session,
@@ -322,7 +327,17 @@ class SSOService {
   }
 
   /**
-   * Refresh access token using a valid refresh token.
+   * Refresh tokens. W205j adds single-use semantics + reuse detection:
+   *
+   *   - The presented refresh token's `jti` must match `session.activeRefreshJti`.
+   *   - On success, a NEW refresh token is minted with a fresh jti, the
+   *     session's activeRefreshJti is updated, and the new pair is returned.
+   *   - If the presented jti does NOT match (i.e. the caller is using a
+   *     refresh token that's already been rotated out), we treat this as
+   *     token theft: the whole session is killed and we throw.
+   *
+   *   This is the standard OAuth refresh-token-rotation pattern (RFC 6749
+   *   §10.4) and lets us detect refresh-token theft.
    */
   async refreshAccessToken(sessionId, refreshToken) {
     let decoded;
@@ -335,7 +350,6 @@ class SSOService {
       throw new Error('Invalid token type');
     }
 
-    // If caller didn't pass sessionId, fall back to the one inside the token
     const effectiveSessionId = sessionId || decoded.sessionId;
     if (!effectiveSessionId) {
       throw new Error('Session id missing');
@@ -349,13 +363,33 @@ class SSOService {
       throw new Error('Session not found');
     }
 
+    // W205j: reuse detection. If the presented jti is not the active one,
+    // someone is replaying an old refresh — kill the whole session.
+    if (session.activeRefreshJti && decoded.jti && session.activeRefreshJti !== decoded.jti) {
+      logger.warn(
+        `[sso] refresh-token reuse detected for session ${effectiveSessionId} — revoking entire session`
+      );
+      await this.endSession(effectiveSessionId);
+      const err = new Error('Refresh token reuse detected — session revoked');
+      err.code = 'REFRESH_REUSE';
+      throw err;
+    }
+
+    // Rotate: issue a new access + a new refresh, retire the old jti.
     const newAccessToken = this.generateAccessToken(
       session.userId,
       session.userPayload,
       effectiveSessionId
     );
+    const newRefreshToken = this.generateRefreshToken(session.userId, effectiveSessionId);
+    const newRefreshDecoded = jwt.decode(newRefreshToken);
+
     session.tokens.accessToken = newAccessToken;
+    session.tokens.refreshToken = newRefreshToken;
+    session.activeRefreshJti = newRefreshDecoded?.jti || null;
     session.lastActivity = Date.now();
+    session.refreshCount = (session.refreshCount || 0) + 1;
+
     await this._store(
       `session:${effectiveSessionId}`,
       session,
@@ -365,6 +399,7 @@ class SSOService {
     logger.info(`Access token refreshed for session: ${effectiveSessionId}`);
     return {
       accessToken: newAccessToken,
+      refreshToken: newRefreshToken,
       expiresIn: Math.floor(this.SESSION_TIMEOUT / SECONDS),
       tokenType: 'Bearer',
     };
@@ -441,25 +476,38 @@ class SSOService {
 
   generateTokens(userId, userPayload, sessionId) {
     const accessToken = this.generateAccessToken(userId, userPayload, sessionId);
-
-    // Refresh tokens stay HS256 — they never leave our trust boundary and
-    // never get verified by third parties. Using HS256 avoids a costly
-    // asymmetric sign on every refresh.
-    const refreshExpiresInSec = Math.floor(this.REFRESH_TOKEN_TIMEOUT / SECONDS);
-    const refreshToken = jwt.sign({ userId, sessionId, type: 'refresh' }, this.JWT_SECRET, {
-      expiresIn: refreshExpiresInSec,
-      algorithm: 'HS256',
-    });
+    const refreshToken = this.generateRefreshToken(userId, sessionId);
 
     const accessExpiresInSec = Math.floor(this.SESSION_TIMEOUT / SECONDS);
     const { secret, options } = getSigningOptions(accessExpiresInSec);
+    // W205k: include sessionId in id_token so the OIDC logout endpoint can
+    // identify which session to terminate from the id_token_hint param.
     const idToken = jwt.sign(
-      { sub: userId, aud: 'sso-client', iss: 'sso-server' },
+      { sub: userId, aud: 'sso-client', iss: 'sso-server', sessionId },
       secret || this.JWT_SECRET,
       options
     );
 
     return { accessToken, refreshToken, idToken };
+  }
+
+  /**
+   * Generate a refresh token carrying a unique `jti`. The jti is what
+   * makes refresh-token rotation (W205j) possible — we track which
+   * jtis are still valid for a session, so reusing a rotated refresh
+   * token is detectable.
+   *
+   * Refresh tokens stay HS256 — they never leave our trust boundary and
+   * never get verified by third parties. Using HS256 avoids a costly
+   * asymmetric sign on every refresh.
+   */
+  generateRefreshToken(userId, sessionId) {
+    const refreshExpiresInSec = Math.floor(this.REFRESH_TOKEN_TIMEOUT / SECONDS);
+    const jti = crypto.randomBytes(16).toString('hex');
+    return jwt.sign({ userId, sessionId, type: 'refresh', jti }, this.JWT_SECRET, {
+      expiresIn: refreshExpiresInSec,
+      algorithm: 'HS256',
+    });
   }
 
   generateAccessToken(userId, userPayload, sessionId) {

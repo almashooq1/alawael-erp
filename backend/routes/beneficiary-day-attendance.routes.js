@@ -31,7 +31,30 @@ const { authenticateToken, requireRole } = require('../middleware/auth');
 
 const BeneficiaryDayAttendance = require('../models/BeneficiaryDayAttendance');
 const Beneficiary = require('../models/Beneficiary');
+const BeneficiarySection = require('../models/BeneficiarySection');
 const safeError = require('../utils/safeError');
+
+/**
+ * Lookup the active section a beneficiary is enrolled in.
+ * Returns { sectionId, classroomId } or empty object when not assigned.
+ * Failures are logged but do not block check-in — auto-link is best-effort.
+ */
+async function findActiveSection(beneficiaryId) {
+  try {
+    const section = await BeneficiarySection.findOne({
+      beneficiaryIds: beneficiaryId,
+      status: 'active',
+    })
+      .select('_id classroomId')
+      .lean();
+    if (!section) return {};
+    const out = { sectionId: section._id };
+    if (section.classroomId) out.classroomId = section.classroomId;
+    return out;
+  } catch {
+    return {};
+  }
+}
 
 router.use(authenticateToken);
 
@@ -205,6 +228,12 @@ router.post('/check-in', requireRole(MARK_ROLES), async (req, res) => {
     if (typeof arrivedByBus === 'boolean') update.arrivedByBus = arrivedByBus;
     if (busRouteId && mongoose.isValidObjectId(busRouteId)) update.busRouteId = busRouteId;
     if (notes) update.notes = String(notes).slice(0, 500);
+
+    // Auto-link: if caller didn't pass classroomId, look up active section enrollment.
+    if (!update.classroomId) {
+      const auto = await findActiveSection(beneficiaryId);
+      if (auto.classroomId) update.classroomId = auto.classroomId;
+    }
 
     const row = await BeneficiaryDayAttendance.findOneAndUpdate({ beneficiaryId, date }, update, {
       new: true,

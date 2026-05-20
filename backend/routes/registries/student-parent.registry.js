@@ -20,7 +20,7 @@
  */
 module.exports = function registerStudentParentRoutes(
   app,
-  { safeRequire, dualMount, safeMount, logger }
+  { safeRequire, dualMount, dualMountAuth, safeMount, logger, authenticate }
 ) {
   // ══════════════════════════════════════════════════════════════════════════
   // ── Imports ─────────────────────────────────────────────────────────────

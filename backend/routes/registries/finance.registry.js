@@ -18,7 +18,7 @@
  */
 module.exports = function registerFinanceRoutes(
   app,
-  { safeRequire, dualMount, safeMount, logger }
+  { safeRequire, dualMount, dualMountAuth, safeMount, logger, authenticate }
 ) {
   // ── Finance Routes (المالية) ──────────────────────────────────────────
   const financeRoutes = safeRequire('../routes/finance.routes.unified');

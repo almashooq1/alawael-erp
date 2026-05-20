@@ -8,6 +8,87 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [Unreleased] — 2026-05-20 — Auth bypass closure on 17 domain routes
+
+A web-admin probe to diagnose why the COO Executive Dashboard wouldn't
+load (root cause: `NEXT_PUBLIC_API_URL` pointed at port 3002, backend
+runs on 3001) surfaced a wider systemic issue. A sweep of all 359
+`dualMount` paths found **17 domain routers that returned 200 with real
+data anonymously** — the worst returning full CARS-2 clinical scores +
+Arabic observations from `/api/v1/assessments`.
+
+### Root cause
+
+`dualMount(app, path, handler)` in `routes/_registry.js` does two
+`app.use()` calls (one for `/api/`, one for `/api/v1/`) but applies
+**no middleware**. The original assumption was that each underlying
+router file would import `authenticate` itself — but the DDD
+`domains/*/routes/*.routes.js` files never did. Result: every mount via
+plain `dualMount` shipped with zero auth at the route boundary.
+
+This was missed because integration tests inject a mock admin user via
+`startup/middleware.js` in test mode (see comment in
+`admin-routes-auth-wiring.test.js`), so runtime no-auth probes inside
+Jest are inert — the bug only manifests against the live server.
+
+### Added
+
+- **`dualMountAuth(app, path, handler)`** helper in
+  `routes/_registry.js` — wraps `dualMount` with `authenticate`
+  middleware on both `/api/` and `/api/v1/` paths. Threaded through the
+  helpers bundle to all 8 sub-registries (features, phases, fleet,
+  education, finance, government, clinical-assessment, clinical-therapy,
+  hr, documents, communication, student-parent) so the same pattern is
+  available everywhere.
+- **`__tests__/dual-mount-auth-locked.test.js`** — static guard that
+  scans the 4 active registry files and asserts the 17 converted paths
+  remain mounted via `dualMountAuth` (or a router with verified
+  internal `authenticate`). 19/19 pass. Modelled on
+  `admin-routes-auth-wiring.test.js` (text-scan, no app boot).
+- **`memory/project_auth_bypass_close_2026-05-20.md`** — agent memory
+  documenting the dualMount/dualMountAuth distinction, the helper-bundle
+  threading gotcha, the 3 web-admin path mismatches (audit-trail,
+  goal-suggestions, measure-recommendations), and the probe script
+  recipe for future audits.
+
+### Changed
+
+- **17 mounts converted to `dualMountAuth`**: assessments, care-plans,
+  dashboards, hr, research, sessions, therapy-sessions, reports,
+  system-settings, rehab-templates, form-templates, programs, tasks,
+  tele-rehab, ar-vr, icf-assessments, approvals, audit-logs.
+- **2 new parallel mounts to match web-admin's expectations**:
+  `/api/v1/audit-trail` → same handler as `/api/v1/audit-trail-enhanced`;
+  `/api/v1/goal-suggestions` → same handler as
+  `/api/v1/rehab/goal-suggestions`. Both gated on `authenticate`.
+
+### Verification
+
+- Re-probe of all 352 `dualMount` paths: **0 routes** return 200 without
+  a token (was 17).
+- `npm run test:sprint`: **2322/2322 tests** pass (after one expected
+  CI-paths-trigger fix that flagged the new test file).
+- `npm run lint:duplication` (Wave 93/G1 anti-duplication guard):
+  clean, 2101 files scanned.
+- `apps/web-admin && npm run typecheck`: clean, 0 TypeScript errors.
+
+### CI
+
+- Added `__tests__/dual-mount-auth-locked.test.js` to the
+  `test:sprint` script in `package.json` AND to the
+  `paths:` block (push + pull_request) in
+  `.github/workflows/sprint-tests.yml` so the new guard runs in CI
+  whenever it changes.
+
+### Commits
+
+- `501420d66` — fix(routes): close auth bypass on 17 domain routes + thread dualMountAuth
+- `9cfdb9205` — test(guard): lock dualMountAuth on 17 auth-required routes
+- `8c232846d` — chore(routes): expose dualMountAuth + authenticate to all sub-registries
+- `ae8f34126` — ci: add dual-mount-auth-locked to sprint-tests.yml path triggers
+
+---
+
 ## [Unreleased] — 2026-05-19 — Test-infra hygiene + audit hooks activated
 
 Multi-thread test-infrastructure session. Headline numbers:

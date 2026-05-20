@@ -27,6 +27,10 @@ const engine = require('../services/assessmentRecommendationEngine.service');
 const llmModule = require('../services/assessmentRecommendationLlm.service');
 const safeError = require('../utils/safeError');
 
+// Register the bundle model so `mongoose.model('AssessmentRecommendationBundle')`
+// resolves regardless of which path first touches the route.
+require('../models/AssessmentRecommendationBundle');
+
 // LLM refiner is bound once at module load. If no Anthropic client
 // has been registered on the global app context, the factory returns
 // null and we serve deterministic-only output.
@@ -280,6 +284,39 @@ router.post('/recommend/accept', async (req, res) => {
     });
     await carePlanDoc.save();
 
+    // W206d — persist the bundle for history view (best-effort, never blocks)
+    let bundleId = null;
+    try {
+      const BundleModel = mongoose.model('AssessmentRecommendationBundle');
+      const bundleDoc = await BundleModel.create({
+        beneficiary: new mongoose.Types.ObjectId(beneficiaryId),
+        therapist: effectiveTherapist,
+        branch:
+          branchId && mongoose.Types.ObjectId.isValid(branchId)
+            ? new mongoose.Types.ObjectId(branchId)
+            : null,
+        scoresInput: req.body.scoresInput || null,
+        beneficiaryContext: req.body.beneficiaryContext || null,
+        bundle: req.body.bundle || {
+          acceptedGoals,
+          acceptedPrograms,
+        },
+        acceptedGoalCount: createdGoals.length,
+        acceptedProgramCount: acceptedPrograms.length,
+        createdGoalIds: createdGoals.map(g => g._id),
+        carePlan: carePlanDoc._id,
+        engineVersion: req.body.engineVersion || 'w206.1',
+        refinedByLlm: Boolean(req.body.refinedByLlm),
+        overallConfidence: req.body.overallConfidence || 'needs_therapist_review',
+      });
+      bundleId = bundleDoc._id;
+    } catch (bundleErr) {
+      // History is convenience, not core — log + continue
+      if (req.log && req.log.warn) {
+        req.log.warn(`[w206d] bundle persistence failed: ${bundleErr.message}`);
+      }
+    }
+
     return res.json({
       success: true,
       data: {
@@ -287,10 +324,81 @@ router.post('/recommend/accept', async (req, res) => {
         carePlanId: carePlanDoc._id,
         carePlanNumber: carePlanDoc.planNumber,
         goalCount: createdGoals.length,
+        bundleId,
       },
     });
   } catch (err) {
     return safeError(res, err, 'assessment_recommend_accept_failed');
+  }
+});
+
+// ─── GET /history/:beneficiaryId — Wave 206d ──────────────────
+
+router.get('/history/:beneficiaryId', async (req, res) => {
+  try {
+    const { beneficiaryId } = req.params;
+    const { limit = 20, skip = 0 } = req.query;
+    if (!mongoose.Types.ObjectId.isValid(beneficiaryId)) {
+      return res
+        .status(400)
+        .json({ success: false, message: 'beneficiaryId must be a valid ObjectId' });
+    }
+    const BundleModel = mongoose.model('AssessmentRecommendationBundle');
+    const lim = Math.min(Math.max(Number(limit) || 20, 1), 100);
+    const skp = Math.max(Number(skip) || 0, 0);
+
+    const [items, total] = await Promise.all([
+      BundleModel.find({ beneficiary: beneficiaryId })
+        .sort({ createdAt: -1 })
+        .limit(lim)
+        .skip(skp)
+        .lean(),
+      BundleModel.countDocuments({ beneficiary: beneficiaryId }),
+    ]);
+
+    return res.json({
+      success: true,
+      data: {
+        items: items.map(b => ({
+          _id: b._id,
+          createdAt: b.createdAt,
+          therapist: b.therapist,
+          acceptedGoalCount: b.acceptedGoalCount,
+          acceptedProgramCount: b.acceptedProgramCount,
+          carePlan: b.carePlan,
+          createdGoalIds: b.createdGoalIds,
+          engineVersion: b.engineVersion,
+          refinedByLlm: b.refinedByLlm,
+          overallConfidence: b.overallConfidence,
+          scoresInput: b.scoresInput,
+          // bundle is large — only include on detail fetch
+        })),
+        total,
+        limit: lim,
+        skip: skp,
+      },
+    });
+  } catch (err) {
+    return safeError(res, err, 'assessment_history_failed');
+  }
+});
+
+// ─── GET /history/bundle/:bundleId — single bundle detail ─────
+
+router.get('/history/bundle/:bundleId', async (req, res) => {
+  try {
+    const { bundleId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(bundleId)) {
+      return res.status(400).json({ success: false, message: 'bundleId must be a valid ObjectId' });
+    }
+    const BundleModel = mongoose.model('AssessmentRecommendationBundle');
+    const doc = await BundleModel.findById(bundleId).lean();
+    if (!doc) {
+      return res.status(404).json({ success: false, message: 'bundle_not_found' });
+    }
+    return res.json({ success: true, data: doc });
+  } catch (err) {
+    return safeError(res, err, 'assessment_history_detail_failed');
   }
 });
 

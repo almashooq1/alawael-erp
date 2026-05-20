@@ -225,4 +225,20 @@ describe('Wave 206 — assessmentRecommendation routes (HTTP surface)', () => {
       expect(res.status).toBe(400);
     });
   });
+
+  // ─── W206d — GET /history HTTP-surface tests ─────────────────
+  describe('GET /history/:beneficiaryId', () => {
+    test('invalid beneficiaryId → 400', async () => {
+      const app = makeApp();
+      const res = await request(app).get('/history/not-an-objectid');
+      expect(res.status).toBe(400);
+      expect(res.body.message).toMatch(/ObjectId/);
+    });
+
+    test('invalid bundleId on detail endpoint → 400', async () => {
+      const app = makeApp();
+      const res = await request(app).get('/history/bundle/not-an-objectid');
+      expect(res.status).toBe(400);
+    });
+  });
 });

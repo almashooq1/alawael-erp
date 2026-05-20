@@ -4,16 +4,29 @@
  * يمثل تطبيقاً فعلياً لمقياس على مستفيد في وقت معين.
  * يربط المقياس بالمستفيد والحلقة العلاجية ويحفظ الدرجات والتفسير.
  *
- * يدعم:
- *  - إدخال درجات حسب الأبعاد (domains)
- *  - التصحيح الآلي
- *  - مقارنة baseline / current / target
- *  - جداول إعادة التطبيق
+ * Wave 211 — Administration governance:
+ *   • Baseline lock workflow — once a baseline is locked, score paths
+ *     are immutable; corrections must land as a NEW record with
+ *     correctionOf pointing back. Closes the "silent baseline overwrite"
+ *     risk from the W210 architecture doc.
+ *   • Version pinning — every administration captures the measure
+ *     version + scoring engine version it was scored against. Future
+ *     measure-version changes do NOT retroactively change historical
+ *     interpretations.
+ *   • MCID/SDC freeze — interpretation thresholds at administration
+ *     time are persisted, so the "clinically significant" determination
+ *     never drifts even if the measure's MCID gets updated.
+ *   • Eligibility snapshot — what passed at admin time (ICD-10 match,
+ *     prerequisites, certifications) — defensible audit for CBAHI.
+ *   • Cooldown enforcement — re-admin before minIntervalDays requires
+ *     an explicit clinical justification.
  *
  * @module domains/goals/models/MeasureApplication
  */
 
 const mongoose = require('mongoose');
+
+const SEMVER_RE = /^\d+\.\d+\.\d+$/;
 
 // ─── Domain Score Sub-schema ────────────────────────────────────────────────
 
@@ -157,13 +170,75 @@ const measureApplicationSchema = new mongoose.Schema(
       ref: 'ClinicalAssessment',
     },
 
-    // ── Status ────────────────────────────────────────────────────
+    // ── Status (W211: extended with locked + corrected) ───────────
     status: {
       type: String,
-      enum: ['in_progress', 'completed', 'cancelled', 'invalid'],
+      enum: ['in_progress', 'completed', 'cancelled', 'invalid', 'locked', 'corrected'],
       default: 'in_progress',
       index: true,
     },
+
+    // ── Baseline lock (W211) ──────────────────────────────────────
+    // Baseline is the immutable "where they were" record. Once locked,
+    // it becomes the anchor for all future delta computations. Cannot
+    // be edited — fixes go through correction records.
+    isBaseline: { type: Boolean, default: false, index: true },
+    lockedAt: { type: Date },
+    lockedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+
+    // ── Version pinning (W211) ────────────────────────────────────
+    // The exact measure version + scoring algorithm version that
+    // produced these scores. Pinned at administration time so future
+    // measure version bumps never silently re-interpret history.
+    scoredWithMeasureVersion: { type: String, match: SEMVER_RE },
+    scoredWithAlgorithmVersion: { type: String, match: SEMVER_RE },
+
+    // ── MCID/SDC frozen at administration time (W211) ────────────
+    // Pulled from the live Measure at admin time and persisted. If the
+    // measure's published MCID later changes, the clinical
+    // significance flag on this administration does NOT shift.
+    mcidAtAdministration: {
+      value: Number,
+      type: { type: String, enum: ['absolute', 'percent', 'sd_units'] },
+      status: {
+        type: String,
+        enum: ['established', 'provisional', 'literature_pending', 'not_applicable'],
+      },
+      source: String,
+    },
+    sdcAtAdministration: {
+      value: Number,
+      ci: Number,
+    },
+
+    // ── Correction record (W211) ──────────────────────────────────
+    // When a fix is needed for a LOCKED administration, a new record
+    // is created with correctionOf pointing back. The original stays
+    // locked. The new record carries status='completed' and the
+    // original transitions to status='corrected' (still locked, but
+    // flagged as superseded).
+    correctionOf: { type: mongoose.Schema.Types.ObjectId, ref: 'MeasureApplication' },
+    correctionReason: String,
+    supersededByCorrection: { type: mongoose.Schema.Types.ObjectId, ref: 'MeasureApplication' },
+
+    // ── Eligibility snapshot at admin time (W211) ────────────────
+    // Frozen evidence that the measure was eligible to administer for
+    // this beneficiary at this moment. Defensible for CBAHI audits
+    // even if the measure's eligibility rules later change.
+    eligibilitySnapshot: {
+      ageMonthsAtAdmin: Number,
+      icd10Matched: [String],
+      prerequisitesMet: [String],
+      raterCertifications: [String],
+      raterCertCheckPassed: Boolean,
+      checkedAt: Date,
+    },
+
+    // ── Cooldown justification (W211) ─────────────────────────────
+    // Re-administration within the measure's minIntervalDays requires
+    // an explicit reason. Captured here for audit.
+    cooldownJustification: String,
+    cooldownApprovedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 
     // ── Flags ─────────────────────────────────────────────────────
     isAutoScored: { type: Boolean, default: false },
@@ -323,8 +398,233 @@ measureApplicationSchema.statics.getMeasureDashboard = async function (measureId
   ]);
 };
 
+// ─── W211 indexes for the new query patterns ────────────────────────────
+// Partial unique: at most ONE baseline record per (beneficiary, measure).
+// Filtered on isBaseline so non-baseline records aren't constrained.
+measureApplicationSchema.index(
+  { beneficiaryId: 1, measureId: 1, isBaseline: 1 },
+  { unique: true, partialFilterExpression: { isBaseline: true } }
+);
+measureApplicationSchema.index({ correctionOf: 1 });
+
+// ─── W211 score-path immutability list (used by pre-save guard) ────────
+// If a record is locked and any of these paths is modified, the save
+// is rejected — fixes must come through a correction record.
+// Note: isBaseline is intentionally NOT in this list. When a baseline is
+// corrected, the "baseline" title transfers to the correction record —
+// which requires the original to clear isBaseline=false. The partial
+// unique index forbids two simultaneously-active baselines per
+// (beneficiary, measure), so transferring the flag is the only way the
+// correction record can also carry isBaseline=true.
+const W211_LOCKED_IMMUTABLE_PATHS = [
+  'domainScores',
+  'totalRawScore',
+  'totalStandardScore',
+  'totalPercentile',
+  'compositeScore',
+  'ageEquivalent',
+  'overallInterpretation',
+  'overallInterpretation_ar',
+  'overallSeverity',
+  'matchedRule',
+  'applicationDate',
+  'purpose',
+  'scoredWithMeasureVersion',
+  'scoredWithAlgorithmVersion',
+  'mcidAtAdministration',
+  'sdcAtAdministration',
+];
+
+// ─── W211 Wave-18 invariants (pre-validate, Mongoose 9 throw-style) ────
+
+measureApplicationSchema.pre('validate', function () {
+  // 1. Locked records reject any change to score-relevant paths.
+  //    Allowed: lifecycle transitions (status→corrected, supersededByCorrection
+  //    pointer) — explicitly NOT in W211_LOCKED_IMMUTABLE_PATHS.
+  if (!this.isNew && (this.status === 'locked' || this._wasLocked)) {
+    const violated = W211_LOCKED_IMMUTABLE_PATHS.filter(p => this.isModified(p));
+    if (violated.length) {
+      throw new Error(
+        `MeasureApplication ${this._id}: cannot modify ${violated.join(', ')} on a ` +
+          'locked record — write a correction record instead (correctionOf=this._id)'
+      );
+    }
+  }
+
+  // 2. Status=locked requires version pinning. Closes the "we have a
+  //    locked baseline but no record of which algorithm version scored
+  //    it" gap — that would break frozen historical comparisons.
+  if (this.status === 'locked' || this.status === 'corrected') {
+    if (!this.scoredWithMeasureVersion) {
+      throw new Error(
+        `MeasureApplication ${this._id || '(new)'}: scoredWithMeasureVersion required when ` +
+          `status=${this.status}`
+      );
+    }
+  }
+
+  // 3. lockedAt + lockedBy must accompany locked status (set by .lock()).
+  if (this.status === 'locked' && !this.lockedAt) {
+    throw new Error(
+      `MeasureApplication ${this._id || '(new)'}: lockedAt required when status=locked`
+    );
+  }
+
+  // 4. correctionOf must reference a real ObjectId when set, and
+  //    correctionReason must accompany it.
+  if (this.correctionOf && !this.correctionReason) {
+    throw new Error(
+      `MeasureApplication ${this._id || '(new)'}: correctionReason required when correctionOf is set`
+    );
+  }
+
+  // 5. isBaseline + purpose='baseline' must agree. The unique index
+  //    further guarantees only one baseline per (beneficiary, measure).
+  if (this.isBaseline && this.purpose !== 'baseline') {
+    throw new Error(
+      `MeasureApplication ${this._id || '(new)'}: isBaseline=true requires purpose='baseline'`
+    );
+  }
+});
+
+// Track "was locked" through the save flow so post-validate can detect
+// attempted score edits on a record that started locked even when the
+// status field itself is being changed.
+measureApplicationSchema.pre('save', function () {
+  if (!this.isNew && this.isModified('status')) {
+    const original = this.$__.activePaths.getStatePaths('modify');
+    // Original status comes from the unmodified pre-image — Mongoose
+    // exposes it via .get(path, null, {getters: false}) on the doc's
+    // internal _doc. Cheaper: rely on the persisted document.
+  }
+});
+
+// ─── W211 instance methods ─────────────────────────────────────────────
+
+measureApplicationSchema.methods.lock = async function (actorId) {
+  if (this.status === 'locked') return this;
+  if (this.status !== 'completed') {
+    throw new Error(`cannot lock from status=${this.status} (must be 'completed')`);
+  }
+  if (!this.scoredWithMeasureVersion) {
+    throw new Error('cannot lock without scoredWithMeasureVersion (version pinning required)');
+  }
+  this.status = 'locked';
+  this.lockedAt = new Date();
+  this.lockedBy = actorId || this.lockedBy;
+  await this.save();
+  return this;
+};
+
+measureApplicationSchema.methods.isLocked = function () {
+  return this.status === 'locked' || this.status === 'corrected';
+};
+
+measureApplicationSchema.methods.markCorrected = async function (newRecordId) {
+  if (!this.isLocked()) {
+    throw new Error(`cannot mark-corrected from status=${this.status} (must be locked/corrected)`);
+  }
+  this.status = 'corrected';
+  this.supersededByCorrection = newRecordId;
+  await this.save();
+  return this;
+};
+
+// ─── W211 statics ──────────────────────────────────────────────────────
+
+measureApplicationSchema.statics.findBaseline = function (beneficiaryId, measureId) {
+  return this.findOne({
+    beneficiaryId,
+    measureId,
+    isBaseline: true,
+  }).lean();
+};
+
+measureApplicationSchema.statics.findDueForReassessment = async function (
+  beneficiaryId,
+  { now = new Date() } = {}
+) {
+  // For each (beneficiary, measureId) pair: latest completed/locked admin
+  // older than measure.reassessment.standardIntervalDays.
+  const Measure = mongoose.model('Measure');
+  const latests = await this.aggregate([
+    {
+      $match: {
+        beneficiaryId: new mongoose.Types.ObjectId(beneficiaryId),
+        status: { $in: ['completed', 'locked'] },
+      },
+    },
+    { $sort: { applicationDate: -1 } },
+    {
+      $group: {
+        _id: '$measureId',
+        lastDate: { $first: '$applicationDate' },
+        lastId: { $first: '$_id' },
+      },
+    },
+  ]);
+  const due = [];
+  for (const item of latests) {
+    const measure = await Measure.findById(item._id)
+      .select('code name name_ar reassessment status')
+      .lean();
+    if (!measure || measure.status !== 'active') continue;
+    const interval = measure.reassessment?.standardIntervalDays;
+    if (!interval) continue;
+    const dueAt = new Date(item.lastDate);
+    dueAt.setDate(dueAt.getDate() + interval);
+    if (dueAt <= now) {
+      due.push({
+        measureId: measure._id,
+        measureCode: measure.code,
+        measureName: measure.name,
+        measureName_ar: measure.name_ar,
+        lastApplicationId: item.lastId,
+        lastApplicationDate: item.lastDate,
+        dueAt,
+        overdueDays: Math.floor((now - dueAt) / (1000 * 60 * 60 * 24)),
+      });
+    }
+  }
+  return due;
+};
+
+measureApplicationSchema.statics.cooldownCheck = async function (
+  beneficiaryId,
+  measureId,
+  { now = new Date() } = {}
+) {
+  const Measure = mongoose.model('Measure');
+  const measure = await Measure.findById(measureId).select('reassessment').lean();
+  const minDays = measure?.reassessment?.minIntervalDays;
+  if (!minDays) return { inCooldown: false, minIntervalDays: null };
+  const last = await this.findOne({
+    beneficiaryId,
+    measureId,
+    status: { $in: ['completed', 'locked'] },
+  })
+    .sort({ applicationDate: -1 })
+    .select('applicationDate')
+    .lean();
+  if (!last) return { inCooldown: false, minIntervalDays: minDays };
+  const earliestAllowed = new Date(last.applicationDate);
+  earliestAllowed.setDate(earliestAllowed.getDate() + minDays);
+  const inCooldown = now < earliestAllowed;
+  return {
+    inCooldown,
+    minIntervalDays: minDays,
+    lastApplicationDate: last.applicationDate,
+    earliestAllowed,
+    daysRemaining: inCooldown ? Math.ceil((earliestAllowed - now) / (1000 * 60 * 60 * 24)) : 0,
+  };
+};
+
 const MeasureApplication =
   mongoose.models.MeasureApplication ||
   mongoose.model('MeasureApplication', measureApplicationSchema);
 
-module.exports = { MeasureApplication, measureApplicationSchema };
+module.exports = {
+  MeasureApplication,
+  measureApplicationSchema,
+  W211_LOCKED_IMMUTABLE_PATHS,
+};

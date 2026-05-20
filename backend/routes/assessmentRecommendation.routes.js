@@ -27,6 +27,7 @@ const engine = require('../services/assessmentRecommendationEngine.service');
 const llmModule = require('../services/assessmentRecommendationLlm.service');
 const createReassessmentSweeper = require('../services/assessmentReassessmentSweeper.service');
 const createBundleAnalytics = require('../services/assessmentBundleAnalytics.service');
+const createBundleOutcomes = require('../services/assessmentBundleOutcomes.service');
 const safeError = require('../utils/safeError');
 
 // Register the bundle model so `mongoose.model('AssessmentRecommendationBundle')`
@@ -57,6 +58,19 @@ function getAnalytics() {
       AssessmentRecommendationBundle: mongoose.model('AssessmentRecommendationBundle'),
     });
     return cachedAnalytics;
+  } catch {
+    return null;
+  }
+}
+
+let cachedOutcomes = null;
+function getOutcomes() {
+  if (cachedOutcomes) return cachedOutcomes;
+  try {
+    cachedOutcomes = createBundleOutcomes({
+      AssessmentRecommendationBundle: mongoose.model('AssessmentRecommendationBundle'),
+    });
+    return cachedOutcomes;
   } catch {
     return null;
   }
@@ -438,6 +452,32 @@ router.get('/analytics', async (req, res) => {
     return res.json({ success: true, data: report });
   } catch (err) {
     return safeError(res, err, 'assessment_analytics_failed');
+  }
+});
+
+// ─── GET /outcomes/:beneficiaryId — Wave 207 ──────────────────
+//
+// Returns per-measure timelines + first→latest deltas computed
+// from this beneficiary's persisted bundle history. Answers "did
+// the engine's interventions move the measure?" — complementary
+// to W206f analytics ("did therapists accept the suggestions?").
+
+router.get('/outcomes/:beneficiaryId', async (req, res) => {
+  try {
+    const { beneficiaryId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(beneficiaryId)) {
+      return res
+        .status(400)
+        .json({ success: false, message: 'beneficiaryId must be a valid ObjectId' });
+    }
+    const outcomes = getOutcomes();
+    if (!outcomes) {
+      return res.status(503).json({ success: false, message: 'outcomes_unavailable' });
+    }
+    const report = await outcomes.getOutcomeReport(beneficiaryId);
+    return res.json({ success: true, data: report });
+  } catch (err) {
+    return safeError(res, err, 'assessment_outcomes_failed');
   }
 });
 

@@ -45,6 +45,7 @@ module.exports = function registerFeatureRoutes(
   const familyVisitsRoutes = safeRequire('../routes/family-visits.routes');
   const fieldTripsRoutes = safeRequire('../routes/field-trips.routes');
   const disabilityCardsRoutes = safeRequire('../routes/disability-cards.routes');
+  const subsidiesRoutes = safeRequire('../routes/subsidies.routes');
   const transportModuleRoutes = safeRequire('../routes/transport-module.routes');
   const transportPublicTrackRoutes = safeRequire('../routes/transport-public-track.routes');
   const schedulingModuleRoutes = safeRequire('../routes/scheduling-module.routes');
@@ -113,6 +114,8 @@ module.exports = function registerFeatureRoutes(
   dualMountAuth(app, 'field-trips', fieldTripsRoutes, authenticate);
   // Wave 204b: Disability cards (بطاقة الإعاقة) — local cache + Phase 2 Authority sync hook
   dualMountAuth(app, 'disability-cards', disabilityCardsRoutes, authenticate);
+  // Wave 205b: Beneficiary subsidies (إعانات ومعاشات شهرية)
+  dualMountAuth(app, 'subsidies', subsidiesRoutes, authenticate);
   logger.info(
     '✅ prompt_04 Beneficiary Management routes mounted: guardians (8 endpoints), disability-assessments (7 endpoints), beneficiary-transfers workflow (6 endpoints), beneficiary-day-attendance rollcall (9 endpoints), beneficiary-sections (7 endpoints), daily-communication (9 endpoints), morning-health-check (7 endpoints), toileting (6 endpoints), beneficiary-meals (6 endpoints), day-rehab-bus-routes (10 endpoints)'
   );

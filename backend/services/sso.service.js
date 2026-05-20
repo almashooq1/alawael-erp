@@ -19,8 +19,31 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const Redis = require('ioredis');
 const logger = require('../utils/logger');
+const ssoKeys = require('./ssoKeys.service');
 
 const SECONDS = 1000;
+
+/**
+ * Pick signing algorithm + secret per env:
+ *   SSO_TOKEN_ALG=RS256 → asymmetric, signed with the RS256 private key.
+ *   default            → HS256, signed with JWT_SECRET (back-compat).
+ *
+ * Verification always tries the kid-matched RS256 public key first when the
+ * token carries a `kid` header, then falls back to HS256 with JWT_SECRET.
+ * That means RS256 rollout is non-breaking: existing HS256 tokens still
+ * verify, and clients can pin on the kid going forward.
+ */
+function getSigningOptions(expiresInSec) {
+  const useRs256 = String(process.env.SSO_TOKEN_ALG || '').toUpperCase() === 'RS256';
+  if (useRs256) {
+    const { privatePem, kid } = ssoKeys.getKeyMaterial();
+    return {
+      secret: privatePem,
+      options: { expiresIn: expiresInSec, algorithm: 'RS256', keyid: kid },
+    };
+  }
+  return { secret: null, options: { expiresIn: expiresInSec, algorithm: 'HS256' } };
+}
 
 class SSOService {
   constructor() {
@@ -275,7 +298,7 @@ class SSOService {
 
       let decoded;
       try {
-        decoded = jwt.verify(accessToken, this.JWT_SECRET);
+        decoded = this._verifyTokenAnyAlg(accessToken);
       } catch (_err) {
         return { valid: false, error: 'Invalid or expired token' };
       }
@@ -419,6 +442,9 @@ class SSOService {
   generateTokens(userId, userPayload, sessionId) {
     const accessToken = this.generateAccessToken(userId, userPayload, sessionId);
 
+    // Refresh tokens stay HS256 — they never leave our trust boundary and
+    // never get verified by third parties. Using HS256 avoids a costly
+    // asymmetric sign on every refresh.
     const refreshExpiresInSec = Math.floor(this.REFRESH_TOKEN_TIMEOUT / SECONDS);
     const refreshToken = jwt.sign({ userId, sessionId, type: 'refresh' }, this.JWT_SECRET, {
       expiresIn: refreshExpiresInSec,
@@ -426,10 +452,11 @@ class SSOService {
     });
 
     const accessExpiresInSec = Math.floor(this.SESSION_TIMEOUT / SECONDS);
+    const { secret, options } = getSigningOptions(accessExpiresInSec);
     const idToken = jwt.sign(
       { sub: userId, aud: 'sso-client', iss: 'sso-server' },
-      this.JWT_SECRET,
-      { expiresIn: accessExpiresInSec, algorithm: 'HS256' }
+      secret || this.JWT_SECRET,
+      options
     );
 
     return { accessToken, refreshToken, idToken };
@@ -437,10 +464,29 @@ class SSOService {
 
   generateAccessToken(userId, userPayload, sessionId) {
     const expiresInSec = Math.floor(this.SESSION_TIMEOUT / SECONDS);
-    return jwt.sign({ ...userPayload, userId, sessionId, type: 'access' }, this.JWT_SECRET, {
-      expiresIn: expiresInSec,
-      algorithm: 'HS256',
-    });
+    const { secret, options } = getSigningOptions(expiresInSec);
+    return jwt.sign(
+      { ...userPayload, userId, sessionId, type: 'access' },
+      secret || this.JWT_SECRET,
+      options
+    );
+  }
+
+  /**
+   * Verify a token regardless of algorithm:
+   *   - If header has `kid` and we hold an RS256 public key for it → RS256 verify.
+   *   - Otherwise → HS256 verify with JWT_SECRET (existing behaviour).
+   * Throws the underlying jsonwebtoken error on failure.
+   */
+  _verifyTokenAnyAlg(token) {
+    const decodedHeader = jwt.decode(token, { complete: true })?.header;
+    if (decodedHeader?.kid) {
+      const pubPem = ssoKeys.getPublicKeyPem(decodedHeader.kid);
+      if (pubPem) {
+        return jwt.verify(token, pubPem, { algorithms: ['RS256'] });
+      }
+    }
+    return jwt.verify(token, this.JWT_SECRET, { algorithms: ['HS256'] });
   }
 
   /** Update mutable session metadata. */
@@ -600,7 +646,7 @@ class SSOService {
    */
   async introspectToken(token) {
     try {
-      const decoded = jwt.verify(token, this.JWT_SECRET);
+      const decoded = this._verifyTokenAnyAlg(token);
       return {
         active: true,
         sub: decoded.userId,

@@ -80,7 +80,52 @@ function mockStatus({ nationalId, createdAtMs }) {
   };
 }
 
-// ── Live adapter (ready for real credentials) ────────────────────────────
+// ── Live adapter (W205f: JWS-signed requests) ────────────────────────────
+
+let _jwt = null;
+function getJwt() {
+  if (!_jwt) _jwt = require('jsonwebtoken');
+  return _jwt;
+}
+
+function normalizePrivateKey(pem) {
+  if (!pem) return null;
+  return pem.replace(/\\n/g, '\n').trim();
+}
+
+/**
+ * Build a JWS-signed bearer token per Nafath spec — RS256, short TTL,
+ * iss=appId, aud=serviceId. The body is a JSON object the server hashes
+ * to bind the token to the request payload.
+ *
+ * Returns the compact JWS string. Throws if NAFATH_PRIVATE_KEY is unset
+ * (callers that opt into live mode without the key get NAFATH_UNCONFIGURED).
+ */
+function signNafathJws(payload, { appId, serviceId, audience }) {
+  const privateKeyPem = normalizePrivateKey(process.env.NAFATH_PRIVATE_KEY);
+  if (!privateKeyPem) {
+    throw Object.assign(new Error('NAFATH_PRIVATE_KEY غير مُكوَّن'), {
+      code: 'NAFATH_UNCONFIGURED',
+    });
+  }
+  const now = Math.floor(Date.now() / 1000);
+  const claims = {
+    iss: appId,
+    aud: audience || `${process.env.NAFATH_BASE_URL || ''}/api/v1/mfa/request`,
+    sub: serviceId,
+    iat: now,
+    exp: now + 60, // 60-second window
+    jti: crypto.randomBytes(16).toString('hex'),
+    body: payload,
+  };
+  const kid = process.env.NAFATH_KID || undefined;
+  const options = {
+    algorithm: 'RS256',
+  };
+  if (kid) options.keyid = kid;
+  return getJwt().sign(claims, privateKeyPem, options);
+}
+
 async function liveInitiate({ nationalId, purpose }) {
   const base = process.env.NAFATH_BASE_URL;
   const appId = process.env.NAFATH_APP_ID;
@@ -92,16 +137,22 @@ async function liveInitiate({ nationalId, purpose }) {
     throw Object.assign(new Error('رقم الهوية الوطنية غير صالح'), { code: 'INVALID_ID' });
   }
 
-  // Per Nafath spec: POST to /api/v1/mfa/request with signed JWT body.
-  // Actual signing/auth is implemented once NAFATH_PRIVATE_KEY is provisioned.
+  const body = { nationalId, purpose };
+  const jws = signNafathJws(body, {
+    appId,
+    serviceId,
+    audience: `${base}/api/v1/mfa/request`,
+  });
+
   const resp = await fetch(`${base}/api/v1/mfa/request`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      Authorization: `Bearer ${jws}`,
       'App-Id': appId,
       'Service-Id': serviceId,
     },
-    body: JSON.stringify({ nationalId, purpose }),
+    body: JSON.stringify(body),
   });
   if (!resp.ok) {
     const text = await resp.text().catch(() => '');
@@ -121,16 +172,39 @@ async function liveInitiate({ nationalId, purpose }) {
 async function liveStatus({ transactionId, nationalId }) {
   const base = process.env.NAFATH_BASE_URL;
   const appId = process.env.NAFATH_APP_ID;
-  if (!base || !appId) {
+  const serviceId = process.env.NAFATH_SERVICE_ID;
+  if (!base || !appId || !serviceId) {
     return { status: 'ERROR', message: 'Nafath live mode غير مُكوَّن' };
   }
+  // Status endpoint also requires a fresh JWS bearer (per Nafath spec)
+  let authHeader = {};
+  try {
+    const jws = signNafathJws(
+      { transactionId, nationalId },
+      {
+        appId,
+        serviceId,
+        audience: `${base}/api/v1/mfa/request/${transactionId}/${nationalId}`,
+      }
+    );
+    authHeader = { Authorization: `Bearer ${jws}` };
+  } catch (err) {
+    // No private key — fall back to header-only auth (some sandbox setups allow this)
+    if (err.code !== 'NAFATH_UNCONFIGURED') throw err;
+  }
+
   const resp = await fetch(
     `${base}/api/v1/mfa/request/${encodeURIComponent(transactionId)}/${encodeURIComponent(nationalId)}`,
-    { headers: { 'App-Id': appId } }
+    {
+      headers: {
+        ...authHeader,
+        'App-Id': appId,
+        'Service-Id': serviceId,
+      },
+    }
   );
   if (!resp.ok) return { status: 'ERROR', message: `HTTP ${resp.status}` };
   const data = await resp.json();
-  // Map Nafath status codes to ours
   const statusMap = {
     WAITING: 'PENDING',
     REQUESTED: 'PENDING',
@@ -162,5 +236,6 @@ module.exports = {
   initiate,
   checkStatus,
   validateNationalId,
+  signNafathJws,
   TRANSACTION_TTL_MS,
 };

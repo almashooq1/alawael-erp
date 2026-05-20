@@ -5,8 +5,64 @@
  */
 
 const crypto = require('crypto');
+const bcrypt = require('bcryptjs');
 const SSOService = require('./sso.service');
 const logger = require('../utils/logger');
+
+// Lazy-require the model so test files that don't touch the DB still load
+// oauth.service.js cleanly (e.g. unit tests that mock the SSO service).
+let _OAuthClient = null;
+function getOAuthClientModel() {
+  if (!_OAuthClient) {
+    try {
+      _OAuthClient = require('../models/OAuthClient');
+    } catch (err) {
+      logger.warn('[oauth] OAuthClient model unavailable:', err.message);
+    }
+  }
+  return _OAuthClient;
+}
+
+/**
+ * Verify a clientId + clientSecret against either:
+ *   1. The DB registry (W205d — preferred)
+ *   2. The legacy env-var OAUTH_CLIENT_SECRET (back-compat — single tenant)
+ *
+ * Returns the client document (DB path) or `true` (env path) on success;
+ * throws on failure.
+ */
+async function verifyClient(clientId, clientSecret, envFallbackSecret) {
+  // 1. DB lookup
+  const Model = getOAuthClientModel();
+  if (Model) {
+    try {
+      const client = await Model.findOne({ clientId, isActive: true })
+        .select('+clientSecretHash')
+        .exec();
+      if (client) {
+        if (client.tokenEndpointAuthMethod === 'none') {
+          // Public client — no secret expected, PKCE will guard the code
+          return client;
+        }
+        const ok = await client.verifyClientSecret(clientSecret);
+        if (!ok) throw new Error('Invalid client credentials');
+        // best-effort lastUsedAt bump (no await)
+        client.touchLastUsed().catch(() => {});
+        return client;
+      }
+    } catch (err) {
+      // If the error is "Invalid client credentials" rethrow; else fall through
+      if (/Invalid client credentials/.test(err.message)) throw err;
+      logger.warn('[oauth] DB client lookup failed, trying env fallback:', err.message);
+    }
+  }
+
+  // 2. Env-var fallback (legacy single-tenant)
+  if (envFallbackSecret && clientSecret === envFallbackSecret) {
+    return true;
+  }
+  throw new Error('Invalid client credentials');
+}
 
 class OAuthService {
   constructor() {
@@ -93,9 +149,8 @@ class OAuthService {
   async exchangeAuthorizationCode(code, clientId, clientSecret, redirectUri, codeVerifier = null) {
     this._ensureEnabled();
     try {
-      if (clientSecret !== this.OAUTH_CLIENT_SECRET) {
-        throw new Error('Invalid client credentials');
-      }
+      // W205d: try DB-backed client registry first, fall back to env var.
+      await verifyClient(clientId, clientSecret, this.OAUTH_CLIENT_SECRET);
 
       const session = await this.ssoService.exchangeAuthorizationCode(
         code,
@@ -164,10 +219,8 @@ class OAuthService {
   async initiateClientCredentialsFlow(clientId, clientSecret, scope) {
     this._ensureEnabled();
     try {
-      // Verify client credentials
-      if (clientSecret !== this.OAUTH_CLIENT_SECRET) {
-        throw new Error('Invalid client credentials');
-      }
+      // W205d: DB registry first, env fallback
+      await verifyClient(clientId, clientSecret, this.OAUTH_CLIENT_SECRET);
 
       const _now = Date.now();
       const accessToken = crypto.randomBytes(32).toString('hex');
@@ -327,16 +380,17 @@ class OAuthService {
    */
   getOpenIDConfiguration() {
     const baseUrl = process.env.SSO_BASE_URL || 'https://sso.yourdomain.com';
+    const ssoBase = `${baseUrl}/api/sso`;
 
     return {
       issuer: baseUrl,
-      authorization_endpoint: `${baseUrl}/oauth2/authorize`,
-      token_endpoint: `${baseUrl}/oauth2/token`,
-      userinfo_endpoint: `${baseUrl}/oauth2/userinfo`,
-      jwks_uri: `${baseUrl}/.well-known/jwks.json`,
-      registration_endpoint: `${baseUrl}/oauth2/register`,
-      revocation_endpoint: `${baseUrl}/oauth2/revoke`,
-      end_session_endpoint: `${baseUrl}/oauth2/logout`,
+      authorization_endpoint: `${ssoBase}/oauth2/authorize`,
+      token_endpoint: `${ssoBase}/oauth2/token`,
+      userinfo_endpoint: `${ssoBase}/oauth2/userinfo`,
+      jwks_uri: `${ssoBase}/.well-known/jwks.json`,
+      registration_endpoint: `${ssoBase}/oauth2/register`,
+      revocation_endpoint: `${ssoBase}/oauth2/revoke`,
+      end_session_endpoint: `${ssoBase}/oauth2/logout`,
       response_types_supported: [
         'code',
         'token',
@@ -432,12 +486,44 @@ class OAuthService {
   async registerClient(clientMetadata) {
     this._ensureEnabled();
     try {
-      const clientId = crypto.randomBytes(16).toString('hex');
-      const clientSecret = crypto.randomBytes(32).toString('hex');
+      const clientId = clientMetadata.clientId || crypto.randomBytes(16).toString('hex');
+      const isPublic = clientMetadata.tokenEndpointAuthMethod === 'none';
+      const clientSecret = isPublic ? null : crypto.randomBytes(32).toString('hex');
 
+      const Model = getOAuthClientModel();
+      if (Model) {
+        const doc = {
+          clientId,
+          clientName: clientMetadata.clientName || `client-${clientId.slice(0, 8)}`,
+          clientSecretHash: clientSecret ? await bcrypt.hash(clientSecret, 12) : 'public',
+          tokenEndpointAuthMethod: clientMetadata.tokenEndpointAuthMethod || 'client_secret_basic',
+          redirectUris: clientMetadata.redirectUris || [],
+          allowedScopes: clientMetadata.scopes || ['openid', 'profile', 'email'],
+          grantTypes: clientMetadata.grantTypes || ['authorization_code', 'refresh_token'],
+          responseTypes: clientMetadata.responseTypes || ['code'],
+          contacts: clientMetadata.contacts || [],
+          createdBy: clientMetadata.createdBy,
+          isActive: true,
+        };
+        const created = await Model.create(doc);
+        logger.info(`Client registered in DB: ${clientId}`);
+        return {
+          client: {
+            clientId: created.clientId,
+            clientName: created.clientName,
+            redirectUris: created.redirectUris,
+            responseTypes: created.responseTypes,
+            grantTypes: created.grantTypes,
+            allowedScopes: created.allowedScopes,
+            tokenEndpointAuthMethod: created.tokenEndpointAuthMethod,
+          },
+          clientSecret, // null for public clients
+        };
+      }
+
+      // Fallback (no DB) — return an in-memory descriptor only
       const client = {
         clientId,
-        clientSecret,
         clientName: clientMetadata.clientName,
         redirectUris: clientMetadata.redirectUris || [],
         responseTypes: clientMetadata.responseTypes || ['code'],
@@ -446,8 +532,7 @@ class OAuthService {
         contacts: clientMetadata.contacts || [],
         registrationTime: Date.now(),
       };
-
-      logger.info(`Client registered: ${clientId}`);
+      logger.warn(`Client registered (ephemeral, no DB): ${clientId}`);
       return { client, clientSecret };
     } catch (error) {
       logger.error('Client registration failed:', error);

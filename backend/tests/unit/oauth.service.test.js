@@ -445,8 +445,34 @@ describe('OAuthService', () => {
 
   // ── registerClient ───────────────────────────────────────────────
 
-  describe('registerClient', () => {
-    it('generates client credentials', async () => {
+  describe('registerClient (W205d: DB-backed)', () => {
+    // W205d: registerClient now persists to MongoDB and returns the
+    // W205d-shape client. These tests inject a minimal mock so the test
+    // file doesn't need a Mongo instance.
+    beforeEach(() => {
+      const bcrypt = require('bcryptjs');
+      const store = new Map();
+      jest.doMock('../../models/OAuthClient', () => ({
+        findOne: jest.fn(),
+        create: jest.fn(async doc => {
+          const stored = {
+            ...doc,
+            verifyClientSecret: async function (c) {
+              return c === 'placeholder' ? true : bcrypt.compare(String(c), this.clientSecretHash);
+            },
+            touchLastUsed: () => Promise.resolve(),
+          };
+          store.set(doc.clientId, stored);
+          return stored;
+        }),
+      }));
+      jest.resetModules();
+      // Force the service to re-evaluate `require('../models/OAuthClient')`
+      const Reloaded = require('../../services/oauth.service');
+      service = new Reloaded();
+    });
+
+    it('generates client credentials and persists to DB', async () => {
       const result = await service.registerClient({
         clientName: 'My App',
         redirectUris: ['https://app.com/cb'],
@@ -456,16 +482,17 @@ describe('OAuthService', () => {
       expect(result.clientSecret).toBeTruthy();
       expect(result.client.clientName).toBe('My App');
       expect(result.client.redirectUris).toEqual(['https://app.com/cb']);
-      expect(result.client.registrationTime).toBeTruthy();
     });
 
     it('uses defaults for missing metadata fields', async () => {
-      const result = await service.registerClient({ clientName: 'App2' });
+      const result = await service.registerClient({
+        clientName: 'App2',
+        redirectUris: ['https://app2.com/cb'],
+      });
 
       expect(result.client.responseTypes).toEqual(['code']);
       expect(result.client.grantTypes).toContain('authorization_code');
-      expect(result.client.scopes).toContain('openid');
-      expect(result.client.contacts).toEqual([]);
+      expect(result.client.allowedScopes).toContain('openid');
     });
   });
 

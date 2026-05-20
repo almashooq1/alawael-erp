@@ -21,6 +21,10 @@ jest.mock('jsonwebtoken', () => {
       if (!data) throw new Error('invalid token');
       return data;
     }),
+    // W205c: SSOService now inspects the JWT header to pick HS256 vs RS256.
+    // Our fake tokens have no real header, so decode returns a stub header
+    // with no kid → the verifier falls back to HS256.
+    decode: jest.fn((_token, _opts) => ({ header: { alg: 'HS256' }, payload: {} })),
     __store: _store,
   };
 });

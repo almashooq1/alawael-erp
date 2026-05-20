@@ -18,7 +18,12 @@ const crypto = require('crypto');
 const router = express.Router();
 const SSOService = require('../services/sso.service');
 const OAuthService = require('../services/oauth.service');
-const { verifySSOToken } = require('../middleware/sso-auth.middleware');
+const ssoKeys = require('../services/ssoKeys.service');
+const OAuthClient = require('../models/OAuthClient');
+const { verifySSOToken, requireRole } = require('../middleware/sso-auth.middleware');
+
+const ADMIN_ROLES = ['super_admin', 'head_office_admin', 'ceo', 'it_admin', 'admin'];
+const adminOnly = requireRole(ADMIN_ROLES);
 const logger = require('../utils/logger');
 const User = require('../models/User');
 const { loginLimiter, sensitiveOperationLimiter } = require('../middleware/rateLimiter');
@@ -678,6 +683,20 @@ router.get('/.well-known/openid-configuration', (_req, res) => {
 });
 
 /**
+ * GET /api/sso/.well-known/jwks.json
+ * Public JWKS for third-party RS256 token verification (W205c).
+ */
+router.get('/.well-known/jwks.json', (_req, res) => {
+  try {
+    const jwks = ssoKeys.getPublicJwks();
+    res.set('Cache-Control', 'public, max-age=600');
+    res.json(jwks);
+  } catch (err) {
+    res.status(503).json({ keys: [], error: 'jwks_unavailable', message: err.message });
+  }
+});
+
+/**
  * POST /api/sso/oauth2/revoke
  */
 router.post('/oauth2/revoke', async (req, res) => {
@@ -774,6 +793,157 @@ router.put('/me', verifySSOToken(), async (req, res) => {
     res.json({ success: true, data: updatedSession });
   } catch (error) {
     safeError(res, error, 'Failed to update session metadata');
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────
+// Admin: OAuth client registry (W205d)
+// ─────────────────────────────────────────────────────────────────────────
+
+/**
+ * GET /api/sso/admin/oauth-clients
+ * List registered OAuth clients. Admin-only.
+ */
+router.get('/admin/oauth-clients', verifySSOToken(), adminOnly, async (_req, res) => {
+  try {
+    const clients = await OAuthClient.find({})
+      .select('-clientSecretHash')
+      .sort({ createdAt: -1 })
+      .lean();
+    res.json({ success: true, data: clients, total: clients.length });
+  } catch (error) {
+    safeError(res, error, 'Failed to list OAuth clients');
+  }
+});
+
+/**
+ * POST /api/sso/admin/oauth-clients
+ * Body: { clientName, redirectUris[], grantTypes[]?, scopes[]?,
+ *         tokenEndpointAuthMethod? }
+ * Returns the plaintext clientSecret ONCE — never again.
+ */
+router.post('/admin/oauth-clients', verifySSOToken(), adminOnly, async (req, res) => {
+  try {
+    const { clientName, redirectUris, grantTypes, scopes, tokenEndpointAuthMethod } = req.body;
+    if (!clientName || !Array.isArray(redirectUris) || redirectUris.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'validation_error',
+        message: 'clientName and redirectUris are required',
+      });
+    }
+    for (const uri of redirectUris) {
+      try {
+        const parsed = new URL(uri);
+        if (!['http:', 'https:'].includes(parsed.protocol)) {
+          return res.status(400).json({
+            success: false,
+            error: 'validation_error',
+            message: `redirect_uri ${uri} must use http or https`,
+          });
+        }
+      } catch {
+        return res.status(400).json({
+          success: false,
+          error: 'validation_error',
+          message: `redirect_uri ${uri} is not a valid URL`,
+        });
+      }
+    }
+    const { client, clientSecret } = await oAuthService.registerClient({
+      clientName,
+      redirectUris,
+      grantTypes,
+      scopes,
+      tokenEndpointAuthMethod,
+      createdBy: req.user.userId,
+    });
+    res.status(201).json({
+      success: true,
+      data: { ...client, clientSecret },
+      message: 'Save the clientSecret now — it cannot be retrieved later',
+    });
+  } catch (error) {
+    safeError(res, error, 'Failed to register OAuth client');
+  }
+});
+
+/**
+ * DELETE /api/sso/admin/oauth-clients/:clientId  (soft delete → isActive=false)
+ */
+router.delete('/admin/oauth-clients/:clientId', verifySSOToken(), adminOnly, async (req, res) => {
+  try {
+    const result = await OAuthClient.updateOne(
+      { clientId: req.params.clientId },
+      { $set: { isActive: false } }
+    );
+    if (!result.matchedCount) {
+      return res.status(404).json({ success: false, error: 'not_found' });
+    }
+    res.json({ success: true });
+  } catch (error) {
+    safeError(res, error, 'Failed to deactivate OAuth client');
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────
+// Admin: Cross-user session management (W205e)
+// ─────────────────────────────────────────────────────────────────────────
+
+/**
+ * GET /api/sso/admin/sessions?userId=<id>
+ * Returns the active sessions of a specific user. Admin-only.
+ */
+router.get('/admin/sessions', verifySSOToken(), adminOnly, async (req, res) => {
+  try {
+    const { userId } = req.query;
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        error: 'validation_error',
+        message: 'userId query param is required',
+      });
+    }
+    const sessions = await ssoService.getUserActiveSessions(String(userId));
+    res.json({ success: true, data: sessions, total: sessions.length });
+  } catch (error) {
+    safeError(res, error, 'Failed to fetch user sessions');
+  }
+});
+
+/**
+ * DELETE /api/sso/admin/sessions/:sessionId
+ * Force-end any session by id. Admin-only.
+ */
+router.delete('/admin/sessions/:sessionId', verifySSOToken(), adminOnly, async (req, res) => {
+  try {
+    const info = await ssoService.getSessionInfo(req.params.sessionId);
+    if (!info) {
+      return res.status(404).json({ success: false, error: 'not_found' });
+    }
+    await ssoService.endSession(req.params.sessionId);
+    logger.info(
+      `[admin] session forced-end by ${req.user.userId}: ${req.params.sessionId} (owner=${info.userId})`
+    );
+    res.json({ success: true });
+  } catch (error) {
+    safeError(res, error, 'Failed to end session');
+  }
+});
+
+/**
+ * POST /api/sso/admin/users/:userId/logout-all
+ * Force-end every session of a user.
+ */
+router.post('/admin/users/:userId/logout-all', verifySSOToken(), adminOnly, async (req, res) => {
+  try {
+    const result = await ssoService.endAllUserSessions(req.params.userId);
+    logger.info(
+      `[admin] all sessions ended for ${req.params.userId} by ${req.user.userId} (count=${result.sessionsEnded})`
+    );
+    res.json({ success: true, sessionsEnded: result.sessionsEnded });
+  } catch (error) {
+    safeError(res, error, 'Failed to end all user sessions');
   }
 });
 

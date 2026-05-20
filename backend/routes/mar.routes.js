@@ -231,6 +231,95 @@ router.post('/:id/hold', requireRole(ADMIN_ROLES), async (req, res) => {
   }
 });
 
+// ── POST /schedule-recurring — bulk create from prescription pattern ──
+// Body: { beneficiaryId, medicationName, dose?, route?, isControlled?,
+//         dailyTimes: ["08:00","20:00"], startDate, endDate, notes? }
+// Generates one MAR row per (day in range × each dailyTime). All status='scheduled'.
+// Caps at 200 rows to prevent runaway.
+router.post('/schedule-recurring', requireRole(ADMIN_ROLES), async (req, res) => {
+  try {
+    const body = req.body || {};
+    if (!body.beneficiaryId || !mongoose.isValidObjectId(body.beneficiaryId)) {
+      return res.status(400).json({ success: false, message: 'beneficiaryId مطلوب' });
+    }
+    if (!String(body.medicationName || '').trim()) {
+      return res.status(400).json({ success: false, message: 'اسم الدواء مطلوب' });
+    }
+    if (!Array.isArray(body.dailyTimes) || body.dailyTimes.length === 0) {
+      return res
+        .status(400)
+        .json({ success: false, message: 'dailyTimes مطلوبة (مثال: ["08:00","20:00"])' });
+    }
+    // Validate each time is HH:MM
+    const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
+    for (const t of body.dailyTimes) {
+      if (!TIME_RE.test(String(t))) {
+        return res
+          .status(400)
+          .json({ success: false, message: `وقت غير صالح: ${t} (يجب HH:MM 24h)` });
+      }
+    }
+    const start = body.startDate ? new Date(body.startDate) : new Date();
+    const end = body.endDate ? new Date(body.endDate) : null;
+    if (!end || isNaN(end.getTime())) {
+      return res.status(400).json({ success: false, message: 'endDate مطلوبة' });
+    }
+    if (end < start) {
+      return res.status(400).json({ success: false, message: 'endDate يجب أن تكون بعد startDate' });
+    }
+    const dayMs = 24 * 60 * 60 * 1000;
+    const days = Math.floor((end.getTime() - start.getTime()) / dayMs) + 1;
+    const total = days * body.dailyTimes.length;
+    if (total > 200) {
+      return res.status(400).json({
+        success: false,
+        message: `النطاق كبير جداً (${total} جرعة). الحد الأقصى 200. اقسمها إلى دفعات.`,
+      });
+    }
+    const route = ROUTES.includes(body.route) ? body.route : 'oral';
+    const docs = [];
+    const cursor = new Date(start);
+    cursor.setHours(0, 0, 0, 0);
+    for (let d = 0; d < days; d++) {
+      for (const t of body.dailyTimes) {
+        const [hh, mm] = String(t)
+          .split(':')
+          .map(n => parseInt(n, 10));
+        const scheduledTime = new Date(cursor);
+        scheduledTime.setHours(hh, mm, 0, 0);
+        docs.push({
+          beneficiaryId: body.beneficiaryId,
+          branchId: body.branchId && mongoose.isValidObjectId(body.branchId) ? body.branchId : null,
+          medicationId:
+            body.medicationId && mongoose.isValidObjectId(body.medicationId)
+              ? body.medicationId
+              : null,
+          medicationName: String(body.medicationName).trim(),
+          dose: String(body.dose || '').slice(0, 100),
+          route,
+          isControlled: !!body.isControlled,
+          date: new Date(cursor),
+          scheduledTime,
+          status: 'scheduled',
+          notes: String(body.notes || '').slice(0, 500),
+        });
+      }
+      cursor.setDate(cursor.getDate() + 1);
+    }
+    const created = await MAR.insertMany(docs, { ordered: false });
+    res.status(201).json({
+      success: true,
+      count: created.length,
+      days,
+      dailyDoses: body.dailyTimes.length,
+      firstScheduled: created[0]?.scheduledTime,
+      lastScheduled: created[created.length - 1]?.scheduledTime,
+    });
+  } catch (err) {
+    return safeError(res, err, 'mar.scheduleRecurring');
+  }
+});
+
 // ── PATCH /:id ────────────────────────────────────────────────────────
 router.patch('/:id', requireRole(ADMIN_ROLES), async (req, res) => {
   try {

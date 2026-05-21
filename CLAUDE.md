@@ -57,6 +57,8 @@ cd ../../alawael-rehab-platform/apps/web-admin && npm run dev
 - `frontend/src/__tests__/` — 1,303 .test.js files. ~11,094 tests. CI gates on full suite in both `ci.yml` (push) and `pr-checks.yml::frontend-tests` (PR).
 - `alawael-rehab-platform/` — zero tests. Health = `npm run typecheck` + `npm run lint` only.
 
+**Skipped-tests audit (2026-05-21)**: full-tree sweep for `describe.skip` / `it.skip` / `test.skip` / `xdescribe` / `xit` / `xtest` patterns. Backend has **zero** real skips (W209 closed the last 13 in eStamp + eSignaturePdf). Frontend has **one** legitimately skipped suite (`frontend/tests/tests/DocumentList.component.test.js`) with a documented TODO — assertions target the pre-refactor inline-table component; new orchestrator-shape rewrite required, not a quick win. Mobile + web-admin have zero skips. **Heuristic**: when searching for `.skip(` patterns, anchor with `\b` or use `(describe|it|test)\.skip\(` — bare `xit\(` regex generates false positives from every `process.exit(` in the codebase.
+
 ## Drift guards in **tests**/ (catch silent regressions)
 
 - `no-broken-requires.test.js` — every relative `require()` resolves. Supports per-(file,target) allow-list for legitimate optional loads.

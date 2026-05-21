@@ -622,12 +622,39 @@ router.get('/templates', (_req, res) => {
   res.json({ success: true, data: whatsappTemplates.listTemplates() });
 });
 
-/** GET /templates/meta — from Meta Business Manager */
+/** GET /templates/meta — from Meta Business Manager (raw passthrough) */
 router.get(
   '/templates/meta',
   asyncHandler(async (_req, res) => {
     const data = await whatsappService.getTemplates();
     res.json({ success: true, data });
+  })
+);
+
+/** GET /templates/synced — locally cached templates after last sync */
+router.get(
+  '/templates/synced',
+  asyncHandler(async (req, res) => {
+    const templateSync = require('../services/whatsapp/templateSync.service');
+    const { status, language } = req.query;
+    const filter = {};
+    if (status) filter.status = status;
+    if (language) filter.language = language;
+    const rows = await templateSync.WhatsAppTemplate.find(filter)
+      .sort({ status: 1, templateName: 1 })
+      .lean();
+    res.json({ success: true, data: rows, total: rows.length });
+  })
+);
+
+/** POST /templates/sync — pull approved templates from Meta + upsert locally */
+router.post(
+  '/templates/sync',
+  asyncHandler(async (_req, res) => {
+    const templateSync = require('../services/whatsapp/templateSync.service');
+    const result = await templateSync.sync();
+    if (!result.ok) return res.status(502).json({ success: false, ...result });
+    res.json({ success: true, data: result });
   })
 );
 

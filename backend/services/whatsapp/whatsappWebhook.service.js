@@ -314,49 +314,130 @@ async function handleIncomingMessage(msg, contact, _phoneNumberId) {
     await whatsappService.markAsRead(msg.id).catch(() => {});
   }
 
-  // Auto-reply
-  const autoReply = await whatsappAI.getAutoReply(classified, {
-    beneficiaryName: familyMember
-      ? `${familyMember.firstName} ${familyMember.lastName}`
-      : undefined,
+  // ─── Auto-reply decision ────────────────────────────────────────────────
+  // The decision engine (services/whatsapp/autoReply.service.js) is pure —
+  // it returns one of: template / text / escalate / none, and we dispatch
+  // accordingly. The old whatsappAI.getAutoReply only covered 2 of 9
+  // intents and skipped escalation. The new engine handles all 9.
+  const autoReply = require('./autoReply.service');
+  const ctxName = familyMember
+    ? `${familyMember.firstName || ''} ${familyMember.lastName || ''}`.trim() || senderName
+    : senderName;
+  const beneficiaryName = familyMember?.beneficiaryName || ctxName;
+
+  // After recording inbound, the 24h service window is open by definition.
+  const decision = autoReply.decide(classified, {
+    canReplyFreeForm: true,
+    hasConsent: true,
+    beneficiaryName,
+    guardianName: ctxName,
   });
 
-  if (autoReply) {
-    const sent = await whatsappService.sendText(fromPhone, autoReply);
-    if (sent?.success && Conversation && conv) {
-      await Conversation.updateOne(
-        { _id: conv._id },
-        {
-          $push: {
-            messages: {
-              direction: 'outgoing',
-              type: 'text',
-              text: autoReply,
-              providerMessageId: sent.messageId,
-              timestamp: new Date(),
-              isAutoReply: true,
-              deliveryStatus: 'sent',
-            },
-          },
-          $set: { lastMessageAt: new Date(), unreadCount: 0 },
+  logger.info(
+    `[WhatsApp AutoReply] decision=${decision.action} ` +
+      `intent=${classified.intent} urgency=${classified.urgencyLevel} ` +
+      `reason=${decision.reason}`
+  );
+
+  let autoReplySent = null;
+  try {
+    if (decision.action === autoReply.ACTION.TEXT) {
+      const text = await autoReply.resolveTextReply(decision, {
+        beneficiaryName,
+        guardianName: ctxName,
+      });
+      if (text) {
+        autoReplySent = await whatsappService.sendText(fromPhone, text);
+        if (autoReplySent?.success && Conversation && conv) {
+          await Conversation.updateOne(
+            { _id: conv._id },
+            {
+              $push: {
+                messages: {
+                  direction: 'outgoing',
+                  type: 'text',
+                  text,
+                  providerMessageId: autoReplySent.messageId,
+                  timestamp: new Date(),
+                  isAutoReply: true,
+                  autoReplyDecision: decision,
+                  deliveryStatus: 'sent',
+                },
+              },
+              $set: { lastMessageAt: new Date(), unreadCount: 0 },
+            }
+          );
         }
+      }
+    } else if (decision.action === autoReply.ACTION.TEMPLATE && decision.templateName) {
+      const params = autoReply.buildTemplateParams(decision, {
+        beneficiaryName,
+        guardianName: ctxName,
+      });
+      autoReplySent = await whatsappService.sendTemplate(
+        fromPhone,
+        decision.templateName,
+        'ar',
+        params || []
       );
+      if (autoReplySent?.success && Conversation && conv) {
+        await Conversation.updateOne(
+          { _id: conv._id },
+          {
+            $push: {
+              messages: {
+                direction: 'outgoing',
+                type: 'template',
+                text: `[template: ${decision.templateName}]`,
+                providerMessageId: autoReplySent.messageId,
+                timestamp: new Date(),
+                isAutoReply: true,
+                autoReplyDecision: decision,
+                deliveryStatus: 'sent',
+              },
+            },
+            $set: { lastMessageAt: new Date(), unreadCount: 0 },
+          }
+        );
+      }
     }
+    // ACTION.ESCALATE and ACTION.NONE fall through to escalation block below.
+  } catch (err) {
+    logger.warn(`[WhatsApp AutoReply] dispatch failed: ${err.message}`);
   }
 
-  // Emit internal event for critical messages
-  if (classified.urgencyLevel === 'critical' || classified.requiresHumanReview) {
+  // Emit internal event for critical messages OR explicit escalate action.
+  // Both paths converge to the same notification primitive so the staff
+  // dashboard only has one "what to look at" signal.
+  const shouldEscalate =
+    decision.action === autoReply.ACTION.ESCALATE ||
+    classified.urgencyLevel === 'critical' ||
+    classified.requiresHumanReview;
+
+  if (shouldEscalate) {
     try {
       const notifService = require('../notifications/notification-enhanced.service');
       if (notifService?.send) {
+        const priority =
+          decision.severity === 'critical' || classified.urgencyLevel === 'critical'
+            ? 'urgent'
+            : decision.severity === 'high'
+              ? 'high'
+              : 'medium';
         await notifService.send({
-          title: `⚠️ رسالة واتساب عاجلة من ${senderName}`,
+          title: `⚠️ رسالة واتساب — ${classified.intent} (${senderName})`,
           body: content.text?.slice(0, 300) || 'رسالة وسائط',
           type: 'alert',
-          priority: classified.urgencyLevel === 'critical' ? 'urgent' : 'high',
+          priority,
           category: 'whatsapp_alert',
           channels: ['inApp'],
-          metadata: { phone: fromPhone, intent: classified.intent, conversationId: conv?._id },
+          metadata: {
+            phone: fromPhone,
+            intent: classified.intent,
+            conversationId: conv?._id,
+            decision,
+            notify: decision.notify || null,
+          },
         });
       }
     } catch (err) {

@@ -42,7 +42,6 @@ const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
-const safeError = require('../utils/safeError');
 const logger = require('../utils/logger');
 
 const strategist = require('../services/measureSelectionStrategist.service');
@@ -52,6 +51,7 @@ const readinessGate = require('../services/measureReadinessGate.service');
 const cascade = require('../services/reassessmentReminderCascade.service');
 const linkageInsights = require('../services/goalLinkageInsights.service');
 const linkage = require('../services/goalMeasureLinkage.service');
+const measureAdmin = require('../services/measureAdministration.service');
 const { MeasureReassessmentTask } = require('../domains/goals/models/MeasureReassessmentTask');
 
 // All routes authenticated + branch-scoped.
@@ -66,7 +66,16 @@ function _toErrorResponse(err) {
   if (msg.match(/required|invalid|must be|cannot be|missing|not found/i)) {
     return { status: 400, body: { success: false, error: msg } };
   }
-  return { status: 500, body: safeError(err) };
+  // W257h-followup: safeError() signature is (res, err, context) — the
+  // previous one-arg call here ALWAYS crashed on the 500 path because
+  // it ran err.stack lookups against undefined `res`. Inline a
+  // production-safe body instead. Same fix pattern as W241 routes.
+  logger.error(`[measures-workflow] unexpected error: ${msg}`, { stack: err && err.stack });
+  const body = {
+    success: false,
+    error: process.env.NODE_ENV === 'production' ? 'حدث خطأ داخلي' : msg,
+  };
+  return { status: 500, body };
 }
 
 // ════════════════════════════════════════════════════════════════════════
@@ -510,6 +519,43 @@ router.get('/links/due-for-review', async (req, res) => {
 });
 
 // ════════════════════════════════════════════════════════════════════════
+// W257h — Anomalous-admins triage list (surfaces W257e/W257f flags)
+// ════════════════════════════════════════════════════════════════════════
+
+/**
+ * GET /anomalous-admins
+ *
+ * Query params:
+ *   branchId?         scope to one branch (defaults to req.branchId)
+ *   from?, to?        ISO-parsable date strings; bounds applicationDate
+ *   severity?         'low'|'medium'|'high' — INCLUSIVE-or-greater
+ *   flagType?         exact type filter (IMPOSSIBLY_FAST_ADMIN / etc.)
+ *   includeSuperseded include status='corrected' admins
+ *   limit?            max results, clamped [1, 500]
+ *
+ * Returns: { success: true, data: { items: [...], total } }
+ */
+router.get('/anomalous-admins', async (req, res) => {
+  try {
+    const opts = {
+      branchId: req.query.branchId || req.branchId || undefined,
+      from: req.query.from || undefined,
+      to: req.query.to || undefined,
+      severity: req.query.severity || undefined,
+      flagType: req.query.flagType || undefined,
+      includeSuperseded:
+        req.query.includeSuperseded === 'true' || req.query.includeSuperseded === '1',
+      limit: req.query.limit ? Number(req.query.limit) : undefined,
+    };
+    const out = await measureAdmin.listAnomalousAdmins(opts);
+    res.json({ success: true, data: out });
+  } catch (err) {
+    const r = _toErrorResponse(err);
+    res.status(r.status).json(r.body);
+  }
+});
+
+// ════════════════════════════════════════════════════════════════════════
 // Health
 // ════════════════════════════════════════════════════════════════════════
 
@@ -517,9 +563,9 @@ router.get('/_health', (req, res) => {
   res.json({
     success: true,
     data: {
-      wave: 'W226+W238+W239',
+      wave: 'W226+W238+W239+W257h',
       mountedAt: 'measures-workflow',
-      endpoints: 20,
+      endpoints: 21,
       services: [
         'W218 strategist',
         'W220 triggers',
@@ -528,6 +574,7 @@ router.get('/_health', (req, res) => {
         'W225 reminders (read-only)',
         'W235 linkage CRUD + decisions',
         'W237 linkage insights',
+        'W257h anomalous-admins triage',
       ],
     },
   });

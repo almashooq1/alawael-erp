@@ -132,6 +132,10 @@ const progressEntrySchema = new mongoose.Schema(
       type: String,
       enum: ['not_attempted', 'emerging', 'developing', 'achieved', 'maintained', 'regressed'],
     },
+    // W248 — currentProgress at this point in time. W216 sets this on each
+    // auto-update; legacy entries (pre-W248) leave it null. Used by the
+    // trend chart on /therapeutic-goals/[id].
+    currentProgressSnapshot: Number,
     recordedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     notes: String,
   },

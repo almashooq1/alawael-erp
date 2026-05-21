@@ -343,6 +343,44 @@ class GoalMeasureLinkageSvc {
   }
 
   /**
+   * W248 — return the goal's currentProgress history as a time series.
+   * Reads `progressHistory[]` populated by W216 measureGoalUpdater
+   * (which W236 + W248 enhanced to include weighted score + snapshot).
+   *
+   * Each entry: { date, value (raw admin score), rating (band),
+   *               currentProgressSnapshot (0-100 percent at this time),
+   *               notes }.
+   *
+   * Legacy entries lack `currentProgressSnapshot` (pre-W248); those
+   * are still returned so consumers see full history but charts should
+   * filter `.filter(p => p.currentProgressSnapshot != null)`.
+   */
+  async progressHistory({ goalId } = {}) {
+    if (!goalId) throw _err('[goalMeasureLinkage] goalId required', REASON_CODES.GOAL_NOT_FOUND);
+    const Goal = M.TherapeuticGoal();
+    if (!Goal) throw _err('[goalMeasureLinkage] model unavailable');
+    const goal = await Goal.findById(goalId, { progressHistory: 1, title: 1, currentProgress: 1 }).lean();
+    if (!goal) throw _err('goal not found', REASON_CODES.GOAL_NOT_FOUND);
+    const history = (goal.progressHistory || [])
+      .slice()
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+      .map(p => ({
+        date: p.date,
+        value: p.value,
+        rating: p.rating,
+        currentProgressSnapshot:
+          typeof p.currentProgressSnapshot === 'number' ? p.currentProgressSnapshot : null,
+        notes: p.notes,
+      }));
+    return {
+      goalId: String(goal._id),
+      title: goal.title,
+      currentProgress: goal.currentProgress ?? null,
+      history,
+    };
+  }
+
+  /**
    * Compute weighted progress for one or all objectives in a goal.
    * If `interpretations` not provided, fetches them per-link via the
    * W232 interpreter (lazy import).

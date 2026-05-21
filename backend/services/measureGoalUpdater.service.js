@@ -177,6 +177,9 @@ class MeasureGoalUpdaterSvc {
           date: input.applicationDate || new Date(),
           value: totalRawScore,
           rating: _ratingFor(finalProgress),
+          // W248 — snapshot of currentProgress at this admin time.
+          // Powers the trend chart on /therapeutic-goals/[id].
+          currentProgressSnapshot: finalProgress,
           recordedBy: input.assessorId || null,
           notes: input.applicationId
             ? `auto-update from MeasureApplication ${input.applicationId}` +

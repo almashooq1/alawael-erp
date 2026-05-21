@@ -458,6 +458,22 @@ router.get('/goals/:goalId/weighted-progress', async (req, res) => {
 });
 
 /**
+ * GET /goals/:goalId/progress-history (W248)
+ * Time-series of currentProgress for the trend chart on
+ * /therapeutic-goals/[id]. Reads progressHistory[] populated by W216
+ * measureGoalUpdater (which W236 + W248 enriched with currentProgressSnapshot).
+ */
+router.get('/goals/:goalId/progress-history', async (req, res) => {
+  try {
+    const out = await linkage.progressHistory({ goalId: req.params.goalId });
+    res.json({ success: true, data: out });
+  } catch (err) {
+    const r = _toErrorResponse(err);
+    res.status(r.status).json(r.body);
+  }
+});
+
+/**
  * GET /measures/:measureId/goals?includeUnlinked=true
  * Reverse lookup — which goals reference this measure?
  */

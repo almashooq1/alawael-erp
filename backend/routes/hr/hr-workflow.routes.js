@@ -62,7 +62,7 @@ function createHrWorkflowRouter({ logger, notifier = null, auditLogger = null, c
       const m = tryLoad(k, p);
       if (m) engineModels[k] = m;
     };
-    set('Employee', '../../models/Employee');
+    set('Employee', '../../models/HR/Employee');
     set('LeaveRequest', '../../models/LeaveRequest');
     set('Grievance', '../../models/HR/Grievance');
     set('EmploymentContract', '../../models/HR/EmploymentContract');

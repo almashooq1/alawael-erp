@@ -290,7 +290,7 @@ function createHrModulesRouter({ logger } = {}) {
   // ─── Org Chart ──────────────────────────────────────────────────────────────
   router.get('/org-chart', authorize(MANAGER), async (_req, res) => {
     try {
-      const Employee = tryLoad('Employee', '../../models/Employee');
+      const Employee = tryLoad('Employee', '../../models/HR/Employee');
       if (!Employee)
         return res.status(503).json({ success: false, message: 'Employee model unavailable' });
       const employees = await Employee.find({ status: 'active' })
@@ -362,7 +362,7 @@ function createHrModulesRouter({ logger } = {}) {
   router.get('/wps/export', authorize(ADMIN), async (req, res) => {
     try {
       const Payroll = tryLoad('Payroll', '../../models/payroll.model');
-      const Employee = tryLoad('Employee', '../../models/Employee');
+      const Employee = tryLoad('Employee', '../../models/HR/Employee');
       if (!Payroll || !Employee)
         return res.status(503).json({ success: false, message: 'models unavailable' });
       const now = new Date();

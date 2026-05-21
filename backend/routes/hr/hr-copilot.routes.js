@@ -41,7 +41,7 @@ function createHrCopilotRouter({ logger, copilot, auditLogger = null } = {}) {
       logger.warn(`[hr-copilot] ${key} unavailable: ${err.message}`);
     }
   }
-  tryLoad('Employee', '../../models/Employee');
+  tryLoad('Employee', '../../models/HR/Employee');
   tryLoad('PerformanceEvaluation', '../../models/PerformanceEvaluation');
   tryLoad('AuditLog', '../../models/AuditLog');
 

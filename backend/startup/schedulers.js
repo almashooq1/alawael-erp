@@ -167,7 +167,7 @@ function setupSchedulers({ isTestEnv }) {
           logger.warn(`[HrWorkflowScheduler] model ${key} unavailable: ${e.message}`);
         }
       };
-      tryModel('Employee', '../models/Employee');
+      tryModel('Employee', '../models/HR/Employee');
       tryModel('LeaveRequest', '../models/LeaveRequest');
       tryModel('Grievance', '../models/HR/Grievance');
       tryModel('EmploymentContract', '../models/HR/EmploymentContract');

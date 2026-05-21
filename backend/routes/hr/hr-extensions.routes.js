@@ -316,7 +316,7 @@ function createHrExtensionsRouter({ logger } = {}) {
 
   router.get('/saudi-compliance/snapshot', authorize(MANAGER_ROLES), async (_req, res) => {
     try {
-      const Employee = tryLoad('Employee', '../../models/Employee');
+      const Employee = tryLoad('Employee', '../../models/HR/Employee');
       if (!Employee)
         return res.status(503).json({ success: false, message: 'Employee model unavailable' });
 

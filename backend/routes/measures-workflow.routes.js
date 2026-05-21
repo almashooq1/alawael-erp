@@ -50,6 +50,7 @@ const triggerSvc = require('../services/reassessmentTriggerService.service');
 const lifecycle = require('../services/reassessmentLifecycle.service');
 const readinessGate = require('../services/measureReadinessGate.service');
 const cascade = require('../services/reassessmentReminderCascade.service');
+const linkageInsights = require('../services/goalLinkageInsights.service');
 const { MeasureReassessmentTask } = require('../domains/goals/models/MeasureReassessmentTask');
 
 // All routes authenticated + branch-scoped.
@@ -259,6 +260,87 @@ router.get('/reminders/beneficiary/:beneficiaryId', async (req, res) => {
 });
 
 // ════════════════════════════════════════════════════════════════════════
+// W237/W238 — Linkage insights (read-only)
+// ════════════════════════════════════════════════════════════════════════
+
+/**
+ * GET /insights/orphaned-measures?branchId=&limit=
+ * Active measures with zero ACTIVE goal-measure links — archival
+ * candidates for governance review.
+ */
+router.get('/insights/orphaned-measures', async (req, res) => {
+  try {
+    const limit = req.query.limit ? Math.min(500, Math.max(1, Number(req.query.limit))) : 50;
+    const out = await linkageInsights.findOrphanedMeasures({
+      branchId: req.query.branchId || undefined,
+      limit,
+    });
+    res.json({ success: true, data: out });
+  } catch (err) {
+    const r = _toErrorResponse(err);
+    res.status(r.status).json(r.body);
+  }
+});
+
+/**
+ * GET /insights/overloaded-measures?branchId=&threshold=&limit=
+ * Measures linked to more than `threshold` distinct goals — concentration
+ * risk if the measure deprecates.
+ */
+router.get('/insights/overloaded-measures', async (req, res) => {
+  try {
+    const threshold = req.query.threshold ? Math.max(1, Number(req.query.threshold)) : 50;
+    const limit = req.query.limit ? Math.min(500, Math.max(1, Number(req.query.limit))) : 50;
+    const out = await linkageInsights.findOverloadedMeasures({
+      branchId: req.query.branchId || undefined,
+      threshold,
+      limit,
+    });
+    res.json({ success: true, data: out });
+  } catch (err) {
+    const r = _toErrorResponse(err);
+    res.status(r.status).json(r.body);
+  }
+});
+
+/**
+ * GET /insights/kpis?branchId=&rationaleMinChars=
+ * Org-wide governance KPIs for `/admin/ops/goal-linkage` dashboard.
+ */
+router.get('/insights/kpis', async (req, res) => {
+  try {
+    const rationaleMinChars = req.query.rationaleMinChars
+      ? Math.max(1, Number(req.query.rationaleMinChars))
+      : 20;
+    const out = await linkageInsights.linkageKpis({
+      branchId: req.query.branchId || undefined,
+      rationaleMinChars,
+    });
+    res.json({ success: true, data: out });
+  } catch (err) {
+    const r = _toErrorResponse(err);
+    res.status(r.status).json(r.body);
+  }
+});
+
+/**
+ * GET /insights/link-type-distribution?branchId=
+ * Counts per linkType (PRIMARY/SECONDARY/SCREENING_ONLY/PROXY/
+ * CONTRAINDICATED), excludes unlinked.
+ */
+router.get('/insights/link-type-distribution', async (req, res) => {
+  try {
+    const out = await linkageInsights.linkTypeDistribution({
+      branchId: req.query.branchId || undefined,
+    });
+    res.json({ success: true, data: out });
+  } catch (err) {
+    const r = _toErrorResponse(err);
+    res.status(r.status).json(r.body);
+  }
+});
+
+// ════════════════════════════════════════════════════════════════════════
 // Health
 // ════════════════════════════════════════════════════════════════════════
 
@@ -266,15 +348,16 @@ router.get('/_health', (req, res) => {
   res.json({
     success: true,
     data: {
-      wave: 'W226',
+      wave: 'W226+W238',
       mountedAt: 'measures-workflow',
-      endpoints: 9,
+      endpoints: 13,
       services: [
         'W218 strategist',
         'W220 triggers',
         'W222 lifecycle',
         'W223 readinessGate',
         'W225 reminders (read-only)',
+        'W237 linkage insights',
       ],
     },
   });

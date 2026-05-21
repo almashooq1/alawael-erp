@@ -2130,7 +2130,7 @@ router.post(
         message: err instanceof Error ? err.message : 'failed to acknowledge task',
       });
     }
-  },
+  }
 );
 
 router.post(
@@ -2170,7 +2170,10 @@ router.post(
       try {
         const updated = await _measureAlertEngineSvc.acknowledge(req.params.alertId, userId);
         audit('clinical.measure_alert_acknowledged', req, {
-          actionDetails: { alertId: req.params.alertId, beneficiaryId: String(alert.beneficiaryId) },
+          actionDetails: {
+            alertId: req.params.alertId,
+            beneficiaryId: String(alert.beneficiaryId),
+          },
           affectedResources: [{ type: 'MeasureAlert', id: req.params.alertId }],
         });
         return res.json({
@@ -2195,7 +2198,7 @@ router.post(
         message: err instanceof Error ? err.message : 'failed to acknowledge alert',
       });
     }
-  },
+  }
 );
 
 router.post(
@@ -2251,7 +2254,96 @@ router.post(
         message: err instanceof Error ? err.message : 'failed to resolve alert',
       });
     }
-  },
+  }
+);
+
+// ── Alert dismiss (W250) ─────────────────────────────────────────────────────
+// Closes a W221 alert as false-positive / no-action-needed. Distinct from
+// `resolve` (which means "I addressed the underlying issue"). The W221
+// model enforces a non-empty dismissalReason via Wave-18 invariant; we
+// match the front-end audit standard (≥10 chars) to keep the audit log
+// useful.
+//
+// SoD note: same caseload-gating as ack/resolve — therapist dismisses
+// their own beneficiaries' alerts. The dismissedBy stamp is the audit
+// trail; if dismissals later prove abusive, they're attributable. No
+// "must differ from raiser" rule because the raiser is the engine, not
+// a user. If a stricter SoD ever lands (e.g. supervisor-only dismiss),
+// it goes behind a separate role gate, not in this route.
+router.post(
+  '/clinical-signals/alerts/:alertId/dismiss',
+  authenticate,
+  requireTherapistRole,
+  async (req, res) => {
+    try {
+      const userId = req.user?.id || req.user?._id || req.user?.userId;
+      const { employeeId, viewerMode } = await resolveTargetEmployee(req, { select: '_id' });
+      if (!employeeId) {
+        if (viewerMode === 'admin_no_target') {
+          return res
+            .status(404)
+            .json({ error: 'NoTargetTherapist', message: 'اختر معالجاً قبل اتخاذ إجراء.' });
+        }
+        return res
+          .status(404)
+          .json({ error: 'EmployeeNotFound', message: 'No Employee record for this user.' });
+      }
+      if (!isValidObjectId(req.params.alertId)) {
+        return res
+          .status(400)
+          .json({ error: 'InvalidId', message: 'alertId is not a valid ObjectId' });
+      }
+      const reason = typeof req.body?.reason === 'string' ? req.body.reason.trim() : '';
+      if (reason.length < 10) {
+        return res.status(400).json({
+          error: 'InvalidReason',
+          message: 'سبب الصرف مطلوب (١٠ أحرف على الأقل).',
+        });
+      }
+      const MeasureAlert = require('../domains/goals/models/MeasureAlert');
+      const alert = await MeasureAlert.findById(req.params.alertId)
+        .select('_id beneficiaryId status')
+        .lean();
+      const owned = await _ownsCaseloadItem(alert, employeeId, viewerMode === 'admin_targeted');
+      if (!owned) {
+        return res.status(404).json({
+          error: 'NotFound',
+          message: 'alert not found or beneficiary not on your caseload',
+        });
+      }
+      try {
+        const updated = await _measureAlertEngineSvc.dismiss(req.params.alertId, {
+          actorId: userId,
+          reason,
+        });
+        audit('clinical.measure_alert_dismissed', req, {
+          actionDetails: {
+            alertId: req.params.alertId,
+            beneficiaryId: String(alert.beneficiaryId),
+            reasonLen: reason.length,
+          },
+          affectedResources: [{ type: 'MeasureAlert', id: req.params.alertId }],
+        });
+        return res.json({
+          id: req.params.alertId,
+          status: updated?.status || 'dismissed',
+          dismissedAt: updated?.dismissedAt ? new Date(updated.dismissedAt).toISOString() : null,
+        });
+      } catch (svcErr) {
+        // Service throws on terminal status (resolved/dismissed) — surface
+        // as 409 so the UI shows "أُغلق سابقاً" instead of a 500.
+        return res.status(409).json({
+          error: 'Conflict',
+          message: svcErr instanceof Error ? svcErr.message : 'cannot dismiss alert',
+        });
+      }
+    } catch (err) {
+      return res.status(500).json({
+        error: 'InternalError',
+        message: err instanceof Error ? err.message : 'failed to dismiss alert',
+      });
+    }
+  }
 );
 
 module.exports = router;

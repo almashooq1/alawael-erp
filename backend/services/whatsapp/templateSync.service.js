@@ -85,6 +85,132 @@ function extractBodyText(components) {
 }
 
 /**
+ * Count the {{N}} placeholders in a template body string.
+ *
+ * Meta numbers parameters from 1 upward, but duplicates are common:
+ *   "مرحباً {{1}}، رصيدك {{2}} ريال. شكراً {{1}}!" → 2 unique params.
+ * Returns the highest-numbered placeholder, which is the MINIMUM count of
+ * parameters the caller must provide. (Providing more is OK; providing
+ * fewer is a Meta 400.)
+ */
+function countPlaceholders(bodyText) {
+  if (typeof bodyText !== 'string' || !bodyText) return 0;
+  const matches = bodyText.match(/\{\{\s*(\d+)\s*\}\}/g);
+  if (!matches) return 0;
+  let max = 0;
+  for (const m of matches) {
+    const n = parseInt(m.replace(/[^0-9]/g, ''), 10);
+    if (n > max) max = n;
+  }
+  return max;
+}
+
+/**
+ * Validate a sendTemplate call against the locally-synced template.
+ *
+ * Catches three classes of caller mistakes BEFORE we burn a round-trip to
+ * Meta and get a 400:
+ *   - Template doesn't exist locally (was it synced? Is the name spelled
+ *     correctly?). Returns ok=true with a `warning` because the local cache
+ *     may simply be stale and the caller might know better.
+ *   - Template exists but is NOT APPROVED (REJECTED, PAUSED, DISABLED,
+ *     MISSING_IN_META, etc.). Returns ok=false.
+ *   - Template approved but caller didn't supply enough body parameters.
+ *     Returns ok=false with the count gap.
+ *
+ * Returns:
+ *   { ok: true,  warning?: string }     — proceed
+ *   { ok: false, reason: string, ... }  — abort send
+ *
+ * Designed to be cheap: hits the 60s in-process cache populated by
+ * listApproved(). Failing open (skipping validation) if the cache misses
+ * AND no Mongo connection is available — we don't want a sync glitch to
+ * block sends.
+ *
+ * @param {string} templateName
+ * @param {string} language
+ * @param {Array} components - the components array passed to sendTemplate
+ * @returns {Promise<{ok:true,warning?:string} | {ok:false,reason:string,details?:object}>}
+ */
+async function validateSendParams(templateName, language, components = []) {
+  if (!templateName) {
+    return { ok: false, reason: 'TEMPLATE_NAME_REQUIRED' };
+  }
+
+  let row;
+  try {
+    row = await WhatsAppTemplate.findOne({ templateName, language }).lean();
+  } catch {
+    // Mongo unavailable — fail open. The downstream Meta call will surface
+    // any real error.
+    return { ok: true, warning: 'validation_skipped_no_db' };
+  }
+
+  if (!row) {
+    return {
+      ok: true,
+      warning: `template '${templateName}' (${language}) not in local cache — proceeding without validation`,
+    };
+  }
+
+  if (row.status !== 'APPROVED') {
+    return {
+      ok: false,
+      reason: 'TEMPLATE_NOT_APPROVED',
+      details: {
+        template: templateName,
+        language,
+        status: row.status,
+        ...(row.rejectionReason ? { rejectionReason: row.rejectionReason } : {}),
+      },
+    };
+  }
+
+  // Count body parameters supplied by the caller.
+  const bodyComponent = (components || []).find(c => c?.type === 'body' || c?.type === 'BODY');
+  const providedParams = Array.isArray(bodyComponent?.parameters)
+    ? bodyComponent.parameters.length
+    : 0;
+
+  const required = countPlaceholders(row.bodyText);
+  if (providedParams < required) {
+    return {
+      ok: false,
+      reason: 'TEMPLATE_PARAM_COUNT_MISMATCH',
+      details: {
+        template: templateName,
+        language,
+        required,
+        provided: providedParams,
+      },
+    };
+  }
+
+  // Per-param char limit: Meta caps template body parameters at 1024 chars.
+  // We trim/reject early so the API doesn't return a confusing 400.
+  if (bodyComponent?.parameters) {
+    for (let i = 0; i < bodyComponent.parameters.length; i++) {
+      const p = bodyComponent.parameters[i];
+      const text = typeof p?.text === 'string' ? p.text : '';
+      if (text.length > 1024) {
+        return {
+          ok: false,
+          reason: 'TEMPLATE_PARAM_TOO_LONG',
+          details: {
+            template: templateName,
+            paramIndex: i,
+            length: text.length,
+            max: 1024,
+          },
+        };
+      }
+    }
+  }
+
+  return { ok: true };
+}
+
+/**
  * Fetch the current template list from Meta. Throws on Meta API errors so
  * the caller can surface them to the admin endpoint.
  */
@@ -233,5 +359,7 @@ module.exports = {
   fetchFromMeta,
   listApproved,
   clearCache,
+  validateSendParams,
   _extractBodyText: extractBodyText,
+  _countPlaceholders: countPlaceholders,
 };

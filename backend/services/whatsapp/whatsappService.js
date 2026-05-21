@@ -193,6 +193,38 @@ async function sendText(to, text, meta = {}) {
  * @param {Array}  [components] - header/body/button component parameters
  */
 async function sendTemplate(to, templateName, language = 'ar', components = []) {
+  // Pre-flight validation against the locally-synced templates table (W272).
+  // Fails fast on TEMPLATE_NOT_APPROVED / TEMPLATE_PARAM_COUNT_MISMATCH /
+  // TEMPLATE_PARAM_TOO_LONG, so the caller gets a precise reason instead of
+  // a Meta 400. Lazy-loaded to avoid a circular require with templateSync
+  // → whatsappService chain.
+  try {
+    const templateSync = require('./templateSync.service');
+    if (templateSync && typeof templateSync.validateSendParams === 'function') {
+      const v = await templateSync.validateSendParams(templateName, language, components);
+      if (!v.ok) {
+        const err = Object.assign(new Error(`Template validation failed: ${v.reason}`), {
+          statusCode: 400,
+          code: v.reason,
+          details: v.details,
+        });
+        throw err;
+      }
+      if (v.warning) {
+        logger.warn(`[WhatsApp] ${v.warning}`);
+      }
+    }
+  } catch (err) {
+    // Re-throw validation errors so the caller (route + withSendGuards)
+    // surfaces them. Defensive: if the validation module itself throws
+    // (e.g. circular require, model unavailable), swallow + log + proceed
+    // so a sync glitch doesn't block sends.
+    if (err && err.code && typeof err.code === 'string' && err.code.startsWith('TEMPLATE_')) {
+      throw err;
+    }
+    logger.debug(`[WhatsApp] validateSendParams unavailable: ${err?.message}`);
+  }
+
   if (!cfg().enabled) {
     logger.info(`[WhatsApp:stub] sendTemplate → ${maskPhone(to)}: ${templateName}`);
     return { success: true, stub: true, messageId: `stub-tmpl-${Date.now()}` };
@@ -434,6 +466,12 @@ async function getTemplates() {
 /**
  * Resolve a Meta media ID to a temporary download URL (valid ~5 minutes).
  * Inbound messages give us only `mediaId`; this endpoint converts it.
+ *
+ * This is the UNCACHED path — every call hits Meta. For most consumers
+ * use `getCachedMediaUrl` instead; it absorbs bursts and refreshes on
+ * expiry. Kept separate so callers that NEED a fresh resolve (e.g. a
+ * retry after a 404) can still bypass the cache.
+ *
  * @param {string} mediaId
  * @returns {Promise<{ url:string, mime_type?:string, sha256?:string, file_size?:number, id:string }>}
  */
@@ -443,6 +481,78 @@ async function getMediaUrl(mediaId) {
   }
   if (!mediaId) throw new Error('mediaId required');
   return request('GET', `/${mediaId}`);
+}
+
+// ─── In-process media URL cache (W272) ─────────────────────────────────────
+// Meta media URLs expire in ~5 minutes. We don't persist them — the cost of
+// a refetch (one GET) is small and the surface area of a stored expired URL
+// is unbounded. The cache exists only to absorb bursts: e.g. a webhook
+// arrives with media, the conversation log writes once, then a re-render
+// of the admin dashboard reads twice within the same minute.
+//
+// TTL = 60s (well under Meta's 5min hard expiry). Cap at 1000 entries so a
+// runaway loop can't OOM the process; LRU eviction by oldest insertedAt.
+//
+// NOT process-shared. In a multi-instance deploy, each replica caches
+// independently. That's fine — the worst case is N redundant Meta calls
+// for a brief window, well under the rate cap.
+const _mediaCache = new Map(); // mediaId → { url, fetchedAt, expiresAt, meta }
+const _MEDIA_CACHE_TTL_MS = 60 * 1000;
+const _MEDIA_CACHE_MAX = 1000;
+
+function _trimMediaCache() {
+  if (_mediaCache.size <= _MEDIA_CACHE_MAX) return;
+  // Drop the oldest 10% in one pass (cheaper than per-insert eviction).
+  const target = Math.floor(_MEDIA_CACHE_MAX * 0.9);
+  const keys = Array.from(_mediaCache.keys());
+  while (_mediaCache.size > target && keys.length) {
+    const k = keys.shift();
+    if (k) _mediaCache.delete(k);
+  }
+}
+
+/**
+ * Cached resolve of a Meta media ID. Returns the same shape as
+ * `getMediaUrl` plus a `cached` boolean for observability.
+ *
+ * Use this from webhook handlers / conversation views / AI summarization —
+ * anywhere the URL is needed but a fresh round-trip per render is wasteful.
+ * On cache miss OR expiry, calls `getMediaUrl` and caches the result.
+ *
+ * `{ forceRefresh: true }` bypasses the cache for callers that just got
+ * a 404 from a stale URL.
+ *
+ * @param {string} mediaId
+ * @param {Object} [opts]
+ * @param {boolean} [opts.forceRefresh=false]
+ * @returns {Promise<{ url:string, mime_type?:string, sha256?:string, file_size?:number, id:string, cached:boolean }>}
+ */
+async function getCachedMediaUrl(mediaId, { forceRefresh = false } = {}) {
+  if (!mediaId) throw new Error('mediaId required');
+  const now = Date.now();
+  if (!forceRefresh) {
+    const hit = _mediaCache.get(mediaId);
+    if (hit && hit.expiresAt > now) {
+      return { ...hit.meta, cached: true };
+    }
+  }
+  const meta = await getMediaUrl(mediaId);
+  _mediaCache.set(mediaId, {
+    url: meta.url,
+    fetchedAt: now,
+    expiresAt: now + _MEDIA_CACHE_TTL_MS,
+    meta,
+  });
+  _trimMediaCache();
+  return { ...meta, cached: false };
+}
+
+function clearMediaCache() {
+  _mediaCache.clear();
+}
+
+function getMediaCacheStats() {
+  return { size: _mediaCache.size, maxSize: _MEDIA_CACHE_MAX, ttlMs: _MEDIA_CACHE_TTL_MS };
 }
 
 /**
@@ -456,7 +566,9 @@ async function downloadMedia(mediaId) {
     // Return a minimal PNG placeholder buffer so callers don't crash in stub mode.
     return Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
   }
-  const meta = await getMediaUrl(mediaId);
+  // Use the cached resolver to absorb bursts (W272). On a 5xx/404 the
+  // caller can refetch with { forceRefresh: true } via getCachedMediaUrl.
+  const meta = await getCachedMediaUrl(mediaId);
   if (!meta?.url) throw new Error('Media URL missing in Meta response');
   return downloadBinary(meta.url);
 }
@@ -548,6 +660,9 @@ const whatsappService = {
   getPhoneInfo,
   getTemplates,
   getMediaUrl,
+  getCachedMediaUrl,
+  clearMediaCache,
+  getMediaCacheStats,
   downloadMedia,
   assertCanMessage,
   normalizePhone,

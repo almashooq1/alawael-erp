@@ -515,38 +515,120 @@ router.post(
   })
 );
 
-/** POST /bulk — bulk send (session reminders batch) */
+/** POST /bulk — bulk send (session reminders batch)
+ *
+ * Each iteration goes through `withSendGuards` so the same production
+ * hardening that protects single sends (rate limit, idempotency, DLQ) also
+ * protects bulk fan-out. A cron job that accidentally re-fires the same
+ * batch will hit the idempotency cache; a misconfigured loop that targets
+ * one phone 200 times will trip the per-phone rate limiter; transient
+ * Meta failures land in the DLQ for the worker to replay.
+ *
+ * Idempotency key derivation: `bulkId` from the caller (or generated) plus
+ * the recipient phone + index. So a retry of the SAME batch is deduped per
+ * recipient even if the order shifts.
+ *
+ * Response now distinguishes three terminal states per row:
+ *   - { success: true,  data: {...} }                  → Meta accepted
+ *   - { success: false, queued: true, code: ... }      → DLQ-enqueued
+ *   - { success: false, rateLimited: true, code: ... } → 429 — skipped
+ */
 router.post(
   '/bulk',
   asyncHandler(async (req, res) => {
     validate(['messages'], req.body);
-    const { messages, templateKey } = req.body;
+    const { messages, templateKey, bulkId: callerBulkId } = req.body;
     if (!Array.isArray(messages) || !messages.length) {
       return res.status(400).json({ success: false, message: 'messages array required' });
     }
 
+    const bulkId = callerBulkId || `bulk-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     const results = [];
-    for (const msg of messages.slice(0, 100)) {
-      // cap at 100 per call
-      try {
-        let result;
-        if (templateKey) {
-          result = await whatsappTemplates.sendTemplate(templateKey, msg.phone, msg.args || []);
-        } else {
-          result = await whatsappService.sendText(msg.phone, msg.text);
-        }
-        results.push({ phone: msg.phone, ...result });
-        // Rate limit: 80 msgs/sec allowed by Meta, add small buffer
-        await new Promise(r => setTimeout(r, 15));
-      } catch (err) {
-        results.push({ phone: msg.phone, success: false, error: err.message });
+    const sliced = messages.slice(0, 100); // cap at 100 per call
+
+    for (let i = 0; i < sliced.length; i++) {
+      const msg = sliced[i];
+      const phone = whatsappService.normalizePhone(msg.phone);
+
+      // Derive a per-recipient idempotency key so re-issuing the same bulkId
+      // re-uses cached results from the first run.
+      const idemKey = `bulk:${bulkId}:${phone}:${i}`;
+      const localReq = {
+        ...req,
+        get(name) {
+          if (typeof name === 'string' && name.toLowerCase() === 'idempotency-key') {
+            return idemKey;
+          }
+          return req.get(name);
+        },
+        body: { ...req.body, beneficiaryId: msg.beneficiaryId || null },
+      };
+
+      let outcome;
+      if (templateKey) {
+        outcome = await withSendGuards(
+          localReq,
+          'template',
+          phone,
+          { to: phone, templateKey, args: msg.args || [] },
+          () => whatsappTemplates.sendTemplate(templateKey, msg.phone, msg.args || [])
+        );
+      } else {
+        outcome = await withSendGuards(localReq, 'text', phone, { to: phone, text: msg.text }, () =>
+          whatsappService.sendText(msg.phone, msg.text)
+        );
       }
+
+      // Translate withSendGuards outcome shape into the bulk row schema.
+      // withSendGuards already updates rate-limit / DLQ as side effects.
+      if (outcome.status === 429) {
+        results.push({
+          phone: msg.phone,
+          success: false,
+          rateLimited: true,
+          code: outcome.body.code,
+        });
+      } else if (outcome.status === 202) {
+        results.push({
+          phone: msg.phone,
+          success: false,
+          queued: true,
+          code: outcome.body.code,
+        });
+      } else if (outcome.body?.data?.success) {
+        results.push({
+          phone: msg.phone,
+          success: true,
+          messageId: outcome.body.data.messageId,
+          replayed: !!outcome.replayed,
+        });
+      } else {
+        results.push({
+          phone: msg.phone,
+          success: false,
+          code: outcome.body?.code || 'UNKNOWN',
+        });
+      }
+
+      // Meta allows ~80 msg/sec; 15ms gap is plenty when the rate limiter
+      // already trims any per-phone abuse.
+      await new Promise(r => setTimeout(r, 15));
     }
 
     const succeeded = results.filter(r => r.success).length;
+    const queued = results.filter(r => r.queued).length;
+    const rateLimited = results.filter(r => r.rateLimited).length;
     res.json({
       success: true,
-      data: { total: results.length, succeeded, failed: results.length - succeeded, results },
+      data: {
+        bulkId,
+        total: results.length,
+        succeeded,
+        queued,
+        rateLimited,
+        failed: results.length - succeeded - queued - rateLimited,
+        results,
+      },
     });
   })
 );

@@ -25,6 +25,11 @@
  *                                                   → W242 MOHRSD CSV
  *                                                    (Excel-compatible
  *                                                    attachment)
+ *   GET   /clinical-report/:beneficiaryId
+ *           ?includeCorrections=false               → W245 clinical
+ *                                                    deep-dive (full
+ *                                                    statistical detail
+ *                                                    + admin history)
  *
  * Auth: all data routes require authenticate + requireBranchAccess.
  * _health is public (matches the W226 convention).
@@ -49,6 +54,7 @@ const logger = require('../utils/logger');
 const aggregator = require('../services/measureOutcomesAggregator.service');
 const familyReport = require('../services/measureFamilyReport.service');
 const ministryReport = require('../services/measureMinistryReport.service');
+const clinicalReport = require('../services/measureClinicalReport.service');
 
 // ─── Health check (public — matches W226 convention) ─────────────
 router.get('/_health', (_req, res) => {
@@ -296,6 +302,55 @@ router.get('/ministry-report/branch/:branchId/csv/:year/:month', async (req, res
     return res.send(csv);
   } catch (err) {
     logger.warn('[measures-outcomes] /ministry-report/.../csv failed: %s', err.message);
+    const r = _toErrorResponse(err);
+    return res.status(r.status).json(r.body);
+  }
+});
+
+// ════════════════════════════════════════════════════════════════════
+// W246 — Clinical deep-dive report (W245 service surface)
+// ════════════════════════════════════════════════════════════════════
+
+/**
+ * GET /clinical-report/:beneficiaryId
+ *
+ * Returns the W245 clinical-deep-dive report — beneficiary-level
+ * payload with FULL statistical detail (trend slope+CI95+R²,
+ * frozen MCID/SDC snapshots, complete admin history with version
+ * pinning, citations). Used by physicians + insurance review.
+ *
+ * Query:
+ *   includeCorrections=false  → drop superseded records from
+ *                               adminHistory (default true keeps
+ *                               them for full audit trail).
+ *
+ * Responses:
+ *   200 → { success: true, data: <W245 report shape> }
+ *   400 → missing beneficiaryId
+ *   503 → models_unavailable propagated from W229 aggregator
+ *   500 → unexpected failure
+ *
+ * Note: this is the THIRD audience layer of the trilogy. Compare:
+ *   /family-report/:id        (W241 — hides jargon)
+ *   /ministry-report/branch/* (W244 — branch monthly rollup)
+ *   /clinical-report/:id      (W246 — beneficiary deep-dive)
+ */
+router.get('/clinical-report/:beneficiaryId', async (req, res) => {
+  try {
+    const { beneficiaryId } = req.params;
+    if (!beneficiaryId) {
+      return res.status(400).json({ success: false, error: 'beneficiaryId required' });
+    }
+    // includeCorrections is opt-OUT (default true) — the medical
+    // record wants the full audit trail unless explicitly stripped.
+    const opts = {};
+    if (req.query.includeCorrections === 'false' || req.query.includeCorrections === '0') {
+      opts.includeCorrections = false;
+    }
+    const out = await clinicalReport.generate(beneficiaryId, opts);
+    return _passThroughOrError(out, res);
+  } catch (err) {
+    logger.warn('[measures-outcomes] /clinical-report failed: %s', err.message);
     const r = _toErrorResponse(err);
     return res.status(r.status).json(r.body);
   }

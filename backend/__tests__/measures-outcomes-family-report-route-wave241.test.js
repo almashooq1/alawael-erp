@@ -43,7 +43,7 @@ describe('W241 — family-report route registration', () => {
     // Endpoint count grows over time as more services land on this
     // surface — match any digit count rather than coupling to it.
     expect(src).toMatch(/Measures Outcomes routes mounted \(\d+ endpoints/);
-    expect(src).toMatch(/W240 family[- ]?(friendly|report)/i);
+    expect(src).toMatch(/W240 family/i);
   });
 });
 

@@ -95,6 +95,12 @@ function weightedProgress(links, interpretations) {
       category: cat || 'NO_INTERPRETATION',
       score: baseScore,
       contributedToAvg: baseScore != null && weight > 0,
+      // W243 — origIndex into goal.objectives[N].measureLinks[]. Callers
+      // that enrich `links` with `_origIndex` (see service layer) get this
+      // bubbled to the UI so the review/unlink modal can target the right
+      // slot in the un-filtered array. Falls back to null for legacy
+      // callers that pass raw filtered arrays.
+      linkIndex: typeof link._origIndex === 'number' ? link._origIndex : null,
     });
 
     if (baseScore == null || weight <= 0) continue;

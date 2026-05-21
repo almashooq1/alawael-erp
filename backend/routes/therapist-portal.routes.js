@@ -2044,4 +2044,214 @@ router.get(
   }
 );
 
+// ── Clinical signals mutations (W241) ─────────────────────────────────────────
+// Lets the therapist close out the loop on items surfaced by W237/W239:
+//   POST .../tasks/:taskId/ack    — acknowledge a W214 reassessment task
+//   POST .../alerts/:alertId/ack  — acknowledge a W221 measure alert
+//   POST .../alerts/:alertId/resolve — resolve a W221 measure alert
+//
+// Dismiss/cancel intentionally NOT exposed here — per CBAHI/SoD review
+// those transitions likely need an actor different from the original
+// raiser. Add later behind a separate role check if the workflow needs it.
+//
+// Authorization: same caseload predicate as the read endpoints — fetch
+// the doc, verify Appointment.exists for (target therapist, beneficiary,
+// 12-month window). Admin viewers (?employeeId=…) check against the
+// previewed therapist, so admin can't act outside that scope either.
+
+const _reassessmentLifecycleSvc = require('../services/reassessmentLifecycle.service');
+const _measureAlertEngineSvc = require('../services/measureAlertEngine.service');
+
+async function _ownsCaseloadItem(item, employeeId, skipCaseloadCheck) {
+  if (!item) return false;
+  if (skipCaseloadCheck) return true;
+  const since = new Date();
+  since.setMonth(since.getMonth() - 12);
+  const owned = await Appointment().exists({
+    therapist: employeeId,
+    beneficiary: item.beneficiaryId,
+    date: { $gte: since },
+  });
+  return Boolean(owned);
+}
+
+router.post(
+  '/clinical-signals/tasks/:taskId/ack',
+  authenticate,
+  requireTherapistRole,
+  async (req, res) => {
+    try {
+      const userId = req.user?.id || req.user?._id || req.user?.userId;
+      const { employeeId, viewerMode } = await resolveTargetEmployee(req, { select: '_id' });
+      if (!employeeId) {
+        if (viewerMode === 'admin_no_target') {
+          return res
+            .status(404)
+            .json({ error: 'NoTargetTherapist', message: 'اختر معالجاً قبل اتخاذ إجراء.' });
+        }
+        return res
+          .status(404)
+          .json({ error: 'EmployeeNotFound', message: 'No Employee record for this user.' });
+      }
+      if (!isValidObjectId(req.params.taskId)) {
+        return res
+          .status(400)
+          .json({ error: 'InvalidId', message: 'taskId is not a valid ObjectId' });
+      }
+      const MeasureReassessmentTask = require('../domains/goals/models/MeasureReassessmentTask');
+      const task = await MeasureReassessmentTask.findById(req.params.taskId)
+        .select('_id beneficiaryId status')
+        .lean();
+      const owned = await _ownsCaseloadItem(task, employeeId, viewerMode === 'admin_targeted');
+      if (!owned) {
+        return res.status(404).json({
+          error: 'NotFound',
+          message: 'task not found or beneficiary not on your caseload',
+        });
+      }
+      const updated = await _reassessmentLifecycleSvc.acknowledgeTask({
+        taskId: req.params.taskId,
+        actor: { userId },
+      });
+      audit('clinical.measure_task_acknowledged', req, {
+        actionDetails: { taskId: req.params.taskId, beneficiaryId: String(task.beneficiaryId) },
+        affectedResources: [{ type: 'MeasureReassessmentTask', id: req.params.taskId }],
+      });
+      return res.json({
+        id: String(updated._id || updated.id),
+        status: updated.status,
+        acknowledgedAt: updated.acknowledgedAt
+          ? new Date(updated.acknowledgedAt).toISOString()
+          : null,
+      });
+    } catch (err) {
+      return res.status(500).json({
+        error: 'InternalError',
+        message: err instanceof Error ? err.message : 'failed to acknowledge task',
+      });
+    }
+  },
+);
+
+router.post(
+  '/clinical-signals/alerts/:alertId/ack',
+  authenticate,
+  requireTherapistRole,
+  async (req, res) => {
+    try {
+      const userId = req.user?.id || req.user?._id || req.user?.userId;
+      const { employeeId, viewerMode } = await resolveTargetEmployee(req, { select: '_id' });
+      if (!employeeId) {
+        if (viewerMode === 'admin_no_target') {
+          return res
+            .status(404)
+            .json({ error: 'NoTargetTherapist', message: 'اختر معالجاً قبل اتخاذ إجراء.' });
+        }
+        return res
+          .status(404)
+          .json({ error: 'EmployeeNotFound', message: 'No Employee record for this user.' });
+      }
+      if (!isValidObjectId(req.params.alertId)) {
+        return res
+          .status(400)
+          .json({ error: 'InvalidId', message: 'alertId is not a valid ObjectId' });
+      }
+      const MeasureAlert = require('../domains/goals/models/MeasureAlert');
+      const alert = await MeasureAlert.findById(req.params.alertId)
+        .select('_id beneficiaryId status')
+        .lean();
+      const owned = await _ownsCaseloadItem(alert, employeeId, viewerMode === 'admin_targeted');
+      if (!owned) {
+        return res.status(404).json({
+          error: 'NotFound',
+          message: 'alert not found or beneficiary not on your caseload',
+        });
+      }
+      try {
+        const updated = await _measureAlertEngineSvc.acknowledge(req.params.alertId, userId);
+        audit('clinical.measure_alert_acknowledged', req, {
+          actionDetails: { alertId: req.params.alertId, beneficiaryId: String(alert.beneficiaryId) },
+          affectedResources: [{ type: 'MeasureAlert', id: req.params.alertId }],
+        });
+        return res.json({
+          id: req.params.alertId,
+          status: updated?.status || 'acknowledged',
+          acknowledgedAt: updated?.acknowledgedAt
+            ? new Date(updated.acknowledgedAt).toISOString()
+            : null,
+        });
+      } catch (svcErr) {
+        // Alert engine throws when status !== 'open' (already resolved /
+        // dismissed). Translate to 409 so the UI shows "already handled"
+        // instead of a generic 500.
+        return res.status(409).json({
+          error: 'Conflict',
+          message: svcErr instanceof Error ? svcErr.message : 'cannot acknowledge alert',
+        });
+      }
+    } catch (err) {
+      return res.status(500).json({
+        error: 'InternalError',
+        message: err instanceof Error ? err.message : 'failed to acknowledge alert',
+      });
+    }
+  },
+);
+
+router.post(
+  '/clinical-signals/alerts/:alertId/resolve',
+  authenticate,
+  requireTherapistRole,
+  async (req, res) => {
+    try {
+      const userId = req.user?.id || req.user?._id || req.user?.userId;
+      const { employeeId, viewerMode } = await resolveTargetEmployee(req, { select: '_id' });
+      if (!employeeId) {
+        if (viewerMode === 'admin_no_target') {
+          return res
+            .status(404)
+            .json({ error: 'NoTargetTherapist', message: 'اختر معالجاً قبل اتخاذ إجراء.' });
+        }
+        return res
+          .status(404)
+          .json({ error: 'EmployeeNotFound', message: 'No Employee record for this user.' });
+      }
+      if (!isValidObjectId(req.params.alertId)) {
+        return res
+          .status(400)
+          .json({ error: 'InvalidId', message: 'alertId is not a valid ObjectId' });
+      }
+      const MeasureAlert = require('../domains/goals/models/MeasureAlert');
+      const alert = await MeasureAlert.findById(req.params.alertId)
+        .select('_id beneficiaryId status')
+        .lean();
+      const owned = await _ownsCaseloadItem(alert, employeeId, viewerMode === 'admin_targeted');
+      if (!owned) {
+        return res.status(404).json({
+          error: 'NotFound',
+          message: 'alert not found or beneficiary not on your caseload',
+        });
+      }
+      const updated = await _measureAlertEngineSvc.resolve(req.params.alertId, {
+        actorId: userId,
+        mode: 'manual',
+      });
+      audit('clinical.measure_alert_resolved', req, {
+        actionDetails: { alertId: req.params.alertId, beneficiaryId: String(alert.beneficiaryId) },
+        affectedResources: [{ type: 'MeasureAlert', id: req.params.alertId }],
+      });
+      return res.json({
+        id: req.params.alertId,
+        status: updated?.status || 'resolved',
+        resolvedAt: updated?.resolvedAt ? new Date(updated.resolvedAt).toISOString() : null,
+      });
+    } catch (err) {
+      return res.status(500).json({
+        error: 'InternalError',
+        message: err instanceof Error ? err.message : 'failed to resolve alert',
+      });
+    }
+  },
+);
+
 module.exports = router;

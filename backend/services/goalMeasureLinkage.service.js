@@ -335,9 +335,19 @@ class GoalMeasureLinkageSvc {
 
     for (let objIdx = 0; objIdx < (goal.objectives || []).length; objIdx++) {
       const obj = goal.objectives[objIdx];
-      const contributing = (obj.measureLinks || []).filter(
-        l => l.linkType !== 'CONTRAINDICATED' && l.status !== 'unlinked'
-      );
+      const allLinks = obj.measureLinks || [];
+      // W243 — enrich contributing entries with their origIndex into the
+      // un-filtered measureLinks[] so the UI can call reviewLink/unlinkLink
+      // with the correct linkIndex slot. Plain object form so rules.js can
+      // read _origIndex without Mongoose subdoc magic.
+      const contributing = [];
+      for (let i = 0; i < allLinks.length; i++) {
+        const l = allLinks[i];
+        if (l.linkType === 'CONTRAINDICATED' || l.status === 'unlinked') continue;
+        const obj_ = typeof l.toObject === 'function' ? l.toObject() : { ...l };
+        obj_._origIndex = i;
+        contributing.push(obj_);
+      }
       let interpretationsMap = interpretations;
       if (!interpretationsMap && interpreter) {
         interpretationsMap = new Map();

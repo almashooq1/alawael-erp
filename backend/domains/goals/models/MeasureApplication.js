@@ -246,6 +246,24 @@ const measureApplicationSchema = new mongoose.Schema(
     reviewedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     reviewedAt: Date,
 
+    // ── Anomaly flags (W257e wiring of W248c detector) ────────────
+    // Observability-only — populated by measureAdministration service
+    // at create time using measureAdminAnomalyDetector.service.js
+    // (W248c). Does NOT block save; surfaces data-quality concerns
+    // (impossibly-fast admin, out-of-range score, implausible delta
+    // vs frozen SDC, pattern-filling) for human review via dashboard.
+    // Empty array on clean admins.
+    anomalyFlags: [
+      {
+        type: { type: String },
+        severity: { type: String, enum: ['low', 'medium', 'high'] },
+        evidence_ar: String,
+        evidence_en: String,
+        fields: { type: mongoose.Schema.Types.Mixed },
+        detectedAt: { type: Date, default: Date.now },
+      },
+    ],
+
     // ── Multi-tenant ──────────────────────────────────────────────
     branchId: { type: mongoose.Schema.Types.ObjectId, ref: 'Branch' },
     organizationId: { type: mongoose.Schema.Types.ObjectId, ref: 'Organization' },

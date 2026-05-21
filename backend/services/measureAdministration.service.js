@@ -48,6 +48,14 @@ function _scoringEngine() {
   return require('./measureScoringEngine.service');
 }
 
+// W257e wiring of W248c anomaly detector. Pure observability —
+// surfaces data-quality concerns onto the admin doc as anomalyFlags[]
+// without blocking save. Lazy-required so tests that mock individual
+// services stay isolated.
+function _anomalyDetector() {
+  return require('./measureAdminAnomalyDetector.service');
+}
+
 const M = {
   Measure: () => {
     try {
@@ -385,6 +393,26 @@ class MeasureAdministrationSvc {
       organizationId: adminDetails.organizationId,
       createdBy: adminDetails.assessorId,
     });
+
+    // ─── Anomaly flags (W257e wiring of W248c detector) ──────────
+    // Compute BEFORE dry-run so the preview also surfaces flags.
+    // Detector is pure + defensive (returns [] on anything weird);
+    // wrap in try/catch anyway so a detector regression cannot
+    // ever break admin creation. Observability-mode: no throw, no
+    // block.
+    try {
+      const flags = _anomalyDetector().detectAnomalies({
+        admin: doc.toObject(),
+        measure,
+      });
+      if (Array.isArray(flags) && flags.length > 0) {
+        doc.anomalyFlags = flags;
+      }
+    } catch (err) {
+      logger.warn(
+        `[measureAdministration] anomaly detector threw — flagging skipped: ${err.message}`
+      );
+    }
 
     // ─── Dry-run (W215) ───────────────────────────────────────────
     // Validate everything without persisting. Useful for the UI's

@@ -7,6 +7,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  Autocomplete,
   Box,
   Container,
   Stack,
@@ -27,6 +28,7 @@ import {
   Avatar,
   Paper,
   Alert,
+  AlertTitle,
   LinearProgress,
   Tabs,
   Tab,
@@ -73,11 +75,31 @@ function formatDate(v) {
   }
 }
 
+const SPECIALIZATION_LABEL_AR = {
+  pt: 'علاج طبيعي',
+  ot: 'علاج وظيفي',
+  speech: 'تخاطب',
+  aba: 'تعديل سلوك',
+  psychology: 'علم نفس',
+  special_education: 'تربية خاصة',
+  vocational: 'تأهيل مهني',
+  nursing: 'تمريض',
+  medical: 'طبي',
+};
+
 export default function TherapistWorkbench() {
   const [tab, setTab] = useState(0);
   const [me, setMe] = useState(null);
   const [errMsg, setErrMsg] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Admin-viewer mode: when the signed-in user has no Employee record (typically
+  // a system admin previewing the page), the backend returns `viewerMode:
+  // 'admin_no_target'` and we surface a therapist picker.
+  const [viewerMode, setViewerMode] = useState('self'); // 'self' | 'admin_no_target' | 'admin_targeted' | 'orphan'
+  const [viewing, setViewing] = useState(null); // resolved Employee whose data is on screen
+  const [therapistOptions, setTherapistOptions] = useState([]);
+  const [selectedTherapistId, setSelectedTherapistId] = useState('');
 
   const [today, setToday] = useState({ items: [], totals: {} });
   const [week, setWeek] = useState({ grouped: {} });
@@ -93,53 +115,80 @@ export default function TherapistWorkbench() {
     mode: 'edit', // 'edit' or 'complete'
   });
 
+  const queryParams = useMemo(
+    () => (selectedTherapistId ? { employeeId: selectedTherapistId } : {}),
+    [selectedTherapistId]
+  );
+
+  const applyViewerMeta = useCallback(data => {
+    if (!data) return;
+    if (data.viewerMode) setViewerMode(data.viewerMode);
+    if (data.viewing !== undefined) setViewing(data.viewing);
+  }, []);
+
   const loadMe = useCallback(async () => {
     try {
-      const { data } = await api.get('/therapist-workbench/me');
+      const { data } = await api.get('/therapist-workbench/me', { params: queryParams });
       setMe(data?.data || null);
+      applyViewerMeta(data);
+      // First time we detect admin viewer mode, fetch the therapist picker list.
+      if (data?.viewerMode === 'admin_no_target' || data?.viewerMode === 'admin_targeted') {
+        if (therapistOptions.length === 0) {
+          try {
+            const { data: tlist } = await api.get('/therapist-workbench/therapists');
+            setTherapistOptions(tlist?.items || []);
+          } catch {
+            // Picker is a nice-to-have — silent if the user lacks admin role
+            // or if the endpoint is unreachable. The main flow still works.
+          }
+        }
+      }
     } catch (err) {
       setErrMsg(
         err?.response?.data?.message ||
           'تعذر تحميل بياناتك — تأكد من تسجيل الدخول بحساب معالج مرتبط بسجل موظف'
       );
     }
-  }, []);
+  }, [queryParams, applyViewerMeta, therapistOptions.length]);
 
   const loadToday = useCallback(async () => {
     setLoading(true);
     try {
-      const { data } = await api.get('/therapist-workbench/today');
+      const { data } = await api.get('/therapist-workbench/today', { params: queryParams });
       setToday({ items: data?.items || [], totals: data?.totals || {} });
+      applyViewerMeta(data);
     } catch (err) {
       setErrMsg(err?.response?.data?.message || 'فشل التحميل');
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [queryParams, applyViewerMeta]);
 
   const loadWeek = useCallback(async () => {
     setLoading(true);
     try {
-      const { data } = await api.get('/therapist-workbench/week');
+      const { data } = await api.get('/therapist-workbench/week', { params: queryParams });
       setWeek({ grouped: data?.grouped || {} });
+      applyViewerMeta(data);
     } catch (err) {
       setErrMsg(err?.response?.data?.message || 'فشل التحميل');
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [queryParams, applyViewerMeta]);
 
   const loadCaseload = useCallback(async () => {
     setLoading(true);
     try {
-      const { data } = await api.get('/therapist-workbench/caseload');
+      const { data } = await api.get('/therapist-workbench/caseload', { params: queryParams });
       setCaseload(data?.items || []);
+      applyViewerMeta(data);
     } catch (err) {
       setErrMsg(err?.response?.data?.message || 'فشل التحميل');
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [queryParams, applyViewerMeta]);
 
   useEffect(() => {
     loadMe();
@@ -150,6 +199,8 @@ export default function TherapistWorkbench() {
     else if (tab === 1) loadWeek();
     else loadCaseload();
   }, [tab, loadToday, loadWeek, loadCaseload]);
+
+  const isAdminNoTarget = viewerMode === 'admin_no_target' && !selectedTherapistId;
 
   const doCheckIn = async session => {
     try {
@@ -232,9 +283,13 @@ export default function TherapistWorkbench() {
             لوحة المعالج
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            {me
-              ? `مرحباً ${fullName(me)} — جلساتك، حالاتك، ملاحظاتك الإكلينيكية (SOAP).`
-              : 'يومك العلاجي — تحضير، متابعة، توثيق سريع.'}
+            {viewing
+              ? `${fullName(viewing) || viewing.name_ar || '—'} · ${
+                  SPECIALIZATION_LABEL_AR[viewing.specialization] || viewing.specialization || '—'
+                }`
+              : me
+                ? `مرحباً ${fullName(me)} — جلساتك، حالاتك، ملاحظاتك الإكلينيكية (SOAP).`
+                : 'يومك العلاجي — تحضير، متابعة، توثيق سريع.'}
           </Typography>
         </Box>
         <IconButton
@@ -248,6 +303,33 @@ export default function TherapistWorkbench() {
           <RefreshIcon />
         </IconButton>
       </Stack>
+
+      {(viewerMode === 'admin_no_target' || viewerMode === 'admin_targeted') && (
+        <Alert severity="info" sx={{ mb: 2 }}>
+          <AlertTitle>وضع المعاينة (مسؤول)</AlertTitle>
+          <Typography variant="body2" sx={{ mb: 1 }}>
+            حسابك غير مرتبط بسجل معالج. اختر معالجاً لمعاينة لوحته:
+          </Typography>
+          <Autocomplete
+            size="small"
+            options={therapistOptions}
+            value={
+              therapistOptions.find(o => String(o._id) === String(selectedTherapistId)) || null
+            }
+            onChange={(_, v) => setSelectedTherapistId(v?._id ? String(v._id) : '')}
+            getOptionLabel={o =>
+              `${o.name_ar || o.name_en || '—'} · ${
+                SPECIALIZATION_LABEL_AR[o.specialization] || o.specialization || '—'
+              }`
+            }
+            isOptionEqualToValue={(a, b) => String(a._id) === String(b._id)}
+            renderInput={params => (
+              <TextField {...params} placeholder="ابحث عن معالج…" variant="outlined" />
+            )}
+            sx={{ maxWidth: 520, bgcolor: 'background.paper' }}
+          />
+        </Alert>
+      )}
 
       {errMsg && (
         <Alert severity="error" sx={{ mb: 2 }} onClose={() => setErrMsg('')}>
@@ -305,7 +387,9 @@ export default function TherapistWorkbench() {
                   <TableRow>
                     <TableCell colSpan={6} align="center">
                       <Typography color="text.secondary" py={3}>
-                        لا توجد جلسات لك اليوم. استمتع بوقتك!
+                        {isAdminNoTarget
+                          ? 'اختر معالجاً من الأعلى لعرض جلساته.'
+                          : 'لا توجد جلسات لك اليوم. استمتع بوقتك!'}
                       </Typography>
                     </TableCell>
                   </TableRow>
@@ -369,7 +453,11 @@ export default function TherapistWorkbench() {
         <Stack spacing={2}>
           {Object.keys(week.grouped || {}).length === 0 && !loading && (
             <Paper sx={{ p: 4, textAlign: 'center' }}>
-              <Typography color="text.secondary">لا توجد جلسات هذا الأسبوع.</Typography>
+              <Typography color="text.secondary">
+                {isAdminNoTarget
+                  ? 'اختر معالجاً من الأعلى لعرض جدوله.'
+                  : 'لا توجد جلسات هذا الأسبوع.'}
+              </Typography>
             </Paper>
           )}
           {Object.keys(week.grouped)
@@ -440,7 +528,9 @@ export default function TherapistWorkbench() {
                 <TableRow>
                   <TableCell colSpan={6} align="center">
                     <Typography color="text.secondary" py={3}>
-                      لا توجد حالات مسجَّلة لك.
+                      {isAdminNoTarget
+                        ? 'اختر معالجاً من الأعلى لعرض حالاته.'
+                        : 'لا توجد حالات مسجَّلة لك.'}
                     </Typography>
                   </TableCell>
                 </TableRow>

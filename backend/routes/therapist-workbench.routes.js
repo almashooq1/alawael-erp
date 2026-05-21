@@ -38,6 +38,23 @@ const ALLOWED = [
   'super_admin',
 ];
 
+const ADMIN_ROLES = ['admin', 'superadmin', 'super_admin'];
+const CLINICAL_SPECIALIZATIONS = [
+  'pt',
+  'ot',
+  'speech',
+  'aba',
+  'psychology',
+  'special_education',
+  'vocational',
+  'nursing',
+  'medical',
+];
+
+function isAdmin(req) {
+  return ADMIN_ROLES.includes(req.user?.role || '');
+}
+
 async function getMyEmployee(req) {
   if (!req.user) return null;
   const email = (req.user.email || '').toLowerCase();
@@ -51,6 +68,47 @@ async function getMyEmployee(req) {
   return null;
 }
 
+/**
+ * Resolve which Employee's data to load.
+ *
+ * Admins can pass `?employeeId=<id>` to inspect any clinical employee's workbench.
+ * Without that param, admins fall back to their own (likely null) Employee record —
+ * the caller decides whether to render an empty admin-viewer state.
+ *
+ * Returns `{ employee, viewerMode, viewing }`:
+ *   - therapist/specialist with own Employee → viewerMode 'self'
+ *   - admin with ?employeeId pointing to a real Employee → viewerMode 'admin_targeted'
+ *   - admin without target → viewerMode 'admin_no_target' (employee null)
+ *   - therapist with no Employee record → viewerMode 'orphan' (employee null)
+ */
+async function resolveTargetEmployee(req) {
+  if (isAdmin(req)) {
+    const wanted = req.query?.employeeId;
+    if (wanted && mongoose.isValidObjectId(wanted)) {
+      const target = await Employee.findById(wanted).lean();
+      if (target) {
+        return { employee: target, viewerMode: 'admin_targeted', viewing: target };
+      }
+    }
+    const own = await getMyEmployee(req);
+    if (own) return { employee: own, viewerMode: 'self', viewing: own };
+    return { employee: null, viewerMode: 'admin_no_target', viewing: null };
+  }
+  const own = await getMyEmployee(req);
+  if (own) return { employee: own, viewerMode: 'self', viewing: own };
+  return { employee: null, viewerMode: 'orphan', viewing: null };
+}
+
+function adminViewerPayload(extras = {}) {
+  return {
+    success: true,
+    viewerMode: 'admin_no_target',
+    viewing: null,
+    message: 'اختر معالجاً من القائمة لمشاهدة لوحته',
+    ...extras,
+  };
+}
+
 function gate(req, res, next) {
   const role = req.user?.role || '';
   if (!ALLOWED.includes(role))
@@ -60,6 +118,25 @@ function gate(req, res, next) {
   next();
 }
 router.use(gate);
+
+// ── GET /therapists — admin picker source ────────────────────────────────
+router.get('/therapists', async (req, res) => {
+  try {
+    if (!isAdmin(req)) {
+      return res.status(403).json({ success: false, message: 'متاح للمسؤولين فقط' });
+    }
+    const items = await Employee.find({
+      status: { $ne: 'inactive' },
+      specialization: { $in: CLINICAL_SPECIALIZATIONS },
+    })
+      .select('_id name_ar name_en specialization email')
+      .sort({ name_ar: 1 })
+      .lean();
+    res.json({ success: true, items, total: items.length });
+  } catch (err) {
+    return safeError(res, err, 'therapist.therapists');
+  }
+});
 
 async function assertMySession(req, id) {
   if (!mongoose.isValidObjectId(id)) return { ok: false, status: 400, msg: 'معرّف غير صالح' };
@@ -76,12 +153,16 @@ async function assertMySession(req, id) {
 // ── GET /me ──────────────────────────────────────────────────────────────
 router.get('/me', async (req, res) => {
   try {
-    const me = await getMyEmployee(req);
-    if (!me)
+    const { employee, viewerMode, viewing } = await resolveTargetEmployee(req);
+    if (!employee) {
+      if (viewerMode === 'admin_no_target') {
+        return res.json(adminViewerPayload({ data: null }));
+      }
       return res
         .status(404)
         .json({ success: false, message: 'لا يوجد سجل موظف مرتبط — تواصل مع الإدارة' });
-    res.json({ success: true, data: me });
+    }
+    res.json({ success: true, data: employee, viewerMode, viewing });
   } catch (err) {
     return safeError(res, err, 'therapist.me');
   }
@@ -90,14 +171,24 @@ router.get('/me', async (req, res) => {
 // ── GET /today ───────────────────────────────────────────────────────────
 router.get('/today', async (req, res) => {
   try {
-    const me = await getMyEmployee(req);
-    if (!me) return res.status(404).json({ success: false, message: 'لا يوجد سجل موظف مرتبط' });
+    const { employee, viewerMode, viewing } = await resolveTargetEmployee(req);
+    if (!employee) {
+      if (viewerMode === 'admin_no_target') {
+        return res.json(
+          adminViewerPayload({
+            items: [],
+            totals: { total: 0, completed: 0, inProgress: 0, upcoming: 0 },
+          })
+        );
+      }
+      return res.status(404).json({ success: false, message: 'لا يوجد سجل موظف مرتبط' });
+    }
     const s = new Date();
     s.setHours(0, 0, 0, 0);
     const e = new Date();
     e.setHours(23, 59, 59, 999);
     const items = await TherapySession.find({
-      therapist: me._id,
+      therapist: employee._id,
       date: { $gte: s, $lte: e },
     })
       .populate('beneficiary', 'firstName lastName firstName_ar lastName_ar beneficiaryNumber')
@@ -111,7 +202,7 @@ router.get('/today', async (req, res) => {
       inProgress: items.filter(x => x.status === 'IN_PROGRESS').length,
       upcoming: items.filter(x => ['SCHEDULED', 'CONFIRMED'].includes(x.status)).length,
     };
-    res.json({ success: true, items, totals });
+    res.json({ success: true, items, totals, viewerMode, viewing });
   } catch (err) {
     return safeError(res, err, 'therapist.today');
   }
@@ -120,8 +211,13 @@ router.get('/today', async (req, res) => {
 // ── GET /week — grouped by date ──────────────────────────────────────────
 router.get('/week', async (req, res) => {
   try {
-    const me = await getMyEmployee(req);
-    if (!me) return res.status(404).json({ success: false, message: 'لا يوجد سجل موظف مرتبط' });
+    const { employee, viewerMode, viewing } = await resolveTargetEmployee(req);
+    if (!employee) {
+      if (viewerMode === 'admin_no_target') {
+        return res.json(adminViewerPayload({ items: [], grouped: {} }));
+      }
+      return res.status(404).json({ success: false, message: 'لا يوجد سجل موظف مرتبط' });
+    }
     const now = new Date();
     const weekStart = new Date(now);
     weekStart.setDate(now.getDate() - now.getDay());
@@ -129,7 +225,7 @@ router.get('/week', async (req, res) => {
     const weekEnd = new Date(weekStart);
     weekEnd.setDate(weekEnd.getDate() + 7);
     const items = await TherapySession.find({
-      therapist: me._id,
+      therapist: employee._id,
       date: { $gte: weekStart, $lt: weekEnd },
     })
       .populate('beneficiary', 'firstName lastName firstName_ar lastName_ar beneficiaryNumber')
@@ -141,7 +237,7 @@ router.get('/week', async (req, res) => {
       const k = new Date(it.date).toISOString().slice(0, 10);
       (grouped[k] ||= []).push(it);
     }
-    res.json({ success: true, items, grouped, weekStart, weekEnd });
+    res.json({ success: true, items, grouped, weekStart, weekEnd, viewerMode, viewing });
   } catch (err) {
     return safeError(res, err, 'therapist.week');
   }
@@ -150,10 +246,15 @@ router.get('/week', async (req, res) => {
 // ── GET /caseload ────────────────────────────────────────────────────────
 router.get('/caseload', async (req, res) => {
   try {
-    const me = await getMyEmployee(req);
-    if (!me) return res.status(404).json({ success: false, message: 'لا يوجد سجل موظف مرتبط' });
+    const { employee, viewerMode, viewing } = await resolveTargetEmployee(req);
+    if (!employee) {
+      if (viewerMode === 'admin_no_target') {
+        return res.json(adminViewerPayload({ items: [], total: 0 }));
+      }
+      return res.status(404).json({ success: false, message: 'لا يوجد سجل موظف مرتبط' });
+    }
     const agg = await TherapySession.aggregate([
-      { $match: { therapist: me._id } },
+      { $match: { therapist: employee._id } },
       {
         $group: {
           _id: '$beneficiary',
@@ -186,7 +287,7 @@ router.get('/caseload', async (req, res) => {
       upcoming: r.upcoming,
       lastSession: r.lastSession,
     }));
-    res.json({ success: true, items, total: items.length });
+    res.json({ success: true, items, total: items.length, viewerMode, viewing });
   } catch (err) {
     return safeError(res, err, 'therapist.caseload');
   }

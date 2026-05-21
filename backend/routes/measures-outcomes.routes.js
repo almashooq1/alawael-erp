@@ -16,6 +16,9 @@
  *   GET   /branch/:branchId?from=&to=               → window rates
  *   GET   /branch/:branchId/timeseries
  *           ?bucket=month|quarter&months=N          → trend chart points
+ *   GET   /family-report/:beneficiaryId
+ *           ?includeHidden=true                     → W240 family-friendly
+ *                                                    Arabic report
  *
  * Auth: all data routes require authenticate + requireBranchAccess.
  * _health is public (matches the W226 convention).
@@ -35,10 +38,10 @@ const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
-const safeError = require('../utils/safeError');
 const logger = require('../utils/logger');
 
 const aggregator = require('../services/measureOutcomesAggregator.service');
+const familyReport = require('../services/measureFamilyReport.service');
 
 // ─── Health check (public — matches W226 convention) ─────────────
 router.get('/_health', (_req, res) => {
@@ -55,7 +58,14 @@ function _toErrorResponse(err) {
   if (msg.match(/required|invalid|must be|cannot be|missing|not found/i)) {
     return { status: 400, body: { success: false, error: msg } };
   }
-  return { status: 500, body: safeError(err) };
+  // Production-safe body: in non-prod include err.message for debug,
+  // in prod return only a generic. Matches the safeError() module's
+  // intent but inline so we can return-and-respond from the caller.
+  const body =
+    process.env.NODE_ENV === 'production'
+      ? { success: false, message: 'حدث خطأ داخلي' }
+      : { success: false, message: msg };
+  return { status: 500, body };
 }
 
 function _passThroughOrError(out, res) {
@@ -153,6 +163,48 @@ router.get('/branch/:branchId/timeseries', async (req, res) => {
     return _passThroughOrError(out, res);
   } catch (err) {
     logger.warn('[measures-outcomes] /branch/.../timeseries failed: %s', err.message);
+    const r = _toErrorResponse(err);
+    return res.status(r.status).json(r.body);
+  }
+});
+
+// ════════════════════════════════════════════════════════════════════
+// W241 — Family-friendly Arabic report (W240 service surface)
+// ════════════════════════════════════════════════════════════════════
+
+/**
+ * GET /family-report/:beneficiaryId
+ *
+ * Returns the W240 family-friendly Arabic report payload. Read-only
+ * orchestration above W229 aggregateBeneficiary + W210 measure metadata.
+ *
+ * Query:
+ *   includeHidden=true   → opt-in to include measures with
+ *                          reporting.showInFamilyReport=false
+ *
+ * Responses:
+ *   200 → { success: true, data: {<W240 report shape>} }
+ *   400 → missing beneficiaryId
+ *   503 → models_unavailable propagated from aggregator
+ *   500 → unexpected failure
+ *
+ * Note: this surface is auth + branch-scoped exactly like the rollup
+ * endpoints. A future wave can layer a print/PDF route on top.
+ */
+router.get('/family-report/:beneficiaryId', async (req, res) => {
+  try {
+    const { beneficiaryId } = req.params;
+    if (!beneficiaryId) {
+      return res.status(400).json({ success: false, error: 'beneficiaryId required' });
+    }
+    const opts = {};
+    if (req.query.includeHidden === 'true' || req.query.includeHidden === '1') {
+      opts.includeHiddenMeasures = true;
+    }
+    const out = await familyReport.generate(beneficiaryId, opts);
+    return _passThroughOrError(out, res);
+  } catch (err) {
+    logger.warn('[measures-outcomes] /family-report failed: %s', err.message);
     const r = _toErrorResponse(err);
     return res.status(r.status).json(r.body);
   }

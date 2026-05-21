@@ -76,11 +76,11 @@ module.exports = function registerClinicalAssessmentRoutes(
     'Measures Workflow routes mounted (9 endpoints — W218 strategist + W220 triggers + W222 lifecycle + W223 readiness gates + W225 reminders read-side)'
   );
 
-  // Measures Outcomes Surface (W233) — read-only HTTP for the W229 aggregator
+  // Measures Outcomes Surface (W233 + W241) — read-only HTTP for W229 aggregator + W240 family report
   const measuresOutcomesRoutes = safeRequire('../routes/measures-outcomes.routes');
   dualMount(app, 'measures-outcomes', measuresOutcomesRoutes);
   logger.info(
-    'Measures Outcomes routes mounted (4 endpoints — W229 aggregator: beneficiary rollup + branch rollup + branch time-series)'
+    'Measures Outcomes routes mounted (5 endpoints — W229 aggregator: beneficiary rollup + branch rollup + branch time-series + W240 family-friendly Arabic report)'
   );
 
   // ══════════════════════════════════════════════════════════════════════════

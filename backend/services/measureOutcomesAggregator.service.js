@@ -113,6 +113,20 @@ const M = {
       }
     }
   },
+  // W262: actor-name resolution for alert lifecycle attribution
+  // (acknowledgedBy / resolvedBy / dismissedBy on per-pair alerts).
+  User: () => {
+    try {
+      return mongoose.model('User');
+    } catch {
+      try {
+        require('../models/User');
+        return mongoose.model('User');
+      } catch {
+        return null;
+      }
+    }
+  },
 };
 
 // ─── Pure rollup helpers ──────────────────────────────────────────
@@ -707,7 +721,13 @@ class MeasureOutcomesAggregatorSvc {
     // beneficiaries in richPairs, then group in app code. Window matches
     // the admin window (firstSeenAt ∈ [from, to]) so the UI markers line
     // up with the score trajectory on the W260 detail chart.
+    //
+    // W262: also resolves actor names for acknowledgedBy / resolvedBy /
+    // dismissedBy via a single batched User.find — gives the UI audit
+    // attribution ("Dr. X dismissed this on … because …") so the alerts
+    // section reads as an active triage log rather than just timestamps.
     const MeasureAlert = M.MeasureAlert();
+    const User = M.User();
     const alertsByBen = new Map();
     if (MeasureAlert && beneficiaryIds.length > 0) {
       const alertDocs = await MeasureAlert.find({
@@ -716,10 +736,40 @@ class MeasureOutcomesAggregatorSvc {
         firstSeenAt: { $gte: fromDate, $lte: toDate },
       })
         .select(
-          '_id beneficiaryId alertType severity status firstSeenAt acknowledgedAt resolvedAt dismissedAt evidence'
+          '_id beneficiaryId alertType severity status firstSeenAt ' +
+            'acknowledgedAt acknowledgedBy resolvedAt resolvedBy resolutionMode ' +
+            'dismissedAt dismissedBy dismissalReason notes evidence'
         )
         .sort({ firstSeenAt: 1 })
         .lean();
+
+      // W262: gather distinct actor user IDs across the alert set and
+      // resolve fullName in a single $in lookup. Falls back to id when
+      // the User model is unavailable or the user has been deleted —
+      // alerts never disappear due to actor name lookup.
+      const actorIds = new Set();
+      for (const a of alertDocs) {
+        if (a.acknowledgedBy) actorIds.add(String(a.acknowledgedBy));
+        if (a.resolvedBy) actorIds.add(String(a.resolvedBy));
+        if (a.dismissedBy) actorIds.add(String(a.dismissedBy));
+      }
+      const userNameById = new Map();
+      if (User && actorIds.size > 0) {
+        const userDocs = await User.find({
+          _id: { $in: [...actorIds].map(id => new mongoose.Types.ObjectId(id)) },
+        })
+          .select('_id fullName')
+          .lean();
+        for (const u of userDocs) {
+          userNameById.set(String(u._id), u.fullName || null);
+        }
+      }
+      const actorRef = id => {
+        if (!id) return null;
+        const key = String(id);
+        return { id: key, fullName: userNameById.get(key) || null };
+      };
+
       for (const a of alertDocs) {
         const key = String(a.beneficiaryId);
         if (!alertsByBen.has(key)) alertsByBen.set(key, []);
@@ -730,8 +780,14 @@ class MeasureOutcomesAggregatorSvc {
           status: a.status,
           firstSeenAt: new Date(a.firstSeenAt).toISOString(),
           acknowledgedAt: a.acknowledgedAt ? new Date(a.acknowledgedAt).toISOString() : null,
+          acknowledgedBy: actorRef(a.acknowledgedBy),
           resolvedAt: a.resolvedAt ? new Date(a.resolvedAt).toISOString() : null,
+          resolvedBy: actorRef(a.resolvedBy),
+          resolutionMode: a.resolutionMode || null,
           dismissedAt: a.dismissedAt ? new Date(a.dismissedAt).toISOString() : null,
+          dismissedBy: actorRef(a.dismissedBy),
+          dismissalReason: a.dismissalReason || null,
+          notes: a.notes || null,
           messageAr: a.evidence?.message_ar || null,
         });
       }

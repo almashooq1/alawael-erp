@@ -76,6 +76,13 @@ module.exports = function registerClinicalAssessmentRoutes(
     'Measures Workflow routes mounted (9 endpoints — W218 strategist + W220 triggers + W222 lifecycle + W223 readiness gates + W225 reminders read-side)'
   );
 
+  // Measures Outcomes Surface (W233) — read-only HTTP for the W229 aggregator
+  const measuresOutcomesRoutes = safeRequire('../routes/measures-outcomes.routes');
+  dualMount(app, 'measures-outcomes', measuresOutcomesRoutes);
+  logger.info(
+    'Measures Outcomes routes mounted (4 endpoints — W229 aggregator: beneficiary rollup + branch rollup + branch time-series)'
+  );
+
   // ══════════════════════════════════════════════════════════════════════════
   // ── Al-Awael Smart Rehabilitation System — الأولويات العشر الاحترافية ──
   // ══════════════════════════════════════════════════════════════════════════

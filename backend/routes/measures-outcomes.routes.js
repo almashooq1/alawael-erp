@@ -187,6 +187,38 @@ router.get('/branch/:branchId/timeseries', async (req, res) => {
   }
 });
 
+/**
+ * W256 — Drill-through for the W255 per-measure compare cell.
+ *
+ *   GET /branch/:branchId/measure/:measureId/pairs?from=&to=
+ *
+ * Returns the (beneficiary × measure) pairs that contribute to
+ * aggregateBranch.byMeasure[measureId]. Same window + ≥3-admin filter
+ * as the rollup, plus per-pair MCID-achievement detail (delta,
+ * mcidValue, first/last score+date, achieved boolean).
+ *
+ * Defaults: last 90 days when from/to omitted (mirrors aggregateBranch).
+ */
+router.get('/branch/:branchId/measure/:measureId/pairs', async (req, res) => {
+  try {
+    const { branchId, measureId } = req.params;
+    if (!branchId || !measureId) {
+      return res.status(400).json({ success: false, error: 'branchId + measureId required' });
+    }
+    const from = _parseDate(req.query.from);
+    const to = _parseDate(req.query.to);
+    const opts = { branchId, measureId };
+    if (from) opts.from = from;
+    if (to) opts.to = to;
+    const out = await aggregator.listMeasurePairsAt(opts);
+    return _passThroughOrError(out, res);
+  } catch (err) {
+    logger.warn('[measures-outcomes] /branch/.../measure/.../pairs failed: %s', err.message);
+    const r = _toErrorResponse(err);
+    return res.status(r.status).json(r.body);
+  }
+});
+
 // ════════════════════════════════════════════════════════════════════
 // W241 — Family-friendly Arabic report (W240 service surface)
 // ════════════════════════════════════════════════════════════════════

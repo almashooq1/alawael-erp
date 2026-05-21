@@ -82,7 +82,7 @@ module.exports = function registerClinicalAssessmentRoutes(
   const measuresOutcomesRoutes = safeRequire('../routes/measures-outcomes.routes');
   dualMount(app, 'measures-outcomes', measuresOutcomesRoutes);
   logger.info(
-    'Measures Outcomes routes mounted (9 endpoints — W229 aggregator + W240 family + W242 MOHRSD JSON+CSV + W245 clinical deep-dive + W250 multi-branch comparison)'
+    'Measures Outcomes routes mounted (10 endpoints — W229 aggregator + W240 family + W242 MOHRSD JSON+CSV + W245 clinical deep-dive + W250 multi-branch comparison + W256 per-measure pairs drill-through)'
   );
 
   // ══════════════════════════════════════════════════════════════════════════

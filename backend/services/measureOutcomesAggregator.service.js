@@ -100,6 +100,19 @@ const M = {
       }
     }
   },
+  // W256: name-resolution for the drill-through pair list.
+  Beneficiary: () => {
+    try {
+      return mongoose.model('Beneficiary');
+    } catch {
+      try {
+        require('../models/Beneficiary');
+        return mongoose.model('Beneficiary');
+      } catch {
+        return null;
+      }
+    }
+  },
 };
 
 // ─── Pure rollup helpers ──────────────────────────────────────────
@@ -568,6 +581,170 @@ class MeasureOutcomesAggregatorSvc {
         administrations: adminsByBucket.get(k) || 0,
         alertsRaised: alertsByBucket.get(k) || 0,
       })),
+    };
+  }
+
+  /**
+   * Drill-through for the W255 per-measure compare cell. Lists the
+   * actual (beneficiary × measure) pairs that contribute to
+   * aggregateBranch's `byMeasure[measureId]` rollup — same window,
+   * same status filter, same ≥3-admins criterion.
+   *
+   * Director clicks "FIM at 25% in Branch B" → this returns the
+   * 12 pairs, showing which 3 achieved MCID and which 9 didn't,
+   * with beneficiary names + first/last scores so they can act.
+   *
+   * @param {string|ObjectId} args.branchId
+   * @param {string|ObjectId} args.measureId
+   * @param {Date|string} [args.from] — default: 90 days ago
+   * @param {Date|string} [args.to]   — default: now
+   * @returns {Promise<{
+   *   branchId: string,
+   *   measureId: string,
+   *   measureCode: string | null,
+   *   measureNameAr: string | null,
+   *   period: { from: Date, to: Date, days: number },
+   *   pairs: Array<{
+   *     beneficiaryId: string,
+   *     beneficiaryNameAr: string,
+   *     beneficiaryNumber: string | null,
+   *     adminCount: number,
+   *     firstScore: number,
+   *     firstDate: string,
+   *     lastScore: number,
+   *     lastDate: string,
+   *     delta: number,
+   *     mcidValue: number | null,
+   *     mcidStatus: string | null,
+   *     mcidAchieved: boolean,
+   *   }>,
+   *   pairsThinHistory: number, // pairs with <3 admins NOT in `pairs[]`
+   * } | { error: 'models_unavailable' }>}
+   */
+  async listMeasurePairsAt({ branchId, measureId, from, to } = {}) {
+    const MeasureApplication = M.MeasureApplication();
+    const Measure = M.Measure();
+    const Beneficiary = M.Beneficiary();
+    if (!MeasureApplication || !Beneficiary) return { error: 'models_unavailable' };
+    if (!branchId || !measureId) {
+      throw new Error('[OutcomesAggregator] branchId + measureId required');
+    }
+
+    const branchObj = mongoose.Types.ObjectId.isValid(branchId)
+      ? new mongoose.Types.ObjectId(branchId)
+      : branchId;
+    const measureObj = mongoose.Types.ObjectId.isValid(measureId)
+      ? new mongoose.Types.ObjectId(measureId)
+      : measureId;
+
+    const fromDate = from ? new Date(from) : new Date(Date.now() - 90 * 86400000);
+    const toDate = to ? new Date(to) : new Date();
+
+    // Same pipeline as aggregateBranch, scoped to one measure.
+    const pairStats = await MeasureApplication.aggregate([
+      {
+        $match: {
+          branchId: branchObj,
+          measureId: measureObj,
+          status: { $in: ['completed', 'locked'] },
+          applicationDate: { $gte: fromDate, $lte: toDate },
+        },
+      },
+      { $sort: { applicationDate: 1 } },
+      {
+        $group: {
+          _id: '$beneficiaryId',
+          admins: { $sum: 1 },
+          first: { $first: '$$ROOT' },
+          last: { $last: '$$ROOT' },
+        },
+      },
+    ]);
+
+    const richPairs = pairStats.filter(p => p.admins >= 3);
+    const thinCount = pairStats.length - richPairs.length;
+
+    // Measure direction + meta — same lookup widening used by W249.
+    let measureCode = null;
+    let measureNameAr = null;
+    let direction = 1;
+    if (Measure) {
+      const measureDoc = await Measure.findById(measureObj)
+        .select('code name_ar name_en name scoringDirection')
+        .lean();
+      if (measureDoc) {
+        measureCode = measureDoc.code || null;
+        measureNameAr = measureDoc.name_ar || measureDoc.name_en || measureDoc.name || measureCode;
+        direction = measureDoc.scoringDirection === 'lower_better' ? -1 : 1;
+      }
+    }
+
+    // Beneficiary name lookup — one query for the whole set.
+    const beneficiaryIds = richPairs.map(p => p._id).filter(Boolean);
+    const beneficiaries = await Beneficiary.find({ _id: { $in: beneficiaryIds } })
+      .select('firstName_ar lastName_ar firstName_en lastName_en beneficiaryNumber')
+      .lean();
+    const benMap = new Map(
+      beneficiaries.map(b => {
+        const nameAr =
+          [b.firstName_ar, b.lastName_ar].filter(Boolean).join(' ').trim() ||
+          [b.firstName_en, b.lastName_en].filter(Boolean).join(' ').trim() ||
+          '—';
+        return [String(b._id), { nameAr, number: b.beneficiaryNumber || null }];
+      })
+    );
+
+    // Build the rows. Achievement matches aggregateBranch's criterion exactly
+    // (direction-aware delta ≥ mcidValue, mcidStatus ∈ established|provisional).
+    const pairs = richPairs.map(p => {
+      const meta = benMap.get(String(p._id)) || { nameAr: '—', number: null };
+      const firstScore = Number(p.first.totalRawScore);
+      const lastScore = Number(p.last.totalRawScore);
+      const delta = (lastScore - firstScore) * direction;
+      const mcidVal = p.last?.mcidAtAdministration?.value;
+      const mcidStatus = p.last?.mcidAtAdministration?.status || null;
+      const mcidEligible =
+        Number.isFinite(mcidVal) &&
+        mcidVal > 0 &&
+        (mcidStatus === 'established' || mcidStatus === 'provisional');
+      const mcidAchieved = mcidEligible && delta >= mcidVal;
+      return {
+        beneficiaryId: String(p._id),
+        beneficiaryNameAr: meta.nameAr,
+        beneficiaryNumber: meta.number,
+        adminCount: p.admins,
+        firstScore,
+        firstDate: new Date(p.first.applicationDate).toISOString(),
+        lastScore,
+        lastDate: new Date(p.last.applicationDate).toISOString(),
+        delta: Math.round(delta * 100) / 100,
+        mcidValue: Number.isFinite(mcidVal) ? mcidVal : null,
+        mcidStatus,
+        mcidAchieved,
+      };
+    });
+
+    // Sort: achieved=false first (action items), then by adminCount desc,
+    // then by absolute delta desc. The director's eye lands on
+    // non-achievers immediately.
+    pairs.sort((a, b) => {
+      if (a.mcidAchieved !== b.mcidAchieved) return a.mcidAchieved ? 1 : -1;
+      if (b.adminCount !== a.adminCount) return b.adminCount - a.adminCount;
+      return Math.abs(b.delta) - Math.abs(a.delta);
+    });
+
+    return {
+      branchId: String(branchObj),
+      measureId: String(measureObj),
+      measureCode,
+      measureNameAr,
+      period: {
+        from: fromDate,
+        to: toDate,
+        days: Math.round((toDate - fromDate) / 86400000),
+      },
+      pairs,
+      pairsThinHistory: thinCount,
     };
   }
 

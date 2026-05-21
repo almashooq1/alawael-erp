@@ -360,27 +360,82 @@ class MeasureOutcomesAggregatorSvc {
     }
 
     // ─── MCID achievement count among rich pairs ─────────────────
-    // We need the measure's direction → look up measures.
+    // Per-measure breakdown (W249) computed in the same pass — needs
+    // measure code+name from the same lookup, so we widen the select
+    // here rather than firing a second query.
     const measureIds = [...new Set(richPairs.map(p => String(p._id.measureId)))];
     const Measure = M.Measure();
     const measures = await Measure.find({
       _id: { $in: measureIds.map(id => new mongoose.Types.ObjectId(id)) },
     })
-      .select('scoringDirection')
+      .select('scoringDirection code name_ar name_en name')
       .lean();
     const dirById = new Map(
       measures.map(m => [String(m._id), m.scoringDirection || 'higher_better'])
     );
+    // Side map for W249 per-measure breakdown — keeps the existing
+    // dirById API untouched for any external caller that reaches here.
+    const metaById = new Map(
+      measures.map(m => [
+        String(m._id),
+        {
+          code: m.code || '—',
+          nameAr: m.name_ar || m.name || m.code || '—',
+        },
+      ])
+    );
+
+    // Per-measure tally accumulated alongside the global MCID loop so we
+    // walk richPairs only once.
+    const byMeasureMap = new Map();
+    function _ensureRow(mid) {
+      let row = byMeasureMap.get(mid);
+      if (!row) {
+        const meta = metaById.get(mid) || { code: '—', nameAr: '—' };
+        row = {
+          measureId: mid,
+          measureCode: meta.code,
+          measureNameAr: meta.nameAr,
+          pairsAnalysed: 0,
+          mcidAchievedCount: 0,
+        };
+        byMeasureMap.set(mid, row);
+      }
+      return row;
+    }
 
     for (const p of richPairs) {
-      const direction = dirById.get(String(p._id.measureId)) === 'lower_better' ? -1 : 1;
+      const mid = String(p._id.measureId);
+      const row = _ensureRow(mid);
+      row.pairsAnalysed++;
+
+      const direction = dirById.get(mid) === 'lower_better' ? -1 : 1;
       const mcidVal = p.last?.mcidAtAdministration?.value;
       const mcidStatus = p.last?.mcidAtAdministration?.status;
       if (!Number.isFinite(mcidVal) || mcidVal <= 0) continue;
       if (mcidStatus !== 'established' && mcidStatus !== 'provisional') continue;
       const delta = (p.last.totalRawScore - p.first.totalRawScore) * direction;
-      if (delta >= mcidVal) mcidAchieved++;
+      if (delta >= mcidVal) {
+        mcidAchieved++;
+        row.mcidAchievedCount++;
+      }
     }
+
+    // Sort by evidence weight (pairsAnalysed desc) — directors should see
+    // the most-tracked measures first; sorting by rate would surface
+    // small-n outliers misleadingly. Round rate to 3 decimals to match
+    // the top-level mcidAchievementRate scaling.
+    const byMeasure = Array.from(byMeasureMap.values())
+      .map(r => ({
+        ...r,
+        mcidAchievementRate: r.pairsAnalysed
+          ? Math.round((r.mcidAchievedCount / r.pairsAnalysed) * 1000) / 1000
+          : 0,
+      }))
+      .sort((a, b) => {
+        if (b.pairsAnalysed !== a.pairsAnalysed) return b.pairsAnalysed - a.pairsAnalysed;
+        return a.measureCode.localeCompare(b.measureCode);
+      });
 
     // ─── Open alert distribution (window-agnostic — alerts open NOW) ─
     let regressionCount = 0;
@@ -441,6 +496,11 @@ class MeasureOutcomesAggregatorSvc {
         achieved: goalsAchieved,
         achievedRate: goalsTotal ? Math.round((goalsAchieved / goalsTotal) * 1000) / 1000 : 0,
       },
+      // W249: per-measure breakdown — directors use this to spot which
+      // measures track well at this site and which need training/protocol
+      // review. Only includes measures with ≥3 admins (richPairs);
+      // sorted by pairsAnalysed desc.
+      byMeasure,
     };
   }
 

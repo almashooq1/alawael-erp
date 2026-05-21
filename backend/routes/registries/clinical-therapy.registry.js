@@ -99,6 +99,14 @@ module.exports = function registerClinicalTherapyRoutes(
   );
 
   // ══════════════════════════════════════════════════════════════════════════
+  // ── Wave 264: GAS (Goal Attainment Scaling) — مقاييس تحقيق الأهداف
+  // ══════════════════════════════════════════════════════════════════════════
+  safeMount(app, ['/api/gas', '/api/v1/gas'], '../routes/gas.routes');
+  logger.info(
+    '✅ GAS routes mounted (W264 Foundation): Kiresuk 5-level scales + scoring + individual & composite T-score analytics (13 endpoints)'
+  );
+
+  // ══════════════════════════════════════════════════════════════════════════
   // ── Phases 30–33: Advanced Rehabilitation — التأهيل المتقدم ─────────────
   // ══════════════════════════════════════════════════════════════════════════
 

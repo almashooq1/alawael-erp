@@ -119,23 +119,71 @@ class MeasureGoalUpdaterSvc {
       for (const goal of goals) {
         const baseline = goal.baseline && goal.baseline.value;
         const target = goal.target && goal.target.value;
-        const progress = _computeProgress(baseline, target, totalRawScore);
-        if (progress === null) {
+        const singleProgress = _computeProgress(baseline, target, totalRawScore);
+        if (singleProgress === null) {
           skipped++;
           details.push({ goalId: String(goal._id), reason: 'no_progress_math' });
           continue;
         }
 
+        // ─── W236 — Linkage-aware aggregation ─────────────────────
+        // When the matched objective has multiple contributing
+        // measureLinks (W235), `currentProgress` is the weighted
+        // aggregation across all of them — NOT just this single
+        // admin's effect. The single-admin progress still goes into
+        // progressHistory as the audit trail of what came in.
+        //
+        // Fallback to single-measure progress when:
+        //   - objective has no measureLinks[] (legacy goal)
+        //   - only 1 contributing link (no aggregation needed)
+        //   - linkage service throws (best-effort)
+        let weightedProgress = null;
+        let weightedDetails = null;
+        try {
+          const matchedObjective = (goal.objectives || []).find(
+            o =>
+              String(o.measureId || '') === String(measureId) ||
+              (o.measureLinks || []).some(
+                l => String(l.measureId) === String(measureId) && l.status !== 'unlinked'
+              )
+          );
+          if (matchedObjective) {
+            const contributing = (matchedObjective.measureLinks || []).filter(
+              l => l.linkType !== 'CONTRAINDICATED' && l.status !== 'unlinked'
+            );
+            if (contributing.length > 1) {
+              const linkage = require('./goalMeasureLinkage.service');
+              const wp = await linkage.computeWeightedProgress({ goalId: goal._id });
+              const objIndex = goal.objectives.indexOf(matchedObjective);
+              const objWp = (wp.objectives || []).find(o => o.objectiveIndex === objIndex);
+              if (objWp && objWp.score != null) {
+                weightedProgress = Math.max(0, Math.min(100, Math.round(objWp.score * 100)));
+                weightedDetails = {
+                  linkCount: contributing.length,
+                  weightedScore: objWp.score,
+                  status: objWp.status,
+                };
+              }
+            }
+          }
+        } catch (err) {
+          // best-effort — fall through to single-measure progress
+          logger.debug?.('[MeasureGoalUpdater] weighted progress failed: %s', err.message);
+        }
+
+        const finalProgress = weightedProgress != null ? weightedProgress : singleProgress;
+
         goal.progressHistory.push({
           date: input.applicationDate || new Date(),
           value: totalRawScore,
-          rating: _ratingFor(progress),
+          rating: _ratingFor(finalProgress),
           recordedBy: input.assessorId || null,
           notes: input.applicationId
-            ? `auto-update from MeasureApplication ${input.applicationId}`
+            ? `auto-update from MeasureApplication ${input.applicationId}` +
+              (weightedDetails ? ` (weighted across ${weightedDetails.linkCount} links)` : '')
             : 'auto-update from new measure administration',
         });
-        goal.currentProgress = progress;
+        goal.currentProgress = finalProgress;
         // status auto-flips to 'achieved' via the existing pre-save
         // hook in TherapeuticGoal when currentProgress >= 100.
 
@@ -145,9 +193,11 @@ class MeasureGoalUpdaterSvc {
           details.push({
             goalId: String(goal._id),
             previousProgress: goal.$__.previousValues?.currentProgress,
-            newProgress: progress,
-            ratingApplied: _ratingFor(progress),
-            achievedNow: progress >= 100,
+            newProgress: finalProgress,
+            singleMeasureProgress: singleProgress,
+            weighted: weightedDetails,
+            ratingApplied: _ratingFor(finalProgress),
+            achievedNow: finalProgress >= 100,
           });
         } catch (err) {
           skipped++;

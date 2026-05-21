@@ -555,6 +555,100 @@ router.get('/anomalous-admins', async (req, res) => {
   }
 });
 
+/**
+ * W257k — CSV export of the anomalous-admins triage list.
+ *
+ *   GET /anomalous-admins.csv?branchId=&from=&to=&severity=&flagType=&...
+ *
+ * Same data shape + filter semantics as the JSON sibling. Mirrors W258
+ * pairs.csv: UTF-8 BOM (Excel auto-detects AR on Windows), AR headers,
+ * RFC 4180 escape on commas/quotes/newlines. One row per admin —
+ * multiple flags collapsed into a semicolon-joined cell so each
+ * applicationDate stays on one row (otherwise pivot tables drift).
+ */
+router.get('/anomalous-admins.csv', async (req, res) => {
+  try {
+    const opts = {
+      branchId: req.query.branchId || req.branchId || undefined,
+      from: req.query.from || undefined,
+      to: req.query.to || undefined,
+      severity: req.query.severity || undefined,
+      flagType: req.query.flagType || undefined,
+      includeSuperseded:
+        req.query.includeSuperseded === 'true' || req.query.includeSuperseded === '1',
+      limit: req.query.limit ? Number(req.query.limit) : undefined,
+    };
+    const out = await measureAdmin.listAnomalousAdmins(opts);
+    const csv = _anomaliesToCsv(out);
+    const stamp = new Date().toISOString().slice(0, 10);
+    const scope = opts.branchId ? String(opts.branchId).slice(-8) : 'all';
+    const filename = `anomalies-${scope}-${stamp}.csv`;
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    return res.send('﻿' + csv);
+  } catch (err) {
+    const r = _toErrorResponse(err);
+    return res.status(r.status).json(r.body);
+  }
+});
+
+// RFC 4180 cell escape — wrap when contains comma/quote/newline.
+function _csvCell(v) {
+  if (v == null) return '';
+  const s = String(v);
+  if (/[",\n\r]/.test(s)) {
+    return `"${s.replace(/"/g, '""')}"`;
+  }
+  return s;
+}
+
+function _anomaliesToCsv(out) {
+  const headers = [
+    'تاريخ التطبيق',
+    'الحالة',
+    'المستفيد',
+    'المقياس',
+    'الفرع',
+    'الدرجة الإجمالية',
+    'الشدة الأعلى',
+    'عدد العلامات',
+    'أنواع العلامات',
+  ];
+  const SEV_ORDER = { high: 3, medium: 2, low: 1 };
+  const rows = [headers.join(',')];
+  const items = (out && out.items) || [];
+  for (const it of items) {
+    const flags = Array.isArray(it.anomalyFlags) ? it.anomalyFlags : [];
+    // Highest severity present on this admin
+    let topSev = '';
+    let topRank = 0;
+    for (const f of flags) {
+      const r = SEV_ORDER[f && f.severity] || 0;
+      if (r > topRank) {
+        topRank = r;
+        topSev = f.severity;
+      }
+    }
+    // De-dup flag types within one admin so the "types" cell is concise
+    const typesSet = new Set();
+    for (const f of flags) if (f && f.type) typesSet.add(f.type);
+    rows.push(
+      [
+        _csvCell(it.applicationDate ? String(it.applicationDate).slice(0, 10) : ''),
+        _csvCell(it.status || ''),
+        _csvCell(String(it.beneficiaryId || '')),
+        _csvCell(String(it.measureId || '')),
+        _csvCell(it.branchId ? String(it.branchId) : ''),
+        _csvCell(it.totalRawScore == null ? '' : it.totalRawScore),
+        _csvCell(topSev),
+        _csvCell(flags.length),
+        _csvCell(Array.from(typesSet).join(';')),
+      ].join(',')
+    );
+  }
+  return rows.join('\n') + '\n';
+}
+
 // ════════════════════════════════════════════════════════════════════════
 // Health
 // ════════════════════════════════════════════════════════════════════════
@@ -563,9 +657,9 @@ router.get('/_health', (req, res) => {
   res.json({
     success: true,
     data: {
-      wave: 'W226+W238+W239+W257h',
+      wave: 'W226+W238+W239+W257h+W257k',
       mountedAt: 'measures-workflow',
-      endpoints: 21,
+      endpoints: 22,
       services: [
         'W218 strategist',
         'W220 triggers',
@@ -575,6 +669,7 @@ router.get('/_health', (req, res) => {
         'W235 linkage CRUD + decisions',
         'W237 linkage insights',
         'W257h anomalous-admins triage',
+        'W257k anomalous-admins CSV export',
       ],
     },
   });

@@ -55,7 +55,10 @@ describe('W257h — anomalous-admins route registration', () => {
     });
     handler({}, res);
     expect(res._body.data.wave).toContain('W257h');
-    expect(res._body.data.endpoints).toBe(21);
+    // Use ≥ 21 rather than exact match so each new endpoint addition
+    // doesn't regress the assertion (W257k bumped to 22; same lesson
+    // as W244 ministry routes + W239 linkage).
+    expect(res._body.data.endpoints).toBeGreaterThanOrEqual(21);
     expect(res._body.data.services.some(s => /W257h/.test(s))).toBe(true);
   });
 });

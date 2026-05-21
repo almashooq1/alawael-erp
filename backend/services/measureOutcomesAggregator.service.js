@@ -703,6 +703,40 @@ class MeasureOutcomesAggregatorSvc {
       })
     );
 
+    // W261: per-pair W221 alert events. Single MeasureAlert.find for ALL
+    // beneficiaries in richPairs, then group in app code. Window matches
+    // the admin window (firstSeenAt ∈ [from, to]) so the UI markers line
+    // up with the score trajectory on the W260 detail chart.
+    const MeasureAlert = M.MeasureAlert();
+    const alertsByBen = new Map();
+    if (MeasureAlert && beneficiaryIds.length > 0) {
+      const alertDocs = await MeasureAlert.find({
+        measureId: measureObj,
+        beneficiaryId: { $in: beneficiaryIds },
+        firstSeenAt: { $gte: fromDate, $lte: toDate },
+      })
+        .select(
+          '_id beneficiaryId alertType severity status firstSeenAt acknowledgedAt resolvedAt dismissedAt evidence'
+        )
+        .sort({ firstSeenAt: 1 })
+        .lean();
+      for (const a of alertDocs) {
+        const key = String(a.beneficiaryId);
+        if (!alertsByBen.has(key)) alertsByBen.set(key, []);
+        alertsByBen.get(key).push({
+          id: String(a._id),
+          alertType: a.alertType,
+          severity: a.severity || 'medium',
+          status: a.status,
+          firstSeenAt: new Date(a.firstSeenAt).toISOString(),
+          acknowledgedAt: a.acknowledgedAt ? new Date(a.acknowledgedAt).toISOString() : null,
+          resolvedAt: a.resolvedAt ? new Date(a.resolvedAt).toISOString() : null,
+          dismissedAt: a.dismissedAt ? new Date(a.dismissedAt).toISOString() : null,
+          messageAr: a.evidence?.message_ar || null,
+        });
+      }
+    }
+
     // Build the rows. Achievement matches aggregateBranch's criterion exactly
     // (direction-aware delta ≥ mcidValue, mcidStatus ∈ established|provisional).
     const pairs = richPairs.map(p => {
@@ -728,6 +762,10 @@ class MeasureOutcomesAggregatorSvc {
               score: Number(h.score),
             }))
         : [];
+      // W261: W221 alert events for this (beneficiary, measure) within
+      // the window. UI renders these as vertical markers on the W260
+      // detail chart. Empty array when no alerts fired.
+      const alerts = alertsByBen.get(String(p._id)) || [];
       return {
         beneficiaryId: String(p._id),
         beneficiaryNameAr: meta.nameAr,
@@ -742,6 +780,7 @@ class MeasureOutcomesAggregatorSvc {
         mcidStatus,
         mcidAchieved,
         scoreHistory,
+        alerts,
       };
     });
 

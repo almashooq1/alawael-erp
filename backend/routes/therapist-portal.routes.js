@@ -177,6 +177,94 @@ async function resolveEmployeeId(userId) {
   return emp ? emp._id : null;
 }
 
+// Admin roles allowed to preview the therapist portal on behalf of any
+// clinical employee. These are the only roles that can pass `?employeeId=`
+// to target another therapist's view.
+const ADMIN_VIEWER_ROLES = new Set(['admin', 'superadmin', 'super_admin']);
+
+// Specializations considered "clinical" — used to filter the /therapists
+// picker so admins don't see HR/finance/IT employees as targets.
+const CLINICAL_SPECIALIZATIONS = [
+  'pt',
+  'ot',
+  'speech',
+  'aba',
+  'psychology',
+  'special_education',
+  'vocational',
+  'nursing',
+  'medical',
+];
+
+function isAdminViewer(req) {
+  return ADMIN_VIEWER_ROLES.has(req.user?.role || '');
+}
+
+/**
+ * Resolve which Employee to scope reads against.
+ *
+ * Mirrors the workbench W232 helper so the two route files behave
+ * identically for the admin-previewer use case (see CLAUDE.md known issues).
+ *
+ * Modes:
+ *   - 'self'             — non-admin with own Employee → load own data
+ *   - 'admin_targeted'   — admin passed ?employeeId=<id> resolving to a real Employee
+ *   - 'admin_no_target'  — admin without target → caller should return empty payload
+ *   - 'orphan'           — non-admin without Employee → caller should 404
+ *
+ * `opts.select` and `opts.populate` are forwarded to the Mongoose query so
+ * each call site can keep its existing projection.
+ */
+async function resolveTargetEmployee(req, opts = {}) {
+  const userId = req.user?.id || req.user?._id || req.user?.userId;
+
+  const runQuery = q => {
+    if (opts.populate) q = q.populate(opts.populate);
+    if (opts.select) q = q.select(opts.select);
+    return q.lean();
+  };
+
+  if (isAdminViewer(req)) {
+    const wanted = req.query?.employeeId;
+    if (wanted && isValidObjectId(wanted)) {
+      const target = await runQuery(Employee().findById(wanted));
+      if (target) {
+        return {
+          employee: target,
+          employeeId: target._id,
+          viewerMode: 'admin_targeted',
+          viewing: {
+            _id: String(target._id),
+            nameAr: target.name_ar || null,
+            specialization: target.specialization || null,
+          },
+        };
+      }
+    }
+    if (userId) {
+      const own = await runQuery(Employee().findOne({ user_id: userId }));
+      if (own) {
+        return { employee: own, employeeId: own._id, viewerMode: 'self', viewing: null };
+      }
+    }
+    return { employee: null, employeeId: null, viewerMode: 'admin_no_target', viewing: null };
+  }
+
+  if (!userId) return { employee: null, employeeId: null, viewerMode: 'no_user', viewing: null };
+  const own = await runQuery(Employee().findOne({ user_id: userId }));
+  if (own) return { employee: own, employeeId: own._id, viewerMode: 'self', viewing: null };
+  return { employee: null, employeeId: null, viewerMode: 'orphan', viewing: null };
+}
+
+function adminViewerEnvelope(extras = {}) {
+  return {
+    viewerMode: 'admin_no_target',
+    viewing: null,
+    message: 'اختر معالجاً من القائمة لمشاهدة لوحته',
+    ...extras,
+  };
+}
+
 // Appointment.status → SessionStatus (therapist UI enum)
 const APPT_STATUS_TO_SESSION_STATUS = {
   PENDING: 'SCHEDULED',
@@ -409,6 +497,41 @@ router.post('/auth/login', async (req, res) => {
 });
 
 // ── Identity ──────────────────────────────────────────────────────────────────
+// ── /therapists — admin picker source ─────────────────────────────────────────
+// Admin-only list of clinical employees, used by the workbench UI when the
+// signed-in admin has no Employee record. Returns 403 for therapist roles
+// (they have no need to enumerate other therapists from this endpoint).
+router.get('/therapists', authenticate, requireTherapistRole, async (req, res) => {
+  try {
+    if (!isAdminViewer(req)) {
+      return res.status(403).json({ error: 'Forbidden', message: 'admin-only endpoint' });
+    }
+    const items = await Employee()
+      .find({
+        status: { $ne: 'inactive' },
+        specialization: { $in: CLINICAL_SPECIALIZATIONS },
+      })
+      .select('_id name_ar name_en specialization email')
+      .sort({ name_ar: 1 })
+      .lean();
+    return res.json({
+      items: items.map(e => ({
+        id: String(e._id),
+        nameAr: e.name_ar || null,
+        nameEn: e.name_en || null,
+        specialty: SPECIALIZATION_LABEL_AR[e.specialization] || e.specialization || '—',
+        email: e.email || null,
+      })),
+      total: items.length,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      error: 'InternalError',
+      message: err instanceof Error ? err.message : 'failed to list therapists',
+    });
+  }
+});
+
 router.get('/me', authenticate, requireTherapistRole, async (req, res) => {
   try {
     const userId = req.user?.id || req.user?._id || req.user?.userId;
@@ -416,13 +539,21 @@ router.get('/me', authenticate, requireTherapistRole, async (req, res) => {
       return res.status(401).json({ error: 'Unauthorized', message: 'user id missing from token' });
     }
 
-    // Resolve the caller's Employee record (therapists have user_id → User).
-    const emp = await Employee()
-      .findOne({ user_id: userId })
-      .populate('branch_id', 'name_ar name_en city')
-      .lean();
+    const {
+      employee: emp,
+      viewerMode,
+      viewing,
+    } = await resolveTargetEmployee(req, {
+      populate: { path: 'branch_id', select: 'name_ar name_en city' },
+    });
 
     if (!emp) {
+      if (viewerMode === 'admin_no_target') {
+        // Admin without a linked Employee record can preview the portal but
+        // sees no profile until they pick a therapist. The workbench UI uses
+        // viewerMode='admin_no_target' to render a picker.
+        return res.json(adminViewerEnvelope({ profile: null }));
+      }
       return res.status(404).json({
         error: 'EmployeeNotFound',
         message: 'No Employee record linked to this user. Contact HR to enroll.',
@@ -451,6 +582,8 @@ router.get('/me', authenticate, requireTherapistRole, async (req, res) => {
         cpeHoursYtd,
         cpeHoursRequired,
       },
+      viewerMode,
+      viewing,
     });
   } catch (err) {
     return res.status(500).json({
@@ -468,13 +601,34 @@ router.get('/today', authenticate, requireTherapistRole, async (req, res) => {
       return res.status(401).json({ error: 'Unauthorized', message: 'user id missing from token' });
     }
 
-    // Single Employee lookup gives us both the therapist identity fields
-    // and the _id used to filter appointments.
-    const emp = await Employee()
-      .findOne({ user_id: userId })
-      .select('_id name_ar specialization scfhs_expiry cpe_hours_ytd cpe_hours_required')
-      .lean();
+    const {
+      employee: emp,
+      viewerMode,
+      viewing,
+    } = await resolveTargetEmployee(req, {
+      select: '_id name_ar specialization scfhs_expiry cpe_hours_ytd cpe_hours_required',
+    });
     if (!emp) {
+      if (viewerMode === 'admin_no_target') {
+        return res.json(
+          adminViewerEnvelope({
+            date: new Date().toISOString().slice(0, 10),
+            counts: {
+              total: 0,
+              upcoming: 0,
+              inProgress: 0,
+              completed: 0,
+              cancelled: 0,
+              pendingDocs: 0,
+            },
+            sessions: [],
+            pendingDocs: [],
+            redFlagsMine: { raised: 0, critical: 0 },
+            inboxUnread: 0,
+            cpe: { ytd: 0, required: 30 },
+          })
+        );
+      }
       return res
         .status(404)
         .json({ error: 'EmployeeNotFound', message: 'No Employee record for this user.' });
@@ -535,6 +689,8 @@ router.get('/today', authenticate, requireTherapistRole, async (req, res) => {
         ytd: Number(emp.cpe_hours_ytd) || 0,
         required: Number(emp.cpe_hours_required) || 30,
       },
+      viewerMode,
+      viewing,
     });
   } catch (err) {
     return res.status(500).json({
@@ -546,9 +702,14 @@ router.get('/today', authenticate, requireTherapistRole, async (req, res) => {
 
 router.get('/schedule', authenticate, requireTherapistRole, async (req, res) => {
   try {
-    const userId = req.user?.id || req.user?._id || req.user?.userId;
-    const employeeId = await resolveEmployeeId(userId);
+    const { employeeId, viewerMode } = await resolveTargetEmployee(req, { select: '_id' });
     if (!employeeId) {
+      // Bare-array endpoint: admin previewer gets [], not an envelope, so
+      // existing `.map()` consumers keep working. viewerMode signaling lives
+      // on GET /me — the UI reads that to render the picker.
+      if (viewerMode === 'admin_no_target') {
+        return res.json([]);
+      }
       return res
         .status(404)
         .json({ error: 'EmployeeNotFound', message: 'No Employee record for this user.' });
@@ -860,9 +1021,9 @@ router.post('/sessions/:id/sign', authenticate, requireTherapistRole, async (req
 // ── Beneficiaries (assigned to therapist only) ────────────────────────────────
 router.get('/beneficiaries', authenticate, requireTherapistRole, async (req, res) => {
   try {
-    const userId = req.user?.id || req.user?._id || req.user?.userId;
-    const employeeId = await resolveEmployeeId(userId);
+    const { employeeId, viewerMode } = await resolveTargetEmployee(req, { select: '_id' });
     if (!employeeId) {
+      if (viewerMode === 'admin_no_target') return res.json([]);
       return res
         .status(404)
         .json({ error: 'EmployeeNotFound', message: 'No Employee record for this user.' });
@@ -1475,9 +1636,9 @@ router.get('/assessments/templates', authenticate, requireTherapistRole, (_req, 
 // a separate stream to surface outstanding evaluations.
 router.get('/assessments', authenticate, requireTherapistRole, async (req, res) => {
   try {
-    const userId = req.user?.id || req.user?._id || req.user?.userId;
-    const employeeId = await resolveEmployeeId(userId);
+    const { employeeId, viewerMode } = await resolveTargetEmployee(req, { select: '_id' });
     if (!employeeId) {
+      if (viewerMode === 'admin_no_target') return res.json([]);
       return res
         .status(404)
         .json({ error: 'EmployeeNotFound', message: 'No Employee record for this user.' });
@@ -1717,13 +1878,18 @@ router.get('/credentials', authenticate, requireTherapistRole, async (req, res) 
     if (!userId)
       return res.status(401).json({ error: 'Unauthorized', message: 'user id missing from token' });
 
-    const emp = await Employee()
-      .findOne({ user_id: userId })
-      .select(
-        'scfhs_number scfhs_expiry scfhs_classification cpe_hours_ytd cpe_hours_required iqama_number iqama_expiry passport_number passport_expiry'
-      )
-      .lean();
+    const { employee: emp, viewerMode } = await resolveTargetEmployee(req, {
+      select:
+        'scfhs_number scfhs_expiry scfhs_classification cpe_hours_ytd cpe_hours_required iqama_number iqama_expiry passport_number passport_expiry',
+    });
     if (!emp) {
+      if (viewerMode === 'admin_no_target') {
+        return res.json({
+          credentials: [],
+          cpe: { year: new Date().getFullYear(), ytd: 0, required: 30, activities: [] },
+          viewerMode,
+        });
+      }
       return res
         .status(404)
         .json({ error: 'EmployeeNotFound', message: 'No Employee record for this user.' });

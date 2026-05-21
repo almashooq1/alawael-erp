@@ -51,6 +51,7 @@ const lifecycle = require('../services/reassessmentLifecycle.service');
 const readinessGate = require('../services/measureReadinessGate.service');
 const cascade = require('../services/reassessmentReminderCascade.service');
 const linkageInsights = require('../services/goalLinkageInsights.service');
+const linkage = require('../services/goalMeasureLinkage.service');
 const { MeasureReassessmentTask } = require('../domains/goals/models/MeasureReassessmentTask');
 
 // All routes authenticated + branch-scoped.
@@ -341,6 +342,155 @@ router.get('/insights/link-type-distribution', async (req, res) => {
 });
 
 // ════════════════════════════════════════════════════════════════════════
+// W235/W239 — Goal-Measure Linkage CRUD + decisions
+// ════════════════════════════════════════════════════════════════════════
+
+/**
+ * POST /goals/:goalId/objectives/:objectiveIndex/links
+ * Body: { measureId, linkType, weight?, expectedTarget?,
+ *         reviewIntervalDays?, mcidExpectation?, interventionRefs,
+ *         linkRationale }
+ */
+router.post('/goals/:goalId/objectives/:objectiveIndex/links', async (req, res) => {
+  try {
+    const objectiveIndex = Number(req.params.objectiveIndex);
+    const out = await linkage.createLink({
+      goalId: req.params.goalId,
+      objectiveIndex,
+      ...(req.body || {}),
+      actor: { userId: req.user?._id },
+    });
+    res.status(201).json({ success: true, data: out });
+  } catch (err) {
+    const r = _toErrorResponse(err);
+    res.status(r.status).json(r.body);
+  }
+});
+
+/**
+ * POST /goals/:goalId/objectives/:objectiveIndex/links/:linkIndex/review
+ * Body: { verdict, notes?, interpretationCategorySnapshot? }
+ * SoD: first reviewer must differ from linkedBy
+ */
+router.post(
+  '/goals/:goalId/objectives/:objectiveIndex/links/:linkIndex/review',
+  async (req, res) => {
+    try {
+      const objectiveIndex = Number(req.params.objectiveIndex);
+      const linkIndex = Number(req.params.linkIndex);
+      const out = await linkage.reviewLink({
+        goalId: req.params.goalId,
+        objectiveIndex,
+        linkIndex,
+        verdict: req.body?.verdict,
+        notes: req.body?.notes,
+        interpretationCategorySnapshot: req.body?.interpretationCategorySnapshot,
+        actor: { userId: req.user?._id },
+      });
+      res.json({ success: true, data: out });
+    } catch (err) {
+      const r = _toErrorResponse(err);
+      res.status(r.status).json(r.body);
+    }
+  }
+);
+
+/**
+ * POST /goals/:goalId/objectives/:objectiveIndex/links/:linkIndex/unlink
+ * Body: { reason }
+ * SoD: unlinker ≠ linkedBy
+ */
+router.post(
+  '/goals/:goalId/objectives/:objectiveIndex/links/:linkIndex/unlink',
+  async (req, res) => {
+    try {
+      const objectiveIndex = Number(req.params.objectiveIndex);
+      const linkIndex = Number(req.params.linkIndex);
+      const out = await linkage.unlinkLink({
+        goalId: req.params.goalId,
+        objectiveIndex,
+        linkIndex,
+        reason: req.body?.reason,
+        actor: { userId: req.user?._id },
+      });
+      res.json({ success: true, data: out });
+    } catch (err) {
+      const r = _toErrorResponse(err);
+      res.status(r.status).json(r.body);
+    }
+  }
+);
+
+/**
+ * GET /goals/:goalId/objectives/:objectiveIndex/suggestions
+ * Q2-Q6 bundled recommendations (modify / addSecondary / unlink /
+ * closeAchieved / closeFailed).
+ */
+router.get('/goals/:goalId/objectives/:objectiveIndex/suggestions', async (req, res) => {
+  try {
+    const objectiveIndex = Number(req.params.objectiveIndex);
+    const out = await linkage.suggestModifications({
+      goalId: req.params.goalId,
+      objectiveIndex,
+    });
+    res.json({ success: true, data: out });
+  } catch (err) {
+    const r = _toErrorResponse(err);
+    res.status(r.status).json(r.body);
+  }
+});
+
+/**
+ * GET /goals/:goalId/weighted-progress
+ * Per-objective weighted-score breakdown.
+ */
+router.get('/goals/:goalId/weighted-progress', async (req, res) => {
+  try {
+    const out = await linkage.computeWeightedProgress({ goalId: req.params.goalId });
+    res.json({ success: true, data: out });
+  } catch (err) {
+    const r = _toErrorResponse(err);
+    res.status(r.status).json(r.body);
+  }
+});
+
+/**
+ * GET /measures/:measureId/goals?includeUnlinked=true
+ * Reverse lookup — which goals reference this measure?
+ */
+router.get('/measures/:measureId/goals', async (req, res) => {
+  try {
+    const out = await linkage.goalsForMeasure({
+      measureId: req.params.measureId,
+      includeUnlinked: req.query.includeUnlinked === 'true',
+    });
+    res.json({ success: true, data: out });
+  } catch (err) {
+    const r = _toErrorResponse(err);
+    res.status(r.status).json(r.body);
+  }
+});
+
+/**
+ * GET /links/due-for-review?branchId=&withinDays=7
+ */
+router.get('/links/due-for-review', async (req, res) => {
+  try {
+    const withinDays = req.query.withinDays
+      ? Math.max(1, Math.min(90, Number(req.query.withinDays)))
+      : 7;
+    const out = await linkage.dueForReview({
+      branchId: req.query.branchId || undefined,
+      withinDays,
+    });
+    res.json({ success: true, data: out });
+  } catch (err) {
+    const r = _toErrorResponse(err);
+    res.status(r.status).json(r.body);
+  }
+});
+
+// ════════════════════════════════════════════════════════════════════════
 // Health
 // ════════════════════════════════════════════════════════════════════════
 
@@ -348,15 +498,16 @@ router.get('/_health', (req, res) => {
   res.json({
     success: true,
     data: {
-      wave: 'W226+W238',
+      wave: 'W226+W238+W239',
       mountedAt: 'measures-workflow',
-      endpoints: 13,
+      endpoints: 20,
       services: [
         'W218 strategist',
         'W220 triggers',
         'W222 lifecycle',
         'W223 readinessGate',
         'W225 reminders (read-only)',
+        'W235 linkage CRUD + decisions',
         'W237 linkage insights',
       ],
     },

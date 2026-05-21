@@ -203,8 +203,189 @@ async function getSignalsForTherapist({ employeeId, lookbackMonths = 12 } = {}) 
   return rows;
 }
 
+// ─── W239: Per-beneficiary drill-down ─────────────────────────────────────
+
+// Lazy-loaded to avoid mongoose cycle at module load.
+let _Measure, _interpreter;
+function Measure() {
+  if (!_Measure) {
+    try {
+      _Measure = require('../domains/goals/models/Measure');
+    } catch {
+      _Measure = null;
+    }
+  }
+  return _Measure;
+}
+function interpreter() {
+  if (!_interpreter) {
+    try {
+      _interpreter = require('./measureProgressInterpreter.service');
+    } catch {
+      _interpreter = null;
+    }
+  }
+  return _interpreter;
+}
+
+/**
+ * Authorize the therapist's access to a specific beneficiary and return
+ * the detailed clinical signals payload for the drill-down page.
+ *
+ * Caseload check (12-month look-back) gates the read for therapist roles;
+ * admin viewers skip the check because the picker already targets a
+ * specific employee.
+ *
+ * @param {object} args
+ * @param {string|mongoose.Types.ObjectId} args.employeeId — therapist
+ *   identity (already resolved by the route via resolveTargetEmployee).
+ * @param {string|mongoose.Types.ObjectId} args.beneficiaryId
+ * @param {boolean} [args.skipCaseloadCheck=false] — admin/superadmin
+ *   viewers should pass true; therapist viewers MUST pass false (default).
+ * @param {string} [args.locale='ar']
+ * @returns {Promise<null | {
+ *   beneficiary: { id, nameAr, beneficiaryNumber },
+ *   tasks: Array<object>,
+ *   alerts: Array<object>,
+ *   narratives: { byMeasure: Array<object>, rollup: object }
+ * }>}
+ *   Returns null when the beneficiary is not on the therapist's caseload
+ *   (route translates to 404) or the beneficiary itself doesn't exist.
+ */
+async function getBeneficiaryDetail({
+  employeeId,
+  beneficiaryId,
+  skipCaseloadCheck = false,
+  locale = 'ar',
+} = {}) {
+  if (!beneficiaryId || !mongoose.Types.ObjectId.isValid(String(beneficiaryId))) {
+    return null;
+  }
+  if (!skipCaseloadCheck) {
+    if (!employeeId || !mongoose.Types.ObjectId.isValid(String(employeeId))) {
+      return null;
+    }
+  }
+
+  // ── 1. Caseload gate (therapist viewer only) ───────────────────────
+  if (!skipCaseloadCheck) {
+    const since = new Date();
+    since.setMonth(since.getMonth() - 12);
+    const owned = await Appointment().exists({
+      therapist: employeeId,
+      beneficiary: beneficiaryId,
+      date: { $gte: since },
+    });
+    if (!owned) return null;
+  }
+
+  // ── 2. Beneficiary header ──────────────────────────────────────────
+  const ben = await Beneficiary()
+    .findById(beneficiaryId)
+    .select('firstName_ar lastName_ar firstName_en lastName_en beneficiaryNumber')
+    .lean();
+  if (!ben) return null;
+  const beneficiary = {
+    id: String(ben._id),
+    nameAr:
+      [ben.firstName_ar, ben.lastName_ar].filter(Boolean).join(' ').trim() ||
+      [ben.firstName_en, ben.lastName_en].filter(Boolean).join(' ').trim() ||
+      '—',
+    beneficiaryNumber: ben.beneficiaryNumber || null,
+  };
+
+  // ── 3. Open tasks (W214) ───────────────────────────────────────────
+  const taskDocs = await MeasureReassessmentTask()
+    .find({
+      beneficiaryId,
+      status: { $in: OPEN_TASK_STATUSES },
+    })
+    .sort({ dueAt: 1 })
+    .lean();
+
+  // ── 4. Open alerts (W221) ──────────────────────────────────────────
+  const alertDocs = await MeasureAlert()
+    .find({ beneficiaryId, status: 'open' })
+    .sort({ severity: -1, firstSeenAt: -1 })
+    .lean();
+
+  // ── 5. Resolve measure names (single query for both tasks + alerts) ─
+  const measureIds = new Set([
+    ...taskDocs.map(t => String(t.measureId)),
+    ...alertDocs.map(a => String(a.measureId)),
+  ]);
+  const measureNameMap = new Map();
+  const MeasureModel = Measure();
+  if (MeasureModel && measureIds.size > 0) {
+    const measures = await MeasureModel.find({ _id: { $in: Array.from(measureIds) } })
+      .select('code name_ar name_en')
+      .lean();
+    for (const m of measures) {
+      measureNameMap.set(String(m._id), {
+        measureNameAr: m.name_ar || m.name_en || m.code || '—',
+        measureNameEn: m.name_en || null,
+      });
+    }
+  }
+
+  const tasks = taskDocs.map(t => {
+    const names = measureNameMap.get(String(t.measureId)) || {};
+    return {
+      id: String(t._id),
+      measureId: String(t.measureId),
+      measureCode: t.measureCode,
+      measureNameAr: names.measureNameAr || t.measureCode || '—',
+      status: t.status,
+      phase: t.phase || 'SCHEDULED',
+      dueAt: t.dueAt ? new Date(t.dueAt).toISOString() : null,
+      overdueDays: Number(t.overdueDays) || 0,
+      lastApplicationDate: t.lastApplicationDate
+        ? new Date(t.lastApplicationDate).toISOString()
+        : null,
+      eventTriggerCode: t.eventTriggerCode || null,
+      escalatedAt: t.escalatedAt ? new Date(t.escalatedAt).toISOString() : null,
+      breachedAt: t.breachedAt ? new Date(t.breachedAt).toISOString() : null,
+    };
+  });
+
+  const alerts = alertDocs.map(a => {
+    const names = measureNameMap.get(String(a.measureId)) || {};
+    return {
+      id: String(a._id),
+      measureId: String(a.measureId),
+      measureCode: a.measureCode,
+      measureNameAr: names.measureNameAr || a.measureCode || '—',
+      alertType: a.alertType,
+      severity: a.severity || 'medium',
+      status: a.status,
+      evidence: a.evidence || null,
+      firstSeenAt: a.firstSeenAt ? new Date(a.firstSeenAt).toISOString() : null,
+      lastEvaluatedAt: a.lastEvaluatedAt ? new Date(a.lastEvaluatedAt).toISOString() : null,
+    };
+  });
+
+  // ── 6. Progress narratives (W232) — best-effort ────────────────────
+  let narratives = { byMeasure: [], rollup: null };
+  const interp = interpreter();
+  if (interp && typeof interp.interpretAll === 'function') {
+    try {
+      const out = await interp.interpretAll({ beneficiaryId, locale });
+      narratives = {
+        byMeasure: Array.isArray(out?.byMeasure) ? out.byMeasure : [],
+        rollup: out?.rollup || null,
+      };
+    } catch {
+      // W232 is informational only — failure shouldn't break the page.
+      narratives = { byMeasure: [], rollup: null };
+    }
+  }
+
+  return { beneficiary, tasks, alerts, narratives };
+}
+
 module.exports = {
   getSignalsForTherapist,
+  getBeneficiaryDetail,
   // Exported for tests so we don't have to reach into the closure.
   _internals: { OPEN_TASK_STATUSES, HIGH_SEVERITY, SLIPPED_PHASES },
 };

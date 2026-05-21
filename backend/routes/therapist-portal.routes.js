@@ -1986,4 +1986,62 @@ router.get('/clinical-signals', authenticate, requireTherapistRole, async (req, 
   }
 });
 
+// ── Clinical signals drill-down (W239) ────────────────────────────────────────
+// Per-beneficiary detail page for the row clicked on the
+// ClinicalSignalsCard. Returns:
+//   - beneficiary header (name + number)
+//   - open W214 tasks (full detail including phase, dueAt, eventTriggerCode)
+//   - open W221 alerts (evidence object, severity)
+//   - W232 progress narratives (best-effort — interpreter may be unavailable)
+//
+// Therapist viewers are gated by 12-month caseload check; admin viewers
+// (resolved via ?employeeId=) skip the gate because the picker already
+// targeted a specific employee. Returns 404 when the beneficiary isn't
+// reachable from the targeted therapist's caseload.
+router.get(
+  '/clinical-signals/:beneficiaryId',
+  authenticate,
+  requireTherapistRole,
+  async (req, res) => {
+    try {
+      const { employeeId, viewerMode } = await resolveTargetEmployee(req, { select: '_id' });
+      if (!employeeId) {
+        // No target therapist resolved — admin previewer w/o pick, or
+        // therapist w/o Employee record. Don't leak per-beneficiary data
+        // in either case.
+        if (viewerMode === 'admin_no_target') {
+          return res.status(404).json({
+            error: 'NoTargetTherapist',
+            message: 'اختر معالجاً من قائمة الإدارة لعرض التفاصيل.',
+          });
+        }
+        return res
+          .status(404)
+          .json({ error: 'EmployeeNotFound', message: 'No Employee record for this user.' });
+      }
+      if (!isValidObjectId(req.params.beneficiaryId)) {
+        return res
+          .status(400)
+          .json({ error: 'InvalidId', message: 'beneficiaryId is not a valid ObjectId' });
+      }
+      const detail = await _therapistClinicalSignalsSvc.getBeneficiaryDetail({
+        employeeId,
+        beneficiaryId: req.params.beneficiaryId,
+        skipCaseloadCheck: viewerMode === 'admin_targeted',
+      });
+      if (!detail) {
+        return res
+          .status(404)
+          .json({ error: 'NotFound', message: 'beneficiary not on your caseload or not found' });
+      }
+      return res.json(detail);
+    } catch (err) {
+      return res.status(500).json({
+        error: 'InternalError',
+        message: err instanceof Error ? err.message : 'failed to load beneficiary clinical detail',
+      });
+    }
+  }
+);
+
 module.exports = router;

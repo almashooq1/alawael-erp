@@ -635,6 +635,74 @@ class MeasureAdministrationSvc {
   }
 
   /**
+   * W257g: list admins that carry one or more anomalyFlags (W257e/W257f
+   * wiring populates these). This closes the value-chain gap — flags
+   * are persisted but invisible without a query path.
+   *
+   * Pure service-layer aggregation, no HTTP route yet (separate scope
+   * decision). Returns admins sorted most-recent first.
+   *
+   * @param {Object} [opts]
+   * @param {ObjectId|string} [opts.branchId] - scope to one branch
+   * @param {Date|string} [opts.from] - applicationDate ≥ from
+   * @param {Date|string} [opts.to] - applicationDate ≤ to
+   * @param {'low'|'medium'|'high'} [opts.severity] - filter by min severity (≥)
+   * @param {string} [opts.flagType] - exact type filter (one of 5 anomaly types)
+   * @param {boolean} [opts.includeSuperseded=false] - include corrected admins
+   * @param {number} [opts.limit=50] - max results (capped at 500)
+   * @returns {Promise<{items: Array, total: number}>}
+   */
+  async listAnomalousAdmins(opts = {}) {
+    const MeasureApplication = M.MeasureApplication();
+    if (!MeasureApplication) return { items: [], total: 0 };
+
+    const filter = {
+      anomalyFlags: { $exists: true, $not: { $size: 0 } },
+    };
+    if (opts.branchId) filter.branchId = opts.branchId;
+    if (!opts.includeSuperseded) filter.status = { $ne: 'corrected' };
+
+    if (opts.from || opts.to) {
+      filter.applicationDate = {};
+      if (opts.from) filter.applicationDate.$gte = new Date(opts.from);
+      if (opts.to) filter.applicationDate.$lte = new Date(opts.to);
+    }
+
+    // Severity + type filters are array-element conditions.
+    // Use $elemMatch so a single flag must satisfy BOTH conditions
+    // (an admin with one high-severity flag of a different type than
+    // the filter should NOT match flagType=X + severity=high).
+    if (opts.severity || opts.flagType) {
+      const elem = {};
+      if (opts.flagType) elem.type = opts.flagType;
+      if (opts.severity) {
+        const SEV_ORDER = { low: 0, medium: 1, high: 2 };
+        const min = SEV_ORDER[opts.severity];
+        if (min == null) {
+          throw new Error(`Invalid severity: ${opts.severity}`);
+        }
+        const allowed = Object.keys(SEV_ORDER).filter(k => SEV_ORDER[k] >= min);
+        elem.severity = { $in: allowed };
+      }
+      filter.anomalyFlags = { $elemMatch: elem };
+    }
+
+    const limit = Math.min(Math.max(1, opts.limit || 50), 500);
+
+    const [items, total] = await Promise.all([
+      MeasureApplication.find(filter)
+        .sort({ applicationDate: -1 })
+        .limit(limit)
+        .select(
+          '_id beneficiaryId measureId branchId applicationDate purpose status totalRawScore anomalyFlags'
+        )
+        .lean(),
+      MeasureApplication.countDocuments(filter),
+    ]);
+    return { items, total };
+  }
+
+  /**
    * Get the chronological history of a measure for a beneficiary.
    * Excludes corrected-superseded records by default.
    */

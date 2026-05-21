@@ -30,6 +30,11 @@
  *                                                    deep-dive (full
  *                                                    statistical detail
  *                                                    + admin history)
+ *   GET   /ministry-comparison
+ *           ?branchIds=a,b,c&year=YYYY&month=MM    → W250 multi-branch
+ *                                                    ministry comparison
+ *                                                    w/ leaderboards +
+ *                                                    org totals
  *
  * Auth: all data routes require authenticate + requireBranchAccess.
  * _health is public (matches the W226 convention).
@@ -54,6 +59,7 @@ const logger = require('../utils/logger');
 const aggregator = require('../services/measureOutcomesAggregator.service');
 const familyReport = require('../services/measureFamilyReport.service');
 const ministryReport = require('../services/measureMinistryReport.service');
+const ministryComparison = require('../services/measureMinistryComparison.service');
 const clinicalReport = require('../services/measureClinicalReport.service');
 
 // ─── Health check (public — matches W226 convention) ─────────────
@@ -351,6 +357,62 @@ router.get('/clinical-report/:beneficiaryId', async (req, res) => {
     return _passThroughOrError(out, res);
   } catch (err) {
     logger.warn('[measures-outcomes] /clinical-report failed: %s', err.message);
+    const r = _toErrorResponse(err);
+    return res.status(r.status).json(r.body);
+  }
+});
+
+// ════════════════════════════════════════════════════════════════════
+// W251 — Multi-branch ministry comparison (W250 service surface)
+// ════════════════════════════════════════════════════════════════════
+
+/**
+ * Parse the branchIds query param. Supports two forms:
+ *   ?branchIds=a,b,c    (CSV — preferred for URL share-friendliness)
+ *   ?branchIds=a&branchIds=b&branchIds=c  (Express array form)
+ *
+ * Returns trimmed string[] with empty entries dropped. Throws when
+ * the result is empty (caller maps to 400).
+ */
+function _parseBranchIds(raw) {
+  if (raw == null) throw new Error('branchIds required (comma-separated list)');
+  let arr = Array.isArray(raw) ? raw : String(raw).split(',');
+  arr = arr.map(s => String(s).trim()).filter(Boolean);
+  if (arr.length === 0) throw new Error('branchIds required (≥1 non-empty id)');
+  return arr;
+}
+
+/**
+ * GET /ministry-comparison?branchIds=a,b,c&year=YYYY&month=MM
+ *
+ * Returns the W250 comparison payload (branches[] + organizationTotals
+ * + leaderboards). Best read alongside W244 single-branch ministry
+ * report when a director wants to drill into one branch's detail.
+ *
+ * Responses:
+ *   200 → { success: true, data: <W250 report shape> }
+ *   400 → missing/invalid branchIds, year, or month
+ *   500 → unexpected service throw
+ *
+ * Note: This endpoint does NOT short-circuit on per-branch errors —
+ * those land in `branches[N].error` and the report still ships.
+ * Only validation errors (bad params) get a 400.
+ */
+router.get('/ministry-comparison', async (req, res) => {
+  try {
+    const branchIds = _parseBranchIds(req.query.branchIds);
+    const y = parseInt(req.query.year, 10);
+    const m = parseInt(req.query.month, 10);
+    if (!Number.isInteger(y) || y < 2000 || y > 2100) {
+      return res.status(400).json({ success: false, error: 'year required (integer 2000-2100)' });
+    }
+    if (!Number.isInteger(m) || m < 1 || m > 12) {
+      return res.status(400).json({ success: false, error: 'month required (integer 1-12)' });
+    }
+    const out = await ministryComparison.compareBranches({ branchIds, year: y, month: m });
+    return res.json({ success: true, data: out });
+  } catch (err) {
+    logger.warn('[measures-outcomes] /ministry-comparison failed: %s', err.message);
     const r = _toErrorResponse(err);
     return res.status(r.status).json(r.body);
   }

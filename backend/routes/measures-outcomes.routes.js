@@ -219,6 +219,91 @@ router.get('/branch/:branchId/measure/:measureId/pairs', async (req, res) => {
   }
 });
 
+/**
+ * W258 — CSV export of the per-(branch, measure) pairs drill.
+ *
+ *   GET /branch/:branchId/measure/:measureId/pairs.csv?from=&to=
+ *
+ * Same data, same window semantics as the JSON pairs route — wrapped
+ * in CSV for directors who want to share / pivot in Excel. UTF-8
+ * with BOM so Excel detects Arabic correctly on Windows. Headers in
+ * Arabic since the audience is Arabic-speaking directors.
+ */
+router.get('/branch/:branchId/measure/:measureId/pairs.csv', async (req, res) => {
+  try {
+    const { branchId, measureId } = req.params;
+    if (!branchId || !measureId) {
+      return res.status(400).json({ success: false, error: 'branchId + measureId required' });
+    }
+    const from = _parseDate(req.query.from);
+    const to = _parseDate(req.query.to);
+    const opts = { branchId, measureId };
+    if (from) opts.from = from;
+    if (to) opts.to = to;
+    const out = await aggregator.listMeasurePairsAt(opts);
+    if (out && out.error) {
+      return res.status(503).json({ success: false, ...out });
+    }
+    const csv = _pairsToCsv(out);
+    const filename = `pairs-${branchId}-${measureId}.csv`;
+    // BOM keeps Excel from misinterpreting the UTF-8 Arabic as Windows-1252.
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    return res.send('﻿' + csv);
+  } catch (err) {
+    logger.warn('[measures-outcomes] /branch/.../pairs.csv failed: %s', err.message);
+    const r = _toErrorResponse(err);
+    return res.status(r.status).json(r.body);
+  }
+});
+
+// CSV cell escaping: wrap fields containing commas / quotes / newlines
+// in double quotes, doubling internal quotes per RFC 4180.
+function _csvCell(v) {
+  if (v == null) return '';
+  const s = String(v);
+  if (/[",\n\r]/.test(s)) {
+    return `"${s.replace(/"/g, '""')}"`;
+  }
+  return s;
+}
+
+function _pairsToCsv(drill) {
+  const headers = [
+    'المستفيد',
+    'رقم المستفيد',
+    'عدد التطبيقات',
+    'النتيجة الأولى',
+    'تاريخ الأول',
+    'النتيجة الأخيرة',
+    'تاريخ الأخير',
+    'Δ',
+    'قيمة MCID',
+    'حالة MCID',
+    'حقّق MCID',
+  ];
+  const rows = [headers.join(',')];
+  const pairs = drill?.pairs || [];
+  for (const p of pairs) {
+    rows.push(
+      [
+        _csvCell(p.beneficiaryNameAr || ''),
+        _csvCell(p.beneficiaryNumber || ''),
+        _csvCell(p.adminCount),
+        _csvCell(p.firstScore),
+        _csvCell(p.firstDate ? p.firstDate.slice(0, 10) : ''),
+        _csvCell(p.lastScore),
+        _csvCell(p.lastDate ? p.lastDate.slice(0, 10) : ''),
+        _csvCell(p.delta),
+        _csvCell(p.mcidValue ?? ''),
+        _csvCell(p.mcidStatus ?? ''),
+        _csvCell(p.mcidAchieved ? 'نعم' : 'لا'),
+      ].join(',')
+    );
+  }
+  return rows.join('\n') + '\n';
+}
+
 // ════════════════════════════════════════════════════════════════════
 // W241 — Family-friendly Arabic report (W240 service surface)
 // ════════════════════════════════════════════════════════════════════

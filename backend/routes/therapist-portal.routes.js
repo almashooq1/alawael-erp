@@ -1958,4 +1958,32 @@ router.get('/credentials', authenticate, requireTherapistRole, async (req, res) 
   }
 });
 
+// ── Clinical signals (W237) ───────────────────────────────────────────────────
+// Roll-up of the Outcomes-vertical (W210→W232) signals the therapist needs
+// to act on today: W214 reassessment tasks + W221 measure alerts, grouped
+// per beneficiary, sorted most-actionable first. Empty array when no
+// beneficiary has any open signal.
+//
+// Bare-array contract: admin-no-target returns `[]`, matching /schedule,
+// /beneficiaries, /assessments.
+const _therapistClinicalSignalsSvc = require('../services/therapistClinicalSignals.service');
+router.get('/clinical-signals', authenticate, requireTherapistRole, async (req, res) => {
+  try {
+    const { employeeId, viewerMode } = await resolveTargetEmployee(req, { select: '_id' });
+    if (!employeeId) {
+      if (viewerMode === 'admin_no_target') return res.json([]);
+      return res
+        .status(404)
+        .json({ error: 'EmployeeNotFound', message: 'No Employee record for this user.' });
+    }
+    const signals = await _therapistClinicalSignalsSvc.getSignalsForTherapist({ employeeId });
+    return res.json(signals);
+  } catch (err) {
+    return res.status(500).json({
+      error: 'InternalError',
+      message: err instanceof Error ? err.message : 'failed to load clinical signals',
+    });
+  }
+});
+
 module.exports = router;

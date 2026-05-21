@@ -617,6 +617,7 @@ class MeasureOutcomesAggregatorSvc {
    *     mcidValue: number | null,
    *     mcidStatus: string | null,
    *     mcidAchieved: boolean,
+   *     scoreHistory: Array<{date: string, score: number}>, // W257 sparkline
    *   }>,
    *   pairsThinHistory: number, // pairs with <3 admins NOT in `pairs[]`
    * } | { error: 'models_unavailable' }>}
@@ -657,6 +658,14 @@ class MeasureOutcomesAggregatorSvc {
           admins: { $sum: 1 },
           first: { $first: '$$ROOT' },
           last: { $last: '$$ROOT' },
+          // W257: full score trajectory ordered by applicationDate asc.
+          // Pre-sort above guarantees order; $push preserves it.
+          // Small per pair (mean ~5, p99 ~15-20 admins) → ~120-480 numbers
+          // total for a typical 24-pair branch view. Acceptable size for
+          // the UI sparkline render — no separate roundtrip needed.
+          history: {
+            $push: { date: '$applicationDate', score: '$totalRawScore' },
+          },
         },
       },
     ]);
@@ -708,6 +717,17 @@ class MeasureOutcomesAggregatorSvc {
         mcidVal > 0 &&
         (mcidStatus === 'established' || mcidStatus === 'provisional');
       const mcidAchieved = mcidEligible && delta >= mcidVal;
+      // W257: score trajectory for the inline sparkline. Walk the $push
+      // result, dropping null/NaN scores defensively so the UI doesn't
+      // have to. Order preserved from the pipeline's pre-sort.
+      const scoreHistory = Array.isArray(p.history)
+        ? p.history
+            .filter(h => Number.isFinite(Number(h.score)))
+            .map(h => ({
+              date: new Date(h.date).toISOString(),
+              score: Number(h.score),
+            }))
+        : [];
       return {
         beneficiaryId: String(p._id),
         beneficiaryNameAr: meta.nameAr,
@@ -721,6 +741,7 @@ class MeasureOutcomesAggregatorSvc {
         mcidValue: Number.isFinite(mcidVal) ? mcidVal : null,
         mcidStatus,
         mcidAchieved,
+        scoreHistory,
       };
     });
 

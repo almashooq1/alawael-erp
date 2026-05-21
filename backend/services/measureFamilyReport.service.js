@@ -30,6 +30,13 @@
 
 const mongoose = require('mongoose');
 
+// W257c wiring (observability-mode only): scan every family-facing
+// string against the engine's jargon blacklist. Leaks surface as a
+// non-fatal `qualityWarnings[]` field on the returned report so
+// downstream consumers can route them for review without breaking
+// existing renderers.
+const { scrubFamilyJargon, FamilyJargonLeak } = require('./clinicalReportNarrativeEngine.service');
+
 const M = {
   Measure: () => {
     try {
@@ -207,7 +214,7 @@ class MeasureFamilyReportSvc {
 
     // Empty rollup short-circuits.
     if (!rollup.measures || rollup.measures.length === 0) {
-      return {
+      const emptyReport = {
         beneficiaryId: rollup.beneficiaryId,
         generatedAt: new Date(),
         reportLanguage: 'ar',
@@ -225,6 +232,9 @@ class MeasureFamilyReportSvc {
         }),
         signOff: this._composeSignOff(),
       };
+      const leaks = this._detectFamilyJargonLeaks(emptyReport);
+      if (leaks.length > 0) emptyReport.qualityWarnings = leaks;
+      return emptyReport;
     }
 
     // Resolve measure metadata in one batch round-trip.
@@ -269,7 +279,7 @@ class MeasureFamilyReportSvc {
       goals: rollup.goals,
     });
 
-    return {
+    const report = {
       beneficiaryId: rollup.beneficiaryId,
       generatedAt: new Date(),
       reportLanguage: 'ar',
@@ -287,6 +297,9 @@ class MeasureFamilyReportSvc {
       narrative,
       signOff: this._composeSignOff(),
     };
+    const leaks = this._detectFamilyJargonLeaks(report);
+    if (leaks.length > 0) report.qualityWarnings = leaks;
+    return report;
   }
 
   /**
@@ -329,6 +342,49 @@ class MeasureFamilyReportSvc {
     }
 
     return parts.join(' ');
+  }
+
+  /**
+   * W257c guardrail: scan every family-facing string field on the
+   * generated report for blacklisted jargon. Returns the list of
+   * leaks (empty when clean). Does NOT throw — caller attaches the
+   * result to `qualityWarnings` so existing callers/tests are
+   * unaffected when zero leaks exist.
+   *
+   * @returns {Array<{field: string, matchedToken: string, sample: string}>}
+   */
+  _detectFamilyJargonLeaks(report) {
+    const leaks = [];
+    const visit = (field, text) => {
+      if (typeof text !== 'string' || text.length === 0) return;
+      try {
+        scrubFamilyJargon(text);
+      } catch (err) {
+        if (err instanceof FamilyJargonLeak) {
+          leaks.push({
+            field,
+            matchedToken: err.matchedToken,
+            sample: err.sample,
+          });
+        } else {
+          throw err;
+        }
+      }
+    };
+
+    visit('headline', report.headline);
+    visit('narrative', report.narrative);
+    if (report.signOff) visit('signOff.label_ar', report.signOff.label_ar);
+    if (Array.isArray(report.alertParagraphs)) {
+      report.alertParagraphs.forEach((p, i) => visit(`alertParagraphs[${i}].text_ar`, p.text_ar));
+    }
+    if (Array.isArray(report.measures)) {
+      report.measures.forEach((m, i) => {
+        visit(`measures[${i}].name_ar`, m.name_ar);
+        visit(`measures[${i}].verdict_ar`, m.verdict_ar);
+      });
+    }
+    return leaks;
   }
 
   _composeSignOff() {

@@ -324,6 +324,70 @@ describe('W262 — listMeasurePairsAt.alerts actor attribution', () => {
     expect(a.dismissalReason).toBe('استمرار التحقق لاحقاً');
   });
 
+  test('malformed actor id → entire User.find does not crash; that actor surfaces fullName: null', async () => {
+    // Regression: legacy / raw-shell / test-fixture data can leak
+    // non-ObjectId strings into the *By fields. Before the defensive
+    // isValid filter, this crashed `new mongoose.Types.ObjectId(badId)`
+    // and propagated as a 500, wiping ALL alert data from the page.
+    const berg = await makeMeasure();
+    const ben = await makeBeneficiary();
+    const dr = await makeUser({ fullName: 'د. سالم' });
+    const branchId = new mongoose.Types.ObjectId();
+    for (const item of [
+      { d: 60, s: 26 },
+      { d: 30, s: 22 },
+      { d: 5, s: 18 },
+    ]) {
+      await seedAdmin({
+        beneficiaryId: ben._id,
+        measureId: berg._id,
+        branchId,
+        daysAgo: item.d,
+        score: item.s,
+      });
+    }
+    // Two alerts: one with a VALID actor, one with a malformed actor.
+    // The malformed one must not crash the whole lookup.
+    await seedAlert({
+      beneficiaryId: ben._id,
+      measureId: berg._id,
+      daysAgo: 25,
+      status: 'acknowledged',
+      acknowledgedAt: new Date(Date.now() - 12 * 86400000),
+      acknowledgedBy: dr._id,
+    });
+    // Forge a doc via the raw collection so we bypass Mongoose's
+    // ObjectId validation — simulates legacy / shell-inserted data.
+    await mongoose.connection.db.collection('measure_alerts').insertOne({
+      beneficiaryId: ben._id,
+      measureId: berg._id,
+      measureCode: 'BERG',
+      alertType: 'PLATEAU_DETECTED',
+      severity: 'medium',
+      status: 'dismissed',
+      firstSeenAt: new Date(Date.now() - 15 * 86400000),
+      lastEvaluatedAt: new Date(Date.now() - 15 * 86400000),
+      dismissedAt: new Date(Date.now() - 3 * 86400000),
+      dismissedBy: 'not-an-objectid', // <-- malformed
+      dismissalReason: 'سبب اختبار',
+      evidence: { message_ar: 'مع actor تالف' },
+    });
+    // The whole call should still succeed
+    const r = await aggregator.listMeasurePairsAt({
+      branchId,
+      measureId: berg._id,
+    });
+    expect(r.pairs).toHaveLength(1);
+    expect(r.pairs[0].alerts).toHaveLength(2);
+    const ackd = r.pairs[0].alerts.find(a => a.status === 'acknowledged');
+    const dism = r.pairs[0].alerts.find(a => a.status === 'dismissed');
+    // Valid actor surfaces fullName normally
+    expect(ackd.acknowledgedBy).toEqual({ id: String(dr._id), fullName: 'د. سالم' });
+    // Malformed actor surfaces as {id: rawString, fullName: null} — no crash
+    expect(dism.dismissedBy).toEqual({ id: 'not-an-objectid', fullName: null });
+    expect(dism.dismissalReason).toBe('سبب اختبار');
+  });
+
   test('single User.find batches lookups across multiple alerts/pairs', async () => {
     const berg = await makeMeasure();
     const branchId = new mongoose.Types.ObjectId();

@@ -755,13 +755,24 @@ class MeasureOutcomesAggregatorSvc {
       }
       const userNameById = new Map();
       if (User && actorIds.size > 0) {
-        const userDocs = await User.find({
-          _id: { $in: [...actorIds].map(id => new mongoose.Types.ObjectId(id)) },
-        })
-          .select('_id fullName')
-          .lean();
-        for (const u of userDocs) {
-          userNameById.set(String(u._id), u.fullName || null);
+        // Defensive: filter to well-formed ObjectId strings before the
+        // $in lookup. Legacy data / raw-shell inserts / test fixtures
+        // can leak non-hex strings into actor fields, and
+        // `new mongoose.Types.ObjectId(badInput)` THROWS — which would
+        // crash the whole User.find call and propagate up as a 500,
+        // wiping ALL alert data from the per-pair view (not just the
+        // attribution). Drop bad IDs silently; UI still renders alerts
+        // with `fullName: null` for those actors.
+        const validIds = [...actorIds].filter(id => mongoose.Types.ObjectId.isValid(id));
+        if (validIds.length > 0) {
+          const userDocs = await User.find({
+            _id: { $in: validIds.map(id => new mongoose.Types.ObjectId(id)) },
+          })
+            .select('_id fullName')
+            .lean();
+          for (const u of userDocs) {
+            userNameById.set(String(u._id), u.fullName || null);
+          }
         }
       }
       const actorRef = id => {

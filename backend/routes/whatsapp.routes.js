@@ -50,6 +50,7 @@ const whatsappService = require('../services/whatsapp/whatsappService');
 const whatsappAI = require('../services/whatsapp/whatsappAI.service');
 const whatsappWebhook = require('../services/whatsapp/whatsappWebhook.service');
 const whatsappTemplates = require('../services/whatsapp/whatsappTemplates.service');
+const { authenticate } = require('../middleware/auth');
 const logger = require('../utils/logger');
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -78,27 +79,49 @@ function validate(fields, body) {
 /** GET /webhook — Meta verification challenge */
 router.get('/webhook', (req, res) => whatsappService.verifyWebhook(req, res));
 
-/** POST /webhook — Inbound events from Meta */
+/** POST /webhook — Inbound events from Meta
+ *
+ * Raw body for HMAC is captured by the global `express.json({verify})` hook
+ * in startup/middleware.js (stashed on req.rawBody as a Buffer).
+ *
+ * Order matters: signature must be VERIFIED before we 200 — otherwise we'd
+ * acknowledge forged webhooks and process attacker-controlled payloads. Meta
+ * tolerates the few-millisecond delay; the 5s budget is for processing, not
+ * for the HTTP ack.
+ */
 router.post(
   '/webhook',
-  express.raw({ type: 'application/json' }),
   asyncHandler(async (req, res) => {
-    // Acknowledge immediately (Meta requires < 5s)
-    res.sendStatus(200);
-
-    const rawBody = req.body?.toString?.() || JSON.stringify(req.body);
+    const rawBody = req.rawBody
+      ? req.rawBody.toString('utf8')
+      : typeof req.body === 'string'
+        ? req.body
+        : JSON.stringify(req.body || {});
     const signature = req.headers['x-hub-signature-256'];
-    let parsed;
-    try {
-      parsed = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
-    } catch {
-      parsed = {};
+
+    if (!whatsappWebhook.verifySignature(rawBody, signature)) {
+      logger.warn(`[WhatsApp Webhook] Rejected: invalid signature from ${req.ip}`);
+      return res.status(401).json({ success: false, message: 'Invalid signature' });
     }
 
-    const result = await whatsappWebhook.processWebhook(parsed, rawBody, signature);
-    logger.info(`[WhatsApp Webhook] Processed: ${JSON.stringify(result)}`);
+    // Signature OK — acknowledge fast (Meta wants < 5s) then process async.
+    res.sendStatus(200);
+
+    const parsed = typeof req.body === 'string' ? JSON.parse(req.body) : req.body || {};
+    try {
+      const result = await whatsappWebhook.processWebhook(parsed, rawBody, signature);
+      logger.info(`[WhatsApp Webhook] Processed: ${JSON.stringify(result)}`);
+    } catch (err) {
+      logger.error(`[WhatsApp Webhook] Processing error: ${err.message}`);
+    }
   })
 );
+
+// ───────────────────────────────────────────────────────────────────────────
+// All routes BELOW require authentication. Webhook endpoints above are
+// intentionally public — Meta calls them directly with an HMAC signature.
+// ───────────────────────────────────────────────────────────────────────────
+router.use(authenticate);
 
 // ═══════════════════════════════════════════════════════════════════════════
 // CONVERSATIONS

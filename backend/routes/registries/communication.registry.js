@@ -29,8 +29,8 @@ module.exports = function registerCommunicationRoutes(
   // PHANTOM: const aiCommRouter = safeRequire('../routes/aiCommunication.routes');
   const communicationRoutes = safeRequire('../routes/communication.routes');
   // PHANTOM: const emailV2Routes = safeRequire('../routes/email-v2.routes');
-  // PHANTOM: const whatsappRoutes = safeRequire('../routes/whatsapp.routes');
-  // PHANTOM: const whatsappEnhancedRoutes = safeRequire('../routes/whatsapp-enhanced.routes');
+  const whatsappRoutes = safeRequire('../routes/whatsapp.routes');
+  const whatsappEnhancedRoutes = safeRequire('../routes/whatsapp-enhanced.routes');
   // PHANTOM: const adminCommRoutes = safeRequire('../routes/admin-communications.routes');
   // PHANTOM: const adminCommEnhancedRoutes = safeRequire('../routes/admin-comm-enhanced.routes');
   // PHANTOM: const electronicDirectivesRoutes = safeRequire('../routes/electronic-directives.routes');
@@ -55,9 +55,25 @@ module.exports = function registerCommunicationRoutes(
   // ══════════════════════════════════════════════════════════════════════════
   // ── WhatsApp Communication System (نظام الوتساب) ──────────────────────
   // ══════════════════════════════════════════════════════════════════════════
-  // PHANTOM-FIX: dualMount(app, 'whatsapp', whatsappRoutes);
-  // PHANTOM-FIX: dualMount(app, 'whatsapp-enhanced', whatsappEnhancedRoutes);
-  logger.info('[Comm] WhatsApp routes SKIPPED (phantom imports)');
+  // The webhook endpoints inside whatsapp.routes.js are PUBLIC by design
+  // (Meta calls them with X-Hub-Signature-256). All other endpoints in that
+  // router gate themselves with `router.use(authenticate)`, so we mount with
+  // the unauthenticated `dualMount` here and let the router do its own auth.
+  // whatsapp-enhanced already calls `router.use(authenticate)` internally.
+  if (whatsappRoutes) {
+    dualMount(app, 'whatsapp', whatsappRoutes);
+    logger.info('[Comm] WhatsApp routes mounted (/api/whatsapp + /api/v1/whatsapp)');
+  } else {
+    logger.warn('[Comm] WhatsApp routes NOT mounted (require failed)');
+  }
+  if (whatsappEnhancedRoutes) {
+    dualMount(app, 'whatsapp-enhanced', whatsappEnhancedRoutes);
+    logger.info(
+      '[Comm] WhatsApp Enhanced routes mounted (broadcast groups, template approval, opt-status)'
+    );
+  } else {
+    logger.warn('[Comm] WhatsApp Enhanced routes NOT mounted (require failed)');
+  }
 
   // ══════════════════════════════════════════════════════════════════════════
   // ── Administrative Communications System (نظام الاتصالات الإدارية) ─────

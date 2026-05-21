@@ -26,7 +26,12 @@ function cfg() {
   return {
     token: process.env.WHATSAPP_API_TOKEN || '',
     phoneId: process.env.WHATSAPP_PHONE_ID || '',
+    // App Secret — for HMAC verification of incoming webhook POST bodies.
     webhookSecret: process.env.WHATSAPP_WEBHOOK_SECRET || '',
+    // Verify Token — a separate value Meta sends back in GET /webhook
+    // during one-time webhook URL verification. Falls back to webhookSecret
+    // for backwards-compat with deployments that conflated the two.
+    verifyToken: process.env.WHATSAPP_VERIFY_TOKEN || process.env.WHATSAPP_WEBHOOK_SECRET || '',
     businessId: process.env.WHATSAPP_BUSINESS_ID || '',
     enabled: process.env.WHATSAPP_ENABLED === 'true' || !!process.env.WHATSAPP_API_TOKEN,
   };
@@ -388,7 +393,12 @@ function verifyWebhook(req, res) {
   const token = req.query['hub.verify_token'];
   const challenge = req.query['hub.challenge'];
 
-  if (mode === 'subscribe' && token === cfg().webhookSecret) {
+  // Meta sends hub.verify_token equal to the value we configured in the
+  // dashboard. WHATSAPP_VERIFY_TOKEN is the canonical name; we fall back to
+  // WHATSAPP_WEBHOOK_SECRET so legacy deployments that set one variable
+  // don't break.
+  const expected = cfg().verifyToken;
+  if (mode === 'subscribe' && expected && token === expected) {
     logger.info('[WhatsApp] Webhook verified ✓');
     return res.status(200).send(challenge);
   }
@@ -480,6 +490,49 @@ function downloadBinary(url) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// Convenience helpers — used by auth/otp-service.js and other callers that
+// don't want to construct a template object by hand. Kept thin: each is a
+// single sendTemplate() call. These are the canonical replacements for the
+// legacy `communication/whatsapp-service.js` exports.
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Send a 4-6 digit OTP via the pre-approved `otp_verification` template.
+ *
+ * @param {string} to - phone number (any GCC format; normalized internally)
+ * @param {string|number} otp - the OTP value to embed in template body
+ * @param {number} [expiryMinutes=5] - shown in the template body
+ * @returns {Promise<{success:boolean, messageId?:string, stub?:boolean}>}
+ */
+async function sendOtp(to, otp, expiryMinutes = 5) {
+  return sendTemplate(to, 'otp_verification', 'ar', [
+    {
+      type: 'body',
+      parameters: [
+        { type: 'text', text: String(otp) },
+        { type: 'text', text: String(expiryMinutes) },
+      ],
+    },
+  ]);
+}
+
+/**
+ * Send a notification via the `notification` template. Title + body fields
+ * must match the template registered in Meta Business Manager.
+ */
+async function sendNotification(to, title, body) {
+  return sendTemplate(to, 'notification', 'ar', [
+    {
+      type: 'body',
+      parameters: [
+        { type: 'text', text: String(title).slice(0, 60) },
+        { type: 'text', text: String(body).slice(0, 1024) },
+      ],
+    },
+  ]);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // Exports
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -499,6 +552,9 @@ const whatsappService = {
   assertCanMessage,
   normalizePhone,
   maskPhone,
+  // Convenience wrappers — see block above.
+  sendOtp,
+  sendNotification,
   isEnabled: () => cfg().enabled,
 };
 

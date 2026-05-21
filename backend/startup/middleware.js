@@ -153,7 +153,18 @@ function setupMiddleware(app, { isTestEnv, isProd }) {
   // ── Body parsing ─────────────────────────────────────────────────────────
   app.use('/api/upload', express.json({ limit: '10mb' }));
   app.use('/api/upload', express.urlencoded({ extended: true, limit: '10mb' }));
-  app.use(express.json({ limit: '1mb' }));
+  // Webhook routes need the raw body buffer for HMAC signature verification.
+  // The `verify` hook runs before JSON.parse and is the only safe place to
+  // capture the exact bytes Meta signed. Stash on req.rawBody for the
+  // route handler — guarded by path prefix so we don't burn memory on every
+  // request.
+  const webhookRawBody = (req, _res, buf) => {
+    const url = req.originalUrl || req.url || '';
+    if (url.includes('/whatsapp/webhook') || url.includes('/webhooks/')) {
+      req.rawBody = buf;
+    }
+  };
+  app.use(express.json({ limit: '1mb', verify: webhookRawBody }));
   app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
   // ── JSON depth limiter (DoS protection) ──────────────────────────────────

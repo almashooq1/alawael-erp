@@ -91,6 +91,14 @@ module.exports = function registerClinicalTherapyRoutes(
   );
 
   // ══════════════════════════════════════════════════════════════════════════
+  // ── Wave 263: AAC (Augmentative & Alternative Communication) — التواصل البديل
+  // ══════════════════════════════════════════════════════════════════════════
+  safeMount(app, ['/api/aac', '/api/v1/aac'], '../routes/aac.routes');
+  logger.info(
+    '✅ AAC routes mounted (W263 Foundation): profile + PECS phase workflow + Arabic symbol library (9 endpoints)'
+  );
+
+  // ══════════════════════════════════════════════════════════════════════════
   // ── Phases 30–33: Advanced Rehabilitation — التأهيل المتقدم ─────────────
   // ══════════════════════════════════════════════════════════════════════════
 

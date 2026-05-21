@@ -45,7 +45,10 @@ describe('W257k — anomalous-admins.csv route', () => {
     });
     handler({}, res);
     expect(res._body.data.wave).toContain('W257k');
-    expect(res._body.data.endpoints).toBe(22);
+    // Inequality not exact — W257l bumped to 23. Same lesson recorded
+    // 4× now (W244, W239, W257h, W257k). Future _health tests should
+    // ALWAYS use `.toBeGreaterThanOrEqual(N)` from day one.
+    expect(res._body.data.endpoints).toBeGreaterThanOrEqual(22);
     expect(res._body.data.services.some(s => /W257k/.test(s))).toBe(true);
   });
 });

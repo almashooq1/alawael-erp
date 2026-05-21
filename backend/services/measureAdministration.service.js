@@ -703,6 +703,123 @@ class MeasureAdministrationSvc {
   }
 
   /**
+   * W257l: aggregate anomaly counts by time bucket. Answers "are
+   * anomalies trending up or down?" for directors. Builds on the
+   * same anomalyFlags persisted by W257e/W257f.
+   *
+   * @param {Object} [opts]
+   * @param {ObjectId|string} [opts.branchId] - scope to one branch
+   * @param {Date|string} [opts.from] - applicationDate ≥ from (default: now - 90d)
+   * @param {Date|string} [opts.to] - applicationDate ≤ to (default: now)
+   * @param {'week'|'month'} [opts.bucket='week'] - bucket granularity
+   * @param {boolean} [opts.includeSuperseded=false] - include corrected admins
+   * @returns {Promise<{
+   *   bucket: string,
+   *   from: Date, to: Date,
+   *   buckets: Array<{period: string, total: number,
+   *                   byType: Record<string,number>,
+   *                   bySeverity: Record<'low'|'medium'|'high', number>}>,
+   *   totals: {total: number, byType: Object, bySeverity: Object}
+   * }>}
+   */
+  async aggregateAnomalies(opts = {}) {
+    const MeasureApplication = M.MeasureApplication();
+    if (!MeasureApplication) {
+      return {
+        bucket: 'week',
+        from: new Date(0),
+        to: new Date(0),
+        buckets: [],
+        totals: this._emptyAnomalyTotals(),
+      };
+    }
+
+    const bucket = opts.bucket === 'month' ? 'month' : 'week';
+    const to = opts.to ? new Date(opts.to) : new Date();
+    const from = opts.from ? new Date(opts.from) : new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
+
+    const filter = {
+      anomalyFlags: { $exists: true, $not: { $size: 0 } },
+      applicationDate: { $gte: from, $lte: to },
+    };
+    if (opts.branchId) filter.branchId = opts.branchId;
+    if (!opts.includeSuperseded) filter.status = { $ne: 'corrected' };
+
+    // Pull only what's needed — applicationDate + anomalyFlags[].(type, severity).
+    // Bucketing in app code keeps the query plan simple + dates in JS instead
+    // of mongo $dateTrunc which has version-dependent semantics.
+    const admins = await MeasureApplication.find(filter)
+      .select('applicationDate anomalyFlags')
+      .lean();
+
+    const bucketsMap = new Map();
+    const totals = this._emptyAnomalyTotals();
+
+    for (const a of admins) {
+      const period = this._bucketKey(a.applicationDate, bucket);
+      let b = bucketsMap.get(period);
+      if (!b) {
+        b = { period, total: 0, byType: {}, bySeverity: { low: 0, medium: 0, high: 0 } };
+        bucketsMap.set(period, b);
+      }
+      // Count this ADMIN once in `total` (not once per flag) so the
+      // headline figure matches W257g listAnomalousAdmins total.
+      b.total += 1;
+      totals.total += 1;
+      // Dedup flag types within one admin to keep byType count
+      // consistent with W257i UI semantics.
+      const typesSeen = new Set();
+      const sevsSeen = new Set();
+      for (const f of a.anomalyFlags || []) {
+        if (f && f.type && !typesSeen.has(f.type)) {
+          typesSeen.add(f.type);
+          b.byType[f.type] = (b.byType[f.type] || 0) + 1;
+          totals.byType[f.type] = (totals.byType[f.type] || 0) + 1;
+        }
+        if (f && f.severity && !sevsSeen.has(f.severity)) {
+          sevsSeen.add(f.severity);
+          if (b.bySeverity[f.severity] != null) b.bySeverity[f.severity] += 1;
+          if (totals.bySeverity[f.severity] != null) totals.bySeverity[f.severity] += 1;
+        }
+      }
+    }
+
+    // Sort by period ascending — chart-friendly.
+    const buckets = Array.from(bucketsMap.values()).sort((a, b) =>
+      a.period.localeCompare(b.period)
+    );
+    return { bucket, from, to, buckets, totals };
+  }
+
+  _emptyAnomalyTotals() {
+    return {
+      total: 0,
+      byType: {},
+      bySeverity: { low: 0, medium: 0, high: 0 },
+    };
+  }
+
+  /**
+   * UTC bucket key for a date. 'week' = ISO-week (YYYY-Www), 'month' =
+   * YYYY-MM. ISO weeks start Monday; week 1 contains the year's first
+   * Thursday (matches international convention used in most reporting).
+   */
+  _bucketKey(date, bucket) {
+    const d = new Date(date);
+    if (Number.isNaN(d.getTime())) return 'unknown';
+    if (bucket === 'month') {
+      return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
+    }
+    // ISO week — adapt from RFC 3339 + ISO 8601
+    const target = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+    const dayNum = target.getUTCDay() || 7; // Sun → 7
+    target.setUTCDate(target.getUTCDate() + 4 - dayNum);
+    const yearStart = new Date(Date.UTC(target.getUTCFullYear(), 0, 1));
+    const weekNum = Math.ceil(((target - yearStart) / 86400000 + 1) / 7);
+    return `${target.getUTCFullYear()}-W${String(weekNum).padStart(2, '0')}`;
+  }
+
+  /**
    * Get the chronological history of a measure for a beneficiary.
    * Excludes corrected-superseded records by default.
    */

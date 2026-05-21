@@ -649,6 +649,33 @@ function _anomaliesToCsv(out) {
   return rows.join('\n') + '\n';
 }
 
+/**
+ * W257l — Anomaly aggregates for trend tiles.
+ *
+ *   GET /anomalous-admins/aggregates?branchId=&from=&to=&bucket=week|month
+ *
+ * Same admin scope as W257h but bucketed by time. Answers "are
+ * anomalies trending up or down?" — directors checking branch health
+ * over time. Bucket defaults to 'week'. Date defaults to last 90d.
+ */
+router.get('/anomalous-admins/aggregates', async (req, res) => {
+  try {
+    const opts = {
+      branchId: req.query.branchId || req.branchId || undefined,
+      from: req.query.from || undefined,
+      to: req.query.to || undefined,
+      bucket: req.query.bucket === 'month' ? 'month' : 'week',
+      includeSuperseded:
+        req.query.includeSuperseded === 'true' || req.query.includeSuperseded === '1',
+    };
+    const out = await measureAdmin.aggregateAnomalies(opts);
+    res.json({ success: true, data: out });
+  } catch (err) {
+    const r = _toErrorResponse(err);
+    res.status(r.status).json(r.body);
+  }
+});
+
 // ════════════════════════════════════════════════════════════════════════
 // Health
 // ════════════════════════════════════════════════════════════════════════
@@ -657,9 +684,9 @@ router.get('/_health', (req, res) => {
   res.json({
     success: true,
     data: {
-      wave: 'W226+W238+W239+W257h+W257k',
+      wave: 'W226+W238+W239+W257h+W257k+W257l',
       mountedAt: 'measures-workflow',
-      endpoints: 22,
+      endpoints: 23,
       services: [
         'W218 strategist',
         'W220 triggers',
@@ -670,6 +697,7 @@ router.get('/_health', (req, res) => {
         'W237 linkage insights',
         'W257h anomalous-admins triage',
         'W257k anomalous-admins CSV export',
+        'W257l anomaly aggregates (trend)',
       ],
     },
   });

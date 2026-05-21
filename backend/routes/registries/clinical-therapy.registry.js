@@ -107,6 +107,14 @@ module.exports = function registerClinicalTherapyRoutes(
   );
 
   // ══════════════════════════════════════════════════════════════════════════
+  // ── Wave 267: BIP fidelity & effectiveness tracking — متابعة دقّة وفعالية BIP
+  // ══════════════════════════════════════════════════════════════════════════
+  safeMount(app, ['/api/bip-tracking', '/api/v1/bip-tracking'], '../routes/bip-tracking.routes');
+  logger.info(
+    '✅ BIP tracking routes mounted (W267): fidelity checks (passing/concerning/failing bands) + effectiveness readings (target vs baseline) + 4-bucket diagnosis + at-risk BIPs dashboard (9 endpoints)'
+  );
+
+  // ══════════════════════════════════════════════════════════════════════════
   // ── Phases 30–33: Advanced Rehabilitation — التأهيل المتقدم ─────────────
   // ══════════════════════════════════════════════════════════════════════════
 

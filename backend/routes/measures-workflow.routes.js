@@ -385,6 +385,9 @@ router.post(
         verdict: req.body?.verdict,
         notes: req.body?.notes,
         interpretationCategorySnapshot: req.body?.interpretationCategorySnapshot,
+        // W247 — modify_target verdict accepts optional expectedTarget
+        // payload (value/direction/changeFromBaseline/achievedByDate).
+        expectedTarget: req.body?.expectedTarget,
         actor: { userId: req.user?._id },
       });
       res.json({ success: true, data: out });

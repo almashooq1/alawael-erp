@@ -201,6 +201,14 @@ class GoalMeasureLinkageSvc {
 
   /**
    * Append a review-history entry. SoD: first review reviewer ≠ linkedBy.
+   *
+   * W247 — optional `expectedTarget` payload. When provided AND
+   * verdict='modify_target', updates the link's expectedTarget alongside
+   * the review entry. For other verdicts the field is ignored
+   * (the schema still has the prior value). Refusing to update on
+   * other verdicts keeps the review-history readable: a status flip
+   * to under_review without a target change is still a valid review
+   * outcome (clinician can defer the actual edit).
    */
   async reviewLink({
     goalId,
@@ -210,6 +218,7 @@ class GoalMeasureLinkageSvc {
     notes,
     actor,
     interpretationCategorySnapshot,
+    expectedTarget,
   } = {}) {
     if (!actor?.userId) {
       throw _err('[goalMeasureLinkage] actor.userId required', REASON_CODES.ACTOR_REQUIRED);
@@ -260,6 +269,19 @@ class GoalMeasureLinkageSvc {
     } else if (verdict === 'modify_target' || verdict === 'add_secondary') {
       // Caller is expected to follow up with an explicit update — set under_review.
       link.status = 'under_review';
+    }
+
+    // W247 — apply expectedTarget edits when verdict is modify_target.
+    if (verdict === 'modify_target' && expectedTarget && typeof expectedTarget === 'object') {
+      link.expectedTarget = link.expectedTarget || {};
+      if (expectedTarget.value != null) link.expectedTarget.value = expectedTarget.value;
+      if (expectedTarget.direction) link.expectedTarget.direction = expectedTarget.direction;
+      if (expectedTarget.changeFromBaseline != null) {
+        link.expectedTarget.changeFromBaseline = expectedTarget.changeFromBaseline;
+      }
+      if (expectedTarget.achievedByDate) {
+        link.expectedTarget.achievedByDate = new Date(expectedTarget.achievedByDate);
+      }
     }
 
     await goal.save();

@@ -596,7 +596,34 @@ class MeasureAdministrationSvc {
       lockedBy: undefined,
       applicationDate: corrections.applicationDate || new Date(),
       createdBy: actorId,
+      // Reset inherited anomalyFlags — the correction may have fixed the
+      // original anomaly, OR introduced a new one. Detector re-runs below
+      // against the corrected payload so the flags reflect post-correction
+      // state, not pre-correction. (W257f wiring.)
+      anomalyFlags: [],
     });
+
+    // W257f: re-run W248c anomaly detector against the corrected payload.
+    // Same observability-mode discipline as administer() (W257e) —
+    // never blocks save, wrapped in try/catch.
+    try {
+      const Measure = M.Measure();
+      const measure = Measure ? await Measure.findById(correction.measureId).lean() : null;
+      if (measure) {
+        const flags = _anomalyDetector().detectAnomalies({
+          admin: correction.toObject(),
+          measure,
+        });
+        if (Array.isArray(flags) && flags.length > 0) {
+          correction.anomalyFlags = flags;
+        }
+      }
+    } catch (err) {
+      logger.warn(
+        `[measureAdministration] correct() anomaly detector threw — flagging skipped: ${err.message}`
+      );
+    }
+
     await correction.save();
 
     // Mark the original as corrected (forward pointer). The schema's

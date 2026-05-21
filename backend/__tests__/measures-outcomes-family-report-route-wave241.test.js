@@ -33,15 +33,17 @@ describe('W241 — family-report route registration', () => {
     expect(paths).toContain('GET /family-report/:beneficiaryId');
   });
 
-  test('registry boot log mentions family report (5 endpoints, W240)', () => {
+  test('registry boot log mentions family report (W240)', () => {
     const fs = require('fs');
     const path = require('path');
     const src = fs.readFileSync(
       path.join(__dirname, '..', 'routes', 'registries', 'clinical-assessment.registry.js'),
       'utf8'
     );
-    expect(src).toMatch(/Measures Outcomes routes mounted \(5 endpoints/);
-    expect(src).toMatch(/W240 family-friendly Arabic report/);
+    // Endpoint count grows over time as more services land on this
+    // surface — match any digit count rather than coupling to it.
+    expect(src).toMatch(/Measures Outcomes routes mounted \(\d+ endpoints/);
+    expect(src).toMatch(/W240 family[- ]?(friendly|report)/i);
   });
 });
 

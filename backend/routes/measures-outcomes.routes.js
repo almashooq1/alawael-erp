@@ -19,6 +19,12 @@
  *   GET   /family-report/:beneficiaryId
  *           ?includeHidden=true                     → W240 family-friendly
  *                                                    Arabic report
+ *   GET   /ministry-report/branch/:branchId
+ *           ?year=YYYY&month=MM                     → W242 MOHRSD JSON
+ *   GET   /ministry-report/branch/:branchId/csv/:year/:month
+ *                                                   → W242 MOHRSD CSV
+ *                                                    (Excel-compatible
+ *                                                    attachment)
  *
  * Auth: all data routes require authenticate + requireBranchAccess.
  * _health is public (matches the W226 convention).
@@ -42,6 +48,7 @@ const logger = require('../utils/logger');
 
 const aggregator = require('../services/measureOutcomesAggregator.service');
 const familyReport = require('../services/measureFamilyReport.service');
+const ministryReport = require('../services/measureMinistryReport.service');
 
 // ─── Health check (public — matches W226 convention) ─────────────
 router.get('/_health', (_req, res) => {
@@ -205,6 +212,90 @@ router.get('/family-report/:beneficiaryId', async (req, res) => {
     return _passThroughOrError(out, res);
   } catch (err) {
     logger.warn('[measures-outcomes] /family-report failed: %s', err.message);
+    const r = _toErrorResponse(err);
+    return res.status(r.status).json(r.body);
+  }
+});
+
+// ════════════════════════════════════════════════════════════════════
+// W244 — MOHRSD monthly ministry report (W242 service surface)
+// ════════════════════════════════════════════════════════════════════
+
+/**
+ * Parse {year, month} from the request — query params for the JSON
+ * endpoint, route params for the CSV endpoint. Throws a 400-shaped
+ * Error if invalid (caught by _toErrorResponse).
+ */
+function _parseMinistryPeriod(year, month) {
+  const y = parseInt(year, 10);
+  const m = parseInt(month, 10);
+  if (!Number.isInteger(y) || y < 2000 || y > 2100) {
+    const err = new Error('year required (integer 2000-2100)');
+    throw err;
+  }
+  if (!Number.isInteger(m) || m < 1 || m > 12) {
+    const err = new Error('month required (integer 1-12)');
+    throw err;
+  }
+  return { year: y, month: m };
+}
+
+/**
+ * GET /ministry-report/branch/:branchId?year=YYYY&month=MM
+ *
+ * Returns the structured JSON ministry report — the same payload that
+ * `generateCsv` builds its spreadsheet from. Used by web-admin to
+ * preview the report before downloading.
+ */
+router.get('/ministry-report/branch/:branchId', async (req, res) => {
+  try {
+    const { branchId } = req.params;
+    if (!branchId) {
+      return res.status(400).json({ success: false, error: 'branchId required' });
+    }
+    const period = _parseMinistryPeriod(req.query.year, req.query.month);
+    const out = await ministryReport.generate(branchId, period);
+    return _passThroughOrError(out, res);
+  } catch (err) {
+    logger.warn('[measures-outcomes] /ministry-report failed: %s', err.message);
+    const r = _toErrorResponse(err);
+    return res.status(r.status).json(r.body);
+  }
+});
+
+/**
+ * GET /ministry-report/branch/:branchId/csv/:year/:month
+ *
+ * Returns the CSV variant as a downloadable attachment. Year and
+ * month live in the route path (not query) so the filename can mirror
+ * them naturally and the URL is share-friendly.
+ *
+ * Headers:
+ *   Content-Type: text/csv; charset=utf-8
+ *   Content-Disposition: attachment; filename="ministry-<branchId>-<year>-<MM>.csv"
+ */
+router.get('/ministry-report/branch/:branchId/csv/:year/:month', async (req, res) => {
+  try {
+    const { branchId, year, month } = req.params;
+    if (!branchId) {
+      return res.status(400).json({ success: false, error: 'branchId required' });
+    }
+    const period = _parseMinistryPeriod(year, month);
+    const csv = await ministryReport.generateCsv(branchId, period);
+    if (csv == null) {
+      return res.status(503).json({
+        success: false,
+        error: 'models_unavailable',
+        message: 'Required collections not registered yet',
+      });
+    }
+    const monthPadded = String(period.month).padStart(2, '0');
+    const filename = `ministry-${branchId}-${period.year}-${monthPadded}.csv`;
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    return res.send(csv);
+  } catch (err) {
+    logger.warn('[measures-outcomes] /ministry-report/.../csv failed: %s', err.message);
     const r = _toErrorResponse(err);
     return res.status(r.status).json(r.body);
   }

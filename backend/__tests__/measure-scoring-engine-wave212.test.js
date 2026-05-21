@@ -451,12 +451,16 @@ describe('W212 — scoringEngine service', () => {
     expect(d.mcidMet).toBe(true);
   });
 
-  test('list() includes all 3 registered modules', () => {
+  test('list() includes the 3 originally-registered modules', () => {
+    // W212 pins the original 3-module contract. W252 added VINELAND-3 + WEEFIM
+    // and asserts the exact 5-module list — this test stays as a minimum-set
+    // guarantee so it doesn't have to be updated every time a new scoring
+    // module ships.
     const codes = scoringEngine
       .list()
       .map(m => m.measureCode)
       .sort();
-    expect(codes).toEqual(['BERG', 'FIM', 'SCQ']);
+    expect(codes).toEqual(expect.arrayContaining(['BERG', 'FIM', 'SCQ']));
   });
 
   test('hasModule() reports registration', () => {

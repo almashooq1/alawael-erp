@@ -325,6 +325,75 @@ class MeasureBaselineSlotSvc {
     });
   }
 
+  /**
+   * Auto-advance the open slot for an admin's (ben, episode, measure)
+   * tuple to BASELINE_COMPLETED. Used by W215 administer() as a
+   * best-effort post-save hook (W228 integration).
+   *
+   * Skip-forwards through whatever open state the slot is in:
+   *   REQUIRED   → SCHEDULED → IN_PROGRESS → COMPLETED
+   *   SCHEDULED  → IN_PROGRESS → COMPLETED
+   *   IN_PROGRESS→ COMPLETED
+   *   COMPLETED/LOCKED/WAIVED/CANCELLED → no-op (idempotent)
+   *
+   * Only fires for purpose='baseline' admins — caller is responsible
+   * for filtering.
+   *
+   * Returns { advanced: bool, slot, fromState } or null when no slot
+   * exists. Never throws on missing slot (best-effort path).
+   */
+  async completeFromAdmin({ admin }) {
+    if (!admin || !admin.beneficiaryId || !admin.measureId) {
+      throw new Error(
+        '[measureBaselineSlot.completeFromAdmin] admin with beneficiaryId+measureId required'
+      );
+    }
+    const Slot = M.MeasureBaselineSlot();
+    if (!Slot) return null;
+
+    const slot = await Slot.findOne({
+      beneficiaryId: admin.beneficiaryId,
+      ...(admin.episodeId ? { episodeId: admin.episodeId } : {}),
+      measureId: admin.measureId,
+      state: { $in: ['BASELINE_REQUIRED', 'BASELINE_SCHEDULED', 'BASELINE_IN_PROGRESS'] },
+    });
+    if (!slot) return null;
+
+    const fromState = slot.state;
+    const actor = { userId: admin.assessorId || admin.completedBy || null };
+
+    // Skip-forward through intermediate states. Each transition appends
+    // its own phaseHistory entry — preserves the audit trail.
+    if (fromState === 'BASELINE_REQUIRED') {
+      await this.schedule({ slotId: slot._id, actor });
+      const inProg = await this.markInProgress({ slotId: slot._id, actor });
+      const completed = await this.complete({
+        slotId: inProg._id,
+        baselineApplicationId: admin._id,
+        actor,
+      });
+      return { advanced: true, slot: completed, fromState };
+    }
+    if (fromState === 'BASELINE_SCHEDULED') {
+      const inProg = await this.markInProgress({ slotId: slot._id, actor });
+      const completed = await this.complete({
+        slotId: inProg._id,
+        baselineApplicationId: admin._id,
+        actor,
+      });
+      return { advanced: true, slot: completed, fromState };
+    }
+    if (fromState === 'BASELINE_IN_PROGRESS') {
+      const completed = await this.complete({
+        slotId: slot._id,
+        baselineApplicationId: admin._id,
+        actor,
+      });
+      return { advanced: true, slot: completed, fromState };
+    }
+    return { advanced: false, slot, fromState };
+  }
+
   // ── Read-side ──────────────────────────────────────────────────
 
   async listForBeneficiary(beneficiaryId) {

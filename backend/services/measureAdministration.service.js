@@ -402,6 +402,31 @@ class MeasureAdministrationSvc {
     await doc.save();
     const result = doc.toObject();
     if (scoringResult) result._scoring = scoringResult.envelope;
+
+    // ─── W228 — baseline slot auto-advance ────────────────────────
+    // When a baseline admin lands, transition any open W227 slot for
+    // this (ben, episode, measure) to BASELINE_COMPLETED. Best-effort:
+    // a slot-service failure must never block the primary admin write.
+    if (doc.isBaseline) {
+      try {
+        const baselineSlotSvc = require('./measureBaselineSlot.service');
+        const slotResult = await baselineSlotSvc.completeFromAdmin({ admin: doc });
+        if (slotResult) result._baselineSlot = slotResult;
+      } catch (err) {
+        // Log silently — slot wire is best-effort.
+        try {
+          const logger = require('../utils/logger');
+          logger.warn(
+            '[measureAdministration] baseline-slot auto-advance failed for admin %s: %s',
+            doc._id,
+            err.message
+          );
+        } catch (_) {
+          // logger unavailable — swallow.
+        }
+      }
+    }
+
     return result;
   }
 

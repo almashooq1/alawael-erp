@@ -246,6 +246,22 @@ function setupSchedulers({ isTestEnv }) {
       logger.warn('⚠️  HR Workflow scheduler failed to start', { error: err.message });
     }
   }, 60000);
+
+  // ── WhatsApp DLQ Worker — replay sends that exhausted in-process retries ──
+  // Wakes every 30 seconds, picks the next item with nextRetryAt <= now,
+  // attempts a single replay through the canonical service. The model has
+  // a 30-day TTL on createdAt, so abandoned/exhausted items eventually
+  // self-prune.
+  setTimeout(() => {
+    try {
+      const dlq = require('../services/whatsapp/dlq.service');
+      dlq.startWorker({ intervalMs: 30_000 });
+      registerShutdownHook('WhatsAppDlqWorker', dlq.stopWorker);
+      logger.info('✅ WhatsApp DLQ worker started (sweep every 30s)');
+    } catch (err) {
+      logger.warn('⚠️  WhatsApp DLQ worker failed to start', { error: err.message });
+    }
+  }, 45000);
 }
 
 module.exports = { setupSchedulers };

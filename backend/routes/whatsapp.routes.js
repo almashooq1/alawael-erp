@@ -50,12 +50,78 @@ const whatsappService = require('../services/whatsapp/whatsappService');
 const whatsappAI = require('../services/whatsapp/whatsappAI.service');
 const whatsappWebhook = require('../services/whatsapp/whatsappWebhook.service');
 const whatsappTemplates = require('../services/whatsapp/whatsappTemplates.service');
+const whatsappRateLimit = require('../services/whatsapp/rateLimit.service');
+const whatsappIdempotency = require('../services/whatsapp/idempotency.service');
+const whatsappDlq = require('../services/whatsapp/dlq.service');
 const { authenticate } = require('../middleware/auth');
 const logger = require('../utils/logger');
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 function asyncHandler(fn) {
   return (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
+}
+
+/**
+ * Gate every outbound send through three guards:
+ *   1. Rate limit per phone (Meta's per-recipient cap + our policy).
+ *   2. Idempotency by `Idempotency-Key` header (24h window).
+ *   3. DLQ enqueue on terminal failure so a transient Meta outage doesn't
+ *      lose the message — the worker will replay.
+ *
+ * The producer is the actual send call (sendText, sendTemplate, ...).
+ * On rate-limit denial returns a 429-shaped object that the route surfaces.
+ *
+ * @param {object} req - Express request (for headers + user lineage)
+ * @param {string} sendType - 'text' | 'template' | 'document' | ...
+ * @param {string} phone - normalized recipient phone
+ * @param {object} payload - what to persist to DLQ on terminal failure
+ * @param {function} producer - async () => Meta send result
+ * @returns {Promise<{status:number, body:object, replayed?:boolean}>}
+ */
+async function withSendGuards(req, sendType, phone, payload, producer) {
+  // 1. Rate limit
+  const rl = await whatsappRateLimit.checkAndRecord(phone);
+  if (!rl.allowed) {
+    return {
+      status: 429,
+      body: {
+        success: false,
+        code: 'RATE_LIMITED',
+        message: `Rate limit exceeded (${rl.reason})`,
+        details: { reason: rl.reason, retryAfterSeconds: rl.retryAfterSeconds, caps: rl.caps },
+      },
+    };
+  }
+
+  // 2. Idempotency
+  const idemKey = req.get('Idempotency-Key') || req.get('X-Idempotency-Key') || null;
+  const ctx = {
+    phone,
+    initiatedBy: req.user?._id || req.user?.userId || req.user?.id || null,
+    organizationId: req.user?.organizationId || null,
+    beneficiaryId: req.body?.beneficiaryId || null,
+    idempotencyKey: idemKey,
+    sendType,
+  };
+
+  try {
+    const { result, replayed } = await whatsappIdempotency.withKey(idemKey, producer);
+    return { status: 200, body: { success: !!result?.success, data: result }, replayed };
+  } catch (err) {
+    // 3. Terminal failure → DLQ. Don't surface 500 to caller; we now own the
+    // delivery. 202 communicates "accepted for retry; status will change".
+    await whatsappDlq.enqueue(sendType, payload, err, ctx).catch(() => {});
+    logger.warn(`[WhatsApp] send failed (${sendType}) → DLQ enqueued: ${err.message}`);
+    return {
+      status: 202,
+      body: {
+        success: false,
+        queued: true,
+        code: 'SEND_QUEUED_FOR_RETRY',
+        message: `Meta API failure — queued for retry (${err.message})`,
+      },
+    };
+  }
 }
 
 function getConversationModel() {
@@ -294,16 +360,19 @@ router.post(
       }
     }
 
-    const result = await whatsappService.sendText(to, text);
+    const phone = whatsappService.normalizePhone(to);
+    const outcome = await withSendGuards(req, 'text', phone, { to: phone, text }, () =>
+      whatsappService.sendText(to, text)
+    );
 
-    // Log to conversation
-    if (result.success) {
+    // Log to conversation on success only.
+    if (outcome.status === 200 && outcome.body?.data?.success) {
       const Conversation = getConversationModel();
       await Conversation.findOneAndUpdate(
-        { phone: whatsappService.normalizePhone(to) },
+        { phone },
         {
           $setOnInsert: {
-            phone: whatsappService.normalizePhone(to),
+            phone,
             beneficiaryId,
             familyMemberId,
             createdAt: new Date(),
@@ -313,10 +382,11 @@ router.post(
               direction: 'outgoing',
               type: 'text',
               text,
-              providerMessageId: result.messageId,
+              providerMessageId: outcome.body.data.messageId,
               timestamp: new Date(),
               staffId,
               deliveryStatus: 'sent',
+              isReplay: !!outcome.replayed,
             },
           },
           $set: { lastMessageAt: new Date() },
@@ -325,7 +395,8 @@ router.post(
       ).catch(err => logger.warn(`[WhatsApp] Log error: ${err.message}`));
     }
 
-    res.json({ success: result.success, data: result });
+    if (outcome.replayed) res.set('X-Idempotent-Replay', '1');
+    return res.status(outcome.status).json(outcome.body);
   })
 );
 
@@ -347,8 +418,16 @@ router.post(
         });
       }
     }
-    const result = await whatsappService.sendTemplate(to, templateName, language, components);
-    res.json({ success: result.success, data: result });
+    const phone = whatsappService.normalizePhone(to);
+    const outcome = await withSendGuards(
+      req,
+      'template',
+      phone,
+      { to: phone, templateName, language, components },
+      () => whatsappService.sendTemplate(to, templateName, language, components)
+    );
+    if (outcome.replayed) res.set('X-Idempotent-Replay', '1');
+    return res.status(outcome.status).json(outcome.body);
   })
 );
 
@@ -370,8 +449,16 @@ router.post(
         });
       }
     }
-    const result = await whatsappService.sendDocument(to, url, caption, { filename });
-    res.json({ success: result.success, data: result });
+    const phone = whatsappService.normalizePhone(to);
+    const outcome = await withSendGuards(
+      req,
+      'document',
+      phone,
+      { to: phone, url, caption, opts: { filename } },
+      () => whatsappService.sendDocument(to, url, caption, { filename })
+    );
+    if (outcome.replayed) res.set('X-Idempotent-Replay', '1');
+    return res.status(outcome.status).json(outcome.body);
   })
 );
 
@@ -392,32 +479,39 @@ router.post(
       footerText,
     } = req.body;
 
-    let result;
-    if (type === 'buttons') {
-      if (!buttons?.length)
-        throw Object.assign(new Error('buttons array required'), { statusCode: 400 });
-      result = await whatsappService.sendInteractiveButtons(
-        to,
-        bodyText,
-        buttons,
-        headerText,
-        footerText
-      );
-    } else if (type === 'list') {
-      if (!items?.length)
-        throw Object.assign(new Error('items array required'), { statusCode: 400 });
-      result = await whatsappService.sendInteractiveList(
-        to,
-        bodyText,
-        buttonLabel || 'اختر',
-        items,
-        sectionTitle
-      );
-    } else {
+    if (type !== 'buttons' && type !== 'list') {
       throw Object.assign(new Error('type must be buttons or list'), { statusCode: 400 });
     }
+    if (type === 'buttons' && !buttons?.length)
+      throw Object.assign(new Error('buttons array required'), { statusCode: 400 });
+    if (type === 'list' && !items?.length)
+      throw Object.assign(new Error('items array required'), { statusCode: 400 });
 
-    res.json({ success: result.success, data: result });
+    const phone = whatsappService.normalizePhone(to);
+    const payload =
+      type === 'buttons'
+        ? { kind: 'buttons', to: phone, bodyText, buttons, headerText, footerText }
+        : {
+            kind: 'list',
+            to: phone,
+            bodyText,
+            buttonLabel: buttonLabel || 'اختر',
+            items,
+            sectionTitle,
+          };
+    const outcome = await withSendGuards(req, 'interactive', phone, payload, () => {
+      return type === 'buttons'
+        ? whatsappService.sendInteractiveButtons(to, bodyText, buttons, headerText, footerText)
+        : whatsappService.sendInteractiveList(
+            to,
+            bodyText,
+            buttonLabel || 'اختر',
+            items,
+            sectionTitle
+          );
+    });
+    if (outcome.replayed) res.set('X-Idempotent-Replay', '1');
+    return res.status(outcome.status).json(outcome.body);
   })
 );
 
@@ -716,6 +810,89 @@ router.get(
     const phone = whatsappService.normalizePhone(req.params.phone);
     const result = await getConsentModel().canMessage(phone);
     res.json({ success: true, data: { phone, ...result } });
+  })
+);
+
+// ═══════════════════════════════════════════════════════════════════════════
+// RATE LIMIT + DLQ — operational visibility & manual control
+// ═══════════════════════════════════════════════════════════════════════════
+
+/** GET /rate-limit/:phone — current counters for one phone. */
+router.get(
+  '/rate-limit/:phone',
+  asyncHandler(async (req, res) => {
+    const phone = whatsappService.normalizePhone(req.params.phone);
+    const stats = await whatsappRateLimit.getStats(phone);
+    const caps = whatsappRateLimit._caps();
+    res.json({ success: true, data: { phone, counters: stats, caps } });
+  })
+);
+
+/** GET /dlq — paginated list of failed/queued sends. */
+router.get(
+  '/dlq',
+  asyncHandler(async (req, res) => {
+    const Dlq = mongoose.models.WhatsAppDlq || require('../models/WhatsAppDlq');
+    const { status, page = 1, limit = 50, phone } = req.query;
+    const filter = {};
+    if (status) filter.status = status;
+    if (phone) filter.phone = whatsappService.normalizePhone(phone);
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const [items, total] = await Promise.all([
+      Dlq.find(filter)
+        .sort({ nextRetryAt: 1, createdAt: -1 })
+        .skip(skip)
+        .limit(parseInt(limit))
+        .lean(),
+      Dlq.countDocuments(filter),
+    ]);
+    res.json({
+      success: true,
+      data: items,
+      total,
+      page: parseInt(page),
+      limit: parseInt(limit),
+    });
+  })
+);
+
+/** POST /dlq/:id/replay — admin force-replay one DLQ item now. */
+router.post(
+  '/dlq/:id/replay',
+  asyncHandler(async (req, res) => {
+    const r = await whatsappDlq.replayOne(req.params.id, { skipConsent: false });
+    if (!r.ok) return res.status(400).json({ success: false, ...r });
+    res.json({ success: true, data: r });
+  })
+);
+
+/** POST /dlq/:id/abandon — mark as abandoned (won't be auto-replayed). */
+router.post(
+  '/dlq/:id/abandon',
+  asyncHandler(async (req, res) => {
+    const Dlq = mongoose.models.WhatsAppDlq || require('../models/WhatsAppDlq');
+    const doc = await Dlq.findByIdAndUpdate(
+      req.params.id,
+      {
+        $set: {
+          status: 'abandoned',
+          lockedUntil: null,
+          notes: req.body?.reason || 'admin_abandon',
+        },
+      },
+      { new: true }
+    );
+    if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
+    res.json({ success: true, data: doc });
+  })
+);
+
+/** POST /dlq/sweep — admin trigger one sweep cycle (debug / staging). */
+router.post(
+  '/dlq/sweep',
+  asyncHandler(async (_req, res) => {
+    const r = await whatsappDlq.sweepOnce();
+    res.json({ success: true, data: r });
   })
 );
 

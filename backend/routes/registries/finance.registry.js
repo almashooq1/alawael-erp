@@ -30,7 +30,6 @@ module.exports = function registerFinanceRoutes(
   const saudiTaxRoutes = safeRequire('../routes/saudiTax.routes');
   const financeOperationsRoutes = safeRequire('../routes/financeOperations.routes');
   const financeModuleRoutes = safeRequire('../routes/finance-module.routes');
-  const digitalWalletRoutes = safeRequire('../routes/digital-wallet.routes');
 
   // ── Mount: Finance ──────────────────────────────────────────────────────
   dualMount(app, 'finance', financeRoutes);
@@ -39,16 +38,9 @@ module.exports = function registerFinanceRoutes(
 
   // ── Mount: Payments ─────────────────────────────────────────────────────
   dualMount(app, 'payments', paymentsRouter);
-
-  // ── Mount: Digital Wallet ──────────────────────────────────────────────
-  // W225b: 15 endpoints (stats/topup/debit/transfer/coupons/loyalty/block-unblock)
-  // were dormant — file existed and `scheduler/wallet.scheduler.js` was registered
-  // in server.js:196 maintaining wallet data via cron, but the HTTP layer was
-  // never mounted so users couldn't interact with their wallet. Self-protecting:
-  // every route applies authenticate + requireBranchAccess + ownership guard
-  // (requireWalletAccess) so plain dualMount is correct (not dualMountAuth).
-  dualMount(app, 'digital-wallet', digitalWalletRoutes);
-  logger.info('[Finance] ✓ Digital wallet routes mounted (15 endpoints, W225b)');
+  // Note: digital-wallet is already mounted via safeMount lower in this
+  // file (see ~line 88). The W225b add here was a duplicate caused by a
+  // flawed dead-route audit; reverted 2026-05-21.
 
   // ── Mount: e-Invoicing & Budget (الفوترة الإلكترونية والميزانية) ────────
   safeMount(app, ['/api/e-invoicing', '/api/v1/e-invoicing'], '../routes/eInvoicing.routes');

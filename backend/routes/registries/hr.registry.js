@@ -45,11 +45,6 @@ module.exports = function registerHrRoutes(
   const attendanceRoutes = safeRequire('../routes/attendance.routes');
   const smartAttendanceRoutes = safeRequire('../routes/smart_attendance.routes');
   const zktecoRoutes = safeRequire('../routes/zkteco.routes');
-  // W217: previously-dormant biometric attendance API (ZKTeco system 37,
-  // 28 endpoints — devices, fingerprint enrollment, shifts, overtime,
-  // policies). Self-protecting (router.use(authenticate +
-  // requireBranchAccess) at module level), so dualMount (not dualMountAuth).
-  const biometricAttendanceRoutes = safeRequire('../routes/biometric-attendance.routes');
 
   // ══════════════════════════════════════════════════════════════════════════
   // ── Core HR System ─────────────────────────────────────────────────────
@@ -72,12 +67,11 @@ module.exports = function registerHrRoutes(
   dualMount(app, 'attendance', attendanceRoutes);
   dualMount(app, 'smart-attendance', smartAttendanceRoutes);
   dualMount(app, 'zkteco', zktecoRoutes);
-  // W217: surface the 28-endpoint biometric attendance API that was
-  // dormant in the repo for weeks (router file existed + tests passed
-  // but no app.use anywhere). See dead-route audit (2026-05-20).
-  dualMount(app, 'biometric-attendance', biometricAttendanceRoutes);
+  // Note: biometric-attendance is already mounted via safeMount lower in
+  // this file (see ~line 140). The W217 add here was a duplicate caused
+  // by a flawed dead-route audit; reverted 2026-05-21.
   logger.info(
-    '[HR] Attendance Engine mounted (hr-attendance, attendance, smart-attendance, zkteco, biometric-attendance — 48+ endpoints)'
+    '[HR] Attendance Engine mounted (hr-attendance, attendance, smart-attendance, zkteco)'
   );
 
   // ══════════════════════════════════════════════════════════════════════════

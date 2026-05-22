@@ -1010,14 +1010,19 @@ function createHikvisionRouter({
     );
 
     // Payroll periods
-    router.post('/payroll/periods', requirePerm('payroll.period.create'), async (req, res) => {
-      try {
-        const r = await payrollPeriodService.createPeriod(req.body || {});
-        return respond(res, r);
-      } catch (err) {
-        return safeError(res, err, 'payroll.period.create');
+    router.post(
+      '/payroll/periods',
+      requirePerm('payroll.period.create'),
+      requireMfaTier(2),
+      async (req, res) => {
+        try {
+          const r = await payrollPeriodService.createPeriod(req.body || {});
+          return respond(res, r);
+        } catch (err) {
+          return safeError(res, err, 'payroll.period.create');
+        }
       }
-    });
+    );
 
     router.get('/payroll/periods', requirePerm('payroll.period.list'), async (req, res) => {
       try {

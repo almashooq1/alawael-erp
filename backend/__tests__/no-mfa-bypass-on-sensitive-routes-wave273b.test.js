@@ -97,6 +97,11 @@ const SENSITIVE_RULES = Object.freeze([
     pathRe: /^\/templates\/exit-cascade$/,
     why: 'biometric template exit-cascade — missed by W273, closed by W275c',
   },
+  {
+    method: 'post',
+    pathRe: /^\/reconciliation\/cases\/:[a-zA-Z]+\/resolve$/,
+    why: 'attendance reconciliation case resolve — missed by W273, closed by W275d',
+  },
 ]);
 
 // ─── Router-stack walker ──────────────────────────────────────────

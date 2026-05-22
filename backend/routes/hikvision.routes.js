@@ -1009,6 +1009,7 @@ function createHikvisionRouter({
     router.post(
       '/reconciliation/cases/:id/resolve',
       requirePerm('attendance.reconciliation.resolve'),
+      requireMfaTier(2),
       async (req, res) => {
         try {
           const r = await reconciliationService.resolveConflict(req.params.id, {

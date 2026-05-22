@@ -37,6 +37,7 @@
 
 const crypto = require('crypto');
 const reg = require('./hikvision.registry');
+const { checkMfaTier } = require('./mfa-tier-check.lib');
 
 function createAttendanceReconciliationService({
   caseModel = null,
@@ -44,12 +45,24 @@ function createAttendanceReconciliationService({
   branchModel = null, // optional — used to resolve shift calendar
   logger = console,
   now = () => new Date(),
+  // ─── Wave 275d — Service-layer MFA tier enforcement ────────────
+  // Default OFF (Wave 99 tests construct with plain { userId } actors).
+  // app.js opts IN with `enforceMfa: true`. 4th adopter of the
+  // [[wave275-service-layer-mfa-pilot]] pattern via shared lib
+  // [[wave275c-extract-face-enrollment]].
+  enforceMfa = false,
 } = {}) {
   if (!caseModel) {
     throw new Error('attendance-reconciliation.service: caseModel is required');
   }
   if (!sourceEventModel) {
     throw new Error('attendance-reconciliation.service: sourceEventModel is required');
+  }
+
+  // Wave 275d — local wrapper binding factory enforceMfa + now;
+  // delegates to shared lib (extracted W275c).
+  function _checkMfaTier(actor, requiredTier, maxAgeMin) {
+    return checkMfaTier(actor, requiredTier, maxAgeMin, { enforceMfa, now });
   }
 
   // ─── Public API ──────────────────────────────────────────────
@@ -322,6 +335,13 @@ function createAttendanceReconciliationService({
         errors: { actor: 'resolver required' },
       };
     }
+    // Wave 275d — service-layer MFA tier 2 (15 min). Closes W273
+    // route-layer oversight on /reconciliation/cases/:id/resolve
+    // (added in this same commit at route layer). 3-layer symmetry.
+    // Runs AFTER actor-presence to preserve existing API contract
+    // (matches W275 reopenPeriod guard-order convention).
+    const mfa = _checkMfaTier(actor, 2, 15);
+    if (!mfa.ok) return mfa;
     if (!note || !String(note).trim()) {
       return {
         ok: false,

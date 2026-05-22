@@ -2507,6 +2507,10 @@ try {
             sourceEventModel: AttendanceSourceEvent,
             branchModel,
             logger,
+            // Wave 275d — service-layer MFA on resolveConflict (T2).
+            // Mirrors route-layer requireMfaTier on
+            // /reconciliation/cases/:id/resolve (added W275d).
+            enforceMfa: true,
           });
           payrollPeriodSvc = createPayrollPeriodService({
             periodModel: PayrollPeriod,

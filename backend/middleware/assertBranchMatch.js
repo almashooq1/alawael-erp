@@ -107,7 +107,127 @@ function effectiveBranchScope(req) {
   return null;
 }
 
+/**
+ * Enforce cross-branch isolation on a beneficiary-keyed route.
+ *
+ * For restricted callers ONLY: loads the Beneficiary by id, asserts
+ * `beneficiary.branchId === req.branchScope.branchId`, throws 403 on
+ * mismatch (or 404 when not found).
+ *
+ * For cross-branch / unrestricted callers and tests without
+ * `req.branchScope`: returns immediately without any DB lookup —
+ * the underlying service is allowed to handle "not found" via its
+ * normal path. This keeps existing route tests green (they stub the
+ * service and never set up a Beneficiary fixture).
+ *
+ * Throws — does not return a value. Errors carry `err.status`
+ * (403 cross-branch, 404 not-found, 503 model-unavailable).
+ * Catch via the route's existing try/catch + _toErrorResponse.
+ *
+ * @param {object} req
+ * @param {string} beneficiaryId
+ * @returns {Promise<void>}
+ */
+async function enforceBeneficiaryBranch(req, beneficiaryId) {
+  if (!req || !req.branchScope || !req.branchScope.restricted) {
+    return; // cross-branch / unscoped / test path — no-op
+  }
+  if (!beneficiaryId) {
+    const err = new Error('beneficiaryId is required');
+    err.status = 400;
+    throw err;
+  }
+  const mongoose = require('mongoose');
+  let Beneficiary;
+  try {
+    Beneficiary = mongoose.model('Beneficiary');
+  } catch (_e) {
+    try {
+      require('../models/Beneficiary');
+      Beneficiary = mongoose.model('Beneficiary');
+    } catch (_e2) {
+      // Restricted caller + model unavailable → fail closed.
+      const err = new Error('Beneficiary model unavailable — refusing for safety (fail-closed)');
+      err.status = 503;
+      throw err;
+    }
+  }
+  const ben = await Beneficiary.findById(beneficiaryId).select('branchId').lean();
+  if (!ben) {
+    const err = new Error('beneficiary not found');
+    err.status = 404;
+    throw err;
+  }
+  assertBranchMatch(req, ben.branchId, 'beneficiary');
+}
+
+// Back-compat alias kept until W269b consumers migrate. Returns the
+// loaded beneficiary OR null on not-found OR sentinel for unrestricted
+// callers, mirroring the original signature.
+async function loadBeneficiaryAndAssertBranch(req, beneficiaryId) {
+  if (!req || !req.branchScope || !req.branchScope.restricted) {
+    return { _id: beneficiaryId, branchId: null, _unchecked: true };
+  }
+  if (!beneficiaryId) {
+    const err = new Error('beneficiaryId is required');
+    err.status = 400;
+    throw err;
+  }
+  const mongoose = require('mongoose');
+  let Beneficiary;
+  try {
+    Beneficiary = mongoose.model('Beneficiary');
+  } catch (_e) {
+    try {
+      require('../models/Beneficiary');
+      Beneficiary = mongoose.model('Beneficiary');
+    } catch (_e2) {
+      const err = new Error('Beneficiary model unavailable — refusing for safety (fail-closed)');
+      err.status = 503;
+      throw err;
+    }
+  }
+  const ben = await Beneficiary.findById(beneficiaryId).select('branchId').lean();
+  if (!ben) return null;
+  assertBranchMatch(req, ben.branchId, 'beneficiary');
+  return ben;
+}
+
+/**
+ * Reject 403 when a restricted caller supplies a list of branch IDs
+ * that includes any branch other than their own. Cross-branch roles
+ * pass through unchanged.
+ *
+ * Designed for endpoints like `/ministry-comparison?branchIds=A,B,C`
+ * where the query carries a list rather than a single ID.
+ *
+ * @param {object} req
+ * @param {string[]} branchIds
+ */
+function assertBranchIdsAllowed(req, branchIds) {
+  if (!req || !req.branchScope || !req.branchScope.restricted) return;
+  if (!Array.isArray(branchIds) || branchIds.length === 0) return;
+  const own = String(req.branchScope.branchId || '');
+  if (!own) {
+    const err = new Error(
+      'cross-branch access denied: restricted user has no branchId (fail-closed)'
+    );
+    err.status = 403;
+    throw err;
+  }
+  for (const id of branchIds) {
+    if (String(id) !== own) {
+      const err = new Error(`cross-branch access denied: branchId ${id} outside caller scope`);
+      err.status = 403;
+      throw err;
+    }
+  }
+}
+
 module.exports = {
   assertBranchMatch,
   effectiveBranchScope,
+  enforceBeneficiaryBranch,
+  loadBeneficiaryAndAssertBranch,
+  assertBranchIdsAllowed,
 };

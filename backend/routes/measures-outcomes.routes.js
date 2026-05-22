@@ -54,6 +54,10 @@ const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const {
+  enforceBeneficiaryBranch,
+  assertBranchIdsAllowed,
+} = require('../middleware/assertBranchMatch');
 const logger = require('../utils/logger');
 
 const aggregator = require('../services/measureOutcomesAggregator.service');
@@ -74,6 +78,17 @@ router.use(requireBranchAccess);
 // ─── Helpers ─────────────────────────────────────────────────────
 function _toErrorResponse(err) {
   const msg = err && err.message ? String(err.message) : 'unknown error';
+  // W269b: explicit 403 path (for cross-branch / fail-closed errors
+  // raised by helpers in middleware/assertBranchMatch.js).
+  if (err && err.status === 403) {
+    return { status: 403, body: { success: false, error: msg } };
+  }
+  if (err && err.status === 503) {
+    return {
+      status: 503,
+      body: { success: false, error: 'models_unavailable', message: msg },
+    };
+  }
   if (msg.match(/required|invalid|must be|cannot be|missing|not found/i)) {
     return { status: 400, body: { success: false, error: msg } };
   }
@@ -124,6 +139,9 @@ router.get('/beneficiary/:beneficiaryId', async (req, res) => {
     if (!beneficiaryId) {
       return res.status(400).json({ success: false, error: 'beneficiaryId required' });
     }
+    // W269b: enforce cross-branch isolation before exposing aggregate.
+    // No-op for cross-branch callers + tests without req.branchScope.
+    await enforceBeneficiaryBranch(req, beneficiaryId);
     const out = await aggregator.aggregateBeneficiary(beneficiaryId);
     return _passThroughOrError(out, res);
   } catch (err) {
@@ -333,6 +351,8 @@ router.get('/family-report/:beneficiaryId', async (req, res) => {
     if (!beneficiaryId) {
       return res.status(400).json({ success: false, error: 'beneficiaryId required' });
     }
+    // W269b: family report is PHI — gate cross-branch reads.
+    await enforceBeneficiaryBranch(req, beneficiaryId);
     const opts = {};
     if (req.query.includeHidden === 'true' || req.query.includeHidden === '1') {
       opts.includeHiddenMeasures = true;
@@ -464,6 +484,9 @@ router.get('/clinical-report/:beneficiaryId', async (req, res) => {
     if (!beneficiaryId) {
       return res.status(400).json({ success: false, error: 'beneficiaryId required' });
     }
+    // W269b: clinical report is the deepest PHI surface (audit trail
+    // + corrections + raw scores) — must be cross-branch isolated.
+    await enforceBeneficiaryBranch(req, beneficiaryId);
     // includeCorrections is opt-OUT (default true) — the medical
     // record wants the full audit trail unless explicitly stripped.
     const opts = {};
@@ -526,6 +549,10 @@ router.get('/ministry-comparison', async (req, res) => {
     if (!Number.isInteger(m) || m < 1 || m > 12) {
       return res.status(400).json({ success: false, error: 'month required (integer 1-12)' });
     }
+    // W269b: requireBranchAccess checks SINGULAR branchId only — the
+    // plural branchIds[] list slips past. Restricted callers must not
+    // see comparison data outside their own branch.
+    assertBranchIdsAllowed(req, branchIds);
     const out = await ministryComparison.compareBranches({ branchIds, year: y, month: m });
     return res.json({ success: true, data: out });
   } catch (err) {

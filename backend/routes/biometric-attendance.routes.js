@@ -194,8 +194,8 @@ router.get('/shifts', async (req, res) => {
   }
 });
 
-// POST /api/biometric-attendance/shifts — إنشاء دوام
-router.post('/shifts', async (req, res) => {
+// POST /api/biometric-attendance/shifts — إنشاء دوام (MFA tier 2 — W275m)
+router.post('/shifts', requireMfaTier(2), async (req, res) => {
   try {
     const shift = await WorkShift.create({
       ...stripUpdateMeta(req.body),
@@ -207,8 +207,8 @@ router.post('/shifts', async (req, res) => {
   }
 });
 
-// PUT /api/biometric-attendance/shifts/:id — تعديل دوام
-router.put('/shifts/:id', async (req, res) => {
+// PUT /api/biometric-attendance/shifts/:id — تعديل دوام (MFA tier 2 — W275m)
+router.put('/shifts/:id', requireMfaTier(2), async (req, res) => {
   try {
     const shift = await WorkShift.findByIdAndUpdate(
       req.params.id,
@@ -222,8 +222,8 @@ router.put('/shifts/:id', async (req, res) => {
   }
 });
 
-// DELETE /api/biometric-attendance/shifts/:id — حذف دوام
-router.delete('/shifts/:id', async (req, res) => {
+// DELETE /api/biometric-attendance/shifts/:id — حذف دوام (MFA tier 2 — W275m, destructive)
+router.delete('/shifts/:id', requireMfaTier(2), async (req, res) => {
   try {
     await WorkShift.findByIdAndUpdate(req.params.id, { deletedAt: new Date(), isActive: false });
     res.json({ success: true, message: 'تم الحذف بنجاح' });

@@ -265,6 +265,22 @@ const SENSITIVE_RULES = Object.freeze([
     pathRe: /^\/devices\/:[a-zA-Z]+\/auto-sync$/,
     why: 'ZKTeco auto-sync toggle — admin preference affecting future cron (W275L)',
   },
+  // ─── Wave 275m — Shift CRUD (biometric-attendance) ─────────────
+  {
+    method: 'post',
+    pathRe: /^\/shifts$/,
+    why: 'work-shift CREATE — admin schedule template (W275m)',
+  },
+  {
+    method: 'put',
+    pathRe: /^\/shifts\/:[a-zA-Z]+$/,
+    why: 'work-shift UPDATE — affects assigned employees (W275m)',
+  },
+  {
+    method: 'delete',
+    pathRe: /^\/shifts\/:[a-zA-Z]+$/,
+    why: 'work-shift DELETE — destructive, soft-deletes shift template (W275m)',
+  },
 ]);
 
 // ─── Router-stack walker ──────────────────────────────────────────

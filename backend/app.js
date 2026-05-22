@@ -2706,6 +2706,12 @@ try {
             libraryModel: HikvisionFaceLibrary,
             isapiAdapter: adapter,
             logger,
+            // W275r — service-layer MFA on full sync chain
+            // (syncAll → syncLibrary → syncLibraryToDevice). Scheduler
+            // passes synthetic system-actor (W275q); HTTP routes pass
+            // actorFrom(req). face-enrollment's confirmEnrollment also
+            // accepts actor (W275r).
+            enforceMfa: true,
           });
         } catch (p6err) {
           logger.warn('[Hikvision] Phase F sync worker failed to wire:', p6err.message);

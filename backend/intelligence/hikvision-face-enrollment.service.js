@@ -160,8 +160,13 @@ function createHikvisionFaceEnrollmentService({
   // ─── confirmEnrollment ──────────────────────────────────────
 
   async function confirmEnrollment(input = {}) {
-    const { templateId, hikvisionPersonId, templateChecksum } = input;
+    const { templateId, hikvisionPersonId, templateChecksum, actor } = input;
 
+    // W275r — MFA tier 2 (15 min). Mirrors W275j route-layer tier on
+    // /templates/:id/confirm. Sync-worker propagates system-actor via
+    // opts.actor (W275q lib); HTTP route passes actorFrom(req).
+    const mfa = _checkMfaTier(actor, 2, 15);
+    if (!mfa.ok) return mfa;
     if (!templateId) return { ok: false, reason: reg.REASON.TEMPLATE_NOT_FOUND };
     if (!hikvisionPersonId) return { ok: false, reason: reg.REASON.PERSON_ID_REQUIRED };
     if (!templateChecksum) return { ok: false, reason: reg.REASON.CHECKSUM_REQUIRED };

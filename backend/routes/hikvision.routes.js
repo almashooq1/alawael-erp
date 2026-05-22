@@ -693,7 +693,9 @@ function createHikvisionRouter({
       async (req, res) => {
         try {
           const body = req.body || {};
+          // W275r — pass actor for service-layer MFA guard.
           const r = await enrollmentService.confirmEnrollment({
+            actor: actorFrom(req),
             templateId: req.params.id,
             hikvisionPersonId: body.hikvisionPersonId,
             templateChecksum: body.templateChecksum,
@@ -1432,10 +1434,11 @@ function createHikvisionRouter({
       requireMfaTier(2),
       async (req, res) => {
         try {
+          // W275r — pass actor for sync-worker service-layer guard chain.
           const r = await syncWorker.syncLibraryToDevice(
             req.params.libraryId,
             req.params.deviceId,
-            req.body || {}
+            { ...(req.body || {}), actor: actorFrom(req) }
           );
           return res.json({ success: true, data: r });
         } catch (err) {
@@ -1450,7 +1453,11 @@ function createHikvisionRouter({
       requireMfaTier(2),
       async (req, res) => {
         try {
-          const r = await syncWorker.syncLibrary(req.params.libraryId, req.body || {});
+          // W275r — pass actor for sync-worker service-layer guard chain.
+          const r = await syncWorker.syncLibrary(req.params.libraryId, {
+            ...(req.body || {}),
+            actor: actorFrom(req),
+          });
           if (!r.ok) return respond(res, r);
           return res.json({ success: true, data: r });
         } catch (err) {
@@ -1465,7 +1472,8 @@ function createHikvisionRouter({
       requireMfaTier(2),
       async (req, res) => {
         try {
-          const r = await syncWorker.syncAll(req.body || {});
+          // W275r — pass actor for sync-worker service-layer guard chain.
+          const r = await syncWorker.syncAll({ ...(req.body || {}), actor: actorFrom(req) });
           return res.json({ success: true, data: r });
         } catch (err) {
           return safeError(res, err, 'hikvision.sync.all');

@@ -38,17 +38,15 @@
  */
 
 const reg = require('./hikvision.registry');
+const { checkMfaTier } = require('./mfa-tier-check.lib');
 
-// Wave 275e note: this service is deliberately NOT a service-layer
-// MFA adopter. `syncAll` + `detectDriftAll` are called from
-// hikvision-scheduler.service.js cron handlers (lines 92, 102) with
-// NO actor — adding `enforceMfa` here would break the scheduled
-// sync. Sensitive mutations from HTTP are gated at the route layer
-// only (see /sync/all + /sync/library/* in W275e route changes).
-// If service-layer enforcement is later required, the scheduler
-// must first be retrofitted to pass a synthetic `{ userId: 'system-
-// scheduler', mfaLevel: <high>, mfaAssertedAt: new Date() }` actor;
-// that change belongs in a separate W275e-followup commit.
+// Wave 275r UPDATE: W275e originally deferred this service to route-
+// only because scheduler had no actor. W275q shipped the synthetic
+// system-actor pattern; scheduler now passes a tier-3 fresh actor.
+// W275r enables service-layer enforcement on the full sync chain
+// (syncAll → syncLibrary → syncLibraryToDevice → confirmEnrollment).
+// Actor flows through each level via opts.actor. enforceMfa default
+// OFF preserves Wave 106 test contracts.
 
 function createHikvisionSyncWorker({
   libraryService = null,
@@ -59,6 +57,8 @@ function createHikvisionSyncWorker({
   isapiAdapter = null, // createMockIsapiAdapter or createIsapiAdapter result
   logger = console,
   now = () => new Date(),
+  // ─── Wave 275r — Service-layer MFA tier enforcement ────────────
+  enforceMfa = false,
 } = {}) {
   if (!libraryService) {
     throw new Error('hikvision-sync-worker: libraryService is required');
@@ -75,9 +75,20 @@ function createHikvisionSyncWorker({
     throw new Error('hikvision-sync-worker: isapiAdapter is required');
   }
 
+  // Wave 275r — shared lib helper bound to factory's enforceMfa + now.
+  function _checkMfaTier(actor, requiredTier, maxAgeMin) {
+    return checkMfaTier(actor, requiredTier, maxAgeMin, { enforceMfa, now });
+  }
+
   // ─── Per-pair sync ────────────────────────────────────────────
 
   async function syncLibraryToDevice(libraryId, deviceId, opts = {}) {
+    // Wave 275r — MFA tier 2 (15 min) at the LEAF. Even though
+    // syncAll/syncLibrary also gate, gating the leaf protects against
+    // direct HTTP-route calls to /sync/library/:libraryId/device/:deviceId
+    // AND covers the test/internal caller scenario.
+    const mfa = _checkMfaTier(opts.actor, 2, 15);
+    if (!mfa.ok) return mfa;
     const startedAt = Date.now();
     const result = {
       ok: false,
@@ -192,10 +203,13 @@ function createHikvisionSyncWorker({
         result.pushed += 1;
         // Confirm enrollment → template moves pending → active
         try {
+          // W275r — propagate actor to face-enrollment's confirmEnrollment
+          // service-layer guard.
           await enrollmentService.confirmEnrollment({
             templateId: template._id,
             hikvisionPersonId: pushed.personId,
             templateChecksum: pushed.checksum,
+            actor: opts.actor,
           });
         } catch (confirmErr) {
           // Confirm might fail if template is already active (idempotent).
@@ -286,6 +300,9 @@ function createHikvisionSyncWorker({
   // ─── Library fan-out ──────────────────────────────────────────
 
   async function syncLibrary(libraryId, opts = {}) {
+    // W275r — MFA tier 2 at the entry. Fail-fast before fan-out to devices.
+    const mfa = _checkMfaTier(opts.actor, 2, 15);
+    if (!mfa.ok) return mfa;
     const library = await libraryModel.findById(libraryId).lean();
     if (!library) {
       return {
@@ -335,6 +352,9 @@ function createHikvisionSyncWorker({
   // ─── Org-wide sweep ───────────────────────────────────────────
 
   async function syncAll(opts = {}) {
+    // W275r — MFA tier 2 at the entry. Fail-fast before fan-out to libraries.
+    const mfa = _checkMfaTier(opts.actor, 2, 15);
+    if (!mfa.ok) return mfa;
     let cursor = libraryModel
       .find({ status: { $ne: reg.LIBRARY_STATUS.ARCHIVED } })
       .sort({ createdAt: 1 });

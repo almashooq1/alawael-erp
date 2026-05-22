@@ -105,7 +105,10 @@ function createHikvisionScheduler({
       available: !!syncWorker,
       handler: async args => {
         if (!syncWorker) throw new Error('syncWorker not wired');
-        return syncWorker.syncAll(args || {});
+        // W275r — pass system actor so sync-worker chain
+        // (syncAll → syncLibrary → syncLibraryToDevice → confirmEnrollment)
+        // passes service-layer MFA guards.
+        return syncWorker.syncAll({ ...(args || {}), actor: _systemActor() });
       },
     },
     [reg.JOB_ID.DRIFT_DETECT_ALL]: {

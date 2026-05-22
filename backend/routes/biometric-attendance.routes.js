@@ -392,6 +392,46 @@ router.get('/monthly-report', async (req, res) => {
   }
 });
 
+// GET /api/biometric-attendance/monthly-report.xlsx — تقرير شهري ك Excel ثنائي اللغة (W274)
+// Bilingual AR/EN, RTL layout, Summary + Per-Employee sheets. Same auth as JSON variant.
+router.get('/monthly-report.xlsx', async (req, res) => {
+  try {
+    const { branchId, year, month } = req.query;
+    if (!branchId) return res.status(400).json({ success: false, message: 'branchId مطلوب' });
+
+    const y = parseInt(year) || new Date().getFullYear();
+    const m = parseInt(month) || new Date().getMonth() + 1;
+    if (m < 1 || m > 12) {
+      return res.status(400).json({ success: false, message: 'الشهر يجب أن يكون بين 1 و 12' });
+    }
+
+    const Branch = require('../models/Branch');
+    const branch = await Branch.findById(branchId).select('code name_ar name_en').lean();
+    if (!branch) {
+      return res.status(404).json({ success: false, message: 'الفرع غير موجود' });
+    }
+
+    const report = await attendanceProcessing.generateMonthlyReport(branchId, y, m);
+    const {
+      buildMonthlyReportWorkbook,
+      buildFilename,
+    } = require('../services/attendance-monthly-report-xlsx.builder');
+    const wb = buildMonthlyReportWorkbook({ branch, year: y, month: m, report });
+
+    const filename = buildFilename(branch.code, y, m);
+    res.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    );
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Cache-Control', 'no-store');
+    await wb.xlsx.write(res);
+    res.end();
+  } catch (err) {
+    safeError(res, err);
+  }
+});
+
 // POST /api/biometric-attendance/mobile-checkin — حضور موبايل مع GPS
 router.post('/mobile-checkin', async (req, res) => {
   try {

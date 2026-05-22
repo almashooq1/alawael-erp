@@ -14,6 +14,20 @@ const SmartAttendance = require('../../models/advanced_attendance.model');
 const WorkShift = require('../../models/workShift.model');
 const Employee = require('../../models/employee.model');
 const logger = require('../../utils/logger');
+const { checkMfaTier } = require('../../intelligence/mfa-tier-check.lib');
+const {
+  makeSystemActor,
+  SYSTEM_USER_IDS,
+  SYSTEM_ROLES,
+} = require('../../intelligence/system-actor.lib');
+
+// Wave 275s — service-layer MFA tier enforcement on syncAttendanceLogs.
+// ZKTeco uses a class-with-static-methods pattern (vs the factory-with-
+// closure pattern in intelligence/hikvision-*). The enforceMfa flag is
+// therefore a module-level constant rather than a factory option. Tests
+// that need to bypass MFA must either pass a system-actor or stub the
+// module's `_ENFORCE_MFA_SYNC` export.
+let _ENFORCE_MFA_SYNC = true;
 
 // ─── مخزن الاتصالات النشطة ──────────────────────────────────────────────────
 const activeConnections = new Map();
@@ -264,7 +278,18 @@ class ZKTecoService {
    * @param {string} syncType - نوع المزامنة ('manual'|'auto'|'scheduled')
    * @param {string} userId - معرف المستخدم الذي بدأ المزامنة
    */
-  static async syncAttendanceLogs(deviceId, syncType = 'manual', userId = null) {
+  static async syncAttendanceLogs(deviceId, syncType = 'manual', userId = null, opts = {}) {
+    // Wave 275s — service-layer MFA tier 2 (15 min). Mirrors W275L
+    // route-layer requireMfaTier on /devices/:id/sync. Auto-sync cron
+    // (line ~745) passes synthetic system actor (W275q lib).
+    if (_ENFORCE_MFA_SYNC) {
+      const mfa = checkMfaTier(opts.actor, 2, 15, { enforceMfa: true });
+      if (!mfa.ok) {
+        throw new Error(
+          `MFA: ${mfa.reason} (requiredTier=${mfa.requiredTier}, actorTier=${mfa.actorTier})`
+        );
+      }
+    }
     const device = await ZKTecoDevice.findById(deviceId);
     if (!device) throw new Error('الجهاز غير موجود');
 
@@ -519,13 +544,14 @@ class ZKTecoService {
   /**
    * مزامنة جميع الأجهزة النشطة
    */
-  static async syncAllDevices(userId = null) {
+  static async syncAllDevices(userId = null, opts = {}) {
     const devices = await ZKTecoDevice.getActiveDevices();
     const results = [];
 
     for (const device of devices) {
       try {
-        const result = await this.syncAttendanceLogs(device._id.toString(), 'manual', userId);
+        // W275s — propagate actor to per-device sync.
+        const result = await this.syncAttendanceLogs(device._id.toString(), 'manual', userId, opts);
         results.push({
           deviceId: device._id,
           deviceName: device.deviceName,
@@ -737,9 +763,18 @@ class ZKTecoService {
 
         logger.info(`ZKTeco: Auto-sync triggered for ${devices.length} device(s)`);
 
+        // W275s — synthesise a fresh system actor for each tick so the
+        // syncAttendanceLogs MFA guard passes the auto-sync path.
+        const systemActor = makeSystemActor({
+          id: SYSTEM_USER_IDS.SCHEDULER,
+          role: SYSTEM_ROLES.SCHEDULER,
+        });
+
         for (const device of devices) {
           try {
-            await this.syncAttendanceLogs(device._id.toString(), 'auto');
+            await this.syncAttendanceLogs(device._id.toString(), 'auto', null, {
+              actor: systemActor,
+            });
           } catch (err) {
             logger.error(`ZKTeco: Auto-sync failed for ${device.deviceName}: ${err.message}`);
           }
@@ -1022,3 +1057,8 @@ class ZKTecoService {
 }
 
 module.exports = ZKTecoService;
+// W275s — Allow tests to toggle MFA enforcement on syncAttendanceLogs.
+// Production code stays at true.
+module.exports.__setEnforceMfaSync = function (v) {
+  _ENFORCE_MFA_SYNC = !!v;
+};

@@ -240,7 +240,10 @@ router.post(
   requireMfaTier(2),
   async (req, res) => {
     try {
-      const result = await ZKTecoService.syncAttendanceLogs(req.params.id, 'manual', req.user.id);
+      // W275s — pass req.actor for service-layer MFA guard.
+      const result = await ZKTecoService.syncAttendanceLogs(req.params.id, 'manual', req.user.id, {
+        actor: req.actor,
+      });
       res.json({
         success: true,
         message:
@@ -270,7 +273,8 @@ router.post(
   requireMfaTier(2),
   async (req, res) => {
     try {
-      const results = await ZKTecoService.syncAllDevices(req.user.id);
+      // W275s — pass req.actor for service-layer MFA guard chain.
+      const results = await ZKTecoService.syncAllDevices(req.user.id, { actor: req.actor });
       const successCount = results.filter(r => r.status === 'success').length;
       res.json({
         success: true,

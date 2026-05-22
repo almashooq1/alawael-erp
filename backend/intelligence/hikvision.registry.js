@@ -300,6 +300,13 @@ const REASON = Object.freeze({
   PERMISSION_DENIED: 'PERMISSION_DENIED',
   VALIDATION_FAILED: 'VALIDATION_FAILED',
   SAVE_FAILED: 'SAVE_FAILED',
+
+  // ─── Wave 275 — Service-layer MFA tier enforcement ─────────────
+  // Mirror of the route-layer reasons in middleware/requireMfaTier.js
+  // (Wave 273). Surfaced by services that opt in via enforceMfa=true
+  // (e.g. payroll-period.service Wave 275 pilot).
+  MFA_TIER_REQUIRED: 'MFA_TIER_REQUIRED',
+  MFA_FRESHNESS_REQUIRED: 'MFA_FRESHNESS_REQUIRED',
 });
 
 // ─── Wave 97 Phase 2 — Face library & template enrollment ───────

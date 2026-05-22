@@ -183,13 +183,27 @@ const REASON_TO_STATUS = Object.freeze({
   // Generic
   VALIDATION_FAILED: 422,
   SAVE_FAILED: 500,
+
+  // ── Wave 275 — Service-layer MFA tier enforcement
+  // Both map to 403 — same as route-layer requireMfaTier (W273).
+  // Surfaced by opt-in services (payroll-period.service Wave 275 pilot).
+  MFA_TIER_REQUIRED: 403,
+  MFA_FRESHNESS_REQUIRED: 403,
 });
 
 function actorFrom(req) {
+  // Wave 275 — propagate MFA tier + freshness from the W273
+  // attachMfaActor middleware into the actor object that opt-in
+  // services (e.g. payroll-period with enforceMfa=true) use to
+  // enforce their service-layer MFA guard. Falls back to {0, null}
+  // when attachMfaActor didn't run (test contexts that bypass it).
+  const fromActor = req.actor || {};
   return {
-    userId: req.user?.id || req.user?._id || null,
-    role: req.user?.role || req.user?.roleCode || null,
-    ip: req.ip,
+    userId: req.user?.id || req.user?._id || fromActor.userId || null,
+    role: req.user?.role || req.user?.roleCode || fromActor.role || null,
+    ip: req.ip || fromActor.ip || null,
+    mfaLevel: typeof fromActor.mfaLevel === 'number' ? fromActor.mfaLevel : 0,
+    mfaAssertedAt: fromActor.mfaAssertedAt || null,
   };
 }
 

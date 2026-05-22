@@ -2510,6 +2510,15 @@ try {
             sourceEventModel: AttendanceSourceEvent,
             reconcilerService: reconciliationSvc,
             logger,
+            // Wave 275 — service-layer MFA tier enforcement (defense-
+            // in-depth on top of W273's route-layer requireMfaTier).
+            // The route layer at /api/v1/hikvision propagates
+            // req.actor.mfaLevel + mfaAssertedAt into the actor object
+            // via routes/hikvision.routes.js::actorFrom. With enforceMfa
+            // true, even a service call from a non-HTTP caller (cron,
+            // worker, CLI) must supply a tier-eligible actor or fail
+            // closed with MFA_TIER_REQUIRED / MFA_FRESHNESS_REQUIRED.
+            enforceMfa: true,
           });
           // Re-construct attendance-source service with the
           // payrollPeriodService so future createSourceEvent calls

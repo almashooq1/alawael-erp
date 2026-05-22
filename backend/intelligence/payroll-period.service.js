@@ -45,6 +45,14 @@ function createPayrollPeriodService({
   reconcilerService = null, // optional; used for snapshot hash computation
   logger = console,
   now = () => new Date(),
+  // ─── Wave 275 — Service-layer MFA tier enforcement ─────────────
+  // Default OFF to preserve existing unit-test contracts (Wave 99
+  // shipped before MFA tiers existed; tests construct the service
+  // with plain { userId } actors). app.js opts IN with
+  // `enforceMfa: true` so production routes always enforce. New
+  // tests can flip to true explicitly to assert the guard. Mirrors
+  // the Wave 95 pattern from beneficiary-lifecycle.service.
+  enforceMfa = false,
 } = {}) {
   if (!periodModel) {
     throw new Error('payroll-period.service: periodModel is required');
@@ -57,6 +65,65 @@ function createPayrollPeriodService({
   }
   // sourceEventModel is optional — only used during close cascade to
   // tag source events with lockedByPayrollPeriodId.
+
+  /**
+   * Wave 275 — service-layer MFA tier guard. Reads actor.mfaLevel and
+   * actor.mfaAssertedAt populated by the W273 attachMfaActor route
+   * middleware (and propagated through routes/hikvision.routes.js
+   * `actorFrom`). When enforceMfa=false, this is a no-op so test
+   * suites that don't need MFA can construct the service cleanly.
+   *
+   * @param {object} actor
+   * @param {number} requiredTier  — 1, 2, or 3
+   * @param {number} maxAgeMin     — assertion freshness window in minutes
+   * @returns {{ ok: true } | { ok: false, reason: string, requiredTier: number, actorTier: number, maxAgeMin?: number, ageMin?: number|null }}
+   */
+  function _checkMfaTier(actor, requiredTier, maxAgeMin) {
+    if (!enforceMfa) return { ok: true };
+    const actorTier = typeof (actor && actor.mfaLevel) === 'number' ? actor.mfaLevel : 0;
+    if (actorTier < requiredTier) {
+      return {
+        ok: false,
+        reason: reg.REASON.MFA_TIER_REQUIRED,
+        requiredTier,
+        actorTier,
+      };
+    }
+    const assertedAt = actor && actor.mfaAssertedAt;
+    if (!assertedAt) {
+      return {
+        ok: false,
+        reason: reg.REASON.MFA_FRESHNESS_REQUIRED,
+        requiredTier,
+        actorTier,
+        maxAgeMin,
+        ageMin: null,
+      };
+    }
+    const t = assertedAt instanceof Date ? assertedAt.getTime() : Date.parse(assertedAt);
+    if (!Number.isFinite(t)) {
+      return {
+        ok: false,
+        reason: reg.REASON.MFA_FRESHNESS_REQUIRED,
+        requiredTier,
+        actorTier,
+        maxAgeMin,
+        ageMin: null,
+      };
+    }
+    const ageMin = Math.floor((now().getTime() - t) / 60000);
+    if (ageMin > maxAgeMin) {
+      return {
+        ok: false,
+        reason: reg.REASON.MFA_FRESHNESS_REQUIRED,
+        requiredTier,
+        actorTier,
+        maxAgeMin,
+        ageMin,
+      };
+    }
+    return { ok: true };
+  }
 
   // ─── Periods ─────────────────────────────────────────────────
 
@@ -163,6 +230,9 @@ function createPayrollPeriodService({
         errors: { actor: 'closer required' },
       };
     }
+    // Wave 275 — service-layer MFA tier 2 (15 min) check.
+    const mfa = _checkMfaTier(actor, 2, 15);
+    if (!mfa.ok) return mfa;
     const doc = await periodModel.findById(id);
     if (!doc) return { ok: false, reason: reg.REASON.PAYROLL_PERIOD_NOT_FOUND };
     if (doc.status === reg.PAYROLL_PERIOD_STATUS.CLOSED) {
@@ -264,6 +334,10 @@ function createPayrollPeriodService({
         errors: { reason: 'min 10 chars' },
       };
     }
+    // Wave 275 — service-layer MFA tier 3 (5 min) check. Reopen is the
+    // highest-impact lifecycle move; matches route-layer tier in W273.
+    const mfa = _checkMfaTier(actor, 3, 5);
+    if (!mfa.ok) return mfa;
     const doc = await periodModel.findById(id);
     if (!doc) return { ok: false, reason: reg.REASON.PAYROLL_PERIOD_NOT_FOUND };
     if (doc.status !== reg.PAYROLL_PERIOD_STATUS.CLOSED) {
@@ -330,6 +404,9 @@ function createPayrollPeriodService({
         errors: { actor: 'initiator required' },
       };
     }
+    // Wave 275 — service-layer MFA tier 2 (15 min) check.
+    const mfa = _checkMfaTier(actor, 2, 15);
+    if (!mfa.ok) return mfa;
     if (!reason || String(reason).trim().length < 10) {
       return { ok: false, reason: reg.REASON.PAYROLL_OVERRIDE_REASON_REQUIRED };
     }
@@ -484,6 +561,11 @@ function createPayrollPeriodService({
         errors: { actor: 'executor required' },
       };
     }
+    // Wave 275 — service-layer MFA tier 3 (5 min) check. Execute is the
+    // hardest-to-reverse operation (mutates a closed payroll period);
+    // matches route-layer tier in W273.
+    const mfa = _checkMfaTier(actor, 3, 5);
+    if (!mfa.ok) return mfa;
     if (!nafathSignatureId) {
       return { ok: false, reason: reg.REASON.PAYROLL_OVERRIDE_NAFATH_REQUIRED };
     }

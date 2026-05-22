@@ -262,7 +262,7 @@ describe('Wave 276 — service-layer MFA enforceMfa drift guard on app.js constr
   // (no enforceMfa) and assert the violation detector flags it.
   test('scanner self-test: synthetic missing-flag site is flagged', () => {
     const fixture = `
-      const { createPayrollPeriodService } = require('./intelligence/payroll-period.service');
+      const { createPayrollPeriodService } = require('payroll-period-fixture');
       const svc = createPayrollPeriodService({ periodModel: M, logger: l });
     `;
     const fixtureAst = parser.parse(fixture, { sourceType: 'unambiguous' });
@@ -277,7 +277,7 @@ describe('Wave 276 — service-layer MFA enforceMfa drift guard on app.js constr
   // when enforceMfa IS present.
   test('scanner self-test: synthetic with-flag site is NOT flagged', () => {
     const fixture = `
-      const { createPayrollPeriodService } = require('./intelligence/payroll-period.service');
+      const { createPayrollPeriodService } = require('payroll-period-fixture');
       const svc = createPayrollPeriodService({ periodModel: M, logger: l, enforceMfa: true });
     `;
     const fixtureAst = parser.parse(fixture, { sourceType: 'unambiguous' });
@@ -291,7 +291,7 @@ describe('Wave 276 — service-layer MFA enforceMfa drift guard on app.js constr
   // destructuring import the same way as W275u's createParserWithLock.
   test('scanner self-test: aliased call site resolves to canonical name', () => {
     const fixture = `
-      const { createHikvisionEventParserService: createParserWithLock } = require('./intelligence/hikvision-event-parser.service');
+      const { createHikvisionEventParserService: createParserWithLock } = require('event-parser-fixture');
       const svc = createParserWithLock({ rawEventModel: R, enforceMfa: true });
     `;
     const fixtureAst = parser.parse(fixture, { sourceType: 'unambiguous' });

@@ -2608,6 +2608,10 @@ try {
             scoreModel: HikvisionFraudScore,
             flagModel: HikvisionFraudFlag,
             logger,
+            // W275q — service-layer MFA on decayAllScores (tier 2).
+            // Scheduler passes synthetic system-actor (W275q lib);
+            // HTTP route passes actorFrom(req).
+            enforceMfa: true,
           });
           fraudDetectionSvc = createHikvisionFraudDetectionService({
             flagModel: HikvisionFraudFlag,

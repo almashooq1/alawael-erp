@@ -23,31 +23,35 @@
  */
 
 const reg = require('./hikvision.registry');
+const { checkMfaTier } = require('./mfa-tier-check.lib');
 
-// Wave 275g note: this service is deliberately NOT a service-layer
-// MFA adopter (same rationale as W275e hikvision-sync-worker).
-// `decayAllScores` is called from hikvision-scheduler.service.js:142
-// (FRAUD_DECAY_ALL cron job) with NO actor — adding `enforceMfa`
-// here would break the scheduled decay. `recomputeScore` is HTTP-only
-// but kept route-only for consistency within this service (mixed
-// service-layer/route-only per-method would create confusion).
-// Sensitive HTTP mutations are gated at the route layer only (see
-// requireMfaTier(2) on /fraud/scores/:employeeId/recompute +
-// /fraud/scores/decay-all in W275g route changes). Service-layer
-// adoption requires retrofitting the scheduler to pass a synthetic
-// system actor — separate W275g-followup commit when needed.
+// Wave 275q UPDATE: W275g originally documented this service as
+// route-only because decayAllScores is called from scheduler:142 with
+// no actor — service-layer gate would have broken cron. W275q ships
+// the synthetic system-actor pattern (intelligence/system-actor.lib),
+// so the scheduler NOW passes a tier-3 fresh actor and service-layer
+// enforcement can be enabled safely. recomputeScore is HTTP-only;
+// route handler (W275g) passes actor explicitly via the W275q route
+// update. enforceMfa default OFF preserves Wave 100 test contracts.
 
 function createHikvisionFraudScoreService({
   scoreModel = null,
   flagModel = null,
   logger = console,
   now = () => new Date(),
+  // ─── Wave 275q — Service-layer MFA tier enforcement ────────────
+  enforceMfa = false,
 } = {}) {
   if (!scoreModel) {
     throw new Error('hikvision-fraud-score.service: scoreModel is required');
   }
   if (!flagModel) {
     throw new Error('hikvision-fraud-score.service: flagModel is required');
+  }
+
+  // Wave 275q — local wrapper delegating to shared lib (extracted W275c).
+  function _checkMfaTier(actor, requiredTier, maxAgeMin) {
+    return checkMfaTier(actor, requiredTier, maxAgeMin, { enforceMfa, now });
   }
 
   // ─── Core compute ────────────────────────────────────────────
@@ -135,7 +139,12 @@ function createHikvisionFraudScoreService({
     });
   }
 
-  async function decayAllScores({ now: nowArg } = {}) {
+  async function decayAllScores({ now: nowArg, actor } = {}) {
+    // Wave 275q — service-layer MFA tier 2 (15 min). Mirrors W275g
+    // route-layer requireMfaTier on /fraud/scores/decay-all. Scheduler
+    // passes synthetic system actor (tier 3, fresh) via W275q lib.
+    const mfa = _checkMfaTier(actor, 2, 15);
+    if (!mfa.ok) return mfa;
     const nowDate = nowArg || now();
 
     // Discover every employeeId with a score row.

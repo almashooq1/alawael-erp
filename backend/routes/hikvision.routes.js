@@ -1409,9 +1409,10 @@ function createHikvisionRouter({
       '/fraud/scores/decay-all',
       requirePerm('fraud.score.recompute'),
       requireMfaTier(2),
-      async (_req, res) => {
+      async (req, res) => {
         try {
-          const r = await fraudScoreService.decayAllScores({});
+          // W275q — pass actor for service-layer MFA guard.
+          const r = await fraudScoreService.decayAllScores({ actor: actorFrom(req) });
           return respond(res, r);
         } catch (err) {
           return safeError(res, err, 'fraud.score.decay-all');

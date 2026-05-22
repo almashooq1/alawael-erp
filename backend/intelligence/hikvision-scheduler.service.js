@@ -49,6 +49,7 @@
  */
 
 const reg = require('./hikvision.registry');
+const { makeSystemActor, SYSTEM_USER_IDS, SYSTEM_ROLES } = require('./system-actor.lib');
 
 function createHikvisionScheduler({
   // Pluggable services — each one resolved by app.js at boot. Missing
@@ -74,6 +75,21 @@ function createHikvisionScheduler({
 } = {}) {
   if (!runModel) {
     throw new Error('hikvision-scheduler: runModel (HikvisionJobRun) is required');
+  }
+
+  // ─── Wave 275q — System actor injection ──────────────────────
+  // Every handler invocation generates a fresh system actor (so
+  // mfaAssertedAt is "now" each tick) and merges it into the args
+  // object. Services with `enforceMfa: true` (W275/b/c/d/f and
+  // future W275q+ adopters) see a tier-3 fresh actor and pass the
+  // checkMfaTier guard. Services without enforceMfa ignore the
+  // injected field (backwards-compat).
+  function _systemActor(role) {
+    return makeSystemActor({
+      id: SYSTEM_USER_IDS.SCHEDULER,
+      role: role || SYSTEM_ROLES.SCHEDULER,
+      now,
+    });
   }
 
   // ─── Job registry — id → { handler, available } ───────────────
@@ -139,7 +155,9 @@ function createHikvisionScheduler({
       available: !!fraudScore,
       handler: async () => {
         if (!fraudScore) throw new Error('fraudScore not wired');
-        return fraudScore.decayAllScores({});
+        // Wave 275q — pass system actor so fraud-score's W275q
+        // service-layer MFA guard accepts the cron-driven call.
+        return fraudScore.decayAllScores({ actor: _systemActor() });
       },
     },
     [reg.JOB_ID.RAW_EVENT_PARSE]: {

@@ -105,7 +105,8 @@ router.delete('/devices/:id', requireMfaTier(2), async (req, res) => {
 });
 
 // POST /api/biometric-attendance/devices/:id/ping — فحص اتصال الجهاز
-router.post('/devices/:id/ping', async (req, res) => {
+// W275n: device ping = active network probe; admin-only diagnostic
+router.post('/devices/:id/ping', requireMfaTier(2), async (req, res) => {
   try {
     const device = await ZktecoDevice.findById(req.params.id);
     if (!device) return res.status(404).json({ success: false, message: 'الجهاز غير موجود' });

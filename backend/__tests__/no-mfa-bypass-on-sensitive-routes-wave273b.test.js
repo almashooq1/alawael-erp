@@ -281,6 +281,29 @@ const SENSITIVE_RULES = Object.freeze([
     pathRe: /^\/shifts\/:[a-zA-Z]+$/,
     why: 'work-shift DELETE — destructive, soft-deletes shift template (W275m)',
   },
+  // ─── Wave 275n — ZKTeco diagnostic probes ──────────────────────
+  // Probes are low-impact individually but admin-only and trigger
+  // device network IO. Tier 2 keeps the pattern consistent.
+  {
+    method: 'post',
+    pathRe: /^\/devices\/:[a-zA-Z]+\/ping$/,
+    why: 'device ping — active network probe; admin-only diagnostic (W275n)',
+  },
+  {
+    method: 'post',
+    pathRe: /^\/test-connection$/,
+    why: 'ZKTeco test-connection — admin IP/port probe (W275n)',
+  },
+  {
+    method: 'post',
+    pathRe: /^\/sync-all$/,
+    why: 'ZKTeco fan-out sync (HTTP-only; cron path uses per-device syncAttendanceLogs) (W275n)',
+  },
+  {
+    method: 'post',
+    pathRe: /^\/health-check$/,
+    why: 'ZKTeco fan-out health-check — admin operational diagnostic (W275n)',
+  },
 ]);
 
 // ─── Router-stack walker ──────────────────────────────────────────

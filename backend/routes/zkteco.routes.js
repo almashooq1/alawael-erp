@@ -192,18 +192,23 @@ router.post(
  * اختبار الاتصال بعنوان IP
  * POST /api/zkteco/test-connection
  */
-router.post('/test-connection', roleMiddleware('admin', 'hr_manager'), async (req, res) => {
-  try {
-    const { ipAddress, port } = req.body;
-    if (!ipAddress) {
-      return res.status(400).json({ success: false, message: 'عنوان IP مطلوب' });
+router.post(
+  '/test-connection',
+  roleMiddleware('admin', 'hr_manager'),
+  requireMfaTier(2),
+  async (req, res) => {
+    try {
+      const { ipAddress, port } = req.body;
+      if (!ipAddress) {
+        return res.status(400).json({ success: false, message: 'عنوان IP مطلوب' });
+      }
+      const result = await ZKTecoService.testConnection(ipAddress, port || 4370);
+      res.json({ success: result.success, ...result });
+    } catch (error) {
+      safeError(res, error, 'zkteco');
     }
-    const result = await ZKTecoService.testConnection(ipAddress, port || 4370);
-    res.json({ success: result.success, ...result });
-  } catch (error) {
-    safeError(res, error, 'zkteco');
   }
-});
+);
 
 /**
  * جلب الوقت من الجهاز
@@ -259,19 +264,24 @@ router.post(
  * مزامنة جميع الأجهزة
  * POST /api/zkteco/sync-all
  */
-router.post('/sync-all', roleMiddleware('admin', 'hr_manager'), async (req, res) => {
-  try {
-    const results = await ZKTecoService.syncAllDevices(req.user.id);
-    const successCount = results.filter(r => r.status === 'success').length;
-    res.json({
-      success: true,
-      message: `تمت المزامنة: ${successCount}/${results.length} جهاز`,
-      data: results,
-    });
-  } catch (error) {
-    safeError(res, error, 'zkteco');
+router.post(
+  '/sync-all',
+  roleMiddleware('admin', 'hr_manager'),
+  requireMfaTier(2),
+  async (req, res) => {
+    try {
+      const results = await ZKTecoService.syncAllDevices(req.user.id);
+      const successCount = results.filter(r => r.status === 'success').length;
+      res.json({
+        success: true,
+        message: `تمت المزامنة: ${successCount}/${results.length} جهاز`,
+        data: results,
+      });
+    } catch (error) {
+      safeError(res, error, 'zkteco');
+    }
   }
-});
+);
 
 /**
  * جلب سجلات المزامنة لجهاز
@@ -422,14 +432,19 @@ router.get('/devices/:id/raw-logs', async (req, res) => {
  * فحص صحة الاتصالات النشطة
  * POST /api/zkteco/health-check
  */
-router.post('/health-check', roleMiddleware('admin', 'hr_manager'), async (req, res) => {
-  try {
-    const results = await ZKTecoService.healthCheck();
-    res.json({ success: true, data: results });
-  } catch (error) {
-    safeError(res, error, 'zkteco');
+router.post(
+  '/health-check',
+  roleMiddleware('admin', 'hr_manager'),
+  requireMfaTier(2),
+  async (req, res) => {
+    try {
+      const results = await ZKTecoService.healthCheck();
+      res.json({ success: true, data: results });
+    } catch (error) {
+      safeError(res, error, 'zkteco');
+    }
   }
-});
+);
 
 /**
  * حالة الاتصالات الحالية

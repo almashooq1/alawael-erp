@@ -122,6 +122,16 @@ const SENSITIVE_RULES = Object.freeze([
     pathRe: /^\/branch-configs\/:[a-zA-Z]+$/,
     why: 'hikvision per-branch config reset — missed by W273, closed by W275f',
   },
+  {
+    method: 'post',
+    pathRe: /^\/fraud\/scores\/:[a-zA-Z]+\/recompute$/,
+    why: 'fraud score recompute — missed by W273, closed by W275g (route-only)',
+  },
+  {
+    method: 'post',
+    pathRe: /^\/fraud\/scores\/decay-all$/,
+    why: 'fraud score bulk decay — missed by W273, closed by W275g (route-only; cron-shaped service)',
+  },
 ]);
 
 // ─── Router-stack walker ──────────────────────────────────────────

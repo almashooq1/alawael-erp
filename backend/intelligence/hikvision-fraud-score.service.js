@@ -24,6 +24,19 @@
 
 const reg = require('./hikvision.registry');
 
+// Wave 275g note: this service is deliberately NOT a service-layer
+// MFA adopter (same rationale as W275e hikvision-sync-worker).
+// `decayAllScores` is called from hikvision-scheduler.service.js:142
+// (FRAUD_DECAY_ALL cron job) with NO actor — adding `enforceMfa`
+// here would break the scheduled decay. `recomputeScore` is HTTP-only
+// but kept route-only for consistency within this service (mixed
+// service-layer/route-only per-method would create confusion).
+// Sensitive HTTP mutations are gated at the route layer only (see
+// requireMfaTier(2) on /fraud/scores/:employeeId/recompute +
+// /fraud/scores/decay-all in W275g route changes). Service-layer
+// adoption requires retrofitting the scheduler to pass a synthetic
+// system actor — separate W275g-followup commit when needed.
+
 function createHikvisionFraudScoreService({
   scoreModel = null,
   flagModel = null,

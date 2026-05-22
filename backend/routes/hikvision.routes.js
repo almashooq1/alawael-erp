@@ -1347,6 +1347,7 @@ function createHikvisionRouter({
     router.post(
       '/fraud/scores/:employeeId/recompute',
       requirePerm('fraud.score.recompute'),
+      requireMfaTier(2),
       async (req, res) => {
         try {
           const r = await fraudScoreService.recomputeScore(req.params.employeeId);
@@ -1360,6 +1361,7 @@ function createHikvisionRouter({
     router.post(
       '/fraud/scores/decay-all',
       requirePerm('fraud.score.recompute'),
+      requireMfaTier(2),
       async (_req, res) => {
         try {
           const r = await fraudScoreService.decayAllScores({});

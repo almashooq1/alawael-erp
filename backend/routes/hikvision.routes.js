@@ -649,6 +649,7 @@ function createHikvisionRouter({
     router.post(
       '/libraries/:id/sync-result',
       requirePerm('hikvision.library.subscribe'),
+      requireMfaTier(2),
       async (req, res) => {
         try {
           const r = await libraryService.recordSyncResult({

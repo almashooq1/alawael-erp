@@ -320,6 +320,15 @@ const SENSITIVE_RULES = Object.freeze([
     pathRe: /^\/libraries\/:[a-zA-Z]+$/,
     why: 'hikvision library UPDATE — admin attribute change (W275o)',
   },
+  // ─── Wave 275p — Library sync-result callback (operator HTTP path) ─
+  // Service-layer recordSyncResult is also called from sync-worker
+  // (internal cron path) so service-layer gate would break cron;
+  // HTTP route gated for operator/external-agent calls.
+  {
+    method: 'post',
+    pathRe: /^\/libraries\/:[a-zA-Z]+\/sync-result$/,
+    why: 'hikvision library sync-result HTTP callback — operator/external-agent (W275p)',
+  },
 ]);
 
 // ─── Router-stack walker ──────────────────────────────────────────

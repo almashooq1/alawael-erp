@@ -9,11 +9,17 @@ const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { attachMfaActor, requireMfaTier } = require('../middleware/requireMfaTier');
 const _logger = require('../utils/logger');
 
-// 🔒 All biometric attendance routes require authentication
+// 🔒 All biometric attendance routes require authentication + branch scope.
+// Wave 273: attachMfaActor populates req.actor.mfaLevel from the in-process
+// MFA state map exposed at app._mfaChallengeService. requireMfaTier(N) is
+// applied per-endpoint on sensitive operations (device delete, enroll,
+// overtime approval — see CLAUDE.md "Don't bypass loadMfaActor middleware").
 router.use(authenticate);
 router.use(requireBranchAccess);
+router.use(attachMfaActor);
 const ZktecoDevice = require('../models/ZktecoDevice');
 const AttendanceLog = require('../models/AttendanceLog');
 const _DailyAttendance = require('../models/DailyAttendance');
@@ -88,8 +94,8 @@ router.put('/devices/:id', async (req, res) => {
   }
 });
 
-// DELETE /api/biometric-attendance/devices/:id — حذف جهاز
-router.delete('/devices/:id', async (req, res) => {
+// DELETE /api/biometric-attendance/devices/:id — حذف جهاز (MFA tier 2)
+router.delete('/devices/:id', requireMfaTier(2), async (req, res) => {
   try {
     await ZktecoDevice.findByIdAndUpdate(req.params.id, { deletedAt: new Date(), isActive: false });
     res.json({ success: true, message: 'تم الحذف بنجاح' });
@@ -130,8 +136,8 @@ router.post('/devices/:id/sync', async (req, res) => {
   }
 });
 
-// POST /api/biometric-attendance/devices/:id/enroll — تسجيل موظف في الجهاز
-router.post('/devices/:id/enroll', async (req, res) => {
+// POST /api/biometric-attendance/devices/:id/enroll — تسجيل موظف في الجهاز (MFA tier 2)
+router.post('/devices/:id/enroll', requireMfaTier(2), async (req, res) => {
   try {
     const device = await ZktecoDevice.findById(req.params.id);
     if (!device) return res.status(404).json({ success: false, message: 'الجهاز غير موجود' });
@@ -497,8 +503,8 @@ router.post('/overtime', async (req, res) => {
   }
 });
 
-// PUT /api/biometric-attendance/overtime/:id/approve — اعتماد وقت إضافي
-router.put('/overtime/:id/approve', async (req, res) => {
+// PUT /api/biometric-attendance/overtime/:id/approve — اعتماد وقت إضافي (MFA tier 2)
+router.put('/overtime/:id/approve', requireMfaTier(2), async (req, res) => {
   try {
     const overtime = await OvertimeRequest.findByIdAndUpdate(
       req.params.id,

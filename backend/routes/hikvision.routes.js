@@ -38,6 +38,7 @@
 const express = require('express');
 const safeError = require('../utils/safeError');
 const reg = require('../intelligence/hikvision.registry');
+const { attachMfaActor, requireMfaTier } = require('../middleware/requireMfaTier');
 
 const REASON_TO_STATUS = Object.freeze({
   // Permission / not-found
@@ -262,6 +263,11 @@ function createHikvisionRouter({
 
   const router = express.Router();
 
+  // Wave 273 — populate req.actor.mfaLevel for the per-endpoint
+  // requireMfaTier(N) guards applied below on payroll/template/fraud/
+  // device-retire routes. Lazy via req.app._mfaChallengeService.
+  router.use(attachMfaActor);
+
   function requirePerm(code) {
     return (req, res, next) => {
       const actor = actorFrom(req);
@@ -328,14 +334,19 @@ function createHikvisionRouter({
     }
   });
 
-  router.post('/devices/:id/retire', requirePerm('hikvision.device.retire'), async (req, res) => {
-    try {
-      const result = await deviceService.retireDevice(req.params.id, req.body?.reason);
-      return respond(res, result);
-    } catch (err) {
-      return safeError(res, err, 'hikvision.device.retire');
+  router.post(
+    '/devices/:id/retire',
+    requirePerm('hikvision.device.retire'),
+    requireMfaTier(2),
+    async (req, res) => {
+      try {
+        const result = await deviceService.retireDevice(req.params.id, req.body?.reason);
+        return respond(res, result);
+      } catch (err) {
+        return safeError(res, err, 'hikvision.device.retire');
+      }
     }
-  });
+  );
 
   // ─── Channels ───────────────────────────────────────────────
 
@@ -646,6 +657,7 @@ function createHikvisionRouter({
     router.post(
       '/templates/:id/suspend',
       requirePerm('hikvision.template.suspend'),
+      requireMfaTier(2),
       async (req, res) => {
         try {
           const body = req.body || {};
@@ -1037,6 +1049,7 @@ function createHikvisionRouter({
     router.post(
       '/payroll/periods/:id/close',
       requirePerm('payroll.period.close'),
+      requireMfaTier(2),
       async (req, res) => {
         try {
           const r = await payrollPeriodService.closePeriod(req.params.id, {
@@ -1052,6 +1065,7 @@ function createHikvisionRouter({
     router.post(
       '/payroll/periods/:id/reopen',
       requirePerm('payroll.period.reopen'),
+      requireMfaTier(3, { maxAgeMin: 5 }),
       async (req, res) => {
         try {
           const r = await payrollPeriodService.reopenPeriod(req.params.id, {
@@ -1066,24 +1080,30 @@ function createHikvisionRouter({
     );
 
     // Payroll overrides
-    router.post('/payroll/overrides', requirePerm('payroll.override.create'), async (req, res) => {
-      try {
-        const r = await payrollPeriodService.draftOverride({
-          payrollPeriodId: req.body?.payrollPeriodId,
-          reconciliationCaseId: req.body?.reconciliationCaseId,
-          afterSnapshot: req.body?.afterSnapshot,
-          reason: req.body?.reason,
-          actor: actorFrom(req),
-        });
-        return respond(res, r);
-      } catch (err) {
-        return safeError(res, err, 'payroll.override.create');
+    router.post(
+      '/payroll/overrides',
+      requirePerm('payroll.override.create'),
+      requireMfaTier(2),
+      async (req, res) => {
+        try {
+          const r = await payrollPeriodService.draftOverride({
+            payrollPeriodId: req.body?.payrollPeriodId,
+            reconciliationCaseId: req.body?.reconciliationCaseId,
+            afterSnapshot: req.body?.afterSnapshot,
+            reason: req.body?.reason,
+            actor: actorFrom(req),
+          });
+          return respond(res, r);
+        } catch (err) {
+          return safeError(res, err, 'payroll.override.create');
+        }
       }
-    });
+    );
 
     router.post(
       '/payroll/overrides/:id/approvals',
       requirePerm('payroll.override.create'),
+      requireMfaTier(2),
       async (req, res) => {
         try {
           const r = await payrollPeriodService.addApprover(req.params.id, {
@@ -1103,6 +1123,7 @@ function createHikvisionRouter({
     router.post(
       '/payroll/overrides/:id/execute',
       requirePerm('payroll.override.create'),
+      requireMfaTier(3, { maxAgeMin: 5 }),
       async (req, res) => {
         try {
           const r = await payrollPeriodService.executeOverride(req.params.id, {
@@ -1228,17 +1249,22 @@ function createHikvisionRouter({
       }
     );
 
-    router.post('/fraud/flags/:id/dismiss', requirePerm('fraud.flag.dismiss'), async (req, res) => {
-      try {
-        const r = await fraudDetectionService.dismissFlag(req.params.id, {
-          actor: actorFrom(req),
-          note: req.body?.note,
-        });
-        return respond(res, r);
-      } catch (err) {
-        return safeError(res, err, 'fraud.flag.dismiss');
+    router.post(
+      '/fraud/flags/:id/dismiss',
+      requirePerm('fraud.flag.dismiss'),
+      requireMfaTier(2),
+      async (req, res) => {
+        try {
+          const r = await fraudDetectionService.dismissFlag(req.params.id, {
+            actor: actorFrom(req),
+            note: req.body?.note,
+          });
+          return respond(res, r);
+        } catch (err) {
+          return safeError(res, err, 'fraud.flag.dismiss');
+        }
       }
-    });
+    );
 
     router.post(
       '/fraud/flags/:id/escalate',

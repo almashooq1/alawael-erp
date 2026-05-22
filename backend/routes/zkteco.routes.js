@@ -12,10 +12,15 @@ const {
 } = require('../middleware/auth');
 
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { attachMfaActor, requireMfaTier } = require('../middleware/requireMfaTier');
 const safeError = require('../utils/safeError');
-// جميع المسارات تتطلب تسجيل الدخول
+// جميع المسارات تتطلب تسجيل الدخول.
+// Wave 273: attachMfaActor populates req.actor.mfaLevel; requireMfaTier(2)
+// is applied per-endpoint on DELETE /devices/:id and the device-user → employee
+// mapping endpoint (attribution-falsification vector — see CLAUDE.md).
 router.use(authMiddleware);
 router.use(requireBranchAccess);
+router.use(attachMfaActor);
 // ════════════════════════════════════════════════════════════════════════════════
 //  إدارة الأجهزة (Device Management) — CRUD
 // ════════════════════════════════════════════════════════════════════════════════
@@ -110,7 +115,7 @@ router.put('/devices/:id', roleMiddleware('admin', 'hr_manager'), async (req, re
  * حذف جهاز
  * DELETE /api/zkteco/devices/:id
  */
-router.delete('/devices/:id', roleMiddleware('admin'), async (req, res) => {
+router.delete('/devices/:id', roleMiddleware('admin'), requireMfaTier(2), async (req, res) => {
   try {
     await ZKTecoService.deleteDevice(req.params.id);
     res.json({
@@ -317,6 +322,7 @@ router.get('/devices/:id/users', async (req, res) => {
 router.post(
   '/devices/:id/users/:userId/map',
   roleMiddleware('admin', 'hr_manager'),
+  requireMfaTier(2),
   async (req, res) => {
     try {
       const result = await ZKTecoService.mapDeviceUser(

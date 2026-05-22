@@ -58,6 +58,15 @@ What becomes easier or more difficult to do because of this change?
 15. [Forbidden-Content Guard Runs on Filled Output](015-forbidden-content-runtime-guard.md) — PHI block at substitution boundary (Wave 122)
 16. [Atomic Stage-Commit Pattern for Cross-Agent Concurrency](016-atomic-commit-cross-agent-race.md) — git workflow lesson (Wave 137)
 
+### Clinical Domain Proposals (Wave 221+, dated 2026-05-21)
+
+17. [Measure-Alert Dismiss/Ack SoD Policy](017-measure-alert-dismiss-sod-policy.md) — 🟡 Proposed; needs clinical lead + compliance sign-off (Wave 221)
+18. [Rehabilitation Protocol Entity — Bridge Between Templates and Plans](018-rehabilitation-protocol-entity.md) — 🟡 Proposed; needs clinical director sign-off
+
+### Security Hardening (Wave 273+, dated 2026-05-22)
+
+19. [MFA Tier Enforcement — Three-Layer Architecture](019-mfa-tier-enforcement-three-layer.md) — route middleware + service-layer factory + drift guards (Waves 273-275z)
+
 ---
 
-**Last Updated:** May 19, 2026 (ADRs 10-16 added in P3 closure session)
+**Last Updated:** May 22, 2026 (ADRs 17-19 added)

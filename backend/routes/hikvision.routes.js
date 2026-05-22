@@ -1849,15 +1849,17 @@ function createHikvisionRouter({
         '/anomalies/scan',
         requirePerm('hikvision.anomalies.read'),
         requireMfaTier(2),
-        async (_req, res) => {
+        async (req, res) => {
           try {
             const startedAt = Date.now();
             const detection = await anomalyDetector.detect({ skipCache: true });
             const durationMs = Date.now() - startedAt;
+            // W275w — pass actor to recordSnapshot for service-layer guard.
             const persisted = await anomalyHistory.recordSnapshot({
               detectionResult: detection,
               source: 'manual',
               durationMs,
+              actor: actorFrom(req),
             });
             if (!persisted.ok) return respond(res, persisted);
             return res.json({ success: true, data: { detection, snapshot: persisted.snapshot } });

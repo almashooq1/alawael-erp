@@ -28,14 +28,26 @@
  */
 
 const reg = require('./hikvision.registry');
+const { checkMfaTier } = require('./mfa-tier-check.lib');
 
 function createHikvisionAnomalyHistoryService({
   snapshotModel = null,
   logger = console,
   now = () => new Date(),
+  // ─── Wave 275w — Service-layer MFA tier enforcement ────────────
+  // Gates recordSnapshot ONLY (the persistence write). detect() at
+  // anomaly-detector stays UNGATED because it's also called from
+  // GET /anomalies (read-only operator drill-in). Scheduler passes
+  // synthetic system actor via W275q.
+  enforceMfa = false,
 } = {}) {
   if (!snapshotModel) {
     throw new Error('hikvision-anomaly-history: snapshotModel is required');
+  }
+
+  // Wave 275w — shared helper bound to factory.
+  function _checkMfaTier(actor, requiredTier, maxAgeMin) {
+    return checkMfaTier(actor, requiredTier, maxAgeMin, { enforceMfa, now });
   }
 
   // ─── Public: writer ──────────────────────────────────────────
@@ -45,7 +57,11 @@ function createHikvisionAnomalyHistoryService({
     source = 'scheduler',
     meta = {},
     durationMs,
+    actor,
   } = {}) {
+    // W275w — MFA tier 2 (15 min). Scheduler passes system actor.
+    const mfa = _checkMfaTier(actor, 2, 15);
+    if (!mfa.ok) return mfa;
     if (!detectionResult || detectionResult.ok === false) {
       // The detector itself failed — don't persist garbage; surface
       // the upstream reason so the caller logs/handles.

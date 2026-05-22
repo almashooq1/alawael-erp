@@ -2938,6 +2938,10 @@ try {
           anomalyHistorySvc = createHikvisionAnomalyHistoryService({
             snapshotModel: HikvisionAnomalySnapshot,
             logger,
+            // W275w — service-layer MFA on recordSnapshot. Scheduler
+            // ANOMALY_SCAN passes system actor; HTTP POST /anomalies/scan
+            // passes actorFrom(req).
+            enforceMfa: true,
           });
         } catch (ahErr) {
           logger.warn('[Hikvision] Wave 114 anomaly-history failed to wire:', ahErr.message);

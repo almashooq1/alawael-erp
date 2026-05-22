@@ -212,10 +212,14 @@ function createHikvisionScheduler({
         // skipCache so we ALWAYS see fresh signal at cron time.
         const detection = await anomalyDetector.detect({ skipCache: true });
         const durationMs = Date.now() - startedAt;
+        // W275w — pass system actor to recordSnapshot (the persist
+        // operation). detect() itself stays UNGATED (also called from
+        // read-only GET /anomalies).
         const persisted = await anomalyHistory.recordSnapshot({
           detectionResult: detection,
           source: 'scheduler',
           durationMs,
+          actor: _systemActor(),
         });
         // Surface the persistence outcome on the job run row so
         // operators can see "detect ok but save failed" cases.

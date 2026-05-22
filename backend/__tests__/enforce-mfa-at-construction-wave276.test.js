@@ -58,6 +58,27 @@ const parser = require('@babel/parser');
 const traverse = require('@babel/traverse').default;
 
 const APP_JS = path.join(__dirname, '..', 'app.js');
+const STARTUP_DIR = path.join(__dirname, '..', 'startup');
+
+// Wave 277 — Hikvision extracted from app.js to startup/hikvisionBootstrap.js
+// (and future passes will extract more sections). The drift guard now walks
+// app.js AND every .js file in startup/ so an extracted construction site
+// is still checked. If app.js is empty of MFA factories after all extracts
+// land, that's fine — the guard's contract is "every factory in the
+// registry MUST be constructed *somewhere* in {app.js, startup/*.js} with
+// enforceMfa: true", not "in app.js specifically".
+function _scanTargetFiles() {
+  const files = [APP_JS];
+  try {
+    for (const entry of fs.readdirSync(STARTUP_DIR, { withFileTypes: true })) {
+      if (!entry.isFile() || !entry.name.endsWith('.js')) continue;
+      files.push(path.join(STARTUP_DIR, entry.name));
+    }
+  } catch {
+    /* startup/ optional — pre-W277 app.js was monolithic */
+  }
+  return files;
+}
 
 /**
  * Every factory whose intelligence/*.service.js export accepts an
@@ -87,8 +108,8 @@ const MFA_AWARE_FACTORIES = Object.freeze([
   'createHikvisionAnomalyHistoryService',
 ]);
 
-function _parseAppJs() {
-  const source = fs.readFileSync(APP_JS, 'utf8');
+function _parseFile(filePath) {
+  const source = fs.readFileSync(filePath, 'utf8');
   return parser.parse(source, {
     sourceType: 'unambiguous',
     allowReturnOutsideFunction: true,
@@ -184,33 +205,52 @@ function _collectConstructionSites(ast, aliases) {
   return sites;
 }
 
-describe('Wave 276 — service-layer MFA enforceMfa drift guard on app.js construction sites', () => {
-  let ast;
-  let aliases;
-  let sites;
+describe('Wave 276 — service-layer MFA enforceMfa drift guard on construction sites', () => {
+  // Aggregate across app.js + every startup/*.js. Aliases collected per
+  // file (a destructuring rename only applies in the file that did it),
+  // then sites are tagged with their source file so violation reports
+  // can name the offending location.
+  const targetFiles = _scanTargetFiles();
+  let aggregatedAliases;
+  let allSites;
+  let perFileAst;
 
   beforeAll(() => {
-    ast = _parseAppJs();
-    aliases = _collectAliases(ast);
-    sites = _collectConstructionSites(ast, aliases);
+    perFileAst = new Map();
+    aggregatedAliases = new Map();
+    allSites = [];
+    for (const file of targetFiles) {
+      const ast = _parseFile(file);
+      perFileAst.set(file, ast);
+      const aliases = _collectAliases(ast);
+      // Merge into aggregated map (factory-name → canonical) so the
+      // alias-self-test below still passes if the rename happens in
+      // startup/*.js instead of app.js.
+      for (const [k, v] of aliases) {
+        aggregatedAliases.set(k, v);
+      }
+      const sites = _collectConstructionSites(ast, aliases).map(s => ({ ...s, file }));
+      allSites.push(...sites);
+    }
   });
 
-  test('app.js parses cleanly and at least one MFA-aware construction site is found', () => {
-    expect(ast).toBeTruthy();
-    expect(aliases.size).toBeGreaterThanOrEqual(MFA_AWARE_FACTORIES.length);
-    expect(sites.length).toBeGreaterThan(0);
+  test('at least one MFA-aware construction site is found across {app.js, startup/*.js}', () => {
+    expect(targetFiles.length).toBeGreaterThan(0);
+    expect(aggregatedAliases.size).toBeGreaterThanOrEqual(MFA_AWARE_FACTORIES.length);
+    expect(allSites.length).toBeGreaterThan(0);
   });
 
-  test('every MFA-aware factory in the registry has at least one call site in app.js', () => {
-    const seen = new Set(sites.map(s => s.canonicalName));
+  test('every MFA-aware factory in the registry has at least one call site', () => {
+    const seen = new Set(allSites.map(s => s.canonicalName));
     const missing = MFA_AWARE_FACTORIES.filter(name => !seen.has(name));
     if (missing.length) {
       throw new Error(
-        `MFA-aware factories declared in MFA_AWARE_FACTORIES but never constructed in app.js:\n  ` +
+        `MFA-aware factories declared in MFA_AWARE_FACTORIES but never constructed in ` +
+          `{app.js, startup/*.js}:\n  ` +
           missing.join('\n  ') +
           `\n\nEither:\n` +
           `  (a) remove the entry from MFA_AWARE_FACTORIES (the service was retired), OR\n` +
-          `  (b) add the construction site to app.js with \`enforceMfa: true\`.\n\n` +
+          `  (b) add the construction site to app.js or a startup/*.js bootstrap with \`enforceMfa: true\`.\n\n` +
           `Silent drift here means the service ships with enforceMfa=false (factory default for ` +
           `backwards compat) and the service-layer defense-in-depth is OFF.`
       );
@@ -219,13 +259,16 @@ describe('Wave 276 — service-layer MFA enforceMfa drift guard on app.js constr
   });
 
   test('every construction site of an MFA-aware factory passes enforceMfa: true', () => {
-    const violations = sites.filter(s => !s.hasEnforceMfa);
+    const violations = allSites.filter(s => !s.hasEnforceMfa);
     if (violations.length) {
       const lines = violations
-        .map(v => `  • ${v.canonicalName} (called as ${v.localName}) at app.js:${v.line}`)
+        .map(v => {
+          const rel = path.relative(path.join(__dirname, '..'), v.file);
+          return `  • ${v.canonicalName} (called as ${v.localName}) at ${rel.replace(/\\/g, '/')}:${v.line}`;
+        })
         .join('\n');
       throw new Error(
-        `Construction sites missing \`enforceMfa: true\` in app.js:\n${lines}\n\n` +
+        `Construction sites missing \`enforceMfa: true\`:\n${lines}\n\n` +
           `Add \`enforceMfa: true\` to the options object literal at each site.\n` +
           `Defense-in-depth rationale: the route-layer requireMfaTier middleware (W273) ` +
           `only fires on HTTP requests. When a non-HTTP caller (cron, worker, CLI) invokes ` +
@@ -240,15 +283,17 @@ describe('Wave 276 — service-layer MFA enforceMfa drift guard on app.js constr
   // Sanity: alias resolution actually picks up the W275u
   // `createHikvisionEventParserService: createParserWithLock` rename.
   // If the alias map silently drops this entry, the re-construction
-  // site at line ~2567 would be invisible to the violation scanner.
+  // site would be invisible to the violation scanner.
   test('alias map captures the createParserWithLock rename (W275u re-construction)', () => {
-    const aliasEntry = aliases.get('createParserWithLock');
+    const aliasEntry = aggregatedAliases.get('createParserWithLock');
     expect(aliasEntry).toBe('createHikvisionEventParserService');
 
     // And both call sites for the parser factory are visible:
     // the initial Phase 3 site (Identifier) AND the Phase 4 re-construction
     // (aliased Identifier).
-    const parserSites = sites.filter(s => s.canonicalName === 'createHikvisionEventParserService');
+    const parserSites = allSites.filter(
+      s => s.canonicalName === 'createHikvisionEventParserService'
+    );
     expect(parserSites.length).toBeGreaterThanOrEqual(2);
     // Both must pass enforceMfa.
     for (const ps of parserSites) {

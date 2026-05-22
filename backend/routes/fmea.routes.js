@@ -14,6 +14,12 @@ const { body, param, query, validationResult } = require('express-validator');
 
 const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+// W277c — MFA tier-2 step-up on FMEA lifecycle terminals.
+// Mirrors W273 / W277b pattern. FMEA verify/team-sign/archive are
+// the records auditors quote when proving the risk was rated and
+// signed off by a qualified team — a compromised quality_manager
+// session must not be able to verify a worksheet silently.
+const { attachMfaActor, requireMfaTier } = require('../middleware/requireMfaTier');
 const safeError = require('../utils/safeError');
 const { getDefault: getService } = require('../services/quality/fmea.service');
 const registry = require('../config/fmea.registry');
@@ -308,10 +314,17 @@ router.post(
 
 // ── transitions ────────────────────────────────────────────────────
 
+// W277c — submit/sign/verify/archive/cancel are the 5 lifecycle
+// terminals. Each gets attachMfaActor (populates req.actor.mfaLevel)
+// + requireMfaTier(2) (step-up gate). Worksheet rows + actions +
+// re-rate stay at the existing RBAC gate — frequent during drafting.
+
 router.post(
   '/:id/submit',
   authenticate,
+  attachMfaActor,
   authorize(['admin', 'ceo', 'quality_manager', 'patient_safety_officer']),
+  requireMfaTier(2),
   [param('id').isMongoId()],
   handleValidation,
   wrap(async (req, res) => {
@@ -328,6 +341,8 @@ router.post(
 router.post(
   '/:id/sign',
   authenticate,
+  attachMfaActor,
+  requireMfaTier(2),
   [param('id').isMongoId()],
   handleValidation,
   wrap(async (req, res) => {
@@ -344,7 +359,9 @@ router.post(
 router.post(
   '/:id/verify',
   authenticate,
+  attachMfaActor,
   authorize(['admin', 'ceo', 'quality_manager', 'patient_safety_officer']),
+  requireMfaTier(2),
   [param('id').isMongoId()],
   handleValidation,
   wrap(async (req, res) => {
@@ -361,7 +378,9 @@ router.post(
 router.post(
   '/:id/archive',
   authenticate,
+  attachMfaActor,
   authorize(['admin', 'ceo', 'quality_manager']),
+  requireMfaTier(2),
   [param('id').isMongoId()],
   handleValidation,
   wrap(async (req, res) => {
@@ -378,7 +397,9 @@ router.post(
 router.post(
   '/:id/cancel',
   authenticate,
+  attachMfaActor,
   authorize(['admin', 'ceo', 'quality_manager']),
+  requireMfaTier(2),
   [param('id').isMongoId(), body('reason').isString().isLength({ min: 3 })],
   handleValidation,
   wrap(async (req, res) => {

@@ -102,6 +102,16 @@ const SENSITIVE_RULES = Object.freeze([
     pathRe: /^\/reconciliation\/cases\/:[a-zA-Z]+\/resolve$/,
     why: 'attendance reconciliation case resolve — missed by W273, closed by W275d',
   },
+  {
+    method: 'post',
+    pathRe: /^\/sync\/all$/,
+    why: 'hikvision org-wide sync — missed by W273, closed by W275e (route-only; cron-shaped service)',
+  },
+  {
+    method: 'post',
+    pathRe: /^\/sync\/library\/.+$/,
+    why: 'hikvision library/device sync — missed by W273, closed by W275e (route-only)',
+  },
 ]);
 
 // ─── Router-stack walker ──────────────────────────────────────────

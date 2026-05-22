@@ -1379,6 +1379,7 @@ function createHikvisionRouter({
     router.post(
       '/sync/library/:libraryId/device/:deviceId',
       requirePerm('hikvision.sync.run'),
+      requireMfaTier(2),
       async (req, res) => {
         try {
           const r = await syncWorker.syncLibraryToDevice(
@@ -1393,24 +1394,34 @@ function createHikvisionRouter({
       }
     );
 
-    router.post('/sync/library/:libraryId', requirePerm('hikvision.sync.run'), async (req, res) => {
-      try {
-        const r = await syncWorker.syncLibrary(req.params.libraryId, req.body || {});
-        if (!r.ok) return respond(res, r);
-        return res.json({ success: true, data: r });
-      } catch (err) {
-        return safeError(res, err, 'hikvision.sync.library');
+    router.post(
+      '/sync/library/:libraryId',
+      requirePerm('hikvision.sync.run'),
+      requireMfaTier(2),
+      async (req, res) => {
+        try {
+          const r = await syncWorker.syncLibrary(req.params.libraryId, req.body || {});
+          if (!r.ok) return respond(res, r);
+          return res.json({ success: true, data: r });
+        } catch (err) {
+          return safeError(res, err, 'hikvision.sync.library');
+        }
       }
-    });
+    );
 
-    router.post('/sync/all', requirePerm('hikvision.sync.run.all'), async (req, res) => {
-      try {
-        const r = await syncWorker.syncAll(req.body || {});
-        return res.json({ success: true, data: r });
-      } catch (err) {
-        return safeError(res, err, 'hikvision.sync.all');
+    router.post(
+      '/sync/all',
+      requirePerm('hikvision.sync.run.all'),
+      requireMfaTier(2),
+      async (req, res) => {
+        try {
+          const r = await syncWorker.syncAll(req.body || {});
+          return res.json({ success: true, data: r });
+        } catch (err) {
+          return safeError(res, err, 'hikvision.sync.all');
+        }
       }
-    });
+    );
 
     router.get(
       '/sync/drift/:libraryId',

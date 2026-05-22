@@ -39,6 +39,17 @@
 
 const reg = require('./hikvision.registry');
 
+// Wave 275e note: this service is deliberately NOT a service-layer
+// MFA adopter. `syncAll` + `detectDriftAll` are called from
+// hikvision-scheduler.service.js cron handlers (lines 92, 102) with
+// NO actor — adding `enforceMfa` here would break the scheduled
+// sync. Sensitive mutations from HTTP are gated at the route layer
+// only (see /sync/all + /sync/library/* in W275e route changes).
+// If service-layer enforcement is later required, the scheduler
+// must first be retrofitted to pass a synthetic `{ userId: 'system-
+// scheduler', mfaLevel: <high>, mfaAssertedAt: new Date() }` actor;
+// that change belongs in a separate W275e-followup commit.
+
 function createHikvisionSyncWorker({
   libraryService = null,
   enrollmentService = null,

@@ -45,6 +45,11 @@ function createHikvisionFraudDetectionService({
   scoreService = null, // optional — applies score impact on emit
   logger = console,
   now = () => new Date(),
+  // ─── Wave 275b — Service-layer MFA tier enforcement ────────────
+  // Default OFF for backwards compat with Wave 100 tests that
+  // construct the service with plain { userId } actors. app.js opts
+  // IN with `enforceMfa: true`. Same opt-in shape as [[wave275-service-layer-mfa-pilot]].
+  enforceMfa = false,
 } = {}) {
   if (!flagModel) {
     throw new Error('hikvision-fraud-detection.service: flagModel is required');
@@ -53,6 +58,68 @@ function createHikvisionFraudDetectionService({
     throw new Error('hikvision-fraud-detection.service: processedEventModel is required');
   }
   void _templateModel;
+
+  /**
+   * Wave 275b — service-layer MFA tier guard. Reads actor.mfaLevel and
+   * actor.mfaAssertedAt populated by the W273 attachMfaActor route
+   * middleware (and propagated through routes/hikvision.routes.js
+   * `actorFrom`). When enforceMfa=false, this is a no-op so test
+   * suites that don't need MFA can construct the service cleanly.
+   * Duplicated inline (not extracted) per CLAUDE.md "three similar
+   * lines is better than a premature abstraction"; extract to a
+   * shared lib once a 3rd service adopts this pattern.
+   *
+   * @param {object} actor
+   * @param {number} requiredTier  — 1, 2, or 3
+   * @param {number} maxAgeMin     — assertion freshness window in minutes
+   * @returns {{ ok: true } | { ok: false, reason: string, requiredTier: number, actorTier: number, maxAgeMin?: number, ageMin?: number|null }}
+   */
+  function _checkMfaTier(actor, requiredTier, maxAgeMin) {
+    if (!enforceMfa) return { ok: true };
+    const actorTier = typeof (actor && actor.mfaLevel) === 'number' ? actor.mfaLevel : 0;
+    if (actorTier < requiredTier) {
+      return {
+        ok: false,
+        reason: reg.REASON.MFA_TIER_REQUIRED,
+        requiredTier,
+        actorTier,
+      };
+    }
+    const assertedAt = actor && actor.mfaAssertedAt;
+    if (!assertedAt) {
+      return {
+        ok: false,
+        reason: reg.REASON.MFA_FRESHNESS_REQUIRED,
+        requiredTier,
+        actorTier,
+        maxAgeMin,
+        ageMin: null,
+      };
+    }
+    const t = assertedAt instanceof Date ? assertedAt.getTime() : Date.parse(assertedAt);
+    if (!Number.isFinite(t)) {
+      return {
+        ok: false,
+        reason: reg.REASON.MFA_FRESHNESS_REQUIRED,
+        requiredTier,
+        actorTier,
+        maxAgeMin,
+        ageMin: null,
+      };
+    }
+    const ageMin = Math.floor((now().getTime() - t) / 60000);
+    if (ageMin > maxAgeMin) {
+      return {
+        ok: false,
+        reason: reg.REASON.MFA_FRESHNESS_REQUIRED,
+        requiredTier,
+        actorTier,
+        maxAgeMin,
+        ageMin,
+      };
+    }
+    return { ok: true };
+  }
 
   // ─── Single-event detectors ──────────────────────────────────
 
@@ -405,6 +472,12 @@ function createHikvisionFraudDetectionService({
   }
 
   async function dismissFlag(id, { actor, note } = {}) {
+    // Wave 275b — service-layer MFA tier 2 (15 min) check. Mirrors
+    // W273 route-layer tier on /fraud/flags/:id/dismiss. Runs BEFORE
+    // note validation because MFA is the heaviest gate; failing fast
+    // saves the user typing a dismissal reason they can't submit.
+    const mfa = _checkMfaTier(actor, 2, 15);
+    if (!mfa.ok) return mfa;
     if (!note || !String(note).trim()) {
       return { ok: false, reason: reg.REASON.FRAUD_FLAG_RESOLUTION_REASON_REQUIRED };
     }
@@ -420,6 +493,12 @@ function createHikvisionFraudDetectionService({
   }
 
   async function escalateFlag(id, { actor, note, escalatedToRole } = {}) {
+    // Wave 275b — service-layer MFA tier 2 (15 min) check. Mirrors
+    // the NEW route-layer tier on /fraud/flags/:id/escalate added in
+    // this same commit (escalate was missed by the original W273
+    // route-layer pass — closed here in both layers atomically).
+    const mfa = _checkMfaTier(actor, 2, 15);
+    if (!mfa.ok) return mfa;
     if (!escalatedToRole || !String(escalatedToRole).trim()) {
       return {
         ok: false,

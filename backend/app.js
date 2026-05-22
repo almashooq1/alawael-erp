@@ -2603,6 +2603,10 @@ try {
             branchModel: branchModelForFraud,
             scoreService: fraudScoreSvc,
             logger,
+            // Wave 275b — service-layer MFA enforcement on dismissFlag
+            // (tier 2) + escalateFlag (tier 2). Mirrors the W273+W275b
+            // route-layer requireMfaTier on /fraud/flags/:id/{dismiss,escalate}.
+            enforceMfa: true,
           });
         } catch (p5err) {
           logger.warn(

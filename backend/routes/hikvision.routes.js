@@ -1288,6 +1288,7 @@ function createHikvisionRouter({
     router.post(
       '/fraud/flags/:id/escalate',
       requirePerm('fraud.flag.escalate'),
+      requireMfaTier(2),
       async (req, res) => {
         try {
           const r = await fraudDetectionService.escalateFlag(req.params.id, {

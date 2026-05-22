@@ -84,6 +84,11 @@ const SENSITIVE_RULES = Object.freeze([
   },
   {
     method: 'post',
+    pathRe: /^\/fraud\/flags\/:[a-zA-Z]+\/escalate$/,
+    why: 'fraud flag escalate — workflow state mutation, missed by W273, closed by W275b',
+  },
+  {
+    method: 'post',
     pathRe: /^\/templates\/:[a-zA-Z]+\/suspend$/,
     why: 'biometric template suspend (W273)',
   },

@@ -73,4 +73,8 @@ router.post('/:id/attachments', (req, res) => controller.addAttachment(req, res)
 router.get('/:id/report', (req, res) => controller.generateReport(req, res));
 router.get('/:id/related', (req, res) => controller.getRelatedIncidents(req, res));
 
+// W277i Pass 2 — audit chain forensic view + integrity verification.
+// Read-only; no MFA gate (reads are always allowed at tier 1 by design).
+router.get('/:id/audit-chain', (req, res) => controller.getAuditChain(req, res));
+
 module.exports = router;

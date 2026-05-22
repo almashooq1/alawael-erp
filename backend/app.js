@@ -2248,6 +2248,25 @@ try {
 // guard which now walks app.js AND startup/*.js for MFA construction sites.
 require('./startup/hikvisionBootstrap').wireHikvision(app, { logger });
 
+// ─── Incident Audit Chain — W277i Pass 2 ─────────────────────────────────────
+// Tamper-evident hash-chained ledger over incident-lifecycle mutations.
+// Late-bound on app so controllers/incidentController.js can read it via
+// req.app._incidentAuditChainService. Graceful: if the model isn't loaded
+// the chain stays unwired and controller writes degrade to a logger warn.
+try {
+  const IncidentAuditChain = require('./models/IncidentAuditChain');
+  const {
+    createIncidentAuditChainService,
+  } = require('./intelligence/incident-audit-chain.service');
+  app._incidentAuditChainService = createIncidentAuditChainService({
+    chainModel: IncidentAuditChain,
+    logger,
+  });
+  logger.info('[incident-audit-chain] ✓ wired (W277i)');
+} catch (iacErr) {
+  logger.warn('[incident-audit-chain] not wired:', iacErr.message);
+}
+
 // ─── Parent Chatbot (Wave 120 / P3.6 Phase 1) ────────────────────────────────
 // Rule-based intent classifier + canned response templates +
 // conversation persistence. Closes the last P3 deliverable.

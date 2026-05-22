@@ -7,6 +7,42 @@ const { validationResult } = require('express-validator');
 const logger = require('../utils/logger');
 const safeError = require('../utils/safeError');
 
+// W277i Pass 2 — incident audit-chain wiring.
+//
+// Tamper-evident ledger over every lifecycle mutation. Late-bound via
+// `req.app._incidentAuditChainService` so:
+//   (a) the chain service can be wired AFTER controller-module-load
+//       (app.js startup order), and
+//   (b) if the chain isn't wired (test env, mis-config), the
+//       controller still works — chain writes degrade to a logger
+//       warning instead of breaking the API.
+//
+// Fire-and-forget: the chain write is awaited but its failure does
+// NOT propagate up. This keeps the API response time bounded by the
+// primary DB write only.
+async function _appendAudit(req, action, payload, subjectId, branchId) {
+  try {
+    const svc = req && req.app && req.app._incidentAuditChainService;
+    if (!svc) return;
+    const actorId = (req.user && (req.user._id || req.user.id)) || null;
+    const actorRole = (req.user && req.user.role) || null;
+    const result = await svc.append({
+      action,
+      actorId,
+      actorRole,
+      subjectId,
+      branchId,
+      payload: payload || {},
+    });
+    if (result && result.ok === false) {
+      logger.warn(`[incident-audit-chain] append ${action} returned ${result.reason}`);
+    }
+  } catch (err) {
+    // Never propagate — audit failure should not 500 the request.
+    logger.warn(`[incident-audit-chain] append ${action} threw: ${err && err.message}`);
+  }
+}
+
 class IncidentController {
   // 1. إنشاء حادثة
   async createIncident(req, res) {
@@ -17,6 +53,18 @@ class IncidentController {
       }
 
       const incident = await incidentService.createIncident(req.body, req.user._id);
+
+      await _appendAudit(
+        req,
+        'incident-created',
+        {
+          incidentNumber: incident && incident.incidentNumber,
+          type: incident && incident.type,
+          severity: incident && incident.severity,
+        },
+        incident && incident._id,
+        incident && incident.branchId
+      );
 
       res.status(201).json({
         success: true,
@@ -92,6 +140,14 @@ class IncidentController {
 
       const incident = await incidentService.updateIncident(req.params.id, req.body, req.user._id);
 
+      await _appendAudit(
+        req,
+        'incident-updated',
+        { changedFields: Object.keys(req.body || {}) },
+        incident && incident._id,
+        incident && incident.branchId
+      );
+
       res.status(200).json({
         success: true,
         message: 'تم تحديث الحادثة بنجاح',
@@ -106,6 +162,8 @@ class IncidentController {
   async deleteIncident(req, res) {
     try {
       const result = await incidentService.deleteIncident(req.params.id, req.user._id);
+
+      await _appendAudit(req, 'incident-deleted', { result }, req.params.id, null);
 
       res.status(200).json({
         success: true,
@@ -130,6 +188,14 @@ class IncidentController {
         status,
         req.user._id,
         notes
+      );
+
+      await _appendAudit(
+        req,
+        'incident-status-changed',
+        { to: status, notes: notes || null },
+        incident && incident._id,
+        incident && incident.branchId
       );
 
       res.status(200).json({
@@ -158,6 +224,14 @@ class IncidentController {
         req.user._id
       );
 
+      await _appendAudit(
+        req,
+        'incident-assigned',
+        { assignedToIds, teamLeadId },
+        incident && incident._id,
+        incident && incident.branchId
+      );
+
       res.status(200).json({
         success: true,
         message: 'تم إسناد الحادثة بنجاح',
@@ -177,6 +251,14 @@ class IncidentController {
       }
 
       const incident = await incidentService.addResponder(req.params.id, req.body, req.user._id);
+
+      await _appendAudit(
+        req,
+        'incident-responder-added',
+        { responder: req.body },
+        incident && incident._id,
+        incident && incident.branchId
+      );
 
       res.status(200).json({
         success: true,
@@ -200,6 +282,14 @@ class IncidentController {
         req.params.id,
         req.body,
         req.user._id
+      );
+
+      await _appendAudit(
+        req,
+        'incident-escalated',
+        { escalation: req.body },
+        incident && incident._id,
+        incident && incident.branchId
       );
 
       res.status(200).json({
@@ -277,6 +367,14 @@ class IncidentController {
 
       const incident = await incidentService.resolveIncident(req.params.id, req.body, req.user._id);
 
+      await _appendAudit(
+        req,
+        'incident-resolved',
+        { resolution: req.body },
+        incident && incident._id,
+        incident && incident.branchId
+      );
+
       res.status(200).json({
         success: true,
         message: 'تم حل الحادثة بنجاح',
@@ -296,6 +394,14 @@ class IncidentController {
       }
 
       const incident = await incidentService.closeIncident(req.params.id, req.body, req.user._id);
+
+      await _appendAudit(
+        req,
+        'incident-closed',
+        { closure: req.body },
+        incident && incident._id,
+        incident && incident.branchId
+      );
 
       res.status(200).json({
         success: true,
@@ -395,6 +501,14 @@ class IncidentController {
     try {
       const incident = await incidentService.archiveIncident(req.params.id, req.user._id);
 
+      await _appendAudit(
+        req,
+        'incident-archived',
+        {},
+        incident && incident._id,
+        incident && incident.branchId
+      );
+
       res.status(200).json({
         success: true,
         message: 'تم أرشفة الحادثة بنجاح',
@@ -455,6 +569,37 @@ class IncidentController {
       });
     } catch (error) {
       safeError(res, error, 'in getCriticalIncidents');
+    }
+  }
+
+  // 21. الحصول على سلسلة التدقيق (audit chain) للحادثة + verify
+  // W277i Pass 2 — read-only forensic view + integrity verification.
+  // Returns the per-incident chain entries (filtered by subjectId)
+  // and the verifier result over the WHOLE chain (because tamper
+  // anywhere upstream invalidates this incident's trail too).
+  async getAuditChain(req, res) {
+    try {
+      const svc = req.app && req.app._incidentAuditChainService;
+      if (!svc) {
+        return res.status(503).json({
+          success: false,
+          message: 'سلسلة التدقيق غير مُهيّأة على هذا الخادم',
+          reason: 'AUDIT_CHAIN_NOT_WIRED',
+        });
+      }
+      const [entriesResult, verifyResult] = await Promise.all([
+        svc.listEntries({ subjectId: req.params.id, limit: 500 }),
+        svc.verify({}),
+      ]);
+      return res.status(200).json({
+        success: true,
+        data: {
+          entries: (entriesResult && entriesResult.entries) || [],
+          integrity: verifyResult,
+        },
+      });
+    } catch (error) {
+      safeError(res, error, 'in getAuditChain');
     }
   }
 }

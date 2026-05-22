@@ -81,7 +81,14 @@ const incidentReportSchema = new mongoose.Schema(
     authority_report_date: { type: Date },
     attachments: [{ type: String }],
 
-    branch_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Branch' },
+    // W277h — branch_id required for cross-branch isolation (W269 policy).
+    // Adverse-event records MUST be attributable to a specific branch so
+    // queries naturally scope by req.branchScope.branchId. Was optional
+    // pre-W277h; making it required is forward-only — any legacy row
+    // missing branch_id needs a one-time backfill before deploy. Mirrors
+    // the Phase 29 `Incident.model.js` (quality/) which already requires
+    // branchId since Wave 96.
+    branch_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Branch', required: true, index: true },
     deleted_at: { type: Date, default: null },
   },
   { timestamps: true }

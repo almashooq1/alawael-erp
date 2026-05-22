@@ -368,6 +368,94 @@ const SENSITIVE_RULES = Object.freeze([
     pathRe: /^\/fraud\/sweep-expired$/,
     why: 'fraud-detection sweep expired flags — operator/cron (W275v)',
   },
+  // ─── Wave 277b-g — Quality-domain MFA closure ─────────────────
+  // The W277 sub-waves gated 25 lifecycle terminals across 7 quality
+  // route files. These broad patterns catch ANY new endpoint added to
+  // those files using the same terminal-keyword conventions
+  // (escalate/resolve/close/archive/verify/sign/cancel/transition/
+  // approvals/submit) without the MFA gate. Paths anchored so nested
+  // routes (e.g., /:id/rows/:rowId in FMEA) don't match — those are
+  // intentionally ungated drafting ops.
+  {
+    method: 'post',
+    pathRe: /^\/:[a-zA-Z]+\/resolve$/,
+    why: 'lifecycle terminal: resolve (W277b incidents, W277e CAPA)',
+  },
+  {
+    method: 'post',
+    pathRe: /^\/:[a-zA-Z]+\/close$/,
+    why: 'lifecycle terminal: close (W277b incidents, W277g mgmt-review)',
+  },
+  {
+    method: 'post',
+    pathRe: /^\/:[a-zA-Z]+\/archive$/,
+    why: 'lifecycle terminal: archive (W277b incidents, W277c FMEA)',
+  },
+  {
+    method: 'post',
+    pathRe: /^\/:[a-zA-Z]+\/submit$/,
+    why: 'lifecycle terminal: submit (W277c FMEA)',
+  },
+  {
+    method: 'post',
+    pathRe: /^\/:[a-zA-Z]+\/sign$/,
+    why: 'lifecycle terminal: sign (W277c FMEA team-sign)',
+  },
+  {
+    method: 'post',
+    pathRe: /^\/:[a-zA-Z]+\/transition$/,
+    why: 'lifecycle terminal: transition (W277d RCA — state advance)',
+  },
+  {
+    method: 'post',
+    pathRe: /^\/:[a-zA-Z]+\/approvals$/,
+    why: 'lifecycle terminal: multi-role approvals (W277g mgmt-review §9.3)',
+  },
+  {
+    method: 'post',
+    pathRe: /^\/sweep-overdue$/,
+    why: 'bulk sweep across asset inventory (W277g calibration)',
+  },
+  {
+    method: 'post',
+    pathRe: /^\/:[a-zA-Z]+\/versions\/:[a-zA-Z]+\/sign$/,
+    why: '21 CFR Part 11 e-signature (W277f controlled-document)',
+  },
+  {
+    method: 'post',
+    pathRe: /^\/:[a-zA-Z]+\/versions\/:[a-zA-Z]+\/revoke-signature\/:[a-zA-Z]+$/,
+    why: '21 CFR Part 11 signature revoke (W277f controlled-document)',
+  },
+  {
+    method: 'post',
+    pathRe: /^\/:[a-zA-Z]+\/versions\/:[a-zA-Z]+\/transition$/,
+    why: '21 CFR Part 11 publish/effective/retire (W277f controlled-document)',
+  },
+  {
+    method: 'post',
+    pathRe: /^\/:[a-zA-Z]+\/escalate$/,
+    why: 'lifecycle terminal: escalate (W277b incidents, W277e CAPA)',
+  },
+  {
+    method: 'post',
+    pathRe: /^\/:[a-zA-Z]+\/verify$/,
+    why: 'lifecycle terminal: verify (W277c FMEA, W277d RCA, W277e CAPA)',
+  },
+  {
+    method: 'post',
+    pathRe: /^\/:[a-zA-Z]+\/cancel$/,
+    why: 'lifecycle terminal: cancel (W277c FMEA, W277d RCA, W277g mgmt-review)',
+  },
+  {
+    method: 'delete',
+    pathRe: /^\/:[a-zA-Z]+$/,
+    why: 'top-level entity DELETE (W277b incidents, W277e CAPA — adverse-event/audit removal)',
+  },
+  {
+    method: 'post',
+    pathRe: /^\/:[a-zA-Z]+\/status$/,
+    why: 'asset status change drives auditor register (W277g calibration in_service/out_of_service/retired)',
+  },
 ]);
 
 // ─── Router-stack walker ──────────────────────────────────────────
@@ -611,6 +699,108 @@ describe('Wave 273b — no MFA bypass on sensitive routes', () => {
       }
     }
     expect(totalSensitive).toBeGreaterThanOrEqual(13);
+  });
+});
+
+// ─── Wave 277h — Quality-domain extension ─────────────────────────
+//
+// The 7 quality route files gated by W277b-g use plain `express.Router()`
+// (no DI factory). They can be `require()`'d directly — no stubbing
+// needed. Cross-router scanning catches future routes added to these
+// files using lifecycle-terminal keywords (escalate/resolve/close/
+// archive/verify/sign/cancel/submit/transition/approvals) without a
+// gate. Per-file coverage-completeness tests in W277b-g already enforce
+// exact gate COUNTS; this drift guard enforces SHAPE (pattern match).
+
+describe('Wave 277h — no MFA bypass on quality-domain sensitive routes', () => {
+  let incidentRouter;
+  let fmeaRouter;
+  let rcaRouter;
+  let capaRouter;
+  let controlledDocRouter;
+  let calibrationRouter;
+  let mgmtReviewRouter;
+
+  beforeAll(() => {
+    jest.isolateModules(() => {
+      incidentRouter = require('../routes/incidentRoutes');
+    });
+    jest.isolateModules(() => {
+      fmeaRouter = require('../routes/fmea.routes');
+    });
+    jest.isolateModules(() => {
+      rcaRouter = require('../routes/rca.routes');
+    });
+    jest.isolateModules(() => {
+      capaRouter = require('../routes/capa-admin.routes');
+    });
+    jest.isolateModules(() => {
+      controlledDocRouter = require('../routes/controlledDocument.routes');
+    });
+    jest.isolateModules(() => {
+      calibrationRouter = require('../routes/calibration.routes');
+    });
+    jest.isolateModules(() => {
+      mgmtReviewRouter = require('../routes/managementReview.routes');
+    });
+  });
+
+  const QUALITY_ROUTERS = () => [
+    ['incident', incidentRouter],
+    ['fmea', fmeaRouter],
+    ['rca', rcaRouter],
+    ['capa-admin', capaRouter],
+    ['controlled-document', controlledDocRouter],
+    ['calibration', calibrationRouter],
+    ['management-review', mgmtReviewRouter],
+  ];
+
+  for (const name of [
+    'incident',
+    'fmea',
+    'rca',
+    'capa-admin',
+    'controlled-document',
+    'calibration',
+    'management-review',
+  ]) {
+    test(`${name} routes: no sensitive endpoint lacks mfaTierGuard`, () => {
+      const router = QUALITY_ROUTERS().find(([n]) => n === name)[1];
+      const violations = _scanRouter(name, router);
+      if (violations.length) {
+        throw new Error(
+          `MFA bypass on ${name}:\n  ` +
+            violations
+              .map(
+                v =>
+                  `${v.method.toUpperCase()} ${v.path}\n    why: ${v.why}\n    chain: [${v.handlers.join(', ')}]`
+              )
+              .join('\n  ')
+        );
+      }
+      expect(violations).toEqual([]);
+    });
+  }
+
+  test('quality scan covers ≥ 25 sensitive endpoints (sanity for W277b-g)', () => {
+    let totalSensitive = 0;
+    for (const [, router] of QUALITY_ROUTERS()) {
+      const stack = (router && router.stack) || [];
+      for (const layer of stack) {
+        if (!layer.route) continue;
+        const path = layer.route.path;
+        if (typeof path !== 'string') continue;
+        const methods = layer.route.methods || {};
+        for (const rule of SENSITIVE_RULES) {
+          if (methods[rule.method] && rule.pathRe.test(path)) totalSensitive++;
+        }
+      }
+    }
+    // W277b-g landed 25 gates exactly; pattern matches should hit
+    // ≥ 25 (some routes may match multiple rules — the broad
+    // /:[a-zA-Z]+/(close|resolve|...)$ regexes can stack with
+    // more-specific ones in the future).
+    expect(totalSensitive).toBeGreaterThanOrEqual(25);
   });
 });
 

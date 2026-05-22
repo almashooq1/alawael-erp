@@ -630,9 +630,13 @@ describe('Wave 273 — hikvision.routes wiring (factory)', () => {
     expect(hits[0].handlers).not.toContain('mfaTierGuard');
   });
 
-  test('POST /events/manual (event replay) does NOT carry mfaTierGuard (intentional — perm-gated only)', () => {
+  test('POST /events/manual (operator event replay) NOW carries mfaTierGuard (W275i)', () => {
+    // Original W273 design intentionally left /events/manual ungated
+    // (perm-gated only). W275i reversed: operator manual ingest is
+    // sensitive (bypasses webhook HMAC verification + reveals an
+    // attack surface for replaying arbitrary events). Tier 2 added.
     const hits = _routeMiddlewareNamesForPath(router, 'post', /^\/events\/manual$/);
     expect(hits.length).toBeGreaterThanOrEqual(1);
-    expect(hits[0].handlers).not.toContain('mfaTierGuard');
+    expect(hits[0].handlers).toContain('mfaTierGuard');
   });
 });

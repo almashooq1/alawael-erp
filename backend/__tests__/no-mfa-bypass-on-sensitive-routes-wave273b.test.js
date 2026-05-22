@@ -176,6 +176,27 @@ const SENSITIVE_RULES = Object.freeze([
     pathRe: /^\/stream\/refresh$/,
     why: 'hikvision stream supervisor refresh — operator stream control (W275h)',
   },
+  // ─── Wave 275i — Clinical reviews + operator triggers ──────────
+  {
+    method: 'post',
+    pathRe: /^\/reviews\/:[a-zA-Z]+\/(approve|reject|escalate)$/,
+    why: 'attendance confidence review decision (approve/reject/escalate) — operator-grade clinical decision (W275i)',
+  },
+  {
+    method: 'post',
+    pathRe: /^\/events\/manual$/,
+    why: 'operator manual event replay — bypasses webhook ingest (W275i)',
+  },
+  {
+    method: 'post',
+    pathRe: /^\/reconciliation\/run\/(employee|branch)$/,
+    why: 'operator-triggered reconciliation run (employee/branch) — distinct from cron-driven compute (W275i)',
+  },
+  {
+    method: 'post',
+    pathRe: /^\/anomalies\/scan$/,
+    why: 'operator manual anomaly scan trigger (W275i)',
+  },
 ]);
 
 // ─── Router-stack walker ──────────────────────────────────────────
@@ -292,6 +313,36 @@ function _buildHikvisionRouter() {
       getScore() {},
       recomputeScore() {},
       decayAllScores() {},
+    },
+    // Wave 275i — Phase 3 parser + attendance-source services needed
+    // to mount /reviews/:id/{approve,reject,escalate} +
+    // /events/{process,process-batch,reprocess-failed} +
+    // /attendance/source-events. Without these, the drift guard
+    // can't scan the review-decision routes.
+    parserService: {
+      processRawEvent() {},
+      processBatch() {},
+      reprocessFailed() {},
+    },
+    attendanceSourceService: {
+      listReviews() {},
+      getReview() {},
+      approveReview() {},
+      rejectReview() {},
+      escalateReview() {},
+      sweepExpiredReviews() {},
+      listSourceEvents() {},
+      getSourceEvent() {},
+    },
+    // Wave 275i — anomaly history needed to mount /anomalies/scan
+    // (which requires both anomalyHistory AND anomalyDetector).
+    anomalyDetector: {
+      detect() {},
+    },
+    anomalyHistory: {
+      listRecent() {},
+      getTrend() {},
+      recordSnapshot() {},
     },
     governance: { hasPermission: () => true },
   });

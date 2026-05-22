@@ -423,25 +423,30 @@ function createHikvisionRouter({
 
   // Manual replay — operator drops an event from a CSV or a logged
   // outage buffer. Gated by `hikvision.event.ingest`.
-  router.post('/events/manual', requirePerm('hikvision.event.ingest'), async (req, res) => {
-    try {
-      const body = req.body || {};
-      const result = await ingestionService.ingest({
-        deviceCode: body.deviceCode,
-        externalEventId: body.externalEventId,
-        eventKind: body.eventKind,
-        capturedAt: body.capturedAt,
-        rawPayload: body.rawPayload || body,
-        channelNo: body.channelNo,
-        sourceIp: req.ip,
-        requestId: req.get('x-request-id') || null,
-        signatureVerified: false, // operator-injected
-      });
-      return respond(res, result);
-    } catch (err) {
-      return safeError(res, err, 'hikvision.event.manual');
+  router.post(
+    '/events/manual',
+    requirePerm('hikvision.event.ingest'),
+    requireMfaTier(2),
+    async (req, res) => {
+      try {
+        const body = req.body || {};
+        const result = await ingestionService.ingest({
+          deviceCode: body.deviceCode,
+          externalEventId: body.externalEventId,
+          eventKind: body.eventKind,
+          capturedAt: body.capturedAt,
+          rawPayload: body.rawPayload || body,
+          channelNo: body.channelNo,
+          sourceIp: req.ip,
+          requestId: req.get('x-request-id') || null,
+          signatureVerified: false, // operator-injected
+        });
+        return respond(res, result);
+      } catch (err) {
+        return safeError(res, err, 'hikvision.event.manual');
+      }
     }
-  });
+  );
 
   router.get('/events', requirePerm('hikvision.event.list'), async (req, res) => {
     try {
@@ -845,6 +850,7 @@ function createHikvisionRouter({
     router.post(
       '/reviews/:id/approve',
       requirePerm('hikvision.review.approve'),
+      requireMfaTier(2),
       async (req, res) => {
         try {
           const r = await attendanceSourceService.approveReview(req.params.id, {
@@ -858,21 +864,27 @@ function createHikvisionRouter({
       }
     );
 
-    router.post('/reviews/:id/reject', requirePerm('hikvision.review.reject'), async (req, res) => {
-      try {
-        const r = await attendanceSourceService.rejectReview(req.params.id, {
-          actor: actorFrom(req),
-          note: req.body?.note,
-        });
-        return respond(res, r);
-      } catch (err) {
-        return safeError(res, err, 'hikvision.review.reject');
+    router.post(
+      '/reviews/:id/reject',
+      requirePerm('hikvision.review.reject'),
+      requireMfaTier(2),
+      async (req, res) => {
+        try {
+          const r = await attendanceSourceService.rejectReview(req.params.id, {
+            actor: actorFrom(req),
+            note: req.body?.note,
+          });
+          return respond(res, r);
+        } catch (err) {
+          return safeError(res, err, 'hikvision.review.reject');
+        }
       }
-    });
+    );
 
     router.post(
       '/reviews/:id/escalate',
       requirePerm('hikvision.review.escalate'),
+      requireMfaTier(2),
       async (req, res) => {
         try {
           const r = await attendanceSourceService.escalateReview(req.params.id, {
@@ -951,6 +963,7 @@ function createHikvisionRouter({
     router.post(
       '/reconciliation/run/employee',
       requirePerm('attendance.reconciliation.run'),
+      requireMfaTier(2),
       async (req, res) => {
         try {
           const r = await reconciliationService.reconcileEmployeeDay({
@@ -969,6 +982,7 @@ function createHikvisionRouter({
     router.post(
       '/reconciliation/run/branch',
       requirePerm('attendance.reconciliation.run'),
+      requireMfaTier(2),
       async (req, res) => {
         try {
           const r = await reconciliationService.reconcileBranchDay({
@@ -1766,22 +1780,27 @@ function createHikvisionRouter({
     // Manual scan is gated by the anomalies.read perm (read-shaped
     // operation; the persisted side-effect is intentional + benign).
     if (anomalyDetector) {
-      router.post('/anomalies/scan', requirePerm('hikvision.anomalies.read'), async (_req, res) => {
-        try {
-          const startedAt = Date.now();
-          const detection = await anomalyDetector.detect({ skipCache: true });
-          const durationMs = Date.now() - startedAt;
-          const persisted = await anomalyHistory.recordSnapshot({
-            detectionResult: detection,
-            source: 'manual',
-            durationMs,
-          });
-          if (!persisted.ok) return respond(res, persisted);
-          return res.json({ success: true, data: { detection, snapshot: persisted.snapshot } });
-        } catch (err) {
-          return safeError(res, err, 'hikvision.anomalies.scan');
+      router.post(
+        '/anomalies/scan',
+        requirePerm('hikvision.anomalies.read'),
+        requireMfaTier(2),
+        async (_req, res) => {
+          try {
+            const startedAt = Date.now();
+            const detection = await anomalyDetector.detect({ skipCache: true });
+            const durationMs = Date.now() - startedAt;
+            const persisted = await anomalyHistory.recordSnapshot({
+              detectionResult: detection,
+              source: 'manual',
+              durationMs,
+            });
+            if (!persisted.ok) return respond(res, persisted);
+            return res.json({ success: true, data: { detection, snapshot: persisted.snapshot } });
+          } catch (err) {
+            return safeError(res, err, 'hikvision.anomalies.scan');
+          }
         }
-      });
+      );
     }
   }
 

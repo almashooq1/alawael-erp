@@ -4,6 +4,11 @@ const express = require('express');
 const { body, param, query, validationResult } = require('express-validator');
 const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+// W277g — MFA tier-2 on calibration lifecycle. Status changes
+// (in_service / out_of_service / retired) drive the JCI/Saudi-MOH
+// asset register. Sweep-overdue is a bulk batch op against the
+// entire asset inventory.
+const { attachMfaActor, requireMfaTier } = require('../middleware/requireMfaTier');
 const safeError = require('../utils/safeError');
 const { getDefault: getService } = require('../services/quality/calibration.service');
 const registry = require('../config/calibration.registry');
@@ -128,7 +133,9 @@ router.post(
 router.post(
   '/:id/status',
   authenticate,
+  attachMfaActor,
   authorize(['admin', 'ceo', 'quality_manager', 'facility_manager']),
+  requireMfaTier(2),
   [param('id').isMongoId(), body('status').isIn(registry.CAL_STATUSES)],
   handleValidation,
   wrap(async (req, res) => {
@@ -150,7 +157,9 @@ router.post(
 router.post(
   '/sweep-overdue',
   authenticate,
+  attachMfaActor,
   authorize(['admin', 'ceo', 'quality_manager']),
+  requireMfaTier(2),
   wrap(async (req, res) => {
     try {
       const swept = await getService().sweepOverdue();

@@ -20,6 +20,10 @@ const { body, param, query, validationResult } = require('express-validator');
 
 const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+// W277g — MFA tier-2 on management-review lifecycle. close/cancel
+// lock the ISO 9001 §9.3 record; approvals are the multi-role
+// sign-off (quality_manager + ceo + medical_director + ...).
+const { attachMfaActor, requireMfaTier } = require('../middleware/requireMfaTier');
 const safeError = require('../utils/safeError');
 const { getDefault: getService } = require('../services/quality/managementReview.service');
 const registry = require('../config/management-review.registry');
@@ -302,8 +306,10 @@ router.post(
 router.post(
   '/:id/close',
   authenticate,
+  attachMfaActor,
   requireBranchAccess,
   authorize('admin', 'quality_manager', 'ceo'),
+  requireMfaTier(2),
   [
     param('id').isMongoId(),
     body('closureNotes').optional().isString(),
@@ -323,8 +329,10 @@ router.post(
 router.post(
   '/:id/cancel',
   authenticate,
+  attachMfaActor,
   requireBranchAccess,
   authorize('admin', 'quality_manager', 'ceo'),
+  requireMfaTier(2),
   [param('id').isMongoId(), body('reason').isString().trim().notEmpty()],
   handleValidation,
   wrap(async (req, res) => {
@@ -340,8 +348,10 @@ router.post(
 router.post(
   '/:id/approvals',
   authenticate,
+  attachMfaActor,
   requireBranchAccess,
   authorize('admin', 'quality_manager', 'ceo', 'medical_director', 'hr_manager', 'finance_manager'),
+  requireMfaTier(2),
   [
     param('id').isMongoId(),
     body('role').isString().notEmpty(),

@@ -2391,6 +2391,11 @@ try {
             libraryModel: HikvisionFaceLibrary,
             employeeModel,
             logger,
+            // Wave 275c — service-layer MFA enforcement on suspendTemplate
+            // (T2) + deactivateOnExit (T2). Mirrors route-layer requireMfaTier
+            // on /templates/:id/suspend (W273) + /templates/exit-cascade
+            // (added W275c — closing W273 oversight).
+            enforceMfa: true,
           });
         } catch (p2err) {
           logger.warn(

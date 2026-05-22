@@ -36,6 +36,7 @@
  */
 
 const reg = require('./hikvision.registry');
+const { checkMfaTier } = require('./mfa-tier-check.lib');
 
 function createHikvisionFraudDetectionService({
   flagModel = null,
@@ -59,66 +60,11 @@ function createHikvisionFraudDetectionService({
   }
   void _templateModel;
 
-  /**
-   * Wave 275b — service-layer MFA tier guard. Reads actor.mfaLevel and
-   * actor.mfaAssertedAt populated by the W273 attachMfaActor route
-   * middleware (and propagated through routes/hikvision.routes.js
-   * `actorFrom`). When enforceMfa=false, this is a no-op so test
-   * suites that don't need MFA can construct the service cleanly.
-   * Duplicated inline (not extracted) per CLAUDE.md "three similar
-   * lines is better than a premature abstraction"; extract to a
-   * shared lib once a 3rd service adopts this pattern.
-   *
-   * @param {object} actor
-   * @param {number} requiredTier  — 1, 2, or 3
-   * @param {number} maxAgeMin     — assertion freshness window in minutes
-   * @returns {{ ok: true } | { ok: false, reason: string, requiredTier: number, actorTier: number, maxAgeMin?: number, ageMin?: number|null }}
-   */
+  // Wave 275c — extracted `_checkMfaTier` to ./_checkMfaTier.lib.js
+  // (shared with payroll-period + face-enrollment). Local wrapper
+  // binds the factory's `enforceMfa` + `now` for one-liner call sites.
   function _checkMfaTier(actor, requiredTier, maxAgeMin) {
-    if (!enforceMfa) return { ok: true };
-    const actorTier = typeof (actor && actor.mfaLevel) === 'number' ? actor.mfaLevel : 0;
-    if (actorTier < requiredTier) {
-      return {
-        ok: false,
-        reason: reg.REASON.MFA_TIER_REQUIRED,
-        requiredTier,
-        actorTier,
-      };
-    }
-    const assertedAt = actor && actor.mfaAssertedAt;
-    if (!assertedAt) {
-      return {
-        ok: false,
-        reason: reg.REASON.MFA_FRESHNESS_REQUIRED,
-        requiredTier,
-        actorTier,
-        maxAgeMin,
-        ageMin: null,
-      };
-    }
-    const t = assertedAt instanceof Date ? assertedAt.getTime() : Date.parse(assertedAt);
-    if (!Number.isFinite(t)) {
-      return {
-        ok: false,
-        reason: reg.REASON.MFA_FRESHNESS_REQUIRED,
-        requiredTier,
-        actorTier,
-        maxAgeMin,
-        ageMin: null,
-      };
-    }
-    const ageMin = Math.floor((now().getTime() - t) / 60000);
-    if (ageMin > maxAgeMin) {
-      return {
-        ok: false,
-        reason: reg.REASON.MFA_FRESHNESS_REQUIRED,
-        requiredTier,
-        actorTier,
-        maxAgeMin,
-        ageMin,
-      };
-    }
-    return { ok: true };
+    return checkMfaTier(actor, requiredTier, maxAgeMin, { enforceMfa, now });
   }
 
   // ─── Single-event detectors ──────────────────────────────────

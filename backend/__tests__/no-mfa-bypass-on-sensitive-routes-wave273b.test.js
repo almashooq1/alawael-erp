@@ -92,6 +92,11 @@ const SENSITIVE_RULES = Object.freeze([
     pathRe: /^\/templates\/:[a-zA-Z]+\/suspend$/,
     why: 'biometric template suspend (W273)',
   },
+  {
+    method: 'post',
+    pathRe: /^\/templates\/exit-cascade$/,
+    why: 'biometric template exit-cascade — missed by W273, closed by W275c',
+  },
 ]);
 
 // ─── Router-stack walker ──────────────────────────────────────────

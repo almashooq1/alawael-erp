@@ -25,6 +25,7 @@
 
 const crypto = require('crypto');
 const reg = require('./hikvision.registry');
+const { checkMfaTier } = require('./mfa-tier-check.lib');
 
 function createHikvisionFaceEnrollmentService({
   templateModel = null,
@@ -32,6 +33,12 @@ function createHikvisionFaceEnrollmentService({
   employeeModel = null,
   logger = console,
   now = () => new Date(),
+  // ─── Wave 275c — Service-layer MFA tier enforcement ────────────
+  // Default OFF for backwards compat with Wave 97 tests (constructed
+  // with plain { userId } actors). app.js opts IN with `enforceMfa: true`.
+  // Mirrors [[wave275-service-layer-mfa-pilot]] + [[wave275b-fraud-detection-mfa]].
+  // 3rd adopter — _checkMfaTier extracted to ./_checkMfaTier.lib.js.
+  enforceMfa = false,
 } = {}) {
   if (!templateModel) {
     throw new Error('hikvision-face-enrollment.service: templateModel is required');
@@ -41,6 +48,12 @@ function createHikvisionFaceEnrollmentService({
   }
   // employeeModel is optional — when present, we verify the employee
   // exists + is active. When absent (test/dev), we trust the caller.
+
+  // Wave 275c — shared helper from ./_checkMfaTier.lib.js, local
+  // wrapper binds factory's enforceMfa + now for one-liner call sites.
+  function _checkMfaTier(actor, requiredTier, maxAgeMin) {
+    return checkMfaTier(actor, requiredTier, maxAgeMin, { enforceMfa, now });
+  }
 
   // ─── enrollEmployee ──────────────────────────────────────────
 
@@ -188,6 +201,11 @@ function createHikvisionFaceEnrollmentService({
   async function suspendTemplate(input = {}) {
     const { templateId, reason, actor, cascadeReason } = input;
 
+    // Wave 275c — MFA tier 2 (15 min). Mirrors W273 route-layer tier
+    // on /templates/:id/suspend. Runs BEFORE reason validation —
+    // fail-fast on heaviest gate (same rationale as W275b dismissFlag).
+    const mfa = _checkMfaTier(actor, 2, 15);
+    if (!mfa.ok) return mfa;
     if (!templateId) return { ok: false, reason: reg.REASON.TEMPLATE_NOT_FOUND };
     if (!reason || !String(reason).trim()) {
       return { ok: false, reason: reg.REASON.SUSPENSION_REASON_REQUIRED };
@@ -362,6 +380,11 @@ function createHikvisionFaceEnrollmentService({
 
   async function deactivateOnExit(input = {}) {
     const { employeeId, exitDate, exitReason, actor } = input;
+    // Wave 275c — MFA tier 2 (15 min). Closes the W273 route-layer
+    // oversight on /templates/exit-cascade (added in this same commit
+    // at the route layer). 3-layer symmetry: route + service + drift.
+    const mfa = _checkMfaTier(actor, 2, 15);
+    if (!mfa.ok) return mfa;
     if (!employeeId) return { ok: false, reason: reg.REASON.EMPLOYEE_REQUIRED };
     const exitDt = exitDate ? new Date(exitDate) : now();
     const reasonText = exitReason

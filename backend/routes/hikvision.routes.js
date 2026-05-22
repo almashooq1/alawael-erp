@@ -710,6 +710,7 @@ function createHikvisionRouter({
     router.post(
       '/templates/exit-cascade',
       requirePerm('hikvision.template.cascade'),
+      requireMfaTier(2),
       async (req, res) => {
         try {
           const body = req.body || {};

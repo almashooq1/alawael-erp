@@ -352,6 +352,22 @@ const SENSITIVE_RULES = Object.freeze([
     pathRe: /^\/events\/reprocess-failed$/,
     why: 'event parser retry failed — operator triage (W275u)',
   },
+  // ─── Wave 275v — Fraud-detection scan/sweep routes ─────────────
+  {
+    method: 'post',
+    pathRe: /^\/fraud\/scan\/templates$/,
+    why: 'fraud-detection scan templates — operator/cron (W275v)',
+  },
+  {
+    method: 'post',
+    pathRe: /^\/fraud\/scan\/unregistered$/,
+    why: 'fraud-detection scan unregistered faces — operator/cron (W275v)',
+  },
+  {
+    method: 'post',
+    pathRe: /^\/fraud\/sweep-expired$/,
+    why: 'fraud-detection sweep expired flags — operator/cron (W275v)',
+  },
 ]);
 
 // ─── Router-stack walker ──────────────────────────────────────────

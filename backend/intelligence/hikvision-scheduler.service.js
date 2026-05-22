@@ -128,7 +128,8 @@ function createHikvisionScheduler({
       available: !!fraudDetection,
       handler: async args => {
         if (!fraudDetection) throw new Error('fraudDetection not wired');
-        return fraudDetection.scanTemplates(args || {});
+        // W275v — pass system actor for service-layer MFA.
+        return fraudDetection.scanTemplates({ ...(args || {}), actor: _systemActor() });
       },
     },
     [reg.JOB_ID.FRAUD_SCAN_UNREGISTERED]: {
@@ -138,7 +139,10 @@ function createHikvisionScheduler({
       available: !!fraudDetection,
       handler: async args => {
         if (!fraudDetection) throw new Error('fraudDetection not wired');
-        return fraudDetection.scanUnregistered(args || {});
+        // W275v — fixed pre-existing typo: service exports
+        // `scanUnregisteredFaces` (not `scanUnregistered`). Same bug
+        // pattern as W275t/u. Also pass system actor.
+        return fraudDetection.scanUnregisteredFaces({ ...(args || {}), actor: _systemActor() });
       },
     },
     [reg.JOB_ID.FRAUD_SWEEP_EXPIRED]: {
@@ -148,7 +152,9 @@ function createHikvisionScheduler({
       available: !!fraudDetection,
       handler: async () => {
         if (!fraudDetection) throw new Error('fraudDetection not wired');
-        return fraudDetection.sweepExpired();
+        // W275v — fixed pre-existing typo: service exports
+        // `sweepExpiredFlags` (not `sweepExpired`). Also pass system actor.
+        return fraudDetection.sweepExpiredFlags({ actor: _systemActor() });
       },
     },
     [reg.JOB_ID.FRAUD_DECAY_ALL]: {

@@ -196,7 +196,10 @@ function createHikvisionFraudDetectionService({
 
   // ─── Template-level scans (cron) ─────────────────────────────
 
-  async function scanTemplates({ since, templateIds } = {}) {
+  async function scanTemplates({ since, templateIds, actor } = {}) {
+    // W275v — MFA tier 2 (15 min). Scheduler passes system actor; HTTP route passes actorFrom(req).
+    const mfa = _checkMfaTier(actor, 2, 15);
+    if (!mfa.ok) return mfa;
     const sinceDt = since
       ? new Date(since)
       : new Date(Date.now() - reg.FRAUD_DEFAULTS.SHARED_IDENTITY_WINDOW_MS);
@@ -318,7 +321,10 @@ function createHikvisionFraudDetectionService({
     return { ok: true, scanned: targets.length, flagsEmitted: flags.length, flags };
   }
 
-  async function scanUnregisteredFaces({ since } = {}) {
+  async function scanUnregisteredFaces({ since, actor } = {}) {
+    // W275v — MFA tier 2 (15 min).
+    const mfa = _checkMfaTier(actor, 2, 15);
+    if (!mfa.ok) return mfa;
     const sinceDt = since
       ? new Date(since)
       : new Date(Date.now() - reg.FRAUD_DEFAULTS.UNREGISTERED_REPEAT_WINDOW_MS);
@@ -462,7 +468,10 @@ function createHikvisionFraudDetectionService({
     });
   }
 
-  async function sweepExpiredFlags({ now: nowArg } = {}) {
+  async function sweepExpiredFlags({ now: nowArg, actor } = {}) {
+    // W275v — MFA tier 2 (15 min).
+    const mfa = _checkMfaTier(actor, 2, 15);
+    if (!mfa.ok) return mfa;
     const nowMs = (nowArg || now()).getTime?.() || Date.now();
     const cutoff = new Date(nowMs - reg.FRAUD_DEFAULTS.SCORE_HARD_EXPIRE_MS);
 

@@ -1258,24 +1258,34 @@ function createHikvisionRouter({
   // Mounted only when both Phase 5 services are supplied.
   if (fraudDetectionService && fraudScoreService) {
     // Detection runners
-    router.post('/fraud/scan/templates', requirePerm('fraud.detection.run'), async (req, res) => {
-      try {
-        const r = await fraudDetectionService.scanTemplates({
-          since: req.body?.since,
-          templateIds: req.body?.templateIds,
-        });
-        return respond(res, r);
-      } catch (err) {
-        return safeError(res, err, 'fraud.scan.templates');
+    router.post(
+      '/fraud/scan/templates',
+      requirePerm('fraud.detection.run'),
+      requireMfaTier(2),
+      async (req, res) => {
+        try {
+          // W275v — pass actor for service-layer MFA guard.
+          const r = await fraudDetectionService.scanTemplates({
+            actor: actorFrom(req),
+            since: req.body?.since,
+            templateIds: req.body?.templateIds,
+          });
+          return respond(res, r);
+        } catch (err) {
+          return safeError(res, err, 'fraud.scan.templates');
+        }
       }
-    });
+    );
 
     router.post(
       '/fraud/scan/unregistered',
       requirePerm('fraud.detection.run'),
+      requireMfaTier(2),
       async (req, res) => {
         try {
+          // W275v — pass actor.
           const r = await fraudDetectionService.scanUnregisteredFaces({
+            actor: actorFrom(req),
             since: req.body?.since,
           });
           return respond(res, r);
@@ -1285,14 +1295,20 @@ function createHikvisionRouter({
       }
     );
 
-    router.post('/fraud/sweep-expired', requirePerm('fraud.detection.run'), async (req, res) => {
-      try {
-        const r = await fraudDetectionService.sweepExpiredFlags({});
-        return respond(res, r);
-      } catch (err) {
-        return safeError(res, err, 'fraud.sweep');
+    router.post(
+      '/fraud/sweep-expired',
+      requirePerm('fraud.detection.run'),
+      requireMfaTier(2),
+      async (req, res) => {
+        try {
+          // W275v — pass actor.
+          const r = await fraudDetectionService.sweepExpiredFlags({ actor: actorFrom(req) });
+          return respond(res, r);
+        } catch (err) {
+          return safeError(res, err, 'fraud.sweep');
+        }
       }
-    });
+    );
 
     // Flag CRUD + actions
     router.get('/fraud/flags', requirePerm('fraud.flag.list'), async (req, res) => {

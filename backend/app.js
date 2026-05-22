@@ -1962,66 +1962,10 @@ try {
 }
 
 // ─── Step-up MFA Challenge (Wave 36) ──────────────────────────────────────────
-// Operationalises Constitution §12. The Wave-31 decide() returns
-// STEP_UP_MFA_REQUIRED when actor.mfaLevel < required tier — this router
-// is the surface clients call to actually obtain the higher tier.
-//
-//   POST /api/v1/mfa/challenge        → create
-//   POST /api/v1/mfa/:id/verify       → submit OTP
-//   GET  /api/v1/mfa/:id              → status
-//
-// `mfaSettingsModel` is optional — when absent (test/dev), the service
-// falls back to a closed-fail verifier and tests inject their own.
-// `sessionUpdater` is a no-op by default; production wires this to the
-// real session store so subsequent decide() calls see the higher tier.
-try {
-  const { createMfaChallengeService } = require('./intelligence/mfa-challenge.service');
-  const createMfaChallengeRouter = require('./routes/mfa-challenge.routes');
-
-  let mfaSettingsModel = null;
-  try {
-    mfaSettingsModel = require('./models/MFASettings');
-  } catch {
-    /* model optional in test/dev — service falls back to closed-fail verifier */
-  }
-
-  // Pluggable session updater. Production should override this from
-  // wherever the session lives (express-session, JWT refresh, Redis).
-  // Exposed on `app` so other modules can swap it without re-importing.
-  app._mfaSessionUpdater =
-    app._mfaSessionUpdater ||
-    async function defaultMfaSessionUpdater({ userId, mfaLevel, mfaAssertedAt }) {
-      // Default: log only. Real session-store wiring is environment-specific.
-      logger.info(
-        `[MFA] session upgrade userId=${userId} mfaLevel=${mfaLevel} at=${mfaAssertedAt?.toISOString?.() || mfaAssertedAt}`
-      );
-    };
-
-  let auditLogger = null;
-  try {
-    const { auditLogService } = require('./services/auditLog.service');
-    if (auditLogService && typeof auditLogService.log === 'function') {
-      auditLogger = auditLogService;
-    }
-  } catch {
-    /* audit optional — challenge still works, no audit row */
-  }
-
-  const mfaSvc = createMfaChallengeService({
-    mfaSettingsModel,
-    auditLogger,
-    sessionUpdater: (...args) => app._mfaSessionUpdater(...args),
-    logger,
-  });
-
-  const { authenticate: mfaAuthMw } = require('./middleware/auth');
-  app.use('/api/v1/mfa', mfaAuthMw, createMfaChallengeRouter({ service: mfaSvc, logger }));
-  // Expose for other modules (route guards) that need `requireMfa(tier)`.
-  app._mfaChallengeService = mfaSvc;
-  logger.info('[MFA] ✓ step-up challenge routes mounted at /api/v1/mfa');
-} catch (mfaErr) {
-  logger.warn('[MFA] routes skipped:', mfaErr.message);
-}
+// Extracted to startup/mfaChallengeBootstrap.js (W277 / Pass 6 — final).
+// MUST run BEFORE beneficiaryLifecycleBootstrap (Pass 5) which reads
+// app._mfaChallengeService — call order in this file is the ordering invariant.
+require('./startup/mfaChallengeBootstrap').wireMfaChallenge(app, { logger });
 
 // ─── Beneficiary 360 Phase 2 — Lifecycle Routes (Wave 40+95) ────────────────
 // Extracted to startup/beneficiaryLifecycleBootstrap.js (W277 / Pass 5 of app.js refactor).

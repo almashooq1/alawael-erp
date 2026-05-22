@@ -13,6 +13,11 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const { authenticate } = require('../middleware/auth');
 const { requireRole } = require('../middleware/rbac');
+// W277e — MFA tier-2 on CAPA lifecycle terminals (resolve/verify/escalate/DELETE).
+// CAPA is what auditors trace from incident → root-cause → corrective action →
+// verification of effectiveness. A compromised admin session must not be able
+// to mark a CAPA "verified/closed" without a second factor.
+const { attachMfaActor, requireMfaTier } = require('../middleware/requireMfaTier');
 const { stripUpdateMeta } = require('../utils/sanitize');
 const safeError = require('../utils/safeError');
 
@@ -276,7 +281,9 @@ router.post(
 router.post(
   '/:id/resolve',
   authenticate,
+  attachMfaActor,
   requireRole(['admin', 'quality_manager', 'manager']),
+  requireMfaTier(2),
   async (req, res) => {
     try {
       const CA = getModel();
@@ -308,7 +315,9 @@ router.post(
 router.post(
   '/:id/verify',
   authenticate,
+  attachMfaActor,
   requireRole(['admin', 'quality_manager']),
+  requireMfaTier(2),
   async (req, res) => {
     try {
       const CA = getModel();
@@ -337,7 +346,9 @@ router.post(
 router.post(
   '/:id/escalate',
   authenticate,
+  attachMfaActor,
   requireRole(['admin', 'quality_manager', 'manager']),
+  requireMfaTier(2),
   async (req, res) => {
     try {
       const CA = getModel();
@@ -368,20 +379,27 @@ router.post(
 
 // ── Soft Delete ──────────────────────────────────────────────────────────────
 // DELETE /api/admin/capa/:id
-router.delete('/:id', authenticate, requireRole(['admin', 'quality_manager']), async (req, res) => {
-  try {
-    const CA = getModel();
-    const doc = await CA.findOneAndUpdate(
-      { _id: req.params.id, isDeleted: false },
-      { $set: { isDeleted: true } },
-      { new: true }
-    );
-    if (!doc)
-      return res.status(404).json({ success: false, message: 'الإجراء التصحيحي غير موجود' });
-    res.json({ success: true, message: 'تم حذف الإجراء التصحيحي بنجاح' });
-  } catch (err) {
-    safeError(res, err, 'capa-admin');
+router.delete(
+  '/:id',
+  authenticate,
+  attachMfaActor,
+  requireRole(['admin', 'quality_manager']),
+  requireMfaTier(2),
+  async (req, res) => {
+    try {
+      const CA = getModel();
+      const doc = await CA.findOneAndUpdate(
+        { _id: req.params.id, isDeleted: false },
+        { $set: { isDeleted: true } },
+        { new: true }
+      );
+      if (!doc)
+        return res.status(404).json({ success: false, message: 'الإجراء التصحيحي غير موجود' });
+      res.json({ success: true, message: 'تم حذف الإجراء التصحيحي بنجاح' });
+    } catch (err) {
+      safeError(res, err, 'capa-admin');
+    }
   }
-});
+);
 
 module.exports = router;

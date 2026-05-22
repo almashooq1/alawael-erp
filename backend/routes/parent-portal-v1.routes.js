@@ -1125,43 +1125,93 @@ router.post('/invoices/:id/pay', authenticate, async (req, res) => {
 });
 
 // ── Messages ──────────────────────────────────────────────────────────────────
-// Portal messaging wires into the central Message service (backend/routes/messages.routes.js).
-// Until that integration lands, we return empty lists — the UI shows
-// "no conversations yet" cleanly rather than 404-ing.
-router.get('/messages/threads', authenticate, (req, res) => {
+// Wired into services/messaging.service.js (W276c). Real Conversation +
+// Message models replace the prior 2026-05-21 hardcoded stub responses
+// (see CLAUDE.md "known issues"). Guardian sees only conversations
+// they participate in — enforced at the service layer via the
+// participants[].user match.
+const _messagingService = require('../services/messaging.service');
+
+router.get('/messages/threads', authenticate, async (req, res) => {
   const userId = req.user?.id || req.user?._id || req.user?.userId;
   if (!userId) return res.status(401).json({ error: 'Unauthorized' });
-  // TODO(phase-16): query MessageThread where participants include this guardian.
-  return res.json([]);
+  try {
+    const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+    const limit = Math.min(50, Math.max(1, parseInt(req.query.limit, 10) || 20));
+    const threads = await _messagingService.getThreads(userId, { page, limit });
+    return res.json(threads);
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ error: 'InternalError', message: err instanceof Error ? err.message : 'failed' });
+  }
 });
 
-router.get('/messages/threads/:threadId', authenticate, (req, res) => {
+router.get('/messages/threads/:threadId', authenticate, async (req, res) => {
   const userId = req.user?.id || req.user?._id || req.user?.userId;
   if (!userId) return res.status(401).json({ error: 'Unauthorized' });
   if (!isValidObjectId(req.params.threadId)) {
     return res.status(400).json({ error: 'InvalidId', message: 'threadId is not valid' });
   }
-  // With no threads created yet, any specific ID is unknown.
-  return res.status(404).json({
-    error: 'NotFound',
-    message: 'thread not found — messaging service wires in phase 16',
-  });
+  try {
+    const r = await _messagingService.getThread(req.params.threadId, userId);
+    if (!r.ok) {
+      if (r.reason === 'NOT_FOUND') {
+        return res.status(404).json({ error: 'NotFound', message: 'thread not found' });
+      }
+      if (r.reason === 'FORBIDDEN') {
+        return res.status(403).json({ error: 'Forbidden', message: 'not a participant' });
+      }
+      return res.status(400).json({ error: 'BadRequest', message: r.reason });
+    }
+    return res.json({ thread: r.thread, messages: r.messages });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ error: 'InternalError', message: err instanceof Error ? err.message : 'failed' });
+  }
 });
 
-router.post('/messages/threads/:threadId', authenticate, (req, res) => {
+router.post('/messages/threads/:threadId', authenticate, async (req, res) => {
   const userId = req.user?.id || req.user?._id || req.user?.userId;
   if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+  if (!isValidObjectId(req.params.threadId)) {
+    return res.status(400).json({ error: 'InvalidId', message: 'threadId is not valid' });
+  }
   if (!req.body?.body || typeof req.body.body !== 'string' || req.body.body.trim().length === 0) {
     return res
       .status(400)
       .json({ error: 'InvalidBody', message: 'body must be a non-empty string' });
   }
-  // Return 503 (service unavailable) rather than 501, so the offline queue
-  // knows to retry later rather than treating this as a permanent failure.
-  return res.status(503).json({
-    error: 'MessagingUnavailable',
-    message: 'messaging service not yet wired for this portal',
-  });
+  try {
+    const r = await _messagingService.addMessageToThread(
+      req.params.threadId,
+      {
+        text: req.body.body,
+        attachments: Array.isArray(req.body.attachments) ? req.body.attachments : [],
+      },
+      userId
+    );
+    if (!r.ok) {
+      if (r.reason === 'NOT_FOUND') {
+        return res.status(404).json({ error: 'NotFound', message: 'thread not found' });
+      }
+      if (r.reason === 'FORBIDDEN') {
+        return res.status(403).json({ error: 'Forbidden', message: 'not a participant' });
+      }
+      if (r.reason === 'EMPTY_CONTENT') {
+        return res
+          .status(400)
+          .json({ error: 'InvalidBody', message: 'body must be a non-empty string' });
+      }
+      return res.status(400).json({ error: 'BadRequest', message: r.reason });
+    }
+    return res.status(201).json({ message: r.message });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ error: 'InternalError', message: err instanceof Error ? err.message : 'failed' });
+  }
 });
 
 // ── Consents (PDPL) ───────────────────────────────────────────────────────────

@@ -652,6 +652,7 @@ function createHikvisionRouter({
     router.post(
       '/libraries/:libraryId/templates',
       requirePerm('hikvision.template.enroll'),
+      requireMfaTier(2),
       async (req, res) => {
         try {
           const body = req.body || {};
@@ -672,6 +673,7 @@ function createHikvisionRouter({
     router.post(
       '/templates/:id/confirm',
       requirePerm('hikvision.template.confirm'),
+      requireMfaTier(2),
       async (req, res) => {
         try {
           const body = req.body || {};
@@ -710,6 +712,7 @@ function createHikvisionRouter({
     router.post(
       '/templates/:id/reenroll',
       requirePerm('hikvision.template.reenroll'),
+      requireMfaTier(2),
       async (req, res) => {
         try {
           const body = req.body || {};

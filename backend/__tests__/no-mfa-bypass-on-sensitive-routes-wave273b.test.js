@@ -197,6 +197,25 @@ const SENSITIVE_RULES = Object.freeze([
     pathRe: /^\/anomalies\/scan$/,
     why: 'operator manual anomaly scan trigger (W275i)',
   },
+  // ─── Wave 275j — Template lifecycle (route-only) ───────────────
+  // confirmEnrollment is also called from hikvision-sync-worker
+  // (cron-shaped) so service-layer gate would break sync; route-only
+  // is the correct scope per [[wave275e]] cron-shape lesson.
+  {
+    method: 'post',
+    pathRe: /^\/libraries\/:[a-zA-Z]+\/templates$/,
+    why: 'biometric template enrollment — adds new face to library (W275j)',
+  },
+  {
+    method: 'post',
+    pathRe: /^\/templates\/:[a-zA-Z]+\/confirm$/,
+    why: 'biometric template confirm — operator confirms device ack (W275j; sync-worker bypasses HTTP path)',
+  },
+  {
+    method: 'post',
+    pathRe: /^\/templates\/:[a-zA-Z]+\/reenroll$/,
+    why: 'biometric template re-enrollment — creates new pending, supersedes previous (W275j)',
+  },
 ]);
 
 // ─── Router-stack walker ──────────────────────────────────────────

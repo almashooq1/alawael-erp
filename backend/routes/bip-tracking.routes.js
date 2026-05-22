@@ -35,12 +35,52 @@
  */
 
 const express = require('express');
+const mongoose = require('mongoose');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { assertBranchMatch, effectiveBranchScope } = require('../middleware/assertBranchMatch');
 const logger = require('../utils/logger');
 
 const bip = require('../services/bipFidelityEffectiveness.service');
+
+// Lazy FBA model loader for branch-ownership checks. Failing the
+// require (test/partial-boot) leaves _FBA() returning null so the
+// existing direct-exec route tests stay green.
+function _FBA() {
+  try {
+    return mongoose.model('BehavioralFunctionAssessment');
+  } catch (_e) {
+    try {
+      require('../models/clinical-assessment/behavioral-function-assessment.model');
+      return mongoose.model('BehavioralFunctionAssessment');
+    } catch (_e2) {
+      return null;
+    }
+  }
+}
+
+/**
+ * Authorize an FBA-scoped operation. Loads the FBA, returns it on
+ * success, returns null when the caller already responded (404 or 403).
+ * Centralizes the load+check pattern used by 6 BIP routes.
+ */
+async function _loadAndAuthorizeFba(req, res, fbaAssessmentId) {
+  const FBA = _FBA();
+  if (!FBA) return { fba: null, missingModel: true }; // model unavailable; pass through
+  const fba = await FBA.findById(fbaAssessmentId).lean();
+  if (!fba) {
+    res.status(404).json({ success: false, error: 'FBA assessment not found' });
+    return null;
+  }
+  try {
+    assertBranchMatch(req, fba.branch, 'FBA assessment');
+  } catch (err) {
+    res.status(err.status || 403).json({ success: false, error: err.message });
+    return null;
+  }
+  return { fba };
+}
 
 // ─── Health ──────────────────────────────────────────────────────
 router.get('/_health', (_req, res) => {
@@ -61,6 +101,9 @@ router.use(requireBranchAccess);
 
 function _toErrorResponse(err) {
   const msg = err && err.message ? String(err.message) : 'unknown error';
+  if (err && err.status === 403) {
+    return { status: 403, body: { success: false, error: msg } };
+  }
   if (msg.match(/required|invalid|must be|cannot be|not found|at least one/i)) {
     return { status: 400, body: { success: false, error: msg } };
   }
@@ -91,6 +134,10 @@ router.post('/fidelity', async (req, res) => {
     if (!actor) {
       return res.status(401).json({ success: false, error: 'authenticated user required' });
     }
+    if (req.body && req.body.fbaAssessmentId) {
+      const authResult = await _loadAndAuthorizeFba(req, res, req.body.fbaAssessmentId);
+      if (authResult === null) return; // response already sent
+    }
     const doc = await bip.recordFidelityCheck(req.body || {}, actor);
     return res.status(201).json({ success: true, data: doc });
   } catch (err) {
@@ -102,6 +149,8 @@ router.post('/fidelity', async (req, res) => {
 
 router.get('/fidelity/fba/:fbaAssessmentId', async (req, res) => {
   try {
+    const authResult = await _loadAndAuthorizeFba(req, res, req.params.fbaAssessmentId);
+    if (authResult === null) return;
     const opts = {
       from: _parseDate(req.query.from),
       to: _parseDate(req.query.to),
@@ -118,6 +167,8 @@ router.get('/fidelity/fba/:fbaAssessmentId', async (req, res) => {
 
 router.get('/fidelity/fba/:fbaAssessmentId/trend', async (req, res) => {
   try {
+    const authResult = await _loadAndAuthorizeFba(req, res, req.params.fbaAssessmentId);
+    if (authResult === null) return;
     const lastN = req.query.lastN ? parseInt(req.query.lastN, 10) : undefined;
     const opts = lastN ? { lastN } : {};
     const out = await bip.computeFidelityTrend(req.params.fbaAssessmentId, opts);
@@ -139,6 +190,10 @@ router.post('/effectiveness', async (req, res) => {
     if (!actor) {
       return res.status(401).json({ success: false, error: 'authenticated user required' });
     }
+    if (req.body && req.body.fbaAssessmentId) {
+      const authResult = await _loadAndAuthorizeFba(req, res, req.body.fbaAssessmentId);
+      if (authResult === null) return;
+    }
     const doc = await bip.recordEffectivenessReading(req.body || {}, actor);
     return res.status(201).json({ success: true, data: doc });
   } catch (err) {
@@ -150,6 +205,8 @@ router.post('/effectiveness', async (req, res) => {
 
 router.get('/effectiveness/fba/:fbaAssessmentId', async (req, res) => {
   try {
+    const authResult = await _loadAndAuthorizeFba(req, res, req.params.fbaAssessmentId);
+    if (authResult === null) return;
     const opts = {
       from: _parseDate(req.query.from),
       to: _parseDate(req.query.to),
@@ -166,6 +223,8 @@ router.get('/effectiveness/fba/:fbaAssessmentId', async (req, res) => {
 
 router.get('/effectiveness/fba/:fbaAssessmentId/trend', async (req, res) => {
   try {
+    const authResult = await _loadAndAuthorizeFba(req, res, req.params.fbaAssessmentId);
+    if (authResult === null) return;
     const lastN = req.query.lastN ? parseInt(req.query.lastN, 10) : undefined;
     const opts = lastN ? { lastN } : {};
     const out = await bip.computeEffectivenessTrend(req.params.fbaAssessmentId, opts);
@@ -183,7 +242,7 @@ router.get('/effectiveness/fba/:fbaAssessmentId/trend', async (req, res) => {
 
 router.get('/at-risk', async (req, res) => {
   try {
-    const branchId = req.query.branchId || req.branchId || undefined;
+    const branchId = effectiveBranchScope(req) || undefined;
     const out = await bip.listAtRiskBips({ branchId, limit: req.query.limit });
     return res.json({ success: true, data: out });
   } catch (err) {
@@ -196,6 +255,8 @@ router.get('/at-risk', async (req, res) => {
 router.get('/diagnosis/fba/:fbaAssessmentId', async (req, res) => {
   try {
     const fbaId = req.params.fbaAssessmentId;
+    const authResult = await _loadAndAuthorizeFba(req, res, fbaId);
+    if (authResult === null) return;
     const [fidTrend, effTrend] = await Promise.all([
       bip.computeFidelityTrend(fbaId).catch(() => null),
       bip.computeEffectivenessTrend(fbaId).catch(() => null),

@@ -30,6 +30,7 @@ const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { assertBranchMatch, effectiveBranchScope } = require('../middleware/assertBranchMatch');
 const logger = require('../utils/logger');
 
 const aac = require('../services/aacProfile.service');
@@ -55,6 +56,10 @@ router.use(requireBranchAccess);
 // ─── Error helpers (mirror measures-outcomes.routes.js) ──────────
 function _toErrorResponse(err) {
   const msg = err && err.message ? String(err.message) : 'unknown error';
+  // 403 path first — security errors carry an explicit status.
+  if (err && err.status === 403) {
+    return { status: 403, body: { success: false, error: msg } };
+  }
   if (msg.match(/required|invalid|must be|cannot be|not found|cannot skip|cannot publish/i)) {
     return { status: 400, body: { success: false, error: msg } };
   }
@@ -89,6 +94,7 @@ router.get('/profile/:beneficiaryId', async (req, res) => {
         .status(404)
         .json({ success: false, error: 'AAC profile not found for beneficiary' });
     }
+    assertBranchMatch(req, doc.branchId, 'AAC profile');
     return res.json({ success: true, data: doc });
   } catch (err) {
     logger.warn('[aac] GET /profile failed: %s', err.message);
@@ -104,6 +110,18 @@ router.put('/profile/:beneficiaryId', async (req, res) => {
     if (!actor) {
       return res.status(401).json({ success: false, error: 'authenticated user required' });
     }
+    // Pre-flight cross-branch check: if profile exists, its branchId
+    // must match. If it doesn't exist, force the incoming branchId to
+    // the caller's scope (restricted users cannot create cross-branch).
+    const existing = await aac.getByBeneficiary(beneficiaryId);
+    if (existing) {
+      assertBranchMatch(req, existing.branchId, 'AAC profile');
+    } else if (req.branchScope && req.branchScope.restricted) {
+      // Force branchId onto the body so cross-branch creation is
+      // mechanically impossible.
+      req.body = req.body || {};
+      req.body.branchId = req.branchScope.branchId;
+    }
     const doc = await aac.upsertProfile(beneficiaryId, req.body || {}, actor);
     return res.json({ success: true, data: doc });
   } catch (err) {
@@ -115,8 +133,11 @@ router.put('/profile/:beneficiaryId', async (req, res) => {
 
 router.get('/profiles', async (req, res) => {
   try {
-    // Branch-scoped users fall back to their own branch automatically.
-    const branchId = req.query.branchId || req.branchId || null;
+    // SECURITY: effectiveBranchScope ALWAYS returns the caller's
+    // own branchId when restricted (ignoring user-supplied query).
+    // Closes the W269 finding where a missing query param caused
+    // the filter to be null (cross-branch leak).
+    const branchId = effectiveBranchScope(req);
     const opts = {
       modality: req.query.modality || undefined,
       pecsPhase: req.query.pecsPhase ? parseInt(req.query.pecsPhase, 10) : undefined,
@@ -141,6 +162,15 @@ router.post('/profile/:beneficiaryId/pecs-phase', async (req, res) => {
     if (!actor) {
       return res.status(401).json({ success: false, error: 'authenticated user required' });
     }
+    // Pre-flight: load existing profile and check branch ownership
+    // before allowing any append to the immutable transition history.
+    const existing = await aac.getByBeneficiary(beneficiaryId);
+    if (!existing) {
+      return res
+        .status(404)
+        .json({ success: false, error: 'AAC profile not found for beneficiary' });
+    }
+    assertBranchMatch(req, existing.branchId, 'AAC profile');
     const { toPhase, criteriaMet, notes } = req.body || {};
     const doc = await aac.transitionPecsPhase(
       { beneficiaryId, toPhase, criteriaMet, notes },
@@ -156,7 +186,7 @@ router.post('/profile/:beneficiaryId/pecs-phase', async (req, res) => {
 
 router.get('/reviews/overdue', async (req, res) => {
   try {
-    const branchId = req.query.branchId || req.branchId || null;
+    const branchId = effectiveBranchScope(req);
     const out = await aac.listOverdueReviews(branchId, { limit: req.query.limit });
     return res.json({ success: true, data: out });
   } catch (err) {

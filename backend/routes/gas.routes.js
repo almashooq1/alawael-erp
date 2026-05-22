@@ -36,6 +36,7 @@ const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { assertBranchMatch } = require('../middleware/assertBranchMatch');
 const logger = require('../utils/logger');
 
 const gas = require('../services/gas.service');
@@ -60,6 +61,9 @@ router.use(requireBranchAccess);
 // ─── Error helpers ───────────────────────────────────────────────
 function _toErrorResponse(err) {
   const msg = err && err.message ? String(err.message) : 'unknown error';
+  if (err && err.status === 403) {
+    return { status: 403, body: { success: false, error: msg } };
+  }
   if (
     msg.match(
       /required|invalid|must be|cannot be|already exists|not found|cannot supersede|cannot score/i
@@ -101,6 +105,7 @@ router.get('/scale/goal/:goalId', async (req, res) => {
     if (!doc) {
       return res.status(404).json({ success: false, error: 'No active GAS scale for this goal' });
     }
+    assertBranchMatch(req, doc.branchId, 'GAS scale');
     return res.json({ success: true, data: doc });
   } catch (err) {
     logger.warn('[gas] GET /scale/goal failed: %s', err.message);
@@ -112,6 +117,10 @@ router.get('/scale/goal/:goalId', async (req, res) => {
 router.get('/scale/goal/:goalId/versions', async (req, res) => {
   try {
     const items = await gas.listVersions(req.params.goalId);
+    if (items.length > 0) {
+      // All versions of one goal carry the same branchId by construction.
+      assertBranchMatch(req, items[0].branchId, 'GAS scale versions');
+    }
     return res.json({ success: true, data: { items, total: items.length } });
   } catch (err) {
     logger.warn('[gas] GET /scale/goal/:goalId/versions failed: %s', err.message);
@@ -126,7 +135,13 @@ router.post('/scale', async (req, res) => {
     if (!actor) {
       return res.status(401).json({ success: false, error: 'authenticated user required' });
     }
-    const doc = await gas.createScale(req.body || {}, actor);
+    // SECURITY: force branchId onto the body so a restricted caller
+    // cannot create a scale tagged in a foreign branch.
+    const body = { ...(req.body || {}) };
+    const enforceBranch =
+      req.branchScope && req.branchScope.restricted ? String(req.branchScope.branchId) : null;
+    if (enforceBranch) body.branchId = enforceBranch;
+    const doc = await gas.createScale(body, actor, { enforceBranch });
     return res.status(201).json({ success: true, data: doc });
   } catch (err) {
     logger.warn('[gas] POST /scale failed: %s', err.message);
@@ -141,6 +156,11 @@ router.post('/scale/:id/supersede', async (req, res) => {
     if (!actor) {
       return res.status(401).json({ success: false, error: 'authenticated user required' });
     }
+    const existing = await gas.getScaleById(req.params.id);
+    if (!existing) {
+      return res.status(404).json({ success: false, error: 'GAS scale not found' });
+    }
+    assertBranchMatch(req, existing.branchId, 'GAS scale');
     const { supersedeReason_ar, ...payload } = req.body || {};
     const doc = await gas.supersedeScale(req.params.id, payload, supersedeReason_ar, actor);
     return res.json({ success: true, data: doc });
@@ -157,6 +177,11 @@ router.patch('/scale/:id/archive', async (req, res) => {
     if (!actor) {
       return res.status(401).json({ success: false, error: 'authenticated user required' });
     }
+    const existing = await gas.getScaleById(req.params.id);
+    if (!existing) {
+      return res.status(404).json({ success: false, error: 'GAS scale not found' });
+    }
+    assertBranchMatch(req, existing.branchId, 'GAS scale');
     const { archiveReason_ar } = req.body || {};
     const doc = await gas.archiveScale(req.params.id, archiveReason_ar, actor);
     return res.json({ success: true, data: doc });
@@ -177,6 +202,16 @@ router.post('/scoring', async (req, res) => {
     if (!actor) {
       return res.status(401).json({ success: false, error: 'authenticated user required' });
     }
+    // SECURITY: load the target scale and verify branch ownership
+    // before recording. Prevents cross-branch scoring writes that
+    // would inherit the foreign branch's tenant tag.
+    if (req.body && req.body.scaleId) {
+      const targetScale = await gas.getScaleById(req.body.scaleId);
+      if (!targetScale) {
+        return res.status(404).json({ success: false, error: 'GAS scale not found' });
+      }
+      assertBranchMatch(req, targetScale.branchId, 'GAS scale');
+    }
     const doc = await gas.recordScoring(req.body || {}, actor);
     return res.status(201).json({ success: true, data: doc });
   } catch (err) {
@@ -192,6 +227,11 @@ router.post('/scoring/:id/supersede', async (req, res) => {
     if (!actor) {
       return res.status(401).json({ success: false, error: 'authenticated user required' });
     }
+    const existing = await gas.getScoringById(req.params.id);
+    if (!existing) {
+      return res.status(404).json({ success: false, error: 'GAS scoring not found' });
+    }
+    assertBranchMatch(req, existing.branchId, 'GAS scoring');
     const { supersedeReason_ar, ...payload } = req.body || {};
     const doc = await gas.supersedeScoring(req.params.id, payload, supersedeReason_ar, actor);
     return res.json({ success: true, data: doc });
@@ -211,6 +251,9 @@ router.get('/scoring/goal/:goalId', async (req, res) => {
       limit: req.query.limit,
     };
     const out = await gas.listScoringsByGoal(req.params.goalId, opts);
+    if (out.items.length > 0) {
+      assertBranchMatch(req, out.items[0].branchId, 'GAS scorings');
+    }
     return res.json({ success: true, data: out });
   } catch (err) {
     logger.warn('[gas] GET /scoring/goal failed: %s', err.message);
@@ -228,6 +271,9 @@ router.get('/scoring/beneficiary/:beneficiaryId', async (req, res) => {
       limit: req.query.limit,
     };
     const out = await gas.listScoringsByBeneficiary(req.params.beneficiaryId, opts);
+    if (out.items.length > 0) {
+      assertBranchMatch(req, out.items[0].branchId, 'GAS scorings');
+    }
     return res.json({ success: true, data: out });
   } catch (err) {
     logger.warn('[gas] GET /scoring/beneficiary failed: %s', err.message);
@@ -242,6 +288,11 @@ router.get('/scoring/beneficiary/:beneficiaryId', async (req, res) => {
 
 router.get('/tscore/scale/:scaleId', async (req, res) => {
   try {
+    const scale = await gas.getScaleById(req.params.scaleId);
+    if (!scale) {
+      return res.status(404).json({ success: false, error: 'GAS scale not found' });
+    }
+    assertBranchMatch(req, scale.branchId, 'GAS scale');
     const opts = { upTo: _parseDate(req.query.upTo) };
     const t = await gas.computeIndividualTScore(req.params.scaleId, opts);
     return res.json({ success: true, data: { tScore: t } });
@@ -259,6 +310,13 @@ router.get('/tscore/beneficiary/:beneficiaryId', async (req, res) => {
       upTo: _parseDate(req.query.upTo),
     };
     const out = await gas.computeBeneficiaryComposite(req.params.beneficiaryId, opts);
+    // Composite includes contributingScales[] each with branchId via
+    // the underlying GasScale doc — pick any one to verify ownership.
+    const first = out.contributingScales[0] || out.missingScales[0];
+    if (first) {
+      const scale = await gas.getScaleById(first.scaleId);
+      if (scale) assertBranchMatch(req, scale.branchId, 'GAS composite');
+    }
     return res.json({ success: true, data: out });
   } catch (err) {
     logger.warn('[gas] GET /tscore/beneficiary failed: %s', err.message);

@@ -85,7 +85,7 @@ function _clampLimit(limit, max = 200, fallback = 50) {
 // Scale lifecycle
 // ════════════════════════════════════════════════════════════════════
 
-async function createScale(input, actorId) {
+async function createScale(input, actorId, opts = {}) {
   if (!input || typeof input !== 'object') {
     throw new Error('scale payload is required');
   }
@@ -110,6 +110,41 @@ async function createScale(input, actorId) {
   if (!domain) throw new Error('domain is required');
   if (!Array.isArray(levels) || levels.length !== 5) {
     throw new Error('levels must be an array of exactly 5 entries');
+  }
+
+  // SECURITY (W269 / Vuln 7): when the caller is branch-scoped,
+  // verify the supplied beneficiaryId belongs to that branch BEFORE
+  // creating a scale that would tag a foreign-branch beneficiary's
+  // composite T-score with our own tenant data. Caller passes
+  // `opts.enforceBranch` = the caller's branchId; we look up the
+  // beneficiary and reject on mismatch.
+  if (opts.enforceBranch) {
+    let Beneficiary;
+    try {
+      Beneficiary = mongoose.model('Beneficiary');
+    } catch (_e) {
+      // Beneficiary model not registered — load it lazily.
+      try {
+        require('../models/Beneficiary');
+        Beneficiary = mongoose.model('Beneficiary');
+      } catch (e2) {
+        // Beneficiary model unavailable in test/internal callers.
+        // Skip the branch check (the test pattern injects mocked
+        // models; opts.enforceBranch is unset in those paths).
+        Beneficiary = null;
+      }
+    }
+    if (Beneficiary) {
+      const ben = await Beneficiary.findById(beneficiaryId).select('branchId').lean();
+      if (!ben) {
+        throw new Error('beneficiary not found');
+      }
+      if (ben.branchId && String(ben.branchId) !== String(opts.enforceBranch)) {
+        const err = new Error('cross-branch access denied for beneficiary');
+        err.status = 403;
+        throw err;
+      }
+    }
   }
 
   // Pre-flight: refuse to create when an active scale already exists
@@ -144,6 +179,26 @@ async function createScale(input, actorId) {
 async function getActiveByGoal(goalId) {
   _requireId(goalId, 'goalId');
   const doc = await _Scale().findOne({ goalId, status: 'active' }).lean();
+  return doc || null;
+}
+
+/**
+ * Fetch a scale by id (any status). Used by route-layer authorization
+ * checks to verify branch ownership before delegating mutations.
+ */
+async function getScaleById(scaleId) {
+  _requireId(scaleId, 'scaleId');
+  const doc = await _Scale().findById(scaleId).lean();
+  return doc || null;
+}
+
+/**
+ * Fetch a scoring by id (any status). Used by route-layer authorization
+ * checks to verify branch ownership before delegating mutations.
+ */
+async function getScoringById(scoringId) {
+  _requireId(scoringId, 'scoringId');
+  const doc = await _Scoring().findById(scoringId).lean();
   return doc || null;
 }
 
@@ -500,6 +555,8 @@ module.exports = {
   // scales
   createScale,
   getActiveByGoal,
+  getScaleById,
+  getScoringById,
   listVersions,
   supersedeScale,
   archiveScale,

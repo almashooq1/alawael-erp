@@ -344,14 +344,19 @@ function createHikvisionRouter({
     }
   });
 
-  router.patch('/devices/:id', requirePerm('hikvision.device.update'), async (req, res) => {
-    try {
-      const result = await deviceService.updateDevice(req.params.id, req.body || {});
-      return respond(res, result);
-    } catch (err) {
-      return safeError(res, err, 'hikvision.device.update');
+  router.patch(
+    '/devices/:id',
+    requirePerm('hikvision.device.update'),
+    requireMfaTier(2),
+    async (req, res) => {
+      try {
+        const result = await deviceService.updateDevice(req.params.id, req.body || {});
+        return respond(res, result);
+      } catch (err) {
+        return safeError(res, err, 'hikvision.device.update');
+      }
     }
-  });
+  );
 
   router.post(
     '/devices/:id/retire',
@@ -407,14 +412,19 @@ function createHikvisionRouter({
     }
   });
 
-  router.patch('/channels/:id', requirePerm('hikvision.channel.update'), async (req, res) => {
-    try {
-      const result = await deviceService.updateChannel(req.params.id, req.body || {});
-      return respond(res, result);
-    } catch (err) {
-      return safeError(res, err, 'hikvision.channel.update');
+  router.patch(
+    '/channels/:id',
+    requirePerm('hikvision.channel.update'),
+    requireMfaTier(2),
+    async (req, res) => {
+      try {
+        const result = await deviceService.updateChannel(req.params.id, req.body || {});
+        return respond(res, result);
+      } catch (err) {
+        return safeError(res, err, 'hikvision.channel.update');
+      }
     }
-  });
+  );
 
   // Note: the device-push webhook lives on a SEPARATE unauthenticated
   // router (createHikvisionWebhookRouter below) — see app.js wiring.
@@ -567,14 +577,19 @@ function createHikvisionRouter({
       }
     });
 
-    router.patch('/libraries/:id', requirePerm('hikvision.library.update'), async (req, res) => {
-      try {
-        const r = await libraryService.updateLibrary(req.params.id, req.body || {});
-        return respond(res, r);
-      } catch (err) {
-        return safeError(res, err, 'hikvision.library.update');
+    router.patch(
+      '/libraries/:id',
+      requirePerm('hikvision.library.update'),
+      requireMfaTier(2),
+      async (req, res) => {
+        try {
+          const r = await libraryService.updateLibrary(req.params.id, req.body || {});
+          return respond(res, r);
+        } catch (err) {
+          return safeError(res, err, 'hikvision.library.update');
+        }
       }
-    });
+    );
 
     router.post(
       '/libraries/:id/archive',

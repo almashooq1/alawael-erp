@@ -304,6 +304,22 @@ const SENSITIVE_RULES = Object.freeze([
     pathRe: /^\/health-check$/,
     why: 'ZKTeco fan-out health-check — admin operational diagnostic (W275n)',
   },
+  // ─── Wave 275o — Hikvision PATCH updates ───────────────────────
+  {
+    method: 'patch',
+    pathRe: /^\/devices\/:[a-zA-Z]+$/,
+    why: 'hikvision device UPDATE — admin attribute change (W275o)',
+  },
+  {
+    method: 'patch',
+    pathRe: /^\/channels\/:[a-zA-Z]+$/,
+    why: 'hikvision channel UPDATE — admin attribute change (W275o)',
+  },
+  {
+    method: 'patch',
+    pathRe: /^\/libraries\/:[a-zA-Z]+$/,
+    why: 'hikvision library UPDATE — admin attribute change (W275o)',
+  },
 ]);
 
 // ─── Router-stack walker ──────────────────────────────────────────

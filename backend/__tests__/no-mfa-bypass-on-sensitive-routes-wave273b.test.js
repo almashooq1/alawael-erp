@@ -242,6 +242,29 @@ const SENSITIVE_RULES = Object.freeze([
     pathRe: /^\/devices\/:[a-zA-Z]+\/users\/:[a-zA-Z]+\/map$/,
     why: 'device-user → employee UNMAP — mirror of map endpoint already gated W273 (W275k)',
   },
+  // ─── Wave 275L — ZKTeco operator control + cross-router sync ───
+  // Sync operations are cron-shaped at the service layer (W275e/g/j
+  // pattern). Route-only gating is the correct scope.
+  {
+    method: 'post',
+    pathRe: /^\/devices\/:[a-zA-Z]+\/connect$/,
+    why: 'ZKTeco device connect — operator session control (W275L)',
+  },
+  {
+    method: 'post',
+    pathRe: /^\/devices\/:[a-zA-Z]+\/disconnect$/,
+    why: 'ZKTeco device disconnect — operator session control (W275L)',
+  },
+  {
+    method: 'post',
+    pathRe: /^\/devices\/:[a-zA-Z]+\/sync$/,
+    why: 'device manual sync (zkteco + biometric-attendance) — cron path bypasses HTTP (W275L)',
+  },
+  {
+    method: 'post',
+    pathRe: /^\/devices\/:[a-zA-Z]+\/auto-sync$/,
+    why: 'ZKTeco auto-sync toggle — admin preference affecting future cron (W275L)',
+  },
 ]);
 
 // ─── Router-stack walker ──────────────────────────────────────────

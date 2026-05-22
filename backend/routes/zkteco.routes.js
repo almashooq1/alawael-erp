@@ -143,40 +143,50 @@ router.delete('/devices/:id', roleMiddleware('admin'), requireMfaTier(2), async 
  * الاتصال بجهاز
  * POST /api/zkteco/devices/:id/connect
  */
-router.post('/devices/:id/connect', roleMiddleware('admin', 'hr_manager'), async (req, res) => {
-  try {
-    const result = await ZKTecoService.connectDevice(req.params.id);
-    res.json({
-      success: true,
-      message: 'تم الاتصال بالجهاز بنجاح',
-      data: result,
-    });
-  } catch (error) {
-    res.status(400).json({
-      success: false,
-      message: safeError(error),
-    });
+router.post(
+  '/devices/:id/connect',
+  roleMiddleware('admin', 'hr_manager'),
+  requireMfaTier(2),
+  async (req, res) => {
+    try {
+      const result = await ZKTecoService.connectDevice(req.params.id);
+      res.json({
+        success: true,
+        message: 'تم الاتصال بالجهاز بنجاح',
+        data: result,
+      });
+    } catch (error) {
+      res.status(400).json({
+        success: false,
+        message: safeError(error),
+      });
+    }
   }
-});
+);
 
 /**
  * قطع الاتصال عن جهاز
  * POST /api/zkteco/devices/:id/disconnect
  */
-router.post('/devices/:id/disconnect', roleMiddleware('admin', 'hr_manager'), async (req, res) => {
-  try {
-    await ZKTecoService.disconnectDevice(req.params.id);
-    res.json({
-      success: true,
-      message: 'تم قطع الاتصال',
-    });
-  } catch (error) {
-    res.status(400).json({
-      success: false,
-      message: safeError(error),
-    });
+router.post(
+  '/devices/:id/disconnect',
+  roleMiddleware('admin', 'hr_manager'),
+  requireMfaTier(2),
+  async (req, res) => {
+    try {
+      await ZKTecoService.disconnectDevice(req.params.id);
+      res.json({
+        success: true,
+        message: 'تم قطع الاتصال',
+      });
+    } catch (error) {
+      res.status(400).json({
+        success: false,
+        message: safeError(error),
+      });
+    }
   }
-});
+);
 
 /**
  * اختبار الاتصال بعنوان IP
@@ -219,26 +229,31 @@ router.get('/devices/:id/time', async (req, res) => {
  * مزامنة سجلات الحضور من جهاز محدد
  * POST /api/zkteco/devices/:id/sync
  */
-router.post('/devices/:id/sync', roleMiddleware('admin', 'hr_manager'), async (req, res) => {
-  try {
-    const result = await ZKTecoService.syncAttendanceLogs(req.params.id, 'manual', req.user.id);
-    res.json({
-      success: true,
-      message:
-        result.status === 'success'
-          ? 'تمت المزامنة بنجاح'
-          : result.status === 'partial'
-            ? 'تمت المزامنة جزئياً'
-            : 'فشلت المزامنة',
-      data: result,
-    });
-  } catch (error) {
-    res.status(400).json({
-      success: false,
-      message: safeError(error),
-    });
+router.post(
+  '/devices/:id/sync',
+  roleMiddleware('admin', 'hr_manager'),
+  requireMfaTier(2),
+  async (req, res) => {
+    try {
+      const result = await ZKTecoService.syncAttendanceLogs(req.params.id, 'manual', req.user.id);
+      res.json({
+        success: true,
+        message:
+          result.status === 'success'
+            ? 'تمت المزامنة بنجاح'
+            : result.status === 'partial'
+              ? 'تمت المزامنة جزئياً'
+              : 'فشلت المزامنة',
+        data: result,
+      });
+    } catch (error) {
+      res.status(400).json({
+        success: false,
+        message: safeError(error),
+      });
+    }
   }
-});
+);
 
 /**
  * مزامنة جميع الأجهزة
@@ -279,22 +294,27 @@ router.get('/devices/:id/sync-history', async (req, res) => {
  * تفعيل/تعطيل المزامنة التلقائية
  * POST /api/zkteco/devices/:id/auto-sync
  */
-router.post('/devices/:id/auto-sync', roleMiddleware('admin', 'hr_manager'), async (req, res) => {
-  try {
-    const { enabled, interval } = req.body;
-    const result = await ZKTecoService.toggleAutoSync(req.params.id, enabled, interval);
-    res.json({
-      success: true,
-      message: enabled ? 'تم تفعيل المزامنة التلقائية' : 'تم تعطيل المزامنة التلقائية',
-      data: result,
-    });
-  } catch (error) {
-    res.status(400).json({
-      success: false,
-      message: safeError(error),
-    });
+router.post(
+  '/devices/:id/auto-sync',
+  roleMiddleware('admin', 'hr_manager'),
+  requireMfaTier(2),
+  async (req, res) => {
+    try {
+      const { enabled, interval } = req.body;
+      const result = await ZKTecoService.toggleAutoSync(req.params.id, enabled, interval);
+      res.json({
+        success: true,
+        message: enabled ? 'تم تفعيل المزامنة التلقائية' : 'تم تعطيل المزامنة التلقائية',
+        data: result,
+      });
+    } catch (error) {
+      res.status(400).json({
+        success: false,
+        message: safeError(error),
+      });
+    }
   }
-});
+);
 
 // ════════════════════════════════════════════════════════════════════════════════
 //  إدارة مستخدمي الجهاز (Device Users)

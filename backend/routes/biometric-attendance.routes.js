@@ -122,7 +122,8 @@ router.post('/devices/:id/ping', async (req, res) => {
 });
 
 // POST /api/biometric-attendance/devices/:id/sync — مزامنة سجلات الجهاز
-router.post('/devices/:id/sync', async (req, res) => {
+// W275L: cross-router gating of POST /devices/:id/sync (matches zkteco)
+router.post('/devices/:id/sync', requireMfaTier(2), async (req, res) => {
   try {
     const device = await ZktecoDevice.findById(req.params.id);
     if (!device) return res.status(404).json({ success: false, message: 'الجهاز غير موجود' });

@@ -82,7 +82,11 @@ const OPTIONAL_REQUIRES_ALLOWLIST = new Set([
   //   - auditLog.service     -> shipped 2026-05-19 commit 10c077325
   //   - anchorLedger.service -> shipped 2026-05-19 (this commit)
   // Both are now actively verified by the broken-requires guard.
-  'app.js::./models/BeneficiaryFile',
+  // W277 Pass 3 — care-planning wiring extracted from app.js to
+  // startup/carePlanningBootstrap.js; the relative path shifted from
+  // `./models/BeneficiaryFile` (app.js) to `../models/BeneficiaryFile`
+  // (one dir deeper). Same optional file-model rationale stands.
+  'startup/carePlanningBootstrap.js::../models/BeneficiaryFile',
 ]);
 
 function walk(dir, files = []) {

@@ -811,9 +811,13 @@ function createHikvisionRouter({
     router.post(
       '/events/:rawEventId/process',
       requirePerm('hikvision.event.process'),
+      requireMfaTier(2),
       async (req, res) => {
         try {
-          const r = await parserService.processRawEvent(req.params.rawEventId);
+          // W275u — pass actor for service-layer MFA guard.
+          const r = await parserService.processRawEvent(req.params.rawEventId, {
+            actor: actorFrom(req),
+          });
           return respond(res, r);
         } catch (err) {
           return safeError(res, err, 'hikvision.event.process');
@@ -824,11 +828,14 @@ function createHikvisionRouter({
     router.post(
       '/events/process-batch',
       requirePerm('hikvision.event.process'),
+      requireMfaTier(2),
       async (req, res) => {
         try {
+          // W275u — pass actor.
           const r = await parserService.processBatch({
             limit: req.body?.limit,
             since: req.body?.since,
+            actor: actorFrom(req),
           });
           return respond(res, r);
         } catch (err) {
@@ -840,9 +847,14 @@ function createHikvisionRouter({
     router.post(
       '/events/reprocess-failed',
       requirePerm('hikvision.event.process'),
+      requireMfaTier(2),
       async (req, res) => {
         try {
-          const r = await parserService.reprocessFailed({ limit: req.body?.limit });
+          // W275u — pass actor.
+          const r = await parserService.reprocessFailed({
+            limit: req.body?.limit,
+            actor: actorFrom(req),
+          });
           return respond(res, r);
         } catch (err) {
           return safeError(res, err, 'hikvision.event.reprocess-failed');

@@ -2470,6 +2470,9 @@ try {
             attendanceSourceService: attendanceSourceSvc,
             branchConfigService: branchConfigSvc, // Wave 110
             logger,
+            // W275u — service-layer MFA on processRawEvent/processBatch/
+            // reprocessFailed. Scheduler passes system actor.
+            enforceMfa: true,
           });
         } catch (p3err) {
           logger.warn('[Hikvision] Phase 3 parser/review services failed to wire:', p3err.message);
@@ -2571,6 +2574,9 @@ try {
               attendanceSourceService: attendanceSourceSvc,
               branchConfigService: branchConfigSvc, // Wave 110
               logger,
+              // W275u — also enable on the re-constructed parser
+              // (Wave 99 Phase 4 path that wires payroll-period lock).
+              enforceMfa: true,
             });
           }
         } catch (p4err) {

@@ -336,6 +336,22 @@ const SENSITIVE_RULES = Object.freeze([
     pathRe: /^\/health\/sweep$/,
     why: 'health monitor sweep — operator/cron stale-device marker (W275t)',
   },
+  // ─── Wave 275u — Event parser routes ──────────────────────────
+  {
+    method: 'post',
+    pathRe: /^\/events\/:[a-zA-Z]+\/process$/,
+    why: 'event parser process single — operator-triggered (W275u)',
+  },
+  {
+    method: 'post',
+    pathRe: /^\/events\/process-batch$/,
+    why: 'event parser batch processing — operator/cron drain pending (W275u)',
+  },
+  {
+    method: 'post',
+    pathRe: /^\/events\/reprocess-failed$/,
+    why: 'event parser retry failed — operator triage (W275u)',
+  },
 ]);
 
 // ─── Router-stack walker ──────────────────────────────────────────

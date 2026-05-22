@@ -170,7 +170,11 @@ function createHikvisionScheduler({
       available: !!eventParser,
       handler: async args => {
         if (!eventParser) throw new Error('eventParser not wired');
-        return eventParser.drainPending(args || {});
+        // W275u — fixed pre-existing typo: service exports `processBatch`
+        // (not `drainPending`). Bug never surfaced because RAW_EVENT_PARSE
+        // cron handler hadn't run in test contexts. Also pass system
+        // actor for service-layer MFA.
+        return eventParser.processBatch({ ...(args || {}), actor: _systemActor() });
       },
     },
     [reg.JOB_ID.HEALTH_SWEEP]: {

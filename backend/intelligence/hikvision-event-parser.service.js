@@ -25,6 +25,7 @@
  */
 
 const reg = require('./hikvision.registry');
+const { checkMfaTier } = require('./mfa-tier-check.lib');
 
 function createHikvisionEventParserService({
   // Models
@@ -39,6 +40,8 @@ function createHikvisionEventParserService({
   branchConfigService = null, // Wave 110 — optional per-branch overrides
   logger = console,
   now = () => new Date(),
+  // ─── Wave 275u — Service-layer MFA tier enforcement ────────────
+  enforceMfa = false,
 } = {}) {
   if (!rawEventModel) {
     throw new Error('hikvision-event-parser.service: rawEventModel is required');
@@ -56,9 +59,17 @@ function createHikvisionEventParserService({
     throw new Error('hikvision-event-parser.service: attendanceSourceService is required');
   }
 
+  // Wave 275u — shared helper bound to factory.
+  function _checkMfaTier(actor, requiredTier, maxAgeMin) {
+    return checkMfaTier(actor, requiredTier, maxAgeMin, { enforceMfa, now });
+  }
+
   // ─── Public ──────────────────────────────────────────────────
 
-  async function processRawEvent(rawEventId) {
+  async function processRawEvent(rawEventId, opts = {}) {
+    // W275u — MFA tier 2 (15 min).
+    const mfa = _checkMfaTier(opts.actor, 2, 15);
+    if (!mfa.ok) return mfa;
     if (!rawEventId) return { ok: false, reason: reg.REASON.RAW_EVENT_NOT_FOUND };
 
     const raw = await rawEventModel.findById(rawEventId);
@@ -318,7 +329,10 @@ function createHikvisionEventParserService({
     };
   }
 
-  async function processBatch({ limit, since } = {}) {
+  async function processBatch({ limit, since, actor } = {}) {
+    // W275u — MFA tier 2 (15 min). Cron path passes system actor via scheduler.
+    const mfa = _checkMfaTier(actor, 2, 15);
+    if (!mfa.ok) return mfa;
     const lim = Math.min(Math.max(Number(limit) || 50, 1), 500);
     const q = { parseStatus: reg.PARSE_STATUS.PENDING };
     if (since) q.receivedAt = { $gte: new Date(since) };
@@ -339,7 +353,10 @@ function createHikvisionEventParserService({
     return { ok: true, scanned: candidates.length, results };
   }
 
-  async function reprocessFailed({ limit } = {}) {
+  async function reprocessFailed({ limit, actor } = {}) {
+    // W275u — MFA tier 2 (15 min).
+    const mfa = _checkMfaTier(actor, 2, 15);
+    if (!mfa.ok) return mfa;
     const lim = Math.min(Math.max(Number(limit) || 50, 1), 500);
     const cursor = rawEventModel
       .find({ parseStatus: reg.PARSE_STATUS.FAILED })
@@ -357,7 +374,9 @@ function createHikvisionEventParserService({
         logger.warn('[Hikvision Parser] reprocess reset failed:', err.message);
       }
     }
-    return processBatch({ limit: lim });
+    // W275u — propagate actor to the inner processBatch so its MFA
+    // guard accepts the recursive call.
+    return processBatch({ limit: lim, actor });
   }
 
   // ─── Helpers ─────────────────────────────────────────────────

@@ -5,6 +5,14 @@ const { body, param, query, validationResult } = require('express-validator');
 
 const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+// W277f — MFA tier-2 step-up on e-signature operations.
+// 21 CFR Part 11 §11.200(a)(1)(i) requires that the act of signing be
+// authenticated by at least two distinct identification components, with
+// the first signing of a session executed using ALL components and
+// subsequent signings using at least one. requireMfaTier(2) is the
+// server-side enforcement of that re-auth (the existing `reAuthConfirmed`
+// body flag on /sign was advisory; this guard makes it binding).
+const { attachMfaActor, requireMfaTier } = require('../middleware/requireMfaTier');
 const safeError = require('../utils/safeError');
 const { getDefault: getService } = require('../services/quality/controlledDocument.service');
 const registry = require('../config/controlled-document.registry');
@@ -139,6 +147,8 @@ router.post(
 router.post(
   '/:id/versions/:vn/sign',
   authenticate,
+  attachMfaActor,
+  requireMfaTier(2),
   [
     param('id').isMongoId(),
     param('vn').isInt({ min: 1 }),
@@ -179,7 +189,9 @@ router.post(
 router.post(
   '/:id/versions/:vn/revoke-signature/:sigId',
   authenticate,
+  attachMfaActor,
   authorize(['admin', 'ceo', 'quality_manager']),
+  requireMfaTier(2),
   [
     param('id').isMongoId(),
     param('vn').isInt({ min: 1 }),
@@ -207,7 +219,9 @@ router.post(
 router.post(
   '/:id/versions/:vn/transition',
   authenticate,
+  attachMfaActor,
   authorize(['admin', 'ceo', 'quality_manager']),
+  requireMfaTier(2),
   [
     param('id').isMongoId(),
     param('vn').isInt({ min: 1 }),

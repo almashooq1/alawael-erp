@@ -12,6 +12,13 @@ const { body, param, query, validationResult } = require('express-validator');
 
 const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+// W277d — MFA tier-2 on RCA lifecycle terminals (transition/verify/cancel).
+// Pattern from W273 / W277b / W277c. Ishikawa + 5-whys + root-cause +
+// action mutations stay ungated — those are the iterative core of an
+// investigation that can span days; gating each row would fatigue users
+// into blind-clicking step-up. The 3 terminals are the moments the
+// investigation conclusion becomes part of the audit record.
+const { attachMfaActor, requireMfaTier } = require('../middleware/requireMfaTier');
 const safeError = require('../utils/safeError');
 const { getDefault: getService } = require('../services/quality/rca.service');
 const registry = require('../config/rca.registry');
@@ -318,7 +325,9 @@ router.patch(
 router.post(
   '/:id/transition',
   authenticate,
+  attachMfaActor,
   authorize(['admin', 'ceo', 'quality_manager', 'patient_safety_officer']),
+  requireMfaTier(2),
   [param('id').isMongoId(), body('to').isIn(registry.RCA_STATUSES)],
   handleValidation,
   wrap(async (req, res) => {
@@ -335,7 +344,9 @@ router.post(
 router.post(
   '/:id/verify',
   authenticate,
+  attachMfaActor,
   authorize(['admin', 'ceo', 'quality_manager', 'patient_safety_officer']),
+  requireMfaTier(2),
   [param('id').isMongoId()],
   handleValidation,
   wrap(async (req, res) => {
@@ -352,7 +363,9 @@ router.post(
 router.post(
   '/:id/cancel',
   authenticate,
+  attachMfaActor,
   authorize(['admin', 'ceo', 'quality_manager']),
+  requireMfaTier(2),
   [param('id').isMongoId(), body('reason').isString().isLength({ min: 3 })],
   handleValidation,
   wrap(async (req, res) => {

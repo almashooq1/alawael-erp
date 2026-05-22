@@ -304,14 +304,19 @@ function createHikvisionRouter({
 
   // ─── Devices ────────────────────────────────────────────────
 
-  router.post('/devices', requirePerm('hikvision.device.create'), async (req, res) => {
-    try {
-      const result = await deviceService.registerDevice(req.body || {});
-      return respond(res, result);
-    } catch (err) {
-      return safeError(res, err, 'hikvision.device.create');
+  router.post(
+    '/devices',
+    requirePerm('hikvision.device.create'),
+    requireMfaTier(2),
+    async (req, res) => {
+      try {
+        const result = await deviceService.registerDevice(req.body || {});
+        return respond(res, result);
+      } catch (err) {
+        return safeError(res, err, 'hikvision.device.create');
+      }
     }
-  });
+  );
 
   router.get('/devices/:idOrCode', requirePerm('hikvision.device.read'), async (req, res) => {
     try {
@@ -367,6 +372,7 @@ function createHikvisionRouter({
   router.post(
     '/devices/:deviceId/channels',
     requirePerm('hikvision.channel.create'),
+    requireMfaTier(2),
     async (req, res) => {
       try {
         const result = await deviceService.registerChannel({
@@ -518,14 +524,19 @@ function createHikvisionRouter({
   // deployable on its own; routes simply 404 if Phase 2 is off.
   if (libraryService && enrollmentService) {
     // Libraries
-    router.post('/libraries', requirePerm('hikvision.library.create'), async (req, res) => {
-      try {
-        const r = await libraryService.createLibrary(req.body || {});
-        return respond(res, r);
-      } catch (err) {
-        return safeError(res, err, 'hikvision.library.create');
+    router.post(
+      '/libraries',
+      requirePerm('hikvision.library.create'),
+      requireMfaTier(2),
+      async (req, res) => {
+        try {
+          const r = await libraryService.createLibrary(req.body || {});
+          return respond(res, r);
+        } catch (err) {
+          return safeError(res, err, 'hikvision.library.create');
+        }
       }
-    });
+    );
 
     router.get('/libraries/:idOrCode', requirePerm('hikvision.library.read'), async (req, res) => {
       try {
@@ -563,6 +574,7 @@ function createHikvisionRouter({
     router.post(
       '/libraries/:id/archive',
       requirePerm('hikvision.library.archive'),
+      requireMfaTier(2),
       async (req, res) => {
         try {
           const r = await libraryService.archiveLibrary(req.params.id, req.body?.reason);
@@ -576,6 +588,7 @@ function createHikvisionRouter({
     router.post(
       '/libraries/:id/subscribe-device',
       requirePerm('hikvision.library.subscribe'),
+      requireMfaTier(2),
       async (req, res) => {
         try {
           const r = await libraryService.subscribeDevice(req.params.id, req.body?.deviceId);
@@ -589,6 +602,7 @@ function createHikvisionRouter({
     router.post(
       '/libraries/:id/unsubscribe-device',
       requirePerm('hikvision.library.subscribe'),
+      requireMfaTier(2),
       async (req, res) => {
         try {
           const r = await libraryService.unsubscribeDevice(req.params.id, req.body?.deviceId);
@@ -1479,21 +1493,26 @@ function createHikvisionRouter({
       }
     );
 
-    router.post('/jobs/:id/run', requirePerm('hikvision.jobs.run'), async (req, res) => {
-      try {
-        const initiator = req.user?._id ? String(req.user._id) : 'manual';
-        const r = await scheduler.runJob({
-          jobId: req.params.id,
-          trigger: reg.JOB_TRIGGER.MANUAL,
-          initiator,
-          args: req.body?.args || {},
-        });
-        if (!r.ok) return respond(res, r);
-        return res.json({ success: true, data: r });
-      } catch (err) {
-        return safeError(res, err, 'hikvision.jobs.run');
+    router.post(
+      '/jobs/:id/run',
+      requirePerm('hikvision.jobs.run'),
+      requireMfaTier(2),
+      async (req, res) => {
+        try {
+          const initiator = req.user?._id ? String(req.user._id) : 'manual';
+          const r = await scheduler.runJob({
+            jobId: req.params.id,
+            trigger: reg.JOB_TRIGGER.MANUAL,
+            initiator,
+            args: req.body?.args || {},
+          });
+          if (!r.ok) return respond(res, r);
+          return res.json({ success: true, data: r });
+        } catch (err) {
+          return safeError(res, err, 'hikvision.jobs.run');
+        }
       }
-    });
+    );
   }
 
   // ─── Wave 109 — Real-Time Event Stream ─────────────────────
@@ -1527,15 +1546,20 @@ function createHikvisionRouter({
       }
     });
 
-    router.post('/stream/refresh', requirePerm('hikvision.stream.control'), async (_req, res) => {
-      try {
-        const r = await streamSupervisor.refresh();
-        if (!r.ok) return respond(res, r);
-        return res.json({ success: true, data: r });
-      } catch (err) {
-        return safeError(res, err, 'hikvision.stream.refresh');
+    router.post(
+      '/stream/refresh',
+      requirePerm('hikvision.stream.control'),
+      requireMfaTier(2),
+      async (_req, res) => {
+        try {
+          const r = await streamSupervisor.refresh();
+          if (!r.ok) return respond(res, r);
+          return res.json({ success: true, data: r });
+        } catch (err) {
+          return safeError(res, err, 'hikvision.stream.refresh');
+        }
       }
-    });
+    );
   }
 
   // ─── Wave 110 — Per-Branch Config Overrides ───────────────

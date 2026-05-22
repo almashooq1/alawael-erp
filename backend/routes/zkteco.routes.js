@@ -75,21 +75,26 @@ router.get('/devices/:id', async (req, res) => {
  * إضافة جهاز جديد
  * POST /api/zkteco/devices
  */
-router.post('/devices', roleMiddleware('admin', 'hr_manager'), async (req, res) => {
-  try {
-    const device = await ZKTecoService.addDevice(req.body, req.user.id);
-    res.status(201).json({
-      success: true,
-      message: 'تم إضافة الجهاز بنجاح',
-      data: device,
-    });
-  } catch (error) {
-    res.status(400).json({
-      success: false,
-      message: safeError(error),
-    });
+router.post(
+  '/devices',
+  roleMiddleware('admin', 'hr_manager'),
+  requireMfaTier(2),
+  async (req, res) => {
+    try {
+      const device = await ZKTecoService.addDevice(req.body, req.user.id);
+      res.status(201).json({
+        success: true,
+        message: 'تم إضافة الجهاز بنجاح',
+        data: device,
+      });
+    } catch (error) {
+      res.status(400).json({
+        success: false,
+        message: safeError(error),
+      });
+    }
   }
-});
+);
 
 /**
  * تعديل جهاز

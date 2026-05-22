@@ -132,6 +132,50 @@ const SENSITIVE_RULES = Object.freeze([
     pathRe: /^\/fraud\/scores\/decay-all$/,
     why: 'fraud score bulk decay — missed by W273, closed by W275g (route-only; cron-shaped service)',
   },
+  // ─── Wave 275h — Administrative CRUD + operator-trigger routes ─
+  // These were not in the original W273 audit (which focused on
+  // payroll/fraud-dismiss/template-suspend). Adding to drift guard
+  // to prevent future regression on admin surface.
+  {
+    method: 'post',
+    pathRe: /^\/devices$/,
+    why: 'hikvision device CREATE — adds new device to org infrastructure (W275h)',
+  },
+  {
+    method: 'post',
+    pathRe: /^\/devices\/:[a-zA-Z]+\/channels$/,
+    why: 'hikvision channel CREATE — adds new camera channel (W275h)',
+  },
+  {
+    method: 'post',
+    pathRe: /^\/libraries$/,
+    why: 'hikvision face library CREATE (W275h)',
+  },
+  {
+    method: 'post',
+    pathRe: /^\/libraries\/:[a-zA-Z]+\/archive$/,
+    why: 'hikvision face library ARCHIVE — destructive (W275h)',
+  },
+  {
+    method: 'post',
+    pathRe: /^\/libraries\/:[a-zA-Z]+\/subscribe-device$/,
+    why: 'hikvision library subscribe new device — pushes biometric data (W275h)',
+  },
+  {
+    method: 'post',
+    pathRe: /^\/libraries\/:[a-zA-Z]+\/unsubscribe-device$/,
+    why: 'hikvision library unsubscribe device — removes biometric data (W275h)',
+  },
+  {
+    method: 'post',
+    pathRe: /^\/jobs\/:[a-zA-Z]+\/run$/,
+    why: 'hikvision manual job trigger — operator override of scheduler (W275h)',
+  },
+  {
+    method: 'post',
+    pathRe: /^\/stream\/refresh$/,
+    why: 'hikvision stream supervisor refresh — operator stream control (W275h)',
+  },
 ]);
 
 // ─── Router-stack walker ──────────────────────────────────────────
@@ -438,10 +482,14 @@ describe('Wave 273b — synthetic fixture (scanner self-test)', () => {
     expect(violations).toEqual([]);
   });
 
-  test('IGNORES non-matching path (e.g., POST /devices — list create, no :id/retire)', () => {
+  test('IGNORES non-matching path (e.g., POST /unrelated)', () => {
     const router = express.Router();
     function handler(_req, _res) {}
-    router.post('/devices', handler);
+    // Note: POST /devices was originally the example here, but W275h
+    // promoted it to a SENSITIVE_RULE (device CREATE is itself
+    // sensitive — adds biometric hardware to org). Use a genuinely
+    // non-matching path to keep the scanner self-test honest.
+    router.post('/unrelated/path/that-does-not-match-any-rule', handler);
     const violations = _scanRouter('synthetic', router);
     expect(violations).toEqual([]);
   });

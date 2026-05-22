@@ -66,8 +66,8 @@ router.get('/devices/:id', async (req, res) => {
   }
 });
 
-// POST /api/biometric-attendance/devices — إضافة جهاز جديد
-router.post('/devices', async (req, res) => {
+// POST /api/biometric-attendance/devices — إضافة جهاز جديد (MFA tier 2 — W275h)
+router.post('/devices', requireMfaTier(2), async (req, res) => {
   try {
     const device = await ZktecoDevice.create({
       ...stripUpdateMeta(req.body),

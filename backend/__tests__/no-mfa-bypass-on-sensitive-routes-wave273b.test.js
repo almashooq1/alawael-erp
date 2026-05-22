@@ -216,6 +216,32 @@ const SENSITIVE_RULES = Object.freeze([
     pathRe: /^\/templates\/:[a-zA-Z]+\/reenroll$/,
     why: 'biometric template re-enrollment — creates new pending, supersedes previous (W275j)',
   },
+  // ─── Wave 275k — Workforce admin (biometric-attendance + zkteco) ─
+  {
+    method: 'post',
+    pathRe: /^\/logs\/manual$/,
+    why: 'manual punch injection — admin override of biometric truth (W275k)',
+  },
+  {
+    method: 'post',
+    pathRe: /^\/shifts\/assign$/,
+    why: 'shift assignment to employee — downstream attendance + payroll effects (W275k)',
+  },
+  {
+    method: 'post',
+    pathRe: /^\/policies$/,
+    why: 'attendance policy CREATE — affects all employees in branch (W275k)',
+  },
+  {
+    method: 'put',
+    pathRe: /^\/policies\/:[a-zA-Z]+$/,
+    why: 'attendance policy UPDATE — same impact as create (W275k)',
+  },
+  {
+    method: 'delete',
+    pathRe: /^\/devices\/:[a-zA-Z]+\/users\/:[a-zA-Z]+\/map$/,
+    why: 'device-user → employee UNMAP — mirror of map endpoint already gated W273 (W275k)',
+  },
 ]);
 
 // ─── Router-stack walker ──────────────────────────────────────────

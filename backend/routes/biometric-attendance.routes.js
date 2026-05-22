@@ -232,7 +232,9 @@ router.delete('/shifts/:id', async (req, res) => {
 });
 
 // POST /api/biometric-attendance/shifts/assign — تعيين دوام لموظف
-router.post('/shifts/assign', async (req, res) => {
+// W275k: shift assignment changes employee schedule = downstream
+// effects on attendance + payroll. Tier 2.
+router.post('/shifts/assign', requireMfaTier(2), async (req, res) => {
   try {
     const { employeeId, shiftId, effectiveFrom, effectiveTo, assignmentType, reason } = req.body;
 
@@ -305,7 +307,9 @@ router.get('/logs', async (req, res) => {
 });
 
 // POST /api/biometric-attendance/logs/manual — تسجيل حضور يدوي
-router.post('/logs/manual', async (req, res) => {
+// W275k: manual punch injection = admin override of biometric truth.
+// Highest-impact attendance mutation. Tier 2.
+router.post('/logs/manual', requireMfaTier(2), async (req, res) => {
   try {
     const { employeeId, punchTime, punchType, reason } = req.body;
 
@@ -575,7 +579,8 @@ router.get('/policies', async (req, res) => {
 });
 
 // POST /api/biometric-attendance/policies — إنشاء سياسة حضور
-router.post('/policies', async (req, res) => {
+// W275k: attendance policy affects all employees in branch. Tier 2.
+router.post('/policies', requireMfaTier(2), async (req, res) => {
   try {
     const policy = await AttendancePolicyModel.create({
       ...stripUpdateMeta(req.body),
@@ -588,7 +593,8 @@ router.post('/policies', async (req, res) => {
 });
 
 // PUT /api/biometric-attendance/policies/:id — تعديل سياسة
-router.put('/policies/:id', async (req, res) => {
+// W275k: policy update — same impact as create. Tier 2.
+router.put('/policies/:id', requireMfaTier(2), async (req, res) => {
   try {
     const policy = await AttendancePolicyModel.findByIdAndUpdate(
       req.params.id,

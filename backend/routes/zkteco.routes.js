@@ -356,6 +356,7 @@ router.post(
 router.delete(
   '/devices/:id/users/:userId/map',
   roleMiddleware('admin', 'hr_manager'),
+  requireMfaTier(2),
   async (req, res) => {
     try {
       const result = await ZKTecoService.unmapDeviceUser(

@@ -112,6 +112,16 @@ const SENSITIVE_RULES = Object.freeze([
     pathRe: /^\/sync\/library\/.+$/,
     why: 'hikvision library/device sync — missed by W273, closed by W275e (route-only)',
   },
+  {
+    method: 'put',
+    pathRe: /^\/branch-configs\/:[a-zA-Z]+$/,
+    why: 'hikvision per-branch config upsert — missed by W273, closed by W275f',
+  },
+  {
+    method: 'delete',
+    pathRe: /^\/branch-configs\/:[a-zA-Z]+$/,
+    why: 'hikvision per-branch config reset — missed by W273, closed by W275f',
+  },
 ]);
 
 // ─── Router-stack walker ──────────────────────────────────────────

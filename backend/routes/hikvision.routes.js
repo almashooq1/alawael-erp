@@ -1602,6 +1602,7 @@ function createHikvisionRouter({
     router.put(
       '/branch-configs/:branchId',
       requirePerm('hikvision.branch-config.write'),
+      requireMfaTier(2),
       async (req, res) => {
         try {
           const actorId = req.user?._id ? String(req.user._id) : null;
@@ -1610,6 +1611,7 @@ function createHikvisionRouter({
             patch: req.body || {},
             actorId,
             notes: req.body?.notes,
+            actor: actorFrom(req),
           });
           if (!r.ok) return respond(res, r);
           return res.json({ success: true, data: r });
@@ -1622,10 +1624,13 @@ function createHikvisionRouter({
     router.delete(
       '/branch-configs/:branchId',
       requirePerm('hikvision.branch-config.write'),
+      requireMfaTier(2),
       async (req, res) => {
         try {
           const actorId = req.user?._id ? String(req.user._id) : null;
-          const r = await branchConfigService.reset(req.params.branchId, actorId);
+          const r = await branchConfigService.reset(req.params.branchId, actorId, {
+            actor: actorFrom(req),
+          });
           if (!r.ok) return respond(res, r);
           return res.json({ success: true, data: r });
         } catch (err) {

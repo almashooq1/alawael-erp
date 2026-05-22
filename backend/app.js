@@ -2424,6 +2424,10 @@ try {
           branchConfigSvc = createHikvisionBranchConfigService({
             configModel: HikvisionBranchConfig,
             logger,
+            // Wave 275f — service-layer MFA on upsert (T2). reset()
+            // chains through upsert so it's auto-protected. Mirrors
+            // route-layer requireMfaTier on PUT/DELETE /branch-configs/:branchId.
+            enforceMfa: true,
           });
         } catch (bcErr) {
           logger.warn('[Hikvision] Wave 110 branch-config failed to wire:', bcErr.message);

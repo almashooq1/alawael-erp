@@ -25,6 +25,7 @@
  */
 
 const reg = require('./hikvision.registry');
+const { checkMfaTier } = require('./mfa-tier-check.lib');
 
 function createHikvisionBranchConfigService({
   configModel = null,
@@ -33,9 +34,23 @@ function createHikvisionBranchConfigService({
   cacheTtlMs = 30_000,
   logger = console,
   now = () => new Date(),
+  // ─── Wave 275f — Service-layer MFA tier enforcement ────────────
+  // Default OFF (Wave 110 tests construct without mfaLevel). app.js
+  // opts IN with `enforceMfa: true`. 5th service-layer adopter via
+  // shared lib [[wave275c-extract-face-enrollment]]. branch-config
+  // is HTTP-only (no cron callers for upsert/reset — confirmed via
+  // grep; cron-driven services call `list`/`get`/`resolveEffective`
+  // which are read-only and don't need MFA).
+  enforceMfa = false,
 } = {}) {
   if (!configModel) {
     throw new Error('hikvision-branch-config: configModel is required');
+  }
+
+  // Wave 275f — local wrapper binding factory enforceMfa + now;
+  // delegates to shared lib (extracted W275c).
+  function _checkMfaTier(actor, requiredTier, maxAgeMin) {
+    return checkMfaTier(actor, requiredTier, maxAgeMin, { enforceMfa, now });
   }
 
   // ─── Cache (per-branch TTL) ───────────────────────────────────
@@ -92,7 +107,12 @@ function createHikvisionBranchConfigService({
     return { ok: true, config: config || null };
   }
 
-  async function upsert({ branchId, patch, actorId = null, notes = undefined } = {}) {
+  async function upsert({ branchId, patch, actorId = null, notes = undefined, actor = null } = {}) {
+    // Wave 275f — service-layer MFA tier 2 (15 min). Single guard at
+    // upsert; reset() chains through here so it's auto-protected. Runs
+    // BEFORE branchId / patch validation (fail-fast on heaviest gate).
+    const mfa = _checkMfaTier(actor, 2, 15);
+    if (!mfa.ok) return mfa;
     if (!branchId) {
       return { ok: false, reason: reg.REASON.BRANCH_CONFIG_NO_BRANCH };
     }
@@ -182,16 +202,18 @@ function createHikvisionBranchConfigService({
     return { ok: true, config: saved };
   }
 
-  async function reset(branchId, actorId) {
+  async function reset(branchId, actorId, opts = {}) {
     if (!branchId) {
       return { ok: false, reason: reg.REASON.BRANCH_CONFIG_NO_BRANCH };
     }
     // Reset == clear both override buckets, keep revision history.
+    // Wave 275f — `opts.actor` flows through to upsert's MFA guard.
     return upsert({
       branchId,
       patch: { confidenceThresholds: {}, fraudDefaults: {} },
       actorId,
       notes: null,
+      actor: opts.actor || null,
     });
   }
 

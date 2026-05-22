@@ -502,14 +502,23 @@ function createHikvisionRouter({
     }
   });
 
-  router.post('/health/sweep', requirePerm('hikvision.health.record'), async (req, res) => {
-    try {
-      const result = await healthService.sweepStaleDevices(req.body || {});
-      return respond(res, result);
-    } catch (err) {
-      return safeError(res, err, 'hikvision.health.sweep');
+  router.post(
+    '/health/sweep',
+    requirePerm('hikvision.health.record'),
+    requireMfaTier(2),
+    async (req, res) => {
+      try {
+        // W275t — pass actor for service-layer MFA guard.
+        const result = await healthService.sweepStaleDevices({
+          ...(req.body || {}),
+          actor: actorFrom(req),
+        });
+        return respond(res, result);
+      } catch (err) {
+        return safeError(res, err, 'hikvision.health.sweep');
+      }
     }
-  });
+  );
 
   router.get('/health/devices/:id', requirePerm('hikvision.health.read'), async (req, res) => {
     try {

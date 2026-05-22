@@ -2361,6 +2361,9 @@ try {
         deviceModel: HikvisionDevice,
         healthLogModel: HikvisionDeviceHealthLog,
         logger,
+        // W275t — gates sweepStaleDevices only; recordHeartbeat stays
+        // open for device webhook ingest.
+        enforceMfa: true,
       });
 
       // Wave 97 Phase 2 — face library + enrollment (graceful)

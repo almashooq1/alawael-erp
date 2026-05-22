@@ -29,18 +29,29 @@
  */
 
 const reg = require('./hikvision.registry');
+const { checkMfaTier } = require('./mfa-tier-check.lib');
 
 function createHikvisionHealthService({
   deviceModel = null,
   healthLogModel = null,
   logger = console,
   now = () => new Date(),
+  // ─── Wave 275t — Service-layer MFA tier enforcement ────────────
+  // Gates sweepStaleDevices ONLY. recordHeartbeat is called from
+  // device webhooks (no user session) so MUST stay ungated. Scheduler
+  // passes synthetic system actor via W275q lib.
+  enforceMfa = false,
 } = {}) {
   if (!deviceModel) {
     throw new Error('hikvision-health.service: deviceModel is required');
   }
   if (!healthLogModel) {
     throw new Error('hikvision-health.service: healthLogModel is required');
+  }
+
+  // Wave 275t — shared helper bound to factory.
+  function _checkMfaTier(actor, requiredTier, maxAgeMin) {
+    return checkMfaTier(actor, requiredTier, maxAgeMin, { enforceMfa, now });
   }
 
   async function recordHeartbeat(input = {}) {
@@ -158,7 +169,11 @@ function createHikvisionHealthService({
     return { ok: true, items };
   }
 
-  async function sweepStaleDevices({ now: nowArg, limit } = {}) {
+  async function sweepStaleDevices({ now: nowArg, limit, actor } = {}) {
+    // W275t — service-layer MFA tier 2 (15 min). Scheduler passes
+    // synthetic system actor; HTTP route passes actorFrom(req).
+    const mfa = _checkMfaTier(actor, 2, 15);
+    if (!mfa.ok) return mfa;
     const lim = Math.min(Math.max(Number(limit) || 500, 1), 5000);
     const nowDate = nowArg || now();
     const cutoffStale = new Date(

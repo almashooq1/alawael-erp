@@ -180,7 +180,11 @@ function createHikvisionScheduler({
       available: !!healthMonitor,
       handler: async () => {
         if (!healthMonitor) throw new Error('healthMonitor not wired');
-        return healthMonitor.sweepUnresponsive();
+        // W275t — fixed pre-existing typo: service exports
+        // `sweepStaleDevices` (not `sweepUnresponsive`). Bug never
+        // surfaced because HEALTH_SWEEP job hadn't run in test
+        // contexts. Also pass system actor for service-layer MFA.
+        return healthMonitor.sweepStaleDevices({ actor: _systemActor() });
       },
     },
     // Wave 114 — periodic anomaly detection + history record.

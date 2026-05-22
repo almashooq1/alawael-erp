@@ -329,6 +329,13 @@ const SENSITIVE_RULES = Object.freeze([
     pathRe: /^\/libraries\/:[a-zA-Z]+\/sync-result$/,
     why: 'hikvision library sync-result HTTP callback — operator/external-agent (W275p)',
   },
+  // ─── Wave 275t — Health sweep ──────────────────────────────────
+  // /health/heartbeat stays UNGATED (device webhook ingest, no user session).
+  {
+    method: 'post',
+    pathRe: /^\/health\/sweep$/,
+    why: 'health monitor sweep — operator/cron stale-device marker (W275t)',
+  },
 ]);
 
 // ─── Router-stack walker ──────────────────────────────────────────

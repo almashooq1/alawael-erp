@@ -44,7 +44,7 @@ const sectionSchema = new mongoose.Schema({
 
 const carePlanSchema = new mongoose.Schema(
   {
-    beneficiary: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    beneficiary: { type: mongoose.Schema.Types.ObjectId, ref: 'Beneficiary', required: true },
 
     // Meta
     planNumber: { type: String },

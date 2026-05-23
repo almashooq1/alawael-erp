@@ -160,7 +160,7 @@ const independentLivingPlanSchema = new mongoose.Schema(
   {
     beneficiary: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      ref: 'Beneficiary',
       required: [true, 'المستفيد مطلوب'],
       index: true,
     },

@@ -24,7 +24,7 @@ const goalSchema = new mongoose.Schema(
     },
     participantId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      ref: 'Beneficiary',
       required: true,
       index: true,
     },

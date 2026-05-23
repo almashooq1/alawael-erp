@@ -20,6 +20,7 @@ On-call playbooks for the alerts defined in `docs/alerts/*.yml`.
 | SCFHS CPE credit attention (HR)         | [cpe-attention.md](cpe-attention.md)             |
 | Session attendance risk (front-desk)    | [attendance-digest.md](attendance-digest.md)     |
 | ZKTeco device-model merge (ops, 1-shot) | [zkteco-device-merge.md](zkteco-device-merge.md) |
+| RAG retrieval quality (AI ops)          | [rag-quality.md](rag-quality.md)                 |
 
 ### Architecture references
 

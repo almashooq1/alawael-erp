@@ -433,6 +433,17 @@ export const MODULE_REGISTRY = [
     description: 'حالة المجدولات الخلفية ومتغيرات البيئة المُفعّلة (W310)',
   },
   {
+    key: 'gov-metrics',
+    nameAr: 'مؤشرات تكاملات الجهات الحكومية',
+    nameEn: 'Gov Integrations Metrics',
+    icon: 'VerifiedUser',
+    path: '/risk-management/gov-metrics',
+    resource: 'quality',
+    roles: ['admin', 'super_admin', 'manager', 'supervisor'],
+    color: '#2b6cb0',
+    description: 'موافقات الجهات وإرسال التقارير الدورية (صحتي/مدد/هيئة) — W314',
+  },
+  {
     key: 'quality',
     nameAr: 'الجودة',
     nameEn: 'Quality',

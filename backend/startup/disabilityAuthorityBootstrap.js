@@ -1,19 +1,31 @@
 'use strict';
 
 /**
- * disabilityAuthorityBootstrap.js — wire W281 adapter routes (W281b).
+ * disabilityAuthorityBootstrap.js — wire W281 adapter routes (W281b)
+ * + W286 monthly periodic-report cron.
  *
  * The adapter is a pure transport module (no class, no MFA gate of its
- * own — gates live at the route layer). This bootstrap simply attaches
- * the adapter to `app._disabilityAuthorityAdapter` and mounts the
- * 3-endpoint routes file.
+ * own — gates live at the route layer). This bootstrap:
+ *   1. Attaches the adapter to `app._disabilityAuthorityAdapter`
+ *   2. Mounts the 3-endpoint adapter routes
+ *   3. (W286) Schedules monthly periodic-report submission cron when
+ *      ENABLE_DA_PERIODIC_CRON=true + DA_REPORTING_BRANCH_IDS=b1,b2
  *
- * Distinct from `disabilityAuthority.routes.js` which serves the
- * pre-existing internal `DisabilityAuthorityService` (periodic reports
- * stored locally). The adapter's routes mount at:
- *   /api/disability-authority/adapter
- *   /api/v1/disability-authority/adapter
+ * Cron pattern mirrors W282b mudadWpsBootstrap: cron disabled by
+ * default, branch IDs from env, system actor with mfaTier=2.
+ *
+ * The cron generates a stub monthly_service report payload — production
+ * should swap this for a real builder pulling service counts from the
+ * DisabilityAuthorityReport / Beneficiary / Session models.
  */
+
+function loadOptional(modulePath) {
+  try {
+    return require(modulePath);
+  } catch {
+    return null;
+  }
+}
 
 function wireDisabilityAuthority(app, deps = {}) {
   const { logger } = deps;
@@ -35,8 +47,84 @@ function wireDisabilityAuthority(app, deps = {}) {
         adapter.getConfig().mode +
         ')'
     );
+
+    // ── W286: monthly periodic-report cron ────────────────────────────
+    const cronEnabled = String(process.env.ENABLE_DA_PERIODIC_CRON || '').toLowerCase() === 'true';
+    if (!cronEnabled) {
+      logger.info(
+        '[startup] DA periodic-report cron DISABLED (set ENABLE_DA_PERIODIC_CRON=true to enable)'
+      );
+      return;
+    }
+
+    const cron = loadOptional('node-cron');
+    if (!cron) {
+      logger.warn('[startup] DA periodic cron requested but node-cron not installed.');
+      return;
+    }
+
+    const branchIds = String(process.env.DA_REPORTING_BRANCH_IDS || '')
+      .split(',')
+      .map(s => s.trim())
+      .filter(Boolean);
+
+    if (branchIds.length === 0) {
+      logger.warn(
+        '[startup] DA periodic cron: ENABLE_DA_PERIODIC_CRON=true but DA_REPORTING_BRANCH_IDS empty'
+      );
+      return;
+    }
+
+    // Day 5 of each month @ 04:00 Asia/Riyadh — reports cover previous month.
+    // (Day 5 gives time for prior month's data to settle; matches WPS pattern.)
+    const task = cron.schedule(
+      '0 4 5 * *',
+      async () => {
+        const now = new Date();
+        // Previous month
+        const prev = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        const periodStart = prev;
+        const periodEnd = new Date(prev.getFullYear(), prev.getMonth() + 1, 0, 23, 59, 59);
+
+        logger.info(
+          `[da-periodic:cron] starting monthly report submission for ${branchIds.length} branches, period=${periodStart.toISOString().slice(0, 7)}`
+        );
+
+        for (const branchId of branchIds) {
+          try {
+            // Stub payload — production should build real metrics from
+            // DisabilityAuthorityReport + Beneficiary + Session models.
+            const reportNumber = `RPT-${branchId}-${periodStart.toISOString().slice(0, 7)}`;
+            const payload = {
+              branchId,
+              period: { start: periodStart.toISOString(), end: periodEnd.toISOString() },
+              reportType: 'monthly_service',
+              note: 'stub-payload — wire production builder before live',
+            };
+            const result = await adapter.submitPeriodicReport({
+              reportNumber,
+              period: { startDate: periodStart, endDate: periodEnd },
+              payload,
+            });
+            logger.info(
+              `[da-periodic:cron] branch=${branchId} reportNumber=${reportNumber} → submissionId=${result.submissionId}`
+            );
+          } catch (err) {
+            logger.error(`[da-periodic:cron] branch=${branchId} failed`, {
+              err: err.message,
+              code: err.code,
+            });
+          }
+        }
+      },
+      { timezone: 'Asia/Riyadh' }
+    );
+    app._daPeriodicCronTask = task;
+    logger.info(
+      `[startup] DA periodic-report cron scheduled (W286): day 5 @ 04:00 Asia/Riyadh, ${branchIds.length} branches`
+    );
   } catch (err) {
-    logger.warn('[startup] Disability Authority wiring failed (W281b)', { err: err.message });
+    logger.warn('[startup] Disability Authority wiring failed (W281b/W286)', { err: err.message });
   }
 }
 

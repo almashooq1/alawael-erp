@@ -157,7 +157,11 @@ function sehhatyServiceFactory({
 
   return {
     importHealthSummary,
-    _checkConsent: checkConsent, // exposed for tests
+    // Public — used by `routes/sehhaty.routes.js` /vaccinations endpoint to
+    // gate the lower-level adapter call. The W278g lesson: private methods
+    // (underscore prefix) called from outside a class are brittle to refactor —
+    // promote to public if the route depends on them.
+    checkConsent,
   };
 }
 

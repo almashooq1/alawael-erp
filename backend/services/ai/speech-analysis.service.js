@@ -288,7 +288,11 @@ function speechAnalysisServiceFactory({
   return {
     registerUpload,
     runAnalysis,
-    _checkConsent: checkConsent,
+    // Public — useful if a future route adds a "check consent without
+    // recording yet" preflight. W278g lesson: don't expose `_underscored`
+    // methods if external callers will rely on them.
+    checkConsent,
+    // Test-only helpers retain the underscore so the boundary stays clear.
     _dispatchAnalyze: dispatchAnalyze,
     _audioHashFor: buf => crypto.createHash('sha256').update(buf).digest('hex'),
   };

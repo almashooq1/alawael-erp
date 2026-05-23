@@ -93,8 +93,8 @@ router.post('/vaccinations', requireMfaTier(1), async (req, res) => {
     // For simplicity we go through the service so the gate is consistent.
     const svc = getService(req);
     if (!svc) return res.status(503).json({ success: false, code: 'SEHHATY_NOT_WIRED' });
-    // Reuse checkConsent via the service's _checkConsent helper, then call the adapter directly.
-    await svc._checkConsent(req.body.beneficiaryId, req.body.consentRecordId);
+    // Reuse the service's public checkConsent then call the adapter directly.
+    await svc.checkConsent(req.body.beneficiaryId, req.body.consentRecordId);
     const result = await adapter.pullVaccinationRecords({
       nationalId: req.body.nationalId,
       consentRecordId: req.body.consentRecordId,

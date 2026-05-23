@@ -2,6 +2,8 @@
 
 > **هذا الملف tracker تنفيذي يربط الـ deliverables التعاقدية في blueprint/09-roadmap.md بالموجات الفعلية المُسلَّمة في git log.**
 > آخر مزامنة: 2026-05-19 (بعد Wave 124).
+>
+> **ملاحظة (2026-05-23)**: يوجد عمل منفصل تحت اسم "Phase 3 Gov + AI" (W280-W286 — تكاملات حكومية + AI متقدم) ليس جزءاً من هذا الملف. التتبع الكامل لتلك المرحلة في `CLAUDE.md` ضمن قسم "Phase 3 Gov + AI surface". اسم الـ phase نفسه عبر بَرنامجَي تخطيط مختلفَين، لكن الـ deliverables مختلفة تماماً: هذا الملف يتتبع Intelligence & Automation (Waves 39-124); ذاك يتتبع DPIA + Sehhaty + Disability Authority + Mudad WPS + RAG + Speech (Waves 280-286).
 
 ---
 

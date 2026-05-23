@@ -1,0 +1,206 @@
+'use strict';
+
+/**
+ * W325 Pass 3 universal phantom-ref drift guard.
+ *
+ * Extension of the W324 audit pattern from one field (beneficiaryId) to ALL
+ * Mongoose `ref:` declarations across the codebase. Catches the same bug
+ * class as W324 (5 × 'BeneficiaryProfile' + 1 × 'Patient' targeted models
+ * that were never registered → silent populate() returning null) but for
+ * every field, not just beneficiaryId.
+ *
+ * Algorithm:
+ *   1. Scan backend/models/**\/*.js + backend/domains/**\/*.js for all
+ *      `mongoose.model('Name', schema, ...)` REGISTRATIONS (two-arg form,
+ *      schema as second positional indicates registration vs lookup).
+ *   2. Scan the SAME source set for every `ref: 'Name'` declaration.
+ *   3. Assert: every ref target exists in the registration set, OR is in
+ *      ALLOWLIST (for legitimate external / cross-system refs).
+ *
+ * Static analysis only — does NOT load mongoose (which is mocked under
+ * backend/jest.setup.js).
+ */
+
+const fs = require('fs');
+const path = require('path');
+
+const REPO_ROOT = path.join(__dirname, '..', '..');
+const BACKEND_ROOT = path.join(__dirname, '..');
+
+// Refs only live inside Mongoose schema definitions — scan models + domains.
+const REF_ROOTS = [path.join(BACKEND_ROOT, 'models'), path.join(BACKEND_ROOT, 'domains')];
+
+// Registrations can live anywhere in backend/ (we've seen them in models/,
+// domains/, workflow/, services/, database/seeders/). Scan all of backend/
+// except __tests__, node_modules, scripts (CLI helpers).
+const REGISTRATION_ROOT = BACKEND_ROOT;
+const REGISTRATION_SKIP_DIRS = new Set([
+  '__tests__',
+  '__mocks__',
+  'tests',
+  'node_modules',
+  '.jest-cache',
+  'coverage',
+]);
+
+// Models deliberately referenced but not Mongoose-owned (pseudo-refs in
+// documentation, external/system refs). Add with one-line // justification.
+const REF_ALLOWLIST = new Set([
+  'MeasurementType.targetDisabilities', // pseudo-ref for documentation inside MeasurementMaster
+]);
+
+// ─── Baseline ratchet: phantom refs that EXIST as of W325 Pass 3 ────────────
+// Each is a real bug from the W324 class (ref pointing to a model that was
+// never registered with mongoose.model — populate() silently returns null).
+// Total: 58 occurrences across 26 unique targets, snapshot 2026-05-24.
+//
+// CONTRACT: NEVER add a new entry to this set. NEW phantoms must be fixed at
+// source (change the ref to the canonical registered model, OR register the
+// missing model). Existing entries get REMOVED as their owners are fixed in
+// future waves (one entry per wave is a reasonable pace).
+//
+// Top fix candidates (highest occurrence × clearest correct target):
+//   Center (10×)      → likely should be 'Branch' (canonical, registered in
+//                       models/Branch.js + database/seeders/database-seeder.js)
+//   Admin (8×)        → likely should be 'User' (admin is a role, not a model)
+//   AdminUser (4×)    → same as Admin — 'User'
+//   Patient (1×)      → 'Beneficiary' (matches W324's CommunityReferral fix
+//                       pattern; this is a second occurrence in ResourceBooking.js)
+const KNOWN_PHANTOM_BASELINE_W325C = new Set([
+  // W324 lookalikes — likely fix is rename to canonical
+  'Center', // 10× — fix candidate: 'Branch'
+  'Admin', // 8× — fix candidate: 'User'
+  'AdminUser', // 4× — fix candidate: 'User'
+  'Patient', // 1× — fix candidate: 'Beneficiary' (W324 found 1 of these, missed this one in ResourceBooking)
+  // Quality-domain refs to a possibly-renamed model
+  'CapaItem', // 4× — investigate quality/ models for the canonical name
+  // Enterprise-Pro speculative refs to never-built models (Enterprise PRO/Plus, CRM, ITAM)
+  'WarehouseBin', // 3×
+  'ProjectPro', // 3×
+  'ProjectTask', // 3×
+  'CRMContact', // 2×
+  'CRMPipeline', // 1×
+  'CRMDeal', // 1×
+  'Company', // 1×
+  'Candidate', // 1×
+  'ITAsset', // 1×
+  'StrategicObjective', // 2×
+  // Misc never-built or renamed
+  'Attachment', // 2× — investigate if Document is the canonical
+  'Class', // 2× — smart-attendance domain
+  'Counselor', // 1× — likely 'User' with role
+  'Violation', // 1× — investigate
+  'Folder', // 1× — investigate Document hierarchy
+  'ComplianceChecklist', // 1× — investigate quality models
+  'ComplianceControl', // 1× — investigate quality models
+  'SurveyTemplate', // 1× — investigate
+  'SatisfactionSurvey', // 1× — investigate
+  'DisabilityRehabilitation', // 1×
+  'SupportTicket', // 1×
+]);
+
+function walkJs(dir, skip, out = []) {
+  if (!fs.existsSync(dir)) return out;
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    if (skip && skip.has(entry.name)) continue;
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) walkJs(full, skip, out);
+    else if (entry.isFile() && entry.name.endsWith('.js')) out.push(full);
+  }
+  return out;
+}
+
+// `mongoose.model('Name', schema, ...)` — two-arg form indicates REGISTRATION.
+// Single-arg `mongoose.model('Name')` is a LOOKUP (used by 100+ services).
+const REGISTRATION_RE = /mongoose\.model\s*\(\s*['"]([^'"]+)['"]\s*,/g;
+const REF_RE = /\bref\s*:\s*['"]([^'"]+)['"]/g;
+
+function collectRegistrations() {
+  const files = walkJs(REGISTRATION_ROOT, REGISTRATION_SKIP_DIRS);
+  const set = new Set();
+  for (const f of files) {
+    const src = fs.readFileSync(f, 'utf8');
+    for (const m of src.matchAll(REGISTRATION_RE)) set.add(m[1]);
+  }
+  return set;
+}
+
+function collectRefs() {
+  const refs = []; // [{ file, ref }]
+  for (const root of REF_ROOTS) {
+    for (const f of walkJs(root)) {
+      const src = fs.readFileSync(f, 'utf8');
+      const rel = path.relative(REPO_ROOT, f).replace(/\\/g, '/');
+      for (const m of src.matchAll(REF_RE)) refs.push({ file: rel, ref: m[1] });
+    }
+  }
+  return refs;
+}
+
+describe('W325 Pass 3 universal phantom-ref drift guard', () => {
+  it('every Mongoose `ref:` target MUST resolve to a registered model (or be allow-listed)', () => {
+    const registrations = collectRegistrations();
+    expect(registrations.size).toBeGreaterThan(100); // sanity floor — codebase has 200+ registered models
+
+    const refs = collectRefs();
+    expect(refs.length).toBeGreaterThan(100); // sanity floor — codebase has hundreds of refs
+
+    const newPhantoms = [];
+    for (const { file, ref } of refs) {
+      if (registrations.has(ref)) continue;
+      if (REF_ALLOWLIST.has(ref)) continue;
+      if (KNOWN_PHANTOM_BASELINE_W325C.has(ref)) continue; // tolerated tech debt
+      newPhantoms.push({ file, ref });
+    }
+
+    if (newPhantoms.length > 0) {
+      const byTarget = new Map();
+      for (const v of newPhantoms) {
+        if (!byTarget.has(v.ref)) byTarget.set(v.ref, []);
+        byTarget.get(v.ref).push(v.file);
+      }
+      const lines = [];
+      for (const [target, callers] of byTarget) {
+        lines.push(`  - "${target}" referenced by ${callers.length} file(s):`);
+        for (const c of callers.slice(0, 5)) lines.push(`      ${c}`);
+        if (callers.length > 5) lines.push(`      ... and ${callers.length - 5} more`);
+      }
+      throw new Error(
+        `Found ${newPhantoms.length} NEW Mongoose ref(s) pointing to unregistered model(s):\n` +
+          lines.join('\n') +
+          `\n\nFix options:\n` +
+          `  (a) Change the ref to the canonical registered model name.\n` +
+          `  (b) Register the missing model with mongoose.model('Name', schema).\n` +
+          `  (c) Add the target to REF_ALLOWLIST in this test with a one-line justification ` +
+          `(only if it's a deliberate external/cross-system ref).\n\n` +
+          `Do NOT add to KNOWN_PHANTOM_BASELINE_W325C — that set is frozen and ratchets DOWN ` +
+          `as existing entries are fixed.`
+      );
+    }
+  });
+
+  it('every entry in KNOWN_PHANTOM_BASELINE_W325C MUST still exist as a real phantom (ratchet-down check)', () => {
+    // When a wave fixes a phantom, its caller must also remove it from the
+    // baseline set in the same commit. This test catches stale entries — i.e.
+    // names that are no longer referenced anywhere (fixed but not pruned).
+    const registrations = collectRegistrations();
+    const refs = collectRefs();
+    const referencedSet = new Set(refs.map(r => r.ref));
+
+    const stale = [];
+    for (const name of KNOWN_PHANTOM_BASELINE_W325C) {
+      // Stale if either: (a) no longer referenced, or (b) now registered.
+      if (!referencedSet.has(name) || registrations.has(name)) {
+        stale.push(name);
+      }
+    }
+
+    if (stale.length > 0) {
+      throw new Error(
+        `${stale.length} entry/entries in KNOWN_PHANTOM_BASELINE_W325C are stale ` +
+          `(fixed or never referenced). Remove them from the baseline set:\n` +
+          stale.map(s => `  - "${s}"`).join('\n')
+      );
+    }
+  });
+});

@@ -34,7 +34,9 @@ jest.mock('../../models/Report', () => {
   return M;
 });
 
-const svc = require('../../services/reportService');
+// Service exports { ReportService, reportService } — auto-gen used `svc` but
+// the methods live on the singleton instance. W278i (2026-05-23): unwrap.
+const svc = require('../../services/reportService').reportService;
 
 describe('reportService service', () => {
   test('module exports an object', () => {

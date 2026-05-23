@@ -34,7 +34,9 @@ jest.mock('../../models/Analytics', () => {
   return M;
 });
 
-const svc = require('../../services/performanceAnalyticsService');
+// Service exports { PerformanceAnalyticsService, performanceAnalyticsService }
+// — auto-gen used `svc` but methods live on the singleton. W278i unwrap.
+const svc = require('../../services/performanceAnalyticsService').performanceAnalyticsService;
 
 describe('performanceAnalyticsService service', () => {
   test('module exports an object', () => {

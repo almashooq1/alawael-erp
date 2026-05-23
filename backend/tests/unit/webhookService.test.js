@@ -78,7 +78,10 @@ jest.mock('../../utils/logger', () => ({
   debug: jest.fn(),
 }));
 
-const svc = require('../../services/webhookService');
+// Service exports { WebhookService, webhookService } — auto-gen used `svc`
+// but the methods live on the singleton instance, not the module object.
+// W278i (2026-05-23): unwrap to the instance so the 13 smoke tests actually exercise it.
+const svc = require('../../services/webhookService').webhookService;
 
 describe('webhookService service', () => {
   test('module exports an object', () => {

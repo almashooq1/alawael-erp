@@ -34,7 +34,9 @@ jest.mock('../../models/Schedule', () => {
   return M;
 });
 
-const svc = require('../../services/scheduleManagementService');
+// Service exports { ScheduleManagementService, scheduleManagementService }
+// — auto-gen used `svc` but methods live on the singleton. W278i unwrap.
+const svc = require('../../services/scheduleManagementService').scheduleManagementService;
 
 describe('scheduleManagementService service', () => {
   test('module exports an object', () => {

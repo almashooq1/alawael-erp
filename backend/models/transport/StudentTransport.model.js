@@ -80,7 +80,7 @@ const studentTransportSchema = new mongoose.Schema({
   approvalDate: Date,
   approvedBy: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'AdminUser',
+    ref: 'User',
   },
   expiryDate: Date,
   renewalHistory: [

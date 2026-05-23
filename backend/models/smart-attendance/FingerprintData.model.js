@@ -49,7 +49,7 @@ const FingerprintDataSchema = new mongoose.Schema(
     },
     verifiedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Admin',
+      ref: 'User',
     },
     verifiedAt: Date,
     recognitionHistory: [

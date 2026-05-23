@@ -36,11 +36,11 @@ const transportPaymentSchema = new mongoose.Schema({
   },
   recordedBy: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'AdminUser',
+    ref: 'User',
   },
   approvedBy: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'AdminUser',
+    ref: 'User',
   },
   approvalDate: Date,
   createdAt: { type: Date, default: Date.now },

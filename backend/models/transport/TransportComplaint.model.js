@@ -51,7 +51,7 @@ const transportComplaintSchema = new mongoose.Schema({
   },
   assignedTo: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'AdminUser',
+    ref: 'User',
   },
   resolution: String,
   resolutionDate: Date,

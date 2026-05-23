@@ -48,7 +48,7 @@ const FaceRecognitionDataSchema = new mongoose.Schema(
     verification: {
       verifiedBy: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Admin',
+        ref: 'User',
       },
       verifiedAt: Date,
       manualReview: Boolean,

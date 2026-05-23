@@ -59,19 +59,17 @@ const REF_ALLOWLIST = new Set([
 // missing model). Existing entries get REMOVED as their owners are fixed in
 // future waves (one entry per wave is a reasonable pace).
 //
-// Top fix candidates (highest occurrence × clearest correct target):
-//   Admin (8×)        → likely should be 'User' (admin is a role, not a model)
-//   AdminUser (4×)    → same as Admin — 'User'
-//   Patient (1×)      → 'Beneficiary' (matches W324's CommunityReferral fix
-//                       pattern; this is a second occurrence in ResourceBooking.js)
+// Remaining top fix candidates after W326+W327+W328:
+//   CapaItem (4×)     → investigate quality/ models for the canonical name
+//   Class (2×)        → smart-attendance domain, investigate
 //
 // Ratchet-DOWN history (newest first):
-//   W326 (commit pending) — 'Center' (10×) → 'Branch' fixed across crisis.model.js + laundry.model.js + kitchen.model.js
+//   W327+W328 (commit pending) — 'Admin' (8×) + 'AdminUser' (4×) + 'Patient' (1×) all → canonical:
+//     'Admin'      → 'User' across 8 smart-attendance models (verifiedBy/registeredBy/generatedBy/reviewedBy fields)
+//     'AdminUser'  → 'User' across 3 transport models (recordedBy/approvedBy/assignedTo fields)
+//     'Patient'    → 'Beneficiary' in ResourceBooking.js (mirrors W324's CommunityReferral fix exactly)
+//   W326 — 'Center' (10×) → 'Branch' fixed across crisis.model.js + laundry.model.js + kitchen.model.js
 const KNOWN_PHANTOM_BASELINE_W325C = new Set([
-  // W324 lookalikes — likely fix is rename to canonical
-  'Admin', // 8× — fix candidate: 'User'
-  'AdminUser', // 4× — fix candidate: 'User'
-  'Patient', // 1× — fix candidate: 'Beneficiary' (W324 found 1 of these, missed this one in ResourceBooking)
   // Quality-domain refs to a possibly-renamed model
   'CapaItem', // 4× — investigate quality/ models for the canonical name
   // Enterprise-Pro speculative refs to never-built models (Enterprise PRO/Plus, CRM, ITAM)

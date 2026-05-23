@@ -86,7 +86,7 @@ const SmartAttendanceRecordSchema = new mongoose.Schema(
       },
       verifiedBy: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Admin',
+        ref: 'User',
       },
       biometricScore: Number, // 0-100
       confidence: Number,

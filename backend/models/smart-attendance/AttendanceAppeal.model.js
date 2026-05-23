@@ -52,7 +52,7 @@ const AttendanceAppealSchema = new mongoose.Schema(
       submittedAt: { type: Date, default: Date.now },
       reviewedBy: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Admin',
+        ref: 'User',
       },
       reviewedAt: Date,
       decision: String,

@@ -103,7 +103,7 @@ const CameraDeviceSchema = new mongoose.Schema(
     registeredAt: { type: Date, default: Date.now },
     registeredBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Admin',
+      ref: 'User',
     },
     lastConnected: Date,
     updatedAt: { type: Date, default: Date.now },

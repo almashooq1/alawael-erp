@@ -45,7 +45,7 @@ const AttendanceSummaryReportSchema = new mongoose.Schema(
     generatedAt: { type: Date, default: Date.now },
     generatedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Admin',
+      ref: 'User',
     },
   },
   { collection: 'attendance_summary_reports' }

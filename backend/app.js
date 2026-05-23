@@ -1986,6 +1986,12 @@ require('./startup/accessReviewBootstrap').wireAccessReview(app, { logger });
 // at the route layer. Drift guard W285 verifies the construction site.
 require('./startup/dpiaBootstrap').wireDpia(app, { logger });
 
+// ─── Sehhaty / Tawakkalna health summary import — Wave 280b ──────────────────
+// Adapter (mock-first) + consent-gated service (5 reject codes, MFA tier 1).
+// CRITICAL: every health-summary import requires Consent.type='health_summary_import'.
+// Live mode requires SEHHATY_{BASE_URL,CLIENT_ID,CLIENT_SECRET,CENTER_ID} env.
+require('./startup/sehhatyBootstrap').wireSehhaty(app, { logger });
+
 // ─── Hikvision Workforce Surveillance & Attendance — Wave 96-114 ─────────────
 // Extracted to startup/hikvisionBootstrap.js (W277 / Pass 1 of app.js refactor).
 // Identical behaviour: same models, same enforceMfa flags (W275 series), same

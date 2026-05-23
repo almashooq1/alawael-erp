@@ -66,16 +66,9 @@ describe('performanceAnalyticsService service', () => {
     expect(r).toBeDefined();
   });
 
-  test('forEach is callable', async () => {
-    if (typeof svc.forEach !== 'function') return;
-    let r;
-    try {
-      r = await svc.forEach({});
-    } catch (e) {
-      r = e;
-    }
-    expect(r).toBeDefined();
-  });
+  // [W278l 2026-05-23] deleted dead smoke for `svc.forEach` — auto-gen
+  // overreach (Array.prototype method, never on the service). Missed
+  // in W278j sweep; caught by the new W278l silent-pass drift guard.
 
   test('getModuleAnalytics is callable', async () => {
     if (typeof svc.getModuleAnalytics !== 'function') return;

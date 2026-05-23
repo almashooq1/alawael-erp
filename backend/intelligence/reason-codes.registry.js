@@ -79,6 +79,9 @@ const REASON_CODES = Object.freeze({
   RISK_TIER_DEESCALATED: 'RISK_TIER_DEESCALATED',
   RISK_TIER_FIRST_CRITICAL: 'RISK_TIER_FIRST_CRITICAL',
   RISK_SWEEP_COMPLETED: 'RISK_SWEEP_COMPLETED',
+
+  // Wave 290 — Auto plan-review trigger on risk escalation
+  PLAN_REVIEW_TRIGGERED_BY_RISK: 'PLAN_REVIEW_TRIGGERED_BY_RISK',
 });
 
 const REASON_LABELS_AR = Object.freeze({
@@ -116,6 +119,7 @@ const REASON_LABELS_AR = Object.freeze({
   RISK_TIER_DEESCALATED: 'تحسّن في درجة خطورة المستفيد',
   RISK_TIER_FIRST_CRITICAL: 'درجة خطورة حرجة لأول مرة',
   RISK_SWEEP_COMPLETED: 'تم الانتهاء من دورة فحص الخطورة',
+  PLAN_REVIEW_TRIGGERED_BY_RISK: 'تم فتح مراجعة طارئة للخطة العلاجية بسبب ارتفاع الخطورة',
 });
 
 // Legacy aliases we've observed in the codebase. The lib normalises any

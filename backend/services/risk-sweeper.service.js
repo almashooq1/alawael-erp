@@ -61,6 +61,9 @@ function shouldRaiseAlert(delta, newTier) {
  * @property {import('mongoose').Model} BeneficiaryModel
  * @property {import('mongoose').Model} RiskSnapshotModel
  * @property {import('mongoose').Model} [AiAlertModel] - optional; alerts skipped if absent
+ * @property {Function} [onAlertRaised] - optional async hook called after an
+ *   alert is created. Receives `{alertId, ben, profile, tierDelta, code, severity, sweepRunId}`.
+ *   Failures are caught + logged; never block the sweep.
  * @property {{info:Function, warn:Function, error:Function}} [logger]
  */
 
@@ -76,6 +79,7 @@ class RiskSweeperService {
     this.Beneficiary = deps.BeneficiaryModel;
     this.RiskSnapshot = deps.RiskSnapshotModel;
     this.AiAlert = deps.AiAlertModel || null;
+    this.onAlertRaised = typeof deps.onAlertRaised === 'function' ? deps.onAlertRaised : null;
     this.logger = deps.logger || { info() {}, warn() {}, error() {} };
   }
 
@@ -117,7 +121,7 @@ class RiskSweeperService {
         if (snap) snapshotsCreated += 1;
 
         if (this.AiAlert && shouldRaiseAlert(tierDelta, profile.overallTier)) {
-          const created = await this._raiseAlert({ ben, profile, tierDelta });
+          const created = await this._raiseAlert({ ben, profile, tierDelta, sweepRunId });
           if (created) alertsRaised += 1;
         }
       } catch (err) {
@@ -181,7 +185,7 @@ class RiskSweeperService {
     return true;
   }
 
-  async _raiseAlert({ ben, profile, tierDelta }) {
+  async _raiseAlert({ ben, profile, tierDelta, sweepRunId }) {
     const severity = TIER_SEVERITY[profile.overallTier] || 'warning';
     const newTierAr = TIER_AR[profile.overallTier] || profile.overallTier;
     const factorSummary = (profile.topFactors || [])
@@ -190,8 +194,9 @@ class RiskSweeperService {
       .join('، ');
     const code = tierDelta === 'escalated' ? 'RISK_TIER_ESCALATED' : 'RISK_TIER_FIRST_CRITICAL';
 
+    let alertDoc = null;
     try {
-      await this.AiAlert.create({
+      alertDoc = await this.AiAlert.create({
         alert_type: 'dropout_risk',
         severity,
         target_type: 'beneficiary',
@@ -215,7 +220,6 @@ class RiskSweeperService {
           computedAt: profile.computedAt,
         },
       });
-      return true;
     } catch (err) {
       this.logger.warn('[risk-sweeper] alert create failed', {
         beneficiaryId: String(ben._id),
@@ -223,6 +227,29 @@ class RiskSweeperService {
       });
       return false;
     }
+
+    // ── W290: fire optional hook for downstream auto-actions ──────────
+    // (e.g. risk-plan-review.service). Hook failures are isolated so
+    // the sweep + alert remain authoritative.
+    if (this.onAlertRaised) {
+      try {
+        await this.onAlertRaised({
+          alertId: alertDoc && alertDoc._id,
+          ben,
+          profile,
+          tierDelta,
+          code,
+          severity,
+          sweepRunId,
+        });
+      } catch (err) {
+        this.logger.warn('[risk-sweeper] onAlertRaised hook failed', {
+          beneficiaryId: String(ben._id),
+          err: err && err.message,
+        });
+      }
+    }
+    return true;
   }
 }
 

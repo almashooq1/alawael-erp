@@ -50,11 +50,49 @@ function wireRiskSweeper(app, deps = {}) {
     return;
   }
 
+  // ── Wave 290: optional plan-review trigger (CRITICAL review on escalation) ──
+  let planReviewService = null;
+  let onAlertRaised = null;
+  try {
+    const CarePlan = (() => {
+      try {
+        return mongoose.model('CarePlan');
+      } catch {
+        return null;
+      }
+    })();
+    const PlanReview = (() => {
+      try {
+        return mongoose.model('PlanReview');
+      } catch {
+        return null;
+      }
+    })();
+    if (CarePlan && PlanReview) {
+      const { RiskPlanReviewService } = require('../services/risk-plan-review.service');
+      planReviewService = new RiskPlanReviewService({
+        CarePlanModel: CarePlan,
+        PlanReviewModel: PlanReview,
+        logger,
+      });
+      onAlertRaised = ctx => planReviewService.triggerOnEscalation(ctx);
+      app._riskPlanReviewService = planReviewService;
+      logger.info('[startup] risk-plan-review service wired (W290)');
+    } else {
+      logger.warn(
+        '[startup] risk-plan-review: CarePlan or PlanReview model missing — auto-review NOT wired'
+      );
+    }
+  } catch (err) {
+    logger.warn('[startup] risk-plan-review wiring failed', { err: err && err.message });
+  }
+
   const service = new RiskSweeperService({
     getProfile: getBeneficiaryRiskProfile,
     BeneficiaryModel: Beneficiary,
     RiskSnapshotModel: RiskSnapshot,
     AiAlertModel: AiAlert,
+    onAlertRaised,
     logger,
   });
   app._riskSweeperService = service;

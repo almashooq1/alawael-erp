@@ -198,3 +198,4 @@ __tests__/payment-gateway-parent-portal-wave278b.test.js
 __tests__/incident-audit-chain-socket-publisher-wave278c.test.js
 __tests__/import-export-formatters-extract-wave278e.test.js
 __tests__/import-export-parsers-extract-wave278f.test.js
+__tests__/import-export-data-quality-extract-wave278g.test.js

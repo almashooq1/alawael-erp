@@ -8,6 +8,8 @@
  */
 
 const importExportService = require('../services/importExportPro.service');
+const parsers = require('../services/importExport/parsers');
+const dataQuality = require('../services/importExport/data-quality');
 const ImportExportJob = require('../models/ImportExportJob');
 const ImportExportTemplate = require('../models/ImportExportTemplate');
 const _logger = require('../utils/logger');
@@ -718,13 +720,13 @@ const generateQualityReport = async (req, res) => {
     switch (ext) {
       case 'xlsx':
       case 'xls':
-        rawData = await importExportService._parseExcel(req.file.buffer, {});
+        rawData = await parsers.parseExcel(req.file.buffer, {});
         break;
       case 'csv':
-        rawData = importExportService._parseCSV(req.file.buffer, {});
+        rawData = parsers.parseCSV(req.file.buffer, {});
         break;
       case 'json':
-        rawData = importExportService._parseJSON(req.file.buffer);
+        rawData = parsers.parseJSON(req.file.buffer);
         break;
       default:
         rawData = [];
@@ -732,15 +734,9 @@ const generateQualityReport = async (req, res) => {
 
     // Build parse info from raw data
     const detectedColumns = rawData.length > 0 ? Object.keys(rawData[0]) : [];
-    const suggestedMappings = importExportService._suggestColumnMappings
-      ? importExportService._suggestColumnMappings(detectedColumns, module)
-      : [];
+    const suggestedMappings = parsers.suggestColumnMappings(detectedColumns, module);
 
-    const report = importExportService.generateDataQualityReport(
-      rawData,
-      suggestedMappings,
-      module
-    );
+    const report = dataQuality.generateDataQualityReport(rawData, suggestedMappings, module);
 
     return res.json({
       success: true,

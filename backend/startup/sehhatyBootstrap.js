@@ -26,10 +26,11 @@ function wireSehhaty(app, deps = {}) {
     const sehhatyServiceFactory = require('../services/sehhaty.service');
     const sehhatyRouter = require('../routes/sehhaty.routes');
 
-    // Try to attach AuditLogger if the adapter-audit logger is present
+    // Try to attach AuditLogger if the adapter-audit logger is present.
+    // adapterAuditLogger lives at services/adapterAuditLogger.js, not utils/.
     let AuditLogger = null;
     try {
-      AuditLogger = require('../utils/adapterAuditLogger');
+      AuditLogger = require('../services/adapterAuditLogger');
     } catch {
       // optional — service degrades to no-audit
     }

@@ -32,7 +32,7 @@ function wireSpeech(app, deps = {}) {
   try {
     const factory = require('../services/ai/speech-analysis.service');
     const speechRouter = require('../routes/speech.routes');
-    const AuditLogger = loadOptional('../utils/adapterAuditLogger');
+    const AuditLogger = loadOptional('../services/adapterAuditLogger');
 
     const speechService = factory({
       AuditLogger,

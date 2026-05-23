@@ -128,7 +128,7 @@ function wireMudadWps(app, deps = {}) {
     }
 
     // ── AUDIT LOGGER ──────────────────────────────────────────────────
-    const AuditLogger = loadOptional('../utils/adapterAuditLogger');
+    const AuditLogger = loadOptional('../services/adapterAuditLogger');
 
     // ── CONSTRUCT ORCHESTRATOR ────────────────────────────────────────
     const orchestrator = orchestratorFactory({

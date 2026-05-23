@@ -153,6 +153,18 @@ describe('10-provider registry consistency', () => {
       'adapterRateLimiter.js',
       'adapterCircuitBreaker.js',
       'adapterMetricsRegistry.js',
+      // Phase 3 adapters (W280 + W281, 2026-05-23) — distinct from the
+      // W93 10-provider hub. The hub is for STATELESS uniform-surface
+      // adapters (one MODE export, rate-limited, circuit-broken, audit-
+      // logged per call). These two have RICHER semantics (consent-gated
+      // PHI import via service wrapper, deterministic mock-first, no
+      // shared rate-limit pool yet) and live as scaffolds until
+      // production cutover. See "Phase 3 Gov + AI surface" section of
+      // CLAUDE.md for the integration roadmap. When sandbox creds land
+      // + they get full hub citizenship, MOVE them up into EXPECTED and
+      // DELETE from this list, then add the 8 touchpoints.
+      'sehhatyAdapter.js',
+      'disabilityAuthorityAdapter.js',
     ]);
     const orphans = files.filter(f => !allowed.has(f));
     expect(orphans).toEqual([]);

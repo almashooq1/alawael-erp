@@ -261,6 +261,12 @@ function createParentChatbotService({
             similarityThreshold: 0.6,
             branchId,
             queryLang: 'ar',
+            // W283e: enable keyword fallback. When embedding provider is
+            // weak (mock-mode or under-tuned production provider), vector
+            // pass may return 0 above threshold. Keyword fallback rescues
+            // via Arabic-normalized token overlap so POLICY_QUERY answers
+            // something useful instead of always degrading to UNKNOWN.
+            keywordFallback: 'auto',
           });
           if (ragResult && ragResult.chunks && ragResult.chunks.length > 0) {
             const answerText = ragResult.chunks.map(c => c.chunkText).join('\n\n---\n\n');

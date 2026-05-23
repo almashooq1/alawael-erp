@@ -217,3 +217,4 @@ __tests__/parent-chatbot-rag-wave283c.test.js
 __tests__/speech-retention-sweeper-wave284c.test.js
 __tests__/da-periodic-cron-wave286.test.js
 __tests__/seed-rag-policies-wave283d.test.js
+__tests__/rag-keyword-fallback-wave283e.test.js

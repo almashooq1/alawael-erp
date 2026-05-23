@@ -25,6 +25,109 @@ const DEFAULT_CHUNK_SIZE = 800;
 const DEFAULT_CHUNK_OVERLAP = 100;
 const DEFAULT_TOP_K = 5;
 const DEFAULT_SIMILARITY_THRESHOLD = 0.75;
+// W283e: keyword fallback parameters. Activated when vector retrieval returns
+// 0 chunks above threshold OR when explicitly enabled via opts.keywordFallback.
+const KEYWORD_FALLBACK_MIN_SCORE = 0.15; // require ≥15% of query tokens to match a chunk
+// Arabic stop-words (common particles + question words that don't carry meaning)
+const STOP_WORDS = new Set([
+  'في',
+  'من',
+  'إلى',
+  'على',
+  'عن',
+  'مع',
+  'ما',
+  'هل',
+  'لا',
+  'هذا',
+  'هذه',
+  'ذلك',
+  'التي',
+  'الذي',
+  'الذين',
+  'و',
+  'أو',
+  'كيف',
+  'متى',
+  'لماذا',
+  'أين',
+  'يا',
+  'أن',
+  'إن',
+  'كان',
+  'كانت',
+  'يكون',
+  'تكون',
+  'قد',
+  'كل',
+  'بعض',
+  'هو',
+  'هي',
+  'هم',
+  // common English particles in mixed queries
+  'the',
+  'a',
+  'an',
+  'is',
+  'are',
+  'of',
+  'to',
+  'in',
+  'on',
+  'at',
+  'and',
+  'or',
+  'what',
+  'when',
+  'where',
+  'why',
+  'how',
+  'do',
+  'does',
+]);
+
+/**
+ * normalizeArabic — diacritics + alif/yaa/taa-marbuta normalization.
+ * Same logic the Parent Chatbot registry uses for keyword matching.
+ */
+function normalizeArabic(text) {
+  if (!text) return '';
+  return String(text)
+    .toLowerCase()
+    .replace(/[ً-ٰٟ]/g, '') // remove diacritics (fatha, kasra, damma, etc.)
+    .replace(/[أإآ]/g, 'ا') // alif variants → bare alif
+    .replace(/ى/g, 'ي') // alif maqsura → ya
+    .replace(/ة/g, 'ه') // ta marbuta → ha
+    .replace(/[ـ]/g, '') // remove tatweel
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/**
+ * tokenize — normalize + split + drop stopwords + drop short tokens.
+ * Returns a Set for cheap intersection checks.
+ */
+function tokenize(text) {
+  if (!text) return new Set();
+  return new Set(
+    normalizeArabic(text)
+      .split(/[\s,.;:!?،؛"'(){}\[\]<>—–\-_/\\@#%&*+=|~`]+/)
+      .filter(w => w.length >= 2 && !STOP_WORDS.has(w))
+  );
+}
+
+/**
+ * keywordScore — fraction of query tokens that appear in chunk tokens.
+ * Symmetric option (overlap / max) gives a value in [0, 1].
+ */
+function keywordScore(queryTokens, chunkTokens) {
+  if (queryTokens.size === 0 || chunkTokens.size === 0) return 0;
+  let hits = 0;
+  for (const qt of queryTokens) {
+    if (chunkTokens.has(qt)) hits++;
+  }
+  return hits / queryTokens.size;
+}
 
 function ragServiceFactory({ embeddingProvider, ChunkModel = null, RetrievalModel = null } = {}) {
   if (!embeddingProvider) throw new Error('rag: embeddingProvider required');
@@ -144,18 +247,64 @@ function ragServiceFactory({ embeddingProvider, ChunkModel = null, RetrievalMode
 
     // In-process cosine — MVP. Swap for $vectorSearch when chunk count > 10K.
     const candidates = await Chunk.find(baseFilter).lean();
-    const scored = candidates
+    const vectorScored = candidates
       .map(c => ({
         chunkId: c._id,
         sourceDocId: c.sourceDocId,
         sourceDocTitle: c.sourceDocTitle,
         sectionPath: c.sectionPath,
         chunkText: c.chunkText,
+        _rawChunk: c, // kept temporarily for the keyword pass; stripped below
         similarity: embeddingProvider.cosineSimilarity(queryEmbedding, c.embedding),
+        matchSource: 'vector',
       }))
       .filter(s => s.similarity >= threshold)
       .sort((a, b) => b.similarity - a.similarity)
-      .slice(0, topK)
+      .slice(0, topK);
+
+    // W283e: keyword fallback. Default ON when vector pass yields 0 chunks
+    // (avoids POLICY_QUERY downgrading to UNKNOWN purely because the
+    // embedding provider is weak — mock-mode or poorly-tuned production
+    // provider). Caller can disable via opts.keywordFallback === false,
+    // or force-include keyword hits via opts.keywordFallback === 'always'.
+    const fbMode = opts.keywordFallback === undefined ? 'auto' : opts.keywordFallback;
+    let scored = vectorScored;
+    let usedKeywordFallback = false;
+    const shouldFallback =
+      fbMode === 'always' || (fbMode !== false && fbMode !== 'never' && vectorScored.length === 0);
+
+    if (shouldFallback) {
+      const queryTokens = tokenize(query);
+      const seenIds = new Set(vectorScored.map(s => String(s.chunkId)));
+      const keywordHits = candidates
+        .filter(c => !seenIds.has(String(c._id)))
+        .map(c => {
+          const chunkTokens = tokenize(c.chunkText + ' ' + c.sourceDocTitle);
+          return {
+            chunkId: c._id,
+            sourceDocId: c.sourceDocId,
+            sourceDocTitle: c.sourceDocTitle,
+            sectionPath: c.sectionPath,
+            chunkText: c.chunkText,
+            similarity: keywordScore(queryTokens, chunkTokens),
+            matchSource: 'keyword',
+          };
+        })
+        .filter(s => s.similarity >= KEYWORD_FALLBACK_MIN_SCORE)
+        .sort((a, b) => b.similarity - a.similarity);
+
+      const slotsRemaining = Math.max(0, topK - vectorScored.length);
+      const merged = [...vectorScored, ...keywordHits.slice(0, slotsRemaining)];
+      if (keywordHits.length > 0) usedKeywordFallback = true;
+      scored = merged.slice(0, topK);
+    }
+
+    // Strip the _rawChunk helper and rank
+    scored = scored
+      .map(s => {
+        delete s._rawChunk;
+        return s;
+      })
       .map((s, idx) => ({ ...s, rank: idx + 1 }));
 
     // Log retrieval (best-effort)
@@ -190,6 +339,8 @@ function ragServiceFactory({ embeddingProvider, ChunkModel = null, RetrievalMode
       chunks: scored,
       topSimilarity: scored.length > 0 ? scored[0].similarity : 0,
       embeddingProvider: provider,
+      usedKeywordFallback,
+      vectorMatchCount: vectorScored.length,
     };
   }
 
@@ -209,9 +360,13 @@ function ragServiceFactory({ embeddingProvider, ChunkModel = null, RetrievalMode
     retrieve,
     cite,
     _chunkText: chunkText,
+    _normalizeArabic: normalizeArabic,
+    _tokenize: tokenize,
+    _keywordScore: keywordScore,
     DEFAULT_CHUNK_SIZE,
     DEFAULT_TOP_K,
     DEFAULT_SIMILARITY_THRESHOLD,
+    KEYWORD_FALLBACK_MIN_SCORE,
   };
 }
 

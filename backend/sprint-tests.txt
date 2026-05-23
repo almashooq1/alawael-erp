@@ -206,3 +206,4 @@ __tests__/dpia-lifecycle-wave285.test.js
 __tests__/disability-authority-adapter-wave281.test.js
 __tests__/sehhaty-adapter-wave280.test.js
 __tests__/mudad-wps-orchestrator-wave282.test.js
+__tests__/rag-mvp-wave283.test.js

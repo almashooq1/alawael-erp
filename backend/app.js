@@ -2012,6 +2012,13 @@ require('./startup/mudadWpsBootstrap').wireMudadWps(app, { logger });
 // (env SPEECH_ANALYSIS_PROVIDER).
 require('./startup/speechBootstrap').wireSpeech(app, { logger });
 
+// ─── RAG (Retrieval-Augmented Generation) — Wave 283b ────────────────────────
+// Pluggable embedding provider (mock default, openai/cohere available).
+// Attaches app._ragService for late binding by Parent Chatbot (W283c) +
+// Care Plan LLM + future report generators. Admin routes for ingestion
+// + manual retrieve preview at /api/rag.
+require('./startup/ragBootstrap').wireRag(app, { logger });
+
 // ─── Hikvision Workforce Surveillance & Attendance — Wave 96-114 ─────────────
 // Extracted to startup/hikvisionBootstrap.js (W277 / Pass 1 of app.js refactor).
 // Identical behaviour: same models, same enforceMfa flags (W275 series), same

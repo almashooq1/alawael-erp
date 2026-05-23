@@ -212,3 +212,4 @@ __tests__/sehhaty-bootstrap-wave280b.test.js
 __tests__/disability-authority-bootstrap-wave281b.test.js
 __tests__/mudad-wps-bootstrap-wave282b.test.js
 __tests__/speech-bootstrap-wave284b.test.js
+__tests__/rag-bootstrap-wave283b.test.js

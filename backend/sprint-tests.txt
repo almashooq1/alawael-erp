@@ -216,3 +216,4 @@ __tests__/rag-bootstrap-wave283b.test.js
 __tests__/parent-chatbot-rag-wave283c.test.js
 __tests__/speech-retention-sweeper-wave284c.test.js
 __tests__/da-periodic-cron-wave286.test.js
+__tests__/seed-rag-policies-wave283d.test.js

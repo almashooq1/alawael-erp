@@ -1979,6 +1979,13 @@ require('./startup/beneficiaryLifecycleBootstrap').wireBeneficiaryLifecycle(app,
 // mount, same 4 app._accessReviewXxx references for cross-feature consumers.
 require('./startup/accessReviewBootstrap').wireAccessReview(app, { logger });
 
+// ─── DPIA (Data Protection Impact Assessment) — Wave 285 ─────────────────────
+// PDPL Art. 14 lifecycle workflow: draft → in_review → approved → signed (MFA-2).
+// Bootstrap constructs the service with enforceMfa:true so non-HTTP callers
+// (cron / worker / CLI) hit the same tier-2 gate that requireMfaTier(2) enforces
+// at the route layer. Drift guard W285 verifies the construction site.
+require('./startup/dpiaBootstrap').wireDpia(app, { logger });
+
 // ─── Hikvision Workforce Surveillance & Attendance — Wave 96-114 ─────────────
 // Extracted to startup/hikvisionBootstrap.js (W277 / Pass 1 of app.js refactor).
 // Identical behaviour: same models, same enforceMfa flags (W275 series), same

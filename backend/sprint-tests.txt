@@ -202,3 +202,4 @@ __tests__/import-export-data-quality-extract-wave278g.test.js
 __tests__/import-export-pro-public-api-wave278h.test.js
 __tests__/no-wrapper-export-direct-call-wave278k.test.js
 __tests__/no-silent-pass-smoke-tests-wave278l.test.js
+__tests__/dpia-lifecycle-wave285.test.js

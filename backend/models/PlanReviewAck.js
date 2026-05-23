@@ -45,7 +45,23 @@ PlanReviewAckSchema.index(
   { unique: true, partialFilterExpression: { action: 'ACK' } }
 );
 
+// ── W300: PDPL retention (opt-in) ─────────────────────────────────────
+// PDPL + Saudi MoH guidance: clinical records retained ≥ 5 years (some
+// categories ≥ 10). HOWEVER auto-deleting entries from a hash-chained
+// audit log BREAKS the chain (priorHash anchors to a missing entry →
+// verify() flags it as PRIOR_HASH_MISMATCH forever). Therefore the TTL
+// is OFF by default and only activates when the operator explicitly
+// sets PLAN_REVIEW_AUDIT_TTL_DAYS > 0. Recommended floor: 1825 (5y).
+// Recommended policy if enabling: archive the full chain to cold storage
+// first (e.g. S3 Glacier), then drop the active collection.
+const TTL_DAYS_RAW = Number(process.env.PLAN_REVIEW_AUDIT_TTL_DAYS || 0);
+const TTL_DAYS = Number.isFinite(TTL_DAYS_RAW) && TTL_DAYS_RAW > 0 ? TTL_DAYS_RAW : 0;
+if (TTL_DAYS > 0) {
+  PlanReviewAckSchema.index({ occurredAt: 1 }, { expireAfterSeconds: TTL_DAYS * 24 * 60 * 60 });
+}
+
 PlanReviewAckSchema.statics.ACTIONS = ACTIONS;
+PlanReviewAckSchema.statics.TTL_DAYS = TTL_DAYS;
 
 module.exports =
   mongoose.models.PlanReviewAck || mongoose.model('PlanReviewAck', PlanReviewAckSchema);

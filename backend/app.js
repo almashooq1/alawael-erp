@@ -2005,6 +2005,13 @@ require('./startup/disabilityAuthorityBootstrap').wireDisabilityAuthority(app, {
 // day 25 @ 02:30 Asia/Riyadh).
 require('./startup/mudadWpsBootstrap').wireMudadWps(app, { logger });
 
+// ─── Speech analysis (SLP) — Wave 284b ───────────────────────────────────────
+// Audio NEVER lives in MongoDB — only metadata + transcript + metrics. Front-end
+// uploads via presigned URL; back-end accepts metadata via /recordings/register.
+// Live providers: openai-whisper-api | anthropic-claude | self-hosted-whisper
+// (env SPEECH_ANALYSIS_PROVIDER).
+require('./startup/speechBootstrap').wireSpeech(app, { logger });
+
 // ─── Hikvision Workforce Surveillance & Attendance — Wave 96-114 ─────────────
 // Extracted to startup/hikvisionBootstrap.js (W277 / Pass 1 of app.js refactor).
 // Identical behaviour: same models, same enforceMfa flags (W275 series), same

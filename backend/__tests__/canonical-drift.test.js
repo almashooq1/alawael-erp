@@ -69,9 +69,9 @@ beforeAll(() => {
 describe('Canonical Data Model → Mongoose drift guard (Wave 285)', () => {
   test('registry has every shipped canonical entity', () => {
     const names = registry.names();
-    // Spec is 10 entities (see canonical/README.md). Hard-assert the
-    // count so accidentally dropping one is caught here.
-    expect(names.length).toBe(10);
+    // Spec is 11 entities (10 persisted + RiskProfile derived view, W287).
+    // Hard-assert the count so accidentally dropping one is caught here.
+    expect(names.length).toBe(11);
     expect(names).toEqual(
       expect.arrayContaining([
         'Beneficiary',
@@ -84,6 +84,7 @@ describe('Canonical Data Model → Mongoose drift guard (Wave 285)', () => {
         'TeleRehabSession',
         'ARVRSession',
         'BehaviorIncident',
+        'RiskProfile',
       ])
     );
   });

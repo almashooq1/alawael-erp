@@ -132,11 +132,11 @@ describe('Wave 286 — Unified Risk Orchestrator', () => {
     });
 
     test('aggregates available sources + isolates failures', async () => {
-      const profile = await getBeneficiaryRiskProfile('ben-123', {
+      const profile = await getBeneficiaryRiskProfile('507f1f77bcf86cd799439011', {
         logger: { warn: () => {} },
       });
 
-      expect(profile.beneficiaryId).toBe('ben-123');
+      expect(profile.beneficiaryId).toBe('507f1f77bcf86cd799439011');
       expect(profile.reason).toBe('RISK_SCORE_COMPUTED');
 
       // clinical (80) + psych_flags (65) → renormalised
@@ -162,7 +162,7 @@ describe('Wave 286 — Unified Risk Orchestrator', () => {
     });
 
     test('explainability invariant — overall result carries factors[]', async () => {
-      const profile = await getBeneficiaryRiskProfile('ben-456', {
+      const profile = await getBeneficiaryRiskProfile('507f1f77bcf86cd799439022', {
         logger: { warn: () => {} },
       });
       expect(Array.isArray(profile.topFactors)).toBe(true);
@@ -222,7 +222,7 @@ describe('Wave 286 — Unified Risk Orchestrator', () => {
         }),
       }));
       const orch = require('../intelligence/risk');
-      const profile = await orch.getBeneficiaryRiskProfile('ben-empty', {
+      const profile = await orch.getBeneficiaryRiskProfile('507f1f77bcf86cd799439033', {
         logger: { warn: () => {} },
       });
       expect(profile.overallScore).toBeNull();

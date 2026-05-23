@@ -134,7 +134,7 @@ async function getBeneficiaryRiskProfile(beneficiaryId, opts = {}) {
     topFactors,
   });
 
-  return {
+  const profile = {
     beneficiaryId: String(beneficiaryId),
     episodeId: opts.episodeId ? String(opts.episodeId) : null,
     overallScore: composite.score,
@@ -151,6 +151,37 @@ async function getBeneficiaryRiskProfile(beneficiaryId, opts = {}) {
     reason,
     explanation,
   };
+
+  // W287 — Canonical self-validation. Any failure here is a coding bug
+  // in this orchestrator or a source plugin; log + ship anyway (do NOT
+  // crash a clinician-facing endpoint over a contract drift).
+  assertCanonicalShape(profile, log);
+
+  return profile;
+}
+
+let _RiskProfileSchema = null;
+function assertCanonicalShape(profile, log) {
+  if (_RiskProfileSchema === null) {
+    try {
+      // Lazy load to avoid a require cycle (canonical/index.js may grow
+      // to depend on intelligence in the future).
+      _RiskProfileSchema = require('../canonical/schemas/risk-profile.canonical').schema;
+    } catch (_e) {
+      _RiskProfileSchema = false; // disable further attempts
+      return;
+    }
+  }
+  if (!_RiskProfileSchema) return;
+  const result = _RiskProfileSchema.safeParse(profile);
+  if (!result.success) {
+    (log.warn || log.log || console.warn).call(
+      log,
+      '[risk-orchestrator] canonical shape drift for beneficiary %s: %s',
+      profile.beneficiaryId,
+      JSON.stringify(result.error.errors.slice(0, 3))
+    );
+  }
 }
 
 function buildExplanationAr({ overallScore, overallTier, sourceCount, topFactors }) {

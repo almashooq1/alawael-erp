@@ -27,6 +27,7 @@ const ENTRIES = [
   require('./schemas/tele-rehab-session.canonical'),
   require('./schemas/arvr-session.canonical'),
   require('./schemas/behavior-incident.canonical'),
+  require('./schemas/risk-profile.canonical'),
 ];
 
 for (const entry of ENTRIES) registry.register(entry);

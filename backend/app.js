@@ -1998,6 +1998,13 @@ require('./startup/sehhatyBootstrap').wireSehhaty(app, { logger });
 // Live mode requires DISABILITY_AUTHORITY_{BASE_URL,API_KEY,CENTER_ID} env.
 require('./startup/disabilityAuthorityBootstrap').wireDisabilityAuthority(app, { logger });
 
+// ─── Mudad WPS monthly orchestrator + cron — Wave 282b ──────────────────────
+// Constructs orchestrator with enforceMfa:true, wires payrollLoader to PayrollRun
+// model, uploader to mudadAdapter, optional HR notifier. Cron disabled by default
+// (ENABLE_MUDAD_CRON=true + MUDAD_BRANCH_IDS=b1,b2 to enable monthly upload on
+// day 25 @ 02:30 Asia/Riyadh).
+require('./startup/mudadWpsBootstrap').wireMudadWps(app, { logger });
+
 // ─── Hikvision Workforce Surveillance & Attendance — Wave 96-114 ─────────────
 // Extracted to startup/hikvisionBootstrap.js (W277 / Pass 1 of app.js refactor).
 // Identical behaviour: same models, same enforceMfa flags (W275 series), same

@@ -400,6 +400,28 @@ export const MODULE_REGISTRY = [
 
   // ─── Quality / Compliance ──────────────────
   {
+    key: 'risk-management',
+    nameAr: 'إدارة المخاطر',
+    nameEn: 'Risk Management',
+    icon: 'Shield',
+    path: '/risk-management',
+    resource: 'quality',
+    roles: ['admin', 'super_admin', 'manager', 'supervisor'],
+    color: '#dd6b20',
+    description: 'لوحة المخاطر، سجل المخاطر، والمراجعات الحرجة',
+  },
+  {
+    key: 'risk-triggered-reviews',
+    nameAr: 'المراجعات الحرجة',
+    nameEn: 'Triggered Reviews',
+    icon: 'WarningAmber',
+    path: '/risk-management/triggered-reviews',
+    resource: 'quality',
+    roles: ['admin', 'super_admin', 'manager', 'supervisor'],
+    color: '#dd6b20',
+    description: 'مراجعات خطط الرعاية المُطلقة بسبب تنبيهات حرجة (W301)',
+  },
+  {
     key: 'quality',
     nameAr: 'الجودة',
     nameEn: 'Quality',

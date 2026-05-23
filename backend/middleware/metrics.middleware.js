@@ -119,6 +119,79 @@ const metricsHandler = (req, res) => {
   lines.push(`http_request_duration_seconds_sum ${sum.toFixed(6)} ${now}`);
   lines.push(`http_request_duration_seconds_count ${count} ${now}`);
 
+  // ── W302: gov adapter counters + latency (adapterMetricsRegistry) ─────
+  try {
+    // eslint-disable-next-line global-require -- lazy: optional in tests
+    const adapter = require('../services/adapterMetricsRegistry');
+    const adapterCounters = adapter.snapshotCounters?.() || {};
+    const adapterLatency = adapter.snapshotLatency?.() || {};
+
+    if (Object.keys(adapterCounters).length) {
+      lines.push('# HELP gov_adapter_calls_total Gov adapter call counters by provider+status.');
+      lines.push('# TYPE gov_adapter_calls_total counter');
+      for (const [provider, c] of Object.entries(adapterCounters)) {
+        for (const status of ['success', 'failed', 'rate_limited']) {
+          lines.push(
+            `gov_adapter_calls_total{provider="${provider}",status="${status}"} ${c[status] || 0} ${now}`
+          );
+        }
+      }
+    }
+    if (Object.keys(adapterLatency).length) {
+      lines.push('# HELP gov_adapter_call_latency_ms Gov adapter call latency (ms).');
+      lines.push('# TYPE gov_adapter_call_latency_ms histogram');
+      for (const [provider, l] of Object.entries(adapterLatency)) {
+        // cumulative buckets (Prometheus convention)
+        let cumulative = 0;
+        for (const b of l.buckets) {
+          cumulative += b.count;
+          const le = b.le === Infinity ? '+Inf' : String(b.le);
+          lines.push(
+            `gov_adapter_call_latency_ms_bucket{provider="${provider}",le="${le}"} ${cumulative} ${now}`
+          );
+        }
+        lines.push(`gov_adapter_call_latency_ms_sum{provider="${provider}"} ${l.sum} ${now}`);
+        lines.push(`gov_adapter_call_latency_ms_count{provider="${provider}"} ${l.count} ${now}`);
+      }
+    }
+  } catch {
+    /* adapter registry not available — emit nothing */
+  }
+
+  // ── W302: risk lifecycle counters (risk-metrics.registry, W297) ──────
+  try {
+    // eslint-disable-next-line global-require -- lazy: optional in tests
+    const risk = require('../intelligence/risk-metrics.registry');
+    const grouped = risk.snapshotGrouped?.() || {};
+    if (Object.keys(grouped).length) {
+      for (const [metricName, series] of Object.entries(grouped)) {
+        // Prometheus names: dots → underscores
+        const pname = metricName.replace(/\./g, '_');
+        lines.push(`# HELP ${pname} Risk lifecycle counter (W297).`);
+        lines.push(`# TYPE ${pname} counter`);
+        for (const [labelKey, count] of Object.entries(series)) {
+          if (labelKey === '_') {
+            lines.push(`${pname} ${count} ${now}`);
+          } else {
+            // labelKey: "k=v,k=v"  →  {k="v",k="v"}
+            const labels = labelKey
+              .split(',')
+              .map(p => {
+                const idx = p.indexOf('=');
+                const k = p.slice(0, idx);
+                const v = p.slice(idx + 1).replace(/"/g, '\\"');
+                return `${k}="${v}"`;
+              })
+              .join(',');
+            lines.push(`${pname}{${labels}} ${count} ${now}`);
+          }
+        }
+      }
+    }
+  } catch {
+    /* risk registry not available — emit nothing */
+  }
+
   res.set('Content-Type', 'text/plain; version=0.0.4; charset=utf-8');
   res.send(lines.join('\n') + '\n');
 };

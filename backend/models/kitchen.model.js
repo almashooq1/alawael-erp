@@ -78,7 +78,7 @@ const menuItemSchema = new Schema(
 const dailyMenuSchema = new Schema(
   {
     date: { type: Date, required: true },
-    center: { type: Schema.Types.ObjectId, ref: 'Center' },
+    center: { type: Schema.Types.ObjectId, ref: 'Branch' },
     meals: {
       breakfast: {
         items: [{ type: Schema.Types.ObjectId, ref: 'MenuItem' }],
@@ -139,7 +139,7 @@ const mealServiceSchema = new Schema(
       required: true,
     },
     date: { type: Date, required: true },
-    center: { type: Schema.Types.ObjectId, ref: 'Center' },
+    center: { type: Schema.Types.ObjectId, ref: 'Branch' },
     servingsPlanned: { type: Number, default: 0 },
     servingsServed: { type: Number, default: 0 },
     servingsWasted: { type: Number, default: 0 },
@@ -204,7 +204,7 @@ const kitchenInventorySchema = new Schema(
     supplier: String,
     cost: Number, // per unit (SAR)
     storageLocation: String,
-    center: { type: Schema.Types.ObjectId, ref: 'Center' },
+    center: { type: Schema.Types.ObjectId, ref: 'Branch' },
     lastRestocked: Date,
     restockedBy: { type: Schema.Types.ObjectId, ref: 'User' },
   },

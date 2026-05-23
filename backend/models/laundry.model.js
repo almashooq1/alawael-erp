@@ -19,7 +19,7 @@ const laundryOrderSchema = new Schema(
     orderNumber: { type: String, unique: true },
     beneficiary: { type: Schema.Types.ObjectId, ref: 'Beneficiary' },
     department: { type: String }, // if bulk from a department
-    center: { type: Schema.Types.ObjectId, ref: 'Center' },
+    center: { type: Schema.Types.ObjectId, ref: 'Branch' },
     type: {
       type: String,
       enum: ['personal', 'bedding', 'towels', 'uniforms', 'curtains', 'bulk', 'special'],
@@ -117,7 +117,7 @@ const laundryMachineSchema = new Schema(
     model: String,
     serialNumber: String,
     capacity: { type: Number }, // kg
-    center: { type: Schema.Types.ObjectId, ref: 'Center' },
+    center: { type: Schema.Types.ObjectId, ref: 'Branch' },
     location: String, // room/area
     status: {
       type: String,
@@ -146,7 +146,7 @@ const laundryScheduleSchema = new Schema(
       max: 6,
     },
     department: String,
-    center: { type: Schema.Types.ObjectId, ref: 'Center' },
+    center: { type: Schema.Types.ObjectId, ref: 'Branch' },
     timeSlot: {
       start: { type: String, required: true }, // "08:00"
       end: { type: String, required: true }, // "10:00"

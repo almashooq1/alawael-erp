@@ -60,15 +60,15 @@ const REF_ALLOWLIST = new Set([
 // future waves (one entry per wave is a reasonable pace).
 //
 // Top fix candidates (highest occurrence × clearest correct target):
-//   Center (10×)      → likely should be 'Branch' (canonical, registered in
-//                       models/Branch.js + database/seeders/database-seeder.js)
 //   Admin (8×)        → likely should be 'User' (admin is a role, not a model)
 //   AdminUser (4×)    → same as Admin — 'User'
 //   Patient (1×)      → 'Beneficiary' (matches W324's CommunityReferral fix
 //                       pattern; this is a second occurrence in ResourceBooking.js)
+//
+// Ratchet-DOWN history (newest first):
+//   W326 (commit pending) — 'Center' (10×) → 'Branch' fixed across crisis.model.js + laundry.model.js + kitchen.model.js
 const KNOWN_PHANTOM_BASELINE_W325C = new Set([
   // W324 lookalikes — likely fix is rename to canonical
-  'Center', // 10× — fix candidate: 'Branch'
   'Admin', // 8× — fix candidate: 'User'
   'AdminUser', // 4× — fix candidate: 'User'
   'Patient', // 1× — fix candidate: 'Beneficiary' (W324 found 1 of these, missed this one in ResourceBooking)

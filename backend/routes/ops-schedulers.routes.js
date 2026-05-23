@@ -141,6 +141,32 @@ function createOpsSchedulersRouter() {
     });
   });
 
+  // W321 — uptime-monitor hook. Returns HTTP 200 when every *enabled+registered*
+  // scheduler is `ok` or `never-run`, HTTP 503 if any is `failed` or `stale`.
+  // Designed for a Pingdom/UptimeRobot-style HEAD/GET probe: small payload,
+  // single status code, no auth (mount behind ops-only path if needed).
+  router.get('/schedulers/health', (_req, res) => {
+    let entries = [];
+    try {
+      const schedulerRegistry = require('../intelligence/scheduler-registry');
+      entries = schedulerRegistry.getAll().map(e => ({
+        key: e.key,
+        health: schedulerRegistry.health(e),
+      }));
+    } catch {
+      entries = [];
+    }
+    const degraded = entries.filter(e => e.health === 'failed' || e.health === 'stale');
+    const status = degraded.length === 0 ? 'ok' : 'degraded';
+    res.status(degraded.length === 0 ? 200 : 503).json({
+      status,
+      checkedAt: new Date().toISOString(),
+      total: entries.length,
+      degraded: degraded.length,
+      entries,
+    });
+  });
+
   return router;
 }
 

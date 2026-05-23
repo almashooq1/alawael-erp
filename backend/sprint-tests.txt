@@ -223,3 +223,4 @@ __tests__/rag-metrics-wave283g.test.js
 __tests__/rag-metrics-endpoint-wave283h.test.js
 __tests__/scheduler-registry.test.js
 __tests__/ops-schedulers-registry-coverage.test.js
+__tests__/ops-schedulers-health-endpoint.test.js

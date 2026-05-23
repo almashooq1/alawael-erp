@@ -218,3 +218,4 @@ __tests__/speech-retention-sweeper-wave284c.test.js
 __tests__/da-periodic-cron-wave286.test.js
 __tests__/seed-rag-policies-wave283d.test.js
 __tests__/rag-keyword-fallback-wave283e.test.js
+__tests__/embedding-provider-live-wave283f.test.js

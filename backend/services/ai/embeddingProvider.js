@@ -55,17 +55,136 @@ function mockEmbed(text) {
   return out;
 }
 
-// ── Live placeholders ───────────────────────────────────────────────────
-async function liveOpenAIEmbed(_text) {
-  throw Object.assign(new Error('OpenAI embedding live mode requires OPENAI_API_KEY env var'), {
-    code: 'EMBEDDING_LIVE_NOT_CONFIGURED',
-  });
+// ── Live provider implementations (W283f) ──────────────────────────────
+// Both providers share the same control flow: validate creds → POST with
+// 10s timeout → 1 retry on transient (5xx + network) → parse → return.
+// Auth/rate-limit/client-error responses do NOT retry. Errors use distinct
+// codes so callers can differentiate config issues from runtime failures.
+
+const HTTP_TIMEOUT_MS = parseInt(process.env.EMBEDDING_HTTP_TIMEOUT_MS, 10) || 10000;
+const HTTP_MAX_RETRIES = 1;
+
+async function _httpPost(url, body, headers) {
+  // Allow tests to inject a fake fetch via module.exports._setFetch.
+  const fetchFn = module.exports._fetch || globalThis.fetch;
+  if (!fetchFn) {
+    throw Object.assign(new Error('global fetch unavailable (Node < 18?)'), {
+      code: 'EMBEDDING_NO_FETCH',
+    });
+  }
+  const ctl = new AbortController();
+  const timeoutId = setTimeout(() => ctl.abort(), HTTP_TIMEOUT_MS);
+  try {
+    return await fetchFn(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...headers },
+      body: JSON.stringify(body),
+      signal: ctl.signal,
+    });
+  } finally {
+    clearTimeout(timeoutId);
+  }
 }
 
-async function liveCohereEmbed(_text) {
-  throw Object.assign(new Error('Cohere embedding live mode requires COHERE_API_KEY env var'), {
-    code: 'EMBEDDING_LIVE_NOT_CONFIGURED',
-  });
+async function _httpPostWithRetry(url, body, headers) {
+  let lastErr;
+  for (let attempt = 0; attempt <= HTTP_MAX_RETRIES; attempt++) {
+    try {
+      const res = await _httpPost(url, body, headers);
+      // 5xx → retry; 4xx → fail immediately
+      if (res.status >= 500 && attempt < HTTP_MAX_RETRIES) {
+        lastErr = Object.assign(new Error(`upstream ${res.status}`), {
+          code: 'EMBEDDING_UPSTREAM_5XX',
+          status: res.status,
+        });
+        continue;
+      }
+      return res;
+    } catch (err) {
+      // Network / timeout — retry once
+      if (attempt < HTTP_MAX_RETRIES) {
+        lastErr = err;
+        continue;
+      }
+      throw Object.assign(err, {
+        code:
+          err.code || (err.name === 'AbortError' ? 'EMBEDDING_TIMEOUT' : 'EMBEDDING_NETWORK_FAIL'),
+      });
+    }
+  }
+  throw lastErr;
+}
+
+async function liveOpenAIEmbed(text) {
+  const key = process.env.OPENAI_API_KEY;
+  if (!key) {
+    throw Object.assign(new Error('OPENAI_API_KEY env var required for live OpenAI embedding'), {
+      code: 'EMBEDDING_LIVE_NOT_CONFIGURED',
+    });
+  }
+  const res = await _httpPostWithRetry(
+    'https://api.openai.com/v1/embeddings',
+    { input: text, model: 'text-embedding-3-large' },
+    { Authorization: `Bearer ${key}` }
+  );
+  if (!res.ok) {
+    const code =
+      res.status === 401
+        ? 'EMBEDDING_AUTH_FAIL'
+        : res.status === 429
+          ? 'EMBEDDING_RATE_LIMITED'
+          : res.status >= 500
+            ? 'EMBEDDING_UPSTREAM_5XX'
+            : 'EMBEDDING_REQUEST_FAILED';
+    throw Object.assign(new Error(`OpenAI embed ${res.status}`), { code, status: res.status });
+  }
+  const body = await res.json();
+  const vec = body?.data?.[0]?.embedding;
+  if (!Array.isArray(vec) || vec.length === 0) {
+    throw Object.assign(new Error('OpenAI returned malformed embedding'), {
+      code: 'EMBEDDING_MALFORMED_RESPONSE',
+    });
+  }
+  return vec;
+}
+
+async function liveCohereEmbed(text) {
+  const key = process.env.COHERE_API_KEY;
+  if (!key) {
+    throw Object.assign(new Error('COHERE_API_KEY env var required for live Cohere embedding'), {
+      code: 'EMBEDDING_LIVE_NOT_CONFIGURED',
+    });
+  }
+  const res = await _httpPostWithRetry(
+    'https://api.cohere.com/v2/embed',
+    {
+      texts: [text],
+      model: 'embed-multilingual-v3.0',
+      input_type: 'search_document',
+      embedding_types: ['float'],
+    },
+    { Authorization: `Bearer ${key}` }
+  );
+  if (!res.ok) {
+    const code =
+      res.status === 401
+        ? 'EMBEDDING_AUTH_FAIL'
+        : res.status === 429
+          ? 'EMBEDDING_RATE_LIMITED'
+          : res.status >= 500
+            ? 'EMBEDDING_UPSTREAM_5XX'
+            : 'EMBEDDING_REQUEST_FAILED';
+    throw Object.assign(new Error(`Cohere embed ${res.status}`), { code, status: res.status });
+  }
+  const body = await res.json();
+  // Cohere v2 returns: { embeddings: { float: [[...]] } }
+  const vec = body?.embeddings?.float?.[0];
+  if (!Array.isArray(vec) || vec.length === 0) {
+    throw Object.assign(new Error('Cohere returned malformed embedding'), {
+      code: 'EMBEDDING_MALFORMED_RESPONSE',
+    });
+  }
+  return vec;
 }
 
 // ── Public API ──────────────────────────────────────────────────────────
@@ -112,7 +231,14 @@ module.exports = {
   getProvider,
   getDimensions,
   cosineSimilarity,
+  // Direct provider access — useful for ops tools that want to call a
+  // specific provider regardless of EMBEDDING_PROVIDER env.
+  liveOpenAIEmbed,
+  liveCohereEmbed,
   // For tests
   _mockEmbed: mockEmbed,
   _MOCK_DIM: MOCK_DIM,
+  // Test injection point: assign module.exports._fetch = mockFetch to
+  // intercept HTTP calls without monkey-patching globalThis.fetch.
+  _fetch: null,
 };

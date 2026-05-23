@@ -1,0 +1,78 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "_meta": {
+    "wave": "W307",
+    "owner": "Risk + Compliance",
+    "description": "Azure Monitor scheduled query rule that fires Sev1 whenever the W297 risk lifecycle counter `risk.plan_review.audit.verified` reports `result=broken` more than 0 times in any 15-minute window. A broken hash chain in plan-review audit indicates either tampering or a chain-rotation bug — both PDPL-reportable.",
+    "depends_on": [
+      "W297 risk-metrics.registry counters",
+      "W299 Log Analytics workbook (risk_metrics_CL custom table)",
+      "W302 Prometheus /metrics → if scraped into Azure Monitor managed Prometheus, alternate query lives in `_promql` field"
+    ],
+    "placeholders": {
+      "<subscription-id>": "Azure subscription GUID",
+      "<resource-group>": "Resource group hosting the Log Analytics workspace",
+      "<workspace-name>": "Log Analytics workspace name",
+      "<action-group-resource-id>": "Resource ID of the Saudi on-call action group (PagerDuty / Teams / SMS to MFA-tier-2 admins)"
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Insights/scheduledQueryRules",
+      "apiVersion": "2023-03-15-preview",
+      "name": "alawael-risk-plan-review-chain-broken",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "displayName": "Al-Awael — Plan-Review Audit Chain Broken",
+        "description": "Sev1: the hash-linked audit chain on a triggered plan-review is broken. Indicates tampering or registry rotation bug. PDPL Article 11 — incident reporting required.",
+        "severity": 1,
+        "enabled": true,
+        "evaluationFrequency": "PT15M",
+        "windowSize": "PT15M",
+        "scopes": [
+          "/subscriptions/<subscription-id>/resourceGroups/<resource-group>/providers/Microsoft.OperationalInsights/workspaces/<workspace-name>"
+        ],
+        "criteria": {
+          "allOf": [
+            {
+              "query": "// Source: risk-metrics.registry W297 emissions ingested as a custom log table.\n// Assumes a periodic exporter pushes `snapshotGrouped()` to risk_metrics_CL\n// with columns: TimeGenerated, name_s, labels_s, value_d.\nrisk_metrics_CL\n| where TimeGenerated > ago(15m)\n| where name_s == 'risk.plan_review.audit.verified'\n| where labels_s contains 'result=broken'\n| summarize total = sum(value_d) by bin(TimeGenerated, 5m)\n| where total > 0",
+              "timeAggregation": "Total",
+              "metricMeasureColumn": "total",
+              "operator": "GreaterThan",
+              "threshold": 0,
+              "failingPeriods": {
+                "numberOfEvaluationPeriods": 1,
+                "minFailingPeriodsToAlert": 1
+              }
+            }
+          ]
+        },
+        "autoMitigate": false,
+        "actions": {
+          "actionGroups": [
+            "<action-group-resource-id>"
+          ],
+          "customProperties": {
+            "runbook": "https://wiki.alawael.internal/runbooks/W307-chain-broken.md",
+            "ar_summary": "كَسر في سلسلة تدقيق مراجعة خطة الرعاية — تحقيق فوري مطلوب"
+          }
+        }
+      }
+    }
+  ],
+  "_promql_alternate": {
+    "_note": "If running Azure Monitor managed Prometheus (W302 /metrics scrape), use this alert rule instead of the KQL-based scheduledQueryRule above.",
+    "rule": {
+      "alert": "PlanReviewAuditChainBroken",
+      "expr": "increase(risk_plan_review_audit_verified{result=\"broken\"}[15m]) > 0",
+      "for": "0m",
+      "labels": { "severity": "critical", "team": "risk-compliance", "pdpl": "article-11" },
+      "annotations": {
+        "summary": "Plan-review audit chain broken in last 15m",
+        "description": "{{ $value }} broken-chain verifications on {{ $labels.instance }} — investigate tampering or registry rotation bug.",
+        "runbook_url": "https://wiki.alawael.internal/runbooks/W307-chain-broken.md"
+      }
+    }
+  }
+}

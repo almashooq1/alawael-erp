@@ -1,0 +1,153 @@
+{
+  "$schema": "https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json",
+  "version": "Notebook/1.0",
+  "items": [
+    {
+      "type": 1,
+      "name": "header",
+      "content": {
+        "json": "# Plan Review SLA — Wave 299\n\nImportable companion to `docs/observability/W296-plan-review-sla.kql.md`.\nDrop this JSON into **Azure Monitor → Workbooks → New → Advanced Editor → Gallery Template** and `Apply`.\n\n**Required tables (custom Log Analytics):**\n- `plan_reviews_CL` — CRITICAL plan-review lifecycle (TRIGGERED / ACK / SLA_ESCALATED), one row per W295 PlanReviewAck entry.\n- `risk_sweep_runs_CL` — output of `RiskSweeperService.runDailySweep`."
+      }
+    },
+    {
+      "type": 9,
+      "name": "parameters",
+      "content": {
+        "version": "KqlParameterItem/1.0",
+        "parameters": [
+          {
+            "id": "p-window",
+            "version": "KqlParameterItem/1.0",
+            "name": "WindowDays",
+            "type": 1,
+            "isRequired": true,
+            "value": "30",
+            "label": "Window (days)"
+          },
+          {
+            "id": "p-branch",
+            "version": "KqlParameterItem/1.0",
+            "name": "BranchId",
+            "type": 2,
+            "isRequired": false,
+            "label": "Branch",
+            "typeSettings": { "additionalResourceOptions": ["value::all"] },
+            "query": "plan_reviews_CL\n| where TimeGenerated > ago({WindowDays}d)\n| where isnotempty(branchId_s)\n| distinct branchId_s\n| order by branchId_s asc",
+            "value": "value::all"
+          }
+        ]
+      }
+    },
+    {
+      "type": 1,
+      "name": "section-throughput",
+      "content": { "json": "## 1 — Daily throughput by action" }
+    },
+    {
+      "type": 3,
+      "name": "q-throughput",
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "plan_reviews_CL\n| where TimeGenerated > ago({WindowDays}d)\n| where '{BranchId}' == '*' or branchId_s == '{BranchId}'\n| summarize Count = count() by Day = bin(TimeGenerated, 1d), Action = action_s\n| render timechart",
+        "size": 0,
+        "visualization": "timechart"
+      }
+    },
+    {
+      "type": 1,
+      "name": "section-ack-latency",
+      "content": { "json": "## 2 — Median time-to-ACK by branch" }
+    },
+    {
+      "type": 3,
+      "name": "q-ack-latency",
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "let triggered = plan_reviews_CL\n  | where TimeGenerated > ago({WindowDays}d)\n  | where action_s == 'TRIGGERED'\n  | project planReviewId = tostring(planReviewId_g), branchId = branchId_s, triggeredAt = TimeGenerated;\nlet acks = plan_reviews_CL\n  | where TimeGenerated > ago({WindowDays}d)\n  | where action_s == 'ACK'\n  | project planReviewId = tostring(planReviewId_g), ackAt = TimeGenerated;\ntriggered\n| join kind=inner acks on planReviewId\n| extend HoursToAck = (ackAt - triggeredAt) / 1h\n| summarize MedianHours = percentile(HoursToAck, 50), Count = count() by branchId\n| order by MedianHours desc",
+        "size": 0,
+        "visualization": "table"
+      }
+    },
+    {
+      "type": 1,
+      "name": "section-sla-breach",
+      "content": { "json": "## 3 — SLA breaches (warning + urgent)" }
+    },
+    {
+      "type": 3,
+      "name": "q-sla-breach",
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "plan_reviews_CL\n| where TimeGenerated > ago({WindowDays}d)\n| where action_s == 'SLA_ESCALATED'\n| where '{BranchId}' == '*' or branchId_s == '{BranchId}'\n| extend Severity = case(level_d == 2, 'urgent', level_d == 1, 'warning', 'other')\n| summarize Count = count() by Day = bin(TimeGenerated, 1d), Severity\n| render columnchart",
+        "size": 0,
+        "visualization": "barchart"
+      }
+    },
+    {
+      "type": 1,
+      "name": "section-no-active-plan",
+      "content": { "json": "## 4 — Risk escalations without active care plan" }
+    },
+    {
+      "type": 3,
+      "name": "q-no-active-plan",
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "risk_sweep_runs_CL\n| where TimeGenerated > ago({WindowDays}d)\n| mv-expand alert = alerts_dynamic\n| where tostring(alert.code) startswith 'RISK_TIER_'\n| where tostring(alert.reason) == 'NO_ACTIVE_CARE_PLAN'\n| summarize Count = count() by branchId = tostring(alert.branchId)\n| order by Count desc",
+        "size": 0,
+        "visualization": "table"
+      }
+    },
+    {
+      "type": 1,
+      "name": "section-chain-broken",
+      "content": {
+        "json": "## 5 — Plan-review audit chains flagged broken (via W295 verify)\n\nFed by manual or scheduled `GET /api/risk-sweep/triggered-reviews/:id/audit` checks that push to `plan_review_audit_verify_CL`."
+      }
+    },
+    {
+      "type": 3,
+      "name": "q-chain-broken",
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "plan_review_audit_verify_CL\n| where TimeGenerated > ago({WindowDays}d)\n| where ok_b == false\n| project TimeGenerated, planReviewId = planReviewId_g, brokenAt = brokenAt_d, reason = reason_s\n| order by TimeGenerated desc",
+        "size": 0,
+        "visualization": "table"
+      }
+    },
+    {
+      "type": 1,
+      "name": "section-metrics",
+      "content": {
+        "json": "## 6 — Lifecycle counter snapshot (W297)\n\nSource: `GET /api/risk-sweep/metrics` shipped to `risk_metrics_CL` by your scraper."
+      }
+    },
+    {
+      "type": 3,
+      "name": "q-metrics",
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "risk_metrics_CL\n| where TimeGenerated > ago({WindowDays}d)\n| summarize Total = sum(value_d) by Metric = name_s, Labels = labels_s\n| order by Metric asc, Total desc",
+        "size": 0,
+        "visualization": "table"
+      }
+    },
+    {
+      "type": 1,
+      "name": "section-top-beneficiaries",
+      "content": { "json": "## 7 — Top beneficiaries by triggered reviews" }
+    },
+    {
+      "type": 3,
+      "name": "q-top-ben",
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "plan_reviews_CL\n| where TimeGenerated > ago({WindowDays}d)\n| where action_s == 'TRIGGERED'\n| where '{BranchId}' == '*' or branchId_s == '{BranchId}'\n| summarize Count = count() by beneficiaryId = tostring(beneficiaryId_g)\n| order by Count desc\n| take 25",
+        "size": 0,
+        "visualization": "table"
+      }
+    }
+  ],
+  "fallbackResourceIds": [],
+  "fromTemplateId": "W299-plan-review-sla"
+}

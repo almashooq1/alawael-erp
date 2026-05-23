@@ -48,6 +48,61 @@ function wireSpeech(app, deps = {}) {
     logger.info(
       `[startup] Speech analysis wired (W284b): /api/speech + /api/v1/speech, provider=${provider}, enforceMfa=true`
     );
+
+    // ── W284c: Speech retention sweeper cron ──────────────────────────
+    // Daily at 03:00 Asia/Riyadh — purges audio files for recordings
+    // past their expiresAt. Disabled by default (ENABLE_SPEECH_RETENTION_CRON=true).
+    try {
+      const sweeperFactory = require('../services/ai/speech-retention-sweeper.service');
+      // storagePurger: in production wire to S3 deleteObject. For now,
+      // log-only purger so cron is operational immediately.
+      const storagePurger = async ({ bucket, key }) => {
+        logger.info(`[speech-retention] would purge s3://${bucket}/${key} (no-op placeholder)`);
+      };
+      const sweeper = sweeperFactory({
+        storagePurger,
+        auditLogger: AuditLogger,
+        redactTranscriptOnPurge: false,
+      });
+      app._speechRetentionSweeper = sweeper;
+
+      const cronEnabled =
+        String(process.env.ENABLE_SPEECH_RETENTION_CRON || '').toLowerCase() === 'true';
+      if (cronEnabled) {
+        const cron = loadOptional('node-cron');
+        if (cron) {
+          const task = cron.schedule(
+            '0 3 * * *',
+            async () => {
+              logger.info('[speech-retention:cron] starting daily sweep');
+              try {
+                const result = await sweeper.runOnce();
+                logger.info(
+                  `[speech-retention:cron] scanned=${result.scanned} purged=${result.purged} failed=${result.failed}`
+                );
+              } catch (err) {
+                logger.error('[speech-retention:cron] sweep failed', { err: err.message });
+              }
+            },
+            { timezone: 'Asia/Riyadh' }
+          );
+          app._speechRetentionCronTask = task;
+          logger.info(
+            '[startup] Speech retention sweeper cron scheduled (W284c): daily @ 03:00 Asia/Riyadh'
+          );
+        } else {
+          logger.warn('[startup] Speech retention: cron requested but node-cron not installed.');
+        }
+      } else {
+        logger.info(
+          '[startup] Speech retention sweeper wired (W284c). Cron DISABLED (set ENABLE_SPEECH_RETENTION_CRON=true).'
+        );
+      }
+    } catch (sweeperErr) {
+      logger.warn('[startup] Speech retention sweeper wiring failed (W284c)', {
+        err: sweeperErr.message,
+      });
+    }
   } catch (err) {
     logger.warn('[startup] Speech analysis wiring failed (W284b)', { err: err.message });
   }

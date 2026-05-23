@@ -37,6 +37,18 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import ScheduleIcon from '@mui/icons-material/Schedule';
 import apiClient from '../../services/api.client';
 
+// W320 — single-glance traffic light for scheduler-registry.health()
+const HEALTH_CHIP = {
+  ok: { label: 'سليم', color: 'success' },
+  stale: { label: 'متأخر', color: 'warning' },
+  failed: { label: 'مُخفِق', color: 'error' },
+  'never-run': { label: 'لم يُنفّذ', color: 'default' },
+};
+function renderHealthChip(health) {
+  const conf = HEALTH_CHIP[health] || HEALTH_CHIP['never-run'];
+  return <Chip label={conf.label} color={conf.color} size="small" variant={conf.color === 'default' ? 'outlined' : 'filled'} />;
+}
+
 export default function CronStatusPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -128,6 +140,7 @@ export default function CronStatusPage() {
               <TableRow>
                 <TableCell>المُجدوِل</TableCell>
                 <TableCell>الحالة</TableCell>
+                <TableCell>صحة</TableCell>
                 <TableCell>آخر تنفيذ</TableCell>
                 <TableCell>متغير البيئة</TableCell>
                 <TableCell>الجدول</TableCell>
@@ -152,6 +165,7 @@ export default function CronStatusPage() {
                       <Chip label="موقوف" size="small" />
                     )}
                   </TableCell>
+                  <TableCell>{renderHealthChip(item.liveStatus && item.liveStatus.health)}</TableCell>
                   <TableCell>
                     {item.liveStatus ? (
                       <Stack spacing={0.5}>

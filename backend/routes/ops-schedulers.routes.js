@@ -105,8 +105,9 @@ function createOpsSchedulersRouter() {
         key: 'hr-anomaly-scheduler',
         nameAr: 'كاشف الشذوذ للموارد البشرية',
         nameEn: 'HR Anomaly Scheduler',
-        envFlag: 'ENABLE_HR_ANOMALY_SCHEDULER',
-        enabled: bool(env.ENABLE_HR_ANOMALY_SCHEDULER),
+        envFlag: 'HR_ANOMALY_SCHEDULER_ENABLED',
+        // Opt-out flag: ON by default unless explicitly set to "false".
+        enabled: env.HR_ANOMALY_SCHEDULER_ENABLED !== 'false',
         defaults: {
           schedule: 'every N minutes (configurable)',
         },

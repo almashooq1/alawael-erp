@@ -25,12 +25,9 @@ const BACKEND_ROOT = path.resolve(__dirname, '..');
 
 // Schedulers that legitimately do NOT yet call schedulerRegistry.register().
 // Each entry must be paired with a follow-up wave commitment.
-const NOT_YET_INSTRUMENTED_ALLOWLIST = new Set([
-  // W317 (planned) — hr-anomaly scheduler lives in server.js with opt-out
-  // HR_ANOMALY_SCHEDULER_ENABLED semantics; needs refactor to a bootstrap
-  // before it can register cleanly. Tracked in CLAUDE.md "Open known issues".
-  'hr-anomaly-scheduler',
-]);
+// W317 — hr-anomaly-scheduler now instruments via in-place wrap in server.js
+// (detector.scan wrapped + register() called); allow-list is intentionally empty.
+const NOT_YET_INSTRUMENTED_ALLOWLIST = new Set([]);
 
 function readSource(relative) {
   return fs.readFileSync(path.join(BACKEND_ROOT, relative), 'utf8');

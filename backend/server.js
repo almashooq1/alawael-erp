@@ -385,6 +385,34 @@ const shouldSkipDBInit = isTestEnv && process.env.SMART_TEST_MODE === 'true';
         exportsPerDayThreshold: Number.parseInt(process.env.HR_ANOMALY_EXPORTS_PER_DAY || '5', 10),
         cooldownMinutes: Number.parseInt(process.env.HR_ANOMALY_COOLDOWN_MINUTES || '60', 10),
       };
+
+      // W317 — opt in to the central scheduler registry so /api/ops/schedulers
+      // can surface live last-run telemetry. We wrap detector.scan rather than
+      // patching the scheduler (lower coupling, no service-API change).
+      const schedulerRegistry = require('./intelligence/scheduler-registry');
+      schedulerRegistry.register('hr-anomaly-scheduler', {
+        meta: { intervalMs, ...scanOptions },
+      });
+      const innerScan = detector.scan.bind(detector);
+      detector.scan = async (opts) => {
+        const started = Date.now();
+        try {
+          const report = await innerScan(opts);
+          schedulerRegistry.recordRun('hr-anomaly-scheduler', {
+            ok: true,
+            durationMs: Date.now() - started,
+          });
+          return report;
+        } catch (err) {
+          schedulerRegistry.recordRun('hr-anomaly-scheduler', {
+            ok: false,
+            error: err,
+            durationMs: Date.now() - started,
+          });
+          throw err;
+        }
+      };
+
       server._hrAnomalyScheduler = createHrAnomalyScheduler({
         detector,
         intervalMs,

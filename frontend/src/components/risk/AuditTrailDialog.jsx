@@ -38,6 +38,7 @@ import {
 } from '@mui/material';
 import VerifiedIcon from '@mui/icons-material/Verified';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import apiClient from '../../services/api.client';
 
 const ACTION_AR = {
@@ -66,6 +67,7 @@ export default function AuditTrailDialog({ open, onClose, planReviewId }) {
   const [error, setError] = useState(null);
   const [result, setResult] = useState(null); // { ok, chainLength, brokenAt?, reason? }
   const [entries, setEntries] = useState([]); // optional: filled if route returns entries
+  const [lastVerifiedAt, setLastVerifiedAt] = useState(null);
 
   const load = useCallback(async () => {
     if (!planReviewId) return;
@@ -80,6 +82,7 @@ export default function AuditTrailDialog({ open, onClose, planReviewId }) {
         reason: data.reason,
       });
       setEntries(Array.isArray(data.entries) ? data.entries : []);
+      setLastVerifiedAt(new Date());
     } catch (err) {
       const status = err?.response?.status;
       const code = err?.response?.data?.code;
@@ -101,6 +104,7 @@ export default function AuditTrailDialog({ open, onClose, planReviewId }) {
       setResult(null);
       setEntries([]);
       setError(null);
+      setLastVerifiedAt(null);
     }
   }, [open, load]);
 
@@ -186,9 +190,21 @@ export default function AuditTrailDialog({ open, onClose, planReviewId }) {
           </Typography>
         )}
       </DialogContent>
-      <DialogActions>
-        <Button onClick={load} disabled={loading}>
-          تحديث
+      <DialogActions sx={{ justifyContent: 'space-between', px: 3 }}>
+        <Box sx={{ flex: 1 }}>
+          {lastVerifiedAt && !loading && (
+            <Typography variant="caption" color="text.secondary">
+              آخر تحقّق: {formatDate(lastVerifiedAt.toISOString())}
+            </Typography>
+          )}
+        </Box>
+        <Button
+          onClick={load}
+          disabled={loading || !planReviewId}
+          startIcon={loading ? <CircularProgress size={16} /> : <RefreshIcon />}
+          color="primary"
+        >
+          إعادة تحقّق
         </Button>
         <Button onClick={onClose} variant="contained">
           إغلاق

@@ -17,7 +17,8 @@
  * GET  /api/v1/beneficiary-core/:id/care-plan     — خطة الرعاية النشطة
  * GET  /api/v1/beneficiary-core/:id/progress      — بيانات التقدم
  * GET  /api/v1/beneficiary-core/:id/alerts        — التنبيهات والمخاطر
- * ══════════════════════════════════════════════════════════════════
+ * GET  /api/v1/beneficiary-core/:id/risk-profile  — درجة الخطورة الموحدة (W286)
+ * ═══════════════════════════════════════════════════════════════════
  */
 
 const express = require('express');
@@ -26,6 +27,7 @@ const coreSvc = require('../services/beneficiaryCore.service');
 const logger = require('../utils/logger');
 const { safeError } = require('../utils/safeError');
 const { validateBody } = require('../intelligence/canonical');
+const { getBeneficiaryRiskProfile } = require('../intelligence/risk');
 
 const wrap = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
@@ -198,6 +200,24 @@ router.get(
   wrap(async (req, res) => {
     const data = await coreSvc._getAlerts(req.params.id);
     res.json({ success: true, data, total: data.length });
+  })
+);
+
+// ════════════════════════════════════════════════════════════════════
+// Wave 286 — Unified Risk Profile (read-only orchestrator)
+// Aggregates: ClinicalRiskScore + PsychRiskFlag + AiPrediction(dropout_risk)
+// + CdssRiskAssessment → weighted composite + explainable factors[].
+// ════════════════════════════════════════════════════════════════════
+router.get(
+  '/:id/risk-profile',
+  auth,
+  wrap(async (req, res) => {
+    const { episodeId } = req.query;
+    const profile = await getBeneficiaryRiskProfile(req.params.id, {
+      episodeId: episodeId || undefined,
+      logger,
+    });
+    res.json({ success: true, data: profile });
   })
 );
 

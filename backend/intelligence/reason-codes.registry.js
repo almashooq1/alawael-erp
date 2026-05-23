@@ -68,6 +68,11 @@ const REASON_CODES = Object.freeze({
   // Hash chain / integrity
   HASH_MISMATCH: 'HASH_MISMATCH',
   PREV_HASH_MISMATCH: 'PREV_HASH_MISMATCH',
+
+  // Wave 286 — Unified Risk Orchestrator
+  RISK_SCORE_COMPUTED: 'RISK_SCORE_COMPUTED',
+  RISK_NO_SOURCES_AVAILABLE: 'RISK_NO_SOURCES_AVAILABLE',
+  RISK_SCORING_FAILED: 'RISK_SCORING_FAILED',
 });
 
 const REASON_LABELS_AR = Object.freeze({
@@ -97,6 +102,10 @@ const REASON_LABELS_AR = Object.freeze({
 
   HASH_MISMATCH: 'تعارض في تجزئة السلسلة — احتمال عبث',
   PREV_HASH_MISMATCH: 'تعارض في الربط بالعنصر السابق في السلسلة',
+
+  RISK_SCORE_COMPUTED: 'تم حساب درجة الخطورة من المصادر المتاحة',
+  RISK_NO_SOURCES_AVAILABLE: 'لا يوجد مصدر بيانات متاح لحساب درجة الخطورة',
+  RISK_SCORING_FAILED: 'فشل أحد مصادر حساب درجة الخطورة',
 });
 
 // Legacy aliases we've observed in the codebase. The lib normalises any

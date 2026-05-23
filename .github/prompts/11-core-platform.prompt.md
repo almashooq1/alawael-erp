@@ -9,6 +9,7 @@ description: إعادة هندسة المشروع ليصبح منصة تأهيل
 أعد تصميم المشروع الحالي ليصبح Unified Rehabilitation Intelligence Platform تعمل كنواة مركزية موحدة بدلاً من مجموعة أنظمة أو وحدات منفصلة.
 
 المطلوب:
+
 - تحليل الوضع الحالي كنظام يحتوي على وحدات كثيرة موجودة مسبقاً.
 - اقتراح Unified Core Platform Architecture.
 - تعريف الكيانات المركزية: Beneficiary, EpisodeOfCare, Assessment, Measure, CarePlan, Session, Goal, FamilyInteraction, QualityCase, Report.
@@ -20,6 +21,7 @@ description: إعادة هندسة المشروع ليصبح منصة تأهيل
 - اقتراح خطة تنفيذ تدريجية لدمج الوحدات الحالية في نواة واحدة.
 
 أعطني الرد بصيغة احترافية تتضمن:
+
 1. الرؤية المعمارية.
 2. البنية المنطقية.
 3. النطاقات الرئيسية.

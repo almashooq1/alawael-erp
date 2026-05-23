@@ -23,8 +23,8 @@ READ FIRST
 Align with the platform doctrine and upstream master prompts:
 
 - `.github/prompts/00-platform-master.prompt.md` — platform doctrine (governing prompt)
-- `.github/prompts/03-beneficiary-360.prompt.md` — Beneficiary 360 master file (filename is `03-`, not `01-`, until renumbered)
-- `.github/prompts/05-measures-library.prompt.md` — Assessment & Measures Engine (filename is `05-`, not `02-`)
+- `.github/prompts/01-beneficiary-360-master.prompt.md` — Beneficiary 360 master file
+- `.github/prompts/02-assessment-measures-engine.prompt.md` — Assessment & Measures Engine
 - `CLAUDE.md` — agent onboarding + wave history
 - `docs/blueprint/00-master-architecture.md` — canonical architecture
 - `docs/MODULES.md` — module map (127 backend modules)

@@ -67,6 +67,13 @@ const NAMES = Object.freeze({
   AUDIT_APPENDED: 'risk.plan_review.audit.appended',
   AUDIT_FAILED: 'risk.plan_review.audit.failed',
   AUDIT_VERIFIED: 'risk.plan_review.audit.verified',
+  // ── W309 gov adapter lifecycle (Sehhaty / Mudad / DA / Nafath) ─────────
+  // Distinct from adapterMetricsRegistry (HTTP-call counters): these track
+  // *consent* + *report-submission* business-lifecycle outcomes, scoped by
+  // provider so a refused consent on Sehhaty doesn't masquerade as success
+  // because the underlying HTTP returned 200.
+  GOV_CONSENT: 'gov.adapter.consent',           // labels: provider, result ∈ granted|refused|revoked|missing|expired
+  GOV_REPORT_SUBMISSION: 'gov.report.submission', // labels: provider, result ∈ ok|failed|skipped, reason?
 });
 
 module.exports = { inc, snapshot, snapshotGrouped, _reset, NAMES };

@@ -246,20 +246,35 @@ function wireRiskSweeper(app, deps = {}) {
   }
 
   const schedule = process.env.RISK_SWEEP_CRON || '0 2 * * *';
+  // W316 — opt in to central scheduler registry for live last-run telemetry.
+  const schedulerRegistry = require('../intelligence/scheduler-registry');
+  schedulerRegistry.register('risk-sweeper', {
+    meta: { schedule, tz: 'Asia/Riyadh', branchCount: branchIds.length },
+  });
   const task = cron.schedule(
     schedule,
     async () => {
+      const started = Date.now();
+      let failedBranches = 0;
+      let firstError = null;
       logger.info('[risk-sweeper:cron] starting daily sweep', { branchCount: branchIds.length });
       for (const branchId of branchIds) {
         try {
           await service.runSweepForBranch({ branchId });
         } catch (err) {
+          failedBranches += 1;
+          if (!firstError) firstError = err;
           logger.error('[risk-sweeper:cron] branch failed', {
             branchId,
             err: err && err.message,
           });
         }
       }
+      schedulerRegistry.recordRun('risk-sweeper', {
+        ok: failedBranches === 0,
+        error: firstError ? new Error(`${failedBranches}/${branchIds.length} branches failed: ${firstError.message}`) : null,
+        durationMs: Date.now() - started,
+      });
     },
     { timezone: 'Asia/Riyadh' }
   );

@@ -75,11 +75,19 @@ function wireDisabilityAuthority(app, deps = {}) {
       return;
     }
 
+    // W316 — opt in to central scheduler registry for live last-run telemetry.
+    const schedulerRegistry = require('../intelligence/scheduler-registry');
+    schedulerRegistry.register('disability-authority-monthly', {
+      meta: { schedule: '0 4 5 * *', tz: 'Asia/Riyadh', branchCount: branchIds.length },
+    });
     // Day 5 of each month @ 04:00 Asia/Riyadh — reports cover previous month.
     // (Day 5 gives time for prior month's data to settle; matches WPS pattern.)
     const task = cron.schedule(
       '0 4 5 * *',
       async () => {
+        const started = Date.now();
+        let failedBranches = 0;
+        let firstError = null;
         const now = new Date();
         // Previous month
         const prev = new Date(now.getFullYear(), now.getMonth() - 1, 1);
@@ -110,12 +118,19 @@ function wireDisabilityAuthority(app, deps = {}) {
               `[da-periodic:cron] branch=${branchId} reportNumber=${reportNumber} → submissionId=${result.submissionId}`
             );
           } catch (err) {
+            failedBranches += 1;
+            if (!firstError) firstError = err;
             logger.error(`[da-periodic:cron] branch=${branchId} failed`, {
               err: err.message,
               code: err.code,
             });
           }
         }
+        schedulerRegistry.recordRun('disability-authority-monthly', {
+          ok: failedBranches === 0,
+          error: firstError ? new Error(`${failedBranches}/${branchIds.length} branches failed: ${firstError.message}`) : null,
+          durationMs: Date.now() - started,
+        });
       },
       { timezone: 'Asia/Riyadh' }
     );

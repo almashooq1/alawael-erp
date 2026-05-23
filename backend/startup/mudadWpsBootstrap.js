@@ -171,10 +171,18 @@ function wireMudadWps(app, deps = {}) {
       return;
     }
 
+    // W316 — opt in to central scheduler registry for live last-run telemetry.
+    const schedulerRegistry = require('../intelligence/scheduler-registry');
+    schedulerRegistry.register('mudad-wps', {
+      meta: { schedule: '30 2 25 * *', tz: 'Asia/Riyadh', branchCount: branchIds.length },
+    });
     // Day 25 of each month at 02:30 Asia/Riyadh
     const task = cron.schedule(
       '30 2 25 * *',
       async () => {
+        const started = Date.now();
+        let failedBranches = 0;
+        let firstError = null;
         const now = new Date();
         const period = { year: now.getFullYear(), month: now.getMonth() + 1 };
         const actor = { userId: 'system-cron', mfaTier: 2, system: true };
@@ -188,12 +196,19 @@ function wireMudadWps(app, deps = {}) {
               `[mudad-wps:cron] branch=${branchId} status=${result.status} batchId=${result.batchId}`
             );
           } catch (err) {
+            failedBranches += 1;
+            if (!firstError) firstError = err;
             logger.error(`[mudad-wps:cron] branch=${branchId} failed`, {
               err: err.message,
               code: err.code,
             });
           }
         }
+        schedulerRegistry.recordRun('mudad-wps', {
+          ok: failedBranches === 0,
+          error: firstError ? new Error(`${failedBranches}/${branchIds.length} branches failed: ${firstError.message}`) : null,
+          durationMs: Date.now() - started,
+        });
       },
       { timezone: 'Asia/Riyadh' }
     );

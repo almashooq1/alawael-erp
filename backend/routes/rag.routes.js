@@ -148,4 +148,59 @@ router.post('/deactivate/:id', requireMfaTier(2), async (req, res) => {
   }
 });
 
+// ── METRICS — W283g operational read, tier 1 ──────────────────────────
+// Returns ONLY the rag.* family of counters from the shared risk-metrics
+// registry. Filters out the W288/W297/W309 risk-sweep + gov-adapter
+// counters so the dashboard sees a focused RAG quality view:
+//
+//   rag.ingest        (provider, sourceDocType)
+//   rag.retrieve      (provider, vector, fallback)
+//   rag.embed.error   (provider, code)
+//
+// Includes derived `health` summary: rescue-rate, error-rate per provider.
+// Climbing rescue-rate is the signal to upgrade the embedder.
+router.get('/metrics', requireMfaTier(1), async (_req, res) => {
+  try {
+    let registry;
+    try {
+      registry = require('../intelligence/risk-metrics.registry');
+    } catch {
+      return res.status(503).json({ success: false, code: 'METRICS_REGISTRY_UNAVAILABLE' });
+    }
+    const all = registry.snapshotGrouped() || {};
+    const counters = {};
+    for (const [name, labels] of Object.entries(all)) {
+      if (name.startsWith('rag.')) counters[name] = labels;
+    }
+
+    // Derived quality summary
+    const retrieve = counters['rag.retrieve'] || {};
+    let totalRetrieves = 0;
+    let rescued = 0;
+    let vectorNone = 0;
+    for (const [labelKey, count] of Object.entries(retrieve)) {
+      totalRetrieves += count;
+      if (labelKey.includes('fallback=rescued')) rescued += count;
+      if (labelKey.includes('vector=none')) vectorNone += count;
+    }
+    const embedErr = counters['rag.embed.error'] || {};
+    const totalErrors = Object.values(embedErr).reduce((s, n) => s + n, 0);
+
+    const health = {
+      totalRetrieves,
+      rescueRate: totalRetrieves > 0 ? rescued / totalRetrieves : 0,
+      vectorMissRate: totalRetrieves > 0 ? vectorNone / totalRetrieves : 0,
+      totalEmbedErrors: totalErrors,
+      embedErrorRate: totalRetrieves > 0 ? totalErrors / totalRetrieves : 0,
+    };
+
+    return res.json({ success: true, counters, health });
+  } catch (err) {
+    logger.error('[rag] metrics error', { err: err && err.message });
+    return res
+      .status(500)
+      .json({ success: false, code: 'METRICS_FAILED', error: safeError(err) });
+  }
+});
+
 module.exports = router;

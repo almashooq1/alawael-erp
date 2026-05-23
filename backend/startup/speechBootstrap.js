@@ -71,16 +71,31 @@ function wireSpeech(app, deps = {}) {
       if (cronEnabled) {
         const cron = loadOptional('node-cron');
         if (cron) {
+          // W316 — opt in to central scheduler registry for live last-run telemetry.
+          const schedulerRegistry = require('../intelligence/scheduler-registry');
+          schedulerRegistry.register('speech-retention-sweeper', {
+            meta: { schedule: '0 3 * * *', tz: 'Asia/Riyadh' },
+          });
           const task = cron.schedule(
             '0 3 * * *',
             async () => {
+              const started = Date.now();
               logger.info('[speech-retention:cron] starting daily sweep');
               try {
                 const result = await sweeper.runOnce();
+                schedulerRegistry.recordRun('speech-retention-sweeper', {
+                  ok: true,
+                  durationMs: Date.now() - started,
+                });
                 logger.info(
                   `[speech-retention:cron] scanned=${result.scanned} purged=${result.purged} failed=${result.failed}`
                 );
               } catch (err) {
+                schedulerRegistry.recordRun('speech-retention-sweeper', {
+                  ok: false,
+                  error: err,
+                  durationMs: Date.now() - started,
+                });
                 logger.error('[speech-retention:cron] sweep failed', { err: err.message });
               }
             },

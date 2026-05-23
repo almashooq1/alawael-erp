@@ -28,7 +28,10 @@ describe('GET /api/ops/schedulers/health (W321)', () => {
   });
 
   afterEach(() => {
-    if (registry && (typeof registry.clear === 'function' || typeof registry._reset === 'function')) {
+    if (
+      registry &&
+      (typeof registry.clear === 'function' || typeof registry._reset === 'function')
+    ) {
       (registry.clear || registry._reset).call(registry);
     }
   });

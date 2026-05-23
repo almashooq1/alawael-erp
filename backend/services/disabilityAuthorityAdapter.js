@@ -162,7 +162,8 @@ async function submitPeriodicReport(payload) {
   }
   try {
     const result = await (isLive() ? liveSubmitReport(payload) : mockSubmitReport(payload));
-    if (_rm) _rm.inc(_rm.NAMES.GOV_REPORT_SUBMISSION, { provider: 'disability_authority', result: 'ok' });
+    if (_rm)
+      _rm.inc(_rm.NAMES.GOV_REPORT_SUBMISSION, { provider: 'disability_authority', result: 'ok' });
     return result;
   } catch (err) {
     if (_rm) {

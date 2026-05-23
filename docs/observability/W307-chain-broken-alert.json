@@ -50,9 +50,7 @@
         },
         "autoMitigate": false,
         "actions": {
-          "actionGroups": [
-            "<action-group-resource-id>"
-          ],
+          "actionGroups": ["<action-group-resource-id>"],
           "customProperties": {
             "runbook": "https://wiki.alawael.internal/runbooks/W307-chain-broken.md",
             "ar_summary": "كَسر في سلسلة تدقيق مراجعة خطة الرعاية — تحقيق فوري مطلوب"

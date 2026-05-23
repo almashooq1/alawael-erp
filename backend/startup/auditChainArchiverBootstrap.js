@@ -16,7 +16,6 @@
 
 function loadOptional(mod) {
   try {
-    // eslint-disable-next-line global-require -- conditional dep
     return require(mod);
   } catch {
     return null;
@@ -31,7 +30,6 @@ function wireAuditChainArchiver(app, { logger } = { logger: console }) {
 
   let PlanReviewAckModel;
   try {
-    // eslint-disable-next-line global-require -- model loaded after mongoose init
     PlanReviewAckModel = require('../models/PlanReviewAck');
   } catch (err) {
     logger.warn?.(`[AuditChainArchiver] PlanReviewAck model missing: ${err.message}`);
@@ -60,12 +58,19 @@ function wireAuditChainArchiver(app, { logger } = { logger: console }) {
   // can surface live last-run telemetry alongside the static env-gate view.
   const schedulerRegistry = require('../intelligence/scheduler-registry');
   schedulerRegistry.register('audit-chain-archiver', {
-    meta: { schedule: '30 3 * * *', tz: 'Asia/Riyadh', archiveAfterDays: days, deleteAfterArchive: deleteAfter },
+    meta: {
+      schedule: '30 3 * * *',
+      tz: 'Asia/Riyadh',
+      archiveAfterDays: days,
+      deleteAfterArchive: deleteAfter,
+    },
   });
 
   const cron = loadOptional('node-cron');
   if (!cron) {
-    logger.warn?.('[AuditChainArchiver] node-cron missing — cron not scheduled (service still available for manual runOnce)');
+    logger.warn?.(
+      '[AuditChainArchiver] node-cron missing — cron not scheduled (service still available for manual runOnce)'
+    );
     return service;
   }
 

@@ -55,11 +55,9 @@ describe('ops-schedulers ↔ scheduler-registry coverage (W318)', () => {
   });
 
   // Scan startup/*.js + server.js for schedulerRegistry.register('<key>') calls.
-  const sources = [
-    ...listJsFiles('startup'),
-    'server.js',
-    'app.js',
-  ].filter(rel => fs.existsSync(path.join(BACKEND_ROOT, rel)));
+  const sources = [...listJsFiles('startup'), 'server.js', 'app.js'].filter(rel =>
+    fs.existsSync(path.join(BACKEND_ROOT, rel))
+  );
 
   const registeredKeys = new Set();
   sources.forEach(rel => {

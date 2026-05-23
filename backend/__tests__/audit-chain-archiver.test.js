@@ -8,9 +8,7 @@ const {
   defaultMemoryAdapter,
   groupByPlanReview,
 } = require('../services/audit-chain-archiver.service');
-const {
-  PlanReviewAckAuditService,
-} = require('../services/plan-review-ack-audit.service');
+const { PlanReviewAckAuditService } = require('../services/plan-review-ack-audit.service');
 
 // Tiny in-memory PlanReviewAck model shaped to satisfy both the audit
 // service (create + findOne) and the archiver (find + deleteMany).

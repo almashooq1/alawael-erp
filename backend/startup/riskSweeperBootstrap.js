@@ -272,7 +272,11 @@ function wireRiskSweeper(app, deps = {}) {
       }
       schedulerRegistry.recordRun('risk-sweeper', {
         ok: failedBranches === 0,
-        error: firstError ? new Error(`${failedBranches}/${branchIds.length} branches failed: ${firstError.message}`) : null,
+        error: firstError
+          ? new Error(
+              `${failedBranches}/${branchIds.length} branches failed: ${firstError.message}`
+            )
+          : null,
         durationMs: Date.now() - started,
       });
     },

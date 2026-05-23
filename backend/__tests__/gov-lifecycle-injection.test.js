@@ -38,7 +38,9 @@ describe('W312 — GOV lifecycle counter injection', () => {
       const adapter = {
         importHealthSummary: adapterThrows
           ? jest.fn().mockRejectedValue(adapterThrows)
-          : jest.fn().mockResolvedValue(adapterResult || { summary: { foo: 1 }, importedAt: new Date() }),
+          : jest
+              .fn()
+              .mockResolvedValue(adapterResult || { summary: { foo: 1 }, importedAt: new Date() }),
       };
       return sehhatyFactory({ adapter, ConsentModel });
     }
@@ -53,14 +55,20 @@ describe('W312 — GOV lifecycle counter injection', () => {
           expiresAt: null,
         },
       });
-      await svc.importHealthSummary({ beneficiaryId: 'b1', nationalId: '1234567890', consentRecordId: 'c1' });
+      await svc.importHealthSummary({
+        beneficiaryId: 'b1',
+        nationalId: '1234567890',
+        consentRecordId: 'c1',
+      });
       const g = registry.snapshotGrouped();
       expect(g['gov.adapter.consent']['provider=sehhaty,result=granted']).toBe(1);
     });
 
     it('emits result=missing when consent record not found', async () => {
       const svc = buildSvc({ consentDoc: null });
-      await expect(svc.importHealthSummary({ beneficiaryId: 'b1', nationalId: '1', consentRecordId: 'cX' })).rejects.toThrow();
+      await expect(
+        svc.importHealthSummary({ beneficiaryId: 'b1', nationalId: '1', consentRecordId: 'cX' })
+      ).rejects.toThrow();
       const g = registry.snapshotGrouped();
       expect(g['gov.adapter.consent']['provider=sehhaty,result=missing']).toBe(1);
     });
@@ -74,7 +82,9 @@ describe('W312 — GOV lifecycle counter injection', () => {
           expiresAt: new Date(Date.now() - 1000),
         },
       });
-      await expect(svc.importHealthSummary({ beneficiaryId: 'b1', nationalId: '1', consentRecordId: 'c1' })).rejects.toThrow();
+      await expect(
+        svc.importHealthSummary({ beneficiaryId: 'b1', nationalId: '1', consentRecordId: 'c1' })
+      ).rejects.toThrow();
       const g = registry.snapshotGrouped();
       expect(g['gov.adapter.consent']['provider=sehhaty,result=expired']).toBe(1);
     });
@@ -88,7 +98,9 @@ describe('W312 — GOV lifecycle counter injection', () => {
           revokedAt: new Date(),
         },
       });
-      await expect(svc.importHealthSummary({ beneficiaryId: 'b1', nationalId: '1', consentRecordId: 'c1' })).rejects.toThrow();
+      await expect(
+        svc.importHealthSummary({ beneficiaryId: 'b1', nationalId: '1', consentRecordId: 'c1' })
+      ).rejects.toThrow();
       const g = registry.snapshotGrouped();
       expect(g['gov.adapter.consent']['provider=sehhaty,result=revoked']).toBe(1);
     });
@@ -98,7 +110,13 @@ describe('W312 — GOV lifecycle counter injection', () => {
   describe('mudad-wps-orchestrator', () => {
     const orchestratorFactory = require('../services/mudad-wps-orchestrator.service');
 
-    function buildOrch({ payroll, uploadResult, uploadThrows, validationErrors, createThrows } = {}) {
+    function buildOrch({
+      payroll,
+      uploadResult,
+      uploadThrows,
+      validationErrors,
+      createThrows,
+    } = {}) {
       return orchestratorFactory({
         mudadService: {
           createBatchForPeriod: createThrows
@@ -128,11 +146,16 @@ describe('W312 — GOV lifecycle counter injection', () => {
     it('emits result=skipped reason=DUPLICATE_BATCH on duplicate', async () => {
       const orch = buildOrch({
         payroll: [{ employeeId: 'e1' }],
-        createThrows: Object.assign(new Error('dup'), { code: 'MUDAD_DUPLICATE_BATCH', existingBatchId: 'oldBatch' }),
+        createThrows: Object.assign(new Error('dup'), {
+          code: 'MUDAD_DUPLICATE_BATCH',
+          existingBatchId: 'oldBatch',
+        }),
       });
       await orch.executeMonthlyWPSUpload({ branchId: 'b1', period });
       const g = registry.snapshotGrouped();
-      expect(g['gov.report.submission']['provider=mudad,reason=DUPLICATE_BATCH,result=skipped']).toBe(1);
+      expect(
+        g['gov.report.submission']['provider=mudad,reason=DUPLICATE_BATCH,result=skipped']
+      ).toBe(1);
     });
 
     it('emits result=failed reason=VALIDATION on validation errors', async () => {
@@ -159,7 +182,9 @@ describe('W312 — GOV lifecycle counter injection', () => {
       });
       await expect(orch.executeMonthlyWPSUpload({ branchId: 'b1', period })).rejects.toThrow();
       const g = registry.snapshotGrouped();
-      expect(g['gov.report.submission']['provider=mudad,reason=MUDAD_NETWORK,result=failed']).toBe(1);
+      expect(g['gov.report.submission']['provider=mudad,reason=MUDAD_NETWORK,result=failed']).toBe(
+        1
+      );
     });
   });
 
@@ -180,7 +205,11 @@ describe('W312 — GOV lifecycle counter injection', () => {
     it('emits provider=disability_authority,result=failed,reason=DA_INVALID_INPUT on bad input', async () => {
       await expect(da.submitPeriodicReport({})).rejects.toThrow();
       const g = registry.snapshotGrouped();
-      expect(g['gov.report.submission']['provider=disability_authority,reason=DA_INVALID_INPUT,result=failed']).toBe(1);
+      expect(
+        g['gov.report.submission'][
+          'provider=disability_authority,reason=DA_INVALID_INPUT,result=failed'
+        ]
+      ).toBe(1);
     });
   });
 });

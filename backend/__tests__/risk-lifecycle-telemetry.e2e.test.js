@@ -14,9 +14,7 @@
 
 const metrics = require('../intelligence/risk-metrics.registry');
 const { RiskPlanReviewService } = require('../services/risk-plan-review.service');
-const {
-  PlanReviewAckAuditService,
-} = require('../services/plan-review-ack-audit.service');
+const { PlanReviewAckAuditService } = require('../services/plan-review-ack-audit.service');
 
 // ── In-memory audit model (subset of mongoose API used by the service) ──
 function makeInMemoryAckModel() {

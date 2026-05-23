@@ -41,29 +41,48 @@ describe('W309 — gov adapter lifecycle metrics', () => {
   });
 
   it('W302 metricsHandler emits sanitized Prometheus lines for gov.report.submission', async () => {
-    registry.inc(registry.NAMES.GOV_REPORT_SUBMISSION, { provider: 'disability_authority', result: 'ok' });
-    registry.inc(registry.NAMES.GOV_REPORT_SUBMISSION, { provider: 'disability_authority', result: 'failed', reason: 'TIMEOUT' });
+    registry.inc(registry.NAMES.GOV_REPORT_SUBMISSION, {
+      provider: 'disability_authority',
+      result: 'ok',
+    });
+    registry.inc(registry.NAMES.GOV_REPORT_SUBMISSION, {
+      provider: 'disability_authority',
+      result: 'failed',
+      reason: 'TIMEOUT',
+    });
     registry.inc(registry.NAMES.GOV_REPORT_SUBMISSION, { provider: 'mudad', result: 'ok' }, 5);
 
     let captured = '';
     const fakeRes = {
       set: () => fakeRes,
-      send: (body) => { captured = String(body); return fakeRes; },
+      send: body => {
+        captured = String(body);
+        return fakeRes;
+      },
       status: () => fakeRes,
     };
     await metricsModule.metricsHandler({ query: {}, headers: {} }, fakeRes);
 
     // Sanitized metric name: dots → underscores
-    expect(captured).toMatch(/gov_report_submission\{[^}]*provider="disability_authority"[^}]*result="ok"[^}]*\}\s+1/);
-    expect(captured).toMatch(/gov_report_submission\{[^}]*provider="disability_authority"[^}]*reason="TIMEOUT"[^}]*result="failed"[^}]*\}\s+1/);
-    expect(captured).toMatch(/gov_report_submission\{[^}]*provider="mudad"[^}]*result="ok"[^}]*\}\s+5/);
+    expect(captured).toMatch(
+      /gov_report_submission\{[^}]*provider="disability_authority"[^}]*result="ok"[^}]*\}\s+1/
+    );
+    expect(captured).toMatch(
+      /gov_report_submission\{[^}]*provider="disability_authority"[^}]*reason="TIMEOUT"[^}]*result="failed"[^}]*\}\s+1/
+    );
+    expect(captured).toMatch(
+      /gov_report_submission\{[^}]*provider="mudad"[^}]*result="ok"[^}]*\}\s+5/
+    );
   });
 
   it('empty registry does not emit gov_* lines', async () => {
     let captured = '';
     const fakeRes = {
       set: () => fakeRes,
-      send: (body) => { captured = String(body); return fakeRes; },
+      send: body => {
+        captured = String(body);
+        return fakeRes;
+      },
       status: () => fakeRes,
     };
     await metricsModule.metricsHandler({ query: {}, headers: {} }, fakeRes);

@@ -85,6 +85,17 @@ const planReviewSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
     },
+    // ── W292: SLA acknowledgement for CRITICAL reviews ────────────
+    // When a CRITICAL review is auto-opened by the W290 risk
+    // trigger, a clinician must acknowledge it within the SLA
+    // window. The plan-review-sla service uses these fields to
+    // detect overdue items and fire AiAlerts.
+    acknowledgedAt: { type: Date, index: { sparse: true } },
+    acknowledgedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    // Tracks how many overdue alerts have been raised (0=none,
+    // 1=24h breach raised, 2=48h breach raised). Used by the SLA
+    // sweeper to stay idempotent across runs.
+    slaEscalationLevel: { type: Number, default: 0, min: 0, max: 2 },
   },
   { timestamps: true }
 );

@@ -287,4 +287,57 @@ router.get('/triggered-reviews', requireMfaTier(1), async (req, res) => {
   }
 });
 
+// ── W292: ACKNOWLEDGE A CRITICAL PLAN REVIEW ──────────────────────────
+// Tier 1 mutating. Clinician confirms they've seen the auto-opened
+// CRITICAL review (stops the SLA sweep from escalating it).
+router.post('/triggered-reviews/:id/acknowledge', requireMfaTier(1), async (req, res) => {
+  try {
+    const sla = req.app._planReviewSlaService;
+    if (!sla) return res.status(503).json({ success: false, code: 'SLA_SERVICE_NOT_WIRED' });
+
+    const branchId = actorBranchOrQuery(req);
+    if (!branchId) return res.status(400).json({ success: false, code: 'BRANCH_REQUIRED' });
+
+    const userId = req.user && (req.user._id || req.user.userId);
+    const result = await sla.acknowledge({ planReviewId: req.params.id, userId });
+    if (!result.ok) {
+      const status =
+        result.reason === 'PLAN_REVIEW_NOT_FOUND'
+          ? 404
+          : result.reason === 'ALREADY_ACKNOWLEDGED'
+            ? 409
+            : 400;
+      return res.status(status).json({ success: false, code: result.reason });
+    }
+
+    // Defense-in-depth branch check: confirm the acknowledged review's
+    // beneficiary lives in the actor's branch (tier <2 cannot cross).
+    if (req.mfaActor && req.mfaActor.tier < 2 && result.review && result.review.beneficiary) {
+      try {
+        const mongoose = require('mongoose');
+        const Beneficiary = mongoose.model('Beneficiary');
+        const ben = await Beneficiary.findById(result.review.beneficiary).select('branchId').lean();
+        if (ben && String(ben.branchId) !== String(branchId)) {
+          return res.status(403).json({ success: false, code: 'CROSS_BRANCH_FORBIDDEN' });
+        }
+      } catch {
+        /* Beneficiary model not registered → fall through (already acked) */
+      }
+    }
+
+    return res.json({
+      success: true,
+      code: 'PLAN_REVIEW_ACKNOWLEDGED',
+      planReviewId: req.params.id,
+      acknowledgedAt: result.review.acknowledgedAt,
+      acknowledgedBy: result.review.acknowledgedBy,
+    });
+  } catch (err) {
+    logger.error('[risk-sweep] acknowledge error', { err: err && err.message });
+    return res
+      .status(500)
+      .json({ success: false, code: 'ACKNOWLEDGE_FAILED', error: safeError(err) });
+  }
+});
+
 module.exports = router;

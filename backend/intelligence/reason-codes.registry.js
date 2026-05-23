@@ -82,6 +82,11 @@ const REASON_CODES = Object.freeze({
 
   // Wave 290 — Auto plan-review trigger on risk escalation
   PLAN_REVIEW_TRIGGERED_BY_RISK: 'PLAN_REVIEW_TRIGGERED_BY_RISK',
+
+  // Wave 292 — Plan-review SLA tracking
+  PLAN_REVIEW_ACKNOWLEDGED: 'PLAN_REVIEW_ACKNOWLEDGED',
+  PLAN_REVIEW_ACK_OVERDUE_24H: 'PLAN_REVIEW_ACK_OVERDUE_24H',
+  PLAN_REVIEW_ACK_OVERDUE_48H: 'PLAN_REVIEW_ACK_OVERDUE_48H',
 });
 
 const REASON_LABELS_AR = Object.freeze({
@@ -120,6 +125,9 @@ const REASON_LABELS_AR = Object.freeze({
   RISK_TIER_FIRST_CRITICAL: 'درجة خطورة حرجة لأول مرة',
   RISK_SWEEP_COMPLETED: 'تم الانتهاء من دورة فحص الخطورة',
   PLAN_REVIEW_TRIGGERED_BY_RISK: 'تم فتح مراجعة طارئة للخطة العلاجية بسبب ارتفاع الخطورة',
+  PLAN_REVIEW_ACKNOWLEDGED: 'تم إقرار المراجعة الطارئة بواسطة الأخصائي',
+  PLAN_REVIEW_ACK_OVERDUE_24H: 'مراجعة خطة طارئة لم يتم إقرارها خلال 24 ساعة',
+  PLAN_REVIEW_ACK_OVERDUE_48H: 'مراجعة خطة طارئة لم يتم إقرارها خلال 48 ساعة — تصعيد عاجل',
 });
 
 // Legacy aliases we've observed in the codebase. The lib normalises any

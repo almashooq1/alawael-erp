@@ -98,6 +98,71 @@ function wireRiskSweeper(app, deps = {}) {
   app._riskSweeperService = service;
   logger.info('[startup] risk-sweeper service wired (W288)');
 
+  // ── Wave 292: plan-review SLA service (acknowledge + overdue sweep) ──
+  try {
+    const PlanReview = (() => {
+      try {
+        return mongoose.model('PlanReview');
+      } catch {
+        return null;
+      }
+    })();
+    if (PlanReview && AiAlert) {
+      const { PlanReviewSlaService } = require('../services/plan-review-sla.service');
+      const slaService = new PlanReviewSlaService({
+        PlanReviewModel: PlanReview,
+        AiAlertModel: AiAlert,
+        BeneficiaryModel: Beneficiary,
+        logger,
+      });
+      app._planReviewSlaService = slaService;
+      logger.info('[startup] plan-review SLA service wired (W292)');
+
+      const slaCronEnabled =
+        String(process.env.ENABLE_PLAN_REVIEW_SLA_CRON || '').toLowerCase() === 'true';
+      if (slaCronEnabled) {
+        const cronMod = loadOptional('node-cron');
+        const slaBranchIds = String(process.env.PLAN_REVIEW_SLA_BRANCH_IDS || '')
+          .split(',')
+          .map(s => s.trim())
+          .filter(Boolean);
+        if (cronMod && slaBranchIds.length) {
+          const slaSchedule = process.env.PLAN_REVIEW_SLA_CRON || '15 * * * *'; // hourly @ :15
+          const slaTask = cronMod.schedule(
+            slaSchedule,
+            async () => {
+              for (const branchId of slaBranchIds) {
+                try {
+                  await slaService.sweep({ branchId });
+                } catch (err) {
+                  logger.error('[plan-review-sla:cron] branch failed', {
+                    branchId,
+                    err: err && err.message,
+                  });
+                }
+              }
+            },
+            { timezone: 'Asia/Riyadh' }
+          );
+          app._planReviewSlaCronTask = slaTask;
+          logger.info('[startup] plan-review SLA cron scheduled', {
+            schedule: slaSchedule,
+            branchCount: slaBranchIds.length,
+            tz: 'Asia/Riyadh',
+          });
+        } else if (slaBranchIds.length === 0) {
+          logger.warn(
+            '[startup] plan-review SLA cron: PLAN_REVIEW_SLA_BRANCH_IDS empty — NOT scheduled'
+          );
+        }
+      }
+    } else {
+      logger.warn('[startup] plan-review SLA: PlanReview or AiAlert missing — service NOT wired');
+    }
+  } catch (err) {
+    logger.warn('[startup] plan-review SLA wiring failed', { err: err && err.message });
+  }
+
   // ── Wave 289: HTTP route surface (manual trigger + dashboard query) ──
   try {
     const riskSweepRouter = require('../routes/risk-sweep.routes');

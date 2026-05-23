@@ -70,8 +70,13 @@ const REF_ALLOWLIST = new Set([
 //     'Patient'    → 'Beneficiary' in ResourceBooking.js (mirrors W324's CommunityReferral fix exactly)
 //   W326 — 'Center' (10×) → 'Branch' fixed across crisis.model.js + laundry.model.js + kitchen.model.js
 const KNOWN_PHANTOM_BASELINE_W325C = new Set([
-  // Quality-domain refs to a possibly-renamed model
-  'CapaItem', // 4× — investigate quality/ models for the canonical name
+  // Quality-domain refs to a DEFERRED (planned but not-yet-built) model.
+  // Investigation 2026-05-24: predictiveRisk.service.js:191 uses
+  // `tryRequire('../../models/CapaItem')` for graceful degradation, and all 4
+  // `linkedCapaId` fields (Audit/FMEA×2/RCA) default null. The CAPA workflow
+  // exists conceptually but the entity has not been formalized as a Mongoose
+  // model yet. Stay in baseline; remove when CapaItem.js is added to models/.
+  'CapaItem', // 4× — DEFERRED model; tryRequire + null-default = no runtime breakage
   // Enterprise-Pro speculative refs to never-built models (Enterprise PRO/Plus, CRM, ITAM)
   'WarehouseBin', // 3×
   'ProjectPro', // 3×

@@ -2034,6 +2034,19 @@ require('./startup/riskSweeperBootstrap').wireRiskSweeper(app, { logger });
 // W307 alert pages on. Cron disabled by default (ENABLE_AUDIT_CHAIN_ARCHIVE=true).
 require('./startup/auditChainArchiverBootstrap').wireAuditChainArchiver(app, { logger });
 
+// ─── Ops: Scheduler health overview — Wave 310 ──────────────────────────────
+// GET /api/ops/schedulers — declarative list of registered schedulers + their
+// ENABLE_* env-gate state. Pairs with the frontend CronStatusPage. Pure-read,
+// no scheduler internals touched, no auth required at the moment (mounted
+// alongside other ops-level reads). If you need RBAC, wrap with `authenticate`.
+try {
+  const { createOpsSchedulersRouter } = require('./routes/ops-schedulers.routes');
+  app.use('/api/ops', createOpsSchedulersRouter());
+  logger.info('[OpsSchedulers] ✓ /api/ops/schedulers mounted (W310)');
+} catch (err) {
+  logger.warn(`[OpsSchedulers] failed to mount /api/ops/schedulers: ${err.message}`);
+}
+
 // ─── Hikvision Workforce Surveillance & Attendance — Wave 96-114 ─────────────
 // Extracted to startup/hikvisionBootstrap.js (W277 / Pass 1 of app.js refactor).
 // Identical behaviour: same models, same enforceMfa flags (W275 series), same

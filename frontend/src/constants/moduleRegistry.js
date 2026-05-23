@@ -422,6 +422,17 @@ export const MODULE_REGISTRY = [
     description: 'مراجعات خطط الرعاية المُطلقة بسبب تنبيهات حرجة (W301)',
   },
   {
+    key: 'cron-status',
+    nameAr: 'حالة المجدولات',
+    nameEn: 'Cron Status',
+    icon: 'Schedule',
+    path: '/risk-management/cron-status',
+    resource: 'admin',
+    roles: ['admin', 'super_admin'],
+    color: '#4a5568',
+    description: 'حالة المجدولات الخلفية ومتغيرات البيئة المُفعّلة (W310)',
+  },
+  {
     key: 'quality',
     nameAr: 'الجودة',
     nameEn: 'Quality',

@@ -10,6 +10,8 @@ const RiskRegister = lazyWithRetry(() => import('../pages/RiskManagement/RiskReg
 const TriggeredReviewsPage = lazyWithRetry(() =>
   import('../pages/RiskManagement/TriggeredReviewsPage')
 );
+// W310
+const CronStatusPage = lazyWithRetry(() => import('../pages/RiskManagement/CronStatusPage'));
 
 export default function RiskManagementRoutes() {
   return (
@@ -17,6 +19,7 @@ export default function RiskManagementRoutes() {
       <Route path="risk-management" element={<RiskDashboard />} />
       <Route path="risk-management/register" element={<RiskRegister />} />
       <Route path="risk-management/triggered-reviews" element={<TriggeredReviewsPage />} />
+      <Route path="risk-management/cron-status" element={<CronStatusPage />} />
     </>
   );
 }

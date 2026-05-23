@@ -130,6 +130,62 @@ const MeasurementMasterSchema = new mongoose.Schema(
       },
     ],
 
+    // ── W325 Pass 1 — additive governance fields ──────────────────────────
+    // Lifecycle, scoring semantics, and multi-discipline reach. All optional
+    // / defaulted so this Pass is non-breaking on existing documents. State
+    // machine + lifecycleHistory append-only + GAS_LINKED/COMPOSITE scoring
+    // ship in Pass 2.
+
+    abbreviation: {
+      type: String,
+      trim: true,
+      maxlength: 20,
+      index: true,
+    },
+
+    disciplines: [
+      {
+        type: String,
+        enum: [
+          'PT',
+          'OT',
+          'SLP',
+          'PSYCHOLOGY',
+          'SPECIAL_ED',
+          'SOCIAL_WORK',
+          'BEHAVIOR_ANALYSIS',
+          'NURSING',
+        ],
+      },
+    ],
+
+    scoreUnits: {
+      type: String,
+      enum: [
+        'NONE',
+        'SECONDS',
+        'REPETITIONS',
+        'PERCENTAGE',
+        'STANDARD_SCORE',
+        'T_SCORE',
+        'Z_SCORE',
+        'AGE_EQUIVALENT',
+        'GRADE_EQUIVALENT',
+      ],
+    },
+
+    scoreDirection: {
+      type: String,
+      enum: ['HIGHER_IS_BETTER', 'LOWER_IS_BETTER', 'TARGET_RANGE', 'NEUTRAL'],
+    },
+
+    lifecycleStatus: {
+      type: String,
+      enum: ['DRAFT', 'ACTIVE', 'DEPRECATED', 'RETIRED'],
+      default: 'ACTIVE',
+      index: true,
+    },
+
     isActive: {
       type: Boolean,
       default: true,

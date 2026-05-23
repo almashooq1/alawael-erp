@@ -19,11 +19,13 @@ const REPO_ROOT = path.resolve(__dirname, '..', '..');
 const BACKEND = path.join(REPO_ROOT, 'backend');
 
 function listSprintTestFiles() {
-  const pkg = require(path.join(BACKEND, 'package.json'));
-  const cmd = pkg.scripts['test:sprint'];
-  return (cmd.match(/__tests__\/[A-Za-z0-9._-]+\.test\.js/g) || []).filter(
-    (v, i, a) => a.indexOf(v) === i
-  );
+  // W278d (2026-05-23) — sprint enumeration moved from inline
+  // package.json string to backend/sprint-tests.txt.
+  const raw = fs.readFileSync(path.join(BACKEND, 'sprint-tests.txt'), 'utf8');
+  return raw
+    .split(/\r?\n/)
+    .map(l => l.trim())
+    .filter(l => l && !l.startsWith('#'));
 }
 
 describe('test-file completeness', () => {

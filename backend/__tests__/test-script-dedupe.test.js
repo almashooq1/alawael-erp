@@ -10,16 +10,35 @@
  *
  * Also asserts neither script has trailing whitespace that could
  * cause shell-word-splitting surprises in CI.
+ *
+ * W278d (2026-05-23): test:sprint's source of truth moved from an
+ * inline package.json string to backend/sprint-tests.txt (one path
+ * per line) because the inline list hit Windows 8191-char cmdline
+ * limit at 8889 chars. This test now reads from whichever source
+ * each script uses. test:ops-subsystems still uses inline (small
+ * enough, no Windows issue).
  */
 
 'use strict';
 
+const fs = require('fs');
 const path = require('path');
 
+const BACKEND = path.join(__dirname, '..');
+
 describe('test script lists are clean', () => {
-  const pkg = require(path.join(__dirname, '..', 'package.json'));
+  const pkg = require(path.join(BACKEND, 'package.json'));
 
   function filesFor(scriptName) {
+    if (scriptName === 'test:sprint') {
+      // W278d — read from sprint-tests.txt (single source of truth)
+      const raw = fs.readFileSync(path.join(BACKEND, 'sprint-tests.txt'), 'utf8');
+      return raw
+        .split(/\r?\n/)
+        .map(l => l.trim())
+        .filter(l => l && !l.startsWith('#'));
+    }
+    // Other scripts still use inline enumeration
     const cmd = pkg.scripts[scriptName];
     return cmd.match(/__tests__\/[A-Za-z0-9._-]+\.test\.js/g) || [];
   }
@@ -39,12 +58,11 @@ describe('test script lists are clean', () => {
     }
   });
 
-  it.each(['test:sprint', 'test:ops-subsystems'])(
-    '%s has no trailing whitespace or double spaces',
-    scriptName => {
-      const cmd = pkg.scripts[scriptName];
-      expect(cmd).not.toMatch(/\s\s/);
-      expect(cmd).not.toMatch(/\s$/);
-    }
-  );
+  // Trailing-whitespace check only applies to inline-enumerated scripts.
+  // sprint-tests.txt is line-oriented so the check doesn't translate.
+  it('test:ops-subsystems has no trailing whitespace or double spaces', () => {
+    const cmd = pkg.scripts['test:ops-subsystems'];
+    expect(cmd).not.toMatch(/\s\s/);
+    expect(cmd).not.toMatch(/\s$/);
+  });
 });

@@ -30,12 +30,14 @@ const TESTS_DIR = path.join(BACKEND, '__tests__');
 const ALLOWLIST = new Set([]);
 
 function listSprintTestFiles() {
-  const pkg = require(path.join(BACKEND, 'package.json'));
-  const cmd = pkg.scripts['test:sprint'];
+  // W278d (2026-05-23) — single source of truth moved from inline
+  // package.json string to backend/sprint-tests.txt. Read here.
+  const raw = fs.readFileSync(path.join(BACKEND, 'sprint-tests.txt'), 'utf8');
   return new Set(
-    (cmd.match(/__tests__\/[A-Za-z0-9._-]+\.test\.js/g) || []).filter(
-      (v, i, a) => a.indexOf(v) === i
-    )
+    raw
+      .split(/\r?\n/)
+      .map(l => l.trim())
+      .filter(l => l && !l.startsWith('#'))
   );
 }
 
@@ -75,9 +77,9 @@ describe('every __tests__/*-waveNN.test.js file that unmocks mongoose is in test
     if (!sprintFiles.has(sprintKey)) {
       throw new Error(
         `__tests__/${name} calls jest.unmock('mongoose') (needs real Mongoose) but is\n` +
-          `not enumerated in scripts.test:sprint. Without sprint inclusion, CI never runs\n` +
-          `it — repeating the 2026-05-19 silent-failure pattern (415 tests dark for an\n` +
-          `unknown stretch). Fix: add the path to the test:sprint script in package.json.`
+          `not enumerated in backend/sprint-tests.txt. Without sprint inclusion, CI never\n` +
+          `runs it — repeating the 2026-05-19 silent-failure pattern (415 tests dark for\n` +
+          `an unknown stretch). Fix: append the path to backend/sprint-tests.txt.`
       );
     }
     expect(sprintFiles.has(sprintKey)).toBe(true);

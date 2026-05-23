@@ -10,6 +10,11 @@
  *
  * This file locks in the invariant: every __tests__/X.test.js name
  * listed in the two scripts exists on disk, in that exact spelling.
+ *
+ * W278d (2026-05-23): test:sprint's source moved from package.json
+ * inline string to backend/sprint-tests.txt (Windows cmdline limit
+ * fix — see W278 commit). Test resolver below picks the right source
+ * per script.
  */
 
 'use strict';
@@ -18,9 +23,10 @@ const fs = require('fs');
 const path = require('path');
 
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
+const BACKEND_DIR = path.join(REPO_ROOT, 'backend');
 
 function scripts() {
-  return require(path.join(REPO_ROOT, 'backend/package.json')).scripts || {};
+  return require(path.join(BACKEND_DIR, 'package.json')).scripts || {};
 }
 
 function extractTestFiles(cmd) {
@@ -29,13 +35,24 @@ function extractTestFiles(cmd) {
   return Array.from(new Set(matches));
 }
 
-function assertAllExist(scriptName) {
+function filesFor(scriptName) {
+  if (scriptName === 'test:sprint') {
+    // W278d — single source of truth lives in sprint-tests.txt
+    const raw = fs.readFileSync(path.join(BACKEND_DIR, 'sprint-tests.txt'), 'utf8');
+    const list = raw
+      .split(/\r?\n/)
+      .map(l => l.trim())
+      .filter(l => l && !l.startsWith('#'));
+    return Array.from(new Set(list));
+  }
   const s = scripts();
-  expect(s[scriptName]).toBeDefined();
-  const files = extractTestFiles(s[scriptName]);
+  return extractTestFiles(s[scriptName] || '');
+}
+
+function assertAllExist(scriptName) {
+  const files = filesFor(scriptName);
   expect(files.length).toBeGreaterThan(0);
-  const backendDir = path.join(REPO_ROOT, 'backend');
-  const missing = files.filter(f => !fs.existsSync(path.join(backendDir, f)));
+  const missing = files.filter(f => !fs.existsSync(path.join(BACKEND_DIR, f)));
   if (missing.length) {
     throw new Error(`${scriptName} references non-existent test files:\n  ${missing.join('\n  ')}`);
   }
@@ -51,9 +68,8 @@ describe('sprint test-script file existence', () => {
   });
 
   it('test:ops-subsystems is a strict subset of test:sprint', () => {
-    const s = scripts();
-    const sprint = new Set(extractTestFiles(s['test:sprint']));
-    const ops = extractTestFiles(s['test:ops-subsystems']);
+    const sprint = new Set(filesFor('test:sprint'));
+    const ops = filesFor('test:ops-subsystems');
     const extra = ops.filter(f => !sprint.has(f));
     expect(extra).toEqual([]);
   });
@@ -63,9 +79,8 @@ describe('sprint test-script file existence', () => {
   });
 
   it('test:drift is a strict subset of test:sprint', () => {
-    const s = scripts();
-    const sprint = new Set(extractTestFiles(s['test:sprint']));
-    const drift = extractTestFiles(s['test:drift']);
+    const sprint = new Set(filesFor('test:sprint'));
+    const drift = filesFor('test:drift');
     const extra = drift.filter(f => !sprint.has(f));
     expect(extra).toEqual([]);
   });

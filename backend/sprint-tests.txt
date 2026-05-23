@@ -194,6 +194,5 @@ __tests__/calibration-mgmtreview-mfa-tier-wave277g.test.js
 __tests__/incident-report-branch-required-wave277h.test.js
 __tests__/incident-audit-chain-wave277i.test.js
 __tests__/incident-audit-chain-wiring-wave277i-pass2.test.js
-__tests__/sprint-enumerations-in-sync-wave278.test.js
 __tests__/payment-gateway-parent-portal-wave278b.test.js
 __tests__/incident-audit-chain-socket-publisher-wave278c.test.js

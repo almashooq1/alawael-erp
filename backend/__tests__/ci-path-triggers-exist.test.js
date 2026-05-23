@@ -92,9 +92,16 @@ describe('sprint-tests.yml paths: triggers exist', () => {
     // Prevents the drift class I just cleaned up: 18 drift tests were
     // in the script but not in paths:, so editing a drift rule didn't
     // trigger the gate that would validate it.
-    const pkg = require(path.join(REPO_ROOT, 'backend/package.json'));
-    const sprintCmd = pkg.scripts['test:sprint'] || '';
-    const sprintTests = sprintCmd.match(/__tests__\/[A-Za-z0-9._-]+\.test\.js/g) || [];
+    //
+    // W278d (2026-05-23) — test:sprint source moved from inline
+    // package.json string to backend/sprint-tests.txt (Windows
+    // cmdline limit fix). Read from the file now.
+    const fs2 = require('fs');
+    const sprintTxt = fs2.readFileSync(path.join(REPO_ROOT, 'backend/sprint-tests.txt'), 'utf8');
+    const sprintTests = sprintTxt
+      .split(/\r?\n/)
+      .map(l => l.trim())
+      .filter(l => l && !l.startsWith('#'));
     const pathsBlock = yml.match(
       /\n {2}push:[\s\S]*?\n {4}paths:[\s\S]*?(?=\n {2}[a-z_]+:|\nenv:|$)/
     );
@@ -104,7 +111,7 @@ describe('sprint-tests.yml paths: triggers exist', () => {
     );
     if (missing.length) {
       throw new Error(
-        'test:sprint references files missing from sprint-tests.yml paths:\n  ' +
+        'sprint-tests.txt references files missing from sprint-tests.yml paths:\n  ' +
           missing.join('\n  ')
       );
     }

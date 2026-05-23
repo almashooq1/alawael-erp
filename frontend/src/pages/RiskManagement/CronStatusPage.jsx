@@ -128,6 +128,7 @@ export default function CronStatusPage() {
               <TableRow>
                 <TableCell>المُجدوِل</TableCell>
                 <TableCell>الحالة</TableCell>
+                <TableCell>آخر تنفيذ</TableCell>
                 <TableCell>متغير البيئة</TableCell>
                 <TableCell>الجدول</TableCell>
                 <TableCell>ملاحظات</TableCell>
@@ -149,6 +150,50 @@ export default function CronStatusPage() {
                       <Chip label="مُفعّل" color="success" size="small" />
                     ) : (
                       <Chip label="موقوف" size="small" />
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {item.liveStatus ? (
+                      <Stack spacing={0.5}>
+                        <Chip
+                          size="small"
+                          label={
+                            item.liveStatus.lastStatus === 'ok'
+                              ? `نجح (${item.liveStatus.lastDurationMs ?? '?'}ms)`
+                              : item.liveStatus.lastStatus === 'failed'
+                              ? 'فشل'
+                              : 'لم يُنفّذ بعد'
+                          }
+                          color={
+                            item.liveStatus.lastStatus === 'ok'
+                              ? 'success'
+                              : item.liveStatus.lastStatus === 'failed'
+                              ? 'error'
+                              : 'default'
+                          }
+                        />
+                        {item.liveStatus.lastRunAt && (
+                          <Typography variant="caption" color="text.secondary">
+                            {new Date(item.liveStatus.lastRunAt).toLocaleString('ar-SA')}
+                          </Typography>
+                        )}
+                        <Typography variant="caption" color="text.secondary">
+                          مرّات: {item.liveStatus.runs} | إخفاقات: {item.liveStatus.failures}
+                        </Typography>
+                        {item.liveStatus.lastError && (
+                          <Typography
+                            variant="caption"
+                            color="error"
+                            sx={{ fontFamily: 'monospace', maxWidth: 240, display: 'block' }}
+                          >
+                            {item.liveStatus.lastError}
+                          </Typography>
+                        )}
+                      </Stack>
+                    ) : (
+                      <Typography variant="caption" color="text.disabled">
+                        غير مُسجّل
+                      </Typography>
                     )}
                   </TableCell>
                   <TableCell>
@@ -176,7 +221,7 @@ export default function CronStatusPage() {
               ))}
               {items.length === 0 && !loading && (
                 <TableRow>
-                  <TableCell colSpan={5} align="center">
+                  <TableCell colSpan={6} align="center">
                     <Typography variant="body2" color="text.secondary">
                       لا توجد مجدولات مسجّلة
                     </Typography>

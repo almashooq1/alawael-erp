@@ -56,6 +56,13 @@ function wireAuditChainArchiver(app, { logger } = { logger: console }) {
 
   app._auditChainArchiverService = service;
 
+  // W315 — opt in to the central scheduler registry so /api/ops/schedulers
+  // can surface live last-run telemetry alongside the static env-gate view.
+  const schedulerRegistry = require('../intelligence/scheduler-registry');
+  schedulerRegistry.register('audit-chain-archiver', {
+    meta: { schedule: '30 3 * * *', tz: 'Asia/Riyadh', archiveAfterDays: days, deleteAfterArchive: deleteAfter },
+  });
+
   const cron = loadOptional('node-cron');
   if (!cron) {
     logger.warn?.('[AuditChainArchiver] node-cron missing — cron not scheduled (service still available for manual runOnce)');
@@ -65,12 +72,22 @@ function wireAuditChainArchiver(app, { logger } = { logger: console }) {
   cron.schedule(
     '30 3 * * *',
     async () => {
+      const started = Date.now();
       try {
         const r = await service.runOnce();
+        schedulerRegistry.recordRun('audit-chain-archiver', {
+          ok: true,
+          durationMs: Date.now() - started,
+        });
         logger.info?.(
           `[AuditChainArchiver] cron run: archived=${r.archivedChains} skipped=${r.skippedChains} deleted=${r.deletedRows}`
         );
       } catch (err) {
+        schedulerRegistry.recordRun('audit-chain-archiver', {
+          ok: false,
+          error: err,
+          durationMs: Date.now() - started,
+        });
         logger.error?.(`[AuditChainArchiver] cron failure: ${err.message}`);
       }
     },

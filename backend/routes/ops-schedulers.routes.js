@@ -28,6 +28,19 @@ function createOpsSchedulersRouter() {
 
   router.get('/schedulers', (_req, res) => {
     const env = process.env;
+    // W315 — pull live last-run telemetry from the central registry. Schedulers
+    // that haven't opted in (haven't called schedulerRegistry.register) simply
+    // get `liveStatus: null` and the UI degrades gracefully.
+    let liveByKey = {};
+    try {
+      const schedulerRegistry = require('../intelligence/scheduler-registry');
+      schedulerRegistry.getAll().forEach(entry => {
+        liveByKey[entry.key] = entry;
+      });
+    } catch {
+      liveByKey = {};
+    }
+
     const items = [
       {
         key: 'audit-chain-archiver',
@@ -105,7 +118,19 @@ function createOpsSchedulersRouter() {
       generatedAt: new Date().toISOString(),
       total: items.length,
       enabled: items.filter(i => i.enabled).length,
-      items,
+      items: items.map(i => ({
+        ...i,
+        liveStatus: liveByKey[i.key]
+          ? {
+              lastRunAt: liveByKey[i.key].lastRunAt,
+              lastStatus: liveByKey[i.key].lastStatus,
+              lastError: liveByKey[i.key].lastError,
+              lastDurationMs: liveByKey[i.key].lastDurationMs,
+              runs: liveByKey[i.key].runs,
+              failures: liveByKey[i.key].failures,
+            }
+          : null,
+      })),
     });
   });
 

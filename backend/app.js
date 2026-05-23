@@ -2019,6 +2019,13 @@ require('./startup/speechBootstrap').wireSpeech(app, { logger });
 // + manual retrieve preview at /api/rag.
 require('./startup/ragBootstrap').wireRag(app, { logger });
 
+// ─── Risk Sweeper (daily) — Wave 288 ───────────────────────────────────
+// Persists daily RiskSnapshot per active beneficiary using the unified
+// Risk Orchestrator (W286) + RiskProfile canonical contract (W287), and
+// raises AiAlert when tier escalates or first-time critical is reached.
+// Cron disabled by default (ENABLE_RISK_SWEEP_CRON=true + RISK_SWEEP_BRANCH_IDS=b1,b2).
+require('./startup/riskSweeperBootstrap').wireRiskSweeper(app, { logger });
+
 // ─── Hikvision Workforce Surveillance & Attendance — Wave 96-114 ─────────────
 // Extracted to startup/hikvisionBootstrap.js (W277 / Pass 1 of app.js refactor).
 // Identical behaviour: same models, same enforceMfa flags (W275 series), same

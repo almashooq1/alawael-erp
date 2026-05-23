@@ -73,6 +73,12 @@ const REASON_CODES = Object.freeze({
   RISK_SCORE_COMPUTED: 'RISK_SCORE_COMPUTED',
   RISK_NO_SOURCES_AVAILABLE: 'RISK_NO_SOURCES_AVAILABLE',
   RISK_SCORING_FAILED: 'RISK_SCORING_FAILED',
+
+  // Wave 288 — Risk Sweeper + tier transitions
+  RISK_TIER_ESCALATED: 'RISK_TIER_ESCALATED',
+  RISK_TIER_DEESCALATED: 'RISK_TIER_DEESCALATED',
+  RISK_TIER_FIRST_CRITICAL: 'RISK_TIER_FIRST_CRITICAL',
+  RISK_SWEEP_COMPLETED: 'RISK_SWEEP_COMPLETED',
 });
 
 const REASON_LABELS_AR = Object.freeze({
@@ -106,6 +112,10 @@ const REASON_LABELS_AR = Object.freeze({
   RISK_SCORE_COMPUTED: 'تم حساب درجة الخطورة من المصادر المتاحة',
   RISK_NO_SOURCES_AVAILABLE: 'لا يوجد مصدر بيانات متاح لحساب درجة الخطورة',
   RISK_SCORING_FAILED: 'فشل أحد مصادر حساب درجة الخطورة',
+  RISK_TIER_ESCALATED: 'ارتفاع في درجة خطورة المستفيد',
+  RISK_TIER_DEESCALATED: 'تحسّن في درجة خطورة المستفيد',
+  RISK_TIER_FIRST_CRITICAL: 'درجة خطورة حرجة لأول مرة',
+  RISK_SWEEP_COMPLETED: 'تم الانتهاء من دورة فحص الخطورة',
 });
 
 // Legacy aliases we've observed in the codebase. The lib normalises any

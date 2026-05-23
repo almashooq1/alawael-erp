@@ -50,6 +50,21 @@ function wireRiskSweeper(app, deps = {}) {
     return;
   }
 
+  // ── Wave 295: tamper-evident audit log (chain) for plan-review lifecycle ──
+  let auditService = null;
+  try {
+    const PlanReviewAck = require('../models/PlanReviewAck');
+    const { PlanReviewAckAuditService } = require('../services/plan-review-ack-audit.service');
+    auditService = new PlanReviewAckAuditService({
+      PlanReviewAckModel: PlanReviewAck,
+      logger,
+    });
+    app._planReviewAckAuditService = auditService;
+    logger.info('[startup] plan-review-ack audit service wired (W295)');
+  } catch (err) {
+    logger.warn('[startup] plan-review-ack audit wiring failed', { err: err && err.message });
+  }
+
   // ── Wave 290: optional plan-review trigger (CRITICAL review on escalation) ──
   let planReviewService = null;
   let onAlertRaised = null;
@@ -74,6 +89,8 @@ function wireRiskSweeper(app, deps = {}) {
       planReviewService = new RiskPlanReviewService({
         CarePlanModel: CarePlan,
         PlanReviewModel: PlanReview,
+        AiAlertModel: AiAlert, // W294: enables linkedPlanReviewId back-link
+        auditService, // W295: tamper-evident audit chain
         logger,
       });
       hooks.push(ctx => planReviewService.triggerOnEscalation(ctx));
@@ -146,6 +163,7 @@ function wireRiskSweeper(app, deps = {}) {
         PlanReviewModel: PlanReview,
         AiAlertModel: AiAlert,
         BeneficiaryModel: Beneficiary,
+        auditService, // W295
         logger,
       });
       app._planReviewSlaService = slaService;

@@ -65,6 +65,7 @@ function buildSummary({ profile, tierDelta, sweepRunId }) {
  * @typedef {Object} PlanReviewDeps
  * @property {import('mongoose').Model} CarePlanModel - legacy CarePlan (`careplans` collection)
  * @property {import('mongoose').Model} PlanReviewModel
+ * @property {import('mongoose').Model} [AiAlertModel] - optional, enables W294 back-link
  * @property {{info:Function, warn:Function, error:Function}} [logger]
  */
 
@@ -76,7 +77,34 @@ class RiskPlanReviewService {
     if (!deps.PlanReviewModel) throw new Error('RiskPlanReviewService: PlanReviewModel required');
     this.CarePlan = deps.CarePlanModel;
     this.PlanReview = deps.PlanReviewModel;
+    this.AiAlert = deps.AiAlertModel || null;
+    this.auditService = deps.auditService || null; // W295
     this.logger = deps.logger || { info() {}, warn() {}, error() {} };
+  }
+
+  /**
+   * W294: write `data.linkedPlanReviewId` back onto the source AiAlert so
+   * the triggered-reviews dashboard (W291) + the SLA workbook (W296) can
+   * traverse alert→review without an extra lookup. Best-effort; failure
+   * never blocks the caller.
+   * @private
+   */
+  async _backLinkAlert(alertId, planReviewId) {
+    if (!this.AiAlert || !alertId || !planReviewId) return false;
+    try {
+      await this.AiAlert.updateOne(
+        { _id: alertId },
+        { $set: { 'data.linkedPlanReviewId': planReviewId } }
+      );
+      return true;
+    } catch (err) {
+      this.logger.warn('[risk-plan-review] alert back-link failed', {
+        alertId: String(alertId),
+        planReviewId: String(planReviewId),
+        err: err && err.message,
+      });
+      return false;
+    }
   }
 
   /**
@@ -85,7 +113,7 @@ class RiskPlanReviewService {
    * @returns {Promise<{created:boolean, reason?:string, planReviewId?:any, carePlanId?:any}>}
    */
   async triggerOnEscalation(ctx) {
-    const { ben, profile, tierDelta, sweepRunId, now = new Date() } = ctx || {};
+    const { alertId, ben, profile, tierDelta, sweepRunId, now = new Date() } = ctx || {};
     if (!ben || !ben._id) return { created: false, reason: 'BENEFICIARY_REQUIRED' };
 
     // ── 1. Locate active care plan ────────────────────────────────────
@@ -112,6 +140,9 @@ class RiskPlanReviewService {
       .select('_id')
       .lean();
     if (existing) {
+      // Idempotent re-fire: still patch the (possibly new) source alert
+      // so dashboards can hop to the active review.
+      await this._backLinkAlert(alertId, existing._id);
       return {
         created: false,
         reason: 'ALREADY_TRIGGERED_TODAY',
@@ -140,11 +171,29 @@ class RiskPlanReviewService {
         tierDelta,
         tier: profile.overallTier,
       });
+      const linked = await this._backLinkAlert(alertId, review._id);
+      // W295: chain-append TRIGGERED event (best-effort).
+      if (this.auditService) {
+        try {
+          await this.auditService.recordTriggered({
+            planReviewId: review._id,
+            beneficiaryId: ben._id,
+            payload: { sweepRunId, tierDelta, alertId: alertId || null },
+            now,
+          });
+        } catch (auditErr) {
+          this.logger.warn('[risk-plan-review] audit record failed', {
+            planReviewId: String(review._id),
+            err: auditErr && auditErr.message,
+          });
+        }
+      }
       return {
         created: true,
         reason: 'PLAN_REVIEW_TRIGGERED_BY_RISK',
         planReviewId: review._id,
         carePlanId: plan._id,
+        alertLinked: linked,
       };
     } catch (err) {
       this.logger.error('[risk-plan-review] create failed', {

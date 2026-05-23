@@ -340,4 +340,20 @@ router.post('/triggered-reviews/:id/acknowledge', requireMfaTier(1), async (req,
   }
 });
 
+// ── W295: VERIFY THE AUDIT CHAIN FOR ONE PLAN REVIEW ──────────────────
+// Tier 2 (audit / quality function — not for routine clinical use).
+router.get('/triggered-reviews/:id/audit', requireMfaTier(2), async (req, res) => {
+  try {
+    const audit = req.app._planReviewAckAuditService;
+    if (!audit) return res.status(503).json({ success: false, code: 'AUDIT_SERVICE_NOT_WIRED' });
+    const result = await audit.verify({ planReviewId: req.params.id });
+    return res.json({ success: true, planReviewId: req.params.id, ...result });
+  } catch (err) {
+    logger.error('[risk-sweep] audit verify error', { err: err && err.message });
+    return res
+      .status(500)
+      .json({ success: false, code: 'AUDIT_VERIFY_FAILED', error: safeError(err) });
+  }
+});
+
 module.exports = router;

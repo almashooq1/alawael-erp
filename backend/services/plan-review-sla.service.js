@@ -36,6 +36,7 @@ class PlanReviewSlaService {
     this.PlanReview = deps.PlanReviewModel;
     this.AiAlert = deps.AiAlertModel;
     this.Beneficiary = deps.BeneficiaryModel || null;
+    this.auditService = deps.auditService || null; // W295
     this.logger = deps.logger || console;
   }
 
@@ -60,6 +61,23 @@ class PlanReviewSlaService {
       { _id: planReviewId, acknowledgedAt: null },
       { $set: { acknowledgedAt: now, acknowledgedBy: userId } }
     );
+    // W295: append to tamper-evident audit chain (best-effort).
+    if (this.auditService) {
+      try {
+        await this.auditService.recordAck({
+          planReviewId,
+          beneficiaryId: review.beneficiary,
+          actorUserId: userId,
+          now,
+        });
+      } catch (err) {
+        this.logger.warn &&
+          this.logger.warn('[plan-review-sla] audit record failed', {
+            planReviewId: String(planReviewId),
+            err: err && err.message,
+          });
+      }
+    }
     return {
       ok: true,
       review: { ...review, acknowledgedAt: now, acknowledgedBy: userId },
@@ -145,6 +163,25 @@ class PlanReviewSlaService {
 
         if (targetLevel === 2) urgent += 1;
         else warn += 1;
+
+        // W295: chain-append SLA_ESCALATED event (best-effort).
+        if (this.auditService) {
+          try {
+            await this.auditService.recordSlaEscalation({
+              planReviewId: review._id,
+              beneficiaryId: review.beneficiary,
+              level: targetLevel,
+              payload: { code, openedAt: review.createdAt },
+              now,
+            });
+          } catch (auditErr) {
+            this.logger.warn &&
+              this.logger.warn('[plan-review-sla] audit record failed', {
+                planReviewId: String(review._id),
+                err: auditErr && auditErr.message,
+              });
+          }
+        }
       } catch (err) {
         errors.push({ planReviewId: review._id, error: err && err.message });
       }

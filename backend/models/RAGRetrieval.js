@@ -43,12 +43,16 @@ const retrievalSchema = new mongoose.Schema(
     branchId: { type: mongoose.Schema.Types.ObjectId, ref: 'Branch', index: true },
     requestedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 
-    retrievedAt: { type: Date, default: Date.now, index: true },
+    // No `index: true` here — the TTL index below covers retrievedAt lookups.
+    // Declaring both produces a "Duplicate schema index on retrievedAt" warning
+    // from Mongoose at startup.
+    retrievedAt: { type: Date, default: Date.now },
   },
   { timestamps: false, collection: 'rag_retrievals' }
 );
 
-// 30-day TTL — aligns with LlmTelemetryCall PDPL retention
+// 30-day TTL — aligns with LlmTelemetryCall PDPL retention. ALSO serves as
+// the lookup index on retrievedAt for "recent retrievals" queries.
 retrievalSchema.index({ retrievedAt: 1 }, { expireAfterSeconds: 30 * 24 * 60 * 60 });
 
 module.exports = mongoose.model('RAGRetrieval', retrievalSchema);

@@ -22,6 +22,25 @@
  * Env:
  *   MONGODB_URI         mongo connection (required unless --dry-run / --list)
  *   EMBEDDING_PROVIDER  defaults to 'mock' (deterministic for dev/CI)
+ *
+ * ⚠️  IMPORTANT — Embedding-provider quality (verified 2026-05-23 in-memory run):
+ *
+ *   The MOCK provider is deterministic but NOT semantic. Same text → same
+ *   vector (good for testing the pipeline) — but DIFFERENT texts get
+ *   essentially random cosine similarity (0.06-0.12 in practice, well
+ *   below the 0.6 default POLICY_QUERY threshold). End-to-end test:
+ *
+ *     Q: "طرق الدفع المتاحة"  →  picks "سياسة إلغاء وتعديل الموعد" (WRONG)
+ *
+ *   With mock provider, POLICY_QUERY downgrades to UNKNOWN for ~all
+ *   queries because no chunks pass the 0.6 threshold. The CHATBOT WIRING
+ *   is correct — RAG-driven answers fire only when retrieval succeeds.
+ *
+ *   For production / demo / any actual Q&A: set
+ *     EMBEDDING_PROVIDER=cohere-embed-multilingual-v3 (best for Arabic, 1024-dim)
+ *     OR EMBEDDING_PROVIDER=openai-text-embedding-3-large (good, 3072-dim)
+ *   + the corresponding API key in env (COHERE_API_KEY / OPENAI_API_KEY)
+ *   + re-run this seed against the production Mongo.
  */
 
 'use strict';

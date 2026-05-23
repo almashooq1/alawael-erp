@@ -196,3 +196,4 @@ __tests__/incident-audit-chain-wave277i.test.js
 __tests__/incident-audit-chain-wiring-wave277i-pass2.test.js
 __tests__/payment-gateway-parent-portal-wave278b.test.js
 __tests__/incident-audit-chain-socket-publisher-wave278c.test.js
+__tests__/import-export-formatters-extract-wave278e.test.js

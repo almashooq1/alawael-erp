@@ -21,6 +21,7 @@
  */
 
 const { hashLinkedPayload } = require('../intelligence/hash-chain.lib');
+const metrics = require('../intelligence/risk-metrics.registry');
 
 function canonicalize({
   action,
@@ -103,8 +104,10 @@ class PlanReviewAckAuditService {
         priorHash,
         currentHash,
       });
+      metrics.inc(metrics.NAMES.AUDIT_APPENDED, { action });
       return { ok: true, entryId: doc._id, currentHash };
     } catch (err) {
+      metrics.inc(metrics.NAMES.AUDIT_FAILED, { reason: 'APPEND_FAILED' });
       this.logger.warn('[plan-review-ack-audit] append failed', {
         action,
         planReviewId: String(planReviewId),
@@ -142,6 +145,7 @@ class PlanReviewAckAuditService {
     for (let i = 0; i < entries.length; i++) {
       const e = entries[i];
       if ((e.priorHash || null) !== prevHash) {
+        metrics.inc(metrics.NAMES.AUDIT_VERIFIED, { result: 'broken' });
         return {
           ok: false,
           chainLength: entries.length,
@@ -160,6 +164,7 @@ class PlanReviewAckAuditService {
       });
       const recomputed = hashLinkedPayload(canon, prevHash);
       if (recomputed !== e.currentHash) {
+        metrics.inc(metrics.NAMES.AUDIT_VERIFIED, { result: 'broken' });
         return {
           ok: false,
           chainLength: entries.length,
@@ -169,6 +174,7 @@ class PlanReviewAckAuditService {
       }
       prevHash = e.currentHash;
     }
+    metrics.inc(metrics.NAMES.AUDIT_VERIFIED, { result: 'ok' });
     return { ok: true, chainLength: entries.length };
   }
 }

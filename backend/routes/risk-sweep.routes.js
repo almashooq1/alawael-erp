@@ -356,4 +356,18 @@ router.get('/triggered-reviews/:id/audit', requireMfaTier(2), async (req, res) =
   }
 });
 
+// ── W297: TELEMETRY SNAPSHOT ────────────────────────────────────
+// Tier 1 (operational read). Returns in-memory counter snapshot for the
+// W288─W295 risk-sweep / plan-review pipeline. Same shape Prometheus
+// scraper consumes; safe to refresh from a dashboard.
+router.get('/metrics', requireMfaTier(1), async (_req, res) => {
+  try {
+    const m = require('../intelligence/risk-metrics.registry');
+    return res.json({ success: true, counters: m.snapshotGrouped() });
+  } catch (err) {
+    logger.error('[risk-sweep] metrics error', { err: err && err.message });
+    return res.status(500).json({ success: false, code: 'METRICS_FAILED', error: safeError(err) });
+  }
+});
+
 module.exports = router;

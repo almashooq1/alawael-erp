@@ -23,6 +23,7 @@
  */
 
 const TIER_AR = { low: 'منخفض', moderate: 'متوسط', high: 'مرتفع', critical: 'حرج' };
+const metrics = require('../intelligence/risk-metrics.registry');
 
 function startOfUtcDay(d = new Date()) {
   const x = new Date(d);
@@ -90,14 +91,19 @@ class RiskPlanReviewService {
    * @private
    */
   async _backLinkAlert(alertId, planReviewId) {
-    if (!this.AiAlert || !alertId || !planReviewId) return false;
+    if (!this.AiAlert || !alertId || !planReviewId) {
+      metrics.inc(metrics.NAMES.BACKLINK_ATTEMPTED, { result: 'skipped' });
+      return false;
+    }
     try {
       await this.AiAlert.updateOne(
         { _id: alertId },
         { $set: { 'data.linkedPlanReviewId': planReviewId } }
       );
+      metrics.inc(metrics.NAMES.BACKLINK_ATTEMPTED, { result: 'ok' });
       return true;
     } catch (err) {
+      metrics.inc(metrics.NAMES.BACKLINK_ATTEMPTED, { result: 'failed' });
       this.logger.warn('[risk-plan-review] alert back-link failed', {
         alertId: String(alertId),
         planReviewId: String(planReviewId),

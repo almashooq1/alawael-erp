@@ -159,7 +159,7 @@ router.post('/deactivate/:id', requireMfaTier(2), async (req, res) => {
 //
 // Includes derived `health` summary: rescue-rate, error-rate per provider.
 // Climbing rescue-rate is the signal to upgrade the embedder.
-router.get('/metrics', requireMfaTier(1), async (_req, res) => {
+router.get('/metrics', requireMfaTier(1), async (req, res) => {
   try {
     let registry;
     try {
@@ -186,20 +186,36 @@ router.get('/metrics', requireMfaTier(1), async (_req, res) => {
     const embedErr = counters['rag.embed.error'] || {};
     const totalErrors = Object.values(embedErr).reduce((s, n) => s + n, 0);
 
+    // W283j cache hit/miss derived from rag.retrieve.cache labels
+    const cacheCounter = counters['rag.retrieve.cache'] || {};
+    let cacheHits = 0;
+    let cacheMisses = 0;
+    for (const [labelKey, count] of Object.entries(cacheCounter)) {
+      if (labelKey.includes('result=hit')) cacheHits += count;
+      else if (labelKey.includes('result=miss')) cacheMisses += count;
+    }
+    const cacheTotal = cacheHits + cacheMisses;
+
     const health = {
       totalRetrieves,
       rescueRate: totalRetrieves > 0 ? rescued / totalRetrieves : 0,
       vectorMissRate: totalRetrieves > 0 ? vectorNone / totalRetrieves : 0,
       totalEmbedErrors: totalErrors,
       embedErrorRate: totalRetrieves > 0 ? totalErrors / totalRetrieves : 0,
+      // W283j cache health — hit rate is the cost-saver KPI
+      cacheHits,
+      cacheMisses,
+      cacheHitRate: cacheTotal > 0 ? cacheHits / cacheTotal : 0,
+      cacheSize:
+        req.app._ragService && typeof req.app._ragService.cacheSize === 'function'
+          ? req.app._ragService.cacheSize()
+          : null,
     };
 
     return res.json({ success: true, counters, health });
   } catch (err) {
     logger.error('[rag] metrics error', { err: err && err.message });
-    return res
-      .status(500)
-      .json({ success: false, code: 'METRICS_FAILED', error: safeError(err) });
+    return res.status(500).json({ success: false, code: 'METRICS_FAILED', error: safeError(err) });
   }
 });
 

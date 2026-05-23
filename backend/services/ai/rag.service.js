@@ -37,6 +37,45 @@ const DEFAULT_CHUNK_SIZE = 800;
 const DEFAULT_CHUNK_OVERLAP = 100;
 const DEFAULT_TOP_K = 5;
 const DEFAULT_SIMILARITY_THRESHOLD = 0.75;
+// W283j: retrieval cache parameters. Matches the LRU+TTL pattern used by
+// parent-chatbot-llm.service.js (W123) — same cost-savings dynamic.
+const DEFAULT_CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutes
+const DEFAULT_CACHE_MAX_ENTRIES = 512;
+
+/**
+ * _createLruCache — same shape as W123 LLM classifier cache.
+ * get() refreshes LRU position; set() evicts oldest when full;
+ * expiry checked on access (lazy eviction, no timer thread).
+ */
+function _createLruCache(maxEntries, ttlMs, nowFn) {
+  const map = new Map();
+  return {
+    get(key) {
+      const entry = map.get(key);
+      if (!entry) return null;
+      if (nowFn() > entry.expiresAt) {
+        map.delete(key);
+        return null;
+      }
+      map.delete(key);
+      map.set(key, entry);
+      return entry.value;
+    },
+    set(key, value) {
+      if (map.has(key)) map.delete(key);
+      while (map.size >= maxEntries) {
+        map.delete(map.keys().next().value);
+      }
+      map.set(key, { value, expiresAt: nowFn() + ttlMs });
+    },
+    clear() {
+      map.clear();
+    },
+    size() {
+      return map.size;
+    },
+  };
+}
 // W283e: keyword fallback parameters. Activated when vector retrieval returns
 // 0 chunks above threshold OR when explicitly enabled via opts.keywordFallback.
 const KEYWORD_FALLBACK_MIN_SCORE = 0.15; // require ≥15% of query tokens to match a chunk
@@ -141,11 +180,28 @@ function keywordScore(queryTokens, chunkTokens) {
   return hits / queryTokens.size;
 }
 
-function ragServiceFactory({ embeddingProvider, ChunkModel = null, RetrievalModel = null } = {}) {
+function ragServiceFactory({
+  embeddingProvider,
+  ChunkModel = null,
+  RetrievalModel = null,
+  // W283j: cache config — opt-in via cacheEnabled:true. Disabled by default
+  // to preserve W283/b backward behavior. Bootstrap sets cacheEnabled:true
+  // for the production singleton.
+  cacheEnabled = false,
+  cacheTtlMs = DEFAULT_CACHE_TTL_MS,
+  cacheMaxEntries = DEFAULT_CACHE_MAX_ENTRIES,
+  now = () => Date.now(),
+} = {}) {
   if (!embeddingProvider) throw new Error('rag: embeddingProvider required');
 
   const Chunk = ChunkModel || (mongoose.models?.ClinicalKnowledgeChunk ?? null);
   const Retrieval = RetrievalModel || (mongoose.models?.RAGRetrieval ?? null);
+
+  // W283j: per-factory cache. Single instance shared across all retrieve()
+  // calls. Invalidated wholesale on ingest (any new doc may match any query,
+  // so per-key invalidation isn't possible without indexing chunks-by-token —
+  // simpler to flush). Disabled when cacheEnabled=false (default).
+  const cache = cacheEnabled ? _createLruCache(cacheMaxEntries, cacheTtlMs, now) : null;
 
   // ── Chunking ──────────────────────────────────────────────────────────
   function chunkText(text, opts = {}) {
@@ -227,6 +283,10 @@ function ragServiceFactory({ embeddingProvider, ChunkModel = null, RetrievalMode
       throw err;
     }
     _emit('rag.ingest', { provider, sourceDocType: doc.sourceDocType });
+    // W283j: flush retrieval cache — new chunks may match queries that
+    // previously returned stale results. Wholesale flush is fine; this is
+    // a write op (admin-triggered, low frequency).
+    if (cache) cache.clear();
     return {
       sourceDocId: doc.sourceDocId,
       version: doc.version || 1,
@@ -252,6 +312,24 @@ function ragServiceFactory({ embeddingProvider, ChunkModel = null, RetrievalMode
     const threshold =
       opts.similarityThreshold != null ? opts.similarityThreshold : DEFAULT_SIMILARITY_THRESHOLD;
     const provider = embeddingProvider.getProvider();
+
+    // W283j: cache lookup. Key includes the parameters that change result
+    // shape: query + branchId + topK + threshold + fallback mode + provider.
+    // Same query with different topK = different cache entry (correct —
+    // result lengths differ).
+    const fbModeForKey = opts.keywordFallback === undefined ? 'auto' : String(opts.keywordFallback);
+    const cacheKey = cache
+      ? `${provider}|${opts.branchId || 'org'}|${topK}|${threshold}|${fbModeForKey}|${crypto.createHash('sha256').update(query).digest('hex').slice(0, 16)}`
+      : null;
+    if (cache && opts.skipCache !== true) {
+      const cached = cache.get(cacheKey);
+      if (cached) {
+        _emit('rag.retrieve.cache', { provider, result: 'hit' });
+        // Return a CLONE so caller mutations don't poison the cache entry.
+        return { ...cached, fromCache: true };
+      }
+    }
+    if (cache) _emit('rag.retrieve.cache', { provider, result: 'miss' });
 
     const queryEmbedding = await embeddingProvider.embed(query);
 
@@ -368,7 +446,7 @@ function ragServiceFactory({ embeddingProvider, ChunkModel = null, RetrievalMode
     }
     _emit('rag.retrieve', { provider, vector: vectorLabel, fallback: fallbackLabel });
 
-    return {
+    const result = {
       retrievalId,
       chunks: scored,
       topSimilarity: scored.length > 0 ? scored[0].similarity : 0,
@@ -376,6 +454,16 @@ function ragServiceFactory({ embeddingProvider, ChunkModel = null, RetrievalMode
       usedKeywordFallback,
       vectorMatchCount: vectorScored.length,
     };
+
+    // W283j: populate cache. retrievalId stays — repeat callers hitting
+    // the cache will see the same retrievalId pointing at the original
+    // audit row. That's correct: the cache returns "what we said last
+    // time," and the audit trail is single-write per actual computation.
+    if (cache && cacheKey) {
+      cache.set(cacheKey, result);
+    }
+
+    return result;
   }
 
   // ── CITE — link a retrieval to an LLM call for audit ──────────────────
@@ -393,6 +481,16 @@ function ragServiceFactory({ embeddingProvider, ChunkModel = null, RetrievalMode
     ingestDocument,
     retrieve,
     cite,
+    // W283j cache controls — admin endpoints / tests can introspect + flush.
+    clearCache() {
+      if (cache) cache.clear();
+    },
+    cacheSize() {
+      return cache ? cache.size() : 0;
+    },
+    isCacheEnabled() {
+      return cache != null;
+    },
     _chunkText: chunkText,
     _normalizeArabic: normalizeArabic,
     _tokenize: tokenize,
@@ -401,6 +499,8 @@ function ragServiceFactory({ embeddingProvider, ChunkModel = null, RetrievalMode
     DEFAULT_TOP_K,
     DEFAULT_SIMILARITY_THRESHOLD,
     KEYWORD_FALLBACK_MIN_SCORE,
+    DEFAULT_CACHE_TTL_MS,
+    DEFAULT_CACHE_MAX_ENTRIES,
   };
 }
 

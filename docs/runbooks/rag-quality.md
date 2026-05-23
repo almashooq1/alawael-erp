@@ -72,8 +72,11 @@ which provider + error-code is driving the rate.
 - **Fix**:
   1. Throttle the ingest (run during low-traffic window).
   2. Upgrade vendor tier (Cohere Production / OpenAI usage tier).
-  3. Add caching: identical query within last N minutes → reuse retrieval
-     (not implemented — separate scope; flag as W283j if needed).
+  3. Verify `health.cacheHitRate` (W283j) — if it's low (<30%), the cache
+     isn't helping. Could be many distinct queries (long-tail) OR cache TTL
+     too short (default 15min — tune via `RAG_CACHE_TTL_MS` env). Cache is
+     ENABLED in production by default; check `health.cacheSize` confirms
+     entries are landing.
 
 ### Case C — `EMBEDDING_UPSTREAM_5XX` (provider down)
 
@@ -171,9 +174,14 @@ vector-quality rate.
   `services/ai/rag.service.js` `retrieve()`. Separate workstream.
 - **Multi-tenant key isolation**: currently single `COHERE_API_KEY` org-wide.
   Per-branch keys would let one branch's runaway not exhaust the org quota.
-- **Cache layer**: identical query within N minutes reuses the retrieval row.
-  Would reduce embed calls 30-50% on high-traffic chatbot. Flag as W283j
-  if rate-limit becomes recurring.
+- ~~**Cache layer**~~ — **shipped W283j 2026-05-23**. LRU+TTL in-process cache,
+  enabled by default (`cacheEnabled:true` in `ragBootstrap`). Tunable via
+  `RAG_CACHE_TTL_MS` (default 900000 = 15min) + `RAG_CACHE_MAX_ENTRIES`
+  (default 512). Auto-flushed on `ingestDocument` (new chunks may match
+  previously-cached queries). `GET /api/rag/metrics` reports
+  `health.cacheHits/cacheMisses/cacheHitRate/cacheSize`. Force-bypass per
+  call via `opts.skipCache:true`. Counter `rag.retrieve.cache` labels
+  `{provider, result: 'hit'|'miss'}`.
 
 ## Related architecture references
 

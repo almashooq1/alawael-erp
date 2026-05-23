@@ -26,7 +26,16 @@ function wireRag(app, deps = {}) {
     const embeddingProvider = require('../services/ai/embeddingProvider');
     const ragRouter = require('../routes/rag.routes');
 
-    const ragService = ragServiceFactory({ embeddingProvider });
+    // W283j: enable retrieval cache in production. Defaults to 15min TTL,
+    // 512 entries (≈40MB RSS at typical chunk-result sizes). Tunable via env.
+    const cacheTtlMs = parseInt(process.env.RAG_CACHE_TTL_MS, 10) || undefined;
+    const cacheMaxEntries = parseInt(process.env.RAG_CACHE_MAX_ENTRIES, 10) || undefined;
+    const ragService = ragServiceFactory({
+      embeddingProvider,
+      cacheEnabled: true,
+      ...(cacheTtlMs ? { cacheTtlMs } : {}),
+      ...(cacheMaxEntries ? { cacheMaxEntries } : {}),
+    });
 
     app._ragService = ragService;
     app._embeddingProvider = embeddingProvider;

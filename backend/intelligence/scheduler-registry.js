@@ -31,6 +31,9 @@
  */
 
 const _registry = new Map();
+// W322 — opt-in durable persistence. Bootstrap flips this to true after
+// hydrating from Mongo so subsequent recordRun() upserts the snapshot.
+let _persistEnabled = false;
 
 function _truncate(value, max = 500) {
   if (value == null) return null;
@@ -89,6 +92,33 @@ function recordRun(key, { ok, error = null, durationMs = null } = {}) {
   entry.lastDurationMs = typeof durationMs === 'number' ? durationMs : null;
   entry.runs += 1;
   if (!ok) entry.failures += 1;
+  // W322 — fire-and-forget durable snapshot. Never block the cron handler,
+  // never throw out of recordRun. Lazy require to avoid Mongoose load at
+  // module init (keeps unit tests fast + framework-agnostic).
+  if (_persistEnabled) {
+    try {
+      const Snapshot = require('../models/SchedulerHealthSnapshot');
+      Snapshot.updateOne(
+        { key },
+        {
+          $set: {
+            lastRunAt: entry.lastRunAt,
+            lastStatus: entry.lastStatus,
+            lastError: entry.lastError,
+            lastDurationMs: entry.lastDurationMs,
+            runs: entry.runs,
+            failures: entry.failures,
+            updatedAt: new Date(),
+          },
+        },
+        { upsert: true }
+      ).catch(() => {
+        /* swallow — health persistence is best-effort */
+      });
+    } catch {
+      /* model load failure — silently skip persistence */
+    }
+  }
   return entry;
 }
 
@@ -148,6 +178,35 @@ function _inferCadenceMs(meta) {
 /** Test helper — never call in production code paths. */
 function _reset() {
   _registry.clear();
+  _persistEnabled = false;
+}
+
+/**
+ * W322 — Rehydrate the in-process registry from durable snapshots so a
+ * fresh process boot doesn't misreport every scheduler as `never-run`.
+ * Called by `startup/schedulerSnapshotsBootstrap.js` after Mongo is ready.
+ * Returns the number of entries hydrated. Safe to call multiple times.
+ */
+async function hydrateFromSnapshots() {
+  let hydrated = 0;
+  try {
+    const Snapshot = require('../models/SchedulerHealthSnapshot');
+    const docs = await Snapshot.find({}).lean();
+    for (const doc of docs) {
+      const existing = _registry.get(doc.key) || register(doc.key);
+      existing.lastRunAt = doc.lastRunAt ? new Date(doc.lastRunAt).toISOString() : null;
+      existing.lastStatus = doc.lastStatus || null;
+      existing.lastError = doc.lastError || null;
+      existing.lastDurationMs = typeof doc.lastDurationMs === 'number' ? doc.lastDurationMs : null;
+      existing.runs = doc.runs || 0;
+      existing.failures = doc.failures || 0;
+      hydrated += 1;
+    }
+  } catch {
+    /* model unavailable — boot continues with empty registry */
+  }
+  _persistEnabled = true;
+  return hydrated;
 }
 
 module.exports = {
@@ -156,5 +215,6 @@ module.exports = {
   get,
   getAll,
   health,
+  hydrateFromSnapshots,
   _reset,
 };

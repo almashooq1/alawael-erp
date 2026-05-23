@@ -169,6 +169,16 @@ const shouldSkipDBInit = isTestEnv && process.env.SMART_TEST_MODE === 'true';
     logger.info('Report Scheduler initialization skipped:', err.message);
   }
 
+  // W322 — Hydrate scheduler-registry from durable Mongo snapshots BEFORE
+  // cron bootstraps register their schedulers (so /api/ops/schedulers/health
+  // doesn't misreport every restart as `never-run`).
+  try {
+    const { wireSchedulerSnapshots } = require('./startup/schedulerSnapshotsBootstrap');
+    await wireSchedulerSnapshots({ logger });
+  } catch (err) {
+    logger.info('Scheduler snapshot hydration skipped:', err.message);
+  }
+
   // Initialize KPI & Attendance Scheduler (prompt_21 — Systems 36 & 37)
   try {
     const { startKpiAttendanceScheduler } = require('./scheduler/kpi-attendance.scheduler');
@@ -394,7 +404,7 @@ const shouldSkipDBInit = isTestEnv && process.env.SMART_TEST_MODE === 'true';
         meta: { intervalMs, ...scanOptions },
       });
       const innerScan = detector.scan.bind(detector);
-      detector.scan = async (opts) => {
+      detector.scan = async opts => {
         const started = Date.now();
         try {
           const report = await innerScan(opts);

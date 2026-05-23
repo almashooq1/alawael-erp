@@ -2026,6 +2026,14 @@ require('./startup/ragBootstrap').wireRag(app, { logger });
 // Cron disabled by default (ENABLE_RISK_SWEEP_CRON=true + RISK_SWEEP_BRANCH_IDS=b1,b2).
 require('./startup/riskSweeperBootstrap').wireRiskSweeper(app, { logger });
 
+// ─── Audit Chain Archiver (daily) — Wave 303 / W308 wire-in ──────────────────
+// Verifies hash-linked plan-review audit chains older than AUDIT_CHAIN_ARCHIVE_DAYS
+// (default 1825 = 5y PDPL retention), writes valid chains as NDJSON, and optionally
+// purges them (AUDIT_CHAIN_ARCHIVE_DELETE=true). Broken chains are SKIPPED — never
+// deleted — and surface via risk.plan_review.audit.verified{result=broken} which
+// W307 alert pages on. Cron disabled by default (ENABLE_AUDIT_CHAIN_ARCHIVE=true).
+require('./startup/auditChainArchiverBootstrap').wireAuditChainArchiver(app, { logger });
+
 // ─── Hikvision Workforce Surveillance & Attendance — Wave 96-114 ─────────────
 // Extracted to startup/hikvisionBootstrap.js (W277 / Pass 1 of app.js refactor).
 // Identical behaviour: same models, same enforceMfa flags (W275 series), same

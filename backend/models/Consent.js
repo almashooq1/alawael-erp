@@ -39,6 +39,10 @@ const CONSENT_TYPES = Object.freeze([
   'data_sharing',
   'trip',
   'research',
+  // Phase 3 additions (W280 + W284):
+  'health_summary_import', // pull beneficiary health summary from Sehhaty / Tawakkalna
+  'voice_recording', // SLP session audio capture for speech analysis
+  'motion_recording', // PT/OT session video capture for gait/ROM analysis
 ]);
 
 // Consent types required for standard clinical care. Missing any of

@@ -204,3 +204,4 @@ __tests__/no-wrapper-export-direct-call-wave278k.test.js
 __tests__/no-silent-pass-smoke-tests-wave278l.test.js
 __tests__/dpia-lifecycle-wave285.test.js
 __tests__/disability-authority-adapter-wave281.test.js
+__tests__/sehhaty-adapter-wave280.test.js

@@ -11,7 +11,7 @@ const smartSchedulerSchema = new mongoose.Schema(
     beneficiaryId: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
-      ref: 'User',
+      ref: 'Beneficiary',
     },
 
     programId: {

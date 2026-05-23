@@ -6,7 +6,7 @@ const ProgramProgressSchema = new mongoose.Schema(
   {
     beneficiaryId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'BeneficiaryProfile',
+      ref: 'Beneficiary',
       required: true,
     },
 

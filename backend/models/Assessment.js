@@ -32,7 +32,7 @@ const programAssessmentSchema = new mongoose.Schema(
     },
     beneficiaryId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      ref: 'Beneficiary',
       required: true,
       index: true,
     },

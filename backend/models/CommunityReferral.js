@@ -9,7 +9,7 @@ const communityReferralSchema = new mongoose.Schema(
     uuid: { type: String, unique: true, sparse: true },
     branchId: { type: mongoose.Schema.Types.ObjectId, ref: 'Branch', required: true },
 
-    beneficiaryId: { type: mongoose.Schema.Types.ObjectId, ref: 'Patient', default: null },
+    beneficiaryId: { type: mongoose.Schema.Types.ObjectId, ref: 'Beneficiary', default: null },
     beneficiaryName: { type: String, required: true },
     beneficiaryPhone: { type: String, maxlength: 20 },
 

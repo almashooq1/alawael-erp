@@ -186,6 +186,62 @@ const MeasurementMasterSchema = new mongoose.Schema(
       index: true,
     },
 
+    // ── W325 Pass 2 — append-only lifecycle audit trail ───────────────────
+    // Pushed by service layer when transitioning lifecycleStatus. Each entry
+    // captures from/to + actor + reasonCode + notes + timestamp. Never
+    // mutated; corrections are new entries referencing the prior state.
+    // Transition validation lives in backend/intelligence/measure-lifecycle.lib.js
+    lifecycleHistory: [
+      {
+        fromStatus: {
+          type: String,
+          enum: ['DRAFT', 'ACTIVE', 'DEPRECATED', 'RETIRED'],
+        },
+        toStatus: {
+          type: String,
+          enum: ['DRAFT', 'ACTIVE', 'DEPRECATED', 'RETIRED'],
+          required: true,
+        },
+        actor: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+        reasonCode: { type: String, trim: true },
+        notes: { type: String, trim: true },
+        at: { type: Date, default: Date.now },
+      },
+    ],
+
+    // ── W325 Pass 2 — scoringType taxonomy (Master-level) ─────────────────
+    // Supersedes MeasurementType.scoringMethod (kept for backward-compat).
+    // GAS_LINKED integrates backend/models/GasScale.js. COMPOSITE references
+    // other measures via compositeOf[]; cycle prevention enforced by
+    // backend/intelligence/measure-lifecycle.lib.js → checkCompositeNoSelfReference.
+    scoringType: {
+      type: String,
+      enum: [
+        'NUMERIC_TOTAL',
+        'SUBSCALES',
+        'PERCENTAGE',
+        'ORDINAL',
+        'CHECKLIST',
+        'FREQUENCY_COUNT',
+        'SEVERITY_BAND',
+        'NARRATIVE',
+        'GAS_LINKED',
+        'COMPOSITE',
+      ],
+    },
+
+    // ── W325 Pass 2 — COMPOSITE scoring component refs ────────────────────
+    // Used only when scoringType === 'COMPOSITE'. Each entry weights a
+    // referenced measure's standardized score into the composite total.
+    // Direct self-reference rejected by lib; multi-hop cycle is a
+    // service-layer concern (requires collection walk).
+    compositeOf: [
+      {
+        measureId: { type: mongoose.Schema.Types.ObjectId, ref: 'MeasurementMaster' },
+        weight: { type: Number, min: 0, max: 1 },
+      },
+    ],
+
     isActive: {
       type: Boolean,
       default: true,

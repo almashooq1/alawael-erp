@@ -21,6 +21,18 @@
 const crypto = require('crypto');
 const mongoose = require('mongoose');
 
+// W283g — lazy-require risk-metrics registry. Silent no-op if unavailable
+// (older repos, test envs that don't wire the registry) so RAG stays usable.
+let _metrics = null;
+function _emit(name, labels) {
+  try {
+    if (!_metrics) _metrics = require('../../intelligence/risk-metrics.registry');
+    _metrics.inc(name, labels);
+  } catch {
+    /* registry absent — silent no-op */
+  }
+}
+
 const DEFAULT_CHUNK_SIZE = 800;
 const DEFAULT_CHUNK_OVERLAP = 100;
 const DEFAULT_TOP_K = 5;
@@ -205,7 +217,16 @@ function ragServiceFactory({ embeddingProvider, ChunkModel = null, RetrievalMode
         metadata: doc.metadata || null,
       });
     }
-    const inserted = await Chunk.insertMany(chunkDocs);
+    let inserted;
+    try {
+      inserted = await Chunk.insertMany(chunkDocs);
+    } catch (err) {
+      // Emit embed-error if the failure came from embed step (caught earlier)
+      // OR a model-write error (less common). Best-effort telemetry.
+      _emit('rag.embed.error', { provider, code: err?.code || 'INSERT_FAILED' });
+      throw err;
+    }
+    _emit('rag.ingest', { provider, sourceDocType: doc.sourceDocType });
     return {
       sourceDocId: doc.sourceDocId,
       version: doc.version || 1,
@@ -333,6 +354,19 @@ function ragServiceFactory({ embeddingProvider, ChunkModel = null, RetrievalMode
         // logging failure must not block retrieval
       }
     }
+
+    // W283g — retrieve telemetry. Three label dimensions:
+    //   provider   → which embedder ran
+    //   vector     → 'some' if vectorScored.length > 0, 'none' otherwise
+    //   fallback   → 'rescued' (kw fired AND vector was empty),
+    //                'merged' (kw fired AND vector had hits — 'always' mode),
+    //                'unused' (kw didn't fire)
+    const vectorLabel = vectorScored.length > 0 ? 'some' : 'none';
+    let fallbackLabel = 'unused';
+    if (usedKeywordFallback) {
+      fallbackLabel = vectorScored.length === 0 ? 'rescued' : 'merged';
+    }
+    _emit('rag.retrieve', { provider, vector: vectorLabel, fallback: fallbackLabel });
 
     return {
       retrievalId,

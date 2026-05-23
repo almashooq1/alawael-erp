@@ -72,8 +72,16 @@ const NAMES = Object.freeze({
   // *consent* + *report-submission* business-lifecycle outcomes, scoped by
   // provider so a refused consent on Sehhaty doesn't masquerade as success
   // because the underlying HTTP returned 200.
-  GOV_CONSENT: 'gov.adapter.consent',           // labels: provider, result ∈ granted|refused|revoked|missing|expired
+  GOV_CONSENT: 'gov.adapter.consent', // labels: provider, result ∈ granted|refused|revoked|missing|expired
   GOV_REPORT_SUBMISSION: 'gov.report.submission', // labels: provider, result ∈ ok|failed|skipped, reason?
+  // ── W283g RAG retrieval + ingest + embed-error telemetry ──────────────
+  // Signals for ops to know:
+  //   - is keyword fallback rescuing too often? → upgrade embedder
+  //   - are embed errors clustering on auth/rate-limit? → rotate keys / scale up
+  //   - how much KB is the org ingesting? → capacity planning
+  RAG_RETRIEVE: 'rag.retrieve', // labels: provider, vector ∈ none|some, fallback ∈ unused|rescued|merged
+  RAG_INGEST: 'rag.ingest', // labels: provider, sourceDocType
+  RAG_EMBED_ERROR: 'rag.embed.error', // labels: provider, code
 });
 
 module.exports = { inc, snapshot, snapshotGrouped, _reset, NAMES };

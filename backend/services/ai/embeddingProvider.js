@@ -115,18 +115,38 @@ async function _httpPostWithRetry(url, body, headers) {
   throw lastErr;
 }
 
+// W283g — lazy metrics emission for embed errors. Silent no-op if registry
+// unavailable. Called from the catch paths of liveCohereEmbed/liveOpenAIEmbed
+// so ops sees auth/rate-limit/upstream failures without coupling to the registry.
+let _embedMetrics = null;
+function _emitEmbedError(provider, code) {
+  try {
+    if (!_embedMetrics) _embedMetrics = require('../../intelligence/risk-metrics.registry');
+    _embedMetrics.inc('rag.embed.error', { provider, code });
+  } catch {
+    /* registry absent — silent no-op */
+  }
+}
+
 async function liveOpenAIEmbed(text) {
   const key = process.env.OPENAI_API_KEY;
   if (!key) {
+    _emitEmbedError('openai-text-embedding-3-large', 'EMBEDDING_LIVE_NOT_CONFIGURED');
     throw Object.assign(new Error('OPENAI_API_KEY env var required for live OpenAI embedding'), {
       code: 'EMBEDDING_LIVE_NOT_CONFIGURED',
     });
   }
-  const res = await _httpPostWithRetry(
-    'https://api.openai.com/v1/embeddings',
-    { input: text, model: 'text-embedding-3-large' },
-    { Authorization: `Bearer ${key}` }
-  );
+  let res;
+  try {
+    res = await _httpPostWithRetry(
+      'https://api.openai.com/v1/embeddings',
+      { input: text, model: 'text-embedding-3-large' },
+      { Authorization: `Bearer ${key}` }
+    );
+  } catch (err) {
+    _emitEmbedError('openai-text-embedding-3-large', err?.code || 'EMBEDDING_NETWORK_FAIL');
+    throw err;
+  }
   if (!res.ok) {
     const code =
       res.status === 401
@@ -136,11 +156,13 @@ async function liveOpenAIEmbed(text) {
           : res.status >= 500
             ? 'EMBEDDING_UPSTREAM_5XX'
             : 'EMBEDDING_REQUEST_FAILED';
+    _emitEmbedError('openai-text-embedding-3-large', code);
     throw Object.assign(new Error(`OpenAI embed ${res.status}`), { code, status: res.status });
   }
   const body = await res.json();
   const vec = body?.data?.[0]?.embedding;
   if (!Array.isArray(vec) || vec.length === 0) {
+    _emitEmbedError('openai-text-embedding-3-large', 'EMBEDDING_MALFORMED_RESPONSE');
     throw Object.assign(new Error('OpenAI returned malformed embedding'), {
       code: 'EMBEDDING_MALFORMED_RESPONSE',
     });
@@ -151,20 +173,27 @@ async function liveOpenAIEmbed(text) {
 async function liveCohereEmbed(text) {
   const key = process.env.COHERE_API_KEY;
   if (!key) {
+    _emitEmbedError('cohere-embed-multilingual-v3', 'EMBEDDING_LIVE_NOT_CONFIGURED');
     throw Object.assign(new Error('COHERE_API_KEY env var required for live Cohere embedding'), {
       code: 'EMBEDDING_LIVE_NOT_CONFIGURED',
     });
   }
-  const res = await _httpPostWithRetry(
-    'https://api.cohere.com/v2/embed',
-    {
-      texts: [text],
-      model: 'embed-multilingual-v3.0',
-      input_type: 'search_document',
-      embedding_types: ['float'],
-    },
-    { Authorization: `Bearer ${key}` }
-  );
+  let res;
+  try {
+    res = await _httpPostWithRetry(
+      'https://api.cohere.com/v2/embed',
+      {
+        texts: [text],
+        model: 'embed-multilingual-v3.0',
+        input_type: 'search_document',
+        embedding_types: ['float'],
+      },
+      { Authorization: `Bearer ${key}` }
+    );
+  } catch (err) {
+    _emitEmbedError('cohere-embed-multilingual-v3', err?.code || 'EMBEDDING_NETWORK_FAIL');
+    throw err;
+  }
   if (!res.ok) {
     const code =
       res.status === 401
@@ -174,12 +203,14 @@ async function liveCohereEmbed(text) {
           : res.status >= 500
             ? 'EMBEDDING_UPSTREAM_5XX'
             : 'EMBEDDING_REQUEST_FAILED';
+    _emitEmbedError('cohere-embed-multilingual-v3', code);
     throw Object.assign(new Error(`Cohere embed ${res.status}`), { code, status: res.status });
   }
   const body = await res.json();
   // Cohere v2 returns: { embeddings: { float: [[...]] } }
   const vec = body?.embeddings?.float?.[0];
   if (!Array.isArray(vec) || vec.length === 0) {
+    _emitEmbedError('cohere-embed-multilingual-v3', 'EMBEDDING_MALFORMED_RESPONSE');
     throw Object.assign(new Error('Cohere returned malformed embedding'), {
       code: 'EMBEDDING_MALFORMED_RESPONSE',
     });

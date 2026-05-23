@@ -96,9 +96,52 @@ cd ../../alawael-rehab-platform/apps/web-admin && npm run dev
 
 - **Architecture**: `docs/blueprint/00-master-architecture.md` (canonical reference covering W11-26)
 - **Module map**: `docs/MODULES.md` (127 backend modules, 80+ frontend pages)
-- **Phase 3 tracker**: `docs/PHASE3_PLAN.md` (Intelligence & Automation — all 6 deliverables now closed)
+- **Phase 3 tracker (Intelligence)**: `docs/PHASE3_PLAN.md` (Intelligence & Automation — all 6 deliverables closed earlier)
+- **Phase 3 tracker (Gov + AI)**: shipped 2026-05-23 across W280-W286 (see "Phase 3 Gov + AI surface" section below)
 - **ADRs**: `docs/architecture/decisions/` (001-019); see ADR-019 for the W273-W278 MFA tier enforcement three-layer architecture
 - **Per-wave detail**: agent memory at `~/.claude/projects/c--Users-x-be-OneDrive-----------04-10-2025-66666/memory/` — `MEMORY.md` is the one-line index, each `project_wave*.md` is the deep detail.
+
+## Phase 3 Gov + AI surface (shipped 2026-05-23, 14 commits W280-W286)
+
+Six service scaffolds + bootstrap wirings + 2 follow-up crons. All mock-first; live mode requires per-service credentials + env flags.
+
+### Services & routes
+
+| Service                         | Adapter / model                                                                                                                   | Bootstrap                                 | Routes                                                               | Cron                                                          |
+| ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- | -------------------------------------------------------------------- | ------------------------------------------------------------- |
+| **DPIA** (W285)                 | `models/Dpia.js` + `services/dpia.service.js`                                                                                     | `startup/dpiaBootstrap.js`                | `/api/dpia` + `/api/v1/dpia` (sign requires MFA tier 2)              | —                                                             |
+| **Sehhaty / Tawakkalna** (W280) | `services/sehhatyAdapter.js` + `services/sehhaty.service.js`                                                                      | `startup/sehhatyBootstrap.js`             | `/api/sehhaty` (consent-gated PHI import)                            | —                                                             |
+| **Disability Authority** (W281) | `services/disabilityAuthorityAdapter.js`                                                                                          | `startup/disabilityAuthorityBootstrap.js` | `/api/disability-authority/adapter`                                  | **W286**: monthly report submission day 5 @ 04:00 Asia/Riyadh |
+| **Mudad WPS** (W282)            | `services/mudad-wps-orchestrator.service.js` (over existing `mudad.service.js` + `mudadAdapter`)                                  | `startup/mudadWpsBootstrap.js`            | (existing `/api/mudad` surface)                                      | **W282b**: monthly upload day 25 @ 02:30 Asia/Riyadh          |
+| **RAG** (W283)                  | `models/ClinicalKnowledgeChunk.js` + `models/RAGRetrieval.js` + `services/ai/embeddingProvider.js` + `services/ai/rag.service.js` | `startup/ragBootstrap.js`                 | `/api/rag` (ingest tier 2, retrieve tier 1, chunks list, deactivate) | —                                                             |
+| **Speech analysis** (W284)      | `models/SpeechSessionRecording.js` + `services/ai/speech-analysis.service.js` + `services/ai/speech-retention-sweeper.service.js` | `startup/speechBootstrap.js`              | `/api/speech` (register tier 2, analyze tier 1, read tier 1)         | **W284c**: retention sweep daily @ 03:00 Asia/Riyadh          |
+
+### Cross-cutting: **Consent extended (W280)**
+
+`Consent.CONSENT_TYPES` added 3 new types: `health_summary_import` (W280), `voice_recording` (W284), `motion_recording` (Phase 4 motion analysis). Existing 5 types preserved.
+
+### Cross-cutting: **RAG wired into Parent Chatbot (W283c)**
+
+New intent `policy.query` (17th intent) at `intelligence/parent-chatbot.registry.js`. When a parent asks a policy question, chatbot calls `ragRetriever.retrieve()` (via `app._ragService` late binding) and emits `{ANSWER_TEXT} + {CITATIONS}` template. On no-match/throw/not-wired → downgrade to UNKNOWN (no hallucination).
+
+### Production cutover checklist per service
+
+| Service              | What still needs external setup                                                                                                                                                                                                                                                                                                                                          |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| DPIA                 | Nothing — internal, ready today                                                                                                                                                                                                                                                                                                                                          |
+| Sehhaty              | `SEHHATY_BASE_URL` + `SEHHATY_CLIENT_ID` + `SEHHATY_CLIENT_SECRET` + `SEHHATY_CENTER_ID` envs (sandbox creds from Sehhaty)                                                                                                                                                                                                                                               |
+| Disability Authority | `DISABILITY_AUTHORITY_BASE_URL` + `_API_KEY` + `_CENTER_ID` envs. For W286 cron: `ENABLE_DA_PERIODIC_CRON=true` + `DA_REPORTING_BRANCH_IDS=b1,b2` + production payload builder (current stub is placeholder)                                                                                                                                                             |
+| Mudad WPS            | `MUDAD_MODE=live` + Mudad sandbox creds. For W282b cron: `ENABLE_MUDAD_CRON=true` + `MUDAD_BRANCH_IDS=b1,b2`. Verify `PayrollRun` model field names match orchestrator's expected shape (currently best-effort with multiple field-name candidates)                                                                                                                      |
+| RAG                  | `EMBEDDING_PROVIDER` env (recommend `cohere-embed-multilingual-v3` for Arabic) + provider API key. Up to ~10K chunks per branch the in-process cosine is fine; beyond that swap to MongoDB Atlas Vector Search. Admin ingestion UI deferred to Phase 4                                                                                                                   |
+| Speech               | (1) Front-end multer-s3 upload route with KMS encryption; backend currently accepts metadata only via `/api/speech/recordings/register`. (2) `SPEECH_ANALYSIS_PROVIDER` env (`openai-whisper-api` simplest). (3) For W284c sweeper cron: `ENABLE_SPEECH_RETENTION_CRON=true` + replace log-only S3 purger placeholder with `s3Client.send(new DeleteObjectCommand(...))` |
+
+### Pattern recap (for future similar work)
+
+- **Mock-first adapter**: deterministic mock keyed on input suffix (`'99'` → expired, `'88'` → not-found). Live mode placeholders throw `*_LIVE_NOT_CONFIGURED`.
+- **Service layer = consent + audit + MFA gate**; adapter = pure transport. The W278g lesson applied to W280 + W284.
+- **Factory pattern with `enforceMfa:true` option** (W275 service-layer defense); W276 drift guard auto-detects new construction sites in `app.js` + `startup/*.js`.
+- **Bootstrap-with-cron template**: env-gated (`ENABLE_X_CRON=true`), branch-scoped (`X_BRANCH_IDS=b1,b2`), per-iteration `try/catch`, `loadOptional` for `node-cron`, Asia/Riyadh timezone.
+- **Idempotency via `sha256(immutable inputs)`**: same input → same key, cron retries don't create phantom batches.
 
 ## Open known issues (as of 2026-05-23)
 

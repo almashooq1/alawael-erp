@@ -154,4 +154,137 @@ router.get('/beneficiary/:id/trend', requireMfaTier(1), async (req, res) => {
   }
 });
 
+// ── W291: TRIGGERED CRITICAL REVIEWS DASHBOARD ─────────────────────────
+// Tier 1 read. Returns CRITICAL PlanReviews opened by the W290 auto-
+// trigger over the last N days (default 7, max 90), joined with the
+// originating AiAlert + beneficiary identity. Scoped to actor branch.
+router.get('/triggered-reviews', requireMfaTier(1), async (req, res) => {
+  try {
+    const mongoose = require('mongoose');
+    const branchId = actorBranchOrQuery(req);
+    if (!branchId) return res.status(400).json({ success: false, code: 'BRANCH_REQUIRED' });
+
+    const PlanReview = (() => {
+      try {
+        return mongoose.model('PlanReview');
+      } catch {
+        return null;
+      }
+    })();
+    if (!PlanReview)
+      return res.status(503).json({ success: false, code: 'PLAN_REVIEW_MODEL_NOT_REGISTERED' });
+
+    const Beneficiary = (() => {
+      try {
+        return mongoose.model('Beneficiary');
+      } catch {
+        return null;
+      }
+    })();
+    const AiAlert = (() => {
+      try {
+        return mongoose.model('AiAlert');
+      } catch {
+        return null;
+      }
+    })();
+
+    const days = Math.min(Math.max(parseInt(req.query.days, 10) || 7, 1), 90);
+    const since = new Date(Date.now() - days * 86400000);
+    const limit = Math.min(parseInt(req.query.limit, 10) || 200, 1000);
+
+    const reviews = await PlanReview.find({
+      reviewType: 'CRITICAL',
+      createdAt: { $gte: since },
+    })
+      .sort({ createdAt: -1 })
+      .limit(limit)
+      .select(
+        '_id carePlan beneficiary reviewDate nextReviewDate summary createdAt acknowledgedAt acknowledgedBy'
+      )
+      .lean();
+
+    // Branch scope via beneficiary lookup (PlanReview has no branchId).
+    const benIds = [...new Set(reviews.map(r => String(r.beneficiary)))];
+    const bens = Beneficiary
+      ? await Beneficiary.find({ _id: { $in: benIds }, branchId })
+          .select('_id branchId firstName lastName fullName')
+          .lean()
+      : [];
+    const benMap = new Map(bens.map(b => [String(b._id), b]));
+    const inBranch = reviews.filter(r => benMap.has(String(r.beneficiary)));
+
+    // Nearest AiAlert per beneficiary (same-window join, ±5min around the review).
+    const alertsByBen = new Map();
+    if (AiAlert && inBranch.length) {
+      const alerts = await AiAlert.find({
+        target_type: 'beneficiary',
+        target_id: { $in: inBranch.map(r => r.beneficiary) },
+        alert_type: 'dropout_risk',
+        'data.code': { $in: ['RISK_TIER_ESCALATED', 'RISK_TIER_FIRST_CRITICAL'] },
+        createdAt: { $gte: since },
+      })
+        .select('_id target_id severity data createdAt')
+        .lean();
+      for (const a of alerts) {
+        const k = String(a.target_id);
+        if (!alertsByBen.has(k)) alertsByBen.set(k, []);
+        alertsByBen.get(k).push(a);
+      }
+    }
+
+    const items = inBranch.map(r => {
+      const ben = benMap.get(String(r.beneficiary)) || {};
+      const candidates = alertsByBen.get(String(r.beneficiary)) || [];
+      const reviewT = new Date(r.createdAt).getTime();
+      let nearest = null;
+      let nearestGap = Infinity;
+      for (const a of candidates) {
+        const gap = Math.abs(new Date(a.createdAt).getTime() - reviewT);
+        if (gap < nearestGap && gap < 5 * 60_000) {
+          nearest = a;
+          nearestGap = gap;
+        }
+      }
+      return {
+        planReviewId: r._id,
+        carePlanId: r.carePlan,
+        beneficiaryId: r.beneficiary,
+        beneficiaryName:
+          ben.fullName || `${ben.firstName || ''} ${ben.lastName || ''}`.trim() || null,
+        branchId: ben.branchId || null,
+        reviewDate: r.reviewDate,
+        nextReviewDate: r.nextReviewDate,
+        summary: r.summary,
+        createdAt: r.createdAt,
+        acknowledgedAt: r.acknowledgedAt || null,
+        acknowledgedBy: r.acknowledgedBy || null,
+        linkedAlert: nearest
+          ? {
+              alertId: nearest._id,
+              severity: nearest.severity,
+              code: nearest.data && nearest.data.code,
+              score: nearest.data && nearest.data.score,
+              tier: nearest.data && nearest.data.tier,
+              sweepRunId: (nearest.data && nearest.data.sweepRunId) || null,
+            }
+          : null,
+      };
+    });
+
+    return res.json({
+      success: true,
+      branchId,
+      windowDays: days,
+      total: items.length,
+      items,
+    });
+  } catch (err) {
+    logger.error('[risk-sweep] triggered-reviews error', { err: err && err.message });
+    return res
+      .status(500)
+      .json({ success: false, code: 'TRIGGERED_REVIEWS_FAILED', error: safeError(err) });
+  }
+});
+
 module.exports = router;

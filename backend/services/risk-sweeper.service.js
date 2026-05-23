@@ -208,6 +208,7 @@ class RiskSweeperService {
         description_en: profile.explanation,
         data: {
           code,
+          sweepRunId,
           score: profile.overallScore,
           tier: profile.overallTier,
           previousTier:

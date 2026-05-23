@@ -37,9 +37,57 @@ async function _appendAudit(req, action, payload, subjectId, branchId) {
     if (result && result.ok === false) {
       logger.warn(`[incident-audit-chain] append ${action} returned ${result.reason}`);
     }
+    // W278c — real-time dashboard publisher. After the chain write
+    // succeeds, broadcast a system alert via the existing socket.io
+    // emitter (server.js + utils/socketEmitter.js). Severity tier
+    // determines client-side rendering: HIGH_PRIORITY_ACTIONS surface
+    // as red banners requiring acknowledgement; everything else as
+    // a quiet feed entry.
+    //
+    // Fire-and-forget: socket failure (emitter not yet initialized,
+    // no listeners) does NOT propagate — primary API + audit chain
+    // are both already done.
+    _publishToSocket(action, { actorId, actorRole, subjectId, branchId, payload });
   } catch (err) {
     // Never propagate — audit failure should not 500 the request.
     logger.warn(`[incident-audit-chain] append ${action} threw: ${err && err.message}`);
+  }
+}
+
+// W278c — channel publisher. Hooked from _appendAudit above. The
+// socket.io emitter is loaded lazily (after server.js initializes
+// it; this controller is required earlier in startup).
+const HIGH_PRIORITY_ACTIONS = new Set([
+  'incident-escalated', // severity bumped, executive review
+  'incident-resolved', // anchors CAPA chain
+  'incident-closed', // locks the record
+  'incident-archived', // cold-storage move
+  'incident-deleted', // irreversible removal
+]);
+function _publishToSocket(action, ctx) {
+  try {
+    // Lazy require to dodge circular-import + late-bind to emitter.
+    const socketEmitter = require('../utils/socketEmitter');
+    if (typeof socketEmitter.emitSystemAlert !== 'function') return;
+    const severity = HIGH_PRIORITY_ACTIONS.has(action) ? 'warning' : 'info';
+    socketEmitter.emitSystemAlert({
+      title: `Incident lifecycle: ${action}`,
+      message: `Subject ${ctx.subjectId || '(unknown)'} — ${action}`,
+      severity,
+      metadata: {
+        kind: 'incident-audit',
+        action,
+        actorId: ctx.actorId,
+        actorRole: ctx.actorRole,
+        subjectId: ctx.subjectId,
+        branchId: ctx.branchId,
+        payload: ctx.payload,
+        emittedAt: new Date().toISOString(),
+      },
+    });
+  } catch (err) {
+    // Emitter not wired yet OR wrong env — silent. Audit chain is the
+    // durable record; this socket emit is just a live convenience.
   }
 }
 

@@ -1112,11 +1112,78 @@ router.post('/invoices/:id/pay', authenticate, async (req, res) => {
         .json({ error: 'NothingDue', message: 'invoice has no outstanding balance' });
     }
 
-    // Demo-mode placeholder. Frontend displays "Demo — gateway not wired" alert.
-    // To activate: integrate HyperPay / PayTabs / STC Pay here.
-    const paymentUrl = `#demo-payment-gateway?invoice=${encodeURIComponent(invoice.invoiceNumber)}&amount=${due}&currency=SAR`;
-
-    return res.json({ paymentUrl });
+    // W278b — wire the live paymentGatewayService instead of the demo
+    // placeholder. The service already supports 8 providers (Moyasar,
+    // HyperPay, PayTabs, Tap, SADAD, Tabby, Tamara, STC Pay); we
+    // default to HyperPay because it's the most widely-deployed Saudi
+    // gateway and supports Mada (Saudi local debit) + Visa/MasterCard
+    // + Apple Pay through a single integration.
+    //
+    // Provider selection priority (most flexible to most constrained):
+    //   1. ?gateway=X query param (caller override; for testing alts)
+    //   2. PAYMENT_GATEWAY_DEFAULT env var (org-level config)
+    //   3. 'hyperpay' (hardcoded fallback)
+    //
+    // Production activation needs ONE of these env-var groups set:
+    //   HYPERPAY_ACCESS_TOKEN + HYPERPAY_ENTITY_MADA + HYPERPAY_ENTITY_VISA
+    //   + HYPERPAY_URL + HYPERPAY_CHECKOUT_URL
+    //   (or MOYASAR_SECRET_KEY, PAYTABS_PROFILE_ID+PAYTABS_SERVER_KEY,
+    //    TAP_SECRET_KEY for the other live providers).
+    //
+    // Without those, the service's axios call returns a clean error +
+    // 500 — frontend should show a "payment temporarily unavailable"
+    // message instead of the prior `#demo-payment-gateway` link.
+    try {
+      const paymentGatewayService = require('../services/paymentGateway.service');
+      const gateway =
+        (typeof req.query.gateway === 'string' && req.query.gateway) ||
+        process.env.PAYMENT_GATEWAY_DEFAULT ||
+        'hyperpay';
+      const paymentMethod = (typeof req.query.method === 'string' && req.query.method) || 'mada';
+      const guardian = await Guardian().findOne({ userId }).select('_id').lean();
+      const tx = await paymentGatewayService.initiatePayment({
+        branchId: invoice.branchId || invoice.branch || null,
+        gateway,
+        paymentMethod,
+        amount: due,
+        beneficiaryId: invoice.beneficiary,
+        guardianId: guardian ? guardian._id : null,
+        description: `سداد فاتورة ${invoice.invoiceNumber}`,
+        metadata: {
+          invoiceId: String(invoice._id),
+          invoiceNumber: invoice.invoiceNumber,
+          source: 'parent-portal-v1',
+        },
+      });
+      // Service returns flat object:
+      //   { transactionId, transactionNumber, status, checkoutUrl,
+      //     threeDSecureUrl, sadadBillNumber, amount, vatAmount }
+      const paymentUrl = tx && (tx.checkoutUrl || tx.threeDSecureUrl);
+      if (!paymentUrl) {
+        return res.status(502).json({
+          error: 'GatewayMissingCheckoutUrl',
+          message: 'payment gateway did not return a checkout URL',
+          gateway,
+          transactionId: tx && String(tx.transactionId),
+        });
+      }
+      return res.json({
+        paymentUrl,
+        gateway,
+        transactionId: tx && String(tx.transactionId),
+        transactionNumber: tx && tx.transactionNumber,
+        amount: tx && tx.amount,
+        vatAmount: tx && tx.vatAmount,
+      });
+    } catch (gwErr) {
+      // Gateway failures should not 500 — return 502 so the offline
+      // queue treats it as transient (retry later) instead of
+      // permanent (drop the request).
+      return res.status(502).json({
+        error: 'GatewayInitiateFailed',
+        message: gwErr instanceof Error ? gwErr.message : 'payment gateway error',
+      });
+    }
   } catch (err) {
     return res
       .status(500)

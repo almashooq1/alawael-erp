@@ -53,6 +53,7 @@ function wireRiskSweeper(app, deps = {}) {
   // ── Wave 290: optional plan-review trigger (CRITICAL review on escalation) ──
   let planReviewService = null;
   let onAlertRaised = null;
+  const hooks = [];
   try {
     const CarePlan = (() => {
       try {
@@ -75,7 +76,7 @@ function wireRiskSweeper(app, deps = {}) {
         PlanReviewModel: PlanReview,
         logger,
       });
-      onAlertRaised = ctx => planReviewService.triggerOnEscalation(ctx);
+      hooks.push(ctx => planReviewService.triggerOnEscalation(ctx));
       app._riskPlanReviewService = planReviewService;
       logger.info('[startup] risk-plan-review service wired (W290)');
     } else {
@@ -85,6 +86,38 @@ function wireRiskSweeper(app, deps = {}) {
     }
   } catch (err) {
     logger.warn('[startup] risk-plan-review wiring failed', { err: err && err.message });
+  }
+
+  // ── Wave 293: optional family-notification on first-critical ──
+  try {
+    if (AiAlert) {
+      const { RiskFamilyNotifyService } = require('../services/risk-family-notify.service');
+      const familyNotifier = new RiskFamilyNotifyService({
+        AiAlertModel: AiAlert,
+        logger,
+      });
+      hooks.push(ctx => familyNotifier.notifyIfFirstCritical(ctx));
+      app._riskFamilyNotifier = familyNotifier;
+      logger.info('[startup] risk-family-notify service wired (W293)');
+    } else {
+      logger.warn('[startup] risk-family-notify: AiAlert missing — notifier NOT wired');
+    }
+  } catch (err) {
+    logger.warn('[startup] risk-family-notify wiring failed', { err: err && err.message });
+  }
+
+  if (hooks.length) {
+    onAlertRaised = async ctx => {
+      for (const fn of hooks) {
+        try {
+          await fn(ctx);
+        } catch (err) {
+          logger.warn('[risk-sweeper] post-alert hook failed', {
+            err: err && err.message,
+          });
+        }
+      }
+    };
   }
 
   const service = new RiskSweeperService({

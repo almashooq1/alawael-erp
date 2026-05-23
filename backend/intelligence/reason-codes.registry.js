@@ -87,6 +87,9 @@ const REASON_CODES = Object.freeze({
   PLAN_REVIEW_ACKNOWLEDGED: 'PLAN_REVIEW_ACKNOWLEDGED',
   PLAN_REVIEW_ACK_OVERDUE_24H: 'PLAN_REVIEW_ACK_OVERDUE_24H',
   PLAN_REVIEW_ACK_OVERDUE_48H: 'PLAN_REVIEW_ACK_OVERDUE_48H',
+
+  // Wave 293 — Family notification (operational signal, privacy-preserving)
+  FAMILY_NOTIFICATION_DUE: 'FAMILY_NOTIFICATION_DUE',
 });
 
 const REASON_LABELS_AR = Object.freeze({
@@ -128,6 +131,7 @@ const REASON_LABELS_AR = Object.freeze({
   PLAN_REVIEW_ACKNOWLEDGED: 'تم إقرار المراجعة الطارئة بواسطة الأخصائي',
   PLAN_REVIEW_ACK_OVERDUE_24H: 'مراجعة خطة طارئة لم يتم إقرارها خلال 24 ساعة',
   PLAN_REVIEW_ACK_OVERDUE_48H: 'مراجعة خطة طارئة لم يتم إقرارها خلال 48 ساعة — تصعيد عاجل',
+  FAMILY_NOTIFICATION_DUE: 'توصية بالتواصل مع أسرة المستفيد لمتابعة الخطة العلاجية (صياغة محايدة)',
 });
 
 // Legacy aliases we've observed in the codebase. The lib normalises any

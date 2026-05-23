@@ -133,6 +133,25 @@ const PATTERNS = [
     ],
   },
   {
+    id: 'risk_metrics_literal_counter_name',
+    why: 'Wave 311 — risk-metrics counter names must come from NAMES.* in intelligence/risk-metrics.registry.js. String literals copy-pasted into services drift the dashboard contract and bypass the registry alias map.',
+    // Match string literals for the 6 canonical counter names. Callers must
+    // use `registry.NAMES.GOV_CONSENT` etc, not bare strings.
+    regex:
+      /['"](?:audit\.append\.attempted|audit\.append\.appended|audit\.append\.failed|audit\.append\.verified|backlink\.attempted|gov\.adapter\.consent|gov\.report\.submission)['"]/,
+    allowedFiles: [
+      'intelligence/risk-metrics.registry.js', // canonical: defines the NAMES constants
+    ],
+  },
+  {
+    id: 'risk_metrics_fork_snapshot',
+    why: 'Wave 311 — only intelligence/risk-metrics.registry.js may declare snapshotGrouped() or _key(). A parallel implementation forks the label-sort contract that the W302 Prometheus exporter depends on.',
+    regex: /(function\s+snapshotGrouped\s*\(|const\s+snapshotGrouped\s*=)/,
+    allowedFiles: [
+      'intelligence/risk-metrics.registry.js', // canonical
+    ],
+  },
+  {
     id: 'new_hash_chain_compute',
     why: 'Hash-chain compute helpers belong in intelligence/hash-chain.lib (Wave 88). External cert chains under services/blockchain are out of scope.',
     // Match `function computeHash(` or `const computeHash =` as a declaration

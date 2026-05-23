@@ -225,3 +225,4 @@ __tests__/scheduler-registry.test.js
 __tests__/ops-schedulers-registry-coverage.test.js
 __tests__/ops-schedulers-health-endpoint.test.js
 __tests__/scheduler-snapshots-persistence.test.js
+__tests__/scheduler-snapshots-bootstrap-order.test.js

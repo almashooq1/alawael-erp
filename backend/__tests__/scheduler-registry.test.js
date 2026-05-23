@@ -79,3 +79,49 @@ describe('scheduler-registry (W315)', () => {
     expect(registry.get('missing')).toBeNull();
   });
 });
+
+describe('scheduler-registry.health (W319)', () => {
+  beforeEach(() => registry._reset());
+
+  it('returns never-run for null/unregistered', () => {
+    expect(registry.health(null)).toBe('never-run');
+    expect(registry.health(registry.register('x'))).toBe('never-run');
+  });
+
+  it('returns failed when lastStatus is failed', () => {
+    registry.register('x');
+    registry.recordRun('x', { ok: false, error: new Error('boom') });
+    expect(registry.health(registry.get('x'))).toBe('failed');
+  });
+
+  it('returns ok when last successful run is within 2× intervalMs', () => {
+    const e = registry.register('x', { meta: { intervalMs: 60_000 } });
+    registry.recordRun('x', { ok: true });
+    const now = Date.parse(e.lastRunAt) + 90_000; // 1.5× interval
+    expect(registry.health(registry.get('x'), now)).toBe('ok');
+  });
+
+  it('returns stale when last successful run is older than 2× intervalMs', () => {
+    const e = registry.register('x', { meta: { intervalMs: 60_000 } });
+    registry.recordRun('x', { ok: true });
+    const now = Date.parse(e.lastRunAt) + 130_000; // > 2× interval
+    expect(registry.health(registry.get('x'), now)).toBe('stale');
+  });
+
+  it('infers cadence from known cron expressions in meta.schedule', () => {
+    registry.register('daily', { meta: { schedule: '30 3 * * *' } }); // daily
+    registry.recordRun('daily', { ok: true });
+    const lastRun = Date.parse(registry.get('daily').lastRunAt);
+    // 1 day later → still ok (within 2× daily cadence)
+    expect(registry.health(registry.get('daily'), lastRun + 24 * 3600_000)).toBe('ok');
+    // 3 days later → stale
+    expect(registry.health(registry.get('daily'), lastRun + 3 * 24 * 3600_000)).toBe('stale');
+  });
+
+  it('returns ok (not stale) when cadence is undetectable', () => {
+    const e = registry.register('x'); // no meta
+    registry.recordRun('x', { ok: true });
+    const now = Date.parse(e.lastRunAt) + 100 * 24 * 3600_000;
+    expect(registry.health(registry.get('x'), now)).toBe('ok');
+  });
+});

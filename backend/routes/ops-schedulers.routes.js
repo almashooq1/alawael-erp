@@ -32,13 +32,18 @@ function createOpsSchedulersRouter() {
     // that haven't opted in (haven't called schedulerRegistry.register) simply
     // get `liveStatus: null` and the UI degrades gracefully.
     let liveByKey = {};
+    // W319 — also surface a derived health verdict per entry so the UI can
+    // render a single-glance traffic light without re-deriving thresholds.
+    let healthByKey = {};
     try {
       const schedulerRegistry = require('../intelligence/scheduler-registry');
       schedulerRegistry.getAll().forEach(entry => {
         liveByKey[entry.key] = entry;
+        healthByKey[entry.key] = schedulerRegistry.health(entry);
       });
     } catch {
       liveByKey = {};
+      healthByKey = {};
     }
 
     const items = [
@@ -129,6 +134,7 @@ function createOpsSchedulersRouter() {
               lastDurationMs: liveByKey[i.key].lastDurationMs,
               runs: liveByKey[i.key].runs,
               failures: liveByKey[i.key].failures,
+              health: healthByKey[i.key] || 'never-run',
             }
           : null,
       })),

@@ -100,6 +100,51 @@ function getAll() {
   return Array.from(_registry.values()).map(e => ({ ...e }));
 }
 
+/**
+ * W319 — derive a synthetic health verdict for a registry entry.
+ *
+ * Returns one of:
+ *   'never-run'  — registered but recordRun() has not fired yet
+ *   'failed'     — last recordRun was ok:false
+ *   'stale'      — last successful run is older than 2× the expected cadence
+ *                  (cadence is inferred from `meta.intervalMs` or `meta.schedule`
+ *                   if it's a known cron pattern; otherwise undetectable → 'ok')
+ *   'ok'         — last run succeeded and is within tolerance
+ *
+ * @param {object} entry  Entry as returned by get()/getAll()
+ * @param {number} [nowMs] Override clock for tests
+ * @returns {'never-run'|'failed'|'stale'|'ok'}
+ */
+function health(entry, nowMs = Date.now()) {
+  if (!entry) return 'never-run';
+  if (entry.lastStatus == null || !entry.lastRunAt) return 'never-run';
+  if (entry.lastStatus === 'failed') return 'failed';
+  // ok path — check staleness against expected cadence
+  const cadenceMs = _inferCadenceMs(entry.meta);
+  if (!cadenceMs) return 'ok'; // unknown cadence, can't judge stale
+  const ageMs = nowMs - Date.parse(entry.lastRunAt);
+  return ageMs > cadenceMs * 2 ? 'stale' : 'ok';
+}
+
+// Known cron expressions used by our bootstraps → next-fire-interval estimate.
+// Only the patterns we actually ship matter; default = unknown (returns null).
+const _CRON_CADENCE_MS = {
+  '30 3 * * *': 24 * 60 * 60 * 1000, // audit-chain-archiver
+  '0 3 * * *': 24 * 60 * 60 * 1000, // speech-retention-sweeper
+  '0 */6 * * *': 6 * 60 * 60 * 1000, // risk-sweeper (every 6h)
+  '30 2 25 * *': 30 * 24 * 60 * 60 * 1000, // mudad monthly
+  '0 4 5 * *': 30 * 24 * 60 * 60 * 1000, // disability authority monthly
+};
+
+function _inferCadenceMs(meta) {
+  if (!meta || typeof meta !== 'object') return null;
+  if (typeof meta.intervalMs === 'number' && meta.intervalMs > 0) return meta.intervalMs;
+  if (typeof meta.schedule === 'string' && _CRON_CADENCE_MS[meta.schedule]) {
+    return _CRON_CADENCE_MS[meta.schedule];
+  }
+  return null;
+}
+
 /** Test helper — never call in production code paths. */
 function _reset() {
   _registry.clear();
@@ -110,5 +155,6 @@ module.exports = {
   recordRun,
   get,
   getAll,
+  health,
   _reset,
 };

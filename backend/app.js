@@ -1992,6 +1992,12 @@ require('./startup/dpiaBootstrap').wireDpia(app, { logger });
 // Live mode requires SEHHATY_{BASE_URL,CLIENT_ID,CLIENT_SECRET,CENTER_ID} env.
 require('./startup/sehhatyBootstrap').wireSehhaty(app, { logger });
 
+// ─── Disability Authority Adapter — Wave 281b ────────────────────────────────
+// Mock-first adapter for verify-card / pull-referrals / submit-report. Distinct
+// from disabilityAuthority.routes.js (internal periodic-report service).
+// Live mode requires DISABILITY_AUTHORITY_{BASE_URL,API_KEY,CENTER_ID} env.
+require('./startup/disabilityAuthorityBootstrap').wireDisabilityAuthority(app, { logger });
+
 // ─── Hikvision Workforce Surveillance & Attendance — Wave 96-114 ─────────────
 // Extracted to startup/hikvisionBootstrap.js (W277 / Pass 1 of app.js refactor).
 // Identical behaviour: same models, same enforceMfa flags (W275 series), same

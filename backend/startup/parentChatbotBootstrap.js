@@ -164,10 +164,17 @@ function wireParentChatbot(app, deps = {}) {
         logger.info('[ParentChatbot] LLM classifier disabled (ANTHROPIC_API_KEY not set)');
       }
 
+      // W283c — wire ragService as ragRetriever for POLICY_QUERY intent.
+      // Late binding: ragBootstrap (W283b) runs earlier in startup and attaches
+      // app._ragService. If it's missing here (graceful degradation), the
+      // chatbot downgrades POLICY_QUERY → UNKNOWN at request time.
+      const ragRetriever = app._ragService || null;
+
       const chatbotService = createParentChatbotService({
         sessionModel: ParentChatbotSession,
         contextService: pcContextService,
         llmClassifier: pcLlmClassifier,
+        ragRetriever,
         logger,
       });
       const { authenticate: pcAuthMw } = require('../middleware/auth');

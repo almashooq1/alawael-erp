@@ -45,6 +45,7 @@ const INTENT = Object.freeze({
   DOCUMENT_REQUEST: 'document.request',
   TRANSPORT_INFO: 'transport.info',
   ESCALATE_HUMAN: 'escalate.human',
+  POLICY_QUERY: 'policy.query', // W283c — RAG-backed answers from center policies + clinical guidelines
   UNKNOWN: 'unknown',
 });
 const INTENTS = Object.freeze(Object.values(INTENT));
@@ -154,6 +155,41 @@ const INTENT_KEYWORDS = Object.freeze({
     ar: Object.freeze(['أريد التحدث مع شخص', 'موظف', 'إنسان', 'تكلم مع موظف', 'مساعدة بشرية']),
     en: Object.freeze(['talk to human', 'human agent', 'real person', 'speak to staff']),
   }),
+  // W283c — RAG-backed policy questions: matches "policy", "procedure",
+  // "rule", "regulation", and Arabic equivalents. The chatbot will pass
+  // the raw message to ragRetriever.retrieve() and surface the top-K
+  // cited chunks via {ANSWER_TEXT} + {CITATIONS} tokens.
+  [INTENT.POLICY_QUERY]: Object.freeze({
+    ar: Object.freeze([
+      'سياسة',
+      'سياسات',
+      'شروط',
+      'شرط',
+      'إجراء',
+      'إجراءات',
+      'قانون',
+      'لوائح',
+      'لائحة',
+      'دليل',
+      'كيف يتم',
+      'ما هي قواعد',
+    ]),
+    en: Object.freeze([
+      'policy',
+      'policies',
+      'procedure',
+      'procedures',
+      'rule',
+      'rules',
+      'regulation',
+      'guideline',
+      'guidelines',
+      'standard',
+      'how do you',
+      'what are the',
+      'sop',
+    ]),
+  }),
 });
 
 // Confidence thresholds for the rule-based classifier.
@@ -197,6 +233,13 @@ const RESPONSE_TEMPLATES = Object.freeze({
     'خدمة النقل متوفرة حسب توافر الباصات في فرعك. للاستفسار عن المسارات والمواعيد، يرجى الاتصال بالاستقبال.',
   [INTENT.ESCALATE_HUMAN]:
     'سأقوم بتحويلك إلى أحد موظفي الاستقبال. سيتواصل معك أحدهم خلال {ETA_MINUTES} دقيقة.',
+  // W283c — RAG-driven. {ANSWER_TEXT} is the synthesized response (top
+  // chunks concatenated, NOT an LLM completion — we don't trust
+  // generation here); {CITATIONS} is a human-readable list of source
+  // doc titles. If retrieval returns 0 chunks above threshold, the
+  // service substitutes the UNKNOWN template so the user is not lied to.
+  [INTENT.POLICY_QUERY]:
+    'بناءً على سياسات المركز ووثائقه:\n\n{ANSWER_TEXT}\n\n📚 المصدر: {CITATIONS}',
   [INTENT.UNKNOWN]:
     'عذرًا، لم أفهم طلبك. هل يمكنك إعادة الصياغة؟ أو اكتب "موظف" للتحدث مع الاستقبال.',
 });

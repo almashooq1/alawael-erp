@@ -36,6 +36,7 @@ function createParentChatbotService({
   sessionModel = null,
   contextService = null, // Wave 122: optional context resolver
   llmClassifier = null, // Wave 123: optional LLM classifier
+  ragRetriever = null, // W283c: optional RAG retriever for POLICY_QUERY intent
   logger = console,
   now = () => new Date(),
 } = {}) {
@@ -246,6 +247,48 @@ function createParentChatbotService({
       }
     } else if (resolvedTokens) {
       contextStatus = 'caller-supplied';
+    }
+
+    // W283c — POLICY_QUERY intent: call ragRetriever and merge ANSWER_TEXT
+    // + CITATIONS tokens. If retrieval returns 0 chunks above threshold,
+    // downgrade to UNKNOWN so the user is not lied to with a synthesized
+    // answer based on irrelevant chunks.
+    if (intentToRespond === reg.INTENT.POLICY_QUERY) {
+      if (ragRetriever && typeof ragRetriever.retrieve === 'function') {
+        try {
+          const ragResult = await ragRetriever.retrieve(message, {
+            topK: 3,
+            similarityThreshold: 0.6,
+            branchId,
+            queryLang: 'ar',
+          });
+          if (ragResult && ragResult.chunks && ragResult.chunks.length > 0) {
+            const answerText = ragResult.chunks.map(c => c.chunkText).join('\n\n---\n\n');
+            const citations = [...new Set(ragResult.chunks.map(c => c.sourceDocTitle))].join(', ');
+            resolvedTokens = {
+              ...(resolvedTokens || {}),
+              ANSWER_TEXT: answerText,
+              CITATIONS: citations,
+              RAG_RETRIEVAL_ID: ragResult.retrievalId ? String(ragResult.retrievalId) : null,
+            };
+            contextStatus =
+              contextStatus === 'unresolved' ? 'rag-resolved' : contextStatus + '+rag';
+          } else {
+            // No relevant chunks → downgrade to UNKNOWN
+            intentToRespond = reg.INTENT.UNKNOWN;
+            contextStatus = 'rag-no-match';
+          }
+        } catch (err) {
+          logger.warn(`[parent-chatbot] ragRetriever threw: ${err.message}`);
+          // Downgrade to UNKNOWN so we don't emit a template with unfilled tokens
+          intentToRespond = reg.INTENT.UNKNOWN;
+          contextStatus = 'rag-threw';
+        }
+      } else {
+        // RAG not wired → cannot answer policy queries → fall through to UNKNOWN
+        intentToRespond = reg.INTENT.UNKNOWN;
+        contextStatus = 'rag-not-wired';
+      }
     }
 
     const gen = generateResponse(intentToRespond, resolvedTokens);

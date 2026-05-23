@@ -25,6 +25,7 @@ const router = express.Router();
 const coreSvc = require('../services/beneficiaryCore.service');
 const logger = require('../utils/logger');
 const { safeError } = require('../utils/safeError');
+const { validateBody } = require('../intelligence/canonical');
 
 const wrap = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
@@ -76,6 +77,12 @@ router.get(
 router.post(
   '/',
   auth,
+  // Wave 285 — Canonical contract validator in PREVIEW mode.
+  // Logs canonical-shape violations without rejecting in-flight clients.
+  // Once telemetry shows clean traffic + Beneficiary Mongoose schema reaches
+  // parity, remove `preview: true` here AND add 'Beneficiary' to
+  // ENFORCED_ENTITIES in __tests__/canonical-drift.test.js to flip strict.
+  validateBody('Beneficiary', { preview: true, logger }),
   wrap(async (req, res) => {
     const actorId = req.user?._id || req.user?.id;
     const beneficiary = await coreSvc.create(req.body, actorId);

@@ -60,6 +60,7 @@ const REASON_CODES = Object.freeze({
   JUSTIFICATION_REQUIRED: 'JUSTIFICATION_REQUIRED',
   COSIGNERS_REQUIRED: 'COSIGNERS_REQUIRED',
   MODEL_VALIDATION_FAILED: 'MODEL_VALIDATION_FAILED',
+  CANONICAL_VALIDATION_FAILED: 'CANONICAL_VALIDATION_FAILED',
 
   // Lookup / resource
   NOT_FOUND: 'NOT_FOUND',
@@ -90,6 +91,7 @@ const REASON_LABELS_AR = Object.freeze({
   JUSTIFICATION_REQUIRED: 'يلزم تبرير للقرار',
   COSIGNERS_REQUIRED: 'يلزم موقّعون مشاركون',
   MODEL_VALIDATION_FAILED: 'فشل تحقق النموذج',
+  CANONICAL_VALIDATION_FAILED: 'فشل مطابقة العقد القانوني للنموذج الموحد',
 
   NOT_FOUND: 'العنصر المطلوب غير موجود',
 

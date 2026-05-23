@@ -60,6 +60,16 @@ function wireRiskSweeper(app, deps = {}) {
   app._riskSweeperService = service;
   logger.info('[startup] risk-sweeper service wired (W288)');
 
+  // ── Wave 289: HTTP route surface (manual trigger + dashboard query) ──
+  try {
+    const riskSweepRouter = require('../routes/risk-sweep.routes');
+    app.use('/api/risk-sweep', riskSweepRouter);
+    app.use('/api/v1/risk-sweep', riskSweepRouter);
+    logger.info('[startup] risk-sweep routes mounted at /api/risk-sweep (W289)');
+  } catch (err) {
+    logger.warn('[startup] risk-sweep routes NOT mounted', { err: err && err.message });
+  }
+
   const cronEnabled = String(process.env.ENABLE_RISK_SWEEP_CRON || '').toLowerCase() === 'true';
   if (!cronEnabled) {
     logger.info('[startup] risk-sweeper cron DISABLED (set ENABLE_RISK_SWEEP_CRON=true to enable)');

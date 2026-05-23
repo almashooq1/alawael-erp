@@ -439,14 +439,6 @@ describe('reportBuilder.service service', () => {
     expect(r).toBeDefined();
   });
 
-  test('filter is callable', async () => {
-    if (typeof svc.filter !== 'function') return;
-    let r;
-    try {
-      r = await svc.filter({});
-    } catch (e) {
-      r = e;
-    }
-    expect(r).toBeDefined();
-  });
+  // [W278j 2026-05-23] deleted dead smoke for `svc.filter` — auto-gen
+  // overreach (Array.prototype method, never on the service).
 });

@@ -39,16 +39,8 @@ describe('policyEngine.service service', () => {
     expect(r).toBeDefined();
   });
 
-  test('forEach is callable', async () => {
-    if (typeof svc.forEach !== 'function') return;
-    let r;
-    try {
-      r = await svc.forEach({});
-    } catch (e) {
-      r = e;
-    }
-    expect(r).toBeDefined();
-  });
+  // [W278j 2026-05-23] deleted dead smoke for `svc.forEach` — auto-gen
+  // overreach (Array.prototype method, never on the service).
 
   test('deletePolicy is callable', async () => {
     if (typeof svc.deletePolicy !== 'function') return;

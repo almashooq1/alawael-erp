@@ -129,38 +129,11 @@ describe('paymentGateway.service service', () => {
     expect(typeof svc).toBe('object');
   });
 
-  test('generateTransactionNumber is callable', async () => {
-    if (typeof svc.generateTransactionNumber !== 'function') return;
-    let r;
-    try {
-      r = await svc.generateTransactionNumber({});
-    } catch (e) {
-      r = e;
-    }
-    expect(r).toBeDefined();
-  });
-
-  test('calculateVat is callable', async () => {
-    if (typeof svc.calculateVat !== 'function') return;
-    let r;
-    try {
-      r = await svc.calculateVat({});
-    } catch (e) {
-      r = e;
-    }
-    expect(r).toBeDefined();
-  });
-
-  test('generateZatcaInvoiceData is callable', async () => {
-    if (typeof svc.generateZatcaInvoiceData !== 'function') return;
-    let r;
-    try {
-      r = await svc.generateZatcaInvoiceData({});
-    } catch (e) {
-      r = e;
-    }
-    expect(r).toBeDefined();
-  });
+  // [W278j 2026-05-23] deleted 3 dead smokes (generateTransactionNumber,
+  // calculateVat, generateZatcaInvoiceData) — auto-gen overreach, these
+  // methods were never on the singleton. paymentGateway's real public
+  // surface is: initiatePayment, handleWebhook, processRefund,
+  // retryFailedPayments, getReconciliationReport, getStats, list.
 
   test('initiatePayment is callable', async () => {
     if (typeof svc.initiatePayment !== 'function') return;

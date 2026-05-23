@@ -285,16 +285,8 @@ describe('importExportPro.service service', () => {
     expect(r).toBeDefined();
   });
 
-  test('map is callable', async () => {
-    if (typeof svc.map !== 'function') return;
-    let r;
-    try {
-      r = await svc.map({});
-    } catch (e) {
-      r = e;
-    }
-    expect(r).toBeDefined();
-  });
+  // [W278j 2026-05-23] deleted dead smoke for `svc.map` — Array.prototype
+  // method, auto-gen overreach, was never on the service.
 
   test('createScheduledExport is callable', async () => {
     if (typeof svc.createScheduledExport !== 'function') return;
@@ -340,25 +332,7 @@ describe('importExportPro.service service', () => {
     expect(r).toBeDefined();
   });
 
-  test('cleanAndEnrichData is callable', async () => {
-    if (typeof svc.cleanAndEnrichData !== 'function') return;
-    let r;
-    try {
-      r = await svc.cleanAndEnrichData({});
-    } catch (e) {
-      r = e;
-    }
-    expect(r).toBeDefined();
-  });
-
-  test('generateDataQualityReport is callable', async () => {
-    if (typeof svc.generateDataQualityReport !== 'function') return;
-    let r;
-    try {
-      r = await svc.generateDataQualityReport({});
-    } catch (e) {
-      r = e;
-    }
-    expect(r).toBeDefined();
-  });
+  // [W278j 2026-05-23] deleted dead smokes for cleanAndEnrichData +
+  // generateDataQualityReport — extracted to services/importExport/
+  // data-quality.js in W278g. The W278g + W278h drift guards cover them.
 });

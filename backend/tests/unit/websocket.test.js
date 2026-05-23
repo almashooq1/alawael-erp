@@ -105,16 +105,8 @@ describe('websocket service', () => {
     expect(r).toBeDefined();
   });
 
-  test('emitters is callable', async () => {
-    if (typeof svc.emitters !== 'function') return;
-    let r;
-    try {
-      r = await svc.emitters({});
-    } catch (e) {
-      r = e;
-    }
-    expect(r).toBeDefined();
-  });
+  // [W278j 2026-05-23] deleted dead smoke for `svc.emitters` — auto-gen
+  // detected the property name but it's an object map, not a function.
 
   test('notifyNewNotification is callable', async () => {
     if (typeof svc.notifyNewNotification !== 'function') return;

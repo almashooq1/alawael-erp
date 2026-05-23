@@ -21,6 +21,26 @@
 const crypto = require('crypto');
 const mongoose = require('mongoose');
 
+// W312: lazy-require risk-metrics registry. Silent no-op if unavailable so the
+// service stays usable in environments where the registry hasn't been wired.
+let _riskMetrics = null;
+function _emitMetric(name, labels) {
+  try {
+    if (!_riskMetrics) _riskMetrics = require('../intelligence/risk-metrics.registry');
+    _riskMetrics.inc(name, labels);
+  } catch {
+    /* ignore */
+  }
+}
+const _CONSENT_ERR_TO_RESULT = Object.freeze({
+  SEHHATY_CONSENT_NOT_FOUND: 'missing',
+  SEHHATY_CONSENT_MISMATCH: 'mismatch',
+  SEHHATY_CONSENT_TYPE_INSUFFICIENT: 'type_insufficient',
+  SEHHATY_CONSENT_REVOKED: 'revoked',
+  SEHHATY_CONSENT_EXPIRED: 'expired',
+  SEHHATY_CONSENT_MODEL_UNAVAILABLE: 'unavailable',
+});
+
 function sehhatyServiceFactory({
   adapter = require('./sehhatyAdapter'),
   ConsentModel = null,
@@ -97,7 +117,17 @@ function sehhatyServiceFactory({
       }
     }
 
-    const consent = await checkConsent(beneficiaryId, consentRecordId);
+    const consent = await (async () => {
+      try {
+        const c = await checkConsent(beneficiaryId, consentRecordId);
+        _emitMetric('gov.adapter.consent', { provider: 'sehhaty', result: 'granted' });
+        return c;
+      } catch (err) {
+        const result = _CONSENT_ERR_TO_RESULT[err && err.code] || 'failed';
+        _emitMetric('gov.adapter.consent', { provider: 'sehhaty', result });
+        throw err;
+      }
+    })();
 
     let adapterResult;
     try {

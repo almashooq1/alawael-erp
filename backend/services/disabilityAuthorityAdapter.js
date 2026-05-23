@@ -153,7 +153,27 @@ async function pullReferralInbox(payload) {
 }
 
 async function submitPeriodicReport(payload) {
-  return isLive() ? liveSubmitReport(payload) : mockSubmitReport(payload);
+  // W312: emit gov.report.submission counter regardless of mode (mock/live).
+  let _rm;
+  try {
+    _rm = require('../intelligence/risk-metrics.registry');
+  } catch {
+    _rm = null;
+  }
+  try {
+    const result = await (isLive() ? liveSubmitReport(payload) : mockSubmitReport(payload));
+    if (_rm) _rm.inc(_rm.NAMES.GOV_REPORT_SUBMISSION, { provider: 'disability_authority', result: 'ok' });
+    return result;
+  } catch (err) {
+    if (_rm) {
+      _rm.inc(_rm.NAMES.GOV_REPORT_SUBMISSION, {
+        provider: 'disability_authority',
+        result: 'failed',
+        reason: (err && err.code) || 'UNKNOWN',
+      });
+    }
+    throw err;
+  }
 }
 
 function getConfig() {

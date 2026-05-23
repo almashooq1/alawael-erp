@@ -28,6 +28,19 @@
 
 const crypto = require('crypto');
 
+// W312: lazy-require risk-metrics for gov.report.submission counters.
+let _riskMetrics = null;
+function _emitSubmission(result, reason) {
+  try {
+    if (!_riskMetrics) _riskMetrics = require('../intelligence/risk-metrics.registry');
+    const labels = { provider: 'mudad', result };
+    if (reason) labels.reason = reason;
+    _riskMetrics.inc(_riskMetrics.NAMES.GOV_REPORT_SUBMISSION, labels);
+  } catch {
+    /* ignore */
+  }
+}
+
 function mudadWpsOrchestratorFactory({
   mudadService,
   payrollLoader = null, // async (branchId, period) → [{ employee, netSalary, iban, ... }]
@@ -94,6 +107,7 @@ function mudadWpsOrchestratorFactory({
     const payrollRecords = await payrollLoader(branchId, period);
     if (!Array.isArray(payrollRecords) || payrollRecords.length === 0) {
       await audit('execute_no_payroll', { branchId, period, idempotencyKey });
+      _emitSubmission('skipped', 'NO_PAYROLL');
       return {
         batchId: null,
         status: 'no_payroll',
@@ -117,6 +131,7 @@ function mudadWpsOrchestratorFactory({
       // should return it. We surface the duplicate via a distinct path:
       if (err.code === 'MUDAD_DUPLICATE_BATCH') {
         await audit('execute_duplicate_batch', { branchId, period, idempotencyKey });
+        _emitSubmission('skipped', 'DUPLICATE_BATCH');
         return {
           batchId: err.existingBatchId,
           status: 'duplicate_batch',
@@ -140,6 +155,7 @@ function mudadWpsOrchestratorFactory({
         idempotencyKey,
         errorCount: validation.errors.length,
       });
+      _emitSubmission('failed', 'VALIDATION');
       return {
         batchId: String(batch._id),
         status: 'validation_failed',
@@ -165,6 +181,7 @@ function mudadWpsOrchestratorFactory({
         idempotencyKey,
         errorCode: err.code,
       });
+      _emitSubmission('failed', err.code || 'UPLOAD');
       throw err;
     }
 
@@ -204,6 +221,7 @@ function mudadWpsOrchestratorFactory({
       perEmployeeCount: payrollRecords.length,
       failureCount: failures.length,
     });
+    _emitSubmission(failures.length > 0 ? 'partial' : 'ok');
 
     return {
       batchId: String(batch._id),

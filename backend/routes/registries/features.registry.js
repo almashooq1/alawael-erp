@@ -41,6 +41,7 @@ module.exports = function registerFeatureRoutes(
   const restraintSeclusionRoutes = safeRequire('../routes/restraint-seclusion.routes');
   const seizureLogRoutes = safeRequire('../routes/seizure-log.routes');
   const safeguardingRoutes = safeRequire('../routes/safeguarding.routes');
+  const communicationAidRoutes = safeRequire('../routes/communication-aid.routes');
   const pickupAuthorizationRoutes = safeRequire('../routes/pickup-authorization.routes');
   const portfolioRoutes = safeRequire('../routes/portfolio.routes');
   const iepRoutes = safeRequire('../routes/iep.routes');
@@ -107,6 +108,8 @@ module.exports = function registerFeatureRoutes(
   dualMountAuth(app, 'seizure-log', seizureLogRoutes, authenticate);
   // Wave 357: Safeguarding (بلاغ حماية) — intake-to-closure + authority referral; CBAHI + Saudi child protection
   dualMountAuth(app, 'safeguarding', safeguardingRoutes, authenticate);
+  // Wave 358: AAC profile (ملف التواصل البديل/المعزّز) — ASHA-aligned modality tiers
+  dualMountAuth(app, 'communication-aid', communicationAidRoutes, authenticate);
   // Wave 196b: Pickup authorization w/ e-sig scaffolding (تصاريح الاستلام)
   dualMountAuth(app, 'pickup-authorization', pickupAuthorizationRoutes, authenticate);
   // Wave 199b: Child portfolio (بورتفوليو الطفل) — photos/videos/artwork/achievements

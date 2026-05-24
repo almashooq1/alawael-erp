@@ -76,11 +76,17 @@ Drift guards enforcing integration invariants (8 suites / 149 assertions):
 - `__tests__/ai-recommendation-plateau-adapter-wave337.test.js` — plateau + regression adapters (TYPE_CONVERTERS dispatch)
 - `__tests__/no-duplicate-model-registration-wave340.test.js` — W340 no duplicate Mongoose model name (ADR-021 framework)
 
-Event bus + cross-domain notification infrastructure:
+Event bus + cross-domain notification infrastructure (verified against source 2026-05-24):
 
-- `backend/services/event-bus/` — in-process event bus (ADR-006)
-- `backend/services/event-bus/eventBus.js` — core publish/subscribe
-- `backend/services/event-bus/eventSubscribers.js` — 15 cross-module DDD event subscribers + 10 notification triggers (visible at app.js boot)
+- `backend/integration/systemIntegrationBus.js` — in-process event bus (ADR-006); exports `{ SystemIntegrationBus, integrationBus, ... }` singleton
+- `backend/startup/integrationBus.js` — wire-up orchestrator invoked from `backend/app.js:67` via `setupIntegrationBus`; this is where ALL subscriber layers are registered in order
+- `backend/integration/crossModuleSubscribers.js` — base cross-module email subscribers (initialized in `server.js:626`)
+- `backend/integration/dddCrossModuleSubscribers.js` — 16 DDD rehabilitation cross-domain event flows (initialized in `startup/integrationBus.js:71`)
+- `backend/integration/dddNotificationTriggers.js` — 10 DDD notification rules (initialized in `startup/integrationBus.js:80`)
+- `backend/integration/dddWorkflowAutomations.js` — 12 Phase-4 automation rules (initialized in `startup/integrationBus.js:89`)
+- `backend/integration/dddWebhookDispatcher.js` — outbound webhook dispatcher
+- `backend/integration/moduleConnector.js` — module-to-module connector layer
+- `backend/database/event-bus.js` — SEPARATE database event bus used by opt-in `services/blockchain/autoIssueSubscribers.js` (env flag `BLOCKCHAIN_AUTO_ISSUE=1`); do NOT confuse with the main integrationBus
 - `backend/models/auditLog.model.js` — 60+ event types audit trail (ADR-009)
 - `backend/intelligence/reason-codes.registry.js` — Wave 89 canonical reason codes (20 codes + Arabic labels + alias map)
 - `backend/intelligence/hash-chain.lib.js` — Wave-18 hash chain for irreversible decisions

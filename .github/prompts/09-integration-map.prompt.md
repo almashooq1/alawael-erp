@@ -106,7 +106,7 @@ Canonical entity registrations (the source of truth for "who owns what"):
 - Classroom → `backend/models/Classroom.js:103` (W335 canonical; NOT Class)
 - FileFolder → `backend/models/documents/FileFolder.js:47` (W335 canonical for Document hierarchy; NOT Folder)
 - TicketEnhanced → `backend/models/TicketEnhanced.js` (W336 canonical for support tickets)
-- CapaItem → `backend/models/CapaItem.js` (W337 canonical for CAPA, latest closure)
+- CapaItem → `backend/models/quality/CapaItem.model.js` (W337 canonical for CAPA — sits under `models/quality/` with the other QMS models, not at models/ root)
 - AiRecommendationBundle → `backend/models/AiRecommendationBundle.js` (W334 canonical)
 - (47 more canonical models tracked in W325c baseline as fully-cleared phantom-ref targets)
 

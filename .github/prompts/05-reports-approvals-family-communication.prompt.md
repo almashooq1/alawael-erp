@@ -87,10 +87,10 @@ Sister repo (`alawael-rehab-platform/`):
 If a file is missing, continue with explicit assumptions. Do NOT invent Prisma
 schemas or files that do not exist in this codebase (backend is Mongoose).
 
-**Known canonical-ref doctrine from W324–W339 series**: when designing new ref
+**Known canonical-ref doctrine from W324–W348 series**: when designing new ref
 fields, use `'Beneficiary'` (NOT User/Patient/BeneficiaryProfile), `'Branch'`
-(NOT Center), `'User'` for staff refs (NOT Admin/AdminUser). 147 permanent
-drift assertions enforce this across 7 suites.
+(NOT Center), `'User'` for staff refs (NOT Admin/AdminUser). 259 drift
+assertions across 13 suites enforce this (2026-05-24 — count is volatile, re-run jest before quoting).
 
 ================================================================
 MISSION

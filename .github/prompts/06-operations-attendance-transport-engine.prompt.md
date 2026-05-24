@@ -111,12 +111,10 @@ Sister repo (`alawael-rehab-platform/`):
 If a file is missing, continue with explicit assumptions. Do NOT invent Prisma
 schemas or files that do not exist in this codebase (backend is Mongoose).
 
-**Known canonical-ref doctrine from W324–W342 series**: when designing new ref
+**Known canonical-ref doctrine from W324–W348 series**: when designing new ref
 fields, use `'Beneficiary'` (NOT User/Patient/BeneficiaryProfile), `'Branch'`
 (NOT Center), `'User'` for staff refs (NOT Admin/AdminUser), `'Classroom'`
-(NOT Class). 149 drift assertions across 8 suites enforce this. Plus W340
-no-duplicate-registration guard now active — new attendance/transport models
-MUST register exactly once.
+(NOT Class). 259 drift assertions across 13 suites enforce this as of 2026-05-24 (count is volatile, re-run jest before quoting). The W340 no-duplicate-registration guard is active — new attendance/transport models MUST register exactly once.
 
 ================================================================
 MISSION

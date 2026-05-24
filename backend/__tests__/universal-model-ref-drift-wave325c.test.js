@@ -81,13 +81,14 @@ const REF_ALLOWLIST = new Set([
 //     'Patient'    → 'Beneficiary' in ResourceBooking.js (mirrors W324's CommunityReferral fix exactly)
 //   W326 — 'Center' (10×) → 'Branch' fixed across crisis.model.js + laundry.model.js + kitchen.model.js
 const KNOWN_PHANTOM_BASELINE_W325C = new Set([
-  // Quality-domain refs to a DEFERRED (planned but not-yet-built) model.
-  // Investigation 2026-05-24: predictiveRisk.service.js:191 uses
-  // `tryRequire('../../models/CapaItem')` for graceful degradation, and all 4
-  // `linkedCapaId` fields (Audit/FMEA×2/RCA) default null. The CAPA workflow
-  // exists conceptually but the entity has not been formalized as a Mongoose
-  // model yet. Stay in baseline; remove when CapaItem.js is added to models/.
-  'CapaItem', // 4× — DEFERRED model; tryRequire + null-default = no runtime breakage
+  // ── W337 RATCHET-DOWN ──────────────────────────────────────────────────────
+  // 'CapaItem' (4×) → BUILT as backend/models/quality/CapaItem.model.js.
+  //   7-state lifecycle (OPEN → IN_PROGRESS → IMPLEMENTED → VERIFIED → CLOSED,
+  //   + REJECTED/CANCELLED terminals), pure-fn lib at intelligence/capa-lifecycle.lib.js,
+  //   29-assertion drift guard at __tests__/capa-item-lifecycle-wave337.test.js.
+  //   All 4 callers (AuditOccurrence/FmeaWorksheet×2/RcaInvestigation) now resolve.
+  //   BASELINE NOW EMPTY — every legacy phantom either fixed, ALLOWLISTed, or built.
+  // ───────────────────────────────────────────────────────────────────────────
   // ── W334 SCANNER FIX ────────────────────────────────────────────────────────
   // Previously listed as "Enterprise-Pro speculative refs" but were ALL real,
   // registered models — the W325c REGISTRATION_RE only matched the direct

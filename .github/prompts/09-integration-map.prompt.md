@@ -48,7 +48,8 @@ Codebase doctrine + drift guards this integration map relies on:
   - ADR-018 (rehabilitation protocol entity, Proposed)
   - ADR-019 (MFA tier enforcement three-layer)
   - ADR-020 (Student vs Beneficiary consolidation, Proposed — domain fragmentation question)
-  - ADR-021 (duplicate-model-registration consolidation strategy, Proposed — Tier 1 stakeholder framework)
+  - ADR-021 (duplicate-model-registration consolidation strategy, Proposed — Tier 1 stakeholder framework with 4-pattern decision tree A/B/C/D)
+  - ADR-022 (ApprovalRequest Pattern D rename proposal, Proposed — per-entity application of ADR-021 framework; supersedes the open ApprovalRequest question with a concrete rename recommendation)
 
 Canonical infrastructure enforcing this integration map:
 
@@ -115,7 +116,7 @@ Known cross-domain divergences this map must address:
 
 1. **Student vs Beneficiary** (ADR-020 Proposed): `Student` is registered as a separate Mongoose model with ~21 callers across smart-attendance/transport/montessori/taqat. Domain fragmentation question pending stakeholder. Integration map should flag where Student refs are used vs Beneficiary refs.
 2. **3 clinical session models** (TherapySession + ClinicalSession + DisabilitySession): noted in 04 prompt as "do NOT add 4th". Integration map should pick one canonical write-target for new flows.
-3. **3 ApprovalRequest schemas** (ADR-021 Tier 1): authorization/approvals (rich state-machine) + models (simple legacy) + services/documents (rich SLA tracking). Recommendation per ADR-021 is RENAME, not consolidate.
+3. **3 ApprovalRequest schemas** (ADR-022, applying ADR-021's Pattern D): authorization/approvals (rich state-machine) + models (simple legacy) + services/documents (rich SLA tracking). ADR-022 is the per-entity rename proposal — pending stakeholder sign-off on the rename triple (ChainApprovalRequest / SimpleApprovalRequest / DocumentApprovalChain or similar).
 4. **3 AuditLog schemas** (ADR-021 Tier 1): canonical (53 event types) + database/audit-trail (different field names) + routes/audit-trail-enhanced. Naming collision causes data fragmentation across what should be one collection.
 
 If a file is missing, continue with explicit assumptions. Do NOT invent Prisma

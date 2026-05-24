@@ -38,7 +38,7 @@ CLAUDE.md
 docs/blueprint/00-master-architecture.md
 docs/MODULES.md
 docs/PHASE3_PLAN.md
-docs/architecture/decisions/ (ADRs 001–021)
+docs/architecture/decisions/ (ADRs 001–022 as of 2026-05-24)
 
 This repo is a Node.js + Express + Mongoose monolith (NOT Prisma) at the
 backend layer; the sister repo `alawael-rehab-platform/` is a TypeScript pnpm

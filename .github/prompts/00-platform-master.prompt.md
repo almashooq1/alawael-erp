@@ -30,7 +30,7 @@ Primary canonical sources in THIS repo (`66666/`):
 - `docs/blueprint/00-master-architecture.md` — canonical architecture (W11–W26)
 - `docs/MODULES.md` — module-by-domain catalog (v3.1.0 snapshot says "127 backend modules + 80+ frontend pages"; codebase has grown past this — trust MODULES.md's current row counts, not legacy citations)
 - `docs/PHASE3_PLAN.md` — Intelligence & Automation deliverables
-- `docs/architecture/decisions/` — ADRs 001–019 (read 005, 007, 009, 010, 019 first)
+- `docs/architecture/decisions/` — ADRs 001–022 as of 2026-05-24 (read 005, 007, 009, 010, 019 first; 020/021/022 are the proposed Tier 1 stakeholder-decision framework)
 - `backend/intelligence/canonical/` — canonical entity schemas + drift guard (single source of truth for entity contracts)
 - `backend/intelligence/reason-codes.registry.js` — canonical reason codes (Wave 89, do not invent new codes)
 - `backend/models/` — Mongoose models (single source of truth for persistence)

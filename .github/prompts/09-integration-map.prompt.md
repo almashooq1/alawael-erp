@@ -83,7 +83,7 @@ Event bus + cross-domain notification infrastructure (verified against source 20
 - `backend/integration/systemIntegrationBus.js` — in-process event bus (ADR-006); exports `{ SystemIntegrationBus, integrationBus, ... }` singleton
 - `backend/startup/integrationBus.js` — wire-up orchestrator invoked from `backend/app.js:67` via `setupIntegrationBus`; this is where ALL subscriber layers are registered in order
 - `backend/integration/crossModuleSubscribers.js` — base cross-module email subscribers (initialized in `server.js:626`)
-- `backend/integration/dddCrossModuleSubscribers.js` — 15 DDD rehabilitation cross-domain event flows (counted via `subscribers.push(...)`; initialized in `startup/integrationBus.js:71`). Note: that file's wire-up comment still says "16 event flows" — stale-by-one; trust the source count.
+- `backend/integration/dddCrossModuleSubscribers.js` — 15 DDD rehabilitation cross-domain event flows (counted via `subscribers.push(...)`; initialized in `startup/integrationBus.js:71`)
 - `backend/integration/dddNotificationTriggers.js` — 10 DDD notification rules (counted via `triggers.push(...)`; initialized in `startup/integrationBus.js:80`)
 - `backend/integration/dddWorkflowAutomations.js` — 12 Phase-4 automation rules in `AUTOMATION_RULES` array (initialized in `startup/integrationBus.js:89`)
 - `backend/integration/dddWebhookDispatcher.js` — outbound webhook dispatcher

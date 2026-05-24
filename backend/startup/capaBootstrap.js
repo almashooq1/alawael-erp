@@ -54,6 +54,18 @@ function wireCapa(app, deps = {}) {
       (emitEvent ? 'wired' : 'noop')
   );
 
+  // ── W345 — REST surface ─────────────────────────────────────────────
+  // Dual-mount under /api/quality/capa + /api/v1/quality/capa to match
+  // the project's two-stem API convention (W283, W334 routes).
+  try {
+    const capaRouter = require('../routes/quality/capa.routes');
+    app.use('/api/quality/capa', capaRouter);
+    app.use('/api/v1/quality/capa', capaRouter);
+    logger.info?.('[startup] CAPA routes mounted (W345): /api/quality/capa + /api/v1/...');
+  } catch (err) {
+    logger.warn?.(`[startup] CAPA routes failed to mount: ${err.message}`);
+  }
+
   // ── Overdue sweeper cron (W344 Pass 3) ──────────────────────────────
   const cronEnabled = String(process.env.ENABLE_CAPA_SWEEPER || '').toLowerCase() === 'true';
   if (!cronEnabled) {

@@ -66,7 +66,7 @@ function setupIntegrationBus(app) {
     // Wire cross-module subscribers
     initializeCrossModuleSubscribers(integrationBus, moduleConnector);
 
-    // Wire DDD rehabilitation cross-domain subscribers (16 event flows)
+    // Wire DDD rehabilitation cross-domain subscribers (15 event subscribers — count: `grep -c "subscribers.push" ../integration/dddCrossModuleSubscribers.js`)
     try {
       const { initializeDDDSubscribers } = require('../integration/dddCrossModuleSubscribers');
       initializeDDDSubscribers(integrationBus, moduleConnector);

@@ -106,6 +106,8 @@ const MFA_AWARE_FACTORIES = Object.freeze([
   'createHikvisionEventParserService',
   // W275w — anomaly-history
   'createHikvisionAnomalyHistoryService',
+  // W345 — CAPA service (Pass 4 wired wireCapa into app.js — service constructed with enforceMfa:true in capaBootstrap)
+  'createCapaService',
 ]);
 
 function _parseFile(filePath) {

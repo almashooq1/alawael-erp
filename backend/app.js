@@ -2030,6 +2030,16 @@ require('./startup/ragBootstrap').wireRag(app, { logger });
 // lock the contracts (lib + model + service + routes + bootstrap).
 require('./startup/aiRecommendationBootstrap').wireAiRecommendations(app, { logger });
 
+// ─── CAPA (Corrective/Preventive Action) — Wave 337+W344+W345 ───────────
+// CapaItem 7-state lifecycle (OPEN → IN_PROGRESS → IMPLEMENTED → VERIFIED → CLOSED,
+// + REJECTED/CANCELLED terminals). Pre-save hook (W340) enforces lib.validateTransition.
+// Service factory constructed with enforceMfa:true (W275 + W276 contract). REST mounted
+// at /api/quality/capa + /api/v1/quality/capa (tier 1 reads, tier 2 on VERIFIED→CLOSED
+// + ANY→REJECTED via service-layer defense). Overdue sweeper cron env-gated
+// (ENABLE_CAPA_SWEEPER=true → daily 06:00 Asia/Riyadh, emits quality.capa.overdue
+// events — no auto-transition, escalation is human).
+require('./startup/capaBootstrap').wireCapa(app, { logger });
+
 // ─── Risk Sweeper (daily) — Wave 288 ───────────────────────────────────
 // Persists daily RiskSnapshot per active beneficiary using the unified
 // Risk Orchestrator (W286) + RiskProfile canonical contract (W287), and

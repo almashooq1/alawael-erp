@@ -18,7 +18,7 @@ const AttendanceViaCameraSchema = new mongoose.Schema(
     },
     classId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Class',
+      ref: 'Classroom',
     },
     cameraId: {
       type: String,

@@ -67,7 +67,7 @@ const journalEntrySchema = new mongoose.Schema(
     attachments: {
       type: [mongoose.Schema.Types.ObjectId],
       default: [],
-      ref: 'Attachment',
+      ref: 'Document',
     },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,

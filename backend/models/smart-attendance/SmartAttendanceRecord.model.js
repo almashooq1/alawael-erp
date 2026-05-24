@@ -12,7 +12,7 @@ const SmartAttendanceRecordSchema = new mongoose.Schema(
     },
     classId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Class',
+      ref: 'Classroom',
       index: true,
     },
     date: {

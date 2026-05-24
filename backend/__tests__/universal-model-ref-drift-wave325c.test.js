@@ -88,10 +88,13 @@ const KNOWN_PHANTOM_BASELINE_W325C = new Set([
   //   CRMPipeline (1×) CRMDeal (1×) Candidate (1×) ITAsset (1×)
   //   StrategicObjective (2×) ComplianceChecklist (1×)
   // ───────────────────────────────────────────────────────────────────────────
-  'Company', // 1× — real phantom in Driver.js:152 (Company.js does not exist)
-  // Misc never-built or renamed
-  'Attachment', // 2× — investigate if Document is the canonical
-  'Class', // 2× — smart-attendance domain
+  'Company', // 1× — real phantom in Driver.js:152 (Company.js does not exist; employer field needs design decision)
+  // ── W335 RATCHET-DOWN ──────────────────────────────────────────────────────
+  // 'Attachment' (2×) → 'Document' across FinancialJournalEntry + RiskAssessment
+  //   (attachments arrays now point to canonical Document model — same fix pattern as W324 Patient→Beneficiary)
+  // 'Class'      (2×) → 'Classroom' across smart-attendance/AttendanceViaCamera + SmartAttendanceRecord
+  //   (classId fields now point to canonical Classroom model — semantic-mismatch fix per W329 pattern)
+  // ──────────────────────────────────────────────────────────────────────────
   // 'Counselor' — RATCHET-DOWN W333: fixed to 'User' (counselor is a staff role, not entity).
   // backend/models/BeneficiaryManagement/CounselingSession.js counselorId now refs 'User'.
   'Violation', // 1× — investigate

@@ -140,7 +140,7 @@ const riskAssessmentSchema = new mongoose.Schema(
     // المراجع والوثائق
     attachments: {
       type: [mongoose.Schema.Types.ObjectId],
-      ref: 'Attachment',
+      ref: 'Document',
       default: [],
     },
 

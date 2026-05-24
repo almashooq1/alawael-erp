@@ -32,14 +32,24 @@ function wireCapa(app, deps = {}) {
 
   const { createCapaService } = require('../services/quality/capa.service');
 
-  // Event emitter shim: services/qualityEventBus may not be present in every
-  // deployment; degrade gracefully to a no-op when absent.
+  // W349 — qualityEventBus wiring. Module exports { createQualityEventBus,
+  // getDefault, ... } — use getDefault() for the singleton (matches the
+  // pattern in auditScheduler.service / calibration.service). Pre-W349 the
+  // wiring checked `bus.emit` / `bus.default.emit` neither of which match
+  // this module's exports → emit was silently a no-op all along. Degrades
+  // to no-op only when the module itself isn't loadable.
   let emitEvent = null;
-  const bus = loadOptional('../services/quality/qualityEventBus.service');
-  if (bus && typeof bus.emit === 'function') {
-    emitEvent = (name, payload) => bus.emit(name, payload);
-  } else if (bus && bus.default && typeof bus.default.emit === 'function') {
-    emitEvent = (name, payload) => bus.default.emit(name, payload);
+  let busInstance = null;
+  const busModule = loadOptional('../services/quality/qualityEventBus.service');
+  if (busModule && typeof busModule.getDefault === 'function') {
+    busInstance = busModule.getDefault();
+    if (busInstance && typeof busInstance.emit === 'function') {
+      emitEvent = (name, payload) => busInstance.emit(name, payload);
+    }
+  } else if (busModule && typeof busModule.emit === 'function') {
+    // Defensive: if some future variant exports emit at module level.
+    busInstance = busModule;
+    emitEvent = (name, payload) => busModule.emit(name, payload);
   }
 
   const service = createCapaService({
@@ -53,6 +63,25 @@ function wireCapa(app, deps = {}) {
     '[startup] CAPA service wired (W344): enforceMfa=true, emitEvent=' +
       (emitEvent ? 'wired' : 'noop')
   );
+
+  // ── W349 — quality.capa.overdue → notification subscriber ──────────
+  // Listens on the same bus, normalizes payload + severity, emits
+  // `notification.capa.overdue.alert` for downstream notification channels.
+  if (busInstance) {
+    try {
+      const { wireCapaAlerts } = require('../services/quality/capa-alerts-subscriber.service');
+      const wired = wireCapaAlerts({ bus: busInstance, logger });
+      app._capaAlertsSubscriber = wired;
+      logger.info?.(
+        '[startup] CAPA alerts subscriber wired (W349): listens on quality.capa.overdue → emits ' +
+          wired.downstreamEvent
+      );
+    } catch (err) {
+      logger.warn?.(`[startup] CAPA alerts subscriber failed to wire: ${err.message}`);
+    }
+  } else {
+    logger.info?.('[startup] CAPA alerts subscriber DISABLED (qualityEventBus not loaded)');
+  }
 
   // ── W348 — producers factory ────────────────────────────────────────
   // W346 producers translate audit findings / RCA root causes / FMEA actions

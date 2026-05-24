@@ -395,3 +395,88 @@ describe('W334 Pass 2 — service surface (aiRecommendation.service.js)', () => 
     expect(SERVICE_SRC).toMatch(/limit\s*=\s*50/);
   });
 });
+
+// ═══════════════════════════════════════════════════════════════════════
+// Pass 3 — REST routes + bootstrap
+// ═══════════════════════════════════════════════════════════════════════
+
+describe('W334 Pass 3 — REST surface (ai-recommendations.routes.js)', () => {
+  const ROUTES_SRC = fs.readFileSync(
+    path.join(__dirname, '..', 'routes', 'ai-recommendations.routes.js'),
+    'utf8'
+  );
+
+  it('declares 8 endpoints (health + 7 functional)', () => {
+    expect(ROUTES_SRC).toMatch(/router\.get\(['"]\/health['"]/);
+    expect(ROUTES_SRC).toMatch(/router\.get\(['"]\/pending['"]/);
+    expect(ROUTES_SRC).toMatch(/router\.get\(['"]\/:id['"]/);
+    expect(ROUTES_SRC).toMatch(/router\.get\(['"]\/:id\/audit['"]/);
+    expect(ROUTES_SRC).toMatch(/router\.get\(['"]\/metrics['"]/);
+    expect(ROUTES_SRC).toMatch(/router\.post\(['"]\/:id\/approve['"]/);
+    expect(ROUTES_SRC).toMatch(/router\.post\(['"]\/:id\/reject['"]/);
+    expect(ROUTES_SRC).toMatch(/router\.post\(['"]\/sweep['"]/);
+  });
+
+  it('approve + sweep require MFA tier 2 (significant actions)', () => {
+    expect(ROUTES_SRC).toMatch(
+      /router\.post\(['"]\/:id\/approve['"]\s*,\s*requireMfaTier\(\s*2\s*\)/
+    );
+    expect(ROUTES_SRC).toMatch(/router\.post\(['"]\/sweep['"]\s*,\s*requireMfaTier\(\s*2\s*\)/);
+  });
+
+  it('reject requires MFA tier 1 + body.reasonCode pre-check', () => {
+    expect(ROUTES_SRC).toMatch(
+      /router\.post\(['"]\/:id\/reject['"]\s*,\s*requireMfaTier\(\s*1\s*\)/
+    );
+    expect(ROUTES_SRC).toMatch(/req\.body\?\.reasonCode/);
+    expect(ROUTES_SRC).toMatch(/'REASON_CODE_REQUIRED'/);
+  });
+
+  it('chains authenticate + attachMfaActor on every authenticated route', () => {
+    expect(ROUTES_SRC).toMatch(/router\.use\(authenticate\)/);
+    expect(ROUTES_SRC).toMatch(/router\.use\(attachMfaActor\)/);
+  });
+
+  it('maps lib error codes to HTTP status (422 / 400 / 403)', () => {
+    expect(ROUTES_SRC).toMatch(/INVALID_TRANSITION[\s\S]{0,80}status:\s*422/);
+    expect(ROUTES_SRC).toMatch(/REASON_CODE_REQUIRED[\s\S]{0,80}status:\s*400/);
+    expect(ROUTES_SRC).toMatch(/MFA_TIER_INSUFFICIENT[\s\S]{0,80}status:\s*403/);
+  });
+
+  it('metrics endpoint computes acceptanceRate + expiredRate + autoDiscardRate', () => {
+    expect(ROUTES_SRC).toMatch(/acceptanceRate/);
+    expect(ROUTES_SRC).toMatch(/expiredRate/);
+    expect(ROUTES_SRC).toMatch(/autoDiscardRate/);
+  });
+});
+
+describe('W334 Pass 3 — bootstrap (aiRecommendationBootstrap.js)', () => {
+  const BOOTSTRAP_SRC = fs.readFileSync(
+    path.join(__dirname, '..', 'startup', 'aiRecommendationBootstrap.js'),
+    'utf8'
+  );
+
+  it('exports wireAiRecommendations(app, deps)', () => {
+    expect(BOOTSTRAP_SRC).toMatch(/function wireAiRecommendations\s*\(\s*app\s*,\s*deps/);
+    expect(BOOTSTRAP_SRC).toMatch(/module\.exports\s*=\s*\{\s*wireAiRecommendations\s*\}/);
+  });
+
+  it('dual-mounts at /api/ai-recommendations + /api/v1/ai-recommendations', () => {
+    expect(BOOTSTRAP_SRC).toMatch(/app\.use\(['"]\/api\/ai-recommendations['"]/);
+    expect(BOOTSTRAP_SRC).toMatch(/app\.use\(['"]\/api\/v1\/ai-recommendations['"]/);
+  });
+
+  it('cron sweeper is env-gated (ENABLE_AI_RECOMMENDATION_CRON=true)', () => {
+    expect(BOOTSTRAP_SRC).toMatch(/process\.env\.ENABLE_AI_RECOMMENDATION_CRON/);
+  });
+
+  it('cron runs daily at 03:00 Asia/Riyadh (matches W284c speech sweeper cadence)', () => {
+    expect(BOOTSTRAP_SRC).toMatch(/['"]0 3 \* \* \*['"]/);
+    expect(BOOTSTRAP_SRC).toMatch(/timezone:\s*['"]Asia\/Riyadh['"]/);
+  });
+
+  it('uses loadOptional for node-cron (graceful degradation if not installed)', () => {
+    expect(BOOTSTRAP_SRC).toMatch(/function loadOptional/);
+    expect(BOOTSTRAP_SRC).toMatch(/loadOptional\(['"]node-cron['"]\)/);
+  });
+});

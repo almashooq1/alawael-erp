@@ -82,6 +82,58 @@ function wireAiRecommendations(app, deps = {}) {
   );
 
   logger.info('[startup] AI recommendations cron sweeper scheduled (daily 03:00 Asia/Riyadh)');
+
+  // ── W338: plateau-alert → AiRecommendationBundle producer cron ────────
+  // Env-gated separately so ops can roll the producer pipeline independently
+  // from the expiry sweeper (both share node-cron; both are env-gated).
+  // Runs at 03:30 Asia/Riyadh (30 min after the expiry sweeper) so any
+  // bundles created today don't immediately expire on the same tick.
+  if (process.env.ENABLE_AI_RECOMMENDATION_PLATEAU_ADAPTER_CRON !== 'true') {
+    logger.info(
+      '[startup] AI recommendations plateau adapter disabled (ENABLE_AI_RECOMMENDATION_PLATEAU_ADAPTER_CRON!=true)'
+    );
+    return;
+  }
+
+  const plateauAdapter = require('../services/aiRecommendation-plateau-adapter.service');
+  const mongoose = require('mongoose');
+
+  cron.schedule(
+    '30 3 * * *',
+    async () => {
+      try {
+        let alertModel;
+        try {
+          alertModel = mongoose.model('MeasureAlert');
+        } catch {
+          logger.warn(
+            '[ai-recommendations] plateau adapter skipped: MeasureAlert model not registered'
+          );
+          return;
+        }
+        const result = await plateauAdapter.createBundlesFromOpenPlateauAlerts({
+          alertModel,
+          aiRecService: aiRecommendationService,
+          limit: 200,
+        });
+        logger.info(
+          `[ai-recommendations] daily plateau adapter: scanned=${result.scanned} converted=${result.converted} skipped=${result.skipped} errors=${result.errors.length}`
+        );
+        if (result.errors.length > 0) {
+          for (const e of result.errors.slice(0, 5)) {
+            logger.warn('[ai-recommendations] plateau adapter error', e);
+          }
+        }
+      } catch (err) {
+        logger.error('[ai-recommendations] plateau adapter cron failed', err);
+      }
+    },
+    { timezone: 'Asia/Riyadh' }
+  );
+
+  logger.info(
+    '[startup] AI recommendations plateau adapter cron scheduled (daily 03:30 Asia/Riyadh)'
+  );
 }
 
 module.exports = { wireAiRecommendations };

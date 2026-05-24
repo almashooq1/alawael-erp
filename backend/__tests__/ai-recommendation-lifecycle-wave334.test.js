@@ -479,6 +479,25 @@ describe('W334 Pass 3 — bootstrap (aiRecommendationBootstrap.js)', () => {
     expect(BOOTSTRAP_SRC).toMatch(/function loadOptional/);
     expect(BOOTSTRAP_SRC).toMatch(/loadOptional\(['"]node-cron['"]\)/);
   });
+
+  // ── W338: plateau-adapter cron wiring ────────────────────────────────
+  it('W338 plateau-adapter cron is env-gated separately from the expiry sweeper', () => {
+    expect(BOOTSTRAP_SRC).toMatch(/process\.env\.ENABLE_AI_RECOMMENDATION_PLATEAU_ADAPTER_CRON/);
+  });
+
+  it('W338 plateau-adapter runs at 03:30 (30 min after expiry sweeper, prevents same-tick expiry)', () => {
+    expect(BOOTSTRAP_SRC).toMatch(/['"]30 3 \* \* \*['"]/);
+  });
+
+  it('W338 plateau-adapter wires plateauAdapter.createBundlesFromOpenPlateauAlerts', () => {
+    expect(BOOTSTRAP_SRC).toMatch(/plateauAdapter\.createBundlesFromOpenPlateauAlerts\(/);
+    expect(BOOTSTRAP_SRC).toMatch(/require\(['"]\.\.\/services\/aiRecommendation-plateau-adapter/);
+  });
+
+  it('W338 gracefully skips when MeasureAlert model is not registered (no-throw)', () => {
+    expect(BOOTSTRAP_SRC).toMatch(/MeasureAlert model not registered/);
+    expect(BOOTSTRAP_SRC).toMatch(/mongoose\.model\(['"]MeasureAlert['"]\)/);
+  });
 });
 
 describe('W336 — wiring in app.js (W334 Pass 4)', () => {

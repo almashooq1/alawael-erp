@@ -288,11 +288,20 @@ const PayrollSchema = new Schema(
 // ============================================
 // MODELS
 // ============================================
-
-const Employee = mongoose.models.Employee || mongoose.model('Employee', EmployeeSchema);
-const LeaveRequest =
-  mongoose.models.LeaveRequest || mongoose.model('LeaveRequest', LeaveRequestSchema);
-const Attendance = mongoose.models.Attendance || mongoose.model('Attendance', AttendanceSchema);
+//
+// W342 — canonical re-exports for 3 of 4 entities (those with a backend/models/<Name>.js).
+// Local schemas above are kept for posterity but the canonical always wins via
+// mongoose.models cache. Switching to explicit require() removes the
+// duplicate-registration drift risk flagged by W340.
+//   Employee     → models/Employee.js
+//   LeaveRequest → models/LeaveRequest.js
+//   Attendance   → models/Attendance.js
+//   Payroll      — NO canonical at models/<Name>.js (only PayrollPeriod.js exists).
+//                  Local registration retained; consolidation deferred until
+//                  a canonical Payroll model is designed.
+const Employee = require('../models/HR/Employee');
+const LeaveRequest = require('../models/LeaveRequest');
+const Attendance = require('../models/Attendance');
 const Payroll = mongoose.models.Payroll || mongoose.model('Payroll', PayrollSchema);
 
 // ============================================

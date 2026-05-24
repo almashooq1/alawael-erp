@@ -97,10 +97,10 @@ const KNOWN_DUPLICATE_REGISTRATIONS = new Set([
   // 'Vehicle'   — W341 CONSOLIDATED: seeder now re-exports canonical models/Vehicle.js
   'LifecyclePolicy',
   'GeneratedReport',
-  'Employee',
-  'LeaveRequest',
-  'Attendance',
-  'Payroll',
+  // 'Employee'      — W342 CONSOLIDATED: hr/saudi-hr-service.js now re-exports models/Employee.js
+  // 'LeaveRequest'  — W342 CONSOLIDATED: same — re-exports models/LeaveRequest.js
+  // 'Attendance'    — W342 CONSOLIDATED: same — re-exports models/Attendance.js
+  'Payroll', // 2× — NO canonical at models/Payroll.js (only PayrollPeriod.js); consolidation deferred
   'Event',
   'BranchSetting',
   'GlobalSetting',

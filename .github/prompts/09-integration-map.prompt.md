@@ -65,7 +65,7 @@ Canonical infrastructure enforcing this integration map:
 - `backend/intelligence/canonical/schemas/group-therapy-session.canonical.js` + `tele-rehab-session.canonical.js` + `arvr-session.canonical.js` — session variant contracts
 - `backend/intelligence/canonical/mongoose-drift.lib.js` — drift detector (canonical vs actual Mongoose schema)
 
-Drift guards enforcing integration invariants (8 suites / 149 assertions):
+Drift guards enforcing integration invariants (10 suites / 209 assertions — verified `npx jest --runInBand` 2026-05-24):
 
 - `__tests__/canonical-beneficiary-ref-wave324.test.js` — W324+W329 canonical-ref enforcement (3 field-name patterns → 'Beneficiary')
 - `__tests__/universal-model-ref-drift-wave325c.test.js` — W325c every `ref:'X'` resolves to registered X (baseline-ratchet)
@@ -74,7 +74,9 @@ Drift guards enforcing integration invariants (8 suites / 149 assertions):
 - `__tests__/care-plan-registry-integrity-wave332.test.js` — W41/W332 care-plan registry (13 STATUSES + 8 PLAN_TYPES + transitions DAG frozen)
 - `__tests__/ai-recommendation-lifecycle-wave334.test.js` — AI recommendation lifecycle (6-state DAG + REST surface integrity)
 - `__tests__/ai-recommendation-plateau-adapter-wave337.test.js` — plateau + regression adapters (TYPE_CONVERTERS dispatch)
+- `__tests__/capa-item-lifecycle-wave337.test.js` — CapaItem lifecycle state machine + reason-code + MFA gating (36 tests; W337 closed the final W325c phantom — CapaItem now canonical)
 - `__tests__/no-duplicate-model-registration-wave340.test.js` — W340 no duplicate Mongoose model name (ADR-021 framework)
+- `__tests__/capa-service-bootstrap-wave344.test.js` — W344 CAPA service + bootstrap drift guard (24 tests; service surface + cron wiring + error-code mapping)
 
 Event bus + cross-domain notification infrastructure (verified against source 2026-05-24):
 

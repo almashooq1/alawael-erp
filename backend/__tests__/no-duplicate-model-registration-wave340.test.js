@@ -127,8 +127,8 @@ const KNOWN_DUPLICATE_REGISTRATIONS = new Set([
   'MDTMeeting',
   'Student', // domain fragmentation per ADR-020 (Student vs Beneficiary)
   'NotificationPreferences',
-  'Referral',
-  'Task',
+  // 'Referral' — W343 moved to REGISTRATION_ALLOWLIST (defensive lookup-with-fallback pattern in routes/)
+  // 'Task'     — W343 moved to REGISTRATION_ALLOWLIST (same pattern)
   'DataSubjectRequest',
   'TherapyProtocol',
   'DigitalSignature',
@@ -137,10 +137,17 @@ const KNOWN_DUPLICATE_REGISTRATIONS = new Set([
 ]);
 
 // Models deliberately referenced but not Mongoose-owned. Inherited from W325c
-// for consistency. Currently empty for this guard's scope.
+// for consistency.
 const REGISTRATION_ALLOWLIST = new Set([
-  // (none — for legitimate cross-system registrations like discriminators
-  //  where multiple file would register the same base name)
+  // W343 — defensive lookup-with-fallback pattern: routes/referrals.routes.js and
+  // routes/tasks.routes.js each define a `function Referral()/Task()` that returns
+  // `mongoose.model('X')` if registered, otherwise registers a fallback schema in
+  // the catch branch. In normal app startup canonical models/<X>.js loads first so
+  // the fallback never executes (dead code), but the scanner sees the literal
+  // pattern. ALLOWLISTed because the intent is graceful degradation, not silent
+  // schema duplication.
+  'Referral',
+  'Task',
 ]);
 
 function walkJs(dir, skip, out = []) {

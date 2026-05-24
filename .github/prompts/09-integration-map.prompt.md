@@ -49,7 +49,9 @@ Codebase doctrine + drift guards this integration map relies on:
   - ADR-019 (MFA tier enforcement three-layer)
   - ADR-020 (Student vs Beneficiary consolidation, Proposed — domain fragmentation question)
   - ADR-021 (duplicate-model-registration consolidation strategy, Proposed — Tier 1 stakeholder framework with 4-pattern decision tree A/B/C/D)
-  - ADR-022 (ApprovalRequest Pattern D rename proposal, Proposed — per-entity application of ADR-021 framework; supersedes the open ApprovalRequest question with a concrete rename recommendation)
+  - ADR-022 (ApprovalRequest Pattern D rename proposal, Proposed — first per-entity application of ADR-021 framework)
+  - ADR-023 (ReportTemplate Pattern D rename proposal, Proposed — second per-entity application; renames to RehabReportTemplate + DocumentReportTemplate, collections already independent)
+  - ADR-024 (WorkflowInstance Pattern D rename proposal, Proposed — third and FINAL per-entity application; 3 sites with NO incumbent canonical in models/ — needs canonical-choice decision)
 
 Canonical infrastructure enforcing this integration map:
 

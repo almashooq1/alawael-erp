@@ -31,14 +31,17 @@ function makeStubModel(rows) {
 }
 
 describe('W350 — thresholds + severity classification', () => {
-  it('exports THRESHOLDS with all 5 documented metrics', () => {
-    expect(Object.keys(THRESHOLDS).sort()).toEqual([
-      'audit.open',
-      'audit.overdue',
-      'capa.critical',
-      'capa.open',
-      'capa.overdue',
-    ]);
+  it('exports THRESHOLDS with the 5 W350-baseline metrics (additional W351+ metrics asserted in their own test)', () => {
+    const keys = Object.keys(THRESHOLDS);
+    expect(keys).toEqual(
+      expect.arrayContaining([
+        'capa.open',
+        'capa.overdue',
+        'capa.critical',
+        'audit.open',
+        'audit.overdue',
+      ])
+    );
   });
 
   it('classifies value > critical as critical, > warning as warning, else ok', () => {

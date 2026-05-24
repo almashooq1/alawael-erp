@@ -45,6 +45,7 @@ module.exports = function registerFeatureRoutes(
   const assistiveDeviceRoutes = safeRequire('../routes/assistive-device.routes');
   const cbahiRoutes = safeRequire('../routes/cbahi.routes');
   const transitionPlanRoutes = safeRequire('../routes/transition-plan.routes');
+  const adaptiveSportsRoutes = safeRequire('../routes/adaptive-sports.routes');
   const pickupAuthorizationRoutes = safeRequire('../routes/pickup-authorization.routes');
   const portfolioRoutes = safeRequire('../routes/portfolio.routes');
   const iepRoutes = safeRequire('../routes/iep.routes');
@@ -119,6 +120,8 @@ module.exports = function registerFeatureRoutes(
   dualMountAuth(app, 'cbahi', cbahiRoutes, authenticate);
   // Wave 361: Transition planning persistence (خطة الانتقال) — graduates W251 scaffold
   dualMountAuth(app, 'transition-plan', transitionPlanRoutes, authenticate);
+  // Wave 362: Adaptive sports persistence (الرياضة التكيّفية) — graduates scaffold
+  dualMountAuth(app, 'adaptive-sports', adaptiveSportsRoutes, authenticate);
   // Wave 196b: Pickup authorization w/ e-sig scaffolding (تصاريح الاستلام)
   dualMountAuth(app, 'pickup-authorization', pickupAuthorizationRoutes, authenticate);
   // Wave 199b: Child portfolio (بورتفوليو الطفل) — photos/videos/artwork/achievements

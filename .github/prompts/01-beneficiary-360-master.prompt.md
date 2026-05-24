@@ -33,7 +33,7 @@ Align with the platform doctrine and existing canonical artifacts:
 - `backend/models/Guardian.js` — family/caregiver model
 - `backend/models/Consent.js` — consent types (append-only)
 - `backend/models/Referral.js` — referral pathway
-- `domains/episodes/models/EpisodeOfCare.js` — episode persistence (phases + teamMember sub-schema)
+- `backend/domains/episodes/models/EpisodeOfCare.js` — episode persistence (phases + teamMember sub-schema)
 
 Sister repo (`alawael-rehab-platform/`) for UI surfaces:
 

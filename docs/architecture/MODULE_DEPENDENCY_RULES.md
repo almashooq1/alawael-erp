@@ -4,7 +4,7 @@
 >
 > **Date introduced**: 2026-05-24
 > **Owner**: Architecture team
-> **Drift guard**: `backend/__tests__/module-dependency-direction.test.js` (W354)
+> **Drift guard**: `backend/__tests__/module-dependency-direction-wave354.test.js` (W354)
 > **Related ADRs**: ADR-006 (Domain Event Bus), ADR-021 (Duplicate Model Registration), ADR-025 (Module Dependency Rules — mapping doctrine→folders)
 
 ## 1) تعريف الوحدات وحدودها
@@ -223,7 +223,7 @@
    - يفشل في CI، أو
    - يتم مراجعته يدويًا قبل الدمج.
 
-> **تطبيق فعلي في هذا الريبو**: drift guard في `backend/__tests__/module-dependency-direction.test.js` (W354) ينفّذ كل من (1)+(2)+(3) عبر static analysis على `backend/domains/*/index.js` (التبعيات المُعلَنة في `BaseDomainModule` constructor) + مسح `require()` فعلي. مع baseline-ratchet pattern مماثل لـ W325c/W340 لرصد الانتهاكات الموجودة + منع الجديدة.
+> **تطبيق فعلي في هذا الريبو**: drift guard في `backend/__tests__/module-dependency-direction-wave354.test.js` (W354) ينفّذ كل من (1)+(2)+(3) عبر static analysis على `backend/domains/*/index.js` (التبعيات المُعلَنة في `BaseDomainModule` constructor) + مسح `require()` فعلي. مع baseline-ratchet pattern مماثل لـ W325c/W340 لرصد الانتهاكات الموجودة + منع الجديدة.
 
 ---
 

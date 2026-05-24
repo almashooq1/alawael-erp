@@ -14,7 +14,7 @@ The doctrine (`docs/architecture/MODULE_DEPENDENCY_RULES.md`) is canonical. This
 
 `docs/architecture/MODULE_DEPENDENCY_RULES.md` defines 8 logical modules with a strict tier ordering:
 
-```
+```text
 1. platform-core          (foundation — depends on nothing)
 2. beneficiary-360
 3. assessment-measures
@@ -137,12 +137,12 @@ If **stakeholders answer Q1-Q5**:
 
 If **the mapping is wrong** (e.g., dashboards should be tier 4, not 7):
 
-- Update the `TIER_ORDER` constant in `backend/__tests__/module-dependency-direction.test.js` + update the table above. Drift guard re-asserts under new ordering.
+- Update the `TIER` constant in `backend/__tests__/module-dependency-direction-wave354.test.js` + update the table above. Drift guard re-asserts under new ordering.
 
 ## Cross-references
 
 - Doctrine: [docs/architecture/MODULE_DEPENDENCY_RULES.md](../MODULE_DEPENDENCY_RULES.md)
-- Drift guard: `backend/__tests__/module-dependency-direction.test.js` (W354)
+- Drift guard: `backend/__tests__/module-dependency-direction-wave354.test.js` (W354)
 - Related ADRs:
   - ADR-006 (Domain Event Bus) — supplies the Events alternative to direct calls per doctrine §3.2
   - ADR-020 (Student/Beneficiary) — same "Proposed pending stakeholder input" pattern

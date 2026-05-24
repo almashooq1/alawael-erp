@@ -85,7 +85,7 @@ Intelligence / governance services:
 - `backend/models/auditLog.model.js` — 53 event types in `AuditEventTypes` (canonical of 3 schemas per ADR-021 Tier 1)
 - `backend/middleware/requireMfaTier.js` — MFA tier enforcement (ADR-019)
 
-Drift guards (**13 suites, 259 assertions as of 2026-05-24 W348** — institutional knowledge already enforced; re-run jest before quoting, this count is volatile across parallel-agent CAPA waves):
+Drift guards (**14 suites, 274 assertions as of 2026-05-24 W349** — institutional knowledge already enforced; re-run jest before quoting, this count is volatile across parallel-agent CAPA waves):
 
 - `__tests__/canonical-beneficiary-ref-wave324.test.js` — 3 beneficiary-ref fields → 'Beneficiary'
 - `__tests__/universal-model-ref-drift-wave325c.test.js` — every `ref:'X'` → registered X (baseline-ratchet)

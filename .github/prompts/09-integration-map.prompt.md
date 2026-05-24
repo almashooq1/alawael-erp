@@ -65,7 +65,7 @@ Canonical infrastructure enforcing this integration map:
 - `backend/intelligence/canonical/schemas/group-therapy-session.canonical.js` + `tele-rehab-session.canonical.js` + `arvr-session.canonical.js` — session variant contracts
 - `backend/intelligence/canonical/mongoose-drift.lib.js` — drift detector (canonical vs actual Mongoose schema)
 
-Drift guards enforcing integration invariants (11 suites / 223 assertions — verified `npx jest --runInBand` 2026-05-24; this count is the moving target most likely to be stale by the time you read it — re-run jest before quoting):
+Drift guards enforcing integration invariants (**13 suites / 259 assertions as of 2026-05-24 W348** — this number is the highest-velocity moving target in the doctrine layer; re-run jest before quoting):
 
 - `__tests__/canonical-beneficiary-ref-wave324.test.js` — W324+W329 canonical-ref enforcement (3 field-name patterns → 'Beneficiary')
 - `__tests__/universal-model-ref-drift-wave325c.test.js` — W325c every `ref:'X'` resolves to registered X (baseline-ratchet)
@@ -77,7 +77,9 @@ Drift guards enforcing integration invariants (11 suites / 223 assertions — ve
 - `__tests__/capa-item-lifecycle-wave337.test.js` — CapaItem lifecycle state machine + reason-code + MFA gating (36 tests; W337 closed the final W325c phantom — CapaItem now canonical)
 - `__tests__/no-duplicate-model-registration-wave340.test.js` — W340 no duplicate Mongoose model name (ADR-021 framework)
 - `__tests__/capa-service-bootstrap-wave344.test.js` — W344 CAPA service + bootstrap drift guard (24 tests; service surface + cron wiring + error-code mapping)
-- `__tests__/capa-routes-wave345.test.js` — W345 CAPA REST routes (8 endpoints; service-layer MFA tier escalation; 5-code error-to-HTTP). Closes the CAPA build chain — feature end-to-end deployable.
+- `__tests__/capa-routes-wave345.test.js` — W345 CAPA REST routes (8 endpoints; service-layer MFA tier escalation; 5-code error-to-HTTP). Closes the user-facing CAPA build chain — feature end-to-end deployable via manual REST entry.
+- `__tests__/capa-producers-wave346.test.js` — W346 producer service (auto-create CapaItem from audit/RCA/FMEA finding via `capaCreated:true` flag; idempotent on same finding ID).
+- `__tests__/capa-producers-routes-wave348.test.js` — W348 producer REST surface (`POST /from-audit-finding/:id`, `/from-rca/:id`, `/from-fmea/:id`). Tier 1 MFA. Closes the audit/RCA/FMEA→CAPA producer chain.
 
 Event bus + cross-domain notification infrastructure (verified against source 2026-05-24):
 

@@ -77,17 +77,18 @@ const KNOWN_PHANTOM_BASELINE_W325C = new Set([
   // exists conceptually but the entity has not been formalized as a Mongoose
   // model yet. Stay in baseline; remove when CapaItem.js is added to models/.
   'CapaItem', // 4× — DEFERRED model; tryRequire + null-default = no runtime breakage
-  // Enterprise-Pro speculative refs to never-built models (Enterprise PRO/Plus, CRM, ITAM)
-  'WarehouseBin', // 3×
-  'ProjectPro', // 3×
-  'ProjectTask', // 3×
-  'CRMContact', // 2×
-  'CRMPipeline', // 1×
-  'CRMDeal', // 1×
-  'Company', // 1×
-  'Candidate', // 1×
-  'ITAsset', // 1×
-  'StrategicObjective', // 2×
+  // ── W334 SCANNER FIX ────────────────────────────────────────────────────────
+  // Previously listed as "Enterprise-Pro speculative refs" but were ALL real,
+  // registered models — the W325c REGISTRATION_RE only matched the direct
+  // `mongoose.model('X', schema)` form, missing helper-wrapped registrations
+  // used by EnterprisePro.js (`reg('X', schema)`) and EnterpriseProPlus.js
+  // (`getOrCreate('X', schema)`). Scanner extended to detect both wrappers via
+  // HELPER_REGISTRATION_RE; 10 entries pruned in one go:
+  //   WarehouseBin (3×) ProjectPro (3×) ProjectTask (3×) CRMContact (2×)
+  //   CRMPipeline (1×) CRMDeal (1×) Candidate (1×) ITAsset (1×)
+  //   StrategicObjective (2×) ComplianceChecklist (1×)
+  // ───────────────────────────────────────────────────────────────────────────
+  'Company', // 1× — real phantom in Driver.js:152 (Company.js does not exist)
   // Misc never-built or renamed
   'Attachment', // 2× — investigate if Document is the canonical
   'Class', // 2× — smart-attendance domain
@@ -95,7 +96,6 @@ const KNOWN_PHANTOM_BASELINE_W325C = new Set([
   // backend/models/BeneficiaryManagement/CounselingSession.js counselorId now refs 'User'.
   'Violation', // 1× — investigate
   'Folder', // 1× — investigate Document hierarchy
-  'ComplianceChecklist', // 1× — investigate quality models
   'ComplianceControl', // 1× — investigate quality models
   'SurveyTemplate', // 1× — investigate
   'SatisfactionSurvey', // 1× — investigate
@@ -117,6 +117,12 @@ function walkJs(dir, skip, out = []) {
 // `mongoose.model('Name', schema, ...)` — two-arg form indicates REGISTRATION.
 // Single-arg `mongoose.model('Name')` is a LOOKUP (used by 100+ services).
 const REGISTRATION_RE = /mongoose\.model\s*\(\s*['"]([^'"]+)['"]\s*,/g;
+// Helper-wrapped registrations used by Enterprise vertical files
+// (EnterprisePro.js uses `reg(name, schema)`; EnterpriseProPlus.js uses
+// `getOrCreate(name, schema)` — both wrap `mongoose.models[name] || mongoose.model(name, schema)`).
+// The `\w+Schema\b` second-arg qualifier prevents false positives on arbitrary 2-arg helpers.
+const HELPER_REGISTRATION_RE =
+  /\b(?:reg|getOrCreate|registerModel|ensureModel|defineModel)\s*\(\s*['"]([^'"]+)['"]\s*,\s*\w+Schema\b/g;
 const REF_RE = /\bref\s*:\s*['"]([^'"]+)['"]/g;
 
 function collectRegistrations() {
@@ -125,6 +131,7 @@ function collectRegistrations() {
   for (const f of files) {
     const src = fs.readFileSync(f, 'utf8');
     for (const m of src.matchAll(REGISTRATION_RE)) set.add(m[1]);
+    for (const m of src.matchAll(HELPER_REGISTRATION_RE)) set.add(m[1]);
   }
   return set;
 }

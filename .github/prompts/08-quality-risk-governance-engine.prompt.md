@@ -81,7 +81,7 @@ Intelligence / governance services:
 - `backend/intelligence/sensitivity-grade.lib.js` — sensitivity gating (ADR-010)
 - `backend/intelligence/hash-chain.lib.js` — Wave-18 invariants for irreversible decisions
 - `backend/services/quality/predictiveRisk.service.js` — predictive risk scoring
-- `backend/intelligence/reason-codes.registry.js` — Wave 89 canonical reason codes (20 UPPER_SNAKE + Arabic labels + alias map)
+- `backend/intelligence/reason-codes.registry.js` — Wave 89 canonical reason codes (31 UPPER_SNAKE as of 2026-05-24, ratcheted by W286/W288/W290/W292; + Arabic labels + alias map)
 - `backend/models/auditLog.model.js` — 53 event types in `AuditEventTypes` (canonical of 3 schemas per ADR-021 Tier 1)
 - `backend/middleware/requireMfaTier.js` — MFA tier enforcement (ADR-019)
 

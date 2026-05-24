@@ -93,7 +93,7 @@ Event bus + cross-domain notification infrastructure (verified against source 20
 - `backend/integration/moduleConnector.js` — module-to-module connector layer
 - `backend/database/event-bus.js` — SEPARATE database event bus used by opt-in `services/blockchain/autoIssueSubscribers.js` (env flag `BLOCKCHAIN_AUTO_ISSUE=1`); do NOT confuse with the main integrationBus
 - `backend/models/auditLog.model.js` — 53 event types in `AuditEventTypes` (ADR-009; canonical of 3 schemas per ADR-021 Tier 1)
-- `backend/intelligence/reason-codes.registry.js` — Wave 89 canonical reason codes (20 codes + Arabic labels + alias map)
+- `backend/intelligence/reason-codes.registry.js` — Wave 89 canonical reason codes (31 codes as of 2026-05-24, ratcheted by W286/W288/W290/W292; UPPER_SNAKE + Arabic labels + alias map). Re-count via awk over the REASON_CODES Object.freeze block.
 - `backend/intelligence/hash-chain.lib.js` — Wave-18 hash chain for irreversible decisions
 - `backend/intelligence/sensitivity-grade.lib.js` — ADR-010 sensitivity gating
 - `backend/middleware/requireMfaTier.js` — ADR-019 MFA tier enforcement

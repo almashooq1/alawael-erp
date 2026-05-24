@@ -54,6 +54,18 @@ function wireCapa(app, deps = {}) {
       (emitEvent ? 'wired' : 'noop')
   );
 
+  // ── W348 — producers factory ────────────────────────────────────────
+  // W346 producers translate audit findings / RCA root causes / FMEA actions
+  // into CapaItem creation requests. Factory consumes the same service we
+  // just constructed (enforceMfa preserved through the chain).
+  try {
+    const { createCapaProducers } = require('../services/quality/capa-producers.service');
+    app._capaProducers = createCapaProducers({ capaService: service });
+    logger.info?.('[startup] CAPA producers wired (W348)');
+  } catch (err) {
+    logger.warn?.(`[startup] CAPA producers failed to wire: ${err.message}`);
+  }
+
   // ── W345 — REST surface ─────────────────────────────────────────────
   // Dual-mount under /api/quality/capa + /api/v1/quality/capa to match
   // the project's two-stem API convention (W283, W334 routes).
@@ -64,6 +76,18 @@ function wireCapa(app, deps = {}) {
     logger.info?.('[startup] CAPA routes mounted (W345): /api/quality/capa + /api/v1/...');
   } catch (err) {
     logger.warn?.(`[startup] CAPA routes failed to mount: ${err.message}`);
+  }
+
+  // ── W348 — producer routes ──────────────────────────────────────────
+  // POST endpoints that produce a CapaItem from an upstream entity and
+  // back-link it on the source sub-doc atomically.
+  try {
+    const producersRouter = require('../routes/quality/capa-producers.routes');
+    app.use('/api/quality/capa-producers', producersRouter);
+    app.use('/api/v1/quality/capa-producers', producersRouter);
+    logger.info?.('[startup] CAPA producer routes mounted (W348): /api/quality/capa-producers');
+  } catch (err) {
+    logger.warn?.(`[startup] CAPA producer routes failed to mount: ${err.message}`);
   }
 
   // ── Overdue sweeper cron (W344 Pass 3) ──────────────────────────────

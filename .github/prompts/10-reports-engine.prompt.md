@@ -4,8 +4,13 @@ description: تصميم محرك التقارير الذكية والدورية
 ---
 
 ================================================================
-READ FIRST — inherits doctrine (light-touch seed; expand later)
+READ FIRST — SUPERSEDED BY 05 (still useful for narrow reporting-UI scope)
 ================================================================
+
+**Superseded**: `.github/prompts/05-reports-approvals-family-communication.prompt.md`
+now carries the full Reporting Engine design including approval flows + family
+output rules. Prefer 05 for any new design work; this 10 stub remains as a
+narrow reporting-UI focused seed.
 
 This prompt is a SEED for the Reporting Engine. Reports aggregate the entire
 platform; this prompt inherits ALL upstream master prompts:
@@ -15,6 +20,7 @@ platform; this prompt inherits ALL upstream master prompts:
 - `.github/prompts/02-assessment-measures-engine.prompt.md` — assessment-driven reports + outcome dashboards
 - `.github/prompts/03-goals-care-plan-engine.prompt.md` — plan summary reports + family-safe approved plan summaries
 - `.github/prompts/04-programs-sessions-progress-engine.prompt.md` — service delivery reports + supervisory dashboards
+- `.github/prompts/05-reports-approvals-family-communication.prompt.md` — **CANONICAL reporting engine doctrine + approval/release flows**
 
 Every report MUST trace back to structured source data (no narrative-only reports). Use the report families listed in upstream prompts; do not invent new families without rationale.
 

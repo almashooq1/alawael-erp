@@ -2047,6 +2047,22 @@ require('./startup/capaBootstrap').wireCapa(app, { logger });
 // Cron disabled by default (ENABLE_RISK_SWEEP_CRON=true + RISK_SWEEP_BRANCH_IDS=b1,b2).
 require('./startup/riskSweeperBootstrap').wireRiskSweeper(app, { logger });
 
+// ─── Clinical sweepers (W356-W363 series) — Wave 364 ───────────────────
+// 7 cron sweepers across SeizureEvent / SafeguardingConcern /
+// CommunicationAidProfile / AssistiveDevice / CbahiAttestation /
+// TransitionPlan / RespiteBooking. Each independently env-gated:
+//   ENABLE_SAFEGUARDING_SLA_SWEEPER       (daily 08:00, critical-1h breach)
+//   ENABLE_DEVICE_LOAN_SWEEPER            (daily 09:00, overdue loans)
+//   ENABLE_DEVICE_MAINTENANCE_SWEEPER     (daily 09:30, due maintenance)
+//   ENABLE_RESPITE_NOSHOW_SWEEPER         (daily 02:00, auto-mark no_show)
+//   ENABLE_TRANSITION_OVERDUE_SWEEPER     (daily 10:00, past plannedDate)
+//   ENABLE_CBAHI_REASSESSMENT_SWEEPER     (weekly Mon 06:00, due reassessment)
+//   ENABLE_AAC_REASSESSMENT_SWEEPER       (weekly Mon 06:30, due reassessment)
+// All default-disabled; ops opts in per env flag. The respite no-show
+// flag is the only one that mutates state (auto-flip approved/confirmed
+// → no_show after 24h with no check-in). All others query + log.
+require('./startup/clinicalSweepersBootstrap').wireClinicalSweepers(app, { logger });
+
 // ─── Audit Chain Archiver (daily) — Wave 303 / W308 wire-in ──────────────────
 // Verifies hash-linked plan-review audit chains older than AUDIT_CHAIN_ARCHIVE_DAYS
 // (default 1825 = 5y PDPL retention), writes valid chains as NDJSON, and optionally

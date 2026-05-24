@@ -148,6 +148,20 @@ function wireCapa(app, deps = {}) {
     logger.warn?.(`[startup] Therapist workload routes failed to mount: ${err.message}`);
   }
 
+  // ── W353 — executive 1-page composite (Phase 9 slice 3) ─────────────
+  // Composes heatmap + workload + beneficiary KPIs into a single-page summary.
+  // Composes existing services (no DB queries beyond beneficiary counts).
+  try {
+    const execRouter = require('../routes/quality/executiveOnePage.routes');
+    app.use('/api/quality/executive-1-page', execRouter);
+    app.use('/api/v1/quality/executive-1-page', execRouter);
+    logger.info?.(
+      '[startup] Executive 1-page routes mounted (W353): /api/quality/executive-1-page'
+    );
+  } catch (err) {
+    logger.warn?.(`[startup] Executive 1-page routes failed to mount: ${err.message}`);
+  }
+
   // ── Overdue sweeper cron (W344 Pass 3) ──────────────────────────────
   const cronEnabled = String(process.env.ENABLE_CAPA_SWEEPER || '').toLowerCase() === 'true';
   if (!cronEnabled) {

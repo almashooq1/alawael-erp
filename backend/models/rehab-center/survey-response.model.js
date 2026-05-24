@@ -10,7 +10,11 @@ const surveyResponseSchema = new Schema(
       unique: true,
       default: () => `RESP-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
     },
-    survey_id: { type: Schema.Types.ObjectId, ref: 'SatisfactionSurvey', required: true },
+    survey_id: {
+      type: Schema.Types.ObjectId,
+      ref: 'RehabCenterSatisfactionSurvey',
+      required: true,
+    },
     beneficiary_id: { type: Schema.Types.ObjectId, ref: 'Beneficiary' },
     program_id: { type: Schema.Types.ObjectId, ref: 'DisabilityRehabilitation' },
 

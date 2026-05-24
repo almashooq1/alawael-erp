@@ -47,6 +47,9 @@ const REGISTRATION_SKIP_DIRS = new Set([
 // documentation, external/system refs). Add with one-line // justification.
 const REF_ALLOWLIST = new Set([
   'MeasurementType.targetDisabilities', // pseudo-ref for documentation inside MeasurementMaster
+  // W335 — Driver.employer refs 'Company': drivers may be employed by external transport
+  // companies (third-party operators). Not a Mongoose-owned entity; deliberate external ref.
+  'Company',
 ]);
 
 // ─── Baseline ratchet: phantom refs that EXIST as of W325 Pass 3 ────────────
@@ -88,22 +91,23 @@ const KNOWN_PHANTOM_BASELINE_W325C = new Set([
   //   CRMPipeline (1×) CRMDeal (1×) Candidate (1×) ITAsset (1×)
   //   StrategicObjective (2×) ComplianceChecklist (1×)
   // ───────────────────────────────────────────────────────────────────────────
-  'Company', // 1× — real phantom in Driver.js:152 (Company.js does not exist; employer field needs design decision)
+  // 'Company' moved to REF_ALLOWLIST (W335 — external 3rd-party transport employer, deliberate)
   // ── W335 RATCHET-DOWN ──────────────────────────────────────────────────────
   // 'Attachment' (2×) → 'Document' across FinancialJournalEntry + RiskAssessment
-  //   (attachments arrays now point to canonical Document model — same fix pattern as W324 Patient→Beneficiary)
   // 'Class'      (2×) → 'Classroom' across smart-attendance/AttendanceViaCamera + SmartAttendanceRecord
-  //   (classId fields now point to canonical Classroom model — semantic-mismatch fix per W329 pattern)
+  // 'Folder'           → 'FileFolder' in Document.parentFolderId
+  //   (existing models/documents/FileFolder.js was the canonical; rename only)
+  // 'SatisfactionSurvey' → 'RehabCenterSatisfactionSurvey' in rehab-center/survey-response.model.js
+  //   (canonical was registered with the RehabCenter prefix at quality/SatisfactionSurvey.model.js
+  //    no — actually registered as RehabCenterSatisfactionSurvey at rehab-center/satisfaction-survey.model.js:66)
+  // 'SurveyTemplate' → 'FamilySurveyTemplate' in familySatisfaction.models.js
+  //   (canonical lives in the same file at line 292; renamed in the response ref)
   // ──────────────────────────────────────────────────────────────────────────
   // 'Counselor' — RATCHET-DOWN W333: fixed to 'User' (counselor is a staff role, not entity).
-  // backend/models/BeneficiaryManagement/CounselingSession.js counselorId now refs 'User'.
   'Violation', // 1× — investigate
-  'Folder', // 1× — investigate Document hierarchy
-  'ComplianceControl', // 1× — investigate quality models
-  'SurveyTemplate', // 1× — investigate
-  'SatisfactionSurvey', // 1× — investigate
-  'DisabilityRehabilitation', // 1×
-  'SupportTicket', // 1×
+  'ComplianceControl', // 1× — only registered in supply-chain-management/ sub-project (out of backend/ scope)
+  'DisabilityRehabilitation', // 1× — investigate rehab-center model alternatives
+  'SupportTicket', // 1× — never-built; UserSubscription.supportTickets[] design decision pending
 ]);
 
 function walkJs(dir, skip, out = []) {

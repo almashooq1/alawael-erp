@@ -103,7 +103,7 @@ const DocumentSchema = new mongoose.Schema(
     },
     parentFolderId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Folder',
+      ref: 'FileFolder',
       default: null,
     },
 

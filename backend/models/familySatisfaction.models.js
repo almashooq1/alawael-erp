@@ -94,7 +94,7 @@ const SurveyTemplateSchema = new Schema(
 // ============================================================
 const SurveyResponseSchema = new Schema(
   {
-    template: { type: Schema.Types.ObjectId, ref: 'SurveyTemplate', required: true },
+    template: { type: Schema.Types.ObjectId, ref: 'FamilySurveyTemplate', required: true },
     templateCode: { type: String, required: true },
 
     // معلومات المستجيب

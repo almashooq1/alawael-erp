@@ -63,12 +63,50 @@ cd ../../alawael-rehab-platform/apps/web-admin && npm run dev
 
 ## Drift guards in **tests**/ (catch silent regressions)
 
+Foundational (sprint/source hygiene):
+
 - `no-broken-requires.test.js` — every relative `require()` resolves. Supports per-(file,target) allow-list for legitimate optional loads.
 - `no-utf8-bom.test.js` — no source file starts with EF BB BF (BOM bytes broke regex-based meta-tests).
 - `no-it-only-or-skip.test.js` — sprint files don't ship with `.only` or `.skip` leaks.
 - `wave-tests-in-sprint.test.js` — any `__tests__/*-waveNN*.test.js` that calls `jest.unmock('mongoose')` must be in `test:sprint` (else CI silently misses it; see the 2026-05-19 561-test rescue thread).
 - `sprint-test-files-exist.test.js` — every sprint enumeration entry resolves to a real file.
 - `test-script-dedupe.test.js` — no duplicate entries in `test:sprint`.
+
+Schema-shape / canonical-entity (W324–W332 series, 50 assertions across 5 suites):
+
+- `canonical-beneficiary-ref-wave324.test.js` — every Mongoose field named `beneficiaryId` / `beneficiary` / `participantId` MUST `ref: 'Beneficiary'`. Static analysis on source (jest.setup.js mocks mongoose). Catches both phantom refs (BeneficiaryProfile / Patient unregistered) AND semantic mismatches (User registered but conceptually wrong). 8 fixes in W324 + 8 fixes in W329 across 16 files.
+- `measure-library-governance-wave325.test.js` — MeasurementMaster schema-shape guard for the 5 W325 P1 additive fields (abbreviation, disciplines[], scoreUnits, scoreDirection, lifecycleStatus). Verifies optional/defaulted (no breaking change on existing docs).
+- `measure-lifecycle-lib-wave325b.test.js` — pure-function tests for `backend/intelligence/measure-lifecycle.lib.js` (4-state DAG + reason codes + MFA tier gating + composite cycle prevention) + schema-shape assertions for W325 P2 additions (lifecycleHistory[] + scoringType + compositeOf[]). 25 lib unit tests + 7 schema assertions = 32 total.
+- `universal-model-ref-drift-wave325c.test.js` — scans backend/models + backend/domains for every `ref: 'X'` and asserts X is `mongoose.model('X', schema)`-registered somewhere in backend/. Two-test guard: (1) NEW phantoms fail, (2) STALE baseline entries fail (forces ratchet-DOWN when fixed). Baseline ratchet pattern; current state 22 targets / 35 occurrences (was 26 / 58 at W325 P3 inception). 31 phantoms resolved across W324+W326+W327+W328+W329. Remaining = CapaItem (4×, DEFERRED — planned future Quality model, tryRequire pattern) + Enterprise PRO/Plus speculative (~12) + misc singletons.
+- `care-plan-registry-integrity-wave332.test.js` — locks the shape of W41's `care-planning.registry.js` (13 STATUSES + 8 PLAN_TYPES + frozen TRANSITIONS with required metadata + BFS reachability from DRAFT + terminal-status escape-hatch nuance — `supersede` legitimately exits FAMILY_NOTIFICATION_SENT for late corrections). Plus static-analysis assertions that CarePlanVersion.js pulls `enum: reg.STATUS_LIST` dynamically (no model↔registry desync possible).
+
+## Canonical entity refs — bug-class taxonomy (W324–W329)
+
+Three bug classes for Mongoose `ref:` strings, all caught by guards above:
+
+1. **Phantom ref** — `ref: 'X'` where `X` is never registered via `mongoose.model('X', schema)`. `populate()` silently returns null. Examples fixed: BeneficiaryProfile×5 (W324), Patient×2 (W324+W328 in CommunityReferral + ResourceBooking), Center×10 (W326 → Branch), Admin×8 + AdminUser×4 (W327 → User).
+2. **Semantic mismatch** — `ref: 'X'` where X IS registered but conceptually wrong. Examples fixed: `Assessment.beneficiaryId: ref:'User'` (W324, beneficiary≠User), `CarePlan.beneficiary: ref:'User'` (W329), `Goal.participantId: ref:'User'` (W329). Six of the eight W329 fixes had Arabic comment `"المستفيد مطلوب"` confirming intent — typed wrong.
+3. **Deferred** — `ref: 'X'` where X is planned but not yet built; caller uses `tryRequire('../../models/X')` for graceful degradation. Currently CapaItem (4×). Stays in baseline with explicit DEFERRED comment; remove when X.js is added to models/.
+
+The canonical names are:
+
+- **Beneficiary** is the canonical entity for "the disabled person being served" — registered at `backend/models/Beneficiary.js:690` + declared in `backend/intelligence/canonical/schemas/beneficiary.canonical.js` (mongooseModelName: 'Beneficiary'). NOT User, NOT Patient, NOT BeneficiaryProfile, NOT Center→use Branch.
+- **Branch** is the canonical org node — NOT Center.
+- **User** is the canonical staff/admin entity — NOT Admin, NOT AdminUser.
+- **Student** is registered as a SEPARATE model from Beneficiary (~21 callers via `ref:'Student'` in smart-attendance/transport/montessori). Domain fragmentation; future ADR may consolidate.
+- **3 clinical-session models coexist**: TherapySession + ClinicalSession + DisabilitySession. The 04-programs-sessions-progress-engine.prompt.md warns "do NOT add a 4th". Future ADR may pick one canonical.
+
+## Ratchet-down pattern (for tech-debt cleanup waves)
+
+When a drift guard discovers a large set of pre-existing violations:
+
+1. **Don't try to fix all at once** — that's a giant unreviewable PR.
+2. **Baseline the current state** in a `KNOWN_*_BASELINE` Set inside the guard.
+3. **Two assertions**: (a) NEW violations not in baseline must fail; (b) STALE baseline entries (no longer present in source) must fail — forces removal from baseline in same commit as the fix.
+4. **One group per wave**: pick a clean subset (e.g. `'Center' (10×) → 'Branch'`), fix all callers + prune from baseline + run guards.
+5. **Document each ratchet-DOWN in the baseline's comment block** so future readers know what's been chipped away.
+
+Proven on W325c (58 phantoms → 35 across 4 waves: W326, W327+W328, W329). The pattern works for ANY large pre-existing tech-debt sweep.
 
 ## Critical conventions
 

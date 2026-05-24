@@ -1,7 +1,24 @@
 ---
-mode: chat
+mode: agent
 description: إعادة هندسة المشروع ليصبح منصة تأهيل موحدة وذكية
 ---
+
+================================================================
+READ FIRST — inherits doctrine (light-touch seed; expand later)
+================================================================
+
+This prompt is a SEED for the Core Platform Architecture re-design. Since it
+operates at the meta level (the platform itself), it inherits:
+
+- `.github/prompts/00-platform-master.prompt.md` — the governing doctrine IS the core-platform definition
+- `.github/prompts/01-beneficiary-360-master.prompt.md` — beneficiary entity is the core anchor
+- `.github/prompts/02-assessment-measures-engine.prompt.md` — assessment is the evidence backbone
+- `.github/prompts/03-goals-care-plan-engine.prompt.md` — plans are the workflow backbone
+- `.github/prompts/04-programs-sessions-progress-engine.prompt.md` — execution is the delivery backbone
+
+This prompt was previously slot 01-; renumbered to 11- to free 01- for the new agent-mode Beneficiary 360 master. Its scope OVERLAPS with 00-platform-master's "CORE PLATFORM LAYERS" section — when in doubt, prefer 00- as the more recent canonical statement.
+
+Apply the standard closing block (Key design decisions / Assumptions / Risks / Next step).
 
 أنت مهندس منصات صحية مؤسسية وخبير في أنظمة التأهيل متعددة التخصصات.
 

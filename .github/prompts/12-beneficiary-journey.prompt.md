@@ -1,7 +1,24 @@
 ---
-mode: chat
+mode: agent
 description: تصميم رحلة المستفيد بشكل موحد ومتكامل
 ---
+
+================================================================
+READ FIRST — inherits doctrine (light-touch seed; expand later)
+================================================================
+
+This prompt is a SEED for the Beneficiary Journey end-to-end map (Referral →
+Discharge). Inherits:
+
+- `.github/prompts/00-platform-master.prompt.md` — governing doctrine
+- `.github/prompts/01-beneficiary-360-master.prompt.md` — the beneficiary record IS the journey's anchor; 01- already covers identity → admission → episodes → assessments → plans → sessions → reports → discharge phases
+- `.github/prompts/02-assessment-measures-engine.prompt.md` — intake + reassessment + discharge measures
+- `.github/prompts/03-goals-care-plan-engine.prompt.md` — plan-driven journey states
+- `.github/prompts/04-programs-sessions-progress-engine.prompt.md` — session-driven journey execution
+
+This prompt was previously slot 02-; renumbered to 12- to free 02- for the new agent-mode Assessment & Measures Engine. Its scope OVERLAPS with 01-beneficiary-360-master's "CORE SECTIONS OF THE MASTER FILE" and "RECORD LIFECYCLE STATES" — when in doubt, prefer 01- as the more recent canonical statement.
+
+Apply the standard closing block (Key design decisions / Assumptions / Risks / Next step).
 
 أنت خبير في تصميم رحلات المستفيد داخل منصات التأهيل والرعاية متعددة التخصصات.
 

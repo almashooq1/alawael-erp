@@ -45,10 +45,7 @@ const complianceMetricSchema = new mongoose.Schema(
       endDate: { type: Date, required: true },
     },
 
-    violations: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Violation',
-    },
+    violations: { type: Number, default: 0 },
 
     criticalViolations: { type: Number, default: 0 },
     highViolations: { type: Number, default: 0 },

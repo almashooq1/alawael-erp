@@ -50,6 +50,14 @@ const REF_ALLOWLIST = new Set([
   // W335 — Driver.employer refs 'Company': drivers may be employed by external transport
   // companies (third-party operators). Not a Mongoose-owned entity; deliberate external ref.
   'Company',
+  // W336 — EvidenceItem.controlIds[] cross-regulation mapping placeholder. Concept-only
+  // pseudo-ref; ComplianceControl as a backend entity is a deferred design decision (likely
+  // GRC-system integration boundary, not an in-process Mongoose model). Same pattern as Company.
+  'ComplianceControl',
+  // W336 — rehab-center/survey-response.program_id refs 'DisabilityRehabilitation'. The rehab-center
+  // domain has IndividualizedPlan + multiple program-style models but no single canonical "program"
+  // entity. Deferred pending product decision: link to IndividualizedPlan vs CarePlan vs domain enum.
+  'DisabilityRehabilitation',
 ]);
 
 // ─── Baseline ratchet: phantom refs that EXIST as of W325 Pass 3 ────────────
@@ -104,10 +112,21 @@ const KNOWN_PHANTOM_BASELINE_W325C = new Set([
   //   (canonical lives in the same file at line 292; renamed in the response ref)
   // ──────────────────────────────────────────────────────────────────────────
   // 'Counselor' — RATCHET-DOWN W333: fixed to 'User' (counselor is a staff role, not entity).
-  'Violation', // 1× — investigate
-  'ComplianceControl', // 1× — only registered in supply-chain-management/ sub-project (out of backend/ scope)
-  'DisabilityRehabilitation', // 1× — investigate rehab-center model alternatives
-  'SupportTicket', // 1× — never-built; UserSubscription.supportTickets[] design decision pending
+  // ── W336 RATCHET-DOWN (4 entries) ─────────────────────────────────────────
+  // 'Violation' (1×) — ComplianceMetric.violations changed from ObjectId ref to
+  //   Number{default:0} to match its sibling count fields (criticalViolations,
+  //   highViolations, mediumViolations, lowViolations). Was a schema-shape bug:
+  //   field name plural + type singular ObjectId next to count cluster → meant
+  //   to be a count all along.
+  // 'SupportTicket' (1×) → 'TicketEnhanced' in UserSubscription.supportTickets[].
+  //   Canonical: backend/models/TicketEnhanced.js registers 'TicketEnhanced' +
+  //   3 satellite models (TicketComment, TicketSlaConfig, TicketEscalationRule).
+  // 'ComplianceControl' (1×) → moved to REF_ALLOWLIST (cross-regulation mapping
+  //   pseudo-ref; deferred design decision on GRC entity ownership).
+  // 'DisabilityRehabilitation' (1×) → moved to REF_ALLOWLIST (program_id field
+  //   in rehab-center/survey-response; deferred design decision on canonical
+  //   program entity for the rehab-center domain).
+  // ──────────────────────────────────────────────────────────────────────────
 ]);
 
 function walkJs(dir, skip, out = []) {

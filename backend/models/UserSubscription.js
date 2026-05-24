@@ -88,7 +88,7 @@ const userSubscriptionSchema = new mongoose.Schema(
     supportTickets: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'SupportTicket',
+        ref: 'TicketEnhanced',
       },
     ],
     customizations: {

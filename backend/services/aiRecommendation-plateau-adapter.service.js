@@ -184,11 +184,209 @@ async function createBundlesFromOpenPlateauAlerts({ alertModel, aiRecService, li
   return result;
 }
 
+// ═══════════════════════════════════════════════════════════════════════
+// W339 — REGRESSION_DETECTED adapter (sibling of plateau)
+// ═══════════════════════════════════════════════════════════════════════
+//
+// Regression alerts are MORE urgent than plateau alerts (measureAlertEngine
+// flags them severity:'high' vs 'medium' for plateau). The converter routes
+// them to type 'ESCALATE_TO_QUALITY' so the supervisor queue surfaces them
+// distinctly from plateau-driven dosage recommendations.
+
+/**
+ * Heuristic confidence for a regression alert.
+ *   - n ≥ 5            +0.25
+ *   - spanDays ≥ 60    +0.20  (shorter than plateau's 90 — regression is more urgent)
+ *   - slope < -1       +0.30  (strict — only negative AND |slope|>1 counts)
+ *   - r² ≥ 0.5         +0.15
+ *   - delta worsens MCID +0.10 (mcidViolated truthy)
+ */
+function scoreRegressionEvidence(evidence = {}) {
+  let s = 0;
+  if ((evidence.n || 0) >= 5) s += 0.25;
+  if ((evidence.spanDays || 0) >= 60) s += 0.2;
+  if (typeof evidence.slopePerMonth === 'number' && evidence.slopePerMonth < -1) {
+    s += 0.3;
+  }
+  if ((evidence.r2 || 0) >= 0.5) s += 0.15;
+  if (evidence.mcidViolated) s += 0.1;
+  return Math.max(0, Math.min(1, s));
+}
+
+function buildRegressionSignals(evidence = {}) {
+  const signals = [];
+  if ((evidence.n || 0) >= 5) {
+    signals.push({
+      name: 'measurement_count_sufficient',
+      weight: 0.25,
+      evidence: `n=${evidence.n} measurements over the window`,
+    });
+  }
+  if ((evidence.spanDays || 0) >= 60) {
+    signals.push({
+      name: 'observation_span_sufficient',
+      weight: 0.2,
+      evidence: `spanDays=${evidence.spanDays} (≥60 — regression confirmed not noise)`,
+    });
+  }
+  if (typeof evidence.slopePerMonth === 'number' && evidence.slopePerMonth < -1) {
+    signals.push({
+      name: 'slope_declining',
+      weight: 0.3,
+      evidence: `slopePerMonth=${evidence.slopePerMonth.toFixed(3)} (negative + |slope|>1)`,
+    });
+  }
+  if ((evidence.r2 || 0) >= 0.5) {
+    signals.push({
+      name: 'trend_well_fit',
+      weight: 0.15,
+      evidence: `r²=${evidence.r2.toFixed(2)} (decline is statistically well-supported)`,
+    });
+  }
+  if (evidence.mcidViolated) {
+    signals.push({
+      name: 'mcid_violated',
+      weight: 0.1,
+      evidence: `score worsened by more than MCID — clinically significant decline`,
+    });
+  }
+  return signals;
+}
+
+/**
+ * Pure converter — turn a REGRESSION_DETECTED alert into createDraft args.
+ * Type: ESCALATE_TO_QUALITY (regression = clinical safety signal, not just a
+ * dosage tuning suggestion). Routes the bundle to the supervisor queue with
+ * higher visual priority than plateau bundles.
+ */
+function regressionAlertToDraftArgs(alert) {
+  if (!alert || alert.alertType !== 'REGRESSION_DETECTED') return null;
+  if (!alert.beneficiaryId) return null;
+  const evidence = alert.evidence || {};
+  const confidence = scoreRegressionEvidence(evidence);
+  const signals = buildRegressionSignals(evidence);
+  const measureLabel =
+    alert.measureRef?.code || alert.measureRef?.name || alert.measureRef || 'unknown measure';
+  const reviewerHint =
+    evidence.message_ar ||
+    `Regression on ${measureLabel}: ${evidence.n || '?'} measurements over ` +
+      `${evidence.spanDays || '?'} days with slope=${(evidence.slopePerMonth || 0).toFixed(2)}/month. ` +
+      `Consider quality escalation + reassessment + plan review.`;
+  return {
+    beneficiaryId: alert.beneficiaryId,
+    branchId: alert.branchId || null,
+    episodeId: alert.episodeId || null,
+    type: 'ESCALATE_TO_QUALITY',
+    confidence,
+    signals,
+    draftAction: {
+      basis: 'regression-alert',
+      sourceAlertId: alert._id,
+      measureRef: alert.measureRef,
+      suggestedAction:
+        'flag to clinical supervisor + clinical lead; trigger reassessment + plan review',
+    },
+    reviewerHint,
+    llmTelemetryCallId: null,
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// W339 — Generic orchestrator (handles any alertType via converter dispatch)
+// ═══════════════════════════════════════════════════════════════════════
+
+const TYPE_CONVERTERS = Object.freeze({
+  PLATEAU_DETECTED: plateauAlertToDraftArgs,
+  REGRESSION_DETECTED: regressionAlertToDraftArgs,
+});
+
+/**
+ * Generic orchestrator — finds open alerts of `alertType` not yet linked,
+ * converts via TYPE_CONVERTERS[alertType], creates draft, stamps alert.
+ * This generalizes the W337 createBundlesFromOpenPlateauAlerts logic so
+ * new producer types (MCID_NOT_MET, overdue, etc.) only need to add a
+ * converter + register in TYPE_CONVERTERS.
+ */
+async function createBundlesFromOpenAlertsOfType({
+  alertModel,
+  aiRecService,
+  alertType,
+  limit = 200,
+} = {}) {
+  if (!alertModel || typeof alertModel.find !== 'function') {
+    throw new Error('plateauAdapter: alertModel with .find required');
+  }
+  if (!aiRecService || typeof aiRecService.createDraft !== 'function') {
+    throw new Error('plateauAdapter: aiRecService.createDraft required');
+  }
+  const converter = TYPE_CONVERTERS[alertType];
+  if (!converter) {
+    throw new Error(`plateauAdapter: no converter registered for alertType=${alertType}`);
+  }
+
+  const alerts = await alertModel
+    .find({
+      alertType,
+      status: 'open',
+      linkedRecommendationBundleId: null,
+    })
+    .limit(limit);
+
+  const result = { scanned: alerts.length, converted: 0, skipped: 0, errors: [], alertType };
+  for (const alert of alerts) {
+    const args = converter(alert);
+    if (!args) {
+      result.skipped++;
+      continue;
+    }
+    try {
+      const bundle = await aiRecService.createDraft(args);
+      await alertModel.updateOne(
+        { _id: alert._id },
+        { $set: { linkedRecommendationBundleId: bundle._id } }
+      );
+      result.converted++;
+    } catch (err) {
+      result.errors.push({
+        alertId: alert._id,
+        code: err.code || 'UNKNOWN',
+        message: err.message,
+      });
+    }
+  }
+  return result;
+}
+
+/**
+ * Backward-compat wrapper (W337 callers stay valid).
+ */
+async function createBundlesFromOpenRegressionAlerts({
+  alertModel,
+  aiRecService,
+  limit = 200,
+} = {}) {
+  return createBundlesFromOpenAlertsOfType({
+    alertModel,
+    aiRecService,
+    alertType: 'REGRESSION_DETECTED',
+    limit,
+  });
+}
+
 module.exports = {
+  // Plateau (W337)
   scoreEvidence,
   buildSignals,
   plateauAlertToDraftArgs,
   createBundlesFromOpenPlateauAlerts,
-  // re-export confidence thresholds for callers building UI summaries
+  // Regression (W339)
+  scoreRegressionEvidence,
+  buildRegressionSignals,
+  regressionAlertToDraftArgs,
+  createBundlesFromOpenRegressionAlerts,
+  // Generic dispatch (W339)
+  TYPE_CONVERTERS,
+  createBundlesFromOpenAlertsOfType,
+  // Lib re-exports for UI summaries
   CONFIDENCE_THRESHOLDS: lib.CONFIDENCE_THRESHOLDS,
 };

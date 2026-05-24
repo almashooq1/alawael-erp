@@ -265,3 +265,166 @@ describe('W337 createBundlesFromOpenPlateauAlerts', () => {
     expect(result.errors[0].code).toBe('INVALID_TRANSITION');
   });
 });
+
+// ═══════════════════════════════════════════════════════════════════════
+// W339 — REGRESSION_DETECTED adapter (sibling of plateau)
+// ═══════════════════════════════════════════════════════════════════════
+
+describe('W339 scoreRegressionEvidence', () => {
+  it('full-strength regression → 1.0', () => {
+    const conf = adapter.scoreRegressionEvidence({
+      n: 8,
+      spanDays: 90,
+      slopePerMonth: -2,
+      r2: 0.85,
+      mcidViolated: true,
+    });
+    expect(conf).toBe(1);
+  });
+
+  it('empty evidence → 0', () => {
+    expect(adapter.scoreRegressionEvidence()).toBe(0);
+    expect(adapter.scoreRegressionEvidence({})).toBe(0);
+  });
+
+  it('positive slope does NOT count (regression requires negative)', () => {
+    const conf = adapter.scoreRegressionEvidence({
+      n: 8,
+      spanDays: 90,
+      slopePerMonth: 2,
+      r2: 0.85,
+    });
+    // n + span + r2 = 0.25 + 0.20 + 0.15 = 0.60 (slope NOT credited because positive)
+    expect(conf).toBeCloseTo(0.6, 5);
+  });
+
+  it('slope of -1 does NOT count (strict < -1)', () => {
+    const conf = adapter.scoreRegressionEvidence({
+      n: 8,
+      spanDays: 90,
+      slopePerMonth: -1,
+      r2: 0.5,
+    });
+    expect(conf).toBeCloseTo(0.6, 5);
+  });
+
+  it('mcidViolated adds the final 0.10', () => {
+    const without = adapter.scoreRegressionEvidence({
+      n: 8,
+      spanDays: 90,
+      slopePerMonth: -2,
+      r2: 0.85,
+    });
+    const withMcid = adapter.scoreRegressionEvidence({
+      n: 8,
+      spanDays: 90,
+      slopePerMonth: -2,
+      r2: 0.85,
+      mcidViolated: true,
+    });
+    expect(withMcid - without).toBeCloseTo(0.1, 5);
+  });
+});
+
+describe('W339 regressionAlertToDraftArgs', () => {
+  it('returns null for non-regression alerts', () => {
+    expect(adapter.regressionAlertToDraftArgs({ alertType: 'PLATEAU_DETECTED' })).toBeNull();
+    expect(adapter.regressionAlertToDraftArgs({ alertType: 'MCID_NOT_MET' })).toBeNull();
+  });
+
+  it('builds ESCALATE_TO_QUALITY args (NOT INCREASE_DOSAGE_AND_REASSESS like plateau)', () => {
+    const alert = {
+      _id: 'a-reg',
+      alertType: 'REGRESSION_DETECTED',
+      beneficiaryId: 'b1',
+      branchId: 'br1',
+      measureRef: { code: 'VABS-3' },
+      evidence: { n: 7, spanDays: 75, slopePerMonth: -2.5, r2: 0.7, mcidViolated: true },
+    };
+    const args = adapter.regressionAlertToDraftArgs(alert);
+    expect(args.type).toBe('ESCALATE_TO_QUALITY');
+    expect(args.confidence).toBe(1);
+    expect(args.draftAction.basis).toBe('regression-alert');
+    expect(args.draftAction.suggestedAction).toMatch(/supervisor/i);
+  });
+
+  it('preserves message_ar in reviewerHint', () => {
+    const args = adapter.regressionAlertToDraftArgs({
+      alertType: 'REGRESSION_DETECTED',
+      beneficiaryId: 'b1',
+      evidence: { message_ar: 'تراجع ملحوظ في الأداء' },
+    });
+    expect(args.reviewerHint).toBe('تراجع ملحوظ في الأداء');
+  });
+});
+
+describe('W339 buildRegressionSignals', () => {
+  it('emits 5 distinct signals for full-strength evidence', () => {
+    const signals = adapter.buildRegressionSignals({
+      n: 8,
+      spanDays: 90,
+      slopePerMonth: -2,
+      r2: 0.85,
+      mcidViolated: true,
+    });
+    expect(signals).toHaveLength(5);
+    const names = signals.map(s => s.name).sort();
+    expect(names).toEqual([
+      'mcid_violated',
+      'measurement_count_sufficient',
+      'observation_span_sufficient',
+      'slope_declining',
+      'trend_well_fit',
+    ]);
+  });
+});
+
+describe('W339 generic createBundlesFromOpenAlertsOfType dispatch', () => {
+  it('throws when alertType has no registered converter', async () => {
+    await expect(
+      adapter.createBundlesFromOpenAlertsOfType({
+        alertModel: { find: () => ({ limit: () => Promise.resolve([]) }) },
+        aiRecService: { createDraft: jest.fn() },
+        alertType: 'UNREGISTERED_ALERT',
+      })
+    ).rejects.toThrow(/no converter/);
+  });
+
+  it('TYPE_CONVERTERS exposes plateau + regression (extensible + frozen)', () => {
+    expect(Object.keys(adapter.TYPE_CONVERTERS).sort()).toEqual([
+      'PLATEAU_DETECTED',
+      'REGRESSION_DETECTED',
+    ]);
+    expect(Object.isFrozen(adapter.TYPE_CONVERTERS)).toBe(true);
+  });
+
+  it('returns alertType in result for caller logging', async () => {
+    const alertModel = {
+      find: () => ({ limit: () => Promise.resolve([]) }),
+      updateOne: jest.fn(),
+    };
+    const r = await adapter.createBundlesFromOpenAlertsOfType({
+      alertModel,
+      aiRecService: { createDraft: jest.fn() },
+      alertType: 'PLATEAU_DETECTED',
+    });
+    expect(r.alertType).toBe('PLATEAU_DETECTED');
+    expect(r.scanned).toBe(0);
+  });
+
+  it('createBundlesFromOpenRegressionAlerts delegates with alertType=REGRESSION_DETECTED', async () => {
+    let capturedQuery = null;
+    const alertModel = {
+      find: q => {
+        capturedQuery = q;
+        return { limit: () => Promise.resolve([]) };
+      },
+      updateOne: jest.fn(),
+    };
+    await adapter.createBundlesFromOpenRegressionAlerts({
+      alertModel,
+      aiRecService: { createDraft: jest.fn() },
+    });
+    expect(capturedQuery.alertType).toBe('REGRESSION_DETECTED');
+  });
+});

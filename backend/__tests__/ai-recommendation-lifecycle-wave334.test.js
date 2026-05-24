@@ -489,9 +489,10 @@ describe('W334 Pass 3 — bootstrap (aiRecommendationBootstrap.js)', () => {
     expect(BOOTSTRAP_SRC).toMatch(/['"]30 3 \* \* \*['"]/);
   });
 
-  it('W338 plateau-adapter wires plateauAdapter.createBundlesFromOpenPlateauAlerts', () => {
-    expect(BOOTSTRAP_SRC).toMatch(/plateauAdapter\.createBundlesFromOpenPlateauAlerts\(/);
+  it('W338+W339 cron iterates plateauAdapter.TYPE_CONVERTERS via generic dispatch', () => {
     expect(BOOTSTRAP_SRC).toMatch(/require\(['"]\.\.\/services\/aiRecommendation-plateau-adapter/);
+    expect(BOOTSTRAP_SRC).toMatch(/plateauAdapter\.TYPE_CONVERTERS/);
+    expect(BOOTSTRAP_SRC).toMatch(/plateauAdapter\.createBundlesFromOpenAlertsOfType\(/);
   });
 
   it('W338 gracefully skips when MeasureAlert model is not registered (no-throw)', () => {

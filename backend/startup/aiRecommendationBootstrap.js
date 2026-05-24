@@ -111,19 +111,30 @@ function wireAiRecommendations(app, deps = {}) {
           );
           return;
         }
-        const result = await plateauAdapter.createBundlesFromOpenPlateauAlerts({
-          alertModel,
-          aiRecService: aiRecommendationService,
-          limit: 200,
-        });
-        logger.info(
-          `[ai-recommendations] daily plateau adapter: scanned=${result.scanned} converted=${result.converted} skipped=${result.skipped} errors=${result.errors.length}`
-        );
-        if (result.errors.length > 0) {
-          for (const e of result.errors.slice(0, 5)) {
-            logger.warn('[ai-recommendations] plateau adapter error', e);
+        // W338 + W339: run all registered producers in one tick.
+        // The generic orchestrator handles per-alertType conversion via
+        // TYPE_CONVERTERS dispatch. New producer types (MCID_NOT_MET,
+        // overdue-reassessment, etc.) add themselves to TYPE_CONVERTERS
+        // and pick up cron coverage automatically.
+        const producerTypes = Object.keys(plateauAdapter.TYPE_CONVERTERS);
+        const summaries = [];
+        for (const alertType of producerTypes) {
+          const r = await plateauAdapter.createBundlesFromOpenAlertsOfType({
+            alertModel,
+            aiRecService: aiRecommendationService,
+            alertType,
+            limit: 200,
+          });
+          summaries.push(
+            `${alertType}: scanned=${r.scanned} converted=${r.converted} skipped=${r.skipped} errors=${r.errors.length}`
+          );
+          if (r.errors.length > 0) {
+            for (const e of r.errors.slice(0, 5)) {
+              logger.warn(`[ai-recommendations] ${alertType} adapter error`, e);
+            }
           }
         }
+        logger.info(`[ai-recommendations] daily producer cron — ${summaries.join(' | ')}`);
       } catch (err) {
         logger.error('[ai-recommendations] plateau adapter cron failed', err);
       }

@@ -65,7 +65,7 @@ Family communication:
 - `backend/models/Notification.js` — notification dispatch
 - `backend/models/WhatsAppConversation.js` — WhatsApp integration (W280-area)
 - `backend/models/WhatsAppConsent.js` — consent-gated WhatsApp
-- `backend/services/parent-chatbot.service.js` (intelligence/) — chatbot with consent + audit
+- `backend/intelligence/parent-chatbot.service.js` — chatbot with consent + audit
 - `backend/services/messaging.service.js` — generic messaging
 - `backend/routes/parent-portal-v1.routes.js` — parent portal HTTP surface
 - `backend/routes/parent-portal-v2.routes.js` — newer portal surface

@@ -99,7 +99,7 @@ Operational state + exceptions:
 - `backend/intelligence/attendance-baseline.service.js` — baseline + drift detection
 - `backend/intelligence/attendance-correction.service.js` — correction workflow
 - `backend/intelligence/attendance-privacy.service.js` — PDPL-aware redaction
-- `backend/intelligence/attendance-device.service.js` — device event normalization
+- `backend/intelligence/attendance-event-emitter.service.js` — device-event normalization (closest equivalent to the originally-planned `attendance-device.service.js` which was never built — the event-emitter handles the same normalization concern)
 
 Sister repo (`alawael-rehab-platform/`):
 

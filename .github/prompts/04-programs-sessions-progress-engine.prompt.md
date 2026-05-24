@@ -59,7 +59,7 @@ Progress (multi-level):
 - `backend/models/GoalProgressSnapshot.js` — point-in-time goal snapshot
 - `backend/models/BeneficiaryProgress.js` — beneficiary-level rollup
 - `backend/intelligence/care-plan-progress-reviewer.service.js` — progress review orchestrator
-- `backend/scheduler/care-plan-plateau-detector.scheduler.js` — periodic plateau detection job
+- `backend/intelligence/care-plan-plateau-detector.scheduler.js` — periodic plateau detection job
 
 Home program + family carryover:
 

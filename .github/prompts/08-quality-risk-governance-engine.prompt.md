@@ -63,10 +63,10 @@ QMS core models (30 files at `backend/models/quality/`):
 
 CAPA + cross-cutting (W337-CapaItem closed the last W325c phantom):
 
-- `backend/models/CapaItem.js` — Corrective Action / Preventive Action (built W337-parallel commit `2f5967bd1`)
+- `backend/models/quality/CapaItem.model.js` — Corrective Action / Preventive Action (built W337-parallel commit `2f5967bd1`; sits under `models/quality/` with the other QMS models)
 - `backend/intelligence/capa-lifecycle.lib.js` — 7-state CAPA DAG (built W337-parallel)
 - `backend/models/ComplianceMetric.js` — compliance metric record (W336 violations field is Number count, not ObjectId)
-- `backend/models/ComplianceAlert.js`
+- `backend/models/EnterprisePro.js` (lines 132-200, registered via `reg('ComplianceAlert', ...)` at line 767) — ComplianceAlert inline schema; not a standalone file
 
 Cross-references from drift-guard waves (canonical refs guaranteed):
 

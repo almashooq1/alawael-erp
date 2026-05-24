@@ -49,7 +49,7 @@ Canonical sources for goals + care-plan surface in this repo:
 - `backend/intelligence/care-plan-recommendation-builder.service.js` — LLM-assisted plan synthesis from assessment evidence
 - `backend/intelligence/care-plan-validator.service.js` — semantic validation (goal coherence, dosing reasonable, team capacity)
 - `backend/services/carePlanReviewService.js` — review cycle + plateau detection
-- `backend/scheduler/care-plan-plateau-detector.js` — periodic plateau detection job
+- `backend/intelligence/care-plan-plateau-detector.scheduler.js` — periodic plateau detection job
 - `backend/intelligence/care-plan-bootstrap.js` — care-plan domain wiring
 - `backend/routes/care-plan.routes.js` — REST surface
 - `backend/intelligence/measure-lifecycle.lib.js` — pure-lib pattern proven in W325 P2 (reusable template)

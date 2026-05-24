@@ -227,3 +227,14 @@ __tests__/ops-schedulers-health-endpoint.test.js
 __tests__/scheduler-snapshots-persistence.test.js
 __tests__/scheduler-snapshots-bootstrap-order.test.js
 __tests__/rag-cache-wave283j.test.js
+
+# W356-W364 clinical-services series (2026-05-25)
+__tests__/seizure-log-wave356.test.js
+__tests__/safeguarding-wave357.test.js
+__tests__/communication-aid-wave358.test.js
+__tests__/assistive-device-wave359.test.js
+__tests__/cbahi-wave360.test.js
+__tests__/transition-plan-wave361.test.js
+__tests__/adaptive-sports-wave362.test.js
+__tests__/respite-wave363.test.js
+__tests__/clinical-sweepers-wave364.test.js

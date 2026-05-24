@@ -103,4 +103,38 @@ capaItemSchema.pre('validate', async function () {
   }
 });
 
+// W340 — defense-in-depth: validate every status change against the lifecycle DAG
+// before the doc is persisted. Mirrors W332 care-plan + W334 Pass 2 AiRecommendation
+// pre-save hook pattern. Throws a CapaTransitionError on violation; the route layer
+// catches and returns the lib's structured {code, message} as 400/403.
+capaItemSchema.pre('save', function (next) {
+  if (this.isNew) return next();
+  if (!this.isModified('status')) return next();
+  const from = this.$__.priorDoc ? this.$__.priorDoc.status : (this._original?.status ?? null);
+  const to = this.status;
+  if (from == null || from === to) return next();
+  // Caller is expected to attach { actor, reasonCode, notes, mfaTier } via
+  // this.$locals.transition (Mongoose convention) before .save(). When absent
+  // (e.g. seeders), we skip the MFA + reason guards but still enforce the DAG.
+  const ctx = this.$locals?.transition || {};
+  const result = lib.validateTransition({
+    from,
+    to,
+    actor: ctx.actor,
+    reasonCode: ctx.reasonCode,
+    notes: ctx.notes,
+    // Only enforce MFA tier if caller supplied one (otherwise treat as system call).
+    mfaTier: ctx.mfaTier != null ? ctx.mfaTier : Number.MAX_SAFE_INTEGER,
+  });
+  if (!result.ok) {
+    const err = new Error(result.message);
+    err.code = result.code;
+    err.name = 'CapaTransitionError';
+    return next(err);
+  }
+  // Append the audit entry — frozen object; safe to push.
+  this.lifecycleHistory.push(result.entry);
+  return next();
+});
+
 module.exports = mongoose.models.CapaItem || mongoose.model('CapaItem', capaItemSchema);

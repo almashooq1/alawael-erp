@@ -77,11 +77,13 @@ const HELPER_REGISTRATION_RE =
 //
 // CONTRACT: do NOT add entries. Add the canonical → re-export path instead.
 const KNOWN_DUPLICATE_REGISTRATIONS = new Set([
-  // Tier 1 — registered in 3 or 4 files (highest risk of silent schema drift)
+  // Tier 1 — registered in 3 or 4 files (highest risk of silent schema drift).
+  // Counts re-verified after W340 scanner comment-stripping fix:
   'AuditLog', // 4× — investigate audit infrastructure consolidation
-  'Beneficiary', // 3× — canonical entity per W324; multiple registrations is alarming
+  'ApprovalRequest', // 3× — discovered W340; schemas DIVERGE significantly (rich state-machine in authorization/approvals/ vs simple legacy in models/ — first-loaded wins silently)
   'ReportTemplate', // 3×
-  'ApprovalRequest', // 3× — discovered W340; canonical likely authorization/approvals/
+  'WorkflowInstance', // 3× (was undercount before W340 comment-stripping fix; surfaced in re-scan)
+  'Beneficiary', // 2× — canonical models/Beneficiary.js + seeder copy; was 3 pre-strip, third was a doc-comment example
 
   // Tier 2 — registered in 2 files (lower risk but still drift-prone)
   'Correspondence',
@@ -152,6 +154,16 @@ function walkJs(dir, skip, out = []) {
   return out;
 }
 
+// Strip JS comments so doc-strings like `mongoose.model('X', schema)` inside a
+// /* */ block or a // line comment don't get counted as a registration. The
+// W340 initial discovery found `scripts/testing/check-model-collisions.js`
+// triggered a false-positive on 'Beneficiary' because the comment contained
+// the literal pattern as an example. Comment-stripping makes the guard
+// rigorous against documentation noise.
+function stripJsComments(src) {
+  return src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '');
+}
+
 function collectRegistrations() {
   const files = walkJs(BACKEND_ROOT, SCAN_SKIP_DIRS);
   // Map<modelName, Set<filePath>>  — using Set because the same file might
@@ -159,7 +171,7 @@ function collectRegistrations() {
   // once in `mongoose.model('X', schema)`), and we only want to count files.
   const byName = new Map();
   for (const f of files) {
-    const src = fs.readFileSync(f, 'utf8');
+    const src = stripJsComments(fs.readFileSync(f, 'utf8'));
     const rel = path.relative(REPO_ROOT, f).replace(/\\/g, '/');
     for (const m of src.matchAll(REGISTRATION_RE)) {
       if (!byName.has(m[1])) byName.set(m[1], new Set());

@@ -215,3 +215,35 @@ describe('W337 — schema canonical refs + dynamic enum binding', () => {
     );
   });
 });
+
+describe('W340 — CapaItem pre-save lifecycle hook (defense-in-depth)', () => {
+  it('registers a pre("save") hook that delegates to lib.validateTransition', () => {
+    expect(MODEL_SRC).toMatch(/capaItemSchema\.pre\(\s*['"]save['"]\s*,/);
+    expect(MODEL_SRC).toMatch(/lib\.validateTransition\(/);
+  });
+
+  it('throws CapaTransitionError (named error) on invalid transition', () => {
+    expect(MODEL_SRC).toMatch(/err\.name\s*=\s*['"]CapaTransitionError['"]/);
+  });
+
+  it('propagates lib error CODE onto the thrown error (for route mapping)', () => {
+    expect(MODEL_SRC).toMatch(/err\.code\s*=\s*result\.code/);
+  });
+
+  it('appends the validated entry into lifecycleHistory on success', () => {
+    expect(MODEL_SRC).toMatch(/this\.lifecycleHistory\.push\(\s*result\.entry\s*\)/);
+  });
+
+  it('reads transition context from $locals.transition (Mongoose convention)', () => {
+    expect(MODEL_SRC).toMatch(/this\.\$locals\??\.transition/);
+  });
+
+  it('uses MAX_SAFE_INTEGER sentinel so absent caller tier bypasses MFA enforcement', () => {
+    expect(MODEL_SRC).toMatch(/Number\.MAX_SAFE_INTEGER/);
+  });
+
+  it('skips hook entirely on new docs (isNew) and when status not modified', () => {
+    expect(MODEL_SRC).toMatch(/this\.isNew/);
+    expect(MODEL_SRC).toMatch(/this\.isModified\(\s*['"]status['"]\s*\)/);
+  });
+});

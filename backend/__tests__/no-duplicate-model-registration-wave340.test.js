@@ -79,7 +79,9 @@ const HELPER_REGISTRATION_RE =
 const KNOWN_DUPLICATE_REGISTRATIONS = new Set([
   // Tier 1 — registered in 3 or 4 files (highest risk of silent schema drift).
   // Counts re-verified after W340 scanner comment-stripping fix:
-  'AuditLog', // 4× — investigate audit infrastructure consolidation
+  // 'AuditLog' — W347 moved to REGISTRATION_ALLOWLIST (defensive pattern, canonical
+  //              always wins via load-order; ADR-021 Tier 1 question Q1-Q3 still open
+  //              for true consolidation but ALLOWLIST preserves current behavior).
   'ApprovalRequest', // 3× — discovered W340; schemas DIVERGE significantly (rich state-machine in authorization/approvals/ vs simple legacy in models/ — first-loaded wins silently)
   'ReportTemplate', // 3×
   'WorkflowInstance', // 3× (was undercount before W340 comment-stripping fix; surfaced in re-scan)
@@ -148,6 +150,20 @@ const REGISTRATION_ALLOWLIST = new Set([
   // schema duplication.
   'Referral',
   'Task',
+  // W347 — AuditLog (4 registration sites, all idempotent/defensive). Per ADR-021
+  // Tier 1 analysis the 4 sites are:
+  //   1. models/auditLog.model.js (canonical, richest schema, 60+ event types)
+  //   2. database/audit-trail.js (try/catch defensive: lookup first, register fallback)
+  //   3. routes/audit-trail-enhanced.routes.js (same try/catch defensive)
+  //   4. middleware/auditTrail.middleware.js (idempotent: mongoose.models.AuditLog || mongoose.model(...))
+  // In normal startup the canonical loads first → other 3 schemas are dead code.
+  // The schemas DIVERGE (canonical uses entityType, routes uses auditableType,
+  // middleware uses event+actor — see ADR-021 comparative table) so a true
+  // consolidation requires the stakeholder decision documented in ADR-021 Q1-Q3:
+  // are there callers depending on the non-canonical field names? Until that's
+  // answered the ALLOWLIST preserves current behavior (canonical always wins via
+  // load-order). Same precedent as W343 Referral/Task.
+  'AuditLog',
 ]);
 
 function walkJs(dir, skip, out = []) {

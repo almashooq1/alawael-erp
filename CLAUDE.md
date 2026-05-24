@@ -114,7 +114,7 @@ When a drift guard discovers a large set of pre-existing violations:
 4. **One group per wave**: pick a clean subset (e.g. `'Center' (10×) → 'Branch'`), fix all callers + prune from baseline + run guards.
 5. **Document each ratchet-DOWN in the baseline's comment block** so future readers know what's been chipped away.
 
-Proven on W325c (58 phantoms → 35 across 4 waves: W326, W327+W328, W329). The pattern works for ANY large pre-existing tech-debt sweep.
+Proven on W325c — **58 phantoms → 0 across ~12 waves** (W324 / W326 / W327+W328 / W329 / W333 / W335 / W336 / W337-built-CapaItem / + REF_ALLOWLIST decisions for Company / ComplianceControl / DisabilityRehabilitation). The pattern works for ANY large pre-existing tech-debt sweep. Now also proven on W340 (52 duplicate-registrations baseline; W341/W342/W343/W347 cleared 11 entries in 4 follow-up waves).
 
 ## Critical conventions
 

@@ -83,18 +83,18 @@ const KNOWN_DUPLICATE_REGISTRATIONS = new Set([
   'ApprovalRequest', // 3× — discovered W340; schemas DIVERGE significantly (rich state-machine in authorization/approvals/ vs simple legacy in models/ — first-loaded wins silently)
   'ReportTemplate', // 3×
   'WorkflowInstance', // 3× (was undercount before W340 comment-stripping fix; surfaced in re-scan)
-  'Beneficiary', // 2× — canonical models/Beneficiary.js + seeder copy; was 3 pre-strip, third was a doc-comment example
+  // 'Beneficiary' — W341 CONSOLIDATED: seeder now re-exports canonical models/Beneficiary.js.
 
   // Tier 2 — registered in 2 files (lower risk but still drift-prone)
   'Correspondence',
   'EmailTemplate',
   'WhatsAppConversation',
   'WhatsAppTemplate',
-  'User', // canonical staff entity per W327
-  'Branch', // canonical org node per W326
-  'Department',
-  'Session', // distinct from clinical session models per W324 audit
-  'Vehicle',
+  // 'User'      — W341 CONSOLIDATED: seeder now re-exports canonical models/User.js
+  // 'Branch'    — W341 CONSOLIDATED: seeder now re-exports canonical models/Branch.js
+  // 'Department'— W341 CONSOLIDATED: seeder now re-exports canonical models/Department.js
+  // 'Session'   — W341 CONSOLIDATED: seeder now re-exports canonical models/Session.js
+  // 'Vehicle'   — W341 CONSOLIDATED: seeder now re-exports canonical models/Vehicle.js
   'LifecyclePolicy',
   'GeneratedReport',
   'Employee',

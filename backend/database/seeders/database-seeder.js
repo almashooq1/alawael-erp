@@ -205,16 +205,21 @@ const vehicleSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// إنشاء النماذج
-const User = mongoose.models.User || mongoose.model('User', userSchema);
-const Branch = mongoose.models.Branch || mongoose.model('Branch', branchSchema);
-const Department = mongoose.models.Department || mongoose.model('Department', departmentSchema);
+// W341 — canonical re-exports for models that have a registered canonical at
+// backend/models/<Name>.js. The seeder's local schema definitions above are
+// kept for `eslint-disable no-unused-vars` posterity but the canonical
+// always wins via the mongoose.models cache; switching to explicit require()
+// removes the duplicate-registration drift risk (W340 baseline shrinks 6×).
+const User = require('../../models/User');
+const Branch = require('../../models/Branch');
+const Department = require('../../models/Department');
+// DisabilityType + Service have NO canonical at backend/models/ — local schema only.
 const DisabilityType =
   mongoose.models.DisabilityType || mongoose.model('DisabilityType', disabilityTypeSchema);
-const Beneficiary = mongoose.models.Beneficiary || mongoose.model('Beneficiary', beneficiarySchema);
+const Beneficiary = require('../../models/Beneficiary');
 const Service = mongoose.models.Service || mongoose.model('Service', serviceSchema);
-const Session = mongoose.models.Session || mongoose.model('Session', sessionSchema);
-const Vehicle = mongoose.models.Vehicle || mongoose.model('Vehicle', vehicleSchema);
+const Session = require('../../models/Session');
+const Vehicle = require('../../models/Vehicle');
 
 // البيانات التجريبية
 const seedData = {

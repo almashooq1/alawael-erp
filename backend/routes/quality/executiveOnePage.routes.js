@@ -20,9 +20,16 @@ const { attachMfaActor, requireMfaTier } = require('../../middleware/requireMfaT
 const {
   createExecutiveOnePageService,
 } = require('../../services/quality/executiveOnePage.service');
+const { createDashboardCache } = require('../../services/quality/dashboard-cache.util');
 const logger = require('../../utils/logger');
 
 const service = createExecutiveOnePageService({ logger });
+
+// W355 — 60s TTL cache; composite service runs 3 sources per call.
+const cache = createDashboardCache({ logger });
+const cachedBuild = cache.wrap(service.build.bind(service), {
+  namespace: 'executiveOnePage',
+});
 
 router.get('/health', (_req, res) => {
   res.json({
@@ -50,12 +57,17 @@ router.get('/', requireMfaTier(1), async (req, res) => {
     let topN = parseInt(req.query.topN, 10);
     if (!Number.isFinite(topN) || topN < 1) topN = 5;
     if (topN > 20) topN = 20;
-    const data = await service.build({ branchIds, topN });
+    const data = await cachedBuild({ branchIds, topN });
     res.json({ success: true, ...data });
   } catch (err) {
     logger.error('[executiveOnePage] GET / failed', err);
     res.status(500).json({ success: false, code: 'INTERNAL_ERROR', message: err.message });
   }
+});
+
+// W355 — ops observability for the cache.
+router.get('/cache/stats', requireMfaTier(1), (_req, res) => {
+  res.json({ success: true, namespace: 'executiveOnePage', ...cache.stats() });
 });
 
 module.exports = router;

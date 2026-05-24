@@ -31,10 +31,19 @@ const {
   createBranchQualityHeatmapService,
   THRESHOLDS,
 } = require('../../services/quality/branchQualityHeatmap.service');
+const { createDashboardCache } = require('../../services/quality/dashboard-cache.util');
 const logger = require('../../utils/logger');
 
 // Single instance per process; aggregations are read-only.
 const service = createBranchQualityHeatmapService({ logger });
+
+// W355 — 60s TTL cache. Aggregations against CapaItem/AuditOccurrence/RcaInvestigation/
+// FmeaWorksheet/Risk are read-heavy and the underlying data changes on human-action
+// cadence (not sub-minute), so a 1-minute staleness window is acceptable.
+const cache = createDashboardCache({ logger });
+const cachedBuildHeatmap = cache.wrap(service.buildHeatmap.bind(service), {
+  namespace: 'branchHeatmap',
+});
 
 router.get('/health', (_req, res) => {
   res.json({
@@ -56,12 +65,17 @@ router.get('/', requireMfaTier(1), async (req, res) => {
           .map(s => s.trim())
           .filter(Boolean)
       : null;
-    const data = await service.buildHeatmap({ branchIds });
+    const data = await cachedBuildHeatmap({ branchIds });
     res.json({ success: true, ...data });
   } catch (err) {
     logger.error('[branchQualityHeatmap] GET / failed', err);
     res.status(500).json({ success: false, code: 'INTERNAL_ERROR', message: err.message });
   }
+});
+
+// W355 — ops observability for the cache.
+router.get('/cache/stats', requireMfaTier(1), (_req, res) => {
+  res.json({ success: true, namespace: 'branchHeatmap', ...cache.stats() });
 });
 
 module.exports = router;

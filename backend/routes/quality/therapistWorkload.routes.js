@@ -23,9 +23,16 @@ const {
   createTherapistWorkloadService,
   THRESHOLDS,
 } = require('../../services/quality/therapistWorkload.service');
+const { createDashboardCache } = require('../../services/quality/dashboard-cache.util');
 const logger = require('../../utils/logger');
 
 const service = createTherapistWorkloadService({ logger });
+
+// W355 — 60s TTL cache; same rationale as branchQualityHeatmap.
+const cache = createDashboardCache({ logger });
+const cachedBuildWorkload = cache.wrap(service.buildWorkload.bind(service), {
+  namespace: 'therapistWorkload',
+});
 
 router.get('/health', (_req, res) => {
   res.json({
@@ -52,12 +59,17 @@ router.get('/', requireMfaTier(1), async (req, res) => {
           .filter(Boolean)
       : null;
     const branchId = req.query.branchId || req.user?.branchId || null;
-    const data = await service.buildWorkload({ therapistIds, branchId });
+    const data = await cachedBuildWorkload({ therapistIds, branchId });
     res.json({ success: true, ...data });
   } catch (err) {
     logger.error('[therapistWorkload] GET / failed', err);
     res.status(500).json({ success: false, code: 'INTERNAL_ERROR', message: err.message });
   }
+});
+
+// W355 — ops observability for the cache.
+router.get('/cache/stats', requireMfaTier(1), (_req, res) => {
+  res.json({ success: true, namespace: 'therapistWorkload', ...cache.stats() });
 });
 
 module.exports = router;

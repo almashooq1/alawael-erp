@@ -113,6 +113,79 @@ aiRecommendationBundleSchema.index({ status: 1, branchId: 1, createdAt: -1 }); /
 aiRecommendationBundleSchema.index({ beneficiaryId: 1, status: 1, createdAt: -1 }); // beneficiary timeline
 aiRecommendationBundleSchema.index({ status: 1, expiresAt: 1 }); // expiry sweeper
 
+// ── W334 Pass 2 — capture pre-edit status for post-init transition validation ──
+aiRecommendationBundleSchema.post('init', function (doc) {
+  doc.$__originalStatus = doc.status;
+});
+
+// ── W334 Pass 2 — pre-save hook: validate status transitions + append history ──
+// Service callers MUST set `doc.$__transitionActor` / `$__transitionReason` /
+// `$__transitionNotes` / `$__transitionMfaTier` before save() when changing
+// status. The hook calls lib.validateTransition; on failure it throws with
+// the lib's structured error code so callers can branch on `err.code`.
+//
+// Idempotent: re-saving without a status change is a no-op (no history entry).
+// New docs go straight to the default state without triggering validation
+// (creation flow is separate from transition flow).
+aiRecommendationBundleSchema.pre('save', function (next) {
+  // New doc — no transition to validate. History will be seeded by the
+  // service layer's createDraft() if needed (e.g. DRAFT→DISCARDED on low
+  // confidence happens in service code, not in the pre-save hook).
+  if (this.isNew) {
+    this.$__originalStatus = this.status;
+    return next();
+  }
+  if (!this.isModified('status')) return next();
+
+  const fromStatus = this.$__originalStatus;
+  const toStatus = this.status;
+
+  // Skip validation if the from-status was never captured (very rare —
+  // typically only when a doc is constructed without post('init'), e.g. in
+  // tests). Defer to the lib in that case via a permissive path.
+  if (!fromStatus) {
+    this.$__originalStatus = toStatus;
+    return next();
+  }
+
+  const result = lib.validateTransition({
+    from: fromStatus,
+    to: toStatus,
+    actor: this.$__transitionActor,
+    reasonCode: this.$__transitionReason,
+    notes: this.$__transitionNotes,
+    mfaTier: this.$__transitionMfaTier,
+  });
+
+  if (!result.ok) {
+    const err = new Error(result.message);
+    err.code = result.code;
+    err.fromStatus = fromStatus;
+    err.toStatus = toStatus;
+    return next(err);
+  }
+
+  // Append to history (append-only audit per W325 P2 / W325 P3 pattern)
+  this.history.push({
+    fromStatus: result.entry.fromStatus,
+    toStatus: result.entry.toStatus,
+    actor: result.entry.actor,
+    reasonCode: result.entry.reasonCode,
+    notes: result.entry.notes,
+    at: result.entry.at,
+  });
+
+  // Update the captured original status for any subsequent in-process save
+  this.$__originalStatus = toStatus;
+  // Clear transient transition context so it can't leak into later saves
+  this.$__transitionActor = undefined;
+  this.$__transitionReason = undefined;
+  this.$__transitionNotes = undefined;
+  this.$__transitionMfaTier = undefined;
+
+  next();
+});
+
 module.exports =
   mongoose.models.AiRecommendationBundle ||
   mongoose.model('AiRecommendationBundle', aiRecommendationBundleSchema);

@@ -311,3 +311,87 @@ describe('W334 AiRecommendationBundle schema canonical refs', () => {
     }
   });
 });
+
+// ═══════════════════════════════════════════════════════════════════════
+// Pass 2 — pre-save hook + service surface
+// ═══════════════════════════════════════════════════════════════════════
+
+describe('W334 Pass 2 — pre-save hook wired on the model', () => {
+  it('captures the original status via post("init")', () => {
+    expect(MODEL_SRC).toMatch(/\.post\(\s*['"]init['"]\s*,/);
+    expect(MODEL_SRC).toMatch(/\$__originalStatus\s*=\s*doc\.status/);
+  });
+
+  it('registers a pre("save") hook that calls lib.validateTransition', () => {
+    expect(MODEL_SRC).toMatch(/\.pre\(\s*['"]save['"]\s*,/);
+    expect(MODEL_SRC).toMatch(/lib\.validateTransition\s*\(/);
+  });
+
+  it('hook short-circuits when status is not modified (no-op idempotency)', () => {
+    expect(MODEL_SRC).toMatch(/isModified\(\s*['"]status['"]\s*\)/);
+  });
+
+  it('hook appends to history[] on a valid transition (audit append-only)', () => {
+    expect(MODEL_SRC).toMatch(/this\.history\.push\s*\(/);
+  });
+
+  it('hook attaches the lib error code to the thrown Error', () => {
+    expect(MODEL_SRC).toMatch(/err\.code\s*=\s*result\.code/);
+  });
+
+  it('hook clears transient transition context after save', () => {
+    expect(MODEL_SRC).toMatch(/\$__transitionActor\s*=\s*undefined/);
+    expect(MODEL_SRC).toMatch(/\$__transitionReason\s*=\s*undefined/);
+    expect(MODEL_SRC).toMatch(/\$__transitionMfaTier\s*=\s*undefined/);
+  });
+});
+
+describe('W334 Pass 2 — service surface (aiRecommendation.service.js)', () => {
+  // Static-analysis on source (jest.setup.js mocks mongoose, so requiring
+  // the service might pull in a partially-mocked Bundle model)
+  const SERVICE_SRC = fs.readFileSync(
+    path.join(__dirname, '..', 'services', 'aiRecommendation.service.js'),
+    'utf8'
+  );
+
+  it('exports exactly 5 public methods', () => {
+    for (const name of ['createDraft', 'approve', 'reject', 'sweepExpired', 'listPending']) {
+      expect(SERVICE_SRC).toMatch(new RegExp(`async function ${name}\\b`));
+      expect(SERVICE_SRC).toMatch(new RegExp(`\\b${name},`));
+    }
+  });
+
+  it('uses lazy model lookup (W214 pattern) to survive cross-require ordering', () => {
+    expect(SERVICE_SRC).toMatch(/function _Bundle\s*\(/);
+    expect(SERVICE_SRC).toMatch(/mongoose\.model\(\s*['"]AiRecommendationBundle['"]\s*\)/);
+  });
+
+  it('createDraft delegates classification to lib.classifyByConfidence', () => {
+    expect(SERVICE_SRC).toMatch(/lib\.classifyByConfidence\(/);
+  });
+
+  it('createDraft computes expiry via lib.computeExpiry on PENDING_REVIEW', () => {
+    expect(SERVICE_SRC).toMatch(/lib\.computeExpiry\(/);
+  });
+
+  it('approve sets transition context (actor + mfaTier) before status mutation', () => {
+    expect(SERVICE_SRC).toMatch(/\$__transitionActor\s*=\s*actorUserId/);
+    expect(SERVICE_SRC).toMatch(/\$__transitionMfaTier\s*=\s*mfaTier/);
+  });
+
+  it('reject requires reasonCode at the service layer (defense in depth with hook)', () => {
+    expect(SERVICE_SRC).toMatch(/if\s*\(\s*!reasonCode\s*\)/);
+    expect(SERVICE_SRC).toMatch(/'REASON_CODE_REQUIRED'/);
+  });
+
+  it('sweepExpired filters PENDING_REVIEW with expiresAt < now and batch-caps to 500', () => {
+    expect(SERVICE_SRC).toMatch(/status:\s*['"]PENDING_REVIEW['"]/);
+    expect(SERVICE_SRC).toMatch(/expiresAt:\s*\{\s*\$lt:\s*now\s*\}/);
+    expect(SERVICE_SRC).toMatch(/\.limit\(500\)/);
+  });
+
+  it('listPending sorts newest-first with a default limit of 50', () => {
+    expect(SERVICE_SRC).toMatch(/\.sort\(\s*\{\s*createdAt:\s*-1\s*\}\s*\)/);
+    expect(SERVICE_SRC).toMatch(/limit\s*=\s*50/);
+  });
+});

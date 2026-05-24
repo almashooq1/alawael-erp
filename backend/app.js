@@ -2019,6 +2019,17 @@ require('./startup/speechBootstrap').wireSpeech(app, { logger });
 // + manual retrieve preview at /api/rag.
 require('./startup/ragBootstrap').wireRag(app, { logger });
 
+// ─── AI Recommendations Engine — Wave 334 ─────────────────────────────
+// AiRecommendationBundle workflow: produced by sweeper (plateau detection,
+// overdue reassessment, etc.) → LLM narrative drafting → confidence
+// classification → supervisor queue → MFA-tier-2 approve / tier-1 reject.
+// Pre-save hook enforces lib.validateTransition. REST surface mounted at
+// /api/ai-recommendations (+ /api/v1). Cron sweeper env-gated:
+// ENABLE_AI_RECOMMENDATION_CRON=true → daily 03:00 Asia/Riyadh expires
+// stale PENDING_REVIEW (>7 days). 108 drift assertions across 6 suites
+// lock the contracts (lib + model + service + routes + bootstrap).
+require('./startup/aiRecommendationBootstrap').wireAiRecommendations(app, { logger });
+
 // ─── Risk Sweeper (daily) — Wave 288 ───────────────────────────────────
 // Persists daily RiskSnapshot per active beneficiary using the unified
 // Risk Orchestrator (W286) + RiskProfile canonical contract (W287), and

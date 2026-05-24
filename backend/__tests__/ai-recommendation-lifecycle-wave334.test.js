@@ -480,3 +480,25 @@ describe('W334 Pass 3 — bootstrap (aiRecommendationBootstrap.js)', () => {
     expect(BOOTSTRAP_SRC).toMatch(/loadOptional\(['"]node-cron['"]\)/);
   });
 });
+
+describe('W336 — wiring in app.js (W334 Pass 4)', () => {
+  // Static analysis on app.js — confirms the bootstrap is invoked at startup.
+  // Without this guard, a future refactor could quietly remove the wire call
+  // and the AI recommendations feature would silently disappear at deploy.
+  const APP_SRC = fs.readFileSync(path.join(__dirname, '..', 'app.js'), 'utf8');
+
+  it('app.js invokes aiRecommendationBootstrap.wireAiRecommendations(app, deps)', () => {
+    expect(APP_SRC).toMatch(
+      /require\(['"]\.\/startup\/aiRecommendationBootstrap['"]\)\.wireAiRecommendations\(\s*app/
+    );
+  });
+
+  it('wiring lives in the AI-services neighborhood (after RAG, near other AI bootstraps)', () => {
+    const ragIdx = APP_SRC.indexOf('wireRag(app');
+    const aiIdx = APP_SRC.indexOf('wireAiRecommendations(app');
+    expect(ragIdx).toBeGreaterThan(0);
+    expect(aiIdx).toBeGreaterThan(ragIdx); // AI Recommendations comes after RAG
+    // Sanity: should be within 1000 chars (i.e. same conceptual section)
+    expect(aiIdx - ragIdx).toBeLessThan(1000);
+  });
+});

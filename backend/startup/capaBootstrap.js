@@ -119,18 +119,33 @@ function wireCapa(app, deps = {}) {
     logger.warn?.(`[startup] CAPA producer routes failed to mount: ${err.message}`);
   }
 
-  // ── W350 — branch quality heatmap routes (Phase 9 dashboard) ────────
-  // Aggregates CAPA + audit metrics per branch into a traffic-light grid.
-  // Read-only; no MFA tier 2 needed; no producers/cron — pure aggregation.
+  // ── W350+W351 — branch quality heatmap routes (Phase 9 dashboard) ──
+  // Aggregates CAPA + Audit + RCA + FMEA + Risk metrics per branch into a
+  // traffic-light grid (8 metrics, 5 sources). Read-only; pure aggregation.
   try {
     const heatmapRouter = require('../routes/quality/branchQualityHeatmap.routes');
     app.use('/api/quality/branch-heatmap', heatmapRouter);
     app.use('/api/v1/quality/branch-heatmap', heatmapRouter);
     logger.info?.(
-      '[startup] Branch quality heatmap routes mounted (W350): /api/quality/branch-heatmap'
+      '[startup] Branch quality heatmap routes mounted (W350+W351): /api/quality/branch-heatmap'
     );
   } catch (err) {
     logger.warn?.(`[startup] Branch quality heatmap routes failed to mount: ${err.message}`);
+  }
+
+  // ── W352 — therapist workload dashboard (Phase 9 slice 2) ───────────
+  // Per-therapist daily-plate view: appointment + session + careplan metrics
+  // (5 cells, 3 sources). Same shape as branch heatmap so the FE can reuse
+  // the grid component, just keyed by therapistId.
+  try {
+    const workloadRouter = require('../routes/quality/therapistWorkload.routes');
+    app.use('/api/quality/therapist-workload', workloadRouter);
+    app.use('/api/v1/quality/therapist-workload', workloadRouter);
+    logger.info?.(
+      '[startup] Therapist workload routes mounted (W352): /api/quality/therapist-workload'
+    );
+  } catch (err) {
+    logger.warn?.(`[startup] Therapist workload routes failed to mount: ${err.message}`);
   }
 
   // ── Overdue sweeper cron (W344 Pass 3) ──────────────────────────────

@@ -24,7 +24,7 @@ Align with the platform doctrine and existing canonical artifacts:
 - `.github/prompts/00-platform-master.prompt.md` — platform doctrine (governing prompt)
 - `CLAUDE.md` — agent onboarding + wave history
 - `docs/blueprint/00-master-architecture.md` — canonical architecture
-- `docs/MODULES.md` — module map (127 backend modules)
+- `docs/MODULES.md` — module map (v3.1.0 snapshot "127 backend modules" is stale — trust the doc's current row counts)
 - `docs/architecture/decisions/` — ADRs (read 004 multi-tenant, 005 role hierarchy, 007 PDPL, 009 audit trail, 010 sensitivity grade, 019 MFA tiers)
 - `backend/models/Beneficiary.js` — current beneficiary persistence model
 - `backend/intelligence/beneficiary-lifecycle.service.js` — gold-standard lifecycle state machine (reference pattern)

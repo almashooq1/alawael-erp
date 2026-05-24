@@ -142,7 +142,7 @@ Proven on W325c — **58 phantoms → 0 across ~12 waves** (W324 / W326 / W327+W
 ## Where the truth lives
 
 - **Architecture**: `docs/blueprint/00-master-architecture.md` (canonical reference covering W11-26)
-- **Module map**: `docs/MODULES.md` (127 backend modules, 80+ frontend pages)
+- **Module map**: `docs/MODULES.md` (canonical module-by-domain catalog; trust its current row counts over any inline citation — codebase has grown past the v3.1.0 "127 backend modules" snapshot)
 - **Phase 3 tracker (Intelligence)**: `docs/PHASE3_PLAN.md` (Intelligence & Automation — all 6 deliverables closed earlier)
 - **Phase 3 tracker (Gov + AI)**: shipped 2026-05-23 across W280-W286 (see "Phase 3 Gov + AI surface" section below)
 - **ADRs**: `docs/architecture/decisions/` (001-019); see ADR-019 for the W273-W278 MFA tier enforcement three-layer architecture

@@ -27,7 +27,7 @@ Align with the platform doctrine and upstream master prompts:
 - `.github/prompts/03-goals-care-plan-engine.prompt.md` — Goals & Care Plan Engine
 - `CLAUDE.md` — agent onboarding + wave history
 - `docs/blueprint/00-master-architecture.md` — canonical architecture
-- `docs/MODULES.md` — module map (127 backend modules)
+- `docs/MODULES.md` — module map (v3.1.0 snapshot "127 backend modules" is stale — trust the doc's current row counts)
 - `docs/architecture/decisions/` — ADRs (read 005 role hierarchy, 007 PDPL, 009 audit trail, 010 sensitivity grade, 011 heuristic-first ML, 012 LLM primary, 018 rehabilitation protocol, 019 MFA tiers)
 
 Canonical sources for programs + sessions + progress in this repo:

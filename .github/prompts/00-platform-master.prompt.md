@@ -28,7 +28,7 @@ Primary canonical sources in THIS repo (`66666/`):
 
 - `CLAUDE.md` — agent onboarding, drift guards, wave history, monorepo layout
 - `docs/blueprint/00-master-architecture.md` — canonical architecture (W11–W26)
-- `docs/MODULES.md` — 127 backend modules + 80+ frontend pages module map
+- `docs/MODULES.md` — module-by-domain catalog (v3.1.0 snapshot says "127 backend modules + 80+ frontend pages"; codebase has grown past this — trust MODULES.md's current row counts, not legacy citations)
 - `docs/PHASE3_PLAN.md` — Intelligence & Automation deliverables
 - `docs/architecture/decisions/` — ADRs 001–019 (read 005, 007, 009, 010, 019 first)
 - `backend/intelligence/canonical/` — canonical entity schemas + drift guard (single source of truth for entity contracts)

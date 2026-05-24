@@ -91,7 +91,8 @@ const KNOWN_PHANTOM_BASELINE_W325C = new Set([
   // Misc never-built or renamed
   'Attachment', // 2× — investigate if Document is the canonical
   'Class', // 2× — smart-attendance domain
-  'Counselor', // 1× — likely 'User' with role
+  // 'Counselor' — RATCHET-DOWN W333: fixed to 'User' (counselor is a staff role, not entity).
+  // backend/models/BeneficiaryManagement/CounselingSession.js counselorId now refs 'User'.
   'Violation', // 1× — investigate
   'Folder', // 1× — investigate Document hierarchy
   'ComplianceChecklist', // 1× — investigate quality models

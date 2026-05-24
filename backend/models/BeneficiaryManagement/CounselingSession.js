@@ -39,7 +39,7 @@ const counselingSessionSchema = new mongoose.Schema(
     // Counselor Information
     counselorId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Counselor',
+      ref: 'User',
     },
     counselorName: {
       type: String,

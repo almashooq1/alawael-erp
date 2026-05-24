@@ -72,7 +72,7 @@ Foundational (sprint/source hygiene):
 - `sprint-test-files-exist.test.js` — every sprint enumeration entry resolves to a real file.
 - `test-script-dedupe.test.js` — no duplicate entries in `test:sprint`.
 
-Schema-shape / canonical-entity / lifecycle (W324–W344 series, **209 assertions across 10 suites** — verified `npx jest --runInBand` 2026-05-24):
+Schema-shape / canonical-entity / lifecycle (W324–W345 series, **223 assertions across 11 suites** — verified `npx jest --runInBand` 2026-05-24; re-verify before quoting: `npx jest --listTests __tests__/{canonical-beneficiary-ref,universal-model-ref-drift,measure-library-governance,measure-lifecycle-lib,care-plan-registry-integrity,ai-recommendation-lifecycle,ai-recommendation-plateau-adapter,capa-item-lifecycle,no-duplicate-model-registration,capa-service-bootstrap,capa-routes}-wave*.test.js | wc -l`):
 
 - `canonical-beneficiary-ref-wave324.test.js` — every Mongoose field named `beneficiaryId` / `beneficiary` / `participantId` MUST `ref: 'Beneficiary'`. Static analysis on source (jest.setup.js mocks mongoose). Catches both phantom refs (BeneficiaryProfile / Patient unregistered) AND semantic mismatches (User registered but conceptually wrong). 8 fixes in W324 + 8 fixes in W329 across 16 files.
 - `measure-library-governance-wave325.test.js` — MeasurementMaster schema-shape guard for the 5 W325 P1 additive fields (abbreviation, disciplines[], scoreUnits, scoreDirection, lifecycleStatus). Verifies optional/defaulted (no breaking change on existing docs).
@@ -84,6 +84,7 @@ Schema-shape / canonical-entity / lifecycle (W324–W344 series, **209 assertion
 - `capa-item-lifecycle-wave337.test.js` — CapaItem 7-state lifecycle (OPEN→IN_PROGRESS→IMPLEMENTED→VERIFIED→CLOSED + REJECTED/CANCELLED terminals) + reason-code requirement + MFA tier gating. 36 tests. The W337 wave closed the final W325c phantom by BUILDING the canonical model.
 - `no-duplicate-model-registration-wave340.test.js` — W340 no duplicate `mongoose.model('X', schema)` registration in >1 source file (detects both direct + helper-wrapped `reg/getOrCreate/registerModel/...`). Baseline ratchet pattern: 52 entries at discovery; W341/W342/W343 cleared 9 entries (seeders + HR services + REGISTRATION_ALLOWLIST decisions). ADR-021 documents Tier 1 stakeholder framework for the divergent schemas (ApprovalRequest, AuditLog, ReportTemplate, WorkflowInstance) that need RENAME not consolidation.
 - `capa-service-bootstrap-wave344.test.js` — W344 CAPA service surface (createCapaItem/transitionCapaItem/listOverdue/sweepOverdue/listByStatus) + bootstrap factory (enforceMfa:true contract) + cron wiring (ENABLE_CAPA_SWEEPER + Asia/Riyadh 06:00 schedule) + error-code → HTTP-status mapping. 24 tests.
+- `capa-routes-wave345.test.js` — W345 CAPA REST surface (8 endpoints under `/api/quality/capa` + `/api/v1/quality/capa` dual mount) + service-layer MFA tier escalation (VERIFIED→CLOSED + ANY→REJECTED → tier 2 even when route declares tier 1) + 5-code error-to-HTTP mapping. 14 tests. Closes the W337→W340→W344→W345 CAPA build chain — feature is end-to-end deployable.
 
 ## Canonical entity refs — bug-class taxonomy (W324–W329)
 

@@ -72,7 +72,7 @@ Family communication:
 
 Audit & PDPL:
 
-- `backend/models/auditLog.model.js` — 60+ event types (W324 canonical)
+- `backend/models/auditLog.model.js` — 53 event types in `AuditEventTypes` (W324 canonical of 3 schemas per ADR-021 Tier 1)
 - `backend/intelligence/hash-chain.lib.js` — Wave-18 invariants for irreversible decisions
 - `docs/architecture/decisions/007-pdpl-compliance-baseline.md` — PDPL retention + anonymization
 - `docs/architecture/decisions/009-audit-trail-standard.md` — audit-event standard

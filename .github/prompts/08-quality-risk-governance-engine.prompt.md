@@ -82,7 +82,7 @@ Intelligence / governance services:
 - `backend/intelligence/hash-chain.lib.js` — Wave-18 invariants for irreversible decisions
 - `backend/services/quality/predictiveRisk.service.js` — predictive risk scoring
 - `backend/intelligence/reason-codes.registry.js` — Wave 89 canonical reason codes (20 UPPER_SNAKE + Arabic labels + alias map)
-- `backend/models/auditLog.model.js` — 60+ event types audit trail
+- `backend/models/auditLog.model.js` — 53 event types in `AuditEventTypes` (canonical of 3 schemas per ADR-021 Tier 1)
 - `backend/middleware/requireMfaTier.js` — MFA tier enforcement (ADR-019)
 
 Drift guards (8 suites, 149 assertions — institutional knowledge already enforced):

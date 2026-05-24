@@ -81,13 +81,13 @@ Event bus + cross-domain notification infrastructure (verified against source 20
 - `backend/integration/systemIntegrationBus.js` — in-process event bus (ADR-006); exports `{ SystemIntegrationBus, integrationBus, ... }` singleton
 - `backend/startup/integrationBus.js` — wire-up orchestrator invoked from `backend/app.js:67` via `setupIntegrationBus`; this is where ALL subscriber layers are registered in order
 - `backend/integration/crossModuleSubscribers.js` — base cross-module email subscribers (initialized in `server.js:626`)
-- `backend/integration/dddCrossModuleSubscribers.js` — 16 DDD rehabilitation cross-domain event flows (initialized in `startup/integrationBus.js:71`)
-- `backend/integration/dddNotificationTriggers.js` — 10 DDD notification rules (initialized in `startup/integrationBus.js:80`)
-- `backend/integration/dddWorkflowAutomations.js` — 12 Phase-4 automation rules (initialized in `startup/integrationBus.js:89`)
+- `backend/integration/dddCrossModuleSubscribers.js` — 15 DDD rehabilitation cross-domain event flows (counted via `subscribers.push(...)`; initialized in `startup/integrationBus.js:71`). Note: that file's wire-up comment still says "16 event flows" — stale-by-one; trust the source count.
+- `backend/integration/dddNotificationTriggers.js` — 10 DDD notification rules (counted via `triggers.push(...)`; initialized in `startup/integrationBus.js:80`)
+- `backend/integration/dddWorkflowAutomations.js` — 12 Phase-4 automation rules in `AUTOMATION_RULES` array (initialized in `startup/integrationBus.js:89`)
 - `backend/integration/dddWebhookDispatcher.js` — outbound webhook dispatcher
 - `backend/integration/moduleConnector.js` — module-to-module connector layer
 - `backend/database/event-bus.js` — SEPARATE database event bus used by opt-in `services/blockchain/autoIssueSubscribers.js` (env flag `BLOCKCHAIN_AUTO_ISSUE=1`); do NOT confuse with the main integrationBus
-- `backend/models/auditLog.model.js` — 60+ event types audit trail (ADR-009)
+- `backend/models/auditLog.model.js` — 53 event types in `AuditEventTypes` (ADR-009; canonical of 3 schemas per ADR-021 Tier 1)
 - `backend/intelligence/reason-codes.registry.js` — Wave 89 canonical reason codes (20 codes + Arabic labels + alias map)
 - `backend/intelligence/hash-chain.lib.js` — Wave-18 hash chain for irreversible decisions
 - `backend/intelligence/sensitivity-grade.lib.js` — ADR-010 sensitivity gating
@@ -110,7 +110,7 @@ Known cross-domain divergences this map must address:
 1. **Student vs Beneficiary** (ADR-020 Proposed): `Student` is registered as a separate Mongoose model with ~21 callers across smart-attendance/transport/montessori/taqat. Domain fragmentation question pending stakeholder. Integration map should flag where Student refs are used vs Beneficiary refs.
 2. **3 clinical session models** (TherapySession + ClinicalSession + DisabilitySession): noted in 04 prompt as "do NOT add 4th". Integration map should pick one canonical write-target for new flows.
 3. **3 ApprovalRequest schemas** (ADR-021 Tier 1): authorization/approvals (rich state-machine) + models (simple legacy) + services/documents (rich SLA tracking). Recommendation per ADR-021 is RENAME, not consolidate.
-4. **3 AuditLog schemas** (ADR-021 Tier 1): canonical (60+ event types) + database/audit-trail (different field names) + routes/audit-trail-enhanced. Naming collision causes data fragmentation across what should be one collection.
+4. **3 AuditLog schemas** (ADR-021 Tier 1): canonical (53 event types) + database/audit-trail (different field names) + routes/audit-trail-enhanced. Naming collision causes data fragmentation across what should be one collection.
 
 If a file is missing, continue with explicit assumptions. Do NOT invent Prisma
 schemas or files that do not exist in this codebase (backend is Mongoose).

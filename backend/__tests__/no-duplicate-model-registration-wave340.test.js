@@ -150,6 +150,17 @@ const REGISTRATION_ALLOWLIST = new Set([
   // schema duplication.
   'Referral',
   'Task',
+  // W370 — TransitionPlan collision: W361 added the canonical `models/TransitionPlan.js`
+  // (camelCase, canonical refs per W324+W329, registered in W366 canonical catalog) BUT a
+  // pre-existing `rehabilitation-services/mdt-transition-quality.js` (mounted live via
+  // `clinical-assessment.registry.js`) ALSO registers `TransitionPlan` with a DIFFERENT
+  // snake_case schema (beneficiary_id, branch_id, transition_type enum, etc.). Schemas
+  // DIVERGE significantly — same bug class as ApprovalRequest (ADR-022) / ReportTemplate
+  // (ADR-023). Cannot autonomously resolve: old module is live (no callers via require()
+  // but mounted as a route), schema migration would break old API contract. ALLOWLISTed
+  // as stopgap pending a future ADR-027-style Pattern D rename proposal (e.g. legacy →
+  // `MdtTransitionPlan`, new keeps `TransitionPlan`). Same precedent as W347 AuditLog.
+  'TransitionPlan',
   // W347 — AuditLog (4 registration sites, all idempotent/defensive). Per ADR-021
   // Tier 1 analysis the 4 sites are:
   //   1. models/auditLog.model.js (canonical, richest schema, 60+ event types)

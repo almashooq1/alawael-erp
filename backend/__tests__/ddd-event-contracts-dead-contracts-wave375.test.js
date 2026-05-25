@@ -93,16 +93,16 @@ const SCAN_SKIP_DIRS = new Set([
 // episodes wired) → 4 (W380 BaseService-emit batch wired 8 events) → 1 (W381
 // quality via qualityEventBus + ai-recommendations via module emitter).
 //
-// Single remaining entry: assessments.OVERDUE requires a NEW cron sweeper +
-// integration with notification/dashboards consumers. Cost of building that
-// (scheduler + service method + tests) significantly exceeds the marginal
-// benefit of clearing the last entry. Deferred to a stakeholder-scoped wave
-// where the overdue-detection cadence + notification routing get explicit
-// decisions (e.g., daily/hourly sweep, severity thresholds, escalation chain).
-const KNOWN_DEAD_CONTRACTS = new Set([
-  // assessments (ASSESSMENT_EVENTS) — 1 dead, 1 alive after W380 wired completeAssessment
-  'assessments.OVERDUE', // assessment.overdue — needs sweeper + cadence stakeholder decision
-]);
+// W383 (2026-05-25) closed the final entry: assessments.OVERDUE now wired via
+// the 12th sweeper in clinicalSweepersBootstrap.js. Daily 04:00 Asia/Riyadh,
+// env-gated by ENABLE_ASSESSMENT_OVERDUE_SWEEPER. Emits assessment.overdue
+// per overdue ClinicalAssessment via lazy-loaded qualityEventBus (W346/W349
+// pattern). Envelope: {beneficiaryId, episodeId, dueDate, daysPastDue}.
+//
+// BASELINE NOW EMPTY ✅ — all 31 dddEventContracts dead-discovery entries
+// resolved across W377 (16 deletes) + W379/W380/W381 (14 wires) + W383
+// (1 sweeper-driven wire).
+const KNOWN_DEAD_CONTRACTS = new Set([]);
 
 function walkJs(dir, out = []) {
   if (!fs.existsSync(dir)) return out;

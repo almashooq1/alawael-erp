@@ -16,6 +16,8 @@
  *   • ENABLE_TRANSITION_OVERDUE_SWEEPER     — daily 10:00, in_progress transition plans past plannedTransitionDate
  *   • ENABLE_CBAHI_REASSESSMENT_SWEEPER     — weekly Mon 06:00, attestations past nextReassessmentDue
  *   • ENABLE_AAC_REASSESSMENT_SWEEPER       — weekly Mon 06:30, active AAC profiles past nextReassessmentDue
+ *   • (+ W370 facility/diet additions, env-gated)
+ *   • ENABLE_ASSESSMENT_OVERDUE_SWEEPER     — daily 04:00, emit assessment.overdue per ClinicalAssessment past dueDate (W383)
  *
  * Six of seven sweepers ONLY query + log (no state mutation). The
  * exception is RESPITE_NOSHOW which auto-flips status approved/confirmed
@@ -472,10 +474,79 @@ function wireClinicalSweepers(app, deps = {}) {
     logger.info('[startup] W369 facility certificate sweeper scheduled (daily 06:00 Asia/Riyadh)');
   }
 
+  // ══════════════════════════════════════════════════════════════════
+  // W383 addition (2026-05-25) — assessment-overdue sweeper, the final
+  // wire for ADR-027's "assessments.OVERDUE" deferral. Closes the W375
+  // dead-contract baseline to ZERO for dddEventContracts.js.
+  // ══════════════════════════════════════════════════════════════════
+
+  // ── 12) ClinicalAssessment overdue notifier ────────────────────────
+  if (process.env.ENABLE_ASSESSMENT_OVERDUE_SWEEPER === 'true') {
+    cron.schedule(
+      '0 4 * * *',
+      async () => {
+        try {
+          const Assessment = safeModel('ClinicalAssessment');
+          if (!Assessment || typeof Assessment.getOverdueAssessments !== 'function') {
+            logger.info('[assessment] overdue sweeper: model or static unavailable');
+            return;
+          }
+          const overdue = await Assessment.getOverdueAssessments();
+          logger.info(`[assessment] daily overdue sweep: ${overdue.length} assessments overdue`);
+
+          // W383: emit canonical contract event per overdue item via lazy-
+          // loaded qualityEventBus (one of the contract's declared consumers
+          // is 'quality', and the bus is the established W346/W348/W349 path).
+          // Envelope per ASSESSMENT_EVENTS.OVERDUE: {beneficiaryId, episodeId,
+          // dueDate, daysPastDue}.
+          let bus = null;
+          try {
+            const busModule = require('../services/quality/qualityEventBus.service');
+            bus = typeof busModule.getDefault === 'function' ? busModule.getDefault() : null;
+          } catch {
+            /* qualityEventBus optional */
+          }
+
+          const now = Date.now();
+          let emitted = 0;
+          for (const a of overdue.slice(0, 500)) {
+            if (bus) {
+              const dueDate = a.dueDate || a.scheduledDate;
+              const daysPastDue = dueDate
+                ? Math.floor((now - new Date(dueDate).getTime()) / 86400000)
+                : null;
+              bus.emit('assessment.overdue', {
+                beneficiaryId: String(a.beneficiaryId),
+                episodeId: a.episodeId ? String(a.episodeId) : undefined,
+                dueDate,
+                daysPastDue,
+              });
+              emitted++;
+            }
+            // Log first 20 for ops visibility (matches sibling sweepers)
+            if (emitted <= 20) {
+              logger.warn(
+                `[assessment] overdue assessment=${a._id} beneficiary=${a.beneficiaryId} due=${a.dueDate || a.scheduledDate}`
+              );
+            }
+          }
+          if (bus && overdue.length) {
+            logger.info(`[assessment] overdue sweep emitted ${emitted} assessment.overdue events`);
+          }
+        } catch (err) {
+          logger.error('[assessment] overdue sweeper failed', err);
+        }
+      },
+      TZ
+    );
+    scheduledCount++;
+    logger.info('[startup] W383 assessment overdue sweeper scheduled (daily 04:00 Asia/Riyadh)');
+  }
+
   if (scheduledCount === 0) {
-    logger.info('[startup] clinical sweepers: all 11 disabled (no ENABLE_*_SWEEPER=true)');
+    logger.info('[startup] clinical sweepers: all 12 disabled (no ENABLE_*_SWEEPER=true)');
   } else {
-    logger.info(`[startup] clinical sweepers wired: ${scheduledCount}/11 enabled`);
+    logger.info(`[startup] clinical sweepers wired: ${scheduledCount}/12 enabled`);
   }
 }
 

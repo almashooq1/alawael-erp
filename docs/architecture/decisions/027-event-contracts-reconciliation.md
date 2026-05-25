@@ -4,7 +4,7 @@ Date: 2026-05-25
 
 ## Status
 
-✅ **Substantially executed (W377 + W379 + W380 + W381, 2026-05-25). Baseline 31 → 1 (97% cleared).**
+✅ **FULLY EXECUTED (W377 + W379 + W380 + W381 + W383, 2026-05-25). Baseline 31 → 0 (100% cleared).**
 
 **Progression**:
 
@@ -13,9 +13,12 @@ Date: 2026-05-25
 | W377 | Deleted 16 contracts (4 in-group + 8 whole-group)                   | 15             |
 | W379 | Wired 3 episodes events (rename ad-hoc)                             | 12             |
 | W380 | Wired 8 events across 5 BaseService-extending services              | 4              |
-| W381 | Wired 3 events (ai-recommendations + 2 quality via qualityEventBus) | **1**          |
+| W381 | Wired 3 events (ai-recommendations + 2 quality via qualityEventBus) | 1              |
+| W383 | Wired assessments.OVERDUE via daily cron sweeper                    | **0**          |
 
-**Single remaining entry**: `assessments.OVERDUE`. Requires NEW cron sweeper + notification/dashboards routing decisions. Cost of building that ≫ marginal benefit of clearing the last entry. Deferred pending stakeholder-scoped wave (cadence + severity thresholds + escalation).
+**BASELINE NOW EMPTY** ✅. ADR-027 fully resolved.
+
+**W383 details**: 12th env-gated stanza in `backend/startup/clinicalSweepersBootstrap.js`. Daily 04:00 Asia/Riyadh, opt-in via `ENABLE_ASSESSMENT_OVERDUE_SWEEPER=true`. Uses `ClinicalAssessment.getOverdueAssessments()` (existing model static) to find overdue items, emits `assessment.overdue` per item via lazy-loaded qualityEventBus (W346/W349 pattern). Envelope: `{beneficiaryId, episodeId, dueDate, daysPastDue (computed)}`. Logs first 20 for ops visibility (matches sibling sweepers' pattern).
 
 **W381 wiring details** (commit pending):
 

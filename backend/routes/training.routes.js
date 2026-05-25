@@ -4,8 +4,15 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
-const { authenticate } = require('../middleware/auth');
+const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+
+// HR/manager-only gate for the 7 mutating training endpoints. Prior to
+// this, ANY authenticated user could create/edit/delete training courses,
+// sessions, and plans — combined with the mass-assignment via
+// `Course.create(req.body)` patterns common in this file, anyone could
+// set arbitrary fields including auto-approval flags and certified-by.
+const requireTrainingAdmin = authorize('admin', 'hr_manager', 'manager');
 
 /** Max page size to prevent memory exhaustion */
 const MAX_PAGE_LIMIT = 100;
@@ -85,39 +92,57 @@ router.get('/courses', authenticate, requireBranchAccess, async (req, res) => {
   }
 });
 
-router.post('/courses', authenticate, requireBranchAccess, async (req, res) => {
-  try {
-    const Course = safeModel('TrainingCourse');
-    const doc = await Course.create({ ...req.body, createdBy: req.user?._id });
-    res.status(201).json({ success: true, data: doc });
-  } catch (err) {
-    safeError(res, err, 'training');
+router.post(
+  '/courses',
+  authenticate,
+  requireBranchAccess,
+  requireTrainingAdmin,
+  async (req, res) => {
+    try {
+      const Course = safeModel('TrainingCourse');
+      const doc = await Course.create({ ...req.body, createdBy: req.user?._id });
+      res.status(201).json({ success: true, data: doc });
+    } catch (err) {
+      safeError(res, err, 'training');
+    }
   }
-});
+);
 
-router.put('/courses/:id', authenticate, requireBranchAccess, async (req, res) => {
-  if (!validObjectId(req, res)) return;
-  try {
-    const Course = safeModel('TrainingCourse');
-    const doc = await Course.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
-    });
-    if (!doc) return res.status(404).json({ success: false, message: 'الدورة غير موجودة' });
-    res.json({ success: true, data: doc });
-  } catch (err) {
-    safeError(res, err, 'training');
+router.put(
+  '/courses/:id',
+  authenticate,
+  requireBranchAccess,
+  requireTrainingAdmin,
+  async (req, res) => {
+    if (!validObjectId(req, res)) return;
+    try {
+      const Course = safeModel('TrainingCourse');
+      const doc = await Course.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
+        new: true,
+      });
+      if (!doc) return res.status(404).json({ success: false, message: 'الدورة غير موجودة' });
+      res.json({ success: true, data: doc });
+    } catch (err) {
+      safeError(res, err, 'training');
+    }
   }
-});
+);
 
-router.delete('/courses/:id', authenticate, requireBranchAccess, async (req, res) => {
-  if (!validObjectId(req, res)) return;
-  try {
-    const _Course = safeModel('TrainingCourse');
-    res.json({ success: true, message: 'تم الحذف بنجاح' });
-  } catch (err) {
-    safeError(res, err, 'training');
+router.delete(
+  '/courses/:id',
+  authenticate,
+  requireBranchAccess,
+  requireTrainingAdmin,
+  async (req, res) => {
+    if (!validObjectId(req, res)) return;
+    try {
+      const _Course = safeModel('TrainingCourse');
+      res.json({ success: true, message: 'تم الحذف بنجاح' });
+    } catch (err) {
+      safeError(res, err, 'training');
+    }
   }
-});
+);
 
 // ── Sessions CRUD ────────────────────────────────────────────
 router.get('/sessions', authenticate, requireBranchAccess, async (req, res) => {
@@ -147,29 +172,41 @@ router.get('/sessions', authenticate, requireBranchAccess, async (req, res) => {
   }
 });
 
-router.post('/sessions', authenticate, requireBranchAccess, async (req, res) => {
-  try {
-    const Session = safeModel('TrainingSession');
-    const doc = await Session.create({ ...req.body, createdBy: req.user?._id });
-    res.status(201).json({ success: true, data: doc });
-  } catch (err) {
-    safeError(res, err, 'training');
+router.post(
+  '/sessions',
+  authenticate,
+  requireBranchAccess,
+  requireTrainingAdmin,
+  async (req, res) => {
+    try {
+      const Session = safeModel('TrainingSession');
+      const doc = await Session.create({ ...req.body, createdBy: req.user?._id });
+      res.status(201).json({ success: true, data: doc });
+    } catch (err) {
+      safeError(res, err, 'training');
+    }
   }
-});
+);
 
-router.put('/sessions/:id', authenticate, requireBranchAccess, async (req, res) => {
-  if (!validObjectId(req, res)) return;
-  try {
-    const Session = safeModel('TrainingSession');
-    const doc = await Session.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
-    });
-    if (!doc) return res.status(404).json({ success: false, message: 'الجلسة غير موجودة' });
-    res.json({ success: true, data: doc });
-  } catch (err) {
-    safeError(res, err, 'training');
+router.put(
+  '/sessions/:id',
+  authenticate,
+  requireBranchAccess,
+  requireTrainingAdmin,
+  async (req, res) => {
+    if (!validObjectId(req, res)) return;
+    try {
+      const Session = safeModel('TrainingSession');
+      const doc = await Session.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
+        new: true,
+      });
+      if (!doc) return res.status(404).json({ success: false, message: 'الجلسة غير موجودة' });
+      res.json({ success: true, data: doc });
+    } catch (err) {
+      safeError(res, err, 'training');
+    }
   }
-});
+);
 
 // ── Plans CRUD ───────────────────────────────────────────────
 router.get('/plans', authenticate, requireBranchAccess, async (req, res) => {
@@ -182,7 +219,7 @@ router.get('/plans', authenticate, requireBranchAccess, async (req, res) => {
   }
 });
 
-router.post('/plans', authenticate, requireBranchAccess, async (req, res) => {
+router.post('/plans', authenticate, requireBranchAccess, requireTrainingAdmin, async (req, res) => {
   try {
     const Plan = safeModel('TrainingPlan');
     const doc = await Plan.create({ ...req.body, createdBy: req.user?._id });
@@ -192,18 +229,24 @@ router.post('/plans', authenticate, requireBranchAccess, async (req, res) => {
   }
 });
 
-router.put('/plans/:id', authenticate, requireBranchAccess, async (req, res) => {
-  if (!validObjectId(req, res)) return;
-  try {
-    const Plan = safeModel('TrainingPlan');
-    const doc = await Plan.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
-    });
-    if (!doc) return res.status(404).json({ success: false, message: 'الخطة غير موجودة' });
-    res.json({ success: true, data: doc });
-  } catch (err) {
-    safeError(res, err, 'training');
+router.put(
+  '/plans/:id',
+  authenticate,
+  requireBranchAccess,
+  requireTrainingAdmin,
+  async (req, res) => {
+    if (!validObjectId(req, res)) return;
+    try {
+      const Plan = safeModel('TrainingPlan');
+      const doc = await Plan.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
+        new: true,
+      });
+      if (!doc) return res.status(404).json({ success: false, message: 'الخطة غير موجودة' });
+      res.json({ success: true, data: doc });
+    } catch (err) {
+      safeError(res, err, 'training');
+    }
   }
-});
+);
 
 module.exports = router;

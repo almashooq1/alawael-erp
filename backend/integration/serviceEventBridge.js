@@ -1,0 +1,235 @@
+'use strict';
+
+/**
+ * serviceEventBridge.js — W387 (2026-05-25).
+ *
+ * Bridges service-local EventEmitter emits (from W379-W386 wires) to the
+ * integrationBus.publish() pipeline. Without this, subscribers in
+ * dddCrossModuleSubscribers.js — which use `integrationBus.subscribe(
+ * 'episodes.episode.created', handler)` and similar namespaced patterns —
+ * never receive events fired via `service.emit('episode.created', payload)`.
+ *
+ * THE ROOT-CAUSE BUG (discovered 2026-05-25 while attempting an integration
+ * test):
+ *
+ *   - integrationBus.publish('episodes', 'episode.created', payload)
+ *     → dispatches with fullEventName = 'episodes.episode.created'
+ *     → reaches subscribers listening for that pattern
+ *
+ *   - service.emit('episode.created', payload)  ← W379-W386 wires
+ *     → local EventEmitter only (BaseService extends EventEmitter)
+ *     → NEVER reaches integrationBus subscribers
+ *
+ * Two separate buses, no link. The W375/W382 drift guards passed because the
+ * eventType STRING appeared in source (producer's emit call + subscriber's
+ * pattern). The W384-W386 behavioral tests passed because they subscribed to
+ * the SAME service-local emitter the producer fires on. But neither caught
+ * the bus-mismatch — that's a producer↔subscriber integration concern.
+ *
+ * THE FIX (this module):
+ *
+ *   For each wired domain service, install a listener that catches the local
+ *   emit and republishes via integrationBus.publish(domain, eventType, payload).
+ *   The integrationBus then handles delivery per contract (persist/broadcast/
+ *   realtime/local) AND dispatches to pattern subscribers.
+ *
+ *   - One source of truth for envelope shape (still the W379-W386 wire)
+ *   - One destination (integrationBus)
+ *   - Failure-isolated (try/catch wraps each forward)
+ *   - Idempotent registration (sets a flag on each service so re-init doesn't
+ *     double-bind)
+ *
+ * Per-service mappings encode the W379-W386 producer surface:
+ *
+ *   episodes.service → episode.{created, phase_transitioned, closed}
+ *   core.beneficiaryService → beneficiary.{status_changed, profile_updated}
+ *   care-plans.service → careplan.{activated, completed}
+ *   goals.goalService → goal.achieved
+ *   behavior.behaviorService → behavior.{incident_recorded, plan_updated}
+ *   assessments.assessmentService → assessment.completed
+ *   aiRecommendation.bus → ai.recommendation_generated
+ *   quality (via qualityEventBus) → quality.{audit_completed, corrective_action_required}
+ *
+ * episodes.created comes via afterCreate hook — fires on every successful
+ * EpisodeService.create. The bridge sees this LOCAL event and re-publishes
+ * it to integrationBus, which dispatches to the timeline/dashboards/workflow/
+ * notification subscribers per the contract's consumers array.
+ *
+ * Wired into startup/integrationBus.js AFTER initializeDDDSubscribers so
+ * subscribers are registered first, then forwarders attach.
+ */
+
+const logger = require('../utils/logger');
+
+const BRIDGE_FLAG = Symbol.for('w387.serviceEventBridge.attached');
+
+/**
+ * Wire service-local events to integrationBus.publish.
+ *
+ * @param {Object} integrationBus  - The systemIntegrationBus singleton
+ * @returns {{wiredCount: number, skippedDomains: string[]}}
+ */
+function wireServiceEventBridge(integrationBus) {
+  if (!integrationBus || typeof integrationBus.publish !== 'function') {
+    logger.warn('[ServiceEventBridge] integrationBus not available — skipping');
+    return { wiredCount: 0, skippedDomains: ['ALL'] };
+  }
+
+  const skipped = [];
+  let wired = 0;
+
+  // Helper: attach a forwarder to a service for a list of eventTypes.
+  // Per-service one-time attachment guarded by BRIDGE_FLAG on the service itself.
+  function attachBridge(domain, service, eventTypes) {
+    if (!service || typeof service.on !== 'function') {
+      skipped.push(domain);
+      return;
+    }
+    if (service[BRIDGE_FLAG]) {
+      // Already wired in a prior call (idempotent)
+      return;
+    }
+    for (const eventType of eventTypes) {
+      service.on(eventType, payload => {
+        // Fire-and-forget: integrationBus.publish is async but we don't await
+        // — the producing service shouldn't pay the latency cost of all
+        // subscribers + persistence + broadcast. Errors logged + swallowed.
+        Promise.resolve()
+          .then(() => integrationBus.publish(domain, eventType, payload))
+          .catch(err => {
+            logger.error(
+              `[ServiceEventBridge] forward failed for ${domain}.${eventType}: ${err.message}`
+            );
+          });
+      });
+    }
+    service[BRIDGE_FLAG] = true;
+    wired += eventTypes.length;
+  }
+
+  // ─── episodes: episode.created / phase_transitioned / closed ────────────
+  try {
+    const episodesDomain = require('../domains/episodes');
+    if (episodesDomain.service) {
+      attachBridge('episodes', episodesDomain.service, [
+        'episode.created',
+        'episode.phase_transitioned',
+        'episode.closed',
+      ]);
+    } else {
+      skipped.push('episodes (service not initialized)');
+    }
+  } catch (err) {
+    skipped.push(`episodes (${err.message})`);
+  }
+
+  // ─── core: beneficiary.{status_changed, profile_updated} ────────────────
+  try {
+    const coreDomain = require('../domains/core');
+    if (coreDomain.beneficiaryService) {
+      attachBridge('core', coreDomain.beneficiaryService, [
+        'beneficiary.status_changed',
+        'beneficiary.profile_updated',
+      ]);
+    } else {
+      skipped.push('core (beneficiaryService not initialized)');
+    }
+  } catch (err) {
+    skipped.push(`core (${err.message})`);
+  }
+
+  // ─── care-plans: careplan.{activated, completed} ────────────────────────
+  try {
+    const cpModule = require('../domains/care-plans/services/CarePlansService');
+    const svc = cpModule.carePlansService;
+    if (svc) {
+      attachBridge('care-plans', svc, ['careplan.activated', 'careplan.completed']);
+    } else {
+      skipped.push('care-plans (singleton not exported)');
+    }
+  } catch (err) {
+    skipped.push(`care-plans (${err.message})`);
+  }
+
+  // ─── goals: goal.achieved ───────────────────────────────────────────────
+  try {
+    const goalsDomain = require('../domains/goals');
+    if (goalsDomain.goalService) {
+      attachBridge('goals', goalsDomain.goalService, ['goal.achieved']);
+    } else {
+      skipped.push('goals (goalService not initialized)');
+    }
+  } catch (err) {
+    skipped.push(`goals (${err.message})`);
+  }
+
+  // ─── behavior: behavior.{incident_recorded, plan_updated} ───────────────
+  try {
+    const { behaviorService } = require('../domains/behavior/services/BehaviorService');
+    if (behaviorService) {
+      attachBridge('behavior', behaviorService, [
+        'behavior.incident_recorded',
+        'behavior.plan_updated',
+      ]);
+    } else {
+      skipped.push('behavior (singleton not found)');
+    }
+  } catch (err) {
+    skipped.push(`behavior (${err.message})`);
+  }
+
+  // ─── assessments: assessment.completed ──────────────────────────────────
+  try {
+    const assessmentsDomain = require('../domains/assessments');
+    if (assessmentsDomain.assessmentService) {
+      attachBridge('assessments', assessmentsDomain.assessmentService, ['assessment.completed']);
+    } else {
+      skipped.push('assessments (assessmentService not initialized)');
+    }
+  } catch (err) {
+    skipped.push(`assessments (${err.message})`);
+  }
+
+  // ─── ai-recommendations: ai.recommendation_generated (module-level bus) ─
+  // The aiRecommendation.service.js exports a module-level `bus` instead of
+  // a class instance. Bridge it the same way.
+  try {
+    const aiRec = require('../services/aiRecommendation.service');
+    if (aiRec.bus) {
+      attachBridge('ai-recommendations', aiRec.bus, ['ai.recommendation_generated']);
+    } else {
+      skipped.push('ai-recommendations (bus not exported)');
+    }
+  } catch (err) {
+    skipped.push(`ai-recommendations (${err.message})`);
+  }
+
+  // ─── quality: audit_completed / corrective_action_required (via qualityEventBus) ─
+  // These W381 emits use qualityEventBus.getDefault() directly. The
+  // integration-bus-published subscribers expect 'quality.audit_completed'
+  // (namespaced) — so we still need to bridge from qualityEventBus to
+  // integrationBus.
+  try {
+    const qBusModule = require('../services/quality/qualityEventBus.service');
+    const qBus = typeof qBusModule.getDefault === 'function' ? qBusModule.getDefault() : null;
+    if (qBus) {
+      attachBridge('quality', qBus, [
+        'quality.audit_completed',
+        'quality.corrective_action_required',
+      ]);
+    } else {
+      skipped.push('quality (qualityEventBus.getDefault missing)');
+    }
+  } catch (err) {
+    skipped.push(`quality (${err.message})`);
+  }
+
+  logger.info(
+    `[ServiceEventBridge] wired ${wired} event forwarders` +
+      (skipped.length ? ` (skipped: ${skipped.join(', ')})` : '')
+  );
+
+  return { wiredCount: wired, skippedDomains: skipped };
+}
+
+module.exports = { wireServiceEventBridge, BRIDGE_FLAG };

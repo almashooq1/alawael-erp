@@ -75,6 +75,22 @@ function setupIntegrationBus(app) {
       logger.warn('[Integration] DDD subscribers skipped:', dddSubErr.message);
     }
 
+    // W387: bridge service-local EventEmitter emits (W379-W386 wires) to
+    // integrationBus.publish so subscribers actually receive them. Pre-W387
+    // the W379-W386 producers fired on local BaseService EventEmitter while
+    // dddCrossModuleSubscribers listened via integrationBus.subscribe —
+    // two separate buses, no link. See backend/integration/serviceEventBridge.js
+    // for the discovery + fix rationale.
+    try {
+      const { wireServiceEventBridge } = require('../integration/serviceEventBridge');
+      const result = wireServiceEventBridge(integrationBus);
+      logger.info(
+        `[Integration] ✓ W387 service-event bridge: ${result.wiredCount} forwarders attached`
+      );
+    } catch (bridgeErr) {
+      logger.warn('[Integration] W387 service-event bridge skipped:', bridgeErr.message);
+    }
+
     // Wire DDD notification triggers (10 notification rules)
     try {
       const { initializeDDDNotifications } = require('../integration/dddNotificationTriggers');

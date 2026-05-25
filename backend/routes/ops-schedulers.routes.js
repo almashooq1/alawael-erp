@@ -118,6 +118,18 @@ function createOpsSchedulersRouter() {
         },
         notes: 'Phase 11 C24 — also exposes /api/v1/hr/ops/anomaly-scheduler for live status',
       },
+      {
+        key: 'capa-overdue-sweeper',
+        nameAr: 'كاسح إجراءات CAPA المتأخرة',
+        nameEn: 'CAPA Overdue Sweeper',
+        envFlag: 'ENABLE_CAPA_SWEEPER',
+        enabled: bool(env.ENABLE_CAPA_SWEEPER),
+        defaults: {
+          schedule: 'daily @ 06:00 Asia/Riyadh',
+        },
+        notes:
+          'W344 — emits quality.capa.overdue events for past-due CapaItems (consumed by W349 alerts subscriber)',
+      },
     ];
 
     res.json({

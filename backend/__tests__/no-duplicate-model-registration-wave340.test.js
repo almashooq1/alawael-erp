@@ -147,6 +147,33 @@ const KNOWN_DUPLICATE_REGISTRATIONS = new Set([
   'DigitalSignature',
   'WorkflowInstance',
   'WorkflowDefinition',
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // AF-2 (2026-05-25) — surfaced by extending the regex to catch
+  // `connection.model(...)` / `conn.model(...)` / `db.model(...)` patterns
+  // (the per-connection registration form, previously a drift-guard blind
+  // spot). Each below has the SAME anti-pattern:
+  //   * Canonical schema lives at `models/<X>.js`
+  //   * A `<domain>/*-service.js` file ALSO registers `'X'` via
+  //     `connection.model('X', schema)` — typically a local schema definition
+  //     designed for multi-tenant connection support, but creates silent
+  //     schema-divergence risk identical to the W325c phantom-ref class.
+  // Consolidation strategy (future ratchet waves):
+  //   (a) For services that DON'T need per-connection isolation: re-export
+  //       the canonical, e.g. `module.exports = require('../models/Vehicle')`.
+  //   (b) For services that legitimately need per-connection schemas (rare):
+  //       ALLOWLIST + add a comment explaining the per-connection requirement.
+  //   (c) For services where the local schema diverges from canonical:
+  //       Pattern D rename per ADR-021 (e.g. `Vehicle` → `TransportVehicle`).
+  'Beneficiary', // models/Beneficiary.js + vehicles/rehabilitation-transport-service.js — HIGH severity (Beneficiary is the canonical-per-CLAUDE.md entity)
+  'EmailLog', // communication/email-models.js + communication/email-service.js (same-domain pair)
+  'Permission', // models/RBAC/Permission.js + permissions/permission-service.js
+  'Role', // models/RBAC/Role.js + permissions/permission-service.js
+  'TrafficAccident', // models/Traffic/TrafficAccident.js + vehicles/saudi-traffic-service.js
+  'TransportRoute', // models/TransportRoute.js + vehicles/rehabilitation-transport-service.js
+  'Vehicle', // models/Vehicle.js + vehicles/vehicle-service.js
+  'VehicleMaintenance', // models/transport/VehicleMaintenance.js + vehicles/vehicle-service.js
+  'VehicleTrip', // vehicles/saudi-vehicle-service.js + vehicles/vehicle-service.js (intra-vehicles pair — both via connection.model; no models/ canonical)
 ]);
 
 // Models deliberately referenced but not Mongoose-owned. Inherited from W325c
@@ -219,6 +246,10 @@ function collectRegistrations() {
     const src = stripJsComments(fs.readFileSync(f, 'utf8'));
     const rel = path.relative(REPO_ROOT, f).replace(/\\/g, '/');
     for (const m of src.matchAll(REGISTRATION_RE)) {
+      if (!byName.has(m[1])) byName.set(m[1], new Set());
+      byName.get(m[1]).add(rel);
+    }
+    for (const m of src.matchAll(CONNECTION_REGISTRATION_RE)) {
       if (!byName.has(m[1])) byName.set(m[1], new Set());
       byName.get(m[1]).add(rel);
     }

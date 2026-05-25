@@ -54,11 +54,29 @@ function wireSpeech(app, deps = {}) {
     // past their expiresAt. Disabled by default (ENABLE_SPEECH_RETENTION_CRON=true).
     try {
       const sweeperFactory = require('../services/ai/speech-retention-sweeper.service');
-      // storagePurger: in production wire to S3 deleteObject. For now,
-      // log-only purger so cron is operational immediately.
-      const storagePurger = async ({ bucket, key }) => {
-        logger.info(`[speech-retention] would purge s3://${bucket}/${key} (no-op placeholder)`);
-      };
+      // storagePurger: prefer real S3-backed purger if @aws-sdk/client-s3 is
+      // installed AND AWS_REGION is set. Falls back to log-only with a LOUD
+      // warning so the PDPL-retention gap is visible at boot. The log-only
+      // path is dev/CI-only; pilot ops should install the SDK before Week 2.
+      const { createS3Purger } = require('../services/ai/speech-s3-purger.service');
+      const realPurger = createS3Purger({ logger });
+      const storagePurger =
+        realPurger ||
+        (async ({ bucket, key }) => {
+          logger.info(
+            `[speech-retention] would purge s3://${bucket}/${key} (no-op placeholder — PDPL retention NOT enforced)`
+          );
+        });
+      if (!realPurger) {
+        logger.warn(
+          '[startup] Speech retention: real S3 purger unavailable (install @aws-sdk/client-s3 + set AWS_REGION). ' +
+            'Falls back to log-only purger — audio files will NOT be deleted after expiresAt. PDPL retention non-compliant.'
+        );
+      } else {
+        logger.info(
+          '[startup] Speech retention: real S3 purger wired (@aws-sdk/client-s3 + AWS_REGION present) — PDPL retention enforced'
+        );
+      }
       const sweeper = sweeperFactory({
         storagePurger,
         auditLogger: AuditLogger,

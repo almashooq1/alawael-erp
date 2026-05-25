@@ -419,7 +419,7 @@ Pilot PM countersigns once all 4 sign:
 
 Use the PILOT_CYCLE_1.md §7 template:
 
-```
+```text
 ISSUE: <one-line description>
 SCENARIO: 1
 STEP: 1.X

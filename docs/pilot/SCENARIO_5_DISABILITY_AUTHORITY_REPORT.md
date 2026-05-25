@@ -78,10 +78,13 @@ X-MFA-Tier: 2
 
 - `schedulerRegistry.recordRun('disability-authority-monthly')` entry appears in registry — confirm via `GET /api/ops/schedulers` → `disability-authority-monthly.lastRun` updated
 - W312 `gov.report.submission` counter increments — confirm via Prometheus scrape OR via `/api/v1/metrics/gov` if exposed:
-  ```
+
+  ```text
   gov_report_submission{provider="disability_authority",result="ok"} 1
   ```
+
   (mock mode returns `ok` deterministically; live mode depends on the real response)
+
 - A `DisabilityAuthorityReport` record (or equivalent submission-log entry) is created with `status='submitted'` (mock) or whatever the live adapter returned
 
 **If it fails**:

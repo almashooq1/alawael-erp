@@ -324,4 +324,4 @@ Login → JWT (15min) + RefreshToken (24h) → Auto-refresh on 401 → Logout
 
 ---
 
-_آخر تحديث: v3.1.0 — 2026-03-29_
+> آخر تحديث: v3.2.0 — 2026-05-25 (W356-W396 series).

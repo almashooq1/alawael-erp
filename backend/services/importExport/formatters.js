@@ -32,7 +32,7 @@ const {
   TextRun,
 } = require('docx');
 
-const { resolveColumns, getNestedValue } = require('./format-helpers');
+const { resolveColumns, getNestedValue, escapeFormulaInjection } = require('./format-helpers');
 const { MODULE_REGISTRY } = require('./module-registry');
 
 /**
@@ -102,7 +102,9 @@ async function exportToExcel(data, fields, module, options = {}) {
         value = JSON.stringify(value);
       }
 
-      cell.value = value ?? '';
+      // Defang formula triggers before assigning to ExcelJS, which
+      // interprets a string-valued cell starting with `=` as a formula.
+      cell.value = escapeFormulaInjection(value ?? '');
       cell.alignment = { vertical: 'middle', wrapText: true };
       cell.border = {
         bottom: { style: 'thin', color: { argb: 'FFE0E0E0' } },
@@ -164,7 +166,11 @@ async function exportToCSV(data, fields, module, options = {}) {
       let value = getNestedValue(item, col.key);
       if (value instanceof Date) value = value.toISOString().split('T')[0];
       if (typeof value === 'object' && value !== null) value = JSON.stringify(value);
-      return value ?? '';
+      // Defang formula triggers BEFORE csv-stringify quotes the field —
+      // csv-stringify quotes correctly for CSV grammar but does NOT
+      // prevent Excel from parsing a leading `=` / `+` / `-` / `@` as
+      // a formula when the file is later opened.
+      return escapeFormulaInjection(value ?? '');
     })
   );
 

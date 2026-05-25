@@ -227,6 +227,31 @@ const requirePermission = permission => {
     }
 
     logger.warn(`Permission denied: user ${req.user.id} lacks [${permission}]`);
+
+    // W398: emit canonical 'auth.permission_denied' event for cross-module
+    // subscribers (audit / security analytics). Envelope per SYSTEM_EVENTS.
+    // PERMISSION_DENIED: {userId, resource, action, ip}.
+    try {
+      const { integrationBus } = require('../integration/systemIntegrationBus');
+      if (integrationBus && typeof integrationBus.publish === 'function') {
+        const [resource, action] = permission.includes(':')
+          ? permission.split(':')
+          : [permission, 'read'];
+        Promise.resolve()
+          .then(() =>
+            integrationBus.publish('system', 'auth.permission_denied', {
+              userId: String(req.user.id),
+              resource,
+              action,
+              ip: req.ip || req.headers['x-forwarded-for'] || '',
+            })
+          )
+          .catch(err => logger.warn('auth.permission_denied publish failed:', err.message));
+      }
+    } catch {
+      /* integrationBus optional */
+    }
+
     return res.status(403).json({
       success: false,
       message: 'ليس لديك صلاحية للوصول إلى هذا المورد',

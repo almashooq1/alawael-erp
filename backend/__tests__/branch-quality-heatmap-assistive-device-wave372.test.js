@@ -33,12 +33,14 @@ describe('W372 — assistiveDevice.maintenanceOverdue threshold', () => {
 });
 
 describe('W372 — aggregation pipeline shape', () => {
-  it('pipeline filters by nextMaintenanceDue<now AND retiredAt=null (active+overdue)', async () => {
+  it('pipeline filters by retiredAt=null + computes overdue+untracked via $cond (W378 dual-metric)', async () => {
     let capturedMatch = null;
+    let capturedGroup = null;
     const assistiveDeviceModel = {
       aggregate: async pipeline => {
         capturedMatch = pipeline.find(s => s.$match).$match;
-        return [{ _id: 'branch-1', overdueCount: 3 }];
+        capturedGroup = pipeline.find(s => s.$group).$group;
+        return [{ _id: 'branch-1', overdueCount: 3, untrackedCount: 0 }];
       },
     };
     const svc = createBranchQualityHeatmapService({
@@ -52,11 +54,17 @@ describe('W372 — aggregation pipeline shape', () => {
       assistiveDeviceModel,
     });
     await svc.buildHeatmap();
-    // retiredAt must be null (excludes retired devices)
+    // W372 — retiredAt:null is THE only $match clause now (W378 moved the date filter into $cond)
     expect(capturedMatch.retiredAt).toBeNull();
-    // nextMaintenanceDue must be both non-null AND < now (excludes unscheduled + future)
-    expect(capturedMatch.nextMaintenanceDue.$ne).toBeNull();
-    expect(capturedMatch.nextMaintenanceDue.$lt).toBeInstanceOf(Date);
+    // W372 overdueCount: $sum of $cond with non-null AND $lt
+    expect(capturedGroup.overdueCount.$sum.$cond[0].$and[0]).toEqual({
+      $ne: ['$nextMaintenanceDue', null],
+    });
+    expect(capturedGroup.overdueCount.$sum.$cond[0].$and[1].$lt[0]).toBe('$nextMaintenanceDue');
+    // W378 untrackedCount: $sum of $cond with $eq null
+    expect(capturedGroup.untrackedCount.$sum.$cond[0]).toEqual({
+      $eq: ['$nextMaintenanceDue', null],
+    });
   });
 
   it('cell populated with severity per threshold', async () => {
@@ -143,9 +151,8 @@ describe('W372 — aggregation pipeline shape', () => {
     });
     await svc.buildHeatmap({ branchIds: ['b1', 'b2'] });
     expect(capturedMatch.branchId).toEqual({ $in: ['b1', 'b2'] });
-    // The maintenance + retiredAt clauses must be preserved alongside branchId
+    // The retiredAt clause must be preserved alongside branchId (W378 moved date filter into $cond)
     expect(capturedMatch.retiredAt).toBeNull();
-    expect(capturedMatch.nextMaintenanceDue.$ne).toBeNull();
   });
 
   it('full-merge: all 8 sources / 11 cells per branch', async () => {

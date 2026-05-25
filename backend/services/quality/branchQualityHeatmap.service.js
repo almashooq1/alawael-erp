@@ -55,6 +55,8 @@ const THRESHOLDS = Object.freeze({
   'respite.upcomingBookings': { warning: 10, critical: 25 }, // moderate: forward-looking load signal (next 7 days)
   // W376 (Life-stage transition — bridges W361 TransitionPlan onto the heatmap)
   'transitionPlan.overdueReviews': { warning: 0, critical: 5 }, // strict: overdue review = beneficiary may miss transition milestone
+  // W378 (Operational hygiene — devices with NO maintenance schedule at all; complements W372)
+  'assistiveDevice.untrackedDevices': { warning: 5, critical: 15 }, // moderate: untracked ≠ unsafe, but ≥5 suggests scheduling-process gap
 });
 
 // Terminal-statuses sets (mirror config/{rca,fmea}.registry.js TERMINAL_STATUSES).
@@ -436,17 +438,35 @@ function createBranchQualityHeatmapService(opts = {}) {
 
   async function _assistiveDeviceMetricsByBranch({ branchIds, now }) {
     const Device = _AssistiveDeviceModel();
-    // Overdue = nextMaintenanceDue is set AND in the past AND device is not retired.
-    // Devices with nextMaintenanceDue:null are excluded — they haven't been scheduled yet,
-    // which is a separate "untracked" signal not modeled here.
-    const match = {
-      nextMaintenanceDue: { $ne: null, $lt: now },
-      retiredAt: null,
-    };
+    // Single pipeline reports BOTH metrics (W372 overdue + W378 untracked) per branch.
+    // W372 overdue = nextMaintenanceDue is set AND in the past AND device is not retired.
+    // W378 untracked = nextMaintenanceDue is null AND device is not retired.
+    const match = { retiredAt: null };
     if (branchIds?.length) match.branchId = { $in: branchIds };
     const pipeline = [
       { $match: match },
-      { $group: { _id: '$branchId', overdueCount: { $sum: 1 } } },
+      {
+        $group: {
+          _id: '$branchId',
+          overdueCount: {
+            $sum: {
+              $cond: [
+                {
+                  $and: [
+                    { $ne: ['$nextMaintenanceDue', null] },
+                    { $lt: ['$nextMaintenanceDue', now] },
+                  ],
+                },
+                1,
+                0,
+              ],
+            },
+          },
+          untrackedCount: {
+            $sum: { $cond: [{ $eq: ['$nextMaintenanceDue', null] }, 1, 0] },
+          },
+        },
+      },
     ];
     return Device.aggregate(pipeline);
   }
@@ -541,6 +561,7 @@ function createBranchQualityHeatmapService(opts = {}) {
             'cbahi.attestationsExpiringSoon': null,
             'respite.upcomingBookings': null,
             'transitionPlan.overdueReviews': null,
+            'assistiveDevice.untrackedDevices': null,
           },
         });
       }
@@ -583,6 +604,11 @@ function createBranchQualityHeatmapService(opts = {}) {
       b.cells['assistiveDevice.maintenanceOverdue'] = _cell(
         'assistiveDevice.maintenanceOverdue',
         r.overdueCount
+      );
+      // W378 — same pipeline reports untracked count alongside overdue.
+      b.cells['assistiveDevice.untrackedDevices'] = _cell(
+        'assistiveDevice.untrackedDevices',
+        r.untrackedCount
       );
     }
     for (const r of cbahiRows) {

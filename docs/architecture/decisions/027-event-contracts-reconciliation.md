@@ -4,7 +4,45 @@ Date: 2026-05-25
 
 ## Status
 
-✅ **FULLY EXECUTED (W377 + W379 + W380 + W381 + W383, 2026-05-25). Baseline 31 → 0 (100% cleared).**
+✅ **FULLY EXECUTED + BRIDGED (W377 + W379-W381 + W383 + W384-W386 + W387, 2026-05-25). Baseline 31 → 0 + 14/14 wires behaviorally verified + producer→subscriber bridge operational.**
+
+### W387 root-cause discovery — bus mismatch (2026-05-25 PM)
+
+While building the W387 integration test (per "stop + verify" recommendation), discovered a critical architectural disconnect that **invalidated all 14 W379-W386 wires at runtime**:
+
+- Producers emit on **BaseService EventEmitter** (local-only): `service.emit('episode.created', payload)`
+- Subscribers in `dddCrossModuleSubscribers.js` listen via **integrationBus.subscribe**(`'episodes.episode.created'`, handler) (namespaced pattern)
+- **NO BRIDGE existed** — events were emit-and-no-listen
+
+How it slipped past 21 commits + 56 assertions:
+
+- W375 dead-detection passed: eventType strings present in BOTH producer + subscriber files
+- W374/W382 structural guards passed: contract definitions were valid
+- W384-W386 behavioral tests passed: they subscribed to the SAME local emitter the producer fires on, never exercising the cross-bus integration
+
+**Fix**: `backend/integration/serviceEventBridge.js` (W387 commit `c17b91581`). Installs forwarders on each W379-W386 wired service singleton that catch local emits and republish via `integrationBus.publish(domain, eventType, payload)`. Idempotent via Symbol flag. Wired into `startup/integrationBus.js` after subscriber registration.
+
+W387 integration test verifies producer→bus→subscriber loop for 3 representative wires + 1 idempotency check. 4 assertions, all pass.
+
+### Reversibility / risk audit (per-decision)
+
+Per "stop + verify" recommendation #2 — review of each architectural decision in ADR-027 before they become canonical:
+
+| Decision                                                                                                                                             | Reversibility                                                               | Risk if wrong                                                                                                                                |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| W377 deleted 16 contracts (sessions/goals partials + workflow/family/dashboards/tele-rehab/ar-vr/group-therapy/research/field-training whole groups) | **Reversible**: git revert restores. Cost: 1 commit.                        | Low. Subscribers not currently expecting these. If team later needs them, re-add via W374-shape contract.                                    |
+| W379 rename `episodeCreated` → `episode.created` (3 events)                                                                                          | **Reversible**: rename back. Cost: small.                                   | Low pre-W387 (no subscribers). Post-W387: medium — subscribers now wired; rename must be coordinated.                                        |
+| W380 wire 8 BaseService.emit batch                                                                                                                   | **Reversible**: remove emit calls. Cost: small.                             | Low. Pre-W385 had envelope bug (incident_recorded behaviorType missing) which W385 caught + fixed.                                           |
+| W381 ai-rec module bus + quality lazy bus                                                                                                            | **Reversible**: remove bus + lazy require. Cost: medium (3 services).       | Low. Bus exports are additive — caller code unaffected.                                                                                      |
+| W383 assessment-overdue sweeper                                                                                                                      | **Reversible**: remove cron stanza. Cost: trivial.                          | **Cadence assumption** (04:00 daily, 7-day threshold) is a default; stakeholder can override via env flags + thresholds without code change. |
+| W387 service-event bridge                                                                                                                            | **Reversible**: remove serviceEventBridge.js + startup hook. Cost: trivial. | **Now medium**: subscribers depend on this delivery path. Removing breaks cross-domain integration.                                          |
+
+**Canonical-de-facto status**: W377/W379/W380/W381/W383/W387 are now operationally canonical because the W354/W374/W375/W382/W384/W385/W386/W387 drift guards depend on them. Reverting requires coordinated changes to guards + ADR. Stakeholder review can still override but cost rises with each subsequent commit that builds on them.
+
+### Still requires stakeholder (acknowledged)
+
+- **W382 LIVE registry baseline (19 wirings)**: HR/finance/medical/attendance domain owners need to decide each contract's wire-vs-delete. Same framework as W377/W379-W381 just per-domain. W387 bridge means newly-wired LIVE events will reach subscribers immediately when implemented.
+- **Subscriber semantics review**: dddCrossModuleSubscribers handlers (e.g., the `core:registered → dashboards:kpi` handler creates KPISnapshot on every beneficiary registration) — fine for current usage but worth a separate scale-review when production volumes ramp.
 
 **Progression**:
 

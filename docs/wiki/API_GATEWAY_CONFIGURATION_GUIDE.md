@@ -9,7 +9,7 @@
 
 ## 🎯 ARCHITECTURE OVERVIEW
 
-```
+```text
 ┌─────────────────────────────────────────────────────────┐
 │              CLIENT APPLICATIONS                         │
 │  (Web, Mobile, Desktop, Third-party API Consumers)      │
@@ -46,7 +46,7 @@
 ```javascript
 services: {
   auth: 'http://localhost:3001',         // ERP Main Service
-  hr: 'http://localhost:3002',           // HR Module  
+  hr: 'http://localhost:3002',           // HR Module
   finance: 'http://localhost:3003',      // Finance Module
   reports: 'http://localhost:3004',      // Reports Service
   notifications: 'http://localhost:3005' // Notifications
@@ -61,18 +61,18 @@ services: {
   'erp': 'http://localhost:3001',              // Main ERP system
   'auth': 'http://localhost:3001/api/auth',   // Authentication
   'users': 'http://localhost:3001/api/users', // User Management
-  
+
   // Specialized Services
   'hr': 'http://localhost:3002',        // HR Module
   'finance': 'http://localhost:3003',   // Finance Module
   'reports': 'http://localhost:3004',   // Reports Service
   'notifications': 'http://localhost:3005', // Notifications
-  
+
   // Advanced Modules
   'scm': 'http://localhost:3006',       // Supply Chain Management
   'graphql': 'http://localhost:4000',   // GraphQL API
   'ai-agent': 'http://localhost:3007',  // Intelligent Agent
-  
+
   // Optional Services
   'mobile-api': 'http://localhost:3008', // Mobile Backend
   'analytics': 'http://localhost:3009'   // Analytics Service
@@ -129,7 +129,7 @@ services:
       - MONGODB_URI=mongodb://mongodb:27017/erp_system
       - POSTGRES_HOST=postgres
     ports:
-      - "3001:3001"
+      - '3001:3001'
     depends_on:
       - postgres
       - redis
@@ -152,7 +152,7 @@ services:
       - GRAPHQL_SERVICE_URL=http://graphql-server:4000
       - SCM_SERVICE_URL=http://scm-backend:3006
     ports:
-      - "8080:8080"
+      - '8080:8080'
     depends_on:
       - erp-backend
       - graphql-server
@@ -168,7 +168,7 @@ services:
       - APOLLO_PORT=4000
       - BACKEND_SERVICE_URL=http://erp-backend:3001
     ports:
-      - "4000:4000"
+      - '4000:4000'
     depends_on:
       - erp-backend
 
@@ -183,7 +183,7 @@ services:
       - PORT=3006
       - MONGODB_URI=mongodb://mongodb:27017/scm_system
     ports:
-      - "3006:3006"
+      - '3006:3006'
     depends_on:
       - mongodb
 
@@ -196,7 +196,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: erp_system
     ports:
-      - "5432:5432"
+      - '5432:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
@@ -204,7 +204,7 @@ services:
     image: redis:7-alpine
     container_name: redis-cache
     ports:
-      - "6379:6379"
+      - '6379:6379'
 
   mongodb:
     image: mongo:7-alpine
@@ -214,7 +214,7 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
       MONGO_INITDB_DATABASE: erp_system
     ports:
-      - "27017:27017"
+      - '27017:27017'
     volumes:
       - mongo_data:/data/db
 
@@ -264,7 +264,7 @@ const securityConfig = {
   // Rate limiting
   rateLimit: {
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100,                   // 100 requests per window
+    max: 100, // 100 requests per window
     standardHeaders: true,
     legacyHeaders: false,
   },
@@ -338,20 +338,13 @@ echo "\n✅ Integration Tests Complete"
 ```javascript
 // Multiple instances of each service (recommended for production)
 const serviceInstances = {
-  'erp': [
-    'http://erp-1:3001',
-    'http://erp-2:3001',
-    'http://erp-3:3001',
-  ],
-  'graphql': [
-    'http://graphql-1:4000',
-    'http://graphql-2:4000',
-  ],
+  erp: ['http://erp-1:3001', 'http://erp-2:3001', 'http://erp-3:3001'],
+  graphql: ['http://graphql-1:4000', 'http://graphql-2:4000'],
 };
 
 // Round-robin load balancing
 let requestIndex = 0;
-const getServiceUrl = (serviceName) => {
+const getServiceUrl = serviceName => {
   const instances = serviceInstances[serviceName] || [config.services[serviceName]];
   const url = instances[requestIndex % instances.length];
   requestIndex++;
@@ -366,23 +359,23 @@ const getServiceUrl = (serviceName) => {
 const cacheMiddleware = (cacheDuration = 300) => {
   return async (req, res, next) => {
     const key = `gateway:${req.method}:${req.path}`;
-    
+
     // Check cache
     const cached = await redisClient.get(key);
     if (cached) {
       return res.json(JSON.parse(cached));
     }
-    
+
     // Continue to proxy...
     const originalJson = res.json;
-    res.json = function(data) {
+    res.json = function (data) {
       // Cache successful responses
       if (res.statusCode === 200) {
         redisClient.setex(key, cacheDuration, JSON.stringify(data));
       }
       return originalJson.call(this, data);
     };
-    
+
     next();
   };
 };
@@ -424,7 +417,7 @@ const cacheMiddleware = (cacheDuration = 300) => {
 // Prometheus-compatible metrics
 const metricsMiddleware = (req, res, next) => {
   const start = Date.now();
-  
+
   res.on('finish', () => {
     const duration = Date.now() - start;
     // Send metrics to Prometheus
@@ -436,7 +429,7 @@ const metricsMiddleware = (req, res, next) => {
       timestamp: new Date(),
     });
   });
-  
+
   next();
 };
 ```
@@ -463,4 +456,3 @@ const metricsMiddleware = (req, res, next) => {
 **Status**: Configuration ready for implementation  
 **Next**: Deploy enhanced gateway configuration  
 **Effort**: 2-3 hours for complete setup & testing
-

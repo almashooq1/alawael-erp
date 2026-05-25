@@ -15,10 +15,12 @@ Phase 2 focuses on implementing the 30+ missing API endpoints that are currently
 ## Missing Endpoints By Category
 
 ### 1. Disability Rehabilitation Module (11 endpoints) 🏥
+
 **Base Path:** `/api/v1/disability-rehabilitation`
 
 #### Programs Management (4 endpoints)
-```
+
+```text
 POST   /api/v1/disability-rehabilitation/programs
 GET    /api/v1/disability-rehabilitation/programs
 GET    /api/v1/disability-rehabilitation/programs/:programId
@@ -27,7 +29,8 @@ DELETE /api/v1/disability-rehabilitation/programs/:programId
 ```
 
 #### Sessions Management (3 endpoints)
-```
+
+```text
 POST   /api/v1/disability-rehabilitation/sessions
 GET    /api/v1/disability-rehabilitation/sessions
 GET    /api/v1/disability-rehabilitation/sessions/:sessionId
@@ -35,7 +38,8 @@ PUT    /api/v1/disability-rehabilitation/sessions/:sessionId
 ```
 
 #### Goals & Assessment (4 endpoints)
-```
+
+```text
 POST   /api/v1/disability-rehabilitation/goals
 GET    /api/v1/disability-rehabilitation/goals/:goalId
 POST   /api/v1/disability-rehabilitation/assessments
@@ -43,22 +47,26 @@ GET    /api/v1/disability-rehabilitation/assessments/:assessmentId
 ```
 
 #### Performance Tracking (Optional)
-```
+
+```text
 GET    /api/v1/disability-rehabilitation/performance/:beneficiaryId
 ```
 
 ### 2. Maintenance Module (3+ endpoints) 🔧
+
 **Base Path:** `/api/v1/maintenance`
 
 #### Currently Failing
-```
+
+```text
 GET    /api/v1/maintenance/schedules       (404)
 POST   /api/v1/maintenance/schedules       (404)
 GET    /api/v1/maintenance/predict/:vehicleId (404)
 ```
 
 #### Additional Required
-```
+
+```text
 PUT    /api/v1/maintenance/schedules/:scheduleId
 DELETE /api/v1/maintenance/schedules/:scheduleId
 POST   /api/v1/maintenance/records
@@ -66,17 +74,20 @@ GET    /api/v1/maintenance/records/:recordId
 ```
 
 ### 3. Webhooks Module (4 endpoints) 📡
+
 **Base Path:** `/api/webhooks`
 
 #### Currently Failing
-```
+
+```text
 POST   /api/webhooks/register              (404)
 POST   /api/webhooks/:webhookId/trigger    (404)
 DELETE /api/webhooks/:webhookId            (404)
 ```
 
 #### Additional
-```
+
+```text
 GET    /api/webhooks
 GET    /api/webhooks/:webhookId
 PUT    /api/webhooks/:webhookId
@@ -86,6 +97,7 @@ POST   /api/webhooks/:webhookId/test
 ### 4. Additional Integration Endpoints (12+ endpoints)
 
 #### Coming from partial implementations that need completion:
+
 - Asset Management (missing full CRUD)
 - Schedule Management (missing deletion)
 - Performance Analytics (missing aggregations)
@@ -97,7 +109,8 @@ POST   /api/webhooks/:webhookId/test
 ## Implementation Strategy
 
 ### Step 1: Create Route Files (30 minutes)
-```
+
+```text
 1. routes/disability-rehabilitation.js        (11 endpoints)
 2. routes/maintenance.js                      (8 endpoints)
 3. routes/webhooks.js                         (5 endpoints)
@@ -105,7 +118,8 @@ POST   /api/webhooks/:webhookId/test
 ```
 
 ### Step 2: Create Service Layer (1-2 hours)
-```
+
+```text
 1. services/disabilityRehabilitationService.js
 2. services/maintenanceService.js
 3. services/webhookService.js
@@ -113,7 +127,8 @@ POST   /api/webhooks/:webhookId/test
 ```
 
 ### Step 3: Create MongoDB Models (30 minutes)
-```
+
+```text
 1. models/disability/Program.model.js
 2. models/disability/Session.model.js
 3. models/disability/Goal.model.js
@@ -123,6 +138,7 @@ POST   /api/webhooks/:webhookId/test
 ```
 
 ### Step 4: Wire Up Routes in app.js (15 minutes)
+
 ```javascript
 app.use('/api/v1/disability-rehabilitation', disabilityRehabilitationRoutes);
 app.use('/api/v1/maintenance', maintenanceRoutes);
@@ -131,6 +147,7 @@ app.use('/api/integrations', integrationsAdvancedRoutes);
 ```
 
 ### Step 5: Add Service Initialization (15 minutes)
+
 ```javascript
 // server.js startup sequence
 const disabilityService = new DisabilityRehabilitationService();
@@ -139,6 +156,7 @@ const webhookService = new WebhookService();
 ```
 
 ### Step 6: Run Tests & Validate (30 minutes)
+
 ```bash
 npm test
 # Verify new endpoints returning 200/201 instead of 404
@@ -148,7 +166,7 @@ npm test
 
 ## File Structure to Create
 
-```
+```text
 backend/
 ├── routes/
 │   ├── disability-rehabilitation.js      (NEW)
@@ -177,11 +195,13 @@ backend/
 ## Expected Test Results After Phase 2
 
 **Current State:**
+
 - Total Errors: 134
 - Missing Routes: 30+ (404 errors)
 - Coverage: 34.71%
 
 **Target State:**
+
 - Total Errors: ~50-60 (only runtime/DB integration issues)
 - Missing Routes: 0 (all skeleton implemented)
 - Coverage: 55-60%
@@ -192,6 +212,7 @@ backend/
 ## Quick Start Commands
 
 ### Phase 2 Execution (When Ready)
+
 ```bash
 # 1. Create all route files
 npm run create:routes
@@ -210,6 +231,7 @@ npm test
 ```
 
 ### Manual Kickoff
+
 ```bash
 # Start from backend root directory
 cd c:\Users\x-be\OneDrive\المستندات\04-10-2025\66666\backend
@@ -226,16 +248,19 @@ npm test
 ## Risk Assessment
 
 ### Low Risk Items ✅
+
 - Route skeleton implementation (standard patterns)
 - Model definitions (use existing patterns from User, Budget, etc.)
 - Service layer basics (follow established patterns)
 
 ### Medium Risk Items ⚠️
+
 - Database integration (ensure proper Mongoose usage)
 - Validation rules (ensure consistency with existing validations)
 - Error handling (must follow security patterns)
 
 ### Mitigation Strategy
+
 - Use existing routes as templates (copy & modify pattern)
 - Follow established error handling (try-catch + logger)
 - Validate against test fixtures first (before real DB)
@@ -245,6 +270,7 @@ npm test
 ## Success Criteria
 
 **Phase 2 Complete When:**
+
 1. ✅ All 30+ endpoint files created
 2. ✅ All services instantiated and tested
 3. ✅ All routes registered in app.js
@@ -276,6 +302,5 @@ Use these existing well-implemented routes as templates:
 
 ---
 
-*Document generated after successful Phase 1 completion*  
-*Date: February 23, 2026*
-
+_Document generated after successful Phase 1 completion_  
+_Date: February 23, 2026_

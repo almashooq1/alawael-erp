@@ -15,18 +15,18 @@
 
 ## التقنيات
 
-| التقنية | الإصدار | الاستخدام |
-|---------|---------|-----------|
-| React | 18.2 | إطار الواجهة |
-| React Router | 6.20 | التوجيه (SPA) |
-| Material-UI (MUI) | 5.15 | مكتبة المكونات |
-| Emotion | 11.11 | الأنماط (CSS-in-JS) |
-| Recharts | 3.7 | الرسوم البيانية |
-| Chart.js | 4.4 | الرسوم البيانية المتقدمة |
-| Axios | 1.13 | HTTP Client |
-| i18next | 23.11 | الترجمة والتعريب |
-| Socket.IO Client | 4.8 | الاتصال الفوري |
-| React Scripts (CRA) | 5.0.1 | أدوات البناء |
+| التقنية             | الإصدار | الاستخدام                |
+| ------------------- | ------- | ------------------------ |
+| React               | 18.2    | إطار الواجهة             |
+| React Router        | 6.20    | التوجيه (SPA)            |
+| Material-UI (MUI)   | 5.15    | مكتبة المكونات           |
+| Emotion             | 11.11   | الأنماط (CSS-in-JS)      |
+| Recharts            | 3.7     | الرسوم البيانية          |
+| Chart.js            | 4.4     | الرسوم البيانية المتقدمة |
+| Axios               | 1.13    | HTTP Client              |
+| i18next             | 23.11   | الترجمة والتعريب         |
+| Socket.IO Client    | 4.8     | الاتصال الفوري           |
+| React Scripts (CRA) | 5.0.1   | أدوات البناء             |
 
 ## البدء السريع
 
@@ -50,7 +50,7 @@ npm start
 
 ### الوصول
 
-```
+```text
 http://localhost:3000
 ```
 
@@ -69,7 +69,7 @@ npm run quality:ci   # فحص الجودة الشامل + التغطية
 
 ## هيكل المشروع
 
-```
+```text
 frontend/
 ├── public/                       # الملفات الثابتة
 ├── src/
@@ -145,7 +145,7 @@ import { Button, Card, Typography } from '@mui/material';
   <Button variant="contained" color="primary">
     عرض التفاصيل
   </Button>
-</Card>
+</Card>;
 ```
 
 ## Path Aliases
@@ -183,6 +183,7 @@ npm run quality:ci
 ```
 
 **النتائج الحالية:**
+
 - 27 مجموعة اختبار — 100% ناجح
 - 534 اختبار — 100% ناجح
 - تغطية: branches 60%+, functions 65%+, lines 70%+
@@ -197,11 +198,11 @@ npm run quality:ci
 ## المتصفحات المدعومة
 
 | المتصفح | الإصدار |
-|---------|---------|
-| Chrome | 90+ |
-| Firefox | 88+ |
-| Safari | 14+ |
-| Edge | 90+ |
+| ------- | ------- |
+| Chrome  | 90+     |
+| Firefox | 88+     |
+| Safari  | 14+     |
+| Edge    | 90+     |
 
 ## البناء للإنتاج
 

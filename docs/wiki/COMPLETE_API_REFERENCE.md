@@ -10,7 +10,7 @@
 
 ### Base URL
 
-```
+```text
 Development: http://localhost:5000/api
 Production: https://api.alawael.com/api
 ```
@@ -18,7 +18,8 @@ Production: https://api.alawael.com/api
 ### Authentication
 
 All requests (except login) require:
-```
+
+```text
 Authorization: Bearer <JWT_TOKEN>
 Content-Type: application/json
 ```
@@ -26,23 +27,29 @@ Content-Type: application/json
 ### Response Format
 
 All responses follow this format:
+
 ```json
 {
   "success": true,
-  "data": { /* actual data */ },
+  "data": {
+    /* actual data */
+  },
   "message": "Optional success message",
   "timestamp": "2026-02-24T12:00:00Z"
 }
 ```
 
 Error responses:
+
 ```json
 {
   "success": false,
   "error": {
     "code": "ERROR_CODE",
     "message": "Human readable message",
-    "details": [ /* validation errors */ ]
+    "details": [
+      /* validation errors */
+    ]
   },
   "timestamp": "2026-02-24T12:00:00Z"
 }
@@ -57,6 +64,7 @@ Error responses:
 **Login with email and password**
 
 Request:
+
 ```json
 {
   "email": "user@example.com",
@@ -65,6 +73,7 @@ Request:
 ```
 
 Response (200):
+
 ```json
 {
   "success": true,
@@ -88,6 +97,7 @@ Response (200):
 **Register a new user**
 
 Request:
+
 ```json
 {
   "email": "newuser@example.com",
@@ -98,6 +108,7 @@ Request:
 ```
 
 Response (201):
+
 ```json
 {
   "success": true,
@@ -118,6 +129,7 @@ Response (201):
 **Refresh expired token**
 
 Request:
+
 ```json
 {
   "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
@@ -125,6 +137,7 @@ Request:
 ```
 
 Response (200):
+
 ```json
 {
   "success": true,
@@ -141,6 +154,7 @@ Response (200):
 **Logout (invalidate token)**
 
 Response (200):
+
 ```json
 {
   "success": true,
@@ -155,6 +169,7 @@ Response (200):
 **Request password reset**
 
 Request:
+
 ```json
 {
   "email": "user@example.com"
@@ -162,6 +177,7 @@ Request:
 ```
 
 Response (200):
+
 ```json
 {
   "success": true,
@@ -176,6 +192,7 @@ Response (200):
 **Reset password with token**
 
 Request:
+
 ```json
 {
   "token": "reset-token-from-email",
@@ -184,6 +201,7 @@ Request:
 ```
 
 Response (200):
+
 ```json
 {
   "success": true,
@@ -200,11 +218,13 @@ Response (200):
 **List all users (admin only)**
 
 Query Parameters:
-```
+
+```text
 ?page=1&limit=20&search=john&role=user&status=active
 ```
 
 Response (200):
+
 ```json
 {
   "success": true,
@@ -236,6 +256,7 @@ Response (200):
 **Get user by ID**
 
 Response (200):
+
 ```json
 {
   "success": true,
@@ -261,6 +282,7 @@ Response (200):
 **Create new user (admin only)**
 
 Request:
+
 ```json
 {
   "email": "newuser@example.com",
@@ -273,6 +295,7 @@ Request:
 ```
 
 Response (201):
+
 ```json
 {
   "success": true,
@@ -291,6 +314,7 @@ Response (201):
 **Update user**
 
 Request:
+
 ```json
 {
   "name": "Updated Name",
@@ -300,6 +324,7 @@ Request:
 ```
 
 Response (200):
+
 ```json
 {
   "success": true,
@@ -318,6 +343,7 @@ Response (200):
 **Delete user (admin only)**
 
 Response (200):
+
 ```json
 {
   "success": true,
@@ -332,6 +358,7 @@ Response (200):
 **Get current user profile**
 
 Response (200):
+
 ```json
 {
   "success": true,
@@ -351,6 +378,7 @@ Response (200):
 **Change own password**
 
 Request:
+
 ```json
 {
   "currentPassword": "OldPassword123!",
@@ -359,6 +387,7 @@ Request:
 ```
 
 Response (200):
+
 ```json
 {
   "success": true,
@@ -375,11 +404,13 @@ Response (200):
 **Get dashboard summary**
 
 Query Parameters:
-```
+
+```text
 ?startDate=2026-02-01&endDate=2026-02-24&metrics=revenue,users,orders
 ```
 
 Response (200):
+
 ```json
 {
   "success": true,
@@ -415,6 +446,7 @@ Response (200):
 **Get custom dashboard**
 
 Response (200):
+
 ```json
 {
   "success": true,
@@ -442,6 +474,7 @@ Response (200):
 **List available reports**
 
 Response (200):
+
 ```json
 {
   "success": true,
@@ -466,11 +499,13 @@ Response (200):
 **Generate report**
 
 Query Parameters:
-```
+
+```text
 ?startDate=2026-02-01&endDate=2026-02-24&format=json
 ```
 
 Response (200):
+
 ```json
 {
   "success": true,
@@ -496,6 +531,7 @@ Response (200):
 **Export report to file**
 
 Request:
+
 ```json
 {
   "format": "pdf",
@@ -504,7 +540,8 @@ Request:
 ```
 
 Response (200):
-```
+
+```text
 File download (PDF/Excel/CSV)
 ```
 
@@ -517,6 +554,7 @@ File download (PDF/Excel/CSV)
 **List organizations**
 
 Response (200):
+
 ```json
 {
   "success": true,
@@ -541,6 +579,7 @@ Response (200):
 **Create organization**
 
 Request:
+
 ```json
 {
   "name": "New Company",
@@ -551,6 +590,7 @@ Request:
 ```
 
 Response (201):
+
 ```json
 {
   "success": true,
@@ -568,6 +608,7 @@ Response (201):
 **Update organization**
 
 Request:
+
 ```json
 {
   "name": "Updated Company Name",
@@ -576,6 +617,7 @@ Request:
 ```
 
 Response (200):
+
 ```json
 {
   "success": true,
@@ -595,6 +637,7 @@ Response (200):
 **Health check (no auth required)**
 
 Response (200):
+
 ```json
 {
   "success": true,
@@ -613,6 +656,7 @@ Response (200):
 **Detailed health with dependencies**
 
 Response (200):
+
 ```json
 {
   "success": true,
@@ -642,6 +686,7 @@ Response (200):
 **System metrics**
 
 Response (200):
+
 ```json
 {
   "success": true,
@@ -677,6 +722,7 @@ Response (200):
 **Get system version (no auth required)**
 
 Response (200):
+
 ```json
 {
   "success": true,
@@ -758,17 +804,19 @@ curl -s -X POST http://localhost:5000/api/analytics/reports/report-1/export \
 
 All list endpoints support pagination:
 
-```
+```text
 GET /api/resource?page=1&limit=20&sort=name&order=asc
 ```
 
 Parameters:
+
 - `page`: Page number (default: 1)
 - `limit`: Items per page (default: 20, max: 100)
 - `sort`: Field to sort by (default: createdAt)
 - `order`: asc or desc (default: desc)
 
 Response includes:
+
 ```json
 {
   "pagination": {
@@ -784,17 +832,17 @@ Response includes:
 
 ## ⚠️ Error Codes
 
-| Code | HTTP | Description |
-|------|------|-----------|
-| BAD_REQUEST | 400 | Invalid input or malformed request |
-| UNAUTHORIZED | 401 | Missing or invalid authentication token |
-| FORBIDDEN | 403 | Authenticated but lacks permission |
-| NOT_FOUND | 404 | Resource doesn't exist |
-| CONFLICT | 409 | Resource already exists |
-| VALIDATION_ERROR | 422 | Data validation failed |
-| RATE_LIMITED | 429 | Too many requests |
-| INTERNAL_ERROR | 500 | Server error |
-| SERVICE_UNAVAILABLE | 503 | Service temporarily unavailable |
+| Code                | HTTP | Description                             |
+| ------------------- | ---- | --------------------------------------- |
+| BAD_REQUEST         | 400  | Invalid input or malformed request      |
+| UNAUTHORIZED        | 401  | Missing or invalid authentication token |
+| FORBIDDEN           | 403  | Authenticated but lacks permission      |
+| NOT_FOUND           | 404  | Resource doesn't exist                  |
+| CONFLICT            | 409  | Resource already exists                 |
+| VALIDATION_ERROR    | 422  | Data validation failed                  |
+| RATE_LIMITED        | 429  | Too many requests                       |
+| INTERNAL_ERROR      | 500  | Server error                            |
+| SERVICE_UNAVAILABLE | 503  | Service temporarily unavailable         |
 
 ---
 
@@ -803,13 +851,15 @@ Response includes:
 Rate limits are enforced per IP and per user:
 
 Response headers:
-```
+
+```text
 X-RateLimit-Limit: 1000
 X-RateLimit-Remaining: 999
 X-RateLimit-Reset: 1708689600
 ```
 
 If exceeded (429):
+
 ```json
 {
   "success": false,
@@ -826,6 +876,7 @@ If exceeded (429):
 ## 📚 SDK & Client Libraries
 
 ### JavaScript/Node.js
+
 ```bash
 npm install alawael-sdk
 ```
@@ -834,7 +885,7 @@ npm install alawael-sdk
 const Alawael = require('alawael-sdk');
 const client = new Alawael({
   apiKey: 'your-api-key',
-  baseURL: 'https://api.alawael.com'
+  baseURL: 'https://api.alawael.com',
 });
 
 const users = await client.users.list();
@@ -843,6 +894,7 @@ const users = await client.users.list();
 ---
 
 ### Python
+
 ```bash
 pip install alawael-sdk
 ```
@@ -857,10 +909,10 @@ users = client.users.list()
 ---
 
 ### cURL
+
 See examples above
 
 ---
 
 **Status:** Production Ready  
 **Last Updated:** February 24, 2026
-

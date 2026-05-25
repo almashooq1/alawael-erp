@@ -20,12 +20,12 @@
 
 ## 1. Prerequisites
 
-| Tool    | Min Version | Install                                |
-|---------|-------------|----------------------------------------|
-| Node.js | 18.0.0      | https://nodejs.org                     |
-| npm     | 9.0.0       | Included with Node.js                  |
-| MongoDB | 5.0+        | https://www.mongodb.com/try/download   |
-| Git     | 2.30+       | https://git-scm.com                    |
+| Tool    | Min Version | Install                                     |
+| ------- | ----------- | ------------------------------------------- |
+| Node.js | 18.0.0      | https://nodejs.org                          |
+| npm     | 9.0.0       | Included with Node.js                       |
+| MongoDB | 5.0+        | https://www.mongodb.com/try/download        |
+| Git     | 2.30+       | https://git-scm.com                         |
 | Redis   | 6.0+        | Optional — set `DISABLE_REDIS=true` to skip |
 
 ---
@@ -48,6 +48,7 @@ npm run dev:all
 ```
 
 Open:
+
 - **API**: http://localhost:3001
 - **Frontend**: http://localhost:3000
 - **Swagger**: http://localhost:3001/api-docs
@@ -81,13 +82,13 @@ See `.env.example` for all available variables with descriptions.
 
 ### Key Environment Flags
 
-| Flag                | Default       | Effect                                          |
-|---------------------|---------------|-------------------------------------------------|
-| `DISABLE_REDIS`     | `false`       | Skip Redis entirely (no NOAUTH errors)          |
-| `ENABLE_SWAGGER`    | `true`        | Enable Swagger UI at `/api-docs`                |
-| `MONGOOSE_DEBUG`    | `false`       | Log all Mongoose queries to console             |
-| `SKIP_PHASE17`      | `false`       | Skip Phase 17 routes during startup             |
-| `NODE_ENV`          | `development` | `development` / `production` / `test`           |
+| Flag             | Default       | Effect                                 |
+| ---------------- | ------------- | -------------------------------------- |
+| `DISABLE_REDIS`  | `false`       | Skip Redis entirely (no NOAUTH errors) |
+| `ENABLE_SWAGGER` | `true`        | Enable Swagger UI at `/api-docs`       |
+| `MONGOOSE_DEBUG` | `false`       | Log all Mongoose queries to console    |
+| `SKIP_PHASE17`   | `false`       | Skip Phase 17 routes during startup    |
+| `NODE_ENV`       | `development` | `development` / `production` / `test`  |
 
 ---
 
@@ -213,7 +214,9 @@ exports.createItem = async (req, res) => {
 
 ```jsx
 // ✅ Good page pattern
-class PageErrorBoundary extends Component { /* ... */ }
+class PageErrorBoundary extends Component {
+  /* ... */
+}
 
 function PageInner() {
   const [data, setData] = useState(null);
@@ -222,7 +225,11 @@ function PageInner() {
 }
 
 export default function Page() {
-  return <PageErrorBoundary><PageInner /></PageErrorBoundary>;
+  return (
+    <PageErrorBoundary>
+      <PageInner />
+    </PageErrorBoundary>
+  );
 }
 ```
 
@@ -245,7 +252,7 @@ new Schema({ name: String }, { timestamps: true })
 
 ### Branch Naming
 
-```
+```text
 main          ← production (protected)
 dev           ← development integration
 feat/name     ← new feature
@@ -257,7 +264,7 @@ refactor/name ← code refactoring
 
 ### Commit Message Format
 
-```
+```text
 type(scope): short description in Arabic or English
 
 - detail 1
@@ -267,7 +274,8 @@ Types: feat | fix | docs | refactor | test | chore | perf | security
 ```
 
 **Examples:**
-```
+
+```text
 feat(rehab): إضافة نظام خطط التأهيل الفردية مع AI assessment
 fix(auth): استبدال authGuard الوهمي بـ JWT حقيقي
 fix(models): إصلاح enum fields بدون type:String في 4 ملفات
@@ -277,10 +285,12 @@ docs(architecture): إضافة وثيقة ARCHITECTURE.md الشاملة
 ### Pre-commit Hooks (Husky)
 
 Automatically runs on every commit:
+
 - ESLint check
 - Cache file detection (prevents committing Redis cache files)
 
 To bypass false-positive hook detection (for legitimate files like `cache.config.js`):
+
 ```bash
 git commit --no-verify -m "your message"
 ```
@@ -302,6 +312,7 @@ git push origin main
 **Cause**: Redis is configured but not running locally, or has no password set.
 
 **Fix**: Add `DISABLE_REDIS=true` to your `.env` file:
+
 ```env
 DISABLE_REDIS=true
 ```
@@ -309,6 +320,7 @@ DISABLE_REDIS=true
 ### ❌ MongoDB connection failed
 
 **Fix**:
+
 ```bash
 # Start MongoDB locally
 mongod --dbpath /data/db
@@ -320,6 +332,7 @@ docker run -d -p 27017:27017 mongo:6
 ### ❌ Route fails to load at startup
 
 Routes using `safeMount` will not crash the server. Check startup logs:
+
 ```bash
 # Look for ROUTE FAIL messages
 npm run dev 2>&1 | grep "ROUTE FAIL"
@@ -345,6 +358,7 @@ This means a field has `unique: true` AND a separate `.index()` call.
 **Cause**: Pre-commit hook (`.husky/pre-commit`) incorrectly flags legitimate files containing "cache" or "seed" in their names.
 
 **Fix**:
+
 ```bash
 git commit --no-verify -m "your commit message"
 ```
@@ -380,10 +394,10 @@ node backend/seeds/branches.seed.js
 
 ## Module Documentation
 
-| Module               | Documentation                                      |
-|---------------------|----------------------------------------------------|
-| Architecture         | [docs/ARCHITECTURE.md](./ARCHITECTURE.md)         |
-| API Reference        | http://localhost:3001/api-docs (Swagger)           |
-| Changelog            | [CHANGELOG.md](../CHANGELOG.md)                   |
-| Contributing         | [CONTRIBUTING.md](../CONTRIBUTING.md)             |
+| Module               | Documentation                                                         |
+| -------------------- | --------------------------------------------------------------------- |
+| Architecture         | [docs/ARCHITECTURE.md](./ARCHITECTURE.md)                             |
+| API Reference        | http://localhost:3001/api-docs (Swagger)                              |
+| Changelog            | [CHANGELOG.md](../CHANGELOG.md)                                       |
+| Contributing         | [CONTRIBUTING.md](../CONTRIBUTING.md)                                 |
 | Rehabilitation Plans | [docs/rehabilitation-dashboard.html](./rehabilitation-dashboard.html) |

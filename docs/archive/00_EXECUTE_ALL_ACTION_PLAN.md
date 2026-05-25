@@ -1,6 +1,9 @@
 # EXECUTE ALL: COMPREHENSIVE IMPLEMENTATION ACTION PLAN
+
 # Start All 4 Phases Immediately
+
 # ALAWAEL ERP Production System
+
 # Date: February 28, 2026
 
 ---
@@ -16,6 +19,7 @@ Your system is stable and all materials are prepared. Starting comprehensive upg
 ## PHASE 1: HTTPS/TLS (TODAY - 30-40 minutes)
 
 ### Prerequisites Check
+
 ```powershell
 # Verify system is ready
 pm2 list
@@ -28,6 +32,7 @@ curl http://localhost:3001/api/v1/health/alive
 ### Step 1: Install Nginx
 
 **Windows:**
+
 ```powershell
 # Option A: Download from nginx.org
 # https://nginx.org/en/download.html
@@ -38,6 +43,7 @@ choco install nginx -y
 ```
 
 **Quick Verify:**
+
 ```powershell
 nginx --version
 # Expected: nginx version x.x.x
@@ -46,6 +52,7 @@ nginx --version
 ### Step 2: Install Let's Encrypt (Certbot)
 
 **Windows with Let's Encrypt:**
+
 ```powershell
 # Download Win-ACME (official Let's Encrypt client for Windows)
 # https://github.com/win-acme/win-acme/releases
@@ -128,6 +135,7 @@ server {
 ### Step 4: Generate Certificate
 
 **Using Let's Encrypt (Certbot):**
+
 ```bash
 # Linux/WSL
 certbot certonly --standalone -d api.example.local
@@ -138,6 +146,7 @@ certbot certonly --standalone -d api.example.local
 ```
 
 **Windows (Self-Signed for testing):**
+
 ```powershell
 # Create self-signed cert (for dev/testing)
 $cert = New-SelfSignedCertificate `
@@ -188,6 +197,7 @@ sudo certbot renew --dry-run
 ```
 
 ### ✅ Phase 1 Complete When:
+
 - [ ] Nginx installed and running
 - [ ] SSL certificate installed
 - [ ] HTTPS endpoint responding (HTTP 200)
@@ -201,6 +211,7 @@ sudo certbot renew --dry-run
 ### Step 1: Install Prometheus
 
 **Windows:**
+
 ```powershell
 # Download Prometheus
 # https://github.com/prometheus/prometheus/releases
@@ -226,7 +237,7 @@ alerting:
         - targets: []
 
 rule_files:
-  - "alert_rules.yml"
+  - 'alert_rules.yml'
 
 scrape_configs:
   - job_name: 'prometheus'
@@ -260,6 +271,7 @@ pm2 save
 ### Step 4: Install Grafana
 
 **Windows:**
+
 ```powershell
 # Download Grafana
 # https://grafana.com/grafana/download
@@ -297,14 +309,14 @@ const prometheus = require('prom-client');
 const httpRequestTotal = new prometheus.Counter({
   name: 'http_requests_total',
   help: 'Total HTTP requests',
-  labelNames: ['method', 'status']
+  labelNames: ['method', 'status'],
 });
 
 const httpRequestDuration = new prometheus.Histogram({
   name: 'http_request_duration_seconds',
   help: 'HTTP request duration',
   labelNames: ['method'],
-  buckets: [0.1, 0.5, 1, 2, 5]
+  buckets: [0.1, 0.5, 1, 2, 5],
 });
 
 // Middleware
@@ -342,6 +354,7 @@ pm2 status
    - **Active Connections:** `active_connections`
 
 ### ✅ Phase 2 Complete When:
+
 - [ ] Prometheus installed and scraping metrics
 - [ ] Grafana installed and accessible
 - [ ] Data source configured
@@ -369,16 +382,19 @@ mkdir -p /data/mongodb/rs3
 ### Step 2: Start MongoDB Instances
 
 **Terminal 1 (Primary):**
+
 ```bash
 mongod --replSet alawael-rs --port 27017 --dbpath C:\mongodb-data\rs1
 ```
 
 **Terminal 2 (Secondary 1):**
+
 ```bash
 mongod --replSet alawael-rs --port 27018 --dbpath C:\mongodb-data\rs2
 ```
 
 **Terminal 3 (Secondary 2):**
+
 ```bash
 mongod --replSet alawael-rs --port 27019 --dbpath C:\mongodb-data\rs3
 ```
@@ -455,6 +471,7 @@ curl http://localhost:3001/api/v1/health/db
 ```
 
 ### ✅ Phase 3 Complete When:
+
 - [ ] 3x MongoDB instances running
 - [ ] Replica set initialized (rs.status() shows PRIMARY+2 SECONDARY)
 - [ ] Connection string updated
@@ -535,21 +552,23 @@ $report | Out-File verification-report.txt
 ### Right Now (Next 2 Hours)
 
 1. **Open Terminal 1 (HTTPS)**
-   ```
+
+   ```text
    Read: IMPLEMENTATION_1_HTTPS_DEPLOYMENT.md
    Execute: Install Nginx
    Duration: 10 min
    ```
 
 2. **Have Terminal 2 Ready (Monitoring)**
-   ```
+
+   ```text
    Prepare: Download Prometheus & Grafana
    Have: Node.js metrics code ready
    Duration: Can start in parallel
    ```
 
 3. **Have Terminal 3-5 Ready (Database)**
-   ```
+   ```text
    Prepare: 3x MongoDB instances
    Have: Connection strings ready
    Duration: Can start tomorrow
@@ -557,7 +576,7 @@ $report | Out-File verification-report.txt
 
 ### Tomorrow (Monitoring Setup)
 
-```
+```text
 T+0:    Verify HTTPS still working
 T+5:    Start Prometheus
 T+10:   Start Grafana
@@ -569,7 +588,7 @@ T+120:  Complete ✓
 
 ### Wednesday (Database Replication)
 
-```
+```text
 T+0:    Verify Monitoring still working
 T+5:    Create data directories
 T+10:   Start 3x MongoDB instances
@@ -583,7 +602,7 @@ T+90:   Complete ✓
 
 ### Thursday (Final Verification)
 
-```
+```text
 T+0:    Run health check suite
 T+30:   Verify all metrics flowing
 T+60:   Validate alert rules
@@ -596,7 +615,8 @@ T+120:  Complete ✓
 ## CRITICAL CHECKPOINTS
 
 ### After HTTPS:
-```
+
+```text
 ✓ curl https://localhost/health returns HTTP 200
 ✓ Nginx process running (get-process nginx)
 ✓ HTTP requests redirect to HTTPS
@@ -604,7 +624,8 @@ T+120:  Complete ✓
 ```
 
 ### After Monitoring:
-```
+
+```text
 ✓ Prometheus scraping metrics (http://localhost:9090/targets)
 ✓ Grafana dashboard showing data (http://localhost:3000)
 ✓ Node.js /metrics endpoint working
@@ -612,7 +633,8 @@ T+120:  Complete ✓
 ```
 
 ### After Database Replication:
-```
+
+```text
 ✓ rs.status() shows 1 PRIMARY + 2 SECONDARY
 ✓ Node.js still responding (curl /health/db)
 ✓ Data replicated on all members
@@ -620,7 +642,8 @@ T+120:  Complete ✓
 ```
 
 ### Final Verification:
-```
+
+```text
 ✓ All 8 PM2 instances ONLINE
 ✓ Nginx ONLINE (https working)
 ✓ Prometheus ONLINE (collecting metrics)
@@ -638,6 +661,7 @@ T+120:  Complete ✓
 ### If Something Breaks
 
 **Nginx Issues:**
+
 ```powershell
 # Kill Nginx
 taskkill /F /IM nginx.exe
@@ -647,6 +671,7 @@ taskkill /F /IM nginx.exe
 ```
 
 **Monitoring Issues:**
+
 ```powershell
 # Kill Prometheus
 taskkill /F /IM prometheus.exe
@@ -655,6 +680,7 @@ taskkill /F /IM prometheus.exe
 ```
 
 **Database Replication Issues:**
+
 ```powershell
 # Fall back to primary only
 # Update .env: MONGODB_URI=mongodb://localhost:27017/alawael-erp
@@ -670,21 +696,25 @@ taskkill /F /IM prometheus.exe
 ### You're Done When:
 
 1. ✅ **HTTPS Working**
+
    - API accessible via https://
    - Certificate valid
    - Auto-renewal configured
 
 2. ✅ **Monitoring Active**
+
    - Grafana dashboard showing metrics
    - Prometheus scraping data
    - Alerts configured
 
 3. ✅ **Database HA**
+
    - 3-node replica set online
    - Automatic failover working
    - Data replicated
 
 4. ✅ **System Stable**
+
    - All services running
    - Performance maintained
    - Zero critical errors
@@ -698,7 +728,7 @@ taskkill /F /IM prometheus.exe
 
 ## FINAL STATUS
 
-```
+```text
 PHASE 1 (HTTPS):            Ready to start - 30-40 min
 PHASE 2 (Monitoring):       Ready for tomorrow - 1.5-2 hours
 PHASE 3 (DB Replication):   Ready for Wednesday - 1.5-2 hours

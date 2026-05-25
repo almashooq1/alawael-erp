@@ -48,7 +48,7 @@ node barcode-server.js
 
 **Expected Output:**
 
-```
+```text
 ✅ MongoDB connected
 🟢 Barcode API Server running on http://localhost:4000
 ```
@@ -64,7 +64,7 @@ npm start
 
 **Expected Output:**
 
-```
+```text
 Compiled successfully!
 Local:        http://localhost:3000
 ```
@@ -82,7 +82,7 @@ Local:        http://localhost:3000
 
 ### **App.js Tabs**
 
-```
+```text
 ┌─────────────────────────────────────────────────┐
 │  لوحة التحكم | الباركود | المخزون | التدقيق   │
 ├─────────────────────────────────────────────────┤
@@ -94,7 +94,7 @@ Local:        http://localhost:3000
 
 ### **BarcodeManager Features**
 
-```
+```text
 BarcodeManager (Parent)
 ├── State Management
 │   ├── QR Code mode (tab 1)
@@ -187,7 +187,7 @@ The backend is running on:
 
 Open DevTools (F12) → Network tab:
 
-```
+```text
 ✅ POST /api/barcode/qr-code
    Headers:
    - Authorization: Bearer {JWT_TOKEN}
@@ -403,7 +403,7 @@ None - Component is self-contained with internal state
 
 **Integration Status:** ✅ **COMPLETE**
 
-```
+```text
 Frontend:        ✅ Ready
 Backend:         ✅ Running (PORT 4000)
 Database:        ✅ Connected (MongoDB)

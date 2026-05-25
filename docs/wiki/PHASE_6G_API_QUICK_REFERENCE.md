@@ -1,17 +1,21 @@
 # Phase 6G: E-Commerce API Quick Reference
 
 ## 📍 Base URL
-```
+
+```text
 /api/ecommerce
 ```
 
 ## 🔐 Authentication
+
 **All checkout endpoints require JWT authentication**:
-```
+
+```text
 Authorization: Bearer {token}
 ```
 
 **Public endpoints** (no auth required):
+
 - `/products` - List products
 - `/products/search/:query` - Search
 - `/products/:id` - Product details
@@ -22,6 +26,7 @@ Authorization: Bearer {token}
 ## 🛍️ Quick API Guide
 
 ### 1. Browse Products
+
 ```bash
 # List all products
 curl http://localhost:5000/api/ecommerce/products
@@ -42,6 +47,7 @@ curl http://localhost:5000/api/ecommerce/products/new
 ---
 
 ### 2. Shopping Cart (Authenticated)
+
 ```bash
 # Add to cart
 curl -X POST http://localhost:5000/api/ecommerce/cart \
@@ -69,6 +75,7 @@ curl -X DELETE http://localhost:5000/api/ecommerce/cart \
 ---
 
 ### 3. Apply Coupon (Authenticated)
+
 ```bash
 curl -X POST http://localhost:5000/api/ecommerce/cart/coupon \
   -H "Authorization: Bearer $TOKEN" \
@@ -78,6 +85,7 @@ curl -X POST http://localhost:5000/api/ecommerce/cart/coupon \
 ---
 
 ### 4. Checkout (Authenticated)
+
 ```bash
 # Create session
 curl -X POST http://localhost:5000/api/ecommerce/checkout \
@@ -108,6 +116,7 @@ curl -X PUT http://localhost:5000/api/ecommerce/checkout/SESSION_ID/payment \
 ---
 
 ### 5. Wishlist (Authenticated)
+
 ```bash
 # Get wishlist
 curl http://localhost:5000/api/ecommerce/wishlist \
@@ -125,6 +134,7 @@ curl -X DELETE http://localhost:5000/api/ecommerce/wishlist/PRODUCT_ID \
 ---
 
 ### 6. Reviews (Authenticated)
+
 ```bash
 curl -X POST http://localhost:5000/api/ecommerce/products/PRODUCT_ID/reviews \
   -H "Authorization: Bearer $TOKEN" \
@@ -140,14 +150,18 @@ curl -X POST http://localhost:5000/api/ecommerce/products/PRODUCT_ID/reviews \
 ## 📦 Response Format
 
 ### Success
+
 ```json
 {
   "success": true,
-  "data": { /* actual data */ }
+  "data": {
+    /* actual data */
+  }
 }
 ```
 
 ### Error
+
 ```json
 {
   "error": "Error message"
@@ -159,6 +173,7 @@ curl -X POST http://localhost:5000/api/ecommerce/products/PRODUCT_ID/reviews \
 ## 🔍 Query Parameters
 
 ### Products List
+
 - `page` - Page number (default: 1)
 - `limit` - Items per page (default: 20)
 - `category` - Filter by category
@@ -169,6 +184,7 @@ curl -X POST http://localhost:5000/api/ecommerce/products/PRODUCT_ID/reviews \
 - `sortOrder` - asc/desc (default: desc)
 
 ### Featured/New
+
 - `limit` - Number of items (default: 10)
 - `days` - Time window in days (for new products)
 
@@ -176,7 +192,7 @@ curl -X POST http://localhost:5000/api/ecommerce/products/PRODUCT_ID/reviews \
 
 ## 💰 Pricing
 
-```
+```text
 Subtotal = sum of (item price × quantity)
 Tax = subtotal × 10%
 Shipping = subtotal > $100 ? $0 : $10
@@ -187,10 +203,10 @@ Total = subtotal + tax + shipping - coupon discount
 
 ## 🎁 Coupon Types
 
-| Type | Example | Calculation |
-|------|---------|-------------|
-| Percentage | SAVE20 | 20% off subtotal (max $50) |
-| Fixed | SAVE10DOLLARS | $10 off subtotal |
+| Type       | Example       | Calculation                |
+| ---------- | ------------- | -------------------------- |
+| Percentage | SAVE20        | 20% off subtotal (max $50) |
+| Fixed      | SAVE10DOLLARS | $10 off subtotal           |
 
 ---
 
@@ -207,6 +223,7 @@ Total = subtotal + tax + shipping - coupon discount
 ## 📱 Mobile Integration
 
 ### Setup
+
 ```typescript
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -229,6 +246,7 @@ const { products, cart, loading, error } = useSelector(state => state.shop);
 - Checkout: ~200ms
 
 **Tips**:
+
 - Cache product list
 - Use pagination
 - Load images progressively
@@ -238,15 +256,15 @@ const { products, cart, loading, error } = useSelector(state => state.shop);
 
 ## ⚠️ Common Errors
 
-| Error | Solution |
-|-------|----------|
-| 401 Unauthorized | Check JWT token |
-| 404 Not Found | Verify product/cart ID |
-| 400 Bad Request | Check request format |
-| Insufficient Stock | Choose lower quantity |
-| Cart Empty | Add items to cart first |
-| Invalid Coupon | Check coupon code spelling |
-| Session Expired | Create new checkout session |
+| Error              | Solution                    |
+| ------------------ | --------------------------- |
+| 401 Unauthorized   | Check JWT token             |
+| 404 Not Found      | Verify product/cart ID      |
+| 400 Bad Request    | Check request format        |
+| Insufficient Stock | Choose lower quantity       |
+| Cart Empty         | Add items to cart first     |
+| Invalid Coupon     | Check coupon code spelling  |
+| Session Expired    | Create new checkout session |
 
 ---
 
@@ -265,6 +283,7 @@ npm test -- ecommerce.test.js -t "addToCart"
 ## 📞 Support
 
 For issues:
+
 1. Check error message
 2. Verify authentication
 3. Check request format

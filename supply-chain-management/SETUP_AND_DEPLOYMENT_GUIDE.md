@@ -1,6 +1,7 @@
 # Supply Chain Management System - Complete Setup & Deployment Guide
 
 ## Table of Contents
+
 1. [Prerequisites](#prerequisites)
 2. [Local Development Setup](#local-development-setup)
 3. [Docker Setup](#docker-setup)
@@ -16,6 +17,7 @@
 ## Prerequisites
 
 ### Required Software
+
 - **Node.js**: v16.0.0 or higher
 - **NPM**: v7.0.0 or higher
 - **MongoDB**: v5.0 or higher (or MongoDB Atlas account)
@@ -23,12 +25,14 @@
 - **Docker** (optional): For containerized deployment
 
 ### System Requirements
+
 - **CPU**: Minimum 2 cores
 - **RAM**: Minimum 4GB (8GB recommended)
 - **Disk**: Minimum 20GB free space
 - **OS**: Linux, macOS, or Windows 10+
 
 ### Network Requirements
+
 - Port 4000 available (backend)
 - Port 3000 available (frontend)
 - Port 27017 available (MongoDB, if local)
@@ -38,6 +42,7 @@
 ## Local Development Setup
 
 ### Step 1: Clone Repository
+
 ```bash
 git clone https://github.com/your-org/supply-chain-management.git
 cd supply-chain-management
@@ -90,6 +95,7 @@ net start MongoDB
 ### Step 5: Run Application
 
 **Backend:**
+
 ```bash
 cd backend
 npm start
@@ -100,6 +106,7 @@ npm start
 ```
 
 **Frontend (in new terminal):**
+
 ```bash
 cd frontend
 npm start
@@ -125,11 +132,13 @@ docker-compose ps
 ```
 
 ### Step 2: Access Services
+
 - **Backend API**: http://localhost:4000
 - **Frontend**: http://localhost:3000
 - **MongoDB**: localhost:27017
 
 ### Step 3: View Logs
+
 ```bash
 # All services
 docker-compose logs
@@ -141,6 +150,7 @@ docker-compose logs mongo
 ```
 
 ### Step 4: Stop Services
+
 ```bash
 docker-compose down
 
@@ -157,15 +167,18 @@ docker-compose down -v
 1. **Create Account**: https://www.mongodb.com/cloud/atlas
 
 2. **Create Cluster**:
+
    - Choose free tier or paid tier
    - Select region closest to your users
 
 3. **Get Connection String**:
+
    - Click "Connect"
    - Select "Connect your application"
    - Copy connection string
 
 4. **Update .env**:
+
 ```env
 MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/supply_chain_db?retryWrites=true&w=majority
 ```
@@ -173,6 +186,7 @@ MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/supply_chain_db?
 ### Local MongoDB
 
 1. **Install MongoDB**:
+
 ```bash
 # macOS
 brew install mongodb-community
@@ -185,6 +199,7 @@ Download from https://www.mongodb.com/try/download/community
 ```
 
 2. **Start MongoDB**:
+
 ```bash
 mongod
 
@@ -193,11 +208,13 @@ sudo systemctl start mongod
 ```
 
 3. **Set .env**:
+
 ```env
 MONGODB_URI=mongodb://localhost:27017/supply_chain_db
 ```
 
 ### Create Database Indexes
+
 ```bash
 # In MongoDB shell
 use supply_chain_db
@@ -545,21 +562,25 @@ db.setProfilingLevel(1, { slowms: 100 })
 ### Common Issues
 
 #### Issue: MongoDB Connection Error
-```
+
+```text
 Error: connect ECONNREFUSED 127.0.0.1:27017
 ```
 
 **Solutions**:
+
 - Ensure MongoDB is running: `mongod`
 - Check MONGODB_URI in .env
 - Verify MongoDB Atlas IP whitelist includes your IP
 
 #### Issue: Port Already In Use
-```
+
+```text
 Error: listen EADDRINUSE: address already in use :::4000
 ```
 
 **Solutions**:
+
 ```bash
 # Kill process on port 4000
 lsof -i :4000
@@ -570,21 +591,25 @@ PORT=5000
 ```
 
 #### Issue: JWT Token Errors
-```
+
+```text
 Error: Invalid authentication token
 ```
 
 **Solutions**:
+
 - Verify JWT_SECRET matches between .env files
 - Check token expiration: `JWT_EXPIRES_IN=7d`
 - Ensure token is passed correctly in Authorization header
 
 #### Issue: CORS Errors
-```
+
+```text
 Access to XMLHttpRequest blocked by CORS policy
 ```
 
 **Solutions**:
+
 ```env
 # Update .env
 CORS_ORIGIN=http://localhost:3000
@@ -593,11 +618,13 @@ CORS_ORIGIN=http://localhost:3000,https://yourdomain.com
 ```
 
 #### Issue: File Upload Fails
-```
+
+```text
 Error: File size exceeds limit
 ```
 
 **Solutions**:
+
 ```env
 # Increase limit in .env
 MAX_FILE_SIZE=10485760  # 10MB
@@ -611,21 +638,25 @@ npm start
 ## Security Best Practices
 
 1. **Environment Variables**:
+
    - Never commit `.env` to git
    - Use strong, random JWT_SECRET (32+ characters)
    - Rotate secrets regularly
 
 2. **Database**:
+
    - Use MongoDB Atlas with authentication
    - Enable IP whitelist
    - Regular automated backups
 
 3. **HTTPS**:
+
    - Deploy with SSL/TLS certificate
    - Use Let's Encrypt (free)
    - Force HTTPS in production
 
 4. **Input Validation**:
+
    - All inputs are validated via express-validator
    - User inputs are sanitized
    - Prevent SQL/NoSQL injection

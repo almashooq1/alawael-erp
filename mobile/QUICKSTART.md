@@ -25,6 +25,7 @@ cd ios && pod install && cd ..
 ### الخطوة 2: الإعدادات الأولية
 
 #### أ. تحديث API URL
+
 ```javascript
 // في ملفات الخدمات: services/*.js
 // غيّر:
@@ -34,6 +35,7 @@ const API_BASE_URL = 'http://YOUR_SERVER_IP:3001/api';
 ```
 
 #### ب. إعداد Firebase (للإشعارات)
+
 ```bash
 # Android:
 1. انسخ google-services.json من Firebase Console
@@ -45,6 +47,7 @@ const API_BASE_URL = 'http://YOUR_SERVER_IP:3001/api';
 ```
 
 #### ج. إعداد متغيرات البيئة
+
 ```bash
 # أنشئ ملف .env.local في المجلد الجذر
 REACT_APP_API_URL=http://localhost:3001/api
@@ -57,6 +60,7 @@ REACT_APP_LOG_LEVEL=debug
 ### الخطوة 3: تشغيل التطبيق
 
 #### على Android
+
 ```bash
 # الطريقة الأولى: امر واحد
 npm run android
@@ -70,6 +74,7 @@ npm run android
 ```
 
 #### على iOS
+
 ```bash
 # الطريقة الأولى: امر واحد
 npm run ios
@@ -83,6 +88,7 @@ npm run ios -- --simulator="iPhone 14"
 ```
 
 #### باستخدام Expo (اختياري)
+
 ```bash
 # التثبيت
 npm install -g expo-cli
@@ -101,6 +107,7 @@ expo start
 ### الخطوة 4: اختبار الميزات الأساسية
 
 #### اختبار تسجيل الدخول
+
 ```javascript
 بيانات الاختبار:
 - Email: test@example.com
@@ -110,6 +117,7 @@ expo start
 ```
 
 #### اختبار GPS
+
 ```javascript
 1. فعّل خدمة الموقع على جهازك
 2. اذهب إلى Dashboard
@@ -118,6 +126,7 @@ expo start
 ```
 
 #### اختبار الإشعارات
+
 ```javascript
 1. ارسل إشعار من الخادم
 2. يجب أن تشاهده في الإشعارات
@@ -129,6 +138,7 @@ expo start
 ### الخطوة 5: مشاكل شائعة والحلول
 
 #### مشكلة: "Cannot find module"
+
 ```bash
 # الحل:
 npm install
@@ -138,6 +148,7 @@ npx react-native start --reset-cache
 ```
 
 #### مشكلة: متحرر الموقع لا يعمل
+
 ```bash
 # Android:
 Settings → Apps → Permissions → Location → تفعيل
@@ -147,6 +158,7 @@ Settings → Privacy → Location Services → تفعيل التطبيق
 ```
 
 #### مشكلة: الإشعارات لا تظهر
+
 ```bash
 # تحقق من:
 1. Firebase مهيأة بشكل صحيح
@@ -155,6 +167,7 @@ Settings → Privacy → Location Services → تفعيل التطبيق
 ```
 
 #### مشكلة: API لا يستجيب
+
 ```javascript
 // تأكد من:
 1. الخادم مشغل: http://localhost:3001
@@ -185,6 +198,7 @@ npm test -- --watch
 ### الخطوة 7: البناء للإنتاج
 
 #### Android Release
+
 ```bash
 # الطريقة 1: من موجه الأوامر
 npm run build:android
@@ -203,6 +217,7 @@ zipalign -v 4 app-release-unsigned.apk app-release.apk
 ```
 
 #### iOS Release
+
 ```bash
 # من Xcode:
 1. اختر Scheme: Release
@@ -218,6 +233,7 @@ npm run build:ios
 ### الخطوة 8: مراقبة التطبيق
 
 #### عرض السجلات (Logs)
+
 ```bash
 # Android
 adb logcat
@@ -227,6 +243,7 @@ xcrun simctl spawn booted log stream --predicate 'process == "Runner"'
 ```
 
 #### أداة Debugging
+
 ```bash
 # React Native Debugger
 npm install --global react-native-debugger
@@ -271,7 +288,7 @@ npm run lint
 
 ### الخطوة 10: البنية الأساسية للملفات
 
-```
+```text
 mobile/
 ├── App.jsx              ← نقطة الدخول
 ├── app.json             ← تكوين التطبيق
@@ -314,11 +331,13 @@ mobile/
 ### 📱 أجهزة الاختبار الموصى بها
 
 **Android:**
+
 - Google Pixel 4/5/6
 - Samsung Galaxy S20+
 - OnePlus 9/10
 
 **iOS:**
+
 - iPhone 12 أو أحدث
 - iPad (اختياري)
 

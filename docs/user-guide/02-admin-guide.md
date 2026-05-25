@@ -27,7 +27,7 @@
 
 ### الميزات الإدارية | Admin Features:
 
-```
+```text
 ✅ إدارة المستخدمين (إضافة، تعديل، حذف)
 ✅ التحكم بالصلاحيات والأدوار
 ✅ مراقبة النشاط والأداء
@@ -47,7 +47,7 @@
 
 ### الوصول إلى لوحة الإدارة | Access Admin Panel:
 
-```
+```text
 URL: https://rehab-system.sa/admin
 أو | Or: http://localhost:3000/admin (محلي | local)
 
@@ -65,7 +65,7 @@ URL: https://rehab-system.sa/admin
 
 **الخطوات | Steps:**
 
-```
+```text
 1. اذهب إلى الإدارة → المستخدمون → إضافة مستخدم جديد
    Go to Admin → Users → Add New User
 
@@ -94,7 +94,7 @@ URL: https://rehab-system.sa/admin
 
 ### تعديل بيانات المستخدم | Edit User Information
 
-```
+```text
 الخطوات | Steps:
 1. ابحث عن المستخدم | Search for user
 2. انقر على التعديل | Click Edit
@@ -109,7 +109,7 @@ URL: https://rehab-system.sa/admin
 
 ### تعطيل/تفعيل مستخدم | Disable/Enable User
 
-```
+```text
 عند الحاجة لمنع المستخدم من الوصول مؤقتاً:
 When you need to temporarily prevent user access:
 
@@ -140,7 +140,7 @@ When you need to temporarily prevent user access:
 
 ### منح الصلاحيات المخصصة | Grant Custom Permissions
 
-```
+```text
 للمستخدمين الذين يحتاجون صلاحيات خاصة:
 For users needing special permissions:
 
@@ -162,7 +162,7 @@ For users needing special permissions:
 
 ### إضافة فرع جديد | Add New Branch
 
-```
+```text
 1. الإدارة → الفروع → إضافة فرع جديد
    Admin → Branches → Add New Branch
 
@@ -188,7 +188,7 @@ For users needing special permissions:
 
 ### إدارة الأقسام | Manage Departments
 
-```
+```text
 لكل فرع عدة أقسام (العلاجية، الإدارية، إلخ):
 Each branch has multiple departments (Therapy, Admin, etc.):
 
@@ -211,7 +211,7 @@ Can copy existing department settings for easier creation
 
 ### مراقبة النشاط | Activity Monitoring
 
-```
+```text
 الإدارة → المراقبة → النشاط
 Admin → Monitoring → Activity
 
@@ -232,7 +232,7 @@ Admin → Monitoring → Activity
 
 ### التقارير المتقدمة | Advanced Reports
 
-```
+```text
 أنواع التقارير المتاحة | Available Report Types:
 
 1. تقارير الأداء | Performance Reports
@@ -267,7 +267,7 @@ Admin → Monitoring → Activity
 
 ### جدول النسخ الاحتياطي | Backup Schedule
 
-```
+```text
 النسخ الاحتياطية التلقائية | Automatic Backups:
 ✓ يومية | Daily: الساعة 2 صباحاً | 2:00 AM
 ✓ أسبوعية | Weekly: يوم الجمعة | Friday
@@ -281,7 +281,7 @@ Admin → Monitoring → Activity
 
 ### النسخ الاحتياطي اليدوي | Manual Backup
 
-```
+```text
 الخطوات | Steps:
 
 1. اذهب إلى الإدارة → النسخ الاحتياطية
@@ -306,7 +306,7 @@ Admin → Monitoring → Activity
 
 ### استعادة من نسخة احتياطية | Restore from Backup
 
-```
+```text
 ⚠️ تحذير مهم | Important Warning:
 الاستعادة ستلغي البيانات الحالية | Restore will overwrite current data
 اطلب موافقة الإدارة العليا | Get management approval
@@ -349,7 +349,7 @@ Admin → Monitoring → Activity
 
 ### عرض سجلات الأخطاء | View Error Logs
 
-```
+```text
 الإدارة → السجلات → الأخطاء
 Admin → Logs → Errors
 
@@ -372,7 +372,7 @@ Admin → Logs → Errors
 
 ### قائمة التحقق اليومية | Daily Checklist
 
-```
+```text
 🔵 في بداية اليوم | At Start of Day:
 ☐ التحقق من حالة الخادم | Check server status
 ☐ عرض التنبيهات الجديدة | Review new alerts
@@ -395,7 +395,7 @@ Admin → Logs → Errors
 
 ### جدول الصيانة الدورية | Maintenance Schedule
 
-```
+```text
 أسبوعي | Weekly:
 🔧 تحديث النظام | System updates
 🔧 تنظيف الملفات المؤقتة | Clear cache files
@@ -417,7 +417,7 @@ Admin → Logs → Errors
 
 ### الإجراءات الطارئة | Emergency Procedures
 
-```
+```text
 في حالة انقطاع الخدمة | In case of service outage:
 
 1. فوري | Immediate:
@@ -440,7 +440,7 @@ Admin → Logs → Errors
 
 ## 📞 جهات الاتصال | Contact Information
 
-```
+```text
 فريق الدعم الفني | Technical Support:
 البريد: support@rehab-system.sa
 الهاتف: +966-1-XXXX-XXXX

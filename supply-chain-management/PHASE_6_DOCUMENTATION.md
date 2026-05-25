@@ -21,6 +21,7 @@
 ### Authentication Endpoints
 
 #### Login
+
 ```http
 POST /api/auth/login
 Content-Type: application/json
@@ -48,6 +49,7 @@ Response: 200 OK
 ### Suppliers Endpoints
 
 #### Get All Suppliers
+
 ```http
 GET /api/suppliers?page=1&limit=10&search=company&sort=rating&order=desc
 
@@ -79,6 +81,7 @@ Response: 200 OK
 ```
 
 #### Get Supplier by ID
+
 ```http
 GET /api/suppliers/:id
 
@@ -98,6 +101,7 @@ Response: 200 OK
 ```
 
 #### Create Supplier
+
 ```http
 POST /api/suppliers
 Content-Type: application/json
@@ -125,6 +129,7 @@ Response: 201 Created
 ```
 
 #### Update Supplier
+
 ```http
 PUT /api/suppliers/:id
 Content-Type: application/json
@@ -144,6 +149,7 @@ Response: 200 OK
 ```
 
 #### Delete Supplier
+
 ```http
 DELETE /api/suppliers/:id
 Authorization: Bearer {token}
@@ -160,6 +166,7 @@ Response: 200 OK
 ### Products Endpoints
 
 #### Get All Products
+
 ```http
 GET /api/products?search=منتج&min_price=100&max_price=500&page=1&limit=10
 
@@ -182,6 +189,7 @@ Response: 200 OK
 ```
 
 #### Create Product
+
 ```http
 POST /api/products
 Content-Type: application/json
@@ -204,6 +212,7 @@ Response: 201 Created
 ### Orders Endpoints
 
 #### Get All Orders
+
 ```http
 GET /api/orders?status=pending&sort=date&order=desc&page=1&limit=10
 
@@ -226,6 +235,7 @@ Response: 200 OK
 ```
 
 #### Create Order
+
 ```http
 POST /api/orders
 Content-Type: application/json
@@ -246,6 +256,7 @@ Response: 201 Created
 ### Dashboard Endpoints
 
 #### Get Dashboard Statistics
+
 ```http
 GET /api/dashboard/stats
 
@@ -264,6 +275,7 @@ Response: 200 OK
 ```
 
 #### Get Advanced Reports
+
 ```http
 GET /api/dashboard/advanced-reports
 
@@ -289,6 +301,7 @@ Response: 200 OK
 ### System Features Overview
 
 #### 1. Supplier Management
+
 - View all suppliers with ratings and contacts
 - Add new suppliers
 - Edit supplier information
@@ -297,6 +310,7 @@ Response: 200 OK
 - Sort by rating, name, date
 
 #### 2. Product Management
+
 - Browse all products
 - View product details (SKU, price, stock)
 - Add new products
@@ -306,6 +320,7 @@ Response: 200 OK
 - Search by product name or SKU
 
 #### 3. Order Management
+
 - Create purchase orders
 - View order details
 - Track order status
@@ -314,6 +329,7 @@ Response: 200 OK
 - Filter by status and date
 
 #### 4. Inventory Management
+
 - Track inventory levels
 - View product quantities
 - Monitor warehouse locations
@@ -321,18 +337,21 @@ Response: 200 OK
 - Generate inventory reports
 
 #### 5. Shipment Tracking
+
 - Track shipments
 - View tracking numbers
 - Monitor delivery status
 - Update shipment information
 
 #### 6. Barcode/QR Codes
+
 - Generate QR codes
 - Generate barcodes
 - Create batch codes
 - Print and export
 
 #### 7. Dashboard Analytics
+
 - View key metrics
 - See supplier ratings
 - Monitor product distribution
@@ -346,25 +365,29 @@ Response: 200 OK
 ### System Administration
 
 #### User Management
-```
+
+```text
 Users: admin
 Role: Administrator
 Password: Admin@123456 (change on first login)
 ```
 
 #### Database Management
+
 - MongoDB automatic seeding
 - Data persistence
 - Backup and recovery
 - Data export/import
 
 #### Server Management
+
 - Start/stop services
 - Monitor logs
 - View error reports
 - Performance monitoring
 
 #### Security Configuration
+
 - JWT token management
 - Password policies
 - Access control
@@ -375,7 +398,8 @@ Password: Admin@123456 (change on first login)
 ## ✅ 4. Developer Guide
 
 ### Project Structure
-```
+
+```text
 supply-chain-management/
 ├── backend/
 │   ├── models/              (MongoDB schemas)
@@ -399,6 +423,7 @@ supply-chain-management/
 ### Technology Stack
 
 **Backend**:
+
 - Node.js 18
 - Express.js 4.18
 - MongoDB 7.0
@@ -407,6 +432,7 @@ supply-chain-management/
 - bcryptjs for password hashing
 
 **Frontend**:
+
 - React 18
 - Material-UI 5
 - Recharts for charts
@@ -414,6 +440,7 @@ supply-chain-management/
 - React Router for navigation
 
 **Infrastructure**:
+
 - Docker & Docker Compose
 - MongoDB Atlas (optional cloud)
 - Node environment management
@@ -421,30 +448,35 @@ supply-chain-management/
 ### Setting Up Development Environment
 
 1. **Clone Repository**
+
    ```bash
    git clone <repository-url>
    cd supply-chain-management
    ```
 
 2. **Backend Setup**
+
    ```bash
    cd backend
    npm install
    ```
 
 3. **Frontend Setup**
+
    ```bash
    cd ../frontend
    npm install
    ```
 
 4. **Environment Configuration**
+
    ```bash
    cp .env.example .env
    # Edit .env with your settings
    ```
 
 5. **Start Development Servers**
+
    ```bash
    # Terminal 1: Backend
    cd backend
@@ -463,18 +495,21 @@ supply-chain-management/
 ### Making Code Changes
 
 #### Backend Changes
+
 1. Modify files in `backend/`
 2. Changes auto-reload with nodemon
 3. Test with curl or Postman
 4. Check logs for errors
 
 #### Frontend Changes
+
 1. Modify files in `frontend/src/`
 2. Changes auto-reload with React hot reload
 3. Check browser console for errors
 4. Run tests with `npm test`
 
 ### Deployment Checklist
+
 - [ ] All tests passing
 - [ ] No console errors
 - [ ] Environment variables set
@@ -490,30 +525,31 @@ supply-chain-management/
 
 ### Query Parameters
 
-| Parameter | Type | Description | Example |
-|-----------|------|-------------|---------|
-| search | string | Search term | ?search=منتج |
-| page | number | Page number | ?page=1 |
-| limit | number | Items per page | ?limit=10 |
-| sort | string | Sort field | ?sort=price |
-| order | string | asc or desc | ?order=asc |
-| status | string | Filter by status | ?status=active |
-| min_price | number | Min price | ?min_price=100 |
-| max_price | number | Max price | ?max_price=500 |
+| Parameter | Type   | Description      | Example        |
+| --------- | ------ | ---------------- | -------------- |
+| search    | string | Search term      | ?search=منتج   |
+| page      | number | Page number      | ?page=1        |
+| limit     | number | Items per page   | ?limit=10      |
+| sort      | string | Sort field       | ?sort=price    |
+| order     | string | asc or desc      | ?order=asc     |
+| status    | string | Filter by status | ?status=active |
+| min_price | number | Min price        | ?min_price=100 |
+| max_price | number | Max price        | ?max_price=500 |
 
 ### Common HTTP Status Codes
 
-| Code | Meaning | Example |
-|------|---------|---------|
-| 200 | OK | GET request successful |
-| 201 | Created | New resource created |
-| 400 | Bad Request | Invalid input |
-| 401 | Unauthorized | No authentication |
-| 403 | Forbidden | No permission |
-| 404 | Not Found | Resource not found |
-| 500 | Server Error | Internal error |
+| Code | Meaning      | Example                |
+| ---- | ------------ | ---------------------- |
+| 200  | OK           | GET request successful |
+| 201  | Created      | New resource created   |
+| 400  | Bad Request  | Invalid input          |
+| 401  | Unauthorized | No authentication      |
+| 403  | Forbidden    | No permission          |
+| 404  | Not Found    | Resource not found     |
+| 500  | Server Error | Internal error         |
 
 ### Error Response Format
+
 ```json
 {
   "success": false,
@@ -529,24 +565,28 @@ supply-chain-management/
 ### Common Issues
 
 #### Backend Won't Start
+
 - Check Node.js version (need 18+)
 - Check MongoDB connection
 - Check port 4000 not in use
 - Check .env file configuration
 
 #### Frontend Won't Load
+
 - Check backend is running
 - Check frontend .env configuration
 - Clear browser cache
 - Check port 3000 not in use
 
 #### Database Connection Failed
+
 - Check MongoDB running
 - Check MongoDB URI correct
 - Check authentication credentials
 - Check network connectivity
 
 #### Can't Login
+
 - Check username/password (admin/Admin@123456)
 - Check JWT configuration
 - Check token stored in localStorage
@@ -557,12 +597,14 @@ supply-chain-management/
 ## Next Steps (Phase 7)
 
 ### 📊 Analytics & Monitoring
+
 - [ ] Advanced dashboards
 - [ ] Custom reports
 - [ ] Real-time alerts
 - [ ] Performance monitoring
 
 ### 🔧 Improvements
+
 - [ ] Search optimization
 - [ ] Export functionality
 - [ ] Batch operations
@@ -573,6 +615,7 @@ supply-chain-management/
 ## Conclusion
 
 Phase 6 delivers:
+
 - ✅ Comprehensive API documentation
 - ✅ User manual
 - ✅ Administrator guide

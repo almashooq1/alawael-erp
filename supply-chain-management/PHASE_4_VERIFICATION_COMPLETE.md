@@ -66,7 +66,7 @@ docker-compose up -d
 
 ## 🔑 DEFAULT LOGIN CREDENTIALS
 
-```
+```text
 Email: admin@test.com
 Password: Test@123
 

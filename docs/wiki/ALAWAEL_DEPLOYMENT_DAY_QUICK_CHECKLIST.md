@@ -6,10 +6,10 @@
 
 ## 📋 DEPLOYMENT DAY CHECKLIST
 
-**Deployment Date:** ________________  
-**Deployment Lead:** ________________  
-**Time Started:** ________________  
-**Estimated End Time:** ________________ (+ 2 hours buffer)  
+**Deployment Date:** ******\_\_\_\_******  
+**Deployment Lead:** ******\_\_\_\_******  
+**Time Started:** ******\_\_\_\_******  
+**Estimated End Time:** ******\_\_\_\_****** (+ 2 hours buffer)
 
 ---
 
@@ -17,9 +17,10 @@
 
 **Timeline: [Start Time] → [End Time]**
 
-**Assigned To:** ________________  
+**Assigned To:** ******\_\_\_\_******
 
 ### Branch Protection
+
 - [ ] Backend: Settings → Branches → Add rule for `main`
   - [ ] Require 1 pull request review
   - [ ] Require status checks
@@ -28,18 +29,21 @@
 - [ ] Verify: Both repos show protected branch status
 
 ### Environments (Development/Staging/Production)
+
 - [ ] Backend: Create 3 environments (dev, staging, prod)
 - [ ] ERP: Create 3 environments (dev, staging, prod)
 - [ ] Verify: All environments visible in repo settings
 - [ ] Add required approvers for production environment
 
 ### GitHub Secrets
+
 - [ ] Backend: Add 6 secrets (GITHUB_TOKEN, SONAR_TOKEN, etc.)
 - [ ] ERP: Add 6 secrets
 - [ ] Verify: All secrets show as "updated"
 - [ ] Test: Try one API call using secrets
 
 ### Teams
+
 - [ ] Create alawael-admins team (add: CTO, VP Eng, DevOps Lead)
 - [ ] Create alawael-developers team (add: 5 backend + 3 ERP engineers)
 - [ ] Create alawael-ops team (add: 2 DevOps + 2 Database)
@@ -47,9 +51,10 @@
 - [ ] Verify: All teams appear in organization
 
 ### Sign-Off
+
 **Phase 2 Status:** ✅ COMPLETE / ❌ INCOMPLETE  
-**Verified By:** ________________  
-**Time Completed:** ________________  
+**Verified By:** ******\_\_\_\_******  
+**Time Completed:** ******\_\_\_\_******
 
 ❗ **DO NOT PROCEED** if any item unchecked
 
@@ -59,10 +64,11 @@
 
 **Timeline: [Start Time] → [End Time]**
 
-**Assigned To:** ________________  
-**Backup Person:** ________________  
+**Assigned To:** ******\_\_\_\_******  
+**Backup Person:** ******\_\_\_\_******
 
 ### Pre-Deployment
+
 - [ ] Verify Phase 2 is COMPLETE
 - [ ] Check staging environment is empty/clean
 - [ ] Verify all Phase 3 metrics baseline captured
@@ -71,6 +77,7 @@
 - [ ] Terminal: Check cloud credentials valid (`aws sts get-caller-identity`)
 
 ### Execute Deployment Script
+
 ```bash
 bash alawael-phase3-staging-deploy.sh
 ```
@@ -85,29 +92,33 @@ bash alawael-phase3-staging-deploy.sh
 - [ ] Phase 3G: Post-deployment validation - PASS
 
 ### Metrics Validation (Critical - All must PASS)
+
 During script execution, verify in Grafana:
+
 - [ ] Response Time P99: < 500ms (target: 475ms)
-  - Actual: __________ ms ✅/❌
+  - Actual: ****\_\_**** ms ✅/❌
 - [ ] Error Rate: < 0.05%
-  - Actual: __________ % ✅/❌
+  - Actual: ****\_\_**** % ✅/❌
 - [ ] CPU Usage: < 80%
-  - Actual: __________ % ✅/❌
+  - Actual: ****\_\_**** % ✅/❌
 - [ ] Memory Usage: < 85%
-  - Actual: __________ % ✅/❌
+  - Actual: ****\_\_**** % ✅/❌
 - [ ] Uptime: 100%
-  - Actual: __________ % ✅/❌
+  - Actual: ****\_\_**** % ✅/❌
 
 ### Post-Deployment Actions
+
 - [ ] Slack: Notify team "Staging deployment PASSED"
 - [ ] Email: ops-team@alawael.company with logs link
 - [ ] Verify: Log file created at `/tmp/alawael-staging-[ID].log`
-- [ ] Archive: Save deployment ID for post-mortem: ________________
+- [ ] Archive: Save deployment ID for post-mortem: ******\_\_\_\_******
 
 ### Sign-Off
+
 **Phase 3 Status:** ✅ PASS / ❌ FAIL  
 **All Metrics Within SLA:** ✅ YES / ❌ NO  
-**Verified By:** ________________  
-**Time Completed:** ________________  
+**Verified By:** ******\_\_\_\_******  
+**Time Completed:** ******\_\_\_\_******
 
 ❗ **DO NOT PROCEED TO PHASE 4** if Phase 3 FAILED
 
@@ -117,13 +128,14 @@ During script execution, verify in Grafana:
 
 **Timeline: [Start Time] → [End Time]**
 
-**Deployment Lead:** ________________  
-**Backup Person:** ________________  
-**CTO On Standby:** ✅ YES / ❌ NO  
+**Deployment Lead:** ******\_\_\_\_******  
+**Backup Person:** ******\_\_\_\_******  
+**CTO On Standby:** ✅ YES / ❌ NO
 
 ### Pre-Deployment Verification
 
 **Blue Environment (v0.9.8 - Current Production):**
+
 - [ ] Response Time P99: < 500ms
   - Check: `curl https://api.alawael.company/api/health`
 - [ ] Error Rate: < 0.05%
@@ -132,18 +144,21 @@ During script execution, verify in Grafana:
   - Check: Load balancer health checks
 
 **Team Ready:**
+
 - [ ] On-Call Primary: ✅ Alerted & Standing by
 - [ ] On-Call Secondary: ✅ Alerted & Standing by
 - [ ] CTO: ✅ Available for decisions
 - [ ] Support Lead: ✅ Notified & monitoring
 
 **Approval:**
+
 - [ ] Phase 3 Staging: ✅ PASSED
 - [ ] Metrics baseline: ✅ CAPTURED
 - [ ] Team consensus: ✅ READY TO DEPLOY
 - [ ] CTO verbal approval: ✅ OBTAINED
 
 ### Execute Production Deployment
+
 ```bash
 bash alawael-phase4-production-deploy.sh
 ```
@@ -159,6 +174,7 @@ bash alawael-phase4-production-deploy.sh
 ### Traffic Switch Validation (Most Critical - Watch This!)
 
 **DURING T+0 (Traffic Switch at ~20-30 min mark):**
+
 - [ ] Grafana: P99 response time live feed visible
 - [ ] Grafana: Error rate live feed visible
 - [ ] Dashboard: Traffic distribution (Blue 100% → Green 100%)
@@ -166,6 +182,7 @@ bash alawael-phase4-production-deploy.sh
 - [ ] Database: No connection pool spike
 
 **IMMEDIATELY AFTER SWITCH (T+0 to T+5):**
+
 - [ ] Response Time P99: Watch for spike then return
   - Expected: Temporary dip to 300-350ms, then 475-500ms
   - ❌ IF > 1000ms for > 30 seconds: **ROLLBACK**
@@ -180,10 +197,11 @@ bash alawael-phase4-production-deploy.sh
   - ❌ IF major spike in errors: **ROLLBACK**
 
 ### Post-Deployment Validation (5 minutes)
+
 - [ ] Response Time P99: < 500ms (check in Grafana)
-  - Actual: __________ ms ✅/❌
+  - Actual: ****\_\_**** ms ✅/❌
 - [ ] Error Rate: < 0.05% (check in Grafana)
-  - Actual: __________ % ✅/❌
+  - Actual: ****\_\_**** % ✅/❌
 - [ ] All servers: Green responding (5/5 healthy)
   - Check: Load balancer health check
 - [ ] Database: Connected and synchronized
@@ -194,6 +212,7 @@ bash alawael-phase4-production-deploy.sh
 ### EMERGENCY ROLLBACK PROCEDURE
 
 **If any of these occur, execute rollback IMMEDIATELY:**
+
 - ❌ Response Time P99 > 1000ms AND sustained > 30 seconds
 - ❌ Error Rate > 1% AND sustained > 30 seconds
 - ❌ Data anomalies or corruption detected
@@ -201,6 +220,7 @@ bash alawael-phase4-production-deploy.sh
 - ❌ Customer reports major outage
 
 **Execute Rollback (< 30 seconds):**
+
 ```bash
 bash alawael-phase4-production-rollback.sh
 ```
@@ -213,43 +233,48 @@ bash alawael-phase4-production-rollback.sh
 - [ ] Slack alert sent to team
 
 ### Post-Phase 4 Documentation
-- [ ] Deployment ID saved: ________________
-- [ ] Start time: ________________
-- [ ] Switch time: ________________
-- [ ] End time: ________________
-- [ ] Total duration: ________________ minutes
+
+- [ ] Deployment ID saved: ******\_\_\_\_******
+- [ ] Start time: ******\_\_\_\_******
+- [ ] Switch time: ******\_\_\_\_******
+- [ ] End time: ******\_\_\_\_******
+- [ ] Total duration: ******\_\_\_\_****** minutes
 
 ### Sign-Off
+
 **Phase 4 Status:** ✅ SUCCESS / ❌ ROLLBACK  
 **All Metrics Within SLA:** ✅ YES / ❌ NO  
-**Deployment Lead Sign-Off:** ________________  
-**CTO Sign-Off:** ________________  
-**Time Completed:** ________________  
+**Deployment Lead Sign-Off:** ******\_\_\_\_******  
+**CTO Sign-Off:** ******\_\_\_\_******  
+**Time Completed:** ******\_\_\_\_******
 
 ---
 
 ## ⏰ PHASE 5: Post-Deployment Monitoring (7 days)
 
 **Starts:** [Deployment Day]  
-**Ends:** [Deployment Day + 7 days]  
+**Ends:** [Deployment Day + 7 days]
 
 ### Hour 1-24 (Intensive Monitoring)
 
 **Hour 1-6:**
+
 - [ ] On-Call Primary: Monitoring dashboard every 5 min
 - [ ] Slack: Status updates every hour
 - [ ] Critical Metrics Target:
-  - P99 < 500ms (actual: ____________)
-  - Error rate < 0.05% (actual: ____________)
+  - P99 < 500ms (actual: ****\_\_\_\_****)
+  - Error rate < 0.05% (actual: ****\_\_\_\_****)
   - No critical escalations
 
 **Hour 7-24:**
+
 - [ ] Daily checkpoints at 9 AM UTC
 - [ ] Review metrics from past 24 hours
 - [ ] Team sign-off: Ready for Day 2-7 monitoring
 
 **Hourly Checkpoint Template (use for each hour):**
-```
+
+```text
 Hour #: ___  Time: ___:___
 P99:        _____ ms ✅/❌
 Error Rate: _____ % ✅/❌
@@ -266,30 +291,32 @@ Sign-off:   ________________
 **Daily Review Meeting: 9:00 AM UTC**
 
 **Daily Checklist (repeat each day):**
-- [ ] Day ___: All SLA metrics reviewed
+
+- [ ] Day \_\_\_: All SLA metrics reviewed
 - [ ] Metrics Within SLA: ✅ YES / ❌ NO
 - [ ] New Issues Detected: ⭕ NONE / ❌ YES
-  - If yes, document: ________________________________________
+  - If yes, document: ******************\_\_\_\_******************
 - [ ] Action Items: [None / List below]
-  - 
-  - 
-- [ ] Team Sign-off: ________________
+  -
+  -
+- [ ] Team Sign-off: ******\_\_\_\_******
 
 **Days 2-7 Metrics (Document Daily):**
 
-| Day | P99 | Error % | CPU % | Memory % | Issues | Status |
-|-----|-----|---------|-------|----------|--------|--------|
-| 1 | ___ | ___ | ___ | ___ | None | ✅ |
-| 2 | ___ | ___ | ___ | ___ | ___ | ✅/❌ |
-| 3 | ___ | ___ | ___ | ___ | ___ | ✅/❌ |
-| 4 | ___ | ___ | ___ | ___ | ___ | ✅/❌ |
-| 5 | ___ | ___ | ___ | ___ | ___ | ✅/❌ |
-| 6 | ___ | ___ | ___ | ___ | ___ | ✅/❌ |
-| 7 | ___ | ___ | ___ | ___ | ___ | ✅/❌ |
+| Day | P99    | Error % | CPU %  | Memory % | Issues | Status |
+| --- | ------ | ------- | ------ | -------- | ------ | ------ |
+| 1   | \_\_\_ | \_\_\_  | \_\_\_ | \_\_\_   | None   | ✅     |
+| 2   | \_\_\_ | \_\_\_  | \_\_\_ | \_\_\_   | \_\_\_ | ✅/❌  |
+| 3   | \_\_\_ | \_\_\_  | \_\_\_ | \_\_\_   | \_\_\_ | ✅/❌  |
+| 4   | \_\_\_ | \_\_\_  | \_\_\_ | \_\_\_   | \_\_\_ | ✅/❌  |
+| 5   | \_\_\_ | \_\_\_  | \_\_\_ | \_\_\_   | \_\_\_ | ✅/❌  |
+| 6   | \_\_\_ | \_\_\_  | \_\_\_ | \_\_\_   | \_\_\_ | ✅/❌  |
+| 7   | \_\_\_ | \_\_\_  | \_\_\_ | \_\_\_   | \_\_\_ | ✅/❌  |
 
 ### Phase 5 Sign-Off
 
 **After 7 Days Complete:**
+
 - [ ] All daily reviews completed
 - [ ] All SLA metrics PASSED (100% compliance)
 - [ ] Zero critical incidents
@@ -297,8 +324,8 @@ Sign-off:   ________________
 - [ ] CTO approval to proceed to Phase 6
 
 **Phase 5 Status:** ✅ PASS / ❌ ISSUES  
-**CTO Sign-Off:** ________________  
-**Date:** ________________  
+**CTO Sign-Off:** ******\_\_\_\_******  
+**Date:** ******\_\_\_\_******
 
 ---
 
@@ -306,9 +333,10 @@ Sign-off:   ________________
 
 **Timeline: [Day 9, ~24 hours after Phase 4]**
 
-**Assigned To:** ________________  
+**Assigned To:** ******\_\_\_\_******
 
 ### Pre-Decommission Checklist
+
 - [ ] Phase 5 monitoring completed (7 days)
 - [ ] All SLA metrics PASSED
 - [ ] Blue environment idle for 24+ hours
@@ -316,6 +344,7 @@ Sign-off:   ________________
 - [ ] CTO approval obtained
 
 ### Execute Decommission
+
 ```bash
 bash alawael-phase6-decommission.sh
 ```
@@ -329,16 +358,18 @@ bash alawael-phase6-decommission.sh
 - [ ] Documentation updated
 
 ### Post-Decommission Verification
+
 - [ ] Green (v1.0.0): All 5 servers receiving 100% traffic
 - [ ] Blue (v0.9.8): Completely decommissioned
 - [ ] Cost savings: Applied to next month's bill
 - [ ] Team trained on Green-only operations
 
 ### Sign-Off
+
 **Phase 6 Status:** ✅ COMPLETE / ❌ INCOMPLETE  
-**Cost Savings Confirmed:** ________________  
-**Verified By:** ________________  
-**Date:** ________________  
+**Cost Savings Confirmed:** ******\_\_\_\_******  
+**Verified By:** ******\_\_\_\_******  
+**Date:** ******\_\_\_\_******
 
 ---
 
@@ -346,14 +377,14 @@ bash alawael-phase6-decommission.sh
 
 ### Final Metrics (All Must Be ✅)
 
-| Metric | Target | Actual | Status |
-|--------|--------|--------|--------|
-| Downtime | 0 seconds | _____ seconds | ✅/❌ |
-| P99 Response | <500ms | _____ ms | ✅/❌ |
-| Error Rate | <0.05% | _____ % | ✅/❌ |
-| Rollbacks Required | 0 | _____ | ✅/❌ |
-| Data Loss | 0 bytes | _____ bytes | ✅/❌ |
-| SLA Compliance | 100% | _____ % | ✅/❌ |
+| Metric             | Target    | Actual         | Status |
+| ------------------ | --------- | -------------- | ------ |
+| Downtime           | 0 seconds | **\_** seconds | ✅/❌  |
+| P99 Response       | <500ms    | **\_** ms      | ✅/❌  |
+| Error Rate         | <0.05%    | **\_** %       | ✅/❌  |
+| Rollbacks Required | 0         | **\_**         | ✅/❌  |
+| Data Loss          | 0 bytes   | **\_** bytes   | ✅/❌  |
+| SLA Compliance     | 100%      | **\_** %       | ✅/❌  |
 
 ### Team Performance
 
@@ -371,7 +402,7 @@ bash alawael-phase6-decommission.sh
 
 ### Executive Sign-Off
 
-```
+```text
 Deployment Successful:  ✅ YES / ❌ NO
 
 CTO:        _________________  Date: __________
@@ -390,21 +421,22 @@ ALAWAEL v1.0.0 DEPLOYMENT COMPLETE ✅
 
 Keep these numbers handy:
 
-| Role | Contact | Phone |
-|------|---------|-------|
-| **On-Call Primary** | ________________ | ________________ |
-| **On-Call Secondary** | ________________ | ________________ |
-| **CTO** | ________________ | ________________ |
-| **VP Operations** | ________________ | ________________ |
+| Role                  | Contact              | Phone                |
+| --------------------- | -------------------- | -------------------- |
+| **On-Call Primary**   | ******\_\_\_\_****** | ******\_\_\_\_****** |
+| **On-Call Secondary** | ******\_\_\_\_****** | ******\_\_\_\_****** |
+| **CTO**               | ******\_\_\_\_****** | ******\_\_\_\_****** |
+| **VP Operations**     | ******\_\_\_\_****** | ******\_\_\_\_****** |
 
 **Slack War Room:** #alawael-war-room  
-**PagerDuty Escalation:** alawael-oncall  
+**PagerDuty Escalation:** alawael-oncall
 
 ---
 
 ## ✅ Final Reminders
 
 **Before You Start:**
+
 - [ ] Print this document
 - [ ] Have all contact numbers ready
 - [ ] Open Slack #alawael-war-room
@@ -413,12 +445,14 @@ Keep these numbers handy:
 - [ ] Notify stakeholders: "Deployment starting in 30 minutes"
 
 **During Deployment:**
+
 - ❌ **DO NOT** interrupt script execution
 - ✅ **DO** monitor metrics on Grafana in real-time
 - ✅ **DO** communicate status updates every 30 min
 - ⚡ **BE READY** with rollback command if metrics fail
 
 **After Successful Phase 4:**
+
 - ✅ Activate 24/7 monitoring (Phase 5)
 - ✅ Schedule daily review meetings
 - ✅ Prepare Phase 6 decommission plan
@@ -432,6 +466,6 @@ Keep these numbers handy:
 
 ---
 
-*Last Updated: February 22, 2026*  
-*Print Date: ________________*  
-*Printed By: ________________*
+_Last Updated: February 22, 2026_  
+_Print Date: ******\_\_\_\_******_  
+_Printed By: ******\_\_\_\_******_

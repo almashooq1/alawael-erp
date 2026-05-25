@@ -24,7 +24,7 @@
 
 #### Checklist
 
-```
+```text
 [ ] Check system status dashboard
 [ ] Review overnight incidents/alerts
 [ ] Review yesterday's metrics
@@ -71,7 +71,7 @@ curl http://localhost:5000/api/system/metrics | jq '.errors'
 
 #### Checklist
 
-```
+```text
 [ ] Document any incidents
 [ ] Review metrics of the day
 [ ] Note any performance changes
@@ -99,33 +99,40 @@ cat /var/log/deploy-schedule.txt
 ## Daily Operations Report - [DATE]
 
 ### System Uptime
+
 - Today: 99.98%
 - This week: 99.95%
 - This month: 99.87%
 
 ### Traffic Summary
+
 - Peak requests/sec: 1,250
 - Average requests/sec: 380
 - Total requests: 32.8M
 
 ### Error Summary
+
 - Total errors: 2,450 (0.007%)
 - Critical: 0
 - High: 2
 - Medium: 8
 
 ### Performance
+
 - API p95: 380ms
 - API p99: 620ms
 - Database queries: avg 12ms
 
 ### Incidents
+
 - None
 
 ### Alerts
+
 - None critical
 
 ### Next Shift Focus
+
 - Monitor deployment (if scheduled)
 - Review [specific component]
 ```
@@ -147,7 +154,7 @@ psql -U postgres -c "SELECT version();"
 
 # Check database size
 psql -U postgres -c "
-  SELECT 
+  SELECT
     datname,
     pg_size_pretty(pg_database_size(datname)) as size
   FROM pg_database
@@ -157,7 +164,7 @@ psql -U postgres -c "
 
 # Check connections
 psql -U postgres -c "
-  SELECT 
+  SELECT
     usename,
     count(*),
     max(EXTRACT(EPOCH FROM (now() - state_change))) as idle_seconds
@@ -168,7 +175,7 @@ psql -U postgres -c "
 
 # Check replication status
 psql -U postgres -c "
-  SELECT 
+  SELECT
     slot_name,
     slot_type,
     active
@@ -177,7 +184,7 @@ psql -U postgres -c "
 
 # Check slow queries
 psql -U postgres -c "
-  SELECT 
+  SELECT
     query,
     calls,
     total_time,
@@ -190,7 +197,7 @@ psql -U postgres -c "
 
 # Check table sizes
 psql -U postgres -c "
-  SELECT 
+  SELECT
     schemaname,
     tablename,
     pg_size_pretty(pg_total_relation_size(schemaname||'.'||tablename)) as size
@@ -227,11 +234,11 @@ echo "✓ Statistics updated"
 
 # Check bloat
 psql -U postgres -d alawael -c "
-  SELECT 
+  SELECT
     schemaname,
     tablename,
-    ROUND(100.0 * (OCTET_LENGTH(t.heap_blks_read) + 
-                   OCTET_LENGTH(t.heap_blks_hit)) / 
+    ROUND(100.0 * (OCTET_LENGTH(t.heap_blks_read) +
+                   OCTET_LENGTH(t.heap_blks_hit)) /
           NULLIF(t.heap_blks_read + t.heap_blks_hit, 0)) AS ratio
   FROM pg_statio_user_tables t
   WHERE (t.heap_blks_read + t.heap_blks_hit) > 0
@@ -292,7 +299,7 @@ YESTERDAY=$(tail -2 $LOGFILE | head -1 | awk '{print $2}')
 TODAY=$(tail -1 $LOGFILE | awk '{print $2}')
 
 if [ "$TODAY" > "$YESTERDAY" ]; then
-  GROWTH=$(( $(echo $TODAY | sed 's/[A-Z]*//g') - 
+  GROWTH=$(( $(echo $TODAY | sed 's/[A-Z]*//g') -
              $(echo $YESTERDAY | sed 's/[A-Z]*//g') ))
   echo "Growth: $GROWTH (acceptable if < 2GB/day)"
 fi
@@ -354,7 +361,7 @@ tail -100 /var/log/postgresql/postgresql.log | grep "duration: " | grep -v "0\."
 
 # First: See current plan
 psql -U postgres -d alawael -c "
-  EXPLAIN ANALYZE SELECT * FROM users 
+  EXPLAIN ANALYZE SELECT * FROM users
   WHERE email LIKE '%test%' AND status = 'active'
   LIMIT 100;
 "
@@ -364,13 +371,13 @@ psql -U postgres -d alawael -c "
 
 # Add index
 psql -U postgres -d alawael -c "
-  CREATE INDEX idx_users_email_status 
+  CREATE INDEX idx_users_email_status
   ON users(email, status);
 "
 
 # Verify optimization
 psql -U postgres -d alawael -c "
-  EXPLAIN ANALYZE SELECT * FROM users 
+  EXPLAIN ANALYZE SELECT * FROM users
   WHERE email LIKE '%test%' AND status = 'active'
   LIMIT 100;
 "
@@ -498,7 +505,7 @@ TABLES=$(psql -U postgres -d alawael_restore -c "SELECT COUNT(*) FROM informatio
 echo "✓ Restored $TABLES tables"
 
 # Test connectivity
-psql -U postgres -d alawael_restore -c "SELECT COUNT(*) FROM users;" 
+psql -U postgres -d alawael_restore -c "SELECT COUNT(*) FROM users;"
 echo "✓ Database verification complete"
 
 # Swap databases (if verified)
@@ -508,7 +515,7 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
   psql -U postgres -c "DROP DATABASE alawael;"
   psql -U postgres -c "ALTER DATABASE alawael_restore RENAME TO alawael;"
   echo "✓ Database swapped"
-  
+
   # Restart application
   docker start app
   echo "✓ Application restarted"
@@ -571,10 +578,10 @@ kill $MONITOR_PID
 # If memory consistently growing > 50MB/hour:
 if [ /* memory growing */ ]; then
   echo "Memory leak detected!"
-  
+
   # Generate heap dump
   docker exec app npm run debug:heapdump
-  
+
   # Analyze
   node --inspect-brk ./node_modules/.bin/clinic.js doctor
 fi
@@ -590,7 +597,7 @@ echo "=== Connection Pool Investigation ==="
 
 # Check current connections
 psql -U postgres -c "
-  SELECT 
+  SELECT
     datname,
     usename,
     application_name,
@@ -638,8 +645,8 @@ docker logs app | tail -100 | grep -i "loop\|recurs"
 
 # 2. Check for expensive queries
 psql -U postgres -c "
-  SELECT query, calls, total_time 
-  FROM pg_stat_statements 
+  SELECT query, calls, total_time
+  FROM pg_stat_statements
   ORDER BY total_time DESC LIMIT 10;
 "
 
@@ -663,7 +670,7 @@ docker restart app
 
 ### Weekly Maintenance Checklist
 
-```
+```text
 Monday 9:00 AM:
 [ ] Review usage metrics
 [ ] Check disk space trends
@@ -688,7 +695,7 @@ Friday 4:00 PM:
 
 ### Monthly Maintenance Checklist
 
-```
+```text
 First of Month:
 [ ] Monthly health report
 [ ] Database optimization
@@ -711,7 +718,7 @@ End of Month:
 
 ### Quarterly Maintenance
 
-```
+```text
 Q1/Q2/Q3/Q4:
 [ ] Full disaster recovery test
 [ ] Complete security audit
@@ -738,24 +745,24 @@ psql -h primary.db -U postgres -c "SELECT 1;" 2>&1 | grep -q "refused"
 
 if [ $? -eq 0 ]; then
   echo "✓ Primary confirmed down"
-  
+
   # Step 2: Stop replication
   psql -h replica.db -U postgres -c "SELECT pg_wal_replay_pause();"
   echo "✓ Replication paused"
-  
+
   # Step 3: Promote replica
   pg_ctl promote -D /var/lib/postgresql/14/replica
   echo "✓ Replica promoted to primary"
-  
+
   # Step 4: Update connection strings
   # Edit app config to point to new primary
   sed -i 's/primary.db/replica.db/g' /app/config.yaml
   echo "✓ Connection strings updated"
-  
+
   # Step 5: Restart app
   docker restart app
   echo "✓ Application restarted"
-  
+
   # Step 6: Verify
   curl http://localhost:5000/api/health | jq '.'
 fi
@@ -818,4 +825,3 @@ echo "✓ Services restarted and verified"
 
 **Status:** Production Ready  
 **Last Updated:** February 24, 2026
-

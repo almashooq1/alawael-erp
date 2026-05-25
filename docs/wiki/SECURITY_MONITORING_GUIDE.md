@@ -57,7 +57,7 @@ module.exports = {
   refreshTokenExpiry: '30d',
   algorithm: 'HS256',
   issuer: 'alawael-api',
-  audience: 'alawael-users'
+  audience: 'alawael-users',
 };
 ```
 
@@ -70,7 +70,7 @@ const corsOptions = {
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  maxAge: 86400 // 24 hours
+  maxAge: 86400, // 24 hours
 };
 
 app.use(cors(corsOptions));
@@ -86,9 +86,9 @@ const fs = require('fs');
 if (process.env.NODE_ENV === 'production') {
   const options = {
     key: fs.readFileSync('/path/to/private-key.pem'),
-    cert: fs.readFileSync('/path/to/certificate.pem')
+    cert: fs.readFileSync('/path/to/certificate.pem'),
   };
-  
+
   https.createServer(options, app).listen(3000);
 }
 ```
@@ -103,7 +103,7 @@ const limiter = rateLimit({
   max: 100, // Limit each IP to 100 requests per windowMs
   message: 'Too many requests from this IP',
   standardHeaders: true, // Return rate limit info in RateLimit-* headers
-  legacyHeaders: false // Disable X-RateLimit-* headers
+  legacyHeaders: false, // Disable X-RateLimit-* headers
 });
 
 // Apply to all routes
@@ -113,7 +113,7 @@ app.use('/api/', limiter);
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 5,
-  skipSuccessfulRequests: true
+  skipSuccessfulRequests: true,
 });
 
 app.post('/api/auth/login', loginLimiter, authController.login);
@@ -128,14 +128,14 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
     lowercase: true,
-    match: /.+\@.+\..+/
+    match: /.+\@.+\..+/,
   },
   firstName: {
     type: String,
     required: true,
     trim: true,
-    maxlength: 100
-  }
+    maxlength: 100,
+  },
 });
 
 // Use parameterized queries
@@ -150,14 +150,16 @@ const helmet = require('helmet');
 
 // Use helmet to set security headers
 app.use(helmet());
-app.use(helmet.contentSecurityPolicy({
-  directives: {
-    defaultSrc: ["'self'"],
-    styleSrc: ["'self'", "'unsafe-inline'"],
-    scriptSrc: ["'self'"],
-    imgSrc: ["'self'", 'data:', 'https:']
-  }
-}));
+app.use(
+  helmet.contentSecurityPolicy({
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrc: ["'self'"],
+      imgSrc: ["'self'", 'data:', 'https:'],
+    },
+  }),
+);
 ```
 
 ### **9. Data Encryption**
@@ -171,28 +173,24 @@ const encryptionKey = process.env.ENCRYPTION_KEY;
 function encryptData(data) {
   const iv = crypto.randomBytes(16);
   const cipher = crypto.createCipheriv(algorithm, Buffer.from(encryptionKey, 'hex'), iv);
-  
+
   let encrypted = cipher.update(JSON.stringify(data), 'utf8', 'hex');
   encrypted += cipher.final('hex');
-  
+
   return {
     iv: iv.toString('hex'),
     data: encrypted,
-    authTag: cipher.getAuthTag().toString('hex')
+    authTag: cipher.getAuthTag().toString('hex'),
   };
 }
 
 function decryptData(encrypted) {
-  const decipher = crypto.createDecipheriv(
-    algorithm,
-    Buffer.from(encryptionKey, 'hex'),
-    Buffer.from(encrypted.iv, 'hex')
-  );
-  
+  const decipher = crypto.createDecipheriv(algorithm, Buffer.from(encryptionKey, 'hex'), Buffer.from(encrypted.iv, 'hex'));
+
   decipher.setAuthTag(Buffer.from(encrypted.authTag, 'hex'));
   let decrypted = decipher.update(encrypted.data, 'hex', 'utf8');
   decrypted += decipher.final('utf8');
-  
+
   return JSON.parse(decrypted);
 }
 ```
@@ -208,7 +206,7 @@ function generate2FASecret(email) {
   return speakeasy.generateSecret({
     name: `Alawael (${email})`,
     issuer: 'Alawael',
-    length: 32
+    length: 32,
   });
 }
 
@@ -218,7 +216,7 @@ function verify2FAToken(secret, token) {
     secret: secret,
     encoding: 'base32',
     token: token,
-    window: 2
+    window: 2,
   });
 }
 ```
@@ -236,21 +234,21 @@ npm install @sentry/node @sentry/tracing
 
 ```javascript
 // Initialize in app.js
-const Sentry = require("@sentry/node");
-const Tracing = require("@sentry/tracing");
+const Sentry = require('@sentry/node');
+const Tracing = require('@sentry/tracing');
 
 Sentry.init({
   dsn: process.env.SENTRY_DSN,
   environment: process.env.NODE_ENV,
   tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
   maxBreadcrumbs: 50,
-  beforeSend: (event) => {
+  beforeSend: event => {
     // Filter sensitive data
     if (event.request?.headers?.authorization) {
       delete event.request.headers.authorization;
     }
     return event;
-  }
+  },
 });
 
 app.use(Sentry.Handlers.requestHandler());
@@ -275,11 +273,11 @@ app.get('/health', (req, res) => {
     checks: {
       memory: process.memoryUsage(),
       database: 'connected', // Check MongoDB connection
-      redis: 'connected',    // Check Redis connection
-      cpu: process.cpuUsage()
-    }
+      redis: 'connected', // Check Redis connection
+      cpu: process.cpuUsage(),
+    },
   };
-  
+
   res.json(healthStatus);
 });
 
@@ -314,20 +312,20 @@ mongooseConnection.on('connected', () => {
   // Log to monitoring service
 });
 
-mongooseConnection.on('error', (err) => {
+mongooseConnection.on('error', err => {
   console.error('MongoDB connection error:', err);
   // Alert ops team
 });
 
 // Check MongoDB performance
-db.serverStatus().ok === 1
+db.serverStatus().ok === 1;
 ```
 
 ### **5. Redis Monitoring**
 
 ```javascript
 // Monitor Redis connection
-redis.on('error', (err) => {
+redis.on('error', err => {
   console.error('Redis error:', err);
   // Alert ops team
 });
@@ -353,31 +351,26 @@ const winston = require('winston');
 
 const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.errors({ stack: true }),
-    winston.format.json()
-  ),
+  format: winston.format.combine(winston.format.timestamp(), winston.format.errors({ stack: true }), winston.format.json()),
   defaultMeta: { service: 'alawael-backend' },
   transports: [
     // File logs
-    new winston.transports.File({ 
-      filename: 'logs/error.log', 
-      level: 'error'
+    new winston.transports.File({
+      filename: 'logs/error.log',
+      level: 'error',
     }),
-    new winston.transports.File({ 
-      filename: 'logs/combined.log' 
+    new winston.transports.File({
+      filename: 'logs/combined.log',
     }),
     // Console logs (development)
-    ...(process.env.NODE_ENV !== 'production' ? [
-      new winston.transports.Console({
-        format: winston.format.combine(
-          winston.format.colorize(),
-          winston.format.simple()
-        )
-      })
-    ] : [])
-  ]
+    ...(process.env.NODE_ENV !== 'production'
+      ? [
+          new winston.transports.Console({
+            format: winston.format.combine(winston.format.colorize(), winston.format.simple()),
+          }),
+        ]
+      : []),
+  ],
 });
 
 module.exports = logger;
@@ -389,13 +382,16 @@ module.exports = logger;
 const morgan = require('morgan');
 
 // Custom morgan format
-morgan.token('user-id', (req) => req.user?.id || 'anonymous');
+morgan.token('user-id', req => req.user?.id || 'anonymous');
 
-const morganFormat = ':remote-addr - :user-id [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] - :response-time ms';
+const morganFormat =
+  ':remote-addr - :user-id [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] - :response-time ms';
 
-app.use(morgan(morganFormat, {
-  stream: fs.createWriteStream('logs/access.log', { flags: 'a' })
-}));
+app.use(
+  morgan(morganFormat, {
+    stream: fs.createWriteStream('logs/access.log', { flags: 'a' }),
+  }),
+);
 ```
 
 ### **3. Audit Logging**
@@ -411,9 +407,9 @@ const auditLog = async (action, userId, resource, details) => {
       details,
       ipAddress: req.ip,
       userAgent: req.get('user-agent'),
-      timestamp: new Date()
+      timestamp: new Date(),
     });
-    
+
     await log.save();
   } catch (err) {
     logger.error('Audit log failed:', err);
@@ -442,31 +438,31 @@ groups:
         expr: rate(errors_total[5m]) > 0.01
         for: 5m
         annotations:
-          summary: "High error rate detected"
+          summary: 'High error rate detected'
 
       - alert: DatabaseDown
         expr: up{job="mongodb"} == 0
         for: 1m
         annotations:
-          summary: "MongoDB is down"
+          summary: 'MongoDB is down'
 
       - alert: HighMemoryUsage
         expr: memory_usage_percent > 80
         for: 5m
         annotations:
-          summary: "High memory usage"
+          summary: 'High memory usage'
 
       - alert: HighCPUUsage
         expr: cpu_usage_percent > 80
         for: 5m
         annotations:
-          summary: "High CPU usage"
+          summary: 'High CPU usage'
 
       - alert: SlowQueryResponse
         expr: histogram_quantile(0.95, http_request_duration_seconds) > 1
         for: 5m
         annotations:
-          summary: "Slow query response"
+          summary: 'Slow query response'
 ```
 
 ### **Slack Integration**
@@ -478,17 +474,19 @@ const notifySlack = async (message, level = 'info') => {
   const colors = {
     error: '#FF0000',
     warning: '#FFA500',
-    info: '#0099FF'
+    info: '#0099FF',
   };
 
   try {
     await axios.post(process.env.SLACK_WEBHOOK_URL, {
-      attachments: [{
-        color: colors[level],
-        title: `Alert: ${level.toUpperCase()}`,
-        text: message,
-        ts: Math.floor(Date.now() / 1000)
-      }]
+      attachments: [
+        {
+          color: colors[level],
+          title: `Alert: ${level.toUpperCase()}`,
+          text: message,
+          ts: Math.floor(Date.now() / 1000),
+        },
+      ],
     });
   } catch (err) {
     logger.error('Slack notification failed:', err);
@@ -563,6 +561,7 @@ echo "Recovery completed from: $BACKUP_DATE"
 ### **Pre-Production Deployment**
 
 - [ ] **Authentication**
+
   - [ ] JWT secret configured (min 32 chars)
   - [ ] Password hashing enabled (bcrypt)
   - [ ] 2FA implemented
@@ -570,12 +569,14 @@ echo "Recovery completed from: $BACKUP_DATE"
   - [ ] Login rate limiting enabled
 
 - [ ] **Transport Security**
+
   - [ ] HTTPS/TLS enabled
   - [ ] Certificate valid and not expired
   - [ ] HSTS headers configured
   - [ ] CSP headers set
 
 - [ ] **Database Security**
+
   - [ ] MongoDB authentication enabled
   - [ ] Network restricted (not open to public)
   - [ ] Encryption at rest enabled
@@ -583,6 +584,7 @@ echo "Recovery completed from: $BACKUP_DATE"
   - [ ] No default credentials
 
 - [ ] **API Security**
+
   - [ ] CORS properly configured
   - [ ] Rate limiting enabled
   - [ ] Input validation on all endpoints
@@ -591,6 +593,7 @@ echo "Recovery completed from: $BACKUP_DATE"
   - [ ] OAuth2 for third-party integrations
 
 - [ ] **Code Security**
+
   - [ ] Dependency audit passed (`npm audit`)
   - [ ] No hardcoded secrets
   - [ ] Security headers configured (helmet)
@@ -598,6 +601,7 @@ echo "Recovery completed from: $BACKUP_DATE"
   - [ ] Code reviewed
 
 - [ ] **Monitoring & Logging**
+
   - [ ] Sentry configured
   - [ ] Error tracking enabled
   - [ ] Access logs configured
@@ -606,6 +610,7 @@ echo "Recovery completed from: $BACKUP_DATE"
   - [ ] Slack/Email notifications setup
 
 - [ ] **Backup & Recovery**
+
   - [ ] Backup strategy defined
   - [ ] Automated backups running
   - [ ] Recovery tested
@@ -641,7 +646,7 @@ echo "Recovery completed from: $BACKUP_DATE"
 
 Monitor these KPIs:
 
-```
+```text
 - Failed login attempts
 - API error rate
 - Average response time

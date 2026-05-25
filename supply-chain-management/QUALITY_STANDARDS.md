@@ -10,7 +10,7 @@
 
 #### ✅ قائمة التحقق
 
-```
+```text
 Code Review:
 ☐ Code review من Lead/Peer قبل الـ merge
 ☐ لا توجد comments معلقة
@@ -63,7 +63,7 @@ const sp = async (q, f) => {
 
 #### ✅ قائمة الاختبارات
 
-```
+```text
 Coverage Requirements:
 ☐ 85%+ overall coverage (حسب ESLint)
 ☐ 90%+ coverage لـ critical paths
@@ -141,7 +141,7 @@ test('search works', () => {
 
 #### ✅ معايير الأداء
 
-```
+```text
 Response Times:
 ☐ API calls: < 500ms
 ☐ Search queries: < 300ms
@@ -183,7 +183,7 @@ time curl -X POST http://localhost:3001/api/search/advanced \
 
 #### ✅ قائمة الأمان
 
-```
+```text
 Input Validation:
 ☐ Validate all user inputs
 ☐ Sanitize محتويات البحث
@@ -247,7 +247,7 @@ throw new Error(`Database at 192.168.1.1 failed`);
 
 ### قبل الـ PR
 
-```
+```text
 ☐ جميع الاختبارات تمر locally
 ☐ لا توجد console errors
 ☐ لا توجد console logs (debug فقط)
@@ -256,7 +256,7 @@ throw new Error(`Database at 192.168.1.1 failed`);
 
 ### عند فتح الـ PR
 
-```
+```text
 Title Format:
 feat/fix/chore: brief description
 
@@ -272,7 +272,7 @@ Closes #123
 
 ### أثناء الـ Code Review
 
-```
+```text
 ☐ تعليقات واضحة وبناءة
 ☐ جميع الأسئلة مجابة
 ☐ Requested changes مطبقة
@@ -319,7 +319,7 @@ npm test -- --coverage
 
 ### Code
 
-```
+```text
 ☐ لا توجد commented code
 ☐ لا توجد console.log()
 ☐ لا توجد debugger statements
@@ -329,7 +329,7 @@ npm test -- --coverage
 
 ### Tests
 
-```
+```text
 ☐ جميع الاختبارات تمر
 ☐ Coverage >= 85%
 ☐ No flaky tests (اختبارات غير مستقرة)
@@ -338,7 +338,7 @@ npm test -- --coverage
 
 ### Documentation
 
-```
+```text
 ☐ Code comments موجودة
 ☐ README updated
 ☐ API docs updated
@@ -347,7 +347,7 @@ npm test -- --coverage
 
 ### Security
 
-```
+```text
 ☐ No hardcoded secrets
 ☐ No sensitive data logged
 ☐ Input validation present
@@ -356,7 +356,7 @@ npm test -- --coverage
 
 ### Performance
 
-```
+```text
 ☐ Response time < 500ms
 ☐ No memory leaks
 ☐ Database optimized
@@ -369,7 +369,7 @@ npm test -- --coverage
 
 ### Scoring System
 
-```
+```text
 Code Quality:       1-10 (يجب >= 8)
 Test Coverage:      1-10 (يجب >= 8)
 Performance:        1-10 (يجب >= 8)
@@ -381,7 +381,7 @@ Overall Score:      (average >= 8)
 
 ### Grade System
 
-```
+```text
 A: 9-10    → Excellent, ship it!
 B: 7-8     → Good, minor improvements needed
 C: 5-6     → Acceptable, improvements required
@@ -393,7 +393,7 @@ F: < 3     → Unacceptable, reject and rework
 
 ## ✅ مثال على PR جاهز للـ Ship
 
-```
+```text
 Title: feat: implement advanced search with filtering
 
 Description:

@@ -191,7 +191,7 @@ GET /api/suppliers?search=الشركة&status=active&sort=rating&order=desc&page
 
 ## File Structure
 
-```
+```text
 backend/
 ├── middleware/
 │   ├── search-filter.js       (NEW - Search & filtering)
@@ -239,7 +239,7 @@ backend/
 
 ### Combined Example
 
-```
+```text
 GET /api/products?search=منتج&status=active&min_price=100&max_price=500&sort=price&order=asc&page=1&limit=15
 ```
 

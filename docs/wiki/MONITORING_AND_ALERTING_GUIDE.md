@@ -20,7 +20,7 @@
 
 ### Application Metrics
 
-```
+```text
 Critical Metrics:
   • Request rate (requests/sec)
   • Response time (p50, p95, p99)
@@ -33,7 +33,7 @@ Critical Metrics:
 
 ### Business Metrics
 
-```
+```text
 Track:
   • Active users
   • Transactions per second
@@ -45,7 +45,7 @@ Track:
 
 ### Infrastructure Metrics
 
-```
+```text
 Monitor:
   • Disk space (alerts at 80%)
   • Network I/O
@@ -61,33 +61,33 @@ Monitor:
 
 ### Critical Alerts (Immediate)
 
-| Metric | Threshold | Action |
-|--------|-----------|--------|
-| **Availability** | < 99.5% (5 min) | Page on-call engineer |
-| **Error Rate** | > 5% (consecutive) | Page on-call engineer |
-| **DB Connection Timeout** | Any occurrence | Page on-call engineer |
-| **Memory > 90%** | 5 consecutive min | Page on-call engineer |
-| **Disk > 95%** | Any occurrence | Page on-call engineer |
-| **API Response Time** | > 5000ms (p95) | Page on-call engineer |
+| Metric                    | Threshold          | Action                |
+| ------------------------- | ------------------ | --------------------- |
+| **Availability**          | < 99.5% (5 min)    | Page on-call engineer |
+| **Error Rate**            | > 5% (consecutive) | Page on-call engineer |
+| **DB Connection Timeout** | Any occurrence     | Page on-call engineer |
+| **Memory > 90%**          | 5 consecutive min  | Page on-call engineer |
+| **Disk > 95%**            | Any occurrence     | Page on-call engineer |
+| **API Response Time**     | > 5000ms (p95)     | Page on-call engineer |
 
 ### High Priority Alerts (30 minutes)
 
-| Metric | Threshold | Action |
-|--------|-----------|--------|
-| **Error Rate** | 1% - 5% (10 min) | Alert DevOps team |
-| **CPU > 80%** | 10 consecutive min | Alert DevOps team |
-| **Memory > 80%** | 15 consecutive min | Alert DevOps team |
-| **API Response Time** | > 1000ms (p95) | Alert team |
+| Metric                   | Threshold          | Action              |
+| ------------------------ | ------------------ | ------------------- |
+| **Error Rate**           | 1% - 5% (10 min)   | Alert DevOps team   |
+| **CPU > 80%**            | 10 consecutive min | Alert DevOps team   |
+| **Memory > 80%**         | 15 consecutive min | Alert DevOps team   |
+| **API Response Time**    | > 1000ms (p95)     | Alert team          |
 | **Cache Hit Rate < 70%** | 10 consecutive min | Review cache config |
 
 ### Medium Priority Alerts (Notification)
 
-| Metric | Threshold | Action |
-|--------|-----------|--------|
-| **Slow Queries** | > 1000ms | Log and review |
-| **API Response Time** | > 500ms (p95) | Monitor trend |
-| **Disk > 80%** | Alert | Plan cleanup |
-| **Certificate Expiration** | < 30 days | Renew |
+| Metric                     | Threshold     | Action         |
+| -------------------------- | ------------- | -------------- |
+| **Slow Queries**           | > 1000ms      | Log and review |
+| **API Response Time**      | > 500ms (p95) | Monitor trend  |
+| **Disk > 80%**             | Alert         | Plan cleanup   |
+| **Certificate Expiration** | < 30 days     | Renew          |
 
 ---
 
@@ -95,7 +95,7 @@ Monitor:
 
 ### What to Log
 
-```
+```text
 Application Logs:
   • Request entry/exit (timestamp, user, endpoint)
   • Error details (stack trace, context)
@@ -120,7 +120,7 @@ Security Logs:
 
 ### Log Level Guidelines
 
-```
+```text
 ERROR:   - Errors requiring immediate action
 WARNING: - Potential issues (degraded performance)
 INFO:    - Important business events
@@ -129,7 +129,7 @@ DEBUG:   - Development/troubleshooting (disabled in prod)
 
 ### Log Retention
 
-```
+```text
 Production Logs:
   • Real-time: 48 hours
   • Hot storage: 30 days
@@ -143,7 +143,7 @@ Production Logs:
 
 ### What to Trace
 
-```
+```text
 Every request should include:
   1. Trace ID (unique request identifier)
   2. Span ID (operation within request)
@@ -156,7 +156,7 @@ Every request should include:
 
 ### Tracing Configuration
 
-```
+```text
 Setup Example:
   • Jaeger integration for tracing
   • Distributed context propagation
@@ -171,7 +171,7 @@ Setup Example:
 
 ### Real-Time Dashboard (Operations Team)
 
-```
+```text
 Display:
   • Overall system health (green/yellow/red)
   • Request rate & response time
@@ -184,7 +184,7 @@ Display:
 
 ### Business Dashboard (Management)
 
-```
+```text
 Display:
   • System uptime (%)
   • Request volume (daily)
@@ -197,7 +197,7 @@ Display:
 
 ### Engineering Dashboard (Developers)
 
-```
+```text
 Display:
   • Request flow (trace visualization)
   • Slow queries/API calls
@@ -209,7 +209,7 @@ Display:
 
 ### Security Dashboard (Security Team)
 
-```
+```text
 Display:
   • Failed authentication attempts
   • Unauthorized access attempts
@@ -238,7 +238,7 @@ Alerting Setup:
 
 ### Email Alerts
 
-```
+```text
 Critical:   Immediate (no digest)
 High:       Every occurrence
 Medium:     Daily digest
@@ -247,7 +247,7 @@ Low:        Weekly digest
 
 ### PagerDuty Integration (Optional)
 
-```
+```text
 Setup:
   • CRITICAL alerts → PagerDuty
   • Escalation policy: 5 min → 15 min → 30 min
@@ -261,7 +261,7 @@ Setup:
 
 ### Push Notifications
 
-```
+```text
 Enabled for:
   • CRITICAL alerts (immediate)
   • System outage (immediate)
@@ -307,7 +307,7 @@ Response: {
 
 ### Monitoring Frequency
 
-```
+```text
 Health Check Schedule:
   • Every 30 seconds: Basic health
   • Every 2 minutes: Detailed health
@@ -320,7 +320,7 @@ Health Check Schedule:
 
 ### Detection Phase (< 1 minute)
 
-```
+```text
 1. Alert triggered
 2. Validated by monitoring system
 3. Incident created automatically
@@ -330,7 +330,7 @@ Health Check Schedule:
 
 ### Response Phase (1-5 minutes)
 
-```
+```text
 1. On-call acknowledges page
 2. Joins incident channel
 3. Reviews alert details
@@ -341,7 +341,7 @@ Health Check Schedule:
 
 ### Mitigation Phase (5-30 minutes)
 
-```
+```text
 1. Root cause identified
 2. Temporary fix applied (if needed)
 3. Monitoring for regression
@@ -351,7 +351,7 @@ Health Check Schedule:
 
 ### Recovery Phase (30+ minutes)
 
-```
+```text
 1. Issue resolved
 2. All systems verified normal
 3. Incident documented
@@ -365,7 +365,7 @@ Health Check Schedule:
 
 ### Resource Monitoring
 
-```
+```text
 Track monthly:
   • Disk space usage trend
   • Database size growth
@@ -382,7 +382,7 @@ Right-size resources:
 
 ### Auto-Scaling Configuration
 
-```
+```text
 Kubernetes Horizontal Pod Autoscaler:
   • Min replicas: 3
   • Max replicas: 10
@@ -398,7 +398,7 @@ Kubernetes Horizontal Pod Autoscaler:
 
 ### Failed Authentication
 
-```
+```text
 Alert if:
   • > 10 failed attempts (10 min) from single IP
   • > 50 failed attempts (1 hour) globally
@@ -413,7 +413,7 @@ Action:
 
 ### Suspicious Activity
 
-```
+```text
 Monitor:
   • Unusual data access patterns
   • Late-night administrative actions
@@ -433,7 +433,7 @@ Alert on:
 
 ### Daily Report (Automated)
 
-```
+```text
 Includes:
   • Uptime percentage
   • Request volume
@@ -445,7 +445,7 @@ Includes:
 
 ### Weekly Report (Manual)
 
-```
+```text
 Includes:
   • Uptime trend
   • Performance trends
@@ -457,7 +457,7 @@ Includes:
 
 ### Monthly Report (Executive)
 
-```
+```text
 Includes:
   • System availability (SLA comparison)
   • Performance summary
@@ -473,7 +473,7 @@ Includes:
 
 ### Recommended Stack
 
-```
+```text
 Metrics Collection:
   • Prometheus (open source)
   • Datadog (commercial)
@@ -533,15 +533,14 @@ Before production:
 
 ## 📞 Support & Escalation
 
-| Issue | Detection | Alert | Action |
-|-------|-----------|-------|--------|
-| **System Down** | < 1 min | Page | Immediate response |
-| **High Error Rate** | 2-5 min | Alert | Investigation |
-| **Performance Degradation** | 5-10 min | Notify | Monitoring |
-| **Security Event** | < 1 min | Page | Immediate investigation |
+| Issue                       | Detection | Alert  | Action                  |
+| --------------------------- | --------- | ------ | ----------------------- |
+| **System Down**             | < 1 min   | Page   | Immediate response      |
+| **High Error Rate**         | 2-5 min   | Alert  | Investigation           |
+| **Performance Degradation** | 5-10 min  | Notify | Monitoring              |
+| **Security Event**          | < 1 min   | Page   | Immediate investigation |
 
 ---
 
 **Status:** Production Ready  
 **Last Updated:** February 24, 2026
-

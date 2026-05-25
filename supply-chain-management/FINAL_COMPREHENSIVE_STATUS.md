@@ -39,7 +39,7 @@
 
 ### الخادم الخلفي (Backend)
 
-```
+```text
 🔹 المنفذ: 4000
 🔹 المسار: supply-chain-management/backend
 🔹 الملف الرئيسي: server-clean.js
@@ -66,7 +66,7 @@ curl http://localhost:4000/health
 
 ### الخادم الأمامي (Frontend)
 
-```
+```text
 🔹 المنفذ: 3000
 🔹 المسار: supply-chain-management/frontend
 🔹 التقنية: React 18
@@ -79,7 +79,7 @@ curl http://localhost:4000/health
 
 ### 🔐 Authentication
 
-```
+```text
 POST   /api/auth/login       - تسجيل الدخول
 POST   /api/auth/register    - التسجيل
 GET    /api/auth/me          - بيانات المستخدم الحالي
@@ -87,14 +87,14 @@ GET    /api/auth/me          - بيانات المستخدم الحالي
 
 ### 📊 Dashboard
 
-```
+```text
 GET    /api/dashboard/stats              - الإحصائيات الأساسية
 GET    /api/dashboard/advanced-reports   - التقارير المتقدمة
 ```
 
 ### 📦 Suppliers (الموردون)
 
-```
+```text
 GET    /api/suppliers        - قائمة الموردين
 POST   /api/suppliers        - إضافة مورد
 PUT    /api/suppliers/:id    - تحديث مورد
@@ -103,7 +103,7 @@ DELETE /api/suppliers/:id    - حذف مورد
 
 ### 📝 Products (المنتجات)
 
-```
+```text
 GET    /api/products         - قائمة المنتجات
 POST   /api/products         - إضافة منتج
 PUT    /api/products/:id     - تحديث منتج
@@ -112,7 +112,7 @@ DELETE /api/products/:id     - حذف منتج
 
 ### 📋 Orders (الطلبات)
 
-```
+```text
 GET    /api/orders           - قائمة الطلبات
 POST   /api/orders           - إضافة طلب
 PUT    /api/orders/:id       - تحديث طلب
@@ -121,7 +121,7 @@ DELETE /api/orders/:id       - حذف طلب
 
 ### 🏪 Inventory (المخزون)
 
-```
+```text
 GET    /api/inventory        - قائمة المخزون
 POST   /api/inventory        - إضافة مخزون
 PUT    /api/inventory/:id    - تحديث مخزون
@@ -130,7 +130,7 @@ DELETE /api/inventory/:id    - حذف مخزون
 
 ### 🚚 Shipments (الشحنات)
 
-```
+```text
 GET    /api/shipments        - قائمة الشحنات
 POST   /api/shipments        - إضافة شحنة
 PUT    /api/shipments/:id    - تحديث شحنة
@@ -139,7 +139,7 @@ DELETE /api/shipments/:id    - حذف شحنة
 
 ### 📦 Barcode (الباركود)
 
-```
+```text
 GET    /api/barcode/health           - فحص الخدمة
 POST   /api/barcode/qr-code          - توليد رمز QR
 POST   /api/barcode/barcode          - توليد Barcode
@@ -149,7 +149,7 @@ GET    /api/barcode/statistics       - إحصائيات الباركود
 
 ### 📋 Audit Logs
 
-```
+```text
 GET    /api/audit-logs       - سجل التدقيق
 ```
 
@@ -179,7 +179,7 @@ GET    /api/audit-logs       - سجل التدقيق
 
 ### 2️⃣ اختبار GET Products ✅
 
-```
+```text
 ✅ منتج 1 - SKU001 - السعر: 100 - المخزون: 50
 ✅ منتج 2 - SKU002 - السعر: 200 - المخزون: 30
 ✅ منتج 3 - SKU003 - السعر: 150 - المخزون: 80
@@ -201,7 +201,7 @@ GET    /api/audit-logs       - سجل التدقيق
 
 ## 📁 هيكل المشروع
 
-```
+```text
 supply-chain-management/
 ├── backend/
 │   ├── server-clean.js           ⭐ الخادم الرئيسي (يعمل)
@@ -237,7 +237,7 @@ supply-chain-management/
 
 ## 🔐 بيانات اعتماد الاختبار
 
-```
+```text
 اسم المستخدم: admin
 كلمة المرور: Admin@123456
 البريد الإلكتروني: admin@alawael.com

@@ -23,7 +23,7 @@
 
 ### System Components
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │                    Frontend (React)                         │
 │            - Login Component                                │
@@ -58,6 +58,7 @@
 ### Data Flow
 
 #### Authentication Flow (SSO → Main Server)
+
 1. User logs in at http://localhost:3001 (Frontend)
 2. Frontend calls `/api/sso/login` on SSO server
 3. SSO returns `accessToken` + `refreshToken`
@@ -67,6 +68,7 @@
 7. Protected routes accessible in Frontend + Backend
 
 #### Supply Chain Flow
+
 1. Authenticated user requests `/api/supply-chain/*`
 2. Main server validates Authorization header
 3. Supply Chain service processes request
@@ -85,10 +87,12 @@ const cors = require('cors');
 const app = express();
 
 // Middleware
-app.use(cors({
-  origin: 'http://localhost:3000',
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: 'http://localhost:3000',
+    credentials: true,
+  }),
+);
 
 // Routes
 const ssoRouter = safeRequire('./routes/sso.routes');
@@ -110,9 +114,11 @@ const cors = require('cors');
 const app = express();
 
 // Middleware
-app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:3000'
-}));
+app.use(
+  cors({
+    origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+  }),
+);
 
 // SSO Integration
 const ssoRouter = safeRequire('./routes/sso.routes');
@@ -175,6 +181,7 @@ LOG_LEVEL=info
 ### SSO Service Integration Points
 
 #### 1. User Authentication
+
 ```javascript
 // When user logs in, SSO provides:
 {
@@ -192,19 +199,20 @@ LOG_LEVEL=info
 ```
 
 #### 2. Token Verification (Main Server)
+
 ```javascript
 // In middleware - verify token with SSO
 const verifyToken = async (req, res, next) => {
   const token = req.headers.authorization?.split(' ')[1];
-  
+
   if (!token) {
-    return res.status(401).json({ 
-      success: false, 
+    return res.status(401).json({
+      success: false,
       error: 'unauthorized',
-      message: 'No token provided' 
+      message: 'No token provided',
     });
   }
-  
+
   try {
     // Option 1: Direct verification (if SSO on same server)
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -215,18 +223,18 @@ const verifyToken = async (req, res, next) => {
     const result = await fetch('http://localhost:3002/api/sso/verify-token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token })
+      body: JSON.stringify({ token }),
     });
-    
+
     if (result.ok) {
       const { data } = await result.json();
       req.user = data.user;
       next();
     } else {
-      res.status(401).json({ 
-        success: false, 
+      res.status(401).json({
+        success: false,
         error: 'invalid_token',
-        message: 'Token verification failed' 
+        message: 'Token verification failed',
       });
     }
   }
@@ -234,21 +242,22 @@ const verifyToken = async (req, res, next) => {
 ```
 
 #### 3. Role-Based Access Control
+
 ```javascript
 // Middleware for role checking
-const requireRole = (roles) => {
+const requireRole = roles => {
   return (req, res, next) => {
     if (!req.user) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
-    
+
     if (!roles.includes(req.user.role)) {
-      return res.status(403).json({ 
+      return res.status(403).json({
         error: 'Forbidden',
-        message: 'Insufficient permissions'
+        message: 'Insufficient permissions',
       });
     }
-    
+
     next();
   };
 };
@@ -265,7 +274,7 @@ app.get('/api/admin', requireRole(['admin']), (req, res) => {
 
 ### 1. Module Structure
 
-```
+```text
 /services/supplyChain.service.js
 ├── Supplier Management
 │   ├── createSupplier()
@@ -302,6 +311,7 @@ app.get('/api/admin', requireRole(['admin']), (req, res) => {
 ### 2. Data Models
 
 #### Supplier Model
+
 ```javascript
 {
   id: "supplier_1",
@@ -318,6 +328,7 @@ app.get('/api/admin', requireRole(['admin']), (req, res) => {
 ```
 
 #### Product Model
+
 ```javascript
 {
   id: "product_1",
@@ -334,6 +345,7 @@ app.get('/api/admin', requireRole(['admin']), (req, res) => {
 ```
 
 #### Purchase Order Model
+
 ```javascript
 {
   id: "po_123",
@@ -354,6 +366,7 @@ app.get('/api/admin', requireRole(['admin']), (req, res) => {
 ```
 
 #### Shipment Model
+
 ```javascript
 {
   id: "shipment_1",
@@ -388,9 +401,9 @@ router.post('/suppliers', async (req, res) => {
     const supplier = await supplyChainService.createSupplier(req.body);
     res.status(201).json({ success: true, data: supplier });
   } catch (error) {
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
-      error: error.message 
+      error: error.message,
     });
   }
 });
@@ -415,7 +428,7 @@ ReactDOM.render(
   <AuthProvider>
     <App />
   </AuthProvider>,
-  document.getElementById('root')
+  document.getElementById('root'),
 );
 ```
 
@@ -445,7 +458,7 @@ export const AuthProvider = ({ children }) => {
     const response = await fetch('http://localhost:3002/api/sso/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
+      body: JSON.stringify({ email, password }),
     });
 
     const { data } = await response.json();
@@ -459,7 +472,7 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     await fetch('http://localhost:3002/api/sso/logout', {
       method: 'POST',
-      headers: { 'Authorization': `Bearer ${token}` }
+      headers: { Authorization: `Bearer ${token}` },
     });
 
     localStorage.removeItem('accessToken');
@@ -468,11 +481,7 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
-  return (
-    <AuthContext.Provider value={{ user, token, login, logout, loading }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={{ user, token, login, logout, loading }}>{children}</AuthContext.Provider>;
 };
 ```
 
@@ -514,7 +523,7 @@ export const useApi = () => {
   const request = async (endpoint, options = {}) => {
     const headers = {
       'Content-Type': 'application/json',
-      ...options.headers
+      ...options.headers,
     };
 
     if (token) {
@@ -523,7 +532,7 @@ export const useApi = () => {
 
     const response = await fetch(endpoint, {
       ...options,
-      headers
+      headers,
     });
 
     if (!response.ok) {
@@ -612,7 +621,7 @@ const supplierModel = {
   status: String,
   rating: Number,
   createdAt: Date,
-  updatedAt: Date
+  updatedAt: Date,
 };
 
 // Replace Map with Model
@@ -686,7 +695,7 @@ const rateLimit = require('express-rate-limit');
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 5, // 5 requests per window
-  message: 'Too many login attempts'
+  message: 'Too many login attempts',
 });
 
 app.post('/api/sso/login', loginLimiter, async (req, res) => {
@@ -697,7 +706,7 @@ app.post('/api/sso/login', loginLimiter, async (req, res) => {
 ### 3. Input Validation
 
 ```javascript
-const validateSupplier = (data) => {
+const validateSupplier = data => {
   const errors = [];
 
   if (!data.name || data.name.length < 3) {
@@ -714,7 +723,7 @@ const validateSupplier = (data) => {
 
   return {
     valid: errors.length === 0,
-    errors
+    errors,
   };
 };
 ```
@@ -722,7 +731,7 @@ const validateSupplier = (data) => {
 ### 4. Data Sanitization
 
 ```javascript
-const sanitize = (input) => {
+const sanitize = input => {
   return input
     .trim()
     .replace(/<script>/g, '')
@@ -751,23 +760,27 @@ const sanitize = (input) => {
 ### Deployment Steps
 
 #### 1. Install Dependencies
+
 ```bash
 cd erp_new_system/backend
 npm install
 ```
 
 #### 2. Configure Environment
+
 ```bash
 cp .env.example .env
 # Edit .env with production values
 ```
 
 #### 3. Run Tests
+
 ```bash
 npm test
 ```
 
 #### 4. Start Servers
+
 ```bash
 # Terminal 1: SSO Server
 npm run start:sso
@@ -777,6 +790,7 @@ npm start
 ```
 
 #### 5. Verify Endpoints
+
 ```bash
 # Check SSO
 curl http://localhost:3002/api/sso/health
@@ -801,17 +815,20 @@ curl http://localhost:3001/api/supply-chain/status
 ## 🧪 Testing Integration
 
 ### Unit Tests
+
 ```bash
 npm test -- tests/sso-e2e-fixed.test.js
 npm test -- tests/supply-chain.test.js
 ```
 
 ### Integration Tests
+
 ```bash
 npm test -- tests/integration/
 ```
 
 ### Load Testing
+
 ```bash
 npm run load-test
 ```

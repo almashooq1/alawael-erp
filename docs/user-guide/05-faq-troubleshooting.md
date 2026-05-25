@@ -29,7 +29,7 @@
 
 **الجواب:**
 
-```
+```text
 1. تحقق من حسابك وبيانات تسجيل الدخول | Verify your account credentials
 2. اذهب إلى https://rehab-system.sa | Go to the website
 3. أدخل بريدك الإلكتروني وكلمة مرورك | Enter email and password
@@ -47,7 +47,7 @@
 
 **الجواب:**
 
-```
+```text
 النظام متضمّن في اشتراك مؤسستك | System included in your organization subscription
 لا توجد رسوم إضافية للمستخدمين | No additional per-user fees
 اتصل بقسم الحسابات للمزيد من التفاصيل | Contact accounting department for details
@@ -61,7 +61,7 @@
 
 **الجواب:**
 
-```
+```text
 البريد الإلكتروني | Email: support@rehab-system.sa
 الهاتف | Phone: +966-1-XXXX-XXXX
 ساعات العمل | Hours: السبت - الخميس 8 صباحاً - 6 مساءً
@@ -78,7 +78,7 @@
 
 **الجواب:**
 
-```
+```text
 نعم، النظام متوافق مع الهواتف الذكية ✓
 Yes, system is mobile-friendly ✓
 
@@ -101,7 +101,7 @@ Yes, system is mobile-friendly ✓
 
 **الجواب:**
 
-```
+```text
 الخطوات | Steps:
 
 1. انقر على ملفك الشخصي (أعلى يمين الشاشة)
@@ -135,7 +135,7 @@ Yes, system is mobile-friendly ✓
 
 **الجواب:**
 
-```
+```text
 طرق التصدير | Export Methods:
 
 1. تصدير المركبات | Export Vehicles:
@@ -168,7 +168,7 @@ Yes, system is mobile-friendly ✓
 
 **الحل | Solutions:**
 
-```
+```text
 الخطوة 1 | Step 1: تحقق من بريدك الإلكتروني | Verify your email
 - تأكد من تهجئة البريد بشكل صحيح | Check email spelling
 - استخدم حروف صغيرة | Use lowercase letters
@@ -198,7 +198,7 @@ Yes, system is mobile-friendly ✓
 
 **الحل | Solution:**
 
-```
+```text
 الأسباب المحتملة | Possible Reasons:
 1. انتهت صلاحية حسابك | Your access expired
 2. قام مسؤول بتعطيل حسابك | Admin disabled your account
@@ -230,7 +230,7 @@ Yes, system is mobile-friendly ✓
 
 **الحل | Solution:**
 
-```
+```text
 الخطوات | Steps:
 
 1. تحقق من تطبيق المصادقة | Check authentication app
@@ -263,7 +263,7 @@ Yes, system is mobile-friendly ✓
 
 **الحل | Solution:**
 
-```
+```text
 الخطوة 1 | Step 1: تحقق من الاتصال بالإنترنت
 Check internet connection
 □ الاتصال الأسلكي | WiFi: السرعة يجب أن تكون > 5 Mbps
@@ -312,7 +312,7 @@ Contact support
 
 **الحل | Solution:**
 
-```
+```text
 الحل السريع | Quick Fix:
 1. اضغط Ctrl + F5 (أعادة تحميل قوي)
    Hard refresh (Ctrl + F5)
@@ -348,7 +348,7 @@ Contact support
 
 **الحل | Solution:**
 
-```
+```text
 الخطوة 1 | Step 1: تحقق من حجم الملف
 Check file size
 □ الحد الأقصى | Max size: 100 MB
@@ -390,7 +390,7 @@ Contact support
 
 **الحل | Solution:**
 
-```
+```text
 الخطوة 1 | Step 1: تحقق من الفتاتر والتصفية
 Check filters and categories
 □ قد تكون الملفات مخفية بسبب التصفية | May be filtered
@@ -432,7 +432,7 @@ Contact support
 
 **الحل | Solution:**
 
-```
+```text
 الخطوة 1 | Step 1: تحقق من الجلسات الموجودة
 Check existing sessions
 □ الذهاب إلى التقويم | Go to calendar
@@ -474,7 +474,7 @@ Request help
 
 **الحل | Solution:**
 
-```
+```text
 الخطوة 1 | Step 1: تحقق من سلة المهملات
 Check trash/deleted items
 □ الذهاب إلى إعدادات | Go to settings
@@ -514,7 +514,7 @@ Backups available
 
 **الجواب:**
 
-```
+```text
 نعم، النظام آمن جداً | Yes, system is very secure
 
 إجراءات الأمان | Security measures:
@@ -541,7 +541,7 @@ Backups available
 
 **الجواب:**
 
-```
+```text
 فقط الأشخاص المصرحين | Only authorized personnel:
 
 ✓ المعالج الرئيسي | Primary therapist
@@ -566,7 +566,7 @@ Backups available
 
 **الجواب:**
 
-```
+```text
 نصائح الأمان | Security Tips:
 
 1. كلمة مرور قوية | Strong Password
@@ -606,7 +606,7 @@ Backups available
 
 ### خريطة استكشاف الأخطاء | Troubleshooting Flowchart:
 
-```
+```text
 هل تواجه مشكلة؟ | Having trouble?
     |
     ├─→ مشكلة في الوصول؟ | Can't login?
@@ -632,7 +632,7 @@ Backups available
 
 ### خطوات عامة لحل المشاكل | General Troubleshooting Steps:
 
-```
+```text
 الخطوة 1: وصف المشكلة | Describe the problem
 □ ما الذي تحاول أن تفعل؟ | What are you trying to do?
 □ ما الخطأ الذي تحصل عليه؟ | What error do you get?
@@ -671,7 +671,7 @@ Backups available
 
 ### قنوات الدعم الفني | Support Channels:
 
-```
+```text
 📧 البريد الإلكتروني | Email:
    support@rehab-system.sa
    (الرد خلال ساعة واحدة | Reply within 1 hour)
@@ -704,7 +704,7 @@ Backups available
 
 ### معلومات تحسين التذكرة | Ticket Information:
 
-```
+```text
 عند فتح تذكرة دعم، تضمن:
 When opening support ticket, include:
 
@@ -749,7 +749,7 @@ When opening support ticket, include:
 
 ## 📚 موارد إضافية | Additional Resources
 
-```
+```text
 الوثائق الأخرى | Other Documentation:
 ✓ 00-getting-started.md - دليل البدء السريع
 ✓ 01-vehicle-management.md - إدارة المركبات

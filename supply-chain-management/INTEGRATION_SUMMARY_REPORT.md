@@ -27,7 +27,7 @@ redesigned, and comprehensive documentation has been created.
 
 ### Timeline
 
-```
+```text
 10:00 - Started session with "متابعه للكل" request
 10:15 - Verified all systems operational (20/20 tests)
 10:30 - User selected Option 1: Frontend Integration
@@ -46,7 +46,7 @@ NOW   - System ready for npm start
 
 **Location:**
 
-```
+```text
 frontend/src/hooks/useBarcodeGeneration.js
 ```
 
@@ -63,8 +63,7 @@ const API_BASE_URL = 'https://api.local/api/barcode';
 **After:**
 
 ```javascript
-const API_BASE_URL =
-  process.env.REACT_APP_API_URL || 'http://localhost:4000/api/barcode';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:4000/api/barcode';
 ```
 
 **Impact:** Hook now connects to actual running backend at http://localhost:4000
@@ -82,8 +81,7 @@ const token = localStorage.getItem('authToken');
 **After:**
 
 ```javascript
-const token =
-  localStorage.getItem('authToken') || localStorage.getItem('token');
+const token = localStorage.getItem('authToken') || localStorage.getItem('token');
 ```
 
 **Impact:** Supports both token key formats with fallback logic
@@ -94,7 +92,7 @@ const token =
 
 **Location:**
 
-```
+```text
 frontend/src/App.js
 ```
 
@@ -276,7 +274,7 @@ return (
 
 ### Component 1: BarcodeManager.jsx
 
-```
+```text
 Location: frontend/src/components/BarcodeManager.jsx
 Lines: 302
 Features:
@@ -290,7 +288,7 @@ Status: ✅ Production ready
 
 ### Component 2: BarcodeManager.css
 
-```
+```text
 Location: frontend/src/components/BarcodeManager.css
 Lines: 200+
 Features:
@@ -303,7 +301,7 @@ Status: ✅ Complete
 
 ### Component 3: useBarcodeGeneration.js
 
-```
+```text
 Location: frontend/src/hooks/useBarcodeGeneration.js
 Lines: 211
 Features:
@@ -347,7 +345,7 @@ Status: ✅ Updated and configured
 
 **Base URL:**
 
-```
+```text
 http://localhost:4000/api/barcode
 ```
 
@@ -370,7 +368,7 @@ http://localhost:4000/api/barcode
 
 Optional (defaults will be used):
 
-```
+```text
 REACT_APP_API_URL=http://localhost:4000/api/barcode
 ```
 
@@ -411,7 +409,7 @@ REACT_APP_API_URL=http://localhost:4000/api/barcode
    ```
 
 3. **Open browser:**
-   ```
+   ```text
    http://localhost:3000
    ```
 

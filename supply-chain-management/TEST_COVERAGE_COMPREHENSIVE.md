@@ -333,7 +333,7 @@ npm test -- api.test.cjs
 
 ### Expected Test Output
 
-```
+```text
 PASS  __tests__/api.test.cjs
 
 Supply Chain Management API
@@ -440,7 +440,7 @@ npm test -- --watch
 
 ## 📈 Coverage Metrics
 
-```
+```text
 Total Tests Written:         40+ ✅
 Test Pass Rate:             100% ✅
 Code Coverage:               85%+ ✅
@@ -564,18 +564,21 @@ Security Feature Coverage:   100% ✅
 ### Current Gaps (Minor)
 
 1. **Backend Integration Tests**
+
    - Status: Ready for extension
    - Recommendation: Add database integration tests when DB is live
    - Priority: Medium
    - Impact: Would increase coverage to 90%+
 
 2. **E2E Tests**
+
    - Status: Manual testing performed
    - Recommendation: Implement Cypress/Selenium E2E tests
    - Priority: Medium
    - Impact: Complete end-to-end validation
 
 3. **Component Unit Tests**
+
    - Status: FileUpload covered
    - Recommendation: Add tests for other 18 components
    - Priority: High
@@ -589,7 +592,7 @@ Security Feature Coverage:   100% ✅
 
 ### Recommendations for Enhancement
 
-```
+```text
 Phase 1: Add Component Tests (Next Week)
 ├── Login & Register components
 ├── Dashboard component
@@ -627,7 +630,7 @@ Phase 3: Add Integration Tests (Next 3 Weeks)
 
 ### Backend Test Suite
 
-```
+```text
 Test Suite: Supply Chain Management API
 ├── Module Exports (5 tests)
 │   ├── ✅ Package configuration
@@ -667,7 +670,7 @@ Pass Rate: 100% ✅
 
 ### Frontend Test Suite
 
-```
+```text
 Test Suite: FileUpload Component
 ├── ✅ Component renders correctly
 ├── ✅ Error handling for max files
@@ -713,21 +716,25 @@ Pass Rate: 100% ✅
 ## 💡 Key Testing Achievements
 
 1. **Comprehensive Configuration Testing** ✅
+
    - Ensures all dependencies are correctly configured
    - Validates package scripts are in place
    - Tests all development tools
 
 2. **Security-First Approach** ✅
+
    - Password hashing tested thoroughly
    - JWT operations validated
    - Input validation rules verified
 
 3. **Integration Point Testing** ✅
+
    - All integration points verified
    - Dependencies working together confirmed
    - Production readiness validated
 
 4. **Component Testing** ✅
+
    - FileUpload component fully tested
    - User interactions validated
    - Error scenarios covered
@@ -777,7 +784,7 @@ npm test
 
 ## 📊 Coverage Summary
 
-```
+```text
 ┌────────────────────────────────────┐
 │   TEST COVERAGE VERIFICATION       │
 │                                    │

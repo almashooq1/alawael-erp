@@ -324,7 +324,7 @@ app.use('/api/transport', transportRoutes);
 
 ## 📁 هيكل الملفات النهائي
 
-```
+```text
 66666/
 ├── backend/
 │   ├── models/
@@ -377,7 +377,7 @@ app.use('/api/transport', transportRoutes);
 
 ### المرحلة 1: التكامل (Integration)
 
-```
+```text
 1. إضافة الـ imports في App.js
 2. إضافة الـ routes في App.js
 3. إضافة نقاط النهاية في server.js
@@ -387,7 +387,7 @@ app.use('/api/transport', transportRoutes);
 
 ### المرحلة 2: الاختبار (Testing)
 
-```
+```text
 1. اختبار جميع API endpoints
 2. اختبار جميع واجهات المستخدم
 3. اختبار التكامل بين الأمام والخلف
@@ -397,7 +397,7 @@ app.use('/api/transport', transportRoutes);
 
 ### المرحلة 3: النشر (Deployment)
 
-```
+```text
 1. إعادة تشغيل الخادم الخلفي
 2. إعادة تشغيل الخادم الأمامي
 3. التحقق من الوصول

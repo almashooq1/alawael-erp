@@ -1,5 +1,7 @@
 # 📧 NOTIFICATIONS SYSTEM - PHASE 6A
+
 ## AlAwael ERP - Multi-Channel Notification Framework
+
 **Date**: February 22, 2026  
 **Status**: ✅ PHASE 6A COMPLETE (3-4 hours)
 
@@ -10,12 +12,14 @@
 ### Comprehensive Notification System Delivered
 
 **4 Notification Channels**:
+
 - ✅ **Email** - Template-based with HTML rendering
 - ✅ **SMS** - Text messaging with Twilio integration
 - ✅ **Push Notifications** - Web push with subscription management
 - ✅ **In-App** - Real-time notifications (existing + enhanced)
 
 **Key Features**:
+
 - ✅ Template management with variable substitution
 - ✅ Batch sending capabilities
 - ✅ User preference management
@@ -31,6 +35,7 @@
 ### Core Service Files
 
 **File: `backend/services/NotificationService.js` (500+ lines)**
+
 - **NotificationTemplate** class - Template engine with variable rendering
 - **EmailService** class - Email delivery with nodemailer
 - **SMSService** class - SMS delivery with Twilio-compatible API
@@ -39,34 +44,20 @@
 - **Exports**: All 5 classes + template instances
 
 **Features**:
+
 ```javascript
 // Template rendering
-const template = new NotificationTemplate(
-  'welcome',
-  'email',
-  'Welcome {{name}}!',
-  'Hello {{name}}, welcome!',
-  ['{{name}}']
-);
+const template = new NotificationTemplate('welcome', 'email', 'Welcome {{name}}!', 'Hello {{name}}, welcome!', ['{{name}}']);
 
 const rendered = template.render({ name: 'Ahmed' });
 // Result: { subject: 'Welcome Ahmed!', body: 'Hello Ahmed, welcome!' }
 
 // Email sending
-const result = await emailService.send(
-  'user@example.com',
-  template,
-  { name: 'Ahmed' },
-  { from: 'noreply@alawael.com' }
-);
+const result = await emailService.send('user@example.com', template, { name: 'Ahmed' }, { from: 'noreply@alawael.com' });
 // Result: { id, type: 'email', status: 'sent', messageId, ... }
 
-// SMS sending  
-const result = await smsService.send(
-  '+966501234567',
-  template,
-  { code: '123456' }
-);
+// SMS sending
+const result = await smsService.send('+966501234567', template, { code: '123456' });
 // Result: { id, type: 'sms', status: 'sent', cost: 0.0075, ... }
 
 // Push notifications
@@ -76,6 +67,7 @@ const result = await pushService.send('userId', template, data);
 ```
 
 **Configuration**:
+
 ```javascript
 const notificationService = NotificationService.initialize({
   email: {
@@ -83,24 +75,26 @@ const notificationService = NotificationService.initialize({
     port: 587,
     user: 'your-email@gmail.com',
     pass: 'your-password',
-    from: 'noreply@alawael.com'
+    from: 'noreply@alawael.com',
   },
   sms: {
     accountSid: 'your-twilio-sid',
     authToken: 'your-twilio-token',
-    fromNumber: '+966...'
+    fromNumber: '+966...',
   },
   push: {
     vapidPublicKey: 'your-public-key',
-    vapidPrivateKey: 'your-private-key'
-  }
+    vapidPrivateKey: 'your-private-key',
+  },
 });
 ```
 
 ### Template Configuration
 
 **File: `backend/config/notificationTemplates.js` (300+ lines)**
+
 - **Email Templates** (5 pre-built):
+
   - welcome - New account registration
   - orderConfirmation - Order placed
   - passwordReset - Password recovery
@@ -108,6 +102,7 @@ const notificationService = NotificationService.initialize({
   - accountVerification - Email verification
 
 - **SMS Templates** (5 pre-built):
+
   - otp - Two-factor authentication codes
   - paymentAlert - Payment notifications
   - orderStatus - Order updates
@@ -122,7 +117,8 @@ const notificationService = NotificationService.initialize({
   - reminderNotification - Reminders
 
 **Template HTML**:
-```
+
+```text
 Email templates include:
 ✅ Professional HTML styling
 ✅ Call-to-action buttons
@@ -148,7 +144,7 @@ Push templates include:
 **File: `backend/routes/notifications.routes.js` (ENHANCED)**
 **Endpoints** (15+ routes):
 
-```
+```text
 GET    /api/v1/notifications              - Get user notifications
 GET    /api/v1/notifications/unread       - Get unread count
 GET    /api/v1/notifications/stats        - Get user statistics
@@ -169,6 +165,7 @@ ADMIN  GET /api/v1/notifications/stats/system - System statistics
 ```
 
 **Request Examples**:
+
 ```json
 // Send email
 POST /api/v1/notifications/send
@@ -236,6 +233,7 @@ POST /api/v1/notifications/send-multi
 ```
 
 **Response Examples**:
+
 ```json
 // Success
 {
@@ -277,7 +275,7 @@ POST /api/v1/notifications/send-multi
 **File: `backend/tests/notification-system.test.js` (400+ lines)**
 **Test Coverage** (40+ test cases):
 
-```
+```text
 ✅ Template Tests (6 tests)
    - Template creation
    - Variable rendering
@@ -320,6 +318,7 @@ POST /api/v1/notifications/send-multi
 ```
 
 **Run Tests**:
+
 ```bash
 npm test -- backend/tests/notification-system.test.js
 ```
@@ -338,19 +337,15 @@ const notificationService = NotificationService.initialize({
   email: {
     host: 'smtp.gmail.com',
     user: 'your-email@gmail.com',
-    pass: 'your-app-password'
-  }
+    pass: 'your-app-password',
+  },
 });
 
 // Send
-const result = await notificationService.sendEmailWithTemplate(
-  'newuser@example.com',
-  'welcome',
-  {
-    name: 'Ahmed',
-    loginUrl: 'https://alawael.com/login'
-  }
-);
+const result = await notificationService.sendEmailWithTemplate('newuser@example.com', 'welcome', {
+  name: 'Ahmed',
+  loginUrl: 'https://alawael.com/login',
+});
 
 console.log(result); // { success: true, id: '...', status: 'sent' }
 ```
@@ -358,13 +353,9 @@ console.log(result); // { success: true, id: '...', status: 'sent' }
 ### 2. Send OTP via SMS
 
 ```javascript
-const result = await notificationService.sendSmsWithTemplate(
-  '+966501234567',
-  'otp',
-  {
-    code: '123456'
-  }
-);
+const result = await notificationService.sendSmsWithTemplate('+966501234567', 'otp', {
+  code: '123456',
+});
 
 console.log(result); // { success: true, status: 'sent', cost: 0.0075 }
 ```
@@ -373,35 +364,23 @@ console.log(result); // { success: true, status: 'sent', cost: 0.0075 }
 
 ```javascript
 const results = await Promise.all([
-  notificationService.sendEmailWithTemplate(
-    'customer@example.com',
-    'orderConfirmation',
-    {
-      customerName: 'Ahmed',
-      orderId: 'ORD-789',
-      total: '1500',
-      currency: 'SAR',
-      deliveryDate: '2026-02-27',
-      trackingUrl: 'https://alawael.com/track/ORD-789'
-    }
-  ),
-  notificationService.sendSmsWithTemplate(
-    '+966501234567',
-    'orderStatus',
-    {
-      orderId: 'ORD-789',
-      status: 'Confirmed',
-      message: 'Your order will be delivered by Feb 27'
-    }
-  ),
-  notificationService.sendPushWithTemplate(
-    'userId_456',
-    'orderUpdate',
-    {
-      orderId: 'ORD-789',
-      status: 'Confirmed'
-    }
-  )
+  notificationService.sendEmailWithTemplate('customer@example.com', 'orderConfirmation', {
+    customerName: 'Ahmed',
+    orderId: 'ORD-789',
+    total: '1500',
+    currency: 'SAR',
+    deliveryDate: '2026-02-27',
+    trackingUrl: 'https://alawael.com/track/ORD-789',
+  }),
+  notificationService.sendSmsWithTemplate('+966501234567', 'orderStatus', {
+    orderId: 'ORD-789',
+    status: 'Confirmed',
+    message: 'Your order will be delivered by Feb 27',
+  }),
+  notificationService.sendPushWithTemplate('userId_456', 'orderUpdate', {
+    orderId: 'ORD-789',
+    status: 'Confirmed',
+  }),
 ]);
 
 console.log(results);
@@ -419,14 +398,11 @@ const subscription = {
   endpoint: 'https://push.example.com/...',
   keys: {
     p256dh: 'base64-key...',
-    auth: 'base64-auth...'
-  }
+    auth: 'base64-auth...',
+  },
 };
 
-const result = notificationService.pushService.registerSubscription(
-  'userId_456',
-  subscription
-);
+const result = notificationService.pushService.registerSubscription('userId_456', subscription);
 
 console.log(result);
 // { id: 'sub_...', userId: 'userId_456', active: true, ... }
@@ -435,17 +411,14 @@ console.log(result);
 ### 5. Set User Preferences
 
 ```javascript
-const result = await notificationService.setNotificationPreferences(
-  'userId_456',
-  {
-    emailEnabled: true,
-    smsEnabled: true,
-    pushEnabled: true,
-    emailOptional: ['promotionalOffer'],
-    smsOptional: [],
-    pushOptional: []
-  }
-);
+const result = await notificationService.setNotificationPreferences('userId_456', {
+  emailEnabled: true,
+  smsEnabled: true,
+  pushEnabled: true,
+  emailOptional: ['promotionalOffer'],
+  smsOptional: [],
+  pushOptional: [],
+});
 
 console.log(result);
 // { success: true, preferences: { userId, ... } }
@@ -473,35 +446,35 @@ console.log(stats);
 
 ### System Capabilities
 
-| Feature | Metric | Status |
-|---------|--------|--------|
-| **Email Channel** | 5 templates | ✅ Ready |
-| **SMS Channel** | 5 templates | ✅ Ready |
-| **Push Channel** | 5 templates | ✅ Ready |
-| **In-App Channel** | Legacy support | ✅ Ready |
-| **Total Templates** | 15 pre-built | ✅ Ready |
-| **Variable Support** | Dynamic substitution | ✅ Ready |
-| **Batch Operations** | Multi-recipient | ✅ Ready |
-| **User Preferences** | Per-channel control | ✅ Ready |
-| **Delivery Tracking** | Full audit trail | ✅ Ready |
-| **Retry Logic** | Automatic retries | ✅ Ready |
-| **Test Coverage** | 40+ test cases | ✅ Ready |
-| **API Endpoints** | 15+ routes | ✅ Ready |
+| Feature               | Metric               | Status   |
+| --------------------- | -------------------- | -------- |
+| **Email Channel**     | 5 templates          | ✅ Ready |
+| **SMS Channel**       | 5 templates          | ✅ Ready |
+| **Push Channel**      | 5 templates          | ✅ Ready |
+| **In-App Channel**    | Legacy support       | ✅ Ready |
+| **Total Templates**   | 15 pre-built         | ✅ Ready |
+| **Variable Support**  | Dynamic substitution | ✅ Ready |
+| **Batch Operations**  | Multi-recipient      | ✅ Ready |
+| **User Preferences**  | Per-channel control  | ✅ Ready |
+| **Delivery Tracking** | Full audit trail     | ✅ Ready |
+| **Retry Logic**       | Automatic retries    | ✅ Ready |
+| **Test Coverage**     | 40+ test cases       | ✅ Ready |
+| **API Endpoints**     | 15+ routes           | ✅ Ready |
 
 ### Code Metrics
 
-| Metric | Value |
-|--------|-------|
-| **Core Service** | 500+ lines |
-| **Templates** | 300+ lines |
-| **Route Handlers** | 400+ lines |
-| **Tests** | 400+ lines |
-| **Total** | 1,600+ lines |
-| **Classes** | 5 (Template, Email, SMS, Push, Service) |
-| **Test Cases** | 40+ tests |
-| **Email Templates** | 5 |
-| **SMS Templates** | 5 |
-| **Push Templates** | 5 |
+| Metric              | Value                                   |
+| ------------------- | --------------------------------------- |
+| **Core Service**    | 500+ lines                              |
+| **Templates**       | 300+ lines                              |
+| **Route Handlers**  | 400+ lines                              |
+| **Tests**           | 400+ lines                              |
+| **Total**           | 1,600+ lines                            |
+| **Classes**         | 5 (Template, Email, SMS, Push, Service) |
+| **Test Cases**      | 40+ tests                               |
+| **Email Templates** | 5                                       |
+| **SMS Templates**   | 5                                       |
+| **Push Templates**  | 5                                       |
 
 ---
 
@@ -552,17 +525,17 @@ const notificationService = NotificationService.initialize({
     port: process.env.SMTP_PORT,
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
-    from: process.env.SMTP_FROM
+    from: process.env.SMTP_FROM,
   },
   sms: {
     accountSid: process.env.TWILIO_ACCOUNT_SID,
     authToken: process.env.TWILIO_AUTH_TOKEN,
-    fromNumber: process.env.TWILIO_PHONE_NUMBER
+    fromNumber: process.env.TWILIO_PHONE_NUMBER,
   },
   push: {
     vapidPublicKey: process.env.VAPID_PUBLIC_KEY,
-    vapidPrivateKey: process.env.VAPID_PRIVATE_KEY
-  }
+    vapidPrivateKey: process.env.VAPID_PRIVATE_KEY,
+  },
 });
 
 // Initialize templates
@@ -581,17 +554,13 @@ router.post('/auth/register', async (req, res) => {
   // Create user...
 
   // Send welcome email
-  const result = await req.app.locals.notificationService.sendEmailWithTemplate(
-    email,
-    'welcome',
-    {
-      name,
-      loginUrl: `${process.env.APP_URL}/login`
-    }
-  );
+  const result = await req.app.locals.notificationService.sendEmailWithTemplate(email, 'welcome', {
+    name,
+    loginUrl: `${process.env.APP_URL}/login`,
+  });
 
   console.log('Welcome email sent:', result.id);
-  
+
   res.json({ success: true, user });
 });
 ```
@@ -613,24 +582,20 @@ const customTemplate = new NotificationTemplate(
    <p>Hello {{customerName}},</p>
    <p>Your invoice for {{amount}} {{currency}} is ready.</p>
    <p><a href="{{downloadUrl}}">Download Invoice</a></p>`,
-  ['{{invoiceId}}', '{{customerName}}', '{{amount}}', '{{currency}}', '{{downloadUrl}}']
+  ['{{invoiceId}}', '{{customerName}}', '{{amount}}', '{{currency}}', '{{downloadUrl}}'],
 );
 
 // Register with service
 notificationService.registerTemplate(customTemplate);
 
 // Use it
-const result = await notificationService.sendEmailWithTemplate(
-  'customer@example.com',
-  'invoiceSent',
-  {
-    invoiceId: 'INV-001',
-    customerName: 'Ahmed',
-    amount: '5000',
-    currency: 'SAR',
-    downloadUrl: 'https://alawael.com/invoices/INV-001'
-  }
-);
+const result = await notificationService.sendEmailWithTemplate('customer@example.com', 'invoiceSent', {
+  invoiceId: 'INV-001',
+  customerName: 'Ahmed',
+  amount: '5000',
+  currency: 'SAR',
+  downloadUrl: 'https://alawael.com/invoices/INV-001',
+});
 ```
 
 ### Override Default Template
@@ -653,11 +618,7 @@ welcomeTemplate.body = `<h1>Welcome {{name}}!</h1>...`;
 
 ```javascript
 try {
-  const result = await notificationService.sendEmailWithTemplate(
-    'user@example.com',
-    'welcome',
-    { name: 'Ahmed' }
-  );
+  const result = await notificationService.sendEmailWithTemplate('user@example.com', 'welcome', { name: 'Ahmed' });
 
   if (result.success) {
     console.log('Email sent:', result.id);
@@ -698,6 +659,7 @@ console.log(`Removed ${cleanup.removed} inactive subscriptions`);
 ## 🎯 NEXT PHASE (6B)
 
 **Advanced Reporting System** (4-5 hours)
+
 - PDF export capability
 - Scheduled reports
 - Email delivery
@@ -711,6 +673,7 @@ console.log(`Removed ${cleanup.removed} inactive subscriptions`);
 ### Phase 6A: Notifications System - COMPLETE ✅
 
 **Deliverables**:
+
 - ✅ NotificationService with 5 classes
 - ✅ NotificationTemplate engine
 - ✅ EmailService (nodemailer)
@@ -732,4 +695,3 @@ console.log(`Removed ${cleanup.removed} inactive subscriptions`);
 ---
 
 **Ready to continue with Phase 6B: Advanced Reporting? 🚀**
-

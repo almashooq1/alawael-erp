@@ -61,7 +61,7 @@ router.get(
       qrCode: qrImage,
       data,
     });
-  })
+  }),
 );
 
 // Generate Barcode for Product
@@ -101,7 +101,7 @@ router.get(
         stock: product.stock,
       },
     });
-  })
+  }),
 );
 
 // Scan and Retrieve Product
@@ -127,7 +127,7 @@ router.post(
       success: true,
       product,
     });
-  })
+  }),
 );
 
 // Bulk Generate QR/Barcodes for all products
@@ -142,7 +142,7 @@ router.get(
           JSON.stringify({
             id: product._id,
             sku: product.sku,
-          })
+          }),
         );
 
         return {
@@ -151,7 +151,7 @@ router.get(
           sku: product.sku,
           qrCode,
         };
-      })
+      }),
     );
 
     res.json({
@@ -159,7 +159,7 @@ router.get(
       count: codes.length,
       codes,
     });
-  })
+  }),
 );
 
 export default router;
@@ -258,12 +258,7 @@ function BarcodeScanner() {
       {/* بحث يدوي */}
       <div className="manual-search">
         <h2>بحث يدوي بالـ SKU</h2>
-        <input
-          type="text"
-          placeholder="أدخل SKU"
-          value={manualSku}
-          onChange={e => setManualSku(e.target.value)}
-        />
+        <input type="text" placeholder="أدخل SKU" value={manualSku} onChange={e => setManualSku(e.target.value)} />
         <button onClick={handleManualSearch}>بحث</button>
       </div>
 
@@ -288,9 +283,7 @@ function BarcodeScanner() {
               <Barcode value={scannedProduct.sku} />
             </div>
 
-            <button onClick={() => generateQR(scannedProduct._id)}>
-              📥 تحميل QR Code
-            </button>
+            <button onClick={() => generateQR(scannedProduct._id)}>📥 تحميل QR Code</button>
           </div>
         </div>
       )}
@@ -375,7 +368,7 @@ router.post(
       success: true,
       location: shipment.currentLocation,
     });
-  })
+  }),
 );
 
 // Get Current Location
@@ -394,7 +387,7 @@ router.get(
       tracking: shipment.tracking,
       estimatedArrival: calculateETA(shipment),
     });
-  })
+  }),
 );
 
 // Get Location History
@@ -408,7 +401,7 @@ router.get(
       success: true,
       history: shipment.locationHistory || [],
     });
-  })
+  }),
 );
 
 // Helper function للـ ETA
@@ -468,13 +461,7 @@ const shipmentSchema = new mongoose.Schema({
 
 ```javascript
 import React, { useState, useEffect } from 'react';
-import {
-  MapContainer,
-  TileLayer,
-  Marker,
-  Popup,
-  Polyline,
-} from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
 import io from 'socket.io-client';
 import 'leaflet/dist/leaflet.css';
 
@@ -527,22 +514,11 @@ function TrackingMap({ shipmentId }) {
     <div className="tracking-map">
       <div className="map-header">
         <h2>🗺️ تتبع الشحنة</h2>
-        {eta && (
-          <div className="eta-display">
-            ⏰ الوصول المتوقع: {new Date(eta).toLocaleTimeString('ar')}
-          </div>
-        )}
+        {eta && <div className="eta-display">⏰ الوصول المتوقع: {new Date(eta).toLocaleTimeString('ar')}</div>}
       </div>
 
-      <MapContainer
-        center={[location.latitude, location.longitude]}
-        zoom={13}
-        style={{ height: '500px', width: '100%' }}
-      >
-        <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution="&copy; OpenStreetMap contributors"
-        />
+      <MapContainer center={[location.latitude, location.longitude]} zoom={13} style={{ height: '500px', width: '100%' }}>
+        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap contributors" />
 
         {/* الموقع الحالي */}
         <Marker position={[location.latitude, location.longitude]}>
@@ -554,20 +530,13 @@ function TrackingMap({ shipmentId }) {
         </Marker>
 
         {/* المسار */}
-        {history.length > 0 && (
-          <Polyline
-            positions={history.map(h => [h.latitude, h.longitude])}
-            color="blue"
-            weight={3}
-          />
-        )}
+        {history.length > 0 && <Polyline positions={history.map(h => [h.latitude, h.longitude])} color="blue" weight={3} />}
       </MapContainer>
 
       {/* معلومات إضافية */}
       <div className="tracking-info">
         <p>
-          📍 الإحداثيات: {location.latitude.toFixed(4)},{' '}
-          {location.longitude.toFixed(4)}
+          📍 الإحداثيات: {location.latitude.toFixed(4)}, {location.longitude.toFixed(4)}
         </p>
         <p>🚚 السرعة: {location.speed || 0} km/h</p>
         <p>🧭 الاتجاه: {location.heading || 0}°</p>
@@ -619,7 +588,7 @@ const employeeSchema = new mongoose.Schema(
       default: 'active',
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export default mongoose.model('Employee', employeeSchema);
@@ -651,7 +620,7 @@ const attendanceSchema = new mongoose.Schema(
     },
     notes: String,
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // Index للبحث السريع
@@ -715,7 +684,7 @@ router.post(
       message: `تم تسجيل حضور ${employee.name}`,
       checkInTime: attendance.checkIn,
     });
-  })
+  }),
 );
 
 // Check Out
@@ -756,7 +725,7 @@ router.post(
       checkOutTime: attendance.checkOut,
       totalHours: attendance.totalHours,
     });
-  })
+  }),
 );
 
 // Get Attendance Report
@@ -791,7 +760,7 @@ router.get(
       summary,
       attendance,
     });
-  })
+  }),
 );
 
 export default router;
@@ -803,7 +772,7 @@ export default router;
 
 ### الأسبوع 1: Barcode/QR
 
-```
+```text
 يوم 1-2: Backend routes
 يوم 3-4: Frontend scanner
 يوم 5:   Testing + Integration
@@ -811,7 +780,7 @@ export default router;
 
 ### الأسبوع 2-3: GPS Tracking
 
-```
+```text
 يوم 1-3: Backend + Socket.io
 يوم 4-6: Frontend map
 يوم 7:   Testing + Mobile app
@@ -819,7 +788,7 @@ export default router;
 
 ### الأسبوع 4-5: HR Attendance
 
-```
+```text
 يوم 1-2: Models & Routes
 يوم 3-4: Frontend UI
 يوم 5-6: Reports & Analytics

@@ -9,7 +9,8 @@
 ## 🎯 Onboarding Overview
 
 **New Employee Journey:**
-```
+
+```text
 Day 1: Setup & Basics
 Day 2-3: Environment & Project
 Day 4-5: Architecture & Code
@@ -24,7 +25,7 @@ Week 4: Independence & Specialization
 
 ### Morning (Welcome)
 
-```
+```text
 1. Welcome & Introduction (30 min)
    • Welcome to team
    • Team introductions
@@ -46,7 +47,7 @@ Week 4: Independence & Specialization
 
 ### Afternoon (Basics)
 
-```
+```text
 4. Calendar & Tools (1 hour)
    • Calendar access
    • Slack/communication tools
@@ -67,7 +68,8 @@ Week 4: Independence & Specialization
 ```
 
 **Checklist:**
-```
+
+```text
 [ ] Laptop setup & access
 [ ] Email & calendar
 [ ] GitHub account
@@ -83,7 +85,7 @@ Week 4: Independence & Specialization
 
 ### Day 2: Local Environment
 
-```
+```text
 Morning (1-2 hours):
 
 1. Install Prerequisites
@@ -134,7 +136,7 @@ curl http://localhost:3000  # Frontend
 
 ### First Success Metrics
 
-```
+```text
 ✅ Can access http://localhost:5000/api/health
 ✅ Can access http://localhost:3000 (frontend)
 ✅ Can login with test credentials
@@ -145,7 +147,7 @@ curl http://localhost:3000  # Frontend
 
 ### Day 2: Project Structure Understanding
 
-```
+```text
 Afternoon (1-2 hours):
 
 Guided Tour: Project Structure
@@ -169,7 +171,7 @@ Run Database Visualization
 
 ### Day 3: Codebase Exploration
 
-```
+```text
 Morning (2 hours):
 
 Pair Programming Session:
@@ -194,7 +196,8 @@ Questions to Answer:
 ```
 
 **Checklist:**
-```
+
+```text
 [ ] All prereqs installed
 [ ] Repository cloned
 [ ] Development environment running
@@ -211,7 +214,7 @@ Questions to Answer:
 
 ### Monday: Architecture Review
 
-```
+```text
 Session: System Architecture (2 hours)
   • Technology stack explanation
   • Layered architecture pattern
@@ -232,7 +235,7 @@ Exercise:
 
 ### Tuesday: Backend Deep Dive
 
-```
+```text
 Session: Express.js & Node.js Patterns (2 hours)
   • Middleware system
   • Route organization
@@ -258,7 +261,7 @@ Assignment:
 
 ### Wednesday: Database & ORM
 
-```
+```text
 Session: PostgreSQL & Sequelize (2 hours)
   • Database schema
   • ORM concepts
@@ -279,7 +282,7 @@ Exercise:
 
 ### Thursday: React Frontend
 
-```
+```text
 Session: React Component Architecture (2 hours)
   • Component lifecycle
   • State management
@@ -301,7 +304,7 @@ Exercise:
 
 ### Friday: Testing & Quality
 
-```
+```text
 Session: Testing Approaches (1.5 hours)
   • Unit tests (Jest)
   • Integration tests
@@ -329,17 +332,17 @@ Week 1 Summary:
 
 ### Setup Development Workflow
 
-```
+```text
 Git Workflow:
   1. Create feature branch
      git checkout -b feature/your-feature
-  
+
   2. Make changes & test
      npm run test:watch
-  
+
   3. Commit with message
      git commit -m "feat: description"
-  
+
   4. Create Pull Request
      • Request review
      • Address feedback
@@ -355,7 +358,7 @@ Code Standards:
 
 ### First Assignment
 
-```
+```text
 Task: Implement User Profile Endpoint
 
 Requirements:
@@ -380,7 +383,7 @@ Success Criteria:
 
 ### Testing Deep Dive
 
-```
+```text
 Study & Implement:
 
 Unit Tests:
@@ -410,7 +413,7 @@ Example:
 
 ### Deployment Process
 
-```
+```text
 Session: How to Deploy (1.5 hours)
   • Staging deployment
   • Production deployment
@@ -432,7 +435,7 @@ Reading:
 
 ### Operations & Monitoring
 
-```
+```text
 Session: Running in Production (1.5 hours)
   • Monitoring dashboards
   • Alert handling
@@ -455,7 +458,7 @@ Reading:
 
 ### First Production Change
 
-```
+```text
 Task: Deploy Small Fix to Production
 
 1. Identify small issue in backlog
@@ -484,7 +487,8 @@ Success:
 Choose 1-2 paths based on interests:
 
 #### Backend Specialization
-```
+
+```text
 Focus Areas:
   • Advanced Node.js patterns
   • Database optimization
@@ -497,7 +501,7 @@ Deep Dive:
   [ ] Implement caching
   [ ] Optimize API performance
   [ ] Review edge cases
-  
+
 Assignment:
   • Improve performance of one endpoint
   • Reduce response time by 50%
@@ -505,7 +509,8 @@ Assignment:
 ```
 
 #### Frontend Specialization
-```
+
+```text
 Focus Areas:
   • React patterns
   • State management
@@ -518,7 +523,7 @@ Deep Dive:
   [ ] Improve bundle size
   [ ] Optimize rendering
   [ ] Add accessibility features
-  
+
 Assignment:
   • Refactor one complex component
   • Improve performance/accessibility
@@ -526,7 +531,8 @@ Assignment:
 ```
 
 #### DevOps Specialization
-```
+
+```text
 Focus Areas:
   • Docker & Docker Compose
   • Kubernetes (if used)
@@ -539,7 +545,7 @@ Deep Dive:
   [ ] Review K8s manifests
   [ ] Study CI/CD workflows
   [ ] Practice deployments
-  
+
 Assignment:
   • Improve deployment process
   • Add monitoring/alerts
@@ -551,7 +557,8 @@ Assignment:
 ## 📚 Recommended Reading List
 
 ### Essential (Week 1-2)
-```
+
+```text
 1. README.md - Project overview
 2. GETTING_STARTED.md - Setup
 3. ARCHITECTURE_AND_DESIGN_PATTERNS.md - System design
@@ -559,7 +566,8 @@ Assignment:
 ```
 
 ### Important (Week 2-3)
-```
+
+```text
 5. COMPLETE_API_REFERENCE.md - API documentation
 6. OPERATIONAL_RUNBOOKS.md - Day-to-day operations
 7. DEPLOYMENT_PLANNING_AND_EXECUTION.md - Deployment
@@ -567,7 +575,8 @@ Assignment:
 ```
 
 ### Reference (As needed)
-```
+
+```text
 9. COMPREHENSIVE_SYSTEM_ANALYSIS.md - Deep analysis
 10. SUPPORT_AND_INCIDENT_RESPONSE.md - Incident handling
 11. PRODUCTION_DEPLOYMENT_CHECKLIST.md - Pre-deployment
@@ -578,7 +587,8 @@ Assignment:
 ## 🏆 Success Metrics
 
 ### By End of Week 1
-```
+
+```text
 ✅ Development environment running
 ✅ Understand project structure
 ✅ Can navigate codebase
@@ -587,7 +597,8 @@ Assignment:
 ```
 
 ### By End of Week 2
-```
+
+```text
 ✅ Completed first feature
 ✅ Tests written & passing
 ✅ Code review feedback addressed
@@ -596,7 +607,8 @@ Assignment:
 ```
 
 ### By End of Week 3
-```
+
+```text
 ✅ Deployed to production
 ✅ No critical issues caused
 ✅ Monitored own changes
@@ -605,7 +617,8 @@ Assignment:
 ```
 
 ### By End of Month
-```
+
+```text
 ✅ Complete ownership of features
 ✅ Can work independently
 ✅ Help other new hires
@@ -619,7 +632,7 @@ Assignment:
 
 ### Daily Responsibilities
 
-```
+```text
 [ ] Available for questions
 [ ] Code review PRs promptly
 [ ] Explain patterns/decisions
@@ -629,7 +642,7 @@ Assignment:
 
 ### Weekly Check-ins
 
-```
+```text
 [ ] 1:1 meeting (30 min)
 [ ] Review progress
 [ ] Answer blockers
@@ -640,7 +653,7 @@ Assignment:
 
 ### Ongoing Support
 
-```
+```text
 [ ] Weekly code review
 [ ] Monthly 1:1
 [ ] Feedback on performance
@@ -654,7 +667,8 @@ Assignment:
 ## 📝 Onboarding Checklist
 
 ### Day 1
-```
+
+```text
 [ ] Welcome & introduction
 [ ] Administrative setup
 [ ] Equipment provision
@@ -664,7 +678,8 @@ Assignment:
 ```
 
 ### Days 2-3
-```
+
+```text
 [ ] Prerequisites installed
 [ ] Repository cloned
 [ ] Development environment running
@@ -675,7 +690,8 @@ Assignment:
 ```
 
 ### Week 1
-```
+
+```text
 [ ] Architecture understood
 [ ] Backend patterns known
 [ ] Frontend patterns known
@@ -685,7 +701,8 @@ Assignment:
 ```
 
 ### Week 2
-```
+
+```text
 [ ] First feature completed
 [ ] Tests written
 [ ] Code reviewed
@@ -694,7 +711,8 @@ Assignment:
 ```
 
 ### Week 3
-```
+
+```text
 [ ] Changes in production
 [ ] Incident response practiced
 [ ] Runbooks read
@@ -703,7 +721,8 @@ Assignment:
 ```
 
 ### Week 4
-```
+
+```text
 [ ] Can work independently
 [ ] Specialization chosen
 [ ] Deep knowledge in area
@@ -717,7 +736,7 @@ Assignment:
 
 ### Weekly Feedback (End of Week)
 
-```
+```text
 Questions for New Hire:
   1. What went well this week?
   2. What was challenging?
@@ -728,7 +747,7 @@ Questions for New Hire:
 
 ### 30-Day Retrospective
 
-```
+```text
 Topics:
   • Onboarding effectiveness
   • Learning pace
@@ -747,7 +766,7 @@ Output:
 
 ## 📞 Emergency Contacts
 
-```
+```text
 Technical Issues:
   • Backend: @backend-team on Slack
   • Frontend: @frontend-team on Slack
@@ -767,4 +786,3 @@ After Hours:
 
 **Status:** Production Ready  
 **Last Updated:** February 24, 2026
-

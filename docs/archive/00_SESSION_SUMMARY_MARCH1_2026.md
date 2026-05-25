@@ -9,6 +9,7 @@
 **الحلول المطبقة:**
 
 - ✓ تحديث [.vscode/settings.json](.vscode/settings.json)
+
   - زيادة ذاكرة TypeScript Server من 2GB إلى 4GB
   - تعطيل Minimap و Parameter Hints
   - تحديد عدد الملفات المفتوحة (10 فقط)
@@ -32,6 +33,7 @@
 **الحلول المطبقة:**
 
 - ✓ إنشاء PowerShell Profile جديد
+
   - الموقع: `C:\Users\x-be\OneDrive\المستندات\PowerShell\Microsoft.PowerShell_profile.ps1`
   - إعدادات UTF-8 تلقائية
   - دوال مخصصة مفيدة
@@ -54,15 +56,18 @@
 ### ملفات تحسين VS Code:
 
 1. [00_VSCODE_PERFORMANCE_GUIDE_AR.md](00_VSCODE_PERFORMANCE_GUIDE_AR.md)
+
    - دليل شامل لتحسين الأداء
    - نصائح للمشاريع الكبيرة
    - تشخيص المشاكل
 
 2. [00_VSCODE_QUICK_FIX_AR.md](00_VSCODE_QUICK_FIX_AR.md)
+
    - خطوات سريعة (3 دقائق)
    - إجراءات فورية
 
 3. [optimize-vscode.ps1](optimize-vscode.ps1)
+
    - سكربت تحسين تلقائي
    - تنظيف Cache
    - فحص النظام
@@ -74,14 +79,17 @@
 ### ملفات PowerShell:
 
 5. PowerShell Profile (تلقائي)
+
    - يُحمل مع كل جلسة
    - دوال مخصصة
 
 6. [test-powershell-fix.ps1](test-powershell-fix.ps1)
+
    - اختبار شامل
    - **النتيجة:** 100% نجاح
 
 7. [reload-profile.ps1](reload-profile.ps1)
+
    - إعادة تحميل Profile
 
 8. [00_POWERSHELL_FIX_COMPLETE_AR.md](00_POWERSHELL_FIX_COMPLETE_AR.md)
@@ -217,7 +225,7 @@ Test-UTF8
 
 ### قبل التحسين:
 
-```
+```text
 ⏱️  وقت فتح المشروع: 15-30 ثانية
 💾 استهلاك الذاكرة: 1162 MB
 🔄 IntelliSense: 2-5 ثواني
@@ -226,7 +234,7 @@ Test-UTF8
 
 ### بعد التحسين:
 
-```
+```text
 ⏱️  وقت فتح المشروع: 5-10 ثواني
 💾 استهلاك الذاكرة: 1099 MB
 🔄 IntelliSense: <1 ثانية
@@ -245,7 +253,7 @@ Test-UTF8
 
 ### اختبار PowerShell:
 
-```
+```text
 ✓ Console Encoding: UTF-8 (65001)
 ✓ Output Encoding: UTF-8 (65001)
 ✓ PowerShell Profile: موجود ومُحمّل
@@ -257,7 +265,7 @@ Test-UTF8
 
 ### اختبار VS Code:
 
-```
+```text
 ✓ No errors found
 ✓ Optimized settings applied
 ✓ Memory usage reduced

@@ -16,19 +16,19 @@ This document contains the final validation checklist before going live to produ
 
 ### Infrastructure Security (24 hours before)
 
-```
+```text
 NETWORK SECURITY:
 [ ] SSL/TLS certificates valid (not expired)
     Verification: curl -v https://api.alawael.com/health | grep SSL
-    
+
 [ ] HTTPS enforced globally
     Verification: curl http://api.alawael.com → redirects to HTTPS
-    
+
 [ ] SSL/TLS version 1.2+ only (disable 1.0/1.1)
     Verification: nmap --script ssl-protocols api.alawael.com
-    
+
 [ ] Certificate pinning configured (mobile apps)
-    
+
 [ ] HSTS header enabled and valid
     Verification: curl -I https://api.alawael.com | grep HSTS
     Expected: Strict-Transport-Security: max-age=31536000
@@ -38,19 +38,19 @@ NETWORK SECURITY:
     • X-Frame-Options: DENY
     • X-XSS-Protection: 1; mode=block
     • Content-Security-Policy: [configured]
-    
+
 [ ] Firewall rules verified
     ✓ Port 80: Open (HTTP redirect)
     ✓ Port 443: Open (HTTPS)
     ✓ Port 5432: Closed to public (database)
     ✓ Port 6379: Closed to public (Redis)
     ✓ SSH: Restricted to bastion only
-    
+
 [ ] WAF (Web Application Firewall) enabled
     • Rate limiting: Active
     • IP blocking: Configured
     • DDoS protection: Active
-    
+
 [ ] VPN/Network access configured
     • Admin access: VPN required
     • Staff access: SSO configured
@@ -58,26 +58,26 @@ NETWORK SECURITY:
 
 ### Application Security (48 hours before)
 
-```
+```text
 AUTHENTICATION:
 [ ] Password hashing: bcrypt with salt (10+ rounds)
     Verification: Check hash from test user account
-    
+
 [ ] Session tokens: JWT signed with strong secret
     Verification: Decode token and verify signature
     Secret length: >= 256 bits
-    
+
 [ ] Password policy enforced
     • Minimum: 12 characters
     • Complexity: Upper, lower, number, special
     • Expiry: 90 days (configurable)
-    
+
 [ ] 2FA enabled for admin accounts
     • Method: TOTP (Google Authenticator)
     • Backup codes: Generated & stored securely
-    
+
 [ ] API key rotation procedure in place
-    
+
 AUTHORIZATION:
 [ ] Role-based access control (RBAC) verified
     Test users created for each role:
@@ -85,29 +85,29 @@ AUTHORIZATION:
     • Manager: Department access
     • User: Own resources
     • Viewer: Read-only
-    
+
 [ ] Row-level security (RLS) configured (if needed)
-    
+
 [ ] Permission matrix reviewed and correct
-    
+
 [ ] No hardcoded credentials anywhere
     Verification: grep -r "password\|secret\|key" src/ | grep -v "\.env"
     Result: Should return 0 matches
-    
+
 DATA PROTECTION:
 [ ] Sensitive data encrypted at rest (AES-256)
     Fields: SSN, passwords, payment info, API keys
-    
+
 [ ] Sensitive data encrypted in transit (TLS 1.3)
-    
+
 [ ] Encryption keys stored in vault
     • Never in code
     • Never in logs
     • Regular rotation: Quarterly
-    
+
 [ ] Data classification complete
     • Public, Internal, Confidential, Secret
-    
+
 [ ] Data retention policy implemented
     • Backup: 30 days (hot) + 1 year (archive)
     • Logs: 90 days (hot) + 1 year (archive)
@@ -116,23 +116,23 @@ DATA PROTECTION:
 
 ### Vulnerability Scanning (72 hours before)
 
-```
+```text
 CODE SECURITY:
 [ ] SAST scan completed (SonarQube)
     Result: 0 critical/high issues
     Medium: [number], Low: [number]
-    
+
 [ ] DAST scan completed (OWASP ZAP)
     Result: 0 critical/high issues
-    
+
 [ ] Dependency scan completed (npm audit)
     Command: npm audit --production
     Result: 0 vulnerabilities
-    
+
 [ ] Container image scan (Trivy)
     Command: trivy image alawael:v1.0.0
     Result: 0 critical/high issues
-    
+
 [ ] Secrets scan (GitGuardian/TruffleHog)
     Git history: 0 exposed secrets
 
@@ -148,16 +148,16 @@ COMPLIANCE:
     8. Data Integrity Failures: ✓
     9. Logging/Monitoring: ✓
     10. SSRF: ✓
-    
+
 [ ] GDPR compliance verified
     • Privacy policy: Current
     • Data retention: Implemented
     • Right to deletion: Functional
     • Data portability: Implemented
-    
+
 [ ] PCI DSS (if handling payments)
     [ ] Passed Level 1 audit
-    
+
 [ ] SOC 2 Type II
     [ ] Audit in progress / Completed
 ```
@@ -168,7 +168,7 @@ COMPLIANCE:
 
 ### Data Integrity (48 hours before)
 
-```
+```text
 BACKUP VERIFICATION:
 [ ] Full backup created and tested
     Size: [X] GB
@@ -176,17 +176,17 @@ BACKUP VERIFICATION:
     Location: [production backup server]
     Tested restore: ✓ Success
     Time to restore: [Y] minutes
-    
+
 [ ] Backup verification script passed
     Command: ./verify-backup.sh latest
     Result: All tables present, data integrity OK
-    
+
 [ ] Incremental backups configured
     Schedule: Hourly
     Retention: 7 days
-    
+
 [ ] Backup encryption: AES-256 enabled
-    
+
 [ ] Off-site backup (geo-redundant)
     Location: Multi-region (AWS/GCP/Azure)
     Sync: Real-time
@@ -195,39 +195,39 @@ REPLICATION:
 [ ] Primary-replica replication working
     Verification: psql -c "SELECT * FROM pg_stat_replication"
     Status: streaming (healthy)
-    
+
 [ ] Replication lag: < 1 second
     Monitoring: Continuous
     Alert: If > 10 seconds
-    
+
 [ ] Replica can be promoted to primary
     Test: Dry-run promotion
     Time to promote: < 30 seconds
-    
+
 [ ] Failover tested without data loss
     Last test: [date]
     Result: ✓ Success
 
 PERFORMANCE BASELINE:
 [ ] Database performance measured
-    Queries: 
+    Queries:
     • Average: 12ms (target: < 50ms) ✓
     • p95: 45ms
     • p99: 85ms
-    
+
     Throughput:
     • Transactions/sec: [X]
     • Connections: [X] active
     • Connection pool: [X]% utilized
-    
+
 [ ] Slow query log reviewed
     Slow queries (> 100ms): [number]
     All investigated and acceptable
-    
+
 [ ] Index coverage complete
     Missing indexes: 0
     Unused indexes: [number] (removed)
-    
+
 [ ] Query execution plans reviewed
     No full table scans on large tables
     All major queries optimized
@@ -238,12 +238,12 @@ MIGRATION READINESS:
     Target: Production alawael database
     Scripts: Tested and verified
     Rollback: Prepared
-    
+
 [ ] Data validation rules created
     Row counts: Match before/after
     Checksums: Match before/after
     Sample rows: Verified
-    
+
 [ ] Test migration completed successfully
     Time: [X] minutes
     Data loss: 0 rows
@@ -252,26 +252,26 @@ MIGRATION READINESS:
 
 ### Database Security
 
-```
+```text
 [ ] Database user accounts configured
     • alawael_app: Application user (restricted)
     • alawael_readonly: Reporting user (read-only)
     • postgres: Admin (no password in code)
-    
+
 [ ] All default users removed
     • postgres password changed
     • template0/1: Secured
-    
+
 [ ] Row-level security (RLS) policies created
-    
+
 [ ] Database encryption enabled
     • Is data encrypted: Yes (PGCRYPTO)
     • Master key location: Vault
-    
+
 [ ] Audit logging enabled
     Log queries: Sensitive operations only
     Retention: 90 days
-    
+
 [ ] Network access restricted
     Only from: Application servers
     Port 5432: Not exposed to internet
@@ -283,20 +283,20 @@ MIGRATION READINESS:
 
 ### Code Quality (72 hours before)
 
-```
+```text
 BUILD VERIFICATION:
 [ ] Final build created and tested
     Command: npm run build --prod
     Output: Build successful (dist/)
     Size: [X] MB
-    
+
 [ ] No build warnings or errors
     npm run lint: 0 errors, 0 warnings
     npm run type-check: 0 typescript errors
-    
+
 [ ] Source maps stripped from production build
     No .map files in dist/
-    
+
 [ ] Environment variables correct
     NODE_ENV=production
     DEBUG=disabled
@@ -308,13 +308,13 @@ TEST RESULTS:
     Unit tests: [X%] coverage
     Integration tests: [X%] passing
     E2E tests: [X%] passing
-    
+
 [ ] Load tests completed
     Scenarios:
     • 100 concurrent users: ✓ Pass
     • 500 concurrent users: ✓ Pass
     • 1000 concurrent users: ✓ Expected degradation
-    
+
     Results documented: go-live-load-test-[date].pdf
 
 STAGING VALIDATION:
@@ -323,17 +323,17 @@ STAGING VALIDATION:
     • Core features: ✓
     • API endpoints: ✓
     • Database operations: ✓
-    
+
 [ ] Cross-browser testing completed
     • Chrome (latest): ✓
     • Firefox (latest): ✓
     • Safari (latest): ✓
     • Edge (latest): ✓
-    
+
 [ ] Mobile testing completed
     • iOS (latest-1): ✓
     • Android (latest-1): ✓
-    
+
 [ ] Performance testing completed
     Page load: < 3 seconds
     API response: < 500ms (p95)
@@ -342,19 +342,19 @@ STAGING VALIDATION:
 
 ### Deployment Artifacts (48 hours before)
 
-```
+```text
 DOCKER IMAGES:
 [ ] Production images built
     alawael:v1.0.0 (backend)
     alawael-web:v1.0.0 (frontend)
     alawael-nginx:v1.0.0 (reverse proxy)
-    
+
 [ ] Images scanned for vulnerabilities
     Result: 0 critical/high issues
-    
+
 [ ] Images pushed to private registry
     Backup registry: Configured
-    
+
 [ ] Images tested in staging environment
 
 KUBERNETES MANIFESTS:
@@ -364,11 +364,11 @@ KUBERNETES MANIFESTS:
     ✓ alawael-ingress.yaml
     ✓ alawael-configmap.yaml
     ✓ alawael-secret.yaml (encrypted)
-    
+
 [ ] Resource limits configured
     • CPU requests: [X]m / limits: [X]m
     • Memory requests: [X]Mi / limits: [X]Mi
-    
+
 [ ] Health checks configured
     • Liveness probe: Every 30s
     • Readiness probe: Every 10s
@@ -378,7 +378,7 @@ INFRASTRUCTURE AS CODE:
 [ ] Terraform/CloudFormation validated
     terraform validate: ✓ Passed
     terraform plan: Reviewed and approved
-    
+
 [ ] Cost estimate reviewed
     Monthly: $[X],XXX
     Annual: $[X],XXX
@@ -390,18 +390,18 @@ INFRASTRUCTURE AS CODE:
 
 ### Monitoring Infrastructure
 
-```
+```text
 METRICS COLLECTION:
 [ ] Prometheus configured
     Scrape interval: 30s
     Retention: 30 days
-    
+
 [ ] Grafana dashboards created
     ✓ System overview
     ✓ API performance
     ✓ Database health
     ✓ Application errors
-    
+
 [ ] Metrics alerts configured
     Critical (Pager): 5
     High (Alert): 10
@@ -412,12 +412,12 @@ LOG AGGREGATION:
     • Elasticsearch: Running
     • Logstash: Ingesting logs
     • Kibana: Dashboards created
-    
+
 [ ] Log indices created
     • app-logs: 7-day retention
     • error-logs: 30-day retention
     • audit-logs: 1-year retention
-    
+
 [ ] Log sampling configured
     Error logs: 100% sampled
     Info logs: 10% sampled
@@ -427,12 +427,12 @@ DISTRIBUTED TRACING:
 [ ] Jaeger/Zipkin running
     Sampling rate: 10% (production)
     Retention: 72 hours
-    
+
 [ ] Traces configured for:
     • API endpoints ✓
     • Database queries ✓
     • External service calls ✓
-    
+
 [ ] Trace visualization working
     Slow traces identified and documented
 
@@ -440,12 +440,12 @@ ALERTING:
 [ ] PagerDuty integration configured
     Escalation policy: 5 min → 15 min → 30 min
     On-call schedule: Active
-    
+
 [ ] Slack integration configured
     #alerts channel: Connected
     #incidents channel: Connected
     Notifications: Configured
-    
+
 [ ] Email alerts configured
     Critical: Immediate
     High: Every occurrence
@@ -455,7 +455,7 @@ ALERTING:
 
 ### Alert Thresholds Verified
 
-```
+```text
 CRITICAL ALERTS (Immediate page):
 [ ] API response time > 5000ms (p95): alert if sustained
 [ ] Error rate > 5%: Alert immediately
@@ -484,7 +484,7 @@ MEDIUM PRIORITY (Notify team):
 
 ### Pre-Deployment Procedures
 
-```
+```text
 24 HOURS BEFORE:
 [ ] Code freeze announced
 [ ] Feature branches merged to main
@@ -512,7 +512,7 @@ MEDIUM PRIORITY (Notify team):
 
 ### Deployment Execution
 
-```
+```text
 DEPLOYMENT STEPS (Blue-Green):
 [ ] Step 1: Deploy to "Green" environment
     Duration: 30 minutes
@@ -521,20 +521,20 @@ DEPLOYMENT STEPS (Blue-Green):
     • Push to registry
     • Deploy K8s manifests
     • Run smoke tests
-    
+
 [ ] Step 2: Traffic shift (gradual)
     Duration: 30 minutes
     • 10% traffic → Green (monitor 5 min)
     • 50% traffic → Green (monitor 10 min)
     • 100% traffic → Green (monitor 5 min)
-    
+
 [ ] Step 3: Validation
     Duration: 30 minutes
     • Error rate check: < 0.5% ✓
     • Response time: Within SLA ✓
     • User reports: No critical issues ✓
     • Business transaction test: Pass ✓
-    
+
 [ ] Step 4: Finalization
     • Blue environment: Keep on standby for 24h
     • Documentation: Update with deployment details
@@ -544,7 +544,7 @@ DEPLOYMENT STEPS (Blue-Green):
 
 ### Rollback Procedure (If needed)
 
-```
+```text
 IMMEDIATE ROLLBACK (< 5 minutes):
 Trigger: Error rate > 5% OR critical feature broken
 Steps:
@@ -553,7 +553,7 @@ Steps:
   3. Shift traffic back to Blue (1 minute)
   4. Verify rollback success (2 minutes)
   5. Notify stakeholders (1 minute)
-  
+
 Total time: < 5 minutes
 
 STAGED ROLLBACK:
@@ -576,7 +576,7 @@ If rollback unsuccessful:
 
 ### War Room Setup (24 hours before)
 
-```
+```text
 LOCATION/CHANNEL:
 [ ] Slack channel: #deploy-alawael-prod
 [ ] Zoom call: [link] (optional, for verbal communication)
@@ -599,15 +599,15 @@ COMMUNICATION PLAN:
 
 ### Stakeholder Communication
 
-```
+```text
 PRE-DEPLOYMENT (48 hours before):
 📧 Email subject: "Scheduled System Maintenance - Feb 24, 2026, 10:00 AM - 12:00 PM"
 Message:
-  "We'll be deploying ALAWAEL ERP v1.0.0 to production. 
+  "We'll be deploying ALAWAEL ERP v1.0.0 to production.
    Expected duration: 2 hours
    Potential impact: Brief service interruption (< 5 min)
    Rollback available if issues occur
-   
+
    - Team ALAWAEL"
 
 AT GO-LIVE (10:00 AM):
@@ -633,7 +633,7 @@ ON FAILURE (Example):
 
 ## ✅ Final Pre-Go-Live Checklist (24 hours before)
 
-```
+```text
 SECURITY:
 [ ] All security checks passed
 [ ] Vulnerabilities: 0 critical/high
@@ -688,7 +688,7 @@ CUSTOMER:
 
 ### Immediate Success (First 1 hour)
 
-```
+```text
 ✅ System availability: > 99.0%
 ✅ Error rate: < 0.5%
 ✅ API response time (p95): < 500ms
@@ -700,7 +700,7 @@ CUSTOMER:
 
 ### Short-term Success (First 24 hours)
 
-```
+```text
 ✅ System uptime: > 99.9%
 ✅ Error rate: < 0.2%
 ✅ All features functional
@@ -712,7 +712,7 @@ CUSTOMER:
 
 ### Long-term Success (First week)
 
-```
+```text
 ✅ System stability: Sustained
 ✅ Performance: Meets SLA
 ✅ No critical incidents
@@ -728,11 +728,11 @@ CUSTOMER:
 
 ### If Issues Occur During Deployment
 
-```
+```text
 ISSUE: High error rate
 DETECTION: < 1 minute (automated alert)
 ACTION: Declare rollback
-TIMELINE: 
+TIMELINE:
   • Decision: 1 minute
   • Execution: 4 minutes
   • Verification: 2 minutes
@@ -760,7 +760,7 @@ Level 3: Customers (public status page)
 
 ### Sign-off Required Before Go-Live
 
-```
+```text
 Release Manager: _________________ Date: _______
 Tech Lead: _________________ Date: _______
 DevOps Lead: _________________ Date: _______
@@ -771,4 +771,3 @@ Security Lead: _________________ Date: _______
 
 **Status:** Ready for Production Launch  
 **Last Updated:** February 24, 2026
-

@@ -35,14 +35,14 @@
 
 ### الخطوة 1: الانتقال إلى قسم المركبات | Step 1: Navigate to Vehicles
 
-```
+```text
 القائمة الجانبية → المركبات → إضافة مركبة جديدة
 Sidebar Menu → Vehicles → Add New Vehicle
 ```
 
 أو انقر على الزر الأحمر:
 
-```
+```text
 [+ إضافة مركبة جديدة | + Add New Vehicle]
 ```
 
@@ -71,7 +71,7 @@ Sidebar Menu → Vehicles → Add New Vehicle
 
 ### الخطوة 3: إرفاق الصور والمستندات | Step 3: Attach Photos & Documents
 
-```
+```text
 [📎 اختر الملفات | Choose Files]
 ```
 
@@ -86,13 +86,13 @@ Sidebar Menu → Vehicles → Add New Vehicle
 
 انقر على الزر الأزرق:
 
-```
+```text
 [✅ حفظ المركبة | Save Vehicle]
 ```
 
 ستظهر رسالة تأكيد:
 
-```
+```text
 ✅ تم إنشاء المركبة بنجاح
 ✅ Vehicle created successfully
 رقم المركبة: VH-2025-00001
@@ -106,13 +106,13 @@ Sidebar Menu → Vehicles → Add New Vehicle
 
 **الطريقة 1: البحث السريع**
 
-```
+```text
 [🔍 البحث | Search...] → اكتب طراز المركبة
 ```
 
 **الطريقة 2: التصفية المتقدمة**
 
-```
+```text
 [🔽 فلاتر متقدمة | Advanced Filters]
 ├─ حسب السنة | By Year
 ├─ حسب الحالة | By Status
@@ -124,7 +124,7 @@ Sidebar Menu → Vehicles → Add New Vehicle
 
 اضغط على اسم المركبة لعرض:
 
-```
+```text
 ┌─────────────────────────────────────────┐
 │        تفاصيل المركبة                 │
 │        Vehicle Details                  │
@@ -163,7 +163,7 @@ Sidebar Menu → Vehicles → Add New Vehicle
 
 **مثال على التعديل:**
 
-```
+```text
 الحالة السابقة: نشط | Active
 الحالة الجديدة: صيانة مجدولة | Scheduled Maintenance
 ```
@@ -181,7 +181,7 @@ Sidebar Menu → Vehicles → Add New Vehicle
 1. افتح تفاصيل المركبة
 2. اضغط على [⋯ المزيد | More] → [🗑️ حذف | Delete]
 3. ستظهر رسالة تأكيد:
-   ```
+   ```text
    تحذير!
    هل أنت متأكد من رغبتك في حذف هذه المركبة؟
    Warning! Are you sure you want to delete this vehicle?
@@ -194,13 +194,13 @@ Sidebar Menu → Vehicles → Add New Vehicle
 
 ### عرض سجل المركبة | View Vehicle History
 
-```
+```text
 [تفاصيل المركبة] → [📊 السجل | History]
 ```
 
 يعرض لك:
 
-```
+```text
 التاريخ | Date: 2026-01-14
 ├─ 10:30 صباحاً: تم إضافة جلسة علاج جديدة
 │  10:30 AM: Added new therapy session
@@ -214,7 +214,7 @@ Sidebar Menu → Vehicles → Add New Vehicle
 
 ### من غيّر البيانات | Who Changed the Data
 
-```
+```text
 آخر تحديث بواسطة: د. أحمد محمد
 Last updated by: Dr. Ahmed Mohammed
 التاريخ: 2026-01-14 في 10:30
@@ -229,12 +229,13 @@ Date: 2026-01-14 at 10:30 AM
 
 - ✅ **استخدم أسماء واضحة | Use clear names**
 
-  ```
+  ```text
   ✓ صحيح: "تويوتا ياريس أبيض 2023"
   ✓ صحيح: "Toyota Yaris White 2023"
   ```
 
 - ✅ **حدّث المعلومات بانتظام | Update regularly**
+
   - أضف ملاحظات عن كل جلسة
   - احفظ السجلات الطبية
 
@@ -247,12 +248,13 @@ Date: 2026-01-14 at 10:30 AM
 
 - ❌ **لا تستخدم أسماء غير واضحة**
 
-  ```
+  ```text
   ✗ خاطئ: "مركبة 1"
   ✗ خاطئ: "car 123"
   ```
 
 - ❌ **لا تحذف مركبات بها جلسات نشطة**
+
   - انقل الجلسات أولاً إذا أردت الحذف
 
 - ❌ **لا تنسى حفظ التغييرات**
@@ -271,7 +273,7 @@ Date: 2026-01-14 at 10:30 AM
 
 1. اضغط [+ إضافة مركبة جديدة]
 2. أملأ البيانات:
-   ```
+   ```text
    الطراز: تويوتا ياريس
    السنة: 2025
    رقم التسلسلي: VH20250001

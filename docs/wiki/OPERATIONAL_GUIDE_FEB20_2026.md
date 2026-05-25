@@ -1,4 +1,5 @@
 # 📖 ERP System - Operational & Deployment Guide
+
 **Version:** 1.0.0  
 **Status:** Production Ready  
 **Last Updated:** February 20, 2026
@@ -8,6 +9,7 @@
 ## 🚀 Quick Start
 
 ### Prerequisites
+
 ```bash
 Node.js 14+
 npm 6+
@@ -16,6 +18,7 @@ Redis (optional)
 ```
 
 ### Installation
+
 ```bash
 # Backend
 cd backend
@@ -24,7 +27,7 @@ cp .env.example .env
 npm test          # Run tests
 npm start         # Start server (dev)
 
-# Frontend  
+# Frontend
 cd ../frontend
 npm install
 npm test          # Run tests
@@ -36,6 +39,7 @@ npm start         # Start dev server
 ## 📋 Test Commands
 
 ### Run All Tests
+
 ```bash
 npm test
 # Expected: 8 PASS, 1 skipped (documents)
@@ -44,6 +48,7 @@ npm test
 ```
 
 ### Run Specific Test Suite
+
 ```bash
 npm test -- __tests__/auth.test.js
 npm test -- __tests__/payrollRoutes.test.js
@@ -52,11 +57,13 @@ npm test -- __tests__/maintenance.comprehensive.test.js
 ```
 
 ### Run with Coverage (Backend)
+
 ```bash
 npm test -- --coverage
 ```
 
 ### Run Frontend Tests
+
 ```bash
 cd frontend
 npm test -- --passWithNoTests
@@ -68,6 +75,7 @@ npm test -- --passWithNoTests
 ## 🖥️ Server Management
 
 ### Start Development Server
+
 ```bash
 npm start
 # Listens on: http://localhost:3001
@@ -75,6 +83,7 @@ npm start
 ```
 
 ### Start Production Server
+
 ```bash
 NODE_ENV=production npm start
 # Listens on configured port
@@ -83,12 +92,14 @@ NODE_ENV=production npm start
 ```
 
 ### Health Check
+
 ```bash
 curl http://localhost:3001/health
 # Expected: { success: true, status: "operational" }
 ```
 
 ### Database Status
+
 ```bash
 curl http://localhost:3001/api/health
 # Lists: Database, Cache, Queue statuses
@@ -99,6 +110,7 @@ curl http://localhost:3001/api/health
 ## 🔍 Monitoring & Diagnostics
 
 ### View Application Logs
+
 ```bash
 # Real-time logs
 npm start
@@ -109,6 +121,7 @@ tail -f logs/error.log
 ```
 
 ### Check System Health
+
 ```bash
 # Backend health
 curl -X GET http://localhost:3001/api/health
@@ -118,6 +131,7 @@ curl -X GET http://localhost:3001/api/db-status
 ```
 
 ### Monitor Performance
+
 ```bash
 # Memory usage
 curl -X GET http://localhost:3001/api/metrics
@@ -131,7 +145,9 @@ curl -X GET http://localhost:3001/api/performance
 ## 🛠️ Troubleshooting
 
 ### Issue: "MongoDB connection error"
+
 **Solution:**
+
 ```bash
 # Check MongoDB is running
 mongod --version
@@ -144,7 +160,9 @@ mongo $MONGODB_URI --eval "db.serverStatus()"
 ```
 
 ### Issue: "Port 3001 already in use"
+
 **Solution:**
+
 ```bash
 # Find process using port
 lsof -i :3001
@@ -153,7 +171,9 @@ kill -9 <PID>
 ```
 
 ### Issue: "Test failures after update"
+
 **Solution:**
+
 ```bash
 # Clear Jest cache
 npm test -- --clearCache
@@ -164,7 +184,9 @@ npm install
 ```
 
 ### Issue: "Authentication failures"
+
 **Solution:**
+
 ```bash
 # Check JWT_SECRET is set
 echo $JWT_SECRET
@@ -181,7 +203,8 @@ npm test -- __tests__/auth.test.js --verbose
 ## 📊 Key API Endpoints
 
 ### Authentication
-```
+
+```text
 POST   /api/auth/register          # Create account
 POST   /api/auth/login             # User login
 POST   /api/auth/logout            # User logout
@@ -190,7 +213,8 @@ GET    /api/auth/me                # Current user info
 ```
 
 ### User Management
-```
+
+```text
 GET    /api/users                  # List users
 GET    /api/users/:id              # Get single user
 POST   /api/users                  # Create user
@@ -199,7 +223,8 @@ DELETE /api/users/:id              # Delete user
 ```
 
 ### Financial
-```
+
+```text
 POST   /api/finance/transactions   # Record transaction
 GET    /api/finance/transactions   # List transactions
 GET    /api/finance/reports        # Generate reports
@@ -207,21 +232,24 @@ POST   /api/finance/export         # Export data
 ```
 
 ### Payroll
-```
+
+```text
 GET    /api/payroll/monthly        # Get monthly payroll
 POST   /api/payroll/process        # Process salaries
 GET    /api/payroll/stats          # Payroll statistics
 ```
 
 ### Notifications
-```
+
+```text
 POST   /api/notifications/send     # Send notification
 GET    /api/notifications          # List notifications
 POST   /api/notifications/bulk     # Send bulk
 ```
 
 ### Reports
-```
+
+```text
 GET    /api/reports                # List reports
 POST   /api/reports/generate       # Create report
 GET    /api/reports/:id            # Get specific report
@@ -232,6 +260,7 @@ GET    /api/reports/:id            # Get specific report
 ## 🔐 Security Configuration
 
 ### Environment Variables
+
 ```bash
 # Essential
 NODE_ENV=production
@@ -249,6 +278,7 @@ RATE_LIMIT_MAX_REQUESTS=100
 ```
 
 ### API Keys Management
+
 ```bash
 # Generate secure key
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
@@ -258,7 +288,8 @@ JWT_SECRET=$(node -e "console.log(...)")
 ```
 
 ### User Roles & Permissions
-```
+
+```text
 admin        # Full system access
 manager      # Department management
 supervisor   # Team oversight
@@ -271,6 +302,7 @@ viewer       # Read-only access
 ## 📈 Performance Tuning
 
 ### Database Optimization
+
 ```bash
 # Create indexes
 mongo $MONGODB_URI < scripts/create-indexes.js
@@ -281,6 +313,7 @@ mongostat
 ```
 
 ### Redis Caching
+
 ```bash
 # Start Redis
 redis-server
@@ -292,6 +325,7 @@ redis-cli
 ```
 
 ### Node.js Performance
+
 ```bash
 # Monitor process
 node --max-old-space-size=2048 server.js
@@ -306,6 +340,7 @@ node --prof-process isolate-*.log > profile.txt
 ## 🔄 Deployment Pipeline
 
 ### Staging Deployment
+
 ```bash
 # 1. Pull latest code
 git pull origin develop
@@ -324,6 +359,7 @@ NODE_ENV=staging npm start
 ```
 
 ### Production Deployment
+
 ```bash
 # 1. Tag release
 git tag v1.0.0
@@ -342,6 +378,7 @@ curl http://production:3001/health
 ```
 
 ### Rollback Procedure
+
 ```bash
 # If deployment fails:
 git revert <commit-hash>
@@ -357,6 +394,7 @@ mongo $MONGODB_URI < scripts/rollback.js
 ## 🐳 Docker Deployment
 
 ### Build Image
+
 ```bash
 docker build -t erp-backend:1.0.0 .
 docker tag erp-backend:1.0.0 myregistry/erp-backend:latest
@@ -364,6 +402,7 @@ docker push myregistry/erp-backend:latest
 ```
 
 ### Run Container
+
 ```bash
 docker run -d \
   -p 3001:3001 \
@@ -377,6 +416,7 @@ docker logs <container-id>
 ```
 
 ### Docker Compose
+
 ```bash
 docker-compose up -d
 docker-compose logs -f
@@ -388,6 +428,7 @@ docker-compose down
 ## 📦 Kubernetes Deployment
 
 ### Deploy to K8s
+
 ```bash
 kubectl apply -f deployment.yaml
 kubectl apply -f service.yaml
@@ -396,6 +437,7 @@ kubectl apply -f secret.yaml
 ```
 
 ### Monitor Pod
+
 ```bash
 kubectl get pods
 kubectl describe pod <pod-name>
@@ -404,6 +446,7 @@ kubectl exec -it <pod-name> /bin/bash
 ```
 
 ### Scale Application
+
 ```bash
 kubectl scale deployment erp-backend --replicas=3
 kubectl autoscale deployment erp-backend --min=2 --max=5
@@ -416,20 +459,23 @@ kubectl autoscale deployment erp-backend --min=2 --max=5
 ### Common Log Patterns
 
 **Success Log**
-```
+
+```text
 [INFO] User logged in: user@example.com
 [INFO] Transaction processed: TXN-12345
 [INFO] Report generated: Monthly-Finance-2026-02
 ```
 
 **Error Log**
-```
+
+```text
 [ERROR] Database connection failed: timeout
 [ERROR] Authentication failed: invalid token
 [ERROR] Route not found: /api/invalid/endpoint
 ```
 
 ### Log Aggregation (ELK Stack)
+
 ```bash
 # View logs in Kibana
 curl http://kibana:5601
@@ -448,6 +494,7 @@ GET /erp-backend-*/_search
 ## 🎓 Best Practices
 
 ### Code Deployment
+
 1. ✅ Always run tests before deploying
 2. ✅ Use feature branches for changes
 3. ✅ Require peer code review
@@ -455,6 +502,7 @@ GET /erp-backend-*/_search
 5. ✅ Test in staging before production
 
 ### Database Management
+
 1. ✅ Backup before major updates
 2. ✅ Test restores regularly
 3. ✅ Monitor disk usage
@@ -462,6 +510,7 @@ GET /erp-backend-*/_search
 5. ✅ Verify replication status
 
 ### Security
+
 1. ✅ Rotate API keys quarterly
 2. ✅ Use HTTPS only in production
 3. ✅ Enable rate limiting
@@ -469,6 +518,7 @@ GET /erp-backend-*/_search
 5. ✅ Keep dependencies updated
 
 ### Performance
+
 1. ✅ Monitor response times
 2. ✅ Cache where possible
 3. ✅ Optimize database queries
@@ -480,13 +530,15 @@ GET /erp-backend-*/_search
 ## 📞 Support & Escalation
 
 ### Severity Levels
+
 - **Critical:** System down, data loss risk → Immediate action
 - **High:** Feature broken, multiple users affected → Within 1 hour
 - **Medium:** Degraded performance, few users → Within 4 hours
 - **Low:** Minor issues, workaround available → Next business day
 
 ### Escalation Path
-```
+
+```text
 Level 1: Developer on-call
     ↓
 Level 2: Team lead if no resolution in 30 min
@@ -501,28 +553,33 @@ Level 4: CTO if P1 unresolved after 4 hours
 ## 📝 Maintenance Schedule
 
 ### Daily
+
 - [ ] Monitor error logs
 - [ ] Check system health
 - [ ] Verify backups completed
 
 ### Weekly
+
 - [ ] Review performance metrics
 - [ ] Update dependencies (patch level)
 - [ ] Test disaster recovery
 
 ### Monthly
+
 - [ ] Database maintenance
 - [ ] Security audit
 - [ ] Capacity planning
 - [ ] Generate reports
 
 ### Quarterly
+
 - [ ] Major updates testing
 - [ ] Load testing
 - [ ] Security penetration test
 - [ ] Backup restoration drill
 
 ### Annually
+
 - [ ] Full system audit
 - [ ] Major version upgrades
 - [ ] Architecture review
@@ -533,6 +590,7 @@ Level 4: CTO if P1 unresolved after 4 hours
 ## ✨ Final Checklist
 
 ### Before Going Live
+
 - [x] All tests passing (315/315)
 - [x] Security measures implemented
 - [x] Error handling verified
@@ -551,4 +609,3 @@ Level 4: CTO if P1 unresolved after 4 hours
 **Questions?** Contact: DevOps Team  
 **Report Generated:** February 20, 2026  
 **Status:** OPERATIONAL ✅
-

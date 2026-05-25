@@ -30,14 +30,14 @@ A comprehensive and advanced system for managing vehicle rehabilitation programs
 
 ### الخطوة الأولى: دخول النظام | Step 1: Access the System
 
-```
+```text
 الرابط | URL: https://rehab-system.sa
 أو | or: http://localhost:3000 (للبيئة المحلية | for local environment)
 ```
 
 ### الخطوة الثانية: إدخال بيانات المستخدم | Step 2: Enter Your Credentials
 
-```
+```text
 البريد الإلكتروني | Email: your.email@company.sa
 كلمة المرور | Password: ••••••••
 ```
@@ -54,7 +54,7 @@ After successful login, you'll be taken to the main dashboard.
 
 ### العناصر الرئيسية | Main Elements
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────────┐
 │                    لوحة التحكم | Dashboard                      │
 ├─────────────────────────────────────────────────────────────────┤
@@ -114,7 +114,7 @@ After successful login, you'll be taken to the main dashboard.
 
 تقع خاصية البحث في الجزء العلوي من كل صفحة:
 
-```
+```text
 [🔍 اكتب هنا للبحث | Type here to search...]
 ```
 
@@ -139,7 +139,7 @@ After successful login, you'll be taken to the main dashboard.
 
 ### داخل النظام | Within the System
 
-```
+```text
 كل صفحة تحتوي على:
 └─ ℹ️ رمز المساعدة | Help icon
    └─ انقر عليه للحصول على توثيق إضافية
@@ -191,7 +191,7 @@ After successful login, you'll be taken to the main dashboard.
 
 **رابط الهاتف | Mobile URL:**
 
-```
+```text
 https://rehab-system.sa/mobile
 أو استخدم التطبيق | or use the mobile app
 ```

@@ -7,9 +7,11 @@
 ## 1. Backend Dashboard Services ✅
 
 ### Executive Dashboard Service
+
 **الملف**: `backend/services/executive-dashboard.service.js` (520 lines)
 
 **المميزات**:
+
 - 📊 Key Performance Indicators (KPIs) شاملة
 - 💰 Financial Overview مع توقعات سنوية
 - 📋 Compliance Status مفصلة بـ 6 أقسام
@@ -20,17 +22,19 @@
 - 🎯 Risk Assessment
 
 **الدوال الرئيسية**:
+
 ```javascript
-- getExecutiveDashboard(filters)        // النافذة الرئيسية
-- _getKPIs()                            // المؤشرات الرئيسية
-- _getFinancialOverview()               // النظرة المالية
-- _getComplianceStatus()                // حالة الالتزام
-- _getHRMetrics()                       // مقاييس الموارد البشرية
-- exportDashboard(format)               // تصدير البيانات
-- scheduleDashboardEmail(email, freq)   // جدولة البريد
+-getExecutiveDashboard(filters) - // النافذة الرئيسية
+  _getKPIs() - // المؤشرات الرئيسية
+  _getFinancialOverview() - // النظرة المالية
+  _getComplianceStatus() - // حالة الالتزام
+  _getHRMetrics() - // مقاييس الموارد البشرية
+  exportDashboard(format) - // تصدير البيانات
+  scheduleDashboardEmail(email, freq); // جدولة البريد
 ```
 
 **البيانات المُرجعة**:
+
 - 4 KPIs رئيسية (الموظفون، الدوران، الامتثال، الرضا)
 - 3 مقاييس مالية (الرواتب، المزايا، المساهمات)
 - 3 مقاييس كفاءة (الأتمتة، معدل الخطأ، الامتثال)
@@ -38,9 +42,11 @@
 - 5+ تحذيرات متعددة المستويات
 
 ### HR Dashboard Service
+
 **الملف**: `backend/services/hr-dashboard.service.js` (640 lines)
 
 **المميزات**:
+
 - 👥 Employee Roster مفصلة
 - 📊 Personnel Management (الحضور، الإجازات، الساعات)
 - 💵 Payroll & Compensation الشاملة
@@ -51,17 +57,19 @@
 - 📄 Compliance & Documents Management
 
 **الدوال الرئيسية**:
+
 ```javascript
-- getHRDashboard(filters)              // لوحة HR الكاملة
-- _getEmployeeRoster()                 // قائمة الموظفين
-- _getPayrollCompensation()            // بيانات الرواتب
-- _getBenefitsManagement()             // إدارة المزايا
-- _getRecruitmentPipeline()            // خط أنابيب التوظيف
-- getEmployeeDetails(employeeId)       // تفاصيل موظف محدد
-- exportHRReport(format)               // تصدير التقارير
+-getHRDashboard(filters) - // لوحة HR الكاملة
+  _getEmployeeRoster() - // قائمة الموظفين
+  _getPayrollCompensation() - // بيانات الرواتب
+  _getBenefitsManagement() - // إدارة المزايا
+  _getRecruitmentPipeline() - // خط أنابيب التوظيف
+  getEmployeeDetails(employeeId) - // تفاصيل موظف محدد
+  exportHRReport(format); // تصدير التقارير
 ```
 
 **البيانات الديناميكية**:
+
 - 250+ موظف بـ 3 أنواع عقود
 - 5 أقسام مع توزيع ميزانية
 - 12 وظيفة مفتوحة بـ 180 متقدم
@@ -69,9 +77,11 @@
 - 4 برامج تطوير نشطة
 
 ### Employee Dashboard Service
+
 **الملف**: `backend/services/employee-dashboard.service.js` (650 lines)
 
 **المميزات**:
+
 - 👤 Personal Information مفصلة
 - 💰 Salary & Compensation مع سجل التطور
 - 🏛️ GOSI Information مع التنبؤات التقاعدية
@@ -82,16 +92,18 @@
 - 📢 Announcements & Quick Actions
 
 **الدوال الرئيسية**:
+
 ```javascript
-- getEmployeeDashboard(employeeId)     // موحة الموظف الكاملة
-- _getPersonalInfo()                   // البيانات الشخصية
-- _getSalaryCompensation()             // الراتب والتعويضات
-- _getGOSIInfo()                       // معلومات التأمينات
-- requestLeave(employeeId, request)    // طلب إجازة
-- downloadDocument(employeeId, type)   // تحميل المستند
+-getEmployeeDashboard(employeeId) - // موحة الموظف الكاملة
+  _getPersonalInfo() - // البيانات الشخصية
+  _getSalaryCompensation() - // الراتب والتعويضات
+  _getGOSIInfo() - // معلومات التأمينات
+  requestLeave(employeeId, request) - // طلب إجازة
+  downloadDocument(employeeId, type); // تحميل المستند
 ```
 
 **البيانات الشخصية**:
+
 - معلومات شخصية كاملة (الاسم، البريد، الهاتف)
 - راتب بـ 3 مكونات (أساسي، سكن، تعويضات)
 - ساجل 12 شهر من الرواتب
@@ -106,7 +118,8 @@
 **الملف**: `backend/routes/dashboards.routes.js` (510 lines)
 
 ### Executive Routes (7 endpoints)
-```
+
+```text
 GET    /dashboards/executive           // لوحة المعلومات الكاملة
 GET    /dashboards/executive/kpis      // المؤشرات الرئيسية فقط
 POST   /dashboards/executive/export    // تصدير PDF/Excel
@@ -114,7 +127,8 @@ POST   /dashboards/executive/schedule-email  // جدولة البريد
 ```
 
 ### HR Routes (12 endpoints)
-```
+
+```text
 GET    /dashboards/hr                  // لوحة HR الكاملة
 GET    /dashboards/hr/employee-roster  // قائمة الموظفين
 GET    /dashboards/hr/payroll          // بيانات الرواتب
@@ -126,7 +140,8 @@ POST   /dashboards/hr/export           // تصدير التقرير
 ```
 
 ### Employee Routes (10 endpoints)
-```
+
+```text
 GET    /dashboards/employee            // لوحة الموظف الكاملة
 GET    /dashboards/employee/salary     // الراتب والتعويضات
 GET    /dashboards/employee/gosi       // معلومات GOSI
@@ -139,7 +154,8 @@ GET    /dashboards/employee/download/:type // تحميل مستند
 ```
 
 ### Status Endpoint
-```
+
+```text
 GET    /dashboards/status              // حالة الخدمة
 ```
 
@@ -150,9 +166,11 @@ GET    /dashboards/status              // حالة الخدمة
 ## 3. Frontend Dashboard Components ✅
 
 ### 3.1 Executive Dashboard Component
+
 **الملف**: `frontend/src/components/dashboards/ExecutiveDashboard.jsx` (480 lines)
 
 **المميزات**:
+
 - ✅ 6 KPI Cards مع ألوان مميزة
 - 📊 Department Budget Chart (BarChart)
 - 📈 Compliance Trend Chart (LineChart)
@@ -163,6 +181,7 @@ GET    /dashboards/status              // حالة الخدمة
 - 📥 Export & Refresh Functions
 
 **الحالات والأمور الديناميكية**:
+
 ```jsx
 const [dashboardData, setDashboardData] = useState(null);
 const [loading, setLoading] = useState(true);
@@ -171,14 +190,17 @@ const [selectedDepartment, setSelectedDepartment] = useState(null);
 ```
 
 **المكونات الثانوية**:
+
 - `<KPICard />` - عرض المؤشر الواحد
 - Chart Components من `recharts`
 - Dynamic Color Coding للحالات
 
 ### 3.2 HR Dashboard Component
+
 **الملف**: `frontend/src/components/dashboards/HRDashboard.jsx` (620 lines)
 
 **المميزات**:
+
 - 📑 Tab Navigation System (5 tabs)
   - Overview
   - Employees Management
@@ -194,6 +216,7 @@ const [selectedDepartment, setSelectedDepartment] = useState(null);
 - ⚠️ Document Expiry Management
 
 **الـ Tabs**:
+
 ```jsx
 1. Overview - الإحصائيات السريعة والرسوم البيانية
 2. Employees - إدارة الموظفين والإجازات
@@ -203,6 +226,7 @@ const [selectedDepartment, setSelectedDepartment] = useState(null);
 ```
 
 **المكونات الثانوية**:
+
 - `<StatCard />` - بطاقة الإحصائية
 - `<InfoCard />` - بطاقة المعلومات
 - `<PayrollCard />` - بطاقة الراتب
@@ -210,9 +234,11 @@ const [selectedDepartment, setSelectedDepartment] = useState(null);
 - Charts من `recharts`
 
 ### 3.3 Employee Dashboard Component
+
 **الملف**: `frontend/src/components/dashboards/EmployeeDashboard.jsx` (820 lines)
 
 **المميزات**:
+
 - 👋 Welcome Header مع معلومات الموظف
 - 🔘 Quick Actions Bar (6 أزرار سريعة)
 - 📢 Announcements Banner
@@ -233,11 +259,13 @@ const [selectedDepartment, setSelectedDepartment] = useState(null);
 **المحتويات التفصيلية**:
 
 **Overview Tab**:
+
 - 4 Metric Cards (الراتب، الإجازات، الحضور، سنوات الخدمة)
 - Personal Information Card
 - Recent Announcements
 
 **Salary Tab**:
+
 - Current Salary Breakdown
 - Last Payslip Details
 - Salary Trend Chart
@@ -245,27 +273,32 @@ const [selectedDepartment, setSelectedDepartment] = useState(null);
 - Historical Payslips Table
 
 **Benefits Tab**:
+
 - GOSI Information Card
 - Medical Insurance Details
 - Benefits Summary
 
 **Leave Tab**:
+
 - Leave Balance by Type
 - Request Leave Form
 - Pending Requests
 - Attendance Summary
 
 **Documents Tab**:
+
 - Personal Documents
 - Work Documents
 - Certifications
 
 **Performance Tab**:
+
 - Performance Review Card
 - Development Goals with Progress
 - Completed/In-Progress/Available Trainings
 
 **المكونات الثانوية**:
+
 - `<MetricCard />` - بطاقة المقياس
 - `<LeaveRequestForm />` - نموذج طلب الإجازة
 - Charts من `recharts`
@@ -275,14 +308,15 @@ const [selectedDepartment, setSelectedDepartment] = useState(null);
 ## 4. Frontend Integration
 
 ### 4.1 API Integration Pattern
+
 ```javascript
 // في كل component
 const fetchDashboardData = async () => {
   try {
     const response = await axios.get('/api/dashboards/TYPE', {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`
-      }
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
     });
     setDashboardData(response.data.data);
   } catch (error) {
@@ -292,6 +326,7 @@ const fetchDashboardData = async () => {
 ```
 
 ### 4.2 State Management
+
 ```jsx
 // Local State للـ Dashboards
 const [dashboardData, setDashboardData] = useState(null);
@@ -301,15 +336,9 @@ const [selectedEmployee, setSelectedEmployee] = useState(null);
 ```
 
 ### 4.3 Chart libraries المستخدمة
+
 ```javascript
-import {
-  LineChart, Line,
-  BarChart, Bar,
-  PieChart, Pie,
-  XAxis, YAxis,
-  CartesianGrid, Tooltip, Legend,
-  ResponsiveContainer
-} from 'recharts';
+import { LineChart, Line, BarChart, Bar, PieChart, Pie, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 ```
 
 ---
@@ -317,14 +346,15 @@ import {
 ## 5. Security & Access Control
 
 ### RBAC Implementation
+
 ```javascript
 // Roles
-- admin              // جميع الصلاحيات
-- executive          // Executive Dashboard فقط
-- hr_manager         // HR Dashboard + Employee Data
-- compliance         // Compliance Data فقط
-- employee           // Own Dashboard فقط
-- viewer             // Read-only
+-admin - // جميع الصلاحيات
+  executive - // Executive Dashboard فقط
+  hr_manager - // HR Dashboard + Employee Data
+  compliance - // Compliance Data فقط
+  employee - // Own Dashboard فقط
+  viewer; // Read-only
 
 // Route Protection
 router.get('/executive', auth, authorize(['admin', 'executive']), handler);
@@ -333,6 +363,7 @@ router.get('/employee', auth, authorize(['employee', 'hr_manager', 'admin']), ha
 ```
 
 ### Data Privacy
+
 - ✅ Employees يرون بيانات أنفسهم فقط
 - ✅ HR Managers يرون بيانات القسم
 - ✅ Executives يرون البيانات المجمعة فقط
@@ -343,6 +374,7 @@ router.get('/employee', auth, authorize(['employee', 'hr_manager', 'admin']), ha
 ## 6. Features & Functionality
 
 ### Real-time Updates
+
 ```javascript
 useEffect(() => {
   fetchDashboardData();
@@ -353,6 +385,7 @@ useEffect(() => {
 ```
 
 ### Export Functionality
+
 ```javascript
 // Full Dashboard Export
 POST /dashboards/executive/export
@@ -364,6 +397,7 @@ POST /dashboards/hr/export
 ```
 
 ### Email Scheduling
+
 ```javascript
 // Schedule Dashboard Email
 POST /dashboards/executive/schedule-email
@@ -374,6 +408,7 @@ POST /dashboards/executive/schedule-email
 ```
 
 ### Leave Request Integration
+
 ```javascript
 // Request Leave
 POST /dashboards/employee/request-leave
@@ -397,6 +432,7 @@ POST /dashboards/employee/request-leave
 ## 7. Data Models & Examples
 
 ### Executive Dashboard Response
+
 ```json
 {
   "success": true,
@@ -417,6 +453,7 @@ POST /dashboards/employee/request-leave
 ```
 
 ### HR Dashboard Response
+
 ```json
 {
   "success": true,
@@ -432,6 +469,7 @@ POST /dashboards/employee/request-leave
 ```
 
 ### Employee Dashboard Response
+
 ```json
 {
   "success": true,
@@ -450,11 +488,11 @@ POST /dashboards/employee/request-leave
 
 ## 8. Performance Metrics
 
-| Component | Load Time | Update Interval | Data Size |
-|-----------|-----------|-----------------|-----------|
-| Executive | <500ms | 5 min | 150KB |
-| HR Dashboard | <750ms | 5 min | 250KB |
-| Employee | <400ms | 5 min | 100KB |
+| Component    | Load Time | Update Interval | Data Size |
+| ------------ | --------- | --------------- | --------- |
+| Executive    | <500ms    | 5 min           | 150KB     |
+| HR Dashboard | <750ms    | 5 min           | 250KB     |
+| Employee     | <400ms    | 5 min           | 100KB     |
 
 ---
 
@@ -471,6 +509,7 @@ POST /dashboards/employee/request-leave
 ## 10. Responsive Design
 
 ### Breakpoints
+
 ```css
 - Desktop: 1200px+ (3-column layouts)
 - Tablet:  768px - 1199px (2-column layouts)
@@ -478,6 +517,7 @@ POST /dashboards/employee/request-leave
 ```
 
 ### Mobile-Friendly Features
+
 - ✅ Scrollable tables
 - ✅ Collapsible sections
 - ✅ Touch-friendly buttons
@@ -508,30 +548,35 @@ POST /dashboards/employee/request-leave
 ## 12. Next Steps (Phase 3-7)
 
 ### Phase 3: Advanced Analytics
+
 - [ ] Custom report builder
 - [ ] Data export with filtering
 - [ ] Scheduled reports
 - [ ] Dashboard sharing & permissions
 
 ### Phase 4: Mobile App
+
 - [ ] React Native app
 - [ ] Offline functionality
 - [ ] Push notifications
 - [ ] Mobile-optimized views
 
 ### Phase 5: GraphQL API
+
 - [ ] GraphQL endpoint
 - [ ] Complex queries support
 - [ ] Real-time subscriptions
 - [ ] Advanced filtering
 
 ### Phase 6: ML & Predictions
+
 - [ ] Employee turnover prediction
 - [ ] Salary optimization model
 - [ ] Performance forecasting
 - [ ] Compliance risk scoring
 
 ### Phase 7: Integration
+
 - [ ] Webhook system
 - [ ] Third-party APIs
 - [ ] Data synchronization
@@ -542,6 +587,7 @@ POST /dashboards/employee/request-leave
 ## Summary
 
 تم بنجاح إنشاء:
+
 - ✅ 3 خدمات Backend شاملة (1,810 lines)
 - ✅ 30+ نقطة نهاية API مع RBAC
 - ✅ 3 مكونات React متقدمة (1,920 lines)

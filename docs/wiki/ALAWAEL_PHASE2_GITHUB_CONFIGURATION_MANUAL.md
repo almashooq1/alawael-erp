@@ -10,6 +10,7 @@
 ## 📋 OVERVIEW
 
 Phase 2 configures GitHub repositories for secure, automated deployment. This includes:
+
 - ✅ Branch protection rules
 - ✅ GitHub Environments (dev, staging, prod)
 - ✅ GitHub Secrets for deployment
@@ -23,11 +24,13 @@ Phase 2 configures GitHub repositories for secure, automated deployment. This in
 ### For alawael-backend Repository
 
 1. **Navigate to repository settings:**
+
    - Go to: https://github.com/almashooq1/alawael-backend
    - Click: Settings (top right)
    - Click: Branches (left sidebar)
 
 2. **Add branch protection rule for 'main':**
+
    - Click: "Add rule" button
    - Branch name pattern: `main`
    - Check: ✅ "Require a pull request before merging"
@@ -55,6 +58,7 @@ Repeat the same steps for: https://github.com/almashooq1/alawael-erp
 ### What is a GitHub Environment?
 
 GitHub Environments allow you to define deployment rules for different stages:
+
 - **dev**: Development deployments (no protection)
 - **staging**: Staging deployments (manual approval optional)
 - **production**: Production deployments (REQUIRES approval)
@@ -62,11 +66,13 @@ GitHub Environments allow you to define deployment rules for different stages:
 ### Create Environments for alawael-backend
 
 1. **Navigate to environments:**
+
    - Go to: https://github.com/almashooq1/alawael-backend
    - Click: Settings
    - Click: Environments (left sidebar)
 
 2. **Create 'dev' environment:**
+
    - Click: "New environment" button
    - Name: `dev`
    - Configuration:
@@ -75,6 +81,7 @@ GitHub Environments allow you to define deployment rules for different stages:
    - Click: "Save protection rules"
 
 3. **Create 'staging' environment:**
+
    - Click: "New environment" button
    - Name: `staging`
    - Configuration:
@@ -107,22 +114,23 @@ GitHub Secrets store sensitive values needed for deployment. These are encrypted
 ### Add Secrets to alawael-backend
 
 1. **Navigate to secrets:**
+
    - Go to: https://github.com/almashooq1/alawael-backend
    - Click: Settings
    - Click: Secrets and variables → Actions (left sidebar)
 
 2. **Add these secrets** (click "New repository secret" for each):
 
-   | Secret Name | Value | Example |
-   |-------------|-------|---------|
-   | `GITHUB_TOKEN` | (auto-generated) | Leave as-is |
-   | `DOCKER_REGISTRY_USERNAME` | Your Docker Hub username | `almashooq1` |
-   | `DOCKER_REGISTRY_PASSWORD` | Your Docker Hub password | `your-password` |
-   | `SONAR_TOKEN` | SonarQube token (optional) | `squ_xxxxx` |
-   | `DATABASE_URL` | Production database connection | `postgresql://...` |
-   | `SLACK_WEBHOOK` | Slack notification webhook | `https://hooks.slack.com/...` |
-   | `AWS_ACCESS_KEY_ID` | AWS IAM access key | `AKIAIOSFODNN7EXAMPLE` |
-   | `AWS_SECRET_ACCESS_KEY` | AWS IAM secret key | `wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY` |
+   | Secret Name                | Value                          | Example                                    |
+   | -------------------------- | ------------------------------ | ------------------------------------------ |
+   | `GITHUB_TOKEN`             | (auto-generated)               | Leave as-is                                |
+   | `DOCKER_REGISTRY_USERNAME` | Your Docker Hub username       | `almashooq1`                               |
+   | `DOCKER_REGISTRY_PASSWORD` | Your Docker Hub password       | `your-password`                            |
+   | `SONAR_TOKEN`              | SonarQube token (optional)     | `squ_xxxxx`                                |
+   | `DATABASE_URL`             | Production database connection | `postgresql://...`                         |
+   | `SLACK_WEBHOOK`            | Slack notification webhook     | `https://hooks.slack.com/...`              |
+   | `AWS_ACCESS_KEY_ID`        | AWS IAM access key             | `AKIAIOSFODNN7EXAMPLE`                     |
+   | `AWS_SECRET_ACCESS_KEY`    | AWS IAM secret key             | `wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY` |
 
 3. **For each secret:**
    - Name: (use exact name from table above)
@@ -144,6 +152,7 @@ GitHub Teams allow you to grant permissions to groups of people and set up requi
 ### Create Team 'ALAWAEL-Admins'
 
 1. **Navigate to organization teams:**
+
    - Go to: https://github.com/orgs/almashooq1/teams
    - Click: "New team" button
    - Team name: `ALAWAEL-Admins`
@@ -151,6 +160,7 @@ GitHub Teams allow you to grant permissions to groups of people and set up requi
    - Click: "Create team"
 
 2. **Add members:**
+
    - Click: "Members" tab
    - Click: "Add a member"
    - Select your GitHub username + other admins
@@ -168,6 +178,7 @@ GitHub Teams allow you to grant permissions to groups of people and set up requi
 ### Create Team 'ALAWAEL-Developers'
 
 1. **Navigate to teams:**
+
    - Go to: https://github.com/orgs/almashooq1/teams
    - Click: "New team"
    - Team name: `ALAWAEL-Developers`
@@ -175,6 +186,7 @@ GitHub Teams allow you to grant permissions to groups of people and set up requi
    - Click: "Create team"
 
 2. **Add members:**
+
    - Add 5 backend engineers
    - Role: `Member`
 
@@ -185,10 +197,12 @@ GitHub Teams allow you to grant permissions to groups of people and set up requi
 ### Create Team 'ALAWAEL-DevOps'
 
 1. **Create team:**
+
    - Name: `ALAWAEL-DevOps`
    - Visibility: `Closed`
 
 2. **Add members:**
+
    - 2 DevOps engineers
    - Role: `Member`
 
@@ -199,10 +213,12 @@ GitHub Teams allow you to grant permissions to groups of people and set up requi
 ### Create Team 'ALAWAEL-Security'
 
 1. **Create team:**
+
    - Name: `ALAWAEL-Security`
    - Visibility: `Closed`
 
 2. **Add members:**
+
    - Security team members
    - Role: `Member`
 
@@ -223,7 +239,8 @@ This file automatically assigns reviewers for specific code paths.
 1. **Create file:** `.github/CODEOWNERS`
 
 2. **Add content:**
-```
+
+```text
 # Global owner (default for all files)
 * @almashooq1
 
@@ -277,34 +294,35 @@ Create similar CODEOWNERS file for ERP repository
 
 ## 🚀 What These Settings Accomplish
 
-| Setting | Purpose | Benefit |
-|---------|---------|---------|
-| **Branch Protection** | Requires PR review before merge to main | Prevents accidental direct commits |
-| **Environments** | Stages deployment to dev → staging → prod | Controlled release pipeline |
-| **Required Reviewers** | Production requires approval | No unreviewed code goes to prod |
-| **Secrets** | Store and secure sensitive values | Passwords/tokens never exposed |
-| **CODEOWNERS** | Auto-assign reviewers by code path | Right people review right code |
-| **Teams** | Group permissions by role | Easier permission management |
+| Setting                | Purpose                                   | Benefit                            |
+| ---------------------- | ----------------------------------------- | ---------------------------------- |
+| **Branch Protection**  | Requires PR review before merge to main   | Prevents accidental direct commits |
+| **Environments**       | Stages deployment to dev → staging → prod | Controlled release pipeline        |
+| **Required Reviewers** | Production requires approval              | No unreviewed code goes to prod    |
+| **Secrets**            | Store and secure sensitive values         | Passwords/tokens never exposed     |
+| **CODEOWNERS**         | Auto-assign reviewers by code path        | Right people review right code     |
+| **Teams**              | Group permissions by role                 | Easier permission management       |
 
 ---
 
 ## ⏱️ Time Estimate
 
-| Step | Duration | Effort |
-|------|----------|--------|
-| 1. Branch Protection | 8 min | Low |
-| 2. Environments | 10 min | Low |
-| 3. Secrets | 15 min | Medium (gathering values) |
-| 4. Teams | 12 min | Low |
-| 5. CODEOWNERS | 5 min | Low |
-| 6. Verification | 5 min | Low |
-| **TOTAL** | **~55 min** | Low-Medium |
+| Step                 | Duration    | Effort                    |
+| -------------------- | ----------- | ------------------------- |
+| 1. Branch Protection | 8 min       | Low                       |
+| 2. Environments      | 10 min      | Low                       |
+| 3. Secrets           | 15 min      | Medium (gathering values) |
+| 4. Teams             | 12 min      | Low                       |
+| 5. CODEOWNERS        | 5 min       | Low                       |
+| 6. Verification      | 5 min       | Low                       |
+| **TOTAL**            | **~55 min** | Low-Medium                |
 
 ---
 
 ## 📝 Notes & Tips
 
 ### Secret Values
+
 - Docker Registry credentials: From Docker Hub account
 - SonarQube token: From SonarQube project settings
 - Database URL: From RDS connection string
@@ -312,16 +330,19 @@ Create similar CODEOWNERS file for ERP repository
 - AWS keys: From IAM console (create new programmatic access)
 
 ### Team Management
+
 - Use organization teams (don't add permissions per-repo)
 - Easier to manage: change 1 team member, grants all permission changes
 - Document which team has which role in your internal wiki
 
 ### Code Review Requirements
+
 - Require at least 1 reviewer for main branch
 - For production: require approval from senior engineer
 - Use protected branches to enforce review
 
 ### Automation Benefits
+
 - GitHub Actions can use these secrets safely
 - Environments segment deployments by stage
 - Teams automate permissions (no manual per-user setup)
@@ -354,11 +375,13 @@ Create similar CODEOWNERS file for ERP repository
 After completing Phase 2:
 
 **Phase 3: Staging Deployment (45 minutes, automated)**
+
 ```bash
 bash alawael-phase3-staging-deploy.sh
 ```
 
 This will:
+
 - Deploy v1.0.0 to staging environment
 - Run smoke tests automatically
 - Validate SLA metrics
@@ -368,13 +391,13 @@ This will:
 
 ## 📞 Troubleshooting
 
-| Issue | Solution |
-|-------|----------|
-| Can't create team | Check org admin permissions |
-| Branch protection won't save | Ensure pull request check is available |
-| Secrets not showing in Actions | Refresh page or re-login |
-| Teams not seeing repos | Check team repo permissions granted |
-| Secrets won't save | Check secret length/format (max 64KB) |
+| Issue                          | Solution                               |
+| ------------------------------ | -------------------------------------- |
+| Can't create team              | Check org admin permissions            |
+| Branch protection won't save   | Ensure pull request check is available |
+| Secrets not showing in Actions | Refresh page or re-login               |
+| Teams not seeing repos         | Check team repo permissions granted    |
+| Secrets won't save             | Check secret length/format (max 64KB)  |
 
 ---
 

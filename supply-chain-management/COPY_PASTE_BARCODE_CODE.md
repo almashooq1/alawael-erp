@@ -96,12 +96,7 @@ export class BarcodeService {
         throw new Error('Invalid product data');
       }
 
-      const {
-        errorCorrectionLevel = 'H',
-        width = 300,
-        margin = 1,
-        version = null,
-      } = options;
+      const { errorCorrectionLevel = 'H', width = 300, margin = 1, version = null } = options;
 
       const qrData = JSON.stringify({
         id: productData._id,
@@ -281,7 +276,7 @@ const barcodeLogSchema = new mongoose.Schema(
       duration: Number,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 barcodeLogSchema.index({ user: 1, createdAt: -1 });
@@ -357,11 +352,7 @@ export const validateBarcodeInput = (req, res, next) => {
 ```javascript
 import express from 'express';
 import { asyncHandler } from '../middleware/errorHandler.js';
-import {
-  authBarcodeOperations,
-  barcodeRateLimiter,
-  validateBarcodeInput,
-} from '../middleware/barcodeAuth.js';
+import { authBarcodeOperations, barcodeRateLimiter, validateBarcodeInput } from '../middleware/barcodeAuth.js';
 import { BarcodeService } from '../services/barcodeService.js';
 import Product from '../models/Product.js';
 import BarcodeLog from '../models/BarcodeLog.js';
@@ -400,7 +391,7 @@ router.post(
     });
 
     res.json(result);
-  })
+  }),
 );
 
 router.post(
@@ -422,7 +413,7 @@ router.post(
     });
 
     res.json(result);
-  })
+  }),
 );
 
 router.post(
@@ -435,17 +426,12 @@ router.post(
     }
 
     if (productIds.length > 1000) {
-      return res
-        .status(400)
-        .json({ error: 'Maximum 1000 products per request' });
+      return res.status(400).json({ error: 'Maximum 1000 products per request' });
     }
 
-    const results = await BarcodeService.generateBatchCodes(
-      productIds,
-      progress => {
-        req.app.get('io')?.emit('barcodeProgress', progress);
-      }
-    );
+    const results = await BarcodeService.generateBatchCodes(productIds, progress => {
+      req.app.get('io')?.emit('barcodeProgress', progress);
+    });
 
     res.json({
       success: true,
@@ -453,7 +439,7 @@ router.post(
       successful: results.filter(r => r.success).length,
       results,
     });
-  })
+  }),
 );
 
 router.get(
@@ -479,7 +465,7 @@ router.get(
       count: logs.length,
       logs,
     });
-  })
+  }),
 );
 
 export default router;
@@ -513,7 +499,7 @@ app.use('/api/barcode', barcodeRoutes);
 
 **في Postman:**
 
-```
+```text
 REQUEST 1: Generate QR
 ================
 Method: POST
@@ -579,11 +565,9 @@ export function useBarcodeGeneration() {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.post(
-        `/api/barcode/generate-qr/${productId}`,
-        options,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const response = await axios.post(`/api/barcode/generate-qr/${productId}`, options, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
       setSuccess(true);
       return response.data;
@@ -605,7 +589,7 @@ export function useBarcodeGeneration() {
       const response = await axios.post(
         `/api/barcode/generate-barcode/${sku}`,
         { format },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
 
       setSuccess(true);
@@ -661,7 +645,7 @@ curl http://localhost:3001/health
 
 ## 🎯 بعد الانتهاء مباشرة
 
-```
+```text
 1️⃣ git add .
 2️⃣ git commit -m "feat: Add Barcode & QR System"
 3️⃣ git push origin develop

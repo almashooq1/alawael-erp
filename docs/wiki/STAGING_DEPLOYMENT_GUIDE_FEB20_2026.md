@@ -197,7 +197,7 @@ ENCRYPTION_ALGORITHM=aes-256-cbc
 
 ### Startup Logs
 
-```
+```text
 ✅ AlAwael ERP Backend Starting...
 ✅ Environment: staging
 ✅ Mock Database: Initialized
@@ -222,7 +222,7 @@ ENCRYPTION_ALGORITHM=aes-256-cbc
 
 ### Test Execution
 
-```
+```text
 PASS advanced-features.integration.test.js
 ✅ Redis Caching Layer (3 tests)
   ✓ should cache and retrieve data
@@ -394,7 +394,7 @@ curl -X POST http://localhost:3001/api/features/experiments \
 
 ### Phase 2: Gradual Production Rollout (Week 2-3)
 
-```
+```text
 Monday: Deploy to 10% traffic
 ├─ Monitor error rates
 ├─ Check performance metrics
@@ -424,7 +424,7 @@ Friday: Full 100% rollout
 
 ### Issue: Backend won't start
 
-```
+```text
 Error: EADDRINUSE: address already in use :::3001
 ```
 
@@ -443,7 +443,7 @@ npm start
 
 ### Issue: Service Worker not registering
 
-```
+```text
 Error: Service Worker registration failed
 ```
 
@@ -456,7 +456,7 @@ Error: Service Worker registration failed
 
 ### Issue: Cache layer not working
 
-```
+```text
 Error: Redis connection refused
 ```
 
@@ -468,7 +468,7 @@ Error: Redis connection refused
 
 ### Issue: Notifications not sending
 
-```
+```text
 Error: Email service error
 ```
 

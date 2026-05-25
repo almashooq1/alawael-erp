@@ -195,7 +195,7 @@ git push origin feature/advanced-search
 
 ### 3. فتح PR على GitHub
 
-```
+```text
 Title: feat: implement advanced search with filtering
 
 Description:
@@ -216,7 +216,7 @@ Related to: #42
 
 ### 4. Code Review
 
-```
+```text
 اطلب من:
 - Tech Lead (للـ approval)
 - QA (للـ testing)
@@ -275,7 +275,7 @@ git push origin feature/advanced-search
 
 ### المشكلة: لا توجد نتائج البحث
 
-```
+```text
 الحل:
 1. تحقق من الـ indexes موجودة
    db.products.getIndexes()
@@ -288,7 +288,7 @@ git push origin feature/advanced-search
 
 ### المشكلة: Component لا يعمل
 
-```
+```text
 الحل:
 1. فتح browser console (F12)
 2. ابحث عن الأخطاء الحمراء
@@ -302,7 +302,7 @@ git push origin feature/advanced-search
 
 ### المشكلة: Tests تفشل
 
-```
+```text
 الحل:
 1. اقرأ رسالة الخطأ بعناية
 2. جرب تشغيل test واحد:
@@ -318,9 +318,9 @@ git push origin feature/advanced-search
 
 ## 📊 متابعة البدء
 
-### اليوم / التاريخ: ****\_****
+### اليوم / التاريخ: \***\*\_\*\***
 
-```
+```text
 ✓ إعداد Environment      [ ] أكتمل الساعة: ______
 ✓ نسخ الملفات          [ ] أكتمل الساعة: ______
 ✓ اختبار Backend       [ ] أكتمل الساعة: ______
@@ -333,7 +333,7 @@ git push origin feature/advanced-search
 
 ### ملاحظات سريعة
 
-```
+```text
 النقاط الإيجابية:
 _______________________________________________________
 
@@ -348,7 +348,7 @@ _______________________________________________________
 
 ## 📞 جهات التواصل للمساعدة
 
-```
+```text
 للأسئلة التقنية:
 → Tech Lead: [الاسم]
 
@@ -366,7 +366,7 @@ _______________________________________________________
 
 ## 🎉 بعد الإنتهاء
 
-```
+```text
 ✅ اذهب للـ slack/teams
 ✅ أخبر الفريق بالإنجاز
 ✅ احفظ screenshot من PR

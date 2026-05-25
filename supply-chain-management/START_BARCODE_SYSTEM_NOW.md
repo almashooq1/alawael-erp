@@ -9,7 +9,7 @@
 
 ### الخطوة 1: فتح الملفات المطلوبة
 
-```
+```text
 اقرأ هذه الملفات بالترتيب:
 1. QUICK_START_GUIDE.md (30 دقيقة)
    - اقرأ قسم "التثبيت والإعداد"
@@ -132,7 +132,7 @@ const barcodeLogSchema = new mongoose.Schema(
     success: { type: Boolean, default: true },
     metadata: { format: String, size: Number },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export default mongoose.model('BarcodeLog', barcodeLogSchema);
@@ -162,7 +162,7 @@ export default mongoose.model('BarcodeLog', barcodeLogSchema);
 انسخ من:
 [PROFESSIONAL_IMPLEMENTATION_SYSTEM.md](PROFESSIONAL_IMPLEMENTATION_SYSTEM.md#-step-3-advanced-api-routes)
 
-```
+```text
 الأوامر المطلوب نسخها:
 ✅ POST /api/barcode/generate-qr/:productId
 ✅ POST /api/barcode/generate-barcode/:sku
@@ -194,7 +194,7 @@ app.use('/api/barcode', barcodeRoutes); // ← دليل الترتيب
 
 **1. Generate QR Code**
 
-```
+```text
 Method: POST
 URL: http://localhost:3001/api/barcode/generate-qr/507f1f77bcf86cd799439011
 
@@ -221,7 +221,7 @@ Body:
 
 **2. Generate Barcode**
 
-```
+```text
 Method: POST
 URL: http://localhost:3001/api/barcode/generate-barcode/SKU-12345
 
@@ -238,7 +238,7 @@ Body:
 
 **3. Batch Generate**
 
-```
+```text
 Method: POST
 URL: http://localhost:3001/api/barcode/batch-generate
 
@@ -315,7 +315,7 @@ import BarcodeManager from './components/BarcodeManager';
 
 #### الخطوة 4: اختبر العملية الكاملة
 
-```
+```text
 1. انتقل للـ URL: http://localhost:3000/barcode
 2. اختبر Generate QR
 3. اختبر Generate Barcode
@@ -459,7 +459,7 @@ npm run test:coverage
 
 ## ✅ Checklist الأسبوع الأول
 
-```
+```text
 الأسبوع 1 - Backend (الأيام 2-7)
 □ تثبيت المكتبات
 □ إعداد ملفات .env
@@ -474,7 +474,7 @@ npm run test:coverage
 
 ## ✅ Checklist الأسبوع الثاني
 
-```
+```text
 الأسبوع 2 - Frontend (الأيام 8-11)
 □ انسخ BarcodeManager.js component
 □ انسخ useBarcodeGeneration.js hook
@@ -489,7 +489,7 @@ npm run test:coverage
 
 ## ✅ Checklist الأسبوع الثالث
 
-```
+```text
 الأسبوع 3 - Testing (الأيام 12-15)
 □ انسخ Unit Tests
 □ شغل Unit Tests
@@ -507,7 +507,7 @@ npm run test:coverage
 
 ### اختبر نفسك:
 
-```
+```text
 □ هل يمكنك توليد QR code؟
 □ هل يمكنك توليد Barcode؟
 □ هل يمكنك توليد batch 10 أكواد في ذات الوقت؟
@@ -565,7 +565,7 @@ jobs:
 
 ## 📊 نتائج النظام بعد 3 أسابيع
 
-```
+```text
 ✅ Barcode & QR Code System
    - توليد QR Codes تلقائياً
    - توليد Barcodes مختلفة
@@ -592,7 +592,7 @@ jobs:
 
 ## 🔗 الملفات المرجعية
 
-```
+```text
 أثناء التطوير اللجأ لـ:
 
 1. PROFESSIONAL_IMPLEMENTATION_SYSTEM.md
@@ -616,7 +616,7 @@ jobs:
 
 ## 💬 نصائح ذهبية
 
-```
+```text
 ⭐ افهم قبل أن تنسخ
    اقرأ الكود وافهم كيفية عمله قبل النسخ
 
@@ -642,7 +642,7 @@ jobs:
 
 ### إذا واجهت مشكلة:
 
-```
+```text
 1️⃣ اقرأ رسالة الخطأ بعناية (غالباً الحل فيها)
 
 2️⃣ ابحث في QUICK_START_GUIDE.md قسم Troubleshooting

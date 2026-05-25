@@ -160,7 +160,7 @@ server {
 
     ssl_certificate /etc/ssl/certs/your_cert.crt;
     ssl_certificate_key /etc/ssl/private/your_key.key;
-    
+
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_ciphers HIGH:!aNULL:!MD5;
     ssl_prefer_server_ciphers on;
@@ -182,7 +182,7 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
-        
+
         # Timeouts
         proxy_connect_timeout 60s;
         proxy_send_timeout 60s;
@@ -242,7 +242,7 @@ curl -X GET https://api.yourdomain.com/health
 
 ### Log Files Location
 
-```
+```text
 /var/log/branch-api/
 ├── error.log
 ├── access.log
@@ -290,7 +290,8 @@ find $BACKUP_DIR -name "backup_*.sql.gz" -mtime +30 -delete
 ```
 
 جدولة مع Cron:
-```
+
+```text
 0 2 * * * /home/app/scripts/backup_database.sh
 ```
 
@@ -356,12 +357,12 @@ flask db check
 
 ## 📞 الدعم والتواصل
 
-| القناة | التفاصيل |
-|--------|----------|
-| البريد الإلكتروني | support@yourdomain.com |
-| الهاتف | +966-11-XXXX-XXXX |
-| الموقع | https://yourdomain.com/support |
-| الوثائق | https://docs.yourdomain.com |
+| القناة            | التفاصيل                       |
+| ----------------- | ------------------------------ |
+| البريد الإلكتروني | support@yourdomain.com         |
+| الهاتف            | +966-11-XXXX-XXXX              |
+| الموقع            | https://yourdomain.com/support |
+| الوثائق           | https://docs.yourdomain.com    |
 
 ---
 

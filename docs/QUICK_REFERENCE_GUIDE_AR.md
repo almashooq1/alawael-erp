@@ -1,4 +1,5 @@
 # 🚀 مرجع سريع - AlAwael ERP System
+
 ## Quick Reference Guide
 
 **آخر تحديث**: فبراير 2026
@@ -89,21 +90,21 @@ docker-compose ps
 
 ## 🔗 الروابط المهمة
 
-| الخدمة | الرابط | الدخول |
-|--------|--------|---------|
-| Dashboard UI | http://localhost:3002 | - |
-| Dashboard API | http://localhost:3001 | - |
-| Backend API | http://localhost:5000 | - |
-| Prometheus | http://localhost:9090 | - |
-| Grafana | http://localhost:3000 | admin/admin |
-| AlertManager | http://localhost:9093 | - |
-| Jaeger (Tracing) | http://localhost:16686 | - |
+| الخدمة           | الرابط                 | الدخول      |
+| ---------------- | ---------------------- | ----------- |
+| Dashboard UI     | http://localhost:3002  | -           |
+| Dashboard API    | http://localhost:3001  | -           |
+| Backend API      | http://localhost:5000  | -           |
+| Prometheus       | http://localhost:9090  | -           |
+| Grafana          | http://localhost:3000  | admin/admin |
+| AlertManager     | http://localhost:9093  | -           |
+| Jaeger (Tracing) | http://localhost:16686 | -           |
 
 ---
 
 ## 📁 هيكل الملفات الرئيسية
 
-```
+```text
 66666/
 ├── .github/
 │   ├── workflows/
@@ -194,12 +195,7 @@ NOTIFICATION_EMAIL: team@alawael.com
     "minSuccessRate": 80,
     "allowedFailures": 2
   },
-  "criticalServices": [
-    "backend",
-    "graphql",
-    "supply-chain",
-    "frontend"
-  ]
+  "criticalServices": ["backend", "graphql", "supply-chain", "frontend"]
 }
 ```
 
@@ -404,27 +400,27 @@ rate(http_requests_total[5m])
 
 ### Quality Alerts
 
-| القاعدة | الشرط | الخطورة |
-|---------|--------|---------|
+| القاعدة             | الشرط                           | الخطورة  |
+| ------------------- | ------------------------------- | -------- |
 | HighTestFailureRate | failure rate > 30% لمدة 5 دقائق | critical |
-| LowTestCoverage | coverage < 60% لمدة 10 دقائق | warning |
-| ConsecutiveFailures | 5 فشل متتالي | high |
+| LowTestCoverage     | coverage < 60% لمدة 10 دقائق    | warning  |
+| ConsecutiveFailures | 5 فشل متتالي                    | high     |
 
 ### Infrastructure Alerts
 
-| القاعدة | الشرط | الخطورة |
-|---------|--------|---------|
-| HighCPUUsage | CPU > 80% لمدة 5 دقائق | warning |
-| HighMemoryUsage | Memory > 85% لمدة 5 دقائق | warning |
-| DiskSpaceLow | Disk < 15% لمدة 10 دقائق | critical |
-| ServiceDown | Service down لمدة دقيقة | critical |
+| القاعدة         | الشرط                     | الخطورة  |
+| --------------- | ------------------------- | -------- |
+| HighCPUUsage    | CPU > 80% لمدة 5 دقائق    | warning  |
+| HighMemoryUsage | Memory > 85% لمدة 5 دقائق | warning  |
+| DiskSpaceLow    | Disk < 15% لمدة 10 دقائق  | critical |
+| ServiceDown     | Service down لمدة دقيقة   | critical |
 
 ### Performance Alerts
 
-| القاعدة | الشرط | الخطورة |
-|---------|--------|---------|
-| SlowTestDuration | duration > 120s لمدة 10 دقائق | warning |
-| HighErrorRate | error rate > 5% لمدة 5 دقائق | critical |
+| القاعدة          | الشرط                         | الخطورة  |
+| ---------------- | ----------------------------- | -------- |
+| SlowTestDuration | duration > 120s لمدة 10 دقائق | warning  |
+| HighErrorRate    | error rate > 5% لمدة 5 دقائق  | critical |
 
 ---
 
@@ -432,12 +428,12 @@ rate(http_requests_total[5m])
 
 ### Slack Channels
 
-| القناة | النوع | التكرار |
-|--------|-------|---------|
-| #critical | خطير جداً | فوري (0s wait) |
-| #quality-alerts | جودة | كل 5 دقائق |
-| #ops-team | بنية تحتية | كل 10 دقائق |
-| #performance | أداء | كل 8 ساعات |
+| القناة          | النوع      | التكرار        |
+| --------------- | ---------- | -------------- |
+| #critical       | خطير جداً  | فوري (0s wait) |
+| #quality-alerts | جودة       | كل 5 دقائق     |
+| #ops-team       | بنية تحتية | كل 10 دقائق    |
+| #performance    | أداء       | كل 8 ساعات     |
 
 ### Email Recipients
 
@@ -523,14 +519,14 @@ act push -W .github/workflows/quality-gate.yml
 
 ### الأدوات المستخدمة
 
-| الأداة | الإصدار | الغرض |
-|-------|---------|-------|
-| Node.js | 20+ | Runtime |
-| Jest | 29+ | Testing |
-| Prometheus | 2.45+ | Metrics |
-| Grafana | 10+ | Visualization |
-| Docker | 24+ | Containers |
-| GitHub Actions | - | CI/CD |
+| الأداة         | الإصدار | الغرض         |
+| -------------- | ------- | ------------- |
+| Node.js        | 20+     | Runtime       |
+| Jest           | 29+     | Testing       |
+| Prometheus     | 2.45+   | Metrics       |
+| Grafana        | 10+     | Visualization |
+| Docker         | 24+     | Containers    |
+| GitHub Actions | -       | CI/CD         |
 
 ### المكتبات الرئيسية
 
@@ -583,6 +579,7 @@ act push -W .github/workflows/quality-gate.yml
 ### تحسين الأداء
 
 1. **Cache NPM Packages**:
+
 ```bash
 # .github/workflows/quality-gate.yml
 - uses: actions/cache@v3
@@ -592,12 +589,14 @@ act push -W .github/workflows/quality-gate.yml
 ```
 
 2. **Parallel Test Execution**:
+
 ```bash
 # Run tests in parallel
 npm test -- --maxWorkers=4
 ```
 
 3. **Reduce Docker Image Size**:
+
 ```dockerfile
 # Use alpine images
 FROM node:20-alpine
@@ -606,6 +605,7 @@ FROM node:20-alpine
 ### أفضل الممارسات
 
 1. **Git Commit Messages**:
+
 ```bash
 feat: Add Slack integration
 fix: Correct metrics endpoint
@@ -614,6 +614,7 @@ test: Add coverage for auth module
 ```
 
 2. **Branch Strategy**:
+
 ```bash
 main      # Production
 develop   # Development
@@ -622,7 +623,8 @@ hotfix/*  # Urgent fixes
 ```
 
 3. **Test Organization**:
-```
+
+```text
 test/
 ├── unit/          # Unit tests
 ├── integration/   # Integration tests
@@ -661,4 +663,3 @@ cat .env | grep -v PASSWORD
 **آخر تحديث**: فبراير 2026
 **Version**: 1.0.0
 **Maintainer**: AlAwael Team
-

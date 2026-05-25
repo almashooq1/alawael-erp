@@ -10,7 +10,7 @@
 
 ### Performance Goals
 
-```
+```text
 Target Metrics:
   • API Response Time: p95 < 500ms, p99 < 1000ms
   • Frontend Load Time: < 3 seconds (first paint)
@@ -23,7 +23,7 @@ Target Metrics:
 
 ### Measurement Approach
 
-```
+```text
 Establish Baseline:
   1. Record current metrics
   2. Identify bottlenecks
@@ -51,15 +51,15 @@ ALTER SYSTEM SET log_min_duration_statement = 1000;
 SELECT pg_reload_conf();
 
 -- Find statistics
-SELECT query, calls, mean_time, max_time 
-FROM pg_stat_statements 
-ORDER BY mean_time DESC 
+SELECT query, calls, mean_time, max_time
+FROM pg_stat_statements
+ORDER BY mean_time DESC
 LIMIT 20;
 
 -- Export slow queries
-SELECT query, mean_time FROM pg_stat_statements 
-WHERE mean_time > 100 
-ORDER BY mean_time DESC 
+SELECT query, mean_time FROM pg_stat_statements
+WHERE mean_time > 100
+ORDER BY mean_time DESC
 \copy (SELECT query, mean_time FROM pg_stat_statements) TO 'slow_queries.csv' WITH CSV
 ```
 
@@ -67,12 +67,12 @@ ORDER BY mean_time DESC
 
 ```sql
 -- Analyze query plan
-EXPLAIN ANALYZE 
+EXPLAIN ANALYZE
 SELECT u.*, o.count as order_count
 FROM users u
 LEFT JOIN (
-  SELECT user_id, COUNT(*) as count 
-  FROM orders 
+  SELECT user_id, COUNT(*) as count
+  FROM orders
   GROUP BY user_id
 ) o ON u.id = o.user_id
 WHERE u.status = 'active'
@@ -97,18 +97,20 @@ const users = await User.findAll();
 const ordersMap = {};
 for (let user of users) {
   const orders = await Order.findAll({ where: { userId: user.id } });
-  ordersMap[user.id] = orders;  // N+1: 1 + N queries
+  ordersMap[user.id] = orders; // N+1: 1 + N queries
 }
 
 // ✅ Good: Single query with join
 const users = await User.findAll({
-  include: [{
-    model: Order,
-    attributes: ['id', 'total'],
-    required: false
-  }],
-  limit: 100
-});  // 1 query with join
+  include: [
+    {
+      model: Order,
+      attributes: ['id', 'total'],
+      required: false,
+    },
+  ],
+  limit: 100,
+}); // 1 query with join
 ```
 
 ### Indexing Strategy
@@ -170,12 +172,12 @@ ORDER BY pg_relation_size(indexrelid) DESC;
 // For 4-core server
 const sequelize = new Sequelize({
   pool: {
-    min: 5,      // Minimum connections to maintain
-    max: 20,     // Maximum connections allowed
+    min: 5, // Minimum connections to maintain
+    max: 20, // Maximum connections allowed
     idle: 10000, // Release after 10s idle
     acquire: 30000, // Timeout for acquire
-    evict: 60000 // Check every minute
-  }
+    evict: 60000, // Check every minute
+  },
 });
 
 // Monitor pool
@@ -191,7 +193,7 @@ sequelize.connectionManager.getConnection().then(conn => {
 -- Use application level caching instead
 
 -- Example: Cache expensive aggregation
-SELECT 
+SELECT
   user_id,
   COUNT(*) as order_count,
   SUM(total) as total_spent
@@ -210,7 +212,7 @@ GROUP BY user_id;
 
 ### Multi-level Caching
 
-```
+```text
 L1: In-Memory Cache (Application)
     ├─ Store: Objects in memory
     ├─ SizeLimit: < 100MB
@@ -239,13 +241,13 @@ async function getUser(userId) {
   // Try cache first
   const cached = await cache.get(`user:${userId}`);
   if (cached) return JSON.parse(cached);
-  
+
   // Miss - query database
   const user = await User.findById(userId);
-  
+
   // Update cache
   await cache.set(`user:${userId}`, JSON.stringify(user), 3600);
-  
+
   return user;
 }
 ```
@@ -256,13 +258,13 @@ async function getUser(userId) {
 async function updateUser(userId, data) {
   // Update database first
   const user = await User.update(data, { where: { id: userId } });
-  
+
   // Invalidate cache
   await cache.delete(`user:${userId}`);
-  
+
   // Update cache with new data
   await cache.set(`user:${userId}`, JSON.stringify(user), 3600);
-  
+
   return user;
 }
 ```
@@ -277,18 +279,18 @@ async function warmCache() {
     attributes: ['id', 'name', 'email'],
     limit: 100,
     order: [['active_orders', 'DESC']],
-    raw: true
+    raw: true,
   });
-  
+
   // Cache each
   for (let user of topUsers) {
     await cache.set(
       `user:${user.id}`,
       JSON.stringify(user),
-      86400  // 24 hours
+      86400, // 24 hours
     );
   }
-  
+
   console.log(`Warmed cache with ${topUsers.length} users`);
 }
 
@@ -306,12 +308,12 @@ async function warmCache() {
 async function invalidateUserData(userId) {
   // Single user
   await cache.delete(`user:${userId}`);
-  
+
   // User's related data
   await cache.delete(`user:${userId}:orders`);
   await cache.delete(`user:${userId}:profile`);
   await cache.delete(`user:${userId}:preferences`);
-  
+
   // Organization-level aggregate (if applicable)
   const user = await User.findById(userId);
   await cache.delete(`org:${user.organization_id}:users:count`);
@@ -319,7 +321,7 @@ async function invalidateUserData(userId) {
 
 // One-shot bulk invalidation
 async function invalidateAll() {
-  await cache.flushDb();  // Use carefully!
+  await cache.flushDb(); // Use carefully!
 }
 
 // Timeout-based (safest)
@@ -336,15 +338,17 @@ async function invalidateAll() {
 ```javascript
 // Enable gzip compression
 const compression = require('compression');
-app.use(compression({
-  level: 6,  // Balance speed/compression
-  threshold: 1024,  // Compress responses > 1KB
-  filter: (req, res) => {
-    // Don't compress streaming responses
-    if (req.headers['x-no-compression']) return false;
-    return compression.filter(req, res);
-  }
-}));
+app.use(
+  compression({
+    level: 6, // Balance speed/compression
+    threshold: 1024, // Compress responses > 1KB
+    filter: (req, res) => {
+      // Don't compress streaming responses
+      if (req.headers['x-no-compression']) return false;
+      return compression.filter(req, res);
+    },
+  }),
+);
 
 // Results:
 // Before: Response size 500KB
@@ -385,12 +389,12 @@ GET /api/users/123?fields=id,name,email  // Returns 3 fields
 // Implementation
 router.get('/:id', async (req, res) => {
   const fields = req.query.fields?.split(',') || [];
-  
+
   const user = await User.findById(req.params.id, {
     attributes: fields.length > 0 ? fields : undefined,
     raw: true
   });
-  
+
   res.json({ success: true, data: user });
 });
 ```
@@ -401,24 +405,24 @@ router.get('/:id', async (req, res) => {
 // ❌ Bad: Wait for slow operation
 app.post('/api/orders', async (req, res) => {
   const order = await Order.create(req.body);
-  
+
   // Slow operations block response
-  await emailService.sendConfirmation(order);  // 3 seconds!
-  await analyticsService.track(order);         // 1 second!
-  
-  res.json(order);  // Slow response!
+  await emailService.sendConfirmation(order); // 3 seconds!
+  await analyticsService.track(order); // 1 second!
+
+  res.json(order); // Slow response!
 });
 
 // ✅ Good: Queue slow operations
 app.post('/api/orders', async (req, res) => {
   const order = await Order.create(req.body);
-  
+
   // Queue work, don't wait
   emailQueue.add({ orderId: order.id });
   analyticsQueue.add({ orderId: order.id });
-  
-  res.json(order);  // Fast response!
-  
+
+  res.json(order); // Fast response!
+
   // Workers process asynchronously
 });
 
@@ -473,17 +477,8 @@ const Analytics = React.lazy(() => import('./pages/Analytics'));
 import { FixedSizeList } from 'react-window';
 
 const UserList = ({ users }) => (
-  <FixedSizeList
-    height={600}
-    itemCount={users.length}
-    itemSize={35}
-    width="100%"
-  >
-    {({ index, style }) => (
-      <div style={style}>
-        {users[index].name}
-      </div>
-    )}
+  <FixedSizeList height={600} itemCount={users.length} itemSize={35} width="100%">
+    {({ index, style }) => <div style={style}>{users[index].name}</div>}
   </FixedSizeList>
 );
 
@@ -536,15 +531,15 @@ clinic flame -- node app.js
 // Measure specific operations
 const measure = async (name, fn) => {
   const start = process.hrtime.bigint();
-  
+
   try {
     const result = await fn();
-    const duration = Number(process.hrtime.bigint() - start) / 1000000;  // Convert to ms
-    
+    const duration = Number(process.hrtime.bigint() - start) / 1000000; // Convert to ms
+
     if (duration > 100) {
       console.warn(`SLOW: ${name} took ${duration.toFixed(2)}ms`);
     }
-    
+
     return result;
   } catch (error) {
     console.error(`ERROR: ${name}`, error);
@@ -608,7 +603,8 @@ ab -n 1000 -c 100 http://localhost:5000/api/health
 ## 🔧 Optimization Checklist
 
 ### Database (Before Optimization)
-```
+
+```text
 [ ] Identify slow queries (> 100ms)
 [ ] Analyze query plans (EXPLAIN ANALYZE)
 [ ] Add missing indexes
@@ -618,7 +614,8 @@ ab -n 1000 -c 100 http://localhost:5000/api/health
 ```
 
 ### Caching
-```
+
+```text
 [ ] Implement cache-aside pattern
 [ ] Set appropriate TTLs
 [ ] Monitor cache hit rate (target: > 85%)
@@ -627,7 +624,8 @@ ab -n 1000 -c 100 http://localhost:5000/api/health
 ```
 
 ### API Performance
-```
+
+```text
 [ ] Enable gzip compression
 [ ] Implement pagination
 [ ] Allow field selection
@@ -637,7 +635,8 @@ ab -n 1000 -c 100 http://localhost:5000/api/health
 ```
 
 ### Frontend
-```
+
+```text
 [ ] Analyze bundle size
 [ ] Enable code splitting
 [ ] Lazy load components
@@ -647,7 +646,8 @@ ab -n 1000 -c 100 http://localhost:5000/api/health
 ```
 
 ### Monitoring
-```
+
+```text
 [ ] Set up performance alerts
 [ ] Create performance dashboards
 [ ] Track metrics over time
@@ -661,7 +661,7 @@ ab -n 1000 -c 100 http://localhost:5000/api/health
 
 ### Example: User List API
 
-```
+```text
 BEFORE OPTIMIZATION:
   • Response time: 3500ms (p95)
   • Database queries: 5 (N+1 problem)
@@ -696,7 +696,7 @@ User Impact:
 
 ### Weekly Performance Review
 
-```
+```text
 Monday Morning Checklist:
   [ ] Review performance metrics
   [ ] Check for regressions
@@ -707,7 +707,7 @@ Monday Morning Checklist:
 
 ### Monthly Deep Dive
 
-```
+```text
 First Friday of Month:
   [ ] Analyze trends over time
   [ ] Compare with targets
@@ -718,7 +718,7 @@ First Friday of Month:
 
 ### Quarterly Optimization Sprint
 
-```
+```text
 Once Per Quarter:
   [ ] Allocate team time for perf work
   [ ] Target 10-20% improvement
@@ -731,4 +731,3 @@ Once Per Quarter:
 
 **Status:** Production Ready  
 **Last Updated:** February 24, 2026
-

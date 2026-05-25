@@ -22,6 +22,7 @@
 ## Quick Start
 
 ### 1️⃣ Clone & Setup (5 minutes)
+
 ```bash
 git clone https://github.com/almashooq1/alawael-erp.git
 cd alawael-erp
@@ -34,6 +35,7 @@ npm install
 ```
 
 ### 2️⃣ Start Services (3 minutes)
+
 ```bash
 # Option A: Docker Compose (recommended)
 docker-compose up -d
@@ -44,6 +46,7 @@ cd frontend && npm start &
 ```
 
 ### 3️⃣ Access Application
+
 - **Frontend:** http://localhost:5173 or http://localhost:3001
 - **Backend API:** http://localhost:3000/api
 - **API Docs:** http://localhost:3000/api/docs
@@ -53,13 +56,15 @@ cd frontend && npm start &
 ## Prerequisites
 
 ### System Requirements
+
 - **OS:** Linux, macOS, or Windows (with WSL2)
 - **CPU:** 2+ cores minimum, 4+ cores recommended
 - **RAM:** 4GB minimum, 8GB recommended
 - **Disk:** 20GB available space
 
 ### Software Requirements
-```
+
+```text
 Node.js:        18.x or 20.x LTS
 npm:            8.x or higher
 MongoDB:        5.0 or higher
@@ -72,6 +77,7 @@ Git:            2.25+
 ### Installation
 
 #### macOS
+
 ```bash
 # Using Homebrew
 brew install node@20
@@ -81,6 +87,7 @@ brew install docker
 ```
 
 #### Ubuntu/Debian
+
 ```bash
 curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
 sudo apt-get install -y nodejs
@@ -90,6 +97,7 @@ sudo apt-get install -y docker.io docker-compose
 ```
 
 #### Windows
+
 ```powershell
 # Using Chocolatey
 choco install nodejs
@@ -113,6 +121,7 @@ nano .env
 ```
 
 **Required Variables:**
+
 ```env
 # Backend
 NODE_ENV=development
@@ -225,6 +234,7 @@ docker-compose logs -f frontend
 ### Docker Compose Configuration
 
 The project includes `docker-compose.yml` with:
+
 - **Backend Container** (Node.js + Express)
 - **Frontend Container** (React + Nginx)
 - **MongoDB Container** (Database)
@@ -232,6 +242,7 @@ The project includes `docker-compose.yml` with:
 - **Nginx Container** (Reverse Proxy)
 
 ### Services
+
 ```yaml
 Services:
   - backend:3000
@@ -335,6 +346,7 @@ kubectl logs -f deployment/alawael-backend -n alawael
 ### Option 3: Cloud Platforms
 
 #### AWS Elastic Beanstalk
+
 ```bash
 # 1. Install EB CLI
 pip install awsebcli
@@ -354,6 +366,7 @@ eb logs
 ```
 
 #### Google Cloud Run
+
 ```bash
 # 1. Build Docker image
 docker build -t gcr.io/PROJECT_ID/alawael-backend ./backend
@@ -374,6 +387,7 @@ gcloud run services describe alawael-backend
 ```
 
 #### Azure App Service
+
 ```bash
 # 1. Create Resource Group
 az group create --name alawael-rg --location eastus
@@ -413,6 +427,7 @@ curl http://localhost:3000/api/system/health
 ```
 
 ### Expected Responses
+
 ```json
 {
   "status": "healthy",
@@ -429,6 +444,7 @@ curl http://localhost:3000/api/system/health
 ### System Monitoring
 
 #### Using PM2 (Recommended for Linux)
+
 ```bash
 # Install PM2
 npm install -g pm2
@@ -462,6 +478,7 @@ pm2 logs
 ```
 
 #### Using Docker Stats
+
 ```bash
 # Real-time resource usage
 docker stats
@@ -511,6 +528,7 @@ redis-cli INFO stats
 ### Common Issues & Solutions
 
 #### 1. Port Already in Use
+
 ```bash
 # Find process using port 3000
 lsof -i :3000
@@ -523,6 +541,7 @@ PORT=3001 npm start
 ```
 
 #### 2. MongoDB Connection Error
+
 ```bash
 # Check MongoDB is running
 systemctl status mongod
@@ -535,6 +554,7 @@ mongo mongodb://localhost:27017/alawael
 ```
 
 #### 3. Redis Connection Error
+
 ```bash
 # Check Redis is running
 systemctl status redis
@@ -547,6 +567,7 @@ redis-cli ping
 ```
 
 #### 4. High Memory Usage
+
 ```bash
 # Restart services
 docker-compose restart
@@ -559,6 +580,7 @@ NODE_OPTIONS="--max-old-space-size=2048" npm start
 ```
 
 #### 5. Slow API Responses
+
 ```bash
 # Check database indexes
 db.collection('users').getIndexes()
@@ -571,6 +593,7 @@ redis-cli INFO stats
 ```
 
 #### 6. SSL Certificate Issues
+
 ```bash
 # Renew Let's Encrypt certificate
 certbot renew --dry-run
@@ -672,4 +695,3 @@ hey -n 10000 -c 100 http://localhost:3000/api/health
 
 **Last Updated:** February 24, 2026  
 **Status:** ✅ Production Ready
-

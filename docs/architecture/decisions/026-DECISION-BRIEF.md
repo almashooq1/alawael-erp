@@ -134,7 +134,7 @@ The IFSP `child → EarlyInterventionChild` ref bug fix (the W324+W329-class iss
 
 ## 6. Decision template (for the meeting note-taker)
 
-```
+```text
 ADR-026 — RESOLVED 2026-MM-DD
 
 Approach selected: [ ] A  [ ] B  [ ] C

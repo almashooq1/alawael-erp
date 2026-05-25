@@ -11,24 +11,28 @@
 ### **START HERE** (Choose Your Path)
 
 #### 👤 **I'm a Developer**
+
 1. First: [Team Briefing](TEAM_BRIEFING.md) - 5 min overview
 2. Then: [Quick Reference](erp_new_system/backend/services/migration/QUICK_REFERENCE.md) - 2 min lookup
 3. Deep: [Migration Guide](erp_new_system/backend/services/migration/MIGRATION_GUIDE.md) - 20 min full reference
 4. Hands-on: [Examples](erp_new_system/backend/examples/migration-examples.js) - 30 min learning
 
 #### 👨‍💼 **I'm in Operations**
+
 1. First: [Team Briefing](TEAM_BRIEFING.md) - 5 min overview
 2. Then: [Integration Guide](erp_new_system/backend/services/migration/INTEGRATION_GUIDE.md) - 15 min setup
 3. Quick: [Quick Reference](erp_new_system/backend/services/migration/QUICK_REFERENCE.md) - 2 min lookup
 4. Next: [Action Plan](NEXT_STEPS_ACTION_PLAN.md) - deployment planning
 
 #### 🧪 **I'm in QA/Testing**
+
 1. First: [Team Briefing](TEAM_BRIEFING.md) - 5 min overview
 2. Then: [Quick Reference](erp_new_system/backend/services/migration/QUICK_REFERENCE.md) - 2 min lookup
 3. Run: [Examples](erp_new_system/backend/examples/migration-examples.js) - 30 min hands-on
 4. Execute: [Tests](erp_new_system/backend/__tests__/migration.test.js) - 30 min verification
 
 #### 👔 **I'm a Manager/Stakeholder**
+
 1. First: [Team Briefing](TEAM_BRIEFING.md) - 5 min overview
 2. Then: [Complete Summary](MIGRATION_SYSTEM_COMPLETE.md) - 10 min detailed status
 3. Next: [Action Plan](NEXT_STEPS_ACTION_PLAN.md) - 15 min deployment schedule
@@ -39,26 +43,26 @@
 
 ### **Summaries & Overview**
 
-| Document | Audience | Length | Purpose |
-|----------|----------|--------|---------|
-| [Team Briefing](TEAM_BRIEFING.md) | Everyone | 5 min | Quick overview of system |
-| [Complete Summary](MIGRATION_SYSTEM_COMPLETE.md) | Tech Leads, Managers | 10-15 min | Detailed system status |
-| [System Overview](erp_new_system/backend/services/migration/README.md) | Developers | 5-10 min | Project introduction |
+| Document                                                               | Audience             | Length    | Purpose                  |
+| ---------------------------------------------------------------------- | -------------------- | --------- | ------------------------ |
+| [Team Briefing](TEAM_BRIEFING.md)                                      | Everyone             | 5 min     | Quick overview of system |
+| [Complete Summary](MIGRATION_SYSTEM_COMPLETE.md)                       | Tech Leads, Managers | 10-15 min | Detailed system status   |
+| [System Overview](erp_new_system/backend/services/migration/README.md) | Developers           | 5-10 min  | Project introduction     |
 
 ### **Technical Guides**
 
-| Document | Audience | Length | Purpose |
-|----------|----------|--------|---------|
-| [Migration Guide](erp_new_system/backend/services/migration/MIGRATION_GUIDE.md) | Developers | 20 min | Complete API reference |
-| [Integration Guide](erp_new_system/backend/services/migration/INTEGRATION_GUIDE.md) | DevOps, Backend | 15 min | Setup & configuration |
-| [Quick Reference](erp_new_system/backend/services/migration/QUICK_REFERENCE.md) | Everyone | 2 min | Fast command lookup |
+| Document                                                                            | Audience        | Length | Purpose                |
+| ----------------------------------------------------------------------------------- | --------------- | ------ | ---------------------- |
+| [Migration Guide](erp_new_system/backend/services/migration/MIGRATION_GUIDE.md)     | Developers      | 20 min | Complete API reference |
+| [Integration Guide](erp_new_system/backend/services/migration/INTEGRATION_GUIDE.md) | DevOps, Backend | 15 min | Setup & configuration  |
+| [Quick Reference](erp_new_system/backend/services/migration/QUICK_REFERENCE.md)     | Everyone        | 2 min  | Fast command lookup    |
 
 ### **Planning & Deployment**
 
-| Document | Audience | Length | Purpose |
-|----------|----------|--------|---------|
+| Document                                 | Audience             | Length | Purpose            |
+| ---------------------------------------- | -------------------- | ------ | ------------------ |
 | [Action Plan](NEXT_STEPS_ACTION_PLAN.md) | Tech Leads, Managers | 20 min | Deployment roadmap |
-| [Resource Index](README.md) | Everyone | 5 min | This document |
+| [Resource Index](README.md)              | Everyone             | 5 min  | This document      |
 
 ---
 
@@ -66,10 +70,10 @@
 
 ### **Core Services** (4 Production-Ready Components)
 
-```
+```text
 erp_new_system/backend/services/migration/
 ├── CSVProcessor.js          (436 lines) - CSV import/export
-├── DatabaseMigration.js     (320 lines) - DB operations  
+├── DatabaseMigration.js     (320 lines) - DB operations
 ├── MigrationManager.js      (479 lines) - Orchestration
 ├── MigrationService.js      (250 lines) - Service layer
 ├── DataValidator.js         (150 lines) - Data validation
@@ -81,14 +85,14 @@ erp_new_system/backend/services/migration/
 
 ### **API & Routes**
 
-```
+```text
 erp_new_system/backend/routes/
 └── migrations.js            (450 lines) - 13 REST endpoints
 ```
 
 ### **Tests & Examples**
 
-```
+```text
 erp_new_system/backend/
 ├── __tests__/
 │   └── migration.test.js    (500+ lines) - 25+ test cases
@@ -102,6 +106,7 @@ erp_new_system/backend/
 ## 🔧 QUICK COMMAND REFERENCE
 
 ### **Start Using It**
+
 ```bash
 # Start the system
 cd erp_new_system/backend && npm start
@@ -122,6 +127,7 @@ node validate-migration-system.js
 ### **Common Tasks**
 
 #### Import CSV
+
 ```bash
 curl -X POST http://localhost:3001/api/migrations/import-csv \
   -F "file=@data.csv" \
@@ -129,6 +135,7 @@ curl -X POST http://localhost:3001/api/migrations/import-csv \
 ```
 
 #### Export Table
+
 ```bash
 curl -X POST http://localhost:3001/api/migrations/export-csv \
   -H "Content-Type: application/json" \
@@ -136,6 +143,7 @@ curl -X POST http://localhost:3001/api/migrations/export-csv \
 ```
 
 #### Create Migration Plan
+
 ```bash
 curl -X POST http://localhost:3001/api/migrations/plan \
   -H "Content-Type: application/json" \
@@ -143,11 +151,13 @@ curl -X POST http://localhost:3001/api/migrations/plan \
 ```
 
 #### Execute Migration
+
 ```bash
 curl -X POST http://localhost:3001/api/migrations/execute
 ```
 
 #### Get Status
+
 ```bash
 curl http://localhost:3001/api/migrations/summary
 ```
@@ -158,21 +168,21 @@ curl http://localhost:3001/api/migrations/summary
 
 ### **13 API Endpoints**
 
-| Method | Endpoint | Purpose |
-|--------|----------|---------|
-| POST | `/initialize` | Initialize migration manager |
-| POST | `/plan` | Create migration plan |
-| GET | `/plan` | Get current plan |
-| POST | `/execute` | Execute migration |
-| GET | `/summary` | Get execution summary |
-| GET | `/log` | View execution logs |
-| DELETE | `/log` | Clear logs |
-| POST | `/import-csv` | Import CSV to database |
-| POST | `/export-csv` | Export table to CSV |
-| POST | `/sample-csv` | Preview CSV contents |
-| GET | `/csv-info` | Get CSV metadata |
-| POST | `/validate-csv` | Validate CSV structure |
-| POST | `/pause`, `/resume` | Control execution |
+| Method | Endpoint            | Purpose                      |
+| ------ | ------------------- | ---------------------------- |
+| POST   | `/initialize`       | Initialize migration manager |
+| POST   | `/plan`             | Create migration plan        |
+| GET    | `/plan`             | Get current plan             |
+| POST   | `/execute`          | Execute migration            |
+| GET    | `/summary`          | Get execution summary        |
+| GET    | `/log`              | View execution logs          |
+| DELETE | `/log`              | Clear logs                   |
+| POST   | `/import-csv`       | Import CSV to database       |
+| POST   | `/export-csv`       | Export table to CSV          |
+| POST   | `/sample-csv`       | Preview CSV contents         |
+| GET    | `/csv-info`         | Get CSV metadata             |
+| POST   | `/validate-csv`     | Validate CSV structure       |
+| POST   | `/pause`, `/resume` | Control execution            |
 
 ### **4 Core Services**
 
@@ -194,7 +204,7 @@ curl http://localhost:3001/api/migrations/summary
 
 ### **Test Results: 31/31 Passing ✅**
 
-```
+```text
 ✅ File Structure        (6/6 tests)
 ✅ Documentation        (4/4 tests)
 ✅ Examples & Tests     (2/2 tests)
@@ -223,6 +233,7 @@ TOTAL: 31/31 ✅ (100%)
 ## 🚀 DEPLOYMENT TIMELINE
 
 ### **Week 1: Testing**
+
 - [x] Complete system validation
 - [ ] Run examples (30 min)
 - [ ] Execute test suite (30 min)
@@ -230,12 +241,14 @@ TOTAL: 31/31 ✅ (100%)
 - [ ] Team walkthrough (1 hour)
 
 ### **Week 2: Integration**
+
 - [ ] Create admin dashboard UI
 - [ ] Integrate migration monitoring
 - [ ] Team training sessions
 - [ ] Documentation finalization
 
 ### **Week 3: Production**
+
 - [ ] Staging deployment
 - [ ] Production testing
 - [ ] Go-live deployment
@@ -250,15 +263,19 @@ TOTAL: 31/31 ✅ (100%)
 ### **For Developers (Priority 1)**
 
 1. **Quick Overview** (5 min)
+
    - Read: [Team Briefing](TEAM_BRIEFING.md)
 
 2. **Command Reference** (2 min)
+
    - Read: [Quick Reference](erp_new_system/backend/services/migration/QUICK_REFERENCE.md)
 
 3. **Complete API Docs** (20 min)
+
    - Read: [Migration Guide](erp_new_system/backend/services/migration/MIGRATION_GUIDE.md)
 
 4. **Hands-on Learning** (30 min)
+
    - Run: `node examples/migration-examples.js 1-8`
 
 5. **Code Understanding** (1 hour)
@@ -267,15 +284,19 @@ TOTAL: 31/31 ✅ (100%)
 ### **For Operations (Priority 1)**
 
 1. **System Overview** (5 min)
+
    - Read: [Team Briefing](TEAM_BRIEFING.md)
 
 2. **Setup Instructions** (15 min)
+
    - Read: [Integration Guide](erp_new_system/backend/services/migration/INTEGRATION_GUIDE.md)
 
 3. **Quick Commands** (5 min)
+
    - Read: [Quick Reference](erp_new_system/backend/services/migration/QUICK_REFERENCE.md)
 
 4. **Deployment Planning** (20 min)
+
    - Read: [Action Plan](NEXT_STEPS_ACTION_PLAN.md)
 
 5. **On-the-Job Practice** (1-2 hours)
@@ -285,15 +306,19 @@ TOTAL: 31/31 ✅ (100%)
 ### **For QA/Testing (Priority 1)**
 
 1. **System Overview** (5 min)
+
    - Read: [Team Briefing](TEAM_BRIEFING.md)
 
 2. **Test Strategy** (10 min)
+
    - Read: [Quick Reference](erp_new_system/backend/services/migration/QUICK_REFERENCE.md)
 
 3. **Run Examples** (1 hour)
+
    - Execute: `node examples/migration-examples.js 1-8`
 
 4. **Execute Tests** (30 min)
+
    - Run: `npm test -- __tests__/migration.test.js`
 
 5. **Create Test Cases** (2-3 hours)
@@ -304,21 +329,25 @@ TOTAL: 31/31 ✅ (100%)
 ## 📞 GETTING HELP
 
 ### **Documentation First** ✅
+
 1. Check [Quick Reference](erp_new_system/backend/services/migration/QUICK_REFERENCE.md) - 2 min
 2. Check [Team Briefing](TEAM_BRIEFING.md) - 5 min common questions
 3. Search [Migration Guide](erp_new_system/backend/services/migration/MIGRATION_GUIDE.md) - 20 min detail
 
 ### **Examples Second** ✅
+
 1. Find matching example in [migration-examples.js](erp_new_system/backend/examples/migration-examples.js)
 2. Run and study the example
 3. Adapt to your use case
 
 ### **Team Support** ✅
+
 1. Ask tech lead for clarification
 2. Share your specific issue
 3. Refer to relevant documentation section
 
 ### **Escalation** ⚠️
+
 1. Document the issue completely
 2. Provide error logs and context
 3. Escalate with examples of what you tried
@@ -327,23 +356,24 @@ TOTAL: 31/31 ✅ (100%)
 
 ## 🎯 KEY FILES AT A GLANCE
 
-| File | Purpose | Size | Status |
-|------|---------|------|--------|
-| [TEAM_BRIEFING.md](TEAM_BRIEFING.md) | Team introduction | 5 min read | ⭐ START HERE |
-| [MIGRATION_SYSTEM_COMPLETE.md](MIGRATION_SYSTEM_COMPLETE.md) | Detailed summary | 15 min read | Complete ✅ |
-| [NEXT_STEPS_ACTION_PLAN.md](NEXT_STEPS_ACTION_PLAN.md) | Deployment plan | 20 min read | Complete ✅ |
-| [QUICK_REFERENCE.md](erp_new_system/backend/services/migration/QUICK_REFERENCE.md) | Command lookup | 2 min ref | Complete ✅ |
-| [MIGRATION_GUIDE.md](erp_new_system/backend/services/migration/MIGRATION_GUIDE.md) | API reference | 20 min read | Complete ✅ |
-| [INTEGRATION_GUIDE.md](erp_new_system/backend/services/migration/INTEGRATION_GUIDE.md) | Setup guide | 15 min read | Complete ✅ |
-| [examples/migration-examples.js](erp_new_system/backend/examples/migration-examples.js) | Working examples | 30 min | 8/8 ✅ |
-| [__tests__/migration.test.js](erp_new_system/backend/__tests__/migration.test.js) | Test suite | 30 min | 25+/25+ ✅ |
+| File                                                                                    | Purpose           | Size        | Status        |
+| --------------------------------------------------------------------------------------- | ----------------- | ----------- | ------------- |
+| [TEAM_BRIEFING.md](TEAM_BRIEFING.md)                                                    | Team introduction | 5 min read  | ⭐ START HERE |
+| [MIGRATION_SYSTEM_COMPLETE.md](MIGRATION_SYSTEM_COMPLETE.md)                            | Detailed summary  | 15 min read | Complete ✅   |
+| [NEXT_STEPS_ACTION_PLAN.md](NEXT_STEPS_ACTION_PLAN.md)                                  | Deployment plan   | 20 min read | Complete ✅   |
+| [QUICK_REFERENCE.md](erp_new_system/backend/services/migration/QUICK_REFERENCE.md)      | Command lookup    | 2 min ref   | Complete ✅   |
+| [MIGRATION_GUIDE.md](erp_new_system/backend/services/migration/MIGRATION_GUIDE.md)      | API reference     | 20 min read | Complete ✅   |
+| [INTEGRATION_GUIDE.md](erp_new_system/backend/services/migration/INTEGRATION_GUIDE.md)  | Setup guide       | 15 min read | Complete ✅   |
+| [examples/migration-examples.js](erp_new_system/backend/examples/migration-examples.js) | Working examples  | 30 min      | 8/8 ✅        |
+| [**tests**/migration.test.js](erp_new_system/backend/__tests__/migration.test.js)       | Test suite        | 30 min      | 25+/25+ ✅    |
 
 ---
 
 ## ⚡ QUICK START PATHS
 
 ### **Path 1: "Get It Running Now" (30 min)**
-```
+
+```text
 1. Start: npm start
 2. Test: curl http://localhost:3001/api/migrations/plan
 3. Run: node examples/migration-examples.js 1
@@ -351,7 +381,8 @@ TOTAL: 31/31 ✅ (100%)
 ```
 
 ### **Path 2: "Understand It First" (1 hour)**
-```
+
+```text
 1. Read: TEAM_BRIEFING.md
 2. Read: QUICK_REFERENCE.md
 3. Read: MIGRATION_GUIDE.md (skim)
@@ -360,7 +391,8 @@ TOTAL: 31/31 ✅ (100%)
 ```
 
 ### **Path 3: "Learn by Doing" (2 hours)**
-```
+
+```text
 1. Read: TEAM_BRIEFING.md
 2. Run: npm start
 3. Run: All 8 examples
@@ -369,7 +401,8 @@ TOTAL: 31/31 ✅ (100%)
 ```
 
 ### **Path 4: "Production Ready" (4 hours)**
-```
+
+```text
 1. Read: All documentation
 2. Run: All examples
 3. Run: Full test suite
@@ -388,7 +421,7 @@ TOTAL: 31/31 ✅ (100%)
 ✅ **Learn** the system (8 examples, 30 min hands-on)  
 ✅ **Test** the system (25+ tests, 30 min validation)  
 ✅ **Deploy** the system (3-week plan, step-by-step)  
-✅ **Support** the system (documentation, examples, guides)  
+✅ **Support** the system (documentation, examples, guides)
 
 ---
 
@@ -397,6 +430,7 @@ TOTAL: 31/31 ✅ (100%)
 ### **Pick ONE:**
 
 1️⃣ **Start the Server** (Fastest Path)
+
 ```bash
 cd erp_new_system/backend && npm start
 curl http://localhost:3001/api/migrations/plan
@@ -406,6 +440,7 @@ curl http://localhost:3001/api/migrations/plan
 👉 [TEAM_BRIEFING.md](TEAM_BRIEFING.md)
 
 3️⃣ **Run Examples** (Hands-on Path)
+
 ```bash
 node examples/migration-examples.js 1
 ```

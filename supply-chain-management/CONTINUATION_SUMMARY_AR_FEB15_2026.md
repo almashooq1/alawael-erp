@@ -173,7 +173,7 @@ npm start
 
 تم إنشاء حساب اختبار تلقائيًا:
 
-```
+```text
 البريد الإلكتروني: admin@test.com
 كلمة المرور: Test@123
 
@@ -298,7 +298,7 @@ docker-compose up -d
 
 ## 📊 النسبة المئوية للإنجاز الإجمالية
 
-```
+```text
 Phase 1: Backend Models       ✅ 100%
 Phase 2: API Implementation   ✅ 100%
 Phase 3: Frontend Core        ✅ 100%

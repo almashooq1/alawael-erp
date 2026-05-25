@@ -80,10 +80,7 @@ router.get(
 
     // Pagination
     const total = await Product.countDocuments(query);
-    const products = await dbQuery
-      .limit(limit)
-      .skip(skip)
-      .populate('supplier', 'name');
+    const products = await dbQuery.limit(limit).skip(skip).populate('supplier', 'name');
 
     res.json({
       data: products,
@@ -94,7 +91,7 @@ router.get(
         pages: Math.ceil(total / limit),
       },
     });
-  })
+  }),
 );
 ```
 
@@ -114,11 +111,7 @@ function ProductListAdvanced() {
   });
 
   const handleSearch = async () => {
-    const query = new URLSearchParams(
-      Object.fromEntries(
-        Object.entries(filters).filter(([_, v]) => v !== '' && v !== null)
-      )
-    );
+    const query = new URLSearchParams(Object.fromEntries(Object.entries(filters).filter(([_, v]) => v !== '' && v !== null)));
 
     const response = await axios.get(`/api/products/search?${query}`);
     setProducts(response.data.data);
@@ -126,16 +119,9 @@ function ProductListAdvanced() {
 
   return (
     <div className="search-container">
-      <input
-        placeholder="ابحث عن منتج..."
-        value={filters.q}
-        onChange={e => setFilters({ ...filters, q: e.target.value })}
-      />
+      <input placeholder="ابحث عن منتج..." value={filters.q} onChange={e => setFilters({ ...filters, q: e.target.value })} />
 
-      <select
-        value={filters.category}
-        onChange={e => setFilters({ ...filters, category: e.target.value })}
-      >
+      <select value={filters.category} onChange={e => setFilters({ ...filters, category: e.target.value })}>
         <option value="">جميع الفئات</option>
         <option value="Electronics">إلكترونيات</option>
         <option value="Clothing">ملابس</option>
@@ -168,7 +154,7 @@ function ProductListAdvanced() {
 
 ### المشكلة الحالية
 
-```
+```text
 كل طلب → Database Query → Response
 استجابة بطيئة، حمل عالي على DB
 ```
@@ -248,7 +234,7 @@ router.get(
   asyncHandler(async (req, res) => {
     const products = await Product.find().limit(100);
     res.json(products);
-  })
+  }),
 );
 
 // Cache product details for 2 hours
@@ -258,7 +244,7 @@ router.get(
   asyncHandler(async (req, res) => {
     const product = await Product.findById(req.params.id);
     res.json(product);
-  })
+  }),
 );
 
 // Cache invalidation when updating
@@ -272,7 +258,7 @@ router.put(
     await redisClient.del('products:list');
 
     res.json(product);
-  })
+  }),
 );
 ```
 
@@ -300,7 +286,7 @@ router.put(
 
 ### المشكلة الحالية
 
-```
+```text
 فرز الميلات، إنشاء التقارير → Blocking المستخدم
 استجابة بطيئة للـ requests
 ```
@@ -367,7 +353,7 @@ router.post(
         template: 'orderConfirmation',
         data: order,
       },
-      { delay: 1000 }
+      { delay: 1000 },
     ); // تأخير 1 ثانية قبل الإرسال
 
     // إرسال إشعار فوري
@@ -376,7 +362,7 @@ router.post(
       message: 'تم إنشاء الطلب',
       orderId: order._id,
     });
-  })
+  }),
 );
 
 // Route لإنشاء التقارير
@@ -397,7 +383,7 @@ router.post(
       jobId: job.id,
       message: 'تم ضبط إنشاء التقرير',
     });
-  })
+  }),
 );
 ```
 
@@ -550,7 +536,7 @@ function Dashboard() {
 
 ## 📊 مخطط التسلسل الزمني المقترح
 
-```
+```text
 الأسبوع 1:
 ├─ يوم 1-2: Advanced Search
 ├─ يوم 3-4: Redis Caching
@@ -615,7 +601,7 @@ function Dashboard() {
 
 ## 🎯 KPIs للقياس
 
-```
+```text
 بعد تطبيق كل ميزة:
 
 Advanced Search:
@@ -647,7 +633,7 @@ i18n:
 
 ## 💰 التقدير المالي
 
-```
+```text
 التطوير (6 أسابيع):
 - 2 مطورين × 6 أسابيع × 5000 ريال = 60,000 ريال
 

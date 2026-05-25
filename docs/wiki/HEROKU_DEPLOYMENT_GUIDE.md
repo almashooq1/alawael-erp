@@ -2,7 +2,7 @@
 
 **الوقت المتوقع:** 5-10 دقائق  
 **المستوى:** سهل جداً  
-**الحالة:** 🟢 جاهز الآن  
+**الحالة:** 🟢 جاهز الآن
 
 ---
 
@@ -10,7 +10,7 @@
 
 ### [1] إنشاء حساب Heroku (2 دقيقة)
 
-```
+```text
 1. اذهب إلى: https://www.heroku.com
 2. اضغط: Sign up
 3. أدخل بريدك
@@ -30,6 +30,7 @@ npm install -g heroku
 ```
 
 **تأكد من التثبيت:**
+
 ```powershell
 heroku --version
 ```
@@ -43,7 +44,7 @@ heroku login
 ```
 
 ✓ ستفتح نافذة متصفح لتسجيل الدخول  
-✓ اختر: Authorize  
+✓ اختر: Authorize
 
 ---
 
@@ -71,7 +72,7 @@ heroku create alawael-backend
 
 أضف هذا السطر الواحد:
 
-```
+```text
 web: node server.js
 ```
 
@@ -100,7 +101,8 @@ heroku open
 ```
 
 أو اذهب يدوياً إلى:
-```
+
+```text
 https://alawael-backend.herokuapp.com
 ```
 
@@ -130,10 +132,10 @@ heroku logs --tail
 
 ## 🔗 روابط مهمة
 
-| الرابط | الوصف |
-|--------|-------|
-| https://www.heroku.com | موقع Heroku |
-| https://dashboard.heroku.com | لوحة التحكم |
+| الرابط                                               | الوصف                 |
+| ---------------------------------------------------- | --------------------- |
+| https://www.heroku.com                               | موقع Heroku           |
+| https://dashboard.heroku.com                         | لوحة التحكم           |
 | https://devcenter.heroku.com/articles/nodejs-support | دعم Node.js في Heroku |
 
 ---
@@ -154,11 +156,13 @@ heroku logs --tail
 ### المشكلة: الرابط يقول "Application Error"
 
 **الحل:**
+
 ```powershell
 heroku logs --tail
 ```
 
 اقرأ رسائل الخطأ وتأكد من:
+
 - ملف `Procfile` موجود وصحيح
 - ملف `package.json` موجود
 - `server.js` موجود وقابل للتشغيل
@@ -193,10 +197,10 @@ app.listen(PORT, () => {
 ✓ احفظ رابط Heroku (https://alawael-backend.herokuapp.com)  
 ✓ شارك الرابط مع الفريق  
 ✓ راقب استهلاك الموارد في لوحة التحكم  
-✓ أضف متغيرات البيئة (ENV) حسب الحاجة  
+✓ أضف متغيرات البيئة (ENV) حسب الحاجة
 
 ---
 
 **تم الإنشاء:** 23 فبراير 2026  
 **الحالة:** جاهز للتنفيذ ✅  
-**الوقت المتوقع:** 5-10 دقائق  
+**الوقت المتوقع:** 5-10 دقائق

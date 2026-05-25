@@ -2,6 +2,7 @@
 
 **How to Use This Document:**
 Each playbook describes a specific operational scenario with:
+
 1. **Recognition:** How to identify the issue
 2. **Impact:** What users experience
 3. **Investigation:** Steps to diagnose
@@ -13,11 +14,13 @@ Each playbook describes a specific operational scenario with:
 ## 🔧 Playbook 1: High Response Time (P99 > 500ms)
 
 ### 🎯 Recognition
+
 - GraphQL alerts: "Response Time P99 critical"
 - Customer reports: "Site feels slow"
 - Dashboard: P99 bar above red line (500ms)
 
 ### 📊 Impact
+
 - Users experience slow page loads
 - API timeouts possible if > 2000ms
 - Checkout process at risk (if > 3s, users abandon)
@@ -26,6 +29,7 @@ Each playbook describes a specific operational scenario with:
 ### 🔍 Investigation Steps
 
 **Step 1: Identify the bottleneck (5 min)**
+
 ```bash
 # Check what's causing the slowness
 curl -H "X-Request-ID: trace-123" https://api.alawael.company/api/health
@@ -35,11 +39,12 @@ curl -H "X-Request-ID: trace-123" https://api.alawael.company/api/health
 ```
 
 **Step 2: Check database (if query-heavy)**
+
 ```sql
 -- Check for slow queries
-SELECT query, avg_time, call_count 
-FROM pg_stat_statements 
-ORDER BY mean_exec_time DESC 
+SELECT query, avg_time, call_count
+FROM pg_stat_statements
+ORDER BY mean_exec_time DESC
 LIMIT 10;
 
 -- Check replication lag
@@ -47,6 +52,7 @@ SELECT * FROM pg_stat_replication;
 ```
 
 **Step 3: Check infrastructure (if resource-heavy)**
+
 ```bash
 # Check CPU/Memory on instances
 aws cloudwatch get-metric-statistics \
@@ -61,6 +67,7 @@ aws cloudwatch get-metric-statistics \
 ```
 
 **Step 4: Check cache efficiency**
+
 ```bash
 # Redis cache hit rate
 redis-cli INFO stats
@@ -72,7 +79,8 @@ redis-cli INFO stats
 ### ✅ Resolution
 
 **If Database Query Issue:**
-```
+
+```text
 1. Identify slow query (from step 2)
 2. Add missing index:
    CREATE INDEX idx_users_email ON users(email);
@@ -81,10 +89,11 @@ redis-cli INFO stats
 ```
 
 **If Infrastructure Issue:**
-```
+
+```text
 1. Check if auto-scaling triggered:
    aws autoscaling describe-auto-scaling-groups
-   
+
 2. If scaling in progress: Wait 2-3 min for new instances
 3. If NOT scaling:
    - Force manual scale: aws autoscaling set-desired-capacity
@@ -95,7 +104,8 @@ redis-cli INFO stats
 ```
 
 **If Cache Issue:**
-```
+
+```text
 1. Check cache hit rate trending
 2. If dropping: Invalidation logic broken
    - Review recent code changes
@@ -110,8 +120,8 @@ redis-cli INFO stats
 1. **Set up alerts:**
    - Alert: Response time P99 > 450ms (warning)
    - Alert: Response time P99 > 500ms (critical)
-   
 2. **Weekly review:**
+
    - Top 10 slowest endpoints
    - Database slow query log
    - Cache hit rate trends
@@ -126,11 +136,13 @@ redis-cli INFO stats
 ## 🔧 Playbook 2: High Error Rate (> 0.05%)
 
 ### 🎯 Recognition
+
 - Alert: "Error Rate Critical (> 0.05%)"
 - Dashboard: Error rate line going up (red zone)
 - Customer tickets: "Getting errors on checkout"
 
 ### 📊 Impact
+
 - Some API calls failing
 - Partial service degradation
 - User might need to retry
@@ -139,6 +151,7 @@ redis-cli INFO stats
 ### 🔍 Investigation Steps
 
 **Step 1: Confirm the error rate (2 min)**
+
 ```bash
 # Check actual error rate from logs
 cat /var/log/alawael-api.log | grep "ERROR" | wc -l
@@ -148,16 +161,18 @@ cat /var/log/alawael-api.log | grep "ERROR" | wc -l
 ```
 
 **Step 2: Identify which endpoint (2 min)**
+
 ```sql
 -- Check error logs
 SELECT endpoint, error_code, error_count, timestamp
-FROM errors 
+FROM errors
 WHERE timestamp > NOW() - INTERVAL '10 minutes'
 ORDER BY error_count DESC;
 ```
 
 **Step 3: Identify error type (3 min)**
-```
+
+```text
 Common errors:
   - 500 Internal Server Error: Application crash
   - 503 Service Unavailable: Scaling issue
@@ -167,6 +182,7 @@ Common errors:
 ```
 
 **Step 4: Check logs for stack traces**
+
 ```bash
 # Tail error logs
 tail -100 /var/log/alawael-api.log | grep "ERROR\|Exception"
@@ -178,7 +194,8 @@ tail -100 /var/log/alawael-api.log | grep "ERROR\|Exception"
 ### ✅ Resolution
 
 **If 500 Internal Server Error:**
-```
+
+```text
 1. Check application logs for exception
 2. If recent code deploy: Rollback immediately
    bash alawael-phase4-production-rollback.sh
@@ -189,7 +206,8 @@ tail -100 /var/log/alawael-api.log | grep "ERROR\|Exception"
 ```
 
 **If 503 Service Unavailable:**
-```
+
+```text
 1. Check if all instances healthy
    aws ec2 describe-instance-status \
      --filters Name=instance-state-name,Values=running
@@ -202,7 +220,8 @@ tail -100 /var/log/alawael-api.log | grep "ERROR\|Exception"
 ```
 
 **If 429 Too Many Requests:**
-```
+
+```text
 1. Check rate limits:
    redis-cli INFO stats | grep commands_processed
 2. If legitimate spike:
@@ -214,7 +233,8 @@ tail -100 /var/log/alawael-api.log | grep "ERROR\|Exception"
 ```
 
 **If 401 Unauthorized:**
-```
+
+```text
 1. Check auth service status
    curl https://auth.alawael.company/health
 2. Check if JWT tokens expired/rotated
@@ -230,11 +250,9 @@ tail -100 /var/log/alawael-api.log | grep "ERROR\|Exception"
 1. **Set up alerts:**
    - Alert: Error rate > 0.03% (warning)
    - Alert: Error rate > 0.05% (critical)
-   
 2. **Code review process:**
    - All PRs reviewed before merge
    - Staging testing required (all error scenarios)
-   
 3. **Monitoring:**
    - Error rate by endpoint dashboard
    - Stack trace tracking
@@ -245,11 +263,13 @@ tail -100 /var/log/alawael-api.log | grep "ERROR\|Exception"
 ## 🔧 Playbook 3: Database Connection Pool Exhausted
 
 ### 🎯 Recognition
+
 - Alert: "Database Connection Pool High (>140/150)"
 - Users get: "Connection pool exhausted" error
 - Application logs show: "Could not get connection from pool"
 
 ### 📊 Impact
+
 - New API requests fail immediately
 - Existing connections work
 - Manifests as 503 Service Unavailable
@@ -258,6 +278,7 @@ tail -100 /var/log/alawael-api.log | grep "ERROR\|Exception"
 ### 🔍 Investigation Steps
 
 **Step 1: Check current pool usage (1 min)**
+
 ```sql
 -- Check connection count
 SELECT count(*) as active_connections
@@ -269,6 +290,7 @@ SHOW max_connections;  -- Server max (usually 200)
 ```
 
 **Step 2: Identify idle connections (2 min)**
+
 ```sql
 -- Find long-running idle connections
 SELECT pid, query_start, state_change, query
@@ -279,6 +301,7 @@ ORDER BY query_start;
 ```
 
 **Step 3: Check for connection leaks (3 min)**
+
 ```bash
 # Recently deployed?
 git log --oneline -5
@@ -291,7 +314,8 @@ grep -r "connection.release()\|connection.close()" \
 ### ✅ Resolution
 
 **If Idle Connections Holding Resources:**
-```
+
+```text
 1. Terminate idle connections:
    SELECT pg_terminate_backend(pid)
    FROM pg_stat_activity
@@ -300,13 +324,14 @@ grep -r "connection.release()\|connection.close()" \
 
 2. Monitor recovery:
    SELECT count(*) as active_connections FROM pg_stat_activity;
-   
+
 3. Should drop significantly (expect < 100 connections)
 4. Create Jira ticket: "Investigate connection leak"
 ```
 
 **If Pool Undersized for Current Traffic:**
-```
+
+```text
 1. Current pool size: 150 connections
 2. Check peak usage: 140/150 = 93% utilization
 3. Increase pool size:
@@ -319,7 +344,8 @@ grep -r "connection.release()\|connection.close()" \
 ```
 
 **If Connection Leak in Application:**
-```
+
+```text
 1. Identify app version with leak:
    git diff v1.0.0...HEAD -- backend/src/database
 
@@ -338,6 +364,7 @@ grep -r "connection.release()\|connection.close()" \
 ### 🛡️ Prevention
 
 1. **Code review:**
+
    - All database code reviewed
    - Check: connection.release() called in finally block
    - Check: No orphaned connections in error paths
@@ -345,7 +372,6 @@ grep -r "connection.release()\|connection.close()" \
 2. **Connection pool monitoring:**
    - Alert: Connection usage > 80% (planning alert)
    - Alert: Connection usage > 90% (critical)
-   
 3. **Load testing:**
    - Test with 2x expected concurrent users
    - Monitor peak connection usage
@@ -356,11 +382,13 @@ grep -r "connection.release()\|connection.close()" \
 ## 🔧 Playbook 4: Replication Lag Detected
 
 ### 🎯 Recognition
+
 - Alert: "Database Replication Lag > 1 second"
 - Dashboard: Replication tab shows lag
 - Users might see stale data (read from replica)
 
 ### 📊 Impact
+
 - Read replicas 1-5 seconds behind primary
 - Users see "old" data if reading from replica
 - Typically not critical (most reads written recently)
@@ -369,9 +397,10 @@ grep -r "connection.release()\|connection.close()" \
 ### 🔍 Investigation Steps
 
 **Step 1: Check replication status (2 min)**
+
 ```sql
 -- Check replication lag
-SELECT 
+SELECT
   application_name,
   EXTRACT(EPOCH FROM (NOW() - pg_last_wal_receive_lsn())) AS lag_seconds
 FROM pg_stat_replication;
@@ -382,6 +411,7 @@ FROM pg_stat_replication;
 ```
 
 **Step 2: Identify if temporary or sustained (3 min)**
+
 ```bash
 # Graph lag over 5 minutes
 # Grafana: Database Dashboard → Replication Lag (trending)
@@ -391,9 +421,10 @@ FROM pg_stat_replication;
 ```
 
 **Step 3: Check replica server resources (2 min)**
+
 ```sql
 -- Connect to replica and check:
-SELECT 
+SELECT
   setting,
   current_setting(setting) AS current_value
 FROM pg_settings
@@ -411,7 +442,8 @@ aws cloudwatch get-metric-statistics \
 ### ✅ Resolution
 
 **If Temporary Write Spike (Expected):**
-```
+
+```text
 1. This is normal during high-traffic periods
 2. Nothing to do - replication will catch up
 3. Monitor lag returns to < 1s within 2-5 min
@@ -420,14 +452,15 @@ aws cloudwatch get-metric-statistics \
 ```
 
 **If Sustained Lag > 5 Seconds:**
-```
+
+```text
 1. Check replica server CPU:
    - If CPU high: Upgrade replica instance
    - If CPU low: Check network bandwidth
-   
+
 2. Check network connectivity:
    ping -c 10 replica-endpoint.rds.amazonaws.com
-   
+
 3. If network issue:
    - Contact AWS Support
    - Failover to another replica (temporary)
@@ -435,10 +468,11 @@ aws cloudwatch get-metric-statistics \
 ```
 
 **If Network Issue (Suspected):**
-```
+
+```text
 1. Failover to other replica as reader:
    Update app connection: read_replica=replica2
-   
+
 2. Leave affected replica unconnected
 3. AWS will auto-redirect reads to healthy replica
 4. Contact AWS for root cause
@@ -450,8 +484,8 @@ aws cloudwatch get-metric-statistics \
 1. **Monitor closely:**
    - Alert: Lag > 2 seconds (planning)
    - Alert: Lag > 5 seconds (critical)
-   
 2. **Baseline understanding:**
+
    - Normal lag: < 500ms
    - During traffic spike: < 2s acceptable
    - Sustained lag: Investigate
@@ -466,11 +500,13 @@ aws cloudwatch get-metric-statistics \
 ## 🔧 Playbook 5: Memory Pressure on Instances
 
 ### 🎯 Recognition
+
 - Alert: "Memory Usage > 85%"
 - Dashboard: Memory bar in red zone
 - Some services might get OOMKilled (Out of Memory Killed)
 
 ### 📊 Impact
+
 - Server might start swapping (very slow)
 - Services getting killed by kernel
 - New instances might fail to start
@@ -478,6 +514,7 @@ aws cloudwatch get-metric-statistics \
 ### 🔍 Investigation Steps
 
 **Step 1: Check which process using memory (2 min)**
+
 ```bash
 # SSH to instance
 ssh ec2-user@instance-ip
@@ -492,6 +529,7 @@ ps aux --sort=-%mem | head -10
 ```
 
 **Step 2: Check for memory leaks (3 min)**
+
 ```bash
 # Node.js heap memory
 node -e "console.log(Math.round(require('os').freemem() / 1024 / 1024)) + 'MB free'"
@@ -504,6 +542,7 @@ watch 'ps aux | grep node | grep -v grep'
 ```
 
 **Step 3: Check if cache layer is bloated (2 min)**
+
 ```bash
 # Redis memory usage
 redis-cli INFO memory | grep used_memory_human
@@ -515,18 +554,19 @@ redis-cli INFO memory | grep used_memory_human
 ### ✅ Resolution
 
 **If Cache Too Large (Most Common):**
-```
+
+```text
 1. Check Redis memory usage:
    redis-cli INFO memory
-   
+
 2. Clear cache (temporary fix):
    redis-cli FLUSHDB
-   
+
 3. Monitor recovery:
    - System memory should drop to < 70%
    - Cache hit rate will drop initially (warm-up)
    - Should recover in 5-10 minutes
-   
+
 4. Implement permanent fix:
    - Review cache expiration policies
    - Reduce cache TTL
@@ -537,15 +577,16 @@ redis-cli INFO memory | grep used_memory_human
 ```
 
 **If NodeJS Server Has Memory Leak:**
-```
+
+```text
 1. Check running time:
    ps aux | grep node
    # Look at start time and memory
-   
+
 2. If started today with high memory:
    - Restart application server
    - Monitor memory after restart
-   
+
 3. If still high after restart:
    - Likely code issue
    - Check recent code changes:
@@ -554,14 +595,15 @@ redis-cli INFO memory | grep used_memory_human
 ```
 
 **If PostgreSQL Client Connection Leak:**
-```
+
+```text
 1. Check connection count:
    SELECT count(*) FROM pg_stat_activity;
-   
+
 2. If > 100 connections:
    - Restart app servers
    - Monitor connection count drop
-   
+
 3. If doesn't drop:
    - Investigate connection pool code
    - May need code change + deploy
@@ -572,11 +614,9 @@ redis-cli INFO memory | grep used_memory_human
 1. **Monitor memory:**
    - Alert: Memory > 75% (planning)
    - Alert: Memory > 85% (critical)
-   
 2. **Code review:**
    - Check for memory leaks in code review
    - Ensure proper cleanup in destructors
-   
 3. **Load testing:**
    - Test for 2+ hours at peak load
    - Check memory trending (should stabilize)
@@ -587,11 +627,13 @@ redis-cli INFO memory | grep used_memory_human
 ## 🔧 Playbook 6: Auto-Scaling Not Triggering
 
 ### 🎯 Recognition
+
 - High traffic but no new instances spinning up
 - CPU 85%+ on existing instances
 - Scaling should have triggered but didn't
 
 ### 📊 Impact
+
 - Performance degrades under load
 - May not recover after spike (no new capacity)
 - Users experience increased latency
@@ -599,6 +641,7 @@ redis-cli INFO memory | grep used_memory_human
 ### 🔍 Investigation Steps
 
 **Step 1: Check auto-scaling status (2 min)**
+
 ```bash
 # Check ASG desired vs actual capacity
 aws autoscaling describe-auto-scaling-groups \
@@ -609,6 +652,7 @@ aws autoscaling describe-auto-scaling-groups \
 ```
 
 **Step 2: Check scaling policies (2 min)**
+
 ```bash
 # List all scaling policies
 aws autoscaling describe-policies \
@@ -619,6 +663,7 @@ aws autoscaling describe-policies \
 ```
 
 **Step 3: Check scaling activity log (3 min)**
+
 ```bash
 # See recent scaling events
 aws autoscaling describe-scaling-activities \
@@ -630,6 +675,7 @@ aws autoscaling describe-scaling-activities \
 ```
 
 **Step 4: Check CloudWatch metrics (2 min)**
+
 ```bash
 # Get current CPU across all instances
 aws cloudwatch get-metric-statistics \
@@ -646,31 +692,33 @@ aws cloudwatch get-metric-statistics \
 ### ✅ Resolution
 
 **If Auto-Scaling Is At Max Capacity:**
-```
+
+```text
 1. Check current capacity:
    aws autoscaling describe-auto-scaling-groups
-   
+
 2. If DesiredCapacity = max (12 instances):
    - Already at max
    - Can't scale further
    - Alert VP Ops: Need RI/cost discussion
-   
+
 3. Temporary options:
    - Increase max capacity (costs more)
    - Reduce traffic (talk to product team)
-   
+
 4. Long-term: Reserved instances upgrade
 ```
 
 **If Scaling Policy Disabled:**
-```
+
+```text
 1. Check scaling policies:
    aws autoscaling describe-policies
-   
+
 2. If no policies found or disabled:
    - Re-enable: aws autoscaling enable-metrics-collection
    - Recreate policy if missing
-   
+
 3. Verify policy:
    - Target CPU: 75%
    - Duration: 2 minutes
@@ -678,16 +726,17 @@ aws cloudwatch get-metric-statistics \
 ```
 
 **If CloudWatch Metrics Not Reporting:**
-```
+
+```text
 1. Check metrics collection:
    aws autoscaling describe-auto-scaling-groups \
      --query '*.EnabledMetrics'
-     
+
 2. If empty: Enable metrics:
    aws autoscaling enable-metrics-collection \
      --auto-scaling-group-name alawael-green-asg \
      --granularity "1Minute"
-     
+
 3. Wait 2-3 minutes for metrics to appear
 4. Retry scaling policy trigger
 ```
@@ -695,11 +744,13 @@ aws cloudwatch get-metric-statistics \
 ### 🛡️ Prevention
 
 1. **Regular testing:**
+
    - Monthly load test to verify scaling works
    - Check new instances become available
    - Verify metrics drop after scaling
 
 2. **Alerting:**
+
    - Alert if no scaling for 10+ min during high CPU
    - Alert if ASG at max capacity
 
@@ -712,28 +763,28 @@ aws cloudwatch get-metric-statistics \
 
 ## 🎯 Quick Reference: Which Playbook to Use
 
-| Symptom | Playbook |
-|---------|----------|
-| Site feels slow | Playbook 1: High Response Time |
-| Getting 500 errors | Playbook 2: High Error Rate |
-| "Connection pool exhausted" error | Playbook 3: Connection Pool |
-| Reading stale data | Playbook 4: Replication Lag |
-| Server running out of memory | Playbook 5: Memory Pressure |
-| Traffic high but no scaling | Playbook 6: Auto-Scaling Not Triggering |
+| Symptom                           | Playbook                                |
+| --------------------------------- | --------------------------------------- |
+| Site feels slow                   | Playbook 1: High Response Time          |
+| Getting 500 errors                | Playbook 2: High Error Rate             |
+| "Connection pool exhausted" error | Playbook 3: Connection Pool             |
+| Reading stale data                | Playbook 4: Replication Lag             |
+| Server running out of memory      | Playbook 5: Memory Pressure             |
+| Traffic high but no scaling       | Playbook 6: Auto-Scaling Not Triggering |
 
 ---
 
 ## 📞 When to Escalate
 
-| Issue | Level 1 (On-Call) | Level 2 (Lead) | Level 3 (CTO) |
-|-------|-------------------|---|---|
-| P99 > 500ms (< 5 min) | Fix | - | - |
-| Error rate > 1% | Fix | Notify if can't resolve | - |
-| Connection pool > 150 | Fix | - | - |
-| Replication lag > 5s | Investigate | Escalate if > 30s | - |
-| Memory > 90% | Restart | - | - |
-| Scaling not working | Fix | Escalate if can't fix | Major incident |
-| Data loss suspected | Notify immediately | Immediate | Immediate |
+| Issue                 | Level 1 (On-Call)  | Level 2 (Lead)          | Level 3 (CTO)  |
+| --------------------- | ------------------ | ----------------------- | -------------- |
+| P99 > 500ms (< 5 min) | Fix                | -                       | -              |
+| Error rate > 1%       | Fix                | Notify if can't resolve | -              |
+| Connection pool > 150 | Fix                | -                       | -              |
+| Replication lag > 5s  | Investigate        | Escalate if > 30s       | -              |
+| Memory > 90%          | Restart            | -                       | -              |
+| Scaling not working   | Fix                | Escalate if can't fix   | Major incident |
+| Data loss suspected   | Notify immediately | Immediate               | Immediate      |
 
 ---
 

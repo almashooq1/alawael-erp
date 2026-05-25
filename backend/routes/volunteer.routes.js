@@ -32,7 +32,7 @@
 'use strict';
 
 const express = require('express');
-const { authenticate } = require('../middleware/auth');
+const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const router = express.Router();
 const _mongoose = require('mongoose');
@@ -43,6 +43,20 @@ const { stripUpdateMeta } = require('../utils/sanitize');
 // 🔒 All volunteer routes require authentication
 router.use(authenticate);
 router.use(requireBranchAccess);
+
+// Coordinator-only gate for admin-side volunteer management. Prior to
+// this any authenticated user could create / edit / delete volunteer
+// records, flip status to "active" (bypassing screening), schedule
+// training, award recognitions, and assign volunteers to opportunities.
+// Self-service flows (/register, check-in, check-out) stay open.
+const requireCoordinator = authorize(
+  'admin',
+  'super_admin',
+  'superadmin',
+  'manager',
+  'hr_manager',
+  'volunteer_coordinator'
+);
 // Models
 const Volunteer = require('../models/Volunteer');
 const VolunteerOpportunity = require('../models/VolunteerOpportunity');
@@ -131,7 +145,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.post('/', async (req, res) => {
+router.post('/', requireCoordinator, async (req, res) => {
   try {
     const doc = await Volunteer.create({ ...req.body, uuid: uuidv4() });
     ok(res, { data: doc, message: 'تم إنشاء المتطوع بنجاح' }, 201);
@@ -168,7 +182,7 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-router.put('/:id', async (req, res) => {
+router.put('/:id', requireCoordinator, async (req, res) => {
   try {
     const doc = await Volunteer.findByIdAndUpdate(
       req.params.id,
@@ -182,7 +196,7 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', requireCoordinator, async (req, res) => {
   try {
     const doc = await Volunteer.findByIdAndUpdate(req.params.id, { deletedAt: new Date() });
     if (!doc) return fail(res, 'المتطوع غير موجود', 404);
@@ -193,7 +207,7 @@ router.delete('/:id', async (req, res) => {
 });
 
 // تحديث حالة المتطوع بعد الغربلة
-router.patch('/:id/status', async (req, res) => {
+router.patch('/:id/status', requireCoordinator, async (req, res) => {
   try {
     const { status, notes } = req.body;
     const allowed = ['active', 'inactive', 'suspended', 'rejected', 'screening'];
@@ -263,7 +277,7 @@ router.get('/opportunities', async (req, res) => {
   }
 });
 
-router.post('/opportunities', async (req, res) => {
+router.post('/opportunities', requireCoordinator, async (req, res) => {
   try {
     const doc = await VolunteerOpportunity.create({ ...req.body, uuid: uuidv4() });
     ok(res, { data: doc, message: 'تم إنشاء الفرصة بنجاح' }, 201);
@@ -282,7 +296,7 @@ router.get('/opportunities/:id', async (req, res) => {
   }
 });
 
-router.put('/opportunities/:id', async (req, res) => {
+router.put('/opportunities/:id', requireCoordinator, async (req, res) => {
   try {
     const doc = await VolunteerOpportunity.findByIdAndUpdate(
       req.params.id,

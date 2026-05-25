@@ -80,7 +80,7 @@
 
 ### مستوى المبتدئ | Beginner Level ⏱️ 15-20 دقيقة | minutes
 
-```
+```text
 1️⃣  اقرأ: 00-getting-started.md (5-10 دق)
 2️⃣  اقرأ: 01-vehicle-management.md (10-15 دق)
 ✅ الآن يمكنك بدء استخدام النظام
@@ -88,7 +88,7 @@
 
 ### مستوى المتوسط | Intermediate Level ⏱️ 30-50 دقيقة | minutes
 
-```
+```text
 البدء من مستوى المبتدئ، ثم:
 1️⃣  اقرأ: 04-document-management.md (15-20 دق)
 2️⃣  اقرأ: 05-faq-troubleshooting.md (10-20 دق)
@@ -97,7 +97,7 @@
 
 ### مستوى المتقدم | Advanced Level ⏱️ 90-150 دقيقة | minutes
 
-```
+```text
 البدء من جميع المستويات السابقة، ثم:
 1️⃣  اقرأ: 02-admin-guide.md (30-45 دق)
 2️⃣  اقرأ: 03-api-documentation.md (40-60 دق)
@@ -108,7 +108,7 @@
 
 ## 🗂️ البنية الكاملة | Complete Structure
 
-```
+```text
 docs/user-guide/
 ├─ README.md (هنا | Here)
 ├─ 00-getting-started.md (400 lines | سطر)
@@ -187,7 +187,7 @@ Total: 3,800+ lines of complete documentation
 
 ### أسبوع 1: الأساسيات | Week 1: Fundamentals
 
-```
+````
 📅 اليوم 1-2 | Days 1-2:
    ├─ 00-getting-started.md (1 ساعة | hour)
    └─ تطبيق عملي (30 دقيقة)
@@ -199,42 +199,45 @@ Total: 3,800+ lines of complete documentation
 📅 اليوم 5-7 | Days 5-7:
    ├─ ممارسة حرة | Free practice
    └─ اطرح الأسئلة | Ask questions
-```
+```text
 
 ### أسبوع 2: الميزات المتوسطة | Week 2: Intermediate
 
-```
+````
+
 📅 اليوم 1-2 | Days 1-2:
-   ├─ 04-document-management.md (1.5 ساعة)
-   └─ تطبيق عملي (1 ساعة)
+├─ 04-document-management.md (1.5 ساعة)
+└─ تطبيق عملي (1 ساعة)
 
 📅 اليوم 3-4 | Days 3-4:
-   ├─ 05-faq-troubleshooting.md (1 ساعة)
-   └─ حل 10 مشاكل | Solve 10 problems (1 ساعة)
+├─ 05-faq-troubleshooting.md (1 ساعة)
+└─ حل 10 مشاكل | Solve 10 problems (1 ساعة)
 
 📅 اليوم 5-7 | Days 5-7:
-   ├─ مشاريع عملية | Real projects
-   └─ ممارسة مكثفة | Intensive practice
-```
+├─ مشاريع عملية | Real projects
+└─ ممارسة مكثفة | Intensive practice
+
+```text
 
 ### أسبوع 3: المستوى المتقدم | Week 3: Advanced
 
 ```
+
 📅 اليوم 1-3 | Days 1-3:
-   ├─ 02-admin-guide.md (2 ساعة)
-   └─ تطبيق فعلي (2 ساعة)
+├─ 02-admin-guide.md (2 ساعة)
+└─ تطبيق فعلي (2 ساعة)
 
 📅 اليوم 4-5 | Days 4-5:
-   ├─ 03-api-documentation.md (2 ساعة)
-   └─ أمثلة برمجية (1.5 ساعة)
+├─ 03-api-documentation.md (2 ساعة)
+└─ أمثلة برمجية (1.5 ساعة)
 
 📅 اليوم 6-7 | Days 6-7:
-   ├─ مشاريع متقدمة | Advanced projects
-   └─ الدعم والإرشاد | Mentoring
+├─ مشاريع متقدمة | Advanced projects
+└─ الدعم والإرشاد | Mentoring
 
 ### ✅ حماية البيانات | Protect Your Data
 
-```
+```text
 
 ✓ احفظ نسخة احتياطية من المستندات المهمة
 ✓ استخدم الوسوم والفئات لتنظيم البيانات
@@ -251,7 +254,7 @@ Total: 3,800+ lines of complete documentation
 
 **البريد الإلكتروني | Email:**
 
-```
+```text
 
 support@rehab-system.sa
 
@@ -259,7 +262,7 @@ support@rehab-system.sa
 
 **الهاتف | Phone:**
 
-```
+```text
 
 +966-XX-XXXX-XXXX (ساعات العمل | Business Hours)
 +966-XX-XXXX-XXXX (الطوارئ | Emergency: 24/7)
@@ -268,7 +271,7 @@ support@rehab-system.sa
 
 **الساعات | Hours:**
 
-```
+```text
 
 السبت - الخميس | Saturday - Thursday
 8:00 AM - 6:00 PM (معايير التوقيت المحلية | Local Time)
@@ -279,7 +282,7 @@ support@rehab-system.sa
 
 **قناتنا على YouTube | YouTube Channel:**
 
-```
+```text
 
 https://www.youtube.com/rehab-system-tutorials
 
@@ -287,7 +290,7 @@ https://www.youtube.com/rehab-system-tutorials
 
 **قوائم التشغيل | Playlists:**
 
-```
+```text
 
 📺 البدء السريع | Getting Started (5 دقائق)
 📺 إدارة المركبات | Vehicle Management (8 دقائق)
@@ -298,7 +301,7 @@ https://www.youtube.com/rehab-system-tutorials
 
 ### 💬 المجتمع والمنتديات | Community Forums
 
-```
+```text
 
 https://forum.rehab-system.sa
 
@@ -306,7 +309,7 @@ https://forum.rehab-system.sa
 
 **الأقسام | Sections:**
 
-```
+```text
 
 ├─ الأسئلة والأجوبة | Q&A
 ├─ الأفكار والاقتراحات | Ideas & Suggestions
@@ -319,7 +322,7 @@ https://forum.rehab-system.sa
 
 ## 📝 قائمة التحقق من الإعداد | Setup Checklist
 
-```
+```text
 
 قبل البدء بالعمل تأكد من:
 
@@ -356,7 +359,7 @@ https://forum.rehab-system.sa
 
 ## 📈 خريطة التقدم | Progress Map
 
-```
+```text
 
 المرحلة 1: التعريف (15 دقيقة)
 ├─ قراءة البدء السريع ✓
@@ -383,7 +386,7 @@ https://forum.rehab-system.sa
 
 ## 🎯 الخطوات التالية | Next Steps
 
-```
+```text
 
 بعد قراءة هذا الفهرس:
 
@@ -421,15 +424,17 @@ https://forum.rehab-system.sa
 📚 وثائق إضافية؟
 📚 Need More Documentation?
 → اطلب موضوع جديد | Request New Topic
-```
+
+```text
 
 ---
 
-**الإصدار | Version:** 1.0  
-**تاريخ الإطلاق | Release Date:** January 14, 2026  
-**آخر تحديث | Last Updated:** January 14, 2026  
+**الإصدار | Version:** 1.0
+**تاريخ الإطلاق | Release Date:** January 14, 2026
+**آخر تحديث | Last Updated:** January 14, 2026
 **الحالة | Status:** ✅ نسخة جاهزة للاستخدام | Ready for Use
 
 **ملاحظة | Note:** هذا الدليل قيد التطوير المستمر. الأقسام المشار إليها بـ "قيد التطوير" ستكون متاحة قريباً.
 
 This guide is under continuous development. Sections marked as "Under Development" will be available soon.
+```

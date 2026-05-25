@@ -26,7 +26,7 @@ npm test:coverage
 
 ### Expected Results
 
-```
+```text
 ✅ 24+ tests should pass
 ✅ 85%+ code coverage
 ✅ Execution time: ~2-3 seconds
@@ -48,7 +48,7 @@ npm test
 
 **Output**:
 
-```
+```text
 PASS  __tests__/api.test.cjs
 
 Supply Chain Management API
@@ -105,7 +105,7 @@ npm test:coverage
 
 **Output**:
 
-```
+```text
 PASS  __tests__/api.test.cjs
 
 Coverage summary:
@@ -149,7 +149,7 @@ npm test
 
 **Output**:
 
-```
+```text
 PASS  src/components/FileUpload.test.js
 
 FileUpload component
@@ -174,7 +174,7 @@ npm test -- --coverage
 
 **Output**:
 
-```
+```text
 PASS  src/components/FileUpload.test.js
 
 Coverage summary:
@@ -409,7 +409,7 @@ PASS  __tests__/api.test.cjs          // Test file passed
 
 ### Coverage Report Explanation
 
-```
+```text
 Statements   : 85.5%   // Lines of code executed
 Branches     : 80.2%   // if/else branches covered
 Functions    : 88.1%   // Functions called in tests
@@ -570,7 +570,7 @@ npm run build
 
 ### Current Metrics
 
-```
+```text
 Tests Written:        40+  ✅
 Pass Rate:           100%  ✅
 Coverage:             85%+ ✅
@@ -580,7 +580,7 @@ Maintenance:         Easy  ✅
 
 ### Targets
 
-```
+```text
 Tests Target:          50+  (Target: +10 tests)
 Pass Rate Target:     100%  (Maintain)
 Coverage Target:       90%  (Target: +5%)

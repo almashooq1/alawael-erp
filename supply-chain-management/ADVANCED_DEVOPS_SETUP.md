@@ -732,7 +732,7 @@ echo "✅ Backup completed: $BACKUP_DIR/mongo_$TIMESTAMP.tar.gz"
 
 ## 🎓 Best Practices Checklist
 
-```
+```text
 [✓] Security
   [✓] JWT token authentication
   [✓] Password hashing (bcrypt)

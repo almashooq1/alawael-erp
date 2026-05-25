@@ -4,7 +4,7 @@
 
 ### System Architecture
 
-```
+```text
 ┌─────────────────────────────────────────────────┐
 │           CDN (CloudFront / Azure CDN)          │
 └────────────────────┬────────────────────────────┘
@@ -36,7 +36,7 @@
 
 ### Deployment Environments
 
-```
+```text
 DEVELOPMENT → STAGING → PRODUCTION
      ↓           ↓           ↓
   Local       Test Env     Live Env
@@ -67,7 +67,7 @@ DEVELOPMENT → STAGING → PRODUCTION
 
 ## 📊 Performance Targets
 
-```
+```text
 Frontend:
 - Page Load: < 3 seconds
 - Time to Interactive: < 4 seconds
@@ -91,7 +91,7 @@ Mobile:
 
 ## 💾 Database Backup Strategy
 
-```
+```text
 Frequency:
 - Hourly: Last 24 hours
 - Daily: Last 7 days
@@ -109,7 +109,7 @@ Strategy:
 
 ## 🎓 Training Requirements
 
-```
+```text
 Operations Team:
 - Deployment procedures (4 hours)
 - Incident response (4 hours)

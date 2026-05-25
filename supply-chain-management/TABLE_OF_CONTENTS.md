@@ -240,7 +240,7 @@
 
 ## 📊 إحصائيات سريعة
 
-```
+```text
 الملفات الجديدة من هذه الجلسة:      12 ملف
 الملفات من الجلسات السابقة:        11 ملف
 ───────────────────────────────────────
@@ -258,7 +258,7 @@
 
 ### أسرع مسار (5 دقائق)
 
-```
+```text
 1. START_HERE_NOW.md
 2. EXECUTIVE_SUMMARY_1PAGE.md
 تم ✓
@@ -266,7 +266,7 @@
 
 ### مسار سريع (20 دقيقة)
 
-```
+```text
 1. QUICK_START_NOW.md
 2. STRATEGIC_RECOMMENDATIONS.md (ملخص)
 3. قرار ✓
@@ -274,7 +274,7 @@
 
 ### مسار شامل (60 دقيقة)
 
-```
+```text
 1. READING_GUIDE.md
 2. STRATEGIC_RECOMMENDATIONS.md
 3. IMPLEMENTATION_GUIDE.md
@@ -283,7 +283,7 @@
 
 ### مسار كامل (120 دقيقة)
 
-```
+```text
 1. STRATEGIC_RECOMMENDATIONS.md
 2. IMPLEMENTATION_GUIDE.md
 3. ENHANCEMENTS_ANALYSIS.md
@@ -295,7 +295,7 @@
 
 ## ✨ الانطباع النهائي
 
-```
+```text
 ┌──────────────────────────────┐
 │ 23+ ملف توثيق شامل        │
 │ منظم حسب الجمهور           │
@@ -312,7 +312,7 @@
 
 **أيهما تختار؟**
 
-```
+```text
 ⏱️ عندي 5 دقائق؟
    → EXECUTIVE_SUMMARY_1PAGE.md
 

@@ -39,7 +39,7 @@
 
 ### 1. إعادة تحميل VS Code
 
-```
+```text
 اضغط Ctrl+Shift+P ثم اكتب "Reload Window" واضغط Enter
 ```
 
@@ -62,7 +62,7 @@ Remove-Item -Recurse -Force "$env:LOCALAPPDATA\Microsoft\TypeScript"
 
 ### 4. إغلاق الملفات غير المستخدمة
 
-```
+```text
 اضغط Ctrl+K ثم W لإغلاق جميع الملفات المفتوحة
 ```
 
@@ -86,7 +86,7 @@ Remove-Item -Recurse -Force "$env:LOCALAPPDATA\Microsoft\TypeScript"
 
 ### عرض أداء VS Code
 
-```
+```text
 Help > Toggle Developer Tools > Performance Monitor
 ```
 
@@ -153,7 +153,7 @@ export NODE_OPTIONS="--max-old-space-size=4096"
 
 #### 4. Restart TypeScript Server
 
-```
+```text
 Ctrl+Shift+P > TypeScript: Restart TS Server
 ```
 

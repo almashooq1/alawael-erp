@@ -39,22 +39,26 @@
 #### Dashboard Visualizations
 
 1. **Revenue Trend Chart**
+
    - Line chart showing monthly revenue
    - Compares against target
    - Shows growth percentage
 
 2. **Product Distribution**
+
    - Pie chart of top-selling products
    - Quantity breakdown
    - Revenue contribution
 
 3. **Supplier Performance**
+
    - Bar chart showing supplier metrics
    - Rating comparison
    - Order volume
    - Delivery performance
 
 4. **Inventory Levels**
+
    - Stock levels by product
    - Reorder point indicators
    - Fast-moving vs slow-moving
@@ -71,7 +75,7 @@
 
 #### Monthly Business Report
 
-```
+```text
 Report Date: February 9, 2026
 Period: February 1-9, 2026
 
@@ -117,7 +121,7 @@ Recommendations:
 
 #### System Health Dashboard
 
-```
+```text
 ┌─────────────────────────────────────────┐
 │        System Health Status             │
 ├─────────────────────────────────────────┤
@@ -203,7 +207,7 @@ Status: ✅ Under 100ms target
 
 #### Excel Export
 
-```
+```text
 - Suppliers List (.xlsx)
 - Products List (.xlsx)
 - Orders Report (.xlsx)
@@ -213,7 +217,7 @@ Status: ✅ Under 100ms target
 
 #### PDF Reports
 
-```
+```text
 - Monthly Business Report
 - Supplier Performance Report
 - Inventory Analysis Report
@@ -223,7 +227,7 @@ Status: ✅ Under 100ms target
 
 #### CSV Export
 
-```
+```text
 - Suppliers (.csv)
 - Products (.csv)
 - Orders (.csv)
@@ -296,7 +300,7 @@ db.products.createIndex({ price: 1 }); // Range query optimization
 
 ### Audit Trail
 
-```
+```text
 2026-02-09 08:13:25 - Admin login from 192.168.1.100
 2026-02-09 08:15:10 - Created Supplier: الشركة الأولى
 2026-02-09 08:16:45 - Updated Product: منتج 1
@@ -372,7 +376,7 @@ db.products.createIndex({ price: 1 }); // Range query optimization
 
 ### Backup Strategy
 
-```
+```text
 Daily Backups: Full database backup
 Weekly Backups: Incremental + full
 Monthly Archives: Long-term storage
@@ -424,7 +428,7 @@ Recovery Point Objective (RPO): < 15 minutes
 
 ## Implementation Timeline
 
-```
+```text
 PHASE 1 (✅ Complete): Barcode System
 ├─ QR Code generation
 ├─ Barcode generation

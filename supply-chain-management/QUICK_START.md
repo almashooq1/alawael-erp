@@ -4,7 +4,7 @@
 
 ### المنفذات النشطة:
 
-```
+```text
 🔹 Backend:  http://localhost:4000
 🔹 Frontend: http://localhost:3000
 🔹 Database: MongoDB (localhost:27017/supply-chain)
@@ -32,7 +32,7 @@ npm start
 
 ### 3️⃣ الوصول للنظام
 
-```
+```text
 Frontend: http://localhost:3000
 Backend:  http://localhost:4000/health
 ```
@@ -41,7 +41,7 @@ Backend:  http://localhost:4000/health
 
 ## 🔐 بيانات الاختبار
 
-```
+```text
 اسم المستخدم: admin
 كلمة المرور: Admin@123456
 ```
@@ -142,7 +142,7 @@ cd frontend && npm start
 
 ## 📂 الملفات المهمة
 
-```
+```text
 supply-chain-management/
 ├── backend/
 │   ├── server-clean.js              ⭐ الخادم الرئيسي

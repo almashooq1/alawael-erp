@@ -49,6 +49,7 @@
 **Services**:
 
 1. **MongoDB** (Database)
+
    - Image: `mongo:7.0-alpine`
    - Port: 27017 (internal only)
    - Volume: `mongodb_data` (persistent)
@@ -56,6 +57,7 @@
    - Auto-restart: enabled
 
 2. **Backend Service**
+
    - Port: 4000
    - Environment: Production
    - Depends on: MongoDB
@@ -63,6 +65,7 @@
    - Logs: JSON format with rotation
 
 3. **Frontend Service**
+
    - Port: 3000
    - Environment: Production
    - Depends on: Backend
@@ -78,7 +81,7 @@
 
 ### Network Architecture
 
-```
+```text
 ┌─────────────────────────────────────────┐
 │        Docker Network: scm-network      │
 ├─────────┬─────────┬──────────┬──────────┤
@@ -271,12 +274,14 @@ services:
 ### ✅ Security Best Practices Implemented
 
 1. **Network Security**
+
    - Internal Docker network
    - Only ports 80, 443, 3000 exposed
    - MongoDB not exposed (internal only)
    - Nginx for SSL/TLS termination
 
 2. **Application Security**
+
    - JWT authentication enabled
    - Password hashing (bcryptjs)
    - CORS configured
@@ -284,6 +289,7 @@ services:
    - Error sanitization
 
 3. **Container Security**
+
    - Alpine Linux (minimal attack surface)
    - Non-root user (recommended)
    - Read-only filesystems (optional)
@@ -483,7 +489,7 @@ gcloud run deploy scm-backend --image gcr.io/<project>/scm-backend --platform ma
 
 ## File Structure
 
-```
+```text
 supply-chain-management/
 ├── docker-compose.yml           (Main orchestration)
 ├── docker-compose.prod.yml      (Production overrides)

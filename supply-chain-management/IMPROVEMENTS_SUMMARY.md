@@ -57,7 +57,7 @@ router.get(
       throw new AppError('Order not found', 404, 'NOT_FOUND');
     }
     res.json(order);
-  })
+  }),
 );
 ```
 
@@ -90,10 +90,7 @@ router.get(
 **Usage Example**:
 
 ```javascript
-import {
-  validateProduct,
-  handleValidationErrors,
-} from '../middleware/validation.js';
+import { validateProduct, handleValidationErrors } from '../middleware/validation.js';
 
 router.post('/', validateProduct, handleValidationErrors, async (req, res) => {
   // Validated data is ready to use
@@ -145,7 +142,7 @@ npm test -- --watch    # Watch mode
 
 **Example Test Output**:
 
-```
+```text
 ✓ POST /api/auth/register - Should register a new user
 ✓ POST /api/auth/login - Should login user
 ✓ GET /api/products - Should retrieve all products
@@ -571,12 +568,14 @@ curl -X POST \
 ## 📈 Next Steps
 
 1. **Immediate** (Next 1-2 days):
+
    - Update .env files with real credentials
    - Run test suite to verify everything works
    - Deploy to staging environment
    - Perform UAT (User Acceptance Testing)
 
 2. **Short-term** (Next 1-2 weeks):
+
    - Set up production monitoring
    - Enable automated backups
    - Configure alerting rules
@@ -584,6 +583,7 @@ curl -X POST \
    - Monitor performance metrics
 
 3. **Medium-term** (Next 1-2 months):
+
    - Implement caching layer (Redis)
    - Add GraphQL API option
    - Implement batch operations

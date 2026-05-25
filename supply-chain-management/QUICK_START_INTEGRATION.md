@@ -16,7 +16,7 @@ node barcode-server.js
 
 **Wait for:**
 
-```
+```text
 ✅ MongoDB connected
 🟢 Barcode API Server running on http://localhost:4000
 ```
@@ -32,7 +32,7 @@ npm start
 
 **Wait for:**
 
-```
+```text
 Compiled successfully!
 Local: http://localhost:3000
 ```
@@ -41,11 +41,12 @@ Local: http://localhost:3000
 
 ### **Step 3: Open Browser**
 
-```
+```text
 http://localhost:3000
 ```
 
 1. **Login** with test credentials:
+
    - Username: any username
    - Password: any password
 
@@ -62,7 +63,7 @@ http://localhost:3000
 
 ### **QR Code Tab**
 
-```
+```text
 Input Fields:
   - Paste or type data
   - Select error correction: L, M, Q, H
@@ -75,7 +76,7 @@ Output:
 
 ### **Barcode Tab**
 
-```
+```text
 Input Fields:
   - Paste or type data
   - Select format: CODE128, CODE39, EAN13, UPC
@@ -88,7 +89,7 @@ Output:
 
 ### **Batch Tab**
 
-```
+```text
 Input:
   - Add multiple items
   - Mix QR and Barcodes
@@ -106,7 +107,7 @@ Output:
 
 ### **1. Test QR Code**
 
-```
+```text
 1. Input: "HELLO_WORLD"
 2. Error Level: M
 3. Expected: QR code preview appears
@@ -115,7 +116,7 @@ Output:
 
 ### **2. Test Barcode**
 
-```
+```text
 1. Input: "1234567890"
 2. Format: CODE128
 3. Expected: Barcode preview appears
@@ -124,7 +125,7 @@ Output:
 
 ### **3. Test Batch**
 
-```
+```text
 1. Item 1: "QR_001" (type: QR)
 2. Item 2: "BC_001" (type: Barcode, format: CODE39)
 3. Expected: Both generated, 2/2 success
@@ -138,7 +139,7 @@ Output:
 
 Look for requests to:
 
-```
+```text
 POST http://localhost:4000/api/barcode/qr-code
 POST http://localhost:4000/api/barcode/barcode
 POST http://localhost:4000/api/barcode/batch

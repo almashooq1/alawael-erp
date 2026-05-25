@@ -14,16 +14,16 @@ This checklist guides you through the complete deployment of ALAWAEL v1.0.0 to p
 
 ## ⏱️ TIMELINE
 
-| Phase | Duration | Cumulative |
-|-------|----------|-----------|
-| Pre-Deployment | 30 min | 30 min |
-| Repository Integration | 45 min | 1h 15m |
-| GitHub Configuration | 60 min | 2h 15m |
-| Testing & Validation | 60 min | 3h 15m |
-| Deployment Staging | 45 min | 4h |
-| Team Briefing | 30 min | 4h 30m |
-| Production Deployment | 30 min | 5h |
-| Total Time | | **≈ 5 hours** |
+| Phase                  | Duration | Cumulative    |
+| ---------------------- | -------- | ------------- |
+| Pre-Deployment         | 30 min   | 30 min        |
+| Repository Integration | 45 min   | 1h 15m        |
+| GitHub Configuration   | 60 min   | 2h 15m        |
+| Testing & Validation   | 60 min   | 3h 15m        |
+| Deployment Staging     | 45 min   | 4h            |
+| Team Briefing          | 30 min   | 4h 30m        |
+| Production Deployment  | 30 min   | 5h            |
+| Total Time             |          | **≈ 5 hours** |
 
 ---
 
@@ -103,6 +103,7 @@ bash alawael-integration.sh ./alawael-backend ./alawael-erp
 ```
 
 **Monitor output for:**
+
 - [ ] Phase 1: Repositories validated ✅
 - [ ] Phase 2: Directory structure created ✅
 - [ ] Phase 3: Tools copied to both repos ✅
@@ -177,6 +178,7 @@ bash alawael-github-config.sh almashooq1 alawael-backend almashooq1 alawael-erp
 ```
 
 This script provides guidance for:
+
 - [ ] GitHub CLI validation
 - [ ] Creating GitHub secrets
 - [ ] Creating teams
@@ -194,6 +196,7 @@ Navigate to each repository's Settings → Secrets → Actions
 **For both repositories, create these 6 secrets:**
 
 #### Backend Repository
+
 ```bash
 # Via GitHub CLI (faster):
 cd alawael-backend
@@ -214,6 +217,7 @@ gh secret set DATABASE_PASSWORD --body '...'
 - [ ] DATABASE_PASSWORD (DB access)
 
 #### ERP Repository
+
 ```bash
 cd ../alawael-erp
 
@@ -238,18 +242,21 @@ Navigate to https://github.com/orgs/YOUR_ORG/teams
 Create 4 teams:
 
 1. **alawael-admins**
+
    - [ ] Team created
    - [ ] Add: Team lead, DevOps leads
    - [ ] Permissions: Full repository access
    - [ ] Can approve deployments
 
 2. **alawael-developers**
+
    - [ ] Team created
    - [ ] Add: Backend/Frontend developers
    - [ ] Permissions: Code push, PR creation
    - [ ] Cannot approve deployments
 
 3. **alawael-ops**
+
    - [ ] Team created
    - [ ] Add: On-call engineers, ops manager
    - [ ] Permissions: Deployment, monitoring
@@ -270,6 +277,7 @@ For **main/master** branch in both repositories:
 Navigate to: Settings → Branches → Add rule for `main`
 
 Configuration:
+
 - [ ] Require pull request reviews: 2 (minimum)
 - [ ] Require status checks to pass
 - [ ] Require branches to be up to date
@@ -286,10 +294,12 @@ Navigate to each repository: Settings → Environments
 Create 3 environments:
 
 #### 1. Development
+
 - [ ] Environment name: `dev`
 - [ ] No protection rules
 
 #### 2. Staging
+
 - [ ] Environment name: `staging`
 - [ ] Require reviewers: alawael-ops
 - [ ] Variables:
@@ -298,6 +308,7 @@ Create 3 environments:
   - STAGING_LOG_LEVEL=info
 
 #### 3. Production
+
 - [ ] Environment name: `production`
 - [ ] Require custom deployment rules
 - [ ] Restrict to: alawael-admins only
@@ -414,6 +425,7 @@ bash alawael-deployment.sh canary staging
 ```
 
 Monitor output:
+
 - [ ] Phase 1: Pre-deployment verification ✅
 - [ ] Phase 2: Test verification ✅
 - [ ] Phase 3: Security verification ✅
@@ -470,6 +482,7 @@ bash .alawael/tools/advanced-testing-suite.sh --load-test --environment=staging
 ### Step 21: Brief Executive Leadership
 
 Present:
+
 - [ ] Executive Summary document
 - [ ] Business value ($400K-500K savings)
 - [ ] Risk assessment (minimal)
@@ -482,6 +495,7 @@ Present:
 ### Step 22: Brief Operations Team
 
 Distribute & review:
+
 - [ ] Quick Reference card (printed copies)
 - [ ] Operations Manual
 - [ ] Incident procedures
@@ -494,6 +508,7 @@ Distribute & review:
 ### Step 23: Brief On-Call Engineers
 
 Review:
+
 - [ ] Incident response procedures
 - [ ] Escalation paths
 - [ ] War room procedures
@@ -525,6 +540,7 @@ Review:
 ### Step 25: Get Final Approvals
 
 Obtain sign-off from:
+
 - [ ] CTO/Technical Lead
 - [ ] Operations Manager
 - [ ] Security Lead
@@ -543,6 +559,7 @@ bash alawael-deployment.sh blue-green production
 ```
 
 Monitor output:
+
 - [ ] Phase 1: Pre-deployment verification ✅
 - [ ] Phase 2: Test verification ✅
 - [ ] Phase 3: Security verification ✅
@@ -585,6 +602,7 @@ curl -s https://alawael.company.com/health | jq
 ### Step 28: Intensive Monitoring (First 24 Hours)
 
 **Hourly checks:**
+
 - [ ] Check error rates (target: < 0.05%)
 - [ ] Check response times (target: P99 < 500ms)
 - [ ] Check resource utilization (CPU < 70%, Memory < 80%)
@@ -594,7 +612,7 @@ curl -s https://alawael.company.com/health | jq
 
 **Create entry for each hour:**
 
-```
+```text
 Hour 1 (T+1h):  ✅ All metrics normal
 Hour 2 (T+2h):  ✅ All metrics normal
 Hour 3 (T+3h):  ✅ All metrics normal
@@ -607,6 +625,7 @@ Hour 24 (T+24h): ✅ All metrics normal - DEPLOYMENT STABLE
 ### Step 29: Daily Monitoring (Days 2-7)
 
 **Daily checks (same time each day):**
+
 - [ ] Morning check: Run health dashboard
 - [ ] Afternoon check: Review metrics
 - [ ] Evening check: Check logs
@@ -614,7 +633,7 @@ Hour 24 (T+24h): ✅ All metrics normal - DEPLOYMENT STABLE
 
 **Create entry for each day:**
 
-```
+```text
 Day 2:  ✅ All checks passed
 Day 3:  ✅ All checks passed
 Day 4:  ✅ All checks passed
@@ -628,6 +647,7 @@ Day 7:  ✅ All checks passed - DEPLOYMENT STABLE
 ### Step 30: Continuous Optimization
 
 Based on monitoring results:
+
 - [ ] Identify performance bottlenecks
 - [ ] Document lessons learned
 - [ ] Plan optimization improvements
@@ -655,6 +675,7 @@ git push origin master
 ```
 
 **Steps:**
+
 1. [ ] Identify critical issue
 2. [ ] Notify team (Slack @here)
 3. [ ] Page on-call if SEV-1
@@ -695,7 +716,8 @@ git push origin master
 ### Sign-Off
 
 **Deployment completed by:**
-```
+
+```text
 Name: _____________________
 Title: _____________________
 Date: _____________________
@@ -713,15 +735,16 @@ CTO: ______________________
 
 **If anything goes wrong:**
 
-| Role | Name | Phone | Email | Slack |
-|------|------|-------|-------|-------|
-| Team Lead | | | | |
-| On-Call #1 | | | | |
-| On-Call #2 | | | | |
-| Operations Manager | | | | |
-| Security Lead | | | | |
+| Role               | Name | Phone | Email | Slack |
+| ------------------ | ---- | ----- | ----- | ----- |
+| Team Lead          |      |       |       |       |
+| On-Call #1         |      |       |       |       |
+| On-Call #2         |      |       |       |       |
+| Operations Manager |      |       |       |       |
+| Security Lead      |      |       |       |       |
 
 **Emergency Channels:**
+
 - Slack: #alawael-incidents
 - Email: alawael-team@company.com
 - PagerDuty: ALAWAEL service page
@@ -746,6 +769,7 @@ CTO: ______________________
 ✅ **ALAWAEL v1.0.0 is successfully deployed to production**
 
 **You have achieved:**
+
 - 48 integrated automation tools
 - Zero-downtime deployments
 - Enterprise-grade security (A+ grade)

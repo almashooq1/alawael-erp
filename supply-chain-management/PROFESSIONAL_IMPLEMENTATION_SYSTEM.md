@@ -8,7 +8,7 @@
 
 ## 🎯 خطة التطوير الاحترافي
 
-```
+```text
 Barcode/QR → Authentication + Rate Limiting + Logging
 GPS Tracking → Real-time Monitoring + Analytics + Alerts
 HR System → Advanced Reporting + Email Notifications + Dashboard
@@ -118,12 +118,7 @@ export class BarcodeService {
     const startTime = Date.now();
 
     try {
-      const {
-        errorCorrectionLevel = 'H',
-        width = 300,
-        margin = 1,
-        version = null,
-      } = options;
+      const { errorCorrectionLevel = 'H', width = 300, margin = 1, version = null } = options;
 
       // Data validation
       if (!productData || typeof productData !== 'object') {
@@ -297,11 +292,7 @@ export class BarcodeService {
 ```javascript
 import express from 'express';
 import { asyncHandler } from '../middleware/errorHandler.js';
-import {
-  authBarcodeOperations,
-  barcodeRateLimiter,
-  validateBarcodeInput,
-} from '../middleware/barcodeAuth.js';
+import { authBarcodeOperations, barcodeRateLimiter, validateBarcodeInput } from '../middleware/barcodeAuth.js';
 import { BarcodeService } from '../services/barcodeService.js';
 import Product from '../models/Product.js';
 import BarcodeLog from '../models/BarcodeLog.js';
@@ -348,7 +339,7 @@ router.post(
     });
 
     res.json(result);
-  })
+  }),
 );
 
 /**
@@ -375,7 +366,7 @@ router.post(
     });
 
     res.json(result);
-  })
+  }),
 );
 
 /**
@@ -392,18 +383,13 @@ router.post(
     }
 
     if (productIds.length > 1000) {
-      return res
-        .status(400)
-        .json({ error: 'Maximum 1000 products per request' });
+      return res.status(400).json({ error: 'Maximum 1000 products per request' });
     }
 
     // استخدام WebSocket للإبلاغ عن التقدم
-    const results = await BarcodeService.generateBatchCodes(
-      productIds,
-      progress => {
-        req.app.get('io')?.emit('barcodeProgress', progress);
-      }
-    );
+    const results = await BarcodeService.generateBatchCodes(productIds, progress => {
+      req.app.get('io')?.emit('barcodeProgress', progress);
+    });
 
     res.json({
       success: true,
@@ -411,7 +397,7 @@ router.post(
       successful: results.filter(r => r.success).length,
       results,
     });
-  })
+  }),
 );
 
 /**
@@ -421,14 +407,7 @@ router.post(
 router.get(
   '/logs',
   asyncHandler(async (req, res) => {
-    const {
-      userId,
-      action,
-      limit = 50,
-      skip = 0,
-      startDate,
-      endDate,
-    } = req.query;
+    const { userId, action, limit = 50, skip = 0, startDate, endDate } = req.query;
 
     const filter = {};
     if (userId) filter.user = userId;
@@ -453,7 +432,7 @@ router.get(
       count: logs.length,
       logs,
     });
-  })
+  }),
 );
 
 export default router;
@@ -507,11 +486,7 @@ function BarcodeManager() {
           setLoading(true);
           const token = localStorage.getItem('token');
 
-          const response = await axios.post(
-            '/api/barcode/scan',
-            { code: decodedText },
-            { headers: { Authorization: `Bearer ${token}` } }
-          );
+          const response = await axios.post('/api/barcode/scan', { code: decodedText }, { headers: { Authorization: `Bearer ${token}` } });
 
           setScannedData(response.data.product);
           setSuccess('تم العثور على المنتج بنجاح');
@@ -522,7 +497,7 @@ function BarcodeManager() {
           setLoading(false);
         }
       },
-      error => console.warn('Scan error:', error)
+      error => console.warn('Scan error:', error),
     );
 
     return scanner;
@@ -537,7 +512,7 @@ function BarcodeManager() {
       const response = await axios.post(
         `/api/barcode/generate-qr/${productId}`,
         { errorCorrection: 'H', width: 300 },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
 
       // تحميل الصورة
@@ -569,7 +544,7 @@ function BarcodeManager() {
       await axios.post(
         '/api/barcode/batch-generate',
         { productIds: selectedProducts, type: 'qr' },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
 
       setSuccess(`تم توليد ${selectedProducts.length} كود بنجاح`);
@@ -588,22 +563,13 @@ function BarcodeManager() {
 
       {/* Mode Selection */}
       <div className="mode-selector">
-        <button
-          className={mode === 'scan' ? 'active' : ''}
-          onClick={() => setMode('scan')}
-        >
+        <button className={mode === 'scan' ? 'active' : ''} onClick={() => setMode('scan')}>
           🔍 مسح
         </button>
-        <button
-          className={mode === 'generate' ? 'active' : ''}
-          onClick={() => setMode('generate')}
-        >
+        <button className={mode === 'generate' ? 'active' : ''} onClick={() => setMode('generate')}>
           📤 توليد مفرد
         </button>
-        <button
-          className={mode === 'batch' ? 'active' : ''}
-          onClick={() => setMode('batch')}
-        >
+        <button className={mode === 'batch' ? 'active' : ''} onClick={() => setMode('batch')}>
           ⚡ توليد جماعي
         </button>
       </div>
@@ -691,10 +657,7 @@ export class TrackingService {
         speed,
         heading,
         lastUpdate: new Date(),
-        totalDistance: this.calculateDistance(previousLocation, [
-          longitude,
-          latitude,
-        ]),
+        totalDistance: this.calculateDistance(previousLocation, [longitude, latitude]),
       };
 
       // حفظ في السجل
@@ -745,10 +708,7 @@ export class TrackingService {
 
     // التحقق من الوصول للوجهة
     if (shipment.destination) {
-      const distance = this.calculateDistance(
-        [lng, lat],
-        [shipment.destination.longitude, shipment.destination.latitude]
-      );
+      const distance = this.calculateDistance([lng, lat], [shipment.destination.longitude, shipment.destination.latitude]);
 
       if (distance < 0.5 && shipment.status !== 'arriving') {
         alerts.push({
@@ -804,10 +764,7 @@ export class TrackingService {
 
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos((lat1 * Math.PI) / 180) *
-        Math.cos((lat2 * Math.PI) / 180) *
-        Math.sin(dLng / 2) *
-        Math.sin(dLng / 2);
+      Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
 
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
@@ -821,10 +778,7 @@ export class TrackingService {
       return null;
     }
 
-    const distance = this.calculateDistance(shipment.currentLocation, [
-      shipment.destination.longitude,
-      shipment.destination.latitude,
-    ]);
+    const distance = this.calculateDistance(shipment.currentLocation, [shipment.destination.longitude, shipment.destination.latitude]);
 
     const avgSpeed = shipment.tracking.speed || 60; // km/h
     const hours = distance / avgSpeed;
@@ -847,24 +801,12 @@ export class TrackingService {
     const history = shipment.locationHistory || [];
 
     const analytics = {
-      totalDistance:
-        history.length > 0 ? history[history.length - 1].totalDistance || 0 : 0,
-      averageSpeed:
-        history.length > 0
-          ? (
-              history.reduce((sum, h) => sum + (h.speed || 0), 0) /
-              history.length
-            ).toFixed(1)
-          : 0,
-      maxSpeed:
-        history.length > 0 ? Math.max(...history.map(h => h.speed || 0)) : 0,
+      totalDistance: history.length > 0 ? history[history.length - 1].totalDistance || 0 : 0,
+      averageSpeed: history.length > 0 ? (history.reduce((sum, h) => sum + (h.speed || 0), 0) / history.length).toFixed(1) : 0,
+      maxSpeed: history.length > 0 ? Math.max(...history.map(h => h.speed || 0)) : 0,
       locationUpdates: history.length,
       duration:
-        history.length > 1
-          ? (new Date(history[history.length - 1].timestamp) -
-              new Date(history[0].timestamp)) /
-            (1000 * 60 * 60)
-          : 0,
+        history.length > 1 ? (new Date(history[history.length - 1].timestamp) - new Date(history[0].timestamp)) / (1000 * 60 * 60) : 0,
       stoppages: this.calculateStoppages(history),
       alerts: shipment.alerts || [],
     };
@@ -908,7 +850,7 @@ router.get(
       success: true,
       analytics,
     });
-  })
+  }),
 );
 
 /**
@@ -929,17 +871,14 @@ router.get(
     const googleMapsKey = process.env.GOOGLE_MAPS_API_KEY;
 
     try {
-      const response = await axios.get(
-        'https://maps.googleapis.com/maps/api/directions/json',
-        {
-          params: {
-            origin: `${shipment.currentLocation.coordinates[1]},${shipment.currentLocation.coordinates[0]}`,
-            destination: `${shipment.destination.latitude},${shipment.destination.longitude}`,
-            key: googleMapsKey,
-            alternatives: true,
-          },
-        }
-      );
+      const response = await axios.get('https://maps.googleapis.com/maps/api/directions/json', {
+        params: {
+          origin: `${shipment.currentLocation.coordinates[1]},${shipment.currentLocation.coordinates[0]}`,
+          destination: `${shipment.destination.latitude},${shipment.destination.longitude}`,
+          key: googleMapsKey,
+          alternatives: true,
+        },
+      });
 
       const routes = response.data.routes.map(route => ({
         distance: route.legs[0].distance.text,
@@ -957,7 +896,7 @@ router.get(
       logger.error('Route calculation failed', { error: error.message });
       res.status(500).json({ error: 'Failed to calculate routes' });
     }
-  })
+  }),
 );
 
 /**
@@ -1027,7 +966,7 @@ const employeeSchema = new mongoose.Schema(
       ref: 'Employee',
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 employeeSchema.index({ department: 1, status: 1 });
@@ -1067,7 +1006,7 @@ const attendanceSchema = new mongoose.Schema(
     leaveType: String, // vacation, sick, unpaid
     notes: String,
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 attendanceSchema.index({ employee: 1, date: -1 });
@@ -1108,7 +1047,7 @@ const payrollSchema = new mongoose.Schema(
     },
     paidDate: Date,
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // تقييم الأداء
@@ -1143,7 +1082,7 @@ const performanceSchema = new mongoose.Schema(
       default: 'pending',
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export const Employee = mongoose.model('Employee', employeeSchema);
@@ -1158,12 +1097,7 @@ export const Performance = mongoose.model('Performance', performanceSchema);
 
 ```javascript
 import nodemailer from 'nodemailer';
-import {
-  Employee,
-  Attendance,
-  Payroll,
-  Performance,
-} from '../models/AdvancedHR.js';
+import { Employee, Attendance, Payroll, Performance } from '../models/AdvancedHR.js';
 import winston from 'winston';
 
 const logger = winston.createLogger({
@@ -1237,13 +1171,8 @@ export class HRService {
           },
         });
 
-        const presentDays = attendance.filter(
-          a => a.status === 'present'
-        ).length;
-        const totalHours = attendance.reduce(
-          (sum, a) => sum + (a.totalHours || 0),
-          0
-        );
+        const presentDays = attendance.filter(a => a.status === 'present').length;
+        const totalHours = attendance.reduce((sum, a) => sum + (a.totalHours || 0), 0);
         const overtimeHours = totalHours - presentDays * 8;
 
         // حساب الراتب
@@ -1323,12 +1252,7 @@ export class HRService {
           presentDays: attendance.filter(a => a.status === 'present').length,
           absentDays: attendance.filter(a => a.status === 'absent').length,
           lateDays: attendance.filter(a => a.status === 'late').length,
-          averageAttendanceRate:
-            (
-              (attendance.filter(a => a.status === 'present').length /
-                attendance.length) *
-              100
-            ).toFixed(2) + '%',
+          averageAttendanceRate: ((attendance.filter(a => a.status === 'present').length / attendance.length) * 100).toFixed(2) + '%',
         },
         departmentBreakdown: this.getDepartmentStats(employees),
         generatedAt: new Date(),
@@ -1367,20 +1291,7 @@ export class HRService {
 ```javascript
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import {
-  BarChart,
-  Bar,
-  PieChart,
-  Pie,
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from 'recharts';
+import { BarChart, Bar, PieChart, Pie, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import './HRDashboard.css';
 
 function HRDashboard() {
@@ -1419,14 +1330,9 @@ function HRDashboard() {
 
     const metrics = {
       totalEmployees: data.employees?.length || 0,
-      activeEmployees:
-        data.employees?.filter(e => e.status === 'active').length || 0,
-      attendanceRate: (
-        ((data.attendance?.present || 0) / (data.attendance?.total || 1)) *
-        100
-      ).toFixed(1),
-      averageOvertimeHours:
-        (data.overtime?.total || 0) / (data.employees?.length || 1),
+      activeEmployees: data.employees?.filter(e => e.status === 'active').length || 0,
+      attendanceRate: (((data.attendance?.present || 0) / (data.attendance?.total || 1)) * 100).toFixed(1),
+      averageOvertimeHours: (data.overtime?.total || 0) / (data.employees?.length || 1),
       departmentStats: data.departments || [],
     };
 
@@ -1491,9 +1397,7 @@ function HRDashboard() {
         </div>
         <div className="metric-card">
           <h3>⏰ متوسط الإضافي</h3>
-          <p className="metric-value">
-            {metrics?.averageOvertimeHours.toFixed(1)} ساعة
-          </p>
+          <p className="metric-value">{metrics?.averageOvertimeHours.toFixed(1)} ساعة</p>
         </div>
       </div>
 
@@ -1552,18 +1456,8 @@ function HRDashboard() {
               <YAxis />
               <Tooltip />
               <Legend />
-              <Line
-                type="monotone"
-                dataKey="present"
-                stroke="#82ca9d"
-                name="حاضر"
-              />
-              <Line
-                type="monotone"
-                dataKey="absent"
-                stroke="#ffc658"
-                name="غائب"
-              />
+              <Line type="monotone" dataKey="present" stroke="#82ca9d" name="حاضر" />
+              <Line type="monotone" dataKey="absent" stroke="#ffc658" name="غائب" />
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -1595,7 +1489,7 @@ export default HRDashboard;
 
 ### المرحلة 2: Barcode/QR (الأسبوع 2-3)
 
-```
+```text
 يوم 1-2: Models و Services و Logging
 يوم 3-4: API Routes مع Authentication
 يوم 5-6: Frontend Component
@@ -1604,7 +1498,7 @@ export default HRDashboard;
 
 ### المرحلة 3: GPS Tracking (الأسبوع 4-6)
 
-```
+```text
 يوم 1-3: Services مع Geofencing
 يوم 4-5: WebSocket و Real-time Updates
 يوم 6-7: Frontend Map و Analytics
@@ -1613,7 +1507,7 @@ export default HRDashboard;
 
 ### المرحلة 4: HR System (الأسبوع 7-10)
 
-```
+```text
 يوم 1-2: Models متقدمة
 يوم 3-4: Payroll Services
 يوم 5-6: Frontend Dashboard
@@ -1698,7 +1592,7 @@ CMD ["node", "server.js"]
 
 ### Environment Variables
 
-```
+```text
 # .env.production
 NODE_ENV=production
 JWT_SECRET=your-secret-key

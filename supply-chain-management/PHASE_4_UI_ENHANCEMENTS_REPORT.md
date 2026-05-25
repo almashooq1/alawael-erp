@@ -38,11 +38,7 @@ const columns = [
 ];
 
 // Usage
-<EnhancedDataTable
-  entityType="suppliers"
-  columns={columns}
-  title="Suppliers Management"
-/>;
+<EnhancedDataTable entityType="suppliers" columns={columns} title="Suppliers Management" />;
 ```
 
 **Features**:
@@ -163,13 +159,7 @@ function SupplierList() {
     { id: 'status', label: 'Status' },
   ];
 
-  return (
-    <EnhancedDataTable
-      entityType="suppliers"
-      columns={columns}
-      title="Suppliers Management"
-    />
-  );
+  return <EnhancedDataTable entityType="suppliers" columns={columns} title="Suppliers Management" />;
 }
 ```
 
@@ -185,13 +175,7 @@ function ProductList() {
     { id: 'status', label: 'Status' },
   ];
 
-  return (
-    <EnhancedDataTable
-      entityType="products"
-      columns={columns}
-      title="Products Management"
-    />
-  );
+  return <EnhancedDataTable entityType="products" columns={columns} title="Products Management" />;
 }
 ```
 
@@ -327,7 +311,7 @@ function ProductList() {
 
 ## File Structure
 
-```
+```text
 frontend/src/
 ├── components/
 │   ├── EnhancedDataTable.jsx          (NEW - Advanced table)

@@ -10,7 +10,7 @@
 
 ### High-Level Architecture
 
-```
+```text
 ┌─────────────────────────────────────────────┐
 │           CLIENT LAYER                       │
 │  ┌──────────┐  ┌──────────┐  ┌──────────┐  │
@@ -44,7 +44,7 @@
 
 ### Layered Architecture
 
-```
+```text
 ┌───────────────────────────────────┐
 │      PRESENTATION LAYER           │
 │  (Controllers, REST endpoints)    │
@@ -62,7 +62,7 @@
 
 ### Module Structure
 
-```
+```text
 alawael-unified/
 ├── backend/
 │   ├── src/
@@ -111,13 +111,15 @@ alawael-unified/
 **Purpose:** Separate concerns in web application
 
 **Implementation:**
-```
+
+```text
 Model:      Database models (user.js, order.js)
 View:       React components / Frontend
 Controller: Express route handlers
 ```
 
 **Example:**
+
 ```javascript
 // Model: models/User.js
 const User = sequelize.define('User', { ... });
@@ -139,11 +141,13 @@ router.get('/:id', userController.getUser);
 **Purpose:** Isolate business logic from controllers
 
 **Implementation:**
-```
+
+```text
 Controller → Service → Repository → Database
 ```
 
 **Example:**
+
 ```javascript
 // Service: services/userService.js
 class UserService {
@@ -169,22 +173,24 @@ exports.getUser = async (req, res) => {
 **Purpose:** Abstract data access logic
 
 **Implementation:**
-```
+
+```text
 Service → Repository → Database Abstraction
 ```
 
 **Example:**
+
 ```javascript
 // Repository: repositories/userRepository.js
 class UserRepository {
   async findById(id) {
     return User.findByPk(id);
   }
-  
+
   async findAll(filters) {
     return User.findAll({ where: filters });
   }
-  
+
   async create(data) {
     return User.create(data);
   }
@@ -201,6 +207,7 @@ const user = await userRepository.findById(userId);
 **Purpose:** Loose coupling between components
 
 **Implementation:**
+
 ```javascript
 // Without DI (tight coupling)
 class UserController {
@@ -228,14 +235,18 @@ const userController = new UserController(userService);
 **Purpose:** Create objects without specifying exact classes
 
 **Implementation:**
+
 ```javascript
 // Factory: factories/NotificationFactory.js
 class NotificationFactory {
   static createNotification(type) {
-    switch(type) {
-      case 'email': return new EmailNotification();
-      case 'sms': return new SMSNotification();
-      case 'push': return new PushNotification();
+    switch (type) {
+      case 'email':
+        return new EmailNotification();
+      case 'sms':
+        return new SMSNotification();
+      case 'push':
+        return new PushNotification();
     }
   }
 }
@@ -252,15 +263,16 @@ notification.send(message);
 **Purpose:** Ensure single instance of a class
 
 **Implementation:**
+
 ```javascript
 // Without Singleton
 const db = new Database();
-const db2 = new Database();  // Different instance!
+const db2 = new Database(); // Different instance!
 
 // With Singleton
 class Database {
   static instance = null;
-  
+
   static getInstance() {
     if (!Database.instance) {
       Database.instance = new Database();
@@ -270,7 +282,7 @@ class Database {
 }
 
 const db = Database.getInstance();
-const db2 = Database.getInstance();  // Same instance
+const db2 = Database.getInstance(); // Same instance
 ```
 
 ---
@@ -280,6 +292,7 @@ const db2 = Database.getInstance();  // Same instance
 **Purpose:** Notify multiple objects about state changes
 
 **Implementation:**
+
 ```javascript
 // Event Emitter (Observer pattern)
 const EventEmitter = require('events');
@@ -287,13 +300,13 @@ const EventEmitter = require('events');
 class UserService extends EventEmitter {
   async createUser(userData) {
     const user = await User.create(userData);
-    this.emit('userCreated', user);  // Notify observers
+    this.emit('userCreated', user); // Notify observers
     return user;
   }
 }
 
 // Observers
-userService.on('userCreated', (user) => {
+userService.on('userCreated', user => {
   emailService.sendWelcomeEmail(user.email);
   analyticsService.trackUserSignup(user);
 });
@@ -306,6 +319,7 @@ userService.on('userCreated', (user) => {
 **Purpose:** Execute functions in sequence
 
 **Implementation:**
+
 ```javascript
 // Middleware: Check authentication
 app.use((req, res, next) => {
@@ -332,14 +346,19 @@ app.use((req, res, next) => {
 **Purpose:** Select algorithm at runtime
 
 **Implementation:**
+
 ```javascript
 // Strategies
 class PDFReportStrategy {
-  generate(data) { /* PDF logic */ }
+  generate(data) {
+    /* PDF logic */
+  }
 }
 
 class ExcelReportStrategy {
-  generate(data) { /* Excel logic */ }
+  generate(data) {
+    /* Excel logic */
+  }
 }
 
 // Context
@@ -347,7 +366,7 @@ class ReportGenerator {
   constructor(strategy) {
     this.strategy = strategy;
   }
-  
+
   generate(data) {
     return this.strategy.generate(data);
   }
@@ -366,6 +385,7 @@ generator.generate(reportData);
 **Purpose:** Add behavior to objects dynamically
 
 **Implementation:**
+
 ```javascript
 // Without decorator
 async function getUser(userId) {
@@ -374,11 +394,11 @@ async function getUser(userId) {
 
 // With caching decorator
 function withCache(fn) {
-  return async function(...args) {
+  return async function (...args) {
     const cacheKey = `${fn.name}:${JSON.stringify(args)}`;
     const cached = await redis.get(cacheKey);
     if (cached) return cached;
-    
+
     const result = await fn(...args);
     await redis.set(cacheKey, result, 3600);
     return result;
@@ -394,7 +414,7 @@ const cachedGetUser = withCache(getUser);
 
 ### API Request Lifecycle
 
-```
+```text
 1. Request Arrives
    ↓
 2. Load Balancer Routes
@@ -464,7 +484,7 @@ userRepository.findById:
 
 ### Database Design
 
-```
+```text
 Entities (45+ models):
   ├── Core
   │   ├── User (users table)
@@ -491,7 +511,7 @@ Relationships:
 
 ### Indexing Strategy
 
-```
+```text
 High-Priority Indexes:
   • users(email) - for login
   • users(status) - for filtering
@@ -515,7 +535,7 @@ Analysis:
 
 ### Authentication Flow
 
-```
+```text
 1. User submits credentials
    ↓
 2. Hash password & compare with DB
@@ -538,7 +558,7 @@ Analysis:
 
 ### Authorization Model
 
-```
+```text
 Role-Based Access Control (RBAC):
 
 Roles:
@@ -566,7 +586,7 @@ Check:
 
 ### Synchronous (REST API)
 
-```
+```text
 Client → API → Database
 ↓
 Response immediately
@@ -574,13 +594,14 @@ Response immediately
 
 ### Asynchronous (Message Queue)
 
-```
+```text
 Client → API → Queue → Worker → Database
 ↓
 Response immediately (queued)
 ```
 
 **Example: Email Sending**
+
 ```javascript
 // API Route
 router.post('/send-email', async (req, res) => {
@@ -590,35 +611,36 @@ router.post('/send-email', async (req, res) => {
 });
 
 // Worker processing queue
-emailQueue.process(async (job) => {
+emailQueue.process(async job => {
   await sendEmail(job.data);
 });
 ```
 
 ### Real-time (WebSocket)
 
-```
+```text
 Client ↔ API ↔ WebSocket Server
 ↓
 Bi-directional communication
 ```
 
 **Example: Live Updates**
+
 ```javascript
 // Server
-io.on('connection', (socket) => {
+io.on('connection', socket => {
   // User joins room
-  socket.on('join-room', (roomId) => {
+  socket.on('join-room', roomId => {
     socket.join(roomId);
   });
-  
+
   // Broadcast to room
   io.to(roomId).emit('user-added', userData);
 });
 
 // Client
 socket.emit('join-room', roomId);
-socket.on('user-added', (userData) => {
+socket.on('user-added', userData => {
   // Update UI
 });
 ```
@@ -629,7 +651,7 @@ socket.on('user-added', (userData) => {
 
 ### Error Hierarchy
 
-```
+```text
 AppError (Base)
 ├── ValidationError (422)
 ├── AuthenticationError (401)
@@ -665,7 +687,7 @@ try {
 
 ### CQRS (Command Query Responsibility Segregation)
 
-```
+```text
 Write Path (Command):
   POST /orders
   ↓
@@ -699,16 +721,16 @@ Read Path (Query):
 
 ### Frontend State
 
-```
+```text
 React Context / Redux:
   • User state (logged-in user)
   • UI state (modals, forms)
   • Data state (cached data)
-  
+
 Example:
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
-  
+
   useEffect(() => {
     fetchUsers();
   }, []);
@@ -716,14 +738,14 @@ Example:
 
 ### Backend State
 
-```
+```text
 Session Management:
   • Stored in Redis
   • TTL: 24 hours
   • Contains: user ID, roles, permissions
-  
+
   redis.set(`session:${sessionId}`, { userId, roles }, 'EX', 86400);
-  
+
 Cache:
   • Query results cached
   • TTL: 1 hour
@@ -736,7 +758,7 @@ Cache:
 
 ### Horizontal Scaling
 
-```
+```text
 Load Balancer
       ↓
   ┌───┴───┐
@@ -750,12 +772,12 @@ Shared Cache
 
 ### Database Scaling
 
-```
+```text
 Current: Single primary + read replica
 
 Future (6-12 months):
   Shard by tenant/customer
-  
+
   Shard 1: Customers A-G
   Shard 2: Customers H-M
   Shard 3: Customers N-T
@@ -764,7 +786,7 @@ Future (6-12 months):
 
 ### Cache Layering
 
-```
+```text
 Request
   ↓
 L1: In-memory cache (application level)
@@ -780,7 +802,7 @@ L3: Database query
 
 ### Logging Strategy
 
-```
+```text
 Application Logs:
   • Request/response logs
   • Error stack traces
@@ -801,7 +823,7 @@ Levels:
 
 ### Metrics & Monitoring
 
-```
+```text
 Key Metrics:
   • Request rate (req/sec)
   • Response time (p50, p95, p99)
@@ -819,4 +841,3 @@ Tools:
 
 **Status:** Production Ready  
 **Last Updated:** February 24, 2026
-

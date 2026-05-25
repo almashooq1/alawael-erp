@@ -1,4 +1,5 @@
 # 📋 PRODUCTION DEPLOYMENT EXECUTION CHECKLIST
+
 **Date**: February 20, 2026 | **System**: ERP Production v1.0  
 **Deployment Window**: [Scheduled Time] | **Duration**: 15-30 minutes
 
@@ -7,6 +8,7 @@
 ## PRE-DEPLOYMENT PHASE (T-1 hour)
 
 ### ✅ Team Preparation
+
 - [ ] All team members present and ready
 - [ ] Communication channels open (Slack, Phone, Teams)
 - [ ] Status page ready to update
@@ -16,6 +18,7 @@
 - [ ] Database backup completed and verified
 
 ### ✅ Environment Verification
+
 - [ ] All 6 services stopped cleanly
 - [ ] Database connectivity tested
 - [ ] Network connectivity confirmed
@@ -25,6 +28,7 @@
 - [ ] DNS entries pointing to load balancer
 
 ### ✅ Configuration Review
+
 - [ ] Environment variables loaded
 - [ ] Database connection strings verified
 - [ ] API keys and secrets configured
@@ -34,6 +38,7 @@
 - [ ] Backup paths confirmed
 
 ### ✅ Final Pre-Flight
+
 - [ ] All team ready to deploy: YES / NO
 - [ ] Management approval obtained: YES / NO
 - [ ] Rollback plan tested: YES / NO
@@ -43,9 +48,10 @@
 
 ## DEPLOYMENT PHASE (T-0)
 
-### ⏱️ Deployment Start Time: _______________
+### ⏱️ Deployment Start Time: ******\_\_\_******
 
 ### Step 1: Verify Environment (2 minutes)
+
 ```bash
 # Navigate to workspace
 cd C:\Users\x-be\OneDrive\المستندات\04-10-2025\66666
@@ -54,49 +60,61 @@ cd C:\Users\x-be\OneDrive\المستندات\04-10-2025\66666
 docker ps --all
 netstat -ano | Select-String "3000|3001|5432|6379|9200"
 ```
+
 - [ ] No existing services running on required ports
 - [ ] Disk space sufficient
 - [ ] Database accessible
 
 ### Step 2: Start Backend Service (3 minutes)
+
 ```bash
 cd erp_new_system/backend
 npm start
 ```
+
 **Expected Output**:
-```
+
+```text
 ✅ Server running on port 3001
 ✅ Database connected & initialized
 ✅ WebSocket enabled
 ✅ MOI Passport routes registered
 ```
+
 - [ ] Backend starts without errors
 - [ ] Port 3001 listening
 - [ ] No critical errors in logs
-- [ ] Time started: _______________
+- [ ] Time started: ******\_\_\_******
 
 ### Step 3: Start Frontend Service (3 minutes)
+
 ```bash
 cd erp_new_system/frontend
 npm start
 ```
+
 **Expected Output**:
-```
+
+```text
 Compiled successfully!
 Running on: http://localhost:3000
 ```
+
 - [ ] Frontend compiles without errors
 - [ ] Port 3000 listening
 - [ ] No critical build warnings
-- [ ] Time started: _______________
+- [ ] Time started: ******\_\_\_******
 
 ### Step 4: Verify All Services (2 minutes)
+
 ```bash
 # Run port scanner
 node SCAN_PORTS.js
 ```
+
 **Expected**:
-```
+
+```text
 Frontend (React)         :3000  ✅ OPEN [LISTENING]
 Backend API (Express)    :3001  ✅ OPEN [LISTENING]
 PostgreSQL Database      :5432  ✅ OPEN [LISTENING]
@@ -104,12 +122,14 @@ Redis Cache              :6379  ✅ OPEN [LISTENING]
 Elasticsearch Search     :9200  ✅ OPEN [LISTENING]
 MongoDB (Optional)       :27017 ✅ OPEN [LISTENING]
 ```
+
 - [ ] All 6/6 services responding
 - [ ] All ports accessible
 - [ ] No connection timeouts
-- [ ] Verification time: _______________
+- [ ] Verification time: ******\_\_\_******
 
 ### Step 5: Health Check (2 minutes)
+
 ```bash
 # Test backend health
 curl http://localhost:3001/health
@@ -120,33 +140,38 @@ curl http://localhost:3000
 # Test MOI health
 curl -X POST http://localhost:3001/api/moi/health
 ```
+
 **Expected**: All return HTTP 200 with valid responses
+
 - [ ] Backend health: PASSING
-- [ ] Frontend loads: PASSING  
+- [ ] Frontend loads: PASSING
 - [ ] MOI health: PASSING
 - [ ] All endpoints responding
 
 ### Step 6: Quick Functional Test (5 minutes)
 
 **Test User Login**:
-```
+
+```text
 1. Open http://localhost:3000 in browser
 2. Log in with default credentials
 3. Verify dashboard loads
 4. Check WebSocket connection active
 ```
+
 - [ ] Application loads
 - [ ] Login successful
 - [ ] Dashboard responsive
 - [ ] Real-time features working
-- [ ] Time verified: _______________
+- [ ] Time verified: ******\_\_\_******
 
 **Test API Endpoints**:
+
 ```bash
 # Test user endpoint
 curl http://localhost:3001/api/users/profile
 
-# Test health endpoint  
+# Test health endpoint
 curl http://localhost:3001/api/health
 
 # Test GraphQL
@@ -154,12 +179,14 @@ curl -X POST http://localhost:3001/graphql \
   -H "Content-Type: application/json" \
   -d '{"query":"{ health { status } }"}'
 ```
+
 - [ ] REST endpoints responding
 - [ ] GraphQL operational
 - [ ] Authentication working
 - [ ] Database queries functional
 
 ### Step 7: Database Verification (2 minutes)
+
 ```bash
 # Test database connection
 curl http://localhost:3001/api/health/db
@@ -167,6 +194,7 @@ curl http://localhost:3001/api/health/db
 # Verify data integrity
 curl http://localhost:3001/api/verify-data
 ```
+
 - [ ] Database connected
 - [ ] Schema verified
 - [ ] Sample data accessible
@@ -176,9 +204,10 @@ curl http://localhost:3001/api/verify-data
 
 ## POST-DEPLOYMENT PHASE (T+0:30)
 
-### ⏱️ Deployment Complete Time: _______________
+### ⏱️ Deployment Complete Time: ******\_\_\_******
 
 ### ✅ Immediate Verification (5 minutes)
+
 - [ ] All services still running after 5 minutes
 - [ ] No error spikes in logs
 - [ ] Performance metrics normal
@@ -188,6 +217,7 @@ curl http://localhost:3001/api/verify-data
 ### ✅ Extended Testing (30 minutes)
 
 **User Operations**:
+
 - [ ] User can register new account
 - [ ] Login/logout working
 - [ ] Password reset functional
@@ -195,6 +225,7 @@ curl http://localhost:3001/api/verify-data
 - [ ] Profile update successful
 
 **Data Operations**:
+
 - [ ] Can create new records
 - [ ] Can read existing data
 - [ ] Can update records
@@ -202,6 +233,7 @@ curl http://localhost:3001/api/verify-data
 - [ ] Data consistency verified
 
 **Advanced Features**:
+
 - [ ] Real-time dashboard updating
 - [ ] Notifications sending
 - [ ] Exports generating
@@ -209,6 +241,7 @@ curl http://localhost:3001/api/verify-data
 - [ ] Search functionality working
 
 **API Endpoints**:
+
 - [ ] REST API responding
 - [ ] GraphQL queries working
 - [ ] WebSocket connections stable
@@ -216,6 +249,7 @@ curl http://localhost:3001/api/verify-data
 - [ ] Data retrieval efficient
 
 ### ✅ System Monitoring (Ongoing)
+
 - [ ] Error rate < 0.5%
 - [ ] API response P95 < 200ms
 - [ ] CPU usage < 50%
@@ -224,6 +258,7 @@ curl http://localhost:3001/api/verify-data
 - [ ] Network latency acceptable
 
 ### ✅ Team Communication
+
 - [ ] Status page updated: LIVE
 - [ ] Customer notifications sent
 - [ ] Internal teams notified
@@ -235,7 +270,8 @@ curl http://localhost:3001/api/verify-data
 ## SIGN-OFF & SIGN-OFF
 
 ### Deployment Execution Sign-Off
-```
+
+```text
 Deployed By:               _____________________
 Backend Verified By:       _____________________
 Frontend Verified By:      _____________________
@@ -246,7 +282,8 @@ Date: ____________________   Time: ____________
 ```
 
 ### Post-Deployment Approval
-```
+
+```text
 ✅ All systems operational
 ✅ Performance baseline met
 ✅ No critical issues identified
@@ -263,6 +300,7 @@ Time of Full Operation:    _______________
 **ONLY EXECUTE IF CRITICAL ISSUES OCCUR**
 
 ### Immediate Actions
+
 ```bash
 # Stop all services
 docker-compose down
@@ -271,11 +309,12 @@ docker-compose down
 # Stop Backend
 TASKKILL /PID [backend-pid] /F
 
-# Stop Frontend  
+# Stop Frontend
 TASKKILL /PID [frontend-pid] /F
 ```
 
 ### Restore Previous Version
+
 ```bash
 # Check git tags
 git tag -l
@@ -289,6 +328,7 @@ docker-compose up -d
 ```
 
 ### Verification
+
 ```bash
 # Verify services up
 docker ps
@@ -300,9 +340,9 @@ curl http://localhost:3000
 ```
 
 **Rollback Status**: ✅ / ❌  
-**Rolled Back By**: _____________________  
-**Time Completed**: _______________  
-**Issue Description**: _______________
+**Rolled Back By**: **********\_**********  
+**Time Completed**: ******\_\_\_******  
+**Issue Description**: ******\_\_\_******
 
 ---
 
@@ -311,7 +351,8 @@ curl http://localhost:3000
 If issues occur during deployment:
 
 **Issue #1**
-```
+
+```text
 Description: _________________________________
 Severity: CRITICAL / HIGH / MEDIUM / LOW
 Detected At: _______________
@@ -323,7 +364,8 @@ Prevention: _________________________________
 ```
 
 **Issue #2** (If applicable)
-```
+
+```text
 Description: _________________________________
 Severity: CRITICAL / HIGH / MEDIUM / LOW
 Detected At: _______________
@@ -339,6 +381,7 @@ Prevention: _________________________________
 ## 24-HOUR MONITORING CHECKLIST
 
 ### Hour 1 (T+1:00)
+
 - [ ] Review error logs
 - [ ] Check performance metrics
 - [ ] Verify all APIs responding
@@ -346,6 +389,7 @@ Prevention: _________________________________
 - [ ] Assess user feedback
 
 ### Hour 4 (T+4:00)
+
 - [ ] Full system health check
 - [ ] Database integrity verification
 - [ ] Performance baseline analysis
@@ -353,6 +397,7 @@ Prevention: _________________________________
 - [ ] Team debrief
 
 ### Hour 8 (T+8:00)
+
 - [ ] Comprehensive system scan
 - [ ] Backup verification
 - [ ] Load test baseline
@@ -360,6 +405,7 @@ Prevention: _________________________________
 - [ ] Lessons learned capture
 
 ### Hour 24 (T+24:00)
+
 - [ ] Full 24-hour stability confirmation
 - [ ] Extended performance metrics
 - [ ] Final health assessment
@@ -371,21 +417,24 @@ Prevention: _________________________________
 ## LESSONS LEARNED & NOTES
 
 ### What Went Well
-```
+
+```text
 _________________________________________________________________
 _________________________________________________________________
 _________________________________________________________________
 ```
 
 ### Areas for Improvement
-```
+
+```text
 _________________________________________________________________
 _________________________________________________________________
 _________________________________________________________________
 ```
 
 ### Action Items for Next Deployment
-```
+
+```text
 1. _________________________________________________________________
 2. _________________________________________________________________
 3. _________________________________________________________________
@@ -397,7 +446,7 @@ _________________________________________________________________
 
 ## FINAL SIGN-OFF
 
-```
+```text
 ╔═══════════════════════════════════════════════════════════════╗
 ║                                                               ║
 ║         ✅ PRODUCTION DEPLOYMENT COMPLETE & VERIFIED         ║
@@ -420,16 +469,16 @@ _________________________________________________________________
 
 ## EMERGENCY CONTACTS
 
-| Role | Name | Phone | Email | Status |
-|------|------|-------|-------|--------|
-| CTO | | | | |
-| VP Eng | | | | |
-| Team Lead | | | | |
-| DevOps | | | | |
-| Backend | | | | |
-| Frontend | | | | |
-| Database | | | | |
-| Support | | | | |
+| Role      | Name | Phone | Email | Status |
+| --------- | ---- | ----- | ----- | ------ |
+| CTO       |      |       |       |        |
+| VP Eng    |      |       |       |        |
+| Team Lead |      |       |       |        |
+| DevOps    |      |       |       |        |
+| Backend   |      |       |       |        |
+| Frontend  |      |       |       |        |
+| Database  |      |       |       |        |
+| Support   |      |       |       |        |
 
 ---
 

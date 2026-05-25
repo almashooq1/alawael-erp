@@ -10,7 +10,7 @@
 
 ### 🟢 GREEN - All Systems Go
 
-```
+```text
 ┌─ Backend Server
 │  ├─ Status: 🟢 RUNNING
 │  ├─ Port: 4000
@@ -45,7 +45,7 @@
 
 ### Change 1: API Endpoint Fix
 
-```
+```text
 File: frontend/src/hooks/useBarcodeGeneration.js
 Line: 7-8
 Change: API_BASE_URL = 'http://localhost:4000/api/barcode'
@@ -55,7 +55,7 @@ Status: ✅ APPLIED
 
 ### Change 2: Token Fallback Logic
 
-```
+```text
 File: frontend/src/hooks/useBarcodeGeneration.js
 Line: 10-11
 Change: Support both authToken and token keys
@@ -65,7 +65,7 @@ Status: ✅ APPLIED
 
 ### Change 3: Import BarcodeManager
 
-```
+```text
 File: frontend/src/App.js
 Line: 12
 Change: Added import statement
@@ -75,7 +75,7 @@ Status: ✅ APPLIED
 
 ### Change 4: Add Navigation State
 
-```
+```text
 File: frontend/src/App.js
 Line: 41
 Change: const [activeTab, setActiveTab] = useState('dashboard')
@@ -85,7 +85,7 @@ Status: ✅ APPLIED
 
 ### Change 5: Tab Navigation System
 
-```
+```text
 File: frontend/src/App.js
 Lines: 63-150
 Change: Complete render method replacement
@@ -97,7 +97,7 @@ Status: ✅ APPLIED
 
 ## 📂 CURRENT FILE STRUCTURE
 
-```
+```text
 supply-chain-management/
 ├── backend/
 │   ├── barcode-server.js ................... ✅ RUNNING
@@ -175,7 +175,7 @@ supply-chain-management/
 
 ### Backend Tests
 
-```
+```text
 Framework: Jest 29.7.0
 Total Tests: 20
 Passing: 20 ✅
@@ -186,7 +186,7 @@ Coverage: Comprehensive
 
 ### Frontend Components
 
-```
+```text
 BarcodeManager.jsx ............ Ready ✅
 BarcodeManager.css ............ Ready ✅
 useBarcodeGeneration.js ....... Updated ✅
@@ -195,7 +195,7 @@ App.js (navigation) ........... Updated ✅
 
 ### Integration Tests
 
-```
+```text
 API Connection ............... Ready ✅
 Token Management ............. Ready ✅
 Error Handling ............... Ready ✅
@@ -246,7 +246,7 @@ Ready to Start? Verify:
 
 **Total Time to Have Running System:** 5 minutes
 
-```
+```text
 1. Open Terminal 1:           30 seconds
 2. Navigate to backend:       15 seconds
 3. Start backend:             30 seconds

@@ -9,22 +9,26 @@
 ## 📚 TRAINING AGENDA
 
 ### Part 1: Foundation (30 minutes)
+
 - [x] What is the Migration System?
 - [x] Why do we need it?
 - [x] Key features & benefits
 
 ### Part 2: Technical Overview (45 minutes)
+
 - [x] Architecture & components
 - [x] How it works internally
 - [x] Data flow & processing
 
 ### Part 3: Hands-On Labs (60 minutes)
+
 - [x] Lab 1: Initialize migration
 - [x] Lab 2: Create & execute plan
 - [x] Lab 3: Monitor progress
 - [x] Lab 4: Handle errors
 
 ### Part 4: Best Practices (30 minutes)
+
 - [x] Migration patterns
 - [x] Performance optimization
 - [x] Troubleshooting
@@ -47,7 +51,8 @@ The Migration System is an **automated database migration tool** that enables:
 ### Why Do We Need It?
 
 #### Before (Manual Process)
-```
+
+```text
 ❌ Days of manual SQL scripting
 ❌ High error rates
 ❌ No progress visibility
@@ -56,7 +61,8 @@ The Migration System is an **automated database migration tool** that enables:
 ```
 
 #### After (Migration System)
-```
+
+```text
 ✅ Minutes to hours (automated)
 ✅ Built-in validation
 ✅ Real-time dashboard
@@ -66,16 +72,16 @@ The Migration System is an **automated database migration tool** that enables:
 
 ### Key Features
 
-| Feature | Benefit |
-|---------|---------|
-| **Batch Processing** | Handle millions of records efficiently |
-| **Data Validation** | Ensure data quality before migration |
-| **CSV Support** | Import/export for external integrations |
-| **Progress Tracking** | Monitor migration status in real-time |
-| **Error Handling** | Automatic retry & partial recovery |
-| **Logging** | Complete audit trail of all operations |
-| **Pause/Resume** | Can pause and resume long migrations |
-| **Transformations** | Automatic data format conversion |
+| Feature               | Benefit                                 |
+| --------------------- | --------------------------------------- |
+| **Batch Processing**  | Handle millions of records efficiently  |
+| **Data Validation**   | Ensure data quality before migration    |
+| **CSV Support**       | Import/export for external integrations |
+| **Progress Tracking** | Monitor migration status in real-time   |
+| **Error Handling**    | Automatic retry & partial recovery      |
+| **Logging**           | Complete audit trail of all operations  |
+| **Pause/Resume**      | Can pause and resume long migrations    |
+| **Transformations**   | Automatic data format conversion        |
 
 ---
 
@@ -83,7 +89,7 @@ The Migration System is an **automated database migration tool** that enables:
 
 ### System Architecture
 
-```
+```text
 ┌─────────────────────────────────────────────────────────┐
 │                  Migration Dashboard (UI)                │
 │        (React Component - Monitor & Control)             │
@@ -117,17 +123,19 @@ The Migration System is an **automated database migration tool** that enables:
 ### Core Components
 
 #### 1. **MigrationService** (Orchestrator)
+
 ```javascript
 // Coordinates entire migration process
 const service = new MigrationService({
   sourceDB: 'mongodb://source:27017/db',
-  targetDB: 'mongodb://target:27017/db'
+  targetDB: 'mongodb://target:27017/db',
 });
 
 // Creates plans, executes, monitors
 ```
 
 #### 2. **DatabaseMigration** (Data Operations)
+
 ```javascript
 // Handles actual data transfer
 // - Reads from source
@@ -137,6 +145,7 @@ const service = new MigrationService({
 ```
 
 #### 3. **CSVProcessor** (File Operations)
+
 ```javascript
 // Handles CSV import/export
 // - Parses CSV files
@@ -146,6 +155,7 @@ const service = new MigrationService({
 ```
 
 #### 4. **DataValidator** (Quality Control)
+
 ```javascript
 // Validates data integrity
 // - Type checking
@@ -156,7 +166,7 @@ const service = new MigrationService({
 
 ### Data Flow Example
 
-```
+```text
 1. User initiates migration
         ↓
 2. Service creates migration plan
@@ -195,18 +205,21 @@ const service = new MigrationService({
 #### Steps:
 
 1. **Open Dashboard**
-   ```
+
+   ```text
    Navigate to: http://localhost:3001/admin/migrations
    ```
 
 2. **Fill in Database URLs**
-   ```
+
+   ```text
    Source DB: mongodb://localhost:27017/source_db
    Target DB: mongodb://localhost:27017/target_db
    ```
 
 3. **Click Initialize**
-   ```
+
+   ```text
    Expected: "Migration manager initialized successfully"
    Status: ✅ Completed
    ```
@@ -232,19 +245,22 @@ const service = new MigrationService({
 #### Steps:
 
 1. **Select Tables to Migrate**
-   ```
+
+   ```text
    ☑️ users
    ☑️ products
    ☑️ orders
    ```
 
 2. **Create Plan**
+
    - Click "Create Plan" button
    - Wait for plan generation
    - Review plan details
 
 3. **Review Execution Details**
-   ```
+
+   ```text
    Plan shows:
    - Total records to migrate
    - Estimated time
@@ -253,12 +269,13 @@ const service = new MigrationService({
    ```
 
 4. **Execute Migration**
+
    - Click "Execute Migration"
    - Monitor progress bar
    - Watch logs in real-time
 
 5. **Expected Output**
-   ```
+   ```text
    ✅ Migration started
    📊 Progress: 15% → 50% → 100%
    📋 Logs showing:
@@ -277,7 +294,7 @@ const service = new MigrationService({
 
 #### Monitor via Dashboard
 
-```
+```text
 📊 Real-time Metrics:
 ├─ Total Records: 50,000
 ├─ Migrated: 35,000 (70%)
@@ -340,14 +357,16 @@ curl http://localhost:3001/api/migrations/log
 #### Scenario: Migration Fails Partway
 
 1. **Pause Migration**
+
    - Click "Pause" button on dashboard
    - System stops processing new batches
    - Current batch completes
 
 2. **Check Error Logs**
+
    ```bash
    curl http://localhost:3001/api/migrations/log | grep -i error
-   
+
    # Review error details
    # Example:
    "error": "Duplicate key in users.email",
@@ -356,20 +375,23 @@ curl http://localhost:3001/api/migrations/log
    ```
 
 3. **Fix Issues**
+
    - Option A: Fix in source database
    - Option B: Applied transformation rule (auto-fix duplicates)
    - Option C: Skip the failing batch
 
 4. **Resume Migration**
+
    - Click "Resume" button
    - System continues from where it paused
    - Processes remaining batches
 
 5. **Verify Completion**
+
    ```bash
    # Final verification
    curl http://localhost:3001/api/migrations/summary
-   
+
    # Should show:
    - All records migrated or skipped
    - Failed count (if any)
@@ -383,7 +405,8 @@ curl http://localhost:3001/api/migrations/log
 ### Migration Patterns
 
 #### Pattern 1: Large Database Migration
-```
+
+```text
 Problem:  Database has 10M+ records
 Solution: Use chunked processing
           - Batch size: 10,000 records
@@ -392,14 +415,16 @@ Solution: Use chunked processing
 ```
 
 #### Pattern 2: Multiple Table Dependencies
-```
+
+```text
 Problem:  Tables have foreign key constraints
 Solution: Migrate in dependency order
           Order: users → products → orders → transactions
 ```
 
 #### Pattern 3: Incremental Migration
-```
+
+```text
 Problem:  Need to minimize downtime
 Solution: Migrate in phases
           - Phase 1: Historical data (off-hours)
@@ -413,30 +438,30 @@ Solution: Migrate in phases
 // ✅ GOOD: Optimized batch size
 const migrationPlan = {
   tables: ['users', 'products'],
-  batchSize: 10000,      // Balanced for memory & speed
-  parallelBatches: 3,    // Process 3 batches in parallel
-  validation: true,      // Validate each batch
-  retryFailed: true      // Retry failed records
+  batchSize: 10000, // Balanced for memory & speed
+  parallelBatches: 3, // Process 3 batches in parallel
+  validation: true, // Validate each batch
+  retryFailed: true, // Retry failed records
 };
 
 // ❌ BAD: Inefficient settings
 const badPlan = {
-  batchSize: 1000000,    // Too large - memory issues
-  parallelBatches: 20,   // Too many - CPU contention
-  validation: false,     // Risky - data quality issues
-  retryFailed: false     // Lost data on failures
+  batchSize: 1000000, // Too large - memory issues
+  parallelBatches: 20, // Too many - CPU contention
+  validation: false, // Risky - data quality issues
+  retryFailed: false, // Lost data on failures
 };
 ```
 
 ### Common Issues & Solutions
 
-| Issue | Cause | Solution |
-|-------|-------|----------|
-| Out of Memory | Large batch size | Reduce `batchSize` to 5000 |
-| Slow Speed | Single-threaded | Increase `parallelBatches` |
-| Data Loss | No validation | Enable validation checks |
-| Connection Errors | Network timeout | Increase `timeout` value |
-| Duplicate Records | No dedup check | Use `DuplicateDetector` |
+| Issue             | Cause            | Solution                   |
+| ----------------- | ---------------- | -------------------------- |
+| Out of Memory     | Large batch size | Reduce `batchSize` to 5000 |
+| Slow Speed        | Single-threaded  | Increase `parallelBatches` |
+| Data Loss         | No validation    | Enable validation checks   |
+| Connection Errors | Network timeout  | Increase `timeout` value   |
+| Duplicate Records | No dedup check   | Use `DuplicateDetector`    |
 
 ### Security Practices
 
@@ -465,32 +490,36 @@ const connectionString = "mongodb://user:pass@host";
 When something goes wrong:
 
 1. **Check Server Status**
+
    ```bash
    curl http://localhost:3001/health
    ```
 
 2. **Review Error Logs**
+
    ```bash
    curl http://localhost:3001/api/migrations/log | grep -i error
    ```
 
 3. **Verify Database Connection**
+
    ```bash
    # Test source connection
    mongosh "mongodb://source:27017/db"
-   
+
    # Test target connection
    mongosh "mongodb://target:27017/db"
    ```
 
 4. **Check Resource Usage**
+
    ```bash
    # Memory
    pm2 monit
-   
+
    # Disk
    df -h
-   
+
    # Network
    netstat -an | grep 3001
    ```
@@ -543,14 +572,14 @@ DELETE /api/migrations/log
 
 ### Dashboard Quick Actions
 
-| Action | Steps | Expected Time |
-|--------|-------|----------------|
-| Initialize | Enter URLs → Click Initialize | 5 seconds |
-| Create Plan | Select tables → Click Plan | 30 seconds |
-| Execute | Click Execute → Monitor | 5-60 minutes |
-| Pause | Click Pause (during execution) | Immediate |
-| Resume | Click Resume (after pause) | 5 seconds |
-| View Logs | Scroll in Logs section | Real-time |
+| Action      | Steps                          | Expected Time |
+| ----------- | ------------------------------ | ------------- |
+| Initialize  | Enter URLs → Click Initialize  | 5 seconds     |
+| Create Plan | Select tables → Click Plan     | 30 seconds    |
+| Execute     | Click Execute → Monitor        | 5-60 minutes  |
+| Pause       | Click Pause (during execution) | Immediate     |
+| Resume      | Click Resume (after pause)     | 5 seconds     |
+| View Logs   | Scroll in Logs section         | Real-time     |
 
 ---
 
@@ -582,12 +611,14 @@ You should be able to:
 ## 📚 ADDITIONAL RESOURCES
 
 ### Documentation
+
 - [Migration API Reference](services/migration/MIGRATION_GUIDE.md)
 - [Integration Guide](services/migration/INTEGRATION_GUIDE.md)
 - [Deployment Guide](DEPLOYMENT_GUIDE_MIGRATION_SYSTEM.md)
 - [Quick Reference](services/migration/QUICK_REFERENCE.md)
 
 ### Videos (if available)
+
 - [ ] Introduction to Migration System (5 min)
 - [ ] Live Migration Demo (15 min)
 - [ ] Troubleshooting Workshop (20 min)
@@ -596,6 +627,7 @@ You should be able to:
 ### Contact
 
 **Questions?**
+
 - Dev Team: dev-team@company.com
 - Slack Channel: #migration-system
 - Office Hours: Tuesday & Thursday 2-3 PM
@@ -605,6 +637,7 @@ You should be able to:
 ## ✅ Training Complete!
 
 **Next Steps:**
+
 1. Practice with Lab environments
 2. Assist with staging migration
 3. Lead production migration

@@ -76,13 +76,7 @@ const router = express.Router();
 router.post(
   '/advanced',
   asyncHandler(async (req, res) => {
-    const {
-      query,
-      filters = {},
-      sort = { createdAt: -1 },
-      page = 1,
-      limit = 20,
-    } = req.body;
+    const { query, filters = {}, sort = { createdAt: -1 }, page = 1, limit = 20 } = req.body;
 
     // بناء MongoDB query
     let searchQuery = {};
@@ -112,10 +106,7 @@ router.post(
 
     // تنفيذ البحث
     const skip = (page - 1) * limit;
-    const results = await Product.find(searchQuery)
-      .sort(sort)
-      .skip(skip)
-      .limit(limit);
+    const results = await Product.find(searchQuery).sort(sort).skip(skip).limit(limit);
 
     const total = await Product.countDocuments(searchQuery);
 
@@ -129,7 +120,7 @@ router.post(
         pages: Math.ceil(total / limit),
       },
     });
-  })
+  }),
 );
 
 // Filter Options Route
@@ -151,7 +142,7 @@ router.get(
       categories,
       priceRange: priceRange[0] || { minPrice: 0, maxPrice: 0 },
     });
-  })
+  }),
 );
 
 export default router;
@@ -251,11 +242,7 @@ function SearchAdvanced() {
             onKeyPress={e => e.key === 'Enter' && handleSearch()}
             className="search-input"
           />
-          <button
-            onClick={() => handleSearch(1)}
-            disabled={loading}
-            className="search-button"
-          >
+          <button onClick={() => handleSearch(1)} disabled={loading} className="search-button">
             {loading ? 'جاري البحث...' : 'بحث'}
           </button>
         </div>
@@ -264,11 +251,7 @@ function SearchAdvanced() {
         <div className="filters-section">
           <div className="filter-group">
             <label>الفئة</label>
-            <select
-              name="category"
-              value={filters.category}
-              onChange={handleFilterChange}
-            >
+            <select name="category" value={filters.category} onChange={handleFilterChange}>
               <option value="">الكل</option>
               {filterOptions.categories?.map(cat => (
                 <option key={cat} value={cat}>
@@ -302,12 +285,7 @@ function SearchAdvanced() {
 
           <div className="filter-group">
             <label>حد أدنى للمخزون</label>
-            <input
-              type="number"
-              name="stock"
-              value={filters.stock}
-              onChange={handleFilterChange}
-            />
+            <input type="number" name="stock" value={filters.stock} onChange={handleFilterChange} />
           </div>
         </div>
       </div>
@@ -332,11 +310,7 @@ function SearchAdvanced() {
             {pagination.pages > 1 && (
               <div className="pagination">
                 {Array.from({ length: pagination.pages }, (_, i) => (
-                  <button
-                    key={i + 1}
-                    onClick={() => handleSearch(i + 1)}
-                    className={currentPage === i + 1 ? 'active' : ''}
-                  >
+                  <button key={i + 1} onClick={() => handleSearch(i + 1)} className={currentPage === i + 1 ? 'active' : ''}>
                     {i + 1}
                   </button>
                 ))}
@@ -477,7 +451,7 @@ git merge feature/advanced-search
 
 ### المهام المرتبطة
 
-```
+```text
 يوم 1:     Redux setup
 يوم 2-3:   Caching implementation
 يوم 4:     Testing
@@ -490,7 +464,7 @@ git merge feature/advanced-search
 
 ### للميزة الواحدة
 
-```
+```text
 ☑️ Code كامل وعاملي
 ☑️ Unit tests تمر (95%+)
 ☑️ Integration tests جاهزة
@@ -507,7 +481,7 @@ git merge feature/advanced-search
 
 ### بعد 1 أسبوع من البدء
 
-```
+```text
 ✅ Advanced Search يعمل كاملاً
 ✅ الاختبارات تمر 100%
 ✅ الفريق متحمس
@@ -516,7 +490,7 @@ git merge feature/advanced-search
 
 ### بعد 2 أسبوع
 
-```
+```text
 ✅ Advanced Search في الإنتاج
 ✅ Redis Caching يعمل
 ✅ الأداء 3x أسرع

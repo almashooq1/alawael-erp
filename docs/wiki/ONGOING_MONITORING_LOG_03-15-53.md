@@ -11,7 +11,7 @@
 
 ### حالة المكونات الرئيسية:
 
-```
+```text
 ✅ npm:              11.8.0
 ✅ Node:             v22.20.0
 ✅ PowerShell:       RemoteSigned

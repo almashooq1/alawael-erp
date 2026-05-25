@@ -53,6 +53,7 @@ CMD ["node", "server.js"]
 ```
 
 **الميزات:**
+
 - ✅ حجم صورة صغير (بناء متعدد المراحل)
 - ✅ مستخدم غير جذر للأمان
 - ✅ Health checks مدمجة
@@ -204,7 +205,7 @@ kubectl version --client
 
 ### البنية
 
-```
+```text
 k8s/
 ├── 01-namespace-config.yaml      # Namespace, ConfigMap, Secret, PV
 ├── 02-mongodb-statefulset.yaml   # MongoDB StatefulSet + Service
@@ -256,7 +257,7 @@ kubectl autoscale deployment backend --min=3 --max=10 --cpu-percent=70
 
 ### Workflows المنشأة
 
-```
+```text
 .github/workflows/
 ├── test-build-backend.yml   # اختبار وبناء الصور
 └── deploy-k8s.yml          # نشر على Kubernetes
@@ -278,7 +279,7 @@ deploy-k8s.yml:
 
 ### Pipeline Stages
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │                    Test & Build Pipeline                    │
 ├─────────────────────────────────────────────────────────────┤
@@ -343,17 +344,17 @@ curl http://localhost:3001/metrics
 ```yaml
 # تكوين logstash
 input {
-  tcp {
-    port => 5000
-    codec => json
-  }
+tcp {
+port => 5000
+codec => json
+}
 }
 
 output {
-  elasticsearch {
-    hosts => ["elasticsearch:9200"]
-    index => "backend-%{+YYYY.MM.dd}"
-  }
+elasticsearch {
+hosts => ["elasticsearch:9200"]
+index => "backend-%{+YYYY.MM.dd}"
+}
 }
 ```
 
@@ -365,7 +366,7 @@ logger.info('User login', {
   userId: user.id,
   timestamp: new Date(),
   ip: req.ip,
-  userAgent: req.get('user-agent')
+  userAgent: req.get('user-agent'),
 });
 ```
 
@@ -444,7 +445,7 @@ kubectl exec -it pod/backend-xxx -- /bin/sh
 
 ### قبل النشر
 
-```
+```text
 ✅ اختبارات محلية تمر
 ✅ اختبارات وحدة تمر
 ✅ اختبارات التكامل تمر
@@ -458,7 +459,7 @@ kubectl exec -it pod/backend-xxx -- /bin/sh
 
 ### أثناء النشر
 
-```
+```text
 ✅ Backup يعمل
 ✅ Monitoring جاهز
 ✅ Logging مفعل
@@ -470,7 +471,7 @@ kubectl exec -it pod/backend-xxx -- /bin/sh
 
 ### بعد النشر
 
-```
+```text
 ✅ Health checks تمر
 ✅ الخدمات متاحة
 ✅ Logs تبدو جيدة
@@ -508,7 +509,7 @@ kubectl exec -it pod/backend-xxx -- /bin/sh
 
 ### Phase 34: Advanced Features
 
-```
+```text
 [ ] شبكات متقدمة (Advanced Networking)
 [ ] التنبؤ بـ AI
 [ ] إجراءات متقدمة للتحليل
@@ -522,6 +523,7 @@ kubectl exec -it pod/backend-xxx -- /bin/sh
 ## 📞 الدعم
 
 للمساعدة والدعم:
+
 - 📧 Email: support@company.com
 - 💬 Chat: #devops في Slack
 - 🐛 Issues: https://github.com/repo/issues
@@ -532,4 +534,4 @@ kubectl exec -it pod/backend-xxx -- /bin/sh
 **Version: Phase 33 v1.0.0**
 **Last Updated: 2024**
 
-*تم إنشاؤه بعناية وتفاني* ❤️
+_تم إنشاؤه بعناية وتفاني_ ❤️

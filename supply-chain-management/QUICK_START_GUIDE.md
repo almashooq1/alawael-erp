@@ -156,7 +156,7 @@ const barcodeLogSchema = new mongoose.Schema(
       duration: Number,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 barcodeLogSchema.index({ user: 1, createdAt: -1 });
@@ -184,11 +184,9 @@ export function useBarcodeGeneration() {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.post(
-        `/api/barcode/generate-qr/${productId}`,
-        options,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const response = await axios.post(`/api/barcode/generate-qr/${productId}`, options, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
       setSuccess(true);
       return response.data;
@@ -210,7 +208,7 @@ export function useBarcodeGeneration() {
       const response = await axios.post(
         `/api/barcode/generate-barcode/${sku}`,
         { format },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
 
       setSuccess(true);
@@ -236,12 +234,10 @@ export function useBarcodeGeneration() {
         {
           headers: { Authorization: `Bearer ${token}` },
           onUploadProgress: progressEvent => {
-            const percentCompleted = Math.round(
-              (progressEvent.loaded * 100) / progressEvent.total
-            );
+            const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
             return percentCompleted;
           },
-        }
+        },
       );
 
       setSuccess(true);
@@ -296,7 +292,7 @@ app.use(
   cors({
     origin: process.env.CLIENT_URL,
     credentials: true,
-  })
+  }),
 );
 
 // Routes
@@ -376,7 +372,7 @@ npm run docker:stop
 
 #### 1. Generate QR Code
 
-```
+```text
 POST http://localhost:3001/api/barcode/generate-qr/507f1f77bcf86cd799439011
 
 Headers:
@@ -402,7 +398,7 @@ Response:
 
 #### 2. Generate Barcode
 
-```
+```text
 POST http://localhost:3001/api/barcode/generate-barcode/SKU-12345
 
 Headers:
@@ -424,7 +420,7 @@ Response:
 
 #### 3. Batch Generate
 
-```
+```text
 POST http://localhost:3001/api/barcode/batch-generate
 
 Headers:
@@ -450,7 +446,7 @@ Response:
 
 #### 4. Update Location (GPS)
 
-```
+```text
 POST http://localhost:3001/api/tracking/location/shipment-id
 
 Body:
@@ -464,7 +460,7 @@ Body:
 
 #### 5. Check In (HR)
 
-```
+```text
 POST http://localhost:3001/api/hr/checkin/EMP-001
 
 Response:
@@ -479,7 +475,7 @@ Response:
 
 ## 📊 Dashboard URLs
 
-```
+```text
 Barcode Management:
 http://localhost:3000/barcode
 
@@ -552,11 +548,7 @@ redis-cli ping
 
 ```javascript
 // أعد توليد Token
-const token = jwt.sign(
-  { id: 'user-id', role: 'admin' },
-  process.env.JWT_SECRET,
-  { expiresIn: '7d' }
-);
+const token = jwt.sign({ id: 'user-id', role: 'admin' }, process.env.JWT_SECRET, { expiresIn: '7d' });
 ```
 
 ### الخطأ: "CORS"

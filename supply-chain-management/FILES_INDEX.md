@@ -11,7 +11,7 @@
 
 #### [PROFESSIONAL_IMPLEMENTATION_SYSTEM.md](PROFESSIONAL_IMPLEMENTATION_SYSTEM.md)
 
-```
+```text
 الحجم: ~5000+ سطر
 الوقت المقترح للقراءة: 2-3 ساعات
 المحتوى:
@@ -41,7 +41,7 @@
 
 #### [TESTING_CICD_DEPLOYMENT.md](TESTING_CICD_DEPLOYMENT.md)
 
-```
+```text
 الحجم: ~3000+ سطر
 الوقت المقترح: 2 ساعة
 المحتوى:
@@ -67,7 +67,7 @@
 
 #### [QUICK_START_GUIDE.md](QUICK_START_GUIDE.md)
 
-```
+```text
 الحجم: ~2000+ سطر
 الوقت المقترح: 1 ساعة
 المحتوى:
@@ -86,7 +86,7 @@
 
 #### [COMPREHENSIVE_SUMMARY.md](COMPREHENSIVE_SUMMARY.md)
 
-```
+```text
 الحجم: ~2500+ سطر
 المحتوى:
 ├─ ملخص المشروع الشامل
@@ -104,7 +104,7 @@
 
 #### [ADVANCED_DEVOPS_SETUP.md](ADVANCED_DEVOPS_SETUP.md)
 
-```
+```text
 الحجم: ~2000+ سطر
 المحتوى:
 ├─ Kubernetes Deployment YAML
@@ -127,7 +127,7 @@
 
 #### [QUICK_SYSTEMS_IMPLEMENTATION.md](QUICK_SYSTEMS_IMPLEMENTATION.md)
 
-```
+```text
 الحجم: ~850+ سطر
 الوقت: 30 دقيقة (مراجعة سريعة)
 المحتوى:
@@ -142,7 +142,7 @@
 
 #### [ADDITIONAL_SYSTEMS_GUIDE.md](ADDITIONAL_SYSTEMS_GUIDE.md)
 
-```
+```text
 المحتوى:
 ├─ 20 نظام إضافي
 │  ├─ Level 1 (5 systems): HR, CRM, Accounting, GPS, Barcode
@@ -162,7 +162,7 @@
 
 ### Backend Files (to be created)
 
-```
+```text
 backend/
 ├── middleware/
 │   ├── barcodeAuth.js                    # Barcode Authentication
@@ -190,7 +190,7 @@ backend/
 
 ### Frontend Files (to be created)
 
-```
+```text
 frontend/src/
 ├── components/
 │   ├── BarcodeManager.js               ✅ Included in PROFESSIONAL_IMPLEMENTATION_SYSTEM.md
@@ -211,7 +211,7 @@ frontend/src/
 
 ### Infrastructure Files
 
-```
+```text
 ├── Dockerfile                          ✅ Included in TESTING_CICD_DEPLOYMENT.md
 ├── docker-compose.yml                  ✅ Included in TESTING_CICD_DEPLOYMENT.md
 ├── .dockerignore                       ❌ (Simple file)
@@ -237,7 +237,7 @@ frontend/src/
 
 ## 📊 Matrix of Documentation vs Implementation
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────────────┐
 │                      Documentation Status                            │
 ├──────────────────────┬──────────────┬──────────────┬────────────────┤
@@ -261,7 +261,7 @@ frontend/src/
 
 ### For Developers (نهج سريع - 3-4 ساعات)
 
-```
+```text
 1️⃣ QUICK_START_GUIDE.md (30 دقيقة)
    ↓ ابدأ بهذا الملف لتحضير البيئة
 
@@ -277,7 +277,7 @@ frontend/src/
 
 ### For DevOps Engineers (نهج شامل - 4-5 ساعات)
 
-```
+```text
 1️⃣ QUICK_START_GUIDE.md (30 دقيقة)
    ↓ البيئة الأساسية
 
@@ -293,7 +293,7 @@ frontend/src/
 
 ### For Managers (Overview - 2 ساعة)
 
-```
+```text
 1️⃣ COMPREHENSIVE_SUMMARY.md (30 دقيقة)
    ↓ الملخص الشامل
 
@@ -313,7 +313,7 @@ frontend/src/
 
 ### Phase 1: Preparation (Week 1)
 
-```
+```text
 □ قراءة QUICK_START_GUIDE.md
 □ إعداد البيئة المحلية
 □ تثبيت جميع المكتبات
@@ -324,7 +324,7 @@ frontend/src/
 
 ### Phase 2: Barcode System (Week 2-3)
 
-```
+```text
 أسبوع 2:
   □ نسخ backend services
   □ نسخ API routes
@@ -341,7 +341,7 @@ frontend/src/
 
 ### Phase 3: GPS Tracking (Week 4-6)
 
-```
+```text
 أسبوع 4-5:
   □ نسخ tracking service
   □ إعداد WebSocket
@@ -357,7 +357,7 @@ frontend/src/
 
 ### Phase 4: HR System (Week 7-10)
 
-```
+```text
 أسبوع 7-8:
   □ نسخ HR models و services
   □ بناء API routes
@@ -372,7 +372,7 @@ frontend/src/
 
 ### Phase 5: Deployment (Week 11-12)
 
-```
+```text
 أسبوع 11:
   □ Docker configuration
   □ GitHub Actions setup
@@ -431,7 +431,7 @@ frontend/src/
 
 ## ✅ Final Verification
 
-```
+```text
 تم إنشاء المتطلبات التالية بنجاح:
 ✅ 6 ملفات توثيق شاملة
 ✅ 100+ أسطر كود احترافي

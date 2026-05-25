@@ -3,7 +3,7 @@
 **Date:** February 22, 2026  
 **Purpose:** Day-of-deployment operations guide for all team members  
 **Duration:** Phases 2-4 covering (100+ hours total)  
-**Status:** ✅ READY FOR DEPLOYMENT  
+**Status:** ✅ READY FOR DEPLOYMENT
 
 ---
 
@@ -16,24 +16,28 @@ Execute ALAWAEL v1.0.0 deployment with **zero downtime**, **<30 second rollback 
 ## DEPLOYMENT DAY SCHEDULE (All Phases at a Glance)
 
 ### Phase 2: GitHub Organization Setup
+
 - **When:** [Date] 10:00 AM - 11:00 AM
 - **Duration:** 45 minutes
 - **Lead:** DevOps
 - **Status:** ✅ READY
 
-### Phase 3: Staging Deployment  
+### Phase 3: Staging Deployment
+
 - **When:** [Date] 2:00 PM - 3:00 PM (can be same day or next day)
 - **Duration:** 45 minutes
 - **Lead:** DevOps + Backend
 - **Status:** ✅ READY
 
 ### Phase 4: Production Deployment
+
 - **When:** [Date] (Week 2, preferably Friday 2:00 PM)
 - **Duration:** 30 minutes (blue-green switch)
 - **Lead:** DevOps + Security
 - **Status:** ✅ READY
 
 ### Phase 4B: Emergency Rollback (if needed)
+
 - **When:** Anytime during/after Phase 4
 - **Duration:** <30 seconds
 - **Lead:** DevOps
@@ -41,12 +45,14 @@ Execute ALAWAEL v1.0.0 deployment with **zero downtime**, **<30 second rollback 
 - **Status:** ✅ READY & TESTED
 
 ### Phase 5: Monitoring
+
 - **When:** 7 days after Phase 4 production deployment
 - **Duration:** Automated (daily reports)
 - **Lead:** DevOps + Operations
 - **Status:** ✅ READY
 
 ### Phase 6: Decommission
+
 - **When:** +7 days (after Phase 5 stability confirmed)
 - **Duration:** 2 hours
 - **Lead:** DevOps
@@ -58,14 +64,16 @@ Execute ALAWAEL v1.0.0 deployment with **zero downtime**, **<30 second rollback 
 ## COMMAND CENTER SETUP (Use This for Each Phase)
 
 ### Location
-```
+
+```text
 Primary: [Company Conference Room - Video Conference]
 Backup: [Secondary Location with internet]
 Online: Slack #alawael-deployment + Zoom
 ```
 
 ### Team Positions
-```
+
+```text
 ┌─────────────────────────────────────────────────────────┐
 │ COMMAND CENTER - DEPLOYMENT HQ                          │
 ├─────────────────────────────────────────────────────────┤
@@ -104,12 +112,14 @@ Online: Slack #alawael-deployment + Zoom
 ```
 
 ### Communication Tools
+
 - **Primary:** Slack channel `#alawael-deployment`
 - **Secondary:** Zoom call (always on during deployment)
 - **Escalation:** [VP Ops phone number]
 - **Status Page:** [Internal status dashboard]
 
 ### Monitoring Dashboards (Have Open)
+
 1. GitHub Actions (Phase 2)
 2. AWS CloudFormation / Azure Portal (Phase 3-4)
 3. Application Monitoring Dashboard (Phase 3-4)
@@ -123,6 +133,7 @@ Online: Slack #alawael-deployment + Zoom
 ## PHASE 2 DEPLOYMENT: GitHub Organization Setup
 
 ### Pre-Deployment Checklist (Do 30 minutes before)
+
 - [ ] All team members on Zoom call
 - [ ] GitHub CLI installed and tested on all machines
 - [ ] GitHub credentials ready for DevOps lead
@@ -131,33 +142,35 @@ Online: Slack #alawael-deployment + Zoom
 - [ ] Documentation printed or bookmarked
 
 ### Hour -1:00 (30 minutes before start)
-```
+
+```text
 09:30 AM: Final preparation
 - All team members dial into Zoom
-- Share screens: DevOps lead shares primary, Backend lead shares secondary  
+- Share screens: DevOps lead shares primary, Backend lead shares secondary
 - Project manager verifies everyone is present
 - Quick role review: Who does what? Confirmed.
 ```
 
-### Hour 0:00 (Start Time: 10:00 AM)  
-```
+### Hour 0:00 (Start Time: 10:00 AM)
+
+```text
 10:00 AM: DEPLOYMENT START - Phase 2
 - DevOps: Start GitHub CLI automation script
   bash alawael-phase2-github-config.sh
-  
+
 10:00-10:30 AM: Script execution (watch for errors)
 - Monitor output in real-time
 - No interactions needed (automated)
 - If error occurs: STOP, diagnose, document
-  
+
 10:30-10:45 AM: Verification phase
 - DevOps: Run verification script
   bash alawael-phase2-verification.sh
-  
+
 - All team members: Test GitHub access
   gh auth status
   gh repo list alawael-org
-  
+
 10:45 AM: Final confirmation
 - DevOps: Confirm all 6 teams created ✅
 - Backend: Confirm repository access ✅
@@ -166,6 +179,7 @@ Online: Slack #alawael-deployment + Zoom
 ```
 
 ### Success Signals ✅
+
 ```bash
 LOOK FOR THESE OUTPUTS:
 ✅ Organization alawael-org created
@@ -177,6 +191,7 @@ LOOK FOR THESE OUTPUTS:
 ```
 
 ### Failure Signals ⚠️
+
 ```bash
 LOOK FOR THESE ERRORS:
 ❌ HTTP 403 Forbidden
@@ -189,7 +204,8 @@ RESPONSE: STOP → Document error → Run manual setup path
 ```
 
 ### Post-Phase 2 Actions
-```
+
+```text
 11:00 AM: Phase 2 Complete!
 
 Immediate:
@@ -214,7 +230,8 @@ Executive Update:
 ## PHASE 3 DEPLOYMENT: Staging Deployment
 
 ### Timeline (Estimated)
-```
+
+```text
 Duration: 45 minutes
 Lead: DevOps + Backend Team
 
@@ -228,7 +245,8 @@ Lead: DevOps + Backend Team
 ```
 
 ### Canary Rollout Details
-```
+
+```text
 Traffic Routing During Phase 3:
 
 Minute 0-5:
@@ -237,7 +255,7 @@ Minute 0-5:
 └─ Status: Monitoring health metrics
 
 Minute 5-10:
-├─ 25% traffic → staging  
+├─ 25% traffic → staging
 ├─ 75% traffic → [old/backup]
 └─ Status: High error rate? → ROLLBACK
 
@@ -258,6 +276,7 @@ Post-deployment:
 ```
 
 ### Pre-Phase 3 Checklist (Do 30 min before)
+
 - [ ] GitHub Phase 2 successfully completed
 - [ ] Team back on Zoom call
 - [ ] Infrastructure team ready with AWS/Azure access
@@ -266,7 +285,8 @@ Post-deployment:
 - [ ] All team members have access to monitoring dashboards
 
 ### During Phase 3: Monitor These Metrics
-```
+
+```text
 CRITICAL METRICS (watch every 5 minutes):
 
 API Response Time:
@@ -301,7 +321,8 @@ CPU Usage:
 ```
 
 ### Phase 3 Go/No-Go Decision
-```
+
+```text
 PROCEED TO 25% IF:
 ☑  API response time < 300ms
 ☑  Error rate < 0.5%
@@ -320,7 +341,8 @@ Current: [Monitor] → [Proceed/Rollback Decision]
 ```
 
 ### Post-Phase 3 Complete
-```
+
+```text
 14:45: Phase 3 Successfully Complete ✅
 
 Verification:
@@ -343,8 +365,9 @@ Executive Update: Phase 3 successful, Phase 4 scheduled
 
 ## PHASE 4 DEPLOYMENT: Production Blue-Green Deployment
 
-### This Is The Big One! 
-```
+### This Is The Big One!
+
+```text
 ⚠️  CRITICAL OPERATION ⚠️
 - Real customers on this system
 - Zero-downtime requirement
@@ -353,7 +376,8 @@ Executive Update: Phase 3 successful, Phase 4 scheduled
 ```
 
 ### Timeline (Estimated)
-```
+
+```text
 Duration: 30 minutes TOTAL
 Lead: DevOps + Security
 
@@ -372,7 +396,8 @@ Lead: DevOps + Security
 ```
 
 ### Blue-Green Architecture
-```
+
+```text
 BEFORE DEPLOYMENT:
 ┌─────────────────────┐
 │   LOAD BALANCER    │
@@ -393,8 +418,8 @@ DURING DEPLOYMENT:
 │   LOAD BALANCER    │
 └──────────┬──────────┘
            │
-         100% ↙                    
-        ↙                          
+         100% ↙
+        ↙
   ┌──────────┐      ┌──────────┐
   │  BLUE   │      │  GREEN  │
   │ (v1.0.0 old) │      │ (v1.0.0 new)
@@ -423,7 +448,8 @@ AFTER DEPLOYMENT:
 ```
 
 ### Pre-Phase 4 Checklist (Do 1 hour before)
-- [ ] Phase 3 (Staging) completed successfully  
+
+- [ ] Phase 3 (Staging) completed successfully
 - [ ] GREEN environment running and tested
 - [ ] BLUE environment running stable
 - [ ] All team members on Zoom and in `#alawael-deployment`
@@ -435,7 +461,8 @@ AFTER DEPLOYMENT:
 - [ ] Caffeine acquired (this is intense!) ☕
 
 ### GO/NO-GO DECISION (30 min before Phase 4)
-```
+
+```text
 Required Approvals (ALL must be YES):
 
 □ DevOps Lead:
@@ -464,7 +491,8 @@ OUTCOME:
 ```
 
 ### CRITICAL: THE 5-SECOND SWITCH
-```
+
+```text
 ⚠️  THIS MOMENT IS CRITICAL ⚠️
 
 T - 5 sec: Ready?
@@ -482,7 +510,7 @@ T + 1 sec: VERIFY SWITCH
            → Is traffic on GREEN?
            → Monitoring shows 100% traffic routed?
            → Response times normal?
-           
+
 T + 5 sec: SMOKE TEST
            → Can we access application?
            → Are health checks passing?
@@ -503,7 +531,8 @@ IF ANYTHING WRONG:
 ### DURING PHASE 4: CRITICAL DECISIONS
 
 #### At 5-Minute Mark
-```
+
+```text
 DECISION POINT: Any issues yet?
 
 ✅ All green? → Continue monitoring
@@ -511,8 +540,9 @@ DECISION POINT: Any issues yet?
 🚨 Critical error? → EXECUTE ROLLBACK NOW
 ```
 
-#### At 10-Minute Mark  
-```
+#### At 10-Minute Mark
+
+```text
 DECISION POINT: Still looking good?
 
 ✅ All nominal? → Confidence growing
@@ -521,7 +551,8 @@ DECISION POINT: Still looking good?
 ```
 
 #### At 15-Minute Mark
-```
+
+```text
 DECISION POINT: Are we stable?
 
 ✅ Stable for 15 min? → Phase 4 usually safe now
@@ -530,7 +561,8 @@ DECISION POINT: Are we stable?
 ```
 
 #### At 25-Minute Mark
-```
+
+```text
 DECISION POINT: Final 5 minutes before completion
 
 ✅ Excellent condition? → Phase 4 nearly complete
@@ -539,7 +571,8 @@ DECISION POINT: Final 5 minutes before completion
 ```
 
 #### At 30-Minute Mark
-```
+
+```text
 ✅ PHASE 4 COMPLETE!
 
 BLUE environment is now decommissioned
@@ -548,7 +581,8 @@ v1.0.0 is officially in production
 ```
 
 ### Post-Phase 4 Actions
-```
+
+```text
 Immediately after (14:30 PM):
 - Confirm traffic 100% on GREEN
 - Run smoke tests again
@@ -581,7 +615,8 @@ Final documentation:
 ## EMERGENCY: INSTANT ROLLBACK PROCEDURE
 
 ### When to Rollback
-```
+
+```text
 AUTOMATIC ROLLBACK TRIGGERS:
 ☐ Error rate > 2% (sustained for 2 min)
 ☐ Response time > 1000ms (sustained for 2 min)
@@ -593,6 +628,7 @@ AUTOMATIC ROLLBACK TRIGGERS:
 ```
 
 ### How to Rollback (Takes < 30 Seconds)
+
 ```bash
 # STEP 1: Execute rollback script (takes 5 seconds)
 cd c:\Users\x-be\OneDrive\المستندات\04-10-2025\66666
@@ -616,10 +652,11 @@ bash alawael-phase4-production-rollback.sh
 ```
 
 ### Rollback Success Criteria
-```
+
+```text
 Check these within 30 seconds:
 
-✅ Load balancer pointing to BLUE? 
+✅ Load balancer pointing to BLUE?
 ✅ 100% traffic on BLUE?
 ✅ Error rate drops below 0.1%?
 ✅ Response time < 200ms?
@@ -636,7 +673,8 @@ If any NO → Escalate to VP Operations 🚨
 ## PHASE 5: 7-Day Monitoring Period
 
 ### What Happens During Phase 5
-```
+
+```text
 Duration: 7 calendar days
 Effort: Automated (with team on-call)
 
@@ -659,7 +697,8 @@ Metrics Monitored:
 ```
 
 ### Daily Reports
-```
+
+```text
 Each morning at 6:00 AM, see report like:
 
 ═══════════════════════════════════════
@@ -694,7 +733,8 @@ Next Report: Feb 23, 2026 at 6:00 AM
 ```
 
 ### Team Responsibilities During Phase 5
-```
+
+```text
 DEVOPS (1 person on-call):
 - Review daily health reports
 - Respond to alerts
@@ -725,7 +765,8 @@ SECURITY (as-needed):
 ## PHASE 6: Decommission & Cost Recovery
 
 ### What Gets Decommissioned
-```
+
+```text
 After 7-day stability confirmed:
 
 OLD INFRASTRUCTURE:
@@ -749,7 +790,8 @@ ARCHIVED (not deleted):
 ```
 
 ### Financial Impact
-```
+
+```text
 COST SAVINGS REALIZED:
 
 Monthly Savings:
@@ -767,7 +809,8 @@ ROI Payback: 2.1 months
 ```
 
 ### Post-Decommission Archive
-```
+
+```text
 What We Keep:
 ✅ 30 days of logs
 ✅ 6 months of backups
@@ -782,8 +825,10 @@ What We Keep:
 ## TEAM ROLES & RESPONSIBILITIES
 
 ### DevOps Lead
+
 **Critical Decision Maker**
-```
+
+```text
 Before Deployment:
 - Verify all scripts tested
 - Confirm infrastructure ready
@@ -805,8 +850,10 @@ After Deployment:
 ```
 
 ### Backend Lead
+
 **Application Health Monitor**
-```
+
+```text
 Before Deployment:
 - Ensure code is tested
 - Verify environment variables
@@ -827,9 +874,11 @@ After Deployment:
 - Document issues found
 ```
 
-### Security Officer  
+### Security Officer
+
 **Guardian of Trust**
-```
+
+```text
 Before Deployment:
 - Final security audit
 - Review all secrets/keys
@@ -850,8 +899,10 @@ After Deployment:
 ```
 
 ### Operations/Support
+
 **Stakeholder Communication**
-```
+
+```text
 Before Deployment:
 - Prepare status updates
 - Brief customer support
@@ -872,12 +923,14 @@ After Deployment:
 ```
 
 ### All Team Members
+
 **Deployment Day Readiness**
-```
+
+```text
 Required:
 ✅ Arrive 30 min early (or log on to Zoom early)
 ✅ Have all passwords/credentials ready
-✅ Phone fully charged  
+✅ Phone fully charged
 ✅ Backup power source available
 ✅ Quiet space to work
 ✅ No other meetings scheduled
@@ -898,7 +951,8 @@ Strictly Avoid:
 ## COMMUNICATION TEMPLATES
 
 ### Pre-Deployment (Email - 1 day before)
-```
+
+```text
 Subject: ⏰ ALAWAEL Deployment Happening Tomorrow - Team Alert
 
 Team,
@@ -931,7 +985,8 @@ See you tomorrow! 🚀
 ```
 
 ### During Deployment (Slack - Every 5 minutes)
-```
+
+```text
 Phase 2 Progress:
 🟢 10:00 - STARTED: GitHub organization setup
 🟢 10:05 - Creating teams (2/6 complete)
@@ -946,7 +1001,8 @@ All green lights. Moving to Phase 3 in 4 hours.
 ```
 
 ### Emergency Alert (Slack - Immediate)
-```
+
+```text
 🚨 ALERT 🚨
 
 ERROR DETECTED: API Response time spiked to 800ms
@@ -962,7 +1018,8 @@ Team standby for potential ROLLBACK
 ```
 
 ### Rollback Notification (Slack - Immediate)
-```
+
+```text
 ⚠️  ROLLBACK EXECUTED ⚠️
 
 Issue: Response time degradation sustained
@@ -982,7 +1039,8 @@ Next Steps:
 ```
 
 ### Post-Deployment Success (Email)
-```
+
+```text
 Subject: ✅ ALAWAEL v1.0.0 Successfully Deployed! 🎉
 
 Team & Stakeholders,
@@ -1027,7 +1085,7 @@ Status: ✅ PRODUCTION LIVE
 ## FINAL CHECKLIST - BEFORE YOU START
 
 - [ ] Read entire deployment manual (this document)
-- [ ] Understand your role and responsibilities  
+- [ ] Understand your role and responsibilities
 - [ ] Know where to find emergency runbooks
 - [ ] Have phone number for escalation
 - [ ] Computer charged and updated

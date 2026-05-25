@@ -7,7 +7,7 @@
 
 ## ⚡ Quick Status
 
-```
+```text
 ┌─────────────────────────────────────────┐
 │  TEST COVERAGE VERIFICATION STATUS      │
 │                                         │
@@ -28,7 +28,7 @@
 
 ### Test Distribution
 
-```
+```text
 Backend Tests (24)
 ├── Configuration: 15 ✅
 ├── Security:      11 ✅
@@ -43,7 +43,7 @@ Total: 29+ Tests ✅
 
 ### Coverage Breakdown
 
-```
+```text
 Configuration:  100% ✅
 Security:       100% ✅
 Integration:    100% ✅
@@ -131,7 +131,7 @@ npm test -- api.test.cjs
 
 ## 📈 Metrics Summary
 
-```
+```text
 Tests Written:     45+  ✅
 Pass Rate:        100%  ✅
 Coverage:          85%+ ✅

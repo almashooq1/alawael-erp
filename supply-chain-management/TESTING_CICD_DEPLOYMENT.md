@@ -47,9 +47,7 @@ describe('BarcodeService', () => {
     });
 
     test('should throw error for invalid product data', async () => {
-      await expect(BarcodeService.generateQRCode(null)).rejects.toThrow(
-        'Invalid product data'
-      );
+      await expect(BarcodeService.generateQRCode(null)).rejects.toThrow('Invalid product data');
     });
 
     test('should handle large data correctly', async () => {
@@ -58,9 +56,7 @@ describe('BarcodeService', () => {
         name: 'A'.repeat(2000), // Large name
       };
 
-      await expect(BarcodeService.generateQRCode(largeProduct)).rejects.toThrow(
-        'QR code data too large'
-      );
+      await expect(BarcodeService.generateQRCode(largeProduct)).rejects.toThrow('QR code data too large');
     });
 
     test('should generate QR with custom options', async () => {
@@ -76,10 +72,7 @@ describe('BarcodeService', () => {
 
   describe('generateBarcode', () => {
     test('should generate barcode successfully', async () => {
-      const result = await BarcodeService.generateBarcode(
-        'SKU-12345',
-        'CODE128'
-      );
+      const result = await BarcodeService.generateBarcode('SKU-12345', 'CODE128');
 
       expect(result.success).toBe(true);
       expect(result.barcode).toBeDefined();
@@ -91,41 +84,27 @@ describe('BarcodeService', () => {
       const formats = ['CODE128', 'CODE39', 'EAN13'];
 
       for (const format of formats) {
-        const result = await BarcodeService.generateBarcode(
-          '12345678901',
-          format
-        );
+        const result = await BarcodeService.generateBarcode('12345678901', format);
         expect(result.success).toBe(true);
         expect(result.format).toBe(format);
       }
     });
 
     test('should reject invalid SKU', async () => {
-      await expect(
-        BarcodeService.generateBarcode('AB', 'CODE128')
-      ).rejects.toThrow('Invalid SKU format');
+      await expect(BarcodeService.generateBarcode('AB', 'CODE128')).rejects.toThrow('Invalid SKU format');
     });
 
     test('should reject invalid format', async () => {
-      await expect(
-        BarcodeService.generateBarcode('SKU-12345', 'INVALID')
-      ).rejects.toThrow('Unsupported format');
+      await expect(BarcodeService.generateBarcode('SKU-12345', 'INVALID')).rejects.toThrow('Unsupported format');
     });
   });
 
   describe('generateBatchCodes', () => {
     test('should generate batch codes successfully', async () => {
-      const productIds = [
-        new mongoose.Types.ObjectId(),
-        new mongoose.Types.ObjectId(),
-        new mongoose.Types.ObjectId(),
-      ];
+      const productIds = [new mongoose.Types.ObjectId(), new mongoose.Types.ObjectId(), new mongoose.Types.ObjectId()];
 
       const progressUpdates = [];
-      const result = await BarcodeService.generateBatchCodes(
-        productIds,
-        progress => progressUpdates.push(progress)
-      );
+      const result = await BarcodeService.generateBatchCodes(productIds, progress => progressUpdates.push(progress));
 
       expect(result.length).toBe(3);
       expect(progressUpdates.length).toBeGreaterThan(0);
@@ -172,9 +151,7 @@ describe('Barcode API Routes', () => {
 
   describe('POST /api/barcode/generate-qr/:productId', () => {
     test('should return 401 without token', async () => {
-      const response = await request(app)
-        .post('/api/barcode/generate-qr/507f1f77bcf86cd799439011')
-        .send({});
+      const response = await request(app).post('/api/barcode/generate-qr/507f1f77bcf86cd799439011').send({});
 
       expect(response.status).toBe(401);
       expect(response.body.error).toContain('authentication');
@@ -206,12 +183,7 @@ describe('Barcode API Routes', () => {
       // إرسال طلبات متعددة بسرعة
       const requests = Array(150)
         .fill(null)
-        .map(() =>
-          request(app)
-            .post('/api/barcode/generate-qr/507f1f77bcf86cd799439011')
-            .set('Authorization', `Bearer ${token}`)
-            .send({})
-        );
+        .map(() => request(app).post('/api/barcode/generate-qr/507f1f77bcf86cd799439011').set('Authorization', `Bearer ${token}`).send({}));
 
       const responses = await Promise.all(requests);
 
@@ -234,24 +206,15 @@ describe('Barcode API Routes', () => {
     test('should reject more than 1000 products', async () => {
       const productIds = Array(1001).fill(new mongoose.Types.ObjectId());
 
-      const response = await request(app)
-        .post('/api/barcode/batch-generate')
-        .set('Authorization', `Bearer ${token}`)
-        .send({ productIds });
+      const response = await request(app).post('/api/barcode/batch-generate').set('Authorization', `Bearer ${token}`).send({ productIds });
 
       expect(response.status).toBe(400);
     });
 
     test('should process batch successfully', async () => {
-      const productIds = [
-        new mongoose.Types.ObjectId(),
-        new mongoose.Types.ObjectId(),
-      ];
+      const productIds = [new mongoose.Types.ObjectId(), new mongoose.Types.ObjectId()];
 
-      const response = await request(app)
-        .post('/api/barcode/batch-generate')
-        .set('Authorization', `Bearer ${token}`)
-        .send({ productIds });
+      const response = await request(app).post('/api/barcode/batch-generate').set('Authorization', `Bearer ${token}`).send({ productIds });
 
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
@@ -284,9 +247,7 @@ describe('Barcode API Routes', () => {
     });
 
     test('should filter logs by date range', async () => {
-      const startDate = new Date(
-        Date.now() - 24 * 60 * 60 * 1000
-      ).toISOString();
+      const startDate = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
       const endDate = new Date().toISOString();
 
       const response = await request(app)
@@ -320,44 +281,33 @@ describe('Barcode System E2E', () => {
 
   test('E2E: Create Product → Generate QR → Scan → Retrieve', async () => {
     // 1. Create product
-    const createResponse = await request(app)
-      .post('/api/products')
-      .set('Authorization', `Bearer ${token}`)
-      .send({
-        name: 'Test Product',
-        sku: 'TEST-001',
-        price: 99.99,
-        stock: 100,
-      });
+    const createResponse = await request(app).post('/api/products').set('Authorization', `Bearer ${token}`).send({
+      name: 'Test Product',
+      sku: 'TEST-001',
+      price: 99.99,
+      stock: 100,
+    });
 
     expect(createResponse.status).toBe(201);
     productId = createResponse.body.product._id;
 
     // 2. Generate QR
-    const qrResponse = await request(app)
-      .post(`/api/barcode/generate-qr/${productId}`)
-      .set('Authorization', `Bearer ${token}`)
-      .send({});
+    const qrResponse = await request(app).post(`/api/barcode/generate-qr/${productId}`).set('Authorization', `Bearer ${token}`).send({});
 
     expect(qrResponse.status).toBe(200);
     qrCode = qrResponse.body.qrCode;
 
     // 3. Scan QR (simulate scanning)
-    const scanResponse = await request(app)
-      .post('/api/barcode/scan')
-      .set('Authorization', `Bearer ${token}`)
-      .send({
-        code: qrResponse.body.data,
-        type: 'qr',
-      });
+    const scanResponse = await request(app).post('/api/barcode/scan').set('Authorization', `Bearer ${token}`).send({
+      code: qrResponse.body.data,
+      type: 'qr',
+    });
 
     expect(scanResponse.status).toBe(200);
     expect(scanResponse.body.product._id).toBe(productId);
 
     // 4. Verify logs
-    const logsResponse = await request(app)
-      .get('/api/barcode/logs')
-      .set('Authorization', `Bearer ${token}`);
+    const logsResponse = await request(app).get('/api/barcode/logs').set('Authorization', `Bearer ${token}`);
 
     expect(logsResponse.status).toBe(200);
     const logs = logsResponse.body.logs;
@@ -455,8 +405,7 @@ jobs:
         run: docker build -t scm-system:latest .
 
       - name: Tag Image
-        run:
-          docker tag scm-system:latest ghcr.io/${{ github.repository
+        run: docker tag scm-system:latest ghcr.io/${{ github.repository
           }}/scm-system:${{ github.sha }}
 
       - name: Push Image
@@ -685,11 +634,7 @@ export default function () {
 
   // Test QR Generation
   group('QR Code Generation', () => {
-    let response = http.post(
-      `${BASE_URL}/barcode/generate-qr/507f1f77bcf86cd799439011`,
-      { errorCorrection: 'H' },
-      authHeaders
-    );
+    let response = http.post(`${BASE_URL}/barcode/generate-qr/507f1f77bcf86cd799439011`, { errorCorrection: 'H' }, authHeaders);
 
     check(response, {
       'status is 200': r => r.status === 200,
@@ -702,17 +647,9 @@ export default function () {
 
   // Test Batch Generation
   group('Batch Code Generation', () => {
-    let productIds = [
-      '507f1f77bcf86cd799439011',
-      '507f1f77bcf86cd799439012',
-      '507f1f77bcf86cd799439013',
-    ];
+    let productIds = ['507f1f77bcf86cd799439011', '507f1f77bcf86cd799439012', '507f1f77bcf86cd799439013'];
 
-    let response = http.post(
-      `${BASE_URL}/barcode/batch-generate`,
-      JSON.stringify({ productIds }),
-      authHeaders
-    );
+    let response = http.post(`${BASE_URL}/barcode/batch-generate`, JSON.stringify({ productIds }), authHeaders);
 
     check(response, {
       'status is 200': r => r.status === 200,
@@ -775,7 +712,7 @@ export default function () {
 
 ### Test Coverage
 
-```
+```text
 Statements   : 95%+ ✅
 Branches     : 90%+ ✅
 Functions    : 95%+ ✅
@@ -784,7 +721,7 @@ Lines        : 95%+ ✅
 
 ### Performance Metrics
 
-```
+```text
 API Response Time:
 - GETمتوسط: < 200ms
 - POST متوسط: < 500ms
@@ -796,7 +733,7 @@ Error Rate: < 0.1%
 
 ### Security
 
-```
+```text
 ✅ JWT Authentication
 ✅ Rate Limiting
 ✅ Input Validation

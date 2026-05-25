@@ -7,7 +7,7 @@ product, supplier, inventory, and shipment management.
 
 ## Base URL
 
-```
+```text
 http://localhost:4000/api
 ```
 
@@ -16,7 +16,7 @@ http://localhost:4000/api
 All endpoints (except `/auth/register` and `/auth/login`) require Bearer token
 in Authorization header:
 
-```
+```text
 Authorization: Bearer <token>
 ```
 

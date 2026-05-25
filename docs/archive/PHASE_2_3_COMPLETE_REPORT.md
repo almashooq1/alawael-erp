@@ -154,6 +154,7 @@ const config = {
 ### ملفات جديدة:
 
 1. **backend/query-optimization.js** (600+ lines)
+
    - 8 أنماط تحسين مختلفة
    - أمثلة عملية
    - Quick checklist
@@ -176,7 +177,7 @@ const config = {
 
 #### 1. تطبيق Query Optimization (2-3 ساعات)
 
-```
+```text
 Endpoints التي تحتاج تحسين:
 ├─ GET /api/vehicles (جلب جميع السيارات)
 │  └─ استخدم Lean() + Pagination
@@ -188,7 +189,7 @@ Endpoints التي تحتاج تحسين:
 
 #### 2. تطبيق Advanced Monitoring (1-2 ساعات)
 
-```
+```text
 Integration Steps:
 1. Import SlowQueryLogger في server.js
 2. Import PerformanceMetrics
@@ -199,7 +200,7 @@ Integration Steps:
 
 #### 3. تشغيل Load Tests (1 ساعة)
 
-```
+```text
 Test Scenarios:
 1. Baseline Test (بدون تحسينات)
 2. After Optimization Test
@@ -213,7 +214,7 @@ Test Scenarios:
 
 ### Scenario 1: Simple Query
 
-```
+```text
 BEFORE: Vehicle.find({ status: 'active' })
 Time: ~200ms
 Size: ~5MB
@@ -229,7 +230,7 @@ Operations: 1
 
 ### Scenario 2: Report Generation
 
-```
+```text
 BEFORE: Manual processing in Node.js
 Time: ~500ms
 Memory: ~100MB
@@ -243,7 +244,7 @@ Code: ~20 lines
 
 ### Scenario 3: List with Pagination
 
-```
+```text
 BEFORE: Load all 10000 records, slice in app
 Time: ~5000ms
 Memory: ~100MB
@@ -271,11 +272,13 @@ Memory: ~500KB (200x less)
 ## 🎓 استفادات مهمة
 
 1. **Query Optimization Impact**
+
    - Lean() وحدها توفر 5-10x تحسن
    - Indexes مهمة جداً (100-300x تحسن)
    - Aggregation بالـ DB أفضل من الـ app
 
 2. **Monitoring Value**
+
    - تتبع الاستعلامات البطيئة حتمي
    - Slow Query Logs توصلك للمشاكل بسرعة
    - Real-time alerts مهمة للـ production
@@ -289,7 +292,7 @@ Memory: ~500KB (200x less)
 
 ## 🔄 الحالة الكلية للمشروع
 
-```
+```text
 📊 PROJECT COMPLETION: 100% ⭐
 
 ✅ Phase 1: Stability

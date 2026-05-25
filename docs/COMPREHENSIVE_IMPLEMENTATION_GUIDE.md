@@ -1,4 +1,5 @@
 # 🚀 دليل التطبيق الشامل - AlAwael ERP System
+
 ## Comprehensive Implementation Guide
 
 **تاريخ الإنجاز**: فبراير 2026
@@ -28,13 +29,13 @@
 
 ### ✅ المراحل المكتملة
 
-| المرحلة | الوصف | الحالة | الملفات |
-|---------|--------|--------|---------|
-| **4C** | CI/CD Pipeline & Automation | ✅ مكتمل | 4 files |
-| **4B-2** | Slack Integration | ✅ مكتمل | 2 files |
-| **4B-3** | Predictive Analytics & AI | ✅ مكتمل | 1 file |
-| **5** | Advanced Monitoring & Observability | ✅ مكتمل | 7 files |
-| **8** | Fix 8 Failed Services Tests | ✅ مكتمل | 8 files |
+| المرحلة  | الوصف                               | الحالة   | الملفات |
+| -------- | ----------------------------------- | -------- | ------- |
+| **4C**   | CI/CD Pipeline & Automation         | ✅ مكتمل | 4 files |
+| **4B-2** | Slack Integration                   | ✅ مكتمل | 2 files |
+| **4B-3** | Predictive Analytics & AI           | ✅ مكتمل | 1 file  |
+| **5**    | Advanced Monitoring & Observability | ✅ مكتمل | 7 files |
+| **8**    | Fix 8 Failed Services Tests         | ✅ مكتمل | 8 files |
 
 **إجمالي الملفات المنشأة**: 22 ملف
 **إجمالي الأسطر البرمجية**: ~5,500+ سطر
@@ -47,6 +48,7 @@
 ### الملفات المنشأة
 
 #### 1. `.github/workflows/quality-gate.yml` (178 lines)
+
 ```yaml
 name: Quality Gate Check
 
@@ -75,6 +77,7 @@ jobs:
 ```
 
 **المزايا**:
+
 - ✅ تشغيل اختبارات لـ 10 خدمات بشكل متوازي
 - ✅ تحليل تغطية الكود (Codecov)
 - ✅ تطبيق قواعد الجودة
@@ -83,6 +86,7 @@ jobs:
 #### 2. `scripts/ci-quality-check.js` (283 lines)
 
 **الوظائف الأساسية**:
+
 ```javascript
 // 4 Quality Gates
 1. minTestCoverage: 70%
@@ -92,6 +96,7 @@ jobs:
 ```
 
 **الاستخدام**:
+
 ```bash
 node scripts/ci-quality-check.js
 ```
@@ -99,6 +104,7 @@ node scripts/ci-quality-check.js
 #### 3. `.github/quality-rules.json` (115 lines)
 
 **التكوين القابل للتخصيص**:
+
 ```json
 {
   "qualityGates": {
@@ -119,6 +125,7 @@ node scripts/ci-quality-check.js
 #### 4. `docs/CI_CD_SETUP_GUIDE.md` (500+ lines)
 
 دليل شامل بالعربية والإنجليزية يغطي:
+
 - إعداد GitHub Actions
 - تكوين Quality Gates
 - إدارة الإشعارات
@@ -129,6 +136,7 @@ node scripts/ci-quality-check.js
 #### تفعيل CI/CD Pipeline
 
 1. **إضافة GitHub Secrets**:
+
 ```bash
 # Settings → Secrets and variables → Actions → New repository secret
 
@@ -140,6 +148,7 @@ NOTIFICATION_EMAIL=team@alawael.com
 ```
 
 2. **دفع الكود إلى GitHub**:
+
 ```bash
 git add .github/ scripts/ docs/
 git commit -m "feat: Add CI/CD pipeline with quality gates"
@@ -147,6 +156,7 @@ git push origin main
 ```
 
 3. **التحقق من التشغيل**:
+
 - افتح `Actions` في مستودع GitHub
 - شاهد تشغيل `Quality Gate Check`
 - تحقق من النتائج والإشعارات
@@ -157,8 +167,8 @@ git push origin main
 // .github/quality-rules.json
 {
   "qualityGates": {
-    "minTestCoverage": 80,  // رفع إلى 80%
-    "allowedFailures": 1     // تقليل إلى 1
+    "minTestCoverage": 80, // رفع إلى 80%
+    "allowedFailures": 1 // تقليل إلى 1
   }
 }
 ```
@@ -278,9 +288,11 @@ curl -X POST http://localhost:3001/api/slack/daily-summary
 
 - انتظر حتى الساعة 9 صباحاً للتقرير اليومي
 - أو عدّل جدول cron للاختبار:
+
 ```javascript
 // scheduler.js
-cron.schedule('* * * * *', async () => {  // كل دقيقة
+cron.schedule('* * * * *', async () => {
+  // كل دقيقة
   await qualityService.sendDailySummary();
 });
 ```
@@ -288,7 +300,8 @@ cron.schedule('* * * * *', async () => {  // كل دقيقة
 ### أمثلة الإشعارات
 
 #### 1. Test Failure Alert
-```
+
+```text
 🚨 Test Failure Alert
 
 Service: backend
@@ -307,7 +320,8 @@ Coverage: 72%
 ```
 
 #### 2. Daily Summary
-```
+
+```text
 📊 Daily Quality Summary - Feb 22, 2026
 
 ✅ Passed: 8 services
@@ -386,6 +400,7 @@ class MLAnalytics {
 ### API Endpoints الجديدة
 
 #### 1. Pattern Analysis
+
 ```bash
 GET /api/analytics/patterns/:service?days=30
 
@@ -419,6 +434,7 @@ Response:
 ```
 
 #### 2. Failure Prediction
+
 ```bash
 GET /api/analytics/predict/:service
 
@@ -444,6 +460,7 @@ Response:
 ```
 
 #### 3. Risk Score
+
 ```bash
 GET /api/analytics/risk/:service
 
@@ -472,6 +489,7 @@ Response:
 ```
 
 #### 4. Analytics Overview
+
 ```bash
 GET /api/analytics/overview
 
@@ -513,7 +531,8 @@ fetch('/api/analytics/risk/backend')
 
 ```javascript
 // scheduler.js - إضافة تقرير تحليلات أسبوعي
-cron.schedule('0 10 * * 1', async () => {  // كل اثنين 10 صباحاً
+cron.schedule('0 10 * * 1', async () => {
+  // كل اثنين 10 صباحاً
   const overview = await mlAnalytics.getAnalyticsOverview();
   await slackService.sendAnalyticsReport(overview);
 });
@@ -525,7 +544,7 @@ cron.schedule('0 10 * * 1', async () => {  // كل اثنين 10 صباحاً
 
 ### البنية التحتية
 
-```
+```text
 monitoring/
 ├── docker-compose.yml           # تنسيق الخدمات
 ├── prometheus/
@@ -544,19 +563,23 @@ monitoring/
 ### الخدمات المنشورة
 
 #### 1. Prometheus (Port 9090)
+
 - **الوظيفة**: جمع المقاييس من 7 targets
 - **الوصول**: http://localhost:9090
 
 #### 2. Grafana (Port 3000)
+
 - **الوظيفة**: تصور المقاييس ولوحات المراقبة
 - **الوصول**: http://localhost:3000
 - **الدخول**: admin / admin
 
 #### 3. AlertManager (Port 9093)
+
 - **الوظيفة**: إدارة وتوجيه التنبيهات
 - **الوصول**: http://localhost:9093
 
 #### 4. Node Exporter (Port 9100)
+
 - **الوظيفة**: مقاييس النظام (CPU, RAM, Disk)
 
 ### النشر
@@ -610,6 +633,7 @@ scrape_configs:
 #### 2. Alert Rules (15+ rules)
 
 **Quality Alerts**:
+
 ```yaml
 - alert: HighTestFailureRate
   expr: (quality_tests_failed / quality_tests_total) > 0.3
@@ -617,10 +641,11 @@ scrape_configs:
   labels:
     severity: critical
   annotations:
-    summary: "High test failure rate detected"
+    summary: 'High test failure rate detected'
 ```
 
 **Infrastructure Alerts**:
+
 ```yaml
 - alert: HighCPUUsage
   expr: node_cpu_usage > 80
@@ -630,6 +655,7 @@ scrape_configs:
 ```
 
 **Performance Alerts**:
+
 ```yaml
 - alert: SlowTestDuration
   expr: quality_test_duration_seconds > 120
@@ -681,7 +707,7 @@ promClient.collectDefaultMetrics({ register });
 const httpRequestDuration = new promClient.Histogram({
   name: 'http_request_duration_seconds',
   help: 'Duration of HTTP requests in seconds',
-  labelNames: ['method', 'route', 'status_code']
+  labelNames: ['method', 'route', 'status_code'],
 });
 register.registerMetric(httpRequestDuration);
 
@@ -723,9 +749,9 @@ const { getNodeAutoInstrumentations } = require('@opentelemetry/auto-instrumenta
 
 const sdk = new NodeSDK({
   traceExporter: new JaegerExporter({
-    endpoint: 'http://localhost:14268/api/traces'
+    endpoint: 'http://localhost:14268/api/traces',
   }),
-  instrumentations: [getNodeAutoInstrumentations()]
+  instrumentations: [getNodeAutoInstrumentations()],
 });
 
 sdk.start();
@@ -753,36 +779,43 @@ docker run -d --name jaeger \
 تم إنشاء ملفات اختبار أساسية لـ 8 خدمات:
 
 1. **graphql/test/basic.test.js**
+
    - اختبارات GraphQL schema
    - اختبارات Resolvers
    - اختبارات Queries
 
 2. **finance-module/backend/test/basic.test.js**
+
    - اختبارات الحسابات المالية
    - اختبارات الضرائب
    - اختبارات التقارير
 
-3. **supply-chain-management/frontend/src/__tests__/basic.test.js**
+3. **supply-chain-management/frontend/src/**tests**/basic.test.js**
+
    - اختبارات React Components
    - اختبارات API Integration
    - اختبارات State Management
 
 4. **intelligent-agent/test/basic.test.js**
+
    - اختبارات AI Models
    - اختبارات Agent Logic
    - اختبارات Decision Making
 
 5. **mobile/test/basic.test.js**
+
    - اختبارات Mobile Components
    - اختبارات Navigation
    - اختبارات API Integration
 
 6. **gateway/test/basic.test.js**
+
    - اختبارات Routing
    - اختبارات Authentication
    - اختبارات Rate Limiting
 
 7. **whatsapp/test/basic.test.js**
+
    - اختبارات Message Handling
    - اختبارات Webhook
    - اختبارات API Integration
@@ -795,11 +828,13 @@ docker run -d --name jaeger \
 ### التحسينات
 
 **Before**:
+
 - ❌ 8 services with 0% test coverage
 - ❌ Dashboard shows 20% overall coverage
 - ❌ CI pipeline fails
 
 **After**:
+
 - ✅ 8 services with basic test scaffolding
 - ✅ Ready for test expansion
 - ✅ CI pipeline will detect tests
@@ -807,6 +842,7 @@ docker run -d --name jaeger \
 ### التوسع المستقبلي
 
 كل ملف اختبار يحتوي على:
+
 - ✅ هيكل اختبار أساسي
 - ✅ تعليقات TODO لاختبارات إضافية
 - ✅ تنظيم describe/test واضح
@@ -930,7 +966,8 @@ node quality-dashboard.js
 ```
 
 **النتيجة المتوقعة**:
-```
+
+```text
 ✅ Backend: Passed (45 tests, 82% coverage)
 ✅ GraphQL: Passed (12 tests, 75% coverage)
 ✅ Finance: Passed (8 tests, 68% coverage)
@@ -970,6 +1007,7 @@ NOTIFICATION_EMAIL
 3. Create → Dashboard → Add Panel
 4. اختر Prometheus datasource
 5. أضف PromQL query:
+
 ```promql
 # Test success rate
 rate(quality_tests_passed[5m]) / rate(quality_tests_total[5m])
@@ -990,11 +1028,13 @@ quality_test_coverage_percent
 #### خطوات الإعداد:
 
 1. **إنشاء Slack App**:
+
    - https://api.slack.com/apps → Create New App
    - From scratch → اسم التطبيق: "AlAwael Quality Bot"
    - اختر Workspace
 
 2. **تفعيل Incoming Webhooks**:
+
    - في App settings → Features → Incoming Webhooks
    - Activate Incoming Webhooks → ON
    - Add New Webhook to Workspace
@@ -1002,6 +1042,7 @@ quality_test_coverage_percent
    - انسخ Webhook URL
 
 3. **تكوين Permissions** (اختياري):
+
    - OAuth & Permissions
    - Bot Token Scopes:
      - `chat:write` - إرسال رسائل
@@ -1035,6 +1076,7 @@ NOTIFICATION_EMAIL=team@alawael.com
 #### Grafana Datasource Configuration:
 
 **تلقائي** (عبر provisioning):
+
 ```yaml
 # monitoring/grafana/provisioning/datasources/datasource.yml
 apiVersion: 1
@@ -1047,6 +1089,7 @@ datasources:
 ```
 
 **يدوي** (إذا لزم الأمر):
+
 1. Grafana → Configuration → Data Sources
 2. Add data source → Prometheus
 3. URL: `http://prometheus:9090`
@@ -1084,11 +1127,12 @@ const { JaegerExporter } = require('@opentelemetry/exporter-jaeger');
 
 const exporter = new JaegerExporter({
   endpoint: 'http://localhost:14268/api/traces',
-  serviceName: 'alawael-backend'
+  serviceName: 'alawael-backend',
 });
 ```
 
 #### الوصول:
+
 - Jaeger UI: http://localhost:16686
 
 ---
@@ -1098,13 +1142,15 @@ const exporter = new JaegerExporter({
 ### مشكلة: Slack Notifications لا تعمل
 
 **الأعراض**:
-```
+
+```text
 Error: Request failed with status code 401
 ```
 
 **الحلول**:
 
 1. **التحقق من Webhook URL**:
+
 ```bash
 # Test webhook manually
 curl -X POST -H 'Content-type: application/json' \
@@ -1115,6 +1161,7 @@ curl -X POST -H 'Content-type: application/json' \
 ```
 
 2. **التحقق من Environment Variable**:
+
 ```bash
 # في dashboard/server
 echo $SLACK_WEBHOOK_URL
@@ -1123,6 +1170,7 @@ echo $SLACK_WEBHOOK_URL
 ```
 
 3. **إعادة إنشاء Webhook**:
+
 - https://api.slack.com/apps
 - اختر التطبيق → Incoming Webhooks
 - Revoke → Add New Webhook
@@ -1130,12 +1178,14 @@ echo $SLACK_WEBHOOK_URL
 ### مشكلة: Prometheus لا يجمع Metrics
 
 **الأعراض**:
+
 - Targets في Prometheus تظهر "DOWN"
 - No data في Grafana
 
 **الحلول**:
 
 1. **التحقق من Endpoints**:
+
 ```bash
 # Test metrics endpoint
 curl http://localhost:3001/metrics
@@ -1145,6 +1195,7 @@ curl http://localhost:5000/metrics
 ```
 
 2. **التحقق من Docker Network**:
+
 ```bash
 # Check if Prometheus can reach host
 docker exec -it prometheus ping host.docker.internal
@@ -1153,12 +1204,14 @@ docker exec -it prometheus ping host.docker.internal
 ```
 
 3. **التحقق من Firewall**:
+
 ```bash
 # Windows: Allow ports
 netsh advfirewall firewall add rule name="Prometheus" dir=in action=allow protocol=TCP localport=9090
 ```
 
 4. **إعادة تحميل Configuration**:
+
 ```bash
 # في Prometheus UI (http://localhost:9090)
 Status → Configuration → Reload
@@ -1170,19 +1223,22 @@ curl -X POST http://localhost:9090/-/reload
 ### مشكلة: Tests لا تعمل
 
 **الأعراض**:
-```
+
+```text
 Error: Cannot find module 'jest'
 ```
 
 **الحلول**:
 
 1. **تثبيت Jest**:
+
 ```bash
 cd [service-directory]
 npm install --save-dev jest @types/jest
 ```
 
 2. **التحقق من package.json**:
+
 ```json
 {
   "scripts": {
@@ -1195,27 +1251,27 @@ npm install --save-dev jest @types/jest
 ```
 
 3. **إنشاء jest.config.js**:
+
 ```javascript
 module.exports = {
   testEnvironment: 'node',
   coverageDirectory: 'coverage',
-  collectCoverageFrom: [
-    'src/**/*.js',
-    '!src/**/*.test.js'
-  ]
+  collectCoverageFrom: ['src/**/*.js', '!src/**/*.test.js'],
 };
 ```
 
 ### مشكلة: CI/CD Pipeline Fails
 
 **الأعراض**:
-```
+
+```text
 Error: DASHBOARD_URL is not set
 ```
 
 **الحلول**:
 
 1. **إضافة GitHub Secrets**:
+
 - Settings → Secrets → Actions → New repository secret
 - أضف جميع المتطلبات:
   - `DASHBOARD_URL`
@@ -1225,6 +1281,7 @@ Error: DASHBOARD_URL is not set
   - `NOTIFICATION_EMAIL`
 
 2. **التحقق من Workflow File**:
+
 ```yaml
 # .github/workflows/quality-gate.yml
 env:
@@ -1233,18 +1290,21 @@ env:
 ```
 
 3. **إعادة تشغيل Workflow**:
+
 - Actions → اختر الفشل Workflow
 - Re-run jobs
 
 ### مشكلة: Grafana لا يعرض Data
 
 **الأعراض**:
+
 - Dashboard فارغ
 - "No data" في Panels
 
 **الحلول**:
 
 1. **التحقق من Datasource**:
+
 ```bash
 # Grafana UI
 Configuration → Data Sources → Prometheus → Test
@@ -1253,6 +1313,7 @@ Configuration → Data Sources → Prometheus → Test
 ```
 
 2. **التحقق من PromQL Query**:
+
 ```promql
 # في Panel → Query
 # جرب query بسيط أولاً:
@@ -1262,10 +1323,12 @@ up
 ```
 
 3. **التحقق من Time Range**:
+
 - في Dashboard → Time picker (أعلى اليمين)
 - اختر "Last 15 minutes" أو "Last 1 hour"
 
 4. **إعادة تشغيل Grafana**:
+
 ```bash
 docker-compose restart grafana
 ```
@@ -1273,18 +1336,21 @@ docker-compose restart grafana
 ### مشكلة: Scheduler لا يعمل
 
 **الأعراض**:
+
 - لا يتم إرسال تقارير يومية
 - لا توجد سجلات cron
 
 **الحلول**:
 
 1. **التحقق من Environment Variable**:
+
 ```bash
 # .env
 ENABLE_SCHEDULER=true  # يجب أن يكون true
 ```
 
 2. **التحقق من السجلات**:
+
 ```bash
 # في dashboard/server
 npm start
@@ -1296,6 +1362,7 @@ npm start
 ```
 
 3. **تعديل جدول Cron للاختبار**:
+
 ```javascript
 // scheduler.js
 // جرب كل دقيقة للاختبار:
@@ -1312,12 +1379,14 @@ cron.schedule('* * * * *', async () => {
 ### ملفات التوثيق المنشأة:
 
 1. **`docs/CI_CD_SETUP_GUIDE.md`** (500+ lines)
+
    - شرح شامل لـ CI/CD Pipeline
    - تكوين GitHub Actions
    - Quality Gates
    - استكشاف الأخطاء
 
 2. **`monitoring/README.md`** (350+ lines)
+
    - دليل Prometheus & Grafana
    - إنشاء Dashboards
    - Alert Rules
@@ -1344,30 +1413,35 @@ cron.schedule('* * * * *', async () => {
 ### ما تم إنجازه
 
 ✅ **Phase 4C - CI/CD Pipeline**:
+
 - GitHub Actions workflows
 - Quality gates enforcement
 - Codecov integration
 - Multi-channel notifications
 
 ✅ **Phase 4B-2 - Slack Integration**:
+
 - 6 types of notifications
 - Automated daily/weekly reports
 - Health monitoring alerts
 - Real-time test notifications
 
 ✅ **Phase 4B-3 - ML Analytics**:
+
 - Pattern analysis engine
 - Failure prediction (0-100 probability)
 - Risk scoring system
 - 4 new API endpoints
 
 ✅ **Phase 5 - Monitoring Stack**:
+
 - Prometheus + Grafana + AlertManager
 - 15+ alert rules
 - Docker Compose setup
 - OpenTelemetry tracing guide
 
 ✅ **Phase 8 - Test Coverage Fix**:
+
 - 8 test files created
 - Coverage scaffolding
 - Ready for expansion
@@ -1383,12 +1457,14 @@ cron.schedule('* * * * *', async () => {
 ### الخطوات التالية
 
 1. **Immediate (الأسبوع القادم)**:
+
    - تكوين Slack webhook
    - نشر monitoring stack
    - تشغيل CI/CD pipeline
    - كتابة اختبارات إضافية
 
 2. **Short-term (الشهر القادم)**:
+
    - إنشاء Grafana dashboards مخصصة
    - توسيع اختبارات الـ 8 خدمات
    - تحسين ML analytics models
@@ -1416,4 +1492,3 @@ cron.schedule('* * * * *', async () => {
 **Contact**: team@alawael.com
 **Documentation**: `/docs`
 **Support**: #alawael-support
-

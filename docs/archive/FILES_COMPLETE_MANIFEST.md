@@ -68,7 +68,7 @@
 
 ### حسب النوع
 
-```
+```text
 ملفات TypeScript/JavaScript:    12 ملف
 ملفات Markdown:                  5 ملفات
 ملفات اختبار:                    2 ملف
@@ -77,7 +77,7 @@
 
 ### حسب الموقع
 
-```
+```text
 frontend/:         7 ملفات (مكونات + خدمات)
 backend/:          5 ملفات (خوادم + خدمات)
 root/:             5 ملفات (توثيق)
@@ -86,7 +86,7 @@ root/:             5 ملفات (توثيق)
 
 ### حسب اللغة
 
-```
+```text
 JavaScript/JSX:    14 ملف (3850+ سطر)
 Markdown:          5 ملفات (1250+ سطر)
 Total:             19 ملف (4500+ سطر)
@@ -108,7 +108,7 @@ Total:             19 ملف (4500+ سطر)
 
 ### قسم التوثيق
 
-```
+```text
 ✅ FINAL_ACHIEVEMENT_SUMMARY.md
 ✅ FINAL_PROJECT_COMPLETION_SUMMARY.md
 ✅ COMPLETE_INTEGRATION_GUIDE.md
@@ -118,7 +118,7 @@ Total:             19 ملف (4500+ سطر)
 
 ### قسم الواجهة الأمامية
 
-```
+```text
 مكونات:
 ✅ frontend/src/components/CustomReportsDashboard.jsx
 ✅ frontend/src/pages/Reports/AdvancedReportsPage.jsx
@@ -136,7 +136,7 @@ Total:             19 ملف (4500+ سطر)
 
 ### قسم الخادم الخلفي
 
-```
+```text
 خوادم:
 ✅ backend/src/notificationServer.js
 ✅ backend/src/routes/reportsRoutes.js
@@ -250,7 +250,7 @@ git push origin v2.0
 
 ## 📊 ملخص الملفات
 
-```
+```text
 إجمالي الملفات المنشأة:        19 ملف
 إجمالي الملفات المعدّلة:       3 ملفات
 إجمالي الملفات المتأثرة:       22 ملف

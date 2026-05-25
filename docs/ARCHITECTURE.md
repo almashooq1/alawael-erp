@@ -23,20 +23,20 @@
 
 Al-Awael ERP is a **monorepo** enterprise resource planning system built for day care centers for people with disabilities. It manages 12 branches + 1 HQ with a full suite of operational, clinical, HR, and financial modules.
 
-| Dimension       | Scale                                      |
-|-----------------|--------------------------------------------|
-| API Modules     | 200+ route modules (36+ phases)            |
-| Mongoose Models | 350+ schemas                               |
-| Services        | 400+ business logic services               |
-| Frontend Pages  | 90+ React pages                            |
-| Tests           | 9,409 passing (Jest + Cypress)             |
-| Branches        | 12 + HQ Riyadh                             |
+| Dimension       | Scale                           |
+| --------------- | ------------------------------- |
+| API Modules     | 200+ route modules (36+ phases) |
+| Mongoose Models | 350+ schemas                    |
+| Services        | 400+ business logic services    |
+| Frontend Pages  | 90+ React pages                 |
+| Tests           | 9,409 passing (Jest + Cypress)  |
+| Branches        | 12 + HQ Riyadh                  |
 
 ---
 
 ## 2. High-Level Architecture
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────────┐
 │                        Client Layer                              │
 │   Browser (React SPA)    │    Mobile (React Native)             │
@@ -65,7 +65,7 @@ Al-Awael ERP is a **monorepo** enterprise resource planning system built for day
 
 ### Traffic Flow
 
-```
+```text
 Request → Nginx → Rate Limiter → Auth Middleware (JWT) → RBAC Check
        → Controller → Service Layer → Repository/Model → MongoDB
        → Response ← Controller ← Service
@@ -77,7 +77,7 @@ Request → Nginx → Rate Limiter → Auth Middleware (JWT) → RBAC Check
 
 ### Directory Structure
 
-```
+```text
 backend/
 ├── api/routes/              # Core API routes (auth, users, modules, CRM)
 ├── archive/                 # Electronic archive system
@@ -126,7 +126,7 @@ backend/
 
 ### Layered Architecture
 
-```
+```text
 ┌─────────────────────────────────────┐
 │         Routes (_registry.js)       │  ← URL mapping only
 ├─────────────────────────────────────┤
@@ -146,11 +146,12 @@ All 200+ routes are registered in a single file `routes/_registry.js` using two 
 
 ```javascript
 // دوال التحميل
-dualMount(app, 'path', handler)   // Mounts on /api/path AND /api/v1/path
-safeMount(app, paths, modulePath) // Graceful — logs error instead of crashing
+dualMount(app, 'path', handler); // Mounts on /api/path AND /api/v1/path
+safeMount(app, paths, modulePath); // Graceful — logs error instead of crashing
 ```
 
 This ensures:
+
 - Zero crashes on missing route modules (safeMount)
 - Automatic `/api/v1/` versioning
 - Centralized route health tracking (`routeHealth.summary`)
@@ -161,7 +162,7 @@ This ensures:
 
 ### Directory Structure
 
-```
+```text
 frontend/src/
 ├── components/
 │   ├── common/              # Shared: ErrorBoundary, LoadingSpinner, etc.
@@ -182,10 +183,15 @@ frontend/src/
 ### Key Patterns
 
 #### Error Boundary Pattern (Every major page)
+
 ```jsx
 class PageErrorBoundary extends Component {
-  static getDerivedStateFromError(error) { return { hasError: true, error }; }
-  componentDidCatch(error, info) { console.error('[Page]', error, info); }
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+  componentDidCatch(error, info) {
+    console.error('[Page]', error, info);
+  }
   render() {
     if (this.state.hasError) return <ErrorFallback error={this.state.error} />;
     return this.props.children;
@@ -193,16 +199,22 @@ class PageErrorBoundary extends Component {
 }
 
 export default function Page() {
-  return <PageErrorBoundary><PageInner /></PageErrorBoundary>;
+  return (
+    <PageErrorBoundary>
+      <PageInner />
+    </PageErrorBoundary>
+  );
 }
 ```
 
 #### Lazy Loading Pattern
+
 ```jsx
 const RehabDashboard = lazyWithRetry(() => import('./pages/RehabDashboard'));
 ```
 
 #### API Service Pattern
+
 ```javascript
 const apiCall = async (path, options = {}) => {
   const token = localStorage.getItem('token') || sessionStorage.getItem('token');
@@ -221,7 +233,7 @@ const apiCall = async (path, options = {}) => {
 
 ### Core Models Hierarchy
 
-```
+```text
 Organization
 └── Branch (12 + HQ)
     ├── Staff (Users — RBAC roles)
@@ -242,16 +254,17 @@ Organization
 
 ```javascript
 // RehabilitationPlan — compound indexes for common query patterns
-RehabilitationPlanSchema.index({ beneficiary: 1, status: 1 });      // Patient's active plans
+RehabilitationPlanSchema.index({ beneficiary: 1, status: 1 }); // Patient's active plans
 RehabilitationPlanSchema.index({ primaryTherapist: 1, status: 1 }); // Therapist's workload
-RehabilitationPlanSchema.index({ branch: 1, status: 1 });           // Branch reports
-RehabilitationPlanSchema.index({ startDate: 1, endDate: 1 });       // Date range queries
+RehabilitationPlanSchema.index({ branch: 1, status: 1 }); // Branch reports
+RehabilitationPlanSchema.index({ startDate: 1, endDate: 1 }); // Date range queries
 RehabilitationPlanSchema.index({ planCode: 1 }, { unique: true, sparse: true });
 ```
 
 ### Schema Validation Rules
 
 All enum fields **must** have `type: String` explicitly:
+
 ```javascript
 // ✅ Correct
 status: { type: String, enum: ['active', 'inactive'], default: 'active' }
@@ -261,6 +274,7 @@ status: { enum: ['active', 'inactive'], default: 'active' }
 ```
 
 `timestamps: true` goes in **schema options**, not inside the schema body:
+
 ```javascript
 // ✅ Correct
 new Schema({ ... }, { timestamps: true })
@@ -275,7 +289,7 @@ new Schema({ timestamps: true, ... })
 
 ### Authentication Flow
 
-```
+```text
 Client → POST /api/auth/login
        → validateCredentials()
        → bcrypt.compare(password, hash)
@@ -292,24 +306,24 @@ Client → Authorization: Bearer <token>
 
 ### RBAC Matrix (Branch System)
 
-| Role              | Scope           | Key Permissions                               |
-|-------------------|-----------------|-----------------------------------------------|
-| hq_super_admin    | All branches    | Full CRUD, override, emergency controls       |
-| hq_admin          | All branches    | Read-write, no override                       |
-| branch_manager    | Own branch      | Full branch CRUD, staff management            |
-| therapist         | Own patients    | Clinical data, plans, sessions                |
-| receptionist      | Own branch      | Scheduling, basic beneficiary data            |
-| driver            | Assigned routes | Transport schedule, check-in/out              |
+| Role           | Scope           | Key Permissions                         |
+| -------------- | --------------- | --------------------------------------- |
+| hq_super_admin | All branches    | Full CRUD, override, emergency controls |
+| hq_admin       | All branches    | Read-write, no override                 |
+| branch_manager | Own branch      | Full branch CRUD, staff management      |
+| therapist      | Own patients    | Clinical data, plans, sessions          |
+| receptionist   | Own branch      | Scheduling, basic beneficiary data      |
+| driver         | Assigned routes | Transport schedule, check-in/out        |
 
 ### Security Middleware Stack
 
 ```javascript
-app.use(helmet())              // Security headers (CSP, HSTS, etc.)
-app.use(mongoSanitize())       // NoSQL injection prevention
-app.use(xssFilter())           // XSS prevention
-app.use(csrf())                // CSRF protection
-app.use(rateLimiter)           // Global rate limiting
-app.use(authRoutes, authRateLimiter)  // Auth-specific rate limit
+app.use(helmet()); // Security headers (CSP, HSTS, etc.)
+app.use(mongoSanitize()); // NoSQL injection prevention
+app.use(xssFilter()); // XSS prevention
+app.use(csrf()); // CSRF protection
+app.use(rateLimiter); // Global rate limiting
+app.use(authRoutes, authRateLimiter); // Auth-specific rate limit
 ```
 
 ---
@@ -318,7 +332,7 @@ app.use(authRoutes, authRateLimiter)  // Auth-specific rate limit
 
 ### Module Overview
 
-```
+```text
 /api/rehab-plans (rehabilitationPlan.routes.js)
 ├── GET    /templates                              # Available plan templates
 ├── GET    /goal-bank?domain=motorSkills           # Goal bank by domain
@@ -340,7 +354,7 @@ app.use(authRoutes, authRateLimiter)  // Auth-specific rate limit
 
 ### AI Assessment Pipeline (v6.0)
 
-```
+```text
 Beneficiary Data → AI Assessment Service
                  → Risk Scoring (0-100)
                  → Outcome Prediction (0-100%)
@@ -351,13 +365,13 @@ Beneficiary Data → AI Assessment Service
 
 ### Field Normalization (Frontend ↔ Service)
 
-| Frontend Field      | Service Field       | Notes                          |
-|---------------------|---------------------|--------------------------------|
-| `beneficiary`       | `beneficiaryId`     | May be name or ObjectId        |
-| `primaryDiagnosis`  | `disabilityType`    | Clinical diagnosis text        |
-| `disabilityCategory`| `disabilityType`    | Fallback if no primaryDiagnosis|
-| `templateUsed`      | `templateType`      | Plan template identifier       |
-| `goalText`          | `description`       | SMART goal text                |
+| Frontend Field       | Service Field    | Notes                           |
+| -------------------- | ---------------- | ------------------------------- |
+| `beneficiary`        | `beneficiaryId`  | May be name or ObjectId         |
+| `primaryDiagnosis`   | `disabilityType` | Clinical diagnosis text         |
+| `disabilityCategory` | `disabilityType` | Fallback if no primaryDiagnosis |
+| `templateUsed`       | `templateType`   | Plan template identifier        |
+| `goalText`           | `description`    | SMART goal text                 |
 
 ---
 
@@ -365,19 +379,19 @@ Beneficiary Data → AI Assessment Service
 
 ### Branch Codes
 
-| Code | Branch Name            | Region   |
-|------|------------------------|----------|
-| HQ   | المقر الرئيسي - الرياض  | Riyadh   |
-| RYD1 | فرع الرياض 1 - العليا   | Riyadh   |
-| JED1 | فرع جدة 1 - الروضة     | Jeddah   |
-| DMM1 | فرع الدمام 1           | Dammam   |
-| MKH1 | فرع مكة المكرمة 1      | Makkah   |
-| MED1 | فرع المدينة 1          | Madinah  |
-| ... | (12 branches total)    | ...      |
+| Code | Branch Name            | Region  |
+| ---- | ---------------------- | ------- |
+| HQ   | المقر الرئيسي - الرياض | Riyadh  |
+| RYD1 | فرع الرياض 1 - العليا  | Riyadh  |
+| JED1 | فرع جدة 1 - الروضة     | Jeddah  |
+| DMM1 | فرع الدمام 1           | Dammam  |
+| MKH1 | فرع مكة المكرمة 1      | Makkah  |
+| MED1 | فرع المدينة 1          | Madinah |
+| ...  | (12 branches total)    | ...     |
 
 ### Key Endpoints
 
-```
+```text
 GET  /api/branch-management/hq/dashboard           # HQ overview
 GET  /api/branch-management/hq/cross-branch        # Cross-branch comparison
 GET  /api/branch-management/:code/dashboard        # Branch dashboard
@@ -412,19 +426,20 @@ POST /api/branch-management/hq/emergency-override  # HQ emergency control
 
 ### HTTP Status Codes
 
-| Status | Usage                                            |
-|--------|--------------------------------------------------|
-| 200    | Successful GET / PUT / PATCH                     |
-| 201    | Successful POST (resource created)               |
-| 400    | Validation error (missing/invalid fields)        |
-| 401    | Missing or invalid JWT token                     |
+| Status | Usage                                             |
+| ------ | ------------------------------------------------- |
+| 200    | Successful GET / PUT / PATCH                      |
+| 201    | Successful POST (resource created)                |
+| 400    | Validation error (missing/invalid fields)         |
+| 401    | Missing or invalid JWT token                      |
 | 403    | Valid token but insufficient permissions          |
-| 404    | Resource not found                               |
-| 503    | Dependent service unavailable (graceful fallback)|
+| 404    | Resource not found                                |
+| 503    | Dependent service unavailable (graceful fallback) |
 
 ### Dual Versioning
 
 All endpoints are available at:
+
 - `/api/{resource}` — production path
 - `/api/v1/{resource}` — versioned path (identical handler)
 
@@ -433,26 +448,31 @@ All endpoints are available at:
 ## 10. Key Design Decisions
 
 ### 1. Monorepo Structure
+
 **Decision**: Keep all modules in one repository.
 **Rationale**: Easier cross-module development, single CI pipeline, consistent tooling.
 **Trade-off**: Large repo size, longer clone times.
 
 ### 2. safeMount for Route Loading
+
 **Decision**: Use `safeMount` for optional/experimental routes.
 **Rationale**: One broken route module should never crash the entire server.
 **Implementation**: Catches require() errors, logs to routeHealth, continues loading.
 
 ### 3. Graceful Redis Degradation
+
 **Decision**: `DISABLE_REDIS=true` completely skips Redis initialization.
 **Rationale**: Development environments without Redis should work without NOAUTH spam.
 **Implementation**: Guard check at the top of `createRedisClient()`, `initializeRedis()`, `connectRedis()`.
 
 ### 4. Field Normalization in Controllers
+
 **Decision**: Normalize field names in controllers, not in the service layer.
 **Rationale**: Services maintain their internal API contract; controllers adapt the HTTP interface.
 **Implementation**: `normalizedBody` object created before passing to service.
 
 ### 5. Error Boundaries on Every Major Page
+
 **Decision**: Wrap every major React page in a class-based Error Boundary.
 **Rationale**: A rendering error in one page should not crash the entire SPA.
 **Pattern**: Inner functional component + outer class boundary exporting the wrapped component.

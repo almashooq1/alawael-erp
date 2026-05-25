@@ -277,7 +277,7 @@
 
 ## 📊 Summary Statistics
 
-```
+```text
 Total Files Verified:        58
 Missing Files:               0
 Verification Success Rate:   100%
@@ -436,7 +436,7 @@ Total Documentation:         5
 
 ## 📝 Status Summary
 
-```
+```text
 ┌─────────────────────────────────────┐
 │  SUPPLY CHAIN MANAGEMENT SYSTEM     │
 │                                     │

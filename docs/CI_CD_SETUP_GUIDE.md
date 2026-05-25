@@ -1,4 +1,5 @@
 # دليل إعداد CI/CD Pipeline
+
 # CI/CD Setup Guide
 
 <div dir="rtl">
@@ -18,14 +19,18 @@
 ## 📦 المتطلبات
 
 ### 1. Repository على GitHub
+
 يجب أن يكون المشروع على GitHub لاستخدام GitHub Actions.
 
 ### 2. Node.js Environment
+
 - Node.js 20 أو أحدث
 - npm مثبت على جميع الخدمات
 
 ### 3. اختبارات موجودة
+
 كل خدمة يجب أن تحتوي على:
+
 - `package.json` مع script للاختبار
 - ملفات الاختبار في مجلد `test/` أو `__tests__/`
 
@@ -44,26 +49,32 @@
 #### Required Secrets:
 
 1. **DASHBOARD_URL** (Optional)
-   ```
+
+   ```text
    https://your-dashboard-url.com
    ```
+
    URL للـ Dashboard الخاص بك لإرسال النتائج
 
 2. **SLACK_WEBHOOK_URL** (Optional)
-   ```
+
+   ```text
    https://hooks.slack.com/services/YOUR/WEBHOOK/URL
    ```
+
    للإشعارات عبر Slack
 
 3. **MAIL_USERNAME** & **MAIL_PASSWORD** (Optional)
-   ```
+
+   ```text
    your-email@gmail.com
    your-app-password
    ```
+
    للإشعارات عبر Email
 
 4. **NOTIFICATION_EMAIL** (Optional)
-   ```
+   ```text
    team@alawael.com
    ```
    البريد الذي سيستقبل الإشعارات
@@ -95,10 +106,7 @@
   },
   "jest": {
     "coverageDirectory": "coverage",
-    "collectCoverageFrom": [
-      "src/**/*.js",
-      "!src/**/*.test.js"
-    ],
+    "collectCoverageFrom": ["src/**/*.js", "!src/**/*.test.js"],
     "coverageThresholds": {
       "global": {
         "statements": 70,
@@ -122,17 +130,12 @@
 ```json
 {
   "qualityGates": {
-    "minTestCoverage": 70,     // Minimum coverage %
-    "minSuccessRate": 80,      // Minimum test success rate %
-    "allowedFailures": 2,      // Max number of failing services
-    "minTestsPerService": 10   // Minimum tests per service
+    "minTestCoverage": 70, // Minimum coverage %
+    "minSuccessRate": 80, // Minimum test success rate %
+    "allowedFailures": 2, // Max number of failing services
+    "minTestsPerService": 10 // Minimum tests per service
   },
-  "criticalServices": [
-    "backend",
-    "graphql",
-    "supply-chain",
-    "frontend"
-  ]
+  "criticalServices": ["backend", "graphql", "supply-chain", "frontend"]
 }
 ```
 
@@ -141,6 +144,7 @@
 <div dir="rtl">
 
 1. قم بعمل Push لأي ملف:
+
    ```bash
    git add .
    git commit -m "test: Trigger CI/CD pipeline"
@@ -162,11 +166,13 @@
 **الملف:** `.github/workflows/quality-gate.yml`
 
 **يعمل عند:**
-- Push إلى branches: main, develop, feature/*
+
+- Push إلى branches: main, develop, feature/\*
 - Pull requests إلى: main, develop
 - يدوياً من Actions tab
 
 **الخطوات:**
+
 1. Checkout الكود
 2. Setup Node.js
 3. Install dependencies لكل خدمة
@@ -185,10 +191,12 @@
 **الملف:** `.github/workflows/deployment-report.yml`
 
 **يعمل عند:**
+
 - Push إلى: main, production
 - يدوياً من Actions tab
 
 **الخطوات:**
+
 1. Collect deployment info
 2. Run final quality checks
 3. Analyze test results
@@ -206,12 +214,14 @@
 **الملف:** `scripts/ci-quality-check.js`
 
 **الوظيفة:**
+
 - تحليل نتائج الاختبارات
 - فرض قواعد الجودة
 - إنشاء تقارير مفصلة
 - إرسال النتائج للـ Dashboard
 
 **الاستخدام:**
+
 ```bash
 node scripts/ci-quality-check.js
 ```
@@ -223,15 +233,19 @@ node scripts/ci-quality-check.js
 <div dir="rtl">
 
 ### Gate 1: Test Coverage
+
 يتحقق من أن نسبة التغطية أكبر من أو تساوي الحد الأدنى المطلوب.
 
 ### Gate 2: Success Rate
+
 يتحقق من أن نسبة نجاح الاختبارات أكبر من أو تساوي الحد الأدنى المطلوب.
 
 ### Gate 3: Critical Services
+
 يتحقق من أن جميع الخدمات الحرجة نجحت في الاختبارات.
 
 ### Gate 4: Failure Threshold
+
 يتحقق من أن عدد الخدمات الفاشلة ضمن الحد المسموح.
 
 </div>
@@ -258,6 +272,7 @@ node scripts/ci-quality-check.js
 <div dir="rtl">
 
 للـ Gmail:
+
 1. أنشئ App Password:
    - Google Account → Security
    - 2-Step Verification (يجب تفعيله)
@@ -275,6 +290,7 @@ node scripts/ci-quality-check.js
 <div dir="rtl">
 
 **الحل:**
+
 - تأكد من وجود `package-lock.json`
 - استخدم `npm ci` بدلاً من `npm install`
 - أضف `--legacy-peer-deps` إذا كانت هناك تعارضات
@@ -286,6 +302,7 @@ node scripts/ci-quality-check.js
 <div dir="rtl">
 
 **الحل:**
+
 - تأكد من وجود script `test` في `package.json`
 - تحقق من وجود ملفات الاختبار
 - استخدم `--passWithNoTests` للسماح بعدم وجود اختبارات
@@ -297,6 +314,7 @@ node scripts/ci-quality-check.js
 <div dir="rtl">
 
 **الحل:**
+
 - راجع متطلبات `.github/quality-rules.json`
 - قلّل الحدود المطلوبة مؤقتاً
 - أصلح الخدمات الفاشلة
@@ -309,6 +327,7 @@ node scripts/ci-quality-check.js
 <div dir="rtl">
 
 **الحل:**
+
 - تأكد من تشغيل tests بنجاح
 - تحقق من إنشاء مجلد `coverage/`
 - راجع paths في upload-artifact action
@@ -320,27 +339,32 @@ node scripts/ci-quality-check.js
 <div dir="rtl">
 
 ### 1. Write Quality Tests
+
 - اكتب اختبارات واضحة ومفهومة
 - غطِّ الحالات الحرجة
 - استخدم descriptive test names
 
 ### 2. Maintain Coverage
+
 - حافظ على 70%+ coverage
 - أضف tests للكود الجديد
 - لا تخفّض thresholds بدون سبب
 
 ### 3. Monitor Regularly
+
 - راقب نتائج CI يومياً
 - أصلح الفشل فوراً
 - راجع trends في Dashboard
 
 ### 4. Keep Rules Updated
+
 - راجع quality-rules.json شهرياً
 - حدّث thresholds تدريجياً
 - أضف critical services الجديدة
 
 ### 5. Use Branches Properly
-- feature/* للتطوير
+
+- feature/\* للتطوير
 - develop للدمج والاختبار
 - main للإنتاج فقط
 
@@ -364,6 +388,7 @@ node scripts/ci-quality-check.js
 <div dir="rtl">
 
 إذا كان Dashboard مفعّل:
+
 - http://localhost:3002 (Development)
 - اعرض real-time results
 - راجع trends and history
@@ -414,6 +439,7 @@ node scripts/ci-quality-check.js
 <div dir="rtl">
 
 للمساعدة:
+
 - راجع هذا الدليل أولاً
 - تحقق من Troubleshooting section
 - راجع logs في GitHub Actions
@@ -427,6 +453,6 @@ node scripts/ci-quality-check.js
 
 **✨ تم بواسطة ALAWAEL ERP Team**
 
-*Last Updated: March 2, 2026*
+_Last Updated: March 2, 2026_
 
 </div>

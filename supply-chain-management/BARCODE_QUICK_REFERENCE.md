@@ -4,7 +4,7 @@
 
 ### Backend (في `backend/`)
 
-```
+```text
 ✅ services/BarcodeService.js      → QR + Barcode generation
 ✅ models/BarcodeLog.js             → Database logging
 ✅ middleware/barcodeAuth.js        → JWT auth + Rate limit
@@ -14,7 +14,7 @@
 
 ### Frontend (في `frontend/src/`)
 
-```
+```text
 ✅ components/BarcodeManager.jsx    → Main UI component
 ✅ components/BarcodeManager.css    → Styling
 ✅ hooks/useBarcodeGeneration.js    → API integration
@@ -22,7 +22,7 @@
 
 ### Tests & Tools (في `backend/`)
 
-```
+```text
 ✅ test-barcode.js                  → Library validation ✅
 ✅ generate-jwt.js                  → Token generation ✅
 ✅ API_TESTS.txt                    → API examples
@@ -32,7 +32,7 @@
 
 ### Documentation (في main folder)
 
-```
+```text
 📄 BARCODE_IMPLEMENTATION_CHECKLIST.md → Progress tracking
 📄 BARCODE_QUICK_STATUS.md             → Status summary
 📄 COPY_PASTE_BARCODE_CODE.md          → Copy-paste ready code
@@ -103,7 +103,7 @@ npm test -- --coverage
 
 ## 🎯 اليوم الأول: التشغيل الأساسي
 
-```
+```text
 [ ] 1. cd backend
 [ ] 2. npm start
 [ ] 3. node generate-jwt.js (في terminal جديد)
@@ -113,7 +113,7 @@ npm test -- --coverage
 
 ## 🎯 اليوم الثاني: API Testing
 
-```
+```text
 [ ] 1. استورد API examples إلى Postman
 [ ] 2. استخدم JWT token
 [ ] 3. اختبر كل endpoint
@@ -122,7 +122,7 @@ npm test -- --coverage
 
 ## 🎯 اليوم الثالث+: اختبارات وتكامل
 
-```
+```text
 [ ] 1. npm test unit tests
 [ ] 2. npm test integration tests
 [ ] 3. Import في App.js
@@ -134,7 +134,7 @@ npm test -- --coverage
 
 ## 🔑 JWT Tokens (جاهزة للاستخدام)
 
-```
+```text
 Role: admin
 Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 (انظر: node generate-jwt.js لآخر tokens)
@@ -144,7 +144,7 @@ Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 ## 📝 API Endpoints (5 فقط!)
 
-```
+```text
 1. POST /api/barcode/qr-code
    Input: {data, errorCorrectionLevel}
    Output: QR code image
@@ -170,7 +170,7 @@ Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 ## 🔧 البيئة المطلوبة
 
-```
+```text
 ✅ Node.js 22+
 ✅ MongoDB (عبر Docker)
 ✅ Redis (عبر Docker)
@@ -281,7 +281,7 @@ npm install jsbarcode qrcode canvas bwip-js winston
 
 ### صباح كل يوم
 
-```
+```text
 [ ] git pull (if using git)
 [ ] npm install (if changed)
 [ ] docker-compose up -d mongo redis
@@ -290,7 +290,7 @@ npm install jsbarcode qrcode canvas bwip-js winston
 
 ### تطوير المميزات
 
-```
+```text
 [ ] اكتب الـ code
 [ ] npm test (لا تنسَ الاختبارات!)
 [ ] curl test (اختبر الـ API يدويًا)
@@ -299,7 +299,7 @@ npm install jsbarcode qrcode canvas bwip-js winston
 
 ### قبل النشر
 
-```
+```text
 [ ] جميع الاختبارات تمر
 [ ] Coverage 95%+
 [ ] لا توجد أخطاء console
@@ -324,7 +324,7 @@ npm install jsbarcode qrcode canvas bwip-js winston
 
 ## 🏁 Success = 5 اخضر ✅
 
-```
+```text
 ✅ Server starts without errors
 ✅ Health check responds 200
 ✅ JWT token generation works

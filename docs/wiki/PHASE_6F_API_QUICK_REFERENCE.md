@@ -1,13 +1,16 @@
 # Phase 6F: ML API Quick Reference
 
 ## 📍 Base URL
-```
+
+```text
 /api/ml
 ```
 
 ## 🔐 Authentication
+
 All endpoints require JWT token in Authorization header:
-```
+
+```text
 Authorization: Bearer {token}
 ```
 
@@ -16,6 +19,7 @@ Authorization: Bearer {token}
 ## 🚀 Quick Endpoints
 
 ### 1. Forecast Order Demand (30 days)
+
 ```bash
 curl -X POST http://localhost:5000/api/ml/forecast/orders \
   -H "Authorization: Bearer $TOKEN" \
@@ -28,6 +32,7 @@ curl -X POST http://localhost:5000/api/ml/forecast/orders \
 ---
 
 ### 2. Forecast Revenue (6 months)
+
 ```bash
 curl -X POST http://localhost:5000/api/ml/forecast/revenue \
   -H "Authorization: Bearer $TOKEN" \
@@ -40,6 +45,7 @@ curl -X POST http://localhost:5000/api/ml/forecast/revenue \
 ---
 
 ### 3. Predict Customer Churn Risk
+
 ```bash
 curl -X POST http://localhost:5000/api/ml/churn/predict \
   -H "Authorization: Bearer $TOKEN" \
@@ -51,6 +57,7 @@ curl -X POST http://localhost:5000/api/ml/churn/predict \
 ---
 
 ### 4. Get Product Recommendations
+
 ```bash
 curl -X POST http://localhost:5000/api/ml/recommendations/products \
   -H "Authorization: Bearer $TOKEN" \
@@ -66,6 +73,7 @@ curl -X POST http://localhost:5000/api/ml/recommendations/products \
 ---
 
 ### 5. Optimize Inventory
+
 ```bash
 curl -X POST http://localhost:5000/api/ml/inventory/optimize \
   -H "Authorization: Bearer $TOKEN" \
@@ -77,6 +85,7 @@ curl -X POST http://localhost:5000/api/ml/inventory/optimize \
 ---
 
 ### 6. Detect Revenue Anomalies
+
 ```bash
 curl -X POST http://localhost:5000/api/ml/anomalies/detect \
   -H "Authorization: Bearer $TOKEN" \
@@ -88,6 +97,7 @@ curl -X POST http://localhost:5000/api/ml/anomalies/detect \
 ```
 
 **Query Parameters**:
+
 - `type`: "revenue" or "orders"
 - `threshold`: Z-score threshold (default 2.5)
 
@@ -96,6 +106,7 @@ curl -X POST http://localhost:5000/api/ml/anomalies/detect \
 ---
 
 ### 7. Get AI Summary
+
 ```bash
 curl -X GET http://localhost:5000/api/ml/insights/summary \
   -H "Authorization: Bearer $TOKEN"
@@ -107,63 +118,59 @@ curl -X GET http://localhost:5000/api/ml/insights/summary \
 
 ## 📊 Model Performance
 
-| Model | Accuracy | Response Time |
-|-------|----------|---------------|
-| Demand Forecast | 85-92% | < 500ms |
-| Churn Prediction | 78-85% | < 1s |
-| Revenue Forecast | 82-90% | < 800ms |
-| Recommendations | 70-88% | < 600ms |
-| Inventory Opt | 88-95% | < 1s |
-| Anomaly Detection | 95%+ | < 400ms |
+| Model             | Accuracy | Response Time |
+| ----------------- | -------- | ------------- |
+| Demand Forecast   | 85-92%   | < 500ms       |
+| Churn Prediction  | 78-85%   | < 1s          |
+| Revenue Forecast  | 82-90%   | < 800ms       |
+| Recommendations   | 70-88%   | < 600ms       |
+| Inventory Opt     | 88-95%   | < 1s          |
+| Anomaly Detection | 95%+     | < 400ms       |
 
 ---
 
 ## 🔧 Common Usage Patterns
 
 ### Pattern 1: Daily Churn Report
+
 ```javascript
 // 1. Get churn predictions
 const churnData = await fetch('/api/ml/churn/predict', {
   method: 'POST',
-  headers: { 'Authorization': `Bearer ${token}` }
+  headers: { Authorization: `Bearer ${token}` },
 });
 
 // 2. Filter high-risk customers
-const highRisk = churnData.riskAssessment
-  .filter(c => c.churnRisk > 0.75);
+const highRisk = churnData.riskAssessment.filter(c => c.churnRisk > 0.75);
 
 // 3. Send retention emails
-highRisk.forEach(c => 
-  sendEmail(c.customerId, c.recommendations)
-);
+highRisk.forEach(c => sendEmail(c.customerId, c.recommendations));
 ```
 
 ### Pattern 2: Inventory Planning
+
 ```javascript
 // 1. Get optimization recommendations
 const inventory = await fetch('/api/ml/inventory/optimize', {
   method: 'POST',
-  headers: { 'Authorization': `Bearer ${token}` }
+  headers: { Authorization: `Bearer ${token}` },
 });
 
 // 2. Sort by potential savings
-const topSavings = inventory.recommendations
-  .sort((a, b) => b.estimatedSavings - a.estimatedSavings)
-  .slice(0, 10);
+const topSavings = inventory.recommendations.sort((a, b) => b.estimatedSavings - a.estimatedSavings).slice(0, 10);
 
 // 3. Update stock levels
-topSavings.forEach(rec => 
-  updateProductStock(rec.productId, rec.recommendedStock)
-);
+topSavings.forEach(rec => updateProductStock(rec.productId, rec.recommendedStock));
 ```
 
 ### Pattern 3: Personalization
+
 ```javascript
 // 1. Get product recommendations
 const recommendations = await fetch('/api/ml/recommendations/products', {
   method: 'POST',
-  headers: { 'Authorization': `Bearer ${token}` },
-  body: JSON.stringify({ customerId, limit: 5 })
+  headers: { Authorization: `Bearer ${token}` },
+  body: JSON.stringify({ customerId, limit: 5 }),
 });
 
 // 2. Display on storefront
@@ -178,47 +185,54 @@ trackMetric('recommendation_click');
 ## ⚠️ Error Handling
 
 ### Insufficient Data
+
 ```json
 {
   "error": "Insufficient historical data (need at least 7 orders)"
 }
 ```
+
 **Solution**: Wait for more transactional data to accumulate
 
 ### Authentication Failure
+
 ```json
 {
   "error": "Unauthorized"
 }
 ```
+
 **Solution**: Verify JWT token is valid and not expired
 
 ### Server Error
+
 ```json
 {
   "error": "Internal server error"
 }
 ```
+
 **Solution**: Check server logs, ensure MongoDB is running
 
 ---
 
 ## 📈 Data Requirements
 
-| Model | Min Data | Optimal | Update Freq |
-|-------|----------|---------|-------------|
-| Demand | 7 days | 90 days | Weekly |
-| Churn | All customers | 12 months | Daily |
-| Revenue | 12 months | 36 months | Weekly |
-| Recommendations | 5 purchases | 50 purchases | Real-time |
-| Inventory | 30 days | 90 days | Weekly |
-| Anomalies | 7 days | 90 days | Real-time |
+| Model           | Min Data      | Optimal      | Update Freq |
+| --------------- | ------------- | ------------ | ----------- |
+| Demand          | 7 days        | 90 days      | Weekly      |
+| Churn           | All customers | 12 months    | Daily       |
+| Revenue         | 12 months     | 36 months    | Weekly      |
+| Recommendations | 5 purchases   | 50 purchases | Real-time   |
+| Inventory       | 30 days       | 90 days      | Weekly      |
+| Anomalies       | 7 days        | 90 days      | Real-time   |
 
 ---
 
 ## 🎯 Expected Results
 
 ### Demand Forecast Results
+
 ```javascript
 {
   "predictions": [
@@ -232,6 +246,7 @@ trackMetric('recommendation_click');
 ```
 
 ### Churn Risk Results
+
 ```javascript
 {
   "riskAssessment": [
@@ -249,6 +264,7 @@ trackMetric('recommendation_click');
 ```
 
 ### Inventory Optimization Results
+
 ```javascript
 {
   "recommendations": [
@@ -271,12 +287,14 @@ trackMetric('recommendation_click');
 ## 🧪 Testing
 
 **Test all endpoints**:
+
 ```bash
 npm test -- mlService.test.js
 ```
 
 **Results** (Expected):
-```
+
+```text
 ✓ predictOrderDemand - 4 tests
 ✓ predictCustomerChurn - 5 tests
 ✓ forecastRevenue - 4 tests
@@ -304,6 +322,7 @@ Total: 34 test suites, 100+ tests, all passing
 ## 🎓 Implementation Examples
 
 ### JavaScript/Node.js
+
 ```javascript
 const mlService = require('./services/MLService');
 
@@ -313,6 +332,7 @@ console.log(`Next 30 days average: ${forecast.predictions[0].predictedQuantity}`
 ```
 
 ### Python
+
 ```python
 import requests
 
@@ -327,6 +347,7 @@ print(f"Forecast accuracy: {forecast['data']['accuracy']}")
 ```
 
 ### cURL
+
 ```bash
 curl -X POST http://localhost:5000/api/ml/forecast/orders \
   -H "Authorization: Bearer YOUR_TOKEN" \
@@ -339,6 +360,7 @@ curl -X POST http://localhost:5000/api/ml/forecast/orders \
 ## 📞 Support
 
 For issues:
+
 1. Check error message format
 2. Verify JWT token
 3. Ensure sufficient historical data

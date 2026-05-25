@@ -11,12 +11,14 @@
 #### 1. **Backend Components** (3 ملفات)
 
 - ✅ **transport.models.js** (668 سطر)
+
   - 10 نماذج قاعدة بيانات شاملة
   - Bus, Driver, BusAssistant, Route, StudentTransport
   - TransportAttendance, TransportPayment, TransportComplaint
   - TripReport, TransportNotification
 
 - ✅ **transport.services.js** (520 سطر)
+
   - 8 خدمات عملية
   - BusService, DriverService, RouteService, StudentTransportService
   - AttendanceService, PaymentService, ComplaintService, NotificationService
@@ -31,18 +33,21 @@
 #### 2. **Frontend Components** (4 صفحات)
 
 - ✅ **StudentTransportPage.js** (350 سطر)
+
   - تسجيل الطالب في النقل
   - عرض التسجيلات والحالة
   - سجل الحضور والدفعات
   - معلومات المسار والسائق
 
 - ✅ **ParentTransportPage.js** (420 سطر)
+
   - متابعة الطالب
   - عرض الحضور والدفعات
   - التنبيهات الفورية
   - تقييم الخدمة
 
 - ✅ **DriverTransportPage.js** (380 سطر)
+
   - معلومات الحافلة والمسار
   - تسجيل الحضور
   - تقرير الرحلة
@@ -59,6 +64,7 @@
 #### 3. **وثائق شاملة** (2 ملف)
 
 - ✅ **TRANSPORT_SYSTEM_DOCUMENTATION.md** (450 سطر)
+
   - نظرة عامة شاملة
   - البنية المعمارية المفصلة
   - شرح جميع الميزات
@@ -206,18 +212,21 @@
 ### الأدوار المدعومة:
 
 1. **👨‍🎓 الطالب** - StudentTransportPage
+
    - تسجيل في النقل
    - متابعة حالة التسجيل
    - سجل الحضور والدفعات
    - معلومات المسار
 
 2. **👨‍👩‍👧‍👦 ولي الأمر** - ParentTransportPage
+
    - متابعة الطالب
    - إشعارات التأخير
    - سجل الدفعات
    - تقييم الخدمة
 
 3. **🚗 السائق** - DriverTransportPage
+
    - معلومات الحافلة والمسار
    - قائمة الطلاب
    - تسجيل الحضور
@@ -284,7 +293,7 @@ import AdminTransportPage from './pages/AdminTransportPage';
 
 ## 📁 هيكل الملفات
 
-```
+```text
 66666/
 ├── backend/
 │   ├── models/

@@ -2,7 +2,7 @@
 
 ## Root Directory Organization
 
-```
+```text
 supply-chain-management/
 ├── backend/                          # Backend Node.js + Express
 │   ├── server-clean.js              # ⭐ Main server file
@@ -98,7 +98,7 @@ supply-chain-management/
 
 ### Backend Components
 
-```
+```text
 backend/
 ├── middleware/
 │   ├── search-filter.js      (300+ lines) - Advanced search
@@ -110,7 +110,7 @@ backend/
 
 ### Frontend Components
 
-```
+```text
 frontend/
 └── src/components/
     ├── EnhancedDataTable.jsx           (300+ lines) - Data table
@@ -119,7 +119,7 @@ frontend/
 
 ### Infrastructure
 
-```
+```text
 ├── backend/Dockerfile          (30 lines)  - Backend container
 ├── frontend/Dockerfile         (30 lines)  - Frontend container
 └── docker-compose.yml          (120+ lines) - Orchestration
@@ -127,7 +127,7 @@ frontend/
 
 ### Documentation
 
-```
+```text
 ├── PHASE_2_TESTING_REPORT.md            ✅
 ├── PHASE_3_OPTIMIZATION_REPORT.md       ✅
 ├── PHASE_4_UI_ENHANCEMENTS_REPORT.md    ✅

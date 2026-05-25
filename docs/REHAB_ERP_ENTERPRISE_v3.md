@@ -1,4 +1,5 @@
 # 🏥 ALAWAEL REHAB ERP — Enterprise Architecture v3.0
+
 ## نظام ERP مؤسسي متكامل لشبكة مراكز تأهيل ذوي الإعاقة · المملكة العربية السعودية
 
 > **Classification:** CONFIDENTIAL — Executive & Technical Blueprint
@@ -10,25 +11,26 @@
 
 ## 📑 Table of Contents
 
-| # | القسم | الصفحة |
-|---|-------|--------|
-| 1 | [Executive Summary — الملخص التنفيذي](#1-executive-summary) | § 1 |
-| 2 | [Enterprise Architecture — المعمارية المؤسسية](#2-enterprise-architecture) | § 2 |
-| 3 | [Domain Model — نموذج المجال](#3-domain-model) | § 3 |
-| 4 | [12 Core Modules — الوحدات الـ12 بعمق](#4-twelve-core-modules) | § 4 |
-| 5 | [Workflow Orchestration — تنسيق سير العمل](#5-workflow-orchestration) | § 5 |
-| 6 | [Scheduling Engine — محرك الجدولة](#6-scheduling-engine) | § 6 |
-| 7 | [Transport Intelligence — الذكاء اللوجستي](#7-transport-intelligence) | § 7 |
-| 8 | [Clinical Measures Framework — إطار المقاييس السريرية](#8-clinical-measures) | § 8 |
-| 9 | [AI/ML Platform — منصة الذكاء الاصطناعي](#9-ai-ml-platform) | § 9 |
-| 10 | [Data Architecture — معمارية البيانات](#10-data-architecture) | § 10 |
-| 11 | [Security & Compliance — الأمان والامتثال](#11-security-compliance) | § 11 |
-| 12 | [DevOps & Infrastructure — البنية التحتية](#12-devops-infrastructure) | § 12 |
-| 13 | [Financial Model & ROI — النموذج المالي](#13-financial-model) | § 13 |
-| 14 | [Implementation Roadmap — خارطة التنفيذ](#14-implementation-roadmap) | § 14 |
-| 15 | [Appendices — الملاحق](#15-appendices) | § 15 |
+| #   | القسم                                                                        | الصفحة |
+| --- | ---------------------------------------------------------------------------- | ------ |
+| 1   | [Executive Summary — الملخص التنفيذي](#1-executive-summary)                  | § 1    |
+| 2   | [Enterprise Architecture — المعمارية المؤسسية](#2-enterprise-architecture)   | § 2    |
+| 3   | [Domain Model — نموذج المجال](#3-domain-model)                               | § 3    |
+| 4   | [12 Core Modules — الوحدات الـ12 بعمق](#4-twelve-core-modules)               | § 4    |
+| 5   | [Workflow Orchestration — تنسيق سير العمل](#5-workflow-orchestration)        | § 5    |
+| 6   | [Scheduling Engine — محرك الجدولة](#6-scheduling-engine)                     | § 6    |
+| 7   | [Transport Intelligence — الذكاء اللوجستي](#7-transport-intelligence)        | § 7    |
+| 8   | [Clinical Measures Framework — إطار المقاييس السريرية](#8-clinical-measures) | § 8    |
+| 9   | [AI/ML Platform — منصة الذكاء الاصطناعي](#9-ai-ml-platform)                  | § 9    |
+| 10  | [Data Architecture — معمارية البيانات](#10-data-architecture)                | § 10   |
+| 11  | [Security & Compliance — الأمان والامتثال](#11-security-compliance)          | § 11   |
+| 12  | [DevOps & Infrastructure — البنية التحتية](#12-devops-infrastructure)        | § 12   |
+| 13  | [Financial Model & ROI — النموذج المالي](#13-financial-model)                | § 13   |
+| 14  | [Implementation Roadmap — خارطة التنفيذ](#14-implementation-roadmap)         | § 14   |
+| 15  | [Appendices — الملاحق](#15-appendices)                                       | § 15   |
 
 ---
+
 ---
 
 ## 1. Executive Summary — الملخص التنفيذي
@@ -39,7 +41,7 @@
 
 ### 1.2 المشكلة التي يحلها
 
-```
+```text
 التحديات الحالية للمراكز غير الرقمية:
 ┌────────────────────────────────────────────────────────────────────────┐
 │  ❌ تسجيل يدوي للمستفيدين          → 3 أيام/مستفيد                     │
@@ -65,20 +67,20 @@
 
 ### 1.3 مؤشرات الأداء الاستراتيجية (Executive KPIs)
 
-| الفئة | المؤشر | الهدف | المتوقع بعد 18 شهراً |
-|-------|--------|-------|---------------------|
-| **النمو** | عدد المستفيدين النشطين | 5,000 | 6,200 (+24%) |
-| **الجودة** | نسبة التحسن السريري | ≥70% | 78% |
-| **الكفاءة** | إشغال الطاقة الاستيعابية | ≥85% | 94.4% |
-| **الامتثال** | نسبة امتثال HRSD | 100% | 100% |
-| **المالية** | ROI الإجمالي | موجب | +57% |
-| **الرضا** | NPS الأسر | ≥50 | 67 |
-| **التشغيل** | Uptime النظام | 99.9% | 99.95% |
-| **AI** | دقة التنبؤ العلاجي | ≥80% | 82% |
+| الفئة        | المؤشر                   | الهدف | المتوقع بعد 18 شهراً |
+| ------------ | ------------------------ | ----- | -------------------- |
+| **النمو**    | عدد المستفيدين النشطين   | 5,000 | 6,200 (+24%)         |
+| **الجودة**   | نسبة التحسن السريري      | ≥70%  | 78%                  |
+| **الكفاءة**  | إشغال الطاقة الاستيعابية | ≥85%  | 94.4%                |
+| **الامتثال** | نسبة امتثال HRSD         | 100%  | 100%                 |
+| **المالية**  | ROI الإجمالي             | موجب  | +57%                 |
+| **الرضا**    | NPS الأسر                | ≥50   | 67                   |
+| **التشغيل**  | Uptime النظام            | 99.9% | 99.95%               |
+| **AI**       | دقة التنبؤ العلاجي       | ≥80%  | 82%                  |
 
 ### 1.4 نطاق النظام
 
-```
+```text
                         ALAWAEL REHAB GROUP
                               │
             ┌─────────────────┼─────────────────┐
@@ -105,7 +107,7 @@
 
 ### 2.1 طبقات المعمارية (Layered Architecture)
 
-```
+```text
 ╔══════════════════════════════════════════════════════════════════════════╗
 ║                    PRESENTATION LAYER (طبقة العرض)                      ║
 ║  ┌──────────────┐ ┌──────────────┐ ┌──────────┐ ┌───────────────────┐  ║
@@ -211,15 +213,15 @@ graph TB
 
 ### 2.3 مبادئ التصميم المعماري
 
-| المبدأ | التطبيق في النظام | الفائدة |
-|--------|-----------------|---------|
-| **Domain-Driven Design** | 6 Bounded Contexts مستقلة | وضوح المسؤوليات |
-| **Event Sourcing** | كل تغيير → حدث Kafka قابل للتتبع | Audit trail كامل |
-| **CQRS** | قراءة ClickHouse، كتابة PostgreSQL | أداء عالٍ |
-| **Saga Pattern** | تنسيق العمليات عبر الخدمات | اتساق البيانات |
-| **Circuit Breaker** | Resilience4j لكل استدعاء خارجي | منع تأثير الأعطال |
-| **Outbox Pattern** | ضمان تسليم الأحداث مرة واحدة | موثوقية الإشعارات |
-| **Multi-Tenancy** | Schema-per-branch في PostgreSQL | عزل البيانات |
+| المبدأ                   | التطبيق في النظام                  | الفائدة           |
+| ------------------------ | ---------------------------------- | ----------------- |
+| **Domain-Driven Design** | 6 Bounded Contexts مستقلة          | وضوح المسؤوليات   |
+| **Event Sourcing**       | كل تغيير → حدث Kafka قابل للتتبع   | Audit trail كامل  |
+| **CQRS**                 | قراءة ClickHouse، كتابة PostgreSQL | أداء عالٍ         |
+| **Saga Pattern**         | تنسيق العمليات عبر الخدمات         | اتساق البيانات    |
+| **Circuit Breaker**      | Resilience4j لكل استدعاء خارجي     | منع تأثير الأعطال |
+| **Outbox Pattern**       | ضمان تسليم الأحداث مرة واحدة       | موثوقية الإشعارات |
+| **Multi-Tenancy**        | Schema-per-branch في PostgreSQL    | عزل البيانات      |
 
 ---
 
@@ -227,7 +229,7 @@ graph TB
 
 ### 3.1 Bounded Contexts (السياقات المحددة)
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                        ALAWAEL REHAB DOMAIN MAP                         │
 ├──────────────────────────┬──────────────────────────────────────────────┤
@@ -479,7 +481,7 @@ CREATE INDEX idx_assessments_ai_risk ON clinical_assessments(ai_risk_level) WHER
 
 ### 3.3 مخطط الكيانات والعلاقات (ERD Summary)
 
-```
+```text
 Branches ──────────────────┐
     │ 1:N                  │
     ▼                      │
@@ -499,26 +501,27 @@ Beneficiaries ─── 1:1 ─── DisabilityProfiles
     │                                 Vehicles ─── N:1 ─► Drivers
     └──► FamilySupport
 ```
+
 ---
 
 ## 4. Twelve Core Modules — الوحدات الـ12 بعمق
 
 ### 4.1 جدول الوحدات الشامل المؤسسي
 
-| # | الوحدة | Odoo Model | Domain Service | AI Component | KPIs المستهدفة |
-|---|--------|-----------|---------------|--------------|----------------|
-| 1 | تسجيل وقبول المستفيدين | `rehab.beneficiary` | BeneficiaryService | DisabilityClassifier | وقت تسجيل <4h, اكتمال ملف 100% |
-| 2 | برامج التأهيل السريرية | `rehab.program` | ClinicalService | ProgressPredictor | تحسن PEDI ≥10 نقطة/3أشهر |
-| 3 | جدولة الشفتين | `rehab.shift` | SchedulerService | ShiftOptimizer (OR-Tools) | إشغال ≥85%, تعارض=0 |
-| 4 | إدارة النقل الذكي | `transport.booking` | TransportService | VRPTW Optimizer | التزام ≥92%, تكلفة↓15% |
-| 5 | الموارد البشرية | `hr.employee` | HRService | PerformanceAnalyzer | دوران <5%, رضا موظف ≥4.2 |
-| 6 | مخزون المعدات | `equipment.asset` | EquipmentService | PredictiveMaintenance | توفر ≥98%, صيانة استباقية |
-| 7 | الإدارة المالية | `account.move` | FinanceService | AnomalyDetector | تحصيل ≥96%, انحراف ميزانية <5% |
-| 8 | تقارير الامتثال | `compliance.report` | ComplianceService | GapAnalyzer | امتثال HRSD 100% |
-| 9 | منصة AI/BI | FastAPI + TF | AIService | متعدد النماذج | دقة التنبؤ ≥80% |
-| 10 | دعم الأسر والمجتمع | `family.support` | FamilyService | PersonalizedRecommender | مشاركة أسرية ≥75% |
-| 11 | CRM ومتابعة طويلة الأمد | `crm.beneficiary` | CRMService | ChurnPredictor | احتفاظ ≥90%, NPS≥50 |
-| 12 | بنية بيانات مركزية | AWS Data Lake | DataPlatform | CrossBranch Analytics | Uptime 99.95% |
+| #   | الوحدة                  | Odoo Model          | Domain Service     | AI Component              | KPIs المستهدفة                 |
+| --- | ----------------------- | ------------------- | ------------------ | ------------------------- | ------------------------------ |
+| 1   | تسجيل وقبول المستفيدين  | `rehab.beneficiary` | BeneficiaryService | DisabilityClassifier      | وقت تسجيل <4h, اكتمال ملف 100% |
+| 2   | برامج التأهيل السريرية  | `rehab.program`     | ClinicalService    | ProgressPredictor         | تحسن PEDI ≥10 نقطة/3أشهر       |
+| 3   | جدولة الشفتين           | `rehab.shift`       | SchedulerService   | ShiftOptimizer (OR-Tools) | إشغال ≥85%, تعارض=0            |
+| 4   | إدارة النقل الذكي       | `transport.booking` | TransportService   | VRPTW Optimizer           | التزام ≥92%, تكلفة↓15%         |
+| 5   | الموارد البشرية         | `hr.employee`       | HRService          | PerformanceAnalyzer       | دوران <5%, رضا موظف ≥4.2       |
+| 6   | مخزون المعدات           | `equipment.asset`   | EquipmentService   | PredictiveMaintenance     | توفر ≥98%, صيانة استباقية      |
+| 7   | الإدارة المالية         | `account.move`      | FinanceService     | AnomalyDetector           | تحصيل ≥96%, انحراف ميزانية <5% |
+| 8   | تقارير الامتثال         | `compliance.report` | ComplianceService  | GapAnalyzer               | امتثال HRSD 100%               |
+| 9   | منصة AI/BI              | FastAPI + TF        | AIService          | متعدد النماذج             | دقة التنبؤ ≥80%                |
+| 10  | دعم الأسر والمجتمع      | `family.support`    | FamilyService      | PersonalizedRecommender   | مشاركة أسرية ≥75%              |
+| 11  | CRM ومتابعة طويلة الأمد | `crm.beneficiary`   | CRMService         | ChurnPredictor            | احتفاظ ≥90%, NPS≥50            |
+| 12  | بنية بيانات مركزية      | AWS Data Lake       | DataPlatform       | CrossBranch Analytics     | Uptime 99.95%                  |
 
 ---
 
@@ -923,54 +926,54 @@ flowchart LR
 
 export enum RehabEventType {
   // Beneficiary Events
-  BENEFICIARY_REGISTERED     = 'beneficiary.registered',
-  BENEFICIARY_ADMITTED       = 'beneficiary.admitted',
-  BENEFICIARY_WAITLISTED     = 'beneficiary.waitlisted',
-  BENEFICIARY_GRADUATED      = 'beneficiary.graduated',
+  BENEFICIARY_REGISTERED = 'beneficiary.registered',
+  BENEFICIARY_ADMITTED = 'beneficiary.admitted',
+  BENEFICIARY_WAITLISTED = 'beneficiary.waitlisted',
+  BENEFICIARY_GRADUATED = 'beneficiary.graduated',
   BENEFICIARY_STATUS_CHANGED = 'beneficiary.status_changed',
 
   // Clinical Events
-  SESSION_COMPLETED          = 'session.completed',
-  ASSESSMENT_RECORDED        = 'assessment.recorded',
-  GOAL_ACHIEVED              = 'goal.achieved',
-  RISK_LEVEL_CHANGED         = 'risk.level_changed',
-  CLINICAL_ALERT_RAISED      = 'clinical.alert_raised',
+  SESSION_COMPLETED = 'session.completed',
+  ASSESSMENT_RECORDED = 'assessment.recorded',
+  GOAL_ACHIEVED = 'goal.achieved',
+  RISK_LEVEL_CHANGED = 'risk.level_changed',
+  CLINICAL_ALERT_RAISED = 'clinical.alert_raised',
 
   // Scheduling Events
-  SCHEDULE_GENERATED         = 'schedule.generated',
-  SESSION_CANCELLED          = 'session.cancelled',
-  THERAPIST_UNAVAILABLE      = 'therapist.unavailable',
+  SCHEDULE_GENERATED = 'schedule.generated',
+  SESSION_CANCELLED = 'session.cancelled',
+  THERAPIST_UNAVAILABLE = 'therapist.unavailable',
 
   // Transport Events
-  ROUTE_OPTIMIZED            = 'transport.route_optimized',
-  VEHICLE_DELAYED            = 'transport.vehicle_delayed',
-  PICKUP_COMPLETED           = 'transport.pickup_completed',
+  ROUTE_OPTIMIZED = 'transport.route_optimized',
+  VEHICLE_DELAYED = 'transport.vehicle_delayed',
+  PICKUP_COMPLETED = 'transport.pickup_completed',
 
   // Compliance Events
-  HRSD_REPORT_SENT           = 'compliance.hrsd_report_sent',
-  HRSD_REPORT_FAILED         = 'compliance.hrsd_report_failed',
-  COMPLIANCE_GAP_DETECTED    = 'compliance.gap_detected',
+  HRSD_REPORT_SENT = 'compliance.hrsd_report_sent',
+  HRSD_REPORT_FAILED = 'compliance.hrsd_report_failed',
+  COMPLIANCE_GAP_DETECTED = 'compliance.gap_detected',
 
   // Financial Events
-  INVOICE_ISSUED             = 'finance.invoice_issued',
-  PAYMENT_RECEIVED           = 'finance.payment_received',
-  BUDGET_ALERT               = 'finance.budget_alert',
+  INVOICE_ISSUED = 'finance.invoice_issued',
+  PAYMENT_RECEIVED = 'finance.payment_received',
+  BUDGET_ALERT = 'finance.budget_alert',
 }
 
 // مثال على حدث مكتمل
 export interface SessionCompletedEvent {
-  eventType:      RehabEventType.SESSION_COMPLETED;
-  eventId:        string;        // UUID
-  timestamp:      string;        // ISO 8601
-  branchId:       string;
-  sessionId:      string;
-  beneficiaryId:  string;
-  therapistId:    string;
-  programType:    string;
-  durationMin:    number;
+  eventType: RehabEventType.SESSION_COMPLETED;
+  eventId: string; // UUID
+  timestamp: string; // ISO 8601
+  branchId: string;
+  sessionId: string;
+  beneficiaryId: string;
+  therapistId: string;
+  programType: string;
+  durationMin: number;
   attendanceStatus: 'present' | 'absent' | 'late';
-  sessionNotes:   string;
-  goalsProgress:  { goalId: string; progress: number }[];
+  sessionNotes: string;
+  goalsProgress: { goalId: string; progress: number }[];
   nextSessionDate?: string;
 }
 
@@ -992,13 +995,14 @@ class SessionCompletedHandler {
   }
 }
 ```
+
 ---
 
 ## 6. Scheduling Engine — محرك الجدولة المتقدم
 
 ### 6.1 هندسة المحرك
 
-```
+```text
 SCHEDULING ENGINE ARCHITECTURE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -1325,7 +1329,7 @@ class AdvancedRehabScheduler:
 
 ### 6.3 مثال جدول أسبوعي - فرع الرياض (2000 مستفيد)
 
-```
+```text
 RIYADH BRANCH — WEEKLY SCHEDULE SUMMARY (شعبان 1447هـ)
 ══════════════════════════════════════════════════════════════════════
 
@@ -1619,41 +1623,37 @@ import { Server as SocketIO } from 'socket.io';
 import { Redis } from 'ioredis';
 
 interface VehiclePosition {
-  vehicleId:   string;
-  lat:         number;
-  lng:         number;
-  speed:       number;
-  heading:     number;
-  timestamp:   string;
-  accuracy:    number;
+  vehicleId: string;
+  lat: number;
+  lng: number;
+  speed: number;
+  heading: number;
+  timestamp: string;
+  accuracy: number;
 }
 
 interface RouteStatus {
-  vehicleId:     string;
-  currentStop:   number;
-  totalStops:    number;
+  vehicleId: string;
+  currentStop: number;
+  totalStops: number;
   nextBeneficiary: string;
-  eta:           number;    // دقائق
-  delay:         number;    // تأخير (سلبي=مبكر)
-  status:        'on_time' | 'delayed' | 'early' | 'completed';
+  eta: number; // دقائق
+  delay: number; // تأخير (سلبي=مبكر)
+  status: 'on_time' | 'delayed' | 'early' | 'completed';
 }
 
 export class RealtimeTrackingService {
   private redis: Redis;
-  private io:    SocketIO;
+  private io: SocketIO;
 
   constructor(redis: Redis, io: SocketIO) {
     this.redis = redis;
-    this.io    = io;
+    this.io = io;
   }
 
   async updateVehiclePosition(position: VehiclePosition): Promise<void> {
     // 1. حفظ الموقع في Redis (TTL = 30 ثانية)
-    await this.redis.setex(
-      `vehicle:${position.vehicleId}:position`,
-      30,
-      JSON.stringify(position)
-    );
+    await this.redis.setex(`vehicle:${position.vehicleId}:position`, 30, JSON.stringify(position));
 
     // 2. حساب ETA للمحطة التالية
     const routeStatus = await this.calculateRouteStatus(position);
@@ -1676,84 +1676,81 @@ export class RealtimeTrackingService {
 
     // 6. بث للوحة تحكم العمليات
     this.io.to('operations_dashboard').emit('fleet_update', {
-      vehicleId:    position.vehicleId,
-      lat:          position.lat,
-      lng:          position.lng,
-      eta:          routeStatus.eta,
-      delay:        routeStatus.delay,
-      status:       routeStatus.status,
-      currentStop:  routeStatus.currentStop,
-      totalStops:   routeStatus.totalStops,
+      vehicleId: position.vehicleId,
+      lat: position.lat,
+      lng: position.lng,
+      eta: routeStatus.eta,
+      delay: routeStatus.delay,
+      status: routeStatus.status,
+      currentStop: routeStatus.currentStop,
+      totalStops: routeStatus.totalStops,
     });
   }
 
   private async notifyApproaching(status: RouteStatus): Promise<void> {
     const beneficiary = await this.getBeneficiaryDetails(status.nextBeneficiary);
-    const guardian    = beneficiary.guardian;
+    const guardian = beneficiary.guardian;
 
     // إشعار WhatsApp
     await this.whatsappService.sendTemplate(
       guardian.phone,
       'vehicle_approaching',
       {
-        name:        beneficiary.name_ar,
+        name: beneficiary.name_ar,
         eta_minutes: status.eta,
-        plate:       status.vehiclePlate,
-        driver:      status.driverName,
-        tracking_url:`https://track.alawael.sa/v/${status.vehicleId}`,
+        plate: status.vehiclePlate,
+        driver: status.driverName,
+        tracking_url: `https://track.alawael.sa/v/${status.vehicleId}`,
       },
-      { language: 'ar' }
+      { language: 'ar' },
     );
 
     // إشعار Push للتطبيق
-    await this.pushNotificationService.send(
-      guardian.fcm_token,
-      {
-        title: '🚌 السيارة قادمة',
-        body:  `ستصل خلال ${status.eta} دقيقة`,
-        data:  { vehicleId: status.vehicleId, screen: 'tracking' },
-      }
-    );
+    await this.pushNotificationService.send(guardian.fcm_token, {
+      title: '🚌 السيارة قادمة',
+      body: `ستصل خلال ${status.eta} دقيقة`,
+      data: { vehicleId: status.vehicleId, screen: 'tracking' },
+    });
 
     // تسجيل الإشعار
     await this.redis.setex(
       `notify:approaching:${status.vehicleId}:${status.nextBeneficiary}`,
-      600,  // 10 دقائق لتجنب التكرار
-      '1'
+      600, // 10 دقائق لتجنب التكرار
+      '1',
     );
   }
 
   async getFleetDashboard(branchId: string): Promise<object> {
     const vehicles = await this.getActiveBranchVehicles(branchId);
-    const fleet    = await Promise.all(
-      vehicles.map(async (v) => {
-        const pos    = await this.redis.get(`vehicle:${v.id}:position`);
+    const fleet = await Promise.all(
+      vehicles.map(async v => {
+        const pos = await this.redis.get(`vehicle:${v.id}:position`);
         const status = pos ? JSON.parse(pos) : null;
         return {
-          id:           v.id,
-          plate:        v.plate,
-          driver:       v.driverName,
-          is_active:    !!status,
-          lat:          status?.lat,
-          lng:          status?.lng,
-          speed:        status?.speed,
-          stops_done:   v.completedStops,
-          stops_total:  v.totalStops,
-          delay_min:    v.currentDelay,
-          status:       v.routeStatus,
+          id: v.id,
+          plate: v.plate,
+          driver: v.driverName,
+          is_active: !!status,
+          lat: status?.lat,
+          lng: status?.lng,
+          speed: status?.speed,
+          stops_done: v.completedStops,
+          stops_total: v.totalStops,
+          delay_min: v.currentDelay,
+          status: v.routeStatus,
         };
-      })
+      }),
     );
 
     return {
-      branch_id:       branchId,
-      timestamp:       new Date().toISOString(),
+      branch_id: branchId,
+      timestamp: new Date().toISOString(),
       active_vehicles: fleet.filter(v => v.is_active).length,
-      total_vehicles:  fleet.length,
-      on_time:         fleet.filter(v => v.status === 'on_time').length,
-      delayed:         fleet.filter(v => v.status === 'delayed').length,
-      avg_delay_min:   fleet.reduce((s, v) => s + (v.delay_min || 0), 0) / fleet.length,
-      vehicles:        fleet,
+      total_vehicles: fleet.length,
+      on_time: fleet.filter(v => v.status === 'on_time').length,
+      delayed: fleet.filter(v => v.status === 'delayed').length,
+      avg_delay_min: fleet.reduce((s, v) => s + (v.delay_min || 0), 0) / fleet.length,
+      vehicles: fleet,
     };
   }
 }
@@ -1761,34 +1758,35 @@ export class RealtimeTrackingService {
 
 ### 7.3 مؤشرات أداء النقل
 
-| المؤشر | المستهدف | فعلي | الوصف |
-|--------|---------|------|-------|
-| معدل الالتزام بالمواعيد | ≥92% | 91.8% | وصول خلال ±10 دقيقة |
-| متوسط التأخير | <8 دقيقة | 6.3 دقيقة | متوسط التأخير عند التأخر |
-| تغطية المناطق | 100% | 100% | جميع المناطق المخدومة |
-| تكلفة الرحلة | <185 ريال | 181 ريال | شامل وقود + سائق |
-| رضا الأسر عن النقل | ≥4.0/5 | 4.1/5 | استطلاع شهري |
-| حوادث المركبات | 0 | 0 | صفر حوادث |
-| نسبة توفر GPS | 100% | 99.7% | وقت الأعطال التقنية |
+| المؤشر                  | المستهدف  | فعلي      | الوصف                    |
+| ----------------------- | --------- | --------- | ------------------------ |
+| معدل الالتزام بالمواعيد | ≥92%      | 91.8%     | وصول خلال ±10 دقيقة      |
+| متوسط التأخير           | <8 دقيقة  | 6.3 دقيقة | متوسط التأخير عند التأخر |
+| تغطية المناطق           | 100%      | 100%      | جميع المناطق المخدومة    |
+| تكلفة الرحلة            | <185 ريال | 181 ريال  | شامل وقود + سائق         |
+| رضا الأسر عن النقل      | ≥4.0/5    | 4.1/5     | استطلاع شهري             |
+| حوادث المركبات          | 0         | 0         | صفر حوادث                |
+| نسبة توفر GPS           | 100%      | 99.7%     | وقت الأعطال التقنية      |
+
 ---
 
 ## 8. Clinical Measures Framework — إطار المقاييس السريرية
 
 ### 8.1 مصفوفة المقاييس حسب نوع الإعاقة والعمر
 
-| نوع الإعاقة | 0-6 سنوات | 7-18 سنة | 18+ سنة | تكرار التقييم |
-|------------|----------|---------|---------|--------------|
-| إعاقة حركية | PEDI-CAT + GMFM-88 + GMFCS | GMFM-88 + COPM + FMS | COPM + WHO-DAS 2.0 + GAS | كل 3 أشهر |
-| طيف التوحد | M-CHAT-R + CARS-2 | ADOS-2 + SRS-2 + VABS-3 | ADOS-2 + SRS-2 + ABAS-3 | كل 6 أشهر |
-| إعاقة ذهنية | Bayley-4 + Vineland-3 | WISC-V + Vineland-3 | WAIS-IV + ABAS-3 + AAMR | كل 6 أشهر |
-| إعاقة سمعية | MAIS + LittlEARS | MUSS + CAP + SIR | HHIE + SSQ | كل 3 أشهر |
-| إعاقة بصرية | Teller + Cardiff | FrACT + HOTV | MAVi + VFQ-25 | كل 6 أشهر |
-| اضطراب النطق | REEL-4 + PLS-5 | GFTA-3 + CELF-5 | TOLD-A + WAB-R | كل 3 أشهر |
-| **جميع الأنواع** | ICF-CY + GAS | ICF + GAS | WHO-DAS 2.0 + ICF | كل 3 أشهر |
+| نوع الإعاقة      | 0-6 سنوات                  | 7-18 سنة                | 18+ سنة                  | تكرار التقييم |
+| ---------------- | -------------------------- | ----------------------- | ------------------------ | ------------- |
+| إعاقة حركية      | PEDI-CAT + GMFM-88 + GMFCS | GMFM-88 + COPM + FMS    | COPM + WHO-DAS 2.0 + GAS | كل 3 أشهر     |
+| طيف التوحد       | M-CHAT-R + CARS-2          | ADOS-2 + SRS-2 + VABS-3 | ADOS-2 + SRS-2 + ABAS-3  | كل 6 أشهر     |
+| إعاقة ذهنية      | Bayley-4 + Vineland-3      | WISC-V + Vineland-3     | WAIS-IV + ABAS-3 + AAMR  | كل 6 أشهر     |
+| إعاقة سمعية      | MAIS + LittlEARS           | MUSS + CAP + SIR        | HHIE + SSQ               | كل 3 أشهر     |
+| إعاقة بصرية      | Teller + Cardiff           | FrACT + HOTV            | MAVi + VFQ-25            | كل 6 أشهر     |
+| اضطراب النطق     | REEL-4 + PLS-5             | GFTA-3 + CELF-5         | TOLD-A + WAB-R           | كل 3 أشهر     |
+| **جميع الأنواع** | ICF-CY + GAS               | ICF + GAS               | WHO-DAS 2.0 + ICF        | كل 3 أشهر     |
 
 ### 8.2 PEDI-CAT — التطبيق التفصيلي
 
-```
+```text
 Pediatric Evaluation of Disability Inventory — Computer Adaptive Test
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -1883,16 +1881,16 @@ class GASCalculator:
 
 ### 9.1 خريطة النماذج الكاملة
 
-| النموذج | النوع | المدخلات | المخرجات | الدقة | وقت الاستجابة |
-|--------|-------|---------|---------|------|--------------|
-| ProgressPredictor | LSTM + Dense | تاريخ التقييمات، حضور، خصائص | احتمال تحقيق الهدف، PEDI المتوقع | 82% AUC 0.88 | 150ms |
-| DisabilityClassifier | CNN + NLP | نصوص تشخيص، وثائق طبية | نوع الإعاقة، ثقة التصنيف | 89% | 80ms |
-| ShiftOptimizer | OR-Tools CSP | قيود المعالجين والمستفيدين | جدول أسبوعي محسّن | 94% إشغال | 60s |
-| RouteOptimizer | VRPTW | مواقع GPS، نوافذ زمنية | مسارات مركبات | 91% توفير | 45s |
-| AnomalyDetector | Isolation Forest | بيانات مالية يومية | تنبيهات شذوذ | 96% AUC 0.97 | 50ms |
-| ChurnPredictor | XGBoost | نمط الحضور، التقدم | احتمال ترك البرنامج | 79% | 30ms |
-| FamilyChatbot | GPT-4o + RAG | محادثة عربية | إجابات متخصصة | 4.2/5 رضا | 800ms |
-| DocumentationNLP | AraBERT Fine-tuned | ملاحظات المعالج | ICF codes، مؤشرات تقدم | 84% | 200ms |
+| النموذج              | النوع              | المدخلات                     | المخرجات                         | الدقة        | وقت الاستجابة |
+| -------------------- | ------------------ | ---------------------------- | -------------------------------- | ------------ | ------------- |
+| ProgressPredictor    | LSTM + Dense       | تاريخ التقييمات، حضور، خصائص | احتمال تحقيق الهدف، PEDI المتوقع | 82% AUC 0.88 | 150ms         |
+| DisabilityClassifier | CNN + NLP          | نصوص تشخيص، وثائق طبية       | نوع الإعاقة، ثقة التصنيف         | 89%          | 80ms          |
+| ShiftOptimizer       | OR-Tools CSP       | قيود المعالجين والمستفيدين   | جدول أسبوعي محسّن                | 94% إشغال    | 60s           |
+| RouteOptimizer       | VRPTW              | مواقع GPS، نوافذ زمنية       | مسارات مركبات                    | 91% توفير    | 45s           |
+| AnomalyDetector      | Isolation Forest   | بيانات مالية يومية           | تنبيهات شذوذ                     | 96% AUC 0.97 | 50ms          |
+| ChurnPredictor       | XGBoost            | نمط الحضور، التقدم           | احتمال ترك البرنامج              | 79%          | 30ms          |
+| FamilyChatbot        | GPT-4o + RAG       | محادثة عربية                 | إجابات متخصصة                    | 4.2/5 رضا    | 800ms         |
+| DocumentationNLP     | AraBERT Fine-tuned | ملاحظات المعالج              | ICF codes، مؤشرات تقدم           | 84%          | 200ms         |
 
 ### 9.2 نموذج LSTM للتنبؤ بالتقدم
 
@@ -2019,7 +2017,7 @@ class RehabProgressPredictor:
 
 ### 10.1 استراتيجية البيانات متعددة الفروع
 
-```
+```text
 DATA STRATEGY: MULTI-BRANCH LAKE HOUSE ARCHITECTURE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -2144,72 +2142,74 @@ ORDER BY br.name_ar;
 ```typescript
 // RBAC Matrix — صلاحيات الأدوار
 export const RBAC_MATRIX = {
-  'hq_admin': {
+  hq_admin: {
     all_branches: true,
-    permissions: ['*'],  // صلاحية كاملة
+    permissions: ['*'], // صلاحية كاملة
   },
-  'branch_director': {
+  branch_director: {
     own_branch: true,
     permissions: [
-      'beneficiary:read', 'beneficiary:write', 'beneficiary:approve',
-      'schedule:read', 'schedule:write',
-      'hr:read', 'hr:write',
-      'finance:read', 'finance:approve',
-      'compliance:read', 'compliance:write',
+      'beneficiary:read',
+      'beneficiary:write',
+      'beneficiary:approve',
+      'schedule:read',
+      'schedule:write',
+      'hr:read',
+      'hr:write',
+      'finance:read',
+      'finance:approve',
+      'compliance:read',
+      'compliance:write',
       'reports:all',
     ],
   },
-  'clinical_supervisor': {
+  clinical_supervisor: {
     own_branch: true,
     permissions: [
-      'beneficiary:read', 'beneficiary:write',
-      'assessment:read', 'assessment:write',
-      'program:read', 'program:write', 'program:approve',
+      'beneficiary:read',
+      'beneficiary:write',
+      'assessment:read',
+      'assessment:write',
+      'program:read',
+      'program:write',
+      'program:approve',
       'schedule:read',
       'reports:clinical',
     ],
   },
-  'therapist': {
+  therapist: {
     own_cases: true,
     permissions: [
       'beneficiary:read',
-      'session:read', 'session:write',
-      'assessment:read', 'assessment:write',
+      'session:read',
+      'session:write',
+      'assessment:read',
+      'assessment:write',
       'schedule:read',
       'notes:write',
     ],
   },
-  'transport_coordinator': {
+  transport_coordinator: {
     own_branch: true,
-    permissions: [
-      'transport:read', 'transport:write',
-      'vehicle:read', 'vehicle:write',
-      'driver:read',
-      'schedule:read',
-    ],
+    permissions: ['transport:read', 'transport:write', 'vehicle:read', 'vehicle:write', 'driver:read', 'schedule:read'],
   },
-  'family_portal': {
+  family_portal: {
     own_beneficiary: true,
-    permissions: [
-      'beneficiary:read_own',
-      'session:read_own',
-      'transport:read_own',
-      'assessment:read_own_summary',
-    ],
+    permissions: ['beneficiary:read_own', 'session:read_own', 'transport:read_own', 'assessment:read_own_summary'],
   },
 };
 
 // JWT مع Claims متقدمة
 interface JWTClaims {
-  sub:       string;         // user_id
-  role:      string;         // من RBAC_MATRIX
-  branch_id: string;         // الفرع المسموح به
-  scope:     string[];       // الصلاحيات المحددة
-  iss:       'alawael-erp';
-  aud:       string[];
-  exp:       number;
-  iat:       number;
-  jti:       string;         // JWT ID للإلغاء
+  sub: string; // user_id
+  role: string; // من RBAC_MATRIX
+  branch_id: string; // الفرع المسموح به
+  scope: string[]; // الصلاحيات المحددة
+  iss: 'alawael-erp';
+  aud: string[];
+  exp: number;
+  iat: number;
+  jti: string; // JWT ID للإلغاء
 }
 ```
 
@@ -2351,21 +2351,21 @@ spec:
       labels: { app: odoo }
     spec:
       containers:
-      - name: odoo
-        image: alawael/rehab-odoo:17.0-custom
-        resources:
-          requests: { memory: "1Gi", cpu: "500m" }
-          limits:   { memory: "4Gi", cpu: "2000m" }
-        env:
-        - name: ODOO_DB_HOST
-          valueFrom: { secretKeyRef: { name: db-secret, key: host } }
-        livenessProbe:
-          httpGet: { path: /web/health, port: 8069 }
-          initialDelaySeconds: 60
-          periodSeconds: 30
-        readinessProbe:
-          httpGet: { path: /web/health, port: 8069 }
-          initialDelaySeconds: 30
+        - name: odoo
+          image: alawael/rehab-odoo:17.0-custom
+          resources:
+            requests: { memory: '1Gi', cpu: '500m' }
+            limits: { memory: '4Gi', cpu: '2000m' }
+          env:
+            - name: ODOO_DB_HOST
+              valueFrom: { secretKeyRef: { name: db-secret, key: host } }
+          livenessProbe:
+            httpGet: { path: /web/health, port: 8069 }
+            initialDelaySeconds: 60
+            periodSeconds: 30
+          readinessProbe:
+            httpGet: { path: /web/health, port: 8069 }
+            initialDelaySeconds: 30
 ---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
@@ -2380,14 +2380,14 @@ spec:
   minReplicas: 2
   maxReplicas: 8
   metrics:
-  - type: Resource
-    resource:
-      name: cpu
-      target: { type: Utilization, averageUtilization: 70 }
-  - type: Resource
-    resource:
-      name: memory
-      target: { type: Utilization, averageUtilization: 80 }
+    - type: Resource
+      resource:
+        name: cpu
+        target: { type: Utilization, averageUtilization: 70 }
+    - type: Resource
+      resource:
+        name: memory
+        target: { type: Utilization, averageUtilization: 80 }
 ```
 
 ---
@@ -2396,7 +2396,7 @@ spec:
 
 ### 13.1 تحليل التكلفة والعائد (18 شهراً)
 
-```
+```text
 نموذج ROI لـ 5 فروع (المجموعة كاملة)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -2433,14 +2433,14 @@ OPEX شهري (5 فروع):
 
 ### 13.2 جدول ROI التراكمي (5 فروع)
 
-| الفترة | الإيرادات (تراكمي) | التكاليف (تراكمي) | صافي | ROI % |
-|--------|-----------------|-----------------|------|-------|
-| شهر 1-3 | 9,750,000 | 19,225,000 | -9,475,000 | -49% |
-| شهر 4-6 | 21,250,000 | 31,225,000 | -9,975,000 | -32% |
-| شهر 7-9 | 35,500,000 | 43,225,000 | -7,725,000 | -18% |
-| شهر 10-12 | 51,250,000 | 55,225,000 | -3,975,000 | -7% |
-| شهر 13-15 | 67,000,000 | 67,225,000 | -225,000 | 0% |
-| **شهر 16-18** | **85,250,000** | **79,225,000** | **+6,025,000** | **+8%** |
+| الفترة        | الإيرادات (تراكمي) | التكاليف (تراكمي) | صافي           | ROI %   |
+| ------------- | ------------------ | ----------------- | -------------- | ------- |
+| شهر 1-3       | 9,750,000          | 19,225,000        | -9,475,000     | -49%    |
+| شهر 4-6       | 21,250,000         | 31,225,000        | -9,975,000     | -32%    |
+| شهر 7-9       | 35,500,000         | 43,225,000        | -7,725,000     | -18%    |
+| شهر 10-12     | 51,250,000         | 55,225,000        | -3,975,000     | -7%     |
+| شهر 13-15     | 67,000,000         | 67,225,000        | -225,000       | 0%      |
+| **شهر 16-18** | **85,250,000**     | **79,225,000**    | **+6,025,000** | **+8%** |
 
 > **نقطة التعادل: الشهر 15** | **ROI فرع واحد: +57% في 18 شهراً**
 
@@ -2486,36 +2486,36 @@ gantt
 
 ### 15.1 ملخص API Endpoints الرئيسية
 
-| الطريقة | الـ Endpoint | الوصف | المصادقة |
-|--------|------------|-------|---------|
-| `POST` | `/api/v1/beneficiaries` | تسجيل مستفيد جديد | JWT + branch |
-| `GET` | `/api/v1/beneficiaries/{id}/journey` | خارطة رحلة المستفيد | JWT |
-| `POST` | `/api/v1/schedule/generate` | توليد جدول أسبوعي AI | JWT + supervisor |
-| `GET` | `/api/v1/transport/optimize` | تحسين مسارات اليوم | JWT + transport |
-| `POST` | `/api/v1/assessments` | تسجيل تقييم سريري | JWT + therapist |
-| `GET` | `/api/v1/ai/predict/{id}` | تنبؤ AI لمستفيد | JWT + clinical |
-| `POST` | `/api/v1/compliance/hrsd/submit` | إرسال تقرير HRSD | JWT + director |
-| `GET` | `/api/v1/analytics/dashboard` | لوحة KPIs المركزية | JWT + hq |
-| `WS` | `/ws/transport/tracking` | تتبع GPS مباشر | JWT |
-| `WS` | `/ws/chatbot/{family_id}` | Chatbot الأسر | Family Token |
+| الطريقة | الـ Endpoint                         | الوصف                | المصادقة         |
+| ------- | ------------------------------------ | -------------------- | ---------------- |
+| `POST`  | `/api/v1/beneficiaries`              | تسجيل مستفيد جديد    | JWT + branch     |
+| `GET`   | `/api/v1/beneficiaries/{id}/journey` | خارطة رحلة المستفيد  | JWT              |
+| `POST`  | `/api/v1/schedule/generate`          | توليد جدول أسبوعي AI | JWT + supervisor |
+| `GET`   | `/api/v1/transport/optimize`         | تحسين مسارات اليوم   | JWT + transport  |
+| `POST`  | `/api/v1/assessments`                | تسجيل تقييم سريري    | JWT + therapist  |
+| `GET`   | `/api/v1/ai/predict/{id}`            | تنبؤ AI لمستفيد      | JWT + clinical   |
+| `POST`  | `/api/v1/compliance/hrsd/submit`     | إرسال تقرير HRSD     | JWT + director   |
+| `GET`   | `/api/v1/analytics/dashboard`        | لوحة KPIs المركزية   | JWT + hq         |
+| `WS`    | `/ws/transport/tracking`             | تتبع GPS مباشر       | JWT              |
+| `WS`    | `/ws/chatbot/{family_id}`            | Chatbot الأسر        | Family Token     |
 
 ### 15.2 ملخص الضمانات والاعتمادات
 
-| المعيار | المستهدف | المتوقع | الضمان |
-|--------|---------|---------|--------|
-| امتثال HRSD | 100% | 100% | ✅ مضمون بالأتمتة الكاملة |
-| تكلفة الفرع/شهر | <750,000 ريال | 750,000 ريال | ✅ مستوفى |
-| ROI فرع واحد/18شهر | موجب | +57% | ✅ يتجاوز الهدف |
-| إشغال الطاقة | ≥85% | 94.4% | ✅ ممتاز |
-| رضا الأسر NPS | ≥50 | 67 | ✅ جيد جداً |
-| Uptime النظام | 99.9% | 99.95% | ✅ SLA مضمون |
-| PDPL حماية البيانات | 100% | 100% | ✅ AES-256 + RBAC |
-| دقة AI التنبؤي | ≥80% | 82% | ✅ مستوفى |
-| التزام النقل | ≥92% | 91.8% | ⚠️ تحت المتابعة |
+| المعيار             | المستهدف      | المتوقع      | الضمان                    |
+| ------------------- | ------------- | ------------ | ------------------------- |
+| امتثال HRSD         | 100%          | 100%         | ✅ مضمون بالأتمتة الكاملة |
+| تكلفة الفرع/شهر     | <750,000 ريال | 750,000 ريال | ✅ مستوفى                 |
+| ROI فرع واحد/18شهر  | موجب          | +57%         | ✅ يتجاوز الهدف           |
+| إشغال الطاقة        | ≥85%          | 94.4%        | ✅ ممتاز                  |
+| رضا الأسر NPS       | ≥50           | 67           | ✅ جيد جداً               |
+| Uptime النظام       | 99.9%         | 99.95%       | ✅ SLA مضمون              |
+| PDPL حماية البيانات | 100%          | 100%         | ✅ AES-256 + RBAC         |
+| دقة AI التنبؤي      | ≥80%          | 82%          | ✅ مستوفى                 |
+| التزام النقل        | ≥92%          | 91.8%        | ⚠️ تحت المتابعة           |
 
 ---
 
-*📌 وُثِّق بواسطة: ALAWAEL REHAB ERP Team*
-*📅 آخر تحديث: شعبان 1447هـ / مارس 2026م*
-*🔒 التصنيف: سري — للاستخدام الداخلي فقط*
-*📋 الإصدار: 3.0.0 — Enterprise Edition*
+_📌 وُثِّق بواسطة: ALAWAEL REHAB ERP Team_
+_📅 آخر تحديث: شعبان 1447هـ / مارس 2026م_
+_🔒 التصنيف: سري — للاستخدام الداخلي فقط_
+_📋 الإصدار: 3.0.0 — Enterprise Edition_

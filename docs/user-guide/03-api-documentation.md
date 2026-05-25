@@ -25,14 +25,14 @@
 
 ### الرابط الأساسي | Base URL:
 
-```
+```text
 https://api.rehab-system.sa/v1
 أو محلي | Or locally: http://localhost:3001/api/v1
 ```
 
 ### نسخة واجهة برمجية التطبيقات | API Version:
 
-```
+```text
 الإصدار الحالي | Current Version: v1.0
 تاريخ الإصدار | Release Date: January 2026
 الحالة | Status: Stable / مستقرة
@@ -92,7 +92,7 @@ https://api.rehab-system.sa/v1
 
 **في كل طلب | In every request:**
 
-```
+```text
 رأس المصادقة | Authorization Header:
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
@@ -105,7 +105,7 @@ curl -H "Authorization: Bearer YOUR_TOKEN" \
 
 **للتطبيقات | For Applications:**
 
-```
+```text
 معرف التطبيق | App ID: app_production_123
 مفتاح API | API Key: sk_live_a1b2c3d4e5f6...
 
@@ -115,7 +115,7 @@ Header: X-API-Key: sk_live_a1b2c3d4e5f6...
 
 ### سياسة الأمان | Security Policy
 
-```
+```text
 ✓ جميع الطلبات يجب أن تكون عبر HTTPS
 ✓ All requests must be over HTTPS
 
@@ -143,7 +143,7 @@ Header: X-API-Key: sk_live_a1b2c3d4e5f6...
 
 **معاملات الطلب | Query Parameters:**
 
-```
+```text
 page: رقم الصفحة (افتراضي: 1) | Page number (default: 1)
 limit: عدد النتائج (افتراضي: 20، الحد الأقصى: 100)
        Number of results (default: 20, max: 100)
@@ -291,7 +291,7 @@ status: حالة المركبة (active, inactive, archived)
 
 **معاملات الطلب | Query Parameters:**
 
-```
+```text
 page: رقم الصفحة | Page number
 limit: عدد النتائج | Results limit
 search: البحث بالاسم أو الرقم الطبي | Search by name or ID
@@ -361,7 +361,7 @@ branchId: الفرع | Branch filter
 
 **معاملات الطلب | Query Parameters:**
 
-```
+```text
 patientId: معرّف المريض | Patient ID
 therapistId: معرّف المعالج | Therapist ID
 dateFrom: من تاريخ | From date
@@ -423,7 +423,7 @@ status: completed, scheduled, cancelled
 
 **معاملات الطلب | Query Parameters:**
 
-```
+```text
 page: رقم الصفحة | Page number
 limit: عدد النتائج | Results limit
 fileType: نوع الملف | File type (pdf, doc, image, etc)
@@ -469,7 +469,7 @@ tags: البحث عن وسوم | Search tags
 
 **معاملات الطلب | Form Parameters:**
 
-```
+```text
 file: الملف المراد رفعه | File to upload
 title: عنوان الوثيقة | Document title
 category: التصنيف | Category
@@ -500,7 +500,7 @@ relatedEntity: المرتبط بـ | Related to (patientId, etc)
 
 **الرد | Response (200 OK):**
 
-```
+```text
 الملف مرفق في الرد | File attached in response
 Content-Type: يعتمد على نوع الملف | Depends on file type
 Content-Disposition: attachment; filename="document.pdf"
@@ -517,7 +517,7 @@ Content-Disposition: attachment; filename="document.pdf"
 
 **معاملات الطلب | Query Parameters:**
 
-```
+```text
 type: نوع التقرير | Report type (performance, financial, compliance)
 dateFrom: من تاريخ | From date
 dateTo: إلى تاريخ | To date

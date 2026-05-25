@@ -39,7 +39,7 @@ Alawael ERP System, ensuring optimal performance, availability, and reliability.
 
 ### Key Components
 
-```
+```text
 ┌─────────────────────────────────────────────────┐
 │           MONITORING ARCHITECTURE               │
 ├─────────────────────────────────────────────────┤
@@ -320,10 +320,7 @@ const winston = require('winston');
 
 const logger = winston.createLogger({
   level: 'info',
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.json()
-  ),
+  format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
   transports: [
     new winston.transports.File({ filename: 'logs/error.log', level: 'error' }),
     new winston.transports.File({ filename: 'logs/combined.log' }),
@@ -542,7 +539,7 @@ console.log('By Severity:', stats.bySeverity);
 
 #### Access Grafana
 
-```
+```text
 URL: http://server-ip:3000
 Username: admin
 Password: (from .env.production)
@@ -551,23 +548,27 @@ Password: (from .env.production)
 #### Main Dashboard Panels
 
 1. **System Overview**
+
    - Uptime
    - Total Requests
    - Active Users
    - Error Rate
 
 2. **Performance Metrics**
+
    - API Response Times (p50, p95, p99)
    - Database Query Times
    - Cache Hit Rate
 
 3. **Resource Usage**
+
    - CPU Usage
    - Memory Usage
    - Disk I/O
    - Network Traffic
 
 4. **Application Metrics**
+
    - Requests per second
    - Error rate by endpoint
    - Authentication success/failure
@@ -612,7 +613,7 @@ Password: (from .env.production)
 
 #### Log Analysis Dashboard
 
-```
+```text
 URL: http://server-ip:5601
 ```
 
@@ -625,7 +626,7 @@ URL: http://server-ip:5601
 
 #### Creating Log Searches
 
-```
+```text
 # Kibana Query Examples
 
 # All errors

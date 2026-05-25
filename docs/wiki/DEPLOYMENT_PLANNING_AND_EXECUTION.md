@@ -12,34 +12,34 @@
 
 #### Compute Resources
 
-```
+```text
 Production Environment (High Availability):
   Web Servers: 3 nodes (load balanced)
     - CPU: 4 cores per node (12 total)
     - RAM: 8GB per node (24GB total)
     - Disk: 100GB SSD per node
-  
+
   Database Server: 1 primary + 1 replica
     - CPU: 8 cores (primary), 8 cores (replica)
     - RAM: 32GB (primary), 32GB (replica)
     - Disk: 500GB SSD (primary), 500GB SSD (replica)
-  
+
   Cache Server (Redis): 1 primary + 1 replica
     - CPU: 4 cores (primary), 4 cores (replica)
     - RAM: 16GB (primary), 16GB (replica)
     - Disk: 100GB SSD (primary), 100GB SSD (replica)
-  
+
   Monitoring Stack: 1 node
     - CPU: 4 cores
     - RAM: 16GB
     - Disk: 500GB SSD
-  
+
   Total Minimum: 24 CPU cores, 120GB RAM, 2TB SSD storage
 ```
 
 #### Network Configuration
 
-```
+```text
 Load Balancer:
   - Type: Application Load Balancer (ALB) or NGINX
   - Listeners: 80 (HTTP) → 443 (HTTPS)
@@ -63,7 +63,7 @@ DNS:
 
 #### Storage Configuration
 
-```
+```text
 Database:
   - Type: PostgreSQL 14+ or MongoDB 6.0+
   - Backup: Daily automated backups (30-day retention)
@@ -92,6 +92,7 @@ Cache:
 ### Phase 1: Staging Deployment (Week 1)
 
 #### Objectives
+
 - Validate deployment procedures
 - Performance baseline establishment
 - Security scanning
@@ -99,7 +100,7 @@ Cache:
 
 #### Steps
 
-```
+```text
 1. Infrastructure Setup
    [ ] Create staging VPC (isolated from production)
    [ ] Deploy databases (replicated setup)
@@ -136,7 +137,7 @@ Cache:
 
 #### Success Criteria
 
-```
+```text
 ✅ All services healthy
 ✅ 100% smoke test pass rate
 ✅ API response time < 500ms (p95)
@@ -150,6 +151,7 @@ Cache:
 ### Phase 2: Pre-Production Deployment (Week 2-3)
 
 #### Objectives
+
 - Mirror production setup
 - Performance validation
 - Disaster recovery testing
@@ -157,7 +159,7 @@ Cache:
 
 #### Steps
 
-```
+```text
 1. Infrastructure Mirror
    [ ] Infrastructure identical to production
    [ ] Same resource allocation
@@ -195,7 +197,7 @@ Cache:
 
 #### Success Criteria
 
-```
+```text
 ✅ 24-hour soak test passed
 ✅ No memory leaks detected
 ✅ Failover tested successfully
@@ -208,7 +210,7 @@ Cache:
 
 #### Pre-Deployment (Day 1)
 
-```
+```text
 48-Hour Before:
   [ ] Final code review complete
   [ ] All tests passing
@@ -236,7 +238,7 @@ Cache:
 
 #### Deployment (Blue-Green Strategy)
 
-```
+```text
 0. Pre-Deployment Checks (30 min)
    [ ] Verify production databases healthy
    [ ] Check backup completed
@@ -272,7 +274,7 @@ Cache:
 
 #### Post-Deployment (Day 2-7)
 
-```
+```text
 Day 1-2: High Monitoring
   [ ] 24/7 monitoring team
   [ ] Check logs frequently
@@ -288,7 +290,7 @@ Day 3-7: Normal Operations
 
 #### Success Criteria
 
-```
+```text
 ✅ Zero data loss
 ✅ Error rate < 0.5%
 ✅ Response time within SLA
@@ -303,14 +305,14 @@ Day 3-7: Normal Operations
 
 ### Strategy
 
-```
+```text
 Region 1: Primary (Active)
   - Full application stack
   - Write operations directed here
   - Backup region hot standby
 
 Region 2: Backup (Standby)
-  - Full application stack  
+  - Full application stack
   - Read-only replica
   - Can be promoted to primary
 
@@ -324,7 +326,7 @@ Failover Procedure:
 
 ### Database Replication
 
-```
+```text
 PostgreSQL Multi-Master:
   - Region 1 primary (write)
   - Region 2 standby (read)
@@ -344,7 +346,7 @@ MongoDB Replica Set:
 
 ### Vertical Scaling (Increase per-server resources)
 
-```
+```text
 When to scale:
   - CPU utilization average > 70%
   - Memory utilization average > 75%
@@ -360,7 +362,7 @@ Procedure (zero-downtime):
 
 ### Horizontal Scaling (Add more servers)
 
-```
+```text
 Triggers at:
   - Requests/sec approaching limit
   - CPU utilization spike
@@ -377,7 +379,7 @@ Auto-Scaling Rules:
 
 ### Database Scaling
 
-```
+```text
 Read Replicas:
   - Add 1 replica per 1000 req/sec
   - Dedicate replicas for reporting
@@ -396,7 +398,7 @@ Sharding (if needed):
 
 ### Zero-Downtime Deployment
 
-```
+```text
 1. Pre-Deployment (5 minutes)
    [ ] Health checks verified
    [ ] Canary metrics approved
@@ -428,7 +430,7 @@ Sharding (if needed):
 
 ### Quick Rollback (< 5 minutes)
 
-```
+```text
 Trigger Conditions:
   - Error rate > 5%
   - API response time > 5000ms (p95)
@@ -445,7 +447,7 @@ Procedure:
 
 ### Complete Rollback
 
-```
+```text
 If Blue-Green Deployment:
   1. Traffic still goes to Blue (current)
   2. Green had issue, keep Blue running
@@ -513,44 +515,49 @@ If Rolling Update:
 
 ## 🎯 Success Metrics
 
-| Metric | Target | Acceptable | Alert |
-|--------|--------|-----------|-------|
-| **Deployment Duration** | < 30 min | < 60 min | > 90 min |
-| **Rollback Time** | < 5 min | < 10 min | > 15 min |
-| **Error Rate** | < 0.1% | < 0.5% | > 1% |
-| **Response Time (p95)** | < 200ms | < 500ms | > 1000ms |
-| **Availability** | > 99.9% | > 99.5% | < 99% |
-| **Data Loss** | 0 | 0 | Alert on any |
+| Metric                  | Target   | Acceptable | Alert        |
+| ----------------------- | -------- | ---------- | ------------ |
+| **Deployment Duration** | < 30 min | < 60 min   | > 90 min     |
+| **Rollback Time**       | < 5 min  | < 10 min   | > 15 min     |
+| **Error Rate**          | < 0.1%   | < 0.5%     | > 1%         |
+| **Response Time (p95)** | < 200ms  | < 500ms    | > 1000ms     |
+| **Availability**        | > 99.9%  | > 99.5%    | < 99%        |
+| **Data Loss**           | 0        | 0          | Alert on any |
 
 ---
 
 ## 📞 Deployment Team Roles
 
 ### Release Manager
+
 - Coordinates deployment
 - Makes go/no-go decision
 - Manages timeline
 - Updates stakeholders
 
 ### DevOps Lead
+
 - Executes deployment
 - Monitors infrastructure
 - Handles scaling
 - Manages traffic shift
 
 ### Application Lead
+
 - Verifies application health
 - Runs smoke tests
 - Monitors error rates
 - Can decide rollback
 
 ### Database Administrator
+
 - Prepares data
 - Manages replication
 - Ensures backups
 - Handles recovery
 
 ### Monitoring & Alerting
+
 - Watches metrics
 - Alerts on issues
 - Manages dashboards
@@ -560,7 +567,7 @@ If Rolling Update:
 
 ## 🔐 Security During Deployment
 
-```
+```text
 Practices:
   [ ] Code signing verified
   [ ] Container images verified
@@ -579,18 +586,21 @@ Practices:
 ## 📝 Post-Deployment Tasks
 
 ### Documentation Update
+
 - Update runbooks
 - Update architecture diagrams
 - Update deployment procedures
 - Update FAQ/troubleshooting
 
 ### Metrics & Improvements
+
 - Collect deployment metrics
 - Identify bottlenecks
 - Plan optimizations
 - Share lessons learned
 
 ### Stakeholder Communication
+
 - Report to executives
 - Update customer base
 - Celebrate wins
@@ -600,4 +610,3 @@ Practices:
 
 **Status:** Production Ready  
 **Last Updated:** February 24, 2026
-

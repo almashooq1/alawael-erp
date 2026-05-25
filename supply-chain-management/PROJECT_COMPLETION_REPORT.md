@@ -212,7 +212,7 @@ operational, production-ready, and ready for immediate deployment**.
 
 ### Backend
 
-```
+```text
 Node.js 18
 Express.js 4.18
 MongoDB 7.0
@@ -223,7 +223,7 @@ bcryptjs Password Hashing
 
 ### Frontend
 
-```
+```text
 React 18
 Material-UI 5
 Recharts (Charts)
@@ -233,7 +233,7 @@ React Router v6
 
 ### Infrastructure
 
-```
+```text
 Docker 20.10+
 Docker Compose 2.0+
 Nginx (Optional)
@@ -242,7 +242,7 @@ MongoDB Atlas Ready
 
 ### Development Tools
 
-```
+```text
 npm / yarn
 nodejs
 MongoDB Compass
@@ -254,7 +254,7 @@ VS Code
 
 ## System Architecture
 
-```
+```text
 ┌─────────────────────────────────────────────────────────┐
 │              SUPPLY CHAIN MANAGEMENT SYSTEM             │
 ├─────────────────────────────────────────────────────────┤
@@ -364,7 +364,7 @@ VS Code
 
 ### Backend Files
 
-```
+```text
 backend/
 ├── models/        (10 schemas)
 ├── routes/        (10+ endpoints)
@@ -375,7 +375,7 @@ backend/
 
 ### Frontend Files
 
-```
+```text
 frontend/
 ├── src/
 │   ├── components/ (25+ components)

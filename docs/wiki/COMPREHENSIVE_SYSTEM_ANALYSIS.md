@@ -10,7 +10,7 @@
 
 ### System Architecture Diagram
 
-```
+```text
 ┌────────────────────────────────────────────────────────────────┐
 │                        CLIENT LAYER                             │
 │  ┌─────────────┐  ┌──────────────┐  ┌──────────────┐          │
@@ -50,16 +50,16 @@
 
 ### Core Components
 
-| Component | Technology | Purpose | Scale |
-|-----------|-----------|---------|-------|
-| **API Server** | Express.js v5.2.1 | REST API backend | 3 nodes |
-| **Database** | PostgreSQL 14+ | Primary data store | 1 primary + 1 replica |
-| **Cache** | Redis 7.0 | Session & data caching | 1 primary + 1 replica |
-| **Load Balancer** | NGINX/ALB | Traffic distribution | Active-active |
-| **File Storage** | S3/Azure Blob | Document storage | Multi-region |
-| **Message Queue** | RabbitMQ/Redis | Async processing | 1 primary + 1 replica |
-| **Frontend** | React 18.2.x | Web UI | CDN-served |
-| **Mobile** | React Native | Cross-platform app | App stores |
+| Component         | Technology        | Purpose                | Scale                 |
+| ----------------- | ----------------- | ---------------------- | --------------------- |
+| **API Server**    | Express.js v5.2.1 | REST API backend       | 3 nodes               |
+| **Database**      | PostgreSQL 14+    | Primary data store     | 1 primary + 1 replica |
+| **Cache**         | Redis 7.0         | Session & data caching | 1 primary + 1 replica |
+| **Load Balancer** | NGINX/ALB         | Traffic distribution   | Active-active         |
+| **File Storage**  | S3/Azure Blob     | Document storage       | Multi-region          |
+| **Message Queue** | RabbitMQ/Redis    | Async processing       | 1 primary + 1 replica |
+| **Frontend**      | React 18.2.x      | Web UI                 | CDN-served            |
+| **Mobile**        | React Native      | Cross-platform app     | App stores            |
 
 ---
 
@@ -67,23 +67,23 @@
 
 ### Response Time Metrics
 
-```
+```text
 Current Performance (Measured):
-  
+
   GET /api/users:
     - Min: 15ms
     - Mean: 85ms
     - p95: 180ms
     - p99: 250ms
     - Max: 850ms
-  
+
   POST /api/orders:
     - Min: 25ms
     - Mean: 150ms
     - p95: 380ms
     - p99: 520ms
     - Max: 2100ms
-  
+
   GET /api/reports:
     - Min: 500ms
     - Mean: 1200ms
@@ -98,7 +98,7 @@ SLA Target:
 
 ### Throughput Analysis
 
-```
+```text
 Current Capacity:
   • Peak requests/sec: 1,200 req/sec
   • Average requests/sec: 300 req/sec
@@ -119,7 +119,7 @@ Scaling Headroom:
 
 ### Database Performance
 
-```
+```text
 Query Performance:
   • Average query: 5-15ms
   • Slow queries (> 100ms): < 0.5%
@@ -140,7 +140,7 @@ Replication Lag:
 
 ### Cache Efficiency
 
-```
+```text
 Redis Cache Statistics:
   • Memory used: 8.2GB / 16GB (51%)
   • Hit rate: 87%
@@ -161,7 +161,7 @@ Cache Breakdown:
 
 ### Authentication & Authorization
 
-```
+```text
 Current Implementation:
   • JWT tokens (HS256 signing)
   • Token expiration: 24 hours
@@ -185,7 +185,7 @@ Assessment: ✅ COMPLIANT
 
 ### API Security
 
-```
+```text
 Security Headers:
   • HTTPS/TLS 1.3: ✅ Enforced
   • CORS: ✅ Configured
@@ -203,7 +203,7 @@ Assessment: ✅ SECURE
 
 ### Data Protection
 
-```
+```text
 Encryption:
   • At rest: AES-256 (database)
   • In transit: TLS 1.3 (HTTPS)
@@ -224,45 +224,45 @@ Assessment: ✅ STRONG
 
 ### Vulnerability Scanning
 
-```
+```text
 OWASP Top 10 Assessment:
 
 1. Broken Access Control: ✅ MITIGATED
    - RBAC implemented
    - Permission checks in place
-   
+
 2. Cryptographic Failures: ✅ MITIGATED
    - TLS 1.3 enforced
    - Strong encryption algorithms
-   
+
 3. Injection: ✅ MITIGATED
    - Parameterized queries
    - Input validation
-   
+
 4. Insecure Design: ✅ MITIGATED
    - Secure development practices
    - Code reviews conducted
-   
+
 5. Security Misconfiguration: ✅ MITIGATED
    - Hardened configuration
    - Security scanning automated
-   
+
 6. Vulnerable Components: ✅ MANAGED
    - npm audit: 0 critical/high
    - Dependency updates: Automated
-   
+
 7. Authentication Failures: ✅ MITIGATED
    - Strong password policy
    - Account lockout
-   
+
 8. Data Integrity Failures: ✅ PROTECTED
    - Audit logging enabled
    - Data validation enforced
-   
+
 9. Logging/Monitoring Failures: ✅ IMPLEMENTED
    - Comprehensive logging
    - Alert monitoring
-   
+
 10. SSRF: ✅ MITIGATED
     - Request validation
     - Network segmentation
@@ -272,7 +272,7 @@ Overall: ✅ SECURE (85/100)
 
 ### Compliance
 
-```
+```text
 Standards Met:
   ✅ GDPR (Data Protection)
   ✅ CCPA (Privacy)
@@ -292,13 +292,13 @@ Audit Status:
 
 ### Horizontal Scaling
 
-```
+```text
 API Server Scaling:
   Current: 3 nodes
   Max per zone: 20 nodes
   Auto-scaling trigger: CPU > 70%
   Scaling time: 2-3 minutes
-  
+
   Characteristics:
     • Stateless design: ✅ Yes
     • Session storage: External (Redis)
@@ -319,7 +319,7 @@ Assessment: ✅ EXCELLENT
 
 ### Database Scaling
 
-```
+```text
 Current Setup:
   • Primary: PostgreSQL single instance
   • Replicas: 1 read replica
@@ -327,19 +327,19 @@ Current Setup:
   • Growth rate: ~2GB/month
 
 Scaling Roadmap:
-  
+
   Phase 1 (Now - 6 months):
     • Single primary + 1 replica
     • Read replicas for analytics
     • Index optimization
     • Capacity: 100GB (max)
-  
+
   Phase 2 (6-12 months):
     • Primary sharding by customer
     • 4 shards (customer groups)
     • Dedicated read replicas
     • Capacity: 500GB
-  
+
   Phase 3 (12+ months):
     • Multi-region sharding
     • Per-region custom shards
@@ -353,7 +353,7 @@ Assessment: ⚠️ PLAN SHARDING
 
 ### Cache Scaling
 
-```
+```text
 Redis Scaling:
   Current: 16GB per instance
   Utilization: 51%
@@ -371,7 +371,7 @@ Assessment: ✅ SUFFICIENT
 
 ### Storage Scaling
 
-```
+```text
 File Storage:
   Current: ~500GB total
   Growth rate: 50GB/month
@@ -394,17 +394,17 @@ Assessment: ✅ S3 SUFFICIENT
 
 ### Identified Bottlenecks
 
-| Bottleneck | Impact | Severity | Solution | ETA |
-|------------|--------|----------|----------|-----|
-| **Report Generation** | Slow reports (p95: 2500ms) | Medium | Query optimization, async processing | 2 weeks |
-| **User Search** | Slow with filters | Low | Add indexes, Redis cache | 1 week |
-| **Large File Upload** | Timeout > 5MB | Medium | Chunked upload, progress tracking | 3 weeks |
-| **Email Sending** | Async but serial | Low | Batch processing, parallelization | 2 weeks |
-| **PDF Generation** | Memory spike | Medium | Streaming, worker pool | 3 weeks |
+| Bottleneck            | Impact                     | Severity | Solution                             | ETA     |
+| --------------------- | -------------------------- | -------- | ------------------------------------ | ------- |
+| **Report Generation** | Slow reports (p95: 2500ms) | Medium   | Query optimization, async processing | 2 weeks |
+| **User Search**       | Slow with filters          | Low      | Add indexes, Redis cache             | 1 week  |
+| **Large File Upload** | Timeout > 5MB              | Medium   | Chunked upload, progress tracking    | 3 weeks |
+| **Email Sending**     | Async but serial           | Low      | Batch processing, parallelization    | 2 weeks |
+| **PDF Generation**    | Memory spike               | Medium   | Streaming, worker pool               | 3 weeks |
 
 ### Performance Improvements
 
-```
+```text
 Quick Wins (This Sprint):
   ✅ Add database indexes (7 identified)
   ✅ Increase Redis cache TTL
@@ -432,7 +432,7 @@ Long-term (3-6 months):
 
 ### Test Scenario 1: Normal Operations (100 concurrent users)
 
-```
+```text
 Results:
   • Transaction rate: 950 req/sec
   • Mean response time: 95ms
@@ -440,13 +440,13 @@ Results:
   • Error rate: 0.0%
   • CPU utilization: 35%
   • Memory utilization: 45%
-  
+
 Status: ✅ PASS (well within limits)
 ```
 
 ### Test Scenario 2: Peak Load (500 concurrent users)
 
-```
+```text
 Results:
   • Transaction rate: 1,180 req/sec
   • Mean response time: 385ms
@@ -454,14 +454,14 @@ Results:
   • Error rate: 0.1%
   • CPU utilization: 72%
   • Memory utilization: 68%
-  
+
 Status: ✅ PASS (acceptable performance)
 Timeline: Sustainable for 30 minutes
 ```
 
 ### Test Scenario 3: Stress Test (1000 concurrent users)
 
-```
+```text
 Results:
   • Transaction rate: 980 req/sec (degraded)
   • Mean response time: 980ms
@@ -469,7 +469,7 @@ Results:
   • Error rate: 2.5%
   • CPU utilization: 95%
   • Memory utilization: 85%
-  
+
 Status: ⚠️ DEGRADED
   • System recovers quickly after load drops
   • Not recommended for sustained load
@@ -478,14 +478,14 @@ Status: ⚠️ DEGRADED
 
 ### Test Scenario 4: Spike Test (rapid scaling 100→500 users)
 
-```
+```text
 Results:
   • Response time spike: < 500ms
   • Auto-scaling triggered: Yes
   • Recovery time: 2 minutes 15 seconds
   • Data loss: 0
   • Auto-scale effectiveness: 95%
-  
+
 Status: ✅ PASS (handles spikes well)
 ```
 
@@ -495,7 +495,7 @@ Status: ✅ PASS (handles spikes well)
 
 ### Uptime History (Last 90 Days)
 
-```
+```text
 Total Uptime: 99.87%
   • Planned Maintenance: 4 hours
   • Unplanned Downtime: 1 hour 22 minutes
@@ -512,23 +512,23 @@ Current Status: ✅ MEETING TARGET
 
 ### Failure Modes Analysis
 
-```
+```text
 Single Points of Failure:
   1. Load Balancer
      Impact: Complete system down
      Mitigation: Active-Active LB redundancy
      Status: ✅ MITIGATED
-  
+
   2. Primary Database
      Impact: Data writes fail
      Mitigation: Replication + automated failover
      Status: ✅ MITIGATED
-  
+
   3. Redis Cache
      Impact: Performance degradation
      Mitigation: Replication + graceful degradation
      Status: ✅ MITIGATED
-  
+
   4. Backups
      Impact: Data loss
      Mitigation: Multi-region, automated
@@ -546,7 +546,7 @@ Overall Resilience: ✅ STRONG
 
 ### Monthly Operating Costs
 
-```
+```text
 Infrastructure:
   • Compute (AWS EC2): $8,500
   • Database (RDS): $4,200
@@ -554,7 +554,7 @@ Infrastructure:
   • Storage (S3): $800
   • Load Balancer: $400
   • Networking: $300
-  
+
 Subtotal: $16,000/month
 
 Services & Tools:
@@ -563,14 +563,14 @@ Services & Tools:
   • Logging (CloudWatch): $600
   • SSL Certificates: $100
   • Domain/DNS: $50
-  
+
 Subtotal: $2,850/month
 
 Personnel:
   • DevOps (1 FTE): $9,000
   • DBA (1 FTE): $8,500
   • Support (1 FTE): $6,000
-  
+
 Subtotal: $23,500/month
 
 TOTAL: $42,350/month ($508,200/year)
@@ -579,13 +579,13 @@ Cost Optimization Opportunities:
   • Reserved instances: -$2,100/month (25% savings)
   • Spot instances (non-critical): -$1,500/month
   • Consolidate monitoring: -$300/month
-  
+
 Optimized Total: ~$38,450/month
 ```
 
 ### Cost Per User (Monthly)
 
-```
+```text
 Active Users: 50,000
 Cost per user: $0.77/month
 
@@ -605,7 +605,7 @@ Revenue required (at 3x margin):
 
 ### Immediate Actions (This Month)
 
-```
+```text
 Priority 1:
   [ ] Implement missing database indexes (2-3 hours)
   [ ] Enable GZIP compression (1 hour)
@@ -623,7 +623,7 @@ Impact: 15-20% performance improvement
 
 ### Short-term (1-3 Months)
 
-```
+```text
 Performance:
   [ ] Report generation async processing
   [ ] PDF generation worker pool
@@ -646,7 +646,7 @@ Impact: Significant improvements in performance & reliability
 
 ### Medium-term (3-6 Months)
 
-```
+```text
 Scalability:
   [ ] Database sharding design
   [ ] Microservices separation planning
@@ -674,7 +674,7 @@ Impact: Position for 10x growth
 
 ### Security Audit Score: 85/100
 
-```
+```text
 Strengths (90+):
   ✅ Authentication & Authorization
   ✅ Data Encryption
@@ -697,7 +697,7 @@ Action Required (< 70):
 
 ### Compliance Checklist
 
-```
+```text
 Data Protection:
   ✅ GDPR compliant
   ✅ Data retention policy
@@ -722,7 +722,7 @@ Operational:
 
 ### What's Working Well
 
-```
+```text
 ✅ Microservices architecture separate concerns
 ✅ Containerization enables easy deployment
 ✅ Comprehensive logging for debugging
@@ -733,7 +733,7 @@ Operational:
 
 ### What Needs Improvement
 
-```
+```text
 ⚠️ Database query optimization needs discipline
 ⚠️ Cache hit rate could be higher
 ⚠️ More comprehensive integration tests
@@ -745,4 +745,3 @@ Operational:
 
 **Status:** Production Ready  
 **Last Updated:** February 24, 2026
-

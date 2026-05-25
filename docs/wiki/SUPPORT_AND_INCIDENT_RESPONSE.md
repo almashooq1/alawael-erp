@@ -11,7 +11,8 @@
 ### Support Tiers
 
 #### Tier 1: Front-Line Support (24/7)
-```
+
+```text
 Responsibility:
   • Initial customer contact
   • Ticket categorization
@@ -24,7 +25,8 @@ Skill Level: Customer service + basic technical
 ```
 
 #### Tier 2: Technical Support (8AM-8PM)
-```
+
+```text
 Responsibility:
   • Complex issue investigation
   • API debugging
@@ -37,7 +39,8 @@ Skill Level: Advanced technical
 ```
 
 #### Tier 3: Engineering (On-Call)
-```
+
+```text
 Responsibility:
   • Critical infrastructure issues
   • Emergency patches
@@ -55,16 +58,16 @@ Skill Level: Expert engineers
 
 ### Priority Levels
 
-| Level | Impact | Example | Response | Resolution |
-|-------|--------|---------|----------|-----------|
-| **P1 / Critical** | System down | System unavailable for users | < 5 min page | < 1 hour |
-| **P2 / High** | Major feature broken | Cannot process transactions | < 15 min | < 4 hours |
-| **P3 / Medium** | Performance degradation | APIs responding slowly | < 1 hour | < 24 hours |
-| **P4 / Low** | Minor issue | UI glitch, typo | < 4 hours | < 1 week |
+| Level             | Impact                  | Example                      | Response     | Resolution |
+| ----------------- | ----------------------- | ---------------------------- | ------------ | ---------- |
+| **P1 / Critical** | System down             | System unavailable for users | < 5 min page | < 1 hour   |
+| **P2 / High**     | Major feature broken    | Cannot process transactions  | < 15 min     | < 4 hours  |
+| **P3 / Medium**   | Performance degradation | APIs responding slowly       | < 1 hour     | < 24 hours |
+| **P4 / Low**      | Minor issue             | UI glitch, typo              | < 4 hours    | < 1 week   |
 
 ### Categorization Examples
 
-```
+```text
 Critical (P1):
   - Application completely down
   - Database connection lost
@@ -105,7 +108,8 @@ Low (P4):
 ### Phase 1: Detection (0-5 min)
 
 #### Automated Detection
-```
+
+```text
 Trigger Sources:
   1. Monitoring alert (most common)
   2. Customer report via chat/email
@@ -130,7 +134,8 @@ Actions:
 ### Phase 2: Response (5-15 min)
 
 #### Initial Assessment
-```
+
+```text
 Questions to Answer:
   1. Is system fully down or partially degraded?
   2. How many users affected?
@@ -148,7 +153,8 @@ Actions:
 ```
 
 #### Communication
-```
+
+```text
 Internally:
   • Slack #incidents channel
   • All relevant teams notified
@@ -166,14 +172,14 @@ Externally:
 
 #### Immediate Actions
 
-```
+```text
 If Possible:
   [ ] Rollback to last stable version
   [ ] Scale up affected service
   [ ] Clear cache if corrupted
   [ ] Redirect traffic if needed
   [ ] Disable problematic feature temporarily
-  
+
 If Not Possible:
   [ ] Load failed requests into queue
   [ ] Switch to read-only mode
@@ -183,7 +189,7 @@ If Not Possible:
 
 #### Root Cause Investigation
 
-```
+```text
 Check in Order:
   1. Recent deployments (last 24 hours)
   2. Infrastructure changes
@@ -206,7 +212,7 @@ Tools to Use:
 
 #### Fix Implementation
 
-```
+```text
 Approach 1: Roll Back (fastest)
   1. Identify problematic version
   2. Prepare rollback
@@ -230,7 +236,7 @@ Approach 3: Workaround
 
 #### Verification
 
-```
+```text
 [ ] System responding normally
 [ ] Error rate dropped to baseline
 [ ] Response time normal
@@ -244,7 +250,8 @@ Approach 3: Workaround
 ### Phase 5: Recovery (1-24 hours)
 
 #### Cleanup
-```
+
+```text
 [ ] Drain processing queues
 [ ] Clear temporary caches
 [ ] Reset circuit breakers
@@ -254,7 +261,8 @@ Approach 3: Workaround
 ```
 
 #### Communication
-```
+
+```text
 Internal:
   [ ] Team debriefing
   [ ] Document resolution
@@ -275,7 +283,8 @@ External:
 ### API Errors
 
 #### 400 Bad Request
-```
+
+```text
 Cause: Invalid request format
 Troubleshooting:
   1. Check request body format (JSON valid?)
@@ -292,7 +301,8 @@ Solution:
 ```
 
 #### 401 Unauthorized
-```
+
+```text
 Cause: Authentication failed
 Troubleshooting:
   1. Check API key valid
@@ -310,7 +320,8 @@ Solution:
 ```
 
 #### 403 Forbidden
-```
+
+```text
 Cause: User lacks permission
 Troubleshooting:
   1. Verify user role
@@ -327,7 +338,8 @@ Solution:
 ```
 
 #### 404 Not Found
-```
+
+```text
 Cause: Resource doesn't exist
 Troubleshooting:
   1. Verify resource ID correct
@@ -345,7 +357,8 @@ Solution:
 ```
 
 #### 429 Too Many Requests
-```
+
+```text
 Cause: Rate limit exceeded
 Troubleshooting:
   1. Check rate limit headers
@@ -363,7 +376,8 @@ Solution:
 ```
 
 #### 500 Internal Server Error
-```
+
+```text
 Cause: Server error (code/data issue)
 Troubleshooting:
   1. Check system status page
@@ -382,7 +396,8 @@ Solution:
 ### Performance Issues
 
 #### Slow API Response
-```
+
+```text
 Diagnosis:
   [ ] Check response time trend
   [ ] Identify affected endpoints
@@ -399,7 +414,8 @@ Solutions:
 ```
 
 #### High CPU Usage
-```
+
+```text
 Diagnosis:
   [ ] Check which process consuming CPU
   [ ] Review error logs for loops
@@ -416,7 +432,8 @@ Solutions:
 ```
 
 #### High Memory Usage
-```
+
+```text
 Diagnosis:
   [ ] Check memory usage trend
   [ ] Identify memory leaks
@@ -435,7 +452,8 @@ Solutions:
 ### Database Issues
 
 #### Connection Timeout
-```
+
+```text
 Troubleshooting:
   1. Check database is running
   2. Verify connection string
@@ -452,7 +470,8 @@ Solution:
 ```
 
 #### Query Timeout
-```
+
+```text
 Troubleshooting:
   1. Check slow query log
   2. Review query plan
@@ -469,7 +488,8 @@ Solution:
 ```
 
 #### Replication Lag
-```
+
+```text
 Troubleshooting:
   1. Check replica status
   2. Verify network connectivity
@@ -491,7 +511,7 @@ Solution:
 
 ### Level 1 → Level 2 (30 minutes)
 
-```
+```text
 Trigger:
   • No progress on issue
   • Requires advanced technical knowledge
@@ -507,7 +527,7 @@ Action:
 
 ### Level 2 → Level 3 (1 hour)
 
-```
+```text
 Trigger:
   • P1/Critical issue
   • Level 2 unable to resolve
@@ -524,7 +544,7 @@ Action:
 
 ### Management Escalation (P1 Only)
 
-```
+```text
 Tier 3 calls:
   • VP Engineering (> 15 min downtime)
   • CTO (> 1 hour downtime)
@@ -543,7 +563,7 @@ Message:
 
 ### During Incident
 
-```
+```text
 Timeline Log (update every 15 minutes):
   HH:MM - Event occurred
   HH:MM - Alert triggered
@@ -563,7 +583,7 @@ Impact Tracked:
 
 ### Post-Incident Report (within 24 hours)
 
-```
+```text
 Template:
 
 ## Incident Summary
@@ -612,6 +632,7 @@ Template:
 **Root Cause:** Application holding connections too long, or query taking too long
 
 **Solution:**
+
 1. Check query execution time
 2. Identify long-running query
 3. Optimize query or add index
@@ -619,6 +640,7 @@ Template:
 5. Scale database resources
 
 **Prevention:**
+
 - Implement connection timeout
 - Monitor connection pool usage
 - Regular query optimization reviews
@@ -632,6 +654,7 @@ Template:
 **Root Cause:** Event listeners not removed, circular references, or large data cached
 
 **Solutions:**
+
 1. Enable heap snapshot monitoring
 2. Identify memory retention
 3. Fix memory leak in code
@@ -639,6 +662,7 @@ Template:
 5. Deploy fix
 
 **Prevention:**
+
 - Regular memory monitoring
 - Code reviews for memory patterns
 - Load testing to detect leaks
@@ -652,6 +676,7 @@ Template:
 **Root Cause:** Network latency, large transactions, or primary load too high
 
 **Solutions:**
+
 1. Check network status between regions
 2. Optimize large transactions
 3. Increase replication bandwidth
@@ -659,6 +684,7 @@ Template:
 5. Reduce write load if possible
 
 **Prevention:**
+
 - Monitor replication lag continuously
 - Plan capacity for replication
 - Test replication under load
@@ -669,7 +695,7 @@ Template:
 
 ### Schedule
 
-```
+```text
 Weekly rotation:
   Monday 00:00 - Monday 23:59: Engineer A
   Tuesday 00:00 - Tuesday 23:59: Engineer B
@@ -687,7 +713,7 @@ Holiday/Weekend:
 
 ### On-Call Responsibilities
 
-```
+```text
 24-Hour Coverage:
   • Respond to pages within 5 minutes
   • Investigate P1/P2 issues
@@ -704,7 +730,7 @@ Off-Call Responsibilities:
 
 ### Compensation
 
-```
+```text
 On-Call Hours:
   • Paid at 1.5x rate while on-call
   • Additional pay if paged
@@ -721,6 +747,7 @@ Fatigue Management:
 ## ✅ Support Checklist
 
 ### Daily
+
 - [ ] Check support queue
 - [ ] Respond to oldest tickets first
 - [ ] Monitor P1/P2 issues
@@ -728,6 +755,7 @@ Fatigue Management:
 - [ ] Check status page health
 
 ### Weekly
+
 - [ ] Analyze support trends
 - [ ] Update knowledge base
 - [ ] Team meeting review
@@ -735,6 +763,7 @@ Fatigue Management:
 - [ ] Metrics analysis
 
 ### Monthly
+
 - [ ] Support metrics review
 - [ ] Training sessions
 - [ ] Process improvements
@@ -745,4 +774,3 @@ Fatigue Management:
 
 **Status:** Production Ready  
 **Last Updated:** February 24, 2026
-

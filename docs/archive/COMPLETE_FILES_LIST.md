@@ -48,7 +48,7 @@
 
 ### للبدء السريع (5 دقائق)
 
-```
+```text
 1. START_NOW_QUICK_GUIDE.md        ⭐ ابدأ هنا
 2. INSTANT_SUMMARY.md              ⭐ ملخص فوري
 3. QUICK_VERIFICATION_CHECKLIST.md ⭐ تحقق سريع
@@ -56,7 +56,7 @@
 
 ### للقراءة الأساسية (30 دقيقة)
 
-```
+```text
 1. TRANSPORT_SYSTEM_COMPLETE_SUMMARY.md
 2. QUICK_RESOURCES_GUIDE.md
 3. TRANSPORT_SYSTEM_SETUP_INSTRUCTIONS.md
@@ -64,7 +64,7 @@
 
 ### للقراءة الشاملة (2 ساعة)
 
-```
+```text
 1. TRANSPORT_SYSTEM_DOCUMENTATION.md
 2. FINAL_EXECUTIVE_SUMMARY.md
 3. COMPREHENSIVE_INDEX.md
@@ -73,7 +73,7 @@
 
 ### للمراقبة المستمرة
 
-```
+```text
 1. DAILY_MONITORING_DASHBOARD.md
 2. MONITORING_COMPLETE_REPORT.md
 3. FINAL_FOLLOWUP_SUMMARY.md
@@ -85,7 +85,7 @@
 
 ### الملفات البرمجية (المسارات)
 
-```
+```text
 backend/models/transport.models.js
 backend/services/transport.services.js
 backend/api/routes/transport.routes.js
@@ -97,7 +97,7 @@ frontend/src/pages/AdminTransportPage.js
 
 ### ملفات التوثيق (المجلد الجذر)
 
-```
+```text
 TRANSPORT_SYSTEM_DOCUMENTATION.md
 TRANSPORT_SYSTEM_SETUP_INSTRUCTIONS.md
 TRANSPORT_SYSTEM_COMPLETE_SUMMARY.md
@@ -121,7 +121,7 @@ COMPLETE_FILES_LIST.md
 
 ### عدد الملفات
 
-```
+```text
 ملفات برمجية:          7 ملفات
 ملفات توثيق:           15 ملف
 الإجمالي:              22 ملف
@@ -129,7 +129,7 @@ COMPLETE_FILES_LIST.md
 
 ### أسطر الكود والنصوص
 
-```
+```text
 برمجة:                 3,990 سطر
 توثيق:                 3,500+ سطر
 الإجمالي:              7,490+ سطر
@@ -137,7 +137,7 @@ COMPLETE_FILES_LIST.md
 
 ### الميزات والعناصر
 
-```
+```text
 API Endpoints:         35+ endpoint
 Database Models:       10 نماذج
 Services:              8 خدمات
@@ -152,7 +152,7 @@ Documentation:         15 ملف
 
 ### الملفات البرمجية
 
-```
+```text
 [✅] transport.models.js (761 سطر)
 [✅] transport.services.js (649 سطر)
 [✅] transport.routes.js (654 سطر)
@@ -164,7 +164,7 @@ Documentation:         15 ملف
 
 ### ملفات التوثيق الأساسية
 
-```
+```text
 [✅] TRANSPORT_SYSTEM_DOCUMENTATION.md
 [✅] TRANSPORT_SYSTEM_SETUP_INSTRUCTIONS.md
 [✅] QUICK_VERIFICATION_CHECKLIST.md
@@ -173,7 +173,7 @@ Documentation:         15 ملف
 
 ### ملفات التوثيق الإضافية
 
-```
+```text
 [✅] MONITORING_COMPLETE_REPORT.md
 [✅] DAILY_MONITORING_DASHBOARD.md
 [✅] FINAL_EXECUTIVE_SUMMARY.md
@@ -256,7 +256,7 @@ Documentation:         15 ملف
 
 ### لشخص جديد
 
-```
+```text
 1. اقرأ: START_NOW_QUICK_GUIDE.md (5 دق)
 2. اقرأ: INSTANT_SUMMARY.md (3 دق)
 3. ابدأ: TRANSPORT_SYSTEM_SETUP_INSTRUCTIONS.md
@@ -264,7 +264,7 @@ Documentation:         15 ملف
 
 ### لمطور تقني
 
-```
+```text
 1. اقرأ: TRANSPORT_SYSTEM_DOCUMENTATION.md (60 دق)
 2. اتبع: TRANSPORT_SYSTEM_SETUP_INSTRUCTIONS.md (30 دق)
 3. استخدم: QUICK_VERIFICATION_CHECKLIST.md (5 دق)
@@ -273,7 +273,7 @@ Documentation:         15 ملف
 
 ### لمسؤول إدارة
 
-```
+```text
 1. اقرأ: FINAL_EXECUTIVE_SUMMARY.md (45 دق)
 2. راجع: QUICK_VERIFICATION_CHECKLIST.md (5 دق)
 3. اطلع على: DAILY_MONITORING_DASHBOARD.md (10 دق)
@@ -282,7 +282,7 @@ Documentation:         15 ملف
 
 ### للبحث عن معلومة
 
-```
+```text
 1. استخدم: COMPREHENSIVE_INDEX.md (الفهرس)
 2. أو استخدم: QUICK_RESOURCES_GUIDE.md (موارد سريعة)
 3. أو ابحث في: COMPLETE_FILES_LIST.md (هذا الملف)
@@ -294,7 +294,7 @@ Documentation:         15 ملف
 
 ### الوصول السريع للملفات البرمجية
 
-```
+```text
 انسخ مباشرة من:
 backend/models/transport.models.js
 إلى: مشروعك/backend/models/
@@ -306,7 +306,7 @@ frontend/src/pages/[PageName].js
 
 ### الوصول السريع لملفات التوثيق
 
-```
+```text
 جميع ملفات التوثيق في: المجلد الجذر (66666/)
 يمكنك فتحها في أي محرر نصوص
 أو عارض Markdown
@@ -360,7 +360,7 @@ frontend/src/pages/[PageName].js
 
 **ابدأ بـ هذا الملف:**
 
-```
+```text
 📄 START_NOW_QUICK_GUIDE.md
 ⏱️ 5 دقائق فقط
 🎯 ستكون جاهزاً للبدء

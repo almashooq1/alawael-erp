@@ -21,15 +21,15 @@
 
 ### What We're Deploying
 
-| Component | Details |
-|-----------|---------|
-| **Version** | 1.0.0 (Stable) |
-| **Code Size** | 20,200+ lines |
-| **Endpoints** | 100+ REST APIs |
-| **Tests** | 500+ cases (92%+ pass) |
-| **Documentation** | 315 files |
-| **Repository** | https://github.com/almashooq1/alawael-backend |
-| **Status** | ✅ Production Ready |
+| Component         | Details                                       |
+| ----------------- | --------------------------------------------- |
+| **Version**       | 1.0.0 (Stable)                                |
+| **Code Size**     | 20,200+ lines                                 |
+| **Endpoints**     | 100+ REST APIs                                |
+| **Tests**         | 500+ cases (92%+ pass)                        |
+| **Documentation** | 315 files                                     |
+| **Repository**    | https://github.com/almashooq1/alawael-backend |
+| **Status**        | ✅ Production Ready                           |
 
 ### Key Features Included
 
@@ -40,7 +40,7 @@
 ✅ Security Framework (JWT, 2FA, RBAC)  
 ✅ CI/CD Pipeline (GitHub Actions)  
 ✅ Monitoring & Alerts (Sentry, Winston)  
-✅ Full Documentation  
+✅ Full Documentation
 
 ---
 
@@ -49,6 +49,7 @@
 ### **Infrastructure/DevOps Team**
 
 **Primary Tasks:**
+
 - [ ] Verify server resources (2GB RAM, 5GB disk minimum)
 - [ ] Set up MongoDB 7.0 instance
 - [ ] Configure Redis (optional, for caching)
@@ -63,6 +64,7 @@
 ### **Backend Development Team**
 
 **Primary Tasks:**
+
 - [ ] Review code changes from v1.0.0 tag
 - [ ] Run local tests and verification
 - [ ] Review API documentation
@@ -75,6 +77,7 @@
 ### **Quality Assurance Team**
 
 **Primary Tasks:**
+
 - [ ] Execute smoke tests on deployed instance
 - [ ] Verify all 100+ endpoints work correctly
 - [ ] Test end-to-end workflows
@@ -88,6 +91,7 @@
 ### **Product/Management Team**
 
 **Primary Tasks:**
+
 - [ ] Final sign-off on release
 - [ ] Communication with stakeholders
 - [ ] Prepare user announcements
@@ -113,6 +117,7 @@
 ### Infrastructure
 
 - [ ] **Database**
+
   - [ ] MongoDB 7.0+ installed
   - [ ] Database created and accessible
   - [ ] Backup procedure tested
@@ -121,6 +126,7 @@
   - [ ] Connection string verified
 
 - [ ] **Environment**
+
   - [ ] Server/VM provisioned
   - [ ] Node.js 18+ installed (`node --version`)
   - [ ] npm 8+ installed (`npm --version`)
@@ -130,6 +136,7 @@
   - [ ] Environment variables prepared
 
 - [ ] **Monitoring & Logging**
+
   - [ ] Sentry account created and configured
   - [ ] Logging service configured (Winston/Morgan)
   - [ ] Alert rules defined
@@ -146,6 +153,7 @@
 ### Security
 
 - [ ] **Credentials & Secrets**
+
   - [ ] JWT_SECRET configured (min 32 chars, random)
   - [ ] Database credentials secure
   - [ ] API keys/tokens stored in .env
@@ -154,6 +162,7 @@
   - [ ] Environment file permissions 600
 
 - [ ] **Network Security**
+
   - [ ] HTTPS/TLS enforced
   - [ ] CORS configured for frontend domain
   - [ ] Rate limiting configured (100 req/15min)
@@ -172,6 +181,7 @@
 ### Communication
 
 - [ ] **Team Notifications**
+
   - [ ] All stakeholders informed
   - [ ] Emergency contacts confirmed
   - [ ] Slack channel created
@@ -384,6 +394,7 @@ curl https://your-domain/api/ml/demand-forecast
 ### **First 24 Hours (Critical Monitoring)**
 
 **Every 1 hour:**
+
 - Check error rate (target: < 0.1%)
 - Monitor response times (target: 250-350ms)
 - Verify database performance
@@ -392,7 +403,8 @@ curl https://your-domain/api/ml/demand-forecast
 - Check user activity/logins
 
 **Dashboard to monitor:**
-```
+
+```text
 https://your-monitoring-system/dashboard
 - Error Rate Graph
 - Response Time Graph
@@ -529,53 +541,61 @@ systemctl restart nginx
 ### **Support Escalation (Severity Levels)**
 
 #### **CRITICAL (P1) - Response: Immediate**
+
 - Application down
 - Data loss risk
 - Security breach
 - Service completely unavailable
 
 **Contacts:**
+
 1. On-call Engineer: [Contact Info]
 2. Infrastructure Manager: [Contact Info]
 3. CTO: [Contact Info]
 
 #### **HIGH (P2) - Response: 30 minutes**
+
 - Significant feature broken
 - Performance degradation > 50%
 - Multiple users affected
 - Data integrity issue
 
 **Contacts:**
+
 1. Senior Engineer: [Contact Info]
 2. DevOps Lead: [Contact Info]
 
 #### **MEDIUM (P3) - Response: 2 hours**
+
 - Single feature broken
 - Minor performance issue
 - Limited user impact
 
 **Contacts:**
+
 1. Support Team: support@alawael.com
 2. Developer on-call: [Contact Info]
 
 #### **LOW (P4) - Response: Next business day**
+
 - Minor bug
 - UI issue
 - Documentation update
 
 **Contacts:**
+
 1. Support Team: support@alawael.com
 2. Regular support channels
 
 ### **Key Contacts**
 
-| Role | Name | Email | Phone |
-|------|------|-------|-------|
+| Role                    | Name   | Email   | Phone   |
+| ----------------------- | ------ | ------- | ------- |
 | **Infrastructure Lead** | [Name] | [email] | [Phone] |
-| **Backend Lead** | [Name] | [email] | [Phone] |
-| **QA Lead** | [Name] | [email] | [Phone] |
-| **Product Manager** | [Name] | [email] | [Phone] |
-| **On-Call (24/7)** | [Name] | [email] | [Phone] |
+| **Backend Lead**        | [Name] | [email] | [Phone] |
+| **QA Lead**             | [Name] | [email] | [Phone] |
+| **Product Manager**     | [Name] | [email] | [Phone] |
+| **On-Call (24/7)**      | [Name] | [email] | [Phone] |
 
 ### **Communication Channels**
 
@@ -598,7 +618,7 @@ systemctl restart nginx
 ✅ Monitoring and alerts working  
 ✅ Security checks passed  
 ✅ No critical errors in logs  
-✅ Team confirms readiness  
+✅ Team confirms readiness
 
 ---
 
@@ -630,12 +650,12 @@ mongorestore --uri="mongodb://..." --archive=backup.archive
 
 This deployment requires approval from:
 
-| Role | Name | Signature | Date |
-|------|------|-----------|------|
-| **Infrastructure Lead** | | | |
-| **QA Lead** | | | |
-| **Product Manager** | | | |
-| **Engineering Director** | | | |
+| Role                     | Name | Signature | Date |
+| ------------------------ | ---- | --------- | ---- |
+| **Infrastructure Lead**  |      |           |      |
+| **QA Lead**              |      |           |      |
+| **Product Manager**      |      |           |      |
+| **Engineering Director** |      |           |      |
 
 ---
 
@@ -655,6 +675,6 @@ This deployment requires approval from:
 
 ---
 
-*Alawael Enterprise Platform*  
-*Deployment Guide v1.0.0*  
-*February 22, 2026*
+_Alawael Enterprise Platform_  
+_Deployment Guide v1.0.0_  
+_February 22, 2026_

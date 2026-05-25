@@ -37,7 +37,7 @@ kubectl apply -f deployment/kubernetes/
 
 **A:**
 
-```
+```text
 Minimum Requirements:
   CPU: 2 cores
   RAM: 4GB
@@ -101,7 +101,7 @@ docker-compose logs -f app
 
 **A:**
 
-```
+```text
 Docker Logs:
   • Application: docker-compose logs app
   • Database: docker-compose logs postgres
@@ -180,7 +180,7 @@ curl -X POST http://localhost:5000/api/auth/forgot-password \
 
 # Via Database (Admin only)
 psql -U postgres -d alawael -c "
-  UPDATE users 
+  UPDATE users
   SET password = crypt('NewPassword123!', gen_salt('bf'))
   WHERE email = 'user@example.com';
 "
@@ -232,7 +232,7 @@ npm run migrate:custom -- --file=data-migration.js
 
 **A:**
 
-```
+```text
 Essential Security Steps:
 
 1. Change default credentials
@@ -639,7 +639,7 @@ curl -X POST http://localhost:5000/api/auth/refresh \
 
 **A:**
 
-```
+```text
 Default Rate Limits:
   • Per IP: 1000 requests / minute
   • Per user: 2000 requests / minute
@@ -707,6 +707,7 @@ Check remaining:
 See: DEPLOYMENT_PLANNING_AND_EXECUTION.md
 
 Quick summary:
+
 ```bash
 1. Review deployment checklist
 2. Run smoke tests in staging
@@ -775,16 +776,19 @@ open http://localhost:3000/status
 **A:**
 
 1. **Documentation**
+
    - Check this FAQ first
    - Read OPERATION_RUNBOOKS.md
    - See SUPPORT_AND_INCIDENT_RESPONSE.md
 
 2. **Check Logs**
+
    - Application logs
    - Error logs
    - System logs
 
 3. **Community/Issues**
+
    - GitHub Issues: github.com/almashooq1/alawael-erp/issues
    - Discussion: github.com/almashooq1/alawael-erp/discussions
 
@@ -797,4 +801,3 @@ open http://localhost:3000/status
 
 **Status:** Production Ready  
 **Last Updated:** February 24, 2026
-

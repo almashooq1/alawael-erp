@@ -4,7 +4,7 @@
 
 ### الخطوة 1️⃣: إعادة تحميل VS Code
 
-```
+```text
 اضغط: Ctrl + Shift + P
 اكتب: Reload Window
 اضغط: Enter
@@ -16,7 +16,7 @@
 
 ### الخطوة 2️⃣: إغلاق جميع الملفات المفتوحة
 
-```
+```text
 اضغط: Ctrl + K
 ثم اضغط: W
 ```
@@ -27,7 +27,7 @@
 
 ### الخطوة 3️⃣: إعادة تشغيل TypeScript Server
 
-```
+```text
 اضغط: Ctrl + Shift + P
 اكتب: TypeScript: Restart TS Server
 اضغط: Enter
@@ -63,7 +63,7 @@ Write-Host "✅ اكتمل التنظيف - أعد تشغيل VS Code" -Foregrou
 
 ### الخطوة 5️⃣: فحص الإضافات الثقيلة
 
-```
+```text
 اضغط: Ctrl + Shift + P
 اكتب: Developer: Show Running Extensions
 اضغط: Enter
@@ -102,7 +102,7 @@ Write-Host "✅ اكتمل التنظيف - أعد تشغيل VS Code" -Foregrou
 
 بدلاً من فتح المجلد الرئيسي:
 
-```
+```text
 File > Close Workspace
 File > Open Folder > اختر مجلد فرعي (مثل: supply-chain-management/backend)
 ```

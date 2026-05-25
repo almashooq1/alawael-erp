@@ -1,6 +1,7 @@
 # API التوثيق الكامل لنظام تتبع الحافلات GPS
 
 ## 📋 جدول المحتويات
+
 1. [مقدمة](#مقدمة)
 2. [المصادقة](#المصادقة)
 3. [نقاط النهاية](#نقاط-النهاية)
@@ -14,13 +15,14 @@
 
 ### معلومات الخادم الأساسية
 
-```
+```text
 Base URL: https://api.fleet-gps.com/api/v1
 API Version: 1.0.0
 Content-Type: application/json
 ```
 
 ### التكنولوجيا المستخدمة
+
 - **Backend**: Node.js 16+ مع Express.js
 - **Database**: MongoDB 5.0+
 - **Cache**: Redis 7+
@@ -47,6 +49,7 @@ Content-Type: application/json
 ```
 
 **Response (201)**:
+
 ```json
 {
   "status": "success",
@@ -72,6 +75,7 @@ Content-Type: application/json
 ```
 
 **Response (200)**:
+
 ```json
 {
   "status": "success",
@@ -97,6 +101,7 @@ Content-Type: application/json
 ```
 
 **Response (200)**:
+
 ```json
 {
   "status": "success",
@@ -112,11 +117,13 @@ Content-Type: application/json
 **POST** `/auth/logout`
 
 **Headers**:
-```
+
+```text
 Authorization: Bearer eyJhbGciOiJIUzUxMiIs...
 ```
 
 **Response (200)**:
+
 ```json
 {
   "status": "success",
@@ -148,6 +155,7 @@ Authorization: Bearer eyJhbGciOiJIUzUxMiIs...
 ```
 
 **Response (200)**:
+
 ```json
 {
   "status": "success",
@@ -165,6 +173,7 @@ Authorization: Bearer eyJhbGciOiJIUzUxMiIs...
 **GET** `/gps/vehicle/{vehicleId}/location`
 
 **Response (200)**:
+
 ```json
 {
   "status": "success",
@@ -185,11 +194,13 @@ Authorization: Bearer eyJhbGciOiJIUzUxMiIs...
 **GET** `/gps/vehicle/{vehicleId}/route`
 
 **Query Parameters**:
+
 - `startDate`: تاريخ البداية (ISO 8601)
 - `endDate`: تاريخ النهاية (ISO 8601)
 - `limit`: عدد النقاط (افتراضي: 100)
 
 **Response (200)**:
+
 ```json
 {
   "status": "success",
@@ -216,6 +227,7 @@ Authorization: Bearer eyJhbGciOiJIUzUxMiIs...
 **GET** `/dashboard/fleet-summary`
 
 **Response (200)**:
+
 ```json
 {
   "status": "success",
@@ -237,11 +249,13 @@ Authorization: Bearer eyJhbGciOiJIUzUxMiIs...
 **GET** `/dashboard/performance-stats`
 
 **Query Parameters**:
+
 - `vehicleId` (اختياري)
 - `driverId` (اختياري)
 - `period`: day, week, month, year
 
 **Response (200)**:
+
 ```json
 {
   "status": "success",
@@ -278,12 +292,14 @@ Authorization: Bearer eyJhbGciOiJIUzUxMiIs...
 **GET** `/dashboard/vehicles`
 
 **Query Parameters**:
+
 - `status`: active, inactive, maintenance
 - `skip`: 0
 - `limit`: 20
 - `sortBy`: speed, fuel, distance
 
 **Response (200)**:
+
 ```json
 {
   "status": "success",
@@ -334,6 +350,7 @@ Authorization: Bearer eyJhbGciOiJIUzUxMiIs...
 ```
 
 **Response (200)**:
+
 ```json
 {
   "status": "success",
@@ -341,16 +358,8 @@ Authorization: Bearer eyJhbGciOiJIUzUxMiIs...
     "riskLevel": "high",
     "probability": 0.78,
     "confidence": 0.92,
-    "factors": [
-      "السرعة العالية جداً",
-      "ظروف الطقس السيئة",
-      "القيادة في الليل"
-    ],
-    "recommendations": [
-      "قلل سرعتك على الفور",
-      "زيادة المسافة الآمنة من المركبات الأخرى",
-      "كن حذراً من الفرامل المفاجئة"
-    ]
+    "factors": ["السرعة العالية جداً", "ظروف الطقس السيئة", "القيادة في الليل"],
+    "recommendations": ["قلل سرعتك على الفور", "زيادة المسافة الآمنة من المركبات الأخرى", "كن حذراً من الفرامل المفاجئة"]
   }
 }
 ```
@@ -372,6 +381,7 @@ Authorization: Bearer eyJhbGciOiJIUzUxMiIs...
 ```
 
 **Response (200)**:
+
 ```json
 {
   "status": "success",
@@ -415,6 +425,7 @@ Authorization: Bearer eyJhbGciOiJIUzUxMiIs...
 ```
 
 **Response (200)**:
+
 ```json
 {
   "status": "success",
@@ -442,11 +453,13 @@ Authorization: Bearer eyJhbGciOiJIUzUxMiIs...
 **GET** `/notifications`
 
 **Query Parameters**:
+
 - `read`: true, false
 - `skip`: 0
 - `limit`: 20
 
 **Response (200)**:
+
 ```json
 {
   "status": "success",
@@ -473,6 +486,7 @@ Authorization: Bearer eyJhbGciOiJIUzUxMiIs...
 **PATCH** `/notifications/{notificationId}/read`
 
 **Response (200)**:
+
 ```json
 {
   "status": "success",
@@ -499,6 +513,7 @@ Authorization: Bearer eyJhbGciOiJIUzUxMiIs...
 ```
 
 **Response (201)**:
+
 ```json
 {
   "status": "success",
@@ -522,6 +537,7 @@ Authorization: Bearer eyJhbGciOiJIUzUxMiIs...
 **GET** `/reports/trips`
 
 **Query Parameters**:
+
 - `vehicleId`: معرف المركبة
 - `driverId`: معرف السائق
 - `startDate`: تاريخ البداية
@@ -529,6 +545,7 @@ Authorization: Bearer eyJhbGciOiJIUzUxMiIs...
 - `format`: json, pdf, csv
 
 **Response (200)**:
+
 ```json
 {
   "status": "success",
@@ -551,7 +568,7 @@ Authorization: Bearer eyJhbGciOiJIUzUxMiIs...
       "totalTrips": 15,
       "totalDistance": 650,
       "totalFuel": 130,
-      "totalCost": 487.50,
+      "totalCost": 487.5,
       "averageSafetyScore": 94
     }
   }
@@ -563,10 +580,12 @@ Authorization: Bearer eyJhbGciOiJIUzUxMiIs...
 **GET** `/reports/performance`
 
 **Query Parameters**:
+
 - `period`: day, week, month, year
 - `type`: vehicle, driver, fleet
 
 **Response (200)**:
+
 ```json
 {
   "status": "success",
@@ -599,7 +618,7 @@ async function login(email, password) {
   const response = await fetch(`${apiBaseUrl}/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password })
+    body: JSON.stringify({ email, password }),
   });
 
   const data = await response.json();
@@ -613,15 +632,15 @@ async function updateLocation(vehicleId, lat, lng, speed) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${authToken}`
+      Authorization: `Bearer ${authToken}`,
     },
     body: JSON.stringify({
       vehicleId,
       latitude: lat,
       longitude: lng,
       speed,
-      timestamp: new Date().toISOString()
-    })
+      timestamp: new Date().toISOString(),
+    }),
   });
 
   return response.json();
@@ -664,16 +683,16 @@ curl -X POST https://api.fleet-gps.com/api/v1/gps/location/update \
 
 ### أكواد الثالثة الشاملة
 
-| الكود | المعنى | الحل |
-|------|--------|------|
-| 200 | نجاح | لا شيء |
-| 201 | تم الإنشاء | لا شيء |
-| 400 | طلب غير صحيح | تحقق من بيانات الطلب |
-| 401 | غير مصرح | تحقق من التوكن |
-| 403 | محظور | لا لديك صلاحية |
-| 404 | غير موجود | تحقق من المسار |
-| 429 | الكثير من الطلبات | انتظر قليلاً |
-| 500 | خطأ الخادم | حاول لاحقاً |
+| الكود | المعنى            | الحل                 |
+| ----- | ----------------- | -------------------- |
+| 200   | نجاح              | لا شيء               |
+| 201   | تم الإنشاء        | لا شيء               |
+| 400   | طلب غير صحيح      | تحقق من بيانات الطلب |
+| 401   | غير مصرح          | تحقق من التوكن       |
+| 403   | محظور             | لا لديك صلاحية       |
+| 404   | غير موجود         | تحقق من المسار       |
+| 429   | الكثير من الطلبات | انتظر قليلاً         |
+| 500   | خطأ الخادم        | حاول لاحقاً          |
 
 ### مثال الخطأ
 
@@ -699,7 +718,7 @@ curl -X POST https://api.fleet-gps.com/api/v1/gps/location/update \
 
 ## حدود المعدل
 
-```
+```text
 عام:          100 طلب في 15 دقيقة
 API الحساسة: 10 طلبات في 5 دقائق
 WebSocket:    1000 رسالة في 60 ثانية
@@ -707,7 +726,7 @@ WebSocket:    1000 رسالة في 60 ثانية
 
 ### Headers الحد
 
-```
+```text
 X-RateLimit-Limit: 100
 X-RateLimit-Remaining: 87
 X-RateLimit-Reset: 1642252800

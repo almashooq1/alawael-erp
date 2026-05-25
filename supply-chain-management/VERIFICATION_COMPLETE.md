@@ -43,7 +43,7 @@ critical files are present and properly organized.**
 
 ## 📁 Detailed File Count
 
-```
+```text
 Backend Structure:
 ├── Configuration Files..................5 ✅
 ├── Middleware Files....................3 ✅
@@ -122,11 +122,13 @@ TOTAL: 63 FILES ✅
 The following verification reports have been created for your reference:
 
 1. **[FILE_VERIFICATION_REPORT.md](FILE_VERIFICATION_REPORT.md)**
+
    - Comprehensive line-by-line file verification
    - Directory structure confirmation
    - Component functionality reference
 
 2. **[VERIFICATION_SUMMARY.md](VERIFICATION_SUMMARY.md)**
+
    - Quick overview of verification results
    - System readiness assessment
    - Next steps guide
@@ -142,7 +144,7 @@ The following verification reports have been created for your reference:
 
 ### Development Ready ✅
 
-```
+```text
 ✅ All source files present
 ✅ All dependencies configured
 ✅ Test framework ready
@@ -151,7 +153,7 @@ The following verification reports have been created for your reference:
 
 ### Production Ready ✅
 
-```
+```text
 ✅ Error handling complete
 ✅ Input validation complete
 ✅ Security measures implemented
@@ -160,7 +162,7 @@ The following verification reports have been created for your reference:
 
 ### Deployment Ready ✅
 
-```
+```text
 ✅ All configuration templates
 ✅ Complete deployment guide
 ✅ Multiple deployment options
@@ -228,7 +230,7 @@ npm test:coverage     # Check coverage
 
 ## ✨ System Health
 
-```
+```text
 ┌──────────────────────────────────────┐
 │   SUPPLY CHAIN MANAGEMENT SYSTEM    │
 │                                      │

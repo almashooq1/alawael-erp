@@ -24,7 +24,7 @@
 
 ## 1. Architecture Overview
 
-```
+```text
 backend/
 ├── models/
 │   └── finance.model.js          (4 lines — alias to Finance.memory)
@@ -67,16 +67,16 @@ backend/
 
 All routes are mounted in `routes/_registry.js`:
 
-| Mount Path | Route File | Lines |
-|---|---|---|
-| `/api/finance` + `/api/v1/finance` | `finance.routes.unified.js` | 2,261 |
-| `/api/finance/advanced` + `/api/v1/finance/advanced` | `finance.routes.advanced.js` | 2,966 |
-| `/api/finance/extended` + `/api/v1/finance/extended` | `finance.routes.extended.js` | 1,320 |
-| `/api/finance/pro` + `/api/v1/finance/pro` | `finance.routes.pro.js` | 1,215 |
+| Mount Path                                               | Route File                     | Lines |
+| -------------------------------------------------------- | ------------------------------ | ----- |
+| `/api/finance` + `/api/v1/finance`                       | `finance.routes.unified.js`    | 2,261 |
+| `/api/finance/advanced` + `/api/v1/finance/advanced`     | `finance.routes.advanced.js`   | 2,966 |
+| `/api/finance/extended` + `/api/v1/finance/extended`     | `finance.routes.extended.js`   | 1,320 |
+| `/api/finance/pro` + `/api/v1/finance/pro`               | `finance.routes.pro.js`        | 1,215 |
 | `/api/finance/enterprise` + `/api/v1/finance/enterprise` | `finance.routes.enterprise.js` | 1,150 |
-| `/api/finance/ultimate` + `/api/v1/finance/ultimate` | `finance.routes.ultimate.js` | 1,123 |
-| `/api/finance/elite` + `/api/v1/finance/elite` | `finance.routes.elite.js` | 1,335 |
-| **NOT MOUNTED** | `finance.routes.js` | 137 |
+| `/api/finance/ultimate` + `/api/v1/finance/ultimate`     | `finance.routes.ultimate.js`   | 1,123 |
+| `/api/finance/elite` + `/api/v1/finance/elite`           | `finance.routes.elite.js`      | 1,335 |
+| **NOT MOUNTED**                                          | `finance.routes.js`            | 137   |
 
 > **Note:** `finance.routes.js` (the stub file) is **not** mounted anywhere in the registry.
 
@@ -130,7 +130,7 @@ module.exports = require('./Finance.memory');
 ### 3.4 `backend/routes/finance.routes.js` — 137 lines ⚠️ NOT MOUNTED
 
 - **Purpose:** Basic Arabic-language finance route stubs
-- **Key Routes:** GET/POST for accounts, journal-entries, invoices, receipts, payments, budget, reports/*, tax/*
+- **Key Routes:** GET/POST for accounts, journal-entries, invoices, receipts, payments, budget, reports/_, tax/_
 - **Quality Issues:**
   - **ALL routes return static empty arrays or fixed messages** — zero DB interaction
   - **Not mounted** in the route registry — completely unused
@@ -297,14 +297,15 @@ module.exports = require('./Finance.memory');
 
 ### 3.19–3.22 Test Files
 
-| File | Lines | Status |
-|---|---|---|
-| `__tests__/finance.routes.comprehensive.test.js` | ~100 | Mocks `Finance.memory`, tests basic POST/GET on stub `finance.routes.js` (which isn't even mounted!) |
-| `__tests__/finance-routes.phase2.test.js` | 841 | Best test file — mocks `FinanceService`, tests transactions/budgets on `finance.routes.unified.js` |
-| `__tests__/finance-advanced.test.js` | 587 | Tests aspirational endpoints (IFRS 16, ASC 606, consolidation, etc.) — accepts wide range of status codes |
-| `tests/finance.test.js` | 12 | **Placeholder** — single `expect(true).toBe(true)` |
+| File                                             | Lines | Status                                                                                                    |
+| ------------------------------------------------ | ----- | --------------------------------------------------------------------------------------------------------- |
+| `__tests__/finance.routes.comprehensive.test.js` | ~100  | Mocks `Finance.memory`, tests basic POST/GET on stub `finance.routes.js` (which isn't even mounted!)      |
+| `__tests__/finance-routes.phase2.test.js`        | 841   | Best test file — mocks `FinanceService`, tests transactions/budgets on `finance.routes.unified.js`        |
+| `__tests__/finance-advanced.test.js`             | 587   | Tests aspirational endpoints (IFRS 16, ASC 606, consolidation, etc.) — accepts wide range of status codes |
+| `tests/finance.test.js`                          | 12    | **Placeholder** — single `expect(true).toBe(true)`                                                        |
 
 **Test Quality Assessment:**
+
 - `finance.routes.comprehensive.test.js` tests the wrong route file (the unmounted stub)
 - `finance-advanced.test.js` uses overly permissive assertions (`expect([200,201,400,401,403,404,500,503]).toContain(status)`) — tests always pass
 - `finance.test.js` is an empty placeholder
@@ -315,6 +316,7 @@ module.exports = require('./Finance.memory');
 ## 4. What the Module Has
 
 ### Functional Features (Connected to DB via routes)
+
 - ✅ Transaction CRUD with filtering, pagination, bulk create
 - ✅ Budget CRUD (create/read/delete — update is broken)
 - ✅ Balance calculation (by aggregation pipeline)
@@ -357,6 +359,7 @@ module.exports = require('./Finance.memory');
 - ✅ Dunning & Collection management
 
 ### Aspirational Features (Routes exist, models likely null)
+
 - ⚠️ Financial Consolidation (IFRS)
 - ⚠️ Revenue Recognition (IFRS 15)
 - ⚠️ Lease Accounting (IFRS 16)
@@ -379,6 +382,7 @@ module.exports = require('./Finance.memory');
 ## 5. What's Missing for a Professional System
 
 ### Critical Missing Features
+
 1. **Real PDF generation** — current "PDF export" sends JSON in a buffer
 2. **Multi-currency accounting** — exchange rates exist but no multi-currency journal entries
 3. **Proper bank reconciliation** — auto-match returns hardcoded data
@@ -390,6 +394,7 @@ module.exports = require('./Finance.memory');
 9. **Proper double-entry ledger** — routes validate debit=credit but don't update Account balances automatically
 
 ### Important Missing Features
+
 10. **Input validation** — validators exist for ~10% of endpoints, the rest accept any input
 11. **Authorization/RBAC** — `authenticateToken` is applied, but no role-based access on most endpoints
 12. **Idempotency** — no idempotency keys for financial operations (double-submit risk)
@@ -400,6 +405,7 @@ module.exports = require('./Finance.memory');
 17. **Currency rounding rules** — no proper decimal handling (floating point math throughout)
 
 ### Nice-to-Have Missing Features
+
 18. **API versioning** — routes are dual-mounted on v1 but there's no v1/v2 differentiation
 19. **Rate limiting per endpoint** — only global rate limiting
 20. **OpenAPI/Swagger documentation** — no endpoint documentation
@@ -411,14 +417,14 @@ module.exports = require('./Finance.memory');
 
 ## 6. Confirmed Bugs
 
-| # | Location | Severity | Description |
-|---|---|---|---|
-| 1 | `finance.service.js` → `checkBudgetStatus` | **HIGH** | Uses `countDocuments` instead of `aggregate` sum — reports document count as "spent amount" |
-| 2 | `finance.routes.unified.js` → `PUT /budgets/:id` | **HIGH** | Calls `FinanceService.updateTransaction()` — there is no `updateBudget()` method, so budget updates use transaction logic |
-| 3 | `finance.routes.unified.js` → PDF export | **MEDIUM** | Sends `JSON.stringify()` in a buffer as "PDF" — not a real PDF document |
-| 4 | `finance.routes.unified.js` → Cash flow trend | **LOW** | Uses `Math.random()` for monthly trend data — non-deterministic |
-| 5 | `finance.routes.advanced.js` → Cash forecast | **LOW** | Uses `Math.random()` for forecast amounts — non-deterministic |
-| 6 | `finance.routes.advanced.js` → Financial ratios | **MEDIUM** | Hardcoded `currentAssets`, `inventory`, `receivables`, etc. even when Account model is available (only `totalAssets/Liabilities/Equity` are computed from DB) |
+| #   | Location                                         | Severity   | Description                                                                                                                                                   |
+| --- | ------------------------------------------------ | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | `finance.service.js` → `checkBudgetStatus`       | **HIGH**   | Uses `countDocuments` instead of `aggregate` sum — reports document count as "spent amount"                                                                   |
+| 2   | `finance.routes.unified.js` → `PUT /budgets/:id` | **HIGH**   | Calls `FinanceService.updateTransaction()` — there is no `updateBudget()` method, so budget updates use transaction logic                                     |
+| 3   | `finance.routes.unified.js` → PDF export         | **MEDIUM** | Sends `JSON.stringify()` in a buffer as "PDF" — not a real PDF document                                                                                       |
+| 4   | `finance.routes.unified.js` → Cash flow trend    | **LOW**    | Uses `Math.random()` for monthly trend data — non-deterministic                                                                                               |
+| 5   | `finance.routes.advanced.js` → Cash forecast     | **LOW**    | Uses `Math.random()` for forecast amounts — non-deterministic                                                                                                 |
+| 6   | `finance.routes.advanced.js` → Financial ratios  | **MEDIUM** | Hardcoded `currentAssets`, `inventory`, `receivables`, etc. even when Account model is available (only `totalAssets/Liabilities/Equity` are computed from DB) |
 
 ---
 
@@ -426,22 +432,23 @@ module.exports = require('./Finance.memory');
 
 ### 100% Dead Code (Can Be Safely Removed)
 
-| File | Lines | Reason |
-|---|---|---|
-| `routes/finance.routes.js` | 137 | Not mounted in registry; all routes return static stubs |
-| `services/financeCore.service.js` | 80 | Not called by any route; hardcoded demo data |
-| `models/finance.model.js` | 4 | Alias to Finance.memory — no route uses this import |
-| `finance/EnterpriseFinancialSystem.js` | 1,264 | In-memory only, not connected to routes/DB |
-| `finance/AdvancedFinancialAnalytics.js` | 701 | In-memory only, depends on above |
-| `finance/CashFlowManagement.js` | 762 | In-memory only, not connected |
-| `finance/FinancialReporting.js` | 768 | In-memory only, not connected |
-| `finance/FinancialValidation.js` | 755 | In-memory only, not connected |
-| `finance/RiskAnalysisManagement.js` | 603 | In-memory only, not connected |
-| `tests/finance.test.js` | 12 | Placeholder — `expect(true).toBe(true)` |
-| `__tests__/finance.routes.comprehensive.test.js` | 100 | Tests the unmounted `finance.routes.js` stub |
-| **TOTAL DEAD CODE** | **~5,186** | **36% of all finance code is dead** |
+| File                                             | Lines      | Reason                                                  |
+| ------------------------------------------------ | ---------- | ------------------------------------------------------- |
+| `routes/finance.routes.js`                       | 137        | Not mounted in registry; all routes return static stubs |
+| `services/financeCore.service.js`                | 80         | Not called by any route; hardcoded demo data            |
+| `models/finance.model.js`                        | 4          | Alias to Finance.memory — no route uses this import     |
+| `finance/EnterpriseFinancialSystem.js`           | 1,264      | In-memory only, not connected to routes/DB              |
+| `finance/AdvancedFinancialAnalytics.js`          | 701        | In-memory only, depends on above                        |
+| `finance/CashFlowManagement.js`                  | 762        | In-memory only, not connected                           |
+| `finance/FinancialReporting.js`                  | 768        | In-memory only, not connected                           |
+| `finance/FinancialValidation.js`                 | 755        | In-memory only, not connected                           |
+| `finance/RiskAnalysisManagement.js`              | 603        | In-memory only, not connected                           |
+| `tests/finance.test.js`                          | 12         | Placeholder — `expect(true).toBe(true)`                 |
+| `__tests__/finance.routes.comprehensive.test.js` | 100        | Tests the unmounted `finance.routes.js` stub            |
+| **TOTAL DEAD CODE**                              | **~5,186** | **36% of all finance code is dead**                     |
 
 ### Partially Dead Code
+
 - **~40% of route handlers** return hardcoded sample data when models are `null` — this is fallback/demo code that shouldn't ship to production
 - **Analytics endpoints** in `finance.routes.advanced.js` (KPIs, anomaly detection, executive summary) are 100% hardcoded responses
 
@@ -450,29 +457,40 @@ module.exports = require('./Finance.memory');
 ## 8. Quality Issues (Systemic)
 
 ### Pattern: `safeRequire` + Hardcoded Fallback
+
 Every route file uses this pattern:
+
 ```js
 const Model = safeRequire('../models/SomeThing', 'SomeThing');
 // In handler:
-if (Model) { /* real DB query */ } else { /* return hardcoded Arabic sample data */ }
+if (Model) {
+  /* real DB query */
+} else {
+  /* return hardcoded Arabic sample data */
+}
 ```
 
 **Problems:**
+
 1. System silently operates with fake data when models are missing
 2. No way to distinguish real data from demo data in API responses
 3. Hardcoded sample data is scattered across ~5,000+ lines
 4. Clients cannot tell if they're receiving real vs demo data
 
 ### Pattern: No Input Validation on Advanced Routes
+
 Only `finance.routes.unified.js` has validators available (15 chains in `finance.validators.js`), but even those aren't consistently applied. The other 6 route files have **zero** validation.
 
 ### Pattern: Inconsistent Error Responses
+
 - Some endpoints return `{ success: false, message: '...' }` with proper HTTP status codes
 - Others return `{ success: true }` with hardcoded fallback data even when no real data exists
 - Enterprise/Ultimate/Elite routes throw `AppError('Model not available', 500/501/503)` — inconsistent codes
 
 ### Pattern: No Authorization Beyond Authentication
+
 All routes apply `authenticateToken` but no RBAC middleware. Any authenticated user can:
+
 - Close fiscal periods
 - Approve expenses
 - Run depreciation
@@ -524,29 +542,29 @@ All routes apply `authenticateToken` but no RBAC middleware. Any authenticated u
 
 Features implemented in **multiple** places:
 
-| Feature | unified | advanced | extended | pro | enterprise | ultimate | elite | finance/ classes |
-|---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| Balance Sheet | ✅ | | | ✅ | | | | ✅ |
-| Income Statement / P&L | ✅ | ✅ | | ✅ | | | | ✅ |
-| Cash Flow Statement | ✅ | | | | | | | ✅ |
-| Equity Changes | | ✅ | | | | | | ✅ |
-| Journal Entries | ✅ | ✅ | | | | | | ✅ |
-| Invoicing | ✅ | ✅ | | | | | | ✅ |
-| Expenses | ✅ | ✅ | | | | | | ✅ |
-| Fixed Assets/Depreciation | ✅ | ✅ | | | | | | |
-| Cost Centers | ✅ | ✅ | | | | | | |
-| Budget Management | ✅ | ✅ | | | | | | ✅ |
-| Financial Ratios | | ✅ | | | | | | ✅ |
-| Cash Flow Forecasting | | ✅ | | | ✅ | | | ✅ |
-| Risk Analysis | | | | | | | ✅ | ✅ |
-| Treasury Management | | | | | ✅ | | ✅ | |
-| Tax/ZATCA | ✅ | ✅ | ✅ | | ✅ | | ✅ | ✅ |
-| Audit Trail/Logging | | ✅ | | | | | ✅ | ✅ |
-| Consolidation | | | | | | ✅ | | ✅ |
-| Approval Workflows | | | | | ✅ | | ✅ | |
-| Bank Reconciliation | | ✅ | | | ✅ | | | |
-| Account Reconciliation | | | | | ✅ | | | |
-| Anomaly Detection | | ✅ | | | | | | ✅ |
+| Feature                   | unified | advanced | extended | pro | enterprise | ultimate | elite | finance/ classes |
+| ------------------------- | :-----: | :------: | :------: | :-: | :--------: | :------: | :---: | :--------------: |
+| Balance Sheet             |   ✅    |          |          | ✅  |            |          |       |        ✅        |
+| Income Statement / P&L    |   ✅    |    ✅    |          | ✅  |            |          |       |        ✅        |
+| Cash Flow Statement       |   ✅    |          |          |     |            |          |       |        ✅        |
+| Equity Changes            |         |    ✅    |          |     |            |          |       |        ✅        |
+| Journal Entries           |   ✅    |    ✅    |          |     |            |          |       |        ✅        |
+| Invoicing                 |   ✅    |    ✅    |          |     |            |          |       |        ✅        |
+| Expenses                  |   ✅    |    ✅    |          |     |            |          |       |        ✅        |
+| Fixed Assets/Depreciation |   ✅    |    ✅    |          |     |            |          |       |                  |
+| Cost Centers              |   ✅    |    ✅    |          |     |            |          |       |                  |
+| Budget Management         |   ✅    |    ✅    |          |     |            |          |       |        ✅        |
+| Financial Ratios          |         |    ✅    |          |     |            |          |       |        ✅        |
+| Cash Flow Forecasting     |         |    ✅    |          |     |     ✅     |          |       |        ✅        |
+| Risk Analysis             |         |          |          |     |            |          |  ✅   |        ✅        |
+| Treasury Management       |         |          |          |     |     ✅     |          |  ✅   |                  |
+| Tax/ZATCA                 |   ✅    |    ✅    |    ✅    |     |     ✅     |          |  ✅   |        ✅        |
+| Audit Trail/Logging       |         |    ✅    |          |     |            |          |  ✅   |        ✅        |
+| Consolidation             |         |          |          |     |            |    ✅    |       |        ✅        |
+| Approval Workflows        |         |          |          |     |     ✅     |          |  ✅   |                  |
+| Bank Reconciliation       |         |    ✅    |          |     |     ✅     |          |       |                  |
+| Account Reconciliation    |         |          |          |     |     ✅     |          |       |                  |
+| Anomaly Detection         |         |    ✅    |          |     |            |          |       |        ✅        |
 
 **Key Insight:** P&L, Balance Sheet, Journal Entries, and Tax features are each implemented **3-4 times** across different files. The `backend/finance/` standalone classes duplicate nearly everything in the routes.
 
@@ -554,18 +572,18 @@ Features implemented in **multiple** places:
 
 ## Summary
 
-| Metric | Value |
-|---|---|
-| Total finance files | 21 |
-| Total lines of code | ~14,300 |
-| Dead code lines | ~5,186 (36%) |
-| Route files mounted | 7 |
-| Route files unmounted | 1 |
-| Confirmed bugs | 6 |
-| Models referenced | ~40 |
-| Models with actual schemas | Unknown (many likely missing) |
-| Test coverage quality | Poor — 1 meaningful test file, 1 tests wrong file, 1 too permissive, 1 placeholder |
-| Endpoints without validation | ~90%+ |
-| Endpoints without RBAC | 100% |
+| Metric                       | Value                                                                              |
+| ---------------------------- | ---------------------------------------------------------------------------------- |
+| Total finance files          | 21                                                                                 |
+| Total lines of code          | ~14,300                                                                            |
+| Dead code lines              | ~5,186 (36%)                                                                       |
+| Route files mounted          | 7                                                                                  |
+| Route files unmounted        | 1                                                                                  |
+| Confirmed bugs               | 6                                                                                  |
+| Models referenced            | ~40                                                                                |
+| Models with actual schemas   | Unknown (many likely missing)                                                      |
+| Test coverage quality        | Poor — 1 meaningful test file, 1 tests wrong file, 1 too permissive, 1 placeholder |
+| Endpoints without validation | ~90%+                                                                              |
+| Endpoints without RBAC       | 100%                                                                               |
 
 **Bottom line:** The finance module has an impressively wide feature surface but suffers from massive code duplication, 36% dead code, missing model schemas, no input validation on most endpoints, confirmed bugs in core financial logic, and hardcoded demo data that ships in production responses. The immediate priorities are fixing the budget bugs, removing dead code, and adding validation + RBAC.

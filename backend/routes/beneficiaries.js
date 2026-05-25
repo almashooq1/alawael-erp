@@ -384,10 +384,20 @@ router.get('/export', async (req, res) => {
 /**
  * GET /api/beneficiaries/:id
  * Get single beneficiary detail
+ *
+ * SECURITY: query MUST compose with branchFilter(req) so a single-branch
+ * staff member can't iterate IDs to read PII from other branches. List
+ * endpoints in this file have always composed it; the single-record
+ * endpoints below (GET/PUT/DELETE/PATCH /:id, /bulk-action, /:id/progress)
+ * historically did not — so any authenticated staff could read or mutate
+ * any beneficiary in any branch via a direct ID lookup. Closed by always
+ * routing through `findOne({_id, ...branchFilter})` / `findOneAndUpdate`,
+ * which returns 404 (uniform "not found") rather than 403 so an attacker
+ * can't probe existence either.
  */
 router.get('/:id', validateObjectId('id'), async (req, res) => {
   try {
-    const beneficiary = await Beneficiary.findById(req.params.id)
+    const beneficiary = await Beneficiary.findOne({ _id: req.params.id, ...branchFilter(req) })
       .select('-password -twoFactorSecret -accountVerificationCode')
       .populate('guardians', 'firstName_ar lastName_ar email phone')
       .populate('programs', 'name description status')
@@ -553,10 +563,14 @@ router.put('/:id', validateObjectId('id'), async (req, res) => {
       updateData.name = `${updateData.firstName_ar} ${updateData.lastName_ar}`;
     }
 
-    const beneficiary = await Beneficiary.findByIdAndUpdate(req.params.id, updateData, {
-      new: true,
-      runValidators: true,
-    }).select('-password -twoFactorSecret -accountVerificationCode');
+    const beneficiary = await Beneficiary.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) },
+      updateData,
+      {
+        new: true,
+        runValidators: true,
+      }
+    ).select('-password -twoFactorSecret -accountVerificationCode');
 
     if (!beneficiary) {
       return res.status(404).json({ success: false, message: 'المستفيد غير موجود' });
@@ -589,7 +603,7 @@ router.delete('/:id', validateObjectId('id'), async (req, res) => {
   try {
     const { reason } = req.body;
 
-    const beneficiary = await Beneficiary.findById(req.params.id);
+    const beneficiary = await Beneficiary.findOne({ _id: req.params.id, ...branchFilter(req) });
     if (!beneficiary) {
       return res.status(404).json({ success: false, message: 'المستفيد غير موجود' });
     }
@@ -613,7 +627,7 @@ router.delete('/:id', validateObjectId('id'), async (req, res) => {
  */
 router.patch('/:id/restore', validateObjectId('id'), async (req, res) => {
   try {
-    const beneficiary = await Beneficiary.findById(req.params.id);
+    const beneficiary = await Beneficiary.findOne({ _id: req.params.id, ...branchFilter(req) });
     if (!beneficiary) {
       return res.status(404).json({ success: false, message: 'المستفيد غير موجود' });
     }
@@ -641,8 +655,8 @@ router.patch('/:id/status', validateObjectId('id'), async (req, res) => {
       return res.status(400).json({ success: false, message: 'الحالة مطلوبة' });
     }
 
-    const beneficiary = await Beneficiary.findByIdAndUpdate(
-      req.params.id,
+    const beneficiary = await Beneficiary.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) },
       { status, lastModifiedBy: req.user?._id },
       { new: true }
     );
@@ -673,11 +687,17 @@ router.post('/bulk-action', async (req, res) => {
       return res.status(400).json({ success: false, message: 'بيانات غير صالحة' });
     }
 
+    // Branch-scope filter applied to every bulk path: a single-branch
+    // staff member can submit IDs from other branches but the updateMany
+    // simply ignores them. modifiedCount in the response will reveal
+    // the size of the intersection, which is acceptable — the alternative
+    // (lookup first, filter, then update) is a TOCTOU race.
+    const scope = branchFilter(req);
     let result;
     switch (action) {
       case 'delete':
         result = await Beneficiary.updateMany(
-          { _id: { $in: ids } },
+          { _id: { $in: ids }, ...scope },
           {
             isArchived: true,
             archivedDate: new Date(),
@@ -687,14 +707,20 @@ router.post('/bulk-action', async (req, res) => {
         );
         break;
       case 'activate':
-        result = await Beneficiary.updateMany({ _id: { $in: ids } }, { status: 'active' });
+        result = await Beneficiary.updateMany(
+          { _id: { $in: ids }, ...scope },
+          { status: 'active' }
+        );
         break;
       case 'deactivate':
-        result = await Beneficiary.updateMany({ _id: { $in: ids } }, { status: 'inactive' });
+        result = await Beneficiary.updateMany(
+          { _id: { $in: ids }, ...scope },
+          { status: 'inactive' }
+        );
         break;
       case 'update-status':
         result = await Beneficiary.updateMany(
-          { _id: { $in: ids } },
+          { _id: { $in: ids }, ...scope },
           { status: data?.status || 'active' }
         );
         break;
@@ -746,8 +772,8 @@ router.post('/:id/progress', validateObjectId('id'), async (req, res) => {
         .json({ success: false, message: 'بيانات ناقصة: الشهر والدرجة والحضور والسلوك مطلوبة' });
     }
 
-    // Check beneficiary exists
-    const beneficiary = await Beneficiary.findById(beneficiaryId);
+    // Check beneficiary exists AND belongs to caller's branch scope
+    const beneficiary = await Beneficiary.findOne({ _id: beneficiaryId, ...branchFilter(req) });
     if (!beneficiary) {
       return res.status(404).json({ success: false, message: 'المستفيد غير موجود' });
     }
@@ -791,13 +817,18 @@ router.post('/:id/progress', validateObjectId('id'), async (req, res) => {
       { new: true, upsert: true, runValidators: true }
     );
 
-    // Update beneficiary academic fields
-    await Beneficiary.findByIdAndUpdate(beneficiaryId, {
-      academicScore,
-      attendanceRate,
-      behaviorRating,
-      progress: activityCompletionRate,
-    });
+    // Update beneficiary academic fields. Re-apply branch scope so a
+    // forged beneficiaryId param can't write through to a foreign branch
+    // even if the existence check above were bypassed somehow.
+    await Beneficiary.findOneAndUpdate(
+      { _id: beneficiaryId, ...branchFilter(req) },
+      {
+        academicScore,
+        attendanceRate,
+        behaviorRating,
+        progress: activityCompletionRate,
+      }
+    );
 
     res.status(201).json({
       success: true,
@@ -815,6 +846,20 @@ router.post('/:id/progress', validateObjectId('id'), async (req, res) => {
  */
 router.get('/:id/progress', validateObjectId('id'), async (req, res) => {
   try {
+    // Verify the parent beneficiary is in the caller's branch scope before
+    // returning their progress history. Without this, a foreign-branch
+    // beneficiaryId leaked academic + attendance + behavior records via
+    // the secondary BeneficiaryProgress collection.
+    const beneficiary = await Beneficiary.findOne({
+      _id: req.params.id,
+      ...branchFilter(req),
+    })
+      .select('_id')
+      .lean();
+    if (!beneficiary) {
+      return res.status(404).json({ success: false, message: 'المستفيد غير موجود' });
+    }
+
     const { limit = 12 } = req.query;
     const data = await BeneficiaryProgress.find({ beneficiaryId: req.params.id })
       .sort({ month: -1 })

@@ -51,6 +51,8 @@ const THRESHOLDS = Object.freeze({
   'assistiveDevice.maintenanceOverdue': { warning: 0, critical: 5 }, // strict: an overdue device may be unsafe
   // W374 (Accreditation compliance — bridges W360 CbahiAttestation onto the heatmap)
   'cbahi.attestationsExpiringSoon': { warning: 0, critical: 5 }, // strict: any attestation expiring in next 30 days needs action
+  // W375 (Operational planning — bridges W363 RespiteBooking onto the heatmap)
+  'respite.upcomingBookings': { warning: 10, critical: 25 }, // moderate: forward-looking load signal (next 7 days)
 });
 
 // Terminal-statuses sets (mirror config/{rca,fmea}.registry.js TERMINAL_STATUSES).
@@ -67,6 +69,10 @@ const SAFEGUARDING_CLOSED_STATUSES = Object.freeze(['closed', 'unsubstantiated']
 // Active = met|partially_met|not_met (something was assessed; draft/n_a aren't tracked for expiry).
 const CBAHI_ACTIVE_STATUSES = Object.freeze(['met', 'partially_met', 'not_met']);
 const CBAHI_EXPIRY_WINDOW_DAYS = 30;
+// W375 — RespiteBooking statuses that represent scheduled-future bookings.
+// 'requested' / 'rejected' / 'completed' / 'cancelled' / 'no_show' / 'checked_in' are not "upcoming".
+const RESPITE_SCHEDULED_STATUSES = Object.freeze(['approved', 'confirmed']);
+const RESPITE_UPCOMING_WINDOW_DAYS = 7;
 
 const SEVERITY_RANK = Object.freeze({ ok: 0, warning: 1, critical: 2 });
 
@@ -185,6 +191,17 @@ function createBranchQualityHeatmapService(opts = {}) {
     } catch {
       require('../../models/CbahiAttestation');
       return mongoose.model('CbahiAttestation');
+    }
+  }
+
+  function _RespiteModel() {
+    if (opts.respiteModel) return opts.respiteModel;
+    const mongoose = require('mongoose');
+    try {
+      return mongoose.model('RespiteBooking');
+    } catch {
+      require('../../models/RespiteBooking');
+      return mongoose.model('RespiteBooking');
     }
   }
 
@@ -365,6 +382,23 @@ function createBranchQualityHeatmapService(opts = {}) {
     return Cbahi.aggregate(pipeline);
   }
 
+  async function _respiteMetricsByBranch({ branchIds, now }) {
+    const Respite = _RespiteModel();
+    // Upcoming = scheduled status AND startAt in next 7 days.
+    const windowEnd = new Date(now);
+    windowEnd.setDate(windowEnd.getDate() + RESPITE_UPCOMING_WINDOW_DAYS);
+    const match = {
+      status: { $in: RESPITE_SCHEDULED_STATUSES },
+      startAt: { $gte: now, $lte: windowEnd },
+    };
+    if (branchIds?.length) match.branchId = { $in: branchIds };
+    const pipeline = [
+      { $match: match },
+      { $group: { _id: '$branchId', upcomingCount: { $sum: 1 } } },
+    ];
+    return Respite.aggregate(pipeline);
+  }
+
   async function _assistiveDeviceMetricsByBranch({ branchIds, now }) {
     const Device = _AssistiveDeviceModel();
     // Overdue = nextMaintenanceDue is set AND in the past AND device is not retired.
@@ -392,6 +426,7 @@ function createBranchQualityHeatmapService(opts = {}) {
     let safeguardingRows = [];
     let assistiveDeviceRows = [];
     let cbahiRows = [];
+    let respiteRows = [];
     try {
       capaRows = await _capaMetricsByBranch({ branchIds, now });
     } catch (err) {
@@ -437,6 +472,11 @@ function createBranchQualityHeatmapService(opts = {}) {
     } catch (err) {
       logger.warn?.(`[branchQualityHeatmap] cbahi aggregation failed: ${err.message}`);
     }
+    try {
+      respiteRows = await _respiteMetricsByBranch({ branchIds, now });
+    } catch (err) {
+      logger.warn?.(`[branchQualityHeatmap] respite aggregation failed: ${err.message}`);
+    }
 
     // Merge by branchId
     const byBranch = new Map();
@@ -458,6 +498,7 @@ function createBranchQualityHeatmapService(opts = {}) {
             'safeguarding.openConcerns': null,
             'assistiveDevice.maintenanceOverdue': null,
             'cbahi.attestationsExpiringSoon': null,
+            'respite.upcomingBookings': null,
           },
         });
       }
@@ -508,6 +549,10 @@ function createBranchQualityHeatmapService(opts = {}) {
         'cbahi.attestationsExpiringSoon',
         r.expiringCount
       );
+    }
+    for (const r of respiteRows) {
+      const b = _ensure(r._id);
+      b.cells['respite.upcomingBookings'] = _cell('respite.upcomingBookings', r.upcomingCount);
     }
 
     // Compute branch-level severity + tally

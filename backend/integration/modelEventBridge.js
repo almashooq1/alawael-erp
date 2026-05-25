@@ -38,6 +38,26 @@ const logger = require('../utils/logger');
 
 const HOOK_FLAG = Symbol.for('w394.modelEventBridge.attached');
 
+// W404: pre-require model files whose schemas are NOT auto-loaded by the
+// startup sequence (pharmacy routes mount late; PayrollPeriod is loaded
+// only via hikvisionBootstrap; RiskSnapshot via riskSweeperBootstrap). The
+// require() side effect registers the schema with mongoose so the
+// bridge's `mongoose.model('X')` lookup succeeds.
+function _preloadOptionalModels() {
+  const optional = [
+    '../models/pharmacy.model', // registers Prescription + Dispensing + Medication
+    '../models/RiskSnapshot',
+    '../models/PayrollPeriod',
+  ];
+  for (const p of optional) {
+    try {
+      require(p);
+    } catch (err) {
+      logger.debug?.(`[ModelEventBridge] optional preload skipped: ${p} (${err.message})`);
+    }
+  }
+}
+
 // Helper: capture isNew flag pre-save (Mongoose loses it post-save).
 // Attached once per schema in attachCreateOnlyHook below.
 function _attachIsNewCapture(Schema) {
@@ -302,6 +322,64 @@ const MAPPINGS = [
       effectiveDate: doc.transferDate || new Date(),
     }),
   },
+  // ─── W404 additions: closes final 3 W382 / 1 W392 baseline entries ────
+  {
+    modelName: 'Prescription',
+    domain: 'medical',
+    eventType: 'prescription.issued',
+    trigger: 'create-only',
+    payload: doc => ({
+      prescriptionId: String(doc._id),
+      beneficiaryId: String(doc.beneficiary || doc.beneficiaryId || ''),
+      doctorId: String(doc.prescriber || doc.prescriberId || doc.createdBy || ''),
+      medications: Array.isArray(doc.items)
+        ? doc.items.map(it => ({
+            medicationId: String(it.medication || ''),
+            name: it.medicationName || '',
+            dose: it.dose || '',
+            frequency: it.frequency || '',
+            duration: it.duration || '',
+          }))
+        : [],
+    }),
+  },
+  {
+    modelName: 'RiskSnapshot',
+    domain: 'medical',
+    eventType: 'risk.alert_raised',
+    trigger: 'create-only',
+    // Only emit when this snapshot represents a clinically actionable risk
+    // signal: a tier escalation OR the first-ever snapshot landing in
+    // high/critical. Routine recompute of moderate/low tiers is noise.
+    predicate: doc => {
+      const tier = doc.overallTier;
+      if (doc.tierDelta === 'escalated') return true;
+      if (doc.tierDelta === 'first' && (tier === 'high' || tier === 'critical')) return true;
+      return false;
+    },
+    payload: doc => ({
+      beneficiaryId: String(doc.beneficiaryId || ''),
+      riskLevel: String(doc.overallTier || 'unknown'),
+      riskType: String(doc.reason || 'risk_profile'),
+      details: String(doc.explanation || ''),
+      raisedBy: 'risk_profile_sweeper',
+    }),
+  },
+  {
+    modelName: 'PayrollPeriod',
+    domain: 'finance',
+    eventType: 'payroll.processed',
+    trigger: 'status-flip',
+    flipField: 'status',
+    flipTo: ['closed'],
+    payload: doc => ({
+      payrollId: String(doc._id),
+      period: String(doc.periodCode || ''),
+      totalAmount: 0, // periods aggregate via HRPayroll children; subscriber re-aggregates
+      employeeCount: Number(doc.casesCounted || 0),
+      processedAt: doc.closedAt || new Date(),
+    }),
+  },
 ];
 
 /**
@@ -315,6 +393,9 @@ function wireModelEventBridge(integrationBus) {
     logger.warn('[ModelEventBridge] integrationBus unavailable — skipping');
     return { wiredCount: 0, skippedMappings: ['ALL'] };
   }
+
+  // W404: ensure schemas for late-loaded models are registered before lookup.
+  _preloadOptionalModels();
 
   const mongoose = require('mongoose');
   const skipped = [];
@@ -330,7 +411,8 @@ function wireModelEventBridge(integrationBus) {
   }
 
   for (const mapping of MAPPINGS) {
-    const { modelName, domain, eventType, trigger, flipField, flipTo, payload } = mapping;
+    const { modelName, domain, eventType, trigger, flipField, flipTo, payload, predicate } =
+      mapping;
     const pairKey = `${modelName}|${eventType}`;
     if (attachedSet.has(pairKey)) continue;
 
@@ -371,6 +453,10 @@ function wireModelEventBridge(integrationBus) {
           if (current === previous) return; // no change
           doc.$__previousStatus = previous;
         }
+
+        // W404: optional predicate gates the emit. Returning false skips
+        // (e.g. RiskSnapshot only emits on tier escalation, not every save).
+        if (typeof predicate === 'function' && !predicate(doc)) return;
 
         const eventPayload = payload(doc);
         Promise.resolve()

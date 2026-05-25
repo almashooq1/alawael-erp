@@ -138,13 +138,14 @@ const MAX_TOTAL_EVENTS = 100; // ceiling
 // W403 (2026-05-25) closed system.CACHE_INVALIDATED via cachingService.js
 // _emitCacheInvalidated hook on clear() + invalidateByPattern(p). Single-
 // key delete() intentionally not a trigger (TTL/LRU would spam). Baseline 4 → 3.
-const KNOWN_DEAD_CONTRACTS = new Set([
-  // finance — 1 remaining (no model)
-  'finance.PAYROLL_PROCESSED', // payroll.processed — no PayrollRun model registered
-  // medical — 2 remaining (models don't exist)
-  'medical.PRESCRIPTION_ISSUED', // prescription.issued — no Prescription model
-  'medical.RISK_ALERT_RAISED', // risk.alert_raised — no RiskAlert/ClinicalRiskScore model registered for hook
-]);
+// W404 (2026-05-25) closed the last 3 baseline entries:
+//   - medical.PRESCRIPTION_ISSUED via Prescription post-save (pharmacy.model.js)
+//   - medical.RISK_ALERT_RAISED via RiskSnapshot post-save (predicate-gated
+//     on tierDelta='escalated' or first-snapshot high/critical)
+//   - finance.PAYROLL_PROCESSED via PayrollPeriod status-flip to 'closed'
+// All wired in modelEventBridge.js with _preloadOptionalModels() ensuring
+// schemas are registered before the bridge runs. Baseline 3 → 0 ✅.
+const KNOWN_DEAD_CONTRACTS = new Set([]);
 
 // ─── Scan helpers ────────────────────────────────────────────────────────────
 

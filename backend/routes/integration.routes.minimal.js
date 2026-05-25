@@ -6,6 +6,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
+const safeError = require('../utils/safeError');
 
 // Health check (public)
 router.get('/health', (req, res) => {
@@ -22,7 +23,7 @@ router.get('/connections', authorize('admin'), async (req, res) => {
     const data = await Integration.find({}).lean();
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'integration');
   }
 });
 
@@ -81,7 +82,7 @@ router.post('/webhook', async (req, res) => {
     // TODO: dispatch to integration handler by source
     res.json({ success: true, data: { id: log._id } });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'integration');
   }
 });
 
@@ -97,7 +98,7 @@ router.get('/webhook/logs', authorize('admin'), async (req, res) => {
     ]);
     res.json({ success: true, data, pagination: { page: +page, limit: +limit, total } });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'integration');
   }
 });
 

@@ -6,6 +6,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
+const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 
@@ -69,7 +70,7 @@ router.get('/', async (req, res) => {
     const totalHits = Object.values(results).reduce((sum, arr) => sum + arr.length, 0);
     res.json({ success: true, data: results, meta: { query: q, totalHits } });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'search');
   }
 });
 
@@ -101,7 +102,7 @@ router.get('/suggest', async (req, res) => {
     }
     res.json({ success: true, data: suggestions });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'search');
   }
 });
 

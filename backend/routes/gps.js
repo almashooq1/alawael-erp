@@ -7,6 +7,7 @@ const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 router.use(requireBranchAccess);
@@ -21,7 +22,7 @@ router.get('/live', async (req, res) => {
     const data = await GPSTrack.find(filter).sort({ timestamp: -1 }).lean();
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'gps');
   }
 });
 
@@ -63,7 +64,7 @@ router.get('/history/:vehicleId', async (req, res) => {
     const data = await GPSTrack.find(filter).sort({ timestamp: 1 }).limit(+limit).lean();
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'gps');
   }
 });
 
@@ -76,7 +77,7 @@ router.get('/vehicle/:vehicleId', async (req, res) => {
       return res.status(404).json({ success: false, message: 'No GPS data for this vehicle' });
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'gps');
   }
 });
 
@@ -87,7 +88,7 @@ router.get('/trip-path/:tripId', async (req, res) => {
     const data = await GPSTrack.find({ tripId: req.params.tripId }).sort({ timestamp: 1 }).lean();
     res.json({ success: true, data, count: data.length });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'gps');
   }
 });
 

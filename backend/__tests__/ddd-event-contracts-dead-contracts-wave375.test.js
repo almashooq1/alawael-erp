@@ -89,10 +89,11 @@ const SCAN_SKIP_DIRS = new Set([
 //
 // To regenerate this set: temporarily comment out the KNOWN_DEAD_CONTRACTS
 // filter in it.a and run — failing assertion will list current dead state.
-// Baseline auto-generated 2026-05-25 from script that loads contracts +
-// scans backend/* for string-literal references. Keys are <group>.<KEY>
-// (object key inside the group, NOT the eventType string). Inline comment
-// after each entry shows the eventType for grep convenience.
+// W377 (2026-05-25) reduced baseline from 31 → 15 by deleting 16 dead contracts
+// (4 in-group + 8 whole groups) per ADR-027. Remaining 15 entries are the
+// "wire" recommendations — contracts that ADR-027 says should be wired to real
+// producers in domain services rather than deleted. As each is wired, remove
+// the entry in the SAME commit (W375.b ratchet-down test catches stale).
 const KNOWN_DEAD_CONTRACTS = new Set([
   // core (BENEFICIARY_DDD_EVENTS) — 2 dead, 1 alive (beneficiary.registered)
   'core.STATUS_CHANGED', // beneficiary.status_changed
@@ -107,39 +108,15 @@ const KNOWN_DEAD_CONTRACTS = new Set([
   // care-plans (CARE_PLAN_EVENTS) — 2 dead, 0 alive
   'care-plans.ACTIVATED', // careplan.activated
   'care-plans.COMPLETED', // careplan.completed
-  // sessions (SESSION_EVENTS) — 2 dead, 1 alive (session.completed referenced in seed)
-  'sessions.CANCELLED', // session.cancelled
-  'sessions.NO_SHOW', // session.no_show
-  // goals (GOAL_EVENTS) — 3 dead, 0 alive
+  // sessions (SESSION_EVENTS) — 0 dead, 1 alive (session.completed referenced in seed)
+  // goals (GOAL_EVENTS) — 1 dead, 0 alive (W377 deleted STALLED + MEASURE_APPLIED)
   'goals.ACHIEVED', // goal.achieved
-  'goals.STALLED', // goal.stalled
-  'goals.MEASURE_APPLIED', // goal.measure_applied
-  // workflow (WORKFLOW_EVENTS) — 2 dead, 0 alive
-  'workflow.TASK_ASSIGNED', // workflow.task_assigned
-  'workflow.TASK_OVERDUE', // workflow.task_overdue
   // quality (QUALITY_EVENTS) — 2 dead, 0 alive
   'quality.AUDIT_COMPLETED', // quality.audit_completed
   'quality.CORRECTIVE_ACTION_REQUIRED', // quality.corrective_action_required
-  // family (FAMILY_EVENTS) — 2 dead, 0 alive
-  'family.COMMUNICATION_LOGGED', // family.communication_logged
-  'family.ENGAGEMENT_LOW', // family.engagement_low
-  // dashboards (DASHBOARD_EVENTS) — 2 dead, 0 alive
-  'dashboards.ALERT_TRIGGERED', // dashboard.alert_triggered
-  'dashboards.KPI_THRESHOLD_BREACHED', // dashboard.kpi_threshold_breached
-  // tele-rehab (TELEREHAB_EVENTS) — 1 dead, 0 alive
-  'tele-rehab.SESSION_COMPLETED', // telerehab.session_completed
-  // ar-vr (ARVR_EVENTS) — 2 dead, 0 alive
-  'ar-vr.SESSION_COMPLETED', // arvr.session_completed
-  'ar-vr.SAFETY_ALERT', // arvr.safety_alert
   // behavior (BEHAVIOR_EVENTS) — 2 dead, 0 alive
   'behavior.INCIDENT_RECORDED', // behavior.incident_recorded
   'behavior.PLAN_UPDATED', // behavior.plan_updated
-  // group-therapy (GROUP_THERAPY_EVENTS) — 1 dead, 0 alive
-  'group-therapy.SESSION_COMPLETED', // group.session_completed
-  // research (RESEARCH_EVENTS) — 1 dead, 0 alive
-  'research.STUDY_COMPLETED', // research.study_completed
-  // field-training (FIELD_TRAINING_EVENTS) — 1 dead, 0 alive
-  'field-training.TRAINEE_EVALUATED', // training.trainee_evaluated
   // ai-recommendations (AI_RECOMMENDATION_EVENTS) — 1 dead, 1 alive (ai.risk_elevated)
   'ai-recommendations.GENERATED', // ai.recommendation_generated
 ]);
@@ -224,7 +201,8 @@ describe('W375 dddEventContracts dead-contract drift guard', () => {
       for (const events of Object.values(contracts.DDD_CONTRACTS)) {
         total += Object.keys(events).length;
       }
-      expect(total).toBeGreaterThanOrEqual(30);
+      // W377 (2026-05-25) shrunk total 34 → 18 via ADR-027 deletions.
+      expect(total).toBeGreaterThanOrEqual(10);
       expect(total).toBeLessThanOrEqual(200);
     });
 

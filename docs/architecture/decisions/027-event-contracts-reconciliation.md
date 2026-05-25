@@ -4,7 +4,21 @@ Date: 2026-05-25
 
 ## Status
 
-🟡 **Proposed pending stakeholder decision on per-group reconciliation strategy (wire-producer vs delete-contract per the 16 dead-group buckets in W375 baseline).**
+🟠 **Partially executed (W377, 2026-05-25). Deletions complete; wirings pending stakeholder per-group sign-off.**
+
+**W377 deletion progress** (commit pending): 16 of the 31 dead contracts deleted per the "delete" recommendations in the per-group table below. Registry shrunk from 34 events / 17 groups → **18 events / 9 groups**. W375 baseline shrunk 31 → 15.
+
+**W378+ wiring work pending**: 15 remaining dead contracts need real producer wiring in domain services. Each requires renaming an ad-hoc `service.emit('camelCaseName', ...)` to use the contract eventType (`<domain>.<snake_case>`) + envelope shape. Per-group authorization still needed because rename touches consumers that may rely on the ad-hoc name.
+
+### Dual-registry finding (W375 follow-up, 2026-05-25)
+
+Discovered during W377 prep: `backend/events/contracts/dddEventContracts.js` is NOT the only event-contracts file. The LIVE registry used by `startup/integrationBus.js:19` is `backend/events/contracts/domainEventContracts.js` (671 LOC, 7 domains, 30 events: hr/finance/beneficiary/medical/attendance/notification/system). The two files cover **nearly-disjoint domain sets** — `domainEventContracts` covers cross-cutting infrastructure (HR/finance/medical/attendance); `dddEventContracts` covers DDD bounded contexts (episodes/care-plans/sessions/etc).
+
+This means:
+
+- `dddEventContracts.js` was even MORE orphaned than W375 reported. Not even `startup/integrationBus.js` loads it.
+- A separate (and likely needed) drift guard could lock `domainEventContracts.js` structural integrity — W374/W375 currently cover only `dddEventContracts`. **Tracked as follow-up after W378+ wirings complete.**
+- The two registries should likely be **consolidated** under one file. Out of scope for W377; needs another ADR.
 
 ## Context
 

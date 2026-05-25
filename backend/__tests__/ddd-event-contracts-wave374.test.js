@@ -46,6 +46,11 @@
 
 const contracts = require('../events/contracts/dddEventContracts');
 
+// W377 (2026-05-25): shrunk from 17 to 9 groups after deleting 8 entirely-
+// aspirational groups (workflow, family, dashboards, tele-rehab, ar-vr,
+// group-therapy, research, field-training) per ADR-027. Remaining 9 are the
+// groups where at least one event is wired or worth wiring per the wire/delete
+// table in ADR-027.
 const EXPECTED_DOMAIN_GROUPS = Object.freeze([
   'core',
   'episodes',
@@ -53,16 +58,8 @@ const EXPECTED_DOMAIN_GROUPS = Object.freeze([
   'care-plans',
   'sessions',
   'goals',
-  'workflow',
   'quality',
-  'family',
-  'dashboards',
-  'tele-rehab',
-  'ar-vr',
   'behavior',
-  'group-therapy',
-  'research',
-  'field-training',
   'ai-recommendations',
 ]);
 
@@ -111,7 +108,7 @@ const REQUIRED_CONTRACT_FIELDS = Object.freeze([
   'consumers',
 ]);
 
-const MIN_TOTAL_EVENTS = 30; // floor; actual count at W374 introduction = 34
+const MIN_TOTAL_EVENTS = 10; // floor; post-W377 actual count = 18 (was 34 pre-W377)
 const MAX_TOTAL_EVENTS = 200; // ceiling; sanity bound — re-baseline if exceeded
 
 describe('W374 DDD event-contracts drift guard', () => {
@@ -129,6 +126,7 @@ describe('W374 DDD event-contracts drift guard', () => {
     });
 
     it('every named event group is also exported as a named export', () => {
+      // W377 (2026-05-25): 8 group-export pairs removed per ADR-027 deletions.
       const groupExportMap = {
         core: 'BENEFICIARY_DDD_EVENTS',
         episodes: 'EPISODE_EVENTS',
@@ -136,16 +134,8 @@ describe('W374 DDD event-contracts drift guard', () => {
         'care-plans': 'CARE_PLAN_EVENTS',
         sessions: 'SESSION_EVENTS',
         goals: 'GOAL_EVENTS',
-        workflow: 'WORKFLOW_EVENTS',
         quality: 'QUALITY_EVENTS',
-        family: 'FAMILY_EVENTS',
-        dashboards: 'DASHBOARD_EVENTS',
-        'tele-rehab': 'TELEREHAB_EVENTS',
-        'ar-vr': 'ARVR_EVENTS',
         behavior: 'BEHAVIOR_EVENTS',
-        'group-therapy': 'GROUP_THERAPY_EVENTS',
-        research: 'RESEARCH_EVENTS',
-        'field-training': 'FIELD_TRAINING_EVENTS',
         'ai-recommendations': 'AI_RECOMMENDATION_EVENTS',
       };
       for (const [group, exportName] of Object.entries(groupExportMap)) {

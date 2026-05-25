@@ -171,6 +171,7 @@
     "check:services:wait": "node scripts/check-services.js --wait --timeout=30",
     "check:deps": "node scripts/check-deps.js",
     "check:deps:size": "node scripts/check-deps.js --size",
+    "check:speech-s3-ready": "node scripts/check-speech-s3-ready.js",
     "generate:secrets": "node scripts/generate-secrets.js",
     "generate:secrets:apply": "node scripts/generate-secrets.js --apply",
     "db:reset": "node scripts/db-reset.js",

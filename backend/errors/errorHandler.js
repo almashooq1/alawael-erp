@@ -154,6 +154,34 @@ const errorHandler = (err, req, res, _next) => {
     if (req.id) res.set('X-Request-Id', req.id);
   }
 
+  // W400: publish system.error.occurred for 5xx errors so the cross-module
+  // monitoring/notification subscribers (system.error.* wildcard) actually
+  // receive runtime errors. Fire-and-forget — never block the response.
+  // Envelope per SYSTEM_EVENTS.ERROR_OCCURRED: errorCode, message, stack,
+  // module, severity.
+  if (classified.statusCode >= 500) {
+    try {
+      const { integrationBus } = require('../integration/systemIntegrationBus');
+      if (integrationBus && typeof integrationBus.publish === 'function') {
+        Promise.resolve()
+          .then(() =>
+            integrationBus.publish('system', 'error.occurred', {
+              errorCode: String(classified.code || 'INTERNAL_ERROR'),
+              message: String(classified.message || err.message || ''),
+              stack: String(
+                (err.stack || classified.stack || '').split('\n').slice(0, 5).join('\n')
+              ),
+              module: String(`${req.method} ${req.originalUrl || req.url || ''}`),
+              severity: classified.statusCode >= 503 ? 'critical' : 'error',
+            })
+          )
+          .catch(pubErr => logger.warn('system.error.occurred publish failed:', pubErr.message));
+      }
+    } catch {
+      /* integrationBus optional */
+    }
+  }
+
   res.status(classified.statusCode).json(response);
 };
 

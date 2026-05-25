@@ -124,9 +124,11 @@ const MAX_TOTAL_EVENTS = 100; // ceiling
 // W396 (2026-05-25) closed 6 more entries: EXPENSE_APPROVED, DELIVERY_FAILED,
 // SALARY_CHANGED, DEPARTMENT_TRANSFERRED via modelEventBridge additions;
 // USER_LOGGED_IN, USER_LOGGED_OUT via auth.middleware integrationBus.publish.
-// Baseline 13 → 7. Remaining entries need: non-existent models (Prescription,
-// RiskAlert, PayrollRun), sweepers (absence, budget), or deeper auth/cache
-// middleware hooks.
+// Baseline 13 → 7.
+// W400 (2026-05-25) closed system.ERROR_OCCURRED via central errorHandler.js
+// publish on 5xx responses. Baseline 7 → 6. Remaining entries need:
+// non-existent models (Prescription, RiskAlert, PayrollRun), sweepers
+// (absence, budget), or deeper cache middleware hook.
 const KNOWN_DEAD_CONTRACTS = new Set([
   // finance — 2 remaining (no model + sweeper-driven)
   'finance.BUDGET_THRESHOLD_REACHED', // budget.threshold_reached — needs nightly sweeper
@@ -136,8 +138,7 @@ const KNOWN_DEAD_CONTRACTS = new Set([
   'medical.RISK_ALERT_RAISED', // risk.alert_raised — no RiskAlert/ClinicalRiskScore model registered for hook
   // attendance — 1 remaining (sweeper)
   'attendance.ABSENCE_DETECTED', // absence.detected — needs daily sweeper
-  // system — 2 remaining (W398 wired PERMISSION_DENIED in requirePermission middleware)
-  'system.ERROR_OCCURRED', // error.occurred — needs central error-handler producer. W397 renamed eventType so 'system.error.*' wildcard matches runtime, but static scan finds no 'error.occurred' literal.
+  // system — 1 remaining (W400 wired ERROR_OCCURRED in errorHandler.js)
   'system.CACHE_INVALIDATED', // cache.invalidated — cache layer hook, no central point
 ]);
 

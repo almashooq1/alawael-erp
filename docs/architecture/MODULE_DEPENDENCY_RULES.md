@@ -88,6 +88,8 @@
 
 ### 3.2 أحداث مجال داخلية (Domain Events)
 
+> **Canonical registry**: `backend/events/contracts/dddEventContracts.js` يحوي الـ contracts الفعلية لجميع الأحداث (17 domain groups, 34 events). الأسماء أدناه أمثلة _illustrative_ (الكلمة العربية "مثل") — الأسماء الفعلية في الكود قد تختلف قليلاً (مثل `beneficiary.registered` بدلاً من `beneficiary.created`). الـ drift guard `__tests__/ddd-event-contracts-wave374.test.js` يقفل structural integrity لهذا الملف.
+
 1. عند حدوث حدث مهم داخل وحدة، يجب إطلاق Event داخلي مثل:
 
    - `beneficiary.created`

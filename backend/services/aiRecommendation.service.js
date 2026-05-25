@@ -122,6 +122,29 @@ async function createDraft({
     action: draftAction || 'review',
   });
 
+  // W391: ALSO emit ai.risk_elevated when confidence indicates critical risk.
+  // Pre-W390 the only producer for ai.risk_elevated was inside the no_show
+  // subscriber handler (deleted in W390 as dead code). The downstream
+  // ai.risk_elevated subscriber in dddCrossModuleSubscribers still exists +
+  // creates DecisionAlert records for critical-risk family notification.
+  // Threshold 0.95 chosen as "highly confident this is a serious finding";
+  // tunable per ADR-027 reconciliation if false-positive rate proves high.
+  // Envelope per AI_RECOMMENDATION_EVENTS.RISK_ELEVATED:
+  //   {beneficiaryId, riskScore, previousScore, riskFactors}
+  if (confidence >= 0.95) {
+    bus.emit('ai.risk_elevated', {
+      beneficiaryId: String(beneficiaryId),
+      riskScore: confidence,
+      // Previous-score baseline: assume PENDING_REVIEW threshold (0.7) as the
+      // prior alert level; if the system tracked actual prior score per
+      // beneficiary that would feed in here.
+      previousScore: 0.7,
+      // Risk factors sourced from the signal array passed by upstream adapters
+      // (plateau-adapter W337, regression-adapter W339); defaults to empty.
+      riskFactors: Array.isArray(signals) ? signals : [],
+    });
+  }
+
   return doc;
 }
 

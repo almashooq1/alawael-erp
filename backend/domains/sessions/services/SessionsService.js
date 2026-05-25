@@ -209,11 +209,17 @@ class SessionsService extends BaseService {
       throw err;
     }
 
-    this.emit('session:completed', {
+    // W391: canonical contract event (was ad-hoc 'session:completed' pre-W391).
+    // Envelope per SESSION_EVENTS.COMPLETED: {sessionId, beneficiaryId,
+    // episodeId, therapistId, sessionType, duration}.
+    // Closes the W389/W391 orphan-subscriber gap for sessions.session.completed.
+    this.emit('session.completed', {
       sessionId: session._id,
       beneficiaryId: session.beneficiaryId,
+      episodeId: session.episodeId,
       therapistId: session.therapistId,
-      goalProgressCount: (goalProgress || []).length,
+      sessionType: session.type,
+      duration: duration || session.duration,
     });
 
     return session;

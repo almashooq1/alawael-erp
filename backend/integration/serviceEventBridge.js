@@ -199,13 +199,42 @@ function wireServiceEventBridge(integrationBus) {
     skipped.push(`assessments (${err.message})`);
   }
 
+  // ─── sessions: session.completed (W391 wire) ────────────────────────────
+  try {
+    const sessionsDomain = require('../domains/sessions');
+    // sessions domain exports the service singleton via initialize() — fallback to
+    // direct module require if not present.
+    let sessionSvc = sessionsDomain.service || sessionsDomain.sessionService;
+    if (!sessionSvc) {
+      try {
+        const mod = require('../domains/sessions/services/SessionsService');
+        sessionSvc = mod.sessionsService || mod.SessionsService;
+        if (typeof sessionSvc === 'function') sessionSvc = new sessionSvc();
+      } catch {
+        /* fallback failed */
+      }
+    }
+    if (sessionSvc) {
+      attachBridge('sessions', sessionSvc, ['session.completed']);
+    } else {
+      skipped.push('sessions (service not initialized)');
+    }
+  } catch (err) {
+    skipped.push(`sessions (${err.message})`);
+  }
+
   // ─── ai-recommendations: ai.recommendation_generated (module-level bus) ─
   // The aiRecommendation.service.js exports a module-level `bus` instead of
   // a class instance. Bridge it the same way.
   try {
     const aiRec = require('../services/aiRecommendation.service');
     if (aiRec.bus) {
-      attachBridge('ai-recommendations', aiRec.bus, ['ai.recommendation_generated']);
+      // W391: ai.risk_elevated added — createDraft emits this when confidence ≥0.95
+      // (closes the orphan-subscriber gap that W390 surfaced).
+      attachBridge('ai-recommendations', aiRec.bus, [
+        'ai.recommendation_generated',
+        'ai.risk_elevated',
+      ]);
     } else {
       skipped.push('ai-recommendations (bus not exported)');
     }

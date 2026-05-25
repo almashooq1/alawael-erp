@@ -75,6 +75,85 @@ function isLiveContract(domain, eventType) {
 // fails CI immediately + must be either deleted OR have its contract restored.
 const KNOWN_DEAD_SUBSCRIBERS = new Set([]);
 
+const BRIDGE_FILE = path.join(__dirname, '..', 'integration', 'serviceEventBridge.js');
+const BACKEND_ROOT = path.join(__dirname, '..');
+
+const PRODUCER_SCAN_SKIP_DIRS = new Set([
+  '__tests__',
+  '__mocks__',
+  'tests',
+  'node_modules',
+  '.jest-cache',
+  'coverage',
+  '_archived',
+  '_test-fixtures',
+]);
+
+function walkJsForProducers(dir, out = []) {
+  if (!fs.existsSync(dir)) return out;
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    if (PRODUCER_SCAN_SKIP_DIRS.has(entry.name)) continue;
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) walkJsForProducers(full, out);
+    else if (entry.isFile() && entry.name.endsWith('.js')) out.push(full);
+  }
+  return out;
+}
+
+// W391: enumerate all event types that have a producer reachable from
+// dddCrossModuleSubscribers. Two paths exist:
+//   (1) Direct integrationBus.publish('<domain>', '<eventType>', ...) calls
+//   (2) serviceEventBridge.attachBridge('<domain>', service, [...]) mappings —
+//       the bridge calls integrationBus.publish, so anything in the bridge IS
+//       a producer.
+// Returns a Set of `<domain>.<eventType>` strings matching subscriber pattern shape.
+function findAllProducedPatterns() {
+  const produced = new Set();
+  const files = walkJsForProducers(BACKEND_ROOT);
+
+  // (1) Direct integrationBus.publish calls
+  const publishRe = /integrationBus\.publish\s*\(\s*['"]([\w-]+)['"]\s*,\s*['"]([\w.]+)['"]/g;
+  for (const f of files) {
+    // Skip the bridge file itself — its publish calls are dispatched FROM
+    // service-local emits and tracked separately below
+    if (f === BRIDGE_FILE) continue;
+    const src = fs.readFileSync(f, 'utf8');
+    for (const m of src.matchAll(publishRe)) {
+      produced.add(`${m[1]}.${m[2]}`);
+    }
+  }
+
+  // (2) Bridge mappings — parse attachBridge('<domain>', svc, ['<eventType>', ...])
+  if (fs.existsSync(BRIDGE_FILE)) {
+    const bridgeSrc = fs.readFileSync(BRIDGE_FILE, 'utf8');
+    const attachRe = /attachBridge\s*\(\s*['"]([\w-]+)['"]\s*,\s*[^,]+,\s*\[([\s\S]*?)\]/g;
+    for (const m of bridgeSrc.matchAll(attachRe)) {
+      const domain = m[1];
+      const eventsBlock = m[2];
+      const eventRe = /['"]([\w.]+)['"]/g;
+      for (const em of eventsBlock.matchAll(eventRe)) {
+        produced.add(`${domain}.${em[1]}`);
+      }
+    }
+  }
+
+  return produced;
+}
+
+// W391: subscriber patterns whose producer existence is intentionally
+// deferred (e.g., the event is meant to be fired by FUTURE wires). Each
+// entry requires a justification comment. Removal-contract via ratchet-down.
+const KNOWN_ORPHAN_SUBSCRIBERS = new Set([
+  // core.beneficiary.registered — listened to by 2 subscribers (timeline +
+  // dashboards KPI). The contract is alive in dddEventContracts but no
+  // current producer fires it. Should fire from BeneficiaryService.afterCreate
+  // when a new beneficiary is created end-to-end. Out of scope for W391 —
+  // requires verifying the create-flow envelope (mrn, name, disabilityType,
+  // disabilityLevel) — separate stakeholder-tier wire pending the
+  // beneficiary-360 onboarding flow ADR.
+  'core.beneficiary.registered',
+]);
+
 describe('W389 subscriber-must-have-producer drift guard', () => {
   describe('subscriber pattern → contract resolution', () => {
     it('every subscriber pattern resolves to a live contract (or is in KNOWN_DEAD_SUBSCRIBERS)', () => {
@@ -121,6 +200,51 @@ describe('W389 subscriber-must-have-producer drift guard', () => {
         throw new Error(
           `${stale.length} entry/entries in KNOWN_DEAD_SUBSCRIBERS are no longer in source ` +
             `(subscriber removed). Remove from Set in same commit that deleted the subscriber:\n` +
+            stale.map(s => `  - ${s}`).join('\n')
+        );
+      }
+    });
+  });
+
+  describe('W391: subscriber → producer existence', () => {
+    it('every subscriber pattern has a producer (direct publish OR bridged emit)', () => {
+      const patterns = extractSubscriberPatterns();
+      const produced = findAllProducedPatterns();
+
+      const orphans = [];
+      for (const pattern of patterns) {
+        if (KNOWN_DEAD_SUBSCRIBERS.has(pattern)) continue; // handled by W389 check 1
+        if (KNOWN_ORPHAN_SUBSCRIBERS.has(pattern)) continue;
+        if (!produced.has(pattern)) {
+          orphans.push(pattern);
+        }
+      }
+      if (orphans.length > 0) {
+        throw new Error(
+          `${orphans.length} subscriber pattern(s) have a live contract but NO producer ` +
+            `(direct integrationBus.publish OR bridge mapping):\n` +
+            orphans.map(o => `  - ${o}`).join('\n') +
+            `\n\nFix options:\n` +
+            `  (a) Add a producer: call integrationBus.publish('<domain>', '<eventType>', payload) ` +
+            `from the appropriate domain service, OR add an attachBridge entry in serviceEventBridge.js.\n` +
+            `  (b) Delete the orphaned subscriber from dddCrossModuleSubscribers.js.\n` +
+            `  (c) If the producer is genuinely deferred (e.g., pending stakeholder design), add ` +
+            `the pattern to KNOWN_ORPHAN_SUBSCRIBERS with a justification comment.\n\n` +
+            `This is the W387 bug class — subscribers that registered but never fire.`
+        );
+      }
+    });
+
+    it('every KNOWN_ORPHAN_SUBSCRIBERS entry is still actually orphan (ratchet-down)', () => {
+      const produced = findAllProducedPatterns();
+      const stale = [];
+      for (const entry of KNOWN_ORPHAN_SUBSCRIBERS) {
+        if (produced.has(entry)) stale.push(entry);
+      }
+      if (stale.length > 0) {
+        throw new Error(
+          `${stale.length} entry/entries in KNOWN_ORPHAN_SUBSCRIBERS now HAVE a producer. ` +
+            `Remove from the Set in the SAME commit that added the producer:\n` +
             stale.map(s => `  - ${s}`).join('\n')
         );
       }

@@ -24,6 +24,7 @@ const CarePlan = require('../models/CarePlan');
 const safeError = require('../utils/safeError');
 const logger = require('../utils/logger');
 const logPiiAccess = require('../middleware/piiAccess.middleware');
+const { assertBeneficiaryInScope } = require('../utils/beneficiaryBranchGate');
 
 router.use(authenticateToken);
 
@@ -181,6 +182,12 @@ router.get('/beneficiary/:id', requireRole(STAFF_ROLES), async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
+    // CarePlan has no direct branchId — scope flows through the parent
+    // beneficiary. Reject 404 if the requested beneficiary is outside the
+    // caller's branch (same as if it didn't exist), so an attacker can't
+    // probe existence by counting plans in another branch.
+    const denied = await assertBeneficiaryInScope(req, req.params.id, res);
+    if (denied) return;
     const items = await CarePlan.find({ beneficiary: req.params.id })
       .sort({ startDate: -1 })
       .lean();
@@ -199,6 +206,11 @@ router.get('/:id', requireRole(STAFF_ROLES), logPiiAccess('CarePlan'), async (re
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     const doc = await CarePlan.findById(req.params.id).lean();
     if (!doc) return res.status(404).json({ success: false, message: 'غير موجود' });
+    // Plan-level branch gate via parent beneficiary (CarePlan has no
+    // direct branchId field). Uniform 404 if the linked beneficiary is
+    // out of scope.
+    const denied = await assertBeneficiaryInScope(req, doc.beneficiary, res);
+    if (denied) return;
     res.json({ success: true, data: doc });
   } catch (err) {
     return safeError(res, err, 'care-plans.getOne');
@@ -232,9 +244,18 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
+    // Pre-fetch the existing plan to learn its beneficiary, then enforce
+    // the branch gate before applying any mutation. Body must NOT be able
+    // to switch which beneficiary the plan belongs to.
+    const existing = await CarePlan.findById(req.params.id).select('beneficiary').lean();
+    if (!existing) return res.status(404).json({ success: false, message: 'غير موجود' });
+    const denied = await assertBeneficiaryInScope(req, existing.beneficiary, res);
+    if (denied) return;
+
     const body = { ...req.body };
     delete body._id;
     delete body.createdAt;
+    delete body.beneficiary; // forbid moving a plan to another beneficiary
     const doc = await CarePlan.findByIdAndUpdate(req.params.id, body, {
       new: true,
       runValidators: true,
@@ -259,6 +280,13 @@ router.post('/:id/goals/:domainPath', requireRole(WRITE_ROLES), async (req, res)
     if (!plan || !domain)
       return res.status(400).json({ success: false, message: 'مسار المجال غير صالح' });
 
+    // Pre-fetch beneficiary to enforce branch gate. Without this, anyone
+    // could push goals onto any care plan in any branch.
+    const existing = await CarePlan.findById(req.params.id).select('beneficiary').lean();
+    if (!existing) return res.status(404).json({ success: false, message: 'غير موجود' });
+    const denied = await assertBeneficiaryInScope(req, existing.beneficiary, res);
+    if (denied) return;
+
     const path = `${plan}.domains.${domain}.goals`;
     const doc = await CarePlan.findByIdAndUpdate(
       req.params.id,
@@ -282,6 +310,9 @@ router.patch('/:id/goals/:goalId', requireRole(WRITE_ROLES), async (req, res) =>
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     const plan = await CarePlan.findById(req.params.id);
     if (!plan) return res.status(404).json({ success: false, message: 'غير موجود' });
+    // Branch gate via parent beneficiary — close cross-tenant goal-edit.
+    const denied = await assertBeneficiaryInScope(req, plan.beneficiary, res);
+    if (denied) return;
 
     const allDomainPaths = [
       'educational.domains.academic.goals',
@@ -330,6 +361,14 @@ router.patch('/:id/goals/:goalId', requireRole(WRITE_ROLES), async (req, res) =>
 // ── DELETE /:id — archive ────────────────────────────────────────────────
 router.delete('/:id', requireRole(WRITE_ROLES), async (req, res) => {
   try {
+    if (!mongoose.isValidObjectId(req.params.id))
+      return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
+    // Pre-fetch to enforce branch gate before archiving.
+    const existing = await CarePlan.findById(req.params.id).select('beneficiary').lean();
+    if (!existing) return res.status(404).json({ success: false, message: 'غير موجود' });
+    const denied = await assertBeneficiaryInScope(req, existing.beneficiary, res);
+    if (denied) return;
+
     const doc = await CarePlan.findByIdAndUpdate(
       req.params.id,
       { status: 'ARCHIVED' },

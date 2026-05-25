@@ -28,6 +28,7 @@ const Beneficiary = require('../models/Beneficiary');
 const safeError = require('../utils/safeError');
 const logger = require('../utils/logger');
 const logPiiAccess = require('../middleware/piiAccess.middleware');
+const { assertBeneficiaryInScope } = require('../utils/beneficiaryBranchGate');
 
 // BC-04: ABAC for session note amendment window (24h, same signer)
 const { PolicyDecisionPoint } = require('../authorization/abac/policy-decision-point');
@@ -306,14 +307,14 @@ router.get('/:id', requireRole(STAFF_ROLES), logPiiAccess('TherapySession'), asy
       .lean();
     if (!doc) return res.status(404).json({ success: false, message: 'الجلسة غير موجودة' });
 
-    if (
-      !HQ_ROLES.includes(req.user?.role) &&
-      req.user?.branchId &&
-      doc.beneficiary?.branchId &&
-      String(doc.beneficiary.branchId) !== String(req.user.branchId)
-    ) {
-      return res.status(403).json({ success: false, message: 'غير مصرح' });
-    }
+    // Branch gate via parent beneficiary. Uniform 404 (not 403) so an
+    // attacker can't probe existence in another branch by timing or
+    // status-code differential. The populated doc still leaked into the
+    // process before the previous 403 — the gate moves the rejection
+    // earlier in the pipeline (after the lookup but before the PHI is
+    // serialised to the wire).
+    const denied = await assertBeneficiaryInScope(req, doc.beneficiary, res);
+    if (denied) return;
     res.json({ success: true, data: doc });
   } catch (err) {
     return safeError(res, err, 'therapy-sessions.getOne');
@@ -410,10 +411,18 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
+    // Branch gate via parent beneficiary BEFORE we mutate. Without this,
+    // a therapist in branch A could edit any session's clinical notes in
+    // any branch — including ones already finalized.
+    const existing = await TherapySession.findById(req.params.id).select('beneficiary').lean();
+    if (!existing) return res.status(404).json({ success: false, message: 'غير موجود' });
+    const denied = await assertBeneficiaryInScope(req, existing.beneficiary, res);
+    if (denied) return;
     const body = { ...req.body };
     delete body._id;
     delete body.createdBy;
     delete body.statusHistory;
+    delete body.beneficiary; // forbid moving a session to another beneficiary
 
     // Conflict re-check if scheduling fields touched
     if (
@@ -463,6 +472,9 @@ router.post('/:id/status', requireRole(WRITE_ROLES), async (req, res) => {
       return res.status(400).json({ success: false, message: 'حالة غير صالحة' });
     const doc = await TherapySession.findById(req.params.id);
     if (!doc) return res.status(404).json({ success: false, message: 'غير موجود' });
+    // Branch gate via parent beneficiary BEFORE recording transition.
+    const denied = await assertBeneficiaryInScope(req, doc.beneficiary, res);
+    if (denied) return;
     const from = doc.status;
     if (from === status) return res.json({ success: true, data: doc, message: 'لا تغيير' });
     doc.status = status;
@@ -488,6 +500,15 @@ router.post('/:id/status', requireRole(WRITE_ROLES), async (req, res) => {
 // ── POST /:id/check-in — quick attendance stamp ──────────────────────────
 router.post('/:id/check-in', requireRole(WRITE_ROLES), async (req, res) => {
   try {
+    if (!mongoose.isValidObjectId(req.params.id))
+      return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
+    // Pre-fetch to enforce branch gate. Check-in marks the session
+    // IN_PROGRESS and stamps attendance — both must require ownership.
+    const existing = await TherapySession.findById(req.params.id).select('beneficiary').lean();
+    if (!existing) return res.status(404).json({ success: false, message: 'غير موجود' });
+    const denied = await assertBeneficiaryInScope(req, existing.beneficiary, res);
+    if (denied) return;
+
     const { arrivalTime, lateMinutes } = req.body || {};
     const now = new Date();
     const arrival =
@@ -517,6 +538,8 @@ router.post('/:id/finalize', requireRole(WRITE_ROLES), async (req, res) => {
   try {
     const session = await TherapySession.findById(req.params.id);
     if (!session) return res.status(404).json({ success: false, message: 'جلسة غير موجودة' });
+    const denied = await assertBeneficiaryInScope(req, session.beneficiary, res);
+    if (denied) return;
     if (session.noteStatus === 'finalized') {
       return res.status(409).json({ success: false, message: 'السجل محكم مسبقاً' });
     }
@@ -549,6 +572,8 @@ router.post('/:id/amend', requireRole(WRITE_ROLES), async (req, res) => {
   try {
     const session = await TherapySession.findById(req.params.id);
     if (!session) return res.status(404).json({ success: false, message: 'جلسة غير موجودة' });
+    const denied = await assertBeneficiaryInScope(req, session.beneficiary, res);
+    if (denied) return;
     if (session.noteStatus !== 'finalized') {
       return res.status(400).json({ success: false, message: 'السجل ليس محكماً — عدّله مباشرة' });
     }
@@ -636,6 +661,15 @@ router.post('/:id/amend', requireRole(WRITE_ROLES), async (req, res) => {
 // ── DELETE /:id — soft cancel ────────────────────────────────────────────
 router.delete('/:id', requireRole(WRITE_ROLES), async (req, res) => {
   try {
+    if (!mongoose.isValidObjectId(req.params.id))
+      return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
+    // Branch gate via parent beneficiary BEFORE cancelling — otherwise a
+    // therapist could mass-cancel sessions in other branches.
+    const existing = await TherapySession.findById(req.params.id).select('beneficiary').lean();
+    if (!existing) return res.status(404).json({ success: false, message: 'غير موجود' });
+    const denied = await assertBeneficiaryInScope(req, existing.beneficiary, res);
+    if (denied) return;
+
     const doc = await TherapySession.findByIdAndUpdate(
       req.params.id,
       {
@@ -725,6 +759,16 @@ router.post('/:id/create-claim', requireRole(WRITE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ ok: false, error: 'invalid_session_id' });
     }
+    // Branch gate via parent beneficiary BEFORE invoking the bridge —
+    // otherwise a single-branch staff member could drag a foreign-branch
+    // session into a claim that the bridge service would happily build.
+    const existing = await TherapySession.findById(req.params.id).select('beneficiary').lean();
+    if (!existing) {
+      return res.status(404).json({ ok: false, error: 'session_not_found' });
+    }
+    const denied = await assertBeneficiaryInScope(req, existing.beneficiary, res);
+    if (denied) return;
+
     const { buildClaimFromSession } = require('../services/sessionToClaimBridge');
     const result = await buildClaimFromSession(req.params.id, {
       unitPrice: req.body?.unitPrice,

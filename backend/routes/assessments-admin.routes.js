@@ -213,7 +213,12 @@ router.get(
     try {
       if (!mongoose.isValidObjectId(req.params.id))
         return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
-      const doc = await ClinicalAssessment.findById(req.params.id)
+      // Atomic branch gate via composed filter — previous read-then-check
+      // both leaked PHI into the process (the populated doc lived in memory
+      // before the 403) and let an attacker distinguish "exists in other
+      // branch" from "does not exist" via the status code. Uniform 404 now.
+      const filter = applyBranchScope(req, { _id: req.params.id });
+      const doc = await ClinicalAssessment.findOne(filter)
         .populate(
           'beneficiary',
           'firstName lastName firstName_ar lastName_ar beneficiaryNumber branchId'
@@ -222,15 +227,6 @@ router.get(
         .populate('reviewer', 'firstName lastName fullName')
         .lean();
       if (!doc) return res.status(404).json({ success: false, message: 'غير موجود' });
-
-      if (
-        !HQ_ROLES.includes(req.user?.role) &&
-        req.user?.branchId &&
-        doc.branchId &&
-        String(doc.branchId) !== String(req.user.branchId)
-      ) {
-        return res.status(403).json({ success: false, message: 'غير مصرح' });
-      }
       res.json({ success: true, data: doc });
     } catch (err) {
       return safeError(res, err, 'assessments.getOne');
@@ -263,9 +259,14 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
     const body = { ...req.body };
     delete body._id;
     delete body.createdBy;
+    delete body.branchId; // forbid clients from moving an assessment between branches
     body.updatedBy = req.user?.id;
 
-    const doc = await ClinicalAssessment.findByIdAndUpdate(req.params.id, body, {
+    // Atomic branch gate — compose `branchId: req.user.branchId` into the
+    // filter for non-HQ roles. Previously PATCH bypassed scope entirely,
+    // letting any therapist edit any branch's clinical assessment.
+    const filter = applyBranchScope(req, { _id: req.params.id });
+    const doc = await ClinicalAssessment.findOneAndUpdate(filter, body, {
       new: true,
       runValidators: true,
     }).lean();
@@ -282,8 +283,12 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
 // ── DELETE /:id — archive ────────────────────────────────────────────────
 router.delete('/:id', requireRole(WRITE_ROLES), async (req, res) => {
   try {
-    const doc = await ClinicalAssessment.findByIdAndUpdate(
-      req.params.id,
+    if (!mongoose.isValidObjectId(req.params.id))
+      return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
+    // Atomic branch gate (same shape as PATCH above).
+    const filter = applyBranchScope(req, { _id: req.params.id });
+    const doc = await ClinicalAssessment.findOneAndUpdate(
+      filter,
       { status: 'archived', updatedBy: req.user?.id },
       { new: true }
     ).lean();

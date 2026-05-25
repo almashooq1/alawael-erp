@@ -44,6 +44,9 @@ const THRESHOLDS = Object.freeze({
   'rca.open': { warning: 3, critical: 10 }, // active RCAs (non-terminal)
   'fmea.active': { warning: 5, critical: 15 }, // active FMEA worksheets
   'risk.critical': { warning: 0, critical: 2 }, // critical-level Risks
+  // W371 (Clinical safety — bridges W356+W357 onto the operational heatmap)
+  'seizures.openEvents': { warning: 0, critical: 5 }, // strict: any unreviewed seizure is a warning
+  'safeguarding.openConcerns': { warning: 0, critical: 3 }, // strict: any open safeguarding concern is a warning
 });
 
 // Terminal-statuses sets (mirror config/{rca,fmea}.registry.js TERMINAL_STATUSES).
@@ -51,6 +54,11 @@ const THRESHOLDS = Object.freeze({
 // jest.unmock('mongoose') dance to load the registry through mongoose mocks.
 const RCA_TERMINAL = Object.freeze(['verified', 'archived', 'cancelled']);
 const FMEA_TERMINAL = Object.freeze(['verified', 'archived', 'cancelled']);
+// W371 — SeizureEvent status enum is ['recorded', 'reviewed'] (binary): open = 'recorded'.
+const SEIZURE_OPEN_STATUS = 'recorded';
+// W371 — SafeguardingConcern has 7-state lifecycle; "closed" or "unsubstantiated" are terminal.
+// Anything else (reported / triaged / investigating / substantiated / escalated_to_authority) is open.
+const SAFEGUARDING_CLOSED_STATUSES = Object.freeze(['closed', 'unsubstantiated']);
 
 const SEVERITY_RANK = Object.freeze({ ok: 0, warning: 1, critical: 2 });
 
@@ -125,6 +133,28 @@ function createBranchQualityHeatmapService(opts = {}) {
     } catch {
       require('../../models/quality/Risk.model');
       return mongoose.model('Risk');
+    }
+  }
+
+  function _SeizureModel() {
+    if (opts.seizureModel) return opts.seizureModel;
+    const mongoose = require('mongoose');
+    try {
+      return mongoose.model('SeizureEvent');
+    } catch {
+      require('../../models/SeizureEvent');
+      return mongoose.model('SeizureEvent');
+    }
+  }
+
+  function _SafeguardingModel() {
+    if (opts.safeguardingModel) return opts.safeguardingModel;
+    const mongoose = require('mongoose');
+    try {
+      return mongoose.model('SafeguardingConcern');
+    } catch {
+      require('../../models/SafeguardingConcern');
+      return mongoose.model('SafeguardingConcern');
     }
   }
 
@@ -268,12 +298,33 @@ function createBranchQualityHeatmapService(opts = {}) {
     return Risk.aggregate(pipeline);
   }
 
+  async function _seizureMetricsByBranch({ branchIds }) {
+    const Seizure = _SeizureModel();
+    const match = { status: SEIZURE_OPEN_STATUS };
+    if (branchIds?.length) match.branchId = { $in: branchIds };
+    const pipeline = [{ $match: match }, { $group: { _id: '$branchId', openEvents: { $sum: 1 } } }];
+    return Seizure.aggregate(pipeline);
+  }
+
+  async function _safeguardingMetricsByBranch({ branchIds }) {
+    const Safeguarding = _SafeguardingModel();
+    const match = { status: { $nin: SAFEGUARDING_CLOSED_STATUSES } };
+    if (branchIds?.length) match.branchId = { $in: branchIds };
+    const pipeline = [
+      { $match: match },
+      { $group: { _id: '$branchId', openConcerns: { $sum: 1 } } },
+    ];
+    return Safeguarding.aggregate(pipeline);
+  }
+
   async function buildHeatmap({ branchIds = null, now = new Date() } = {}) {
     let capaRows = [];
     let auditRows = [];
     let rcaRows = [];
     let fmeaRows = [];
     let riskRows = [];
+    let seizureRows = [];
+    let safeguardingRows = [];
     try {
       capaRows = await _capaMetricsByBranch({ branchIds, now });
     } catch (err) {
@@ -299,6 +350,16 @@ function createBranchQualityHeatmapService(opts = {}) {
     } catch (err) {
       logger.warn?.(`[branchQualityHeatmap] risk aggregation failed: ${err.message}`);
     }
+    try {
+      seizureRows = await _seizureMetricsByBranch({ branchIds });
+    } catch (err) {
+      logger.warn?.(`[branchQualityHeatmap] seizure aggregation failed: ${err.message}`);
+    }
+    try {
+      safeguardingRows = await _safeguardingMetricsByBranch({ branchIds });
+    } catch (err) {
+      logger.warn?.(`[branchQualityHeatmap] safeguarding aggregation failed: ${err.message}`);
+    }
 
     // Merge by branchId
     const byBranch = new Map();
@@ -316,6 +377,8 @@ function createBranchQualityHeatmapService(opts = {}) {
             'rca.open': null,
             'fmea.active': null,
             'risk.critical': null,
+            'seizures.openEvents': null,
+            'safeguarding.openConcerns': null,
           },
         });
       }
@@ -344,6 +407,14 @@ function createBranchQualityHeatmapService(opts = {}) {
     for (const r of riskRows) {
       const b = _ensure(r._id);
       b.cells['risk.critical'] = _cell('risk.critical', r.criticalCount);
+    }
+    for (const r of seizureRows) {
+      const b = _ensure(r._id);
+      b.cells['seizures.openEvents'] = _cell('seizures.openEvents', r.openEvents);
+    }
+    for (const r of safeguardingRows) {
+      const b = _ensure(r._id);
+      b.cells['safeguarding.openConcerns'] = _cell('safeguarding.openConcerns', r.openConcerns);
     }
 
     // Compute branch-level severity + tally

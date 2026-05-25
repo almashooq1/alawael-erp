@@ -28,6 +28,15 @@ const ENTRIES = [
   require('./schemas/arvr-session.canonical'),
   require('./schemas/behavior-incident.canonical'),
   require('./schemas/risk-profile.canonical'),
+  // W356-W363 clinical-services series (2026-05-25):
+  require('./schemas/seizure-event.canonical'),
+  require('./schemas/safeguarding-concern.canonical'),
+  require('./schemas/communication-aid-profile.canonical'),
+  require('./schemas/assistive-device.canonical'),
+  require('./schemas/cbahi-attestation.canonical'),
+  require('./schemas/transition-plan.canonical'),
+  require('./schemas/adaptive-sports-program.canonical'),
+  require('./schemas/respite-booking.canonical'),
 ];
 
 for (const entry of ENTRIES) registry.register(entry);

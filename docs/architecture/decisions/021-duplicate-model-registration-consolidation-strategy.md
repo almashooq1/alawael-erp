@@ -6,6 +6,8 @@ Date: 2026-05-24
 
 🟡 **Proposed — needs technical-lead + domain-owner sign-off before Tier 1 consolidation begins.**
 
+> **📋 Decision-ready brief**: see [021-DECISION-BRIEF.md](021-DECISION-BRIEF.md) for per-entity schema comparisons + recommended pattern (D rename in 4/5 cases) + 5 per-entity meeting agendas + execution sequence (lowest risk first: TransitionPlan → ReportTemplate → WorkflowInstance → ApprovalRequest → AuditLog). Resolving this ADR ALSO closes ADRs 022/023/024/028 in the same sprint.
+
 This ADR captures the W340 bug-class discovery and the patterns proven by W341–W343 cleanups. Tier 2 entries (39 names registered in 2 files each) follow mechanical patterns and can proceed without ADR; Tier 1 entries (4 names registered in 3–4 files with divergent schemas) need this ADR's framework before consolidation.
 
 ## Context

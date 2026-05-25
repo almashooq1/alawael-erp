@@ -7,6 +7,7 @@ const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 router.use(requireBranchAccess);
@@ -25,7 +26,7 @@ router.get('/', async (req, res) => {
     ]);
     res.json({ success: true, data, pagination: { page: +page, limit: +limit, total } });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'transportRoutes');
   }
 });
 
@@ -46,7 +47,7 @@ router.get('/:id', async (req, res) => {
     if (!route) return res.status(404).json({ success: false, message: 'Route not found' });
     res.json({ success: true, data: route });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'transportRoutes');
   }
 });
 
@@ -75,7 +76,7 @@ router.delete('/:id', authorize('admin'), async (req, res) => {
     if (!route) return res.status(404).json({ success: false, message: 'Route not found' });
     res.json({ success: true, message: 'Route deactivated' });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'transportRoutes');
   }
 });
 
@@ -86,7 +87,7 @@ router.get('/:id/stops', async (req, res) => {
     if (!route) return res.status(404).json({ success: false, message: 'Route not found' });
     res.json({ success: true, data: route.stops || [] });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'transportRoutes');
   }
 });
 
@@ -97,7 +98,7 @@ router.get('/:id/schedule', async (req, res) => {
     if (!route) return res.status(404).json({ success: false, message: 'Route not found' });
     res.json({ success: true, data: route.schedule || {} });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'transportRoutes');
   }
 });
 

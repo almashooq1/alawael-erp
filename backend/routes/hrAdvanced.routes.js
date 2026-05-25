@@ -8,6 +8,7 @@ const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 router.use(requireBranchAccess);
@@ -37,7 +38,7 @@ router.get('/workforce/analytics', authorize('admin', 'hr_manager'), async (req,
     ]);
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'hrAdvanced');
   }
 });
 
@@ -56,7 +57,7 @@ router.get('/succession/plans', authorize('admin', 'hr_manager'), async (req, re
     ]);
     res.json({ success: true, data, pagination: { page: +page, limit: +limit, total } });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'hrAdvanced');
   }
 });
 
@@ -77,7 +78,7 @@ router.get('/competencies', async (req, res) => {
     const data = await Competency.find().sort({ category: 1, name: 1 }).lean();
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'hrAdvanced');
   }
 });
 
@@ -98,7 +99,7 @@ router.get('/employees/:employeeId/skills', async (req, res) => {
     const data = await EmployeeSkill.find({ employeeId: req.params.employeeId }).lean();
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'hrAdvanced');
   }
 });
 

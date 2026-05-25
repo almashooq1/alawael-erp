@@ -7,6 +7,7 @@ const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 router.use(requireBranchAccess);
@@ -30,7 +31,7 @@ router.get('/', async (req, res) => {
     ]);
     res.json({ success: true, data, pagination: { page: +page, limit: +limit, total } });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'trafficAccidents');
   }
 });
 
@@ -56,7 +57,7 @@ router.get('/:id', async (req, res) => {
       return res.status(404).json({ success: false, message: 'Accident record not found' });
     res.json({ success: true, data: accident });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'trafficAccidents');
   }
 });
 
@@ -82,7 +83,7 @@ router.delete('/:id', authorize('admin'), async (req, res) => {
     await TrafficAccident.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'Accident record deleted' });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'trafficAccidents');
   }
 });
 
@@ -130,7 +131,7 @@ router.get('/stats/overview', async (req, res) => {
     ]);
     res.json({ success: true, data: { total, open, bySeverity, byMonth } });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'trafficAccidents');
   }
 });
 

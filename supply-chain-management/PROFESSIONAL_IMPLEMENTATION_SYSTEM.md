@@ -16,7 +16,7 @@ HR System → Advanced Reporting + Email Notifications + Dashboard
 
 ---
 
-# 1️⃣ نظام Barcode & QR Code - Version Pro
+## 1️⃣ نظام Barcode & QR Code - Version Pro
 
 ## 🔐 Step 1: Enhanced Security & Validation
 
@@ -609,7 +609,7 @@ export default BarcodeManager;
 
 ---
 
-# 2️⃣ نظام GPS Tracking - Version Pro
+## 2️⃣ نظام GPS Tracking - Version Pro
 
 ## 🚗 Step 1: Real-time Tracking Service
 
@@ -918,7 +918,7 @@ export function setupTrackingWebSocket(io) {
 
 ---
 
-# 3️⃣ نظام HR - Version Pro
+## 3️⃣ نظام HR - Version Pro
 
 ## 👥 Step 1: Advanced HR Models
 

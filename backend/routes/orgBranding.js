@@ -7,6 +7,7 @@ const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 router.use(requireBranchAccess);
@@ -18,7 +19,7 @@ router.get('/', async (req, res) => {
     const branding = await OrgBranding.findOne({}).lean();
     res.json({ success: true, data: branding || {} });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'orgBranding');
   }
 });
 
@@ -86,7 +87,7 @@ router.get('/branch/:branchId', async (req, res) => {
     const branding = await BranchBranding.findOne({ branchId: req.params.branchId }).lean();
     res.json({ success: true, data: branding || {} });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'orgBranding');
   }
 });
 

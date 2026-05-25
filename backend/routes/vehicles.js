@@ -8,6 +8,7 @@ const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 router.use(requireBranchAccess);
@@ -28,7 +29,7 @@ router.get('/', async (req, res) => {
     ]);
     res.json({ success: true, data, pagination: { page: +page, limit: +limit, total } });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'vehicles');
   }
 });
 
@@ -49,7 +50,7 @@ router.get('/:id', async (req, res) => {
     if (!vehicle) return res.status(404).json({ success: false, message: 'Vehicle not found' });
     res.json({ success: true, data: vehicle });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'vehicles');
   }
 });
 
@@ -78,7 +79,7 @@ router.delete('/:id', authorize('admin'), async (req, res) => {
     if (!vehicle) return res.status(404).json({ success: false, message: 'Vehicle not found' });
     res.json({ success: true, message: 'Vehicle retired' });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'vehicles');
   }
 });
 
@@ -128,7 +129,7 @@ router.get('/:id/documents', async (req, res) => {
     if (!vehicle) return res.status(404).json({ success: false, message: 'Vehicle not found' });
     res.json({ success: true, data: vehicle.documents || [] });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'vehicles');
   }
 });
 
@@ -139,7 +140,7 @@ router.get('/:id/assignment-history', async (req, res) => {
     if (!vehicle) return res.status(404).json({ success: false, message: 'Vehicle not found' });
     res.json({ success: true, data: vehicle.assignmentHistory || [] });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'vehicles');
   }
 });
 
@@ -155,7 +156,7 @@ router.get('/stats/overview', async (req, res) => {
     ]);
     res.json({ success: true, data: { total, active, maintenance, retired } });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'vehicles');
   }
 });
 

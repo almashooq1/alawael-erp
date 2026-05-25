@@ -160,7 +160,7 @@ router.get('/my-submissions', async (req, res) => {
     const secret = process.env.JWT_SECRET || process.env.AUTH_SECRET || 'dev-fallback';
     let payload;
     try {
-      payload = jwt.verify(m[1], secret);
+      payload = jwt.verify(m[1], secret, { algorithms: ['HS256'] });
     } catch {
       return res.status(401).json({ ok: false, error: 'INVALID_TOKEN' });
     }

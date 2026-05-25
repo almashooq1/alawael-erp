@@ -1,5 +1,6 @@
 # 🔧 دليل التحسين العملي | Practical Implementation Guide
-# اختبارات محسّنة وأفضل ممارسات | Enhanced Tests & Best Practices
+
+## اختبارات محسّنة وأفضل ممارسات | Enhanced Tests & Best Practices
 
 ---
 
@@ -20,16 +21,10 @@ module.exports = {
   testEnvironment: 'node',
 
   // Test file patterns
-  testMatch: [
-    '**/*.test.js',
-    '!**/node_modules/**'
-  ],
+  testMatch: ['**/*.test.js', '!**/node_modules/**'],
 
   // Setup files
-  setupFilesAfterEnv: [
-    '<rootDir>/tests/setup.js',
-    '<rootDir>/tests/jest.setup.js'
-  ],
+  setupFilesAfterEnv: ['<rootDir>/tests/setup.js', '<rootDir>/tests/jest.setup.js'],
 
   // ✅ IMPROVED: Enable coverage collection
   collectCoverage: true,
@@ -43,43 +38,36 @@ module.exports = {
     '!vendor/**',
     '!**/node_modules/**',
     '!**/*.config.js',
-    '!**/index.js' // Usually just exports
+    '!**/index.js', // Usually just exports
   ],
 
   // Coverage directory
   coverageDirectory: 'coverage',
-  
+
   // ✅ IMPROVED: Enhanced coverage reporters
-  coverageReporters: [
-    'text',
-    'text-summary',
-    'html',
-    'lcov',
-    'json',
-    'json-summary'
-  ],
+  coverageReporters: ['text', 'text-summary', 'html', 'lcov', 'json', 'json-summary'],
 
   // ✅ IMPROVED: Increased coverage thresholds
   coverageThreshold: {
     global: {
-      branches: 80,      // UP from 50
-      functions: 80,     // UP from 50
-      lines: 80,         // UP from 50
-      statements: 80     // UP from 50
+      branches: 80, // UP from 50
+      functions: 80, // UP from 50
+      lines: 80, // UP from 50
+      statements: 80, // UP from 50
     },
     // ✅ NEW: Specific thresholds for critical files
     './services/**/*.js': {
       branches: 85,
       functions: 85,
       lines: 85,
-      statements: 85
+      statements: 85,
     },
     './models/**/*.js': {
       branches: 80,
       functions: 90,
       lines: 90,
-      statements: 90
-    }
+      statements: 90,
+    },
   },
 
   // Increased timeout for integration tests
@@ -96,14 +84,14 @@ module.exports = {
         classNameTemplate: '{classname}',
         titleTemplate: '{title}',
         ancestorSeparator: ' › ',
-        usePathAsClassName: true
-      }
-    ]
+        usePathAsClassName: true,
+      },
+    ],
   ],
 
   // ✅ NEW: Transform configuration for ES modules
   transform: {
-    '^.+\\.js$': 'babel-jest'
+    '^.+\\.js$': 'babel-jest',
   },
 
   // ✅ NEW: Module name mapper for path aliases
@@ -111,13 +99,13 @@ module.exports = {
     '^@/(.*)$': '<rootDir>/src/$1',
     '^@services/(.*)$': '<rootDir>/services/$1',
     '^@models/(.*)$': '<rootDir>/models/$1',
-    '^@utils/(.*)$': '<rootDir>/utils/$1'
+    '^@utils/(.*)$': '<rootDir>/utils/$1',
   },
 
   // ✅ NEW: Test environment options
   testEnvironmentOptions: {
     // Suppress specific warnings
-    suppressConsoleErrorOnDeprecation: true
+    suppressConsoleErrorOnDeprecation: true,
   },
 
   // ✅ NEW: Improved performance
@@ -125,18 +113,13 @@ module.exports = {
   bail: 0, // Don't stop on first failure
 
   // ✅ NEW: Watch mode plugins
-  watchPlugins: [
-    'jest-watch-typeahead/filename',
-    'jest-watch-typeahead/testname'
-  ],
+  watchPlugins: ['jest-watch-typeahead/filename', 'jest-watch-typeahead/testname'],
 
   // ✅ IMPROVED: Better snapshot settings
-  snapshotSerializers: [
-    'jest-serializer-html'
-  ],
+  snapshotSerializers: ['jest-serializer-html'],
 
   // ✅ NEW: Verbose output
-  verbose: true
+  verbose: true,
 };
 ```
 
@@ -157,7 +140,7 @@ global.testCoverageMetadata = {
   testCount: 0,
   passCount: 0,
   failCount: 0,
-  skipCount: 0
+  skipCount: 0,
 };
 
 // Increment test counter
@@ -182,7 +165,7 @@ expect.extend({
    * Check if response matches standard format
    */
   toHaveValidStructure(received, expectedFields = []) {
-    const pass = 
+    const pass =
       received &&
       typeof received === 'object' &&
       'success' in received &&
@@ -193,9 +176,7 @@ expect.extend({
     return {
       pass,
       message: () =>
-        pass
-          ? `Expected response not to have valid structure`
-          : `Expected response to include fields: ${expectedFields.join(', ')}`
+        pass ? `Expected response not to have valid structure` : `Expected response to include fields: ${expectedFields.join(', ')}`,
     };
   },
 
@@ -203,24 +184,13 @@ expect.extend({
    * Check if data is properly sanitized
    */
   toBeClean(received) {
-    const xssPatterns = [
-      /<script/i,
-      /javascript:/i,
-      /on\w+=/i,
-      /<iframe/i,
-      /<object/i
-    ];
+    const xssPatterns = [/<script/i, /javascript:/i, /on\w+=/i, /<iframe/i, /<object/i];
 
-    const pass = !xssPatterns.some(pattern => 
-      pattern.test(JSON.stringify(received))
-    );
+    const pass = !xssPatterns.some(pattern => pattern.test(JSON.stringify(received)));
 
     return {
       pass,
-      message: () =>
-        pass
-          ? `Expected data to contain XSS patterns`
-          : `Expected data to be clean of XSS patterns`
+      message: () => (pass ? `Expected data to contain XSS patterns` : `Expected data to be clean of XSS patterns`),
     };
   },
 
@@ -229,20 +199,17 @@ expect.extend({
    */
   toBeEncrypted(received) {
     // Check if looks like encrypted (contains specific patterns)
-    const hasEncryptionMarkers = 
-      received && 
+    const hasEncryptionMarkers =
+      received &&
       (received.startsWith('$2') || // bcrypt
-       received.startsWith('$argon2') || // argon2
-       /^[a-f0-9]{64}$/.test(received)); // hex hash
+        received.startsWith('$argon2') || // argon2
+        /^[a-f0-9]{64}$/.test(received)); // hex hash
 
     return {
       pass: hasEncryptionMarkers,
-      message: () =>
-        hasEncryptionMarkers
-          ? `Expected not to be encrypted`
-          : `Expected to be properly encrypted`
+      message: () => (hasEncryptionMarkers ? `Expected not to be encrypted` : `Expected to be properly encrypted`),
     };
-  }
+  },
 });
 
 // =============================================
@@ -259,18 +226,18 @@ beforeEach(() => {
 afterEach(() => {
   performance.mark('test-end');
   performance.measure('test', 'test-start', 'test-end');
-  
+
   const measure = performance.getEntriesByName('test')[0];
   const testName = expect.getState().currentTestName;
-  
+
   // Log slow tests (> 500ms)
   if (measure.duration > 500) {
     slowTests.push({
       name: testName,
-      duration: measure.duration.toFixed(2)
+      duration: measure.duration.toFixed(2),
     });
   }
-  
+
   performance.clearMarks();
   performance.clearMeasures();
 });
@@ -293,12 +260,12 @@ afterAll(() => {
   if (global.gc) {
     global.gc();
   }
-  
+
   const finalMemory = process.memoryUsage().heapUsed / 1024 / 1024;
   const increase = (finalMemory - initialMemory).toFixed(2);
-  
+
   console.log(`\n📊 Memory usage increase: ${increase} MB`);
-  
+
   if (slowTests.length > 0) {
     console.log('\n⚠️ Slow tests detected:');
     slowTests.forEach(test => {
@@ -323,13 +290,12 @@ afterAll(() => {
  */
 
 describe('Boundary Cases & Edge Cases', () => {
-  
   // =============================================
   // String Input Boundaries
   // =============================================
-  
+
   describe('String Input Handling', () => {
-    const stringValidator = (input) => {
+    const stringValidator = input => {
       if (!input) return false;
       if (typeof input !== 'string') return false;
       if (input.length > 1000) return false;
@@ -371,9 +337,9 @@ describe('Boundary Cases & Edge Cases', () => {
   // =============================================
   // Numeric Boundaries
   // =============================================
-  
+
   describe('Numeric Input Handling', () => {
-    const ageValidator = (age) => {
+    const ageValidator = age => {
       if (typeof age !== 'number') return false;
       if (age < 0 || age > 150) return false;
       if (!Number.isInteger(age)) return false;
@@ -406,9 +372,9 @@ describe('Boundary Cases & Edge Cases', () => {
   // =============================================
   // Array Boundaries
   // =============================================
-  
+
   describe('Array Handling', () => {
-    const arrayProcessor = (arr) => {
+    const arrayProcessor = arr => {
       if (!Array.isArray(arr)) return null;
       if (arr.length === 0) return null;
       if (arr.length > 1000) return null;
@@ -440,9 +406,9 @@ describe('Boundary Cases & Edge Cases', () => {
   // =============================================
   // Date Boundaries
   // =============================================
-  
+
   describe('Date Handling', () => {
-    const dateValidator = (date) => {
+    const dateValidator = date => {
       if (!(date instanceof Date)) return false;
       if (isNaN(date.getTime())) return false;
       return true;
@@ -464,11 +430,11 @@ describe('Boundary Cases & Edge Cases', () => {
   // =============================================
   // Security Injection Tests
   // =============================================
-  
+
   describe('Injection Prevention', () => {
-    const sanitizeInput = (input) => {
+    const sanitizeInput = input => {
       if (typeof input !== 'string') return '';
-      
+
       // Remove common injection patterns
       return input
         .replace(/<script[^>]*>.*?<\/script>/gi, '')
@@ -519,13 +485,12 @@ describe('Boundary Cases & Edge Cases', () => {
  */
 
 describe('Comprehensive Security Tests', () => {
-  
   // =============================================
   // Password Security
   // =============================================
-  
+
   describe('Password Validation', () => {
-    const validatePassword = (password) => {
+    const validatePassword = password => {
       if (!password) return false;
       if (password.length < 8) return false;
       if (!/[A-Z]/.test(password)) return false; // uppercase
@@ -558,9 +523,9 @@ describe('Comprehensive Security Tests', () => {
   // =============================================
   // Email Validation
   // =============================================
-  
+
   describe('Email Validation', () => {
-    const validateEmail = (email) => {
+    const validateEmail = email => {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       return emailRegex.test(email);
     };
@@ -581,7 +546,7 @@ describe('Comprehensive Security Tests', () => {
   // =============================================
   // Rate Limiting
   // =============================================
-  
+
   describe('Rate Limiting', () => {
     class RateLimiter {
       constructor(maxAttempts = 5, windowMs = 15 * 60 * 1000) {
@@ -593,16 +558,14 @@ describe('Comprehensive Security Tests', () => {
       isLimited(key) {
         const now = Date.now();
         const userAttempts = this.attempts.get(key) || [];
-        
+
         // Remove old attempts
-        const recentAttempts = userAttempts.filter(
-          time => now - time < this.windowMs
-        );
-        
+        const recentAttempts = userAttempts.filter(time => now - time < this.windowMs);
+
         if (recentAttempts.length >= this.maxAttempts) {
           return true;
         }
-        
+
         recentAttempts.push(now);
         this.attempts.set(key, recentAttempts);
         return false;
@@ -616,7 +579,7 @@ describe('Comprehensive Security Tests', () => {
     test('should allow requests within limit', () => {
       const limiter = new RateLimiter(3, 1000);
       const key = 'user123';
-      
+
       expect(limiter.isLimited(key)).toBe(false);
       expect(limiter.isLimited(key)).toBe(false);
       expect(limiter.isLimited(key)).toBe(false);
@@ -625,22 +588,22 @@ describe('Comprehensive Security Tests', () => {
     test('should block requests exceeding limit', () => {
       const limiter = new RateLimiter(3, 1000);
       const key = 'user123';
-      
+
       limiter.isLimited(key);
       limiter.isLimited(key);
       limiter.isLimited(key);
-      
+
       expect(limiter.isLimited(key)).toBe(true);
     });
 
     test('should reset on clear', () => {
       const limiter = new RateLimiter(2, 1000);
       const key = 'user123';
-      
+
       limiter.isLimited(key);
       limiter.isLimited(key);
       limiter.reset(key);
-      
+
       expect(limiter.isLimited(key)).toBe(false);
     });
   });
@@ -648,14 +611,11 @@ describe('Comprehensive Security Tests', () => {
   // =============================================
   // CORS Validation
   // =============================================
-  
-  describe('CORS Validation', () => {
-    const allowedOrigins = [
-      'https://example.com',
-      'https://app.example.com'
-    ];
 
-    const isOriginAllowed = (origin) => {
+  describe('CORS Validation', () => {
+    const allowedOrigins = ['https://example.com', 'https://app.example.com'];
+
+    const isOriginAllowed = origin => {
       return allowedOrigins.includes(origin);
     };
 
@@ -692,46 +652,46 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    
+
     strategy:
       matrix:
         node-version: [18.x, 20.x]
-    
+
     steps:
       - name: 📥 Checkout code
         uses: actions/checkout@v3
-      
+
       - name: 📦 Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
-      
+
       - name: 📚 Install dependencies
         run: npm ci
-      
+
       - name: 🔍 Run linter
         run: npm run lint --if-present
-      
+
       - name: 🧪 Run tests
         run: npm test -- --coverage
         env:
           NODE_ENV: test
-      
+
       - name: 📊 Upload coverage
         uses: codecov/codecov-action@v3
         with:
           files: ./coverage/lcov.info
           flags: unittests
           name: codecov-umbrella
-      
+
       - name: 📈 Test Results
         if: always()
         uses: actions/upload-artifact@v3
         with:
           name: test-reports
           path: test-reports/
-      
+
       - name: 📉 Coverage Report
         if: always()
         uses: actions/upload-artifact@v3
@@ -771,6 +731,7 @@ jobs:
 ## 📋 قائمة التحقق | Checklist
 
 ### قبل الدمج | Before Merging
+
 - [ ] جميع الاختبارات تمرت ✅
 - [ ] التغطية ≥ 80% 📊
 - [ ] لا توجد تحذيرات ⚠️
@@ -778,6 +739,7 @@ jobs:
 - [ ] الأداء تم التحقق منها ⚡
 
 ### عند التوزيع | Before Deployment
+
 - [ ] اختبارات الإنتاج نجحت ✅
 - [ ] التقارير تم طباعتها 📄
 - [ ] الموارس تم تنظيفها 🧹
@@ -787,5 +749,4 @@ jobs:
 
 **تم إعداد هذا الدليل بواسطة**: GitHub Copilot  
 **التاريخ**: FEB 24, 2026  
-**النسخة**: 1.0.0  
-
+**النسخة**: 1.0.0

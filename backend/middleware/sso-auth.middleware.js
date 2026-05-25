@@ -396,7 +396,7 @@ class SSOAuthMiddleware {
    */
   extractSessionId(token) {
     try {
-      const decoded = jwt.verify(token, this.JWT_SECRET);
+      const decoded = jwt.verify(token, this.JWT_SECRET, { algorithms: ['HS256'] });
       return decoded.sessionId;
     } catch (_error) {
       return null;

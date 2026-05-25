@@ -322,7 +322,7 @@ router.post('/refresh', async (req, res) => {
     }
 
     // Verify refresh token
-    const decoded = jwt.verify(refreshToken, JWT_REFRESH_SECRET);
+    const decoded = jwt.verify(refreshToken, JWT_REFRESH_SECRET, { algorithms: ['HS256'] });
 
     // Check if refresh token has been blacklisted (token rotation).
     // The blacklist module exposes `isBlacklisted`, not `has` — the old

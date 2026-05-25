@@ -41,7 +41,12 @@ const requireAuth = async (req, res, next) => {
       return res.status(401).json({ success: false, message: 'Token has been revoked' });
     }
 
-    const decoded = jwt.verify(token, JWT_SECRET);
+    // Explicit algorithms allowlist — jsonwebtoken v9 defaults are
+    // mostly safe with a string secret (rejects RS256/ES256 since
+    // those need a key object), but pinning to HS256 makes the
+    // policy declarative and survives future jsonwebtoken-default
+    // changes or accidental refactor to a Buffer/KeyObject secret.
+    const decoded = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] });
     req.user = decoded;
     next();
   } catch (err) {
@@ -73,10 +78,11 @@ const authenticateToken = async (req, res, next) => {
       return res.status(401).json({ success: false, message: 'Access token is required' });
     }
 
-    // Synchronous verify — throws on invalid/expired token (fully caught by outer try/catch)
+    // Synchronous verify — throws on invalid/expired token (fully caught by outer try/catch).
+    // Explicit algorithms allowlist — see authenticate() above for rationale.
     let decoded;
     try {
-      decoded = jwt.verify(token, JWT_SECRET);
+      decoded = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] });
     } catch (err) {
       if (err.name === 'TokenExpiredError') {
         return res
@@ -118,7 +124,7 @@ const optionalAuth = (req, res, next) => {
       return next();
     }
 
-    jwt.verify(token, JWT_SECRET, (err, decoded) => {
+    jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] }, (err, decoded) => {
       if (!err) {
         req.user = decoded;
         req.userId = decoded.id || decoded.sub;
@@ -322,7 +328,7 @@ const extractToken = req => {
  */
 const verifyToken = token => {
   try {
-    return jwt.verify(token, JWT_SECRET);
+    return jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] });
   } catch {
     return null;
   }
@@ -416,7 +422,7 @@ const refreshToken = (req, res) => {
     const { jwtRefreshSecret } = require('../config/secrets');
     let refreshDecoded;
     try {
-      refreshDecoded = jwt.verify(refreshTk, jwtRefreshSecret);
+      refreshDecoded = jwt.verify(refreshTk, jwtRefreshSecret, { algorithms: ['HS256'] });
     } catch {
       return res.status(403).json({
         success: false,
@@ -439,7 +445,10 @@ const refreshToken = (req, res) => {
 
     let decoded;
     try {
-      decoded = jwt.verify(accessToken, JWT_SECRET, { ignoreExpiration: true });
+      decoded = jwt.verify(accessToken, JWT_SECRET, {
+        algorithms: ['HS256'],
+        ignoreExpiration: true,
+      });
     } catch {
       return res.status(403).json({ success: false, error: 'Invalid access token' });
     }

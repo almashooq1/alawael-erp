@@ -342,7 +342,9 @@ class SSOService {
   async refreshAccessToken(sessionId, refreshToken) {
     let decoded;
     try {
-      decoded = jwt.verify(refreshToken, this.JWT_SECRET);
+      // Pin to HS256 — the other verify in this file (line 537) is
+      // already explicit; matching that pattern across the surface.
+      decoded = jwt.verify(refreshToken, this.JWT_SECRET, { algorithms: ['HS256'] });
     } catch (_err) {
       throw new Error('Invalid or expired refresh token');
     }

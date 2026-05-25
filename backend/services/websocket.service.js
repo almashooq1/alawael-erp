@@ -52,7 +52,9 @@ class WebSocketService {
         return next(new Error('Authentication token required'));
       }
 
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      // Pin algorithm — sockets bypass HTTP middleware, so this is the
+      // sole verification surface for realtime channels.
+      const decoded = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ['HS256'] });
       socket.userId = decoded.id;
       socket.userRole = decoded.role;
 

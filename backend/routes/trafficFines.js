@@ -7,6 +7,7 @@ const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 router.use(requireBranchAccess);
@@ -31,7 +32,7 @@ router.get('/', async (req, res) => {
     ]);
     res.json({ success: true, data, pagination: { page: +page, limit: +limit, total } });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'trafficFines');
   }
 });
 
@@ -56,7 +57,7 @@ router.get('/:id', async (req, res) => {
     if (!fine) return res.status(404).json({ success: false, message: 'Traffic fine not found' });
     res.json({ success: true, data: fine });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'trafficFines');
   }
 });
 
@@ -119,7 +120,7 @@ router.get('/stats/summary', async (req, res) => {
       data: { total, unpaid, totalAmount: (totalAmount[0] || { total: 0 }).total },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'trafficFines');
   }
 });
 

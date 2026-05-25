@@ -7,6 +7,7 @@ const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 router.use(requireBranchAccess);
@@ -26,7 +27,7 @@ router.get('/', async (req, res) => {
     ]);
     res.json({ success: true, data, pagination: { page: +page, limit: +limit, total } });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'licenses');
   }
 });
 
@@ -51,7 +52,7 @@ router.get('/:id', async (req, res) => {
     if (!license) return res.status(404).json({ success: false, message: 'License not found' });
     res.json({ success: true, data: license });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'licenses');
   }
 });
 
@@ -116,7 +117,7 @@ router.get('/expiring/soon', async (req, res) => {
       .lean();
     res.json({ success: true, data, count: data.length });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'licenses');
   }
 });
 

@@ -41,6 +41,7 @@ const { authenticateToken, requireRole } = require('../middleware/auth');
 const Device = require('../models/AssistiveDevice');
 const Beneficiary = require('../models/Beneficiary');
 const safeError = require('../utils/safeError');
+const { escapeRegex } = require('../utils/sanitize');
 
 router.use(authenticateToken);
 
@@ -126,7 +127,11 @@ router.get('/', requireRole(READ_ROLES), async (req, res) => {
       filter.availability = String(req.query.availability);
     }
     if (req.query.assetTag) {
-      filter.assetTag = new RegExp(String(req.query.assetTag).slice(0, 50), 'i');
+      // escapeRegex defangs catastrophic-backtracking patterns like
+      // `(a+)+$` that would otherwise let the caller pin a Mongo query
+      // for minutes / seconds via ReDoS. Slice keeps the input bounded
+      // even after escaping.
+      filter.assetTag = new RegExp(escapeRegex(String(req.query.assetTag).slice(0, 50)), 'i');
     }
     const p = Math.max(1, parseInt(req.query.page, 10) || 1);
     const l = Math.min(200, Math.max(1, parseInt(req.query.limit, 10) || 50));

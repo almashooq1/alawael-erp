@@ -27,6 +27,7 @@ const { authenticateToken, requireRole } = require('../middleware/auth');
 const Cheque = require('../models/Cheque');
 const JournalEntry = require('../models/finance/JournalEntry');
 const svc = require('../services/finance/chequeService');
+const { escapeRegex } = require('../utils/sanitize');
 
 const READ_ROLES = [
   'admin',
@@ -88,7 +89,11 @@ router.get('/', requireRole(READ_ROLES), async (req, res) => {
     if (req.query.status) filter.status = req.query.status;
     if (req.query.type) filter.type = req.query.type;
     if (req.query.branchId) filter.branch_id = req.query.branchId;
-    if (req.query.payee) filter.payee = new RegExp(String(req.query.payee), 'i');
+    if (req.query.payee) {
+      // escapeRegex + bound length — without these, a payee=`(a+)+$`-style
+      // search pattern can pin the Mongo query in catastrophic backtracking.
+      filter.payee = new RegExp(escapeRegex(String(req.query.payee).slice(0, 100)), 'i');
+    }
     const limit = Math.min(Number(req.query.limit) || 50, 200);
     const docs = await Cheque.find(filter).limit(limit).lean();
     ok(res, { count: docs.length, items: docs });

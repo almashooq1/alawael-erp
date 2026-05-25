@@ -341,7 +341,14 @@ class OTPService {
       });
     }
 
-    // للتجربة - محاكاة الإرسال
+    // Dev-only fallback — log the OTP so a developer with the box can
+    // complete the flow. In production this would leak fresh, valid
+    // OTPs to monitoring/log pipelines that grant account access to
+    // anyone with log read; refuse-to-issue is the safer failure mode.
+    if (process.env.NODE_ENV === 'production') {
+      logger.error('[otp] email service not configured — refusing to issue OTP in production');
+      throw new Error('OTP delivery unavailable — please contact support');
+    }
     logger.info(`📧 [DEV] OTP for ${email}: ${otp}`);
     return { success: true, method: 'email', messageId: `dev_${Date.now()}` };
   }
@@ -366,7 +373,11 @@ class OTPService {
       logger.error('SMS Error:', error);
     }
 
-    // للتجربة - محاكاة الإرسال
+    // Dev-only fallback (see sendOTPViaEmail comment).
+    if (process.env.NODE_ENV === 'production') {
+      logger.error('[otp] SMS service not configured — refusing to issue OTP in production');
+      throw new Error('OTP delivery unavailable — please contact support');
+    }
     logger.info(`📱 [DEV] OTP for ${phone}: ${otp}`);
     return { success: true, method: 'sms', messageId: `dev_${Date.now()}` };
   }
@@ -406,7 +417,11 @@ class OTPService {
       logger.error('WhatsApp Error:', error);
     }
 
-    // للتجربة - محاكاة الإرسال
+    // Dev-only fallback (see sendOTPViaEmail comment).
+    if (process.env.NODE_ENV === 'production') {
+      logger.error('[otp] WhatsApp service not configured — refusing to issue OTP in production');
+      throw new Error('OTP delivery unavailable — please contact support');
+    }
     logger.info(`💬 [DEV] WhatsApp OTP for ${phone}: ${otp}`);
     return { success: true, method: 'whatsapp', messageId: `dev_${Date.now()}` };
   }

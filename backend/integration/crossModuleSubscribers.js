@@ -567,25 +567,12 @@ function createSubscribers(integrationBus, moduleConnector) {
     },
   });
 
-  // ─── Auth → Email: Account locked alert ───────────────────────────
-  subscribers.push({
-    name: 'auth:locked → email:alert',
-    pattern: 'auth.account.locked',
-    handler: async event => {
-      if (!emailManager || !event.payload.email) return;
-      try {
-        await emailManager.sendAccountLocked(event.payload.email, {
-          fullName: event.payload.fullName || event.payload.email,
-          reason: event.payload.reason || 'تجاوز عدد المحاولات المسموح',
-          lockDuration: event.payload.lockDuration || '30 دقيقة',
-          ip: event.payload.ip || '',
-        });
-        logger.info(`[CrossModule/Email] Account locked email sent`);
-      } catch (err) {
-        logger.warn(`[CrossModule/Email] Failed to send account locked email:`, err.message);
-      }
-    },
-  });
+  // W397 DELETED: 'auth:locked → email:alert' subscriber.
+  // Listened for 'auth.account.locked' but no contract exists under domain
+  // 'auth' (domainEventContracts has SYSTEM_EVENTS not AUTH_EVENTS). No
+  // producer fires this. Pre-W397 dead code. If account-lockout flow is
+  // needed in the future, add SYSTEM_EVENTS.ACCOUNT_LOCKED contract +
+  // wire from a brute-force-detection middleware/service.
 
   return subscribers;
 }

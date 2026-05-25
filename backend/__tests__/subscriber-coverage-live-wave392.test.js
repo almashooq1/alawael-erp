@@ -143,27 +143,14 @@ function findAllProducedPatterns() {
 // Patterns that DON'T resolve to a contract — typos or domain renames.
 // Removal contract: fix the subscriber's pattern string OR delete the
 // subscriber if no contract should exist.
-const KNOWN_TYPO_PATTERNS = new Set([
-  // W395 fixed 'beneficiary.status.changed' → renamed to canonical
-  // 'beneficiary.beneficiary.status_changed' in crossModuleSubscribers.js.
-  // 'auth.account.locked' — domain 'auth' doesn't exist in
-  // domainEventContracts. There's no AUTH_EVENTS group; auth-related events
-  // live under SYSTEM_EVENTS (USER_LOGGED_IN/OUT, PERMISSION_DENIED). Either
-  // (a) add an AUTH_EVENTS group + ACCOUNT_LOCKED contract, OR (b) move the
-  // subscriber to listen for 'system.auth.account_locked' style + add that
-  // event to SYSTEM_EVENTS. Stakeholder decision pending.
-  'auth.account.locked',
-  // 'system.error.*' — wildcard pattern, but integrationBus dispatch produces
-  // fullEventName `${domain}.${eventType}` so a publish('system', 'system.error',
-  // payload) becomes 'system.system.error' (domain-prefix doubled when eventType
-  // itself starts with the domain name). Subscribers should listen for either
-  // 'system.system.error.*' to match the duplicated form OR publish should use
-  // a non-prefixed eventType like 'error.occurred' under domain='system'.
-  // Two such subscribers exist (lines ~396 + ~545 of crossModuleSubscribers.js)
-  // — both fixable in one cleanup. Stakeholder decision: rename eventType in
-  // contract OR update both subscribers.
-  'system.error.*',
-]);
+// W397 (2026-05-25) cleared both typos:
+//   - 'auth.account.locked' subscriber DELETED (dead code, no contract).
+//   - 'system.error.*' wildcard NOW MATCHES: SYSTEM_EVENTS.ERROR_OCCURRED
+//     eventType renamed 'system.error' → 'error.occurred' so fullEventName
+//     becomes 'system.error.occurred' which matches the 'system.error.*'
+//     wildcard cleanly. Resolves the namespace-prefix duplication issue.
+// BASELINE NOW EMPTY ✅ for typo patterns.
+const KNOWN_TYPO_PATTERNS = new Set([]);
 
 // W394 (2026-05-25) closed most LIVE-registry orphans via modelEventBridge
 // post-save hooks on Employee/LeaveRequest/Invoice/Payment/ClinicalSession/

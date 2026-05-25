@@ -524,7 +524,11 @@ const SYSTEM_EVENTS = {
 
   ERROR_OCCURRED: {
     domain: 'system',
-    eventType: 'system.error',
+    // W397: was 'system.error' — integrationBus prefixes domain so fullEventName
+    // would have been 'system.system.error' (domain doubled), missing the
+    // subscriber wildcard pattern 'system.error.*'. Renamed to 'error.occurred'
+    // so fullEventName='system.error.occurred' which DOES match 'system.error.*'.
+    eventType: 'error.occurred',
     version: 1,
     description: 'حدث خطأ في النظام — System error occurred',
     payload: {

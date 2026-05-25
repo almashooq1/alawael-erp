@@ -93,6 +93,7 @@ const ALLOWED_EVENT_PREFIXES = Object.freeze(
     'auth',
     'cache',
     'system',
+    'error', // W397 — ERROR_OCCURRED renamed from 'system.error' to 'error.occurred'
   ])
 );
 
@@ -135,7 +136,8 @@ const KNOWN_DEAD_CONTRACTS = new Set([
   'medical.RISK_ALERT_RAISED', // risk.alert_raised — no RiskAlert/ClinicalRiskScore model registered for hook
   // attendance — 1 remaining (sweeper)
   'attendance.ABSENCE_DETECTED', // absence.detected — needs daily sweeper
-  // system — 2 remaining (deeper middleware hooks)
+  // system — 3 remaining (deeper middleware hooks)
+  'system.ERROR_OCCURRED', // error.occurred — needs central error-handler middleware producer. W397 renamed eventType from 'system.error' to 'error.occurred' so subscriber wildcard 'system.error.*' matches runtime fullEventName 'system.error.occurred' — but no producer fires yet. Static scan finds no 'error.occurred' literal because subscribers use wildcard.
   'system.PERMISSION_DENIED', // auth.permission_denied — authorization middleware (multiple callsites)
   'system.CACHE_INVALIDATED', // cache.invalidated — cache layer hook (no central point)
 ]);

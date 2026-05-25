@@ -1,8 +1,10 @@
-# Production Cutover — W356–W370 Clinical Services Series
+# Production Cutover — W356–W370 Clinical Services Series (W384 follow-up)
 
-Date: 2026-05-25
+Date: 2026-05-25 (W391 follow-up patch)
 Authors: AlMashooq + Claude Opus 4.7
-Scope: 15 waves (W356–W370), 19 commits, ~13,000 LOC, ~525 drift assertions
+Scope: 15 waves (W356–W370) + W384 (CaregiverSupportProgram graduation) + W390 (aggregator polish), ~22 commits, ~14,500 LOC, ~580 drift assertions
+
+**W391 update**: W384 added an 11th module (`CaregiverSupportProgram`, 18 endpoints, +55 drift assertions) and W390 extended the W381 clinical-services aggregator. Everything below applies to the combined surface.
 
 This document is the ops-facing checklist for activating the W356–W370
 modules in a production environment. It exists because the work was
@@ -48,6 +50,7 @@ their route files being required in `features.registry.js`:
 | W363 | `RespiteBooking`              | `respite_bookings`               | No (event log)                |
 | W368 | `BeneficiaryDietPrescription` | `beneficiary_diet_prescriptions` | **YES** (unique index)        |
 | W369 | `FacilityAsset`               | `facility_assets`                | No (asset catalog)            |
+| W384 | `CaregiverSupportProgram`     | `caregiver_support_programs`     | No (multiple per beneficiary) |
 
 **MongoDB index creation**: Mongoose auto-creates indexes on first model
 use. For prod, run `db.runCommand({listIndexes: <collection>})` after
@@ -76,10 +79,11 @@ All under dual mount: `/api/<path>` AND `/api/v1/<path>`.
 | W363 | `/respite`           | 17        | `authenticateToken` |
 | W368 | `/diet-prescription` | 17        | `authenticateToken` |
 | W369 | `/facility-asset`    | 19        | `authenticateToken` |
+| W384 | `/caregiver-support` | 18        | `authenticateToken` |
 
-**Total: 157 endpoints** added in this series. All use the existing
-`safeError` utility + `requireRole` middleware. No new auth/MFA
-infrastructure required.
+**Total: 175 endpoints** added across this series (157 W356-W370 + 18 W384).
+All use the existing `safeError` utility + `requireRole` middleware. No new
+auth/MFA infrastructure required.
 
 **Role definitions referenced** (some may need adding to the canonical
 role list if absent):
@@ -94,8 +98,11 @@ role list if absent):
 - `compliance` (W369, W360) — read
 - `inventory` (W359) — write+approve
 - `coach` (W362) — write
-- `social_worker` (W361, W363) — write
+- `social_worker` (W361, W363, W384) — write
 - `kitchen` (W368) — read
+- `psychologist` (W384) — clinical write
+- `counselor` (W384) — clinical write
+- `family_coordinator` (W384) — write
 
 If any of these are missing from your auth-provider role list, add them
 before activating the matching module's UI. Backend won't reject them
@@ -119,9 +126,9 @@ const entry = canonicalEntry('SeizureEvent');
 Use these from validator middleware (e.g. `validateBody(canonical.X)`)
 to centralize input validation against the canonical contract.
 
-Registry total grew **11 → 21 entries**. Drift-detection lib
-(`mongoose-drift.lib.js`) can now compare any Mongoose schema against
-its canonical Zod equivalent.
+Registry total grew **11 → 22 entries** (21 W356-W369 + W384 caregiver-support).
+Drift-detection lib (`mongoose-drift.lib.js`) can now compare any Mongoose
+schema against its canonical Zod equivalent.
 
 ---
 
@@ -193,9 +200,9 @@ end state.
 
 ## 6. Sprint suite gating (W365 + W370)
 
-12 drift guards added to `backend/sprint-tests.txt`:
+13 drift guards added to `backend/sprint-tests.txt` (12 W356-W370 + 1 W384):
 
-```
+```text
 __tests__/seizure-log-wave356.test.js
 __tests__/safeguarding-wave357.test.js
 __tests__/communication-aid-wave358.test.js
@@ -208,44 +215,49 @@ __tests__/clinical-sweepers-wave364.test.js
 __tests__/canonical-schemas-wave366.test.js
 __tests__/diet-prescription-wave368.test.js
 __tests__/facility-asset-wave369.test.js
+__tests__/caregiver-support-program-wave384.test.js
 ```
 
 Run via `cd backend && npm run test:sprint` (the main CI gate, ~13 min
-for the full ~225-file suite). The 12 W356-W370 guards together add
-~525 assertions, all static-analysis (no MongoMemoryServer required) —
-they execute in under 10 seconds total.
+for the full ~225-file suite). The 13 guards together add **~580
+assertions** (525 W356-W370 + 55 W384), all static-analysis (no
+MongoMemoryServer required) — they execute in under 11 seconds total.
 
 ---
 
-## 7. Frontend follow-up (alawael-rehab-platform repo)
+## 7. Frontend (alawael-rehab-platform repo) — DELIVERED W372-W376 + W384
 
-Not built in this session. Each new HTTP surface needs a page in
-`apps/web-admin/src/app/(dashboard)/` with the standard patterns:
+All 11 surfaces shipped 2026-05-25 across `apps/web-admin/src/app/(dashboard)/`:
 
-- List page with pagination + filters
-- Detail page reading `GET /:id`
-- Form / action buttons mapped to the relevant POST/PATCH endpoints
-- Arabic-first RTL with English fallback (per project convention)
-
-Recommended page structure (10 new directories needed):
-
-```
+```text
 apps/web-admin/src/app/(dashboard)/
-  seizure-log/              ← W356
-  safeguarding/             ← W357
-  communication-aid/        ← W358
-  assistive-devices/        ← W359
-  cbahi/                    ← W360 (+ W367 expansion)
-  transition-plans/         ← W361
-  adaptive-sports/          ← W362
-  respite-bookings/         ← W363
-  diet-prescriptions/       ← W368
-  facility-assets/          ← W369
+  seizure-log/              ← W356 (list + [id] + new — W372/W374)
+  safeguarding/             ← W357 (W373/W375/W376)
+  communication-aid/        ← W358 (W373/W375/W376)
+  assistive-devices/        ← W359 (W373/W375/W376)
+  cbahi/                    ← W360 (+ W367 expansion — W373/W375/W376)
+  transition-plans/         ← W361 (W373/W375/W376)
+  adaptive-sports/          ← W362 (W373/W375/W376)
+  respite/                  ← W363 (W373/W375/W376)
+  diet-prescription/        ← W368 (W373/W375/W376)
+  facility-assets/          ← W369 (W373/W375/W376)
+  caregiver-support/        ← W384 (list + [id] + new — W384)
+  clinical-services/[id]/   ← W381 cross-surface aggregator (8 cards as of W390)
 ```
 
-Estimate: ~40-80 component-hours total (4-8 hours per surface). Reuse
-existing `beneficiaries/` page patterns for list/detail; reuse
-`quality/incidents/` page patterns for event-log surfaces.
+Total: **33 new pages** (10 list + 10 detail + 10 new-event forms +
+1 aggregator + 1 deep-link from BeneficiaryMasterFile — W382). All
+use Arabic-first RTL + contextual lifecycle action buttons + Wave-18
+client-side conditional required-field validation. The clinical
+section of `components/layout/nav-items.v2.tsx` registers all 11
+list-page links.
+
+Pattern: `seizure-log` is the reference implementation for event-log
+surfaces; the other 9 follow it line-for-line with field-name swaps.
+`caregiver-support` adopted the same conventions in W384 — conditional
+sections per programType (training shows totalModules; sibling_group
+shows ageRange) + contextual action buttons + Zarit pre/post outcome
+panel.
 
 ---
 
@@ -293,7 +305,7 @@ curl http://api/api/facility-asset/life-safety # → 401 — correct
 
 # 2. Verify canonical registry
 node -e "console.log(require('./backend/intelligence/canonical').registry.list().length)"
-# Expected: 21
+# Expected: 22  (11 baseline + W356-W369 + W384)
 
 # 3. Verify CBAHI catalog
 node -e "console.log(require('./backend/intelligence/cbahi-standards.registry').STANDARDS.length)"
@@ -313,8 +325,9 @@ cd backend && npx jest --config=jest.config.js \
   __tests__/canonical-schemas-wave366.test.js \
   __tests__/diet-prescription-wave368.test.js \
   __tests__/facility-asset-wave369.test.js \
+  __tests__/caregiver-support-program-wave384.test.js \
   --no-coverage
-# Expected: 12 suites pass, ~525 assertions in <10s
+# Expected: 13 suites pass, ~580 assertions in <11s
 ```
 
 If any of the above returns differently than expected, do not enable the
@@ -327,7 +340,14 @@ pass before activation.
 
 - All 19 commits of the W356-W370 series are on `origin/main` between
   `2258c8176` (W356) and `e1c0788bc` (W370).
+- W384 CaregiverSupportProgram backend at `74e37c814`; frontend trio at
+  alawael-rehab-platform commit `20921e8`. W390 aggregator + docs at
+  `4a3369de7` (backend) + `2c78c3b` (frontend).
 - Memory: `~/.claude/projects/c--Users-x-be-OneDrive-----------04-10-2025-66666/memory/project_w356_w363_gap_close_series_2026-05-25.md`
-- Original module audit: `MODULE_AUDIT_2026-05-25.md` (in this directory).
+- Original module audit: `MODULE_AUDIT_2026-05-25.md` (in this directory)
+  — Caregiver/sibling support row marked CLOSED W384.
 - ADR-026 (only stakeholder-blocked item touching this series):
   [decisions/026-iep-ifsp-care-plan-fragmentation.md](decisions/026-iep-ifsp-care-plan-fragmentation.md).
+- CLAUDE.md "Wave numbers W356-W390 consumed" line documents the parallel
+  agent collisions on W381/W383/W384/W390 (clinical-services series vs.
+  event-bus bridge series; both attributions preserved).

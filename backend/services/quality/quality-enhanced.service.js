@@ -213,7 +213,7 @@ class QualityEnhancedService {
     const total = findings.length;
     const complianceRate = total > 0 ? Math.round((conformities / total) * 100 * 10) / 10 : 0;
 
-    return Audit.findByIdAndUpdate(
+    const audit = await Audit.findByIdAndUpdate(
       auditId,
       {
         findings,
@@ -228,6 +228,25 @@ class QualityEnhancedService {
       },
       { new: true }
     );
+
+    // W381: emit canonical contract event. Envelope per QUALITY_EVENTS.AUDIT_COMPLETED.
+    // Lazy-load qualityEventBus (W349 pattern) to avoid hard dep in test envs.
+    try {
+      const busModule = require('./qualityEventBus.service');
+      const bus = typeof busModule.getDefault === 'function' ? busModule.getDefault() : null;
+      if (bus) {
+        bus.emit('quality.audit_completed', {
+          auditId: String(auditId),
+          score: complianceRate,
+          findingsCount: total,
+          criticalFindings: majorNc,
+        });
+      }
+    } catch {
+      /* qualityEventBus optional */
+    }
+
+    return audit;
   }
 
   // ============================================================

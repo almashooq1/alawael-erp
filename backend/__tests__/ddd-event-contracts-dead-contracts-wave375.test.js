@@ -89,25 +89,19 @@ const SCAN_SKIP_DIRS = new Set([
 //
 // To regenerate this set: temporarily comment out the KNOWN_DEAD_CONTRACTS
 // filter in it.a and run — failing assertion will list current dead state.
-// W377 (2026-05-25) reduced baseline from 31 → 15 by deleting 16 dead contracts
-// (4 in-group + 8 whole groups) per ADR-027. Remaining 15 entries are the
-// "wire" recommendations — contracts that ADR-027 says should be wired to real
-// producers in domain services rather than deleted. As each is wired, remove
-// the entry in the SAME commit (W375.b ratchet-down test catches stale).
+// Baseline progression: 31 (W375 discovery) → 15 (W377 deletions) → 12 (W379
+// episodes wired) → 4 (W380 BaseService-emit batch wired 8 events) → 1 (W381
+// quality via qualityEventBus + ai-recommendations via module emitter).
+//
+// Single remaining entry: assessments.OVERDUE requires a NEW cron sweeper +
+// integration with notification/dashboards consumers. Cost of building that
+// (scheduler + service method + tests) significantly exceeds the marginal
+// benefit of clearing the last entry. Deferred to a stakeholder-scoped wave
+// where the overdue-detection cadence + notification routing get explicit
+// decisions (e.g., daily/hourly sweep, severity thresholds, escalation chain).
 const KNOWN_DEAD_CONTRACTS = new Set([
-  // core (BENEFICIARY_DDD_EVENTS) — 0 dead, 3 alive after W380 wired afterUpdate hook
-  // episodes (EPISODE_EVENTS) — 0 dead, 3 alive after W379
   // assessments (ASSESSMENT_EVENTS) — 1 dead, 1 alive after W380 wired completeAssessment
-  'assessments.OVERDUE', // assessment.overdue — needs separate sweeper, W381+ scope
-  // care-plans (CARE_PLAN_EVENTS) — 0 dead, 2 alive after W380 wired activate/complete
-  // sessions (SESSION_EVENTS) — 0 dead, 1 alive (session.completed via seed)
-  // goals (GOAL_EVENTS) — 0 dead, 1 alive after W380 wired achieveGoal
-  // quality (QUALITY_EVENTS) — 2 dead, 0 alive — needs qualityEventBus integration (W381+)
-  'quality.AUDIT_COMPLETED', // quality.audit_completed
-  'quality.CORRECTIVE_ACTION_REQUIRED', // quality.corrective_action_required
-  // behavior (BEHAVIOR_EVENTS) — 0 dead, 2 alive after W380 wired createRecord + createPlan
-  // ai-recommendations — 1 dead, 1 alive (ai.risk_elevated)
-  'ai-recommendations.GENERATED', // ai.recommendation_generated — function-only service, W381+ scope
+  'assessments.OVERDUE', // assessment.overdue — needs sweeper + cadence stakeholder decision
 ]);
 
 function walkJs(dir, out = []) {

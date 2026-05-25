@@ -30,7 +30,15 @@
  */
 
 const mongoose = require('mongoose');
+const { EventEmitter } = require('events');
 const lib = require('../intelligence/ai-recommendation-lifecycle.lib');
+
+// W381 — module-level EventEmitter so this function-only service can fire
+// canonical contract events (ai.recommendation_generated). Listeners can
+// subscribe via aiRecommendationService.bus.on('ai.recommendation_generated', h).
+// Pattern: same as integration/dddCrossModuleSubscribers.js uses for the
+// cross-module wiring it does (which only listens to ai.risk_elevated today).
+const bus = new EventEmitter();
 
 // Lazy model lookup so service can be required before model registration
 // (mirrors the W214 pattern used elsewhere in this codebase).
@@ -98,6 +106,22 @@ async function createDraft({
     doc.expiresAt = lib.computeExpiry(new Date());
   }
   await doc.save();
+
+  // W381: emit canonical contract event for any bundle that surfaced to the
+  // supervisor queue (PENDING_REVIEW) or stays in DRAFT for tuning. DISCARDED
+  // returns early at line 92 — those are intentionally silent (confidence too
+  // low to warrant downstream attention).
+  // Envelope per AI_RECOMMENDATION_EVENTS.GENERATED.
+  // Field mapping: ruleId ← type (the bundle.type is the closest analog to
+  // "which rule generated this" in the W334 lifecycle); action ← draftAction.
+  bus.emit('ai.recommendation_generated', {
+    recommendationId: String(doc._id),
+    beneficiaryId: String(beneficiaryId),
+    ruleId: type,
+    confidence,
+    action: draftAction || 'review',
+  });
+
   return doc;
 }
 
@@ -193,4 +217,5 @@ module.exports = {
   reject,
   sweepExpired,
   listPending,
+  bus, // W381: module-level EventEmitter for canonical contract events
 };

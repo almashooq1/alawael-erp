@@ -4,19 +4,24 @@ Date: 2026-05-25
 
 ## Status
 
-🟠 **Partially executed (W377, 2026-05-25). Deletions complete; wirings pending stakeholder per-group sign-off.**
+✅ **Substantially executed (W377 + W379 + W380 + W381, 2026-05-25). Baseline 31 → 1 (97% cleared).**
 
-**W377 deletion progress** (commit `79783ab81`): 16 of the 31 dead contracts deleted per the "delete" recommendations in the per-group table below. Registry shrunk from 34 events / 17 groups → **18 events / 9 groups**. W375 baseline shrunk 31 → 15.
+**Progression**:
 
-**W379 wiring progress** (commit pending): **episodes group fully wired (3 events)**. `domains/episodes/index.js` ad-hoc emits renamed to contract eventTypes with full envelopes:
+| Wave | Action                                                              | Baseline after |
+| ---- | ------------------------------------------------------------------- | -------------- |
+| W377 | Deleted 16 contracts (4 in-group + 8 whole-group)                   | 15             |
+| W379 | Wired 3 episodes events (rename ad-hoc)                             | 12             |
+| W380 | Wired 8 events across 5 BaseService-extending services              | 4              |
+| W381 | Wired 3 events (ai-recommendations + 2 quality via qualityEventBus) | **1**          |
 
-- `'episodeCreated'` → `'episode.created'` (afterCreate hook, payload: `{episodeId, beneficiaryId, phase}`)
-- `'phaseAdvanced'` → `'episode.phase_transitioned'` (advancePhase, payload: `{episodeId, beneficiaryId, fromPhase, toPhase, performedBy}`)
-- `'episodeDischarged'` → `'episode.closed'` (dischargeEpisode, payload: `{episodeId, beneficiaryId, outcome, durationDays}`)
+**Single remaining entry**: `assessments.OVERDUE`. Requires NEW cron sweeper + notification/dashboards routing decisions. Cost of building that ≫ marginal benefit of clearing the last entry. Deferred pending stakeholder-scoped wave (cadence + severity thresholds + escalation).
 
-Safe because: pre-W379 grep confirmed **zero external subscribers** for any of these ad-hoc names — they were emit-only-no-listen. Rename moves them onto the canonical contract without breaking anything. W375 baseline shrunk 15 → 12.
+**W381 wiring details** (commit pending):
 
-**W380+ wiring pending**: 12 remaining dead contracts (core 2, assessments 2, care-plans 2, goals 1, quality 2, behavior 2, ai-recommendations 1). These need ADDING new producer code (no pre-existing ad-hoc emits to rename), so each is a deeper service edit than episodes was.
+- `ai.recommendation_generated` — `services/aiRecommendation.service.js` createDraft. Function-only service got a module-level `EventEmitter` (`bus`) exported alongside the API. Field mapping: `ruleId` ← bundle `type`; `action` ← `draftAction`. Emitted for DRAFT (tuning band) + PENDING_REVIEW (supervisor queue); silenced for DISCARDED (low-confidence noise).
+- `quality.audit_completed` — `services/quality/quality-enhanced.service.js` submitAuditChecklist (after Audit.findByIdAndUpdate to status:'completed'). Uses lazy-loaded qualityEventBus (W349 pattern). Payload: `{auditId, score (from complianceRate), findingsCount (total), criticalFindings (majorNc)}`.
+- `quality.corrective_action_required` — `services/quality/capa-producers.service.js` createCapaFromAuditFinding (after capaService.createCapaItem resolves). Only fires from audit producer (contract specifies `auditId`); RCA + FMEA producers don't fire this event. Payload: `{auditId, finding, severity (from finding.type), assigneeId (from ownerUserId)}`.
 
 ### Dual-registry finding (W375 follow-up, 2026-05-25)
 

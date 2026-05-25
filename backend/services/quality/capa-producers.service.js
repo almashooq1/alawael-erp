@@ -36,6 +36,18 @@
 
 const lib = require('../../intelligence/capa-lifecycle.lib');
 
+// W381 — lazy qualityEventBus loader (W349 pattern) so producers can emit
+// canonical contract events without forcing the bus as a hard dep. Returns
+// null if the bus isn't available (test envs, partial bootstraps).
+function _getBus() {
+  try {
+    const busModule = require('./qualityEventBus.service');
+    return typeof busModule.getDefault === 'function' ? busModule.getDefault() : null;
+  } catch {
+    return null;
+  }
+}
+
 const DEFAULT_DUE_DAYS = 30;
 
 function _defaultDueDate(days = DEFAULT_DUE_DAYS) {
@@ -114,7 +126,7 @@ function createCapaProducers({ capaService } = {}) {
       err.code = 'INVALID_INPUT';
       throw err;
     }
-    return capaService.createCapaItem({
+    const capa = await capaService.createCapaItem({
       source: {
         module: 'audit',
         refId: occurrenceDoc._id,
@@ -132,6 +144,22 @@ function createCapaProducers({ capaService } = {}) {
       verificationCriteria: finding.evidence ? `Evidence on file: ${finding.evidence}` : null,
       createdBy,
     });
+
+    // W381: emit canonical contract event. Envelope per
+    // QUALITY_EVENTS.CORRECTIVE_ACTION_REQUIRED. Only fires from the audit
+    // producer (contract specifies `auditId`); RCA + FMEA producers don't fire
+    // this event (their findings aren't "audit findings" in the contract sense).
+    const bus = _getBus();
+    if (bus) {
+      bus.emit('quality.corrective_action_required', {
+        auditId: String(occurrenceDoc._id),
+        finding: finding.description || `finding-${findingId}`,
+        severity: finding.type || 'observation',
+        assigneeId: String(owner),
+      });
+    }
+
+    return capa;
   }
 
   async function createCapaFromRcaRootCause(input) {

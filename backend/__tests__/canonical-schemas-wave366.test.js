@@ -25,11 +25,14 @@ const W356_W363_ENTRIES = [
   { name: 'TransitionPlan', modulePath: 'Life-Stage Transitions' },
   { name: 'AdaptiveSportsProgram', modulePath: 'Adaptive Sports' },
   { name: 'RespiteBooking', modulePath: 'Respite Care' },
+  // W370 additions
+  { name: 'BeneficiaryDietPrescription', modulePath: 'Clinical Diet Orders' },
+  { name: 'FacilityAsset', modulePath: 'Facility Management' },
 ];
 
-describe('W366 canonical registry — W356-W363 series registered', () => {
-  it('registry total grew to ≥ 19 entries (11 pre-existing + 8 new)', () => {
-    expect(registry.list().length).toBeGreaterThanOrEqual(19);
+describe('W366 + W370 canonical registry — W356-W369 series registered', () => {
+  it('registry total grew to ≥ 21 entries (11 pre-existing + 8 W356-W363 + 2 W368-W369)', () => {
+    expect(registry.list().length).toBeGreaterThanOrEqual(21);
   });
 
   for (const { name, modulePath } of W356_W363_ENTRIES) {
@@ -140,6 +143,31 @@ describe('W366 — minimal-valid payload parses for each entity', () => {
       nightCount: 0,
       emergencyContactName: 'Parent',
       emergencyContactPhone: '+966500000000',
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it('BeneficiaryDietPrescription (W370 addition)', () => {
+    const r = canonical.BeneficiaryDietPrescription.safeParse({
+      beneficiaryId: OID,
+      foodIddsiLevel: 4,
+      drinkIddsiLevel: 2,
+      status: 'active',
+      prescriberDiscipline: 'speech_language_pathologist',
+      prescribedAt: new Date(),
+      nextReviewDue: new Date(Date.now() + 90 * 86400000),
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it('FacilityAsset (W370 addition)', () => {
+    const r = canonical.FacilityAsset.safeParse({
+      assetTag: 'ELEV-001',
+      name: 'Main building elevator',
+      category: 'elevator',
+      branchId: OID,
+      criticality: 'life_safety',
+      status: 'in_service',
     });
     expect(r.success).toBe(true);
   });

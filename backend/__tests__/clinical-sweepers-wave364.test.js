@@ -49,8 +49,9 @@ describe('W364 clinicalSweepersBootstrap — exports', () => {
   });
 });
 
-describe('W364 — 7 sweepers, each env-gated independently', () => {
+describe('W364 + W370 — 11 sweepers, each env-gated independently', () => {
   const envFlags = [
+    // W364 original 7
     'ENABLE_SAFEGUARDING_SLA_SWEEPER',
     'ENABLE_DEVICE_LOAN_SWEEPER',
     'ENABLE_DEVICE_MAINTENANCE_SWEEPER',
@@ -58,6 +59,11 @@ describe('W364 — 7 sweepers, each env-gated independently', () => {
     'ENABLE_TRANSITION_OVERDUE_SWEEPER',
     'ENABLE_CBAHI_REASSESSMENT_SWEEPER',
     'ENABLE_AAC_REASSESSMENT_SWEEPER',
+    // W370 additions (4) — for W368 (diet) + W369 (facility) modules
+    'ENABLE_DIET_REVIEW_SWEEPER',
+    'ENABLE_FACILITY_INSPECTION_SWEEPER',
+    'ENABLE_FACILITY_MAINTENANCE_SWEEPER',
+    'ENABLE_FACILITY_CERT_SWEEPER',
   ];
 
   for (const flag of envFlags) {
@@ -67,10 +73,15 @@ describe('W364 — 7 sweepers, each env-gated independently', () => {
     });
   }
 
-  it('counts scheduledCount as it wires each sweeper', () => {
+  it('counts scheduledCount as it wires each sweeper (W364: 7, W370: +4 = 11)', () => {
     expect(SRC).toMatch(/let\s+scheduledCount\s*=\s*0/);
     const incs = SRC.match(/scheduledCount\+\+/g) || [];
-    expect(incs.length).toBe(7);
+    expect(incs.length).toBe(11);
+  });
+
+  it('logger summary reports n/11 enabled (post-W370)', () => {
+    expect(SRC).toMatch(/all 11 disabled/);
+    expect(SRC).toMatch(/clinical sweepers wired:\s*\$\{scheduledCount\}\/11/);
   });
 });
 
@@ -98,6 +109,14 @@ describe('W364 — sweepers reference correct models', () => {
   it('CommunicationAidProfile via safeModel', () => {
     expect(SRC).toMatch(/safeModel\(['"]CommunicationAidProfile['"]\)/);
   });
+
+  it('BeneficiaryDietPrescription via safeModel (W370)', () => {
+    expect(SRC).toMatch(/safeModel\(['"]BeneficiaryDietPrescription['"]\)/);
+  });
+
+  it('FacilityAsset via safeModel (W370)', () => {
+    expect(SRC).toMatch(/safeModel\(['"]FacilityAsset['"]\)/);
+  });
 });
 
 describe('W364 — cron schedules', () => {
@@ -110,6 +129,11 @@ describe('W364 — cron schedules', () => {
     ['0 10 * * *', 'transition overdue (daily 10:00)'],
     ['0 6 * * 1', 'CBAHI reassessment (weekly Mon 06:00)'],
     ['30 6 * * 1', 'AAC reassessment (weekly Mon 06:30)'],
+    // W370 additions
+    ['0 7 * * 1', 'diet prescription review (weekly Mon 07:00)'],
+    ['0 5 * * *', 'facility inspection (daily 05:00)'],
+    ['30 5 * * *', 'facility maintenance (daily 05:30)'],
+    ['0 6 * * *', 'facility certificate (daily 06:00)'],
   ];
 
   for (const [expr, label] of schedules) {

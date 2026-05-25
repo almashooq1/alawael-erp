@@ -305,10 +305,177 @@ function wireClinicalSweepers(app, deps = {}) {
     logger.info('[startup] W358 AAC reassessment sweeper scheduled (weekly Mon 06:30 Asia/Riyadh)');
   }
 
+  // ══════════════════════════════════════════════════════════════════
+  // W370 additions (2026-05-25) — 4 sweepers for W368 + W369 modules.
+  // Brings the total from 7 → 11 env-gated stanzas in this bootstrap.
+  // ══════════════════════════════════════════════════════════════════
+
+  // ── 8) Diet prescription due-review (weekly) ──────────────────────
+  if (process.env.ENABLE_DIET_REVIEW_SWEEPER === 'true') {
+    cron.schedule(
+      '0 7 * * 1',
+      async () => {
+        try {
+          const Rx = safeModel('BeneficiaryDietPrescription');
+          if (!Rx) return;
+          const now = new Date();
+          const due = await Rx.find({
+            status: 'active',
+            nextReviewDue: { $ne: null, $lt: now },
+          })
+            .select(
+              '_id beneficiaryId branchId nextReviewDue prescriberDiscipline npo enteralFeeding.active'
+            )
+            .limit(500)
+            .lean();
+          logger.info(`[diet-rx] weekly review sweep: ${due.length} prescriptions due`);
+          for (const r of due.slice(0, 20)) {
+            const flags = [];
+            if (r.npo) flags.push('NPO');
+            if (r.enteralFeeding && r.enteralFeeding.active) flags.push('enteral');
+            logger.warn(
+              `[diet-rx] review due rx=${r._id} beneficiary=${r.beneficiaryId} discipline=${r.prescriberDiscipline} ${flags.length ? '[' + flags.join('+') + '] ' : ''}due=${r.nextReviewDue}`
+            );
+          }
+        } catch (err) {
+          logger.error('[diet-rx] review sweeper failed', err);
+        }
+      },
+      TZ
+    );
+    scheduledCount++;
+    logger.info(
+      '[startup] W368 diet prescription review sweeper scheduled (weekly Mon 07:00 Asia/Riyadh)'
+    );
+  }
+
+  // ── 9) FacilityAsset due-inspection ───────────────────────────────
+  if (process.env.ENABLE_FACILITY_INSPECTION_SWEEPER === 'true') {
+    cron.schedule(
+      '0 5 * * *',
+      async () => {
+        try {
+          const Asset = safeModel('FacilityAsset');
+          if (!Asset) return;
+          const now = new Date();
+          const due = await Asset.find({
+            status: { $ne: 'retired' },
+            nextInspectionDue: { $ne: null, $lt: now },
+          })
+            .select('_id assetTag branchId category criticality nextInspectionDue')
+            .limit(500)
+            .lean();
+          // Surface life_safety items first
+          due.sort((a, b) =>
+            a.criticality === 'life_safety' && b.criticality !== 'life_safety'
+              ? -1
+              : b.criticality === 'life_safety' && a.criticality !== 'life_safety'
+                ? 1
+                : 0
+          );
+          const lifeSafetyCount = due.filter(a => a.criticality === 'life_safety').length;
+          logger.info(
+            `[facility] daily inspection sweep: ${due.length} assets due (life_safety=${lifeSafetyCount})`
+          );
+          for (const a of due.slice(0, 20)) {
+            logger.warn(
+              `[facility] inspection due asset=${a._id} tag=${a.assetTag} category=${a.category} criticality=${a.criticality} due=${a.nextInspectionDue}`
+            );
+          }
+        } catch (err) {
+          logger.error('[facility] inspection sweeper failed', err);
+        }
+      },
+      TZ
+    );
+    scheduledCount++;
+    logger.info('[startup] W369 facility inspection sweeper scheduled (daily 05:00 Asia/Riyadh)');
+  }
+
+  // ── 10) FacilityAsset due-maintenance ─────────────────────────────
+  if (process.env.ENABLE_FACILITY_MAINTENANCE_SWEEPER === 'true') {
+    cron.schedule(
+      '30 5 * * *',
+      async () => {
+        try {
+          const Asset = safeModel('FacilityAsset');
+          if (!Asset) return;
+          const now = new Date();
+          const due = await Asset.find({
+            status: { $ne: 'retired' },
+            nextMaintenanceDue: { $ne: null, $lt: now },
+          })
+            .select('_id assetTag branchId category criticality nextMaintenanceDue')
+            .limit(500)
+            .lean();
+          logger.info(`[facility] daily maintenance sweep: ${due.length} assets due`);
+          for (const a of due.slice(0, 20)) {
+            logger.warn(
+              `[facility] maintenance due asset=${a._id} tag=${a.assetTag} category=${a.category} due=${a.nextMaintenanceDue}`
+            );
+          }
+        } catch (err) {
+          logger.error('[facility] maintenance sweeper failed', err);
+        }
+      },
+      TZ
+    );
+    scheduledCount++;
+    logger.info('[startup] W369 facility maintenance sweeper scheduled (daily 05:30 Asia/Riyadh)');
+  }
+
+  // ── 11) FacilityAsset expired-certificate ─────────────────────────
+  if (process.env.ENABLE_FACILITY_CERT_SWEEPER === 'true') {
+    cron.schedule(
+      '0 6 * * *',
+      async () => {
+        try {
+          const Asset = safeModel('FacilityAsset');
+          if (!Asset) return;
+          const now = new Date();
+          const withExpired = await Asset.find({
+            status: { $ne: 'retired' },
+            'certificates.expiresAt': { $lt: now },
+          })
+            .select('_id assetTag branchId criticality certificates')
+            .limit(500)
+            .lean();
+          let totalExpired = 0;
+          let lifeSafetyExpired = 0;
+          for (const a of withExpired) {
+            const expired = (a.certificates || []).filter(
+              c => c.expiresAt && new Date(c.expiresAt).getTime() < now.getTime()
+            );
+            totalExpired += expired.length;
+            if (a.criticality === 'life_safety' && expired.length > 0) lifeSafetyExpired++;
+          }
+          logger.info(
+            `[facility] daily certificate sweep: ${withExpired.length} assets with ${totalExpired} expired certs (life_safety=${lifeSafetyExpired})`
+          );
+          for (const a of withExpired.slice(0, 20)) {
+            const expired = (a.certificates || []).filter(
+              c => c.expiresAt && new Date(c.expiresAt).getTime() < now.getTime()
+            );
+            for (const c of expired) {
+              logger.warn(
+                `[facility] cert expired asset=${a._id} tag=${a.assetTag} criticality=${a.criticality} cert=${c.number || c.name || '?'} authority=${c.issuingAuthority} expired=${c.expiresAt}`
+              );
+            }
+          }
+        } catch (err) {
+          logger.error('[facility] certificate sweeper failed', err);
+        }
+      },
+      TZ
+    );
+    scheduledCount++;
+    logger.info('[startup] W369 facility certificate sweeper scheduled (daily 06:00 Asia/Riyadh)');
+  }
+
   if (scheduledCount === 0) {
-    logger.info('[startup] clinical sweepers: all 7 disabled (no ENABLE_*_SWEEPER=true)');
+    logger.info('[startup] clinical sweepers: all 11 disabled (no ENABLE_*_SWEEPER=true)');
   } else {
-    logger.info(`[startup] clinical sweepers wired: ${scheduledCount}/7 enabled`);
+    logger.info(`[startup] clinical sweepers wired: ${scheduledCount}/11 enabled`);
   }
 }
 

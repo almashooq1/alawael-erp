@@ -37,6 +37,9 @@ const ENTRIES = [
   require('./schemas/transition-plan.canonical'),
   require('./schemas/adaptive-sports-program.canonical'),
   require('./schemas/respite-booking.canonical'),
+  // W368-W369 additions (2026-05-25):
+  require('./schemas/beneficiary-diet-prescription.canonical'),
+  require('./schemas/facility-asset.canonical'),
 ];
 
 for (const entry of ENTRIES) registry.register(entry);

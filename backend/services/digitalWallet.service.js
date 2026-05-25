@@ -350,24 +350,51 @@ class DigitalWalletService {
    * إضافة نقاط الولاء
    */
   async addLoyaltyPoints(wallet, points, type, sourceType = null, sourceId = null, userId) {
-    const before = wallet.loyaltyPoints;
-    wallet.loyaltyPoints += points;
-    if (!wallet.isModified) await wallet.save();
+    // W426: atomic $inc fixes TWO bugs at once:
+    //   (1) Lost-update race — pre-W426 `wallet.loyaltyPoints += points;
+    //       wallet.save();` could lose concurrent earnings (two parallel
+    //       earn-events for balance=500 each adding 10 might both read 500
+    //       and both write 510 instead of 520).
+    //   (2) save-never-called bug — pre-W426 guarded `save()` with
+    //       `if (!wallet.isModified)`. `wallet.isModified` is a Mongoose
+    //       METHOD (function reference, always truthy), so `!truthy ===
+    //       false` and save() was effectively never called. Points were
+    //       added in-memory but never persisted to Mongo. The returned
+    //       `wallet` object showed the new balance but the next fetch
+    //       showed the old one.
+    // Both closed in one shot via atomic findByIdAndUpdate $inc.
+    const pts = Number(points);
+    if (!Number.isFinite(pts) || pts <= 0) return wallet;
+    const before = wallet.loyaltyPoints || 0;
+    const updated = await DigitalWallet.findByIdAndUpdate(
+      wallet._id,
+      { $inc: { loyaltyPoints: pts }, $set: { updatedBy: userId } },
+      { new: true }
+    );
+    if (!updated) return wallet;
+    // Mutate the caller's wallet doc so callers that return `updated` see
+    // the true post-state. We can't replace the doc object (callers hold
+    // the reference) but we can sync the points field.
+    wallet.loyaltyPoints = updated.loyaltyPoints;
 
     await LoyaltyPointsTransaction.create({
       branchId: wallet.branchId,
       uuid: uuidv4(),
       walletId: wallet._id,
       type: 'earn',
-      points,
+      points: pts,
       balanceBefore: before,
-      balanceAfter: before + points,
+      // W426: use the actual atomic post-state instead of arithmetic on
+      // possibly-stale `before`. Keeps audit trail accurate under
+      // contention.
+      balanceAfter: updated.loyaltyPoints,
       description: `اكتساب نقاط - ${type}`,
       sourceType,
       sourceId,
       expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // سنة
       createdBy: userId,
     });
+    return wallet;
   }
 
   /**
@@ -505,11 +532,30 @@ class DigitalWalletService {
 
     let expiredCount = 0;
     for (const pts of expired) {
-      const wallet = await DigitalWallet.findById(pts.walletId);
-      if (wallet && wallet.loyaltyPoints >= pts.points) {
-        wallet.loyaltyPoints -= pts.points;
-        await wallet.save();
-
+      // W426: atomic check-and-decrement. The previous code did:
+      //
+      //   const wallet = await DigitalWallet.findById(pts.walletId);
+      //   if (wallet.loyaltyPoints >= pts.points) {
+      //     wallet.loyaltyPoints -= pts.points;
+      //     await wallet.save();
+      //   }
+      //
+      // Race window between findById and save:
+      //   (a) Concurrent user redemption could read the same balance,
+      //       both deduct, both save → balance goes negative (or the
+      //       second save silently lost-update).
+      //   (b) Two ticks of this sweeper (manual re-run during scheduled
+      //       run) both read balance=N, both deduct pts.points twice
+      //       → over-expiry, user loses too many points.
+      // Atomic findOneAndUpdate with `loyaltyPoints: {$gte}` filter
+      // collapses check+update into one Mongo op; insufficient-balance
+      // case simply doesn't match (null result), skipping cleanly.
+      const wallet = await DigitalWallet.findOneAndUpdate(
+        { _id: pts.walletId, loyaltyPoints: { $gte: pts.points } },
+        { $inc: { loyaltyPoints: -pts.points } },
+        { new: true }
+      );
+      if (wallet) {
         await LoyaltyPointsTransaction.create({
           branchId: wallet.branchId,
           uuid: uuidv4(),

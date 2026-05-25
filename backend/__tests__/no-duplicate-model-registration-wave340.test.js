@@ -103,6 +103,12 @@ const KNOWN_DUPLICATE_REGISTRATIONS = new Set([
   'EmailTemplate',
   'WhatsAppConversation',
   'WhatsAppTemplate',
+  // 'LifecyclePolicy' — 2026-05-25 moved to REGISTRATION_ALLOWLIST (defensive
+  //                     lookup-with-fallback pattern in database/ttl-lifecycle-manager.js
+  //                     lines 79-84: try { mongoose.model('LifecyclePolicy') } catch
+  //                     { mongoose.model('LifecyclePolicy', schema) }. Pure lookup-first;
+  //                     fallback is dead code in normal startup. Matches W347 AuditLog +
+  //                     W343 Referral/Task precedents.
   // 'User'      — W341 CONSOLIDATED: seeder now re-exports canonical models/User.js
   // 'Branch'    — W341 CONSOLIDATED: seeder now re-exports canonical models/Branch.js
   // 'Department'— W341 CONSOLIDATED: seeder now re-exports canonical models/Department.js
@@ -243,6 +249,13 @@ const REGISTRATION_ALLOWLIST = new Set([
   // the same try/catch block in the same routes file.
   'BranchSetting',
   'GlobalSetting',
+  // 2026-05-25 — LifecyclePolicy. Same try-lookup-catch-fallback pattern as
+  // W347 AuditLog. Located in database/ttl-lifecycle-manager.js lines 79-84.
+  // Canonical loads first via models/ auto-discovery + LifecyclePolicy.js exists
+  // somewhere in models/ that registers it; the inline fallback in this file
+  // is dead code (only fires if canonical lookup throws, which it doesn't in
+  // normal startup). ALLOWLIST preserves current behavior.
+  'LifecyclePolicy',
 ]);
 
 function walkJs(dir, skip, out = []) {

@@ -72,16 +72,16 @@ These require external parties. Claude cannot move them forward; user owns the r
 
 Claude CAN ship these without external dependencies. Each is decision-then-implement OR pure autonomous.
 
-| Item                                                                                | Effort                                   | Impact                                                                                                                            | Mode                                               | Status                                   | Priority                                    |
-| ----------------------------------------------------------------------------------- | ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- | ---------------------------------------- | ------------------------------------------- |
-| **W340 duplicate-model baseline cleanup** (47 entries → 0)                          | L (many small waves)                     | Each entry consolidates 2-3 source files; eliminates schema-divergence risk class entirely                                        | 🤖 per Tier 2 entry; 🤝 per Tier 1 (after ADR-021) | 📋 backlog (47 remaining)                | MED (drift guards baselined; safe to defer) |
-| **AWS SDK install for pilot env** (`npm install @aws-sdk/client-s3`)                | XS (one command)                         | Closes PDPL retention gap fully (W284d boot-WARN → INFO)                                                                          | 👤 (env-specific decision)                         | ⏸ blocked-on-user (which env first?)    | **HIGH** (PDPL compliance)                  |
-| **`AWS_REGION` env var** in pilot deployment                                        | XS                                       | Same gate                                                                                                                         | 👤                                                 | ⏸ blocked-on-user                       | **HIGH**                                    |
-| **Speech analysis provider wiring** (`SPEECH_ANALYSIS_PROVIDER=openai-whisper-api`) | M (~2 days)                              | Unblocks Speech tab in UI — transcription + fluency scoring                                                                       | 🤝 (you pick provider → Claude wires)              | ⏸ blocked-on-user (provider choice)     | LOW (speech-tab nice-to-have for pilot)     |
-| **Frontend pages for W356-W370 modules**                                            | L (10 modules × 3 pages each = 30 pages) | Pilot Week 2-3 needs UI for these clinical modules. **W372-W376 already shipped some**; need re-audit for what's still missing    | 🤖 per page (W279 e2e suite is the template)       | 📋 backlog (count unknown — needs audit) | **MED** (pilot UX)                          |
-| **Madaa.uploadPayload** SFTP impl                                                   | M                                        | Bank salary cards for non-Saudi workers. **LOW priority — Mudad WPS is primary**. Adapter currently throws "not implemented (P1)" | 🤝                                                 | ⏸ blocked-on-vendor + low-priority      | LOW                                         |
-| **Backup verification** procedure                                                   | M                                        | "Are Mongo backups actually restorable?" — no current test. Could be one runbook + monthly restore-drill script.                  | 🤝 (you decide backup tool first)                  | 📋 backlog                               | MED                                         |
-| **Mock auto-reset hour** for pilot mock-mode envs                                   | XS                                       | One env var to auto-rotate mock data daily so pilot doesn't accumulate stale fake records                                         | 🤖                                                 | 📋 backlog                               | LOW                                         |
+| Item                                                                                | Effort                                   | Impact                                                                                                                                                                                        | Mode                                               | Status                                                                        | Priority                                    |
+| ----------------------------------------------------------------------------------- | ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- | ----------------------------------------------------------------------------- | ------------------------------------------- |
+| **W340 duplicate-model baseline cleanup** (41 entries → 0)                          | L (many small waves)                     | Each entry consolidates 2-3 source files; eliminates schema-divergence risk class entirely. Verified 2026-05-25: 41 active entries (down from initial 52 after W341/W342/W343/W347 ratchets). | 🤖 per Tier 2 entry; 🤝 per Tier 1 (after ADR-021) | 📋 backlog (41 remaining)                                                     | MED (drift guards baselined; safe to defer) |
+| **AWS SDK install for pilot env** (`npm install @aws-sdk/client-s3`)                | XS (one command)                         | Closes PDPL retention gap fully (W284d boot-WARN → INFO)                                                                                                                                      | 👤 + 🤖 verify                                     | 🚧 in-flight Cycle 1 — Claude shipping verification script; user runs install | **HIGH** (PDPL compliance)                  |
+| **`AWS_REGION` env var** in pilot deployment                                        | XS                                       | Same gate                                                                                                                                                                                     | 👤                                                 | 🚧 in-flight Cycle 1 — paired with above                                      | **HIGH**                                    |
+| **Speech analysis provider wiring** (`SPEECH_ANALYSIS_PROVIDER=openai-whisper-api`) | M (~2 days)                              | Unblocks Speech tab in UI — transcription + fluency scoring                                                                                                                                   | 🤝 (you pick provider → Claude wires)              | ⏸ blocked-on-user (provider choice)                                          | LOW (speech-tab nice-to-have for pilot)     |
+| **Frontend pages for W356-W370 modules**                                            | L (10 modules × 3 pages each = 30 pages) | Pilot Week 2-3 needs UI for these clinical modules. **W372-W376 already shipped some**; need re-audit for what's still missing                                                                | 🤖 per page (W279 e2e suite is the template)       | 📋 backlog (count unknown — needs audit)                                      | **MED** (pilot UX)                          |
+| **Madaa.uploadPayload** SFTP impl                                                   | M                                        | Bank salary cards for non-Saudi workers. **LOW priority — Mudad WPS is primary**. Adapter currently throws "not implemented (P1)"                                                             | 🤝                                                 | ⏸ blocked-on-vendor + low-priority                                           | LOW                                         |
+| **Backup verification** procedure                                                   | M                                        | "Are Mongo backups actually restorable?" — no current test. Could be one runbook + monthly restore-drill script.                                                                              | 🤝 (you decide backup tool first)                  | 📋 backlog                                                                    | MED                                         |
+| **Mock auto-reset hour** for pilot mock-mode envs                                   | XS                                       | One env var to auto-rotate mock data daily so pilot doesn't accumulate stale fake records                                                                                                     | 🤖                                                 | 📋 backlog                                                                    | LOW                                         |
 
 ---
 
@@ -111,33 +111,41 @@ Claude CAN ship these without external dependencies. Each is decision-then-imple
 
 ## 6. Tech-debt parking lot (low priority, no urgency)
 
-| Item                                                 | Why parked                                                                  | Mode | Status                                          |
-| ---------------------------------------------------- | --------------------------------------------------------------------------- | ---- | ----------------------------------------------- |
-| Legacy frontend (`frontend/`) end-of-life            | Superseded by web-admin; both run during cutover. Decide when to deprecate. | 👤   | 📋 backlog (deferred until pilot retrospective) |
-| W354 module-dependency baseline (currently EMPTY ✅) | Maintained — no action                                                      | n/a  | ✅ done                                         |
-| W325c phantom-ref baseline (currently EMPTY ✅)      | Maintained — no action                                                      | n/a  | ✅ done                                         |
-| Legacy `documentWorkflow` skips                      | All resolved (CLAUDE.md "Open known issues")                                | n/a  | ✅ done                                         |
+| Item                                                                                | Why parked                                                                  | Mode | Status                                          |
+| ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------- | ---- | ----------------------------------------------- |
+| Legacy frontend (`frontend/`) end-of-life                                           | Superseded by web-admin; both run during cutover. Decide when to deprecate. | 👤   | 📋 backlog (deferred until pilot retrospective) |
+| W354 module-dependency baseline (currently EMPTY ✅)                                | Maintained — no action                                                      | n/a  | ✅ done                                         |
+| W325c phantom-ref baseline (currently EMPTY ✅)                                     | Maintained — no action                                                      | n/a  | ✅ done                                         |
+| W382 LIVE-registry dead-contracts baseline (currently EMPTY ✅, post W400-W404)     | Maintained — adding any new dead contract now fails CI                      | n/a  | ✅ done                                         |
+| W392 LIVE-registry orphan-subscribers baseline (currently EMPTY ✅, post W400-W404) | Maintained — adding any new unwired subscriber now fails CI                 | n/a  | ✅ done                                         |
+| Legacy `documentWorkflow` skips                                                     | All resolved (CLAUDE.md "Open known issues")                                | n/a  | ✅ done                                         |
 
 ---
 
 ## 7. Recently closed (this session — audit trail)
 
-| Date       | Commit                | Item                                                       | Wave            |
-| ---------- | --------------------- | ---------------------------------------------------------- | --------------- |
-| 2026-05-25 | `275adec68`           | SCENARIO_5 pilot walkthrough (5/5 complete)                | —               |
-| 2026-05-25 | `a367ba915`           | W364 12-sweeper count + no-broken-requires false positive  | drift           |
-| 2026-05-25 | `aba7fe9cb`           | pilot/README.md index + PILOT_CYCLE_1 cross-refs           | —               |
-| 2026-05-25 | `445e9d301`           | capa-overdue-sweeper orphan + 16 CI paths                  | sprint gate     |
-| 2026-05-25 | `f47dde1` (web-admin) | W279 V4 master-file e2e suite                              | —               |
-| 2026-05-25 | `59f7475` (web-admin) | safeUrl XSS guard + 23 tests                               | security        |
-| 2026-05-25 | `7fccd9531`           | **DA stub-payload safety guard**                           | W286 follow-up  |
-| 2026-05-25 | `bf5d71895`           | PRODUCTION_GAPS_BEFORE_LIVE.md cutover matrix              | —               |
-| 2026-05-25 | `ad20c03cc`           | **Speech S3 real purger + PDPL boot WARN** (W284d)         | W284c follow-up |
-| 2026-05-25 | `7f412f760`           | Gaps matrix update post-S3 fix                             | docs            |
-| 2026-05-25 | `2f245f576`           | **Preflight extension — 12 adapters + Phase 3 cron gates** | preflight       |
-| 2026-05-25 | `9e325b3ef`           | OPERATIONS.md cutover checklist updated                    | docs            |
+| Date       | Commit                | Item                                                                                            | Wave            |
+| ---------- | --------------------- | ----------------------------------------------------------------------------------------------- | --------------- |
+| 2026-05-25 | `275adec68`           | SCENARIO_5 pilot walkthrough (5/5 complete)                                                     | —               |
+| 2026-05-25 | `a367ba915`           | W364 12-sweeper count + no-broken-requires false positive                                       | drift           |
+| 2026-05-25 | `aba7fe9cb`           | pilot/README.md index + PILOT_CYCLE_1 cross-refs                                                | —               |
+| 2026-05-25 | `445e9d301`           | capa-overdue-sweeper orphan + 16 CI paths                                                       | sprint gate     |
+| 2026-05-25 | `f47dde1` (web-admin) | W279 V4 master-file e2e suite                                                                   | —               |
+| 2026-05-25 | `59f7475` (web-admin) | safeUrl XSS guard + 23 tests                                                                    | security        |
+| 2026-05-25 | `7fccd9531`           | **DA stub-payload safety guard**                                                                | W286 follow-up  |
+| 2026-05-25 | `bf5d71895`           | PRODUCTION_GAPS_BEFORE_LIVE.md cutover matrix                                                   | —               |
+| 2026-05-25 | `ad20c03cc`           | **Speech S3 real purger + PDPL boot WARN** (W284d)                                              | W284c follow-up |
+| 2026-05-25 | `7f412f760`           | Gaps matrix update post-S3 fix                                                                  | docs            |
+| 2026-05-25 | `2f245f576`           | **Preflight extension — 12 adapters + Phase 3 cron gates**                                      | preflight       |
+| 2026-05-25 | `9e325b3ef`           | OPERATIONS.md cutover checklist updated                                                         | docs            |
+| 2026-05-25 | `01be56a9b`           | **W400** errorHandler `system.error.occurred` 5xx publish                                       | W400            |
+| 2026-05-25 | `d6a867d4a`           | **W401** budgetThresholdSweeper + env-gated daily cron                                          | W401            |
+| 2026-05-25 | `3a774373b`           | **W402** absenceDetectionSweeper + new bootstrap                                                | W402            |
+| 2026-05-25 | `df2e01073`           | **W403** cachingService cache-invalidation hook                                                 | W403            |
+| 2026-05-25 | `62abf8897`           | **W404** modelEventBridge 3 new mappings + predicate feature; W382 baseline 3→0 ✅, W392 1→0 ✅ | W404            |
+| 2026-05-25 | `4897f9d97`           | W405 CLAUDE.md + PRODUCTION_GAPS catch up to W400-W404                                          | W405            |
 
-**Session totals**: 12 commits across 2 repos. 3-layer safety stack complete (deploy + boot + runtime). All drift guards green (~1856 assertions). test:sprint = 237/237 suites & 5283/5283 tests green.
+**Combined session totals (both agents, 2026-05-25)**: 18 commits across 2 repos. 3-layer safety stack complete (deploy + boot + runtime). Both LIVE-registry event-contract baselines now empty (W382 + W392). 11 event-architecture drift guards (83 assertions); ~1856 platform-wide assertions; test:sprint 237/237 suites green.
 
 ---
 

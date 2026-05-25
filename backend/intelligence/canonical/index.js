@@ -40,6 +40,8 @@ const ENTRIES = [
   // W368-W369 additions (2026-05-25):
   require('./schemas/beneficiary-diet-prescription.canonical'),
   require('./schemas/facility-asset.canonical'),
+  // W384 family support (2026-05-25):
+  require('./schemas/caregiver-support-program.canonical'),
 ];
 
 for (const entry of ENTRIES) registry.register(entry);

@@ -169,18 +169,17 @@ const KNOWN_TYPO_PATTERNS = new Set([
 // post-save hooks on Employee/LeaveRequest/Invoice/Payment/ClinicalSession/
 // Beneficiary/ClinicalAssessment/AttendanceRecord. Remaining orphans require
 // non-model triggers (sweepers, middleware) or services I haven't probed:
+// W396 (2026-05-25) closed 2 entries: hr.salary.changed + hr.department.transferred
+// via modelEventBridge Employee field-flip hooks. Baseline 6 → 4.
 const KNOWN_LIVE_ORPHAN_SUBSCRIBERS = new Set([
-  // hr — needs Mongoose model + payroll service. Not in modelEventBridge yet.
-  'hr.department.transferred', // requires Employee.department field change tracking — model-driven, schema may differ
-  'hr.salary.changed', // requires Payroll/SalaryHistory model — different shape
-  // finance — sweeper-driven (budget threshold) + W394 doesn't cover all
-  'finance.budget.threshold_reached', // needs nightly budget-vs-spend sweeper, similar to W383 pattern
-  // medical — risk alert needs RiskAssessment service, complex
-  'medical.risk.alert_raised', // service-driven; needs clinical risk workflow
-  // attendance — absence sweeper, similar to W383
-  'attendance.absence.detected', // needs daily attendance sweeper — beneficiary no-shows
-  // system — middleware-driven, not Mongoose
-  'system.auth.permission_denied', // requires authorization middleware hook — different pattern
+  // finance — sweeper-driven (budget threshold)
+  'finance.budget.threshold_reached', // needs nightly budget-vs-spend sweeper, W383-style
+  // medical — no RiskAlert model registered
+  'medical.risk.alert_raised', // needs RiskAlert/ClinicalRiskScore model + post-save
+  // attendance — sweeper-driven
+  'attendance.absence.detected', // needs daily attendance sweeper (beneficiary or employee)
+  // system — middleware-driven
+  'system.auth.permission_denied', // authorization middleware with many callsites
 ]);
 
 // Wildcards: subscriber listens for any matching prefix. Producer-existence

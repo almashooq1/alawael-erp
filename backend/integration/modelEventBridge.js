@@ -61,7 +61,11 @@ const MAPPINGS = [
     trigger: 'create-only',
     payload: doc => ({
       employeeId: String(doc._id),
-      name: doc.fullName || doc.name || `${doc.firstName || ''} ${doc.lastName || ''}`.trim() || 'Unknown',
+      name:
+        doc.fullName ||
+        doc.name ||
+        `${doc.firstName || ''} ${doc.lastName || ''}`.trim() ||
+        'Unknown',
       department: doc.department || doc.departmentName || doc.departmentId || '',
       position: doc.position || doc.jobTitle || doc.title || '',
       startDate: doc.startDate || doc.hireDate || doc.joinDate || doc.createdAt,
@@ -238,6 +242,64 @@ const MAPPINGS = [
       employeeId: String(doc.employeeId || doc.employee || ''),
       checkedOutAt: doc.checkOutTime || doc.checkedOutAt || new Date(),
       totalHours: doc.totalHours || doc.workedHours || 0,
+    }),
+  },
+  // ─── W396 additions ─────────────────────────────────────────────────────
+  {
+    modelName: 'Expense',
+    domain: 'finance',
+    eventType: 'expense.approved',
+    trigger: 'status-flip',
+    flipField: 'status',
+    flipTo: ['approved'],
+    payload: doc => ({
+      expenseId: String(doc._id),
+      amount: doc.amount || doc.totalAmount || 0,
+      category: doc.category || doc.expenseCategory || 'other',
+      approvedBy: String(doc.approvedBy || doc.reviewedBy || 'system'),
+      department: doc.department || doc.departmentId || '',
+    }),
+  },
+  {
+    modelName: 'Notification',
+    domain: 'notification',
+    eventType: 'notification.delivery_failed',
+    trigger: 'status-flip',
+    flipField: 'status',
+    flipTo: ['failed', 'delivery_failed', 'bounced'],
+    payload: doc => ({
+      notificationId: String(doc._id),
+      recipientId: String(doc.recipientId || doc.userId || doc.to || ''),
+      channel: doc.channel || doc.deliveryChannel || 'unknown',
+      error: doc.error || doc.failureReason || 'unknown error',
+      retryCount: doc.retryCount || doc.attempts || 0,
+    }),
+  },
+  {
+    modelName: 'Employee',
+    domain: 'hr',
+    eventType: 'salary.changed',
+    trigger: 'status-flip-any',
+    flipField: 'baseSalary',
+    payload: doc => ({
+      employeeId: String(doc._id),
+      oldSalary: doc.$__previous_baseSalary || 0,
+      newSalary: doc.baseSalary || doc.salary || 0,
+      effectiveDate: doc.salaryEffectiveDate || new Date(),
+      reason: doc.salaryChangeReason || 'unspecified',
+    }),
+  },
+  {
+    modelName: 'Employee',
+    domain: 'hr',
+    eventType: 'department.transferred',
+    trigger: 'status-flip-any',
+    flipField: 'department',
+    payload: doc => ({
+      employeeId: String(doc._id),
+      fromDepartment: doc.$__previous_department || 'unknown',
+      toDepartment: doc.department || doc.departmentId || 'unknown',
+      effectiveDate: doc.transferDate || new Date(),
     }),
   },
 ];

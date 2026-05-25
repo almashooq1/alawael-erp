@@ -120,30 +120,24 @@ const MAX_TOTAL_EVENTS = 100; // ceiling
 //
 // To regenerate: comment out the KNOWN_DEAD_CONTRACTS filter in the first dead-
 // contract test + re-run to see the current state.
-// W394 (2026-05-25) closed 6 entries via modelEventBridge post-save hooks:
-// EMPLOYEE_TERMINATED, LEAVE_REQUESTED, RECORD_CREATED, THERAPY_SESSION_COMPLETED,
-// CHECKED_IN, CHECKED_OUT. Baseline 19 → 13. Remaining entries need non-model
-// triggers (sweepers, middleware, service-method specific) or domain expertise.
+// W396 (2026-05-25) closed 6 more entries: EXPENSE_APPROVED, DELIVERY_FAILED,
+// SALARY_CHANGED, DEPARTMENT_TRANSFERRED via modelEventBridge additions;
+// USER_LOGGED_IN, USER_LOGGED_OUT via auth.middleware integrationBus.publish.
+// Baseline 13 → 7. Remaining entries need: non-existent models (Prescription,
+// RiskAlert, PayrollRun), sweepers (absence, budget), or deeper auth/cache
+// middleware hooks.
 const KNOWN_DEAD_CONTRACTS = new Set([
-  // hr — 2 remaining (need Payroll model or specific service method)
-  'hr.SALARY_CHANGED', // salary.changed — Payroll-driven, multi-field
-  'hr.DEPARTMENT_TRANSFERRED', // department.transferred — Employee.department flip
-  // finance — 3 remaining (workflow + sweeper-driven)
-  'finance.EXPENSE_APPROVED', // expense.approved — ExpenseRequest workflow
-  'finance.BUDGET_THRESHOLD_REACHED', // budget.threshold_reached — needs sweeper
-  'finance.PAYROLL_PROCESSED', // payroll.processed — PayrollRun service
-  // medical — 2 remaining (clinical workflow)
-  'medical.PRESCRIPTION_ISSUED', // prescription.issued — Prescription service
-  'medical.RISK_ALERT_RAISED', // risk.alert_raised — clinical risk workflow
+  // finance — 2 remaining (no model + sweeper-driven)
+  'finance.BUDGET_THRESHOLD_REACHED', // budget.threshold_reached — needs nightly sweeper
+  'finance.PAYROLL_PROCESSED', // payroll.processed — no PayrollRun model registered
+  // medical — 2 remaining (models don't exist)
+  'medical.PRESCRIPTION_ISSUED', // prescription.issued — no Prescription model
+  'medical.RISK_ALERT_RAISED', // risk.alert_raised — no RiskAlert/ClinicalRiskScore model registered for hook
   // attendance — 1 remaining (sweeper)
-  'attendance.ABSENCE_DETECTED', // absence.detected — needs daily attendance sweeper
-  // notification — 1 remaining (failure handler)
-  'notification.DELIVERY_FAILED', // notification.delivery_failed — notification dispatch failure
-  // system — 4 remaining (middleware-driven, not Mongoose)
-  'system.USER_LOGGED_IN', // auth.logged_in — auth middleware
-  'system.USER_LOGGED_OUT', // auth.logged_out — auth middleware
-  'system.PERMISSION_DENIED', // auth.permission_denied — authorization middleware
-  'system.CACHE_INVALIDATED', // cache.invalidated — cache layer hook
+  'attendance.ABSENCE_DETECTED', // absence.detected — needs daily sweeper
+  // system — 2 remaining (deeper middleware hooks)
+  'system.PERMISSION_DENIED', // auth.permission_denied — authorization middleware (multiple callsites)
+  'system.CACHE_INVALIDATED', // cache.invalidated — cache layer hook (no central point)
 ]);
 
 // ─── Scan helpers ────────────────────────────────────────────────────────────

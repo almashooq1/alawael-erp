@@ -350,6 +350,26 @@ const generateTokenWithSession = async (userData, ipAddress, userAgent, expiresI
     logger.warn('Session creation failed:', { error: error.message });
   }
 
+  // W396: emit canonical 'auth.logged_in' event for cross-module subscribers.
+  // Envelope per SYSTEM_EVENTS.USER_LOGGED_IN: {userId, ip, userAgent}.
+  // Fire-and-forget via integrationBus (lazy require to avoid hard coupling).
+  try {
+    const { integrationBus } = require('../integration/systemIntegrationBus');
+    if (integrationBus && typeof integrationBus.publish === 'function') {
+      Promise.resolve()
+        .then(() =>
+          integrationBus.publish('system', 'auth.logged_in', {
+            userId: String(userData.id),
+            ip: ipAddress || '',
+            userAgent: userAgent || '',
+          })
+        )
+        .catch(err => logger.warn('auth.logged_in publish failed:', err.message));
+    }
+  } catch {
+    /* integrationBus optional */
+  }
+
   return { token, refreshToken: refreshTk };
 };
 
@@ -428,7 +448,22 @@ const revokeToken = async token => {
     const Session = getSession();
     const session = await Session.findOne({ token });
     if (session) {
+      const userId = session.userId;
       await session.terminate();
+      // W396: emit canonical 'auth.logged_out' event for cross-module subscribers.
+      // Envelope per SYSTEM_EVENTS.USER_LOGGED_OUT: {userId}.
+      try {
+        const { integrationBus } = require('../integration/systemIntegrationBus');
+        if (integrationBus && typeof integrationBus.publish === 'function') {
+          Promise.resolve()
+            .then(() =>
+              integrationBus.publish('system', 'auth.logged_out', { userId: String(userId) })
+            )
+            .catch(err => logger.warn('auth.logged_out publish failed:', err.message));
+        }
+      } catch {
+        /* integrationBus optional */
+      }
     }
     return { success: true };
   } catch (error) {

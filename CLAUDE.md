@@ -129,6 +129,18 @@ The canonical names are:
 - **Student** is registered as a SEPARATE model from Beneficiary (~21 callers via `ref:'Student'` in smart-attendance/transport/montessori). Domain fragmentation; future ADR may consolidate.
 - **3 clinical-session models coexist**: TherapySession + ClinicalSession + DisabilitySession. The 04-programs-sessions-progress-engine.prompt.md warns "do NOT add a 4th". Future ADR may pick one canonical.
 
+**Canonical file-location priority** (W340 pattern, when multiple files register the same model name — picking which becomes canonical for Pattern A/D consolidation per ADR-021):
+
+1. `backend/authorization/**` — richest state-machine schemas (e.g., `authorization/approvals/approval-request.model.js` wins over `models/ApprovalRequest.js` because the authorization schema carries `chainId`+`steps`+`decisions`+`slaDeadline`+methods vs the legacy HR-only `requestType`+`requester`+`comments`)
+2. `backend/intelligence/canonical/schemas/**` — Zod-mirrored canonical schemas (these declare `mongooseModelName` for cross-reference)
+3. `backend/models/**` (root) — Mongoose models in the canonical models directory
+4. `backend/models/<domain>/**` — domain-specific subfolders (e.g., `models/reports/ReportTemplate.js`)
+5. `backend/services/<domain>/**`, `backend/workflow/**`, etc. — domain-local registrations (lowest priority — usually candidates for Pattern D rename per ADR-021)
+
+When there's a tie at the same priority level, **richer schema wins** (more fields + indexes + methods + virtuals). See [docs/architecture/decisions/021-DECISION-BRIEF.md](docs/architecture/decisions/021-DECISION-BRIEF.md) for per-entity application + [021-CALLER-AUDIT-APPROVAL-WORKFLOW.md](docs/architecture/decisions/021-CALLER-AUDIT-APPROVAL-WORKFLOW.md) for the caller-impact analysis of the 2 highest-risk Tier 1 entries (both downgraded LOW after audit).
+
+**W340 drift-guard blind spot** (discovered 2026-05-25 during the audit above): the W340 regex matches `mongoose.model(...)` + helper-wrapped registrations only — it does NOT scan `connection.model(...)` / `conn.model(...)` / `db.model(...)` patterns. 16 files in `backend/` use the `connection.model` pattern (`workflow/workflow-engine.js`, all `vehicles/*-service.js`, all `communication/*-service.js`, `auth/otp-service.js`, `permissions/permission-service.js`, `students/*-service.js`, `infrastructure/migrationRunner.js`). At least one hidden duplicate is known: `workflow/workflow-engine.js:185` registers `WorkflowInstance` via `connection.model` — invisible to W340 (the file is also dead code, 0 importers — deletion will close both findings).
+
 ## Ratchet-down pattern (for tech-debt cleanup waves)
 
 When a drift guard discovers a large set of pre-existing violations:

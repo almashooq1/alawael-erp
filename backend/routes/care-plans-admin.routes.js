@@ -25,6 +25,7 @@ const safeError = require('../utils/safeError');
 const logger = require('../utils/logger');
 const logPiiAccess = require('../middleware/piiAccess.middleware');
 const { assertBeneficiaryInScope } = require('../utils/beneficiaryBranchGate');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 router.use(authenticateToken);
 
@@ -342,7 +343,11 @@ router.patch('/:id/goals/:goalId', requireRole(WRITE_ROLES), async (req, res) =>
           ? cur.id(req.params.goalId)
           : cur.find(g => String(g._id) === req.params.goalId);
         if (goal) {
-          Object.assign(goal, req.body);
+          // stripUpdateMeta drops prototype-pollution keys + meta fields
+          // (_id, __v, createdBy/At, role, isAdmin, password, etc) so a
+          // malicious body can't backdate, reassign authorship, or
+          // pollute Object.prototype via `__proto__` / `constructor`.
+          Object.assign(goal, stripUpdateMeta(req.body));
           matched = true;
           break;
         }

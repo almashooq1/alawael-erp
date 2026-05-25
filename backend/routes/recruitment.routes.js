@@ -33,7 +33,7 @@
 'use strict';
 
 const express = require('express');
-const { authenticate } = require('../middleware/auth');
+const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const router = express.Router();
 const { v4: uuidv4 } = require('uuid');
@@ -43,6 +43,16 @@ const { stripUpdateMeta } = require('../utils/sanitize');
 // 🔒 All recruitment routes require authentication
 router.use(authenticate);
 router.use(requireBranchAccess);
+
+// HR-only gate — every mutating endpoint below (except the two
+// candidate-side flows /postings/:id/apply and /offers/:id/respond)
+// must require an HR role. Prior to this, any authenticated user
+// could create / publish / close job postings, schedule interviews,
+// send offers, edit applications, and add candidates to the talent
+// pool — combined with the mass-assignment via `{ ...req.body }` at
+// JobPosting.create + TalentPool.create, this also let them set
+// arbitrary fields including status, salary band, and internal notes.
+const requireHr = authorize('admin', 'hr_manager');
 // Models
 const JobPosting = require('../models/JobPosting');
 const JobApplication = require('../models/JobApplication');
@@ -144,7 +154,7 @@ router.get('/postings', async (req, res) => {
   }
 });
 
-router.post('/postings', async (req, res) => {
+router.post('/postings', requireHr, async (req, res) => {
   try {
     const required = [
       'title',
@@ -173,7 +183,7 @@ router.get('/postings/:id', async (req, res) => {
   }
 });
 
-router.put('/postings/:id', async (req, res) => {
+router.put('/postings/:id', requireHr, async (req, res) => {
   try {
     const doc = await JobPosting.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
@@ -186,7 +196,7 @@ router.put('/postings/:id', async (req, res) => {
   }
 });
 
-router.delete('/postings/:id', async (req, res) => {
+router.delete('/postings/:id', requireHr, async (req, res) => {
   try {
     const doc = await JobPosting.findByIdAndUpdate(req.params.id, { deletedAt: new Date() });
     if (!doc) return fail(res, 'الوظيفة غير موجودة', 404);
@@ -197,7 +207,7 @@ router.delete('/postings/:id', async (req, res) => {
 });
 
 // نشر الوظيفة
-router.post('/postings/:id/publish', async (req, res) => {
+router.post('/postings/:id/publish', requireHr, async (req, res) => {
   try {
     const doc = await JobPosting.findByIdAndUpdate(
       req.params.id,
@@ -213,7 +223,7 @@ router.post('/postings/:id/publish', async (req, res) => {
 });
 
 // إغلاق الوظيفة
-router.post('/postings/:id/close', async (req, res) => {
+router.post('/postings/:id/close', requireHr, async (req, res) => {
   try {
     const doc = await JobPosting.findByIdAndUpdate(
       req.params.id,
@@ -310,7 +320,7 @@ router.get('/applications/:id', async (req, res) => {
 });
 
 // تحديث حالة الطلب
-router.patch('/applications/:id/status', async (req, res) => {
+router.patch('/applications/:id/status', requireHr, async (req, res) => {
   try {
     const { status, rejectionReason, hrNotes } = req.body;
     const allowed = [
@@ -342,7 +352,7 @@ router.patch('/applications/:id/status', async (req, res) => {
 });
 
 // جدولة مقابلة
-router.post('/applications/:id/interview', async (req, res) => {
+router.post('/applications/:id/interview', requireHr, async (req, res) => {
   try {
     const application = await JobApplication.findById(req.params.id);
     if (!application) return fail(res, 'الطلب غير موجود', 404);
@@ -368,7 +378,7 @@ router.post('/applications/:id/interview', async (req, res) => {
 });
 
 // إنشاء عرض عمل
-router.post('/applications/:id/offer', async (req, res) => {
+router.post('/applications/:id/offer', requireHr, async (req, res) => {
   try {
     const application = await JobApplication.findById(req.params.id);
     if (!application) return fail(res, 'الطلب غير موجود', 404);
@@ -427,7 +437,7 @@ router.get('/interviews', async (req, res) => {
 });
 
 // إكمال المقابلة وتسجيل النتيجة
-router.patch('/interviews/:id/complete', async (req, res) => {
+router.patch('/interviews/:id/complete', requireHr, async (req, res) => {
   try {
     const { score, feedback, strengths, weaknesses, recommendation } = req.body;
     const doc = await RecruitmentInterview.findByIdAndUpdate(
@@ -477,7 +487,7 @@ router.get('/offers', async (req, res) => {
 });
 
 // إرسال عرض العمل
-router.post('/offers/:id/send', async (req, res) => {
+router.post('/offers/:id/send', requireHr, async (req, res) => {
   try {
     const offer = await JobOffer.findByIdAndUpdate(
       req.params.id,
@@ -575,7 +585,7 @@ router.get('/onboarding', async (req, res) => {
 });
 
 // تحديث مهمة إعداد
-router.patch('/onboarding/:id/task', async (req, res) => {
+router.patch('/onboarding/:id/task', requireHr, async (req, res) => {
   try {
     const { taskId, status: taskStatus, notes } = req.body;
     if (!taskId) return fail(res, 'taskId مطلوب');
@@ -643,7 +653,7 @@ router.get('/talent-pool', async (req, res) => {
   }
 });
 
-router.post('/talent-pool', async (req, res) => {
+router.post('/talent-pool', requireHr, async (req, res) => {
   try {
     const required = ['fullName', 'email'];
     const missing = required.filter(f => !req.body[f]);

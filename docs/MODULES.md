@@ -234,7 +234,7 @@
 
 ### المسارات الرئيسية (`App.jsx`)
 
-```
+```text
 / → Dashboard (الرئيسية)
 /login → صفحة الدخول
 /rehab/* → نظام التأهيل (RehabRoutes.jsx)
@@ -273,7 +273,7 @@
 
 ## خريطة التكامل (Integration Map)
 
-```
+```text
 Frontend (port 3002)
       │
       │  HTTP/REST   (REACT_APP_API_URL = localhost:3001/api)
@@ -293,19 +293,19 @@ Backend API (port 3001)
 
 ### نمط Controller (Backend)
 
-```
+```text
 Route → Middleware (auth, rbac, validate) → Controller → Service → Model → MongoDB
 ```
 
 ### نمط الصفحة (Frontend)
 
-```
+```text
 Route (lazy) → ErrorBoundary → Page → API Service (axios) → Backend
 ```
 
 ### نمط المصادقة
 
-```
+```text
 Login → JWT (15min) + RefreshToken (24h) → Auto-refresh on 401 → Logout
 ```
 

@@ -18,7 +18,7 @@ Periodic bundles also live in `OneDrive/المستندات/04-10-2025/_backups/*
 
 ## Top-level layout (66666/)
 
-```
+```text
 backend/      Express API, Mongoose models, services, routes, tests
   intelligence/   Shared cross-domain libs (hash-chain, sod, sensitivity-grade, etc.) — canonical, do NOT duplicate
   scripts/        CLI tools (digesters, seeders, preflight, anti-duplication-check)

@@ -2,7 +2,7 @@
 
 Date: 2026-05-25 (W391 follow-up patch)
 Authors: AlMashooq + Claude Opus 4.7
-Scope: 15 waves (W356–W370) + W384 (CaregiverSupportProgram graduation) + W390 (aggregator polish), ~22 commits, ~14,500 LOC, ~580 drift assertions
+Scope: 15 waves (W356–W370) + W384 (CaregiverSupportProgram graduation) + W390 (aggregator polish) + W393 (caregiver overdue sweeper), ~24 commits, ~14,500 LOC, **564 drift assertions** (verified by end-of-session full-sweep 2026-05-25)
 
 **W391 update**: W384 added an 11th module (`CaregiverSupportProgram`, 18 endpoints, +55 drift assertions) and W390 extended the W381 clinical-services aggregator. Everything below applies to the combined surface.
 
@@ -220,9 +220,11 @@ __tests__/caregiver-support-program-wave384.test.js
 ```
 
 Run via `cd backend && npm run test:sprint` (the main CI gate, ~13 min
-for the full ~225-file suite). The 13 guards together add **~580
-assertions** (525 W356-W370 + 55 W384), all static-analysis (no
-MongoMemoryServer required) — they execute in under 11 seconds total.
+for the full ~225-file suite). The 13 guards together add **564
+assertions** (509 W356-W370 + 55 W384), all static-analysis (no
+MongoMemoryServer required) — they execute in ~3-12 seconds total
+depending on parallel-vs-runInBand mode (verified 2026-05-25
+full-sweep at HEAD `475f0cb11`).
 
 ---
 
@@ -328,7 +330,7 @@ cd backend && npx jest --config=jest.config.js \
   __tests__/facility-asset-wave369.test.js \
   __tests__/caregiver-support-program-wave384.test.js \
   --no-coverage
-# Expected: 13 suites pass, ~580 assertions in <11s
+# Expected: 13 suites pass, 564 assertions in ~3-12s
 ```
 
 If any of the above returns differently than expected, do not enable the

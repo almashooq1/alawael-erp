@@ -4,13 +4,26 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
-const { authenticate } = require('../middleware/auth');
+const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 
 const safeModel = n =>
   mongoose.models[n] ? mongoose.model(n) : require(`../models/PublicRelations`)[n];
 const { stripUpdateMeta } = require('../utils/sanitize');
 const safeError = require('../utils/safeError');
+
+// PR/marketing admin-only gate for all 7 mutating endpoints (media
+// coverage, campaigns, partnerships CRUD). Without this, any
+// authenticated user could create/edit PR records that surface to the
+// public landing page + marketing materials.
+const requirePrAdmin = authorize(
+  'admin',
+  'super_admin',
+  'superadmin',
+  'manager',
+  'pr_manager',
+  'marketing_manager'
+);
 
 // ── Dashboard ────────────────────────────────────────────────
 router.get('/dashboard', authenticate, requireBranchAccess, async (_req, res) => {
@@ -75,7 +88,7 @@ router.get('/media', authenticate, requireBranchAccess, async (req, res) => {
   }
 });
 
-router.post('/media', authenticate, requireBranchAccess, async (req, res) => {
+router.post('/media', authenticate, requireBranchAccess, requirePrAdmin, async (req, res) => {
   try {
     const Media = safeModel('MediaCoverage');
     const doc = await Media.create({ ...req.body, createdBy: req.user?._id });
@@ -85,7 +98,7 @@ router.post('/media', authenticate, requireBranchAccess, async (req, res) => {
   }
 });
 
-router.put('/media/:id', authenticate, requireBranchAccess, async (req, res) => {
+router.put('/media/:id', authenticate, requireBranchAccess, requirePrAdmin, async (req, res) => {
   try {
     const Media = safeModel('MediaCoverage');
     const doc = await Media.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
@@ -98,7 +111,7 @@ router.put('/media/:id', authenticate, requireBranchAccess, async (req, res) => 
   }
 });
 
-router.delete('/media/:id', authenticate, requireBranchAccess, async (req, res) => {
+router.delete('/media/:id', authenticate, requireBranchAccess, requirePrAdmin, async (req, res) => {
   try {
     const Media = safeModel('MediaCoverage');
     await Media.findByIdAndDelete(req.params.id);
@@ -130,7 +143,7 @@ router.get('/campaigns', authenticate, requireBranchAccess, async (req, res) => 
   }
 });
 
-router.post('/campaigns', authenticate, requireBranchAccess, async (req, res) => {
+router.post('/campaigns', authenticate, requireBranchAccess, requirePrAdmin, async (req, res) => {
   try {
     const Camp = safeModel('Campaign');
     const doc = await Camp.create({ ...req.body, createdBy: req.user?._id });
@@ -140,18 +153,24 @@ router.post('/campaigns', authenticate, requireBranchAccess, async (req, res) =>
   }
 });
 
-router.put('/campaigns/:id', authenticate, requireBranchAccess, async (req, res) => {
-  try {
-    const Camp = safeModel('Campaign');
-    const doc = await Camp.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
-    });
-    if (!doc) return res.status(404).json({ success: false, message: 'غير موجود' });
-    res.json({ success: true, data: doc });
-  } catch (err) {
-    safeError(res, err, 'public-relations');
+router.put(
+  '/campaigns/:id',
+  authenticate,
+  requireBranchAccess,
+  requirePrAdmin,
+  async (req, res) => {
+    try {
+      const Camp = safeModel('Campaign');
+      const doc = await Camp.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
+        new: true,
+      });
+      if (!doc) return res.status(404).json({ success: false, message: 'غير موجود' });
+      res.json({ success: true, data: doc });
+    } catch (err) {
+      safeError(res, err, 'public-relations');
+    }
   }
-});
+);
 
 // ── Partnerships CRUD ────────────────────────────────────────
 router.get('/partnerships', authenticate, requireBranchAccess, async (req, res) => {
@@ -164,27 +183,39 @@ router.get('/partnerships', authenticate, requireBranchAccess, async (req, res) 
   }
 });
 
-router.post('/partnerships', authenticate, requireBranchAccess, async (req, res) => {
-  try {
-    const Part = safeModel('Partnership');
-    const doc = await Part.create({ ...req.body, createdBy: req.user?._id });
-    res.status(201).json({ success: true, data: doc });
-  } catch (err) {
-    safeError(res, err, 'public-relations');
+router.post(
+  '/partnerships',
+  authenticate,
+  requireBranchAccess,
+  requirePrAdmin,
+  async (req, res) => {
+    try {
+      const Part = safeModel('Partnership');
+      const doc = await Part.create({ ...req.body, createdBy: req.user?._id });
+      res.status(201).json({ success: true, data: doc });
+    } catch (err) {
+      safeError(res, err, 'public-relations');
+    }
   }
-});
+);
 
-router.put('/partnerships/:id', authenticate, requireBranchAccess, async (req, res) => {
-  try {
-    const Part = safeModel('Partnership');
-    const doc = await Part.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
-    });
-    if (!doc) return res.status(404).json({ success: false, message: 'غير موجود' });
-    res.json({ success: true, data: doc });
-  } catch (err) {
-    safeError(res, err, 'public-relations');
+router.put(
+  '/partnerships/:id',
+  authenticate,
+  requireBranchAccess,
+  requirePrAdmin,
+  async (req, res) => {
+    try {
+      const Part = safeModel('Partnership');
+      const doc = await Part.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
+        new: true,
+      });
+      if (!doc) return res.status(404).json({ success: false, message: 'غير موجود' });
+      res.json({ success: true, data: doc });
+    } catch (err) {
+      safeError(res, err, 'public-relations');
+    }
   }
-});
+);
 
 module.exports = router;

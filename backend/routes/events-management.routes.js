@@ -4,10 +4,23 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
-const { authenticate } = require('../middleware/auth');
+const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const { stripUpdateMeta } = require('../utils/sanitize');
 const safeError = require('../utils/safeError');
+
+// Coordinator-only gate for create/edit/delete event endpoints. The
+// registration endpoint stays open (community members register
+// themselves for events). Mass-assignment risk on Event.create remains
+// for HR/admin only after this — they're already trusted to set fields.
+const requireEventAdmin = authorize(
+  'admin',
+  'super_admin',
+  'superadmin',
+  'manager',
+  'hr_manager',
+  'event_coordinator'
+);
 
 const safeModel = n =>
   mongoose.models[n] ? mongoose.model(n) : require(`../models/EventManagement`)[n];
@@ -74,7 +87,7 @@ router.get('/', authenticate, requireBranchAccess, async (req, res) => {
   }
 });
 
-router.post('/', authenticate, requireBranchAccess, async (req, res) => {
+router.post('/', authenticate, requireBranchAccess, requireEventAdmin, async (req, res) => {
   try {
     const Ev = safeModel('Event');
     const doc = await Ev.create({ ...req.body, createdBy: req.user?._id });
@@ -84,7 +97,7 @@ router.post('/', authenticate, requireBranchAccess, async (req, res) => {
   }
 });
 
-router.put('/:id', authenticate, requireBranchAccess, async (req, res) => {
+router.put('/:id', authenticate, requireBranchAccess, requireEventAdmin, async (req, res) => {
   try {
     const Ev = safeModel('Event');
     const doc = await Ev.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), { new: true });
@@ -95,7 +108,7 @@ router.put('/:id', authenticate, requireBranchAccess, async (req, res) => {
   }
 });
 
-router.delete('/:id', authenticate, requireBranchAccess, async (req, res) => {
+router.delete('/:id', authenticate, requireBranchAccess, requireEventAdmin, async (req, res) => {
   try {
     const Ev = safeModel('Event');
     await Ev.findByIdAndDelete(req.params.id);

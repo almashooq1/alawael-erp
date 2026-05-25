@@ -7,6 +7,7 @@ const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 router.use(requireBranchAccess);
@@ -26,7 +27,7 @@ router.get('/pages', async (req, res) => {
     ]);
     res.json({ success: true, data, pagination: { page: +page, limit: +limit, total } });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'cms');
   }
 });
 
@@ -47,7 +48,7 @@ router.get('/pages/:id', async (req, res) => {
     if (!item) return res.status(404).json({ success: false, message: 'Page not found' });
     res.json({ success: true, data: item });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'cms');
   }
 });
 
@@ -87,7 +88,7 @@ router.delete('/pages/:id', authorize('admin'), async (req, res) => {
     await CMSPage.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'Page deleted' });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'cms');
   }
 });
 
@@ -105,7 +106,7 @@ router.get('/announcements', async (req, res) => {
     ]);
     res.json({ success: true, data, pagination: { page: +page, limit: +limit, total } });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'cms');
   }
 });
 

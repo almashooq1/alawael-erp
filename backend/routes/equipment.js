@@ -7,6 +7,7 @@ const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 router.use(requireBranchAccess);
@@ -26,7 +27,7 @@ router.get('/', async (req, res) => {
     ]);
     res.json({ success: true, data, pagination: { page: +page, limit: +limit, total } });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'equipment');
   }
 });
 
@@ -47,7 +48,7 @@ router.get('/:id', async (req, res) => {
     if (!equipment) return res.status(404).json({ success: false, message: 'Equipment not found' });
     res.json({ success: true, data: equipment });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'equipment');
   }
 });
 
@@ -72,7 +73,7 @@ router.delete('/:id', authorize('admin'), async (req, res) => {
     await Equipment.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'Equipment deleted' });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'equipment');
   }
 });
 
@@ -137,7 +138,7 @@ router.get('/stats/by-category', async (req, res) => {
     ]);
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'equipment');
   }
 });
 

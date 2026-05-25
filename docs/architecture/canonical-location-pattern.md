@@ -9,7 +9,7 @@ When duplicate Mongoose model registrations exist under the same name (the W340 
 
 ## Precedence rule
 
-```
+```text
 1. authorization/         — highest authority (security domain)
 2. intelligence/canonical/ — explicit canonical contracts (W325 P1)
 3. models/ root           — primary model directory
@@ -56,6 +56,28 @@ Before `mongoose.model('SomeName', schema)`:
 3. **If no duplicate**: pick the location per the precedence rule
 
 The W340 drift guard at `backend/__tests__/no-duplicate-model-registration-wave340.test.js` runs on every PR. New duplicates fail CI unless added to `KNOWN_DUPLICATE_REGISTRATIONS` baseline with explicit ADR reference.
+
+## Exception: the empty-shim pattern (added 2026-05-25 per Cycle 6 audit)
+
+Sometimes a higher-priority location holds a placeholder file like:
+
+```javascript
+// backend/models/<subdir>/X.js
+const schema = new mongoose.Schema({}, { strict: false, timestamps: true });
+module.exports = mongoose.models.X || mongoose.model('X', schema);
+```
+
+This is an **empty-shim** — `strict: false` + no field definitions. It's NOT a real canonical even though it's in a higher-priority directory. Likely an auto-generated boilerplate file never filled in.
+
+**Rule**: when the higher-priority location has an empty-shim, treat it as if it doesn't exist. Apply the precedence rule starting from the next location with a real schema. THEN: in the consolidation wave, the rich schema MIGRATES into the empty-shim's location (filling it in), and the rich-source switches to a lazy lookup.
+
+**Examples found in W340 audit (2026-05-25)**:
+
+- `Permission`: `models/RBAC/Permission.js` is empty-shim; rich schema in `permissions/permission-service.js`
+- `TrafficAccident`: `models/Traffic/TrafficAccident.js` is empty-shim; rich schema in `vehicles/saudi-traffic-service.js`
+- Probably more in the 47-entry W340 baseline; see [TIER2_AUDIT.md](decisions/TIER2_AUDIT.md) for the survey.
+
+**Don't ratchet down empty-shim entries without doing the schema migration first** — the empty-shim is invisible to most callers (it accepts anything via `strict:false`), so silently switching them to a different schema would produce different validation behaviour.
 
 ## Why this matters
 

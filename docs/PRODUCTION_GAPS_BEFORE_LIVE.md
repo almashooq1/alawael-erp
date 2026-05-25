@@ -2,7 +2,7 @@
 
 **Type**: Operational matrix — what's stubbed/placeholder/blocked across the platform
 **Audience**: Ops team + product PM + pilot owner (decides cutover sequence)
-**Updated**: 2026-05-25 (post-W286-safety-guard `7fccd9531`)
+**Updated**: 2026-05-25 (post-W400-W404 — LIVE-registry event baselines now empty; 5 new producer surfaces added)
 
 This is the single source of truth for "what is NOT actually production-ready yet" across the platform. Use it when planning cutover sequence, prioritising stakeholder asks, or deciding what to ship for the pilot.
 
@@ -101,17 +101,19 @@ Does the adapter have an auto-submitting cron?
 
 ## 7. Quick reference — env flags + their gate
 
-| Env flag                            | When to flip                                 | What needs to be done first                                                                                                                       |
-| ----------------------------------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `DISABILITY_AUTHORITY_MODE=live`    | Week 3 of pilot per SCENARIO_5               | Build production payload + implement liveSubmitReport                                                                                             |
-| `ENABLE_DA_PERIODIC_CRON=true`      | Same as above + `DA_REPORTING_BRANCH_IDS=b1` | Either fully implement live, OR keep mock mode (cron works in mock for telemetry)                                                                 |
-| `SEHHATY_MODE=live`                 | When MoH provides Sehhaty creds              | Implement liveImportSummary + liveVaccinations                                                                                                    |
-| `MUDAD_MODE=live`                   | When SAMA Mudad sandbox available            | Wire `mudadAdapter.uploadBatch` + sandbox-first cutover                                                                                           |
-| `NPHIES_MODE=live`                  | When NPHIES sandbox creds provided           | Set NPHIES_CLIENT_ID + NPHIES_PROVIDER_ID + sandbox URL                                                                                           |
-| `ENABLE_MUDAD_CRON=true`            | After MUDAD_MODE=live + sandbox tested       | Verify PayrollRun shape matches orchestrator query                                                                                                |
-| `ENABLE_SPEECH_RETENTION_CRON=true` | Anytime — sweeper safe to enable (W284d)     | For full PDPL compliance: `npm install @aws-sdk/client-s3` + set `AWS_REGION`. Without these, sweeper falls back to log-only with boot-time WARN. |
-| `ENABLE_CAPA_SWEEPER=true`          | Anytime (internal sweeper)                   | None — safe to enable in any env                                                                                                                  |
-| `ENABLE_*_SWEEPER=true` (clinical)  | Anytime (internal sweepers)                  | None — see clinicalSweepersBootstrap.js for the 13                                                                                                |
+| Env flag                                | When to flip                                                                     | What needs to be done first                                                                                                                       |
+| --------------------------------------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DISABILITY_AUTHORITY_MODE=live`        | Week 3 of pilot per SCENARIO_5                                                   | Build production payload + implement liveSubmitReport                                                                                             |
+| `ENABLE_DA_PERIODIC_CRON=true`          | Same as above + `DA_REPORTING_BRANCH_IDS=b1`                                     | Either fully implement live, OR keep mock mode (cron works in mock for telemetry)                                                                 |
+| `SEHHATY_MODE=live`                     | When MoH provides Sehhaty creds                                                  | Implement liveImportSummary + liveVaccinations                                                                                                    |
+| `MUDAD_MODE=live`                       | When SAMA Mudad sandbox available                                                | Wire `mudadAdapter.uploadBatch` + sandbox-first cutover                                                                                           |
+| `NPHIES_MODE=live`                      | When NPHIES sandbox creds provided                                               | Set NPHIES_CLIENT_ID + NPHIES_PROVIDER_ID + sandbox URL                                                                                           |
+| `ENABLE_MUDAD_CRON=true`                | After MUDAD_MODE=live + sandbox tested                                           | Verify PayrollRun shape matches orchestrator query                                                                                                |
+| `ENABLE_SPEECH_RETENTION_CRON=true`     | Anytime — sweeper safe to enable (W284d)                                         | For full PDPL compliance: `npm install @aws-sdk/client-s3` + set `AWS_REGION`. Without these, sweeper falls back to log-only with boot-time WARN. |
+| `ENABLE_CAPA_SWEEPER=true`              | Anytime (internal sweeper)                                                       | None — safe to enable in any env                                                                                                                  |
+| `ENABLE_*_SWEEPER=true` (clinical)      | Anytime (internal sweepers)                                                      | None — see clinicalSweepersBootstrap.js for the 13                                                                                                |
+| `ENABLE_BUDGET_THRESHOLD_SWEEPER=true`  | Anytime (W401 — emits finance.budget.threshold_reached daily)                    | Optionally tune via `BUDGET_THRESHOLD_PERCENT=80` (default 80% utilization). Internal event bus only — no external transport.                     |
+| `ENABLE_ABSENCE_DETECTION_SWEEPER=true` | Anytime (W402 — emits attendance.absence.detected daily over yesterday's window) | Optionally widen via `ABSENCE_DETECTION_STATUSES=absent,on_leave,sick` (default `absent` only). Internal event bus only.                          |
 
 ---
 

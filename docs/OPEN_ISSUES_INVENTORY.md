@@ -118,6 +118,7 @@ Claude CAN ship these without external dependencies. Each is decision-then-imple
 | W325c phantom-ref baseline (currently EMPTY ✅)                                     | Maintained — no action                                                      | n/a  | ✅ done                                         |
 | W382 LIVE-registry dead-contracts baseline (currently EMPTY ✅, post W400-W404)     | Maintained — adding any new dead contract now fails CI                      | n/a  | ✅ done                                         |
 | W392 LIVE-registry orphan-subscribers baseline (currently EMPTY ✅, post W400-W404) | Maintained — adding any new unwired subscriber now fails CI                 | n/a  | ✅ done                                         |
+| W407 dddNotificationTriggers dead-triggers baseline (currently EMPTY ✅, post W407) | Maintained — third subscriber file now guarded; 3 dead handlers cleaned     | n/a  | ✅ done                                         |
 | Legacy `documentWorkflow` skips                                                     | All resolved (CLAUDE.md "Open known issues")                                | n/a  | ✅ done                                         |
 
 ---
@@ -146,8 +147,12 @@ Claude CAN ship these without external dependencies. Each is decision-then-imple
 | 2026-05-25 | `df2e01073`           | **W403** cachingService cache-invalidation hook                                                                                               | W403            |
 | 2026-05-25 | `62abf8897`           | **W404** modelEventBridge 3 new mappings + predicate feature; W382 baseline 3→0 ✅, W392 1→0 ✅                                               | W404            |
 | 2026-05-25 | `4897f9d97`           | W405 CLAUDE.md + PRODUCTION_GAPS catch up to W400-W404                                                                                        | W405            |
+| 2026-05-25 | `cac86637b`           | W406 OPEN_ISSUES_INVENTORY catchup post W400-W405                                                                                             | W406            |
+| 2026-05-25 | `55a9617e2`           | **W407** dddNotificationTriggers drift guard + 3 dead handler deletions (sessions.no_show / dashboards.alert_triggered / ar-vr.safety_alert)  | W407            |
+| 2026-05-25 | `0430849e3`           | **W408** strict envelope-shape verification for W400-W404 producers (W385 pattern applied to LIVE registry); 7 envelope-shape assertions      | W408            |
+| 2026-05-25 | `20b8e8056`           | W408 follow-up — CLAUDE.md assertion-count correction (was 97/12, actual 93/13)                                                               | W408            |
 
-**Combined session totals (both agents, 2026-05-25)**: 18 commits across 2 repos. 3-layer safety stack complete (deploy + boot + runtime). Both LIVE-registry event-contract baselines now empty (W382 + W392). 11 event-architecture drift guards (83 assertions); ~1856 platform-wide assertions; test:sprint 237/237 suites green.
+**Combined session totals (both agents, 2026-05-25)**: 21 commits across 2 repos. 3-layer safety stack complete (deploy + boot + runtime). All three subscriber-file baselines now empty (W389 dddCrossModuleSubscribers, W392 crossModuleSubscribers, W407 dddNotificationTriggers). Both LIVE-registry event-contract baselines now empty (W382 + W392). **13 event-architecture drift guards (93 assertions)**; ~1856 platform-wide assertions; test:sprint 237/237 suites green.
 
 ---
 

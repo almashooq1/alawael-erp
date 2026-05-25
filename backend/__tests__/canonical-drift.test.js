@@ -54,6 +54,17 @@ const MODEL_FILES_TO_TRY = [
   '../models/TeleSession',
   '../models/ImmersiveSession',
   '../models/BehaviorIncident',
+  // W367 — added with the W366 canonical-schema expansion (W356-W363 series).
+  // Without these requires, the drift detector lists each as MODEL_NOT_REGISTERED
+  // and silently skips comparison — Mongoose-vs-canonical drift would go undetected.
+  '../models/SeizureEvent',
+  '../models/SafeguardingConcern',
+  '../models/CommunicationAidProfile',
+  '../models/AssistiveDevice',
+  '../models/CbahiAttestation',
+  '../models/TransitionPlan',
+  '../models/AdaptiveSportsProgram',
+  '../models/RespiteBooking',
 ];
 
 beforeAll(() => {
@@ -69,11 +80,15 @@ beforeAll(() => {
 describe('Canonical Data Model → Mongoose drift guard (Wave 285)', () => {
   test('registry has every shipped canonical entity', () => {
     const names = registry.names();
-    // Spec is 11 entities (10 persisted + RiskProfile derived view, W287).
-    // Hard-assert the count so accidentally dropping one is caught here.
-    expect(names.length).toBe(11);
+    // W367 — count refreshed from 11 → 19 to accommodate the W366 expansion
+    // (W356-W363 series added 8 schemas). Use toBeGreaterThanOrEqual so future
+    // additive registrations don't break the test before the catalog is updated
+    // here (the arrayContaining checks below catch accidental DELETIONS,
+    // which is the actual regression risk).
+    expect(names.length).toBeGreaterThanOrEqual(19);
     expect(names).toEqual(
       expect.arrayContaining([
+        // W285 baseline (11 entities)
         'Beneficiary',
         'EpisodeOfCare',
         'Assessment',
@@ -85,6 +100,15 @@ describe('Canonical Data Model → Mongoose drift guard (Wave 285)', () => {
         'ARVRSession',
         'BehaviorIncident',
         'RiskProfile',
+        // W366 — W356-W363 clinical / operational / safety expansion (8 entities)
+        'SeizureEvent',
+        'SafeguardingConcern',
+        'CommunicationAidProfile',
+        'AssistiveDevice',
+        'CbahiAttestation',
+        'TransitionPlan',
+        'AdaptiveSportsProgram',
+        'RespiteBooking',
       ])
     );
   });

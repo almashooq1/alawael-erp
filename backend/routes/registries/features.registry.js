@@ -48,6 +48,7 @@ module.exports = function registerFeatureRoutes(
   const adaptiveSportsRoutes = safeRequire('../routes/adaptive-sports.routes');
   const respiteRoutes = safeRequire('../routes/respite.routes');
   const dietPrescriptionRoutes = safeRequire('../routes/diet-prescription.routes');
+  const facilityAssetRoutes = safeRequire('../routes/facility-asset.routes');
   const pickupAuthorizationRoutes = safeRequire('../routes/pickup-authorization.routes');
   const portfolioRoutes = safeRequire('../routes/portfolio.routes');
   const iepRoutes = safeRequire('../routes/iep.routes');
@@ -128,6 +129,8 @@ module.exports = function registerFeatureRoutes(
   dualMountAuth(app, 'respite', respiteRoutes, authenticate);
   // Wave 368: Beneficiary diet prescription (وصفة النظام الغذائي) — IDDSI dysphagia + NPO + enteral
   dualMountAuth(app, 'diet-prescription', dietPrescriptionRoutes, authenticate);
+  // Wave 369: Facility asset PPM (أصول المنشأة) — elevators/ramps/HVAC/fire/water/oxygen/sensory rooms
+  dualMountAuth(app, 'facility-asset', facilityAssetRoutes, authenticate);
   // Wave 196b: Pickup authorization w/ e-sig scaffolding (تصاريح الاستلام)
   dualMountAuth(app, 'pickup-authorization', pickupAuthorizationRoutes, authenticate);
   // Wave 199b: Child portfolio (بورتفوليو الطفل) — photos/videos/artwork/achievements

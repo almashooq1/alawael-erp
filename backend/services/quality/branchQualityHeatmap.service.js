@@ -53,6 +53,8 @@ const THRESHOLDS = Object.freeze({
   'cbahi.attestationsExpiringSoon': { warning: 0, critical: 5 }, // strict: any attestation expiring in next 30 days needs action
   // W375 (Operational planning — bridges W363 RespiteBooking onto the heatmap)
   'respite.upcomingBookings': { warning: 10, critical: 25 }, // moderate: forward-looking load signal (next 7 days)
+  // W376 (Life-stage transition — bridges W361 TransitionPlan onto the heatmap)
+  'transitionPlan.overdueReviews': { warning: 0, critical: 5 }, // strict: overdue review = beneficiary may miss transition milestone
 });
 
 // Terminal-statuses sets (mirror config/{rca,fmea}.registry.js TERMINAL_STATUSES).
@@ -73,6 +75,13 @@ const CBAHI_EXPIRY_WINDOW_DAYS = 30;
 // 'requested' / 'rejected' / 'completed' / 'cancelled' / 'no_show' / 'checked_in' are not "upcoming".
 const RESPITE_SCHEDULED_STATUSES = Object.freeze(['approved', 'confirmed']);
 const RESPITE_UPCOMING_WINDOW_DAYS = 7;
+// W376 — TransitionPlan STATUSES = [draft, readiness_assessed, in_progress, completed, paused, cancelled].
+// Active = readiness_assessed | in_progress | paused (drafts have no review yet; completed/cancelled have no future review).
+const TRANSITION_PLAN_ACTIVE_STATUSES = Object.freeze([
+  'readiness_assessed',
+  'in_progress',
+  'paused',
+]);
 
 const SEVERITY_RANK = Object.freeze({ ok: 0, warning: 1, critical: 2 });
 
@@ -202,6 +211,17 @@ function createBranchQualityHeatmapService(opts = {}) {
     } catch {
       require('../../models/RespiteBooking');
       return mongoose.model('RespiteBooking');
+    }
+  }
+
+  function _TransitionPlanModel() {
+    if (opts.transitionPlanModel) return opts.transitionPlanModel;
+    const mongoose = require('mongoose');
+    try {
+      return mongoose.model('TransitionPlan');
+    } catch {
+      require('../../models/TransitionPlan');
+      return mongoose.model('TransitionPlan');
     }
   }
 
@@ -382,6 +402,21 @@ function createBranchQualityHeatmapService(opts = {}) {
     return Cbahi.aggregate(pipeline);
   }
 
+  async function _transitionPlanMetricsByBranch({ branchIds, now }) {
+    const Plan = _TransitionPlanModel();
+    // Overdue review = active plan AND nextReviewDate is non-null AND in the past.
+    const match = {
+      status: { $in: TRANSITION_PLAN_ACTIVE_STATUSES },
+      nextReviewDate: { $ne: null, $lt: now },
+    };
+    if (branchIds?.length) match.branchId = { $in: branchIds };
+    const pipeline = [
+      { $match: match },
+      { $group: { _id: '$branchId', overdueReviewCount: { $sum: 1 } } },
+    ];
+    return Plan.aggregate(pipeline);
+  }
+
   async function _respiteMetricsByBranch({ branchIds, now }) {
     const Respite = _RespiteModel();
     // Upcoming = scheduled status AND startAt in next 7 days.
@@ -427,6 +462,7 @@ function createBranchQualityHeatmapService(opts = {}) {
     let assistiveDeviceRows = [];
     let cbahiRows = [];
     let respiteRows = [];
+    let transitionPlanRows = [];
     try {
       capaRows = await _capaMetricsByBranch({ branchIds, now });
     } catch (err) {
@@ -477,6 +513,11 @@ function createBranchQualityHeatmapService(opts = {}) {
     } catch (err) {
       logger.warn?.(`[branchQualityHeatmap] respite aggregation failed: ${err.message}`);
     }
+    try {
+      transitionPlanRows = await _transitionPlanMetricsByBranch({ branchIds, now });
+    } catch (err) {
+      logger.warn?.(`[branchQualityHeatmap] transition-plan aggregation failed: ${err.message}`);
+    }
 
     // Merge by branchId
     const byBranch = new Map();
@@ -499,6 +540,7 @@ function createBranchQualityHeatmapService(opts = {}) {
             'assistiveDevice.maintenanceOverdue': null,
             'cbahi.attestationsExpiringSoon': null,
             'respite.upcomingBookings': null,
+            'transitionPlan.overdueReviews': null,
           },
         });
       }
@@ -553,6 +595,13 @@ function createBranchQualityHeatmapService(opts = {}) {
     for (const r of respiteRows) {
       const b = _ensure(r._id);
       b.cells['respite.upcomingBookings'] = _cell('respite.upcomingBookings', r.upcomingCount);
+    }
+    for (const r of transitionPlanRows) {
+      const b = _ensure(r._id);
+      b.cells['transitionPlan.overdueReviews'] = _cell(
+        'transitionPlan.overdueReviews',
+        r.overdueReviewCount
+      );
     }
 
     // Compute branch-level severity + tally

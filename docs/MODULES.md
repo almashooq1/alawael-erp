@@ -112,8 +112,9 @@
 | `/api/respite`                | الرعاية المؤقتة — Disability Authority subsidy (W363)                |
 | `/api/diet-prescription`      | الوصفة الغذائية السريرية — IDDSI + NPO + enteral (W368)              |
 | `/api/facility-asset`         | أصول المنشأة — مصاعد/منحدرات/إنذار/أوكسجين + PPM (W369)              |
+| `/api/caregiver-support`      | برامج دعم مقدمي الرعاية — Zarit pre/post + sessions (W384)           |
 
-> 📑 **W356-W382 Series Doc**: `docs/architecture/PRODUCTION_CUTOVER_W356_W370.md` is the ops checklist (11 ENV flags + 12 role names + cutover verification). See `CLAUDE.md` "W356–W376 Clinical Services Series" section for the full pattern recap.
+> 📑 **W356-W385 Series Doc**: `docs/architecture/PRODUCTION_CUTOVER_W356_W370.md` is the ops checklist (11 ENV flags + 12 role names + cutover verification). See `CLAUDE.md` "W356–W376 Clinical Services Series" section for the full pattern recap. W384 added caregiver-support; W385 wired it into the `/clinical-services/[id]` aggregator (8 surfaces).
 
 ### 🤖 7. الذكاء الاصطناعي (AI/ML)
 

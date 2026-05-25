@@ -66,7 +66,11 @@
 
 Each scenario exercises one cross-module path. **مدة كل scenario = ~2-4 hours of real work spread over a few days**.
 
+> **📋 Detailed walkthroughs (step-by-step + acceptance + sign-off + cleanup) live in [docs/pilot/](pilot/README.md)**. The tables below are summaries; run the per-scenario doc for the actual execution.
+
 ### Scenario 1: Beneficiary intake → first session (الأساسي)
+
+📖 **Full walkthrough**: [docs/pilot/SCENARIO_1_INTAKE_TO_FIRST_SESSION.md](pilot/SCENARIO_1_INTAKE_TO_FIRST_SESSION.md)
 
 **Touchpoints**: B360 + Assessment + Care Plan + Session + Family Portal.
 
@@ -88,6 +92,8 @@ Each scenario exercises one cross-module path. **مدة كل scenario = ~2-4 hou
 
 ### Scenario 2: Re-assessment cycle → plan revision
 
+📖 **Full walkthrough**: [docs/pilot/SCENARIO_2_REASSESSMENT_REVISION.md](pilot/SCENARIO_2_REASSESSMENT_REVISION.md)
+
 **Touchpoints**: Assessment re-run + CarePlanVersion + family re-approval.
 
 | Step | UI / API                                                         | Verify                                                  |
@@ -104,6 +110,8 @@ Each scenario exercises one cross-module path. **مدة كل scenario = ~2-4 hou
 ---
 
 ### Scenario 3: Quality finding → CAPA → close (the W337-W349 chain end-to-end)
+
+📖 **Full walkthrough**: [docs/pilot/SCENARIO_3_CAPA_END_TO_END.md](pilot/SCENARIO_3_CAPA_END_TO_END.md)
 
 **Touchpoints**: AuditOccurrence → producer → CapaItem → workflow → CLOSED.
 
@@ -125,6 +133,8 @@ Each scenario exercises one cross-module path. **مدة كل scenario = ~2-4 hou
 
 ### Scenario 4: Transport + camera attendance reconciliation
 
+📖 **Full walkthrough**: [docs/pilot/SCENARIO_4_TRANSPORT_HIKVISION.md](pilot/SCENARIO_4_TRANSPORT_HIKVISION.md)
+
 **Touchpoints**: TransportAssignment + Hikvision attendance + reconciliation.
 
 | Step | UI / API                                              | Verify                                                                                       |
@@ -142,6 +152,8 @@ Each scenario exercises one cross-module path. **مدة كل scenario = ~2-4 hou
 ---
 
 ### Scenario 5: Monthly disability-authority report submission
+
+📖 **Full walkthrough**: [docs/pilot/SCENARIO_5_DISABILITY_AUTHORITY_REPORT.md](pilot/SCENARIO_5_DISABILITY_AUTHORITY_REPORT.md)
 
 **Touchpoints**: DisabilityAuthorityAdapter (W281) + monthly cron (W286).
 

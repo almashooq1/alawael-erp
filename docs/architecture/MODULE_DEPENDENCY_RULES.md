@@ -257,18 +257,18 @@
 
 ملخّص المابينج (مرجعي — التفصيل في ADR-025):
 
-| Doctrine Module                          | `backend/domains/` folders                                                       | Legacy areas                                                                                   |
-| ---------------------------------------- | -------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| `platform-core`                          | `security`, `notifications`, `workflow`                                          | `intelligence/`, `middleware/`, `utils/`, `database/`                                          |
-| `beneficiary-360`                        | `core`, `family`, `episodes`, `timeline`                                         | `models/Beneficiary.js`, `models/EpisodeOfCare.js`                                             |
-| `assessment-measures`                    | `assessments`, `goals` (MeasuresLibrary)                                         | `models/MeasurementMaster.js`, `services/measureLifecycle*`                                    |
-| `goals-care-plans`                       | `care-plans`, `behavior`                                                         | `intelligence/care-planning.registry.js`                                                       |
-| `programs-sessions-progress`             | `programs`, `sessions`, `group-therapy`, `tele-rehab`, `ar-vr`, `field-training` | `services/sessions*`, `models/Therapy*`                                                        |
-| `operations-attendance-transport`        | `hr`                                                                             | `routes/transport*`, `routes/biometric-attendance*`, `services/hikvision*`, `services/zkteco*` |
-| `reports-approvals-family-communication` | `reports`, `dashboards`, `ai-recommendations`                                    | `authorization/approvals/`, `routes/parent-portal-v1.routes.js`, `services/messaging*`         |
-| `quality-risk-governance`                | `quality`, `research`                                                            | `services/quality/`, `routes/quality/`, `database/audit-trail.js`                              |
+| Doctrine Module                                        | `backend/domains/` folders                                                       | Legacy areas                                                                               |
+| ------------------------------------------------------ | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `platform-core`                                        | `security`, `notifications`, `workflow`                                          | `intelligence/`, `middleware/`, `utils/`, `database/`                                      |
+| `beneficiary-360`                                      | `core`, `episodes`, `timeline`                                                   | `models/Beneficiary.js`, `models/EpisodeOfCare.js`                                         |
+| `assessment-measures`                                  | `assessments`, `goals` (MeasuresLibrary)                                         | `models/MeasurementMaster.js`, `services/measureLifecycle*`                                |
+| `goals-care-plans`                                     | `care-plans`, `behavior`                                                         | `intelligence/care-planning.registry.js`                                                   |
+| `programs-sessions-progress`                           | `programs`, `sessions`, `group-therapy`, `tele-rehab`, `ar-vr`, `field-training` | `services/sessions*`, `models/Therapy*`                                                    |
+| `operations-attendance-transport + quality` (W354b T6) | `hr`, `quality`                                                                  | `routes/transport*`, `services/quality/`, `services/hikvision*`, `database/audit-trail.js` |
+| `reports-approvals-family-communication` (W354b T7)    | `reports`, `dashboards`, `ai-recommendations`, `family`, `research`              | `authorization/approvals/`, `routes/parent-portal-v1.routes.js`, `services/messaging*`     |
+| _(reserved)_ T8                                        | _(none)_                                                                         | W354b folded quality into T6, research + family into T7                                    |
 
-**ملاحظات على المابينج**:
+**ملاحظات على المابينج (W354b 2026-05-25)**:
 
 - `research` ضمن quality-risk-governance لأنها clinical-research/audit-related (راجع ADR-025 Q3).
 - `dashboards` ضمن reports-approvals-family لأن KPI/DecisionSupport هي طبقة قراءة-عرض، لا مالك بيانات أصلي.

@@ -7,14 +7,20 @@
  * against the actual code in `backend/domains/`:
  *
  *   Tier 1: platform-core           — security, notifications, workflow
- *   Tier 2: beneficiary-360         — core, family, episodes, timeline
+ *   Tier 2: beneficiary-360         — core, episodes, timeline
  *   Tier 3: assessment-measures     — assessments, goals
  *   Tier 4: goals-care-plans        — care-plans, behavior
  *   Tier 5: programs-sessions-      — programs, sessions, group-therapy,
  *                                     progress      tele-rehab, ar-vr, field-training
- *   Tier 6: operations-att-transp   — hr
- *   Tier 7: reports-approvals-fam   — reports, dashboards, ai-recommendations
- *   Tier 8: quality-risk-governance — quality, research
+ *   Tier 6: operations + quality    — hr, quality
+ *   Tier 7: reports-approvals-fam   — reports, dashboards, ai-recommendations,
+ *                                     -communication  family, research
+ *
+ * (W354b revision 2026-05-25 per Q1 + Q2: quality 8→6, research 8→7,
+ *  family 2→7. Doctrine's "quality at tier 8 = top consumer" framing missed
+ *  the producer side (audits surfaced by reports). Family is largely a parent-
+ *  portal communication domain — doctrine §4 places "Family Communications"
+ *  in tier 7. Original tier-8 slot now empty/reserved.)
  *
  * Mapping is the ADR-025 decision; revise both the ADR and the TIER constant
  * below if stakeholders change Q1-Q5 answers.
@@ -73,7 +79,6 @@ const TIER = Object.freeze({
   workflow: 1,
   // Tier 2 — beneficiary-360
   core: 2,
-  family: 2,
   episodes: 2,
   timeline: 2,
   // Tier 3 — assessment-measures
@@ -89,15 +94,16 @@ const TIER = Object.freeze({
   'tele-rehab': 5,
   'ar-vr': 5,
   'field-training': 5,
-  // Tier 6 — operations-attendance-transport
+  // Tier 6 — operations-attendance-transport + quality
   hr: 6,
+  quality: 6, // W354b: 8 → 6 per Q2 (quality is BOTH producer + consumer)
   // Tier 7 — reports-approvals-family-communication
   reports: 7,
   dashboards: 7,
   'ai-recommendations': 7,
-  // Tier 8 — quality-risk-governance
-  quality: 8,
-  research: 8,
+  family: 7, // W354b: 2 → 7 per family-portal placement (doctrine §4)
+  research: 7, // W354b: 8 → 7 per Q3 follow-up (clinical-research consumer)
+  // Tier 8 — RESERVED (was quality-risk-governance; now folded into T6 + T7)
 });
 
 // Folders inside backend/domains/ that are NOT product domains.
@@ -109,42 +115,35 @@ const UNMAPPED_DOMAIN_ALLOWLIST = new Set([
 // ─── Known violations baselined at W354 introduction (2026-05-24) ────────────
 
 // Format: 'fromDomain|toDomain'
-// Each entry is a CURRENTLY-DECLARED reversal that ADR-025 documents under
-// Q1-Q5. Resolution lives behind stakeholder sign-off:
-//   * workflow→{core,episodes,timeline}: Q1 (move workflow off tier 1, OR
-//     refactor JourneyService to accept projections).
-//   * family→{sessions,goals,care-plans}: family is currently in tier 2 but
-//     pulls from 3-5. Either (a) split family into a tier-2 owner + a
-//     tier-7 messaging consumer, or (b) re-tier family to 5+.
-//   * dashboards→quality, reports→quality: Q2 (move quality off tier 8, or
-//     invert via events).
+// CONTRACT: when a violation is refactored away, remove the entry here in
+// the SAME commit as the refactor. Test (b) catches stale entries.
 //
-// REMOVAL CONTRACT: when a violation is refactored away, remove the entry
-// here in the SAME commit as the refactor. Test (b) catches stale entries.
-const KNOWN_TIER_VIOLATIONS = new Set([
-  'dashboards|quality',
-  'family|sessions',
-  'family|goals',
-  'family|care-plans',
-  'reports|quality',
-  'workflow|core',
-  'workflow|episodes',
-  'workflow|timeline',
-]);
+// W354b (2026-05-25) cleared the original baseline of 8 entries via tier
+// remapping + workflow declared-deps cleanup (no behavioral code change):
+//   * dashboards|quality, reports|quality cleared by quality 8→6 (now T7→T6 legal)
+//   * family|{sessions,goals,care-plans} cleared by family 2→7 (now T7→{T5,T3,T4} legal)
+//   * workflow|{core,episodes,timeline} cleared by JourneyService refactor (the
+//     declared deps were only present for module-load-order; after switching
+//     to mongoose.model('X') runtime lookups in JourneyService the deps were
+//     removed from workflow/index.js).
+// See ADR-025 + commit history for the full audit trail.
+const KNOWN_TIER_VIOLATIONS = new Set([]);
 
 // Format: 'fromDomain|targetDomain|targetSubdir|targetRest'
 // `targetRest` is the path after the subdir, normalized to forward slashes
 // and stripped of .js extension. We baseline by canonical require path
 // (not by callsite line) so multiple require statements of the same module
-// from the same file collapse to ONE baseline entry. JourneyService has 7
-// requires that all collapse to 3 unique target modules (EpisodeOfCare ×5,
-// Beneficiary ×1, CareTimeline ×1 → 3 entries).
-const KNOWN_FACADE_BYPASSES = new Set([
-  // domains/workflow/services/JourneyService.js — see Q1 in ADR-025
-  'workflow|core|models|Beneficiary',
-  'workflow|episodes|models|EpisodeOfCare',
-  'workflow|timeline|models|CareTimeline',
-]);
+// from the same file collapse to ONE baseline entry.
+//
+// W354b (2026-05-25) cleared the original baseline of 3 entries by switching
+// JourneyService's 8 cross-domain `require('../../X/models/Y')` callsites to
+// `mongoose.model('Y')` runtime lookups (same pattern as FamilyService.js +
+// 25+ other places in the codebase). Same runtime semantics; the facade-
+// respect rule is now honored via platform-tier mongoose registry instead
+// of direct filesystem reach-in. Auto-test
+// tests/unit/workflow-services-JourneyService.domain.test.js:43 updated
+// from 12 → 4 to match the new local-require count.
+const KNOWN_FACADE_BYPASSES = new Set([]);
 
 // ─── Scanning helpers ────────────────────────────────────────────────────────
 

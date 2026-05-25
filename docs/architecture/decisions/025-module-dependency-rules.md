@@ -4,9 +4,20 @@ Date: 2026-05-24
 
 ## Status
 
-🟡 **Partially decided 2026-05-25 — Q1 + Q2 still need stakeholder sign-off; Q3 + Q4 answered autonomously; Q5 confirmed out of W354 scope.**
+✅ **W354b 2026-05-25 — Baseline cleared to zero. All 5 questions resolved.**
 
-The doctrine (`docs/architecture/MODULE_DEPENDENCY_RULES.md`) is canonical. This ADR captures the mapping between its 8 logical modules and the actual code layout in `backend/`, plus the drift guard (W354) that enforces direction + circular-free + facade-respect. Of the 5 originally-open questions, **Q3 (research) and Q4 (hr) are answered without affecting any current violation**, **Q5 (legacy) is confirmed deliberately out of scope**, and **Q1 (workflow) + Q2 (reports/dashboards→quality) carry concrete recommendations for stakeholder confirmation**.
+The doctrine (`docs/architecture/MODULE_DEPENDENCY_RULES.md`) is canonical. This ADR captures the mapping between its 8 logical modules and the actual code layout in `backend/`, plus the drift guard (W354) that enforces direction + circular-free + facade-respect.
+
+**Final resolution** (commits `15678c63a` → `ee1fc0885` → `37f376822` → W354b):
+
+- Q1 (workflow): JourneyService refactored to use `mongoose.model('X')` runtime lookups; workflow declared deps cleared. 3 tier + 3 facade-bypass entries removed.
+- Q2 (reports/dashboards→quality): TIER remapped — `quality: 8 → 6`, `research: 8 → 7`. 2 tier entries removed.
+- Q3 (research): tier 7 confirmed (was 8; moved with Q2).
+- Q4 (hr): tier 6 confirmed; split deferred to follow-up ADR.
+- Q5 (legacy): out of W354 scope (deliberate).
+- **Family re-tier 2 → 7**: family is primarily a parent-portal communication domain (doctrine §4 places "Family Communications" in tier 7). 3 tier entries removed.
+
+**Result**: W354 baseline 8 + 3 → **0 + 0**. 9/9 drift-guard tests pass with empty `KNOWN_TIER_VIOLATIONS` + `KNOWN_FACADE_BYPASSES`. JourneyService auto-test `tests/unit/workflow-services-JourneyService.domain.test.js` count updated 12 → 4 to match new local-require count.
 
 ## Context
 
@@ -71,16 +82,16 @@ These 8 tier-direction + 3 unique facade-bypass entries are the W354 baseline. *
 
 ## The mapping (8 doctrine modules ↔ 24 domains + legacy areas)
 
-| Tier | Doctrine Module                          | `backend/domains/` folders                                                       | Legacy areas                                                                                         | Owns (per §4)                                                    |
-| ---- | ---------------------------------------- | -------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
-| 1    | `platform-core`                          | `security`, `notifications`, `workflow`                                          | `intelligence/`, `middleware/`, `utils/`, `database/`, `models/User.js`, `models/Branch.js`          | Users, Branches, Roles, Permissions, WorkflowTasks, Dictionaries |
-| 2    | `beneficiary-360`                        | `core`, `family`, `episodes`, `timeline`                                         | `models/Beneficiary.js`, `models/EpisodeOfCare.js`                                                   | Beneficiary, Guardians, Episodes                                 |
-| 3    | `assessment-measures`                    | `assessments`, `goals` (MeasuresLibrary)                                         | `models/MeasurementMaster.js`, `services/measureLifecycle*`, `intelligence/measure-lifecycle.lib.js` | Assessments, Measures, Results                                   |
-| 4    | `goals-care-plans`                       | `care-plans`, `behavior`                                                         | `intelligence/care-planning.registry.js`                                                             | Goals, Care Plans                                                |
-| 5    | `programs-sessions-progress`             | `programs`, `sessions`, `group-therapy`, `tele-rehab`, `ar-vr`, `field-training` | `services/sessions*`, `models/Therapy*Session.js`                                                    | Programs, Sessions, Progress Signals                             |
-| 6    | `operations-attendance-transport`        | `hr`                                                                             | `routes/transport*`, `routes/biometric-attendance*`, `services/hikvision*`, `services/zkteco*`       | Schedules, Attendance, Transport                                 |
-| 7    | `reports-approvals-family-communication` | `reports`, `dashboards`, `ai-recommendations`                                    | `authorization/approvals/`, `routes/parent-portal-v1.routes.js`, `services/messaging*`               | Report Artifacts, Family Communications                          |
-| 8    | `quality-risk-governance`                | `quality`, `research`                                                            | `services/quality/`, `routes/quality/`, `database/audit-trail.js`, `models/auditLog.model.js`        | Risks, Incidents, Audits, CAPA                                   |
+| Tier | Doctrine Module                             | `backend/domains/` folders                                                       | Legacy areas                                                                                         | Owns (per §4)                                                    |
+| ---- | ------------------------------------------- | -------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| 1    | `platform-core`                             | `security`, `notifications`, `workflow`                                          | `intelligence/`, `middleware/`, `utils/`, `database/`, `models/User.js`, `models/Branch.js`          | Users, Branches, Roles, Permissions, WorkflowTasks, Dictionaries |
+| 2    | `beneficiary-360`                           | `core`, `episodes`, `timeline`                                                   | `models/Beneficiary.js`, `models/EpisodeOfCare.js`                                                   | Beneficiary, Guardians, Episodes                                 |
+| 3    | `assessment-measures`                       | `assessments`, `goals` (MeasuresLibrary)                                         | `models/MeasurementMaster.js`, `services/measureLifecycle*`, `intelligence/measure-lifecycle.lib.js` | Assessments, Measures, Results                                   |
+| 4    | `goals-care-plans`                          | `care-plans`, `behavior`                                                         | `intelligence/care-planning.registry.js`                                                             | Goals, Care Plans                                                |
+| 5    | `programs-sessions-progress`                | `programs`, `sessions`, `group-therapy`, `tele-rehab`, `ar-vr`, `field-training` | `services/sessions*`, `models/Therapy*Session.js`                                                    | Programs, Sessions, Progress Signals                             |
+| 6    | `operations-attendance-transport + quality` | `hr`, `quality`                                                                  | `routes/transport*`, `services/quality/`, `services/hikvision*`, `database/audit-trail.js`           | Schedules, Attendance, Transport, Risks, Incidents, Audits, CAPA |
+| 7    | `reports-approvals-family-communication`    | `reports`, `dashboards`, `ai-recommendations`, `family`, `research`              | `authorization/approvals/`, `routes/parent-portal-v1.routes.js`, `services/messaging*`               | Report Artifacts, Family Communications, Research                |
+| 8    | _(reserved)_                                | _(none)_                                                                         | _(none)_                                                                                             | W354b folded quality into T6 and research into T7                |
 
 ### Mapping decisions worth noting
 

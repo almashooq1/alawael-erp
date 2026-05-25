@@ -38,9 +38,13 @@ describe('domains/workflow/services/JourneyService.js', () => {
     expect(source).toMatch(/try\s*\{/);
   });
 
-  test('has local dependencies (12)', () => {
+  test('has local dependencies (4 after W354 mongoose.model refactor)', () => {
+    // W354 (2026-05-25): cross-domain `require('../../X/models/Y')` × 8 swapped to
+    // `mongoose.model('Y')` runtime lookups to honor facade-respect rule in
+    // docs/architecture/MODULE_DEPENDENCY_RULES.md §1.2. Local count dropped 12 → 4
+    // (kept: WorkflowEngine + WorkflowTask + WorkflowTransitionLog + logger).
     const locals = source.match(/require\s*\(\s*['"]\.[^'"]+['"]\s*\)/g) || [];
-    expect(locals.length).toBe(12);
+    expect(locals.length).toBe(4);
   });
 
   test('has module.exports', () => {

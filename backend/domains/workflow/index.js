@@ -7,7 +7,10 @@
  *  - نماذج المهام وسجلات التدقيق
  *  - مسارات API
  *
- * Dependencies: core, episodes, timeline
+ * Dependencies: none — workflow is tier-1 infrastructure. After the W354
+ * JourneyService refactor (2026-05-25) the journey orchestrator does runtime
+ * `mongoose.model('X')` lookups instead of static cross-domain requires, so
+ * workflow no longer needs core/episodes/timeline at module-load time.
  *
  * @module domains/workflow
  */
@@ -26,7 +29,7 @@ class WorkflowDomain extends BaseDomainModule {
       name: 'workflow',
       version: '1.0.0',
       description: 'محرك سير العمل ورحلة المستفيد — من الإحالة إلى الخروج',
-      dependencies: ['core', 'episodes', 'timeline'],
+      dependencies: [],
     });
 
     this.engine = workflowEngine;

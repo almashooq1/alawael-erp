@@ -8,6 +8,7 @@
  * @module domains/workflow/services/JourneyService
  */
 
+const mongoose = require('mongoose');
 const { workflowEngine } = require('../WorkflowEngine');
 const WorkflowTask = require('../models/WorkflowTask');
 const WorkflowTransitionLog = require('../models/WorkflowTransitionLog');
@@ -26,7 +27,7 @@ class JourneyService {
    * بدء رحلة جديدة — إنشاء حلقة علاجية + انتقال للإحالة
    */
   async startJourney({ beneficiaryId, referralData, userId, branchId, organizationId }) {
-    const EpisodeOfCare = require('../../episodes/models/EpisodeOfCare');
+    const EpisodeOfCare = mongoose.model('EpisodeOfCare');
 
     // 1. إنشاء حلقة علاجية جديدة
     const episode = await EpisodeOfCare.create({
@@ -78,7 +79,7 @@ class JourneyService {
     });
 
     // 4. تحديث ملف المستفيد
-    const Beneficiary = require('../../core/models/Beneficiary');
+    const Beneficiary = mongoose.model('Beneficiary');
     await Beneficiary.findByIdAndUpdate(beneficiaryId, {
       currentEpisodeId: episode._id,
       $inc: { totalEpisodes: 1 },
@@ -99,7 +100,7 @@ class JourneyService {
    * نقل المستفيد للمرحلة التالية
    */
   async advancePhase({ episodeId, toPhase, userId, reason, context = {} }) {
-    const EpisodeOfCare = require('../../episodes/models/EpisodeOfCare');
+    const EpisodeOfCare = mongoose.model('EpisodeOfCare');
     const episode = await EpisodeOfCare.findById(episodeId);
 
     if (!episode) {
@@ -210,7 +211,7 @@ class JourneyService {
    * تجاوز سريري (Exception) — نقل بدون قواعد عادية
    */
   async exceptionAdvance({ episodeId, toPhase, userId, reason, approvedBy }) {
-    const EpisodeOfCare = require('../../episodes/models/EpisodeOfCare');
+    const EpisodeOfCare = mongoose.model('EpisodeOfCare');
     const episode = await EpisodeOfCare.findById(episodeId);
 
     if (!episode) {
@@ -289,7 +290,7 @@ class JourneyService {
    * الحصول على حالة رحلة المستفيد الحالية
    */
   async getJourneyStatus(episodeId) {
-    const EpisodeOfCare = require('../../episodes/models/EpisodeOfCare');
+    const EpisodeOfCare = mongoose.model('EpisodeOfCare');
     const episode = await EpisodeOfCare.findById(episodeId)
       .populate('beneficiaryId', 'name fileNumber personalInfo')
       .populate('team.userId', 'name role');
@@ -329,7 +330,7 @@ class JourneyService {
    * التحقق من إمكانية الانتقال
    */
   async checkTransition(episodeId, toPhase, context = {}) {
-    const EpisodeOfCare = require('../../episodes/models/EpisodeOfCare');
+    const EpisodeOfCare = mongoose.model('EpisodeOfCare');
     const episode = await EpisodeOfCare.findById(episodeId);
     if (!episode) return { valid: false, errors: ['الحلقة العلاجية غير موجودة'] };
 
@@ -385,7 +386,7 @@ class JourneyService {
    * الحصول على تقدم جميع الحلقات النشطة (لوحة تحكم)
    */
   async getActiveJourneysDashboard(filters = {}) {
-    const EpisodeOfCare = require('../../episodes/models/EpisodeOfCare');
+    const EpisodeOfCare = mongoose.model('EpisodeOfCare');
 
     const query = { status: { $in: ['planned', 'active'] } };
     if (filters.branchId) query.branchId = filters.branchId;
@@ -488,7 +489,7 @@ class JourneyService {
     flags,
   }) {
     try {
-      const CareTimeline = require('../../timeline/models/CareTimeline');
+      const CareTimeline = mongoose.model('CareTimeline');
       await CareTimeline.create({
         beneficiaryId,
         episodeId,

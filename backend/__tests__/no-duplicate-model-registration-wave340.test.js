@@ -172,7 +172,11 @@ const KNOWN_DUPLICATE_REGISTRATIONS = new Set([
   //                (was strict:false placeholder). Service now does mongoose.model()
   //                lookup. Per TIER2_AUDIT Cycle 6 empty-shim pattern.
   // 'Role'       — CONSOLIDATED 2026-05-25 (empty-shim batch): same path as Permission.
-  'TrafficAccident', // models/Traffic/TrafficAccident.js + vehicles/saudi-traffic-service.js
+  // 'TrafficAccident' — CONSOLIDATED 2026-05-25 (empty-shim batch): rich schema
+  //                     migrated from vehicles/saudi-traffic-service.js to
+  //                     models/Traffic/TrafficAccident.js (was strict:false
+  //                     placeholder). Service now does mongoose.model() lookup.
+  //                     Per TIER2_AUDIT Cycle 6 empty-shim pattern.
   'TransportRoute', // models/TransportRoute.js + vehicles/rehabilitation-transport-service.js
   'Vehicle', // models/Vehicle.js + vehicles/vehicle-service.js
   'VehicleMaintenance', // models/transport/VehicleMaintenance.js + vehicles/vehicle-service.js

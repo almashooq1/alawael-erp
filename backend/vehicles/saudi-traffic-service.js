@@ -265,119 +265,15 @@ TrafficViolationSchema.index({ 'vehicle.plateNumber': 1 });
 TrafficViolationSchema.index({ 'details.dateTime': 1 });
 
 /**
- * Traffic Accident Schema - الحوادث المرورية
+ * TrafficAccident schema migrated to canonical models/Traffic/TrafficAccident.js
+ * per the empty-shim pattern (Cycle 6 TIER2_AUDIT + canonical-location-pattern §
+ * "Exception: the empty-shim pattern"). The connection.model registration below
+ * replaced with mongoose.model() lookup. Keeping trafficConfig.accidentStatuses
+ * here for backward compatibility with the service's other methods that read
+ * status labels — the schema's enum values (ACCIDENT_STATUS_TYPES) are inlined
+ * in the canonical model.
  */
-const TrafficAccidentSchema = new mongoose.Schema(
-  {
-    // معرف الحادث
-    accidentId: { type: String, unique: true },
-    accidentNumber: String,
-
-    // الموقع والتاريخ
-    location: {
-      road: String,
-      city: String,
-      region: String,
-      coordinates: { lat: Number, lng: Number },
-      landmark: String,
-    },
-    dateTime: Date,
-
-    // الظروف
-    circumstances: {
-      weather: { type: String, enum: ['clear', 'cloudy', 'rain', 'fog', 'dust'] },
-      roadCondition: { type: String, enum: ['dry', 'wet', 'sandy', 'damaged'] },
-      lighting: { type: String, enum: ['daylight', 'night_lit', 'night_unlit', 'dawn_dusk'] },
-      trafficCondition: { type: String, enum: ['light', 'moderate', 'heavy', 'congested'] },
-    },
-
-    // المركبات المتضررة
-    vehicles: [
-      {
-        plateNumber: String,
-        plateLetters: String,
-        region: String,
-        ownerName: String,
-        driverName: String,
-        driverNationalId: String,
-        damage: {
-          severity: { type: String, enum: ['minor', 'moderate', 'severe', 'total'] },
-          description: String,
-          estimatedCost: Number,
-          photos: [String],
-        },
-        insurance: {
-          company: String,
-          policyNumber: String,
-          claimNumber: String,
-        },
-        atFault: Boolean,
-        faultPercentage: Number,
-      },
-    ],
-
-    // المصابين
-    injuries: [
-      {
-        personType: { type: String, enum: ['driver', 'passenger', 'pedestrian'] },
-        name: String,
-        nationalId: String,
-        severity: { type: String, enum: ['minor', 'moderate', 'severe', 'fatal'] },
-        hospital: String,
-        notes: String,
-      },
-    ],
-
-    // رجال المرور
-    police: {
-      officerName: String,
-      officerId: String,
-      station: String,
-      reportNumber: String,
-      arrivalTime: Date,
-    },
-
-    // التقرير
-    report: {
-      cause: String,
-      description: String,
-      diagram: String, // رسم توضيحي
-      photos: [String],
-      witnessStatements: [
-        {
-          witnessName: String,
-          statement: String,
-          date: Date,
-        },
-      ],
-    },
-
-    // الحالة
-    status: {
-      type: String,
-      enum: Object.keys(trafficConfig.accidentStatuses),
-      default: 'pending',
-    },
-
-    // الحل
-    resolution: {
-      type: { type: String, enum: ['amicable', 'police', 'insurance', 'court'] },
-      date: Date,
-      details: String,
-      totalCompensation: Number,
-    },
-
-    // Tenant
-    tenantId: String,
-
-    // Timestamps
-    createdAt: { type: Date, default: Date.now },
-    updatedAt: Date,
-  },
-  {
-    collection: 'traffic_accidents',
-  }
-);
+require('../models/Traffic/TrafficAccident');
 
 /**
  * Saudi Traffic Service Class
@@ -396,7 +292,9 @@ class SaudiTrafficService extends EventEmitter {
   async initialize(connection) {
     this.DriverLicense = connection.model('DriverLicense', DriverLicenseSchema);
     this.TrafficViolation = connection.model('TrafficViolation', TrafficViolationSchema);
-    this.TrafficAccident = connection.model('TrafficAccident', TrafficAccidentSchema);
+    // TrafficAccident: lookup from canonical models/Traffic/TrafficAccident.js
+    // (loaded via require at top of file). Per TIER2_AUDIT Cycle 6 empty-shim.
+    this.TrafficAccident = mongoose.model('TrafficAccident');
     logger.info('✅ Saudi Traffic Service initialized');
   }
 

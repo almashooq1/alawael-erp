@@ -47,6 +47,8 @@ const THRESHOLDS = Object.freeze({
   // W371 (Clinical safety — bridges W356+W357 onto the operational heatmap)
   'seizures.openEvents': { warning: 0, critical: 5 }, // strict: any unreviewed seizure is a warning
   'safeguarding.openConcerns': { warning: 0, critical: 3 }, // strict: any open safeguarding concern is a warning
+  // W372 (Operational safety — bridges W359 AssistiveDevice onto the heatmap)
+  'assistiveDevice.maintenanceOverdue': { warning: 0, critical: 5 }, // strict: an overdue device may be unsafe
 });
 
 // Terminal-statuses sets (mirror config/{rca,fmea}.registry.js TERMINAL_STATUSES).
@@ -155,6 +157,17 @@ function createBranchQualityHeatmapService(opts = {}) {
     } catch {
       require('../../models/SafeguardingConcern');
       return mongoose.model('SafeguardingConcern');
+    }
+  }
+
+  function _AssistiveDeviceModel() {
+    if (opts.assistiveDeviceModel) return opts.assistiveDeviceModel;
+    const mongoose = require('mongoose');
+    try {
+      return mongoose.model('AssistiveDevice');
+    } catch {
+      require('../../models/AssistiveDevice');
+      return mongoose.model('AssistiveDevice');
     }
   }
 
@@ -317,6 +330,23 @@ function createBranchQualityHeatmapService(opts = {}) {
     return Safeguarding.aggregate(pipeline);
   }
 
+  async function _assistiveDeviceMetricsByBranch({ branchIds, now }) {
+    const Device = _AssistiveDeviceModel();
+    // Overdue = nextMaintenanceDue is set AND in the past AND device is not retired.
+    // Devices with nextMaintenanceDue:null are excluded — they haven't been scheduled yet,
+    // which is a separate "untracked" signal not modeled here.
+    const match = {
+      nextMaintenanceDue: { $ne: null, $lt: now },
+      retiredAt: null,
+    };
+    if (branchIds?.length) match.branchId = { $in: branchIds };
+    const pipeline = [
+      { $match: match },
+      { $group: { _id: '$branchId', overdueCount: { $sum: 1 } } },
+    ];
+    return Device.aggregate(pipeline);
+  }
+
   async function buildHeatmap({ branchIds = null, now = new Date() } = {}) {
     let capaRows = [];
     let auditRows = [];
@@ -325,6 +355,7 @@ function createBranchQualityHeatmapService(opts = {}) {
     let riskRows = [];
     let seizureRows = [];
     let safeguardingRows = [];
+    let assistiveDeviceRows = [];
     try {
       capaRows = await _capaMetricsByBranch({ branchIds, now });
     } catch (err) {
@@ -360,6 +391,11 @@ function createBranchQualityHeatmapService(opts = {}) {
     } catch (err) {
       logger.warn?.(`[branchQualityHeatmap] safeguarding aggregation failed: ${err.message}`);
     }
+    try {
+      assistiveDeviceRows = await _assistiveDeviceMetricsByBranch({ branchIds, now });
+    } catch (err) {
+      logger.warn?.(`[branchQualityHeatmap] assistive-device aggregation failed: ${err.message}`);
+    }
 
     // Merge by branchId
     const byBranch = new Map();
@@ -379,6 +415,7 @@ function createBranchQualityHeatmapService(opts = {}) {
             'risk.critical': null,
             'seizures.openEvents': null,
             'safeguarding.openConcerns': null,
+            'assistiveDevice.maintenanceOverdue': null,
           },
         });
       }
@@ -415,6 +452,13 @@ function createBranchQualityHeatmapService(opts = {}) {
     for (const r of safeguardingRows) {
       const b = _ensure(r._id);
       b.cells['safeguarding.openConcerns'] = _cell('safeguarding.openConcerns', r.openConcerns);
+    }
+    for (const r of assistiveDeviceRows) {
+      const b = _ensure(r._id);
+      b.cells['assistiveDevice.maintenanceOverdue'] = _cell(
+        'assistiveDevice.maintenanceOverdue',
+        r.overdueCount
+      );
     }
 
     // Compute branch-level severity + tally

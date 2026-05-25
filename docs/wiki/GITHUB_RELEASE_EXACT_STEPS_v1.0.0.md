@@ -177,21 +177,21 @@ Security Score: A+ (0 critical issues)
 ## 🚀 Quick Start
 
 ```bash
-# Clone and install
+## Clone and install
 git clone https://github.com/almashooq1/alawael-backend.git
 cd alawael-backend
 git checkout v1.0.0
 npm install
 
-# Setup environment
+## Setup environment
 cp .env.example .env
-# Edit .env with your database URL
+## Edit .env with your database URL
 
-# Run server
+## Run server
 npm start
-# Visit http://localhost:3000/api/health
+## Visit http://localhost:3000/api/health
 
-# Run tests
+## Run tests
 npm test
 ````
 
@@ -379,35 +379,35 @@ Bundle Size: 3.2 MB (optimized)
 ## 🚀 Quick Start
 
 ```bash
-# Clone and install
+## Clone and install
 git clone https://github.com/almashooq1/alawael-erp.git
 cd alawael-erp
 git checkout v1.0.0
 npm install
 
-# Start development
+## Start development
 expo start
 
-# Run on iOS simulator
+## Run on iOS simulator
 expo start --ios
 
-# Run on Android emulator
+## Run on Android emulator
 expo start --android
 
-# Run tests
+## Run tests
 npm test
 ````
 
 ## 🌐 Deploy to App Stores
 
 ```bash
-# Build for iOS
+## Build for iOS
 eas build --platform ios
 
-# Build for Android
+## Build for Android
 eas build --platform android
 
-# Submit to stores
+## Submit to stores
 eas submit --platform ios
 eas submit --platform android
 ```
@@ -422,7 +422,7 @@ This release is **production-ready** with:
 - ✅ Code review: Complete
 - ✅ All integrations tested
 
-## 🔗 Links
+## 🔗 Frontend Release Links
 
 - **Repository:** https://github.com/almashooq1/alawael-erp
 - **Backend Release:** See paired v1.0.0 release in alawael-backend

@@ -2,7 +2,7 @@
 
 > **القاعدة الحاكمة**: لا توجد لوحة مغلقة. كل KPI / chart / alert يجب أن يقود إلى:
 > `explanation → breakdown → owner → next action → related records`.
-
+>
 > **Governing rule**: No dashboard is a dead end. Every KPI / chart / alert must lead to:
 > `explanation → breakdown → owner → next action → related records`.
 

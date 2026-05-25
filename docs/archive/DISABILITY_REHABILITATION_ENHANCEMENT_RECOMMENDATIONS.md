@@ -1,6 +1,6 @@
 # توصيات تحسين نظام تأهيل ذوي الإعاقة
 
-# Disability Rehabilitation System Enhancement Recommendations
+## Disability Rehabilitation System Enhancement Recommendations
 
 ## 📋 فهرس المحتويات
 

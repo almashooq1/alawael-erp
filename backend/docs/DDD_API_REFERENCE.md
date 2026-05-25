@@ -1,6 +1,6 @@
 # DDD Platform — API Reference
 
-# منصة التأهيل الموحدة الذكية — مرجع واجهات البرمجة
+## منصة التأهيل الموحدة الذكية — مرجع واجهات البرمجة
 
 > **Base URL**: `http://localhost:3001` > **API Version**: `/api/v1` (also `/api/v2`)
 > **Auth**: Bearer JWT token in `Authorization` header

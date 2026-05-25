@@ -175,47 +175,47 @@ docker-compose up -d
 ## 🔐 .gitignore Updates
 
 ```bash
-# Node.js
+## Node.js
 node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 package-lock.json*
 
-# Environment
+## Environment
 .env
 .env.*.local
 
-# Build outputs
+## Build outputs
 dist/
 build/
 coverage/
 .nyc_output/
 
-# IDE
+## IDE
 .vscode/
 .idea/
 *.swp
 *.swo
 
-# OS
+## OS
 .DS_Store
 Thumbs.db
 
-# Logs
+## Logs
 logs/
 *.log
 
-# Temporary
+## Temporary
 temp/
 tmp/
 .cache/
 
-# Docker
+## Docker
 .dockerignore
 docker-compose.override.yml
 
-# Test
+## Test
 .jest-cache/
 __tests__/__snapshots__/
 ````
@@ -255,7 +255,7 @@ __tests__/__snapshots__/
 ### 2. Setup CI/CD
 
 ```yaml
-# .github/workflows/test.yml
+## .github/workflows/test.yml
 name: Run Tests
 on: [push, pull_request]
 jobs:

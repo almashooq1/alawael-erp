@@ -125,7 +125,7 @@ Mapping (from ADR-020):
 
 ## 4. Decision template
 
-```
+```text
 ADR-020 — RESOLVED 2026-MM-DD
 
 Approach selected: [ ] A consolidate  [ ] B formalize  [ ] C deprecate

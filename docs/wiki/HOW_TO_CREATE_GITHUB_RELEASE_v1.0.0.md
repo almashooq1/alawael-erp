@@ -168,23 +168,23 @@ Alawael Enterprise Platform v1.0.0
 ### Clone and Run
 
 ```bash
-# Clone the repository
+## Clone the repository
 git clone https://github.com/almashooq1/alawael-backend.git
 cd alawael-backend
 git checkout v1.0.0
 
-# Install dependencies
+## Install dependencies
 npm install
 
-# Set up environment
+## Set up environment
 cp .env.example .env
-# Edit .env with your configuration
+## Edit .env with your configuration
 
-# Start development server
+## Start development server
 npm start
-# Server runs on http://localhost:3000
+## Server runs on http://localhost:3000
 
-# Run tests
+## Run tests
 npm test
 ```
 ````

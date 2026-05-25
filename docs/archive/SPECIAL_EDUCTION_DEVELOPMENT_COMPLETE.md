@@ -1,6 +1,6 @@
 # تقرير تطوير نظام التربية الخاصة المتكامل
 
-# Special Education System Development Report
+## Special Education System Development Report
 
 ## 📅 التاريخ: 26 فبراير 2026
 

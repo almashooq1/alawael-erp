@@ -1,7 +1,7 @@
 # برومتات بناء نظام الأوائل الكامل — ERP لتأهيل ذوي الإعاقة
 
 > **الاستخدام:** كل قسم = prompt جاهز لتنفيذه. أعطِ القسم كاملاً للـ AI (Claude/ChatGPT/…) مع إضافة `"اعتمد على هيكل المشروع الحالي في c:\...\66666"` كـ context.
-
+>
 > **السياق الثابت (أضفه لكل prompt):**
 >
 > - Saudi context: PDPL compliance, Arabic-first RTL, Hijri calendar, SCFHS licensing

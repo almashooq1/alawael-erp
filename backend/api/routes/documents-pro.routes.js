@@ -116,10 +116,7 @@ router.get('/dashboard', async (req, res) => {
       },
     });
   } catch (err) {
-    logger.error(`[DocumentPro] خطأ في لوحة المعلومات: ${err.message}`);
-    res
-      .status(500)
-      .json({ success: false, message: 'خطأ في تحميل لوحة المعلومات', error: err.message });
+    return safeError(res, err, 'documentsPro.dashboard');
   }
 });
 

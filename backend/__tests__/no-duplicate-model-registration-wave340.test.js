@@ -115,8 +115,15 @@ const KNOWN_DUPLICATE_REGISTRATIONS = new Set([
   // 'Attendance'    — W342 CONSOLIDATED: same — re-exports models/Attendance.js
   'Payroll', // 2× — NO canonical at models/Payroll.js (only PayrollPeriod.js); consolidation deferred
   'Event',
-  'BranchSetting',
-  'GlobalSetting',
+  // 'BranchSetting' — 2026-05-25 moved to REGISTRATION_ALLOWLIST (defensive
+  //                   lookup-with-fallback pattern in routes/central-settings.routes.js
+  //                   lines 24-98: try { require('../models/BranchSetting') } catch
+  //                   { mongoose.model('BranchSetting', schema) }. Canonical wins via
+  //                   load-order in normal startup; fallback is dead code. Matches
+  //                   W347 AuditLog + W343 Referral/Task precedents.
+  // 'GlobalSetting' — same routes/central-settings.routes.js defensive try/catch pattern.
+  //                   Both names ALLOWLISTed together since they're paired in the same
+  //                   try/catch block.
   'NotificationLog',
   'Consent', // canonical PDPL entity
   'DocumentAccessLog',
@@ -227,6 +234,15 @@ const REGISTRATION_ALLOWLIST = new Set([
   // answered the ALLOWLIST preserves current behavior (canonical always wins via
   // load-order). Same precedent as W343 Referral/Task.
   'AuditLog',
+  // 2026-05-25 — BranchSetting + GlobalSetting. Same defensive try/catch pattern
+  // as W343 Referral/Task + W347 AuditLog. Located in routes/central-settings.routes.js
+  // lines 24-98: `try { require('../models/BranchSetting') } catch { mongoose.model(...) }`.
+  // In normal app startup canonical models/BranchSetting.js loads first via auto-discovery;
+  // the catch-branch fallback is dead code. Schemas differ but only the canonical executes
+  // at runtime so divergence never bites. Both names ALLOWLISTed together since they share
+  // the same try/catch block in the same routes file.
+  'BranchSetting',
+  'GlobalSetting',
 ]);
 
 function walkJs(dir, skip, out = []) {

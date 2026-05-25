@@ -18,6 +18,7 @@ const sharingService = require('../../services/documents/documentSharing.service
 const retentionService = require('../../services/documents/documentRetention.service');
 const favoritesService = require('../../services/documents/documentFavorites.service');
 const analyticsEngine = require('../../services/documents/documentAnalytics.engine');
+const safeError = require('../../utils/safeError');
 
 // Authentication middleware
 let authenticateToken;
@@ -674,9 +675,13 @@ router.get(
 );
 
 // ─── Error handler ──────────────────────────
+// W422-style helper handles status passthrough (err.status/statusCode 4xx)
+// AND redacts err.message in production. Logging is built in.
 router.use((err, req, res, _next) => {
-  logger.error(`[Documents-Pro-V3] Error: ${err.message}`, { stack: err.stack });
-  res.status(err.status || 500).json({ success: false, error: err.message || 'خطأ في الخادم' });
+  // If err.status is set (e.g. NotFoundError = 404), preserve it by aliasing
+  // to statusCode so safeError's passthrough logic engages.
+  if (err.status && !err.statusCode) err.statusCode = err.status;
+  return safeError(res, err, 'documentsProV3');
 });
 
 module.exports = router;

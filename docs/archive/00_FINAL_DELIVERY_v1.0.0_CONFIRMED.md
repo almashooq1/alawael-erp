@@ -481,7 +481,7 @@ All documentation is in your project root:
 
 ---
 
-# 🎉 CONGRATULATIONS!
+## 🎉 CONGRATULATIONS!
 
 **Your production platform is ready!**
 

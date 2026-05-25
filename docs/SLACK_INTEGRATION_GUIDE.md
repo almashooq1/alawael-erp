@@ -1,5 +1,5 @@
 # ALAWAEL Quality System - Slack Integration Guide
-# Advanced Notifications and Real-time Alerts
+## Advanced Notifications and Real-time Alerts
 
 ## Overview
 

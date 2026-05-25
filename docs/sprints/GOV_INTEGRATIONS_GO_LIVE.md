@@ -271,7 +271,7 @@ Internal incident — on-call engineer:
 
 ---
 
-## Observability
+### Observability (operational dashboards)
 
 Three surfaces, pick the one that fits the question:
 

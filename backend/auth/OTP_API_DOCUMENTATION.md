@@ -1,6 +1,6 @@
 # 📚 توثيق نظام OTP للمصادقة
 
-# OTP Authentication System Documentation
+## OTP Authentication System Documentation
 
 ## نظرة عامة | Overview
 

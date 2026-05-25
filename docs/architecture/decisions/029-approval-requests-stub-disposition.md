@@ -122,7 +122,7 @@ Is there an external caller of `/api/approval-requests` we haven't audited (mobi
 
 ## Decision template
 
-```
+```text
 ADR-029 — RESOLVED 2026-MM-DD
 
 Approver signature (Approvals domain owner / tech lead):  __________________________

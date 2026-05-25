@@ -18,6 +18,7 @@ const tagsService = require('../../services/documents/documentTags.service');
 const aclService = require('../../services/documents/documentACL.service');
 const pdfEngine = require('../../services/documents/documentPDF.engine');
 const realtimeEngine = require('../../services/documents/documentRealtime.engine');
+const safeError = require('../../utils/safeError');
 
 // Authentication middleware
 let authenticateToken;
@@ -822,7 +823,9 @@ router.get(
 // ─── Error handler ──────────────────────────
 router.use((err, req, res, _next) => {
   logger.error(`[Documents-Pro-V4] Error: ${err.message}`, { stack: err.stack });
-  res.status(err.status || 500).json({ success: false, error: err.message || 'خطأ في الخادم' });
+  // W422: redact err.message in prod, preserve 4xx statusCode passthrough.
+  if (err.status && !err.statusCode) err.statusCode = err.status;
+  return safeError(res, err, 'documentsProV4');
 });
 
 module.exports = router;

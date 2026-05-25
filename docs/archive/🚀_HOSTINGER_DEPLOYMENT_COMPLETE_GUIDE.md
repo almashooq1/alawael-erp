@@ -1,6 +1,6 @@
 # 🚀 دليل النشر الآمن على Hostinger
 
-# Safe Deployment Guide to Hostinger
+## Safe Deployment Guide to Hostinger
 
 ## 📋 متطلبات النشر
 

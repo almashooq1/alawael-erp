@@ -181,7 +181,7 @@ sudo systemctl start alawael-backend
 
 ---
 
-##  Nginx Reverse Proxy Configuration
+## Nginx Reverse Proxy Configuration
 
 ```nginx
 upstream backend {

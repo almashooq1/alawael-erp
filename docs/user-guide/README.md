@@ -145,7 +145,7 @@ Total: 3,800+ lines of complete documentation
 
 ## 📊 إحصائيات الوثائق | Documentation Statistics
 
-````
+````text
 إجمالي الصفحات:        7+ صفحات
 الأقسام الرئيسية:      6 أقسام
 الميزات المغطاة:       50+ ميزة
@@ -187,7 +187,7 @@ Total: 3,800+ lines of complete documentation
 
 ### أسبوع 1: الأساسيات | Week 1: Fundamentals
 
-````
+````text
 📅 اليوم 1-2 | Days 1-2:
    ├─ 00-getting-started.md (1 ساعة | hour)
    └─ تطبيق عملي (30 دقيقة)

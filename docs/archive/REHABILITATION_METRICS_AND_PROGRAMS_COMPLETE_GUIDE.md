@@ -1,6 +1,6 @@
 # الدليل الشامل لبرامج ومقاييس تأهيل ذوي الإعاقة
 
-# Complete Guide to Disability Rehabilitation Metrics and Programs
+## Complete Guide to Disability Rehabilitation Metrics and Programs
 
 ## 📋 فهرس المحتويات
 

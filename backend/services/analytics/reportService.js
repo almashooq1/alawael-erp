@@ -4,6 +4,7 @@
  */
 
 const crypto = require('crypto');
+const { escapeFormulaInjection } = require('../importExport/format-helpers');
 
 class ReportService {
   constructor() {
@@ -361,7 +362,19 @@ class ReportService {
     if (data.length === 0) return '';
 
     const headers = Object.keys(data[0]);
-    const rows = data.map(item => headers.map(h => `"${item[h]}"`).join(','));
+    // Two issues with the original `"${item[h]}"` shape:
+    //   1. Internal `"` chars in the value break CSV grammar (a value
+    //      like `He said "hi"` becomes `"He said "hi""` which most
+    //      parsers split into three fields).
+    //   2. No formula-injection defence — a value starting with `=`
+    //      runs as a formula when the CSV is opened in Excel/Sheets
+    //      (OWASP CSV injection; W423 doctrine).
+    // Defang formula triggers first, then escape `"` → `""` per RFC 4180.
+    const escape = v => {
+      const s = escapeFormulaInjection(v == null ? '' : String(v));
+      return `"${s.replace(/"/g, '""')}"`;
+    };
+    const rows = data.map(item => headers.map(h => escape(item[h])).join(','));
 
     return [headers.join(','), ...rows].join('\n');
   }

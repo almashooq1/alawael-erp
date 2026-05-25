@@ -29,6 +29,7 @@ const ClinicalAssessment = require('../models/ClinicalAssessment');
 const Beneficiary = require('../models/Beneficiary');
 const outcome = require('../services/outcomeService');
 const safeError = require('../utils/safeError');
+const { escapeFormulaInjection } = require('../services/importExport/format-helpers');
 
 router.use(authenticateToken);
 
@@ -210,7 +211,10 @@ router.get('/export.csv', requireRole(ADMIN_ROLES), async (req, res) => {
 
     const csvEscape = v => {
       if (v == null) return '';
-      const s = String(v);
+      // W423 doctrine — defang formula triggers before CSV-quoting.
+      // beneficiaryName + interpretation + category fields carry
+      // user-influenced text.
+      const s = escapeFormulaInjection(String(v));
       if (/[",\n\r]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
       return s;
     };

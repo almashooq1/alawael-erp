@@ -9,6 +9,7 @@
 
 const mongoose = require('mongoose');
 const _crypto = require('crypto');
+const { escapeFormulaInjection } = require('../importExport/format-helpers');
 
 /* ─── Import/Export Job Model ────────────────────────────────── */
 const importExportJobSchema = new mongoose.Schema(
@@ -303,7 +304,8 @@ class DocumentImportExportService {
         .map(h => {
           const v = flat[h];
           if (v === undefined || v === null) return '';
-          const str = String(v);
+          // Defang formula triggers before CSV-quoting — W423 doctrine.
+          const str = escapeFormulaInjection(String(v));
           return str.includes(',') || str.includes('"') || str.includes('\n')
             ? `"${str.replace(/"/g, '""')}"`
             : str;

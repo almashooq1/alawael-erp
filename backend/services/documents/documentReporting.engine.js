@@ -10,6 +10,7 @@
 const mongoose = require('mongoose');
 const _crypto = require('crypto');
 const EventEmitter = require('events');
+const { escapeFormulaInjection } = require('../importExport/format-helpers');
 
 /* ─── Report Template Model ──────────────────────────────────── */
 const reportTemplateSchema = new mongoose.Schema(
@@ -510,8 +511,15 @@ class DocumentReportingEngine extends EventEmitter {
   _toCSV(report) {
     const columns = report.templateId?.columns || [];
     const header = columns.map(c => c.labelAr || c.label).join(',');
+    // Defang formula triggers + proper RFC-4180 quote-escaping. Previous
+    // shape `"${row[c.key] ?? ''}"` neither escaped internal `"` nor
+    // defanged `=`/`+`/`-`/`@` leading chars — W423 doctrine.
+    const csvCell = v => {
+      const s = escapeFormulaInjection(v == null ? '' : String(v));
+      return `"${s.replace(/"/g, '""')}"`;
+    };
     const rows = (report.result?.data || []).map(row =>
-      columns.map(c => `"${row[c.key] ?? ''}"`).join(',')
+      columns.map(c => csvCell(row[c.key])).join(',')
     );
     return [header, ...rows].join('\n');
   }

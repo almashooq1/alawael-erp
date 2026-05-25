@@ -28,6 +28,7 @@ const NpsResponse = require('../models/NpsResponse');
 const Guardian = require('../models/Guardian');
 const nps = require('../services/npsService');
 const safeError = require('../utils/safeError');
+const { escapeFormulaInjection } = require('../services/importExport/format-helpers');
 
 router.use(authenticateToken);
 
@@ -251,7 +252,11 @@ router.get('/export.csv', requireRole(ADMIN_ROLES), async (req, res) => {
 
     const csvEscape = v => {
       if (v == null) return '';
-      const s = String(v);
+      // W423 doctrine — defang formula triggers BEFORE CSV-quoting.
+      // `comment` is free-text from a parent's NPS survey response —
+      // exactly the kind of admin-influenced field that would carry
+      // `=HYPERLINK(...)` payloads.
+      const s = escapeFormulaInjection(String(v));
       if (/[",\n\r]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
       return s;
     };

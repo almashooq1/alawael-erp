@@ -34,6 +34,7 @@
  */
 
 const mongoose = require('mongoose');
+const { escapeFormulaInjection } = require('./importExport/format-helpers');
 
 const M = {
   Measure: () => {
@@ -112,7 +113,11 @@ function _periodBounds(year, month) {
 
 function _csvEscape(value) {
   if (value == null) return '';
-  const s = String(value);
+  // Defang formula triggers (`=`/`+`/`-`/`@`/TAB/CR) BEFORE the CSV
+  // grammar pass — W423 doctrine. The Excel formula parser runs on the
+  // unquoted prefix of each cell, so the leading `'` must be the very
+  // first byte the user-supplied string contributes.
+  const s = escapeFormulaInjection(String(value));
   if (s.includes(',') || s.includes('"') || s.includes('\n') || s.includes('\r')) {
     return `"${s.replace(/"/g, '""')}"`;
   }

@@ -15,6 +15,7 @@
  */
 
 const logger = console;
+const { escapeFormulaInjection } = require('./importExport/format-helpers');
 
 /* ══════════════════════════════════════════════════════════════════════
    CONSTANTS & REFERENCE DATA
@@ -1112,7 +1113,15 @@ class OCRDocumentService {
       }
     };
     flatten(data);
-    return rows.map(r => r.join(',')).join('\n');
+    // OCR-extracted Value column is the highest-risk field here — it
+    // pulls raw text out of scanned documents and a forged ID card or
+    // form containing `=cmd|...` would land directly in the CSV cell.
+    // Defang formula triggers + RFC-4180 quote-escape (W423 doctrine).
+    const csvCell = v => {
+      const s = escapeFormulaInjection(v == null ? '' : String(v));
+      return `"${s.replace(/"/g, '""')}"`;
+    };
+    return rows.map(r => r.map(csvCell).join(',')).join('\n');
   }
 
   /* ══════════════════════════════════════════════════════════════════

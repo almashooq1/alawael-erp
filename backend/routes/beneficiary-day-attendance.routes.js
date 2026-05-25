@@ -33,6 +33,7 @@ const BeneficiaryDayAttendance = require('../models/BeneficiaryDayAttendance');
 const Beneficiary = require('../models/Beneficiary');
 const BeneficiarySection = require('../models/BeneficiarySection');
 const safeError = require('../utils/safeError');
+const { escapeFormulaInjection } = require('../services/importExport/format-helpers');
 
 /**
  * Lookup the active section a beneficiary is enrolled in.
@@ -418,7 +419,11 @@ router.get('/export.csv', requireRole(READ_ROLES), async (req, res) => {
     const hydrated = await hydrateBeneficiaries(items);
     const csvEscape = v => {
       if (v == null) return '';
-      const s = String(v);
+      // Defang formula triggers (W423 doctrine) — beneficiaryName +
+      // notes columns below carry user-influenced text that would
+      // otherwise execute on open in Excel/Sheets if it started with
+      // `=` / `+` / `-` / `@` / TAB / CR.
+      const s = escapeFormulaInjection(String(v));
       if (/[",\n\r]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
       return s;
     };

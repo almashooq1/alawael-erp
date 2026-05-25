@@ -35,11 +35,10 @@ const systemService = {
   updateNotificationTemplate: async (id, data) => api.put(`/notification-templates/${id}`, data),
   deleteNotificationTemplate: async id => api.delete(`/notification-templates/${id}`),
 
-  // Approval Requests
-  getApprovalRequests: async () => api.get('/approval-requests'),
-  getApprovalRequest: async id => api.get(`/approval-requests/${id}`),
-  approveRequest: async id => api.post(`/approval-requests/${id}/approve`),
-  rejectRequest: async id => api.post(`/approval-requests/${id}/reject`),
+  // Approval Requests — REMOVED in ADR-029 Option A (2026-05-25). The stub backend
+  // at /api/approval-requests was deleted (silent-no-op risk). Use the canonical
+  // approvals.service.js (listRequests / approveRequest / rejectRequest /
+  // cancelRequest / escalateRequest) which targets /api/v1/approvals instead.
 
   // Templates
   getTemplates: async () => api.get('/templates'),

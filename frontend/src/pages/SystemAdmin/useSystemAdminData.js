@@ -5,6 +5,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSnackbar } from 'contexts/SnackbarContext';
 import systemService from 'services/system.service';
+import { listRequests as listApprovalRequests } from 'services/approvals.service';
 import logger from 'utils/logger';
 import { useConfirmDialog } from '../../components/common/ConfirmDialog';
 import { DEMO_DATA } from './systemAdmin.demoData';
@@ -39,9 +40,12 @@ const useSystemAdminData = () => {
             .getEcommerceProducts()
             .catch(err => logger.warn('فشل تحميل منتجات التجارة الإلكترونية', err)),
           systemService.getTemplates().catch(err => logger.warn('فشل تحميل القوالب', err)),
-          systemService
-            .getApprovalRequests()
-            .catch(err => logger.warn('فشل تحميل طلبات الموافقة', err)),
+          // ADR-029 Option A (2026-05-25): migrated from systemService.getApprovalRequests
+          // (which hit the deleted stub /api/approval-requests) to the canonical
+          // approvals.service.listRequests (which hits /api/v1/approvals).
+          listApprovalRequests({ limit: 10 }).catch(err =>
+            logger.warn('فشل تحميل طلبات الموافقة', err)
+          ),
           systemService
             .getNotificationTemplates()
             .catch(err => logger.warn('فشل تحميل قوالب الإشعارات', err)),

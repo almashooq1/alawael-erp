@@ -402,7 +402,6 @@
     "appointments.routes.js",
     "appointmentScheduling.routes.js",
     "approvalRequests.js",
-    "approvalRequests.routes.js",
     "ar-rehab.routes.js",
     "asset-management.routes.js",
     "assets.js",

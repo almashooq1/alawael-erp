@@ -555,7 +555,10 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   dualMount(app, 'admin/adapter-audit', require('../routes/adapter-audit.routes'));
   dualMount(app, 'notify', require('../routes/notify.routes'));
   dualMount(app, 'notification-templates', require('../routes/notificationTemplates.routes'));
-  dualMount(app, 'approval-requests', require('../routes/approvalRequests.routes'));
+  // ADR-029 Option A (2026-05-25): the approvalRequests stub at /api/approval-requests was
+  // deleted because it returned hardcoded fake data including silent-no-op POST handlers.
+  // The canonical implementation at authorization/approvals/approvals.routes.js mounted at
+  // /api/v1/approvals is the real surface; SystemAdmin's lone caller was migrated to use it.
   dualMount(app, 'templates', require('../routes/templates.routes'));
   dualMount(app, 'groups', require('../routes/groups.routes'));
 

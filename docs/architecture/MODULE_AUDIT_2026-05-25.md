@@ -7,6 +7,24 @@ modules as priority gaps. First-principles file-system audit revealed that
 scaffolds). This document records the ground truth so future "build X because
 it's missing" requests can be checked against reality first.
 
+## Status update (post W356–W370 session)
+
+Of the genuine gaps + scaffolds catalogued below, **all 10 actionable items
+have been built across waves W356–W370** (2026-05-25 single session,
+19 commits, ~13,000 LOC). See
+[PRODUCTION_CUTOVER_W356_W370.md](PRODUCTION_CUTOVER_W356_W370.md) for the
+ops checklist and
+[decisions/026-iep-ifsp-care-plan-fragmentation.md](decisions/026-iep-ifsp-care-plan-fragmentation.md)
+for the one stakeholder-blocked decision (IEP/IFSP consolidation).
+
+The "🔴 absent" set was further refined during the build: of the four
+"secondary gaps" listed below (Catering/Diets, Facilities PPM, Laundry,
+Wheelchair/Prosthetics maintenance), audit-first re-checks found that
+`kitchen.model.js` + `laundry.model.js` already exist at production
+grade — only the per-beneficiary CLINICAL DIET PRESCRIPTION (W368) and
+FACILITY PPM (W369) were genuine gaps. The discipline of grep-first-audit
+saved ~2 wasted waves' worth of duplicate-builds.
+
 Pattern recap: this is the same lesson as
 [ADR-026](decisions/026-iep-ifsp-care-plan-fragmentation.md) and the
 `feedback_audit_doctrine_prompts_against_source` memory entry — prose
@@ -60,7 +78,14 @@ to 🟢 production-grade.** Schema design exists in service code — the lift is
 | **Caregiver/sibling support**         | [`models/clinical-assessment/caregiver-burden-assessment.model.js`](../../backend/models/clinical-assessment/caregiver-burden-assessment.model.js)                                                                                                                                                                                     | Assessment exists but no support program / counseling sessions / sibling-group workflow.                                                          |
 | **Seizure / red-flag observations**   | [`services/redFlagObservations/incidentObservations.js`](../../backend/services/redFlagObservations/incidentObservations.js), [`models/quality/Incident.model.js`](../../backend/models/quality/Incident.model.js)                                                                                                                     | No dedicated longitudinal Seizure log (date / duration / type / triggers / medication response). Currently mixed into generic incident reporting. |
 
-### 🔴 Verified absent — genuine gaps
+### 🔴 Verified absent — genuine gaps (HISTORICAL — all built post-session)
+
+> **STATUS POST 2026-05-25 SESSION**: every row below has been built.
+> Mapping: AAC → W358 / Safeguarding → W357 / CBAHI mapping → W360+W367 /
+> Assistive Devices → W359 / Catering-as-clinical-prescription → W368 /
+> Facilities PPM → W369. Laundry + Wheelchair-only were reclassified as
+> ALREADY-EXISTING (laundry.model) or SUBSUMED (wheelchair → W359 category).
+> See "Operational extensions" section below + PRODUCTION_CUTOVER_W356_W370.md.
 
 | Module                                                  | Search confirmation                                                                                                                                     |
 | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -72,6 +97,15 @@ to 🟢 production-grade.** Schema design exists in service code — the lift is
 | **Facilities Management (PPM elevators/ramps)**         | No PPM scheduling for accessibility-critical infrastructure.                                                                                            |
 | **Laundry / Housekeeping** (for residential centers)    | No matches.                                                                                                                                             |
 | **Wheelchair / Prosthetics registry + maintenance**     | Same as Assistive Devices — generic inventory only.                                                                                                     |
+
+### ✅ Operational extensions built (W364 + W370)
+
+| Wave               | Artifact                                                  | Coverage                                                                                                                        |
+| ------------------ | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| W364 / `199c5f7d4` | `startup/clinicalSweepersBootstrap.js` initial 7 sweepers | safeguarding SLA, device loan/maintenance, respite no-show (mutating), transition overdue, CBAHI reassessment, AAC reassessment |
+| W370 / `e1c0788bc` | Extension to 11 sweepers                                  | + diet review, facility inspection/maintenance/certificate                                                                      |
+| W365 + W370        | Sprint enumeration                                        | 12 new entries in `sprint-tests.txt`                                                                                            |
+| W366 + W370        | Canonical schemas catalog                                 | 11 → 21 entries; every W356-W369 module has a registered Zod schema                                                             |
 
 ### 🔵 Stakeholder-blocked
 

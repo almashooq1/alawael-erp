@@ -62,6 +62,10 @@
 const logger = require('../utils/logger');
 
 const BRIDGE_FLAG = Symbol.for('w387.serviceEventBridge.attached');
+// W388 refinement: per-event tracking instead of per-service flag. Needed for
+// buses like qualityEventBus where multiple distinct events (with different
+// canonical domains) flow through the SAME instance.
+const ATTACHED_EVENTS = Symbol.for('w387.serviceEventBridge.attachedEvents');
 
 /**
  * Wire service-local events to integrationBus.publish.
@@ -79,17 +83,22 @@ function wireServiceEventBridge(integrationBus) {
   let wired = 0;
 
   // Helper: attach a forwarder to a service for a list of eventTypes.
-  // Per-service one-time attachment guarded by BRIDGE_FLAG on the service itself.
+  // W388 refinement: per-(bus, eventType) tracking so buses shared across
+  // domains (e.g., qualityEventBus carrying both quality.* AND
+  // assessments.assessment.overdue) can be wired by multiple attachBridge
+  // calls with different domain prefixes without conflict.
   function attachBridge(domain, service, eventTypes) {
     if (!service || typeof service.on !== 'function') {
       skipped.push(domain);
       return;
     }
-    if (service[BRIDGE_FLAG]) {
-      // Already wired in a prior call (idempotent)
-      return;
+    if (!service[ATTACHED_EVENTS]) {
+      service[ATTACHED_EVENTS] = new Set();
+      service[BRIDGE_FLAG] = true; // preserved for backward-compat
     }
+    const attached = service[ATTACHED_EVENTS];
     for (const eventType of eventTypes) {
+      if (attached.has(eventType)) continue; // already wired on this bus
       service.on(eventType, payload => {
         // Fire-and-forget: integrationBus.publish is async but we don't await
         // — the producing service shouldn't pay the latency cost of all
@@ -102,9 +111,9 @@ function wireServiceEventBridge(integrationBus) {
             );
           });
       });
+      attached.add(eventType);
+      wired++;
     }
-    service[BRIDGE_FLAG] = true;
-    wired += eventTypes.length;
   }
 
   // ─── episodes: episode.created / phase_transitioned / closed ────────────
@@ -217,6 +226,13 @@ function wireServiceEventBridge(integrationBus) {
         'quality.audit_completed',
         'quality.corrective_action_required',
       ]);
+      // W388: the W383 sweeper emits `assessment.overdue` on this SAME bus
+      // (it lazy-loaded qualityEventBus as the most-available cross-cutting
+      // emitter). The event belongs to the 'assessments' canonical domain,
+      // so we attach a separate forwarder with that domain prefix. Per-event
+      // tracking in attachBridge() prevents listener conflict with the
+      // 'quality' forwarders above.
+      attachBridge('assessments', qBus, ['assessment.overdue']);
     } else {
       skipped.push('quality (qualityEventBus.getDefault missing)');
     }

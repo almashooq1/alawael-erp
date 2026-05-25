@@ -19,12 +19,14 @@ class BehaviorService extends BaseService {
     const BehaviorRecord = mongoose.model('BehaviorRecord');
     const record = await BehaviorRecord.create(data);
     // W380: canonical contract event (was ad-hoc 'behavior:record:created' pre-W380).
-    // Envelope per BEHAVIOR_EVENTS.INCIDENT_RECORDED.
+    // W385 fix: contract envelope is {recordId, beneficiaryId, behaviorType, severity}
+    // — original W380 emitted occurredAt (not in contract) + missed behaviorType.
+    // Discovered by behavioral test event-contract-emission-verification-wave385.
     this.emit('behavior.incident_recorded', {
       recordId: record._id,
       beneficiaryId: data.beneficiaryId,
+      behaviorType: data.behavior?.topography,
       severity: data.behavior?.severity,
-      occurredAt: record.occurredAt || new Date(),
     });
     // Auto-notify for severe/crisis (intra-domain signal, not promoted to canonical)
     if (['severe', 'crisis'].includes(data.behavior?.severity)) {

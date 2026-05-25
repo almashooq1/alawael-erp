@@ -307,6 +307,302 @@ const STANDARDS = Object.freeze([
     evidenceTypes: ['inspection_record', 'photograph', 'attestation_signed'],
     crossLinks: [],
   },
+
+  // ═════════════════════════════════════════════════════════════════
+  // W367 expansion (2026-05-25) — 25 additional standards bringing the
+  // starter set from 20 → 45 across the same 8 chapters.
+  // ═════════════════════════════════════════════════════════════════
+
+  // ── PSG additions ─────────────────────────────────────────────
+  {
+    key: 'PSG_ALLERGY_MANAGEMENT',
+    chapter: 'PSG',
+    code: 'PSG.2',
+    titleEn: 'Allergy + sensitivity management',
+    titleAr: 'إدارة الحساسية',
+    requirement:
+      'Every beneficiary record carries a verified allergy list updated at each visit. High-risk allergies (medication, latex, food, environmental) are flagged at point-of-care.',
+    evidenceTypes: ['policy_document', 'system_screenshot', 'audit_report'],
+    crossLinks: ['Beneficiary', 'MedicationAdministrationRecord'],
+  },
+  {
+    key: 'PSG_HANDOFF_COMMUNICATION',
+    chapter: 'PSG',
+    code: 'PSG.3',
+    titleEn: 'Structured handoff communication',
+    titleAr: 'تواصل التسليم المنظّم',
+    requirement:
+      'Shift-change + cross-discipline handoffs use a structured tool (SBAR / I-PASS) documented per beneficiary; verbal-only handoffs are not permitted for high-risk cases.',
+    evidenceTypes: ['policy_document', 'training_record', 'audit_report'],
+    crossLinks: [],
+  },
+  {
+    key: 'PSG_SEIZURE_RESPONSE',
+    chapter: 'PSG',
+    code: 'PSG.9',
+    titleEn: 'Seizure response + escalation pathway',
+    titleAr: 'الاستجابة للنوبات الصرعية',
+    requirement:
+      'Documented pathway for observing, timing, and escalating seizures including rescue medication PRN orders, status-epilepticus (≥5 min) emergency protocol, and parent notification SLA.',
+    evidenceTypes: ['policy_document', 'log_or_register', 'training_record'],
+    crossLinks: ['SeizureEvent', 'MedicationAdministrationRecord'],
+  },
+
+  // ── MMS additions ─────────────────────────────────────────────
+  {
+    key: 'MMS_STORAGE_TEMPERATURE',
+    chapter: 'MMS',
+    code: 'MMS.2',
+    titleEn: 'Medication storage temperature monitoring',
+    titleAr: 'مراقبة درجة حرارة تخزين الأدوية',
+    requirement:
+      'All medication storage areas (room temp + refrigerated + frozen) have continuous temperature monitoring; out-of-range alarms trigger documented response within 30 minutes.',
+    evidenceTypes: ['log_or_register', 'inspection_record', 'system_screenshot'],
+    crossLinks: [],
+  },
+  {
+    key: 'MMS_NARCOTIC_INVENTORY',
+    chapter: 'MMS',
+    code: 'MMS.7',
+    titleEn: 'Narcotic + controlled substance inventory',
+    titleAr: 'جرد المواد المخدرة والمراقبة',
+    requirement:
+      'Per-shift narcotic count with two-signature reconciliation. Variance investigations documented + closed within 24h. Disposal witnessed + recorded.',
+    evidenceTypes: ['log_or_register', 'attestation_signed', 'audit_report'],
+    crossLinks: ['MedicationAdministrationRecord'],
+  },
+  {
+    key: 'MMS_PATIENT_EDUCATION',
+    chapter: 'MMS',
+    code: 'MMS.8',
+    titleEn: 'Medication patient + family education',
+    titleAr: 'تثقيف المستفيد والأسرة عن الأدوية',
+    requirement:
+      'Each newly prescribed medication: documented education to family in Arabic covering dose / schedule / side-effects / interactions / when to call. Re-education on dose changes.',
+    evidenceTypes: ['policy_document', 'log_or_register', 'audit_report'],
+    crossLinks: ['Consent'],
+  },
+
+  // ── IC additions ──────────────────────────────────────────────
+  {
+    key: 'IC_ISOLATION_PRECAUTIONS',
+    chapter: 'IC',
+    code: 'IC.2',
+    titleEn: 'Isolation precaution protocols',
+    titleAr: 'بروتوكولات العزل الوقائية',
+    requirement:
+      'Documented standard / contact / droplet / airborne precaution criteria; PPE availability at point-of-care; signage in Arabic + English; staff training annual.',
+    evidenceTypes: ['policy_document', 'training_record', 'photograph'],
+    crossLinks: [],
+  },
+  {
+    key: 'IC_STERILIZATION_REPROCESSING',
+    chapter: 'IC',
+    code: 'IC.3',
+    titleEn: 'Reusable equipment sterilization + reprocessing',
+    titleAr: 'تعقيم وإعادة معالجة الأجهزة',
+    requirement:
+      'Per-cycle biological + chemical indicator records for autoclave + ETO; failed cycles trigger documented reprocessing of affected items + recall procedure.',
+    evidenceTypes: ['log_or_register', 'inspection_record', 'audit_report'],
+    crossLinks: ['AssistiveDevice'],
+  },
+  {
+    key: 'IC_BLOODBORNE_EXPOSURE',
+    chapter: 'IC',
+    code: 'IC.4',
+    titleEn: 'Bloodborne pathogen exposure response',
+    titleAr: 'الاستجابة للتعرض للأمراض المنقولة بالدم',
+    requirement:
+      'Documented post-exposure protocol with source-testing + prophylaxis decision tree; exposed staff get follow-up at 6 weeks / 3 months / 6 months. PEP within 2 hours of exposure.',
+    evidenceTypes: ['policy_document', 'incident_report', 'log_or_register'],
+    crossLinks: ['Incident'],
+  },
+
+  // ── LD additions ──────────────────────────────────────────────
+  {
+    key: 'LD_QUALITY_IMPROVEMENT_PROGRAM',
+    chapter: 'LD',
+    code: 'LD.2',
+    titleEn: 'Quality improvement program',
+    titleAr: 'برنامج تحسين الجودة',
+    requirement:
+      'Annual quality plan with measurable indicators per discipline; quarterly indicator dashboards + improvement projects with PDCA documentation.',
+    evidenceTypes: ['policy_document', 'minutes_of_meeting', 'audit_report'],
+    crossLinks: ['CapaItem'],
+  },
+  {
+    key: 'LD_ETHICS_COMMITTEE',
+    chapter: 'LD',
+    code: 'LD.3',
+    titleEn: 'Clinical ethics committee',
+    titleAr: 'لجنة الأخلاقيات السريرية',
+    requirement:
+      'Standing ethics committee with documented charter, meeting cadence (≥ quarterly), and on-call consultation pathway for case-level ethical questions.',
+    evidenceTypes: ['policy_document', 'minutes_of_meeting'],
+    crossLinks: [],
+  },
+  {
+    key: 'LD_STAFF_COMPETENCY',
+    chapter: 'LD',
+    code: 'LD.5',
+    titleEn: 'Staff competency assessment',
+    titleAr: 'تقييم كفاءة الموظفين',
+    requirement:
+      'Every clinical staff member has documented initial + annual competency assessment per discipline; remediation plans for failures.',
+    evidenceTypes: ['training_record', 'attestation_signed', 'audit_report'],
+    crossLinks: [],
+  },
+
+  // ── IM additions ──────────────────────────────────────────────
+  {
+    key: 'IM_DOWNTIME_PROCEDURES',
+    chapter: 'IM',
+    code: 'IM.6',
+    titleEn: 'EHR downtime procedures',
+    titleAr: 'إجراءات تعطل النظام الإلكتروني',
+    requirement:
+      'Documented paper-based fallback procedures + downtime forms; planned downtime drills ≥ annual; post-downtime data entry within 24 hours.',
+    evidenceTypes: ['policy_document', 'inspection_record', 'log_or_register'],
+    crossLinks: [],
+  },
+  {
+    key: 'IM_DATA_BACKUP_RECOVERY',
+    chapter: 'IM',
+    code: 'IM.7',
+    titleEn: 'Data backup + recovery testing',
+    titleAr: 'النسخ الاحتياطي واستعادة البيانات',
+    requirement:
+      'Daily backup of clinical data with off-site replication. Recovery drills tested ≥ annually with documented RTO + RPO + post-test review.',
+    evidenceTypes: ['policy_document', 'system_screenshot', 'audit_report'],
+    crossLinks: [],
+  },
+
+  // ── ASC additions ─────────────────────────────────────────────
+  {
+    key: 'ASC_PAIN_ASSESSMENT',
+    chapter: 'ASC',
+    code: 'ASC.5',
+    titleEn: 'Pain assessment + reassessment',
+    titleAr: 'تقييم الألم وإعادة التقييم',
+    requirement:
+      'Validated age-appropriate + cognition-appropriate pain scales (FLACC, Wong-Baker, Numeric, PAINAD); pain reassessment 30 min after intervention.',
+    evidenceTypes: ['policy_document', 'log_or_register', 'audit_report'],
+    crossLinks: ['Assessment'],
+  },
+  {
+    key: 'ASC_NUTRITIONAL_SCREENING',
+    chapter: 'ASC',
+    code: 'ASC.6',
+    titleEn: 'Nutritional screening + assessment',
+    titleAr: 'فحص وتقييم التغذية',
+    requirement:
+      'Initial screen within defined timeframe; positive screen triggers RD consultation. Dysphagia screening for beneficiaries with neurological disability.',
+    evidenceTypes: ['policy_document', 'log_or_register', 'audit_report'],
+    crossLinks: ['Assessment', 'CarePlanVersion'],
+  },
+  {
+    key: 'ASC_PSYCHOSOCIAL_ASSESSMENT',
+    chapter: 'ASC',
+    code: 'ASC.7',
+    titleEn: 'Psychosocial assessment',
+    titleAr: 'التقييم النفسي والاجتماعي',
+    requirement:
+      'Family functioning + social-environment + mental-health screen integrated into initial assessment; positive screens link to social worker + counseling referral.',
+    evidenceTypes: ['policy_document', 'log_or_register'],
+    crossLinks: ['Assessment', 'CarePlanVersion'],
+  },
+
+  // ── PCC additions ─────────────────────────────────────────────
+  {
+    key: 'PCC_PATIENT_RIGHTS',
+    chapter: 'PCC',
+    code: 'PCC.1',
+    titleEn: 'Patient + family rights and responsibilities',
+    titleAr: 'حقوق ومسؤوليات المستفيد والأسرة',
+    requirement:
+      'Posted patient-rights statement in Arabic + English at every public area; documented on admission with signature; staff training annual.',
+    evidenceTypes: ['policy_document', 'photograph', 'training_record'],
+    crossLinks: ['Consent'],
+  },
+  {
+    key: 'PCC_COMPLAINT_HANDLING',
+    chapter: 'PCC',
+    code: 'PCC.5',
+    titleEn: 'Complaint + grievance handling',
+    titleAr: 'معالجة الشكاوى',
+    requirement:
+      'Documented complaint pathway with acknowledged-within-72h + closed-within-30d SLAs; complaints reviewed for safety implications + linked to CAPA where warranted.',
+    evidenceTypes: ['policy_document', 'log_or_register', 'capa_record'],
+    crossLinks: ['CapaItem'],
+  },
+  {
+    key: 'PCC_ADVANCE_DIRECTIVES',
+    chapter: 'PCC',
+    code: 'PCC.6',
+    titleEn: 'Advance directives + end-of-life preferences',
+    titleAr: 'التوجيهات المسبقة وتفضيلات نهاية الحياة',
+    requirement:
+      'Adult beneficiaries + guardians of minors offered documented end-of-life preference conversation; preferences in EHR + accessible at point-of-care.',
+    evidenceTypes: ['policy_document', 'attestation_signed', 'log_or_register'],
+    crossLinks: ['Consent'],
+  },
+
+  // ── EOC additions ─────────────────────────────────────────────
+  {
+    key: 'EOC_WATER_SAFETY',
+    chapter: 'EOC',
+    code: 'EOC.8',
+    titleEn: 'Water + Legionella safety',
+    titleAr: 'سلامة المياه ومكافحة بكتيريا الليجيونيلا',
+    requirement:
+      'Water system risk assessment + temperature + biocide monitoring + Legionella culturing per Saudi regulations.',
+    evidenceTypes: ['policy_document', 'log_or_register', 'inspection_record'],
+    crossLinks: [],
+  },
+  {
+    key: 'EOC_OXYGEN_MEDICAL_GAS',
+    chapter: 'EOC',
+    code: 'EOC.9',
+    titleEn: 'Medical oxygen + medical gas safety',
+    titleAr: 'سلامة الأوكسجين والغازات الطبية',
+    requirement:
+      'Cylinder storage + transport + change-out procedures; pressure monitoring; staff competency for any beneficiary on supplemental oxygen.',
+    evidenceTypes: ['policy_document', 'inspection_record', 'training_record'],
+    crossLinks: [],
+  },
+  {
+    key: 'EOC_ELECTRICAL_SAFETY',
+    chapter: 'EOC',
+    code: 'EOC.10',
+    titleEn: 'Electrical safety + biomedical equipment',
+    titleAr: 'السلامة الكهربائية والأجهزة الحيوية',
+    requirement:
+      'Annual electrical-safety inspection of patient-contact equipment; leak-current testing; portable-equipment register with PAT certificates.',
+    evidenceTypes: ['inspection_record', 'log_or_register'],
+    crossLinks: ['AssistiveDevice'],
+  },
+  {
+    key: 'EOC_BIOMEDICAL_WASTE',
+    chapter: 'EOC',
+    code: 'EOC.11',
+    titleEn: 'Biomedical + sharps waste management',
+    titleAr: 'إدارة النفايات الطبية والحادة',
+    requirement:
+      'Segregated waste streams (general / infectious / sharps / pharmaceutical) with color-coded containers; manifest tracking from point-of-generation to licensed disposal.',
+    evidenceTypes: ['policy_document', 'log_or_register', 'inspection_record', 'photograph'],
+    crossLinks: [],
+  },
+  {
+    key: 'EOC_CODE_RESPONSE',
+    chapter: 'EOC',
+    code: 'EOC.12',
+    titleEn: 'Emergency code response (medical + security)',
+    titleAr: 'استجابة حالات الطوارئ والكودات',
+    requirement:
+      'Documented code-blue (cardiac arrest), code-pink (infant/child abduction), code-orange (hazmat), code-grey (security/aggressive person) procedures. Drills ≥ 2 per code per year.',
+    evidenceTypes: ['policy_document', 'training_record', 'log_or_register'],
+    crossLinks: ['SafeguardingConcern'],
+  },
 ]);
 
 const STANDARD_BY_KEY = Object.freeze(

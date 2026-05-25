@@ -51,9 +51,13 @@ describe('W360 CBAHI registry — chapters', () => {
 });
 
 describe('W360 CBAHI registry — standards', () => {
-  it('exposes exactly 20 starter standards', () => {
+  it('exposes ≥ 20 starter standards (W360=20, W367 ratchet-up to 45)', () => {
     expect(Array.isArray(registry.STANDARDS)).toBe(true);
-    expect(registry.STANDARDS.length).toBe(20);
+    // W360 shipped 20. W367 (2026-05-25) expanded to 45 across the same
+    // 8 chapters. Future additions ratchet UP this count; the registry
+    // never shrinks (deletions require explicit deprecation marking).
+    expect(registry.STANDARDS.length).toBeGreaterThanOrEqual(20);
+    expect(registry.STANDARDS.length).toBe(45);
   });
 
   it('each standard has required fields', () => {
@@ -112,7 +116,7 @@ describe('W360 CBAHI registry — standards', () => {
     expect(registry.findStandard('PSG_PATIENT_ID_TWO_IDENTIFIERS')).toBeTruthy();
     expect(registry.findStandard('NONEXISTENT_KEY')).toBeNull();
     expect(registry.listChapter('PSG').length).toBeGreaterThan(0);
-    expect(registry.allKeys().length).toBe(20);
+    expect(registry.allKeys().length).toBe(45);
   });
 });
 

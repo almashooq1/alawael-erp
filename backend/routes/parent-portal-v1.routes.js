@@ -260,9 +260,9 @@ router.get('/beneficiaries/:id/summary', authenticate, async (req, res) => {
   try {
     const userId = req.user?.id || req.user?._id || req.user?.userId;
     if (!(await guardianOwnsBeneficiary(userId, req.params.id))) {
-      return res
-        .status(403)
-        .json({ error: 'Forbidden', message: 'beneficiary not linked to this guardian' });
+      // W411: unify with 404 so caller can't distinguish "exists but not yours"
+      // from "doesn't exist". Matches the 5ca905fde / W410 doctrine.
+      return res.status(404).json({ error: 'NotFound', message: 'not found' });
     }
 
     const b = await Beneficiary()
@@ -312,9 +312,9 @@ router.get('/beneficiaries/:id/sessions', authenticate, async (req, res) => {
   try {
     const userId = req.user?.id || req.user?._id || req.user?.userId;
     if (!(await guardianOwnsBeneficiary(userId, req.params.id))) {
-      return res
-        .status(403)
-        .json({ error: 'Forbidden', message: 'beneficiary not linked to this guardian' });
+      // W411: unify with 404 so caller can't distinguish "exists but not yours"
+      // from "doesn't exist". Matches the 5ca905fde / W410 doctrine.
+      return res.status(404).json({ error: 'NotFound', message: 'not found' });
     }
 
     // Latest 50 appointments — the portal shows a combined upcoming + recent timeline.
@@ -348,9 +348,9 @@ router.get('/beneficiaries/:id/appointments', authenticate, async (req, res) => 
   try {
     const userId = req.user?.id || req.user?._id || req.user?.userId;
     if (!(await guardianOwnsBeneficiary(userId, req.params.id))) {
-      return res
-        .status(403)
-        .json({ error: 'Forbidden', message: 'beneficiary not linked to this guardian' });
+      // W411: unify with 404 so caller can't distinguish "exists but not yours"
+      // from "doesn't exist". Matches the 5ca905fde / W410 doctrine.
+      return res.status(404).json({ error: 'NotFound', message: 'not found' });
     }
 
     const now = new Date();
@@ -419,9 +419,9 @@ router.get('/beneficiaries/:id/care-plan', authenticate, async (req, res) => {
   try {
     const userId = req.user?.id || req.user?._id || req.user?.userId;
     if (!(await guardianOwnsBeneficiary(userId, req.params.id))) {
-      return res
-        .status(403)
-        .json({ error: 'Forbidden', message: 'beneficiary not linked to this guardian' });
+      // W411: unify with 404 so caller can't distinguish "exists but not yours"
+      // from "doesn't exist". Matches the 5ca905fde / W410 doctrine.
+      return res.status(404).json({ error: 'NotFound', message: 'not found' });
     }
 
     const CarePlan = require('../models/CarePlan');
@@ -615,9 +615,9 @@ router.get('/beneficiaries/:id/appointments', authenticate, async (req, res) => 
   try {
     const userId = req.user?.id || req.user?._id || req.user?.userId;
     if (!(await guardianOwnsBeneficiary(userId, req.params.id))) {
-      return res
-        .status(403)
-        .json({ error: 'Forbidden', message: 'beneficiary not linked to this guardian' });
+      // W411: unify with 404 so caller can't distinguish "exists but not yours"
+      // from "doesn't exist". Matches the 5ca905fde / W410 doctrine.
+      return res.status(404).json({ error: 'NotFound', message: 'not found' });
     }
 
     const { status, from, to, limit = '50' } = req.query;
@@ -671,9 +671,8 @@ router.post('/appointments/:appointmentId/reschedule-request', authenticate, asy
     // Ownership: the guardian must own the beneficiary on this appointment.
     const beneficiaryId = appt.beneficiary || appt.beneficiaryId;
     if (!(await guardianOwnsBeneficiary(userId, beneficiaryId))) {
-      return res
-        .status(403)
-        .json({ error: 'Forbidden', message: 'appointment not linked to this guardian' });
+      // W411: unify with 404 (anti-existence-probe).
+      return res.status(404).json({ error: 'NotFound', message: 'not found' });
     }
 
     const { reason } = req.body || {};
@@ -734,9 +733,9 @@ router.get('/beneficiaries/:id/reports', authenticate, async (req, res) => {
   try {
     const userId = req.user?.id || req.user?._id || req.user?.userId;
     if (!(await guardianOwnsBeneficiary(userId, req.params.id))) {
-      return res
-        .status(403)
-        .json({ error: 'Forbidden', message: 'beneficiary not linked to this guardian' });
+      // W411: unify with 404 so caller can't distinguish "exists but not yours"
+      // from "doesn't exist". Matches the 5ca905fde / W410 doctrine.
+      return res.status(404).json({ error: 'NotFound', message: 'not found' });
     }
 
     // Completed appointments — filter to those carrying a signed SOAP envelope.
@@ -789,9 +788,8 @@ router.get('/reports/:reportId', authenticate, async (req, res) => {
 
     // Guardian scope: confirm the caller owns this appointment's beneficiary.
     if (!(await guardianOwnsBeneficiary(userId, String(appt.beneficiary)))) {
-      return res
-        .status(403)
-        .json({ error: 'Forbidden', message: 'report belongs to another family' });
+      // W411: unify with 404 (anti-existence-probe).
+      return res.status(404).json({ error: 'NotFound', message: 'not found' });
     }
 
     const env = parseSoapEnvelope(appt.internalNotes);
@@ -925,9 +923,8 @@ router.post('/approvals/:id/decide', authenticate, async (req, res) => {
     const consent = await Consent().findById(req.params.id);
     if (consent) {
       if (!(await guardianOwnsBeneficiary(userId, String(consent.beneficiaryId)))) {
-        return res
-          .status(403)
-          .json({ error: 'Forbidden', message: 'consent belongs to another family' });
+        // W411: unify with 404 (anti-existence-probe).
+        return res.status(404).json({ error: 'NotFound', message: 'not found' });
       }
       if (decision === 'APPROVE') {
         consent.grantedAt = new Date();
@@ -951,9 +948,8 @@ router.post('/approvals/:id/decide', authenticate, async (req, res) => {
     const plan = await CarePlan.findById(req.params.id);
     if (plan) {
       if (!(await guardianOwnsBeneficiary(userId, String(plan.beneficiary)))) {
-        return res
-          .status(403)
-          .json({ error: 'Forbidden', message: 'care plan belongs to another family' });
+        // W411: unify with 404 (anti-existence-probe).
+        return res.status(404).json({ error: 'NotFound', message: 'not found' });
       }
       if (decision === 'APPROVE') {
         plan.signedAt = new Date();
@@ -1085,9 +1081,8 @@ router.post('/invoices/:id/pay', authenticate, async (req, res) => {
 
     // Ownership scope.
     if (!(await guardianOwnsBeneficiary(userId, String(invoice.beneficiary)))) {
-      return res
-        .status(403)
-        .json({ error: 'Forbidden', message: 'invoice belongs to another family' });
+      // W411: unify with 404 (anti-existence-probe).
+      return res.status(404).json({ error: 'NotFound', message: 'not found' });
     }
 
     if (invoice.status === 'PAID') {
@@ -1367,9 +1362,8 @@ router.post('/consents/:id/grant', authenticate, async (req, res) => {
 
     // Ownership: the beneficiary must belong to the caller's guardian.
     if (!(await guardianOwnsBeneficiary(userId, String(doc.beneficiaryId)))) {
-      return res
-        .status(403)
-        .json({ error: 'Forbidden', message: 'consent belongs to another family' });
+      // W411: unify with 404 (anti-existence-probe).
+      return res.status(404).json({ error: 'NotFound', message: 'not found' });
     }
 
     if (doc.grantedAt && !doc.revokedAt) {
@@ -1425,9 +1419,8 @@ router.post('/consents/:id/revoke', authenticate, async (req, res) => {
     // Ownership: the beneficiary must belong to the caller's guardian.
     const ownsChildren = await guardianOwnsBeneficiary(userId, String(doc.beneficiaryId));
     if (!ownsChildren) {
-      return res
-        .status(403)
-        .json({ error: 'Forbidden', message: 'consent belongs to another family' });
+      // W411: unify with 404 (anti-existence-probe).
+      return res.status(404).json({ error: 'NotFound', message: 'not found' });
     }
     if (doc.revokedAt) {
       return res

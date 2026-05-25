@@ -40,25 +40,55 @@ Pick the level that fits what you're asking:
 
 ## Deploying a gov-integration flip
 
-Going mock → live for any of the 10 Saudi providers:
+Going mock → live for any of the **12 covered adapters** (10 original Saudi providers + Phase 3 additions `disabilityAuthority` + `sehhaty`):
 
-1. Confirm contract + credentials in hand (see
+1. **Read the gaps matrix first**: [`PRODUCTION_GAPS_BEFORE_LIVE.md`](PRODUCTION_GAPS_BEFORE_LIVE.md)
+   has the per-adapter risk class + which mitigations are in place. Look up your
+   provider row before any flag flip. The §6 decision tree shows when a flag is
+   safe to flip vs. requires dev work first.
+2. Confirm contract + credentials in hand (see
    [GOV_INTEGRATIONS_GO_LIVE.md](sprints/GOV_INTEGRATIONS_GO_LIVE.md)
    § _Pre-requisites_).
-2. Set the env vars (see `backend/.env.example` — every `{PROVIDER}_*`
+3. Set the env vars (see `backend/.env.example` — every `{PROVIDER}_*`
    block is documented inline with sensible defaults).
-3. **Run preflight**: `cd backend && npm run preflight`. Exits 0 if
-   every `*_MODE=live` adapter has its full env var set; exits 1 with
-   a per-provider missing-vars list otherwise. Wire this into k8s
-   initContainer / Dockerfile / CI deploy gate so the app never
-   boots half-configured.
-4. `POST /api/admin/gov-integrations/:provider/test-connection` before
+4. **Run preflight**: `cd backend && npm run preflight`. Exits 0 if
+   every `*_MODE=live` adapter has its full env var set AND every Phase 3
+   cron-readiness gate passes (W286 DA stub-builder check + W284d Speech S3
+   PDPL check); exits 1 with a per-provider missing-vars list + cron-failures
+   reason otherwise. Wire this into k8s initContainer / Dockerfile / CI deploy
+   gate so the app never boots half-configured.
+5. `POST /api/admin/gov-integrations/:provider/test-connection` before
    flipping traffic. Must return `ok: true`.
-5. Set `{PROVIDER}_MODE=live` and redeploy.
-6. Watch `/admin/integrations-ops` for the first 5 minutes — the card
-   should show `mode: live` and `configured: true`.
-7. If anything looks wrong, flip back: `{PROVIDER}_MODE=mock` and redeploy.
+6. Set `{PROVIDER}_MODE=live` and redeploy.
+7. Watch `/admin/integrations-ops` for the first 5 minutes — the card
+   should show `mode: live` and `configured: true`. For Phase 3 adapters
+   (DA + Sehhaty + Speech retention) also watch boot logs for the
+   `PDPL retention enforced` INFO or `PDPL retention non-compliant` WARN.
+8. If anything looks wrong, flip back: `{PROVIDER}_MODE=mock` and redeploy.
    Mock mode takes over immediately.
+
+### Auto-submitting cron specifics (W286 DA + W282b Mudad + W284c Speech)
+
+If you're flipping a cron's env flag (`ENABLE_DA_PERIODIC_CRON=true` /
+`ENABLE_MUDAD_CRON=true` / `ENABLE_SPEECH_RETENTION_CRON=true`):
+
+- **DA cron**: preflight will FAIL if `note: adapter.STUB_PAYLOAD_MARKER` is
+  still in `startup/disabilityAuthorityBootstrap.js`. The production payload
+  builder MUST be wired before live cron submission. Adapter has a runtime
+  guard (`DA_STUB_PAYLOAD_REJECTED`) as a 2nd safety net.
+- **Mudad cron**: data is real (built from `PayrollRun` model); only the SFTP
+  upload step is mocked. No marker guard — verify the `mudadAdapter` wiring +
+  sandbox URL BEFORE flipping. Worst case: real salary file to wrong bank.
+- **Speech retention**: PDPL compliance requires both `@aws-sdk/client-s3`
+  installed and `AWS_REGION` set. Preflight FAILS if cron enabled without
+  these. Boot WARN if the fallback log-only path activates.
+
+The 3-layer safety stack (post-W284d/W286 follow-ups, commits `7fccd9531` +
+`ad20c03cc` + `2f245f576`):
+
+1. **Deploy-time FAIL** — preflight gate (k8s initContainer / CI)
+2. **Boot-time WARN** — visible log line if a fallback path activates
+3. **Runtime FAIL** — adapter refuses unsafe inputs (DA stub payload)
 
 ---
 

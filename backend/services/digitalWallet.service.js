@@ -374,27 +374,55 @@ class DigitalWalletService {
    * استبدال نقاط الولاء بخصم
    */
   async redeemLoyaltyPoints(walletId, points, userId) {
-    const wallet = await DigitalWallet.findById(walletId);
-    if (!wallet) throw new Error('المحفظة غير موجودة');
-    if (wallet.loyaltyPoints < points) {
-      throw new Error(`نقاط غير كافية: لديك ${wallet.loyaltyPoints} نقطة`);
+    const pts = Number(points);
+    if (!Number.isFinite(pts) || pts < 1) {
+      throw new Error('عدد النقاط غير صالح');
     }
 
-    const discountAmount = points / 100; // 100 نقطة = 1 ريال
-    const before = wallet.loyaltyPoints;
-    wallet.loyaltyPoints -= points;
-    wallet.updatedBy = userId;
-    await wallet.save();
+    // Atomic check-and-decrement (W425). The previous code did:
+    //
+    //   const wallet = await DigitalWallet.findById(walletId);
+    //   if (wallet.loyaltyPoints < points) throw 'insufficient';
+    //   wallet.loyaltyPoints -= points;
+    //   await wallet.save();
+    //
+    // Two concurrent redemptions for balance=500, points=300 would
+    // both read 500, both pass the check, both deduct, both save →
+    // user double-spends and walks away with 6 SAR of discount for
+    // 300 points actual deduction. Because LoyaltyPointsTransaction
+    // also lands twice (`balanceAfter: 200` twice), the audit log
+    // hides the divergence — only a periodic reconciliation against
+    // balanceBefore/After deltas would catch the missing points.
+    //
+    // findOneAndUpdate with `loyaltyPoints: {$gte: pts}` in the
+    // filter makes the check-and-decrement one Mongo op; if the
+    // balance is insufficient the update simply doesn't match.
+    const updated = await DigitalWallet.findOneAndUpdate(
+      { _id: walletId, loyaltyPoints: { $gte: pts } },
+      { $inc: { loyaltyPoints: -pts }, $set: { updatedBy: userId } },
+      { new: true }
+    );
+
+    if (!updated) {
+      // Either wallet doesn't exist OR balance < pts. Re-read for
+      // an actionable message (no race here — we're not mutating).
+      const current = await DigitalWallet.findById(walletId).select('loyaltyPoints').lean();
+      if (!current) throw new Error('المحفظة غير موجودة');
+      throw new Error(`نقاط غير كافية: لديك ${current.loyaltyPoints} نقطة`);
+    }
+
+    const discountAmount = pts / 100; // 100 نقطة = 1 ريال
+    const before = updated.loyaltyPoints + pts; // pre-decrement value, reconstructed
 
     await LoyaltyPointsTransaction.create({
-      branchId: wallet.branchId,
+      branchId: updated.branchId,
       uuid: uuidv4(),
-      walletId: wallet._id,
+      walletId: updated._id,
       type: 'redeem',
-      points,
+      points: pts,
       balanceBefore: before,
-      balanceAfter: wallet.loyaltyPoints,
-      description: `استبدال ${points} نقطة = ${discountAmount} SAR`,
+      balanceAfter: updated.loyaltyPoints,
+      description: `استبدال ${pts} نقطة = ${discountAmount} SAR`,
       createdBy: userId,
     });
 

@@ -28,7 +28,7 @@ A merge script (`backend/scripts/migrations/zkteco-device-merge.js`) consolidate
 
    Sample output (dry-run):
 
-   ```
+   ```text
    ZKTeco device merge — DRY RUN
      Legacy rows: 12  Canonical rows: 9
      Plan:
@@ -79,7 +79,7 @@ Expected exit codes:
 
 On success you'll see:
 
-```
+```text
 ✓ Executed: inserted 3, no-op 9
 ```
 

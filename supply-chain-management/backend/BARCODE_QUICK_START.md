@@ -34,7 +34,7 @@ node generate-jwt.js
 
 ### 1. Health Check (No Auth)
 
-```
+```text
 GET http://localhost:4000/api/barcode/health
 
 ✅ Response: { "status": "healthy", "service": "barcode-api" }
@@ -42,7 +42,7 @@ GET http://localhost:4000/api/barcode/health
 
 ### 2. Generate QR Code
 
-```
+```text
 POST http://localhost:4000/api/barcode/qr-code
 Header: Authorization: Bearer [JWT_TOKEN]
 
@@ -56,7 +56,7 @@ Body: {
 
 ### 3. Generate Barcode
 
-```
+```text
 POST http://localhost:4000/api/barcode/barcode
 Header: Authorization: Bearer [JWT_TOKEN]
 
@@ -70,7 +70,7 @@ Body: {
 
 ### 4. Batch Processing
 
-```
+```text
 POST http://localhost:4000/api/barcode/batch
 Header: Authorization: Bearer [JWT_TOKEN]
 
@@ -86,7 +86,7 @@ Body: {
 
 ### 5. Get Statistics
 
-```
+```text
 GET http://localhost:4000/api/barcode/statistics
 Header: Authorization: Bearer [JWT_TOKEN]
 
@@ -109,7 +109,7 @@ Output includes three tokens for:
 
 Copy the token and use in Authorization header:
 
-```
+```text
 Authorization: Bearer <TOKEN_HERE>
 ```
 
@@ -151,7 +151,7 @@ curl -X POST http://localhost:4000/api/barcode/barcode \
 
 When running, you should see:
 
-```
+```text
 ✨ Barcode API Server running on http://localhost:4000
 📍 Health Check: http://localhost:4000/api/barcode/health
 

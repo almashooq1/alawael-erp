@@ -4,7 +4,7 @@
 
 ## Directory Layout
 
-```
+```text
 backend/integrations/
 ├── README.md
 ├── _common/

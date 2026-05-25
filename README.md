@@ -59,7 +59,7 @@ It covers children, staff, finance, HR, supply chain, communications, e-learning
 
 ## Project Structure
 
-```
+```text
 alawael-erp/
 ├── backend/                 # Express.js API server (MongoDB)
 │   ├── config/              #   Config & DB connection
@@ -125,7 +125,7 @@ alawael-erp/
 
 ## Architecture
 
-```
+```text
                     ┌─────────────┐
                     │   Nginx     │  (reverse proxy, SSL termination)
                     └──────┬──────┘

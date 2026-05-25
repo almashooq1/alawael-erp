@@ -16,7 +16,7 @@
 
 ### PROMPT 1.1 — Multi-Branch RBAC + Branch Isolation
 
-```
+```text
 ابنِ نظام صلاحيات متعدد الفروع (multi-branch RBAC) على المشروع الحالي:
 
 المتطلبات:
@@ -40,7 +40,7 @@
 
 ### PROMPT 1.2 — User Management + Government ID Integration
 
-```
+```text
 ابنِ نظام إدارة مستخدمين يدعم المواطنين السعوديين والمقيمين:
 
 المتطلبات:
@@ -61,7 +61,7 @@
 
 ### PROMPT 1.3 — Hiearchy Organization Structure
 
-```
+```text
 أضف "الهيكل التنظيمي" (Org Chart) القابل للتحرير:
 
 المتطلبات:
@@ -85,7 +85,7 @@
 
 ### PROMPT 2.1 — Beneficiary 360 Profile
 
-```
+```text
 ابنِ ملف مستفيد 360° شامل:
 
 المتطلبات (UI في /beneficiaries/:id):
@@ -117,7 +117,7 @@ Backend:
 
 ### PROMPT 2.2 — Smart IEP Engine
 
-```
+```text
 ابنِ محرك خطط تأهيل فردية (Individualized Education Plans) ذكي:
 
 المتطلبات:
@@ -146,7 +146,7 @@ Backend:
 
 ### PROMPT 2.3 — Session Management
 
-```
+```text
 ابنِ نظام إدارة جلسات:
 
 المتطلبات:
@@ -174,7 +174,7 @@ Backend:
 
 ### PROMPT 3.1 — Parent Portal
 
-```
+```text
 ابنِ بوابة ولي الأمر (mobile-first PWA):
 
 المتطلبات:
@@ -201,7 +201,7 @@ Backend:
 
 ### PROMPT 3.2 — Therapist Portal
 
-```
+```text
 ابنِ بوابة الأخصائي (tablet-first، للاستخدام داخل الجلسة):
 
 المتطلبات:
@@ -222,7 +222,7 @@ Backend:
 
 ### PROMPT 3.3 — Student (Beneficiary) Portal
 
-```
+```text
 ابنِ بوابة مستفيد بواجهة مبسّطة (للمراهقين والكبار المستقلين):
 
 المتطلبات:
@@ -242,7 +242,7 @@ Backend:
 
 ### PROMPT 3.4 — Admin Portal (Command Center)
 
-```
+```text
 ابنِ command center للإدارة التنفيذية:
 
 المتطلبات:
@@ -269,7 +269,7 @@ Backend:
 
 ### PROMPT 4.1 — Employee Lifecycle Management
 
-```
+```text
 ابنِ نظام HR شامل ومتكامل:
 
 المتطلبات:
@@ -302,7 +302,7 @@ Backend:
 
 ### PROMPT 4.2 — Recruitment & ATS
 
-```
+```text
 ابنِ Applicant Tracking System:
 
 المتطلبات:
@@ -324,7 +324,7 @@ Backend:
 
 ### PROMPT 4.3 — Succession Planning + Career Pathways
 
-```
+```text
 ابنِ Succession Planning:
 
 المتطلبات:
@@ -346,7 +346,7 @@ Backend:
 
 ### PROMPT 5.1 — Full Accounting System
 
-```
+```text
 ابنِ نظام محاسبة متكامل (متوافق مع ZATCA):
 
 المتطلبات:
@@ -396,7 +396,7 @@ Backend:
 
 ### PROMPT 5.2 — Revenue Cycle Management (RCM)
 
-```
+```text
 ابنِ RCM للقطاع الصحي (insurance billing):
 
 المتطلبات:
@@ -416,7 +416,7 @@ Backend:
 
 ### PROMPT 5.3 — Treasury & Cash Management
 
-```
+```text
 ابنِ Treasury:
 
 المتطلبات:
@@ -434,7 +434,7 @@ Backend:
 
 ### PROMPT 6.1 — Assessment Battery
 
-```
+```text
 ابنِ مكتبة تقييمات إكلينيكية:
 
 المتطلبات:
@@ -463,7 +463,7 @@ Backend:
 
 ### PROMPT 6.2 — Specialized Programs
 
-```
+```text
 ابنِ برامج متخصصة لكل نوع إعاقة:
 
 المتطلبات:
@@ -500,7 +500,7 @@ Backend:
 
 ### PROMPT 6.3 — Social Services + Independent Living
 
-```
+```text
 ابنِ نظام الخدمات الاجتماعية والحياة المستقلة:
 
 المتطلبات:
@@ -519,7 +519,7 @@ Backend:
 
 ### PROMPT 6.4 — Psychological + Behavioral Support
 
-```
+```text
 ابنِ نظام الدعم النفسي والسلوكي:
 
 المتطلبات:
@@ -546,7 +546,7 @@ Backend:
 
 ### PROMPT 7.1 — E-Learning Platform
 
-```
+```text
 ابنِ منصة تعلم إلكتروني للمستفيدين والأهل:
 
 المتطلبات:
@@ -570,7 +570,7 @@ Backend:
 
 ### PROMPT 7.2 — Education & Curriculum
 
-```
+```text
 ابنِ نظام إدارة المناهج التعليمية:
 
 المتطلبات:
@@ -589,7 +589,7 @@ Backend:
 
 ### PROMPT 8.1 — Fleet & Transport Management
 
-```
+```text
 ابنِ نظام أسطول ونقل كامل:
 
 المتطلبات:
@@ -616,7 +616,7 @@ Backend:
 
 ### PROMPT 8.2 — Facility & Maintenance Management
 
-```
+```text
 ابنِ نظام صيانة ومرافق:
 
 المتطلبات:
@@ -638,7 +638,7 @@ Backend:
 
 ### PROMPT 8.3 — Procurement & Supply Chain
 
-```
+```text
 ابنِ نظام مشتريات وسلسلة إمداد:
 
 المتطلبات:
@@ -663,7 +663,7 @@ Backend:
 
 ### PROMPT 9.1 — Reports Engine + Multi-Channel Distribution
 
-```
+```text
 ابنِ محرك تقارير احترافي:
 
 المتطلبات:
@@ -702,7 +702,7 @@ Backend:
 
 ### PROMPT 9.2 — Government Integrations
 
-```
+```text
 ابنِ التكامل مع الجهات الحكومية:
 
 المتطلبات:
@@ -736,7 +736,7 @@ Backend:
 
 ### PROMPT 9.3 — Analytics + BI Dashboard
 
-```
+```text
 ابنِ منصة BI:
 
 المتطلبات:
@@ -763,7 +763,7 @@ Backend:
 
 ### PROMPT 10.1 — Notifications Center
 
-```
+```text
 ابنِ مركز إشعارات موحد:
 
 المتطلبات:
@@ -780,7 +780,7 @@ Backend:
 
 ### PROMPT 10.2 — Document Management + E-Signature
 
-```
+```text
 ابنِ نظام إدارة مستندات:
 
 المتطلبات:
@@ -809,7 +809,7 @@ Backend:
 
 ### PROMPT 10.3 — CRM (Beneficiary Relationship Management)
 
-```
+```text
 ابنِ CRM متخصص لمستفيدين:
 
 المتطلبات:
@@ -840,7 +840,7 @@ Backend:
 
 ### PROMPT 10.4 — Communications & PR
 
-```
+```text
 ابنِ وحدة اتصالات إدارية:
 
 المتطلبات:
@@ -856,7 +856,7 @@ Backend:
 
 ### PROMPT 10.5 — Meetings Management
 
-```
+```text
 ابنِ نظام اجتماعات:
 
 المتطلبات:
@@ -878,7 +878,7 @@ Backend:
 
 ### PROMPT 11.1 — Quality Management System (QMS)
 
-```
+```text
 ابنِ QMS مبني على معايير CARF:
 
 المتطلبات:
@@ -902,7 +902,7 @@ Backend:
 
 ### PROMPT 11.2 — Regulatory Compliance
 
-```
+```text
 ابنِ الامتثال التنظيمي:
 
 المتطلبات:
@@ -929,7 +929,7 @@ Backend:
 
 ### PROMPT 12.1 — Internal Integration Bus
 
-```
+```text
 ابنِ event-driven architecture:
 
 المتطلبات:
@@ -946,7 +946,7 @@ Backend:
 
 ### PROMPT 12.2 — Audit + Security
 
-```
+```text
 ابنِ أمن شامل:
 
 المتطلبات:
@@ -971,7 +971,7 @@ Backend:
 
 ### PROMPT 13.1 — Mobile Apps
 
-```
+```text
 ابنِ تطبيقات جوّال (React Native / Flutter):
 
 المتطلبات:
@@ -989,7 +989,7 @@ Backend:
 
 ### PROMPT 13.2 — AI Features
 
-```
+```text
 أضف ميزات ذكاء صناعي:
 
 المتطلبات:
@@ -1011,7 +1011,7 @@ Backend:
 
 ### PROMPT 13.3 — IoT & Wearables
 
-```
+```text
 ادمج IoT:
 
 المتطلبات:
@@ -1076,7 +1076,7 @@ Backend:
 
 ## 🛠️ Context Prompt (استخدم مع كل task)
 
-```
+```text
 أنت مهندس سينيور تعمل على نظام ERP متعدد الفروع لمراكز تأهيل ذوي الإعاقة في السعودية.
 
 الـ stack الحالي (الملفات موجودة):

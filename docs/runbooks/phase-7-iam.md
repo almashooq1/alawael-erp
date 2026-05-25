@@ -13,7 +13,7 @@ entries (`approval-escalate`, `audit-chain-verify`,
 
 ## 1. Layered enforcement
 
-```
+```text
 Request → [1] authenticateToken       → JWT verify, user load
         → [2] rate limit               → per-user, per-IP
         → [3] CSRF                     → mutation requests

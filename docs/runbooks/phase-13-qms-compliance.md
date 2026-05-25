@@ -26,7 +26,7 @@ This runbook is the day-to-day operator's guide to the Phase 13 QMS & Compliance
 
 ## 2. Service map
 
-```
+```text
 ┌─────────────────────────── QualityEventBus (C5) ───────────────────────────┐
 │   Every service below publishes events here.                                │
 │   Subscribe patterns: quality.*  ·  compliance.*  ·  <exact>                │
@@ -104,7 +104,7 @@ Graceful shutdown stops every timer, unsubscribes the pipeline, and awaits `bus.
 
 Operators don't need to touch anything — the platform automates the chain:
 
-```
+```text
 1. Incident reported (severity ≥ major)
      │  quality.incident.reported event fires
      │
@@ -239,7 +239,7 @@ bootstrapQualityCompliance({
 
 Phase-13 test commands from `66666/` root:
 
-```
+```text
 # All Phase 13 suites
 npx jest backend/__tests__/management-review-service.test.js \
          backend/__tests__/evidence-vault-service.test.js \

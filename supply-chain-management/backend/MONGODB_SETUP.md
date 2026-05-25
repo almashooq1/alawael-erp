@@ -186,7 +186,7 @@ curl http://localhost:3001/api/dashboard/advanced-reports
 
 ### المجموعات (Collections):
 
-```
+```text
 supply-chain/
 ├── suppliers
 ├── products

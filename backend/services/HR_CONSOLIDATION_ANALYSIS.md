@@ -22,7 +22,7 @@
 
 ### File 1: `hrCore.service.js` (78 lines)
 
-```
+```text
 module.exports = HRCoreService;
 module.exports.instance = new HRCoreService();
 ```
@@ -36,7 +36,7 @@ module.exports.instance = new HRCoreService();
 
 ### File 2: `hr-advanced.service.js` (443 lines)
 
-```
+```text
 module.exports = new HRService();
 ```
 
@@ -67,7 +67,7 @@ module.exports = new HRService();
 
 ### File 3: `hr-dashboard.service.js` (589 lines)
 
-```
+```text
 module.exports = new HRDashboardService();
 ```
 
@@ -81,7 +81,7 @@ module.exports = new HRDashboardService();
 
 ### File 4: `hr.advanced.service.js` (630 lines)
 
-```
+```text
 module.exports = {
   PerformanceManagementService,
   LeaveManagementService,
@@ -111,7 +111,7 @@ module.exports = {
 
 ### File 5: `hrPhase6Service.js` (145 lines)
 
-```
+```text
 module.exports = HRPhase6Service;
 ```
 
@@ -134,7 +134,7 @@ module.exports = HRPhase6Service;
 
 ### File 6: `employeeAffairs.service.js` (1052 lines)
 
-```
+```text
 module.exports = new EmployeeAffairsService();
 ```
 
@@ -179,7 +179,7 @@ module.exports = new EmployeeAffairsService();
 
 ### File 7: `employeeAffairs.expanded.service.js` (998 lines)
 
-```
+```text
 module.exports = new EmployeeAffairsExpandedService();
 ```
 
@@ -224,7 +224,7 @@ module.exports = new EmployeeAffairsExpandedService();
 
 ### File 8: `employeeAffairs.phase2.service.js` (806 lines)
 
-```
+```text
 module.exports = new EmployeeAffairsPhase2Service();
 ```
 
@@ -282,7 +282,7 @@ module.exports = new EmployeeAffairsPhase2Service();
 
 ### File 9: `employeeAffairs.phase3.service.js` (651 lines)
 
-```
+```text
 module.exports = new EmployeeAffairsPhase3Service();
 ```
 

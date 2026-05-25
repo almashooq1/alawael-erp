@@ -4,7 +4,7 @@
 
 ## Structure
 
-```
+```text
 authorization/abac/
 ├── README.md                  # this file
 ├── index.js                   # public API
@@ -28,7 +28,7 @@ authorization/abac/
 
 ## Decision Flow
 
-```
+```text
   Request ──▶ PEP middleware ──▶ build { subject, action, resource, env }
                                           │
                                           ▼

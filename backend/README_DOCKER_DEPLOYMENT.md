@@ -211,7 +211,7 @@ When everything works, you'll see:
 
 ✓ `docker ps` shows:
 
-```
+```text
 CONTAINER ID   IMAGE                           STATUS
 a3f8b2c9e4d1   your-user/alawael-backend:v1   Up 5 hours
 ```
@@ -286,7 +286,7 @@ docker run -d --name alawael-app ... <user>/alawael-backend:v2
 
 These are pre-configured to make your app work:
 
-```
+```text
 PORT=3001                 (change if port conflicts)
 NODE_ENV=production       (security)
 USE_MOCK_DB=true          (in-memory database)

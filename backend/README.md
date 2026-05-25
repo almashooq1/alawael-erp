@@ -17,7 +17,7 @@ Express.js API server for the Al-Awael Day Care Center ERP system.
 
 ## Directory Structure
 
-```
+```text
 backend/
 ├── app.js                    # Express app (middleware + routes)
 ├── server.js                 # HTTP server + DB + Socket.IO init

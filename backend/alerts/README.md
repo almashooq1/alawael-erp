@@ -39,7 +39,7 @@ module.exports = {
 
 ## Structure
 
-```
+```text
 backend/alerts/
 ├── README.md
 ├── index.js                 # public API

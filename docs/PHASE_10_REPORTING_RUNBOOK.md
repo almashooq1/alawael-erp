@@ -90,7 +90,7 @@ All 6 core requirement buckets are satisfied end-to-end at the backend. The only
 
 ## 3. Architecture summary (for on-call)
 
-```
+```text
   CATALOG        → 30 reports × 7 periodicities × 9 audiences × 6 channels × 4 confidentiality
                       (config/report.catalog.js — pure data, frozen)
         │

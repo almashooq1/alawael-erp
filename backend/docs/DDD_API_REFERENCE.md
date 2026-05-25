@@ -121,7 +121,7 @@
 
 ### 12-Phase Lifecycle
 
-```
+```text
 referral → screening → intake → assessment → planning →
 active-treatment → review → transition → discharge-planning →
 discharge → follow-up → closed
@@ -671,7 +671,7 @@ npm run db:seed:ddd:force
 
 ## Architecture Summary
 
-```
+```text
 frontend/                      backend/
 ├── services/ddd/index.js      ├── domains/
 │   (20 API objects)           │   ├── _base/

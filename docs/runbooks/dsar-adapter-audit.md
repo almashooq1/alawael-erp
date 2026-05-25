@@ -57,7 +57,7 @@ Open `/admin/adapter-audit` as `dpo` or `compliance_officer`.
 
 **Query A — all rows where we accessed the subject's record:**
 
-```
+```text
 Filter: (use URL bar)
 /admin/adapter-audit?targetHash=<hash-from-step-2>&limit=200
 ```
@@ -70,7 +70,7 @@ entityKind / entityId / ipHash / errorMessage`.
 **Query B — broaden by entity ref** (if the subject is also a local
 record, e.g. an Employee):
 
-```
+```text
 /admin/adapter-audit?entityKind=Employee&entityId=<mongo-id>&limit=200
 ```
 

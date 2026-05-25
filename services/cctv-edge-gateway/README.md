@@ -66,7 +66,7 @@ stored in `config.local.json`.
 
 ## Endpoints exposed by the edge
 
-```
+```text
 GET  /health                         → status + queue size + sessions
 GET  /sessions                       → list active HLS sessions
 POST /hls/start                      → { sessionId, rtspUrl }

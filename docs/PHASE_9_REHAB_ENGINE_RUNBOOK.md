@@ -54,7 +54,7 @@ builders for presentation surfaces.
 
 ### HTTP surfaces
 
-```
+```text
 GET  /api/v1/rehab/disciplines/taxonomy
 GET  /api/v1/rehab/disciplines/health
 GET  /api/v1/rehab/disciplines/suggest?age=…&icf=…

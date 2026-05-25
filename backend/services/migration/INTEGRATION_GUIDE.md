@@ -85,7 +85,7 @@ const targetConnection = mysql.createPool({
 
 Add to your `.env` file:
 
-```
+```text
 # Source Database
 SOURCE_DB_HOST=localhost
 SOURCE_DB_USER=root
@@ -261,7 +261,7 @@ runMigration();
 
 **Request 1: Create Plan**
 
-```
+```text
 POST /api/migrations/plan
 Body (JSON):
 {
@@ -276,7 +276,7 @@ Body (JSON):
 
 **Request 2: Execute Migration**
 
-```
+```text
 POST /api/migrations/execute
 Body (JSON):
 {
@@ -286,7 +286,7 @@ Body (JSON):
 
 **Request 3: Get Summary**
 
-```
+```text
 GET /api/migrations/summary
 ```
 

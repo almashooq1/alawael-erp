@@ -33,7 +33,7 @@ app.use('/api/disability-rehabilitation', require('./routes/disability-rehabilit
 
 #### Step 3: Access Swagger UI
 
-```
+```text
 http://localhost:3001/api/docs
 ```
 
@@ -82,7 +82,7 @@ http://localhost:3001/api/docs
 
 All endpoints require JWT Bearer token:
 
-```
+```text
 Authorization: Bearer <your_jwt_token>
 ```
 

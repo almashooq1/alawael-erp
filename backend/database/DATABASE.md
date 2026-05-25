@@ -35,7 +35,7 @@
 
 ### المكونات الرئيسية
 
-```
+```text
 backend/
 ├── config/
 │   ├── database.js           # إعدادات الاتصال + Retry Logic
@@ -125,7 +125,7 @@ node backend/database/health/db-health.js
 
 ### التجمعات الأساسية (Core Collections)
 
-```
+```text
 ┌─────────────────────────────────────────────────────────┐
 │ IDENTITY & AUTH                                         │
 │   users, sessions, apikeys, tokens                      │
@@ -171,7 +171,7 @@ node backend/database/health/db-health.js
 
 ### الملف الرئيسي
 
-```
+```text
 backend/database/indexes/core-indexes.js
 ```
 
@@ -226,7 +226,7 @@ node -e "
 
 ### تسمية ملفات الـ Migration
 
-```
+```text
 YYYYMMDDHHMMSS_description.js
 مثال: 20250201000000_create-all-collections.js
 ```

@@ -139,34 +139,34 @@ console.log('Validations:', result.executionLog);
 
 ### Initialize
 
-```
+```text
 POST /api/migrations/initialize
 ```
 
 ### Create Plan
 
-```
+```text
 POST /api/migrations/plan
 Body: { tables: [...], options: {...} }
 ```
 
 ### Execute
 
-```
+```text
 POST /api/migrations/execute
 Body: { continueOnError: false }
 ```
 
 ### Get Status
 
-```
+```text
 GET /api/migrations/summary
 GET /api/migrations/log
 ```
 
 ### CSV Operations
 
-```
+```text
 POST /api/migrations/import-csv
 POST /api/migrations/export-csv
 GET /api/migrations/csv-info?csvPath=...
@@ -176,7 +176,7 @@ POST /api/migrations/sample-csv
 
 ### Control
 
-```
+```text
 POST /api/migrations/pause
 POST /api/migrations/resume
 DELETE /api/migrations/log
@@ -254,7 +254,7 @@ new CSVProcessor({
 
 ## File Locations
 
-```
+```text
 backend/
 ├── services/migration/
 │   ├── index.js                    # Main export

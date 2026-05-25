@@ -85,7 +85,7 @@ These cannot ship without a product decision. Each ADR has 4 stakeholder questio
 
 For each `*_MODE=live` env flag you're about to set:
 
-```
+```text
 Does the adapter have an auto-submitting cron?
 ├── No (user-triggered or verify-only) → safe to flip; user sees errors per-call
 └── Yes

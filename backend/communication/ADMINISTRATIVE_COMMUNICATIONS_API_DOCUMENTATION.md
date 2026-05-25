@@ -42,7 +42,7 @@
 
 ### المراسلات
 
-```
+```text
 POST   /api/admin-communications/correspondences          # إنشاء مراسلة
 GET    /api/admin-communications/correspondences          # البحث في المراسلات
 GET    /api/admin-communications/correspondences/inbox    # صندوق الوارد
@@ -64,7 +64,7 @@ GET    /api/admin-communications/correspondences/:id/history # سجل الإجر
 
 ### القوالب
 
-```
+```text
 GET    /api/admin-communications/templates                # قائمة القوالب
 POST   /api/admin-communications/templates                # إنشاء قالب
 POST   /api/admin-communications/templates/:id/apply      # تطبيق قالب
@@ -72,7 +72,7 @@ POST   /api/admin-communications/templates/:id/apply      # تطبيق قالب
 
 ### الجهات الخارجية
 
-```
+```text
 GET    /api/admin-communications/external-entities        # البحث في الجهات
 POST   /api/admin-communications/external-entities        # إضافة جهة
 GET    /api/admin-communications/external-entities/:id    # تفاصيل جهة
@@ -81,7 +81,7 @@ PUT    /api/admin-communications/external-entities/:id    # تحديث جهة
 
 ### التكامل الحكومي
 
-```
+```text
 GET    /api/admin-communications/government/ministries    # قائمة الوزارات
 GET    /api/admin-communications/government/regions       # قائمة المناطق
 ```
@@ -114,7 +114,7 @@ POST /api/admin-communications/correspondences
 
 ### البحث في المراسلات
 
-```
+```text
 GET /api/admin-communications/correspondences?q=اجتماع&type=official_letter&status=sent&page=1&limit=20
 ```
 

@@ -155,7 +155,7 @@ TIMELINE EVENT TAXONOMY
 
 The longitudinal timeline is the primary navigation surface. Every event has:
 
-```
+```text
 {
   eventId, beneficiaryId, branchId, episodeId?,
   type: <enum>, category: <enum>, severity: <info|warning|critical>,

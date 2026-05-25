@@ -28,7 +28,7 @@ What this phase adds is the **integration backbone**: a catalog that names every
 
 ### 1.1 Layered view
 
-```
+```text
 ┌────────────────────────────────────────────────────────────────────┐
 │  PRESENTATION  │ web-admin dashboards · parent portal · PDF · email│
 ├────────────────────────────────────────────────────────────────────┤
@@ -58,7 +58,7 @@ What this phase adds is the **integration backbone**: a catalog that names every
 
 ### 1.3 Request flow (periodic report)
 
-```
+```text
 ┌────────────┐   ┌──────────────┐   ┌────────────────┐   ┌───────────┐
 │ cron tick  │ → │ catalog      │ → │ builder (pure) │ → │ renderer  │
 │ (weekly)   │   │ byPeriodicity│   │ JSON doc       │   │ HTML/PDF  │
@@ -240,7 +240,7 @@ The catalog lives at `config/report.catalog.js` and is **pure data** (same disci
 
 ### 4.3 Approval workflow (state machine)
 
-```
+```text
    (create)
       │
       ▼
@@ -291,7 +291,7 @@ Rules:
 
 One row per **(report-instance × recipient × channel)**. The ledger of truth.
 
-```
+```text
 reportId            string (catalog id)
 instanceKey         string (reportId:periodKey:scopeKey) — indexed
 periodKey           string (e.g. '2026-W17', '2026-04', '2026-Q2', '2026')
@@ -328,7 +328,7 @@ Indexes:
 
 #### `report_approval_requests`
 
-```
+```text
 reportId            string (catalog id)
 instanceKey         string — indexed
 scopeKey            string | null

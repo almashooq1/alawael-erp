@@ -45,7 +45,7 @@ A comprehensive, production-ready data migration system for the ERP backend that
 
 ## 📁 Project Structure
 
-```
+```text
 backend/
 ├── services/
 │   └── migration/
@@ -144,20 +144,20 @@ Orchestrates complete migration workflows:
 
 ### Initialization
 
-```
+```text
 POST /api/migrations/initialize
 ```
 
 ### Planning
 
-```
+```text
 POST /api/migrations/plan
 GET /api/migrations/plan
 ```
 
 ### Execution
 
-```
+```text
 POST /api/migrations/execute
 GET /api/migrations/summary
 GET /api/migrations/log
@@ -166,7 +166,7 @@ DELETE /api/migrations/log
 
 ### CSV Operations
 
-```
+```text
 POST /api/migrations/import-csv
 POST /api/migrations/export-csv
 POST /api/migrations/sample-csv
@@ -176,7 +176,7 @@ POST /api/migrations/validate-csv
 
 ### Control
 
-```
+```text
 POST /api/migrations/pause
 POST /api/migrations/resume
 ```
@@ -331,7 +331,7 @@ node examples/migration-examples.js 2
 
 ### Workflow 1: Database to Database
 
-```
+```text
 1. Create migration plan
 2. Execute migration
 3. Verify integrity
@@ -340,7 +340,7 @@ node examples/migration-examples.js 2
 
 ### Workflow 2: CSV Import
 
-```
+```text
 1. Validate CSV structure
 2. Sample data
 3. Import with transformation
@@ -349,7 +349,7 @@ node examples/migration-examples.js 2
 
 ### Workflow 3: Full Backup
 
-```
+```text
 1. Export all tables
 2. Archive CSV files
 3. Verify backup

@@ -39,7 +39,7 @@
 
 ## 🏗️ البنية عالية المستوى
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────────┐
 │                       CLIENT LAYER                               │
 │  Web SPA  │  Mobile (Parent)  │  Mobile (Therapist)  │ Kiosk    │

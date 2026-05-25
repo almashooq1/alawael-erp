@@ -9,7 +9,7 @@ Barcode API through the main `index.js` file.
 
 **Error:**
 
-```
+```text
 SyntaxError: The requested module '../models/AuditLog.js' does not provide an export named 'default'
 ```
 
@@ -97,7 +97,7 @@ Created `barcode-server.js` - a dedicated barcode API server that:
 
 ### Server Startup Flow
 
-```
+```text
 Server Start: node barcode-server.js
         ↓
 Load Environment Variables (.env)
@@ -117,7 +117,7 @@ Listen on Port 4000
 
 ### Request Flow
 
-```
+```text
 HTTP Request to /api/barcode/qr-code
         ↓
 Express Routes Handler (barcode-pro.js)
@@ -141,7 +141,7 @@ Client Receives Data
 
 ## 📁 File Structure After Conversion
 
-```
+```text
 backend/
 ├── barcode-server.js ..................... ✨ New Server Entry Point (ES Modules)
 ├── index.js ............................ ⚠️  Main Server (Mixed Modules - Not Used)

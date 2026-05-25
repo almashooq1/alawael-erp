@@ -56,7 +56,7 @@ npm install swagger-jsdoc swagger-ui-express
 
 - بعد التشغيل:
 
-```
+```text
 http://localhost:3001/api/docs
 ```
 
@@ -65,6 +65,7 @@ http://localhost:3001/api/docs
 ## 📌 ما يجب توثيقه داخل Swagger
 
 - جميع المسارات الأساسية في:
+
   - المستخدمين
   - المصادقة
   - التقارير
@@ -74,6 +75,7 @@ http://localhost:3001/api/docs
   - الإعدادات
 
   ### مراقبة النظام (Monitoring)
+
   - `GET /api/monitoring/health`
   - `GET /api/monitoring/health/dashboard`
   - `GET /api/monitoring/dashboard`

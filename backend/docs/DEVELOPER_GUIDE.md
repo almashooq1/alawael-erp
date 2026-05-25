@@ -80,7 +80,7 @@ npm run smoke:comprehensive
 
 **ENV للتنبيهات (اختياري):**
 
-```
+```text
 ALERT_EMAILS=admin@example.com,ops@example.com
 ALERT_SMS=+966500000000,+966511111111
 ```

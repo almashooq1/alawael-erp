@@ -229,7 +229,7 @@ Pre-pilot data prep (1 day before training):
 
 **Daily** (5 min, anyone with an issue):
 
-```
+```text
 ISSUE: <one-line description>
 SCENARIO: <1/2/3/4/5>
 STEP: <e.g. 3.4>

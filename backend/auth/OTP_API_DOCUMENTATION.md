@@ -33,7 +33,7 @@
 
 ### Base URL
 
-```
+```text
 /api/v1/auth/otp
 ```
 
@@ -270,7 +270,7 @@ const verify = await fetch('/api/v1/auth/otp/login/verify', {
 
 ### قالب SMS
 
-```
+```text
 رمز التحقق: 123456
 صالح لمدة 5 دقيقة
 @الأهداف
@@ -278,7 +278,7 @@ const verify = await fetch('/api/v1/auth/otp/login/verify', {
 
 ### قالب WhatsApp
 
-```
+```text
 🔐 رمز التحقق الخاص بك هو: 123456
 ⏰ صالح لمدة 5 دقيقة
 

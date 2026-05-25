@@ -13,7 +13,7 @@
 
 ### ✅ **Endpoint 1: Health Check (Public)**
 
-```
+```text
 GET /api/barcode/health
 Status: 200 OK
 Authentication: Not Required
@@ -31,7 +31,7 @@ Response Time: < 100ms
 
 ### ✅ **Endpoint 2: Generate QR Code**
 
-```
+```text
 POST /api/barcode/qr-code
 Status: 200 OK
 Authentication: Required (Admin Token)
@@ -60,7 +60,7 @@ Authentication: Required (Admin Token)
 
 ### ✅ **Endpoint 3: Generate Barcode**
 
-```
+```text
 POST /api/barcode/barcode
 Status: 200 OK
 Authentication: Required (Warehouse Manager Token)
@@ -90,7 +90,7 @@ Authentication: Required (Warehouse Manager Token)
 
 ### ✅ **Endpoint 4: Batch Processing**
 
-```
+```text
 POST /api/barcode/batch
 Status: 200 OK
 Authentication: Required (Logistics Token)
@@ -123,7 +123,7 @@ Authentication: Required (Logistics Token)
 
 ### ✅ **Endpoint 5: Statistics**
 
-```
+```text
 GET /api/barcode/statistics
 Status: 200 OK
 Authentication: Required (Admin Token)
@@ -338,7 +338,7 @@ node barcode-server.js
 
 Expected output:
 
-```
+```text
 ✨ Barcode API Server running on http://localhost:4000
 📍 Health Check: http://localhost:4000/api/barcode/health
 

@@ -6,6 +6,8 @@ Date: 2026-05-24
 
 🟡 **Proposed — needs clinical director + admissions lead + smart-attendance owner sign-off before implementation.**
 
+> **📋 Decision-ready brief**: see [020-DECISION-BRIEF.md](020-DECISION-BRIEF.md) for live caller counts (16 not 21), frontend impact analysis (minimal — no /students/ page), risk matrix per approach × 5 dimensions, 30-min stakeholder meeting agenda, and decision template.
+
 This ADR is a proposal, not an accepted decision. The discovery was made during
 the test-run of `.github/prompts/04-programs-sessions-progress-engine.prompt.md`
 (2026-05-24); the choice between consolidation and explicit separation depends

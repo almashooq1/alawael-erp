@@ -18,8 +18,9 @@
  *   • ENABLE_AAC_REASSESSMENT_SWEEPER       — weekly Mon 06:30, active AAC profiles past nextReassessmentDue
  *   • (+ W370 facility/diet additions, env-gated)
  *   • ENABLE_ASSESSMENT_OVERDUE_SWEEPER     — daily 04:00, emit assessment.overdue per ClinicalAssessment past dueDate (W383)
+ *   • ENABLE_CAREGIVER_SUPPORT_OVERDUE_SWEEPER — daily 10:30, CaregiverSupportProgram active past targetCompletionDate (W393)
  *
- * Six of seven sweepers ONLY query + log (no state mutation). The
+ * Twelve of thirteen sweepers ONLY query + log (no state mutation). The
  * exception is RESPITE_NOSHOW which auto-flips status approved/confirmed
  * → no_show when the booking startAt is more than 24h in the past with
  * no check-in — operationally safer than leaving the slot blocked.
@@ -543,10 +544,46 @@ function wireClinicalSweepers(app, deps = {}) {
     logger.info('[startup] W383 assessment overdue sweeper scheduled (daily 04:00 Asia/Riyadh)');
   }
 
+  // ── 13) CaregiverSupportProgram overdue flagger (W393) ─────────────
+  if (process.env.ENABLE_CAREGIVER_SUPPORT_OVERDUE_SWEEPER === 'true') {
+    cron.schedule(
+      '30 10 * * *',
+      async () => {
+        try {
+          const Program = safeModel('CaregiverSupportProgram');
+          if (!Program) return;
+          const now = new Date();
+          const overdue = await Program.find({
+            status: { $in: ['enrolled', 'in_progress'] },
+            targetCompletionDate: { $ne: null, $lt: now },
+          })
+            .select('_id beneficiaryId branchId programType caregiverName targetCompletionDate')
+            .limit(500)
+            .lean();
+          logger.info(
+            `[caregiver-support] overdue sweep: ${overdue.length} programs past targetCompletionDate`
+          );
+          for (const p of overdue.slice(0, 20)) {
+            logger.warn(
+              `[caregiver-support] overdue program=${p._id} type=${p.programType} caregiver=${p.caregiverName} target=${p.targetCompletionDate}`
+            );
+          }
+        } catch (err) {
+          logger.error('[caregiver-support] overdue sweeper failed', err);
+        }
+      },
+      TZ
+    );
+    scheduledCount++;
+    logger.info(
+      '[startup] W393 caregiver-support overdue sweeper scheduled (daily 10:30 Asia/Riyadh)'
+    );
+  }
+
   if (scheduledCount === 0) {
-    logger.info('[startup] clinical sweepers: all 12 disabled (no ENABLE_*_SWEEPER=true)');
+    logger.info('[startup] clinical sweepers: all 13 disabled (no ENABLE_*_SWEEPER=true)');
   } else {
-    logger.info(`[startup] clinical sweepers wired: ${scheduledCount}/12 enabled`);
+    logger.info(`[startup] clinical sweepers wired: ${scheduledCount}/13 enabled`);
   }
 }
 

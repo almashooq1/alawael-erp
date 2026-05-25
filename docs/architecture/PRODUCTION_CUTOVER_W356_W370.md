@@ -132,25 +132,26 @@ schema against its canonical Zod equivalent.
 
 ---
 
-## 4. Bootstrap cron sweepers — 11 ENV flags
+## 4. Bootstrap cron sweepers — 12 ENV flags (W391 update: +1 caregiver-support overdue, W393)
 
 All default-disabled. To activate, set `ENABLE_<FLAG>=true` in the
 environment + restart. Each is independent — turn them on one at a time
 and watch the logs.
 
-| ENV flag                              | Wave | Schedule (Asia/Riyadh) | Mutates state?                                                          |
-| ------------------------------------- | ---- | ---------------------- | ----------------------------------------------------------------------- |
-| `ENABLE_SAFEGUARDING_SLA_SWEEPER`     | W357 | Daily 08:00            | No (read+log)                                                           |
-| `ENABLE_DEVICE_LOAN_SWEEPER`          | W359 | Daily 09:00            | No                                                                      |
-| `ENABLE_DEVICE_MAINTENANCE_SWEEPER`   | W359 | Daily 09:30            | No                                                                      |
-| `ENABLE_RESPITE_NOSHOW_SWEEPER`       | W363 | Daily 02:00            | **YES** (auto-flips approved/confirmed → no_show after 24h+no check-in) |
-| `ENABLE_TRANSITION_OVERDUE_SWEEPER`   | W361 | Daily 10:00            | No                                                                      |
-| `ENABLE_CBAHI_REASSESSMENT_SWEEPER`   | W360 | Weekly Mon 06:00       | No                                                                      |
-| `ENABLE_AAC_REASSESSMENT_SWEEPER`     | W358 | Weekly Mon 06:30       | No                                                                      |
-| `ENABLE_DIET_REVIEW_SWEEPER`          | W368 | Weekly Mon 07:00       | No                                                                      |
-| `ENABLE_FACILITY_INSPECTION_SWEEPER`  | W369 | Daily 05:00            | No                                                                      |
-| `ENABLE_FACILITY_MAINTENANCE_SWEEPER` | W369 | Daily 05:30            | No                                                                      |
-| `ENABLE_FACILITY_CERT_SWEEPER`        | W369 | Daily 06:00            | No                                                                      |
+| ENV flag                                   | Wave | Schedule (Asia/Riyadh) | Mutates state?                                                          |
+| ------------------------------------------ | ---- | ---------------------- | ----------------------------------------------------------------------- |
+| `ENABLE_SAFEGUARDING_SLA_SWEEPER`          | W357 | Daily 08:00            | No (read+log)                                                           |
+| `ENABLE_DEVICE_LOAN_SWEEPER`               | W359 | Daily 09:00            | No                                                                      |
+| `ENABLE_DEVICE_MAINTENANCE_SWEEPER`        | W359 | Daily 09:30            | No                                                                      |
+| `ENABLE_RESPITE_NOSHOW_SWEEPER`            | W363 | Daily 02:00            | **YES** (auto-flips approved/confirmed → no_show after 24h+no check-in) |
+| `ENABLE_TRANSITION_OVERDUE_SWEEPER`        | W361 | Daily 10:00            | No                                                                      |
+| `ENABLE_CBAHI_REASSESSMENT_SWEEPER`        | W360 | Weekly Mon 06:00       | No                                                                      |
+| `ENABLE_AAC_REASSESSMENT_SWEEPER`          | W358 | Weekly Mon 06:30       | No                                                                      |
+| `ENABLE_DIET_REVIEW_SWEEPER`               | W368 | Weekly Mon 07:00       | No                                                                      |
+| `ENABLE_FACILITY_INSPECTION_SWEEPER`       | W369 | Daily 05:00            | No                                                                      |
+| `ENABLE_FACILITY_MAINTENANCE_SWEEPER`      | W369 | Daily 05:30            | No                                                                      |
+| `ENABLE_FACILITY_CERT_SWEEPER`             | W369 | Daily 06:00            | No                                                                      |
+| `ENABLE_CAREGIVER_SUPPORT_OVERDUE_SWEEPER` | W393 | Daily 10:30            | No (read+log; programs past targetCompletionDate)                       |
 
 **Drift-guard contract**: the W364 + W370 drift guards assert exactly
 **one** `.save()` call across the entire bootstrap (the respite no-show

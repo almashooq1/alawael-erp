@@ -91,6 +91,21 @@ function setupIntegrationBus(app) {
       logger.warn('[Integration] W387 service-event bridge skipped:', bridgeErr.message);
     }
 
+    // W394: model post-save bridge for the LIVE registry (HR/finance/medical/
+    // beneficiary/attendance events). Closes the W392 baseline of 17 orphan
+    // subscribers by hooking Mongoose model post-save → integrationBus.publish.
+    // Lowest-common-denominator producer wiring: every Employee.create,
+    // Invoice.create, etc. fires the canonical contract event automatically.
+    try {
+      const { wireModelEventBridge } = require('../integration/modelEventBridge');
+      const result = wireModelEventBridge(integrationBus);
+      logger.info(
+        `[Integration] ✓ W394 model-event bridge: ${result.wiredCount} post-save hooks attached`
+      );
+    } catch (bridgeErr) {
+      logger.warn('[Integration] W394 model-event bridge skipped:', bridgeErr.message);
+    }
+
     // Wire DDD notification triggers (10 notification rules)
     try {
       const { initializeDDDNotifications } = require('../integration/dddNotificationTriggers');

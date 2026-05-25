@@ -95,21 +95,24 @@ function resolvesWildcard(pattern) {
   );
 }
 
+const MODEL_BRIDGE_FILE = path.join(__dirname, '..', 'integration', 'modelEventBridge.js');
+
 function findAllProducedPatterns() {
   const produced = new Set();
   const files = walkJs(BACKEND_ROOT);
 
-  // (1) Direct integrationBus.publish calls
+  // (1) Direct integrationBus.publish calls (literal-args form)
   const publishRe = /integrationBus\.publish\s*\(\s*['"]([\w-]+)['"]\s*,\s*['"]([\w.]+)['"]/g;
   for (const f of files) {
     if (f === BRIDGE_FILE) continue;
+    if (f === MODEL_BRIDGE_FILE) continue; // parsed via mapping array below
     const src = fs.readFileSync(f, 'utf8');
     for (const m of src.matchAll(publishRe)) {
       produced.add(`${m[1]}.${m[2]}`);
     }
   }
 
-  // (2) Bridge attachBridge mappings
+  // (2) serviceEventBridge attachBridge mappings (W387)
   if (fs.existsSync(BRIDGE_FILE)) {
     const bridgeSrc = fs.readFileSync(BRIDGE_FILE, 'utf8');
     const attachRe = /attachBridge\s*\(\s*['"]([\w-]+)['"]\s*,\s*[^,]+,\s*\[([\s\S]*?)\]/g;
@@ -120,6 +123,15 @@ function findAllProducedPatterns() {
       for (const em of eventsBlock.matchAll(eventRe)) {
         produced.add(`${domain}.${em[1]}`);
       }
+    }
+  }
+
+  // (3) modelEventBridge MAPPINGS array (W394) — { domain: '...', eventType: '...' }
+  if (fs.existsSync(MODEL_BRIDGE_FILE)) {
+    const src = fs.readFileSync(MODEL_BRIDGE_FILE, 'utf8');
+    const mappingRe = /domain:\s*['"]([\w-]+)['"]\s*,\s*eventType:\s*['"]([\w.]+)['"]/g;
+    for (const m of src.matchAll(mappingRe)) {
+      produced.add(`${m[1]}.${m[2]}`);
     }
   }
 
@@ -157,33 +169,22 @@ const KNOWN_TYPO_PATTERNS = new Set([
   'system.error.*',
 ]);
 
-// Subscribers with valid contract but no producer (the W382 baseline class).
-// All 13 unique patterns here listed for clarity. Removal contract: wire a
-// producer in the appropriate domain service + add bridge mapping, OR delete
-// the subscriber.
+// W394 (2026-05-25) closed most LIVE-registry orphans via modelEventBridge
+// post-save hooks on Employee/LeaveRequest/Invoice/Payment/ClinicalSession/
+// Beneficiary/ClinicalAssessment/AttendanceRecord. Remaining orphans require
+// non-model triggers (sweepers, middleware) or services I haven't probed:
 const KNOWN_LIVE_ORPHAN_SUBSCRIBERS = new Set([
-  // hr group
-  'hr.employee.hired',
-  'hr.employee.terminated',
-  'hr.department.transferred',
-  'hr.leave.approved',
-  'hr.salary.changed',
-  // finance group
-  'finance.payment.received',
-  'finance.budget.threshold_reached',
-  'finance.invoice.created',
-  // medical group
-  'medical.therapy.session_completed',
-  'medical.risk.alert_raised',
-  // beneficiary group (this registry uses domain='beneficiary' not 'core')
-  'beneficiary.beneficiary.registered',
-  'beneficiary.beneficiary.status_changed',
-  'beneficiary.assessment.completed',
-  // attendance group
-  'attendance.absence.detected',
-  'attendance.employee.checked_out',
-  // system group
-  'system.auth.permission_denied',
+  // hr — needs Mongoose model + payroll service. Not in modelEventBridge yet.
+  'hr.department.transferred', // requires Employee.department field change tracking — model-driven, schema may differ
+  'hr.salary.changed', // requires Payroll/SalaryHistory model — different shape
+  // finance — sweeper-driven (budget threshold) + W394 doesn't cover all
+  'finance.budget.threshold_reached', // needs nightly budget-vs-spend sweeper, similar to W383 pattern
+  // medical — risk alert needs RiskAssessment service, complex
+  'medical.risk.alert_raised', // service-driven; needs clinical risk workflow
+  // attendance — absence sweeper, similar to W383
+  'attendance.absence.detected', // needs daily attendance sweeper — beneficiary no-shows
+  // system — middleware-driven, not Mongoose
+  'system.auth.permission_denied', // requires authorization middleware hook — different pattern
 ]);
 
 // Wildcards: subscriber listens for any matching prefix. Producer-existence

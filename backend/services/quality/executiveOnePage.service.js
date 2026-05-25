@@ -41,8 +41,46 @@
 
 const SEVERITY_RANK = Object.freeze({ ok: 0, warning: 1, critical: 2 });
 
+// W373 — Safety-relevant heatmap cells that roll up into the executive safety KPI.
+// These are the subset of heatmap metrics where ANY non-zero value is a clinical or
+// operational-safety signal worth surfacing at the executive level.
+const SAFETY_CELL_KEYS = Object.freeze([
+  'seizures.openEvents', // W371 (W356 bridge)
+  'safeguarding.openConcerns', // W371 (W357 bridge)
+  'assistiveDevice.maintenanceOverdue', // W372 (W359 bridge)
+  'capa.critical', // W350 (CAPA criticals are operational-safety risks)
+]);
+
 function _severityRank(s) {
   return SEVERITY_RANK[s] ?? 0;
+}
+
+// W373 — Compute aggregate safety KPIs from heatmap branches[]
+function _safetyKpis(branches) {
+  let totalEvents = 0; // sum across all safety cells in all branches
+  const perMetric = {}; // metric → total
+  for (const k of SAFETY_CELL_KEYS) perMetric[k] = 0;
+  let branchesWithSafetyWarning = 0;
+
+  for (const b of branches || []) {
+    let branchHasSafetyWarning = false;
+    for (const k of SAFETY_CELL_KEYS) {
+      const cell = b.cells?.[k];
+      if (cell && Number.isFinite(cell.value) && cell.value > 0) {
+        perMetric[k] += cell.value;
+        totalEvents += cell.value;
+        if (cell.severity !== 'ok') branchHasSafetyWarning = true;
+      }
+    }
+    if (branchHasSafetyWarning) branchesWithSafetyWarning += 1;
+  }
+
+  return {
+    totalEvents,
+    perMetric,
+    branchesWithSafetyWarning,
+    branchesScanned: (branches || []).length,
+  };
 }
 
 function _worstMetricInCells(cells) {
@@ -133,6 +171,8 @@ function createExecutiveOnePageService(opts = {}) {
         beneficiaries: null,
         quality: null,
         workload: null,
+        // W373 — derived from heatmap.branches[] without a separate aggregation call
+        safety: null,
       },
       topAttention: { branches: [], therapists: [] },
     };
@@ -152,9 +192,12 @@ function createExecutiveOnePageService(opts = {}) {
         const heatmap = await _HeatmapService().buildHeatmap({ branchIds, now });
         out.kpis.quality = heatmap.summary;
         out.topAttention.branches = _topAttention(heatmap.branches, 'branchId', topN);
+        // W373 — derive safety roll-up from the same branches[] (no extra DB call)
+        out.kpis.safety = _safetyKpis(heatmap.branches);
       } catch (err) {
         logger.warn?.(`[executiveOnePage] heatmap composition failed: ${err.message}`);
         out.kpis.quality = { error: err.message };
+        out.kpis.safety = { error: err.message };
       }
     })();
 
@@ -175,7 +218,13 @@ function createExecutiveOnePageService(opts = {}) {
 
   return {
     build,
-    _internals: { _severityRank, _worstMetricInCells, _topAttention },
+    _internals: {
+      _severityRank,
+      _worstMetricInCells,
+      _topAttention,
+      _safetyKpis,
+      SAFETY_CELL_KEYS,
+    },
   };
 }
 

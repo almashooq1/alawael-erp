@@ -147,7 +147,15 @@ class GoalService extends BaseService {
       lastModifiedBy: userId,
     });
     this._invalidateCache();
-    this.emit('goalAchieved', { goalId });
+    // W380: canonical contract event (was ad-hoc 'goalAchieved' pre-W380).
+    // Envelope per GOAL_EVENTS.ACHIEVED. result is the updated doc; falls back
+    // gracefully if some fields are absent.
+    this.emit('goal.achieved', {
+      goalId,
+      beneficiaryId: result?.beneficiaryId,
+      goalType: result?.domain || result?.category,
+      achievementDate: result?.achievedDate || new Date(),
+    });
     return result;
   }
 }

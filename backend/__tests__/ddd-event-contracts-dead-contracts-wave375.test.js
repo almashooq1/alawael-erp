@@ -95,28 +95,19 @@ const SCAN_SKIP_DIRS = new Set([
 // producers in domain services rather than deleted. As each is wired, remove
 // the entry in the SAME commit (W375.b ratchet-down test catches stale).
 const KNOWN_DEAD_CONTRACTS = new Set([
-  // core (BENEFICIARY_DDD_EVENTS) — 2 dead, 1 alive (beneficiary.registered)
-  'core.STATUS_CHANGED', // beneficiary.status_changed
-  'core.PROFILE_UPDATED', // beneficiary.profile_updated
-  // episodes (EPISODE_EVENTS) — 0 dead, 3 alive after W379 wired producers in
-  // domains/episodes/index.js (afterCreate / advancePhase / dischargeEpisode).
-  // assessments (ASSESSMENT_EVENTS) — 2 dead, 0 alive
-  'assessments.COMPLETED', // assessment.completed
-  'assessments.OVERDUE', // assessment.overdue
-  // care-plans (CARE_PLAN_EVENTS) — 2 dead, 0 alive
-  'care-plans.ACTIVATED', // careplan.activated
-  'care-plans.COMPLETED', // careplan.completed
-  // sessions (SESSION_EVENTS) — 0 dead, 1 alive (session.completed referenced in seed)
-  // goals (GOAL_EVENTS) — 1 dead, 0 alive (W377 deleted STALLED + MEASURE_APPLIED)
-  'goals.ACHIEVED', // goal.achieved
-  // quality (QUALITY_EVENTS) — 2 dead, 0 alive
+  // core (BENEFICIARY_DDD_EVENTS) — 0 dead, 3 alive after W380 wired afterUpdate hook
+  // episodes (EPISODE_EVENTS) — 0 dead, 3 alive after W379
+  // assessments (ASSESSMENT_EVENTS) — 1 dead, 1 alive after W380 wired completeAssessment
+  'assessments.OVERDUE', // assessment.overdue — needs separate sweeper, W381+ scope
+  // care-plans (CARE_PLAN_EVENTS) — 0 dead, 2 alive after W380 wired activate/complete
+  // sessions (SESSION_EVENTS) — 0 dead, 1 alive (session.completed via seed)
+  // goals (GOAL_EVENTS) — 0 dead, 1 alive after W380 wired achieveGoal
+  // quality (QUALITY_EVENTS) — 2 dead, 0 alive — needs qualityEventBus integration (W381+)
   'quality.AUDIT_COMPLETED', // quality.audit_completed
   'quality.CORRECTIVE_ACTION_REQUIRED', // quality.corrective_action_required
-  // behavior (BEHAVIOR_EVENTS) — 2 dead, 0 alive
-  'behavior.INCIDENT_RECORDED', // behavior.incident_recorded
-  'behavior.PLAN_UPDATED', // behavior.plan_updated
-  // ai-recommendations (AI_RECOMMENDATION_EVENTS) — 1 dead, 1 alive (ai.risk_elevated)
-  'ai-recommendations.GENERATED', // ai.recommendation_generated
+  // behavior (BEHAVIOR_EVENTS) — 0 dead, 2 alive after W380 wired createRecord + createPlan
+  // ai-recommendations — 1 dead, 1 alive (ai.risk_elevated)
+  'ai-recommendations.GENERATED', // ai.recommendation_generated — function-only service, W381+ scope
 ]);
 
 function walkJs(dir, out = []) {

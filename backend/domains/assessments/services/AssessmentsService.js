@@ -208,11 +208,15 @@ class AssessmentsService extends BaseService {
       throw err;
     }
 
-    this.emit('assessment:completed', {
+    // W380: canonical contract event (was ad-hoc 'assessment:completed' pre-W380).
+    // Envelope per ASSESSMENT_EVENTS.COMPLETED. `type` sourced from tool;
+    // episodeId from the linked episode field if any.
+    this.emit('assessment.completed', {
       assessmentId: assessment._id,
       beneficiaryId: String(assessment.beneficiary),
-      tool: assessment.tool,
-      score: assessment.score,
+      episodeId: assessment.episodeId ? String(assessment.episodeId) : undefined,
+      type: assessment.tool,
+      overallScore: assessment.score,
     });
 
     return assessment;

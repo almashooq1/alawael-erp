@@ -18,12 +18,15 @@ class BehaviorService extends BaseService {
   async createRecord(data) {
     const BehaviorRecord = mongoose.model('BehaviorRecord');
     const record = await BehaviorRecord.create(data);
-    this.emit('behavior:record:created', {
+    // W380: canonical contract event (was ad-hoc 'behavior:record:created' pre-W380).
+    // Envelope per BEHAVIOR_EVENTS.INCIDENT_RECORDED.
+    this.emit('behavior.incident_recorded', {
       recordId: record._id,
       beneficiaryId: data.beneficiaryId,
       severity: data.behavior?.severity,
+      occurredAt: record.occurredAt || new Date(),
     });
-    // Auto-notify for severe/crisis
+    // Auto-notify for severe/crisis (intra-domain signal, not promoted to canonical)
     if (['severe', 'crisis'].includes(data.behavior?.severity)) {
       this.emit('behavior:alert:severe', {
         recordId: record._id,
@@ -94,7 +97,15 @@ class BehaviorService extends BaseService {
   async createPlan(data) {
     const BehaviorPlan = mongoose.model('BehaviorPlan');
     const plan = await BehaviorPlan.create(data);
-    this.emit('behavior:plan:created', { planId: plan._id, beneficiaryId: data.beneficiaryId });
+    // W380: canonical contract event. The contract is `behavior.plan_updated`
+    // (description: "Behavior plan updated") — semantically covers both new and
+    // updated plans (creation = first-update lifecycle event). Strategies array
+    // sourced from plan.strategies when present, else empty.
+    this.emit('behavior.plan_updated', {
+      planId: plan._id,
+      beneficiaryId: data.beneficiaryId,
+      strategies: Array.isArray(plan.strategies) ? plan.strategies : [],
+    });
     return plan;
   }
 

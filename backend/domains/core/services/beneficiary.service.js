@@ -57,17 +57,39 @@ class BeneficiaryService extends BaseService {
     }
   }
 
-  async afterUpdate(entity, previous, _context) {
-    // Track status changes
+  async afterUpdate(entity, previous, context) {
+    // W380: canonical contract events (was ad-hoc 'statusChanged' pre-W380).
+    // Two events fire on update:
+    //   beneficiary.status_changed — when entity.status actually transitions
+    //   beneficiary.profile_updated — for any other field change
+
     if (entity.status !== previous.status) {
       logger.info(
         `[BeneficiaryService] Status changed: ${previous.status} → ${entity.status} for ${entity._id}`
       );
-      this.emit('statusChanged', {
+      // Envelope per BENEFICIARY_DDD_EVENTS.STATUS_CHANGED.
+      this.emit('beneficiary.status_changed', {
         beneficiaryId: entity._id,
-        from: previous.status,
-        to: entity.status,
+        oldStatus: previous.status,
+        newStatus: entity.status,
+        reason: context?.reason || entity.statusReason || 'unspecified',
       });
+    } else {
+      // Status unchanged → fire profile-updated for the other-field-change path.
+      // updatedFields list sourced from entity.modifiedPaths() when available;
+      // falls back to ['unknown'] for lean docs.
+      // Envelope per BENEFICIARY_DDD_EVENTS.PROFILE_UPDATED.
+      const updatedFields =
+        typeof entity.modifiedPaths === 'function'
+          ? entity.modifiedPaths().filter(p => p !== 'updatedAt' && p !== 'lastModifiedBy')
+          : ['unknown'];
+      if (updatedFields.length > 0) {
+        this.emit('beneficiary.profile_updated', {
+          beneficiaryId: entity._id,
+          updatedFields,
+          updatedBy: context?.userId || entity.lastModifiedBy || 'system',
+        });
+      }
     }
   }
 

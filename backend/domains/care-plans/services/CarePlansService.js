@@ -161,9 +161,13 @@ class CarePlansService extends BaseService {
       throw err;
     }
 
-    this.emit('care-plan:activated', {
+    // W380: canonical contract event (was ad-hoc 'care-plan:activated' pre-W380).
+    // Envelope per CARE_PLAN_EVENTS.ACTIVATED. goalCount derived from plan.goals.
+    this.emit('careplan.activated', {
       planId: plan._id,
       beneficiaryId: plan.beneficiaryId,
+      episodeId: plan.episodeId,
+      goalCount: Array.isArray(plan.goals) ? plan.goals.length : 0,
     });
 
     return plan;
@@ -189,10 +193,13 @@ class CarePlansService extends BaseService {
       throw err;
     }
 
-    this.emit('care-plan:completed', {
+    // W380: canonical contract event (was ad-hoc 'care-plan:completed' pre-W380).
+    // Envelope per CARE_PLAN_EVENTS.COMPLETED. achievementRate sourced from
+    // outcomeRating (0-100 scale) when present, else null.
+    this.emit('careplan.completed', {
       planId: plan._id,
       beneficiaryId: plan.beneficiaryId,
-      outcomeRating,
+      achievementRate: typeof outcomeRating === 'number' ? outcomeRating : null,
     });
 
     return plan;

@@ -47,21 +47,27 @@ The doctrine names 8 modules. The DDD layer has 24 domains. Multiple domains map
 
 A static-analysis scan of `backend/domains/*/index.js` extracted declared `dependencies` for every domain, plus `require()` paths across services. Findings:
 
-**Declared-dependency violations of doctrine direction**:
+**Declared-dependency violations of doctrine direction** (each verified as REAL runtime usage, NOT vestigial metadata — 2026-05-25 follow-up scan):
 
-1. **`reports` depends on `quality`** — reports is tier 7, quality is tier 8. Reports → quality reverses the doctrine direction (a "lower" tier reading from a "higher" one).
-2. **`dashboards` depends on `quality`** — dashboards is part of reports-approvals-family (tier 7), same violation.
-3. **`family` depends on `sessions, goals, care-plans`** — family is part of beneficiary-360 (tier 2), but it pulls from tiers 3-5.
+1. **`reports` depends on `quality`** — tier 7 → tier 8. Real usage:
+   - `domains/reports/services/ReportsEngine.js:358-387` does `mongoose.model('QualityAudit')` + `mongoose.model('CorrectiveAction')` aggregates for quality-section report data.
+   - `domains/reports/models/ReportTemplate.js:32-33` lists `QualityAudit` + `CorrectiveAction` as valid `dataSource` enum values for templates.
+2. **`dashboards` depends on `quality`** — tier 7 → tier 8. Real usage:
+   - `domains/dashboards/services/DecisionSupportEngine.js:163-164` does `mongoose.model('CorrectiveAction')` to surface overdue CAPAs in decision alerts.
+3. **`family` depends on `sessions, goals, care-plans`** — tier 2 → tiers 3-5. Real usage:
+   - `family→goals`: `domains/family/services/FamilyService.js:201,213` does `mongoose.model('TherapeuticGoal')` for the family-portal active-goals widget.
+   - `family→sessions`: same file line 202,220 does `mongoose.model('ClinicalSession')` for the recent-sessions widget.
+   - `family→care-plans`: `domains/family/models/FamilyCommunication.js:91` has `relatedCarePlanId: { ref: 'UnifiedCarePlan' }` linking communications to care plans.
 
 **Facade-bypass violations (reaching into another domain's internals)**:
 
-1. `backend/domains/workflow/services/JourneyService.js:29,81,102,213,292,332,388,491` — reaches into `episodes/models/EpisodeOfCare`, `core/models/Beneficiary`, `timeline/models/CareTimeline` directly (7 occurrences).
-2. `backend/domains/core/services/beneficiary360.service.js:162,506` — reaches into `workflow/WorkflowEngine` (2 occurrences). Workflow doesn't expose this via its `index.js`.
-3. `backend/domains/goals/models/MeasureApplication.js:660,670` — reaches UP into legacy `services/measureReassessmentScheduler.service`, `services/measureGoalUpdater.service`.
+1. `backend/domains/workflow/services/JourneyService.js:29,81,102,213,292,332,388,491` — reaches into `episodes/models/EpisodeOfCare`, `core/models/Beneficiary`, `timeline/models/CareTimeline` directly (7 occurrences, collapse to 3 unique target modules in W354 baseline).
+2. `backend/domains/core/services/beneficiary360.service.js:162,506` — reaches into `workflow/WorkflowEngine` (2 occurrences). Not in W354 baseline because the require is `'../../workflow/WorkflowEngine'` (top-level file, not under `models/|services/|...`). Whether `WorkflowEngine.js` qualifies as workflow's public API alongside `index.js` is an open question — currently treated as public.
+3. `backend/domains/goals/models/MeasureApplication.js:660,670` — reaches UP into legacy `services/measureReassessmentScheduler.service`, `services/measureGoalUpdater.service`. Not in W354 baseline (the guard scopes cross-domain `domains/X/...`, not domain→legacy). Documented as a known gap; ratifying domain→legacy enforcement is a separate ADR.
 
 **No circular dependencies detected** in the declared graph as of 2026-05-24.
 
-These violations are the W354 baseline.
+These 8 tier-direction + 3 unique facade-bypass entries are the W354 baseline. **Vestigial-deps audit (2026-05-25)** confirmed every entry is real runtime usage — none are simply outdated metadata. Stakeholder decisions on Q1-Q2 are therefore on the critical path; no free ratchets exist.
 
 ## The mapping (8 doctrine modules ↔ 24 domains + legacy areas)
 

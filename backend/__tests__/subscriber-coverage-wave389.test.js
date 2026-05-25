@@ -68,29 +68,12 @@ function isLiveContract(domain, eventType) {
   return Object.values(group).some(evt => evt.eventType === eventType);
 }
 
-// Known dead subscribers baselined at W389 introduction (2026-05-25).
-// These pattern strings point to contracts that W377 deleted as
-// "aspirational, no producer intent". The subscribers remain in the
-// codebase as dead handlers — they registered but never fire.
-//
-// REMOVAL OPTIONS:
-//   (a) Delete the subscribers.push({ pattern: 'X', handler: ... }) block
-//       from dddCrossModuleSubscribers.js. Subscribers had no impact pre-
-//       W387 anyway (no producer fired the matching event). Clean removal.
-//   (b) Restore the contract + wire a producer. Larger scope.
-//
-// Test (b) "stale baseline entries fail" forces removal in the SAME commit
-// that addresses the subscriber.
-const KNOWN_DEAD_SUBSCRIBERS = new Set([
-  // W377 deleted SESSION_EVENTS.{CANCELLED, NO_SHOW} — subscribers remain
-  'sessions.session.no_show',
-  // W377 deleted ARVR_EVENTS whole group
-  'ar-vr.arvr.safety_alert',
-  // W377 deleted DASHBOARD_EVENTS whole group
-  'dashboards.dashboard.alert_triggered',
-  // W377 deleted FAMILY_EVENTS whole group
-  'family.family.engagement_low',
-]);
+// W390 (2026-05-25) cleared the W389 introduction baseline of 4 entries by
+// deleting the dead subscriber blocks from dddCrossModuleSubscribers.js (per
+// option (a) — these never fired anyway because their contracts were W377-
+// deleted). BASELINE NOW EMPTY ✅. Any new dead subscriber added in the future
+// fails CI immediately + must be either deleted OR have its contract restored.
+const KNOWN_DEAD_SUBSCRIBERS = new Set([]);
 
 describe('W389 subscriber-must-have-producer drift guard', () => {
   describe('subscriber pattern → contract resolution', () => {

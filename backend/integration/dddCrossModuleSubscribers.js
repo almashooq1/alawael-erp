@@ -186,34 +186,11 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
-  // ─── Sessions → AI: No-show triggers risk analysis ─────────────────
-  subscribers.push({
-    name: 'sessions:no_show → ai:risk_check',
-    pattern: 'sessions.session.no_show',
-    handler: async event => {
-      logger.warn(
-        `[DDD-CrossModule] No-show for beneficiary ${event.payload.beneficiaryId} (${event.payload.consecutiveNoShows} consecutive)`
-      );
-      try {
-        if (event.payload.consecutiveNoShows >= 3) {
-          // Publish risk elevated event
-          await integrationBus.publish(
-            'ai-recommendations',
-            'ai.risk_elevated',
-            {
-              beneficiaryId: event.payload.beneficiaryId,
-              riskScore: 0.7 + event.payload.consecutiveNoShows * 0.05,
-              previousScore: 0.5,
-              riskFactors: [`${event.payload.consecutiveNoShows} consecutive no-shows`],
-            },
-            { priority: 'critical', delivery: ['persist', 'broadcast', 'realtime', 'local'] }
-          );
-        }
-      } catch (err) {
-        logger.error(`[DDD-CrossModule] Risk check failed: ${err.message}`);
-      }
-    },
-  });
+  // W390 DELETED: 'sessions:no_show → ai:risk_check' subscriber.
+  // Listened for 'sessions.session.no_show' which W377 deleted (SESSION_EVENTS.
+  // NO_SHOW + CANCELLED). Subscriber was dead-on-arrival — its handler's
+  // integrationBus.publish('ai-recommendations', 'ai.risk_elevated', ...) chain
+  // also became unreachable. Removal closes the W389 baseline by 1 entry.
 
   // ─── Goals → Timeline: Goal achieved ───────────────────────────────
   subscribers.push({
@@ -325,67 +302,10 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
-  // ─── AR/VR → Workflow: Safety alert creates urgent task ────────────
-  subscribers.push({
-    name: 'ar-vr:safety_alert → workflow:urgent_task',
-    pattern: 'ar-vr.arvr.safety_alert',
-    handler: async event => {
-      logger.warn(`[DDD-CrossModule] AR/VR Safety Alert: ${event.payload.alertType}`);
-      try {
-        const mongoose = require('mongoose');
-        const WorkflowTask = mongoose.models.WorkflowTask;
-        if (WorkflowTask) {
-          await WorkflowTask.create({
-            beneficiary: event.payload.beneficiaryId,
-            title: `تنبيه سلامة AR/VR: ${event.payload.alertType}`,
-            titleEn: `AR/VR Safety: ${event.payload.alertType}`,
-            taskType: 'safety-alert',
-            status: 'pending',
-            priority: 'urgent',
-            source: 'ar-vr',
-            metadata: {
-              sessionId: event.payload.sessionId,
-              metric: event.payload.metric,
-              value: event.payload.value,
-            },
-            dueDate: new Date(Date.now() + 24 * 60 * 60 * 1000),
-          });
-        }
-      } catch (err) {
-        logger.error(`[DDD-CrossModule] AR/VR safety task failed: ${err.message}`);
-      }
-    },
-  });
-
-  // ─── Dashboard → Workflow: Alert triggers action task ──────────────
-  subscribers.push({
-    name: 'dashboards:alert → workflow:task',
-    pattern: 'dashboards.dashboard.alert_triggered',
-    handler: async event => {
-      try {
-        const mongoose = require('mongoose');
-        const WorkflowTask = mongoose.models.WorkflowTask;
-        if (WorkflowTask && event.payload.severity === 'critical') {
-          await WorkflowTask.create({
-            title: `تنبيه قرار: ${event.payload.rule}`,
-            titleEn: `Decision Alert: ${event.payload.rule}`,
-            taskType: 'decision-alert',
-            status: 'pending',
-            priority: 'urgent',
-            source: 'dashboards',
-            metadata: {
-              alertId: event.payload.alertId,
-              kpiValue: event.payload.kpiValue,
-              threshold: event.payload.threshold,
-            },
-            dueDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
-          });
-        }
-      } catch (err) {
-        logger.error(`[DDD-CrossModule] Dashboard alert task failed: ${err.message}`);
-      }
-    },
-  });
+  // W390 DELETED: 'ar-vr:safety_alert' + 'dashboards:alert' subscribers.
+  // Listened for 'ar-vr.arvr.safety_alert' + 'dashboards.dashboard.alert_triggered'
+  // which W377 deleted (ARVR_EVENTS + DASHBOARD_EVENTS whole groups).
+  // Both subscribers were dead-on-arrival — no producer existed.
 
   // ─── AI → Family: Notify family on risk elevated ───────────────────
   subscribers.push({
@@ -451,31 +371,9 @@ function initializeDDDSubscribers(integrationBus, _moduleConnector) {
     },
   });
 
-  // ─── Family Low Engagement → Workflow Task ─────────────────────────
-  subscribers.push({
-    name: 'family:engagement_low → workflow:task',
-    pattern: 'family.family.engagement_low',
-    handler: async event => {
-      try {
-        const mongoose = require('mongoose');
-        const WorkflowTask = mongoose.models.WorkflowTask;
-        if (WorkflowTask) {
-          await WorkflowTask.create({
-            beneficiary: event.payload.beneficiaryId,
-            title: `تفاعل أسري منخفض (${event.payload.daysSinceContact} يوم)`,
-            titleEn: `Low family engagement (${event.payload.daysSinceContact} days)`,
-            taskType: 'family-outreach',
-            status: 'pending',
-            priority: 'high',
-            source: 'family-engagement',
-            dueDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
-          });
-        }
-      } catch (err) {
-        logger.error(`[DDD-CrossModule] Family engagement task failed: ${err.message}`);
-      }
-    },
-  });
+  // W390 DELETED: 'family:engagement_low' subscriber.
+  // Listened for 'family.family.engagement_low' which W377 deleted (FAMILY_EVENTS
+  // whole group). Dead-on-arrival — no producer existed.
 
   // ── Register all subscribers ───────────────────────────────────────
   let registered = 0;

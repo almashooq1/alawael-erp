@@ -7,11 +7,28 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
+const { loginLimiter } = require('../middleware/rateLimiter');
+const logger = require('../utils/logger');
 
 // POST /api/montessori-auth/login
-// Montessori-specific login
-router.post('/login', async (req, res) => {
+// Montessori-specific login.
+// Hardening (W412):
+//   1. `loginLimiter` (5/15min per IP) — sister of the main /sso/login
+//      gate; without it this side-door endpoint was exposed to
+//      unlimited credential-stuffing.
+//   2. Refuse to sign if JWT_SECRET is unset — the previous code passed
+//      `undefined` straight through to jsonwebtoken which creates an
+//      unverifiable token (the verifier later rejects it, but the
+//      token IS issued, polluting clients).
+//   3. Catch-all returns generic 500 — `err.message` previously leaked
+//      stack-trace strings (model field names, query shapes) to anyone
+//      able to trigger an unhandled throw.
+router.post('/login', loginLimiter, async (req, res) => {
   try {
+    if (!process.env.JWT_SECRET) {
+      logger.error('[montessoriAuth] JWT_SECRET not configured — refusing to issue token');
+      return res.status(503).json({ success: false, message: 'الخدمة غير مكوّنة بعد' });
+    }
     const User = require('../models/User');
     const jwt = require('jsonwebtoken');
     const { username, password } = req.body;
@@ -35,7 +52,8 @@ router.post('/login', async (req, res) => {
       data: { token, user: { _id: user._id, username: user.username, role: user.role } },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    logger.error('[montessoriAuth] login failure', { message: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في الخادم' });
   }
 });
 
@@ -44,7 +62,8 @@ router.post('/logout', authenticate, async (req, res) => {
   try {
     res.json({ success: true, message: 'Logged out successfully' });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    logger.error('[montessoriAuth] logout failure', { message: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في الخادم' });
   }
 });
 
@@ -56,7 +75,8 @@ router.get('/session', authenticate, async (req, res) => {
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
     res.json({ success: true, data: { user, system: 'montessori' } });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    logger.error('[montessoriAuth] session failure', { message: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في الخادم' });
   }
 });
 
@@ -69,7 +89,8 @@ router.get('/classrooms', authenticate, async (req, res) => {
     const classrooms = await Classroom.find(filter).lean();
     res.json({ success: true, data: classrooms });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    logger.error('[montessoriAuth] classrooms failure', { message: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في الخادم' });
   }
 });
 

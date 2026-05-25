@@ -49,6 +49,8 @@ const THRESHOLDS = Object.freeze({
   'safeguarding.openConcerns': { warning: 0, critical: 3 }, // strict: any open safeguarding concern is a warning
   // W372 (Operational safety — bridges W359 AssistiveDevice onto the heatmap)
   'assistiveDevice.maintenanceOverdue': { warning: 0, critical: 5 }, // strict: an overdue device may be unsafe
+  // W374 (Accreditation compliance — bridges W360 CbahiAttestation onto the heatmap)
+  'cbahi.attestationsExpiringSoon': { warning: 0, critical: 5 }, // strict: any attestation expiring in next 30 days needs action
 });
 
 // Terminal-statuses sets (mirror config/{rca,fmea}.registry.js TERMINAL_STATUSES).
@@ -61,6 +63,10 @@ const SEIZURE_OPEN_STATUS = 'recorded';
 // W371 — SafeguardingConcern has 7-state lifecycle; "closed" or "unsubstantiated" are terminal.
 // Anything else (reported / triaged / investigating / substantiated / escalated_to_authority) is open.
 const SAFEGUARDING_CLOSED_STATUSES = Object.freeze(['closed', 'unsubstantiated']);
+// W374 — CbahiAttestation STATUSES = [draft, met, partially_met, not_met, not_applicable].
+// Active = met|partially_met|not_met (something was assessed; draft/n_a aren't tracked for expiry).
+const CBAHI_ACTIVE_STATUSES = Object.freeze(['met', 'partially_met', 'not_met']);
+const CBAHI_EXPIRY_WINDOW_DAYS = 30;
 
 const SEVERITY_RANK = Object.freeze({ ok: 0, warning: 1, critical: 2 });
 
@@ -168,6 +174,17 @@ function createBranchQualityHeatmapService(opts = {}) {
     } catch {
       require('../../models/AssistiveDevice');
       return mongoose.model('AssistiveDevice');
+    }
+  }
+
+  function _CbahiModel() {
+    if (opts.cbahiModel) return opts.cbahiModel;
+    const mongoose = require('mongoose');
+    try {
+      return mongoose.model('CbahiAttestation');
+    } catch {
+      require('../../models/CbahiAttestation');
+      return mongoose.model('CbahiAttestation');
     }
   }
 
@@ -330,6 +347,24 @@ function createBranchQualityHeatmapService(opts = {}) {
     return Safeguarding.aggregate(pipeline);
   }
 
+  async function _cbahiMetricsByBranch({ branchIds, now }) {
+    const Cbahi = _CbahiModel();
+    // Expiring soon = active status AND nextReassessmentDue in the next 30 days.
+    // null nextReassessmentDue → not yet scheduled, excluded (separate signal).
+    const windowEnd = new Date(now);
+    windowEnd.setDate(windowEnd.getDate() + CBAHI_EXPIRY_WINDOW_DAYS);
+    const match = {
+      status: { $in: CBAHI_ACTIVE_STATUSES },
+      nextReassessmentDue: { $ne: null, $gte: now, $lte: windowEnd },
+    };
+    if (branchIds?.length) match.branchId = { $in: branchIds };
+    const pipeline = [
+      { $match: match },
+      { $group: { _id: '$branchId', expiringCount: { $sum: 1 } } },
+    ];
+    return Cbahi.aggregate(pipeline);
+  }
+
   async function _assistiveDeviceMetricsByBranch({ branchIds, now }) {
     const Device = _AssistiveDeviceModel();
     // Overdue = nextMaintenanceDue is set AND in the past AND device is not retired.
@@ -356,6 +391,7 @@ function createBranchQualityHeatmapService(opts = {}) {
     let seizureRows = [];
     let safeguardingRows = [];
     let assistiveDeviceRows = [];
+    let cbahiRows = [];
     try {
       capaRows = await _capaMetricsByBranch({ branchIds, now });
     } catch (err) {
@@ -396,6 +432,11 @@ function createBranchQualityHeatmapService(opts = {}) {
     } catch (err) {
       logger.warn?.(`[branchQualityHeatmap] assistive-device aggregation failed: ${err.message}`);
     }
+    try {
+      cbahiRows = await _cbahiMetricsByBranch({ branchIds, now });
+    } catch (err) {
+      logger.warn?.(`[branchQualityHeatmap] cbahi aggregation failed: ${err.message}`);
+    }
 
     // Merge by branchId
     const byBranch = new Map();
@@ -416,6 +457,7 @@ function createBranchQualityHeatmapService(opts = {}) {
             'seizures.openEvents': null,
             'safeguarding.openConcerns': null,
             'assistiveDevice.maintenanceOverdue': null,
+            'cbahi.attestationsExpiringSoon': null,
           },
         });
       }
@@ -458,6 +500,13 @@ function createBranchQualityHeatmapService(opts = {}) {
       b.cells['assistiveDevice.maintenanceOverdue'] = _cell(
         'assistiveDevice.maintenanceOverdue',
         r.overdueCount
+      );
+    }
+    for (const r of cbahiRows) {
+      const b = _ensure(r._id);
+      b.cells['cbahi.attestationsExpiringSoon'] = _cell(
+        'cbahi.attestationsExpiringSoon',
+        r.expiringCount
       );
     }
 

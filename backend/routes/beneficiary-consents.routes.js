@@ -54,6 +54,7 @@
 'use strict';
 
 const express = require('express');
+const { assertBeneficiaryInScope } = require('../utils/beneficiaryBranchGate');
 
 function asyncHandler(fn) {
   return (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
@@ -106,6 +107,12 @@ function createConsentRouter(deps = {}) {
           error: { code: 'BENEFICIARY_ID_REQUIRED', message: 'beneficiaryId is required' },
         });
       }
+      // Branch gate via parent beneficiary. Without this, any staff
+      // could enumerate PDPL consents for any beneficiary across all
+      // branches — including the "did this person consent to research?"
+      // bit that determines what we can do with their data.
+      const denied = await assertBeneficiaryInScope(req, beneficiaryId, res);
+      if (denied) return;
       const docs = await Consent.find({ beneficiaryId }).sort({ grantedAt: -1 }).lean();
       return res.status(200).json({ data: docs.map(toConsentRecord) });
     })
@@ -121,6 +128,11 @@ function createConsentRouter(deps = {}) {
           error: { code: 'BENEFICIARY_ID_REQUIRED', message: 'beneficiaryId is required' },
         });
       }
+      // Branch gate — without this, a foreign-branch staff could FORGE
+      // a consent (e.g. add a `research` consent that never existed,
+      // unlocking downstream usage of the data they shouldn't have).
+      const denied = await assertBeneficiaryInScope(req, beneficiaryId, res);
+      if (denied) return;
       const body = req.body || {};
       if (!consentTypes.includes(body.type)) {
         return res.status(400).json({
@@ -166,6 +178,11 @@ function createConsentRouter(deps = {}) {
           },
         });
       }
+      // Branch gate — revoking another branch's consent is also a
+      // PDPL violation in the opposite direction (data the user did
+      // consent to using is now flagged as withdrawn).
+      const denied = await assertBeneficiaryInScope(req, beneficiaryId, res);
+      if (denied) return;
       const body = req.body || {};
       const doc = await Consent.findOne({ _id: consentId, beneficiaryId });
       if (!doc) {
@@ -201,6 +218,11 @@ function createConsentRouter(deps = {}) {
           error: { code: 'BENEFICIARY_ID_REQUIRED', message: 'beneficiaryId is required' },
         });
       }
+      // Branch gate — consent-tracking flag is the master PDPL switch
+      // for this beneficiary; reading or flipping it across branches
+      // would let any staff probe or sabotage tracking elsewhere.
+      const denied = await assertBeneficiaryInScope(req, beneficiaryId, res);
+      if (denied) return;
       const doc = await Beneficiary.findById(beneficiaryId, 'consentTrackingEnabled').lean();
       if (!doc) {
         return res.status(404).json({
@@ -238,6 +260,10 @@ function createConsentRouter(deps = {}) {
           },
         });
       }
+      // Branch gate — PATCH on a foreign-branch beneficiary's consent-
+      // tracking flag could silently disable PDPL enforcement for them.
+      const denied = await assertBeneficiaryInScope(req, beneficiaryId, res);
+      if (denied) return;
       const updated = await Beneficiary.findByIdAndUpdate(
         beneficiaryId,
         { $set: { consentTrackingEnabled: enabled } },

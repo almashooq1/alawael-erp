@@ -1414,9 +1414,17 @@ router.get(
   '/report/full/:beneficiaryId',
   authenticateToken,
   requireBranchAccess,
-  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const { beneficiaryId } = req.params;
+    // Branch gate — full assessment report aggregates 10× each of
+    // every assessment type for the beneficiary (ADL, ICF, behavioral,
+    // etc). Without this, a foreign-branch staff could pull a complete
+    // clinical profile for any beneficiary across all branches. The
+    // duplicate `requireBranchAccess` (typo from W407 era) is also
+    // collapsed here since the second pass was a no-op.
+    const { assertBeneficiaryInScope } = require('../utils/beneficiaryBranchGate');
+    const denied = await assertBeneficiaryInScope(req, beneficiaryId, res);
+    if (denied) return;
     const allAssessments = {};
 
     for (const [type, Model] of Object.entries(ASSESSMENT_MODELS)) {

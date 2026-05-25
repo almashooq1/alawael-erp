@@ -26,6 +26,7 @@ const Guardian = require('../models/Guardian');
 const Beneficiary = require('../models/Beneficiary');
 const { authenticateToken } = require('../middleware/auth.middleware');
 const { escapeRegex } = require('../utils/sanitize');
+const { assertBeneficiaryInScope } = require('../utils/beneficiaryBranchGate');
 
 // ─── دوال مساعدة ──────────────────────────────────────────────────────────────
 const ok = (res, data, meta = {}) => res.json({ success: true, ...meta, data });
@@ -331,6 +332,12 @@ router.post('/:id/link', validateId, async (req, res) => {
       return fail(res, 'معرّف المستفيد غير صحيح', 422);
     }
 
+    // Branch gate — linking a guardian to a foreign-branch beneficiary
+    // would let a staff member in branch A grant a parent access to
+    // PHI from branch B (via parent-portal). Uniform 404 on out-of-scope.
+    const denied = await assertBeneficiaryInScope(req, beneficiaryId, res);
+    if (denied) return;
+
     const [guardian, beneficiary] = await Promise.all([
       Guardian.findById(req.params.id).lean(),
       Beneficiary.findById(beneficiaryId),
@@ -377,6 +384,11 @@ router.delete('/:id/unlink/:beneficiaryId', validateId, async (req, res) => {
   try {
     const { beneficiaryId } = req.params;
     if (!isValidId(beneficiaryId)) return fail(res, 'معرّف المستفيد غير صحيح', 400);
+
+    // Branch gate — unlinking a guardian from a foreign-branch
+    // beneficiary is the mirror PDPL violation of /link above.
+    const denied = await assertBeneficiaryInScope(req, beneficiaryId, res);
+    if (denied) return;
 
     const beneficiary = await Beneficiary.findById(beneficiaryId);
     if (!beneficiary) return fail(res, 'المستفيد غير موجود', 404);

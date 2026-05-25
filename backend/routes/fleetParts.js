@@ -72,17 +72,47 @@ router.patch(
     try {
       const FleetPart = require('../models/Fleet/FleetPart');
       const { quantity = 1, vehicleId, notes } = req.body;
-      const part = await FleetPart.findById(req.params.id);
-      if (!part) return res.status(404).json({ success: false, message: 'Part not found' });
-      if (part.quantity < quantity) {
-        return res
-          .status(400)
-          .json({ success: false, message: `Insufficient stock: only ${part.quantity} available` });
+      const qty = Number(quantity);
+      if (!Number.isFinite(qty) || qty < 1) {
+        return res.status(400).json({ success: false, message: 'Invalid quantity' });
       }
-      part.quantity -= quantity;
-      part.usageLogs = part.usageLogs || [];
-      part.usageLogs.push({ quantity, vehicleId, notes, usedAt: new Date(), usedBy: req.user._id });
-      await part.save();
+      // Atomic stock-check + decrement + log push. The previous
+      // `findById` → `if (part.quantity < quantity)` → `part.quantity -=
+      // quantity` → `save()` pattern was racy: two concurrent /use
+      // requests for stock=15 with qty=10 each both read 15, both
+      // pass the check, both deduct, both save → final stock would be
+      // 5 instead of failing the second request, or worse, settle to a
+      // negative value depending on Mongoose `__v` versioning state.
+      // findOneAndUpdate with `quantity: {$gte: qty}` in the filter
+      // makes the check-and-decrement a single Mongo op; if stock is
+      // insufficient the update simply doesn't match (null result).
+      const part = await FleetPart.findOneAndUpdate(
+        { _id: req.params.id, quantity: { $gte: qty } },
+        {
+          $inc: { quantity: -qty },
+          $push: {
+            usageLogs: {
+              quantity: qty,
+              vehicleId,
+              notes,
+              usedAt: new Date(),
+              usedBy: req.user._id,
+            },
+          },
+        },
+        { new: true }
+      );
+      if (!part) {
+        // Either the part doesn't exist OR it exists with quantity<qty.
+        // Re-read the latest quantity (no race here — we're not mutating)
+        // to give the caller an actionable message.
+        const current = await FleetPart.findById(req.params.id).select('quantity').lean();
+        if (!current) return res.status(404).json({ success: false, message: 'Part not found' });
+        return res.status(400).json({
+          success: false,
+          message: `Insufficient stock: only ${current.quantity} available`,
+        });
+      }
       res.json({ success: true, data: part });
     } catch (err) {
       res.status(400).json({ success: false, message: err.message });

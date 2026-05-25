@@ -164,16 +164,21 @@ async function linkTawakkalna(payload) {
 }
 
 function getConfig() {
+  // Compute missing env vars for live mode (preflight-compatible shape).
+  const missing = [];
+  if (isLive()) {
+    if (!process.env.SEHHATY_BASE_URL) missing.push('SEHHATY_BASE_URL');
+    if (!process.env.SEHHATY_CLIENT_ID) missing.push('SEHHATY_CLIENT_ID');
+    if (!process.env.SEHHATY_CLIENT_SECRET) missing.push('SEHHATY_CLIENT_SECRET');
+    if (!process.env.SEHHATY_CENTER_ID) missing.push('SEHHATY_CENTER_ID');
+  }
   return {
+    provider: 'sehhaty',
     mode: MODE,
-    liveConfigured: isLive()
-      ? !!(
-          process.env.SEHHATY_BASE_URL &&
-          process.env.SEHHATY_CLIENT_ID &&
-          process.env.SEHHATY_CLIENT_SECRET &&
-          process.env.SEHHATY_CENTER_ID
-        )
-      : null,
+    configured: isLive() ? missing.length === 0 : true,
+    missing: missing.length ? missing : undefined,
+    // Retained for backward compatibility with existing callers.
+    liveConfigured: isLive() ? missing.length === 0 : null,
     // CRITICAL: consent check is the SERVICE layer's responsibility, not adapter's.
     // The adapter trusts that the caller has validated consent before invoking.
     consentRequirement: 'health_summary_import (enforced at service layer)',

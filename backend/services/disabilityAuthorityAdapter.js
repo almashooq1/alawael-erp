@@ -200,16 +200,21 @@ async function submitPeriodicReport(payload) {
 }
 
 function getConfig() {
+  // Compute missing env vars for live mode (preflight-compatible shape).
+  const missing = [];
+  if (isLive()) {
+    if (!process.env.DISABILITY_AUTHORITY_BASE_URL) missing.push('DISABILITY_AUTHORITY_BASE_URL');
+    if (!process.env.DISABILITY_AUTHORITY_API_KEY) missing.push('DISABILITY_AUTHORITY_API_KEY');
+    if (!process.env.DISABILITY_AUTHORITY_CENTER_ID) missing.push('DISABILITY_AUTHORITY_CENTER_ID');
+  }
   return {
+    provider: 'disabilityAuthority',
     mode: MODE,
+    configured: isLive() ? missing.length === 0 : true,
+    missing: missing.length ? missing : undefined,
     referralTtlMs: REFERRAL_TTL_MS,
-    liveConfigured: isLive()
-      ? !!(
-          process.env.DISABILITY_AUTHORITY_BASE_URL &&
-          process.env.DISABILITY_AUTHORITY_API_KEY &&
-          process.env.DISABILITY_AUTHORITY_CENTER_ID
-        )
-      : null,
+    // Retained for backward compatibility with existing callers.
+    liveConfigured: isLive() ? missing.length === 0 : null,
   };
 }
 

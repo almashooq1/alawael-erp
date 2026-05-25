@@ -89,4 +89,86 @@ describe('preflight script — exit code contract', () => {
     const names = parsed.live.misconfigured.map(x => x.name).sort();
     expect(names).toEqual(['absher', 'gosi', 'nphies']);
   });
+
+  // ─────────────────────────────────────────────────────────────────────
+  // Phase 3 cron-readiness gates (W286 DA cron stub-builder + W284d Speech
+  // S3 PDPL). These are deploy-time checks that mirror the env-flag
+  // readiness table in PRODUCTION_GAPS_BEFORE_LIVE.md §7.
+  // ─────────────────────────────────────────────────────────────────────
+  describe('Phase 3 cron-readiness gates', () => {
+    it('disabilityAuthority + sehhaty are checked alongside the 10 gov providers', () => {
+      // In default mock mode, both should appear in JSON output.
+      const r = runPreflight({}, ['--json']);
+      expect(r.status).toBe(0);
+      const parsed = JSON.parse(r.stdout);
+      expect(parsed.mock).toEqual(expect.arrayContaining(['disabilityAuthority', 'sehhaty']));
+    });
+
+    it('disabilityAuthority in live mode without creds → preflight FAIL', () => {
+      const r = runPreflight(
+        { DISABILITY_AUTHORITY_MODE: 'live' /* no BASE_URL/API_KEY/CENTER_ID */ },
+        ['--json']
+      );
+      expect(r.status).toBe(1);
+      const parsed = JSON.parse(r.stdout);
+      const da = parsed.live.misconfigured.find(x => x.name === 'disabilityAuthority');
+      expect(da).toBeTruthy();
+      expect(da.missing).toEqual(
+        expect.arrayContaining([
+          'DISABILITY_AUTHORITY_BASE_URL',
+          'DISABILITY_AUTHORITY_API_KEY',
+          'DISABILITY_AUTHORITY_CENTER_ID',
+        ])
+      );
+    });
+
+    it('DA cron enabled + live mode + stub builder still in bootstrap → cronFailure', () => {
+      // Bootstrap source still contains `note: adapter.STUB_PAYLOAD_MARKER`
+      // (this commit) so the gate trips.
+      const r = runPreflight(
+        {
+          DISABILITY_AUTHORITY_MODE: 'live',
+          DISABILITY_AUTHORITY_BASE_URL: 'https://sandbox.example.sa',
+          DISABILITY_AUTHORITY_API_KEY: 'k',
+          DISABILITY_AUTHORITY_CENTER_ID: 'c',
+          ENABLE_DA_PERIODIC_CRON: 'true',
+        },
+        ['--json']
+      );
+      expect(r.status).toBe(1);
+      const parsed = JSON.parse(r.stdout);
+      const cron = parsed.cronFailures.find(f => f.name === 'da-periodic-cron');
+      expect(cron).toBeTruthy();
+      expect(cron.reason).toMatch(/stub builder|STUB_PAYLOAD_MARKER/i);
+    });
+
+    it('Speech retention cron enabled + AWS SDK missing → cronFailure', () => {
+      // @aws-sdk/client-s3 is intentionally NOT in package.json (W284d
+      // design — install per-env). So enabling the cron always trips
+      // this gate until an ops install happens.
+      const r = runPreflight({ ENABLE_SPEECH_RETENTION_CRON: 'true' }, ['--json']);
+      expect(r.status).toBe(1);
+      const parsed = JSON.parse(r.stdout);
+      const cron = parsed.cronFailures.find(f => f.name === 'speech-retention-cron');
+      expect(cron).toBeTruthy();
+      expect(cron.reason).toMatch(/@aws-sdk\/client-s3|AWS_REGION/);
+    });
+
+    it('DA cron disabled OR DA mock → no cronFailure regardless of stub builder', () => {
+      // Default state: ENABLE_DA_PERIODIC_CRON unset → gate does not fire.
+      const r = runPreflight({}, ['--json']);
+      const parsed = JSON.parse(r.stdout);
+      expect(parsed.cronFailures.find(f => f.name === 'da-periodic-cron')).toBeFalsy();
+      // Cron enabled but mock mode → also no failure.
+      const r2 = runPreflight({ ENABLE_DA_PERIODIC_CRON: 'true' }, ['--json']);
+      const parsed2 = JSON.parse(r2.stdout);
+      expect(parsed2.cronFailures.find(f => f.name === 'da-periodic-cron')).toBeFalsy();
+    });
+
+    it('CI_PREFLIGHT compact stderr mentions cron-readiness failures', () => {
+      const r = runPreflight({ ENABLE_SPEECH_RETENTION_CRON: 'true', CI_PREFLIGHT: '1' });
+      expect(r.status).toBe(1);
+      expect(r.stderr).toMatch(/cron-readiness: speech-retention-cron/);
+    });
+  });
 });

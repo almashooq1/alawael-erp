@@ -114,7 +114,7 @@
 | `/api/facility-asset`         | أصول المنشأة — مصاعد/منحدرات/إنذار/أوكسجين + PPM (W369)              |
 | `/api/caregiver-support`      | برامج دعم مقدمي الرعاية — Zarit pre/post + sessions (W384)           |
 
-> 📑 **W356-W385 Series Doc**: `docs/architecture/PRODUCTION_CUTOVER_W356_W370.md` is the ops checklist (11 ENV flags + 12 role names + cutover verification). See `CLAUDE.md` "W356–W376 Clinical Services Series" section for the full pattern recap. W384 added caregiver-support; W385 wired it into the `/clinical-services/[id]` aggregator (8 surfaces).
+> 📑 **W356-W390 Series Doc**: `docs/architecture/PRODUCTION_CUTOVER_W356_W370.md` is the ops checklist (11 ENV flags + 12 role names + cutover verification). See `CLAUDE.md` "W356–W376 Clinical Services Series" section for the full pattern recap. W384 added caregiver-support; W390 wired it into the `/clinical-services/[id]` aggregator (8 surfaces). Note: W381/W383/W384/W385/W386/W387/W388/W389 collide with a parallel agent session — see CLAUDE.md "Wave numbers consumed" line.
 
 ### 🤖 7. الذكاء الاصطناعي (AI/ML)
 

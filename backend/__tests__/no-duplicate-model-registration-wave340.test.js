@@ -167,8 +167,11 @@ const KNOWN_DUPLICATE_REGISTRATIONS = new Set([
   //       Pattern D rename per ADR-021 (e.g. `Vehicle` → `TransportVehicle`).
   'Beneficiary', // models/Beneficiary.js + vehicles/rehabilitation-transport-service.js — HIGH severity (Beneficiary is the canonical-per-CLAUDE.md entity)
   'EmailLog', // communication/email-models.js + communication/email-service.js (same-domain pair)
-  'Permission', // models/RBAC/Permission.js + permissions/permission-service.js
-  'Role', // models/RBAC/Role.js + permissions/permission-service.js
+  // 'Permission' — CONSOLIDATED 2026-05-25 (empty-shim batch): rich schema migrated
+  //                from permissions/permission-service.js to models/RBAC/Permission.js
+  //                (was strict:false placeholder). Service now does mongoose.model()
+  //                lookup. Per TIER2_AUDIT Cycle 6 empty-shim pattern.
+  // 'Role'       — CONSOLIDATED 2026-05-25 (empty-shim batch): same path as Permission.
   'TrafficAccident', // models/Traffic/TrafficAccident.js + vehicles/saudi-traffic-service.js
   'TransportRoute', // models/TransportRoute.js + vehicles/rehabilitation-transport-service.js
   'Vehicle', // models/Vehicle.js + vehicles/vehicle-service.js

@@ -45,97 +45,15 @@ const permissionConfig = {
 };
 
 /**
- * Permission Schema
+ * Permission + Role schemas — migrated to canonical models/RBAC/{Permission,Role}.js
+ * per the empty-shim pattern (Cycle 6 TIER2_AUDIT + canonical-location-pattern §
+ * "Exception: the empty-shim pattern"). The local connection.model registrations
+ * below replaced with mongoose.model() lookups against the now-rich canonical files.
+ * Keeping permissionConfig here since it's used by other service methods (defaults,
+ * cache TTL, inheritance maxDepth) — only the schema definitions moved.
  */
-const PermissionSchema = new mongoose.Schema(
-  {
-    // Permission identification
-    key: { type: String, required: true, unique: true },
-    name: { type: String, required: true },
-    description: String,
-    category: { type: String, default: 'general' },
-
-    // Permission details
-    type: { type: String, enum: Object.keys(permissionConfig.types), default: 'read' },
-    level: { type: Number, default: 1 },
-
-    // Resource
-    resource: {
-      type: { type: String }, // module, feature, data, api
-      module: String,
-      action: String,
-      conditions: mongoose.Schema.Types.Mixed,
-    },
-
-    // Hierarchy
-    parent: { type: mongoose.Schema.Types.ObjectId, ref: 'Permission' },
-    children: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Permission' }],
-
-    // Metadata
-    isSystem: { type: Boolean, default: false },
-    isActive: { type: Boolean, default: true },
-
-    // Timestamps
-    createdAt: { type: Date, default: Date.now },
-    updatedAt: Date,
-  },
-  {
-    collection: 'permissions',
-  }
-);
-
-/**
- * Role Schema
- */
-const RoleSchema = new mongoose.Schema(
-  {
-    // Role identification
-    key: { type: String, required: true, unique: true },
-    name: { type: String, required: true },
-    description: String,
-
-    // Permissions
-    permissions: [
-      {
-        permission: { type: mongoose.Schema.Types.ObjectId, ref: 'Permission' },
-        level: { type: Number, default: 1 },
-        conditions: mongoose.Schema.Types.Mixed,
-        grantedAt: { type: Date, default: Date.now },
-        grantedBy: String,
-      },
-    ],
-
-    // Inheritance
-    inherits: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Role' }],
-
-    // Scope
-    scope: {
-      type: {
-        type: String,
-        enum: ['global', 'tenant', 'department', 'team', 'custom'],
-        default: 'tenant',
-      },
-      value: String,
-    },
-
-    // Hierarchy level
-    level: { type: Number, default: 0 },
-
-    // Metadata
-    isSystem: { type: Boolean, default: false },
-    isActive: { type: Boolean, default: true },
-
-    // Tenant
-    tenantId: String,
-
-    // Timestamps
-    createdAt: { type: Date, default: Date.now },
-    updatedAt: Date,
-  },
-  {
-    collection: 'roles',
-  }
-);
+require('../models/RBAC/Permission');
+require('../models/RBAC/Role');
 
 /**
  * User Permission Schema
@@ -239,8 +157,12 @@ class AdvancedPermissionService {
    * Initialize service
    */
   async initialize(connection) {
-    this.Permission = connection.model('Permission', PermissionSchema);
-    this.Role = connection.model('Role', RoleSchema);
+    // Permission + Role: lookup from canonical models/RBAC/{Permission,Role}.js
+    // (loaded via require at top of file; the schema is already registered).
+    // The empty-shim consolidation per TIER2_AUDIT Cycle 6+8 means there's
+    // exactly one registration site for each — this canonical.
+    this.Permission = mongoose.model('Permission');
+    this.Role = mongoose.model('Role');
     this.UserPermission = connection.model('UserPermission', UserPermissionSchema);
     this.PermissionCheckLog = connection.model('PermissionCheckLog', PermissionCheckLogSchema);
 

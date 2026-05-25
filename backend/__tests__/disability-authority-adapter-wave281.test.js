@@ -144,4 +144,89 @@ describe('W281 — Disability Authority adapter', () => {
       expect(k3).not.toBe(k1);
     });
   });
+
+  // ─────────────────────────────────────────────────────────────────────
+  // Live-mode stub-payload safety guard (post-W286 follow-up).
+  //
+  // Risk this guard protects against: a future operator flips
+  // DISABILITY_AUTHORITY_MODE=live + ENABLE_DA_PERIODIC_CRON=true BEFORE
+  // replacing the bootstrap's stub payload builder with real production
+  // metrics. Without the guard, the cron would build a `{ note: 'stub-
+  // payload — …' }` payload and POST it to the live Disability Authority
+  // endpoint — a reputational incident waiting to happen. The guard
+  // refuses any submitPeriodicReport call carrying STUB_PAYLOAD_MARKER
+  // when MODE=live; mock mode is unaffected (passes through, prints
+  // submissionId so dev cycles work normally).
+  // ─────────────────────────────────────────────────────────────────────
+  describe('stub-payload safety guard', () => {
+    it('exposes STUB_PAYLOAD_MARKER constant for bootstrap reuse', () => {
+      expect(typeof adapter.STUB_PAYLOAD_MARKER).toBe('string');
+      expect(adapter.STUB_PAYLOAD_MARKER).toContain('stub-payload');
+      expect(adapter._STUB_PAYLOAD_MARKER).toBe(adapter.STUB_PAYLOAD_MARKER);
+    });
+
+    it('bootstrap source references adapter.STUB_PAYLOAD_MARKER (single source of truth)', () => {
+      const fs = require('fs');
+      const path = require('path');
+      const src = fs.readFileSync(
+        path.join(__dirname, '..', 'startup', 'disabilityAuthorityBootstrap.js'),
+        'utf8'
+      );
+      expect(src).toMatch(/note:\s*adapter\.STUB_PAYLOAD_MARKER/);
+      // And: the literal marker string is NOT inlined elsewhere in the
+      // bootstrap (would defeat the SoT pattern).
+      const inlineHits =
+        src.match(/'stub-payload [—-] wire production builder before live'/g) || [];
+      expect(inlineHits.length).toBe(0);
+    });
+
+    it('mock mode passes stub payload through (unchanged dev behaviour)', async () => {
+      const result = await adapter.submitPeriodicReport({
+        reportNumber: 'RPT-STUB-MOCK',
+        period: { startDate: new Date('2026-05-01'), endDate: new Date('2026-05-31') },
+        payload: { branchId: 'b1', note: adapter.STUB_PAYLOAD_MARKER },
+      });
+      expect(result.submissionId).toMatch(/^da-/);
+    });
+
+    it('live mode REFUSES stub payload with DA_STUB_PAYLOAD_REJECTED', async () => {
+      const orig = process.env.DISABILITY_AUTHORITY_MODE;
+      process.env.DISABILITY_AUTHORITY_MODE = 'live';
+      jest.resetModules();
+      try {
+        const aLive = require('../services/disabilityAuthorityAdapter');
+        await expect(
+          aLive.submitPeriodicReport({
+            reportNumber: 'RPT-STUB-LIVE',
+            period: { startDate: new Date('2026-05-01'), endDate: new Date('2026-05-31') },
+            payload: { branchId: 'b1', note: aLive.STUB_PAYLOAD_MARKER },
+          })
+        ).rejects.toMatchObject({ code: 'DA_STUB_PAYLOAD_REJECTED' });
+      } finally {
+        if (orig === undefined) delete process.env.DISABILITY_AUTHORITY_MODE;
+        else process.env.DISABILITY_AUTHORITY_MODE = orig;
+        jest.resetModules();
+      }
+    });
+
+    it('live mode allows NON-stub payload (would hit liveSubmitReport → DA_LIVE_NOT_CONFIGURED until real impl)', async () => {
+      const orig = process.env.DISABILITY_AUTHORITY_MODE;
+      process.env.DISABILITY_AUTHORITY_MODE = 'live';
+      jest.resetModules();
+      try {
+        const aLive = require('../services/disabilityAuthorityAdapter');
+        await expect(
+          aLive.submitPeriodicReport({
+            reportNumber: 'RPT-REAL-LIVE',
+            period: { startDate: new Date('2026-05-01'), endDate: new Date('2026-05-31') },
+            payload: { branchId: 'b1', services: 100, beneficiaries: 50 }, // no stub marker
+          })
+        ).rejects.toMatchObject({ code: 'DA_LIVE_NOT_CONFIGURED' });
+      } finally {
+        if (orig === undefined) delete process.env.DISABILITY_AUTHORITY_MODE;
+        else process.env.DISABILITY_AUTHORITY_MODE = orig;
+        jest.resetModules();
+      }
+    });
+  });
 });

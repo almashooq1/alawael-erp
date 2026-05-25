@@ -102,12 +102,16 @@ function wireDisabilityAuthority(app, deps = {}) {
           try {
             // Stub payload — production should build real metrics from
             // DisabilityAuthorityReport + Beneficiary + Session models.
+            // The `note` field uses adapter.STUB_PAYLOAD_MARKER so that the
+            // adapter's safety guard (submitPeriodicReport) refuses to submit
+            // this payload if MODE=live is flipped before the real builder
+            // lands. Single source of truth for the marker string.
             const reportNumber = `RPT-${branchId}-${periodStart.toISOString().slice(0, 7)}`;
             const payload = {
               branchId,
               period: { start: periodStart.toISOString(), end: periodEnd.toISOString() },
               reportType: 'monthly_service',
-              note: 'stub-payload — wire production builder before live',
+              note: adapter.STUB_PAYLOAD_MARKER,
             };
             const result = await adapter.submitPeriodicReport({
               reportNumber,

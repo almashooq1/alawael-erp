@@ -28,6 +28,12 @@ const crypto = require('crypto');
 const MODE = (process.env.DISABILITY_AUTHORITY_MODE || 'mock').toLowerCase();
 const REFERRAL_TTL_MS = 24 * 60 * 60 * 1000; // 24h freshness for referral inbox
 
+// Single source of truth for the stub-payload tag. Bootstrap stamps every
+// generated cron payload with `note: STUB_PAYLOAD_MARKER`. submitPeriodicReport
+// refuses to send any payload carrying this marker when MODE=live — better
+// an early-fail alert than placeholder data reaching the live DA endpoint.
+const STUB_PAYLOAD_MARKER = 'stub-payload — wire production builder before live';
+
 function isLive() {
   return MODE === 'live';
 }
@@ -153,6 +159,22 @@ async function pullReferralInbox(payload) {
 }
 
 async function submitPeriodicReport(payload) {
+  // SAFETY GUARD (post-W286): bootstrap's stub payload builder stamps
+  // every generated payload with `note: STUB_PAYLOAD_MARKER`. If somebody
+  // flips DISABILITY_AUTHORITY_MODE=live before replacing the stub builder
+  // with production metrics, refuse to submit. Better a noisy alert than
+  // placeholder data reaching the live Disability Authority endpoint.
+  if (isLive() && payload && payload.payload && payload.payload.note === STUB_PAYLOAD_MARKER) {
+    throw Object.assign(
+      new Error(
+        'Refusing to submit stub payload to live Disability Authority. ' +
+          'Replace the stub builder in startup/disabilityAuthorityBootstrap.js ' +
+          'with production metrics (from DisabilityAuthorityReport + Beneficiary + ' +
+          'Session models) before enabling DISABILITY_AUTHORITY_MODE=live.'
+      ),
+      { code: 'DA_STUB_PAYLOAD_REJECTED' }
+    );
+  }
   // W312: emit gov.report.submission counter regardless of mode (mock/live).
   let _rm;
   try {
@@ -196,7 +218,10 @@ module.exports = {
   pullReferralInbox,
   submitPeriodicReport,
   getConfig,
+  // Shared constants
+  STUB_PAYLOAD_MARKER,
   // For tests
   _idempotencyKey: idempotencyKey,
   _MOCK_CLASSIFICATIONS: MOCK_CLASSIFICATIONS,
+  _STUB_PAYLOAD_MARKER: STUB_PAYLOAD_MARKER,
 };

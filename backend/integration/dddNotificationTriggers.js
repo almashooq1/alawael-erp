@@ -4,16 +4,17 @@
  * Listens to DDD domain events and dispatches notifications via
  * the existing notification system (push, SMS, email, in-app).
  *
- * Notification rules:
+ * Notification rules (7 live; #3 #8 #9 deleted W407 — W377 removed their
+ * underlying DDD contracts):
  *  1. Beneficiary registered → admin + clinical team notification
  *  2. Episode phase transition → assigned therapist + supervisor
- *  3. Session no-show → therapist + supervisor + family
+ *  3. (deleted) Session no-show — sessions.session.no_show contract removed
  *  4. Assessment overdue → assigned clinician + quality team
  *  5. Goal achieved → family + supervisor
  *  6. Risk elevated → clinical director + assigned team
  *  7. Quality corrective action → assignee + manager
- *  8. Decision alert → executive + relevant dept
- *  9. AR/VR safety alert → therapist + medical team
+ *  8. (deleted) Decision alert — dashboards group removed
+ *  9. (deleted) AR/VR safety alert — ar-vr group removed
  * 10. Behavior incident → behavior team + family + therapist
  *
  * @module integration/dddNotificationTriggers
@@ -104,28 +105,11 @@ function initializeDDDNotifications(integrationBus) {
     },
   });
 
-  // ── 3. Session no-show ─────────────────────────────────────────────
-  triggers.push({
-    pattern: 'sessions.session.no_show',
-    handler: async event => {
-      const isCritical = event.payload.consecutiveNoShows >= 3;
-      await dispatch({
-        title: `عدم حضور جلسة${isCritical ? ' (متكرر!)' : ''}`,
-        titleEn: `Session No-Show${isCritical ? ' (Repeated!)' : ''}`,
-        message: `المستفيد لم يحضر الجلسة (${event.payload.consecutiveNoShows} مرات متتالية)`,
-        type: isCritical ? 'error' : 'warning',
-        category: 'session',
-        priority: isCritical ? 'urgent' : 'high',
-        roles: ['therapist', 'supervisor'],
-        data: {
-          sessionId: event.payload.sessionId,
-          beneficiaryId: event.payload.beneficiaryId,
-          consecutiveNoShows: event.payload.consecutiveNoShows,
-        },
-        channel: isCritical ? ['in-app', 'push', 'sms'] : ['in-app', 'push'],
-      });
-    },
-  });
+  // ── 3. Session no-show — DELETED W407 ──────────────────────────────
+  // Handler removed: W377 deleted the `sessions.session.no_show` contract
+  // from dddEventContracts.js; this trigger was dead-on-arrival. Same
+  // precedent as W390's 4 deletions in dddCrossModuleSubscribers.js. If a
+  // future ADR re-adds the contract, re-add the handler in the same PR.
 
   // ── 4. Assessment overdue ──────────────────────────────────────────
   triggers.push({
@@ -210,44 +194,13 @@ function initializeDDDNotifications(integrationBus) {
     },
   });
 
-  // ── 8. Decision alert ──────────────────────────────────────────────
-  triggers.push({
-    pattern: 'dashboards.dashboard.alert_triggered',
-    handler: async event => {
-      await dispatch({
-        title: `تنبيه قرار: ${event.payload.rule}`,
-        titleEn: `Decision Alert: ${event.payload.rule}`,
-        message: `مؤشر أداء تجاوز الحد — القيمة: ${event.payload.kpiValue}, الحد: ${event.payload.threshold}`,
-        type: event.payload.severity === 'critical' ? 'error' : 'warning',
-        category: 'dashboard',
-        priority: event.payload.severity === 'critical' ? 'urgent' : 'high',
-        roles: ['admin', 'manager'],
-        data: { alertId: event.payload.alertId, rule: event.payload.rule },
-        channel: ['in-app', 'push'],
-      });
-    },
-  });
+  // ── 8. Decision alert — DELETED W407 ───────────────────────────────
+  // Handler removed: W377 deleted the entire `dashboards` DDD contract
+  // group. This trigger was dead-on-arrival.
 
-  // ── 9. AR/VR safety alert ──────────────────────────────────────────
-  triggers.push({
-    pattern: 'ar-vr.arvr.safety_alert',
-    handler: async event => {
-      await dispatch({
-        title: '🚨 تنبيه سلامة AR/VR',
-        titleEn: '🚨 AR/VR Safety Alert',
-        message: `تنبيه سلامة: ${event.payload.alertType} — المقياس: ${event.payload.metric}=${event.payload.value}`,
-        type: 'error',
-        category: 'safety',
-        priority: 'urgent',
-        roles: ['therapist', 'doctor', 'supervisor'],
-        data: {
-          sessionId: event.payload.sessionId,
-          beneficiaryId: event.payload.beneficiaryId,
-        },
-        channel: ['in-app', 'push', 'sms'],
-      });
-    },
-  });
+  // ── 9. AR/VR safety alert — DELETED W407 ───────────────────────────
+  // Handler removed: W377 deleted the entire `ar-vr` DDD contract group.
+  // This trigger was dead-on-arrival.
 
   // ── 10. Behavior incident ──────────────────────────────────────────
   triggers.push({

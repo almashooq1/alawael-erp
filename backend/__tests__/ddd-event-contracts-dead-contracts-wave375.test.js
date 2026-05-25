@@ -98,10 +98,8 @@ const KNOWN_DEAD_CONTRACTS = new Set([
   // core (BENEFICIARY_DDD_EVENTS) — 2 dead, 1 alive (beneficiary.registered)
   'core.STATUS_CHANGED', // beneficiary.status_changed
   'core.PROFILE_UPDATED', // beneficiary.profile_updated
-  // episodes (EPISODE_EVENTS) — 3 dead, 0 alive
-  'episodes.CREATED', // episode.created
-  'episodes.PHASE_TRANSITIONED', // episode.phase_transitioned
-  'episodes.CLOSED', // episode.closed
+  // episodes (EPISODE_EVENTS) — 0 dead, 3 alive after W379 wired producers in
+  // domains/episodes/index.js (afterCreate / advancePhase / dischargeEpisode).
   // assessments (ASSESSMENT_EVENTS) — 2 dead, 0 alive
   'assessments.COMPLETED', // assessment.completed
   'assessments.OVERDUE', // assessment.overdue

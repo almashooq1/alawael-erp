@@ -6,9 +6,17 @@ Date: 2026-05-25
 
 🟠 **Partially executed (W377, 2026-05-25). Deletions complete; wirings pending stakeholder per-group sign-off.**
 
-**W377 deletion progress** (commit pending): 16 of the 31 dead contracts deleted per the "delete" recommendations in the per-group table below. Registry shrunk from 34 events / 17 groups → **18 events / 9 groups**. W375 baseline shrunk 31 → 15.
+**W377 deletion progress** (commit `79783ab81`): 16 of the 31 dead contracts deleted per the "delete" recommendations in the per-group table below. Registry shrunk from 34 events / 17 groups → **18 events / 9 groups**. W375 baseline shrunk 31 → 15.
 
-**W378+ wiring work pending**: 15 remaining dead contracts need real producer wiring in domain services. Each requires renaming an ad-hoc `service.emit('camelCaseName', ...)` to use the contract eventType (`<domain>.<snake_case>`) + envelope shape. Per-group authorization still needed because rename touches consumers that may rely on the ad-hoc name.
+**W379 wiring progress** (commit pending): **episodes group fully wired (3 events)**. `domains/episodes/index.js` ad-hoc emits renamed to contract eventTypes with full envelopes:
+
+- `'episodeCreated'` → `'episode.created'` (afterCreate hook, payload: `{episodeId, beneficiaryId, phase}`)
+- `'phaseAdvanced'` → `'episode.phase_transitioned'` (advancePhase, payload: `{episodeId, beneficiaryId, fromPhase, toPhase, performedBy}`)
+- `'episodeDischarged'` → `'episode.closed'` (dischargeEpisode, payload: `{episodeId, beneficiaryId, outcome, durationDays}`)
+
+Safe because: pre-W379 grep confirmed **zero external subscribers** for any of these ad-hoc names — they were emit-only-no-listen. Rename moves them onto the canonical contract without breaking anything. W375 baseline shrunk 15 → 12.
+
+**W380+ wiring pending**: 12 remaining dead contracts (core 2, assessments 2, care-plans 2, goals 1, quality 2, behavior 2, ai-recommendations 1). These need ADDING new producer code (no pre-existing ad-hoc emits to rename), so each is a deeper service edit than episodes was.
 
 ### Dual-registry finding (W375 follow-up, 2026-05-25)
 

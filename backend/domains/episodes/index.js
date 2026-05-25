@@ -93,7 +93,13 @@ class EpisodeService extends BaseService {
     logger.info(
       `[EpisodeService] New episode created: ${entity.episodeNumber} for beneficiary ${entity.beneficiaryId}`
     );
-    this.emit('episodeCreated', { episodeId: entity._id, beneficiaryId: entity.beneficiaryId });
+    // W379: emit canonical contract event (was ad-hoc 'episodeCreated' pre-W379).
+    // Envelope per EPISODE_EVENTS.CREATED in events/contracts/dddEventContracts.js.
+    this.emit('episode.created', {
+      episodeId: entity._id,
+      beneficiaryId: entity.beneficiaryId,
+      phase: entity.currentPhase,
+    });
   }
 
   async getActiveEpisode(beneficiaryId) {
@@ -125,12 +131,17 @@ class EpisodeService extends BaseService {
       error.statusCode = 404;
       throw error;
     }
+    const fromPhase = episode.currentPhase;
     const result = await episode.advancePhase(userId);
     this._invalidateCache();
-    this.emit('phaseAdvanced', {
+    // W379: emit canonical contract event (was ad-hoc 'phaseAdvanced' pre-W379).
+    // Envelope per EPISODE_EVENTS.PHASE_TRANSITIONED.
+    this.emit('episode.phase_transitioned', {
       episodeId,
       beneficiaryId: episode.beneficiaryId,
-      newPhase: result.currentPhase,
+      fromPhase,
+      toPhase: result.currentPhase,
+      performedBy: userId,
     });
     return result;
   }
@@ -193,10 +204,17 @@ class EpisodeService extends BaseService {
     }
     const result = await episode.discharge(data);
     this._invalidateCache();
-    this.emit('episodeDischarged', {
+    // W379: emit canonical contract event (was ad-hoc 'episodeDischarged' pre-W379).
+    // Envelope per EPISODE_EVENTS.CLOSED. durationDays computed from startDate
+    // if available; outcome falls back to reason for backward-shape support.
+    const durationDays = episode.startDate
+      ? Math.max(0, Math.floor((Date.now() - new Date(episode.startDate).getTime()) / 86400000))
+      : null;
+    this.emit('episode.closed', {
       episodeId,
       beneficiaryId: episode.beneficiaryId,
-      reason: data.reason,
+      outcome: data.outcome || data.reason || 'completed',
+      durationDays,
     });
     return result;
   }

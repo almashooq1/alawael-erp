@@ -313,7 +313,7 @@ router.put('/opportunities/:id', requireCoordinator, async (req, res) => {
   }
 });
 
-router.delete('/opportunities/:id', async (req, res) => {
+router.delete('/opportunities/:id', requireCoordinator, async (req, res) => {
   try {
     const doc = await VolunteerOpportunity.findByIdAndUpdate(req.params.id, {
       deletedAt: new Date(),
@@ -354,7 +354,7 @@ router.get('/assignments', async (req, res) => {
   }
 });
 
-router.post('/assignments', async (req, res) => {
+router.post('/assignments', requireCoordinator, async (req, res) => {
   try {
     const { volunteerId, opportunityId, assignmentDate } = req.body;
     if (!volunteerId || !opportunityId || !assignmentDate)
@@ -424,7 +424,7 @@ router.patch('/assignments/:id/check-out', async (req, res) => {
 });
 
 // إصدار شهادة تطوع
-router.post('/assignments/:id/certificate', async (req, res) => {
+router.post('/assignments/:id/certificate', requireCoordinator, async (req, res) => {
   try {
     const assignment = await VolunteerAssignment.findById(req.params.id);
     if (!assignment) return fail(res, 'التكليف غير موجود', 404);
@@ -469,7 +469,7 @@ router.get('/training', async (req, res) => {
   }
 });
 
-router.post('/training', async (req, res) => {
+router.post('/training', requireCoordinator, async (req, res) => {
   try {
     const doc = await VolunteerTrainingSession.create({ ...req.body, uuid: uuidv4() });
     ok(res, { data: doc, message: 'تم إنشاء جلسة التدريب بنجاح' }, 201);
@@ -504,7 +504,7 @@ router.get('/recognitions', async (req, res) => {
   }
 });
 
-router.post('/recognitions', async (req, res) => {
+router.post('/recognitions', requireCoordinator, async (req, res) => {
   try {
     const required = ['volunteerId', 'awardType', 'title', 'awardedDate'];
     const missing = required.filter(f => !req.body[f]);

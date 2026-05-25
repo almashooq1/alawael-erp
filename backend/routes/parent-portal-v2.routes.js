@@ -623,7 +623,10 @@ router.get('/children/:id/certificates/:certId', async (req, res) => {
     if (!cert || cert.isDeleted)
       return res.status(404).json({ success: false, message: 'الشهادة غير موجودة' });
     if (cert.recipient?.nationalId !== child?.nationalId) {
-      return res.status(403).json({ success: false, message: 'الشهادة لا تخص هذا الطفل' });
+      // W412: unify with 404 — caller can't distinguish "cert exists for
+      // another child" from "doesn't exist". Matches W411 / 5ca905fde
+      // doctrine on parent-portal cross-tenant existence leaks.
+      return res.status(404).json({ success: false, message: 'الشهادة غير موجودة' });
     }
 
     const verdict = cert.hash ? await certService.verifyByHash(cert.hash) : null;
@@ -659,7 +662,10 @@ router.get('/children/:id/certificates/:certId/pdf', async (req, res) => {
     if (!cert || cert.isDeleted)
       return res.status(404).json({ success: false, message: 'الشهادة غير موجودة' });
     if (cert.recipient?.nationalId !== child?.nationalId) {
-      return res.status(403).json({ success: false, message: 'الشهادة لا تخص هذا الطفل' });
+      // W412: unify with 404 — caller can't distinguish "cert exists for
+      // another child" from "doesn't exist". Matches W411 / 5ca905fde
+      // doctrine on parent-portal cross-tenant existence leaks.
+      return res.status(404).json({ success: false, message: 'الشهادة غير موجودة' });
     }
     const verifyUrl = certService.publicVerifyUrl(cert.hash);
     const pdf = await generateCertificatePdf(cert, { verifyUrl });

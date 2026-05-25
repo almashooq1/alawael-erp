@@ -6,6 +6,8 @@ Date: 2026-05-24
 
 🟡 **Proposed — needs clinical director + Ministry-of-Education compliance lead + early-intervention domain owner sign-off before implementation.**
 
+> **📋 Decision-ready brief**: see [026-DECISION-BRIEF.md](026-DECISION-BRIEF.md) for live codebase ecosystem counts (correcting some of the effort estimates below), stakeholder meeting agenda, and no-regrets pre-work items that ship value regardless of which approach wins.
+
 This ADR is a proposal, not an accepted decision. The discovery was made during
 a Wave 355 scoping pass that initially planned to add `IEP` / `IFSP` / `ITP` as
 new `PLAN_TYPES` entries in

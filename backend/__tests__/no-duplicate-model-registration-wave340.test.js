@@ -51,12 +51,23 @@ const SCAN_SKIP_DIRS = new Set([
   '_archived',
 ]);
 
-// Two patterns we count as a registration:
+// Three patterns we count as a registration:
 //   mongoose.model('Name', schema)            — direct two-arg form
+//   connection.model('Name', schema)          — per-connection registration (W341c
+//                                               extension after the AF-2 audit found
+//                                               at least one hidden duplicate via
+//                                               this pattern: workflow-engine.js
+//                                               registered WorkflowInstance through
+//                                               `connection.model` while being dead
+//                                               code. 14 files in backend/ use this
+//                                               pattern; conn/db are interchangeable
+//                                               variable names for the mongoose
+//                                               Connection object.)
 //   reg('Name', schemaName)                   — helper-wrapped (Enterprise PRO/Plus convention)
 //   getOrCreate('Name', schemaName)
 //   registerModel('Name', schemaName)
 const REGISTRATION_RE = /mongoose\.model\s*\(\s*['"]([^'"]+)['"]\s*,/g;
+const CONNECTION_REGISTRATION_RE = /\b(?:connection|conn|db)\.model\s*\(\s*['"]([^'"]+)['"]\s*,/g;
 const HELPER_REGISTRATION_RE =
   /\b(?:reg|getOrCreate|registerModel|ensureModel|defineModel)\s*\(\s*['"]([^'"]+)['"]\s*,\s*\w+Schema\b/g;
 

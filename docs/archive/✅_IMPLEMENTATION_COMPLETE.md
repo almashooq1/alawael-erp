@@ -137,7 +137,7 @@ npm run dev
 
 ### الوصول للتطبيق
 
-```
+```text
 http://localhost:5173
 ```
 
@@ -155,7 +155,7 @@ npm run preview
 
 ## 📁 هيكل المشروع
 
-```
+```text
 frontend/
 │
 ├── 📄 index.html                    ✅ الصفحة الرئيسية
@@ -269,7 +269,7 @@ npm run format
 
 ### 1. نظام الإشعارات الذكي
 
-```
+```text
 ✅ عداد تلقائي
 ✅ أيقونات ملونة
 ✅ وقت نسبي ("الآن", "5د", "2س")
@@ -278,7 +278,7 @@ npm run format
 
 ### 2. نظام الرسوم البيانية
 
-```
+```text
 ✅ تحديث فوري عند تغيير الفترة
 ✅ 3 فترات زمنية (أسبوع، شهر، سنة)
 ✅ بيانات محاكاة واقعية
@@ -287,7 +287,7 @@ npm run format
 
 ### 3. نظام الملاحة المتقدم
 
-```
+```text
 ✅ قوائم منسدلة متداخلة
 ✅ حفظ الحالة المحلي
 ✅ تحديد النشط
@@ -296,7 +296,7 @@ npm run format
 
 ### 4. نظام الألوان الديناميكي
 
-```
+```text
 ✅ 12 لون أساسي
 ✅ 50+ تدرج ممتد
 ✅ دعم الوضع الليلي
@@ -309,7 +309,7 @@ npm run format
 
 ### المرحلة 4: State Management (Pinia)
 
-```
+```text
 [ ] useStudentStore.ts
 [ ] useProgramStore.ts
 [ ] useSessionStore.ts
@@ -318,7 +318,7 @@ npm run format
 
 ### المرحلة 5: Pages & Forms
 
-```
+```text
 [ ] StudentForm.vue
 [ ] ProgramForm.vue
 [ ] PlanForm.vue
@@ -327,7 +327,7 @@ npm run format
 
 ### المرحلة 6: Integration
 
-```
+```text
 [ ] API integration
 [ ] Backend connection
 [ ] Data fetching
@@ -394,7 +394,7 @@ npm run dev
 
 ### ✅ تم إنجاز جميع المتطلبات
 
-```
+```text
 ✅ واجهة ERP احترافية وذكية
 ✅ دعم كامل للعربية والـ RTL
 ✅ معايير WCAG 2.1 AAA

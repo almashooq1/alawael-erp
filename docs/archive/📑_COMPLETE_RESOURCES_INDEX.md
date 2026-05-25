@@ -4,7 +4,7 @@
 
 ### للبدء السريع (5 دقائق)
 
-```
+```text
 👉 🎯_START_HERE_5_MINUTES.md
    - خطوات البدء الخمس
    - تثبيت البرامج
@@ -14,7 +14,7 @@
 
 ### للقراءة الأولى (30 دقيقة)
 
-```
+```text
 1️⃣ ⚡_QUICK_START_GUIDE.md
    - معلومات سريعة
    - أوامر مهمة
@@ -32,7 +32,7 @@
 
 ### للمطورين
 
-```
+```text
 📚_DEVELOPER_GUIDE.md (محدث)
   ├─ معمارية النظام
   ├─ قاعدة البيانات
@@ -52,7 +52,7 @@
 
 ### للإدارة والتقارير
 
-```
+```text
 🎉_FINAL_DELIVERY_REPORT.md
   ├─ ملخص الإنجاز النهائي
   ├─ إحصائيات شاملة
@@ -71,7 +71,7 @@
 
 ### للمرحلة المتقدمة
 
-```
+```text
 🚀_PHASE_2_ADVANCED_FEATURES.md
   ├─ الميزات المضافة اليوم
   ├─ التقنيات المتقدمة
@@ -83,7 +83,7 @@
 
 ### ملخص الملفات الجديدة
 
-```
+```text
 📝_NEW_FILES_SUMMARY.md
   ├─ ملخص الإضافات اليوم
   ├─ إحصائيات الكود الجديد
@@ -98,7 +98,7 @@
 
 ### Backend Structure
 
-```
+```text
 backend/
 ├── 📄 app.py                        ← Entry point (Flask)
 ├── 📄 config.py                     ← Configuration
@@ -144,7 +144,7 @@ backend/
 
 ### Frontend Structure
 
-```
+```text
 frontend/
 ├── 📄 package.json                  ← Dependencies
 ├── 📄 jest.config.js                ← Jest configuration
@@ -195,14 +195,14 @@ frontend/
 
 ### Getting Started (البدء)
 
-```
+```text
 🎯_START_HERE_5_MINUTES.md           ← ابدأ هنا!
 ⚡_QUICK_START_GUIDE.md               ← خطوات البدء السريعة
 ```
 
 ### Development (التطوير)
 
-```
+```text
 📚_DEVELOPER_GUIDE.md                 ← دليل المطور الشامل
 🗺️_PROJECT_MAP.md                    ← خريطة الملفات
 📝_NEW_FILES_SUMMARY.md              ← ملخص الملفات الجديدة
@@ -210,13 +210,13 @@ frontend/
 
 ### Testing & Quality (الاختبارات والجودة)
 
-```
+```text
 📋_TESTING_COMPLETE_GUIDE.md         ← دليل الاختبار الشامل
 ```
 
 ### Status & Reports (التقارير)
 
-```
+```text
 🎉_FINAL_DELIVERY_REPORT.md          ← التقرير النهائي
 🚀_PHASE_2_ADVANCED_FEATURES.md     ← الميزات المتقدمة
 ✅_PROJECT_COMPLETION_CHECKLIST.md   ← قائمة التحقق
@@ -228,7 +228,7 @@ frontend/
 
 ### المصادقة (Authentication)
 
-```
+```text
 File:     backend/routes/auth.py
 Tests:    backend/tests/test_routes_auth.py
 Frontend: src/pages/Auth/Login.jsx
@@ -238,7 +238,7 @@ Docs:     📚_DEVELOPER_GUIDE.md (Auth section)
 
 ### إدارة المستفيدين (Beneficiaries)
 
-```
+```text
 Model:    backend/models/beneficiary.py
 Routes:   backend/routes/beneficiaries.py
 Tests:    backend/tests/test_routes_beneficiaries.py
@@ -248,7 +248,7 @@ Redux:    src/store/slices/beneficiariesSlice.js
 
 ### الجلسات (Sessions)
 
-```
+```text
 Model:    backend/models/session.py
 Routes:   backend/routes/sessions.py
 Frontend: src/pages/Sessions/*
@@ -258,7 +258,7 @@ Tests:    backend/tests/test_routes_sessions.py (ready)
 
 ### التقارير (Reports)
 
-```
+```text
 Model:    backend/models/report.py
 Routes:   backend/routes/reports.py
 PDF:      backend/services/pdf_export.py
@@ -268,7 +268,7 @@ Redux:    src/store/slices/reportsSlice.js
 
 ### التقييمات (Assessments)
 
-```
+```text
 Model:    backend/models/assessment.py
 Routes:   backend/routes/assessments.py
 Frontend: src/pages/Assessments/*
@@ -277,7 +277,7 @@ Redux:    src/store/slices/assessmentsSlice.js
 
 ### الأهداف (Goals)
 
-```
+```text
 Model:    backend/models/goal.py
 Routes:   backend/routes/goals.py
 Frontend: src/pages/Goals/*
@@ -286,7 +286,7 @@ Redux:    src/store/slices/goalsSlice.js
 
 ### التحليلات (Analytics)
 
-```
+```text
 Service:  backend/services/analytics.py
 Routes:   7 endpoints جديدة
 Docs:     🚀_PHASE_2_ADVANCED_FEATURES.md
@@ -294,7 +294,7 @@ Docs:     🚀_PHASE_2_ADVANCED_FEATURES.md
 
 ### الأداء والـ Caching (Performance)
 
-```
+```text
 Service:  backend/services/performance.py
 Docs:     📚_DEVELOPER_GUIDE.md (Performance)
 Config:   backend/config.py
@@ -302,7 +302,7 @@ Config:   backend/config.py
 
 ### التصدير إلى PDF (PDF Export)
 
-```
+```text
 Service:  backend/services/pdf_export.py
 Routes:   /api/pdf/report/<id>, /api/pdf/session/<id>
 Docs:     🚀_PHASE_2_ADVANCED_FEATURES.md
@@ -310,7 +310,7 @@ Docs:     🚀_PHASE_2_ADVANCED_FEATURES.md
 
 ### البريد الإلكتروني (Email)
 
-```
+```text
 Service:  backend/services/email_notifications.py
 Config:   backend/config.py (MAIL settings)
 Routes:   None (background task)
@@ -323,7 +323,7 @@ Docs:     🚀_PHASE_2_ADVANCED_FEATURES.md
 
 ### Backend Tests
 
-```
+```text
 Test Fixtures:
   └─ backend/tests/__init__.py
 
@@ -345,7 +345,7 @@ Configuration:
 
 ### Frontend Tests
 
-```
+```text
 Component Tests:
   └─ frontend/src/__tests__/Login.test.js
 
@@ -358,7 +358,7 @@ Configuration:
 
 ### اختبار شامل
 
-```
+```text
 اقرأ:    📋_TESTING_COMPLETE_GUIDE.md
 تشغيل:   pytest backend/tests/ -v
          npm test -- --coverage
@@ -370,7 +370,7 @@ Configuration:
 
 ### الصفحات الرئيسية
 
-```
+```text
 Dashboard:
   Path:  src/pages/Dashboard/Dashboard.jsx
   Route: /dashboard
@@ -394,7 +394,7 @@ Beneficiaries:
 
 ### محلي (Local)
 
-```
+```text
 URL:      http://localhost:5000/api/docs/
 Type:     Swagger UI
 Language: العربية
@@ -403,7 +403,7 @@ Test:     Try it out button
 
 ### في الكود
 
-```
+```text
 File:     backend/swagger_docs.py
 Content:  جميع 53 endpoints موثقة
 Format:   YAML + Description
@@ -416,14 +416,14 @@ Examples: Request & Response samples
 
 ### ملفات المتطلبات
 
-```
+```text
 Backend:   backend/requirements.txt (20+ packages)
 Frontend:  frontend/package.json (30+ packages)
 ```
 
 ### بيانات بيئة الإنتاج
 
-```
+```text
 Backend:   .env (في المجلد backend)
 Frontend:  .env (في المجلد frontend)
 Example:   .env.example (للمرجعية)
@@ -435,7 +435,7 @@ Example:   .env.example (للمرجعية)
 
 ### أرقام المشروع
 
-```
+```text
 Total Code Lines:        23,100+ سطر
 Backend Code:            6,650 سطر
 Frontend Code:           10,250 سطر
@@ -457,7 +457,7 @@ Test Cases:              100+ اختبار
 
 ## 🚀 النسخ والإصدارات
 
-```
+```text
 الإصدار الحالي:    2.0-Production
 حالة المشروع:      95% مكتمل
 جاهز للإنتاج:      ✅ نعم
@@ -470,7 +470,7 @@ Test Cases:              100+ اختبار
 
 ### للعثور على حل
 
-```
+```text
 1. اقرأ الملف المناسب من الفهرس أعلاه
 2. ابحث عن كلمة مفتاحية في الأدلة
 3. راجع الكود والتعليقات
@@ -479,7 +479,7 @@ Test Cases:              100+ اختبار
 
 ### الملفات الحساسة (احذر عند التعديل!)
 
-```
+```text
 🔴 حرج:
    - backend/models/__init__.py  (علاقات قاعدة البيانات)
    - backend/app.py              (إعدادات التطبيق)
@@ -501,7 +501,7 @@ Test Cases:              100+ اختبار
 
 ### ماذا تملك الآن؟
 
-```
+```text
 ✅ تطبيق كامل متكامل
 ✅ 50+ ميزة جاهزة
 ✅ نظام اختبار شامل
@@ -513,7 +513,7 @@ Test Cases:              100+ اختبار
 
 ### الخطوات الإستراتيجية:
 
-```
+```text
 1. اقرأ 🎯_START_HERE_5_MINUTES.md
 2. شغّل التطبيق واختبره
 3. اقرأ الأدلة الشاملة

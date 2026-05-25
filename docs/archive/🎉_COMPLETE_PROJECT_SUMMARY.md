@@ -6,7 +6,7 @@
 
 ## 📊 الإحصائيات الحتمية
 
-```
+```text
 ┌─────────────────────────────────────────────────────┐
 │             PROJECT FINAL STATISTICS                │
 ├─────────────────────────────────────────────────────┤
@@ -48,7 +48,7 @@
 
 ### الجلسة 1 (14 يناير 2026) - البناء الأساسي
 
-```
+```text
 ✅ 8 ملفات توثيق شاملة (65,000+ كلمة)
 ✅ 9 مكونات Vue متقدمة (600+ سطر)
 ✅ نظام التوجيه الكامل (30+ مسار)
@@ -62,7 +62,7 @@
 
 ### الجلسة 2 (16 يناير 2026) - البناء الوظيفي
 
-```
+```text
 ✅ 11 ملف جديد (3,615+ سطر كود)
 ✅ 2 Pinia Stores متطورة (365 سطر)
 ✅ 4 مكونات Form متقدمة (350 سطر)
@@ -163,7 +163,7 @@
 
 ## 🏆 معايير الجودة
 
-```
+```text
 ┌──────────────────────────────────────────┐
 │           QUALITY SCORECARD              │
 ├──────────────────────────────────────────┤
@@ -204,7 +204,7 @@ npm run dev
 
 ### الخطوة 3: الاستمتاع!
 
-```
+```text
 افتح: http://localhost:5173
 استمتع بـ Alawael ERP System 🎉
 ```
@@ -243,7 +243,7 @@ npm run dev
 
 ### Frontend Stack
 
-```
+```text
 • Vue 3 (Composition API)
 • Vite (Build tool)
 • Pinia (State management)
@@ -255,7 +255,7 @@ npm run dev
 
 ### Backend Stack
 
-```
+```text
 • Express.js (Web framework)
 • MongoDB (Database)
 • Mongoose (ODM)
@@ -267,7 +267,7 @@ npm run dev
 
 ### Tools & Services
 
-```
+```text
 • Docker (Containerization)
 • Jest (Testing)
 • Swagger (API docs)
@@ -305,7 +305,7 @@ npm run dev
 
 ## ✅ قائمة التحقق النهائية
 
-```
+```text
 الإنجازات:
 [✅] Frontend متكامل 100%
 [✅] Backend متطور 100%
@@ -335,7 +335,7 @@ npm run dev
 
 ## 🎉 الملخص النهائي
 
-```
+```text
 ╔════════════════════════════════════════════════════╗
 ║                                                    ║
 ║   🎊 ALAWAEL ERP SYSTEM - PROJECT COMPLETE 🎊   ║
@@ -424,7 +424,7 @@ npm run dev
 
 ## 📋 الخطوات التالية الفورية
 
-```
+```text
 1. افتح: ✨_FINAL_INSTRUCTIONS.md (10 دقائق)
 2. اتبع: 🚀_QUICK_START.md (5 دقائق)
 3. شغّل Backend: npm run dev

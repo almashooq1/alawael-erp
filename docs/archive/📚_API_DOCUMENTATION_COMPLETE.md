@@ -8,7 +8,7 @@
 
 ## 🌐 معلومات API الأساسية
 
-```
+```text
 Base URL (Development):  http://localhost:3001/api
 Base URL (Production):   https://alawael.com/api
 API Version:             v1
@@ -23,7 +23,7 @@ Content-Type:            application/json
 
 ### Authentication Header
 
-```
+```text
 Authorization: Bearer <JWT_TOKEN>
 ```
 
@@ -54,7 +54,7 @@ Authorization: Bearer <JWT_TOKEN>
 
 **Endpoint:**
 
-```
+```text
 POST /auth/login
 ```
 
@@ -107,7 +107,7 @@ POST /auth/login
 
 **Endpoint:**
 
-```
+```text
 POST /auth/login-phone
 ```
 
@@ -129,7 +129,7 @@ POST /auth/login-phone
 
 **Endpoint:**
 
-```
+```text
 POST /auth/login-id
 ```
 
@@ -150,7 +150,7 @@ POST /auth/login-id
 
 **Endpoint:**
 
-```
+```text
 POST /auth/smart-login
 ```
 
@@ -172,7 +172,7 @@ POST /auth/smart-login
 
 **Endpoint:**
 
-```
+```text
 POST /auth/verify-2fa
 ```
 
@@ -205,13 +205,13 @@ POST /auth/verify-2fa
 
 **Endpoint:**
 
-```
+```text
 POST /auth/setup-2fa
 ```
 
 **Headers:**
 
-```
+```text
 Authorization: Bearer <JWT_TOKEN>
 ```
 
@@ -234,7 +234,7 @@ Authorization: Bearer <JWT_TOKEN>
 
 **Endpoint:**
 
-```
+```text
 POST /auth/enable-2fa
 ```
 
@@ -253,13 +253,13 @@ POST /auth/enable-2fa
 
 **Endpoint:**
 
-```
+```text
 POST /auth/logout
 ```
 
 **Headers:**
 
-```
+```text
 Authorization: Bearer <JWT_TOKEN>
 ```
 
@@ -278,7 +278,7 @@ Authorization: Bearer <JWT_TOKEN>
 
 **Endpoint:**
 
-```
+```text
 POST /auth/refresh-token
 ```
 
@@ -308,7 +308,7 @@ POST /auth/refresh-token
 
 **Endpoint:**
 
-```
+```text
 POST /auth/forgot-password
 ```
 
@@ -335,7 +335,7 @@ POST /auth/forgot-password
 
 **Endpoint:**
 
-```
+```text
 POST /auth/reset-password
 ```
 
@@ -365,13 +365,13 @@ POST /auth/reset-password
 
 **Endpoint:**
 
-```
+```text
 GET /users/me
 ```
 
 **Headers:**
 
-```
+```text
 Authorization: Bearer <JWT_TOKEN>
 ```
 
@@ -406,13 +406,13 @@ Authorization: Bearer <JWT_TOKEN>
 
 **Endpoint:**
 
-```
+```text
 PUT /users/profile
 ```
 
 **Headers:**
 
-```
+```text
 Authorization: Bearer <JWT_TOKEN>
 Content-Type: application/json
 ```
@@ -444,13 +444,13 @@ Content-Type: application/json
 
 **Endpoint:**
 
-```
+```text
 POST /users/change-password
 ```
 
 **Headers:**
 
-```
+```text
 Authorization: Bearer <JWT_TOKEN>
 ```
 
@@ -479,13 +479,13 @@ Authorization: Bearer <JWT_TOKEN>
 
 **Endpoint:**
 
-```
+```text
 GET /users?page=1&limit=20&role=user&status=active
 ```
 
 **Headers:**
 
-```
+```text
 Authorization: Bearer <JWT_TOKEN>
 ```
 
@@ -521,7 +521,7 @@ Authorization: Bearer <JWT_TOKEN>
 
 **Endpoint:**
 
-```
+```text
 GET /health
 ```
 
@@ -547,13 +547,13 @@ GET /health
 
 **Endpoint:**
 
-```
+```text
 GET /stats
 ```
 
 **Headers:**
 
-```
+```text
 Authorization: Bearer <JWT_TOKEN>
 ```
 
@@ -604,7 +604,7 @@ Authorization: Bearer <JWT_TOKEN>
 
 ## 🔢 رموز الأخطاء (Error Codes)
 
-```
+```text
 200 OK                    - العملية نجحت
 201 Created               - تم الإنشاء بنجاح
 400 Bad Request           - طلب غير صحيح
@@ -621,7 +621,7 @@ Authorization: Bearer <JWT_TOKEN>
 
 ## 📊 معدل الحد (Rate Limiting)
 
-```
+```text
 عام:                    100 requests / 15 minutes
 المصادقة:                5 attempts / 15 minutes
 API العام:              500 requests / hour
@@ -657,7 +657,7 @@ curl -X PUT http://localhost:3001/api/users/profile \
 
 ## 📖 الوثائق التفاعلية (Swagger)
 
-```
+```text
 URL: https://alawael.com/api/docs
 ```
 
@@ -671,7 +671,7 @@ URL: https://alawael.com/api/docs
 
 ## ✅ قائمة فحص الـ API
 
-```
+```text
 ☐ جميع endpoints موثقة
 ☐ جميع الأخطاء المحتملة موثقة
 ☐ أمثلة طلبات موجودة

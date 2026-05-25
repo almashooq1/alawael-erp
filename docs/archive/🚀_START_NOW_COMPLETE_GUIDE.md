@@ -29,7 +29,7 @@ npm start
 
 ### Step 3: Open Browser
 
-```
+```text
 http://localhost:3000
 ```
 
@@ -41,7 +41,7 @@ http://localhost:3000
 
 ### Beneficiaries Management
 
-```
+```text
 URL: http://localhost:3000/beneficiaries
 Features:
 ✅ List all beneficiaries
@@ -53,7 +53,7 @@ Features:
 
 ### Export Data
 
-```
+```text
 Steps:
 1. Go to beneficiaries page
 2. Click "تصدير" (Export) button
@@ -63,7 +63,7 @@ Steps:
 
 ### View Analytics
 
-```
+```text
 Steps:
 1. Go to reports section
 2. See 3 charts:
@@ -74,7 +74,7 @@ Steps:
 
 ### Real-time Notifications
 
-```
+```text
 Location: Top right corner (Bell icon)
 Shows live updates when:
 ✅ New beneficiary added
@@ -180,7 +180,7 @@ curl http://localhost:3001/api/health
 
 ### Default Test Account
 
-```
+```text
 Email: admin@test.com
 Password: Password123
 ```
@@ -223,7 +223,7 @@ npm install
 
 ### Problem: CORS Error
 
-```
+```text
 ✅ Already configured for localhost
 ✅ Frontend URL is whitelisted
 ✅ Should work automatically
@@ -264,7 +264,7 @@ Ctrl + Shift + Delete (in browser)
 
 ### Scenario 1: Add Beneficiary
 
-```
+```text
 1. Click "إضافة مستفيد جديد"
 2. Fill form with:
    - First Name: أحمد
@@ -278,7 +278,7 @@ Ctrl + Shift + Delete (in browser)
 
 ### Scenario 2: Export Data
 
-```
+```text
 1. Click "تصدير"
 2. Select "CSV"
 3. File downloads as المستفيدين.csv
@@ -287,7 +287,7 @@ Ctrl + Shift + Delete (in browser)
 
 ### Scenario 3: View Charts
 
-```
+```text
 1. Go to Reports section
 2. See 3 different charts
 3. Charts update with real data
@@ -298,7 +298,7 @@ Ctrl + Shift + Delete (in browser)
 
 ## 🔄 System Components
 
-```
+```text
 Frontend (React)
     ↓
 Redux Store (State Management)
@@ -417,7 +417,7 @@ When everything works:
 
 ### START NOW:
 
-```
+```text
 Terminal 1: npm start (in backend)
 Terminal 2: npm start (in frontend)
 Browser: http://localhost:3000

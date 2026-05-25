@@ -22,7 +22,7 @@ All you need to do is follow 3 simple guides to go from development to **LIVE on
 
 **What you'll do:**
 
-```
+```text
 1. Register a domain (alawael-erp.com or custom)
 2. Setup DNS records
 3. Get SSL certificate
@@ -40,7 +40,7 @@ All you need to do is follow 3 simple guides to go from development to **LIVE on
 
 **What you'll do:**
 
-```
+```text
 1. Install testing libraries
 2. Setup Jest configuration
 3. Write unit tests
@@ -59,7 +59,7 @@ All you need to do is follow 3 simple guides to go from development to **LIVE on
 
 **What you'll do:**
 
-```
+```text
 1. Create VPS account (DigitalOcean/AWS/Linode)
 2. Setup server environment
 3. Deploy application
@@ -119,7 +119,7 @@ Open these files in order:
 
 ## ⏱️ TIMELINE
 
-```
+```text
 NOW (18 Jan):
 ├─ Step 1: Domain + SSL (60 min)
 ├─ Step 2: Testing (60 min)
@@ -135,7 +135,7 @@ https://your-domain.com LIVE! 🎉
 
 ### Right now, do this:
 
-```
+```text
 1. Open file: PRIORITY_3_LIVE_IMPLEMENTATION.md
 2. Go to: https://www.hostinger.com
 3. Register your domain
@@ -179,7 +179,7 @@ All materials are included:
 
 After completing all 3 steps, you'll have:
 
-```
+```text
 ✅ https://your-domain.com
    → Your domain is live
 
@@ -283,7 +283,7 @@ Everything is prepared. All you need to do is execute the 3 guides.
 
 ## 📊 SYSTEM STATUS (Current)
 
-```
+```text
 Backend:        http://localhost:3001      ✅
 Frontend:       http://localhost:3002      ✅
 Database:       MongoDB Atlas              ✅
@@ -322,7 +322,7 @@ Ready for:      Production                 ✅
 
 ## 📅 TIMELINE TO SUCCESS
 
-```
+```text
 Today (18 Jan):
   09:00 - Start Priority 3 (Domain)
   10:00 - Start Priority 4 (Testing)

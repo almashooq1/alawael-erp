@@ -538,7 +538,7 @@ curl https://alawael.com/api/health
 
 ## 📊 قائمة فحص النشر
 
-```
+```text
 قبل النشر:
 ☐ جميع الاختبارات تمر بنجاح (npm test)
 ☐ لا توجد أخطاء في ESLint

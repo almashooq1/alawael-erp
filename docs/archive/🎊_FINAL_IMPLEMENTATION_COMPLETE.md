@@ -199,7 +199,7 @@
 
 ## 📁 File Structure
 
-```
+```text
 backend/
 ├── api/
 │   ├── ai_prediction_api.py        (300+ lines) ✅
@@ -461,7 +461,7 @@ Documentation/
 
 ## 🎉 Project Status
 
-```
+```text
 ███████████████████████████████████████████ 100%
 
 ✅ ALL FEATURES IMPLEMENTED

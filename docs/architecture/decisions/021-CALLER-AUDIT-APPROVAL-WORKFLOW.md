@@ -65,7 +65,7 @@ Registration #2 above (`workflow/workflow-engine.js:185`) uses `connection.model
 
 It does NOT scan `connection.model(...)` or `conn.model(...)` or `db.model(...)`. There are **16 other files** in the codebase using the `connection|conn|db.model(` pattern:
 
-```
+```text
 backend/students/student-service.js
 backend/students/report-scheduler-service.js
 backend/workflow/workflow-engine.js

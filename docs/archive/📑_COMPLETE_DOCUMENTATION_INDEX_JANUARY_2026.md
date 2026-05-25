@@ -25,7 +25,7 @@ bash 🚀_START_ALL_SERVICES.sh
 
 #### الوصول إلى التطبيق:
 
-```
+```text
 Frontend:  http://localhost:3000
 Backend:   http://localhost:3001
 Docs:      http://localhost:3001/api-docs
@@ -66,7 +66,7 @@ Docs:      http://localhost:3001/api-docs
 
 ## 🏗️ هيكل المشروع
 
-```
+```text
 AlAwael ERP/
 ├── 📂 backend/
 │   ├── 📂 api/
@@ -173,7 +173,7 @@ npm start
 
 ### الخطوة 5: الوصول
 
-```
+```text
 افتح المتصفح:
 http://localhost:3000
 
@@ -202,7 +202,7 @@ http://localhost:3000
 
 ### البرامج المطلوبة
 
-```
+```text
 ✅ Node.js 16.0.0 أو أعلى
 ✅ npm 7.0.0 أو أعلى
 ✅ MongoDB 4.4+ (محلي أو MongoDB Atlas)
@@ -212,7 +212,7 @@ http://localhost:3000
 
 ### الحسابات والخدمات
 
-```
+```text
 إذا كنت تستخدم Staging/Production:
 
 □ MongoDB Atlas     - لقاعدة البيانات
@@ -228,7 +228,7 @@ http://localhost:3000
 
 ### Authentication
 
-```
+```text
 POST   /api/auth/login              - تسجيل الدخول
 POST   /api/auth/register           - التسجيل
 POST   /api/auth/refresh-token      - تحديث التوكن
@@ -237,7 +237,7 @@ POST   /api/auth/logout             - تسجيل الخروج
 
 ### User Management
 
-```
+```text
 GET    /api/user-profile            - الملف الشخصي
 PUT    /api/user-profile            - تحديث الملف
 GET    /api/user-profile/statistics - الإحصائيات
@@ -245,7 +245,7 @@ GET    /api/user-profile/statistics - الإحصائيات
 
 ### Search & Filtering
 
-```
+```text
 POST   /api/search                  - بحث متقدم
 POST   /api/search/filters          - تصفية البيانات
 GET    /api/search/stats            - إحصائيات البحث
@@ -253,21 +253,21 @@ GET    /api/search/stats            - إحصائيات البحث
 
 ### AI & Intelligence
 
-```
+```text
 POST   /api/ai-advanced/predictions - توقعات AI
 POST   /api/ai-advanced/model-training - تدريب النموذج
 ```
 
 ### Notifications
 
-```
+```text
 GET    /api/notifications-advanced/list   - قائمة الإشعارات
 POST   /api/notifications-advanced/send   - إرسال إشعار
 ```
 
 ### Chatbot
 
-```
+```text
 POST   /api/chatbot/chat            - الدردشة
 GET    /api/chatbot/statistics      - إحصائيات البوت
 ```
@@ -296,7 +296,7 @@ npm test -- --watch
 
 ### نتائج الاختبارات المتوقعة
 
-```
+```text
 ✅ 150+ اختبارات
 ✅ 100% نسبة النجاح
 ✅ 92% تغطية الأكواد
@@ -309,7 +309,7 @@ npm test -- --watch
 
 ### أفضل الممارسات
 
-```
+```text
 ✅ استخدم HTTPS في الإنتاج
 ✅ قم بتحديث المتطلبات بانتظام
 ✅ استخدم متغيرات البيئة للمفاتيح
@@ -320,7 +320,7 @@ npm test -- --watch
 
 ### متطلبات كلمات المرور
 
-```
+```text
 - الحد الأدنى: 8 أحرف
 - يجب أن تحتوي على: أحرف كبيرة وصغيرة
 - يجب أن تحتوي على: أرقام
@@ -346,7 +346,7 @@ pm2 logs
 
 ### المؤشرات المهمة
 
-```
+```text
 - Response Time
 - Error Rate
 - CPU Usage
@@ -392,7 +392,7 @@ npm install
 
 #### المشكلة: "API returns 401 Unauthorized"
 
-```
+```text
 - تحقق من وجود Authorization header
 - تأكد من صحة JWT token
 - تحقق من انتهاء صلاحية التوكن
@@ -404,7 +404,7 @@ npm install
 
 ### جهات الاتصال
 
-```
+```text
 📧 البريد الإلكتروني:     support@alawael.com
 📞 الهاتف:               +966-XX-XXXX-XXXX
 💬 Telegram:            [رابط المجموعة]
@@ -414,7 +414,7 @@ npm install
 
 ### ساعات الدعم
 
-```
+```text
 السبت - الخميس: 08:00 - 18:00
 الجمعة:        12:00 - 20:00
 الإجازات:      Available 24/7 للحالات الطارئة
@@ -424,7 +424,7 @@ npm install
 
 ## 🎊 الملخص النهائي
 
-```
+```text
 النظام جاهز بنسبة 100% للاستخدام!
 
 ✅ جميع الميزات مُختبرة
@@ -442,7 +442,7 @@ npm install
 
 ### وثائق خارجية مفيدة
 
-```
+```text
 React:           https://react.dev
 Node.js:         https://nodejs.org/docs/
 MongoDB:         https://docs.mongodb.com/
@@ -453,7 +453,7 @@ Material-UI:     https://mui.com/
 
 ### مقاطع فيديو تعليمية
 
-```
+```text
 شرح البدء السريع:     [YouTube Link]
 شرح API Integration: [YouTube Link]
 شرح الإنتاج:        [YouTube Link]
@@ -464,7 +464,7 @@ Material-UI:     https://mui.com/
 
 ## 🏆 الحالة النهائية
 
-```
+```text
 Project Status:      ✅ PRODUCTION READY
 Test Coverage:       ✅ 100% PASS
 Code Quality:        ✅ A+ GRADE

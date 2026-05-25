@@ -66,7 +66,7 @@
 
 ### Frontend Components (جديدة)
 
-```
+```text
 ✅ BeneficiariesPage.jsx
 ✅ BeneficiaryDetailPage.jsx
 ✅ BeneficiariesFilter.jsx
@@ -80,7 +80,7 @@
 
 ### Backend Services (جديدة)
 
-```
+```text
 ✅ services/socketHandler.js
 ✅ Verified beneficiary.routes.js
 ✅ Verified notificationService.js
@@ -88,7 +88,7 @@
 
 ### Documentation (جديدة)
 
-```
+```text
 ✅ PHASE_1_API_INTEGRATION_TEST.ps1
 ✅ PHASE_1_QUICK_TEST.bat
 ✅ 📋_PHASE_3_ADVANCED_FEATURES_COMPLETE.md
@@ -124,7 +124,7 @@ PHASE_1_QUICK_TEST.bat
 
 ### 3️⃣ الدخول للتطبيق
 
-```
+```text
 URL: http://localhost:3000
 ```
 
@@ -192,7 +192,7 @@ URL: http://localhost:3000
 
 ## 🎉 النتيجة النهائية
 
-```
+```text
 ╔════════════════════════════════════════════════════╗
 ║                                                    ║
 ║   ✅ جميع المراحل مكتملة بنجاح                   ║

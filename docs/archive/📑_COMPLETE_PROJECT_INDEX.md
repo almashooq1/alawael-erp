@@ -38,7 +38,7 @@
 
 ### ملفات Frontend
 
-```
+```text
 frontend/
 ├── src/
 │   ├── components/
@@ -87,7 +87,7 @@ frontend/
 
 ### ملفات Backend
 
-```
+```text
 backend/
 ├── server.js                         ✅ نقطة الدخول (569 سطر متقدم)
 ├── package.json                      ✅ المكتبات (50+)
@@ -156,7 +156,7 @@ backend/
 
 ### ملفات التوثيق والدليل
 
-```
+```text
 documentation/
 ├── 🎊_START_HERE.md                  ← ابدأ من هنا!
 ├── ✨_FINAL_INSTRUCTIONS.md          ← التوجيهات النهائية
@@ -211,7 +211,7 @@ documentation/
 
 ## 📊 إحصائيات المشروع
 
-```
+```text
 Frontend:
 ├── Components:      12 مكون ✅
 ├── Pages:           9 صفحات ✅
@@ -304,7 +304,7 @@ npm run benchmark
 
 ## 🎉 الملخص
 
-```
+```text
 أنت الآن تملك:
 ✅ Frontend متكامل وجميل (Vue 3)
 ✅ Backend متطور وآمن (Express.js)

@@ -44,7 +44,7 @@ pytest -m integration
 
 ### هيكل الاختبارات
 
-```
+```text
 backend/tests/
 ├── __init__.py                      # Fixtures والإعدادات
 ├── test_models_beneficiary.py       # اختبارات نموذج المستفيد
@@ -122,7 +122,7 @@ npm test -- --testNamePattern="Login"
 
 ### هيكل الاختبارات
 
-```
+```text
 frontend/src/__tests__/
 ├── Login.test.js                    # اختبارات مكون Login
 ├── Dashboard.test.js                # اختبارات Dashboard
@@ -218,7 +218,7 @@ open coverage/lcov-report/index.html
 
 ### أهداف التغطية
 
-```
+```text
 Backend:
 - Models:          90%+
 - Routes:          85%+
@@ -312,7 +312,7 @@ locust -f locustfile.py --host=http://localhost:5000
 
 ## 7. قائمة التحقق قبل النشر
 
-```
+```text
 قبل نشر الكود:
 
 Backend:

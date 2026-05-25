@@ -29,7 +29,7 @@
 
 ### الموارد المطلوبة
 
-```
+```text
 CPU:       4 cores minimum
 RAM:       8GB minimum (16GB recommended)
 Storage:   50GB minimum (100GB recommended)
@@ -470,7 +470,7 @@ docker-compose exec redis redis-cli --stat
 
 ### للمساعدة الفنية:
 
-```
+```text
 📧 Email: support@rehabilitation-center.com
 🔗 Tickets: https://support.rehabilitation-center.com
 📋 Documentation: https://docs.rehabilitation-center.com
@@ -479,7 +479,7 @@ docker-compose exec redis redis-cli --stat
 
 ### للبلاغات الأمنية:
 
-```
+```text
 🔒 Email: security@rehabilitation-center.com
 🔑 GPG Key: https://rehabilitation-center.com/security.gpg
 ```

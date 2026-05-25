@@ -239,7 +239,7 @@ Register-ScheduledTask -Action $action -Trigger $trigger -TaskName "ERP Backup" 
 
 ### مشكلة: لا يمكن الاتصال بقاعدة البيانات
 
-```
+```text
 Error: connect ECONNREFUSED
 ```
 
@@ -252,7 +252,7 @@ Error: connect ECONNREFUSED
 
 ### مشكلة: البيانات لا تُحفظ
 
-```
+```text
 Data is lost after restart
 ```
 
@@ -271,7 +271,7 @@ Data is lost after restart
 
 ### مشكلة: Mongoose not found
 
-```
+```text
 Error: Cannot find module 'mongoose'
 ```
 

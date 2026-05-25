@@ -23,7 +23,7 @@
 
 ## 🏗️ هيكل النظام
 
-```
+```text
 CRM-ERP System (2026)
 ├── 🎯 Frontend (React 18 + Vite)
 │   ├── ✅ Login Page (تسجيل الدخول)
@@ -67,16 +67,19 @@ CRM-ERP System (2026)
 ### 📚 وثائق شاملة
 
 1. **📚_COMPLETE_API_DOCUMENTATION.md**
+
    - توثيق كامل لـ 50+ API endpoints
    - أمثلة عملية للطلبات والاستجابات
    - معلومات الأمان والترخيص
 
 2. **🗄️_MONGODB_ATLAS_SETUP.md**
+
    - خطوات الربط خطوة بخطوة
    - أمثلة Schema/Model
    - أفضل الممارسات
 
 3. **📊_ADVANCED_ANALYTICS_GUIDE.md**
+
    - 5 وحدات تحليلية (HR, Sales, Learning, Finance, Customer)
    - توليد التقارير المخصصة
    - مخططات بيانية (5 أنواع)
@@ -89,21 +92,25 @@ CRM-ERP System (2026)
 ### 📁 ملفات الخدمات
 
 5. **backend/swagger-config.js**
+
    - تكوين Swagger/OpenAPI
    - تعريفات API الكاملة
    - معايير البيانات
 
 6. **backend/services/emailService.js** (450+ سطر)
+
    - Nodemailer integration
    - 7 قوالب بريد
    - دعم البريد المجموعي
 
 7. **backend/services/smsService.js** (350+ سطر)
+
    - Twilio & Vonage integration
    - 8 قوالب SMS
    - مراقبة الرصيد
 
 8. **backend/routes/emailRoutes.js** (200+ سطر)
+
    - 7 endpoints للبريد الإلكتروني
    - التحقق والأمان
    - معالجة الأخطاء
@@ -119,7 +126,7 @@ CRM-ERP System (2026)
 
 ### تسجيل الدخول
 
-```
+```text
 🔓 Admin Account:
    Username: admin
    Password: admin123
@@ -135,7 +142,7 @@ CRM-ERP System (2026)
 
 ### Access URLs
 
-```
+```text
 🌐 Frontend:       http://localhost:3000
 🌐 Backend API:    http://localhost:3001
 📚 API Docs:       http://localhost:3001/api-docs
@@ -157,7 +164,7 @@ CRM-ERP System (2026)
 
 ### التوثيق
 
-```
+```text
 HTTP Header:
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
@@ -196,7 +203,7 @@ Refresh: Automatic on login
 
 ### KPIs الرئيسية
 
-```
+```text
 📈 Business Metrics:
    • Total Revenue: $1,250,000
    • Growth Rate: 15.3%
@@ -305,7 +312,7 @@ curl -X POST http://localhost:3001/api/email/verify \
 
 ## 📦 مساحة التخزين المستخدمة
 
-```
+```text
 📊 Code Size:
    • Frontend:      ~5 MB (React + Dependencies)
    • Backend:       ~15 MB (Express + Modules)
@@ -327,7 +334,7 @@ curl -X POST http://localhost:3001/api/email/verify \
 
 ### مشكلة: Backend لا يبدأ
 
-```
+```text
 ✅ الحل:
 1. تحقق من PORT 3001 خالية
 2. تحقق من متطلبات Node.js (v14+)
@@ -337,7 +344,7 @@ curl -X POST http://localhost:3001/api/email/verify \
 
 ### مشكلة: Frontend فارغة
 
-```
+```text
 ✅ الحل:
 1. تأكد من تشغيل Backend على 3001
 2. امسح الـ cache: Ctrl+Shift+Del
@@ -347,7 +354,7 @@ curl -X POST http://localhost:3001/api/email/verify \
 
 ### مشكلة: البريد الإلكتروني لا يُرسل
 
-```
+```text
 ✅ الحل:
 1. جرّب معرف بريد Gmail جديد
 2. استخدم App Password بدلاً من كلمة المرور الأساسية
@@ -357,7 +364,7 @@ curl -X POST http://localhost:3001/api/email/verify \
 
 ### مشكلة: الرسائل النصية لا تُرسل
 
-```
+```text
 ✅ الحل:
 1. جرّب Twilio account مع أرصدة
 2. استخدم +1 رقم اختبار من Twilio
@@ -371,7 +378,7 @@ curl -X POST http://localhost:3001/api/email/verify \
 
 ### Phase 8-12: بالفعل مكتملة ✅
 
-```
+```text
 ✅ Phase 8:  Document Management System
 ✅ Phase 9:  Integration & API Management
 ✅ Phase 10: Advanced Analytics & Reporting
@@ -381,7 +388,7 @@ curl -X POST http://localhost:3001/api/email/verify \
 
 ### Phase 13+: الخطط المستقبلية
 
-```
+```text
 📋 Phase 13: Mobile App (iOS/Android)
 📋 Phase 14: Advanced Security (2FA, SSO)
 📋 Phase 15: AI Chatbot Integration
@@ -410,7 +417,7 @@ curl -X POST http://localhost:3001/api/email/verify \
 
 ### قنوات الدعم
 
-```
+```text
 📧 Email:  support@example.com
 💬 Chat:   Slack #support
 🚨 Issues: GitHub Issues
@@ -464,7 +471,7 @@ curl -X POST http://localhost:3001/api/email/verify \
 
 ## 📊 إحصائيات النظام
 
-```
+```text
 📈 Code Statistics:
    • Lines of Code: 50,000+
    • Files Created: 200+

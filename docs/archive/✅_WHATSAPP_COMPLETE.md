@@ -26,7 +26,7 @@
 
 ## 📂 الموقع
 
-```
+```text
 whatsapp/
 ├── 👉_START_HERE.md          ← ابدأ من هنا!
 ├── 🎉_READY_TO_USE.md        ← دليل الاستخدام

@@ -32,7 +32,7 @@
 
 ### ⚡ Option 1: أسرع طريقة (2 دقيقة)
 
-```
+```text
 1. اقرأ: ⚡_QUICK_COMMANDS.md
 2. نسخ والصق الأوامر
 3. كم!
@@ -40,7 +40,7 @@
 
 ### 🎯 Option 2: متوازن (5 دقائق)
 
-```
+```text
 1. اقرأ: ⚡_MONGODB_ATLAS_5_STEPS.md
 2. اتبع الـ 5 خطوات
 3. كم!
@@ -48,7 +48,7 @@
 
 ### 📖 Option 3: شامل (10 دقائق)
 
-```
+```text
 1. اقرأ: 💾_MONGODB_ATLAS_SETUP.md
 2. اتبع الـ 8 خطوات
 3. كم!
@@ -56,7 +56,7 @@
 
 ### 📸 Option 4: مرئي (10 دقائق)
 
-```
+```text
 1. اقرأ: 📸_MONGODB_ATLAS_VISUAL_GUIDE.md
 2. اتبع مع الصور
 3. كم!
@@ -96,7 +96,7 @@ npm start
 
 ## ✨ النتيجة المتوقعة:
 
-```
+```text
 ✅ MongoDB Atlas متصل
 ✅ قاعدة بيانات alawael-erp محفوظة
 ✅ Backend على 3001
@@ -120,7 +120,7 @@ npm start
 
 ## 🎊 المجموع:
 
-```
+```text
 4 Guides      + 2 Scripts     + 3 References =
 Complete Setup Package Ready! 🎉
 ```
@@ -131,7 +131,7 @@ Complete Setup Package Ready! 🎉
 
 **اختر دليل واحد والدرس البداية مباشرة!**
 
-```
+```text
 💾 START HERE: 🎯_MONGODB_START_HERE.md
 ```
 

@@ -54,7 +54,7 @@
 
 ### Components (7)
 
-```
+```text
 ✅ BeneficiariesPage.jsx
 ✅ BeneficiaryDetailPage.jsx
 ✅ BeneficiariesFilter.jsx
@@ -66,14 +66,14 @@
 
 ### Services (2)
 
-```
+```text
 ✅ utils/enhancedApi.js
 ✅ services/socketHandler.js
 ```
 
 ### Documentation (6)
 
-```
+```text
 ✅ PHASE_1_API_INTEGRATION_TEST.ps1
 ✅ PHASE_1_QUICK_TEST.bat
 ✅ 📋_PHASE_3_ADVANCED_FEATURES_COMPLETE.md
@@ -199,7 +199,7 @@ Full deployment guide included.
 
 ## 🎊 FINAL STATUS
 
-```
+```text
 ╔════════════════════════════════════════════════╗
 ║                                                ║
 ║   ✅ PROJECT COMPLETE & VERIFIED             ║

@@ -182,7 +182,7 @@ These ALL ship value regardless of which decision the meeting makes. If user aut
 
 ## 7. Decision template (for each per-entity meeting note-taker)
 
-```
+```text
 TIER 1 ENTITY: [ApprovalRequest | AuditLog | ReportTemplate | WorkflowInstance | TransitionPlan]
 Date: 2026-MM-DD
 

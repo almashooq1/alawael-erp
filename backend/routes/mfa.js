@@ -4,6 +4,7 @@
  */
 
 const express = require('express');
+const crypto = require('crypto');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 const safeError = require('../utils/safeError');
@@ -100,8 +101,15 @@ router.post('/totp/verify', async (req, res) => {
 router.post('/backup-codes/generate', async (req, res) => {
   try {
     const MFASettings = require('../models/MFASettings');
+    // MFA backup codes BYPASS the second factor — they're auth-equivalent
+    // to a password. `Math.random()` is a Mersenne-Twister derivative,
+    // predictable from ~624 outputs; generating 10 codes from the same
+    // sequence lets an attacker who observed ANY prior Math.random output
+    // in the same process narrow the codes to a tractable search space.
+    // crypto.randomBytes is the cryptographic-strength alternative the
+    // rest of the codebase already uses for token/secret generation.
     const codes = Array.from({ length: 10 }, () =>
-      Math.random().toString(36).substring(2, 10).toUpperCase()
+      crypto.randomBytes(5).toString('hex').toUpperCase()
     );
     await MFASettings.findOneAndUpdate(
       { userId: req.user._id },

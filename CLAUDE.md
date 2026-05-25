@@ -199,6 +199,58 @@ New intent `policy.query` (17th intent) at `intelligence/parent-chatbot.registry
 - **Bootstrap-with-cron template**: env-gated (`ENABLE_X_CRON=true`), branch-scoped (`X_BRANCH_IDS=b1,b2`), per-iteration `try/catch`, `loadOptional` for `node-cron`, Asia/Riyadh timezone.
 - **Idempotency via `sha256(immutable inputs)`**: same input → same key, cron retries don't create phantom batches.
 
+## W356–W376 Clinical Services Series (shipped 2026-05-25, 25 commits across 2 repos)
+
+Single-session build closing every actionable gap from the `docs/architecture/MODULE_AUDIT_2026-05-25.md` audit. 10 backend modules + 30 frontend pages + 11 cron sweepers + 21 canonical schemas + 45 CBAHI standards. **~22,800 LOC**, **674+ drift assertions**. Series origin commit `599e057b7`, terminal commit `64acf9da9` on `alawael-erp`; frontend `75f63f2` → `3351230` on `alawael-rehab-platform`.
+
+### Backend modules (W356–W370) — full route surface
+
+| Wave        | Module                                                                                        | Path                 | Endpoints |
+| ----------- | --------------------------------------------------------------------------------------------- | -------------------- | --------- |
+| W356        | `SeizureEvent` (ILAE 2017 + status-epilepticus virtual ≥300s)                                 | `/seizure-log`       | 11        |
+| W357        | `SafeguardingConcern` (CBAHI + Saudi child-protection authority)                              | `/safeguarding`      | 13        |
+| W358        | `CommunicationAidProfile` (ASHA-aligned AAC, singleton per beneficiary)                       | `/communication-aid` | 12        |
+| W359        | `AssistiveDevice` (loan + maintenance lifecycle)                                              | `/assistive-device`  | 20        |
+| W360 + W367 | `CbahiAttestation` + 45-standard `intelligence/cbahi-standards.registry.js` across 8 chapters | `/cbahi`             | 16        |
+| W361        | `TransitionPlan` (5 life-stage transitions + readiness scoring)                               | `/transition-plan`   | 15        |
+| W362        | `AdaptiveSportsProgram` (19 sports + medical-clearance gate for high demand)                  | `/adaptive-sports`   | 17        |
+| W363        | `RespiteBooking` (8-state booking lifecycle, mandatory emergency contact)                     | `/respite`           | 17        |
+| W368        | `BeneficiaryDietPrescription` (IDDSI dysphagia + NPO + enteral)                               | `/diet-prescription` | 17        |
+| W369        | `FacilityAsset` (26-category PPM + regulatory certificates + life-safety)                     | `/facility-asset`    | 19        |
+
+### Operational layer
+
+- **W364 + W370 — `startup/clinicalSweepersBootstrap.js`**: 11 cron sweepers wired into `app.js` after `riskSweeperBootstrap`. Each independently `ENABLE_*_SWEEPER=true` env-gated, Asia/Riyadh timezone, `loadOptional` for `node-cron`. **Only `ENABLE_RESPITE_NOSHOW_SWEEPER` mutates state** (approved/confirmed → no_show after 24h no check-in). W364 drift guard asserts `.save()` count === 1 across the file — adding a second mutating sweeper requires updating baseline.
+- **W365 + W370 — sprint-tests.txt enumeration**: 12 W356-W370 drift guards gated by `npm run test:sprint`. Re-running selectively: `cd backend && npx jest --config=jest.config.js __tests__/{seizure-log-wave356,safeguarding-wave357,communication-aid-wave358,assistive-device-wave359,cbahi-wave360,transition-plan-wave361,adaptive-sports-wave362,respite-wave363,clinical-sweepers-wave364,canonical-schemas-wave366,diet-prescription-wave368,facility-asset-wave369}.test.js --no-coverage` — ~525 assertions in <10s.
+- **W366 + W370 — canonical catalog**: 8 + 2 new Zod schemas under `intelligence/canonical/schemas/`. Catalog grew 11 → 21 entries. Each schema is a thin Zod mirror of its Mongoose model. Use via `const { canonical } = require('./intelligence/canonical'); canonical.SeizureEvent.safeParse(payload)`.
+
+### Frontend (W372–W376, `alawael-rehab-platform/apps/web-admin`)
+
+30 Next.js 15 pages: 10 list + 10 detail (`[id]`) + 10 create-form (`new`). All under `apps/web-admin/src/app/(dashboard)/<surface>/`. **Template**: `seizure-log` is the reference implementation; the other 9 surfaces follow it line-for-line with field name changes. Conventions:
+
+- `useBeneficiaryFilter` + `BeneficiaryFilterBanner` on per-beneficiary surfaces (singletons use `/by-beneficiary/:id`).
+- Stats tiles highlight breach states (red border + `bg-red-50`) — status-epilepticus / overdue-loan / expired-cert / critical-no-supervisor / life-safety-OOS.
+- Detail pages have CONTEXTUAL action buttons — only the W356-W370 transitions still applicable for current status are rendered.
+- Forms surface Wave-18 invariants as client-side conditional required fields (e.g. injury=true → injuryNotes required), with server as final authority.
+
+Nav entries registered at `components/layout/nav-items.v2.tsx` clinical section (12 entries — seizure-log + 9 W373 list pages + 2 pre-existing AAC/nutrition that link to legacy surfaces).
+
+### Open ADR (single stakeholder-blocked item touching this series)
+
+[`docs/architecture/decisions/026-iep-ifsp-care-plan-fragmentation.md`](docs/architecture/decisions/026-iep-ifsp-care-plan-fragmentation.md) — 🟡 Proposed. 3-way fragmentation (W41 CarePlanVersion / W200b IndividualEducationPlan / `early-intervention/IFSP`) blocks IEP/IFSP consolidation. W361 TransitionPlan deliberately cross-links both `CarePlanVersion` AND `IndividualEducationPlan` to stay neutral. Until ADR-026 resolves, do NOT add IEP/IFSP plan types to `intelligence/care-planning.registry.PLAN_TYPES` — would create 4-way fragmentation.
+
+### Ops cutover
+
+[`docs/architecture/PRODUCTION_CUTOVER_W356_W370.md`](docs/architecture/PRODUCTION_CUTOVER_W356_W370.md) is the single source of truth for activating the modules in prod. Topics: 10 Mongoose collection registrations, 157 endpoint mounts, 12 role names needing auth-provider provisioning (`safeguarding_lead`, `dietitian`, `speech_language_pathologist`, `physician`, `facility_manager`, `maintenance`, `safety_officer`, `compliance`, `inventory`, `coach`, `social_worker`, `kitchen`), 11 env-flag activation order (read-only sweepers first, mutating respite no-show last), CBAHI 45-standard usage, sprint-gated CI verification, monitoring tiers.
+
+### Pattern recap (when extending this series)
+
+- **Audit-first discipline**: 6 of 10 "🔴 missing" gaps from the 2026-05-24 user analysis turned out to already exist (RestraintSeclusion W193b, eMAR W191b, NPHIES, IEP W200b, kitchen.model, laundry.model). Save ~6 wasted duplicate-build waves: grep before scoping. See `feedback_audit_doctrine_prompts_against_source` memory entry.
+- **Atomic-wave pattern**: every backend wave shipped as one commit with `model + routes + features.registry mount + drift guard test`. Frontend pages similarly batched. No partial-state commits.
+- **Wave-18 invariants discipline**: every new model declares `__invariants` virtual path + `path('__invariants').validate(fn)` + `this.invalidate(field, msg)` for each rule. Drift guard regex-asserts the exact invalidate calls present in source.
+- **Ratchet-up baseline pattern**: W360 (20 standards) → W367 (45 standards) followed the W325c phantom-ref recipe — baselines ratchet UP only; deletions require explicit deprecation marking.
+- **Wave numbers W356–W376 consumed.** Next available: **W377+** (W377 = this CLAUDE.md update).
+
 ## Open known issues (as of 2026-05-23)
 
 - ~~documentWorkflow / documentTemplates engine skips~~ — **resolved 2026-05-19** in commits `8fe0b2264` + `4e509eec2`. The 4 stale skips (escalateOverdue + 3 `new X(...)` blocks) are now all green. Pattern recap: prefer lazy `mongoose.model('X')` lookup at constructor sites instead of capturing the model reference at module load, so unit tests can intercept via `mongoose.model.mockImplementation`.

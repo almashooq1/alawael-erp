@@ -28,14 +28,14 @@
 
 ### Public Endpoints
 
-```
+```text
 ✅ GET  /api/lms/courses           - Get all courses (supports query params)
 ✅ GET  /api/lms/courses/:id       - Get course details by ID
 ```
 
 ### Protected Endpoints (Require Authentication)
 
-```
+```text
 🔒 POST   /api/lms/courses                           - Create new course
 🔒 PUT    /api/lms/courses/:id                       - Update course
 🔒 DELETE /api/lms/courses/:id                       - Delete course
@@ -119,7 +119,7 @@ module.exports = new ELearningService();
 
 ### Automated Tests (3/3 Passed)
 
-```
+```text
 ✅ Query params (filter by category)
 ✅ Course detail by ID
 ✅ Root endpoint responding
@@ -250,15 +250,18 @@ npm start
 ## 🔄 Next Steps (Optional)
 
 1. **Frontend Integration Testing**
+
    - Open http://localhost:3002
    - Navigate to eLearning section
    - Test course browsing and enrollment UI
 
 2. **Authentication Testing**
+
    - Test protected endpoints with auth token
    - Verify authorization for admin/instructor actions
 
 3. **Database Migration**
+
    - Set `USE_MOCK_DB=false` when ready to use MongoDB Atlas
    - Update `.env` with `MONGODB_URI`
 

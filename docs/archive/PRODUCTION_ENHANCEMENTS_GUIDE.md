@@ -259,7 +259,7 @@ app.get('/api/stats', cacheMiddleware(CacheDurations.MEDIUM), ...);
 
 ### أفضل الممارسات Best Practices
 
-```
+```text
 ✅ Cache stable data with LONG or HOUR duration
 ✅ Use SHORT for frequently changing data
 ✅ Clear cache after data updates
@@ -302,7 +302,7 @@ LOG_MAX_SIZE=10         # Max file size in MB
 
 ### موقع ملفات السجلات Log Files Location
 
-```
+```text
 dashboard/server/
 └── logs/
     ├── dashboard-2026-03-02.log
@@ -312,7 +312,7 @@ dashboard/server/
 
 ### تنسيق السجلات Log Format
 
-```
+```text
 [2026-03-02T10:30:45.123Z] [INFO] [req-abc123] User logged in: {"userId":456}
 [2026-03-02T10:31:12.456Z] [WARN] [req-def456] Slow request detected: 1523ms GET /api/data
 [2026-03-02T10:32:00.789Z] [ERROR] Database error: Connection timeout
@@ -320,7 +320,7 @@ dashboard/server/
 
 ### التناوب التلقائي Automatic Rotation
 
-```
+```text
 - New file created daily
 - Old files rotated when exceeding LOG_MAX_SIZE
 - Files compressed automatically (gzip)
@@ -417,7 +417,7 @@ HEALTH_ERROR_RATE_CRITICAL=10 # Critical at 10% error rate
 
 ### حالات الصحة Health States
 
-```
+```text
 ✅ healthy - All systems operational
   - Memory < 85%
   - CPU < 70%
@@ -513,7 +513,7 @@ PERF_MAX_HISTORY=1000              # Keep last 1000 operations
 
 ### اقتراحات التحسين Optimization Suggestions
 
-```
+```text
 النظام يقدم اقتراحات تلقائية بناءً على:
 The system provides automatic suggestions based on:
 

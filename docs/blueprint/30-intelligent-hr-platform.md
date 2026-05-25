@@ -237,7 +237,7 @@ verified.
 
 ## Endpoint reference (full Phase 30 surface)
 
-```
+```text
 # Workflow Automation
 GET    /api/v1/hr/workflow/rules                — list rules + readiness
 POST   /api/v1/hr/workflow/run                  — execute every enabled rule
@@ -271,7 +271,7 @@ GET    /api/v1/hr/me/access-log                 — PDPL Art. 18 DSAR
 
 ## UI surface (23 pages under /hr/_ + /me/_)
 
-```
+```text
 /hr/employees                     — list + new + [id]
 /hr/departments                   — read-only registry
 /hr/attendance                    — daily dashboard

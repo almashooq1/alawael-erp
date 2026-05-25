@@ -74,7 +74,7 @@ Alawael ERP System data, ensuring business continuity and data protection.
 
 ### Backup Types
 
-```
+```text
 ┌─────────────────────────────────────────────────┐
 │           BACKUP SCHEDULE                       │
 ├─────────────────────────────────────────────────┤
@@ -635,7 +635,7 @@ aws s3 mv /backup/ s3://alawael-backups/ --recursive
 
 ## 📝 Backup Checklist
 
-```
+```text
 Daily Backup Checklist:
 □ Automated backup completed
 □ Backup uploaded to S3

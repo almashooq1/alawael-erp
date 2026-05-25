@@ -74,7 +74,7 @@ Flags:
 
 Output:
 
-```
+```text
 === Backfill complete in 12.3s ===
 Totals: { scanned: 1547, issued: 1547, skipped: 0 }
 

@@ -26,7 +26,7 @@ unified admin + mobile + parent surface.
 
 ## 2. Architecture
 
-```
+```text
  ┌─ each branch ──────────────────┐         ┌─ central (backend) ─────────────┐
  │                                │         │                                  │
  │  Cameras ── RTSP/HTTPS ── NVR ─┼─event─→ │   /api/v1/cctv/webhooks/nvr/:c  │
@@ -178,7 +178,7 @@ curl -s -H "Authorization: Bearer $TOK" "https://alaweal.org/api/v1/cctv/alerts?
 
 ## 7. Tests
 
-```
+```text
 backend/__tests__/cctv-adapter.test.js              13 tests
 backend/__tests__/cctv-event-service.test.js         8 tests
 backend/__tests__/cctv-webhook-hmac.test.js          7 tests

@@ -67,7 +67,7 @@
 
 ### Backend Architecture
 
-```
+```text
 backend/
 ├── api/
 │   └── routes/
@@ -82,7 +82,7 @@ backend/
 
 ### Frontend Architecture
 
-```
+```text
 frontend/
 └── src/
     ├── components/
@@ -381,7 +381,7 @@ const analytics = await workflowService.getWorkflowAnalytics({
 
 ## 📊 Workflow Lifecycle
 
-```
+```text
 [إنشاء] ──────► [بدء المرحلة 1] ──────► [موافقة/رفض]
   ▼                    ▼                      ▼
 [تهيئة]          [قيد التنفيذ]          [المرحلة التالية]

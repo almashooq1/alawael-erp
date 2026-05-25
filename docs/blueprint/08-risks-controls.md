@@ -395,7 +395,7 @@
 
 ## 9. Risk Summary Dashboard
 
-```
+```text
 Critical (10-12):  R-01 (PDPL)
 High (7-9):        R-02 (PHI breach), R-08 (Clinical harm), R-09 (Therapist turnover),
                     R-16 (Security vulns)

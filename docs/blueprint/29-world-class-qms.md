@@ -76,7 +76,7 @@ Four pillars, each delivered as full vertical slices (model + service + routes +
 
 ### API surface
 
-```
+```text
 GET    /api/v1/fmea/reference
 GET    /api/v1/fmea/dashboard?branchId=
 GET    /api/v1/fmea?status=&type=&scale=&limit=&skip=
@@ -150,7 +150,7 @@ The service emits `quality.fmea.high_priority_detected`; any subscriber on `qual
 
 ### API surface
 
-```
+```text
 GET    /api/v1/rca/reference
 GET    /api/v1/rca/dashboard?branchId=
 GET    /api/v1/rca?status=&severity=&limit=&skip=
@@ -199,7 +199,7 @@ POST   /api/v1/rca/:id/cancel
 
 ### API surface
 
-```
+```text
 GET    /api/v1/spc/reference
 GET    /api/v1/spc/dashboard?branchId=
 GET    /api/v1/spc?status=&chartType=&limit=&skip=
@@ -242,7 +242,7 @@ POST   /api/v1/spc/:id/archive
 
 ### API surface
 
-```
+```text
 GET    /api/v1/pareto-a3/reference
 POST   /api/v1/pareto-a3/pareto/compute
 GET    /api/v1/pareto-a3/pareto/incidents?branchId=&fromDate=&toDate=&groupBy=&threshold=
@@ -297,7 +297,7 @@ POST   /api/v1/pareto-a3/a3/:id/cancel
 
 ### API surface
 
-```
+```text
 GET    /api/v1/standards
 GET    /api/v1/standards/dashboard?branchId=
 GET    /api/v1/standards/:code/reference
@@ -350,7 +350,7 @@ DELETE /api/v1/standards/:code/clauses/:clauseCode/evidence/:linkId
 
 ### API surface
 
-```
+```text
 GET    /api/v1/controlled-documents/reference
 GET    /api/v1/controlled-documents/dashboard?branchId=
 GET    /api/v1/controlled-documents?branchId=&type=&q=

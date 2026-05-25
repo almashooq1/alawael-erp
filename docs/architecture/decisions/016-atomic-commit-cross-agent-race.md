@@ -12,7 +12,7 @@ During the P3-closure session (2026-05-18/19), multiple Claude agents worked
 in parallel against the same git repo — one on the chatbot vertical, others
 on the attendance platform. Standard workflow was:
 
-```
+```text
 1. Edit files
 2. Run tests
 3. Lint

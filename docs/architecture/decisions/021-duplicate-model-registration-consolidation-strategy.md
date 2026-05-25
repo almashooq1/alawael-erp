@@ -163,7 +163,7 @@ The naming collision (`entityType` vs `auditableType`) means callers expecting o
 
 For each Tier 1 entry, walk this decision tree:
 
-```
+```text
 1. Compare the N schemas side-by-side.
    ├─ If they're operationally the SAME entity (similar fields, same intent):
    │     → Pattern A or B: consolidate via canonical re-export. Pick richest.

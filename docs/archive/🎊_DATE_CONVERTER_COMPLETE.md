@@ -97,7 +97,7 @@
 
 ### البنية المعمارية
 
-```
+```text
 Enterprise System
 ├── Frontend
 │   └── DateConverterComponent.js
@@ -185,15 +185,18 @@ batch(['2025-01-16', '2025-01-17', '2025-01-18']);
 ### المكونات
 
 1. **Header Section**
+
    - عنوان جميل مع أيقونات
    - وصف النظام وتقويم أم القرى
 
 2. **Tab 1: تحويل التاريخ**
+
    - تحويل ميلادي إلى هجري
    - تحويل هجري إلى ميلادي
    - عرض المعلومات فوراً
 
 3. **Tab 2: معلومات شاملة**
+
    - معلومات يوم واحد
    - عرض متعدد الأعمدة
    - تنسيق احترافي
@@ -209,7 +212,7 @@ batch(['2025-01-16', '2025-01-17', '2025-01-18']);
 
 ### الاختبارات المضافة
 
-```
+```text
 ✓ DateConverterService (7 test suites)
   ✓ gregorianToHijri (3 tests)
   ✓ hijriToGregorian (3 tests)
@@ -247,7 +250,7 @@ Time:        < 5 seconds ⚡
 
 ## 📋 الملفات المنشأة
 
-```
+```text
 backend/
 ├── services/
 │   └── DateConverterService.js          [✅ جديد]
@@ -366,6 +369,7 @@ const handleDateChange = date => {
 ### الملفات التوثيقية
 
 1. **📅_DATE_CONVERTER_COMPLETE_GUIDE.md**
+
    - دليل شامل (900+ سطر)
    - جميع الدوال والـ endpoints
    - أمثلة عملية

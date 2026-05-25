@@ -118,7 +118,7 @@ clinical-role permission gate.
 already-mounted services (capa-admin, quality-narrative). These can
 mount safely under `quality_compliance` group with read/write split.
 
-```
+```text
 quality{CommandCenter,Controls,HealthScore,Narrative}.routes
 managementReview.routes · capa-admin.routes
 controlledDocument.routes (21 CFR Part 11 — needs e-sig binding)
@@ -149,7 +149,7 @@ launch plan. Mounting partial fleet ≠ mounting the whole.
 
 ## Medium-tier orphans (Education 13 + Dashboards 13)
 
-```
+```text
 EDU (13): student-{certificates,complaints,elearning,events,
           health-tracker,management,rewards-store} · cms ·
           elearning · montessoriAuth · communityAwarenessRoutes ·

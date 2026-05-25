@@ -67,7 +67,7 @@ gantt
 
 ## 1. النظرة العامة
 
-```
+```text
 Phase P0 — Stabilize                        (0–4 أسابيع)
          │
          ▼
@@ -533,7 +533,7 @@ Phase P5 — Continuous Improvement           (دائم)
 
 ## 10. Budget Heat-map (نسبي)
 
-```
+```text
 P0 Stabilize       █ (low — internal effort)
 P1 Foundation      ████████ (high — integrations + ABAC + PDPL)
 P2 Portals         ██████ (medium-high — mobile dev)

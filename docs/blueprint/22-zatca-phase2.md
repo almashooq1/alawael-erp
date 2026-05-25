@@ -16,7 +16,7 @@
 
 ## Architecture (post-wiring)
 
-```
+```text
 Invoice.save()                           Invoice.save() with ZATCA_AUTOSUBMIT=true
        │                                          │
        ▼                                          ▼
@@ -110,7 +110,7 @@ The hook (`backend/services/invoiceZatcaHook.js`) implements:
    `POST /production-csid`. Until this step the credential cannot send
    real invoices.
 4. **Set env vars on the VPS:**
-   ```
+   ```text
    ZATCA_SIGNER_MODE=live
    FATOORA_MODE=live
    FATOORA_BASE_URL=https://gw-fatoora.zatca.gov.sa/e-invoicing/core
@@ -148,7 +148,7 @@ The hook (`backend/services/invoiceZatcaHook.js`) implements:
 
 ## Tests
 
-```
+```text
 backend/tests/unit/invoiceZatcaHook.test.js           # 21 tests (hook bridge + real-time alerting)
 backend/tests/unit/zatca-submission-rejected.rule.test.js  #  6 tests (alert rule sweep)
 backend/__tests__/zatca-xml-signer.e2e.test.js        # XML canonicalization + signing
@@ -160,13 +160,13 @@ backend/tests/unit/zatcaCalculation.service.test.js   # VAT math
 
 Run the hook tests in isolation:
 
-```
+```text
 npx jest tests/unit/invoiceZatcaHook.test.js --no-coverage
 ```
 
 Run the full ZATCA suite via the existing sprint shortcut:
 
-```
+```text
 npm run test:zatca-signer
 ```
 
@@ -193,7 +193,7 @@ might breach dozens of invoices in one tick.
 
 Per-tick output:
 
-```
+```text
 { scanned, retried, retrySucceeded, retryFailed, breached, breachAlerted, breachIds }
 ```
 
@@ -202,7 +202,7 @@ Per-tick output:
 Same shape as `nphiesReconciliationScheduler` (start/stop/tick/getStats).
 Cadence default 30 minutes. Env vars:
 
-```
+```text
 ZATCA_SLA_INTERVAL_MS=1800000     # default 30 min
 ZATCA_SLA_BATCH_SIZE=50
 ZATCA_SLA_WARN_MS=64800000        # 18h

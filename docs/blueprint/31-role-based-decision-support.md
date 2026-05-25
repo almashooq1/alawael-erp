@@ -21,7 +21,7 @@ A branch manager and a therapist see the SAME card component for "Stalled goals"
 
 ## 2. Density presets
 
-```
+```text
 LOW       4–6 KPI tiles per fold, large numerals, big spacing,
           headline-first. For executives.
 MEDIUM    8–12 tiles, mixed chart sizes, breadcrumbs visible.
@@ -179,7 +179,7 @@ The same component renders differently based on the consuming dashboard's `densi
 
 A role's `restrictedData` array specifies which fields/sections to mask:
 
-```
+```text
 clinical_phi    — diagnosis, assessment scores, treatment notes
 financial       — invoice amounts, payment details, claim data
 hr_compensation — salary, allowances, bonuses

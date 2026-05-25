@@ -91,7 +91,7 @@
 
 ### services/ (11 خدمة)
 
-```
+```text
 backup-service/    file-processor/    iot-gateway/
 log-aggregator/    python-ml/         queue-worker/
 report-worker/     saudi-gov-gateway/ scheduler/
@@ -100,7 +100,7 @@ search-service/    webhook-worker/
 
 ### backend/ (52 مجلد — بعد حذف 31)
 
-```
+```text
 Core:           api/ auth/ controllers/ domains/ errors/ models/ routes/ services/ startup/
 Infrastructure: config/ constants/ database/ events/ infrastructure/ integration/
                 middleware/ locales/ utils/ validators/ repositories/
@@ -115,7 +115,7 @@ DevOps:         docs/ scripts/
 
 ### Docker Services (Production - 19)
 
-```
+```text
 Infrastructure: mongodb, redis
 Core:           backend, frontend, nginx, api-gateway
 AI:             intelligent-agent, python-ml
@@ -129,7 +129,7 @@ Integration:    saudi-gov-gateway, iot-gateway
 
 ## التحقق النهائي ✅
 
-```
+```text
 [CrossModule] Initialized 23/23 cross-module subscribers     ✅
 [DDD-CrossModule] 15/15 DDD event subscribers registered     ✅
 [DDD-Notify] 10/10 notification triggers registered          ✅
@@ -153,7 +153,7 @@ app.js: تحميل ناجح                                          ✅
 
 ## الأرشيف الكامل
 
-```
+```text
 _archived/
 ├── dead-laravel-*/        → 12 مجلد Laravel
 ├── dead-services/         → 11 ملف خدمة وكيلة

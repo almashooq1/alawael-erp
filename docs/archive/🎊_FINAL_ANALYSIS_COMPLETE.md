@@ -59,7 +59,7 @@
 
 ### خطوة 1: الفهم (1 ساعة)
 
-```
+```text
 اقرأ:
 1. ⚡_QUICK_2_MINUTE_SUMMARY.md (2 دقيقة)
 2. 🎯_START_HERE_DEPLOYMENT.md (5 دقائق)
@@ -70,7 +70,7 @@
 
 ### خطوة 2: التحضير (1 ساعة)
 
-```
+```text
 طبّق:
 1. فحص النظام: python pre_deployment_system_checker.py
 2. قائمة تحقق: python FINAL_PRE_DEPLOYMENT_CHECKLIST.py
@@ -80,7 +80,7 @@
 
 ### خطوة 3: النشر (1.5 ساعة)
 
-```
+```text
 اتبع:
 🚀_HOSTINGER_DEPLOYMENT_COMPLETE_GUIDE.md
 - تحضير Hostinger
@@ -91,7 +91,7 @@
 
 ### خطوة 4: المراقبة (0.5 ساعة)
 
-```
+```text
 راقب:
 - الأداء
 - الأخطاء
@@ -103,7 +103,7 @@
 
 ## 📈 ملخص الحالة:
 
-```
+```text
 الجاهزية:      ✅ 100%
 الأمان:         ✅ 100%
 الأداء:         ✅ 100%
@@ -138,7 +138,7 @@ python FINAL_PRE_DEPLOYMENT_CHECKLIST.py
 
 ## 🏆 النتيجة النهائية:
 
-```
+```text
 ✨ نظام AlAwael ERP System
 ✨ معتمد للنشر 100%
 ✨ آمن وموثوق وعالي الأداء

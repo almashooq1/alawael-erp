@@ -10,7 +10,7 @@
 
 ### 1️⃣ **frontend/src/services/api.js** ✨ جديد
 
-```
+```text
 ✅ Centralized API service layer
 ✅ 6 API modules: modules, dashboard, notifications, search, analytics, health
 ✅ Utility functions: withMockFallback, retryFetch
@@ -28,7 +28,7 @@
 
 ### 2️⃣ **frontend/src/pages/Home.js** 🔄 محدث
 
-```
+```text
 ✅ useEffect لاستدعاء getTopKPIs من API
 ✅ Loading state
 ✅ Error handling مع Alert
@@ -45,7 +45,7 @@
 
 ### 3️⃣ **frontend/src/pages/Dashboard.js** 🔄 محدث
 
-```
+```text
 ✅ fetchDashboardData مع Promise.all
 ✅ getSummarySystems + getTopKPIs
 ✅ Error handling مع Warning Alert
@@ -63,7 +63,7 @@
 
 ### 4️⃣ **frontend/src/pages/ModulePage.js** 🔄 محدث
 
-```
+```text
 ✅ modulesAPI.getModuleData(moduleKey)
 ✅ State management: data, error
 ✅ Automatic mock fallback per module
@@ -81,7 +81,7 @@
 
 ### 5️⃣ **frontend/src/components/NotificationsPopover.js** 🔄 محدث
 
-```
+```text
 ✅ notificationsAPI.getNotifications(10)
 ✅ Fetch when popover opens
 ✅ markAsRead(notificationId) on click
@@ -100,7 +100,7 @@
 
 ### Modules
 
-```
+```text
 GET  /api/modules/summary          → { modules: [...] }
 GET  /api/modules/{moduleKey}       → { kpis, items, actions, charts }
 GET  /api/modules/{moduleKey}/kpis  → { kpis: [...] }
@@ -110,7 +110,7 @@ GET  /api/modules/{moduleKey}/charts→ { charts: {...} }
 
 ### Dashboard
 
-```
+```text
 GET  /api/dashboard                 → { summaryCards, topKPIs }
 GET  /api/dashboard/systems         → { systems: [...] }
 GET  /api/dashboard/top-kpis?limit=4 → { data: [...] }
@@ -118,7 +118,7 @@ GET  /api/dashboard/top-kpis?limit=4 → { data: [...] }
 
 ### Notifications
 
-```
+```text
 GET  /api/notifications?limit=10    → { notifications: [...] }
 GET  /api/notifications/unread-count → { count: number }
 PATCH /api/notifications/{id}/read  → { success: true }
@@ -127,7 +127,7 @@ DELETE /api/notifications/{id}      → { success: true }
 
 ### Search & Analytics
 
-```
+```text
 GET  /api/search?q=...&category=... → { results: [...] }
 GET  /api/search/suggestions?q=...  → { suggestions: [...] }
 GET  /api/analytics/{moduleKey}?... → { data: {...} }
@@ -138,7 +138,7 @@ GET  /api/analytics/{moduleKey}/{kpiKey}/trend?days=30 → { trend: [...] }
 
 ## 🛡️ البنية المعمارية:
 
-```
+```text
 Frontend                          Backend
 ┌─────────────────────┐           ┌──────────────┐
 │  Components/Pages   │           │   Express    │

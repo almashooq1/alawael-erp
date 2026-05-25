@@ -219,7 +219,7 @@
 
 ## 🔄 دورة حياة سير العمل / Workflow Lifecycle
 
-```
+```text
 ┌─────────────┐
 │  إنشاء      │
 │  Create     │
@@ -365,7 +365,7 @@ npm test -- workflows.test.js
 
 **النتائج المتوقعة:**
 
-```
+```text
 ✅ GET /api/templates - should return all workflow templates
 ✅ POST /api/workflows - should create a new workflow successfully
 ✅ GET /api/workflows - should get all workflows

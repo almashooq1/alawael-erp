@@ -33,16 +33,19 @@
 ### المكونات:
 
 1. **AI Prediction Models** (`backend/models/prediction.model.js`)
+
    - دعم 4 أنواع تنبؤات
    - مع fallback للذاكرة
 
 2. **AI Services** (`backend/services/ai-predictions.service.js`)
+
    - `predictPerformance()` - التنبؤ بالأداء
    - `predictChurn()` - التنبؤ بالتوقف
    - `predictBehavior()` - تحليل السلوك
    - `predictTrends()` - تحليل الاتجاهات
 
 3. **API Endpoints:**
+
    - `POST /api/ai-predictions/predict-performance`
    - `GET /api/ai-predictions/predict-churn/:userId`
    - `GET /api/ai-predictions/predict-behavior/:userId`
@@ -51,6 +54,7 @@
    - `GET /api/ai-predictions/recommendations/:userId`
 
 4. **Frontend Components:**
+
    - `AIAnalyticsDashboard.jsx` - لوحة تحكم AI
 
 5. **Testing:**
@@ -264,7 +268,7 @@
 
 ### Backend Architecture:
 
-```
+```text
 backend/
 ├── models/           # 10+ نماذج بيانات
 ├── services/         # خدمات الأعمال
@@ -277,7 +281,7 @@ backend/
 
 ### Frontend Architecture:
 
-```
+```text
 frontend/src/
 ├── components/       # مكونات React
 ├── pages/            # الصفحات

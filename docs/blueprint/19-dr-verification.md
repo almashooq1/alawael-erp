@@ -20,7 +20,7 @@
 
 ## How it works
 
-```
+```text
                                 ┌──────────────┐
 backupMongoDB() fails ─────────►│ ops-alerter  │── whatsapp ─► on-call
                                 │              │── sms ──────► on-call
@@ -214,7 +214,7 @@ is forward-compatible.
 
 ## Tests
 
-```
+```text
 backend/tests/unit/ops-alerter.test.js     #  5 tests
 backend/tests/unit/dr-verify.test.js       #  9 tests
 backend/tests/unit/backup-crypto.test.js   # 16 tests (incl. tamper detection)

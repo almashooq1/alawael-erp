@@ -275,7 +275,7 @@ pm2 logs alawael-frontend
 
 ### File: /etc/logrotate.d/alawael
 
-```
+```text
 /var/log/nginx/alawael-* {
     daily
     rotate 7

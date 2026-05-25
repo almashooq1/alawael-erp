@@ -25,7 +25,7 @@ Audit results are captured in
 
 ## 3. Compliance Framework (4 Layers)
 
-```
+```text
 L1 · Regulations Registry    — standards + clauses (CBAHI/JCI/MOH/ISO/PDPL/SFDA)
   │
 L2 · Control Library         — one control = one testable assertion
@@ -84,7 +84,7 @@ L4 · Evidence & Attestation  — EvidenceItem (hashed + signed + retention-awar
 
 ### 5.3 State machine
 
-```
+```text
  scheduled ──► agenda_set ──► in_progress ──► decisions_recorded
                                                      │
                                                      ▼

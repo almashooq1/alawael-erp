@@ -570,26 +570,31 @@ app.get('/api/protected', verifyToken, (req, res) => {
 ### تدابير الأمان المطبقة
 
 1. **Password Hashing**
+
    - استخدام Bcrypt مع 10 جولات
    - كلمات مرور قوية إجبارية
    - عدم تخزين كلمات مرور عادية
 
 2. **JWT Tokens**
+
    - توقيع آمن (HS256)
    - انتهاء الصلاحية
    - Refresh Token
 
 3. **Input Validation**
+
    - التحقق من صيغة البريد
    - التحقق من صيغة الجوال
    - التحقق من صيغة الهوية
    - التحقق من اسم المستخدم
 
 4. **Rate Limiting** (جاهز)
+
    - تحديد محاولات الدخول
    - حماية من Brute Force
 
 5. **Audit Logging**
+
    - تسجيل جميع عمليات الدخول
    - تسجيل محاولات فاشلة
    - تسجيل IP والجهاز
@@ -621,7 +626,7 @@ npm test -- --watch
 
 ### نتائج الاختبارات المتوقعة
 
-```
+```text
 ✅ Input Validation (15 tests)
    ✓ Email validation
    ✓ Phone validation

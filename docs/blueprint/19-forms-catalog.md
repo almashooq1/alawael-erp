@@ -72,7 +72,7 @@ infrastructure" into "ERP with forms ready out of the box".
 
 ## Architecture
 
-```
+```text
 backend/config/forms-catalog.registry.js   ← 32 frozen catalog entries (pure data)
                 ↓
 backend/services/formsCatalogService.js    ← list / get / instantiate (DI'd model)
@@ -168,7 +168,7 @@ npm run test:forms-catalog
 
 ## Touched files
 
-```
+```text
 backend/config/forms-catalog.registry.js               (new, 700+ lines)
 backend/services/formsCatalogService.js                (new)
 backend/routes/forms-catalog.routes.js                 (new)

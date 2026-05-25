@@ -6,7 +6,7 @@
 
 ## 1. المستويات الستة (Role Hierarchy)
 
-```
+```text
                         ┌─────────────────────────────────┐
   L1  SUPER_ADMIN       │ المنصة كاملة + إعدادات تقنية  │   Platform level
                         └────────────────┬────────────────┘
@@ -435,7 +435,7 @@ break-glass:
 
 ## 7. ABAC Engine Implementation Outline
 
-```
+```text
 ┌─────────────────────────┐
 │ Policy Store (YAML)     │  مصدر الحقيقة
 │ /config/abac-policies/  │

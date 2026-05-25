@@ -53,7 +53,7 @@ pytest --cov=backend --cov-report=html
 
 **النتائج المتوقعة:**
 
-```
+```text
 ✅ 22/22 tests passing
 ✅ Coverage: 95%+
 ✅ جميع النقاط النهائية تعمل
@@ -105,7 +105,7 @@ python backend/scripts/add_sample_data.py
 
 **النتائج:**
 
-```
+```text
 ✅ 50 مستخدم
 ✅ 200 مستفيد
 ✅ 500 جلسة
@@ -153,7 +153,7 @@ socket.on('session_update', data => {
 
 **الأحداث المدعومة:**
 
-```
+```text
 ✅ session_started
 ✅ session_ended
 ✅ dashboard_update
@@ -182,7 +182,7 @@ git push
 
 **التحقق من الحالة:**
 
-```
+```text
 GitHub → Actions → Workflows
 ```
 
@@ -347,7 +347,7 @@ pytest backend/tests/test_security_performance.py \
 
 **الاختبارات المدرجة:**
 
-```
+```text
 ✅ API Key Management (5 tests)
 ✅ Two-Factor Auth (2 tests)
 ✅ Audit Logs (1 test)
@@ -362,7 +362,7 @@ pytest backend/tests/test_security_performance.py \
 
 ### استيراد المجموعة:
 
-```
+```text
 1. فتح Postman
 2. Import → Postman_Collection.json
 3. تعيين متغيرات البيئة

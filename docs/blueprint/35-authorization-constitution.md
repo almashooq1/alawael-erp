@@ -59,7 +59,7 @@ Each branch is a near-independent legal entity. Branch A's manager doesn't need 
 
 Every access decision passes through 5 layers, evaluated in order. **ALL must allow → access granted. ANY denies → access denied.**
 
-```
+```text
   ┌───────────────────────────────────────────────────────┐
   │ Layer 1 — IDENTITY                                    │
   │   Is the request authenticated? Is the session valid? │
@@ -86,7 +86,7 @@ Every access decision passes through 5 layers, evaluated in order. **ALL must al
 
 ### 2.2 The decision signature
 
-```
+```text
 decide({
   actor:    { userId, roles[], branchId, regionBranchIds[], mfaLevel,
               sessionAgeMin, emergencyAccess: { active, expiresAt, reason }, riskScore },
@@ -122,7 +122,7 @@ decide({
 
 ### 3.1 The 7-level ladder
 
-```
+```text
 GLOBAL          — all branches + HQ administrative data
    │
    ▼
@@ -166,7 +166,7 @@ TEMP_ELEVATED   — actor was granted a higher scope for a bounded time
 
 A user temporarily elevated to BRANCH from OWN keeps their identity, base role, base scope, AND adds an elevation:
 
-```
+```text
 actor.baseScope:        OWN
 actor.elevation: {
   toScope: BRANCH,
@@ -444,7 +444,7 @@ These combos, held by ONE actor, are **forbidden** (validated at role-grant time
 
 The decision layer (`decide()` in §2) enforces these at runtime:
 
-```
+```text
 SoD_RULES = [
   {
     id: 'invoice-self-approval',
@@ -555,7 +555,7 @@ For all roles: **bulk export of > 100 records ALWAYS requires step-up MFA + reco
 
 ### 7.1 The composite decision
 
-```
+```text
 allow ⇔
   rbac.role.holdsPermission(action)            (Layer 2)
   AND scope.entity ⊆ scope.actor                (Layer 3)
@@ -565,7 +565,7 @@ allow ⇔
 
 ### 7.2 Policy rule structure
 
-```
+```text
 {
   id:        string,
   appliesTo: { actions[] OR allActions },
@@ -600,7 +600,7 @@ allow ⇔
 
 Action: `finance.invoices.approve` on invoice `INV-2026-00123`.
 
-```
+```text
 Actor: { userId: U-7, roles: ['finance'], branchId: 'B-1', mfaLevel: 2, sessionAgeMin: 4 }
 Resource: { type: 'Invoice', id: 'INV-...', branchId: 'B-1', amount: 50000,
             createdBy: 'U-7', status: 'pending-approval', sensitivity: 'financial' }
@@ -646,7 +646,7 @@ The system surfaces the FIRST denial reason but ALWAYS records the full evaluati
 
 ### 8.2 The "branch-context propagation" pattern
 
-```
+```text
 Request enters → middleware extracts actor from JWT
                 ↓
                 Loads actor.roles, actor.branchId, actor.regionBranchIds, actor.elevation
@@ -774,7 +774,7 @@ If the user lacks permission, the button is **hidden, not disabled**. Disabled b
 
 ### 10.4 No-permission vs no-data states
 
-```
+```text
 ┌────────────────────────────┐    ┌────────────────────────────┐
 │ 🔒 You don't have access to │    │ 📭 No invoices yet          │
 │ this section.              │    │                            │
@@ -800,7 +800,7 @@ Critical distinction: a branch user seeing "0 invoices" in another branch is a S
 
 Approving an invoice > SAR 10,000 triggers a confirmation modal:
 
-```
+```text
 ┌─────────────────────────────────────────┐
 │ ⚠ Confirm Invoice Approval             │
 │                                          │
@@ -825,7 +825,7 @@ Approving an invoice > SAR 10,000 triggers a confirmation modal:
 
 When TEMP_ELEVATED is in effect:
 
-```
+```text
 🟠 ELEVATED ACCESS ACTIVE — Acting as Branch Manager for Branch Riyadh
    Expires in 47 min · All actions enhanced-audited · Reason: Branch manager on leave
                                                                        [ End Now ]
@@ -837,7 +837,7 @@ The banner is unmissable + clickable to view the full elevation record + click-t
 
 Inline on every list/card:
 
-```
+```text
 Invoice INV-2026-00123  [Branch: Riyadh]  [Status: pending]
 ```
 
@@ -849,7 +849,7 @@ Helps the user understand at a glance what they're looking at — and helps a ma
 
 ### 11.1 The 9 enforcement layers
 
-```
+```text
 1. JWT verification          (identity layer)
    ↓
 2. Session validity check     (revocation, MFA freshness)
@@ -1067,7 +1067,7 @@ The audit log uses a hash-chain (Phase 8 audit-hash-chain-service). Every entry 
 
 ### 13.2 The activation flow
 
-```
+```text
 1. User clicks "Request Emergency Access"
    ↓
 2. Form: { reason (required, ≥ 50 chars), durationMin (max 4h), scope }
@@ -1104,7 +1104,7 @@ Hard expiry. No "extend" — user must file a fresh request. This prevents indef
 
 Every emergency-access session triggers a mandatory review within 7 days:
 
-```
+```text
 Reviewer: super_admin (different from activator if possible)
 Form:
   - Was the reason valid?
@@ -1144,7 +1144,7 @@ If review flags misuse:
 
 ### 14.2 Review checklist (per user)
 
-```
+```text
 ☐ Still employed?
 ☐ Still in the same role?
 ☐ Still needs every permission they currently hold?
@@ -1196,7 +1196,7 @@ When an employee is terminated (HR system → User model `status='terminated'`):
 
 ### 15.1 Joiner
 
-```
+```text
 1. HR creates Employee record (Wave 27 productivity employee model)
    ↓
 2. Auto-create User account, status='pending-activation'
@@ -1217,7 +1217,7 @@ When an employee is terminated (HR system → User model `status='terminated'`):
 
 ### 15.2 Mover — internal role/branch change
 
-```
+```text
 1. HR (or branch manager via Wave 25 quick action) initiates change
    ↓
 2. System computes diff of permissions: { granted, revoked }
@@ -1254,7 +1254,7 @@ This prevents data carryover.
 
 ### 15.5 Offboarding
 
-```
+```text
 HR initiates termination (or contract end auto-triggers)
    ↓
 Immediate session revocation across all devices
@@ -1318,7 +1318,7 @@ Auto-triggers (no human approval needed):
 
 ### 16.2 Risk score model
 
-```
+```text
 riskScore(user) = baseRisk(role)
                 + 0.3 × hasUnusualAccessInLastHour
                 + 0.2 × failedLoginsLast24h / 5

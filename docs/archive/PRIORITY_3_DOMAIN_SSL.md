@@ -14,7 +14,7 @@
 
 **A Records:**
 
-```
+```text
 Type: A
 Name: @
 Value: YOUR_SERVER_IP (e.g., 192.168.1.100 or hosting provider IP)
@@ -23,7 +23,7 @@ TTL: 3600
 
 **CNAME Records:**
 
-```
+```text
 Type: CNAME
 Name: www
 Value: alawael-erp.com
@@ -32,7 +32,7 @@ TTL: 3600
 
 **MX Records (for Email):**
 
-```
+```text
 Type: MX
 Name: @
 Value: mail.alawael-erp.com

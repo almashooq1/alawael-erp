@@ -12,7 +12,7 @@
 
 ### 1️⃣ للمديرين والقادة
 
-```
+```text
 📊 EXECUTIVE_SUMMARY_AND_TIMELINE.md
    ├─ نظرة عامة عن المشروع
    ├─ الميزانية والعائد على الاستثمار
@@ -26,7 +26,7 @@
 
 ### 2️⃣ لفريق التطوير
 
-```
+```text
 📖 QUICK_START_GUIDE_FOR_TEAM.md
    ├─ ما هو دورك بالضبط
    ├─ أول مهمة لك
@@ -40,7 +40,7 @@
 
 ### 3️⃣ لمدير المشروع
 
-```
+```text
 🚀 KICKOFF_AND_EXECUTION_PLAN.md
    ├─ خطة التنفيذ المفصلة
    ├─ توزيع المهام اليومي
@@ -54,7 +54,7 @@
 
 ### 4️⃣ للمطورين (التفاصيل الفنية)
 
-```
+```text
 💻 IMPLEMENTATION_AND_INTEGRATION_GUIDE.md
    ├─ نماذج قاعدة البيانات الكاملة
    ├─ الخوارزميات والحسابات
@@ -73,7 +73,7 @@
 
 ### المقاييس التقييمية
 
-```
+```text
 🔬 ADVANCED_ASSESSMENT_MEASURES_AND_PROGRAMS.md (50 KB)
    ├─ 2 مقياس متقدم مع أكود كاملة
    │  ├─ PEDI-CAT (تقييم الأطفال الشامل)
@@ -88,7 +88,7 @@
    👥 من: مطورين وفريق طبي
 ```
 
-```
+```text
 📊 10_ADDITIONAL_ASSESSMENT_MEASURES.md (40 KB)
    ├─ 10 مقاييس متقدمة كاملة:
    │  ├─ PEDI-CAT (تقييم الأطفال)
@@ -111,7 +111,7 @@
 
 ### البرامج التأهيلية
 
-```
+```text
 🏥 12_SPECIALIZED_REHABILITATION_PROGRAMS.md (45 KB)
    ├─ 12 برنامج متخصص:
    │  ├─ 1. العلاج الطبيعي المتقدم
@@ -138,7 +138,7 @@
 
 ## 📋 ملفات التنظيم والإدارة
 
-```
+```text
 📁 FILE_ORGANIZATION_AND_RESOURCES.md
    ├─ هيكل المشروع الكامل
    ├─ موقع كل ملف
@@ -151,7 +151,7 @@
    👥 من: جميع الفريق
 ```
 
-```
+```text
 🎊 FINAL_SUMMARY_AND_NEXT_STEPS.md
    ├─ ملخص ما تم إنجازه
    ├─ الأثر المتوقع
@@ -169,7 +169,7 @@
 
 ### 👨‍💼 مدير المشروع
 
-```
+```text
 يوم 1:
 └─ اقرأ: EXECUTIVE_SUMMARY_AND_TIMELINE.md
          KICKOFF_AND_EXECUTION_PLAN.md
@@ -187,7 +187,7 @@
 
 ### 👨‍💻 مطور Backend
 
-```
+```text
 اليوم الأول:
 ├─ اقرأ: QUICK_START_GUIDE_FOR_TEAM.md
 ├─ اقرأ: IMPLEMENTATION_AND_INTEGRATION_GUIDE.md (القسم الأول)
@@ -204,7 +204,7 @@
 
 ### 👨‍🎨 مطور Frontend
 
-```
+```text
 اليوم الأول:
 ├─ اقرأ: QUICK_START_GUIDE_FOR_TEAM.md
 ├─ اقرأ: IMPLEMENTATION_AND_INTEGRATION_GUIDE.md (القسم الثاني)
@@ -225,7 +225,7 @@
 
 ### 🧪 متخصص QA/Testing
 
-```
+```text
 اليوم الأول:
 ├─ اقرأ: QUICK_START_GUIDE_FOR_TEAM.md
 ├─ اقرأ: IMPLEMENTATION_AND_INTEGRATION_GUIDE.md (معايير الجودة)
@@ -248,7 +248,7 @@
 
 ### 👨‍🏥 فريق طبي/إكلينيكي
 
-```
+```text
 اليوم الأول:
 ├─ اقرأ: EXECUTIVE_SUMMARY_AND_TIMELINE.md
 ├─ اقرأ: QUICK_START_GUIDE_FOR_TEAM.md (القسم الخاص بك)
@@ -274,7 +274,7 @@
 
 ### للقراءة السريعة (ساعة واحدة)
 
-```
+```text
 1. EXECUTIVE_SUMMARY_AND_TIMELINE.md (15 دقيقة)
 2. QUICK_START_GUIDE_FOR_TEAM.md (10 دقيقة)
 3. FINAL_SUMMARY_AND_NEXT_STEPS.md (15 دقيقة)
@@ -283,7 +283,7 @@
 
 ### للقراءة المتعمقة (يومان)
 
-```
+```text
 اليوم الأول (4 ساعات):
 ├─ EXECUTIVE_SUMMARY_AND_TIMELINE.md (30 دقيقة)
 ├─ KICKOFF_AND_EXECUTION_PLAN.md (60 دقيقة)
@@ -303,7 +303,7 @@
 
 ### المقاييس والتقييمات
 
-```
+```text
 ❓ كيف يعمل PEDI-CAT؟
 → ADVANCED_ASSESSMENT_MEASURES_AND_PROGRAMS.md (جزء PEDI-CAT)
 
@@ -322,7 +322,7 @@
 
 ### البرامج التأهيلية
 
-```
+```text
 ❓ برنامج العلاج الطبيعي؟
 → 12_SPECIALIZED_REHABILITATION_PROGRAMS.md (برنامج 1)
 
@@ -338,7 +338,7 @@
 
 ### التطوير والتكامل
 
-```
+```text
 ❓ كيف أبني نموذج قاعدة البيانات؟
 → IMPLEMENTATION_AND_INTEGRATION_GUIDE.md (القسم Models)
 
@@ -354,7 +354,7 @@
 
 ### الإدارة والتنفيذ
 
-```
+```text
 ❓ كيف أدير المشروع؟
 → KICKOFF_AND_EXECUTION_PLAN.md
 
@@ -374,7 +374,7 @@
 
 ### في المكتب
 
-```
+```text
 مطبوع على الورق:
 ├─ EXECUTIVE_SUMMARY_AND_TIMELINE.md (طابع كل يوم)
 ├─ QUICK_START_GUIDE_FOR_TEAM.md (للفريق الجديد)
@@ -383,7 +383,7 @@
 
 ### على الحاسوب
 
-```
+```text
 على VS Code:
 ├─ فتح الملفات بشكل سهل
 ├─ البحث (Ctrl+F) عن مواضيع
@@ -397,7 +397,7 @@
 
 ### على الهاتف
 
-```
+```text
 قارئ PDF:
 ├─ تحويل الملفات إلى PDF
 ├─ قراءة في أي وقت
@@ -408,7 +408,7 @@
 
 ## ✅ قائمة التحقق للقراءة
 
-```
+```text
 ☐ Day 1: اقرأ EXECUTIVE_SUMMARY_AND_TIMELINE.md
 ☐ Day 1: اقرأ QUICK_START_GUIDE_FOR_TEAM.md
 ☐ Day 2: اقرأ KICKOFF_AND_EXECUTION_PLAN.md
@@ -425,7 +425,7 @@
 
 ## 📞 للمزيد من الاستفسارات
 
-```
+```text
 إذا لم تجد إجابتك في الملفات:
 1. اسأل في الاجتماع اليومي
 2. اتصل بقائد الفريق

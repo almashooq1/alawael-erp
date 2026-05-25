@@ -84,7 +84,7 @@ docker-compose up -d
 
 ### **Option 3: Deploy to Production (5 minutes)**
 
-```
+```text
 1. Go to railway.app
 2. Sign in with GitHub
 3. Select your repo
@@ -171,7 +171,7 @@ All previous status and progress documents remain available
 
 ### System Status
 
-```
+```text
 Backend:        ✅ Ready (Express on 3001)
 Frontend:       ✅ Ready (React on 3000)
 Database:       ✅ Ready (MongoDB on 27017)
@@ -191,7 +191,7 @@ Overall:        ✅ PRODUCTION READY
 
 ### Key Endpoints
 
-```
+```text
 Frontend:       http://localhost:3000
 API:            http://localhost:3001
 Health Check:   http://localhost:3001/api/health
@@ -307,7 +307,7 @@ Database:       mongodb://localhost:27017
 
 ## ⏰ Timeline Summary
 
-```
+```text
 Session Start       Jan 16, 2026, 9:00 AM
 ├─ Verification    9:00-9:30 (30 min)
 ├─ Documentation   9:30-10:00 (30 min)
@@ -347,7 +347,7 @@ After deployment, you should see:
 
 **In Terminal:**
 
-```
+```text
 ✅ Server listening on port 3001
 ✅ WebSocket server initialized
 ✅ Connected to MongoDB
@@ -357,7 +357,7 @@ After deployment, you should see:
 
 **In Browser:**
 
-```
+```text
 ✅ Homepage loads
 ✅ Can navigate pages
 ✅ No console errors
@@ -367,7 +367,7 @@ After deployment, you should see:
 
 **In Network:**
 
-```
+```text
 ✅ API responds to requests
 ✅ WebSocket connects
 ✅ Database queries work

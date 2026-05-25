@@ -73,7 +73,7 @@ inside the router against the dashboard's `audience` list.
 
 ### Example — executive dashboard
 
-```
+```text
 GET /api/v1/dashboards/executive?branch=riyadh-2&dateRange=MTD
 ```
 
@@ -328,7 +328,7 @@ without any client-side constant.
 
 ### Architecture
 
-```
+```text
 heroKpis ── evaluateSnapshot ──► evaluator (pure) ──► decision
                                       │
                                       ▼

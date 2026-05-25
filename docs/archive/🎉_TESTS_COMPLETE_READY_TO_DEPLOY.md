@@ -7,7 +7,7 @@
 
 ## ✅ FINAL TEST RUN RESULTS
 
-```
+```text
 ╔═════════════════════════════════════════════╗
 ║                                             ║
 ║   Test Suites: 77 passed, 77 total ✅      ║
@@ -60,7 +60,7 @@ docker-compose up -d
 
 ### Option 3: Production Cloud (5 min)
 
-```
+```text
 1. Go to railway.app
 2. Click "Deploy from GitHub"
 3. Deploy your repo

@@ -6,7 +6,7 @@
 
 الملفات المشبوهة:
 
-```
+```text
 ✓ backend/api/routes/auth.routes.js
 ✓ backend/api/routes/users.routes.js
 ✓ أي route يحتوي على محاولة إرسال response مرتين
@@ -198,7 +198,7 @@ router.post('/register', async (req, res, next) => {
 
 ## 📝 قائمة الملفات التي تحتاج فحص:
 
-```
+```text
 ✓ backend/api/routes/auth.routes.js          ← يحتمل المشكلة
 ✓ backend/api/routes/users.routes.js         ← يحتمل المشكلة
 ✓ backend/routes/hr.routes.js                ← فحص
@@ -252,7 +252,7 @@ router.post('/register', async (req, res, next) => {
 
 ## ✨ الملخص النهائي:
 
-```
+```text
 Rule 1: استخدم `return` دائماً مع res.json/send
 Rule 2: في error handlers، استخدم `next(err)` فقط
 Rule 3: لا تحاول إرسال response مرتين في نفس handler

@@ -192,7 +192,7 @@
 
 ### "I want to deploy RIGHT NOW" (10 minutes)
 
-```
+```text
 1. Read: ⚡_QUICK_REFERENCE_CARD.md (3 min)
 2. Read: 🎬_START_NOW_3_OPTIONS.md (5 min)
 3. Execute: Copy-paste command from your chosen path (2 min)
@@ -201,7 +201,7 @@
 
 ### "I want to understand before deploying" (20 minutes)
 
-```
+```text
 1. Read: 🎯_CONTINUATION_SUMMARY.md (5 min)
 2. Read: 📊_DEPLOYMENT_STATUS_DASHBOARD.md (3 min)
 3. Read: 🎯_MASTER_INDEX.md (5 min)
@@ -211,7 +211,7 @@
 
 ### "I want complete information" (30+ minutes)
 
-```
+```text
 1. Read: 🎉_CONTINUATION_COMPLETE.md (5 min)
 2. Read: 🎯_CONTINUATION_SUMMARY.md (5 min)
 3. Read: 📘_COMPLETE_DEPLOYMENT_GUIDE.md (15 min)
@@ -221,7 +221,7 @@
 
 ### "I'm lost and need guidance" (10 minutes)
 
-```
+```text
 1. Read: 🎯_MASTER_INDEX.md (3 min)
 2. Find: The file you need
 3. Read: That file (7 min)
@@ -230,7 +230,7 @@
 
 ### "I need troubleshooting help" (Varies)
 
-```
+```text
 1. Read: 📘_COMPLETE_DEPLOYMENT_GUIDE.md - Troubleshooting (10 min)
 2. Or: Look up specific issue in any guide's troubleshooting section
 3. Execute: The solution provided
@@ -273,7 +273,7 @@
 
 **By Filename Emoji:**
 
-```
+```text
 ⚡  = Quick & Fast
 🎯  = Planning & Navigation
 🎬  = Action & Deployment
@@ -284,7 +284,7 @@
 
 **By Use Case:**
 
-```
+```text
 "Help me choose!"         → 🎬_START_NOW_3_OPTIONS.md
 "Where do I look?"        → 🎯_MASTER_INDEX.md
 "I need everything"       → 📘_COMPLETE_DEPLOYMENT_GUIDE.md

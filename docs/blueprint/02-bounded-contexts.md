@@ -389,7 +389,7 @@
 
 **Data Pipeline:**
 
-```
+```text
 Operational DBs ──▶ Event Stream ──▶ Data Lake (S3)
                                       │
                                       ▼
@@ -433,7 +433,7 @@ Operational DBs ──▶ Event Stream ──▶ Data Lake (S3)
 
 ## 3. Context Map (العلاقات بين السياقات)
 
-```
+```text
                     ┌───────────────┐
                     │  BC-01 IAM    │◀────────┐
                     └──────┬────────┘         │ (JWT validation)

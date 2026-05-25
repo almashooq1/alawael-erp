@@ -11,7 +11,7 @@
 
 ### Before & After Summary
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │               COVERAGE IMPROVEMENT SUMMARY                   │
 ├─────────────────────────────────────────────────────────────┤
@@ -29,7 +29,7 @@
 
 ### Final Test Results
 
-```
+```text
 ✅ Test Suites: 11 PASSED, 12 failed (47.8% suites passing)
 ✅ Tests:       458 PASSED, 74 failed (86.1% tests passing)
 ✅ Snapshots:   0 total
@@ -103,7 +103,7 @@
 
 **الاختبارات الناجحة (11 Suites):**
 
-```
+```text
 ✅ middleware.test.js                 (15/15)
 ✅ validators.test.js                 (26/26)
 ✅ security.test.js                   (passing)
@@ -119,7 +119,7 @@
 
 **الاختبارات الفاشلة المتبقية (74 failures):**
 
-```
+```text
 ❌ auth.test.js                (users login issue: 500)
 ❌ auth.extended.test.js       (status code mismatches)
 ❌ reports.routes.expanded.test (9 failures - data type issues)
@@ -143,7 +143,7 @@
 
 ### التحسن بالنسبة المئوية
 
-```
+```text
 Phase 1 Improvement:  152 → 414 tests  (+172 tests, +113% increase)
 Phase 2 Improvement:  414 → 458 tests  (+44 tests, +10.6% increase)
 Total Improvement:    152 → 458 tests  (+306 tests, +201% increase)
@@ -199,7 +199,7 @@ function logSecurityEvent(eventName, details = {}) {
 
 ### الفئة 1: مشاكل في البيانات الوهمية (Mock Data Issues)
 
-```
+```text
 ❌ auth.test.js - 2 failures
    - Users login returns 500 instead of 200
    - May be database mock or authentication logic
@@ -212,7 +212,7 @@ function logSecurityEvent(eventName, details = {}) {
 
 ### الفئة 2: مشاكل في Methods
 
-```
+```text
 ❌ models.test.js - 8 failures
    - Methods not found: findByIdAndUpdate, findByIdAndDelete
    - Should use: updateById, removeById instead
@@ -221,7 +221,7 @@ function logSecurityEvent(eventName, details = {}) {
 
 ### الفئة 3: مشاكل في السبايز والـ Mocks
 
-```
+```text
 ❌ models.extended.test.js - 2 failures
    - Mock call count assertions incorrect
    - May be cache behavior issue
@@ -237,7 +237,7 @@ function logSecurityEvent(eventName, details = {}) {
 
 ### الفئة 4: مشاكل في البيانات الأساسية
 
-```
+```text
 ❌ database.test.js - 1 failure
    - User object missing 'name' property
    - Database structure mismatch
@@ -249,7 +249,7 @@ function logSecurityEvent(eventName, details = {}) {
 
 ### Priority 1: سريعة جداً (15 دقيقة)
 
-```
+```text
 1. ✅ Fix models.test.js method names
    → Change findByIdAndUpdate → updateById
    → Change findByIdAndDelete → removeById
@@ -260,7 +260,7 @@ function logSecurityEvent(eventName, details = {}) {
 
 ### Priority 2: متوسطة (30 دقيقة)
 
-```
+```text
 3. Fix logger/errorHandler mocks
    → Proper jest.spyOn setup
    → Correct stack trace format
@@ -271,7 +271,7 @@ function logSecurityEvent(eventName, details = {}) {
 
 ### Priority 3: بعيدة المدى (1-2 ساعة)
 
-```
+```text
 5. Database structure validation
    → Ensure user object has required properties
 
@@ -284,7 +284,7 @@ function logSecurityEvent(eventName, details = {}) {
 
 ## 📝 الملفات المُعدّلة
 
-```
+```text
 ✅ backend/middleware/auth.js
 ✅ backend/utils/security.js
 ✅ backend/utils/validators.js
@@ -319,7 +319,7 @@ function logSecurityEvent(eventName, details = {}) {
 
 ### التقدم المحقق
 
-```
+```text
 🎯 Target: Reach 85% test passing rate
 ✅ ACHIEVED: 86.1% (458/532 tests)
 ✅ Coverage Improved: 25.54% → ~50-55% (estimated)

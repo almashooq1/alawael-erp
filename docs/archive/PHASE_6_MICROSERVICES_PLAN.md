@@ -59,7 +59,7 @@
 
 **Main API Endpoints:**
 
-```
+```text
 GET    /api/inventory/products                     # List with barcode/category/search filters
 POST   /api/inventory/products                     # Create product
 GET    /api/inventory/products/low-stock            # Low-stock alerts
@@ -109,7 +109,7 @@ The monolith currently mixes school supplies, medical supplies, rehabilitation e
 
 **Main API Endpoints:**
 
-```
+```text
 GET/POST /api/academic/years                        # Academic year management
 GET/POST /api/academic/curricula                     # Curriculum plans with learning objectives
 GET/POST /api/academic/subjects                      # Subject catalog
@@ -152,7 +152,7 @@ Currently 8 separate route files (1,800+ combined lines) handle academics within
 
 **Main API Endpoints:**
 
-```
+```text
 GET/POST /api/student-health/records                 # Health records CRUD
 POST     /api/student-health/daily-check             # Daily health screening entry
 GET      /api/student-health/students/:id/history     # Full health history
@@ -198,7 +198,7 @@ Medical records require HIPAA/CBAHI-level data isolation, encryption-at-rest, an
 
 **Main API Endpoints:**
 
-```
+```text
 GET/POST /api/campus-security/visitors               # Visitor CRUD
 POST     /api/campus-security/visitors/:id/check-in   # Check-in with badge print
 POST     /api/campus-security/visitors/:id/check-out   # Check-out
@@ -243,7 +243,7 @@ Saudi childcare/rehabilitation centers have strict child protection requirements
 
 **Main API Endpoints:**
 
-```
+```text
 GET/POST /api/crisis/plans                            # Emergency plan management
 POST     /api/crisis/plans/:id/activate                # Activate emergency plan
 GET/POST /api/crisis/incidents                         # Crisis incident reporting
@@ -290,7 +290,7 @@ Emergency management spans 3 separate monolith modules (crisis, civilDefense, EH
 
 **Main API Endpoints:**
 
-```
+```text
 GET/POST /api/compliance/standards                    # Accreditation standards library
 GET      /api/compliance/standards/gaps                # Gap analysis
 GET/POST /api/compliance/assessments                   # Self-assessment submissions
@@ -333,7 +333,7 @@ Saudi rehabilitation centers must comply with multiple regulatory bodies simulta
 
 **Main API Endpoints:**
 
-```
+```text
 GET/POST /api/events                                  # Events CRUD with rich filters
 GET      /api/events/calendar                          # Calendar view (month/week/day)
 POST     /api/events/:id/register                      # Register participant
@@ -379,7 +379,7 @@ Events currently exist across three separate route files (student events, enterp
 
 **Main API Endpoints:**
 
-```
+```text
 GET/POST /api/assets                                   # Asset register CRUD
 GET      /api/assets/barcode/:barcode                   # Scan barcode lookup
 GET      /api/assets/depreciation/report                # Depreciation schedule report
@@ -424,7 +424,7 @@ Rehabilitation centers manage expensive medical/ rehab equipment (standing frame
 
 **Main API Endpoints:**
 
-```
+```text
 GET/POST /api/training/programs                        # Training program catalog
 POST     /api/training/programs/:id/enroll              # Employee enrollment
 GET      /api/training/enrollments                       # My enrollments
@@ -465,7 +465,7 @@ Saudi rehab centers require therapists/specialists to maintain professional cert
 
 **Main API Endpoints:**
 
-```
+```text
 GET/POST /api/cms/pages                                # Website pages CRUD
 GET      /api/cms/pages/:slug                           # Get page by slug
 POST     /api/cms/pages/:id/publish                     # Publish page
@@ -508,7 +508,7 @@ Currently the CMS is a basic in-memory service in the monolith. A dedicated micr
 
 **Main API Endpoints:**
 
-```
+```text
 GET/POST /api/forms/templates                          # Form template CRUD
 GET      /api/forms/templates/built-in                  # Pre-built templates (48+)
 POST     /api/forms/templates/:id/publish               # Publish template
@@ -554,7 +554,7 @@ Currently 3 separate systems handle forms (form templates, family satisfaction, 
 
 **Main API Endpoints:**
 
-```
+```text
 GET/POST /api/budget/budgets                           # Budget CRUD
 GET      /api/budget/budgets/stats/overview             # Overall budget utilization
 POST     /api/budget/budgets/:id/spend                  # Record spending against budget
@@ -602,7 +602,7 @@ Budget management is currently a basic CRUD in the monolith. A dedicated microse
 
 **Main API Endpoints:**
 
-```
+```text
 POST     /api/student-lifecycle/admissions                 # New admission application
 GET      /api/student-lifecycle/admissions/pipeline        # Admission funnel
 GET      /api/student-lifecycle/waitlist                    # Waitlist management
@@ -651,7 +651,7 @@ Student journey from waitlist → admission → enrollment → active → gradua
 
 **Main API Endpoints:**
 
-```
+```text
 GET      /api/integrations/systems                      # Available integration systems
 GET/POST /api/integrations/configs                      # Integration configuration CRUD
 POST     /api/integrations/configs/:id/test              # Test connectivity
@@ -699,7 +699,7 @@ Saudi Arabia requires mandatory integration with 7+ government platforms (Noor, 
 
 **Main API Endpoints:**
 
-```
+```text
 GET/POST /api/facilities                                # Facilities CRUD
 GET/POST /api/facilities/spaces                         # Spaces/rooms within facilities
 GET      /api/facilities/spaces/available                # Available spaces (filter by time, type, capacity)
@@ -722,7 +722,7 @@ Rehabilitation centers have specialized spaces (sensory rooms, hydrotherapy pool
 
 ## Dependency Graph
 
-```
+```text
                     ┌──────────────────────┐
                     │   api-gateway (8080)  │
                     └──────────┬───────────┘

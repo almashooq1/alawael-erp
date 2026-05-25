@@ -65,7 +65,7 @@ broader suite count looks off — focus on the sprint gate.
 
 Follow the [Conventional Commits](https://www.conventionalcommits.org/) specification:
 
-```
+```text
 feat(finance): add invoice PDF export
 fix(auth): prevent token refresh race condition
 chore(deps): bump mongoose to 9.1.4

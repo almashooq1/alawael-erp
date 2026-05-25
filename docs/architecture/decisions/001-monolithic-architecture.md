@@ -28,7 +28,7 @@ We will adopt a **monolithic architecture** with clear modular separation:
 
 ### Architecture Components:
 
-```
+```text
 ┌─────────────────────────────────────┐
 │         Frontend (React)             │
 │  - Admin Dashboard                   │

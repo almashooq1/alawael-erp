@@ -78,7 +78,7 @@
 
 ## 📊 التقدم
 
-```
+```text
 Before:  32% ├███░░░░░░░░░░░░░░░░│ 32%
 After:   65% ├████████████░░░░░░░│ 65%
          ────────────────────────────
@@ -138,7 +138,7 @@ After:   65% ├████████████░░░░░░░│ 65%
 
 ### البيانات الافتراضية:
 
-```
+```text
 Email:    admin@alawael.com
 Password: Admin@123456
 Role:     Admin
@@ -149,10 +149,12 @@ Role:     Admin
 ## ⚠️ التحديات المتوقعة
 
 1. **MongoDB Installation**
+
    - قد تحتاج لتثبيت MongoDB locally
    - أو استخدام MongoDB Atlas (online)
 
 2. **Connection Issues**
+
    - تأكد من أن MongoDB يعمل
    - تحقق من MONGODB_URI في .env
 

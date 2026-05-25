@@ -466,7 +466,7 @@ const analytics = securityService.generateSecurityAnalytics();
 
 #### Queue Management Endpoints:
 
-```
+```text
 POST   /api/backups/queue/add-job
 GET    /api/backups/queue/status
 GET    /api/backups/queue/job/:jobId
@@ -475,7 +475,7 @@ DELETE /api/backups/queue/job/:jobId/cancel
 
 #### Sync Operations Endpoints:
 
-```
+```text
 POST /api/backups/sync/incremental
 GET  /api/backups/sync/status
 POST /api/backups/sync/conflict-resolve
@@ -483,7 +483,7 @@ POST /api/backups/sync/conflict-resolve
 
 #### Analytics Endpoints:
 
-```
+```text
 POST /api/backups/analytics/analyze-performance
 GET  /api/backups/analytics/success-rate-prediction
 GET  /api/backups/analytics/duration-estimation
@@ -494,7 +494,7 @@ GET  /api/backups/analytics/report
 
 #### Recovery Endpoints:
 
-```
+```text
 POST /api/backups/recovery/analyze-fitness
 POST /api/backups/recovery/select-backup
 POST /api/backups/recovery/point-in-time
@@ -506,7 +506,7 @@ POST /api/backups/recovery/failover
 
 #### Performance Endpoints:
 
-```
+```text
 GET  /api/backups/performance/current
 GET  /api/backups/performance/report
 GET  /api/backups/performance/bottlenecks
@@ -516,7 +516,7 @@ POST /api/backups/performance/auto-optimize
 
 #### Security Endpoints:
 
-```
+```text
 POST /api/backups/security/access-control
 POST /api/backups/security/verify-access
 POST /api/backups/security/encrypt
@@ -529,7 +529,7 @@ GET  /api/backups/security/analytics
 
 #### System Integration Endpoints:
 
-```
+```text
 GET /api/backups/system/health
 GET /api/backups/system/dashboard
 ```

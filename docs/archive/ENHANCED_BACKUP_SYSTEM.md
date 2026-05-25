@@ -33,7 +33,7 @@ The Enhanced Backup Management System provides a comprehensive and reliable solu
 
 ### نسخ احتياطية تلقائية ويدوية | Automated & Manual Backups
 
-```
+```text
 ✅ جدولة تلقائية يومية | Daily automated scheduling
 ✅ نسخ كاملة وزيادية | Full and incremental backups
 ✅ إنشاء يدوي حسب الطلب | On-demand manual creation
@@ -42,7 +42,7 @@ The Enhanced Backup Management System provides a comprehensive and reliable solu
 
 ### تخزين متعدد المواقع | Multi-Location Storage
 
-```
+```text
 ✅ التخزين المحلي | Local storage
 ✅ AWS S3 | Amazon S3
 ✅ Google Cloud Storage (GCS)
@@ -52,7 +52,7 @@ The Enhanced Backup Management System provides a comprehensive and reliable solu
 
 ### التشفير والضغط | Encryption & Compression
 
-```
+```text
 ✅ تشفير AES-256 | AES-256 Encryption
 ✅ ضغط Gzip | Gzip Compression
 ✅ حساب SHA-256 للتحقق | SHA-256 Checksums
@@ -61,7 +61,7 @@ The Enhanced Backup Management System provides a comprehensive and reliable solu
 
 ### المراقبة والتنبيهات | Monitoring & Alerts
 
-```
+```text
 ✅ فحوصات الصحة المستمرة | Continuous health checks
 ✅ تتبع مقاييس الأداء | Performance metrics tracking
 ✅ نظام تنبيهات ذكي | Intelligent alert system
@@ -70,7 +70,7 @@ The Enhanced Backup Management System provides a comprehensive and reliable solu
 
 ### إدارة متقدمة | Advanced Management
 
-```
+```text
 ✅ استعادة من نسخة احتياطية | Backup restoration
 ✅ التحقق من السلامة | Integrity validation
 ✅ تنظيف تلقائي للنسخ القديمة | Automatic old backup cleanup
@@ -81,7 +81,7 @@ The Enhanced Backup Management System provides a comprehensive and reliable solu
 
 ## 🏗️ البنية المعمارية | Architecture
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │                    BACKUP SYSTEM ARCHITECTURE                │
 └─────────────────────────────────────────────────────────────┘
@@ -214,7 +214,7 @@ enhancedBackup.scheduleBackups('0 2 * * *'); // 2 AM daily
 
 ### سير عمل النسخ الكاملة | Full Backup Workflow
 
-```
+```text
 1. إطلاق النسخ الاحتياطية | Create Backup
    └─ التحقق من المتطلبات | Verify prerequisites
 
@@ -241,7 +241,7 @@ enhancedBackup.scheduleBackups('0 2 * * *'); // 2 AM daily
 
 ### سير عمل الاستعادة | Restore Workflow
 
-```
+```text
 1. اختيار النسخة | Select Backup
    └─ التحقق من صحتها | Verify backup
 
@@ -647,7 +647,7 @@ backupMonitoring.createAlert({
 
 ### خطوات الاستعادة | Recovery Steps
 
-```
+```text
 1️⃣ تقييم الوضع | Assess situation
    └─ تحديد نقطة الاستعادة | Identify recovery point
 

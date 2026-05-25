@@ -28,7 +28,7 @@ This wave isn't about new features. It's about an **enforceable contract** on wh
 
 Every element registered in the layout policy is scored against this contract at boot:
 
-```
+```text
 SCORE PASS ⇔
   element.intentAr is non-empty
   AND element.intentEn is non-empty
@@ -47,7 +47,7 @@ Result: **no element ships without a stated `intent` and a `tier`.** The governi
 
 ## 3. Tier semantics
 
-```
+```text
 TIER 1  must-show — the user makes daily decisions from this directly.
         Always above the fold. Largest visual weight. Critical signals,
         primary KPIs, exception lists.
@@ -83,7 +83,7 @@ Exceeding these budgets fails validation. The fix is always one of: demote eleme
 
 Every dashboard MUST be ordered:
 
-```
+```text
 Position 0    CRITICAL_SIGNALS    Exception/alert stream — tier 1
 Position 1    OPERATIONAL_PULSE   Primary KPIs — tier 1
 Position 2+   TASK_GROUPS         Role-specific work — tier 1/2
@@ -122,7 +122,7 @@ The "never auto-save" rule applies to clinical signatures, financial approvals, 
 
 Each role × dashboard combination has pre-applied filters:
 
-```
+```text
 executive    /dashboards/executive          dateRange=last_30d  branchScope=all
 head_office  /dashboards/head-office        dateRange=last_7d   branchScope=all
 branch_mgr   /dashboards/branch/:id         dateRange=last_7d   branchScope=:id

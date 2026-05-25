@@ -71,7 +71,7 @@
 
 #### 4. **Document Routes** (`backend/routes/documentRoutes.js`)
 
-```
+```text
 POST   /documents/upload        - تحميل مستند
 GET    /documents               - جميع المستندات
 GET    /documents/folders       - المجلدات
@@ -121,7 +121,7 @@ Features:
 
 **الحقول:**
 
-```
+```text
 - File upload zone
 - Title (required)
 - Description (optional)
@@ -167,7 +167,7 @@ Features:
 
 **الصفحة الرئيسية:**
 
-```
+```text
 ┌─────────────────────────────────────────────┐
 │  📁 إدارة المستندات  [تحميل مستند]        │
 ├─────────────────────────────────────────────┤
@@ -367,7 +367,7 @@ node ../add_documents_sample_data.js
 
 ### **جديد (New)**
 
-```
+```text
 ✅ backend/models/Document.js
 ✅ backend/controllers/documentController.js
 ✅ backend/middleware/uploadMiddleware.js
@@ -382,7 +382,7 @@ node ../add_documents_sample_data.js
 
 ### **معدل (Modified)**
 
-```
+```text
 ✅ backend/server.js (added documentRoutes)
 ✅ frontend/src/App.js (added Documents route)
 ✅ frontend/src/components/Layout.js (added Documents link)
@@ -414,7 +414,7 @@ npm start
 
 ### **3. الوصول إلى النظام**
 
-```
+```text
 http://localhost:3000
 - اذهب إلى: إدارة المستندات من القائمة الجانبية
 - أو: http://localhost:3000/documents
@@ -456,7 +456,7 @@ http://localhost:3000
 
 ## 📈 الإحصائيات المتاحة
 
-```
+```text
 // في صفحة المستندات
 📊 إجمالي المستندات
 💾 إجمالي الحجم
@@ -476,26 +476,26 @@ http://localhost:3000
 
 ### **Backend API**
 
-```
+```text
 Base URL: http://localhost:3001/api
 Prefix: /documents
 ```
 
 ### **Frontend Routes**
 
-```
+```text
 /documents - الصفحة الرئيسية
 ```
 
 ### **Database Collections**
 
-```
+```text
 documents - تخزين بيانات المستندات
 ```
 
 ### **File Storage**
 
-```
+```text
 backend/uploads/ - تخزين الملفات
 ```
 
@@ -524,7 +524,7 @@ backend/uploads/ - تخزين الملفات
 
 ## 🎯 الخطوات التالية (Optional)
 
-```
+```text
 1. Database integration (if using actual DB)
 2. Advanced search with Elasticsearch
 3. Document preview (PDF, Word preview)
@@ -551,7 +551,7 @@ backend/uploads/ - تخزين الملفات
 
 ## 🎉 حالة النظام
 
-```
+```text
 ✅ Backend: يعمل بشكل كامل
 ✅ Frontend: يعمل بشكل كامل
 ✅ APIs: 12+ endpoint جاهز

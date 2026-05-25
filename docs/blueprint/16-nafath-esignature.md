@@ -21,7 +21,7 @@
 
 ## 2. البنية
 
-```
+```text
 [Document in system]                [Nafath identity]                [Evidence Repo]
   (IRP / Contract /                    (gov service)                 (JWS + manifest)
    Consent / Policy)
@@ -105,7 +105,7 @@
 
 **Headers:**
 
-```
+```text
 Authorization: Bearer <jwt>
 Idempotency-Key: irp-65e1-sign-<random>
 ```
@@ -131,7 +131,7 @@ Idempotency-Key: irp-65e1-sign-<random>
 
 ## 5. State Machine
 
-```
+```text
 REQUESTED ─▶ PENDING ─▶ APPROVED
                  │
                  ├──▶ REJECTED    (user declined)
@@ -150,7 +150,7 @@ REQUESTED ─▶ PENDING ─▶ APPROVED
 
 لمنع إرسال إشعارين لجوال المستخدم عند double-click:
 
-```
+```text
 fingerprint = sha256(documentType | documentId | documentHash | nationalId | purpose)
 ```
 

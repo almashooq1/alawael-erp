@@ -19,7 +19,7 @@
 
 ## 1. Architecture
 
-```
+```text
 ┌──────────────────────────────────────────────────────────────────┐
 │                    المطلوبون للاستخدام                            │
 │                                                                  │
@@ -158,7 +158,7 @@ cd backend && npm run test:integration-hardening
 
 Expected output (last verified 2026-05-03):
 
-```
+```text
 Test Suites: 21 passed, 21 total
 Tests:       209 passed, 209 total
 ```
@@ -249,7 +249,7 @@ PII redactor wraps every `AclClient` call — national IDs and phones are masked
 
 Every Nafath signing request produces an auditor-ready JSON package:
 
-```
+```text
 GET /api/v1/nafath/signing/:id/evidence
 ```
 
@@ -290,7 +290,7 @@ timer; Article 4 surfaces a 30-day SLA chip per data-subject request.
 
 Boot-time config for the hardening + integration layers:
 
-```
+```text
 # Redis — optional; falls back to in-memory idempotency store
 REDIS_URL=redis://localhost:6379
 

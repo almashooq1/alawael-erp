@@ -60,7 +60,7 @@ Smoke test `__tests__/national-address-models-sweep.test.js` asserts every model
 
 ## Operating modes
 
-```
+```text
 WASEL_MODE=mock   (default — used for local dev + CI; sentinel ...00 → not_found, ...99 → invalid)
 WASEL_MODE=live   (requires WASEL_BASE_URL + WASEL_API_KEY)
 ```
@@ -88,7 +88,7 @@ To require addresses on a per-entity basis (e.g. for the Beneficiary admission w
 
 Run with:
 
-```
+```text
 npx jest __tests__/national-address-*.test.js __tests__/wasel-address-routes.test.js --no-coverage --forceExit
 ```
 
@@ -101,7 +101,7 @@ npx jest __tests__/national-address-*.test.js __tests__/wasel-address-routes.tes
 
 ### Backfill legacy Branch records
 
-```
+```text
 # preview only (recommended first run)
 npm run wasel:backfill:dry --prefix backend
 
@@ -115,7 +115,7 @@ Source: `backend/scripts/backfill-branch-national-address.js`. Walks every `Bran
 
 Before flipping production to `WASEL_MODE=live`, run from a bastion or CI step:
 
-```
+```text
 WASEL_MODE=live \
 WASEL_BASE_URL=https://api.address.gov.sa \
 WASEL_API_KEY=*** \

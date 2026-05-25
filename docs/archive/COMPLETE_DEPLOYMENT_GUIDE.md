@@ -46,7 +46,7 @@
 
 ### النظام المحلي (Windows)
 
-```
+```text
 ✅ Node.js: v22.20.0
 ✅ npm: v10.9.3
 ✅ Git: مثبت
@@ -56,7 +56,7 @@
 
 ### Hostinger Server
 
-```
+```text
 ⚠️ يحتاج تفعيل:
   - Node.js (من cPanel)
   - npm
@@ -70,7 +70,7 @@
 
 ### بيانات الاتصال
 
-```
+```text
 Host:     82.25.96.160
 Port:     65002
 Username: u799444911
@@ -80,10 +80,12 @@ Password: Be@101010
 ### خطوات تفعيل Node.js على Hostinger
 
 1. **الدخول إلى cPanel**
+
    - افتح: https://hpanel.hostinger.com
    - سجل الدخول بحسابك
 
 2. **تفعيل Node.js**
+
    - اذهب إلى: Advanced → Node.js Selector
    - اختر: Node.js Version (أحدث إصدار متاح)
    - اضغط: Enable Node.js
@@ -101,7 +103,7 @@ Password: Be@101010
 
 #### أ. تحميل وإعداد PuTTY
 
-```
+```text
 1. حمّل PuTTY من: https://www.putty.org/
 2. شغّل putty.exe
 3. في Session:
@@ -243,7 +245,7 @@ railway up
 
 ### 1. ربط الدومين (بعد النشر)
 
-```
+```text
 1. اذهب إلى Hostinger Control Panel
 2. Domains → Manage
 3. DNS Records → Add Record:
@@ -297,7 +299,7 @@ curl -X POST http://yourdomain.com:3001/api/auth/login \
 
 ### 2. Frontend Test
 
-```
+```text
 افتح المتصفح: http://yourdomain.com
 
 سجل الدخول:
@@ -363,7 +365,7 @@ pm2 status
 
 ### مشكلة 1: Node.js not found
 
-```
+```text
 الحل:
 1. ادخل cPanel
 2. Advanced → Node.js Selector

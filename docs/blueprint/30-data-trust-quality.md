@@ -41,7 +41,7 @@ Combining any two collapses the action; splitting further invents distinctions n
 
 ## 2. The Five Quality Levels
 
-```
+```text
 score   level       UI badge color   default behavior
 ─────   ─────────   ──────────────   ────────────────────────────────
 ≥ 0.90  excellent   green            number rendered cleanly
@@ -63,7 +63,7 @@ This masking is **dataset-level config**, not always-on. Some datasets (e.g. ope
 
 Every KPI card gets a single trust badge in the corner — color + score:
 
-```
+```text
 ┌──────────────────────────────────────┐
 │  Active beneficiaries     [✓ 0.92]   │
 │                                       │
@@ -77,7 +77,7 @@ Click the badge → opens the breakdown drawer (next surface).
 
 ### 3.2 Per-dimension breakdown drawer
 
-```
+```text
 ┌─────────────────────────────────────────────────────┐
 │  Data Quality — Active beneficiaries                │
 │  Composite: 0.92 (good)                             │
@@ -103,7 +103,7 @@ Click the badge → opens the breakdown drawer (next surface).
 
 On operational dashboards (where the user is technical), per-dimension badges appear inline next to the metric label — not hidden in a drawer:
 
-```
+```text
 Active beneficiaries  Fresh:✓ Comp:✓ Valid:✓ Cons:⚠
 246
 ```
@@ -114,7 +114,7 @@ Executives don't see this — too noisy. The composite badge is enough for them.
 
 Below every KPI value, a tiny source tag shows where the number came from:
 
-```
+```text
 246
 ↗ +12 this week
 src: zkteco_v2 · ehr_v3 (cross-source ✓)
@@ -122,7 +122,7 @@ src: zkteco_v2 · ehr_v3 (cross-source ✓)
 
 If sources disagree, the tag turns amber:
 
-```
+```text
 src: zkteco_v2 ⚠ ehr_v3 (4% delta)
 ```
 
@@ -130,7 +130,7 @@ src: zkteco_v2 ⚠ ehr_v3 (4% delta)
 
 Every Insight, NBA, executive digest already has a `confidence` block (Wave 18). When the consumer is the data-quality layer, we render that confidence chip uniformly:
 
-```
+```text
 [Insight card]
 "Attendance dropped 12% — likely transport"
 [AI confidence: medium 0.72]   reasoning →   dismiss
@@ -187,7 +187,7 @@ Same data, two presentations:
 
 ### 6.1 Executive view
 
-```
+```text
 ┌────────────────────────────────────────────┐
 │  Active beneficiaries          [✓ 0.92]    │
 │  246                                       │
@@ -208,7 +208,7 @@ Same data, two presentations:
 
 ### 6.2 Operational view
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────────┐
 │  Active beneficiaries  [Fresh:✓ Comp:✓ Valid:✓ Cons:⚠ Src:✓]   │
 │  246                                                            │
@@ -232,7 +232,7 @@ Same data, two presentations:
 
 Adds a fixed PHI banner across the top whenever the value is rendered without masking:
 
-```
+```text
 ⚠ PHI present — viewer audited (PDPL Art.13)
 ```
 

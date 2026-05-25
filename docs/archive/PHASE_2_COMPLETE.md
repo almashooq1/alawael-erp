@@ -8,7 +8,7 @@
 
 ### 1. إنشاء 4 ملفات اختبارات موسعة جديدة
 
-```
+```text
 ✅ reports.routes.expanded.test.js  - 280+ أسطر
 ✅ ai.routes.expanded.test.js       - 400+ أسطر
 ✅ hr.routes.expanded.test.js       - 520+ أسطر
@@ -26,7 +26,7 @@
 
 ### 3. وثائق شاملة - 4 ملفات توثيق جديدة
 
-```
+```text
 ✅ CODE_COVERAGE_REPORT.md          (1200+ سطر)
 ✅ COVERAGE_ENHANCEMENT_PLAN.md     (800+ سطر)
 ✅ FINAL_COVERAGE_REPORT.md         (400+ سطر)
@@ -39,7 +39,7 @@
 
 ### Test Execution Results
 
-```
+```text
 ┌─────────────────────────────────────┐
 │ Test Suite Results                  │
 ├─────────────────────────────────────┤
@@ -57,7 +57,7 @@
 
 ### Coverage Metrics
 
-```
+```text
 ┌────────────────────────────────────────────┐
 │ Coverage Summary                           │
 ├────────────────────────────────────────────┤
@@ -115,7 +115,7 @@
 
 ### High Coverage (✅ 60%+)
 
-```
+```text
 ✅ middleware/validation.js         88.15%
 ✅ middleware/rateLimiter.js        88.88%
 ✅ middleware/errorHandler.js       88.46%
@@ -126,7 +126,7 @@
 
 ### Medium Coverage (🟡 30-60%)
 
-```
+```text
 🟡 api/routes/users.routes.js       53.73%
 🟡 api/routes/auth.routes.js        36.53%
 🟡 config/inMemoryDB.js             61.11%
@@ -134,7 +134,7 @@
 
 ### Low Coverage (❌ <30%)
 
-```
+```text
 ❌ routes/ai.routes.js              20.65% (Need +30 tests)
 ❌ routes/finance.routes.js         25.26% (Need +30 tests)
 ❌ routes/hr.routes.js              16.30% (Need +35 tests)

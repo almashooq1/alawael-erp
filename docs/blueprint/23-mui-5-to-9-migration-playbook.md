@@ -53,7 +53,7 @@ v9 with console warnings only.
 
 ## Surface area
 
-```
+```text
 @mui/icons-material imports : 927 across 125 files
 ListItem button usages       : ~70  (codemod target — known buggy)
 Grid item usages             : substantial (Grid v2 in v6+ removes `item`+`xs`/`sm`/etc.)
@@ -151,7 +151,7 @@ needs:
 
 ## File pointers (where the surface is concentrated)
 
-```
+```text
 frontend/src/components/Layout/LayoutWithTheme.jsx       — theme provider
 frontend/src/pages/whatsapp/WhatsAppDashboard.jsx        — known buggy after codemod
 frontend/src/components/messaging/ChatComponent.jsx      — known buggy after codemod

@@ -75,7 +75,7 @@ unmapped value) gets the fallback CPT `99999` and a
 
 Mounted on the existing therapy-sessions admin router:
 
-```
+```text
 POST /api/admin/therapy-sessions/:id/create-claim
 ```
 
@@ -129,7 +129,7 @@ table).
 
 ### Tariff data shape
 
-```
+```text
 provider:        'Bupa Arabia'         // human-readable, case-insensitive match
 providerId:      'BUPA-001'            // optional canonical NPHIES insurer id
 cptCode:         '97110'               // CPT code (mirror REHAB_CPT_CODES)
@@ -260,7 +260,7 @@ adds 3 audits (open / closed / no-meta) to the gated suite. All pass at
 month-end use case: turn 100+ completed-but-unbilled sessions into
 NPHIES claim drafts in one call.
 
-```
+```text
 POST /api/admin/therapy-sessions/bulk-create-claims
 body: { from: '2026-04-01', to: '2026-04-30', dryRun?, maxBatch? }
 ```
@@ -346,7 +346,7 @@ This closes the lifecycle: once a session is billed and reimbursed, the
 the create-claim paths (single, bulk, manual). The bridge already warns
 when `session.isBilled` is true, so the cycle is:
 
-```
+```text
 session COMPLETED        → bridge creates draft claim   (warns, doesn't block)
 draft submitted to NPHIES → status=PENDING_REVIEW
 NPHIES approves          → recon service flips:
@@ -380,7 +380,7 @@ REJECTED, already-billed sessions, model throws, null model, status aliases.
 
 ## Tests
 
-```
+```text
 backend/tests/unit/sessionToClaimBridge.test.js                  # 26 tests (22 + 4 tariff)
 backend/tests/unit/insuranceTariffs.test.js                      # 12 tests
 backend/tests/unit/bulkSessionClaims.test.js                     # 12 tests (selection + idempotency + partition + dryRun)

@@ -245,14 +245,14 @@ Included:
 
 ### Default Credentials
 
-```
+```text
 Email:    admin@alawael.com
 Password: Admin@123456
 ```
 
 ### Default Ports
 
-```
+```text
 Frontend:  3000 (local) / 5173 (dev)
 Backend:   3001
 Docker:    5173 (frontend), 3001 (backend)
@@ -260,7 +260,7 @@ Docker:    5173 (frontend), 3001 (backend)
 
 ### Key Files Location
 
-```
+```text
 Frontend Build:    /frontend/build/
 Backend:           /backend/
 Database:          /backend/data/
@@ -306,7 +306,7 @@ Docs:              /QUICK_DEPLOY.md (start here!)
 
 Use this checklist during deployment:
 
-```
+```text
 BEFORE DEPLOYMENT
 - [ ] Read deployment guide completely
 - [ ] Verify all requirements met

@@ -33,7 +33,7 @@
 
 ### توزيع الملفات حسب المرحلة
 
-```
+```text
 Phase 4C (CI/CD):           4 files   (~1,100 lines)
 Phase 4B-2 (Slack):         2 files   (~400 lines)
 Phase 4B-3 (ML Analytics):  1 file    (~510 lines)
@@ -183,7 +183,7 @@ curl -X POST http://localhost:3001/api/slack/daily-summary
 
 **Test Failure**:
 
-```
+```text
 🚨 Test Failure Alert
 
 Service: backend
@@ -198,7 +198,7 @@ Failed Tests:
 
 **Daily Summary**:
 
-```
+```text
 📊 Daily Quality Summary
 
 ✅ Passed: 8 services
@@ -379,7 +379,7 @@ curl http://localhost:3001/api/analytics/overview
 
 **البنية التحتية**:
 
-```
+```text
 monitoring/
 ├── docker-compose.yml          # Orchestration
 ├── prometheus/
@@ -604,7 +604,7 @@ docker-compose logs -f
 
 **Before**:
 
-```
+```text
 ❌ graphql: 0 tests, 0% coverage - FAILING
 ❌ finance: 0 tests, 0% coverage - FAILING
 ❌ frontend: 0 tests, 0% coverage - FAILING
@@ -619,7 +619,7 @@ Overall: 2/10 passing (20% pass rate)
 
 **After**:
 
-```
+```text
 ✅ graphql: 5 tests, ready for expansion
 ✅ finance: 5 tests, ready for expansion
 ✅ frontend: 5 tests, ready for expansion
@@ -668,7 +668,7 @@ describe('Service Tests', () => {
 
 ### Phase 4C: CI/CD (4 files)
 
-```
+```text
 .github/workflows/quality-gate.yml
 .github/workflows/deployment-report.yml
 scripts/ci-quality-check.js
@@ -677,20 +677,20 @@ scripts/ci-quality-check.js
 
 ### Phase 4B-2: Slack (2 files)
 
-```
+```text
 dashboard/server/integrations/slack.js
 dashboard/server/services/scheduler.js
 ```
 
 ### Phase 4B-3: ML Analytics (1 file)
 
-```
+```text
 dashboard/server/services/ml-analytics.js
 ```
 
 ### Phase 5: Monitoring (7 files)
 
-```
+```text
 monitoring/docker-compose.yml
 monitoring/prometheus/prometheus.yml
 monitoring/prometheus/alert.rules.yml
@@ -703,7 +703,7 @@ monitoring/OPENTELEMETRY_SETUP.md
 
 ### Phase 8: Tests (8 files)
 
-```
+```text
 graphql/test/basic.test.js
 finance-module/backend/test/basic.test.js
 supply-chain-management/frontend/src/__tests__/basic.test.js
@@ -716,7 +716,7 @@ backend-1/test/basic.test.js
 
 ### Documentation (3 files)
 
-```
+```text
 docs/CI_CD_SETUP_GUIDE.md
 docs/COMPREHENSIVE_IMPLEMENTATION_GUIDE.md
 docs/QUICK_REFERENCE_GUIDE_AR.md
@@ -724,7 +724,7 @@ docs/QUICK_REFERENCE_GUIDE_AR.md
 
 ### الملفات المعدلة (3 files)
 
-```
+```text
 dashboard/server/services/quality.js     (+ Slack integration)
 dashboard/server/routes/api.js           (+ 5 endpoints)
 dashboard/server/index.js                (+ scheduler integration)
@@ -785,7 +785,7 @@ dashboard/server/index.js                (+ scheduler integration)
 
 #### Coverage
 
-```
+```text
 Before: 20% overall
 After:  65%+ overall (estimated)
 
@@ -794,7 +794,7 @@ Improvement: +225%
 
 #### Automation
 
-```
+```text
 Before: Manual testing only
 After:  - Automated CI/CD pipeline
         - Scheduled reports (daily/weekly)
@@ -806,7 +806,7 @@ Improvement: From 0% to 100% automation
 
 #### Visibility
 
-```
+```text
 Before: No monitoring, no alerts
 After:  - Full metrics collection (7 targets)
         - Real-time dashboards
@@ -818,7 +818,7 @@ Improvement: Complete observability
 
 #### Intelligence
 
-```
+```text
 Before: No analytics
 After:  - Pattern analysis
         - Failure prediction
@@ -1113,7 +1113,7 @@ Include:
 
 ### System Status
 
-```
+```text
 ┌─────────────────────────────────────────┐
 │  AlAwael ERP System v1.0.0             │
 │  Status: ✅ PRODUCTION READY            │

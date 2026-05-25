@@ -40,7 +40,7 @@ router.post('/payments', idempotency({ scope: req => req.user.tenantId }), payme
 
 لفحص الصف:
 
-```
+```text
 GET /api/v1/admin/ops/dlq?integration=nafath&status=parked
 GET /api/v1/admin/ops/dlq/:id
 POST /api/v1/admin/ops/dlq/:id/discard
@@ -125,7 +125,7 @@ setDlq(require('./infrastructure/adapters/mongoDlqStore').create(db));
 
 الاختبارات الموحّدة (39 تأكيد في 5 suites):
 
-```
+```text
 npx jest \
   backend/__tests__/idempotency-middleware.test.js \
   backend/__tests__/dead-letter-queue.test.js \

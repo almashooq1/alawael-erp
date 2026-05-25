@@ -22,18 +22,21 @@
 #### 🛡️ Security Files
 
 1. **middleware/rateLimiter.js**
+
    - API rate limiter: 100 requests / 15 min
    - Auth rate limiter: 5 attempts / 15 min (strict)
    - Password rate limiter: 3 attempts / hour (very strict)
    - Create account limiter: 3 accounts / hour
 
 2. **middleware/sanitize.js**
+
    - NoSQL injection protection
    - XSS attack protection
    - HTTP Parameter Pollution prevention
    - Input sanitization logging
 
 3. **middleware/securityHeaders.js**
+
    - Helmet configuration
    - Content Security Policy (CSP)
    - HSTS (HTTP Strict Transport Security)
@@ -43,6 +46,7 @@
    - XSS Filter
 
 4. **middleware/validation.js**
+
    - Password policy enforcement:
      - Min 8 characters
      - Uppercase required
@@ -72,6 +76,7 @@
 #### 🔐 Authentication Files
 
 6. **api/routes/auth.routes.js**
+
    - POST /api/auth/register - Registration with validation
    - POST /api/auth/login - Login with rate limiting
    - POST /api/auth/refresh - Token refresh
@@ -81,6 +86,7 @@
    - POST /api/auth/change-password - Password change
 
 7. **api/routes/users.routes.js**
+
    - GET /api/users - List all users (admin)
    - GET /api/users/:id - Get user by ID (admin)
    - POST /api/users - Create user (admin)
@@ -88,6 +94,7 @@
    - DELETE /api/users/:id - Delete user (admin)
 
 8. **middleware/auth.js**
+
    - authenticateToken - JWT verification
    - requireAdmin - Admin role check
    - optionalAuth - Optional authentication
@@ -159,7 +166,7 @@
 
 ### Security Headers Added
 
-```
+```text
 ✅ Content-Security-Policy
 ✅ X-DNS-Prefetch-Control
 ✅ Expect-CT

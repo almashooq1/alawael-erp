@@ -26,7 +26,7 @@
 
 تم اكتشاف **530+ ملف مصدري متداخل وظيفياً** موزعة على **8 مجالات وظيفية رئيسية** عبر **14 وحدة نشر مستقلة** (deployment units). النظام يعاني من **تكرار بنيوي على 5 مستويات في وقت واحد**:
 
-```
+```text
 المستوى 1: backend/services/*.js          → الخدمات الكلاسيكية
 المستوى 2: backend/services/ddd*.js       → 125 خدمة DDD
 المستوى 3: backend/domains/*/             → 39 نطاق DDD منفصل
@@ -275,7 +275,7 @@
 
 ### 4.1 الإشعارات — أسوأ حالة تكرار
 
-```
+```text
 الحالة الحالية (16 خدمة + 11 نموذج + 10 مسارات + 2 microservices):
 
 backend/services/notificationService.js          ─┐
@@ -305,7 +305,7 @@ services/notification-service/                     ─┘
 
 ### 4.2 البريد الإلكتروني — 4 نسخ من نفس الملف
 
-```
+```text
 backend/communication/email-service.js     → النسخة الأصلية
 backend/services/emailService.js           → نسخة 2 (camelCase)
 backend/services/email.service.js          → نسخة 3 (dot notation)
@@ -316,7 +316,7 @@ backend/utils/emailService.js              → نسخة 4 (في المساعدا
 
 ### 4.3 بوابة الدفع — 4 تطبيقات
 
-```
+```text
 backend/services/paymentGateway.service.js     → خدمة 1
 backend/services/payment-gateway.service.js    → خدمة 2 (بشرطة!)
 services/payment-gateway/                      → مشروع كامل 1
@@ -327,7 +327,7 @@ services/payment-gateway-service/              → مشروع كامل 2
 
 ### 4.4 طبقة DDD — 375 ملفاً إضافياً
 
-```
+```text
 125 × ddd-*.routes.js    → مسارات
 125 × ddd*.js (services) → خدمات
 125 × Ddd*.js (models)   → نماذج
@@ -422,7 +422,7 @@ services/payment-gateway-service/              → مشروع كامل 2
 
 ### 6.3 على التعقيد
 
-```
+```text
 تعقيد النظام الحالي:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   Routes:  300+ (classic) + 125 (DDD) = 425+ endpoints
@@ -443,7 +443,7 @@ services/payment-gateway-service/              → مشروع كامل 2
 
 ### 7.1 المبدأ: Modular Monolith + Optional Satellites
 
-```
+```text
 ┌──────────────────────────────────────────────────────────────┐
 │                        NGINX (Reverse Proxy)                  │
 │                     Port 80/443 — SSL Termination             │
@@ -504,7 +504,7 @@ services/payment-gateway-service/              → مشروع كامل 2
 
 ### 7.2 هيكل المجلدات المقترح
 
-```
+```text
 alawael-erp/
 ├── frontend/                          # React SPA (الحالي — يبقى)
 ├── mobile/                            # React Native (يبقى كما هو)
@@ -652,7 +652,7 @@ alawael-erp/
 
 ### المرحلة 1 — الإزالة الآمنة (أسبوعان)
 
-```
+```text
 الأولوية: 🔴 حرج
 الجهد: منخفض-متوسط
 المخاطر: منخفضة (حذف كود غير مستخدم)
@@ -672,7 +672,7 @@ alawael-erp/
 
 ### المرحلة 2 — توحيد الطبقة DDD (3 أسابيع)
 
-```
+```text
 الأولوية: 🟠 عالي
 الجهد: متوسط
 المخاطر: متوسطة (يتطلب اختبارات)
@@ -686,7 +686,7 @@ alawael-erp/
 
 ### المرحلة 3 — دمج الـ Microservices (4 أسابيع)
 
-```
+```text
 الأولوية: 🟠 عالي
 الجهد: عالي
 المخاطر: متوسطة-عالية
@@ -701,7 +701,7 @@ alawael-erp/
 
 ### المرحلة 4 — إعادة هيكلة الـ Backend (6 أسابيع)
 
-```
+```text
 الأولوية: 🟡 متوسط
 الجهد: عالي جداً
 المخاطر: عالية (إعادة كتابة)

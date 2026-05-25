@@ -16,7 +16,7 @@ A draft-first, evidence-bound, human-in-the-loop planning engine. AI proposes (W
 
 ## 2. Module map
 
-```
+```text
 backend/intelligence/
   care-planning.registry.js                   Wave 41  — 8 plan types / 13 statuses / 13 transitions / 17 rules
   care-plan-validator.service.js              Wave 41  — readinessScore §4.2 + confidence §3.2
@@ -59,7 +59,7 @@ docs/
 
 ## 3. State machine
 
-```
+```text
 draft
   └─> validation_pending
         └─> ready_for_submission
@@ -146,7 +146,7 @@ Each transition has its own permission; the `TRANSITION_TO_PERMISSION` map in [c
 
 Mounted under `/api/v1/care-plans/` behind `authenticate`. See [openapi-care-planning.yaml](../api/openapi-care-planning.yaml) for the full spec.
 
-```
+```text
 POST   /recommendations/build-prompt           # build LLM prompt (no LLM call)
 POST   /recommendations/validate               # validate LLM proposal
 POST   /                                       # createDraft
@@ -375,7 +375,7 @@ GET /api/v1/care-plans/:id/audit-trail
 
 ## 16. Go-live checklist
 
-```
+```text
 ☐ MongoDB connected (Wave 49 E2E requires real Mongo)
 ☐ CarePlanVersion model loaded
 ☐ Governance service initialised (`care-plan.*` permissions present)
@@ -414,7 +414,7 @@ GET /api/v1/care-plans/:id/audit-trail
 
 ## 18. Owners + escalation
 
-```
+```text
 Code owner:           Care Planning Engineering
 Clinical owner:       Clinical Supervisor (per branch)
 DPO owner:            Quality & Compliance (governance.registry holders)

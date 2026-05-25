@@ -17,7 +17,7 @@
 
 **API Endpoints:**
 
-```
+```text
 POST   /api/employees                   - إضافة موظف
 GET    /api/employees                   - جلب جميع الموظفين
 GET    /api/employees/:id               - جلب موظف محدد
@@ -41,6 +41,7 @@ DELETE /api/hr/leaves/:id               - حذف الطلب
 **صفحات جديدة:**
 
 - ✅ **EmployeesView.vue** - إدارة الموظفين
+
   - عرض جميع الموظفين بـ CRUD
   - إحصائيات (إجمالي، نشطون، غير نشطين)
   - بحث وفلترة
@@ -48,6 +49,7 @@ DELETE /api/hr/leaves/:id               - حذف الطلب
   - Average salary calculation
 
 - ✅ **LeavesView.vue** - إدارة الإجازات
+
   - عرض طلبات الإجازات
   - إحصائيات (معلقة، موافق، مرفوضة)
   - الموافقة/الرفض من قبل الـ Admin

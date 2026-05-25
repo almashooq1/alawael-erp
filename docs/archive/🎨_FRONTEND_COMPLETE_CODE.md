@@ -10,7 +10,7 @@
 
 ## 📁 هيكل المشروع
 
-```
+```text
 frontend/
 ├── public/
 │   ├── index.html

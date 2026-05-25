@@ -19,7 +19,7 @@ npm test
 
 ### الخطوة 3: مراجعة النتائج
 
-```
+```text
 Test Suites: 3 passed
 Tests:       95+ passed
 Coverage:    > 80%

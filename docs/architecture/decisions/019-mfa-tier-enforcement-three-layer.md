@@ -63,7 +63,7 @@ zktecoService.js` cron handlers). Cron has no user session, so
 
 Adopt a **five-layer enforcement stack**:
 
-```
+```text
 1. Route-layer middleware             requireMfaTier(N, { maxAgeMin })
 2. Service-layer factory + helper     enforceMfa flag + _checkMfaTier(actor, t, m)
 3. Synthetic system-actor             makeSystemActor() for cron paths

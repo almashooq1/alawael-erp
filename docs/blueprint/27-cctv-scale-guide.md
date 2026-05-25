@@ -75,7 +75,7 @@ workers so 100 cameras don't open 100 sockets at once.
 
 Full-cycle time at scale 5000 cameras / 12 branches:
 
-```
+```text
 perBranch = ceil(500 / 12) = 42 cameras/branch/tick
 ticks per full cycle = ceil(5000 / 42) ≈ 120 ticks
 elapsed = 120 × 60s = 120 min ≈ 2 hours
@@ -124,7 +124,7 @@ Everything above, plus:
 
 ## Ops endpoints
 
-```
+```text
 GET  /api/v1/cctv/admin/queue           # snapshot: depth / hwm / drops / errors
 POST /api/v1/cctv/admin/queue/flush     # force-flush right now (debug)
 GET  /api/v1/cctv/admin/config          # adapter mode + breakers + agent stats

@@ -2,7 +2,7 @@
 
 ## 📂 **بنية المشروع الكاملة**
 
-```
+```text
 project-root/
 │
 ├── 🎊 Documentation Files (الملفات الموثقة)
@@ -200,7 +200,7 @@ project-root/
 
 ### Authentication (3):
 
-```
+```text
 POST   /api/auth/register
 POST   /api/auth/login
 POST   /api/auth/refresh
@@ -208,7 +208,7 @@ POST   /api/auth/refresh
 
 ### Beneficiaries (5):
 
-```
+```text
 GET    /api/beneficiaries
 POST   /api/beneficiaries
 GET    /api/beneficiaries/<id>
@@ -218,7 +218,7 @@ DELETE /api/beneficiaries/<id>
 
 ### Sessions (5):
 
-```
+```text
 GET    /api/sessions
 POST   /api/sessions
 GET    /api/sessions/<id>
@@ -228,7 +228,7 @@ DELETE /api/sessions/<id>
 
 ### Analytics (5):
 
-```
+```text
 GET    /api/analytics/dashboard
 GET    /api/analytics/sessions/stats
 GET    /api/analytics/beneficiaries/stats
@@ -238,7 +238,7 @@ GET    /api/analytics/export/csv
 
 ### WebSocket (7):
 
-```
+```text
 /socket.io/connect
 /socket.io/disconnect
 /socket.io/authenticate
@@ -250,7 +250,7 @@ GET    /api/analytics/export/csv
 
 ### Security (7):
 
-```
+```text
 POST   /api/security/api-keys
 GET    /api/security/api-keys
 GET    /api/security/api-keys/<id>
@@ -264,7 +264,7 @@ GET    /api/security/audit-logs
 
 ### Advanced (10):
 
-```
+```text
 POST   /api/advanced/beneficiaries/batch-create
 PUT    /api/advanced/beneficiaries/batch-update
 DELETE /api/advanced/beneficiaries/batch-delete
@@ -314,7 +314,7 @@ grep -r "/api/analytics" backend/routes/
 
 ### طبقة Models:
 
-```
+```text
 User (المستخدم)
   └── لديه Beneficiaries (مستفيدين)
       └── لديه Sessions (جلسات)
@@ -329,7 +329,7 @@ AuditLog (سجل التدقيق)
 
 ### طبقة Routes:
 
-```
+```text
 auth.py          → المصادقة والتسجيل
 beneficiaries.py → إدارة المستفيدين
 sessions.py      → إدارة الجلسات
@@ -341,7 +341,7 @@ advanced.py      → العمليات المتقدمة
 
 ### طبقة Tests:
 
-```
+```text
 test_auth.py                  → اختبارات المصادقة
 test_beneficiaries.py         → اختبارات المستفيدين
 test_sessions.py              → اختبارات الجلسات
@@ -354,7 +354,7 @@ load_test.py                  → اختبار الحمل
 
 ## 🚀 **قائمة التحقق السريعة**
 
-```
+```text
 الملفات الأساسية:
   ☑️ app.py (مُحدّث)
   ☑️ models/ (كاملة)

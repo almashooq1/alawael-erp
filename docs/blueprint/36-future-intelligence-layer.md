@@ -47,7 +47,7 @@ is to preserve intent, not to provide implementation detail premature to evidenc
 Replace W219 categorical trend classification (`PLATEAU | REGRESSION | …`) with
 posterior distributions over the same categories + credible intervals for slope.
 
-```
+```text
 TrendPosterior {
   distribution: { CATEGORY → probability }
   point_estimate: 'PLATEAU'
@@ -65,7 +65,7 @@ internalizing what credible intervals mean. Both are untested.
 Three-tier resolution: `personalized_local` > `cohort_adjusted_literature` >
 `measure.interpretation.mcid` (current).
 
-```
+```text
 MCIDResolution(beneficiary, measure):
   if local_data.n(matched_cohort) ≥ 100 and confidence ≥ moderate:
     return empirical_mcid(cohort = age±2, dx, baseline±SD)

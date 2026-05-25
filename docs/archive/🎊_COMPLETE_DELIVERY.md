@@ -124,7 +124,7 @@
 
 **Best for:** Fast, easy, most reliable production deployment
 
-```
+```text
 1. Go to https://railway.app
 2. Create account (use GitHub for easy auth)
 3. Create new project
@@ -151,7 +151,7 @@ Steps outlined in: [QUICK_DEPLOY.md](QUICK_DEPLOY.md) → PATH 2
 
 **Best for:** Local testing, staging environment
 
-```
+```text
 docker-compose up -d
 ```
 
@@ -170,7 +170,7 @@ See: [COMPLETE_DEPLOYMENT_GUIDE.md](COMPLETE_DEPLOYMENT_GUIDE.md)
 
 Everything has been verified:
 
-```
+```text
 Code Quality:              ✅ 0 errors, 0 warnings
 Frontend Build:            ✅ 1.6 MB optimized
 Backend API:               ✅ 50+ endpoints working
@@ -189,7 +189,7 @@ Deployment Guides:         ✅ Ready for 4 platforms
 
 ## 🔑 IMPORTANT CREDENTIALS
 
-```
+```text
 Admin Email:    admin@alawael.com
 Admin Password: Admin@123456
 

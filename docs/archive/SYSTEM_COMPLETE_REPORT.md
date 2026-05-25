@@ -79,7 +79,7 @@
 
 **File Structure:**
 
-```
+```text
 backend/
 ├── api/
 │   ├── routes/
@@ -148,7 +148,7 @@ frontend/
 
 ## 🔐 Demo Credentials
 
-```
+```text
 📧 Email: admin@alawael.com
 🔑 Password: Admin@123456
 ```
@@ -157,7 +157,7 @@ frontend/
 
 ### Authentication
 
-```
+```text
 POST   /api/auth/register        - تسجيل مستخدم جديد
 POST   /api/auth/login           - تسجيل الدخول
 POST   /api/auth/logout          - تسجيل الخروج
@@ -169,7 +169,7 @@ POST   /api/auth/change-password - تغيير كلمة المرور
 
 ### Users (Admin)
 
-```
+```text
 GET    /api/users                - جلب جميع المستخدمين
 POST   /api/users                - إضافة مستخدم
 GET    /api/users/:id            - جلب مستخدم
@@ -179,7 +179,7 @@ DELETE /api/users/:id            - حذف مستخدم
 
 ### Employees (HR)
 
-```
+```text
 GET    /api/employees            - جميع الموظفين
 POST   /api/employees            - إضافة موظف
 GET    /api/employees/:id        - موظف محدد
@@ -191,14 +191,14 @@ PATCH  /api/employees/:id/status - تغيير الحالة
 
 ### Attendance
 
-```
+```text
 POST   /api/hr/attendance        - تسجيل الحضور
 GET    /api/hr/attendance/:id    - سجل الحضور
 ```
 
 ### Leaves
 
-```
+```text
 POST   /api/hr/leaves            - طلب إجازة
 GET    /api/hr/leaves            - جميع الطلبات
 GET    /api/hr/leaves/:id        - إجازات الموظف
@@ -287,23 +287,27 @@ DELETE /api/hr/leaves/:id        - حذف الطلب
 ## 🚀 الخطوات القادمة (Optional)
 
 1. **Testing Suite**
+
    - Jest for Backend
    - Vitest for Frontend
    - E2E with Playwright
 
 2. **Advanced Features**
+
    - Reports & Analytics
    - Export to PDF/Excel
    - Email Notifications
    - SMS Alerts
 
 3. **Infrastructure**
+
    - Docker Deployment
    - CI/CD Pipeline
    - Monitoring & Logging
    - Database Migration (MongoDB)
 
 4. **Mobile App**
+
    - React Native
    - Flutter
    - Progressive Web App

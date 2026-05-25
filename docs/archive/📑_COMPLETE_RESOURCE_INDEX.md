@@ -5,11 +5,13 @@
 **New to this project?** Start with these files in order:
 
 1. **[🎊_COMPLETE_DELIVERY.md](🎊_COMPLETE_DELIVERY.md)** ⭐ START HERE FIRST
+
    - 2-minute overview of everything
    - What you're getting
    - How to deploy
 
 2. **[🚀_START_DEPLOYMENT.md](🚀_START_DEPLOYMENT.md)**
+
    - Quick decision tree
    - Choose your platform
    - Links to all guides
@@ -75,7 +77,7 @@
 
 **Railway route (RECOMMENDED):**
 
-```
+```text
 Create Railway account → Select repo → Click Deploy → Wait 5 min → Live!
 ```
 
@@ -101,7 +103,7 @@ Create Railway account → Select repo → Click Deploy → Wait 5 min → Live!
 
 1. Read: [START_NOW.md](START_NOW.md) (5 min)
 2. Run local:
-   ```
+   ```text
    cd frontend && npm run dev
    cd backend && npm run dev
    ```

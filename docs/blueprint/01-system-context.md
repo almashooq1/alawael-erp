@@ -48,7 +48,7 @@ C4Context
 
 ## 1-B. System Context Diagram (ASCII — Legacy Reference)
 
-```
+```text
                                   ┌──────────────────────────────────┐
                                   │   أنظمة حكومية سعودية            │
                                   │  ZATCA   │ GOSI    │ Qiwa        │
@@ -167,7 +167,7 @@ C4Context
 
 ### 3.1 رحلة مستفيد جديد (High-Level)
 
-```
+```text
 External Referrer ──┐
 Parent (self)       ├──▶ Public Intake Form ──▶ Platform (Intake BC)
 Branch Reception    ──┘                         │
@@ -192,7 +192,7 @@ Branch Reception    ──┘                         │
 
 ### 3.2 تدفق تقديم خدمة يومية
 
-```
+```text
 Therapist App ──▶ Check-in (biometric/QR) ──▶ HR Attendance
                             │
                             ▼
@@ -207,7 +207,7 @@ Therapist App ──▶ Check-in (biometric/QR) ──▶ HR Attendance
 
 ### 3.3 تدفق إداري تنفيذي
 
-```
+```text
 HQ Dashboard ──▶ Real-time KPIs (branch-level aggregations)
        │
        ▼

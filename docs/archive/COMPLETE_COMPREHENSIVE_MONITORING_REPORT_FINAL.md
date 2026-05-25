@@ -11,7 +11,7 @@
 
 ### الحالة الكلية: ✅ **ممتازة**
 
-```
+```text
 ┌────────────────────────────────────────────┐
 │  النظام في حالة مثالية - جاهز للعمل      │
 │  جميع الخدمات تعمل بكفاءة عالية ✅       │
@@ -27,7 +27,7 @@
 
 ### 1️⃣ Backend Server (Express.js + Node.js)
 
-```
+```text
 ✅ Status:             يعمل بنجاح
 ✅ Port:               3001 (مستمع)
 ✅ Health Check:       200 OK
@@ -42,7 +42,7 @@
 
 ### 2️⃣ Frontend Server (React + Material-UI)
 
-```
+```text
 ✅ Status:             يعمل بنجاح
 ✅ Port:               3002 (مستمع)
 ✅ Framework:          React 18.2.0
@@ -57,7 +57,7 @@
 
 ### 3️⃣ MongoDB Database
 
-```
+```text
 ⚠️  Status:             متاح (اختياري)
 ✅ Port:               27017
 ✅ Version:            9.1.2
@@ -74,7 +74,7 @@
 
 ### استهلاك الموارد
 
-```
+```text
 عدد العمليات Node.js:     6 عمليات نشطة
 الذاكرة الكلية:            ~40 MB
 CPU Usage:               منخفض جداً
@@ -85,7 +85,7 @@ System Health:          100% صحي
 
 ### معلومات النظام
 
-```
+```text
 نظام التشغيل:            Windows 10/11
 Architecture:           64-bit
 Total RAM:              16+ GB
@@ -100,7 +100,7 @@ Network:                متصل بنجاح
 
 ### طبقات الحماية الثمانية
 
-```
+```text
 1️⃣  JWT Authentication           ✅ فعّال
 2️⃣  Password Encryption           ✅ bcryptjs
 3️⃣  Helmet Security Headers       ✅ فعّال
@@ -119,7 +119,7 @@ Network:                متصل بنجاح
 
 ### اليوم (16 ملف)
 
-```
+```text
 ✅ CONTINUOUS_MONITORING_REPORT.md              (تقرير المتابعة المستمر)
 ✅ MONITORING_UPDATE_2026-01-13.md              (تحديث المتابعة)
 ✅ FULL_SYSTEM_STARTUP_REPORT.md                (تقرير البدء الشامل)
@@ -140,7 +140,7 @@ Network:                متصل بنجاح
 
 ### إحصائيات
 
-```
+```text
 عدد الملفات:            16+ ملف
 إجمالي الكلمات:        75,000+ كلمة
 عدد التوصيات:          150+ توصية
@@ -154,7 +154,7 @@ Network:                متصل بنجاح
 
 ### ملخص النتائج
 
-```
+```text
 Test Suites:      2 passed, 3 failed (60% success rate)
 Tests:            9 passed, 9 failed (50% success rate)
 Duration:         57 seconds
@@ -163,7 +163,7 @@ Coverage:         25.54% (يحتاج تحسين)
 
 ### الاختبارات الناجحة
 
-```
+```text
 ✅ Health Check Tests:    PASS (استجابة <50ms)
 ✅ Employee Tests:        PASS (9/9 اختبار)
 ✅ API Framework:         صحيح معماريًا
@@ -172,7 +172,7 @@ Coverage:         25.54% (يحتاج تحسين)
 
 ### الاختبارات الفاشلة (بسبب MongoDB)
 
-```
+```text
 ❌ Authentication Tests:   MongoDB Timeout
 ❌ User Tests:            MongoDB Timeout
 ⚠️  Rate Limiting Tests:  بسبب محدّد الطلبات
@@ -186,7 +186,7 @@ Coverage:         25.54% (يحتاج تحسين)
 
 ### الأداء الحالية
 
-```
+```text
 Response Time:        <50ms ✅ (ممتاز)
 Throughput:           كافي ✅
 Database Query:       معقول ⚠️ (يحتاج تحسين)
@@ -197,7 +197,7 @@ Memory Leaks:         لا يوجد ✅
 
 ### الأهداف المستهدفة
 
-```
+```text
 Response Time:        <50ms مستقر ✅
 Code Coverage:        85%+ (الحالي 25%)
 Test Pass Rate:       85%+ (الحالي 50%)
@@ -295,7 +295,7 @@ npm install --save-dev artillery
 
 #### المكونات المطلوبة
 
-```
+```text
 📊 Charts & Graphs
 📈 Real-time Analytics
 📌 System Metrics
@@ -335,7 +335,7 @@ npm install --save-dev artillery
 
 ### النقاط الإيجابية ✅
 
-```
+```text
 ✅ النظام معماري صحيح 100%
 ✅ الأمان ممتاز (100/100)
 ✅ الأداء قوية (<50ms)
@@ -348,7 +348,7 @@ npm install --save-dev artillery
 
 ### النقاط التي تحتاج تحسين ⚠️
 
-```
+```text
 ⚠️  MongoDB Timeout في الاختبارات
 ⚠️  Code Coverage منخفضة (25.54%)
 ⚠️  اختبارات Frontend غير موجودة
@@ -358,7 +358,7 @@ npm install --save-dev artillery
 
 ### الخلاصة النهائية
 
-```
+```text
 الحالة الكلية: 83/100 (ممتازة)
 الجاهزية: جاهز للعمل الآن
 الإنتاجية: يمكن الإطلاق بعد إصلاح MongoDB
@@ -374,7 +374,7 @@ npm install --save-dev artillery
 
 **1. MongoDB Connection Timeout**
 
-```
+```text
 المشكلة: اختبارات MongoDB تفشل بعد 10 ثواني
 الحل:
   1. تشغيل mongod --dbpath C:\data\db
@@ -384,7 +384,7 @@ npm install --save-dev artillery
 
 **2. Jest Timeout**
 
-```
+```text
 المشكلة: Jest timeout بعد 15 ثانية
 الحل:
   1. تحديث jest.config.js
@@ -393,7 +393,7 @@ npm install --save-dev artillery
 
 **3. Port Already in Use**
 
-```
+```text
 المشكلة: Port 3001 أو 3002 مستخدم
 الحل:
   1. netstat -ano | findstr :3001

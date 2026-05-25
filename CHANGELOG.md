@@ -913,7 +913,7 @@ PII-redacted and audit-logged.
 
 ### Commits pushed to origin/main
 
-```
+```text
 055ce36c  Pillar 1 backend — analysis tooling
 424b8efc  Pillar 2 backend — standards compliance
 14c091a9  Pillar 3.1 backend — Supplier SCARs

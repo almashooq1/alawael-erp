@@ -8,7 +8,7 @@
 
 ### المراحل السبع
 
-```
+```text
   [1]            [2]             [3]              [4]              [5]              [6]              [7]
  إحالة   ───▶   قبول   ───▶   تقييم   ───▶   خطة IRP   ───▶   جلسات   ───▶   مراجعة   ───▶   إنهاء
 Referral      Intake      Assessment        Plan          Delivery        Review       Discharge
@@ -122,7 +122,7 @@ Referral      Intake      Assessment        Plan          Delivery        Review
 
 **Daily Cycle:**
 
-```
+```text
 08:00 — موظف الاستقبال يؤكد مواعيد اليوم
        (SMS/WA تذكير لأولياء الأمور أُرسل البارحة)
        │
@@ -222,7 +222,7 @@ Referral      Intake      Assessment        Plan          Delivery        Review
 
 ### 2.1 IRP Approval Workflow
 
-```
+```text
 Therapist drafts IRP ──▶ Clinical Supervisor Review
                                │
                                ├── Approved → Branch Manager
@@ -239,7 +239,7 @@ Therapist drafts IRP ──▶ Clinical Supervisor Review
 
 ### 2.2 Invoice Cancellation Workflow
 
-```
+```text
 Accountant requests cancellation ──▶ Branch Manager
                                           │
                                           ├── < 1,000 SAR → Auto-approve
@@ -257,7 +257,7 @@ Accountant requests cancellation ──▶ Branch Manager
 
 ### 2.3 Employee Onboarding Workflow
 
-```
+```text
 Recruitment → Offer Accepted → Onboarding Checklist
                                       │
    ┌──────────┬──────────┬─────────┬──┴──────┬──────────┐
@@ -280,7 +280,7 @@ Contract  GOSI enroll  Qiwa   Bank acct   Credentials  IT Setup
 
 ### 2.4 Incident Investigation Workflow
 
-```
+```text
 Incident Reported (any user)
          │
          ▼
@@ -316,7 +316,7 @@ Minor │ Moderate │ Major/Catastrophic
 
 ### 2.5 Complaint Resolution Workflow
 
-```
+```text
 Complaint received
      │
      ▼
@@ -353,7 +353,7 @@ Resolution proposal
 
 ### 3.1 "New Beneficiary" Saga
 
-```
+```text
 Step 1: BC-01 → Create User (portal account for guardian)
          ├── Success → Continue
          └── Failure → Compensate: none (not created yet), abort
@@ -397,7 +397,7 @@ COMPLETE: Beneficiary.admissionStatus = 'active'
 
 ### 3.2 "Session → Invoice → Payment" Saga
 
-```
+```text
 Session completed (BC-04 event)
         │
         ▼
@@ -427,7 +427,7 @@ Wait for payment (up to due date)
 
 ### Beneficiary Admission Status
 
-```
+```text
     applicant
        │
        ▼ (accept)
@@ -444,7 +444,7 @@ Wait for payment (up to due date)
 
 ### Session Status
 
-```
+```text
   scheduled ─────(cancel pre-24h)────▶ cancelled
       │
       ├─(reschedule)─▶ scheduled (new time)
@@ -463,7 +463,7 @@ Wait for payment (up to due date)
 
 ### Invoice Status
 
-```
+```text
   draft ──(issue)──▶ issued ──(send)──▶ sent
                         │                 │
                         │                 ├─(partial pay)──▶ partially_paid
@@ -483,7 +483,7 @@ Wait for payment (up to due date)
 
 ### IRP Status
 
-```
+```text
   draft ─(submit)─▶ pending_approval
                           │
                     ┌─────┼─────┐

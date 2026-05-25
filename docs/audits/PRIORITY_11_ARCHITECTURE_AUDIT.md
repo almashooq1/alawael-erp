@@ -195,7 +195,7 @@ startSchedulers(app);
 
 #### Evidence
 
-```
+```text
 Unique mount paths: 167
 Duplicate mount paths: 3
   dashboard: mounted 3 times
@@ -229,7 +229,7 @@ Duplicate mount paths: 3
 
 ### QW-1: Fix 3 Duplicate Route Mounts
 
-```
+```text
 dashboard: mounted 3 times → keep 1
 kpi-dashboard: mounted 2 times → keep 1
 telehealth: mounted 2 times → keep 1
@@ -337,7 +337,7 @@ The DDD layer has **excellent** error handling discipline:
 
 ## Recommended Priority #11 Action Plan
 
-```
+```text
 Week 1:
   ├─ Quick Wins: Fix 3 duplicate mounts (30 min)
   ├─ Quick Wins: Add CI route mount guard (1 hr)

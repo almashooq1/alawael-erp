@@ -38,7 +38,7 @@
 
 ### 🎯 **ملفات البدء (7 ملفات)**
 
-```
+```text
 START:
 ├─ 🎊_START_HERE.md                    (الاستهلال الكامل)
 ├─ 00_READ_ME_FIRST.md                 (اقرأ هنا أولا)
@@ -51,7 +51,7 @@ START:
 
 ### 🔄 **ملفات الحالة والتقدم (12 ملف)**
 
-```
+```text
 STATUS:
 ├─ ✅_SYSTEM_STATUS.md                 (الحالة الحالية)
 ├─ ✅_FINAL_VERIFICATION.md            (التحقق النهائي)
@@ -69,7 +69,7 @@ STATUS:
 
 ### 📊 **ملفات الملخصات والتقارير (8 ملفات)**
 
-```
+```text
 SUMMARIES:
 ├─ 📊_QUICK_SUMMARY.md                 (ملخص سريع)
 ├─ 📊_PROJECT_STATUS.md                (حالة المشروع)
@@ -83,7 +83,7 @@ SUMMARIES:
 
 ### 📄 **ملفات المراحل الأساسية (Phases 1-8) - مكتملة 100%**
 
-```
+```text
 PHASES 1-8 (COMPLETED):
 ├─ 00_PHASE_6_COMPLETION_SUMMARY.md
 ├─ 🔄_WEBSOCKET_REALTIME_INTEGRATION.md
@@ -97,7 +97,7 @@ PHASES 1-8 (COMPLETED):
 
 ### 📋 **ملفات المراحل الجديدة (Phases 9-13) - مخطط شامل**
 
-```
+```text
 PHASES 9-13 (PLANNED WITH FULL DOCUMENTATION):
 ├─ 🎨_PHASE_9_FRONTEND_IMPLEMENTATION.md   (React Dashboard)
 ├─ 🤖_PHASE_10_AI_INTELLIGENCE.md         (ML & AI)
@@ -108,7 +108,7 @@ PHASES 9-13 (PLANNED WITH FULL DOCUMENTATION):
 
 ### 🎉 **ملفات الإنجاز والتسليم (10 ملفات)**
 
-```
+```text
 COMPLETION:
 ├─ 🎉_FINAL_COMPREHENSIVE_COMPLETION_REPORT.md (التقرير الكامل)
 ├─ 🎊_PROJECT_COMPLETE.txt                 (المشروع مكتمل)
@@ -124,7 +124,7 @@ COMPLETION:
 
 ### 📚 **ملفات الموارد والملاحة (8 ملفات)**
 
-```
+```text
 RESOURCES:
 ├─ 📚_FILES_NAVIGATION_GUIDE.md         (دليل الملفات)
 ├─ 📑_COMPLETE_RESOURCE_INDEX.md        (فهرس الموارد)
@@ -138,7 +138,7 @@ RESOURCES:
 
 ### 🔧 **ملفات الإعدادات والتكوين (5 ملفات)**
 
-```
+```text
 CONFIGURATION:
 ├─ app.py                               (التطبيق الرئيسي)
 ├─ config.py                            (الإعدادات)
@@ -149,7 +149,7 @@ CONFIGURATION:
 
 ### 🧪 **ملفات الاختبارات والسكريبتات (3 ملفات)**
 
-```
+```text
 TESTING:
 ├─ 🧪_TEST_SYSTEM.ps1                  (تشغيل الاختبارات)
 ├─ tests/                               (مجلد الاختبارات)
@@ -158,7 +158,7 @@ TESTING:
 
 ### 🎯 **ملفات البيانات النموذجية (30+ ملف)**
 
-```
+```text
 SAMPLE DATA:
 ├─ add_*_sample_data.py                 (إضافة بيانات عينة)
 │  ├─ add_ai_communications_sample_data.py
@@ -174,7 +174,7 @@ SAMPLE DATA:
 
 ### 📞 **ملفات التواصل والاتصالات (2 ملف)**
 
-```
+```text
 COMMUNICATIONS:
 ├─ _COMMUNICATIONS_COMPLETE_REPORT.md  (تقرير الاتصالات)
 └─ _COMMUNICATIONS_SYSTEM_GUIDE.md     (دليل الاتصالات)
@@ -186,7 +186,7 @@ COMMUNICATIONS:
 
 ### المراحل المكتملة (Phases 1-8): ✅ **مكتملة 100%**
 
-```
+```text
 PHASE 1-2: ✅ Core Foundation
 ├─ نموذج إدارة كامل
 ├─ 10 نماذج بيانات
@@ -244,7 +244,7 @@ PHASE 8: ✅ Performance
 
 ### المراحل المخطط لها (Phases 9-13): 📋 **مصممة وموثقة بالكامل**
 
-```
+```text
 PHASE 9: 📋 Frontend (React Dashboard)
 ├─ 🎨_PHASE_9_FRONTEND_IMPLEMENTATION.md
 ├─ 20+ مكون React
@@ -292,7 +292,7 @@ PHASE 13: 🏢 Enterprise Features
 
 ### قاعدة الكود:
 
-```
+```text
 ┌──────────────────────────────────────┐
 │ أسطر الكود الكلية: 5000+ سطر         │
 ├──────────────────────────────────────┤
@@ -307,7 +307,7 @@ PHASE 13: 🏢 Enterprise Features
 
 ### الأداء:
 
-```
+```text
 ┌──────────────────────────────────────┐
 │ وقت الاستجابة:     < 200ms (p95)    │
 │ الإنتاجية:        10,000+ req/sec   │
@@ -319,7 +319,7 @@ PHASE 13: 🏢 Enterprise Features
 
 ### الجودة:
 
-```
+```text
 ┌──────────────────────────────────────┐
 │ Code Quality:      A+                │
 │ Security:         Top Tier           │
@@ -335,7 +335,7 @@ PHASE 13: 🏢 Enterprise Features
 
 ### الإنجاز:
 
-```
+```text
 ✅ نظام إدارة شامل مكتمل
 ✅ 30+ نقطة API موثقة
 ✅ 72+ اختبار نجح (100%)
@@ -350,7 +350,7 @@ PHASE 13: 🏢 Enterprise Features
 
 ### المرحلة الاحقة:
 
-```
+```text
 📋 Phase 9 Frontend (React)
    ├─ وثائق كاملة ✅
    ├─ الهندسة المعمارية ✅
@@ -386,7 +386,7 @@ PHASE 13: 🏢 Enterprise Features
 
 #### 1️⃣ **الإطلاق الفوري**
 
-```
+```text
 اليوم:   شغّل Phase 1-8
 أسبوع:   إضافة تحسينات
 شهر:     إطلاق Phase 9
@@ -394,7 +394,7 @@ PHASE 13: 🏢 Enterprise Features
 
 #### 2️⃣ **الاستثمار في الواجهة**
 
-```
+```text
 أسبوع 1:  React Dashboard (Phase 9)
 أسبوع 2:  Integration مع Backend
 أسبوع 3:  Polish & Deploy
@@ -402,7 +402,7 @@ PHASE 13: 🏢 Enterprise Features
 
 #### 3️⃣ **الذهاب للمحمول**
 
-```
+```text
 أسبوع 1-2: Mobile App بدء
 أسبوع 3-4: Feature implementation
 أسبوع 5:   Testing & Deploy
@@ -410,7 +410,7 @@ PHASE 13: 🏢 Enterprise Features
 
 #### 4️⃣ **التوسع للمؤسسات**
 
-```
+```text
 أسبوع 1-2: Multi-tenancy
 أسبوع 3:   Reporting System
 أسبوع 4:   Enterprise Features
@@ -422,7 +422,7 @@ PHASE 13: 🏢 Enterprise Features
 
 ### ابحث عن:
 
-```
+```text
 Frontend:     🎨_PHASE_9_FRONTEND_IMPLEMENTATION.md
 AI/ML:        🤖_PHASE_10_AI_INTELLIGENCE.md
 Mobile:       📱_PHASE_11_MOBILE_APP.md
@@ -432,7 +432,7 @@ Enterprise:   🏢_PHASE_13_ENTERPRISE_FEATURES.md
 
 ### اقرأ:
 
-```
+```text
 البدء:        🎊_START_HERE.md
 الملخص:       📊_QUICK_SUMMARY.md
 التقرير:      🎉_FINAL_COMPREHENSIVE_COMPLETION_REPORT.md
@@ -444,7 +444,7 @@ Enterprise:   🏢_PHASE_13_ENTERPRISE_FEATURES.md
 
 ## 🎉 **الخلاصة**
 
-```
+```text
 ✅ المشروع الأساسي: مكتمل 100%
 ✅ الوثائق: شاملة وكاملة
 ✅ الاختبارات: نجحت جميعاً

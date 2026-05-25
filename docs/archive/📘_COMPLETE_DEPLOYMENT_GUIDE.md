@@ -33,7 +33,7 @@ npm start
 
 **Expected output:**
 
-```
+```text
 ✅ Express server running on http://localhost:3001
 ✅ WebSocket server initialized
 ✅ Connected to MongoDB
@@ -50,14 +50,14 @@ npm run dev
 
 **Expected output:**
 
-```
+```text
 ✅ Vite dev server running at http://localhost:3000
 ✅ Ready in XXms
 ```
 
 ### Access Application
 
-```
+```text
 Frontend: http://localhost:3000
 API: http://localhost:3001
 Database: mongodb://localhost:27017
@@ -109,16 +109,19 @@ docker-compose down
 **Steps:**
 
 1. **Sign Up** (1 minute)
+
    - Go to https://railway.app/new
    - Click "Deploy from GitHub"
    - Sign in with GitHub
 
 2. **Select Repository** (1 minute)
+
    - Select your repository
    - Railway auto-detects monorepo
    - Configures frontend + backend
 
 3. **Configure** (1 minute)
+
    - Add environment variables
    - Set JWT_SECRET
    - Set DB credentials
@@ -130,7 +133,7 @@ docker-compose down
 
 **Result:**
 
-```
+```text
 Frontend: https://your-app.railway.app
 API: https://your-app.railway.app/api
 System: Live on internet! 🌐
@@ -142,7 +145,7 @@ System: Live on internet! 🌐
 
 ### Architecture
 
-```
+```text
 ┌─────────────────┐
 │  User Browser   │
 │ :3000 or cloud  │
@@ -368,7 +371,7 @@ VITE_WEBSOCKET_URL=http://localhost:dynamic_port
 
 **Error:**
 
-```
+```text
 Error: listen EADDRINUSE: address already in use :::3001
 ```
 
@@ -388,7 +391,7 @@ taskkill /PID <PID> /F
 
 **Error:**
 
-```
+```text
 Error: connect ECONNREFUSED 127.0.0.1:27017
 ```
 
@@ -409,7 +412,7 @@ mongosh "mongodb://localhost:27017"
 
 **Error:**
 
-```
+```text
 Error: Cannot find module 'express'
 ```
 
@@ -428,7 +431,7 @@ cd backend && npm install
 
 **Error:**
 
-```
+```text
 Access to XMLHttpRequest blocked by CORS policy
 ```
 
@@ -444,7 +447,7 @@ Access to XMLHttpRequest blocked by CORS policy
 
 **Error:**
 
-```
+```text
 WebSocket connection failed
 ```
 

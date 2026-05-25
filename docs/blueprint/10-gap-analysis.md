@@ -423,7 +423,7 @@
 
 ## 5. Priority Matrix (Impact × Effort)
 
-```
+```text
     High Impact
          │
   ┌──────┼──────┐

@@ -21,7 +21,7 @@
 
 ### الإحصائيات الرئيسية
 
-```
+```text
 📊 6000+ سطر كود
 🔗 50+ API Endpoint
 📄 11 صفحة أمامية
@@ -129,14 +129,14 @@ npm run dev
 
 **4. افتح المتصفح**
 
-```
+```text
 Frontend:  http://localhost:5173
 Backend:   http://localhost:3001
 ```
 
 **5. بيانات الدخول**
 
-```
+```text
 📧 Email:    admin@alawael.com
 🔑 Password: Admin@123456
 ```
@@ -165,7 +165,7 @@ Redis Commander: http://localhost:8082
 
 ## 📁 هيكل المشروع
 
-```
+```text
 alawael-erp/
 │
 ├── backend/                           # Express.js API
@@ -296,7 +296,7 @@ npm run test:ui
 
 ### تقرير التغطية
 
-```
+```text
 Backend Coverage:    80%+  ✅
 Frontend Coverage:   75%+  ✅
 Integration Tests:   Complete ✅
@@ -495,7 +495,7 @@ REFRESH_TOKEN_EXPIRE=7d
 
 ## 📊 إحصائيات المشروع
 
-```
+```text
 📝 Total Lines of Code:      6000+
 📁 Total Files:              46+
 🔗 Total Endpoints:          50+

@@ -192,7 +192,7 @@
 
 ## 📁 هيكل الملفات | File Structure
 
-```
+```text
 backend/
 ├── rehabilitation-services/
 │   ├── physical-therapy-service.js ✅

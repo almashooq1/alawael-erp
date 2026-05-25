@@ -152,7 +152,7 @@
 
 ## 2. Placement summary
 
-```
+```text
 Top of every role's landing dashboard:
   [Morning briefing card]       (1.1)
   [Pinned widgets — max 6]      (1.6)
@@ -186,7 +186,7 @@ Dedicated pages:
 
 ### 3.1 Annotation (per-KPI comments)
 
-```
+```text
 {
   _id, kpiId, branchId?, byUserId, byRole,
   textAr | textEn, at,
@@ -198,7 +198,7 @@ Dedicated pages:
 
 ### 3.2 HandoffNote
 
-```
+```text
 {
   _id, byUserId, byRole, branchId,
   subjectType: 'Beneficiary'|'Employee'|'Shift'|'Other',
@@ -214,7 +214,7 @@ Dedicated pages:
 
 ### 3.3 FollowUp (operational queue)
 
-```
+```text
 {
   _id, ownerUserId, ownerRole, branchId?,
   sourceType: 'insight'|'alert'|'manual',
@@ -229,7 +229,7 @@ Dedicated pages:
 
 ### 3.4 Watchlist (user-owned list)
 
-```
+```text
 {
   _id, ownerUserId, ownerRole,
   nameAr | nameEn,
@@ -241,7 +241,7 @@ Dedicated pages:
 
 ### 3.5 UserPreferences (presets + pins + saved views)
 
-```
+```text
 {
   userId,
   dashboardPresets: {

@@ -10,7 +10,7 @@
 
 ### **النظام الأساسي (Phases 1-8):**
 
-```
+```text
 ✅ نظام إدارة شامل
 ✅ 5000+ سطر كود محترف
 ✅ 30+ نقطة API
@@ -25,7 +25,7 @@
 
 ### **التوثيق الشامل (Phases 9-13):**
 
-```
+```text
 ✅ Phase 9: Frontend Architecture (React)
 ✅ Phase 10: AI & ML Features
 ✅ Phase 11: Mobile App (React Native)
@@ -41,7 +41,7 @@
 
 ### 🔥 **ابدأ من هنا (5 ملفات):**
 
-```
+```text
 1. ⚡_30_SECOND_SUMMARY.md
    → ملخص 30 ثانية فقط!
 
@@ -60,7 +60,7 @@
 
 ### 📚 **للتطوير المستقبلي (5 ملفات):**
 
-```
+```text
 6. 🎨_PHASE_9_FRONTEND_IMPLEMENTATION.md
 7. 🤖_PHASE_10_AI_INTELLIGENCE.md
 8. 📱_PHASE_11_MOBILE_APP.md
@@ -70,7 +70,7 @@
 
 ### 🎯 **التقارير والمراجع:**
 
-```
+```text
 11. 🎉_FINAL_COMPREHENSIVE_COMPLETION_REPORT.md
 12. 📍_FINAL_MASTER_INDEX_COMPLETE_V13.md
 13. ⚡_ULTIMATE_QUICK_START_GUIDE.md
@@ -83,7 +83,7 @@
 
 ### **الخيار 1️⃣: Frontend (الأول)**
 
-```
+```text
 Phase:   9 - React Dashboard
 Effort:  2-3 weeks
 Team:    2-3 React developers
@@ -95,7 +95,7 @@ ROI:     ⭐⭐⭐⭐⭐ (عائد عالي)
 
 ### **الخيار 2️⃣: DevOps (القوة)**
 
-```
+```text
 Phase:   12 - Advanced DevOps
 Effort:  2-3 weeks
 Team:    1-2 DevOps engineers
@@ -107,7 +107,7 @@ ROI:     ⭐⭐⭐⭐⭐ (توفير تكاليس)
 
 ### **الخيار 3️⃣: AI (الذكاء)**
 
-```
+```text
 Phase:   10 - AI Intelligence
 Effort:  3-4 weeks
 Team:    1-2 ML engineers
@@ -119,7 +119,7 @@ ROI:     ⭐⭐⭐⭐⭐ (قيمة عالية)
 
 ### **الخيار 4️⃣: Mobile (الوصول)**
 
-```
+```text
 Phase:   11 - Mobile App
 Effort:  4-5 weeks
 Team:    2-3 React Native devs
@@ -131,7 +131,7 @@ ROI:     ⭐⭐⭐⭐ (توسع)
 
 ### **الخيار 5️⃣: Enterprise (النمو)**
 
-```
+```text
 Phase:   13 - Enterprise Features
 Effort:  3-4 weeks
 Team:    3-4 developers
@@ -147,7 +147,7 @@ ROI:     ⭐⭐⭐⭐⭐ (إيرادات)
 
 ### **القصير (8 أسابيع):**
 
-```
+```text
 Weeks 1-2:   Phase 9 Frontend
 Weeks 3-4:   Phase 9 Testing & Deployment
 Weeks 5-6:   Phase 12 DevOps
@@ -156,7 +156,7 @@ Weeks 7-8:   Polish & Launch
 
 ### **المتوسط (12 أسبوع):**
 
-```
+```text
 Weeks 1-4:   Phase 9 Frontend
 Weeks 5-8:   Phase 12 DevOps
 Weeks 9-12:  Phase 10 AI (جزئي)
@@ -164,7 +164,7 @@ Weeks 9-12:  Phase 10 AI (جزئي)
 
 ### **الطويل (16+ أسابيع):**
 
-```
+```text
 Weeks 1-4:   Phase 9 Frontend
 Weeks 5-8:   Phase 12 DevOps
 Weeks 9-12:  Phase 10 AI
@@ -178,7 +178,7 @@ Weeks 17+:   Phase 13 Enterprise
 
 ### **اختر Phase 9 إذا:**
 
-```
+```text
 ✅ تريد تحسين التجربة الفوري
 ✅ لديك فريق React جيد
 ✅ الأولوية للعملاء
@@ -187,7 +187,7 @@ Weeks 17+:   Phase 13 Enterprise
 
 ### **اختر Phase 12 إذا:**
 
-```
+```text
 ✅ تريد نظام موثوق 99.99%
 ✅ لديك DevOps engineer
 ✅ الأولوية للاستقرار
@@ -196,7 +196,7 @@ Weeks 17+:   Phase 13 Enterprise
 
 ### **اختر Phase 10 إذا:**
 
-```
+```text
 ✅ تريد إضافة قيمة ذكية
 ✅ لديك ML engineer
 ✅ الأولوية للميزات
@@ -205,7 +205,7 @@ Weeks 17+:   Phase 13 Enterprise
 
 ### **اختر Phase 11 إذا:**
 
-```
+```text
 ✅ تريد وصول أوسع
 ✅ لديك React Native team
 ✅ الأولوية للجوال
@@ -214,7 +214,7 @@ Weeks 17+:   Phase 13 Enterprise
 
 ### **اختر Phase 13 إذا:**
 
-```
+```text
 ✅ تريد توسيع للمؤسسات
 ✅ لديك 3-4 مطورين
 ✅ الأولوية للإيرادات
@@ -227,7 +227,7 @@ Weeks 17+:   Phase 13 Enterprise
 
 ### **يوم 1:**
 
-```
+```text
 1. اقرأ: ⚡_30_SECOND_SUMMARY.md (30 ثانية)
 2. اقرأ: 🎊_QUICK_NAVIGATION_MAP.md (5 دقائق)
 3. قرّر: أي مرحلة تختار (5 دقائق)
@@ -235,7 +235,7 @@ Weeks 17+:   Phase 13 Enterprise
 
 ### **يوم 2:**
 
-```
+```text
 1. اقرأ: توثيق المرحلة المختارة (ساعة)
 2. افهم: المتطلبات والموارد
 3. جهّز: خطتك والجدول الزمني
@@ -243,7 +243,7 @@ Weeks 17+:   Phase 13 Enterprise
 
 ### **يوم 3:**
 
-```
+```text
 1. اجمع: الفريق الأول
 2. اشرح: المرحلة والخطة
 3. ابدأ: التطوير الأساسي
@@ -253,7 +253,7 @@ Weeks 17+:   Phase 13 Enterprise
 
 ## ✨ **النقاط الرئيسية**
 
-```
+```text
 ✅ النظام الحالي:         مكتمل وموثوق
 ✅ التوثيق:             شامل وواضح
 ✅ الخطط المستقبلية:    جاهزة للتنفيذ
@@ -266,7 +266,7 @@ Weeks 17+:   Phase 13 Enterprise
 
 ## 🎁 **ما تحتاجه الآن**
 
-```
+```text
 1. القراءة (ساعة واحدة)
    → اقرأ ملفات البدء
 
@@ -296,14 +296,14 @@ Weeks 17+:   Phase 13 Enterprise
 
 ### **للأسئلة العامة:**
 
-```
+```text
 اقرأ: ⚡_ULTIMATE_QUICK_START_GUIDE.md
 أو:  📍_FINAL_MASTER_INDEX_COMPLETE_V13.md
 ```
 
 ### **للمرحلة المختارة:**
 
-```
+```text
 اقرأ: ملف المرحلة الكامل
 اتبع: الخطوات والتوثيق
 اسأل: إذا التبست نقطة
@@ -313,7 +313,7 @@ Weeks 17+:   Phase 13 Enterprise
 
 ## 🎉 **الخلاصة النهائية**
 
-```
+```text
 أنت حالياً:
 ═══════════════════════════════════════════════════
 📍 نهاية المرحلة 8 من 13
@@ -333,7 +333,7 @@ Weeks 17+:   Phase 13 Enterprise
 
 ## 🚀 **ابدأ الآن!**
 
-```
+```text
 اختر واحد:
 
 🎨 Frontend?      → 🎨_PHASE_9_FRONTEND_IMPLEMENTATION.md

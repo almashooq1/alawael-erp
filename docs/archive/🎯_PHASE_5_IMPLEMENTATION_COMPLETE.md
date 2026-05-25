@@ -119,7 +119,7 @@ app.register_blueprint(analytics.analytics_bp)
 
 ### Tests Count: 27 (Expected after analytics tests)
 
-```
+```text
 ✓ test_models.py                  5/5
 ✓ test_routes_auth.py             9/9
 ✓ test_routes_beneficiaries.py    8/8
@@ -147,7 +147,7 @@ python scripts/add_sample_data.py
 
 **Output:**
 
-```
+```text
 ✅ Created 50 users
 ✅ Created 200 beneficiaries
 ✅ Created 500 sessions
@@ -228,7 +228,7 @@ curl -X GET http://localhost:5000/api/analytics/dashboard \
 
 ### Database Relationships
 
-```
+```text
 User
 ├── Beneficiaries (1:N)
 │   └── Sessions (1:N)
@@ -236,7 +236,7 @@ User
 
 ### Sample Data Relationships
 
-```
+```text
 50 Users
   ↓
 200 Beneficiaries (4 per user average)
@@ -347,7 +347,7 @@ This Phase demonstrates:
 
 ## 🏆 Current Project Status
 
-```
+```text
 PHASE 3 (Testing):      ✅ COMPLETE (22/22 tests)
 PHASE 4 (Deployment):   ✅ COMPLETE (Docker ready)
 PHASE 5 (Advanced):     ✅ COMPLETE (Analytics added)
@@ -364,19 +364,23 @@ Production Ready:       YES ✅
 ## 💡 What's Working Now
 
 1. **Authentication** ✅
+
    - Register, Login, Refresh, Profile
 
 2. **Beneficiary Management** ✅
+
    - Full CRUD operations
    - Session tracking
 
 3. **Analytics** ✅ NEW
+
    - Dashboard metrics
    - Statistical analysis
    - Usage trends
    - Data export
 
 4. **Testing** ✅
+
    - 27+ test cases
    - 100% core functionality
    - Sample data ready
@@ -395,7 +399,7 @@ Production Ready:       YES ✅
 
 **Option 1: Continue with Phase 6 (Production Deployment)**
 
-```
+```text
 → Set up cloud infrastructure
 → Configure CI/CD pipeline
 → Deploy to production
@@ -404,7 +408,7 @@ Production Ready:       YES ✅
 
 **Option 2: Complete Phase 5 Enhancements (WebSocket)**
 
-```
+```text
 → Add real-time notifications
 → Implement WebSocket support
 → Live dashboard updates
@@ -412,7 +416,7 @@ Production Ready:       YES ✅
 
 **Option 3: Phase 7 (Advanced Security)**
 
-```
+```text
 → API key management
 → Audit logging
 → RBAC implementation

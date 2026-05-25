@@ -15,7 +15,7 @@
 
 ### Backend services + scripts + utilities
 
-```
+```text
 backend/services/ops-alerter.js
 backend/services/sessionToClaimBridge.js
 backend/services/bulkSessionClaims.js
@@ -34,14 +34,14 @@ backend/startup/zatcaB2cSlaScheduler.js
 
 ### Backend routes (admin CRUD endpoints)
 
-```
+```text
 backend/routes/insurance-tariffs-admin.routes.js
 backend/routes/zatca-credentials-admin.routes.js
 ```
 
 ### Backend tests
 
-```
+```text
 backend/__tests__/nphies-session-billing-hook.test.js
 backend/tests/unit/dr-verify.test.js
 backend/tests/unit/ops-alerter.test.js
@@ -63,7 +63,7 @@ backend/tests/unit/env-vars-documented.test.js
 
 ### Frontend React + tests
 
-```
+```text
 frontend/src/__test-utils__/a11y.js
 frontend/src/components/nphies/CreateClaimDialog.jsx
 frontend/src/components/nphies/BulkCreateClaimsDialog.jsx
@@ -80,13 +80,13 @@ frontend/src/__tests__/drift/react-app-env-vars-documented.test.js
 
 ### CI
 
-```
+```text
 .github/workflows/dr-verify.yml
 ```
 
 ### Documentation (runbooks)
 
-```
+```text
 docs/blueprint/19-dr-verification.md
 docs/blueprint/20-accessibility.md
 docs/blueprint/21-session-to-claim-bridge.md
@@ -100,7 +100,7 @@ docs/blueprint/24-session-2026-05-02-manifest.md       (this file)
 After the 30-step operational push, the same session continued into
 the QMS / PDPL UI gap.
 
-```
+```text
 backend/middleware/piiAccess.middleware.js
 backend/routes/pii-access-audit-admin.routes.js
 backend/tests/unit/piiAccess.middleware.test.js
@@ -125,7 +125,7 @@ Files that already existed and were edited as part of this session.
 
 ### Backend
 
-```
+```text
 .env.example                                          # +4 sections (DR, ops-alerter, ZATCA, smoke)
 backend/.env.example                                  # implicit via shared guard
 backend/app.js                                        # boot block for ZATCA SLA scheduler
@@ -145,7 +145,7 @@ backend/routes/hr/employee-admin.routes.js            # logPiiAccess('Employee')
 
 ### Frontend
 
-```
+```text
 frontend/.env.example                                 # +3 missing REACT_APP_* vars
 frontend/cypress/support/commands.js                  # removed empty cy.checkA11y stub
 frontend/src/components/Layout/sidebar/sidebarNavConfig.jsx  # 2 nphies + 9 QMS/PDPL admin entries
@@ -157,7 +157,7 @@ frontend/src/__tests__/services-*.test.js (63 files)  # toBe → toBeGreaterThan
 
 ### CI
 
-```
+```text
 .github/workflows/pr-checks.yml                       # frontend-tests gate widened
 .github/workflows/deploy-hostinger.yml                # 3 silent-fail layers removed +
                                                      # smoke probes step + tariff seed step
@@ -165,7 +165,7 @@ frontend/src/__tests__/services-*.test.js (63 files)  # toBe → toBeGreaterThan
 
 ### Top-level
 
-```
+```text
 CHANGELOG.md                                          # full session entry
 ```
 
@@ -174,7 +174,7 @@ CHANGELOG.md                                          # full session entry
 These files appear in `git status` but are **pre-existing WIP** that
 predates this session. Review and commit them separately.
 
-```
+```text
 backend/jest.config.js
 backend/package.json
 backend/models/EpisodeOfCare.js

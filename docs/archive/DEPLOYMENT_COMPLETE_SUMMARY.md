@@ -4,7 +4,7 @@
 
 ### ✅ 5 ملفات نشر شاملة تم إنشاؤها
 
-```
+```text
 1. 📖 HOSTINGER_DEPLOYMENT.md (230+ سطر)
    └─ دليل خطوة بخطوة مفصّل
 
@@ -54,7 +54,7 @@ chmod +x deploy-hostinger.sh
 
 ### جديد اليوم:
 
-```
+```text
 ✅ HOSTINGER_DEPLOYMENT.md (نشر شامل)
 ✅ deploy-hostinger.sh (سكريبت تلقائي)
 ✅ nginx-hostinger.conf (إعدادات Nginx)
@@ -64,7 +64,7 @@ chmod +x deploy-hostinger.sh
 
 ### من قبل:
 
-```
+```text
 ✅ README.md (محسّن مع badges)
 ✅ LICENSE (MIT License)
 ✅ CONTRIBUTING.md (دليل المساهمة)
@@ -77,7 +77,7 @@ chmod +x deploy-hostinger.sh
 
 ### الخطوة 1: حضّر Hostinger
 
-```
+```text
 1. ذهاب إلى hostinger.com
 2. تسجيل الدخول
 3. تفعيل Node.js
@@ -104,7 +104,7 @@ cd alawael-erp
 
 ### الخطوة 3: أعد الإعدادات
 
-```
+```text
 1. ربط Domain
 2. ثبيت SSL (Let's Encrypt - مجاني)
 3. اختبار الموقع
@@ -114,7 +114,7 @@ cd alawael-erp
 
 ## ✨ المميزات الرئيسية | Key Features
 
-```
+```text
 📖 دليل شامل
   └─ 230+ سطر بالعربية والإنجليزية
   └─ خطوات واضحة ومفصلة
@@ -151,7 +151,7 @@ cd alawael-erp
 
 بعد النشر ستحصل على:
 
-```
+```text
 ✅ FRONTEND
    ├─ URL: https://yourdomain.com
    ├─ React 18.2 + Material-UI
@@ -186,7 +186,7 @@ cd alawael-erp
 
 ## 📈 إحصائيات المشروع | Project Statistics
 
-```
+```text
 Code Files:         113 ملف
 Lines of Code:      18,561 سطر
 Repository Size:    161 KB
@@ -201,7 +201,7 @@ Status:             Production Ready ✅
 
 ## 🔗 الروابط المهمة | Important Links
 
-```
+```text
 GitHub Repository:
 https://github.com/almashooq1/alawael-erp
 
@@ -222,7 +222,7 @@ Documentation:
 
 ## ⏱️ الوقت المتوقع | Time Estimates
 
-```
+```text
 التلقائي:
 ├─ التحضير: 5 دقائق
 ├─ النشر: 5 دقائق
@@ -264,7 +264,7 @@ Documentation:
 
 ## 💡 نصائح مهمة | Important Tips
 
-```
+```text
 🔐 الأمان:
   ├─ غيّر JWT Secret
   ├─ استخدم HTTPS فقط
@@ -310,6 +310,7 @@ Documentation:
 إذا واجهت أي مشاكل:
 
 1. **اقرأ الدليل:**
+
    - HOSTINGER_DEPLOYMENT.md (الأكثر شمولاً)
    - HOSTINGER_QUICK_START.md (للمشاكل الشائعة)
 
@@ -330,7 +331,7 @@ Documentation:
 
 ## 🎉 الخلاصة | Conclusion
 
-```
+```text
 لقد أنجزنا:
 ✅ شرح شامل للنشر على Hostinger
 ✅ سكريبت تلقائي للنشر الكامل

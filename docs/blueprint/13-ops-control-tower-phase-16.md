@@ -35,7 +35,7 @@ layer into a proper control tower.
 
 ## 2. Architecture at a glance
 
-```
+```text
                          ┌─────────────────────────┐
                          │   Ops Control Tower     │
                          │  (opsDashboard.service) │
@@ -151,7 +151,7 @@ slaEngine.listBreaches({ … });
 
 **14 canonical states** with a formal transition graph:
 
-```
+```text
 draft → submitted → triaged → approved → scheduled → in_progress
                        ↓                    ↓            ↓
                     rejected             on_hold       blocked
@@ -202,7 +202,7 @@ Facility is now a first-class entity separate from Branch:
 
 **Auto-orchestration** (the ops team's biggest win):
 
-```
+```text
 raiseFinding(inspectionId, { severity: 'critical', ... })
   ↓
   1. activates facility.inspection.closeout SLA clock

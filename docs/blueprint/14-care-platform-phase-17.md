@@ -44,7 +44,7 @@ The 2026-04-23 audit flagged every care-adjacent module at partial maturity:
 
 ### Service topology
 
-```
+```text
                          ┌─────────────────────────┐
                          │  qualityEventBus (C15)  │
                          └────────────┬────────────┘
@@ -93,7 +93,7 @@ All 4 reuse the Phase-16 SLA engine + breach notification infrastructure:
 
 Ten registry files, fifteen Mongoose models (all auto-numbered):
 
-```
+```text
 backend/config/care/
   crm.registry.js            │ Inquiry + Lead state machines
   social.registry.js         │ SocialCase + assessment + plan
@@ -203,7 +203,7 @@ Every care model implements `schema.pre('validate')` that generates `PREFIX-YYYY
 
 ### 4.2 Common queries
 
-```
+```text
 # Find all beneficiaries at imminent churn risk
 GET /api/care/retention/high-risk?band=imminent&acknowledged=false
 

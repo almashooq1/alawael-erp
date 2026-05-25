@@ -30,7 +30,7 @@ This wave doesn't add features users see directly. It ties together every prior 
 
 Every permission is a dot-separated code: `domain.subdomain.action`.
 
-```
+```text
 finance.invoices.view
 finance.invoices.approve
 finance.zatca.submit
@@ -75,7 +75,7 @@ The registry maps each permission code to the **set of role groups** that hold i
 
 Every Wave 24 layout-element gains an optional `requiredPermissions: []` array. The dashboard resolver does:
 
-```
+```text
 for each element in dashboard:
   if element.requiredPermissions.length > 0:
     if not user holds ALL of those permissions:
@@ -90,7 +90,7 @@ This is **stronger than `revealOn`**. Tier-3 elements may be hidden but still lo
 
 Every field that crosses an API response gets tagged. The fieldKindMap from Wave 23 is the index:
 
-```
+```text
 clinical_phi      diagnosis, treatment_notes, assessment_scores
 financial         invoice_amount, payment_method, claim_data
 hr_compensation   salary, allowances, bonuses
@@ -111,7 +111,7 @@ The governance service exposes:
 
 `GET /api/v1/governance/audit-trail/:entityType/:entityId` returns a single chronologically merged feed:
 
-```
+```text
 events:
   - kind: 'audit-log'          (from AuditLog collection)
     at, actorUserId, actorRole, action, ipAddress, metadata
@@ -131,7 +131,7 @@ Sorted DESC. Filterable by event kind. Paginated.
 
 For state changes, the response includes a structural diff:
 
-```
+```text
 {
   kind: 'state-transition',
   at: '2026-05-17T10:30:00Z',
@@ -199,7 +199,7 @@ The UI calls `GET /api/v1/governance/banners?dataKinds=clinical_phi,financial` a
 
 Every record that needs approval implements this sub-document:
 
-```
+```text
 approvalState: {
   stage: 'draft'|'pending-review'|'approved'|'rejected'|'expired',
   currentStep: number,         // 1, 2, 3... matches workflow definition
@@ -226,7 +226,7 @@ The status pill is also a permission gate — clicking it triggers `approve/reje
 
 Every exception reviewed in the [[productivity-features-2026-05-17]] Exception Review Center must result in an explicit decision:
 
-```
+```text
 {
   exceptionId, reviewedAt, reviewedBy: userId, reviewedRole: roleGroup,
   decision: 'accepted'|'rejected'|'requires-followup',

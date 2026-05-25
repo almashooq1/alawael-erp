@@ -63,7 +63,7 @@
 
 ### API Endpoints Available
 
-```
+```text
 GET    /api/backup/list        - List all backups
 POST   /api/backup/create      - Create new backup
 GET    /api/backup/stats       - Backup statistics

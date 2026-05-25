@@ -21,7 +21,7 @@
 
 ## 2. Entity Relationship Diagram (Conceptual)
 
-```
+```text
                           ┌──────────────┐
                           │    Branch    │
                           └──────┬───────┘
@@ -175,7 +175,7 @@
 
 #### E-1: User
 
-```
+```text
 User {
   id: UUID
   email: String (unique)
@@ -196,7 +196,7 @@ User {
 
 #### E-2: Role
 
-```
+```text
 Role {
   id: String                   # canonical snake_case (e.g., 'therapist')
   level: Integer               # 1-6 (hierarchy)
@@ -210,7 +210,7 @@ Role {
 
 #### E-3: Permission
 
-```
+```text
 Permission {
   id: String                   # 'resource:action' (e.g., 'invoice:create')
   resource: String
@@ -222,7 +222,7 @@ Permission {
 
 #### E-4: Branch
 
-```
+```text
 Branch {
   id: UUID
   code: String (unique)         # RYD1, JED1, HQ...
@@ -245,7 +245,7 @@ Branch {
 
 #### E-5: Beneficiary
 
-```
+```text
 Beneficiary {
   id: UUID
   branchId: UUID (FK)          # primary branch of care
@@ -292,7 +292,7 @@ Beneficiary {
 
 #### E-6: Guardian
 
-```
+```text
 Guardian {
   id: UUID
   branchId: UUID (FK)
@@ -311,7 +311,7 @@ Guardian {
 
 #### E-7: Employee
 
-```
+```text
 Employee {
   id: UUID
   branchId: UUID (FK)
@@ -339,7 +339,7 @@ Employee {
 
 #### E-8: Credential
 
-```
+```text
 Credential {
   id: UUID
   employeeId: UUID (FK)
@@ -357,7 +357,7 @@ Credential {
 
 #### E-9: Assessment
 
-```
+```text
 Assessment {
   id: UUID
   branchId: UUID (FK)
@@ -383,7 +383,7 @@ Assessment {
 
 #### E-10: IRP (Individualized Rehab Plan)
 
-```
+```text
 IRP {
   id: UUID
   branchId: UUID (FK)
@@ -407,7 +407,7 @@ IRP {
 
 #### E-11: Goal (SMART)
 
-```
+```text
 Goal {
   id: UUID
   branchId: UUID (FK)
@@ -431,7 +431,7 @@ Goal {
 
 #### E-12: Program (Therapy Program)
 
-```
+```text
 Program {
   id: UUID
   branchId: UUID (FK)           # or NULL for group-wide programs
@@ -449,7 +449,7 @@ Program {
 
 #### E-13: Session (Therapy Session)
 
-```
+```text
 Session {
   id: UUID
   branchId: UUID (FK)
@@ -474,7 +474,7 @@ Session {
 
 #### E-14: SessionNote
 
-```
+```text
 SessionNote {
   id: UUID
   sessionId: UUID (FK)
@@ -489,7 +489,7 @@ SessionNote {
 
 #### E-15: Measurement (Progress)
 
-```
+```text
 Measurement {
   id: UUID
   branchId: UUID (FK)
@@ -509,7 +509,7 @@ Measurement {
 
 #### E-16: Appointment
 
-```
+```text
 Appointment {
   id: UUID
   branchId: UUID (FK)
@@ -528,7 +528,7 @@ Appointment {
 
 #### E-16b: CpeRecord (SCFHS continuing-education credit)
 
-```
+```text
 CpeRecord {
   id: UUID
   employeeId: UUID (FK Employee)          # licensed therapist only
@@ -560,7 +560,7 @@ CpeRecord {
 
 #### E-17: Attendance (Employee)
 
-```
+```text
 Attendance {
   id: UUID
   branchId: UUID (FK)
@@ -577,7 +577,7 @@ Attendance {
 
 #### E-18: TransportTrip
 
-```
+```text
 TransportTrip {
   id: UUID
   branchId: UUID (FK)
@@ -597,7 +597,7 @@ TransportTrip {
 
 #### E-19: Invoice
 
-```
+```text
 Invoice {
   id: UUID
   branchId: UUID (FK)
@@ -628,7 +628,7 @@ Invoice {
 
 #### E-20: Contract
 
-```
+```text
 Contract {
   id: UUID
   branchId: UUID (FK)
@@ -648,7 +648,7 @@ Contract {
 
 #### E-21: Referral
 
-```
+```text
 Referral {
   id: UUID
   branchId: UUID (FK)           # receiving branch
@@ -669,7 +669,7 @@ Referral {
 
 #### E-22: Document
 
-```
+```text
 Document {
   id: UUID
   branchId: UUID (FK)
@@ -693,7 +693,7 @@ Document {
 
 #### E-23: Incident (Quality)
 
-```
+```text
 Incident {
   id: UUID
   branchId: UUID (FK)
@@ -723,7 +723,7 @@ Incident {
 
 #### E-24: Complaint (CRM)
 
-```
+```text
 Complaint {
   id: UUID
   branchId: UUID (FK)
@@ -753,7 +753,7 @@ Complaint {
 
 #### E-25: SocialWorkCase
 
-```
+```text
 SocialWorkCase {
   id: UUID
   branchId: UUID (FK)
@@ -773,7 +773,7 @@ SocialWorkCase {
 
 #### E-26: PsychSupportCase
 
-```
+```text
 PsychSupportCase {
   id: UUID
   branchId: UUID (FK)

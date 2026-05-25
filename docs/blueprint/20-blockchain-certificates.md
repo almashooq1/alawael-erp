@@ -10,7 +10,7 @@ what alerts mean.
 
 ## 1 · System overview
 
-```
+```text
                 ┌──────────────────────────────┐
                 │   admin UI (web-admin)       │
                 │  ──────────────────────────  │
@@ -52,7 +52,7 @@ what alerts mean.
 
 ## 2 · Lifecycle
 
-```
+```text
 draft ──issue()──▶ issued ──[batch anchor]──▶ has merkleRoot/proof + tx
    │                  │
    │                  ├──sign()──▶ multi-signature

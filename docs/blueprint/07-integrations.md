@@ -132,7 +132,7 @@ sequenceDiagram
 
 كل نظام خارجي يُخاطَب عبر طبقة ACL في `BC-12 Government Integrations` (أو modules مخصصة في BC-11 للاتصالات). الـ Core لا يعرف شيئاً عن schemas الخارج.
 
-```
+```text
 ┌────────────────┐      ┌──────────────────┐      ┌────────────────┐
 │  Internal Core │─────▶│ ACL Adapter     │─────▶│  External API  │
 │  (clean model) │◀─────│ (translate +    │◀─────│  (Gov/3rd party)│
@@ -152,7 +152,7 @@ sequenceDiagram
 
 **Flow:**
 
-```
+```text
 Invoice issued in BC-06
    │
    ▼
@@ -236,7 +236,7 @@ POST to ZATCA FATOORA API (sandbox/production)
 
 **Flow:**
 
-```
+```text
 User requests signature → Platform redirects to Nafath
                                       │
                                       ▼
@@ -281,7 +281,7 @@ User requests signature → Platform redirects to Nafath
 
 **Flow:**
 
-```
+```text
 Platform → Yakeen API (nationalId + date of birth)
                                       │
                                       ▼
@@ -318,7 +318,7 @@ Platform → Yakeen API (nationalId + date of birth)
 
 **Flow:**
 
-```
+```text
 Beneficiary arrives → Check insurance coverage
                                 │
                                 ▼

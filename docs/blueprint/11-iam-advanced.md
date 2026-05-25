@@ -23,7 +23,7 @@
 
 ### 2.1 البنية الهرمية (6 مستويات × 3 أبعاد)
 
-```
+```text
 Level  ─── Scope ──────────────── Example Roles ─────────────────────
  L1    Platform                   super_admin
  L2    Group (HQ)                 head_office_admin, hq_cfo, hq_cmo, hq_cqo, hq_chro, hq_ceo, dpo
@@ -296,7 +296,7 @@ The platform enforces that no single user performs two conflicting duties on the
 
 ### 7.2 Activation Flow
 
-```
+```text
 User clicks "Emergency Access" → fills form (justification + subject + duration)
     ↓
 System grants elevated scope for ≤ 4 hours
@@ -386,7 +386,7 @@ Per ADR-009, every:
 
 ### 10.1 Layered Enforcement
 
-```
+```text
 ┌────────────────────────────────────────────────┐
 │ Route Middleware (per-route)                   │
 │   authenticateToken → RBAC → ABAC (enforce)    │
@@ -406,7 +406,7 @@ Per ADR-009, every:
 
 ### 10.2 Decision Flow (single request)
 
-```
+```text
   Request
      │
      ▼

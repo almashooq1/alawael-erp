@@ -10,7 +10,7 @@
 
 ## 1. The Five-Level Drill Hierarchy
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────────────┐
 │  LEVEL 0 — Executive (org-wide)                                     │
 │  /dashboards/executive                                              │
@@ -67,7 +67,7 @@ These are NOT five different pages. They are five lenses on the same KPI in the 
 
 ## 3. Drill-Down Map (visual)
 
-```
+```text
                           ┌─────────────────────┐
                           │  Executive Summary  │
                           │  (Level 0)          │
@@ -116,7 +116,7 @@ Every back-arrow returns to the previous level with the same filter context (the
 
 When the user clicks **"شرح هذا الرقم / Explain this number"** on any KPI or alert, the system returns an ordered chain of "because" steps:
 
-```
+```text
 Example: "Attendance is down 12% at Branch A"
 
   KPI: kpi.attendance.daily_rate
@@ -150,7 +150,7 @@ The chain length is capped at 5 hops to avoid speculation; if no clear root caus
 
 Every drill-down link follows this shape:
 
-```
+```text
 /dashboards/<level>/<id>?from=<source>&kpiId=<kpiId>&filter=<filterId>&t=<timestamp>
 ```
 
@@ -169,7 +169,7 @@ The breadcrumb is built **from the URL alone** — no client-side state. This me
 
 Example:
 
-```
+```text
 URL:        /care/360/65f12c?from=branch_dashboard&kpiId=goals_stalled&filter=stalled_30d
 Breadcrumb: Executive › Branch A › Care › Goals stalled (3) › Ahmed (file 1024)
 ```
@@ -185,7 +185,7 @@ If the user landed on a deep link without going through the chain (e.g. from a S
 
 When a drill jumps domains (e.g. care KPI → transport root cause), the URL prefix changes but the `from` param preserves the origin:
 
-```
+```text
 /transport/maintenance?from=care_360_attendance_drill&kpiId=kpi.attendance.daily_rate
 ```
 
@@ -270,7 +270,7 @@ A drift test will fail CI if a KPI is added to `kpi.registry.js` without a match
 
 When the UI asks "who owns this KPI right now?", we resolve through this chain:
 
-```
+```text
 1. Direct assignee on the originating alert/insight (alert.ownership.assignedTo)
 2. Branch-scoped role holder (e.g. branch_manager of :branchId)
 3. Domain-scoped role holder (e.g. medical_director, finance_director)
@@ -289,7 +289,7 @@ The Explanation tab in the drill detail panel renders the **latest active Insigh
 
 Query:
 
-```
+```text
 GET /api/v1/insights?
   branchId=<branchId>&
   relatedEntityId=<beneficiaryId>&

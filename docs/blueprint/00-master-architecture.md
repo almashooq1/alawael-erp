@@ -30,7 +30,7 @@ When work began, the system shipped: 305 admin pages, 103 sidebar links, 39 KPIs
 
 ### 3. القيود الحاكمة · Governing constraints
 
-```
+```text
 1. لا إعادة كتابة شاملة — التطوير تدريجي طبقي (wave-by-wave)
 2. عربية أولاً (Arabic-first, RTL) مع تكافؤ إنجليزي عند الحاجة
 3. كل ميزة جديدة opt-in عبر env flag — لا تعطّل ما يعمل
@@ -189,7 +189,7 @@ Permissions registry (40+ codes × role-group holders) + widget gating + `maskFo
 
 What happens when a branch manager opens their dashboard at 8 am:
 
-```
+```text
 1. authenticate middleware → resolves canonical role
         ↓
 2. GET /api/v1/role-profiles/me/dashboard?branchId=...

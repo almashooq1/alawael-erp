@@ -76,7 +76,7 @@ primary language:
 
 ### Translation File Structure
 
-```
+```text
 /frontend/admin-dashboard/src/locales/
 ├── ar/
 │   ├── common.json

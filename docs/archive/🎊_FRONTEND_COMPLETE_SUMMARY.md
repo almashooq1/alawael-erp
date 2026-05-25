@@ -168,7 +168,7 @@ Plus: `/groups`, `/friends`, `/profile`, `/activity`
 
 ### Frontend Components
 
-```
+```text
 frontend/src/components/
 ├── Sparkline.js           ← مخططات الاتجاه
 ├── BarChart.js            ← مخططات الأعمدة
@@ -180,14 +180,14 @@ frontend/src/components/
 
 ### Frontend Data
 
-```
+```text
 frontend/src/data/
 └── moduleMocks.js         ← 7 وحدات بيانات كاملة
 ```
 
 ### Frontend Pages
 
-```
+```text
 frontend/src/pages/
 ├── Home.js                ← محدّث: KPIs + alerts + sparklines
 ├── Dashboard.js           ← مُعاد كتابته: unified overview
@@ -197,7 +197,7 @@ frontend/src/pages/
 
 ### Frontend Styles
 
-```
+```text
 frontend/src/
 ├── theme.js               ← Teal/Orange theme + RTL
 └── index.css              ← Manrope font + background

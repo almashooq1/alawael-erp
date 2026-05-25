@@ -39,7 +39,7 @@ We adopt **Nafath as the primary e-signature provider** for all Saudi citizens a
 
 ### Flow
 
-```
+```text
 User initiates signing → Platform creates signature request with document hash
                          │
                          ▼

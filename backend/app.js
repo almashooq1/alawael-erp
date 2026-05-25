@@ -398,6 +398,15 @@ try {
   logger.warn('[Finance] bootstrap skipped:', err.message);
 }
 
+// W402: absence-detection sweeper — daily emit of attendance.absence.detected
+// over yesterday's HRAttendanceRecord rows. Env-gated; off by default.
+try {
+  const { bootstrapAbsenceDetection } = require('./startup/absenceDetectionBootstrap');
+  bootstrapAbsenceDetection({ logger, isTestEnv });
+} catch (err) {
+  logger.warn('[AbsenceDetection] bootstrap skipped:', err.message);
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // 7.5 BENEFICIARY-360 RED-FLAG SYSTEM
 //     (registry → engine → store → routes — Commits 1–10)

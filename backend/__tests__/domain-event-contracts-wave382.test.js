@@ -131,14 +131,16 @@ const MAX_TOTAL_EVENTS = 100; // ceiling
 // services/finance/budgetThresholdSweeper.js wired in financeBootstrap.js
 // (env-gated daily cron, ENABLE_BUDGET_THRESHOLD_SWEEPER=true).
 // Baseline 6 → 5.
+// W402 (2026-05-25) closed attendance.ABSENCE_DETECTED via
+// services/hr/absenceDetectionSweeper.js wired via
+// startup/absenceDetectionBootstrap.js (env-gated daily cron,
+// ENABLE_ABSENCE_DETECTION_SWEEPER=true). Baseline 5 → 4.
 const KNOWN_DEAD_CONTRACTS = new Set([
   // finance — 1 remaining (no model)
   'finance.PAYROLL_PROCESSED', // payroll.processed — no PayrollRun model registered
   // medical — 2 remaining (models don't exist)
   'medical.PRESCRIPTION_ISSUED', // prescription.issued — no Prescription model
   'medical.RISK_ALERT_RAISED', // risk.alert_raised — no RiskAlert/ClinicalRiskScore model registered for hook
-  // attendance — 1 remaining (sweeper)
-  'attendance.ABSENCE_DETECTED', // absence.detected — needs daily sweeper
   // system — 1 remaining
   'system.CACHE_INVALIDATED', // cache.invalidated — cache layer hook, no central point
 ]);

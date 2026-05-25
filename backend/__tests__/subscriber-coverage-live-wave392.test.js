@@ -161,11 +161,12 @@ const KNOWN_TYPO_PATTERNS = new Set([]);
 // W401 (2026-05-25) closed finance.budget.threshold_reached via
 // budgetThresholdSweeper.js wired in financeBootstrap (env-gated cron).
 // Baseline 3 → 2.
+// W402 (2026-05-25) closed attendance.absence.detected via
+// absenceDetectionSweeper.js wired in absenceDetectionBootstrap
+// (env-gated daily cron). Baseline 2 → 1.
 const KNOWN_LIVE_ORPHAN_SUBSCRIBERS = new Set([
   // medical — no RiskAlert model registered
   'medical.risk.alert_raised', // needs RiskAlert/ClinicalRiskScore model + post-save
-  // attendance — sweeper-driven
-  'attendance.absence.detected', // needs daily attendance sweeper (beneficiary or employee)
 ]);
 
 // Wildcards: subscriber listens for any matching prefix. Producer-existence

@@ -113,10 +113,12 @@ router.get('/recordings/:id', requireMfaTier(1), async (req, res) => {
     const Recording = require('../models/SpeechSessionRecording');
     const rec = await Recording.findById(req.params.id).lean();
     if (!rec) return res.status(404).json({ success: false, code: 'SPEECH_RECORDING_NOT_FOUND' });
-    // Branch isolation (W269 pattern): only same-branch users can read
+    // W413: branch isolation — pre-W413 distinguished cross-branch via a
+    // dedicated 403 code; unifying with the not-found 404 closes the
+    // existence-probe side channel. See parent-portal W411/W412 doctrine.
     const userBranch = req.user?.branchId;
     if (userBranch && rec.branchId && String(rec.branchId) !== String(userBranch)) {
-      return res.status(403).json({ success: false, code: 'SPEECH_CROSS_BRANCH_DENIED' });
+      return res.status(404).json({ success: false, code: 'SPEECH_RECORDING_NOT_FOUND' });
     }
     return res.json({ success: true, recording: rec });
   } catch (err) {

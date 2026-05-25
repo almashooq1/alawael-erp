@@ -712,7 +712,11 @@ router.post(
     const role = String(req.user?.role || req.user?.roleCode || '').toUpperCase();
     const isAdmin = GPS_ADMIN_ROLES.has(role);
     if (!isAdmin && String(trip.driver_id) !== String(req.user?._id || req.user?.id)) {
-      return res.status(403).json({ success: false, message: 'غير مصرح: هذه الرحلة ليست لك' });
+      // W413: unify with 404 (anti-existence-probe). Non-admin caller who
+      // isn't the assigned driver can't distinguish "trip exists but
+      // assigned to another driver" from "trip doesn't exist". Matches
+      // W411/W412 doctrine.
+      return res.status(404).json({ success: false, message: 'الرحلة غير موجودة' });
     }
 
     const { results, notes, odometer_start, fuel_level } = req.body;
@@ -1400,7 +1404,11 @@ router.post(
     });
     if (!trip) return res.status(404).json({ success: false, message: 'الرحلة غير موجودة' });
     if (String(trip.driver_id) !== String(driverId)) {
-      return res.status(403).json({ success: false, message: 'غير مصرح: هذه الرحلة ليست لك' });
+      // W413: unify with 404 (anti-existence-probe). Non-admin caller who
+      // isn't the assigned driver can't distinguish "trip exists but
+      // assigned to another driver" from "trip doesn't exist". Matches
+      // W411/W412 doctrine.
+      return res.status(404).json({ success: false, message: 'الرحلة غير موجودة' });
     }
 
     let passenger;
@@ -1540,7 +1548,11 @@ router.post(
     const trip = await Trip.findOne({ _id: req.params.id, deleted_at: null });
     if (!trip) return res.status(404).json({ success: false, message: 'الرحلة غير موجودة' });
     if (String(trip.driver_id) !== String(driverId)) {
-      return res.status(403).json({ success: false, message: 'غير مصرح: هذه الرحلة ليست لك' });
+      // W413: unify with 404 (anti-existence-probe). Non-admin caller who
+      // isn't the assigned driver can't distinguish "trip exists but
+      // assigned to another driver" from "trip doesn't exist". Matches
+      // W411/W412 doctrine.
+      return res.status(404).json({ success: false, message: 'الرحلة غير موجودة' });
     }
 
     const passenger = trip.passengers.find(

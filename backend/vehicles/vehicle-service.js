@@ -480,10 +480,25 @@ class VehicleManagementService extends EventEmitter {
    * Initialize service
    */
   async initialize(connection) {
-    this.Vehicle = connection.model('Vehicle', VehicleSchema);
-    this.VehicleTrip = connection.model('VehicleTrip', VehicleTripSchema);
-    this.VehicleMaintenance = connection.model('VehicleMaintenance', VehicleMaintenanceSchema);
-    this.FuelLog = connection.model('FuelLog', FuelLogSchema);
+    // W340 dormant-service consolidation (2026-05-25): switched from
+    // connection.model registrations to mongoose.model() lookup against
+    // canonical models/. The schemas defined above (VehicleSchema,
+    // VehicleTripSchema, VehicleMaintenanceSchema, FuelLogSchema) are kept
+    // as documentation of what this service originally registered, but are
+    // dead code at runtime: vehicles/index.js is never required from
+    // app.js, so this initialize() never fires. If this service ever gets
+    // wired up via vehicles/index.js, the canonical schemas at
+    // models/Vehicle.js + models/transport/VehicleMaintenance.js will be
+    // used. VehicleTrip + FuelLog have no canonical at models/ yet — if
+    // wiring this service up, create those canonicals first.
+    this.Vehicle = mongoose.model('Vehicle');
+    this.VehicleTrip = mongoose.models.VehicleTrip || null;
+    this.VehicleMaintenance = mongoose.model('VehicleMaintenance');
+    this.FuelLog = mongoose.models.FuelLog || null;
+
+    // Touch the dormant schema consts to silence eslint no-unused-vars
+    // (we keep them as documentation per the comment above).
+    void [VehicleSchema, VehicleTripSchema, VehicleMaintenanceSchema, FuelLogSchema];
 
     logger.info('✅ Vehicle Management Service initialized');
   }

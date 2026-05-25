@@ -165,22 +165,29 @@ const KNOWN_DUPLICATE_REGISTRATIONS = new Set([
   //       ALLOWLIST + add a comment explaining the per-connection requirement.
   //   (c) For services where the local schema diverges from canonical:
   //       Pattern D rename per ADR-021 (e.g. `Vehicle` → `TransportVehicle`).
-  'Beneficiary', // models/Beneficiary.js + vehicles/rehabilitation-transport-service.js — HIGH severity (Beneficiary is the canonical-per-CLAUDE.md entity)
-  'EmailLog', // communication/email-models.js + communication/email-service.js (same-domain pair)
-  // 'Permission' — CONSOLIDATED 2026-05-25 (empty-shim batch): rich schema migrated
-  //                from permissions/permission-service.js to models/RBAC/Permission.js
-  //                (was strict:false placeholder). Service now does mongoose.model()
-  //                lookup. Per TIER2_AUDIT Cycle 6 empty-shim pattern.
-  // 'Role'       — CONSOLIDATED 2026-05-25 (empty-shim batch): same path as Permission.
-  // 'TrafficAccident' — CONSOLIDATED 2026-05-25 (empty-shim batch): rich schema
-  //                     migrated from vehicles/saudi-traffic-service.js to
-  //                     models/Traffic/TrafficAccident.js (was strict:false
-  //                     placeholder). Service now does mongoose.model() lookup.
-  //                     Per TIER2_AUDIT Cycle 6 empty-shim pattern.
-  'TransportRoute', // models/TransportRoute.js + vehicles/rehabilitation-transport-service.js
-  'Vehicle', // models/Vehicle.js + vehicles/vehicle-service.js
-  'VehicleMaintenance', // models/transport/VehicleMaintenance.js + vehicles/vehicle-service.js
-  'VehicleTrip', // vehicles/saudi-vehicle-service.js + vehicles/vehicle-service.js (intra-vehicles pair — both via connection.model; no models/ canonical)
+  // ─────────────────────────────────────────────────────────────────────────
+  // 6 AF-2 entries below ALL CONSOLIDATED 2026-05-25 via the dormant-service
+  // cleanup pattern. Discovery: vehicles/index.js + communication/email-service
+  // .initialize() are NEVER called from app.js, so the connection.model
+  // registrations inside them never fire at runtime — they were static-only
+  // duplicates. Each service's connection.model('X', schema) replaced with
+  // mongoose.model('X') lookup against the loaded canonical (or
+  // mongoose.models.X || null for cases without a canonical). Schema
+  // definitions kept inline as documentation, marked dead-code via
+  // `void X;` to silence eslint. Zero runtime impact today; future engineers
+  // wiring up these services get canonical schemas + a comment explaining
+  // the situation. If any service genuinely needs per-connection isolation
+  // for multi-tenant, do Pattern D rename (e.g. 'TenantVehicle') in same wave.
+  // 'Beneficiary'         — vehicles/rehabilitation-transport-service.js (dormant)
+  // 'EmailLog'            — communication/email-service.js (dormant; was Pattern D
+  //                         shape drift to: [String] vs canonical to: [{address,name}])
+  // 'Permission'          — CONSOLIDATED 2026-05-25 empty-shim batch (98988fe75)
+  // 'Role'                — CONSOLIDATED 2026-05-25 empty-shim batch (98988fe75)
+  // 'TrafficAccident'     — CONSOLIDATED 2026-05-25 empty-shim batch (a56c9feb0)
+  // 'TransportRoute'      — vehicles/rehabilitation-transport-service.js (dormant)
+  // 'Vehicle'             — vehicles/vehicle-service.js (dormant)
+  // 'VehicleMaintenance'  — vehicles/vehicle-service.js (dormant)
+  // 'VehicleTrip'         — vehicles/{vehicle,saudi-vehicle}-service.js (both dormant)
 ]);
 
 // Models deliberately referenced but not Mongoose-owned. Inherited from W325c

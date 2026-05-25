@@ -136,10 +136,20 @@ class EmailService {
         this.transporter = this.createSMTPTransporter();
     }
 
-    // Initialize Email Log model
+    // Initialize Email Log model.
+    // W340 dormant-service consolidation (2026-05-25): switched from
+    // connection.model(...) registration to mongoose.model('EmailLog')
+    // lookup against the canonical at communication/email-models.js
+    // (the canonical has the rich schema + indexes + is actively used by
+    // email-routes.js). TIER2_AUDIT Cycle 6 flagged this as Pattern D
+    // shape drift: canonical has `to: [{address, name}]` vs the local
+    // EmailLogSchema's `to: [String]` — relying on canonical means
+    // future callers get consistent shape. This service's initialize()
+    // is dormant (never called from app.js), so this is a static-only
+    // cleanup with zero runtime impact today.
     if (connection) {
-      const mongoose = require('mongoose');
-      this.EmailLog = connection.model('EmailLog', new mongoose.Schema(EmailLogSchema));
+      this.EmailLog = require('mongoose').models.EmailLog || null;
+      void EmailLogSchema; // kept as documentation of the divergent local shape
     }
 
     // Load templates

@@ -536,9 +536,22 @@ class RehabilitationTransportService extends EventEmitter {
    * Initialize service
    */
   async initialize(connection) {
-    this.Beneficiary = connection.model('Beneficiary', BeneficiarySchema);
+    // W340 dormant-service consolidation (2026-05-25): Beneficiary +
+    // TransportRoute switched to mongoose.model() lookup. Canonical
+    // sources are models/Beneficiary.js (HIGH severity canonical entity
+    // per CLAUDE.md — never override) and models/TransportRoute.js (also
+    // exists at models/Fleet/TransportRoute.js + models/transport/
+    // TransportRoute.js — pre-existing 3-way fragmentation flagged for
+    // future ADR). RehabilitationBranch stays as connection.model since
+    // it has a unique name (no canonical duplicate). BeneficiarySchema
+    // + TransportRouteSchema kept as documentation. Service is dormant —
+    // vehicles/index.js never required from app.js, so initialize() never
+    // fires. Beneficiary registration HERE could have silently overridden
+    // the canonical if both were live; cleanup eliminates that future risk.
+    this.Beneficiary = mongoose.model('Beneficiary');
     this.Branch = connection.model('RehabilitationBranch', RehabilitationBranchSchema);
-    this.Route = connection.model('TransportRoute', TransportRouteSchema);
+    this.Route = mongoose.model('TransportRoute');
+    void [BeneficiarySchema, TransportRouteSchema]; // documentation, see above
     logger.info('✅ Rehabilitation Transport Service initialized');
   }
 

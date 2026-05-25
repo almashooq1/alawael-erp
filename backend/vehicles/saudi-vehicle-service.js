@@ -376,8 +376,20 @@ class SaudiVehicleService extends EventEmitter {
    * Initialize service
    */
   async initialize(connection) {
+    // W340 dormant-service consolidation (2026-05-25): the VehicleTrip
+    // registration here DIVERGES from vehicles/vehicle-service.js's
+    // VehicleTripSchema (Saudi-specific: tripType enum, cargo + hazmatDetails,
+    // readings/costs structure, 'delayed' status). Both services are
+    // dormant (vehicles/index.js never required from app.js), so neither
+    // registration fires at runtime. SaudiVehicle stays as connection.model
+    // since it has a unique name (no canonical duplicate). VehicleTrip
+    // switched to lookup — if wiring this service up requires the Saudi-
+    // specific shape, do Pattern D rename to 'SaudiVehicleTrip' first per
+    // ADR-021 framework. VehicleTripSchema kept here as the source of
+    // truth for the Saudi-specific fields when that decision happens.
     this.Vehicle = connection.model('SaudiVehicle', SaudiVehicleSchema);
-    this.Trip = connection.model('VehicleTrip', VehicleTripSchema);
+    this.Trip = mongoose.models.VehicleTrip || null;
+    void VehicleTripSchema; // documentation, see comment above
     logger.info('✅ Saudi Vehicle Service initialized');
   }
 

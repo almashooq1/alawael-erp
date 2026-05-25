@@ -135,14 +135,15 @@ const MAX_TOTAL_EVENTS = 100; // ceiling
 // services/hr/absenceDetectionSweeper.js wired via
 // startup/absenceDetectionBootstrap.js (env-gated daily cron,
 // ENABLE_ABSENCE_DETECTION_SWEEPER=true). Baseline 5 → 4.
+// W403 (2026-05-25) closed system.CACHE_INVALIDATED via cachingService.js
+// _emitCacheInvalidated hook on clear() + invalidateByPattern(p). Single-
+// key delete() intentionally not a trigger (TTL/LRU would spam). Baseline 4 → 3.
 const KNOWN_DEAD_CONTRACTS = new Set([
   // finance — 1 remaining (no model)
   'finance.PAYROLL_PROCESSED', // payroll.processed — no PayrollRun model registered
   // medical — 2 remaining (models don't exist)
   'medical.PRESCRIPTION_ISSUED', // prescription.issued — no Prescription model
   'medical.RISK_ALERT_RAISED', // risk.alert_raised — no RiskAlert/ClinicalRiskScore model registered for hook
-  // system — 1 remaining
-  'system.CACHE_INVALIDATED', // cache.invalidated — cache layer hook, no central point
 ]);
 
 // ─── Scan helpers ────────────────────────────────────────────────────────────

@@ -19,6 +19,36 @@ class CachingService {
       deletes: 0,
       evictions: 0,
     };
+    // W403: optional integrationBus + module name for emitting
+    // system.cache.invalidated on explicit clear / invalidateByPattern.
+    this._integrationBus = options.integrationBus || null;
+    this._cacheModule = options.cacheModule || 'cachingService';
+  }
+
+  // W403: fire-and-forget publish for system.cache.invalidated. Lazy-loads
+  // integrationBus if not injected so existing call sites keep working.
+  // Per SYSTEM_EVENTS.CACHE_INVALIDATED: { keys[], reason, module }.
+  _emitCacheInvalidated(keys, reason) {
+    let bus = this._integrationBus;
+    if (!bus) {
+      try {
+        bus = require('../integration/systemIntegrationBus').integrationBus;
+      } catch {
+        return;
+      }
+    }
+    if (!bus || typeof bus.publish !== 'function') return;
+    Promise.resolve()
+      .then(() =>
+        bus.publish('system', 'cache.invalidated', {
+          keys: Array.isArray(keys) ? keys.map(String) : [],
+          reason: String(reason || 'unspecified'),
+          module: String(this._cacheModule),
+        })
+      )
+      .catch(() => {
+        /* swallow — cache flow must not fail on bus errors */
+      });
   }
 
   /**
@@ -123,12 +153,16 @@ class CachingService {
    * Clear cache
    */
   clear() {
+    const clearedKeys = [...this.cache.keys()];
     // إلغاء جميع المؤقتات أولاً
     for (const timer of this._timers.values()) {
       clearTimeout(timer);
     }
     this._timers.clear();
     this.cache.clear();
+    if (clearedKeys.length > 0) {
+      this._emitCacheInvalidated(clearedKeys, 'clear');
+    }
     return true;
   }
 
@@ -228,14 +262,19 @@ class CachingService {
    * Invalidate by pattern
    */
   invalidateByPattern(pattern) {
-    let count = 0;
+    const matched = [];
     for (const key of this.cache.keys()) {
       if (key.includes(pattern)) {
-        this.delete(key);
-        count++;
+        matched.push(key);
       }
     }
-    return count;
+    for (const key of matched) {
+      this.delete(key);
+    }
+    if (matched.length > 0) {
+      this._emitCacheInvalidated(matched, `pattern:${pattern}`);
+    }
+    return matched.length;
   }
 
   /**

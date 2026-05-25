@@ -7,6 +7,7 @@ const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 router.use(requireBranchAccess);
@@ -18,7 +19,7 @@ router.get('/roles', authorize('admin', 'hr_manager'), async (req, res) => {
     const data = await Role.find().sort({ name: 1 }).lean();
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'rbac');
   }
 });
 
@@ -28,7 +29,7 @@ router.post('/roles', authorize('admin'), async (req, res) => {
     const role = await Role.create({ ...req.body, createdBy: req.user._id });
     res.status(201).json({ success: true, data: role });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    return safeError(res, err, 'rbac');
   }
 });
 
@@ -39,7 +40,7 @@ router.get('/roles/:id', authorize('admin', 'hr_manager'), async (req, res) => {
     if (!role) return res.status(404).json({ success: false, message: 'Role not found' });
     res.json({ success: true, data: role });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'rbac');
   }
 });
 
@@ -53,7 +54,7 @@ router.put('/roles/:id', authorize('admin'), async (req, res) => {
     if (!role) return res.status(404).json({ success: false, message: 'Role not found' });
     res.json({ success: true, data: role });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    return safeError(res, err, 'rbac');
   }
 });
 
@@ -63,7 +64,7 @@ router.delete('/roles/:id', authorize('admin'), async (req, res) => {
     await Role.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'Role deleted' });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'rbac');
   }
 });
 
@@ -74,7 +75,7 @@ router.get('/permissions', authorize('admin'), async (req, res) => {
     const data = await Permission.find().sort({ module: 1, action: 1 }).lean();
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'rbac');
   }
 });
 
@@ -85,7 +86,7 @@ router.get('/users/:userId/roles', authorize('admin', 'hr_manager'), async (req,
     const data = await UserRole.find({ userId: req.params.userId }).lean();
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'rbac');
   }
 });
 
@@ -99,7 +100,7 @@ router.post('/users/:userId/roles', authorize('admin'), async (req, res) => {
     });
     res.status(201).json({ success: true, data: assignment });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    return safeError(res, err, 'rbac');
   }
 });
 

@@ -8,6 +8,7 @@ const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 router.use(requireBranchAccess);
@@ -33,7 +34,7 @@ router.get('/dashboard', authorize('admin', 'hr_manager', 'manager'), async (req
     ]);
     res.json({ success: true, data: { totalActive, newThisMonth, byDepartment, byJobType } });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'hrUnified');
   }
 });
 
@@ -61,7 +62,7 @@ router.get('/employees/search', async (req, res) => {
     ]);
     res.json({ success: true, data, pagination: { page: +page, limit: +limit, total } });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'hrUnified');
   }
 });
 
@@ -77,7 +78,7 @@ router.get('/reports/headcount', authorize('admin', 'hr_manager'), async (req, r
     ]);
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'hrUnified');
   }
 });
 
@@ -93,7 +94,7 @@ router.get('/reports/turnover', authorize('admin', 'hr_manager'), async (req, re
     ]);
     res.json({ success: true, data: { year: +year, hired, terminated, net: hired - terminated } });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'hrUnified');
   }
 });
 
@@ -104,7 +105,7 @@ router.get('/policies', async (req, res) => {
     const data = await HRPolicy.find({ status: 'active' }).sort({ category: 1 }).lean();
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'hrUnified');
   }
 });
 
@@ -118,7 +119,7 @@ router.post('/policies', authorize('admin', 'hr_manager'), async (req, res) => {
     });
     res.status(201).json({ success: true, data: policy });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    return safeError(res, err, 'hrUnified');
   }
 });
 

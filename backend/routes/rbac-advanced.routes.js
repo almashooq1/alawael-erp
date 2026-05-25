@@ -7,6 +7,7 @@ const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 router.use(requireBranchAccess);
@@ -18,7 +19,7 @@ router.get('/groups', authorize('admin'), async (req, res) => {
     const data = await RoleGroup.find().sort({ name: 1 }).lean();
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'rbac.advanced');
   }
 });
 
@@ -28,7 +29,7 @@ router.post('/groups', authorize('admin'), async (req, res) => {
     const group = await RoleGroup.create({ ...req.body, createdBy: req.user._id });
     res.status(201).json({ success: true, data: group });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    return safeError(res, err, 'rbac.advanced');
   }
 });
 
@@ -41,7 +42,7 @@ router.get('/delegations', authorize('admin', 'hr_manager', 'manager'), async (r
     const data = await RoleDelegation.find(filter).sort({ createdAt: -1 }).lean();
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'rbac.advanced');
   }
 });
 
@@ -63,7 +64,7 @@ router.post('/delegations', authorize('admin', 'manager'), async (req, res) => {
     });
     res.status(201).json({ success: true, data: delegation });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    return safeError(res, err, 'rbac.advanced');
   }
 });
 
@@ -73,7 +74,7 @@ router.delete('/delegations/:id', authorize('admin', 'manager'), async (req, res
     await RoleDelegation.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'Delegation revoked' });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'rbac.advanced');
   }
 });
 
@@ -84,7 +85,7 @@ router.get('/rules', authorize('admin'), async (req, res) => {
     const data = await RBACRule.find({ isActive: true }).sort({ priority: 1 }).lean();
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'rbac.advanced');
   }
 });
 
@@ -94,7 +95,7 @@ router.post('/rules', authorize('admin'), async (req, res) => {
     const rule = await RBACRule.create({ ...req.body, isActive: true, createdBy: req.user._id });
     res.status(201).json({ success: true, data: rule });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    return safeError(res, err, 'rbac.advanced');
   }
 });
 
@@ -113,7 +114,7 @@ router.get('/check', async (req, res) => {
       data: { userId, module, action, hasPermission: assignments.length > 0 },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'rbac.advanced');
   }
 });
 

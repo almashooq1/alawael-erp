@@ -6,6 +6,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
+const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 router.use(authorize('admin'));
@@ -23,7 +24,7 @@ router.get('/overview', async (req, res) => {
     ]);
     res.json({ success: true, data: { roles, permissions, assignments } });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'rbac.admin');
   }
 });
 
@@ -84,7 +85,7 @@ router.get('/audit-log', async (req, res) => {
     ]);
     res.json({ success: true, data, pagination: { page: +page, limit: +limit, total } });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'rbac.admin');
   }
 });
 

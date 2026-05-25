@@ -7,6 +7,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
+const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 
@@ -18,7 +19,7 @@ router.get('/profile', async (req, res) => {
     if (!beneficiary) return res.status(404).json({ success: false, message: 'Profile not found' });
     res.json({ success: true, data: beneficiary });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'beneficiaryPortal');
   }
 });
 
@@ -38,7 +39,7 @@ router.put('/profile', async (req, res) => {
     if (!beneficiary) return res.status(404).json({ success: false, message: 'Profile not found' });
     res.json({ success: true, data: beneficiary });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    return safeError(res, err, 'beneficiaryPortal');
   }
 });
 
@@ -57,7 +58,7 @@ router.get('/services', async (req, res) => {
       .lean();
     res.json({ success: true, data: episodes });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'beneficiaryPortal');
   }
 });
 
@@ -78,7 +79,7 @@ router.get('/appointments', async (req, res) => {
       .lean();
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'beneficiaryPortal');
   }
 });
 
@@ -94,7 +95,7 @@ router.get('/service-requests', async (req, res) => {
       .lean();
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'beneficiaryPortal');
   }
 });
 
@@ -112,7 +113,7 @@ router.post('/service-requests', async (req, res) => {
     });
     res.status(201).json({ success: true, data: request });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    return safeError(res, err, 'beneficiaryPortal');
   }
 });
 
@@ -126,7 +127,7 @@ router.get('/documents', async (req, res) => {
     const data = await Document.find({ beneficiaryId: beneficiary._id }).lean();
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'beneficiaryPortal');
   }
 });
 

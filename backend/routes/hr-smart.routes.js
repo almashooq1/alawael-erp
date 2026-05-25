@@ -8,6 +8,7 @@ const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 router.use(requireBranchAccess);
@@ -36,7 +37,7 @@ router.get(
       ]);
       res.json({ success: true, data: anomalies, count: anomalies.length });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      return safeError(res, err, 'hr-smart');
     }
   }
 );
@@ -61,7 +62,7 @@ router.get('/leaves/conflicts', authorize('admin', 'hr_manager', 'manager'), asy
     const data = await LeaveRequest.find(filter).lean();
     res.json({ success: true, data, count: data.length });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'hr-smart');
   }
 });
 
@@ -88,7 +89,7 @@ router.get(
         })),
       });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      return safeError(res, err, 'hr-smart');
     }
   }
 );
@@ -103,7 +104,7 @@ router.get('/performance/alerts', authorize('admin', 'hr_manager', 'manager'), a
       .lean();
     res.json({ success: true, data: alerts, count: alerts.length });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'hr-smart');
   }
 });
 
@@ -121,7 +122,7 @@ router.post('/suggestions', authorize('admin', 'hr_manager'), async (req, res) =
       },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'hr-smart');
   }
 });
 

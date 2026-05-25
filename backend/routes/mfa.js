@@ -6,6 +6,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
+const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 
@@ -25,7 +26,7 @@ router.get('/status', async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'mfa');
   }
 });
 
@@ -45,7 +46,7 @@ router.post('/enable', async (req, res) => {
     );
     res.json({ success: true, data: settings });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    return safeError(res, err, 'mfa');
   }
 });
 
@@ -59,7 +60,7 @@ router.post('/disable', async (req, res) => {
     );
     res.json({ success: true, message: 'MFA disabled' });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    return safeError(res, err, 'mfa');
   }
 });
 
@@ -76,7 +77,7 @@ router.post('/totp/setup', async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'mfa');
   }
 });
 
@@ -91,7 +92,7 @@ router.post('/totp/verify', async (req, res) => {
       data: { verified: false, message: 'TOTP verification pending implementation' },
     });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    return safeError(res, err, 'mfa');
   }
 });
 
@@ -109,7 +110,7 @@ router.post('/backup-codes/generate', async (req, res) => {
     );
     res.json({ success: true, data: { codes } });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'mfa');
   }
 });
 

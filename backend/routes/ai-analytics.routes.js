@@ -18,6 +18,7 @@ const AiAlert = require('../models/AiAlert');
 const AiGeneratedReport = require('../models/AiGeneratedReport');
 const AiModelConfig = require('../models/AiModelConfig');
 const safeError = require('../utils/safeError');
+const { assertBeneficiaryInScope } = require('../utils/beneficiaryBranchGate');
 
 // Auth middleware
 router.use(authenticate);
@@ -308,6 +309,12 @@ router.post(
     const { beneficiary_id } = req.body;
     if (!beneficiary_id) return res.status(400).json({ message: 'beneficiary_id مطلوب' });
 
+    // Branch gate — beneficiary_id arrives from the body, so without this
+    // any authenticated staff could request AI-generated predictions for
+    // any beneficiary across all branches. Uniform 404 on out-of-scope.
+    const denied = await assertBeneficiaryInScope(req, beneficiary_id, res);
+    if (denied) return;
+
     const Beneficiary = require('../models/Beneficiary');
     const beneficiary = await Beneficiary.findById(beneficiary_id).lean();
     if (!beneficiary) return res.status(404).json({ message: 'المستفيد غير موجود' });
@@ -505,6 +512,12 @@ router.post(
       return res.status(400).json({ message: 'beneficiary_id و month مطلوبان' });
     }
 
+    // Branch gate — body-supplied id otherwise lets staff generate AI
+    // monthly reports (PHI summary intended for the parent) for any
+    // beneficiary across all branches.
+    const denied = await assertBeneficiaryInScope(req, beneficiary_id, res);
+    if (denied) return;
+
     const Beneficiary = require('../models/Beneficiary');
     const beneficiary = await Beneficiary.findById(beneficiary_id).lean();
     if (!beneficiary) return res.status(404).json({ message: 'المستفيد غير موجود' });
@@ -545,6 +558,11 @@ router.post(
   '/analyze/beneficiary/:beneficiaryId',
   asyncHandler(async (req, res) => {
     const { beneficiaryId } = req.params;
+
+    // Branch gate — param-supplied id, same risk as the body-supplied
+    // variants above.
+    const denied = await assertBeneficiaryInScope(req, beneficiaryId, res);
+    if (denied) return;
 
     const Beneficiary = require('../models/Beneficiary');
     const beneficiary = await Beneficiary.findById(beneficiaryId).lean();
@@ -770,6 +788,12 @@ router.post(
     if (!beneficiary_id) {
       return res.status(400).json({ message: 'beneficiary_id مطلوب' });
     }
+
+    // Branch gate — body-supplied id; without it, an AI care-plan
+    // suggestion (which feeds therapy modalities + dosage) could be
+    // pulled for any beneficiary across all branches.
+    const denied = await assertBeneficiaryInScope(req, beneficiary_id, res);
+    if (denied) return;
 
     const Beneficiary = require('../models/Beneficiary');
     const beneficiary = await Beneficiary.findById(beneficiary_id).lean();

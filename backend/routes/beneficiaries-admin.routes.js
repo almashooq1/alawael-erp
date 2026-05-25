@@ -202,18 +202,17 @@ router.get('/stats', requireRole(STAFF_ROLES), async (req, res) => {
 // added — and only logs 2xx (real disclosures, not denied access).
 router.get('/:id', requireRole(STAFF_ROLES), logPiiAccess('Beneficiary'), async (req, res) => {
   try {
-    const doc = await Beneficiary.findById(req.params.id).lean();
-    if (!doc) return res.status(404).json({ success: false, message: 'المستفيد غير موجود' });
-
-    // Branch-scope check
+    // Atomic compose — previous code did read-then-403, leaking the
+    // populated doc into the process before the branch check and letting
+    // an attacker distinguish "exists in other branch" from "does not
+    // exist" by the 403-vs-404 differential. Uniform 404 now.
+    const filter = { _id: req.params.id };
     const HQ = ['admin', 'superadmin', 'super_admin'];
-    if (
-      !HQ.includes(req.user?.role) &&
-      req.user?.branchId &&
-      String(doc.branchId) !== String(req.user.branchId)
-    ) {
-      return res.status(403).json({ success: false, message: 'غير مصرح' });
+    if (!HQ.includes(req.user?.role) && req.user?.branchId) {
+      filter.branchId = req.user.branchId;
     }
+    const doc = await Beneficiary.findOne(filter).lean();
+    if (!doc) return res.status(404).json({ success: false, message: 'المستفيد غير موجود' });
     res.json({ success: true, data: doc });
   } catch (err) {
     return safeError(res, err, 'beneficiaries.getOne');
@@ -246,8 +245,18 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
   try {
     const body = { ...req.body };
     delete body._id;
+    delete body.branchId; // forbid clients from moving a record between branches
     body.updatedBy = req.user?.id;
-    const doc = await Beneficiary.findByIdAndUpdate(req.params.id, body, {
+    // Atomic branch gate composed into the filter. Previous PATCH
+    // bypassed scope entirely — only the GET path had any branch check,
+    // so any therapist could edit any branch's beneficiary record via
+    // direct ID.
+    const HQ = ['admin', 'superadmin', 'super_admin'];
+    const filter = { _id: req.params.id };
+    if (!HQ.includes(req.user?.role) && req.user?.branchId) {
+      filter.branchId = req.user.branchId;
+    }
+    const doc = await Beneficiary.findOneAndUpdate(filter, body, {
       new: true,
       runValidators: true,
     }).lean();
@@ -264,8 +273,15 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
 // ── DELETE /:id — soft delete (archive) ─────────────────────────────────
 router.delete('/:id', requireRole(WRITE_ROLES), async (req, res) => {
   try {
-    const doc = await Beneficiary.findByIdAndUpdate(
-      req.params.id,
+    // Same atomic branch gate as PATCH above — DELETE previously bypassed
+    // scope entirely, letting any therapist archive any branch's record.
+    const HQ = ['admin', 'superadmin', 'super_admin'];
+    const filter = { _id: req.params.id };
+    if (!HQ.includes(req.user?.role) && req.user?.branchId) {
+      filter.branchId = req.user.branchId;
+    }
+    const doc = await Beneficiary.findOneAndUpdate(
+      filter,
       { isArchived: true, archivedAt: new Date(), archivedBy: req.user?.id, status: 'inactive' },
       { new: true }
     ).lean();

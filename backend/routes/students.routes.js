@@ -4,12 +4,18 @@ const { authenticate } = require('../middleware/auth');
 const { requireBranchAccess, _branchFilter } = require('../middleware/branchScope.middleware');
 const _logger = require('../utils/logger');
 const safeError = require('../utils/safeError');
+const { assertBeneficiaryInScope } = require('../utils/beneficiaryBranchGate');
 
 router.use(authenticate);
 router.use(requireBranchAccess);
 // GET /:id/dashboard
 router.get('/:id/dashboard', async (req, res) => {
   try {
+    // Branch gate — :id is a beneficiary (the route family calls them
+    // "students" but they're Beneficiary docs). Without this, any staff
+    // could pull dashboard PII for any branch's student.
+    const denied = await assertBeneficiaryInScope(req, req.params.id, res);
+    if (denied) return;
     const Beneficiary = require('../models/Beneficiary');
     const student = await Beneficiary.findById(req.params.id).lean();
     if (!student) return res.status(404).json({ success: false, message: 'الطالب غير موجود' });
@@ -25,6 +31,8 @@ router.get('/:id/dashboard', async (req, res) => {
 // GET /:id/schedule
 router.get('/:id/schedule', async (req, res) => {
   try {
+    const denied = await assertBeneficiaryInScope(req, req.params.id, res);
+    if (denied) return;
     const Schedule = require('../models/Schedule');
     const data = await Schedule.find({ studentId: req.params.id }).sort({ date: 1 }).lean();
     res.json({ success: true, data });
@@ -36,6 +44,8 @@ router.get('/:id/schedule', async (req, res) => {
 // GET /:id/grades
 router.get('/:id/grades', async (req, res) => {
   try {
+    const denied = await assertBeneficiaryInScope(req, req.params.id, res);
+    if (denied) return;
     const BenMgmt = require('../models/BeneficiaryManagement');
     const data = await BenMgmt.AcademicRecord.find({ beneficiaryId: req.params.id }).lean();
     res.json({ success: true, data });
@@ -47,6 +57,8 @@ router.get('/:id/grades', async (req, res) => {
 // GET /:id/attendance
 router.get('/:id/attendance', async (req, res) => {
   try {
+    const denied = await assertBeneficiaryInScope(req, req.params.id, res);
+    if (denied) return;
     const BenMgmt = require('../models/BeneficiaryManagement');
     const data = await BenMgmt.AttendanceRecord.find({ beneficiaryId: req.params.id })
       .sort({ date: -1 })
@@ -60,6 +72,8 @@ router.get('/:id/attendance', async (req, res) => {
 // GET /:id/assignments
 router.get('/:id/assignments', async (req, res) => {
   try {
+    const denied = await assertBeneficiaryInScope(req, req.params.id, res);
+    if (denied) return;
     const HomeAssignment = require('../models/HomeAssignment');
     const data = await HomeAssignment.find({ beneficiary: req.params.id })
       .sort({ date: -1 })
@@ -87,6 +101,10 @@ router.get('/:id/announcements', async (req, res) => {
 // POST /:id/assignments/:assignmentId/submit — تسليم واجب
 router.post('/:id/assignments/:assignmentId/submit', async (req, res) => {
   try {
+    // Gate via the parent student. Without this, staff could mark any
+    // student's assignment as submitted from any branch.
+    const denied = await assertBeneficiaryInScope(req, req.params.id, res);
+    if (denied) return;
     const HomeAssignment = require('../models/HomeAssignment');
     const assignment = await HomeAssignment.findById(req.params.assignmentId);
     if (!assignment) {

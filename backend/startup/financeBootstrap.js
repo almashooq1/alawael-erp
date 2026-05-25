@@ -97,6 +97,45 @@ function startChequeExpiryScheduler({ logger, tickMs = DEFAULT_TICK_MS }) {
   };
 }
 
+function startBudgetThresholdScheduler({ logger, tickMs = DEFAULT_TICK_MS }) {
+  const { sweepBudgetThresholds } = require('../services/finance/budgetThresholdSweeper');
+  const Budget = require('../models/Budget');
+  const thresholdPercent = Number(process.env.BUDGET_THRESHOLD_PERCENT) || 80;
+
+  async function tick() {
+    try {
+      if (mongoose.connection?.readyState !== 1) return;
+      const { integrationBus } = require('../integration/systemIntegrationBus');
+      const res = await sweepBudgetThresholds({
+        BudgetModel: Budget,
+        integrationBus,
+        thresholdPercent,
+        logger,
+      });
+      if (res?.emitted > 0) {
+        logger.info?.(
+          `[financeBootstrap] budget-threshold sweep: emitted=${res.emitted} scanned=${res.scanned} threshold=${thresholdPercent}%`
+        );
+      }
+    } catch (err) {
+      logger.warn?.('[financeBootstrap] budget-threshold sweep failed', { error: err.message });
+    }
+  }
+
+  const handle = setInterval(tick, tickMs);
+  if (handle.unref) handle.unref();
+  const initial = setTimeout(tick, 60000);
+  if (initial.unref) initial.unref();
+
+  return {
+    stop() {
+      clearInterval(handle);
+      clearTimeout(initial);
+    },
+    _tick: tick,
+  };
+}
+
 function bootstrapFinance({ logger = console, isTestEnv = false } = {}) {
   // Seed regardless of env so even tests hitting a real DB have
   // the COA ready; the operation is idempotent and cheap.
@@ -105,7 +144,7 @@ function bootstrapFinance({ logger = console, isTestEnv = false } = {}) {
   });
 
   if (isTestEnv) {
-    return { scheduler: null };
+    return { scheduler: null, budgetThresholdScheduler: null };
   }
 
   let scheduler = null;
@@ -118,11 +157,27 @@ function bootstrapFinance({ logger = console, isTestEnv = false } = {}) {
     });
   }
 
-  return { scheduler };
+  // W401: budget-threshold sweeper. Env-gated to keep CI / local-dev quiet.
+  // Emits finance.budget.threshold_reached for each active budget whose
+  // utilization >= BUDGET_THRESHOLD_PERCENT (default 80).
+  let budgetThresholdScheduler = null;
+  if (process.env.ENABLE_BUDGET_THRESHOLD_SWEEPER === 'true') {
+    try {
+      budgetThresholdScheduler = startBudgetThresholdScheduler({ logger });
+      logger.info?.('[financeBootstrap] budget-threshold sweeper started (24h cadence)');
+    } catch (err) {
+      logger.warn?.('[financeBootstrap] budget-threshold sweeper not started', {
+        error: err.message,
+      });
+    }
+  }
+
+  return { scheduler, budgetThresholdScheduler };
 }
 
 module.exports = {
   bootstrapFinance,
   seedChartOfAccounts,
   startChequeExpiryScheduler,
+  startBudgetThresholdScheduler,
 };

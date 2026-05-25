@@ -158,9 +158,10 @@ const KNOWN_TYPO_PATTERNS = new Set([]);
 // non-model triggers (sweepers, middleware) or services I haven't probed:
 // W398 (2026-05-25) closed system.auth.permission_denied via auth.js
 // requirePermission middleware publish call. Baseline 4 → 3.
+// W401 (2026-05-25) closed finance.budget.threshold_reached via
+// budgetThresholdSweeper.js wired in financeBootstrap (env-gated cron).
+// Baseline 3 → 2.
 const KNOWN_LIVE_ORPHAN_SUBSCRIBERS = new Set([
-  // finance — sweeper-driven (budget threshold)
-  'finance.budget.threshold_reached', // needs nightly budget-vs-spend sweeper, W383-style
   // medical — no RiskAlert model registered
   'medical.risk.alert_raised', // needs RiskAlert/ClinicalRiskScore model + post-save
   // attendance — sweeper-driven

@@ -126,19 +126,20 @@ const MAX_TOTAL_EVENTS = 100; // ceiling
 // USER_LOGGED_IN, USER_LOGGED_OUT via auth.middleware integrationBus.publish.
 // Baseline 13 → 7.
 // W400 (2026-05-25) closed system.ERROR_OCCURRED via central errorHandler.js
-// publish on 5xx responses. Baseline 7 → 6. Remaining entries need:
-// non-existent models (Prescription, RiskAlert, PayrollRun), sweepers
-// (absence, budget), or deeper cache middleware hook.
+// publish on 5xx responses. Baseline 7 → 6.
+// W401 (2026-05-25) closed finance.BUDGET_THRESHOLD_REACHED via
+// services/finance/budgetThresholdSweeper.js wired in financeBootstrap.js
+// (env-gated daily cron, ENABLE_BUDGET_THRESHOLD_SWEEPER=true).
+// Baseline 6 → 5.
 const KNOWN_DEAD_CONTRACTS = new Set([
-  // finance — 2 remaining (no model + sweeper-driven)
-  'finance.BUDGET_THRESHOLD_REACHED', // budget.threshold_reached — needs nightly sweeper
+  // finance — 1 remaining (no model)
   'finance.PAYROLL_PROCESSED', // payroll.processed — no PayrollRun model registered
   // medical — 2 remaining (models don't exist)
   'medical.PRESCRIPTION_ISSUED', // prescription.issued — no Prescription model
   'medical.RISK_ALERT_RAISED', // risk.alert_raised — no RiskAlert/ClinicalRiskScore model registered for hook
   // attendance — 1 remaining (sweeper)
   'attendance.ABSENCE_DETECTED', // absence.detected — needs daily sweeper
-  // system — 1 remaining (W400 wired ERROR_OCCURRED in errorHandler.js)
+  // system — 1 remaining
   'system.CACHE_INVALIDATED', // cache.invalidated — cache layer hook, no central point
 ]);
 

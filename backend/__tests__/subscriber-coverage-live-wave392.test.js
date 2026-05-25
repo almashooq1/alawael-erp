@@ -144,12 +144,8 @@ function findAllProducedPatterns() {
 // Removal contract: fix the subscriber's pattern string OR delete the
 // subscriber if no contract should exist.
 const KNOWN_TYPO_PATTERNS = new Set([
-  // 'beneficiary.status.changed' — dots where underscores belong + missing
-  // namespace. Real contract: BENEFICIARY_EVENTS.STATUS_CHANGED has
-  // eventType 'beneficiary.status_changed'. Subscriber expects underscore
-  // form per the contract envelope. Fix: rename to
-  // 'beneficiary.beneficiary.status_changed' to match the namespaced pattern.
-  'beneficiary.status.changed',
+  // W395 fixed 'beneficiary.status.changed' → renamed to canonical
+  // 'beneficiary.beneficiary.status_changed' in crossModuleSubscribers.js.
   // 'auth.account.locked' — domain 'auth' doesn't exist in
   // domainEventContracts. There's no AUTH_EVENTS group; auth-related events
   // live under SYSTEM_EVENTS (USER_LOGGED_IN/OUT, PERMISSION_DENIED). Either

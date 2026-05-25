@@ -45,10 +45,27 @@ class BeneficiaryService extends BaseService {
     }
   }
 
-  async afterCreate(entity, _context) {
+  async afterCreate(entity, context) {
     logger.info(
       `[BeneficiaryService] New beneficiary created: ${entity._id} (${entity.fullNameArabic || entity.firstName})`
     );
+    // W395: fire canonical contract event for the DDD registry.
+    // Envelope per BENEFICIARY_DDD_EVENTS.REGISTERED in dddEventContracts:
+    //   {beneficiaryId, mrn, name, disabilityType, disabilityLevel}.
+    // The LIVE registry's `beneficiary.beneficiary.registered` is fired
+    // separately by W394 modelEventBridge post-save hook. Subscribers in
+    // dddCrossModuleSubscribers will receive this via W387 bridge.
+    this.emit('beneficiary.registered', {
+      beneficiaryId: entity._id,
+      mrn: entity.mrn || '',
+      name:
+        entity.fullNameArabic ||
+        entity.fullName ||
+        `${entity.firstName || ''} ${entity.lastName || ''}`.trim() ||
+        'Unknown',
+      disabilityType: entity.disability?.primaryDiagnosis || '',
+      disabilityLevel: entity.disability?.severity || '',
+    });
   }
 
   async beforeUpdate(_id, data, _existing, context) {

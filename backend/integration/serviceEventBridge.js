@@ -132,11 +132,12 @@ function wireServiceEventBridge(integrationBus) {
     skipped.push(`episodes (${err.message})`);
   }
 
-  // ─── core: beneficiary.{status_changed, profile_updated} ────────────────
+  // ─── core: beneficiary.{registered, status_changed, profile_updated} ──
   try {
     const coreDomain = require('../domains/core');
     if (coreDomain.beneficiaryService) {
       attachBridge('core', coreDomain.beneficiaryService, [
+        'beneficiary.registered', // W395 — wired from afterCreate
         'beneficiary.status_changed',
         'beneficiary.profile_updated',
       ]);

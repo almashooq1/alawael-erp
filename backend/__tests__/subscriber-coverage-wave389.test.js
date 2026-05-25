@@ -143,16 +143,13 @@ function findAllProducedPatterns() {
 // W391: subscriber patterns whose producer existence is intentionally
 // deferred (e.g., the event is meant to be fired by FUTURE wires). Each
 // entry requires a justification comment. Removal-contract via ratchet-down.
-const KNOWN_ORPHAN_SUBSCRIBERS = new Set([
-  // core.beneficiary.registered — listened to by 2 subscribers (timeline +
-  // dashboards KPI). The contract is alive in dddEventContracts but no
-  // current producer fires it. Should fire from BeneficiaryService.afterCreate
-  // when a new beneficiary is created end-to-end. Out of scope for W391 —
-  // requires verifying the create-flow envelope (mrn, name, disabilityType,
-  // disabilityLevel) — separate stakeholder-tier wire pending the
-  // beneficiary-360 onboarding flow ADR.
-  'core.beneficiary.registered',
-]);
+// W395 (2026-05-25) closed core.beneficiary.registered by wiring producer in
+// BeneficiaryService.afterCreate. Envelope sourced from
+// {beneficiaryId, mrn, name, disabilityType, disabilityLevel} per
+// BENEFICIARY_DDD_EVENTS.REGISTERED. Bridge mapping added in
+// serviceEventBridge.attachBridge('core', beneficiaryService, [...]).
+// BASELINE NOW EMPTY ✅
+const KNOWN_ORPHAN_SUBSCRIBERS = new Set([]);
 
 describe('W389 subscriber-must-have-producer drift guard', () => {
   describe('subscriber pattern → contract resolution', () => {

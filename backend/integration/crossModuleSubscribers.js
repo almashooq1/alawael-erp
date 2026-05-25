@@ -511,9 +511,13 @@ function createSubscribers(integrationBus, moduleConnector) {
   });
 
   // ─── Beneficiary → Email: Status change notification ──────────────
+  // W395 fix: was 'beneficiary.status.changed' (typo — dots vs underscore +
+  // missing namespace). Real contract is BENEFICIARY_EVENTS.STATUS_CHANGED
+  // with eventType 'beneficiary.status_changed'; integrationBus publishes
+  // it as fullEventName='beneficiary.beneficiary.status_changed'.
   subscribers.push({
     name: 'beneficiary:status → email:notification',
-    pattern: 'beneficiary.status.changed',
+    pattern: 'beneficiary.beneficiary.status_changed',
     handler: async event => {
       if (!emailManager || !User) return;
       try {

@@ -86,6 +86,29 @@ Three modules use PLURAL paths while 7 use SINGULAR + 1 is nested. CLAUDE.md's W
 
 ---
 
+## 3.5 IEP frontend path consolidation (ADR-026 no-regrets #4)
+
+The web-admin has TWO paths that both consume IEP backend surfaces:
+
+| Path         | Pages                  | Backend API                                                                    | History                                                                                         | Canonical?                 |
+| ------------ | ---------------------- | ------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------- | -------------------------- |
+| `/iep/`      | list + detail + new    | `/api/smart-iep` (older, pre-W200b)                                            | Pre-MoE-alignment work                                                                          | ⚠ legacy                  |
+| `/iep-plan/` | list + detail (no new) | `/api/v1/iep-plan` (W200b, MoE-aligned with Nafath signatures + 8-domain enum) | Wave 200b explicitly added to avoid `/iep` collision per `features.registry.js:142-143` comment | ✅ canonical going forward |
+
+**Convention going forward** (until ADR-026 resolves):
+
+- New IEP work goes to `/iep-plan/` (W200b MoE-aligned shape)
+- `/iep/` (older `/api/smart-iep`) stays for backward compatibility but no new features
+- Any deep-link from beneficiary 360, search results, or external bookmarks SHOULD target `/iep-plan/`
+- The /iep/ → /iep-plan/ consolidation is contingent on ADR-026 outcome:
+  - **Approach A** (consolidate to CarePlanVersion) — both paths eventually deprecate in favour of `/care-plans?planType=iep`
+  - **Approach B** (formalize tiers) — /iep-plan/ stays canonical; /iep/ deprecates
+  - **Approach C** (adapter + deprecate) — same as A; both go through the adapter
+
+Until the meeting decides, **don't add new features to /iep/**. Future agents picking up frontend IEP work should default to `/iep-plan/`.
+
+---
+
 ## 4. Out of scope but observed
 
 The broader `(dashboard)/` directory has **158 top-level routes**, many of which have list-only pages (no detail/new). Examples:

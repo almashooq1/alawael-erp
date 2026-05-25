@@ -24,12 +24,14 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const { authenticateToken, requireRole } = require('../middleware/auth');
+const { attachMfaActor, requireMfaTier } = require('../middleware/requireMfaTier');
 
 const IEP = require('../models/IndividualEducationPlan');
 const Beneficiary = require('../models/Beneficiary');
 const safeError = require('../utils/safeError');
 
 router.use(authenticateToken);
+router.use(attachMfaActor); // ADR-026 no-regrets #1 — populate req.actor with mfaLevel for downstream tier checks
 
 const READ_ROLES = [
   'admin',
@@ -337,7 +339,9 @@ router.delete('/:id/services/:serviceId', requireRole(WRITE_ROLES), async (req, 
 });
 
 // ── POST /:id/sign — append signature ──────────────────────────────────
-router.post('/:id/sign', requireRole(WRITE_ROLES), async (req, res) => {
+// ADR-026 no-regrets #1 + ADR-019 layer-2: signing an IEP is legally
+// binding (Nafath-attested). Mirror CarePlanVersion's analogous gate.
+router.post('/:id/sign', requireRole(WRITE_ROLES), requireMfaTier(2), async (req, res) => {
   try {
     const body = req.body || {};
     if (!String(body.role || '').trim() || !String(body.name || '').trim()) {
@@ -370,34 +374,41 @@ const TRANSITIONS = {
   completed: ['archived'],
   archived: [],
 };
-router.post('/:id/transition', requireRole(TRANSITION_ROLES), async (req, res) => {
-  try {
-    const next = String(req.body?.to || '');
-    if (!STATUSES.includes(next)) {
-      return res.status(400).json({ success: false, message: 'to غير صالح' });
+// ADR-026 no-regrets #1 + ADR-019 layer-2: status transitions (especially
+// to/from `active`) are the IEP equivalent of CarePlanVersion's approve gate.
+router.post(
+  '/:id/transition',
+  requireRole(TRANSITION_ROLES),
+  requireMfaTier(2),
+  async (req, res) => {
+    try {
+      const next = String(req.body?.to || '');
+      if (!STATUSES.includes(next)) {
+        return res.status(400).json({ success: false, message: 'to غير صالح' });
+      }
+      const row = await IEP.findById(req.params.id);
+      if (!row) return res.status(404).json({ success: false, message: 'الخطة غير موجودة' });
+      const allowed = TRANSITIONS[row.status] || [];
+      if (!allowed.includes(next)) {
+        return res
+          .status(409)
+          .json({ success: false, message: `لا يمكن الانتقال من ${row.status} إلى ${next}` });
+      }
+      // Activation requires signatures
+      if (next === 'active' && (!row.signatures || row.signatures.length === 0)) {
+        return res.status(400).json({ success: false, message: 'لا يمكن تفعيل خطة غير موقعة' });
+      }
+      row.status = next;
+      if (next === 'active' && !row.effectiveStartDate) {
+        row.effectiveStartDate = new Date();
+      }
+      await row.save();
+      res.json({ success: true, data: row });
+    } catch (err) {
+      return safeError(res, err, 'iep.transition');
     }
-    const row = await IEP.findById(req.params.id);
-    if (!row) return res.status(404).json({ success: false, message: 'الخطة غير موجودة' });
-    const allowed = TRANSITIONS[row.status] || [];
-    if (!allowed.includes(next)) {
-      return res
-        .status(409)
-        .json({ success: false, message: `لا يمكن الانتقال من ${row.status} إلى ${next}` });
-    }
-    // Activation requires signatures
-    if (next === 'active' && (!row.signatures || row.signatures.length === 0)) {
-      return res.status(400).json({ success: false, message: 'لا يمكن تفعيل خطة غير موقعة' });
-    }
-    row.status = next;
-    if (next === 'active' && !row.effectiveStartDate) {
-      row.effectiveStartDate = new Date();
-    }
-    await row.save();
-    res.json({ success: true, data: row });
-  } catch (err) {
-    return safeError(res, err, 'iep.transition');
   }
-});
+);
 
 // ── POST /:id/review ──────────────────────────────────────────────────
 router.post('/:id/review', requireRole(WRITE_ROLES), async (req, res) => {
@@ -421,7 +432,8 @@ router.post('/:id/review', requireRole(WRITE_ROLES), async (req, res) => {
 });
 
 // ── DELETE /:id ───────────────────────────────────────────────────────
-router.delete('/:id', requireRole(DELETE_ROLES), async (req, res) => {
+// ADR-026 no-regrets #1 + ADR-019 layer-2: destructive on legal artifact.
+router.delete('/:id', requireRole(DELETE_ROLES), requireMfaTier(2), async (req, res) => {
   try {
     const row = await IEP.findByIdAndDelete(req.params.id);
     if (!row) return res.status(404).json({ success: false, message: 'الخطة غير موجودة' });

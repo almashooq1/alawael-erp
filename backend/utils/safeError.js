@@ -18,10 +18,20 @@ const GENERIC_MESSAGE = 'حدث خطأ داخلي';
  * @param {import('express').Response} res - Express response
  * @param {Error} err - The caught error
  * @param {string} [context] - Optional context for logging (e.g. route name)
+ * @param {Object} [opts] - Optional response-shape controls
+ * @param {'success'|'ok'} [opts.shape='success'] - Response key shape.
+ *   'success' → `{ success: false, error: <msg> }` (default; matches the
+ *   majority of routes including the e603d4deb sweep).
+ *   'ok' → `{ ok: false, error: <msg> }` (matches the legacy admin-ops /
+ *   audit-reviews / forms-catalog / uploads family). Use this when the
+ *   route previously responded with `ok: false` and frontend callers
+ *   specifically check the `ok` key.
  */
-function safeError(res, err, context) {
+function safeError(res, err, context, opts) {
   const logMeta = { stack: err.stack };
   if (context) logMeta.context = context;
+
+  const shape = opts && opts.shape === 'ok' ? 'ok' : 'success';
 
   // Errors that carry their own statusCode (e.g. RateLimitError=429) are
   // expected operational responses — pass them through verbatim, not as
@@ -31,7 +41,10 @@ function safeError(res, err, context) {
 
   if (passThroughStatus) {
     logger.warn(err.message, { ...logMeta, code: err.code, statusCode: err.statusCode });
-    const body = { success: false, message: err.message, code: err.code };
+    const body =
+      shape === 'ok'
+        ? { ok: false, error: err.message, code: err.code }
+        : { success: false, message: err.message, code: err.code };
     if (err.retryAfterMs) body.retryAfterMs = err.retryAfterMs;
     if (err.scope) body.scope = err.scope;
     if (err.provider) body.provider = err.provider;
@@ -49,7 +62,8 @@ function safeError(res, err, context) {
 
   logger.error(err.message, logMeta);
   const message = IS_PRODUCTION ? GENERIC_MESSAGE : err.message;
-  return res.status(500).json({ success: false, error: message });
+  const body = shape === 'ok' ? { ok: false, error: message } : { success: false, error: message };
+  return res.status(500).json(body);
 }
 
 module.exports = safeError;

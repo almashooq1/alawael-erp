@@ -25,6 +25,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const { authenticate, authorize } = require('../middleware/auth');
+const safeError = require('../utils/safeError');
 
 const router = express.Router();
 
@@ -100,7 +101,7 @@ router.post('/', upload.single('file'), async (req, res) => {
       hash,
     });
   } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
+    return safeError(res, err, 'uploads', { shape: 'ok' });
   }
 });
 
@@ -130,7 +131,7 @@ router.get('/', (_req, res) => {
     entries.sort((a, b) => new Date(b.mtime) - new Date(a.mtime));
     res.json({ ok: true, entries: entries.slice(0, 200) });
   } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
+    return safeError(res, err, 'uploads', { shape: 'ok' });
   }
 });
 
@@ -146,7 +147,7 @@ router.delete('/:bucket/:filename', (req, res) => {
     fs.unlinkSync(fullPath);
     res.json({ ok: true, deleted: { bucket, filename } });
   } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
+    return safeError(res, err, 'uploads', { shape: 'ok' });
   }
 });
 

@@ -26,6 +26,7 @@
 const express = require('express');
 const FormTemplate = require('../models/FormTemplate');
 const FormSubmission = require('../models/FormSubmission');
+const safeError = require('../utils/safeError');
 
 let unifiedNotifier = null;
 try {
@@ -96,7 +97,7 @@ router.get('/', async (_req, res) => {
     res.set('Cache-Control', 'public, max-age=120');
     res.json({ ok: true, templates });
   } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
+    return safeError(res, err, 'publicForms', { shape: 'ok' });
   }
 });
 
@@ -167,7 +168,7 @@ router.get('/track/:submissionNumber', trackRateLimit, async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
+    return safeError(res, err, 'publicForms', { shape: 'ok' });
   }
 });
 
@@ -198,7 +199,7 @@ router.get('/:templateId', async (req, res) => {
     res.set('Cache-Control', 'public, max-age=120');
     res.json({ ok: true, template: tpl });
   } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
+    return safeError(res, err, 'publicForms', { shape: 'ok' });
   }
 });
 
@@ -346,7 +347,7 @@ router.post('/:templateId/submit', rateLimit, async (req, res) => {
         .catch(err => console.warn('public-form confirmation notify failed:', err.message));
     }
   } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
+    return safeError(res, err, 'publicForms', { shape: 'ok' });
   }
 });
 

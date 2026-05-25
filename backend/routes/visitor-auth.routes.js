@@ -20,6 +20,7 @@ const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 
 const FormSubmission = require('../models/FormSubmission');
+const safeError = require('../utils/safeError');
 
 let unifiedNotifier = null;
 try {
@@ -118,7 +119,7 @@ router.post('/request-otp', rateLimit, async (req, res) => {
 
     res.json({ ok: true, message: 'تم إرسال الرمز.' });
   } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
+    return safeError(res, err, 'visitorAuth', { shape: 'ok' });
   }
 });
 
@@ -148,7 +149,7 @@ router.post('/verify-otp', rateLimit, async (req, res) => {
 
     res.json({ ok: true, token, contact });
   } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
+    return safeError(res, err, 'visitorAuth', { shape: 'ok' });
   }
 });
 
@@ -179,7 +180,7 @@ router.get('/my-submissions', async (req, res) => {
       .lean();
     res.json({ ok: true, contact: payload.contact, submissions: subs });
   } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
+    return safeError(res, err, 'visitorAuth', { shape: 'ok' });
   }
 });
 

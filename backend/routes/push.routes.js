@@ -19,6 +19,7 @@
 
 const express = require('express');
 const PushSubscription = require('../models/PushSubscription');
+const safeError = require('../utils/safeError');
 
 let webpush = null;
 try {
@@ -75,7 +76,7 @@ authRouter.post('/subscribe', async (req, res) => {
     );
     res.json({ ok: true, subscription: { id: sub._id } });
   } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
+    return safeError(res, err, 'push', { shape: 'ok' });
   }
 });
 
@@ -86,7 +87,7 @@ authRouter.post('/unsubscribe', async (req, res) => {
     await PushSubscription.deleteOne({ endpoint });
     res.json({ ok: true });
   } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
+    return safeError(res, err, 'push', { shape: 'ok' });
   }
 });
 
@@ -104,7 +105,7 @@ authRouter.get('/subscriptions', async (req, res) => {
       .lean();
     res.json({ ok: true, subscriptions: subs });
   } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
+    return safeError(res, err, 'push', { shape: 'ok' });
   }
 });
 
@@ -126,7 +127,7 @@ authRouter.patch('/subscriptions/:id', async (req, res) => {
     if (!sub) return res.status(404).json({ ok: false, error: 'NOT_FOUND' });
     res.json({ ok: true, subscription: sub });
   } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
+    return safeError(res, err, 'push', { shape: 'ok' });
   }
 });
 
@@ -141,7 +142,7 @@ authRouter.delete('/subscriptions/:id', async (req, res) => {
     await PushSubscription.deleteOne({ _id: req.params.id });
     res.json({ ok: true });
   } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
+    return safeError(res, err, 'push', { shape: 'ok' });
   }
 });
 
@@ -182,7 +183,7 @@ authRouter.post('/test', async (req, res) => {
     }
     res.json({ ok: true, sent, total: subs.length });
   } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
+    return safeError(res, err, 'push', { shape: 'ok' });
   }
 });
 

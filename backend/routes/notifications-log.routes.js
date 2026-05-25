@@ -12,6 +12,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const { authenticate } = require('../middleware/auth');
+const safeError = require('../utils/safeError');
 
 const router = express.Router();
 router.use(authenticate);
@@ -68,7 +69,7 @@ router.get('/', async (req, res) => {
     ]);
     res.json({ ok: true, items, total });
   } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
+    return safeError(res, err, 'notificationsLog', { shape: 'ok' });
   }
 });
 
@@ -98,7 +99,7 @@ router.get('/stats', async (req, res) => {
     ]);
     res.json({ ok: true, windowDays: days, total, byChannel, byStatus, byTemplate });
   } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
+    return safeError(res, err, 'notificationsLog', { shape: 'ok' });
   }
 });
 
@@ -137,7 +138,7 @@ router.post('/:id/retry', async (req, res) => {
     });
     res.json({ ok: true, message: 'تمت إعادة المحاولة' });
   } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
+    return safeError(res, err, 'notificationsLog', { shape: 'ok' });
   }
 });
 
@@ -153,7 +154,7 @@ router.get('/:id', async (req, res) => {
     if (!item) return res.status(404).json({ ok: false, error: 'NOT_FOUND' });
     res.json({ ok: true, item });
   } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
+    return safeError(res, err, 'notificationsLog', { shape: 'ok' });
   }
 });
 

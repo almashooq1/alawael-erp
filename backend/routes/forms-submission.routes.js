@@ -27,6 +27,7 @@ const express = require('express');
 const FormTemplate = require('../models/FormTemplate');
 const FormSubmission = require('../models/FormSubmission');
 const { authenticate } = require('../middleware/auth');
+const safeError = require('../utils/safeError');
 
 // Loaded lazily so the routes file still parses if these aren't installed.
 let unifiedNotifier = null;
@@ -90,7 +91,7 @@ router.get('/templates', async (req, res) => {
       .lean();
     res.json({ ok: true, templates });
   } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
+    return safeError(res, err, 'formsSubmission', { shape: 'ok' });
   }
 });
 
@@ -102,7 +103,7 @@ router.get('/templates/:id', async (req, res) => {
     }
     res.json({ ok: true, template: tpl });
   } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
+    return safeError(res, err, 'formsSubmission', { shape: 'ok' });
   }
 });
 
@@ -140,7 +141,7 @@ router.patch('/templates/:id', async (req, res) => {
     if (touched) await tpl.save();
     res.json({ ok: true, template: tpl.toObject() });
   } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
+    return safeError(res, err, 'formsSubmission', { shape: 'ok' });
   }
 });
 
@@ -190,7 +191,7 @@ router.post('/:templateId/submit', async (req, res) => {
 
     res.status(201).json({ ok: true, submission: sub.toObject() });
   } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
+    return safeError(res, err, 'formsSubmission', { shape: 'ok' });
   }
 });
 
@@ -248,7 +249,7 @@ router.get('/submissions', async (req, res) => {
 
     res.json({ ok: true, submissions, total });
   } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
+    return safeError(res, err, 'formsSubmission', { shape: 'ok' });
   }
 });
 
@@ -267,7 +268,7 @@ router.get('/submissions/:id', async (req, res) => {
     }
     res.json({ ok: true, submission: sub });
   } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
+    return safeError(res, err, 'formsSubmission', { shape: 'ok' });
   }
 });
 
@@ -304,7 +305,7 @@ router.put('/submissions/:id', async (req, res) => {
     await sub.save();
     res.json({ ok: true, submission: sub.toObject() });
   } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
+    return safeError(res, err, 'formsSubmission', { shape: 'ok' });
   }
 });
 
@@ -417,7 +418,7 @@ router.get('/analytics', async (req, res) => {
       reviewedCount: reviewedAgg[0]?.count || 0,
     });
   } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
+    return safeError(res, err, 'formsSubmission', { shape: 'ok' });
   }
 });
 
@@ -522,7 +523,7 @@ router.post('/submissions/bulk-review', async (req, res) => {
 
     res.json({ ok: true, ...results });
   } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
+    return safeError(res, err, 'formsSubmission', { shape: 'ok' });
   }
 });
 
@@ -672,7 +673,7 @@ router.put('/submissions/:id/review', async (req, res) => {
 
     res.json({ ok: true, submission: sub.toObject() });
   } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
+    return safeError(res, err, 'formsSubmission', { shape: 'ok' });
   }
 });
 

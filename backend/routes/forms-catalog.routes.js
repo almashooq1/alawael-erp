@@ -24,6 +24,7 @@
 const express = require('express');
 const { authenticate, authorize } = require('../middleware/auth');
 const { createFormsCatalogService } = require('../services/formsCatalogService');
+const safeError = require('../utils/safeError');
 
 function buildRouter({ formTemplateModel } = {}) {
   const router = express.Router();
@@ -94,7 +95,7 @@ function buildRouter({ formTemplateModel } = {}) {
       const result = await service.instantiateAll(ctx, filter);
       res.json({ ok: true, ...result });
     } catch (err) {
-      res.status(500).json({ ok: false, error: err.message });
+      return safeError(res, err, 'formsCatalog', { shape: 'ok' });
     }
   });
 

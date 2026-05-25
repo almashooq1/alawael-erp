@@ -19,6 +19,7 @@ const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const safeError = require('../utils/safeError');
 
 const router = express.Router();
 
@@ -89,7 +90,7 @@ router.post('/', rateLimit, upload.single('file'), async (req, res) => {
       mime: req.file.mimetype,
     });
   } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
+    return safeError(res, err, 'publicUploads', { shape: 'ok' });
   }
 });
 

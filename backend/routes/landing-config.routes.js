@@ -21,6 +21,7 @@
 const express = require('express');
 const LandingConfig = require('../models/LandingConfig');
 const { authenticate, authorize } = require('../middleware/auth');
+const safeError = require('../utils/safeError');
 
 const router = express.Router();
 
@@ -34,7 +35,7 @@ router.get('/config', async (_req, res) => {
     res.set('Cache-Control', 'public, max-age=60');
     res.json({ ok: true, config: cfg.toObject() });
   } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
+    return safeError(res, err, 'landingConfig', { shape: 'ok' });
   }
 });
 
@@ -66,7 +67,7 @@ router.put('/config', async (req, res) => {
     await cfg.save();
     res.json({ ok: true, config: cfg.toObject() });
   } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
+    return safeError(res, err, 'landingConfig', { shape: 'ok' });
   }
 });
 
@@ -90,7 +91,7 @@ router.patch('/config', async (req, res) => {
     await cfg.save();
     res.json({ ok: true, config: cfg.toObject() });
   } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
+    return safeError(res, err, 'landingConfig', { shape: 'ok' });
   }
 });
 
@@ -108,7 +109,7 @@ router.patch('/config/section/:id', async (req, res) => {
     await cfg.save();
     res.json({ ok: true, section: cfg.sections[idx], version: cfg.version });
   } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
+    return safeError(res, err, 'landingConfig', { shape: 'ok' });
   }
 });
 
@@ -131,7 +132,7 @@ router.post('/config/section', async (req, res) => {
     await cfg.save();
     res.status(201).json({ ok: true, section, version: cfg.version });
   } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
+    return safeError(res, err, 'landingConfig', { shape: 'ok' });
   }
 });
 
@@ -148,7 +149,7 @@ router.delete('/config/section/:id', async (req, res) => {
     await cfg.save();
     res.json({ ok: true, version: cfg.version, remaining: cfg.sections.length });
   } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
+    return safeError(res, err, 'landingConfig', { shape: 'ok' });
   }
 });
 
@@ -167,7 +168,7 @@ router.post('/config/reset', async (req, res) => {
     );
     res.json({ ok: true, config: cfg.toObject() });
   } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
+    return safeError(res, err, 'landingConfig', { shape: 'ok' });
   }
 });
 

@@ -17,6 +17,7 @@
 const express = require('express');
 const FormSubmission = require('../models/FormSubmission');
 const { authenticate } = require('../middleware/auth');
+const safeError = require('../utils/safeError');
 
 const router = express.Router();
 router.use(authenticate);
@@ -108,7 +109,7 @@ router.get('/reviews', async (req, res) => {
 
     res.json({ ok: true, events });
   } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
+    return safeError(res, err, 'auditReviews', { shape: 'ok' });
   }
 });
 
@@ -145,7 +146,7 @@ router.get('/reviews/stats', async (req, res) => {
       reviewedCount: withMs,
     });
   } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
+    return safeError(res, err, 'auditReviews', { shape: 'ok' });
   }
 });
 

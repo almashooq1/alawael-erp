@@ -7,6 +7,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const { Analytics, Asset, Schedule, DisabilityProgram } = require('../models');
 const redisClient = require('../config/redis');
+const safeError = require('../utils/safeError');
 
 const router = express.Router();
 
@@ -338,7 +339,7 @@ router.get('/routes', (_req, res) => {
       missingStubs: missing.map(f => f.module),
     });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    return safeError(res, err, 'health');
   }
 });
 
@@ -399,7 +400,7 @@ router.get('/domains', (_req, res) => {
       domains: summary,
     });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    return safeError(res, err, 'health');
   }
 });
 

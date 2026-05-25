@@ -24,6 +24,7 @@ const dlq = require('../infrastructure/deadLetterQueue');
 const { authenticate, authorize } = require('../middleware/auth');
 const aggregatorModule = require('../services/integrationHealthAggregator');
 const { buildSnapshot } = aggregatorModule;
+const safeError = require('../utils/safeError');
 
 const router = express.Router();
 const replayAdapters = new Map();
@@ -93,7 +94,7 @@ router.get('/integration-health', (_req, res) => {
     const snapshot = buildSnapshot();
     res.json({ ok: true, snapshot });
   } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
+    return safeError(res, err, 'adminOpsDlq', { shape: 'ok' });
   }
 });
 
@@ -113,7 +114,7 @@ router.get('/dlq', async (req, res) => {
     });
     res.json({ ok: true, ...result });
   } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
+    return safeError(res, err, 'adminOpsDlq', { shape: 'ok' });
   }
 });
 
@@ -123,7 +124,7 @@ router.get('/dlq/:id', async (req, res) => {
     if (!entry) return res.status(404).json({ ok: false, error: 'NOT_FOUND' });
     res.json({ ok: true, entry });
   } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
+    return safeError(res, err, 'adminOpsDlq', { shape: 'ok' });
   }
 });
 
@@ -133,7 +134,7 @@ router.post('/dlq/:id/discard', async (req, res) => {
     if (!entry) return res.status(404).json({ ok: false, error: 'NOT_FOUND' });
     res.json({ ok: true, entry });
   } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
+    return safeError(res, err, 'adminOpsDlq', { shape: 'ok' });
   }
 });
 
@@ -153,7 +154,7 @@ router.post('/dlq/:id/replay', async (req, res) => {
     const outcome = await dlq.replay(entry.id, adapter);
     res.json({ ok: !!outcome.ok, outcome });
   } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
+    return safeError(res, err, 'adminOpsDlq', { shape: 'ok' });
   }
 });
 
@@ -177,7 +178,7 @@ router.get('/integration-health/trends/:integration', async (req, res) => {
     });
     res.json({ ok: true, ...result });
   } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
+    return safeError(res, err, 'adminOpsDlq', { shape: 'ok' });
   }
 });
 
@@ -189,7 +190,7 @@ router.post('/integration-health/sample', async (_req, res) => {
     const summary = await recorder.recordOnce({ source: 'manual' });
     res.json({ ok: true, summary });
   } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
+    return safeError(res, err, 'adminOpsDlq', { shape: 'ok' });
   }
 });
 
@@ -205,7 +206,7 @@ router.get('/integration-health/alerts', async (req, res) => {
     });
     res.json({ ok: true, ...result });
   } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
+    return safeError(res, err, 'adminOpsDlq', { shape: 'ok' });
   }
 });
 
@@ -218,7 +219,7 @@ router.post('/integration-health/alerts/:id/ack', async (req, res) => {
     if (!updated) return res.status(404).json({ ok: false, error: 'NOT_FOUND_OR_NOT_OPEN' });
     res.json({ ok: true, alert: updated });
   } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
+    return safeError(res, err, 'adminOpsDlq', { shape: 'ok' });
   }
 });
 
@@ -231,7 +232,7 @@ router.post('/integration-health/alerts/:id/resolve', async (req, res) => {
     if (!updated) return res.status(404).json({ ok: false, error: 'NOT_FOUND_OR_RESOLVED' });
     res.json({ ok: true, alert: updated });
   } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
+    return safeError(res, err, 'adminOpsDlq', { shape: 'ok' });
   }
 });
 
@@ -244,7 +245,7 @@ router.post('/integration-health/alerts/evaluate', async (_req, res) => {
     const summary = await engine.evaluate({});
     res.json({ ok: true, summary });
   } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
+    return safeError(res, err, 'adminOpsDlq', { shape: 'ok' });
   }
 });
 

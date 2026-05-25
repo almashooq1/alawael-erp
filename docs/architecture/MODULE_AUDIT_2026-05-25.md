@@ -47,36 +47,48 @@ analyses drift from the file system; ls/Grep audit BEFORE first commit.
 
 ### 🟢 Production-grade — DO NOT rebuild
 
-| Module                                        | Files                                                                                                                                                                                 | Wave       |
-| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
-| **Restraint & Seclusion register**            | [`models/RestraintSeclusionEvent.js`](../../backend/models/RestraintSeclusionEvent.js) + [`routes/restraint-seclusion.routes.js`](../../backend/routes/restraint-seclusion.routes.js) | W193b      |
-| **eMAR (Medication Administration)**          | [`models/MedicationAdministrationRecord.js`](../../backend/models/MedicationAdministrationRecord.js) + [`routes/mar.routes.js`](../../backend/routes/mar.routes.js)                   | W191b      |
-| **NPHIES (claims / eligibility / preauth)**   | [`services/nphies.service.js`](../../backend/services/nphies.service.js) + `models/nphies/{EligibilityCheck,PriorAuthorization,InsuranceClaim}.js`                                    | unnumbered |
-| **IndividualEducationPlan (IEP/IFSP)**        | [`models/IndividualEducationPlan.js`](../../backend/models/IndividualEducationPlan.js) + [`routes/iep.routes.js`](../../backend/routes/iep.routes.js)                                 | W200b      |
-| **CarePlanVersion (canonical care plan)**     | [`models/CarePlanVersion.js`](../../backend/models/CarePlanVersion.js) + 30+ caller ecosystem                                                                                         | W41        |
-| **CAPA + RCA + FMEA quality cycle**           | `services/quality/capa-*` + `models/quality/*` + 7 drift guards                                                                                                                       | W337–W349  |
-| **Adaptive sports catalog (scaffolding)**     | see 🟡 below — service exists but scaffold-only                                                                                                                                       |
-| **Transition planning service (scaffolding)** | see 🟡 below — service exists but scaffold-only                                                                                                                                       |
+| Module                                      | Files                                                                                                                                                                                                              | Wave       |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------- |
+| **Restraint & Seclusion register**          | [`models/RestraintSeclusionEvent.js`](../../backend/models/RestraintSeclusionEvent.js) + [`routes/restraint-seclusion.routes.js`](../../backend/routes/restraint-seclusion.routes.js)                              | W193b      |
+| **eMAR (Medication Administration)**        | [`models/MedicationAdministrationRecord.js`](../../backend/models/MedicationAdministrationRecord.js) + [`routes/mar.routes.js`](../../backend/routes/mar.routes.js)                                                | W191b      |
+| **NPHIES (claims / eligibility / preauth)** | [`services/nphies.service.js`](../../backend/services/nphies.service.js) + `models/nphies/{EligibilityCheck,PriorAuthorization,InsuranceClaim}.js`                                                                 | unnumbered |
+| **IndividualEducationPlan (IEP/IFSP)**      | [`models/IndividualEducationPlan.js`](../../backend/models/IndividualEducationPlan.js) + [`routes/iep.routes.js`](../../backend/routes/iep.routes.js)                                                              | W200b      |
+| **CarePlanVersion (canonical care plan)**   | [`models/CarePlanVersion.js`](../../backend/models/CarePlanVersion.js) + 30+ caller ecosystem                                                                                                                      | W41        |
+| **CAPA + RCA + FMEA quality cycle**         | `services/quality/capa-*` + `models/quality/*` + 7 drift guards                                                                                                                                                    | W337–W349  |
+| **SeizureEvent (longitudinal seizure log)** | [`models/SeizureEvent.js`](../../backend/models/SeizureEvent.js) + [`routes/seizure-log.routes.js`](../../backend/routes/seizure-log.routes.js)                                                                    | W356       |
+| **TransitionPlan (life-stage transitions)** | [`models/TransitionPlan.js`](../../backend/models/TransitionPlan.js) + [`routes/transition-plan.routes.js`](../../backend/routes/transition-plan.routes.js) — graduated W361                                       | W361       |
+| **AdaptiveSportsProgram**                   | [`models/AdaptiveSportsProgram.js`](../../backend/models/AdaptiveSportsProgram.js) + [`routes/adaptive-sports.routes.js`](../../backend/routes/adaptive-sports.routes.js) — graduated W362                         | W362       |
+| **CaregiverSupportProgram**                 | [`models/CaregiverSupportProgram.js`](../../backend/models/CaregiverSupportProgram.js) + [`routes/caregiver-support-program.routes.js`](../../backend/routes/caregiver-support-program.routes.js) — graduated W384 | W384       |
 
-### 🟡 Scaffolding — exists but data not persisted
+### 🟡 Scaffolding — exists but data not persisted (HISTORICAL — all 3 graduated)
 
-| Module                      | Files                                                                                                                                    | Reason it's scaffolding                                                                                                                                                                                                                            |
-| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Transition planning**     | [`rehabilitation-services/transition-planning-service.js`](../../backend/rehabilitation-services/transition-planning-service.js)         | Constructor: `this.plans = new Map(); this.assessments = new Map(); ...`. No Mongoose model. Data lost on restart. Covers 5 transition types (early-to-school, school-to-secondary, school-to-work, rehab-to-community, dependent-to-independent). |
-| **Adaptive sports**         | [`rehabilitation-services/adaptive-sports-service.js`](../../backend/rehabilitation-services/adaptive-sports-service.js)                 | Same pattern — Maps in constructor. Has a sports catalog (wheelchair basketball, tennis, etc.) but no session/assessment persistence.                                                                                                              |
-| **Advanced family support** | [`rehabilitation-services/advanced-family-support-service.js`](../../backend/rehabilitation-services/advanced-family-support-service.js) | Service exists but no booking model. Respite-adjacent.                                                                                                                                                                                             |
+> **STATUS POST 2026-05-25 SESSION**: every scaffold below has been graduated
+> to 🟢 production-grade with a Mongoose model + routes + canonical schema +
+> Wave-18 invariants + drift guard. The in-memory scaffold files remain as
+> archival reference but are no longer the data layer.
 
-**These scaffolds need a model + routes + Wave-18 invariants pass to graduate
-to 🟢 production-grade.** Schema design exists in service code — the lift is
-~1 wave each.
+| Module                      | Original scaffold                                                                                                                        | Graduated to                                                                                                                          | Wave |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ---- |
+| **Transition planning**     | [`rehabilitation-services/transition-planning-service.js`](../../backend/rehabilitation-services/transition-planning-service.js)         | [`models/TransitionPlan.js`](../../backend/models/TransitionPlan.js) + `routes/transition-plan.routes.js`                             | W361 |
+| **Adaptive sports**         | [`rehabilitation-services/adaptive-sports-service.js`](../../backend/rehabilitation-services/adaptive-sports-service.js)                 | [`models/AdaptiveSportsProgram.js`](../../backend/models/AdaptiveSportsProgram.js) + `routes/adaptive-sports.routes.js`               | W362 |
+| **Advanced family support** | [`rehabilitation-services/advanced-family-support-service.js`](../../backend/rehabilitation-services/advanced-family-support-service.js) | [`models/CaregiverSupportProgram.js`](../../backend/models/CaregiverSupportProgram.js) + `routes/caregiver-support-program.routes.js` | W384 |
 
-### 🟠 Partial — surface exists but workflow incomplete
+**Why the scaffold files still exist**: removing them would be a separate
+ADR-grade decision because some downstream services may still reference
+the old in-memory APIs. Future cleanup: audit `grep -r "require.*advanced-family-support-service"` etc. and migrate / delete the
+scaffolds. Not blocking for cutover.
 
-| Module                                | What exists                                                                                                                                                                                                                                                                                                                            | What's missing                                                                                                                                                                                             |
-| ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Vocational / Supported employment** | [`models/SupportedHousing.js`](../../backend/models/SupportedHousing.js), [`models/clinical-assessment/transition-readiness-assessment.model.js`](../../backend/models/clinical-assessment/transition-readiness-assessment.model.js), [`students/student-config.js`](../../backend/students/student-config.js) (has vocational fields) | No sheltered-employment / job-matching workflow. No employer registry. No internship tracking.                                                                                                             |
-| **Caregiver/sibling support**         | [`models/clinical-assessment/caregiver-burden-assessment.model.js`](../../backend/models/clinical-assessment/caregiver-burden-assessment.model.js) + [`models/CaregiverSupportProgram.js`](../../backend/models/CaregiverSupportProgram.js) (W384 — CLOSED)                                                                            | ~~Assessment exists but no support program~~ — **CLOSED W384**: 5 program types (counseling/training/parent/sibling/peer) + 5-state lifecycle + Zarit pre/post + 18 endpoints at `/api/caregiver-support`. |
-| **Seizure / red-flag observations**   | [`services/redFlagObservations/incidentObservations.js`](../../backend/services/redFlagObservations/incidentObservations.js), [`models/quality/Incident.model.js`](../../backend/models/quality/Incident.model.js)                                                                                                                     | No dedicated longitudinal Seizure log (date / duration / type / triggers / medication response). Currently mixed into generic incident reporting.                                                          |
+### 🟠 Partial — surface exists but workflow incomplete (2 of 3 CLOSED post-session)
+
+> Post-2026-05-25 status: 2 of 3 partials closed (Caregiver/sibling W384,
+> Seizure W356). The remaining open partial is Vocational / Supported
+> employment — has profile model but lacks job-matching workflow.
+
+| Module                                | What exists                                                                                                                                                                                                                                                                                                                                                                                                                                           | What's missing                                                                                                                                                                                                                                                                         |
+| ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Vocational / Supported employment** | [`models/SupportedHousing.js`](../../backend/models/SupportedHousing.js), [`models/clinical-assessment/transition-readiness-assessment.model.js`](../../backend/models/clinical-assessment/transition-readiness-assessment.model.js), [`students/student-config.js`](../../backend/students/student-config.js) (has vocational fields)                                                                                                                | No sheltered-employment / job-matching workflow. No employer registry. No internship tracking.                                                                                                                                                                                         |
+| **Caregiver/sibling support**         | [`models/clinical-assessment/caregiver-burden-assessment.model.js`](../../backend/models/clinical-assessment/caregiver-burden-assessment.model.js) + [`models/CaregiverSupportProgram.js`](../../backend/models/CaregiverSupportProgram.js) (W384 — CLOSED)                                                                                                                                                                                           | ~~Assessment exists but no support program~~ — **CLOSED W384**: 5 program types (counseling/training/parent/sibling/peer) + 5-state lifecycle + Zarit pre/post + 18 endpoints at `/api/caregiver-support`.                                                                             |
+| **Seizure / red-flag observations**   | [`models/SeizureEvent.js`](../../backend/models/SeizureEvent.js) + [`routes/seizure-log.routes.js`](../../backend/routes/seizure-log.routes.js) (W356 — CLOSED). Generic incident reporting at [`services/redFlagObservations/incidentObservations.js`](../../backend/services/redFlagObservations/incidentObservations.js) + [`models/quality/Incident.model.js`](../../backend/models/quality/Incident.model.js) remains for non-seizure red flags. | ~~No dedicated longitudinal Seizure log~~ — **CLOSED W356**: ILAE 2017 classification + status-epilepticus virtual (≥300s) + 11 endpoints at `/api/seizure-log`. Triggers, medication response, and EEG-correlate fields captured. Longitudinal trending now possible per beneficiary. |
 
 ### 🔴 Verified absent — genuine gaps (HISTORICAL — all built post-session)
 
@@ -116,34 +128,47 @@ to 🟢 production-grade.** Schema design exists in service code — the lift is
 | **ApprovalRequest schema divergence**      | Rich vs simple schemas at 3 source files; ADR-021 + 022 pending                                                     | [ADR-022](decisions/022-approval-request-pattern-d-rename-proposal.md) |
 | **AuditLog 3× registration**               | Different field names (entityType vs auditableType) across 4 source files                                           | ADR-021 ALLOWLIST stopgap applied W347                                 |
 
-## Implications for prioritization
+## Implications for prioritization (HISTORICAL — see closed/open status below)
 
-The original 10-item priority list reduces to:
+The original 10-item priority list and what happened to each:
 
-**Top genuine gaps** (ordered by clinical/regulatory impact):
+**Top genuine gaps** — all closed in W356-W360 session:
 
-1. **AAC workflow** — significant population (non-verbal beneficiaries),
-   currently nothing.
-2. **Safeguarding workflow** — regulatory necessity (child protection +
-   elder abuse). High blast radius if a real incident is mishandled.
-3. **Dedicated Seizure log** — broad population (CP + autism + syndromes).
-   Currently bleeds into generic incident reporting; longitudinal trending
-   not possible.
-4. **Assistive Device lifecycle** — core to disability rehab. Inventory
-   tracking only, no loan/return/maintenance.
-5. **CBAHI accreditation mapping** — unlocks government contracting; ~1
-   wave of doctrine work, no code.
+1. ✅ **AAC workflow** — closed W358 `CommunicationAidProfile` (singleton per beneficiary, ASHA modality tiers, 12 endpoints at `/api/communication-aid`).
+2. ✅ **Safeguarding workflow** — closed W357 `SafeguardingConcern` (13 endpoints + CBAHI + Saudi child-protection authority).
+3. ✅ **Dedicated Seizure log** — closed W356 `SeizureEvent` (ILAE 2017 + status-epilepticus ≥300s + 11 endpoints).
+4. ✅ **Assistive Device lifecycle** — closed W359 `AssistiveDevice` (loan + maintenance, 20 endpoints).
+5. ✅ **CBAHI accreditation mapping** — closed W360 + W367 (45 standards / 8 chapters + per-branch attestation, 16 endpoints).
 
-**Graduating scaffolds to production** (medium-effort, well-defined):
+**Graduating scaffolds to production** — all 3 closed:
 
-6. Transition planning persistence — schema exists in service code.
-7. Adaptive sports persistence — sports catalog exists in service code.
-8. Respite booking — family-support service exists as base.
+6. ✅ Transition planning — closed W361 `TransitionPlan` (5 life-stage transitions + 15 endpoints).
+7. ✅ Adaptive sports — closed W362 `AdaptiveSportsProgram` (19 sports + sessions + achievements, 17 endpoints).
+8. ✅ Family support (was titled "respite booking" in original list) — closed W363 `RespiteBooking` (17 endpoints) + W384 `CaregiverSupportProgram` (5 program types + Zarit pre/post + 18 endpoints).
 
-**Defer until stakeholder decision** (no autonomous progress possible):
+**Defer until stakeholder decision** — still open:
 
-9. IEP/IFSP unification — see ADR-026.
-10. Student/Beneficiary unification — see ADR-020.
+9. 🔵 IEP/IFSP unification — see [ADR-026](decisions/026-iep-ifsp-care-plan-fragmentation.md).
+10. 🔵 Student/Beneficiary unification — see [ADR-020](decisions/020-student-vs-beneficiary-consolidation.md).
+
+**Items NOT in the original list but built in the same series**:
+
+- W368 `BeneficiaryDietPrescription` (IDDSI + NPO + enteral, 17 endpoints).
+- W369 `FacilityAsset` (26-category PPM + regulatory certificates, 19 endpoints).
+
+**Items NOT in the original list and still open as 🟠 partial**:
+
+- **Vocational / Supported employment** — `models/rehab-advanced/VocationalProfile.model.js` exists (snake_case, no Wave-18 invariants, no canonical schema). Has work-skills/training/employment-applications fields but no employer registry, no job-matching workflow, no internship tracking. Would need a refactor (camelCase + canonical schema) AND additive build (employer registry + job-placement workflow) to graduate to 🟢. Estimated ~2-3 waves of work.
+
+## Session totals (W356-W393 closed state, 2026-05-25)
+
+- **11 production-grade modules** built (W356-W370 ten + W384 caregiver-support).
+- **175 endpoints** under `/api/(v1/)?...`.
+- **13 cron sweepers** wired (1 mutating: respite no-show; 12 read-only).
+- **22 canonical Zod schemas** registered in `intelligence/canonical/`.
+- **33 frontend pages** at `apps/web-admin/src/app/(dashboard)/` (10 list + 10 detail + 10 new-event + 1 aggregator + 1 deep-link).
+- **~564 drift assertions** across 13 sprint-gated tests (verified end-to-end 2026-05-25).
+- **Cutover guide**: [PRODUCTION_CUTOVER_W356_W370.md](PRODUCTION_CUTOVER_W356_W370.md).
 
 ## Recipe for next session
 

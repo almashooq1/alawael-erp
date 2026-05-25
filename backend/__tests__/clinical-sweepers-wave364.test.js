@@ -1,11 +1,12 @@
 'use strict';
 
 /**
- * W364 drift guard — clinicalSweepersBootstrap shape.
+ * W364 + W370 + W383 drift guard — clinicalSweepersBootstrap shape.
  *
- * Locks the 7-sweeper bootstrap shape:
+ * Locks the 12-sweeper bootstrap shape:
  *   • exports wireClinicalSweepers(app, {logger})
- *   • 7 env-gated cron stanzas using independent ENABLE_*_SWEEPER flags
+ *   • 12 env-gated cron stanzas using independent ENABLE_*_SWEEPER flags
+ *     (W364: 7, W370: +4, W383: +1)
  *   • Asia/Riyadh timezone on every schedule
  *   • Only the RESPITE_NOSHOW sweeper mutates state (status flip)
  *   • Wired into app.js after riskSweeperBootstrap (clinical-services
@@ -49,7 +50,7 @@ describe('W364 clinicalSweepersBootstrap — exports', () => {
   });
 });
 
-describe('W364 + W370 — 11 sweepers, each env-gated independently', () => {
+describe('W364 + W370 + W383 — 12 sweepers, each env-gated independently', () => {
   const envFlags = [
     // W364 original 7
     'ENABLE_SAFEGUARDING_SLA_SWEEPER',
@@ -64,6 +65,8 @@ describe('W364 + W370 — 11 sweepers, each env-gated independently', () => {
     'ENABLE_FACILITY_INSPECTION_SWEEPER',
     'ENABLE_FACILITY_MAINTENANCE_SWEEPER',
     'ENABLE_FACILITY_CERT_SWEEPER',
+    // W383 addition — emits assessment.overdue per ClinicalAssessment past dueDate
+    'ENABLE_ASSESSMENT_OVERDUE_SWEEPER',
   ];
 
   for (const flag of envFlags) {
@@ -73,15 +76,15 @@ describe('W364 + W370 — 11 sweepers, each env-gated independently', () => {
     });
   }
 
-  it('counts scheduledCount as it wires each sweeper (W364: 7, W370: +4 = 11)', () => {
+  it('counts scheduledCount as it wires each sweeper (W364: 7, W370: +4, W383: +1 = 12)', () => {
     expect(SRC).toMatch(/let\s+scheduledCount\s*=\s*0/);
     const incs = SRC.match(/scheduledCount\+\+/g) || [];
-    expect(incs.length).toBe(11);
+    expect(incs.length).toBe(12);
   });
 
-  it('logger summary reports n/11 enabled (post-W370)', () => {
-    expect(SRC).toMatch(/all 11 disabled/);
-    expect(SRC).toMatch(/clinical sweepers wired:\s*\$\{scheduledCount\}\/11/);
+  it('logger summary reports n/12 enabled (post-W383)', () => {
+    expect(SRC).toMatch(/all 12 disabled/);
+    expect(SRC).toMatch(/clinical sweepers wired:\s*\$\{scheduledCount\}\/12/);
   });
 });
 
@@ -134,6 +137,8 @@ describe('W364 — cron schedules', () => {
     ['0 5 * * *', 'facility inspection (daily 05:00)'],
     ['30 5 * * *', 'facility maintenance (daily 05:30)'],
     ['0 6 * * *', 'facility certificate (daily 06:00)'],
+    // W383 addition
+    ['0 4 * * *', 'assessment overdue (daily 04:00, W383)'],
   ];
 
   for (const [expr, label] of schedules) {

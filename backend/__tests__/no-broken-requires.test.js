@@ -62,6 +62,11 @@ const FALSE_POSITIVE_ALLOWLIST = new Set([
   path.join('scripts', 'migrations', 'secure-routes.js'),
   // Legacy auto-generated test stub outside __tests__/.
   path.join('tests', 'unit', 'check_app.root.test.js'),
+  // W340 drift guard prints `require('../canonical/path')` inside a
+  // multi-line error-message template (consolidation guidance for the
+  // next maintainer). Not a real require — the scanner is fooled by
+  // the pattern living in a quoted string.
+  path.join('__tests__', 'no-duplicate-model-registration-wave340.test.js'),
 ]);
 
 // Per-(file, target) allow-list for legitimately-optional dynamic loads.

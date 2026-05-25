@@ -14,8 +14,30 @@ const express = require('express');
 
 const router = express.Router();
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 const logger = require('../utils/logger');
 const safeError = require('../utils/safeError');
+
+/**
+ * Timing-safe string comparison.
+ *
+ * Naive `a !== b` short-circuits on the first mismatched byte. With
+ * predictable network jitter (LAN, or a hostile inside-VPC attacker)
+ * an admin-bootstrap secret can be probed one byte at a time. The
+ * codebase already uses `crypto.timingSafeEqual` for WhatsApp/CSRF/QR
+ * signature verification — apply the same here for the setup secret
+ * since this endpoint gates first-admin creation.
+ *
+ * Returns false on length mismatch (per Node docs requirement that
+ * both buffers be the same length) — that's a separate side-channel
+ * but acceptable for fixed-length secrets, and the alternative (HMAC
+ * both sides first) is overkill for a setup-only endpoint.
+ */
+function timingSafeEqual(a, b) {
+  if (typeof a !== 'string' || typeof b !== 'string') return false;
+  if (a.length !== b.length) return false;
+  return crypto.timingSafeEqual(Buffer.from(a, 'utf8'), Buffer.from(b, 'utf8'));
+}
 
 /**
  * GET /api/setup/status
@@ -69,7 +91,7 @@ router.post('/init-admin', async (req, res) => {
     }
 
     const providedKey = req.body?.secretKey || req.headers['x-setup-key'];
-    if (!providedKey || providedKey !== SETUP_SECRET) {
+    if (!providedKey || !timingSafeEqual(String(providedKey), SETUP_SECRET)) {
       logger.warn(`[setup] Unauthorized init-admin attempt from ${req.ip}`);
       return res.status(401).json({
         success: false,

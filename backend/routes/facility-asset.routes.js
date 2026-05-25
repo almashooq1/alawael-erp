@@ -380,12 +380,10 @@ router.post('/:id/inspection', requireRole(WRITE_ROLES), async (req, res) => {
         .json({ success: false, message: `kind يجب أن يكون: ${INSPECTION_KINDS.join(' | ')}` });
     }
     if (!INSPECTION_OUTCOMES.includes(String(body.outcome))) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: `outcome يجب أن يكون: ${INSPECTION_OUTCOMES.join(' | ')}`,
-        });
+      return res.status(400).json({
+        success: false,
+        message: `outcome يجب أن يكون: ${INSPECTION_OUTCOMES.join(' | ')}`,
+      });
     }
     const defects = Array.isArray(body.defectsFound)
       ? body.defectsFound.slice(0, 20).map(s => String(s).slice(0, 200))
@@ -511,12 +509,10 @@ router.post('/:id/return-to-service', requireRole(WRITE_ROLES), async (req, res)
     const row = await Asset.findById(req.params.id);
     if (!row) return res.status(404).json({ success: false, message: 'الأصل غير موجود' });
     if (!['maintenance', 'out_of_service', 'inspection_failed'].includes(row.status)) {
-      return res
-        .status(409)
-        .json({
-          success: false,
-          message: 'الأصل ليس متاحاً للإرجاع للخدمة (الحالة: ' + row.status + ')',
-        });
+      return res.status(409).json({
+        success: false,
+        message: 'الأصل ليس متاحاً للإرجاع للخدمة (الحالة: ' + row.status + ')',
+      });
     }
     row.status = 'in_service';
     row.outOfServiceReason = '';

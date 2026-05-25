@@ -81,6 +81,40 @@ After this, the entry follows pure Pattern A (consolidated to canonical models/ 
 
 ---
 
+## 3.5 Batch 2 — 5 more entries sampled (Cycle 7 continuation)
+
+Per Cycle 6's recommended Cycle 7 approach (classify in batches of 5-10), sampled 5 more entries:
+
+| #   | Entity              | Actual pattern                                      |         New pattern?         | Notes                                                                                                                                                                                                                                                       |
+| --- | ------------------- | --------------------------------------------------- | :--------------------------: | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 6   | **Role**            | Empty-shim                                          | Same as Permission (Cycle 6) | `models/RBAC/Role.js` is 6 lines, `strict: false`. Same as Permission.                                                                                                                                                                                      |
+| 7   | **Consent**         | **Dual-real**                                       |             NEW              | Both registrations have real schemas: `models/Consent.js` (91 lines, PDPL-canonical with 8+ consent types) + `privacy/consent.model.js` (114 lines, may be richer with privacy-specific fields). Need schema-diff before consolidating.                     |
+| 8   | **Vendor**          | Possibly **single-real** + helper-wrapped duplicate |             NEW              | Only 1 direct `mongoose.model('Vendor')` registration visible in main grep; W340's helper-wrapped detection (`reg('Vendor', schema)`) catches the second. Pattern likely Pattern A consolidation via canonical re-export, but need to find the helper site. |
+| 9   | **NotificationLog** | **Dual-real**                                       |       Same as Consent        | `models/communication/NotificationLog.js` + `services/unifiedNotifier.js` both register real schemas; comparison needed.                                                                                                                                    |
+| 10  | **FormSubmission**  | **Dual-real** + 1 lookup                            |       Same as Consent        | `models/FormSubmission.js` (real) + `services/documents/documentForms.service.js` (real); plus an in-file lookup at `models/FormSubmission.js:313` (safe — same-file).                                                                                      |
+
+### Refined pattern taxonomy (after 10 entries sampled)
+
+| Pattern                                         |                      Count in 10 sampled                       | Description                                                                                                                         |
+| ----------------------------------------------- | :------------------------------------------------------------: | ----------------------------------------------------------------------------------------------------------------------------------- |
+| **Empty-shim**                                  |             3 (Permission, TrafficAccident, Role)              | Higher-priority location has `strict:false` placeholder; rich schema lives in services/                                             |
+| **Dual-real (similar)**                         | 3-4 (Vehicle, TransportRoute, NotificationLog, FormSubmission) | Both locations have real schemas of similar shape; need diff to confirm true overlap vs divergence                                  |
+| **Dual-real (divergent)**                       |            1+ (EmailLog confirmed; Consent suspect)            | Both have real schemas but with shape drift — Pattern D rename territory                                                            |
+| **Single-real + helper-wrapped**                |                       1 (Vendor suspect)                       | One real registration + a helper-wrapped duplicate elsewhere (caught by W340 scanner via `reg/getOrCreate/registerModel/...` regex) |
+| **True-mechanical (re-export already correct)** |                               0                                | None found yet in 10 samples                                                                                                        |
+
+### Updated effort estimate
+
+After 10 samples, the empty-shim pattern represents ~30% of the baseline. Dual-real similar represents ~30-40%. Each requires per-entry work but BATCHING similar patterns reduces overhead:
+
+- Empty-shim batch: 1 wave migrates 5-10 entries at once (schema migration in canonical location is mechanical once you've done one)
+- Dual-real similar batch: 1 wave per entry (need per-entry diff + caller migration)
+- Dual-real divergent (Pattern D): 1 wave per entry (renaming + caller updates per ADR-021 framework)
+
+Refined total estimate: **~50-100 hours** for the 47-entry baseline (down from ~100-200 estimate after batch 1; up from ~24 hours ADR-021 implied). The empty-shim batching opportunity saves real time.
+
+---
+
 ## 4. Recommended Cycle 7+ approach
 
 **Don't try to clear Tier 2 mechanically.** Instead:

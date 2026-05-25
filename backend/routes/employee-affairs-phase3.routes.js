@@ -8,6 +8,7 @@ const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 router.use(requireBranchAccess);
@@ -27,7 +28,7 @@ router.get('/promotions', authorize('admin', 'hr_manager', 'manager'), async (re
     ]);
     res.json({ success: true, data, pagination: { page: +page, limit: +limit, total } });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'employeeAffairsPhase3');
   }
 });
 
@@ -83,7 +84,7 @@ router.get('/transfers', authorize('admin', 'hr_manager', 'manager'), async (req
     ]);
     res.json({ success: true, data, pagination: { page: +page, limit: +limit, total } });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'employeeAffairsPhase3');
   }
 });
 

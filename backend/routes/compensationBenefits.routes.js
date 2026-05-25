@@ -7,6 +7,7 @@ const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 router.use(requireBranchAccess);
@@ -18,7 +19,7 @@ router.get('/salary-structures', authorize('admin', 'hr_manager'), async (req, r
     const data = await SalaryStructure.find().sort({ name: 1 }).lean();
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'compensationBenefits');
   }
 });
 
@@ -39,7 +40,7 @@ router.get('/benefits-packages', async (req, res) => {
     const data = await BenefitsPackage.find({ isActive: true }).lean();
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'compensationBenefits');
   }
 });
 
@@ -64,7 +65,7 @@ router.get('/enrollment/:employeeId', async (req, res) => {
     const data = await BenefitsEnrollment.find({ employeeId: req.params.employeeId }).lean();
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'compensationBenefits');
   }
 });
 
@@ -102,7 +103,7 @@ router.get('/payroll-runs', authorize('admin', 'hr_manager', 'finance'), async (
     ]);
     res.json({ success: true, data, pagination: { page: +page, limit: +limit, total } });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err, 'compensationBenefits');
   }
 });
 

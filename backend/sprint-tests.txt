@@ -292,3 +292,4 @@ __tests__/financial-navigation-behavioral-wave469.test.js
 __tests__/family-counselling-wave470.test.js
 __tests__/family-counselling-behavioral-wave470.test.js
 __tests__/goal-forecaster-wave429.test.js
+__tests__/goal-forecaster-service-wave430.test.js

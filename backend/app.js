@@ -2039,6 +2039,20 @@ require('./startup/ragBootstrap').wireRag(app, { logger });
 // lock the contracts (lib + model + service + routes + bootstrap).
 require('./startup/aiRecommendationBootstrap').wireAiRecommendations(app, { logger });
 
+// ─── Goal Forecaster Sweeper (Phase B2) — Wave 430 ─────────────────────
+// Predictive counterpart to the W337 reactive PLATEAU_DETECTED detector.
+// Scans active TherapeuticGoals × their PRIMARY measure linkages, runs the
+// W429 OLS forecaster at goal.targetDate, grades vs goal.target.value, and
+// creates/updates/resolves FORECAST_OFF_TRACK MeasureAlerts. The W338 cron
+// auto-picks-up the new alertType via the W429-extended TYPE_CONVERTERS
+// dispatch — ZERO additional wiring beyond this bootstrap.
+//
+// Env-gated:
+//   GOAL_FORECASTER='off' kill-switch
+//   ENABLE_FORECAST_OFF_TRACK_SWEEPER=true + FORECAST_SWEEPER_BRANCH_IDS=b1,b2
+//   Daily @ 04:30 Asia/Riyadh (30min after W286 risk sweep at 04:00).
+require('./startup/goalForecasterBootstrap').wireGoalForecaster(app, { logger });
+
 // ─── CAPA (Corrective/Preventive Action) — Wave 337+W344+W345 ───────────
 // CapaItem 7-state lifecycle (OPEN → IN_PROGRESS → IMPLEMENTED → VERIFIED → CLOSED,
 // + REJECTED/CANCELLED terminals). Pre-save hook (W340) enforces lib.validateTransition.

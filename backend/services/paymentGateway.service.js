@@ -453,18 +453,63 @@ class PaymentGatewayService {
 
   /**
    * التحقق من توقيع Webhook
+   *
+   * W429 closes two bugs in three lines:
+   *
+   *   1. Fail-open when secret unset. The original
+   *      `if (!secret) return true` meant a production deployment
+   *      that forgot to set `HYPERPAY_WEBHOOK_SECRET` (or any gateway
+   *      slug)`_WEBHOOK_SECRET` accepted ANY signature, letting an
+   *      external caller POST forged "payment-succeeded" webhooks
+   *      that mark unpaid invoices as paid (free service for the
+   *      customer) — or fake "refund-completed" that triggers
+   *      reverse-accounting entries. Highest-impact fail-open bug
+   *      class found in this audit.
+   *
+   *   2. `computed === signature` naive compare. `===` on strings
+   *      short-circuits at the first mismatched byte. With LAN-
+   *      jitter resolution an attacker can probe the 64-char hex
+   *      signature byte-by-byte. Slow but feasible. Use
+   *      crypto.timingSafeEqual.
+   *
+   * Also tightened: input-validation on `gateway` (must be a non-
+   * empty string matching the slug allowlist letters/numbers/dash).
+   * Without this, `gateway = '../../../etc/passwd'.toUpperCase()` is
+   * harmless (env keys are restricted) but `gateway = ''` would
+   * compute env-key `'_WEBHOOK_SECRET'` and accidentally hit a real
+   * variable in some deployments.
    */
   _verifySignature(gateway, payload, signature) {
     try {
+      if (typeof gateway !== 'string' || !/^[a-z0-9_-]{1,40}$/i.test(gateway)) return false;
+      if (typeof signature !== 'string' || signature.length === 0) return false;
+
       const secret = process.env[`${gateway.toUpperCase()}_WEBHOOK_SECRET`];
-      if (!secret) return true; // إذا لم يتم تعيين سر، نقبل
+      if (!secret) {
+        // Refuse-to-verify in production. Dev/test keeps the legacy
+        // permissive behaviour so local manual webhook curl-testing
+        // still works without a real provider secret.
+        if (process.env.NODE_ENV === 'production') {
+          // Lazy-require logger so this file's existing import shape
+          // doesn't change.
+          const logger = require('../utils/logger');
+          logger.error(
+            `[paymentGateway] ${gateway.toUpperCase()}_WEBHOOK_SECRET not set in production — rejecting webhook (fail closed)`
+          );
+          return false;
+        }
+        return true;
+      }
 
       const computed = crypto
         .createHmac('sha256', secret)
         .update(JSON.stringify(payload))
         .digest('hex');
 
-      return computed === signature;
+      // timing-safe equality requires identical-length buffers; bail
+      // explicitly to avoid the throw `timingSafeEqual` does on mismatch.
+      if (computed.length !== signature.length) return false;
+      return crypto.timingSafeEqual(Buffer.from(computed, 'utf8'), Buffer.from(signature, 'utf8'));
     } catch {
       return false;
     }

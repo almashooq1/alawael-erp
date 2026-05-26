@@ -22,9 +22,14 @@ const { authenticateToken, requireRole } = require('../middleware/auth');
 const PickupAuth = require('../models/PickupAuthorization');
 const Beneficiary = require('../models/Beneficiary');
 const safeError = require('../utils/safeError');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
 
 router.use(authenticateToken);
+// W447: branch-scope every endpoint. Model carries `branchId`; pre-W447
+// list filters were optional + instance loads bare findById, opening
+// cross-tenant IDOR (read/modify/delete any branch by ObjectId guess).
+router.use(requireBranchAccess);
 router.use(bodyScopedBeneficiaryGuard); // W441: enforce branch on req.body.beneficiaryId
 
 const READ_ROLES = [
@@ -58,7 +63,7 @@ async function hydrate(items) {
 // ── GET / ──────────────────────────────────────────────────────────────
 router.get('/', requireRole(READ_ROLES), async (req, res) => {
   try {
-    const filter = {};
+    const filter = { ...branchFilter(req) }; /* W447 */
     if (req.query.beneficiaryId && mongoose.isValidObjectId(req.query.beneficiaryId)) {
       filter.beneficiaryId = req.query.beneficiaryId;
     }
@@ -94,6 +99,7 @@ router.get('/active', requireRole(READ_ROLES), async (req, res) => {
   try {
     const now = new Date();
     const filter = {
+      ...branchFilter(req), // W447
       status: 'signed',
       validFrom: { $lte: now },
       validUntil: { $gte: now },
@@ -115,7 +121,8 @@ router.get('/:id', requireRole(READ_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await PickupAuth.findById(req.params.id).lean();
+    const row = await PickupAuth.findOne({ _id: req.params.id, ...branchFilter(req) }) /* W447 */
+      .lean();
     if (!row) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
     const [hydrated] = await hydrate([row]);
     res.json({ success: true, data: hydrated });
@@ -173,7 +180,7 @@ router.post('/:id/sign', requireRole(WRITE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await PickupAuth.findById(req.params.id);
+    const row = await PickupAuth.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W447 */
     if (!row) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
     if (row.status !== 'requested') {
       return res
@@ -205,7 +212,7 @@ router.post('/:id/use', requireRole(STAFF_ROLES), async (req, res) => {
     if (!presentedNationalId) {
       return res.status(400).json({ success: false, message: 'رقم الهوية المُقدَّم مطلوب' });
     }
-    const row = await PickupAuth.findById(req.params.id);
+    const row = await PickupAuth.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W447 */
     if (!row) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
     if (row.status !== 'signed') {
       return res
@@ -244,7 +251,7 @@ router.post('/:id/revoke', requireRole(WRITE_ROLES), async (req, res) => {
     if (!reason) {
       return res.status(400).json({ success: false, message: 'سبب الإلغاء مطلوب' });
     }
-    const row = await PickupAuth.findById(req.params.id);
+    const row = await PickupAuth.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W447 */
     if (!row) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
     if (row.status === 'used') {
       return res.status(409).json({ success: false, message: 'لا يمكن إلغاء تصريح تم استخدامه' });
@@ -265,7 +272,10 @@ router.delete('/:id', requireRole(DELETE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await PickupAuth.findByIdAndDelete(req.params.id);
+    const row = await PickupAuth.findOneAndDelete({
+      _id: req.params.id,
+      ...branchFilter(req),
+    }); /* W447 */
     if (!row) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
     res.json({ success: true, message: 'تم الحذف' });
   } catch (err) {

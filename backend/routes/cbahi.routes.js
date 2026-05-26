@@ -35,8 +35,13 @@ const { authenticateToken, requireRole } = require('../middleware/auth');
 const Attestation = require('../models/CbahiAttestation');
 const registry = require('../intelligence/cbahi-standards.registry');
 const safeError = require('../utils/safeError');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 
 router.use(authenticateToken);
+// W447: branch-scope every endpoint. Model carries `branchId`; pre-W447
+// list filters were optional + instance loads bare findById, opening
+// cross-tenant IDOR (read/modify/delete any branch by ObjectId guess).
+router.use(requireBranchAccess);
 
 const READ_ROLES = [
   'admin',
@@ -110,7 +115,7 @@ router.get('/chapters', requireRole(READ_ROLES), async (_req, res) => {
 // ── GET /attestations ──────────────────────────────────────────────
 router.get('/attestations', requireRole(READ_ROLES), async (req, res) => {
   try {
-    const filter = {};
+    const filter = { ...branchFilter(req) }; /* W447 */
     if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
@@ -146,7 +151,10 @@ router.get('/attestations/by-branch/:branchId', requireRole(READ_ROLES), async (
     if (!mongoose.isValidObjectId(req.params.branchId)) {
       return res.status(400).json({ success: false, message: 'معرّف فرع غير صالح' });
     }
-    const items = await Attestation.find({ branchId: req.params.branchId })
+    const items = await Attestation.find({
+      ...branchFilter(req),
+      /* W447 */ branchId: req.params.branchId,
+    })
       .sort({ standardChapter: 1, standardCode: 1 })
       .lean();
     res.json({ success: true, items, count: items.length });
@@ -162,7 +170,10 @@ router.get('/attestations/by-standard/:key', requireRole(READ_ROLES), async (req
     if (!standard) {
       return res.status(404).json({ success: false, message: 'المعيار غير موجود' });
     }
-    const items = await Attestation.find({ standardKey: req.params.key })
+    const items = await Attestation.find({
+      ...branchFilter(req),
+      /* W447 */ standardKey: req.params.key,
+    })
       .sort({ updatedAt: -1 })
       .lean();
     res.json({ success: true, standard, items, count: items.length });
@@ -174,7 +185,7 @@ router.get('/attestations/by-standard/:key', requireRole(READ_ROLES), async (req
 // ── GET /attestations/dashboard ────────────────────────────────────
 router.get('/attestations/dashboard', requireRole(READ_ROLES), async (req, res) => {
   try {
-    const filter = {};
+    const filter = { ...branchFilter(req) }; /* W447 */
     if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
@@ -230,7 +241,10 @@ router.get('/attestations/dashboard', requireRole(READ_ROLES), async (req, res) 
 router.get('/attestations/due-reassessment', requireRole(READ_ROLES), async (req, res) => {
   try {
     const now = new Date();
-    const filter = { nextReassessmentDue: { $ne: null, $lt: now } };
+    const filter = {
+      ...branchFilter(req), // W447
+      nextReassessmentDue: { $ne: null, $lt: now },
+    };
     if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
@@ -247,7 +261,8 @@ router.get('/attestations/:id', requireRole(READ_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Attestation.findById(req.params.id).lean();
+    const row = await Attestation.findOne({ _id: req.params.id, ...branchFilter(req) }) /* W447 */
+      .lean();
     if (!row) return res.status(404).json({ success: false, message: 'الإقرار غير موجود' });
     res.json({ success: true, data: row });
   } catch (err) {
@@ -267,7 +282,8 @@ router.post('/attestations', requireRole(WRITE_ROLES), async (req, res) => {
       return res.status(400).json({ success: false, message: 'standardKey غير موجود في السجل' });
     }
     const existing = await Attestation.findOne({
-      branchId: body.branchId,
+      ...branchFilter(req),
+      /* W447 */ branchId: body.branchId,
       standardKey: body.standardKey,
     }).lean();
     if (existing) {
@@ -297,7 +313,7 @@ router.post('/attestations/:id/attest', requireRole(WRITE_ROLES), async (req, re
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Attestation.findById(req.params.id);
+    const row = await Attestation.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W447 */
     if (!row) return res.status(404).json({ success: false, message: 'الإقرار غير موجود' });
     const body = req.body || {};
     if (!STATUSES.includes(String(body.status))) {
@@ -331,16 +347,14 @@ router.post('/attestations/:id/evidence', requireRole(WRITE_ROLES), async (req, 
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Attestation.findById(req.params.id);
+    const row = await Attestation.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W447 */
     if (!row) return res.status(404).json({ success: false, message: 'الإقرار غير موجود' });
     const body = req.body || {};
     if (!registry.EVIDENCE_TYPES.includes(String(body.type))) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: `type يجب أن يكون أحد ${registry.EVIDENCE_TYPES.join(' | ')}`,
-        });
+      return res.status(400).json({
+        success: false,
+        message: `type يجب أن يكون أحد ${registry.EVIDENCE_TYPES.join(' | ')}`,
+      });
     }
     if (!String(body.summary || '').trim()) {
       return res.status(400).json({ success: false, message: 'summary مطلوب' });
@@ -372,7 +386,10 @@ router.delete(
       if (!mongoose.isValidObjectId(req.params.id)) {
         return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
       }
-      const row = await Attestation.findById(req.params.id);
+      const row = await Attestation.findOne({
+        _id: req.params.id,
+        ...branchFilter(req),
+      }); /* W447 */
       if (!row) return res.status(404).json({ success: false, message: 'الإقرار غير موجود' });
       const before = row.evidence.length;
       row.evidence = row.evidence.filter(e => String(e._id) !== String(req.params.evidenceId));
@@ -393,7 +410,7 @@ router.post('/attestations/:id/snapshot', requireRole(WRITE_ROLES), async (req, 
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Attestation.findById(req.params.id);
+    const row = await Attestation.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W447 */
     if (!row) return res.status(404).json({ success: false, message: 'الإقرار غير موجود' });
     row.history.push({
       snapshotAt: new Date(),
@@ -417,7 +434,7 @@ router.patch('/attestations/:id', requireRole(WRITE_ROLES), async (req, res) => 
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Attestation.findById(req.params.id);
+    const row = await Attestation.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W447 */
     if (!row) return res.status(404).json({ success: false, message: 'الإقرار غير موجود' });
     const editable = [
       'gapNotes',
@@ -443,7 +460,10 @@ router.delete('/attestations/:id', requireRole(DELETE_ROLES), async (req, res) =
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Attestation.findByIdAndDelete(req.params.id);
+    const row = await Attestation.findOneAndDelete({
+      _id: req.params.id,
+      ...branchFilter(req),
+    }); /* W447 */
     if (!row) return res.status(404).json({ success: false, message: 'الإقرار غير موجود' });
     res.json({ success: true, deleted: true, id: req.params.id });
   } catch (err) {

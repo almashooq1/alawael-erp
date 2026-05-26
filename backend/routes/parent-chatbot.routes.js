@@ -20,6 +20,7 @@
 const express = require('express');
 const safeError = require('../utils/safeError');
 const reg = require('../intelligence/parent-chatbot.registry');
+const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
 
 const REASON_TO_STATUS = Object.freeze({
   PERMISSION_DENIED: 403,
@@ -75,6 +76,7 @@ function createParentChatbotRouter({
   void logger;
 
   const router = express.Router();
+  router.use(bodyScopedBeneficiaryGuard); // W441: enforce branch on req.body.beneficiaryId
 
   function requirePerm(code) {
     return (req, res, next) => {

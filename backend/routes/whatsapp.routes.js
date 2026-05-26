@@ -44,6 +44,7 @@
 
 const express = require('express');
 const router = express.Router();
+router.use(bodyScopedBeneficiaryGuard); // W441: enforce branch on req.body.beneficiaryId
 const mongoose = require('mongoose');
 
 const whatsappService = require('../services/whatsapp/whatsappService');
@@ -55,6 +56,7 @@ const whatsappIdempotency = require('../services/whatsapp/idempotency.service');
 const whatsappDlq = require('../services/whatsapp/dlq.service');
 const { authenticate } = require('../middleware/auth');
 const logger = require('../utils/logger');
+const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 function asyncHandler(fn) {

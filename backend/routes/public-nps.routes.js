@@ -17,12 +17,14 @@
 
 const express = require('express');
 const router = express.Router();
+router.use(bodyScopedBeneficiaryGuard); // W441: enforce branch on req.body.beneficiaryId
 const mongoose = require('mongoose');
 
 const NpsResponse = require('../models/NpsResponse');
 const Guardian = require('../models/Guardian');
 const nps = require('../services/npsService');
 const safeError = require('../utils/safeError');
+const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
 
 // ── POST /submit — guardian-self-service NPS submission ────────────────
 router.post('/submit', async (req, res) => {

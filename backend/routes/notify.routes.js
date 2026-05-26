@@ -14,8 +14,10 @@ const router = express.Router();
 const { authenticateToken, requireRole } = require('../middleware/auth');
 const { notify, NotificationLog } = require('../services/unifiedNotifier');
 const safeError = require('../utils/safeError');
+const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
 
 router.use(authenticateToken);
+router.use(bodyScopedBeneficiaryGuard); // W441: enforce branch on req.body.beneficiaryId
 
 const STAFF_ROLES = [
   'admin',

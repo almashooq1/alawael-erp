@@ -28,10 +28,12 @@ const { authenticate } = require('../middleware/auth');
 const { requireRole } = require('../middleware/rbac.v2.middleware');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const safeError = require('../utils/safeError');
+const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
 
 const router = express.Router();
 router.use(authenticate);
 router.use(requireBranchAccess);
+router.use(bodyScopedBeneficiaryGuard); // W441: enforce branch on req.body.beneficiaryId
 
 const safeModel = name => {
   try {

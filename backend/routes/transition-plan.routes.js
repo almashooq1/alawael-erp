@@ -33,8 +33,10 @@ const { authenticateToken, requireRole } = require('../middleware/auth');
 const Plan = require('../models/TransitionPlan');
 const Beneficiary = require('../models/Beneficiary');
 const safeError = require('../utils/safeError');
+const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
 
 router.use(authenticateToken);
+router.use(bodyScopedBeneficiaryGuard); // W441: enforce branch on req.body.beneficiaryId
 
 const READ_ROLES = [
   'admin',

@@ -27,6 +27,7 @@ const Beneficiary = require('../models/Beneficiary');
 const { authenticateToken } = require('../middleware/auth.middleware');
 const { escapeRegex } = require('../utils/sanitize');
 const { assertBeneficiaryInScope } = require('../utils/beneficiaryBranchGate');
+const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
 
 // ─── دوال مساعدة ──────────────────────────────────────────────────────────────
 const ok = (res, data, meta = {}) => res.json({ success: true, ...meta, data });
@@ -44,6 +45,7 @@ const validateId = (req, res, next) => {
 // ─── جميع المسارات تتطلب مصادقة ───────────────────────────────────────────────
 router.use(authenticateToken);
 router.use(requireBranchAccess);
+router.use(bodyScopedBeneficiaryGuard); // W441: enforce branch on req.body.beneficiaryId
 // ══════════════════════════════════════════════════════════════════════════════
 // GET /api/guardians/search — بحث سريع
 // ══════════════════════════════════════════════════════════════════════════════

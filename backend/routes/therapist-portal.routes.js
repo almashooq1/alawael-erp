@@ -1335,6 +1335,29 @@ router.post('/goals/:goalId/progress', authenticate, requireTherapistRole, async
         .status(404)
         .json({ error: 'NotFound', message: 'goal subdocument not resolvable' });
 
+    // W269d (security): caseload guard — therapist must have a recent
+    // assignment to the beneficiary owning this goal. Without this,
+    // any authenticated therapist could log progress on any goal in
+    // the system by knowing its ObjectId.
+    const employeeId = await resolveEmployeeId(userId);
+    if (!employeeId) {
+      return res
+        .status(404)
+        .json({ error: 'EmployeeNotFound', message: 'No Employee record for this user.' });
+    }
+    const twelveMonthsAgo = new Date();
+    twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12);
+    const hasAccess = await Appointment().countDocuments({
+      therapist: employeeId,
+      beneficiary: plan.beneficiary,
+      date: { $gte: twelveMonthsAgo },
+    });
+    if (!hasAccess) {
+      return res
+        .status(403)
+        .json({ error: 'Forbidden', message: 'no active assignment to this beneficiary' });
+    }
+
     const now = new Date();
     await GoalProgressEntry().create({
       carePlanId: plan._id,
@@ -1456,6 +1479,35 @@ router.post('/red-flags', authenticate, requireTherapistRole, async (req, res) =
     // Validate body.
     if (!beneficiaryId || typeof beneficiaryId !== 'string') {
       return res.status(400).json({ error: 'InvalidBody', message: 'beneficiaryId is required' });
+    }
+    if (!isValidObjectId(beneficiaryId)) {
+      return res
+        .status(400)
+        .json({ error: 'InvalidBody', message: 'beneficiaryId is not a valid ObjectId' });
+    }
+
+    // W269d (security): caseload guard — therapist must have a recent
+    // assignment to the beneficiary before raising a red flag against
+    // their record. Without this, any authenticated therapist could
+    // raise a red flag on any beneficiary (an audit-trail-tagged
+    // event that surfaces on the supervisor dashboard).
+    const employeeId = await resolveEmployeeId(userId);
+    if (!employeeId) {
+      return res
+        .status(404)
+        .json({ error: 'EmployeeNotFound', message: 'No Employee record for this user.' });
+    }
+    const twelveMonthsAgo = new Date();
+    twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12);
+    const hasAccess = await Appointment().countDocuments({
+      therapist: employeeId,
+      beneficiary: beneficiaryId,
+      date: { $gte: twelveMonthsAgo },
+    });
+    if (!hasAccess) {
+      return res
+        .status(403)
+        .json({ error: 'Forbidden', message: 'no active assignment to this beneficiary' });
     }
     if (!code || typeof code !== 'string') {
       return res.status(400).json({ error: 'InvalidBody', message: 'code is required' });

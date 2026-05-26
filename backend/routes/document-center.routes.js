@@ -44,6 +44,7 @@ const { body, query, param, validationResult } = require('express-validator');
 const svc = require('../services/documentCenter.service');
 const logger = require('../utils/logger');
 const safeError = require('../utils/safeError');
+const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
 
 // ── Auth middleware ──────────────────────────────────────────────
 let auth;
@@ -58,6 +59,7 @@ try {
 }
 
 router.use(auth);
+router.use(bodyScopedBeneficiaryGuard); // W441: enforce branch on req.body.beneficiaryId
 
 // ── Helper: handle validation errors ────────────────────────────
 function validate(req, res) {

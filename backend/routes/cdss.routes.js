@@ -45,6 +45,7 @@ const router = express.Router();
 // 🔒 All CDSS routes require authentication
 router.use(authenticate);
 router.use(requireBranchAccess);
+router.use(bodyScopedBeneficiaryGuard); // W441: enforce branch on req.body.beneficiaryId
 const ClinicalRule = require('../models/ClinicalRule');
 const DrugLibrary = require('../models/DrugLibrary');
 const CdssAlert = require('../models/CdssAlert');
@@ -53,6 +54,7 @@ const RehabPlanSuggestion = require('../models/RehabPlanSuggestion');
 const DifferentialDiagnosis = require('../models/DifferentialDiagnosis');
 const PrescriptionValidation = require('../models/PrescriptionValidation');
 const CdssDecisionLog = require('../models/CdssDecisionLog');
+const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);

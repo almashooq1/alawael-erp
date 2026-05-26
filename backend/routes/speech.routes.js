@@ -24,6 +24,7 @@ const { authenticate } = require('../middleware/auth');
 const { attachMfaActor, requireMfaTier } = require('../middleware/requireMfaTier');
 const safeError = require('../utils/safeError');
 const logger = require('../utils/logger');
+const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
 
 function getService(req) {
   return req.app._speechAnalysisService;
@@ -31,6 +32,7 @@ function getService(req) {
 
 router.use(authenticate);
 router.use(attachMfaActor);
+router.use(bodyScopedBeneficiaryGuard); // W441: enforce branch on req.body.beneficiaryId
 
 // ── Health probe ───────────────────────────────────────────────────────
 router.get('/health', (req, res) => {

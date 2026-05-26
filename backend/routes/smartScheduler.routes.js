@@ -12,9 +12,11 @@ const TherapySession = require('../models/TherapySession');
 const appointmentService = require('../services/appointment.service');
 const logger = require('../utils/logger');
 const safeError = require('../utils/safeError');
+const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
 
 router.use(authenticate);
 router.use(requireBranchAccess);
+router.use(bodyScopedBeneficiaryGuard); // W441: enforce branch on req.body.beneficiaryId
 // ─── List smart schedules ─────────────────────────────────────────────
 
 router.get('/', async (req, res) => {

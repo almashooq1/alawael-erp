@@ -15,7 +15,9 @@
 
 const express = require('express');
 const router = express.Router();
+router.use(bodyScopedBeneficiaryGuard); // W441: enforce branch on req.body.beneficiaryId
 const mongoose = require('mongoose');
+const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
 
 const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 

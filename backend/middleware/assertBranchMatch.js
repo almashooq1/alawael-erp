@@ -277,6 +277,59 @@ async function branchScopedBeneficiaryParam(req, res, next, beneficiaryId) {
   }
 }
 
+/**
+ * Express middleware that auto-enforces branch ownership when a
+ * request body carries `beneficiaryId`. Complements
+ * `branchScopedBeneficiaryParam` which only fires for URL params.
+ *
+ * Apply once per route file:
+ *   router.use(bodyScopedBeneficiaryGuard);
+ *
+ * Closes the W440 follow-up gap: 31+ route files take
+ * `req.body.beneficiaryId` in POST/PUT handlers without enforcement.
+ * These are WRITE paths — a cross-branch write creates/modifies
+ * records tagged to a foreign beneficiary, which is arguably more
+ * dangerous than the read-path leaks W269 closed.
+ *
+ * Behaviour:
+ *   - No body or no `beneficiaryId` field in body → no-op
+ *   - Cross-branch role / no req.branchScope → no-op (test back-compat)
+ *   - Restricted + mismatch → 403
+ *   - Restricted + not-found → 404
+ *
+ * Order matters: place AFTER authenticate + requireBranchAccess so
+ * `req.branchScope` is populated. The middleware no-ops when scope
+ * is absent, preserving test ergonomics.
+ *
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ */
+async function bodyScopedBeneficiaryGuard(req, res, next) {
+  const bid = req && req.body && req.body.beneficiaryId;
+  if (!bid) return next();
+  try {
+    await enforceBeneficiaryBranch(req, bid);
+    next();
+  } catch (err) {
+    if (err && err.status === 403) {
+      return res.status(403).json({ success: false, error: err.message });
+    }
+    if (err && err.status === 404) {
+      return res.status(404).json({ success: false, error: err.message });
+    }
+    if (err && err.status === 503) {
+      return res
+        .status(503)
+        .json({ success: false, error: 'models_unavailable', message: err.message });
+    }
+    if (err && err.status === 400) {
+      return res.status(400).json({ success: false, error: err.message });
+    }
+    next(err);
+  }
+}
+
 module.exports = {
   assertBranchMatch,
   effectiveBranchScope,
@@ -284,4 +337,5 @@ module.exports = {
   loadBeneficiaryAndAssertBranch,
   assertBranchIdsAllowed,
   branchScopedBeneficiaryParam,
+  bodyScopedBeneficiaryGuard,
 };

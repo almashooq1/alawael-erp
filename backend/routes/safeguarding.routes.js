@@ -36,8 +36,17 @@ const { authenticateToken, requireRole } = require('../middleware/auth');
 const Concern = require('../models/SafeguardingConcern');
 const Beneficiary = require('../models/Beneficiary');
 const safeError = require('../utils/safeError');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 
 router.use(authenticateToken);
+// W444: branch-scope every safeguarding endpoint. Pre-W444 the model
+// carried `branchId` but routes filtered only optionally and instance
+// loads had zero branch check. Cross-tenant safeguarding leakage is
+// especially severe — concern records contain child-protection
+// allegations + alleged-perpetrator names + witness lists. A
+// safeguarding_lead in branch A could read or modify branch B's
+// active investigations by guessing IDs.
+router.use(requireBranchAccess);
 
 const READ_ROLES = [
   'admin',
@@ -115,7 +124,10 @@ async function hydrate(items) {
 // ── GET /open ─────────────────────────────────────────────────────────
 router.get('/open', requireRole(READ_ROLES), async (req, res) => {
   try {
-    const filter = { status: { $nin: ['closed', 'unsubstantiated'] } };
+    const filter = {
+      ...branchFilter(req), // W444
+      status: { $nin: ['closed', 'unsubstantiated'] },
+    };
     if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
@@ -137,7 +149,7 @@ router.get('/open', requireRole(READ_ROLES), async (req, res) => {
 // ── GET / ──────────────────────────────────────────────────────────────
 router.get('/', requireRole(READ_ROLES), async (req, res) => {
   try {
-    const filter = {};
+    const filter = { ...branchFilter(req) }; // W444
     if (
       req.query.subjectBeneficiaryId &&
       mongoose.isValidObjectId(req.query.subjectBeneficiaryId)
@@ -188,7 +200,10 @@ router.get('/by-subject/:id', requireRole(READ_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const items = await Concern.find({ subjectBeneficiaryId: req.params.id })
+    const items = await Concern.find({
+      subjectBeneficiaryId: req.params.id,
+      ...branchFilter(req), // W444
+    })
       .sort({ reportedAt: -1 })
       .limit(100)
       .lean();
@@ -205,7 +220,10 @@ router.get('/stats', requireRole(READ_ROLES), async (req, res) => {
       ? startOfDay(new Date(req.query.from))
       : startOfDay(new Date(Date.now() - 90 * 24 * 60 * 60 * 1000));
     const to = req.query.to ? endOfDay(new Date(req.query.to)) : endOfDay(new Date());
-    const filter = { reportedAt: { $gte: from, $lte: to } };
+    const filter = {
+      ...branchFilter(req), // W444
+      reportedAt: { $gte: from, $lte: to },
+    };
     if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
@@ -251,7 +269,7 @@ router.get('/:id', requireRole(READ_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Concern.findById(req.params.id).lean();
+    const row = await Concern.findOne({ _id: req.params.id, ...branchFilter(req) }).lean(); // W444
     if (!row) return res.status(404).json({ success: false, message: 'البلاغ غير موجود' });
     const [hydrated] = await hydrate([row]);
     res.json({ success: true, data: hydrated });
@@ -340,7 +358,7 @@ router.post('/:id/triage', requireRole(INVESTIGATE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Concern.findById(req.params.id);
+    const row = await Concern.findOne({ _id: req.params.id, ...branchFilter(req) }); // W444
     if (!row) return res.status(404).json({ success: false, message: 'البلاغ غير موجود' });
     if (row.status !== 'reported') {
       return res
@@ -375,7 +393,7 @@ router.post('/:id/investigate', requireRole(INVESTIGATE_ROLES), async (req, res)
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Concern.findById(req.params.id);
+    const row = await Concern.findOne({ _id: req.params.id, ...branchFilter(req) }); // W444
     if (!row) return res.status(404).json({ success: false, message: 'البلاغ غير موجود' });
     if (!['reported', 'triaged'].includes(row.status)) {
       return res
@@ -407,7 +425,7 @@ router.post('/:id/substantiate', requireRole(INVESTIGATE_ROLES), async (req, res
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Concern.findById(req.params.id);
+    const row = await Concern.findOne({ _id: req.params.id, ...branchFilter(req) }); // W444
     if (!row) return res.status(404).json({ success: false, message: 'البلاغ غير موجود' });
     if (row.status !== 'investigating') {
       return res
@@ -449,7 +467,7 @@ router.post('/:id/notify-authority', requireRole(INVESTIGATE_ROLES), async (req,
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Concern.findById(req.params.id);
+    const row = await Concern.findOne({ _id: req.params.id, ...branchFilter(req) }); // W444
     if (!row) return res.status(404).json({ success: false, message: 'البلاغ غير موجود' });
     if (!String(req.body?.authorityName || '').trim()) {
       return res.status(400).json({ success: false, message: 'authorityName مطلوب' });
@@ -474,7 +492,7 @@ router.post('/:id/close', requireRole(CLOSE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Concern.findById(req.params.id);
+    const row = await Concern.findOne({ _id: req.params.id, ...branchFilter(req) }); // W444
     if (!row) return res.status(404).json({ success: false, message: 'البلاغ غير موجود' });
     if (row.status === 'closed') {
       return res.status(409).json({ success: false, message: 'البلاغ مغلق بالفعل' });
@@ -500,7 +518,7 @@ router.patch('/:id', requireRole(INVESTIGATE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Concern.findById(req.params.id);
+    const row = await Concern.findOne({ _id: req.params.id, ...branchFilter(req) }); // W444
     if (!row) return res.status(404).json({ success: false, message: 'البلاغ غير موجود' });
     if (row.status === 'closed') {
       return res.status(409).json({ success: false, message: 'لا يمكن تعديل بلاغ مغلق' });
@@ -539,7 +557,8 @@ router.delete('/:id', requireRole(DELETE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Concern.findByIdAndDelete(req.params.id);
+    // W444: branch-scoped delete — cross-tenant ID 404s instead of removing wrong row
+    const row = await Concern.findOneAndDelete({ _id: req.params.id, ...branchFilter(req) });
     if (!row) return res.status(404).json({ success: false, message: 'البلاغ غير موجود' });
     res.json({ success: true, deleted: true, id: req.params.id });
   } catch (err) {

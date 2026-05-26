@@ -46,6 +46,7 @@
 
 const express = require('express');
 const router = express.Router();
+router.use(bodyScopedBeneficiaryGuard); // W441: enforce branch on req.body.beneficiaryId
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -66,6 +67,7 @@ const {
 // ─── Rate Limiters ────────────────────────────────────────────────────────────
 const { createCustomLimiter } = require('../middleware/rateLimiter');
 const safeError = require('../utils/safeError');
+const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
 const parentOtpSendLimiter = createCustomLimiter({
   windowMs: 15 * 60 * 1000,
   max: 5,

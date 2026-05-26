@@ -29,9 +29,11 @@ const { attachMfaActor, requireMfaTier } = require('../middleware/requireMfaTier
 const IEP = require('../models/IndividualEducationPlan');
 const Beneficiary = require('../models/Beneficiary');
 const safeError = require('../utils/safeError');
+const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
 
 router.use(authenticateToken);
 router.use(attachMfaActor); // ADR-026 no-regrets #1 — populate req.actor with mfaLevel for downstream tier checks
+router.use(bodyScopedBeneficiaryGuard); // W441: enforce branch on req.body.beneficiaryId
 
 const READ_ROLES = [
   'admin',

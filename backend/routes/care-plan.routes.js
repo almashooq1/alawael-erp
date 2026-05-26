@@ -77,6 +77,7 @@ const auditTrail = require('../intelligence/care-plan-audit-trail.service');
 const programsLibrary = require('../intelligence/care-plan-programs-library.registry');
 const groupPlanService = require('../intelligence/group-plan.service');
 const reportGenerator = require('../intelligence/care-plan-report-generator.service');
+const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
 
 const REASON_TO_STATUS = Object.freeze({
   ACTOR_REQUIRED: 401,
@@ -164,6 +165,7 @@ function createCarePlanRouter({ service, governance, logger = console } = {}) {
   void logger;
 
   const router = express.Router();
+  router.use(bodyScopedBeneficiaryGuard); // W441: enforce branch on req.body.beneficiaryId
 
   function ensurePermission(req, res, permissionCode) {
     const actor = actorFrom(req);

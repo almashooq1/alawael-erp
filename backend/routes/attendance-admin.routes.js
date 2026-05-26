@@ -29,8 +29,10 @@ const SessionAttendance = require('../models/SessionAttendance');
 const Beneficiary = require('../models/Beneficiary');
 const attendance = require('../services/sessionAttendanceService');
 const safeError = require('../utils/safeError');
+const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
 
 router.use(authenticateToken);
+router.use(bodyScopedBeneficiaryGuard); // W441: enforce branch on req.body.beneficiaryId
 
 const READ_ROLES = [
   'admin',

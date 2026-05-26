@@ -33,8 +33,10 @@ const { authenticateToken, requireRole } = require('../middleware/auth');
 const Booking = require('../models/RespiteBooking');
 const Beneficiary = require('../models/Beneficiary');
 const safeError = require('../utils/safeError');
+const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
 
 router.use(authenticateToken);
+router.use(bodyScopedBeneficiaryGuard); // W441: enforce branch on req.body.beneficiaryId
 
 const READ_ROLES = [
   'admin',
@@ -407,12 +409,10 @@ router.post('/:id/confirm', requireRole(OPS_ROLES), async (req, res) => {
     const row = await Booking.findById(req.params.id);
     if (!row) return res.status(404).json({ success: false, message: 'الحجز غير موجود' });
     if (row.status !== 'approved') {
-      return res
-        .status(409)
-        .json({
-          success: false,
-          message: 'يجب اعتماد الحجز قبل التأكيد (الحالة: ' + row.status + ')',
-        });
+      return res.status(409).json({
+        success: false,
+        message: 'يجب اعتماد الحجز قبل التأكيد (الحالة: ' + row.status + ')',
+      });
     }
     row.status = 'confirmed';
     await row.save();

@@ -39,8 +39,10 @@ const { body, param, query, validationResult } = require('express-validator');
 const { authenticate, authorize } = require('../../middleware/auth');
 const safeError = require('../../utils/safeError');
 const registry = require('../../config/care/crm.registry');
+const { bodyScopedBeneficiaryGuard } = require('../../middleware/assertBranchMatch');
 
 const router = express.Router();
+router.use(bodyScopedBeneficiaryGuard); // W441: enforce branch on req.body.beneficiaryId
 
 const wrap = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 

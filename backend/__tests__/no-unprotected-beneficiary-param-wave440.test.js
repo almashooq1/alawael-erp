@@ -62,6 +62,8 @@ const ENFORCEMENT_SIGNALS = [
   { name: 'enforceBeneficiaryBranch', regex: /\benforceBeneficiaryBranch\b/ },
   { name: 'assertBranchMatch', regex: /\bassertBranchMatch\b/ },
   { name: 'branchScopedBeneficiaryParam', regex: /\bbranchScopedBeneficiaryParam\b/ },
+  // W441 — body-keyed enforcement middleware
+  { name: 'bodyScopedBeneficiaryGuard', regex: /\bbodyScopedBeneficiaryGuard\b/ },
   // Caseload guard pattern — Appointment.countDocuments with therapist
   // + beneficiary scoping
   {
@@ -80,7 +82,7 @@ const EXEMPT_PATHS = new Set([
   // (none currently)
 ]);
 
-describe('W440 — req.params.beneficiaryId enforcement drift guard', () => {
+describe('W440/W441 — req.params + req.body beneficiaryId enforcement drift guard', () => {
   test('every route file using req.params.beneficiaryId enforces branch isolation', () => {
     const files = glob.sync('routes/**/*.js', { cwd: REPO_BACKEND, nodir: true });
     const offenders = [];
@@ -121,6 +123,55 @@ describe('W440 — req.params.beneficiaryId enforcement drift guard', () => {
           "Either add `router.param('beneficiaryId', branchScopedBeneficiaryParam)` from\n" +
           'middleware/assertBranchMatch.js (recommended), OR use branchFilter(req) in queries,\n' +
           'OR apply the caseload-guard pattern (Appointment.countDocuments + therapist + beneficiary).\n' +
+          'Affected files:\n' +
+          lines
+      );
+    }
+    expect(offenders).toEqual([]);
+  });
+
+  test('W441: every route file using req.body.beneficiaryId enforces branch isolation', () => {
+    const files = glob.sync('routes/**/*.js', { cwd: REPO_BACKEND, nodir: true });
+    const offenders = [];
+
+    for (const rel of files) {
+      const norm = rel.replace(/\\/g, '/');
+      if (EXEMPT_PATHS.has(norm)) continue;
+
+      const abs = path.join(REPO_BACKEND, rel);
+      const src = fs.readFileSync(abs, 'utf8');
+      const stripped = stripJsComments(src);
+
+      // Match either `req.body.beneficiaryId` or a destructured
+      // `const { beneficiaryId } = req.body` (followed by usage).
+      const bodyUsages =
+        (stripped.match(/\breq\.body\.beneficiaryId\b/g) || []).length +
+        (stripped.match(/\{\s*[^}]*\bbeneficiaryId\b[^}]*\}\s*=\s*req\.body\b/g) || []).length;
+      if (bodyUsages === 0) continue;
+
+      const present = ENFORCEMENT_SIGNALS.filter(s => s.regex.test(stripped)).map(s => s.name);
+      if (present.length === 0) {
+        offenders.push({
+          file: norm,
+          uses: bodyUsages,
+          signals: 'NONE',
+        });
+      }
+    }
+
+    if (offenders.length > 0) {
+      const lines = offenders
+        .map(
+          o =>
+            `  - ${o.file} (${o.uses} req.body.beneficiaryId usage${
+              o.uses === 1 ? '' : 's'
+            }, ${o.signals})`
+        )
+        .join('\n');
+      throw new Error(
+        `W441: ${offenders.length} route file(s) accept beneficiaryId in body WITHOUT branch enforcement.\n` +
+          'Add `router.use(bodyScopedBeneficiaryGuard)` from middleware/assertBranchMatch.js\n' +
+          '(must be AFTER `router.use(requireBranchAccess)` so req.branchScope is populated).\n' +
           'Affected files:\n' +
           lines
       );

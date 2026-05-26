@@ -26,6 +26,7 @@
 
 const express = require('express');
 const router = express.Router();
+router.use(bodyScopedBeneficiaryGuard); // W441: enforce branch on req.body.beneficiaryId
 const mongoose = require('mongoose');
 const { authenticateToken, requireRole } = require('../middleware/auth');
 
@@ -34,6 +35,7 @@ const Beneficiary = require('../models/Beneficiary');
 const BeneficiarySection = require('../models/BeneficiarySection');
 const safeError = require('../utils/safeError');
 const { escapeFormulaInjection } = require('../services/importExport/format-helpers');
+const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
 
 /**
  * Lookup the active section a beneficiary is enrolled in.

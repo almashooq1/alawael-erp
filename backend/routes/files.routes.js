@@ -30,8 +30,10 @@ const multer = require('multer');
 const { authenticateToken, requireRole } = require('../middleware/auth');
 const UploadedFile = require('../models/UploadedFile');
 const safeError = require('../utils/safeError');
+const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
 
 router.use(authenticateToken);
+router.use(bodyScopedBeneficiaryGuard); // W441: enforce branch on req.body.beneficiaryId
 
 const UPLOAD_ROOT = path.resolve(__dirname, '..', 'uploads');
 const MAX_BYTES = parseInt(process.env.UPLOAD_MAX_BYTES || '10485760', 10); // 10MB default

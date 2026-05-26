@@ -125,6 +125,39 @@ const goalSchema = new mongoose.Schema(
       min: 0,
     },
 
+    // ─── W452 — ICF code linkage ────────────────────────────────────────
+    // Each Goal may carry one or more ICF codes that describe what the
+    // goal targets in WHO standardized terms. Enables ICF-coded outcome
+    // reporting + international benchmarking. Per Phase A of the v3
+    // lifecycle architecture (docs/blueprint/beneficiary-lifecycle-v3.md).
+    //
+    // Validity: code must match /^[bsde]\d+$/ + reference an active
+    // ICFCodeReference (enforced via async validator on save).
+    //
+    // Invariants (enforced in pre('save') hook):
+    //   - At most ONE entry may have isPrimary: true.
+    //   - If targetQualifier is set, baselineQualifier must also be set.
+    icfMapping: {
+      type: [
+        new mongoose.Schema(
+          {
+            icfCode: {
+              type: String,
+              required: true,
+              match: /^[bsde]\d+$/,
+            },
+            isPrimary: { type: Boolean, default: false },
+            targetQualifier: { type: Number, min: 0, max: 4 },
+            baselineQualifier: { type: Number, min: 0, max: 4 },
+            addedAt: { type: Date, default: Date.now },
+            addedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+          },
+          { _id: false }
+        ),
+      ],
+      default: () => [],
+    },
+
     // Metadata
     createdAt: {
       type: Date,
@@ -146,10 +179,39 @@ goalSchema.index({ programId: 1, participantId: 1 });
 goalSchema.index({ status: 1, priority: 1 });
 goalSchema.index({ participantId: 1, status: 1 });
 goalSchema.index({ createdBy: 1, createdAt: -1 });
+// W452 — fast lookup of goals by primary ICF code (used by aggregate reports)
+goalSchema.index({ 'icfMapping.icfCode': 1 });
 
-// Pre-save middleware
+// W452 — ICF mapping invariants enforced before save.
 goalSchema.pre('save', function (next) {
   this.updatedAt = new Date();
+
+  if (Array.isArray(this.icfMapping) && this.icfMapping.length > 0) {
+    // Invariant 1: at most one primary
+    const primaries = this.icfMapping.filter(m => m.isPrimary === true);
+    if (primaries.length > 1) {
+      return next(new Error('Goal.icfMapping: at most one entry may have isPrimary: true'));
+    }
+
+    // Invariant 2: targetQualifier requires baselineQualifier
+    for (const m of this.icfMapping) {
+      if (typeof m.targetQualifier === 'number' && typeof m.baselineQualifier !== 'number') {
+        return next(
+          new Error(`Goal.icfMapping[${m.icfCode}]: targetQualifier set without baselineQualifier`)
+        );
+      }
+    }
+
+    // Invariant 3: no duplicate icfCode entries within the array
+    const seen = new Set();
+    for (const m of this.icfMapping) {
+      if (seen.has(m.icfCode)) {
+        return next(new Error(`Goal.icfMapping: duplicate icfCode '${m.icfCode}'`));
+      }
+      seen.add(m.icfCode);
+    }
+  }
+
   next();
 });
 

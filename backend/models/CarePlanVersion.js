@@ -60,6 +60,19 @@ const SmartCheckSchema = new mongoose.Schema(
   { _id: false }
 );
 
+// W452 — embedded ICF mapping subdoc for PlanGoal. Mirrors the structure
+// on the standalone Goal model. Wave-18 invariants enforced at the
+// CarePlanVersion-level pre('save') validator (see end of file).
+const PlanGoalIcfMappingSchema = new mongoose.Schema(
+  {
+    icfCode: { type: String, required: true, match: /^[bsde]\d+$/ },
+    isPrimary: { type: Boolean, default: false },
+    targetQualifier: { type: Number, min: 0, max: 4 },
+    baselineQualifier: { type: Number, min: 0, max: 4 },
+  },
+  { _id: false }
+);
+
 const PlanGoalSchema = new mongoose.Schema(
   {
     goalId: { type: String, required: true, maxlength: 100 },
@@ -83,6 +96,12 @@ const PlanGoalSchema = new mongoose.Schema(
     },
     successCriterion: { type: String, default: null, maxlength: 1000 },
     humanConfirmationRequired: { type: [String], default: () => [] },
+
+    // W452 — ICF code linkage. Same shape as Goal.icfMapping. Used to
+    // express in WHO ICF terms what this planned goal targets so the
+    // care plan can produce ICF-coded outcome reports for Disability
+    // Authority / MOH submissions.
+    icfMapping: { type: [PlanGoalIcfMappingSchema], default: () => [] },
   },
   { _id: false }
 );
@@ -525,6 +544,47 @@ CarePlanVersionSchema.path('__invariants').validate(function () {
         this.invalidate('amendments', `amendment ${a.amendmentId} predates approvedAt`);
         ok = false;
         break;
+      }
+    }
+  }
+
+  // 8. W452 — ICF mapping invariants per PlanGoal:
+  //    (a) at most one primary entry
+  //    (b) targetQualifier requires baselineQualifier
+  //    (c) no duplicate icfCode within a goal's mapping array
+  if (Array.isArray(this.goals)) {
+    for (let i = 0; i < this.goals.length; i++) {
+      const goal = this.goals[i];
+      if (!Array.isArray(goal.icfMapping) || goal.icfMapping.length === 0) continue;
+
+      const primaries = goal.icfMapping.filter(m => m.isPrimary === true);
+      if (primaries.length > 1) {
+        this.invalidate(
+          `goals.${i}.icfMapping`,
+          `goal "${goal.goalId}" has ${primaries.length} primary ICF mappings; at most one allowed`
+        );
+        ok = false;
+      }
+
+      const seen = new Set();
+      for (const m of goal.icfMapping) {
+        if (seen.has(m.icfCode)) {
+          this.invalidate(
+            `goals.${i}.icfMapping`,
+            `goal "${goal.goalId}" has duplicate icfCode '${m.icfCode}'`
+          );
+          ok = false;
+          break;
+        }
+        seen.add(m.icfCode);
+
+        if (typeof m.targetQualifier === 'number' && typeof m.baselineQualifier !== 'number') {
+          this.invalidate(
+            `goals.${i}.icfMapping`,
+            `goal "${goal.goalId}" icfCode '${m.icfCode}' has targetQualifier without baselineQualifier`
+          );
+          ok = false;
+        }
       }
     }
   }

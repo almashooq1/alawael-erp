@@ -598,15 +598,37 @@ class AttendanceManagementService {
   }
 
   static async processLeaveRequest(leaveId, { decision, managerId, managerNotes }) {
-    const leave = await Leave().findById(leaveId);
-    if (!leave) return { success: false, message: 'طلب الإجازة غير موجود' };
-    if (leave.status !== 'pending') return { success: false, message: 'الطلب تمت معالجته مسبقاً' };
-
-    leave.status = decision; // 'approved' | 'rejected'
-    leave.approvedBy = managerId;
-    leave.managerNotes = managerNotes;
-    leave.processedAt = new Date();
-    await leave.save();
+    // W434: atomic state-flip. Pre-W434 was findById → check status ===
+    // 'pending' → set status / approvedBy / managerNotes / processedAt
+    // → save. Two concurrent processLeaveRequest calls (two managers
+    // clicking approve simultaneously, UI double-tap, or one approving
+    // while another rejects) would both pass the check, both write
+    // their decision, second save wins. End-state status is one of the
+    // two decisions (race-dependent), approvedBy/managerNotes/processedAt
+    // is the second writer's. PLUS the attendance-marking loop below
+    // would fire ONCE per call → if both approve, attendance records
+    // marked 'leave' twice with the second managerId stamped.
+    //
+    // Filter `status: 'pending'` ensures only the first caller wins;
+    // second gets the "already processed" error path.
+    const now = new Date();
+    const leave = await Leave().findOneAndUpdate(
+      { _id: leaveId, status: 'pending' },
+      {
+        $set: {
+          status: decision,
+          approvedBy: managerId,
+          managerNotes,
+          processedAt: now,
+        },
+      },
+      { new: true }
+    );
+    if (!leave) {
+      const existing = await Leave().findById(leaveId).select('status').lean();
+      if (!existing) return { success: false, message: 'طلب الإجازة غير موجود' };
+      return { success: false, message: 'الطلب تمت معالجته مسبقاً' };
+    }
 
     // If approved, mark attendance records as 'leave'
     if (decision === 'approved') {

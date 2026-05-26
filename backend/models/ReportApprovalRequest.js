@@ -211,6 +211,25 @@ ReportApprovalRequestSchema.statics.findExpirySweep = function (now = new Date()
   });
 };
 
+// W431: optimistic concurrency. Same race-class as W428/W429/W430.
+// The instance methods approve(), reject(), markDispatched(), expire(),
+// and cancel() each call _transition() which validates canTransitionTo
+// + pushes a stateHistory entry + flips `state`. Without OCC, two
+// concurrent approve() calls (UI double-click, retry, supervisor +
+// auto-approval cron racing on a PENDING request) would BOTH pass
+// canTransitionTo('APPROVED'), BOTH push a stateHistory entry, BOTH
+// save — silent duplicate audit + double-fire downstream (dispatch
+// pipeline, notification, audit log). For confidential reports this
+// is high-impact: a report could be dispatched twice if the dispatch-
+// worker also raced.
+//
+// Why not atomic findOneAndUpdate (the W427 pattern): the instance
+// methods are part of the model's API contract. Replacing them with
+// findOneAndUpdate would break callers that expect doc.approve(...).
+// OCC keeps the existing instance-method surface intact; only the
+// second concurrent save() throws VersionError.
+ReportApprovalRequestSchema.set('optimisticConcurrency', true);
+
 module.exports = {
   ReportApprovalRequestSchema,
   STATES,

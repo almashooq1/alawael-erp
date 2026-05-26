@@ -525,6 +525,9 @@ on:
       - 'backend/__tests__/medication-administration-record-behavioral-wave191b.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/family-decision-rights-wave477.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/individual-education-plan-behavioral-wave200b.test.js'
+      - 'backend/__tests__/phase-e-e2e-smoke-wave478.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -1033,6 +1036,9 @@ on:
       - 'backend/__tests__/medication-administration-record-behavioral-wave191b.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/family-decision-rights-wave477.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/individual-education-plan-behavioral-wave200b.test.js'
+      - 'backend/__tests__/phase-e-e2e-smoke-wave478.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

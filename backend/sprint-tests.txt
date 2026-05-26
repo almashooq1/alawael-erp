@@ -277,3 +277,4 @@ __tests__/realtime-gateway-wave427.test.js
 __tests__/emit-without-subscriber-wave428.test.js
 __tests__/self-advocacy-wave462.test.js
 __tests__/crpd-compliance-wave463.test.js
+__tests__/independent-advocate-role-wave464.test.js

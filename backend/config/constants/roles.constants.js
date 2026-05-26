@@ -38,6 +38,25 @@ const ROLES = {
   PATIENT_RELATIONS_OFFICER: 'patient_relations_officer',
   CRM_SUPERVISOR: 'crm_supervisor',
   DPO: 'dpo',
+  // ── CRPD compliance role (W464 — 2026-05-26) ──────────────────────
+  // Independent Advocate per CRPD Article 12 (supported decision-making)
+  // + ADR-031 Q2. Sources can vary: NGO partnership / Disability Authority
+  // appointment / internal-but-organizationally-independent. Permissions
+  // designed to be conflict-of-interest-free: read access to beneficiary
+  // file + write access to BeneficiaryVoiceLog + DecisionRightsAssessment +
+  // Complaint. Cannot override clinical decisions but CAN challenge them
+  // via Rights surfaces.
+  INDEPENDENT_ADVOCATE: 'independent_advocate',
+  // ── Cultural Adaptation role (Phase E — 2026-05-26) ────────────────
+  // Cultural Officer per Phase E. Single role, deferred via stakeholder
+  // Q3 (standalone vs combined vs shared). Reserved here in the constant
+  // so downstream code can reference it without breaking when Phase E
+  // ships.
+  CULTURAL_OFFICER: 'cultural_officer',
+  // ── Family Wellbeing role (Phase C — 2026-05-26) ──────────────────
+  // Family Counsellor per Phase C. Sister of Cultural Officer — reserved
+  // here for forward-compat.
+  FAMILY_COUNSELLOR: 'family_counsellor',
   // ─────────────────────────────────────────────────────────────────
   PARENT: 'parent',
   STUDENT: 'student',
@@ -170,6 +189,13 @@ const ROLE_LEVELS = {
   [ROLES.HR]: 5,
   [ROLES.NURSE]: 5,
   [ROLES.PATIENT_RELATIONS_OFFICER]: 5,
+  // W464 — Independent Advocate at Level 4 (cross-discipline, single-branch
+  // scope by default; can be granted region-scope for NGO arrangements that
+  // cover multiple branches).
+  [ROLES.INDEPENDENT_ADVOCATE]: 4,
+  // Phase C/E future roles at Level 5 (professional caseload).
+  [ROLES.CULTURAL_OFFICER]: 5,
+  [ROLES.FAMILY_COUNSELLOR]: 5,
 
   [ROLES.PARENT]: 6,
   [ROLES.STUDENT]: 6,

@@ -257,6 +257,25 @@ socialCaseSchema.virtual('openInterventions').get(function () {
 socialCaseSchema.set('toJSON', { virtuals: true });
 socialCaseSchema.set('toObject', { virtuals: true });
 
+// W436: optimistic concurrency. The `services/care/socialCase.service.js`
+// state-machine methods (recordAssessment / assignWorker / activatePlan /
+// closeCase / transitionIntervention) all do findById → push status-
+// History entry → mutate doc fields → SLA activate/observe + bus emit
+// → save. Same race-class as W428/W429/W430/W431. Two concurrent
+// transitions for the same case (UI double-click, social worker +
+// supervisor acting simultaneously, retry-loop) would BOTH push a
+// statusHistory entry, BOTH fire slaEngine.observe() / .activate()
+// (duplicate SLA clock signals — wrong breach-detection math), BOTH
+// emit `ops.care.social.*` (downstream subscribers process the same
+// event twice).
+//
+// OCC keeps the existing in-service logic (registry.eventForTransition,
+// SLA hooks, _pushHistory) intact — only the second concurrent save()
+// throws VersionError, surfaced through the safeError chain to the
+// route layer. Same trade-off as W428-W431 (atomic findOneAndUpdate
+// would bypass the load-bearing in-method validation).
+socialCaseSchema.set('optimisticConcurrency', true);
+
 const SocialCase = mongoose.models.SocialCase || mongoose.model('SocialCase', socialCaseSchema);
 
 module.exports = SocialCase;

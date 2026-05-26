@@ -123,6 +123,18 @@ const MeasurementResultSchema = new mongoose.Schema(
       default: 'DRAFT',
     },
 
+    // ─── W453 — ICF qualifier snapshot ──────────────────────────────────
+    // Auto-populated on save when the parent MeasurementMaster has a
+    // qualifierAlgorithm ≠ 'manual'. Manual algorithms or unmappable
+    // values leave this field unset.
+    icfQualifier: {
+      code: { type: String, match: /^[bsde]\d+$/ },
+      qualifier: { type: Number, min: 0, max: 4 },
+      confidence: { type: String, enum: ['high', 'medium', 'low'] },
+      mappedAutomatically: { type: Boolean, default: false },
+      mappedAt: { type: Date },
+    },
+
     approvalInfo: {
       approvedBy: mongoose.Schema.Types.ObjectId,
       approvalDate: Date,

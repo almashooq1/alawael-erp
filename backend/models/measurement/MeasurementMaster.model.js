@@ -247,6 +247,34 @@ const MeasurementMasterSchema = new mongoose.Schema(
       default: true,
     },
 
+    // ─── W453 — Default ICF qualifier mapping ───────────────────────────
+    // Each measure can declare a default ICF code + qualifier algorithm
+    // so that MeasureRecord saves can auto-populate `icfQualifier` from
+    // the recorded value. See backend/intelligence/icf-qualifier-mapping.lib.js
+    // for the algorithms.
+    //
+    // qualifierAlgorithm semantics:
+    //   'direct_5_band'   — bands[i].minValue ≤ value ≤ bands[i].maxValue → qualifier
+    //   'inverse_5_band'  — same as direct but flips qualifier (higher value = lower impairment)
+    //   'threshold_based' — single threshold; value ≥ threshold → qualifier else 0
+    //   'manual'          — never auto-populate; clinician decides
+    defaultIcfMapping: {
+      primary: { type: String, match: /^[bsde]\d+$/ },
+      secondary: [{ type: String, match: /^[bsde]\d+$/ }],
+      qualifierAlgorithm: {
+        type: String,
+        enum: ['direct_5_band', 'inverse_5_band', 'threshold_based', 'manual'],
+        default: 'manual',
+      },
+      qualifierBands: [
+        {
+          minValue: { type: Number },
+          maxValue: { type: Number },
+          qualifier: { type: Number, min: 0, max: 4 },
+        },
+      ],
+    },
+
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
   },
@@ -258,6 +286,8 @@ const MeasurementMasterSchema = new mongoose.Schema(
 // ============================
 MeasurementMasterSchema.index({ typeId: 1, isActive: 1 });
 MeasurementMasterSchema.index({ targetDisabilities: 1 });
+// W453 — fast lookup by primary ICF code for ICF-coded outcome reports
+MeasurementMasterSchema.index({ 'defaultIcfMapping.primary': 1 });
 // code: removed — unique:true creates implicit index
 
 const MeasurementMaster =

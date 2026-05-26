@@ -32,6 +32,21 @@ function fakeChequeModel(initial = []) {
       store.set(String(id), next);
       return { ...next };
     },
+    // W439: chequeService now uses findOneAndUpdate with a status filter
+    // for the CAS gate. Mirror the same behaviour with the filter check.
+    async findOneAndUpdate(filter, patch) {
+      const id = String(filter._id);
+      const cur = store.get(id);
+      if (!cur) return null;
+      if (filter.status !== undefined && cur.status !== filter.status) return null;
+      const next = { ...cur, ...patch };
+      store.set(id, next);
+      return { ...next };
+    },
+    async exists(filter) {
+      const id = String(filter._id);
+      return store.has(id) ? { _id: id } : null;
+    },
     find(filter = {}) {
       const rows = Array.from(store.values()).filter(c => {
         if (filter.status && filter.status.$in) {

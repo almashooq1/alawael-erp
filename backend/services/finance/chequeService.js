@@ -69,12 +69,32 @@ function assertTransition(cheque, to) {
   }
 }
 
-async function saveOrUpdate(ChequeModel, id, patch) {
-  const updated = await ChequeModel.findByIdAndUpdate(id, patch, {
+async function saveOrUpdate(ChequeModel, id, patch, expectedFromStatus) {
+  // W439: CAS-style update. When the caller passes
+  // `expectedFromStatus`, the filter requires `status: expectedFromStatus`
+  // so only ONE concurrent transitionXxxCheque() call matches the
+  // doc. The second concurrent caller's update returns null and the
+  // service errors out BEFORE the journal entry is posted — preventing
+  // duplicate ledger entries for the same financial event.
+  //
+  // expectedFromStatus is optional to preserve compatibility with
+  // any non-transition update callers (none today, but the helper
+  // is exported via the closure for future flexibility).
+  const filter = expectedFromStatus ? { _id: id, status: expectedFromStatus } : { _id: id };
+  const updated = await ChequeModel.findOneAndUpdate(filter, patch, {
     new: true,
     runValidators: true,
   });
   if (!updated) {
+    // Disambiguate: doesn't exist, or status moved concurrently.
+    const exists = expectedFromStatus ? await ChequeModel.exists({ _id: id }) : false;
+    if (expectedFromStatus && exists) {
+      const err = new Error(
+        `cheque ${id} status changed concurrently (expected '${expectedFromStatus}') — retry`
+      );
+      err.code = 'CONCURRENT_TRANSITION';
+      throw err;
+    }
     const err = new Error(`cheque ${id} not found`);
     err.code = 'NOT_FOUND';
     throw err;
@@ -137,10 +157,15 @@ async function depositCheque({
   }
   assertTransition(cheque, 'deposited');
 
-  const updated = await saveOrUpdate(ChequeModel, id, {
-    status: 'deposited',
-    depositDate: depositDate || new Date(),
-  });
+  const updated = await saveOrUpdate(
+    ChequeModel,
+    id,
+    {
+      status: 'deposited',
+      depositDate: depositDate || new Date(),
+    },
+    cheque.status // W439: CAS gate prevents duplicate journal post
+  );
 
   const journal = await postJournal(JournalEntryModel, {
     entry_type: 'payment',
@@ -183,10 +208,15 @@ async function clearCheque({
   }
   assertTransition(cheque, 'cleared');
 
-  const updated = await saveOrUpdate(ChequeModel, id, {
-    status: 'cleared',
-    clearDate: clearDate || new Date(),
-  });
+  const updated = await saveOrUpdate(
+    ChequeModel,
+    id,
+    {
+      status: 'cleared',
+      clearDate: clearDate || new Date(),
+    },
+    cheque.status // W439: CAS gate
+  );
 
   const lines =
     cheque.type === 'received'
@@ -235,11 +265,16 @@ async function bounceCheque({
   }
   assertTransition(cheque, 'bounced');
 
-  const updated = await saveOrUpdate(ChequeModel, id, {
-    status: 'bounced',
-    bounceDate: bounceDate || new Date(),
-    bounceReason: reason,
-  });
+  const updated = await saveOrUpdate(
+    ChequeModel,
+    id,
+    {
+      status: 'bounced',
+      bounceDate: bounceDate || new Date(),
+      bounceReason: reason,
+    },
+    cheque.status // W439: CAS gate prevents duplicate journal reversal
+  );
 
   let journal = null;
   if (cheque.type === 'received' && cheque.status === 'deposited') {
@@ -269,10 +304,15 @@ async function cancelCheque({ ChequeModel, id, reason, _userId }) {
     throw err;
   }
   assertTransition(cheque, 'cancelled');
-  return saveOrUpdate(ChequeModel, id, {
-    status: 'cancelled',
-    notes: reason ? `Cancelled: ${reason}` : cheque.notes,
-  });
+  return saveOrUpdate(
+    ChequeModel,
+    id,
+    {
+      status: 'cancelled',
+      notes: reason ? `Cancelled: ${reason}` : cheque.notes,
+    },
+    cheque.status // W439: CAS gate
+  );
 }
 
 async function holdCheque({ ChequeModel, id, reason }) {
@@ -283,10 +323,15 @@ async function holdCheque({ ChequeModel, id, reason }) {
     throw err;
   }
   assertTransition(cheque, 'on_hold');
-  return saveOrUpdate(ChequeModel, id, {
-    status: 'on_hold',
-    notes: reason ? `On hold: ${reason}` : cheque.notes,
-  });
+  return saveOrUpdate(
+    ChequeModel,
+    id,
+    {
+      status: 'on_hold',
+      notes: reason ? `On hold: ${reason}` : cheque.notes,
+    },
+    cheque.status // W439: CAS gate
+  );
 }
 
 async function releaseHold({ ChequeModel, id }) {
@@ -297,7 +342,12 @@ async function releaseHold({ ChequeModel, id }) {
     throw err;
   }
   assertTransition(cheque, 'pending');
-  return saveOrUpdate(ChequeModel, id, { status: 'pending' });
+  return saveOrUpdate(
+    ChequeModel,
+    id,
+    { status: 'pending' },
+    cheque.status // W439: CAS gate
+  );
 }
 
 /**

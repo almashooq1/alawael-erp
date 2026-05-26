@@ -11,6 +11,25 @@ const mongoose = require('mongoose');
 const crypto = require('crypto');
 const EventEmitter = require('events');
 
+// W441: SSRF guard for stored integration URLs. `triggerIntegration`
+// fetches `config.url` via real fetch() / http.request() — without
+// this gate, any authenticated caller could POST /integrations with
+// `config.url = http://169.254.169.254/latest/meta-data/...` and exfil
+// the response via IntegrationLog. Use the async validator at storage
+// time (includes DNS rebinding defence) and the sync one at fetch
+// time (defense-in-depth, no network round-trip).
+let _validateOutboundUrl = null;
+let _validateOutboundUrlSync = null;
+try {
+  ({
+    validateOutboundUrl: _validateOutboundUrl,
+    validateOutboundUrlSync: _validateOutboundUrlSync,
+  } = require('../../utils/urlValidator'));
+} catch {
+  _validateOutboundUrl = null;
+  _validateOutboundUrlSync = null;
+}
+
 /* ─── Integration Model ──────────────────────────────────────── */
 const integrationSchema = new mongoose.Schema(
   {
@@ -239,6 +258,14 @@ class DocumentIntegrationsService extends EventEmitter {
   async create(data) {
     const { name, nameAr, type, provider, config, triggers, userId } = data;
 
+    // W441: SSRF gate at storage time. async variant includes DNS-
+    // rebinding defence (the URL is going to be fetched server-side
+    // later, so DNS-resolution time is acceptable). Throws clear
+    // error message which the route surfaces as the failure reason.
+    if (_validateOutboundUrl && config && typeof config.url === 'string' && config.url.length > 0) {
+      await _validateOutboundUrl(config.url);
+    }
+
     // Generate webhook secret
     const secret = crypto.randomBytes(32).toString('hex');
 
@@ -268,6 +295,18 @@ class DocumentIntegrationsService extends EventEmitter {
 
   /* ── Update Integration ───────────────────────────────────── */
   async update(integrationId, updates) {
+    // W441: SSRF gate also on update. Without this, an attacker could
+    // POST a benign URL (passing the create-time check) and then PATCH
+    // it to a metadata endpoint, sidestepping the gate entirely.
+    if (
+      _validateOutboundUrl &&
+      updates?.config &&
+      typeof updates.config.url === 'string' &&
+      updates.config.url.length > 0
+    ) {
+      await _validateOutboundUrl(updates.config.url);
+    }
+
     if (updates.config?.authConfig) {
       updates.config.authConfig = this._encrypt(updates.config.authConfig);
     }
@@ -436,6 +475,17 @@ class DocumentIntegrationsService extends EventEmitter {
   }
 
   async _httpRequest(url, options) {
+    // W441: defense-in-depth SSRF check at fetch time. Stored rows may
+    // pre-date the create-time gate, and a future migration or direct
+    // DB write could reintroduce a bad URL. Sync variant — no DNS
+    // round-trip — keeps the dispatch fast on the happy path.
+    if (_validateOutboundUrlSync) {
+      const check = _validateOutboundUrlSync(url);
+      if (!check.valid) {
+        throw new Error(`SSRF-blocked outbound URL: ${check.reason}`);
+      }
+    }
+
     // Use built-in fetch if available, otherwise simulate
     if (typeof fetch !== 'undefined') {
       const controller = new AbortController();

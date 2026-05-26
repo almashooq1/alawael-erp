@@ -22,13 +22,13 @@ echo "[pre-push] route-load smoke (TDZ class detector)…"
 cd backend && npm run check:routes-load
 cd ..
 
-# 2026-05-26 (Cycle 11): block tracked-source-files-matching-gitignore
-# class. Caught the _primitives.js silent-break (intelligence/canonical
-# /_primitives.js required by 22 schemas, matched the `_*.js` rule, CI
-# clone broke while local sprint passed). Fast (<1s). Baseline is in
-# scripts/check-gitignored-sources.js — any NEW tracked-ignored file
-# requires either a `!` negation in .gitignore (preferred) or an
-# explicit baseline entry with comment.
+# 2026-05-26 Cycle 11: block tracked-source-files-matching-gitignore
+# class. Caught the _primitives.js silent-break - intelligence/canonical
+# _primitives.js required by 22 schemas, matched the underscore-star-js
+# rule, CI clone broke while local sprint passed. Fast under 1s.
+# Baseline is in scripts/check-gitignored-sources.js - any NEW tracked-
+# ignored file requires either a negation rule in .gitignore preferred
+# or an explicit baseline entry with comment.
 echo "[pre-push] gitignored-source-files drift check…"
 cd backend && npm run check:gitignored-sources
 cd ..

@@ -101,7 +101,7 @@ emergencyPlanSchema.index({ center: 1 });
 
 emergencyPlanSchema.pre('save', async function (next) {
   if (!this.planNumber) {
-    const count = await mongoose.model('EmergencyPlan').countDocuments();
+    const count = await mongoose.model('CrisisEmergencyPlan').countDocuments();
     this.planNumber = `EP-${String(count + 1).padStart(5, '0')}`;
   }
   next();
@@ -321,13 +321,14 @@ const emergencyContactSchema = new Schema(
 emergencyContactSchema.index({ category: 1, priority: 1 });
 emergencyContactSchema.index({ center: 1, isActive: 1 });
 
-// All three colliding names below are registered with `Crisis*` scoped
+// All four colliding names below are registered with `Crisis*` scoped
 // names. Export keys unchanged so consumers don't move.
 //   CrisisIncident   collides with models/EnterpriseUltra.js
 //   EmergencyDrill   collides with models/civilDefense.model.js
 //   EmergencyContact collides with models/EmergencyContact.js
+//   EmergencyPlan    collides with models/EmergencyPlan.js (W458 canonical)
 const EmergencyPlan =
-  mongoose.models.EmergencyPlan || mongoose.model('EmergencyPlan', emergencyPlanSchema);
+  mongoose.models.CrisisEmergencyPlan || mongoose.model('CrisisEmergencyPlan', emergencyPlanSchema);
 const CrisisIncident =
   mongoose.models.CrisisCrisisIncident ||
   mongoose.model('CrisisCrisisIncident', crisisIncidentSchema);

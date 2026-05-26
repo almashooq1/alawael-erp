@@ -1571,8 +1571,13 @@ module.exports = {
   BusinessImpactAnalysis:
     mongoose.models.BusinessImpactAnalysis ||
     mongoose.model('BusinessImpactAnalysis', BusinessImpactAnalysisSchema),
+  // Renamed registration from 'CrisisIncident' → 'UltraCrisisIncident' to
+  // clear collision with W458's models/CrisisIncident.js (new canonical for
+  // cross-domain crisis orchestration). Export key unchanged so callers of
+  // routes/enterpriseUltra.routes.js continue to work.
   CrisisIncident:
-    mongoose.models.CrisisIncident || mongoose.model('CrisisIncident', CrisisIncidentSchema),
+    mongoose.models.UltraCrisisIncident ||
+    mongoose.model('UltraCrisisIncident', CrisisIncidentSchema),
   BCDrill: mongoose.models.BCDrill || mongoose.model('BCDrill', BCDrillSchema),
   DisasterRecoveryPlan:
     mongoose.models.DisasterRecoveryPlan ||

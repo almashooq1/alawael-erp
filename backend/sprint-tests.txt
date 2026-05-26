@@ -307,3 +307,4 @@ __tests__/cultural-profile-wave475.test.js
 __tests__/restraint-seclusion-event-behavioral-wave193b.test.js
 __tests__/gender-routing-wave476.test.js
 __tests__/medication-administration-record-behavioral-wave191b.test.js
+__tests__/family-decision-rights-wave477.test.js

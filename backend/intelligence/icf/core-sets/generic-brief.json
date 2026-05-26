@@ -1,0 +1,189 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "setName": "generic_brief",
+  "setVersion": "2017",
+  "displayName": {
+    "en": "Generic Brief ICF Core Set",
+    "ar": "المجموعة الأساسية العامة المختصرة"
+  },
+  "description": {
+    "en": "WHO Generic Brief ICF Core Set — fallback for any condition. Used when condition-specific Brief Core Sets are not yet developed or applicable. Covers the highest-impact ICF codes across all 4 components.",
+    "ar": "المجموعة الأساسية العامة المختصرة لـ ICF — تستخدم احتياطياً لأي حالة عندما لا تتوفر مجموعة أساسية مختصرة خاصة بالحالة. تغطي أعلى رموز ICF تأثيراً عبر المكونات الأربعة."
+  },
+  "source": {
+    "publication": "Cieza et al., based on WHO ICF Brief Core Set framework",
+    "url": "https://icd.who.int/browse/2024-01/icf/en"
+  },
+  "codes": [
+    {
+      "code": "b117",
+      "component": "bodyFunctions",
+      "chapter": 1,
+      "level": 3,
+      "title": "Intellectual functions",
+      "titleAr": "الوظائف الذهنية",
+      "description": "General mental functions, required to understand and constructively integrate the various mental functions including all cognitive functions and their development over the life span.",
+      "descriptionAr": "الوظائف العقلية العامة المطلوبة لفهم ودمج الوظائف العقلية المختلفة بشكل بنّاء، بما في ذلك جميع الوظائف المعرفية وتطورها عبر مراحل الحياة."
+    },
+    {
+      "code": "b126",
+      "component": "bodyFunctions",
+      "chapter": 1,
+      "level": 3,
+      "title": "Temperament and personality functions",
+      "titleAr": "وظائف المزاج والشخصية",
+      "description": "General mental functions of constitutional disposition of the individual to react in a particular way to situations, including the set of mental characteristics that makes the individual distinct from others.",
+      "descriptionAr": "الوظائف العقلية العامة للاستعداد التكويني للفرد للاستجابة بطريقة معينة للمواقف، بما في ذلك مجموعة الخصائص العقلية التي تميز الفرد عن الآخرين."
+    },
+    {
+      "code": "b134",
+      "component": "bodyFunctions",
+      "chapter": 1,
+      "level": 3,
+      "title": "Sleep functions",
+      "titleAr": "وظائف النوم",
+      "description": "General mental functions of periodic, reversible and selective physical and mental disengagement from one's immediate environment.",
+      "descriptionAr": "الوظائف العقلية العامة للانفصال الجسدي والعقلي الدوري القابل للعكس عن البيئة المباشرة."
+    },
+    {
+      "code": "b152",
+      "component": "bodyFunctions",
+      "chapter": 1,
+      "level": 3,
+      "title": "Emotional functions",
+      "titleAr": "الوظائف الانفعالية",
+      "description": "Specific mental functions related to the feeling and affective components of the processes of the mind.",
+      "descriptionAr": "الوظائف العقلية المحددة المتعلقة بمكونات الشعور والوجدان لعمليات العقل."
+    },
+    {
+      "code": "b280",
+      "component": "bodyFunctions",
+      "chapter": 2,
+      "level": 3,
+      "title": "Sensation of pain",
+      "titleAr": "الإحساس بالألم",
+      "description": "Sensation of unpleasant feeling indicating potential or actual damage to some body structure.",
+      "descriptionAr": "الإحساس بشعور غير سار يدل على ضرر محتمل أو فعلي ببعض بنية الجسم."
+    },
+    {
+      "code": "d160",
+      "component": "activitiesParticipation",
+      "chapter": 1,
+      "level": 3,
+      "title": "Focusing attention",
+      "titleAr": "تركيز الانتباه",
+      "description": "Intentionally focusing on specific stimuli, such as filtering out distracting noises.",
+      "descriptionAr": "التركيز عمداً على محفزات معينة، مثل تصفية الضوضاء المشتتة."
+    },
+    {
+      "code": "d175",
+      "component": "activitiesParticipation",
+      "chapter": 1,
+      "level": 3,
+      "title": "Solving problems",
+      "titleAr": "حل المشكلات",
+      "description": "Finding solutions to questions or situations by identifying and analysing issues, developing options, and implementing a solution.",
+      "descriptionAr": "إيجاد حلول للأسئلة أو المواقف من خلال تحديد القضايا وتحليلها، وتطوير الخيارات، وتنفيذ الحل."
+    },
+    {
+      "code": "d350",
+      "component": "activitiesParticipation",
+      "chapter": 3,
+      "level": 3,
+      "title": "Conversation",
+      "titleAr": "المحادثة",
+      "description": "Starting, sustaining and ending an interchange of thoughts and ideas by means of spoken, written, sign or other forms of language.",
+      "descriptionAr": "بدء واستمرار وإنهاء تبادل الأفكار والآراء عن طريق اللغة المنطوقة أو المكتوبة أو لغة الإشارة أو أشكال اللغة الأخرى."
+    },
+    {
+      "code": "d450",
+      "component": "activitiesParticipation",
+      "chapter": 4,
+      "level": 3,
+      "title": "Walking",
+      "titleAr": "المشي",
+      "description": "Moving along a surface on foot, step by step, so that one foot is always on the ground.",
+      "descriptionAr": "التحرك على سطح بالقدم، خطوة بخطوة، بحيث تكون قدم واحدة دائماً على الأرض."
+    },
+    {
+      "code": "d510",
+      "component": "activitiesParticipation",
+      "chapter": 5,
+      "level": 3,
+      "title": "Washing oneself",
+      "titleAr": "الاغتسال",
+      "description": "Washing and drying one's whole body, or body parts, using water and appropriate cleaning and drying materials.",
+      "descriptionAr": "غسل وتجفيف الجسم كاملاً أو أجزاء منه باستخدام الماء ومواد التنظيف والتجفيف المناسبة."
+    },
+    {
+      "code": "d530",
+      "component": "activitiesParticipation",
+      "chapter": 5,
+      "level": 3,
+      "title": "Toileting",
+      "titleAr": "استخدام المرحاض",
+      "description": "Planning and carrying out the elimination of human waste, and cleaning oneself afterwards.",
+      "descriptionAr": "التخطيط وتنفيذ التخلص من الفضلات البشرية، وتنظيف الذات بعد ذلك."
+    },
+    {
+      "code": "d550",
+      "component": "activitiesParticipation",
+      "chapter": 5,
+      "level": 3,
+      "title": "Eating",
+      "titleAr": "الأكل",
+      "description": "Carrying out the coordinated tasks and actions of eating food that has been served, bringing it to the mouth and consuming it in culturally acceptable ways.",
+      "descriptionAr": "تنفيذ المهام والإجراءات المنسقة لتناول الطعام المقدم، وإيصاله إلى الفم واستهلاكه بطرق مقبولة ثقافياً."
+    },
+    {
+      "code": "d710",
+      "component": "activitiesParticipation",
+      "chapter": 7,
+      "level": 3,
+      "title": "Basic interpersonal interactions",
+      "titleAr": "التفاعلات الشخصية الأساسية",
+      "description": "Interacting with people in a contextually and socially appropriate manner.",
+      "descriptionAr": "التفاعل مع الناس بطريقة مناسبة سياقياً واجتماعياً."
+    },
+    {
+      "code": "e310",
+      "component": "environmentalFactors",
+      "chapter": 3,
+      "level": 3,
+      "title": "Immediate family",
+      "titleAr": "الأسرة المباشرة",
+      "description": "Individuals related by birth, marriage or other relationship recognized by the culture as immediate family, including spouses, partners, parents, siblings, children, foster parents, adoptive parents and grandparents.",
+      "descriptionAr": "الأفراد المرتبطون بالميلاد أو الزواج أو علاقة أخرى تعترف بها الثقافة كأسرة مباشرة، بما في ذلك الأزواج والشركاء والوالدان والأشقاء والأبناء والآباء بالحضانة والآباء بالتبني والأجداد."
+    },
+    {
+      "code": "e355",
+      "component": "environmentalFactors",
+      "chapter": 3,
+      "level": 3,
+      "title": "Health professionals",
+      "titleAr": "الكوادر الصحية",
+      "description": "All service providers working within the context of the health system, such as doctors, nurses, physiotherapists, occupational therapists, speech therapists, audiologists, orthotists-prosthetists, medical social workers and others.",
+      "descriptionAr": "جميع مقدمي الخدمات العاملين في سياق النظام الصحي، مثل الأطباء والممرضين وأخصائيي العلاج الطبيعي والوظيفي والنطق والسمع وأخصائيي الأجهزة التعويضية والأخصائيين الاجتماعيين الطبيين وغيرهم."
+    },
+    {
+      "code": "e410",
+      "component": "environmentalFactors",
+      "chapter": 4,
+      "level": 3,
+      "title": "Individual attitudes of immediate family members",
+      "titleAr": "اتجاهات أفراد الأسرة المباشرة",
+      "description": "General or specific opinions and beliefs of immediate family members about the person or about other matters that influence individual behaviour and actions.",
+      "descriptionAr": "الآراء والمعتقدات العامة أو المحددة لأفراد الأسرة المباشرة حول الشخص أو حول أمور أخرى تؤثر على السلوك والأفعال الفردية."
+    },
+    {
+      "code": "e580",
+      "component": "environmentalFactors",
+      "chapter": 5,
+      "level": 3,
+      "title": "Health services, systems and policies",
+      "titleAr": "الخدمات والأنظمة والسياسات الصحية",
+      "description": "Services, systems and policies for preventing and treating health problems, providing medical rehabilitation and promoting a healthy lifestyle.",
+      "descriptionAr": "الخدمات والأنظمة والسياسات لمنع وعلاج المشاكل الصحية وتقديم إعادة التأهيل الطبي وتعزيز نمط حياة صحي."
+    }
+  ]
+}

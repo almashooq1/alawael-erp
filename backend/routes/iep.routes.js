@@ -29,9 +29,14 @@ const { attachMfaActor, requireMfaTier } = require('../middleware/requireMfaTier
 const IEP = require('../models/IndividualEducationPlan');
 const Beneficiary = require('../models/Beneficiary');
 const safeError = require('../utils/safeError');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
 
 router.use(authenticateToken);
+// W446: branch-scope every endpoint. Model carries `branchId`; pre-W446
+// list filters were optional + instance loads bare findById, opening
+// cross-tenant IDOR (read/modify/delete any branch by ObjectId guess).
+router.use(requireBranchAccess);
 router.use(attachMfaActor); // ADR-026 no-regrets #1 — populate req.actor with mfaLevel for downstream tier checks
 router.use(bodyScopedBeneficiaryGuard); // W441: enforce branch on req.body.beneficiaryId
 
@@ -76,7 +81,7 @@ async function hydrate(items) {
 // ── GET / ──────────────────────────────────────────────────────────────
 router.get('/', requireRole(READ_ROLES), async (req, res) => {
   try {
-    const filter = {};
+    const filter = { ...branchFilter(req) }; /* W446 */
     if (req.query.beneficiaryId && mongoose.isValidObjectId(req.query.beneficiaryId)) {
       filter.beneficiaryId = req.query.beneficiaryId;
     }
@@ -114,7 +119,7 @@ router.get('/by-beneficiary/:id', requireRole(READ_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const items = await IEP.find({ beneficiaryId: req.params.id })
+    const items = await IEP.find({ ...branchFilter(req), /* W446 */ beneficiaryId: req.params.id })
       .sort({ planYear: -1 })
       .lean({ virtuals: true });
     res.json({ success: true, items, count: items.length });
@@ -129,7 +134,8 @@ router.get('/:id', requireRole(READ_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await IEP.findById(req.params.id).lean({ virtuals: true });
+    const row = await IEP.findOne({ _id: req.params.id, ...branchFilter(req) }) /* W446 */
+      .lean({ virtuals: true });
     if (!row) return res.status(404).json({ success: false, message: 'الخطة غير موجودة' });
     const [hydrated] = await hydrate([row]);
     res.json({ success: true, data: hydrated });
@@ -189,7 +195,7 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await IEP.findById(req.params.id);
+    const row = await IEP.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W446 */
     if (!row) return res.status(404).json({ success: false, message: 'الخطة غير موجودة' });
     if (row.status === 'active' || row.status === 'archived') {
       return res
@@ -225,7 +231,7 @@ router.post('/:id/goals', requireRole(WRITE_ROLES), async (req, res) => {
     if (!String(body.text || '').trim() || !String(body.criteria || '').trim()) {
       return res.status(400).json({ success: false, message: 'text و criteria مطلوبان' });
     }
-    const row = await IEP.findById(req.params.id);
+    const row = await IEP.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W446 */
     if (!row) return res.status(404).json({ success: false, message: 'الخطة غير موجودة' });
     if (row.status === 'archived') {
       return res.status(409).json({ success: false, message: 'لا يمكن تعديل خطة مؤرشفة' });
@@ -253,7 +259,7 @@ router.patch('/:id/goals/:goalId', requireRole(WRITE_ROLES), async (req, res) =>
     if (!mongoose.isValidObjectId(req.params.id) || !mongoose.isValidObjectId(req.params.goalId)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await IEP.findById(req.params.id);
+    const row = await IEP.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W446 */
     if (!row) return res.status(404).json({ success: false, message: 'الخطة غير موجودة' });
     const goal = row.goals.id(req.params.goalId);
     if (!goal) return res.status(404).json({ success: false, message: 'الهدف غير موجود' });
@@ -276,7 +282,7 @@ router.patch('/:id/goals/:goalId', requireRole(WRITE_ROLES), async (req, res) =>
 // ── DELETE /:id/goals/:goalId ──────────────────────────────────────────
 router.delete('/:id/goals/:goalId', requireRole(WRITE_ROLES), async (req, res) => {
   try {
-    const row = await IEP.findById(req.params.id);
+    const row = await IEP.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W446 */
     if (!row) return res.status(404).json({ success: false, message: 'الخطة غير موجودة' });
     if (row.status === 'active' || row.status === 'archived') {
       return res
@@ -300,7 +306,7 @@ router.post('/:id/services', requireRole(WRITE_ROLES), async (req, res) => {
     if (!String(body.name || '').trim()) {
       return res.status(400).json({ success: false, message: 'name مطلوب' });
     }
-    const row = await IEP.findById(req.params.id);
+    const row = await IEP.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W446 */
     if (!row) return res.status(404).json({ success: false, message: 'الخطة غير موجودة' });
     if (row.status === 'archived') {
       return res.status(409).json({ success: false, message: 'لا يمكن تعديل خطة مؤرشفة' });
@@ -325,7 +331,7 @@ router.post('/:id/services', requireRole(WRITE_ROLES), async (req, res) => {
 // ── DELETE /:id/services/:serviceId ────────────────────────────────────
 router.delete('/:id/services/:serviceId', requireRole(WRITE_ROLES), async (req, res) => {
   try {
-    const row = await IEP.findById(req.params.id);
+    const row = await IEP.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W446 */
     if (!row) return res.status(404).json({ success: false, message: 'الخطة غير موجودة' });
     if (row.status === 'archived') {
       return res.status(409).json({ success: false, message: 'لا يمكن تعديل خطة مؤرشفة' });
@@ -349,7 +355,7 @@ router.post('/:id/sign', requireRole(WRITE_ROLES), requireMfaTier(2), async (req
     if (!String(body.role || '').trim() || !String(body.name || '').trim()) {
       return res.status(400).json({ success: false, message: 'role و name مطلوبان' });
     }
-    const row = await IEP.findById(req.params.id);
+    const row = await IEP.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W446 */
     if (!row) return res.status(404).json({ success: false, message: 'الخطة غير موجودة' });
     if (row.status === 'archived') {
       return res.status(409).json({ success: false, message: 'لا يمكن توقيع خطة مؤرشفة' });
@@ -388,7 +394,7 @@ router.post(
       if (!STATUSES.includes(next)) {
         return res.status(400).json({ success: false, message: 'to غير صالح' });
       }
-      const row = await IEP.findById(req.params.id);
+      const row = await IEP.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W446 */
       if (!row) return res.status(404).json({ success: false, message: 'الخطة غير موجودة' });
       const allowed = TRANSITIONS[row.status] || [];
       if (!allowed.includes(next)) {
@@ -419,7 +425,7 @@ router.post('/:id/review', requireRole(WRITE_ROLES), async (req, res) => {
     if (!summary) {
       return res.status(400).json({ success: false, message: 'ملخص المراجعة مطلوب' });
     }
-    const row = await IEP.findById(req.params.id);
+    const row = await IEP.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W446 */
     if (!row) return res.status(404).json({ success: false, message: 'الخطة غير موجودة' });
     row.reviewHistory.push({
       reviewDate: new Date(),
@@ -437,7 +443,7 @@ router.post('/:id/review', requireRole(WRITE_ROLES), async (req, res) => {
 // ADR-026 no-regrets #1 + ADR-019 layer-2: destructive on legal artifact.
 router.delete('/:id', requireRole(DELETE_ROLES), requireMfaTier(2), async (req, res) => {
   try {
-    const row = await IEP.findByIdAndDelete(req.params.id);
+    const row = await IEP.findOneAndDelete({ _id: req.params.id, ...branchFilter(req) }); /* W446 */
     if (!row) return res.status(404).json({ success: false, message: 'الخطة غير موجودة' });
     res.json({ success: true, message: 'تم الحذف' });
   } catch (err) {

@@ -28,9 +28,14 @@ const { authenticateToken, requireRole } = require('../middleware/auth');
 const Visit = require('../models/FamilyVisitRequest');
 const Beneficiary = require('../models/Beneficiary');
 const safeError = require('../utils/safeError');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
 
 router.use(authenticateToken);
+// W446: branch-scope every endpoint. Model carries `branchId`; pre-W446
+// list filters were optional + instance loads bare findById, opening
+// cross-tenant IDOR (read/modify/delete any branch by ObjectId guess).
+router.use(requireBranchAccess);
 router.use(bodyScopedBeneficiaryGuard); // W441: enforce branch on req.body.beneficiaryId
 
 const READ_ROLES = [
@@ -92,7 +97,7 @@ function startOfNextMonth(d) {
 // ── GET / ──────────────────────────────────────────────────────────────
 router.get('/', requireRole(READ_ROLES), async (req, res) => {
   try {
-    const filter = {};
+    const filter = { ...branchFilter(req) }; /* W446 */
     if (req.query.beneficiaryId && mongoose.isValidObjectId(req.query.beneficiaryId)) {
       filter.beneficiaryId = req.query.beneficiaryId;
     }
@@ -131,7 +136,8 @@ router.get('/upcoming', requireRole(READ_ROLES), async (req, res) => {
     const now = new Date();
     const horizon = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
     const raw = await Visit.find({
-      status: 'approved',
+      ...branchFilter(req),
+      /* W446 */ status: 'approved',
       requestedDate: { $gte: now, $lte: horizon },
     })
       .sort({ requestedDate: 1 })
@@ -149,7 +155,10 @@ router.get('/by-beneficiary/:id', requireRole(READ_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const items = await Visit.find({ beneficiaryId: req.params.id })
+    const items = await Visit.find({
+      ...branchFilter(req),
+      /* W446 */ beneficiaryId: req.params.id,
+    })
       .sort({ requestedDate: -1 })
       .limit(50)
       .lean();
@@ -165,7 +174,8 @@ router.get('/:id', requireRole(READ_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Visit.findById(req.params.id).lean();
+    const row = await Visit.findOne({ _id: req.params.id, ...branchFilter(req) }) /* W446 */
+      .lean();
     if (!row) return res.status(404).json({ success: false, message: 'الطلب غير موجود' });
     const [hydrated] = await hydrate([row]);
     res.json({ success: true, data: hydrated });
@@ -202,7 +212,8 @@ router.post('/', requireRole(CREATE_ROLES), async (req, res) => {
     const monthStart = startOfMonth(requestedDate);
     const monthEnd = startOfNextMonth(requestedDate);
     const approvedThisMonth = await Visit.countDocuments({
-      beneficiaryId: body.beneficiaryId,
+      ...branchFilter(req),
+      /* W446 */ beneficiaryId: body.beneficiaryId,
       status: 'approved',
       requestedDate: { $gte: monthStart, $lt: monthEnd },
     });
@@ -237,7 +248,7 @@ router.post('/', requireRole(CREATE_ROLES), async (req, res) => {
 // ── POST /:id/approve ─────────────────────────────────────────────────
 router.post('/:id/approve', requireRole(APPROVE_ROLES), async (req, res) => {
   try {
-    const row = await Visit.findById(req.params.id);
+    const row = await Visit.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W446 */
     if (!row) return res.status(404).json({ success: false, message: 'الطلب غير موجود' });
     if (row.status !== 'requested') {
       return res
@@ -277,7 +288,7 @@ router.post('/:id/decline', requireRole(APPROVE_ROLES), async (req, res) => {
     if (!reason) {
       return res.status(400).json({ success: false, message: 'سبب الرفض مطلوب' });
     }
-    const row = await Visit.findById(req.params.id);
+    const row = await Visit.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W446 */
     if (!row) return res.status(404).json({ success: false, message: 'الطلب غير موجود' });
     if (row.status !== 'requested') {
       return res
@@ -296,7 +307,7 @@ router.post('/:id/decline', requireRole(APPROVE_ROLES), async (req, res) => {
 // ── POST /:id/check-in ────────────────────────────────────────────────
 router.post('/:id/check-in', requireRole(STAFF_ROLES), async (req, res) => {
   try {
-    const row = await Visit.findById(req.params.id);
+    const row = await Visit.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W446 */
     if (!row) return res.status(404).json({ success: false, message: 'الطلب غير موجود' });
     if (row.status !== 'approved') {
       return res
@@ -314,7 +325,7 @@ router.post('/:id/check-in', requireRole(STAFF_ROLES), async (req, res) => {
 // ── POST /:id/check-out ───────────────────────────────────────────────
 router.post('/:id/check-out', requireRole(STAFF_ROLES), async (req, res) => {
   try {
-    const row = await Visit.findById(req.params.id);
+    const row = await Visit.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W446 */
     if (!row) return res.status(404).json({ success: false, message: 'الطلب غير موجود' });
     if (!row.actualArrivalTime) {
       return res.status(400).json({ success: false, message: 'يجب تسجيل وصول الأهل أولاً' });
@@ -334,7 +345,7 @@ router.post('/:id/check-out', requireRole(STAFF_ROLES), async (req, res) => {
 // ── POST /:id/mark-no-show ────────────────────────────────────────────
 router.post('/:id/mark-no-show', requireRole(STAFF_ROLES), async (req, res) => {
   try {
-    const row = await Visit.findById(req.params.id);
+    const row = await Visit.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W446 */
     if (!row) return res.status(404).json({ success: false, message: 'الطلب غير موجود' });
     if (row.status !== 'approved') {
       return res.status(409).json({ success: false, message: 'الحالة غير صالحة لتسجيل عدم حضور' });
@@ -350,7 +361,7 @@ router.post('/:id/mark-no-show', requireRole(STAFF_ROLES), async (req, res) => {
 // ── POST /:id/cancel ──────────────────────────────────────────────────
 router.post('/:id/cancel', requireRole(CREATE_ROLES), async (req, res) => {
   try {
-    const row = await Visit.findById(req.params.id);
+    const row = await Visit.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W446 */
     if (!row) return res.status(404).json({ success: false, message: 'الطلب غير موجود' });
     if (row.status === 'completed' || row.status === 'no_show') {
       return res
@@ -368,7 +379,10 @@ router.post('/:id/cancel', requireRole(CREATE_ROLES), async (req, res) => {
 // ── DELETE /:id ───────────────────────────────────────────────────────
 router.delete('/:id', requireRole(DELETE_ROLES), async (req, res) => {
   try {
-    const row = await Visit.findByIdAndDelete(req.params.id);
+    const row = await Visit.findOneAndDelete({
+      _id: req.params.id,
+      ...branchFilter(req),
+    }); /* W446 */
     if (!row) return res.status(404).json({ success: false, message: 'الطلب غير موجود' });
     res.json({ success: true, message: 'تم الحذف' });
   } catch (err) {

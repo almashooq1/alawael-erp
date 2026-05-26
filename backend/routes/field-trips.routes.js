@@ -28,9 +28,14 @@ const { authenticateToken, requireRole } = require('../middleware/auth');
 const FieldTrip = require('../models/FieldTrip');
 const Beneficiary = require('../models/Beneficiary');
 const safeError = require('../utils/safeError');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
 
 router.use(authenticateToken);
+// W446: branch-scope every endpoint. Model carries `branchId`; pre-W446
+// list filters were optional + instance loads bare findById, opening
+// cross-tenant IDOR (read/modify/delete any branch by ObjectId guess).
+router.use(requireBranchAccess);
 router.use(bodyScopedBeneficiaryGuard); // W441: enforce branch on req.body.beneficiaryId
 
 const READ_ROLES = [
@@ -87,7 +92,7 @@ async function hydrateTrip(trip) {
 // ── GET / ──────────────────────────────────────────────────────────────
 router.get('/', requireRole(READ_ROLES), async (req, res) => {
   try {
-    const filter = {};
+    const filter = { ...branchFilter(req) }; /* W446 */
     if (req.query.status && STATUSES.includes(String(req.query.status))) {
       filter.status = String(req.query.status);
     }
@@ -125,7 +130,8 @@ router.get('/upcoming', requireRole(READ_ROLES), async (req, res) => {
     const now = new Date();
     const horizon = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
     const items = await FieldTrip.find({
-      status: { $in: ['approved', 'in_progress'] },
+      ...branchFilter(req),
+      /* W446 */ status: { $in: ['approved', 'in_progress'] },
       tripDate: { $gte: now, $lte: horizon },
     })
       .sort({ tripDate: 1 })
@@ -142,7 +148,8 @@ router.get('/:id', requireRole(READ_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const trip = await FieldTrip.findById(req.params.id).lean({ virtuals: true });
+    const trip = await FieldTrip.findOne({ _id: req.params.id, ...branchFilter(req) }) /* W446 */
+      .lean({ virtuals: true });
     if (!trip) return res.status(404).json({ success: false, message: 'الرحلة غير موجودة' });
     const hydrated = await hydrateTrip(trip);
     res.json({ success: true, data: hydrated });
@@ -199,7 +206,7 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await FieldTrip.findById(req.params.id);
+    const row = await FieldTrip.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W446 */
     if (!row) return res.status(404).json({ success: false, message: 'الرحلة غير موجودة' });
     if (row.status === 'in_progress' || row.status === 'completed') {
       return res
@@ -229,7 +236,7 @@ router.post('/:id/enroll', requireRole(WRITE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(beneficiaryId)) {
       return res.status(400).json({ success: false, message: 'beneficiaryId مطلوب' });
     }
-    const row = await FieldTrip.findById(req.params.id);
+    const row = await FieldTrip.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W446 */
     if (!row) return res.status(404).json({ success: false, message: 'الرحلة غير موجودة' });
     if (row.status === 'in_progress' || row.status === 'completed' || row.status === 'cancelled') {
       return res
@@ -254,7 +261,7 @@ router.post('/:id/unenroll', requireRole(WRITE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(beneficiaryId)) {
       return res.status(400).json({ success: false, message: 'beneficiaryId مطلوب' });
     }
-    const row = await FieldTrip.findById(req.params.id);
+    const row = await FieldTrip.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W446 */
     if (!row) return res.status(404).json({ success: false, message: 'الرحلة غير موجودة' });
     if (row.status === 'in_progress' || row.status === 'completed') {
       return res
@@ -287,7 +294,7 @@ router.post('/:id/consent', requireRole(WRITE_ROLES), async (req, res) => {
     if (status === 'signed' && !String(signedBy || '').trim()) {
       return res.status(400).json({ success: false, message: 'signedBy مطلوب' });
     }
-    const row = await FieldTrip.findById(req.params.id);
+    const row = await FieldTrip.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W446 */
     if (!row) return res.status(404).json({ success: false, message: 'الرحلة غير موجودة' });
     const enroll = row.enrollments.find(e => String(e.beneficiaryId) === String(beneficiaryId));
     if (!enroll) {
@@ -312,7 +319,7 @@ router.post('/:id/staff', requireRole(WRITE_ROLES), async (req, res) => {
   try {
     const name = String(req.body?.name || '').trim();
     if (!name) return res.status(400).json({ success: false, message: 'الاسم مطلوب' });
-    const row = await FieldTrip.findById(req.params.id);
+    const row = await FieldTrip.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W446 */
     if (!row) return res.status(404).json({ success: false, message: 'الرحلة غير موجودة' });
     if (row.status === 'completed' || row.status === 'cancelled') {
       return res.status(409).json({ success: false, message: 'الرحلة منتهية' });
@@ -332,7 +339,7 @@ router.post('/:id/transition', requireRole(APPROVE_ROLES), async (req, res) => {
     if (!STATUSES.includes(next)) {
       return res.status(400).json({ success: false, message: 'to غير صالح' });
     }
-    const row = await FieldTrip.findById(req.params.id);
+    const row = await FieldTrip.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W446 */
     if (!row) return res.status(404).json({ success: false, message: 'الرحلة غير موجودة' });
     const allowed = TRANSITIONS[row.status] || [];
     if (!allowed.includes(next)) {
@@ -371,7 +378,7 @@ router.post('/:id/transition', requireRole(APPROVE_ROLES), async (req, res) => {
 // ── POST /:id/depart ──────────────────────────────────────────────────
 router.post('/:id/depart', requireRole(WRITE_ROLES), async (req, res) => {
   try {
-    const row = await FieldTrip.findById(req.params.id);
+    const row = await FieldTrip.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W446 */
     if (!row) return res.status(404).json({ success: false, message: 'الرحلة غير موجودة' });
     if (row.status !== 'approved') {
       return res
@@ -390,7 +397,7 @@ router.post('/:id/depart', requireRole(WRITE_ROLES), async (req, res) => {
 // ── POST /:id/return ──────────────────────────────────────────────────
 router.post('/:id/return', requireRole(WRITE_ROLES), async (req, res) => {
   try {
-    const row = await FieldTrip.findById(req.params.id);
+    const row = await FieldTrip.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W446 */
     if (!row) return res.status(404).json({ success: false, message: 'الرحلة غير موجودة' });
     if (row.status !== 'in_progress') {
       return res.status(409).json({ success: false, message: 'الرحلة غير جارية' });
@@ -417,7 +424,7 @@ router.post('/:id/attendance', requireRole(WRITE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(beneficiaryId)) {
       return res.status(400).json({ success: false, message: 'beneficiaryId مطلوب' });
     }
-    const row = await FieldTrip.findById(req.params.id);
+    const row = await FieldTrip.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W446 */
     if (!row) return res.status(404).json({ success: false, message: 'الرحلة غير موجودة' });
     const enroll = row.enrollments.find(e => String(e.beneficiaryId) === String(beneficiaryId));
     if (!enroll) return res.status(404).json({ success: false, message: 'المستفيد غير مسجّل' });
@@ -432,7 +439,10 @@ router.post('/:id/attendance', requireRole(WRITE_ROLES), async (req, res) => {
 // ── DELETE /:id ───────────────────────────────────────────────────────
 router.delete('/:id', requireRole(DELETE_ROLES), async (req, res) => {
   try {
-    const row = await FieldTrip.findByIdAndDelete(req.params.id);
+    const row = await FieldTrip.findOneAndDelete({
+      _id: req.params.id,
+      ...branchFilter(req),
+    }); /* W446 */
     if (!row) return res.status(404).json({ success: false, message: 'الرحلة غير موجودة' });
     res.json({ success: true, message: 'تم الحذف' });
   } catch (err) {

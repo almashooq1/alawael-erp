@@ -159,6 +159,13 @@ mdtMeetingSchema.virtual('openActionItems').get(function () {
 mdtMeetingSchema.set('toJSON', { virtuals: true });
 mdtMeetingSchema.set('toObject', { virtuals: true });
 
+// W438: optimistic concurrency. MDT meeting state-machine (schedule /
+// hold / cancel / finalize) does findById → push history → mutate
+// status → notification side-effects → save. Same race-class as
+// W437 — silent duplicate audit + double-notify under concurrent
+// admin actions.
+mdtMeetingSchema.set('optimisticConcurrency', true);
+
 const MdtMeeting = mongoose.models.MdtMeeting || mongoose.model('MdtMeeting', mdtMeetingSchema);
 
 module.exports = MdtMeeting;

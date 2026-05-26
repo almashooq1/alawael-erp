@@ -149,6 +149,12 @@ transitionReadinessSchema.virtual('openGoalsCount').get(function () {
 transitionReadinessSchema.set('toJSON', { virtuals: true });
 transitionReadinessSchema.set('toObject', { virtuals: true });
 
+// W438: optimistic concurrency. Transition-readiness assessments
+// follow the same draft/in-progress/finalized state-machine pattern
+// with append-only history. OCC closes the silent duplicate audit
+// + downstream notification double-fire race.
+transitionReadinessSchema.set('optimisticConcurrency', true);
+
 const TransitionReadinessAssessment =
   mongoose.models.TransitionReadinessAssessment ||
   mongoose.model('TransitionReadinessAssessment', transitionReadinessSchema);

@@ -221,6 +221,15 @@ welfareAppSchema.virtual('hasActiveAppeal').get(function () {
 welfareAppSchema.set('toJSON', { virtuals: true });
 welfareAppSchema.set('toObject', { virtuals: true });
 
+// W438: optimistic concurrency. Welfare application state-machine
+// (submit / review / approve / reject / disburse) does findById →
+// push history → mutate status → SLA observe + bus emit → save.
+// Concurrent approve clicks silently duplicate audit + double-fire
+// the disbursement-trigger event. Like W435 leave approval, this
+// touches financial state (welfare disbursement amount) so the
+// double-fire risk is real.
+welfareAppSchema.set('optimisticConcurrency', true);
+
 const WelfareApplication =
   mongoose.models.WelfareApplication || mongoose.model('WelfareApplication', welfareAppSchema);
 

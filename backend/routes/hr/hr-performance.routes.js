@@ -24,6 +24,7 @@
 
 const express = require('express');
 const { authorize } = require('../../middleware/auth');
+const { effectiveBranchScope } = require('../../middleware/assertBranchMatch');
 const safeError = require('../../utils/safeError');
 const { HrPerformanceService } = require('../../services/hr/hrPerformanceService');
 
@@ -49,7 +50,9 @@ function createHrPerformanceRouter({ logger }) {
   router.get('/evaluations', async (req, res) => {
     try {
       const { employeeId, status, period, page, limit } = req.query;
-      const branchId = req.branchId; // set by requireBranchAccess
+      // W269g: req.branchId was never actually set by middleware; the
+      // canonical source is req.branchScope.branchId (effectiveBranchScope).
+      const branchId = effectiveBranchScope(req) || undefined;
       const result = await getService().listEvaluations({
         employeeId,
         status,
@@ -67,7 +70,7 @@ function createHrPerformanceRouter({ logger }) {
   // GET /evaluations/stats — must come BEFORE /:id
   router.get('/evaluations/stats', async (req, res) => {
     try {
-      const branchId = req.branchId;
+      const branchId = effectiveBranchScope(req) || undefined;
       const stats = await getService().getPerformanceStats({ branchId });
       res.json({ success: true, data: stats });
     } catch (err) {
@@ -204,7 +207,9 @@ function createHrPerformanceRouter({ logger }) {
   // GET /stats
   router.get('/stats', async (req, res) => {
     try {
-      const stats = await getService().getPerformanceStats({ branchId: req.branchId });
+      const stats = await getService().getPerformanceStats({
+        branchId: effectiveBranchScope(req) || undefined,
+      });
       res.json({ success: true, data: stats });
     } catch (err) {
       safeError(res, err, 'performance stats');

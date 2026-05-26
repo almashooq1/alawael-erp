@@ -7,6 +7,7 @@ const express = require('express');
 const router = express.Router();
 const { requireAuth, requireRole } = require('../middleware/auth');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { effectiveBranchScope } = require('../middleware/assertBranchMatch');
 const GoalBank = require('../models/GoalBank');
 const logger = require('../utils/logger');
 const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
@@ -100,7 +101,13 @@ router.post(
   requireRole(['admin', 'supervisor', 'therapist']),
   async (req, res) => {
     try {
-      const goal = await GoalBank.create({ ...stripUpdateMeta(req.body), branchId: req.branchId });
+      // W269g: req.branchId was never set by middleware — was the canonical
+      // source `req.branchScope.branchId`. The old code created
+      // orphaned goals (branchId=undefined) invisible to restricted callers.
+      const goal = await GoalBank.create({
+        ...stripUpdateMeta(req.body),
+        branchId: effectiveBranchScope(req),
+      });
       res.status(201).json({ success: true, data: goal });
     } catch (err) {
       logger.error('goalBank create error:', err);
@@ -158,8 +165,10 @@ router.post('/bulk', requireAuth, requireBranchAccess, requireRole(['admin']), a
     if (!Array.isArray(goals) || goals.length === 0) {
       return res.status(400).json({ success: false, message: 'goals array is required' });
     }
+    // W269g: same fix as create path — use the canonical branchScope.
+    const callerBranch = effectiveBranchScope(req);
     const result = await GoalBank.insertMany(
-      goals.map(g => ({ ...g, branchId: req.branchId })),
+      goals.map(g => ({ ...g, branchId: callerBranch })),
       { ordered: false }
     );
     res.status(201).json({ success: true, inserted: result.length });

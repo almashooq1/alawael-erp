@@ -2,18 +2,18 @@
   <img src="frontend/public/logo192.png" alt="Al-Awael ERP" width="80" />
 </p>
 
-<h1 align="center">Al-Awael ERP — v3.1.0</h1>
+<h1 align="center">Al-Awael ERP — v3.3.0</h1>
 <p align="center">
   نظام إدارة مراكز الأوائل للرعاية النهارية<br/>
   <em>Enterprise Resource Planning for Al-Awael Day Care Centers</em>
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-v3.1.0-blue" />
+  <img src="https://img.shields.io/badge/version-v3.3.0-blue" />
   <img src="https://img.shields.io/badge/node-%3E%3D18-brightgreen" />
   <img src="https://img.shields.io/badge/backend-Express%2FMongoDB-blue" />
   <img src="https://img.shields.io/badge/frontend-React%2018%20%2B%20MUI%205-61DAFB" />
-  <img src="https://img.shields.io/badge/sprint%20gate-1553%20passing-brightgreen" />
+  <img src="https://img.shields.io/badge/sprint%20gate-244%20suites%20passing-brightgreen" />
   <img src="https://img.shields.io/badge/eslint-0%20errors-brightgreen" />
   <img src="https://img.shields.io/badge/license-MIT-green" />
 </p>
@@ -25,9 +25,9 @@
 | Document                                                | Description                                                                                                                           |
 | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
 | [blueprint/README.md](docs/blueprint/README.md)         | 🎯 **Unified Platform Blueprint** — ERP+EMR+CRM+Rehab vision, 14 bounded contexts, canonical data model, 6-level RBAC, phased roadmap |
-| [MODULES.md](docs/MODULES.md)                           | 🗺️ **خريطة الوحدات** — 127 backend module + 80+ frontend page                                                                         |
+| [MODULES.md](docs/MODULES.md)                           | 🗺️ **خريطة الوحدات** — 211 mount points + 48 direct frontend pages (re-counted 2026-05-26; was 127+80 in v3.2.0)                      |
 | [ARCHITECTURE.md](docs/ARCHITECTURE.md)                 | System architecture, design decisions, module breakdown                                                                               |
-| [architecture/decisions/](docs/architecture/decisions/) | Architecture Decision Records (ADRs 001–009)                                                                                          |
+| [architecture/decisions/](docs/architecture/decisions/) | Architecture Decision Records (ADRs 001–031; 8 still-blocked, 23 accepted/superseded)                                                 |
 | [DEVELOPMENT.md](docs/DEVELOPMENT.md)                   | Developer setup guide, code standards, git workflow                                                                                   |
 | [CONTRIBUTING.md](CONTRIBUTING.md)                      | Contribution guidelines and PR process                                                                                                |
 | [SECURITY.md](SECURITY.md)                              | Vulnerability disclosure policy + PDPL compliance posture + scope                                                                     |
@@ -207,7 +207,7 @@ npm run dev:all
 ### Testing
 
 ```bash
-# Run the sprint gate — 1451 tests that CI enforces on every PR
+# Run the sprint gate — 244 test suites that CI enforces on every PR (re-counted 2026-05-26; was claimed 1451 in stale doc-snapshot)
 npm run test:sprint
 
 # Run the full backend suite (includes many legacy suites with stale

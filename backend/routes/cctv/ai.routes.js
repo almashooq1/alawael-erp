@@ -23,6 +23,7 @@ const express = require('express');
 const { CctvFaceIdentity, CctvAnpr, CctvZone, CctvEvent } = require('../../models/cctv');
 const aiDispatcher = require('../../services/cctv/ai');
 const { authenticateToken, requireRole } = require('../../middleware/auth');
+const { stripUpdateMeta } = require('../../utils/sanitize'); // W451
 
 const router = express.Router();
 router.use(authenticateToken);
@@ -40,7 +41,9 @@ router.get('/faces', requireRole(['admin', 'security_officer']), async (req, res
 
 router.post('/faces', requireRole(['admin', 'security_officer']), async (req, res) => {
   try {
-    const f = await CctvFaceIdentity.create(req.body);
+    // W451: sanitize before create — even admin shouldn't be able to
+    // mass-assign _id/__v/__proto__/etc into a biometric face record.
+    const f = await CctvFaceIdentity.create(stripUpdateMeta(req.body || {}));
     res.status(201).json({ success: true, data: f });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
@@ -48,7 +51,12 @@ router.post('/faces', requireRole(['admin', 'security_officer']), async (req, re
 });
 
 router.patch('/faces/:id', requireRole(['admin', 'security_officer']), async (req, res) => {
-  const f = await CctvFaceIdentity.findByIdAndUpdate(req.params.id, req.body, { new: true });
+  // W451: sanitize meta-fields before mass-assign on biometric face data
+  const f = await CctvFaceIdentity.findByIdAndUpdate(
+    req.params.id,
+    stripUpdateMeta(req.body || {}),
+    { new: true }
+  );
   if (!f) return res.status(404).json({ success: false, message: 'FACE_NOT_FOUND' });
   res.json({ success: true, data: f });
 });
@@ -72,7 +80,8 @@ router.get('/anpr', requireRole(['admin', 'security_officer']), async (req, res)
 
 router.post('/anpr', requireRole(['admin', 'security_officer']), async (req, res) => {
   try {
-    const r = await CctvAnpr.create(req.body);
+    // W451: sanitize meta-fields before create
+    const r = await CctvAnpr.create(stripUpdateMeta(req.body || {}));
     res.status(201).json({ success: true, data: r });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
@@ -92,7 +101,8 @@ router.get('/zones/:cameraId', async (req, res) => {
 
 router.post('/zones', requireRole(['admin', 'security_officer']), async (req, res) => {
   try {
-    const z = await CctvZone.create(req.body);
+    // W451: sanitize meta-fields before create
+    const z = await CctvZone.create(stripUpdateMeta(req.body || {}));
     res.status(201).json({ success: true, data: z });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
@@ -100,7 +110,10 @@ router.post('/zones', requireRole(['admin', 'security_officer']), async (req, re
 });
 
 router.patch('/zones/:id', requireRole(['admin', 'security_officer']), async (req, res) => {
-  const z = await CctvZone.findByIdAndUpdate(req.params.id, req.body, { new: true });
+  // W451: sanitize meta-fields before update
+  const z = await CctvZone.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body || {}), {
+    new: true,
+  });
   if (!z) return res.status(404).json({ success: false, message: 'ZONE_NOT_FOUND' });
   res.json({ success: true, data: z });
 });

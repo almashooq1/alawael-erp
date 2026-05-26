@@ -26,9 +26,16 @@ const { authenticateToken, requireRole } = require('../middleware/auth');
 const WaitingListEntry = require('../models/WaitingListEntry');
 const wl = require('../services/waitingListService');
 const safeError = require('../utils/safeError');
+const { stripUpdateMeta } = require('../utils/sanitize'); // W451
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
 
 router.use(authenticateToken);
+// W451: branch-scope waitlist admin. WaitingListEntry carries branchId.
+// Pre-W451 PATCH /:id was a bare findByIdAndUpdate(req.params.id, req.body)
+// — mass-assignment + tenant-takeover (set branchId to move waiter to
+// another branch).
+router.use(requireBranchAccess);
 router.use(bodyScopedBeneficiaryGuard); // W441: enforce branch on req.body.beneficiaryId
 
 const READ_ROLES = [
@@ -123,9 +130,16 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
-    const row = await WaitingListEntry.findByIdAndUpdate(req.params.id, req.body || {}, {
-      new: true,
-    });
+    // W451: branch-scoped + sanitized update. Pre-W451: bare
+    // findByIdAndUpdate(req.params.id, req.body) — mass-assignment
+    // of branchId / _id / __v / __proto__ / etc + tenant-takeover.
+    const body = stripUpdateMeta(req.body || {});
+    delete body.branchId; // tenant-takeover defense
+    const row = await WaitingListEntry.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) },
+      body,
+      { new: true }
+    );
     if (!row) return res.status(404).json({ success: false, message: 'غير موجود' });
     res.json({ success: true, data: row });
   } catch (err) {

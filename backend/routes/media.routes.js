@@ -789,8 +789,9 @@ router.get('/file/:filename', authenticate, requireBranchAccess, (req, res) => {
     // Path-traversal protection: strip directory components
     const safeName = path.basename(req.params.filename);
     const filePath = path.join(uploadsDir, safeName);
-    // Verify resolved path stays within uploads directory
-    if (!path.resolve(filePath).startsWith(path.resolve(uploadsDir))) {
+    // W454: strict path-sep boundary — prevents prefix-shared-sibling
+    // escape like `/path/uploads-evil/file` matching `/path/uploads`.
+    if (!path.resolve(filePath).startsWith(path.resolve(uploadsDir) + path.sep)) {
       return res.status(400).json({ success: false, message: 'اسم ملف غير صالح' });
     }
     if (!fs.existsSync(filePath)) {

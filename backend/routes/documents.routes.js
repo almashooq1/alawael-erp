@@ -723,7 +723,21 @@ router.get(
     const doc = await Document.findOne({ _id: req.params.id, status: { $ne: 'محذوف' } });
     if (!doc) return res.status(404).json({ success: false, message: 'المستند غير موجود' });
 
-    if (!fs.existsSync(doc.filePath)) {
+    // W454: defense-in-depth path-boundary check. `doc.filePath` is
+    // currently set only by saveToDisk() (server-controlled) and PUT
+    // /:id uses an explicit allowlist (no filePath update), so this
+    // check is belt-and-suspenders against future regressions, direct
+    // DB writes, or migrations that touch filePath.
+    const resolvedPath = path.resolve(doc.filePath);
+    if (!resolvedPath.startsWith(path.resolve(UPLOADS_ROOT) + path.sep)) {
+      logger.warn('[Documents] Path-boundary violation', {
+        docId: String(doc._id),
+        filePath: doc.filePath,
+      });
+      return res.status(403).json({ success: false, message: 'مسار غير مسموح' });
+    }
+
+    if (!fs.existsSync(resolvedPath)) {
       return res.status(404).json({ success: false, message: 'الملف غير موجود على الخادم' });
     }
 
@@ -734,7 +748,7 @@ router.get(
     );
     res.setHeader('Cache-Control', 'private, max-age=3600');
 
-    const stream = fs.createReadStream(doc.filePath);
+    const stream = fs.createReadStream(resolvedPath);
     stream.pipe(res);
     stream.on('error', err => {
       logger.error('[Documents] Preview stream error:', err);
@@ -752,7 +766,17 @@ router.get(
     const doc = await Document.findOne({ _id: req.params.id, status: { $ne: 'محذوف' } });
     if (!doc) return res.status(404).json({ success: false, message: 'المستند غير موجود' });
 
-    if (!fs.existsSync(doc.filePath)) {
+    // W454: defense-in-depth path-boundary check (see /preview)
+    const resolvedPath = path.resolve(doc.filePath);
+    if (!resolvedPath.startsWith(path.resolve(UPLOADS_ROOT) + path.sep)) {
+      logger.warn('[Documents] Path-boundary violation', {
+        docId: String(doc._id),
+        filePath: doc.filePath,
+      });
+      return res.status(403).json({ success: false, message: 'مسار غير مسموح' });
+    }
+
+    if (!fs.existsSync(resolvedPath)) {
       return res.status(404).json({ success: false, message: 'الملف غير موجود على الخادم' });
     }
 
@@ -764,7 +788,7 @@ router.get(
     res.setHeader('Content-Length', doc.fileSize);
     res.setHeader('Cache-Control', 'private, no-cache');
 
-    const stream = fs.createReadStream(doc.filePath);
+    const stream = fs.createReadStream(resolvedPath);
     stream.pipe(res);
     stream.on('error', err => {
       logger.error('[Documents] Download stream error:', err);

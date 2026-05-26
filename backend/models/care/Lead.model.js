@@ -206,6 +206,14 @@ leadSchema.virtual('isTerminal').get(function () {
 leadSchema.set('toJSON', { virtuals: true });
 leadSchema.set('toObject', { virtuals: true });
 
+// W437: optimistic concurrency. The lead-funnel state-machine
+// (services/care/leadFunnel.service.js transitionLead / closeLead /
+// convertToBeneficiary) does findById → push history → mutate status
+// → SLA observe + bus emit → save. Concurrent transitions silently
+// duplicate audit + double-emit. OCC throws VersionError on the
+// second concurrent save() instead of overwriting.
+leadSchema.set('optimisticConcurrency', true);
+
 // Exported as `CareLead` so the existing `CrmLead` legacy model keeps working.
 const CareLead = mongoose.models.CareLead || mongoose.model('CareLead', leadSchema);
 

@@ -158,6 +158,13 @@ psychRiskFlagSchema.virtual('ageMinutes').get(function () {
 psychRiskFlagSchema.set('toJSON', { virtuals: true });
 psychRiskFlagSchema.set('toObject', { virtuals: true });
 
+// W437: optimistic concurrency. Same race-class as W428-W431/W436. The
+// psych-risk-flag state-machine methods (raise / acknowledge / resolve /
+// escalate) all do findById → push history → set status → save with
+// downstream notification side-effects. OCC closes the silent duplicate
+// audit / double-notification race under concurrent supervisor actions.
+psychRiskFlagSchema.set('optimisticConcurrency', true);
+
 const PsychRiskFlag =
   mongoose.models.PsychRiskFlag || mongoose.model('PsychRiskFlag', psychRiskFlagSchema);
 

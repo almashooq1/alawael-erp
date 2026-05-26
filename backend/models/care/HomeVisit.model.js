@@ -268,6 +268,13 @@ homeVisitSchema.virtual('hasCriticalConcern').get(function () {
 homeVisitSchema.set('toJSON', { virtuals: true });
 homeVisitSchema.set('toObject', { virtuals: true });
 
+// W437: optimistic concurrency. The home-visit state-machine
+// (schedule / start / complete / cancel) does findById → push
+// statusHistory → mutate status → save with downstream SLA + bus
+// side-effects. Concurrent transitions silently duplicate audit
+// trail. OCC closes the race.
+homeVisitSchema.set('optimisticConcurrency', true);
+
 const HomeVisit = mongoose.models.HomeVisit || mongoose.model('HomeVisit', homeVisitSchema);
 
 module.exports = HomeVisit;

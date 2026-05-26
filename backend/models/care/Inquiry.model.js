@@ -130,6 +130,19 @@ inquirySchema.virtual('ageOpenHours').get(function () {
 inquirySchema.set('toJSON', { virtuals: true });
 inquirySchema.set('toObject', { virtuals: true });
 
+// W437: optimistic concurrency. The inquiry state-machine
+// (services/care/leadFunnel.service.js transitionInquiry / closeInquiry /
+// promoteInquiry) does findById → push history → mutate status → SLA
+// observe + bus emit → save. Concurrent state transitions silently
+// duplicate audit + double-emit. promoteInquiry specifically creates
+// a downstream Lead doc as a slow side-effect — OCC ensures only ONE
+// concurrent promotion's save() succeeds, but does NOT prevent both
+// from calling createLead() upstream. A full fix for promoteInquiry's
+// duplicate-lead-creation race would need a W433-style CAS reservation
+// (intermediate 'promoting' state); OCC at the schema level closes
+// the audit + final-status duplication.
+inquirySchema.set('optimisticConcurrency', true);
+
 const Inquiry = mongoose.models.Inquiry || mongoose.model('Inquiry', inquirySchema);
 
 module.exports = Inquiry;

@@ -19,7 +19,14 @@ jobs:
   tests:
     name: Tests & Code Quality
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # Bumped 15 → 25 (2026-05-26 Cycle 11 of CI investigation): backend
+    # test count grew past the original 15-min budget after W340+ added
+    # ~500+ drift assertions. Parallel Sprint Tests workflow finishes in
+    # ~7 min (focused on __tests__/), but THIS job also runs lint +
+    # coverage on top of the full test surface, pushing total to 17+ min.
+    # CI was cancelling here despite Sprint Tests success → false-failure
+    # signal blocking deploy.
+    timeout-minutes: 25
 
     steps:
       - name: Checkout code

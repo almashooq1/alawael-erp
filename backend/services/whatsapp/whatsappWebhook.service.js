@@ -66,7 +66,19 @@ function getConsentModel() {
 function verifySignature(rawBody, signature) {
   const secret = process.env.WHATSAPP_WEBHOOK_SECRET || '';
   if (!secret) {
-    logger.warn('[WhatsApp] WHATSAPP_WEBHOOK_SECRET not set — skipping signature check');
+    // Dev/test only — never skip in production. Same class as W419
+    // OTP fallback: a forgotten env var in prod would silently turn
+    // signature verification into a no-op, letting any external caller
+    // inject fake WhatsApp events (delivery-status / inbound-message /
+    // status-update) into the system. Refuse-to-verify is the safer
+    // failure mode — webhooks fail closed instead of fail open.
+    if (process.env.NODE_ENV === 'production') {
+      logger.error(
+        '[WhatsApp] WHATSAPP_WEBHOOK_SECRET not set in production — rejecting webhook (fail closed)'
+      );
+      return false;
+    }
+    logger.warn('[WhatsApp] WHATSAPP_WEBHOOK_SECRET not set — skipping signature check (dev only)');
     return true;
   }
   if (!signature || typeof signature !== 'string') return false;

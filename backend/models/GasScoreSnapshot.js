@@ -96,5 +96,4 @@ GasScoreSnapshotSchema.index({ branchId: 1, snapshotDate: -1, snapshotType: 1 })
 GasScoreSnapshotSchema.index({ episodeOfCareId: 1, snapshotDate: -1 });
 
 module.exports =
-  mongoose.models.GasScoreSnapshot ||
-  mongoose.model('GasScoreSnapshot', GasScoreSnapshotSchema);
+  mongoose.models.GasScoreSnapshot || mongoose.model('GasScoreSnapshot', GasScoreSnapshotSchema);

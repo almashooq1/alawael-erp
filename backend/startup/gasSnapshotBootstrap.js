@@ -49,7 +49,7 @@ function wireGasSnapshots(app, deps = {}) {
   const branchIdsRaw = process.env.GAS_SNAPSHOT_BRANCH_IDS || '';
   const branchIds = branchIdsRaw
     .split(',')
-    .map((s) => s.trim())
+    .map(s => s.trim())
     .filter(Boolean);
 
   if (branchIds.length === 0) {

@@ -183,7 +183,11 @@ router.post(
       try {
         bus = require('../services/quality/qualityEventBus.service').getDefault();
       } catch (err) {
-        return res.status(500).json({ success: false, error: `bus_unavailable: ${err.message}` });
+        // W456: strip err.message in production — could leak internal
+        // require paths or library internals. Log full err for ops.
+        const logger = require('../utils/logger');
+        logger.error('[notificationLog] bus unavailable', { stack: err.stack });
+        return res.status(500).json({ success: false, error: 'bus_unavailable' });
       }
       await bus.emit(doc.eventName, doc.payloadSummary || {});
       res.json({

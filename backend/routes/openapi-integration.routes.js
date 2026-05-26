@@ -30,6 +30,7 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const YAML = require('yaml');
+const safeError = require('../utils/safeError'); // W456
 
 const router = express.Router();
 
@@ -64,7 +65,8 @@ router.get('/integration.yaml', (_req, res) => {
     res.set('Cache-Control', 'public, max-age=60');
     res.send(yaml);
   } catch (err) {
-    res.status(500).json({ error: 'SPEC_LOAD_FAILED', message: err.message });
+    // W456: safeError suppresses err.message (e.g. internal paths) in prod
+    return safeError(res, err, 'openapi.yaml');
   }
 });
 
@@ -75,7 +77,7 @@ router.get('/integration.json', (_req, res) => {
     res.set('Cache-Control', 'public, max-age=60');
     res.send(JSON.stringify(parsed, null, 2));
   } catch (err) {
-    res.status(500).json({ error: 'SPEC_LOAD_FAILED', message: err.message });
+    return safeError(res, err, 'openapi.json'); // W456
   }
 });
 
@@ -99,7 +101,7 @@ router.get('/integration', (req, res, next) => {
       .reduce((chain, mw) => chain.then(() => new Promise(r => mw(req, res, r))), Promise.resolve())
       .then(() => setup(req, res, next));
   } catch (err) {
-    res.status(500).json({ error: 'SWAGGER_UI_LOAD_FAILED', message: err.message });
+    return safeError(res, err, 'swagger-ui'); // W456
   }
 });
 
@@ -117,7 +119,7 @@ router.get('/integration.postman.json', (_req, res) => {
     );
     res.send(JSON.stringify(collection, null, 2));
   } catch (err) {
-    res.status(500).json({ error: 'POSTMAN_GEN_FAILED', message: err.message });
+    return safeError(res, err, 'postman-gen'); // W456
   }
 });
 
@@ -130,7 +132,7 @@ router.get('/events.yaml', (_req, res) => {
     res.set('Cache-Control', 'public, max-age=60');
     res.send(yaml);
   } catch (err) {
-    res.status(500).json({ error: 'ASYNCAPI_LOAD_FAILED', message: err.message });
+    return safeError(res, err, 'asyncapi.yaml'); // W456
   }
 });
 
@@ -141,7 +143,7 @@ router.get('/events.json', (_req, res) => {
     res.set('Cache-Control', 'public, max-age=60');
     res.send(JSON.stringify(parsed, null, 2));
   } catch (err) {
-    res.status(500).json({ error: 'ASYNCAPI_LOAD_FAILED', message: err.message });
+    return safeError(res, err, 'asyncapi.json'); // W456
   }
 });
 

@@ -33,6 +33,7 @@ const {
 } = require('../../services/quality/branchQualityHeatmap.service');
 const { createDashboardCache } = require('../../services/quality/dashboard-cache.util');
 const logger = require('../../utils/logger');
+const safeError = require('../../utils/safeError'); // W456
 
 // Single instance per process; aggregations are read-only.
 const service = createBranchQualityHeatmapService({ logger });
@@ -68,8 +69,8 @@ router.get('/', requireMfaTier(1), async (req, res) => {
     const data = await cachedBuildHeatmap({ branchIds });
     res.json({ success: true, ...data });
   } catch (err) {
-    logger.error('[branchQualityHeatmap] GET / failed', err);
-    res.status(500).json({ success: false, code: 'INTERNAL_ERROR', message: err.message });
+    // W456: safeError suppresses err.message in production
+    return safeError(res, err, 'branchQualityHeatmap.list');
   }
 });
 

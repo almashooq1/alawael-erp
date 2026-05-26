@@ -28,6 +28,7 @@ const { authenticateToken, requireRole } = require('../middleware/auth');
 const FieldTrip = require('../models/FieldTrip');
 const Beneficiary = require('../models/Beneficiary');
 const safeError = require('../utils/safeError');
+const { stripUpdateMeta } = require('../utils/sanitize'); // W450
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
 
@@ -213,12 +214,18 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
         .status(409)
         .json({ success: false, message: 'لا يمكن تعديل رحلة بحالة ' + row.status });
     }
-    const body = { ...(req.body || {}) };
+    // W450: strip protected meta-fields (_id, __v, createdBy, role, etc)
+    // before mass-assign so attacker can't escalate or move the doc to
+    // another branch. The W446 branchFilter check at load-time only
+    // ensures the doc IS in caller's branch — without stripUpdateMeta
+    // the attacker could set body.branchId to move it OUT.
+    const body = stripUpdateMeta(req.body || {});
     delete body.status;
     delete body.enrollments;
     delete body.staffParticipants; // use /staff
     delete body.actualDepartureTime;
     delete body.actualReturnTime;
+    delete body.branchId; // tenant-takeover defense
     if (body.tripDate) body.tripDate = new Date(body.tripDate);
     if (body.endDate) body.endDate = new Date(body.endDate);
     Object.assign(row, body);

@@ -29,6 +29,7 @@ const { attachMfaActor, requireMfaTier } = require('../middleware/requireMfaTier
 const IEP = require('../models/IndividualEducationPlan');
 const Beneficiary = require('../models/Beneficiary');
 const safeError = require('../utils/safeError');
+const { stripUpdateMeta } = require('../utils/sanitize'); // W450
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
 
@@ -202,7 +203,8 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
         .status(409)
         .json({ success: false, message: 'لا يمكن تعديل خطة بحالة ' + row.status });
     }
-    const body = { ...(req.body || {}) };
+    // W450: strip protected meta-fields + tenant-takeover defense
+    const body = stripUpdateMeta(req.body || {});
     delete body.beneficiaryId;
     delete body.planYear;
     delete body.status; // use /transition
@@ -210,6 +212,7 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
     delete body.goals; // use /goals endpoints
     delete body.services; // use /services endpoints
     delete body.reviewHistory; // use /review
+    delete body.branchId; // tenant-takeover defense
     Object.assign(row, body);
     await row.save();
     res.json({ success: true, data: row });

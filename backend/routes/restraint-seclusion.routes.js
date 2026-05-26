@@ -29,6 +29,7 @@ const { authenticateToken, requireRole } = require('../middleware/auth');
 const RSEvent = require('../models/RestraintSeclusionEvent');
 const Beneficiary = require('../models/Beneficiary');
 const safeError = require('../utils/safeError');
+const { stripUpdateMeta } = require('../utils/sanitize'); // W450
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
 
@@ -391,13 +392,15 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
     if (row.status === 'reviewed') {
       return res.status(409).json({ success: false, message: 'السجل مراجَع — لا يمكن تعديله' });
     }
-    const body = { ...(req.body || {}) };
+    // W450: strip protected meta-fields + tenant-takeover defense
+    const body = stripUpdateMeta(req.body || {});
     delete body.beneficiaryId;
     delete body.status;
     delete body.finalizedAt;
     delete body.reviewedBy;
     delete body.reviewedByName;
     delete body.reviewedAt;
+    delete body.branchId; // tenant-takeover defense
     if (body.startTime) body.startTime = new Date(body.startTime);
     if (body.endTime) body.endTime = new Date(body.endTime);
     Object.assign(row, body);

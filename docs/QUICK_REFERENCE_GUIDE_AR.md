@@ -513,8 +513,8 @@ act push -W .github/workflows/quality-gate.yml
 ### التوثيق الداخلي
 
 - [CI/CD Setup Guide](./CI_CD_SETUP_GUIDE.md)
-- [Monitoring Setup](../monitoring/README.md)
-- [OpenTelemetry Guide](../monitoring/OPENTELEMETRY_SETUP.md)
+- [Monitoring Guide](./MONITORING_GUIDE.md) <!-- was broken `../monitoring/README.md` (dir deprecated; original moved to _archived/dead-monitoring/) — fixed 2026-05-26 -->
+- [Monitoring & Alerting Guide (wiki)](./wiki/MONITORING_AND_ALERTING_GUIDE.md) <!-- was broken `../monitoring/OPENTELEMETRY_SETUP.md` (file archived) — replaced with active wiki doc 2026-05-26 -->
 - [Comprehensive Implementation Guide](./COMPREHENSIVE_IMPLEMENTATION_GUIDE.md)
 
 ### الأدوات المستخدمة

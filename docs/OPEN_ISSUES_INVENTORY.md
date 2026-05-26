@@ -1,7 +1,7 @@
 # Open Issues Inventory — Single Source of Truth
 
 **Type**: Team-collaboration backlog (Claude + المستخدم)
-**Updated**: 2026-05-25
+**Updated**: 2026-05-26
 **Purpose**: Every open item across the platform in one place, with **who decides** + **who implements** + **blockers** + **suggested order**
 
 This is the doc we (Claude + user) work from during the systematic problem-solving cadence. Pick items, work them through, mark done. Don't let issues live only in CLAUDE.md / individual ADRs / scattered TODOs — pull them here.

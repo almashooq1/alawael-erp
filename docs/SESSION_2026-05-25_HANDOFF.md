@@ -82,23 +82,25 @@ Updated gate table (post-fix):
 
 ### Cycle 11 final tally — 7 silent CI bugs uncovered + fixed
 
-| # | Bug | Fix commit | Layer |
-| --- | --- | --- | --- |
-| 1 | `backend/intelligence/canonical/_primitives.js` silently gitignored (broke 22 canonical schemas on CI clone) | `327192b1c` (parallel agent force-add) + `ca453d703` (my `!`-negation) | gitignore |
-| 2 | `preflight.PROVIDERS` extended 10→12 in pre-1 broke 10-name `provider-registry-consistency` contract | `df91e5e0f` (split into PROVIDERS + PHASE3_ADAPTERS) | test contract |
-| 3 | `sprint-tests.yml` paths missed W269d-W269g (security sweep) | `862ac1050` | CI paths |
-| 4 | Frontend `services-system.service.test.js` async-count asserted ≥50 but refactor reduced to 46 | `bdf98b17d` (absorbed; relaxed to ≥40) | brittle assertion |
-| 5 | `sprint-tests.yml` paths missed W269h (`no-broken-req-branchid`) | `920a22005` (absorbed) | CI paths (recurring class) |
-| 6 | 2 ESLint `/* eslint-env */` errors (deprecated in ESLint 9+) in test files | `a2377c5da` | lint |
-| 7 | CI Pipeline "Tests & Code Quality" job timeout 15min not enough (backend test count grew) | `9f070d929` (15→25 min) | CI config |
+| #   | Bug                                                                                                          | Fix commit                                                             | Layer                      |
+| --- | ------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------- | -------------------------- |
+| 1   | `backend/intelligence/canonical/_primitives.js` silently gitignored (broke 22 canonical schemas on CI clone) | `327192b1c` (parallel agent force-add) + `ca453d703` (my `!`-negation) | gitignore                  |
+| 2   | `preflight.PROVIDERS` extended 10→12 in pre-1 broke 10-name `provider-registry-consistency` contract         | `df91e5e0f` (split into PROVIDERS + PHASE3_ADAPTERS)                   | test contract              |
+| 3   | `sprint-tests.yml` paths missed W269d-W269g (security sweep)                                                 | `862ac1050`                                                            | CI paths                   |
+| 4   | Frontend `services-system.service.test.js` async-count asserted ≥50 but refactor reduced to 46               | `bdf98b17d` (absorbed; relaxed to ≥40)                                 | brittle assertion          |
+| 5   | `sprint-tests.yml` paths missed W269h (`no-broken-req-branchid`)                                             | `920a22005` (absorbed)                                                 | CI paths (recurring class) |
+| 6   | 2 ESLint `/* eslint-env */` errors (deprecated in ESLint 9+) in test files                                   | `a2377c5da`                                                            | lint                       |
+| 7   | CI Pipeline "Tests & Code Quality" job timeout 15min not enough (backend test count grew)                    | `9f070d929` (15→25 min)                                                | CI config                  |
 
 **Final verified state (post-`9f070d929`)**:
+
 - ✅ Sprint Tests SUCCESS on `9f070d929`
 - ✅ 4/5 CI Pipeline jobs SUCCESS (Frontend / Mobile / SCM / Security Scanning)
 - ⚠ Tests & Code Quality job runs to ~17 min; would have completed but got cancelled by parallel-agent's next push (concurrency `cancel-in-progress:true`)
 - ✅ Code-level CI gates ALL FIXED — the only remaining "issue" is operational (parallel-agent push cadence vs CI concurrency rule)
 
 **Memory entries from this session**:
+
 - `feedback_local_pass_is_not_ci_pass` — the core lesson (local pass ≠ CI pass)
 - `feedback_verify_classifications_at_execution` — don't blindly execute prior plans
 - `feedback_full_sweep_drift_guard_verification` — end-of-session sweep recipe
@@ -115,6 +117,7 @@ Ordered by leverage:
 1. **Choose pilot branch** (PILOT_CYCLE_1.md Q1 — `📋 CRITICAL`, blocks ALL pilot work)
 
    - Effort: 1 stakeholder call with branch manager
+   - **Decision tool ready**: [`pilot/BRANCH_SELECTION_SCORECARD.md`](pilot/BRANCH_SELECTION_SCORECARD.md) — 9-criterion scorecard, fill in 2-3 candidates, highest score wins (turns the §2 checklist into a numerical decision)
    - Once done: SCENARIO_1-6 walkthroughs can execute, training plan can schedule
 
 2. **AWS install for pilot env** (Cycle 1 #2 user-side)
@@ -137,9 +140,10 @@ Ordered by leverage:
 
 ### Medium leverage — vendor relationships
 
-5. **DA + Mudad sandbox creds outreach** (per [PRODUCTION_GAPS_BEFORE_LIVE.md](PRODUCTION_GAPS_BEFORE_LIVE.md) §2)
+5. **DA + Mudad + Sehhaty sandbox creds outreach** (per [PRODUCTION_GAPS_BEFORE_LIVE.md](PRODUCTION_GAPS_BEFORE_LIVE.md) §2)
    - Long lead time — start contact even if not acting immediately
    - DA blocks pilot Week 3 live-cutover
+   - **Drafts ready**: [`pilot/VENDOR_OUTREACH_DRAFTS.md`](pilot/VENDOR_OUTREACH_DRAFTS.md) — 3 Arabic emails (DA + Sehhaty + Mudad) with exact technical asks; review + send
 
 ### Low leverage — when convenient
 

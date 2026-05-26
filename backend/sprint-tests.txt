@@ -103,6 +103,7 @@ __tests__/eod-digest-loaders-wave32.test.js
 __tests__/access-review-wave38.test.js
 __tests__/access-review-attestation-behavioral-wave38.test.js
 __tests__/beneficiary-lifecycle-wave39.test.js
+__tests__/beneficiary-lifecycle-transition-behavioral-wave39.test.js
 __tests__/care-plan-wave41.test.js
 __tests__/care-plan-explain-views-llm-wave48.test.js
 __tests__/care-plan-e2e-wave49.test.js
@@ -297,3 +298,4 @@ __tests__/goal-forecaster-service-wave430.test.js
 __tests__/wbci-trigger-engine-wave471.test.js
 __tests__/smart-inbox-ranker-wave431.test.js
 __tests__/phase-c-e2e-smoke-wave472.test.js
+__tests__/caseload-matcher-wave432.test.js

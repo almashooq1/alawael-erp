@@ -119,7 +119,7 @@
     "test:phase3": "jest --no-coverage",
     "test:guard:maintenance-mocks": "node scripts/testing/check-maintenance-mocks-centralized.js",
     "test:guard:model-collisions": "node scripts/testing/check-model-collisions.js",
-    "test:guard": "npm run test:guard:maintenance-mocks && npm run test:guard:model-collisions",
+    "test:guard": "npm run test:guard:maintenance-mocks && npm run test:guard:model-collisions && npm run check:sprint-paths",
     "quality:backend": "npm run test:guard && npm test -- --passWithNoTests --no-coverage",
     "quality:ci": "npm run audit:ci && npm run test:guard && npm test -- --passWithNoTests --ci --runInBand",
     "quality:push": "npm run test:guard && npm run test:domains && npm run test:phase2 -- --ci --runInBand",

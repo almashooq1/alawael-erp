@@ -347,10 +347,12 @@ router.get('/jobs/:id/download', authenticate, requireBranchAccess, async (req, 
     const fs = require('fs');
     const { pipeline } = require('stream');
 
-    // Path-traversal guard: resolve and verify containment
+    // W455: path-traversal guard with strict path.sep boundary —
+    // prevents prefix-shared-sibling escape (e.g. `/generated_reports-evil/...`
+    // matching `/generated_reports`).
     const reportsDir = path.resolve(__dirname, '..', 'generated_reports');
     const filePath = path.resolve(reportsDir, path.basename(job.file_path));
-    if (!filePath.startsWith(reportsDir)) {
+    if (!filePath.startsWith(reportsDir + path.sep)) {
       return res.status(400).json({ success: false, message: 'مسار الملف غير صالح' });
     }
     if (!fs.existsSync(filePath)) {

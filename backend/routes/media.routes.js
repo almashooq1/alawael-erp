@@ -872,7 +872,15 @@ router.get('/:id/download', authenticate, requireBranchAccess, async (req, res) 
     }
 
     const filePath = media.filePath || path.join(uploadsDir, media.fileName);
-    if (!fs.existsSync(filePath)) {
+    // W455: defense-in-depth path-boundary check. `media.filePath` is
+    // currently server-controlled but with no PUT guard against
+    // filePath updates the way documents.routes.js has, this is the
+    // primary defense rather than belt-and-suspenders.
+    const resolvedFile = path.resolve(filePath);
+    if (!resolvedFile.startsWith(path.resolve(uploadsDir) + path.sep)) {
+      return res.status(403).json({ success: false, message: 'مسار غير مسموح' });
+    }
+    if (!fs.existsSync(resolvedFile)) {
       return res.status(404).json({ success: false, message: 'الملف غير موجود على الخادم' });
     }
 
@@ -890,7 +898,7 @@ router.get('/:id/download', authenticate, requireBranchAccess, async (req, res) 
       /[\r\n"]/g,
       '_'
     );
-    res.download(filePath, safeOriginalName);
+    res.download(resolvedFile, safeOriginalName);
   } catch (error) {
     safeError(res, error, 'GET /media/:id/download error');
   }

@@ -6,16 +6,16 @@
 
 ## نظرة عامة (re-counted 2026-05-26)
 
-| الطبقة             | المحتوى                                          | العدد (2026-05-26)             | كان (v3.2.0) |
-| ------------------ | ------------------------------------------------ | ------------------------------ | ------------ |
-| Backend Mounts     | `dualMount`/`safeMount` calls في `_registry.js`  | **211** (197 unique paths)     | 127          |
-| Frontend Pages     | ملفات مباشرة في `src/pages/` (المستوى الأول)     | **48** ملف pages مباشر         | "80+"        |
-| Frontend Total JSX | كل `.jsx`/`.tsx` في `src/pages/` (recursive)     | **564** (بما فيها subfolders)  | n/a          |
-| Mongoose Models    | ملفات في `backend/models/**` (recursive)         | **865** ملف (530 في المستوى 1) | "350+"       |
-| Unique Model Names | أسماء فريدة مُسجَّلة (mongoose+connection+helper) | **1,253** اسم فريد             | n/a          |
-| Backend Services   | `*.service.js` تحت `backend/services/`           | **305** ملف خدمة               | "60+"        |
-| Backend Tests      | `.test.js` في `__tests__/` + `tests/`            | **2,210** ملف اختبار           | n/a          |
-| Frontend Tests     | `.test.js`/`.test.jsx` في `frontend/src/`        | **1,305** ملف اختبار           | "1,303"      |
+| الطبقة             | المحتوى                                           | العدد (2026-05-26)             | كان (v3.2.0)    |
+| ------------------ | ------------------------------------------------- | ------------------------------ | --------------- |
+| Backend Mounts     | `dualMount`/`safeMount` calls في `_registry.js`   | **211** (197 unique paths)     | 127             |
+| Frontend Pages     | ملفات مباشرة في `src/pages/` (المستوى الأول)      | **48** ملف pages مباشر         | "80+"           |
+| Frontend Total JSX | كل `.jsx`/`.tsx` في `src/pages/` (recursive)      | **564** (بما فيها subfolders)  | n/a             |
+| Mongoose Models    | ملفات في `backend/models/**` (recursive)          | **865** ملف (530 في المستوى 1) | "350+"          |
+| Unique Model Names | أسماء فريدة مُسجَّلة (mongoose+connection+helper) | **1,253** اسم فريد             | n/a             |
+| Backend Services   | `*.service.js` تحت `backend/services/`            | **305** ملف خدمة               | "60+"           |
+| Backend Tests      | `.test.js` في `__tests__/` + `tests/`             | **2,210** ملف اختبار           | n/a             |
+| Frontend Tests     | `.test.js`/`.test.jsx` في `frontend/src/`         | **1,305** ملف اختبار           | "1,303"         |
 | Grand Total Tests  | جميع ملفات `.test.js[x]`                          | **3,515** ملف                  | "9409 اختبار"\* |
 
 \* الرقم "9409 اختبار" في v3.2.0 كان يحسب test() functions داخل الملفات (متغيّر بشكل كبير)، ليس عدد الملفات. الأرقام الجديدة تحسب الملفات (أكثر استقراراً للقياس).

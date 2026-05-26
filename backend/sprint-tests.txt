@@ -249,3 +249,8 @@ __tests__/diet-prescription-wave368.test.js
 __tests__/facility-asset-wave369.test.js
 __tests__/caregiver-support-program-wave384.test.js
 __tests__/caregiver-support-program-behavioral-wave384.test.js
+__tests__/seizure-log-behavioral-wave356.test.js
+__tests__/safeguarding-behavioral-wave357.test.js
+__tests__/communication-aid-behavioral-wave358.test.js
+__tests__/assistive-device-behavioral-wave359.test.js
+__tests__/cbahi-behavioral-wave360.test.js

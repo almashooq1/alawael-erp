@@ -28,9 +28,14 @@ const { authenticateToken, requireRole } = require('../middleware/auth');
 const SeizureEvent = require('../models/SeizureEvent');
 const Beneficiary = require('../models/Beneficiary');
 const safeError = require('../utils/safeError');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
 
 router.use(authenticateToken);
+// W445: branch-scope every endpoint. Model carries `branchId`; pre-W445
+// list filters were optional + instance loads bare findById, opening
+// cross-tenant IDOR (read/modify/delete any branch by ObjectId guess).
+router.use(requireBranchAccess);
 router.use(bodyScopedBeneficiaryGuard); // W441: enforce branch on req.body.beneficiaryId
 
 const READ_ROLES = [
@@ -87,7 +92,10 @@ async function hydrate(items) {
 router.get('/today', requireRole(READ_ROLES), async (req, res) => {
   try {
     const d = req.query.date ? new Date(req.query.date) : new Date();
-    const filter = { date: { $gte: startOfDay(d), $lte: endOfDay(d) } };
+    const filter = {
+      ...branchFilter(req), // W445
+      date: { $gte: startOfDay(d), $lte: endOfDay(d) },
+    };
     if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
@@ -123,7 +131,7 @@ router.get('/today', requireRole(READ_ROLES), async (req, res) => {
 // ── GET / ──────────────────────────────────────────────────────────────
 router.get('/', requireRole(READ_ROLES), async (req, res) => {
   try {
-    const filter = {};
+    const filter = { ...branchFilter(req) }; /* W445 */
     if (req.query.beneficiaryId && mongoose.isValidObjectId(req.query.beneficiaryId)) {
       filter.beneficiaryId = req.query.beneficiaryId;
     }
@@ -171,7 +179,10 @@ router.get('/by-beneficiary/:id', requireRole(READ_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const items = await SeizureEvent.find({ beneficiaryId: req.params.id })
+    const items = await SeizureEvent.find({
+      ...branchFilter(req),
+      /* W445 */ beneficiaryId: req.params.id,
+    })
       .sort({ startTime: -1 })
       .limit(100)
       .lean();
@@ -201,7 +212,10 @@ router.get('/stats', requireRole(READ_ROLES), async (req, res) => {
       ? startOfDay(new Date(req.query.from))
       : startOfDay(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000));
     const to = req.query.to ? endOfDay(new Date(req.query.to)) : endOfDay(new Date());
-    const filter = { date: { $gte: from, $lte: to } };
+    const filter = {
+      ...branchFilter(req), // W445
+      date: { $gte: from, $lte: to },
+    };
     if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
@@ -254,7 +268,8 @@ router.get('/:id', requireRole(READ_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await SeizureEvent.findById(req.params.id).lean();
+    const row = await SeizureEvent.findOne({ _id: req.params.id, ...branchFilter(req) }) /* W445 */
+      .lean();
     if (!row) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
     const [hydrated] = await hydrate([row]);
     res.json({ success: true, data: hydrated });
@@ -357,7 +372,7 @@ router.post('/:id/notify-parent', requireRole(WRITE_ROLES), async (req, res) => 
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await SeizureEvent.findById(req.params.id);
+    const row = await SeizureEvent.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W445 */
     if (!row) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
     if (row.status === 'reviewed') {
       return res.status(409).json({ success: false, message: 'لا يمكن تعديل سجل تمت مراجعته' });
@@ -379,7 +394,7 @@ router.post('/:id/notify-supervisor', requireRole(WRITE_ROLES), async (req, res)
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await SeizureEvent.findById(req.params.id);
+    const row = await SeizureEvent.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W445 */
     if (!row) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
     if (row.status === 'reviewed') {
       return res.status(409).json({ success: false, message: 'لا يمكن تعديل سجل تمت مراجعته' });
@@ -400,7 +415,7 @@ router.post('/:id/review', requireRole(REVIEW_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await SeizureEvent.findById(req.params.id);
+    const row = await SeizureEvent.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W445 */
     if (!row) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
     if (row.status === 'reviewed') {
       return res.status(409).json({ success: false, message: 'السجل سبق وأن تمت مراجعته' });
@@ -422,7 +437,7 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await SeizureEvent.findById(req.params.id);
+    const row = await SeizureEvent.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W445 */
     if (!row) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
     if (row.status === 'reviewed') {
       return res.status(409).json({ success: false, message: 'لا يمكن تعديل سجل تمت مراجعته' });
@@ -464,7 +479,10 @@ router.delete('/:id', requireRole(DELETE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await SeizureEvent.findByIdAndDelete(req.params.id);
+    const row = await SeizureEvent.findOneAndDelete({
+      _id: req.params.id,
+      ...branchFilter(req),
+    }); /* W445 */
     if (!row) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
     res.json({ success: true, deleted: true, id: req.params.id });
   } catch (err) {

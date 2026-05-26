@@ -34,9 +34,14 @@ const { authenticateToken, requireRole } = require('../middleware/auth');
 const Rx = require('../models/BeneficiaryDietPrescription');
 const Beneficiary = require('../models/Beneficiary');
 const safeError = require('../utils/safeError');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
 
 router.use(authenticateToken);
+// W445: branch-scope every endpoint. Model carries `branchId`; pre-W445
+// list filters were optional + instance loads bare findById, opening
+// cross-tenant IDOR (read/modify/delete any branch by ObjectId guess).
+router.use(requireBranchAccess);
 router.use(bodyScopedBeneficiaryGuard); // W441: enforce branch on req.body.beneficiaryId
 
 const READ_ROLES = [
@@ -94,7 +99,7 @@ async function hydrate(items) {
 // ── GET / ───────────────────────────────────────────────────────────
 router.get('/', requireRole(READ_ROLES), async (req, res) => {
   try {
-    const filter = {};
+    const filter = { ...branchFilter(req) }; /* W445 */
     if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
@@ -133,7 +138,10 @@ router.get('/by-beneficiary/:id', requireRole(READ_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Rx.findOne({ beneficiaryId: req.params.id }).lean();
+    const row = await Rx.findOne({
+      beneficiaryId: req.params.id,
+      ...branchFilter(req), // W445
+    }).lean();
     if (!row) return res.status(404).json({ success: false, message: 'لا توجد وصفة غذائية' });
     const [hydrated] = await hydrate([row]);
     res.json({ success: true, data: hydrated });
@@ -146,7 +154,11 @@ router.get('/by-beneficiary/:id', requireRole(READ_ROLES), async (req, res) => {
 router.get('/due-review', requireRole(READ_ROLES), async (req, res) => {
   try {
     const now = new Date();
-    const filter = { status: 'active', nextReviewDue: { $ne: null, $lt: now } };
+    const filter = {
+      ...branchFilter(req), // W445
+      status: 'active',
+      nextReviewDue: { $ne: null, $lt: now },
+    };
     if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
@@ -161,7 +173,7 @@ router.get('/due-review', requireRole(READ_ROLES), async (req, res) => {
 // ── GET /npo-active ─────────────────────────────────────────────────
 router.get('/npo-active', requireRole(READ_ROLES), async (req, res) => {
   try {
-    const filter = { status: 'active', npo: true };
+    const filter = { ...branchFilter(req), status: 'active', npo: true }; /* W445 */
     if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
@@ -176,7 +188,11 @@ router.get('/npo-active', requireRole(READ_ROLES), async (req, res) => {
 // ── GET /enteral-active ─────────────────────────────────────────────
 router.get('/enteral-active', requireRole(READ_ROLES), async (req, res) => {
   try {
-    const filter = { status: 'active', 'enteralFeeding.active': true };
+    const filter = {
+      ...branchFilter(req),
+      status: 'active',
+      'enteralFeeding.active': true,
+    }; /* W445 */
     if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
@@ -191,7 +207,7 @@ router.get('/enteral-active', requireRole(READ_ROLES), async (req, res) => {
 // ── GET /stats ──────────────────────────────────────────────────────
 router.get('/stats', requireRole(READ_ROLES), async (req, res) => {
   try {
-    const filter = {};
+    const filter = { ...branchFilter(req) }; /* W445 */
     if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
@@ -239,7 +255,8 @@ router.get('/:id', requireRole(READ_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Rx.findById(req.params.id).lean();
+    const row = await Rx.findOne({ _id: req.params.id, ...branchFilter(req) }) /* W445 */
+      .lean();
     if (!row) return res.status(404).json({ success: false, message: 'الوصفة غير موجودة' });
     const [hydrated] = await hydrate([row]);
     res.json({ success: true, data: hydrated });
@@ -255,7 +272,10 @@ router.post('/', requireRole(PRESCRIBE_ROLES), async (req, res) => {
     if (!body.beneficiaryId || !mongoose.isValidObjectId(body.beneficiaryId)) {
       return res.status(400).json({ success: false, message: 'beneficiaryId مطلوب' });
     }
-    const existing = await Rx.findOne({ beneficiaryId: body.beneficiaryId }).lean();
+    const existing = await Rx.findOne({
+      beneficiaryId: body.beneficiaryId,
+      ...branchFilter(req), // W445
+    }).lean();
     if (existing) {
       return res.status(409).json({
         success: false,
@@ -318,7 +338,7 @@ router.post('/:id/activate', requireRole(PRESCRIBE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Rx.findById(req.params.id);
+    const row = await Rx.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W445 */
     if (!row) return res.status(404).json({ success: false, message: 'الوصفة غير موجودة' });
     if (!['draft', 'on_hold'].includes(row.status)) {
       return res
@@ -359,7 +379,7 @@ router.post('/:id/start-npo', requireRole(PRESCRIBE_ROLES), async (req, res) => 
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Rx.findById(req.params.id);
+    const row = await Rx.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W445 */
     if (!row) return res.status(404).json({ success: false, message: 'الوصفة غير موجودة' });
     if (!String(req.body?.reason || '').trim()) {
       return res.status(400).json({ success: false, message: 'سبب NPO مطلوب' });
@@ -384,7 +404,7 @@ router.post('/:id/end-npo', requireRole(PRESCRIBE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Rx.findById(req.params.id);
+    const row = await Rx.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W445 */
     if (!row) return res.status(404).json({ success: false, message: 'الوصفة غير موجودة' });
     if (!row.npo) {
       return res.status(409).json({ success: false, message: 'الوصفة ليست في NPO حالياً' });
@@ -407,7 +427,7 @@ router.post('/:id/start-enteral', requireRole(PRESCRIBE_ROLES), async (req, res)
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Rx.findById(req.params.id);
+    const row = await Rx.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W445 */
     if (!row) return res.status(404).json({ success: false, message: 'الوصفة غير موجودة' });
     const body = req.body || {};
     if (!ENTERAL_ROUTES.includes(String(body.route))) {
@@ -448,7 +468,7 @@ router.post('/:id/stop-enteral', requireRole(PRESCRIBE_ROLES), async (req, res) 
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Rx.findById(req.params.id);
+    const row = await Rx.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W445 */
     if (!row) return res.status(404).json({ success: false, message: 'الوصفة غير موجودة' });
     if (!row.enteralFeeding || !row.enteralFeeding.active) {
       return res.status(409).json({ success: false, message: 'التغذية الأنبوبية غير مفعّلة' });
@@ -467,7 +487,7 @@ router.post('/:id/review', requireRole(PRESCRIBE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Rx.findById(req.params.id);
+    const row = await Rx.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W445 */
     if (!row) return res.status(404).json({ success: false, message: 'الوصفة غير موجودة' });
     if (row.status !== 'active') {
       return res
@@ -500,7 +520,7 @@ router.post('/:id/discontinue', requireRole(PRESCRIBE_ROLES), async (req, res) =
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Rx.findById(req.params.id);
+    const row = await Rx.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W445 */
     if (!row) return res.status(404).json({ success: false, message: 'الوصفة غير موجودة' });
     if (!String(req.body?.reason || '').trim()) {
       return res.status(400).json({ success: false, message: 'سبب الإيقاف مطلوب' });
@@ -520,7 +540,7 @@ router.patch('/:id', requireRole(PRESCRIBE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Rx.findById(req.params.id);
+    const row = await Rx.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W445 */
     if (!row) return res.status(404).json({ success: false, message: 'الوصفة غير موجودة' });
     if (row.status === 'discontinued') {
       return res.status(409).json({ success: false, message: 'الوصفة موقوفة' });
@@ -557,7 +577,7 @@ router.delete('/:id', requireRole(DELETE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Rx.findByIdAndDelete(req.params.id);
+    const row = await Rx.findOneAndDelete({ _id: req.params.id, ...branchFilter(req) }); /* W445 */
     if (!row) return res.status(404).json({ success: false, message: 'الوصفة غير موجودة' });
     res.json({ success: true, deleted: true, id: req.params.id });
   } catch (err) {

@@ -34,9 +34,14 @@ const { authenticateToken, requireRole } = require('../middleware/auth');
 const Program = require('../models/AdaptiveSportsProgram');
 const Beneficiary = require('../models/Beneficiary');
 const safeError = require('../utils/safeError');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
 
 router.use(authenticateToken);
+// W445: branch-scope every endpoint. Model carries `branchId`; pre-W445
+// list filters were optional + instance loads bare findById, opening
+// cross-tenant IDOR (read/modify/delete any branch by ObjectId guess).
+router.use(requireBranchAccess);
 router.use(bodyScopedBeneficiaryGuard); // W441: enforce branch on req.body.beneficiaryId
 
 const READ_ROLES = [
@@ -97,7 +102,7 @@ router.get('/catalog', requireRole(READ_ROLES), async (_req, res) => {
 // ── GET / ─────────────────────────────────────────────────────────────
 router.get('/', requireRole(READ_ROLES), async (req, res) => {
   try {
-    const filter = {};
+    const filter = { ...branchFilter(req) }; /* W445 */
     if (req.query.beneficiaryId && mongoose.isValidObjectId(req.query.beneficiaryId)) {
       filter.beneficiaryId = req.query.beneficiaryId;
     }
@@ -137,7 +142,10 @@ router.get('/by-beneficiary/:id', requireRole(READ_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const items = await Program.find({ beneficiaryId: req.params.id })
+    const items = await Program.find({
+      ...branchFilter(req),
+      /* W445 */ beneficiaryId: req.params.id,
+    })
       .sort({ startDate: -1, createdAt: -1 })
       .lean();
     res.json({ success: true, items, count: items.length });
@@ -152,7 +160,7 @@ router.get('/by-sport/:sport', requireRole(READ_ROLES), async (req, res) => {
     if (!SPORTS.includes(req.params.sport)) {
       return res.status(404).json({ success: false, message: 'الرياضة غير موجودة في الكتالوج' });
     }
-    const filter = { sport: req.params.sport };
+    const filter = { ...branchFilter(req), sport: req.params.sport }; /* W445 */
     if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
@@ -170,7 +178,7 @@ router.get('/by-sport/:sport', requireRole(READ_ROLES), async (req, res) => {
 // ── GET /stats ────────────────────────────────────────────────────────
 router.get('/stats', requireRole(READ_ROLES), async (req, res) => {
   try {
-    const filter = {};
+    const filter = { ...branchFilter(req) }; /* W445 */
     if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
@@ -208,7 +216,8 @@ router.get('/:id', requireRole(READ_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Program.findById(req.params.id).lean();
+    const row = await Program.findOne({ _id: req.params.id, ...branchFilter(req) }) /* W445 */
+      .lean();
     if (!row) return res.status(404).json({ success: false, message: 'البرنامج غير موجود' });
     const [hydrated] = await hydrate([row]);
     res.json({ success: true, data: hydrated });
@@ -284,7 +293,7 @@ router.post('/:id/activate', requireRole(WRITE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Program.findById(req.params.id);
+    const row = await Program.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W445 */
     if (!row) return res.status(404).json({ success: false, message: 'البرنامج غير موجود' });
     if (!['draft', 'paused'].includes(row.status)) {
       return res
@@ -312,7 +321,7 @@ router.post('/:id/complete', requireRole(WRITE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Program.findById(req.params.id);
+    const row = await Program.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W445 */
     if (!row) return res.status(404).json({ success: false, message: 'البرنامج غير موجود' });
     if (row.status !== 'active') {
       return res
@@ -334,7 +343,7 @@ router.post('/:id/discontinue', requireRole(WRITE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Program.findById(req.params.id);
+    const row = await Program.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W445 */
     if (!row) return res.status(404).json({ success: false, message: 'البرنامج غير موجود' });
     if (!String(req.body?.reason || '').trim()) {
       return res.status(400).json({ success: false, message: 'reason مطلوب' });
@@ -355,7 +364,7 @@ router.post('/:id/sessions', requireRole(WRITE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Program.findById(req.params.id);
+    const row = await Program.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W445 */
     if (!row) return res.status(404).json({ success: false, message: 'البرنامج غير موجود' });
     const body = req.body || {};
     if (!body.date) {
@@ -394,7 +403,7 @@ router.post('/:id/achievements', requireRole(WRITE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Program.findById(req.params.id);
+    const row = await Program.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W445 */
     if (!row) return res.status(404).json({ success: false, message: 'البرنامج غير موجود' });
     const body = req.body || {};
     if (!String(body.title || '').trim()) {
@@ -421,7 +430,7 @@ router.post('/:id/medical-clearance', requireRole(WRITE_ROLES), async (req, res)
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Program.findById(req.params.id);
+    const row = await Program.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W445 */
     if (!row) return res.status(404).json({ success: false, message: 'البرنامج غير موجود' });
     row.medicalClearance = true;
     row.medicalClearanceBy = String(req.body?.by || req.user?.name || '').slice(0, 100);
@@ -439,7 +448,7 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Program.findById(req.params.id);
+    const row = await Program.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W445 */
     if (!row) return res.status(404).json({ success: false, message: 'البرنامج غير موجود' });
     if (['completed', 'discontinued'].includes(row.status)) {
       return res
@@ -479,7 +488,7 @@ router.delete('/:id/sessions/:sessionId', requireRole(WRITE_ROLES), async (req, 
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Program.findById(req.params.id);
+    const row = await Program.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W445 */
     if (!row) return res.status(404).json({ success: false, message: 'البرنامج غير موجود' });
     const before = row.sessions.length;
     row.sessions = row.sessions.filter(s => String(s._id) !== String(req.params.sessionId));
@@ -499,7 +508,7 @@ router.delete('/:id/achievements/:achId', requireRole(WRITE_ROLES), async (req, 
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Program.findById(req.params.id);
+    const row = await Program.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W445 */
     if (!row) return res.status(404).json({ success: false, message: 'البرنامج غير موجود' });
     const before = row.achievements.length;
     row.achievements = row.achievements.filter(a => String(a._id) !== String(req.params.achId));
@@ -519,7 +528,10 @@ router.delete('/:id', requireRole(DELETE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Program.findByIdAndDelete(req.params.id);
+    const row = await Program.findOneAndDelete({
+      _id: req.params.id,
+      ...branchFilter(req),
+    }); /* W445 */
     if (!row) return res.status(404).json({ success: false, message: 'البرنامج غير موجود' });
     res.json({ success: true, deleted: true, id: req.params.id });
   } catch (err) {

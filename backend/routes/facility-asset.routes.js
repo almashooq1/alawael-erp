@@ -35,8 +35,13 @@ const { authenticateToken, requireRole } = require('../middleware/auth');
 
 const Asset = require('../models/FacilityAsset');
 const safeError = require('../utils/safeError');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 
 router.use(authenticateToken);
+// W445: branch-scope every endpoint. Model carries `branchId`; pre-W445
+// list filters were optional + instance loads bare findById, opening
+// cross-tenant IDOR (read/modify/delete any branch by ObjectId guess).
+router.use(requireBranchAccess);
 
 const READ_ROLES = [
   'admin',
@@ -80,7 +85,7 @@ function pushCappedInspection(doc, entry) {
 // ── GET / ───────────────────────────────────────────────────────────
 router.get('/', requireRole(READ_ROLES), async (req, res) => {
   try {
-    const filter = {};
+    const filter = { ...branchFilter(req) }; /* W445 */
     if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
@@ -118,6 +123,7 @@ router.get('/due-inspection', requireRole(READ_ROLES), async (req, res) => {
   try {
     const now = new Date();
     const filter = {
+      ...branchFilter(req), // W445
       status: { $ne: 'retired' },
       nextInspectionDue: { $ne: null, $lt: now },
     };
@@ -136,6 +142,7 @@ router.get('/due-maintenance', requireRole(READ_ROLES), async (req, res) => {
   try {
     const now = new Date();
     const filter = {
+      ...branchFilter(req), // W445
       status: { $ne: 'retired' },
       nextMaintenanceDue: { $ne: null, $lt: now },
     };
@@ -152,7 +159,10 @@ router.get('/due-maintenance', requireRole(READ_ROLES), async (req, res) => {
 // ── GET /out-of-service ─────────────────────────────────────────────
 router.get('/out-of-service', requireRole(READ_ROLES), async (req, res) => {
   try {
-    const filter = { status: { $in: ['out_of_service', 'inspection_failed'] } };
+    const filter = {
+      ...branchFilter(req), // W445
+      status: { $in: ['out_of_service', 'inspection_failed'] },
+    };
     if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
@@ -170,7 +180,10 @@ router.get('/out-of-service', requireRole(READ_ROLES), async (req, res) => {
 router.get('/expired-certificates', requireRole(READ_ROLES), async (req, res) => {
   try {
     const now = new Date();
-    const filter = { 'certificates.expiresAt': { $lt: now } };
+    const filter = {
+      ...branchFilter(req), // W445
+      'certificates.expiresAt': { $lt: now },
+    };
     if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
@@ -184,7 +197,7 @@ router.get('/expired-certificates', requireRole(READ_ROLES), async (req, res) =>
 // ── GET /life-safety ────────────────────────────────────────────────
 router.get('/life-safety', requireRole(READ_ROLES), async (req, res) => {
   try {
-    const filter = { criticality: 'life_safety' };
+    const filter = { ...branchFilter(req), criticality: 'life_safety' }; /* W445 */
     if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
@@ -201,7 +214,7 @@ router.get('/life-safety', requireRole(READ_ROLES), async (req, res) => {
 // ── GET /stats ──────────────────────────────────────────────────────
 router.get('/stats', requireRole(READ_ROLES), async (req, res) => {
   try {
-    const filter = {};
+    const filter = { ...branchFilter(req) }; /* W445 */
     if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
@@ -264,7 +277,8 @@ router.get('/:id', requireRole(READ_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Asset.findById(req.params.id).lean();
+    const row = await Asset.findOne({ _id: req.params.id, ...branchFilter(req) }) /* W445 */
+      .lean();
     if (!row) return res.status(404).json({ success: false, message: 'الأصل غير موجود' });
     res.json({ success: true, data: row });
   } catch (err) {
@@ -333,7 +347,7 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Asset.findById(req.params.id);
+    const row = await Asset.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W445 */
     if (!row) return res.status(404).json({ success: false, message: 'الأصل غير موجود' });
     if (row.status === 'retired') {
       return res.status(409).json({ success: false, message: 'الأصل متقاعد' });
@@ -371,7 +385,7 @@ router.post('/:id/inspection', requireRole(WRITE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Asset.findById(req.params.id);
+    const row = await Asset.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W445 */
     if (!row) return res.status(404).json({ success: false, message: 'الأصل غير موجود' });
     const body = req.body || {};
     if (!INSPECTION_KINDS.includes(String(body.kind))) {
@@ -450,7 +464,7 @@ router.post('/:id/certificate', requireRole(WRITE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Asset.findById(req.params.id);
+    const row = await Asset.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W445 */
     if (!row) return res.status(404).json({ success: false, message: 'الأصل غير موجود' });
     const body = req.body || {};
     if (!String(body.number || '').trim()) {
@@ -487,7 +501,7 @@ router.post('/:id/start-maintenance', requireRole(WRITE_ROLES), async (req, res)
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Asset.findById(req.params.id);
+    const row = await Asset.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W445 */
     if (!row) return res.status(404).json({ success: false, message: 'الأصل غير موجود' });
     if (row.status === 'retired') {
       return res.status(409).json({ success: false, message: 'الأصل متقاعد' });
@@ -506,7 +520,7 @@ router.post('/:id/return-to-service', requireRole(WRITE_ROLES), async (req, res)
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Asset.findById(req.params.id);
+    const row = await Asset.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W445 */
     if (!row) return res.status(404).json({ success: false, message: 'الأصل غير موجود' });
     if (!['maintenance', 'out_of_service', 'inspection_failed'].includes(row.status)) {
       return res.status(409).json({
@@ -530,7 +544,7 @@ router.post('/:id/out-of-service', requireRole(WRITE_ROLES), async (req, res) =>
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Asset.findById(req.params.id);
+    const row = await Asset.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W445 */
     if (!row) return res.status(404).json({ success: false, message: 'الأصل غير موجود' });
     if (!String(req.body?.reason || '').trim()) {
       return res.status(400).json({ success: false, message: 'سبب الإيقاف مطلوب' });
@@ -551,7 +565,7 @@ router.post('/:id/retire', requireRole(RETIRE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Asset.findById(req.params.id);
+    const row = await Asset.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W445 */
     if (!row) return res.status(404).json({ success: false, message: 'الأصل غير موجود' });
     if (!String(req.body?.reason || '').trim()) {
       return res.status(400).json({ success: false, message: 'سبب التقاعد مطلوب' });
@@ -572,7 +586,7 @@ router.delete('/:id/inspections/:inspId', requireRole(WRITE_ROLES), async (req, 
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Asset.findById(req.params.id);
+    const row = await Asset.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W445 */
     if (!row) return res.status(404).json({ success: false, message: 'الأصل غير موجود' });
     const before = row.inspections.length;
     row.inspections = row.inspections.filter(e => String(e._id) !== String(req.params.inspId));
@@ -592,7 +606,7 @@ router.delete('/:id/certificates/:certId', requireRole(WRITE_ROLES), async (req,
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Asset.findById(req.params.id);
+    const row = await Asset.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W445 */
     if (!row) return res.status(404).json({ success: false, message: 'الأصل غير موجود' });
     const before = row.certificates.length;
     row.certificates = row.certificates.filter(c => String(c._id) !== String(req.params.certId));
@@ -612,7 +626,10 @@ router.delete('/:id', requireRole(DELETE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Asset.findByIdAndDelete(req.params.id);
+    const row = await Asset.findOneAndDelete({
+      _id: req.params.id,
+      ...branchFilter(req),
+    }); /* W445 */
     if (!row) return res.status(404).json({ success: false, message: 'الأصل غير موجود' });
     res.json({ success: true, deleted: true, id: req.params.id });
   } catch (err) {

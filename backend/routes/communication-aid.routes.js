@@ -29,9 +29,14 @@ const { authenticateToken, requireRole } = require('../middleware/auth');
 const Profile = require('../models/CommunicationAidProfile');
 const Beneficiary = require('../models/Beneficiary');
 const safeError = require('../utils/safeError');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
 
 router.use(authenticateToken);
+// W445: branch-scope every endpoint. Model carries `branchId`; pre-W445
+// list filters were optional + instance loads bare findById, opening
+// cross-tenant IDOR (read/modify/delete any branch by ObjectId guess).
+router.use(requireBranchAccess);
 router.use(bodyScopedBeneficiaryGuard); // W441: enforce branch on req.body.beneficiaryId
 
 const READ_ROLES = [
@@ -79,7 +84,7 @@ async function hydrate(items) {
 // ── GET / ──────────────────────────────────────────────────────────────
 router.get('/', requireRole(READ_ROLES), async (req, res) => {
   try {
-    const filter = {};
+    const filter = { ...branchFilter(req) }; /* W445 */
     if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
@@ -122,7 +127,10 @@ router.get('/by-beneficiary/:id', requireRole(READ_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Profile.findOne({ beneficiaryId: req.params.id }).lean();
+    const row = await Profile.findOne({
+      beneficiaryId: req.params.id,
+      ...branchFilter(req), // W445
+    }).lean();
     if (!row) return res.status(404).json({ success: false, message: 'لا يوجد ملف AAC' });
     const [hydrated] = await hydrate([row]);
     res.json({ success: true, data: hydrated });
@@ -136,6 +144,7 @@ router.get('/due-reassessment', requireRole(READ_ROLES), async (req, res) => {
   try {
     const now = new Date();
     const filter = {
+      ...branchFilter(req), // W445
       lifecycleStatus: 'active',
       nextReassessmentDue: { $ne: null, $lt: now },
     };
@@ -153,7 +162,7 @@ router.get('/due-reassessment', requireRole(READ_ROLES), async (req, res) => {
 // ── GET /stats ─────────────────────────────────────────────────────────
 router.get('/stats', requireRole(READ_ROLES), async (req, res) => {
   try {
-    const filter = {};
+    const filter = { ...branchFilter(req) }; /* W445 */
     if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
@@ -200,7 +209,8 @@ router.get('/:id', requireRole(READ_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Profile.findById(req.params.id).lean();
+    const row = await Profile.findOne({ _id: req.params.id, ...branchFilter(req) }) /* W445 */
+      .lean();
     if (!row) return res.status(404).json({ success: false, message: 'الملف غير موجود' });
     const [hydrated] = await hydrate([row]);
     res.json({ success: true, data: hydrated });
@@ -216,7 +226,10 @@ router.post('/', requireRole(WRITE_ROLES), async (req, res) => {
     if (!body.beneficiaryId || !mongoose.isValidObjectId(body.beneficiaryId)) {
       return res.status(400).json({ success: false, message: 'beneficiaryId مطلوب' });
     }
-    const existing = await Profile.findOne({ beneficiaryId: body.beneficiaryId }).lean();
+    const existing = await Profile.findOne({
+      beneficiaryId: body.beneficiaryId,
+      ...branchFilter(req), // W445
+    }).lean();
     if (existing) {
       return res.status(409).json({
         success: false,
@@ -277,7 +290,7 @@ router.post('/:id/activate', requireRole(WRITE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Profile.findById(req.params.id);
+    const row = await Profile.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W445 */
     if (!row) return res.status(404).json({ success: false, message: 'الملف غير موجود' });
     if (row.lifecycleStatus !== 'draft' && row.lifecycleStatus !== 'paused') {
       return res
@@ -312,7 +325,7 @@ router.post('/:id/snapshot', requireRole(WRITE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Profile.findById(req.params.id);
+    const row = await Profile.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W445 */
     if (!row) return res.status(404).json({ success: false, message: 'الملف غير موجود' });
     row.history.push({
       snapshotAt: new Date(),
@@ -337,7 +350,7 @@ router.post('/:id/tools', requireRole(WRITE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Profile.findById(req.params.id);
+    const row = await Profile.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W445 */
     if (!row) return res.status(404).json({ success: false, message: 'الملف غير موجود' });
     const body = req.body || {};
     if (!String(body.name || '').trim()) {
@@ -376,7 +389,7 @@ router.delete('/:id/tools/:toolId', requireRole(WRITE_ROLES), async (req, res) =
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Profile.findById(req.params.id);
+    const row = await Profile.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W445 */
     if (!row) return res.status(404).json({ success: false, message: 'الملف غير موجود' });
     const before = row.activeTools.length;
     row.activeTools = row.activeTools.filter(t => String(t._id) !== String(req.params.toolId));
@@ -396,7 +409,7 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Profile.findById(req.params.id);
+    const row = await Profile.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W445 */
     if (!row) return res.status(404).json({ success: false, message: 'الملف غير موجود' });
     const editable = [
       'primaryModality',
@@ -437,7 +450,10 @@ router.delete('/:id', requireRole(DELETE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Profile.findByIdAndDelete(req.params.id);
+    const row = await Profile.findOneAndDelete({
+      _id: req.params.id,
+      ...branchFilter(req),
+    }); /* W445 */
     if (!row) return res.status(404).json({ success: false, message: 'الملف غير موجود' });
     res.json({ success: true, deleted: true, id: req.params.id });
   } catch (err) {

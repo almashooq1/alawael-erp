@@ -33,9 +33,14 @@ const { authenticateToken, requireRole } = require('../middleware/auth');
 const Booking = require('../models/RespiteBooking');
 const Beneficiary = require('../models/Beneficiary');
 const safeError = require('../utils/safeError');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
 
 router.use(authenticateToken);
+// W445: branch-scope every endpoint. Model carries `branchId`; pre-W445
+// list filters were optional + instance loads bare findById, opening
+// cross-tenant IDOR (read/modify/delete any branch by ObjectId guess).
+router.use(requireBranchAccess);
 router.use(bodyScopedBeneficiaryGuard); // W441: enforce branch on req.body.beneficiaryId
 
 const READ_ROLES = [
@@ -116,7 +121,7 @@ async function hydrate(items) {
 // ── GET / ──────────────────────────────────────────────────────────
 router.get('/', requireRole(READ_ROLES), async (req, res) => {
   try {
-    const filter = {};
+    const filter = { ...branchFilter(req) }; /* W445 */
     if (req.query.beneficiaryId && mongoose.isValidObjectId(req.query.beneficiaryId)) {
       filter.beneficiaryId = req.query.beneficiaryId;
     }
@@ -161,7 +166,10 @@ router.get('/by-beneficiary/:id', requireRole(READ_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const items = await Booking.find({ beneficiaryId: req.params.id })
+    const items = await Booking.find({
+      ...branchFilter(req),
+      /* W445 */ beneficiaryId: req.params.id,
+    })
       .sort({ startAt: -1 })
       .limit(100)
       .lean();
@@ -174,7 +182,11 @@ router.get('/by-beneficiary/:id', requireRole(READ_ROLES), async (req, res) => {
 // ── GET /upcoming ──────────────────────────────────────────────────
 router.get('/upcoming', requireRole(READ_ROLES), async (req, res) => {
   try {
-    const filter = { status: { $in: ['approved', 'confirmed'] }, startAt: { $gt: new Date() } };
+    const filter = {
+      ...branchFilter(req), // W445
+      status: { $in: ['approved', 'confirmed'] },
+      startAt: { $gt: new Date() },
+    };
     if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
@@ -189,7 +201,7 @@ router.get('/upcoming', requireRole(READ_ROLES), async (req, res) => {
 // ── GET /active ────────────────────────────────────────────────────
 router.get('/active', requireRole(READ_ROLES), async (req, res) => {
   try {
-    const filter = { status: 'checked_in' };
+    const filter = { ...branchFilter(req), status: 'checked_in' }; /* W445 */
     if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
@@ -212,6 +224,7 @@ router.get('/day/:date', requireRole(READ_ROLES), async (req, res) => {
     const dayEnd = endOfDay(target);
     // Active on this day = startAt <= dayEnd AND endAt >= dayStart
     const filter = {
+      ...branchFilter(req), // W445
       startAt: { $lte: dayEnd },
       endAt: { $gte: dayStart },
       status: { $in: ['approved', 'confirmed', 'checked_in', 'completed'] },
@@ -234,7 +247,10 @@ router.get('/stats', requireRole(READ_ROLES), async (req, res) => {
       ? startOfDay(new Date(req.query.from))
       : startOfDay(new Date(Date.now() - 90 * 24 * 60 * 60 * 1000));
     const to = req.query.to ? endOfDay(new Date(req.query.to)) : endOfDay(new Date());
-    const filter = { startAt: { $gte: from, $lte: to } };
+    const filter = {
+      ...branchFilter(req), // W445
+      startAt: { $gte: from, $lte: to },
+    };
     if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
@@ -272,7 +288,8 @@ router.get('/:id', requireRole(READ_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Booking.findById(req.params.id).lean();
+    const row = await Booking.findOne({ _id: req.params.id, ...branchFilter(req) }) /* W445 */
+      .lean();
     if (!row) return res.status(404).json({ success: false, message: 'الحجز غير موجود' });
     const [hydrated] = await hydrate([row]);
     res.json({ success: true, data: hydrated });
@@ -357,7 +374,7 @@ router.post('/:id/approve', requireRole(APPROVE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Booking.findById(req.params.id);
+    const row = await Booking.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W445 */
     if (!row) return res.status(404).json({ success: false, message: 'الحجز غير موجود' });
     if (row.status !== 'requested') {
       return res
@@ -381,7 +398,7 @@ router.post('/:id/reject', requireRole(APPROVE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Booking.findById(req.params.id);
+    const row = await Booking.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W445 */
     if (!row) return res.status(404).json({ success: false, message: 'الحجز غير موجود' });
     if (row.status !== 'requested') {
       return res
@@ -406,7 +423,7 @@ router.post('/:id/confirm', requireRole(OPS_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Booking.findById(req.params.id);
+    const row = await Booking.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W445 */
     if (!row) return res.status(404).json({ success: false, message: 'الحجز غير موجود' });
     if (row.status !== 'approved') {
       return res.status(409).json({
@@ -428,7 +445,7 @@ router.post('/:id/check-in', requireRole(OPS_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Booking.findById(req.params.id);
+    const row = await Booking.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W445 */
     if (!row) return res.status(404).json({ success: false, message: 'الحجز غير موجود' });
     if (!['approved', 'confirmed'].includes(row.status)) {
       return res
@@ -451,7 +468,7 @@ router.post('/:id/check-out', requireRole(OPS_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Booking.findById(req.params.id);
+    const row = await Booking.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W445 */
     if (!row) return res.status(404).json({ success: false, message: 'الحجز غير موجود' });
     if (row.status !== 'checked_in') {
       return res.status(409).json({ success: false, message: 'الحجز ليس في حالة تسجيل دخول' });
@@ -476,7 +493,7 @@ router.post('/:id/cancel', requireRole(INTAKE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Booking.findById(req.params.id);
+    const row = await Booking.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W445 */
     if (!row) return res.status(404).json({ success: false, message: 'الحجز غير موجود' });
     if (['completed', 'cancelled', 'no_show'].includes(row.status)) {
       return res
@@ -503,7 +520,7 @@ router.post('/:id/no-show', requireRole(OPS_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Booking.findById(req.params.id);
+    const row = await Booking.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W445 */
     if (!row) return res.status(404).json({ success: false, message: 'الحجز غير موجود' });
     if (!['approved', 'confirmed'].includes(row.status)) {
       return res
@@ -525,7 +542,7 @@ router.patch('/:id', requireRole(OPS_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Booking.findById(req.params.id);
+    const row = await Booking.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W445 */
     if (!row) return res.status(404).json({ success: false, message: 'الحجز غير موجود' });
     if (['completed', 'cancelled', 'rejected', 'no_show'].includes(row.status)) {
       return res
@@ -565,7 +582,10 @@ router.delete('/:id', requireRole(DELETE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Booking.findByIdAndDelete(req.params.id);
+    const row = await Booking.findOneAndDelete({
+      _id: req.params.id,
+      ...branchFilter(req),
+    }); /* W445 */
     if (!row) return res.status(404).json({ success: false, message: 'الحجز غير موجود' });
     res.json({ success: true, deleted: true, id: req.params.id });
   } catch (err) {

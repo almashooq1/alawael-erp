@@ -302,3 +302,5 @@ __tests__/phase-c-e2e-smoke-wave472.test.js
 __tests__/caseload-matcher-wave432.test.js
 __tests__/prayer-time-wave473.test.js
 __tests__/ramadan-protocol-wave474.test.js
+__tests__/escalation-predictor-wave433.test.js
+__tests__/cultural-profile-wave475.test.js

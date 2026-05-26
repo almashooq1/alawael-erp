@@ -127,8 +127,21 @@ const {
 const parentNotifications = require('../services/transport/parentNotifications.service');
 const escapeRegex = require('../utils/escapeRegex');
 
-const TRACKING_TOKEN_SECRET =
-  process.env.TRANSPORT_TRACKING_SECRET || 'transport-tracking-default-rotate-me';
+// W457: TRANSPORT_TRACKING_SECRET MUST be set in production —
+// same secret as routes/transport-public-track.routes.js (tokens
+// signed here are verified there).
+const TRACKING_TOKEN_SECRET = (() => {
+  const v = process.env.TRANSPORT_TRACKING_SECRET;
+  if (v) return v;
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error(
+      'TRANSPORT_TRACKING_SECRET is required in production — refusing to start with a known default'
+    );
+  }
+
+  console.warn('[transport-module] TRANSPORT_TRACKING_SECRET unset — using non-prod fallback');
+  return 'transport-tracking-default-rotate-me';
+})();
 
 let _AuditLog = null;
 function getAuditLog() {

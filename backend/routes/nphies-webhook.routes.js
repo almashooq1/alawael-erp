@@ -45,10 +45,29 @@ function _normalizePayload(raw) {
   };
 }
 
+// W457: NPHIES webhook secret MUST be set in production. Pre-W457 a
+// missing env defaulted to the literal 'nphies-dev-secret-change-me'
+// which an attacker could read from this source file → forge HMAC
+// signatures and inject fake claim-status updates (e.g. mark a denied
+// claim as approved, or vice versa).
+const _NPHIES_WEBHOOK_SECRET = (() => {
+  const v = process.env.NPHIES_WEBHOOK_SECRET;
+  if (v) return v;
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error(
+      'NPHIES_WEBHOOK_SECRET is required in production — refusing to start with a known default'
+    );
+  }
+  // dev/test only — emit warning
+
+  console.warn('[nphies-webhook] NPHIES_WEBHOOK_SECRET unset — using non-prod fallback');
+  return 'nphies-dev-secret-change-me';
+})();
+
 router.post(
   '/',
   verifyWebhookHmac({
-    secret: process.env.NPHIES_WEBHOOK_SECRET || 'nphies-dev-secret-change-me',
+    secret: _NPHIES_WEBHOOK_SECRET,
     header: process.env.NPHIES_WEBHOOK_HEADER || 'X-NPHIES-Signature',
     prefix: process.env.NPHIES_WEBHOOK_PREFIX || 'sha256=',
     encoding: 'hex',

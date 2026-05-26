@@ -144,8 +144,19 @@ router.post('/verify-otp', rateLimit, async (req, res) => {
     }
     otps.delete(contact);
 
-    const secret = process.env.JWT_SECRET || process.env.AUTH_SECRET || 'dev-fallback';
-    const token = jwt.sign({ contact, role: 'visitor' }, secret, { expiresIn: '24h' });
+    // W457: refuse to fall back to 'dev-fallback' in production —
+    // attacker knowing the literal could forge any visitor token.
+    const secret = process.env.JWT_SECRET || process.env.AUTH_SECRET;
+    if (!secret) {
+      if (process.env.NODE_ENV === 'production') {
+        return res.status(503).json({ ok: false, error: 'AUTH_SECRET_MISSING' });
+      }
+      // dev/test only — emit warning so it shows up in CI logs
+
+      console.warn('[visitor-auth] no JWT_SECRET/AUTH_SECRET — falling back to dev secret');
+    }
+    const effectiveSecret = secret || 'dev-fallback-do-not-use-in-production';
+    const token = jwt.sign({ contact, role: 'visitor' }, effectiveSecret, { expiresIn: '24h' });
 
     res.json({ ok: true, token, contact });
   } catch (err) {
@@ -158,10 +169,21 @@ router.get('/my-submissions', async (req, res) => {
     const auth = req.headers.authorization || '';
     const m = /^Bearer (.+)$/.exec(auth);
     if (!m) return res.status(401).json({ ok: false, error: 'NO_TOKEN' });
-    const secret = process.env.JWT_SECRET || process.env.AUTH_SECRET || 'dev-fallback';
+    // W457: refuse to fall back to 'dev-fallback' in production —
+    // attacker knowing the literal could forge any visitor token.
+    const secret = process.env.JWT_SECRET || process.env.AUTH_SECRET;
+    if (!secret) {
+      if (process.env.NODE_ENV === 'production') {
+        return res.status(503).json({ ok: false, error: 'AUTH_SECRET_MISSING' });
+      }
+      // dev/test only — emit warning so it shows up in CI logs
+
+      console.warn('[visitor-auth] no JWT_SECRET/AUTH_SECRET — falling back to dev secret');
+    }
+    const effectiveSecret = secret || 'dev-fallback-do-not-use-in-production';
     let payload;
     try {
-      payload = jwt.verify(m[1], secret, { algorithms: ['HS256'] });
+      payload = jwt.verify(m[1], effectiveSecret, { algorithms: ['HS256'] });
     } catch {
       return res.status(401).json({ ok: false, error: 'INVALID_TOKEN' });
     }

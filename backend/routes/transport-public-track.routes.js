@@ -29,8 +29,25 @@ try {
   createCustomLimiter = () => (_req, _res, next) => next();
 }
 
-const TRACKING_TOKEN_SECRET =
-  process.env.TRANSPORT_TRACKING_SECRET || 'transport-tracking-default-rotate-me';
+// W457: TRANSPORT_TRACKING_SECRET MUST be set in production. Pre-W457
+// the literal fallback 'transport-tracking-default-rotate-me' was
+// readable in source — attacker knowing it could forge transport
+// tracking tokens for any child + scrape live GPS positions of the
+// bus carrying them home.
+const TRACKING_TOKEN_SECRET = (() => {
+  const v = process.env.TRANSPORT_TRACKING_SECRET;
+  if (v) return v;
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error(
+      'TRANSPORT_TRACKING_SECRET is required in production — refusing to start with a known default'
+    );
+  }
+
+  console.warn(
+    '[transport-public-track] TRANSPORT_TRACKING_SECRET unset — using non-prod fallback'
+  );
+  return 'transport-tracking-default-rotate-me';
+})();
 
 const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 

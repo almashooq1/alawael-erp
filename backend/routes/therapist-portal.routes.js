@@ -18,6 +18,23 @@ const express = require('express');
 const mongoose = require('mongoose');
 const router = express.Router();
 
+// W458: brute-force defense on /auth/login. Pre-W458 the endpoint had
+// NO rate limit at all — attacker could hammer credential guesses
+// against any therapist email/username indefinitely. loginLimiter is
+// the same gate used by sso.routes.js + montessoriAuth.js (5 req/15min
+// per IP via securityConfig.rateLimit.login).
+let _loginLimiter = null;
+function loginLimiter(req, res, next) {
+  if (!_loginLimiter) {
+    try {
+      _loginLimiter = require('../middleware/rateLimiter').loginLimiter;
+    } catch {
+      _loginLimiter = (_req, _res, _next) => _next();
+    }
+  }
+  return _loginLimiter(req, res, next);
+}
+
 const isValidObjectId = id => mongoose.Types.ObjectId.isValid(String(id));
 
 // Lazy requires so a missing dep never crashes module load (routes stay listable).
@@ -405,7 +422,7 @@ router.use(idempotency());
  * The token shape and verification path are identical to the platform-wide
  * authenticate() middleware — this endpoint just bundles the Employee lookup.
  */
-router.post('/auth/login', async (req, res) => {
+router.post('/auth/login', loginLimiter, async (req, res) => {
   try {
     const { identifier, password } = req.body || {};
     if (

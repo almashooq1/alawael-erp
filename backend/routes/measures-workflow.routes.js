@@ -42,6 +42,10 @@ const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const {
+  enforceBeneficiaryBranch,
+  effectiveBranchScope,
+} = require('../middleware/assertBranchMatch');
 const logger = require('../utils/logger');
 
 const strategist = require('../services/measureSelectionStrategist.service');
@@ -63,6 +67,19 @@ router.use(requireBranchAccess);
 function _toErrorResponse(err) {
   // Service-level validation errors land here with a recognisable prefix.
   const msg = err && err.message ? String(err.message) : 'unknown error';
+  // W269e: explicit 403/503 from assertBranchMatch / enforceBeneficiaryBranch.
+  if (err && err.status === 403) {
+    return { status: 403, body: { success: false, error: msg } };
+  }
+  if (err && err.status === 503) {
+    return {
+      status: 503,
+      body: { success: false, error: 'models_unavailable', message: msg },
+    };
+  }
+  if (err && err.status === 404) {
+    return { status: 404, body: { success: false, error: msg } };
+  }
   if (msg.match(/required|invalid|must be|cannot be|missing|not found/i)) {
     return { status: 400, body: { success: false, error: msg } };
   }
@@ -142,7 +159,7 @@ router.get('/triggers/:eventCode/preview', async (req, res) => {
 router.get('/tasks', async (req, res) => {
   try {
     const phase = req.query.phase || undefined;
-    const branchId = req.query.branchId || req.branchId || undefined;
+    const branchId = effectiveBranchScope(req) || undefined;
     const statusIn = req.query.statusIn
       ? String(req.query.statusIn)
           .split(',')
@@ -202,6 +219,7 @@ router.post('/tasks/:taskId/review-breach', async (req, res) => {
  */
 router.get('/readiness/care-plan-review/:beneficiaryId', async (req, res) => {
   try {
+    await enforceBeneficiaryBranch(req, req.params.beneficiaryId);
     const out = await readinessGate.gateCarePlanReview({
       beneficiaryId: req.params.beneficiaryId,
       freshnessWindowDays: req.query.freshnessWindowDays
@@ -223,6 +241,7 @@ router.get('/readiness/care-plan-review/:beneficiaryId', async (req, res) => {
  */
 router.get('/readiness/discharge/:beneficiaryId', async (req, res) => {
   try {
+    await enforceBeneficiaryBranch(req, req.params.beneficiaryId);
     const out = await readinessGate.gateDischarge({
       beneficiaryId: req.params.beneficiaryId,
       freshnessWindowDays: req.query.freshnessWindowDays
@@ -241,6 +260,7 @@ router.get('/readiness/discharge/:beneficiaryId', async (req, res) => {
  */
 router.get('/required-measures/:beneficiaryId', async (req, res) => {
   try {
+    await enforceBeneficiaryBranch(req, req.params.beneficiaryId);
     const list = await readinessGate.listRequiredMeasures({
       beneficiaryId: req.params.beneficiaryId,
     });
@@ -261,6 +281,7 @@ router.get('/required-measures/:beneficiaryId', async (req, res) => {
  */
 router.get('/reminders/beneficiary/:beneficiaryId', async (req, res) => {
   try {
+    await enforceBeneficiaryBranch(req, req.params.beneficiaryId);
     const list = await cascade.listForBeneficiary(req.params.beneficiaryId);
     res.json({ success: true, data: list });
   } catch (err) {
@@ -282,7 +303,7 @@ router.get('/insights/orphaned-measures', async (req, res) => {
   try {
     const limit = req.query.limit ? Math.min(500, Math.max(1, Number(req.query.limit))) : 50;
     const out = await linkageInsights.findOrphanedMeasures({
-      branchId: req.query.branchId || undefined,
+      branchId: effectiveBranchScope(req) || undefined,
       limit,
     });
     res.json({ success: true, data: out });
@@ -302,7 +323,7 @@ router.get('/insights/overloaded-measures', async (req, res) => {
     const threshold = req.query.threshold ? Math.max(1, Number(req.query.threshold)) : 50;
     const limit = req.query.limit ? Math.min(500, Math.max(1, Number(req.query.limit))) : 50;
     const out = await linkageInsights.findOverloadedMeasures({
-      branchId: req.query.branchId || undefined,
+      branchId: effectiveBranchScope(req) || undefined,
       threshold,
       limit,
     });
@@ -323,7 +344,7 @@ router.get('/insights/kpis', async (req, res) => {
       ? Math.max(1, Number(req.query.rationaleMinChars))
       : 20;
     const out = await linkageInsights.linkageKpis({
-      branchId: req.query.branchId || undefined,
+      branchId: effectiveBranchScope(req) || undefined,
       rationaleMinChars,
     });
     res.json({ success: true, data: out });
@@ -341,7 +362,7 @@ router.get('/insights/kpis', async (req, res) => {
 router.get('/insights/link-type-distribution', async (req, res) => {
   try {
     const out = await linkageInsights.linkTypeDistribution({
-      branchId: req.query.branchId || undefined,
+      branchId: effectiveBranchScope(req) || undefined,
     });
     res.json({ success: true, data: out });
   } catch (err) {
@@ -508,7 +529,7 @@ router.get('/links/due-for-review', async (req, res) => {
       ? Math.max(1, Math.min(90, Number(req.query.withinDays)))
       : 7;
     const out = await linkage.dueForReview({
-      branchId: req.query.branchId || undefined,
+      branchId: effectiveBranchScope(req) || undefined,
       withinDays,
     });
     res.json({ success: true, data: out });
@@ -538,7 +559,7 @@ router.get('/links/due-for-review', async (req, res) => {
 router.get('/anomalous-admins', async (req, res) => {
   try {
     const opts = {
-      branchId: req.query.branchId || req.branchId || undefined,
+      branchId: effectiveBranchScope(req) || undefined,
       from: req.query.from || undefined,
       to: req.query.to || undefined,
       severity: req.query.severity || undefined,
@@ -569,7 +590,7 @@ router.get('/anomalous-admins', async (req, res) => {
 router.get('/anomalous-admins.csv', async (req, res) => {
   try {
     const opts = {
-      branchId: req.query.branchId || req.branchId || undefined,
+      branchId: effectiveBranchScope(req) || undefined,
       from: req.query.from || undefined,
       to: req.query.to || undefined,
       severity: req.query.severity || undefined,
@@ -661,7 +682,7 @@ function _anomaliesToCsv(out) {
 router.get('/anomalous-admins/aggregates', async (req, res) => {
   try {
     const opts = {
-      branchId: req.query.branchId || req.branchId || undefined,
+      branchId: effectiveBranchScope(req) || undefined,
       from: req.query.from || undefined,
       to: req.query.to || undefined,
       bucket: req.query.bucket === 'month' ? 'month' : 'week',

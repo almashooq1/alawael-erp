@@ -257,10 +257,16 @@ describe('W257k — handler delegation + CSV shape', () => {
     expect(csv).toContain('"with""quote"');
   });
 
-  test('branchId falls back to req.branchId middleware-set', async () => {
+  test('W269e: restricted role gets own branch from req.branchScope.branchId', async () => {
     stub.listAnomalousAdmins.mockResolvedValueOnce({ items: [], total: 0 });
     const h = getHandler();
-    await h({ query: {}, branchId: 'mw-branch' }, fakeRes());
+    await h(
+      {
+        query: {},
+        branchScope: { restricted: true, branchId: 'mw-branch' },
+      },
+      fakeRes()
+    );
     expect(stub.listAnomalousAdmins).toHaveBeenCalledWith(
       expect.objectContaining({ branchId: 'mw-branch' })
     );

@@ -164,6 +164,8 @@ __tests__/gas-foundation-wave264.test.js
 __tests__/bip-fidelity-effectiveness-wave267.test.js
 __tests__/branch-isolation-security-wave269.test.js
 __tests__/branch-isolation-measures-outcomes-wave269b.test.js
+__tests__/therapist-portal-caseload-guard-wave269d.test.js
+__tests__/branch-isolation-measures-workflow-wave269e.test.js
 __tests__/biometric-mfa-tier-wave273.test.js
 __tests__/no-mfa-bypass-on-sensitive-routes-wave273b.test.js
 __tests__/attendance-monthly-report-xlsx-wave274.test.js

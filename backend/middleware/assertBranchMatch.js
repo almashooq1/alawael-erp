@@ -98,11 +98,15 @@ function assertBranchMatch(req, docBranchId, label = 'document') {
  * @returns {string|null}
  */
 function effectiveBranchScope(req) {
-  if (!req || !req.branchScope) return null;
-  if (req.branchScope.restricted) {
+  if (!req) return null;
+  if (req.branchScope && req.branchScope.restricted) {
     return req.branchScope.branchId ? String(req.branchScope.branchId) : null;
   }
-  // Cross-branch role: honour explicit query filter if provided.
+  // Cross-branch role OR test/internal path (no branchScope): honour
+  // explicit query filter if provided. Treating missing scope as
+  // "no constraint" preserves back-compat with handler-level unit
+  // tests that pass `req = { query: { branchId: ... } }` and don't
+  // simulate the requireBranchAccess middleware output.
   if (req.query && req.query.branchId) return String(req.query.branchId);
   return null;
 }

@@ -118,21 +118,35 @@ describe('W257h — handler param parsing + delegation', () => {
     });
   });
 
-  test('branchId query param is passed through', async () => {
+  test('branchId query param is honoured for cross-branch role (W269e: must NOT be honoured for restricted)', async () => {
     stub.listAnomalousAdmins.mockResolvedValueOnce({ items: [], total: 0 });
     const h = getHandler();
-    await h({ query: { branchId: 'b123' } }, fakeRes());
+    // cross-branch role: query branchId is honoured.
+    await h(
+      {
+        query: { branchId: 'b123' },
+        branchScope: { restricted: false, branchId: null },
+      },
+      fakeRes()
+    );
     expect(stub.listAnomalousAdmins).toHaveBeenCalledWith(
       expect.objectContaining({ branchId: 'b123' })
     );
   });
 
-  test('branchId falls back to req.branchId when query omitted', async () => {
+  test('W269e: restricted role ALWAYS gets own branchId regardless of query', async () => {
     stub.listAnomalousAdmins.mockResolvedValueOnce({ items: [], total: 0 });
     const h = getHandler();
-    await h({ query: {}, branchId: 'middleware-set' }, fakeRes());
+    // restricted user supplies a spoofed branchId in query — must be ignored.
+    await h(
+      {
+        query: { branchId: 'spoofed-branch' },
+        branchScope: { restricted: true, branchId: 'own-branch' },
+      },
+      fakeRes()
+    );
     expect(stub.listAnomalousAdmins).toHaveBeenCalledWith(
-      expect.objectContaining({ branchId: 'middleware-set' })
+      expect.objectContaining({ branchId: 'own-branch' })
     );
   });
 

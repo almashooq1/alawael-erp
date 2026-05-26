@@ -442,10 +442,16 @@ describe('W257l route handler delegation', () => {
     );
   });
 
-  test('branchId falls back to req.branchId middleware-set', async () => {
+  test('W269e: restricted role gets own branch from req.branchScope.branchId', async () => {
     stub.aggregateAnomalies.mockResolvedValueOnce({ bucket: 'week', buckets: [], totals: {} });
     const h = getHandler();
-    await h({ query: {}, branchId: 'mw-branch' }, fakeRes());
+    await h(
+      {
+        query: {},
+        branchScope: { restricted: true, branchId: 'mw-branch' },
+      },
+      fakeRes()
+    );
     expect(stub.aggregateAnomalies).toHaveBeenCalledWith(
       expect.objectContaining({ branchId: 'mw-branch' })
     );

@@ -47,17 +47,38 @@ This doc is the answer to: "what did 9 cycles produce, what's the state now, wha
 
 ---
 
-## 2. Platform health (verified 2026-05-25)
+## 2. Platform health — Cycle 10-11 TRUTH-CORRECTION
 
-| Gate                                           | Result                                                                           |
-| ---------------------------------------------- | -------------------------------------------------------------------------------- |
-| `test:sprint` (full 237 suites)                | ✅ 237/237 + 5283/5283 tests pass (~14.7 min)                                    |
-| `lint:duplication`                             | ✅ Clean (2337 files)                                                            |
-| `preflight`                                    | ✅ 12 adapters mock-mode, safe to deploy                                         |
-| `gov:status`                                   | ✅ 10/10 providers green                                                         |
-| 14 drift guards touched                        | ✅ 129/129 tests pass                                                            |
-| 3-layer safety stack (deploy + boot + runtime) | ✅ Complete for Phase 3 adapters                                                 |
-| Parallel-agent WIP security review             | ✅ No high-confidence vulnerabilities (W427 + ACL registry are net improvements) |
+> ⚠ **This section originally claimed "all gates green" + "shippable".
+> Cycle 10-11 (after this doc first shipped) discovered CI was actually
+> RED the entire session.** Two hidden bugs surfaced via `gh run list`:
+>
+> 1. `backend/intelligence/canonical/_primitives.js` silently gitignored
+>    by broad `_*.js` pattern → 22 canonical schemas broke on CI clone
+>    (local FS had the file, local sprint passed). Fixed by parallel
+>    agent's `327192b1c` (force-add) + my `ca453d703` (`!`-negation).
+> 2. My pre-1 commit `2f245f576` extended preflight PROVIDERS 10→12,
+>    breaking provider-registry-consistency test's 10-name EXPECTED
+>    contract. Broke for entire session; never re-ran full sprint after.
+>    Fixed in `df91e5e0f` (split into PROVIDERS + PHASE3_ADAPTERS).
+>
+> **Lesson**: memory entry `feedback_local_pass_is_not_ci_pass` —
+> local pass ≠ CI pass. Always `gh run list --branch main --limit 5`
+> before claiming "shippable".
+
+Updated gate table (post-fix):
+
+| Gate                                           | Local Result                          | CI Result (verified `gh run list`)                                                    |
+| ---------------------------------------------- | ------------------------------------- | ------------------------------------------------------------------------------------- |
+| `test:sprint` local                            | ✅ 237/237 (misleading — see callout) | Was RED on `_primitives` + `provider-consistency`; post-`df91e5e0f` awaiting CI green |
+| `lint:duplication`                             | ✅ Clean (2337 files)                 | ✅ No CI equivalent                                                                   |
+| `preflight` local                              | ✅ 12 adapters mock-mode              | Was RED via provider-consistency before `df91e5e0f`                                   |
+| `gov:status`                                   | ✅ 10/10 providers green              | n/a                                                                                   |
+| 14 drift guards touched                        | ✅ 129/129 tests pass                 | Pre-fix: ✗ CI red. Post-fix: awaiting confirmation on `df91e5e0f`.                    |
+| 3-layer safety stack (deploy + boot + runtime) | ✅ Code complete                      | n/a (deployment readiness depends on CI green)                                        |
+| Parallel-agent WIP security review             | ✅ No high-confidence vulnerabilities | n/a                                                                                   |
+
+**Next session must verify CI green** via `gh run list --branch main --workflow "🧪 Sprint Tests" --limit 3` before any "shippable" claim.
 
 ---
 

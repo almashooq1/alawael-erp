@@ -1,7 +1,7 @@
-# Phase A — Wave Plan W448-W456
+# Phase A — Wave Plan W448-W459 (Final)
 
 > **Date**: 2026-05-26  
-> **Status**: 🟡 Proposed — pending ADR-031 approval  
+> **Status**: ✅ **COMPLETE** — all 9 Phase A waves shipped 2026-05-26 across W448 + W452-W459. 353 tests passing in CI sprint (~3.1s).  
 > **Replaces**: the originally-planned `PHASE_A_WAVES_W391_W400.md` (renamed/revised after audit)  
 > **Scope**: Tier 1 quick wins identified by `GAP_ANALYSIS_LIFECYCLE_V3.md` — ICF extensions + GAS T-score enhancements + Crisis pathway orchestration  
 > **Duration**: ~3 weeks (15-20 work days)  
@@ -23,17 +23,17 @@ Per [`GAP_ANALYSIS_LIFECYCLE_V3.md`](GAP_ANALYSIS_LIFECYCLE_V3.md), Phase A was 
 
 ## 1. Wave Summary Table
 
-| Wave                | Title                                               | Tier  | Days | Risk    | Type                        | Status                                                              |
-| ------------------- | --------------------------------------------------- | ----- | ---- | ------- | --------------------------- | ------------------------------------------------------------------- |
-| **W448**            | ICF Core Sets seeding                               | A-ext | 2    | Low     | Data/seed                   | ✅ shipped 2026-05-26 (`26209cea1`)                                 |
-| ~~W449~~ → **W450** | CarePlanGoal ↔ ICF code linkage                    | A-ext | 2    | Low     | Schema extension            | pending — collision (W449 claimed by security IDOR fix `05c482bd2`) |
-| ~~W450~~ → **W451** | MeasurementMaster ↔ ICF qualifier mapping          | A-ext | 2    | Low-Med | Schema + lib extension      | pending                                                             |
-| ~~W451~~ → **W452** | GAS scale AI-assisted construction helper           | A-ext | 1    | Low     | Service addition            | pending                                                             |
-| ~~W452~~ → **W453** | GAS T-score periodic snapshot collection            | A-ext | 2    | Low     | New collection + cron       | pending                                                             |
-| ~~W453~~ → **W454** | Family-friendly GAS interpretation layer (Arabic)   | A-ext | 1    | Low     | Service addition            | pending                                                             |
-| ~~W454~~ → **W455** | ICF profile aggregation reports (branch + national) | A-ext | 2    | Med     | Service + APIs              | pending                                                             |
-| ~~W455~~ → **W456** | Crisis pathway orchestration over W356/W357         | F-int | 3    | Med     | New orchestrator + workflow | pending                                                             |
-| ~~W456~~ → **W457** | Phase A smoke + drift guards + sprint-tests update  | A-ext | 1    | Low     | Tests + CI                  | pending                                                             |
+| Wave                | Title                                               | Tier  | Days | Risk    | Type                        | Status                                                   |
+| ------------------- | --------------------------------------------------- | ----- | ---- | ------- | --------------------------- | -------------------------------------------------------- |
+| **W448**            | ICF Core Sets seeding                               | A-ext | 2    | Low     | Data/seed                   | ✅ shipped 2026-05-26 (`26209cea1`)                      |
+| ~~W449~~ → **W452** | CarePlanGoal ↔ ICF code linkage                    | A-ext | 2    | Low     | Schema extension            | ✅ shipped 2026-05-26 (`c70935c96`)                      |
+| ~~W450~~ → **W453** | MeasurementMaster ↔ ICF qualifier mapping          | A-ext | 2    | Low-Med | Schema + lib extension      | ✅ shipped 2026-05-26 (`3c0862bae`)                      |
+| ~~W451~~ → **W454** | GAS scale AI-assisted construction helper           | A-ext | 1    | Low     | Service addition            | ✅ shipped 2026-05-26 (`8d973e2d2`)                      |
+| ~~W452~~ → **W455** | GAS T-score periodic snapshot collection            | A-ext | 2    | Low     | New collection + cron       | ✅ shipped 2026-05-26 (`846a149cd`)                      |
+| ~~W453~~ → **W456** | Family-friendly GAS interpretation layer (Arabic)   | A-ext | 1    | Low     | Service addition            | ✅ shipped 2026-05-26 (`0d53d3f95`)                      |
+| ~~W454~~ → **W457** | ICF profile aggregation reports (branch + national) | A-ext | 2    | Med     | Service + APIs              | ✅ shipped 2026-05-26 (`27c9f4fab`)                      |
+| ~~W455~~ → **W458** | Crisis pathway orchestration over W356/W357         | F-int | 3    | Med     | New orchestrator + workflow | ✅ shipped 2026-05-26 (`9bc0445d2`+`bd51e9931` followup) |
+| ~~W456~~ → **W459** | Phase A smoke + drift guards + sprint-tests update  | A-ext | 1    | Low     | Tests + CI                  | ✅ shipped 2026-05-26 (this commit)                      |
 
 **Total**: 16 work days ≈ 3.5 weeks at 1 FTE, ~2 weeks at 2 FTE.
 

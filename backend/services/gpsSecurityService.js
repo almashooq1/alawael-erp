@@ -395,11 +395,18 @@ class GPSSecurityService {
    */
   static async verifyAPIKey(apiKey, apiSecret) {
     try {
-      // هذا يجب أن يكون متصل بقاعدة بيانات مفاتيح الـ API
+      // W440: null + type guard. `crypto.timingSafeEqual` throws on
+      // unequal-length buffers — the outer try/catch hid the throw but
+      // also collapsed "wrong length" and "wrong content" into the same
+      // false return path via an exception rather than a timing-safe
+      // compare. With the length pre-check, both paths return false
+      // immediately without invoking the comparator.
+      if (typeof apiKey !== 'string' || typeof apiSecret !== 'string') return false;
       const hash = crypto.createHash('sha256').update(apiSecret).digest('hex');
-
-      // المقارنة الآمنة
-      return crypto.timingSafeEqual(Buffer.from(apiKey), Buffer.from(hash));
+      const keyBuf = Buffer.from(apiKey);
+      const hashBuf = Buffer.from(hash);
+      if (keyBuf.length !== hashBuf.length) return false;
+      return crypto.timingSafeEqual(keyBuf, hashBuf);
     } catch (error) {
       logger.error('خطأ في التحقق من API Key:', error);
       return false;

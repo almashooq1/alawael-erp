@@ -3,6 +3,17 @@ const crypto = require('crypto');
 const logger = require('../utils/logger');
 const { EventEmitter } = require('events');
 
+// W440: SSRF guard for webhook URLs. Sync variant (no DNS round-trip)
+// keeps registerWebhook/updateWebhook synchronous; blocks literal private
+// IPs, cloud-metadata hostnames, sensitive ports, non-HTTP schemes,
+// decimal/hex IP tricks, and .local/.internal TLDs.
+let _validateOutboundUrlSync = null;
+try {
+  ({ validateOutboundUrlSync: _validateOutboundUrlSync } = require('../utils/urlValidator'));
+} catch {
+  _validateOutboundUrlSync = null;
+}
+
 // =========================================
 // WebhookEvent — single webhook event
 // =========================================
@@ -233,6 +244,12 @@ class IntegrationService extends EventEmitter {
   // --- In-memory API ---
 
   registerWebhook(url, events) {
+    if (_validateOutboundUrlSync) {
+      const check = _validateOutboundUrlSync(url);
+      if (!check.valid) {
+        throw new Error(`Invalid webhook URL: ${check.reason}`);
+      }
+    }
     const sub = new WebhookSubscription(url, events);
     this._webhooks.set(sub.id, sub);
     return sub;
@@ -250,7 +267,15 @@ class IntegrationService extends EventEmitter {
     const wh = this._webhooks.get(id);
     if (!wh) return;
     if (updates.events) wh.events = updates.events;
-    if (updates.url) wh.url = updates.url;
+    if (updates.url) {
+      if (_validateOutboundUrlSync) {
+        const check = _validateOutboundUrlSync(updates.url);
+        if (!check.valid) {
+          throw new Error(`Invalid webhook URL: ${check.reason}`);
+        }
+      }
+      wh.url = updates.url;
+    }
     if (typeof updates.isActive === 'boolean') wh.isActive = updates.isActive;
   }
 
@@ -303,8 +328,27 @@ class IntegrationService extends EventEmitter {
   }
 
   validateWebhookSignature(signature, payload, secret) {
-    const expected = crypto.createHmac('sha256', secret).update(payload).digest('hex');
-    return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected));
+    // W440: `crypto.timingSafeEqual` throws "Input buffers must have the
+    // same byte length" on length mismatch. Pre-W440 a wrong-length
+    // signature crashed the caller (and only call site is currently
+    // commented out in routes/integrations.routes.js — but the helper
+    // is a public method anyone could re-enable). Guard with null check
+    // + length pre-check + try/catch so it ALWAYS returns boolean.
+    if (typeof signature !== 'string' || typeof secret !== 'string') return false;
+    let expected;
+    try {
+      expected = crypto.createHmac('sha256', secret).update(payload).digest('hex');
+    } catch {
+      return false;
+    }
+    const sigBuf = Buffer.from(signature);
+    const expBuf = Buffer.from(expected);
+    if (sigBuf.length !== expBuf.length) return false;
+    try {
+      return crypto.timingSafeEqual(sigBuf, expBuf);
+    } catch {
+      return false;
+    }
   }
 
   getStatistics() {

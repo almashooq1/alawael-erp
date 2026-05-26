@@ -2097,6 +2097,16 @@ try {
   logger.warn(`[OpsSchedulers] failed to mount /api/ops/schedulers: ${err.message}`);
 }
 
+// ─── Realtime SSE Gateway (Phase A1) — Wave 427 ─────────────────────────────
+// Bridges systemIntegrationBus + qualityEventBus → W135 in-process broker
+// (which sat orphaned, 0 callers, same anti-pattern as W225 wallet) and
+// mounts SSE endpoint at /api/realtime/stream + /api/v1/realtime/stream.
+// Per-event ACL via intelligence/realtime-topic-acl.registry.js (default-deny).
+// Branch scoping enforced at subscribe-time via req.branchScope.
+// Late-bound on app._realtimeBroker so future producers (Phase B forecasting,
+// Phase C SOAP, Phase D behavior) publish directly without bus knowledge.
+require('./startup/realtimeGatewayBootstrap').wireRealtimeGateway(app, { logger });
+
 // ─── Hikvision Workforce Surveillance & Attendance — Wave 96-114 ─────────────
 // Extracted to startup/hikvisionBootstrap.js (W277 / Pass 1 of app.js refactor).
 // Identical behaviour: same models, same enforceMfa flags (W275 series), same

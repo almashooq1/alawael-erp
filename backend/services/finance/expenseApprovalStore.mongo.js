@@ -57,6 +57,11 @@ function project(doc) {
     payment: o.payment && o.payment.status ? o.payment : null,
     rejection: o.rejection && o.rejection.by ? o.rejection : null,
     metadata: o.metadata || {},
+    // W442: surface __v to the service so put() can CAS-gate against
+    // the exact version we read. Service treats it as opaque (just
+    // copies it back unchanged); store interprets it as the
+    // optimistic-concurrency token.
+    __v: typeof o.__v === 'number' ? o.__v : 0,
   };
 }
 
@@ -70,10 +75,55 @@ function createMongoStore({ Model }) {
     },
 
     async put(id, record) {
-      // upsert so create and update go through the same code path
+      // W442: optimistic concurrency on the store contract. The
+      // expenseApprovalService's approve/reject/etc. flows do
+      // store.get → mutate-in-memory → store.put. Pre-W442 was full-
+      // document replace via findOneAndUpdate({expenseId}, {$set:
+      // record}) — no version check. Two concurrent approvers at
+      // step.dualControl level both read approvers=[], both push their
+      // approver, both call put → second's put SILENTLY OVERWRITES
+      // the first, losing one approval entry. Result: chain advances
+      // with only ONE recorded approver instead of two, AND audit
+      // history is incomplete.
+      //
+      // Fix: include `__v` from the read in the filter as a CAS gate.
+      // If the doc was modified concurrently, the filter fails and
+      // we throw CONCURRENT_MODIFICATION so the caller (route or
+      // ABAC layer) can retry / surface as 409.
+      const expectedV = typeof record.__v === 'number' ? record.__v : null;
+      const { __v: _ignore, ...recordNoVersion } = record;
+      if (expectedV !== null) {
+        // UPDATE path — CAS against the version we read.
+        const updated = await Model.findOneAndUpdate(
+          { expenseId: String(id), __v: expectedV },
+          {
+            $set: { ...recordNoVersion, expenseId: String(id) },
+            $inc: { __v: 1 },
+          },
+          { new: true }
+        ).lean();
+        if (updated) return project(updated);
+        // CAS miss — disambiguate: doesn't exist, or version mismatch.
+        const exists = await Model.exists({ expenseId: String(id) });
+        if (exists) {
+          const err = new Error(
+            `expense ${id} was modified concurrently (expected __v=${expectedV}) — retry`
+          );
+          err.code = 'CONCURRENT_MODIFICATION';
+          throw err;
+        }
+        // Doesn't exist but caller had a version — fall through to
+        // upsert path. This happens when a record was deleted between
+        // get and put; treat as a fresh insert.
+      }
+      // CREATE path (no __v) or fallback after a stale-version on a
+      // deleted-then-recreated record: upsert without version filter.
       const doc = await Model.findOneAndUpdate(
         { expenseId: String(id) },
-        { $set: { ...record, expenseId: String(id) } },
+        {
+          $set: { ...recordNoVersion, expenseId: String(id) },
+          $setOnInsert: { __v: 0 },
+        },
         { upsert: true, new: true, setDefaultsOnInsert: true }
       ).lean();
       return project(doc);

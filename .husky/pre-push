@@ -4,6 +4,15 @@
 
 set -e
 
+# 2026-05-26 (Cycle 11): block the recurring sprint-tests.yml drift class
+# at the push gate. Drift caught HERE means CI can never go red on it
+# again — fired 3× this session (W269d-g batch + W269h solo + W440)
+# before this guard. Fast (<1s); failure prints missing entries +
+# suggests `npm run sync:sprint-paths` for the one-command auto-fix.
+echo "[pre-push] sprint-tests.yml drift check…"
+cd backend && npm run check:sprint-paths
+cd ..
+
 echo "[pre-push] backend quality:push…"
 cd backend && npm run quality:push
 cd ..

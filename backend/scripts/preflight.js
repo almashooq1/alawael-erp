@@ -29,6 +29,13 @@
 
 'use strict';
 
+// The original 10-provider sprint contract. Locked by
+// provider-registry-consistency.test.js (the EXPECTED list is the
+// single source of truth; all 6 touchpoints — adapterRateLimiter
+// DEFAULTS, circuit defaults, metrics counters, gov-status PROVIDERS,
+// preflight PROVIDERS, and adapter files — must match.
+// DO NOT add Phase 3 adapters here without also updating the test's
+// EXPECTED + all other touchpoints in the same commit.
 const PROVIDERS = [
   'gosi',
   'scfhs',
@@ -40,12 +47,15 @@ const PROVIDERS = [
   'nphies',
   'wasel',
   'balady',
-  // Phase 3 additions — adapters added W280-W281 with the same getConfig
-  // shape (provider/mode/configured/missing). Their crons get a separate
-  // readiness check in checkPhase3Crons() below.
-  'disabilityAuthority',
-  'sehhaty',
 ];
+
+// Phase 3 adapters checked alongside the 10 above but kept in a
+// SEPARATE list so they don't break the 10-provider consistency
+// contract. Same getConfig() shape (provider/mode/configured/missing).
+// Their crons get a readiness check in checkPhase3Crons() below.
+const PHASE3_ADAPTERS = ['disabilityAuthority', 'sehhaty'];
+
+const ALL_CHECKED = [...PROVIDERS, ...PHASE3_ADAPTERS];
 
 if (process.argv.includes('--help') || process.argv.includes('-h')) {
   process.stdout.write(
@@ -176,7 +186,10 @@ function checkPhase3Crons() {
 }
 
 function main() {
-  const results = PROVIDERS.map(name => ({ name, ...loadAdapter(name) }));
+  // Check all 10 PROVIDERS + 2 PHASE3_ADAPTERS uniformly. Both lists
+  // are kept separate at module top to preserve the 10-provider
+  // consistency-test contract, but main() treats them identically.
+  const results = ALL_CHECKED.map(name => ({ name, ...loadAdapter(name) }));
 
   const loadErrors = results.filter(r => !r.ok);
   const liveMisconfigured = results.filter(

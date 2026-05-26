@@ -248,3 +248,4 @@ __tests__/canonical-schemas-wave366.test.js
 __tests__/diet-prescription-wave368.test.js
 __tests__/facility-asset-wave369.test.js
 __tests__/caregiver-support-program-wave384.test.js
+__tests__/caregiver-support-program-behavioral-wave384.test.js

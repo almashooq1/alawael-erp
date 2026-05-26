@@ -320,6 +320,26 @@ class DigitalWalletService {
 
   /**
    * تسجيل استخدام الكوبون
+   *
+   * W427: atomic limit-aware increment. Pre-W427 this was:
+   *
+   *   findById → check limit in applyCoupon (separate call earlier) →
+   *   create CouponUsage → unconditional $inc usedCount.
+   *
+   * Race: N concurrent applyCoupon callers all read `usedCount=4`
+   * for `usageLimit=5`, all pass the check, all eventually call
+   * recordCouponUsage which $inc's → usedCount settles at 4+N,
+   * overshooting the limit by N-1.
+   *
+   * Fix: atomic `findOneAndUpdate` with `{$expr: {$lt: ['$usedCount',
+   * '$usageLimit']}}` guard performs the check-and-increment in one
+   * Mongo op. If the limit is already reached the update returns null
+   * and we refuse to record the usage (caller is responsible for
+   * rolling back the wallet debit OR for being prepared to handle
+   * this — see jsdoc).
+   *
+   * Coupons WITHOUT a usageLimit (null/undefined) skip the guard via
+   * the `$or` clause and increment unconditionally.
    */
   async recordCouponUsage(
     couponId,
@@ -329,8 +349,29 @@ class DigitalWalletService {
     orderAmount,
     userId
   ) {
-    const coupon = await DiscountCoupon.findById(couponId);
-    if (!coupon) throw new Error('الكوبون غير موجود');
+    // Atomic compare-and-increment (W427).
+    const coupon = await DiscountCoupon.findOneAndUpdate(
+      {
+        _id: couponId,
+        $or: [
+          { usageLimit: { $exists: false } },
+          { usageLimit: null },
+          { $expr: { $lt: ['$usedCount', '$usageLimit'] } },
+        ],
+      },
+      { $inc: { usedCount: 1 } },
+      { new: true }
+    );
+
+    if (!coupon) {
+      // Either the coupon doesn't exist OR usedCount has caught up to
+      // usageLimit since applyCoupon was called (the race we're closing).
+      const stale = await DiscountCoupon.findById(couponId).select('usedCount usageLimit').lean();
+      if (!stale) throw new Error('الكوبون غير موجود');
+      throw new Error(
+        `تجاوز حد استخدام الكوبون (${stale.usedCount}/${stale.usageLimit}) — سباق متزامن`
+      );
+    }
 
     await CouponUsage.create({
       branchId: coupon.branchId,
@@ -342,8 +383,6 @@ class DigitalWalletService {
       usedAt: new Date(),
       createdBy: userId,
     });
-
-    await DiscountCoupon.findByIdAndUpdate(couponId, { $inc: { usedCount: 1 } });
   }
 
   /**

@@ -28,6 +28,7 @@ const mockDiscountCoupon = {
   findOne: jest.fn(),
   findById: jest.fn(),
   findByIdAndUpdate: jest.fn(),
+  findOneAndUpdate: jest.fn(),
 };
 
 const mockCouponUsage = {
@@ -334,23 +335,51 @@ describe('DigitalWalletService', () => {
   // ── recordCouponUsage ────────────────────────────────────────────
 
   describe('recordCouponUsage', () => {
-    it('creates usage and increments coupon count', async () => {
-      mockDiscountCoupon.findById.mockResolvedValue({ _id: 'c1', branchId: 'br1' });
+    it('atomically check-and-increments coupon count, then records usage', async () => {
+      // W427: the check-and-increment is now ONE Mongo op (findOneAndUpdate
+      // with `{$expr: {$lt: ['$usedCount', '$usageLimit']}}` guard). The
+      // returned doc is the post-increment value, and we use it to derive
+      // branchId for the CouponUsage record.
+      mockDiscountCoupon.findOneAndUpdate.mockResolvedValue({
+        _id: 'c1',
+        branchId: 'br1',
+        usedCount: 5,
+        usageLimit: 10,
+      });
       mockCouponUsage.create.mockResolvedValue({});
-      mockDiscountCoupon.findByIdAndUpdate.mockResolvedValue({});
 
       await service.recordCouponUsage('c1', 'ben1', 'tx1', 20, 200, 'u1');
 
+      expect(mockDiscountCoupon.findOneAndUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          _id: 'c1',
+          $or: expect.any(Array),
+        }),
+        { $inc: { usedCount: 1 } },
+        { new: true }
+      );
       expect(mockCouponUsage.create).toHaveBeenCalled();
-      expect(mockDiscountCoupon.findByIdAndUpdate).toHaveBeenCalledWith('c1', {
-        $inc: { usedCount: 1 },
-      });
     });
 
-    it('throws when coupon not found', async () => {
-      mockDiscountCoupon.findById.mockResolvedValue(null);
+    it('throws when coupon not found (atomic update returned null + findById also null)', async () => {
+      mockDiscountCoupon.findOneAndUpdate.mockResolvedValue(null);
+      mockDiscountCoupon.findById.mockReturnValue({
+        select: () => ({ lean: () => Promise.resolve(null) }),
+      });
       await expect(service.recordCouponUsage('bad', 'b', 'tx', 10, 100, 'u')).rejects.toThrow(
         'غير موجود'
+      );
+    });
+
+    it('throws "limit exceeded" when atomic update returned null but coupon exists at limit (W427 race close)', async () => {
+      // Atomic compare-and-increment failed because usedCount caught up
+      // to usageLimit since applyCoupon was called — the race we're closing.
+      mockDiscountCoupon.findOneAndUpdate.mockResolvedValue(null);
+      mockDiscountCoupon.findById.mockReturnValue({
+        select: () => ({ lean: () => Promise.resolve({ usedCount: 5, usageLimit: 5 }) }),
+      });
+      await expect(service.recordCouponUsage('c1', 'b', 'tx', 10, 100, 'u')).rejects.toThrow(
+        /تجاوز حد استخدام الكوبون.*5\/5/
       );
     });
   });
@@ -358,13 +387,26 @@ describe('DigitalWalletService', () => {
   // ── addLoyaltyPoints ─────────────────────────────────────────────
 
   describe('addLoyaltyPoints', () => {
-    it('adds points and creates transaction', async () => {
+    it('atomically $inc-s points and creates earn transaction (W426)', async () => {
+      // W426 replaced `wallet.loyaltyPoints += points; save()` with
+      // atomic `findByIdAndUpdate $inc` — mock must reflect that.
       const wallet = fakeWallet({ loyaltyPoints: 10 });
+      mockDigitalWallet.findByIdAndUpdate.mockResolvedValue({
+        _id: wallet._id,
+        branchId: wallet.branchId,
+        loyaltyPoints: 15,
+      });
       await service.addLoyaltyPoints(wallet, 5, 'payment', 'Source', 'src1', 'u1');
 
+      expect(mockDigitalWallet.findByIdAndUpdate).toHaveBeenCalledWith(
+        wallet._id,
+        expect.objectContaining({ $inc: { loyaltyPoints: 5 } }),
+        expect.objectContaining({ new: true })
+      );
+      // Impl mutates wallet.loyaltyPoints from the atomic post-state.
       expect(wallet.loyaltyPoints).toBe(15);
       expect(mockLoyaltyPointsTransaction.create).toHaveBeenCalledWith(
-        expect.objectContaining({ type: 'earn', points: 5 })
+        expect.objectContaining({ type: 'earn', points: 5, balanceAfter: 15 })
       );
     });
   });
@@ -372,24 +414,41 @@ describe('DigitalWalletService', () => {
   // ── redeemLoyaltyPoints ──────────────────────────────────────────
 
   describe('redeemLoyaltyPoints', () => {
-    it('redeems points for discount', async () => {
-      const wallet = fakeWallet({ loyaltyPoints: 200 });
-      mockDigitalWallet.findById.mockResolvedValue(wallet);
+    it('redeems points for discount via atomic $inc (W425)', async () => {
+      // W425: findOneAndUpdate({_id, loyaltyPoints: {$gte: pts}}, {$inc})
+      // returns the post-deduction wallet.
+      mockDigitalWallet.findOneAndUpdate.mockResolvedValue({
+        _id: 'w1',
+        branchId: 'br1',
+        loyaltyPoints: 100, // 200 - 100 after atomic $inc
+      });
 
       const discount = await service.redeemLoyaltyPoints('w1', 100, 'u1');
 
       expect(discount).toBe(1); // 100/100 = 1 SAR
-      expect(wallet.loyaltyPoints).toBe(100);
-      expect(wallet.save).toHaveBeenCalled();
+      expect(mockDigitalWallet.findOneAndUpdate).toHaveBeenCalledWith(
+        { _id: 'w1', loyaltyPoints: { $gte: 100 } },
+        expect.objectContaining({ $inc: { loyaltyPoints: -100 } }),
+        expect.objectContaining({ new: true })
+      );
+      expect(mockLoyaltyPointsTransaction.create).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'redeem', points: 100, balanceAfter: 100 })
+      );
     });
 
-    it('throws when insufficient points', async () => {
-      mockDigitalWallet.findById.mockResolvedValue(fakeWallet({ loyaltyPoints: 10 }));
+    it('throws "insufficient" when atomic update fails AND wallet has fewer points (W425 race close)', async () => {
+      mockDigitalWallet.findOneAndUpdate.mockResolvedValue(null);
+      mockDigitalWallet.findById.mockReturnValue({
+        select: () => ({ lean: () => Promise.resolve({ loyaltyPoints: 10 }) }),
+      });
       await expect(service.redeemLoyaltyPoints('w1', 50, 'u')).rejects.toThrow('نقاط غير كافية');
     });
 
-    it('throws when wallet not found', async () => {
-      mockDigitalWallet.findById.mockResolvedValue(null);
+    it('throws "wallet not found" when atomic update fails AND wallet absent', async () => {
+      mockDigitalWallet.findOneAndUpdate.mockResolvedValue(null);
+      mockDigitalWallet.findById.mockReturnValue({
+        select: () => ({ lean: () => Promise.resolve(null) }),
+      });
       await expect(service.redeemLoyaltyPoints('bad', 10, 'u')).rejects.toThrow(
         'المحفظة غير موجودة'
       );
@@ -453,19 +512,30 @@ describe('DigitalWalletService', () => {
   // ── expireLoyaltyPoints ──────────────────────────────────────────
 
   describe('expireLoyaltyPoints', () => {
-    it('expires points and creates expire transaction', async () => {
+    it('expires points via atomic $inc and creates expire transaction (W426)', async () => {
+      // W426: sweeper now uses findOneAndUpdate with `loyaltyPoints:
+      // {$gte: pts.points}` guard instead of findById + save.
       mockLoyaltyPointsTransaction.find.mockResolvedValue([
         {
           walletId: 'w1',
           points: 20,
         },
       ]);
-      mockDigitalWallet.findById.mockResolvedValue(fakeWallet({ loyaltyPoints: 50 }));
+      mockDigitalWallet.findOneAndUpdate.mockResolvedValue({
+        _id: 'w1',
+        branchId: 'br1',
+        loyaltyPoints: 30, // 50 - 20 after atomic $inc
+      });
       mockLoyaltyPointsTransaction.create.mockResolvedValue({});
 
       const count = await service.expireLoyaltyPoints();
 
       expect(count).toBe(1);
+      expect(mockDigitalWallet.findOneAndUpdate).toHaveBeenCalledWith(
+        { _id: 'w1', loyaltyPoints: { $gte: 20 } },
+        expect.objectContaining({ $inc: { loyaltyPoints: -20 } }),
+        expect.objectContaining({ new: true })
+      );
     });
 
     it('returns 0 when no expired points', async () => {

@@ -82,6 +82,14 @@ const EXEMPT_PATHS = new Set([
   // (none currently)
 ]);
 
+// W442-specific exemptions for the FK-singular / snake-case body
+// patterns. Each entry MUST document why the route is safe.
+const W442_EXEMPT_PATHS = new Set([
+  // (none currently — every flagged file now applies bodyScopedBeneficiaryGuard,
+  //  even when the field is a context object: the guard ObjectId-shape-checks
+  //  before enforcing, so applying it is harmless AND future-proofs the route.)
+]);
+
 describe('W440/W441 — req.params + req.body beneficiaryId enforcement drift guard', () => {
   test('every route file using req.params.beneficiaryId enforces branch isolation', () => {
     const files = glob.sync('routes/**/*.js', { cwd: REPO_BACKEND, nodir: true });
@@ -172,6 +180,67 @@ describe('W440/W441 — req.params + req.body beneficiaryId enforcement drift gu
         `W441: ${offenders.length} route file(s) accept beneficiaryId in body WITHOUT branch enforcement.\n` +
           'Add `router.use(bodyScopedBeneficiaryGuard)` from middleware/assertBranchMatch.js\n' +
           '(must be AFTER `router.use(requireBranchAccess)` so req.branchScope is populated).\n' +
+          'Affected files:\n' +
+          lines
+      );
+    }
+    expect(offenders).toEqual([]);
+  });
+
+  test('W442: every route file using req.body.beneficiary (FK singular) or req.body.beneficiary_id (snake_case) enforces branch isolation', () => {
+    const files = glob.sync('routes/**/*.js', { cwd: REPO_BACKEND, nodir: true });
+    const offenders = [];
+
+    for (const rel of files) {
+      const norm = rel.replace(/\\/g, '/');
+      if (W442_EXEMPT_PATHS.has(norm)) continue;
+      if (EXEMPT_PATHS.has(norm)) continue;
+
+      const abs = path.join(REPO_BACKEND, rel);
+      const src = fs.readFileSync(abs, 'utf8');
+      const stripped = stripJsComments(src);
+
+      // W442 covers 4 patterns:
+      //   1. `req.body.beneficiary`        — FK singular access
+      //   2. `req.body.beneficiary_id`     — snake_case FK access
+      //   3. `const { beneficiary } = req.body`     — destructured singular
+      //   4. `const { beneficiary_id } = req.body`  — destructured snake
+      // The negative-lookahead `(?!Id\b)` on the first match prevents
+      // double-counting `req.body.beneficiaryId` (already handled by W441).
+      const bodyUsages =
+        (stripped.match(/\breq\.body\.beneficiary(?!Id\b|_id\b|\w)/g) || []).length +
+        (stripped.match(/\breq\.body\.beneficiary_id\b/g) || []).length +
+        (stripped.match(/\{\s*[^}]*\bbeneficiary\b(?!Id)[^}]*\}\s*=\s*req\.body\b/g) || []).length +
+        (stripped.match(/\{\s*[^}]*\bbeneficiary_id\b[^}]*\}\s*=\s*req\.body\b/g) || []).length;
+      if (bodyUsages === 0) continue;
+
+      const present = ENFORCEMENT_SIGNALS.filter(s => s.regex.test(stripped)).map(s => s.name);
+      if (present.length === 0) {
+        offenders.push({
+          file: norm,
+          uses: bodyUsages,
+          signals: 'NONE',
+        });
+      }
+    }
+
+    if (offenders.length > 0) {
+      const lines = offenders
+        .map(
+          o =>
+            `  - ${o.file} (${o.uses} req.body.beneficiary{,_id} usage${
+              o.uses === 1 ? '' : 's'
+            }, ${o.signals})`
+        )
+        .join('\n');
+      throw new Error(
+        `W442: ${offenders.length} route file(s) accept beneficiary FK in body WITHOUT branch enforcement.\n` +
+          'Add `router.use(bodyScopedBeneficiaryGuard)` from middleware/assertBranchMatch.js.\n' +
+          'The guard auto-detects all 3 canonical FK field names\n' +
+          '(beneficiaryId, beneficiary, beneficiary_id) and ObjectId-shape-checks before enforcing.\n' +
+          'Place AFTER `router.use(requireBranchAccess)` so req.branchScope is populated.\n' +
+          'If the field is a context object (not an FK), the guard auto-skips by ObjectId regex —\n' +
+          'still apply the guard to satisfy this drift check + future-proof the route.\n' +
           'Affected files:\n' +
           lines
       );

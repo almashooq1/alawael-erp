@@ -31,7 +31,16 @@ const createBundleOutcomes = require('../services/assessmentBundleOutcomes.servi
 const {
   enforceBeneficiaryBranch,
   effectiveBranchScope,
+  bodyScopedBeneficiaryGuard,
 } = require('../middleware/assertBranchMatch');
+// W442: router-level defense-in-depth — the per-callsite
+// enforceBeneficiaryBranch calls on /accept (line 236) + the 3 below
+// stay as primary guards; this one auto-fires when a future endpoint
+// reads req.body.beneficiaryId (or any of the 3 canonical FK forms)
+// without a per-callsite call. No-op for the dry-run /recommend which
+// passes `beneficiary` as a context object (auto-skipped by ObjectId
+// regex check inside the guard).
+router.use(bodyScopedBeneficiaryGuard);
 const safeError = require('../utils/safeError');
 
 // Register the bundle model so `mongoose.model('AssessmentRecommendationBundle')`

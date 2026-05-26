@@ -14,6 +14,7 @@
 const express = require('express');
 const { authenticate } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
 const { stripUpdateMeta } = require('../utils/sanitize');
 const router = express.Router();
 const mongoose = require('mongoose');
@@ -21,6 +22,7 @@ const mongoose = require('mongoose');
 // 🔒 All scheduling routes require authentication
 router.use(authenticate);
 router.use(requireBranchAccess);
+router.use(bodyScopedBeneficiaryGuard); // W442: enforce branch on req.body.beneficiary_id (snake)
 // ─── Models ──────────────────────────────────────────────────────────────────
 const Appointment = require('../models/scheduling/Appointment');
 const TherapistAvailability = require('../models/scheduling/TherapistAvailability');

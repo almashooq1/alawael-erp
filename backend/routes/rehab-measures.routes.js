@@ -37,6 +37,11 @@ const {
   generateClinicalSummary,
   generateSMARTGoals,
 } = require('../rehabilitation-services/smart-assessment-engine');
+const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
+// W442: defense-in-depth on stateless scoring routes — `beneficiary`
+// is currently a context object (name_ar/diagnosis/age), guard
+// auto-skips non-ObjectId values. Future-proofs against regression.
+router.use(bodyScopedBeneficiaryGuard);
 
 // Lazy-instantiate engine (stateless, safe to reuse)
 const engine = new SmartAssessmentEngine();

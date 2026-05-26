@@ -279,20 +279,26 @@ async function branchScopedBeneficiaryParam(req, res, next, beneficiaryId) {
 
 /**
  * Express middleware that auto-enforces branch ownership when a
- * request body carries `beneficiaryId`. Complements
- * `branchScopedBeneficiaryParam` which only fires for URL params.
+ * request body carries any of the 3 canonical beneficiary identifier
+ * field names. Complements `branchScopedBeneficiaryParam` which only
+ * fires for URL params.
+ *
+ * Recognised body fields (in priority order — first non-empty wins):
+ *   1. `beneficiaryId` — primary canonical (camelCase id)
+ *   2. `beneficiary`   — FK singular (ObjectId-string; W442)
+ *   3. `beneficiary_id` — snake_case (W442)
  *
  * Apply once per route file:
  *   router.use(bodyScopedBeneficiaryGuard);
  *
- * Closes the W440 follow-up gap: 31+ route files take
- * `req.body.beneficiaryId` in POST/PUT handlers without enforcement.
+ * Closes the W440 → W441 → W442 series gap: 47+ route files take a
+ * beneficiary identifier in POST/PUT handlers without enforcement.
  * These are WRITE paths — a cross-branch write creates/modifies
  * records tagged to a foreign beneficiary, which is arguably more
  * dangerous than the read-path leaks W269 closed.
  *
  * Behaviour:
- *   - No body or no `beneficiaryId` field in body → no-op
+ *   - No body or no recognised field in body → no-op
  *   - Cross-branch role / no req.branchScope → no-op (test back-compat)
  *   - Restricted + mismatch → 403
  *   - Restricted + not-found → 404
@@ -306,10 +312,28 @@ async function branchScopedBeneficiaryParam(req, res, next, beneficiaryId) {
  * @param {import('express').NextFunction} next
  */
 async function bodyScopedBeneficiaryGuard(req, res, next) {
-  const bid = req && req.body && req.body.beneficiaryId;
-  if (!bid) return next();
+  const body = req && req.body;
+  if (!body) return next();
+  // W442: accept any of 3 canonical FK field names. Priority: explicit
+  // *Id first, then snake_case, then the FK-singular `beneficiary`.
+  // Body validators upstream may already coerce these — we only need
+  // ONE to enforce branch isolation.
+  const raw = body.beneficiaryId || body.beneficiary_id || body.beneficiary;
+  if (!raw) return next();
+  // Some endpoints pass `beneficiary` as a context object
+  // ({ age, diagnosis, ... }) rather than an ObjectId — the
+  // assessmentRecommendationEngine and a few scoring routes do this.
+  // Only enforce when the value is string-like AND ObjectId-shaped.
+  // Mongoose ObjectId instances coerce to 24-hex via String().
+  if (typeof raw !== 'string' && (typeof raw !== 'object' || raw === null || !raw.toString)) {
+    return next();
+  }
+  const bidStr = String(raw);
+  // 24-hex Mongo ObjectId is the canonical shape across this codebase.
+  // Anything else (object stringification, non-hex code) falls through.
+  if (!/^[a-f0-9]{24}$/i.test(bidStr)) return next();
   try {
-    await enforceBeneficiaryBranch(req, bid);
+    await enforceBeneficiaryBranch(req, bidStr);
     next();
   } catch (err) {
     if (err && err.status === 403) {

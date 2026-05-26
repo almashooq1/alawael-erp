@@ -66,9 +66,15 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
-const { branchScopedBeneficiaryParam } = require('../middleware/assertBranchMatch');
+const {
+  branchScopedBeneficiaryParam,
+  bodyScopedBeneficiaryGuard,
+} = require('../middleware/assertBranchMatch');
 // W440: auto-enforce branch ownership on every :beneficiaryId param.
 router.param('beneficiaryId', branchScopedBeneficiaryParam);
+// W442: enforce branch on req.body.beneficiary (FK singular) used by
+// all 12 assessment POST handlers below.
+router.use(bodyScopedBeneficiaryGuard);
 
 /* ─── Services ─────────────────────────────────────────────────────────── */
 const SmartAssessmentEngine = require('../services/smart-assessment-engine');

@@ -37,6 +37,7 @@ const PriorAuthorization = require('../models/PriorAuthorization');
 const InsuranceEligibilityCheck = require('../models/InsuranceEligibilityCheck');
 const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
 const _logger = require('../utils/logger');
 const _safeError = require('../utils/safeError');
 const escapeRegex = require('../utils/escapeRegex');
@@ -46,6 +47,7 @@ const wrap = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch
 // ── Auth على جميع المسارات ────────────────────────────────────────────────────
 router.use(authenticate);
 router.use(requireBranchAccess);
+router.use(bodyScopedBeneficiaryGuard); // W442: enforce branch on req.body.beneficiary_id (snake)
 // ══════════════════════════════════════════════════════════════════════════════
 // STATS — الإحصائيات
 // ══════════════════════════════════════════════════════════════════════════════

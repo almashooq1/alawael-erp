@@ -14,6 +14,7 @@ const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
 const {
   ScheduleTemplate,
   TimeSlot,
@@ -25,6 +26,7 @@ const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 router.use(requireBranchAccess);
+router.use(bodyScopedBeneficiaryGuard); // W442: enforce branch on req.body.beneficiary (singular FK)
 /* ── Field whitelists ───────────────────────────────────────────── */
 const TEMPLATE_FIELDS = [
   'name',

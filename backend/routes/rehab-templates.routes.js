@@ -12,8 +12,14 @@ const {
   listTemplates,
   getTemplate,
 } = require('../rehabilitation-services/rehab-program-templates');
+const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
 
 const router = express.Router();
+// W442: defense-in-depth. `beneficiary` here is normally a context
+// object (diagnosis/age) but the guard auto-skips non-ObjectId values,
+// so applying it costs nothing AND protects against future regressions
+// if a caller starts passing a Beneficiary ObjectId reference.
+router.use(bodyScopedBeneficiaryGuard);
 
 const ok = (res, data, meta = {}) => res.json({ success: true, ...meta, data });
 const fail = (res, message, status = 400) => res.status(status).json({ success: false, message });

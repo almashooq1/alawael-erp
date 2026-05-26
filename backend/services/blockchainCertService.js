@@ -286,14 +286,31 @@ async function signCertificate(certId, { userId, signerName, signerTitle }) {
 }
 
 async function revokeCertificate(certId, { userId, reason }) {
-  const cert = await BlockchainCertificate.findById(certId);
-  if (!cert) throw Object.assign(new Error('الشهادة غير موجودة'), { status: 404 });
-  if (cert.status === 'revoked') {
+  // W440: atomic state-flip. Pre-W440 was findById → check status !==
+  // 'revoked' → set status='revoked' + revocation metadata → save →
+  // emit `blockchain.certificate.revoked`. Two concurrent revoke
+  // calls would both pass the check, both save (second overwrites
+  // first's revocation.reason/revokedBy/revokedAt), AND both emit
+  // the revoke event → downstream subscribers (audit log,
+  // notification, compliance webhook) process the revocation TWICE.
+  // For an audit-critical event like revocation this is a real
+  // observability + downstream-trigger correctness bug.
+  //
+  // Filter `status: {$ne: 'revoked'}` ensures only the first caller
+  // wins; second falls into the "already revoked" branch BEFORE the
+  // emit fires.
+  const revokedAt = new Date();
+  const revocation = { revokedAt, revokedBy: userId, reason: reason || 'غير محدد' };
+  const cert = await BlockchainCertificate.findOneAndUpdate(
+    { _id: certId, status: { $ne: 'revoked' } },
+    { $set: { status: 'revoked', revocation } },
+    { new: true }
+  );
+  if (!cert) {
+    const existing = await BlockchainCertificate.findById(certId).select('status').lean();
+    if (!existing) throw Object.assign(new Error('الشهادة غير موجودة'), { status: 404 });
     throw Object.assign(new Error('الشهادة مُلغاة بالفعل'), { status: 400 });
   }
-  cert.status = 'revoked';
-  cert.revocation = { revokedAt: new Date(), revokedBy: userId, reason: reason || 'غير محدد' };
-  await cert.save();
   metrics.bumpCertificate('revoked');
   emitQuality('blockchain.certificate.revoked', {
     certificateId: String(cert._id),

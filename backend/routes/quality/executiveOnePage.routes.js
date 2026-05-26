@@ -22,6 +22,7 @@ const {
 } = require('../../services/quality/executiveOnePage.service');
 const { createDashboardCache } = require('../../services/quality/dashboard-cache.util');
 const logger = require('../../utils/logger');
+const safeError = require('../../utils/safeError'); // W456
 
 const service = createExecutiveOnePageService({ logger });
 
@@ -60,8 +61,8 @@ router.get('/', requireMfaTier(1), async (req, res) => {
     const data = await cachedBuild({ branchIds, topN });
     res.json({ success: true, ...data });
   } catch (err) {
-    logger.error('[executiveOnePage] GET / failed', err);
-    res.status(500).json({ success: false, code: 'INTERNAL_ERROR', message: err.message });
+    // W456: safeError suppresses err.message in production
+    return safeError(res, err, 'executiveOnePage.list');
   }
 });
 

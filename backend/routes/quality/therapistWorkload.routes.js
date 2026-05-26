@@ -25,6 +25,7 @@ const {
 } = require('../../services/quality/therapistWorkload.service');
 const { createDashboardCache } = require('../../services/quality/dashboard-cache.util');
 const logger = require('../../utils/logger');
+const safeError = require('../../utils/safeError'); // W456
 
 const service = createTherapistWorkloadService({ logger });
 
@@ -62,8 +63,8 @@ router.get('/', requireMfaTier(1), async (req, res) => {
     const data = await cachedBuildWorkload({ therapistIds, branchId });
     res.json({ success: true, ...data });
   } catch (err) {
-    logger.error('[therapistWorkload] GET / failed', err);
-    res.status(500).json({ success: false, code: 'INTERNAL_ERROR', message: err.message });
+    // W456: use safeError so err.message is suppressed in production
+    return safeError(res, err, 'therapistWorkload.list');
   }
 });
 

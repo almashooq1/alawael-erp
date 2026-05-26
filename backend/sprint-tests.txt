@@ -301,3 +301,4 @@ __tests__/smart-inbox-ranker-wave431.test.js
 __tests__/phase-c-e2e-smoke-wave472.test.js
 __tests__/caseload-matcher-wave432.test.js
 __tests__/prayer-time-wave473.test.js
+__tests__/ramadan-protocol-wave474.test.js

@@ -22,17 +22,22 @@ find models -name "*.js" -exec grep -l "path('__invariants').validate\|path(\"__
 done | awk '$2 > 0 && $3 == 0 {print}'
 ```
 
-## High-priority gaps (HAS static test, MISSING behavioral)
+## High-priority gaps — ✅ CLOSED (2026-05-26 session)
 
-These are the most valuable next-up targets — the static infrastructure already exists, just need to add the MongoMemoryServer-based behavioral counterpart following the W384 template.
+All 3 high-priority gaps from the original audit now have paired behavioral counterparts. Recipe + boilerplate is in `~/.claude/projects/.../memory/feedback_pair_static_with_behavioral_tests.md`.
 
-| Model                            | Static refs | Behavioral | Estimated effort | Why high-value                                                                                                   |
-| -------------------------------- | ----------: | ---------: | ---------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `CarePlanVersion`                |           3 |          0 | M (~1 hr)        | Canonical care plan (W41); 30+ caller ecosystem; lifecycle invariants critical to W41-W60 chain                  |
-| `BeneficiaryLifecycleTransition` |           1 |          0 | M (~1 hr)        | Beneficiary lifecycle (W39); MFA-tier-enforced state machine; fail-closed semantics need behavioral verification |
-| `AccessReviewAttestation`        |           1 |          0 | M (~1 hr)        | Access review (W38, W95 MFA wiring); compliance-critical attestations                                            |
+| Model                            | Static refs | Behavioral | Closed in | Assertions |
+| -------------------------------- | ----------: | ---------: | --------- | ---------: |
+| `AccessReviewAttestation`        |           1 |          1 | `aebcb323d` | 49 |
+| `BeneficiaryLifecycleTransition` |           1 |          1 | `875309491` | 27 |
+| `CarePlanVersion`                |           3 |          1 | `a48c3ab2c` | 29 |
 
-**Estimated total: ~3 hours for 3 modules, expected ~60-90 behavioral assertions added.**
+**Actual total: 105 assertions added across 3 modules.** Real bugs caught along the way:
+- W458 → discovered Mongoose-9 legacy-hook shim must be loaded BEFORE the model require (every behavioral test now adds `require('config/mongoose.plugins')` in `beforeAll`)
+- W468 → caught 2 fixture field-name mismatches in one PR (`informant` → `raterType`, `snapshotType` → `assessmentType`) — exact W357/W358 bug class repeated
+- W458 model collision regression (CrisisIncident + EmergencyPlan dual-registration) caught at the W340 baseline gate before push
+
+Next-up: lower-priority categories below. Pick by domain priority — the **Clinical operations** group has the most safety-critical models (IndividualEducationPlan W200b, MedicationAdministrationRecord W191b, RestraintSeclusionEvent W193b) and is the recommended next batch.
 
 Same pattern as W356-W384: each behavioral test should cover (1) Wave-18 invariants actually fire via `await expect(p.save()).rejects.toThrow(/field/)`, (2) virtuals compute on persisted docs, (3) defaults on round-trip, (4) compound indexes present, (5) one end-to-end lifecycle happy-path.
 

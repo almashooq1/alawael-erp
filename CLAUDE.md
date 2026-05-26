@@ -165,7 +165,7 @@ Proven on W325c — **58 phantoms → 0 across ~12 waves** (W324 / W326 / W327+W
 
 ## Critical conventions
 
-- **Wave numbering**: features ship in numbered "Waves" (currently at W147). Numbers are assigned at commit time — parallel sessions sometimes collide. Use `git log --oneline -20` to see the latest before claiming a number.
+- **Wave numbering**: features ship in numbered "Waves" (currently at **W447+** as of 2026-05-26 — re-verify with `git log -50 --oneline | grep -oE 'W[0-9]+' | sort -u | tail -5`; previous CLAUDE.md claim of W147 was ~300 waves stale). Numbers are assigned at commit time — parallel sessions sometimes collide. Use `git log --oneline -20` to see the latest before claiming a number.
 - **Atomic commit pattern**: stage + commit in ONE Bash call (`git add files && git commit -m "..."`) — separate `git add` then `git commit` calls have lost work to cross-agent races (Waves 131+134 absorbed into other sessions). See memory entries for W137/138/139 for the proven recipe.
 - **Wave-18 invariants**: every new Mongoose model must declare cross-field invariants via virtual paths (see `backend/intelligence/hash-chain.lib.js` callers for examples).
 - **TTL fields**: all PII-touching collections use 30-day TTL minimum (aligns PDPL). Patterns at `LlmTelemetryCall`, `LlmAnomalySnapshot`, `HikvisionJobRun`.

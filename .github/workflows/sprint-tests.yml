@@ -498,6 +498,9 @@ on:
       - 'backend/__tests__/goal-forecaster-service-wave430.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/wbci-trigger-engine-wave471.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/smart-inbox-ranker-wave431.test.js'
+      - 'backend/__tests__/phase-c-e2e-smoke-wave472.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -979,6 +982,9 @@ on:
       - 'backend/__tests__/goal-forecaster-service-wave430.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/wbci-trigger-engine-wave471.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/smart-inbox-ranker-wave431.test.js'
+      - 'backend/__tests__/phase-c-e2e-smoke-wave472.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

@@ -294,3 +294,5 @@ __tests__/family-counselling-behavioral-wave470.test.js
 __tests__/goal-forecaster-wave429.test.js
 __tests__/goal-forecaster-service-wave430.test.js
 __tests__/wbci-trigger-engine-wave471.test.js
+__tests__/smart-inbox-ranker-wave431.test.js
+__tests__/phase-c-e2e-smoke-wave472.test.js

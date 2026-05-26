@@ -13,6 +13,8 @@
 'use strict';
 
 const express = require('express');
+const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
+
 const router = express.Router();
 router.use(bodyScopedBeneficiaryGuard); // W441: enforce branch on req.body.beneficiaryId
 const mongoose = require('mongoose');
@@ -28,8 +30,6 @@ const Guardian = require('../models/Guardian');
 const User = require('../models/User');
 const safeError = require('../utils/safeError');
 const logger = require('../utils/logger');
-const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
-
 // ── multer setup ─────────────────────────────────────────────────────────
 const UPLOAD_DIR = path.join(__dirname, '../uploads/clinical-docs');
 try {

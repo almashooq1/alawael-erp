@@ -36,6 +36,8 @@
  */
 
 const express = require('express');
+const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
+
 const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
@@ -54,8 +56,6 @@ const RehabPlanSuggestion = require('../models/RehabPlanSuggestion');
 const DifferentialDiagnosis = require('../models/DifferentialDiagnosis');
 const PrescriptionValidation = require('../models/PrescriptionValidation');
 const CdssDecisionLog = require('../models/CdssDecisionLog');
-const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
-
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 

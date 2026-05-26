@@ -43,6 +43,8 @@
 'use strict';
 
 const express = require('express');
+const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
+
 const router = express.Router();
 router.use(bodyScopedBeneficiaryGuard); // W441: enforce branch on req.body.beneficiaryId
 const mongoose = require('mongoose');
@@ -56,8 +58,6 @@ const whatsappIdempotency = require('../services/whatsapp/idempotency.service');
 const whatsappDlq = require('../services/whatsapp/dlq.service');
 const { authenticate } = require('../middleware/auth');
 const logger = require('../utils/logger');
-const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
-
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 function asyncHandler(fn) {
   return (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);

@@ -25,6 +25,8 @@
  */
 
 const express = require('express');
+const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
+
 const router = express.Router();
 router.use(bodyScopedBeneficiaryGuard); // W441: enforce branch on req.body.beneficiaryId
 const mongoose = require('mongoose');
@@ -35,8 +37,6 @@ const Beneficiary = require('../models/Beneficiary');
 const BeneficiarySection = require('../models/BeneficiarySection');
 const safeError = require('../utils/safeError');
 const { escapeFormulaInjection } = require('../services/importExport/format-helpers');
-const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
-
 /**
  * Lookup the active section a beneficiary is enrolled in.
  * Returns { sectionId, classroomId } or empty object when not assigned.

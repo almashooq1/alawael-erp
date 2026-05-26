@@ -24,7 +24,7 @@ This is the doc we (Claude + user) work from during the systematic problem-solvi
 
 ---
 
-## 1. Stakeholder-blocked ADRs (7 open)
+## 1. Stakeholder-blocked ADRs (8 still-blocked + 1 ✅ resolved kept for audit-trail = 9 rows; was "7 open" pre-2026-05-26 when ADR-029 + ADR-030 added)
 
 These cannot ship without a product/architecture decision. Each ADR has explicit questions inside; user needs to convene the named stakeholders and resolve.
 

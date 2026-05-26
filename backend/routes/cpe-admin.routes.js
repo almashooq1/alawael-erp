@@ -29,6 +29,7 @@ const CpeRecord = require('../models/CpeRecord');
 const Employee = require('../models/HR/Employee');
 const cpe = require('../services/cpeService');
 const safeError = require('../utils/safeError');
+const { escapeFormulaInjection } = require('../services/importExport/format-helpers');
 
 router.use(authenticateToken);
 
@@ -341,7 +342,12 @@ router.get('/export.csv', requireRole(READ_ROLES), async (req, res) => {
 
     const csvEscape = v => {
       if (v == null) return '';
-      const s = String(v);
+      // W423 doctrine — defang formula triggers BEFORE CSV quoting.
+      // employeeName + scfhsNumber + free-text activity/notes fields
+      // below would otherwise execute on open in Excel if they start
+      // with `=`/`+`/`-`/`@`/TAB/CR. SCFHS audit sheet — high-trust
+      // surface for a regulator.
+      const s = escapeFormulaInjection(String(v));
       if (/[",\n\r]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
       return s;
     };

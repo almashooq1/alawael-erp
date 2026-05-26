@@ -18,6 +18,7 @@ const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
 const validateObjectId = require('../middleware/validateObjectId');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const safeError = require('../utils/safeError');
+const { escapeFormulaInjection } = require('../services/importExport/format-helpers');
 // All beneficiary routes require authentication + branch scope
 router.use(authenticate);
 router.use(requireBranchAccess);
@@ -367,7 +368,29 @@ router.get('/export', async (req, res) => {
       data.forEach(b => {
         const name = b.fullName || b.name || `${b.firstName || ''} ${b.lastName || ''}`;
         const phone = b.contactInfo?.primaryPhone || b.phone || '';
-        csv += `"${name}","${STATUS_LABELS[b.status] || b.status}","${CATEGORY_LABELS[b.category] || b.category || ''}","${b.gender || ''}","${phone}","${b.email || ''}","${b.address?.city || ''}","${(b.registrationDate || b.createdAt || '').toString().slice(0, 10)}","${b.progress || 0}%"\n`;
+        // W423 doctrine + RFC-4180 quote-escape (W430). Previous raw
+        // `"${name}"` had three bugs: (1) no formula-injection defence
+        // — a name starting with `=`/`+`/`-`/`@` runs as a formula on
+        // open; (2) no internal-quote escape — a name like `Ahmad "AI"
+        // Khan` splits into three CSV fields; (3) no newline guard —
+        // addresses with `\n` break row boundaries.
+        const cell = v => {
+          const s = escapeFormulaInjection(v == null ? '' : String(v));
+          return `"${s.replace(/"/g, '""')}"`;
+        };
+        const date = (b.registrationDate || b.createdAt || '').toString().slice(0, 10);
+        csv +=
+          [
+            cell(name),
+            cell(STATUS_LABELS[b.status] || b.status),
+            cell(CATEGORY_LABELS[b.category] || b.category || ''),
+            cell(b.gender || ''),
+            cell(phone),
+            cell(b.email || ''),
+            cell(b.address?.city || ''),
+            cell(date),
+            cell(`${b.progress || 0}%`),
+          ].join(',') + '\n';
       });
       res.setHeader('Content-Type', 'text/csv; charset=utf-8');
       res.setHeader('Content-Disposition', 'attachment; filename=beneficiaries-export.csv');

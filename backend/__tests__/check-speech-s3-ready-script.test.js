@@ -33,12 +33,12 @@ function runCheck(extraEnv = {}, args = []) {
 describe('check-speech-s3-ready script — exit code contract', () => {
   it('exits 1 in default env (no SDK, no AWS_REGION)', () => {
     // @aws-sdk/client-s3 is intentionally NOT in package.json (W284d
-    // design — install per-env). So in CI/dev the script always reports
-    // not-ready unless someone explicitly installed it.
+    // SDK is NOW installed as a dependency (2026-05-26). Default env
+    // has SDK present + AWS_REGION unset → script reports 1 gap
+    // (AWS_REGION), exits 1.
     const r = runCheck();
     expect(r.status).toBe(1);
     expect(r.stdout).toMatch(/NOT ready/);
-    expect(r.stdout).toMatch(/@aws-sdk\/client-s3/);
     expect(r.stdout).toMatch(/AWS_REGION/);
   });
 
@@ -49,25 +49,25 @@ describe('check-speech-s3-ready script — exit code contract', () => {
     expect(parsed.check).toBe('speech-s3-ready');
     expect(parsed.ready).toBe(false);
     expect(parsed.checks).toMatchObject({
-      sdkInstalled: { ok: false, fix: expect.stringMatching(/npm install/) },
+      sdkInstalled: { ok: true }, // SDK now in package.json (2026-05-26)
       regionSet: { ok: false, fix: expect.stringMatching(/AWS_REGION/) },
       bootstrapWiring: { ok: true }, // W284d wiring still in place
     });
     expect(parsed.summary).toMatch(/fall back to log-only/);
   });
 
-  it('reports actionable fix lines for each gap', () => {
+  it('reports actionable fix line for the remaining gap (AWS_REGION)', () => {
     const r = runCheck();
-    expect(r.stdout).toMatch(/fix.*npm install @aws-sdk\/client-s3/);
     expect(r.stdout).toMatch(/fix.*export AWS_REGION/);
   });
 
-  it('AWS_REGION set alone is still not ready (SDK still missing)', () => {
+  it('AWS_REGION set + SDK installed → fully ready', () => {
     const r = runCheck({ AWS_REGION: 'me-south-1' }, ['--json']);
-    expect(r.status).toBe(1);
+    expect(r.status).toBe(0); // both gates pass now
     const parsed = JSON.parse(r.stdout);
+    expect(parsed.ready).toBe(true);
     expect(parsed.checks.regionSet).toEqual({ ok: true, value: 'me-south-1' });
-    expect(parsed.checks.sdkInstalled.ok).toBe(false);
+    expect(parsed.checks.sdkInstalled.ok).toBe(true);
   });
 
   it('detects bootstrap wiring drift (would catch a future regression)', () => {

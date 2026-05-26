@@ -9,6 +9,9 @@
  *   - REGRESSION_DETECTED  — W219 trend.classification='regression'
  *   - PLATEAU_DETECTED     — trend='plateau' over ≥90-day span
  *   - MCID_NOT_MET         — ≥3 admins since baseline, no MCID achievement
+ *   - FORECAST_OFF_TRACK   — W429 Phase B forecaster: projection at goal
+ *                            target date misses goal.targetValue (predictive
+ *                            counterpart to PLATEAU_DETECTED/REGRESSION_DETECTED)
  *
  * Decoupled from the global `Alert` collection in `backend/alerts/`
  * to keep the measure domain self-contained — the global alerts
@@ -30,7 +33,12 @@
 
 const mongoose = require('mongoose');
 
-const ALERT_TYPES = ['REGRESSION_DETECTED', 'PLATEAU_DETECTED', 'MCID_NOT_MET'];
+const ALERT_TYPES = [
+  'REGRESSION_DETECTED',
+  'PLATEAU_DETECTED',
+  'MCID_NOT_MET',
+  'FORECAST_OFF_TRACK', // W429 Phase B Outcome Forecasting
+];
 
 const ALERT_STATUSES = ['open', 'acknowledged', 'resolved', 'dismissed'];
 

@@ -295,9 +295,147 @@ function regressionAlertToDraftArgs(alert) {
 // W339 — Generic orchestrator (handles any alertType via converter dispatch)
 // ═══════════════════════════════════════════════════════════════════════
 
+// ═══════════════════════════════════════════════════════════════════════
+// W429 — FORECAST_OFF_TRACK adapter (Phase B Outcome Forecasting)
+// ═══════════════════════════════════════════════════════════════════════
+//
+// Forecast alerts are PROACTIVE — even when current score is still on-track,
+// if the linear-regression projection at goal.targetDate misses goal.target,
+// surface it NOW so the team can intervene before the deadline. The
+// upstream producer (goal-forecaster sweeper, follow-up wave) creates a
+// MeasureAlert with alertType='FORECAST_OFF_TRACK' whose evidence carries
+// the full forecast object from intelligence/goal-forecaster.lib.js.
+
+/**
+ * Heuristic confidence for a forecast-off-track alert. Higher confidence
+ * when: more data points, longer span, well-fit trend (r²), wider miss,
+ * and (most importantly) ciMisses=true (even the optimistic 95% CI
+ * upper bound still misses the target).
+ *
+ *   - n ≥ 5            +0.20
+ *   - spanDays ≥ 60    +0.15  (need history depth to forecast credibly)
+ *   - r² ≥ 0.5         +0.20  (linear assumption is justified)
+ *   - severity high+   +0.20  (forecast gap > 2× tolerance)
+ *   - severity critical +0.15  (ciMisses — even best-case fails)
+ *   - slopeAcceleration negative (worsening) +0.10
+ */
+function scoreForecastEvidence(evidence = {}) {
+  let s = 0;
+  if ((evidence.n || 0) >= 5) s += 0.2;
+  if ((evidence.spanDays || 0) >= 60) s += 0.15;
+  if ((evidence.r2 || 0) >= 0.5) s += 0.2;
+  const sev = evidence.severity;
+  if (sev === 'high' || sev === 'critical') s += 0.2;
+  if (sev === 'critical') s += 0.15;
+  if (typeof evidence.slopeAcceleration === 'number' && evidence.slopeAcceleration < 0) {
+    s += 0.1;
+  }
+  return Math.max(0, Math.min(1, s));
+}
+
+function buildForecastSignals(evidence = {}) {
+  const signals = [];
+  if ((evidence.n || 0) >= 5) {
+    signals.push({
+      name: 'measurement_count_sufficient',
+      weight: 0.2,
+      evidence: `n=${evidence.n} measurements in the regression window`,
+    });
+  }
+  if ((evidence.spanDays || 0) >= 60) {
+    signals.push({
+      name: 'observation_span_sufficient',
+      weight: 0.15,
+      evidence: `spanDays=${evidence.spanDays} (≥60 = forecast horizon credible)`,
+    });
+  }
+  if ((evidence.r2 || 0) >= 0.5) {
+    signals.push({
+      name: 'trend_well_fit',
+      weight: 0.2,
+      evidence: `r²=${evidence.r2.toFixed(2)} (linear model captures the trajectory)`,
+    });
+  }
+  if (evidence.severity === 'high' || evidence.severity === 'critical') {
+    signals.push({
+      name: 'forecast_gap_material',
+      weight: 0.2,
+      evidence: `severity=${evidence.severity} (projected gap > 2× tolerance band)`,
+    });
+  }
+  if (evidence.severity === 'critical') {
+    signals.push({
+      name: 'ci_upper_misses',
+      weight: 0.15,
+      evidence: `Even the 95% CI optimistic bound misses the target — high-confidence off-track`,
+    });
+  }
+  if (typeof evidence.slopeAcceleration === 'number' && evidence.slopeAcceleration < 0) {
+    signals.push({
+      name: 'slope_decelerating',
+      weight: 0.1,
+      evidence: `slopeAcceleration=${evidence.slopeAcceleration.toFixed(3)} (trend worsening half-on-half)`,
+    });
+  }
+  return signals;
+}
+
+/**
+ * Pure converter — FORECAST_OFF_TRACK alert → createDraft args. Type
+ * is INCREASE_DOSAGE_AND_REASSESS by default — same therapeutic
+ * intervention as plateau, but the trigger is predictive rather than
+ * reactive. critical-severity forecasts (ciMisses) escalate to
+ * ESCALATE_TO_QUALITY since they're as urgent as W339 regressions.
+ */
+function forecastAlertToDraftArgs(alert) {
+  if (!alert || alert.alertType !== 'FORECAST_OFF_TRACK') return null;
+  if (!alert.beneficiaryId) return null;
+  const evidence = alert.evidence || {};
+  const confidence = scoreForecastEvidence(evidence);
+  const signals = buildForecastSignals(evidence);
+  const measureLabel =
+    alert.measureRef?.code || alert.measureRef?.name || alert.measureRef || 'unknown measure';
+  const projected = evidence.projected;
+  const target = evidence.target;
+  const projectedAt = evidence.projectedAt;
+  const reviewerHint =
+    evidence.message_ar ||
+    `Forecast off-track on ${measureLabel}: projection=${projected != null ? projected.toFixed(2) : '?'} ` +
+      `vs target=${target != null ? target.toFixed(2) : '?'} at ${projectedAt || 'horizon'}. ` +
+      `Severity=${evidence.severity || 'unknown'}. Consider raising frequency or revisiting goal target.`;
+  return {
+    beneficiaryId: alert.beneficiaryId,
+    branchId: alert.branchId || null,
+    episodeId: alert.episodeId || null,
+    // critical → escalate; otherwise standard dosage increase suggestion
+    type: evidence.severity === 'critical' ? 'ESCALATE_TO_QUALITY' : 'INCREASE_DOSAGE_AND_REASSESS',
+    confidence,
+    signals,
+    draftAction: {
+      basis: 'forecast-alert',
+      sourceAlertId: alert._id,
+      measureRef: alert.measureRef,
+      forecast: {
+        projected,
+        target,
+        projectedAt,
+        ci95: evidence.ci95 || null,
+        slopePerMonth: evidence.slopePerMonth || null,
+      },
+      suggestedAction:
+        evidence.severity === 'critical'
+          ? 'flag to clinical supervisor + clinical lead; reassess goal feasibility'
+          : 'review session frequency + consider intermediate target',
+    },
+    reviewerHint,
+    llmTelemetryCallId: null,
+  };
+}
+
 const TYPE_CONVERTERS = Object.freeze({
   PLATEAU_DETECTED: plateauAlertToDraftArgs,
   REGRESSION_DETECTED: regressionAlertToDraftArgs,
+  FORECAST_OFF_TRACK: forecastAlertToDraftArgs,
 });
 
 /**
@@ -384,7 +522,11 @@ module.exports = {
   buildRegressionSignals,
   regressionAlertToDraftArgs,
   createBundlesFromOpenRegressionAlerts,
-  // Generic dispatch (W339)
+  // Forecast off-track (W429 — Phase B Outcome Forecasting)
+  scoreForecastEvidence,
+  buildForecastSignals,
+  forecastAlertToDraftArgs,
+  // Generic dispatch (W339 — auto picks up FORECAST_OFF_TRACK via TYPE_CONVERTERS)
   TYPE_CONVERTERS,
   createBundlesFromOpenAlertsOfType,
   // Lib re-exports for UI summaries

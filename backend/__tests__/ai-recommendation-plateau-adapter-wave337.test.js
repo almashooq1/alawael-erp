@@ -390,8 +390,12 @@ describe('W339 generic createBundlesFromOpenAlertsOfType dispatch', () => {
     ).rejects.toThrow(/no converter/);
   });
 
-  it('TYPE_CONVERTERS exposes plateau + regression (extensible + frozen)', () => {
+  it('TYPE_CONVERTERS exposes plateau + regression + forecast (extensible + frozen)', () => {
+    // W429 (Phase B Outcome Forecasting) added FORECAST_OFF_TRACK.
+    // Registry stays frozen; adding a new producer means a new wave
+    // explicitly extends this set (ratchet-up).
     expect(Object.keys(adapter.TYPE_CONVERTERS).sort()).toEqual([
+      'FORECAST_OFF_TRACK',
       'PLATEAU_DETECTED',
       'REGRESSION_DETECTED',
     ]);

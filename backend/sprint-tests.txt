@@ -290,3 +290,5 @@ __tests__/sibling-adjustment-behavioral-wave468.test.js
 __tests__/financial-navigation-wave469.test.js
 __tests__/financial-navigation-behavioral-wave469.test.js
 __tests__/family-counselling-wave470.test.js
+__tests__/family-counselling-behavioral-wave470.test.js
+__tests__/goal-forecaster-wave429.test.js

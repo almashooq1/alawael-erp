@@ -144,6 +144,14 @@ function walkJs(dir, skip, out = []) {
 // `mongoose.model('Name', schema, ...)` — two-arg form indicates REGISTRATION.
 // Single-arg `mongoose.model('Name')` is a LOOKUP (used by 100+ services).
 const REGISTRATION_RE = /mongoose\.model\s*\(\s*['"]([^'"]+)['"]\s*,/g;
+// Per-connection registrations: `connection.model('Name', schema)` /
+// `conn.model('Name', schema)` / `db.model('Name', schema)`. Added 2026-05-26
+// for symmetry with W340's CONNECTION_REGISTRATION_RE (b12fd9c8b discovered the
+// dormant-service pattern: 14 files in backend/ use this form, mostly in
+// vehicles/* + communication/* + auth/otp-service). Without this regex, a ref
+// pointing to a name that's registered ONLY via connection.model would be
+// flagged as a phantom; with this regex, it's correctly counted as registered.
+const CONNECTION_REGISTRATION_RE = /\b(?:connection|conn|db)\.model\s*\(\s*['"]([^'"]+)['"]\s*,/g;
 // Helper-wrapped registrations used by Enterprise vertical files
 // (EnterprisePro.js uses `reg(name, schema)`; EnterpriseProPlus.js uses
 // `getOrCreate(name, schema)` — both wrap `mongoose.models[name] || mongoose.model(name, schema)`).
@@ -158,6 +166,7 @@ function collectRegistrations() {
   for (const f of files) {
     const src = fs.readFileSync(f, 'utf8');
     for (const m of src.matchAll(REGISTRATION_RE)) set.add(m[1]);
+    for (const m of src.matchAll(CONNECTION_REGISTRATION_RE)) set.add(m[1]);
     for (const m of src.matchAll(HELPER_REGISTRATION_RE)) set.add(m[1]);
   }
   return set;

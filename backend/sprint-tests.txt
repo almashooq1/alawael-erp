@@ -101,6 +101,7 @@ __tests__/care-gap-loader-wave29.test.js
 __tests__/kpi-series-loader-wave30.test.js
 __tests__/eod-digest-loaders-wave32.test.js
 __tests__/access-review-wave38.test.js
+__tests__/access-review-attestation-behavioral-wave38.test.js
 __tests__/beneficiary-lifecycle-wave39.test.js
 __tests__/care-plan-wave41.test.js
 __tests__/care-plan-explain-views-llm-wave48.test.js

@@ -137,4 +137,20 @@ capaItemSchema.pre('save', function (next) {
   return next();
 });
 
+// W429: optimistic concurrency. Same race-class as W428 on
+// AiRecommendationBundle. Pre-save hook runs validateTransition +
+// appends to lifecycleHistory[]. Without OCC, two concurrent
+// transitionCapa() calls (UI double-tap on the "Verify" button, retry
+// loop, supervisor + auditor simultaneously transitioning) would both
+// see the same `from` status, both pass validateTransition, both push
+// a lifecycleHistory entry — silent duplicate audit trail + double-
+// emit on the quality.capa.* event bus.
+//
+// Atomic findOneAndUpdate would bypass the pre-save hook (same
+// reason W428 chose OCC over atomic flip). With OCC the second
+// concurrent save throws VersionError, surfaces as a 500/409, and
+// the second user sees "someone else just modified this — please
+// refresh".
+capaItemSchema.set('optimisticConcurrency', true);
+
 module.exports = mongoose.models.CapaItem || mongoose.model('CapaItem', capaItemSchema);

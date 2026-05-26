@@ -477,6 +477,9 @@ on:
       - 'backend/__tests__/phase-b-e2e-smoke-wave466.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/self-advocacy-behavioral-wave462.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/complaint-reasonable-adjustments-behavioral-wave465.test.js'
+      - 'backend/__tests__/family-wbci-wave467.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -937,6 +940,9 @@ on:
       - 'backend/__tests__/phase-b-e2e-smoke-wave466.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/self-advocacy-behavioral-wave462.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/complaint-reasonable-adjustments-behavioral-wave465.test.js'
+      - 'backend/__tests__/family-wbci-wave467.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

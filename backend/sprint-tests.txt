@@ -280,3 +280,4 @@ __tests__/self-advocacy-wave462.test.js
 __tests__/crpd-compliance-wave463.test.js
 __tests__/independent-advocate-role-wave464.test.js
 __tests__/complaint-reasonable-adjustments-wave465.test.js
+__tests__/phase-b-e2e-smoke-wave466.test.js

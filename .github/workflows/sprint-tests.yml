@@ -487,6 +487,10 @@ on:
       - 'backend/__tests__/financial-navigation-wave469.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/sibling-adjustment-behavioral-wave468.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/family-counselling-wave470.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/financial-navigation-behavioral-wave469.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -957,6 +961,10 @@ on:
       - 'backend/__tests__/financial-navigation-wave469.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/sibling-adjustment-behavioral-wave468.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/family-counselling-wave470.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/financial-navigation-behavioral-wave469.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

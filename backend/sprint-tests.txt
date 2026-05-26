@@ -288,3 +288,5 @@ __tests__/family-wbci-behavioral-wave467.test.js
 __tests__/sibling-adjustment-wave468.test.js
 __tests__/sibling-adjustment-behavioral-wave468.test.js
 __tests__/financial-navigation-wave469.test.js
+__tests__/financial-navigation-behavioral-wave469.test.js
+__tests__/family-counselling-wave470.test.js

@@ -284,3 +284,5 @@ __tests__/complaint-reasonable-adjustments-wave465.test.js
 __tests__/complaint-reasonable-adjustments-behavioral-wave465.test.js
 __tests__/phase-b-e2e-smoke-wave466.test.js
 __tests__/family-wbci-wave467.test.js
+__tests__/family-wbci-behavioral-wave467.test.js
+__tests__/sibling-adjustment-wave468.test.js

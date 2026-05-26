@@ -13,6 +13,15 @@ echo "[pre-push] sprint-tests.yml drift check…"
 cd backend && npm run check:sprint-paths
 cd ..
 
+# 2026-05-26 (Cycle 11): block TDZ-class bugs at the push gate. Loads
+# every routes/**/*.routes.js + reports any that throw on require.
+# Caught W441 TDZ in 8 files (commit a870736ae) — broke 100+ admin
+# routes silently. ~10 sec. Ignores mongoose 'already compiled' + env
+# load failures (known false-positive classes).
+echo "[pre-push] route-load smoke (TDZ class detector)…"
+cd backend && npm run check:routes-load
+cd ..
+
 echo "[pre-push] backend quality:push…"
 cd backend && npm run quality:push
 cd ..

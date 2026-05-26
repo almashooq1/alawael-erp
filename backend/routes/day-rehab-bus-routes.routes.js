@@ -24,9 +24,14 @@ const { authenticateToken, requireRole } = require('../middleware/auth');
 const DayRehabBusRoute = require('../models/DayRehabBusRoute');
 const Beneficiary = require('../models/Beneficiary');
 const safeError = require('../utils/safeError');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
 
 router.use(authenticateToken);
+// W448: branch-scope every endpoint. Model(s) carry `branchId`; pre-W448
+// list filters were optional + instance loads bare findById, opening
+// cross-tenant IDOR (read/modify/delete any branch by ObjectId guess).
+router.use(requireBranchAccess);
 router.use(bodyScopedBeneficiaryGuard); // W441: enforce branch on req.body.beneficiaryId
 
 const READ_ROLES = [
@@ -73,7 +78,7 @@ async function hydrateStops(route) {
 // ── GET / ──────────────────────────────────────────────────────────────
 router.get('/', requireRole(READ_ROLES), async (req, res) => {
   try {
-    const filter = {};
+    const filter = { ...branchFilter(req) }; /* W448 */
     if (req.query.status && STATUSES.includes(String(req.query.status))) {
       filter.status = String(req.query.status);
     }
@@ -109,7 +114,11 @@ router.get('/:id', requireRole(READ_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const route = await DayRehabBusRoute.findById(req.params.id).lean({ virtuals: true });
+    const route = await DayRehabBusRoute.findOne({
+      _id: req.params.id,
+      ...branchFilter(req),
+    }) /* W448 */
+      .lean({ virtuals: true });
     if (!route) return res.status(404).json({ success: false, message: 'الخط غير موجود' });
     const hydrated = await hydrateStops(route);
     res.json({ success: true, data: hydrated });
@@ -165,10 +174,14 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
     const body = { ...(req.body || {}) };
     delete body._id;
     delete body.stops; // use /stops endpoints
-    const route = await DayRehabBusRoute.findByIdAndUpdate(req.params.id, body, {
-      new: true,
-      runValidators: true,
-    });
+    const route = await DayRehabBusRoute.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) },
+      /* W448 */ body,
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
     if (!route) return res.status(404).json({ success: false, message: 'الخط غير موجود' });
     res.json({ success: true, data: route });
   } catch (err) {
@@ -186,7 +199,10 @@ router.post('/:id/stops', requireRole(WRITE_ROLES), async (req, res) => {
     if (!body.name?.trim()) {
       return res.status(400).json({ success: false, message: 'اسم المحطة مطلوب' });
     }
-    const route = await DayRehabBusRoute.findById(req.params.id);
+    const route = await DayRehabBusRoute.findOne({
+      _id: req.params.id,
+      ...branchFilter(req),
+    }); /* W448 */
     if (!route) return res.status(404).json({ success: false, message: 'الخط غير موجود' });
 
     const order = body.order ?? route.stops.length + 1;
@@ -214,7 +230,10 @@ router.patch('/:id/stops/:stopId', requireRole(WRITE_ROLES), async (req, res) =>
     if (!mongoose.isValidObjectId(req.params.id) || !mongoose.isValidObjectId(req.params.stopId)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const route = await DayRehabBusRoute.findById(req.params.id);
+    const route = await DayRehabBusRoute.findOne({
+      _id: req.params.id,
+      ...branchFilter(req),
+    }); /* W448 */
     if (!route) return res.status(404).json({ success: false, message: 'الخط غير موجود' });
     const stop = route.stops.id(req.params.stopId);
     if (!stop) return res.status(404).json({ success: false, message: 'المحطة غير موجودة' });
@@ -244,7 +263,10 @@ router.delete('/:id/stops/:stopId', requireRole(WRITE_ROLES), async (req, res) =
     if (!mongoose.isValidObjectId(req.params.id) || !mongoose.isValidObjectId(req.params.stopId)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const route = await DayRehabBusRoute.findById(req.params.id);
+    const route = await DayRehabBusRoute.findOne({
+      _id: req.params.id,
+      ...branchFilter(req),
+    }); /* W448 */
     if (!route) return res.status(404).json({ success: false, message: 'الخط غير موجود' });
     const stop = route.stops.id(req.params.stopId);
     if (!stop) return res.status(404).json({ success: false, message: 'المحطة غير موجودة' });
@@ -266,7 +288,10 @@ router.post('/:id/assign', requireRole(WRITE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(stopId) || !mongoose.isValidObjectId(beneficiaryId)) {
       return res.status(400).json({ success: false, message: 'stopId و beneficiaryId مطلوبان' });
     }
-    const route = await DayRehabBusRoute.findById(req.params.id);
+    const route = await DayRehabBusRoute.findOne({
+      _id: req.params.id,
+      ...branchFilter(req),
+    }); /* W448 */
     if (!route) return res.status(404).json({ success: false, message: 'الخط غير موجود' });
     const stop = route.stops.id(stopId);
     if (!stop) return res.status(404).json({ success: false, message: 'المحطة غير موجودة' });
@@ -290,7 +315,10 @@ router.post('/:id/unassign', requireRole(WRITE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(stopId) || !mongoose.isValidObjectId(beneficiaryId)) {
       return res.status(400).json({ success: false, message: 'stopId و beneficiaryId مطلوبان' });
     }
-    const route = await DayRehabBusRoute.findById(req.params.id);
+    const route = await DayRehabBusRoute.findOne({
+      _id: req.params.id,
+      ...branchFilter(req),
+    }); /* W448 */
     if (!route) return res.status(404).json({ success: false, message: 'الخط غير موجود' });
     const stop = route.stops.id(stopId);
     if (!stop) return res.status(404).json({ success: false, message: 'المحطة غير موجودة' });
@@ -309,12 +337,15 @@ router.delete('/:id', requireRole(WRITE_ROLES), async (req, res) => {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
     if (req.query.hard === '1') {
-      const row = await DayRehabBusRoute.findByIdAndDelete(req.params.id);
+      const row = await DayRehabBusRoute.findOneAndDelete({
+        _id: req.params.id,
+        ...branchFilter(req),
+      }); /* W448 */
       if (!row) return res.status(404).json({ success: false, message: 'الخط غير موجود' });
       return res.json({ success: true, message: 'تم الحذف نهائياً' });
     }
-    const row = await DayRehabBusRoute.findByIdAndUpdate(
-      req.params.id,
+    const row = await DayRehabBusRoute.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) } /* W448 */,
       { status: 'archived' },
       { new: true }
     );

@@ -12,7 +12,7 @@ const { body } = require('express-validator');
 const { validate } = require('../middleware/validate');
 const logger = require('../utils/logger');
 const { authenticate } = require('../middleware/auth');
-const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const Group = require('../models/Group');
 const { escapeRegex } = require('../utils/sanitize');
 const safeError = require('../utils/safeError');
@@ -83,7 +83,8 @@ router.get('/contacts', async (req, res) => {
 // ─── GET /api/groups/:id — تفاصيل مجموعة ───
 router.get('/:id', async (req, res) => {
   try {
-    const group = await Group.findById(req.params.id).lean();
+    const group = await Group.findOne({ _id: req.params.id, ...branchFilter(req) }) /* W448 */
+      .lean();
     if (!group) {
       return res.status(404).json({ success: false, error: 'المجموعة غير موجودة' });
     }
@@ -159,8 +160,8 @@ router.put(
       if (name !== undefined) updates.name = name.trim();
       if (description !== undefined) updates.description = description.trim();
 
-      const group = await Group.findByIdAndUpdate(
-        req.params.id,
+      const group = await Group.findOneAndUpdate(
+        { _id: req.params.id, ...branchFilter(req) } /* W448 */,
         { $set: updates },
         { new: true, runValidators: true }
       ).lean();
@@ -179,8 +180,8 @@ router.put(
 // ─── DELETE /api/groups/:id — حذف مجموعة ───
 router.delete('/:id', async (req, res) => {
   try {
-    const group = await Group.findByIdAndUpdate(
-      req.params.id,
+    const group = await Group.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) } /* W448 */,
       { $set: { status: 'deleted' } },
       { new: true }
     );
@@ -210,7 +211,7 @@ router.post(
         return res.status(400).json({ success: false, error: 'اسم العضو مطلوب' });
       }
 
-      const group = await Group.findById(req.params.id);
+      const group = await Group.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W448 */
       if (!group) {
         return res.status(404).json({ success: false, error: 'المجموعة غير موجودة' });
       }
@@ -238,7 +239,7 @@ router.post(
 // ─── DELETE /api/groups/:id/members/:memberId — إزالة عضو ───
 router.delete('/:id/members/:memberIndex', async (req, res) => {
   try {
-    const group = await Group.findById(req.params.id);
+    const group = await Group.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W448 */
     if (!group) {
       return res.status(404).json({ success: false, error: 'المجموعة غير موجودة' });
     }

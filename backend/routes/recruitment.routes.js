@@ -34,7 +34,7 @@
 
 const express = require('express');
 const { authenticate, authorize } = require('../middleware/auth');
-const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const router = express.Router();
 const { v4: uuidv4 } = require('uuid');
 const escapeRegex = require('../utils/escapeRegex');
@@ -97,14 +97,22 @@ router.get('/stats', async (req, res) => {
     weekEnd.setDate(weekStart.getDate() + 7);
 
     const [openJobs, newApps, weekInterviews, sentOffers] = await Promise.all([
-      JobPosting.countDocuments({ ...filter, status: 'published' }),
-      JobApplication.countDocuments({ ...filter, status: 'received' }),
+      JobPosting.countDocuments({
+        ...branchFilter(req),
+        /* W448 */ ...filter,
+        status: 'published',
+      }),
+      JobApplication.countDocuments({
+        ...branchFilter(req),
+        /* W448 */ ...filter,
+        status: 'received',
+      }),
       RecruitmentInterview.countDocuments({
         ...filter,
         scheduledAt: { $gte: weekStart, $lt: weekEnd },
         status: 'scheduled',
       }),
-      JobOffer.countDocuments({ ...filter, status: 'sent' }),
+      JobOffer.countDocuments({ ...branchFilter(req), /* W448 */ ...filter, status: 'sent' }),
     ]);
 
     ok(res, {
@@ -134,7 +142,7 @@ router.get('/postings', async (req, res) => {
       page = 1,
       limit = 15,
     } = req.query;
-    const filter = {};
+    const filter = { ...branchFilter(req) }; /* W448 */
     if (branchId) filter.branchId = branchId;
     if (status) filter.status = status;
     if (department) filter.department = new RegExp(escapeRegex(String(department)), 'i');
@@ -175,7 +183,8 @@ router.post('/postings', requireHr, async (req, res) => {
 
 router.get('/postings/:id', async (req, res) => {
   try {
-    const doc = await JobPosting.findById(req.params.id).lean();
+    const doc = await JobPosting.findOne({ _id: req.params.id, ...branchFilter(req) }) /* W448 */
+      .lean();
     if (!doc) return fail(res, 'الوظيفة غير موجودة', 404);
     ok(res, { data: doc });
   } catch (err) {
@@ -185,10 +194,14 @@ router.get('/postings/:id', async (req, res) => {
 
 router.put('/postings/:id', requireHr, async (req, res) => {
   try {
-    const doc = await JobPosting.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
-      runValidators: true,
-    });
+    const doc = await JobPosting.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) },
+      /* W448 */ stripUpdateMeta(req.body),
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
     if (!doc) return fail(res, 'الوظيفة غير موجودة', 404);
     ok(res, { data: doc, message: 'تم التحديث بنجاح' });
   } catch (err) {
@@ -198,7 +211,10 @@ router.put('/postings/:id', requireHr, async (req, res) => {
 
 router.delete('/postings/:id', requireHr, async (req, res) => {
   try {
-    const doc = await JobPosting.findByIdAndUpdate(req.params.id, { deletedAt: new Date() });
+    const doc = await JobPosting.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) },
+      /* W448 */ { deletedAt: new Date() }
+    );
     if (!doc) return fail(res, 'الوظيفة غير موجودة', 404);
     ok(res, { message: 'تم الحذف بنجاح' });
   } catch (err) {
@@ -209,8 +225,8 @@ router.delete('/postings/:id', requireHr, async (req, res) => {
 // نشر الوظيفة
 router.post('/postings/:id/publish', requireHr, async (req, res) => {
   try {
-    const doc = await JobPosting.findByIdAndUpdate(
-      req.params.id,
+    const doc = await JobPosting.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) } /* W448 */,
       { status: 'published', publishedAt: new Date() },
       { new: true }
     );
@@ -225,8 +241,8 @@ router.post('/postings/:id/publish', requireHr, async (req, res) => {
 // إغلاق الوظيفة
 router.post('/postings/:id/close', requireHr, async (req, res) => {
   try {
-    const doc = await JobPosting.findByIdAndUpdate(
-      req.params.id,
+    const doc = await JobPosting.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) } /* W448 */,
       { status: 'closed' },
       { new: true }
     );
@@ -240,7 +256,10 @@ router.post('/postings/:id/close', requireHr, async (req, res) => {
 // تقديم طلب توظيف
 router.post('/postings/:id/apply', async (req, res) => {
   try {
-    const posting = await JobPosting.findById(req.params.id);
+    const posting = await JobPosting.findOne({
+      _id: req.params.id,
+      ...branchFilter(req),
+    }); /* W448 */
     if (!posting) return fail(res, 'الوظيفة غير موجودة', 404);
     if (posting.status !== 'published') return fail(res, 'هذه الوظيفة غير متاحة للتقديم');
     if (posting.applicationDeadline < new Date())
@@ -261,7 +280,10 @@ router.post('/postings/:id/apply', async (req, res) => {
     });
 
     // تحديث عداد الطلبات
-    await JobPosting.findByIdAndUpdate(req.params.id, { $inc: { applicationsCount: 1 } });
+    await JobPosting.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) },
+      /* W448 */ { $inc: { applicationsCount: 1 } }
+    );
 
     ok(res, { data: doc, message: 'تم استلام طلبك بنجاح، سيتم مراجعته وإبلاغك' }, 201);
   } catch (err) {
@@ -284,7 +306,7 @@ router.get('/applications', async (req, res) => {
       page = 1,
       limit = 15,
     } = req.query;
-    const filter = {};
+    const filter = { ...branchFilter(req) }; /* W448 */
     if (branchId) filter.branchId = branchId;
     if (status) filter.status = status;
     if (jobPostingId) filter.jobPostingId = jobPostingId;
@@ -309,7 +331,10 @@ router.get('/applications', async (req, res) => {
 
 router.get('/applications/:id', async (req, res) => {
   try {
-    const doc = await JobApplication.findById(req.params.id)
+    const doc = await JobApplication.findOne({
+      _id: req.params.id,
+      ...branchFilter(req),
+    }) /* W448 */
       .populate('jobPostingId', 'title titleAr department employmentType')
       .lean();
     if (!doc) return fail(res, 'الطلب غير موجود', 404);
@@ -343,7 +368,11 @@ router.patch('/applications/:id/status', requireHr, async (req, res) => {
     }
     if (status === 'hired') updates.hiredAt = new Date();
 
-    const doc = await JobApplication.findByIdAndUpdate(req.params.id, updates, { new: true });
+    const doc = await JobApplication.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) },
+      /* W448 */ updates,
+      { new: true }
+    );
     if (!doc) return fail(res, 'الطلب غير موجود', 404);
     ok(res, { data: doc, message: 'تم تحديث حالة الطلب بنجاح' });
   } catch (err) {
@@ -354,7 +383,10 @@ router.patch('/applications/:id/status', requireHr, async (req, res) => {
 // جدولة مقابلة
 router.post('/applications/:id/interview', requireHr, async (req, res) => {
   try {
-    const application = await JobApplication.findById(req.params.id);
+    const application = await JobApplication.findOne({
+      _id: req.params.id,
+      ...branchFilter(req),
+    }); /* W448 */
     if (!application) return fail(res, 'الطلب غير موجود', 404);
 
     const required = ['interviewType', 'scheduledAt', 'interviewers'];
@@ -369,7 +401,10 @@ router.post('/applications/:id/interview', requireHr, async (req, res) => {
       status: 'scheduled',
     });
 
-    await JobApplication.findByIdAndUpdate(req.params.id, { status: 'interview' });
+    await JobApplication.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) },
+      /* W448 */ { status: 'interview' }
+    );
 
     ok(res, { data: interview, message: 'تم جدولة المقابلة بنجاح' }, 201);
   } catch (err) {
@@ -380,7 +415,10 @@ router.post('/applications/:id/interview', requireHr, async (req, res) => {
 // إنشاء عرض عمل
 router.post('/applications/:id/offer', requireHr, async (req, res) => {
   try {
-    const application = await JobApplication.findById(req.params.id);
+    const application = await JobApplication.findOne({
+      _id: req.params.id,
+      ...branchFilter(req),
+    }); /* W448 */
     if (!application) return fail(res, 'الطلب غير موجود', 404);
     if (application.status !== 'interview' && application.status !== 'shortlisted') {
       return fail(res, 'لا يمكن إنشاء عرض عمل إلا بعد المقابلة');
@@ -402,7 +440,10 @@ router.post('/applications/:id/offer', requireHr, async (req, res) => {
       status: 'draft',
     });
 
-    await JobApplication.findByIdAndUpdate(req.params.id, { status: 'offer' });
+    await JobApplication.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) },
+      /* W448 */ { status: 'offer' }
+    );
 
     ok(res, { data: offer, message: 'تم إنشاء عرض العمل بنجاح' }, 201);
   } catch (err) {
@@ -416,7 +457,7 @@ router.post('/applications/:id/offer', requireHr, async (req, res) => {
 router.get('/interviews', async (req, res) => {
   try {
     const { status, interviewType, branchId, page = 1, limit = 15 } = req.query;
-    const filter = {};
+    const filter = { ...branchFilter(req) }; /* W448 */
     if (branchId) filter.branchId = branchId;
     if (status) filter.status = status;
     if (interviewType) filter.interviewType = interviewType;
@@ -466,7 +507,7 @@ router.patch('/interviews/:id/complete', requireHr, async (req, res) => {
 router.get('/offers', async (req, res) => {
   try {
     const { status, branchId, page = 1, limit = 15 } = req.query;
-    const filter = {};
+    const filter = { ...branchFilter(req) }; /* W448 */
     if (branchId) filter.branchId = branchId;
     if (status) filter.status = status;
     const { skip } = paginate(page, limit);
@@ -489,8 +530,8 @@ router.get('/offers', async (req, res) => {
 // إرسال عرض العمل
 router.post('/offers/:id/send', requireHr, async (req, res) => {
   try {
-    const offer = await JobOffer.findByIdAndUpdate(
-      req.params.id,
+    const offer = await JobOffer.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) } /* W448 */,
       { status: 'sent', sentAt: new Date() },
       { new: true }
     );
@@ -507,11 +548,11 @@ router.patch('/offers/:id/respond', async (req, res) => {
     const { accepted, rejectionReason } = req.body;
     if (accepted === undefined) return fail(res, 'يجب تحديد accepted (true/false)');
 
-    const offer = await JobOffer.findById(req.params.id);
+    const offer = await JobOffer.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W448 */
     if (!offer) return fail(res, 'العرض غير موجود', 404);
 
-    const updatedOffer = await JobOffer.findByIdAndUpdate(
-      req.params.id,
+    const updatedOffer = await JobOffer.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) } /* W448 */,
       {
         status: accepted ? 'accepted' : 'rejected',
         respondedAt: new Date(),
@@ -565,7 +606,7 @@ router.patch('/offers/:id/respond', async (req, res) => {
 router.get('/onboarding', async (req, res) => {
   try {
     const { status, branchId, page = 1, limit = 15 } = req.query;
-    const filter = {};
+    const filter = { ...branchFilter(req) }; /* W448 */
     if (branchId) filter.branchId = branchId;
     if (status) filter.status = status;
     const { skip } = paginate(page, limit);
@@ -637,7 +678,7 @@ router.patch('/onboarding/:id/task', requireHr, async (req, res) => {
 router.get('/talent-pool', async (req, res) => {
   try {
     const { status, isSaudi, skills, branchId, page = 1, limit = 15 } = req.query;
-    const filter = {};
+    const filter = { ...branchFilter(req) }; /* W448 */
     if (branchId) filter.branchId = branchId;
     if (status) filter.status = status;
     if (isSaudi !== undefined) filter.isSaudi = isSaudi === 'true';
@@ -677,7 +718,7 @@ router.get('/reports/nitaqat', async (req, res) => {
 
     const [total, saudis] = await Promise.all([
       JobApplication.countDocuments(filter),
-      JobApplication.countDocuments({ ...filter, isSaudi: true }),
+      JobApplication.countDocuments({ ...branchFilter(req), /* W448 */ ...filter, isSaudi: true }),
     ]);
 
     const saudiPercent = total > 0 ? Math.round((saudis / total) * 100 * 10) / 10 : 0;
@@ -710,10 +751,19 @@ router.get('/reports/cost', async (req, res) => {
     const [totalPostings, filledPostings, totalApplications, totalHired, hiredApps] =
       await Promise.all([
         JobPosting.countDocuments(filter),
-        JobPosting.countDocuments({ ...filter, status: 'filled' }),
+        JobPosting.countDocuments({ ...branchFilter(req), /* W448 */ ...filter, status: 'filled' }),
         JobApplication.countDocuments(filter),
-        JobApplication.countDocuments({ ...filter, status: 'hired' }),
-        JobApplication.find({ ...filter, status: 'hired', hiredAt: { $ne: null } })
+        JobApplication.countDocuments({
+          ...branchFilter(req),
+          /* W448 */ ...filter,
+          status: 'hired',
+        }),
+        JobApplication.find({
+          ...branchFilter(req),
+          /* W448 */ ...filter,
+          status: 'hired',
+          hiredAt: { $ne: null },
+        })
           .select('createdAt hiredAt')
           .lean(),
       ]);

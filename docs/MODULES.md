@@ -1,18 +1,36 @@
-# Al-Awael ERP — Module Map v3.2.0 (W356-W382 patch)
+# Al-Awael ERP — Module Map v3.3.0 (re-counted 2026-05-26)
 
-> خريطة الوحدات الكاملة للنظام — 137+ وحدة backend + 110+ صفحة frontend (post W356-W382 series, 2026-05-25)
+> خريطة الوحدات الكاملة للنظام — re-counted 2026-05-26 (was v3.2.0 post W356-W382; counts had drifted significantly since v3.1.0 snapshot)
 
 ---
 
-## نظرة عامة
+## نظرة عامة (re-counted 2026-05-26)
 
-| الطبقة          | المحتوى                            | العدد       |
-| --------------- | ---------------------------------- | ----------- |
-| Backend Routes  | وحدات API مسجّلة في `_registry.js` | 127 وحدة    |
-| Frontend Pages  | صفحات React في `src/pages/`        | 80+ صفحة    |
-| Mongoose Models | نماذج قاعدة البيانات               | 350+ نموذج  |
-| Services        | طبقة الأعمال                       | 60+ خدمة    |
-| Jest Tests      | اختبارات                           | 9409 اختبار |
+| الطبقة             | المحتوى                                          | العدد (2026-05-26)             | كان (v3.2.0) |
+| ------------------ | ------------------------------------------------ | ------------------------------ | ------------ |
+| Backend Mounts     | `dualMount`/`safeMount` calls في `_registry.js`  | **211** (197 unique paths)     | 127          |
+| Frontend Pages     | ملفات مباشرة في `src/pages/` (المستوى الأول)     | **48** ملف pages مباشر         | "80+"        |
+| Frontend Total JSX | كل `.jsx`/`.tsx` في `src/pages/` (recursive)     | **564** (بما فيها subfolders)  | n/a          |
+| Mongoose Models    | ملفات في `backend/models/**` (recursive)         | **865** ملف (530 في المستوى 1) | "350+"       |
+| Unique Model Names | أسماء فريدة مُسجَّلة (mongoose+connection+helper) | **1,253** اسم فريد             | n/a          |
+| Backend Services   | `*.service.js` تحت `backend/services/`           | **305** ملف خدمة               | "60+"        |
+| Backend Tests      | `.test.js` في `__tests__/` + `tests/`            | **2,210** ملف اختبار           | n/a          |
+| Frontend Tests     | `.test.js`/`.test.jsx` في `frontend/src/`        | **1,305** ملف اختبار           | "1,303"      |
+| Grand Total Tests  | جميع ملفات `.test.js[x]`                          | **3,515** ملف                  | "9409 اختبار"\* |
+
+\* الرقم "9409 اختبار" في v3.2.0 كان يحسب test() functions داخل الملفات (متغيّر بشكل كبير)، ليس عدد الملفات. الأرقام الجديدة تحسب الملفات (أكثر استقراراً للقياس).
+
+**Re-count commands** (للـ doc-truthing audits المستقبلية):
+
+```bash
+grep -cE "(dualMount|safeMount)\(\s*app" backend/routes/_registry.js     # ← 211
+find frontend/src/pages -maxdepth 1 -name "*.jsx" -o -name "*.tsx" | wc -l  # ← 48
+find backend/models -name "*.js" -type f | wc -l                          # ← 865
+find backend/services -name "*.service.js" -type f | wc -l                # ← 305
+find backend/__tests__ -name "*.test.js" | wc -l                          # ← 796
+find backend/tests -name "*.test.js" | wc -l                              # ← 1414
+find frontend/src -name "*.test.js*" | wc -l                              # ← 1305
+```
 
 ---
 

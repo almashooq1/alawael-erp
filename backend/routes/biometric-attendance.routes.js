@@ -8,7 +8,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
-const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { attachMfaActor, requireMfaTier } = require('../middleware/requireMfaTier');
 const _logger = require('../utils/logger');
 
@@ -58,7 +58,11 @@ router.get('/devices', async (req, res) => {
 // GET /api/biometric-attendance/devices/:id — تفاصيل جهاز
 router.get('/devices/:id', async (req, res) => {
   try {
-    const device = await ZktecoDevice.findById(req.params.id).populate('branchId');
+    const device = await ZktecoDevice.findOne({
+      _id: req.params.id,
+      ...branchFilter(req),
+    }) /* W448 */
+      .populate('branchId');
     if (!device) return res.status(404).json({ success: false, message: 'الجهاز غير موجود' });
     res.json({ success: true, data: device });
   } catch (err) {
@@ -82,8 +86,8 @@ router.post('/devices', requireMfaTier(2), async (req, res) => {
 // PUT /api/biometric-attendance/devices/:id — تعديل جهاز
 router.put('/devices/:id', async (req, res) => {
   try {
-    const device = await ZktecoDevice.findByIdAndUpdate(
-      req.params.id,
+    const device = await ZktecoDevice.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) } /* W448 */,
       { ...stripUpdateMeta(req.body), updatedBy: req.user?._id },
       { new: true }
     );
@@ -97,7 +101,10 @@ router.put('/devices/:id', async (req, res) => {
 // DELETE /api/biometric-attendance/devices/:id — حذف جهاز (MFA tier 2)
 router.delete('/devices/:id', requireMfaTier(2), async (req, res) => {
   try {
-    await ZktecoDevice.findByIdAndUpdate(req.params.id, { deletedAt: new Date(), isActive: false });
+    await ZktecoDevice.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) },
+      /* W448 */ { deletedAt: new Date(), isActive: false }
+    );
     res.json({ success: true, message: 'تم الحذف بنجاح' });
   } catch (err) {
     safeError(res, err);
@@ -108,7 +115,10 @@ router.delete('/devices/:id', requireMfaTier(2), async (req, res) => {
 // W275n: device ping = active network probe; admin-only diagnostic
 router.post('/devices/:id/ping', requireMfaTier(2), async (req, res) => {
   try {
-    const device = await ZktecoDevice.findById(req.params.id);
+    const device = await ZktecoDevice.findOne({
+      _id: req.params.id,
+      ...branchFilter(req),
+    }); /* W448 */
     if (!device) return res.status(404).json({ success: false, message: 'الجهاز غير موجود' });
 
     const online = await zktecoSdk.connect(device);
@@ -126,7 +136,10 @@ router.post('/devices/:id/ping', requireMfaTier(2), async (req, res) => {
 // W275L: cross-router gating of POST /devices/:id/sync (matches zkteco)
 router.post('/devices/:id/sync', requireMfaTier(2), async (req, res) => {
   try {
-    const device = await ZktecoDevice.findById(req.params.id);
+    const device = await ZktecoDevice.findOne({
+      _id: req.params.id,
+      ...branchFilter(req),
+    }); /* W448 */
     if (!device) return res.status(404).json({ success: false, message: 'الجهاز غير موجود' });
 
     const logs = await zktecoSdk.pullAttendanceLogs(device);
@@ -141,7 +154,10 @@ router.post('/devices/:id/sync', requireMfaTier(2), async (req, res) => {
 // POST /api/biometric-attendance/devices/:id/enroll — تسجيل موظف في الجهاز (MFA tier 2)
 router.post('/devices/:id/enroll', requireMfaTier(2), async (req, res) => {
   try {
-    const device = await ZktecoDevice.findById(req.params.id);
+    const device = await ZktecoDevice.findOne({
+      _id: req.params.id,
+      ...branchFilter(req),
+    }); /* W448 */
     if (!device) return res.status(404).json({ success: false, message: 'الجهاز غير موجود' });
 
     const Employee = require('../models/HR/Employee');

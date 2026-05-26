@@ -33,7 +33,7 @@
 
 const express = require('express');
 const { authenticate, authorize } = require('../middleware/auth');
-const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const router = express.Router();
 const _mongoose = require('mongoose');
 const { v4: uuidv4 } = require('uuid');
@@ -80,8 +80,8 @@ router.get('/stats', async (req, res) => {
 
     const [total, active, pending, totalHoursAgg] = await Promise.all([
       Volunteer.countDocuments(filter),
-      Volunteer.countDocuments({ ...filter, status: 'active' }),
-      Volunteer.countDocuments({ ...filter, status: 'pending' }),
+      Volunteer.countDocuments({ ...branchFilter(req), /* W448 */ ...filter, status: 'active' }),
+      Volunteer.countDocuments({ ...branchFilter(req), /* W448 */ ...filter, status: 'pending' }),
       Volunteer.aggregate([
         { $match: { ...filter, deletedAt: null } },
         { $group: { _id: null, total: { $sum: '$totalHours' } } },
@@ -111,7 +111,7 @@ router.get('/stats', async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     const { search, status, category, branchId, page = 1, limit = 15 } = req.query;
-    const filter = {};
+    const filter = { ...branchFilter(req) }; /* W448 */
     if (branchId) filter.branchId = branchId;
     if (status) filter.status = status;
     if (category) filter.category = category;
@@ -174,7 +174,8 @@ router.post('/register', async (req, res) => {
 
 router.get('/:id', async (req, res) => {
   try {
-    const doc = await Volunteer.findById(req.params.id).lean();
+    const doc = await Volunteer.findOne({ _id: req.params.id, ...branchFilter(req) }) /* W448 */
+      .lean();
     if (!doc) return fail(res, 'المتطوع غير موجود', 404);
     ok(res, { data: doc });
   } catch (err) {
@@ -184,8 +185,8 @@ router.get('/:id', async (req, res) => {
 
 router.put('/:id', requireCoordinator, async (req, res) => {
   try {
-    const doc = await Volunteer.findByIdAndUpdate(
-      req.params.id,
+    const doc = await Volunteer.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) } /* W448 */,
       { ...req.body, updatedBy: req.body.updatedBy || null },
       { new: true, runValidators: true }
     );
@@ -198,7 +199,10 @@ router.put('/:id', requireCoordinator, async (req, res) => {
 
 router.delete('/:id', requireCoordinator, async (req, res) => {
   try {
-    const doc = await Volunteer.findByIdAndUpdate(req.params.id, { deletedAt: new Date() });
+    const doc = await Volunteer.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) },
+      /* W448 */ { deletedAt: new Date() }
+    );
     if (!doc) return fail(res, 'المتطوع غير موجود', 404);
     ok(res, { message: 'تم الحذف بنجاح' });
   } catch (err) {
@@ -219,7 +223,11 @@ router.patch('/:id/status', requireCoordinator, async (req, res) => {
       updates.verifiedAt = new Date();
       updates.activeSince = new Date();
     }
-    const doc = await Volunteer.findByIdAndUpdate(req.params.id, updates, { new: true });
+    const doc = await Volunteer.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) },
+      /* W448 */ updates,
+      { new: true }
+    );
     if (!doc) return fail(res, 'المتطوع غير موجود', 404);
     ok(res, { data: doc, message: 'تم تحديث الحالة بنجاح' });
   } catch (err) {
@@ -230,12 +238,17 @@ router.patch('/:id/status', requireCoordinator, async (req, res) => {
 // مطابقة المتطوع مع الفرص المناسبة
 router.get('/:id/match-opportunities', async (req, res) => {
   try {
-    const volunteer = await Volunteer.findById(req.params.id).lean();
+    const volunteer = await Volunteer.findOne({
+      _id: req.params.id,
+      ...branchFilter(req),
+    }) /* W448 */
+      .lean();
     if (!volunteer) return fail(res, 'المتطوع غير موجود', 404);
 
     const skills = volunteer.skills || [];
     const opportunities = await VolunteerOpportunity.find({
-      branchId: volunteer.branchId,
+      ...branchFilter(req),
+      /* W448 */ branchId: volunteer.branchId,
       status: 'open',
       startDate: { $gte: new Date() },
     }).lean();
@@ -257,7 +270,7 @@ router.get('/:id/match-opportunities', async (req, res) => {
 router.get('/opportunities', async (req, res) => {
   try {
     const { status, category, branchId, page = 1, limit = 15 } = req.query;
-    const filter = {};
+    const filter = { ...branchFilter(req) }; /* W448 */
     if (branchId) filter.branchId = branchId;
     if (status) filter.status = status;
     if (category) filter.category = category;
@@ -288,7 +301,11 @@ router.post('/opportunities', requireCoordinator, async (req, res) => {
 
 router.get('/opportunities/:id', async (req, res) => {
   try {
-    const doc = await VolunteerOpportunity.findById(req.params.id).lean();
+    const doc = await VolunteerOpportunity.findOne({
+      _id: req.params.id,
+      ...branchFilter(req),
+    }) /* W448 */
+      .lean();
     if (!doc) return fail(res, 'الفرصة غير موجودة', 404);
     ok(res, { data: doc });
   } catch (err) {
@@ -298,8 +315,8 @@ router.get('/opportunities/:id', async (req, res) => {
 
 router.put('/opportunities/:id', requireCoordinator, async (req, res) => {
   try {
-    const doc = await VolunteerOpportunity.findByIdAndUpdate(
-      req.params.id,
+    const doc = await VolunteerOpportunity.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) } /* W448 */,
       stripUpdateMeta(req.body),
       {
         new: true,
@@ -315,9 +332,12 @@ router.put('/opportunities/:id', requireCoordinator, async (req, res) => {
 
 router.delete('/opportunities/:id', requireCoordinator, async (req, res) => {
   try {
-    const doc = await VolunteerOpportunity.findByIdAndUpdate(req.params.id, {
-      deletedAt: new Date(),
-    });
+    const doc = await VolunteerOpportunity.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) },
+      /* W448 */ {
+        deletedAt: new Date(),
+      }
+    );
     if (!doc) return fail(res, 'الفرصة غير موجودة', 404);
     ok(res, { message: 'تم الحذف بنجاح' });
   } catch (err) {
@@ -331,7 +351,7 @@ router.delete('/opportunities/:id', requireCoordinator, async (req, res) => {
 router.get('/assignments', async (req, res) => {
   try {
     const { volunteerId, opportunityId, status, branchId, page = 1, limit = 15 } = req.query;
-    const filter = {};
+    const filter = { ...branchFilter(req) }; /* W448 */
     if (branchId) filter.branchId = branchId;
     if (volunteerId) filter.volunteerId = volunteerId;
     if (opportunityId) filter.opportunityId = opportunityId;
@@ -383,8 +403,8 @@ router.post('/assignments', requireCoordinator, async (req, res) => {
 // تسجيل دخول المتطوع
 router.patch('/assignments/:id/check-in', async (req, res) => {
   try {
-    const doc = await VolunteerAssignment.findByIdAndUpdate(
-      req.params.id,
+    const doc = await VolunteerAssignment.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) } /* W448 */,
       { checkedInAt: new Date(), status: 'confirmed' },
       { new: true }
     );
@@ -398,7 +418,10 @@ router.patch('/assignments/:id/check-in', async (req, res) => {
 // تسجيل خروج المتطوع + حساب الساعات
 router.patch('/assignments/:id/check-out', async (req, res) => {
   try {
-    const assignment = await VolunteerAssignment.findById(req.params.id);
+    const assignment = await VolunteerAssignment.findOne({
+      _id: req.params.id,
+      ...branchFilter(req),
+    }); /* W448 */
     if (!assignment) return fail(res, 'التكليف غير موجود', 404);
 
     const now = new Date();
@@ -406,8 +429,8 @@ router.patch('/assignments/:id/check-out', async (req, res) => {
       ? Math.round(((now - assignment.checkedInAt) / 3600000) * 100) / 100
       : 0;
 
-    const doc = await VolunteerAssignment.findByIdAndUpdate(
-      req.params.id,
+    const doc = await VolunteerAssignment.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) } /* W448 */,
       { checkedOutAt: now, actualHours: hours, status: 'completed' },
       { new: true }
     );
@@ -426,13 +449,16 @@ router.patch('/assignments/:id/check-out', async (req, res) => {
 // إصدار شهادة تطوع
 router.post('/assignments/:id/certificate', requireCoordinator, async (req, res) => {
   try {
-    const assignment = await VolunteerAssignment.findById(req.params.id);
+    const assignment = await VolunteerAssignment.findOne({
+      _id: req.params.id,
+      ...branchFilter(req),
+    }); /* W448 */
     if (!assignment) return fail(res, 'التكليف غير موجود', 404);
     if (assignment.status !== 'completed') return fail(res, 'لا يمكن إصدار شهادة لتكليف غير مكتمل');
 
     const path = `certificates/volunteer_${assignment.volunteerId}_${assignment._id}.pdf`;
-    const doc = await VolunteerAssignment.findByIdAndUpdate(
-      req.params.id,
+    const doc = await VolunteerAssignment.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) } /* W448 */,
       { certificateIssued: true, certificateIssuedAt: new Date(), certificatePath: path },
       { new: true }
     );
@@ -449,7 +475,7 @@ router.post('/assignments/:id/certificate', requireCoordinator, async (req, res)
 router.get('/training', async (req, res) => {
   try {
     const { status, trainingType, branchId, page = 1, limit = 15 } = req.query;
-    const filter = {};
+    const filter = { ...branchFilter(req) }; /* W448 */
     if (branchId) filter.branchId = branchId;
     if (status) filter.status = status;
     if (trainingType) filter.trainingType = trainingType;
@@ -484,7 +510,7 @@ router.post('/training', requireCoordinator, async (req, res) => {
 router.get('/recognitions', async (req, res) => {
   try {
     const { volunteerId, branchId, page = 1, limit = 15 } = req.query;
-    const filter = {};
+    const filter = { ...branchFilter(req) }; /* W448 */
     if (branchId) filter.branchId = branchId;
     if (volunteerId) filter.volunteerId = volunteerId;
 
@@ -528,12 +554,18 @@ router.post('/recognitions', requireCoordinator, async (req, res) => {
 // مزامنة مع منصة منصتي
 router.get('/mntasati/sync/:id', async (req, res) => {
   try {
-    const volunteer = await Volunteer.findById(req.params.id);
+    const volunteer = await Volunteer.findOne({
+      _id: req.params.id,
+      ...branchFilter(req),
+    }); /* W448 */
     if (!volunteer) return fail(res, 'المتطوع غير موجود', 404);
     if (!volunteer.mntasatiId) return fail(res, 'لا يوجد معرف منصتي لهذا المتطوع');
 
     // تكامل API مع منصة منصتي - https://www.mntasati.com/api
-    await Volunteer.findByIdAndUpdate(req.params.id, { mntasatiSyncedAt: new Date() });
+    await Volunteer.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) },
+      /* W448 */ { mntasatiSyncedAt: new Date() }
+    );
     ok(res, { message: 'تمت المزامنة مع منصة منصتي بنجاح' });
   } catch (err) {
     fail(res, err.message, 500);

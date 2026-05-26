@@ -24,9 +24,14 @@ const { authenticateToken, requireRole } = require('../middleware/auth');
 const BeneficiarySection = require('../models/BeneficiarySection');
 const Beneficiary = require('../models/Beneficiary');
 const safeError = require('../utils/safeError');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
 
 router.use(authenticateToken);
+// W448: branch-scope every endpoint. Model(s) carry `branchId`; pre-W448
+// list filters were optional + instance loads bare findById, opening
+// cross-tenant IDOR (read/modify/delete any branch by ObjectId guess).
+router.use(requireBranchAccess);
 router.use(bodyScopedBeneficiaryGuard); // W441: enforce branch on req.body.beneficiaryId
 
 const READ_ROLES = [
@@ -62,7 +67,7 @@ async function hydrateRoster(section) {
 // ── GET / ───────────────────────────────────────────────────────────────
 router.get('/', requireRole(READ_ROLES), async (req, res) => {
   try {
-    const filter = {};
+    const filter = { ...branchFilter(req) }; /* W448 */
     if (req.query.program && PROGRAMS.includes(String(req.query.program))) {
       filter.program = String(req.query.program);
     }
@@ -101,7 +106,11 @@ router.get('/:id', requireRole(READ_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const section = await BeneficiarySection.findById(req.params.id).lean({ virtuals: true });
+    const section = await BeneficiarySection.findOne({
+      _id: req.params.id,
+      ...branchFilter(req),
+    }) /* W448 */
+      .lean({ virtuals: true });
     if (!section) return res.status(404).json({ success: false, message: 'الفصل غير موجود' });
     const hydrated = await hydrateRoster(section);
     res.json({ success: true, data: hydrated });
@@ -171,10 +180,14 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
     if (body.status && !STATUSES.includes(body.status)) {
       return res.status(400).json({ success: false, message: 'الحالة غير صالحة' });
     }
-    const doc = await BeneficiarySection.findByIdAndUpdate(req.params.id, body, {
-      new: true,
-      runValidators: true,
-    });
+    const doc = await BeneficiarySection.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) },
+      /* W448 */ body,
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
     if (!doc) return res.status(404).json({ success: false, message: 'الفصل غير موجود' });
     res.json({ success: true, data: doc });
   } catch (err) {
@@ -192,7 +205,10 @@ router.post('/:id/assign', requireRole(WRITE_ROLES), async (req, res) => {
     if (!ids.length) {
       return res.status(400).json({ success: false, message: 'beneficiaryIds مطلوبة' });
     }
-    const section = await BeneficiarySection.findById(req.params.id);
+    const section = await BeneficiarySection.findOne({
+      _id: req.params.id,
+      ...branchFilter(req),
+    }); /* W448 */
     if (!section) return res.status(404).json({ success: false, message: 'الفصل غير موجود' });
     const existing = new Set((section.beneficiaryIds || []).map(String));
     for (const id of ids) existing.add(id);
@@ -221,7 +237,10 @@ router.post('/:id/unassign', requireRole(WRITE_ROLES), async (req, res) => {
     if (!ids.size) {
       return res.status(400).json({ success: false, message: 'beneficiaryIds مطلوبة' });
     }
-    const section = await BeneficiarySection.findById(req.params.id);
+    const section = await BeneficiarySection.findOne({
+      _id: req.params.id,
+      ...branchFilter(req),
+    }); /* W448 */
     if (!section) return res.status(404).json({ success: false, message: 'الفصل غير موجود' });
     section.beneficiaryIds = (section.beneficiaryIds || []).filter(b => !ids.has(String(b)));
     await section.save();
@@ -238,12 +257,15 @@ router.delete('/:id', requireRole(WRITE_ROLES), async (req, res) => {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
     if (req.query.hard === '1') {
-      const row = await BeneficiarySection.findByIdAndDelete(req.params.id);
+      const row = await BeneficiarySection.findOneAndDelete({
+        _id: req.params.id,
+        ...branchFilter(req),
+      }); /* W448 */
       if (!row) return res.status(404).json({ success: false, message: 'الفصل غير موجود' });
       return res.json({ success: true, message: 'تم الحذف نهائياً' });
     }
-    const row = await BeneficiarySection.findByIdAndUpdate(
-      req.params.id,
+    const row = await BeneficiarySection.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) } /* W448 */,
       { status: 'archived' },
       { new: true }
     );

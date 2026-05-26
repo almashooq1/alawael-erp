@@ -320,23 +320,45 @@ class LeaveService {
    * الموافقة على الإجازة
    */
   async approveLeave(leaveId, approvedBy, rejectionReason = null) {
+    // W435: CAS reservation. Pre-W435 did findById → mutate status →
+    // call updateLeaveBalance() (SIDE-EFFECT — debits employee's leave
+    // balance) → save. Two race vectors closed in one fix:
+    //
+    //   (a) Concurrent approveLeave calls (two managers click approve
+    //       simultaneously, UI double-tap): both findById, both pass,
+    //       both call updateLeaveBalance() → balance debited TWICE for
+    //       the same leave; second save wins on approvedBy/approvalDate.
+    //
+    //   (b) Pre-existing logic bug — approveLeave on an ALREADY-
+    //       approved leave didn't check current status, so a repeat
+    //       call would re-call updateLeaveBalance() and double-debit
+    //       even without concurrency.
+    //
+    // CAS filter `status: {$in: ['مرسل', 'قيد المراجعة']}` ensures only
+    // ONE caller's update matches; the second (or the no-op re-call)
+    // returns null and falls into the "already processed" branch
+    // BEFORE updateLeaveBalance fires.
     try {
-      const leave = await Leave.findById(leaveId);
-      if (!leave) throw new Error('لم يتم العثور على الإجازة');
-
-      if (rejectionReason) {
-        leave.status = 'مرفوض';
-        leave.rejectionReason = rejectionReason;
-      } else {
-        leave.status = 'موافق عليه';
-        leave.approvedBy = approvedBy;
-        leave.approvalDate = new Date();
-
-        // تحديث رصيد الإجازات
-        await this.updateLeaveBalance(leave.employeeId, leave.leaveType, leave.duration);
+      const now = new Date();
+      const update = rejectionReason
+        ? { $set: { status: 'مرفوض', rejectionReason } }
+        : { $set: { status: 'موافق عليه', approvedBy, approvalDate: now } };
+      const leave = await Leave.findOneAndUpdate(
+        { _id: leaveId, status: { $in: ['مرسل', 'قيد المراجعة'] } },
+        update,
+        { new: true }
+      );
+      if (!leave) {
+        const existing = await Leave.findById(leaveId).select('status').lean();
+        if (!existing) throw new Error('لم يتم العثور على الإجازة');
+        throw new Error('تمت معالجة طلب الإجازة مسبقاً');
       }
 
-      await leave.save();
+      // Side-effect runs ONCE per successful approval claim — guaranteed
+      // by the CAS gate above.
+      if (!rejectionReason) {
+        await this.updateLeaveBalance(leave.employeeId, leave.leaveType, leave.duration);
+      }
 
       return {
         success: true,
@@ -344,6 +366,14 @@ class LeaveService {
         data: leave,
       };
     } catch (error) {
+      // W435: preserve specific Arabic error messages (caller depends
+      // on them for i18n routing); only wrap unexpected errors.
+      if (
+        error.message === 'لم يتم العثور على الإجازة' ||
+        error.message === 'تمت معالجة طلب الإجازة مسبقاً'
+      ) {
+        throw error;
+      }
       throw new Error('حدث خطأ داخلي');
     }
   }

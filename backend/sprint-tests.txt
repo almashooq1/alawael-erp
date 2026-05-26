@@ -168,6 +168,7 @@ __tests__/therapist-portal-caseload-guard-wave269d.test.js
 __tests__/branch-isolation-measures-workflow-wave269e.test.js
 __tests__/branch-isolation-assessment-recommendation-wave269f.test.js
 __tests__/branch-isolation-hr-performance-wave269g.test.js
+__tests__/no-broken-req-branchid-wave269h.test.js
 __tests__/biometric-mfa-tier-wave273.test.js
 __tests__/no-mfa-bypass-on-sensitive-routes-wave273b.test.js
 __tests__/attendance-monthly-report-xlsx-wave274.test.js

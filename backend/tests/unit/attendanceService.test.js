@@ -13,6 +13,7 @@ const mockRecordSave = jest.fn();
 const mockScheduleFindOne = jest.fn();
 const mockLeaveFindById = jest.fn();
 const mockLeaveFind = jest.fn();
+const mockLeaveFindOneAndUpdate = jest.fn();
 const mockLeaveSave = jest.fn();
 
 const mockBalanceFindOne = jest.fn();
@@ -38,6 +39,8 @@ jest.mock('../../models/attendanceModel', () => {
   }));
   MockLeave.findById = (...a) => mockLeaveFindById(...a);
   MockLeave.find = (...a) => mockLeaveFind(...a);
+  // W435: approveLeave switched to atomic CAS via findOneAndUpdate.
+  MockLeave.findOneAndUpdate = (...a) => mockLeaveFindOneAndUpdate(...a);
 
   const MockLeaveBalance = jest.fn().mockImplementation(data => ({
     ...data,
@@ -282,16 +285,19 @@ describe('LeaveService', () => {
     });
   });
 
-  describe('approveLeave', () => {
+  describe('approveLeave (W435 atomic CAS)', () => {
     it('approves and updates balance', async () => {
-      const doc = {
+      // W435: service uses findOneAndUpdate with status:'مرسل'|'قيد المراجعة'
+      // filter. Mock returns the approved doc (atomic match succeeded).
+      mockLeaveFindOneAndUpdate.mockResolvedValue({
         _id: 'L1',
         employeeId: 'E1',
         leaveType: 'إجازة سنوية',
         duration: 3,
-        save: jest.fn().mockResolvedValue(true),
-      };
-      mockLeaveFindById.mockResolvedValue(doc);
+        status: 'موافق عليه',
+        approvedBy: 'ADMIN-1',
+        approvalDate: new Date(),
+      });
       mockBalanceFindOne.mockResolvedValue({
         annualLeaveUsed: 0,
         annualLeaveAllocation: 21,
@@ -300,23 +306,40 @@ describe('LeaveService', () => {
 
       const res = await leave.approveLeave('L1', 'ADMIN-1');
       expect(res.success).toBe(true);
-      expect(doc.status).toBe('موافق عليه');
+      expect(res.data.status).toBe('موافق عليه');
     });
 
     it('rejects with rejection reason', async () => {
-      const doc = {
+      mockLeaveFindOneAndUpdate.mockResolvedValue({
         _id: 'L1',
-        save: jest.fn().mockResolvedValue(true),
-      };
-      mockLeaveFindById.mockResolvedValue(doc);
-      await leave.approveLeave('L1', 'ADMIN', 'overdue');
-      expect(doc.status).toBe('مرفوض');
-      expect(doc.rejectionReason).toBe('overdue');
+        status: 'مرفوض',
+        rejectionReason: 'overdue',
+      });
+      const res = await leave.approveLeave('L1', 'ADMIN', 'overdue');
+      expect(res.success).toBe(true);
+      expect(res.data.status).toBe('مرفوض');
+      expect(res.data.rejectionReason).toBe('overdue');
     });
 
     it('throws when not found', async () => {
-      mockLeaveFindById.mockResolvedValue(null);
-      await expect(leave.approveLeave('bad', 'A')).rejects.toThrow('حدث خطأ داخلي');
+      // CAS misses (leave doesn't exist) → null
+      mockLeaveFindOneAndUpdate.mockResolvedValue(null);
+      // Disambiguation: findById returns the lean chain
+      mockLeaveFindById.mockReturnValue({
+        select: jest.fn().mockReturnValue({ lean: jest.fn().mockResolvedValue(null) }),
+      });
+      await expect(leave.approveLeave('bad', 'A')).rejects.toThrow('لم يتم العثور على الإجازة');
+    });
+
+    it('throws when leave already processed (W435 new case)', async () => {
+      // CAS misses (status was already approved/rejected) → null
+      mockLeaveFindOneAndUpdate.mockResolvedValue(null);
+      mockLeaveFindById.mockReturnValue({
+        select: jest.fn().mockReturnValue({
+          lean: jest.fn().mockResolvedValue({ _id: 'L1', status: 'موافق عليه' }),
+        }),
+      });
+      await expect(leave.approveLeave('L1', 'A')).rejects.toThrow('تمت معالجة طلب الإجازة مسبقاً');
     });
   });
 

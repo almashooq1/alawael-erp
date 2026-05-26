@@ -13,7 +13,7 @@
 'use strict';
 
 // jest globals are auto-injected by the jest test runner — no require needed.
-/* eslint-env jest */
+// (eslint-env jest configured in eslint.config.js for __tests__/; inline comments deprecated)
 
 // ─── Mock the Beneficiary model BEFORE requiring the helper ────────────────
 const mockFindOne = jest.fn();

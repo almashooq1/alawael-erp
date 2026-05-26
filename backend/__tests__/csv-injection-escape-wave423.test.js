@@ -8,7 +8,7 @@
 
 'use strict';
 
-/* eslint-env jest */
+// (eslint-env jest configured in eslint.config.js for __tests__/; inline comments deprecated)
 
 const { escapeFormulaInjection } = require('../services/importExport/format-helpers');
 

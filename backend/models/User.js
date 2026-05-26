@@ -300,20 +300,74 @@ const MAX_LOGIN_ATTEMPTS = 5;
 const LOCK_TIME_MS = 15 * 60 * 1000; // 15 minutes
 
 userSchema.methods.incLoginAttempts = async function () {
-  // If previous lock has expired, reset and start fresh
-  if (this.lockUntil && this.lockUntil < Date.now()) {
-    return this.updateOne({
-      $set: { failedLoginAttempts: 1 },
-      $unset: { lockUntil: 1 },
-    });
+  // W435: race-free failed-login increment.
+  //
+  // Previous implementation decided whether to set `lockUntil` based on
+  // the in-memory `this.failedLoginAttempts` snapshot taken at doc-load.
+  // Five parallel failed logins each observed `0 + 1 < 5` and none set
+  // the lock — counter ended at 5+ but the account was never locked,
+  // letting an attacker bypass the brute-force gate entirely.
+  //
+  // Fix: (1) atomically increment (or reset on expired lock) via an
+  // aggregation-pipeline update so the DB makes the time comparison —
+  // not the in-memory snapshot; (2) re-read the post-increment value
+  // and, if it crossed the threshold and no lock is currently active,
+  // set `lockUntil` in a second update guarded by a CAS filter so
+  // simultaneous threshold-crossers idempotently write the same lock.
+  const Model = this.constructor;
+
+  const updated = await Model.findOneAndUpdate(
+    { _id: this._id },
+    [
+      {
+        $set: {
+          failedLoginAttempts: {
+            $cond: [
+              {
+                $and: [
+                  { $ne: [{ $ifNull: ['$lockUntil', null] }, null] },
+                  { $lt: ['$lockUntil', '$$NOW'] },
+                ],
+              },
+              1,
+              { $add: [{ $ifNull: ['$failedLoginAttempts', 0] }, 1] },
+            ],
+          },
+          lockUntil: {
+            $cond: [
+              {
+                $and: [
+                  { $ne: [{ $ifNull: ['$lockUntil', null] }, null] },
+                  { $lt: ['$lockUntil', '$$NOW'] },
+                ],
+              },
+              null,
+              '$lockUntil',
+            ],
+          },
+        },
+      },
+    ],
+    { new: true, projection: { failedLoginAttempts: 1, lockUntil: 1 } }
+  );
+
+  if (!updated) return null;
+
+  if (updated.failedLoginAttempts >= MAX_LOGIN_ATTEMPTS && !updated.lockUntil) {
+    await Model.updateOne(
+      {
+        _id: this._id,
+        $or: [
+          { lockUntil: null },
+          { lockUntil: { $exists: false } },
+          { lockUntil: { $lt: new Date() } },
+        ],
+      },
+      { $set: { lockUntil: new Date(Date.now() + LOCK_TIME_MS) } }
+    );
   }
 
-  const updates = { $inc: { failedLoginAttempts: 1 } };
-  // Lock the account when threshold is reached
-  if (this.failedLoginAttempts + 1 >= MAX_LOGIN_ATTEMPTS && !this.isLocked) {
-    updates.$set = { lockUntil: new Date(Date.now() + LOCK_TIME_MS) };
-  }
-  return this.updateOne(updates);
+  return updated;
 };
 
 // Reset login attempts on successful login

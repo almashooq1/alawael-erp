@@ -256,6 +256,23 @@ function createLeadFunnelService({
   /**
    * Promote an inquiry into a Lead. Copies contact + subject snapshot
    * into the new lead, back-links the two, and activates lead SLAs.
+   *
+   * W441: race-safe via CAS reservation on the inquiry's promotedAt
+   * field. Pre-W441 did findById → check status → createLead (SLOW
+   * side-effect that creates a downstream Lead document) → save. Two
+   * concurrent promoteInquiry calls for the same inquiry would both
+   * pass the check and BOTH call createLead → TWO Lead documents
+   * created with different IDs; only ONE is back-linked to the
+   * inquiry; the other is orphaned in the DB (sourceInquiryId points
+   * to an inquiry whose promotedLeadId references a SIBLING lead).
+   * This is real data integrity damage — orphaned leads accumulate
+   * over time and skew funnel-stage analytics.
+   *
+   * CAS gate via `promotedAt`: only the FIRST concurrent caller's
+   * atomic update succeeds at claiming the promotion. The second
+   * caller's filter doesn't match and falls into the "already
+   * promoting" branch BEFORE createLead fires. On createLead failure,
+   * the reservation is rolled back so a retry can claim it.
    */
   async function promoteInquiry(id, leadOverrides = {}, { actorId = null } = {}) {
     const inq = await inquiryModel.findById(id);
@@ -267,6 +284,21 @@ function createLeadFunnelService({
       .inquiryRequiredFields(inq.status, 'promoted_to_lead')
       .filter(f => _missing(inq[f]));
     if (missing.length) throw new MissingFieldError(missing);
+
+    // W441: CAS reservation — claim the promotion by setting promotedAt
+    // atomically. Filter requires `promotedAt: null` so only ONE caller
+    // wins. status is left unchanged for now (the actual
+    // 'promoted_to_lead' transition happens after createLead succeeds,
+    // preserving the existing transition graph + audit history shape).
+    const promoteClaim = now();
+    const claimed = await inquiryModel.findOneAndUpdate(
+      { _id: id, promotedAt: null, status: { $ne: 'promoted_to_lead' } },
+      { $set: { promotedAt: promoteClaim } },
+      { new: true }
+    );
+    if (!claimed) {
+      throw new ConflictError('Inquiry already being promoted (concurrent caller)');
+    }
 
     const leadData = {
       sourceInquiryId: inq._id,
@@ -284,11 +316,21 @@ function createLeadFunnelService({
       ownerNameSnapshot: inq.ownerNameSnapshot || null,
       ...leadOverrides,
     };
-    const lead = await createLead(leadData, { actorId, fromInquiry: true });
+    let lead;
+    try {
+      lead = await createLead(leadData, { actorId, fromInquiry: true });
+    } catch (err) {
+      // W441: createLead failed — roll back the reservation so a
+      // future retry can re-claim it. If we don't roll back, the
+      // inquiry is permanently stuck (promotedAt set, status still
+      // non-terminal, no Lead linked).
+      await inquiryModel.findByIdAndUpdate(id, { $set: { promotedAt: null } });
+      throw err;
+    }
 
-    // Mark inquiry as promoted
+    // Mark inquiry as promoted (back-link + status + history)
     inq.promotedLeadId = lead._id;
-    inq.promotedAt = now();
+    inq.promotedAt = promoteClaim; // already persisted by the CAS; keep in-memory in sync
     _pushHistory(inq, {
       from: inq.status,
       to: 'promoted_to_lead',

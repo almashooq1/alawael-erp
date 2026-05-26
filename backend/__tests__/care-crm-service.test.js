@@ -87,6 +87,42 @@ function makeModel({ prefix = 'doc', autoNumber = null, preSave = null } = {}) {
         return true;
       }).length;
     },
+    // W441: leadFunnel.promoteInquiry now uses findOneAndUpdate as a CAS
+    // gate (filter: {_id, promotedAt: null, status: {$ne: 'promoted_to_lead'}}).
+    // Mock implementation: respect the filter; null result if mismatch.
+    findOneAndUpdate: async (filter, update, _opts) => {
+      const doc = docs.find(d => {
+        for (const [k, v] of Object.entries(filter || {})) {
+          if (k === '_id') {
+            if (d._id !== v) return false;
+            continue;
+          }
+          if (v === null) {
+            if (d[k] != null) return false;
+            continue;
+          }
+          if (typeof v === 'object' && !Array.isArray(v) && !(v instanceof Date)) {
+            if (v.$ne !== undefined && d[k] === v.$ne) return false;
+            if (v.$in && !v.$in.includes(d[k])) return false;
+          } else if (d[k] !== v) return false;
+        }
+        return true;
+      });
+      if (!doc) return null;
+      if (update && update.$set) {
+        Object.assign(doc, update.$set);
+      }
+      return doc;
+    },
+    // W441: rollback path on createLead failure uses findByIdAndUpdate.
+    findByIdAndUpdate: async (id, update) => {
+      const doc = docs.find(d => d._id === id);
+      if (!doc) return null;
+      if (update && update.$set) {
+        Object.assign(doc, update.$set);
+      }
+      return doc;
+    },
     _docs: () => docs,
   };
 }

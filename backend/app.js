@@ -2072,6 +2072,10 @@ require('./startup/riskSweeperBootstrap').wireRiskSweeper(app, { logger });
 // → no_show after 24h with no check-in). All others query + log.
 require('./startup/clinicalSweepersBootstrap').wireClinicalSweepers(app, { logger });
 
+// W455 — GAS T-score weekly snapshot cron (env-gated, default OFF).
+// ENABLE_GAS_SNAPSHOT_CRON=true + GAS_SNAPSHOT_BRANCH_IDS=b1,b2
+require('./startup/gasSnapshotBootstrap').wireGasSnapshots(app, { logger });
+
 // ─── Audit Chain Archiver (daily) — Wave 303 / W308 wire-in ──────────────────
 // Verifies hash-linked plan-review audit chains older than AUDIT_CHAIN_ARCHIVE_DAYS
 // (default 1825 = 5y PDPL retention), writes valid chains as NDJSON, and optionally

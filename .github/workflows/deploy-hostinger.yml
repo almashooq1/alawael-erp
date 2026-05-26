@@ -65,7 +65,7 @@ jobs:
           fi
           echo "✅ Deployment confirmed"
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 2
 
@@ -120,9 +120,9 @@ jobs:
     # 25m16s, leaving production stale on e06a7667 for 11+ hours).
     timeout-minutes: 35
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
 
@@ -155,9 +155,9 @@ jobs:
       needs.preflight.result == 'success'
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
 
@@ -233,7 +233,7 @@ jobs:
       name: production
       url: https://alaweal.org
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Check required secrets
         run: |

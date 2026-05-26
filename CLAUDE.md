@@ -175,6 +175,80 @@ Proven on W325c — **58 phantoms → 0 across ~12 waves** (W324 / W326 / W327+W
 - **Don't mock the database** in integration tests when the test path runs against MongoDB in dev — silent divergence is the biggest risk. Mongoose `findById` mock thenable that returns thenable instances will hang Jest silently (Wave 96 gotcha).
 - **Don't use `Set-Content` / `Out-File` in PowerShell for UTF-8 with Arabic text** — defaults vary. Prefer the `Write` tool.
 - **Lazy-read `process.env`** in CCTV/Hikvision modules. Top-level reads break under Dynatrace (Phase 27 gotcha).
+- **NEVER write `req.branchId`** — that field is never set by any middleware in this codebase. Use `effectiveBranchScope(req)` from [`backend/middleware/assertBranchMatch.js`](backend/middleware/assertBranchMatch.js). The W269h drift guard (`__tests__/no-broken-req-branchid-wave269h.test.js`) fails CI on regression. See "Cross-branch isolation (W269 series)" below.
+
+## Cross-branch isolation (W269 series, shipped 2026-05-22 → 2026-05-26)
+
+`requireBranchAccess` (middleware/branchScope.middleware.js) only rejects requests that **explicitly name a foreign branchId in query/body** — it does NOT auto-filter document queries, and does NOT block path-based ID lookups (`/profile/:beneficiaryId`, `/fba/:fbaAssessmentId`, `/scale/:id`, etc.). Services MUST apply their own enforcement.
+
+Two correct enforcement layers exist:
+
+### Layer A — branchFilter (the safe legacy pattern)
+
+For routes whose model has a `branchId` field and whose queries you control:
+
+```js
+const { branchFilter } = require('../middleware/branchScope.middleware');
+const items = await Model.find({ ...branchFilter(req), status: 'active' });
+```
+
+`branchFilter(req)` returns `{branchId: <user-branch>}` when restricted, `{}` for cross-branch roles. Examples in active use: `routes/goalProgress.routes.js`, `routes/standardizedAssessments.routes.js`.
+
+### Layer B — assertBranchMatch helper (for ID-keyed lookups + write paths)
+
+For routes that take a beneficiary/resource ID via `req.params` or `req.body` and need explicit ownership verification:
+
+```js
+const {
+  assertBranchMatch,
+  effectiveBranchScope,
+  enforceBeneficiaryBranch,
+  assertBranchIdsAllowed,
+} = require('../middleware/assertBranchMatch');
+
+// Read endpoint with explicit doc lookup:
+const doc = await service.getById(req.params.id);
+if (!doc) return res.status(404)...;
+assertBranchMatch(req, doc.branchId, 'AAC profile');   // throws 403 on mismatch
+
+// Beneficiary-keyed route (loads Beneficiary + asserts):
+await enforceBeneficiaryBranch(req, req.params.beneficiaryId);  // throws 403/404
+
+// Branch-list endpoint (always returns caller's branch when restricted):
+const branchId = effectiveBranchScope(req);  // ignores ?branchId= spoofing
+const filter = { ...(branchId && { branchId }) };
+
+// Multi-branch query (e.g. /ministry-comparison?branchIds=A,B):
+assertBranchIdsAllowed(req, req.query.branchIds.split(','));   // throws 403 on foreign
+```
+
+### Anti-patterns (do NOT use)
+
+- ❌ `const branchId = req.branchId || ...` — `req.branchId` is ALWAYS undefined. The fallback silently leaks all branches.
+- ❌ `Model.findById(req.params.x)` returned directly — no ownership check.
+- ❌ `req.query.branchId || undefined` passed to service for a restricted user — defeats isolation; use `effectiveBranchScope(req)`.
+
+### W269 wave scope (40 routes protected, 64 security tests, 1 drift guard)
+
+| Wave  | Surface                                                                     | Commit                 |
+| ----- | --------------------------------------------------------------------------- | ---------------------- |
+| W269  | AAC + GAS + BIP tracking (12)                                               | `ff3c7198f`            |
+| W269b | measures-outcomes (4) + ministry-comparison branchIds spoof                 | `f21a905a9`            |
+| W269c | v4 BeneficiaryMasterFile ClinicalToolsLinks regression                      | `c3aaed2`              |
+| W269d | therapist-portal /goals + /red-flags (caseload guard, stronger than branch) | `327192b1c`            |
+| W269e | measures-workflow (12 routes — beneficiary + branch lists)                  | `05eb3ffee`            |
+| W269f | assessmentRecommendation (5 routes — bundles + analytics + accept)          | `db516be22`            |
+| W269g | hr-performance + goalBank (req.branchId sweep)                              | `7e283ff23`            |
+| W269h | **drift guard** — CI fails on any new req.branchId in routes/ or services/  | `bdf98b17d` (absorbed) |
+
+### Adding a new tenant-scoped route (post-W269 contract)
+
+1. Decide enforcement model:
+   - Branch isolation (typical) → use `branchFilter` OR helper Layer B above
+   - Caseload isolation (therapist portal style — STRONGER) → `Appointment.countDocuments({therapist, beneficiary, date: >= 12-months-ago}) → 403`
+   - Cross-branch (admin tools) → no check, but require `requireRole(['admin', ...])`
+2. Run W269h locally (`npx jest __tests__/no-broken-req-branchid-wave269h.test.js`) before commit
+3. If the route is beneficiary-keyed, add a per-route test mirroring `__tests__/branch-isolation-*-wave269*.test.js` (cross-branch denial + same-branch success)
 
 ## Where the truth lives
 

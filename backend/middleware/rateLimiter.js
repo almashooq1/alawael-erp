@@ -59,7 +59,19 @@ const getRedisStore = (prefix = 'rl:') => {
  * الحصول على معرف العميل (IP + optional User ID)
  */
 const getClientIdentifier = req => {
-  const ip = req.ip || req.connection?.remoteAddress || req.headers['x-forwarded-for'] || '0.0.0.0';
+  // W433: drop the `req.headers['x-forwarded-for']` fallback. Express's
+  // `trust proxy: 1` (set in startup/middleware.js:93) already
+  // populates `req.ip` from the trusted hop's XFF chain. If req.ip is
+  // unpopulated, that means the trust-proxy code DELIBERATELY chose
+  // not to trust the XFF header — usually because the request came
+  // direct (not via the proxy), so the header is client-supplied and
+  // can be set to anything. Using it as a fallback re-opens the
+  // spoofing window: an attacker could set `X-Forwarded-For: $rand`
+  // on each request and bypass the rate-limit bucket entirely.
+  //
+  // Fallback to '0.0.0.0' instead — all untrusted direct traffic
+  // shares one bucket, which is the correct conservative behaviour.
+  const ip = req.ip || req.connection?.remoteAddress || '0.0.0.0';
   const userId = req.user?.id || '';
   return userId ? `${ip}:${userId}` : ip;
 };

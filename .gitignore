@@ -189,6 +189,12 @@ _*.json
 _*.tmp
 __*.txt
 
+# Legitimate source files that match `_*.js` above but are NOT dev-only
+# scratch — they're real shared libraries / canonical schemas. CI fails
+# without them. Discovered 2026-05-26 via Cycle 10 CI investigation:
+# 22 canonical schemas import `../_primitives` → Sprint Tests broke.
+!backend/intelligence/canonical/_primitives.js
+
 # ───────────────────────────────────────────────────────────────
 # 11b. Root-level Python debug/deploy scripts (~250 files)
 # These are dev-only diagnostic scripts, NOT part of the app

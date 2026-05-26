@@ -178,6 +178,7 @@
     "sync:sprint-paths": "node scripts/sync-sprint-tests-paths.js",
     "check:sprint-paths": "node scripts/sync-sprint-tests-paths.js --check",
     "check:routes-load": "node scripts/scan-route-files.js",
+    "check:gitignored-sources": "node scripts/check-gitignored-sources.js",
     "generate:secrets": "node scripts/generate-secrets.js",
     "generate:secrets:apply": "node scripts/generate-secrets.js --apply",
     "db:reset": "node scripts/db-reset.js",

@@ -247,9 +247,13 @@ router.get('/:id/download', requireRole(READ_ROLES), async (req, res) => {
     if (doc.status === 'soft_deleted') {
       return res.status(404).json({ success: false, message: 'الملف محذوف' });
     }
-    // Ensure path is within UPLOAD_ROOT (prevent traversal)
+    // W453: ensure path is within UPLOAD_ROOT (prevent traversal).
+    // Pre-W453 the check was `resolved.startsWith(UPLOAD_ROOT)` which
+    // matches a sibling like `/path/uploads-evil/file` when UPLOAD_ROOT
+    // is `/path/uploads`. Adding `+ path.sep` requires the path to be
+    // STRICTLY inside the directory (not a prefix-shared sibling).
     const resolved = path.resolve(doc.storagePath);
-    if (!resolved.startsWith(UPLOAD_ROOT)) {
+    if (!resolved.startsWith(path.resolve(UPLOAD_ROOT) + path.sep)) {
       return res.status(403).json({ success: false, message: 'مسار غير مسموح' });
     }
     if (!fs.existsSync(resolved)) {
@@ -278,7 +282,8 @@ router.delete('/:id', requireRole(DELETE_ROLES), async (req, res) => {
       const doc = await UploadedFile.findByIdAndDelete(req.params.id);
       if (!doc) return res.status(404).json({ success: false, message: 'الملف غير موجود' });
       const resolved = path.resolve(doc.storagePath);
-      if (resolved.startsWith(UPLOAD_ROOT)) {
+      // W453: strict path-sep boundary (see /:id/download for rationale)
+      if (resolved.startsWith(path.resolve(UPLOAD_ROOT) + path.sep)) {
         await fsp.unlink(resolved).catch(() => {});
       }
       return res.json({ success: true, message: 'تم الحذف النهائي' });

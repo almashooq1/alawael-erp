@@ -259,7 +259,7 @@ router.get('/view/:fileType/:fileName', authenticate, requireBranchAccess, async
     const safeName = path.basename(fileName);
     const baseDir = path.join(__dirname, '../uploads/medical-files', subDir);
     const filePath = path.join(baseDir, safeName);
-    if (!path.resolve(filePath).startsWith(path.resolve(baseDir))) {
+    if (!path.resolve(filePath).startsWith(path.resolve(baseDir) + path.sep)) {
       return res.status(400).json({ success: false, message: 'اسم ملف غير صالح' });
     }
 
@@ -289,7 +289,7 @@ router.get('/download/:fileType/:fileName', authenticate, requireBranchAccess, a
     const safeName = path.basename(fileName);
     const baseDir = path.join(__dirname, '../uploads/medical-files', subDir);
     const filePath = path.join(baseDir, safeName);
-    if (!path.resolve(filePath).startsWith(path.resolve(baseDir))) {
+    if (!path.resolve(filePath).startsWith(path.resolve(baseDir) + path.sep)) {
       return res.status(400).json({ success: false, message: 'اسم ملف غير صالح' });
     }
 
@@ -332,7 +332,7 @@ router.delete(
       const safeName = path.basename(fileName);
       const baseDir = path.join(__dirname, '../uploads/medical-files', subDir);
       const filePath = path.join(baseDir, safeName);
-      if (!path.resolve(filePath).startsWith(path.resolve(baseDir))) {
+      if (!path.resolve(filePath).startsWith(path.resolve(baseDir) + path.sep)) {
         return res.status(400).json({ success: false, message: 'اسم ملف غير صالح' });
       }
 
@@ -368,7 +368,7 @@ router.get('/info/:fileType/:fileName', authenticate, requireBranchAccess, async
     const safeName = path.basename(fileName);
     const baseDir = path.join(__dirname, '../uploads/medical-files', subDir);
     const filePath = path.join(baseDir, safeName);
-    if (!path.resolve(filePath).startsWith(path.resolve(baseDir))) {
+    if (!path.resolve(filePath).startsWith(path.resolve(baseDir) + path.sep)) {
       return res.status(400).json({ success: false, message: 'اسم ملف غير صالح' });
     }
 

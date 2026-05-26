@@ -656,7 +656,8 @@ router.get(
     const filePath = path.join(uploadDir, safeId, safeFilename);
     // Verify resolved path stays within uploadDir
     const resolved = path.resolve(filePath);
-    if (!resolved.startsWith(path.resolve(uploadDir))) {
+    // W453: strict path-sep boundary (prevents prefix-shared-sibling escape)
+    if (!resolved.startsWith(path.resolve(uploadDir) + path.sep)) {
       return res.status(400).json({ success: false, message: 'معرف غير صالح' });
     }
 

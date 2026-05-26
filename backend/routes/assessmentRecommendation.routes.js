@@ -28,6 +28,10 @@ const llmModule = require('../services/assessmentRecommendationLlm.service');
 const createReassessmentSweeper = require('../services/assessmentReassessmentSweeper.service');
 const createBundleAnalytics = require('../services/assessmentBundleAnalytics.service');
 const createBundleOutcomes = require('../services/assessmentBundleOutcomes.service');
+const {
+  enforceBeneficiaryBranch,
+  effectiveBranchScope,
+} = require('../middleware/assertBranchMatch');
 const safeError = require('../utils/safeError');
 
 // Register the bundle model so `mongoose.model('AssessmentRecommendationBundle')`
@@ -226,6 +230,20 @@ router.post('/recommend/accept', async (req, res) => {
         .json({ success: false, message: 'acceptedGoals must be a non-empty array' });
     }
 
+    // W269f: enforce branch ownership before creating SmartGoal +
+    // CarePlan tagged to the supplied beneficiaryId.
+    try {
+      await enforceBeneficiaryBranch(req, beneficiaryId);
+    } catch (err) {
+      if (err.status === 403) {
+        return res.status(403).json({ success: false, message: err.message });
+      }
+      if (err.status === 404) {
+        return res.status(404).json({ success: false, message: err.message });
+      }
+      throw err;
+    }
+
     const SmartGoal = mongoose.model('SmartGoal');
     const CarePlan = mongoose.model('CarePlan');
 
@@ -388,6 +406,18 @@ router.get('/history/:beneficiaryId', async (req, res) => {
         .status(400)
         .json({ success: false, message: 'beneficiaryId must be a valid ObjectId' });
     }
+    // W269f
+    try {
+      await enforceBeneficiaryBranch(req, beneficiaryId);
+    } catch (err) {
+      if (err.status === 403) {
+        return res.status(403).json({ success: false, message: err.message });
+      }
+      if (err.status === 404) {
+        return res.status(404).json({ success: false, message: err.message });
+      }
+      throw err;
+    }
     const BundleModel = mongoose.model('AssessmentRecommendationBundle');
     const lim = Math.min(Math.max(Number(limit) || 20, 1), 100);
     const skp = Math.max(Number(skip) || 0, 0);
@@ -445,7 +475,12 @@ router.get('/analytics', async (req, res) => {
     if (req.query.therapistId && mongoose.Types.ObjectId.isValid(req.query.therapistId)) {
       opts.therapistId = new mongoose.Types.ObjectId(req.query.therapistId);
     }
-    if (req.query.branchId && mongoose.Types.ObjectId.isValid(req.query.branchId)) {
+    // W269f: force branchId to caller's own when restricted, ignoring
+    // user-supplied query input. Cross-branch role honours the query.
+    const callerBranch = effectiveBranchScope(req);
+    if (callerBranch && mongoose.Types.ObjectId.isValid(callerBranch)) {
+      opts.branchId = new mongoose.Types.ObjectId(callerBranch);
+    } else if (req.query.branchId && mongoose.Types.ObjectId.isValid(req.query.branchId)) {
       opts.branchId = new mongoose.Types.ObjectId(req.query.branchId);
     }
     const report = await analytics.getReport(opts);
@@ -469,6 +504,18 @@ router.get('/outcomes/:beneficiaryId', async (req, res) => {
       return res
         .status(400)
         .json({ success: false, message: 'beneficiaryId must be a valid ObjectId' });
+    }
+    // W269f
+    try {
+      await enforceBeneficiaryBranch(req, beneficiaryId);
+    } catch (err) {
+      if (err.status === 403) {
+        return res.status(403).json({ success: false, message: err.message });
+      }
+      if (err.status === 404) {
+        return res.status(404).json({ success: false, message: err.message });
+      }
+      throw err;
     }
     const outcomes = getOutcomes();
     if (!outcomes) {
@@ -538,6 +585,21 @@ router.get('/history/bundle/:bundleId', async (req, res) => {
     const doc = await BundleModel.findById(bundleId).lean();
     if (!doc) {
       return res.status(404).json({ success: false, message: 'bundle_not_found' });
+    }
+    // W269f: bundle carries a beneficiary FK — enforce branch on the
+    // beneficiary, not on a (non-existent) branchId on the bundle.
+    try {
+      await enforceBeneficiaryBranch(req, String(doc.beneficiary));
+    } catch (err) {
+      if (err.status === 403) {
+        return res.status(403).json({ success: false, message: err.message });
+      }
+      if (err.status === 404) {
+        // The bundle exists but its beneficiary doesn't — treat as
+        // not-found to avoid leaking the existence of the bundle.
+        return res.status(404).json({ success: false, message: 'bundle_not_found' });
+      }
+      throw err;
     }
     return res.json({ success: true, data: doc });
   } catch (err) {

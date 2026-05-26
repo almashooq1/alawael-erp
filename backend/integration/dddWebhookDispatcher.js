@@ -21,6 +21,16 @@ const mongoose = require('mongoose');
 const crypto = require('crypto');
 const logger = require('../utils/logger');
 
+// W439: SSRF guard for outbound webhook URLs. Optional load — `urlValidator`
+// is core infra and should always resolve, but the catch keeps the
+// dispatcher loadable in lean test environments that stub utils/.
+let validateOutboundUrl = null;
+try {
+  ({ validateOutboundUrl } = require('../utils/urlValidator'));
+} catch {
+  validateOutboundUrl = null;
+}
+
 // ── Lazy service loader ─────────────────────────────────────────────────
 
 function getWebhookService() {
@@ -156,6 +166,32 @@ async function dispatchDDDWebhook(domain, event, doc, meta = {}) {
     const start = Date.now();
 
     try {
+      // W439: SSRF defense-in-depth — validate stored URL before EVERY
+      // dispatch, not just at registration time. Existing rows may have
+      // been written before the registration-time check landed, and a
+      // future DB direct-write or migration could reintroduce a bad URL.
+      // `validateOutboundUrl` blocks private IPv4/6 ranges + cloud
+      // metadata + sensitive ports + DNS-rebinding hostnames.
+      if (validateOutboundUrl) {
+        try {
+          await validateOutboundUrl(wh.url);
+        } catch (ssrfErr) {
+          summary.failed++;
+          await DDDWebhookDelivery.create({
+            webhookId: wh._id,
+            domain,
+            event,
+            modelName: meta.modelName,
+            documentId: doc?._id,
+            success: false,
+            error: `SSRF-blocked: ${ssrfErr.message}`,
+            responseTimeMs: Date.now() - start,
+            attempt: 1,
+          }).catch(() => {});
+          continue;
+        }
+      }
+
       const signature = signPayload(payload, wh.secret);
       const headers = {
         'Content-Type': 'application/json',
@@ -353,6 +389,20 @@ function createWebhookRouter() {
       } = req.body;
       if (!name || !url) {
         return res.status(400).json({ success: false, message: 'name and url are required' });
+      }
+
+      // W439: SSRF guard at registration. Refuse to persist URLs that
+      // target internal infra (private ranges, cloud metadata, sensitive
+      // ports, DNS-rebinding hostnames).
+      if (validateOutboundUrl) {
+        try {
+          await validateOutboundUrl(url);
+        } catch (ssrfErr) {
+          return res.status(400).json({
+            success: false,
+            message: `Invalid webhook URL: ${ssrfErr.message}`,
+          });
+        }
       }
 
       const wh = await DDDWebhook.create({

@@ -88,6 +88,14 @@ class WebhookService {
    */
   async updateWebhook(webhookId, data) {
     try {
+      // W439: SSRF guard on update — `registerWebhook` validates `data.url`
+      // at create time, but the original update path skipped the check.
+      // An attacker could register a benign URL then PATCH it to a
+      // private/metadata endpoint and trigger SSRF on the next dispatch.
+      if (data && typeof data.url === 'string' && data.url.length > 0) {
+        await validateOutboundUrl(data.url);
+      }
+
       const webhook = await Webhook.findByIdAndUpdate(
         webhookId,
         { ...data, updatedAt: new Date() },

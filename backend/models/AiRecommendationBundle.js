@@ -113,6 +113,23 @@ aiRecommendationBundleSchema.index({ status: 1, branchId: 1, createdAt: -1 }); /
 aiRecommendationBundleSchema.index({ beneficiaryId: 1, status: 1, createdAt: -1 }); // beneficiary timeline
 aiRecommendationBundleSchema.index({ status: 1, expiresAt: 1 }); // expiry sweeper
 
+// W428: optimistic concurrency. The service's approve/reject/discard
+// path is findById → mutate → save with a pre-save hook that runs
+// validateTransition and appends to history[]. Without OCC, two
+// concurrent approve() calls would both pass validateTransition
+// (both saw `status='PENDING_REVIEW'`), both append a history entry,
+// both save — silently producing a duplicate audit-trail entry plus
+// firing downstream events twice (notification, plan_review).
+//
+// With `optimisticConcurrency: true`, Mongoose tracks __v on every
+// save; the second concurrent save throws VersionError. The W422-style
+// safeError helper surfaces this as a 500 (caller can retry) rather
+// than silently double-emitting. This is the right semantic for an
+// MFA-gated supervisor decision: only one user should win the
+// transition, the other gets a "someone else just modified this"
+// signal and refreshes.
+aiRecommendationBundleSchema.set('optimisticConcurrency', true);
+
 // ── W334 Pass 2 — capture pre-edit status for post-init transition validation ──
 aiRecommendationBundleSchema.post('init', function (doc) {
   doc.$__originalStatus = doc.status;

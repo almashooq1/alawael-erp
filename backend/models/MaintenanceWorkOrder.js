@@ -90,6 +90,25 @@ maintenanceWorkOrderSchema.index({ scheduledDate: 1 });
 maintenanceWorkOrderSchema.index({ assetId: 1 });
 maintenanceWorkOrderSchema.index({ branchId: 1 });
 
+// W430: optimistic concurrency. Same race-class as W428/W429. The
+// `services/operations/workOrderStateMachine.service.js` transition()
+// path is findById → push statusHistory → set status → save with
+// SLA observe() side-effects + `ops.wo.${event}` bus emit on every
+// transition. Without OCC, two concurrent transitions for the same
+// work order (UI double-click on "Resolve", retry on a flaky network,
+// supervisor + maintenance staff acting simultaneously) would BOTH
+// pass canTransition (both see the same `from`), BOTH push a
+// statusHistory entry, BOTH save — silent duplicate audit trail PLUS
+// double-fire on the SLA "resolved" / "first_response" observers
+// (SLA clock incorrectly stopped twice → wrong breach-detection math)
+// AND duplicate ops.wo.${event} emits to downstream subscribers.
+//
+// Atomic findOneAndUpdate would skip the SLA hooks (which run BEFORE
+// save and read `wo.slaId` / `wo.policyFor()`). OCC keeps the save()
+// call sequence intact; second concurrent save throws VersionError;
+// state machine surfaces it as a structured error.
+maintenanceWorkOrderSchema.set('optimisticConcurrency', true);
+
 module.exports =
   mongoose.models.MaintenanceWorkOrder ||
   mongoose.model('MaintenanceWorkOrder', maintenanceWorkOrderSchema);

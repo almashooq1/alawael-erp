@@ -304,3 +304,4 @@ __tests__/prayer-time-wave473.test.js
 __tests__/ramadan-protocol-wave474.test.js
 __tests__/escalation-predictor-wave433.test.js
 __tests__/cultural-profile-wave475.test.js
+__tests__/restraint-seclusion-event-behavioral-wave193b.test.js

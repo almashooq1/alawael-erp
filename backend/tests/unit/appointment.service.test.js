@@ -27,6 +27,13 @@ const createModelMock = () => {
   Model.find = jest.fn();
   Model.findById = jest.fn();
   Model.findOne = jest.fn();
+  // W432: atomic state-flip in cancelAppointment / checkIn uses
+  // findOneAndUpdate. Existing tests mock only findById; the W432 paths
+  // need both. The cancel/checkIn test blocks below were updated to
+  // arrange findOneAndUpdate; this entry just ensures every test that
+  // doesn't bother arranging it doesn't throw "undefined is not a
+  // function".
+  Model.findOneAndUpdate = jest.fn();
   Model.countDocuments = jest.fn();
   Model.aggregate = jest.fn();
   return Model;
@@ -575,11 +582,19 @@ describe('Appointment CRUD', () => {
     });
   });
 
-  // ── cancelAppointment ────────────────────────────────────────────────
+  // ── cancelAppointment (W432 atomic state-flip) ───────────────────────
   describe('cancelAppointment', () => {
     it('cancels appointment successfully', async () => {
-      const doc = makeMockDoc();
-      mockAppointment.findById.mockResolvedValue(doc);
+      // W432: service uses findOneAndUpdate with aggregation pipeline.
+      const cancelledDoc = {
+        _id: 'apt1',
+        status: 'CANCELLED',
+        cancellationReason: 'سبب الإلغاء',
+        cancelledBy: 'user1',
+        cancelledAt: new Date(),
+        statusHistory: [{ from: 'CONFIRMED', to: 'CANCELLED', changedBy: 'user1' }],
+      };
+      mockAppointment.findOneAndUpdate.mockResolvedValue(cancelledDoc);
 
       const result = await service.cancelAppointment('apt1', 'سبب الإلغاء', 'user1');
       expect(result.status).toBe('CANCELLED');
@@ -587,17 +602,43 @@ describe('Appointment CRUD', () => {
       expect(result.cancelledBy).toBe('user1');
       expect(result.cancelledAt).toBeInstanceOf(Date);
       expect(result.statusHistory).toHaveLength(1);
-      expect(doc.save).toHaveBeenCalled();
+      // The new atomic path doesn't call doc.save() — it's the
+      // findOneAndUpdate itself that persists.
+      expect(mockAppointment.findOneAndUpdate).toHaveBeenCalled();
     });
 
     it('throws 404 when appointment not found', async () => {
-      mockAppointment.findById.mockResolvedValue(null);
+      // findOneAndUpdate returns null (no doc matched the filter).
+      mockAppointment.findOneAndUpdate.mockResolvedValue(null);
+      // Disambiguation findById returns null too — doc doesn't exist.
+      mockAppointment.findById.mockReturnValue({
+        select: jest.fn().mockReturnValue({ lean: jest.fn().mockResolvedValue(null) }),
+      });
       try {
         await service.cancelAppointment('bad', 'reason', 'user1');
         fail('Should have thrown');
       } catch (err) {
         expect(err).toBeInstanceOf(AppError);
         expect(err.statusCode).toBe(404);
+      }
+    });
+
+    it('throws 409 when appointment already cancelled', async () => {
+      // findOneAndUpdate null because status was already CANCELLED.
+      mockAppointment.findOneAndUpdate.mockResolvedValue(null);
+      // Disambiguation findById returns the existing (already-cancelled) doc.
+      mockAppointment.findById.mockReturnValue({
+        select: jest.fn().mockReturnValue({
+          lean: jest.fn().mockResolvedValue({ _id: 'apt1', status: 'CANCELLED' }),
+        }),
+      });
+      try {
+        await service.cancelAppointment('apt1', 'reason', 'user1');
+        fail('Should have thrown');
+      } catch (err) {
+        expect(err).toBeInstanceOf(AppError);
+        expect(err.statusCode).toBe(409);
+        expect(err.code).toBe('ALREADY_CANCELLED');
       }
     });
   });
@@ -607,13 +648,32 @@ describe('Appointment CRUD', () => {
 // 4. CHECK-IN
 // ══════════════════════════════════════════════════════════════════════════════
 
-describe('checkIn', () => {
+describe('checkIn (W432 atomic state-flip)', () => {
+  function arrangeLeanRead(payload) {
+    // W432 service first reads `findOne({_id}).select('date startTime status').lean()`
+    // to compute scheduledTime before the atomic update.
+    mockAppointment.findOne.mockReturnValue({
+      select: jest.fn().mockReturnValue({ lean: jest.fn().mockResolvedValue(payload) }),
+    });
+  }
+
   it('checks in patient and calculates waitTimeMinutes', async () => {
     const now = new Date();
     const scheduledDate = new Date(now);
     scheduledDate.setHours(9, 0, 0, 0);
-    const doc = makeMockDoc({ date: scheduledDate, startTime: '09:00', statusHistory: [] });
-    mockAppointment.findById.mockResolvedValue(doc);
+    arrangeLeanRead({
+      _id: 'apt1',
+      status: 'CONFIRMED',
+      date: scheduledDate,
+      startTime: '09:00',
+    });
+    mockAppointment.findOneAndUpdate.mockResolvedValue({
+      _id: 'apt1',
+      status: 'CHECKED_IN',
+      checkInTime: new Date(),
+      waitTimeMinutes: 0,
+      statusHistory: [{ from: 'CONFIRMED', to: 'CHECKED_IN', changedBy: 'user1' }],
+    });
 
     const result = await service.checkIn('apt1', 'user1');
     expect(result.status).toBe('CHECKED_IN');
@@ -622,25 +682,30 @@ describe('checkIn', () => {
     expect(result.waitTimeMinutes).toBeGreaterThanOrEqual(0);
     expect(result.statusHistory).toHaveLength(1);
     expect(result.statusHistory[0].to).toBe('CHECKED_IN');
-    expect(doc.save).toHaveBeenCalled();
   });
 
   it('waitTimeMinutes is 0 if checkIn is before scheduled time', async () => {
     const futureDate = new Date();
     futureDate.setHours(futureDate.getHours() + 2);
-    const doc = makeMockDoc({
+    arrangeLeanRead({
+      _id: 'apt1',
+      status: 'CONFIRMED',
       date: futureDate,
       startTime: `${String(futureDate.getHours()).padStart(2, '0')}:00`,
-      statusHistory: [],
     });
-    mockAppointment.findById.mockResolvedValue(doc);
+    mockAppointment.findOneAndUpdate.mockResolvedValue({
+      _id: 'apt1',
+      status: 'CHECKED_IN',
+      waitTimeMinutes: 0,
+      statusHistory: [{ from: 'CONFIRMED', to: 'CHECKED_IN' }],
+    });
 
     const result = await service.checkIn('apt1', 'user1');
     expect(result.waitTimeMinutes).toBeGreaterThanOrEqual(0);
   });
 
   it('throws 404 when appointment not found', async () => {
-    mockAppointment.findById.mockResolvedValue(null);
+    arrangeLeanRead(null);
     try {
       await service.checkIn('bad', 'user1');
       fail('Should have thrown');
@@ -650,9 +715,30 @@ describe('checkIn', () => {
     }
   });
 
-  it('tracks status change from PENDING to CHECKED_IN', async () => {
-    const doc = makeMockDoc({ status: 'CONFIRMED', statusHistory: [] });
-    mockAppointment.findById.mockResolvedValue(doc);
+  it('throws 409 when appointment already checked in', async () => {
+    arrangeLeanRead({ _id: 'apt1', status: 'CHECKED_IN', date: new Date(), startTime: '09:00' });
+    try {
+      await service.checkIn('apt1', 'user1');
+      fail('Should have thrown');
+    } catch (err) {
+      expect(err).toBeInstanceOf(AppError);
+      expect(err.statusCode).toBe(409);
+      expect(err.code).toBe('ALREADY_CHECKED_IN');
+    }
+  });
+
+  it('tracks status change from CONFIRMED to CHECKED_IN', async () => {
+    arrangeLeanRead({
+      _id: 'apt1',
+      status: 'CONFIRMED',
+      date: new Date(),
+      startTime: '09:00',
+    });
+    mockAppointment.findOneAndUpdate.mockResolvedValue({
+      _id: 'apt1',
+      status: 'CHECKED_IN',
+      statusHistory: [{ from: 'CONFIRMED', to: 'CHECKED_IN' }],
+    });
 
     const result = await service.checkIn('apt1', 'user1');
     expect(result.statusHistory[0].from).toBe('CONFIRMED');
@@ -660,13 +746,29 @@ describe('checkIn', () => {
   });
 
   it('sets checkInTime as current Date', async () => {
-    const doc = makeMockDoc({ statusHistory: [] });
-    mockAppointment.findById.mockResolvedValue(doc);
+    // W432: checkIn now derives checkInTime inside the service and writes
+    // it via findOneAndUpdate. Capture from the aggregation-pipeline args.
+    arrangeLeanRead({
+      _id: 'apt1',
+      status: 'CONFIRMED',
+      date: new Date(),
+      startTime: '09:00',
+    });
+    let capturedCheckInTime;
+    mockAppointment.findOneAndUpdate.mockImplementation((filter, pipeline) => {
+      capturedCheckInTime = pipeline?.[0]?.$set?.checkInTime;
+      return Promise.resolve({
+        _id: 'apt1',
+        status: 'CHECKED_IN',
+        checkInTime: capturedCheckInTime,
+      });
+    });
     const before = Date.now();
     await service.checkIn('apt1', 'user1');
     const after = Date.now();
-    expect(doc.checkInTime.getTime()).toBeGreaterThanOrEqual(before);
-    expect(doc.checkInTime.getTime()).toBeLessThanOrEqual(after);
+    expect(capturedCheckInTime).toBeInstanceOf(Date);
+    expect(capturedCheckInTime.getTime()).toBeGreaterThanOrEqual(before);
+    expect(capturedCheckInTime.getTime()).toBeLessThanOrEqual(after);
   });
 });
 

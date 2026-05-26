@@ -214,40 +214,99 @@ class AppointmentService {
    * Cancel appointment
    */
   async cancelAppointment(id, reason, userId) {
-    const apt = await Appointment.findById(id);
-    if (!apt) throw new AppError('الموعد غير موجود', 404, 'NOT_FOUND');
-
-    apt.statusHistory.push({ from: apt.status, to: 'CANCELLED', changedBy: userId, reason });
-    apt.status = 'CANCELLED';
-    apt.cancellationReason = reason;
-    apt.cancelledBy = userId;
-    apt.cancelledAt = new Date();
-    await apt.save();
-    return apt;
+    // W432: atomic state-flip. Pre-W432 did findById → push
+    // statusHistory → set status='CANCELLED' → save. Two concurrent
+    // cancels (UI double-tap, retry, receptionist + auto-cancel cron
+    // racing) would both pass + both push a statusHistory entry +
+    // both write cancelledBy/cancelledAt — silent duplicate audit
+    // trail PLUS cancelledBy/cancelledAt becomes the second writer's
+    // (could be 'system' instead of the human cancelling).
+    //
+    // Filter `status: {$ne: 'CANCELLED'}` ensures only the first
+    // caller wins; second caller sees null match and gets the
+    // "already cancelled" error path. Aggregation pipeline lets us
+    // read the current `$status` for the statusHistory entry inside
+    // the same atomic op.
+    const now = new Date();
+    const apt = await Appointment.findOneAndUpdate(
+      { _id: id, status: { $ne: 'CANCELLED' } },
+      [
+        {
+          $set: {
+            statusHistory: {
+              $concatArrays: [
+                { $ifNull: ['$statusHistory', []] },
+                [{ from: '$status', to: 'CANCELLED', changedBy: userId, reason, changedAt: now }],
+              ],
+            },
+            status: 'CANCELLED',
+            cancellationReason: reason,
+            cancelledBy: userId,
+            cancelledAt: now,
+          },
+        },
+      ],
+      { new: true }
+    );
+    if (apt) return apt;
+    // Disambiguate the failure case.
+    const existing = await Appointment.findById(id).select('status').lean();
+    if (!existing) throw new AppError('الموعد غير موجود', 404, 'NOT_FOUND');
+    throw new AppError('الموعد ملغى مسبقاً', 409, 'ALREADY_CANCELLED');
   }
 
   /**
    * Check-in patient
    */
   async checkIn(id, userId) {
-    const apt = await Appointment.findById(id);
+    // W432: atomic state-flip. Pre-W432 did findById → push
+    // statusHistory → set status='CHECKED_IN' → save. Concurrent
+    // check-ins from the same kiosk-touch or retry-loop would both
+    // pass + both compute waitTimeMinutes from `new Date()` (racing
+    // values) + both push a statusHistory entry. End state has
+    // duplicate audit + the second writer's checkInTime (off by
+    // milliseconds).
+    //
+    // checkInTime + waitTimeMinutes need to be computed BEFORE the
+    // atomic update (need scheduledTime which derives from date +
+    // startTime). We compute once, then atomically write — filter
+    // `status: {$ne: 'CHECKED_IN'}` prevents the double-flip.
+    const checkInTime = new Date();
+    const apt = await Appointment.findOne({ _id: id }).select('date startTime status').lean();
     if (!apt) throw new AppError('الموعد غير موجود', 404, 'NOT_FOUND');
-
-    apt.statusHistory.push({ from: apt.status, to: 'CHECKED_IN', changedBy: userId });
-    apt.status = 'CHECKED_IN';
-    apt.checkInTime = new Date();
-
-    // Calculate wait time
+    if (apt.status === 'CHECKED_IN') {
+      throw new AppError('الموعد مسجل وصول مسبقاً', 409, 'ALREADY_CHECKED_IN');
+    }
     const scheduledTime = new Date(apt.date);
     if (apt.startTime) {
       const [h, m] = apt.startTime.split(':').map(Number);
       scheduledTime.setHours(h, m, 0, 0);
     }
-    const waitMs = apt.checkInTime - scheduledTime;
-    apt.waitTimeMinutes = Math.max(0, Math.round(waitMs / 60000));
+    const waitTimeMinutes = Math.max(0, Math.round((checkInTime - scheduledTime) / 60000));
 
-    await apt.save();
-    return apt;
+    const updated = await Appointment.findOneAndUpdate(
+      { _id: id, status: { $ne: 'CHECKED_IN' } },
+      [
+        {
+          $set: {
+            statusHistory: {
+              $concatArrays: [
+                { $ifNull: ['$statusHistory', []] },
+                [{ from: '$status', to: 'CHECKED_IN', changedBy: userId, changedAt: checkInTime }],
+              ],
+            },
+            status: 'CHECKED_IN',
+            checkInTime,
+            waitTimeMinutes,
+          },
+        },
+      ],
+      { new: true }
+    );
+    if (updated) return updated;
+    // Race lost — someone else just flipped to CHECKED_IN between our
+    // read and write. Surface as "already checked in".
+    throw new AppError('الموعد مسجل وصول مسبقاً', 409, 'ALREADY_CHECKED_IN');
   }
 
   /**

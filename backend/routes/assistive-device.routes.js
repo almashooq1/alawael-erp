@@ -42,8 +42,20 @@ const Device = require('../models/AssistiveDevice');
 const Beneficiary = require('../models/Beneficiary');
 const safeError = require('../utils/safeError');
 const { escapeRegex } = require('../utils/sanitize');
+const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 
 router.use(authenticateToken);
+// W443: branch-scope every assistive-device endpoint. Pre-W443 the
+// model carried `branchId` but the routes filtered only optionally
+// (when ?branchId= was supplied) and instance reads (findById) had
+// zero branch check — a clinician in branch A could read, modify,
+// retire, loan, or delete devices in branch B simply by knowing the
+// ObjectId. `requireBranchAccess` populates `req.branchScope`;
+// `branchFilter(req)` returns `{ branchId: <user's branch> }` for
+// scoped users and `{}` for unrestricted (admin/super_admin).
+router.use(requireBranchAccess);
+router.use(bodyScopedBeneficiaryGuard); // W441: enforce branch on req.body.beneficiaryId
 
 const READ_ROLES = [
   'admin',
@@ -116,8 +128,10 @@ async function hydrateLoans(items) {
 // ── GET / ──────────────────────────────────────────────────────────
 router.get('/', requireRole(READ_ROLES), async (req, res) => {
   try {
-    const filter = {};
+    const filter = { ...branchFilter(req) }; // W443: enforce caller's branch scope
     if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
+      // Allow narrowing to a sub-branch only if caller can already see it
+      // (branchFilter constrains the OR-set; this is an AND-narrow).
       filter.branchId = req.query.branchId;
     }
     if (req.query.category && CATEGORIES.includes(String(req.query.category))) {
@@ -157,7 +171,7 @@ router.get('/', requireRole(READ_ROLES), async (req, res) => {
 // ── GET /available ─────────────────────────────────────────────────
 router.get('/available', requireRole(READ_ROLES), async (req, res) => {
   try {
-    const filter = { availability: 'available' };
+    const filter = { ...branchFilter(req), availability: 'available' }; // W443
     if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
@@ -176,6 +190,7 @@ router.get('/due-maintenance', requireRole(READ_ROLES), async (req, res) => {
   try {
     const now = new Date();
     const filter = {
+      ...branchFilter(req), // W443
       availability: { $ne: 'retired' },
       nextMaintenanceDue: { $ne: null, $lt: now },
     };
@@ -194,6 +209,7 @@ router.get('/overdue-loans', requireRole(READ_ROLES), async (req, res) => {
   try {
     const now = new Date();
     const filter = {
+      ...branchFilter(req), // W443
       availability: 'loaned',
       currentLoanExpectedReturnAt: { $ne: null, $lt: now },
     };
@@ -214,7 +230,7 @@ router.get('/overdue-loans', requireRole(READ_ROLES), async (req, res) => {
 // ── GET /stats ─────────────────────────────────────────────────────
 router.get('/stats', requireRole(READ_ROLES), async (req, res) => {
   try {
-    const filter = {};
+    const filter = { ...branchFilter(req) }; // W443
     if (req.query.branchId && mongoose.isValidObjectId(req.query.branchId)) {
       filter.branchId = req.query.branchId;
     }
@@ -263,7 +279,9 @@ router.get('/:id', requireRole(READ_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Device.findById(req.params.id).lean();
+    // W443: findOne with branch filter so cross-tenant IDs 404 instead
+    // of leaking the device row.
+    const row = await Device.findOne({ _id: req.params.id, ...branchFilter(req) }).lean();
     if (!row) return res.status(404).json({ success: false, message: 'الجهاز غير موجود' });
     const [hydrated] = await hydrateLoans([row]);
     res.json({ success: true, data: hydrated });
@@ -325,7 +343,7 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Device.findById(req.params.id);
+    const row = await Device.findOne({ _id: req.params.id, ...branchFilter(req) }); // W443
     if (!row) return res.status(404).json({ success: false, message: 'الجهاز غير موجود' });
     if (row.availability === 'retired') {
       return res.status(409).json({ success: false, message: 'الجهاز متقاعد ولا يمكن تعديله' });
@@ -361,7 +379,7 @@ router.post('/:id/retire', requireRole(APPROVE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Device.findById(req.params.id);
+    const row = await Device.findOne({ _id: req.params.id, ...branchFilter(req) }); // W443
     if (!row) return res.status(404).json({ success: false, message: 'الجهاز غير موجود' });
     if (row.availability === 'loaned') {
       return res.status(409).json({ success: false, message: 'لا يمكن تقاعد جهاز مُعار حالياً' });
@@ -391,7 +409,7 @@ router.post('/:id/loans', requireRole(WRITE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Device.findById(req.params.id);
+    const row = await Device.findOne({ _id: req.params.id, ...branchFilter(req) }); // W443
     if (!row) return res.status(404).json({ success: false, message: 'الجهاز غير موجود' });
     if (row.availability !== 'available') {
       return res
@@ -433,7 +451,7 @@ router.post('/:id/loans/:loanId/approve', requireRole(APPROVE_ROLES), async (req
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Device.findById(req.params.id);
+    const row = await Device.findOne({ _id: req.params.id, ...branchFilter(req) }); // W443
     if (!row) return res.status(404).json({ success: false, message: 'الجهاز غير موجود' });
     const loan = row.loans.id(req.params.loanId);
     if (!loan) return res.status(404).json({ success: false, message: 'طلب الإعارة غير موجود' });
@@ -459,7 +477,7 @@ router.post('/:id/loans/:loanId/check-out', requireRole(WRITE_ROLES), async (req
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Device.findById(req.params.id);
+    const row = await Device.findOne({ _id: req.params.id, ...branchFilter(req) }); // W443
     if (!row) return res.status(404).json({ success: false, message: 'الجهاز غير موجود' });
     if (row.availability !== 'available') {
       return res
@@ -490,7 +508,7 @@ router.post('/:id/loans/:loanId/return', requireRole(WRITE_ROLES), async (req, r
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Device.findById(req.params.id);
+    const row = await Device.findOne({ _id: req.params.id, ...branchFilter(req) }); // W443
     if (!row) return res.status(404).json({ success: false, message: 'الجهاز غير موجود' });
     const loan = row.loans.id(req.params.loanId);
     if (!loan) return res.status(404).json({ success: false, message: 'طلب الإعارة غير موجود' });
@@ -520,7 +538,7 @@ router.post('/:id/loans/:loanId/mark-lost', requireRole(APPROVE_ROLES), async (r
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Device.findById(req.params.id);
+    const row = await Device.findOne({ _id: req.params.id, ...branchFilter(req) }); // W443
     if (!row) return res.status(404).json({ success: false, message: 'الجهاز غير موجود' });
     const loan = row.loans.id(req.params.loanId);
     if (!loan) return res.status(404).json({ success: false, message: 'طلب الإعارة غير موجود' });
@@ -546,7 +564,7 @@ router.post('/:id/loans/:loanId/mark-damaged', requireRole(APPROVE_ROLES), async
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Device.findById(req.params.id);
+    const row = await Device.findOne({ _id: req.params.id, ...branchFilter(req) }); // W443
     if (!row) return res.status(404).json({ success: false, message: 'الجهاز غير موجود' });
     const loan = row.loans.id(req.params.loanId);
     if (!loan) return res.status(404).json({ success: false, message: 'طلب الإعارة غير موجود' });
@@ -573,7 +591,7 @@ router.post('/:id/loans/:loanId/cancel', requireRole(WRITE_ROLES), async (req, r
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Device.findById(req.params.id);
+    const row = await Device.findOne({ _id: req.params.id, ...branchFilter(req) }); // W443
     if (!row) return res.status(404).json({ success: false, message: 'الجهاز غير موجود' });
     const loan = row.loans.id(req.params.loanId);
     if (!loan) return res.status(404).json({ success: false, message: 'طلب الإعارة غير موجود' });
@@ -596,7 +614,7 @@ router.post('/:id/maintenance/start', requireRole(WRITE_ROLES), async (req, res)
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Device.findById(req.params.id);
+    const row = await Device.findOne({ _id: req.params.id, ...branchFilter(req) }); // W443
     if (!row) return res.status(404).json({ success: false, message: 'الجهاز غير موجود' });
     if (row.availability === 'loaned') {
       return res
@@ -621,7 +639,7 @@ router.post('/:id/maintenance/end', requireRole(WRITE_ROLES), async (req, res) =
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Device.findById(req.params.id);
+    const row = await Device.findOne({ _id: req.params.id, ...branchFilter(req) }); // W443
     if (!row) return res.status(404).json({ success: false, message: 'الجهاز غير موجود' });
     if (row.availability !== 'maintenance') {
       return res.status(409).json({ success: false, message: 'الجهاز ليس في حالة صيانة' });
@@ -644,7 +662,7 @@ router.post('/:id/maintenance', requireRole(WRITE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Device.findById(req.params.id);
+    const row = await Device.findOne({ _id: req.params.id, ...branchFilter(req) }); // W443
     if (!row) return res.status(404).json({ success: false, message: 'الجهاز غير موجود' });
     const body = req.body || {};
     if (!MAINTENANCE_KINDS.includes(String(body.kind))) {
@@ -682,7 +700,12 @@ router.delete('/:id', requireRole(DELETE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Device.findByIdAndDelete(req.params.id);
+    // W443: findOneAndDelete with branch filter so cross-tenant
+    // delete attempts 404 instead of removing the wrong row.
+    const row = await Device.findOneAndDelete({
+      _id: req.params.id,
+      ...branchFilter(req),
+    });
     if (!row) return res.status(404).json({ success: false, message: 'الجهاز غير موجود' });
     res.json({ success: true, deleted: true, id: req.params.id });
   } catch (err) {

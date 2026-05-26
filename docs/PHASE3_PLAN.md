@@ -12,7 +12,7 @@
 | طبقة                       | الملف                                                                                           |
 | -------------------------- | ----------------------------------------------------------------------------------------------- |
 | **التعريف التعاقدي لـ P3** | [docs/blueprint/09-roadmap.md §5](blueprint/09-roadmap.md)                                      |
-| **معمارية النظام**         | [docs/ARCHITECTURE.md](ARCHITECTURE.md) (v3.1.0)                                                |
+| **معمارية النظام**         | [docs/ARCHITECTURE.md](ARCHITECTURE.md) (v3.3.0)                                                |
 | **خريطة الوحدات**          | [docs/MODULES.md](MODULES.md) + [docs/blueprint/03-modules-map.md](blueprint/03-modules-map.md) |
 | **gap analysis**           | [docs/blueprint/10-gap-analysis.md](blueprint/10-gap-analysis.md)                               |
 

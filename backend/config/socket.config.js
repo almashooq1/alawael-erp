@@ -52,7 +52,13 @@ class SocketManager {
         }
 
         const { jwtSecret } = require('./secrets');
-        const decoded = jwt.verify(token, jwtSecret);
+        // W442: pin algorithm to HS256. Without an explicit allowlist,
+        // jsonwebtoken trusts the token's own `alg` header — opening
+        // the alg=none bypass (some lib versions) and the RS256/HS256
+        // confusion attack (forge HS256 signed with whatever public
+        // key is reachable). Socket.io auth is privileged: a forged
+        // token gives full session impersonation.
+        const decoded = jwt.verify(token, jwtSecret, { algorithms: ['HS256'] });
         socket.userId = decoded.id || decoded.userId;
         socket.userEmail = decoded.email;
 

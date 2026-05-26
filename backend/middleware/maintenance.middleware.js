@@ -47,7 +47,12 @@ const maintenanceMiddleware = (req, res, next) => {
     if (authHeader && authHeader.startsWith('Bearer ')) {
       const token = authHeader.split(' ')[1];
       try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        // W442: pin algorithm to HS256. The path runs during a
+        // maintenance lockout and grants ADMIN/DEVELOPER override —
+        // missing algorithm pinning means an attacker can forge a
+        // token via alg=none or RS256→HS256 confusion and bypass the
+        // entire lockout. High-value path; lock it down.
+        const decoded = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ['HS256'] });
         if (decoded && (decoded.role === 'ADMIN' || decoded.role === 'DEVELOPER')) {
           // Add header to warn admin
           res.set('X-System-Status', 'MAINTENANCE_MODE');

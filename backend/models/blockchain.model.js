@@ -137,10 +137,15 @@ const BlockchainCertificateSchema = new Schema(
     qrCode: String,
     verificationUrl: String,
 
-    // Status
+    // Status — W433 added 'issuing' as an intermediate state held during
+    // the blockchain-anchor RPC. issueCertificate() now CAS-flips
+    // draft → issuing (claiming exclusive ownership) BEFORE calling the
+    // anchor, preventing concurrent issuance from submitting duplicate
+    // blockchain transactions (wasted gas + audit-trail divergence
+    // from chain).
     status: {
       type: String,
-      enum: ['draft', 'issued', 'verified', 'revoked', 'expired'],
+      enum: ['draft', 'issuing', 'issued', 'verified', 'revoked', 'expired'],
       default: 'draft',
     },
     revocation: {

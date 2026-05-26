@@ -139,9 +139,30 @@ async function createCertificate(body, { userId, idempotencyKey } = {}) {
 
 // ── Issue (single cert, anchors immediately as batch-of-1) ─────────────────
 async function issueCertificate(certId, { userId } = {}) {
-  const cert = await BlockchainCertificate.findById(certId);
-  if (!cert) throw Object.assign(new Error('الشهادة غير موجودة'), { status: 404 });
-  if (cert.status !== 'draft') {
+  // W433: CAS-reserve before anchor. Pre-W433 did findById → check
+  // status==='draft' → call adapter.anchor() (SLOW blockchain RPC) →
+  // set status='issued' → save. Two concurrent issueCertificate(certId)
+  // calls would both pass the status==='draft' check and BOTH call
+  // adapter.anchor() — submitting TWO blockchain transactions for the
+  // same certificate with different transactionHash values. Wasted
+  // gas, divergent on-chain history, and the second save() silently
+  // overwrites the first's transactionHash with no audit trail of the
+  // dual submission.
+  //
+  // W433 fix: atomic CAS draft → issuing as a reservation. Only ONE
+  // caller's update matches; the second caller errors out (400/404)
+  // BEFORE the expensive adapter.anchor() call. After successful
+  // anchor, the second save flips issuing → issued with the anchor
+  // data. On anchor failure, we revert issuing → draft so a future
+  // retry can succeed.
+  const cert = await BlockchainCertificate.findOneAndUpdate(
+    { _id: certId, status: 'draft' },
+    { $set: { status: 'issuing' } },
+    { new: true }
+  );
+  if (!cert) {
+    const existing = await BlockchainCertificate.findById(certId).select('status').lean();
+    if (!existing) throw Object.assign(new Error('الشهادة غير موجودة'), { status: 404 });
     throw Object.assign(new Error('لا يمكن إصدار شهادة ليست في حالة مسودة'), { status: 400 });
   }
 
@@ -152,6 +173,8 @@ async function issueCertificate(certId, { userId } = {}) {
     anchor = await adapter.anchor({ merkleRoot: root, batchSize: 1 });
     metrics.bumpAnchor(adapter.name, 'success');
   } catch (err) {
+    // W433: revert the reservation so the cert can be retried.
+    await BlockchainCertificate.findByIdAndUpdate(certId, { $set: { status: 'draft' } });
     metrics.bumpAnchor(adapter.name, 'fail');
     throw err;
   }

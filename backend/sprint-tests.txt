@@ -271,3 +271,4 @@ __tests__/crisis-orchestrator-wave458.test.js
 __tests__/crisis-orchestrator-behavioral-wave458.test.js
 __tests__/phase-a-e2e-smoke-wave459.test.js
 __tests__/beneficiary-voice-log-wave460.test.js
+__tests__/decision-rights-wave461.test.js

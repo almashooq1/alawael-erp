@@ -293,6 +293,10 @@ router.post(
  */
 router.post(
   '/login',
+  // W459: gate /login the same as /send (it also issues OTP via SMS/email)
+  // — pre-W459 attacker could flood any identifier with OTP traffic +
+  // burn through provider budget + spam the target's phone/email.
+  otpSendLimiter,
   [
     body('identifier').notEmpty().withMessage('البريد الإلكتروني أو رقم الجوال مطلوب'),
     body('method').optional().isIn(['email', 'sms', 'whatsapp', 'auto']),
@@ -345,6 +349,10 @@ router.post(
  */
 router.post(
   '/login/verify',
+  // W459: gate /login/verify with otpVerifyLimiter — same as /verify.
+  // Without this an attacker could brute-force a 4-digit OTP with up to
+  // 10000 attempts and the only friction was the OTP's TTL.
+  otpVerifyLimiter,
   [
     body('identifier').notEmpty().withMessage('البريد الإلكتروني أو رقم الجوال مطلوب'),
     body('otp').isLength({ min: 4, max: 8 }).withMessage('رمز التحقق يجب أن يكون 4-8 أرقام'),
@@ -435,6 +443,10 @@ router.post(
  */
 router.post(
   '/register',
+  // W459: gate /register with otpSendLimiter — issues OTP via SMS/email.
+  // Without this an attacker could spam OTPs to harvested phone numbers
+  // for resource exhaustion or smishing pre-text.
+  otpSendLimiter,
   [
     body('identifier').notEmpty().withMessage('البريد الإلكتروني أو رقم الجوال مطلوب'),
     body('name')
@@ -497,6 +509,10 @@ router.post(
  */
 router.post(
   '/register/complete',
+  // W459: gate /register/complete with otpVerifyLimiter — verifies an
+  // OTP. Without this an attacker could brute-force the 4-8 digit OTP
+  // for any harvested identifier.
+  otpVerifyLimiter,
   [
     body('identifier').notEmpty().withMessage('البريد الإلكتروني أو رقم الجوال مطلوب'),
     body('otp').isLength({ min: 4, max: 8 }).withMessage('رمز التحقق يجب أن يكون 4-8 أرقام'),

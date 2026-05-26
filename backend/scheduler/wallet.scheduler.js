@@ -50,31 +50,54 @@ async function expireLoyaltyPoints() {
 
     for (const pts of expiredPoints) {
       try {
-        const wallet = await DigitalWallet.findById(pts.walletId);
-        if (!wallet || wallet.loyaltyPoints < pts.points) {
+        // W431: atomic check-and-decrement (same pattern as W426 in
+        // digitalWallet.service.expireLoyaltyPoints, which this
+        // scheduler duplicates). The previous code did:
+        //
+        //   const wallet = await DigitalWallet.findById(pts.walletId);
+        //   if (!wallet || wallet.loyaltyPoints < pts.points) skip;
+        //   await DigitalWallet.findByIdAndUpdate(_, { $inc: -pts.points });
+        //
+        // Race window between findById (read) and findByIdAndUpdate
+        // ($inc): a concurrent user redemption could lower the balance
+        // BELOW pts.points after the guard passed, and the $inc would
+        // still fire → balance goes NEGATIVE. The audit trail at
+        // `balanceAfter: balanceBefore - pts.points` would then record
+        // the wrong figures (using the stale `balanceBefore`).
+        //
+        // atomic findOneAndUpdate with `loyaltyPoints: {$gte: pts.points}`
+        // filter collapses guard+update into one Mongo op. Insufficient-
+        // balance case simply doesn't match (null result), skipping
+        // cleanly.
+        const updated = await DigitalWallet.findOneAndUpdate(
+          { _id: pts.walletId, loyaltyPoints: { $gte: pts.points } },
+          { $inc: { loyaltyPoints: -pts.points } },
+          { new: true }
+        );
+
+        if (!updated) {
           skipped++;
           continue;
         }
-
-        const balanceBefore = wallet.loyaltyPoints;
-        await DigitalWallet.findByIdAndUpdate(pts.walletId, {
-          $inc: { loyaltyPoints: -pts.points },
-        });
 
         await LoyaltyPointsTransaction.create({
           branchId: pts.branchId,
           walletId: pts.walletId,
           type: 'expire',
           points: pts.points,
-          balanceBefore,
-          balanceAfter: balanceBefore - pts.points,
+          // Use atomic post-state instead of arithmetic against the stale
+          // read, so the audit trail stays accurate under contention.
+          balanceBefore: updated.loyaltyPoints + pts.points,
+          balanceAfter: updated.loyaltyPoints,
           description: 'انتهاء صلاحية النقاط',
           createdAt: new Date(),
         });
 
-        // تحديث سجل النقاط الأصلي لتجنب التكرار
+        // Mark the source earn-record processed so the next tick doesn't
+        // re-pick it (the `expiresAt: { $lt: today }` filter above would
+        // otherwise re-match it next run).
         await LoyaltyPointsTransaction.findByIdAndUpdate(pts._id, {
-          expiresAt: null, // إزالة تاريخ الانتهاء بعد المعالجة
+          expiresAt: null,
         });
 
         expired++;

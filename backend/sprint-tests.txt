@@ -306,3 +306,4 @@ __tests__/escalation-predictor-wave433.test.js
 __tests__/cultural-profile-wave475.test.js
 __tests__/restraint-seclusion-event-behavioral-wave193b.test.js
 __tests__/gender-routing-wave476.test.js
+__tests__/medication-administration-record-behavioral-wave191b.test.js

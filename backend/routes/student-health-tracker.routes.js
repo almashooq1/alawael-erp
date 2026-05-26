@@ -25,11 +25,14 @@ const mongoose = require('mongoose');
 const { authenticate } = require('../middleware/auth');
 const { requireRole } = require('../middleware/rbac.v2.middleware');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { branchScopedBeneficiaryParam } = require('../middleware/assertBranchMatch');
 const safeError = require('../utils/safeError');
 
 const router = express.Router();
 router.use(authenticate);
 router.use(requireBranchAccess);
+// W440: auto-enforce branch ownership on every :beneficiaryId param.
+router.param('beneficiaryId', branchScopedBeneficiaryParam);
 
 const safeModel = name => {
   try {

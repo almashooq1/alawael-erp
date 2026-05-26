@@ -3,7 +3,11 @@ const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { branchScopedBeneficiaryParam } = require('../middleware/assertBranchMatch');
 const { paginate } = require('../utils/paginate');
+
+// W440: auto-enforce branch ownership on every :beneficiaryId param.
+router.param('beneficiaryId', branchScopedBeneficiaryParam);
 
 const MAX_PAGE_LIMIT = 100;
 

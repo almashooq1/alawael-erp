@@ -6,9 +6,12 @@ const express = require('express');
 const { body, param, query, validationResult } = require('express-validator');
 const { authenticateToken: authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { branchScopedBeneficiaryParam } = require('../middleware/assertBranchMatch');
 const svc = require('../services/aiDiagnostic.service');
 
 const router = express.Router();
+// W440: auto-enforce branch ownership on every :beneficiaryId param.
+router.param('beneficiaryId', branchScopedBeneficiaryParam);
 
 /* ── helpers ── */
 const handleValidation = (req, res, next) => {

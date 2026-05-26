@@ -9,6 +9,9 @@ const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { branchScopedBeneficiaryParam } = require('../middleware/assertBranchMatch');
+// W440: auto-enforce branch ownership on every :beneficiaryId param.
+router.param('beneficiaryId', branchScopedBeneficiaryParam);
 const logger = require('../utils/logger');
 
 // Models

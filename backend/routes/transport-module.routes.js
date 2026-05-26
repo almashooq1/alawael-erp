@@ -20,11 +20,14 @@ try {
 } catch {
   createCustomLimiter = () => (_req, _res, next) => next();
 }
+const { branchScopedBeneficiaryParam } = require('../middleware/assertBranchMatch');
 const router = express.Router();
 const mongoose = require('mongoose');
 
 // 🔒 All transport routes require authentication
 router.use(authenticate);
+// W440: auto-enforce branch ownership on every :beneficiaryId param.
+router.param('beneficiaryId', branchScopedBeneficiaryParam);
 router.use(requireBranchAccess);
 
 // Rate-limiter for GPS endpoints: 600 single-point uploads / minute / device

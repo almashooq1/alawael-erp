@@ -15,7 +15,10 @@
  */
 
 const express = require('express');
+const { branchScopedBeneficiaryParam } = require('../middleware/assertBranchMatch');
 const router = express.Router();
+// W440: auto-enforce branch ownership on every :beneficiaryId param.
+router.param('beneficiaryId', branchScopedBeneficiaryParam);
 const sessionCenterSvc = require('../services/sessionCenter.service');
 const logger = require('../utils/logger');
 

@@ -59,6 +59,7 @@
 const express = require('express');
 const safeError = require('../utils/safeError');
 const reg = require('../intelligence/beneficiary-lifecycle.registry');
+const { branchScopedBeneficiaryParam } = require('../middleware/assertBranchMatch');
 
 const REASON_TO_STATUS = Object.freeze({
   ACTOR_REQUIRED: 401,
@@ -134,6 +135,8 @@ function createBeneficiaryLifecycleRouter({ service, governance, logger = consol
   void logger;
 
   const router = express.Router();
+  // W440: auto-enforce branch ownership on every :beneficiaryId param.
+  router.param('beneficiaryId', branchScopedBeneficiaryParam);
 
   // Permission helper — wraps governance.hasPermission with structured
   // response on denial.

@@ -15,10 +15,13 @@ const express = require('express');
 const { body, param, query, validationResult } = require('express-validator');
 
 const { authenticate, authorize } = require('../../middleware/auth');
+const { branchScopedBeneficiaryParam } = require('../../middleware/assertBranchMatch');
 const safeError = require('../../utils/safeError');
 const registry = require('../../config/care/psych.registry');
 
 const router = express.Router();
+// W440: auto-enforce branch ownership on every :beneficiaryId param.
+router.param('beneficiaryId', branchScopedBeneficiaryParam);
 
 const wrap = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 

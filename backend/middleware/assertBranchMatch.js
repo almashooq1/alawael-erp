@@ -228,10 +228,60 @@ function assertBranchIdsAllowed(req, branchIds) {
   }
 }
 
+/**
+ * Express param-middleware that auto-runs enforceBeneficiaryBranch on
+ * every `:beneficiaryId` URL parameter in the router it's attached to.
+ *
+ * Usage (one line per route file):
+ *   const { branchScopedBeneficiaryParam } = require('../middleware/assertBranchMatch');
+ *   router.param('beneficiaryId', branchScopedBeneficiaryParam);
+ *
+ * Closes the W269 → W269h gap (drift guard caught req.branchId
+ * regression; this param-middleware closes the LARGER gap where
+ * routes had a :beneficiaryId path param but never explicitly
+ * called enforceBeneficiaryBranch). With this hook installed,
+ * every restricted user's request hits a Beneficiary.findById +
+ * branchId match BEFORE the route handler runs. Cross-branch
+ * roles and tests without req.branchScope skip the lookup entirely.
+ *
+ * On 403/404/503 from the helper, this middleware sends the response
+ * directly (short-circuiting the route handler chain). All other
+ * errors fall through to the standard Express error middleware via
+ * next(err).
+ *
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ * @param {string} beneficiaryId - the URL parameter value
+ */
+async function branchScopedBeneficiaryParam(req, res, next, beneficiaryId) {
+  try {
+    await enforceBeneficiaryBranch(req, beneficiaryId);
+    next();
+  } catch (err) {
+    if (err && err.status === 403) {
+      return res.status(403).json({ success: false, error: err.message });
+    }
+    if (err && err.status === 404) {
+      return res.status(404).json({ success: false, error: err.message });
+    }
+    if (err && err.status === 503) {
+      return res
+        .status(503)
+        .json({ success: false, error: 'models_unavailable', message: err.message });
+    }
+    if (err && err.status === 400) {
+      return res.status(400).json({ success: false, error: err.message });
+    }
+    next(err);
+  }
+}
+
 module.exports = {
   assertBranchMatch,
   effectiveBranchScope,
   enforceBeneficiaryBranch,
   loadBeneficiaryAndAssertBranch,
   assertBranchIdsAllowed,
+  branchScopedBeneficiaryParam,
 };

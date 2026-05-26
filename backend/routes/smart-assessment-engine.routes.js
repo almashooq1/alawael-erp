@@ -66,6 +66,9 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
+const { branchScopedBeneficiaryParam } = require('../middleware/assertBranchMatch');
+// W440: auto-enforce branch ownership on every :beneficiaryId param.
+router.param('beneficiaryId', branchScopedBeneficiaryParam);
 
 /* ─── Services ─────────────────────────────────────────────────────────── */
 const SmartAssessmentEngine = require('../services/smart-assessment-engine');

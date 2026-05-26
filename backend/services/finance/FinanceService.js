@@ -215,16 +215,33 @@ class ZatcaService {
 // ===== خدمة المطالبات التأمينية =====
 class InsuranceClaimService {
   static async submitClaim(claimId) {
-    const claim = await InsuranceClaim.findById(claimId).populate(
-      'beneficiary_id insurance_company_id'
-    );
-    if (!claim) throw new Error('المطالبة غير موجودة');
-    if (claim.status !== 'draft') throw new Error('المطالبة تم تقديمها مسبقاً');
-
-    claim.status = 'submitted';
-    claim.submission_date = new Date();
-    claim.submitted_at = new Date();
-    return claim.save();
+    // W427: atomic state-flip. The previous code did:
+    //
+    //   const claim = await InsuranceClaim.findById(claimId);
+    //   if (claim.status !== 'draft') throw 'already submitted';
+    //   claim.status = 'submitted';
+    //   await claim.save();
+    //
+    // Two concurrent submit-clicks (UI double-tap, API retry, automation
+    // race) would both see status='draft', both flip to 'submitted',
+    // both write submission_date. End-state status is identical but
+    // BOTH callers think they "won" the submission, and any downstream
+    // event hook (audit log, NPHIES notification, etc.) would fire
+    // twice. Atomic findOneAndUpdate with `status: 'draft'` in the
+    // filter ensures only ONE caller transitions; the second matches
+    // nothing and falls into the "already submitted" branch.
+    const now = new Date();
+    const updated = await InsuranceClaim.findOneAndUpdate(
+      { _id: claimId, status: 'draft' },
+      { $set: { status: 'submitted', submission_date: now, submitted_at: now } },
+      { new: true }
+    ).populate('beneficiary_id insurance_company_id');
+    if (updated) return updated;
+    // Atomic update didn't match — disambiguate the failure case for the
+    // caller so the error reflects truth.
+    const existing = await InsuranceClaim.findById(claimId).select('status').lean();
+    if (!existing) throw new Error('المطالبة غير موجودة');
+    throw new Error('المطالبة تم تقديمها مسبقاً');
   }
 
   static async processClaimResponse(claimId, approvedItems, totalApproved, status) {

@@ -267,4 +267,5 @@ __tests__/gas-snapshot-wave455.test.js
 __tests__/gas-interpretation-wave456.test.js
 __tests__/icf-aggregate-wave457.test.js
 __tests__/crisis-orchestrator-wave458.test.js
+__tests__/crisis-orchestrator-behavioral-wave458.test.js
 __tests__/phase-a-e2e-smoke-wave459.test.js

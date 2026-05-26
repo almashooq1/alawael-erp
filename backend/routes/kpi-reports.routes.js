@@ -7,7 +7,7 @@
 
 const express = require('express');
 const { authenticate } = require('../middleware/auth');
-const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const router = express.Router();
 
 // 🔒 All KPI Reports routes require authentication
@@ -52,7 +52,7 @@ router.get('/', async (req, res) => {
 // GET /api/kpi-reports/:id — تفاصيل تقرير
 router.get('/:id', async (req, res) => {
   try {
-    const report = await KpiReport.findById(req.params.id);
+    const report = await KpiReport.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W449 */
     if (!report) return res.status(404).json({ success: false, message: 'التقرير غير موجود' });
     res.json({ success: true, data: report });
   } catch (err) {
@@ -138,7 +138,7 @@ router.post('/generate', async (req, res) => {
 // GET /api/kpi-reports/:id/download — تحميل التقرير
 router.get('/:id/download', async (req, res) => {
   try {
-    const report = await KpiReport.findById(req.params.id);
+    const report = await KpiReport.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W449 */
     if (!report) return res.status(404).json({ success: false, message: 'التقرير غير موجود' });
     if (report.status !== 'ready') {
       return res.status(422).json({ success: false, message: 'التقرير غير جاهز بعد' });
@@ -161,7 +161,10 @@ router.get('/:id/download', async (req, res) => {
 // DELETE /api/kpi-reports/:id — حذف تقرير
 router.delete('/:id', async (req, res) => {
   try {
-    await KpiReport.findByIdAndUpdate(req.params.id, { deletedAt: new Date() });
+    await KpiReport.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) },
+      /* W449 */ { deletedAt: new Date() }
+    );
     res.json({ success: true, message: 'تم الحذف بنجاح' });
   } catch (err) {
     safeError(res, err);
@@ -176,9 +179,9 @@ router.get('/stats/summary', async (req, res) => {
 
     const [total, ready, generating, failed] = await Promise.all([
       KpiReport.countDocuments(query),
-      KpiReport.countDocuments({ ...query, status: 'ready' }),
-      KpiReport.countDocuments({ ...query, status: 'generating' }),
-      KpiReport.countDocuments({ ...query, status: 'failed' }),
+      KpiReport.countDocuments({ ...branchFilter(req), /* W449 */ ...query, status: 'ready' }),
+      KpiReport.countDocuments({ ...branchFilter(req), /* W449 */ ...query, status: 'generating' }),
+      KpiReport.countDocuments({ ...branchFilter(req), /* W449 */ ...query, status: 'failed' }),
     ]);
 
     res.json({ success: true, data: { total, ready, generating, failed } });

@@ -24,9 +24,14 @@ const { authenticateToken, requireRole } = require('../middleware/auth');
 const Card = require('../models/BeneficiaryDisabilityCard');
 const Beneficiary = require('../models/Beneficiary');
 const safeError = require('../utils/safeError');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
 
 router.use(authenticateToken);
+// W449: branch-scope every endpoint. Model carries `branchId`; pre-W449
+// list filters were optional + instance loads bare findById, opening
+// cross-tenant IDOR (read/modify/delete any branch by ObjectId guess).
+router.use(requireBranchAccess);
 router.use(bodyScopedBeneficiaryGuard); // W441: enforce branch on req.body.beneficiaryId
 
 const READ_ROLES = [
@@ -65,7 +70,7 @@ async function hydrate(items) {
 // ── GET / ──────────────────────────────────────────────────────────────
 router.get('/', requireRole(READ_ROLES), async (req, res) => {
   try {
-    const filter = {};
+    const filter = { ...branchFilter(req) }; /* W449 */
     if (req.query.beneficiaryId && mongoose.isValidObjectId(req.query.beneficiaryId)) {
       filter.beneficiaryId = req.query.beneficiaryId;
     }
@@ -109,7 +114,8 @@ router.get('/expiring', requireRole(READ_ROLES), async (req, res) => {
     const now = new Date();
     const horizon = new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
     const raw = await Card.find({
-      expiryDate: { $ne: null, $lte: horizon },
+      ...branchFilter(req),
+      /* W449 */ expiryDate: { $ne: null, $lte: horizon },
       status: { $ne: 'pending_renewal' },
     })
       .sort({ expiryDate: 1 })
@@ -127,7 +133,10 @@ router.get('/by-beneficiary/:id', requireRole(READ_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const card = await Card.findOne({ beneficiaryId: req.params.id }).lean({ virtuals: true });
+    const card = await Card.findOne({
+      ...branchFilter(req),
+      /* W449 */ beneficiaryId: req.params.id,
+    }).lean({ virtuals: true });
     if (!card)
       return res.status(404).json({ success: false, message: 'لا توجد بطاقة لهذا المستفيد' });
     const [hydrated] = await hydrate([card]);
@@ -143,7 +152,8 @@ router.get('/:id', requireRole(READ_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const card = await Card.findById(req.params.id).lean({ virtuals: true });
+    const card = await Card.findOne({ _id: req.params.id, ...branchFilter(req) }) /* W449 */
+      .lean({ virtuals: true });
     if (!card) return res.status(404).json({ success: false, message: 'البطاقة غير موجودة' });
     res.json({ success: true, data: card });
   } catch (err) {
@@ -190,12 +200,16 @@ router.post('/', requireRole(WRITE_ROLES), async (req, res) => {
       enteredByName: req.user?.name || body.enteredByName || '',
       syncedFromAuthority: false, // Manual entry
     };
-    const doc = await Card.findOneAndUpdate({ beneficiaryId: body.beneficiaryId }, update, {
-      new: true,
-      upsert: true,
-      setDefaultsOnInsert: true,
-      runValidators: true,
-    });
+    const doc = await Card.findOneAndUpdate(
+      { ...branchFilter(req), /* W449 */ beneficiaryId: body.beneficiaryId },
+      update,
+      {
+        new: true,
+        upsert: true,
+        setDefaultsOnInsert: true,
+        runValidators: true,
+      }
+    );
     res.status(201).json({ success: true, data: doc });
   } catch (err) {
     if (err?.code === 11000) {
@@ -221,10 +235,14 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
     }
     if (body.issuedDate) body.issuedDate = new Date(body.issuedDate);
     if (body.expiryDate) body.expiryDate = new Date(body.expiryDate);
-    const row = await Card.findByIdAndUpdate(req.params.id, body, {
-      new: true,
-      runValidators: true,
-    });
+    const row = await Card.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) },
+      /* W449 */ body,
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
     if (!row) return res.status(404).json({ success: false, message: 'البطاقة غير موجودة' });
     res.json({ success: true, data: row });
   } catch (err) {
@@ -238,7 +256,7 @@ router.post('/:id/sync', requireRole(WRITE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Card.findById(req.params.id);
+    const row = await Card.findOne({ _id: req.params.id, ...branchFilter(req) }); /* W449 */
     if (!row) return res.status(404).json({ success: false, message: 'البطاقة غير موجودة' });
 
     // Phase 1: mock sync — just refreshes timestamp.
@@ -265,7 +283,10 @@ router.delete('/:id', requireRole(WRITE_ROLES), async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     }
-    const row = await Card.findByIdAndDelete(req.params.id);
+    const row = await Card.findOneAndDelete({
+      _id: req.params.id,
+      ...branchFilter(req),
+    }); /* W449 */
     if (!row) return res.status(404).json({ success: false, message: 'البطاقة غير موجودة' });
     res.json({ success: true, message: 'تم الحذف' });
   } catch (err) {

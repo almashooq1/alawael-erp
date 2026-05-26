@@ -254,3 +254,8 @@ __tests__/safeguarding-behavioral-wave357.test.js
 __tests__/communication-aid-behavioral-wave358.test.js
 __tests__/assistive-device-behavioral-wave359.test.js
 __tests__/cbahi-behavioral-wave360.test.js
+__tests__/transition-plan-behavioral-wave361.test.js
+__tests__/adaptive-sports-behavioral-wave362.test.js
+__tests__/respite-behavioral-wave363.test.js
+__tests__/diet-prescription-behavioral-wave368.test.js
+__tests__/facility-asset-behavioral-wave369.test.js

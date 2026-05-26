@@ -65,9 +65,24 @@ const ALLOWED_MIMES = new Set([
 
 const storage = multer.diskStorage({
   destination: function (req, _file, cb) {
-    const purpose = String(req.body?.purpose || 'other');
+    // W452: path-traversal defense. Pre-W452 `req.body.purpose` flowed
+    // straight into path.join — an attacker could send
+    // `purpose: '../../../etc/sneaky'` and multer would create the
+    // directory (and write the file) OUTSIDE UPLOAD_ROOT before the
+    // route handler's PURPOSES allowlist check ran. The post-write
+    // unlink would only remove the file inside the escaped dir; the
+    // dir itself remains, and the file could land in a web-accessible
+    // location if writable. Validate the purpose against the canonical
+    // PURPOSES list at multer time, and verify the resolved path
+    // stays within UPLOAD_ROOT before continuing.
+    const raw = String(req.body?.purpose || 'other');
+    const purpose = UploadedFile.PURPOSES.includes(raw) ? raw : 'other';
     const dateDir = new Date().toISOString().slice(0, 10);
     const dir = path.join(UPLOAD_ROOT, purpose, dateDir);
+    const resolved = path.resolve(dir);
+    if (!resolved.startsWith(path.resolve(UPLOAD_ROOT) + path.sep)) {
+      return cb(new Error('invalid upload path'), '');
+    }
     fs.mkdir(dir, { recursive: true }, err => {
       if (err) return cb(err, '');
       cb(null, dir);

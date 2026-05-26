@@ -273,8 +273,10 @@ __tests__/phase-a-e2e-smoke-wave459.test.js
 __tests__/beneficiary-voice-log-wave460.test.js
 __tests__/beneficiary-voice-log-behavioral-wave460.test.js
 __tests__/decision-rights-wave461.test.js
+__tests__/decision-rights-behavioral-wave461.test.js
 __tests__/realtime-gateway-wave427.test.js
 __tests__/emit-without-subscriber-wave428.test.js
 __tests__/self-advocacy-wave462.test.js
 __tests__/crpd-compliance-wave463.test.js
 __tests__/independent-advocate-role-wave464.test.js
+__tests__/complaint-reasonable-adjustments-wave465.test.js

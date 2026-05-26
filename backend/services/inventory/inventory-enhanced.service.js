@@ -359,24 +359,59 @@ class InventoryEnhancedService {
   }
 
   async recordItemCount(stockCountId, itemId, countedQuantity) {
+    // W432: atomic positional update for the item entry.
+    //
+    // The previous code did:
+    //   const stockCount = await StockCount.findById(stockCountId);
+    //   item.countedQuantity = countedQuantity;
+    //   item.status = 'counted';
+    //   ...recompute aggregates...
+    //   await stockCount.save();
+    //
+    // Classic Mongoose subdoc-array race: two warehouse staff
+    // scanning different items in the same stockCount concurrently
+    // both load the full items[] array, modify one entry each, and
+    // save the WHOLE array. Last write wins → one staff member's
+    // count is silently lost. Repeats every time two scanners ping
+    // the same stockCount within ~50ms of each other.
+    //
+    // Fix:
+    //   1. Atomic positional `$set` of the target item's two fields.
+    //      Concurrent updates on DIFFERENT items[] entries no longer
+    //      conflict because each touches a unique positional slot.
+    //   2. Re-read the doc afterwards (non-mutating, no race) to
+    //      derive the post-update aggregates from the live array
+    //      state.
+    //   3. Persist the aggregates with a second updateOne. This
+    //      aggregate-pass remains racy under heavy contention (two
+    //      counts firing within ~1ms can produce slightly stale
+    //      matchedItems / discrepancyItems counts) but item data
+    //      itself is never lost. Stats can be reconciled by a
+    //      periodic aggregate sweep; lost item data could not be
+    //      recovered.
+    const upd = await StockCount.updateOne(
+      { _id: stockCountId, 'items.itemId': itemId },
+      {
+        $set: {
+          'items.$.countedQuantity': countedQuantity,
+          'items.$.status': 'counted',
+        },
+      }
+    );
+    if (upd.matchedCount === 0) {
+      // Either the stockCount doesn't exist OR the item isn't in its items[].
+      const exists = await StockCount.exists({ _id: stockCountId });
+      throw new Error(exists ? 'الصنف غير موجود في سجل الجرد' : 'سجل الجرد غير موجود');
+    }
+
+    // Recompute aggregates from the live post-update state.
     const stockCount = await StockCount.findById(stockCountId);
-    if (!stockCount) throw new Error('سجل الجرد غير موجود');
-
-    const item = stockCount.items.find(i => i.itemId.toString() === itemId);
-    if (!item) throw new Error('الصنف غير موجود في سجل الجرد');
-
-    item.countedQuantity = countedQuantity;
-    item.status = 'counted';
-
-    // تحديث إحصائيات
     const counted = stockCount.items.filter(i => i.status === 'counted');
     const discrepancies = counted.filter(
       i => i.countedQuantity !== null && i.countedQuantity !== i.systemQuantity
     );
-
     stockCount.matchedItems = counted.length - discrepancies.length;
     stockCount.discrepancyItems = discrepancies.length;
-
     return stockCount.save();
   }
 

@@ -266,3 +266,4 @@ __tests__/gas-scale-builder-wave454.test.js
 __tests__/gas-snapshot-wave455.test.js
 __tests__/gas-interpretation-wave456.test.js
 __tests__/icf-aggregate-wave457.test.js
+__tests__/crisis-orchestrator-wave458.test.js

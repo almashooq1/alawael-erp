@@ -23,19 +23,21 @@ Per [`GAP_ANALYSIS_LIFECYCLE_V3.md`](GAP_ANALYSIS_LIFECYCLE_V3.md), Phase A was 
 
 ## 1. Wave Summary Table
 
-| Wave     | Title                                               | Tier  | Days | Risk    | Type                        |
-| -------- | --------------------------------------------------- | ----- | ---- | ------- | --------------------------- |
-| **W448** | ICF Core Sets seeding                               | A-ext | 2    | Low     | Data/seed                   |
-| **W449** | CarePlanGoal ↔ ICF code linkage                    | A-ext | 2    | Low     | Schema extension            |
-| **W450** | MeasurementMaster ↔ ICF qualifier mapping          | A-ext | 2    | Low-Med | Schema + lib extension      |
-| **W451** | GAS scale AI-assisted construction helper           | A-ext | 1    | Low     | Service addition            |
-| **W452** | GAS T-score periodic snapshot collection            | A-ext | 2    | Low     | New collection + cron       |
-| **W453** | Family-friendly GAS interpretation layer (Arabic)   | A-ext | 1    | Low     | Service addition            |
-| **W454** | ICF profile aggregation reports (branch + national) | A-ext | 2    | Med     | Service + APIs              |
-| **W455** | Crisis pathway orchestration over W356/W357         | F-int | 3    | Med     | New orchestrator + workflow |
-| **W456** | Phase A smoke + drift guards + sprint-tests update  | A-ext | 1    | Low     | Tests + CI                  |
+| Wave                | Title                                               | Tier  | Days | Risk    | Type                        | Status                                                              |
+| ------------------- | --------------------------------------------------- | ----- | ---- | ------- | --------------------------- | ------------------------------------------------------------------- |
+| **W448**            | ICF Core Sets seeding                               | A-ext | 2    | Low     | Data/seed                   | ✅ shipped 2026-05-26 (`26209cea1`)                                 |
+| ~~W449~~ → **W450** | CarePlanGoal ↔ ICF code linkage                    | A-ext | 2    | Low     | Schema extension            | pending — collision (W449 claimed by security IDOR fix `05c482bd2`) |
+| ~~W450~~ → **W451** | MeasurementMaster ↔ ICF qualifier mapping          | A-ext | 2    | Low-Med | Schema + lib extension      | pending                                                             |
+| ~~W451~~ → **W452** | GAS scale AI-assisted construction helper           | A-ext | 1    | Low     | Service addition            | pending                                                             |
+| ~~W452~~ → **W453** | GAS T-score periodic snapshot collection            | A-ext | 2    | Low     | New collection + cron       | pending                                                             |
+| ~~W453~~ → **W454** | Family-friendly GAS interpretation layer (Arabic)   | A-ext | 1    | Low     | Service addition            | pending                                                             |
+| ~~W454~~ → **W455** | ICF profile aggregation reports (branch + national) | A-ext | 2    | Med     | Service + APIs              | pending                                                             |
+| ~~W455~~ → **W456** | Crisis pathway orchestration over W356/W357         | F-int | 3    | Med     | New orchestrator + workflow | pending                                                             |
+| ~~W456~~ → **W457** | Phase A smoke + drift guards + sprint-tests update  | A-ext | 1    | Low     | Tests + CI                  | pending                                                             |
 
 **Total**: 16 work days ≈ 3.5 weeks at 1 FTE, ~2 weeks at 2 FTE.
+
+> **Wave-collision note (2026-05-26)**: W448 shipped at commit `26209cea1`. A parallel security agent claimed W449 at `05c482bd2` for cross-tenant IDOR fix on disability-cards + kpi-reports (orthogonal scope, NOT the CarePlanGoal ICF linkage planned here). Phase A remaining 8 waves shift by +1 → **W450-W457**. Per the CLAUDE.md atomic-commit-pattern doctrine, re-verify the next available wave with `git log --oneline -20 \| grep -oE 'W[0-9]+' \| sort -un \| tail -5` immediately before each new wave commit. Document filename retained as `PHASE_A_WAVES_W448_W456.md` for backlink continuity even though the range is now W448 + W450-W457.
 
 ---
 

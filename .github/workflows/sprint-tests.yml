@@ -441,6 +441,7 @@ on:
       - 'backend/__tests__/diet-prescription-behavioral-wave368.test.js'
       - 'backend/__tests__/facility-asset-behavioral-wave369.test.js'
       - 'backend/__tests__/icf-core-sets-seeding-wave448.test.js'
+      - 'backend/__tests__/care-plan-goal-icf-mapping-wave452.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -865,6 +866,7 @@ on:
       - 'backend/__tests__/diet-prescription-behavioral-wave368.test.js'
       - 'backend/__tests__/facility-asset-behavioral-wave369.test.js'
       - 'backend/__tests__/icf-core-sets-seeding-wave448.test.js'
+      - 'backend/__tests__/care-plan-goal-icf-mapping-wave452.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

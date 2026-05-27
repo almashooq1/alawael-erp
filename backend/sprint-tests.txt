@@ -316,3 +316,4 @@ __tests__/payroll-period-behavioral-wave99.test.js
 __tests__/story-models-wave480.test.js
 __tests__/pride-moment-wave481.test.js
 __tests__/llm-anomaly-models-behavioral-wave144-147.test.js
+__tests__/productivity-models-behavioral-wave27.test.js

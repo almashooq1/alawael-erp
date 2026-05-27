@@ -60,13 +60,18 @@ async function findUserByNationalId(nationalId) {
   return null;
 }
 
+// W505: PDPL-compliant salt resolution. Pre-W505 the fallback
+// 'pdpl-salt' literal made hashed IPs de-anonymizable in production
+// if JWT_SECRET was unset — anyone with a leaked audit-log copy
+// could brute-force the 4-billion IPv4 space against the public
+// fallback. getPdplSalt() throws in production when JWT_SECRET is
+// missing.
+const { getPdplSalt } = require('../utils/pdplSalt');
+const NAFATH_IP_SALT = getPdplSalt('nafath-ip');
+
 function hashIp(ip) {
   if (!ip) return '';
-  return crypto
-    .createHash('sha256')
-    .update(`${ip}:${process.env.JWT_SECRET || 'pdpl-salt'}`)
-    .digest('hex')
-    .slice(0, 32);
+  return crypto.createHash('sha256').update(`${ip}:${NAFATH_IP_SALT}`).digest('hex').slice(0, 32);
 }
 
 // ── POST /initiate ───────────────────────────────────────────────────────
@@ -232,16 +237,12 @@ router.get('/status/:requestId', async (req, res) => {
             authMethod: 'nafath',
             nationalId: doc.nationalId,
           };
-          const session = await ssoService.createSession(
-            userPayload.userId,
-            userPayload,
-            {
-              source: 'nafath',
-              userAgent: req.get('user-agent'),
-              ipAddress: req.ip,
-              nafathRequestId: String(doc._id),
-            }
-          );
+          const session = await ssoService.createSession(userPayload.userId, userPayload, {
+            source: 'nafath',
+            userAgent: req.get('user-agent'),
+            ipAddress: req.ip,
+            nafathRequestId: String(doc._id),
+          });
           ssoSession = {
             sessionId: session.sessionId,
             accessToken: session.accessToken,
@@ -253,10 +254,7 @@ router.get('/status/:requestId', async (req, res) => {
 
           // Update lastLogin (best-effort — never block on this)
           try {
-            await User.updateOne(
-              { _id: linkedUser._id },
-              { $set: { lastLogin: new Date() } }
-            );
+            await User.updateOne({ _id: linkedUser._id }, { $set: { lastLogin: new Date() } });
           } catch (e) {
             logger.warn('[nafath] lastLogin update failed:', e.message);
           }

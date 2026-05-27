@@ -36,7 +36,13 @@ function _fingerprint({ documentType, documentId, documentHash, signerNationalId
     .digest('hex');
 }
 
-function _hashIp(ip, salt = process.env.JWT_SECRET || 'pdpl-salt') {
+// W505: PDPL-compliant salt resolution. getPdplSalt() throws in
+// production when JWT_SECRET is unset — the pre-W505 'pdpl-salt'
+// literal default made hashed IPs de-anonymizable from leaked logs.
+const { getPdplSalt } = require('../utils/pdplSalt');
+const _DEFAULT_NAFATH_SIGNING_SALT = getPdplSalt('nafath-signing');
+
+function _hashIp(ip, salt = _DEFAULT_NAFATH_SIGNING_SALT) {
   if (!ip) return null;
   return crypto.createHash('sha256').update(`${ip}:${salt}`).digest('hex').slice(0, 32);
 }

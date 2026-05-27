@@ -48,7 +48,15 @@ class RateLimitError extends Error {
   }
 }
 
-function hashString(s, salt = process.env.JWT_SECRET || 'alawael-pdpl-salt') {
+// W505: PDPL-compliant salt resolution. getPdplSalt() throws in
+// production when JWT_SECRET is unset — the pre-W505
+// 'alawael-pdpl-salt' literal default made hashed strings (IPs,
+// device IDs, fingerprints recorded in adapter audit logs)
+// de-anonymizable from any leaked log copy.
+const { getPdplSalt } = require('../utils/pdplSalt');
+const _DEFAULT_ADAPTER_AUDIT_SALT = getPdplSalt('adapter-audit');
+
+function hashString(s, salt = _DEFAULT_ADAPTER_AUDIT_SALT) {
   if (!s) return '';
   return crypto.createHash('sha256').update(`${s}:${salt}`).digest('hex').slice(0, 32);
 }

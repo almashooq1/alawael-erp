@@ -17,7 +17,13 @@ const DefaultModel = require('../models/YakeenVerification.model');
 const defaultAdapter = require('./absherAdapter');
 
 const DEFAULT_CACHE_WINDOW_MS = 24 * 60 * 60 * 1000;
-const SALT = process.env.JWT_SECRET || 'pdpl-yakeen-salt';
+// W505: PDPL-compliant salt resolution. getPdplSalt() throws in
+// production when JWT_SECRET is unset — the pre-W505 'pdpl-yakeen-
+// salt' literal default made hashed NIDs (10-digit Saudi national
+// IDs — only 10B possible values, trivially brute-forceable against
+// a hash whose salt is known) de-anonymizable from leaked logs.
+const { getPdplSalt } = require('../utils/pdplSalt');
+const SALT = getPdplSalt('yakeen');
 
 function _hashNid(nid) {
   return crypto.createHash('sha256').update(`${nid}:${SALT}`).digest('hex');

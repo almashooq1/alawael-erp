@@ -550,13 +550,22 @@ const EmailQueueSchema = new Schema(
 EmailQueueSchema.index({ status: 1, scheduledFor: 1, priority: -1 });
 EmailQueueSchema.index({ 'metadata.tenantId': 1, status: 1 });
 
-// Create models
-const EmailTemplate = mongoose.model('EmailTemplate', EmailTemplateSchema);
-const EmailLog = mongoose.model('EmailLog', EmailLogSchema);
-const EmailCampaign = mongoose.model('EmailCampaign', EmailCampaignSchema);
-const EmailList = mongoose.model('EmailList', EmailListSchema);
-const EmailSignature = mongoose.model('EmailSignature', EmailSignatureSchema);
-const EmailQueue = mongoose.model('EmailQueue', EmailQueueSchema);
+// Create models — defensive `mongoose.models.X || mongoose.model(...)` guards
+// against OverwriteModelError. EmailTemplate + EmailLog are W340 baseline
+// entries (registered in >1 file with divergent schemas). The other names are
+// kept defensive for symmetry / future-proofing — zero-risk idempotent change.
+const EmailTemplate = mongoose.models.EmailTemplate
+  || mongoose.model('EmailTemplate', EmailTemplateSchema);
+const EmailLog = mongoose.models.EmailLog
+  || mongoose.model('EmailLog', EmailLogSchema);
+const EmailCampaign = mongoose.models.EmailCampaign
+  || mongoose.model('EmailCampaign', EmailCampaignSchema);
+const EmailList = mongoose.models.EmailList
+  || mongoose.model('EmailList', EmailListSchema);
+const EmailSignature = mongoose.models.EmailSignature
+  || mongoose.model('EmailSignature', EmailSignatureSchema);
+const EmailQueue = mongoose.models.EmailQueue
+  || mongoose.model('EmailQueue', EmailQueueSchema);
 
 module.exports = {
   EmailTemplate,

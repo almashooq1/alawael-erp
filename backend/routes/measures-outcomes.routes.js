@@ -562,4 +562,49 @@ router.get('/ministry-comparison', async (req, res) => {
   }
 });
 
+// ════════════════════════════════════════════════════════════════════
+// W479 Phase B3 — Forecast off-track list endpoint
+// ════════════════════════════════════════════════════════════════════
+
+/**
+ * GET /branch/:branchId/forecast-off-track?severity=&limit=
+ * → list open FORECAST_OFF_TRACK alerts for the branch with the full
+ *   W429 forecaster evidence attached (W479 Phase B3 surface) (projected vs target, gap, r²,
+ *   slopePerMonth, goalTitle, projectedAt).
+ *
+ * Distinct from existing surfaces:
+ *   - /branch/:branchId (alerts SUMMARY counter) — this gives the
+ *     ROWS with rich evidence per alert.
+ *   - /branch/:branchId/measure/:measureId/pairs — pair-history,
+ *     window-bounded admin trajectory; this is open-alert oriented.
+ *   - therapist-portal MeasureAlert routes — caseload-scoped, not
+ *     branch-scoped (this endpoint complements them for directors).
+ *
+ * Query:
+ *   severity ∈ {low, medium, high, critical} (optional filter)
+ *   limit    1..500 (default 200)
+ *
+ * Returns: { branchId, total, items: [...] } envelope.
+ */
+router.get('/branch/:branchId/forecast-off-track', async (req, res) => {
+  try {
+    const { branchId } = req.params;
+    if (!branchId) {
+      return res.status(400).json({ success: false, error: 'branchId required' });
+    }
+    const opts = {};
+    if (req.query.severity) opts.severity = String(req.query.severity);
+    if (req.query.limit) {
+      const n = parseInt(req.query.limit, 10);
+      if (Number.isFinite(n)) opts.limit = n;
+    }
+    const out = await aggregator.listForecastOffTrackForBranch(branchId, opts);
+    return _passThroughOrError(out, res);
+  } catch (err) {
+    logger.warn('[measures-outcomes] /branch/.../forecast-off-track failed: %s', err.message);
+    const r = _toErrorResponse(err);
+    return res.status(r.status).json(r.body);
+  }
+});
+
 module.exports = router;

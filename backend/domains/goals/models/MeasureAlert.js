@@ -73,6 +73,15 @@ const measureAlertSchema = new mongoose.Schema(
     // Evidence snapshot — frozen at first emission. Re-scan updates
     // refreshable counters (n, lastEvaluatedAt) but never overwrites
     // historical context (firstSeenAt, baseline summary).
+    //
+    // W479 Phase B3: extended with the W429 forecaster fields. Pre-W479
+    // these were silently stripped on save by Mongoose strict-mode (the
+    // goalForecaster.service.js sweeper wrote them but they never
+    // persisted — a discovered bug, not regression). All additive +
+    // optional; existing retrospective alerts (REGRESSION/PLATEAU/MCID)
+    // continue to populate only the legacy fields. The W479 dashboard
+    // surface (listForecastOffTrackForBranch) reads these for the
+    // detail table.
     evidence: {
       n: Number, // admin count behind the call
       spanDays: Number,
@@ -85,6 +94,23 @@ const measureAlertSchema = new mongoose.Schema(
       mcidStatus: String,
       bestAchievedDelta: Number, // for MCID_NOT_MET
       message_ar: String,
+      // ── W429 forecaster fields (W479 schema extension) ───────────
+      projected: Number,
+      projectedAt: Date,
+      target: Number,
+      gap: Number,
+      severity: String,
+      ciMisses: Boolean,
+      ci95: {
+        lo: Number,
+        hi: Number,
+      },
+      slopeAcceleration: Number,
+      direction: { type: String, enum: ['higher', 'lower'] },
+      goalId: { type: mongoose.Schema.Types.ObjectId, ref: 'TherapeuticGoal' },
+      goalTitle: String,
+      // Auto-resolve sub-trail when a forecast no longer breaches.
+      autoResolveReason: String,
     },
 
     // Lifecycle timestamps

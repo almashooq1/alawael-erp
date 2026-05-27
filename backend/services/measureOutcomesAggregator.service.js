@@ -468,6 +468,12 @@ class MeasureOutcomesAggregatorSvc {
     let regressionCount = 0;
     let plateauCount = 0;
     let mcidAlertCount = 0;
+    // W479 Phase B3: predictive alert counter — surfaces the W429 chain
+    // (goalForecaster → MeasureAlert{alertType:'FORECAST_OFF_TRACK'})
+    // in the same KPI strip the director already reads for retrospective
+    // alerts. Keeps the existing 3 retrospective counters intact for
+    // backward-compat with the W248 dashboard.
+    let forecastOffTrackCount = 0;
     let activeAlertsTotal = 0;
     if (MeasureAlert) {
       const alertAgg = await MeasureAlert.aggregate([
@@ -479,6 +485,7 @@ class MeasureOutcomesAggregatorSvc {
         if (a._id === 'REGRESSION_DETECTED') regressionCount = a.count;
         if (a._id === 'PLATEAU_DETECTED') plateauCount = a.count;
         if (a._id === 'MCID_NOT_MET') mcidAlertCount = a.count;
+        if (a._id === 'FORECAST_OFF_TRACK') forecastOffTrackCount = a.count;
       }
     }
 
@@ -512,11 +519,19 @@ class MeasureOutcomesAggregatorSvc {
         regression: regressionCount,
         plateau: plateauCount,
         mcidNotMet: mcidAlertCount,
+        // W479 Phase B3: predictive (W429 forecast off-track) — additive,
+        // does not change `total` arithmetic (already summed above from
+        // the same aggregation).
+        forecastOffTrack: forecastOffTrackCount,
       },
       // Alert-driven rates use total alerts as denom approximation; with
       // small populations the per-pair MCID rate above is sturdier.
       regressionRate: denom ? Math.round((regressionCount / denom) * 1000) / 1000 : 0,
       plateauRate: denom ? Math.round((plateauCount / denom) * 1000) / 1000 : 0,
+      // W479: forecast-off-track-rate — same denominator strategy.
+      // Predictive nature means a high rate is an EARLY signal (acts as
+      // a leading indicator vs the trailing regression/plateau rates).
+      forecastOffTrackRate: denom ? Math.round((forecastOffTrackCount / denom) * 1000) / 1000 : 0,
       goals: {
         total: goalsTotal,
         active: goalsActive,
@@ -579,10 +594,27 @@ class MeasureOutcomesAggregatorSvc {
           .lean()
       : [];
     const alertsByBucket = new Map();
+    // W479 Phase B3: track alerts BOTH as total (alertsRaised, preserved
+    // for the W248 SVG bar chart) AND broken down by type, so the chart
+    // legend can render a stacked breakdown showing predictive vs
+    // retrospective signals over time. Backward compatible: pre-W479
+    // consumers reading only `alertsRaised` keep working unchanged.
+    const alertsByTypeBucket = new Map();
     for (const a of alerts) {
       const key =
         bucket === 'quarter' ? _quarterBucket(a.firstSeenAt) : _monthBucket(a.firstSeenAt);
       alertsByBucket.set(key, (alertsByBucket.get(key) || 0) + 1);
+      const byType = alertsByTypeBucket.get(key) || {
+        forecastOffTrack: 0,
+        regression: 0,
+        plateau: 0,
+        mcidNotMet: 0,
+      };
+      if (a.alertType === 'FORECAST_OFF_TRACK') byType.forecastOffTrack++;
+      else if (a.alertType === 'REGRESSION_DETECTED') byType.regression++;
+      else if (a.alertType === 'PLATEAU_DETECTED') byType.plateau++;
+      else if (a.alertType === 'MCID_NOT_MET') byType.mcidNotMet++;
+      alertsByTypeBucket.set(key, byType);
     }
 
     const keys = [...new Set([...adminsByBucket.keys(), ...alertsByBucket.keys()])].sort();
@@ -594,6 +626,13 @@ class MeasureOutcomesAggregatorSvc {
         bucket: k,
         administrations: adminsByBucket.get(k) || 0,
         alertsRaised: alertsByBucket.get(k) || 0,
+        // W479: per-type breakdown of the same bucket. Sums to alertsRaised.
+        alertsByType: alertsByTypeBucket.get(k) || {
+          forecastOffTrack: 0,
+          regression: 0,
+          plateau: 0,
+          mcidNotMet: 0,
+        },
       })),
     };
   }
@@ -872,6 +911,193 @@ class MeasureOutcomesAggregatorSvc {
       },
       pairs,
       pairsThinHistory: thinCount,
+    };
+  }
+
+  /**
+   * W479 Phase B3 — list open FORECAST_OFF_TRACK alerts for a branch
+   * with the full forecaster evidence shape attached.
+   *
+   * Reads:
+   *   MeasureAlert.find({branchId, alertType:'FORECAST_OFF_TRACK', status:'open'})
+   *   + Beneficiary.find({_id: $in}) for name/number resolution
+   *   + Measure.find({_id: $in}) for code/name resolution
+   *
+   * The W479 dashboard table renders one row per alert with:
+   *   - beneficiary deep-link (id, nameAr, number)
+   *   - measure label + code
+   *   - severity badge
+   *   - projected vs target (with gap delta)
+   *   - r² + slopePerMonth (forecast confidence + direction)
+   *   - projectedAt (the horizon — usually goal.targetDate)
+   *   - goalTitle (the goal that's projected to miss)
+   *   - firstSeenAt + lastEvaluatedAt (when the signal first appeared
+   *     and when the cron last re-evaluated)
+   *
+   * NOT a duplicate of `measurePairs` (which is window-bounded admin
+   * history) or `aggregateBranch.alerts` (which is just a count) — this
+   * surfaces the rich `evidence` snapshot the forecaster left behind
+   * (goal-forecaster.lib + goalForecaster.service.js W429+W430).
+   *
+   * @param {string|ObjectId} branchId
+   * @param {Object} [opts]
+   * @param {'low'|'medium'|'high'|'critical'} [opts.severity]
+   *   — optional filter (e.g. only high+critical)
+   * @param {number} [opts.limit=200]  — clamped 1..500
+   * @returns {Promise<{
+   *   branchId: string,
+   *   total: number,
+   *   items: Array<{
+   *     alertId: string,
+   *     beneficiaryId: string,
+   *     beneficiaryNameAr: string,
+   *     beneficiaryNumber: string | null,
+   *     measureId: string,
+   *     measureCode: string,
+   *     measureNameAr: string,
+   *     severity: string,
+   *     firstSeenAt: string,
+   *     lastEvaluatedAt: string | null,
+   *     goalId: string | null,
+   *     goalTitle: string | null,
+   *     projected: number | null,
+   *     projectedAt: string | null,
+   *     target: number | null,
+   *     gap: number | null,
+   *     direction: 'higher'|'lower'|null,
+   *     r2: number | null,
+   *     slopePerMonth: number | null,
+   *     n: number | null,
+   *     spanDays: number | null,
+   *     ciMisses: boolean | null,
+   *     messageAr: string | null,
+   *   }>,
+   * } | { error: 'models_unavailable' }>}
+   */
+  async listForecastOffTrackForBranch(branchId, opts = {}) {
+    const MeasureAlert = M.MeasureAlert();
+    const Measure = M.Measure();
+    const Beneficiary = M.Beneficiary();
+    if (!MeasureAlert || !Beneficiary || !Measure) {
+      return { error: 'models_unavailable' };
+    }
+    if (!branchId) {
+      throw new Error('[OutcomesAggregator] branchId required');
+    }
+
+    const branchObj = mongoose.Types.ObjectId.isValid(branchId)
+      ? new mongoose.Types.ObjectId(branchId)
+      : branchId;
+    const limit = Math.min(500, Math.max(1, Number.isFinite(opts.limit) ? opts.limit : 200));
+
+    const match = {
+      branchId: branchObj,
+      alertType: 'FORECAST_OFF_TRACK',
+      status: 'open',
+    };
+    if (opts.severity && ['low', 'medium', 'high', 'critical'].includes(opts.severity)) {
+      match.severity = opts.severity;
+    }
+
+    // Severity rank for sort order — surface critical first; secondary
+    // sort by firstSeenAt asc so the oldest unresolved within a tier
+    // bubbles up (clinical triage convention).
+    const SEV_RANK = { critical: 0, high: 1, medium: 2, low: 3 };
+
+    const alerts = await MeasureAlert.find(match)
+      .select(
+        '_id beneficiaryId measureId measureCode severity firstSeenAt lastEvaluatedAt evidence'
+      )
+      .lean();
+
+    if (alerts.length === 0) {
+      return { branchId: String(branchObj), total: 0, items: [] };
+    }
+
+    const beneficiaryIds = [...new Set(alerts.map(a => String(a.beneficiaryId)))];
+    const measureIds = [...new Set(alerts.map(a => String(a.measureId)))];
+
+    const [beneficiaries, measures] = await Promise.all([
+      // Match the W256/W262 selection pattern: name is derived from
+      // firstName_ar + lastName_ar (or _en fallback), never a raw
+      // `nameAr` field (that doesn't exist on the canonical schema).
+      Beneficiary.find({ _id: { $in: beneficiaryIds } })
+        .select('firstName_ar lastName_ar firstName_en lastName_en beneficiaryNumber')
+        .lean(),
+      Measure.find({ _id: { $in: measureIds } })
+        .select('_id code name name_ar')
+        .lean(),
+    ]);
+    const benMap = new Map(
+      beneficiaries.map(b => {
+        const nameAr =
+          [b.firstName_ar, b.lastName_ar].filter(Boolean).join(' ').trim() ||
+          [b.firstName_en, b.lastName_en].filter(Boolean).join(' ').trim() ||
+          '—';
+        return [String(b._id), { nameAr, number: b.beneficiaryNumber || null }];
+      })
+    );
+    const measureMap = new Map(
+      measures.map(m => [
+        String(m._id),
+        {
+          code: m.code || '—',
+          nameAr: m.name_ar || m.name || '—',
+        },
+      ])
+    );
+
+    const items = alerts
+      .map(a => {
+        const ben = benMap.get(String(a.beneficiaryId)) || {
+          nameAr: '—',
+          number: null,
+        };
+        const measure = measureMap.get(String(a.measureId)) || {
+          code: a.measureCode || '—',
+          nameAr: '—',
+        };
+        const ev = a.evidence || {};
+        return {
+          alertId: String(a._id),
+          beneficiaryId: String(a.beneficiaryId),
+          beneficiaryNameAr: ben.nameAr,
+          beneficiaryNumber: ben.number,
+          measureId: String(a.measureId),
+          measureCode: measure.code,
+          measureNameAr: measure.nameAr,
+          severity: a.severity || 'medium',
+          firstSeenAt: a.firstSeenAt
+            ? new Date(a.firstSeenAt).toISOString()
+            : new Date().toISOString(),
+          lastEvaluatedAt: a.lastEvaluatedAt ? new Date(a.lastEvaluatedAt).toISOString() : null,
+          goalId: ev.goalId ? String(ev.goalId) : null,
+          goalTitle: ev.goalTitle || null,
+          projected: Number.isFinite(ev.projected) ? ev.projected : null,
+          projectedAt: ev.projectedAt ? new Date(ev.projectedAt).toISOString() : null,
+          target: Number.isFinite(ev.target) ? ev.target : null,
+          gap: Number.isFinite(ev.gap) ? ev.gap : null,
+          direction: ev.direction === 'lower' || ev.direction === 'higher' ? ev.direction : null,
+          r2: Number.isFinite(ev.r2) ? ev.r2 : null,
+          slopePerMonth: Number.isFinite(ev.slopePerMonth) ? ev.slopePerMonth : null,
+          n: Number.isFinite(ev.n) ? ev.n : null,
+          spanDays: Number.isFinite(ev.spanDays) ? ev.spanDays : null,
+          ciMisses: typeof ev.ciMisses === 'boolean' ? ev.ciMisses : null,
+          messageAr: ev.message_ar || null,
+        };
+      })
+      .sort((a, b) => {
+        const sa = SEV_RANK[a.severity] ?? 99;
+        const sb = SEV_RANK[b.severity] ?? 99;
+        if (sa !== sb) return sa - sb;
+        return new Date(a.firstSeenAt) - new Date(b.firstSeenAt);
+      })
+      .slice(0, limit);
+
+    return {
+      branchId: String(branchObj),
+      total: alerts.length,
+      items,
     };
   }
 

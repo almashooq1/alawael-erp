@@ -110,8 +110,7 @@ const KNOWN_CALLBACK_HOOK_BASELINE = new Set([
   // W494 ratchet wave 4 (parallel agent): Delegation + DifferentialDiagnosis + DisabilityProgram
   // (CrmCampaign + Webhook + EmailPreference removed — see W494 ratchet)
   'models/DisabilitySession.js',
-  'models/DiscussionForum.js',
-  'models/DrugLibrary.js',
+  // W494 ratchet (mine, +2): DiscussionForum + DrugLibrary converted to async.
   'models/ESignature.js',
   'models/EStamp.js',
   'models/ElearningCourse.js',

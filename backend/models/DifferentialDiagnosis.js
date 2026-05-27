@@ -35,9 +35,9 @@ const differentialDiagnosisSchema = new mongoose.Schema(
 
 differentialDiagnosisSchema.index({ branchId: 1, beneficiaryId: 1, status: 1 });
 
-differentialDiagnosisSchema.pre('save', function (next) {
+// W494: callback → async.
+differentialDiagnosisSchema.pre('save', async function () {
   if (!this.uuid) this.uuid = require('crypto').randomUUID();
-  next();
 });
 
 module.exports =

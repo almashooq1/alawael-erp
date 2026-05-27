@@ -29,9 +29,9 @@ const discussionForumSchema = new mongoose.Schema(
 
 discussionForumSchema.index({ branchId: 1, courseId: 1, isPinned: -1 });
 
-discussionForumSchema.pre('save', function (next) {
+// W494: callback → async.
+discussionForumSchema.pre('save', async function () {
   if (!this.uuid) this.uuid = require('crypto').randomUUID();
-  next();
 });
 
 module.exports =

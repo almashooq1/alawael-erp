@@ -41,9 +41,9 @@ drugLibrarySchema.index({ branchId: 1, drugClass: 1 });
 drugLibrarySchema.index({ isActive: 1 });
 drugLibrarySchema.index({ genericName: 'text', brandNames: 'text' });
 
-drugLibrarySchema.pre('save', function (next) {
+// W494: callback → async.
+drugLibrarySchema.pre('save', async function () {
   if (!this.uuid) this.uuid = require('crypto').randomUUID();
-  next();
 });
 
 module.exports = mongoose.models.DrugLibrary || mongoose.model('DrugLibrary', drugLibrarySchema);

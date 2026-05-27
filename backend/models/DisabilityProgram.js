@@ -74,10 +74,9 @@ disabilityProgramSchema.index({ category: 1, status: 1 });
 disabilityProgramSchema.index({ createdBy: 1, createdAt: -1 });
 disabilityProgramSchema.index({ status: 1, createdAt: -1 });
 
-// Pre-save middleware
-disabilityProgramSchema.pre('save', function (next) {
+// Pre-save middleware. W494: callback → async.
+disabilityProgramSchema.pre('save', async function () {
   this.updatedAt = new Date();
-  next();
 });
 
 module.exports =

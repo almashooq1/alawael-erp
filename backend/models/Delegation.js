@@ -187,11 +187,11 @@ delegationSchema.statics.generateDelegationNumber = async function () {
 };
 
 /* ━━━ Pre-save ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-delegationSchema.pre('save', function (next) {
+// W494: callback → async.
+delegationSchema.pre('save', async function () {
   if (this.status === 'active' && this.endDate < new Date()) {
     this.status = 'expired';
   }
-  next();
 });
 
 module.exports = mongoose.models.Delegation || mongoose.model('Delegation', delegationSchema);

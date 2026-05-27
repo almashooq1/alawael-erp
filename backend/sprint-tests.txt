@@ -334,3 +334,4 @@ __tests__/hikvision-camera-channel-behavioral-wave96.test.js
 __tests__/hikvision-branch-config-behavioral-wave98.test.js
 __tests__/hikvision-face-library-behavioral-wave97b.test.js
 __tests__/equity-routes-wave489.test.js
+__tests__/hikvision-device-behavioral-wave96b.test.js

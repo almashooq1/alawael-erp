@@ -326,3 +326,4 @@ __tests__/hikvision-fraud-models-behavioral-wave100.test.js
 __tests__/models-use-defensive-guard-wave411.test.js
 __tests__/equity-engine-wave487.test.js
 __tests__/phase-g-e2e-smoke-wave488.test.js
+__tests__/hikvision-anomaly-snapshot-behavioral-wave114.test.js

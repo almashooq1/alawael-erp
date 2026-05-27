@@ -33,6 +33,17 @@ echo "[pre-push] gitignored-source-files drift check…"
 cd backend && npm run check:gitignored-sources
 cd ..
 
+# 2026-05-27 (Cycle 12): block Mongoose mixed pre/post hook styles
+# (async + callback) on the SAME event — Kareem dispatches the whole
+# chain via Promise adapters when ANY hook is async, leaving `next`
+# undefined for callback siblings → TypeError on every doc.save().
+# Caught W465→W483 (Complaint.js mix → parent-portal-v2 CI red ~24h)
+# AND a second live case in measurement/QuickAssessment.model.js
+# during gate development. <1s static scan of backend/models/**/*.js.
+echo "[pre-push] mongoose hook-style drift check…"
+cd backend && npm run check:hook-style
+cd ..
+
 echo "[pre-push] backend quality:push…"
 cd backend && npm run quality:push
 cd ..

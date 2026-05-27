@@ -140,18 +140,21 @@ QuickAssessmentSchema.statics.getStatsByType = async function (beneficiaryId) {
 // ============================
 
 // Auto-calculate QuickAssessment totals
-QuickAssessmentSchema.pre('save', function (next) {
+// Converted from callback-style to async style to match the sibling
+// async hook below — Mongoose's Kareem dispatches the chain via Promise
+// adapters when ANY hook is async, leaving `next` undefined for callback
+// siblings (TypeError on every save). Same fix W483 applied to Complaint.js.
+QuickAssessmentSchema.pre('save', async function () {
   if (this.items && this.items.length > 0 && this.totalScore == null) {
     this.totalScore = this.items.reduce((sum, item) => sum + (item.score || 0), 0);
   }
   if (this.totalScore != null && this.maxScore && this.maxScore > 0) {
     this.percentageScore = Math.round((this.totalScore / this.maxScore) * 100);
   }
-  next();
 });
 
 // Auto-compute change from previous for QuickAssessment
-QuickAssessmentSchema.pre('save', async function (next) {
+QuickAssessmentSchema.pre('save', async function () {
   if (this.isNew && this.previousScoreRef?.score != null) {
     const prevScore = this.previousScoreRef.score;
     const currentScore = this.totalScore || 0;
@@ -162,7 +165,6 @@ QuickAssessmentSchema.pre('save', async function (next) {
         currentScore > prevScore ? 'improved' : currentScore < prevScore ? 'declined' : 'stable',
     };
   }
-  next();
 });
 
 // ============================

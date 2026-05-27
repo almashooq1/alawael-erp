@@ -146,7 +146,8 @@ crmLeadSchema.virtual('qualityScore').get(function () {
 });
 
 // ── Pre-save: auto UUID ───────────────────────────────────────────────────────
-crmLeadSchema.pre('save', function (next) {
+// W494: callback → async.
+crmLeadSchema.pre('save', async function () {
   if (!this.uuid) {
     this.uuid = require('crypto').randomUUID();
   }
@@ -155,7 +156,6 @@ crmLeadSchema.pre('save', function (next) {
     d.setDate(d.getDate() + 1);
     this.nextFollowupAt = d;
   }
-  next();
 });
 
 // ── Static: calculate lead score ──────────────────────────────────────────────

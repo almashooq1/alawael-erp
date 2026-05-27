@@ -53,9 +53,9 @@ const crmSurveySchema = new mongoose.Schema(
 
 crmSurveySchema.index({ branchId: 1, isActive: 1 });
 
-crmSurveySchema.pre('save', function (next) {
+// W494: callback → async.
+crmSurveySchema.pre('save', async function () {
   if (!this.uuid) this.uuid = require('crypto').randomUUID();
-  next();
 });
 
 module.exports = mongoose.models.CrmSurvey || mongoose.model('CrmSurvey', crmSurveySchema);

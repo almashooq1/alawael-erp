@@ -30,9 +30,9 @@ const crmReferralCommissionSchema = new mongoose.Schema(
 crmReferralCommissionSchema.index({ partnerId: 1, status: 1 });
 crmReferralCommissionSchema.index({ leadId: 1 });
 
-crmReferralCommissionSchema.pre('save', function (next) {
+// W494: callback → async.
+crmReferralCommissionSchema.pre('save', async function () {
   if (!this.uuid) this.uuid = require('crypto').randomUUID();
-  next();
 });
 
 module.exports =

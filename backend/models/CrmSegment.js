@@ -24,9 +24,9 @@ const crmSegmentSchema = new mongoose.Schema(
 
 crmSegmentSchema.index({ branchId: 1, isActive: 1 });
 
-crmSegmentSchema.pre('save', function (next) {
+// W494: callback → async.
+crmSegmentSchema.pre('save', async function () {
   if (!this.uuid) this.uuid = require('crypto').randomUUID();
-  next();
 });
 
 module.exports = mongoose.models.CrmSegment || mongoose.model('CrmSegment', crmSegmentSchema);

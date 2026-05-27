@@ -55,9 +55,9 @@ const crmPartnerSchema = new mongoose.Schema(
 crmPartnerSchema.index({ branchId: 1, status: 1 });
 crmPartnerSchema.index({ branchId: 1, type: 1 });
 
-crmPartnerSchema.pre('save', function (next) {
+// W494: callback → async.
+crmPartnerSchema.pre('save', async function () {
   if (!this.uuid) this.uuid = require('crypto').randomUUID();
-  next();
 });
 
 module.exports = mongoose.models.CrmPartner || mongoose.model('CrmPartner', crmPartnerSchema);

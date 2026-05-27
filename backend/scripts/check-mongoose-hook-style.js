@@ -109,13 +109,9 @@ const KNOWN_CALLBACK_HOOK_BASELINE = new Set([
   'models/CourseModule.js',
   'models/CpdRecord.js',
   'models/CrisisIncident.js',
-  // W494-Webhook,EmailPreference,CrmCampaign ratchet-DOWN — pruned 3
-  // entries after async conversion (see commit subject).
-  'models/CrmLead.js',
-  'models/CrmPartner.js',
-  'models/CrmReferralCommission.js',
-  'models/CrmSegment.js',
-  'models/CrmSurvey.js',
+  // W494 ratchet wave 1: Webhook + EmailPreference + CrmCampaign (-3)
+  // W494 ratchet wave 2: 5 Crm* models (CrmLead/Partner/Referral/Segment/Survey)
+  //   — all single uuid-fill hooks, trivial async conversion.
   'models/CulturalProfile.js',
   'models/DecisionRightsAssessment.js',
   'models/Delegation.js',

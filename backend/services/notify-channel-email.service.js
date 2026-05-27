@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * notify-channel-email.service.js — Wave 518 (email notification channel).
+ * notify-channel-email.service.js — Wave 519 (email notification channel).
  *
  * Second concrete channel for the W516 notification surface. Subscribes
  * to `notification.measure_alert.reassigned.alert` and sends an email
@@ -74,7 +74,9 @@ function _loadDefaultSendEmail() {
 function _defaultGetUserById(userId) {
   const User = _modelOrNull('User', '../models/User');
   if (!User) return Promise.resolve(null);
-  return User.findById(userId).select('_id email firstName_ar lastName_ar firstName lastName').lean();
+  return User.findById(userId)
+    .select('_id email firstName_ar lastName_ar firstName lastName')
+    .lean();
 }
 
 function _renderEmail({ payload, recipient, isFrom, isTo }) {
@@ -148,7 +150,7 @@ function wireEmailNotificationChannel({
 
   if (!send) {
     logger.warn?.(
-      '[notify-email] W518 services/email not loadable — channel will receive events but skip sends (logged once)'
+      '[notify-email] W519 services/email not loadable — channel will receive events but skip sends (logged once)'
     );
   }
 
@@ -194,9 +196,7 @@ function wireEmailNotificationChannel({
         if (!recipient || !recipient.email) {
           // No email on file — log + skip. Operator can later wire SMS
           // channel or manual outreach.
-          logger.warn?.(
-            `[notify-email] recipient=${recipientId} has no email — skipping`
-          );
+          logger.warn?.(`[notify-email] recipient=${recipientId} has no email — skipping`);
           stats.skipped++;
           continue;
         }
@@ -226,7 +226,7 @@ function wireEmailNotificationChannel({
   };
 
   const unsubscribe = integrationBus.subscribe(EVENT_PATTERN, handler);
-  logger.info?.(`[notify-email] W518 wired — subscribing to '${EVENT_PATTERN}'`);
+  logger.info?.(`[notify-email] W519 wired — subscribing to '${EVENT_PATTERN}'`);
 
   return {
     unsubscribe: typeof unsubscribe === 'function' ? unsubscribe : () => {},

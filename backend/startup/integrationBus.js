@@ -152,22 +152,17 @@ function setupIntegrationBus(app) {
       logger.warn('[Integration] W517 in-app notification channel skipped:', inAppErr.message);
     }
 
-    // W518 — second concrete channel: email. Same upstream event as W517
+    // W519 — second concrete channel: email. Same upstream event as W517
     // (notification.measure_alert.reassigned.alert) but sends via the
     // existing services/email manager. Channel auto-degrades to no-op
     // when SMTP is not configured (CI/dev), surfacing the event in
     // logs without erroring.
     try {
-      const {
-        wireEmailNotificationChannel,
-      } = require('../services/notify-channel-email.service');
+      const { wireEmailNotificationChannel } = require('../services/notify-channel-email.service');
       wireEmailNotificationChannel({ integrationBus, logger });
-      logger.info('[Integration] ✓ W518 email notification channel wired');
+      logger.info('[Integration] ✓ W519 email notification channel wired');
     } catch (emailErr) {
-      logger.warn(
-        '[Integration] W518 email notification channel skipped:',
-        emailErr.message
-      );
+      logger.warn('[Integration] W519 email notification channel skipped:', emailErr.message);
     }
 
     // Wire DDD notification triggers (10 notification rules)

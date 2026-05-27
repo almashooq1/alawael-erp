@@ -377,4 +377,4 @@ __tests__/measure-alert-reassign-notify-wave516.test.js
 __tests__/decision-rights-routes-wave515.test.js
 __tests__/notify-channel-in-app-wave517.test.js
 __tests__/self-advocacy-routes-wave518.test.js
-__tests__/notify-channel-email-wave518.test.js
+__tests__/notify-channel-email-wave519.test.js

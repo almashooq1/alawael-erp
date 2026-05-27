@@ -12,7 +12,7 @@
 
 const express = require('express');
 const router = express.Router();
-const { authenticate } = require('../middleware/auth');
+const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const { bodyScopedBeneficiaryGuard } = require('../middleware/assertBranchMatch');
 const {
@@ -24,8 +24,28 @@ const {
 const logger = require('../utils/logger');
 const safeError = require('../utils/safeError');
 
+// W469: role gate for appointment scheduling. Pre-W469 any
+// authenticated user could create/modify/delete schedule templates,
+// time slots, reminders, and waitlist entries — affecting every
+// clinician's calendar. Restrict to scheduling/clinical/admin roles.
+const SCHEDULING_ROLES = [
+  'admin',
+  'super_admin',
+  'superadmin',
+  'manager',
+  'branch_manager',
+  'clinical_supervisor',
+  'receptionist',
+  'scheduler',
+  'physician',
+  'doctor',
+  'nurse',
+  'therapist',
+];
+
 router.use(authenticate);
 router.use(requireBranchAccess);
+router.use(authorize(SCHEDULING_ROLES)); // W469: clinical + reception only
 router.use(bodyScopedBeneficiaryGuard); // W442: enforce branch on req.body.beneficiary (singular FK)
 /* ── Field whitelists ───────────────────────────────────────────── */
 const TEMPLATE_FIELDS = [

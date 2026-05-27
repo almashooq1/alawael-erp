@@ -7,10 +7,28 @@
 
 const express = require('express');
 const router = express.Router();
-const { authenticate } = require('../middleware/auth');
+const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { attachMfaActor, requireMfaTier } = require('../middleware/requireMfaTier');
 const _logger = require('../utils/logger');
+
+// W469: role gate for biometric PII. Pre-W469 any authenticated user
+// (parent-portal user, visitor with valid JWT) could read/modify
+// ZKTeco device configs, biometric enrollment data, attendance logs,
+// AttendancePolicy, OvertimeRequest. Biometric data (face/fingerprint
+// templates) is the most sensitive PII class — non-revocable, lifelong.
+// PDPL Article 6 special-category. Restrict to HR + admin only.
+// (MFA tier check still applies per-endpoint on sensitive ops.)
+const BIOMETRIC_ROLES = [
+  'admin',
+  'super_admin',
+  'superadmin',
+  'manager',
+  'branch_manager',
+  'hr',
+  'hr_manager',
+  'receptionist',
+];
 
 // 🔒 All biometric attendance routes require authentication + branch scope.
 // Wave 273: attachMfaActor populates req.actor.mfaLevel from the in-process
@@ -19,6 +37,7 @@ const _logger = require('../utils/logger');
 // overtime approval — see CLAUDE.md "Don't bypass loadMfaActor middleware").
 router.use(authenticate);
 router.use(requireBranchAccess);
+router.use(authorize(BIOMETRIC_ROLES)); // W469: HR + admin only — biometric PII
 router.use(attachMfaActor);
 const ZktecoDevice = require('../models/ZktecoDevice');
 const AttendanceLog = require('../models/AttendanceLog');

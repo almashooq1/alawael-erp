@@ -98,16 +98,12 @@ const KNOWN_CALLBACK_HOOK_BASELINE = new Set([
   'models/BeneficiaryManagement/SkillsDevelopment.js',
   'models/BeneficiaryManagement/SupportPlan.js',
   'models/BeneficiaryVoiceLog.js',
-  'models/CdssAlert.js',
-  'models/CdssDecisionLog.js',
-  'models/CdssRiskAssessment.js',
-  'models/ClinicalRule.js',
+  // W494 ratchet wave 3: 3 Cdss* + ClinicalRule + CpdRecord (-5)
   'models/CommunityActivity.js',
   'models/ComplaintEnhanced.js',
   'models/ComplianceMetric.js',
   'models/CourseEnrollment.js',
   'models/CourseModule.js',
-  'models/CpdRecord.js',
   'models/CrisisIncident.js',
   // W494 ratchet wave 1: Webhook + EmailPreference + CrmCampaign (-3)
   // W494 ratchet wave 2: 5 Crm* models (CrmLead/Partner/Referral/Segment/Survey)

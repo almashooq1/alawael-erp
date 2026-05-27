@@ -37,9 +37,9 @@ cdssDecisionLogSchema.index({ branchId: 1, beneficiaryId: 1, decisionType: 1 });
 cdssDecisionLogSchema.index({ decisionAt: -1 });
 cdssDecisionLogSchema.index({ usedForMlTraining: 1 });
 
-cdssDecisionLogSchema.pre('save', function (next) {
+// W494: callback → async.
+cdssDecisionLogSchema.pre('save', async function () {
   if (!this.uuid) this.uuid = require('crypto').randomUUID();
-  next();
 });
 
 module.exports =

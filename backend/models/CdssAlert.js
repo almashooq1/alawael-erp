@@ -60,9 +60,9 @@ cdssAlertSchema.index({ alertType: 1, severity: 1 });
 cdssAlertSchema.index({ triggeredAt: -1 });
 cdssAlertSchema.index({ contextType: 1, contextId: 1 });
 
-cdssAlertSchema.pre('save', function (next) {
+// W494: callback → async.
+cdssAlertSchema.pre('save', async function () {
   if (!this.uuid) this.uuid = require('crypto').randomUUID();
-  next();
 });
 
 module.exports = mongoose.models.CdssAlert || mongoose.model('CdssAlert', cdssAlertSchema);

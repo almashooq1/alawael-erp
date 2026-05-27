@@ -44,9 +44,9 @@ const cpdRecordSchema = new mongoose.Schema(
 cpdRecordSchema.index({ branchId: 1, userId: 1, year: 1, status: 1 });
 cpdRecordSchema.index({ activityDate: -1 });
 
-cpdRecordSchema.pre('save', function (next) {
+// W494: callback → async.
+cpdRecordSchema.pre('save', async function () {
   if (!this.uuid) this.uuid = require('crypto').randomUUID();
-  next();
 });
 
 module.exports = mongoose.models.CpdRecord || mongoose.model('CpdRecord', cpdRecordSchema);

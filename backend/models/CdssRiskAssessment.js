@@ -45,9 +45,9 @@ cdssRiskAssessmentSchema.index({ branchId: 1, beneficiaryId: 1, assessmentType: 
 cdssRiskAssessmentSchema.index({ riskLevel: 1, assessmentDate: -1 });
 cdssRiskAssessmentSchema.index({ assessmentDate: -1 });
 
-cdssRiskAssessmentSchema.pre('save', function (next) {
+// W494: callback → async.
+cdssRiskAssessmentSchema.pre('save', async function () {
   if (!this.uuid) this.uuid = require('crypto').randomUUID();
-  next();
 });
 
 module.exports =

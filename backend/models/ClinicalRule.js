@@ -58,9 +58,9 @@ clinicalRuleSchema.index({ branchId: 1, category: 1, isActive: 1 });
 clinicalRuleSchema.index({ severity: 1, isActive: 1 });
 clinicalRuleSchema.index({ priority: 1 });
 
-clinicalRuleSchema.pre('save', function (next) {
+// W494: callback → async.
+clinicalRuleSchema.pre('save', async function () {
   if (!this.uuid) this.uuid = require('crypto').randomUUID();
-  next();
 });
 
 module.exports = mongoose.models.ClinicalRule || mongoose.model('ClinicalRule', clinicalRuleSchema);

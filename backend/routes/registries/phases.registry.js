@@ -602,6 +602,11 @@ module.exports = function registerPhaseRoutes(
   );
   safeMount(app, ['/api/public-forms', '/api/v1/public-forms'], '../routes/public-forms.routes');
 
+  // W507 Phase E2 — Smart Inbox (ranked actionable items for the
+  // caller's role/branch via W431 SmartInboxRanker). Distinct from
+  // /api/reports-inbox (which is delivered PDF reports).
+  safeMount(app, ['/api/smart-inbox', '/api/v1/smart-inbox'], '../routes/smart-inbox.routes');
+
   // Reports
   safeMount(app, ['/api/reports-inbox', '/api/v1/reports-inbox'], '../routes/reports-inbox.routes');
   safeMount(app, ['/api/reports-ops', '/api/v1/reports-ops'], '../routes/reports-ops.routes');

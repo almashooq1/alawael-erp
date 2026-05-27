@@ -366,3 +366,5 @@ __tests__/smart-inbox-route-wave507.test.js
 __tests__/mass-assignment-create-strip-update-meta-wave507.test.js
 __tests__/behavioral-escalation-source-wave434.test.js
 __tests__/idor-crm-enhanced-branch-filter-wave508.test.js
+__tests__/measure-alert-auto-assignment-wave509.test.js
+__tests__/smart-platform-metrics-wave435.test.js

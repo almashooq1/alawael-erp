@@ -115,6 +115,24 @@ function wireGoalForecaster(app, deps = {}) {
       }
       const durationMs = Date.now() - startedAt.getTime();
       logger.info('[goal-forecaster:cron] tick complete', { ...summary, durationMs });
+
+      // W435 / Phase F2 — emit counters + duration histogram. No-op when
+      // metrics facade absent (prom-client missing or wire-up skipped).
+      const metrics = app && app._smartPlatformMetrics;
+      if (metrics && metrics.enabled) {
+        try {
+          for (let i = 0; i < summary.created; i++) metrics.incForecastAlert('created');
+          for (let i = 0; i < summary.updated; i++) metrics.incForecastAlert('updated');
+          for (let i = 0; i < summary.resolved; i++) metrics.incForecastAlert('resolved');
+          for (let i = 0; i < summary.skipped; i++) metrics.incForecastAlert('skipped');
+          for (let i = 0; i < summary.errors; i++) metrics.incForecastAlert('error');
+          metrics.observeSweepDuration('goal_forecaster', durationMs / 1000);
+        } catch (mErr) {
+          logger.warn('[goal-forecaster:cron] metrics emit failed', {
+            err: mErr && mErr.message,
+          });
+        }
+      }
     },
     { timezone: 'Asia/Riyadh' }
   );

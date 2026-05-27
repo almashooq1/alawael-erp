@@ -53,6 +53,64 @@ function wireRealtimeGateway(app, deps = {}) {
     });
     app._realtimeBroker = broker;
 
+    // ── 1b. Smart-platform metrics facade (W435 / Phase F2). Late-bind
+    // a singleton so other producers (W430 forecaster sweeper, future
+    // W431 ranker call-sites, etc.) can read app._smartPlatformMetrics.
+    // No-op when prom-client absent (test env).
+    let metrics = app._smartPlatformMetrics;
+    if (!metrics) {
+      try {
+        const {
+          createSmartPlatformMetrics,
+        } = require('../intelligence/smart-platform-metrics.service');
+        metrics = createSmartPlatformMetrics();
+        app._smartPlatformMetrics = metrics;
+      } catch (mErr) {
+        logger.warn(`[realtime] metrics facade skipped: ${mErr.message}`);
+        metrics = null;
+      }
+    }
+
+    // Wrap broker.publish + subscribe/unsubscribe so every fan-out and
+    // every subscription change updates the W435 counters. Wrapper is
+    // transparent: same return values, same throw behaviour. Drops to
+    // no-op when metrics is null.
+    if (metrics && metrics.enabled) {
+      const _origPublish = broker.publish.bind(broker);
+      broker.publish = function publishWithMetrics(args) {
+        const r = _origPublish(args);
+        try {
+          if (r && r.ok && !r.idempotent) {
+            const sourceBus = args?.meta?.source || 'direct';
+            metrics.incRealtimeEvent(args?.topic, sourceBus);
+          }
+        } catch {
+          /* metric drop */
+        }
+        return r;
+      };
+      const _origSubscribe = broker.subscribe.bind(broker);
+      broker.subscribe = function subscribeWithMetrics(args) {
+        const r = _origSubscribe(args);
+        try {
+          metrics.setActiveSubscriptions(broker.stats().activeSubscriptions);
+        } catch {
+          /* drop */
+        }
+        return r;
+      };
+      const _origUnsub = broker.unsubscribe.bind(broker);
+      broker.unsubscribe = function unsubscribeWithMetrics(sub) {
+        const r = _origUnsub(sub);
+        try {
+          metrics.setActiveSubscriptions(broker.stats().activeSubscriptions);
+        } catch {
+          /* drop */
+        }
+        return r;
+      };
+    }
+
     // ── 2. Bridge: integrationBus → broker ────────────────────────
     let integrationBridgeOk = false;
     try {

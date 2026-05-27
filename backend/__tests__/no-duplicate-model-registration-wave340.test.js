@@ -157,7 +157,16 @@ const KNOWN_DUPLICATE_REGISTRATIONS = new Set([
   //   Recommendation: Pattern D rename inbox → 'UserNotification' (fewer touch
   //   points). Open ADR-031 to confirm before executing.
   'NotificationLog',
-  'Consent', // canonical PDPL entity
+  // 'Consent' — 2026-05-27 moved to REGISTRATION_ALLOWLIST. Verified dormant
+  //   privacy fallback: privacy/consent.model.js has ZERO production importers
+  //   (only __tests__/privacy.routes.test.js imports it; privacy/privacy.routes.js
+  //   uses buildRouter DI but is never mounted in app.js or any registry).
+  //   Canonical models/Consent.js has 8 production callers (app.js, beneficiary-
+  //   consents.routes.js, therapistPortal.service.js, parent-portal-v1.routes.js,
+  //   consentObservations.js, sehhaty-adapter tests). Both use the defensive
+  //   `mongoose.models.Consent || mongoose.model(...)` guard, so canonical wins
+  //   load-order race; privacy fallback is dead code at runtime. Same precedent
+  //   as W347 AuditLog / W343 Referral+Task.
   'DocumentAccessLog',
   'DocumentShare',
   'DocumentVersion',
@@ -282,6 +291,19 @@ const REGISTRATION_ALLOWLIST = new Set([
   // is dead code (only fires if canonical lookup throws, which it doesn't in
   // normal startup). ALLOWLIST preserves current behavior.
   'LifecyclePolicy',
+  // 2026-05-27 — Consent. Two registration sites: (1) canonical models/Consent.js
+  // (8 production callers, beneficiary-centric schema: type/grantedBy:Guardian/
+  // revokedAt), (2) privacy/consent.model.js (PDPL-centric schema: subjectType/
+  // legalBasis/state/noticeVersion). Verified 2026-05-27 that #2 has ZERO
+  // production importers — privacy/privacy.routes.js uses DI buildRouter pattern
+  // but is never mounted in app.js or any route registry. Both files use the
+  // defensive `mongoose.models.Consent || mongoose.model(...)` idiom; canonical
+  // wins load-order race trivially. Same precedent as W347 AuditLog / W343
+  // Referral+Task. A future ADR may decide to either (a) delete the dormant
+  // privacy/consent.model.js + privacy/privacy.routes.js if PDPL ledger surface
+  // is permanently scoped to clinical consents, or (b) wire the PDPL router
+  // with its own model name (e.g. 'PdplConsent') to formalize the two domains.
+  'Consent',
 ]);
 
 function walkJs(dir, skip, out = []) {

@@ -328,3 +328,4 @@ __tests__/equity-engine-wave487.test.js
 __tests__/phase-g-e2e-smoke-wave488.test.js
 __tests__/hikvision-anomaly-snapshot-behavioral-wave114.test.js
 __tests__/services-use-defensive-guard-wave412.test.js
+__tests__/backend-wide-defensive-guard-wave413.test.js

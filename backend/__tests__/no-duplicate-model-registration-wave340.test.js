@@ -130,6 +130,32 @@ const KNOWN_DUPLICATE_REGISTRATIONS = new Set([
   // 'GlobalSetting' — same routes/central-settings.routes.js defensive try/catch pattern.
   //                   Both names ALLOWLISTed together since they're paired in the same
   //                   try/catch block.
+  // 'NotificationLog' — 2026-05-27 INVESTIGATED (not yet consolidated):
+  //   Two genuinely DIVERGENT schemas under one model name:
+  //     (a) services/unifiedNotifier.js — DELIVERY LOG (channel/to/subject/body/
+  //         attempts/providerMessageId/sentAt — camelCase). Used by 18 callers
+  //         across routes/+startup/+services/ as the multi-channel notify() audit trail.
+  //     (b) models/communication/NotificationLog.js — USER INBOX (user_id/
+  //         title_ar/body_ar/recipients[]/is_read/read_at — snake_case bilingual).
+  //         Used by ONE caller: routes/communication-module.routes.js (inbox CRUD).
+  //   Runtime: unifiedNotifier loads first via top-level requires in 18 files
+  //   (notifications-log.routes.js mounted at app.js:318 transitively pulls it)
+  //   → its DELIVERY-LOG schema wins via mongoose.models cache → the bilingual
+  //   USER-INBOX schema returns the cached delivery-log model → ALL queries in
+  //   communication-module.routes.js silently match against wrong fields
+  //   (mongoose strict mode strips snake_case fields the delivery-log schema
+  //   doesn't have). Production impact: inbox endpoints return empty/wrong
+  //   results. Tests in tests/unit/communication-module.routes.test.js pass
+  //   because they mock the model entirely.
+  //   Resolution: Pattern D rename per ADR-021 — rename one model name. Two
+  //   different domains, two different schemas, ONE name is the problem. Either:
+  //     - Rename inbox → 'UserNotification' (touches communication-module.routes
+  //       + the schema file + DB collection migration)
+  //     - Rename delivery → 'NotificationDeliveryLog' (touches 18 callers +
+  //       services/unifiedNotifier.js + DB migration). Lower-blast-radius name
+  //       but higher caller-update count.
+  //   Recommendation: Pattern D rename inbox → 'UserNotification' (fewer touch
+  //   points). Open ADR-031 to confirm before executing.
   'NotificationLog',
   'Consent', // canonical PDPL entity
   'DocumentAccessLog',

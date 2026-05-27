@@ -8,6 +8,7 @@ const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const safeError = require('../utils/safeError');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 router.use(authenticate);
 router.use(requireBranchAccess);
@@ -60,10 +61,14 @@ router.get('/:id', async (req, res) => {
 router.put('/:id', authorize('admin', 'manager', 'compliance_officer'), async (req, res) => {
   try {
     const FleetCompliance = require('../models/Fleet/FleetCompliance');
-    const record = await FleetCompliance.findByIdAndUpdate(req.params.id, req.body, {
-      returnDocument: 'after',
-      runValidators: true,
-    });
+    const record = await FleetCompliance.findByIdAndUpdate(
+      req.params.id,
+      stripUpdateMeta(req.body),
+      {
+        returnDocument: 'after',
+        runValidators: true,
+      }
+    );
     if (!record)
       return res.status(404).json({ success: false, message: 'Compliance record not found' });
     res.json({ success: true, data: record });

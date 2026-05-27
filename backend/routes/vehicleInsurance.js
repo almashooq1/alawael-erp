@@ -8,6 +8,7 @@ const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const safeError = require('../utils/safeError');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 router.use(authenticate);
 router.use(requireBranchAccess);
@@ -60,10 +61,14 @@ router.get('/:id', async (req, res) => {
 router.put('/:id', authorize('admin', 'manager', 'fleet_officer'), async (req, res) => {
   try {
     const VehicleInsurance = require('../models/Fleet/VehicleInsurance');
-    const policy = await VehicleInsurance.findByIdAndUpdate(req.params.id, req.body, {
-      returnDocument: 'after',
-      runValidators: true,
-    });
+    const policy = await VehicleInsurance.findByIdAndUpdate(
+      req.params.id,
+      stripUpdateMeta(req.body),
+      {
+        returnDocument: 'after',
+        runValidators: true,
+      }
+    );
     if (!policy)
       return res.status(404).json({ success: false, message: 'Insurance policy not found' });
     res.json({ success: true, data: policy });

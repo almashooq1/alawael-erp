@@ -23,6 +23,11 @@ const { authenticate } = require('../middleware/auth');
 const { requireRole } = require('../middleware/rbac.v2.middleware');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const safeError = require('../utils/safeError');
+// W506: stripUpdateMeta blocks _id/__v/role/password/__proto__/etc on mass-
+// assignment from req.body; explicit `delete body.branchId` blocks the
+// tenant-takeover class (admin/manager could otherwise rewrite branchId
+// to relocate a template to another tenant).
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 const router = express.Router();
 router.use(authenticate);
@@ -229,8 +234,12 @@ router.post('/templates', requireRole('admin', 'manager'), async (req, res) => {
     const NotifTmpl = safeModel('NotificationTemplate');
     if (!NotifTmpl)
       return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
+    // W506: deny-list sensitive meta + force trusted server-side fields AFTER
+    // the spread so they cannot be overridden via req.body.
+    const body = stripUpdateMeta(req.body || {});
+    delete body.branchId;
     const doc = await NotifTmpl.create({
-      ...req.body,
+      ...body,
       type: 'ai_response',
       branchId: req.user.branchId,
       createdBy: req.user._id,
@@ -247,9 +256,18 @@ router.put('/templates/:id', requireRole('admin', 'manager'), async (req, res) =
     const NotifTmpl = safeModel('NotificationTemplate');
     if (!NotifTmpl)
       return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
+    // W506: pre-W506 the bare `req.body` update let admin/manager:
+    //  - rewrite branchId → relocate the template into another tenant
+    //    (the filter passes since the doc IS in caller's branch; the
+    //    update silently moves it OUT).
+    //  - set createdBy/_id/__v/role/password/__proto__ via mass-
+    //    assignment (most are no-ops in Mongoose but defense-in-depth
+    //    matters once the deny-list is centralised).
+    const body = stripUpdateMeta(req.body || {});
+    delete body.branchId;
     const doc = await NotifTmpl.findOneAndUpdate(
       { _id: req.params.id, branchId: req.user.branchId },
-      req.body,
+      body,
       { returnDocument: 'after', runValidators: true }
     );
     if (!doc) return res.status(404).json({ success: false, message: 'Template not found' });

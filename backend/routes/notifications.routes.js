@@ -300,7 +300,7 @@ router.put(
       return res.json({ success: true, data: updated });
     }
     // Fallback to service
-    const result = await NotificationsService.updateNotification(id, req.body);
+    const result = await NotificationsService.updateNotification(id, stripUpdateMeta(req.body));
     res.json({ success: true, ...result });
   })
 );

@@ -58,6 +58,7 @@ const whatsappIdempotency = require('../services/whatsapp/idempotency.service');
 const whatsappDlq = require('../services/whatsapp/dlq.service');
 const { authenticate } = require('../middleware/auth');
 const logger = require('../utils/logger');
+const { stripUpdateMeta } = require('../utils/sanitize');
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 function asyncHandler(fn) {
   return (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
@@ -335,7 +336,7 @@ router.post(
 router.post(
   '/send/text',
   asyncHandler(async (req, res) => {
-    validate(['to', 'text'], req.body);
+    validate(['to', 'text'], stripUpdateMeta(req.body));
     const {
       to,
       text,

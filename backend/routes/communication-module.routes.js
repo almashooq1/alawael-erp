@@ -503,7 +503,7 @@ router.put('/contacts/:id', async (req, res) => {
   try {
     const contact = await ContactDirectory.findOneAndUpdate(
       { _id: req.params.id, deleted_at: null },
-      req.body,
+      stripUpdateMeta(req.body),
       { returnDocument: 'after', runValidators: true }
     );
     if (!contact) return res.status(404).json({ success: false, error: 'جهة الاتصال غير موجودة' });

@@ -8,6 +8,7 @@ const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const safeError = require('../utils/safeError');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 router.use(authenticate);
 router.use(requireBranchAccess);
@@ -54,7 +55,7 @@ router.get('/:id', async (req, res) => {
 router.put('/:id', authorize('admin', 'manager', 'fleet_officer', 'mechanic'), async (req, res) => {
   try {
     const FleetPart = require('../models/Fleet/FleetPart');
-    const part = await FleetPart.findByIdAndUpdate(req.params.id, req.body, {
+    const part = await FleetPart.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       returnDocument: 'after',
       runValidators: true,
     });

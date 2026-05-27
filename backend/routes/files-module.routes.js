@@ -18,6 +18,7 @@ const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const FileRecord = require('../models/documents/FileRecord');
 const FileFolder = require('../models/documents/FileFolder');
 const safeError = require('../utils/safeError');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 router.use(authenticate);
 router.use(requireBranchAccess);
@@ -86,7 +87,7 @@ router.put('/folders/:id', async (req, res) => {
   try {
     const folder = await FileFolder.findOneAndUpdate(
       { _id: req.params.id, deleted_at: null, is_system: { $ne: true } },
-      req.body,
+      stripUpdateMeta(req.body),
       { returnDocument: 'after', runValidators: true }
     );
     if (!folder) return res.status(404).json({ success: false, error: 'المجلد غير موجود أو محمي' });

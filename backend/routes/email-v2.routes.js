@@ -30,6 +30,7 @@ const { authenticate } = require('../middleware/auth');
 const { requireRole } = require('../middleware/rbac.v2.middleware');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const safeError = require('../utils/safeError');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 const router = express.Router();
 router.use(authenticate);
@@ -179,7 +180,7 @@ router.put('/drafts/:id', async (req, res) => {
       return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
     const doc = await Communication.findOneAndUpdate(
       { _id: req.params.id, status: 'draft', sentBy: req.user._id },
-      req.body,
+      stripUpdateMeta(req.body),
       { returnDocument: 'after' }
     );
     if (!doc) return res.status(404).json({ success: false, message: 'Draft not found' });
@@ -363,7 +364,7 @@ router.put('/templates/:id', requireRole('admin', 'manager'), async (req, res) =
       return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
     const doc = await NotifTmpl.findOneAndUpdate(
       { _id: req.params.id, branchId: req.user.branchId, type: 'email' },
-      req.body,
+      stripUpdateMeta(req.body),
       { returnDocument: 'after' }
     );
     if (!doc) return res.status(404).json({ success: false, message: 'Template not found' });

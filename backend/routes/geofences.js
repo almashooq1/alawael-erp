@@ -8,6 +8,7 @@ const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const safeError = require('../utils/safeError');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 router.use(authenticate);
 router.use(requireBranchAccess);
@@ -54,7 +55,7 @@ router.get('/:id', async (req, res) => {
 router.put('/:id', authorize('admin', 'manager'), async (req, res) => {
   try {
     const Geofence = require('../models/Fleet/Geofence');
-    const geofence = await Geofence.findByIdAndUpdate(req.params.id, req.body, {
+    const geofence = await Geofence.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       returnDocument: 'after',
       runValidators: true,
     });

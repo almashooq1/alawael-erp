@@ -8,6 +8,7 @@ const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const safeError = require('../utils/safeError');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 router.use(authenticate);
 router.use(requireBranchAccess);
@@ -64,10 +65,14 @@ router.put(
   async (req, res) => {
     try {
       const FleetAccident = require('../models/Fleet/FleetAccident');
-      const accident = await FleetAccident.findByIdAndUpdate(req.params.id, req.body, {
-        returnDocument: 'after',
-        runValidators: true,
-      });
+      const accident = await FleetAccident.findByIdAndUpdate(
+        req.params.id,
+        stripUpdateMeta(req.body),
+        {
+          returnDocument: 'after',
+          runValidators: true,
+        }
+      );
       if (!accident)
         return res.status(404).json({ success: false, message: 'Accident report not found' });
       res.json({ success: true, data: accident });

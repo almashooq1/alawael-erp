@@ -361,3 +361,4 @@ __tests__/equity-engine-behavioral-wave503.test.js
 __tests__/idor-student-assignment-submit-wave504.test.js
 __tests__/measure-alert-realtime-bridge-wave506.test.js
 __tests__/pdpl-salt-no-literal-fallback-wave505.test.js
+__tests__/tenant-takeover-strip-update-meta-wave506.test.js

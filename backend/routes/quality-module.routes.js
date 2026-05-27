@@ -13,6 +13,7 @@ const QualityIndicator = require('../models/quality/QualityIndicator');
 const QualityMeasurement = require('../models/quality/QualityMeasurement');
 const IncidentReport = require('../models/quality/IncidentReport');
 const safeError = require('../utils/safeError');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 router.use(authenticate);
 router.use(requireBranchAccess);
@@ -82,7 +83,7 @@ router.put('/indicators/:id', async (req, res) => {
   try {
     const indicator = await QualityIndicator.findOneAndUpdate(
       { _id: req.params.id, deleted_at: null },
-      req.body,
+      stripUpdateMeta(req.body),
       { returnDocument: 'after', runValidators: true }
     );
     if (!indicator) return res.status(404).json({ error: 'المؤشر غير موجود' });
@@ -222,7 +223,7 @@ router.put('/measurements/:id', async (req, res) => {
   try {
     const measurement = await QualityMeasurement.findOneAndUpdate(
       { _id: req.params.id, deleted_at: null },
-      req.body,
+      stripUpdateMeta(req.body),
       { returnDocument: 'after', runValidators: true }
     );
     if (!measurement) return res.status(404).json({ error: 'القياس غير موجود' });
@@ -366,7 +367,7 @@ router.put('/incidents/:id', async (req, res) => {
   try {
     const incident = await IncidentReport.findOneAndUpdate(
       { _id: req.params.id, deleted_at: null, status: { $nin: ['closed'] } },
-      req.body,
+      stripUpdateMeta(req.body),
       { returnDocument: 'after', runValidators: true }
     );
     if (!incident) return res.status(404).json({ error: 'لا يمكن تعديل هذه الحادثة' });

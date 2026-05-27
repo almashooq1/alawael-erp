@@ -168,7 +168,7 @@ router.put(
       const Room = require('../models/Room');
       const room = await Room.findOneAndUpdate(
         { _id: req.params.roomId, branchId: req.params.branchId },
-        req.body,
+        stripUpdateMeta(req.body),
         { returnDocument: 'after' }
       );
       if (!room) return res.status(404).json({ success: false, message: 'الغرفة غير موجودة' });
@@ -237,7 +237,7 @@ router.put(
       const BranchService = require('../models/BranchService');
       const service = await BranchService.findOneAndUpdate(
         { _id: req.params.serviceId, branchId: req.params.branchId },
-        req.body,
+        stripUpdateMeta(req.body),
         { returnDocument: 'after' }
       );
       if (!service) return res.status(404).json({ success: false, message: 'الخدمة غير موجودة' });

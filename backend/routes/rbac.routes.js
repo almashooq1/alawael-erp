@@ -8,6 +8,7 @@ const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const safeError = require('../utils/safeError');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 router.use(authenticate);
 router.use(requireBranchAccess);
@@ -47,7 +48,7 @@ router.get('/roles/:id', authorize('admin', 'hr_manager'), async (req, res) => {
 router.put('/roles/:id', authorize('admin'), async (req, res) => {
   try {
     const Role = require('../models/RBAC/Role');
-    const role = await Role.findByIdAndUpdate(req.params.id, req.body, {
+    const role = await Role.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       returnDocument: 'after',
       runValidators: true,
     });

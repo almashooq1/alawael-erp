@@ -34,6 +34,7 @@ const { authenticate } = require('../middleware/auth');
 const { requireRole } = require('../middleware/rbac.v2.middleware');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const safeError = require('../utils/safeError');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 const router = express.Router();
 router.use(authenticate);
@@ -320,7 +321,7 @@ router.put('/rules/:id', requireRole('admin', 'manager'), async (req, res) => {
       return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
     const doc = await SmartNotif.findOneAndUpdate(
       { _id: req.params.id, branchId: req.user.branchId, recordType: 'rule' },
-      req.body,
+      stripUpdateMeta(req.body),
       { returnDocument: 'after' }
     );
     if (!doc) return res.status(404).json({ success: false, message: 'Rule not found' });

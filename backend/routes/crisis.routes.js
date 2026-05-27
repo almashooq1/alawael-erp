@@ -11,7 +11,7 @@
 
 const express = require('express');
 const router = express.Router();
-const { authenticate } = require('../middleware/auth');
+const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const {
   EmergencyPlan,
@@ -22,9 +22,29 @@ const {
 const _logger = require('../utils/logger');
 const safeError = require('../utils/safeError');
 
+// W466: role gate for safety/emergency governance. Pre-W466 every
+// endpoint allowed any authenticated user to create/modify/delete
+// EmergencyPlans (org-wide emergency procedures), file fake
+// CrisisIncident reports, schedule misleading drills, or modify the
+// EmergencyContact tree (which could redirect emergency alerts to
+// wrong recipients). Plus: a malicious plan rewrite could push staff
+// toward the wrong evacuation route during an ACTUAL emergency.
+// Restrict to safety/operations roles only.
+const CRISIS_ROLES = [
+  'admin',
+  'super_admin',
+  'superadmin',
+  'manager',
+  'branch_manager',
+  'safety_officer',
+  'clinical_supervisor',
+  'safeguarding_lead',
+];
+
 // ── All crisis routes require authentication ──────────────────────
 router.use(authenticate);
 router.use(requireBranchAccess);
+router.use(authorize(CRISIS_ROLES)); // W466: safety/ops only — life-safety surface
 // ── Field whitelists (mass-assignment protection) ─────────────────
 const PLAN_FIELDS = [
   'title',

@@ -23,15 +23,39 @@ const {
   ClinicalNote,
   Allergy,
 } = require('../models/emr.model');
-const { authenticate } = require('../middleware/auth');
+const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
 const safeError = require('../utils/safeError');
 
+// W466: role gate for EMR (PHI). Pre-W466 every endpoint only had
+// `authenticate + requireBranchAccess` — meaning ANY authenticated
+// user (visitor with a valid JWT, parent-portal user, therapist
+// without medical role) could read every patient's medical records,
+// vitals, lab results, clinical notes, AND modify them. The allergy
+// CRUD is especially dangerous: a malicious or careless edit to a
+// beneficiary's allergy list could KILL them (wrong allergy info →
+// wrong med administered).
+//
+// Restrict to clinical roles only.
+const EMR_ROLES = [
+  'admin',
+  'super_admin',
+  'superadmin',
+  'manager',
+  'branch_manager',
+  'clinical_supervisor',
+  'physician',
+  'doctor',
+  'nurse',
+  'therapist',
+];
+
 // ── Auth: all EMR routes require authentication (PHI data) ───────────────
 router.use(authenticate);
 router.use(requireBranchAccess);
+router.use(authorize(EMR_ROLES)); // W466: clinical roles only — PHI surface
 // ═══════════════════════════════════════════════════════════════════════════
 // MEDICAL RECORDS — السجلات الطبية
 // ═══════════════════════════════════════════════════════════════════════════

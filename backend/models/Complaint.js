@@ -118,20 +118,21 @@ complaintSchema.index({ advocateInvolved: 1, status: 1 });
 // 'new' status, advocate involvement is REQUIRED per CRPD Art. 12 +
 // W461 requiresAdvocate doctrine. Enforced as soft-validation: warns
 // in non-finalized states, blocks on final closure without advocate.
-complaintSchema.pre('save', function (next) {
+// W483: converted from callback-style to async style — Mongoose was
+// dispatching this as a Promise hook because the SIBLING pre-save at
+// line 100 is async, and Kareem's mixed-style dispatch left `next`
+// undefined here, throwing TypeError on every Complaint.create. The
+// blast radius was every parent-portal-v2 + complaint-creation route
+// (CI parent-portal-v2.api.test.js was RED on main as of W477+).
+complaintSchema.pre('save', async function () {
   const beneficiaryComplaint = this.beneficiaryId || ['student', 'parent'].includes(this.source);
   const closingWithoutAdvocate =
-    beneficiaryComplaint &&
-    ['resolved', 'closed'].includes(this.status) &&
-    !this.advocateInvolved;
+    beneficiaryComplaint && ['resolved', 'closed'].includes(this.status) && !this.advocateInvolved;
   if (closingWithoutAdvocate) {
-    return next(
-      new Error(
-        'Complaint: beneficiary-related complaint cannot be resolved/closed without advocateInvolved=true (CRPD Article 12 — W464)'
-      )
+    throw new Error(
+      'Complaint: beneficiary-related complaint cannot be resolved/closed without advocateInvolved=true (CRPD Article 12 — W464)'
     );
   }
-  next();
 });
 
 module.exports = mongoose.models.Complaint || mongoose.model('Complaint', complaintSchema);

@@ -626,6 +626,8 @@ on:
       - 'backend/__tests__/smart-inbox-route-wave507.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/mass-assignment-create-strip-update-meta-wave507.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/behavioral-escalation-source-wave434.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -1235,6 +1237,8 @@ on:
       - 'backend/__tests__/smart-inbox-route-wave507.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/mass-assignment-create-strip-update-meta-wave507.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/behavioral-escalation-source-wave434.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

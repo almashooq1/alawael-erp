@@ -40,10 +40,11 @@ const TIERS_AR = Object.freeze({
  * sources/ and register it in orchestrator.js LOAD_SOURCES.
  */
 const SOURCE_WEIGHTS = Object.freeze({
-  clinical: 0.4, // ClinicalRiskScore — most authoritative, rule-engine driven
-  psych_flags: 0.25, // PsychRiskFlag — active flags raised by clinicians
-  dropout: 0.2, // AiPrediction (dropout_risk) — ML / rule-based churn signal
+  clinical: 0.35, // ClinicalRiskScore — most authoritative, rule-engine driven
+  psych_flags: 0.2, // PsychRiskFlag — active flags raised by clinicians
+  dropout: 0.15, // AiPrediction (dropout_risk) — ML / rule-based churn signal
   cdss: 0.15, // CdssRiskAssessment — fall / pressure ulcer / NEWS etc.
+  behavioral_escalation: 0.15, // W434: escalation-predictor on BehaviorIncident series
 });
 
 function tierFromScore(score) {

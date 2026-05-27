@@ -42,6 +42,7 @@ const LOAD_SOURCES = [
   require('./sources/psych-flags.source'),
   require('./sources/dropout.source'),
   require('./sources/cdss.source'),
+  require('./sources/behavioral-escalation.source'), // W434 — Phase D2 5th source
 ];
 
 function listSources() {

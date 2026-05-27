@@ -121,6 +121,22 @@ function setupIntegrationBus(app) {
       logger.warn('[Integration] W509 auto-assignment subscriber skipped:', autoErr.message);
     }
 
+    // W516 — measure-alert reassign notification fan-out. Subscribes to
+    // medical.measure_alert.reassigned (W514) and emits the downstream
+    // notification.measure_alert.reassigned.alert event for channel
+    // dispatchers (Slack/email/in-app/SMS). Mirrors the W349 capa-alerts
+    // pattern: this subscriber owns the cross-domain translation; actual
+    // channel implementations are independent.
+    try {
+      const {
+        wireMeasureAlertReassignNotify,
+      } = require('../services/measure-alert-reassign-notify.service');
+      wireMeasureAlertReassignNotify({ integrationBus, logger });
+      logger.info('[Integration] ✓ W516 measure-alert reassign notify subscriber wired');
+    } catch (notifyErr) {
+      logger.warn('[Integration] W516 reassign-notify subscriber skipped:', notifyErr.message);
+    }
+
     // Wire DDD notification triggers (10 notification rules)
     try {
       const { initializeDDDNotifications } = require('../integration/dddNotificationTriggers');

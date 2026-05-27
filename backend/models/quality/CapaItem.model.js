@@ -107,12 +107,12 @@ capaItemSchema.pre('validate', async function () {
 // before the doc is persisted. Mirrors W332 care-plan + W334 Pass 2 AiRecommendation
 // pre-save hook pattern. Throws a CapaTransitionError on violation; the route layer
 // catches and returns the lib's structured {code, message} as 400/403.
-capaItemSchema.pre('save', function (next) {
-  if (this.isNew) return next();
-  if (!this.isModified('status')) return next();
+capaItemSchema.pre('save', async function () {
+  if (this.isNew) return;
+  if (!this.isModified('status')) return;
   const from = this.$__.priorDoc ? this.$__.priorDoc.status : (this._original?.status ?? null);
   const to = this.status;
-  if (from == null || from === to) return next();
+  if (from == null || from === to) return;
   // Caller is expected to attach { actor, reasonCode, notes, mfaTier } via
   // this.$locals.transition (Mongoose convention) before .save(). When absent
   // (e.g. seeders), we skip the MFA + reason guards but still enforce the DAG.
@@ -130,11 +130,10 @@ capaItemSchema.pre('save', function (next) {
     const err = new Error(result.message);
     err.code = result.code;
     err.name = 'CapaTransitionError';
-    return next(err);
+    throw err;
   }
   // Append the audit entry — frozen object; safe to push.
   this.lifecycleHistory.push(result.entry);
-  return next();
 });
 
 // W429: optimistic concurrency. Same race-class as W428 on

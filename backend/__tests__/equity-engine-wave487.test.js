@@ -52,6 +52,34 @@ describe('W487 — equity-engine.service structural', () => {
     expect(SERVICE_SRC).toMatch(/IDEMPOTENT_EXISTING/);
   });
 
+  it('W503 auto-creates CAPA on overallSeverity=major', () => {
+    expect(SERVICE_SRC).toMatch(/_autoCreateCapaForAlert/);
+    expect(SERVICE_SRC).toMatch(/audit\.overallSeverity === 'major'/);
+  });
+
+  it('W503 auto-CAPA source.module is "equity"', () => {
+    expect(SERVICE_SRC).toMatch(/module:\s*['"]equity['"]/);
+  });
+
+  it('W503 auto-CAPA defaults to 30-day due + priority high + corrective type', () => {
+    expect(SERVICE_SRC).toMatch(/setDate\(dueDate\.getDate\(\) \+ 30\)/);
+    expect(SERVICE_SRC).toMatch(/priority:\s*['"]high['"]/);
+    expect(SERVICE_SRC).toMatch(/type:\s*['"]corrective['"]/);
+  });
+
+  it('W503 auto-CAPA failure does not roll back the alert', () => {
+    expect(SERVICE_SRC).toMatch(/Don't fail the audit/);
+  });
+
+  it('W503 auto-CAPA links via alert.capaItemId', () => {
+    expect(SERVICE_SRC).toMatch(/alert\.capaItemId\s*=\s*capaItem\._id/);
+  });
+
+  it('W503 SOURCE_MODULES.equity is registered in capa-lifecycle.lib', () => {
+    const lib = require('../intelligence/capa-lifecycle.lib');
+    expect(lib.SOURCE_MODULES).toContain('equity');
+  });
+
   it('runAuditAndPersist throws when branchId missing', () => {
     expect(SERVICE_SRC).toMatch(/branchId is required/);
   });

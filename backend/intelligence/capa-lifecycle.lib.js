@@ -92,6 +92,7 @@ const SOURCE_MODULES = Object.freeze([
   'improvement',
   'inspection',
   'management_review',
+  'equity', // W503 — auto-CAPA from major equity disparity (Phase G)
   'other',
 ]);
 

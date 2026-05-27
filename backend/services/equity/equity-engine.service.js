@@ -107,7 +107,82 @@ async function runAuditAndPersist({
     generatedBy,
   });
 
-  return { alert, audit, skipped: false, reason: 'PERSISTED' };
+  // W503 — auto-create CAPA for major-severity disparities. Wires the
+  // Phase G triage queue to the existing CAPA lifecycle (W337+W344+W345).
+  // Best-effort: a CAPA creation failure doesn't roll back the alert.
+  let capaItem = null;
+  if (audit.overallSeverity === 'major') {
+    try {
+      capaItem = await _autoCreateCapaForAlert({ alert, audit });
+      if (capaItem) {
+        alert.capaItemId = capaItem._id;
+        await alert.save();
+      }
+    } catch (err) {
+      // Don't fail the audit just because CAPA wiring is unavailable.
+      // The alert is still persisted; capa can be manually attached later.
+    }
+  }
+
+  return { alert, audit, skipped: false, reason: 'PERSISTED', capaItem };
+}
+
+/**
+ * W503 — auto-create a CAPA item for a major-severity equity alert.
+ * Returns null if the CAPA service / CAPA model is not available
+ * (test environments, partial bootstraps).
+ */
+async function _autoCreateCapaForAlert({ alert, audit }) {
+  let createCapaService;
+  try {
+    createCapaService = require('../quality/capa.service').createCapaService;
+  } catch {
+    return null;
+  }
+  // Verify CapaItem model is registered
+  try {
+    mongoose.model('CapaItem');
+  } catch {
+    return null;
+  }
+
+  const svc = createCapaService({ enforceMfa: false });
+
+  const dueDate = new Date();
+  dueDate.setDate(dueDate.getDate() + 30); // 30-day default SLA
+
+  // Build a human-readable title + description from the audit findings
+  const flaggedCohorts = (audit.findings || [])
+    .filter(f => f.vsReference?.flagged)
+    .map(f => f.cohort)
+    .slice(0, 3)
+    .join(', ');
+
+  const title = `Equity remediation: ${alert.dimension} / ${alert.metricKind} (${alert.overallSeverity})`;
+  const description = [
+    `Equity audit flagged ${audit.flaggedCount} cohort(s) on dimension="${alert.dimension}" for metric="${alert.metricKind}".`,
+    flaggedCohorts ? `Most-affected cohorts: ${flaggedCohorts}.` : '',
+    `Period: ${new Date(alert.periodStart).toISOString().slice(0, 10)} to ${new Date(alert.periodEnd).toISOString().slice(0, 10)}.`,
+    `Source EquityDisparityAlert: ${alert._id}.`,
+  ]
+    .filter(Boolean)
+    .join(' ');
+
+  return svc.createCapaItem({
+    source: {
+      module: 'equity',
+      refId: alert._id,
+      collection: 'equity_disparity_alerts',
+    },
+    type: 'corrective',
+    title,
+    description,
+    ownerUserId: alert.assignedTo || alert.branchId, // best-effort; supervisor reassigns
+    dueDate,
+    branchId: alert.branchId,
+    priority: 'high',
+    createdBy: alert.assignedTo || alert.branchId,
+  });
 }
 
 /**

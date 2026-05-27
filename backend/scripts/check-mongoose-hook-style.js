@@ -99,12 +99,9 @@ const KNOWN_CALLBACK_HOOK_BASELINE = new Set([
   'models/BeneficiaryManagement/SupportPlan.js',
   'models/BeneficiaryVoiceLog.js',
   // W494 ratchet wave 3: 3 Cdss* + ClinicalRule + CpdRecord (-5)
-  'models/CommunityActivity.js',
+  // W494 ratchet wave 4: CommunityActivity + ComplianceMetric +
+  //   CourseEnrollment + CourseModule + CrisisIncident (-5)
   'models/ComplaintEnhanced.js',
-  'models/ComplianceMetric.js',
-  'models/CourseEnrollment.js',
-  'models/CourseModule.js',
-  'models/CrisisIncident.js',
   // W494 ratchet wave 1: Webhook + EmailPreference + CrmCampaign (-3)
   // W494 ratchet wave 2: 5 Crm* models (CrmLead/Partner/Referral/Segment/Survey)
   //   — all single uuid-fill hooks, trivial async conversion.
@@ -166,7 +163,7 @@ const KNOWN_CALLBACK_HOOK_BASELINE = new Set([
   'models/emr.model.js',
   'models/gratuity.model.js',
   'models/pharmacy.model.js',
-  'models/quality/CapaItem.model.js',
+  // W503: CapaItem converted to async style — unblocks auto-CAPA on major equity disparity.
   'models/quality/Risk.model.js',
   'models/rehabilitation/Program.js',
   'models/reports/ReportSchedule.js',

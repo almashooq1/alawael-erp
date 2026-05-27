@@ -64,6 +64,7 @@ module.exports = function registerFeatureRoutes(
   const inventoryModuleRoutes = safeRequire('../routes/inventory-module.routes');
   const qualityModuleRoutes = safeRequire('../routes/quality-module.routes');
   const equityRoutes = safeRequire('../routes/equity.routes');
+  const storiesRoutes = safeRequire('../routes/stories.routes');
   const notificationEnhancedRoutes = safeRequire('../routes/notification-enhanced.routes');
   const branchEnhancedRoutes = safeRequire('../routes/branch-enhanced.routes');
   const inventoryEnhancedRoutes = safeRequire('../routes/inventory-enhanced.routes');
@@ -173,8 +174,9 @@ module.exports = function registerFeatureRoutes(
   dualMount(app, 'inventory-module', inventoryModuleRoutes);
   dualMount(app, 'quality-module', qualityModuleRoutes);
   dualMount(app, 'equity', equityRoutes);
+  dualMount(app, 'stories', storiesRoutes);
   logger.info(
-    '✅ prompt_08 Operational Modules mounted: inventory-module (25+ endpoints), quality-module (30+ endpoints), equity (W489: 6 endpoints — Phase G) — communication-module in communication.registry.js, files-module in documents.registry.js'
+    '✅ prompt_08 Operational Modules mounted: inventory-module (25+ endpoints), quality-module (30+ endpoints), equity (W489: 6 endpoints — Phase G), stories (W491: 7 endpoints — Phase F) — communication-module in communication.registry.js, files-module in documents.registry.js'
   );
 
   // ─── prompt_08 Enhanced: الوحدات المحسّنة (8-12) ─────────────────────────

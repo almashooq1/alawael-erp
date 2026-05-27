@@ -28,7 +28,25 @@
 
 const express = require('express');
 const router = express.Router();
-const { authenticate } = require('../middleware/auth');
+const { authenticate, authorize } = require('../middleware/auth');
+
+// W468: role gate for AAC therapy data (PHI). Pre-W468 any
+// authenticated user could create/modify/delete AAC (Augmentative
+// & Alternative Communication) therapy profiles. AAC profiles are
+// clinical artefacts — speech-language pathologists + therapists +
+// clinical leadership only.
+const AAC_ROLES = [
+  'admin',
+  'super_admin',
+  'superadmin',
+  'manager',
+  'branch_manager',
+  'clinical_supervisor',
+  'speech_language_pathologist',
+  'therapist',
+  'physician',
+  'doctor',
+];
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const { assertBranchMatch, effectiveBranchScope } = require('../middleware/assertBranchMatch');
 const logger = require('../utils/logger');
@@ -52,6 +70,7 @@ router.get('/_health', (_req, res) => {
 // All data routes authenticated + branch-scoped.
 router.use(authenticate);
 router.use(requireBranchAccess);
+router.use(authorize(AAC_ROLES)); // W468: clinical AAC profiles — PHI
 
 // ─── Error helpers (mirror measures-outcomes.routes.js) ──────────
 function _toErrorResponse(err) {

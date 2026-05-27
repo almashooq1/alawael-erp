@@ -99,13 +99,22 @@ function listTrackedIgnored(cwd) {
     .map(s => s.replace(/\\/g, '/'));
 }
 
+// Pure set-diff helper. Exposed for unit tests because the ratchet-DOWN
+// pattern (W325c) needs BOTH `added` (new violations) AND `removed`
+// (stale baseline entries) to fire — silently dropping either direction
+// would weaken the gate. See `check-gitignored-sources-script.test.js`.
+function diffBaseline(current, baseline) {
+  const added = [...current].filter(f => !baseline.has(f)).sort();
+  const removed = [...baseline].filter(f => !current.has(f)).sort();
+  return { added, removed };
+}
+
 function main() {
   const cwd = repoRoot();
   const current = new Set(listTrackedIgnored(cwd));
   const baseline = BASELINE_TRACKED_IGNORED;
 
-  const added = [...current].filter(f => !baseline.has(f)).sort();
-  const removed = [...baseline].filter(f => !current.has(f)).sort();
+  const { added, removed } = diffBaseline(current, baseline);
 
   if (JSON_MODE) {
     process.stdout.write(
@@ -152,4 +161,13 @@ function main() {
   process.exit(added.length + removed.length === 0 ? 0 : 1);
 }
 
-main();
+// Export pure helpers + baseline for unit tests. Only run main() as CLI.
+module.exports = {
+  BASELINE_TRACKED_IGNORED,
+  listTrackedIgnored,
+  diffBaseline,
+};
+
+if (require.main === module) {
+  main();
+}

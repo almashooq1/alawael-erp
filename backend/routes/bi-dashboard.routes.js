@@ -32,11 +32,32 @@ function safeModel(name) {
 }
 
 // ── Auth middleware ────────────────────────────────────────────────
-const { authenticate } = require('../middleware/auth');
+const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const safeError = require('../utils/safeError');
+
+// W468: role gate. Pre-W468 every BI dashboard endpoint was open to
+// any authenticated user — meaning a therapist/nurse/parent could
+// read executive financial KPIs, cross-branch performance comparisons,
+// HR analytics, retention churn data, and other strategic intel.
+// BI dashboards aggregate sensitive operational + financial data
+// not meant for clinical/operational staff. Restrict to executive +
+// analyst + finance + HR-manager tier.
+const BI_DASHBOARD_ROLES = [
+  'admin',
+  'super_admin',
+  'superadmin',
+  'manager',
+  'branch_manager',
+  'analyst',
+  'finance',
+  'finance_manager',
+  'hr_manager',
+];
+
 router.use(authenticate);
 router.use(requireBranchAccess);
+router.use(authorize(BI_DASHBOARD_ROLES)); // W468
 // ═══════════════════════════════════════════════════════════════════
 // 1. EXECUTIVE OVERVIEW — النظرة التنفيذية الشاملة
 // ═══════════════════════════════════════════════════════════════════

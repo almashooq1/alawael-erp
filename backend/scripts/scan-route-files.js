@@ -97,4 +97,11 @@ function main() {
   process.exit(broken.length === 0 ? 0 : 1);
 }
 
-main();
+// Export pure helpers + ignore-patterns for unit tests. The shouldIgnore
+// filter is the most-likely-to-silently-break piece: if a pattern is
+// removed/regressed, real TDZ errors get filtered as "known class".
+module.exports = { shouldIgnore, IGNORED_ERROR_PATTERNS, listRouteFiles };
+
+if (require.main === module) {
+  main();
+}

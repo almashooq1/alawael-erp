@@ -345,6 +345,9 @@ __tests__/attendance-triage-models-behavioral-wave124.test.js
 __tests__/attendance-event-lifecycle-behavioral-wave98-99.test.js
 __tests__/attendance-outbox-review-behavioral-wave98-130.test.js
 __tests__/attendance-day-rollup-behavioral-wave131-132-174.test.js
+__tests__/attendance-policy-geofence-credential-behavioral-wave122-133-138.test.js
 __tests__/equity-models-behavioral-wave486.test.js
 __tests__/story-models-behavioral-wave480.test.js
 __tests__/sync-sprint-tests-paths-script.test.js
+__tests__/scan-route-files-script.test.js
+__tests__/check-gitignored-sources-script.test.js

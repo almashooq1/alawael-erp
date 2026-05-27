@@ -130,6 +130,7 @@ __tests__/measures-workflow-routes-wave226.test.js
 __tests__/measure-baseline-slot-wave227.test.js
 __tests__/measure-baseline-slot-admin-wire-wave228.test.js
 __tests__/measure-outcomes-aggregator-wave229.test.js
+__tests__/measure-outcomes-aggregator-forecast-wave479.test.js
 __tests__/branch-reassessment-policy-wave230.test.js
 __tests__/therapist-workbench-admin-viewer-wave232.test.js
 __tests__/measure-progress-interpreter-wave232.test.js
@@ -312,3 +313,6 @@ __tests__/individual-education-plan-behavioral-wave200b.test.js
 __tests__/phase-e-e2e-smoke-wave478.test.js
 __tests__/story-builder-wave479.test.js
 __tests__/payroll-period-behavioral-wave99.test.js
+__tests__/story-models-wave480.test.js
+__tests__/pride-moment-wave481.test.js
+__tests__/llm-anomaly-models-behavioral-wave144-147.test.js

@@ -70,7 +70,11 @@ earlyWarningAlertSchema.index({ beneficiary_id: 1, alert_type: 1, status: 1 });
 earlyWarningAlertSchema.index({ branch_id: 1, status: 1, severity: 1 });
 earlyWarningAlertSchema.index({ createdAt: -1 });
 
-const EarlyWarningAlert = mongoose.model('EarlyWarningAlert', earlyWarningAlertSchema);
+// Defensive guard pattern (ADR-021 + W340): prevents OverwriteModelError
+// on double-load (tests, hot-reload). First-loader wins the model cache.
+const EarlyWarningAlert =
+  mongoose.models.EarlyWarningAlert ||
+  mongoose.model('EarlyWarningAlert', earlyWarningAlertSchema);
 
 // ══════════════════════════════════════════════════════
 // محرك كشف الثبات والتراجع (Plateau/Regression Detector)

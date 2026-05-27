@@ -120,11 +120,13 @@ const EscalationNotificationSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const EscalationRule = mongoose.model('EscalationRule', EscalationRuleSchema);
-const EscalationNotification = mongoose.model(
-  'EscalationNotification',
-  EscalationNotificationSchema
-);
+// Defensive guard pattern (ADR-021 + W340): prevents OverwriteModelError
+// on double-load (tests, hot-reload). First-loader wins the model cache.
+const EscalationRule =
+  mongoose.models.EscalationRule || mongoose.model('EscalationRule', EscalationRuleSchema);
+const EscalationNotification =
+  mongoose.models.EscalationNotification ||
+  mongoose.model('EscalationNotification', EscalationNotificationSchema);
 
 // ============================================================
 // القواعد الافتراضية للتصعيد

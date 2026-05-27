@@ -147,9 +147,15 @@ const CARFActionPlanSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const CARFStandard = mongoose.model('CARFStandard', CARFStandardSchema);
-const CARFAssessment = mongoose.model('CARFAssessment', CARFAssessmentSchema);
-const CARFActionPlan = mongoose.model('CARFActionPlan', CARFActionPlanSchema);
+// Defensive guard pattern: prevents OverwriteModelError when this file is
+// loaded twice (e.g. test isolation, hot-reload). First-loader wins the
+// mongoose.models cache. See ADR-021 + W340 drift guard.
+const CARFStandard =
+  mongoose.models.CARFStandard || mongoose.model('CARFStandard', CARFStandardSchema);
+const CARFAssessment =
+  mongoose.models.CARFAssessment || mongoose.model('CARFAssessment', CARFAssessmentSchema);
+const CARFActionPlan =
+  mongoose.models.CARFActionPlan || mongoose.model('CARFActionPlan', CARFActionPlanSchema);
 
 // ============================================================
 // معايير CARF الأساسية - Core Standards

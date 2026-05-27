@@ -275,11 +275,18 @@ router.get('/branch/:branchId/measure/:measureId/pairs.csv', async (req, res) =>
   }
 });
 
-// CSV cell escaping: wrap fields containing commas / quotes / newlines
-// in double quotes, doubling internal quotes per RFC 4180.
+// W461: CSV cell escaping — RFC-4180 quoting + OWASP formula-injection
+// defang. Pre-W461 only quote/comma/newline escaping ran, so a
+// malicious beneficiary name like `=cmd|'/c calc'!A0` written via the
+// intake form would land in the CSV as a formula and Excel would
+// execute it when the export was opened.
+const {
+  escapeFormulaInjection: _escapeFormula,
+} = require('../services/importExport/format-helpers');
+
 function _csvCell(v) {
   if (v == null) return '';
-  const s = String(v);
+  const s = _escapeFormula(String(v));
   if (/[",\n\r]/.test(s)) {
     return `"${s.replace(/"/g, '""')}"`;
   }

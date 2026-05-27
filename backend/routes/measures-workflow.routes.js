@@ -613,10 +613,14 @@ router.get('/anomalous-admins.csv', async (req, res) => {
   }
 });
 
-// RFC 4180 cell escape — wrap when contains comma/quote/newline.
+// W461: RFC 4180 cell escape + OWASP formula-injection defang.
+const {
+  escapeFormulaInjection: _escFormula461,
+} = require('../services/importExport/format-helpers');
+
 function _csvCell(v) {
   if (v == null) return '';
-  const s = String(v);
+  const s = _escFormula461(String(v));
   if (/[",\n\r]/.test(s)) {
     return `"${s.replace(/"/g, '""')}"`;
   }

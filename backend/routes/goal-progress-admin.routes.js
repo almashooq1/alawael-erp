@@ -235,12 +235,19 @@ router.get('/export.csv', requireRole(ADMIN_ROLES), async (req, res) => {
           .lean()
       : [];
     const bMap = new Map(benefs.map(b => [String(b._id), b]));
-    const esc = v =>
-      v == null
-        ? ''
-        : /[",\n\r]/.test(String(v))
-          ? '"' + String(v).replace(/"/g, '""') + '"'
-          : String(v);
+    // W461: RFC-4180 + OWASP formula-injection defang. `r.note` is
+    // therapist-written free text and beneficiary names come from
+    // intake forms; without escapeFormulaInjection a value starting
+    // with `=`, `+`, `-`, `@`, TAB, or CR executes as a formula when
+    // the CSV opens in Excel.
+    const {
+      escapeFormulaInjection: _escFormula461,
+    } = require('../services/importExport/format-helpers');
+    const esc = v => {
+      if (v == null) return '';
+      const s = _escFormula461(String(v));
+      return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+    };
     const header = [
       'recordedAt',
       'beneficiaryNumber',

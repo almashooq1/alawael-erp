@@ -321,9 +321,16 @@ router.get('/export.csv', requireRole(READ_ROLES), async (req, res) => {
       : [];
     const benefMap = new Map(benefs.map(b => [String(b._id), b]));
 
+    // W461: RFC-4180 + OWASP formula-injection defang. Beneficiary
+    // names/numbers can carry attacker-supplied data via intake forms;
+    // without escapeFormulaInjection a name like `=cmd|...` would
+    // execute as a formula when the export is opened in Excel.
+    const {
+      escapeFormulaInjection: _escFormula,
+    } = require('../services/importExport/format-helpers');
     const csvEscape = v => {
       if (v == null) return '';
-      const s = String(v);
+      const s = _escFormula(String(v));
       if (/[",\n\r]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
       return s;
     };

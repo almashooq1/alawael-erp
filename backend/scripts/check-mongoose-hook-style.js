@@ -180,4 +180,11 @@ function main() {
   process.exit(allDrift.length === 0 ? 0 : 1);
 }
 
-main();
+// Pure helpers exported for unit tests (check-mongoose-hook-style-script.test.js).
+// Only invoke main() when run as CLI — required-as-module needs the helpers
+// without auto-executing the filesystem scan.
+module.exports = { classifyHook, analyze, listSchemaFiles, SCAN_DIRS };
+
+if (require.main === module) {
+  main();
+}

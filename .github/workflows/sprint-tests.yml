@@ -550,6 +550,9 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/disparity-detection-wave484.test.js'
       - 'backend/__tests__/equity-models-wave486.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/hikvision-fraud-models-behavioral-wave100.test.js'
+      - 'backend/__tests__/models-use-defensive-guard-wave411.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -1083,6 +1086,9 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/disparity-detection-wave484.test.js'
       - 'backend/__tests__/equity-models-wave486.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/hikvision-fraud-models-behavioral-wave100.test.js'
+      - 'backend/__tests__/models-use-defensive-guard-wave411.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

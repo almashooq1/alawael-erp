@@ -82,5 +82,6 @@ if (mongoose.models.AssessmentRecommendationBundle) {
   bundleSchema.index({ beneficiary: 1, createdAt: -1 });
   bundleSchema.index({ therapist: 1, createdAt: -1 });
 
-  module.exports = mongoose.model('AssessmentRecommendationBundle', bundleSchema);
+  module.exports =
+    mongoose.models.AssessmentRecommendationBundle || mongoose.model('AssessmentRecommendationBundle', bundleSchema);
 }

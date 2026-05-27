@@ -37,5 +37,6 @@ if (mongoose.models.DailyTask) {
 
   dailyTaskSchema.index({ therapist: 1, status: 1, dueDate: 1 });
 
-  module.exports = mongoose.model('DailyTask', dailyTaskSchema);
+  module.exports =
+    mongoose.models.DailyTask || mongoose.model('DailyTask', dailyTaskSchema);
 }

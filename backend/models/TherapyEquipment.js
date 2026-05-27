@@ -44,5 +44,6 @@ if (mongoose.models.TherapyEquipment) {
 
   schema.index({ status: 1 });
 
-  module.exports = mongoose.model('TherapyEquipment', schema);
+  module.exports =
+    mongoose.models.TherapyEquipment || mongoose.model('TherapyEquipment', schema);
 }

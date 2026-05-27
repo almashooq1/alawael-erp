@@ -49,5 +49,6 @@ if (mongoose.models.ProfessionalDevActivity) {
 
   professionalDevActivitySchema.index({ therapist: 1, date: -1 });
 
-  module.exports = mongoose.model('ProfessionalDevActivity', professionalDevActivitySchema);
+  module.exports =
+    mongoose.models.ProfessionalDevActivity || mongoose.model('ProfessionalDevActivity', professionalDevActivitySchema);
 }

@@ -43,5 +43,6 @@ if (mongoose.models.TherapyCustomKPI) {
 
   schema.index({ therapist: 1 });
 
-  module.exports = mongoose.model('TherapyCustomKPI', schema);
+  module.exports =
+    mongoose.models.TherapyCustomKPI || mongoose.model('TherapyCustomKPI', schema);
 }

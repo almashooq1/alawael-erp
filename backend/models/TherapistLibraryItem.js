@@ -33,5 +33,6 @@ if (mongoose.models.TherapistLibraryItem) {
 
   schema.index({ therapist: 1, kind: 1 });
 
-  module.exports = mongoose.model('TherapistLibraryItem', schema);
+  module.exports =
+    mongoose.models.TherapistLibraryItem || mongoose.model('TherapistLibraryItem', schema);
 }

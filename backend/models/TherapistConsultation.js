@@ -53,5 +53,6 @@ if (mongoose.models.TherapistConsultation) {
   therapistConsultationSchema.index({ requester: 1, status: 1 });
   therapistConsultationSchema.index({ consultant: 1, status: 1 });
 
-  module.exports = mongoose.model('TherapistConsultation', therapistConsultationSchema);
+  module.exports =
+    mongoose.models.TherapistConsultation || mongoose.model('TherapistConsultation', therapistConsultationSchema);
 }

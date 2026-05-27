@@ -61,5 +61,6 @@ if (mongoose.models.SafetyProtocol) {
 
   schema.index({ category: 1, status: 1 });
 
-  module.exports = mongoose.model('SafetyProtocol', schema);
+  module.exports =
+    mongoose.models.SafetyProtocol || mongoose.model('SafetyProtocol', schema);
 }

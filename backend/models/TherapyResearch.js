@@ -65,5 +65,6 @@ if (mongoose.models.TherapyResearch) {
 
   schema.index({ principalInvestigator: 1, status: 1 });
 
-  module.exports = mongoose.model('TherapyResearch', schema);
+  module.exports =
+    mongoose.models.TherapyResearch || mongoose.model('TherapyResearch', schema);
 }

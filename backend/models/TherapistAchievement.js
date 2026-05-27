@@ -49,5 +49,6 @@ if (mongoose.models.TherapistAchievement) {
   therapistAchievementSchema.index({ therapist: 1, date: -1 });
   therapistAchievementSchema.index({ branch: 1, type: 1 });
 
-  module.exports = mongoose.model('TherapistAchievement', therapistAchievementSchema);
+  module.exports =
+    mongoose.models.TherapistAchievement || mongoose.model('TherapistAchievement', therapistAchievementSchema);
 }

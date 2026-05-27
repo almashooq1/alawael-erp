@@ -88,5 +88,6 @@ if (mongoose.models.Notification) {
   notificationSchema.index({ createdAt: -1 });
   notificationSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
-  module.exports = mongoose.model('Notification', notificationSchema);
+  module.exports =
+    mongoose.models.Notification || mongoose.model('Notification', notificationSchema);
 }

@@ -48,5 +48,6 @@ if (mongoose.models.SmartGoal) {
 
   smartGoalSchema.index({ therapist: 1, beneficiary: 1, status: 1 });
 
-  module.exports = mongoose.model('SmartGoal', smartGoalSchema);
+  module.exports =
+    mongoose.models.SmartGoal || mongoose.model('SmartGoal', smartGoalSchema);
 }

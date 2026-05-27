@@ -56,5 +56,6 @@ if (mongoose.models.TherapyPrescription) {
   therapyPrescriptionSchema.index({ therapist: 1, issuedAt: -1 });
   therapyPrescriptionSchema.index({ beneficiary: 1, status: 1 });
 
-  module.exports = mongoose.model('TherapyPrescription', therapyPrescriptionSchema);
+  module.exports =
+    mongoose.models.TherapyPrescription || mongoose.model('TherapyPrescription', therapyPrescriptionSchema);
 }

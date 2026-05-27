@@ -43,5 +43,6 @@ if (mongoose.models.TherapyAssessment) {
   therapyAssessmentSchema.index({ therapist: 1, conductedAt: -1 });
   therapyAssessmentSchema.index({ beneficiary: 1, conductedAt: -1 });
 
-  module.exports = mongoose.model('TherapyAssessment', therapyAssessmentSchema);
+  module.exports =
+    mongoose.models.TherapyAssessment || mongoose.model('TherapyAssessment', therapyAssessmentSchema);
 }

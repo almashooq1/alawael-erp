@@ -32,5 +32,6 @@ if (mongoose.models.ParentMessage) {
   schema.index({ therapist: 1, beneficiary: 1, sentAt: -1 });
   schema.index({ guardian: 1, readAt: 1 });
 
-  module.exports = mongoose.model('ParentMessage', schema);
+  module.exports =
+    mongoose.models.ParentMessage || mongoose.model('ParentMessage', schema);
 }

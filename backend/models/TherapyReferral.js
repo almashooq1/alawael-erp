@@ -37,5 +37,6 @@ if (mongoose.models.TherapyReferral) {
   schema.index({ referrer: 1, status: 1 });
   schema.index({ referredTo: 1, status: 1 });
 
-  module.exports = mongoose.model('TherapyReferral', schema);
+  module.exports =
+    mongoose.models.TherapyReferral || mongoose.model('TherapyReferral', schema);
 }

@@ -74,5 +74,6 @@ if (mongoose.models.FieldTraining) {
   fieldTrainingSchema.index({ therapist: 1, status: 1 });
   fieldTrainingSchema.index({ branch: 1, startDate: -1 });
 
-  module.exports = mongoose.model('FieldTraining', fieldTrainingSchema);
+  module.exports =
+    mongoose.models.FieldTraining || mongoose.model('FieldTraining', fieldTrainingSchema);
 }

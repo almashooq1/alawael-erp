@@ -34,5 +34,6 @@ if (mongoose.models.TherapistProgressRecord) {
 
   schema.index({ therapist: 1, beneficiary: 1, recordedAt: -1 });
 
-  module.exports = mongoose.model('TherapistProgressRecord', schema);
+  module.exports =
+    mongoose.models.TherapistProgressRecord || mongoose.model('TherapistProgressRecord', schema);
 }

@@ -83,5 +83,6 @@ if (mongoose.models.TherapyQualityReport) {
   therapyQualityReportSchema.index({ branch: 1, status: 1 });
   therapyQualityReportSchema.index({ author: 1, createdAt: -1 });
 
-  module.exports = mongoose.model('TherapyQualityReport', therapyQualityReportSchema);
+  module.exports =
+    mongoose.models.TherapyQualityReport || mongoose.model('TherapyQualityReport', therapyQualityReportSchema);
 }

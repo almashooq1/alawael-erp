@@ -318,3 +318,4 @@ __tests__/pride-moment-wave481.test.js
 __tests__/llm-anomaly-models-behavioral-wave144-147.test.js
 __tests__/productivity-models-behavioral-wave27.test.js
 __tests__/story-surface-variant-builder-wave482.test.js
+__tests__/phase-f-e2e-smoke-wave483.test.js

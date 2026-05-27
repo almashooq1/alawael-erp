@@ -149,7 +149,7 @@ dpiaSchema.virtual('isExpired').get(function () {
   return ageMs > 365 * 24 * 60 * 60 * 1000;
 });
 
-module.exports = mongoose.model('Dpia', dpiaSchema);
+module.exports = mongoose.models.Dpia || mongoose.model('Dpia', dpiaSchema);
 module.exports.DPIA_STATUSES = DPIA_STATUSES;
 module.exports.DPIA_DATA_CATEGORIES = DPIA_DATA_CATEGORIES;
 module.exports.DPIA_LAWFUL_BASES = DPIA_LAWFUL_BASES;

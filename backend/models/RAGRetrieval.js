@@ -55,4 +55,4 @@ const retrievalSchema = new mongoose.Schema(
 // the lookup index on retrievedAt for "recent retrievals" queries.
 retrievalSchema.index({ retrievedAt: 1 }, { expireAfterSeconds: 30 * 24 * 60 * 60 });
 
-module.exports = mongoose.model('RAGRetrieval', retrievalSchema);
+module.exports = mongoose.models.RAGRetrieval || mongoose.model('RAGRetrieval', retrievalSchema);

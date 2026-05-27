@@ -116,6 +116,8 @@ recordingSchema.index({ beneficiaryId: 1, analysisStatus: 1, createdAt: -1 });
 // Compound: "expired recordings to purge"
 recordingSchema.index({ expiresAt: 1, audioPurgedAt: 1 });
 
-module.exports = mongoose.model('SpeechSessionRecording', recordingSchema);
+module.exports =
+  mongoose.models.SpeechSessionRecording ||
+  mongoose.model('SpeechSessionRecording', recordingSchema);
 module.exports.ANALYSIS_STATUSES = ANALYSIS_STATUSES;
 module.exports.ANALYSIS_PROVIDERS = ANALYSIS_PROVIDERS;

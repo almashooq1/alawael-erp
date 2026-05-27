@@ -91,6 +91,8 @@ chunkSchema.index({ branchId: 1, isActive: 1, embeddingProvider: 1 });
 chunkSchema.index({ isOrgWide: 1, isActive: 1, embeddingProvider: 1 });
 chunkSchema.index({ sourceDocId: 1, version: -1 });
 
-module.exports = mongoose.model('ClinicalKnowledgeChunk', chunkSchema);
+module.exports =
+  mongoose.models.ClinicalKnowledgeChunk ||
+  mongoose.model('ClinicalKnowledgeChunk', chunkSchema);
 module.exports.EMBEDDING_PROVIDERS = EMBEDDING_PROVIDERS;
 module.exports.SOURCE_DOC_TYPES = SOURCE_DOC_TYPES;

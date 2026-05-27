@@ -276,4 +276,5 @@ function buildDefaultConfig(tenantId) {
 
 LandingConfigSchema.statics.buildDefault = buildDefaultConfig;
 
-module.exports = mongoose.model('LandingConfig', LandingConfigSchema);
+module.exports =
+  mongoose.models.LandingConfig || mongoose.model('LandingConfig', LandingConfigSchema);

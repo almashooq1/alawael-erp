@@ -30,7 +30,10 @@
  * HikvisionDeviceHealthLog.ts, HikvisionJobRun.startedAt,
  * LlmAnomalyAck.expiresAt, LlmAnomalyAck.anomalyId (partial-unique),
  * LlmAnomalySnapshot.recordedAt, LlmTelemetryCall.at,
- * PlanReviewAck.occurredAt, WhatsAppDlq.createdAt.
+ * PlanReviewAck.occurredAt, WhatsAppDlq.createdAt,
+ * AttendanceNfcCard.cardUid (partial-unique only-1-active),
+ * GasScale.goalId (partial-unique only-1-active-scale-per-goal),
+ * HikvisionBranchConfig.branchId (redundant explicit unique vs inline).
  *
  * The drift guard is the same shape as W325c/W340 (baseline ratchet +
  * new-violation block); here baseline is empty and any new collision
@@ -52,8 +55,18 @@ function listModelFiles() {
   return out;
 }
 
+function stripComments(src) {
+  // Strip /* … */ block comments first, then // line comments.
+  // This prevents the index-scanner from matching `.index(...)` calls
+  // that appear inside "REMOVED DUPLICATE" cleanup comments.
+  let out = src.replace(/\/\*[\s\S]*?\*\//g, '');
+  out = out.replace(/(^|[^:])\/\/.*$/gm, '$1');
+  return out;
+}
+
 function detectCollisions(filePath) {
-  const src = fs.readFileSync(filePath, 'utf-8');
+  const rawSrc = fs.readFileSync(filePath, 'utf-8');
+  const src = stripComments(rawSrc);
   const collisions = [];
 
   // Find every `.index({field: 1}, ...)` single-key index declaration.
@@ -98,11 +111,14 @@ describe('W495 no-duplicate-single-key-index drift guard', () => {
       'HikvisionAnomalySnapshot.js',
       'HikvisionDeviceHealthLog.js',
       'HikvisionJobRun.js',
-      'LlmAnomalyAck.js',
+      'LlmAnomalyAck.js', // both `expiresAt` (TTL) and `anomalyId` (partial-unique)
       'LlmAnomalySnapshot.js',
       'LlmTelemetryCall.js',
       'PlanReviewAck.js',
       'WhatsAppDlq.js',
+      'AttendanceNfcCard.js', // cardUid only-1-active partial-unique
+      'GasScale.js', // goalId only-1-active-scale-per-goal partial-unique
+      'HikvisionBranchConfig.js', // branchId redundant explicit unique
     ];
     for (const file of baseline) {
       const stillThere = allCollisions.find(c => c.file === file);
@@ -115,17 +131,20 @@ describe('W495 no-duplicate-single-key-index drift guard', () => {
     }
   });
 
-  it('no model file has a TTL-index colliding with an inline `index: true`', () => {
+  it('no model file has a single-key explicit `.index()` colliding with an inline `index: true`', () => {
     if (allCollisions.length > 0) {
       const detail = allCollisions.map(c => `  - ${c.file}: field "${c.field}"`).join('\n');
       throw new Error(
-        `Found ${allCollisions.length} model(s) with the duplicate-TTL-index bug class.\n` +
+        `Found ${allCollisions.length} model(s) with the duplicate-single-key-index bug class.\n` +
           `Mongoose 9 logs "Duplicate schema index on {field:1}" and silently drops\n` +
-          `the TTL spec — rows accumulate indefinitely instead of expiring.\n\n` +
+          `the options block of the explicit \`.index(...)\` call — TTL, unique,\n` +
+          `partialFilterExpression, etc. are all lost. Two confirmed failure modes:\n` +
+          `  (a) TTL spec dropped → PDPL retention violated, rows accumulate forever.\n` +
+          `  (b) unique/partial-unique dropped → duplicate rows allowed silently.\n\n` +
           `Fix per file: remove the inline \`index: true\` from the field declaration\n` +
-          `so the explicit \`Schema.index({field:1}, {expireAfterSeconds:...})\` is the\n` +
-          `sole index on that field. Compound indexes that include the field cover\n` +
-          `prefix-queries; the inline single-key index is redundant.\n\n` +
+          `so the explicit \`Schema.index({field:1}, OPTIONS)\` is the sole index on\n` +
+          `that field. Compound indexes that include the field cover prefix-queries;\n` +
+          `the inline single-key index is redundant.\n\n` +
           `Files:\n${detail}`
       );
     }

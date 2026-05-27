@@ -37,7 +37,7 @@ const CARD_STATUSES = Object.values(CARD_STATUS);
 
 const AttendanceNfcCardSchema = new mongoose.Schema(
   {
-    cardUid: { type: String, required: true, maxlength: 64, index: true },
+    cardUid: { type: String, required: true, maxlength: 64 },
 
     employeeId: {
       type: mongoose.Schema.Types.ObjectId,

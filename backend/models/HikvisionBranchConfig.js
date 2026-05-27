@@ -78,7 +78,10 @@ const HikvisionBranchConfigSchema = new mongoose.Schema(
   { timestamps: true, collection: 'hikvision_branch_configs' }
 );
 
-HikvisionBranchConfigSchema.index({ branchId: 1 }, { unique: true });
+// Note: branchId already has `unique: true` inline, which creates a
+// unique single-key index. The previous explicit `.index({branchId:1},
+// {unique:true})` here was redundant and triggered Mongoose's
+// duplicate-index warning. Removed W495 2026-05-27.
 
 // ─── Wave-18 invariants ────────────────────────────────────────
 HikvisionBranchConfigSchema.add({

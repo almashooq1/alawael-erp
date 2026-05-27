@@ -49,7 +49,6 @@ const gasScaleSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'TherapeuticGoal',
       required: true,
-      index: true,
     },
     beneficiaryId: {
       type: mongoose.Schema.Types.ObjectId,

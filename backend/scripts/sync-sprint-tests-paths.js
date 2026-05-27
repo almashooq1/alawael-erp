@@ -50,6 +50,18 @@ function findMissing(yml, entries) {
   return entries.filter(e => !yml.includes(`'${e}'`) && !yml.includes(`"${e}"`));
 }
 
+// Find entries that aren't in BOTH push + pull_request blocks (i.e.,
+// `< 2 quoted occurrences` in the yml). Exposed for unit tests because
+// the regex-escape logic here silently breaks if any of the special
+// chars in entry paths change.
+function findPartiallyMissing(yml, entries) {
+  return entries.filter(e => {
+    const re = new RegExp(`['"]${e.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}['"]`, 'g');
+    const matches = yml.match(re) || [];
+    return matches.length < 2;
+  });
+}
+
 function appendBeforeAnchor(yml, anchor, items) {
   // Anchor: `      - 'backend/package.json'\n      - '.github/workflows/sprint-tests.yml'`
   // Append items as `      - 'X'` lines BEFORE the anchor.
@@ -73,11 +85,7 @@ function main() {
 
   // Each test file should appear in BOTH push + pull_request blocks =
   // 2 occurrences in the yml. Find entries with < 2 occurrences.
-  const partiallyMissing = entries.filter(e => {
-    const re = new RegExp(`['"]${e.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}['"]`, 'g');
-    const matches = yml.match(re) || [];
-    return matches.length < 2;
-  });
+  const partiallyMissing = findPartiallyMissing(yml, entries);
 
   if (partiallyMissing.length === 0) {
     console.log(
@@ -135,4 +143,9 @@ function main() {
   process.exit(0);
 }
 
-main();
+// Export pure helpers for unit tests. Only run main() as CLI.
+module.exports = { readSprintList, findMissing, findPartiallyMissing, appendBeforeAnchor };
+
+if (require.main === module) {
+  main();
+}

@@ -63,6 +63,126 @@ const SKIP_DIR_NAMES = new Set([
 const HOOK_RE =
   /(\w+(?:Schema|schema))\s*\.\s*(pre|post)\s*\(\s*['"]([a-zA-Z]+)['"]\s*(?:,\s*\{[^}]*\}\s*)?,\s*(async\s+)?function\s*\(([^)]*)\)/g;
 
+// W494 baseline (2026-05-27): files with at least one pure callback-
+// style pre/post hook. Under Mongoose 9, EVERY callback hook throws
+// `TypeError: next is not a function` on .save() because Kareem now
+// dispatches all hooks via Promise adapters. Each entry below is a
+// LATENT bug — the W494 incident exposed 4 of these (StoryBook +
+// StorySurfaceVariant + EquityDisparityAlert + OutcomeBenchmark) at
+// once; the remaining ~99 will fire as soon as something exercises
+// each model's .save() path under Mongoose 9.
+//
+// Ratchet-DOWN per W325c pattern:
+//   - NEW callback file (not in baseline) → fail at push (forces async
+//     style for all new model hooks per the memory recipe)
+//   - STALE baseline entry (file fixed) → fail at push (forces removal
+//     from baseline in same commit as the conversion to async)
+//
+// Cleanup strategy: convert each file's hooks one-at-a-time, prune the
+// entry from this Set, commit. Same wave pattern that drove W325c
+// phantom-ref baseline 58 → 0 across ~12 waves.
+const KNOWN_CALLBACK_HOOK_BASELINE = new Set([
+  'domains/care-plans/models/UnifiedCarePlan.js',
+  'domains/sessions/models/ClinicalSession.js',
+  'models/AccountingExpense.js',
+  'models/AiRecommendationBundle.js',
+  'models/Assessment.js',
+  'models/Asset.js',
+  'models/AwarenessProgram.js',
+  'models/BeneficiaryManagement/AcademicRecord.js',
+  'models/BeneficiaryManagement/Achievement.js',
+  'models/BeneficiaryManagement/AttendanceRecord.js',
+  'models/BeneficiaryManagement/CounselingSession.js',
+  'models/BeneficiaryManagement/FinancialSupport.js',
+  'models/BeneficiaryManagement/Scholarship.js',
+  'models/BeneficiaryManagement/SkillsDevelopment.js',
+  'models/BeneficiaryManagement/SupportPlan.js',
+  'models/BeneficiaryVoiceLog.js',
+  'models/CdssAlert.js',
+  'models/CdssDecisionLog.js',
+  'models/CdssRiskAssessment.js',
+  'models/ClinicalRule.js',
+  'models/CommunityActivity.js',
+  'models/ComplaintEnhanced.js',
+  'models/ComplianceMetric.js',
+  'models/CourseEnrollment.js',
+  'models/CourseModule.js',
+  'models/CpdRecord.js',
+  'models/CrisisIncident.js',
+  'models/CrmCampaign.js',
+  'models/CrmLead.js',
+  'models/CrmPartner.js',
+  'models/CrmReferralCommission.js',
+  'models/CrmSegment.js',
+  'models/CrmSurvey.js',
+  'models/CulturalProfile.js',
+  'models/DecisionRightsAssessment.js',
+  'models/Delegation.js',
+  'models/DifferentialDiagnosis.js',
+  'models/DisabilityProgram.js',
+  'models/DisabilitySession.js',
+  'models/DiscussionForum.js',
+  'models/DrugLibrary.js',
+  'models/ESignature.js',
+  'models/EStamp.js',
+  'models/ElearningCourse.js',
+  'models/ElearningQuiz.js',
+  'models/EmailPreference.js',
+  'models/EmergencyPlan.js',
+  'models/EnterpriseRisk.js',
+  'models/EventParticipation.js',
+  'models/Exam.js',
+  'models/FamilyCounsellingSession.js',
+  'models/FinancialTransaction.js',
+  'models/ForumReply.js',
+  'models/Goal.js',
+  'models/HikvisionRawEvent.js',
+  'models/ImportExportJob.js',
+  'models/ImportExportTemplate.js',
+  'models/Incident.js',
+  'models/InsuranceTariff.js',
+  'models/LearningPath.js',
+  'models/MDTCoordination.js',
+  'models/Maintenance.js',
+  'models/MaintenancePrediction.js',
+  'models/ModuleProgress.js',
+  'models/ParentChatbotSession.js',
+  'models/PaymentVoucher.js',
+  'models/PrescriptionValidation.js',
+  'models/Product.js',
+  'models/Productivity/UserPreferences.js',
+  'models/QuizAttempt.js',
+  'models/QuizQuestion.js',
+  'models/RehabPlanSuggestion.js',
+  'models/RiskAssessment.js',
+  'models/Schedule.js',
+  'models/SiblingAdjustmentRecord.js',
+  'models/SmartIRP.js',
+  'models/TaxFiling.js',
+  'models/TrainerEvaluation.js',
+  'models/TrainingCompliance.js',
+  'models/WaitlistEntry.js',
+  'models/Webhook.js',
+  'models/WebhookDelivery.js',
+  'models/auditLog.model.js',
+  'models/clinical-assessment/caregiver-burden-assessment.model.js',
+  'models/clinical-assessment/mchat-assessment.model.js',
+  'models/clinical-assessment/quality-of-life-assessment.model.js',
+  'models/conversation.model.js',
+  'models/disability-assessment.model.js',
+  'models/ecommerce.models.js',
+  'models/emr.model.js',
+  'models/gratuity.model.js',
+  'models/pharmacy.model.js',
+  'models/quality/CapaItem.model.js',
+  'models/quality/Risk.model.js',
+  'models/rehabilitation/Program.js',
+  'models/reports/ReportSchedule.js',
+  'privacy/consent.model.js',
+  'privacy/data-subject-request.model.js',
+  'services/whatsapp/templateSync.service.js',
+]);
+
 function listSchemaFiles(roots) {
   const out = [];
   function walk(d) {
@@ -103,19 +223,25 @@ function classifyHook(isAsync, params, bodyAhead) {
   return 'sync';
 }
 
-function analyze(file) {
+// Classify hooks in a single file. Returns:
+//   - mixed: groups where async + callback coexist on same event (W483)
+//   - callbackOnly: hooks using pure callback style (W494 — broken under Mongoose 9)
+function classifyFile(file) {
   const src = fs.readFileSync(file, 'utf8');
   const hooks = [];
   let m;
-  // Reset regex state for each file
   HOOK_RE.lastIndex = 0;
   while ((m = HOOK_RE.exec(src)) !== null) {
     const [, schemaName, when, event, asyncKw, params] = m;
-    // Peek the next ~600 chars to detect `next(...)` calls in the body
     const bodyAhead = src.slice(m.index + m[0].length, m.index + m[0].length + 600);
     const style = classifyHook(!!asyncKw, params, bodyAhead);
     hooks.push({ schemaName, when, event, style, line: lineOf(src, m.index) });
   }
+  return hooks;
+}
+
+function analyze(file) {
+  const hooks = classifyFile(file);
   // Group by (schema, when, event) and check for mixed callback ↔ async
   const groups = {};
   for (const h of hooks) {
@@ -137,6 +263,16 @@ function analyze(file) {
   return drift;
 }
 
+// W494 (Mongoose 9): even PURE callback-style hooks fail because Kareem
+// dispatches every hook chain via Promise adapters now. `function(next)
+// { next() }` throws `TypeError: next is not a function` on every
+// .save(). Memory: feedback_mongoose_9_pre_save_callback_silent_break.
+// Returns true if the file has ANY callback-style hook (regardless of
+// siblings or event). Returns false if all hooks are async or sync.
+function hasCallbackHook(file) {
+  return classifyFile(file).some(h => h.style === 'callback');
+}
+
 function lineOf(src, idx) {
   return src.slice(0, idx).split('\n').length;
 }
@@ -144,46 +280,98 @@ function lineOf(src, idx) {
 function main() {
   const files = listSchemaFiles(SCAN_DIRS);
   const allDrift = [];
+  const currentCallbackFiles = new Set();
   for (const f of files) {
     const d = analyze(f);
     if (d.length) allDrift.push(...d);
+    if (hasCallbackHook(f)) {
+      const rel = path.relative(path.resolve(__dirname, '..'), f).split(path.sep).join('/');
+      currentCallbackFiles.add(rel);
+    }
   }
+
+  // W494 ratchet-DOWN diff
+  const newCallback = [...currentCallbackFiles]
+    .filter(f => !KNOWN_CALLBACK_HOOK_BASELINE.has(f))
+    .sort();
+  const staleBaseline = [...KNOWN_CALLBACK_HOOK_BASELINE]
+    .filter(f => !currentCallbackFiles.has(f))
+    .sort();
+
+  const totalFailures = allDrift.length + newCallback.length + staleBaseline.length;
 
   if (JSON_MODE) {
     process.stdout.write(
-      JSON.stringify({ scanned: files.length, drift: allDrift }, null, 2) + '\n'
+      JSON.stringify(
+        {
+          scanned: files.length,
+          mixedStyleDrift: allDrift,
+          newCallbackFiles: newCallback,
+          staleBaselineEntries: staleBaseline,
+          callbackBaselineSize: KNOWN_CALLBACK_HOOK_BASELINE.size,
+          currentCallbackFileCount: currentCallbackFiles.size,
+        },
+        null,
+        2
+      ) + '\n'
     );
   } else {
     console.log(`Scanned ${files.length} model files.`);
-    if (allDrift.length === 0) {
+    if (totalFailures === 0) {
       console.log('✓ No mixed async/callback hook styles found.');
-    } else {
       console.log(
-        `✗ ${allDrift.length} mixed-style hook group(s) — TypeError on every save() risk:`
+        `✓ Callback-hook baseline in sync (${currentCallbackFiles.size} files, baseline: ${KNOWN_CALLBACK_HOOK_BASELINE.size}).`
+      );
+    }
+    if (allDrift.length > 0) {
+      console.log(
+        `✗ ${allDrift.length} mixed-style hook group(s) — TypeError on every save() risk (W483):`
       );
       for (const d of allDrift) {
         console.log(`  ${d.file}: ${d.key}`);
         for (const h of d.hooks) console.log(`    line ${h.line}: ${h.style}`);
       }
       console.log('');
-      console.log('Mongoose Kareem middleware dispatches the WHOLE hook chain via Promise');
-      console.log('adapters when ANY hook on an event is async — callback-style siblings');
-      console.log('then receive undefined for `next`, throwing TypeError on doc.save().');
+      console.log('Mongoose Kareem dispatches the WHOLE hook chain via Promise adapters');
+      console.log("when ANY hook is async — callback siblings receive undefined for `next`.");
+      console.log('Fix: convert ALL hooks for that event to async style.');
+    }
+    if (newCallback.length > 0) {
+      console.log(
+        `✗ ${newCallback.length} NEW file(s) with callback-style hook — W494 silent break under Mongoose 9:`
+      );
+      for (const f of newCallback) console.log(`  + ${f}`);
       console.log('');
-      console.log('Fix: convert ALL hooks for that event to the same style.');
-      console.log('  Async pattern:    pre("save", async function () { … throw new Error(…) })');
-      console.log('  Callback pattern: pre("save", function (next) { … next(new Error(…)) })');
+      console.log('Under Mongoose 9, ALL `function(next) { next() }` hooks throw');
+      console.log('`TypeError: next is not a function` on every .save() call. Fix:');
+      console.log('  pre("save", async function () { … this.x = 1 … })');
+      console.log('See memory: feedback_mongoose_9_pre_save_callback_silent_break.');
+    }
+    if (staleBaseline.length > 0) {
+      console.log(
+        `✗ ${staleBaseline.length} STALE baseline entr(y/ies) — file no longer has callback hooks:`
+      );
+      for (const f of staleBaseline) console.log(`  - ${f}`);
       console.log('');
-      console.log('See memory entry feedback_mongoose_mixed_pre_save_hook_styles + W483.');
+      console.log('Remove these from KNOWN_CALLBACK_HOOK_BASELINE in');
+      console.log('scripts/check-mongoose-hook-style.js (ratchet-DOWN per W325c).');
     }
   }
-  process.exit(allDrift.length === 0 ? 0 : 1);
+  process.exit(totalFailures === 0 ? 0 : 1);
 }
 
 // Pure helpers exported for unit tests (check-mongoose-hook-style-script.test.js).
 // Only invoke main() when run as CLI — required-as-module needs the helpers
 // without auto-executing the filesystem scan.
-module.exports = { classifyHook, analyze, listSchemaFiles, SCAN_DIRS };
+module.exports = {
+  classifyHook,
+  analyze,
+  classifyFile,
+  hasCallbackHook,
+  listSchemaFiles,
+  SCAN_DIRS,
+  KNOWN_CALLBACK_HOOK_BASELINE,
+};
 
 if (require.main === module) {
   main();

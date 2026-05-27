@@ -33,15 +33,33 @@
 'use strict';
 
 const express = require('express');
-const { authenticate } = require('../middleware/auth');
+const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
 const router = express.Router();
 const { v4: uuidv4 } = require('uuid');
 
+// W470: role gate for community service governance. Pre-W470 any
+// authenticated user (including parent-portal users) could
+// create/modify/delete CommunityProgram + CommunityEvent +
+// CsoPartnership records — org-level community engagement
+// commitments. Restrict to community/volunteer/admin tier.
+const COMMUNITY_ROLES = [
+  'admin',
+  'super_admin',
+  'superadmin',
+  'manager',
+  'branch_manager',
+  'community_lead',
+  'volunteer_coordinator',
+  'social_worker',
+  'public_relations',
+];
+
 // 🔒 All community service routes require authentication
 router.use(authenticate);
 router.use(requireBranchAccess);
+router.use(authorize(COMMUNITY_ROLES)); // W470
 // Models
 const CommunityProgram = require('../models/CommunityProgram');
 const CommunityEvent = require('../models/CommunityEvent');

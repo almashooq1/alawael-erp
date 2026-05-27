@@ -26,7 +26,12 @@ const os = require('os');
 const path = require('path');
 
 const SCRIPT = path.join(__dirname, '..', 'scripts', 'check-mongoose-hook-style.js');
-const { classifyHook, analyze } = require('../scripts/check-mongoose-hook-style');
+const {
+  classifyHook,
+  analyze,
+  hasCallbackHook,
+  KNOWN_CALLBACK_HOOK_BASELINE,
+} = require('../scripts/check-mongoose-hook-style');
 
 describe('check-mongoose-hook-style — classifyHook (pure)', () => {
   it('classifies async function () as async', () => {
@@ -176,6 +181,99 @@ describe('check-mongoose-hook-style — analyze (file-level)', () => {
   });
 });
 
+describe('check-mongoose-hook-style — hasCallbackHook + W494 baseline', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'hook-w494-test-'));
+  });
+
+  afterEach(() => {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  });
+
+  function writeFixture(name, body) {
+    const p = path.join(tmpDir, name);
+    fs.writeFileSync(p, body, 'utf8');
+    return p;
+  }
+
+  it('returns true for a file with a single callback-style hook (W494 risk)', () => {
+    const file = writeFixture(
+      'callback-only.js',
+      `
+        const TestSchema = new mongoose.Schema({ x: Number });
+        TestSchema.pre('save', function (next) { this.x = 1; next(); });
+      `
+    );
+    expect(hasCallbackHook(file)).toBe(true);
+  });
+
+  it('returns false for a file with only async hooks (W494-safe)', () => {
+    const file = writeFixture(
+      'async-only.js',
+      `
+        const TestSchema = new mongoose.Schema({ x: Number });
+        TestSchema.pre('save', async function () { this.x = 1; });
+        TestSchema.pre('validate', async function () { this.x = 2; });
+      `
+    );
+    expect(hasCallbackHook(file)).toBe(false);
+  });
+
+  it('returns false for a file with sync hooks (no `next` param)', () => {
+    const file = writeFixture(
+      'sync-only.js',
+      `
+        const TestSchema = new mongoose.Schema({ x: Number });
+        TestSchema.pre('save', function () { this.x = 1; });
+      `
+    );
+    expect(hasCallbackHook(file)).toBe(false);
+  });
+
+  it('returns true if ANY hook is callback (mixed with async still flags)', () => {
+    const file = writeFixture(
+      'mixed.js',
+      `
+        const TestSchema = new mongoose.Schema({ x: Number });
+        TestSchema.pre('save', async function () { this.x = 1; });
+        TestSchema.pre('validate', function (next) { next(); });
+      `
+    );
+    expect(hasCallbackHook(file)).toBe(true);
+  });
+});
+
+describe('check-mongoose-hook-style — KNOWN_CALLBACK_HOOK_BASELINE structure', () => {
+  it('is a Set instance', () => {
+    expect(KNOWN_CALLBACK_HOOK_BASELINE).toBeInstanceOf(Set);
+  });
+
+  it('contains at least 50 entries (W494 baseline reality — was 99 at install)', () => {
+    expect(KNOWN_CALLBACK_HOOK_BASELINE.size).toBeGreaterThanOrEqual(50);
+  });
+
+  it('every entry uses POSIX paths (no backslashes, no absolute paths)', () => {
+    for (const entry of KNOWN_CALLBACK_HOOK_BASELINE) {
+      expect(entry).not.toMatch(/\\/);
+      expect(entry).not.toMatch(/^[A-Z]:\//);
+      expect(entry).not.toMatch(/^\//);
+    }
+  });
+
+  it('contains the W494 historical entries (Story + Equity models)', () => {
+    // Note: the W494 fix commit `b0a487856` already converted these
+    // four files to async — so they should NOT be in baseline anymore.
+    // The historical context test verifies the OPPOSITE: these files
+    // shouldn't be re-added. We assert they're absent.
+    expect(KNOWN_CALLBACK_HOOK_BASELINE.has('models/StoryBook.js')).toBe(false);
+    expect(KNOWN_CALLBACK_HOOK_BASELINE.has('models/StorySurfaceVariant.js')).toBe(false);
+    expect(KNOWN_CALLBACK_HOOK_BASELINE.has('models/EquityDisparityAlert.js')).toBe(false);
+    expect(KNOWN_CALLBACK_HOOK_BASELINE.has('models/OutcomeBenchmark.js')).toBe(false);
+  });
+});
+
 describe('check-mongoose-hook-style — CLI exit-code contract', () => {
   it('exits 0 against the real backend/models (current state must be clean)', () => {
     const r = spawnSync('node', [SCRIPT], { encoding: 'utf8', timeout: 30000 });
@@ -183,12 +281,17 @@ describe('check-mongoose-hook-style — CLI exit-code contract', () => {
     expect(r.stdout).toMatch(/No mixed async\/callback hook styles found/);
   });
 
-  it('--json mode prints valid JSON with scanned + drift fields', () => {
+  it('--json mode prints valid JSON with scanned + drift + baseline fields', () => {
     const r = spawnSync('node', [SCRIPT, '--json'], { encoding: 'utf8', timeout: 30000 });
     expect(r.status).toBe(0);
     const parsed = JSON.parse(r.stdout);
     expect(parsed.scanned).toBeGreaterThan(100);
-    expect(Array.isArray(parsed.drift)).toBe(true);
-    expect(parsed.drift).toEqual([]);
+    expect(Array.isArray(parsed.mixedStyleDrift)).toBe(true);
+    expect(Array.isArray(parsed.newCallbackFiles)).toBe(true);
+    expect(Array.isArray(parsed.staleBaselineEntries)).toBe(true);
+    expect(parsed.mixedStyleDrift).toEqual([]);
+    expect(parsed.newCallbackFiles).toEqual([]);
+    expect(parsed.staleBaselineEntries).toEqual([]);
+    expect(typeof parsed.callbackBaselineSize).toBe('number');
   });
 });

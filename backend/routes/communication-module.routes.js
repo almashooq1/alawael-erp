@@ -13,7 +13,7 @@
 
 const express = require('express');
 const router = express.Router();
-const { authenticate } = require('../middleware/auth');
+const { authenticate, authorize } = require('../middleware/auth');
 
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 // ─── Models ───────────────────────────────────────────────────────────────────
@@ -25,9 +25,54 @@ const escapeRegex = require('../utils/escapeRegex');
 const { stripUpdateMeta } = require('../utils/sanitize');
 const safeError = require('../utils/safeError');
 
+// W470: role gate for internal communications. Pre-W470 any
+// authenticated principal (including parent-portal users + external
+// visitors with valid tokens) could:
+//   - POST /announcements + /:id/publish — plant org-wide announcements
+//   - DELETE /contacts/:id — wipe contact directory entries
+//   - PUT /announcements/:id — modify existing announcements
+// Restrict to internal staff. Parent-portal + visitor roles are
+// blocked from the entire internal-comms surface.
+const INTERNAL_COMMS_ROLES = [
+  'admin',
+  'super_admin',
+  'superadmin',
+  'manager',
+  'branch_manager',
+  'clinical_supervisor',
+  'physician',
+  'doctor',
+  'nurse',
+  'therapist',
+  'teacher',
+  'receptionist',
+  'hr',
+  'hr_manager',
+  'compliance',
+  'quality',
+  'safety_officer',
+  'social_worker',
+  'case_manager',
+  'inventory',
+  'finance',
+  'maintenance',
+];
+
+// Stricter set for announcement WRITE ops (publish power)
+const ANNOUNCEMENT_WRITE_ROLES = [
+  'admin',
+  'super_admin',
+  'superadmin',
+  'manager',
+  'branch_manager',
+  'clinical_supervisor',
+  'hr_manager',
+];
+
 // ─── Middleware ───────────────────────────────────────────────────────────────
 router.use(authenticate);
 router.use(requireBranchAccess);
+router.use(authorize(INTERNAL_COMMS_ROLES)); // W470: internal staff only
 // ══════════════════════════════════════════════════════════════
 // ANNOUNCEMENTS — الإعلانات
 // ══════════════════════════════════════════════════════════════
@@ -71,7 +116,7 @@ router.get('/announcements', async (req, res) => {
 });
 
 // POST /announcements
-router.post('/announcements', async (req, res) => {
+router.post('/announcements', authorize(ANNOUNCEMENT_WRITE_ROLES) /* W470 */, async (req, res) => {
   try {
     const announcement = await Announcement.create({
       ...stripUpdateMeta(req.body),
@@ -100,43 +145,55 @@ router.get('/announcements/:id', async (req, res) => {
 });
 
 // PUT /announcements/:id
-router.put('/announcements/:id', async (req, res) => {
-  try {
-    const ann = await Announcement.findOneAndUpdate(
-      { _id: req.params.id, deleted_at: null },
-      { ...stripUpdateMeta(req.body), updated_by: req.user._id },
-      { new: true, runValidators: true }
-    );
-    if (!ann) return res.status(404).json({ success: false, error: 'الإعلان غير موجود' });
-    res.json({ success: true, data: ann });
-  } catch (err) {
-    res.status(400).json({ success: false, error: err.message });
+router.put(
+  '/announcements/:id',
+  authorize(ANNOUNCEMENT_WRITE_ROLES) /* W470 */,
+  async (req, res) => {
+    try {
+      const ann = await Announcement.findOneAndUpdate(
+        { _id: req.params.id, deleted_at: null },
+        { ...stripUpdateMeta(req.body), updated_by: req.user._id },
+        { new: true, runValidators: true }
+      );
+      if (!ann) return res.status(404).json({ success: false, error: 'الإعلان غير موجود' });
+      res.json({ success: true, data: ann });
+    } catch (err) {
+      res.status(400).json({ success: false, error: err.message });
+    }
   }
-});
+);
 
 // DELETE /announcements/:id
-router.delete('/announcements/:id', async (req, res) => {
-  try {
-    await Announcement.findByIdAndUpdate(req.params.id, { deleted_at: new Date() });
-    res.json({ success: true, message: 'تم حذف الإعلان' });
-  } catch (err) {
-    safeError(res, err);
+router.delete(
+  '/announcements/:id',
+  authorize(ANNOUNCEMENT_WRITE_ROLES) /* W470 */,
+  async (req, res) => {
+    try {
+      await Announcement.findByIdAndUpdate(req.params.id, { deleted_at: new Date() });
+      res.json({ success: true, message: 'تم حذف الإعلان' });
+    } catch (err) {
+      safeError(res, err);
+    }
   }
-});
+);
 
 // POST /announcements/:id/publish
-router.post('/announcements/:id/publish', async (req, res) => {
-  try {
-    const ann = await Announcement.findByIdAndUpdate(
-      req.params.id,
-      { is_published: true, published_at: new Date() },
-      { new: true }
-    );
-    res.json({ success: true, data: ann, message: 'تم نشر الإعلان' });
-  } catch (err) {
-    safeError(res, err);
+router.post(
+  '/announcements/:id/publish',
+  authorize(ANNOUNCEMENT_WRITE_ROLES) /* W470 */,
+  async (req, res) => {
+    try {
+      const ann = await Announcement.findByIdAndUpdate(
+        req.params.id,
+        { is_published: true, published_at: new Date() },
+        { new: true }
+      );
+      res.json({ success: true, data: ann, message: 'تم نشر الإعلان' });
+    } catch (err) {
+      safeError(res, err);
+    }
   }
-});
+);
 
 // POST /announcements/:id/read — تسجيل قراءة
 router.post('/announcements/:id/read', async (req, res) => {

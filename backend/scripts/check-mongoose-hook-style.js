@@ -107,10 +107,8 @@ const KNOWN_CALLBACK_HOOK_BASELINE = new Set([
   //   — all single uuid-fill hooks, trivial async conversion.
   'models/CulturalProfile.js',
   'models/DecisionRightsAssessment.js',
-  'models/Delegation.js',
-  'models/DifferentialDiagnosis.js',
+  // W494 ratchet wave 4 (parallel agent): Delegation + DifferentialDiagnosis + DisabilityProgram
   // (CrmCampaign + Webhook + EmailPreference removed — see W494 ratchet)
-  'models/DisabilityProgram.js',
   'models/DisabilitySession.js',
   'models/DiscussionForum.js',
   'models/DrugLibrary.js',

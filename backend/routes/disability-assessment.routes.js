@@ -20,10 +20,28 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const Beneficiary = require('../models/Beneficiary');
 const logger = require('../utils/logger');
-const { authenticate } = require('../middleware/auth');
+const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const validateObjectId = require('../middleware/validateObjectId');
 const safeError = require('../utils/safeError');
+
+// W467: role gate for clinical disability assessments (PHI). Pre-W467
+// any authenticated user could create/modify/delete scale + test
+// results. Assessments drive clinical care decisions; falsified
+// scores misdirect treatment. Clinical roles only.
+const DISABILITY_ASSESSMENT_ROLES = [
+  'admin',
+  'super_admin',
+  'superadmin',
+  'manager',
+  'branch_manager',
+  'clinical_supervisor',
+  'physician',
+  'doctor',
+  'nurse',
+  'therapist',
+  'psychologist',
+];
 
 // ─── Inline models (stored in the same collection for now) ──────────────────
 
@@ -64,6 +82,7 @@ const AssessmentResult =
 // ─── Auth guard ──────────────────────────────────────────────────────────────
 router.use(authenticate);
 router.use(requireBranchAccess);
+router.use(authorize(DISABILITY_ASSESSMENT_ROLES)); // W467
 
 // ────────────────────────────────────────────────────────────────────────────
 //  GET /disability/beneficiaries

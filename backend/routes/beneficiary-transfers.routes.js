@@ -28,6 +28,21 @@ const BeneficiaryTransfer = require('../models/BeneficiaryTransfer');
 const Beneficiary = require('../models/Beneficiary');
 const beneficiaryService = require('../services/BeneficiaryService');
 const { authenticateToken } = require('../middleware/auth.middleware');
+const { authorize } = require('../middleware/auth');
+
+// W467: role gate. Pre-W467 any authenticated user (therapist/nurse/
+// parent) could move ANY beneficiary across branches, self-approve
+// transfers, or block legitimate ones. Restrict to manager/admin/
+// social_worker — management ops only.
+const TRANSFER_ROLES = [
+  'admin',
+  'super_admin',
+  'superadmin',
+  'manager',
+  'branch_manager',
+  'social_worker',
+  'case_manager',
+];
 
 // ─── دوال مساعدة ──────────────────────────────────────────────────────────────
 const ok = (res, data, meta = {}) => res.json({ success: true, ...meta, data });
@@ -44,6 +59,7 @@ const validateId = (req, res, next) => {
 // ─── جميع المسارات تتطلب مصادقة ───────────────────────────────────────────────
 router.use(authenticateToken);
 router.use(requireBranchAccess);
+router.use(authorize(TRANSFER_ROLES)); // W467
 // ══════════════════════════════════════════════════════════════════════════════
 // GET /api/beneficiary-transfers — قائمة طلبات النقل
 // ══════════════════════════════════════════════════════════════════════════════

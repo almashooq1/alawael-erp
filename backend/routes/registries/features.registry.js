@@ -52,6 +52,7 @@ module.exports = function registerFeatureRoutes(
   const caregiverSupportProgramRoutes = safeRequire('../routes/caregiver-support-program.routes');
   const voiceLogRoutes = safeRequire('../routes/voice-log.routes');
   const decisionRightsRoutes = safeRequire('../routes/decision-rights.routes');
+  const selfAdvocacyRoutes = safeRequire('../routes/self-advocacy.routes');
   const pickupAuthorizationRoutes = safeRequire('../routes/pickup-authorization.routes');
   const portfolioRoutes = safeRequire('../routes/portfolio.routes');
   const iepRoutes = safeRequire('../routes/iep.routes');
@@ -152,6 +153,16 @@ module.exports = function registerFeatureRoutes(
   // nextReviewDue) / branch stats / get / create (draft) / finalize (full Wave-18
   // invariant chain) / record-outcome / supersede / patch / delete.
   dualMountAuth(app, 'decision-rights', decisionRightsRoutes, authenticate);
+  // Wave 518 (Phase B Rights & Voice — REST surface): self-advocacy on top of W462
+  // SelfAdvocacyTrainingPlan. CRPD-aligned 5-Rights curriculum (be_heard / consent /
+  // refuse / complain / community) across 4 age-banded tracks (early / primary /
+  // teen / adult). Singleton per beneficiary (W462 unique index on beneficiaryId).
+  // 12 endpoints: list / by-beneficiary singleton lookup / branch stats / get /
+  // create / module start+complete+skip / hold+resume / patch / delete. Plan auto-
+  // completes via the model's pre-save hook when all 5 rights reach completed.
+  // This closes the three-wave Phase B route trilogy (W513 voice-log + W515
+  // decision-rights + W518 self-advocacy).
+  dualMountAuth(app, 'self-advocacy', selfAdvocacyRoutes, authenticate);
   // Wave 196b: Pickup authorization w/ e-sig scaffolding (تصاريح الاستلام)
   dualMountAuth(app, 'pickup-authorization', pickupAuthorizationRoutes, authenticate);
   // Wave 199b: Child portfolio (بورتفوليو الطفل) — photos/videos/artwork/achievements

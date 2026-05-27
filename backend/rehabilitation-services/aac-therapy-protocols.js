@@ -259,7 +259,13 @@ const TherapyProtocolSchema = new Schema(
 
 TherapyProtocolSchema.index({ approach: 1, 'target_population.disability_types': 1 });
 
-const TherapyProtocol = mongoose.model('TherapyProtocol', TherapyProtocolSchema);
+// Defensive registration — prevents OverwriteModelError when this file loads
+// after `rehabilitation-services/advanced-therapy-protocols.js` (which also
+// registers 'TherapyProtocol'). Both schemas are divergent and both are in
+// the W340 baseline pending ADR-032 resolution. Until consolidation lands,
+// whichever loads first wins the mongoose.models cache.
+const TherapyProtocol = mongoose.models.TherapyProtocol
+  || mongoose.model('TherapyProtocol', TherapyProtocolSchema);
 
 // بروتوكولات مدمجة - 12 بروتوكول أساسي
 const BUILT_IN_PROTOCOLS = [

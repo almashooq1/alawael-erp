@@ -124,7 +124,8 @@ const AACProfileSchema = new Schema(
   { timestamps: true }
 );
 
-const AACProfile = mongoose.model('AACProfile', AACProfileSchema);
+const AACProfile =
+  mongoose.models.AACProfile || mongoose.model('AACProfile', AACProfileSchema);
 
 // قائمة المفردات الأساسية (Core Vocabulary) - 100+ كلمة أساسية
 const CORE_VOCABULARY = [
@@ -264,8 +265,8 @@ TherapyProtocolSchema.index({ approach: 1, 'target_population.disability_types':
 // registers 'TherapyProtocol'). Both schemas are divergent and both are in
 // the W340 baseline pending ADR-032 resolution. Until consolidation lands,
 // whichever loads first wins the mongoose.models cache.
-const TherapyProtocol = mongoose.models.TherapyProtocol
-  || mongoose.model('TherapyProtocol', TherapyProtocolSchema);
+const TherapyProtocol =
+  mongoose.models.TherapyProtocol || mongoose.model('TherapyProtocol', TherapyProtocolSchema);
 
 // بروتوكولات مدمجة - 12 بروتوكول أساسي
 const BUILT_IN_PROTOCOLS = [

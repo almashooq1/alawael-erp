@@ -109,7 +109,8 @@ const KNOWN_CALLBACK_HOOK_BASELINE = new Set([
   'models/CourseModule.js',
   'models/CpdRecord.js',
   'models/CrisisIncident.js',
-  'models/CrmCampaign.js',
+  // W494-Webhook,EmailPreference,CrmCampaign ratchet-DOWN — pruned 3
+  // entries after async conversion (see commit subject).
   'models/CrmLead.js',
   'models/CrmPartner.js',
   'models/CrmReferralCommission.js',
@@ -119,6 +120,7 @@ const KNOWN_CALLBACK_HOOK_BASELINE = new Set([
   'models/DecisionRightsAssessment.js',
   'models/Delegation.js',
   'models/DifferentialDiagnosis.js',
+  // (CrmCampaign + Webhook + EmailPreference removed — see W494 ratchet)
   'models/DisabilityProgram.js',
   'models/DisabilitySession.js',
   'models/DiscussionForum.js',
@@ -127,7 +129,6 @@ const KNOWN_CALLBACK_HOOK_BASELINE = new Set([
   'models/EStamp.js',
   'models/ElearningCourse.js',
   'models/ElearningQuiz.js',
-  'models/EmailPreference.js',
   'models/EmergencyPlan.js',
   'models/EnterpriseRisk.js',
   'models/EventParticipation.js',
@@ -162,7 +163,6 @@ const KNOWN_CALLBACK_HOOK_BASELINE = new Set([
   'models/TrainerEvaluation.js',
   'models/TrainingCompliance.js',
   'models/WaitlistEntry.js',
-  'models/Webhook.js',
   'models/WebhookDelivery.js',
   'models/auditLog.model.js',
   'models/clinical-assessment/caregiver-burden-assessment.model.js',
@@ -333,7 +333,7 @@ function main() {
       }
       console.log('');
       console.log('Mongoose Kareem dispatches the WHOLE hook chain via Promise adapters');
-      console.log("when ANY hook is async — callback siblings receive undefined for `next`.");
+      console.log('when ANY hook is async — callback siblings receive undefined for `next`.');
       console.log('Fix: convert ALL hooks for that event to async style.');
     }
     if (newCallback.length > 0) {

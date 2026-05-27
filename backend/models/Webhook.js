@@ -139,9 +139,11 @@ webhookSchema.index({ status: 1, lastDeliveryDate: -1 });
 webhookSchema.index({ createdBy: 1, createdAt: -1 });
 
 // Pre-save middleware
-webhookSchema.pre('save', function (next) {
+// W494: converted from callback to async style — Mongoose 9's Kareem
+// throws TypeError on `function(next)` hooks. Memory:
+// feedback_mongoose_9_pre_save_callback_silent_break.
+webhookSchema.pre('save', async function () {
   this.updatedAt = new Date();
-  next();
 });
 
 module.exports = mongoose.models.Webhook || mongoose.model('Webhook', webhookSchema);

@@ -63,9 +63,9 @@ crmCampaignSchema.virtual('clickRate').get(function () {
     : 0;
 });
 
-crmCampaignSchema.pre('save', function (next) {
+// W494: converted from callback to async style.
+crmCampaignSchema.pre('save', async function () {
   if (!this.uuid) this.uuid = require('crypto').randomUUID();
-  next();
 });
 
 module.exports = mongoose.models.CrmCampaign || mongoose.model('CrmCampaign', crmCampaignSchema);

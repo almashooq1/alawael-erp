@@ -147,11 +147,11 @@ emailPreferenceSchema.index({ unsubscribeToken: 1 });
 emailPreferenceSchema.index({ 'deliveryHealth.suppressed': 1 });
 
 // ─── Pre-save: Generate unsubscribe token ──────────────────────────────
-emailPreferenceSchema.pre('save', function (next) {
+// W494: converted from callback to async style.
+emailPreferenceSchema.pre('save', async function () {
   if (!this.unsubscribeToken) {
     this.unsubscribeToken = crypto.randomBytes(32).toString('hex');
   }
-  next();
 });
 
 // ─── Static: Find or create preferences for a user ─────────────────────

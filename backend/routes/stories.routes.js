@@ -406,11 +406,12 @@ router.post(
         return res.status(403).json({ success: false, code: 'FAMILY_ACCESS_NOT_GRANTED' });
       }
 
-      // Atomic increment + timestamp — avoids the W494-class concurrent-save bug
+      // Atomic increment + timestamp — avoids the W494-class concurrent-save bug.
+      // `returnDocument:'after'` is the Mongoose 9+ form (legacy `{new:true}` is deprecated).
       const updated = await Book.findByIdAndUpdate(
         req.params.id,
         { $inc: { familyViewCount: 1 }, $set: { lastViewedAt: new Date() } },
-        { new: true }
+        { returnDocument: 'after' }
       ).lean();
 
       res.json({

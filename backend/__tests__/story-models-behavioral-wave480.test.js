@@ -318,7 +318,7 @@ describe('W495 — share-with-family + view tracking behavioral', () => {
     const updated = await StoryBook.findByIdAndUpdate(
       initial._id,
       { $inc: { familyViewCount: 1 }, $set: { lastViewedAt: now } },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     expect(updated.familyViewCount).toBe(1);
     expect(new Date(updated.lastViewedAt).getTime()).toBeCloseTo(now.getTime(), -2);

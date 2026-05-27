@@ -42,6 +42,10 @@ const ROLE_TOPIC_ALLOWLIST = Object.freeze({
     'assessment.*',
     'ai.*',
     'cache.*',
+    // W506 Phase C — outcome measure alerts on the /admin/ops/measures-outcomes
+    // dashboard. Not `medical.*` (admin role isn't a clinical viewer for the
+    // full medical surface) — single explicit topic.
+    'medical.measure_alert.raised',
   ],
 
   // ── Branch leadership ─────────────────────────────────────────────
@@ -57,6 +61,8 @@ const ROLE_TOPIC_ALLOWLIST = Object.freeze({
     'ai.*',
     'finance.budget.threshold_reached',
     'hr.absence.detected',
+    // W506: branch manager sees outcome alerts for ops triage.
+    'medical.measure_alert.raised',
   ],
   supervisor: [
     'quality.capa.*',
@@ -69,6 +75,9 @@ const ROLE_TOPIC_ALLOWLIST = Object.freeze({
     'ai.risk_elevated',
     'goal.achieved',
     'behavior.incident_recorded',
+    // W506: clinical supervisor picks up forecast off-track + regression
+    // alerts for the supervisor inbox (SmartInboxRanker W431).
+    'medical.measure_alert.raised',
   ],
 
   // ── Clinical roles ────────────────────────────────────────────────

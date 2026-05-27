@@ -48,6 +48,7 @@ function _preloadOptionalModels() {
     '../models/pharmacy.model', // registers Prescription + Dispensing + Medication
     '../models/RiskSnapshot',
     '../models/PayrollPeriod',
+    '../domains/goals/models/MeasureAlert', // W506: outcome measure alerts
   ];
   for (const p of optional) {
     try {
@@ -378,6 +379,30 @@ const MAPPINGS = [
       totalAmount: 0, // periods aggregate via HRPayroll children; subscriber re-aggregates
       employeeCount: Number(doc.casesCounted || 0),
       processedAt: doc.closedAt || new Date(),
+    }),
+  },
+  // ─── W506 — Phase C closure for W479 forecast-off-track surface ──────
+  // Each MeasureAlert.create() publishes medical.measure_alert.raised so
+  // the W479 director dashboard (and supervisor inbox / therapist portal)
+  // react in real-time instead of polling on a 5-min cadence.
+  //
+  // create-only trigger: re-saves on existing alerts (lastEvaluatedAt
+  // updates from the W430 sweeper) MUST NOT republish — only fresh
+  // signals. Auto-resolve on a previously open alert flips status to
+  // 'resolved' on the same doc; that's an update, not a create.
+  {
+    modelName: 'MeasureAlert',
+    domain: 'medical',
+    eventType: 'measure_alert.raised',
+    trigger: 'create-only',
+    payload: doc => ({
+      alertId: String(doc._id),
+      beneficiaryId: String(doc.beneficiaryId || ''),
+      measureId: String(doc.measureId || ''),
+      measureCode: String(doc.measureCode || ''),
+      alertType: String(doc.alertType || ''),
+      severity: String(doc.severity || 'medium'),
+      branchId: doc.branchId ? String(doc.branchId) : '',
     }),
   },
 ];

@@ -617,9 +617,9 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/no-duplicate-ttl-index-wave495.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/measure-alert-realtime-bridge-wave505.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/pdpl-salt-no-literal-fallback-wave505.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/measure-alert-realtime-bridge-wave506.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -1220,9 +1220,9 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/no-duplicate-ttl-index-wave495.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
-      - 'backend/__tests__/measure-alert-realtime-bridge-wave505.test.js'
-      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/pdpl-salt-no-literal-fallback-wave505.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/measure-alert-realtime-bridge-wave506.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

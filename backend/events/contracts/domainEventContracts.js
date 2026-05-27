@@ -379,6 +379,31 @@ const MEDICAL_EVENTS = {
     priority: PRIORITY.CRITICAL,
     consumers: ['notification', 'dashboard', 'management'],
   },
+
+  // W506 Phase C — outcome measure alert (closes W479 polling-→-SSE gap).
+  // Producer: domains/goals/models/MeasureAlert post-save (W394 pattern,
+  // create-only trigger) wired via integration/modelEventBridge.js.
+  // Consumers: W479 director dashboard at /admin/ops/measures-outcomes
+  // (replaces useAutoRefresh polling), supervisor inbox SmartInboxRanker
+  // (W431), clinical-signals service therapist-portal surface.
+  MEASURE_ALERT_RAISED: {
+    domain: 'medical',
+    eventType: 'measure_alert.raised',
+    version: 1,
+    description: 'تنبيه قياس نتائج جديد — Measure outcome alert raised',
+    payload: {
+      alertId: 'string',
+      beneficiaryId: 'string',
+      measureId: 'string',
+      measureCode: 'string',
+      alertType: 'string', // REGRESSION_DETECTED | PLATEAU_DETECTED | MCID_NOT_MET | FORECAST_OFF_TRACK
+      severity: 'string', // low | medium | high | critical
+      branchId: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.HIGH,
+    consumers: ['dashboard', 'notification', 'supervisor_queue'],
+  },
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════

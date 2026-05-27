@@ -50,6 +50,7 @@ module.exports = function registerFeatureRoutes(
   const dietPrescriptionRoutes = safeRequire('../routes/diet-prescription.routes');
   const facilityAssetRoutes = safeRequire('../routes/facility-asset.routes');
   const caregiverSupportProgramRoutes = safeRequire('../routes/caregiver-support-program.routes');
+  const voiceLogRoutes = safeRequire('../routes/voice-log.routes');
   const pickupAuthorizationRoutes = safeRequire('../routes/pickup-authorization.routes');
   const portfolioRoutes = safeRequire('../routes/portfolio.routes');
   const iepRoutes = safeRequire('../routes/iep.routes');
@@ -136,6 +137,12 @@ module.exports = function registerFeatureRoutes(
   dualMountAuth(app, 'facility-asset', facilityAssetRoutes, authenticate);
   // Wave 384: Caregiver support program (برنامج دعم مقدمي الرعاية) — counseling/training/support-group persistence
   dualMountAuth(app, 'caregiver-support', caregiverSupportProgramRoutes, authenticate);
+  // Wave 513 (Phase B Rights & Voice — REST surface): voice-log on top of W460 BeneficiaryVoiceLog
+  // model. CRPD Article 7+12+21 — beneficiary's persistent voice channel (preferences / dreams /
+  // fears / dislikes / daily+session ratings / complaints / consent changes / requests). 9
+  // endpoints: list / per-beneficiary history with CRPD-compliance summary / branch stats /
+  // get / create / action / supersede / patch / delete (admin-only). branchFilter on every query.
+  dualMountAuth(app, 'voice-log', voiceLogRoutes, authenticate);
   // Wave 196b: Pickup authorization w/ e-sig scaffolding (تصاريح الاستلام)
   dualMountAuth(app, 'pickup-authorization', pickupAuthorizationRoutes, authenticate);
   // Wave 199b: Child portfolio (بورتفوليو الطفل) — photos/videos/artwork/achievements

@@ -369,5 +369,5 @@ __tests__/idor-crm-enhanced-branch-filter-wave508.test.js
 __tests__/measure-alert-auto-assignment-wave509.test.js
 __tests__/smart-platform-metrics-wave435.test.js
 __tests__/caseload-rebalance-wave510.test.js
-__tests__/voice-log-routes-wave511.test.js
+__tests__/voice-log-routes-wave513.test.js
 __tests__/caseload-rebalance-apply-wave512.test.js

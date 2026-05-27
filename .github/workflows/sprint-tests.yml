@@ -562,6 +562,8 @@ on:
       - 'backend/__tests__/services-use-defensive-guard-wave412.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/backend-wide-defensive-guard-wave413.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/cctv-lazy-env-read-wave414.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -1107,6 +1109,8 @@ on:
       - 'backend/__tests__/services-use-defensive-guard-wave412.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/backend-wide-defensive-guard-wave413.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/cctv-lazy-env-read-wave414.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

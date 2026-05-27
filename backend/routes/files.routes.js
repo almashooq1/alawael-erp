@@ -259,8 +259,27 @@ router.get('/:id/download', requireRole(READ_ROLES), async (req, res) => {
     if (!fs.existsSync(resolved)) {
       return res.status(404).json({ success: false, message: 'الملف غير موجود على القرص' });
     }
-    res.set('Content-Type', doc.mimeType);
-    res.set('Content-Disposition', `inline; filename="${encodeURIComponent(doc.originalName)}"`);
+    // W463: defense-in-depth stored-XSS guard (sibling of W462 on
+    // documents.routes.js). ALLOWED_MIMES currently excludes the
+    // executable-script mime classes, but if a future maintainer
+    // adds text/html, text/xml, application/xml, or image/svg+xml
+    // to the allowlist, inline render would be stored-XSS. Force
+    // attachment + sandbox CSP for those mimes regardless.
+    const mime = doc.mimeType || 'application/octet-stream';
+    const isExecutableScript =
+      /^text\/(html|xml)/i.test(mime) ||
+      /^application\/xml/i.test(mime) ||
+      /^image\/svg/i.test(mime);
+    const disposition = isExecutableScript ? 'attachment' : 'inline';
+    res.set('Content-Type', mime);
+    res.set(
+      'Content-Disposition',
+      `${disposition}; filename="${encodeURIComponent(doc.originalName)}"`
+    );
+    if (isExecutableScript) {
+      res.set('X-Frame-Options', 'DENY');
+      res.set('Content-Security-Policy', "sandbox; default-src 'none'");
+    }
     fs.createReadStream(resolved).pipe(res);
   } catch (err) {
     return safeError(res, err, 'files.download');

@@ -161,6 +161,7 @@ on:
       - 'backend/__tests__/measure-baseline-slot-wave227.test.js'
       - 'backend/__tests__/measure-baseline-slot-admin-wire-wave228.test.js'
       - 'backend/__tests__/measure-outcomes-aggregator-wave229.test.js'
+      - 'backend/__tests__/measure-outcomes-aggregator-forecast-wave479.test.js'
       - 'backend/__tests__/branch-reassessment-policy-wave230.test.js'
       - 'backend/__tests__/measure-progress-interpreter-wave232.test.js'
       - 'backend/__tests__/therapist-workbench-admin-viewer-wave232.test.js'
@@ -532,6 +533,8 @@ on:
       - 'backend/__tests__/story-builder-wave479.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/payroll-period-behavioral-wave99.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/story-models-wave480.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -676,6 +679,7 @@ on:
       - 'backend/__tests__/measure-baseline-slot-wave227.test.js'
       - 'backend/__tests__/measure-baseline-slot-admin-wire-wave228.test.js'
       - 'backend/__tests__/measure-outcomes-aggregator-wave229.test.js'
+      - 'backend/__tests__/measure-outcomes-aggregator-forecast-wave479.test.js'
       - 'backend/__tests__/branch-reassessment-policy-wave230.test.js'
       - 'backend/__tests__/measure-progress-interpreter-wave232.test.js'
       - 'backend/__tests__/therapist-workbench-admin-viewer-wave232.test.js'
@@ -1047,6 +1051,8 @@ on:
       - 'backend/__tests__/story-builder-wave479.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/payroll-period-behavioral-wave99.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/story-models-wave480.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

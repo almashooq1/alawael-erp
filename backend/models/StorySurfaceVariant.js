@@ -122,43 +122,37 @@ StorySurfaceVariantSchema.index({ storyBookId: 1, surfaceType: 1 }, { unique: tr
 StorySurfaceVariantSchema.index({ beneficiaryId: 1, surfaceType: 1, status: 1 });
 
 // Wave-18 invariants
-StorySurfaceVariantSchema.pre('save', function (next) {
-  // Status: approved requires approvedBy
-  if (['approved', 'published'].includes(this.status) && !this.approvedBy) {
-    return next(new Error(`StorySurfaceVariant: status="${this.status}" requires approvedBy`));
-  }
-  // Retracted requires reason
-  if (this.status === 'retracted' && (!this.retractionReason || this.retractionReason.length < 5)) {
-    return next(
-      new Error('StorySurfaceVariant: retracted status requires retractionReason ≥5 chars')
-    );
-  }
-  // Auto-fill timestamps
-  if (this.status === 'approved' && !this.approvedAt) this.approvedAt = new Date();
-  if (this.status === 'retracted' && !this.retractedAt) this.retractedAt = new Date();
-
-  // Sibling/beneficiary variants are sensitive by default
+StorySurfaceVariantSchema.pre('save', async function () {
+  // Sibling/beneficiary variants are sensitive by default — apply BEFORE
+  // the status checks so the auto-flag persists even on save failures.
   if (
     ['sibling_friendly_story', 'beneficiary_personal_story'].includes(this.surfaceType) &&
     this.isSensitive === false
   ) {
     this.isSensitive = true;
   }
+  // Status: approved requires approvedBy
+  if (['approved', 'published'].includes(this.status) && !this.approvedBy) {
+    throw new Error(`StorySurfaceVariant: status="${this.status}" requires approvedBy`);
+  }
+  // Retracted requires reason
+  if (this.status === 'retracted' && (!this.retractionReason || this.retractionReason.length < 5)) {
+    throw new Error('StorySurfaceVariant: retracted status requires retractionReason ≥5 chars');
+  }
+  // Auto-fill timestamps
+  if (this.status === 'approved' && !this.approvedAt) this.approvedAt = new Date();
+  if (this.status === 'retracted' && !this.retractedAt) this.retractedAt = new Date();
 
   // Visual assets with photos require consentVerified=true before publish
   if (['approved', 'published'].includes(this.status)) {
     for (const asset of this.visualAssets || []) {
       if (asset.kind === 'photo' && asset.consentVerified !== true) {
-        return next(
-          new Error(
-            'StorySurfaceVariant: photo visualAssets require consentVerified=true before approval/publish'
-          )
+        throw new Error(
+          'StorySurfaceVariant: photo visualAssets require consentVerified=true before approval/publish'
         );
       }
     }
   }
-
-  next();
 });
 
 module.exports =

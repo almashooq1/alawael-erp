@@ -104,15 +104,15 @@ OutcomeBenchmarkSchema.index(
 );
 
 // Wave-18 invariants
-OutcomeBenchmarkSchema.pre('save', function (next) {
+OutcomeBenchmarkSchema.pre('save', async function () {
   if (this.periodStart && this.periodEnd && this.periodStart >= this.periodEnd) {
-    return next(new Error('OutcomeBenchmark: periodStart must be before periodEnd'));
+    throw new Error('OutcomeBenchmark: periodStart must be before periodEnd');
   }
   if (this.scope === 'branch' && !this.branchId) {
-    return next(new Error('OutcomeBenchmark: scope=branch requires branchId'));
+    throw new Error('OutcomeBenchmark: scope=branch requires branchId');
   }
   if (this.scope === 'regional' && !this.region) {
-    return next(new Error('OutcomeBenchmark: scope=regional requires region'));
+    throw new Error('OutcomeBenchmark: scope=regional requires region');
   }
   if (this.status === 'published' && !this.publishedAt) this.publishedAt = new Date();
   if (this.status === 'retired' && !this.retiredAt) this.retiredAt = new Date();
@@ -121,9 +121,8 @@ OutcomeBenchmarkSchema.pre('save', function (next) {
     this.percentile75 !== undefined &&
     this.percentile25 > this.percentile75
   ) {
-    return next(new Error('OutcomeBenchmark: percentile25 must be <= percentile75'));
+    throw new Error('OutcomeBenchmark: percentile25 must be <= percentile75');
   }
-  next();
 });
 
 module.exports =

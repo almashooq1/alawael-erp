@@ -149,9 +149,9 @@ EquityDisparityAlertSchema.index({ branchId: 1, dimension: 1, periodStart: -1 })
 EquityDisparityAlertSchema.index({ branchId: 1, status: 1, overallSeverity: 1 });
 
 // Wave-18 invariants
-EquityDisparityAlertSchema.pre('save', function (next) {
+EquityDisparityAlertSchema.pre('save', async function () {
   if (this.periodStart && this.periodEnd && this.periodStart >= this.periodEnd) {
-    return next(new Error('EquityDisparityAlert: periodStart must be before periodEnd'));
+    throw new Error('EquityDisparityAlert: periodStart must be before periodEnd');
   }
   // Resolved + dismissed require terminal timestamp
   if (this.status === 'resolved' && !this.resolvedAt) this.resolvedAt = new Date();
@@ -159,15 +159,12 @@ EquityDisparityAlertSchema.pre('save', function (next) {
   if (this.status === 'acknowledged' && !this.acknowledgedAt) this.acknowledgedAt = new Date();
   // Dismissed requires reason >=5 chars
   if (this.status === 'dismissed' && (!this.dismissalReason || this.dismissalReason.length < 5)) {
-    return next(
-      new Error('EquityDisparityAlert: dismissed status requires dismissalReason >=5 chars')
-    );
+    throw new Error('EquityDisparityAlert: dismissed status requires dismissalReason >=5 chars');
   }
   // Only major/moderate get persisted as alerts (none/minor filtered upstream)
   if (this.overallSeverity === 'none') {
-    return next(new Error('EquityDisparityAlert: overallSeverity=none should not be persisted'));
+    throw new Error('EquityDisparityAlert: overallSeverity=none should not be persisted');
   }
-  next();
 });
 
 module.exports =

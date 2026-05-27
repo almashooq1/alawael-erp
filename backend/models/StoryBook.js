@@ -108,9 +108,9 @@ StoryBookSchema.index({ beneficiaryId: 1, periodStart: -1 });
 StoryBookSchema.index({ branchId: 1, periodType: 1, status: 1 });
 
 // Wave-18 invariants
-StoryBookSchema.pre('save', function (next) {
+StoryBookSchema.pre('save', async function () {
   if (this.periodStart && this.periodEnd && this.periodStart >= this.periodEnd) {
-    return next(new Error('StoryBook: periodStart must be before periodEnd'));
+    throw new Error('StoryBook: periodStart must be before periodEnd');
   }
   // Status transitions
   if (this.status === 'reviewed' && !this.reviewedAt) this.reviewedAt = new Date();
@@ -120,9 +120,8 @@ StoryBookSchema.pre('save', function (next) {
   }
   // published requires reviewedBy
   if (['published', 'shared_with_family'].includes(this.status) && !this.reviewedBy) {
-    return next(new Error(`StoryBook: status="${this.status}" requires reviewedBy`));
+    throw new Error(`StoryBook: status="${this.status}" requires reviewedBy`);
   }
-  next();
 });
 
 module.exports = mongoose.models.StoryBook || mongoose.model('StoryBook', StoryBookSchema);

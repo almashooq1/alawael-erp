@@ -404,6 +404,33 @@ const MEDICAL_EVENTS = {
     priority: PRIORITY.HIGH,
     consumers: ['dashboard', 'notification', 'supervisor_queue'],
   },
+
+  // W514 — measure alert reassigned. Producer: W512 POST /caseload-rebalance/apply
+  // (manual supervisor action). Consumers: both therapists' inboxes refresh,
+  // notification service surfaces the move, future calendar-sync hooks
+  // pick up the change. Distinct event from `measure_alert.raised` so
+  // subscribers can react differently (e.g. notify FROM therapist of
+  // removal + TO therapist of addition).
+  MEASURE_ALERT_REASSIGNED: {
+    domain: 'medical',
+    eventType: 'measure_alert.reassigned',
+    version: 1,
+    description: 'إعادة تعيين تنبيه قياس — Measure alert reassigned to a different therapist',
+    payload: {
+      alertId: 'string',
+      beneficiaryId: 'string',
+      branchId: 'string',
+      fromTherapistId: 'string',
+      toTherapistId: 'string',
+      actorId: 'string', // supervisor who applied the move
+      reason: 'string',
+      alertType: 'string',
+      severity: 'string',
+    },
+    delivery: [DELIVERY.PERSIST, DELIVERY.BROADCAST, DELIVERY.REALTIME, DELIVERY.LOCAL],
+    priority: PRIORITY.NORMAL,
+    consumers: ['dashboard', 'notification', 'supervisor_queue', 'calendar_sync'],
+  },
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════

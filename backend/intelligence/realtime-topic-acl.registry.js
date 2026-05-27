@@ -46,6 +46,8 @@ const ROLE_TOPIC_ALLOWLIST = Object.freeze({
     // dashboard. Not `medical.*` (admin role isn't a clinical viewer for the
     // full medical surface) — single explicit topic.
     'medical.measure_alert.raised',
+    // W514 — supervisor rebalance moves notify admin dashboards.
+    'medical.measure_alert.reassigned',
   ],
 
   // ── Branch leadership ─────────────────────────────────────────────
@@ -63,6 +65,8 @@ const ROLE_TOPIC_ALLOWLIST = Object.freeze({
     'hr.absence.detected',
     // W506: branch manager sees outcome alerts for ops triage.
     'medical.measure_alert.raised',
+    // W514: branch manager sees rebalance moves applied in their branch.
+    'medical.measure_alert.reassigned',
   ],
   supervisor: [
     'quality.capa.*',
@@ -78,6 +82,9 @@ const ROLE_TOPIC_ALLOWLIST = Object.freeze({
     // W506: clinical supervisor picks up forecast off-track + regression
     // alerts for the supervisor inbox (SmartInboxRanker W431).
     'medical.measure_alert.raised',
+    // W514: supervisor sees reassignments they themselves applied
+    // (audit trail) AND moves applied by other supervisors in their branch.
+    'medical.measure_alert.reassigned',
   ],
 
   // ── Clinical roles ────────────────────────────────────────────────
@@ -98,6 +105,10 @@ const ROLE_TOPIC_ALLOWLIST = Object.freeze({
     'careplan.completed',
     'goal.achieved',
     'ai.recommendation_generated',
+    // W514: therapists ARE direct recipients of reassign moves (either
+    // losing or gaining a case). They need this single topic without
+    // the full medical.* firehose that's reserved for clinical viewers.
+    'medical.measure_alert.reassigned',
   ],
   nurse: ['session.completed', 'medical.*', 'beneficiary.status_changed'],
   nursing_supervisor: ['session.*', 'medical.*', 'beneficiary.status_changed', 'quality.capa.*'],

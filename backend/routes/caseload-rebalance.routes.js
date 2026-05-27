@@ -170,6 +170,44 @@ router.post('/apply', express.json(), async (req, res) => {
           { type: 'User', id: toTherapistId },
         ],
       });
+
+      // W514 — emit medical.measure_alert.reassigned for downstream
+      // realtime subscribers (both therapists' inboxes, notification
+      // service, future calendar-sync). Fire-and-forget; emit failure
+      // must never break the user-facing response. We resolve the bus
+      // lazily so the route doesn't require integrationBus to be
+      // initialized at module load (test environments often skip it).
+      try {
+        const { integrationBus } = require('../integration/systemIntegrationBus');
+        if (integrationBus && typeof integrationBus.publish === 'function') {
+          Promise.resolve()
+            .then(() =>
+              integrationBus.publish('medical', 'measure_alert.reassigned', {
+                alertId,
+                beneficiaryId: String(result.alert?.beneficiaryId || ''),
+                branchId: String(result.alert?.branchId || alertProbe.branchId || ''),
+                fromTherapistId,
+                toTherapistId,
+                actorId: String(req.user?._id || req.user?.id || ''),
+                reason: typeof reason === 'string' ? reason.slice(0, 500) : '',
+                alertType: String(result.alert?.alertType || ''),
+                severity: String(result.alert?.severity || ''),
+              })
+            )
+            .catch(emitErr => {
+              logger.warn(
+                '[caseload-rebalance] reassign emit failed: %s',
+                emitErr.message || emitErr
+              );
+            });
+        }
+      } catch (busErr) {
+        logger.warn(
+          '[caseload-rebalance] integrationBus unavailable for reassign emit: %s',
+          busErr.message || busErr
+        );
+      }
+
       return res.json({ success: true, data: result });
     }
 

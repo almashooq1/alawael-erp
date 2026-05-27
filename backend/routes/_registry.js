@@ -235,7 +235,7 @@ const dualMount = (app, path, handler, middleware = []) => {
 // authentication internally. Apply broadly when the router exposes
 // beneficiary / clinical / HR data. Adds `authenticate` ahead of the handler.
 //
-// W471/W472: defense-in-depth at mount-time. W471 fixed `referrals` (PHI
+// W471/W502: defense-in-depth at mount-time. W471 fixed `referrals` (PHI
 // exposure). W472 swept the remaining 20 bare-mounted slugs that had
 // NO internal auth at all (catastrophic: security/domain RBAC mgmt,
 // break-glass, family/behavior/goals/episodes/timeline PHI surfaces,
@@ -243,7 +243,7 @@ const dualMount = (app, path, handler, middleware = []) => {
 // transport/succession-planning/social-media/report-builder writes).
 // `auth/nafath` remains on bare dualMount as the deliberate exception —
 // it IS the login flow and must be public. Drift guard:
-// __tests__/auth-gate-mount-sweep-wave472.test.js.
+// __tests__/auth-gate-mount-sweep-wave502.test.js.
 const dualMountAuth = (app, path, handler) => dualMount(app, path, handler, [authenticate]);
 
 /**

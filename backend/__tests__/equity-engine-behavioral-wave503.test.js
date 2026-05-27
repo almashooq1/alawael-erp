@@ -180,3 +180,63 @@ describe('W503 — runAuditAndPersist with auto-CAPA', () => {
     expect(String(r.capaItem.branchId)).toBe(String(payload.branchId));
   });
 });
+
+describe('W504 — ensureCapaForAlert (retry-capa)', () => {
+  it('returns ALREADY_LINKED when the alert already has a CAPA', async () => {
+    const first = await engineService.runAuditAndPersist(baseAuditPayload());
+    expect(first.capaItem).toBeTruthy();
+
+    const second = await engineService.ensureCapaForAlert(first.alert._id);
+    expect(second.skipped).toBe(true);
+    expect(second.reason).toBe('ALREADY_LINKED');
+    expect(String(second.capaItem._id)).toBe(String(first.capaItem._id));
+  });
+
+  it('CREATES a CAPA for an alert that lost its link (orphan recovery)', async () => {
+    const r = await engineService.runAuditAndPersist(baseAuditPayload());
+    // Simulate the orphan state — clear the link, delete the CAPA.
+    const CapaItem = require('../models/quality/CapaItem.model');
+    await CapaItem.deleteMany({});
+    await EquityDisparityAlert.findByIdAndUpdate(r.alert._id, {
+      $unset: { capaItemId: 1 },
+    });
+
+    const retry = await engineService.ensureCapaForAlert(r.alert._id);
+    expect(retry.skipped).toBe(false);
+    expect(retry.reason).toBe('CREATED');
+    expect(retry.capaItem).toBeTruthy();
+
+    // Alert should now be re-linked
+    const refreshed = await EquityDisparityAlert.findById(r.alert._id).lean();
+    expect(String(refreshed.capaItemId)).toBe(String(retry.capaItem._id));
+  });
+
+  it("returns NOT_MAJOR for moderate-severity alerts (won't auto-create)", async () => {
+    // Force a moderate-severity alert by inserting one directly.
+    const alert = await EquityDisparityAlert.create({
+      branchId: new mongoose.Types.ObjectId(),
+      dimension: 'gender',
+      metricKind: 'gas_avg_tscore',
+      periodStart: new Date('2026-01-01'),
+      periodEnd: new Date('2026-03-31'),
+      periodKind: 'quarterly',
+      findings: [],
+      overallSeverity: 'moderate',
+      flaggedCount: 1,
+      signatureHash: 'c'.repeat(64),
+      status: 'open',
+      generatedBy: 'manual_audit',
+    });
+
+    const r = await engineService.ensureCapaForAlert(alert._id);
+    expect(r.skipped).toBe(true);
+    expect(r.reason).toBe('NOT_MAJOR');
+    expect(r.capaItem).toBeNull();
+  });
+
+  it('throws ALERT_NOT_FOUND when alert ID is missing', async () => {
+    await expect(
+      engineService.ensureCapaForAlert(new mongoose.Types.ObjectId())
+    ).rejects.toMatchObject({ code: 'ALERT_NOT_FOUND' });
+  });
+});

@@ -80,6 +80,29 @@ describe('W487 — equity-engine.service structural', () => {
     expect(lib.SOURCE_MODULES).toContain('equity');
   });
 
+  it('W504 ensureCapaForAlert is exported', () => {
+    expect(typeof service.ensureCapaForAlert).toBe('function');
+  });
+
+  it('W504 ensureCapaForAlert short-circuits on NOT_MAJOR severity', () => {
+    expect(SERVICE_SRC).toMatch(/NOT_MAJOR/);
+    expect(SERVICE_SRC).toMatch(/alert\.overallSeverity !== 'major'/);
+  });
+
+  it('W504 ensureCapaForAlert returns ALREADY_LINKED when CAPA exists', () => {
+    expect(SERVICE_SRC).toMatch(/ALREADY_LINKED/);
+  });
+
+  it('W504 _resolveCapaOwner tries assignedTo → quality_lead → admin → branch placeholder', () => {
+    expect(SERVICE_SRC).toMatch(/role:\s*['"]quality_lead['"]/);
+    expect(SERVICE_SRC).toMatch(/role:\s*['"]admin['"]/);
+    expect(SERVICE_SRC).toMatch(/_resolveCapaOwner/);
+  });
+
+  it('W504 ensureCapaForAlert throws ALERT_NOT_FOUND when alert missing', () => {
+    expect(SERVICE_SRC).toMatch(/ALERT_NOT_FOUND/);
+  });
+
   it('runAuditAndPersist throws when branchId missing', () => {
     expect(SERVICE_SRC).toMatch(/branchId is required/);
   });

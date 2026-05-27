@@ -131,7 +131,35 @@ async function runAuditAndPersist({
  * W503 — auto-create a CAPA item for a major-severity equity alert.
  * Returns null if the CAPA service / CAPA model is not available
  * (test environments, partial bootstraps).
+ *
+ * Owner resolution order (W504):
+ *   1. alert.assignedTo                    — supervisor pre-assigned the alert
+ *   2. User with role=quality_lead in branch — best-fit production default
+ *   3. User with role=admin in branch       — escalation fallback
+ *   4. alert.branchId                       — last-resort placeholder marker
+ *      that surfaces in the CAPA queue with an obviously-wrong owner,
+ *      forcing supervisor reassignment.
  */
+async function _resolveCapaOwner(alert) {
+  if (alert.assignedTo) return alert.assignedTo;
+  // Try to find a default owner for the branch
+  try {
+    const UserModel = mongoose.model('User');
+    const filter = { branchId: alert.branchId, status: { $ne: 'inactive' } };
+    const lead = await UserModel.findOne({ ...filter, role: 'quality_lead' })
+      .select('_id')
+      .lean();
+    if (lead) return lead._id;
+    const admin = await UserModel.findOne({ ...filter, role: 'admin' })
+      .select('_id')
+      .lean();
+    if (admin) return admin._id;
+  } catch {
+    // User model unavailable — fall through to branchId placeholder
+  }
+  return alert.branchId;
+}
+
 async function _autoCreateCapaForAlert({ alert, audit }) {
   let createCapaService;
   try {
@@ -168,6 +196,8 @@ async function _autoCreateCapaForAlert({ alert, audit }) {
     .filter(Boolean)
     .join(' ');
 
+  const ownerUserId = await _resolveCapaOwner(alert);
+
   return svc.createCapaItem({
     source: {
       module: 'equity',
@@ -177,12 +207,62 @@ async function _autoCreateCapaForAlert({ alert, audit }) {
     type: 'corrective',
     title,
     description,
-    ownerUserId: alert.assignedTo || alert.branchId, // best-effort; supervisor reassigns
+    ownerUserId,
     dueDate,
     branchId: alert.branchId,
     priority: 'high',
-    createdBy: alert.assignedTo || alert.branchId,
+    createdBy: ownerUserId,
   });
+}
+
+/**
+ * W504 — ensure a CAPA exists for an alert. Used by the retry endpoint
+ * and any backfill path for alerts created before W503.
+ *
+ *   - If alert already has capaItemId AND that CAPA exists → return existing
+ *   - Else if alert.overallSeverity is 'major' → create a new CAPA
+ *   - Else (moderate/minor) → return null with reason NOT_MAJOR
+ */
+async function ensureCapaForAlert(alertId) {
+  const AlertModel = mongoose.model('EquityDisparityAlert');
+  const alert = await AlertModel.findById(alertId);
+  if (!alert) {
+    const err = new Error('Alert not found');
+    err.code = 'ALERT_NOT_FOUND';
+    throw err;
+  }
+
+  if (alert.overallSeverity !== 'major') {
+    return { capaItem: null, alert, skipped: true, reason: 'NOT_MAJOR' };
+  }
+
+  // If already linked, verify the CAPA still exists; if not, treat as orphan
+  // and create fresh.
+  if (alert.capaItemId) {
+    try {
+      const CapaModel = mongoose.model('CapaItem');
+      const existing = await CapaModel.findById(alert.capaItemId).lean();
+      if (existing) {
+        return { capaItem: existing, alert, skipped: true, reason: 'ALREADY_LINKED' };
+      }
+    } catch {
+      /* CapaItem model not registered — fall through to create */
+    }
+  }
+
+  // Build a synthetic `audit` object from the persisted findings for the
+  // title/description template.
+  const audit = {
+    findings: alert.findings || [],
+    flaggedCount: alert.flaggedCount,
+    overallSeverity: alert.overallSeverity,
+  };
+  const capaItem = await _autoCreateCapaForAlert({ alert, audit });
+  if (capaItem) {
+    alert.capaItemId = capaItem._id;
+    await alert.save();
+  }
+  return { capaItem, alert, skipped: false, reason: 'CREATED' };
 }
 
 /**
@@ -238,6 +318,7 @@ async function runBranchSweep({
 module.exports = {
   runAuditAndPersist,
   runBranchSweep,
+  ensureCapaForAlert,
   computeSignature,
   BINARY_METRICS,
 };

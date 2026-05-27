@@ -202,6 +202,44 @@ router.post(
 );
 
 /**
+ * POST /api/equity/alerts/:id/retry-capa — tier 1 MFA
+ * Body: {} — ensures a CAPA exists for this alert. Creates one if
+ * missing (major severity only), returns existing if already linked.
+ * Idempotent. Used to backfill alerts created before W503 or to recover
+ * from auto-creation failures.
+ */
+router.post(
+  '/alerts/:id/retry-capa',
+  requireRole(['admin', 'supervisor', 'quality_lead', 'compliance']),
+  requireMfaTier(1),
+  async (req, res) => {
+    const engineService = require('../services/equity/equity-engine.service');
+    const Alert = loadAlertModel();
+    if (!Alert) return res.status(503).json({ success: false, code: 'MODEL_NOT_REGISTERED' });
+
+    try {
+      const alert = await Alert.findById(req.params.id).lean();
+      if (!alert) return res.status(404).json({ success: false, code: 'NOT_FOUND' });
+      assertBranchMatch(req, alert.branchId, 'EquityDisparityAlert');
+
+      const result = await engineService.ensureCapaForAlert(req.params.id);
+      const status = result.reason === 'ALREADY_LINKED' ? 200 : 201;
+      return res.status(status).json({ success: true, ...result });
+    } catch (err) {
+      if (err.statusCode === 403) {
+        return res.status(403).json({ success: false, code: 'BRANCH_MISMATCH' });
+      }
+      if (err.code === 'ALERT_NOT_FOUND') {
+        return res.status(404).json({ success: false, code: 'NOT_FOUND' });
+      }
+      return res
+        .status(500)
+        .json({ success: false, code: 'RETRY_CAPA_FAILED', message: err.message });
+    }
+  }
+);
+
+/**
  * POST /api/equity/audit — tier 2 MFA
  * Body: { dimension, metricKind, observations, periodStart, periodEnd, branchId? }
  * Runs an ad-hoc audit + persists alert if severity >= moderate.

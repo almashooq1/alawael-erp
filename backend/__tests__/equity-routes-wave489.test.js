@@ -39,6 +39,24 @@ describe('W489 — equity.routes structural', () => {
     expect(ROUTE_SRC).toMatch(/router\.post\(\s*['"]\/audit['"][\s\S]+?requireMfaTier\(2\)/);
   });
 
+  it('W504 declares POST /alerts/:id/retry-capa with tier 1 MFA', () => {
+    expect(ROUTE_SRC).toMatch(
+      /router\.post\(\s*['"]\/alerts\/:id\/retry-capa['"][\s\S]+?requireMfaTier\(1\)/
+    );
+  });
+
+  it('W504 retry-capa returns 201 on CREATED, 200 on ALREADY_LINKED', () => {
+    expect(ROUTE_SRC).toMatch(/result\.reason === 'ALREADY_LINKED' \? 200 : 201/);
+  });
+
+  it('W504 retry-capa maps ALERT_NOT_FOUND to 404', () => {
+    expect(ROUTE_SRC).toMatch(/err\.code === 'ALERT_NOT_FOUND'/);
+  });
+
+  it('W504 retry-capa uses branch isolation via assertBranchMatch', () => {
+    expect(ROUTE_SRC).toMatch(/retry-capa[\s\S]+?assertBranchMatch\(req,\s*alert\.branchId/);
+  });
+
   it('declares GET /benchmarks', () => {
     expect(ROUTE_SRC).toMatch(/router\.get\(\s*['"]\/benchmarks['"]/);
   });

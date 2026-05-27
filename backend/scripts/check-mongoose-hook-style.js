@@ -31,7 +31,31 @@ const fs = require('fs');
 const path = require('path');
 
 const JSON_MODE = process.argv.includes('--json');
-const MODELS_DIR = path.resolve(__dirname, '..', 'models');
+
+// Directories where Mongoose schemas can be declared. backend/models/ is
+// the canonical home but pre/post hooks also live in domain-specific
+// folders (domains/*/models/), plugins (database/plugins/), authorization
+// (tenantScope.plugin), privacy (data-subject-request.model), and a few
+// services that declare their own schemas inline.
+const SCAN_DIRS = [
+  path.resolve(__dirname, '..', 'models'),
+  path.resolve(__dirname, '..', 'domains'),
+  path.resolve(__dirname, '..', 'database'),
+  path.resolve(__dirname, '..', 'authorization'),
+  path.resolve(__dirname, '..', 'privacy'),
+  path.resolve(__dirname, '..', 'integration'),
+  path.resolve(__dirname, '..', 'intelligence'),
+  path.resolve(__dirname, '..', 'rehabilitation-services'),
+  path.resolve(__dirname, '..', 'services'),
+];
+const SKIP_DIR_NAMES = new Set([
+  '_archived',
+  '_backups',
+  'node_modules',
+  '__tests__',
+  'tests',
+  'scripts',
+]);
 
 // Match `<Schema>.pre('event', <opts?>, <fn>)` or .post(...). Capture
 // event name + signature start. We need to read forward to see whether
@@ -39,20 +63,26 @@ const MODELS_DIR = path.resolve(__dirname, '..', 'models');
 const HOOK_RE =
   /(\w+(?:Schema|schema))\s*\.\s*(pre|post)\s*\(\s*['"]([a-zA-Z]+)['"]\s*(?:,\s*\{[^}]*\}\s*)?,\s*(async\s+)?function\s*\(([^)]*)\)/g;
 
-function listModelFiles(dir) {
+function listSchemaFiles(roots) {
   const out = [];
   function walk(d) {
-    for (const e of fs.readdirSync(d, { withFileTypes: true })) {
+    let entries;
+    try {
+      entries = fs.readdirSync(d, { withFileTypes: true });
+    } catch {
+      return; // dir may not exist (e.g. fresh checkout missing one of SCAN_DIRS)
+    }
+    for (const e of entries) {
       const full = path.join(d, e.name);
       if (e.isDirectory()) {
-        if (e.name === '_archived' || e.name === 'node_modules') continue;
+        if (SKIP_DIR_NAMES.has(e.name)) continue;
         walk(full);
       } else if (e.isFile() && e.name.endsWith('.js')) {
         out.push(full);
       }
     }
   }
-  walk(dir);
+  for (const root of roots) walk(root);
   return out;
 }
 
@@ -112,7 +142,7 @@ function lineOf(src, idx) {
 }
 
 function main() {
-  const files = listModelFiles(MODELS_DIR);
+  const files = listSchemaFiles(SCAN_DIRS);
   const allDrift = [];
   for (const f of files) {
     const d = analyze(f);

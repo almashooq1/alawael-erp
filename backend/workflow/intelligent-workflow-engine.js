@@ -367,10 +367,19 @@ const WorkflowAuditLogSchema = new Schema({
 // MODELS
 // ============================================
 
-const WorkflowDefinition = mongoose.model('WorkflowDefinition', WorkflowDefinitionSchema);
-const WorkflowInstance = mongoose.model('WorkflowInstance', WorkflowInstanceSchema);
-const TaskInstance = mongoose.model('TaskInstance', TaskInstanceSchema);
-const WorkflowAuditLog = mongoose.model('WorkflowAuditLog', WorkflowAuditLogSchema);
+// Defensive registration — WorkflowDefinition + WorkflowInstance are also
+// registered by `services/documents/documentWorkflow*.service.js` (defensively).
+// Without the `mongoose.models.X ||` guard this file would throw
+// OverwriteModelError when loaded after the documents-side registration.
+// Schema divergence between sites tracked under ADR-032 / ADR-024.
+const WorkflowDefinition = mongoose.models.WorkflowDefinition
+  || mongoose.model('WorkflowDefinition', WorkflowDefinitionSchema);
+const WorkflowInstance = mongoose.models.WorkflowInstance
+  || mongoose.model('WorkflowInstance', WorkflowInstanceSchema);
+const TaskInstance = mongoose.models.TaskInstance
+  || mongoose.model('TaskInstance', TaskInstanceSchema);
+const WorkflowAuditLog = mongoose.models.WorkflowAuditLog
+  || mongoose.model('WorkflowAuditLog', WorkflowAuditLogSchema);
 
 // ============================================
 // INTELLIGENT WORKFLOW ENGINE CLASS

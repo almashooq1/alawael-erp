@@ -1,25 +1,28 @@
 'use strict';
 
 /**
- * caseload-rebalance.routes.js — Wave 510 (Phase E3).
+ * caseload-rebalance.routes.js — Wave 510 + W512.
  *
- * Read-only HTTP surface for the W510 caseload rebalance analysis.
- *
+ * W510 — read-only analysis:
  *   GET /api/v1/caseload-rebalance/branch/:branchId/suggestions
  *     ?threshold=12&improvement=0.1&limit=50
  *
- *   → { branchId, generatedAt, overloaded, underloaded, suggestions, reason? }
+ * W512 — apply a single move (the W511 frontend "Apply" button):
+ *   POST /api/v1/caseload-rebalance/apply
+ *     body: { alertId, fromTherapistId, toTherapistId, reason? }
+ *     → { action: 'applied' | 'skipped', reason?, alert? }
  *
- * Auth: authenticate + requireBranchAccess. Restricted callers can only
- * analyze their own branch (the branchScope middleware fails-closed on
- * mismatch).
+ * Auth: authenticate + requireBranchAccess on both. Restricted callers
+ * can only operate on their own branch (assertBranchMatch enforces).
  *
- * NEVER writes — the consumer surfaces suggestions in a supervisor UI
- * dialog where each "Apply" click runs a separate write through a
- * future endpoint (or the existing MeasureAlert reassignment route).
+ * Apply is atomic — the underlying findOneAndUpdate only succeeds if
+ * the alert is STILL open AND STILL assigned to the expected
+ * fromTherapistId. Stale suggestions (manual reassignment happened
+ * after the suggestion list was computed) safely no-op.
  */
 
 const express = require('express');
+const mongoose = require('mongoose');
 const router = express.Router();
 
 const { authenticate } = require('../middleware/auth');
@@ -29,6 +32,40 @@ const logger = require('../utils/logger');
 const safeError = require('../utils/safeError');
 
 const rebalance = require('../services/caseload-rebalance.service');
+
+// Best-effort audit logger — mirrors therapist-portal.routes pattern.
+// AuditLog is optional; audit failures must never break the request.
+function _auditLog(eventType, req, extras = {}) {
+  try {
+    let Model = null;
+    try {
+      Model = mongoose.model('AuditLog');
+    } catch {
+      try {
+        require('../models/auditLog.model');
+        Model = mongoose.model('AuditLog');
+      } catch {
+        return;
+      }
+    }
+    if (!Model || typeof Model.create !== 'function') return;
+    const userId = req.user?.id || req.user?._id || req.user?.userId;
+    Model.create({
+      eventType,
+      eventCategory: extras.category || 'clinical',
+      severity: extras.severity || 'info',
+      status: extras.status || 'success',
+      ip: req.ip,
+      userAgent: req.get && req.get('user-agent'),
+      userId,
+      actionDetails: extras.actionDetails || {},
+      affectedResources: extras.affectedResources || [],
+      result: extras.result || 'success',
+    }).catch(() => {});
+  } catch {
+    /* swallow */
+  }
+}
 
 router.use(authenticate);
 router.use(requireBranchAccess);
@@ -73,6 +110,84 @@ router.get('/branch/:branchId/suggestions', async (req, res) => {
     }
     logger.warn('[caseload-rebalance] /suggestions failed: %s', err.message || err);
     return safeError(res, err, 'caseload-rebalance.suggestions');
+  }
+});
+
+// ════════════════════════════════════════════════════════════════════
+// W512 — Apply a single rebalance move (atomic)
+// ════════════════════════════════════════════════════════════════════
+
+router.post('/apply', express.json(), async (req, res) => {
+  try {
+    const { alertId, fromTherapistId, toTherapistId, reason } = req.body || {};
+    if (!alertId || typeof alertId !== 'string') {
+      return res.status(400).json({ success: false, error: 'alertId required (string)' });
+    }
+    if (!fromTherapistId || typeof fromTherapistId !== 'string') {
+      return res.status(400).json({ success: false, error: 'fromTherapistId required (string)' });
+    }
+    if (!toTherapistId || typeof toTherapistId !== 'string') {
+      return res.status(400).json({ success: false, error: 'toTherapistId required (string)' });
+    }
+
+    // Branch isolation — load the alert lightly to grab branchId, then assert.
+    let MeasureAlert;
+    try {
+      MeasureAlert = mongoose.model('MeasureAlert');
+    } catch {
+      require('../domains/goals/models/MeasureAlert');
+      MeasureAlert = mongoose.model('MeasureAlert');
+    }
+    const alertProbe = await MeasureAlert.findById(alertId).select('_id branchId').lean();
+    if (!alertProbe) {
+      return res.status(404).json({ success: false, error: 'alert_not_found' });
+    }
+    if (alertProbe.branchId) {
+      assertBranchMatch(req, alertProbe.branchId, 'caseload-rebalance.apply');
+    }
+
+    const result = await rebalance.applyMove({
+      alertId,
+      fromTherapistId,
+      toTherapistId,
+      reason: typeof reason === 'string' ? reason.slice(0, 500) : null,
+      actorId: req.user?._id || req.user?.id || null,
+    });
+
+    if (result.action === 'applied') {
+      _auditLog('caseload.alert_reassigned', req, {
+        category: 'clinical',
+        severity: 'info',
+        actionDetails: {
+          alertId,
+          fromTherapistId,
+          toTherapistId,
+          reason: reason || null,
+        },
+        affectedResources: [
+          { type: 'MeasureAlert', id: alertId },
+          { type: 'User', id: fromTherapistId },
+          { type: 'User', id: toTherapistId },
+        ],
+      });
+      return res.json({ success: true, data: result });
+    }
+
+    // 409 for stale/conflict skip reasons; 200 for benign skips.
+    const conflictReasons = new Set([
+      'not_currently_assigned',
+      'not_open',
+      'same_therapist',
+      'invalid_to_therapist',
+    ]);
+    const status = conflictReasons.has(result.reason) ? 409 : 200;
+    return res.status(status).json({ success: status === 200, data: result });
+  } catch (err) {
+    if (err && err.status === 403) {
+      return res.status(403).json({ success: false, error: err.message });
+    }
+    logger.warn('[caseload-rebalance] /apply failed: %s', err.message || err);
+    return safeError(res, err, 'caseload-rebalance.apply');
   }
 });
 

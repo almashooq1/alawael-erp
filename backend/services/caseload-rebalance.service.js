@@ -311,8 +311,100 @@ async function suggestRebalanceMoves({
   };
 }
 
+/**
+ * W512 Phase E3 follow-up — APPLY a single rebalance move atomically.
+ *
+ * Counterpart to suggestRebalanceMoves (W510): the suggestion service
+ * is read-only; this writes the actual `MeasureAlert.assigneeId` update.
+ * Strict conditional update — only succeeds if the alert is STILL open
+ * AND STILL assigned to the expected fromTherapistId. Concurrent moves,
+ * auto-resolve flips, manual reassignment, and stale suggestion lists
+ * are all naturally filtered.
+ *
+ * Public contract:
+ *   applyMove({ alertId, fromTherapistId, toTherapistId, reason?, actorId? })
+ *     → { action: 'applied' | 'skipped', reason?, alert? }
+ *
+ *   action='applied'  : MeasureAlert was updated, returns the new doc
+ *   action='skipped'  : one of:
+ *     'alert_not_found'        — alertId doesn't resolve
+ *     'not_open'               — status is already resolved/dismissed
+ *     'not_currently_assigned' — assigneeId no longer matches fromTherapistId
+ *                                (stale suggestion — someone else moved it)
+ *     'same_therapist'         — from === to (no-op)
+ *     'invalid_to_therapist'   — toTherapistId doesn't exist or is inactive
+ *     'models_unavailable'     — schema not loaded
+ *
+ * Does NOT (yet):
+ *   - Emit medical.measure_alert.reassigned event (future wave — needs new
+ *     contract + W506 ACL update)
+ *   - Send notifications to either therapist (future move-notify service)
+ *   - Sync calendars
+ *
+ * What it DOES:
+ *   - Atomic MeasureAlert.findOneAndUpdate with status+from filter
+ *   - Validates toTherapistId exists + isActive + role='therapist'
+ *   - Same branch as the alert (cross-branch reassignment forbidden)
+ *   - Caller passes actorId for audit attribution (route adds the audit log)
+ */
+async function applyMove({
+  alertId,
+  fromTherapistId,
+  toTherapistId,
+  reason: _reason,
+  actorId: _actorId,
+} = {}) {
+  if (!alertId) throw new Error('[caseload-rebalance.applyMove] alertId required');
+  if (!fromTherapistId) throw new Error('[caseload-rebalance.applyMove] fromTherapistId required');
+  if (!toTherapistId) throw new Error('[caseload-rebalance.applyMove] toTherapistId required');
+  if (String(fromTherapistId) === String(toTherapistId)) {
+    return { action: 'skipped', reason: 'same_therapist' };
+  }
+
+  const MeasureAlert = _modelOrNull('MeasureAlert', '../domains/goals/models/MeasureAlert');
+  const User = _modelOrNull('User', '../models/User');
+  if (!MeasureAlert || !User) {
+    return { action: 'skipped', reason: 'models_unavailable' };
+  }
+
+  // Step 1: load the alert and sanity-check current state.
+  const alert = await MeasureAlert.findById(alertId)
+    .select('_id beneficiaryId branchId status assigneeId alertType severity')
+    .lean();
+  if (!alert) return { action: 'skipped', reason: 'alert_not_found' };
+  if (alert.status !== 'open') return { action: 'skipped', reason: 'not_open' };
+  if (!alert.assigneeId || String(alert.assigneeId) !== String(fromTherapistId)) {
+    return { action: 'skipped', reason: 'not_currently_assigned' };
+  }
+
+  // Step 2: validate target therapist is real, active, same branch.
+  const toUser = await User.findById(toTherapistId).select('_id role isActive branchId').lean();
+  if (!toUser) return { action: 'skipped', reason: 'invalid_to_therapist' };
+  if (toUser.role !== 'therapist' || toUser.isActive === false) {
+    return { action: 'skipped', reason: 'invalid_to_therapist' };
+  }
+  if (alert.branchId && String(toUser.branchId) !== String(alert.branchId)) {
+    return { action: 'skipped', reason: 'invalid_to_therapist' };
+  }
+
+  // Step 3: atomic conditional update — only the FIRST caller that sees
+  // the expected (status='open', assigneeId=fromTherapistId) wins.
+  const updated = await MeasureAlert.findOneAndUpdate(
+    { _id: alertId, assigneeId: fromTherapistId, status: 'open' },
+    { $set: { assigneeId: new mongoose.Types.ObjectId(String(toTherapistId)) } },
+    { new: true }
+  ).lean();
+
+  if (!updated) {
+    return { action: 'skipped', reason: 'not_currently_assigned' };
+  }
+
+  return { action: 'applied', alert: updated };
+}
+
 module.exports = {
   suggestRebalanceMoves,
+  applyMove,
   // Exported for tests
   _loadByTherapistInBranch,
   _normalizeTherapist,

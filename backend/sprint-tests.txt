@@ -311,3 +311,4 @@ __tests__/family-decision-rights-wave477.test.js
 __tests__/individual-education-plan-behavioral-wave200b.test.js
 __tests__/phase-e-e2e-smoke-wave478.test.js
 __tests__/story-builder-wave479.test.js
+__tests__/payroll-period-behavioral-wave99.test.js

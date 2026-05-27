@@ -84,6 +84,22 @@ This ADR proposes one disposition per affected cluster.
 
 Workflow-engine sub-cluster overlaps with the ADR-024 ApprovalRequest/WorkflowInstance Pattern D proposal.
 
+### Sub-cluster 5: case-mismatch silent duplicates (newly discovered 2026-05-27)
+
+A separate hazard class found while sweeping naked `mongoose.model()` registrations after the initial ADR draft. Same divergent-schema pattern as sub-clusters 1+3, but **invisible to the W340 drift guard** because the two registration sites use different *capitalizations* of the same logical name — Mongoose treats them as two unrelated models, so no duplicate-name violation fires.
+
+| Logical entity | Canonical name + site                                                                                                                    | Variant name + site                                                                  | Hazard                                                                                                                                                              |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| AAC profile    | `'AacProfile'` — `models/AacProfile.js:201` (W263 canonical; live via `services/aacProfile.service.js` + `routes/aac.routes.js` + W263 tests) | `'AACProfile'` — `rehabilitation-services/aac-therapy-protocols.js:127` (live via `routes/registries/clinical-assessment.registry.js:159`) | Two completely different schemas (W263 camelCase + Rowland Communication Matrix + Wave-18 invariants vs legacy snake_case + embedded vocabulary_bank/communication_boards/progress_log). Zero `ref:'AACProfile'` callers in codebase; legacy variant CRUD'd only by its in-file router (~13 endpoints). |
+
+**Why W340 missed it**: the guard scans for case-sensitive collisions on `mongoose.model('X', schema)` registrations. `'AacProfile'` and `'AACProfile'` are two distinct cache keys → no W340 violation, but the same architectural class as sub-cluster 3 (canonical + divergent legacy service-side schema, both live).
+
+**PowerShell audit caveat**: PowerShell regex matching is case-insensitive by default. Initial sweep showed `AACProfile` and `AacProfile` as a 2-site duplicate; only single-file grep on the canonical confirmed the casing actually differs. **Lesson**: any "X is registered in 2+ sites" finding from PowerShell needs case-sensitive re-verification before triage.
+
+**Drift-guard recommendation**: extend W340 with a case-insensitive cross-check pass — collect `mongoose.model(name, ...)` calls grouped by `name.toLowerCase()`, flag any group with >1 distinct casing. Likely catches typos elsewhere (audit-only, separate wave).
+
+**Disposition** (deferred to stakeholder per same logic as sub-clusters 1+3): legacy `'AACProfile'` has zero external `ref:` callers and its routes overlap functionally with the W263 canonical surface. Strong candidate for deletion (the embedded router can be removed wholesale and `clinical-assessment.registry.js:159` un-mounted) once a behavior-equivalence check confirms W263's `/api/aac` surface covers the 13 legacy endpoints. Alternative: Pattern D rename to `'LegacyAACVocabularyBank'` to preserve the orphaned vocabulary_bank data shape.
+
 ---
 
 ## Runtime risk (why this is P1)
@@ -172,6 +188,7 @@ Apply Option A to sub-cluster 3 (rehab-services — smallest scope, highest urge
 - **Q1** — For documents-pro sub-cluster: are the divergent service-side fields (`shareLink`, `recipientId` on DocumentShare; the slim ImportExportJob shape) intentionally simpler for documents-domain UX, or vestigial? If intentional, Pattern D rename is right; if vestigial, consolidate.
 - **Q2** — For workflow-engine sub-cluster: is there a legitimate need for documents.service to have its own WorkflowInstance shape distinct from the platform-wide intelligent-workflow-engine? If yes → Pattern D; if no → consolidate via ADR-024.
 - **Q3** — Are any of the EnterprisePro models (RoomBooking, Vendor, Facility, etc.) actually queried via the canonical `mongoose.model('X')` lookup from outside the EnterprisePro routes? Caller-audit needed to size Option A risk.
+- **Q4** — For sub-cluster 5 (`'AACProfile'` legacy variant): is the embedded vocabulary_bank/communication_boards/progress_log data shape still in production use anywhere (data persisted with `aacprofiles` collection vs W263's `aacprofiles` — same collection name, schema collision risk on writes), or can the legacy router be deleted and its route un-mounted from `clinical-assessment.registry.js:159`? Behavior-equivalence audit against W263's `/api/aac` surface needed.
 
 ---
 

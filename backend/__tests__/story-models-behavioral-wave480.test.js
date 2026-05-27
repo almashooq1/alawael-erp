@@ -285,3 +285,66 @@ describe('W480 — StorySurfaceVariant behavioral', () => {
     ).rejects.toThrow();
   });
 });
+
+describe('W495 — share-with-family + view tracking behavioral', () => {
+  it('accepts status=shared_with_family + familyAccessGranted=true + reviewedBy', async () => {
+    const book = await StoryBook.create(
+      baseBook({
+        status: 'shared_with_family',
+        reviewedBy: new mongoose.Types.ObjectId(),
+        familyAccessGranted: true,
+      })
+    );
+    expect(book.status).toBe('shared_with_family');
+    expect(book.familyAccessGranted).toBe(true);
+    expect(book.sharedWithFamilyAt).toBeInstanceOf(Date);
+  });
+
+  it('familyViewCount + lastViewedAt fields default to 0 / undefined', async () => {
+    const book = await StoryBook.create(baseBook());
+    expect(book.familyViewCount).toBe(0);
+    expect(book.lastViewedAt).toBeUndefined();
+  });
+
+  it('atomic $inc familyViewCount + $set lastViewedAt (W495 view endpoint contract)', async () => {
+    const initial = await StoryBook.create(
+      baseBook({
+        status: 'shared_with_family',
+        reviewedBy: new mongoose.Types.ObjectId(),
+        familyAccessGranted: true,
+      })
+    );
+    const now = new Date();
+    const updated = await StoryBook.findByIdAndUpdate(
+      initial._id,
+      { $inc: { familyViewCount: 1 }, $set: { lastViewedAt: now } },
+      { new: true }
+    ).lean();
+    expect(updated.familyViewCount).toBe(1);
+    expect(new Date(updated.lastViewedAt).getTime()).toBeCloseTo(now.getTime(), -2);
+  });
+
+  it('atomic $inc is race-safe: 5 concurrent views → familyViewCount=5', async () => {
+    const initial = await StoryBook.create(
+      baseBook({
+        status: 'shared_with_family',
+        reviewedBy: new mongoose.Types.ObjectId(),
+        familyAccessGranted: true,
+      })
+    );
+    await Promise.all(
+      Array.from({ length: 5 }, () =>
+        StoryBook.findByIdAndUpdate(initial._id, {
+          $inc: { familyViewCount: 1 },
+          $set: { lastViewedAt: new Date() },
+        })
+      )
+    );
+    const final = await StoryBook.findById(initial._id).lean();
+    expect(final.familyViewCount).toBe(5);
+  });
+
+  it('rejects familyViewCount < 0 (model guard)', async () => {
+    await expect(StoryBook.create(baseBook({ familyViewCount: -1 }))).rejects.toThrow();
+  });
+});

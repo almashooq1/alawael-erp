@@ -607,6 +607,15 @@ module.exports = function registerPhaseRoutes(
   // /api/reports-inbox (which is delivered PDF reports).
   safeMount(app, ['/api/smart-inbox', '/api/v1/smart-inbox'], '../routes/smart-inbox.routes');
 
+  // W510 Phase E3 — Caseload rebalance suggestions (read-only analysis
+  // via W432 caseload-matcher). Pairs with W509 auto-assignment for
+  // post-hoc rebalancing; never writes — supervisor UI applies moves.
+  safeMount(
+    app,
+    ['/api/caseload-rebalance', '/api/v1/caseload-rebalance'],
+    '../routes/caseload-rebalance.routes'
+  );
+
   // Reports
   safeMount(app, ['/api/reports-inbox', '/api/v1/reports-inbox'], '../routes/reports-inbox.routes');
   safeMount(app, ['/api/reports-ops', '/api/v1/reports-ops'], '../routes/reports-ops.routes');

@@ -368,3 +368,4 @@ __tests__/behavioral-escalation-source-wave434.test.js
 __tests__/idor-crm-enhanced-branch-filter-wave508.test.js
 __tests__/measure-alert-auto-assignment-wave509.test.js
 __tests__/smart-platform-metrics-wave435.test.js
+__tests__/caseload-rebalance-wave510.test.js

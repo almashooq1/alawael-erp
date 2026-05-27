@@ -343,6 +343,7 @@ __tests__/attendance-device-models-behavioral-wave122.test.js
 __tests__/attendance-import-models-behavioral-wave123.test.js
 __tests__/attendance-triage-models-behavioral-wave124.test.js
 __tests__/attendance-event-lifecycle-behavioral-wave98-99.test.js
+__tests__/attendance-outbox-review-behavioral-wave98-130.test.js
 __tests__/equity-models-behavioral-wave486.test.js
 __tests__/story-models-behavioral-wave480.test.js
 __tests__/sync-sprint-tests-paths-script.test.js

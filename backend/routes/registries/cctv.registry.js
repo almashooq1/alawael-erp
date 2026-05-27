@@ -20,9 +20,8 @@
  */
 'use strict';
 
-const HEALTH_TICK_MS = parseInt(process.env.CCTV_HEALTH_TICK_MS, 10) || 60_000;
-const NVR_TICK_MS = parseInt(process.env.CCTV_NVR_TICK_MS, 10) || 5 * 60_000;
-const REAP_TICK_MS = parseInt(process.env.CCTV_REAP_TICK_MS, 10) || 30_000;
+// Tick intervals are lazy-read inside startSchedulers (Phase 27 gotcha — top-level
+// process.env reads break under Dynatrace agent injection).
 
 let started = false;
 const handles = [];
@@ -30,6 +29,9 @@ const handles = [];
 function startSchedulers(logger) {
   if (started) return;
   started = true;
+  const HEALTH_TICK_MS = parseInt(process.env.CCTV_HEALTH_TICK_MS, 10) || 60_000;
+  const NVR_TICK_MS = parseInt(process.env.CCTV_NVR_TICK_MS, 10) || 5 * 60_000;
+  const REAP_TICK_MS = parseInt(process.env.CCTV_REAP_TICK_MS, 10) || 30_000;
   let healthMonitor;
   let streamService;
   let eventQueue;

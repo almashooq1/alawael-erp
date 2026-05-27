@@ -19,15 +19,17 @@ const httpAgentPool = require('./httpAgentPool');
 const live = require('./hikvisionISAPIAdapter');
 const mock = require('./hikvisionMockAdapter');
 
-const MODE = (process.env.HIKVISION_MODE || 'mock').toLowerCase();
+// HIKVISION_MODE is lazy-read inside selectImpl (Phase 27 gotcha — top-level
+// process.env reads break under Dynatrace agent injection).
 
 function _targetKey(opts) {
   return opts?.ip || 'global';
 }
 
 function selectImpl() {
-  if (MODE === 'live') return live;
-  if (MODE === 'mock') return mock;
+  const mode = (process.env.HIKVISION_MODE || 'mock').toLowerCase();
+  if (mode === 'live') return live;
+  if (mode === 'mock') return mock;
   return mock;
 }
 

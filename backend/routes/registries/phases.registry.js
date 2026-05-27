@@ -616,6 +616,16 @@ module.exports = function registerPhaseRoutes(
     '../routes/caseload-rebalance.routes'
   );
 
+  // W436 Phase E4 (close) — Caseload assignment suggestions (NEW
+  // assignment for a beneficiary, vs W510 which rebalances existing).
+  // Wires the W432 matcher into an admin/supervisor surface AND closes
+  // the W435 F2 instrumentation chain (5/5 producers emitting metrics).
+  safeMount(
+    app,
+    ['/api/caseload-assignment', '/api/v1/caseload-assignment'],
+    '../routes/caseload-assignment.routes'
+  );
+
   // Reports
   safeMount(app, ['/api/reports-inbox', '/api/v1/reports-inbox'], '../routes/reports-inbox.routes');
   safeMount(app, ['/api/reports-ops', '/api/v1/reports-ops'], '../routes/reports-ops.routes');

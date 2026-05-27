@@ -167,11 +167,62 @@ const KNOWN_DUPLICATE_REGISTRATIONS = new Set([
   //   `mongoose.models.Consent || mongoose.model(...)` guard, so canonical wins
   //   load-order race; privacy fallback is dead code at runtime. Same precedent
   //   as W347 AuditLog / W343 Referral+Task.
+  //
+  // ─── CLUSTER: documents-pro divergent-schema duplicates (2026-05-27 audit) ───
+  // The next 5 entries (DocumentAccessLog, DocumentShare, DocumentVersion,
+  // ComplianceAlert, CalendarEvent) ALL share the same P1 bug class as
+  // NotificationLog (above): two genuinely different schemas registered under
+  // the same model name, BOTH live in production. Root pattern:
+  //   - models/<X>.js — canonical, defensive `mongoose.models.X ||` guard,
+  //     required by routes/facilities.routes.js + routes/inventory-enhanced.routes.js
+  //     + routes/recruitment.routes.js etc. (1-3 callers each, canonical refs).
+  //   - services/documents/{documentSharing,documentVersioning,documentCalendar,
+  //     documentComplianceMonitor}.service.js — each inlines its OWN schema with
+  //     `mongoose.models.X || mongoose.model('X', LocalSchema)`. Wired LIVE via
+  //     api/routes/documents-pro-{phase3,phase5,phase7,extended}.routes.js which
+  //     are mounted by routes/registries/documents.registry.js → /api/v1/documents.
+  // Concrete divergences confirmed today (sample: DocumentAccessLog):
+  //   canonical action enum: ['view','download','print','edit','delete','share',
+  //                            'sign','upload','archive']
+  //   service  action enum: ['view','download','edit','print','comment']
+  //                          (adds 'comment'; drops delete/share/sign/upload/archive)
+  //   service adds: shareId ref:'DocumentShare', userName (String)
+  //   collection: canonical default ('documentaccesslogs'),
+  //               service explicit 'document_access_logs' (SO TWO COLLECTIONS
+  //               could exist at runtime if both register first against different
+  //               connections — but in shared mongoose registry the first-loader
+  //               schema wins ENTIRELY, including collection name).
+  // DocumentShare similarly diverges (canonical: shareToken/sharedWith/isActive;
+  // service: shareLink/recipientId/status — completely different field names).
+  // ComplianceAlert + CalendarEvent: services/documents/*.service.js vs
+  // models/EnterprisePro.js (mega-file `reg()` helper at line ~760-784).
+  // Runtime impact: whichever route loads first wins; loser-schema's writes get
+  // mongoose-strict-stripped; loser-schema's queries match wrong/zero docs.
+  //   Recommendation: each entry needs an ADR-031-style Pattern D rename of the
+  //   service-side schema (e.g. DocumentShare in service → `DocumentShareLink`,
+  //   DocumentAccessLog in service → `DocumentAccessAudit`, etc.) OR consolidation
+  //   to canonical (preferred) by migrating documents-pro routes to require the
+  //   canonical models/X.js and deleting the local schema. The mega-file
+  //   EnterprisePro.js entries (CalendarEvent + ComplianceAlert + RoomBooking +
+  //   Warehouse + JobPosting) require a separate decision: keep mega-file (rename
+  //   each model) or split into per-model files (drop mega-file's `reg()` bulk
+  //   registration). Defer until stakeholder ADR.
+  // Adding to ALLOWLIST would be INCORRECT here — these are NOT defensive
+  // fallbacks; they are competing live schemas. Keeping in baseline = visible
+  // tech debt that fails CI on any new such duplicate.
+  // ──────────────────────────────────────────────────────────────────────────
   'DocumentAccessLog',
   'DocumentShare',
   'DocumentVersion',
   'ComplianceAlert',
   'CalendarEvent',
+  // RoomBooking + Warehouse + JobPosting + JobApplication + Facility: same
+  // EnterprisePro.js / EnterpriseProPlus.js mega-file `reg()` / `getOrCreate()`
+  // bulk-registration pattern vs single-file canonical at models/<X>.js with
+  // DIVERGENT schemas (verified 2026-05-27 for RoomBooking: canonical uses
+  // bookingDate/startTime/endTime + room:ObjectId ref:'Room', mega-file uses
+  // start/end:Date + room:String). Same P1 cluster as above documents-pro group;
+  // requires stakeholder ADR before either Pattern D rename or mega-file split.
   'RoomBooking',
   'Warehouse',
   'JobPosting',

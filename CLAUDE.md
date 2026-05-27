@@ -71,6 +71,35 @@ find frontend/src/__tests__ -name "*.test.js" | wc -l       # ← 1303
 
 **Schedulers / sweepers audit (2026-05-21, re-counted 2026-05-26)**: **47** scheduler/sweeper source files (was 39 in 2026-05-21 audit; +8 added via W400-W408 series — budgetThresholdSweeper, absenceDetectionSweeper, hrAnomalyScheduler, capaAgingScheduler, etc.) across `scheduler/`, `intelligence/`, `services/`, `services/quality/`, `services/hr/`, `services/email/`, `services/ai/`, `startup/`, `students/`, `alerts/`. **Every one is reachable from startup.** Shallow grep against `app.js | server.js | startup/` directly initially flagged 4 candidates (alerts/scheduler, care-plan-plateau-detector, services/email/emailScheduler, startup/dlqReplayScheduler) as dormant — all 4 turned out to be wired via 1–2 hops through bootstrap files (`alerts/bootstrap.js`, `intelligence/care-plan-bootstrap.js`, `startup/integrationHardeningBootstrap.js`) or via the `services/<domain>/index.js` aggregator pattern. **For the next audit, the chain to walk is**: `app.js | server.js → */bootstrap.js → */scheduler.js`. The W225 wallet finding (scheduler wired but its HTTP API dormant) is a **unique inversion** — not a recurring pattern — every other scheduler in the system is integrated end-to-end.
 
+## Pre-push prevention stack (4 gates, Cycle 11+12 — 2026-05-26/27)
+
+`.husky/pre-push` runs 4 static drift checks BEFORE the heavy `quality:push` block. Each was extracted from a real silent-break that cost ~24h of CI red. Combined runtime <15s; failure messages include the one-command fix. Order in the hook (independent, sequential):
+
+| #   | Script                                                                              | Bug class caught                                                                                   | Historical incident                                                                                                                                                                                |
+| --- | ----------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | `npm run check:sprint-paths` (`backend/scripts/sync-sprint-tests-paths.js --check`) | `sprint-tests.txt` ↔ `.github/workflows/sprint-tests.yml` `paths:` trigger out of sync            | W269d-g + W269h + W440 (3× before gate); validated by catching W412 + W413 in Cycle 12 push window                                                                                                 |
+| 2   | `npm run check:routes-load` (`backend/scripts/scan-route-files.js`)                 | `routes/**/*.routes.js` files that throw on `require()` (TDZ class)                                | W441 — 8 files moved `router.use(guard)` above the guard's import; broke 100+ admin routes silently                                                                                                |
+| 3   | `npm run check:gitignored-sources` (`backend/scripts/check-gitignored-sources.js`)  | Tracked source files matching `.gitignore` rules — silent on local FS, deleted on `git clean -fdx` | `intelligence/canonical/_primitives.js` matched `_*.js`, 22 schemas broke CI                                                                                                                       |
+| 4   | `npm run check:hook-style` (`backend/scripts/check-mongoose-hook-style.js`)         | Mixed async/callback dispatch on same `pre()`/`post()` event in a Mongoose schema                  | W465→W483 Complaint.js — Kareem routed via Promise adapter when ANY hook async, leaving `next` undefined for callback siblings → TypeError on every `.save()`; caught parent-portal-v2 CI red ~24h |
+
+**Auto-fix recipes** (when a gate fails at push time):
+
+- Gate 1: `cd backend && npm run sync:sprint-paths` (auto-appends missing entries to yml).
+- Gate 2: open the failing route file; the error message names the symbol — usually a `const X = require(...)` declared AFTER `router.use(X)`. Move the import to the top.
+- Gate 3: prefer `!path/to/file` negation in `.gitignore`; fallback is adding to `BASELINE_TRACKED_IGNORED` set with a comment.
+- Gate 4: convert ALL hooks for that event to the same style — async (`async function () { … throw new Error(…) }`) is the W483 canonical form.
+
+**Adding a 5th gate** (when a new silent-break class shows up 3+ times):
+
+1. The check must be PURE-source (no DB, no boot), <2s, exit 0/1.
+2. Add `backend/scripts/check-X.js` with `--json` mode + standard exit semantics.
+3. Wire `check:X` in `backend/package.json` scripts.
+4. Add `npm run check:X` block in `.husky/pre-push` BEFORE `quality:push`.
+5. Add a self-test (`__tests__/check-X-script.test.js`) covering pure helpers + CLI exit contract — gate 4's `check-mongoose-hook-style-script.test.js` is the reference (15 assertions, in-memory fixtures via `mkdtempSync`, no Mongo). Enumerate in `sprint-tests.txt`.
+6. Document in the gate's leading comment block: WHY (incident + commit hash) + HOW TO FIX.
+
+Detail + extension recipe: `~/.claude/projects/.../memory/project_pre_push_prevention_stack_2026-05-26.md`.
+
 ## Drift guards in **tests**/ (catch silent regressions)
 
 Foundational (sprint/source hygiene):

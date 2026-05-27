@@ -614,6 +614,8 @@ on:
       - 'backend/__tests__/equity-engine-behavioral-wave503.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/idor-student-assignment-submit-wave504.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/no-duplicate-ttl-index-wave495.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -1211,6 +1213,8 @@ on:
       - 'backend/__tests__/equity-engine-behavioral-wave503.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/idor-student-assignment-submit-wave504.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/no-duplicate-ttl-index-wave495.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

@@ -66,7 +66,15 @@ const AttendanceRetentionPolicySchema = new mongoose.Schema(
     lastEditedByRole: { type: String, default: null, maxlength: 60 },
     notes: { type: String, default: null, maxlength: 500 },
   },
-  { timestamps: true, collection: 'attendance_retention_policies' }
+  {
+    timestamps: true,
+    collection: 'attendance_retention_policies',
+    // The `collection` schema field above is intentional — it names the
+    // target collection a retention policy applies to. The shadowing of
+    // Mongoose's `Schema.prototype.collection` is acceptable here because
+    // no caller dereferences `policy.collection` as the Mongoose accessor.
+    suppressReservedKeysWarning: true,
+  }
 );
 
 AttendanceRetentionPolicySchema.add({

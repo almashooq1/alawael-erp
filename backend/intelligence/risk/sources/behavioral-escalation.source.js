@@ -27,8 +27,23 @@
 
 const mongoose = require('mongoose');
 const predictor = require('../../escalation-predictor.lib');
+const metricsModule = require('../../smart-platform-metrics.service');
 
 const SOURCE_NAME = 'behavioral_escalation';
+
+function _emitMetric(tier) {
+  // Lazy + graceful: facade may not be wired yet at this exact moment;
+  // when running outside the app boot, getDefault() returns an instance
+  // that's a no-op when prom-client is absent.
+  try {
+    const m = metricsModule.getDefault();
+    if (m && typeof m.incEscalationPrediction === 'function') {
+      m.incEscalationPrediction(tier);
+    }
+  } catch {
+    /* metric drop — never throw into the risk orchestrator hot path */
+  }
+}
 
 // Pull a wider window than the predictor needs so the prior comparison
 // window has data. 21 days = 7 (recent default) + 14 (prior default).
@@ -39,6 +54,7 @@ async function fetch(beneficiaryId /*, opts */) {
   try {
     Model = mongoose.model('BehaviorIncident');
   } catch (_e) {
+    _emitMetric('unavailable');
     return {
       source: SOURCE_NAME,
       available: false,
@@ -59,6 +75,7 @@ async function fetch(beneficiaryId /*, opts */) {
     .lean();
 
   if (!incidents || incidents.length === 0) {
+    _emitMetric('no_data');
     return {
       source: SOURCE_NAME,
       available: true,
@@ -70,6 +87,7 @@ async function fetch(beneficiaryId /*, opts */) {
   }
 
   const result = predictor.predict(incidents);
+  _emitMetric(result.tier || 'unknown');
 
   // Map predictor signals → orchestrator factors envelope.
   const factors = result.signals.map(sig => ({

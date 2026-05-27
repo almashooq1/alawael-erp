@@ -205,8 +205,40 @@ function createSmartPlatformMetrics({
   };
 }
 
+// ── Singleton accessor for stateless callers ──────────────────────
+//
+// Stateless modules (source plugins, pure libs called from anywhere)
+// can't read `app._smartPlatformMetrics`. They lazy-bind via getDefault()
+// which returns the same instance the W427 bootstrap created (after first
+// boot) OR auto-creates one on first call (when running outside the app
+// boot — tests, scripts, REPL).
+//
+// Tests can call _resetDefault() between specs to avoid prom-client's
+// "metric already registered" guard when re-registering on the default
+// register.
+
+let _default = null;
+
+function getDefault(opts = {}) {
+  if (!_default) {
+    _default = createSmartPlatformMetrics(opts);
+  }
+  return _default;
+}
+
+function _setDefault(instance) {
+  _default = instance;
+}
+
+function _resetDefault() {
+  _default = null;
+}
+
 module.exports = {
   createSmartPlatformMetrics,
+  getDefault,
+  _setDefault,
+  _resetDefault,
   SWEEP_DURATION_BUCKETS,
   _tryRequirePromClient,
 };

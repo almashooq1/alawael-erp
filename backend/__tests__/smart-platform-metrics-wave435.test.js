@@ -23,11 +23,16 @@
 
 const fs = require('fs');
 const path = require('path');
+const mongoose = require('mongoose');
 
+const metricsModule = require('../intelligence/smart-platform-metrics.service');
 const {
   createSmartPlatformMetrics,
+  getDefault,
+  _setDefault,
+  _resetDefault,
   SWEEP_DURATION_BUCKETS,
-} = require('../intelligence/smart-platform-metrics.service');
+} = metricsModule;
 
 const FACADE_JS = path.resolve(
   __dirname,
@@ -37,6 +42,14 @@ const FACADE_JS = path.resolve(
 );
 const REALTIME_JS = path.resolve(__dirname, '..', 'startup', 'realtimeGatewayBootstrap.js');
 const FORECASTER_JS = path.resolve(__dirname, '..', 'startup', 'goalForecasterBootstrap.js');
+const ESCALATION_SOURCE_JS = path.resolve(
+  __dirname,
+  '..',
+  'intelligence',
+  'risk',
+  'sources',
+  'behavioral-escalation.source.js'
+);
 const READ = p => fs.readFileSync(p, 'utf8');
 
 // ──────────────────────────────────────────────────────────────────
@@ -271,6 +284,184 @@ describe('W435 — facade catalog drift guard', () => {
 
   test('facade module exports the documented public surface', () => {
     expect(typeof createSmartPlatformMetrics).toBe('function');
+    expect(typeof getDefault).toBe('function');
+    expect(typeof _setDefault).toBe('function');
+    expect(typeof _resetDefault).toBe('function');
     expect(Array.isArray(SWEEP_DURATION_BUCKETS)).toBe(true);
+  });
+});
+
+// ──────────────────────────────────────────────────────────────────
+//  5. getDefault singleton — lazy-bind for stateless callers
+// ──────────────────────────────────────────────────────────────────
+
+describe('W435 — getDefault singleton', () => {
+  afterEach(() => {
+    _resetDefault();
+  });
+
+  test('returns the same instance across multiple calls', () => {
+    const a = getDefault({ promClient: null });
+    const b = getDefault({ promClient: null });
+    expect(a).toBe(b);
+  });
+
+  test('_setDefault overrides what getDefault returns', () => {
+    const { promClient } = _makePromStub();
+    const explicit = createSmartPlatformMetrics({ promClient });
+    _setDefault(explicit);
+    const recovered = getDefault();
+    expect(recovered).toBe(explicit);
+  });
+
+  test('_resetDefault clears the cache (next getDefault creates fresh)', () => {
+    const a = getDefault({ promClient: null });
+    _resetDefault();
+    const b = getDefault({ promClient: null });
+    expect(a).not.toBe(b);
+  });
+});
+
+// ──────────────────────────────────────────────────────────────────
+//  6. W434 escalation source plugin — wired to metrics
+// ──────────────────────────────────────────────────────────────────
+
+describe('W435 — escalation source plugin emits incEscalationPrediction', () => {
+  afterEach(() => {
+    _resetDefault();
+    jest.restoreAllMocks();
+  });
+
+  test('source plugin source-tree requires metrics service + emits per tier', () => {
+    const src = READ(ESCALATION_SOURCE_JS);
+    expect(src).toMatch(/require\(['"]\.\.\/\.\.\/smart-platform-metrics\.service['"]\)/);
+    expect(src).toMatch(/metricsModule\.getDefault\(\)/);
+    expect(src).toMatch(/incEscalationPrediction\(/);
+    // Three result paths exist; each must emit a label
+    expect(src).toMatch(/_emitMetric\(['"]unavailable['"]\)/);
+    expect(src).toMatch(/_emitMetric\(['"]no_data['"]\)/);
+    expect(src).toMatch(/_emitMetric\(result\.tier/);
+  });
+
+  test('SOURCE_UNAVAILABLE path emits incEscalationPrediction("unavailable")', async () => {
+    const { promClient, calls } = _makePromStub();
+    _setDefault(createSmartPlatformMetrics({ promClient }));
+
+    // BehaviorIncident model NOT registered → SOURCE_UNAVAILABLE
+    jest.spyOn(mongoose, 'model').mockImplementation(name => {
+      if (name === 'BehaviorIncident') throw new Error('not registered');
+      return {};
+    });
+
+    // Late-require so the spy + setDefault are in place first
+    const {
+      fetch: fetchSource,
+    } = require('../intelligence/risk/sources/behavioral-escalation.source');
+    const r = await fetchSource('ben-1');
+    expect(r.reason).toBe('SOURCE_UNAVAILABLE');
+    const emitted = calls.incs.filter(
+      c => c.name === 'smart_platform_escalation_predictions_total'
+    );
+    expect(emitted).toHaveLength(1);
+    expect(emitted[0].labels).toEqual({ tier: 'unavailable' });
+  });
+
+  test('NO_DATA path emits incEscalationPrediction("no_data")', async () => {
+    const { promClient, calls } = _makePromStub();
+    _setDefault(createSmartPlatformMetrics({ promClient }));
+
+    const model = {
+      find: () => ({
+        sort: () => ({
+          limit: () => ({
+            select: () => ({ lean: async () => [] }),
+          }),
+        }),
+      }),
+    };
+    jest.spyOn(mongoose, 'model').mockImplementation(name => {
+      if (name === 'BehaviorIncident') return model;
+      return {};
+    });
+
+    const {
+      fetch: fetchSource,
+    } = require('../intelligence/risk/sources/behavioral-escalation.source');
+    const r = await fetchSource('ben-2');
+    expect(r.reason).toBe('NO_DATA');
+    const emitted = calls.incs.filter(
+      c => c.name === 'smart_platform_escalation_predictions_total'
+    );
+    expect(emitted).toHaveLength(1);
+    expect(emitted[0].labels).toEqual({ tier: 'no_data' });
+  });
+
+  test('populated series emits incEscalationPrediction(result.tier)', async () => {
+    const { promClient, calls } = _makePromStub();
+    _setDefault(createSmartPlatformMetrics({ promClient }));
+
+    const now = Date.now();
+    const incidents = Array.from({ length: 10 }, (_, i) => ({
+      observedAt: new Date(now - (i + 1) * 3600_000),
+      behaviorType: 'self_injury',
+      severity: 'major',
+      antecedent: 'transition',
+    }));
+    const model = {
+      find: () => ({
+        sort: () => ({
+          limit: () => ({
+            select: () => ({ lean: async () => incidents }),
+          }),
+        }),
+      }),
+    };
+    jest.spyOn(mongoose, 'model').mockImplementation(name => {
+      if (name === 'BehaviorIncident') return model;
+      return {};
+    });
+
+    const {
+      fetch: fetchSource,
+    } = require('../intelligence/risk/sources/behavioral-escalation.source');
+    const r = await fetchSource('ben-3');
+    expect(r.score).toBeGreaterThan(0);
+    const emitted = calls.incs.filter(
+      c => c.name === 'smart_platform_escalation_predictions_total'
+    );
+    expect(emitted).toHaveLength(1);
+    // Tier should match what the result returned
+    expect(['critical', 'high', 'moderate', 'low']).toContain(emitted[0].labels.tier);
+    expect(emitted[0].labels.tier).toBe(r.raw.tier);
+  });
+
+  test('emit failure never throws into source plugin hot path', async () => {
+    // Override default with a metrics whose incEscalationPrediction throws
+    _setDefault({
+      enabled: true,
+      incEscalationPrediction: () => {
+        throw new Error('boom — metric subsystem failed');
+      },
+    });
+    jest.spyOn(mongoose, 'model').mockImplementation(name => {
+      if (name === 'BehaviorIncident') throw new Error('not registered');
+      return {};
+    });
+    const {
+      fetch: fetchSource,
+    } = require('../intelligence/risk/sources/behavioral-escalation.source');
+    // Must NOT throw — defensive catch in source plugin _emitMetric()
+    await expect(fetchSource('ben-4')).resolves.toBeTruthy();
+  });
+});
+
+// ──────────────────────────────────────────────────────────────────
+//  7. Wire-up sentinel: bootstrap sets the singleton via _setDefault
+// ──────────────────────────────────────────────────────────────────
+
+describe('W435 — realtime bootstrap registers facade as module singleton', () => {
+  test('bootstrap calls metricsModule._setDefault so getDefault() returns same instance', () => {
+    const src = READ(REALTIME_JS);
+    expect(src).toMatch(/metricsModule\._setDefault\(metrics\)/);
   });
 });

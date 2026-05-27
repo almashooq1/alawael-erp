@@ -60,10 +60,12 @@ function wireRealtimeGateway(app, deps = {}) {
     let metrics = app._smartPlatformMetrics;
     if (!metrics) {
       try {
-        const {
-          createSmartPlatformMetrics,
-        } = require('../intelligence/smart-platform-metrics.service');
-        metrics = createSmartPlatformMetrics();
+        const metricsModule = require('../intelligence/smart-platform-metrics.service');
+        metrics = metricsModule.createSmartPlatformMetrics();
+        // W435: register as the module-level singleton so stateless
+        // callers (source plugins, pure libs) get the SAME instance
+        // via getDefault() instead of creating a duplicate registry.
+        metricsModule._setDefault(metrics);
         app._smartPlatformMetrics = metrics;
       } catch (mErr) {
         logger.warn(`[realtime] metrics facade skipped: ${mErr.message}`);

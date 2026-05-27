@@ -101,12 +101,25 @@ router.get('/:id/announcements', async (req, res) => {
 // POST /:id/assignments/:assignmentId/submit — تسليم واجب
 router.post('/:id/assignments/:assignmentId/submit', async (req, res) => {
   try {
-    // Gate via the parent student. Without this, staff could mark any
-    // student's assignment as submitted from any branch.
+    // W504: two-layer IDOR fix.
+    //
+    // Layer 1 — branch-scope gate on the parent beneficiary (:id).
+    // Without this, staff in any branch could mark any student's
+    // assignment as submitted from any branch.
     const denied = await assertBeneficiaryInScope(req, req.params.id, res);
     if (denied) return;
     const HomeAssignment = require('../models/HomeAssignment');
-    const assignment = await HomeAssignment.findById(req.params.assignmentId);
+    // Layer 2 — bind :assignmentId to :id. Pre-W504 the route fetched
+    // by :assignmentId alone and mutated WITHOUT verifying the
+    // assignment actually belonged to the beneficiary in :id. An
+    // attacker with scope on beneficiary A could submit homework
+    // belonging to beneficiary B (in any branch) by reusing the URL
+    // shell but swapping :assignmentId. Forcing `beneficiary: :id` in
+    // the query closes the cross-beneficiary IDOR.
+    const assignment = await HomeAssignment.findOne({
+      _id: req.params.assignmentId,
+      beneficiary: req.params.id,
+    });
     if (!assignment) {
       return res.status(404).json({ success: false, message: 'الواجب غير موجود' });
     }

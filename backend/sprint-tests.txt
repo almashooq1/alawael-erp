@@ -357,3 +357,4 @@ __tests__/check-gitignored-sources-script.test.js
 __tests__/auth-gate-mount-sweep-wave502.test.js
 __tests__/auth-bypass-x-user-id-wave503.test.js
 __tests__/equity-engine-behavioral-wave503.test.js
+__tests__/idor-student-assignment-submit-wave504.test.js

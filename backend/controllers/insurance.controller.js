@@ -136,7 +136,7 @@ class InsuranceController {
       const policy = await InsurancePolicy.findByIdAndUpdate(
         req.params.id,
         { ...req.body, updatedBy: req.user?.userId || req.user?.id },
-        { new: true, runValidators: true }
+        { returnDocument: 'after', runValidators: true }
       );
       if (!policy) return res.status(404).json({ success: false, message: 'الوثيقة غير موجودة' });
       res.json({ success: true, message: 'تم تحديث الوثيقة بنجاح', data: policy });

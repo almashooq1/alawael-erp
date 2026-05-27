@@ -451,7 +451,7 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
     delete body.force;
 
     const doc = await TherapySession.findByIdAndUpdate(req.params.id, body, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     }).lean();
     if (!doc) return res.status(404).json({ success: false, message: 'غير موجود' });
@@ -522,7 +522,7 @@ router.post('/:id/check-in', requireRole(WRITE_ROLES), async (req, res) => {
         'attendance.lateMinutes': typeof lateMinutes === 'number' ? lateMinutes : 0,
         status: 'IN_PROGRESS',
       },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     if (!doc) return res.status(404).json({ success: false, message: 'غير موجود' });
     res.json({ success: true, data: doc, message: 'تم تسجيل الحضور' });
@@ -684,7 +684,7 @@ router.delete('/:id', requireRole(WRITE_ROLES), async (req, res) => {
           },
         },
       },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     if (!doc) return res.status(404).json({ success: false, message: 'غير موجود' });
     res.json({ success: true, message: 'تم إلغاء الجلسة' });

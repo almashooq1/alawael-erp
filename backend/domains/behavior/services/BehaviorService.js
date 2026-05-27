@@ -90,7 +90,7 @@ class BehaviorService extends BaseService {
         reviewedAt: new Date(),
         reviewNotes: reviewData.notes,
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 
@@ -138,7 +138,11 @@ class BehaviorService extends BaseService {
 
   async updatePlan(id, data) {
     const BehaviorPlan = mongoose.model('BehaviorPlan');
-    return BehaviorPlan.findByIdAndUpdate(id, { ...data, $inc: { version: 1 } }, { new: true });
+    return BehaviorPlan.findByIdAndUpdate(
+      id,
+      { ...data, $inc: { version: 1 } },
+      { returnDocument: 'after' }
+    );
   }
 
   async approvePlan(id, approverId) {
@@ -146,7 +150,7 @@ class BehaviorService extends BaseService {
     return BehaviorPlan.findByIdAndUpdate(
       id,
       { status: 'active', approvedBy: approverId, approvedAt: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 
@@ -158,7 +162,7 @@ class BehaviorService extends BaseService {
         $push: { reviews: { ...review, date: new Date() } },
         reviewDate: review.nextReviewDate,
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 

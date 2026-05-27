@@ -250,7 +250,7 @@ class DocumentClassificationService {
   }
 
   async updateModel(modelId, data) {
-    return ClassificationModel.findByIdAndUpdate(modelId, data, { new: true });
+    return ClassificationModel.findByIdAndUpdate(modelId, data, { returnDocument: 'after' });
   }
 
   async getModels(filters = {}) {
@@ -267,7 +267,11 @@ class DocumentClassificationService {
   }
 
   async activateModel(modelId) {
-    return ClassificationModel.findByIdAndUpdate(modelId, { status: 'active' }, { new: true });
+    return ClassificationModel.findByIdAndUpdate(
+      modelId,
+      { status: 'active' },
+      { returnDocument: 'after' }
+    );
   }
 
   async trainModel(modelId, trainingData) {

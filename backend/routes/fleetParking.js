@@ -63,7 +63,7 @@ router.patch('/:id/park', async (req, res) => {
     const spot = await FleetParking.findByIdAndUpdate(
       req.params.id,
       { occupied: true, vehicleId, parkedAt: new Date(), parkedBy: req.user._id },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!spot) return res.status(404).json({ success: false, message: 'Parking spot not found' });
     res.json({ success: true, data: spot });
@@ -84,7 +84,7 @@ router.patch('/:id/release', async (req, res) => {
         releasedAt: new Date(),
         releasedBy: req.user._id,
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!spot) return res.status(404).json({ success: false, message: 'Parking spot not found' });
     res.json({ success: true, data: spot });

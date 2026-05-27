@@ -55,7 +55,7 @@ router.put('/:id', authorize('admin', 'manager', 'fleet_officer', 'mechanic'), a
   try {
     const FleetPart = require('../models/Fleet/FleetPart');
     const part = await FleetPart.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!part) return res.status(404).json({ success: false, message: 'Part not found' });
@@ -100,7 +100,7 @@ router.patch(
             },
           },
         },
-        { new: true }
+        { returnDocument: 'after' }
       );
       if (!part) {
         // Either the part doesn't exist OR it exists with quantity<qty.
@@ -132,7 +132,7 @@ router.patch('/:id/restock', authorize('admin', 'manager', 'fleet_officer'), asy
           restockLogs: { quantity, notes, restockedAt: new Date(), restockedBy: req.user._id },
         },
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!part) return res.status(404).json({ success: false, message: 'Part not found' });
     res.json({ success: true, data: part });

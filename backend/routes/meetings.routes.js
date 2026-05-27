@@ -171,10 +171,7 @@ router.put('/:id', authorize(['admin', 'manager']), async (req, res) => {
         meetingLink,
         department,
       },
-      {
-        new: true,
-        runValidators: true,
-      }
+      { returnDocument: 'after', runValidators: true }
     ).lean();
     if (!meeting) return res.status(404).json({ success: false, message: 'الاجتماع غير موجود' });
     res.json({ success: true, data: meeting, message: 'تم تحديث الاجتماع بنجاح' });

@@ -86,7 +86,7 @@ router.post('/', authorize(['admin', 'manager']), async (req, res) => {
 router.put('/:id', validateObjectId('id'), authorize(['admin', 'manager']), async (req, res) => {
   try {
     const timetable = await Timetable.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!timetable) return res.status(404).json({ success: false, message: 'الجدول غير موجود' });
@@ -241,7 +241,7 @@ router.patch('/:id/publish', validateObjectId('id'), authorize(['admin']), async
     const timetable = await Timetable.findByIdAndUpdate(
       req.params.id,
       { status: 'published', effectiveFrom: req.body.effectiveFrom || new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!timetable) return res.status(404).json({ success: false, message: 'الجدول غير موجود' });
     res.json({ success: true, data: timetable, message: 'تم نشر الجدول بنجاح' });

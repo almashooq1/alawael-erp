@@ -314,7 +314,7 @@ class DocumentIntegrationsService extends EventEmitter {
     const integration = await Integration.findByIdAndUpdate(
       integrationId,
       { $set: updates },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     ).lean();
 
     if (!integration) return { success: false, error: 'التكامل غير موجود' };

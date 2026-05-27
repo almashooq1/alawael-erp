@@ -126,7 +126,7 @@ router.put('/:id', async (req, res) => {
   try {
     const WH = safeModel('Warehouse');
     const data = await WH.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!data) return res.status(404).json({ success: false, message: 'المستودع غير موجود' });
@@ -141,7 +141,11 @@ router.put('/:id', async (req, res) => {
 router.delete('/:id', async (req, res) => {
   try {
     const WH = safeModel('Warehouse');
-    const data = await WH.findByIdAndUpdate(req.params.id, { status: 'closed' }, { new: true });
+    const data = await WH.findByIdAndUpdate(
+      req.params.id,
+      { status: 'closed' },
+      { returnDocument: 'after' }
+    );
     if (!data) return res.status(404).json({ success: false, message: 'المستودع غير موجود' });
     res.json({ success: true, data });
   } catch (err) {
@@ -187,7 +191,7 @@ router.put('/items/:id', async (req, res) => {
   try {
     const WHItem = safeModel('WarehouseItem');
     const data = await WHItem.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
+      returnDocument: 'after',
     });
     if (!data) return res.status(404).json({ success: false, message: 'الصنف غير موجود' });
     res.json({ success: true, data });

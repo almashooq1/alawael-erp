@@ -110,7 +110,7 @@ function makeGenericCrudRouter(moduleName) {
       const record = await ExtensionRecord.findOneAndUpdate(
         { _id: req.params.id, module: moduleName },
         update,
-        { new: true, runValidators: false }
+        { returnDocument: 'after', runValidators: false }
       ).lean();
       if (!record) return res.status(404).json({ success: false, message: 'Record not found' });
       return res.json({ success: true, data: record });

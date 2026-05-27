@@ -58,7 +58,7 @@ router.put('/:id', async (req, res) => {
   try {
     const Donor = require('../models/Donor');
     const data = await Donor.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
+      returnDocument: 'after',
     }).lean();
     if (!data) return res.status(404).json({ success: false, message: 'المتبرع غير موجود' });
     res.json({ success: true, data, message: 'تم تحديث المتبرع بنجاح' });

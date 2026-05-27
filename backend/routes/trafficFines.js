@@ -65,7 +65,7 @@ router.put('/:id', authorize('admin', 'manager', 'fleet_officer'), async (req, r
   try {
     const TrafficFine = require('../models/Fleet/TrafficFine');
     const fine = await TrafficFine.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!fine) return res.status(404).json({ success: false, message: 'Traffic fine not found' });
@@ -82,7 +82,7 @@ router.patch('/:id/pay', authorize('admin', 'manager', 'fleet_officer'), async (
     const fine = await TrafficFine.findByIdAndUpdate(
       req.params.id,
       { status: 'paid', paidAt: new Date(), receiptNumber, paidAmount, paidBy: req.user._id },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!fine) return res.status(404).json({ success: false, message: 'Traffic fine not found' });
     res.json({ success: true, data: fine });
@@ -98,7 +98,7 @@ router.patch('/:id/contest', async (req, res) => {
     const fine = await TrafficFine.findByIdAndUpdate(
       req.params.id,
       { status: 'contested', contestReason, contestedAt: new Date(), contestedBy: req.user._id },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!fine) return res.status(404).json({ success: false, message: 'Traffic fine not found' });
     res.json({ success: true, data: fine });

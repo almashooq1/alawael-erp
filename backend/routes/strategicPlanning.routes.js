@@ -81,7 +81,7 @@ router.post(
 router.put('/goals/:id', authorize(['admin', 'super_admin', 'manager']), async (req, res) => {
   try {
     const goal = await StrategicGoal.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!goal) return res.status(404).json({ success: false, message: 'الهدف غير موجود' });
@@ -174,10 +174,7 @@ router.put('/initiatives/:id', authorize(['admin', 'super_admin', 'manager']), a
     const doc = await StrategicInitiative.findByIdAndUpdate(
       req.params.id,
       stripUpdateMeta(req.body),
-      {
-        new: true,
-        runValidators: true,
-      }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!doc) return res.status(404).json({ success: false, message: 'المبادرة غير موجودة' });
     res.json({ success: true, data: doc, message: 'تم تحديث المبادرة بنجاح' });
@@ -250,7 +247,7 @@ router.post(
 router.put('/kpis/:id', authorize(['admin', 'super_admin', 'manager']), async (req, res) => {
   try {
     const doc = await StrategicKPI.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!doc) return res.status(404).json({ success: false, message: 'المؤشر غير موجود' });

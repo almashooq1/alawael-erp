@@ -302,7 +302,7 @@ router.delete('/leads/:id', authorize(['admin', 'super_admin', 'manager']), asyn
     const lead = await CrmLead.findByIdAndUpdate(
       req.params.id,
       { deletedAt: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!lead) return res.status(404).json({ success: false, message: 'العميل غير موجود' });
     res.json({ success: true, message: 'تم حذف العميل بنجاح' });
@@ -360,7 +360,7 @@ router.post('/leads/:id/enroll', async (req, res) => {
     const lead = await CrmLead.findByIdAndUpdate(
       req.params.id,
       { status: 'enrolled', enrolledAt: new Date(), updatedBy: req.user?._id || req.userId },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!lead) return res.status(404).json({ success: false, message: 'العميل غير موجود' });
 
@@ -451,7 +451,7 @@ router.put('/partners/:id', authorize(['admin', 'super_admin', 'manager']), asyn
     const partner = await CrmPartner.findByIdAndUpdate(
       req.params.id,
       { ...stripUpdateMeta(req.body), updatedBy: req.user?._id || req.userId },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!partner) return res.status(404).json({ success: false, message: 'الشريك غير موجود' });
     res.json({ success: true, data: partner, message: 'تم تحديث الشريك بنجاح' });
@@ -468,7 +468,7 @@ router.delete('/partners/:id', authorize(['admin', 'super_admin']), async (req, 
     const partner = await CrmPartner.findByIdAndUpdate(
       req.params.id,
       { deletedAt: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!partner) return res.status(404).json({ success: false, message: 'الشريك غير موجود' });
     res.json({ success: true, message: 'تم حذف الشريك بنجاح' });
@@ -672,7 +672,7 @@ router.put('/segments/:id', async (req, res) => {
     const segment = await CrmSegment.findByIdAndUpdate(
       req.params.id,
       { ...stripUpdateMeta(req.body), updatedBy: req.user?._id || req.userId },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!segment) return res.status(404).json({ success: false, message: 'الشريحة غير موجودة' });
     res.json({ success: true, data: segment, message: 'تم تحديث الشريحة بنجاح' });
@@ -862,7 +862,7 @@ router.put(
       const commission = await CrmReferralCommission.findByIdAndUpdate(
         req.params.id,
         { ...stripUpdateMeta(req.body), updatedBy: req.user?._id || req.userId },
-        { new: true, runValidators: true }
+        { returnDocument: 'after', runValidators: true }
       );
       if (!commission)
         return res.status(404).json({ success: false, message: 'العمولة غير موجودة' });

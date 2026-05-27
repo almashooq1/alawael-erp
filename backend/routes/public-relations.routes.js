@@ -102,7 +102,7 @@ router.put('/media/:id', authenticate, requireBranchAccess, requirePrAdmin, asyn
   try {
     const Media = safeModel('MediaCoverage');
     const doc = await Media.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
+      returnDocument: 'after',
     });
     if (!doc) return res.status(404).json({ success: false, message: 'غير موجود' });
     res.json({ success: true, data: doc });
@@ -162,7 +162,7 @@ router.put(
     try {
       const Camp = safeModel('Campaign');
       const doc = await Camp.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-        new: true,
+        returnDocument: 'after',
       });
       if (!doc) return res.status(404).json({ success: false, message: 'غير موجود' });
       res.json({ success: true, data: doc });
@@ -208,7 +208,7 @@ router.put(
     try {
       const Part = safeModel('Partnership');
       const doc = await Part.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-        new: true,
+        returnDocument: 'after',
       });
       if (!doc) return res.status(404).json({ success: false, message: 'غير موجود' });
       res.json({ success: true, data: doc });

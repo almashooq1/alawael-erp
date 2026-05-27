@@ -188,7 +188,7 @@ router.put('/:id', requireCoordinator, async (req, res) => {
     const doc = await Volunteer.findOneAndUpdate(
       { _id: req.params.id, ...branchFilter(req) } /* W448 */,
       { ...req.body, updatedBy: req.body.updatedBy || null },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!doc) return fail(res, 'المتطوع غير موجود', 404);
     ok(res, { data: doc, message: 'تم التحديث بنجاح' });
@@ -226,7 +226,7 @@ router.patch('/:id/status', requireCoordinator, async (req, res) => {
     const doc = await Volunteer.findOneAndUpdate(
       { _id: req.params.id, ...branchFilter(req) },
       /* W448 */ updates,
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!doc) return fail(res, 'المتطوع غير موجود', 404);
     ok(res, { data: doc, message: 'تم تحديث الحالة بنجاح' });
@@ -318,10 +318,7 @@ router.put('/opportunities/:id', requireCoordinator, async (req, res) => {
     const doc = await VolunteerOpportunity.findOneAndUpdate(
       { _id: req.params.id, ...branchFilter(req) } /* W448 */,
       stripUpdateMeta(req.body),
-      {
-        new: true,
-        runValidators: true,
-      }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!doc) return fail(res, 'الفرصة غير موجودة', 404);
     ok(res, { data: doc, message: 'تم التحديث بنجاح' });
@@ -406,7 +403,7 @@ router.patch('/assignments/:id/check-in', async (req, res) => {
     const doc = await VolunteerAssignment.findOneAndUpdate(
       { _id: req.params.id, ...branchFilter(req) } /* W448 */,
       { checkedInAt: new Date(), status: 'confirmed' },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!doc) return fail(res, 'التكليف غير موجود', 404);
     ok(res, { data: doc, message: 'تم تسجيل الدخول بنجاح' });
@@ -432,7 +429,7 @@ router.patch('/assignments/:id/check-out', async (req, res) => {
     const doc = await VolunteerAssignment.findOneAndUpdate(
       { _id: req.params.id, ...branchFilter(req) } /* W448 */,
       { checkedOutAt: now, actualHours: hours, status: 'completed' },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     // تحديث ساعات وإحصائيات المتطوع
@@ -460,7 +457,7 @@ router.post('/assignments/:id/certificate', requireCoordinator, async (req, res)
     const doc = await VolunteerAssignment.findOneAndUpdate(
       { _id: req.params.id, ...branchFilter(req) } /* W448 */,
       { certificateIssued: true, certificateIssuedAt: new Date(), certificatePath: path },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     ok(res, { data: doc, certificate: path, message: 'تم إصدار الشهادة بنجاح' });

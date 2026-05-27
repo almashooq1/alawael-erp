@@ -178,7 +178,7 @@ router.post(
             },
           },
         },
-        { new: true }
+        { returnDocument: 'after' }
       );
       if (!plan) return res.status(404).json({ success: false, message: 'الخطة غير موجودة' });
       res.json({ success: true, message: 'تم إضافة المرشح بنجاح', data: plan });
@@ -203,7 +203,7 @@ router.put(
       const plan = await SuccessionPlan.findByIdAndUpdate(
         req.params.planId,
         { $set: updateFields },
-        { arrayFilters: [{ 'elem._id': req.params.candidateId }], new: true }
+        { arrayFilters: [{ 'elem._id': req.params.candidateId }], returnDocument: 'after' }
       );
       if (!plan) return res.status(404).json({ success: false, message: 'الخطة غير موجودة' });
       res.json({ success: true, message: 'تم تحديث المرشح بنجاح', data: plan });
@@ -253,7 +253,7 @@ router.post(
             'successors.$[elem].assessmentDate': new Date(),
           },
         },
-        { arrayFilters: [{ 'elem.candidateId': req.params.candidateId }], new: true }
+        { arrayFilters: [{ 'elem.candidateId': req.params.candidateId }], returnDocument: 'after' }
       );
       if (!plan) return res.status(404).json({ success: false, message: 'الخطة غير موجودة' });
       res.json({ success: true, message: 'تم تقييم الجاهزية بنجاح', data: plan });
@@ -285,10 +285,7 @@ router.put(
       const plan = await SuccessionPlan.findByIdAndUpdate(
         req.params.planId,
         stripUpdateMeta(req.body),
-        {
-          new: true,
-          runValidators: true,
-        }
+        { returnDocument: 'after', runValidators: true }
       );
       if (!plan) return res.status(404).json({ success: false, message: 'الخطة غير موجودة' });
       res.json({ success: true, message: 'تم تحديث خطة التعاقب بنجاح', data: plan });
@@ -331,7 +328,7 @@ router.post(
             },
           },
         },
-        { new: true }
+        { returnDocument: 'after' }
       );
 
       if (!plan) {
@@ -413,7 +410,7 @@ router.put(
           notes,
           updatedAt: new Date(),
         },
-        { new: true }
+        { returnDocument: 'after' }
       );
 
       if (!plan) {
@@ -449,7 +446,7 @@ router.put(
             [`developmentGoals.${req.params.goalIndex}.completionPercentage`]: completionPercentage,
           },
         },
-        { new: true }
+        { returnDocument: 'after' }
       );
 
       if (!plan) {
@@ -490,7 +487,7 @@ router.post(
             status: 'planned',
           },
         },
-        { new: true }
+        { returnDocument: 'after' }
       );
 
       if (!plan) {
@@ -528,7 +525,7 @@ router.post(
             status: 'active',
           },
         },
-        { new: true }
+        { returnDocument: 'after' }
       );
 
       if (!plan) {

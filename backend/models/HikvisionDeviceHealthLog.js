@@ -36,7 +36,7 @@ const HikvisionDeviceHealthLogSchema = new mongoose.Schema(
       default: null,
       index: true,
     },
-    ts: { type: Date, required: true, default: Date.now, index: true },
+    ts: { type: Date, required: true, default: Date.now },
 
     // Probe outcome
     onlineStatus: {

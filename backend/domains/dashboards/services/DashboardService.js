@@ -47,12 +47,12 @@ class DashboardService extends BaseService {
 
   async updateDashboard(id, data) {
     const DashboardConfig = mongoose.model('DashboardConfig');
-    return DashboardConfig.findByIdAndUpdate(id, data, { new: true });
+    return DashboardConfig.findByIdAndUpdate(id, data, { returnDocument: 'after' });
   }
 
   async deleteDashboard(id) {
     const DashboardConfig = mongoose.model('DashboardConfig');
-    return DashboardConfig.findByIdAndUpdate(id, { isDeleted: true }, { new: true });
+    return DashboardConfig.findByIdAndUpdate(id, { isDeleted: true }, { returnDocument: 'after' });
   }
 
   async addWidget(dashboardId, widget) {
@@ -61,7 +61,7 @@ class DashboardService extends BaseService {
     return DashboardConfig.findByIdAndUpdate(
       dashboardId,
       { $push: { widgets: widget } },
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 
@@ -70,7 +70,7 @@ class DashboardService extends BaseService {
     return DashboardConfig.findByIdAndUpdate(
       dashboardId,
       { $pull: { widgets: { widgetId } } },
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 
@@ -115,7 +115,7 @@ class DashboardService extends BaseService {
 
   async updateKPI(id, data) {
     const KPIDefinition = mongoose.model('KPIDefinition');
-    return KPIDefinition.findByIdAndUpdate(id, data, { new: true });
+    return KPIDefinition.findByIdAndUpdate(id, data, { returnDocument: 'after' });
   }
 
   /* ═══════════════════════ KPI SNAPSHOTS ═══════════════════════ */
@@ -268,7 +268,7 @@ class DashboardService extends BaseService {
         acknowledgedBy: userId,
         responseTimeMinutes: undefined,
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (alert) {
       alert.responseTimeMinutes = Math.round((alert.acknowledgedAt - alert.createdAt) / 60000);
@@ -288,7 +288,7 @@ class DashboardService extends BaseService {
         resolvedBy: userId,
         resolutionNotes: notes,
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (alert) {
       alert.resolutionTimeMinutes = Math.round((now - alert.createdAt) / 60000);
@@ -307,7 +307,7 @@ class DashboardService extends BaseService {
           actionsTaken: { action: `Dismissed: ${reason}`, takenBy: userId, takenAt: new Date() },
         },
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 
@@ -316,7 +316,7 @@ class DashboardService extends BaseService {
     return DecisionAlert.findByIdAndUpdate(
       id,
       { status: 'escalated', escalatedTo: escalateTo, escalatedAt: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 
@@ -325,7 +325,7 @@ class DashboardService extends BaseService {
     return DecisionAlert.findByIdAndUpdate(
       id,
       { status: 'in_progress', assignedTo },
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 

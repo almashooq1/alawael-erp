@@ -60,7 +60,7 @@ class ResearchService extends BaseService {
   /* ── Update study ── */
   async updateStudy(id, data) {
     const ResearchStudy = mongoose.model('ResearchStudy');
-    return ResearchStudy.findByIdAndUpdate(id, data, { new: true });
+    return ResearchStudy.findByIdAndUpdate(id, data, { returnDocument: 'after' });
   }
 
   /* ── Transition status ── */
@@ -129,7 +129,7 @@ class ResearchService extends BaseService {
           'participants.$.consentDate': new Date(),
         },
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 
@@ -139,7 +139,7 @@ class ResearchService extends BaseService {
     return ResearchStudy.findByIdAndUpdate(
       studyId,
       { $push: { milestones: milestone } },
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 
@@ -149,7 +149,7 @@ class ResearchService extends BaseService {
     return ResearchStudy.findByIdAndUpdate(
       studyId,
       { $push: { publications: publication } },
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 

@@ -60,7 +60,7 @@ router.put('/:id', authorize('admin', 'manager', 'fleet_officer'), async (req, r
   try {
     const FleetPenalty = require('../models/Fleet/FleetPenalty');
     const penalty = await FleetPenalty.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!penalty) return res.status(404).json({ success: false, message: 'Penalty not found' });
@@ -84,7 +84,7 @@ router.patch('/:id/pay', authorize('admin', 'manager', 'fleet_officer'), async (
         notes,
         paidBy: req.user._id,
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!penalty) return res.status(404).json({ success: false, message: 'Penalty not found' });
     res.json({ success: true, data: penalty });

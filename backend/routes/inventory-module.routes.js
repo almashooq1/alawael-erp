@@ -82,7 +82,7 @@ router.put('/items/:id', async (req, res) => {
     const item = await InventoryItem.findOneAndUpdate(
       { _id: req.params.id, deleted_at: null },
       { ...req.body, updated_by: req.user._id },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!item) return res.status(404).json({ error: 'العنصر غير موجود' });
     res.json({ item, message: 'تم تحديث العنصر' });
@@ -97,7 +97,7 @@ router.delete('/items/:id', async (req, res) => {
     const item = await InventoryItem.findOneAndUpdate(
       { _id: req.params.id, deleted_at: null },
       { deleted_at: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!item) return res.status(404).json({ error: 'العنصر غير موجود' });
     res.json({ message: 'تم حذف العنصر' });
@@ -268,7 +268,7 @@ router.put('/purchase-orders/:id', async (req, res) => {
     const po = await PurchaseOrder.findOneAndUpdate(
       { _id: req.params.id, deleted_at: null, status: { $in: ['draft', 'pending_approval'] } },
       { ...req.body, updated_by: req.user._id },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!po) return res.status(404).json({ error: 'لا يمكن تعديل هذا الأمر' });
     res.json({ order: po, message: 'تم تحديث أمر الشراء' });
@@ -283,7 +283,7 @@ router.post('/purchase-orders/:id/submit', async (req, res) => {
     const po = await PurchaseOrder.findOneAndUpdate(
       { _id: req.params.id, deleted_at: null, status: 'draft' },
       { status: 'pending_approval' },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!po) return res.status(404).json({ error: 'لا يمكن إرسال هذا الأمر' });
     res.json({ order: po, message: 'تم إرسال أمر الشراء للاعتماد' });
@@ -298,7 +298,7 @@ router.post('/purchase-orders/:id/approve', async (req, res) => {
     const po = await PurchaseOrder.findOneAndUpdate(
       { _id: req.params.id, deleted_at: null, status: 'pending_approval' },
       { status: 'approved', approved_by: req.user._id, approved_at: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!po) return res.status(404).json({ error: 'لا يمكن اعتماد هذا الأمر' });
     res.json({ order: po, message: 'تم اعتماد أمر الشراء' });
@@ -374,7 +374,7 @@ router.delete('/purchase-orders/:id', async (req, res) => {
     const po = await PurchaseOrder.findOneAndUpdate(
       { _id: req.params.id, deleted_at: null, status: { $in: ['draft', 'pending_approval'] } },
       { deleted_at: new Date(), status: 'cancelled' },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!po) return res.status(404).json({ error: 'لا يمكن حذف هذا الأمر' });
     res.json({ message: 'تم إلغاء أمر الشراء' });

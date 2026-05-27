@@ -233,7 +233,11 @@ class ApprovalChainsService {
         s.stepNumber = i + 1;
       });
     }
-    const chain = await ApprovalChain.findByIdAndUpdate(chainId, { $set: data }, { new: true });
+    const chain = await ApprovalChain.findByIdAndUpdate(
+      chainId,
+      { $set: data },
+      { returnDocument: 'after' }
+    );
     if (!chain) throw new Error('سلسلة الموافقات غير موجودة');
     return { success: true, chain };
   }
@@ -281,7 +285,7 @@ class ApprovalChainsService {
     const chain = await ApprovalChain.findByIdAndUpdate(
       chainId,
       { status: 'active' },
-      { new: true }
+      { returnDocument: 'after' }
     );
     return { success: true, chain };
   }

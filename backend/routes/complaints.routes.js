@@ -174,7 +174,7 @@ router.put(
         updates.resolvedAt = new Date();
       }
       const doc = await Complaint.findByIdAndUpdate(req.params.id, updates, {
-        new: true,
+        returnDocument: 'after',
         runValidators: true,
       });
       if (!doc) return res.status(404).json({ success: false, message: 'الشكوى غير موجودة' });
@@ -228,7 +228,7 @@ router.post(
           status: 'escalated',
           assignedTo: req.body.assignedTo,
         },
-        { new: true }
+        { returnDocument: 'after' }
       );
       if (!doc) return res.status(404).json({ success: false, message: 'الشكوى غير موجودة' });
       res.json({ success: true, data: doc, message: 'تم تصعيد الشكوى بنجاح' });
@@ -255,7 +255,7 @@ router.post(
           resolution: req.body.resolution,
           resolvedAt: new Date(),
         },
-        { new: true }
+        { returnDocument: 'after' }
       );
       if (!doc) return res.status(404).json({ success: false, message: 'الشكوى غير موجودة' });
       res.json({ success: true, data: doc, message: 'تم حل الشكوى بنجاح' });
@@ -277,7 +277,7 @@ router.post(
       const doc = await Complaint.findByIdAndUpdate(
         req.params.id,
         { rating: req.body.rating },
-        { new: true }
+        { returnDocument: 'after' }
       );
       if (!doc) return res.status(404).json({ success: false, message: 'الشكوى غير موجودة' });
       res.json({ success: true, data: doc, message: 'شكراً لتقييمك' });

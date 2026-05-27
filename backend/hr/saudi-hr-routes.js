@@ -152,7 +152,7 @@ router.put('/employees/:id', authMiddleware, checkPermission('hr.edit'), async (
     const employee = await Employee.findByIdAndUpdate(
       req.params.id,
       { $set: updates },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
 
     if (!employee) {
@@ -175,7 +175,7 @@ router.delete('/employees/:id', authMiddleware, checkPermission('hr.delete'), as
     const employee = await Employee.findByIdAndUpdate(
       req.params.id,
       { status: 'terminated' },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     if (!employee) {
@@ -391,7 +391,7 @@ router.put(
           approvedBy: req.user.employee,
           approvedAt: new Date(),
         },
-        { new: true }
+        { returnDocument: 'after' }
       );
 
       if (!leaveRequest) {

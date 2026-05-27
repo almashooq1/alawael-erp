@@ -83,7 +83,7 @@ router.patch('/:id/approve', authorize('admin', 'manager', 'fleet_officer'), asy
     const reservation = await FleetReservation.findByIdAndUpdate(
       req.params.id,
       { status: 'approved', approvedAt: new Date(), approvedBy: req.user._id },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!reservation)
       return res.status(404).json({ success: false, message: 'Reservation not found' });
@@ -100,7 +100,7 @@ router.patch('/:id/cancel', async (req, res) => {
     const reservation = await FleetReservation.findByIdAndUpdate(
       req.params.id,
       { status: 'cancelled', cancelReason: reason, cancelledBy: req.user._id },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!reservation)
       return res.status(404).json({ success: false, message: 'Reservation not found' });

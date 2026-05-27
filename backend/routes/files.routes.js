@@ -310,7 +310,7 @@ router.delete('/:id', requireRole(DELETE_ROLES), async (req, res) => {
     const doc = await UploadedFile.findByIdAndUpdate(
       req.params.id,
       { status: 'soft_deleted', deletedAt: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!doc) return res.status(404).json({ success: false, message: 'الملف غير موجود' });
     res.json({ success: true, message: 'تم الحذف (Soft)' });

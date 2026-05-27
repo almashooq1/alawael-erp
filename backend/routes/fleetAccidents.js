@@ -65,7 +65,7 @@ router.put(
     try {
       const FleetAccident = require('../models/Fleet/FleetAccident');
       const accident = await FleetAccident.findByIdAndUpdate(req.params.id, req.body, {
-        new: true,
+        returnDocument: 'after',
         runValidators: true,
       });
       if (!accident)
@@ -91,7 +91,7 @@ router.patch('/:id/close', authorize('admin', 'manager', 'safety_officer'), asyn
         closedAt: new Date(),
         closedBy: req.user._id,
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!accident)
       return res.status(404).json({ success: false, message: 'Accident report not found' });

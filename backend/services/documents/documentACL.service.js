@@ -404,7 +404,11 @@ class DocumentACLService {
   // ══════════════════════════════════════════
   async revokeACL(aclId, revokedBy) {
     try {
-      const acl = await DocumentACL.findByIdAndUpdate(aclId, { isActive: false }, { new: true });
+      const acl = await DocumentACL.findByIdAndUpdate(
+        aclId,
+        { isActive: false },
+        { returnDocument: 'after' }
+      );
       if (!acl) return { success: false, error: 'الصلاحية غير موجودة' };
       logger.info(`[ACL] Revoked: ${aclId} by ${revokedBy}`);
       return { success: true, revoked: true };

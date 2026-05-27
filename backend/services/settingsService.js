@@ -122,7 +122,7 @@ async function set(key, value, branchId = null, updatedBy = null) {
       await BranchSetting.findOneAndUpdate(
         { branchId, key },
         { value, overriddenBy: updatedBy, overriddenAt: new Date() },
-        { upsert: true, new: true }
+        { upsert: true, returnDocument: 'after' }
       );
       cacheDelete(`branch:${branchId}:${key}`);
     } else {

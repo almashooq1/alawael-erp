@@ -119,7 +119,7 @@ router.put(
     const company = await InsuranceCompany.findByIdAndUpdate(
       req.params.id,
       { ...req.body, updatedBy: req.user._id },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!company)
       return res.status(404).json({ success: false, message: 'شركة التأمين غير موجودة' });
@@ -256,7 +256,7 @@ router.put(
     const policy = await InsurancePolicy.findOneAndUpdate(
       { _id: req.params.id, deletedAt: null },
       { ...req.body, updatedBy: req.user._id },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!policy) return res.status(404).json({ success: false, message: 'الوثيقة غير موجودة' });
     res.json({ success: true, data: policy });
@@ -455,7 +455,7 @@ router.patch(
         adjudicatedAt: new Date(),
         updatedBy: req.user._id,
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!claim) return res.status(404).json({ success: false, message: 'المطالبة غير موجودة' });
     res.json({ success: true, data: claim, message: 'تم تحديث حالة المطالبة' });

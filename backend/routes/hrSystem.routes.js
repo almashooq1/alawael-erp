@@ -144,7 +144,7 @@ router.post('/attendance/checkout', async (req, res) => {
     const record = await Attendance.findOneAndUpdate(
       { employeeId: targetEmpId, checkIn: { $gte: today }, checkOut: null },
       { checkOut: new Date() },
-      { new: true, sort: { checkIn: -1 } }
+      { returnDocument: 'after', sort: { checkIn: -1 } }
     );
     if (!record) {
       return res

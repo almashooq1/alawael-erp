@@ -123,7 +123,7 @@ router.patch('/payroll-runs/:id/approve', authorize('admin', 'hr_manager'), asyn
     const run = await PayrollRun.findByIdAndUpdate(
       req.params.id,
       { status: 'approved', approvedAt: new Date(), approvedBy: req.user._id },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!run) return res.status(404).json({ success: false, message: 'Payroll run not found' });
     res.json({ success: true, data: run });

@@ -111,7 +111,7 @@ router.put(
       const emp = await Employee.findOneAndUpdate(
         { _id: req.params.id, deleted_at: null },
         stripUpdateMeta(req.body),
-        { new: true }
+        { returnDocument: 'after' }
       );
       if (!emp) return res.status(404).json({ error: 'الموظف غير موجود' });
       res.json({ data: emp });
@@ -210,7 +210,7 @@ router.patch(
       const record = await PayrollRecord.findByIdAndUpdate(
         req.params.id,
         { status: 'approved', approved_by: req.user._id, approved_at: new Date() },
-        { new: true }
+        { returnDocument: 'after' }
       );
       res.json({ data: record });
     } catch (err) {
@@ -390,7 +390,7 @@ router.patch(
       const eos = await EndOfServiceCalculation.findByIdAndUpdate(
         req.params.id,
         { status: 'approved', approved_by: req.user._id, approved_at: new Date() },
-        { new: true }
+        { returnDocument: 'after' }
       );
       res.json({ data: eos });
     } catch (err) {

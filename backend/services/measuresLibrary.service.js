@@ -266,7 +266,7 @@ class MeasuresLibrarySvc {
     data.updatedBy = actorId;
 
     const filter = mongoose.Types.ObjectId.isValid(id) ? { _id: id } : { code: id };
-    return Measure.findOneAndUpdate(filter, { $set: data }, { new: true }).lean();
+    return Measure.findOneAndUpdate(filter, { $set: data }, { returnDocument: 'after' }).lean();
   }
 
   // ───────────────────────────────────────────────────────────────

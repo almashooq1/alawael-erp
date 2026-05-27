@@ -240,7 +240,7 @@ router.post('/auth/verify-otp', parentOtpVerifyLimiter, async (req, res) => {
           isActive: true,
           lastActiveAt: new Date(),
         },
-        { upsert: true, new: true }
+        { upsert: true, returnDocument: 'after' }
       );
     }
 
@@ -597,7 +597,7 @@ router.put('/appointments/:id/cancel', async (req, res) => {
       const appt = await Schedule.findOneAndUpdate(
         { _id: req.params.id, guardianId },
         { status: 'cancelled', cancelReason: req.body.reason || 'إلغاء من ولي الأمر' },
-        { new: true }
+        { returnDocument: 'after' }
       );
       updated = !!appt;
     } catch (e) {
@@ -1119,7 +1119,7 @@ router.post('/devices', async (req, res) => {
         lastActiveAt: new Date(),
         ...(notificationPreferences && { notificationPreferences }),
       },
-      { upsert: true, new: true }
+      { upsert: true, returnDocument: 'after' }
     );
 
     res.json({ success: true, message: 'تم تسجيل الجهاز', data: device });
@@ -1223,7 +1223,7 @@ router.put('/admin/complaints/:id', async (req, res) => {
             }
           : {}),
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     if (!complaint) return res.status(404).json({ success: false, message: 'الشكوى غير موجودة' });

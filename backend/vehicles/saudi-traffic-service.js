@@ -522,7 +522,7 @@ class SaudiTrafficService extends EventEmitter {
     }
 
     const accident = await this.TrafficAccident.findOneAndUpdate({ accidentId }, update, {
-      new: true,
+      returnDocument: 'after',
     });
 
     this.emit('accident:updated', accident);

@@ -84,7 +84,7 @@ router.put(
       const program = await GroupProgram.findOneAndUpdate(
         { _id: req.params.id, ...branchFilter(req) },
         stripUpdateMeta(req.body),
-        { new: true, runValidators: true }
+        { returnDocument: 'after', runValidators: true }
       );
       if (!program) return res.status(404).json({ success: false, message: 'Program not found' });
       res.json({ success: true, data: program });
@@ -131,7 +131,7 @@ router.post(
       const program = await GroupProgram.findOneAndUpdate(
         { _id: req.params.id, ...branchFilter(req) },
         { $addToSet: { students: { $each: studentIds } } },
-        { new: true }
+        { returnDocument: 'after' }
       ).populate('students', 'name');
       if (!program) return res.status(404).json({ success: false, message: 'Program not found' });
       res.json({ success: true, data: program });
@@ -153,7 +153,7 @@ router.delete(
       const program = await GroupProgram.findOneAndUpdate(
         { _id: req.params.id, ...branchFilter(req) },
         { $pull: { students: req.params.studentId } },
-        { new: true }
+        { returnDocument: 'after' }
       );
       if (!program) return res.status(404).json({ success: false, message: 'Program not found' });
       res.json({ success: true, data: program });
@@ -171,7 +171,7 @@ router.post('/:id/sessions', requireAuth, requireBranchAccess, async (req, res) 
     const program = await GroupProgram.findOneAndUpdate(
       { _id: req.params.id, ...branchFilter(req) },
       { $push: { sessions: { $each: [req.body], $slice: -200 } } },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!program) return res.status(404).json({ success: false, message: 'Program not found' });
     res.status(201).json({ success: true, data: program.sessions[program.sessions.length - 1] });

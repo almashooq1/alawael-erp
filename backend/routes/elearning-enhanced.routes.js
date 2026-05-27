@@ -165,7 +165,7 @@ router.put(
     const course = await ElearningCourse.findOneAndUpdate(
       { _id: req.params.id, deletedAt: null },
       { ...req.body, updatedBy: req.user?._id },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!course) return res.status(404).json({ message: 'المقرر غير موجود' });
     res.json({ message: 'تم التحديث بنجاح', data: course });
@@ -178,7 +178,7 @@ router.delete(
     const course = await ElearningCourse.findOneAndUpdate(
       { _id: req.params.id, deletedAt: null },
       { deletedAt: new Date(), updatedBy: req.user?._id },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!course) return res.status(404).json({ message: 'المقرر غير موجود' });
     res.json({ message: 'تم الحذف بنجاح' });
@@ -321,7 +321,7 @@ router.post(
         },
         $setOnInsert: { startedAt: new Date(), createdBy: req.user?._id },
       },
-      { upsert: true, new: true }
+      { upsert: true, returnDocument: 'after' }
     );
 
     // حساب نسبة التقدم الكلية
@@ -603,7 +603,7 @@ router.patch(
         verifiedAt: new Date(),
         updatedBy: req.user?._id,
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!record) return res.status(404).json({ message: 'سجل CPD غير موجود' });
     res.json({ message: 'تم اعتماد سجل CPD', data: record });
@@ -684,7 +684,7 @@ router.post(
             createdBy: req.user?._id,
           },
         },
-        { upsert: true, new: true }
+        { upsert: true, returnDocument: 'after' }
       );
 
       // سجل الامتثال
@@ -700,7 +700,7 @@ router.post(
             createdBy: req.user?._id,
           },
         },
-        { upsert: true, new: true }
+        { upsert: true, returnDocument: 'after' }
       );
 
       results.push(enrollment);

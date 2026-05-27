@@ -39,7 +39,7 @@ router.put('/notification-prefs', authMiddleware, requireBranchAccess, async (re
     const prefs = await WorkflowNotifPref.findOneAndUpdate(
       { user: uid(req) },
       { ...req.body, user: uid(req) },
-      { new: true, upsert: true }
+      { returnDocument: 'after', upsert: true }
     );
     res.json({ success: true, data: prefs, message: 'تم تحديث تفضيلات الإشعارات' });
   } catch (error) {

@@ -129,7 +129,7 @@ router.patch('/:id/assign', requireRole('admin', 'manager', 'supervisor'), async
     const doc = await Communication.findOneAndUpdate(
       { _id: req.params.id, branchId: req.user.branchId, channel: 'complaint' },
       { assignedTo, assignedAt: new Date(), assignedBy: req.user._id, status: 'in_progress' },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!doc) return res.status(404).json({ success: false, message: 'Complaint not found' });
     res.json({ success: true, data: doc });
@@ -157,7 +157,7 @@ router.post(
             notes: { content: note, isInternal, addedBy: req.user._id, addedAt: new Date() },
           },
         },
-        { new: true }
+        { returnDocument: 'after' }
       );
       if (!doc) return res.status(404).json({ success: false, message: 'Complaint not found' });
       res.json({ success: true, data: doc });
@@ -190,7 +190,7 @@ router.patch('/:id/resolve', requireRole('admin', 'manager', 'supervisor'), asyn
         resolvedBy: req.user._id,
         notifySubmitter,
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!doc)
       return res
@@ -219,7 +219,7 @@ router.patch('/:id/escalate', requireRole('admin', 'manager', 'supervisor'), asy
         escalatedBy: req.user._id,
         priority: 'urgent',
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!doc) return res.status(404).json({ success: false, message: 'Complaint not found' });
     res.json({ success: true, data: doc });
@@ -238,7 +238,7 @@ router.patch('/:id/reopen', requireRole('admin', 'manager', 'supervisor'), async
     const doc = await Communication.findOneAndUpdate(
       { _id: req.params.id, branchId: req.user.branchId, channel: 'complaint', status: 'resolved' },
       { status: 'open', reopenReason: reason, reopenedAt: new Date(), reopenedBy: req.user._id },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!doc)
       return res.status(404).json({ success: false, message: 'Resolved complaint not found' });
@@ -265,7 +265,7 @@ router.post('/:id/feedback', async (req, res) => {
         status: 'resolved',
       },
       { customerRating: rating, customerFeedback: comment, feedbackAt: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!doc)
       return res.status(404).json({ success: false, message: 'Resolved complaint not found' });

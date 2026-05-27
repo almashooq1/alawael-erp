@@ -200,7 +200,7 @@ class FinanceService {
   static async updateTransaction(transactionId, data) {
     try {
       const transaction = await Transaction.findByIdAndUpdate(transactionId, data, {
-        new: true,
+        returnDocument: 'after',
       }).lean();
 
       if (!transaction) {
@@ -225,7 +225,7 @@ class FinanceService {
       const transaction = await Transaction.findByIdAndUpdate(
         transactionId,
         { isArchived: true, archivedAt: new Date() },
-        { new: true }
+        { returnDocument: 'after' }
       );
 
       if (!transaction) {
@@ -418,7 +418,7 @@ class FinanceService {
       const budget = await Budget.findByIdAndUpdate(
         budgetId,
         { isArchived: true, archivedAt: new Date() },
-        { new: true }
+        { returnDocument: 'after' }
       );
 
       if (!budget) {

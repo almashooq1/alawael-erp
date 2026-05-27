@@ -400,7 +400,7 @@ class DocumentEmailGatewayService extends EventEmitter {
         },
         $inc: { 'tracking.openCount': 1 },
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     return { success: !!message };
   }
@@ -429,7 +429,7 @@ class DocumentEmailGatewayService extends EventEmitter {
     const template = await EmailTemplate.findByIdAndUpdate(
       templateId,
       { $set: updates },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     if (!template) return { success: false, error: 'القالب غير موجود' };
     return { success: true, template };
@@ -462,7 +462,7 @@ class DocumentEmailGatewayService extends EventEmitter {
     const rule = await ForwardingRule.findByIdAndUpdate(
       ruleId,
       { $set: updates },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     if (!rule) return { success: false, error: 'القاعدة غير موجودة' };
     return { success: true, rule };

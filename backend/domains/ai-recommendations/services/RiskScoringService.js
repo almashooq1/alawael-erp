@@ -250,7 +250,7 @@ class RiskScoringService {
     if (note) update.responseNote = note;
     if (action === 'completed') update.completedAt = new Date();
 
-    return Recommendation.findByIdAndUpdate(recoId, update, { new: true }).lean();
+    return Recommendation.findByIdAndUpdate(recoId, update, { returnDocument: 'after' }).lean();
   }
 
   async markViewed(recoId, userId) {
@@ -258,7 +258,7 @@ class RiskScoringService {
     return Recommendation.findOneAndUpdate(
       { _id: recoId, status: 'pending' },
       { status: 'viewed', viewedAt: new Date(), viewedBy: userId },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
   }
 
@@ -269,7 +269,7 @@ class RiskScoringService {
       {
         outcome: { wasHelpful, impactNote, ratedAt: new Date(), ratedBy: userId },
       },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
   }
 

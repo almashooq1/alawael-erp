@@ -93,7 +93,7 @@ router.put('/:id', requireAuth, requireBranchAccess, async (req, res) => {
     const record = await GoalProgressHistory.findOneAndUpdate(
       { _id: req.params.id, ...branchFilter(req) },
       stripUpdateMeta(req.body),
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!record) return res.status(404).json({ success: false, message: 'Record not found' });
     res.json({ success: true, data: record });

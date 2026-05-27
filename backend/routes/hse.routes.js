@@ -107,7 +107,7 @@ router.post(
 router.put('/incidents/:id', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const doc = await SafetyIncident.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!doc) return res.status(404).json({ success: false, message: 'الحادثة غير موجودة' });
@@ -173,7 +173,7 @@ router.post('/inspections', authenticate, requireBranchAccess, async (req, res) 
 router.put('/inspections/:id', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const doc = await SafetyInspection.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!doc) return res.status(404).json({ success: false, message: 'التفتيش غير موجود' });

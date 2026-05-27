@@ -104,7 +104,7 @@ router.get('/talent/jobs/:id', authenticateToken, requireBranchAccess, async (re
 router.put('/talent/jobs/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const job = await JobPosting.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!job) return res.status(404).json({ success: false, message: 'Not found' });
@@ -186,7 +186,7 @@ router.post('/talent/candidates', authenticateToken, requireBranchAccess, async 
 router.put('/talent/candidates/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const doc = await Candidate.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
+      returnDocument: 'after',
     });
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });
@@ -288,7 +288,7 @@ router.put('/talent/interviews/:id', authenticateToken, requireBranchAccess, asy
     const doc = await InterviewSchedule.findByIdAndUpdate(
       req.params.id,
       stripUpdateMeta(req.body),
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });
@@ -337,7 +337,7 @@ router.get('/facilities/:id', authenticateToken, requireBranchAccess, async (req
 router.put('/facilities/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const doc = await Facility.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
+      returnDocument: 'after',
     });
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });
@@ -424,7 +424,7 @@ router.post('/facilities/bookings', authenticateToken, requireBranchAccess, asyn
 router.put('/facilities/bookings/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const doc = await SpaceBooking.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
+      returnDocument: 'after',
     });
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });
@@ -475,7 +475,7 @@ router.post('/facilities/leases', authenticateToken, requireBranchAccess, async 
 router.put('/facilities/leases/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const doc = await LeaseContract.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
+      returnDocument: 'after',
     });
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });
@@ -565,7 +565,7 @@ router.get('/vendors/:id', authenticateToken, requireBranchAccess, async (req, r
 router.put('/vendors/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const doc = await Vendor.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
@@ -646,7 +646,7 @@ router.post('/vendors/rfqs', authenticateToken, requireBranchAccess, async (req,
 router.put('/vendors/rfqs/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const doc = await RFQ.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
+      returnDocument: 'after',
     });
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });
@@ -661,7 +661,7 @@ router.put('/vendors/rfqs/:id/award', authenticateToken, requireBranchAccess, as
     const doc = await RFQ.findByIdAndUpdate(
       req.params.id,
       { status: 'awarded', awardedTo: vendorId },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });
@@ -773,7 +773,7 @@ router.get('/itsm/incidents/:id', authenticateToken, requireBranchAccess, async 
 router.put('/itsm/incidents/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const doc = await ITIncident.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
+      returnDocument: 'after',
     });
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });
@@ -819,7 +819,7 @@ router.put(
             resolvedBy: req.user?.id,
           },
         },
-        { new: true }
+        { returnDocument: 'after' }
       );
       if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
       res.json({ success: true, data: doc });
@@ -889,7 +889,7 @@ router.post('/itsm/assets', authenticateToken, requireBranchAccess, async (req, 
 router.put('/itsm/assets/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const doc = await ITAsset.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
+      returnDocument: 'after',
     });
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });
@@ -931,7 +931,7 @@ router.put('/itsm/catalog/:id', authenticateToken, requireBranchAccess, async (r
     const doc = await ServiceCatalogItem.findByIdAndUpdate(
       req.params.id,
       stripUpdateMeta(req.body),
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });
@@ -975,7 +975,7 @@ router.post('/itsm/changes', authenticateToken, requireBranchAccess, async (req,
 router.put('/itsm/changes/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const doc = await ChangeRequest.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
+      returnDocument: 'after',
     });
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });
@@ -1067,7 +1067,7 @@ router.get('/ehs/incidents/:id', authenticateToken, requireBranchAccess, async (
 router.put('/ehs/incidents/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const doc = await SafetyIncident.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
+      returnDocument: 'after',
     });
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });
@@ -1137,7 +1137,7 @@ router.post('/ehs/inspections', authenticateToken, requireBranchAccess, async (r
 router.put('/ehs/inspections/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const doc = await SafetyInspection.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
+      returnDocument: 'after',
     });
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });
@@ -1180,7 +1180,7 @@ router.post('/ehs/hazards', authenticateToken, requireBranchAccess, async (req, 
 router.put('/ehs/hazards/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const doc = await HazardRegister.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
+      returnDocument: 'after',
     });
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });
@@ -1219,7 +1219,7 @@ router.post('/ehs/ppe', authenticateToken, requireBranchAccess, async (req, res)
 router.put('/ehs/ppe/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const doc = await PPERecord.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
+      returnDocument: 'after',
     });
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });
@@ -1285,7 +1285,7 @@ router.put('/strategy/objectives/:id', authenticateToken, requireBranchAccess, a
     const doc = await StrategicObjective.findByIdAndUpdate(
       req.params.id,
       stripUpdateMeta(req.body),
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });
@@ -1417,7 +1417,7 @@ router.put(
       const doc = await StrategicInitiative.findByIdAndUpdate(
         req.params.id,
         stripUpdateMeta(req.body),
-        { new: true }
+        { returnDocument: 'after' }
       );
       if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
       res.json({ success: true, data: doc });
@@ -1466,7 +1466,7 @@ router.post('/strategy/swot', authenticateToken, requireBranchAccess, async (req
 router.put('/strategy/swot/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const doc = await SWOTAnalysis.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
+      returnDocument: 'after',
     });
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });

@@ -52,7 +52,7 @@ class FieldTrainingService extends BaseService {
 
   async updateProgram(id, data) {
     const TrainingProgram = mongoose.model('TrainingProgram');
-    return TrainingProgram.findByIdAndUpdate(id, data, { new: true });
+    return TrainingProgram.findByIdAndUpdate(id, data, { returnDocument: 'after' });
   }
 
   /* ═══════════════════ TRAINEES ═══════════════════ */
@@ -118,7 +118,7 @@ class FieldTrainingService extends BaseService {
         $push: { hourLogs: { ...hourData, date: hourData.date || new Date() } },
         $inc: { 'hours.totalLogged': hourData.hours, [`hours.${field}`]: hourData.hours },
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 
@@ -130,7 +130,7 @@ class FieldTrainingService extends BaseService {
       {
         $push: { evaluations: { ...evaluation, date: evaluation.date || new Date() } },
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 
@@ -143,7 +143,7 @@ class FieldTrainingService extends BaseService {
         $push: { supervisionSessions: { ...session, date: session.date || new Date() } },
         $inc: { 'hours.supervision': (session.durationMinutes || 0) / 60 },
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 
@@ -156,7 +156,7 @@ class FieldTrainingService extends BaseService {
         $push: { observations: { ...observation, date: observation.date || new Date() } },
         $inc: { 'hours.observation': 1 },
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 
@@ -192,7 +192,7 @@ class FieldTrainingService extends BaseService {
       {
         $push: { caseload: { ...caseData, assignedDate: new Date() } },
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 
@@ -206,7 +206,7 @@ class FieldTrainingService extends BaseService {
         completedAt: new Date(),
         ...completionData,
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 

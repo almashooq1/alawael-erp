@@ -359,7 +359,9 @@ router.put(
         const compliant = data.items.filter(i => i.status === 'compliant').length;
         data.overallScore = total > 0 ? Math.round((compliant / total) * 100) : 0;
       }
-      const cl = await ComplianceChecklist.findByIdAndUpdate(req.params.id, data, { new: true });
+      const cl = await ComplianceChecklist.findByIdAndUpdate(req.params.id, data, {
+        returnDocument: 'after',
+      });
       res.json(cl);
     } catch (e) {
       safeError(res, e, '[EnterprisePro]');
@@ -454,7 +456,7 @@ router.post(
       const alert = await ComplianceAlert.findByIdAndUpdate(
         req.params.id,
         { isResolved: true, resolvedBy: uid(req), resolvedAt: new Date() },
-        { new: true }
+        { returnDocument: 'after' }
       );
       res.json(alert);
     } catch (e) {
@@ -533,9 +535,7 @@ router.put(
       const t = await ReportTemplate.findByIdAndUpdate(
         req.params.id,
         pick(req.body, FIELDS.report),
-        {
-          new: true,
-        }
+        { returnDocument: 'after' }
       );
       res.json(t);
     } catch (e) {
@@ -713,7 +713,7 @@ router.post('/calendar-hub/events', authenticateToken, requireBranchAccess, asyn
 router.put('/calendar-hub/events/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const ev = await CalendarEvent.findByIdAndUpdate(req.params.id, pick(req.body, FIELDS.event), {
-      new: true,
+      returnDocument: 'after',
     });
     res.json(ev);
   } catch (e) {
@@ -935,7 +935,7 @@ router.post('/crm-pro/contacts', authenticateToken, requireBranchAccess, async (
 router.put('/crm-pro/contacts/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const c = await CRMContact.findByIdAndUpdate(req.params.id, pick(req.body, FIELDS.contact), {
-      new: true,
+      returnDocument: 'after',
     });
     res.json(c);
   } catch (e) {
@@ -984,7 +984,7 @@ router.post('/crm-pro/pipelines', authenticateToken, requireBranchAccess, async 
 router.put('/crm-pro/pipelines/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const p = await CRMPipeline.findByIdAndUpdate(req.params.id, pick(req.body, FIELDS.pipeline), {
-      new: true,
+      returnDocument: 'after',
     });
     res.json(p);
   } catch (e) {
@@ -1056,7 +1056,7 @@ router.post('/crm-pro/deals', authenticateToken, requireBranchAccess, async (req
 router.put('/crm-pro/deals/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const d = await CRMDeal.findByIdAndUpdate(req.params.id, pick(req.body, FIELDS.deal), {
-      new: true,
+      returnDocument: 'after',
     });
     res.json(d);
   } catch (e) {
@@ -1078,7 +1078,7 @@ router.put('/crm-pro/deals/:id/move', authenticateToken, requireBranchAccess, as
     const d = await CRMDeal.findByIdAndUpdate(
       req.params.id,
       { stage: req.body.stageId, stageName: req.body.stageName },
-      { new: true }
+      { returnDocument: 'after' }
     );
     res.json(d);
   } catch (e) {
@@ -1145,7 +1145,7 @@ router.post('/crm-pro/activities', authenticateToken, requireBranchAccess, async
 router.put('/crm-pro/activities/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const a = await CRMActivity.findByIdAndUpdate(req.params.id, pick(req.body, FIELDS.activity), {
-      new: true,
+      returnDocument: 'after',
     });
     res.json(a);
   } catch (e) {
@@ -1242,9 +1242,7 @@ router.put(
       const wh = await Warehouse.findByIdAndUpdate(
         req.params.id,
         pick(req.body, FIELDS.warehouse),
-        {
-          new: true,
-        }
+        { returnDocument: 'after' }
       );
       res.json(wh);
     } catch (e) {
@@ -1296,7 +1294,7 @@ router.put(
   async (req, res) => {
     try {
       const bin = await WarehouseBin.findByIdAndUpdate(req.params.id, pick(req.body, FIELDS.bin), {
-        new: true,
+        returnDocument: 'after',
       });
       res.json(bin);
     } catch (e) {
@@ -1340,7 +1338,7 @@ router.put(
       const sl = await StockLevel.findByIdAndUpdate(
         req.params.id,
         pick(req.body, FIELDS.stockLevel),
-        { new: true }
+        { returnDocument: 'after' }
       );
       res.json(sl);
     } catch (e) {
@@ -1378,7 +1376,7 @@ router.post(
       const a = await StockAlert.findByIdAndUpdate(
         req.params.id,
         { isResolved: true, resolvedBy: uid(req), resolvedAt: new Date() },
-        { new: true }
+        { returnDocument: 'after' }
       );
       res.json(a);
     } catch (e) {
@@ -1443,7 +1441,7 @@ router.put(
       const t = await StockTransferOrder.findByIdAndUpdate(
         req.params.id,
         pick(req.body, FIELDS.transfer),
-        { new: true }
+        { returnDocument: 'after' }
       );
       res.json(t);
     } catch (e) {
@@ -1461,7 +1459,7 @@ router.post(
       const t = await StockTransferOrder.findByIdAndUpdate(
         req.params.id,
         { status: 'approved', approvedBy: uid(req) },
-        { new: true }
+        { returnDocument: 'after' }
       );
       res.json(t);
     } catch (e) {
@@ -1479,7 +1477,7 @@ router.post(
       const t = await StockTransferOrder.findByIdAndUpdate(
         req.params.id,
         { status: 'in_transit', shippedDate: new Date() },
-        { new: true }
+        { returnDocument: 'after' }
       );
       res.json(t);
     } catch (e) {
@@ -1497,7 +1495,7 @@ router.post(
       const t = await StockTransferOrder.findByIdAndUpdate(
         req.params.id,
         { status: 'received', receivedDate: new Date() },
-        { new: true }
+        { returnDocument: 'after' }
       );
       res.json(t);
     } catch (e) {
@@ -1610,7 +1608,7 @@ router.put(
   async (req, res) => {
     try {
       const p = await ProjectPro.findByIdAndUpdate(req.params.id, pick(req.body, FIELDS.project), {
-        new: true,
+        returnDocument: 'after',
       });
       res.json(p);
     } catch (e) {
@@ -1722,7 +1720,7 @@ router.post('/project-pro/tasks', authenticateToken, requireBranchAccess, async 
 router.put('/project-pro/tasks/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const t = await ProjectTask.findByIdAndUpdate(req.params.id, pick(req.body, FIELDS.task), {
-      new: true,
+      returnDocument: 'after',
     });
     // Update project progress if task status changes
     if (req.body.status && t) {

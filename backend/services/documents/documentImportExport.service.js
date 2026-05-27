@@ -552,7 +552,7 @@ class DocumentImportExportService {
     const job = await ImportExportJob.findOneAndUpdate(
       { _id: jobId, status: { $in: ['pending', 'processing'] } },
       { $set: { status: 'cancelled' } },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!job) return { success: false, error: 'المهمة غير قابلة للإلغاء' };
     return { success: true };
@@ -579,7 +579,7 @@ class DocumentImportExportService {
     const mapping = await FieldMapping.findByIdAndUpdate(
       mappingId,
       { $set: updates },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     if (!mapping) return { success: false, error: 'القالب غير موجود' };
     return { success: true, mapping };

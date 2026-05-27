@@ -132,7 +132,7 @@ function buildCrud(Model, modelName, opts = {}) {
       const doc = await Model.findOneAndUpdate(
         { _id: req.params.id, ...branchFilter(req) },
         stripUpdateMeta(req.body),
-        { new: true, runValidators: true }
+        { returnDocument: 'after', runValidators: true }
       );
       if (!doc) return res.status(404).json({ success: false, message: `${modelName} not found` });
       res.json({ success: true, data: doc });

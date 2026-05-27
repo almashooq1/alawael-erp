@@ -145,7 +145,7 @@ router.put(
   async (req, res) => {
     try {
       const dept = await Department.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-        new: true,
+        returnDocument: 'after',
         runValidators: true,
       });
       if (!dept) return res.status(404).json({ success: false, message: 'القسم غير موجود' });
@@ -254,7 +254,7 @@ router.put(
   async (req, res) => {
     try {
       const pos = await Position.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-        new: true,
+        returnDocument: 'after',
         runValidators: true,
       });
       if (!pos) return res.status(404).json({ success: false, message: 'المنصب غير موجود' });

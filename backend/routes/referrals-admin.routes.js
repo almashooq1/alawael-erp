@@ -164,7 +164,9 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     const patch = { ...(req.body || {}) };
     if (patch.status && patch.status !== 'pending') patch.settledAt = new Date();
-    const row = await ReferralTracking.findByIdAndUpdate(req.params.id, patch, { new: true });
+    const row = await ReferralTracking.findByIdAndUpdate(req.params.id, patch, {
+      returnDocument: 'after',
+    });
     if (!row) return res.status(404).json({ success: false, message: 'غير موجود' });
     res.json({ success: true, data: row });
   } catch (err) {

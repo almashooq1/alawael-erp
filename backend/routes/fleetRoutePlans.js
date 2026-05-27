@@ -59,7 +59,7 @@ router.put('/:id', authorize('admin', 'manager', 'dispatcher'), async (req, res)
   try {
     const FleetRoutePlan = require('../models/Fleet/FleetRoutePlan');
     const plan = await FleetRoutePlan.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!plan) return res.status(404).json({ success: false, message: 'Route plan not found' });
@@ -79,7 +79,7 @@ router.patch('/:id/waypoints', authorize('admin', 'manager', 'dispatcher'), asyn
     const plan = await FleetRoutePlan.findByIdAndUpdate(
       req.params.id,
       { waypoints, updatedBy: req.user._id },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!plan) return res.status(404).json({ success: false, message: 'Route plan not found' });
     res.json({ success: true, data: plan });

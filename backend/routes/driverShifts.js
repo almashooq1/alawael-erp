@@ -63,7 +63,7 @@ router.put('/:id', authorize('admin', 'manager', 'dispatcher'), async (req, res)
   try {
     const DriverShift = require('../models/Fleet/DriverShift');
     const shift = await DriverShift.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!shift) return res.status(404).json({ success: false, message: 'Shift not found' });
@@ -79,7 +79,7 @@ router.patch('/:id/clock-in', async (req, res) => {
     const shift = await DriverShift.findByIdAndUpdate(
       req.params.id,
       { status: 'active', actualStartTime: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!shift) return res.status(404).json({ success: false, message: 'Shift not found' });
     res.json({ success: true, data: shift });
@@ -95,7 +95,7 @@ router.patch('/:id/clock-out', async (req, res) => {
     const shift = await DriverShift.findByIdAndUpdate(
       req.params.id,
       { status: 'completed', actualEndTime: new Date(), notes },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!shift) return res.status(404).json({ success: false, message: 'Shift not found' });
     res.json({ success: true, data: shift });

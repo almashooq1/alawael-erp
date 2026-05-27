@@ -121,7 +121,7 @@ router.put(
       const definition = await WorkflowDefinition.findByIdAndUpdate(
         req.params.id,
         { $set: { ...req.body, updatedBy: req.user.id } },
-        { new: true, runValidators: true }
+        { returnDocument: 'after', runValidators: true }
       );
 
       if (!definition) {
@@ -168,7 +168,7 @@ router.delete(
       const definition = await WorkflowDefinition.findByIdAndUpdate(
         req.params.id,
         { status: 'archived' },
-        { new: true }
+        { returnDocument: 'after' }
       );
 
       if (!definition) {

@@ -462,7 +462,9 @@ router.get('/mdt/meetings/:id', async (req, res) => {
 
 router.patch('/mdt/meetings/:id', async (req, res) => {
   try {
-    const meeting = await MDTMeeting.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const meeting = await MDTMeeting.findByIdAndUpdate(req.params.id, req.body, {
+      returnDocument: 'after',
+    });
     if (!meeting) return res.status(404).json({ success: false, error: 'الاجتماع غير موجود' });
     res.json({ success: true, message: 'تم تحديث الاجتماع', data: meeting });
   } catch (err) {
@@ -548,7 +550,9 @@ router.get('/transition/plans/:id', async (req, res) => {
 
 router.patch('/transition/plans/:id', async (req, res) => {
   try {
-    const plan = await TransitionPlan.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const plan = await TransitionPlan.findByIdAndUpdate(req.params.id, req.body, {
+      returnDocument: 'after',
+    });
     if (!plan) return res.status(404).json({ success: false, error: 'خطة الانتقال غير موجودة' });
     plan.calculateReadiness();
     await plan.save();
@@ -644,7 +648,7 @@ router.post('/quality/kpis/:branchId/action-plans', async (req, res) => {
     const kpi = await QualityKPI.findOneAndUpdate(
       { branch_id: req.params.branchId, period: currentPeriod },
       { $push: { action_plans: { $each: [req.body.action_plan], $slice: -100 } } },
-      { new: true, upsert: false }
+      { returnDocument: 'after', upsert: false }
     );
     if (!kpi)
       return res.status(404).json({ success: false, error: 'لا توجد بيانات جودة لهذه الفترة' });

@@ -99,7 +99,7 @@ router.put(
           lastModifiedBy: req.user._id,
           lastModifiedDate: new Date(),
         },
-        { new: true }
+        { returnDocument: 'after' }
       );
       if (!plan) {
         return res.status(404).json({ success: false, message: 'خطة التدقيق غير موجودة' });
@@ -222,7 +222,7 @@ router.put(
           lastModifiedBy: req.user._id,
           lastModifiedDate: new Date(),
         },
-        { new: true }
+        { returnDocument: 'after' }
       );
       if (!audit) {
         return res.status(404).json({ success: false, message: 'عملية التدقيق غير موجودة' });
@@ -274,7 +274,7 @@ router.post(
           lastModifiedBy: req.user._id,
           lastModifiedDate: new Date(),
         },
-        { new: true }
+        { returnDocument: 'after' }
       );
       res.json({
         success: true,
@@ -372,7 +372,7 @@ router.put(
           lastModifiedBy: req.user._id,
           lastModifiedDate: new Date(),
         },
-        { new: true }
+        { returnDocument: 'after' }
       );
       if (!report) {
         return res.status(404).json({ success: false, message: 'التقرير غير موجود' });
@@ -409,7 +409,7 @@ router.put(
           lastModifiedBy: req.user._id,
           lastModifiedDate: new Date(),
         },
-        { new: true }
+        { returnDocument: 'after' }
       );
       res.json({
         success: true,
@@ -441,7 +441,7 @@ router.put(
           'closingInfo.closingComments': req.body.comments,
           lastModifiedDate: new Date(),
         },
-        { new: true }
+        { returnDocument: 'after' }
       );
       res.json({
         success: true,
@@ -547,7 +547,7 @@ router.put(
           lastModifiedBy: req.user._id,
           lastModifiedDate: new Date(),
         },
-        { new: true }
+        { returnDocument: 'after' }
       );
       if (!action) {
         return res.status(404).json({ success: false, message: 'الإجراء غير موجود' });
@@ -577,7 +577,7 @@ router.put(
           'implementation.status': req.body.status,
           lastModifiedDate: new Date(),
         },
-        { new: true }
+        { returnDocument: 'after' }
       );
       res.json({
         success: true,
@@ -610,7 +610,7 @@ router.put(
           overallStatus: req.body.isEffective ? 'effective' : 'ineffective',
           lastModifiedDate: new Date(),
         },
-        { new: true }
+        { returnDocument: 'after' }
       );
       res.json({
         success: true,
@@ -641,7 +641,7 @@ router.put(
           overallStatus: 'closed',
           lastModifiedDate: new Date(),
         },
-        { new: true }
+        { returnDocument: 'after' }
       );
       res.json({
         success: true,
@@ -737,7 +737,7 @@ router.put(
           lastModifiedBy: req.user._id,
           lastModifiedDate: new Date(),
         },
-        { new: true }
+        { returnDocument: 'after' }
       );
       if (!followUp) {
         return res.status(404).json({ success: false, message: 'المتابعة غير موجودة' });
@@ -772,7 +772,7 @@ router.put(
           'followUpInfo.status': req.body.allMet ? 'completed' : 'awaiting-evidence',
           lastModifiedDate: new Date(),
         },
-        { new: true }
+        { returnDocument: 'after' }
       );
       res.json({
         success: true,
@@ -806,7 +806,7 @@ router.put(
           statusOverall: req.body.approvalStatus === 'approved' ? 'closed' : 'pending',
           lastModifiedDate: new Date(),
         },
-        { new: true }
+        { returnDocument: 'after' }
       );
       res.json({
         success: true,

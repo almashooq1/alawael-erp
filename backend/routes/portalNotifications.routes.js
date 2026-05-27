@@ -218,10 +218,7 @@ router.put('/:id', requireAuth, requireBranchAccess, async (req, res) => {
     const doc = await PortalNotification.findOneAndUpdate(
       { _id: req.params.id, ...branchFilter(req) },
       stripUpdateMeta(req.body),
-      {
-        new: true,
-        runValidators: true,
-      }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!doc) return res.status(404).json({ success: false, message: 'Notification not found' });
     res.json({ success: true, data: doc });

@@ -124,7 +124,7 @@ router.post(
 router.put('/meetings/:id', authorize(['admin', 'manager']), async (req, res) => {
   try {
     const meeting = await MDTMeeting.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     }).lean();
     if (!meeting) return res.status(404).json({ success: false, message: 'الاجتماع غير موجود' });
@@ -423,10 +423,7 @@ router.put('/plans/:id', authorize(['admin', 'manager', 'therapist']), async (re
     const plan = await UnifiedRehabPlan.findByIdAndUpdate(
       req.params.id,
       stripUpdateMeta(req.body),
-      {
-        new: true,
-        runValidators: true,
-      }
+      { returnDocument: 'after', runValidators: true }
     ).lean();
     if (!plan) return res.status(404).json({ success: false, message: 'خطة التأهيل غير موجودة' });
     res.json({ success: true, data: plan, message: 'تم تحديث خطة التأهيل بنجاح' });
@@ -771,10 +768,7 @@ router.put('/referrals/:id', authorize(['admin', 'manager']), async (req, res) =
     const ticket = await ReferralTicket.findByIdAndUpdate(
       req.params.id,
       stripUpdateMeta(req.body),
-      {
-        new: true,
-        runValidators: true,
-      }
+      { returnDocument: 'after', runValidators: true }
     ).lean();
     if (!ticket)
       return res.status(404).json({ success: false, message: 'تذكرة الإحالة غير موجودة' });

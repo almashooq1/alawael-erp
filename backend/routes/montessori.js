@@ -79,7 +79,7 @@ router.put('/:id', authorizeRoles('مدير', 'معلم'), async (req, res, next
   const program = await MontessoriProgram.findByIdAndUpdate(
     req.params.id,
     { name, ageGroup, capacity, enrolled, instructor, status, schedule, description },
-    { new: true }
+    { returnDocument: 'after' }
   );
   if (!program) return res.status(404).json({ message: 'البرنامج غير موجود' });
   res.json(program);
@@ -127,7 +127,7 @@ router.put('/students/:id', authorizeRoles('مدير', 'معلم'), async (req, 
   const student = await Student.findByIdAndUpdate(
     req.params.id,
     { fullName, birthDate, gender, disabilityTypes, parent, plan, notes },
-    { new: true }
+    { returnDocument: 'after' }
   );
   if (!student) return res.status(404).json({ message: 'Not found' });
   res.json(student);
@@ -159,7 +159,7 @@ router.put('/plans/:id', authorizeRoles('مدير', 'معلم'), async (req, res
   const plan = await MontessoriPlan.findByIdAndUpdate(
     req.params.id,
     { student, goals },
-    { new: true }
+    { returnDocument: 'after' }
   );
   if (!plan) return res.status(404).json({ message: 'Not found' });
   res.json(plan);
@@ -195,7 +195,7 @@ router.put('/sessions/:id', authorizeRoles('مدير', 'معلم', 'أخصائي
   const session = await Session.findByIdAndUpdate(
     req.params.id,
     { student, plan: planRef, date, type, activities, attendance, notes },
-    { new: true }
+    { returnDocument: 'after' }
   );
   if (!session) return res.status(404).json({ message: 'Not found' });
   res.json(session);
@@ -231,7 +231,7 @@ router.put('/evaluations/:id', authorizeRoles('مدير', 'معلم', 'أخصا�
   const evaluation = await Evaluation.findByIdAndUpdate(
     req.params.id,
     { student, plan: planRef, date, area, skill, level, notes },
-    { new: true }
+    { returnDocument: 'after' }
   );
   if (!evaluation) return res.status(404).json({ message: 'Not found' });
   res.json(evaluation);
@@ -267,7 +267,7 @@ router.put('/activities/:id', authorizeRoles('مدير', 'معلم', 'أخصائ
   const activity = await Activity.findByIdAndUpdate(
     req.params.id,
     { name, description, area, media },
-    { new: true }
+    { returnDocument: 'after' }
   );
   if (!activity) return res.status(404).json({ message: 'Not found' });
   res.json(activity);
@@ -299,7 +299,7 @@ router.put('/team/:id', authorizeRoles('مدير'), async (req, res) => {
   const member = await TeamMember.findByIdAndUpdate(
     req.params.id,
     { name, role, contact },
-    { new: true }
+    { returnDocument: 'after' }
   );
   if (!member) return res.status(404).json({ message: 'Not found' });
   res.json(member);
@@ -331,7 +331,7 @@ router.put('/parents/:id', authorizeRoles('مدير'), async (req, res) => {
   const parent = await Parent.findByIdAndUpdate(
     req.params.id,
     { name, phone, email, students },
-    { new: true }
+    { returnDocument: 'after' }
   );
   if (!parent) return res.status(404).json({ message: 'Not found' });
   res.json(parent);
@@ -360,7 +360,11 @@ router.get('/media/:id', authorizeRoles('مدير', 'معلم', 'أخصائي', 
 });
 router.put('/media/:id', authorizeRoles('مدير', 'معلم', 'أخصائي'), async (req, res) => {
   const { url, type } = req.body;
-  const media = await MediaFile.findByIdAndUpdate(req.params.id, { url, type }, { new: true });
+  const media = await MediaFile.findByIdAndUpdate(
+    req.params.id,
+    { url, type },
+    { returnDocument: 'after' }
+  );
   if (!media) return res.status(404).json({ message: 'Not found' });
   res.json(media);
 });
@@ -395,7 +399,7 @@ router.put('/reports/:id', authorizeRoles('مدير', 'معلم', 'أخصائي'
   const report = await Report.findByIdAndUpdate(
     req.params.id,
     { student, plan: planRef, date, summary, recommendations },
-    { new: true }
+    { returnDocument: 'after' }
   );
   if (!report) return res.status(404).json({ message: 'Not found' });
   res.json(report);

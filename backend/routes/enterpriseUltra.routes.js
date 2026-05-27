@@ -122,7 +122,7 @@ router.put(
   requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await LegalCase.findByIdAndUpdate(req.params.id, sanitize(req.body), {
-      new: true,
+      returnDocument: 'after',
     });
     res.json({ success: true, data: item });
   })
@@ -137,7 +137,7 @@ router.patch(
     const item = await LegalCase.findByIdAndUpdate(
       req.params.id,
       { status: req.body.status },
-      { new: true }
+      { returnDocument: 'after' }
     );
     res.json({ success: true, data: item });
   })
@@ -203,7 +203,7 @@ router.put(
   requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await CourtHearing.findByIdAndUpdate(req.params.id, sanitize(req.body), {
-      new: true,
+      returnDocument: 'after',
     });
     res.json({ success: true, data: item });
   })
@@ -245,7 +245,7 @@ router.put(
   requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await PowerOfAttorney.findByIdAndUpdate(req.params.id, sanitize(req.body), {
-      new: true,
+      returnDocument: 'after',
     });
     res.json({ success: true, data: item });
   })
@@ -260,7 +260,7 @@ router.patch(
     const item = await PowerOfAttorney.findByIdAndUpdate(
       req.params.id,
       { status: 'revoked' },
-      { new: true }
+      { returnDocument: 'after' }
     );
     res.json({ success: true, data: item });
   })
@@ -302,7 +302,7 @@ router.put(
   requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await LegalOpinion.findByIdAndUpdate(req.params.id, sanitize(req.body), {
-      new: true,
+      returnDocument: 'after',
     });
     res.json({ success: true, data: item });
   })
@@ -317,7 +317,7 @@ router.patch(
     const item = await LegalOpinion.findByIdAndUpdate(
       req.params.id,
       { status: 'delivered', deliveryDate: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
     res.json({ success: true, data: item });
   })
@@ -359,7 +359,7 @@ router.put(
   requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await RegulatoryFiling.findByIdAndUpdate(req.params.id, sanitize(req.body), {
-      new: true,
+      returnDocument: 'after',
     });
     res.json({ success: true, data: item });
   })
@@ -431,7 +431,7 @@ router.put(
   requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await BoardMeeting.findByIdAndUpdate(req.params.id, sanitize(req.body), {
-      new: true,
+      returnDocument: 'after',
     });
     res.json({ success: true, data: item });
   })
@@ -446,7 +446,7 @@ router.patch(
     const item = await BoardMeeting.findByIdAndUpdate(
       req.params.id,
       { status: 'completed', ...sanitize(req.body) },
-      { new: true }
+      { returnDocument: 'after' }
     );
     res.json({ success: true, data: item });
   })
@@ -488,7 +488,7 @@ router.put(
   requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await BoardCommittee.findByIdAndUpdate(req.params.id, sanitize(req.body), {
-      new: true,
+      returnDocument: 'after',
     });
     res.json({ success: true, data: item });
   })
@@ -530,7 +530,7 @@ router.put(
   requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await BoardResolution.findByIdAndUpdate(req.params.id, sanitize(req.body), {
-      new: true,
+      returnDocument: 'after',
     });
     res.json({ success: true, data: item });
   })
@@ -544,7 +544,9 @@ router.patch(
   asyncHandler(async (req, res) => {
     const { vote } = req.body; // 'for', 'against', 'abstain'
     const update = { $inc: { [`votes.${vote}`]: 1 } };
-    const item = await BoardResolution.findByIdAndUpdate(req.params.id, update, { new: true });
+    const item = await BoardResolution.findByIdAndUpdate(req.params.id, update, {
+      returnDocument: 'after',
+    });
     res.json({ success: true, data: item });
   })
 );
@@ -558,7 +560,7 @@ router.patch(
     const item = await BoardResolution.findByIdAndUpdate(
       req.params.id,
       { implementationStatus: req.body.status || 'in_progress' },
-      { new: true }
+      { returnDocument: 'after' }
     );
     res.json({ success: true, data: item });
   })
@@ -600,7 +602,7 @@ router.put(
   requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await GovernancePolicy.findByIdAndUpdate(req.params.id, sanitize(req.body), {
-      new: true,
+      returnDocument: 'after',
     });
     res.json({ success: true, data: item });
   })
@@ -622,7 +624,7 @@ router.post(
           },
         },
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     res.json({ success: true, data: item });
   })
@@ -737,7 +739,9 @@ router.put(
   requireBranchAccess,
   requireBranchAccess,
   asyncHandler(async (req, res) => {
-    const item = await BCPPlan.findByIdAndUpdate(req.params.id, sanitize(req.body), { new: true });
+    const item = await BCPPlan.findByIdAndUpdate(req.params.id, sanitize(req.body), {
+      returnDocument: 'after',
+    });
     res.json({ success: true, data: item });
   })
 );
@@ -751,7 +755,7 @@ router.patch(
     const item = await BCPPlan.findByIdAndUpdate(
       req.params.id,
       { status: 'active' },
-      { new: true }
+      { returnDocument: 'after' }
     );
     res.json({ success: true, data: item });
   })
@@ -793,7 +797,7 @@ router.put(
   requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await BusinessImpactAnalysis.findByIdAndUpdate(req.params.id, sanitize(req.body), {
-      new: true,
+      returnDocument: 'after',
     });
     res.json({ success: true, data: item });
   })
@@ -846,7 +850,7 @@ router.put(
   requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await CrisisIncident.findByIdAndUpdate(req.params.id, sanitize(req.body), {
-      new: true,
+      returnDocument: 'after',
     });
     res.json({ success: true, data: item });
   })
@@ -861,7 +865,7 @@ router.patch(
     const item = await CrisisIncident.findByIdAndUpdate(
       req.params.id,
       { $push: { escalationPath: { $each: [req.body], $slice: -100 } } },
-      { new: true }
+      { returnDocument: 'after' }
     );
     res.json({ success: true, data: item });
   })
@@ -876,7 +880,7 @@ router.patch(
     const item = await CrisisIncident.findByIdAndUpdate(
       req.params.id,
       { status: 'resolved', resolvedAt: new Date(), ...sanitize(req.body) },
-      { new: true }
+      { returnDocument: 'after' }
     );
     res.json({ success: true, data: item });
   })
@@ -917,7 +921,9 @@ router.put(
   requireBranchAccess,
   requireBranchAccess,
   asyncHandler(async (req, res) => {
-    const item = await BCDrill.findByIdAndUpdate(req.params.id, sanitize(req.body), { new: true });
+    const item = await BCDrill.findByIdAndUpdate(req.params.id, sanitize(req.body), {
+      returnDocument: 'after',
+    });
     res.json({ success: true, data: item });
   })
 );
@@ -931,7 +937,7 @@ router.patch(
     const item = await BCDrill.findByIdAndUpdate(
       req.params.id,
       { overallScore: req.body.score, status: 'completed' },
-      { new: true }
+      { returnDocument: 'after' }
     );
     res.json({ success: true, data: item });
   })
@@ -973,7 +979,7 @@ router.put(
   requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await DisasterRecoveryPlan.findByIdAndUpdate(req.params.id, sanitize(req.body), {
-      new: true,
+      returnDocument: 'after',
     });
     res.json({ success: true, data: item });
   })
@@ -1061,7 +1067,9 @@ router.put(
   requireBranchAccess,
   requireBranchAccess,
   asyncHandler(async (req, res) => {
-    const item = await CXSurvey.findByIdAndUpdate(req.params.id, sanitize(req.body), { new: true });
+    const item = await CXSurvey.findByIdAndUpdate(req.params.id, sanitize(req.body), {
+      returnDocument: 'after',
+    });
     res.json({ success: true, data: item });
   })
 );
@@ -1075,7 +1083,7 @@ router.patch(
     const item = await CXSurvey.findByIdAndUpdate(
       req.params.id,
       { status: 'active' },
-      { new: true }
+      { returnDocument: 'after' }
     );
     res.json({ success: true, data: item });
   })
@@ -1117,7 +1125,7 @@ router.put(
   requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await CXFeedback.findByIdAndUpdate(req.params.id, sanitize(req.body), {
-      new: true,
+      returnDocument: 'after',
     });
     res.json({ success: true, data: item });
   })
@@ -1191,7 +1199,7 @@ router.put(
   requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await CXComplaint.findByIdAndUpdate(req.params.id, sanitize(req.body), {
-      new: true,
+      returnDocument: 'after',
     });
     res.json({ success: true, data: item });
   })
@@ -1212,7 +1220,7 @@ router.patch(
           escalationHistory: { $each: [{ ...sanitize(req.body), date: new Date() }], $slice: -200 },
         },
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     res.json({ success: true, data: item });
   })
@@ -1227,7 +1235,7 @@ router.patch(
     const item = await CXComplaint.findByIdAndUpdate(
       req.params.id,
       { status: 'resolved', resolution: req.body.resolution, 'sla.resolvedAt': new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
     res.json({ success: true, data: item });
   })
@@ -1269,7 +1277,7 @@ router.put(
   requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await CustomerJourney.findByIdAndUpdate(req.params.id, sanitize(req.body), {
-      new: true,
+      returnDocument: 'after',
     });
     res.json({ success: true, data: item });
   })
@@ -1311,7 +1319,7 @@ router.put(
   requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await ServiceBenchmark.findByIdAndUpdate(req.params.id, sanitize(req.body), {
-      new: true,
+      returnDocument: 'after',
     });
     res.json({ success: true, data: item });
   })
@@ -1390,7 +1398,7 @@ router.put(
   requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await EnergyReading.findByIdAndUpdate(req.params.id, sanitize(req.body), {
-      new: true,
+      returnDocument: 'after',
     });
     res.json({ success: true, data: item });
   })
@@ -1452,7 +1460,7 @@ router.put(
   requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await CarbonFootprint.findByIdAndUpdate(req.params.id, sanitize(req.body), {
-      new: true,
+      returnDocument: 'after',
     });
     res.json({ success: true, data: item });
   })
@@ -1494,7 +1502,7 @@ router.put(
   requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await WasteRecord.findByIdAndUpdate(req.params.id, sanitize(req.body), {
-      new: true,
+      returnDocument: 'after',
     });
     res.json({ success: true, data: item });
   })
@@ -1565,7 +1573,7 @@ router.put(
   requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await ESGReport.findByIdAndUpdate(req.params.id, sanitize(req.body), {
-      new: true,
+      returnDocument: 'after',
     });
     res.json({ success: true, data: item });
   })
@@ -1607,7 +1615,7 @@ router.put(
   requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await SustainabilityGoal.findByIdAndUpdate(req.params.id, sanitize(req.body), {
-      new: true,
+      returnDocument: 'after',
     });
     res.json({ success: true, data: item });
   })
@@ -1626,7 +1634,7 @@ router.patch(
         'current.date': new Date(),
         progressPercentage: req.body.progress,
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     res.json({ success: true, data: item });
   })
@@ -1708,7 +1716,7 @@ router.put(
   requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await MaturityAssessment.findByIdAndUpdate(req.params.id, sanitize(req.body), {
-      new: true,
+      returnDocument: 'after',
     });
     res.json({ success: true, data: item });
   })
@@ -1750,7 +1758,7 @@ router.put(
   requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await InnovationIdea.findByIdAndUpdate(req.params.id, sanitize(req.body), {
-      new: true,
+      returnDocument: 'after',
     });
     res.json({ success: true, data: item });
   })
@@ -1767,7 +1775,9 @@ router.post(
       $inc: { [`votes.${direction}`]: 1 },
       $addToSet: { 'votes.voters': req.user._id },
     };
-    const item = await InnovationIdea.findByIdAndUpdate(req.params.id, update, { new: true });
+    const item = await InnovationIdea.findByIdAndUpdate(req.params.id, update, {
+      returnDocument: 'after',
+    });
     res.json({ success: true, data: item });
   })
 );
@@ -1781,7 +1791,7 @@ router.patch(
     const item = await InnovationIdea.findByIdAndUpdate(
       req.params.id,
       { status: req.body.status },
-      { new: true }
+      { returnDocument: 'after' }
     );
     res.json({ success: true, data: item });
   })
@@ -1834,7 +1844,7 @@ router.put(
   requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await InnovationProject.findByIdAndUpdate(req.params.id, sanitize(req.body), {
-      new: true,
+      returnDocument: 'after',
     });
     res.json({ success: true, data: item });
   })
@@ -1849,7 +1859,7 @@ router.patch(
     const item = await InnovationProject.findByIdAndUpdate(
       req.params.id,
       { stage: req.body.stage, status: req.body.status || 'in_progress' },
-      { new: true }
+      { returnDocument: 'after' }
     );
     res.json({ success: true, data: item });
   })
@@ -1892,7 +1902,7 @@ router.put(
   requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await TechRadarEntry.findByIdAndUpdate(req.params.id, sanitize(req.body), {
-      new: true,
+      returnDocument: 'after',
     });
     res.json({ success: true, data: item });
   })
@@ -1913,7 +1923,7 @@ router.patch(
         status: 'moved',
         movedDate: new Date(),
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     res.json({ success: true, data: item });
   })
@@ -1955,7 +1965,7 @@ router.put(
   requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await TransformationKPI.findByIdAndUpdate(req.params.id, sanitize(req.body), {
-      new: true,
+      returnDocument: 'after',
     });
     res.json({ success: true, data: item });
   })
@@ -1976,7 +1986,7 @@ router.patch(
           historicalData: { $each: [{ date: new Date(), value: req.body.actual }], $slice: -1000 },
         },
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     res.json({ success: true, data: item });
   })

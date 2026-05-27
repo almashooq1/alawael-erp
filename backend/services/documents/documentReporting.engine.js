@@ -320,7 +320,7 @@ class DocumentReportingEngine extends EventEmitter {
     const template = await ReportTemplate.findByIdAndUpdate(
       templateId,
       { $set: updates },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     if (!template) return { success: false, error: 'القالب غير موجود' };
     return { success: true, template };
@@ -555,7 +555,7 @@ th,td{border:1px solid #ddd;padding:8px;text-align:right}th{background:#3b82f6;c
           },
         },
       },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     if (!template) return { success: false, error: 'القالب غير موجود' };
     return { success: true, template };

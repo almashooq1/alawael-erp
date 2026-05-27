@@ -125,7 +125,7 @@ class CarePlansService extends BaseService {
     const plan = await UnifiedCarePlan.findByIdAndUpdate(
       id,
       { $set: data },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     ).lean();
 
     if (!plan) {
@@ -152,7 +152,7 @@ class CarePlansService extends BaseService {
     const plan = await UnifiedCarePlan.findByIdAndUpdate(
       id,
       { $set: { status: 'active', activatedDate: new Date() } },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
 
     if (!plan) {
@@ -184,7 +184,7 @@ class CarePlansService extends BaseService {
     const plan = await UnifiedCarePlan.findByIdAndUpdate(
       id,
       { $set: { status: 'completed', completedDate: new Date(), summary, outcomeRating } },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
 
     if (!plan) {
@@ -216,7 +216,7 @@ class CarePlansService extends BaseService {
     const plan = await UnifiedCarePlan.findByIdAndUpdate(
       id,
       { $push: { goals: goal } },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
 
     if (!plan) {

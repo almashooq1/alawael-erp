@@ -83,7 +83,7 @@ router.post('/', authorize(['admin']), async (req, res) => {
 router.put('/:id', validateObjectId('id'), authorize(['admin']), async (req, res) => {
   try {
     const teacher = await Teacher.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     }).populate('subjects', 'name code');
     if (!teacher) return res.status(404).json({ success: false, message: 'المعلم غير موجود' });

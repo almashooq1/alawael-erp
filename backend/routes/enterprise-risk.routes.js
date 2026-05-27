@@ -142,7 +142,7 @@ router.put(
     try {
       const Risk = safeModel('EnterpriseRisk');
       const doc = await Risk.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-        new: true,
+        returnDocument: 'after',
         runValidators: true,
       });
       if (!doc) return res.status(404).json({ success: false, message: 'المخاطرة غير موجودة' });
@@ -235,7 +235,7 @@ router.put(
     try {
       const Assessment = safeModel('RiskAssessment');
       const doc = await Assessment.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-        new: true,
+        returnDocument: 'after',
       });
       if (!doc) return res.status(404).json({ success: false, message: 'التقييم غير موجود' });
       res.json({ success: true, data: doc });

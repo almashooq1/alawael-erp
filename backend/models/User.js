@@ -348,7 +348,7 @@ userSchema.methods.incLoginAttempts = async function () {
         },
       },
     ],
-    { new: true, projection: { failedLoginAttempts: 1, lockUntil: 1 } }
+    { returnDocument: 'after', projection: { failedLoginAttempts: 1, lockUntil: 1 } }
   );
 
   if (!updated) return null;

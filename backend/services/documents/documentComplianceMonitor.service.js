@@ -470,7 +470,7 @@ class DocumentComplianceMonitorService {
           notes: data.notes,
         },
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!alert) return { success: false, error: 'التنبيه غير موجود' };
     return { success: true, alert };
@@ -480,7 +480,7 @@ class DocumentComplianceMonitorService {
     const alert = await ComplianceAlert.findByIdAndUpdate(
       alertId,
       { $set: { status: 'dismissed', notes: data.notes } },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!alert) return { success: false, error: 'التنبيه غير موجود' };
     return { success: true, alert };
@@ -511,7 +511,7 @@ class DocumentComplianceMonitorService {
     const rule = await ComplianceRule.findByIdAndUpdate(
       ruleId,
       { $set: updates },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     if (!rule) return { success: false, error: 'القاعدة غير موجودة' };
     return { success: true, rule };

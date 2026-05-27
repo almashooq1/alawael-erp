@@ -55,7 +55,7 @@ router.put('/:id', authorize('admin', 'manager'), async (req, res) => {
   try {
     const Cargo = require('../models/Fleet/Cargo');
     const cargo = await Cargo.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!cargo) return res.status(404).json({ success: false, message: 'Cargo not found' });
@@ -81,7 +81,7 @@ router.patch(
           deliveryNotes: notes,
           deliveredBy: req.user._id,
         },
-        { new: true }
+        { returnDocument: 'after' }
       );
       if (!cargo) return res.status(404).json({ success: false, message: 'Cargo not found' });
       res.json({ success: true, data: cargo });

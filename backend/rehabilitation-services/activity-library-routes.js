@@ -184,7 +184,9 @@ router.patch('/activities/:id', async (req, res) => {
     for (const k of allowed) {
       if (req.body[k] !== undefined) updates[k] = req.body[k];
     }
-    const activity = await Activity.findByIdAndUpdate(req.params.id, updates, { new: true });
+    const activity = await Activity.findByIdAndUpdate(req.params.id, updates, {
+      returnDocument: 'after',
+    });
     if (!activity) return res.status(404).json({ success: false, error: 'النشاط غير موجود' });
     res.json({ success: true, message: 'تم تحديث النشاط', data: activity });
   } catch (err) {
@@ -199,7 +201,7 @@ router.post('/activities/:id/use', async (req, res) => {
     const activity = await Activity.findByIdAndUpdate(
       req.params.id,
       { $inc: inc },
-      { new: true, projection: { usage_count: 1, name_ar: 1 } }
+      { returnDocument: 'after', projection: { usage_count: 1, name_ar: 1 } }
     );
     if (!activity) return res.status(404).json({ success: false, error: 'النشاط غير موجود' });
     res.json({ success: true, data: activity });

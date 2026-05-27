@@ -59,7 +59,7 @@ router.put('/templates/:id', authenticate, requireBranchAccess, async (req, res)
     const template = await NotificationTemplate.findByIdAndUpdate(
       req.params.id,
       { ...req.body, updatedBy: req.user._id },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!template) return res.status(404).json({ success: false, message: 'القالب غير موجود' });
     res.json({ success: true, data: template });
@@ -140,7 +140,7 @@ router.put('/preferences/:category', authenticate, requireBranchAccess, async (r
     const pref = await NotificationPreference.findOneAndUpdate(
       { userId: req.user._id, category: req.params.category },
       { ...req.body, userId: req.user._id, category: req.params.category },
-      { upsert: true, new: true }
+      { upsert: true, returnDocument: 'after' }
     );
     res.json({ success: true, data: pref });
   } catch (err) {
@@ -198,7 +198,7 @@ router.post('/broadcasts/:id/approve', authenticate, requireBranchAccess, async 
     const broadcast = await BroadcastMessage.findByIdAndUpdate(
       req.params.id,
       { status: 'approved', approvedBy: req.user._id, approvedAt: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
     res.json({ success: true, data: broadcast });
   } catch (err) {
@@ -294,7 +294,7 @@ router.put('/escalations/:id/acknowledge', authenticate, requireBranchAccess, as
     const escalation = await Escalation.findByIdAndUpdate(
       req.params.id,
       { status: 'acknowledged', acknowledgedAt: new Date(), acknowledgedBy: req.user._id },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!escalation) return res.status(404).json({ success: false, message: 'التصعيد غير موجود' });
     res.json({ success: true, data: escalation });
@@ -314,7 +314,7 @@ router.put('/escalations/:id/resolve', authenticate, requireBranchAccess, async 
         resolvedBy: req.user._id,
         resolutionNotes: req.body.notes,
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     res.json({ success: true, data: escalation });
   } catch (err) {

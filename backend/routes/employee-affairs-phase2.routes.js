@@ -58,7 +58,7 @@ router.patch('/disciplinary/:id/resolve', authorize('admin', 'hr_manager'), asyn
         resolvedAt: new Date(),
         resolvedBy: req.user._id,
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!action) return res.status(404).json({ success: false, message: 'Action not found' });
     res.json({ success: true, data: action });
@@ -112,7 +112,7 @@ router.patch('/grievances/:id/respond', authorize('admin', 'hr_manager'), async 
         respondedAt: new Date(),
         respondedBy: req.user._id,
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!grievance) return res.status(404).json({ success: false, message: 'Grievance not found' });
     res.json({ success: true, data: grievance });

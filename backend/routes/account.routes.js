@@ -41,7 +41,7 @@ router.put('/security', async (req, res) => {
     const updates = {};
     if (req.body.twoFactorEnabled !== undefined)
       updates.twoFactorEnabled = req.body.twoFactorEnabled;
-    const user = await User.findByIdAndUpdate(req.user?.id, updates, { new: true })
+    const user = await User.findByIdAndUpdate(req.user?.id, updates, { returnDocument: 'after' })
       .select('-password')
       .lean();
     res.json({ success: true, data: user, message: 'تم تحديث إعدادات الأمان' });

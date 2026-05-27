@@ -170,7 +170,7 @@ recordGrantSchema.statics.revoke = async function revokeGrant({ grantId, revoked
         revokeReason: (reason || '').slice(0, 300),
       },
     },
-    { new: true }
+    { returnDocument: 'after' }
   ).lean();
 };
 

@@ -30,7 +30,7 @@ const TTL_SECONDS = 30 * 24 * 60 * 60;
 
 const HikvisionAnomalySnapshotSchema = new mongoose.Schema(
   {
-    recordedAt: { type: Date, required: true, default: Date.now, index: true },
+    recordedAt: { type: Date, required: true, default: Date.now },
 
     // Source: 'scheduler' (cron job) | 'manual' (operator) | 'startup'
     source: {

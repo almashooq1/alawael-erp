@@ -659,7 +659,11 @@ class DocumentBackupService {
   }
 
   async updatePolicy(policyId, data) {
-    const policy = await BackupPolicy.findByIdAndUpdate(policyId, { $set: data }, { new: true });
+    const policy = await BackupPolicy.findByIdAndUpdate(
+      policyId,
+      { $set: data },
+      { returnDocument: 'after' }
+    );
     if (!policy) throw new Error('السياسة غير موجودة');
     return { success: true, policy };
   }

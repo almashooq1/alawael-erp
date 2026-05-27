@@ -221,7 +221,7 @@ router.put('/kpis/:code', async (req, res) => {
       return res.status(501).json({ success: false, message: 'KPI model not available' });
     }
     const kpi = await BIKPI.findOneAndUpdate({ code: req.params.code }, stripUpdateMeta(req.body), {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!kpi) {
@@ -724,7 +724,7 @@ router.put('/reports/:id', async (req, res) => {
         scheduleConfig: req.body.scheduleConfig,
         $inc: { version: 1 },
       },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!report) {
       return res.status(404).json({ success: false, message: 'التقرير غير موجود أو غير مصرح' });
@@ -744,7 +744,7 @@ router.delete('/reports/:id', async (req, res) => {
     const report = await BIReport.findOneAndUpdate(
       { _id: req.params.id, owner: req.user._id },
       { status: 'archived' },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!report) {
       return res.status(404).json({ success: false, message: 'التقرير غير موجود أو غير مصرح' });

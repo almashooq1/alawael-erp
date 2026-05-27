@@ -308,7 +308,7 @@ router.put('/messages/:id/read', async (req, res) => {
     const updated = await ParentMessage.findOneAndUpdate(
       { _id: req.params.id, guardianId: guardian._id },
       { $set: { isRead: true, readAt: new Date() } },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
 
     if (!updated) return res.status(404).json({ success: false, message: 'الرسالة غير موجودة' });
@@ -367,7 +367,7 @@ router.delete('/devices/:token', async (req, res) => {
     const result = await ParentDevice.findOneAndUpdate(
       { deviceToken: req.params.token, guardianId: guardian._id },
       { $set: { isActive: false } },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
 
     if (!result) return res.status(404).json({ success: false, message: 'الجهاز غير موجود' });

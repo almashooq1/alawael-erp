@@ -877,7 +877,7 @@ class DocumentAIAssistantService {
     const interaction = await AIInteraction.findByIdAndUpdate(
       interactionId,
       { $set: { feedback } },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!interaction) return { success: false, error: 'التفاعل غير موجود' };
     return { success: true };
@@ -917,7 +917,7 @@ class DocumentAIAssistantService {
     const item = await AIKnowledge.findByIdAndUpdate(
       knowledgeId,
       { $set: updates },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     this._knowledgeCache = null;
     if (!item) return { success: false, error: 'العنصر غير موجود' };

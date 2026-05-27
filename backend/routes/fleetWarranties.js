@@ -59,7 +59,7 @@ router.put('/:id', authorize('admin', 'manager', 'fleet_officer'), async (req, r
   try {
     const FleetWarranty = require('../models/Fleet/FleetWarranty');
     const warranty = await FleetWarranty.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!warranty) return res.status(404).json({ success: false, message: 'Warranty not found' });
@@ -82,7 +82,7 @@ router.post('/:id/claim', async (req, res) => {
           claims: { description, claimDate: claimDate || new Date(), claimedBy: req.user._id },
         },
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!warranty) return res.status(404).json({ success: false, message: 'Warranty not found' });
     res.json({ success: true, data: warranty });

@@ -407,7 +407,7 @@ router.post(
       }
 
       // Atomic increment + timestamp — avoids the W494-class concurrent-save bug.
-      // `returnDocument:'after'` is the Mongoose 9+ form (legacy `{new:true}` is deprecated).
+      // returnDocument:'after' is the Mongoose 9+ replacement for the legacy new-true option.
       const updated = await Book.findByIdAndUpdate(
         req.params.id,
         { $inc: { familyViewCount: 1 }, $set: { lastViewedAt: new Date() } },

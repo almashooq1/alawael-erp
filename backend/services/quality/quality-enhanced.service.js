@@ -72,7 +72,7 @@ class QualityEnhancedService {
         rootCause,
         status: 'action_plan',
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 
@@ -80,7 +80,7 @@ class QualityEnhancedService {
     return Incident.findByIdAndUpdate(
       incidentId,
       { status: 'closed', closureNotes: notes, closedBy, closedAt: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 
@@ -127,7 +127,7 @@ class QualityEnhancedService {
         satisfactionRating,
         'slaTracking.resolvedAt': new Date(),
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 
@@ -226,7 +226,7 @@ class QualityEnhancedService {
         status: 'completed',
         actualDate: new Date(),
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     // W381: emit canonical contract event. Envelope per QUALITY_EVENTS.AUDIT_COMPLETED.
@@ -306,7 +306,7 @@ class QualityEnhancedService {
       update.status = 'completed';
       update.actualEndDate = new Date();
     }
-    return ImprovementProject.findByIdAndUpdate(projectId, update, { new: true });
+    return ImprovementProject.findByIdAndUpdate(projectId, update, { returnDocument: 'after' });
   }
 
   // ============================================================

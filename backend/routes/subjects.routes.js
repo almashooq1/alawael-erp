@@ -95,7 +95,7 @@ router.post('/', authorize(['admin']), async (req, res) => {
 router.put('/:id', validateObjectId('id'), authorize(['admin']), async (req, res) => {
   try {
     const subject = await Subject.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!subject) return res.status(404).json({ success: false, message: 'المادة غير موجودة' });

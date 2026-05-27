@@ -203,7 +203,7 @@ async function acknowledge(alertId, userId) {
   return CctvAlert.findByIdAndUpdate(
     alertId,
     { status: 'acknowledged', acknowledgedBy: userId, acknowledgedAt: new Date() },
-    { new: true }
+    { returnDocument: 'after' }
   );
 }
 
@@ -211,7 +211,7 @@ async function resolve(alertId, { userId, resolution, status = 'resolved' }) {
   return CctvAlert.findByIdAndUpdate(
     alertId,
     { status, resolvedBy: userId, resolvedAt: new Date(), resolution },
-    { new: true }
+    { returnDocument: 'after' }
   );
 }
 
@@ -224,7 +224,7 @@ async function escalate(alertId, userId, incidentId) {
       resolvedBy: userId,
       resolvedAt: new Date(),
     },
-    { new: true }
+    { returnDocument: 'after' }
   );
 }
 

@@ -74,7 +74,7 @@ router.put('/preferences', async (req, res) => {
     const prefs = await NotifPref.findOneAndUpdate(
       { userId: req.user._id },
       { ...req.body, userId: req.user._id, updatedAt: new Date() },
-      { upsert: true, new: true }
+      { upsert: true, returnDocument: 'after' }
     );
     res.json({ success: true, data: prefs });
   } catch (err) {
@@ -133,7 +133,7 @@ router.patch('/inbox/:id/read', async (req, res) => {
     const doc = await Notif.findOneAndUpdate(
       { _id: req.params.id, userId: req.user._id },
       { isRead: true, readAt: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!doc) return res.status(404).json({ success: false, message: 'Notification not found' });
     res.json({ success: true, data: doc });
@@ -225,7 +225,7 @@ router.put('/templates/:id', requireRole('admin', 'manager'), async (req, res) =
     const doc = await NotifTmpl.findOneAndUpdate(
       { _id: req.params.id, branchId: req.user.branchId },
       { ...req.body, updatedBy: req.user._id },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!doc) return res.status(404).json({ success: false, message: 'Template not found' });
     res.json({ success: true, data: doc });
@@ -321,7 +321,7 @@ router.put('/rules/:id', requireRole('admin', 'manager'), async (req, res) => {
     const doc = await SmartNotif.findOneAndUpdate(
       { _id: req.params.id, branchId: req.user.branchId, recordType: 'rule' },
       req.body,
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!doc) return res.status(404).json({ success: false, message: 'Rule not found' });
     res.json({ success: true, data: doc });

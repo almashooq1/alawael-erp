@@ -113,7 +113,7 @@ router.put('/:id', requireRole('admin', 'manager', 'receptionist'), async (req, 
     const doc = await Beneficiary.findOneAndUpdate(
       { _id: req.params.id, branchId: req.user.branchId },
       { ...req.body, updatedBy: req.user._id },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!doc) return res.status(404).json({ success: false, message: 'Student not found' });
     res.json({ success: true, data: doc });
@@ -142,7 +142,7 @@ router.patch('/:id/status', requireRole('admin', 'manager'), async (req, res) =>
         statusChangedAt: new Date(),
         statusChangedBy: req.user._id,
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!doc) return res.status(404).json({ success: false, message: 'Student not found' });
     res.json({ success: true, data: doc });

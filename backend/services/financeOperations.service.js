@@ -182,7 +182,7 @@ class FinanceOperationsService {
     delete data._id;
     data.updatedBy = userId;
     const doc = await JournalEntry.findByIdAndUpdate(id, data, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     }).lean();
     if (!doc) throw Object.assign(new Error('القيد غير موجود'), { status: 404 });
@@ -225,7 +225,7 @@ class FinanceOperationsService {
     delete data._id;
     data.updatedBy = userId;
     const doc = await PettyCash.findByIdAndUpdate(id, data, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     }).lean();
     if (!doc) throw Object.assign(new Error('سجل الصندوق الصغير غير موجود'), { status: 404 });
@@ -270,7 +270,10 @@ class FinanceOperationsService {
   async updateCheque(id, data, userId) {
     delete data._id;
     data.updatedBy = userId;
-    const doc = await Cheque.findByIdAndUpdate(id, data, { new: true, runValidators: true }).lean();
+    const doc = await Cheque.findByIdAndUpdate(id, data, {
+      returnDocument: 'after',
+      runValidators: true,
+    }).lean();
     if (!doc) throw Object.assign(new Error('الشيك غير موجود'), { status: 404 });
     return doc;
   }
@@ -308,7 +311,7 @@ class FinanceOperationsService {
     delete data._id;
     data.updatedBy = userId;
     const doc = await BankReconciliation.findByIdAndUpdate(id, data, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     }).lean();
     if (!doc) throw Object.assign(new Error('المطابقة البنكية غير موجودة'), { status: 404 });
@@ -345,7 +348,7 @@ class FinanceOperationsService {
     delete data._id;
     data.updatedBy = userId;
     const doc = await CreditNote.findByIdAndUpdate(id, data, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     }).lean();
     if (!doc) throw Object.assign(new Error('إشعار الائتمان غير موجود'), { status: 404 });

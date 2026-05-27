@@ -148,10 +148,7 @@ router.put('/:id', authorize(['admin', 'manager']), async (req, res) => {
     const contract = await Contract.findByIdAndUpdate(
       req.params.id,
       { contractTitle, contractType, supplier, startDate, endDate, value, status, terms, notes },
-      {
-        new: true,
-        runValidators: true,
-      }
+      { returnDocument: 'after', runValidators: true }
     ).lean();
     if (!contract) return res.status(404).json({ success: false, message: 'العقد غير موجود' });
     res.json({ success: true, data: contract, message: 'تم تحديث العقد بنجاح' });

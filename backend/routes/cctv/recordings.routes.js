@@ -41,7 +41,7 @@ router.post(
     const r = await CctvRecording.findByIdAndUpdate(
       req.params.id,
       { legalHold: true },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!r) return res.status(404).json({ success: false, message: 'NOT_FOUND' });
     res.json({ success: true, data: r });
@@ -52,7 +52,7 @@ router.delete('/:id/legal-hold', requireRole(['admin', 'dpo']), async (req, res)
   const r = await CctvRecording.findByIdAndUpdate(
     req.params.id,
     { legalHold: false },
-    { new: true }
+    { returnDocument: 'after' }
   );
   if (!r) return res.status(404).json({ success: false, message: 'NOT_FOUND' });
   res.json({ success: true, data: r });

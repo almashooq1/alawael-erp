@@ -120,7 +120,7 @@ class KnowledgeCenterService {
     const article = await KnowledgeArticle.findByIdAndUpdate(
       id,
       { $inc: { views: 1 } },
-      { new: true }
+      { returnDocument: 'after' }
     )
       .populate('author', 'name fullName email')
       .populate('lastModifiedBy', 'name fullName')
@@ -232,7 +232,7 @@ class KnowledgeCenterService {
     if (updates.keywords) updates.keywords = updates.keywords.map(k => k.toLowerCase());
 
     const article = await KnowledgeArticle.findByIdAndUpdate(id, updates, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     })
       .populate('author', 'name fullName')
@@ -306,7 +306,7 @@ class KnowledgeCenterService {
           },
         },
       },
-      { new: true }
+      { returnDocument: 'after' }
     )
       .populate('comments.author', 'name fullName')
       .lean();
@@ -337,7 +337,7 @@ class KnowledgeCenterService {
     await KnowledgeRating.findOneAndUpdate(
       { article: articleId, user: userId },
       { rating, feedback: feedback || '', helpful: rating >= 4 },
-      { upsert: true, new: true }
+      { upsert: true, returnDocument: 'after' }
     );
 
     // Recalculate aggregate
@@ -422,7 +422,7 @@ class KnowledgeCenterService {
 
   async updateCategory(id, data) {
     const category = await KnowledgeCategory.findByIdAndUpdate(id, data, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!category) throw new Error('التصنيف غير موجود');

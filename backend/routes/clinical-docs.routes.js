@@ -278,7 +278,7 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
     body.lastModifiedBy = req.user?.id;
     body.lastModified = new Date();
     const doc = await Document.findByIdAndUpdate(req.params.id, body, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     }).lean();
     if (!doc) return res.status(404).json({ success: false, message: 'غير موجود' });
@@ -320,7 +320,7 @@ router.post('/:id/share', requireRole(WRITE_ROLES), async (req, res) => {
           sharedWith: { userId: targetUserId, name, email, permission, sharedAt: new Date() },
         },
       },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     if (!doc) return res.status(404).json({ success: false, message: 'غير موجود' });
     logger.info('[clinical-docs] shared', {
@@ -369,7 +369,7 @@ router.delete('/:id', requireRole(WRITE_ROLES), async (req, res) => {
     const doc = await Document.findByIdAndUpdate(
       req.params.id,
       { isArchived: true, archivedAt: new Date(), archivedBy: req.user?.id },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     if (!doc) return res.status(404).json({ success: false, message: 'غير موجود' });
     res.json({ success: true, message: 'تمت الأرشفة' });

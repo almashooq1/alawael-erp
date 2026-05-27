@@ -177,7 +177,7 @@ class DocumentFavoritesService {
           },
           $setOnInsert: { userId, documentId, type: data.type || 'bookmark' },
         },
-        { upsert: true, new: true }
+        { upsert: true, returnDocument: 'after' }
       );
 
       return { success: true, bookmark: this._formatBookmark(bookmark.toObject()) };

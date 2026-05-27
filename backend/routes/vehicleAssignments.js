@@ -76,7 +76,7 @@ router.patch('/:id/end', authorize('admin', 'manager', 'fleet_officer'), async (
     const assignment = await VehicleAssignment.findByIdAndUpdate(
       req.params.id,
       { status: 'ended', endedAt: new Date(), notes, endedBy: req.user._id },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!assignment)
       return res.status(404).json({ success: false, message: 'Assignment not found' });

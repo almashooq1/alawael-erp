@@ -382,7 +382,11 @@ class DocumentQRCodeService extends EventEmitter {
 
   /* ── Revoke code ──────────────────────────────────────────── */
   async revoke(codeId, userId) {
-    const qr = await QRCode.findByIdAndUpdate(codeId, { status: 'revoked' }, { new: true });
+    const qr = await QRCode.findByIdAndUpdate(
+      codeId,
+      { status: 'revoked' },
+      { returnDocument: 'after' }
+    );
     if (!qr) return { success: false, error: 'الكود غير موجود' };
     this.emit('revoked', { code: qr.code, documentId: qr.documentId, userId });
     return { success: true, qrCode: qr };

@@ -265,11 +265,11 @@ router.put('/', requireAdmin, async (req, res) => {
           await BranchSetting.findOneAndUpdate(
             { branchId, key },
             { branchId, key, value },
-            { upsert: true, new: true }
+            { upsert: true, returnDocument: 'after' }
           );
         } else {
           // الإعداد العام
-          await GlobalSetting.findOneAndUpdate({ key }, { value }, { new: true });
+          await GlobalSetting.findOneAndUpdate({ key }, { value }, { returnDocument: 'after' });
         }
         updated.push(key);
       } catch (e) {
@@ -420,7 +420,11 @@ router.post('/upload', requireAdmin, async (req, res) => {
         { upsert: true }
       );
     } else {
-      await GlobalSetting.findOneAndUpdate({ key }, { value: fileUrl }, { new: true });
+      await GlobalSetting.findOneAndUpdate(
+        { key },
+        { value: fileUrl },
+        { returnDocument: 'after' }
+      );
     }
 
     return res.json({

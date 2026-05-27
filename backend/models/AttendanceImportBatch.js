@@ -39,7 +39,7 @@ const AttendanceImportBatchSchema = new mongoose.Schema(
     // results in duplicates.
     payloadHash: { type: String, required: true, maxlength: 128 },
 
-    submittedAt: { type: Date, required: true, default: Date.now, index: true },
+    submittedAt: { type: Date, required: true, default: Date.now },
     submitterIp: { type: String, default: null, maxlength: 60 },
 
     totalRows: { type: Number, required: true, min: 0 },

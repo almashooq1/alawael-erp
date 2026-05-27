@@ -346,7 +346,7 @@ class LeaveService {
       const leave = await Leave.findOneAndUpdate(
         { _id: leaveId, status: { $in: ['مرسل', 'قيد المراجعة'] } },
         update,
-        { new: true }
+        { returnDocument: 'after' }
       );
       if (!leave) {
         const existing = await Leave.findById(leaveId).select('status').lean();

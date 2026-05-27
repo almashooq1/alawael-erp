@@ -124,8 +124,7 @@ const AACProfileSchema = new Schema(
   { timestamps: true }
 );
 
-const AACProfile =
-  mongoose.models.AACProfile || mongoose.model('AACProfile', AACProfileSchema);
+const AACProfile = mongoose.models.AACProfile || mongoose.model('AACProfile', AACProfileSchema);
 
 // قائمة المفردات الأساسية (Core Vocabulary) - 100+ كلمة أساسية
 const CORE_VOCABULARY = [
@@ -605,7 +604,7 @@ router.patch('/aac/profiles/:beneficiaryId', async (req, res) => {
     const profile = await AACProfile.findOneAndUpdate(
       { beneficiary_id: req.params.beneficiaryId },
       req.body,
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!profile) return res.status(404).json({ success: false, error: 'الملف غير موجود' });
     res.json({ success: true, message: 'تم تحديث ملف AAC', data: profile });

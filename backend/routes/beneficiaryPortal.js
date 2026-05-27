@@ -34,7 +34,7 @@ router.put('/profile', async (req, res) => {
     const beneficiary = await Beneficiary.findOneAndUpdate(
       { userId: req.user._id },
       { ...updates, updatedAt: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!beneficiary) return res.status(404).json({ success: false, message: 'Profile not found' });
     res.json({ success: true, data: beneficiary });

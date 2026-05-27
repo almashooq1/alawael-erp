@@ -101,7 +101,7 @@ router.post('/', authorize(['admin', 'manager']), async (req, res) => {
 router.put('/:id', validateObjectId('id'), authorize(['admin', 'manager']), async (req, res) => {
   try {
     const classroom = await Classroom.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!classroom) return res.status(404).json({ success: false, message: 'الفصل غير موجود' });

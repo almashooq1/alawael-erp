@@ -286,7 +286,7 @@ router.put(
       };
 
       const caseDoc = await CaseManagement.findByIdAndUpdate(req.params.id, updateData, {
-        new: true,
+        returnDocument: 'after',
         runValidators: true,
       });
 

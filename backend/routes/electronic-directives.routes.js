@@ -122,7 +122,7 @@ router.put('/:id', requireRole('admin', 'manager', 'doctor', 'clinician'), async
     const doc = await Document.findOneAndUpdate(
       { _id: req.params.id, branchId: req.user.branchId, category: 'directive', status: 'draft' },
       { ...req.body, updatedBy: req.user._id },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!doc) return res.status(404).json({ success: false, message: 'Draft directive not found' });
     res.json({ success: true, data: doc });
@@ -174,7 +174,7 @@ router.post(
             },
           },
         },
-        { new: true }
+        { returnDocument: 'after' }
       );
       if (!doc)
         return res
@@ -225,7 +225,7 @@ router.patch('/:id/sign', async (req, res) => {
         signatureStatus: 'signed',
         status: 'active',
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!doc)
       return res
@@ -255,7 +255,7 @@ router.patch('/:id/witness-sign', async (req, res) => {
           },
         },
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!doc) return res.status(404).json({ success: false, message: 'Directive not found' });
     res.json({ success: true, data: doc });
@@ -294,7 +294,7 @@ router.patch('/:id/revoke', requireRole('admin', 'manager', 'doctor'), async (re
           },
         },
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!doc)
       return res

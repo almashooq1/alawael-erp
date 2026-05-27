@@ -931,7 +931,7 @@ router.put(
     safeUpdate.lastModified = new Date();
 
     const doc = await Model.findByIdAndUpdate(req.params.id, safeUpdate, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     }).lean();
 
@@ -956,7 +956,7 @@ router.delete(
     const doc = await Model.findByIdAndUpdate(
       req.params.id,
       { status: 'deleted', deletedAt: new Date(), deletedBy: req.user?._id || req.user?.id },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
 
     if (!doc) return res.status(404).json({ success: false, message: 'لم يتم العثور على التقييم' });

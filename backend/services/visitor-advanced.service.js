@@ -220,7 +220,7 @@ class VisitorAdvancedService {
     const visitor = await Visitor.findByIdAndUpdate(
       id,
       { $set: data },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!visitor) throw new Error('الزائر غير موجود');
 
@@ -602,7 +602,11 @@ class VisitorAdvancedService {
   }
 
   async removeFromBlacklist(id, _userId, _userName) {
-    const entry = await VisitorBlacklist.findByIdAndUpdate(id, { isActive: false }, { new: true });
+    const entry = await VisitorBlacklist.findByIdAndUpdate(
+      id,
+      { isActive: false },
+      { returnDocument: 'after' }
+    );
     if (!entry) throw new Error('السجل غير موجود');
     return entry;
   }

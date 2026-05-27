@@ -73,7 +73,7 @@ router.put('/incentives/:id/approve', authorize(['admin', 'manager']), async (re
     const item = await IndividualIncentive.findByIdAndUpdate(
       req.params.id,
       { status: 'approved', approvedBy: req.user?.id, approvedAt: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     if (!item) return res.status(404).json({ success: false, message: 'الحافز غير موجود' });
     res.json({ success: true, data: item, message: 'تم اعتماد الحافز' });
@@ -89,7 +89,7 @@ router.put('/incentives/:id/mark-paid', authorize(['admin']), async (req, res) =
     const item = await IndividualIncentive.findByIdAndUpdate(
       req.params.id,
       { status: 'paid', paidAt: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     if (!item) return res.status(404).json({ success: false, message: 'الحافز غير موجود' });
     res.json({ success: true, data: item, message: 'تم صرف الحافز' });

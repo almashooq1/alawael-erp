@@ -515,7 +515,7 @@ class DocumentEncryptionService {
           reason: 'تصنيف تلقائي',
         },
       },
-      { upsert: true, new: true }
+      { upsert: true, returnDocument: 'after' }
     );
 
     return { success: true, classification, detectedPatterns };
@@ -619,7 +619,11 @@ class DocumentEncryptionService {
   }
 
   async updateDLPPolicy(policyId, data) {
-    const policy = await DLPPolicy.findByIdAndUpdate(policyId, { $set: data }, { new: true });
+    const policy = await DLPPolicy.findByIdAndUpdate(
+      policyId,
+      { $set: data },
+      { returnDocument: 'after' }
+    );
     if (!policy) throw new Error('السياسة غير موجودة');
     return { success: true, policy };
   }

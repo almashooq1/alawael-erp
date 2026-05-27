@@ -178,7 +178,7 @@ router.put('/cases/:id', async (req, res) => {
   try {
     const LC = safeModel('LegalCase');
     const data = await LC.findByIdAndUpdate(req.params.id, pick(req.body, CASE_FIELDS), {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!data) return res.status(404).json({ success: false, message: 'القضية غير موجودة' });
@@ -194,7 +194,7 @@ router.delete('/cases/:id', async (req, res) => {
     const data = await LC.findByIdAndUpdate(
       req.params.id,
       { status: 'closed', closedAt: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!data) return res.status(404).json({ success: false, message: 'القضية غير موجودة' });
     res.json({ success: true, data });
@@ -243,7 +243,7 @@ router.put('/consultations/:id', async (req, res) => {
   try {
     const LCons = safeModel('LegalConsultation');
     const data = await LCons.findByIdAndUpdate(req.params.id, pick(req.body, CONSULTATION_FIELDS), {
-      new: true,
+      returnDocument: 'after',
     });
     if (!data) return res.status(404).json({ success: false, message: 'الاستشارة غير موجودة' });
     res.json({ success: true, data });

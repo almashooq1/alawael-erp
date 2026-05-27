@@ -89,7 +89,7 @@ router.post('/', authorize(['admin', 'manager']), async (req, res) => {
 router.put('/:id', validateObjectId('id'), authorize(['admin', 'manager']), async (req, res) => {
   try {
     const year = await AcademicYear.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!year) return res.status(404).json({ success: false, message: 'العام الدراسي غير موجود' });
@@ -125,7 +125,7 @@ router.patch(
       const year = await AcademicYear.findByIdAndUpdate(
         req.params.id,
         { isCurrent: true, status: 'active' },
-        { new: true }
+        { returnDocument: 'after' }
       );
       if (!year)
         return res.status(404).json({ success: false, message: 'العام الدراسي غير موجود' });

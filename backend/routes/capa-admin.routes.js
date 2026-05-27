@@ -238,7 +238,7 @@ router.patch(
       const doc = await CA.findOneAndUpdate(
         { _id: req.params.id, isDeleted: false },
         { $set: updates },
-        { new: true, runValidators: true }
+        { returnDocument: 'after', runValidators: true }
       );
       if (!doc)
         return res.status(404).json({ success: false, message: 'الإجراء التصحيحي غير موجود' });
@@ -391,7 +391,7 @@ router.delete(
       const doc = await CA.findOneAndUpdate(
         { _id: req.params.id, isDeleted: false },
         { $set: { isDeleted: true } },
-        { new: true }
+        { returnDocument: 'after' }
       );
       if (!doc)
         return res.status(404).json({ success: false, message: 'الإجراء التصحيحي غير موجود' });

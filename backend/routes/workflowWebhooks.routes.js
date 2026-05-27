@@ -99,7 +99,7 @@ router.put('/webhooks/:id', authMiddleware, requireBranchAccess, async (req, res
       }
     }
     const wh = await WorkflowWebhook.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
+      returnDocument: 'after',
     });
     if (!wh) return res.status(404).json({ success: false, message: 'غير موجود' });
     res.json({ success: true, data: wh });

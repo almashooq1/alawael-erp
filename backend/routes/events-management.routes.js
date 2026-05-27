@@ -100,7 +100,9 @@ router.post('/', authenticate, requireBranchAccess, requireEventAdmin, async (re
 router.put('/:id', authenticate, requireBranchAccess, requireEventAdmin, async (req, res) => {
   try {
     const Ev = safeModel('Event');
-    const doc = await Ev.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), { new: true });
+    const doc = await Ev.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
+      returnDocument: 'after',
+    });
     if (!doc) return res.status(404).json({ success: false, message: 'الفعالية غير موجودة' });
     res.json({ success: true, data: doc });
   } catch (err) {

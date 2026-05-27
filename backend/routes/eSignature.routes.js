@@ -173,7 +173,7 @@ router.put('/templates/:id', authorize(['admin', 'super_admin']), async (req, re
     const tpl = await ESignatureTemplate.findByIdAndUpdate(
       req.params.id,
       { ...req.body, version: undefined },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!tpl) return res.status(404).json({ success: false, message: 'القالب غير موجود' });
     tpl.version += 1;
@@ -199,7 +199,7 @@ router.delete('/templates/:id', authorize(['admin', 'super_admin']), async (req,
     const tpl = await ESignatureTemplate.findByIdAndUpdate(
       req.params.id,
       { isActive: false },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!tpl) return res.status(404).json({ success: false, message: 'القالب غير موجود' });
     res.json({ success: true, message: 'تم حذف القالب' });

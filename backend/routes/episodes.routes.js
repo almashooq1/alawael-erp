@@ -189,7 +189,7 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
     const episode = await EpisodeOfCare.findByIdAndUpdate(
       req.params.id,
       { $set: rest },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!episode) {
       return res.status(404).json({ success: false, error: 'Episode not found' });
@@ -246,7 +246,7 @@ router.delete('/:id', requireRole(WRITE_ROLES), async (req, res) => {
     const episode = await EpisodeOfCare.findByIdAndUpdate(
       req.params.id,
       { isArchived: true },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!episode) {
       return res.status(404).json({ success: false, error: 'Episode not found' });

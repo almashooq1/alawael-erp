@@ -92,9 +92,7 @@ router.put(
       const item = await InventoryItem.findByIdAndUpdate(
         req.params.itemId,
         stripUpdateMeta(req.body),
-        {
-          new: true,
-        }
+        { returnDocument: 'after' }
       );
       if (!item) return res.status(404).json({ success: false, message: 'الصنف غير موجود' });
       res.json({ success: true, data: item });
@@ -202,7 +200,7 @@ router.put(
       const warehouse = await Warehouse.findByIdAndUpdate(
         req.params.id,
         stripUpdateMeta(req.body),
-        { new: true }
+        { returnDocument: 'after' }
       );
       if (!warehouse)
         return res.status(404).json({ success: false, message: 'المستودع غير موجود' });
@@ -262,7 +260,7 @@ router.put(
     try {
       const { Supplier } = require('../models/InventoryStock');
       const supplier = await Supplier.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-        new: true,
+        returnDocument: 'after',
       });
       res.json({ success: true, data: supplier });
     } catch (err) {
@@ -397,7 +395,7 @@ router.put(
       const po = await PurchaseOrder.findByIdAndUpdate(
         req.params.poId,
         { status: 'approved', approvedBy: req.user._id, approvedAt: new Date() },
-        { new: true }
+        { returnDocument: 'after' }
       );
       res.json({ success: true, data: po });
     } catch (err) {
@@ -476,7 +474,7 @@ router.put(
     try {
       const { Asset } = require('../models/InventoryStock');
       const asset = await Asset.findByIdAndUpdate(req.params.assetId, stripUpdateMeta(req.body), {
-        new: true,
+        returnDocument: 'after',
       });
       res.json({ success: true, data: asset });
     } catch (err) {
@@ -513,7 +511,7 @@ router.post('/assets/:assetId/maintenance', authenticate, requireBranchAccess, a
           },
         },
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     res.json({ success: true, data: asset });
   } catch (err) {

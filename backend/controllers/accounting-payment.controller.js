@@ -193,7 +193,7 @@ exports.updatePayment = async (req, res) => {
     const updatedPayment = await AccountingPayment.findByIdAndUpdate(
       req.params.id,
       { ...req.body, updatedBy: req.user?._id },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     ).populate('invoice');
 
     res.json({

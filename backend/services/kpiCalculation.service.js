@@ -257,7 +257,7 @@ async function calculateSingle(definition, branchId, periodType, year, period) {
       isCalculated: true,
       calculatedAt: new Date(),
     },
-    { upsert: true, new: true }
+    { upsert: true, returnDocument: 'after' }
   );
 
   if (definition.enableAlerts && variancePct !== null) {
@@ -341,7 +341,7 @@ async function generateScorecard(branchId, periodType, year, period) {
       })),
       generatedAt: new Date(),
     },
-    { upsert: true, new: true }
+    { upsert: true, returnDocument: 'after' }
   );
 }
 

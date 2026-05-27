@@ -75,10 +75,7 @@ router.put(
       const plan = await SubscriptionPlan.findOneAndUpdate(
         { _id: req.params.id, ...branchFilter(req) },
         stripUpdateMeta(req.body),
-        {
-          new: true,
-          runValidators: true,
-        }
+        { returnDocument: 'after', runValidators: true }
       );
       if (!plan) return res.status(404).json({ success: false, message: 'Plan not found' });
       res.json({ success: true, data: plan });

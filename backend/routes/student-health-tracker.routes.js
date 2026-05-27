@@ -96,7 +96,7 @@ router.post(
       const doc = await Beneficiary.findOneAndUpdate(
         { _id: beneficiaryId, branchId: req.user.branchId },
         update,
-        { new: true }
+        { returnDocument: 'after' }
       );
       if (!doc) return res.status(404).json({ success: false, message: 'Beneficiary not found' });
       res
@@ -154,7 +154,7 @@ router.post(
       const doc = await Beneficiary.findOneAndUpdate(
         { _id: req.params.beneficiaryId, branchId: req.user.branchId },
         { $push: { healthLog: vitalsEntry }, lastVitalsAt: new Date() },
-        { new: true }
+        { returnDocument: 'after' }
       );
       if (!doc) return res.status(404).json({ success: false, message: 'Beneficiary not found' });
       res.status(201).json({ success: true, data: vitalsEntry });
@@ -247,7 +247,7 @@ router.post(
       const doc = await Beneficiary.findOneAndUpdate(
         { _id: req.params.beneficiaryId, branchId: req.user.branchId },
         { $push: { medications: medEntry } },
-        { new: true }
+        { returnDocument: 'after' }
       );
       if (!doc) return res.status(404).json({ success: false, message: 'Beneficiary not found' });
       res.status(201).json({ success: true, data: medEntry });
@@ -277,7 +277,7 @@ router.patch(
           'medications._id': req.params.medId,
         },
         { $set: updateFields },
-        { new: true }
+        { returnDocument: 'after' }
       );
       if (!doc) return res.status(404).json({ success: false, message: 'Medication not found' });
       res.json({
@@ -312,7 +312,7 @@ router.delete(
             'medications.$.discontinuedBy': req.user._id,
           },
         },
-        { new: true }
+        { returnDocument: 'after' }
       );
       if (!doc) return res.status(404).json({ success: false, message: 'Medication not found' });
       res.json({ success: true, message: 'Medication discontinued' });
@@ -368,7 +368,7 @@ router.post(
       const doc = await Beneficiary.findOneAndUpdate(
         { _id: beneficiaryId, branchId: req.user.branchId },
         { $push: { healthLog: incident } },
-        { new: true }
+        { returnDocument: 'after' }
       );
       if (!doc) return res.status(404).json({ success: false, message: 'Beneficiary not found' });
       res.status(201).json({ success: true, data: incident });

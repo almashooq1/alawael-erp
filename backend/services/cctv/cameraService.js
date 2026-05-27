@@ -17,14 +17,14 @@ async function create(payload) {
 }
 
 async function update(id, patch) {
-  return CctvCamera.findByIdAndUpdate(id, patch, { new: true });
+  return CctvCamera.findByIdAndUpdate(id, patch, { returnDocument: 'after' });
 }
 
 async function softDelete(id, __by) {
   return CctvCamera.findByIdAndUpdate(
     id,
     { isDeleted: true, status: 'retired', $set: { 'auth.passwordRef': null } },
-    { new: true }
+    { returnDocument: 'after' }
   );
 }
 
@@ -118,7 +118,7 @@ async function setStatus(cameraId, status, extras = {}) {
   return CctvCamera.findByIdAndUpdate(
     cameraId,
     { status, lastSeenAt: new Date(), ...extras },
-    { new: true }
+    { returnDocument: 'after' }
   );
 }
 

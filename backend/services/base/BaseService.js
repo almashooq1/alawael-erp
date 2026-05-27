@@ -203,7 +203,7 @@ class BaseService {
         deletedAt: new Date(),
         ...(options.userId && { deletedBy: options.userId }),
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!doc) throw new NotFoundError(`${this.modelName} not found (id: ${id})`);
     logger.debug(`[${this.modelName}] Soft-deleted: ${id}`);
@@ -231,7 +231,7 @@ class BaseService {
     const doc = await this.model.findOneAndUpdate(
       { _id: id, deleted: true },
       { $unset: { deleted: 1, deletedAt: 1, deletedBy: 1 } },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!doc) throw new NotFoundError(`${this.modelName} not found or not deleted (id: ${id})`);
     logger.debug(`[${this.modelName}] Restored: ${id}`);

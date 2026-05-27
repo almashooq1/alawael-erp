@@ -105,7 +105,7 @@ router.put(
       const shift = await WorkShift.findOneAndUpdate(
         { _id: req.params.id, deletedAt: null },
         { ...req.body, updatedBy: req.user._id, updatedAt: new Date() },
-        { new: true, runValidators: true }
+        { returnDocument: 'after', runValidators: true }
       );
       if (!shift) return res.status(404).json({ success: false, message: 'جدول الدوام غير موجود' });
       res.json({ success: true, message: 'تم التحديث بنجاح', data: shift });
@@ -347,7 +347,7 @@ router.post(
           approvedAt: new Date(),
           updatedAt: new Date(),
         },
-        { new: true }
+        { returnDocument: 'after' }
       );
       if (!overtime)
         return res
@@ -381,7 +381,7 @@ router.post(
           notes: req.body.reason || 'مرفوض',
           updatedAt: new Date(),
         },
-        { new: true }
+        { returnDocument: 'after' }
       );
       if (!overtime)
         return res

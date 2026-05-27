@@ -30,7 +30,7 @@ router.put('/', authorize('admin'), async (req, res) => {
     const branding = await OrgBranding.findOneAndUpdate(
       {},
       { ...req.body, updatedBy: req.user._id, updatedAt: new Date() },
-      { upsert: true, new: true }
+      { upsert: true, returnDocument: 'after' }
     );
     res.json({ success: true, data: branding });
   } catch (err) {
@@ -47,7 +47,7 @@ router.post('/logo', authorize('admin'), async (req, res) => {
     const branding = await OrgBranding.findOneAndUpdate(
       {},
       { $set: { [`logos.${logoType}`]: logoUrl }, updatedBy: req.user._id, updatedAt: new Date() },
-      { upsert: true, new: true }
+      { upsert: true, returnDocument: 'after' }
     );
     res.json({ success: true, data: branding });
   } catch (err) {
@@ -72,7 +72,7 @@ router.patch('/colors', authorize('admin'), async (req, res) => {
         },
         updatedBy: req.user._id,
       },
-      { upsert: true, new: true }
+      { upsert: true, returnDocument: 'after' }
     );
     res.json({ success: true, data: branding });
   } catch (err) {
@@ -97,7 +97,7 @@ router.put('/branch/:branchId', authorize('admin', 'branch_manager'), async (req
     const branding = await BranchBranding.findOneAndUpdate(
       { branchId: req.params.branchId },
       { ...req.body, branchId: req.params.branchId, updatedBy: req.user._id },
-      { upsert: true, new: true }
+      { upsert: true, returnDocument: 'after' }
     );
     res.json({ success: true, data: branding });
   } catch (err) {

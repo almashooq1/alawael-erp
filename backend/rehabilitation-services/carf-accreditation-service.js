@@ -699,7 +699,7 @@ class CARFAccreditationService {
    */
   async updateActionPlan(planId, updates) {
     const plan = await CARFActionPlan.findOneAndUpdate({ planId }, updates, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!plan) throw new Error(`خطة العمل ${planId} غير موجودة`);

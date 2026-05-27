@@ -246,7 +246,7 @@ router.put('/:id', async (req, res) => {
     const doc = await Document.findOneAndUpdate(
       { _id: req.params.id, branchId: req.user.branchId, isDeleted: { $ne: true } },
       { $set: { ...updates, updatedAt: new Date(), updatedBy: req.user._id } },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!doc) return res.status(404).json({ success: false, message: 'Document not found' });
     res.json({ success: true, data: doc });
@@ -346,7 +346,7 @@ router.post('/:id/share', requireRole('admin', 'manager'), async (req, res) => {
           shares: { userId, role, expiresAt, sharedBy: req.user._id, sharedAt: new Date() },
         },
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!doc) return res.status(404).json({ success: false, message: 'Document not found' });
     res.json({ success: true, data: doc });

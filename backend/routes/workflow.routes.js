@@ -205,7 +205,7 @@ router.put('/definitions/:id', authMiddleware, requireBranchAccess, async (req, 
     const def = await WorkflowDefinition.findByIdAndUpdate(
       req.params.id,
       { $set: { ...req.body, updatedBy: uid(req) } },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!def) return res.status(404).json({ success: false, message: 'سير العمل غير موجود' });
     res.json({ success: true, data: def, message: 'تم تحديث سير العمل' });
@@ -249,7 +249,7 @@ router.delete('/definitions/:id', authMiddleware, requireBranchAccess, async (re
     const def = await WorkflowDefinition.findByIdAndUpdate(
       req.params.id,
       { status: 'archived' },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!def) return res.status(404).json({ success: false, message: 'غير موجود' });
     res.json({ success: true, message: 'تم أرشفة سير العمل' });

@@ -183,10 +183,7 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
     const doc = await BeneficiarySection.findOneAndUpdate(
       { _id: req.params.id, ...branchFilter(req) },
       /* W448 */ body,
-      {
-        new: true,
-        runValidators: true,
-      }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!doc) return res.status(404).json({ success: false, message: 'الفصل غير موجود' });
     res.json({ success: true, data: doc });
@@ -267,7 +264,7 @@ router.delete('/:id', requireRole(WRITE_ROLES), async (req, res) => {
     const row = await BeneficiarySection.findOneAndUpdate(
       { _id: req.params.id, ...branchFilter(req) } /* W448 */,
       { status: 'archived' },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!row) return res.status(404).json({ success: false, message: 'الفصل غير موجود' });
     res.json({ success: true, message: 'تم الأرشفة', data: row });

@@ -188,7 +188,7 @@ async function linkSpecializedRecord(input) {
   const Incident = _CrisisIncident();
   const update =
     type === 'seizure' ? { seizureEventId: recordId } : { safeguardingConcernId: recordId };
-  const incident = await Incident.findByIdAndUpdate(crisisId, update, { new: true });
+  const incident = await Incident.findByIdAndUpdate(crisisId, update, { returnDocument: 'after' });
   if (!incident) throw new Error('linkSpecializedRecord: crisis not found');
   return incident;
 }

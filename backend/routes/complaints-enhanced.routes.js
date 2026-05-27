@@ -436,7 +436,7 @@ router.put(
       const complaint = await ComplaintV2.findByIdAndUpdate(
         req.params.id,
         { ...req.body, updatedBy: req.user?._id || req.userId },
-        { new: true, runValidators: true }
+        { returnDocument: 'after', runValidators: true }
       );
       if (!complaint) return res.status(404).json({ success: false, message: 'الشكوى غير موجودة' });
       res.json({ success: true, data: complaint, message: 'تم تحديث الشكوى بنجاح' });
@@ -559,7 +559,7 @@ router.post('/:id/rate', async (req, res) => {
     const complaint = await ComplaintV2.findByIdAndUpdate(
       req.params.id,
       { satisfactionRating: rating, satisfactionComment: comment || null },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!complaint) return res.status(404).json({ success: false, message: 'الشكوى غير موجودة' });
     res.json({ success: true, message: 'شكرًا على تقييمك' });
@@ -620,7 +620,7 @@ router.put('/categories/:id', authorize(['admin', 'super_admin', 'manager']), as
     const category = await ComplaintCategory.findByIdAndUpdate(
       req.params.id,
       { ...req.body, updatedBy: req.user?._id || req.userId },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!category) return res.status(404).json({ success: false, message: 'التصنيف غير موجود' });
     res.json({ success: true, data: category, message: 'تم تحديث التصنيف بنجاح' });
@@ -679,7 +679,7 @@ router.put('/sla-configs/:id', authorize(['admin', 'super_admin']), async (req, 
     const config = await ComplaintSlaConfig.findByIdAndUpdate(
       req.params.id,
       { ...req.body, updatedBy: req.user?._id || req.userId },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!config) return res.status(404).json({ success: false, message: 'الإعداد غير موجود' });
     res.json({ success: true, data: config, message: 'تم تحديث إعداد SLA بنجاح' });
@@ -805,7 +805,7 @@ router.post(
           status: 'reviewed',
           updatedBy: req.user?._id || req.userId,
         },
-        { new: true }
+        { returnDocument: 'after' }
       );
       if (!feedback)
         return res.status(404).json({ success: false, message: 'الملاحظة غير موجودة' });
@@ -824,7 +824,7 @@ router.put('/feedback/:id', authorize(['admin', 'super_admin', 'manager']), asyn
     const feedback = await CrmFeedback.findByIdAndUpdate(
       req.params.id,
       { ...req.body, updatedBy: req.user?._id || req.userId },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!feedback) return res.status(404).json({ success: false, message: 'الملاحظة غير موجودة' });
     res.json({ success: true, data: feedback, message: 'تم التحديث بنجاح' });

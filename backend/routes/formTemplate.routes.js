@@ -151,7 +151,7 @@ router.put('/:id', requireRole('admin', 'manager', 'supervisor'), async (req, re
     const doc = await FormTemplate.findByIdAndUpdate(
       req.params.id,
       { $set: { ...updates, updatedAt: new Date(), updatedBy: req.user._id } },
-      { new: true }
+      { returnDocument: 'after' }
     );
     res.json({ success: true, data: doc });
   } catch (err) {
@@ -197,7 +197,7 @@ router.patch('/:id/publish', requireRole('admin', 'manager', 'supervisor'), asyn
     const doc = await FormTemplate.findByIdAndUpdate(
       req.params.id,
       { $set: { status: newStatus, ...extraFields } },
-      { new: true }
+      { returnDocument: 'after' }
     );
     res.json({ success: true, data: doc });
   } catch (err) {
@@ -356,7 +356,7 @@ router.patch(
       const doc = await FormSubmission.findOneAndUpdate(
         { _id: req.params.subId, branchId: req.user.branchId },
         { $set: { status, reviewNote, reviewedBy: req.user._id, reviewedAt: new Date() } },
-        { new: true }
+        { returnDocument: 'after' }
       );
       if (!doc) return res.status(404).json({ success: false, message: 'Submission not found' });
       res.json({ success: true, data: doc });

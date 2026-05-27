@@ -61,7 +61,7 @@ class DigitalWalletService {
         $inc: { balance: amount, totalToppedUp: amount },
         $set: { updatedBy: userId },
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!updated) throw new Error('فشل شحن المحفظة — يرجى المحاولة مرة أخرى');
 
@@ -134,7 +134,7 @@ class DigitalWalletService {
         $inc: { balance: -amount, totalSpent: amount },
         $set: { updatedBy: userId },
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     if (!updated) {
@@ -208,7 +208,7 @@ class DigitalWalletService {
             $inc: { balance: -amount, totalSpent: amount },
             $set: { updatedBy: userId },
           },
-          { new: true, session }
+          { returnDocument: 'after', session }
         );
         if (!debitResult) throw new Error('فشل الخصم: الرصيد غير كافٍ أو المحفظة محجوبة');
 
@@ -219,7 +219,7 @@ class DigitalWalletService {
             $inc: { balance: amount, totalToppedUp: amount },
             $set: { updatedBy: userId },
           },
-          { new: true, session }
+          { returnDocument: 'after', session }
         );
         if (!creditResult) throw new Error('فشل الإضافة: المحفظة الهدف محجوبة');
 
@@ -360,7 +360,7 @@ class DigitalWalletService {
         ],
       },
       { $inc: { usedCount: 1 } },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     if (!coupon) {
@@ -408,7 +408,7 @@ class DigitalWalletService {
     const updated = await DigitalWallet.findByIdAndUpdate(
       wallet._id,
       { $inc: { loyaltyPoints: pts }, $set: { updatedBy: userId } },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!updated) return wallet;
     // Mutate the caller's wallet doc so callers that return `updated` see
@@ -466,7 +466,7 @@ class DigitalWalletService {
     const updated = await DigitalWallet.findOneAndUpdate(
       { _id: walletId, loyaltyPoints: { $gte: pts } },
       { $inc: { loyaltyPoints: -pts }, $set: { updatedBy: userId } },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     if (!updated) {
@@ -502,7 +502,7 @@ class DigitalWalletService {
     const wallet = await DigitalWallet.findByIdAndUpdate(
       walletId,
       { isBlocked: true, blockReason: reason, blockedAt: new Date(), updatedBy: userId },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!wallet) throw new Error('المحفظة غير موجودة');
     return wallet;
@@ -515,7 +515,7 @@ class DigitalWalletService {
     const wallet = await DigitalWallet.findByIdAndUpdate(
       walletId,
       { isBlocked: false, blockReason: null, blockedAt: null, updatedBy: userId },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!wallet) throw new Error('المحفظة غير موجودة');
     return wallet;
@@ -592,7 +592,7 @@ class DigitalWalletService {
       const wallet = await DigitalWallet.findOneAndUpdate(
         { _id: pts.walletId, loyaltyPoints: { $gte: pts.points } },
         { $inc: { loyaltyPoints: -pts.points } },
-        { new: true }
+        { returnDocument: 'after' }
       );
       if (wallet) {
         await LoyaltyPointsTransaction.create({

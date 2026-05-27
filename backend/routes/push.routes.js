@@ -122,7 +122,7 @@ authRouter.patch('/subscriptions/:id', async (req, res) => {
     const sub = await PushSubscription.findByIdAndUpdate(
       req.params.id,
       { $set: update },
-      { new: true }
+      { returnDocument: 'after' }
     ).select('-keys');
     if (!sub) return res.status(404).json({ ok: false, error: 'NOT_FOUND' });
     res.json({ ok: true, subscription: sub });

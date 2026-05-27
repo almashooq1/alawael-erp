@@ -565,7 +565,7 @@ router.patch(
     const ot = await OvertimeRequest.findByIdAndUpdate(
       req.params.overtimeId,
       { status: req.body.decision },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!ot) return res.status(404).json({ success: false, message: 'الطلب غير موجود' });
 

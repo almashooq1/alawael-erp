@@ -206,12 +206,16 @@ async function acknowledge(eventId, userId) {
   return CctvEvent.findOneAndUpdate(
     { eventId },
     { acknowledgedAt: new Date(), acknowledgedBy: userId },
-    { new: true }
+    { returnDocument: 'after' }
   );
 }
 
 async function linkIncident(eventId, incidentId) {
-  return CctvEvent.findOneAndUpdate({ eventId }, { relatedIncidentId: incidentId }, { new: true });
+  return CctvEvent.findOneAndUpdate(
+    { eventId },
+    { relatedIncidentId: incidentId },
+    { returnDocument: 'after' }
+  );
 }
 
 async function countsLastHour(branchCode) {

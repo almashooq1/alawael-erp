@@ -116,10 +116,7 @@ router.put('/:id', async (req, res) => {
     const referral = await MedicalReferral.findByIdAndUpdate(
       req.params.id,
       stripUpdateMeta(req.body),
-      {
-        new: true,
-        runValidators: true,
-      }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!referral) return res.status(404).json({ success: false, message: 'الإحالة غير موجودة' });
     res.json({ success: true, data: referral });

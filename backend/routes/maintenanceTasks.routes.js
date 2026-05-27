@@ -147,10 +147,7 @@ router.put('/:id', requireAuth, requireBranchAccess, async (req, res) => {
     const task = await MaintenanceTask.findOneAndUpdate(
       { _id: req.params.id, ...branchFilter(req) },
       stripUpdateMeta(req.body),
-      {
-        new: true,
-        runValidators: true,
-      }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!task) return res.status(404).json({ success: false, message: 'Task not found' });
     res.json({ success: true, data: task });
@@ -195,10 +192,7 @@ router.patch('/:id/status', requireAuth, requireBranchAccess, async (req, res) =
     const task = await MaintenanceTask.findOneAndUpdate(
       { _id: req.params.id, ...branchFilter(req) },
       update,
-      {
-        new: true,
-        runValidators: true,
-      }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!task) return res.status(404).json({ success: false, message: 'Task not found' });
 
@@ -223,7 +217,7 @@ router.post('/:id/quality-check', requireAuth, requireBranchAccess, async (req, 
     const task = await MaintenanceTask.findOneAndUpdate(
       { _id: req.params.id, ...branchFilter(req) },
       { qualityChecklist, qualityScore },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!task) return res.status(404).json({ success: false, message: 'Task not found' });
     res.json({ success: true, data: task });

@@ -153,10 +153,7 @@ router.put('/:id', authorize(['admin', 'manager']), async (req, res) => {
     const risk = await RiskAssessment.findByIdAndUpdate(
       req.params.id,
       { title, description, riskType, probability, impact, mitigation, status, owner },
-      {
-        new: true,
-        runValidators: true,
-      }
+      { returnDocument: 'after', runValidators: true }
     ).lean();
     if (!risk) return res.status(404).json({ success: false, message: 'المخاطرة غير موجودة' });
     res.json({ success: true, data: risk, message: 'تم تحديث تقييم المخاطرة' });

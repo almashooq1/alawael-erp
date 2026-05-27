@@ -277,7 +277,7 @@ router.put('/:id', validateId, async (req, res) => {
     const guardian = await Guardian.findByIdAndUpdate(
       req.params.id,
       { $set: updates },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     ).lean();
 
     if (!guardian) return fail(res, 'ولي الأمر غير موجود', 404);

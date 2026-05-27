@@ -430,7 +430,7 @@ function createIntegrationAlertEngine(deps = {}) {
           acknowledgedBy: userId || null,
         },
       },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     return updated;
   }
@@ -446,7 +446,7 @@ function createIntegrationAlertEngine(deps = {}) {
           resolvedReason: 'manual',
         },
       },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     return updated;
   }

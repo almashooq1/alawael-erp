@@ -45,7 +45,7 @@ router.patch('/connections/:id/enable', authorize('admin'), async (req, res) => 
     const item = await Integration.findByIdAndUpdate(
       req.params.id,
       { enabled: true, updatedBy: req.user._id },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!item) return res.status(404).json({ success: false, message: 'Integration not found' });
     res.json({ success: true, data: item });
@@ -61,7 +61,7 @@ router.patch('/connections/:id/disable', authorize('admin'), async (req, res) =>
     const item = await Integration.findByIdAndUpdate(
       req.params.id,
       { enabled: false, updatedBy: req.user._id },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!item) return res.status(404).json({ success: false, message: 'Integration not found' });
     res.json({ success: true, data: item });

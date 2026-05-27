@@ -98,7 +98,7 @@ router.put('/categories/:id', authorize(['admin', 'manager']), async (req, res) 
     const category = await AssetCategory.findByIdAndUpdate(
       req.params.id,
       { ...stripUpdateMeta(req.body), updatedBy: req.user?.id },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     ).lean();
     if (!category) return res.status(404).json({ success: false, message: 'التصنيف غير موجود' });
     res.json({ success: true, data: category, message: 'تم التحديث' });
@@ -202,7 +202,7 @@ router.put('/assets/:id', authorize(['admin', 'manager']), async (req, res) => {
     const asset = await Asset.findByIdAndUpdate(
       req.params.id,
       { ...stripUpdateMeta(req.body), updatedAt: new Date() },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     ).lean();
     if (!asset) return res.status(404).json({ success: false, message: 'الأصل غير موجود' });
     res.json({ success: true, data: asset, message: 'تم تحديث الأصل' });
@@ -297,7 +297,7 @@ router.patch('/depreciation/:id/post', authorize(['admin', 'manager']), async (r
     const schedule = await AssetDepreciationSchedule.findByIdAndUpdate(
       req.params.id,
       { status: 'posted', postedBy: req.user?.id, postedAt: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     if (!schedule) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
     res.json({ success: true, data: schedule, message: 'تم ترحيل الإهلاك' });
@@ -395,7 +395,7 @@ router.put('/work-orders/:id', authorize(['admin', 'manager', 'technician']), as
     const wo = await MaintenanceWorkOrder.findByIdAndUpdate(
       req.params.id,
       { ...stripUpdateMeta(req.body), updatedBy: req.user?.id },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     ).lean();
     if (!wo) return res.status(404).json({ success: false, message: 'أمر العمل غير موجود' });
     res.json({ success: true, data: wo, message: 'تم التحديث' });
@@ -426,7 +426,7 @@ router.patch(
           completedDate: new Date(),
           updatedBy: req.user?.id,
         },
-        { new: true }
+        { returnDocument: 'after' }
       );
       if (!wo) return res.status(404).json({ success: false, message: 'أمر العمل غير موجود' });
       // Reactivate asset
@@ -508,7 +508,7 @@ router.patch('/transfers/:id/approve', authorize(['admin', 'manager']), async (r
     const transfer = await AssetTransfer.findByIdAndUpdate(
       req.params.id,
       { status: 'approved', approvedBy: req.user?.id },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     if (!transfer) return res.status(404).json({ success: false, message: 'طلب النقل غير موجود' });
     res.json({ success: true, data: transfer, message: 'تمت الموافقة على النقل' });
@@ -543,7 +543,7 @@ router.patch('/transfers/:id/reject', authorize(['admin', 'manager']), async (re
     const transfer = await AssetTransfer.findByIdAndUpdate(
       req.params.id,
       { status: 'rejected', updatedBy: req.user?.id },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     if (!transfer) return res.status(404).json({ success: false, message: 'طلب النقل غير موجود' });
     res.json({ success: true, data: transfer, message: 'تم رفض طلب النقل' });
@@ -616,7 +616,7 @@ router.patch('/bookings/:id/cancel', async (req, res) => {
     const booking = await ResourceBooking.findByIdAndUpdate(
       req.params.id,
       { status: 'cancelled', updatedBy: req.user?.id },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     if (!booking) return res.status(404).json({ success: false, message: 'الحجز غير موجود' });
     res.json({ success: true, data: booking, message: 'تم إلغاء الحجز' });
@@ -730,7 +730,7 @@ router.patch('/inventories/:id/complete', authorize(['admin', 'manager']), async
         completedAt: new Date(),
         updatedBy: req.user?.id,
       },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     if (!inventory) return res.status(404).json({ success: false, message: 'الجرد غير موجود' });
     res.json({ success: true, data: inventory, message: 'تم إتمام الجرد' });

@@ -233,7 +233,7 @@ class MeasurementService {
           ...updateData,
           updatedAt: new Date(),
         },
-        { new: true }
+        { returnDocument: 'after' }
       );
 
       return updated;

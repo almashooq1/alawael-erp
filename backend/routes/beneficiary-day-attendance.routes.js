@@ -239,7 +239,7 @@ router.post('/check-in', requireRole(MARK_ROLES), async (req, res) => {
     }
 
     const row = await BeneficiaryDayAttendance.findOneAndUpdate({ beneficiaryId, date }, update, {
-      new: true,
+      returnDocument: 'after',
       upsert: true,
       setDefaultsOnInsert: true,
     });
@@ -266,7 +266,7 @@ router.post('/check-out', requireRole(MARK_ROLES), async (req, res) => {
     if (notes) update.notes = String(notes).slice(0, 500);
 
     const row = await BeneficiaryDayAttendance.findOneAndUpdate({ beneficiaryId, date }, update, {
-      new: true,
+      returnDocument: 'after',
     });
     if (!row) {
       return res
@@ -308,7 +308,7 @@ router.post('/mark', requireRole(MARK_ROLES), async (req, res) => {
     if (status === 'late') update.checkInTime = new Date();
 
     const row = await BeneficiaryDayAttendance.findOneAndUpdate({ beneficiaryId, date }, update, {
-      new: true,
+      returnDocument: 'after',
       upsert: true,
       setDefaultsOnInsert: true,
     });
@@ -357,7 +357,7 @@ router.post('/bulk', requireRole(MARK_ROLES), async (req, res) => {
       const row = await BeneficiaryDayAttendance.findOneAndUpdate(
         { beneficiaryId: it.beneficiaryId, date },
         update,
-        { new: true, upsert: true, setDefaultsOnInsert: true }
+        { returnDocument: 'after', upsert: true, setDefaultsOnInsert: true }
       );
       results.push({ beneficiaryId: String(it.beneficiaryId), ok: true, id: row._id });
     }
@@ -379,7 +379,7 @@ router.patch('/:id', requireRole(ADMIN_ROLES), async (req, res) => {
     if (body.checkInTime) body.checkInTime = new Date(body.checkInTime);
     if (body.checkOutTime) body.checkOutTime = new Date(body.checkOutTime);
     const row = await BeneficiaryDayAttendance.findByIdAndUpdate(req.params.id, body, {
-      new: true,
+      returnDocument: 'after',
     });
     if (!row) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
     res.json({ success: true, data: row });

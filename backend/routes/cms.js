@@ -58,7 +58,7 @@ router.put('/pages/:id', authorize('admin', 'content_manager'), async (req, res)
     const item = await CMSPage.findByIdAndUpdate(
       req.params.id,
       { ...req.body, updatedBy: req.user._id },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!item) return res.status(404).json({ success: false, message: 'Page not found' });
     res.json({ success: true, data: item });
@@ -73,7 +73,7 @@ router.patch('/pages/:id/publish', authorize('admin', 'content_manager'), async 
     const item = await CMSPage.findByIdAndUpdate(
       req.params.id,
       { status: 'published', publishedAt: new Date(), publishedBy: req.user._id },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!item) return res.status(404).json({ success: false, message: 'Page not found' });
     res.json({ success: true, data: item });

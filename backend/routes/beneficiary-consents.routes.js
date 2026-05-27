@@ -267,7 +267,7 @@ function createConsentRouter(deps = {}) {
       const updated = await Beneficiary.findByIdAndUpdate(
         beneficiaryId,
         { $set: { consentTrackingEnabled: enabled } },
-        { new: true, runValidators: true, lean: true }
+        { returnDocument: 'after', runValidators: true, lean: true }
       );
       if (!updated) {
         return res.status(404).json({

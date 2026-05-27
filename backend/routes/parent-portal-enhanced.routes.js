@@ -219,7 +219,7 @@ router.post('/verify-otp', parentOtpVerifyLimiter, async (req, res) => {
           isActive: true,
           lastActiveAt: new Date(),
         },
-        { upsert: true, new: true }
+        { upsert: true, returnDocument: 'after' }
       );
     }
 
@@ -269,7 +269,7 @@ router.post('/fcm-token', async (req, res) => {
         isActive: true,
         lastActiveAt: new Date(),
       },
-      { upsert: true, new: true }
+      { upsert: true, returnDocument: 'after' }
     );
 
     return res.json({ success: true, message: 'تم تسجيل الجهاز' });
@@ -1034,7 +1034,9 @@ router.put('/admin/complaints/:id', async (req, res) => {
     if (assignedTo) update.assignedTo = assignedTo;
     if (status === 'resolved') update.resolvedAt = new Date();
 
-    const complaint = await ParentComplaint.findByIdAndUpdate(req.params.id, update, { new: true });
+    const complaint = await ParentComplaint.findByIdAndUpdate(req.params.id, update, {
+      returnDocument: 'after',
+    });
 
     if (!complaint) {
       return res.status(404).json({ success: false, message: 'الشكوى غير موجودة' });

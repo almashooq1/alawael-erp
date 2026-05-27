@@ -83,7 +83,7 @@ router.put('/indicators/:id', async (req, res) => {
     const indicator = await QualityIndicator.findOneAndUpdate(
       { _id: req.params.id, deleted_at: null },
       req.body,
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!indicator) return res.status(404).json({ error: 'المؤشر غير موجود' });
     res.json({ indicator, message: 'تم تحديث المؤشر' });
@@ -98,7 +98,7 @@ router.delete('/indicators/:id', async (req, res) => {
     const indicator = await QualityIndicator.findOneAndUpdate(
       { _id: req.params.id, deleted_at: null },
       { deleted_at: new Date(), is_active: false },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!indicator) return res.status(404).json({ error: 'المؤشر غير موجود' });
     res.json({ message: 'تم حذف المؤشر' });
@@ -223,7 +223,7 @@ router.put('/measurements/:id', async (req, res) => {
     const measurement = await QualityMeasurement.findOneAndUpdate(
       { _id: req.params.id, deleted_at: null },
       req.body,
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!measurement) return res.status(404).json({ error: 'القياس غير موجود' });
     res.json({ measurement, message: 'تم تحديث القياس' });
@@ -238,7 +238,7 @@ router.post('/measurements/:id/verify', async (req, res) => {
     const measurement = await QualityMeasurement.findOneAndUpdate(
       { _id: req.params.id, deleted_at: null, data_verified: false },
       { data_verified: true, verified_by: req.user._id, verified_at: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!measurement)
       return res.status(404).json({ error: 'القياس غير موجود أو تم التحقق منه مسبقاً' });
@@ -254,7 +254,7 @@ router.delete('/measurements/:id', async (req, res) => {
     const measurement = await QualityMeasurement.findOneAndUpdate(
       { _id: req.params.id, deleted_at: null },
       { deleted_at: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!measurement) return res.status(404).json({ error: 'القياس غير موجود' });
     res.json({ message: 'تم حذف القياس' });
@@ -367,7 +367,7 @@ router.put('/incidents/:id', async (req, res) => {
     const incident = await IncidentReport.findOneAndUpdate(
       { _id: req.params.id, deleted_at: null, status: { $nin: ['closed'] } },
       req.body,
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!incident) return res.status(404).json({ error: 'لا يمكن تعديل هذه الحادثة' });
     res.json({ incident, message: 'تم تحديث الحادثة' });
@@ -388,7 +388,7 @@ router.post('/incidents/:id/investigate', async (req, res) => {
         contributing_factors,
         corrective_actions,
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!incident) return res.status(404).json({ error: 'لا يمكن فتح تحقيق لهذه الحادثة' });
     res.json({ incident, message: 'تم فتح التحقيق' });
@@ -413,7 +413,7 @@ router.post('/incidents/:id/close', async (req, res) => {
         closed_at: new Date(),
         closure_notes,
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!incident) return res.status(404).json({ error: 'لا يمكن إغلاق هذه الحادثة' });
     res.json({ incident, message: 'تم إغلاق الحادثة' });
@@ -428,7 +428,7 @@ router.post('/incidents/:id/escalate', async (req, res) => {
     const incident = await IncidentReport.findOneAndUpdate(
       { _id: req.params.id, deleted_at: null, status: { $nin: ['closed'] } },
       { status: 'escalated', is_reported_to_authority: true, authority_report_date: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!incident) return res.status(404).json({ error: 'لا يمكن تصعيد هذه الحادثة' });
     res.json({ incident, message: 'تم تصعيد الحادثة للجهات المختصة' });
@@ -466,7 +466,7 @@ router.delete('/incidents/:id', async (req, res) => {
     const incident = await IncidentReport.findOneAndUpdate(
       { _id: req.params.id, deleted_at: null, status: 'reported' },
       { deleted_at: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!incident) return res.status(404).json({ error: 'لا يمكن حذف هذه الحادثة' });
     res.json({ message: 'تم حذف الحادثة' });

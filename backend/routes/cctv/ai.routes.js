@@ -55,7 +55,7 @@ router.patch('/faces/:id', requireRole(['admin', 'security_officer']), async (re
   const f = await CctvFaceIdentity.findByIdAndUpdate(
     req.params.id,
     stripUpdateMeta(req.body || {}),
-    { new: true }
+    { returnDocument: 'after' }
   );
   if (!f) return res.status(404).json({ success: false, message: 'FACE_NOT_FOUND' });
   res.json({ success: true, data: f });
@@ -65,7 +65,7 @@ router.delete('/faces/:id', requireRole(['admin']), async (req, res) => {
   const f = await CctvFaceIdentity.findByIdAndUpdate(
     req.params.id,
     { status: 'disabled' },
-    { new: true }
+    { returnDocument: 'after' }
   );
   res.json({ success: true, data: f });
 });
@@ -89,7 +89,11 @@ router.post('/anpr', requireRole(['admin', 'security_officer']), async (req, res
 });
 
 router.delete('/anpr/:id', requireRole(['admin', 'security_officer']), async (req, res) => {
-  const r = await CctvAnpr.findByIdAndUpdate(req.params.id, { status: 'revoked' }, { new: true });
+  const r = await CctvAnpr.findByIdAndUpdate(
+    req.params.id,
+    { status: 'revoked' },
+    { returnDocument: 'after' }
+  );
   res.json({ success: true, data: r });
 });
 
@@ -112,14 +116,18 @@ router.post('/zones', requireRole(['admin', 'security_officer']), async (req, re
 router.patch('/zones/:id', requireRole(['admin', 'security_officer']), async (req, res) => {
   // W451: sanitize meta-fields before update
   const z = await CctvZone.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body || {}), {
-    new: true,
+    returnDocument: 'after',
   });
   if (!z) return res.status(404).json({ success: false, message: 'ZONE_NOT_FOUND' });
   res.json({ success: true, data: z });
 });
 
 router.delete('/zones/:id', requireRole(['admin']), async (req, res) => {
-  const z = await CctvZone.findByIdAndUpdate(req.params.id, { enabled: false }, { new: true });
+  const z = await CctvZone.findByIdAndUpdate(
+    req.params.id,
+    { enabled: false },
+    { returnDocument: 'after' }
+  );
   res.json({ success: true, data: z });
 });
 

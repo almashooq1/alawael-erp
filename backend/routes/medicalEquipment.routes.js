@@ -105,7 +105,7 @@ router.post('/equipment', async (req, res) => {
 router.put('/equipment/:id', async (req, res) => {
   try {
     const eq = await MedicalEquipment.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!eq) return res.status(404).json({ success: false, message: 'المعدة غير موجودة' });
@@ -243,7 +243,7 @@ router.patch('/maintenance/:id/complete', async (req, res) => {
         totalCost: (req.body.laborCost || 0) + (req.body.partsCost || 0),
         equipmentConditionAfter: req.body.equipmentConditionAfter || 'fully_operational',
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!record) return res.status(404).json({ success: false, message: 'أمر الصيانة غير موجود' });
 

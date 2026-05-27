@@ -475,7 +475,7 @@ router.post('/children/:id/communication-book/:entryId/seen', async (req, res) =
     const updated = await DailyCommunicationLog.findOneAndUpdate(
       { _id: req.params.entryId, beneficiaryId: req.params.id },
       { parentSeen: true, parentSeenAt: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     if (!updated) {
       return res.status(404).json({ success: false, message: 'لم يتم العثور على المدخل' });
@@ -927,7 +927,7 @@ router.patch('/notifications/:id/read', async (req, res) => {
     const updated = await PortalNotification.findOneAndUpdate(
       { _id: req.params.id, guardianId: guardian._id },
       { $set: { isRead: true, readAt: new Date() } },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
 
     if (!updated) return res.status(404).json({ success: false, message: 'التنبيه غير موجود' });
@@ -1137,7 +1137,7 @@ router.post('/children/:id/care-plan/:planId/mark-signed', async (req, res) => {
           signedBy: req.user?.id || null,
         },
       },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
 
     // If updated is null, the plan was already signed by a prior call —
@@ -1267,7 +1267,7 @@ router.post('/children/:id/home-programs/:programId/log', async (req, res) => {
           },
         },
       },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
 
     if (!updated) {

@@ -190,7 +190,7 @@ router.post('/', requireRole(WRITE_ROLES), async (req, res) => {
     const row = await MorningHealthCheck.findOneAndUpdate(
       { beneficiaryId: body.beneficiaryId, date },
       update,
-      { new: true, upsert: true, setDefaultsOnInsert: true, runValidators: true }
+      { returnDocument: 'after', upsert: true, setDefaultsOnInsert: true, runValidators: true }
     );
     res.status(201).json({ success: true, data: row });
   } catch (err) {
@@ -214,7 +214,7 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
       return res.status(400).json({ success: false, message: 'السبب مطلوب' });
     }
     const row = await MorningHealthCheck.findByIdAndUpdate(req.params.id, body, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!row) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
@@ -233,7 +233,7 @@ router.post('/:id/notify-parent', requireRole(WRITE_ROLES), async (req, res) => 
     const row = await MorningHealthCheck.findByIdAndUpdate(
       req.params.id,
       { parentNotified: true, parentNotifiedAt: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!row) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
     res.json({ success: true, data: row });

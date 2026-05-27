@@ -111,10 +111,7 @@ router.put('/contracts/:id', [mongoId('id'), validate], async (req, res) => {
     const contract = await InsuranceContract.findByIdAndUpdate(
       req.params.id,
       stripUpdateMeta(req.body),
-      {
-        new: true,
-        runValidators: true,
-      }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!contract) return res.status(404).json({ success: false, message: 'العقد غير موجود' });
     res.json({ success: true, data: contract });
@@ -232,7 +229,7 @@ router.patch('/pre-auth/:id/approve', [mongoId('id'), validate], async (req, res
           approvedDate: new Date(),
         },
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!preAuth)
       return res.status(404).json({ success: false, message: 'الموافقة المسبقة غير موجودة' });
@@ -251,7 +248,7 @@ router.patch(
       const preAuth = await PreAuthorization.findByIdAndUpdate(
         req.params.id,
         { status: 'denied', denialReason: req.body.reason },
-        { new: true }
+        { returnDocument: 'after' }
       );
       if (!preAuth)
         return res.status(404).json({ success: false, message: 'الموافقة المسبقة غير موجودة' });
@@ -373,7 +370,7 @@ router.post(
 router.put('/claims/:id', async (req, res) => {
   try {
     const claim = await InsuranceClaim.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!claim) return res.status(404).json({ success: false, message: 'المطالبة غير موجودة' });
@@ -528,7 +525,7 @@ router.delete('/claim-items/:id', async (req, res) => {
     const item = await ClaimItem.findByIdAndUpdate(
       req.params.id,
       { isDeleted: true },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!item) return res.status(404).json({ success: false, message: 'البند غير موجود' });
     res.json({ success: true, message: 'تم حذف البند بنجاح' });

@@ -101,7 +101,11 @@ function createHrModulesRouter({ logger } = {}) {
       try {
         const M = tryLoad(prefix, modelPath);
         if (!M) return res.status(503).json({ success: false, message: 'model unavailable' });
-        const doc = await M.findByIdAndUpdate(req.params.id, { $set: req.body }, { new: true });
+        const doc = await M.findByIdAndUpdate(
+          req.params.id,
+          { $set: req.body },
+          { returnDocument: 'after' }
+        );
         if (!doc) return res.status(404).json({ success: false, message: 'not found' });
         res.json({ success: true, data: doc });
       } catch (err) {

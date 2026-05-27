@@ -190,7 +190,7 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
     }
     if (body.achievementDate) body.achievementDate = new Date(body.achievementDate);
     const row = await Portfolio.findByIdAndUpdate(req.params.id, body, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!row) return res.status(404).json({ success: false, message: 'العنصر غير موجود' });

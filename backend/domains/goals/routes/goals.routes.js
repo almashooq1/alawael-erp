@@ -127,7 +127,7 @@ router.put(
       return res.status(400).json({ success: false, message: 'Invalid goal id' });
     }
     const goal = await TherapeuticGoal.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     }).lean();
     if (!goal) return res.status(404).json({ success: false, message: 'Goal not found' });

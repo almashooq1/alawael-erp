@@ -68,7 +68,7 @@ router.patch('/:id/approve', authorize('admin'), async (req, res) => {
     const disposal = await FleetDisposal.findByIdAndUpdate(
       req.params.id,
       { status: 'approved', approvedAt: new Date(), approvedBy: req.user._id },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!disposal)
       return res.status(404).json({ success: false, message: 'Disposal record not found' });
@@ -92,7 +92,7 @@ router.patch('/:id/complete', authorize('admin', 'manager'), async (req, res) =>
         completedAt: new Date(),
         completedBy: req.user._id,
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!disposal)
       return res.status(404).json({ success: false, message: 'Disposal record not found' });

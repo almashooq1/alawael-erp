@@ -221,7 +221,9 @@ class DocumentTagsService {
 
   async updateCategory(categoryId, updates) {
     try {
-      const category = await TagCategory.findByIdAndUpdate(categoryId, updates, { new: true });
+      const category = await TagCategory.findByIdAndUpdate(categoryId, updates, {
+        returnDocument: 'after',
+      });
       return { success: true, category };
     } catch (err) {
       return { success: false, error: err.message };
@@ -269,7 +271,7 @@ class DocumentTagsService {
         }
       }
 
-      const tag = await Tag.findByIdAndUpdate(tagId, updates, { new: true });
+      const tag = await Tag.findByIdAndUpdate(tagId, updates, { returnDocument: 'after' });
       return { success: true, tag };
     } catch (err) {
       return { success: false, error: err.message };

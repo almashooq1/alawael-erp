@@ -158,10 +158,7 @@ router.put('/controls/:id', async (req, res) => {
     const control = await InternalControl.findByIdAndUpdate(
       req.params.id,
       stripUpdateMeta(req.body),
-      {
-        new: true,
-        runValidators: true,
-      }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!control) return res.status(404).json({ success: false, error: 'الضابط غير موجود' });
     res.json({ success: true, data: control });
@@ -248,7 +245,7 @@ router.put('/items/:id', async (req, res) => {
     if (!ComplianceItem)
       return res.status(501).json({ success: false, error: 'Model not available' });
     const item = await ComplianceItem.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!item) return res.status(404).json({ success: false, error: 'البند غير موجود' });
@@ -332,7 +329,7 @@ router.patch('/logs/:id/resolve', async (req, res) => {
     const log = await ComplianceLog.findByIdAndUpdate(
       req.params.id,
       { status: 'RESOLVED', resolvedAt: new Date(), resolvedBy: req.user?._id },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!log) return res.status(404).json({ success: false, error: 'السجل غير موجود' });
     res.json({ success: true, data: log, message: 'تم حل المشكلة' });
@@ -398,10 +395,7 @@ router.put('/metrics/:id', async (req, res) => {
     const metric = await ComplianceMetric.findByIdAndUpdate(
       req.params.id,
       stripUpdateMeta(req.body),
-      {
-        new: true,
-        runValidators: true,
-      }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!metric) return res.status(404).json({ success: false, error: 'المقياس غير موجود' });
     res.json({ success: true, data: metric });

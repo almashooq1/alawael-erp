@@ -283,7 +283,7 @@ router.post(
           approvalDate: new Date(),
           approvalNotes: notes,
         },
-        { new: true }
+        { returnDocument: 'after' }
       );
 
       res.json({
@@ -322,7 +322,7 @@ router.post(
           approvalDate: new Date(),
           approvalNotes: reason,
         },
-        { new: true }
+        { returnDocument: 'after' }
       );
 
       res.json({

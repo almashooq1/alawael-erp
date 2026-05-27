@@ -294,7 +294,7 @@ router.post(
         resolvedBy: staffId,
         resolutionNote: req.body.note,
       },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     if (!data) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data });
@@ -310,7 +310,7 @@ router.post(
     const data = await Conversation.findByIdAndUpdate(
       req.params.id,
       { assignedTo: req.body.staffId, status: 'pending_review' },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     if (!data) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data });
@@ -991,7 +991,7 @@ router.post(
           notes: req.body?.reason || 'admin_abandon',
         },
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });

@@ -350,7 +350,7 @@ class GosiFullService {
         paymentDetails: { contributions: contributionDetails },
         generatedBy,
       },
-      { upsert: true, new: true }
+      { upsert: true, returnDocument: 'after' }
     );
 
     logger.info(
@@ -459,7 +459,7 @@ class GosiFullService {
         totalContribution: components.grandTotal,
         updatedBy,
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 
@@ -496,7 +496,7 @@ class GosiFullService {
             paymentStatus: 'pending',
             notes: `مسير رواتب: ${payrollId}`,
           },
-          { upsert: true, new: true }
+          { upsert: true, returnDocument: 'after' }
         );
 
         results.push({ employeeId: item.employeeId, contribution });
@@ -525,7 +525,7 @@ class GosiFullService {
         approvedBy,
         approvedAt: new Date(),
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     if (!payment) throw new Error('سجل الدفع غير موجود');
@@ -728,7 +728,7 @@ class GosiFullService {
         isEstimated: false,
         confirmedBy,
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     if (!calc) throw new Error('حساب مكافأة نهاية الخدمة غير موجود');
@@ -744,7 +744,7 @@ class GosiFullService {
     return EndOfServiceCalculation.findByIdAndUpdate(
       calculationId,
       { status: 'paid', paidDate: new Date(paidDate) },
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 

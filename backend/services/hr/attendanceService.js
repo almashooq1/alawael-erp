@@ -177,7 +177,7 @@ class HRAttendanceService {
           approvedDate: new Date(),
           approvalNotes: approverData.notes,
         },
-        { new: true }
+        { returnDocument: 'after' }
       );
 
       if (!leave) throw new Error('الإجازة غير موجودة');
@@ -219,7 +219,7 @@ class HRAttendanceService {
           rejectedDate: new Date(),
           rejectionReason: rejectionData.reason,
         },
-        { new: true }
+        { returnDocument: 'after' }
       );
 
       if (!leave) throw new Error('الإجازة غير موجودة');

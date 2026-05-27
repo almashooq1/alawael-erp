@@ -180,7 +180,7 @@ router.put('/drafts/:id', async (req, res) => {
     const doc = await Communication.findOneAndUpdate(
       { _id: req.params.id, status: 'draft', sentBy: req.user._id },
       req.body,
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!doc) return res.status(404).json({ success: false, message: 'Draft not found' });
     res.json({ success: true, data: doc });
@@ -244,7 +244,7 @@ router.patch('/inbox/:id/read', async (req, res) => {
     const doc = await Communication.findOneAndUpdate(
       { _id: req.params.id, branchId: req.user.branchId },
       { isRead: true, readAt: new Date(), readBy: req.user._id },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!doc) return res.status(404).json({ success: false, message: 'Email not found' });
     res.json({ success: true, data: doc });
@@ -281,7 +281,7 @@ router.delete('/inbox/:id', async (req, res) => {
     const doc = await Communication.findOneAndUpdate(
       { _id: req.params.id, branchId: req.user.branchId },
       { isDeleted: true, deletedAt: new Date(), deletedBy: req.user._id },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!doc) return res.status(404).json({ success: false, message: 'Email not found' });
     res.json({ success: true, message: 'Email moved to trash' });
@@ -315,7 +315,7 @@ router.put('/preferences', async (req, res) => {
     const prefs = await EmailPref.findOneAndUpdate(
       { userId: req.user._id },
       { ...req.body, userId: req.user._id },
-      { upsert: true, new: true }
+      { upsert: true, returnDocument: 'after' }
     );
     res.json({ success: true, data: prefs });
   } catch (err) {
@@ -364,7 +364,7 @@ router.put('/templates/:id', requireRole('admin', 'manager'), async (req, res) =
     const doc = await NotifTmpl.findOneAndUpdate(
       { _id: req.params.id, branchId: req.user.branchId, type: 'email' },
       req.body,
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!doc) return res.status(404).json({ success: false, message: 'Template not found' });
     res.json({ success: true, data: doc });

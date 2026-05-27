@@ -103,7 +103,7 @@ router.put('/projects/:id', authorize(['admin', 'manager']), async (req, res) =>
         team,
         milestones,
       },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     ).lean();
     if (!project) return res.status(404).json({ success: false, message: 'المشروع غير موجود' });
     res.json({ success: true, data: project, message: 'تم تحديث المشروع' });
@@ -121,7 +121,7 @@ router.patch('/tasks/:id', async (req, res) => {
     const task = await Task.findByIdAndUpdate(
       req.params.id,
       { title, description, project, assignedTo, status, priority, dueDate, progress },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     if (!task) return res.status(404).json({ success: false, message: 'المهمة غير موجودة' });
     res.json({ success: true, data: task, message: 'تم تحديث المهمة' });

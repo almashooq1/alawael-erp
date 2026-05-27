@@ -193,7 +193,7 @@ router.put('/catalog/:id', requireRole('admin', 'manager'), async (req, res) => 
     const doc = await StudentActivity.findOneAndUpdate(
       { _id: req.params.id, branchId: req.user.branchId, activityType: 'reward_catalog' },
       { $set: { data: req.body } },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!doc) return res.status(404).json({ success: false, message: 'Catalog item not found' });
     res.json({ success: true, data: doc });

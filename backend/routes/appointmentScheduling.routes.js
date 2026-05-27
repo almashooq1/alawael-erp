@@ -141,10 +141,7 @@ router.put('/templates/:id', async (req, res) => {
     const template = await ScheduleTemplate.findByIdAndUpdate(
       req.params.id,
       pick(req.body, TEMPLATE_FIELDS),
-      {
-        new: true,
-        runValidators: true,
-      }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!template) return res.status(404).json({ success: false, message: 'القالب غير موجود' });
     res.json({ success: true, data: template });
@@ -302,7 +299,7 @@ router.patch('/slots/:id/cancel', async (req, res) => {
         currentPatients: 0,
         isOverbooked: false,
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!slot) return res.status(404).json({ success: false, message: 'الفترة غير موجودة' });
     res.json({ success: true, data: slot, message: 'تم إلغاء الحجز' });
@@ -316,7 +313,7 @@ router.patch('/slots/:id/block', async (req, res) => {
     const slot = await TimeSlot.findByIdAndUpdate(
       req.params.id,
       { status: 'blocked', notes: req.body.reason },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!slot) return res.status(404).json({ success: false, message: 'الفترة غير موجودة' });
     res.json({ success: true, data: slot });
@@ -467,7 +464,7 @@ router.patch('/waitlist/:id/offer', async (req, res) => {
         offeredAt: new Date(),
         offerExpiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!entry) return res.status(404).json({ success: false, message: 'سجل الانتظار غير موجود' });
     res.json({ success: true, data: entry });
@@ -481,7 +478,7 @@ router.patch('/waitlist/:id/cancel', async (req, res) => {
     const entry = await WaitlistEntry.findByIdAndUpdate(
       req.params.id,
       { status: 'cancelled' },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!entry) return res.status(404).json({ success: false, message: 'سجل الانتظار غير موجود' });
     res.json({ success: true, data: entry });

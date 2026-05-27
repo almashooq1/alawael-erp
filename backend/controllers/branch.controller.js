@@ -98,7 +98,7 @@ exports.updateBranch = async (req, res) => {
     const branch = await Branch.findOneAndUpdate(
       { code: req.params.branch_code.toUpperCase() },
       { $set: updates },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!branch) return fail(res, 'Branch not found', 404);
     ok(res, { branch }, 'Branch updated successfully');
@@ -113,7 +113,7 @@ exports.deleteBranch = async (req, res) => {
     const branch = await Branch.findOneAndUpdate(
       { code: req.params.branch_code.toUpperCase() },
       { status: 'inactive' },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!branch) return fail(res, 'Branch not found', 404);
     ok(res, { branch }, 'Branch deactivated successfully');
@@ -552,7 +552,7 @@ exports.updateBranchSettings = async (req, res) => {
     const branch = await Branch.findOneAndUpdate(
       { code: req.params.branch_code.toUpperCase() },
       { $set: { settings: req.body } },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!branch) return fail(res, 'Branch not found', 404);
     ok(res, { settings: branch.settings }, 'Settings updated');

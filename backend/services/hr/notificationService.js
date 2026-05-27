@@ -285,7 +285,7 @@ class HRNotificationService {
       return await Notification.findByIdAndUpdate(
         notificationId,
         { isRead: true, readAt: new Date() },
-        { new: true }
+        { returnDocument: 'after' }
       );
     } catch (error) {
       throw new Error(`خطأ في تعليم الإشعار: ${error.message}`);
@@ -362,7 +362,7 @@ class HRNotificationService {
             },
           },
         },
-        { new: true, upsert: true }
+        { returnDocument: 'after', upsert: true }
       );
 
       return notification;

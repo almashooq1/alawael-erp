@@ -79,7 +79,7 @@ router.put('/reports/:id', authMiddleware, requireBranchAccess, async (req, res)
     const report = await WorkflowSavedReport.findByIdAndUpdate(
       req.params.id,
       { ...req.body },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!report) return res.status(404).json({ success: false, message: 'غير موجود' });
     res.json({ success: true, data: report });

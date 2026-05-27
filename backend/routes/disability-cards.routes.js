@@ -203,12 +203,7 @@ router.post('/', requireRole(WRITE_ROLES), async (req, res) => {
     const doc = await Card.findOneAndUpdate(
       { ...branchFilter(req), /* W449 */ beneficiaryId: body.beneficiaryId },
       update,
-      {
-        new: true,
-        upsert: true,
-        setDefaultsOnInsert: true,
-        runValidators: true,
-      }
+      { returnDocument: 'after', upsert: true, setDefaultsOnInsert: true, runValidators: true }
     );
     res.status(201).json({ success: true, data: doc });
   } catch (err) {
@@ -238,10 +233,7 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
     const row = await Card.findOneAndUpdate(
       { _id: req.params.id, ...branchFilter(req) },
       /* W449 */ body,
-      {
-        new: true,
-        runValidators: true,
-      }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!row) return res.status(404).json({ success: false, message: 'البطاقة غير موجودة' });
     res.json({ success: true, data: row });

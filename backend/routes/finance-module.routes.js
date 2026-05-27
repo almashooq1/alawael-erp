@@ -150,7 +150,7 @@ router.put(
     const account = await ChartOfAccount.findOneAndUpdate(
       { _id: req.params.id, deleted_at: null },
       { ...updateData, updated_at: new Date() },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!account) return res.status(404).json({ success: false, message: 'الحساب غير موجود' });
     res.json({ success: true, data: account, message: 'تم تحديث الحساب' });
@@ -165,7 +165,7 @@ router.delete(
     const account = await ChartOfAccount.findOneAndUpdate(
       { _id: req.params.id, deleted_at: null },
       { deleted_at: new Date(), is_active: false },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!account) return res.status(404).json({ success: false, message: 'الحساب غير موجود' });
     res.json({ success: true, message: 'تم حذف الحساب' });
@@ -259,7 +259,7 @@ router.post(
         approved_by: req.user?._id,
         approved_at: new Date(),
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!entry)
       return res
@@ -327,7 +327,7 @@ router.delete(
     const entry = await JournalEntry.findOneAndUpdate(
       { _id: req.params.id, deleted_at: null, status: 'draft' },
       { deleted_at: new Date(), status: 'cancelled' },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!entry)
       return res.status(404).json({ success: false, message: 'القيد غير موجود أو لا يمكن حذفه' });
@@ -476,7 +476,7 @@ router.post(
     const invoice = await Invoice.findOneAndUpdate(
       { _id: req.params.id, deleted_at: null, status: { $in: ['draft', 'pending'] } },
       { status: 'cancelled', cancellation_reason: req.body.reason, updated_at: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!invoice)
       return res
@@ -701,7 +701,7 @@ router.delete(
     const payment = await Payment.findOneAndUpdate(
       { _id: req.params.id, deleted_at: null, status: { $in: ['pending', 'failed'] } },
       { deleted_at: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!payment)
       return res
@@ -802,7 +802,7 @@ router.post(
         submitted_at: new Date(),
         submitted_by: req.user?._id,
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!claim)
       return res
@@ -827,7 +827,7 @@ router.post(
         insurance_notes: notes,
         approved_at: new Date(),
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!claim) return res.status(404).json({ success: false, message: 'المطالبة غير موجودة' });
     res.json({ success: true, data: claim, message: 'تم اعتماد المطالبة' });
@@ -846,7 +846,7 @@ router.post(
         rejection_reason: req.body.reason,
         rejected_at: new Date(),
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!claim) return res.status(404).json({ success: false, message: 'المطالبة غير موجودة' });
     res.json({ success: true, data: claim, message: 'تم رفض المطالبة' });
@@ -861,7 +861,7 @@ router.delete(
     const claim = await InsuranceClaim.findOneAndUpdate(
       { _id: req.params.id, deleted_at: null, status: 'draft' },
       { deleted_at: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!claim)
       return res

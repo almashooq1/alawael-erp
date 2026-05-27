@@ -163,7 +163,7 @@ router.put(
       const group = await Group.findOneAndUpdate(
         { _id: req.params.id, ...branchFilter(req) } /* W448 */,
         { $set: updates },
-        { new: true, runValidators: true }
+        { returnDocument: 'after', runValidators: true }
       ).lean();
 
       if (!group) {
@@ -183,7 +183,7 @@ router.delete('/:id', async (req, res) => {
     const group = await Group.findOneAndUpdate(
       { _id: req.params.id, ...branchFilter(req) } /* W448 */,
       { $set: { status: 'deleted' } },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     if (!group) {

@@ -242,7 +242,7 @@ function createHrWebhooksRouter({ subscriptionModel, logger = console } = {}) {
         .findOneAndUpdate(
           { _id: req.params.id, deleted_at: null },
           { $set: update },
-          { new: true, runValidators: true }
+          { returnDocument: 'after', runValidators: true }
         )
         .lean();
       if (!doc) return res.status(404).json({ error: 'not found' });
@@ -265,7 +265,7 @@ function createHrWebhooksRouter({ subscriptionModel, logger = console } = {}) {
         .findOneAndUpdate(
           { _id: req.params.id, deleted_at: null },
           { $set: { deleted_at: new Date(), is_active: false } },
-          { new: true }
+          { returnDocument: 'after' }
         )
         .lean();
       if (!doc) return res.status(404).json({ error: 'not found' });
@@ -289,7 +289,7 @@ function createHrWebhooksRouter({ subscriptionModel, logger = console } = {}) {
         .findOneAndUpdate(
           { _id: req.params.id, deleted_at: null },
           { $set: { hmac_secret: newSecret } },
-          { new: true }
+          { returnDocument: 'after' }
         )
         .lean();
       if (!doc) return res.status(404).json({ error: 'not found' });

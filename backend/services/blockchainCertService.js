@@ -158,7 +158,7 @@ async function issueCertificate(certId, { userId } = {}) {
   const cert = await BlockchainCertificate.findOneAndUpdate(
     { _id: certId, status: 'draft' },
     { $set: { status: 'issuing' } },
-    { new: true }
+    { returnDocument: 'after' }
   );
   if (!cert) {
     const existing = await BlockchainCertificate.findById(certId).select('status').lean();
@@ -304,7 +304,7 @@ async function revokeCertificate(certId, { userId, reason }) {
   const cert = await BlockchainCertificate.findOneAndUpdate(
     { _id: certId, status: { $ne: 'revoked' } },
     { $set: { status: 'revoked', revocation } },
-    { new: true }
+    { returnDocument: 'after' }
   );
   if (!cert) {
     const existing = await BlockchainCertificate.findById(certId).select('status').lean();

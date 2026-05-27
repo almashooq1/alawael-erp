@@ -314,7 +314,7 @@ const updateTemplate = async (req, res) => {
     const template = await ImportExportTemplate.findOneAndUpdate(
       { _id: req.params.id, isDeleted: false },
       { ...req.body, updatedBy: userId },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     if (!template) {
@@ -337,7 +337,7 @@ const deleteTemplate = async (req, res) => {
     const template = await ImportExportTemplate.findOneAndUpdate(
       { _id: req.params.id, isDeleted: false },
       { isDeleted: true, isActive: false, deletedAt: new Date(), updatedBy: userId },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     if (!template) {

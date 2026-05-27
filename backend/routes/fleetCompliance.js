@@ -61,7 +61,7 @@ router.put('/:id', authorize('admin', 'manager', 'compliance_officer'), async (r
   try {
     const FleetCompliance = require('../models/Fleet/FleetCompliance');
     const record = await FleetCompliance.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!record)
@@ -82,7 +82,7 @@ router.patch(
       const record = await FleetCompliance.findByIdAndUpdate(
         req.params.id,
         { status: 'resolved', resolution, notes, resolvedAt: new Date(), resolvedBy: req.user._id },
-        { new: true }
+        { returnDocument: 'after' }
       );
       if (!record)
         return res.status(404).json({ success: false, message: 'Compliance record not found' });

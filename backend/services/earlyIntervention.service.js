@@ -74,7 +74,7 @@ class EarlyInterventionService {
   async updateChild(id, data, userId) {
     data.updatedBy = userId;
     const child = await EarlyInterventionChild.findByIdAndUpdate(id, data, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!child) throw new Error('ملف الطفل غير موجود');
@@ -209,7 +209,7 @@ class EarlyInterventionService {
   async updateScreening(id, data, userId) {
     data.updatedBy = userId;
     const screening = await DevelopmentalScreening.findByIdAndUpdate(id, data, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!screening) throw new Error('سجل الفحص غير موجود');
@@ -338,7 +338,7 @@ class EarlyInterventionService {
     }
 
     const milestone = await DevelopmentalMilestone.findByIdAndUpdate(id, data, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!milestone) throw new Error('المعلم التنموي غير موجود');
@@ -465,7 +465,10 @@ class EarlyInterventionService {
 
   async updateIFSP(id, data, userId) {
     data.updatedBy = userId;
-    const ifsp = await IFSP.findByIdAndUpdate(id, data, { new: true, runValidators: true });
+    const ifsp = await IFSP.findByIdAndUpdate(id, data, {
+      returnDocument: 'after',
+      runValidators: true,
+    });
     if (!ifsp) throw new Error('خطة IFSP غير موجودة');
     logger.info(`[EIS] IFSP updated: ${ifsp.planNumber} by user ${userId}`);
     return ifsp;
@@ -591,7 +594,7 @@ class EarlyInterventionService {
   async updateReferral(id, data, userId) {
     data.updatedBy = userId;
     const referral = await EarlyReferral.findByIdAndUpdate(id, data, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!referral) throw new Error('الإحالة غير موجودة');

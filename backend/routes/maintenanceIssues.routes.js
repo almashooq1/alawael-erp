@@ -119,10 +119,7 @@ router.put('/:id', requireAuth, requireBranchAccess, async (req, res) => {
     const issue = await MaintenanceIssue.findOneAndUpdate(
       { _id: req.params.id, ...branchFilter(req) },
       stripUpdateMeta(req.body),
-      {
-        new: true,
-        runValidators: true,
-      }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!issue) return res.status(404).json({ success: false, message: 'Issue not found' });
     res.json({ success: true, data: issue });
@@ -166,10 +163,7 @@ router.patch('/:id/status', requireAuth, requireBranchAccess, async (req, res) =
     const issue = await MaintenanceIssue.findOneAndUpdate(
       { _id: req.params.id, ...branchFilter(req) },
       update,
-      {
-        new: true,
-        runValidators: true,
-      }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!issue) return res.status(404).json({ success: false, message: 'Issue not found' });
 
@@ -200,7 +194,7 @@ router.post('/:id/diagnosis', requireAuth, requireBranchAccess, async (req, res)
           diagnosisDate: new Date(),
         },
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!issue) return res.status(404).json({ success: false, message: 'Issue not found' });
     res.json({ success: true, data: issue });
@@ -224,7 +218,7 @@ router.post('/:id/comments', requireAuth, requireBranchAccess, async (req, res) 
           },
         },
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!issue) return res.status(404).json({ success: false, message: 'Issue not found' });
     res.json({ success: true, data: issue.comments[issue.comments.length - 1] });

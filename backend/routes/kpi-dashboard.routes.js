@@ -54,7 +54,7 @@ router.post('/categories', async (req, res) => {
 router.put('/categories/:id', async (req, res) => {
   try {
     const category = await KpiCategory.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
+      returnDocument: 'after',
     });
     if (!category) return res.status(404).json({ success: false, message: 'الفئة غير موجودة' });
     res.json({ success: true, data: category });
@@ -110,9 +110,7 @@ router.put('/definitions/:id', async (req, res) => {
     const definition = await KpiDefinition.findByIdAndUpdate(
       req.params.id,
       stripUpdateMeta(req.body),
-      {
-        new: true,
-      }
+      { returnDocument: 'after' }
     );
     if (!definition) return res.status(404).json({ success: false, message: 'التعريف غير موجود' });
     res.json({ success: true, data: definition });
@@ -256,7 +254,7 @@ router.post('/set-target', async (req, res) => {
         departmentId: null,
       },
       { targetValue, minimumValue, stretchValue, setBy: req.user?._id },
-      { upsert: true, new: true }
+      { upsert: true, returnDocument: 'after' }
     );
 
     res.json({ success: true, message: 'تم تحديث الهدف بنجاح', data: target });
@@ -332,7 +330,7 @@ router.put('/alerts/:id/acknowledge', async (req, res) => {
         acknowledgedBy: req.user?._id,
         isRead: true,
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!alert) return res.status(404).json({ success: false, message: 'التنبيه غير موجود' });
     res.json({ success: true, data: alert });

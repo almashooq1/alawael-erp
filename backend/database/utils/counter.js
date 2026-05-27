@@ -212,7 +212,7 @@ async function getNextNumber(counterName, overrides = {}) {
     const corrected = await Counter.findOneAndUpdate(
       { _id: key, seq: { $lt: startAt } },
       { $set: { seq: startAt } },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (corrected) seq = startAt;
   }

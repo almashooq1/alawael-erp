@@ -504,7 +504,7 @@ class DocumentAutomationService {
     const rule = await AutomationRule.findByIdAndUpdate(
       ruleId,
       { $set: updates },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     if (!rule) return { success: false, error: 'القاعدة غير موجودة' };
     return { success: true, rule };

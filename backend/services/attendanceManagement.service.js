@@ -551,7 +551,7 @@ class AttendanceManagementService {
           source,
         },
       },
-      { upsert: true, new: true }
+      { upsert: true, returnDocument: 'after' }
     );
 
     return { success: true, message: 'تم حفظ السجل بنجاح', record };
@@ -622,7 +622,7 @@ class AttendanceManagementService {
           processedAt: now,
         },
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!leave) {
       const existing = await Leave().findById(leaveId).select('status').lean();

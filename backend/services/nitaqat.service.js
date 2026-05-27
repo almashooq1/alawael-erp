@@ -127,7 +127,7 @@ class NitaqatService {
         recommendations,
         calculatedBy,
       },
-      { upsert: true, new: true }
+      { upsert: true, returnDocument: 'after' }
     );
 
     logger.info(

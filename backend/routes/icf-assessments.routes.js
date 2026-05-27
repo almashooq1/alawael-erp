@@ -230,7 +230,11 @@ router.put(
   '/:id',
   asyncHandler(async (req, res) => {
     const M = IcfAssessment();
-    const doc = await M.findByIdAndUpdate(req.params.id, { $set: req.body }, { new: true }).lean();
+    const doc = await M.findByIdAndUpdate(
+      req.params.id,
+      { $set: req.body },
+      { returnDocument: 'after' }
+    ).lean();
     if (!doc) return res.status(404).json({ success: false, message: 'Assessment not found' });
     res.json({ success: true, data: doc });
   })
@@ -243,7 +247,7 @@ router.patch(
     const doc = await M.findByIdAndUpdate(
       req.params.id,
       { $set: { status: req.body.status } },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     res.json({ success: true, data: doc });
   })

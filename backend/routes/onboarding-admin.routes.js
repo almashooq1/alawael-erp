@@ -147,7 +147,9 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
     if (patch.status === 'completed' && !patch.actualCompletionDate) {
       patch.actualCompletionDate = new Date();
     }
-    const row = await OnboardingChecklist.findByIdAndUpdate(req.params.id, patch, { new: true });
+    const row = await OnboardingChecklist.findByIdAndUpdate(req.params.id, patch, {
+      returnDocument: 'after',
+    });
     if (!row) return res.status(404).json({ success: false, message: 'غير موجود' });
     res.json({ success: true, data: row });
   } catch (err) {

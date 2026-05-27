@@ -319,7 +319,7 @@ async function handleIncomingMessage(msg, contact, _phoneNumberId) {
         },
         $inc: { unreadCount: 1 },
       },
-      { upsert: true, new: true }
+      { upsert: true, returnDocument: 'after' }
     );
 
     // Mark as read with WhatsApp API

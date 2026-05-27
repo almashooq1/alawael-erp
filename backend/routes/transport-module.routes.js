@@ -271,7 +271,7 @@ router.put(
     const vehicle = await Vehicle.findOneAndUpdate(
       { _id: req.params.id, deleted_at: null },
       { ...updateData, updated_at: new Date() },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!vehicle) return res.status(404).json({ success: false, message: 'المركبة غير موجودة' });
     res.json({ success: true, data: vehicle, message: 'تم تحديث بيانات المركبة' });
@@ -286,7 +286,7 @@ router.delete(
     const vehicle = await Vehicle.findOneAndUpdate(
       { _id: req.params.id, deleted_at: null },
       { deleted_at: new Date(), status: 'decommissioned' },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!vehicle) return res.status(404).json({ success: false, message: 'المركبة غير موجودة' });
     res.json({ success: true, message: 'تم حذف المركبة' });
@@ -317,7 +317,7 @@ router.post(
     const vehicle = await Vehicle.findOneAndUpdate(
       { _id: req.params.id, deleted_at: null },
       { current_driver_id: driver_id, updated_at: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     ).populate('current_driver_id', 'name phone');
     if (!vehicle) return res.status(404).json({ success: false, message: 'المركبة غير موجودة' });
     res.json({ success: true, data: vehicle, message: 'تم تعيين السائق' });
@@ -401,7 +401,7 @@ router.put(
     const route = await TransportRoute.findOneAndUpdate(
       { _id: req.params.id, deleted_at: null },
       { ...updateData, updated_at: new Date() },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!route) return res.status(404).json({ success: false, message: 'المسار غير موجود' });
     res.json({ success: true, data: route, message: 'تم تحديث المسار' });
@@ -416,7 +416,7 @@ router.delete(
     const route = await TransportRoute.findOneAndUpdate(
       { _id: req.params.id, deleted_at: null },
       { deleted_at: new Date(), status: 'inactive' },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!route) return res.status(404).json({ success: false, message: 'المسار غير موجود' });
     res.json({ success: true, message: 'تم حذف المسار' });
@@ -585,7 +585,7 @@ router.put(
     const trip = await Trip.findOneAndUpdate(
       { _id: req.params.id, deleted_at: null },
       { ...updateData, updated_at: new Date() },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!trip) return res.status(404).json({ success: false, message: 'الرحلة غير موجودة' });
     res.json({ success: true, data: trip, message: 'تم تحديث الرحلة' });
@@ -698,7 +698,7 @@ router.post(
         cancelled_at: new Date(),
         cancelled_by: req.user?._id,
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!trip)
       return res
@@ -844,7 +844,7 @@ router.delete(
     const trip = await Trip.findOneAndUpdate(
       { _id: req.params.id, deleted_at: null, status: 'scheduled' },
       { deleted_at: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!trip)
       return res
@@ -1134,7 +1134,7 @@ router.put(
     const record = await VehicleMaintenance.findOneAndUpdate(
       { _id: req.params.id, deleted_at: null },
       { ...updateData, updated_at: new Date() },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!record) return res.status(404).json({ success: false, message: 'سجل الصيانة غير موجود' });
     res.json({ success: true, data: record, message: 'تم تحديث سجل الصيانة' });
@@ -1149,7 +1149,7 @@ router.delete(
     const record = await VehicleMaintenance.findOneAndUpdate(
       { _id: req.params.id, deleted_at: null },
       { deleted_at: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!record) return res.status(404).json({ success: false, message: 'سجل الصيانة غير موجود' });
     res.json({ success: true, message: 'تم حذف سجل الصيانة' });

@@ -90,13 +90,21 @@ const createStudy = async (data, userId) => {
 };
 
 const updateStudy = async (id, data) => {
-  return ResearchStudy.findByIdAndUpdate(id, { $set: data }, { new: true, runValidators: true })
+  return ResearchStudy.findByIdAndUpdate(
+    id,
+    { $set: data },
+    { returnDocument: 'after', runValidators: true }
+  )
     .populate('principalInvestigator', 'fullName email role')
     .lean();
 };
 
 const deleteStudy = async id => {
-  return ResearchStudy.findByIdAndUpdate(id, { isActive: false }, { new: true }).lean();
+  return ResearchStudy.findByIdAndUpdate(
+    id,
+    { isActive: false },
+    { returnDocument: 'after' }
+  ).lean();
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -160,12 +168,16 @@ const updateOutcomeMeasure = async (id, data) => {
   return OutcomeMeasure.findByIdAndUpdate(
     id,
     { $set: data },
-    { new: true, runValidators: true }
+    { returnDocument: 'after', runValidators: true }
   ).lean();
 };
 
 const deleteOutcomeMeasure = async id => {
-  return OutcomeMeasure.findByIdAndUpdate(id, { isActive: false }, { new: true }).lean();
+  return OutcomeMeasure.findByIdAndUpdate(
+    id,
+    { isActive: false },
+    { returnDocument: 'after' }
+  ).lean();
 };
 
 /**
@@ -472,12 +484,16 @@ const updateDataset = async (id, data) => {
   return AnonymizedDataset.findByIdAndUpdate(
     id,
     { $set: data },
-    { new: true, runValidators: true }
+    { returnDocument: 'after', runValidators: true }
   ).lean();
 };
 
 const deleteDataset = async id => {
-  return AnonymizedDataset.findByIdAndUpdate(id, { isActive: false }, { new: true }).lean();
+  return AnonymizedDataset.findByIdAndUpdate(
+    id,
+    { isActive: false },
+    { returnDocument: 'after' }
+  ).lean();
 };
 
 /**
@@ -491,7 +507,7 @@ const logDatasetAccess = async (datasetId, userId, action, ipAddress, purpose) =
         accessLog: { userId, action, ipAddress, purpose, timestamp: new Date() },
       },
     },
-    { new: true }
+    { returnDocument: 'after' }
   ).lean();
 };
 
@@ -556,12 +572,16 @@ const updateEffectivenessReport = async (id, data) => {
   return ProgramEffectiveness.findByIdAndUpdate(
     id,
     { $set: data },
-    { new: true, runValidators: true }
+    { returnDocument: 'after', runValidators: true }
   ).lean();
 };
 
 const deleteEffectivenessReport = async id => {
-  return ProgramEffectiveness.findByIdAndUpdate(id, { isActive: false }, { new: true }).lean();
+  return ProgramEffectiveness.findByIdAndUpdate(
+    id,
+    { isActive: false },
+    { returnDocument: 'after' }
+  ).lean();
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -612,12 +632,16 @@ const updateBenchmarkingReport = async (id, data) => {
   return BenchmarkingReport.findByIdAndUpdate(
     id,
     { $set: data },
-    { new: true, runValidators: true }
+    { returnDocument: 'after', runValidators: true }
   ).lean();
 };
 
 const deleteBenchmarkingReport = async id => {
-  return BenchmarkingReport.findByIdAndUpdate(id, { isActive: false }, { new: true }).lean();
+  return BenchmarkingReport.findByIdAndUpdate(
+    id,
+    { isActive: false },
+    { returnDocument: 'after' }
+  ).lean();
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -687,7 +711,10 @@ const updateExport = async (id, data, userId) => {
       auditTrail: { action: 'configured', performedBy: userId, details: 'Export updated' },
     };
   }
-  return ResearchDataExport.findByIdAndUpdate(id, data, { new: true, runValidators: true }).lean();
+  return ResearchDataExport.findByIdAndUpdate(id, data, {
+    returnDocument: 'after',
+    runValidators: true,
+  }).lean();
 };
 
 const approveExport = async (id, userId) => {
@@ -701,7 +728,7 @@ const approveExport = async (id, userId) => {
         auditTrail: { action: 'approved', performedBy: userId, details: 'Export approved' },
       },
     },
-    { new: true }
+    { returnDocument: 'after' }
   ).lean();
 };
 
@@ -714,12 +741,16 @@ const revokeExport = async (id, userId, reason) => {
         auditTrail: { action: 'revoked', performedBy: userId, details: reason || 'Export revoked' },
       },
     },
-    { new: true }
+    { returnDocument: 'after' }
   ).lean();
 };
 
 const deleteExport = async id => {
-  return ResearchDataExport.findByIdAndUpdate(id, { isActive: false }, { new: true }).lean();
+  return ResearchDataExport.findByIdAndUpdate(
+    id,
+    { isActive: false },
+    { returnDocument: 'after' }
+  ).lean();
 };
 
 // ═══════════════════════════════════════════════════════════════════════════

@@ -152,7 +152,7 @@ router.post('/records', async (req, res) => {
 router.put('/records/:id', async (req, res) => {
   try {
     const record = await MedicalRecord.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!record) return res.status(404).json({ success: false, message: 'السجل الطبي غير موجود' });
@@ -325,7 +325,7 @@ router.post('/lab-results', async (req, res) => {
 router.put('/lab-results/:id', async (req, res) => {
   try {
     const result = await LabResult.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!result) return res.status(404).json({ success: false, message: 'النتيجة غير موجودة' });
@@ -446,7 +446,7 @@ router.patch('/clinical-notes/:id/finalize', async (req, res) => {
     const note = await ClinicalNote.findByIdAndUpdate(
       req.params.id,
       { status: 'final' },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!note) return res.status(404).json({ success: false, message: 'الملاحظة غير موجودة' });
     logger.info(`[EMR] Clinical note finalized: ${note._id}`);
@@ -540,7 +540,7 @@ router.post('/allergies', async (req, res) => {
 router.put('/allergies/:id', async (req, res) => {
   try {
     const allergy = await Allergy.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!allergy)

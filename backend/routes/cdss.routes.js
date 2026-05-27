@@ -166,7 +166,7 @@ router.put(
     const rule = await ClinicalRule.findOneAndUpdate(
       { _id: req.params.id, deletedAt: null },
       { ...stripUpdateMeta(req.body), updatedBy: req.user?._id },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!rule) return res.status(404).json({ message: 'القاعدة السريرية غير موجودة' });
     res.json({ message: 'تم التحديث بنجاح', data: rule });
@@ -180,7 +180,7 @@ router.delete(
     const rule = await ClinicalRule.findOneAndUpdate(
       { _id: req.params.id, deletedAt: null },
       { deletedAt: new Date(), updatedBy: req.user?._id },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!rule) return res.status(404).json({ message: 'القاعدة السريرية غير موجودة' });
     res.json({ message: 'تم الحذف بنجاح' });
@@ -316,7 +316,7 @@ router.patch(
         acknowledgedBy: req.user?._id,
         updatedBy: req.user?._id,
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!alert) return res.status(404).json({ message: 'التنبيه غير موجود' });
     res.json({ message: 'تم استلام التنبيه', data: alert });
@@ -339,7 +339,7 @@ router.patch(
         acknowledgedBy: req.user?._id,
         updatedBy: req.user?._id,
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!alert) return res.status(404).json({ message: 'التنبيه غير موجود' });
 
@@ -367,7 +367,7 @@ router.patch(
     const alert = await CdssAlert.findOneAndUpdate(
       { _id: req.params.id, deletedAt: null },
       { status: 'resolved', resolvedAt: new Date(), updatedBy: req.user?._id },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!alert) return res.status(404).json({ message: 'التنبيه غير موجود' });
     res.json({ message: 'تم حل التنبيه', data: alert });
@@ -435,7 +435,7 @@ router.put(
     const drug = await DrugLibrary.findOneAndUpdate(
       { _id: req.params.id, deletedAt: null },
       { ...stripUpdateMeta(req.body), updatedBy: req.user?._id },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!drug) return res.status(404).json({ message: 'الدواء غير موجود' });
     res.json({ message: 'تم التحديث بنجاح', data: drug });
@@ -449,7 +449,7 @@ router.delete(
     const drug = await DrugLibrary.findOneAndUpdate(
       { _id: req.params.id, deletedAt: null },
       { deletedAt: new Date(), updatedBy: req.user?._id },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!drug) return res.status(404).json({ message: 'الدواء غير موجود' });
     res.json({ message: 'تم الحذف بنجاح' });
@@ -657,7 +657,7 @@ router.patch(
         modificationsMade: req.body.modifications,
         updatedBy: req.user?._id,
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!suggestion) return res.status(404).json({ message: 'الاقتراح غير موجود' });
 
@@ -683,7 +683,7 @@ router.patch(
     const suggestion = await RehabPlanSuggestion.findOneAndUpdate(
       { _id: req.params.id, deletedAt: null },
       { status: 'rejected', clinicianNotes: req.body.reason, updatedBy: req.user?._id },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!suggestion) return res.status(404).json({ message: 'الاقتراح غير موجود' });
     res.json({ message: 'تم رفض الاقتراح', data: suggestion });
@@ -739,7 +739,7 @@ router.patch(
         confirmedAt: new Date(),
         updatedBy: req.user?._id,
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!diagnosis) return res.status(404).json({ message: 'التشخيص التفريقي غير موجود' });
     res.json({ message: 'تم تأكيد التشخيص', data: diagnosis });

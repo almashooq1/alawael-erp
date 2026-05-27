@@ -82,7 +82,7 @@ async function saveOrUpdate(ChequeModel, id, patch, expectedFromStatus) {
   // is exported via the closure for future flexibility).
   const filter = expectedFromStatus ? { _id: id, status: expectedFromStatus } : { _id: id };
   const updated = await ChequeModel.findOneAndUpdate(filter, patch, {
-    new: true,
+    returnDocument: 'after',
     runValidators: true,
   });
   if (!updated) {

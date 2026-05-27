@@ -210,7 +210,7 @@ class ARVRService extends BaseService {
     const doc = await ARVRSession.findByIdAndUpdate(
       id,
       { status: 'in_progress', startedAt: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
     return shapeSession(doc);
   }
@@ -221,13 +221,17 @@ class ARVRService extends BaseService {
     const doc = await ARVRSession.findByIdAndUpdate(
       id,
       { status: 'paused', $inc: { pauseCount: 1 } },
-      { new: true }
+      { returnDocument: 'after' }
     );
     return shapeSession(doc);
   }
   async resumeSession(id) {
     const ARVRSession = mongoose.model('ARVRSession');
-    const doc = await ARVRSession.findByIdAndUpdate(id, { status: 'in_progress' }, { new: true });
+    const doc = await ARVRSession.findByIdAndUpdate(
+      id,
+      { status: 'in_progress' },
+      { returnDocument: 'after' }
+    );
     return shapeSession(doc);
   }
 
@@ -286,7 +290,7 @@ class ARVRService extends BaseService {
       };
     }
 
-    const doc = await ARVRSession.findByIdAndUpdate(id, update, { new: true });
+    const doc = await ARVRSession.findByIdAndUpdate(id, update, { returnDocument: 'after' });
     return shapeSession(doc);
   }
 
@@ -296,7 +300,7 @@ class ARVRService extends BaseService {
     const doc = await ARVRSession.findByIdAndUpdate(
       id,
       { status: 'aborted', abortReason: reason, endedAt: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
     return shapeSession(doc);
   }
@@ -332,7 +336,7 @@ class ARVRService extends BaseService {
       },
       $push: { 'safety.safetyIncidents': incident },
     };
-    const doc = await ARVRSession.findByIdAndUpdate(id, update, { new: true });
+    const doc = await ARVRSession.findByIdAndUpdate(id, update, { returnDocument: 'after' });
     return shapeSession(doc);
   }
 

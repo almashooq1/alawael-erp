@@ -265,7 +265,7 @@ router.post(
     const appointment = await Appointment.findOneAndUpdate(
       { _id: req.params.id, deleted_at: null, status: 'pending' },
       { status: 'confirmed', confirmed_at: new Date(), confirmed_by: req.user?._id },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!appointment)
       return res
@@ -294,7 +294,7 @@ router.post(
         duration_actual: duration_actual || undefined,
         attendance_status: attendance_status || 'attended',
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!appointment)
       return res
@@ -321,7 +321,7 @@ router.post(
         cancelled_by: req.body.cancelled_by || 'center',
         cancelled_at: new Date(),
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!appointment)
       return res
@@ -384,7 +384,7 @@ router.delete(
     const appointment = await Appointment.findOneAndUpdate(
       { _id: req.params.id, deleted_at: null, status: 'pending' },
       { deleted_at: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!appointment)
       return res.status(404).json({ success: false, message: 'الموعد غير موجود أو لا يمكن حذفه' });
@@ -646,7 +646,7 @@ router.post(
     const recurrence = await AppointmentRecurrence.findOneAndUpdate(
       { _id: req.params.id, deleted_at: null, status: 'active' },
       { status: 'paused', pause_reason: req.body.reason, paused_at: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!recurrence)
       return res.status(404).json({ success: false, message: 'جدول التكرار غير موجود' });
@@ -673,7 +673,7 @@ router.post(
     const recurrence = await AppointmentRecurrence.findOneAndUpdate(
       { _id: req.params.id, deleted_at: null, status: 'paused' },
       { status: 'active', resumed_at: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!recurrence)
       return res.status(404).json({ success: false, message: 'جدول التكرار غير موجود' });
@@ -710,7 +710,7 @@ router.delete(
     const recurrence = await AppointmentRecurrence.findOneAndUpdate(
       { _id: req.params.id, deleted_at: null },
       { deleted_at: new Date(), status: 'cancelled' },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!recurrence)
       return res.status(404).json({ success: false, message: 'جدول التكرار غير موجود' });
@@ -809,7 +809,7 @@ router.delete(
     const booking = await RoomBooking.findOneAndUpdate(
       { _id: req.params.id, deleted_at: null },
       { deleted_at: new Date(), status: 'cancelled' },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!booking) return res.status(404).json({ success: false, message: 'الحجز غير موجود' });
     res.json({ success: true, message: 'تم إلغاء حجز الغرفة' });
@@ -939,7 +939,7 @@ router.put(
     const entry = await WaitlistEntry.findOneAndUpdate(
       { _id: req.params.id, deleted_at: null },
       { ...updateData, updated_at: new Date() },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!entry) return res.status(404).json({ success: false, message: 'الإدخال غير موجود' });
     res.json({ success: true, data: entry, message: 'تم تحديث بيانات الانتظار' });
@@ -959,7 +959,7 @@ router.post(
         removed_at: new Date(),
         deleted_at: new Date(),
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!entry) return res.status(404).json({ success: false, message: 'الإدخال غير موجود' });
     res.json({ success: true, message: 'تم الإزالة من قائمة الانتظار' });

@@ -176,10 +176,7 @@ router.put('/:id', requireAuth, requireBranchAccess, async (req, res) => {
     const doc = await Activity.findOneAndUpdate(
       { _id: req.params.id, ...branchFilter(req) },
       stripUpdateMeta(req.body),
-      {
-        new: true,
-        runValidators: true,
-      }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!doc) return res.status(404).json({ success: false, message: 'Activity not found' });
     res.json({ success: true, data: doc });
@@ -215,7 +212,7 @@ router.patch('/:id/status', requireAuth, requireBranchAccess, async (req, res) =
     const doc = await Activity.findOneAndUpdate(
       { _id: req.params.id, ...branchFilter(req) },
       { status },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!doc) return res.status(404).json({ success: false, message: 'Activity not found' });
     res.json({ success: true, data: doc });
@@ -235,7 +232,7 @@ router.post('/:id/participants', requireAuth, requireBranchAccess, async (req, r
     const doc = await Activity.findOneAndUpdate(
       { _id: req.params.id, ...branchFilter(req) },
       { $addToSet: { participants: { $each: participantIds } } },
-      { new: true }
+      { returnDocument: 'after' }
     ).populate('participants', 'name');
 
     if (!doc) return res.status(404).json({ success: false, message: 'Activity not found' });
@@ -255,7 +252,7 @@ router.delete(
       const doc = await Activity.findOneAndUpdate(
         { _id: req.params.id, ...branchFilter(req) },
         { $pull: { participants: req.params.participantId } },
-        { new: true }
+        { returnDocument: 'after' }
       ).populate('participants', 'name');
 
       if (!doc) return res.status(404).json({ success: false, message: 'Activity not found' });

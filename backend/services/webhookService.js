@@ -99,7 +99,7 @@ class WebhookService {
       const webhook = await Webhook.findByIdAndUpdate(
         webhookId,
         { ...data, updatedAt: new Date() },
-        { new: true, runValidators: true }
+        { returnDocument: 'after', runValidators: true }
       ).populate('createdBy', 'firstName lastName email');
 
       if (!webhook) return null;
@@ -338,7 +338,7 @@ class WebhookService {
       const webhook = await Webhook.findByIdAndUpdate(
         webhookId,
         { isActive: false, status: 'inactive', updatedAt: new Date() },
-        { new: true }
+        { returnDocument: 'after' }
       );
 
       if (!webhook) return null;
@@ -359,7 +359,7 @@ class WebhookService {
       const webhook = await Webhook.findByIdAndUpdate(
         webhookId,
         { isActive: true, status: 'active', updatedAt: new Date() },
-        { new: true }
+        { returnDocument: 'after' }
       );
 
       if (!webhook) return null;

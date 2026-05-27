@@ -87,7 +87,7 @@ router.put('/folders/:id', async (req, res) => {
     const folder = await FileFolder.findOneAndUpdate(
       { _id: req.params.id, deleted_at: null, is_system: { $ne: true } },
       req.body,
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!folder) return res.status(404).json({ success: false, error: 'المجلد غير موجود أو محمي' });
     res.json({ success: true, data: folder });
@@ -223,7 +223,7 @@ router.put('/files/:id', async (req, res) => {
     const file = await FileRecord.findOneAndUpdate(
       { _id: req.params.id, deleted_at: null },
       { ...req.body, updated_by: req.user._id },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!file) return res.status(404).json({ success: false, error: 'الملف غير موجود' });
     res.json({ success: true, data: file });
@@ -238,7 +238,7 @@ router.get('/files/:id/download', async (req, res) => {
     const file = await FileRecord.findOneAndUpdate(
       { _id: req.params.id, deleted_at: null },
       { $inc: { download_count: 1 }, last_accessed_at: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!file) return res.status(404).json({ success: false, error: 'الملف غير موجود' });
     // في الإنتاج: يُعيد مسار الملف أو رابط مؤقت
@@ -282,7 +282,7 @@ router.post('/files/:id/archive', async (req, res) => {
     const file = await FileRecord.findByIdAndUpdate(
       req.params.id,
       { is_archived: true, archived_at: new Date(), archived_by: req.user._id },
-      { new: true }
+      { returnDocument: 'after' }
     );
     res.json({ success: true, data: file, message: 'تم أرشفة الملف' });
   } catch (err) {

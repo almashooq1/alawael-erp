@@ -72,7 +72,7 @@ async function expireLoyaltyPoints() {
         const updated = await DigitalWallet.findOneAndUpdate(
           { _id: pts.walletId, loyaltyPoints: { $gte: pts.points } },
           { $inc: { loyaltyPoints: -pts.points } },
-          { new: true }
+          { returnDocument: 'after' }
         );
 
         if (!updated) {

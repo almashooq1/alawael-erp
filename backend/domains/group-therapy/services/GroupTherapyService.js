@@ -41,7 +41,7 @@ class GroupTherapyService {
 
   async updateGroup(groupId, data) {
     const TherapyGroup = mongoose.model('TherapyGroup');
-    return TherapyGroup.findByIdAndUpdate(groupId, data, { new: true }).lean();
+    return TherapyGroup.findByIdAndUpdate(groupId, data, { returnDocument: 'after' }).lean();
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -121,7 +121,7 @@ class GroupTherapyService {
     return GroupSession.findByIdAndUpdate(
       sessionId,
       { ...data, status: 'completed' },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
   }
 

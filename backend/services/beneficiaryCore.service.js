@@ -352,7 +352,7 @@ class BeneficiaryCoreSvc {
     const updated = await Beneficiary.findByIdAndUpdate(
       beneficiaryId,
       { $set: update },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     ).lean();
 
     return updated;

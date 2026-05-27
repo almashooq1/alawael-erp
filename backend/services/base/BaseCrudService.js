@@ -95,7 +95,7 @@ class BaseCrudService extends BaseDomainModule {
    * @param {Object} [opts] — { runValidators: true, ... }
    */
   _update(Model, id, data, opts = {}) {
-    return Model.findByIdAndUpdate(id, data, { new: true, ...opts }).lean();
+    return Model.findByIdAndUpdate(id, data, { returnDocument: 'after', ...opts }).lean();
   }
 
   /**

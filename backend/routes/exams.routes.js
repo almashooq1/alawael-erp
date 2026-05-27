@@ -104,7 +104,7 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const exam = await Exam.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!exam) return res.status(404).json({ success: false, message: 'الاختبار غير موجود' });

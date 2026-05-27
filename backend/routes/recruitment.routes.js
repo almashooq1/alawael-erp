@@ -197,10 +197,7 @@ router.put('/postings/:id', requireHr, async (req, res) => {
     const doc = await JobPosting.findOneAndUpdate(
       { _id: req.params.id, ...branchFilter(req) },
       /* W448 */ stripUpdateMeta(req.body),
-      {
-        new: true,
-        runValidators: true,
-      }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!doc) return fail(res, 'الوظيفة غير موجودة', 404);
     ok(res, { data: doc, message: 'تم التحديث بنجاح' });
@@ -228,7 +225,7 @@ router.post('/postings/:id/publish', requireHr, async (req, res) => {
     const doc = await JobPosting.findOneAndUpdate(
       { _id: req.params.id, ...branchFilter(req) } /* W448 */,
       { status: 'published', publishedAt: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!doc) return fail(res, 'الوظيفة غير موجودة', 404);
     // TODO: مزامنة مع منصات التوظيف (Jadarat, Taqat, LinkedIn)
@@ -244,7 +241,7 @@ router.post('/postings/:id/close', requireHr, async (req, res) => {
     const doc = await JobPosting.findOneAndUpdate(
       { _id: req.params.id, ...branchFilter(req) } /* W448 */,
       { status: 'closed' },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!doc) return fail(res, 'الوظيفة غير موجودة', 404);
     ok(res, { data: doc, message: 'تم إغلاق الوظيفة' });
@@ -371,7 +368,7 @@ router.patch('/applications/:id/status', requireHr, async (req, res) => {
     const doc = await JobApplication.findOneAndUpdate(
       { _id: req.params.id, ...branchFilter(req) },
       /* W448 */ updates,
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!doc) return fail(res, 'الطلب غير موجود', 404);
     ok(res, { data: doc, message: 'تم تحديث حالة الطلب بنجاح' });
@@ -492,7 +489,7 @@ router.patch('/interviews/:id/complete', requireHr, async (req, res) => {
         weaknesses,
         recommendation,
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!doc) return fail(res, 'المقابلة غير موجودة', 404);
     ok(res, { data: doc, message: 'تم تسجيل نتيجة المقابلة بنجاح' });
@@ -533,7 +530,7 @@ router.post('/offers/:id/send', requireHr, async (req, res) => {
     const offer = await JobOffer.findOneAndUpdate(
       { _id: req.params.id, ...branchFilter(req) } /* W448 */,
       { status: 'sent', sentAt: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!offer) return fail(res, 'العرض غير موجود', 404);
     ok(res, { data: offer, message: 'تم إرسال عرض العمل بنجاح' });
@@ -558,7 +555,7 @@ router.patch('/offers/:id/respond', async (req, res) => {
         respondedAt: new Date(),
         rejectionReason: accepted ? undefined : rejectionReason,
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     if (accepted) {
@@ -663,7 +660,7 @@ router.patch('/onboarding/:id/task', requireHr, async (req, res) => {
         status: overallStatus,
         actualCompletionDate: overallStatus === 'completed' ? new Date() : null,
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     ok(res, { data: doc, message: 'تم تحديث المهمة بنجاح' });

@@ -59,7 +59,7 @@ class BranchEnhancedService {
       BranchSetting.findOneAndUpdate(
         { branchId, key: s.key },
         { ...s, branchId },
-        { upsert: true, new: true }
+        { upsert: true, returnDocument: 'after' }
       )
     );
 
@@ -81,7 +81,11 @@ class BranchEnhancedService {
    */
   async updateSettings(branchId, settings, _updatedBy) {
     const ops = Object.entries(settings).map(([key, value]) =>
-      BranchSetting.findOneAndUpdate({ branchId, key }, { value: String(value) }, { new: true })
+      BranchSetting.findOneAndUpdate(
+        { branchId, key },
+        { value: String(value) },
+        { returnDocument: 'after' }
+      )
     );
     return Promise.all(ops);
   }
@@ -123,7 +127,7 @@ class BranchEnhancedService {
   }
 
   async updateRoomStatus(roomId, status) {
-    return Room.findByIdAndUpdate(roomId, { status }, { new: true });
+    return Room.findByIdAndUpdate(roomId, { status }, { returnDocument: 'after' });
   }
 
   async getRoomSchedule(roomId, date) {
@@ -157,7 +161,11 @@ class BranchEnhancedService {
   }
 
   async updateBranchServicePrice(branchId, serviceCode, price) {
-    return BranchService.findOneAndUpdate({ branchId, serviceCode }, { price }, { new: true });
+    return BranchService.findOneAndUpdate(
+      { branchId, serviceCode },
+      { price },
+      { returnDocument: 'after' }
+    );
   }
 
   // ============================================================
@@ -172,7 +180,7 @@ class BranchEnhancedService {
     return BeneficiaryTransfer.findByIdAndUpdate(
       transferId,
       { status: 'approved', approvedBy, approvedAt: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 
@@ -180,7 +188,7 @@ class BranchEnhancedService {
     return BeneficiaryTransfer.findByIdAndUpdate(
       transferId,
       { status: 'rejected', approvedBy, rejectionReason: reason },
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 

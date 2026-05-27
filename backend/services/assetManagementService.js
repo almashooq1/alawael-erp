@@ -93,7 +93,7 @@ class AssetManagementService {
       const asset = await Asset.findByIdAndUpdate(
         assetId,
         { $set: updates },
-        { new: true, runValidators: true }
+        { returnDocument: 'after', runValidators: true }
       ).populate('createdBy', 'firstName lastName email');
 
       if (!asset) return null;

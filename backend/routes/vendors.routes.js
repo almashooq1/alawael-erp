@@ -104,7 +104,7 @@ router.put('/:id', async (req, res) => {
   try {
     const Vendor = require('../models/Vendor');
     const data = await Vendor.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
+      returnDocument: 'after',
     }).lean();
     if (!data) return res.status(404).json({ success: false, message: 'المورد غير موجود' });
     res.json({ success: true, data, message: 'تم تحديث المورد بنجاح' });

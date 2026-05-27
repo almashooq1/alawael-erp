@@ -163,7 +163,7 @@ router.post('/', requireRole(WRITE_ROLES), async (req, res) => {
     const row = await MealEvent.findOneAndUpdate(
       { beneficiaryId: body.beneficiaryId, date, mealType: body.mealType },
       update,
-      { new: true, upsert: true, setDefaultsOnInsert: true }
+      { returnDocument: 'after', upsert: true, setDefaultsOnInsert: true }
     );
     res.status(201).json({ success: true, data: row });
   } catch (err) {
@@ -180,7 +180,7 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
     delete body.beneficiaryId;
     delete body.date;
     delete body.mealType;
-    const row = await MealEvent.findByIdAndUpdate(req.params.id, body, { new: true });
+    const row = await MealEvent.findByIdAndUpdate(req.params.id, body, { returnDocument: 'after' });
     if (!row) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
     res.json({ success: true, data: row });
   } catch (err) {

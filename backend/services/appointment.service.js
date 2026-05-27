@@ -246,7 +246,7 @@ class AppointmentService {
           },
         },
       ],
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (apt) return apt;
     // Disambiguate the failure case.
@@ -301,7 +301,7 @@ class AppointmentService {
           },
         },
       ],
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (updated) return updated;
     // Race lost — someone else just flipped to CHECKED_IN between our

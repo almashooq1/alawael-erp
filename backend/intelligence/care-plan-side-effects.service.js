@@ -266,7 +266,7 @@ function createCarePlanSideEffectHandlers({
           },
           $set: { lastPlanFiledAt: now() },
         },
-        { upsert: true, new: true }
+        { upsert: true, returnDocument: 'after' }
       );
     } catch (err) {
       logger.warn && logger.warn(`[side-effects] save_to_record failed: ${err.message}`);

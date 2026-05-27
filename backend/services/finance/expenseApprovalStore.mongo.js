@@ -100,7 +100,7 @@ function createMongoStore({ Model }) {
             $set: { ...recordNoVersion, expenseId: String(id) },
             $inc: { __v: 1 },
           },
-          { new: true }
+          { returnDocument: 'after' }
         ).lean();
         if (updated) return project(updated);
         // CAS miss — disambiguate: doesn't exist, or version mismatch.

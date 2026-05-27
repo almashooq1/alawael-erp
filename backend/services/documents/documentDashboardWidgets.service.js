@@ -287,7 +287,7 @@ class DocumentDashboardWidgetsService {
       await Widget.findOneAndUpdate(
         { key: widget.key },
         { $setOnInsert: widget },
-        { upsert: true, new: true }
+        { upsert: true, returnDocument: 'after' }
       );
     }
     return { success: true, initialized: DEFAULT_WIDGETS.length };
@@ -324,7 +324,7 @@ class DocumentDashboardWidgetsService {
     const widget = await Widget.findByIdAndUpdate(
       widgetId,
       { $set: updates },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     if (!widget) return { success: false, error: 'العنصر غير موجود' };
     return { success: true, widget };
@@ -367,7 +367,7 @@ class DocumentDashboardWidgetsService {
       const layout = await DashboardLayout.findOneAndUpdate(
         { _id: layoutId, userId },
         { $set: { name, nameAr, widgets, theme, columns, filters } },
-        { new: true }
+        { returnDocument: 'after' }
       ).lean();
       if (!layout) return { success: false, error: 'التخطيط غير موجود' };
       return { success: true, layout };
@@ -392,7 +392,7 @@ class DocumentDashboardWidgetsService {
     const layout = await DashboardLayout.findOneAndUpdate(
       { _id: layoutId, userId },
       { isDefault: true },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     if (!layout) return { success: false, error: 'التخطيط غير موجود' };
     return { success: true, layout };
@@ -410,7 +410,7 @@ class DocumentDashboardWidgetsService {
     const layout = await DashboardLayout.findOneAndUpdate(
       { _id: layoutId, userId },
       { $push: { widgets: widgetConfig } },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     if (!layout) return { success: false, error: 'التخطيط غير موجود' };
     return { success: true, layout };
@@ -421,7 +421,7 @@ class DocumentDashboardWidgetsService {
     const layout = await DashboardLayout.findOneAndUpdate(
       { _id: layoutId, userId },
       { $pull: { widgets: { widgetKey } } },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     if (!layout) return { success: false, error: 'التخطيط غير موجود' };
     return { success: true, layout };
@@ -437,7 +437,7 @@ class DocumentDashboardWidgetsService {
           ...(size && { 'widgets.$.size': size }),
         },
       },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     if (!layout) return { success: false, error: 'العنصر غير موجود في التخطيط' };
     return { success: true, layout };
@@ -483,7 +483,7 @@ class DocumentDashboardWidgetsService {
     const layout = await DashboardLayout.findOneAndUpdate(
       { _id: layoutId, userId },
       { $set: { widgets: defaultLayout } },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     if (!layout) return { success: false, error: 'التخطيط غير موجود' };
     return { success: true, layout };

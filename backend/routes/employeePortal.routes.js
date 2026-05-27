@@ -79,7 +79,7 @@ router.put('/profile', async (req, res) => {
       if (req.body[f] !== undefined) updates[f] = req.body[f];
     });
     const employee = await Employee.findOneAndUpdate({ userId: req.user.id }, updates, {
-      new: true,
+      returnDocument: 'after',
       upsert: false,
     }).lean();
     if (!employee) {

@@ -167,7 +167,7 @@ class DocumentLifecycleService {
     const policy = await LifecyclePolicy.findByIdAndUpdate(
       policyId,
       { ...data, updatedBy: userId },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!policy) throw new Error('السياسة غير موجودة');
     return policy;

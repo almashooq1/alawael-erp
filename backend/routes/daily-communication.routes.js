@@ -208,7 +208,7 @@ router.post('/', requireRole(WRITE_ROLES), async (req, res) => {
     const row = await DailyCommunicationLog.findOneAndUpdate(
       { beneficiaryId: body.beneficiaryId, date },
       update,
-      { new: true, upsert: true, setDefaultsOnInsert: true, runValidators: true }
+      { returnDocument: 'after', upsert: true, setDefaultsOnInsert: true, runValidators: true }
     );
     res.status(201).json({ success: true, data: row });
   } catch (err) {
@@ -236,7 +236,7 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
     delete body.parentRespondedAt;
     body.status = 'amended';
     const row = await DailyCommunicationLog.findByIdAndUpdate(req.params.id, body, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!row) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
@@ -255,7 +255,7 @@ router.post('/:id/parent-seen', requireRole(READ_ROLES), async (req, res) => {
     const row = await DailyCommunicationLog.findByIdAndUpdate(
       req.params.id,
       { parentSeen: true, parentSeenAt: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!row) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
     res.json({ success: true, data: row });
@@ -282,7 +282,7 @@ router.post('/:id/parent-response', requireRole(READ_ROLES), async (req, res) =>
         parentSeen: true,
         parentSeenAt: new Date(),
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!row) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
     res.json({ success: true, data: row });

@@ -27,7 +27,7 @@ const PlanReviewAckSchema = new Schema(
     // For SLA_ESCALATED: 1=warning(24h), 2=urgent(48h). Null otherwise.
     level: { type: Number, default: null, min: 0, max: 2 },
     actorUserId: { type: Types.ObjectId, ref: 'User', default: null },
-    occurredAt: { type: Date, required: true, default: () => new Date(), index: true },
+    occurredAt: { type: Date, required: true, default: () => new Date() },
     // Compact, opaque-to-consumers payload (sweepRunId, alertId, etc.).
     payload: { type: Object, default: {} },
     // Hash-chain integrity fields (W18 invariant pattern).

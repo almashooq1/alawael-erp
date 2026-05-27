@@ -62,7 +62,7 @@ router.put('/:id', async (req, res) => {
   try {
     const Campaign = require('../models/Campaign');
     const data = await Campaign.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
+      returnDocument: 'after',
     }).lean();
     if (!data) return res.status(404).json({ success: false, message: 'الحملة غير موجودة' });
     res.json({ success: true, data, message: 'تم تحديث الحملة بنجاح' });

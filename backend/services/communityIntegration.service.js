@@ -105,7 +105,7 @@ async function updateActivity(id, data, userId) {
   return CommunityActivity.findByIdAndUpdate(
     id,
     { ...data, updatedBy: userId },
-    { new: true, runValidators: true }
+    { returnDocument: 'after', runValidators: true }
   );
 }
 
@@ -204,7 +204,7 @@ async function updatePartnership(id, data, userId) {
   return CivilPartnership.findByIdAndUpdate(
     id,
     { ...data, updatedBy: userId },
-    { new: true, runValidators: true }
+    { returnDocument: 'after', runValidators: true }
   );
 }
 
@@ -297,7 +297,7 @@ async function updateParticipation(id, data, userId) {
   return EventParticipation.findByIdAndUpdate(
     id,
     { ...data, updatedBy: userId },
-    { new: true, runValidators: true }
+    { returnDocument: 'after', runValidators: true }
   );
 }
 
@@ -319,7 +319,7 @@ async function recordAttendance(participationId, attendanceData) {
 async function submitFeedback(participationId, feedbackData, feedbackType = 'participant') {
   const update =
     feedbackType === 'guardian' ? { guardianFeedback: feedbackData } : { feedback: feedbackData };
-  return EventParticipation.findByIdAndUpdate(participationId, update, { new: true });
+  return EventParticipation.findByIdAndUpdate(participationId, update, { returnDocument: 'after' });
 }
 
 async function getParticipationStats(activityId) {
@@ -451,7 +451,7 @@ async function updateAssessment(id, data, userId) {
   return IntegrationAssessment.findByIdAndUpdate(
     id,
     { ...data, updatedBy: userId },
-    { new: true, runValidators: true }
+    { returnDocument: 'after', runValidators: true }
   );
 }
 
@@ -595,7 +595,7 @@ async function updateAwarenessProgram(id, data, userId) {
   return AwarenessProgram.findByIdAndUpdate(
     id,
     { ...data, updatedBy: userId },
-    { new: true, runValidators: true }
+    { returnDocument: 'after', runValidators: true }
   );
 }
 

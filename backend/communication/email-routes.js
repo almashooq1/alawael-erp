@@ -372,7 +372,7 @@ router.put('/templates/:id', authenticate, async (req, res) => {
     const template = await EmailTemplate.findByIdAndUpdate(
       req.params.id,
       { $set: updates },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     if (!template) {

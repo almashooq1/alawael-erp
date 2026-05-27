@@ -29,11 +29,11 @@ const TTL_MAX_DAYS = 30;
 
 const LlmAnomalyAckSchema = new mongoose.Schema(
   {
-    anomalyId: { type: String, required: true, index: true, maxlength: 200 },
+    anomalyId: { type: String, required: true, maxlength: 200 },
     acknowledgedAt: { type: Date, required: true, default: Date.now, index: true },
     acknowledgedBy: { type: String, default: null, maxlength: 80 },
     acknowledgedByRole: { type: String, default: null, maxlength: 80 },
-    expiresAt: { type: Date, required: true, index: true },
+    expiresAt: { type: Date, required: true },
     reason: { type: String, default: '', maxlength: 500 },
 
     // Bookkeeping snapshot of the anomaly at ack-time. Tiny — same

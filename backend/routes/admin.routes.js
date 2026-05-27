@@ -300,7 +300,7 @@ router.put('/users/:id', async (req, res) => {
     const user = await User.findByIdAndUpdate(
       req.params.id,
       { name, email, phone, role, status },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     )
       .select('-password')
       .lean();
@@ -317,7 +317,7 @@ router.delete('/users/:id', async (req, res) => {
     const user = await User.findByIdAndUpdate(
       req.params.id,
       { isActive: false, deactivatedAt: new Date(), deactivatedBy: req.user?._id },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!user) return res.status(404).json({ success: false, message: 'المستخدم غير موجود' });
     logger.info(`User soft-deleted: ${user._id} by ${req.user?._id}`);
@@ -334,7 +334,7 @@ router.delete('/payments/:id', async (req, res) => {
     const payment = await Payment.findByIdAndUpdate(
       req.params.id,
       { status: 'cancelled', cancelledAt: new Date(), cancelledBy: req.user?._id },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!payment) return res.status(404).json({ success: false, message: 'المدفوعة غير موجودة' });
     logger.info(`Payment soft-deleted: ${payment._id} by ${req.user?._id}`);

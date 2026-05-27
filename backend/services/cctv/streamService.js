@@ -208,7 +208,7 @@ async function heartbeat(sessionId) {
   return CctvStreamSession.findOneAndUpdate(
     { sessionId, status: { $in: ['starting', 'active', 'idle'] } },
     { lastHeartbeatAt: new Date(), status: 'active' },
-    { new: true }
+    { returnDocument: 'after' }
   );
 }
 
@@ -216,7 +216,7 @@ async function stop(sessionId) {
   return CctvStreamSession.findOneAndUpdate(
     { sessionId, status: { $ne: 'ended' } },
     { status: 'ended', endedAt: new Date() },
-    { new: true }
+    { returnDocument: 'after' }
   );
 }
 

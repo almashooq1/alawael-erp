@@ -220,7 +220,7 @@ router.post('/', requireRole(MARK_ROLES), async (req, res) => {
         markedBy: req.user?.id,
         markedAt: new Date(),
       },
-      { new: true, upsert: true, setDefaultsOnInsert: true }
+      { returnDocument: 'after', upsert: true, setDefaultsOnInsert: true }
     );
     res.status(201).json({ success: true, data: row });
   } catch (err) {
@@ -253,7 +253,7 @@ router.post('/bulk', requireRole(MARK_ROLES), async (req, res) => {
           markedBy: req.user?.id,
           markedAt: new Date(),
         },
-        { new: true, upsert: true, setDefaultsOnInsert: true }
+        { returnDocument: 'after', upsert: true, setDefaultsOnInsert: true }
       );
       results.push({ sessionId: String(it.sessionId), ok: true, id: row._id });
     }
@@ -274,7 +274,9 @@ router.patch('/:id', requireRole(ADMIN_ROLES), async (req, res) => {
     delete body.sessionId;
     delete body.beneficiaryId;
     if (body.scheduledDate) body.scheduledDate = new Date(body.scheduledDate);
-    const row = await SessionAttendance.findByIdAndUpdate(req.params.id, body, { new: true });
+    const row = await SessionAttendance.findByIdAndUpdate(req.params.id, body, {
+      returnDocument: 'after',
+    });
     if (!row) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
     res.json({ success: true, data: row });
   } catch (err) {

@@ -752,7 +752,7 @@ router.put('/:id', async (req, res) => {
     updateData.updatedAt = new Date();
 
     const user = await User.findByIdAndUpdate(req.params.id, updateData, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     })
       .select('-password -passwordHistory -mfa.secret -mfa.backupCodes')
@@ -812,7 +812,7 @@ router.delete('/:id', async (req, res) => {
         deactivationReason: reason || undefined,
         updatedAt: new Date(),
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     if (!user) {
@@ -923,7 +923,7 @@ router.post('/:id/unlock', async (req, res) => {
         $unset: { lockUntil: '' },
         updatedAt: new Date(),
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     if (!user) {
@@ -955,7 +955,7 @@ router.put('/:id/permissions', async (req, res) => {
         deniedPermissions: deniedPermissions || [],
         updatedAt: new Date(),
       },
-      { new: true }
+      { returnDocument: 'after' }
     )
       .select('-password')
       .lean();
@@ -1096,7 +1096,9 @@ router.patch('/:id/verify', async (req, res) => {
     if (emailVerified !== undefined) updateData.emailVerified = emailVerified;
     if (phoneVerified !== undefined) updateData.phoneVerified = phoneVerified;
 
-    const user = await User.findByIdAndUpdate(req.params.id, updateData, { new: true })
+    const user = await User.findByIdAndUpdate(req.params.id, updateData, {
+      returnDocument: 'after',
+    })
       .select('emailVerified phoneVerified fullName')
       .lean();
 

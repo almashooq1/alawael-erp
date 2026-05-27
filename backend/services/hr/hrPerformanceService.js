@@ -214,7 +214,7 @@ class HrPerformanceService {
         approvalDate: new Date(),
         updatedAt: new Date(),
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!doc) throw Object.assign(new Error('التقييم غير موجود'), { status: 404 });
     this.log.info({ evalId: id, approverId }, '[HrPerf] evaluation approved');
@@ -225,7 +225,11 @@ class HrPerformanceService {
    * Delete (archive) an evaluation.
    */
   async deleteEvaluation(id) {
-    const doc = await this.PE.findByIdAndUpdate(id, { status: 'archived' }, { new: true });
+    const doc = await this.PE.findByIdAndUpdate(
+      id,
+      { status: 'archived' },
+      { returnDocument: 'after' }
+    );
     if (!doc) throw Object.assign(new Error('التقييم غير موجود'), { status: 404 });
     return { deleted: true };
   }
@@ -257,7 +261,7 @@ class HrPerformanceService {
     const doc = await this.SP.findByIdAndUpdate(
       id,
       { ...body, updatedAt: new Date() },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!doc) throw Object.assign(new Error('خطة التعاقب غير موجودة'), { status: 404 });
     return doc;

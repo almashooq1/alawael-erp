@@ -202,7 +202,7 @@ router.post('/:id/refuse', requireRole(ADMINISTER_ROLES), async (req, res) => {
         administeredByName: req.user?.name || '',
         refusalReason: reason.slice(0, 500),
       },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!row) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
     res.json({ success: true, data: row });
@@ -224,7 +224,7 @@ router.post('/:id/hold', requireRole(ADMIN_ROLES), async (req, res) => {
     const row = await MAR.findByIdAndUpdate(
       req.params.id,
       { status: 'held', notes: reason.slice(0, 500) },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!row) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
     res.json({ success: true, data: row });
@@ -333,7 +333,7 @@ router.patch('/:id', requireRole(ADMIN_ROLES), async (req, res) => {
     delete body.date;
     if (body.scheduledTime) body.scheduledTime = new Date(body.scheduledTime);
     const row = await MAR.findByIdAndUpdate(req.params.id, body, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!row) return res.status(404).json({ success: false, message: 'السجل غير موجود' });

@@ -365,7 +365,7 @@ class ImportExportProService {
                     results.skipped.push(globalIdx);
                     job.progress.skipped++;
                   } else {
-                    await Model.findOneAndUpdate(filter, record, { new: true });
+                    await Model.findOneAndUpdate(filter, record, { returnDocument: 'after' });
                     results.updated.push(globalIdx);
                     job.progress.successful++;
                   }
@@ -379,7 +379,9 @@ class ImportExportProService {
                 const filter = {
                   [options.duplicateCheckField]: record[options.duplicateCheckField],
                 };
-                const updated = await Model.findOneAndUpdate(filter, record, { new: true });
+                const updated = await Model.findOneAndUpdate(filter, record, {
+                  returnDocument: 'after',
+                });
                 if (updated) {
                   results.updated.push(updated._id);
                   job.progress.successful++;

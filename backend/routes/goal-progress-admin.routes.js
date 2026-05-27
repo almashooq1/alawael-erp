@@ -198,7 +198,9 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
     delete body.goalId;
     delete body.beneficiaryId;
     if (body.progressPercent != null) body.progressPercent = Number(body.progressPercent);
-    const row = await GoalProgressEntry.findByIdAndUpdate(req.params.id, body, { new: true });
+    const row = await GoalProgressEntry.findByIdAndUpdate(req.params.id, body, {
+      returnDocument: 'after',
+    });
     if (!row) return res.status(404).json({ success: false, message: 'غير موجود' });
     res.json({ success: true, data: row });
   } catch (err) {

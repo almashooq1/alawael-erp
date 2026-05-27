@@ -88,7 +88,7 @@ router.put(
   async (req, res) => {
     try {
       const room = await Room.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-        new: true,
+        returnDocument: 'after',
         runValidators: true,
       });
       if (!room) return res.status(404).json({ success: false, message: 'الغرفة غير موجودة' });
@@ -223,7 +223,7 @@ router.put(
         }
       }
       const booking = await RoomBooking.findByIdAndUpdate(req.params.id, updates, {
-        new: true,
+        returnDocument: 'after',
         runValidators: true,
       });
       if (!booking) return res.status(404).json({ success: false, message: 'الحجز غير موجود' });
@@ -240,7 +240,7 @@ router.delete('/bookings/:id', authorize(['admin', 'super_admin', 'manager']), a
     const booking = await RoomBooking.findByIdAndUpdate(
       req.params.id,
       { status: 'cancelled' },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!booking) return res.status(404).json({ success: false, message: 'الحجز غير موجود' });
     res.json({ success: true, data: booking, message: 'تم إلغاء الحجز بنجاح' });
@@ -324,7 +324,7 @@ router.put(
         updates.completedDate = new Date();
       }
       const mr = await MaintenanceRequest.findByIdAndUpdate(req.params.id, updates, {
-        new: true,
+        returnDocument: 'after',
         runValidators: true,
       });
       if (!mr) return res.status(404).json({ success: false, message: 'الطلب غير موجود' });

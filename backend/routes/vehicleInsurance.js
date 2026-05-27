@@ -61,7 +61,7 @@ router.put('/:id', authorize('admin', 'manager', 'fleet_officer'), async (req, r
   try {
     const VehicleInsurance = require('../models/Fleet/VehicleInsurance');
     const policy = await VehicleInsurance.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!policy)

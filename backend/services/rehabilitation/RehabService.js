@@ -435,7 +435,7 @@ class SessionService {
           prompting_level: g.prompting_level,
           notes: g.notes,
         },
-        { upsert: true, new: true }
+        { upsert: true, returnDocument: 'after' }
       );
       created.push(progress);
 

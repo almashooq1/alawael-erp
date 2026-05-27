@@ -71,7 +71,7 @@ class SaudiTaxService {
     delete data._id;
     data.updatedBy = userId;
     const doc = await VATReturn.findByIdAndUpdate(id, data, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     }).lean();
     if (!doc) throw Object.assign(new Error('إقرار الضريبة غير موجود'), { status: 404 });
@@ -152,7 +152,7 @@ class SaudiTaxService {
     delete data.filingNumber;
     data.updatedBy = userId;
     const doc = await TaxFiling.findByIdAndUpdate(id, data, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     }).lean();
     if (!doc) throw Object.assign(new Error('الإقرار الضريبي غير موجود'), { status: 404 });
@@ -223,7 +223,7 @@ class SaudiTaxService {
       data.netAmount = data.grossAmount - data.withholdingAmount;
     }
     const doc = await WithholdingTax.findByIdAndUpdate(id, data, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     }).lean();
     if (!doc) throw Object.assign(new Error('شهادة الاستقطاع غير موجودة'), { status: 404 });
@@ -231,7 +231,11 @@ class SaudiTaxService {
   }
 
   async deleteWithholdingTax(id) {
-    const doc = await WithholdingTax.findByIdAndUpdate(id, { isDeleted: true }, { new: true });
+    const doc = await WithholdingTax.findByIdAndUpdate(
+      id,
+      { isDeleted: true },
+      { returnDocument: 'after' }
+    );
     if (!doc) throw Object.assign(new Error('شهادة الاستقطاع غير موجودة'), { status: 404 });
     return { message: 'تم حذف شهادة الاستقطاع' };
   }

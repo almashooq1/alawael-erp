@@ -169,7 +169,7 @@ router.patch('/template-requests/:id', requireRole('admin', 'manager'), async (r
     const doc = await NotifTmpl.findOneAndUpdate(
       { _id: req.params.id, branchId: req.user.branchId },
       { approvalStatus: status, reviewNotes, reviewedBy: req.user._id, reviewedAt: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!doc)
       return res.status(404).json({ success: false, message: 'Template request not found' });
@@ -212,7 +212,7 @@ router.patch('/opt-status/:contactId', requireRole('admin', 'manager'), async (r
     const doc = await WA.findOneAndUpdate(
       { _id: req.params.contactId, branchId: req.user.branchId },
       { optStatus: status, optStatusUpdatedAt: new Date(), optStatusUpdatedBy: req.user._id },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!doc) return res.status(404).json({ success: false, message: 'Contact not found' });
     res.json({ success: true, data: doc });

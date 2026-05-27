@@ -64,7 +64,7 @@ class SupplyChainRepository {
     return Supplier.find(filter);
   }
   async updateSupplier(id, data) {
-    return Supplier.findByIdAndUpdate(id, data, { new: true });
+    return Supplier.findByIdAndUpdate(id, data, { returnDocument: 'after' });
   }
   async deleteSupplier(id) {
     return Supplier.findByIdAndDelete(id);
@@ -81,7 +81,7 @@ class SupplyChainRepository {
     return PurchaseOrder.find(filter).populate('supplier');
   }
   async updatePurchaseOrder(id, data) {
-    return PurchaseOrder.findByIdAndUpdate(id, data, { new: true });
+    return PurchaseOrder.findByIdAndUpdate(id, data, { returnDocument: 'after' });
   }
 
   // Shipments
@@ -95,7 +95,7 @@ class SupplyChainRepository {
     return Shipment.find(filter);
   }
   async updateShipment(id, data) {
-    return Shipment.findByIdAndUpdate(id, data, { new: true });
+    return Shipment.findByIdAndUpdate(id, data, { returnDocument: 'after' });
   }
 
   // Analytics

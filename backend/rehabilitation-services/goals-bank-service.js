@@ -1526,7 +1526,7 @@ class GoalsBankService {
    */
   async updateGoal(goalId, updates) {
     const goal = await Goal.findOneAndUpdate({ goalId }, updates, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!goal) throw new Error(`الهدف ${goalId} غير موجود`);

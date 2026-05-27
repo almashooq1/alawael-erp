@@ -164,7 +164,7 @@ class SessionsService extends BaseService {
     const session = await ClinicalSession.findByIdAndUpdate(
       id,
       { $set: data },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     ).lean();
     if (!session) {
       const err = new Error('الجلسة غير موجودة');
@@ -200,7 +200,7 @@ class SessionsService extends BaseService {
           activities: activities || [],
         },
       },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     ).lean();
 
     if (!session) {
@@ -242,7 +242,7 @@ class SessionsService extends BaseService {
           'cancellation.reason': reason,
         },
       },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
 
     if (!session) {

@@ -29,7 +29,7 @@ class ProgramsService {
   async updateProgram(programId, data) {
     const Program = mongoose.model('Program');
     const program = await Program.findByIdAndUpdate(programId, data, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!program) throw this._notFound('البرنامج غير موجود');

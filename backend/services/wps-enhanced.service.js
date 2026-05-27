@@ -52,7 +52,7 @@ class WpsEnhancedService {
         status: 'file_generated',
         generatedBy,
       },
-      { upsert: true, new: true }
+      { upsert: true, returnDocument: 'after' }
     );
 
     logger.info(
@@ -154,7 +154,7 @@ class WpsEnhancedService {
         uploadedBy,
         mudadNotes,
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 
@@ -171,7 +171,7 @@ class WpsEnhancedService {
         discrepancies: complianceData.discrepancies,
         bankTransferDate: complianceData.bankTransferDate || null,
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 

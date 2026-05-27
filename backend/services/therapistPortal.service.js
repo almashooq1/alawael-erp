@@ -414,7 +414,7 @@ class TherapistPortalService {
           ...(data.preferences && { preferences: data.preferences }),
         },
       },
-      { new: true, upsert: true }
+      { returnDocument: 'after', upsert: true }
     );
     return avail;
   }
@@ -424,7 +424,7 @@ class TherapistPortalService {
     const avail = await Availability.findOneAndUpdate(
       { therapist: therapistId },
       { $push: { exceptions: { $each: [exception], $slice: -200 } } },
-      { new: true, upsert: true }
+      { returnDocument: 'after', upsert: true }
     );
     return avail;
   }
@@ -488,7 +488,7 @@ class TherapistPortalService {
         notes: { subjective, objective, assessment, plan },
         ...(rating && { rating }),
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!session) return null;
 
@@ -511,7 +511,7 @@ class TherapistPortalService {
         documentedAt: new Date(),
         'quality.isComplete': !!(subjective && objective && assessment && plan),
       },
-      { upsert: true, new: true }
+      { upsert: true, returnDocument: 'after' }
     );
 
     return session;
@@ -588,7 +588,7 @@ class TherapistPortalService {
         documentedAt: new Date(),
         'quality.isComplete': data.isComplete || false,
       },
-      { upsert: true, new: true }
+      { upsert: true, returnDocument: 'after' }
     );
     return doc;
   }
@@ -1064,7 +1064,7 @@ class TherapistPortalService {
 
   async updateTelehealthSession(id, patch) {
     const { Teleconsultation } = require('../models/Telehealth');
-    return Teleconsultation.findByIdAndUpdate(id, patch, { new: true });
+    return Teleconsultation.findByIdAndUpdate(id, patch, { returnDocument: 'after' });
   }
 
   async updateTelehealthStatus(id, status) {
@@ -1078,12 +1078,16 @@ class TherapistPortalService {
         update.durationMinutes = Math.round((Date.now() - doc.startedAt.getTime()) / 60000);
       }
     }
-    return Teleconsultation.findByIdAndUpdate(id, update, { new: true });
+    return Teleconsultation.findByIdAndUpdate(id, update, { returnDocument: 'after' });
   }
 
   async deleteTelehealthSession(id) {
     const { Teleconsultation } = require('../models/Telehealth');
-    return Teleconsultation.findByIdAndUpdate(id, { deletedAt: new Date() }, { new: true });
+    return Teleconsultation.findByIdAndUpdate(
+      id,
+      { deletedAt: new Date() },
+      { returnDocument: 'after' }
+    );
   }
 
   // ─── Consent Management (consumed by routes/therapistElite.routes.js) ────
@@ -1114,7 +1118,7 @@ class TherapistPortalService {
 
   async updateConsent(id, patch) {
     const { Consent } = require('../models/Consent');
-    return Consent.findByIdAndUpdate(id, patch, { new: true });
+    return Consent.findByIdAndUpdate(id, patch, { returnDocument: 'after' });
   }
 
   async signConsent(id, payload = {}) {
@@ -1126,7 +1130,7 @@ class TherapistPortalService {
       ...(payload.grantedBy ? { grantedBy: payload.grantedBy } : {}),
       ...(payload.expiresAt ? { expiresAt: new Date(payload.expiresAt) } : {}),
     };
-    return Consent.findByIdAndUpdate(id, update, { new: true });
+    return Consent.findByIdAndUpdate(id, update, { returnDocument: 'after' });
   }
 
   async revokeConsent(id, reason = null) {
@@ -1134,7 +1138,7 @@ class TherapistPortalService {
     return Consent.findByIdAndUpdate(
       id,
       { revokedAt: new Date(), revokedReason: reason },
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 
@@ -1165,7 +1169,7 @@ class TherapistPortalService {
 
   async updateWaitingListItem(id, patch) {
     const WaitingListEntry = require('../models/WaitingListEntry');
-    return WaitingListEntry.findByIdAndUpdate(id, patch, { new: true });
+    return WaitingListEntry.findByIdAndUpdate(id, patch, { returnDocument: 'after' });
   }
 
   async updateWaitingStatus(id, status) {
@@ -1173,7 +1177,7 @@ class TherapistPortalService {
     const update = { status };
     if (status === 'offered') update.offeredAt = new Date();
     if (status === 'enrolled') update.enrolledAt = new Date();
-    return WaitingListEntry.findByIdAndUpdate(id, update, { new: true });
+    return WaitingListEntry.findByIdAndUpdate(id, update, { returnDocument: 'after' });
   }
 
   async removeFromWaitingList(id) {
@@ -1210,7 +1214,7 @@ class TherapistPortalService {
 
   async updateFieldTraining(id, patch) {
     const FieldTraining = require('../models/FieldTraining');
-    return FieldTraining.findByIdAndUpdate(id, patch, { new: true });
+    return FieldTraining.findByIdAndUpdate(id, patch, { returnDocument: 'after' });
   }
 
   async addTrainingEvaluation(id, evaluation) {
@@ -1222,7 +1226,7 @@ class TherapistPortalService {
           evaluations: { ...evaluation, date: evaluation?.date || new Date() },
         },
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 
@@ -1243,13 +1247,17 @@ class TherapistPortalService {
         },
         $inc: { completedHours: hours },
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 
   async deleteFieldTraining(id) {
     const FieldTraining = require('../models/FieldTraining');
-    return FieldTraining.findByIdAndUpdate(id, { deletedAt: new Date() }, { new: true });
+    return FieldTraining.findByIdAndUpdate(
+      id,
+      { deletedAt: new Date() },
+      { returnDocument: 'after' }
+    );
   }
 
   // ─── Quality Reports (therapist-portal scope) ────────────────────────────
@@ -1282,7 +1290,7 @@ class TherapistPortalService {
 
   async updateQualityReport(id, patch) {
     const TherapyQualityReport = require('../models/TherapyQualityReport');
-    return TherapyQualityReport.findByIdAndUpdate(id, patch, { new: true });
+    return TherapyQualityReport.findByIdAndUpdate(id, patch, { returnDocument: 'after' });
   }
 
   async addFinding(id, finding) {
@@ -1293,13 +1301,17 @@ class TherapistPortalService {
     return TherapyQualityReport.findByIdAndUpdate(
       id,
       { $push: { findings: { ...finding, raisedAt: finding.raisedAt || new Date() } } },
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 
   async deleteQualityReport(id) {
     const TherapyQualityReport = require('../models/TherapyQualityReport');
-    return TherapyQualityReport.findByIdAndUpdate(id, { deletedAt: new Date() }, { new: true });
+    return TherapyQualityReport.findByIdAndUpdate(
+      id,
+      { deletedAt: new Date() },
+      { returnDocument: 'after' }
+    );
   }
 
   // ─── Achievements (therapist recognition feed) ───────────────────────────
@@ -1329,12 +1341,16 @@ class TherapistPortalService {
 
   async updateAchievement(id, patch) {
     const TherapistAchievement = require('../models/TherapistAchievement');
-    return TherapistAchievement.findByIdAndUpdate(id, patch, { new: true });
+    return TherapistAchievement.findByIdAndUpdate(id, patch, { returnDocument: 'after' });
   }
 
   async deleteAchievement(id) {
     const TherapistAchievement = require('../models/TherapistAchievement');
-    return TherapistAchievement.findByIdAndUpdate(id, { deletedAt: new Date() }, { new: true });
+    return TherapistAchievement.findByIdAndUpdate(
+      id,
+      { deletedAt: new Date() },
+      { returnDocument: 'after' }
+    );
   }
 
   // ─── Treatment Plans (consumed by routes/therapistExtended.routes.js) ────
@@ -1363,7 +1379,7 @@ class TherapistPortalService {
     return TherapeuticPlan.findOneAndUpdate(
       { _id: planId, assignedTherapists: therapistId },
       patch,
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 
@@ -1404,7 +1420,7 @@ class TherapistPortalService {
     return TherapyAssessment.findOneAndUpdate(
       { _id: assessmentId, therapist: therapistId },
       { deletedAt: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 
@@ -1440,7 +1456,7 @@ class TherapistPortalService {
     return TherapyPrescription.findOneAndUpdate(
       { _id: prescriptionId, therapist: therapistId },
       patch,
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 
@@ -1449,7 +1465,7 @@ class TherapistPortalService {
     return TherapyPrescription.findOneAndUpdate(
       { _id: prescriptionId, therapist: therapistId },
       { deletedAt: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 
@@ -1484,7 +1500,7 @@ class TherapistPortalService {
     return ProfessionalDevActivity.findOneAndUpdate(
       { _id: activityId, therapist: therapistId },
       patch,
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 
@@ -1493,7 +1509,7 @@ class TherapistPortalService {
     return ProfessionalDevActivity.findOneAndUpdate(
       { _id: activityId, therapist: therapistId },
       { deletedAt: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 
@@ -1605,7 +1621,7 @@ class TherapistPortalService {
         },
         status: 'answered',
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 
@@ -1621,7 +1637,7 @@ class TherapistPortalService {
         $or: [{ requester: therapistId }, { consultant: therapistId }],
       },
       update,
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 
@@ -1630,7 +1646,7 @@ class TherapistPortalService {
     return TherapistConsultation.findOneAndUpdate(
       { _id: consultationId, requester: therapistId },
       { deletedAt: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 
@@ -1664,7 +1680,7 @@ class TherapistPortalService {
     const update = { ...patch };
     if (patch.status === 'completed' && !patch.completedAt) update.completedAt = new Date();
     return DailyTask.findOneAndUpdate({ _id: taskId, therapist: therapistId }, update, {
-      new: true,
+      returnDocument: 'after',
     });
   }
 
@@ -1673,7 +1689,7 @@ class TherapistPortalService {
     return DailyTask.findOneAndUpdate(
       { _id: taskId, therapist: therapistId },
       { deletedAt: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 
@@ -1699,7 +1715,7 @@ class TherapistPortalService {
     return TherapistProgressRecord.findOneAndUpdate(
       { _id: recordId, therapist: therapistId },
       { deletedAt: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 
@@ -1728,7 +1744,11 @@ class TherapistPortalService {
 
   async deleteLibraryItem(itemId) {
     const TherapistLibraryItem = require('../models/TherapistLibraryItem');
-    return TherapistLibraryItem.findByIdAndUpdate(itemId, { deletedAt: new Date() }, { new: true });
+    return TherapistLibraryItem.findByIdAndUpdate(
+      itemId,
+      { deletedAt: new Date() },
+      { returnDocument: 'after' }
+    );
   }
 
   // ─── Templates ───────────────────────────────────────────────────────────
@@ -1756,7 +1776,7 @@ class TherapistPortalService {
   async updateTemplate(therapistId, templateId, patch) {
     const TherapistTemplate = require('../models/TherapistTemplate');
     return TherapistTemplate.findOneAndUpdate({ _id: templateId, therapist: therapistId }, patch, {
-      new: true,
+      returnDocument: 'after',
     });
   }
 
@@ -1765,7 +1785,7 @@ class TherapistPortalService {
     return TherapistTemplate.findByIdAndUpdate(
       templateId,
       { $inc: { usageCount: 1 }, lastUsedAt: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 
@@ -1774,7 +1794,7 @@ class TherapistPortalService {
     return TherapistTemplate.findByIdAndUpdate(
       templateId,
       { deletedAt: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 
@@ -1806,7 +1826,7 @@ class TherapistPortalService {
     return ParentMessage.findOneAndUpdate(
       { _id: messageId, therapist: therapistId },
       { readAt: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 
@@ -1815,7 +1835,7 @@ class TherapistPortalService {
     return ParentMessage.findOneAndUpdate(
       { _id: messageId, therapist: therapistId },
       { deletedAt: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 
@@ -1843,7 +1863,7 @@ class TherapistPortalService {
   async updateSmartGoal(therapistId, goalId, patch) {
     const SmartGoal = require('../models/SmartGoal');
     return SmartGoal.findOneAndUpdate({ _id: goalId, therapist: therapistId }, patch, {
-      new: true,
+      returnDocument: 'after',
     });
   }
 
@@ -1879,7 +1899,7 @@ class TherapistPortalService {
     return SmartGoal.findOneAndUpdate(
       { _id: goalId, therapist: therapistId },
       { deletedAt: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 
@@ -1905,7 +1925,7 @@ class TherapistPortalService {
 
   async updateReferral(id, patch) {
     const TherapyReferral = require('../models/TherapyReferral');
-    return TherapyReferral.findByIdAndUpdate(id, patch, { new: true });
+    return TherapyReferral.findByIdAndUpdate(id, patch, { returnDocument: 'after' });
   }
 
   async updateReferralStatus(id, status) {
@@ -1913,12 +1933,16 @@ class TherapistPortalService {
     const update = { status };
     if (status === 'accepted' || status === 'declined') update.respondedAt = new Date();
     if (status === 'completed') update.completedAt = new Date();
-    return TherapyReferral.findByIdAndUpdate(id, update, { new: true });
+    return TherapyReferral.findByIdAndUpdate(id, update, { returnDocument: 'after' });
   }
 
   async deleteReferral(id) {
     const TherapyReferral = require('../models/TherapyReferral');
-    return TherapyReferral.findByIdAndUpdate(id, { deletedAt: new Date() }, { new: true });
+    return TherapyReferral.findByIdAndUpdate(
+      id,
+      { deletedAt: new Date() },
+      { returnDocument: 'after' }
+    );
   }
 
   // ─── Groups (group therapy) ──────────────────────────────────────────────
@@ -1938,7 +1962,7 @@ class TherapistPortalService {
 
   async updateGroup(id, patch) {
     const TherapyGroup = require('../models/TherapyGroup');
-    return TherapyGroup.findByIdAndUpdate(id, patch, { new: true });
+    return TherapyGroup.findByIdAndUpdate(id, patch, { returnDocument: 'after' });
   }
 
   async addParticipant(groupId, payload) {
@@ -1964,13 +1988,17 @@ class TherapistPortalService {
     return TherapyGroup.findByIdAndUpdate(
       groupId,
       { $pull: { participants: { beneficiary: participantId } } },
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 
   async deleteGroup(id) {
     const TherapyGroup = require('../models/TherapyGroup');
-    return TherapyGroup.findByIdAndUpdate(id, { deletedAt: new Date() }, { new: true });
+    return TherapyGroup.findByIdAndUpdate(
+      id,
+      { deletedAt: new Date() },
+      { returnDocument: 'after' }
+    );
   }
 
   // ─── Equipment (booking) ─────────────────────────────────────────────────
@@ -1987,7 +2015,7 @@ class TherapistPortalService {
 
   async updateEquipment(id, patch) {
     const TherapyEquipment = require('../models/TherapyEquipment');
-    return TherapyEquipment.findByIdAndUpdate(id, patch, { new: true });
+    return TherapyEquipment.findByIdAndUpdate(id, patch, { returnDocument: 'after' });
   }
 
   async bookEquipment(id, bookedBy, until) {
@@ -2023,7 +2051,11 @@ class TherapistPortalService {
 
   async deleteEquipment(id) {
     const TherapyEquipment = require('../models/TherapyEquipment');
-    return TherapyEquipment.findByIdAndUpdate(id, { deletedAt: new Date() }, { new: true });
+    return TherapyEquipment.findByIdAndUpdate(
+      id,
+      { deletedAt: new Date() },
+      { returnDocument: 'after' }
+    );
   }
 
   // ─── Custom KPIs ─────────────────────────────────────────────────────────
@@ -2054,12 +2086,16 @@ class TherapistPortalService {
       await kpi.save();
       return kpi;
     }
-    return TherapyCustomKPI.findByIdAndUpdate(id, patch, { new: true });
+    return TherapyCustomKPI.findByIdAndUpdate(id, patch, { returnDocument: 'after' });
   }
 
   async deleteKPI(id) {
     const TherapyCustomKPI = require('../models/TherapyCustomKPI');
-    return TherapyCustomKPI.findByIdAndUpdate(id, { deletedAt: new Date() }, { new: true });
+    return TherapyCustomKPI.findByIdAndUpdate(
+      id,
+      { deletedAt: new Date() },
+      { returnDocument: 'after' }
+    );
   }
 
   // ─── Safety Protocols ────────────────────────────────────────────────────
@@ -2083,7 +2119,7 @@ class TherapistPortalService {
 
   async updateSafetyProtocol(id, patch) {
     const SafetyProtocol = require('../models/SafetyProtocol');
-    return SafetyProtocol.findByIdAndUpdate(id, patch, { new: true });
+    return SafetyProtocol.findByIdAndUpdate(id, patch, { returnDocument: 'after' });
   }
 
   async reportIncident(protocolId, incident) {
@@ -2094,7 +2130,7 @@ class TherapistPortalService {
     return SafetyProtocol.findByIdAndUpdate(
       protocolId,
       { $push: { incidents: { ...incident, reportedAt: new Date() } } },
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 
@@ -2112,7 +2148,11 @@ class TherapistPortalService {
 
   async deleteSafetyProtocol(id) {
     const SafetyProtocol = require('../models/SafetyProtocol');
-    return SafetyProtocol.findByIdAndUpdate(id, { deletedAt: new Date() }, { new: true });
+    return SafetyProtocol.findByIdAndUpdate(
+      id,
+      { deletedAt: new Date() },
+      { returnDocument: 'after' }
+    );
   }
 
   // ─── Research ────────────────────────────────────────────────────────────
@@ -2135,7 +2175,7 @@ class TherapistPortalService {
 
   async updateResearch(id, patch) {
     const TherapyResearch = require('../models/TherapyResearch');
-    return TherapyResearch.findByIdAndUpdate(id, patch, { new: true });
+    return TherapyResearch.findByIdAndUpdate(id, patch, { returnDocument: 'after' });
   }
 
   async addPublication(researchId, publication) {
@@ -2153,13 +2193,17 @@ class TherapistPortalService {
           },
         },
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 
   async deleteResearch(id) {
     const TherapyResearch = require('../models/TherapyResearch');
-    return TherapyResearch.findByIdAndUpdate(id, { deletedAt: new Date() }, { new: true });
+    return TherapyResearch.findByIdAndUpdate(
+      id,
+      { deletedAt: new Date() },
+      { returnDocument: 'after' }
+    );
   }
 }
 

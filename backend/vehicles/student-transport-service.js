@@ -557,7 +557,7 @@ class StudentTransportService extends EventEmitter {
     const bus = await this.Bus.findOneAndUpdate(
       { busId },
       { 'tracking.currentLocation': { ...location, timestamp: new Date() } },
-      { new: true }
+      { returnDocument: 'after' }
     );
     this.emit('bus:location_updated', { busId, location });
     return bus;
@@ -595,7 +595,7 @@ class StudentTransportService extends EventEmitter {
     return this.Student.findOneAndUpdate(
       { studentId },
       { pickup: pickupData, updatedAt: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 
@@ -606,7 +606,7 @@ class StudentTransportService extends EventEmitter {
         'attendance.todayStatus': status,
         updatedAt: new Date(),
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     this.emit('student:attendance', { studentId, status });
     return student;
@@ -629,7 +629,7 @@ class StudentTransportService extends EventEmitter {
         'schedule.actualStartTime': new Date(),
         updatedAt: new Date(),
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     this.emit('trip:started', trip);
     return trip;
@@ -644,7 +644,7 @@ class StudentTransportService extends EventEmitter {
         stats,
         updatedAt: new Date(),
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     this.emit('trip:completed', trip);
     return trip;

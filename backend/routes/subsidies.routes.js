@@ -200,7 +200,7 @@ router.post('/', requireRole(WRITE_ROLES), async (req, res) => {
     const doc = await Subsidy.findOneAndUpdate(
       { beneficiaryId: body.beneficiaryId, year, month, subsidyType: body.subsidyType },
       update,
-      { new: true, upsert: true, setDefaultsOnInsert: true, runValidators: true }
+      { returnDocument: 'after', upsert: true, setDefaultsOnInsert: true, runValidators: true }
     );
     res.status(201).json({ success: true, data: doc });
   } catch (err) {
@@ -225,7 +225,7 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
     if (body.expectedDate) body.expectedDate = new Date(body.expectedDate);
     if (body.receivedDate) body.receivedDate = new Date(body.receivedDate);
     const row = await Subsidy.findByIdAndUpdate(req.params.id, body, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!row) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
@@ -249,7 +249,7 @@ router.post('/:id/mark-received', requireRole(WRITE_ROLES), async (req, res) => 
       update.receiptNumber = String(req.body.receiptNumber).slice(0, 50);
     }
     const row = await Subsidy.findByIdAndUpdate(req.params.id, update, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!row) return res.status(404).json({ success: false, message: 'السجل غير موجود' });

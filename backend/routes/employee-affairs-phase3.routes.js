@@ -52,7 +52,7 @@ router.patch('/promotions/:id/activate', authorize('admin', 'hr_manager'), async
     const promotion = await Promotion.findByIdAndUpdate(
       req.params.id,
       { status: 'active', activatedAt: new Date(), activatedBy: req.user._id },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!promotion) return res.status(404).json({ success: false, message: 'Promotion not found' });
     // Update employee record
@@ -108,7 +108,7 @@ router.patch('/transfers/:id/execute', authorize('admin', 'hr_manager'), async (
     const transfer = await Transfer.findByIdAndUpdate(
       req.params.id,
       { status: 'completed', executedAt: new Date(), executedBy: req.user._id },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!transfer) return res.status(404).json({ success: false, message: 'Transfer not found' });
     // Update employee department

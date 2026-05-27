@@ -65,7 +65,7 @@ class TeleRehabService extends BaseService {
         status: 'in_progress',
         startedAt: new Date(),
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     this.emit('tele:session:started', { sessionId: id });
     return session;
@@ -84,7 +84,7 @@ class TeleRehabService extends BaseService {
         (new Date(update.endedAt) - new Date(update.startedAt)) / 60000
       );
     }
-    const session = await TeleSession.findByIdAndUpdate(id, update, { new: true });
+    const session = await TeleSession.findByIdAndUpdate(id, update, { returnDocument: 'after' });
     this.emit('tele:session:completed', { sessionId: id, beneficiaryId: session.beneficiaryId });
     return session;
   }
@@ -95,20 +95,24 @@ class TeleRehabService extends BaseService {
     return TeleSession.findByIdAndUpdate(
       id,
       { status: 'cancelled', cancellationReason: reason },
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 
   /* ── Record quality ── */
   async recordQuality(id, qualityData) {
     const TeleSession = mongoose.model('TeleSession');
-    return TeleSession.findByIdAndUpdate(id, { connectionQuality: qualityData }, { new: true });
+    return TeleSession.findByIdAndUpdate(
+      id,
+      { connectionQuality: qualityData },
+      { returnDocument: 'after' }
+    );
   }
 
   /* ── Satisfaction ── */
   async submitSatisfaction(id, satisfaction) {
     const TeleSession = mongoose.model('TeleSession');
-    return TeleSession.findByIdAndUpdate(id, { satisfaction }, { new: true });
+    return TeleSession.findByIdAndUpdate(id, { satisfaction }, { returnDocument: 'after' });
   }
 
   /* ── Dashboard ── */

@@ -184,7 +184,7 @@ class ContractService {
     if (status === 'authenticated') update.qiwaAuthenticationDate = new Date();
     if (status === 'active') update.employeeSignedDate = new Date();
 
-    return EmploymentContract.findByIdAndUpdate(contractId, update, { new: true });
+    return EmploymentContract.findByIdAndUpdate(contractId, update, { returnDocument: 'after' });
   }
 
   // =========================================================================

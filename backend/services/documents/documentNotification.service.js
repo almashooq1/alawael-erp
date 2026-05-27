@@ -439,7 +439,7 @@ class DocumentNotificationService extends EventEmitter {
     const result = await Notification.findOneAndUpdate(
       { _id: notificationId, userId },
       { isRead: true, readAt: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
     return result ? this._formatNotification(result) : null;
   }
@@ -462,7 +462,7 @@ class DocumentNotificationService extends EventEmitter {
     const result = await Notification.findOneAndUpdate(
       { _id: notificationId, userId },
       { isArchived: true },
-      { new: true }
+      { returnDocument: 'after' }
     );
     return result ? this._formatNotification(result) : null;
   }
@@ -541,7 +541,7 @@ class DocumentNotificationService extends EventEmitter {
     const prefs = await NotificationPreferences.findOneAndUpdate(
       { userId },
       { $set: updates },
-      { new: true, upsert: true }
+      { returnDocument: 'after', upsert: true }
     );
     return prefs;
   }

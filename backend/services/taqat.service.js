@@ -38,7 +38,7 @@ class TaqatService {
       const seeker = await TaqatJobSeeker.findByIdAndUpdate(
         id,
         { ...data, updatedBy: userId },
-        { new: true, runValidators: true }
+        { returnDocument: 'after', runValidators: true }
       );
       if (!seeker) throw new Error('الباحث عن عمل غير موجود');
       return seeker;
@@ -149,7 +149,7 @@ class TaqatService {
   async updateJobOpportunity(id, data, _userId) {
     try {
       const job = await TaqatJobOpportunity.findByIdAndUpdate(id, data, {
-        new: true,
+        returnDocument: 'after',
         runValidators: true,
       });
       if (!job) throw new Error('الفرصة الوظيفية غير موجودة');
@@ -428,7 +428,7 @@ class TaqatService {
           })),
           generatedAt: new Date(),
         },
-        { upsert: true, new: true }
+        { upsert: true, returnDocument: 'after' }
       );
 
       return stats;

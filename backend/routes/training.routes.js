@@ -118,7 +118,7 @@ router.put(
     try {
       const Course = safeModel('TrainingCourse');
       const doc = await Course.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-        new: true,
+        returnDocument: 'after',
       });
       if (!doc) return res.status(404).json({ success: false, message: 'الدورة غير موجودة' });
       res.json({ success: true, data: doc });
@@ -198,7 +198,7 @@ router.put(
     try {
       const Session = safeModel('TrainingSession');
       const doc = await Session.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-        new: true,
+        returnDocument: 'after',
       });
       if (!doc) return res.status(404).json({ success: false, message: 'الجلسة غير موجودة' });
       res.json({ success: true, data: doc });
@@ -239,7 +239,7 @@ router.put(
     try {
       const Plan = safeModel('TrainingPlan');
       const doc = await Plan.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-        new: true,
+        returnDocument: 'after',
       });
       if (!doc) return res.status(404).json({ success: false, message: 'الخطة غير موجودة' });
       res.json({ success: true, data: doc });

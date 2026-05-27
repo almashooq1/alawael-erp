@@ -82,7 +82,7 @@ router.put('/templates/:id', async (req, res) => {
     const template = await CertificateTemplate.findByIdAndUpdate(
       req.params.id,
       stripUpdateMeta(req.body),
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!template) return res.status(404).json({ success: false, error: 'القالب غير موجود' });
     res.json({ success: true, data: template });

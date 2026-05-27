@@ -589,10 +589,7 @@ router.put('/:id', validateObjectId('id'), async (req, res) => {
     const beneficiary = await Beneficiary.findOneAndUpdate(
       { _id: req.params.id, ...branchFilter(req) },
       updateData,
-      {
-        new: true,
-        runValidators: true,
-      }
+      { returnDocument: 'after', runValidators: true }
     ).select('-password -twoFactorSecret -accountVerificationCode');
 
     if (!beneficiary) {
@@ -681,7 +678,7 @@ router.patch('/:id/status', validateObjectId('id'), async (req, res) => {
     const beneficiary = await Beneficiary.findOneAndUpdate(
       { _id: req.params.id, ...branchFilter(req) },
       { status, lastModifiedBy: req.user?._id },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     if (!beneficiary) {
@@ -837,7 +834,7 @@ router.post('/:id/progress', validateObjectId('id'), async (req, res) => {
         teacherNotes,
         overallPerformance,
       },
-      { new: true, upsert: true, runValidators: true }
+      { returnDocument: 'after', upsert: true, runValidators: true }
     );
 
     // Update beneficiary academic fields. Re-apply branch scope so a

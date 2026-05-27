@@ -156,7 +156,7 @@ class AssessmentsService extends BaseService {
     const assessment = await ClinicalAssessment.findByIdAndUpdate(
       id,
       { $set: data },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     ).lean();
 
     if (!assessment) {
@@ -199,7 +199,7 @@ class AssessmentsService extends BaseService {
           duration,
         },
       },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     ).lean();
 
     if (!assessment) {

@@ -573,14 +573,16 @@ CorrespondenceActionSchema.index({ correspondenceId: 1, performedAt: -1 });
 // Create Models — defensive `mongoose.models.X || mongoose.model(...)` guards
 // against OverwriteModelError. Correspondence is a W340 baseline entry
 // (registered in >1 file). Other names kept defensive for symmetry.
-const Correspondence = mongoose.models.Correspondence
-  || mongoose.model('Correspondence', CorrespondenceSchema);
-const ExternalEntity = mongoose.models.ExternalEntity
-  || mongoose.model('ExternalEntity', ExternalEntitySchema);
-const CorrespondenceTemplate = mongoose.models.CorrespondenceTemplate
-  || mongoose.model('CorrespondenceTemplate', CorrespondenceTemplateSchema);
-const CorrespondenceAction = mongoose.models.CorrespondenceAction
-  || mongoose.model('CorrespondenceAction', CorrespondenceActionSchema);
+const Correspondence =
+  mongoose.models.Correspondence || mongoose.model('Correspondence', CorrespondenceSchema);
+const ExternalEntity =
+  mongoose.models.ExternalEntity || mongoose.model('ExternalEntity', ExternalEntitySchema);
+const CorrespondenceTemplate =
+  mongoose.models.CorrespondenceTemplate ||
+  mongoose.model('CorrespondenceTemplate', CorrespondenceTemplateSchema);
+const CorrespondenceAction =
+  mongoose.models.CorrespondenceAction ||
+  mongoose.model('CorrespondenceAction', CorrespondenceActionSchema);
 
 // ==================== Service Class ====================
 
@@ -637,7 +639,7 @@ class AdministrativeCommunicationsService {
     const result = await Counter.findOneAndUpdate(
       { _id: key },
       { $inc: { seq: 1 } },
-      { new: true, upsert: true }
+      { returnDocument: 'after', upsert: true }
     );
     return result.seq;
   }

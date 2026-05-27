@@ -408,7 +408,7 @@ class DocumentOCRService extends EventEmitter {
     const job = await OCRJob.findOneAndUpdate(
       { _id: jobId, status: { $in: ['queued', 'processing'] } },
       { status: 'cancelled', completedAt: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!job) return { success: false, error: 'لا يمكن إلغاء المهمة' };
     return { success: true, job };

@@ -250,7 +250,7 @@ class EventStore {
     await SnapshotModel.findOneAndUpdate(
       { aggregateType, aggregateId },
       { version, state, domain: aggregateType.toLowerCase() },
-      { upsert: true, new: true }
+      { upsert: true, returnDocument: 'after' }
     );
     logger.debug(`[EventStore] Snapshot saved for ${aggregateType}:${aggregateId} at v${version}`);
   }

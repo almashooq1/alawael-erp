@@ -294,7 +294,7 @@ function createLeadFunnelService({
     const claimed = await inquiryModel.findOneAndUpdate(
       { _id: id, promotedAt: null, status: { $ne: 'promoted_to_lead' } },
       { $set: { promotedAt: promoteClaim } },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!claimed) {
       throw new ConflictError('Inquiry already being promoted (concurrent caller)');

@@ -59,7 +59,7 @@ router.put('/:id', authorize('admin', 'manager', 'fleet_officer'), async (req, r
   try {
     const FleetFuelCard = require('../models/Fleet/FleetFuelCard');
     const card = await FleetFuelCard.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!card) return res.status(404).json({ success: false, message: 'Fuel card not found' });
@@ -76,7 +76,7 @@ router.patch('/:id/assign', authorize('admin', 'manager', 'fleet_officer'), asyn
     const card = await FleetFuelCard.findByIdAndUpdate(
       req.params.id,
       { assignedTo: driverId, assignedAt: new Date(), assignedBy: req.user._id },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!card) return res.status(404).json({ success: false, message: 'Fuel card not found' });
     res.json({ success: true, data: card });
@@ -93,7 +93,7 @@ router.post('/:id/transactions', async (req, res) => {
       {
         $push: { transactions: { ...req.body, recordedAt: new Date(), recordedBy: req.user._id } },
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!card) return res.status(404).json({ success: false, message: 'Fuel card not found' });
     res.json({ success: true, data: card });

@@ -123,7 +123,7 @@ router.post('/:id/archive', requireRole('admin', 'manager', 'supervisor'), async
         retentionExpiry,
         $unset: { restoredAt: '', restoredBy: '' },
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!doc)
       return res
@@ -168,7 +168,7 @@ router.post('/:id/restore', requireRole('admin', 'manager'), async (req, res) =>
           retentionExpiry: '',
         },
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!doc) return res.status(404).json({ success: false, message: 'المستند المؤرشف غير موجود' });
     try {
@@ -300,7 +300,7 @@ router.patch('/:id/retention', requireRole('admin', 'manager'), async (req, res)
         retentionUpdatedAt: new Date(),
         retentionUpdatedBy: req.user._id,
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     res.json({ success: true, data: doc });
   } catch (err) {
@@ -473,7 +473,7 @@ router.post(
           'archiveRecommendation.acknowledgedAt': new Date(),
           'archiveRecommendation.acknowledgedBy': req.user._id,
         },
-        { new: true }
+        { returnDocument: 'after' }
       );
       if (!doc) return res.status(404).json({ success: false, message: 'المستند غير موجود' });
       res.json({ success: true, data: doc, message: 'تمت أرشفة المستند بناءً على التوصية' });
@@ -496,7 +496,7 @@ router.post(
         {
           'archiveRecommendation.dismissed': true,
         },
-        { new: true }
+        { returnDocument: 'after' }
       );
       if (!doc) return res.status(404).json({ success: false, message: 'المستند غير موجود' });
       res.json({ success: true, message: 'تم تجاهل التوصية' });

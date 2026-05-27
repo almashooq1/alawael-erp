@@ -236,7 +236,7 @@ router.put('/results/:resultId/approve', async (req, res) => {
           approvalNotes: req.body.approvalNotes,
         },
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     res.json({
@@ -332,7 +332,7 @@ router.put('/:planId/approve', async (req, res) => {
           approvalNotes: req.body.approvalNotes,
         },
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     res.json({
@@ -645,7 +645,7 @@ router.put('/types/:id', async (req, res) => {
     const updated = await MeasurementType.findByIdAndUpdate(
       req.params.id,
       { ...req.body, updatedAt: new Date() },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
 
     if (!updated) {
@@ -667,7 +667,7 @@ router.delete('/types/:id', async (req, res) => {
     const updated = await MeasurementType.findByIdAndUpdate(
       req.params.id,
       { isActive: false, updatedAt: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     if (!updated) {
@@ -689,7 +689,7 @@ router.put('/masters/:id', async (req, res) => {
     const updated = await MeasurementMaster.findByIdAndUpdate(
       req.params.id,
       { ...req.body, updatedAt: new Date() },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
 
     if (!updated) {
@@ -711,7 +711,7 @@ router.delete('/masters/:id', async (req, res) => {
     const updated = await MeasurementMaster.findByIdAndUpdate(
       req.params.id,
       { isActive: false, updatedAt: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     if (!updated) {

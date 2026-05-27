@@ -136,7 +136,7 @@ router.patch('/:id', authorize(WRITE_ROLES), async (req, res) => {
     delete body._id;
     delete body.code; // code is immutable after creation
     const doc = await Branch.findByIdAndUpdate(req.params.id, body, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     }).lean();
     if (!doc) return res.status(404).json({ success: false, message: 'الفرع غير موجود' });
@@ -162,7 +162,7 @@ router.delete('/:id', authorize(WRITE_ROLES), async (req, res) => {
     const doc = await Branch.findByIdAndUpdate(
       req.params.id,
       { status: 'inactive' },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     if (!doc) return res.status(404).json({ success: false, message: 'الفرع غير موجود' });
     logger.info('[branches] deactivated', { id: req.params.id, by: req.user?.id });

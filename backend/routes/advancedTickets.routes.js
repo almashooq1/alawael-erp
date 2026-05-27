@@ -108,7 +108,7 @@ router.put('/:id', async (req, res) => {
       updates['sla.resolvedAt'] = new Date();
     }
     const ticket = await AdvancedTicket.findByIdAndUpdate(req.params.id, updates, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     }).lean();
     if (!ticket) return res.status(404).json({ success: false, message: 'التذكرة غير موجودة' });

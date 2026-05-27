@@ -72,7 +72,7 @@ router.put(
       const branch = await Branch.findByIdAndUpdate(
         req.params.branchId,
         stripUpdateMeta(req.body),
-        { new: true }
+        { returnDocument: 'after' }
       );
       if (!branch) return res.status(404).json({ success: false, message: 'الفرع غير موجود' });
       res.json({ success: true, data: branch });
@@ -119,7 +119,7 @@ router.put(
         const updated = await BranchSetting.findOneAndUpdate(
           { branchId: req.params.branchId, key: s.key },
           { value: String(s.value) },
-          { new: true, upsert: true }
+          { returnDocument: 'after', upsert: true }
         );
         results.push(updated);
       }
@@ -169,7 +169,7 @@ router.put(
       const room = await Room.findOneAndUpdate(
         { _id: req.params.roomId, branchId: req.params.branchId },
         req.body,
-        { new: true }
+        { returnDocument: 'after' }
       );
       if (!room) return res.status(404).json({ success: false, message: 'الغرفة غير موجودة' });
       res.json({ success: true, data: room });
@@ -238,7 +238,7 @@ router.put(
       const service = await BranchService.findOneAndUpdate(
         { _id: req.params.serviceId, branchId: req.params.branchId },
         req.body,
-        { new: true }
+        { returnDocument: 'after' }
       );
       if (!service) return res.status(404).json({ success: false, message: 'الخدمة غير موجودة' });
       res.json({ success: true, data: service });
@@ -292,7 +292,7 @@ router.put(
       const transfer = await BeneficiaryTransfer.findByIdAndUpdate(
         req.params.transferId,
         { status: 'approved', approvedBy: req.user._id, approvedAt: new Date() },
-        { new: true }
+        { returnDocument: 'after' }
       );
       res.json({ success: true, data: transfer });
     } catch (err) {
@@ -313,7 +313,7 @@ router.put(
       const transfer = await BeneficiaryTransfer.findByIdAndUpdate(
         req.params.transferId,
         { status: 'rejected', rejectionReason: req.body.reason },
-        { new: true }
+        { returnDocument: 'after' }
       );
       res.json({ success: true, data: transfer });
     } catch (err) {

@@ -132,7 +132,7 @@ class EmployeeAffairsService {
     const employee = await Emp.findByIdAndUpdate(
       id,
       { ...updates, updatedAt: new Date() },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!employee) throw new Error('الموظف غير موجود');
     logger.info(`[EmployeeAffairs] Employee updated: ${employee.employeeId}`);
@@ -152,7 +152,7 @@ class EmployeeAffairsService {
         isActive: false,
         updatedAt: new Date(),
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!employee) throw new Error('الموظف غير موجود');
     logger.info(`[EmployeeAffairs] Employee terminated: ${employee.employeeId} - ${reason}`);
@@ -564,7 +564,7 @@ class EmployeeAffairsService {
     const employee = await Emp.findByIdAndUpdate(
       employeeId,
       { 'performance.goals': goals },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!employee) throw new Error('الموظف غير موجود');
     return employee.performance.goals;
@@ -617,7 +617,7 @@ class EmployeeAffairsService {
         'contract.contractType': contractType,
         'contract.renewalDate': new Date(),
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!employee) throw new Error('الموظف غير موجود');
     logger.info(`[EmployeeAffairs] Contract renewed: ${employee.employeeId} until ${newEndDate}`);

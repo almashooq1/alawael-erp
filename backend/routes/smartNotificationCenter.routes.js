@@ -46,7 +46,7 @@ router.put('/:id/read', async (req, res) => {
     const notif = await SmartNotification.findOneAndUpdate(
       { _id: req.params.id, recipient: req.user.id },
       { isRead: true, readAt: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     if (!notif) return res.status(404).json({ success: false, message: 'الإشعار غير موجود' });
     res.json({ success: true, data: notif, message: 'تم تحديد الإشعار كمقروء' });

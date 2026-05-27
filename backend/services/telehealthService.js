@@ -235,7 +235,7 @@ async function updateDeviceTest(waitingRoomId, testData) {
       connectionQuality: testData.connectionQuality,
       bandwidthKbps: testData.bandwidthKbps,
     },
-    { new: true }
+    { returnDocument: 'after' }
   );
   const isReady = room.cameraTested && room.microphoneTested && room.connectionTested;
   return { room, isReady };

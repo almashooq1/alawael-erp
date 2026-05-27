@@ -117,7 +117,10 @@ class BaseRepository {
    * تحديث بمعرف
    */
   async updateById(id, data) {
-    return this.model.findByIdAndUpdate(id, data, { new: true, runValidators: true }).lean().exec();
+    return this.model
+      .findByIdAndUpdate(id, data, { returnDocument: 'after', runValidators: true })
+      .lean()
+      .exec();
   }
 
   /**
@@ -133,7 +136,11 @@ class BaseRepository {
   async deleteById(id, { hard = false } = {}) {
     if (this.softDelete && !hard) {
       return this.model
-        .findByIdAndUpdate(id, { [this.deletedField]: true, deletedAt: new Date() }, { new: true })
+        .findByIdAndUpdate(
+          id,
+          { [this.deletedField]: true, deletedAt: new Date() },
+          { returnDocument: 'after' }
+        )
         .lean()
         .exec();
     }

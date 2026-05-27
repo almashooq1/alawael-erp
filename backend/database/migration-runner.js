@@ -126,7 +126,7 @@ class MigrationRunner {
         lockedAt: new Date(),
         expiresAt,
       },
-      { upsert: true, new: true }
+      { upsert: true, returnDocument: 'after' }
     );
 
     if (result.lockedBy !== lockId) {

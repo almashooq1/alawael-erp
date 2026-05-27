@@ -136,7 +136,11 @@ router.put(
   '/:id',
   asyncHandler(async (req, res) => {
     const M = Task();
-    const task = await M.findByIdAndUpdate(req.params.id, { $set: req.body }, { new: true }).lean();
+    const task = await M.findByIdAndUpdate(
+      req.params.id,
+      { $set: req.body },
+      { returnDocument: 'after' }
+    ).lean();
     if (!task) return res.status(404).json({ success: false, message: 'Task not found' });
     res.json({ success: true, data: task });
   })
@@ -157,7 +161,11 @@ router.patch(
     const M = Task();
     const update = { status: req.body.status };
     if (req.body.status === 'completed') update.completedAt = new Date();
-    const task = await M.findByIdAndUpdate(req.params.id, { $set: update }, { new: true }).lean();
+    const task = await M.findByIdAndUpdate(
+      req.params.id,
+      { $set: update },
+      { returnDocument: 'after' }
+    ).lean();
     if (!task) return res.status(404).json({ success: false, message: 'Task not found' });
     res.json({ success: true, data: task });
   })
@@ -173,7 +181,11 @@ router.patch(
       update.status = 'completed';
       update.completedAt = new Date();
     }
-    const task = await M.findByIdAndUpdate(req.params.id, { $set: update }, { new: true }).lean();
+    const task = await M.findByIdAndUpdate(
+      req.params.id,
+      { $set: update },
+      { returnDocument: 'after' }
+    ).lean();
     if (!task) return res.status(404).json({ success: false, message: 'Task not found' });
     res.json({ success: true, data: task });
   })

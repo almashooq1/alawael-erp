@@ -134,7 +134,7 @@ router.put('/courses/:id', requireRole('admin', 'manager', 'supervisor'), async 
     const doc = await StudentActivity.findOneAndUpdate(
       { _id: req.params.id, branchId: req.user.branchId, activityType: 'elearning_course' },
       { $set: { data: { ...req.body } } },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!doc) return res.status(404).json({ success: false, message: 'Course not found' });
     res.json({ success: true, data: doc });
@@ -293,7 +293,7 @@ router.post('/my-courses/:id/complete-lesson', async (req, res) => {
     const enrollment = await StudentActivity.findOneAndUpdate(
       { _id: req.params.id, branchId: req.user.branchId, activityType: 'elearning_enrollment' },
       { $addToSet: { 'data.completedLessons': { lessonId, completedAt: new Date() } } },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!enrollment)
       return res.status(404).json({ success: false, message: 'Enrollment not found' });

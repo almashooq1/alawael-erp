@@ -153,7 +153,7 @@ router.put(
       const ann = await Announcement.findOneAndUpdate(
         { _id: req.params.id, deleted_at: null },
         { ...stripUpdateMeta(req.body), updated_by: req.user._id },
-        { new: true, runValidators: true }
+        { returnDocument: 'after', runValidators: true }
       );
       if (!ann) return res.status(404).json({ success: false, error: 'الإعلان غير موجود' });
       res.json({ success: true, data: ann });
@@ -186,7 +186,7 @@ router.post(
       const ann = await Announcement.findByIdAndUpdate(
         req.params.id,
         { is_published: true, published_at: new Date() },
-        { new: true }
+        { returnDocument: 'after' }
       );
       res.json({ success: true, data: ann, message: 'تم نشر الإعلان' });
     } catch (err) {
@@ -504,7 +504,7 @@ router.put('/contacts/:id', async (req, res) => {
     const contact = await ContactDirectory.findOneAndUpdate(
       { _id: req.params.id, deleted_at: null },
       req.body,
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!contact) return res.status(404).json({ success: false, error: 'جهة الاتصال غير موجودة' });
     res.json({ success: true, data: contact });

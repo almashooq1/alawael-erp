@@ -174,7 +174,7 @@ class DriverController {
       delete updates.employeeId;
 
       const driver = await Driver.findByIdAndUpdate(id, updates, {
-        new: true,
+        returnDocument: 'after',
         runValidators: true,
       })
         .populate('userId', 'name email phone')
@@ -218,7 +218,7 @@ class DriverController {
           deactivationDate: new Date(),
           deactivationReason: reason,
         },
-        { new: true }
+        { returnDocument: 'after' }
       );
 
       if (!driver) {

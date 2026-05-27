@@ -163,7 +163,7 @@ class PostRehabFollowUpService {
    */
   async updateCase(caseId, data) {
     const postRehabCase = await PostRehabCase.findByIdAndUpdate(caseId, data, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!postRehabCase) {
@@ -378,7 +378,7 @@ class PostRehabFollowUpService {
     const visit = await FollowUpVisit.findByIdAndUpdate(
       visitId,
       { status: 'MISSED', notes: reason },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!visit) throw new Error('الزيارة غير موجودة');
 

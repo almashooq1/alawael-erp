@@ -138,7 +138,7 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
     const row = await WaitingListEntry.findOneAndUpdate(
       { _id: req.params.id, ...branchFilter(req) },
       body,
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!row) return res.status(404).json({ success: false, message: 'غير موجود' });
     res.json({ success: true, data: row });
@@ -151,7 +151,7 @@ async function statusTransition(id, patch) {
   return WaitingListEntry.findByIdAndUpdate(
     id,
     { ...patch, statusChangedAt: new Date() },
-    { new: true }
+    { returnDocument: 'after' }
   );
 }
 

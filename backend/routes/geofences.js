@@ -55,7 +55,7 @@ router.put('/:id', authorize('admin', 'manager'), async (req, res) => {
   try {
     const Geofence = require('../models/Fleet/Geofence');
     const geofence = await Geofence.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!geofence) return res.status(404).json({ success: false, message: 'Geofence not found' });

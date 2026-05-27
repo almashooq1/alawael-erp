@@ -107,7 +107,7 @@ router.put('/templates/:id', authorize(['admin', 'manager']), async (req, res) =
     const tmpl = await ContractTemplate.findByIdAndUpdate(
       req.params.id,
       { ...req.body, updatedBy: req.user?.id },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     ).lean();
     if (!tmpl) return res.status(404).json({ success: false, message: 'القالب غير موجود' });
     res.json({ success: true, data: tmpl, message: 'تم تحديث القالب' });
@@ -246,7 +246,7 @@ router.put('/contracts/:id', authorize(['admin', 'manager']), async (req, res) =
     const contract = await Contract.findByIdAndUpdate(
       req.params.id,
       { ...req.body, updatedBy: req.user?.id, updatedAt: new Date() },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     ).lean();
     res.json({ success: true, data: contract, message: 'تم تحديث العقد' });
   } catch (err) {
@@ -311,7 +311,7 @@ router.post(
           reviewedAt: new Date(),
           approverId: req.user?.id,
         },
-        { new: true }
+        { returnDocument: 'after' }
       ).lean();
       if (!approval)
         return res.status(404).json({ success: false, message: 'سجل الاعتماد غير موجود' });
@@ -342,7 +342,7 @@ router.post('/contracts/:id/sign', async (req, res) => {
         signedAt: new Date(),
         ipAddress: req.ip,
       },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     if (!party) return res.status(404).json({ success: false, message: 'الطرف غير موجود' });
     // Check if all parties signed
@@ -392,7 +392,7 @@ router.post('/contracts/:id/terminate', authorize(['admin', 'manager']), async (
     const contract = await Contract.findByIdAndUpdate(
       req.params.id,
       { status: 'TERMINATED', notes: reason, updatedBy: req.user?.id },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     if (!contract) return res.status(404).json({ success: false, message: 'العقد غير موجود' });
     res.json({ success: true, data: contract, message: 'تم إنهاء العقد' });
@@ -540,7 +540,7 @@ router.patch(
       const neg = await ContractNegotiation.findByIdAndUpdate(
         req.params.negId,
         { status: 'resolved', resolvedBy: req.user?.id, resolvedAt: new Date() },
-        { new: true }
+        { returnDocument: 'after' }
       ).lean();
       if (!neg) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       res.json({ success: true, data: neg, message: 'تم حل النقطة التفاوضية' });

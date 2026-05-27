@@ -211,7 +211,7 @@ exports.updateExpense = async (req, res) => {
     const updatedExpense = await AccountingExpense.findByIdAndUpdate(
       req.params.id,
       { ...req.body, updatedBy: req.user?._id },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     ).populate('createdBy', 'name email');
 
     res.json({

@@ -424,7 +424,11 @@ class EpisodeCenterSvc {
     }
     if (reason) update.statusChangeReason = reason;
 
-    return Episode.findByIdAndUpdate(episodeId, { $set: update }, { new: true }).lean();
+    return Episode.findByIdAndUpdate(
+      episodeId,
+      { $set: update },
+      { returnDocument: 'after' }
+    ).lean();
   }
 
   // ───────────────────────────────────────────────────────────────

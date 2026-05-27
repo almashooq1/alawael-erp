@@ -350,7 +350,7 @@ class SecurityService {
     clean.updatedBy = userId;
 
     const policy = await SecurityPolicy.findOneAndUpdate({ organizationId: 'default' }, clean, {
-      new: true,
+      returnDocument: 'after',
       upsert: true,
       runValidators: true,
     }).lean();

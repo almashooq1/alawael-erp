@@ -31,7 +31,7 @@ class NoorService {
     const config = await NoorConfig.findOneAndUpdate(
       { organization: organizationId },
       { ...data, updatedBy: userId },
-      { new: true, upsert: true, runValidators: true }
+      { returnDocument: 'after', upsert: true, runValidators: true }
     );
     const obj = config.toObject();
     if (obj.credentials) delete obj.credentials.encryptedApiKey;
@@ -78,7 +78,7 @@ class NoorService {
     return NoorStudent.findByIdAndUpdate(
       id,
       { ...data, updatedBy: userId },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
   }
 
@@ -171,7 +171,7 @@ class NoorService {
     return NoorIEP.findByIdAndUpdate(
       id,
       { ...data, updatedBy: userId },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
   }
 

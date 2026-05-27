@@ -1178,7 +1178,7 @@ router.put(
     const updated = await Account.findByIdAndUpdate(
       req.params.id,
       { ...req.body, updatedBy: req.user?.id },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     if (!updated) {
       throw new AppError('الحساب غير موجود', 404);
@@ -1745,7 +1745,7 @@ router.put(
     const updated = await CostCenter.findByIdAndUpdate(
       req.params.id,
       { ...req.body, updatedBy: req.user?.id },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     if (!updated) {
       throw new AppError('مركز التكلفة غير موجود', 404);
@@ -1825,7 +1825,7 @@ router.put(
     const updated = await FixedAsset.findByIdAndUpdate(
       req.params.id,
       { ...req.body, updatedBy: req.user?.id },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     if (!updated) {
       throw new AppError('الأصل غير موجود', 404);
@@ -2072,7 +2072,7 @@ router.put(
     updateData.updatedBy = req.user?.id;
 
     const updated = await AccountingInvoice.findByIdAndUpdate(req.params.id, updateData, {
-      new: true,
+      returnDocument: 'after',
     }).lean();
     if (!updated) {
       throw new AppError('الفاتورة غير موجودة', 404);

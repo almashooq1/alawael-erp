@@ -168,7 +168,7 @@ router.put(
     const plan = await M.findByIdAndUpdate(
       req.params.planId,
       { $set: req.body },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     if (!plan) return res.status(404).json({ success: false, message: 'Treatment plan not found' });
     res.json({ success: true, data: plan });
@@ -183,7 +183,7 @@ router.patch(
     const plan = await M.findOneAndUpdate(
       { _id: req.params.planId, 'goals._id': req.params.goalId },
       { $set: { 'goals.$': { ...req.body, _id: req.params.goalId } } },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     res.json({ success: true, data: plan });
   })
@@ -286,7 +286,7 @@ router.put(
     const record = await M.findByIdAndUpdate(
       req.params.id,
       { $set: req.body },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     if (!record) return res.status(404).json({ success: false, message: 'Prescription not found' });
     res.json({ success: true, data: record });
@@ -336,7 +336,7 @@ router.put(
     const record = await M.findByIdAndUpdate(
       req.params.id,
       { $set: req.body },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     if (!record) return res.status(404).json({ success: false, message: 'Record not found' });
     res.json({ success: true, data: record });
@@ -479,7 +479,7 @@ router.post(
     const record = await M.findByIdAndUpdate(
       req.params.id,
       { $set: { response: req.body.response, respondedAt: new Date(), status: 'resolved' } },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     if (!record) return res.status(404).json({ success: false, message: 'Consultation not found' });
     res.json({ success: true, data: record });
@@ -493,7 +493,7 @@ router.patch(
     const record = await M.findByIdAndUpdate(
       req.params.id,
       { $set: { status: req.body.status } },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     if (!record) return res.status(404).json({ success: false, message: 'Consultation not found' });
     res.json({ success: true, data: record });

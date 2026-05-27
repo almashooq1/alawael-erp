@@ -63,7 +63,7 @@ router.put('/courses/:id', authorize('admin', 'trainer', 'hr_manager'), async (r
     const course = await ELearningCourse.findByIdAndUpdate(
       req.params.id,
       { ...req.body, updatedBy: req.user._id },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!course) return res.status(404).json({ success: false, message: 'Course not found' });
     res.json({ success: true, data: course });
@@ -118,7 +118,9 @@ router.patch('/enrollments/:id/progress', async (req, res) => {
       updates.status = 'completed';
       updates.completedAt = new Date();
     }
-    const enrollment = await Enrollment.findByIdAndUpdate(req.params.id, updates, { new: true });
+    const enrollment = await Enrollment.findByIdAndUpdate(req.params.id, updates, {
+      returnDocument: 'after',
+    });
     if (!enrollment)
       return res.status(404).json({ success: false, message: 'Enrollment not found' });
     res.json({ success: true, data: enrollment });

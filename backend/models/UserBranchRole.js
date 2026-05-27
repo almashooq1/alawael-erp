@@ -168,7 +168,7 @@ userBranchRoleSchema.statics.revoke = async function revokeAssignment({
         revokeReason: (reason || '').slice(0, 300),
       },
     },
-    { new: true }
+    { returnDocument: 'after' }
   ).lean();
 };
 

@@ -540,7 +540,7 @@ class VehicleManagementService extends EventEmitter {
     const vehicle = await this.Vehicle.findByIdAndUpdate(
       vehicleId,
       { ...updates, updatedAt: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     this.emit('vehicle:updated', vehicle);
@@ -555,7 +555,7 @@ class VehicleManagementService extends EventEmitter {
     const vehicle = await this.Vehicle.findByIdAndUpdate(
       vehicleId,
       { status, updatedAt: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     this.emit('vehicle:status_changed', { vehicle, status, reason });
@@ -606,7 +606,7 @@ class VehicleManagementService extends EventEmitter {
         },
         updatedAt: new Date(),
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     this.emit('vehicle:driver_assigned', { vehicle, driver: driverData });
@@ -625,7 +625,7 @@ class VehicleManagementService extends EventEmitter {
         status: 'available',
         updatedAt: new Date(),
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     this.emit('vehicle:driver_released', vehicle);
@@ -644,7 +644,7 @@ class VehicleManagementService extends EventEmitter {
         'odometer.lastUpdated': new Date(),
         updatedAt: new Date(),
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     this.emit('vehicle:odometer_updated', {

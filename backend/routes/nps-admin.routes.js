@@ -206,7 +206,9 @@ router.patch('/:id', requireRole(ADMIN_ROLES), async (req, res) => {
     }
     delete body.surveyKey;
     delete body.guardianId;
-    const row = await NpsResponse.findByIdAndUpdate(req.params.id, body, { new: true });
+    const row = await NpsResponse.findByIdAndUpdate(req.params.id, body, {
+      returnDocument: 'after',
+    });
     if (!row) return res.status(404).json({ success: false, message: 'غير موجود' });
     res.json({ success: true, data: row });
   } catch (err) {

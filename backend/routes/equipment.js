@@ -58,7 +58,7 @@ router.put('/:id', authorize('admin', 'manager', 'inventory_manager'), async (re
     const equipment = await Equipment.findByIdAndUpdate(
       req.params.id,
       { ...req.body, updatedBy: req.user._id },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!equipment) return res.status(404).json({ success: false, message: 'Equipment not found' });
     res.json({ success: true, data: equipment });
@@ -91,7 +91,7 @@ router.patch('/:id/checkout', async (req, res) => {
         checkedOutAt: new Date(),
         checkedOutBy: req.user._id,
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!equipment) return res.status(404).json({ success: false, message: 'Equipment not found' });
     res.json({ success: true, data: equipment });
@@ -114,7 +114,7 @@ router.patch('/:id/return', async (req, res) => {
         lastCondition: condition,
         returnNotes: notes,
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!equipment) return res.status(404).json({ success: false, message: 'Equipment not found' });
     res.json({ success: true, data: equipment });

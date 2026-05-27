@@ -152,7 +152,7 @@ class DocumentKnowledgeGraphService {
       const updated = await GraphNode.findByIdAndUpdate(
         existing._id,
         { $set: { label, type, properties, lastAnalyzed: new Date() } },
-        { new: true }
+        { returnDocument: 'after' }
       ).lean();
       return { success: true, node: updated, updated: true };
     }

@@ -69,7 +69,7 @@ router.patch('/:id', async (req, res) => {
     const comm = await Communication.findByIdAndUpdate(
       req.params.id,
       { subject, message, to, type, priority, status, isRead },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     if (!comm) return res.status(404).json({ success: false, message: 'المراسلة غير موجودة' });
     res.json({ success: true, data: comm });

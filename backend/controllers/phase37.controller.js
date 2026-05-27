@@ -97,7 +97,7 @@ function buildCRUD(Model, labelEn, labelAr) {
         const doc = await Model.findByIdAndUpdate(
           req.params.id,
           { ...stripUpdateMeta(req.body), updatedBy: userId(req) },
-          { new: true, runValidators: true }
+          { returnDocument: 'after', runValidators: true }
         );
         if (!doc) return res.status(404).json({ success: false, message: `${labelAr} غير موجود` });
         ok(res, doc, `تم تحديث ${labelAr} بنجاح`);
@@ -172,7 +172,7 @@ const accreditationStandards = {
           lastReviewDate: new Date(),
           reviewedBy: userId(req),
         },
-        { new: true }
+        { returnDocument: 'after' }
       );
       if (!doc) return res.status(404).json({ success: false, message: 'المعيار غير موجود' });
       ok(res, doc, 'تم تحديث حالة الامتثال');
@@ -190,7 +190,7 @@ const accreditationStandards = {
             evidenceItems: { ...req.body, uploadedBy: userId(req), uploadedAt: new Date() },
           },
         },
-        { new: true }
+        { returnDocument: 'after' }
       );
       if (!doc) return res.status(404).json({ success: false, message: 'المعيار غير موجود' });
       ok(res, doc, 'تمت إضافة الدليل بنجاح');
@@ -231,7 +231,7 @@ const accreditationSurveys = {
           findings,
           status: 'completed',
         },
-        { new: true }
+        { returnDocument: 'after' }
       );
       if (!doc) return res.status(404).json({ success: false, message: 'مسح الاعتماد غير موجود' });
       ok(res, doc, 'تم تسجيل نتيجة المسح');
@@ -327,7 +327,7 @@ const familyTraining = {
         if (status === 'completed') update.completedAt = new Date();
         if (sessionAttendance) update.$push = { sessionAttendance: { $each: sessionAttendance } };
         const doc = await FamilyTrainingEnrollment.findByIdAndUpdate(req.params.id, update, {
-          new: true,
+          returnDocument: 'after',
         });
         if (!doc) return res.status(404).json({ success: false, message: 'التسجيل غير موجود' });
         ok(res, doc, 'تم تحديث التقدم');
@@ -397,7 +397,7 @@ const clinicalDecisionSupport = {
             acknowledgedAt: new Date(),
             resolutionAction: req.body.resolutionAction,
           },
-          { new: true }
+          { returnDocument: 'after' }
         );
         if (!doc) return res.status(404).json({ success: false, message: 'التنبيه غير موجود' });
         ok(res, doc, 'تم تأكيد استلام التنبيه');
@@ -416,7 +416,7 @@ const clinicalDecisionSupport = {
             resolvedAt: new Date(),
             resolutionAction: req.body.resolutionAction,
           },
-          { new: true }
+          { returnDocument: 'after' }
         );
         if (!doc) return res.status(404).json({ success: false, message: 'التنبيه غير موجود' });
         ok(res, doc, 'تم حل التنبيه');
@@ -505,7 +505,7 @@ const staffCompetency = {
             ? { employeeSignedAt: new Date() }
             : { supervisorSignedAt: new Date(), status: 'completed' };
         const doc = await StaffCompetencyAssessment.findByIdAndUpdate(req.params.id, update, {
-          new: true,
+          returnDocument: 'after',
         });
         if (!doc) return res.status(404).json({ success: false, message: 'التقييم غير موجود' });
         ok(res, doc, 'تم التوقيع الرقمي');
@@ -540,7 +540,7 @@ const staffCompetency = {
               totalCEUEarned: req.body.ceuCredits || 0,
             },
           },
-          { new: true }
+          { returnDocument: 'after' }
         );
         if (!doc) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
         ok(res, doc, 'تمت إضافة النشاط التطويري');
@@ -618,7 +618,7 @@ const communityOutreach = {
       const doc = await OutreachProgram.findByIdAndUpdate(
         req.params.id,
         { ...req.body, status: 'completed' },
-        { new: true }
+        { returnDocument: 'after' }
       );
       if (!doc) return res.status(404).json({ success: false, message: 'البرنامج غير موجود' });
       ok(res, doc, 'تم تسجيل نتائج البرنامج');
@@ -652,7 +652,7 @@ const digitalTherapeutics = {
       const doc = await DigitalTherapeutic.findByIdAndUpdate(
         req.params.id,
         { $push: { adherenceData: sessionData } },
-        { new: true }
+        { returnDocument: 'after' }
       );
       if (!doc) return res.status(404).json({ success: false, message: 'البرنامج غير موجود' });
       // Recalculate adherence rate
@@ -671,7 +671,7 @@ const digitalTherapeutics = {
       const doc = await DigitalTherapeutic.findByIdAndUpdate(
         req.params.id,
         { $push: { progressMetrics: { ...req.body, date: new Date() } } },
-        { new: true }
+        { returnDocument: 'after' }
       );
       if (!doc) return res.status(404).json({ success: false, message: 'البرنامج غير موجود' });
       ok(res, doc, 'تمت إضافة مقياس التقدم');
@@ -734,7 +734,7 @@ const outcomeContracting = {
       const doc = await OutcomeContract.findByIdAndUpdate(
         req.params.id,
         { $push: { performanceReports: report }, $inc: { totalPaid: report.paymentEarned || 0 } },
-        { new: true }
+        { returnDocument: 'after' }
       );
       if (!doc) return res.status(404).json({ success: false, message: 'العقد غير موجود' });
       ok(res, doc, 'تم تقديم تقرير الأداء');
@@ -810,7 +810,7 @@ const contentManagement = {
             },
           },
         },
-        { new: true }
+        { returnDocument: 'after' }
       );
       if (!doc) return res.status(404).json({ success: false, message: 'المحتوى غير موجود' });
       ok(res, doc, 'تمت إضافة النسخة');

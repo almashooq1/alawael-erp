@@ -435,7 +435,7 @@ class ReportingEngine {
             {
               $setOnInsert: { ...baseDoc, status: 'QUEUED', attempts: 0 },
             },
-            { upsert: true, new: true }
+            { upsert: true, returnDocument: 'after' }
           );
         } catch (err) {
           errors.push(`queue failed for ${r.id}/${channelName}: ${err.message}`);

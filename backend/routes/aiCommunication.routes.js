@@ -250,7 +250,7 @@ router.put('/templates/:id', requireRole('admin', 'manager'), async (req, res) =
     const doc = await NotifTmpl.findOneAndUpdate(
       { _id: req.params.id, branchId: req.user.branchId },
       req.body,
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!doc) return res.status(404).json({ success: false, message: 'Template not found' });
     res.json({ success: true, data: doc });

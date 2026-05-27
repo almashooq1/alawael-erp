@@ -388,7 +388,7 @@ class NotificationEnhancedService {
     return NotificationTemplate.findByIdAndUpdate(
       id,
       { ...data, updatedBy: userId },
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 
@@ -403,7 +403,7 @@ class NotificationEnhancedService {
     return NotificationPreference.findOneAndUpdate(
       { userId, category },
       { ...prefs },
-      { upsert: true, new: true }
+      { upsert: true, returnDocument: 'after' }
     );
   }
 
@@ -422,7 +422,7 @@ class NotificationEnhancedService {
     return Escalation.findByIdAndUpdate(
       id,
       { status: 'acknowledged', acknowledgedAt: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 
@@ -430,7 +430,7 @@ class NotificationEnhancedService {
     return Escalation.findByIdAndUpdate(
       id,
       { status: 'resolved', resolvedAt: new Date(), resolutionNotes: notes },
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 
@@ -442,7 +442,7 @@ class NotificationEnhancedService {
     return BroadcastMessage.findByIdAndUpdate(
       id,
       { status: 'approved', approvedBy: userId, approvedAt: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 }

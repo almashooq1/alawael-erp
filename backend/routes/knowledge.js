@@ -61,7 +61,7 @@ router.get('/articles/:id', async (req, res) => {
     const article = await KnowledgeArticle.findByIdAndUpdate(
       req.params.id,
       { $inc: { views: 1 } },
-      { new: true }
+      { returnDocument: 'after' }
     )
       .populate('author', 'name email')
       .populate('relatedArticles', 'title slug');
@@ -238,10 +238,7 @@ router.put(
       const category = await KnowledgeCategory.findByIdAndUpdate(
         req.params.id,
         { name, nameAr, description, descriptionAr, icon, parentCategory, order, isActive },
-        {
-          new: true,
-          runValidators: true,
-        }
+        { returnDocument: 'after', runValidators: true }
       );
 
       if (!category) {

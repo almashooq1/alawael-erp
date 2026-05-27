@@ -55,7 +55,7 @@ router.put('/:id', authorize('admin', 'manager'), async (req, res) => {
   try {
     const TransportRoute = require('../models/Fleet/TransportRoute');
     const route = await TransportRoute.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!route) return res.status(404).json({ success: false, message: 'Route not found' });
@@ -71,7 +71,7 @@ router.delete('/:id', authorize('admin'), async (req, res) => {
     const route = await TransportRoute.findByIdAndUpdate(
       req.params.id,
       { status: 'inactive' },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!route) return res.status(404).json({ success: false, message: 'Route not found' });
     res.json({ success: true, message: 'Route deactivated' });

@@ -115,7 +115,7 @@ router.patch(
       const record = await MedicalHistory.findOneAndUpdate(
         { beneficiary: req.params.beneficiaryId, ...branchFilter(req) },
         { $set: updates },
-        { new: true, runValidators: true }
+        { returnDocument: 'after', runValidators: true }
       );
       if (!record) return fail(res, 'السجل غير موجود', 404);
       ok(res, record, { message: 'تم التحديث' });
@@ -219,7 +219,7 @@ router.patch(
           approvedAt: new Date(),
           transferDate: req.body.transferDate || new Date(),
         },
-        { new: true }
+        { returnDocument: 'after' }
       );
       if (!record) return fail(res, 'الطلب غير موجود', 404);
       ok(res, record, { message: 'تمت الموافقة على الطلب' });
@@ -242,7 +242,7 @@ router.patch(
           status: 'rejected',
           rejectionReason: req.body.rejectionReason || 'لم يُذكر سبب',
         },
-        { new: true }
+        { returnDocument: 'after' }
       );
       if (!record) return fail(res, 'الطلب غير موجود', 404);
       ok(res, record, { message: 'تم رفض الطلب' });
@@ -294,7 +294,7 @@ router.patch('/emergency-contacts/:id', requireAuth, requireBranchAccess, async 
     const contact = await EmergencyContact.findOneAndUpdate(
       { _id: req.params.id, ...branchFilter(req) },
       stripUpdateMeta(req.body),
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!contact) return fail(res, 'جهة الاتصال غير موجودة', 404);
     ok(res, contact, { message: 'تم التحديث' });
@@ -511,7 +511,7 @@ router.patch('/employment-contracts/:id', requireAuth, requireBranchAccess, asyn
     const contract = await EmploymentContract.findOneAndUpdate(
       { _id: req.params.id, ...branchFilterFor(req, 'branch') },
       stripUpdateMeta(req.body),
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!contract) return fail(res, 'العقد غير موجود', 404);
     ok(res, contract, { message: 'تم التحديث' });
@@ -534,7 +534,7 @@ router.patch(
           approvedBy: req.user?._id || req.user?.id,
           approvedAt: new Date(),
         },
-        { new: true }
+        { returnDocument: 'after' }
       );
       if (!contract) return fail(res, 'العقد غير موجود', 404);
       ok(res, contract, { message: 'تم اعتماد العقد' });
@@ -550,7 +550,7 @@ router.delete('/employment-contracts/:id', requireAuth, requireBranchAccess, asy
     const contract = await EmploymentContract.findOneAndUpdate(
       { _id: req.params.id, ...branchFilterFor(req, 'branch') },
       { status: 'terminated' },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!contract) return fail(res, 'العقد غير موجود', 404);
     ok(res, null, { message: 'تم إنهاء العقد' });
@@ -668,7 +668,7 @@ router.patch('/chart-of-accounts/:id', requireAuth, requireBranchAccess, async (
     const account = await ChartOfAccounts.findOneAndUpdate(
       { _id: req.params.id, ...branchFilterFor(req, 'branch') },
       stripUpdateMeta(req.body),
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!account) return fail(res, 'الحساب غير موجود', 404);
     ok(res, account, { message: 'تم التحديث' });

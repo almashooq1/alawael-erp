@@ -943,10 +943,7 @@ router.put(
       const entity = await ExternalEntity.findByIdAndUpdate(
         req.params.id,
         { name, type, contactPerson, email, phone, address, notes, status },
-        {
-          new: true,
-          runValidators: true,
-        }
+        { returnDocument: 'after', runValidators: true }
       );
 
       if (!entity) {

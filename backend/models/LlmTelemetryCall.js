@@ -35,7 +35,7 @@ const TTL_SECONDS = 30 * 24 * 60 * 60;
 
 const LlmTelemetryCallSchema = new mongoose.Schema(
   {
-    at: { type: Date, required: true, default: Date.now, index: true },
+    at: { type: Date, required: true, default: Date.now },
     serviceName: { type: String, required: true, maxlength: 64, index: true },
     source: {
       type: String,

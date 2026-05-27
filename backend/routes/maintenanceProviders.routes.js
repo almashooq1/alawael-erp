@@ -113,10 +113,7 @@ router.put(
       const provider = await MaintenanceProvider.findOneAndUpdate(
         { _id: req.params.id, ...branchFilter(req) },
         stripUpdateMeta(req.body),
-        {
-          new: true,
-          runValidators: true,
-        }
+        { returnDocument: 'after', runValidators: true }
       );
       if (!provider) return res.status(404).json({ success: false, message: 'Provider not found' });
       res.json({ success: true, data: provider });
@@ -189,7 +186,7 @@ router.patch(
       const provider = await MaintenanceProvider.findOneAndUpdate(
         { _id: req.params.id, ...branchFilter(req) },
         { verifiedAt: new Date(), verifiedBy: req.user?._id || req.user?.id },
-        { new: true }
+        { returnDocument: 'after' }
       );
       if (!provider) return res.status(404).json({ success: false, message: 'Provider not found' });
       res.json({ success: true, data: provider });

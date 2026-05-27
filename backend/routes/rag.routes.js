@@ -139,7 +139,7 @@ router.post('/deactivate/:id', requireMfaTier(2), async (req, res) => {
     const result = await Chunk.findByIdAndUpdate(
       req.params.id,
       { $set: { isActive: false } },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!result) return res.status(404).json({ success: false, code: 'RAG_CHUNK_NOT_FOUND' });
     return res.json({ success: true, chunkId: result._id, isActive: result.isActive });

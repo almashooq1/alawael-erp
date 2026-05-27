@@ -136,7 +136,7 @@ class InventoryEnhancedService {
     await InventoryStock.findOneAndUpdate(
       { itemId, warehouseId },
       { quantityOnHand: newQuantity },
-      { upsert: true, new: true }
+      { upsert: true, returnDocument: 'after' }
     );
 
     return InventoryTransaction.create({
@@ -246,7 +246,11 @@ class InventoryEnhancedService {
   }
 
   async approvePurchaseOrder(poId, approvedBy) {
-    return PurchaseOrder.findByIdAndUpdate(poId, { status: 'approved', approvedBy }, { new: true });
+    return PurchaseOrder.findByIdAndUpdate(
+      poId,
+      { status: 'approved', approvedBy },
+      { returnDocument: 'after' }
+    );
   }
 
   async receiveGoodsFromPO(poId, receivedItems, performedBy) {
@@ -324,7 +328,7 @@ class InventoryEnhancedService {
         accumulatedDepreciation: dep.accumulatedDepreciation,
         currentValue: dep.currentBookValue,
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 
@@ -432,7 +436,7 @@ class InventoryEnhancedService {
     return StockCount.findByIdAndUpdate(
       stockCountId,
       { status: 'approved', approvedBy },
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 

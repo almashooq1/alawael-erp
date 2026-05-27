@@ -59,7 +59,7 @@ router.put('/:id', authorize('admin', 'manager', 'fleet_officer', 'mechanic'), a
   try {
     const FleetTire = require('../models/Fleet/FleetTire');
     const tire = await FleetTire.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!tire) return res.status(404).json({ success: false, message: 'Tire record not found' });
@@ -85,7 +85,7 @@ router.patch(
           reason,
           replacedBy: req.user._id,
         },
-        { new: true }
+        { returnDocument: 'after' }
       );
       if (!tire) return res.status(404).json({ success: false, message: 'Tire record not found' });
       res.json({ success: true, data: tire });
@@ -103,7 +103,7 @@ router.post('/:id/pressure-log', async (req, res) => {
       {
         $push: { pressureLogs: { ...req.body, recordedAt: new Date(), recordedBy: req.user._id } },
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!tire) return res.status(404).json({ success: false, message: 'Tire record not found' });
     res.json({ success: true, data: tire });

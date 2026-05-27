@@ -48,7 +48,7 @@ router.put('/roles/:id', authorize('admin'), async (req, res) => {
   try {
     const Role = require('../models/RBAC/Role');
     const role = await Role.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!role) return res.status(404).json({ success: false, message: 'Role not found' });

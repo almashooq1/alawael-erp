@@ -60,7 +60,7 @@ router.put('/:id', authorize('admin', 'manager'), async (req, res) => {
   try {
     const License = require('../models/License/License');
     const license = await License.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!license) return res.status(404).json({ success: false, message: 'License not found' });
@@ -94,7 +94,7 @@ router.patch('/:id/renew', authorize('admin', 'manager'), async (req, res) => {
         },
         ...(documentUrl ? { documentUrl } : {}),
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!license) return res.status(404).json({ success: false, message: 'License not found' });
     res.json({ success: true, data: license });

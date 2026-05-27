@@ -287,7 +287,7 @@ router.post(
     const session = await S.findByIdAndUpdate(
       req.params.sessionId,
       { $set: { soapNotes: req.body, documentedAt: new Date() } },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     if (!session) return res.status(404).json({ success: false, message: 'Session not found' });
     res.json({ success: true, data: session.soapNotes });
@@ -320,7 +320,7 @@ router.post(
               rescheduleReason: reason,
             },
           },
-          { new: true }
+          { returnDocument: 'after' }
         )
       )
     );

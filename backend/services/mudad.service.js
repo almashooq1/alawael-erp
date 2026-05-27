@@ -148,7 +148,7 @@ class MudadService {
                 },
               },
             },
-            { upsert: true, new: true }
+            { upsert: true, returnDocument: 'after' }
           );
 
           records.push(record);
@@ -526,7 +526,7 @@ class MudadService {
           generatedBy: userId,
           generatedAt: new Date(),
         },
-        { upsert: true, new: true }
+        { upsert: true, returnDocument: 'after' }
       );
 
       return { success: true, report };

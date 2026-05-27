@@ -11,7 +11,7 @@ async function create(payload) {
 }
 
 async function update(id, patch) {
-  return CctvNvr.findByIdAndUpdate(id, patch, { new: true });
+  return CctvNvr.findByIdAndUpdate(id, patch, { returnDocument: 'after' });
 }
 
 async function getById(id) {
@@ -71,7 +71,7 @@ async function setStatus(nvrId, status, extras = {}) {
   return CctvNvr.findByIdAndUpdate(
     nvrId,
     { status, lastSeenAt: new Date(), ...extras },
-    { new: true }
+    { returnDocument: 'after' }
   );
 }
 

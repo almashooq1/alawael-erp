@@ -373,7 +373,7 @@ class DocumentFormsService {
     const t = await FormTemplate.findByIdAndUpdate(
       templateId,
       { status: 'published' },
-      { new: true }
+      { returnDocument: 'after' }
     );
     return { success: true, template: t };
   }
@@ -552,7 +552,11 @@ class DocumentFormsService {
   }
 
   async updateCustomField(fieldId, data) {
-    const field = await CustomFieldDef.findByIdAndUpdate(fieldId, { $set: data }, { new: true });
+    const field = await CustomFieldDef.findByIdAndUpdate(
+      fieldId,
+      { $set: data },
+      { returnDocument: 'after' }
+    );
     if (!field) throw new Error('الحقل غير موجود');
     return { success: true, field };
   }

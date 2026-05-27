@@ -75,7 +75,7 @@ const AttendanceExceptionSchema = new mongoose.Schema(
       default: attReg.EXCEPTION_STATUS.OPEN,
       index: true,
     },
-    detectedAt: { type: Date, required: true, default: Date.now, index: true },
+    detectedAt: { type: Date, required: true, default: Date.now },
     detectorRunId: { type: String, default: null, maxlength: 80 },
 
     resolution: {

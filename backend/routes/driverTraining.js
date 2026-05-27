@@ -60,7 +60,7 @@ router.put('/:id', authorize('admin', 'manager', 'hr'), async (req, res) => {
   try {
     const DriverTraining = require('../models/Fleet/DriverTraining');
     const training = await DriverTraining.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!training) return res.status(404).json({ success: false, message: 'Training not found' });
@@ -85,7 +85,7 @@ router.patch('/:id/complete', authorize('admin', 'manager', 'hr'), async (req, r
         notes,
         completedBy: req.user._id,
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!training) return res.status(404).json({ success: false, message: 'Training not found' });
     res.json({ success: true, data: training });

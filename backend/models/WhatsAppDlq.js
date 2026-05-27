@@ -76,7 +76,7 @@ const WhatsAppDlqSchema = new mongoose.Schema(
     replayedAt: { type: Date, default: null },
 
     // ─── Audit ─────────────────────────────────────────────────────────────
-    createdAt: { type: Date, default: Date.now, index: true },
+    createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
     notes: { type: String, default: '' },
   },
@@ -154,7 +154,7 @@ WhatsAppDlqSchema.statics.claimNext = async function claimNext({ now = new Date(
     {
       $set: { status: 'retrying', lockedUntil: new Date(now.getTime() + 30_000) },
     },
-    { sort: { nextRetryAt: 1 }, new: true }
+    { sort: { nextRetryAt: 1 }, returnDocument: 'after' }
   );
 };
 
@@ -169,7 +169,7 @@ WhatsAppDlqSchema.statics.markReplayed = async function markReplayed(id, provide
         lockedUntil: null,
       },
     },
-    { new: true }
+    { returnDocument: 'after' }
   );
 };
 

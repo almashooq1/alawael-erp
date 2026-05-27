@@ -61,9 +61,7 @@ router.put(
       const standard = await QualityStandard.findByIdAndUpdate(
         req.params.id,
         stripUpdateMeta(req.body),
-        {
-          new: true,
-        }
+        { returnDocument: 'after' }
       );
       res.json({ success: true, data: standard });
     } catch (err) {
@@ -117,7 +115,7 @@ router.put(
       const checklist = await Checklist.findByIdAndUpdate(
         req.params.id,
         stripUpdateMeta(req.body),
-        { new: true }
+        { returnDocument: 'after' }
       );
       res.json({ success: true, data: checklist });
     } catch (err) {
@@ -207,9 +205,7 @@ router.put('/incidents/:incidentId', authenticate, requireBranchAccess, async (r
     const incident = await Incident.findByIdAndUpdate(
       req.params.incidentId,
       stripUpdateMeta(req.body),
-      {
-        new: true,
-      }
+      { returnDocument: 'after' }
     );
     res.json({ success: true, data: incident });
   } catch (err) {
@@ -251,7 +247,7 @@ router.post(
             },
           },
         },
-        { new: true }
+        { returnDocument: 'after' }
       );
       res.json({ success: true, data: incident });
     } catch (err) {
@@ -277,7 +273,7 @@ router.put(
           closedAt: new Date(),
           closureNotes: req.body.notes,
         },
-        { new: true }
+        { returnDocument: 'after' }
       );
       res.json({ success: true, data: incident });
     } catch (err) {
@@ -333,9 +329,7 @@ router.put('/complaints/:complaintId', authenticate, requireBranchAccess, async 
     const complaint = await Complaint.findByIdAndUpdate(
       req.params.complaintId,
       stripUpdateMeta(req.body),
-      {
-        new: true,
-      }
+      { returnDocument: 'after' }
     );
     res.json({ success: true, data: complaint });
   } catch (err) {
@@ -454,7 +448,7 @@ router.put(
     try {
       const { Audit } = require('../models/QualityModels');
       const audit = await Audit.findByIdAndUpdate(req.params.auditId, stripUpdateMeta(req.body), {
-        new: true,
+        returnDocument: 'after',
       });
       res.json({ success: true, data: audit });
     } catch (err) {
@@ -507,9 +501,7 @@ router.put('/improvements/:projectId', authenticate, requireBranchAccess, async 
     const project = await ImprovementProject.findByIdAndUpdate(
       req.params.projectId,
       stripUpdateMeta(req.body),
-      {
-        new: true,
-      }
+      { returnDocument: 'after' }
     );
     res.json({ success: true, data: project });
   } catch (err) {
@@ -528,7 +520,7 @@ router.put(
       const update = { currentPhase: phase };
       update[`${phase}Phase`] = phaseData;
       const project = await ImprovementProject.findByIdAndUpdate(req.params.projectId, update, {
-        new: true,
+        returnDocument: 'after',
       });
       res.json({ success: true, data: project });
     } catch (err) {
@@ -606,7 +598,7 @@ router.put('/risks/:riskId', authenticate, requireBranchAccess, async (req, res)
       req.body.riskLevel = svc.assessRiskLevel(likelihood, impact);
     }
     const risk = await Risk.findByIdAndUpdate(req.params.riskId, stripUpdateMeta(req.body), {
-      new: true,
+      returnDocument: 'after',
     });
     res.json({ success: true, data: risk });
   } catch (err) {

@@ -207,7 +207,7 @@ class DocumentCalendarService extends EventEmitter {
     const event = await CalendarEvent.findByIdAndUpdate(
       eventId,
       { $set: updates },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     ).lean();
 
     if (!event) return { success: false, error: 'الحدث غير موجود' };
@@ -233,7 +233,7 @@ class DocumentCalendarService extends EventEmitter {
         completedBy: userId,
         ...(notes && { notes }),
       },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
 
     if (!event) return { success: false, error: 'الحدث غير موجود' };
@@ -256,7 +256,7 @@ class DocumentCalendarService extends EventEmitter {
         startDate: new Date(snoozeUntil),
         'reminders.$[].sent': false,
       },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
 
     if (!event) return { success: false, error: 'الحدث غير موجود' };
@@ -348,7 +348,7 @@ class DocumentCalendarService extends EventEmitter {
     const event = await CalendarEvent.findOneAndUpdate(
       { _id: eventId, 'assignees.userId': userId },
       { $set: { 'assignees.$.status': response.status, 'assignees.$.response': response.note } },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
 
     if (!event) return { success: false, error: 'الحدث غير موجود أو لست مشاركاً' };

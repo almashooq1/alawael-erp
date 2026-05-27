@@ -96,7 +96,7 @@ whatsappConsentSchema.statics.setConsent = async function (phone, optedIn, ctx =
     },
     $push: { history: entry },
   };
-  return this.findOneAndUpdate({ phone }, update, { upsert: true, new: true });
+  return this.findOneAndUpdate({ phone }, update, { upsert: true, returnDocument: 'after' });
 };
 
 /**

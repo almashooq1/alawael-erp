@@ -115,10 +115,7 @@ router.put('/:id', requireAuth, requireBranchAccess, async (req, res) => {
     const prediction = await MaintenancePrediction.findOneAndUpdate(
       { _id: req.params.id, ...branchFilter(req) },
       stripUpdateMeta(req.body),
-      {
-        new: true,
-        runValidators: true,
-      }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!prediction)
       return res.status(404).json({ success: false, message: 'Prediction not found' });
@@ -160,7 +157,7 @@ router.patch('/:id/acknowledge', requireAuth, requireBranchAccess, async (req, r
         acknowledgedBy: req.user?._id || req.user?.id,
         acknowledgedDate: new Date(),
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!prediction)
       return res.status(404).json({ success: false, message: 'Prediction not found' });
@@ -178,7 +175,7 @@ router.patch('/:id/resolve', requireAuth, requireBranchAccess, async (req, res) 
     const prediction = await MaintenancePrediction.findOneAndUpdate(
       { _id: req.params.id, ...branchFilter(req) },
       { status: 'resolved', resolutionDate: new Date(), actualResult },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!prediction)
       return res.status(404).json({ success: false, message: 'Prediction not found' });

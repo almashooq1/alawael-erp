@@ -143,7 +143,7 @@ router.put('/:id', requireRole('admin', 'manager', 'supervisor'), async (req, re
         'data.status': { $ne: 'cancelled' },
       },
       { $set: { data: req.body } },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!doc)
       return res.status(404).json({ success: false, message: 'Event not found or cancelled' });
@@ -192,7 +192,7 @@ router.patch('/:id/publish', requireRole('admin', 'manager', 'supervisor'), asyn
         'data.publishedAt': new Date(),
         'data.publishedBy': req.user._id,
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!doc) return res.status(404).json({ success: false, message: 'Draft event not found' });
     res.json({ success: true, data: doc });
@@ -226,7 +226,7 @@ router.post('/:id/register', async (req, res) => {
           'data.registrations': { studentId, registeredAt: new Date(), registeredBy: req.user._id },
         },
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     res.status(201).json({ success: true, data: doc });
   } catch (err) {
@@ -304,7 +304,7 @@ router.post(
             },
           },
         },
-        { new: true }
+        { returnDocument: 'after' }
       );
       if (!doc) return res.status(404).json({ success: false, message: 'Event not found' });
       res.json({ success: true, data: doc });

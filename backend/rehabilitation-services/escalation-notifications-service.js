@@ -572,7 +572,9 @@ class EscalationNotificationsService extends EventEmitter {
   }
 
   async updateRule(ruleId, updates) {
-    const rule = await EscalationRule.findOneAndUpdate({ ruleId }, updates, { new: true });
+    const rule = await EscalationRule.findOneAndUpdate({ ruleId }, updates, {
+      returnDocument: 'after',
+    });
     if (!rule) throw new Error(`القاعدة ${ruleId} غير موجودة`);
     return { success: true, data: rule };
   }

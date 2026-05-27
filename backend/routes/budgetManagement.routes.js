@@ -112,7 +112,7 @@ router.put('/:id', authorize(['admin', 'manager']), async (req, res) => {
     const budget = await Budget.findByIdAndUpdate(
       req.params.id,
       { name, department, fiscalYear, totalAmount, lineItems, status, notes },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     ).lean();
     if (!budget) return res.status(404).json({ success: false, message: 'الميزانية غير موجودة' });
     res.json({ success: true, data: budget, message: 'تم تحديث الميزانية بنجاح' });

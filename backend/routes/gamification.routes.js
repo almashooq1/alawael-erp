@@ -54,7 +54,7 @@ router.put(
   async (req, res) => {
     try {
       const badge = await Badge.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-        new: true,
+        returnDocument: 'after',
         runValidators: true,
       });
       if (!badge) return res.status(404).json({ success: false, message: 'Badge not found' });

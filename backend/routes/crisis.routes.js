@@ -172,7 +172,7 @@ router.post('/plans', async (req, res) => {
 router.put('/plans/:id', async (req, res) => {
   try {
     const plan = await EmergencyPlan.findByIdAndUpdate(req.params.id, pick(req.body, PLAN_FIELDS), {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!plan) return res.status(404).json({ success: false, error: 'الخطة غير موجودة' });
@@ -187,7 +187,7 @@ router.patch('/plans/:id/approve', async (req, res) => {
     const plan = await EmergencyPlan.findByIdAndUpdate(
       req.params.id,
       { status: 'active', approvedBy: req.user._id, approvedAt: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!plan) return res.status(404).json({ success: false, error: 'الخطة غير موجودة' });
     res.json({ success: true, data: plan, message: 'تمت الموافقة على الخطة' });
@@ -201,7 +201,7 @@ router.delete('/plans/:id', async (req, res) => {
     const plan = await EmergencyPlan.findByIdAndUpdate(
       req.params.id,
       { isDeleted: true },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!plan) return res.status(404).json({ success: false, error: 'الخطة غير موجودة' });
     res.json({ success: true, message: 'تم حذف الخطة' });
@@ -283,10 +283,7 @@ router.put('/incidents/:id', async (req, res) => {
     const incident = await CrisisIncident.findByIdAndUpdate(
       req.params.id,
       pick(req.body, INCIDENT_FIELDS),
-      {
-        new: true,
-        runValidators: true,
-      }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!incident) return res.status(404).json({ success: false, error: 'الحادثة غير موجودة' });
     res.json({ success: true, data: incident });
@@ -408,10 +405,7 @@ router.put('/drills/:id', async (req, res) => {
     const drill = await EmergencyDrill.findByIdAndUpdate(
       req.params.id,
       pick(req.body, DRILL_FIELDS),
-      {
-        new: true,
-        runValidators: true,
-      }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!drill) return res.status(404).json({ success: false, error: 'التمرين غير موجود' });
     res.json({ success: true, data: drill });
@@ -477,10 +471,7 @@ router.put('/contacts/:id', async (req, res) => {
     const contact = await EmergencyContact.findByIdAndUpdate(
       req.params.id,
       pick(req.body, CONTACT_FIELDS),
-      {
-        new: true,
-        runValidators: true,
-      }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!contact) return res.status(404).json({ success: false, error: 'جهة الاتصال غير موجودة' });
     res.json({ success: true, data: contact });

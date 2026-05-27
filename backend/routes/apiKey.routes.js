@@ -74,7 +74,7 @@ router.put('/:id', requireAuth, requireBranchAccess, requireRole(['admin']), asy
     if (isActive !== undefined) update.isActive = isActive;
 
     const key = await ApiKey.findByIdAndUpdate(req.params.id, update, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!key) return res.status(404).json({ success: false, message: 'API key not found' });
@@ -93,7 +93,11 @@ router.put(
   requireRole(['admin']),
   async (req, res) => {
     try {
-      const key = await ApiKey.findByIdAndUpdate(req.params.id, { isActive: false }, { new: true });
+      const key = await ApiKey.findByIdAndUpdate(
+        req.params.id,
+        { isActive: false },
+        { returnDocument: 'after' }
+      );
       if (!key) return res.status(404).json({ success: false, message: 'API key not found' });
       res.json({ success: true, message: 'API key revoked', data: key });
     } catch (err) {

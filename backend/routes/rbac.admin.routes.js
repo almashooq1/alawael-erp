@@ -38,7 +38,7 @@ router.patch('/roles/:roleId/permissions', async (req, res) => {
     const role = await Role.findByIdAndUpdate(
       req.params.roleId,
       { $set: { permissions }, updatedBy: req.user._id },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!role) return res.status(404).json({ success: false, message: 'Role not found' });
     res.json({ success: true, data: role });

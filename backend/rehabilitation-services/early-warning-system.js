@@ -73,8 +73,7 @@ earlyWarningAlertSchema.index({ createdAt: -1 });
 // Defensive guard pattern (ADR-021 + W340): prevents OverwriteModelError
 // on double-load (tests, hot-reload). First-loader wins the model cache.
 const EarlyWarningAlert =
-  mongoose.models.EarlyWarningAlert ||
-  mongoose.model('EarlyWarningAlert', earlyWarningAlertSchema);
+  mongoose.models.EarlyWarningAlert || mongoose.model('EarlyWarningAlert', earlyWarningAlertSchema);
 
 // ══════════════════════════════════════════════════════
 // محرك كشف الثبات والتراجع (Plateau/Regression Detector)
@@ -439,7 +438,7 @@ class EarlyWarningService {
         acknowledged_at: new Date(),
         resolution_notes_ar: notes,
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 
@@ -455,7 +454,7 @@ class EarlyWarningService {
         resolved_at: new Date(),
         resolution_notes_ar: notes,
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 

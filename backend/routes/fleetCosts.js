@@ -60,7 +60,7 @@ router.put('/:id', authorize('admin', 'manager'), async (req, res) => {
   try {
     const FleetCost = require('../models/Fleet/FleetCost');
     const cost = await FleetCost.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!cost) return res.status(404).json({ success: false, message: 'Cost record not found' });

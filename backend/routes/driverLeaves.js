@@ -72,7 +72,7 @@ router.patch('/:id/approve', authorize('admin', 'manager', 'hr'), async (req, re
     const leave = await DriverLeave.findByIdAndUpdate(
       req.params.id,
       { status: 'approved', approvedAt: new Date(), approvedBy: req.user._id },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!leave) return res.status(404).json({ success: false, message: 'Leave not found' });
     res.json({ success: true, data: leave });
@@ -88,7 +88,7 @@ router.patch('/:id/reject', authorize('admin', 'manager', 'hr'), async (req, res
     const leave = await DriverLeave.findByIdAndUpdate(
       req.params.id,
       { status: 'rejected', rejectionReason: reason, rejectedBy: req.user._id },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!leave) return res.status(404).json({ success: false, message: 'Leave not found' });
     res.json({ success: true, data: leave });

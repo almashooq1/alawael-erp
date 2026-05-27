@@ -143,7 +143,7 @@ router.post('/menu-items', async (req, res) => {
 router.put('/menu-items/:id', async (req, res) => {
   try {
     const item = await MenuItem.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!item) return res.status(404).json({ success: false, error: 'عنصر القائمة غير موجود' });
@@ -158,7 +158,7 @@ router.delete('/menu-items/:id', async (req, res) => {
     const item = await MenuItem.findByIdAndUpdate(
       req.params.id,
       { isActive: false },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!item) return res.status(404).json({ success: false, error: 'عنصر القائمة غير موجود' });
     res.json({ success: true, message: 'تم إلغاء تفعيل عنصر القائمة' });
@@ -245,7 +245,7 @@ router.post('/daily-menus', async (req, res) => {
 router.put('/daily-menus/:id', async (req, res) => {
   try {
     const menu = await DailyMenu.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!menu) return res.status(404).json({ success: false, error: 'القائمة اليومية غير موجودة' });
@@ -260,7 +260,7 @@ router.patch('/daily-menus/:id/approve', async (req, res) => {
     const menu = await DailyMenu.findByIdAndUpdate(
       req.params.id,
       { status: 'approved', approvedBy: req.user?._id },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!menu) return res.status(404).json({ success: false, error: 'القائمة اليومية غير موجودة' });
     res.json({ success: true, data: menu, message: 'تمت الموافقة على القائمة' });
@@ -325,7 +325,7 @@ router.post('/meal-service', async (req, res) => {
 router.put('/meal-service/:id', async (req, res) => {
   try {
     const record = await MealService.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!record) return res.status(404).json({ success: false, error: 'سجل الخدمة غير موجود' });
@@ -420,10 +420,7 @@ router.put('/inventory/:id', async (req, res) => {
     const item = await KitchenInventory.findByIdAndUpdate(
       req.params.id,
       stripUpdateMeta(req.body),
-      {
-        new: true,
-        runValidators: true,
-      }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!item) return res.status(404).json({ success: false, error: 'عنصر المخزون غير موجود' });
     res.json({ success: true, data: item });
@@ -438,7 +435,7 @@ router.patch('/inventory/:id/restock', async (req, res) => {
     const item = await KitchenInventory.findByIdAndUpdate(
       req.params.id,
       { $inc: { quantity }, lastRestocked: new Date(), restockedBy: req.user?._id },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!item) return res.status(404).json({ success: false, error: 'عنصر المخزون غير موجود' });
     res.json({ success: true, data: item, message: 'تم إعادة التخزين بنجاح' });

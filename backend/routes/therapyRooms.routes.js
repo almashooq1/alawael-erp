@@ -85,10 +85,7 @@ router.put(
       const room = await TherapyRoom.findOneAndUpdate(
         { _id: req.params.id, ...branchFilter(req) },
         stripUpdateMeta(req.body),
-        {
-          new: true,
-          runValidators: true,
-        }
+        { returnDocument: 'after', runValidators: true }
       );
       if (!room) return res.status(404).json({ success: false, message: 'Room not found' });
       res.json({ success: true, data: room });

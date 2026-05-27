@@ -258,7 +258,7 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
     delete body.createdAt;
     delete body.beneficiary; // forbid moving a plan to another beneficiary
     const doc = await CarePlan.findByIdAndUpdate(req.params.id, body, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     }).lean();
     if (!doc) return res.status(404).json({ success: false, message: 'غير موجود' });
@@ -295,7 +295,7 @@ router.post('/:id/goals/:domainPath', requireRole(WRITE_ROLES), async (req, res)
         $push: { [path]: req.body },
         [`${plan}.enabled`]: true,
       },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     ).lean();
     if (!doc) return res.status(404).json({ success: false, message: 'غير موجود' });
     res.json({ success: true, data: doc, message: 'تمت إضافة الهدف' });
@@ -377,7 +377,7 @@ router.delete('/:id', requireRole(WRITE_ROLES), async (req, res) => {
     const doc = await CarePlan.findByIdAndUpdate(
       req.params.id,
       { status: 'ARCHIVED' },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     if (!doc) return res.status(404).json({ success: false, message: 'غير موجود' });
     res.json({ success: true, message: 'تم الأرشفة' });

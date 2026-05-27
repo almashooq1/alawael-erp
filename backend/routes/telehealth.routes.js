@@ -203,7 +203,7 @@ router.patch('/consultations/:id', async (req, res) => {
     });
 
     const consultation = await Teleconsultation.findByIdAndUpdate(req.params.id, update, {
-      new: true,
+      returnDocument: 'after',
     });
     res.json({ success: true, data: consultation });
   } catch (err) {
@@ -574,9 +574,7 @@ router.patch(
       const slot = await ProviderAvailabilitySlot.findByIdAndUpdate(
         req.params.id,
         stripUpdateMeta(req.body),
-        {
-          new: true,
-        }
+        { returnDocument: 'after' }
       );
       res.json({ success: true, data: slot });
     } catch (err) {
@@ -680,7 +678,7 @@ router.post('/devices/:id/reading', async (req, res) => {
         lastReadingAt: new Date(),
         lastReadingData: req.body.reading,
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!device) return res.status(404).json({ success: false, message: 'الجهاز غير موجود' });
 
@@ -741,7 +739,7 @@ router.patch('/virtual-sessions/:id/whiteboard', async (req, res) => {
     const session = await VirtualSession.findByIdAndUpdate(
       req.params.id,
       { whiteboardData: req.body.data },
-      { new: true }
+      { returnDocument: 'after' }
     );
     res.json({ success: true, data: session });
   } catch (err) {

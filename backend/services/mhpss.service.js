@@ -74,7 +74,7 @@ class MHPSSService {
   async updateSession(id, data) {
     try {
       const session = await CounselingSession.findByIdAndUpdate(id, data, {
-        new: true,
+        returnDocument: 'after',
         runValidators: true,
       });
       if (!session) return { success: false, message: 'الجلسة غير موجودة' };
@@ -197,7 +197,7 @@ class MHPSSService {
   async updateProgram(id, data) {
     try {
       const program = await MentalHealthProgram.findByIdAndUpdate(id, data, {
-        new: true,
+        returnDocument: 'after',
         runValidators: true,
       });
       if (!program) return { success: false, message: 'البرنامج غير موجود' };
@@ -438,7 +438,7 @@ class MHPSSService {
   async updateCrisis(id, data) {
     try {
       const crisis = await CrisisIntervention.findByIdAndUpdate(id, data, {
-        new: true,
+        returnDocument: 'after',
         runValidators: true,
       });
       if (!crisis) return { success: false, message: 'حالة الأزمة غير موجودة' };
@@ -575,7 +575,7 @@ class MHPSSService {
   async updateGroup(id, data) {
     try {
       const group = await SupportGroup.findByIdAndUpdate(id, data, {
-        new: true,
+        returnDocument: 'after',
         runValidators: true,
       });
       if (!group) return { success: false, message: 'المجموعة غير موجودة' };

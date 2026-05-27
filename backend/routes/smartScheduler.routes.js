@@ -374,7 +374,7 @@ router.put('/:id', async (req, res) => {
     const scheduler = await SmartScheduler.model.findByIdAndUpdate(
       req.params.id,
       { ...req.body, updatedAt: new Date(), updatedBy: req.user?.id },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!scheduler) {
       return res.status(404).json({ success: false, message: 'الجدول غير موجود' });

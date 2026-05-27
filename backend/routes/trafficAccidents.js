@@ -67,7 +67,7 @@ router.put('/:id', async (req, res) => {
     const accident = await TrafficAccident.findByIdAndUpdate(
       req.params.id,
       { ...req.body, updatedBy: req.user._id },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!accident)
       return res.status(404).json({ success: false, message: 'Accident record not found' });
@@ -101,7 +101,7 @@ router.patch('/:id/close', authorize('admin', 'manager'), async (req, res) => {
         closedAt: new Date(),
         closedBy: req.user._id,
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!accident)
       return res.status(404).json({ success: false, message: 'Accident record not found' });

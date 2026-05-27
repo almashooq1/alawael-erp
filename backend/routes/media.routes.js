@@ -595,7 +595,7 @@ router.put('/:id', authenticate, requireBranchAccess, async (req, res) => {
           },
         },
       },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     )
       .populate('uploadedBy', 'name email avatar')
       .lean();
@@ -635,7 +635,7 @@ router.delete('/:id', authenticate, requireBranchAccess, async (req, res) => {
           },
         },
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     if (!media) {
@@ -672,7 +672,7 @@ router.post('/:id/restore', authenticate, requireBranchAccess, async (req, res) 
           },
         },
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     if (!media) return res.status(404).json({ success: false, message: 'الوسيط غير موجود' });
@@ -1090,7 +1090,7 @@ router.put('/albums/:id', authenticate, requireBranchAccess, async (req, res) =>
     const album = await MediaAlbum.findByIdAndUpdate(
       req.params.id,
       { $set: updates },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!album) return res.status(404).json({ success: false, message: 'الألبوم غير موجود' });
     res.json({ success: true, message: 'تم تحديث الألبوم بنجاح', data: album });
@@ -1108,7 +1108,7 @@ router.delete('/albums/:id', authenticate, requireBranchAccess, async (req, res)
     const album = await MediaAlbum.findByIdAndUpdate(
       req.params.id,
       { status: 'محذوف' },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!album) return res.status(404).json({ success: false, message: 'الألبوم غير موجود' });
 

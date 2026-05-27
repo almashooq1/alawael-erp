@@ -118,7 +118,7 @@ router.put('/:id', requireAuth, requireBranchAccess, async (req, res) => {
     const assessment = await StandardizedAssessment.findOneAndUpdate(
       { _id: req.params.id, ...branchFilter(req) },
       stripUpdateMeta(req.body),
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!assessment)
       return res.status(404).json({ success: false, message: 'Assessment not found' });

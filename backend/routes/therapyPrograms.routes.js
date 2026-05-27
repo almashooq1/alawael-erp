@@ -94,10 +94,7 @@ router.put(
       const program = await TherapyProgram.findOneAndUpdate(
         { _id: req.params.id, ...branchFilter(req) },
         stripUpdateMeta(req.body),
-        {
-          new: true,
-          runValidators: true,
-        }
+        { returnDocument: 'after', runValidators: true }
       );
       if (!program) return res.status(404).json({ success: false, message: 'Program not found' });
       res.json({ success: true, data: program });

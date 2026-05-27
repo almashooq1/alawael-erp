@@ -120,7 +120,7 @@ router.patch('/queue/:id/assign', async (req, res) => {
     const doc = await Communication.findOneAndUpdate(
       { _id: req.params.id, branchId: req.user.branchId },
       { assignedTo, assignedAt: new Date(), assignedBy: req.user._id, status: 'in_progress' },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!doc) return res.status(404).json({ success: false, message: 'Communication not found' });
     res.json({ success: true, data: doc });
@@ -146,7 +146,7 @@ router.patch('/queue/:id/escalate', async (req, res) => {
         escalatedBy: req.user._id,
         priority: 'urgent',
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!doc) return res.status(404).json({ success: false, message: 'Communication not found' });
     res.json({ success: true, data: doc });
@@ -165,7 +165,7 @@ router.patch('/queue/:id/close', async (req, res) => {
     const doc = await Communication.findOneAndUpdate(
       { _id: req.params.id, branchId: req.user.branchId },
       { status: 'resolved', resolution, resolvedAt: new Date(), resolvedBy: req.user._id },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!doc) return res.status(404).json({ success: false, message: 'Communication not found' });
     res.json({ success: true, data: doc });

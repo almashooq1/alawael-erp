@@ -97,7 +97,7 @@ router.patch('/:id/read', async (req, res) => {
     const msg = await FleetCommunication.findByIdAndUpdate(
       req.params.id,
       { status: 'read', readAt: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!msg) return res.status(404).json({ success: false, message: 'Message not found' });
     res.json({ success: true, data: msg });

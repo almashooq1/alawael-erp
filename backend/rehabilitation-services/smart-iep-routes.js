@@ -250,7 +250,7 @@ router.post('/iep/:id/parent-consent', async (req, res) => {
           },
         },
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!iep) return res.status(404).json({ success: false, error: 'الخطة غير موجودة' });
     res.json({ success: true, message: 'تم تسجيل موافقة ولي الأمر', data: iep.parent_consent });
@@ -349,7 +349,9 @@ router.patch('/iep/:id', async (req, res) => {
     });
     updates.updated_at = new Date();
 
-    const iep = await SmartIEP.findByIdAndUpdate(req.params.id, updates, { new: true });
+    const iep = await SmartIEP.findByIdAndUpdate(req.params.id, updates, {
+      returnDocument: 'after',
+    });
     if (!iep) return res.status(404).json({ success: false, error: 'الخطة غير موجودة' });
 
     res.json({ success: true, message: 'تم تحديث الخطة بنجاح', data: iep });

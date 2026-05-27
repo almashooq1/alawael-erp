@@ -96,7 +96,7 @@ class ScheduleManagementService {
       const schedule = await Schedule.findByIdAndUpdate(
         scheduleId,
         { $set: updates },
-        { new: true, runValidators: true }
+        { returnDocument: 'after', runValidators: true }
       )
         .populate('createdBy', 'firstName lastName email')
         .populate('confirmedBy', 'firstName lastName email');
@@ -176,7 +176,7 @@ class ScheduleManagementService {
             confirmedAt: new Date(),
           },
         },
-        { new: true, runValidators: true }
+        { returnDocument: 'after', runValidators: true }
       )
         .populate('createdBy', 'firstName lastName email')
         .populate('confirmedBy', 'firstName lastName email');

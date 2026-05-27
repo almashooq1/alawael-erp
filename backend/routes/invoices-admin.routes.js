@@ -233,7 +233,7 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
       body.totalAmount = totals.totalAmount;
     }
     const doc = await Invoice.findByIdAndUpdate(req.params.id, body, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     }).lean();
     if (!doc) return res.status(404).json({ success: false, message: 'غير موجود' });
@@ -300,7 +300,7 @@ router.post('/:id/pay', requireRole(WRITE_ROLES), async (req, res) => {
     const doc = await Invoice.findByIdAndUpdate(
       req.params.id,
       { status: 'PAID', paymentMethod, paidAt: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     if (!doc) return res.status(404).json({ success: false, message: 'غير موجود' });
     res.json({ success: true, data: doc, message: 'تم تسجيل الدفع' });
@@ -315,7 +315,7 @@ router.post('/:id/cancel', requireRole(WRITE_ROLES), async (req, res) => {
     const doc = await Invoice.findByIdAndUpdate(
       req.params.id,
       { status: 'CANCELLED', notes: req.body?.reason || '' },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     if (!doc) return res.status(404).json({ success: false, message: 'غير موجود' });
     res.json({ success: true, data: doc, message: 'تم الإلغاء' });

@@ -93,7 +93,7 @@ router.post('/grants/:id/revoke', requireRole(['admin', 'dpo', 'manager']), asyn
       revokedAt: new Date(),
       revokedReason: req.body.reason,
     },
-    { new: true }
+    { returnDocument: 'after' }
   );
   if (!g) return res.status(404).json({ success: false, message: 'GRANT_NOT_FOUND' });
   res.json({ success: true, data: g });

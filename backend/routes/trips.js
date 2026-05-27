@@ -61,7 +61,7 @@ router.put('/:id', authorize('admin', 'manager', 'dispatcher'), async (req, res)
   try {
     const Trip = require('../models/Fleet/Trip');
     const trip = await Trip.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!trip) return res.status(404).json({ success: false, message: 'Trip not found' });
@@ -80,7 +80,7 @@ router.patch(
       const trip = await Trip.findByIdAndUpdate(
         req.params.id,
         { status: 'in_progress', actualStartTime: new Date(), startedBy: req.user._id },
-        { new: true }
+        { returnDocument: 'after' }
       );
       if (!trip) return res.status(404).json({ success: false, message: 'Trip not found' });
       res.json({ success: true, data: trip });
@@ -106,7 +106,7 @@ router.patch(
           notes,
           completedBy: req.user._id,
         },
-        { new: true }
+        { returnDocument: 'after' }
       );
       if (!trip) return res.status(404).json({ success: false, message: 'Trip not found' });
       res.json({ success: true, data: trip });
@@ -123,7 +123,7 @@ router.patch('/:id/cancel', authorize('admin', 'manager', 'dispatcher'), async (
     const trip = await Trip.findByIdAndUpdate(
       req.params.id,
       { status: 'cancelled', cancelReason: reason, cancelledBy: req.user._id },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!trip) return res.status(404).json({ success: false, message: 'Trip not found' });
     res.json({ success: true, data: trip });

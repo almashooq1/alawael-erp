@@ -571,7 +571,11 @@ class DocumentTranslationService {
   }
 
   async updateGlossary(glossaryId, data) {
-    const glossary = await Glossary.findByIdAndUpdate(glossaryId, { $set: data }, { new: true });
+    const glossary = await Glossary.findByIdAndUpdate(
+      glossaryId,
+      { $set: data },
+      { returnDocument: 'after' }
+    );
     if (!glossary) throw new Error('المسرد غير موجود');
     return { success: true, glossary };
   }

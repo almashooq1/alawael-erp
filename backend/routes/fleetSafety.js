@@ -62,7 +62,7 @@ router.put('/:id', authorize('admin', 'manager', 'safety_officer'), async (req, 
   try {
     const FleetSafety = require('../models/Fleet/FleetSafety');
     const incident = await FleetSafety.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!incident)
@@ -80,7 +80,7 @@ router.patch('/:id/close', authorize('admin', 'manager', 'safety_officer'), asyn
     const incident = await FleetSafety.findByIdAndUpdate(
       req.params.id,
       { status: 'closed', resolution, closedAt: new Date(), closedBy: req.user._id },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!incident)
       return res.status(404).json({ success: false, message: 'Safety incident not found' });

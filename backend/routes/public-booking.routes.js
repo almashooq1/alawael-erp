@@ -239,7 +239,7 @@ router.patch('/admin/:id/status', authenticateToken, requireRole(STAFF_ROLES), a
     if (req.user?.id) update.assignedTo = req.user.id;
 
     const doc = await PublicBookingRequest.findByIdAndUpdate(req.params.id, update, {
-      new: true,
+      returnDocument: 'after',
     }).lean();
     if (!doc) return res.status(404).json({ success: false, message: 'الطلب غير موجود' });
 

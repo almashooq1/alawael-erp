@@ -100,7 +100,7 @@ function createHrExtensionsRouter({ logger } = {}) {
       const doc = await EmployeeDocument.findByIdAndUpdate(
         req.params.id,
         { status: 'archived' },
-        { new: true }
+        { returnDocument: 'after' }
       );
       if (!doc) return res.status(404).json({ success: false, message: 'not found' });
       res.json({ success: true, data: doc });
@@ -206,7 +206,7 @@ function createHrExtensionsRouter({ logger } = {}) {
       const goal = await EmployeeGoal.findByIdAndUpdate(
         req.params.id,
         { $set: update },
-        { new: true }
+        { returnDocument: 'after' }
       );
       if (!goal) return res.status(404).json({ success: false, message: 'not found' });
       res.json({ success: true, data: goal });

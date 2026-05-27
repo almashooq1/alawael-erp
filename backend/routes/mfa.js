@@ -43,7 +43,7 @@ router.post('/enable', async (req, res) => {
         $addToSet: { methods: method },
         updatedAt: new Date(),
       },
-      { upsert: true, new: true }
+      { upsert: true, returnDocument: 'after' }
     );
     res.json({ success: true, data: settings });
   } catch (err) {

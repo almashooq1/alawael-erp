@@ -101,10 +101,7 @@ router.put('/:id', async (req, res) => {
     const curriculum = await Curriculum.findByIdAndUpdate(
       req.params.id,
       stripUpdateMeta(req.body),
-      {
-        new: true,
-        runValidators: true,
-      }
+      { returnDocument: 'after', runValidators: true }
     )
       .populate('subject', 'name code')
       .populate('teacher', 'fullName');
@@ -187,7 +184,7 @@ router.patch('/:id/approve', async (req, res) => {
         approvedBy: req.user?._id || req.user?.id,
         approvedDate: new Date(),
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!curriculum) return res.status(404).json({ success: false, message: 'المنهج غير موجود' });
     res.json({ success: true, data: curriculum, message: 'تم اعتماد المنهج بنجاح' });

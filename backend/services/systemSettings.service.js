@@ -48,7 +48,7 @@ class SystemSettingsService {
     const settings = await SystemSettings.findOneAndUpdate(
       {},
       { $set: setFields },
-      { new: true, upsert: true, runValidators: true }
+      { returnDocument: 'after', upsert: true, runValidators: true }
     ).lean();
 
     logger.info(
@@ -70,7 +70,7 @@ class SystemSettingsService {
     const settings = await SystemSettings.findOneAndUpdate(
       {},
       { $set: { [section]: defaultValues } },
-      { new: true, upsert: true }
+      { returnDocument: 'after', upsert: true }
     ).lean();
 
     logger.info(`SystemSettings: section "${section}" reset to defaults`);
@@ -87,7 +87,7 @@ class SystemSettingsService {
     const settings = await SystemSettings.findOneAndUpdate(
       {},
       { $set: update },
-      { new: true, upsert: true }
+      { returnDocument: 'after', upsert: true }
     ).lean();
     logger.info(`Maintenance mode: ${enabled ? 'ON' : 'OFF'}`);
     return settings;

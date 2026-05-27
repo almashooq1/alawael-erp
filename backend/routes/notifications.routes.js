@@ -291,7 +291,7 @@ router.put(
     const { id } = req.params;
     if (notificationModel) {
       const updated = await notificationModel.findByIdAndUpdate(id, stripUpdateMeta(req.body), {
-        new: true,
+        returnDocument: 'after',
         runValidators: true,
       });
       if (!updated) {

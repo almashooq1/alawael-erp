@@ -157,7 +157,7 @@ router.put('/medications/:id', async (req, res) => {
     const medication = await Medication.findByIdAndUpdate(
       req.params.id,
       { ...pick(req.body, MEDICATION_FIELDS), updatedBy: req.user?.id },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!medication) return res.status(404).json({ success: false, message: 'الدواء غير موجود' });
     res.json({ success: true, data: medication });
@@ -171,7 +171,7 @@ router.delete('/medications/:id', async (req, res) => {
     const medication = await Medication.findByIdAndUpdate(
       req.params.id,
       { isDeleted: true },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!medication) return res.status(404).json({ success: false, message: 'الدواء غير موجود' });
     res.json({ success: true, message: 'تم حذف الدواء بنجاح' });
@@ -248,10 +248,7 @@ router.put('/prescriptions/:id', async (req, res) => {
     const prescription = await Prescription.findByIdAndUpdate(
       req.params.id,
       stripUpdateMeta(req.body),
-      {
-        new: true,
-        runValidators: true,
-      }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!prescription)
       return res.status(404).json({ success: false, message: 'الوصفة غير موجودة' });
@@ -271,7 +268,7 @@ router.patch('/prescriptions/:id/verify', async (req, res) => {
         verifiedAt: new Date(),
         pharmacistNotes: req.body.notes,
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!prescription)
       return res.status(404).json({ success: false, message: 'الوصفة غير موجودة' });
@@ -287,7 +284,7 @@ router.patch('/prescriptions/:id/cancel', async (req, res) => {
     const prescription = await Prescription.findByIdAndUpdate(
       req.params.id,
       { status: 'cancelled', notes: req.body.reason },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!prescription)
       return res.status(404).json({ success: false, message: 'الوصفة غير موجودة' });
@@ -349,7 +346,7 @@ router.post('/dispensing', async (req, res) => {
         const updated = await PharmacyInventory.findOneAndUpdate(
           { _id: item.batch, quantity: { $gte: item.quantityDispensed } },
           { $inc: { quantity: -item.quantityDispensed } },
-          { new: true }
+          { returnDocument: 'after' }
         );
         if (!updated) {
           // Rollback dispensing record on insufficient stock
@@ -374,7 +371,7 @@ router.patch('/dispensing/:id/return', async (req, res) => {
     const dispensing = await Dispensing.findByIdAndUpdate(
       req.params.id,
       { status: 'returned' },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!dispensing)
       return res.status(404).json({ success: false, message: 'سجل الصرف غير موجود' });
@@ -458,7 +455,7 @@ router.put('/inventory/:id', async (req, res) => {
       if (req.body[key] !== undefined) updates[key] = req.body[key];
     }
     const batch = await PharmacyInventory.findByIdAndUpdate(req.params.id, updates, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!batch) return res.status(404).json({ success: false, message: 'الدفعة غير موجودة' });

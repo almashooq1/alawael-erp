@@ -267,7 +267,7 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
     // letting any therapist edit any branch's clinical assessment.
     const filter = applyBranchScope(req, { _id: req.params.id });
     const doc = await ClinicalAssessment.findOneAndUpdate(filter, body, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     }).lean();
     if (!doc) return res.status(404).json({ success: false, message: 'غير موجود' });
@@ -290,7 +290,7 @@ router.delete('/:id', requireRole(WRITE_ROLES), async (req, res) => {
     const doc = await ClinicalAssessment.findOneAndUpdate(
       filter,
       { status: 'archived', updatedBy: req.user?.id },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     if (!doc) return res.status(404).json({ success: false, message: 'غير موجود' });
     res.json({ success: true, message: 'تم الأرشفة' });

@@ -482,7 +482,7 @@ class QualityEngine {
     return CorrectiveAction.findByIdAndUpdate(
       actionId,
       { status: 'resolved', resolvedAt: new Date(), resolvedBy: userId, resolutionNote: note },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
   }
 

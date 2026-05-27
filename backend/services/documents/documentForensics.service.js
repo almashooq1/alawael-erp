@@ -363,7 +363,7 @@ class AuditForensicsService {
     return TamperAlert.findByIdAndUpdate(
       alertId,
       { 'alerts.$[].acknowledged': true },
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 
@@ -497,7 +497,7 @@ class AuditForensicsService {
   }
 
   async updatePolicy(policyId, data) {
-    return AuditPolicy.findByIdAndUpdate(policyId, data, { new: true });
+    return AuditPolicy.findByIdAndUpdate(policyId, data, { returnDocument: 'after' });
   }
 
   async getPolicies() {

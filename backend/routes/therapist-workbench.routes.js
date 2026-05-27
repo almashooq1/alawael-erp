@@ -323,7 +323,7 @@ router.patch('/session/:id/notes', async (req, res) => {
     if (rating != null) update.rating = rating;
     if (Array.isArray(goalsProgress)) update.goalsProgress = goalsProgress;
     const doc = await TherapySession.findByIdAndUpdate(req.params.id, update, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     }).lean();
     res.json({ success: true, data: doc, message: 'تم حفظ الملاحظات' });
@@ -349,7 +349,7 @@ router.post('/session/:id/check-in', async (req, res) => {
         'attendance.lateMinutes': Number(req.body?.lateMinutes) || 0,
         status: 'IN_PROGRESS',
       },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     res.json({ success: true, data: doc, message: 'تم تسجيل الحضور وبدء الجلسة' });
   } catch (err) {

@@ -169,7 +169,7 @@ router.put(
       };
 
       const standard = await Standard.findByIdAndUpdate(req.params.id, updateData, {
-        new: true,
+        returnDocument: 'after',
         runValidators: true,
       });
 
@@ -357,10 +357,7 @@ router.put(
           notes,
           notesAr,
         },
-        {
-          new: true,
-          runValidators: true,
-        }
+        { returnDocument: 'after', runValidators: true }
       );
 
       if (!accreditation) {
@@ -546,10 +543,7 @@ router.put(
           reportFile,
           nextFollowUpDate,
         },
-        {
-          new: true,
-          runValidators: true,
-        }
+        { returnDocument: 'after', runValidators: true }
       );
 
       if (!audit) {
@@ -801,10 +795,7 @@ router.put(
           notes,
           notesAr,
         },
-        {
-          new: true,
-          runValidators: true,
-        }
+        { returnDocument: 'after', runValidators: true }
       );
 
       if (!tracking) {
@@ -1018,10 +1009,7 @@ router.put(
           responsible,
           status,
         },
-        {
-          new: true,
-          runValidators: true,
-        }
+        { returnDocument: 'after', runValidators: true }
       );
 
       if (!indicator) {

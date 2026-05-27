@@ -305,7 +305,7 @@ router.post('/:id/notify-parent', requireRole(WRITE_ROLES), async (req, res) => 
     const row = await RSEvent.findOneAndUpdate(
       { _id: req.params.id, ...branchFilter(req) },
       { parentNotifiedAt: new Date(), parentNotificationMethod: method },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!row) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
     res.json({ success: true, data: row });

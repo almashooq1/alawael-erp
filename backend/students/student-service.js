@@ -103,7 +103,7 @@ class StudentService extends EventEmitter {
     const student = await this._getModel().findOneAndUpdate(
       { studentId },
       { ...updateData, updatedAt: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     if (student) this.emit('student:updated', student);

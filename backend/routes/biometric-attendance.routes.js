@@ -108,7 +108,7 @@ router.put('/devices/:id', async (req, res) => {
     const device = await ZktecoDevice.findOneAndUpdate(
       { _id: req.params.id, ...branchFilter(req) } /* W448 */,
       { ...stripUpdateMeta(req.body), updatedBy: req.user?._id },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!device) return res.status(404).json({ success: false, message: 'الجهاز غير موجود' });
     res.json({ success: true, data: device });
@@ -249,7 +249,7 @@ router.put('/shifts/:id', requireMfaTier(2), async (req, res) => {
     const shift = await WorkShift.findByIdAndUpdate(
       req.params.id,
       { ...stripUpdateMeta(req.body), updatedBy: req.user?._id },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!shift) return res.status(404).json({ success: false, message: 'الدوام غير موجود' });
     res.json({ success: true, data: shift });
@@ -590,7 +590,7 @@ router.put('/overtime/:id/approve', requireMfaTier(2), async (req, res) => {
     const overtime = await OvertimeRequest.findByIdAndUpdate(
       req.params.id,
       { status: 'approved', approvedBy: req.user?._id, approvedAt: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!overtime) return res.status(404).json({ success: false, message: 'الطلب غير موجود' });
     res.json({ success: true, data: overtime });
@@ -636,7 +636,7 @@ router.put('/policies/:id', requireMfaTier(2), async (req, res) => {
     const policy = await AttendancePolicyModel.findByIdAndUpdate(
       req.params.id,
       { ...stripUpdateMeta(req.body), updatedBy: req.user?._id },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!policy) return res.status(404).json({ success: false, message: 'السياسة غير موجودة' });
     res.json({ success: true, data: policy });

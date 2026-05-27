@@ -784,7 +784,7 @@ router.put('/sla-configs/:id', requireAdmin, async (req, res) => {
     const config = await TicketSlaConfig.findByIdAndUpdate(
       req.params.id,
       stripUpdateMeta(req.body),
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!config) return res.status(404).json({ success: false, message: 'الإعداد غير موجود' });
     return res.json({ success: true, message: 'تم تحديث إعداد SLA', data: config });
@@ -850,9 +850,7 @@ router.put('/escalation-rules/:id', requireAdmin, async (req, res) => {
     const rule = await TicketEscalationRule.findByIdAndUpdate(
       req.params.id,
       stripUpdateMeta(req.body),
-      {
-        new: true,
-      }
+      { returnDocument: 'after' }
     );
     if (!rule) return res.status(404).json({ success: false, message: 'القاعدة غير موجودة' });
     return res.json({ success: true, message: 'تم تحديث قاعدة التصعيد', data: rule });

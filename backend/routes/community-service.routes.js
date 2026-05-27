@@ -179,7 +179,7 @@ router.get('/programs/:id', async (req, res) => {
 router.put('/programs/:id', async (req, res) => {
   try {
     const doc = await CommunityProgram.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!doc) return fail(res, 'البرنامج غير موجود', 404);
@@ -267,7 +267,7 @@ router.get('/events/:id', async (req, res) => {
 router.put('/events/:id', async (req, res) => {
   try {
     const doc = await CommunityEvent.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!doc) return fail(res, 'الفعالية غير موجودة', 404);
@@ -323,7 +323,7 @@ router.post('/partnerships', async (req, res) => {
 router.put('/partnerships/:id', async (req, res) => {
   try {
     const doc = await CsoPartnership.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!doc) return fail(res, 'الشراكة غير موجودة', 404);
@@ -405,10 +405,7 @@ router.put('/resources/:id', async (req, res) => {
     const doc = await CommunityResource.findByIdAndUpdate(
       req.params.id,
       stripUpdateMeta(req.body),
-      {
-        new: true,
-        runValidators: true,
-      }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!doc) return fail(res, 'المورد غير موجود', 404);
     ok(res, { data: doc, message: 'تم التحديث بنجاح' });
@@ -466,7 +463,9 @@ router.patch('/referrals/:id/status', async (req, res) => {
     if (status === 'accepted') updates.acceptedAt = new Date();
     if (status === 'completed') updates.completedAt = new Date();
 
-    const doc = await CommunityReferral.findByIdAndUpdate(req.params.id, updates, { new: true });
+    const doc = await CommunityReferral.findByIdAndUpdate(req.params.id, updates, {
+      returnDocument: 'after',
+    });
     if (!doc) return fail(res, 'الإحالة غير موجودة', 404);
     ok(res, { data: doc, message: 'تم تحديث حالة الإحالة بنجاح' });
   } catch (err) {

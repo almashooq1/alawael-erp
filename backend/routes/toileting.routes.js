@@ -178,7 +178,9 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
     if (body.type && !TYPES.includes(body.type)) {
       return res.status(400).json({ success: false, message: 'type غير صالح' });
     }
-    const row = await ToiletingEvent.findByIdAndUpdate(req.params.id, body, { new: true });
+    const row = await ToiletingEvent.findByIdAndUpdate(req.params.id, body, {
+      returnDocument: 'after',
+    });
     if (!row) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
     res.json({ success: true, data: row });
   } catch (err) {

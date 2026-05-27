@@ -62,7 +62,7 @@ router.patch('/:id/acknowledge', async (req, res) => {
     const alert = await FleetAlert.findByIdAndUpdate(
       req.params.id,
       { acknowledged: true, acknowledgedAt: new Date(), acknowledgedBy: req.user._id },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!alert) return res.status(404).json({ success: false, message: 'Alert not found' });
     res.json({ success: true, data: alert });

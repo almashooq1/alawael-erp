@@ -234,7 +234,7 @@ class InsuranceClaimService {
     const updated = await InsuranceClaim.findOneAndUpdate(
       { _id: claimId, status: 'draft' },
       { $set: { status: 'submitted', submission_date: now, submitted_at: now } },
-      { new: true }
+      { returnDocument: 'after' }
     ).populate('beneficiary_id insurance_company_id');
     if (updated) return updated;
     // Atomic update didn't match — disambiguate the failure case for the

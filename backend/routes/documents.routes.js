@@ -879,7 +879,7 @@ router.put(
     const doc = await Document.findOneAndUpdate(
       { _id: req.params.id, status: { $ne: 'محذوف' } },
       { $set: allowed },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!doc) return res.status(404).json({ success: false, message: 'المستند غير موجود' });
 
@@ -896,7 +896,7 @@ router.delete(
     const doc = await Document.findOneAndUpdate(
       { _id: req.params.id, status: { $ne: 'محذوف' } },
       { $set: { status: 'محذوف', isArchived: false } },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!doc) return res.status(404).json({ success: false, message: 'المستند غير موجود' });
 
@@ -914,7 +914,7 @@ router.post(
     const doc = await Document.findOneAndUpdate(
       { _id: req.params.id, status: 'محذوف' },
       { $set: { status: 'نشط', isArchived: false } },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!doc)
       return res
@@ -941,7 +941,7 @@ router.post(
           archivedBy: req.user._id,
         },
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!doc)
       return res.status(404).json({ success: false, message: 'المستند غير موجود أو مؤرشف بالفعل' });

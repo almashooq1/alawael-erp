@@ -61,7 +61,7 @@ class MongoDeadLetterStore {
     const doc = await this.Model.findByIdAndUpdate(
       id,
       { $set: { ...extra, status, updatedAt: Date.now() } },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     if (!doc) return null;
     return { ...doc, id: doc._id };

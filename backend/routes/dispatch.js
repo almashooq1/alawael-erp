@@ -69,7 +69,7 @@ router.patch('/:id/assign', authorize('admin', 'manager', 'dispatcher'), async (
     const order = await Dispatch.findByIdAndUpdate(
       req.params.id,
       { driverId, vehicleId, status: 'assigned', assignedAt: new Date(), assignedBy: req.user._id },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!order)
       return res.status(404).json({ success: false, message: 'Dispatch order not found' });
@@ -86,7 +86,7 @@ router.patch('/:id/status', authorize('admin', 'manager', 'dispatcher'), async (
     const order = await Dispatch.findByIdAndUpdate(
       req.params.id,
       { status, notes, updatedBy: req.user._id },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!order)
       return res.status(404).json({ success: false, message: 'Dispatch order not found' });

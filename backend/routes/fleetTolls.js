@@ -60,7 +60,7 @@ router.put('/:id', authorize('admin', 'manager'), async (req, res) => {
   try {
     const FleetToll = require('../models/Fleet/FleetToll');
     const toll = await FleetToll.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!toll) return res.status(404).json({ success: false, message: 'Toll record not found' });

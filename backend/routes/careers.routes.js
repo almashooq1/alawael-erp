@@ -146,7 +146,7 @@ router.patch('/admin/:id/status', authenticateToken, requireRole(HR_ROLES), asyn
     if (typeof reviewNotes === 'string') update.reviewNotes = reviewNotes.slice(0, 4000);
     if (req.user?.id) update.reviewedBy = req.user.id;
     const doc = await PublicJobApplication.findByIdAndUpdate(req.params.id, update, {
-      new: true,
+      returnDocument: 'after',
     }).lean();
     if (!doc) return res.status(404).json({ success: false, message: 'الطلب غير موجود' });
     res.json({ success: true, item: doc });

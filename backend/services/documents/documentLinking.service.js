@@ -179,7 +179,7 @@ class DocumentLinkingService {
           deactivatedAt: new Date(),
           deactivatedBy: userId,
         },
-        { new: true }
+        { returnDocument: 'after' }
       );
 
       if (!link) return { success: false, error: 'الرابط غير موجود' };

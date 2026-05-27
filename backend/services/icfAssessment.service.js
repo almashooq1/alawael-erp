@@ -156,7 +156,7 @@ class ICFAssessmentService {
     const assessment = await ICFAssessment.findOneAndUpdate(
       { _id: id, isDeleted: false },
       { isDeleted: true, isActive: false, updatedBy: userId },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!assessment) throw new Error('التقييم غير موجود');
     logger.info(`ICF Assessment deleted: ${assessment.assessmentNumber} by user ${userId}`);

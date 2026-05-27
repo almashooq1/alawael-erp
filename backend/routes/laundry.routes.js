@@ -99,7 +99,7 @@ router.post('/orders', async (req, res) => {
 router.put('/orders/:id', async (req, res) => {
   try {
     const order = await LaundryOrder.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!order) return res.status(404).json({ success: false, error: 'الطلب غير موجود' });
@@ -127,7 +127,9 @@ router.patch('/orders/:id/status', async (req, res) => {
     if (status === 'ready') update.completedAt = new Date();
     if (status === 'delivered') update.deliveredAt = new Date();
 
-    const order = await LaundryOrder.findByIdAndUpdate(req.params.id, update, { new: true });
+    const order = await LaundryOrder.findByIdAndUpdate(req.params.id, update, {
+      returnDocument: 'after',
+    });
     if (!order) return res.status(404).json({ success: false, error: 'الطلب غير موجود' });
 
     // Free the machine if order is delivered or cancelled
@@ -158,7 +160,7 @@ router.patch('/orders/:id/assign-machine', async (req, res) => {
     const order = await LaundryOrder.findByIdAndUpdate(
       req.params.id,
       { machine: machineId, status: 'washing' },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!order) return res.status(404).json({ success: false, error: 'الطلب غير موجود' });
 
@@ -210,10 +212,7 @@ router.put('/machines/:id', async (req, res) => {
     const machine = await LaundryMachine.findByIdAndUpdate(
       req.params.id,
       stripUpdateMeta(req.body),
-      {
-        new: true,
-        runValidators: true,
-      }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!machine) return res.status(404).json({ success: false, error: 'الجهاز غير موجود' });
     res.json({ success: true, data: machine });
@@ -227,7 +226,7 @@ router.patch('/machines/:id/maintenance', async (req, res) => {
     const machine = await LaundryMachine.findByIdAndUpdate(
       req.params.id,
       { status: 'maintenance', lastMaintenance: new Date(), currentOrder: null, ...req.body },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!machine) return res.status(404).json({ success: false, error: 'الجهاز غير موجود' });
     res.json({ success: true, data: machine, message: 'تم إرسال الجهاز للصيانة' });
@@ -274,10 +273,7 @@ router.put('/schedules/:id', async (req, res) => {
     const schedule = await LaundrySchedule.findByIdAndUpdate(
       req.params.id,
       stripUpdateMeta(req.body),
-      {
-        new: true,
-        runValidators: true,
-      }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!schedule) return res.status(404).json({ success: false, error: 'الجدول غير موجود' });
     res.json({ success: true, data: schedule });
@@ -291,7 +287,7 @@ router.delete('/schedules/:id', async (req, res) => {
     const schedule = await LaundrySchedule.findByIdAndUpdate(
       req.params.id,
       { isActive: false },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!schedule) return res.status(404).json({ success: false, error: 'الجدول غير موجود' });
     res.json({ success: true, message: 'تم إلغاء تفعيل الجدول' });

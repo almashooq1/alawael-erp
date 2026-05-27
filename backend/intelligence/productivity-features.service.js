@@ -107,7 +107,7 @@ function createProductivityFeaturesService({
       const updated = await models.Annotation.findByIdAndUpdate(
         annotationId,
         { resolvedAt: now() },
-        { new: true }
+        { returnDocument: 'after' }
       );
       if (!updated) return { ok: false, reason: 'NOT_FOUND' };
       return { ok: true, annotation: updated };

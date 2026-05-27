@@ -265,7 +265,7 @@ async function markAsRead(notificationId, userId) {
   return Model.findOneAndUpdate(
     { _id: notificationId, recipient: userId },
     { read: true, readAt: new Date() },
-    { new: true }
+    { returnDocument: 'after' }
   );
 }
 
@@ -333,7 +333,7 @@ async function updatePreferences(userId, preferences) {
   return Model.findOneAndUpdate(
     { userId },
     { ...preferences, userId },
-    { upsert: true, new: true }
+    { upsert: true, returnDocument: 'after' }
   );
 }
 
@@ -562,17 +562,17 @@ async function getDeliveryStatus(id) {
 
 async function updateNotification(id, patch) {
   const { Notification: M } = getModels();
-  return M.findByIdAndUpdate(id, patch, { new: true });
+  return M.findByIdAndUpdate(id, patch, { returnDocument: 'after' });
 }
 
 async function archiveNotification(id) {
   const { Notification: M } = getModels();
-  return M.findByIdAndUpdate(id, { status: 'archived' }, { new: true });
+  return M.findByIdAndUpdate(id, { status: 'archived' }, { returnDocument: 'after' });
 }
 
 async function restoreNotification(id) {
   const { Notification: M } = getModels();
-  return M.findByIdAndUpdate(id, { status: 'sent' }, { new: true });
+  return M.findByIdAndUpdate(id, { status: 'sent' }, { returnDocument: 'after' });
 }
 
 async function toggleFavorite(id) {

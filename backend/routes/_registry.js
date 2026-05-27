@@ -234,6 +234,16 @@ const dualMount = (app, path, handler, middleware = []) => {
 // Convenience wrapper — use for any domain router that does NOT enforce
 // authentication internally. Apply broadly when the router exposes
 // beneficiary / clinical / HR data. Adds `authenticate` ahead of the handler.
+//
+// W471/W472: defense-in-depth at mount-time. W471 fixed `referrals` (PHI
+// exposure). W472 swept the remaining 20 bare-mounted slugs that had
+// NO internal auth at all (catastrophic: security/domain RBAC mgmt,
+// break-glass, family/behavior/goals/episodes/timeline PHI surfaces,
+// rehab/quality/workflow clinical, plus auxiliary purchasing/fuel/
+// transport/succession-planning/social-media/report-builder writes).
+// `auth/nafath` remains on bare dualMount as the deliberate exception —
+// it IS the login flow and must be public. Drift guard:
+// __tests__/auth-gate-mount-sweep-wave472.test.js.
 const dualMountAuth = (app, path, handler) => dualMount(app, path, handler, [authenticate]);
 
 /**
@@ -379,7 +389,7 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   dualMount(app, 'licenses', licensesRoutes);
   dualMount(app, 'cases', caseManagementRoutes);
   dualMount(app, 'internal-audit', internalAuditRoutes);
-  dualMount(app, 'quality', qualityRoutes);
+  dualMountAuth(app, 'quality', qualityRoutes);
   dualMount(app, 'management-review', managementReviewRoutes);
   dualMount(app, 'evidence', evidenceRoutes);
   dualMount(app, 'compliance-calendar', complianceCalendarRoutes);
@@ -499,7 +509,7 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   // ── W206 Smart Rehab Engine — assessment→goals+programs+schedule ────────
   dualMountAuth(app, 'assessment-engine', require('../routes/assessmentRecommendation.routes'));
   dualMount(app, 'admin/care-plans', require('../routes/care-plans-admin.routes'));
-  dualMount(app, 'episodes', require('../routes/episodes.routes'));
+  dualMountAuth(app, 'episodes', require('../routes/episodes.routes'));
   // rehabilitation-advanced is now registered via clinical-therapy.registry.js (via phases.registry.js)
   dualMount(app, 'parent-v2', require('../routes/parent-portal-v2.routes'));
   dualMount(app, 'parent-v2', require('../routes/parent-portal-v2-extras.routes'));
@@ -567,9 +577,9 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
 
   // ── DDD Domain Routes (مسارات نطاقات DDD) ──────────────────────────────────
   // Core: Beneficiary CRUD (/core/beneficiaries) + 360° dashboard
-  dualMount(app, 'core', safeRequire('../domains/core/routes/core.routes'));
+  dualMountAuth(app, 'core', safeRequire('../domains/core/routes/core.routes'));
   // Workflow & Journey Engine
-  dualMount(app, 'workflow', safeRequire('../domains/workflow/routes/workflow.routes'));
+  dualMountAuth(app, 'workflow', safeRequire('../domains/workflow/routes/workflow.routes'));
   // Rehabilitation Programs Library — auth required
   dualMountAuth(app, 'programs', safeRequire('../domains/programs/routes/programs.routes'));
   // AI Recommendations & Risk Scoring
@@ -579,7 +589,7 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
     safeRequire('../domains/ai-recommendations/routes/recommendations.routes')
   );
   // Family Engagement Portal
-  dualMount(app, 'family', safeRequire('../domains/family/routes/family.routes'));
+  dualMountAuth(app, 'family', safeRequire('../domains/family/routes/family.routes'));
   // WhatsApp AI Integration
   dualMount(app, 'whatsapp', safeRequire('../routes/whatsapp.routes'));
   // Group Therapy
@@ -593,9 +603,9 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   // AR/VR Rehabilitation — auth required
   dualMountAuth(app, 'ar-vr', safeRequire('../domains/ar-vr/routes/ar-vr.routes'));
   // Behavior Management
-  dualMount(app, 'behavior', safeRequire('../domains/behavior/routes/behavior.routes'));
+  dualMountAuth(app, 'behavior', safeRequire('../domains/behavior/routes/behavior.routes'));
   // Goals & Measures Library (/goals/goals CRUD + /goals/measures/*)
-  dualMount(app, 'goals', safeRequire('../domains/goals/routes/index.routes'));
+  dualMountAuth(app, 'goals', safeRequire('../domains/goals/routes/index.routes'));
   // Dashboards & Decision Support — auth required (domain router has no internal authenticate)
   dualMountAuth(app, 'dashboards', safeRequire('../domains/dashboards/routes/dashboards.routes'));
   // Field Training
@@ -607,11 +617,11 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   // Clinical Research — auth required
   dualMountAuth(app, 'research', safeRequire('../domains/research/routes/research.routes'));
   // Episodes of Care — محور المنصة (الحلقة العلاجية الموحدة)
-  dualMount(app, 'episodes', safeRequire('../domains/episodes/routes/episodes.routes'));
+  dualMountAuth(app, 'episodes', safeRequire('../domains/episodes/routes/episodes.routes'));
   // HR — الموارد البشرية الموحدة — auth required (employee PII)
   dualMountAuth(app, 'hr', safeRequire('../domains/hr/routes/hr.routes'));
   // Security/RBAC — الأمان وإدارة الصلاحيات الموحدة
-  dualMount(app, 'security/domain', safeRequire('../domains/security/routes/security-rbac.routes'));
+  dualMountAuth(app, 'security/domain', safeRequire('../domains/security/routes/security-rbac.routes'));
   // Notifications (الإشعارات الموحدة)
   dualMount(
     app,
@@ -619,11 +629,11 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
     safeRequire('../domains/notifications/routes/notifications.routes')
   );
   // Quality & Compliance (الجودة والامتثال)
-  dualMount(app, 'quality', safeRequire('../domains/quality/routes/quality.routes'));
+  dualMountAuth(app, 'quality', safeRequire('../domains/quality/routes/quality.routes'));
   // Reports Engine (محرك التقارير) — auth required
   dualMountAuth(app, 'reports', safeRequire('../domains/reports/routes/reports.routes'));
   // Rehab Measures Library & Smart Assessment Engine (مكتبة المقاييس التأهيلية والتقييم الذكي)
-  dualMount(app, 'rehab-measures', safeRequire('../routes/rehab-measures.routes'));
+  dualMountAuth(app, 'rehab-measures', safeRequire('../routes/rehab-measures.routes'));
   // Rehab Program Templates Engine (محرك قوالب برامج التأهيل) — auth required
   dualMountAuth(app, 'rehab-templates', safeRequire('../routes/rehab-templates.routes'));
   // Activity Library — Phase 27 (مكتبة الأنشطة التأهيلية)
@@ -645,7 +655,7 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
     safeRequire('../routes/therapy-sessions-analytics.routes')
   );
   // Therapist Extended — treatment plans, assessments, prescriptions, professional-dev, analytics, consultations
-  dualMount(app, 'therapist-extended', safeRequire('../routes/therapist-extended.routes'));
+  dualMountAuth(app, 'therapist-extended', safeRequire('../routes/therapist-extended.routes'));
   // ICF Assessments — التصنيف الدولي للأداء الوظيفي
   dualMountAuth(app, 'icf-assessments', safeRequire('../routes/icf-assessments.routes'));
   // Task Management — إدارة المهام — auth required
@@ -664,7 +674,7 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   // a regression at mount-time, not a route-file bug.
   dualMountAuth(app, 'referrals', safeRequire('../routes/referrals.routes'));
   // Rehab Disciplines & Goal Suggestions — تخصصات التأهيل ومقترحات الأهداف
-  dualMount(app, 'rehab', safeRequire('../routes/rehab.routes'));
+  dualMountAuth(app, 'rehab', safeRequire('../routes/rehab.routes'));
 
   // ── Phase-12 Gap-Fill Mounts ───────────────────────────────────────────
   // Incidents — الحوادث والبلاغات
@@ -680,22 +690,22 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   // Quality Management — إدارة الجودة
   dualMount(app, 'quality-management', safeRequire('../routes/qualityManagement.routes'));
   // Purchasing — المشتريات
-  dualMount(app, 'purchasing', safeRequire('../routes/purchasing.routes'));
+  dualMountAuth(app, 'purchasing', safeRequire('../routes/purchasing.routes'));
   // Fuel Management — إدارة الوقود
-  dualMount(app, 'fuel', safeRequire('../routes/fuel.routes'));
+  dualMountAuth(app, 'fuel', safeRequire('../routes/fuel.routes'));
   // Transport Overview — نظرة عامة على النقل
-  dualMount(app, 'transport', safeRequire('../routes/transport.routes'));
+  dualMountAuth(app, 'transport', safeRequire('../routes/transport.routes'));
   // Form Templates — النماذج الجاهزة — auth required
   dualMountAuth(app, 'form-templates', safeRequire('../routes/form-templates.routes'));
   // Report Builder — منشئ التقارير
-  dualMount(app, 'report-builder', safeRequire('../routes/report-builder.routes'));
+  dualMountAuth(app, 'report-builder', safeRequire('../routes/report-builder.routes'));
   // System Settings — إعدادات النظام — auth required (exposes security config)
   dualMountAuth(app, 'system-settings', safeRequire('../routes/system-settings.routes'));
 
   // Unified Care Plans (خطط الرعاية الموحدة) — auth required (PII)
   dualMountAuth(app, 'care-plans', safeRequire('../domains/care-plans/routes/care-plans.routes'));
   // Care Timeline (الخط الزمني الطولي)
-  dualMount(app, 'timeline', safeRequire('../domains/timeline/routes/timeline.routes'));
+  dualMountAuth(app, 'timeline', safeRequire('../domains/timeline/routes/timeline.routes'));
 
   // ── Platform Extension Modules — 32 generic CRUD domains ─────────────────
   const makeGenericCrudRouter = require('../domains/extensions/routes/generic-crud.factory');
@@ -758,7 +768,7 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   dualMount(app, 'therapist-elite', safeRequire('../routes/therapistElite.routes'));
   // Strategic & Succession Planning
   dualMount(app, 'strategic-planning', safeRequire('../routes/strategicPlanning.routes'));
-  dualMount(app, 'succession-planning', safeRequire('../routes/successionPlanning.routes'));
+  dualMountAuth(app, 'succession-planning', safeRequire('../routes/successionPlanning.routes'));
   // Finance Operations
   dualMount(app, 'finance-operations', safeRequire('../routes/financeOperations.routes'));
   // OCR / Document Intelligence
@@ -784,13 +794,13 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   // Specialized Programs — البرامج المتخصصة
   dualMount(app, 'specialized-programs', safeRequire('../routes/specializedPrograms.routes'));
   // Disability Rehabilitation (maps to specialized rehab domain)
-  dualMount(app, 'disability-rehab', safeRequire('../routes/rehabilitation-specialized.routes'));
+  dualMountAuth(app, 'disability-rehab', safeRequire('../routes/rehabilitation-specialized.routes'));
   // Rehabilitation Equipment
   dualMount(app, 'rehab-equipment', safeRequire('../routes/medicalEquipment.routes'));
   // Social Media Management — إدارة وسائل التواصل الاجتماعي
-  dualMount(app, 'social-media', safeRequire('../routes/social-media.routes'));
+  dualMountAuth(app, 'social-media', safeRequire('../routes/social-media.routes'));
   // Break-Glass Emergency Access — الوصول الطارئ
-  dualMount(app, 'break-glass', safeRequire('../routes/break-glass.routes'));
+  dualMountAuth(app, 'break-glass', safeRequire('../routes/break-glass.routes'));
 
   logger.info(
     'New frontend-backend integration routes mounted (8 new + 4 dual-mounted + 17 DDD + 32 extension modules)'

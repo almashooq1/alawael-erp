@@ -58,7 +58,7 @@ router.put('/:id', authorize('admin', 'manager'), async (req, res) => {
   try {
     const Vehicle = require('../models/Fleet/Vehicle');
     const vehicle = await Vehicle.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!vehicle) return res.status(404).json({ success: false, message: 'Vehicle not found' });
@@ -74,7 +74,7 @@ router.delete('/:id', authorize('admin'), async (req, res) => {
     const vehicle = await Vehicle.findByIdAndUpdate(
       req.params.id,
       { status: 'retired' },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!vehicle) return res.status(404).json({ success: false, message: 'Vehicle not found' });
     res.json({ success: true, message: 'Vehicle retired' });
@@ -88,7 +88,11 @@ router.patch('/:id/status', authorize('admin', 'manager', 'fleet_officer'), asyn
   try {
     const Vehicle = require('../models/Fleet/Vehicle');
     const { status } = req.body;
-    const vehicle = await Vehicle.findByIdAndUpdate(req.params.id, { status }, { new: true });
+    const vehicle = await Vehicle.findByIdAndUpdate(
+      req.params.id,
+      { status },
+      { returnDocument: 'after' }
+    );
     if (!vehicle) return res.status(404).json({ success: false, message: 'Vehicle not found' });
     res.json({ success: true, data: vehicle });
   } catch (err) {
@@ -111,7 +115,7 @@ router.post(
           },
           currentMileage: reading,
         },
-        { new: true }
+        { returnDocument: 'after' }
       );
       if (!vehicle) return res.status(404).json({ success: false, message: 'Vehicle not found' });
       res.json({ success: true, data: vehicle });

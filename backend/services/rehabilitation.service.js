@@ -53,7 +53,7 @@ class RehabilitationService {
   async updateAssessment(assessmentId, updateData) {
     try {
       const assessment = await DisabilityAssessment.findByIdAndUpdate(assessmentId, updateData, {
-        new: true,
+        returnDocument: 'after',
         runValidators: true,
       });
       if (!assessment) {

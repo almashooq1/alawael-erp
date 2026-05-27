@@ -203,7 +203,7 @@ class PdplService {
     return ConsentRecord.findOneAndUpdate(
       { userId, purpose, isActive: true },
       { isActive: false, withdrawalDate: new Date(), consentGiven: false },
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 
@@ -248,7 +248,7 @@ class PdplService {
   async updateRequestStatus(requestId, status, handledBy, notes) {
     const update = { status, handledBy, notes };
     if (['completed', 'rejected'].includes(status)) update.completedAt = new Date();
-    return DataSubjectRequest.findByIdAndUpdate(requestId, update, { new: true });
+    return DataSubjectRequest.findByIdAndUpdate(requestId, update, { returnDocument: 'after' });
   }
 
   async getDataSubjectRequests(filters = {}) {
@@ -368,7 +368,7 @@ class PdplService {
   }
 
   async updateBreachIncident(incidentId, update) {
-    return DataBreachIncident.findByIdAndUpdate(incidentId, update, { new: true });
+    return DataBreachIncident.findByIdAndUpdate(incidentId, update, { returnDocument: 'after' });
   }
 
   // =========================================================================

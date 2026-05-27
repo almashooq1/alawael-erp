@@ -453,7 +453,7 @@ class SaudiVehicleService extends EventEmitter {
     const vehicle = await this.Vehicle.findByIdAndUpdate(
       vehicleId,
       { ...updates, updatedAt: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     this.emit('vehicle:updated', vehicle);
@@ -589,7 +589,7 @@ class SaudiVehicleService extends EventEmitter {
         'readings.startFuel': startData.fuel,
         updatedAt: new Date(),
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     this.emit('trip:started', trip);
@@ -610,7 +610,7 @@ class SaudiVehicleService extends EventEmitter {
         'costs.total': (endData.fuelCost || 0) + (endData.tolls || 0) + (endData.parking || 0),
         updatedAt: new Date(),
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     // Update vehicle odometer

@@ -26,7 +26,7 @@ class FamilyService {
 
   async updateFamilyMember(memberId, data) {
     const FamilyMember = mongoose.model('FamilyMember');
-    return FamilyMember.findByIdAndUpdate(memberId, data, { new: true }).lean();
+    return FamilyMember.findByIdAndUpdate(memberId, data, { returnDocument: 'after' }).lean();
   }
 
   async getPrimaryContact(beneficiaryId) {
@@ -43,7 +43,7 @@ class FamilyService {
     return FamilyMember.findByIdAndUpdate(
       memberId,
       { $push: { consents: { ...consent, grantedAt: new Date() } } },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
   }
 
@@ -52,7 +52,7 @@ class FamilyService {
     return FamilyMember.findOneAndUpdate(
       { _id: memberId, 'consents._id': consentId },
       { $set: { 'consents.$.status': 'revoked', 'consents.$.revokedAt': new Date() } },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
   }
 
@@ -139,7 +139,7 @@ class FamilyService {
     return FamilyCommunication.findByIdAndUpdate(
       commId,
       { followUpStatus: 'completed', followUpNote: note },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
   }
 
@@ -164,7 +164,7 @@ class FamilyService {
     return FamilyCommunication.findOneAndUpdate(
       { _id: commId, 'homework._id': homeworkId },
       { $set: update },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
   }
 

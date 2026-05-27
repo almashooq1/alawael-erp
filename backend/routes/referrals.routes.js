@@ -151,7 +151,7 @@ router.patch(
     const facility = await M.findByIdAndUpdate(
       req.params.id,
       { $set: req.body },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     res.json({ success: true, data: facility });
   })
@@ -272,7 +272,7 @@ router.patch(
     const referral = await M.findByIdAndUpdate(
       req.params.id,
       { $set: req.body },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     res.json({ success: true, data: referral });
   })
@@ -293,7 +293,7 @@ router.post(
           reviewedBy: req.user?.id,
         },
       },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     res.json({ success: true, data: referral });
   })
@@ -306,7 +306,7 @@ router.post(
     const referral = await M.findByIdAndUpdate(
       req.params.id,
       { $set: { status: req.body.status } },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     res.json({ success: true, data: referral });
   })
@@ -319,7 +319,7 @@ router.post(
     const referral = await M.findByIdAndUpdate(
       req.params.id,
       { $set: { status: 'under_review' } },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     res.json({ success: true, data: referral });
   })
@@ -335,7 +335,7 @@ router.post(
     const updated = await M.findByIdAndUpdate(
       req.params.id,
       { $set: { priority } },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     res.json({ success: true, data: updated });
   })
@@ -358,7 +358,7 @@ router.post(
     const referral = await M.findByIdAndUpdate(
       req.params.id,
       { $push: { communications: msg } },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     res.status(201).json({ success: true, data: referral?.communications?.slice(-1)[0] });
   })
@@ -385,7 +385,7 @@ router.post(
     const referral = await M.findByIdAndUpdate(
       req.params.id,
       { $push: { documents: doc } },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     res.status(201).json({ success: true, data: doc });
   })
@@ -407,7 +407,7 @@ router.post(
     const referral = await M.findByIdAndUpdate(
       req.params.id,
       { $set: { assessment: req.body } },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     res.json({ success: true, data: referral?.assessment });
   })

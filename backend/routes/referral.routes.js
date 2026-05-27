@@ -166,9 +166,7 @@ router.patch(
       const facility = await ReferringFacility.findByIdAndUpdate(
         req.params.id,
         stripUpdateMeta(req.body),
-        {
-          new: true,
-        }
+        { returnDocument: 'after' }
       );
       res.json({ success: true, data: facility });
     } catch (err) {
@@ -325,7 +323,9 @@ router.patch(
       allowed.forEach(k => {
         if (req.body[k] !== undefined) update[k] = req.body[k];
       });
-      const referral = await Referral.findByIdAndUpdate(req.params.id, update, { new: true });
+      const referral = await Referral.findByIdAndUpdate(req.params.id, update, {
+        returnDocument: 'after',
+      });
       res.json({ success: true, data: referral });
     } catch (err) {
       res.status(400).json({ success: false, message: err.message });
@@ -478,7 +478,7 @@ router.patch('/communications/:commId/read', async (req, res) => {
     const comm = await ReferralCommunication.findByIdAndUpdate(
       req.params.commId,
       { isRead: true, readAt: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
     res.json({ success: true, data: comm });
   } catch (err) {
@@ -597,7 +597,7 @@ router.post(
           assessedBy,
           assessmentDate: new Date(),
         },
-        { upsert: true, new: true }
+        { upsert: true, returnDocument: 'after' }
       ).populate('assessedBy', 'name');
 
       res.json({ success: true, data: assessment });

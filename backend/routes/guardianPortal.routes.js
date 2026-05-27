@@ -132,7 +132,7 @@ router.put('/profile', async (req, res) => {
     const doc = await Guardian.findOneAndUpdate(
       { userId: req.user._id, branchId: req.user.branchId },
       { $set: { ...updates, updatedAt: new Date() } },
-      { new: true, upsert: false }
+      { returnDocument: 'after', upsert: false }
     );
     if (!doc)
       return res.status(404).json({ success: false, message: 'Guardian profile not found' });
@@ -384,7 +384,7 @@ router.post('/messages/:id/reply', async (req, res) => {
         $or: [{ senderId: req.user._id }, { recipientId: req.user._id }],
       },
       { $push: { thread: { body, senderId: req.user._id, sentAt: new Date() } } },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!original) return res.status(404).json({ success: false, message: 'Message not found' });
     res.json({ success: true, data: original });

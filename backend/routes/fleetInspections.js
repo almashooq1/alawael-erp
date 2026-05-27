@@ -61,7 +61,7 @@ router.put('/:id', authorize('admin', 'manager', 'fleet_officer', 'mechanic'), a
   try {
     const FleetInspection = require('../models/Fleet/FleetInspection');
     const inspection = await FleetInspection.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!inspection)

@@ -57,7 +57,7 @@ const HikvisionJobRunSchema = new mongoose.Schema(
     },
 
     // Lifecycle timestamps
-    startedAt: { type: Date, required: true, default: Date.now, index: true },
+    startedAt: { type: Date, required: true, default: Date.now },
     finishedAt: { type: Date, default: null },
     durationMs: { type: Number, default: null, min: 0 },
 

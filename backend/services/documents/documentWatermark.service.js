@@ -317,7 +317,7 @@ class DocumentWatermarkService {
     const log = await WatermarkLog.findOneAndUpdate(
       { trackingCode },
       { $set: { status: 'revoked' } },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!log) return { success: false, error: 'كود التتبع غير موجود' };
     return { success: true };
@@ -368,7 +368,7 @@ class DocumentWatermarkService {
     const profile = await WatermarkProfile.findByIdAndUpdate(
       profileId,
       { $set: updates },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     if (!profile) return { success: false, error: 'الملف غير موجود' };
     return { success: true, profile };

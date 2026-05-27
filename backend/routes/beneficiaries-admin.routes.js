@@ -257,7 +257,7 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
       filter.branchId = req.user.branchId;
     }
     const doc = await Beneficiary.findOneAndUpdate(filter, body, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     }).lean();
     if (!doc) return res.status(404).json({ success: false, message: 'غير موجود' });
@@ -283,7 +283,7 @@ router.delete('/:id', requireRole(WRITE_ROLES), async (req, res) => {
     const doc = await Beneficiary.findOneAndUpdate(
       filter,
       { isArchived: true, archivedAt: new Date(), archivedBy: req.user?.id, status: 'inactive' },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
     if (!doc) return res.status(404).json({ success: false, message: 'غير موجود' });
     logger.info('[beneficiaries] archived', { id: req.params.id, by: req.user?.id });

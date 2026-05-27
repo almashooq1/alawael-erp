@@ -113,7 +113,7 @@ const eventSchema = new mongoose.Schema(
     acknowledgedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     acknowledgedAt: { type: Date },
 
-    retainUntil: { type: Date, index: true },
+    retainUntil: { type: Date },
   },
   { timestamps: true }
 );

@@ -65,7 +65,10 @@ const qrCodeSchema = new mongoose.Schema(
   { timestamps: true, collection: 'document_qrcodes' }
 );
 
-qrCodeSchema.index({ code: 1 });
+// Note: `code` already has `unique: true` inline, which creates a unique
+// single-key index. The previous explicit `.index({code: 1})` here was
+// redundant and triggered Mongoose's duplicate-index warning. Removed
+// W495 follow-up 2026-05-27.
 qrCodeSchema.index({ documentId: 1, type: 1 });
 qrCodeSchema.index({ 'data.expiresAt': 1 }, { expireAfterSeconds: 0 });
 

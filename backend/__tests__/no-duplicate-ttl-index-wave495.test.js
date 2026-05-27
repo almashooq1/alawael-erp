@@ -16,24 +16,31 @@
  *       have prevented duplicate active acks was a no-op.
  *
  * Detection: pure-source regex scan, no DB, no mongoose connect.
- *   1. For each model file, locate every `.index({field: 1 or -1}, ...)`
+ *   1. Walk every .js under backend/ (skip node_modules, __tests__,
+ *      tests, _archived, coverage, .git). Pre-filter to files that
+ *      declare a Mongoose schema so the scanner stays fast.
+ *   2. For each schema file, locate every `.index({field: 1 or -1}, ...)`
  *      single-key index declaration.
- *   2. For each such field, check whether the schema field
+ *   3. For each such field, check whether the schema field
  *      definition (`field: { type: ..., index: true }`) has a colliding
  *      inline `index: true`.
- *   3. Fail with the exact file+field so the fix is obvious.
+ *   4. Fail with the exact file+field so the fix is obvious.
  *
  * Closed historical collisions (W130/W136 + the W495 sweep on
- * 2026-05-27): AttendanceEventOutbox.createdAt,
- * ClinicalAttendanceDiscrepancy.detectedAt, AttendanceException.detectedAt,
- * AttendanceImportBatch.submittedAt, HikvisionAnomalySnapshot.recordedAt,
- * HikvisionDeviceHealthLog.ts, HikvisionJobRun.startedAt,
- * LlmAnomalyAck.expiresAt, LlmAnomalyAck.anomalyId (partial-unique),
- * LlmAnomalySnapshot.recordedAt, LlmTelemetryCall.at,
- * PlanReviewAck.occurredAt, WhatsAppDlq.createdAt,
- * AttendanceNfcCard.cardUid (partial-unique only-1-active),
- * GasScale.goalId (partial-unique only-1-active-scale-per-goal),
- * HikvisionBranchConfig.branchId (redundant explicit unique vs inline).
+ * 2026-05-27): models/AttendanceEventOutbox.createdAt,
+ * models/ClinicalAttendanceDiscrepancy.detectedAt, models/AttendanceException.detectedAt,
+ * models/AttendanceImportBatch.submittedAt, models/HikvisionAnomalySnapshot.recordedAt,
+ * models/HikvisionDeviceHealthLog.ts, models/HikvisionJobRun.startedAt,
+ * models/LlmAnomalyAck.expiresAt, models/LlmAnomalyAck.anomalyId (partial-unique),
+ * models/LlmAnomalySnapshot.recordedAt, models/LlmTelemetryCall.at,
+ * models/PlanReviewAck.occurredAt, models/WhatsAppDlq.createdAt,
+ * models/AttendanceNfcCard.cardUid (partial-unique only-1-active),
+ * models/GasScale.goalId (partial-unique only-1-active-scale-per-goal),
+ * models/HikvisionBranchConfig.branchId (redundant explicit unique vs inline),
+ * services/documents/documentQRCode.service.js.code (redundant explicit
+ * vs inline unique), models/cctv/CctvEvent.retainUntil (TTL silent drop),
+ * models/cctv/CctvHealthCheck.retainUntil (TTL silent drop). 18 total
+ * closures across 18 fields.
  *
  * The drift guard is the same shape as W325c/W340 (baseline ratchet +
  * new-violation block); here baseline is empty and any new collision
@@ -43,15 +50,40 @@
 const fs = require('fs');
 const path = require('path');
 
-const MODELS_DIR = path.join(__dirname, '..', 'models');
+const BACKEND_DIR = path.join(__dirname, '..');
 
-function listModelFiles() {
+const SKIP_DIRS = new Set(['node_modules', '__tests__', 'tests', '_archived', 'coverage', '.git']);
+
+function listSchemaFiles() {
   const out = [];
-  for (const entry of fs.readdirSync(MODELS_DIR, { withFileTypes: true })) {
-    if (entry.isFile() && entry.name.endsWith('.js')) {
-      out.push(path.join(MODELS_DIR, entry.name));
+  function walk(dir) {
+    let entries;
+    try {
+      entries = fs.readdirSync(dir, { withFileTypes: true });
+    } catch {
+      return;
+    }
+    for (const entry of entries) {
+      if (SKIP_DIRS.has(entry.name)) continue;
+      const p = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        walk(p);
+      } else if (entry.isFile() && entry.name.endsWith('.js')) {
+        // Only scan files that actually declare a Mongoose schema.
+        // Cheap pre-filter to keep the scan fast; the deeper
+        // regex still runs only on these.
+        try {
+          const src = fs.readFileSync(p, 'utf-8');
+          if (/new\s+mongoose\.Schema\s*\(/.test(src) || /new\s+Schema\s*\(/.test(src)) {
+            out.push(p);
+          }
+        } catch {
+          /* skip unreadable */
+        }
+      }
     }
   }
+  walk(BACKEND_DIR);
   return out;
 }
 
@@ -88,7 +120,10 @@ function detectCollisions(filePath) {
     // drops its OPTIONS — TTL, unique, partialFilterExpression, etc.
     const fieldDeclRe = new RegExp(`^\\s+${idxField}\\s*:\\s*\\{[^}]*\\bindex\\s*:\\s*true`, 'm');
     if (fieldDeclRe.test(src)) {
-      collisions.push({ field: idxField, file: path.basename(filePath) });
+      collisions.push({
+        field: idxField,
+        file: path.relative(BACKEND_DIR, filePath).replace(/\\/g, '/'),
+      });
     }
   }
   return collisions;
@@ -96,36 +131,43 @@ function detectCollisions(filePath) {
 
 describe('W495 no-duplicate-single-key-index drift guard', () => {
   const allCollisions = [];
-  for (const f of listModelFiles()) {
+  for (const f of listSchemaFiles()) {
     for (const c of detectCollisions(f)) {
       allCollisions.push(c);
     }
   }
 
-  it('detects W130 + W136 baseline as cleared on 2026-05-27', () => {
+  it('detects all 16 closed-on-2026-05-27 baseline files as still clean', () => {
     const baseline = [
-      'AttendanceEventOutbox.js',
-      'ClinicalAttendanceDiscrepancy.js',
-      'AttendanceException.js',
-      'AttendanceImportBatch.js',
-      'HikvisionAnomalySnapshot.js',
-      'HikvisionDeviceHealthLog.js',
-      'HikvisionJobRun.js',
-      'LlmAnomalyAck.js', // both `expiresAt` (TTL) and `anomalyId` (partial-unique)
-      'LlmAnomalySnapshot.js',
-      'LlmTelemetryCall.js',
-      'PlanReviewAck.js',
-      'WhatsAppDlq.js',
-      'AttendanceNfcCard.js', // cardUid only-1-active partial-unique
-      'GasScale.js', // goalId only-1-active-scale-per-goal partial-unique
-      'HikvisionBranchConfig.js', // branchId redundant explicit unique
+      // W130/W136 + W495 sweep (Wave-18 models)
+      'models/AttendanceEventOutbox.js',
+      'models/ClinicalAttendanceDiscrepancy.js',
+      'models/AttendanceException.js',
+      'models/AttendanceImportBatch.js',
+      'models/HikvisionAnomalySnapshot.js',
+      'models/HikvisionDeviceHealthLog.js',
+      'models/HikvisionJobRun.js',
+      'models/LlmAnomalyAck.js', // both `expiresAt` (TTL) and `anomalyId` (partial-unique)
+      'models/LlmAnomalySnapshot.js',
+      'models/LlmTelemetryCall.js',
+      'models/PlanReviewAck.js',
+      'models/WhatsAppDlq.js',
+      'models/AttendanceNfcCard.js', // cardUid only-1-active partial-unique
+      'models/GasScale.js', // goalId only-1-active-scale-per-goal partial-unique
+      'models/HikvisionBranchConfig.js', // branchId redundant explicit unique
+      // W495 cross-directory follow-up — services/ with inline-schemas
+      'services/documents/documentQRCode.service.js', // code redundant explicit
+      // W495 cross-directory follow-up — nested models/<subdir>/ files
+      'models/cctv/CctvEvent.js', // retainUntil TTL silent drop
+      'models/cctv/CctvHealthCheck.js', // retainUntil TTL silent drop
     ];
     for (const file of baseline) {
       const stillThere = allCollisions.find(c => c.file === file);
       if (stillThere) {
         throw new Error(
-          `Regression: ${file}.${stillThere.field} reverted to the duplicate-TTL-index pattern. ` +
-            `Mongoose silently drops the TTL spec. Remove the inline \`index: true\` from the field.`
+          `Regression: ${file}.${stillThere.field} reverted to the duplicate-single-key-index pattern. ` +
+            `Mongoose silently drops the explicit \`.index()\` options block. Remove the inline \`index: true\` from the field, ` +
+            `or remove the redundant explicit \`.index({${stillThere.field}: 1})\` call when the inline \`unique: true\` already creates the index.`
         );
       }
     }

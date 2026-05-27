@@ -44,6 +44,18 @@ echo "[pre-push] mongoose hook-style drift check…"
 cd backend && npm run check:hook-style
 cd ..
 
+# 2026-05-27: block Wave-number collisions across the 66666/ +
+# alawael-rehab-platform/ repo pair before they reach a remote. Two
+# parallel-running agents have collided on the same WNNN 15+ times in
+# the W381→W508 range (see project_security_w471_w508 memory note).
+# Each collision costs ~30 min after-the-fact untangling. Scans last
+# N commits in both repos (~1s); fails with a one-line "suggested next
+# free wave: WNNN" + 3-recipe fix block. Bypass with CHECK_WAVE_SKIP=1
+# for coordinated multi-repo waves (rare).
+echo "[pre-push] wave-number collision check…"
+cd backend && npm run check:wave-collision
+cd ..
+
 echo "[pre-push] backend quality:push…"
 cd backend && npm run quality:push
 cd ..

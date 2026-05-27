@@ -659,6 +659,10 @@ on:
       - 'backend/__tests__/notify-channel-sms-wave520.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/phase-b-routes-e2e-smoke-wave521.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/check-wave-collision-script.test.js'
+      - 'backend/__tests__/check-dormant-modules-script.test.js'
+      - 'backend/__tests__/check-memory-health-script.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -1301,6 +1305,10 @@ on:
       - 'backend/__tests__/notify-channel-sms-wave520.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/phase-b-routes-e2e-smoke-wave521.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/check-wave-collision-script.test.js'
+      - 'backend/__tests__/check-dormant-modules-script.test.js'
+      - 'backend/__tests__/check-memory-health-script.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

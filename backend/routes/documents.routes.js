@@ -741,11 +741,38 @@ router.get(
       return res.status(404).json({ success: false, message: 'الملف غير موجود على الخادم' });
     }
 
-    res.setHeader('Content-Type', doc.mimeType || 'application/octet-stream');
+    // W462: Stored-XSS defense on preview. ALLOWED_MIMES includes
+    // `text/html`, `text/xml`, and `application/xml` for legitimate
+    // template/report uploads — but with Content-Disposition:inline
+    // an attacker uploading malicious HTML (`<script>` tags) would
+    // get it RENDERED in the application origin on preview, owning
+    // any admin who clicks the preview link (session theft, CSRF
+    // token theft, PHI exfil). `text/xml` carries the same risk via
+    // XSL processing instructions.
+    //
+    // Mitigation: for these executable-script MIME types, force the
+    // `attachment` disposition (browser downloads, never renders).
+    // Also strip the X-Frame-Options header that some browsers honor
+    // for iframe embedding. PDF/images/Word docs continue to preview
+    // inline as before.
+    const mime = doc.mimeType || 'application/octet-stream';
+    const isExecutableScript =
+      /^text\/(html|xml)/i.test(mime) ||
+      /^application\/xml/i.test(mime) ||
+      /^image\/svg/i.test(mime); // SVG can carry inline <script> too
+    const disposition = isExecutableScript ? 'attachment' : 'inline';
+
+    res.setHeader('Content-Type', mime);
     res.setHeader(
       'Content-Disposition',
-      `inline; filename="${encodeURIComponent(doc.originalFileName)}"`
+      `${disposition}; filename="${encodeURIComponent(doc.originalFileName)}"`
     );
+    if (isExecutableScript) {
+      // Defense-in-depth: even if a browser ignores the disposition,
+      // these headers block in-iframe rendering and execution.
+      res.setHeader('X-Frame-Options', 'DENY');
+      res.setHeader('Content-Security-Policy', "sandbox; default-src 'none'");
+    }
     res.setHeader('Cache-Control', 'private, max-age=3600');
 
     const stream = fs.createReadStream(resolvedPath);

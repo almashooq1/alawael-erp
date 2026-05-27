@@ -106,6 +106,21 @@ function setupIntegrationBus(app) {
       logger.warn('[Integration] W394 model-event bridge skipped:', bridgeErr.message);
     }
 
+    // W509 Phase D — auto-assign new MeasureAlerts to the best-match therapist
+    // via the W432 caseload-matcher, triggered by the W506 medical.measure_alert.raised
+    // event. Only assigns when assigneeId is still null (no manual override).
+    // Wired AFTER modelEventBridge so the producer side is live before this
+    // subscriber attaches.
+    try {
+      const {
+        wireMeasureAlertAutoAssignment,
+      } = require('../services/measure-alert-auto-assignment.service');
+      wireMeasureAlertAutoAssignment({ integrationBus, logger });
+      logger.info('[Integration] ✓ W509 measure-alert auto-assignment subscriber wired');
+    } catch (autoErr) {
+      logger.warn('[Integration] W509 auto-assignment subscriber skipped:', autoErr.message);
+    }
+
     // Wire DDD notification triggers (10 notification rules)
     try {
       const { initializeDDDNotifications } = require('../integration/dddNotificationTriggers');

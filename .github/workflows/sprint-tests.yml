@@ -599,6 +599,8 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/scan-route-files-script.test.js'
       - 'backend/__tests__/check-gitignored-sources-script.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/attendance-policy-geofence-credential-behavioral-wave122-133-138.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -1181,6 +1183,8 @@ on:
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/scan-route-files-script.test.js'
       - 'backend/__tests__/check-gitignored-sources-script.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/attendance-policy-geofence-credential-behavioral-wave122-133-138.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

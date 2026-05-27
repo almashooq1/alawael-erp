@@ -15,7 +15,7 @@
 const express = require('express');
 const router = express.Router();
 
-const { authenticate } = require('../middleware/auth');
+const { authenticate, authorize } = require('../middleware/auth');
 const { attachMfaActor, requireMfaTier } = require('../middleware/requireMfaTier');
 const safeError = require('../utils/safeError');
 const logger = require('../utils/logger');
@@ -25,8 +25,21 @@ function getDpiaService(req) {
   return req.app._dpiaService;
 }
 
+// W465: role gate for DPIA governance. Pre-W465 only authenticate +
+// attachMfaActor — any user could plant fake DPIA reports, insert
+// fake risks, advance drafts past review (only /sign was MFA-tier-2).
+const DPIA_ROLES = [
+  'admin',
+  'super_admin',
+  'superadmin',
+  'dpo',
+  'compliance_officer',
+  'compliance',
+];
+
 router.use(authenticate);
 router.use(attachMfaActor);
+router.use(authorize(DPIA_ROLES)); // W465
 
 // ── LIST ───────────────────────────────────────────────────────────────
 router.get('/', async (req, res) => {

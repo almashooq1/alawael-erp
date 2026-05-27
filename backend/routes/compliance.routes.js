@@ -7,15 +7,30 @@
 
 const express = require('express');
 const router = express.Router();
-const { authenticate } = require('../middleware/auth');
+const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 const { stripUpdateMeta } = require('../utils/sanitize');
 const safeError = require('../utils/safeError');
 
+// W465: role gate for compliance governance. Regulator-facing
+// InternalControl + ComplianceItem + ComplianceLog + ComplianceMetric
+// — only compliance/admin/quality should mutate (or read in detail).
+const COMPLIANCE_ROLES = [
+  'admin',
+  'super_admin',
+  'superadmin',
+  'manager',
+  'branch_manager',
+  'compliance',
+  'compliance_officer',
+  'quality',
+];
+
 // ─── Authentication Middleware ────────────────────────────────────────────
 router.use(authenticate);
 router.use(requireBranchAccess);
+router.use(authorize(COMPLIANCE_ROLES)); // W465
 // Safe-require models (project uses safeRequire pattern)
 let InternalControl, ComplianceItem, ComplianceLog, ComplianceMetric;
 try {

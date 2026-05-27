@@ -38,9 +38,9 @@ const elearningQuizSchema = new mongoose.Schema(
 
 elearningQuizSchema.index({ courseId: 1 });
 
-elearningQuizSchema.pre('save', function (next) {
+// W494: callback → async.
+elearningQuizSchema.pre('save', async function () {
   if (!this.uuid) this.uuid = require('crypto').randomUUID();
-  next();
 });
 
 module.exports =

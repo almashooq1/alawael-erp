@@ -111,17 +111,15 @@ const KNOWN_CALLBACK_HOOK_BASELINE = new Set([
   // (CrmCampaign + Webhook + EmailPreference removed — see W494 ratchet)
   'models/DisabilitySession.js',
   // W494 ratchet (mine, +2): DiscussionForum + DrugLibrary converted to async.
-  'models/ESignature.js',
-  'models/EStamp.js',
-  'models/ElearningCourse.js',
-  'models/ElearningQuiz.js',
+  // W494 ratchet wave 6: ESignature + EStamp + ElearningCourse +
+  //   ElearningQuiz (-4) — auto-expiry + uuid-fill hooks.
   'models/EmergencyPlan.js',
   'models/EnterpriseRisk.js',
   'models/EventParticipation.js',
   'models/Exam.js',
   'models/FamilyCounsellingSession.js',
   'models/FinancialTransaction.js',
-  'models/ForumReply.js',
+  // (ForumReply removed — W494 ratchet wave 6 bonus)
   'models/Goal.js',
   'models/HikvisionRawEvent.js',
   'models/ImportExportJob.js',

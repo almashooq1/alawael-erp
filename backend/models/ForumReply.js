@@ -27,9 +27,9 @@ const forumReplySchema = new mongoose.Schema(
 
 forumReplySchema.index({ branchId: 1, forumId: 1, parentId: 1 });
 
-forumReplySchema.pre('save', function (next) {
+// W494: callback → async.
+forumReplySchema.pre('save', async function () {
   if (!this.uuid) this.uuid = require('crypto').randomUUID();
-  next();
 });
 
 module.exports = mongoose.models.ForumReply || mongoose.model('ForumReply', forumReplySchema);

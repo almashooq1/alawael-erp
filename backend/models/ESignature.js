@@ -209,14 +209,14 @@ eSignatureSchema.index({ expiresAt: 1 });
 eSignatureSchema.index({ verificationCode: 1 });
 
 /* ─── Pre-save ───────────────────────────────────────────────────────────── */
-eSignatureSchema.pre('save', function (next) {
+// W494: callback → async.
+eSignatureSchema.pre('save', async function () {
   if (this.expiresAt && new Date() > this.expiresAt && this.status !== 'completed') {
     this.status = 'expired';
     this.signers.forEach(s => {
       if (s.status === 'pending') s.status = 'expired';
     });
   }
-  next();
 });
 
 /* ─── Methods ────────────────────────────────────────────────────────────── */

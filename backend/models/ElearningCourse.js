@@ -71,9 +71,9 @@ elearningCourseSchema.index({ branchId: 1, category: 1, status: 1 });
 elearningCourseSchema.index({ isMandatory: 1, status: 1 });
 elearningCourseSchema.index({ instructorId: 1 });
 
-elearningCourseSchema.pre('save', function (next) {
+// W494: callback → async.
+elearningCourseSchema.pre('save', async function () {
   if (!this.uuid) this.uuid = require('crypto').randomUUID();
-  next();
 });
 
 module.exports =

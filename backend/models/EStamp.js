@@ -237,7 +237,8 @@ eStampSchema.index({ createdBy: 1 });
 eStampSchema.index({ validUntil: 1 });
 
 /* ─── Pre-save: Check expiry ─────────────────────────────────────────────── */
-eStampSchema.pre('save', function (next) {
+// W494: callback → async.
+eStampSchema.pre('save', async function () {
   if (
     this.isExpirable &&
     this.validUntil &&
@@ -251,7 +252,6 @@ eStampSchema.pre('save', function (next) {
       timestamp: new Date(),
     });
   }
-  next();
 });
 
 /* ─── Methods ────────────────────────────────────────────────────────────── */

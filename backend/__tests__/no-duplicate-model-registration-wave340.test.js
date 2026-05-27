@@ -232,12 +232,42 @@ const KNOWN_DUPLICATE_REGISTRATIONS = new Set([
   'VendorEvaluation',
   'ChangeRequest',
   'StrategicInitiative',
+  //
+  // ─── UMBRELLA: 2026-05-27 audit — all entries below to 'WorkflowDefinition'
+  //     belong to the SAME divergent-schema cluster as the documents-pro block
+  //     above. Audited registration sites for each via grep
+  //     `mongoose.model\(['"]X['"]`. Pattern repeats across:
+  //       * services/documents/document{Forms,Notification,Signature,
+  //         DigitalCert,Workflow*,ImportExport}.service.js
+  //       * rehabilitation-services/{advanced-therapy-protocols,
+  //         aac-therapy-protocols,goals-bank-service,mdt-transition-quality}.js
+  //       * workflow/intelligent-workflow-engine.js
+  //       * privacy/data-subject-request.model.js vs services/pdpl.service.js
+  //       * models/operations/NotificationPreferences.model.js vs
+  //         services/documents/documentNotification.service.js
+  //       * models/MDTCoordination.js vs rehabilitation-services/mdt-transition-quality.js
+  //     Confirmed schema divergence samples:
+  //       - GoalBank: canonical domain enum 5 SHOUTING_CASE values vs service
+  //         17 snake_case values + 14 extra fields
+  //       - ImportExportJob: canonical ~30 fields with sub-schemas vs service
+  //         ~10 fields, different collection name
+  //       - TherapyProtocol (aac-therapy-protocols.js:262 uses NON-defensive
+  //         `mongoose.model()` — would throw OverwriteModelError if loaded
+  //         after advanced-therapy-protocols.js; works today only because of
+  //         load order)
+  //     Same resolution applies as documents-pro cluster: each entry needs
+  //     Pattern D rename (per ADR-021 framework) OR consolidation by deleting
+  //     service-side schema and requiring canonical models/<X>.js. The
+  //     workflow-engine vs documents-pro WorkflowDefinition/Instance split
+  //     likely warrants its own ADR (workflow domain owns multiple engines).
+  //     Keeping in baseline = visible tech debt; CI fails on any NEW duplicate.
+  // ──────────────────────────────────────────────────────────────────────────
   'FormSubmission',
   'FormTemplate',
   'GoalBank',
   'ImportExportJob',
   'MDTMeeting',
-  'Student', // domain fragmentation per ADR-020 (Student vs Beneficiary)
+  'Student', // domain fragmentation per ADR-020 (Student vs Beneficiary) — see ADR-020 for canonical-consolidation decision (deferred pending stakeholder)
   'NotificationPreferences',
   // 'Referral' — W343 moved to REGISTRATION_ALLOWLIST (defensive lookup-with-fallback pattern in routes/)
   // 'Task'     — W343 moved to REGISTRATION_ALLOWLIST (same pattern)

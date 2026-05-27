@@ -485,4 +485,122 @@ describe('W340 no-duplicate-model-registration drift guard', () => {
       );
     }
   });
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // 2026-05-27 — case-insensitive cross-check pass (ADR-032 sub-cluster 5).
+  // Mongoose model-name registry is CASE-SENSITIVE: 'AacProfile' and 'AACProfile'
+  // are two distinct cache entries, so the duplicate-name guards above don't
+  // flag them. But Mongoose pluralizes both to the SAME MongoDB collection
+  // name (`aacprofiles`), so two casings of one logical name = two schemas
+  // writing to one collection — silent schema/data collision.
+  //
+  // This guard groups all registrations by `name.toLowerCase()`; any group
+  // with >1 distinct casing is flagged. Either a typo (rename to canonical)
+  // or a legitimate-but-divergent legacy variant (ALLOWLIST + ADR).
+  // ─────────────────────────────────────────────────────────────────────────
+  const KNOWN_CASE_VARIANTS = new Set([
+    // 'aacprofile' — 'AacProfile' (canonical W263, models/AacProfile.js) +
+    // 'AACProfile' (legacy P9/P10, rehabilitation-services/aac-therapy-protocols.js).
+    // Both pluralize to the `aacprofiles` MongoDB collection. ADR-032 sub-cluster 5
+    // open question Q4 — pending stakeholder behavior-equivalence audit of the
+    // 13-endpoint legacy router before deletion or Pattern D rename.
+    'aacprofile',
+    // ─────────────────────────────────────────────────────────────────────────
+    // 2026-05-27 case-variant guard initial discovery — 7 additional entries.
+    // All are the same P1 bug class as 'aacprofile': two casings of one logical
+    // name → same Mongo collection → silent schema collision. Each deferred to
+    // ADR-032 sub-cluster 5 disposition (per-entry stakeholder decision needed).
+    // ─────────────────────────────────────────────────────────────────────────
+    // 'kpidefinition' — KPIDefinition (domains/dashboards/models/) vs
+    //   KpiDefinition (models/KpiDefinition.js). Both → `kpidefinitions` collection.
+    'kpidefinition',
+    // 'aiprediction' — AiPrediction (models/AiPrediction.js) vs AIPrediction
+    //   (models/organization.model.js mega-file). Both → `aipredictions` collection.
+    'aiprediction',
+    // 'mdtmeeting' — MdtMeeting (models/care/MdtMeeting.model.js) vs MDTMeeting
+    //   (models/MDTCoordination.js + rehabilitation-services/mdt-transition-quality.js;
+    //   the latter pair is already in KNOWN_DUPLICATE_REGISTRATIONS as 'MDTMeeting').
+    //   Triple-collision: 3 files, 2 casings, 1 Mongo collection (`mdtmeetings`).
+    'mdtmeeting',
+    // 'elearningcourse' — ELearningCourse (models/ELearning/Course.js) vs
+    //   ElearningCourse (models/ElearningCourse.js). Both → `elearningcourses`.
+    'elearningcourse',
+    // 'hrpolicy' — HRPolicy (models/HR/HRPolicy.js) vs HrPolicy (models/HR/Policy.js).
+    //   Both → `hrpolicies` collection.
+    'hrpolicy',
+    // 'icfassessment' — ICFAssessment (models/icf/ICFAssessment.model.js canonical)
+    //   vs IcfAssessment (routes/icf-assessments.routes.js inlines a local schema).
+    //   Route-side inline schema is a strong Pattern D rename or delete candidate.
+    'icfassessment',
+    // 'zktecodevice' — ZktecoDevice (models/ZktecoDevice.js) vs ZKTecoDevice
+    //   (models/zktecoDevice.model.js). Note also filename casing differs.
+    //   Both → `zktecodevices` collection.
+    'zktecodevice',
+  ]);
+
+  it('no model name has multiple case variants registered (silent collection-collision check)', () => {
+    const byName = collectRegistrations();
+    const byLower = new Map(); // Map<lowerName, Map<exactName, Set<file>>>
+    for (const [name, files] of byName) {
+      const lower = name.toLowerCase();
+      if (!byLower.has(lower)) byLower.set(lower, new Map());
+      byLower.get(lower).set(name, files);
+    }
+
+    const newCaseVariants = [];
+    for (const [lower, variants] of byLower) {
+      if (variants.size <= 1) continue;
+      if (KNOWN_CASE_VARIANTS.has(lower)) continue;
+      newCaseVariants.push({
+        lower,
+        variants: [...variants.entries()].map(([name, files]) => ({
+          name,
+          files: [...files],
+        })),
+      });
+    }
+
+    if (newCaseVariants.length > 0) {
+      const lines = newCaseVariants
+        .map(v => {
+          const variantLines = v.variants
+            .map(x => `      "${x.name}" in: ${x.files.join(', ')}`)
+            .join('\n');
+          return `  - lowercase("${v.lower}") has ${v.variants.length} distinct casings:\n${variantLines}`;
+        })
+        .join('\n');
+      throw new Error(
+        `Found ${newCaseVariants.length} model name(s) registered in multiple case variants:\n${lines}\n\n` +
+          `Both casings pluralize to the SAME MongoDB collection — silent schema collision on writes.\n\n` +
+          `Fix options:\n` +
+          `  (a) Rename one to match the canonical (preferred when it's a typo).\n` +
+          `  (b) Pattern D rename (ADR-021) when the two are genuinely different entities.\n` +
+          `  (c) Delete the dormant variant if it has no production callers.\n` +
+          `  (d) Add to KNOWN_CASE_VARIANTS + open an ADR (ADR-032 sub-cluster 5 precedent).`
+      );
+    }
+  });
+
+  it('every entry in KNOWN_CASE_VARIANTS still has >1 casing registered (ratchet-down check)', () => {
+    const byName = collectRegistrations();
+    const byLower = new Map();
+    for (const name of byName.keys()) {
+      const lower = name.toLowerCase();
+      if (!byLower.has(lower)) byLower.set(lower, new Set());
+      byLower.get(lower).add(name);
+    }
+    const stale = [];
+    for (const lower of KNOWN_CASE_VARIANTS) {
+      const variants = byLower.get(lower);
+      if (!variants || variants.size <= 1) stale.push(lower);
+    }
+    if (stale.length > 0) {
+      throw new Error(
+        `${stale.length} entry/entries in KNOWN_CASE_VARIANTS are stale ` +
+          `(now have ≤1 casing registered). Remove them from the set in the same ` +
+          `commit that consolidated the variants:\n` +
+          stale.map(s => `  - "${s}"`).join('\n')
+      );
+    }
+  });
 });

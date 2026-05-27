@@ -347,6 +347,8 @@ __tests__/attendance-outbox-review-behavioral-wave98-130.test.js
 __tests__/attendance-day-rollup-behavioral-wave131-132-174.test.js
 __tests__/attendance-policy-geofence-credential-behavioral-wave122-133-138.test.js
 __tests__/attendance-clinical-day-care-behavioral-wave136-176-177.test.js
+__tests__/day-rehab-section-bus-trip-behavioral-wave175-183-202b.test.js
+__tests__/family-finance-audit-behavioral-wave196b-201b-205b-277i.test.js
 __tests__/equity-models-behavioral-wave486.test.js
 __tests__/story-models-behavioral-wave480.test.js
 __tests__/sync-sprint-tests-paths-script.test.js

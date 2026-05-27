@@ -495,12 +495,27 @@ router.delete(
         });
       }
 
-      // حذف الملف من النظام
+      // W460: path-boundary check before unlink. `file.fileUrl` is
+      // server-controlled today (set by upload handler at line 449 as
+      // `/uploads/medical-files/${req.file.filename}`), but if a future
+      // route or migration ever lets user input flow into fileUrl, a
+      // bare `path.join + fs.unlink` becomes arbitrary-file-delete.
+      // Resolve + verify the path stays under the canonical uploads
+      // directory before deleting.
       const filePath = path.join(__dirname, '../', file.fileUrl);
-      try {
-        await fs.unlink(filePath);
-      } catch (err) {
-        logger.error('خطأ في حذف الملف:', { message: err.message });
+      const resolvedPath = path.resolve(filePath);
+      const uploadsBase = path.resolve(__dirname, '..', 'uploads', 'medical-files');
+      if (!resolvedPath.startsWith(uploadsBase + path.sep)) {
+        logger.warn('[caseManagement] Refused unlink — path escapes uploads dir', {
+          fileUrl: file.fileUrl,
+          caseId: String(caseDoc._id),
+        });
+      } else {
+        try {
+          await fs.unlink(resolvedPath);
+        } catch (err) {
+          logger.error('خطأ في حذف الملف:', { message: err.message });
+        }
       }
 
       file.remove();

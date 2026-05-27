@@ -465,3 +465,41 @@ describe('W435 — realtime bootstrap registers facade as module singleton', () 
     expect(src).toMatch(/metricsModule\._setDefault\(metrics\)/);
   });
 });
+
+// ──────────────────────────────────────────────────────────────────
+//  8. W507 smart-inbox route — wired to incInboxRanking (W435+ chain)
+// ──────────────────────────────────────────────────────────────────
+
+describe('W435 — smart-inbox route emits incInboxRanking via getDefault', () => {
+  const SMART_INBOX_ROUTES_JS = path.resolve(__dirname, '..', 'routes', 'smart-inbox.routes.js');
+
+  test('route source-tree requires metrics service + calls getDefault', () => {
+    const src = READ(SMART_INBOX_ROUTES_JS);
+    expect(src).toMatch(/require\(['"]\.\.\/intelligence\/smart-platform-metrics\.service['"]\)/);
+    expect(src).toMatch(/metricsModule\.getDefault\(\)/);
+    expect(src).toMatch(/incInboxRanking\(/);
+  });
+
+  test('route emits "empty" label when ranked list is empty', () => {
+    const src = READ(SMART_INBOX_ROUTES_JS);
+    expect(src).toMatch(/incInboxRanking\(['"]empty['"]\)/);
+  });
+
+  test('route emits top-item severity as label otherwise (lowercased)', () => {
+    const src = READ(SMART_INBOX_ROUTES_JS);
+    // Top severity should derive from items[0].item.severity
+    expect(src).toMatch(/items\[0\]\?\.item\?\.severity/);
+    expect(src).toMatch(/\.toLowerCase\(\)/);
+  });
+
+  test('emit helper is try-catch wrapped (never throws into route)', () => {
+    const src = READ(SMART_INBOX_ROUTES_JS);
+    // The _emitRankingMetric function exists and wraps in try/catch
+    expect(src).toMatch(/function _emitRankingMetric\(/);
+    // try { ... } catch { … } pattern in the helper body
+    const helperMatch = src.match(/function _emitRankingMetric\([\s\S]*?\n\}\n/);
+    expect(helperMatch).toBeTruthy();
+    expect(helperMatch[0]).toMatch(/try\s*\{/);
+    expect(helperMatch[0]).toMatch(/catch\s*\{?/);
+  });
+});

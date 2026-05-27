@@ -46,6 +46,26 @@ const logger = require('../utils/logger');
 const safeError = require('../utils/safeError');
 
 const ranker = require('../intelligence/smart-inbox-ranker.lib');
+const metricsModule = require('../intelligence/smart-platform-metrics.service');
+
+// W435+: lazy-bind to the smart-platform metrics facade. Emits
+// incInboxRanking(top_severity) once per ranked response so ops can
+// see the inbox-ranker activity rate per role/severity distribution.
+// Wrapped in try/catch — metric failure never breaks the response.
+function _emitRankingMetric(items) {
+  try {
+    const m = metricsModule.getDefault();
+    if (!m || typeof m.incInboxRanking !== 'function') return;
+    if (!items || items.length === 0) {
+      m.incInboxRanking('empty');
+      return;
+    }
+    const topSeverity = String(items[0]?.item?.severity || 'unknown').toLowerCase();
+    m.incInboxRanking(topSeverity);
+  } catch {
+    /* metric drop — never throw into route hot path */
+  }
+}
 
 // Severity stays "medium" if a producer left it null — matches the ranker's
 // default weight assumption (medium ≈ 0.4).
@@ -181,6 +201,10 @@ router.get('/me', async (req, res) => {
     // Sort DESC by score, then take top-N.
     ranked.sort((a, b) => b.score - a.score);
     const items = ranked.slice(0, limit);
+
+    // W435+: emit ranker activity counter (top-severity label) so the
+    // Phase F2 observability surface reports inbox usage in production.
+    _emitRankingMetric(items);
 
     return res.json({
       success: true,

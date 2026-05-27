@@ -14,7 +14,7 @@ function asyncHandler(fn) {
 }
 
 function getUserId(req) {
-  return req.user?._id || req.user?.id || req.headers['x-user-id'];
+  return req.user?._id || req.user?.id || null;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════

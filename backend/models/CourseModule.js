@@ -38,9 +38,9 @@ const courseModuleSchema = new mongoose.Schema(
 
 courseModuleSchema.index({ courseId: 1, orderIndex: 1 });
 
-courseModuleSchema.pre('save', function (next) {
+// W494: callback → async.
+courseModuleSchema.pre('save', async function () {
   if (!this.uuid) this.uuid = require('crypto').randomUUID();
-  next();
 });
 
 module.exports = mongoose.models.CourseModule || mongoose.model('CourseModule', courseModuleSchema);

@@ -49,9 +49,9 @@ courseEnrollmentSchema.index({ branchId: 1, userId: 1, status: 1 });
 courseEnrollmentSchema.index({ status: 1, dueDate: 1 });
 courseEnrollmentSchema.index({ certificateNumber: 1 });
 
-courseEnrollmentSchema.pre('save', function (next) {
+// W494: callback → async.
+courseEnrollmentSchema.pre('save', async function () {
   if (!this.uuid) this.uuid = require('crypto').randomUUID();
-  next();
 });
 
 module.exports =

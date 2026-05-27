@@ -203,10 +203,10 @@ communityActivitySchema.index({ 'location.city': 1, category: 1 });
 communityActivitySchema.index({ targetDisabilityTypes: 1 });
 
 // ─── Pre-save ────────────────────────────────────────────────────────────────
-communityActivitySchema.pre('save', function (next) {
+// W494: callback → async.
+communityActivitySchema.pre('save', async function () {
   if (this.cost === 0) this.isFree = true;
   else this.isFree = false;
-  next();
 });
 
 // ─── Virtuals ────────────────────────────────────────────────────────────────

@@ -91,7 +91,8 @@ complianceMetricSchema.virtual('compliancePercentage').get(function () {
   return (this.currentValue / this.targetValue) * 100;
 });
 
-complianceMetricSchema.pre('save', function (next) {
+// W494: callback → async.
+complianceMetricSchema.pre('save', async function () {
   if (this.currentValue < this.threshold) {
     this.status = 'non_compliant';
   } else if (this.currentValue < this.targetValue) {
@@ -99,7 +100,6 @@ complianceMetricSchema.pre('save', function (next) {
   } else {
     this.status = 'compliant';
   }
-  next();
 });
 
 complianceMetricSchema.statics.getLatestMetrics = function (organizationId) {

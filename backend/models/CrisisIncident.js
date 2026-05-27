@@ -141,14 +141,14 @@ CrisisIncidentSchema.index({ beneficiaryId: 1, occurredAt: -1 });
 CrisisIncidentSchema.index({ status: 1, severity: 1 });
 
 // Wave-18 invariant: status closed/resolved requires resolvedAt / closedAt
-CrisisIncidentSchema.pre('save', function (next) {
+// W494: callback → async.
+CrisisIncidentSchema.pre('save', async function () {
   if ((this.status === 'resolved' || this.status === 'closed') && !this.resolvedAt) {
     this.resolvedAt = new Date();
   }
   if (this.status === 'closed' && !this.closedAt) {
     this.closedAt = new Date();
   }
-  next();
 });
 
 module.exports =

@@ -17,7 +17,7 @@ function asyncHandler(fn) {
   return (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 }
 function getUserId(req) {
-  return req.user?._id || req.user?.id || req.headers['x-user-id'];
+  return req.user?._id || req.user?.id || null;
 }
 
 /* ── Records ── */

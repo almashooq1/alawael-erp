@@ -608,6 +608,8 @@ on:
       - 'backend/__tests__/family-finance-audit-behavioral-wave196b-201b-205b-277i.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/auth-gate-mount-sweep-wave502.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/auth-bypass-x-user-id-wave503.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -1199,6 +1201,8 @@ on:
       - 'backend/__tests__/family-finance-audit-behavioral-wave196b-201b-205b-277i.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/auth-gate-mount-sweep-wave502.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/auth-bypass-x-user-id-wave503.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

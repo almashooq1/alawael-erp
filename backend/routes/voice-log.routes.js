@@ -80,7 +80,7 @@ const WRITE_ROLES = [
 const DELETE_ROLES = ['admin', 'superadmin', 'super_admin'];
 
 // Enums mirrored from the model schema — kept local to fail-fast on drift.
-// Drift guard wave511 asserts these match the schema enums byte-for-byte.
+// Drift guard wave513 asserts these match the schema enums byte-for-byte.
 const ENTRY_KINDS = [
   'preference',
   'dream',

@@ -165,6 +165,19 @@ function setupIntegrationBus(app) {
       logger.warn('[Integration] W519 email notification channel skipped:', emailErr.message);
     }
 
+    // W520 — third concrete channel: SMS. Subscribes to the same W516
+    // upstream event as W517/W519. Wraps services/smsService (currently
+    // a stub returning {skipped:true} — channel handles this gracefully
+    // and counts it under stats.providerNotConfigured, not errored).
+    // When Unifonic/Twilio integrate, zero changes needed here.
+    try {
+      const { wireSmsNotificationChannel } = require('../services/notify-channel-sms.service');
+      wireSmsNotificationChannel({ integrationBus, logger });
+      logger.info('[Integration] ✓ W520 SMS notification channel wired');
+    } catch (smsErr) {
+      logger.warn('[Integration] W520 SMS notification channel skipped:', smsErr.message);
+    }
+
     // Wire DDD notification triggers (10 notification rules)
     try {
       const { initializeDDDNotifications } = require('../integration/dddNotificationTriggers');

@@ -48,6 +48,38 @@ describe('W491 — stories.routes structural', () => {
     expect(ROUTE_SRC).toMatch(/router\.get\(\s*['"]\/variants\/:id['"]/);
   });
 
+  it('declares POST /books/:id/share-with-family (W495)', () => {
+    expect(ROUTE_SRC).toMatch(/router\.post\(\s*['"]\/books\/:id\/share-with-family['"]/);
+  });
+
+  it('share-with-family rejects when not yet published', () => {
+    expect(ROUTE_SRC).toMatch(/NOT_PUBLISHED/);
+    expect(ROUTE_SRC).toMatch(/Story must be published before sharing/);
+  });
+
+  it('share-with-family sets familyAccessGranted=true', () => {
+    expect(ROUTE_SRC).toMatch(/book\.familyAccessGranted\s*=\s*true/);
+  });
+
+  it('declares POST /books/:id/view (W495 family-view tracking)', () => {
+    expect(ROUTE_SRC).toMatch(/router\.post\(\s*['"]\/books\/:id\/view['"]/);
+  });
+
+  it('view endpoint uses atomic findByIdAndUpdate with $inc', () => {
+    expect(ROUTE_SRC).toMatch(/findByIdAndUpdate\([\s\S]+?\$inc:\s*\{\s*familyViewCount:\s*1\s*\}/);
+    expect(ROUTE_SRC).toMatch(/\$set:\s*\{\s*lastViewedAt:/);
+  });
+
+  it('view endpoint rejects when familyAccessGranted=false', () => {
+    expect(ROUTE_SRC).toMatch(/FAMILY_ACCESS_NOT_GRANTED/);
+  });
+
+  it('view endpoint allows parent + beneficiary + guardian roles', () => {
+    expect(ROUTE_SRC).toMatch(
+      /'\/books\/:id\/view'[\s\S]+?requireRole\(\[[\s\S]+?'parent'[\s\S]+?'beneficiary'[\s\S]+?'guardian'/
+    );
+  });
+
   it('uses global authenticateToken', () => {
     expect(ROUTE_SRC).toMatch(/router\.use\(authenticateToken\)/);
   });

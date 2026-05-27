@@ -346,6 +346,88 @@ router.post(
 );
 
 /**
+ * POST /api/stories/books/:id/share-with-family
+ * Body: {} — transitions published → shared_with_family, sets
+ * familyAccessGranted=true + sharedWithFamilyAt. Requires book to be
+ * already published (status='published' or 'shared_with_family').
+ */
+router.post(
+  '/books/:id/share-with-family',
+  requireRole(['admin', 'supervisor', 'clinician']),
+  async (req, res) => {
+    const Book = loadBookModel();
+    if (!Book) return res.status(503).json({ success: false, code: 'MODEL_NOT_REGISTERED' });
+
+    try {
+      const book = await Book.findById(req.params.id);
+      if (!book) return res.status(404).json({ success: false, code: 'NOT_FOUND' });
+      assertBranchMatch(req, book.branchId, 'StoryBook');
+
+      if (!['published', 'shared_with_family'].includes(book.status)) {
+        return res.status(400).json({
+          success: false,
+          code: 'NOT_PUBLISHED',
+          message: 'Story must be published before sharing with family',
+        });
+      }
+
+      book.status = 'shared_with_family';
+      book.familyAccessGranted = true;
+      await book.save();
+      res.json({ success: true, book: book.toObject() });
+    } catch (err) {
+      if (err.statusCode === 403) {
+        return res.status(403).json({ success: false, code: 'BRANCH_MISMATCH' });
+      }
+      res.status(500).json({ success: false, code: 'SHARE_FAILED', message: err.message });
+    }
+  }
+);
+
+/**
+ * POST /api/stories/books/:id/view
+ * Body: {} — records a family/beneficiary view: increments familyViewCount,
+ * sets lastViewedAt. Caller role 'parent' / 'beneficiary' typically. Only
+ * works when book.familyAccessGranted=true.
+ */
+router.post(
+  '/books/:id/view',
+  requireRole(['admin', 'supervisor', 'clinician', 'parent', 'beneficiary', 'guardian']),
+  async (req, res) => {
+    const Book = loadBookModel();
+    if (!Book) return res.status(503).json({ success: false, code: 'MODEL_NOT_REGISTERED' });
+
+    try {
+      const book = await Book.findById(req.params.id);
+      if (!book) return res.status(404).json({ success: false, code: 'NOT_FOUND' });
+      assertBranchMatch(req, book.branchId, 'StoryBook');
+
+      if (!book.familyAccessGranted) {
+        return res.status(403).json({ success: false, code: 'FAMILY_ACCESS_NOT_GRANTED' });
+      }
+
+      // Atomic increment + timestamp — avoids the W494-class concurrent-save bug
+      const updated = await Book.findByIdAndUpdate(
+        req.params.id,
+        { $inc: { familyViewCount: 1 }, $set: { lastViewedAt: new Date() } },
+        { new: true }
+      ).lean();
+
+      res.json({
+        success: true,
+        familyViewCount: updated.familyViewCount,
+        lastViewedAt: updated.lastViewedAt,
+      });
+    } catch (err) {
+      if (err.statusCode === 403) {
+        return res.status(403).json({ success: false, code: 'BRANCH_MISMATCH' });
+      }
+      res.status(500).json({ success: false, code: 'VIEW_FAILED', message: err.message });
+    }
+  }
+);
+
+/**
  * GET /api/stories/variants/:id
  */
 router.get(

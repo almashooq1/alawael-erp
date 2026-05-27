@@ -275,6 +275,9 @@
     "uuid": "^14.0.0",
     "@tootallnate/once": "^3.0.1",
     "http-proxy-agent": "^7.0.2",
-    "sanitize-html": "2.17.4"
+    "sanitize-html": "2.17.4",
+    "tmp": ">=0.2.6",
+    "qs": ">=6.15.2",
+    "ws": ">=8.20.1"
   }
 }

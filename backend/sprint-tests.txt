@@ -339,3 +339,4 @@ __tests__/hikvision-job-and-event-behavioral-wave108-109.test.js
 __tests__/check-mongoose-hook-style-script.test.js
 __tests__/attendance-shift-models-behavioral-wave121.test.js
 __tests__/stories-routes-wave491.test.js
+__tests__/attendance-device-models-behavioral-wave122.test.js

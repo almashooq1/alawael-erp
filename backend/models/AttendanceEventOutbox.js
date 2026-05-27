@@ -47,7 +47,7 @@ const AttendanceEventOutboxSchema = new mongoose.Schema(
 
     status: { type: String, enum: STATUSES, default: 'pending', index: true },
 
-    createdAt: { type: Date, required: true, default: Date.now, index: true },
+    createdAt: { type: Date, required: true, default: Date.now },
     deliveredAt: { type: Date, default: null },
     deliveryAttempts: { type: Number, default: 0, min: 0 },
     lastError: { type: String, default: null, maxlength: 500 },

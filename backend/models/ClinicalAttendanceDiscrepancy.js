@@ -71,7 +71,7 @@ const ClinicalAttendanceDiscrepancySchema = new mongoose.Schema(
     details: { type: mongoose.Schema.Types.Mixed, default: () => ({}) },
 
     status: { type: String, enum: STATUSES, default: 'open', index: true },
-    detectedAt: { type: Date, required: true, default: Date.now, index: true },
+    detectedAt: { type: Date, required: true, default: Date.now },
 
     resolution: {
       actorId: { type: mongoose.Schema.Types.ObjectId, default: null },

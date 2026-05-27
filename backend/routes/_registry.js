@@ -651,7 +651,18 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   // Task Management — إدارة المهام — auth required
   dualMountAuth(app, 'tasks', safeRequire('../routes/tasks.routes'));
   // Referral Portal — بوابة التحويلات
-  dualMount(app, 'referrals', safeRequire('../routes/referrals.routes'));
+  // W471: switched dualMount → dualMountAuth. Pre-W471 the entire
+  // referrals surface (24 endpoints handling patient referrals
+  // between facilities — PHI: patient demographics, medical history,
+  // urgency, assessments, FHIR IDs, inter-facility comms) was
+  // mounted WITHOUT auth middleware. The route file referrals.routes.js
+  // itself never calls router.use(authenticate). Anonymous attacker
+  // could hit /api/v1/referrals/<id> and read every referral in the
+  // system (PHI exfiltration), DELETE referrals, POST fake referrals
+  // to harm a competitor facility's reputation. Sibling routes
+  // (icf-assessments, tasks) correctly use dualMountAuth — this was
+  // a regression at mount-time, not a route-file bug.
+  dualMountAuth(app, 'referrals', safeRequire('../routes/referrals.routes'));
   // Rehab Disciplines & Goal Suggestions — تخصصات التأهيل ومقترحات الأهداف
   dualMount(app, 'rehab', safeRequire('../routes/rehab.routes'));
 

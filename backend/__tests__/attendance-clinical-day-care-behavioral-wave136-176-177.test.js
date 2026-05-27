@@ -174,6 +174,14 @@ describe('ClinicalAttendanceDiscrepancy — Wave-18 invariants', () => {
     expect(Discrepancy.STATUSES).toContain('open');
     expect(Discrepancy.STATUSES).toContain('resolved');
   });
+
+  it('declares 180-day TTL index on detectedAt', async () => {
+    const indexes = await Discrepancy.collection.indexes();
+    const ttl = indexes.find(i => i.expireAfterSeconds);
+    expect(ttl).toBeDefined();
+    expect(ttl.expireAfterSeconds).toBe(180 * 24 * 60 * 60);
+    expect(ttl.key).toEqual({ detectedAt: 1 });
+  });
 });
 
 // ════════════════════════════════════════════════════════════════════

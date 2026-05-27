@@ -135,12 +135,12 @@ describe('AttendanceEventOutbox — Wave-18 invariants', () => {
     expect(Outbox.TTL_SECONDS).toBe(90 * 24 * 60 * 60);
   });
 
-  it('exposes 90-day TTL_SECONDS constant', () => {
-    // Note: the schema declares both `index: true` and `.index(...)` on
-    // createdAt — Mongoose 9 warns + silently drops the TTL spec. Asserting
-    // the runtime index would require a model-level fix. Until then we
-    // assert the documented constant; the model cleanup is a separate PR.
-    expect(Outbox.TTL_SECONDS).toBe(90 * 24 * 60 * 60);
+  it('declares 90-day TTL index on createdAt', async () => {
+    const indexes = await Outbox.collection.indexes();
+    const ttl = indexes.find(i => i.expireAfterSeconds);
+    expect(ttl).toBeDefined();
+    expect(ttl.expireAfterSeconds).toBe(90 * 24 * 60 * 60);
+    expect(ttl.key).toEqual({ createdAt: 1 });
   });
 });
 

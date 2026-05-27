@@ -310,7 +310,7 @@ router.get('/lab-results/:id', async (req, res) => {
 
 router.post('/lab-results', async (req, res) => {
   try {
-    const result = new LabResult(req.body);
+    const result = new LabResult(stripUpdateMeta(req.body));
     await result.save();
     logger.info(`[EMR] Lab result created: ${result.labOrderNumber}`);
     res.status(201).json({ success: true, data: result });

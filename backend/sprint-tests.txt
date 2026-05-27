@@ -363,3 +363,4 @@ __tests__/measure-alert-realtime-bridge-wave506.test.js
 __tests__/pdpl-salt-no-literal-fallback-wave505.test.js
 __tests__/tenant-takeover-strip-update-meta-wave506.test.js
 __tests__/smart-inbox-route-wave507.test.js
+__tests__/mass-assignment-create-strip-update-meta-wave507.test.js

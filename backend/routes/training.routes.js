@@ -10,7 +10,7 @@ const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 // HR/manager-only gate for the 7 mutating training endpoints. Prior to
 // this, ANY authenticated user could create/edit/delete training courses,
 // sessions, and plans — combined with the mass-assignment via
-// `Course.create(req.body)` patterns common in this file, anyone could
+// `Course.create(stripUpdateMeta(req.body))` patterns common in this file, anyone could
 // set arbitrary fields including auto-approval flags and certified-by.
 const requireTrainingAdmin = authorize('admin', 'hr_manager', 'manager');
 

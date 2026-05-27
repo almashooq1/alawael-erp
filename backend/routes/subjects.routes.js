@@ -77,7 +77,7 @@ router.get('/:id', validateObjectId('id'), async (req, res) => {
 // ── Create subject ───────────────────────────────────────────
 router.post('/', authorize(['admin']), async (req, res) => {
   try {
-    const subject = new Subject(req.body);
+    const subject = new Subject(stripUpdateMeta(req.body));
     if (req.user) subject.createdBy = req.user._id || req.user.id;
     await subject.save();
     res.status(201).json({ success: true, data: subject, message: 'تم إنشاء المادة بنجاح' });

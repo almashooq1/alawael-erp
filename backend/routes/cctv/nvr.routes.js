@@ -12,6 +12,7 @@
 const express = require('express');
 const nvrService = require('../../services/cctv/nvrService');
 const { authenticateToken, requireRole } = require('../../middleware/auth');
+const { stripUpdateMeta } = require('../../utils/sanitize');
 
 const router = express.Router();
 router.use(authenticateToken);
@@ -32,7 +33,7 @@ router.get('/:id', async (req, res) => {
 
 router.post('/', requireRole(['admin', 'security_officer']), async (req, res) => {
   try {
-    const n = await nvrService.create(req.body);
+    const n = await nvrService.create(stripUpdateMeta(req.body));
     res.status(201).json({ success: true, data: n });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });

@@ -19,6 +19,7 @@ const { body, param, query, validationResult } = require('express-validator');
 const { authenticate, authorize } = require('../../middleware/auth');
 const safeError = require('../../utils/safeError');
 const registry = require('../../config/facility.registry');
+const { stripUpdateMeta } = require('../../utils/sanitize');
 
 const router = express.Router();
 
@@ -169,7 +170,9 @@ router.post(
   handleValidation,
   wrap(async (req, res) => {
     try {
-      const doc = await getFacilityService().create(req.body, { actorId: req.user?._id });
+      const doc = await getFacilityService().create(stripUpdateMeta(req.body), {
+        actorId: req.user?._id,
+      });
       res.status(201).json({ success: true, data: doc });
     } catch (err) {
       mapError(err, res);

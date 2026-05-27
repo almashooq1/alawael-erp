@@ -16,6 +16,7 @@
 const express = require('express');
 const cameraService = require('../../services/cctv/cameraService');
 const { authenticateToken, requireRole } = require('../../middleware/auth');
+const { stripUpdateMeta } = require('../../utils/sanitize');
 
 const router = express.Router();
 
@@ -55,7 +56,7 @@ router.get('/:id', async (req, res) => {
 
 router.post('/', requireRole(['admin', 'security_officer']), async (req, res) => {
   try {
-    const cam = await cameraService.create(req.body);
+    const cam = await cameraService.create(stripUpdateMeta(req.body));
     res.status(201).json({ success: true, data: cam });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });

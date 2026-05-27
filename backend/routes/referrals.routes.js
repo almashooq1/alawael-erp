@@ -12,6 +12,7 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 // ── Models ────────────────────────────────────────────────────────────────────
 function Referral() {
@@ -129,7 +130,7 @@ router.post(
   '/facilities',
   asyncHandler(async (req, res) => {
     const M = ReferralFacility();
-    const facility = await M.create(req.body);
+    const facility = await M.create(stripUpdateMeta(req.body));
     res.status(201).json({ success: true, data: facility });
   })
 );

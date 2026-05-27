@@ -19,6 +19,7 @@ const { authenticateToken, requireRole } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const { body, param: _param, validationResult } = require('express-validator');
 const safeError = require('../utils/safeError');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 /** Validation error handler */
 const validate = (req, res, next) => {
@@ -555,7 +556,7 @@ router.post(
   requireRole('admin', 'hr'),
   async (req, res) => {
     try {
-      const structure = new CompensationStructure(req.body);
+      const structure = new CompensationStructure(stripUpdateMeta(req.body));
       structure.createdBy = req.user._id;
       await structure.save();
 
@@ -615,7 +616,7 @@ router.post(
   requireRole('hr', 'manager', 'admin'),
   async (req, res) => {
     try {
-      const incentive = new IndividualIncentive(req.body);
+      const incentive = new IndividualIncentive(stripUpdateMeta(req.body));
       incentive.recommendedBy = {
         userId: req.user._id,
         name: req.user.name,
@@ -733,7 +734,7 @@ router.post(
   requireRole('manager', 'hr', 'admin'),
   async (req, res) => {
     try {
-      const penalty = new PerformancePenalty(req.body);
+      const penalty = new PerformancePenalty(stripUpdateMeta(req.body));
       await penalty.save();
 
       res.json({
@@ -844,7 +845,7 @@ router.post(
   requireRole(['hr', 'admin']),
   async (req, res) => {
     try {
-      const summary = new BenefitsSummary(req.body);
+      const summary = new BenefitsSummary(stripUpdateMeta(req.body));
       await summary.save();
 
       res.json({

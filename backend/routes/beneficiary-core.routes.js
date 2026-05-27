@@ -28,6 +28,7 @@ const logger = require('../utils/logger');
 const { safeError } = require('../utils/safeError');
 const { validateBody } = require('../intelligence/canonical');
 const { getBeneficiaryRiskProfile } = require('../intelligence/risk');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 const wrap = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
@@ -87,7 +88,7 @@ router.post(
   validateBody('Beneficiary', { preview: true, logger }),
   wrap(async (req, res) => {
     const actorId = req.user?._id || req.user?.id;
-    const beneficiary = await coreSvc.create(req.body, actorId);
+    const beneficiary = await coreSvc.create(stripUpdateMeta(req.body), actorId);
     logger.info('[BeneficiaryCore] New beneficiary created by %s', actorId);
     res.status(201).json({ success: true, data: beneficiary });
   })

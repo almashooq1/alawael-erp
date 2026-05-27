@@ -17,6 +17,7 @@ const {
 const { authenticateToken, requireRole: authorizeRoles } = require('../middleware/auth');
 
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+const { stripUpdateMeta } = require('../utils/sanitize');
 // Async error safety wrapper — catches unhandled promise rejections in route handlers
 const wrapAsync = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 const _get = router.get.bind(router);
@@ -109,7 +110,7 @@ router.get('/students', authorizeRoles('مدير', 'معلم', 'أخصائي'), 
   res.json({ success: true, data, ...meta });
 });
 router.post('/students', authorizeRoles('مدير', 'معلم'), async (req, res) => {
-  const student = new Student(req.body);
+  const student = new Student(stripUpdateMeta(req.body));
   await student.save();
   res.status(201).json(student);
 });
@@ -145,7 +146,7 @@ router.get('/plans', authorizeRoles('مدير', 'معلم', 'أخصائي'), asy
   res.json({ success: true, data, ...meta });
 });
 router.post('/plans', authorizeRoles('مدير', 'معلم'), async (req, res) => {
-  const plan = new MontessoriPlan(req.body);
+  const plan = new MontessoriPlan(stripUpdateMeta(req.body));
   await plan.save();
   res.status(201).json(plan);
 });
@@ -177,7 +178,7 @@ router.get('/sessions', authorizeRoles('مدير', 'معلم', 'أخصائي'), 
   res.json({ success: true, data, ...meta });
 });
 router.post('/sessions', authorizeRoles('مدير', 'معلم', 'أخصائي'), async (req, res) => {
-  const session = new Session(req.body);
+  const session = new Session(stripUpdateMeta(req.body));
   await session.save();
   res.status(201).json(session);
 });
@@ -213,7 +214,7 @@ router.get('/evaluations', authorizeRoles('مدير', 'معلم', 'أخصائي'
   res.json({ success: true, data, ...meta });
 });
 router.post('/evaluations', authorizeRoles('مدير', 'معلم', 'أخصائي'), async (req, res) => {
-  const evaluation = new Evaluation(req.body);
+  const evaluation = new Evaluation(stripUpdateMeta(req.body));
   await evaluation.save();
   res.status(201).json(evaluation);
 });
@@ -249,7 +250,7 @@ router.get('/activities', authorizeRoles('مدير', 'معلم', 'أخصائي')
   res.json({ success: true, data, ...meta });
 });
 router.post('/activities', authorizeRoles('مدير', 'معلم', 'أخصائي'), async (req, res) => {
-  const activity = new Activity(req.body);
+  const activity = new Activity(stripUpdateMeta(req.body));
   await activity.save();
   res.status(201).json(activity);
 });
@@ -285,7 +286,7 @@ router.get('/team', authorizeRoles('مدير'), async (req, res) => {
   res.json({ success: true, data, ...meta });
 });
 router.post('/team', authorizeRoles('مدير'), async (req, res) => {
-  const member = new TeamMember(req.body);
+  const member = new TeamMember(stripUpdateMeta(req.body));
   await member.save();
   res.status(201).json(member);
 });
@@ -317,7 +318,7 @@ router.get('/parents', authorizeRoles('مدير', 'معلم'), async (req, res) 
   res.json({ success: true, data, ...meta });
 });
 router.post('/parents', authorizeRoles('مدير'), async (req, res) => {
-  const parent = new Parent(req.body);
+  const parent = new Parent(stripUpdateMeta(req.body));
   await parent.save();
   res.status(201).json(parent);
 });
@@ -349,7 +350,7 @@ router.get('/media', authorizeRoles('مدير', 'معلم', 'أخصائي'), asy
   res.json({ success: true, data, ...meta });
 });
 router.post('/media', authorizeRoles('مدير', 'معلم', 'أخصائي'), async (req, res) => {
-  const media = new MediaFile(req.body);
+  const media = new MediaFile(stripUpdateMeta(req.body));
   await media.save();
   res.status(201).json(media);
 });
@@ -381,7 +382,7 @@ router.get('/reports', authorizeRoles('مدير', 'معلم', 'أخصائي'), a
   res.json({ success: true, data, ...meta });
 });
 router.post('/reports', authorizeRoles('مدير', 'معلم', 'أخصائي'), async (req, res) => {
-  const report = new Report(req.body);
+  const report = new Report(stripUpdateMeta(req.body));
   await report.save();
   res.status(201).json(report);
 });

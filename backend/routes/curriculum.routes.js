@@ -80,7 +80,7 @@ router.get('/:id', async (req, res) => {
 // ── Create curriculum ────────────────────────────────────────
 router.post('/', async (req, res) => {
   try {
-    const curriculum = new Curriculum(req.body);
+    const curriculum = new Curriculum(stripUpdateMeta(req.body));
     if (req.user) curriculum.createdBy = req.user._id || req.user.id;
     await curriculum.save();
     const populated = await Curriculum.findById(curriculum._id)

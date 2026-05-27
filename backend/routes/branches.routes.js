@@ -18,6 +18,7 @@ const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const Branch = require('../models/Branch');
 const safeError = require('../utils/safeError');
 const logger = require('../utils/logger');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 router.use(authenticate);
 router.use(requireBranchAccess);
@@ -110,7 +111,7 @@ router.post(
   ]),
   async (req, res) => {
     try {
-      const doc = await Branch.create(req.body);
+      const doc = await Branch.create(stripUpdateMeta(req.body));
       logger.info('[branches] created', {
         id: doc._id.toString(),
         code: doc.code,

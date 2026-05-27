@@ -6,6 +6,7 @@ const {
 } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const safeError = require('../utils/safeError');
+const { stripUpdateMeta } = require('../utils/sanitize');
 const {
   KnowledgeArticle,
   KnowledgeCategory,
@@ -211,7 +212,7 @@ router.post(
   roleMiddleware(['admin', 'manager']),
   async (req, res) => {
     try {
-      const category = new KnowledgeCategory(req.body);
+      const category = new KnowledgeCategory(stripUpdateMeta(req.body));
       await category.save();
 
       res.status(201).json({

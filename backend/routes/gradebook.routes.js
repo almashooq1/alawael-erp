@@ -118,7 +118,7 @@ router.post('/', authorize(['admin', 'teacher']), async (req, res) => {
     if (entry) {
       return res.json({ success: true, data: entry, message: 'السجل موجود بالفعل' });
     }
-    entry = new Gradebook(req.body);
+    entry = new Gradebook(stripUpdateMeta(req.body));
     await entry.save();
     res.status(201).json({ success: true, data: entry, message: 'تم إنشاء سجل الدرجات بنجاح' });
   } catch (error) {

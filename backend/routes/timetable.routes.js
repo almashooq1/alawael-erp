@@ -71,7 +71,7 @@ router.get('/:id', validateObjectId('id'), async (req, res) => {
 // ── Create timetable ─────────────────────────────────────────
 router.post('/', authorize(['admin', 'manager']), async (req, res) => {
   try {
-    const timetable = new Timetable(req.body);
+    const timetable = new Timetable(stripUpdateMeta(req.body));
     if (req.user) timetable.createdBy = req.user._id || req.user.id;
     await timetable.save();
     res.status(201).json({ success: true, data: timetable, message: 'تم إنشاء الجدول بنجاح' });

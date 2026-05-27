@@ -18,6 +18,7 @@ const express = require('express');
 const router = express.Router();
 const episodeCenterSvc = require('../services/episodeCenter.service');
 const logger = require('../utils/logger');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 const wrap = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
@@ -76,7 +77,7 @@ router.post(
   auth,
   wrap(async (req, res) => {
     const actorId = req.user?._id || req.user?.id;
-    const episode = await episodeCenterSvc.create(req.body, actorId);
+    const episode = await episodeCenterSvc.create(stripUpdateMeta(req.body), actorId);
     logger.info('[EpisodeCenter] New episode created by %s', actorId);
     res.status(201).json({ success: true, data: episode });
   })

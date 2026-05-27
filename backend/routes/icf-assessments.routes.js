@@ -13,6 +13,7 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const { branchScopedBeneficiaryParam } = require('../middleware/assertBranchMatch');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 // W440: auto-enforce branch ownership on every :beneficiaryId param.
 router.param('beneficiaryId', branchScopedBeneficiaryParam);
@@ -80,7 +81,7 @@ router.post(
   '/',
   asyncHandler(async (req, res) => {
     const M = IcfAssessment();
-    const doc = await M.create(req.body);
+    const doc = await M.create(stripUpdateMeta(req.body));
     res.status(201).json({ success: true, data: doc });
   })
 );

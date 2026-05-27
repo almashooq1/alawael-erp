@@ -19,6 +19,7 @@ const { authenticate, authorize } = require('../middleware/auth');
 const { attachMfaActor, requireMfaTier } = require('../middleware/requireMfaTier');
 const safeError = require('../utils/safeError');
 const logger = require('../utils/logger');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 // Lazy require — service is constructed in startup bootstrap with enforceMfa:true
 function getDpiaService(req) {
@@ -76,7 +77,7 @@ router.post('/', async (req, res) => {
     if (!svc) return res.status(503).json({ success: false, code: 'DPIA_SERVICE_NOT_WIRED' });
     const actor = { userId: req.user?._id || req.user?.id, branchId: req.user?.branchId };
     if (!actor.userId) return res.status(401).json({ success: false, code: 'ACTOR_REQUIRED' });
-    const dpia = await svc.create(req.body, actor);
+    const dpia = await svc.create(stripUpdateMeta(req.body), actor);
     res.status(201).json({ success: true, dpia });
   } catch (err) {
     const status = err.code === 'DPIA_ACTOR_REQUIRED' ? 401 : 400;

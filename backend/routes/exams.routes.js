@@ -89,7 +89,7 @@ router.get('/:id', async (req, res) => {
 // ── Create exam ──────────────────────────────────────────────
 router.post('/', async (req, res) => {
   try {
-    const exam = new Exam(req.body);
+    const exam = new Exam(stripUpdateMeta(req.body));
     if (req.user) exam.createdBy = req.user._id || req.user.id;
     await exam.save();
     res.status(201).json({ success: true, data: exam, message: 'تم إنشاء الاختبار بنجاح' });

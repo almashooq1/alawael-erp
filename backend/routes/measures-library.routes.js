@@ -17,6 +17,7 @@ const express = require('express');
 const router = express.Router();
 const measuresLibrarySvc = require('../services/measuresLibrary.service');
 const logger = require('../utils/logger');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 const wrap = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
@@ -90,7 +91,7 @@ router.post(
   auth,
   wrap(async (req, res) => {
     const actorId = req.user?._id || req.user?.id;
-    const data = await measuresLibrarySvc.create(req.body, actorId);
+    const data = await measuresLibrarySvc.create(stripUpdateMeta(req.body), actorId);
     logger.info('[MeasuresLibrary] New measure created: %s by %s', data.code, actorId);
     res.status(201).json({ success: true, data });
   })

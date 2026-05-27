@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
-const { escapeRegex } = require('../utils/sanitize');
+const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
 const safeError = require('../utils/safeError');
 const {
   Standard,
@@ -292,7 +292,7 @@ router.post(
   authorize(['admin', 'quality_manager']),
   async (req, res) => {
     try {
-      const accreditation = new Accreditation(req.body);
+      const accreditation = new Accreditation(stripUpdateMeta(req.body));
       await accreditation.save();
 
       res.status(201).json({
@@ -952,7 +952,7 @@ router.post(
   authorize(['admin', 'quality_manager']),
   async (req, res) => {
     try {
-      const indicator = new QualityIndicator(req.body);
+      const indicator = new QualityIndicator(stripUpdateMeta(req.body));
       await indicator.save();
 
       res.status(201).json({

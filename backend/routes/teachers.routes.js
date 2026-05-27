@@ -69,7 +69,7 @@ router.get('/:id', validateObjectId('id'), async (req, res) => {
 // ── Create teacher ───────────────────────────────────────────
 router.post('/', authorize(['admin']), async (req, res) => {
   try {
-    const teacher = new Teacher(req.body);
+    const teacher = new Teacher(stripUpdateMeta(req.body));
     await teacher.save();
     res.status(201).json({ success: true, data: teacher, message: 'تم إضافة المعلم بنجاح' });
   } catch (error) {

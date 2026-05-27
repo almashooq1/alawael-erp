@@ -330,3 +330,4 @@ __tests__/hikvision-anomaly-snapshot-behavioral-wave114.test.js
 __tests__/services-use-defensive-guard-wave412.test.js
 __tests__/backend-wide-defensive-guard-wave413.test.js
 __tests__/cctv-lazy-env-read-wave414.test.js
+__tests__/hikvision-camera-channel-behavioral-wave96.test.js

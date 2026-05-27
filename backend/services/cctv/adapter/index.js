@@ -120,11 +120,15 @@ const surface = [
   'ping',
 ];
 
-const adapter = { mode: MODE };
+const adapter = {
+  get mode() {
+    return (process.env.HIKVISION_MODE || 'mock').toLowerCase();
+  },
+};
 for (const fn of surface) adapter[fn] = wrap(fn);
 
 adapter.getConfig = () => ({
-  mode: MODE,
+  mode: (process.env.HIKVISION_MODE || 'mock').toLowerCase(),
   surface,
   breakers: perTargetBreaker.snapshot(),
   agents: httpAgentPool.snapshot(),

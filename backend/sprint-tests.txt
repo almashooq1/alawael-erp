@@ -379,3 +379,4 @@ __tests__/notify-channel-in-app-wave517.test.js
 __tests__/self-advocacy-routes-wave518.test.js
 __tests__/notify-channel-email-wave519.test.js
 __tests__/notify-channel-sms-wave520.test.js
+__tests__/phase-b-routes-e2e-smoke-wave521.test.js

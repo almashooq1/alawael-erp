@@ -51,6 +51,7 @@ module.exports = function registerFeatureRoutes(
   const facilityAssetRoutes = safeRequire('../routes/facility-asset.routes');
   const caregiverSupportProgramRoutes = safeRequire('../routes/caregiver-support-program.routes');
   const voiceLogRoutes = safeRequire('../routes/voice-log.routes');
+  const decisionRightsRoutes = safeRequire('../routes/decision-rights.routes');
   const pickupAuthorizationRoutes = safeRequire('../routes/pickup-authorization.routes');
   const portfolioRoutes = safeRequire('../routes/portfolio.routes');
   const iepRoutes = safeRequire('../routes/iep.routes');
@@ -143,6 +144,14 @@ module.exports = function registerFeatureRoutes(
   // endpoints: list / per-beneficiary history with CRPD-compliance summary / branch stats /
   // get / create / action / supersede / patch / delete (admin-only). branchFilter on every query.
   dualMountAuth(app, 'voice-log', voiceLogRoutes, authenticate);
+  // Wave 515 (Phase B Rights & Voice — REST surface): decision-rights on top of W461
+  // DecisionRightsAssessment. CRPD Article 12 supported decision-making — capacity
+  // assessed PER DECISION via 4-criterion framework (0-3 each, composite 0-12 → 4
+  // routed layers: autonomy/supported/substituted/emergency). 10 endpoints:
+  // list / per-beneficiary history with layer mix / pending-review (overdue
+  // nextReviewDue) / branch stats / get / create (draft) / finalize (full Wave-18
+  // invariant chain) / record-outcome / supersede / patch / delete.
+  dualMountAuth(app, 'decision-rights', decisionRightsRoutes, authenticate);
   // Wave 196b: Pickup authorization w/ e-sig scaffolding (تصاريح الاستلام)
   dualMountAuth(app, 'pickup-authorization', pickupAuthorizationRoutes, authenticate);
   // Wave 199b: Child portfolio (بورتفوليو الطفل) — photos/videos/artwork/achievements

@@ -6,7 +6,12 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const { authenticate, authorize } = require('../middleware/auth');
-const { requireBranchAccess } = require('../middleware/branchScope.middleware');
+// W508: branchFilter wraps every per-id read/write so the doc must be
+// in caller's branch BEFORE Mongoose returns it. Pre-W508 the 11
+// CrmLead/Partner/Campaign findById sites loaded across all branches —
+// authenticated caller with any role could enumerate, mutate, or
+// soft-delete CRM records belonging to other tenants by guessing IDs.
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const _logger = require('../utils/logger');
 const { stripUpdateMeta } = require('../utils/sanitize');
 
@@ -210,7 +215,7 @@ router.get('/leads/:id', async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
 
-    const lead = await CrmLead.findById(req.params.id)
+    const lead = await CrmLead.findOne({ _id: req.params.id, ...branchFilter(req) })
       .populate('assignedTo', 'name email')
       .populate('partnerId', 'name type commissionRate')
       .populate('referralId', 'firstName lastName phone')
@@ -260,7 +265,7 @@ router.put('/leads/:id', async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
 
-    const lead = await CrmLead.findById(req.params.id);
+    const lead = await CrmLead.findOne({ _id: req.params.id, ...branchFilter(req) });
     if (!lead) return res.status(404).json({ success: false, message: 'العميل غير موجود' });
 
     const oldStatus = lead.status;
@@ -299,8 +304,8 @@ router.delete('/leads/:id', authorize(['admin', 'super_admin', 'manager']), asyn
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
 
-    const lead = await CrmLead.findByIdAndUpdate(
-      req.params.id,
+    const lead = await CrmLead.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) },
       { deletedAt: new Date() },
       { returnDocument: 'after' }
     );
@@ -317,7 +322,7 @@ router.post('/leads/:id/activity', async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
 
-    const lead = await CrmLead.findById(req.params.id);
+    const lead = await CrmLead.findOne({ _id: req.params.id, ...branchFilter(req) });
     if (!lead) return res.status(404).json({ success: false, message: 'العميل غير موجود' });
 
     const { type, subject, body, direction, outcome, durationMinutes, nextFollowupAt } = req.body;
@@ -357,8 +362,8 @@ router.post('/leads/:id/enroll', async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
 
-    const lead = await CrmLead.findByIdAndUpdate(
-      req.params.id,
+    const lead = await CrmLead.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) },
       { status: 'enrolled', enrolledAt: new Date(), updatedBy: req.user?._id || req.userId },
       { returnDocument: 'after' }
     );
@@ -420,7 +425,10 @@ router.get('/partners/:id', async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
-    const partner = await CrmPartner.findById(req.params.id).lean();
+    const partner = await CrmPartner.findOne({
+      _id: req.params.id,
+      ...branchFilter(req),
+    }).lean();
     if (!partner) return res.status(404).json({ success: false, message: 'الشريك غير موجود' });
     res.json({ success: true, data: partner });
   } catch (err) {
@@ -448,8 +456,8 @@ router.put('/partners/:id', authorize(['admin', 'super_admin', 'manager']), asyn
   try {
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
-    const partner = await CrmPartner.findByIdAndUpdate(
-      req.params.id,
+    const partner = await CrmPartner.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) },
       { ...stripUpdateMeta(req.body), updatedBy: req.user?._id || req.userId },
       { returnDocument: 'after', runValidators: true }
     );
@@ -465,8 +473,8 @@ router.delete('/partners/:id', authorize(['admin', 'super_admin']), async (req, 
   try {
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
-    const partner = await CrmPartner.findByIdAndUpdate(
-      req.params.id,
+    const partner = await CrmPartner.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) },
       { deletedAt: new Date() },
       { returnDocument: 'after' }
     );
@@ -534,7 +542,10 @@ router.get('/campaigns/:id', async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
-    const campaign = await CrmCampaign.findById(req.params.id).lean();
+    const campaign = await CrmCampaign.findOne({
+      _id: req.params.id,
+      ...branchFilter(req),
+    }).lean();
     if (!campaign) return res.status(404).json({ success: false, message: 'الحملة غير موجودة' });
     res.json({ success: true, data: campaign });
   } catch (err) {
@@ -562,7 +573,10 @@ router.put('/campaigns/:id', authorize(['admin', 'super_admin', 'manager']), asy
   try {
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
-    const campaign = await CrmCampaign.findById(req.params.id);
+    const campaign = await CrmCampaign.findOne({
+      _id: req.params.id,
+      ...branchFilter(req),
+    });
     if (!campaign) return res.status(404).json({ success: false, message: 'الحملة غير موجودة' });
     if (campaign.status === 'running')
       return res.status(422).json({ success: false, message: 'لا يمكن تعديل حملة جارية' });
@@ -584,7 +598,10 @@ router.post(
     try {
       if (!mongoose.isValidObjectId(req.params.id))
         return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
-      const campaign = await CrmCampaign.findById(req.params.id);
+      const campaign = await CrmCampaign.findOne({
+        _id: req.params.id,
+        ...branchFilter(req),
+      });
       if (!campaign) return res.status(404).json({ success: false, message: 'الحملة غير موجودة' });
       if (!['draft', 'scheduled'].includes(campaign.status))
         return res
@@ -607,7 +624,10 @@ router.delete('/campaigns/:id', authorize(['admin', 'super_admin']), async (req,
   try {
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
-    const campaign = await CrmCampaign.findById(req.params.id);
+    const campaign = await CrmCampaign.findOne({
+      _id: req.params.id,
+      ...branchFilter(req),
+    });
     if (!campaign) return res.status(404).json({ success: false, message: 'الحملة غير موجودة' });
     if (campaign.status === 'running')
       return res.status(422).json({ success: false, message: 'لا يمكن حذف حملة جارية' });
@@ -641,7 +661,10 @@ router.get('/segments/:id', async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
-    const segment = await CrmSegment.findById(req.params.id).lean();
+    const segment = await CrmSegment.findOne({
+      _id: req.params.id,
+      ...branchFilter(req),
+    }).lean();
     if (!segment) return res.status(404).json({ success: false, message: 'الشريحة غير موجودة' });
     res.json({ success: true, data: segment });
   } catch (err) {
@@ -669,8 +692,8 @@ router.put('/segments/:id', async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
-    const segment = await CrmSegment.findByIdAndUpdate(
-      req.params.id,
+    const segment = await CrmSegment.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) },
       { ...stripUpdateMeta(req.body), updatedBy: req.user?._id || req.userId },
       { returnDocument: 'after', runValidators: true }
     );
@@ -686,7 +709,10 @@ router.delete('/segments/:id', authorize(['admin', 'super_admin']), async (req, 
   try {
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
-    await CrmSegment.findByIdAndUpdate(req.params.id, { deletedAt: new Date() });
+    await CrmSegment.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) },
+      { deletedAt: new Date() }
+    );
     res.json({ success: true, message: 'تم حذف الشريحة بنجاح' });
   } catch (err) {
     safeError(res, err, 'CRM segment delete error');
@@ -717,7 +743,10 @@ router.get('/surveys/:id', async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
-    const survey = await CrmSurvey.findById(req.params.id).lean();
+    const survey = await CrmSurvey.findOne({
+      _id: req.params.id,
+      ...branchFilter(req),
+    }).lean();
     if (!survey) return res.status(404).json({ success: false, message: 'الاستطلاع غير موجود' });
     res.json({ success: true, data: survey });
   } catch (err) {
@@ -746,7 +775,15 @@ router.post('/surveys/:id/respond', async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
 
-    const survey = await CrmSurvey.findById(req.params.id);
+    // W508: bind survey response to caller's branch — prevents
+    // cross-branch flooding (caller in branch A enumerating + spamming
+    // a survey owned by branch B). The respondent identity is still
+    // arbitrary (anyone in caller's tenant can respond), but cross-
+    // tenant submission is closed.
+    const survey = await CrmSurvey.findOne({
+      _id: req.params.id,
+      ...branchFilter(req),
+    });
     if (!survey) return res.status(404).json({ success: false, message: 'الاستطلاع غير موجود' });
     if (!survey.isActive)
       return res.status(422).json({ success: false, message: 'الاستطلاع غير نشط' });
@@ -792,7 +829,10 @@ router.delete('/surveys/:id', authorize(['admin', 'super_admin']), async (req, r
   try {
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
-    await CrmSurvey.findByIdAndUpdate(req.params.id, { deletedAt: new Date() });
+    await CrmSurvey.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) },
+      { deletedAt: new Date() }
+    );
     res.json({ success: true, message: 'تم حذف الاستطلاع بنجاح' });
   } catch (err) {
     safeError(res, err, 'CRM survey delete error');
@@ -859,8 +899,8 @@ router.put(
     try {
       if (!mongoose.isValidObjectId(req.params.id))
         return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
-      const commission = await CrmReferralCommission.findByIdAndUpdate(
-        req.params.id,
+      const commission = await CrmReferralCommission.findOneAndUpdate(
+        { _id: req.params.id, ...branchFilter(req) },
         { ...stripUpdateMeta(req.body), updatedBy: req.user?._id || req.userId },
         { returnDocument: 'after', runValidators: true }
       );

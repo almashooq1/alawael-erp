@@ -375,3 +375,4 @@ __tests__/measure-alert-reassigned-event-wave514.test.js
 __tests__/caseload-assignment-wave436.test.js
 __tests__/measure-alert-reassign-notify-wave516.test.js
 __tests__/decision-rights-routes-wave515.test.js
+__tests__/notify-channel-in-app-wave517.test.js

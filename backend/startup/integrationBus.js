@@ -137,6 +137,21 @@ function setupIntegrationBus(app) {
       logger.warn('[Integration] W516 reassign-notify subscriber skipped:', notifyErr.message);
     }
 
+    // W517 — first concrete channel for the W516 notification surface:
+    // in-app Notification docs (bell-icon counter). Subscribes to
+    // notification.measure_alert.reassigned.alert and writes one
+    // Notification doc per recipient. Idempotent via the
+    // notificationId='reassign:{alertId}:{recipientId}' dedupe key.
+    // Future channels (email/SMS/push/Slack) plug into the same upstream
+    // event with their own subscribers — no changes here.
+    try {
+      const { wireInAppNotificationChannel } = require('../services/notify-channel-in-app.service');
+      wireInAppNotificationChannel({ integrationBus, logger });
+      logger.info('[Integration] ✓ W517 in-app notification channel wired');
+    } catch (inAppErr) {
+      logger.warn('[Integration] W517 in-app notification channel skipped:', inAppErr.message);
+    }
+
     // Wire DDD notification triggers (10 notification rules)
     try {
       const { initializeDDDNotifications } = require('../integration/dddNotificationTriggers');

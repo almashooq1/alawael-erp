@@ -10,10 +10,23 @@ const { body } = require('express-validator');
 const { validate } = require('../middleware/validate');
 const { escapeRegex } = require('../utils/sanitize');
 const validateObjectId = require('../middleware/validateObjectId');
-const { authenticate } = require('../middleware/auth');
+const { authenticate, authorize } = require('../middleware/auth');
 
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const MAX_PAGE_LIMIT = 100;
+
+// W464: role gate for the entire governance surface. Pre-W464 the
+// file had only `authenticate + requireBranchAccess`, meaning ANY
+// authenticated user (therapist, nurse, parent portal user) could
+// POST /decisions, approve/publish/revoke them, create
+// correspondence, or create authority delegations. 34 governance
+// endpoints exposed without a role check = privilege escalation
+// across the entire admin surface.
+//
+// Restrict to admin/super_admin/manager/branch_manager — the
+// operational roles that legitimately need to file decisions,
+// correspondence, and delegations.
+const GOVERNANCE_ROLES = ['admin', 'super_admin', 'superadmin', 'manager', 'branch_manager'];
 
 /* ━━━ Sort Whitelist ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 const ADMIN_SAFE_SORTS = new Set([
@@ -37,6 +50,7 @@ const safeSortOf = raw => (ADMIN_SAFE_SORTS.has(raw) ? raw : '-createdAt');
 /* ━━━ Auth ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 router.use(authenticate);
 router.use(requireBranchAccess);
+router.use(authorize(GOVERNANCE_ROLES)); // W464: governance surface — admin/manager only
 /* ━━━ Field Whitelists ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 const DECISION_FIELDS = [
   'title',

@@ -323,7 +323,10 @@ router.delete('/content/:id', authenticate, requireBranchAccess, (req, res) => {
 // ================== SESSIONS: GET by ID, UPDATE, DELETE ==================
 
 // GET /api/community/sessions/:id - Get specific session by ID
-router.get('/sessions/:id', (req, res) => {
+router.get('/sessions/:id', (req, res, next) => {
+  // W543: session ids are numeric counters; a non-numeric segment is a literal
+  // sibling (/sessions/upcoming, /sessions/stats) — fall through to it.
+  if (!/^\d+$/.test(req.params.id)) return next();
   try {
     let sessionId = req.params.id;
     if (!isNaN(sessionId)) sessionId = parseInt(sessionId);
@@ -398,7 +401,10 @@ router.delete('/sessions/:id', authenticate, requireBranchAccess, (req, res) => 
 // ================== LIBRARY: GET by ID, UPDATE, DELETE ==================
 
 // GET /api/community/library/:id - Get specific library resource by ID
-router.get('/library/:id', (req, res) => {
+router.get('/library/:id', (req, res, next) => {
+  // W543: library ids are `lib-<ts>` strings; a segment without that prefix is a
+  // literal sibling (/library/search, /library/stats) — fall through to it.
+  if (!/^lib-/.test(req.params.id)) return next();
   try {
     const resource = communityData.library.find(r => r._id === req.params.id);
 

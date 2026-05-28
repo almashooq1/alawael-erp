@@ -33,10 +33,6 @@ const ROUTES_DIR = path.join(__dirname, '..', 'routes');
 // W531 fixed biometric-attendance + branch-enhanced; the rest chip down next.
 const BASELINE = new Set([
   'routes/archive.routes.js::POST::/bulk/archive',
-  'routes/community.js::GET::/sessions/upcoming',
-  'routes/community.js::GET::/sessions/stats',
-  'routes/community.js::GET::/library/search',
-  'routes/community.js::GET::/library/stats',
   'routes/documentAdvanced.routes.js::GET::/watermarks/templates',
   'routes/documentAdvanced.routes.js::GET::/qr/stats',
   'routes/enterprisePro.routes.js::PUT::/project-pro/tasks/reorder',

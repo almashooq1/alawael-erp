@@ -122,3 +122,49 @@ describe('safeError', () => {
     expect(res._body.code).toBeUndefined();
   });
 });
+
+// W530 — polymorphic safeError: the legacy string-returning form must keep
+// working alongside the response-sender form. ~650 call sites still use
+// `message: safeError(err)` (string form); before the polymorphic fix those
+// threw `undefined.stack` on their error paths → unhandled rejection.
+describe('safeError — legacy string-returning form (W530 regression)', () => {
+  const ORIG = process.env.NODE_ENV;
+  afterEach(() => {
+    process.env.NODE_ENV = ORIG;
+  });
+
+  it('safeError(err) returns the message string (dev), does NOT throw or send', () => {
+    process.env.NODE_ENV = 'development';
+    expect(() => safeError(new Error('boom'))).not.toThrow();
+    expect(safeError(new Error('boom'))).toBe('boom');
+  });
+
+  it('safeError(string) returns the string as-is', () => {
+    process.env.NODE_ENV = 'development';
+    expect(safeError('plain message')).toBe('plain message');
+  });
+
+  it('safeError(err, fallback) uses fallback when no message', () => {
+    process.env.NODE_ENV = 'development';
+    expect(safeError({}, 'fallback msg')).toBe('fallback msg');
+  });
+
+  it('response-sender form still works (regression guard for the 3500+ callers)', () => {
+    const res = mockRes();
+    safeError(res, new Error('handler failed'));
+    expect(res._status).toBe(500);
+    expect(res._body).toHaveProperty('error');
+  });
+
+  it('named import { safeError } resolves to the same function', () => {
+    // module.exports = safeError; module.exports.safeError = safeError;
+    expect(typeof safeError.safeError).toBe('function');
+    expect(safeError.safeError).toBe(safeError);
+  });
+
+  it('safeError(res) with no error object does not throw', () => {
+    const res = mockRes();
+    expect(() => safeError(res)).not.toThrow();
+    expect(res._status).toBe(500);
+  });
+});

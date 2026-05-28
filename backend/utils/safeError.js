@@ -28,6 +28,24 @@ const GENERIC_MESSAGE = 'حدث خطأ داخلي';
  *   specifically check the `ok` key.
  */
 function safeError(res, err, context, opts) {
+  // ── Legacy string-returning form: safeError(error, fallback) ──────────────
+  // The original safeError (pre "Round 9" refactor adbdea474) RETURNED a
+  // sanitized string and was called as `message: safeError(err)`. ~650 call
+  // sites still use that form. The refactor changed the signature to a
+  // response-SENDER `safeError(res, err)` but never migrated those callers, so
+  // every one threw `undefined.stack` on its error path → unhandled rejection.
+  // Detect the call shape: a real Express `res` has .status + .json functions.
+  const looksLikeRes = res && typeof res.status === 'function' && typeof res.json === 'function';
+  if (!looksLikeRes) {
+    const error = res; // first arg was actually the error
+    const fallback = typeof err === 'string' ? err : undefined;
+    if (IS_PRODUCTION) return undefined; // omit internal detail in prod
+    if (error == null) return fallback || GENERIC_MESSAGE;
+    return typeof error === 'string' ? error : error.message || fallback || GENERIC_MESSAGE;
+  }
+
+  // ── Response-sender form: safeError(res, err, context, opts) ──────────────
+  err = err || {}; // tolerate safeError(res) with no error object
   const logMeta = { stack: err.stack };
   if (context) logMeta.context = context;
 
@@ -67,3 +85,5 @@ function safeError(res, err, context, opts) {
 }
 
 module.exports = safeError;
+// Named-import compatibility: some callers do `const { safeError } = require(...)`.
+module.exports.safeError = safeError;

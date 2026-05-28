@@ -333,6 +333,73 @@ class AttendanceManagementService {
     };
   }
 
+  /**
+   * Weekly attendance trend — last 7 calendar days.
+   * Returns [{ day, date, present, late, absent }] (one row per day, oldest→newest).
+   * `branchId` is accepted for API symmetry but ignored: the Attendance schema
+   * carries no branch field (same convention as getTodayAttendance's _branchId).
+   */
+  static async _getWeeklyTrend(_branchId, department) {
+    const DAYS = 7;
+    const end = new Date();
+    end.setHours(23, 59, 59, 999);
+    const start = new Date(end);
+    start.setHours(0, 0, 0, 0);
+    start.setDate(start.getDate() - (DAYS - 1));
+
+    const match = { date: { $gte: start, $lte: end } };
+    if (department) match.department = department;
+    const records = await Attendance().find(match).select('date status').lean();
+
+    const AR_DAYS = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+    const buckets = [];
+    const index = new Map();
+    for (let i = 0; i < DAYS; i++) {
+      const dt = new Date(start);
+      dt.setDate(start.getDate() + i);
+      const row = {
+        day: AR_DAYS[dt.getDay()],
+        date: `${String(dt.getMonth() + 1).padStart(2, '0')}/${String(dt.getDate()).padStart(2, '0')}`,
+        present: 0,
+        late: 0,
+        absent: 0,
+      };
+      buckets.push(row);
+      index.set(dt.toDateString(), row);
+    }
+
+    for (const r of records) {
+      const row = index.get(new Date(r.date).toDateString());
+      if (!row) continue;
+      if (r.status === 'present' || r.status === 'remote' || r.status === 'half_day')
+        row.present += 1;
+      else if (r.status === 'late') row.late += 1;
+      else if (r.status === 'absent') row.absent += 1;
+    }
+    return buckets;
+  }
+
+  /**
+   * Department attendance breakdown for a date range.
+   * Returns [{ department, statuses: [{ status, count }], total }] sorted by total desc.
+   */
+  static async _getDepartmentBreakdown(start, end) {
+    const rows = await Attendance().aggregate([
+      { $match: { date: { $gte: start, $lte: end }, department: { $ne: null } } },
+      { $group: { _id: { department: '$department', status: '$status' }, count: { $sum: 1 } } },
+    ]);
+
+    const byDept = new Map();
+    for (const r of rows) {
+      const dept = r._id.department || 'غير محدد';
+      if (!byDept.has(dept)) byDept.set(dept, { department: dept, statuses: [], total: 0 });
+      const entry = byDept.get(dept);
+      entry.statuses.push({ status: r._id.status, count: r.count });
+      entry.total += r.count;
+    }
+    return Array.from(byDept.values()).sort((a, b) => b.total - a.total);
+  }
+
   // ═══════════════════════════════════════════════════════════════════════════
   // 4. TODAY'S ATTENDANCE LIST
   // ═══════════════════════════════════════════════════════════════════════════

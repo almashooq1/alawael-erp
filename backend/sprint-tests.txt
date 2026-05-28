@@ -385,3 +385,4 @@ __tests__/check-dormant-modules-script.test.js
 __tests__/check-memory-health-script.test.js
 __tests__/clinical-crisis-routes-wave524.test.js
 __tests__/hr-smart-analytics-no-branch-scope-wave527.test.js
+__tests__/attendance-mgmt-dashboard-wave528.test.js

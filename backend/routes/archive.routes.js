@@ -102,49 +102,55 @@ router.get('/', requireRole('admin', 'manager', 'supervisor'), async (req, res) 
 // ──────────────────────────────────────────────────────────────────────────
 // POST /:id/archive — archive a single document
 // ──────────────────────────────────────────────────────────────────────────
-router.post('/:id/archive', requireRole('admin', 'manager', 'supervisor'), async (req, res) => {
-  try {
-    const Document = safeModel('Document');
-    if (!Document)
-      return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
-    const { reason = '', retentionYears = 7 } = req.body;
-    const years = Math.max(1, Math.min(100, Number(retentionYears) || 7));
-    const archivedAt = new Date();
-    const retentionExpiry = computeRetentionExpiry(archivedAt, years);
-    const doc = await Document.findOneAndUpdate(
-      { _id: req.params.id, isArchived: { $ne: true } },
-      {
-        status: STATUS_ARCHIVED,
-        isArchived: true,
-        archivedAt,
-        archivedBy: req.user._id,
-        archiveReason: String(reason).trim(),
-        retentionYears: years,
-        retentionExpiry,
-        $unset: { restoredAt: '', restoredBy: '' },
-      },
-      { returnDocument: 'after' }
-    );
-    if (!doc)
-      return res
-        .status(404)
-        .json({ success: false, message: 'Document not found or already archived' });
+router.post(
+  '/:id/archive',
+  requireRole('admin', 'manager', 'supervisor'),
+  async (req, res, next) => {
+    // W546: non-ObjectId → fall through to literal sibling POST /bulk/archive.
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) return next();
     try {
-      doc.activityLog?.push({
-        action: 'أرشفة',
-        performedBy: req.user._id,
-        performedByName: req.user.name || req.user.fullName || '',
-        details: reason ? `سبب: ${reason}` : '',
-      });
-      await doc.save();
-    } catch (logErr) {
-      logger.warn(`[Archive] activity-log push failed: ${logErr.message}`);
+      const Document = safeModel('Document');
+      if (!Document)
+        return res.status(503).json({ success: false, message: 'Service temporarily unavailable' });
+      const { reason = '', retentionYears = 7 } = req.body;
+      const years = Math.max(1, Math.min(100, Number(retentionYears) || 7));
+      const archivedAt = new Date();
+      const retentionExpiry = computeRetentionExpiry(archivedAt, years);
+      const doc = await Document.findOneAndUpdate(
+        { _id: req.params.id, isArchived: { $ne: true } },
+        {
+          status: STATUS_ARCHIVED,
+          isArchived: true,
+          archivedAt,
+          archivedBy: req.user._id,
+          archiveReason: String(reason).trim(),
+          retentionYears: years,
+          retentionExpiry,
+          $unset: { restoredAt: '', restoredBy: '' },
+        },
+        { returnDocument: 'after' }
+      );
+      if (!doc)
+        return res
+          .status(404)
+          .json({ success: false, message: 'Document not found or already archived' });
+      try {
+        doc.activityLog?.push({
+          action: 'أرشفة',
+          performedBy: req.user._id,
+          performedByName: req.user.name || req.user.fullName || '',
+          details: reason ? `سبب: ${reason}` : '',
+        });
+        await doc.save();
+      } catch (logErr) {
+        logger.warn(`[Archive] activity-log push failed: ${logErr.message}`);
+      }
+      res.json({ success: true, data: doc, message: 'تم أرشفة المستند بنجاح' });
+    } catch (err) {
+      safeError(res, err, 'archive document');
     }
-    res.json({ success: true, data: doc, message: 'تم أرشفة المستند بنجاح' });
-  } catch (err) {
-    safeError(res, err, 'archive document');
   }
-});
+);
 
 // ──────────────────────────────────────────────────────────────────────────
 // POST /:id/restore — restore an archived document

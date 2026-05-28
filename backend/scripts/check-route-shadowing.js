@@ -28,16 +28,13 @@ const path = require('path');
 
 const ROUTES_DIR = path.join(__dirname, '..', 'routes');
 
-// Pre-existing shadowed routes pending per-file reorder waves (ratchet-DOWN
-// only — never add new entries; fix + remove). Format: "relFile::METHOD::path".
-// W531 fixed biometric-attendance + branch-enhanced; the rest chip down next.
-const BASELINE = new Set([
-  'routes/archive.routes.js::POST::/bulk/archive',
-  'routes/enterprisePro.routes.js::PUT::/project-pro/tasks/reorder',
-  'routes/managementReview.routes.js::GET::/analytics',
-  'routes/scheduling-module.routes.js::GET::/appointments/calendar',
-  'routes/workflow.routes.js::POST::/tasks/bulk/complete',
-]);
+// Baseline of pre-existing shadowed routes. EMPTY as of W546 — the W531→W546
+// ratchet drained all 70 originals to zero (fall-through guards / reorders).
+// This gate is now HARD ZERO: any shadowed literal route fails CI. Do NOT add
+// entries here; fix the route instead (move the literal above its :param
+// sibling, or add an ObjectId/format fall-through guard that calls next()).
+// Format if ever needed again: "relFile::METHOD::path".
+const BASELINE = new Set([]);
 
 const METHOD_RE = /\brouter\.(get|post|put|patch|delete|all)\s*\(\s*['"`]([^'"`]+)['"`]/g;
 

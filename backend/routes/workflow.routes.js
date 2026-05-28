@@ -1065,7 +1065,9 @@ router.post('/tasks/:id/start', authMiddleware, requireBranchAccess, async (req,
   }
 });
 
-router.post('/tasks/:id/complete', authMiddleware, requireBranchAccess, async (req, res) => {
+router.post('/tasks/:id/complete', authMiddleware, requireBranchAccess, async (req, res, next) => {
+  // W546: non-ObjectId → fall through to literal sibling POST /tasks/bulk/complete.
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) return next();
   try {
     const { action, comment, attachments } = req.body;
     const task = await engine.completeTask(

@@ -129,6 +129,8 @@ router.get(
   '/:id',
   authenticate,
   requireBranchAccess,
+  // W546: non-ObjectId → fall through to literal sibling GET /analytics.
+  (req, res, next) => (/^[0-9a-fA-F]{24}$/.test(req.params.id) ? next() : next('route')),
   [param('id').isMongoId()],
   handleValidation,
   wrap(async (req, res) => {

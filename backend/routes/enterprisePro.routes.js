@@ -1717,23 +1717,30 @@ router.post('/project-pro/tasks', authenticateToken, requireBranchAccess, async 
   }
 });
 
-router.put('/project-pro/tasks/:id', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    const t = await ProjectTask.findByIdAndUpdate(req.params.id, pick(req.body, FIELDS.task), {
-      returnDocument: 'after',
-    });
-    // Update project progress if task status changes
-    if (req.body.status && t) {
-      const tasks = await ProjectTask.find({ project: t.project }).lean();
-      const done = tasks.filter(tk => tk.status === 'done').length;
-      const progress = tasks.length > 0 ? Math.round((done / tasks.length) * 100) : 0;
-      await ProjectPro.findByIdAndUpdate(t.project, { progress });
+router.put(
+  '/project-pro/tasks/:id',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res, next) => {
+    // W546: non-ObjectId → fall through to literal sibling PUT /project-pro/tasks/reorder.
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) return next();
+    try {
+      const t = await ProjectTask.findByIdAndUpdate(req.params.id, pick(req.body, FIELDS.task), {
+        returnDocument: 'after',
+      });
+      // Update project progress if task status changes
+      if (req.body.status && t) {
+        const tasks = await ProjectTask.find({ project: t.project }).lean();
+        const done = tasks.filter(tk => tk.status === 'done').length;
+        const progress = tasks.length > 0 ? Math.round((done / tasks.length) * 100) : 0;
+        await ProjectPro.findByIdAndUpdate(t.project, { progress });
+      }
+      res.json(t);
+    } catch (e) {
+      safeError(res, e, '[EnterprisePro]');
     }
-    res.json(t);
-  } catch (e) {
-    safeError(res, e, '[EnterprisePro]');
   }
-});
+);
 
 router.delete(
   '/project-pro/tasks/:id',

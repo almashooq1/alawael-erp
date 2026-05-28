@@ -126,6 +126,8 @@ router.get(
 // GET /scheduling-module/appointments/:id
 router.get(
   '/appointments/:id',
+  // W546: non-ObjectId → fall through to literal sibling GET /appointments/calendar.
+  (req, res, next) => (/^[0-9a-fA-F]{24}$/.test(req.params.id) ? next() : next('route')),
   validateObjectId(),
   asyncHandler(async (req, res) => {
     const appointment = await Appointment.findOne({ _id: req.params.id, deleted_at: null })

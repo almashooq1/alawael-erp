@@ -53,17 +53,6 @@ const BASELINE = new Set([
   'routes/measurements.routes.js::POST::/batch-assessment',
   'routes/scheduling-module.routes.js::GET::/appointments/calendar',
   'routes/workflow.routes.js::POST::/tasks/bulk/complete',
-  'routes/workflowPro.routes.js::GET::/forms/field-types',
-  'routes/workflowPro.routes.js::GET::/forms/stats',
-  'routes/workflowPro.routes.js::GET::/sla-policies/dashboard',
-  'routes/workflowPro.routes.js::GET::/sla-policies/stats',
-  'routes/workflowPro.routes.js::GET::/approval-chains/instances',
-  'routes/workflowPro.routes.js::GET::/approval-chains/stats',
-  'routes/workflowPro.routes.js::GET::/approval-chains/my-pending',
-  'routes/workflowPro.routes.js::GET::/automations/logs',
-  'routes/workflowPro.routes.js::GET::/automations/stats',
-  'routes/workflowPro.routes.js::GET::/automations/events',
-  'routes/workflowPro.routes.js::GET::/automations/actions',
 ]);
 
 const METHOD_RE = /\brouter\.(get|post|put|patch|delete|all)\s*\(\s*['"`]([^'"`]+)['"`]/g;

@@ -73,7 +73,9 @@ router.get('/forms', async (req, res) => {
 });
 
 // GET /forms/:id — Get form detail
-router.get('/forms/:id', async (req, res) => {
+router.get('/forms/:id', async (req, res, next) => {
+  // Non-ObjectId → fall through to literal siblings (/forms/field-types, /forms/stats) — W539.
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) return next();
   try {
     const form = await WorkflowFormTemplate.findById(req.params.id)
       .populate('createdBy', 'name nameAr email')
@@ -599,7 +601,9 @@ router.get('/sla-policies', async (req, res) => {
 });
 
 // GET /sla-policies/:id — Get policy detail
-router.get('/sla-policies/:id', async (req, res) => {
+router.get('/sla-policies/:id', async (req, res, next) => {
+  // Non-ObjectId → fall through to literal siblings (/sla-policies/dashboard, /stats) — W539.
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) return next();
   try {
     const policy = await WorkflowSLAPolicy.findById(req.params.id)
       .populate('createdBy', 'name nameAr email')
@@ -1207,7 +1211,9 @@ router.get('/approval-chains', async (req, res) => {
 });
 
 // GET /approval-chains/:id — Get chain detail
-router.get('/approval-chains/:id', async (req, res) => {
+router.get('/approval-chains/:id', async (req, res, next) => {
+  // Non-ObjectId → fall through to literal siblings (/instances, /stats, /my-pending) — W539.
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) return next();
   try {
     const chain = await WorkflowApprovalChain.findById(req.params.id)
       .populate('createdBy', 'name nameAr email')
@@ -1548,7 +1554,9 @@ router.get('/automations', async (req, res) => {
 });
 
 // GET /automations/:id — Get automation rule detail
-router.get('/automations/:id', async (req, res) => {
+router.get('/automations/:id', async (req, res, next) => {
+  // Non-ObjectId → fall through to literal siblings (/logs, /stats, /events, /actions) — W539.
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) return next();
   try {
     const rule = await WorkflowAutomationRule.findById(req.params.id)
       .populate('createdBy', 'name nameAr email')

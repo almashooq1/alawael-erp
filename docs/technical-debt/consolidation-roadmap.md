@@ -40,7 +40,14 @@ canonical path, while existing consumers keep running.
 
 ---
 
-## Phase 2 — Document services (DEPRECATED, parallel live)
+## Phase 2 — Document services (✅ RESOLVED 2026-05-28, W526)
+
+**Status: CLOSED.** W526 (`729d003f0`) retired all 6 dead flat
+document-service duplicates listed below — they were superseded by
+`services/documents/*` and had zero live consumers. The
+`no-duplicate-service-pairs.test.js` GRANDFATHERED set is now empty and
+ratchets DOWN: any new flat `documentFoo.service.js` duplicate fails CI
+immediately. The historical table is retained below for the audit trail.
 
 Five pairs of document services. The root-level EventEmitter-based
 implementations are older; the `services/documents/*.service.js`

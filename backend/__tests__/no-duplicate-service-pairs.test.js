@@ -35,14 +35,15 @@ const DOCUMENTS_DIR = path.join(ROOT_SERVICES, 'documents');
 // Pairs that already exist and are tracked in the consolidation
 // roadmap. These are allowed to stay until the migration plan in
 // docs/technical-debt/consolidation-roadmap.md is executed.
-const GRANDFATHERED = new Set([
-  'documentAudit',
-  'documentComparison',
-  'documentFavorites',
-  'documentWatermark',
-  'documentQR', // root spells it "QR"; canonical spells it "QRCode"
-  'documentExport', // root is Export; canonical is ImportExport
-]);
+//
+// 2026-05-28: W526 retired the last 6 dead flat document-service
+// duplicates (documentAudit / documentComparison / documentFavorites /
+// documentWatermark / documentQR / documentExport — all superseded by
+// services/documents/*). The document-namespace duplicate debt is now
+// FULLY cleared → this set is empty. The ratchet-down test below
+// (`stale = GRANDFATHERED - rootSet`) enforces that it STAYS empty:
+// any new flat document-service duplicate now fails CI immediately.
+const GRANDFATHERED = new Set([]);
 
 /**
  * Extract the "base name" from a service filename by stripping the

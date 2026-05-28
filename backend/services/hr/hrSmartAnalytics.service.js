@@ -675,7 +675,7 @@ class HrSmartAnalyticsService {
               as: 'emp',
             },
           },
-          { $unwind: { path: '$emp', preserveNullAndEmpty: true } },
+          { $unwind: { path: '$emp', preserveNullAndEmptyArrays: true } },
           {
             $group: {
               _id: '$emp.department',

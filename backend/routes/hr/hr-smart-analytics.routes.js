@@ -128,12 +128,17 @@ function createHrSmartAnalyticsRouter({ logger = console } = {}) {
   });
 
   // ── مساعد: استخراج branchId من الاستعلام ──────────────────────────────
+  // يُرجع:
+  //   false   — branchId غير صالح، وقد أُرسل رد 400 بالفعل (أوقف المعالج)
+  //   null    — لا يوجد branchId (نطاق كامل: كل الفروع) — قيمة صحيحة تُمرَّر للخدمة
+  //   ObjectId — نطاق فرع محدّد
+  // ملاحظة: لا تستخدم null كإشارة "توقف" لأنه نطاق صالح (W: تسبّب في تعليق الطلب).
   function extractScope(req, res) {
     const raw = req.query.branchId;
     const branchId = parseBranchId(raw);
     if (branchId === undefined) {
       res.status(400).json({ error: 'invalid branchId' });
-      return null;
+      return false;
     }
     return branchId;
   }
@@ -142,7 +147,7 @@ function createHrSmartAnalyticsRouter({ logger = console } = {}) {
   router.get('/dashboard', async (req, res) => {
     try {
       const branchId = extractScope(req, res);
-      if (branchId === null) return;
+      if (branchId === false) return;
       const data = await getService().getFullDashboard({ branchId });
       return res.json({ success: true, data });
     } catch (err) {
@@ -155,7 +160,7 @@ function createHrSmartAnalyticsRouter({ logger = console } = {}) {
   router.get('/intelligence', async (req, res) => {
     try {
       const branchId = extractScope(req, res);
-      if (branchId === null) return;
+      if (branchId === false) return;
       const data = await getService().getIntelligenceDashboard({ branchId });
       return res.json({ success: true, data });
     } catch (err) {
@@ -168,7 +173,7 @@ function createHrSmartAnalyticsRouter({ logger = console } = {}) {
   router.get('/compliance', async (req, res) => {
     try {
       const branchId = extractScope(req, res);
-      if (branchId === null) return;
+      if (branchId === false) return;
       const data = await getService().getComplianceDashboard({ branchId });
       return res.json({ success: true, data });
     } catch (err) {
@@ -181,7 +186,7 @@ function createHrSmartAnalyticsRouter({ logger = console } = {}) {
   router.get('/payroll', async (req, res) => {
     try {
       const branchId = extractScope(req, res);
-      if (branchId === null) return;
+      if (branchId === false) return;
       const month = parseIntOpt(req.query.month, 1, 12);
       const year = parseIntOpt(req.query.year, 2000, 2100);
       const data = await getService().getPayrollAnalytics({ branchId, month, year });
@@ -196,7 +201,7 @@ function createHrSmartAnalyticsRouter({ logger = console } = {}) {
   router.get('/performance', async (req, res) => {
     try {
       const branchId = extractScope(req, res);
-      if (branchId === null) return;
+      if (branchId === false) return;
       const year = parseIntOpt(req.query.year, 2000, 2100);
       const data = await getService().getPerformanceDistribution({ branchId, year });
       return res.json({ success: true, data });
@@ -210,7 +215,7 @@ function createHrSmartAnalyticsRouter({ logger = console } = {}) {
   router.get('/training', async (req, res) => {
     try {
       const branchId = extractScope(req, res);
-      if (branchId === null) return;
+      if (branchId === false) return;
       const year = parseIntOpt(req.query.year, 2000, 2100);
       const data = await getService().getTrainingEffectiveness({ branchId, year });
       return res.json({ success: true, data });
@@ -224,7 +229,7 @@ function createHrSmartAnalyticsRouter({ logger = console } = {}) {
   router.get('/risk-scores', async (req, res) => {
     try {
       const branchId = extractScope(req, res);
-      if (branchId === null) return;
+      if (branchId === false) return;
       const limit = parseIntOpt(req.query.limit, 1, 100) ?? 20;
       const { department } = req.query;
       const data = await getService().getTurnoverRiskScores({ branchId, department, limit });
@@ -239,7 +244,7 @@ function createHrSmartAnalyticsRouter({ logger = console } = {}) {
   router.get('/recommendations', async (req, res) => {
     try {
       const branchId = extractScope(req, res);
-      if (branchId === null) return;
+      if (branchId === false) return;
       const data = await getService().getSmartRecommendations({ branchId });
       return res.json({ success: true, data, count: data.length });
     } catch (err) {

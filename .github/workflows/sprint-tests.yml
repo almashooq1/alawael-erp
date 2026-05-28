@@ -665,6 +665,8 @@ on:
       - 'backend/__tests__/check-memory-health-script.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/clinical-crisis-routes-wave524.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/hr-smart-analytics-no-branch-scope-wave527.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -1313,6 +1315,8 @@ on:
       - 'backend/__tests__/check-memory-health-script.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/clinical-crisis-routes-wave524.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/hr-smart-analytics-no-branch-scope-wave527.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

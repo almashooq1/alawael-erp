@@ -119,7 +119,7 @@ function setupAdminEndpoints(app, { isProd }) {
     }
 
     try {
-      const email = (process.env.ADMIN_EMAIL || 'admin@alawael.com.sa').toLowerCase().trim();
+      const email = (process.env.ADMIN_EMAIL || 'admin@alawael.com').toLowerCase().trim();
       const collection = mongoose.connection.db.collection('users');
 
       const user = await collection.findOne({ email });

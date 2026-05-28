@@ -63,7 +63,7 @@ export default function LoginPage() {
   useEffect(() => {
     const t = setTimeout(() => setMounted(true), 80);
     if (process.env.NODE_ENV === 'development') {
-      setForm({ email: 'admin@alawael.com.sa', password: 'Admin@2026' });
+      setForm({ email: 'admin@alawael.com', password: 'Admin@2026' });
     }
     return () => clearTimeout(t);
   }, []);

@@ -105,7 +105,7 @@ router.post('/init-admin', async (req, res) => {
       return safeError(res, new Error('ADMIN_PASSWORD env var must be set and ≥ 8 chars'), 'setup');
     }
 
-    const ADMIN_EMAIL = (process.env.ADMIN_EMAIL || 'admin@alawael.com.sa').toLowerCase().trim();
+    const ADMIN_EMAIL = (process.env.ADMIN_EMAIL || 'admin@alawael.com').toLowerCase().trim();
 
     // ─── تحميل الـ User model ─────────────────────────────────────────────
     let User;

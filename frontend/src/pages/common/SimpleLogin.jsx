@@ -121,7 +121,7 @@ export default function SimpleLogin() {
   useEffect(() => {
     const t = setTimeout(() => setMounted(true), 80);
     if (process.env.NODE_ENV === 'development') {
-      setForm({ email: 'admin@alawael.com.sa', password: 'Admin@2026' });
+      setForm({ email: 'admin@alawael.com', password: 'Admin@2026' });
     }
     return () => clearTimeout(t);
   }, []);
@@ -929,7 +929,7 @@ export default function SimpleLogin() {
                   <Typography
                     sx={{ fontSize: '0.72rem', color: '#6366F1', fontFamily: 'monospace' }}
                   >
-                    admin@alawael.com.sa
+                    admin@alawael.com
                   </Typography>
                   <Box sx={{ width: 1, height: 12, backgroundColor: alpha('#6366F1', 0.25) }} />
                   <Typography

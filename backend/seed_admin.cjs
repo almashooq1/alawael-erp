@@ -33,12 +33,12 @@ async function main() {
     console.log('🔐 Password hashed successfully');
 
     // Delete existing admin if exists
-    const deleteResult = await usersCol.deleteMany({ email: 'superadmin@alawael.com.sa' });
+    const deleteResult = await usersCol.deleteMany({ email: 'superadmin@alawael.com' });
     console.log(`🗑️ Deleted ${deleteResult.deletedCount} existing superadmin records`);
 
     // Insert directly into the 'users' collection (same collection Mongoose User model uses)
     const result = await usersCol.insertOne({
-      email: 'superadmin@alawael.com.sa',
+      email: 'superadmin@alawael.com',
       password: hashedPassword,
       fullName: 'مدير النظام',
       role: 'super_admin',
@@ -58,7 +58,7 @@ async function main() {
     console.log('✅ Admin user created with _id:', result.insertedId);
 
     // Verify: find the user back using findOne
-    const verify = await usersCol.findOne({ email: 'superadmin@alawael.com.sa' });
+    const verify = await usersCol.findOne({ email: 'superadmin@alawael.com' });
     console.log('✅ Verification - User found:', verify ? verify.email : 'NOT FOUND');
     console.log('✅ Password hash starts with:', verify?.password?.substring(0, 10));
 
@@ -67,7 +67,7 @@ async function main() {
     console.log('✅ Password comparison test:', match ? 'PASS ✓' : 'FAIL ✗');
 
     console.log('\n🎉 Admin user created successfully!');
-    console.log('📧 Email: superadmin@alawael.com.sa');
+    console.log('📧 Email: superadmin@alawael.com');
     console.log('🔑 Password: Admin@2025!');
   } catch (err) {
     console.error('❌ Error:', err.message);

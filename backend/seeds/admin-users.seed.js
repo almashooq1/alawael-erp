@@ -42,7 +42,7 @@ function getAdminPassword(envKey, fallbackEnvKey) {
 const adminUsers = [
   {
     username: 'superadmin',
-    email: 'superadmin@alawael.com.sa',
+    email: 'superadmin@alawael.com',
     getPassword: () => getAdminPassword('SUPERADMIN_PASSWORD', 'ADMIN_PASSWORD'),
     profile: {
       firstName: { ar: 'مدير', en: 'Super' },
@@ -55,7 +55,7 @@ const adminUsers = [
   },
   {
     username: 'admin',
-    email: 'admin@alawael.com.sa',
+    email: 'admin@alawael.com',
     getPassword: () => getAdminPassword('ADMIN_PASSWORD', 'ADMIN_PASSWORD'),
     profile: {
       firstName: { ar: 'مدير', en: 'Admin' },

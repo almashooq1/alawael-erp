@@ -229,6 +229,11 @@ const connectDB = async () => {
         serverSelectionTimeoutMS: 5000,
         socketTimeoutMS: 45000,
         connectTimeoutMS: 10000,
+        // Force IPv4 resolution. On Windows, `localhost` resolves to IPv6 ::1
+        // FIRST, so a Docker/WSL MongoDB bound to [::]:27017 (often auth-enabled)
+        // shadows the local IPv4 mongod → every query returns "Unauthorized".
+        // family:4 makes the driver hit 127.0.0.1 regardless of the URI host.
+        family: 4,
         retryWrites: true,
         w: 'majority',
         maxPoolSize: parseInt(process.env.DB_POOL_SIZE) || 10,

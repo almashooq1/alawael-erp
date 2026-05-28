@@ -56,6 +56,17 @@ echo "[pre-push] wave-number collision check…"
 cd backend && npm run check:wave-collision
 cd ..
 
+# 2026-05-28 (W531): block Express route-ordering shadowing — a literal
+# route declared AFTER a same-shape :param sibling is unreachable (the
+# param route wins and casts the literal segment as a Mongo ObjectId →
+# 500). Found app-wide while auditing HR (72 pre-existing across ~30
+# files, biometric/branch fixed + rest baselined to ratchet down). Pure
+# source scan (<1s). Failure names file + literal + shadowing param; fix
+# is to move the literal's declaration above the :param route.
+echo "[pre-push] route-shadowing check (literal route after :param sibling)…"
+cd backend && npm run check:route-shadowing
+cd ..
+
 echo "[pre-push] backend quality:push…"
 cd backend && npm run quality:push
 cd ..

@@ -671,6 +671,8 @@ on:
       - 'backend/__tests__/attendance-mgmt-dashboard-wave528.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/auth-validate-middleware-regression-wave529.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/check-route-shadowing-script.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -1325,6 +1327,8 @@ on:
       - 'backend/__tests__/attendance-mgmt-dashboard-wave528.test.js'
       # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
       - 'backend/__tests__/auth-validate-middleware-regression-wave529.test.js'
+      # Auto-synced from sprint-tests.txt by scripts/sync-sprint-tests-paths.js
+      - 'backend/__tests__/check-route-shadowing-script.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:

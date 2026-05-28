@@ -182,6 +182,7 @@
     "check:hook-style": "node scripts/check-mongoose-hook-style.js",
     "check:wave-collision": "node scripts/check-wave-collision.js",
     "check:wave-collision:json": "node scripts/check-wave-collision.js --json",
+    "check:route-shadowing": "node scripts/check-route-shadowing.js",
     "check:dormant-modules": "node scripts/check-dormant-modules.js",
     "check:dormant-modules:json": "node scripts/check-dormant-modules.js --json",
     "check:dormant-modules:bare": "node scripts/check-dormant-modules.js --bare",

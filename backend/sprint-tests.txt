@@ -387,3 +387,4 @@ __tests__/clinical-crisis-routes-wave524.test.js
 __tests__/hr-smart-analytics-no-branch-scope-wave527.test.js
 __tests__/attendance-mgmt-dashboard-wave528.test.js
 __tests__/auth-validate-middleware-regression-wave529.test.js
+__tests__/check-route-shadowing-script.test.js

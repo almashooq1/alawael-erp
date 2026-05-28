@@ -47,6 +47,40 @@ router.post(
   }
 );
 
+// ── نقل المستفيدين ──────────────────────────────────
+// NOTE: literal /transfers must be declared BEFORE /:branchId or Express casts
+// "transfers" as a Branch ObjectId → 500.
+router.get('/transfers', authenticate, requireBranchAccess, async (req, res) => {
+  try {
+    const BeneficiaryTransfer = require('../models/BeneficiaryTransfer');
+    const transfers = await BeneficiaryTransfer.find()
+      .populate('beneficiaryId', 'full_name_ar file_number')
+      .populate('fromBranchId', 'name nameAr')
+      .populate('toBranchId', 'name nameAr')
+      .populate('requestedBy', 'name email')
+      .populate('approvedBy', 'name email')
+      .sort({ createdAt: -1 })
+      .limit(200);
+    res.json({ success: true, data: transfers });
+  } catch (err) {
+    safeError(res, err);
+  }
+});
+
+router.post('/transfers', authenticate, requireBranchAccess, async (req, res) => {
+  try {
+    const BeneficiaryTransfer = require('../models/BeneficiaryTransfer');
+    const transfer = await BeneficiaryTransfer.create({
+      ...req.body,
+      requestedBy: req.user._id,
+      status: 'pending',
+    });
+    res.status(201).json({ success: true, data: transfer });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+});
+
 // تفاصيل فرع
 router.get('/:branchId', authenticate, requireBranchAccess, async (req, res) => {
   try {
@@ -247,38 +281,6 @@ router.put(
     }
   }
 );
-
-// ── نقل المستفيدين ──────────────────────────────────
-router.get('/transfers', authenticate, requireBranchAccess, async (req, res) => {
-  try {
-    const BeneficiaryTransfer = require('../models/BeneficiaryTransfer');
-    const transfers = await BeneficiaryTransfer.find()
-      .populate('beneficiaryId', 'full_name_ar file_number')
-      .populate('fromBranchId', 'name nameAr')
-      .populate('toBranchId', 'name nameAr')
-      .populate('requestedBy', 'name email')
-      .populate('approvedBy', 'name email')
-      .sort({ createdAt: -1 })
-      .limit(200);
-    res.json({ success: true, data: transfers });
-  } catch (err) {
-    safeError(res, err);
-  }
-});
-
-router.post('/transfers', authenticate, requireBranchAccess, async (req, res) => {
-  try {
-    const BeneficiaryTransfer = require('../models/BeneficiaryTransfer');
-    const transfer = await BeneficiaryTransfer.create({
-      ...req.body,
-      requestedBy: req.user._id,
-      status: 'pending',
-    });
-    res.status(201).json({ success: true, data: transfer });
-  } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
-  }
-});
 
 router.put(
   '/transfers/:transferId/approve',

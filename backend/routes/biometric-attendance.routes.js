@@ -74,6 +74,17 @@ router.get('/devices', async (req, res) => {
   }
 });
 
+// GET /api/biometric-attendance/devices/health-check — فحص جميع الأجهزة
+// NOTE: must be declared BEFORE /devices/:id or Express casts "health-check" as an ObjectId.
+router.get('/devices/health-check', async (req, res) => {
+  try {
+    const results = await zktecoSdk.healthCheck();
+    res.json({ success: true, data: results });
+  } catch (err) {
+    safeError(res, err);
+  }
+});
+
 // GET /api/biometric-attendance/devices/:id — تفاصيل جهاز
 router.get('/devices/:id', async (req, res) => {
   try {
@@ -195,16 +206,6 @@ router.post('/devices/push-data', async (req, res) => {
   try {
     await zktecoSdk.handlePushData(req.body);
     res.json({ success: true, status: 'ok' });
-  } catch (err) {
-    safeError(res, err);
-  }
-});
-
-// GET /api/biometric-attendance/devices/health-check — فحص جميع الأجهزة
-router.get('/devices/health-check', async (req, res) => {
-  try {
-    const results = await zktecoSdk.healthCheck();
-    res.json({ success: true, data: results });
   } catch (err) {
     safeError(res, err);
   }

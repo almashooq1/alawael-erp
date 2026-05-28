@@ -34,8 +34,6 @@ const ROUTES_DIR = path.join(__dirname, '..', 'routes');
 const BASELINE = new Set([
   'routes/archive.routes.js::POST::/bulk/archive',
   'routes/enterprisePro.routes.js::PUT::/project-pro/tasks/reorder',
-  'routes/enterpriseProPlus.routes.js::GET::/facilities/leases',
-  'routes/enterpriseProPlus.routes.js::GET::/facilities/utilities',
   'routes/managementReview.routes.js::GET::/analytics',
   'routes/scheduling-module.routes.js::GET::/appointments/calendar',
   'routes/workflow.routes.js::POST::/tasks/bulk/complete',

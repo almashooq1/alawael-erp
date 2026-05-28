@@ -324,7 +324,9 @@ router.post('/facilities', authenticateToken, requireBranchAccess, async (req, r
   }
 });
 
-router.get('/facilities/:id', authenticateToken, requireBranchAccess, async (req, res) => {
+router.get('/facilities/:id', authenticateToken, requireBranchAccess, async (req, res, next) => {
+  // W545: non-ObjectId → fall through to literal siblings /facilities/leases, /facilities/utilities.
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) return next();
   try {
     const doc = await Facility.findById(req.params.id).lean();
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });

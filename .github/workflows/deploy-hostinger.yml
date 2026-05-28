@@ -130,11 +130,14 @@ jobs:
         working-directory: backend
         run: npm ci --legacy-peer-deps 2>&1 || npm install --legacy-peer-deps
 
-      - name: Run backend tests
+      - name: Run backend tests (canonical sprint gate)
         working-directory: backend
-        # --maxWorkers=2 keeps memory usage under the runner's 7GB cap
-        # while still parallelizing two suites at a time.
-        run: npm test -- --forceExit --detectOpenHandles --passWithNoTests --no-coverage --maxWorkers=2
+        # W552: was bare `npm test` (the entire 2000+ file Jest surface) which hit
+        # the 35-min cap on every run → "🧪 Run Tests" cancelled → "🚀 Deploy to
+        # VPS" skipped → automated prod deploys silently dormant. Mirror W547 (the
+        # CI Pipeline fix): run the canonical gate (~13 min, well under the cap),
+        # the same suite Sprint Tests already proves green.
+        run: npm run test:guard && npm run test:sprint
         env:
           NODE_ENV: test
           JWT_SECRET: test-jwt-secret-ci-only

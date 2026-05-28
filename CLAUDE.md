@@ -400,6 +400,80 @@ Nav entries registered at `components/layout/nav-items.v2.tsx` clinical section 
 - **Ratchet-up baseline pattern**: W360 (20 standards) → W367 (45 standards) followed the W325c phantom-ref recipe — baselines ratchet UP only; deletions require explicit deprecation marking.
 - **Wave numbers W356–W390 consumed** (2026-05-24 → 2026-05-25), with **hard collisions on W381 / W383 / W384** between two concurrent agent sessions — both numbers exist in git log under different content (clinical-services series mine vs. event-bus bridge series parallel). Next available: **W391+**. Post-W376 follow-ups: **W377** CLAUDE.md series-recap section / **W378** parallel-agent collision (their `79783ab81` + `9ee5341c4` claimed W377/W378 separately — noted as drift; my W377 ended up landing as a later wave number) / **W379** `BeneficiaryPicker` adopted across the 10 new-event forms in place of raw ObjectId text inputs / **W380** `scripts/seed-cbahi-attestations.js` + `npm run seed:cbahi` (idempotent, `--branch`/`--all-branches`/`--list`/`--dry-run`/`--reset`/`--json`) — closes the 45-standards-per-branch bootstrap usability gap / **W381 (clinical-services)** `(dashboard)/clinical-services/[id]/page.tsx` cross-surface aggregator (Promise.allSettled fan-out across 7 per-beneficiary surfaces; `beneficiaryApi.getById` not `.get`; `exactOptionalPropertyTypes` compliance via `count?: number | undefined`) — **collides with parallel W381** at `7adb6e336` (architecture: wire 3 events for ai-recommendations + quality, ADR-027 baseline 4→1) / **W382** `BeneficiaryMasterFile.tsx` deep-link pill — **parallel W382** at `10e89c915` claims same number for drift guard on `domainEventContracts.js` LIVE registry / **W383 (docs)** `docs/MODULES.md` v3.1.0 → v3.2.0 patch — **collides with parallel W383** at `031a63f6d` (architecture: assessment-overdue sweeper, ADR-027 baseline 1→0 ✅) / **W384 (family-support)** `CaregiverSupportProgram` model + 18 routes + canonical schema + 55-assertion drift guard + 3 frontend pages + nav entry — closes the last 🟠 autonomous-actionable item from MODULE_AUDIT — **collides with parallel W384** at `77e8107fd` (architecture: behavioral verification of W379+W380+W381 wirings, 7 tests). **Parallel agent waves W385-W389 (no collision with mine)**: W385 5 behavioral verifications + envelope bug (`3463bb8f9`) / W386 final 5 behavioral verifications, 14/14 wires (`c99625ce4`) / W387 service-event-bridge real bug fix — service-local emits weren't reaching integrationBus subscribers; 4-test integration suite (`c17b91581`+`285cd646f`) / W388 meta-drift-guard for bridge coverage (`b80f89cea`) / W389 subscriber-must-have-producer drift guard catches W377 fallout (`a7451a9b8`). / **W390** integration polish — added caregiver-support as 8th card in W381(clinical-services)'s `/clinical-services/[id]` aggregator + MODULES.md row + MODULE_AUDIT closure note.
 
+## Phase B Rights & Voice — End-to-End (shipped 2026-05-27/28, 13 commits across 2 repos)
+
+CRPD compliance surfaces (Article 7+12+21) — beneficiary voice + capacity assessment + self-advocacy curriculum. Shipped as a full vertical slice: model → routes → frontend list → detail → form, with E2E smoke verification.
+
+### Stack (5 waves + 1 CVE + 3 follow-up fixes)
+
+```text
+Model (66666)                Routes (66666)          List + Detail + New (web-admin)
+──────────────────────────────────────────────────────────────────────────────────────
+W460 BeneficiaryVoiceLog   → W513 voice-log (9 ep)   → W519 list + W520 [id]+new
+W461 DecisionRightsAssess  → W515 decision-rights    → W519 list + W520 [id]+new
+                                  (11 ep, draft→finalize lifecycle)
+W462 SelfAdvocacyPlan      → W518 self-advocacy      → W519 list + W520 [id]+new
+                                  (12 ep, singleton-per-beneficiary)
+
+E2E smoke verification:    W466 (model + lib layer) + W521 (route layer, 28 assertions)
+```
+
+### Endpoints — total 32 across 3 routes
+
+| Wave | Path                         | Endpoints | Key behaviors                                                                                                                                   |
+| ---- | ---------------------------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| W513 | `/api/(v1/)?voice-log`       | 9         | record + log action + supersede + branchFilter on every query                                                                                   |
+| W515 | `/api/(v1/)?decision-rights` | 11        | draft→finalize CTA invokes lib (compositeScore + routedLayer); FINALIZE_ROLES ⊂ WRITE_ROLES (4-tier escalation)                                 |
+| W518 | `/api/(v1/)?self-advocacy`   | 12        | singleton enforced via explicit 409 + `existingPlanId` in body; modules auto-seed at create; auto-finalize at 100% completion via pre-save hook |
+
+### CRPD compliance surfaced in payloads
+
+- `/voice-log/by-beneficiary/:id` + `/voice-log/stats` return `crpdCompliance: { directCount, proxyCount, directPct }` — anti-substitution doctrine visible in UI (red tile when directPct < 50%)
+- `/decision-rights/stats` returns `crpdCompliance: { autonomyShare }` — Layer 1 (autonomy) share of finalized assessments
+- `/self-advocacy/stats` returns per-right `moduleCompletion` map — UI shows 5-rights breakdown card
+
+### Production-readiness — zero env vars, deployable on next push
+
+- All 3 routes mounted via `dualMountAuth` in `features.registry.js` (anti-regression: never plain `dualMount`)
+- 4 pre-push gates passing on every commit (sprint-paths + routes-load + gitignored-sources + hook-style)
+- 5th gate (`check:wave-collision`, W522) caught 3 collision attempts mid-build during this session — proven valuable
+- Cross-tenant isolation: 28+ `branchFilter(req)` calls across 3 routes (W269 doctrine); zero `req.branchId` reads (W269h class); explicit `mongoose.isValidObjectId` on every `params.id`
+- Anti-mass-assignment: zero `...req.body` spread; zero `Object.assign(row, req.body)`; all status transitions via dedicated endpoints (W506/W507 doctrine)
+- W464 CRPD-aware roles in WRITE_ROLES: `independent_advocate` + `cultural_officer`
+
+### Test coverage — ~388 assertions across 11 test files
+
+| Layer                                       | Files                                                                                                                  | Assertions     |
+| ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | -------------- |
+| Static drift guards (models)                | `beneficiary-voice-log-wave460` + `decision-rights-wave461` + `self-advocacy-wave462`                                  | ~105           |
+| Static drift guards (routes)                | `voice-log-routes-wave513` + `decision-rights-routes-wave515` + `self-advocacy-routes-wave518`                         | 125 (38+42+45) |
+| Behavioral counterparts (MongoMemoryServer) | `beneficiary-voice-log-behavioral-wave460` + `decision-rights-behavioral-wave461` + `self-advocacy-behavioral-wave462` | ~100           |
+| E2E smoke                                   | `phase-b-e2e-smoke-wave466` + `phase-b-routes-e2e-smoke-wave521`                                                       | ~58            |
+
+### CI hygiene fixes shipped alongside (3, all unblocking shared infrastructure)
+
+1. **Frontend audit HIGH CVE** (`tmp <0.2.6` + `ws 8.0.0-8.20.0`): closed via `frontend/package.json` overrides. Recipe in [[feedback-frontend-audit-cve-via-package-overrides]].
+2. **Dual-React-copies** (3-month-old bug): `@alawael/ui` peerDeps pinned `react@^18` while web-admin uses `react@19.2.6`. pnpm installed a local React 18 copy under `packages/ui/node_modules/react`. Components compiled against React 18's `$$typeof` symbol weren't recognized by React 19's SSR → "Objects are not valid as a React child" error blocking ALL web-admin CI since W515. Fixed via `ea6f971` (widen peer + keep types at 18). Recipe in [[feedback-dual-react-copies-diagnosis-2026-05-28]].
+3. **W522 false-positive** (parallel agent's check-dormant-modules-script.test.js writes `require('./fooService')` as fixture content): allowlist entry in `no-broken-requires.test.js`.
+
+### Pattern recap — 3 wave-number collisions this session
+
+Hard collisions on **W511 / W514 / W517 / W518**: parallel agent claimed each minutes before me. Recipe in [[project-phase-b-end-to-end-2026-05-27]]:
+
+1. Rename test file via `mv old-waveNNN.test.js new-waveMMM.test.js`
+2. `Edit replace_all` for `Wave NNN` / `WNNN` / `waveNNN` in route + test + registry comment (3 files)
+3. `npm run sync:sprint-paths` (auto-appends; doesn't remove stale)
+4. **Manually** remove stale entries from `.github/workflows/sprint-tests.yml`
+5. Re-run drift guard locally before commit
+
+`check:wave-collision` (W522 pre-push gate #5) now catches this PROACTIVELY at push time. Cross-references in commit messages (e.g. "fix W522" for a fix-up) trigger a false positive — skip with `CHECK_WAVE_SKIP=1 git push` per the gate's own recipe.
+
+### Open Phase B follow-ups (deferred)
+
+- **Behavioral coverage for routes layer**: W513/W515/W518 have static drift guards but no `supertest`-based behavioral tests against a real Express app boot. Pattern: spin up Express, mount route, hit each endpoint with mock JWT + assert 200/400/404/403.
+- **Frontend stylistic alignment**: my 9 Phase B pages use raw Tailwind classes + inline styles consistent with the seizure-log template. Parallel agent's codemod sweeps are migrating EVERYTHING to `@alawael/ui` primitives (Button + Stat + Tabs + DocField etc.). My pages will eventually be codemodded too — leave consistent with current template.
+- **Frontend tests**: zero unit tests for the 9 Phase B pages. seizure-log/communication-aid/respite siblings also have no tests — codebase pattern, not a gap.
+
 ## Open known issues (as of 2026-05-23)
 
 - ~~documentWorkflow / documentTemplates engine skips~~ — **resolved 2026-05-19** in commits `8fe0b2264` + `4e509eec2`. The 4 stale skips (escalateOverdue + 3 `new X(...)` blocks) are now all green. Pattern recap: prefer lazy `mongoose.model('X')` lookup at constructor sites instead of capturing the model reference at module load, so unit tests can intercept via `mongoose.model.mockImplementation`.

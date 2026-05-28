@@ -257,7 +257,10 @@ router.put('/results/:resultId/approve', async (req, res) => {
  * إنشاء خطة تأهيلية فردية
  * POST /api/rehabilitation-plans/:beneficiaryId
  */
-router.post('/:beneficiaryId', async (req, res) => {
+router.post('/:beneficiaryId', async (req, res, next) => {
+  const mongoose = require('mongoose');
+  // Non-ObjectId → fall through to literal sibling /batch-assessment — W540.
+  if (!mongoose.Types.ObjectId.isValid(req.params.beneficiaryId)) return next();
   try {
     const plan = await measurementService.createIndividualRehabPlan(
       req.params.beneficiaryId,
@@ -278,7 +281,10 @@ router.post('/:beneficiaryId', async (req, res) => {
  * الحصول على خطة التأهيل الفردية
  * GET /api/rehabilitation-plans/:beneficiaryId
  */
-router.get('/:beneficiaryId', async (req, res) => {
+router.get('/:beneficiaryId', async (req, res, next) => {
+  const mongoose = require('mongoose');
+  // Non-ObjectId → fall through to literal siblings (/categories, /programs, /dashboard) — W540.
+  if (!mongoose.Types.ObjectId.isValid(req.params.beneficiaryId)) return next();
   try {
     const plan = await measurementService.getIndividualRehabPlan(req.params.beneficiaryId);
 

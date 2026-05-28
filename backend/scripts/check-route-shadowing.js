@@ -47,10 +47,6 @@ const BASELINE = new Set([
   'routes/enterpriseProPlus.routes.js::GET::/facilities/leases',
   'routes/enterpriseProPlus.routes.js::GET::/facilities/utilities',
   'routes/managementReview.routes.js::GET::/analytics',
-  'routes/measurements.routes.js::GET::/categories',
-  'routes/measurements.routes.js::GET::/programs',
-  'routes/measurements.routes.js::GET::/dashboard',
-  'routes/measurements.routes.js::POST::/batch-assessment',
   'routes/scheduling-module.routes.js::GET::/appointments/calendar',
   'routes/workflow.routes.js::POST::/tasks/bulk/complete',
 ]);

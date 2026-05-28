@@ -25,6 +25,7 @@ const path = require('path');
 const SCRIPT = path.join(__dirname, '..', 'scripts', 'check-wave-collision.js');
 const {
   extractWaves,
+  extractClaimWaves,
   parseOneline,
   buildWaveIndex,
   detectCollisions,
@@ -89,6 +90,42 @@ describe('check-wave-collision — extractWaves (regex)', () => {
   });
 });
 
+describe('check-wave-collision — extractClaimWaves (claim vs cross-reference)', () => {
+  it('claims only the wave before the em-dash; treats post-dash waves as references', () => {
+    // The W524 false-positive that exposed this: "W524 — wire W458" must
+    // claim W524 only, NOT collide on the W458 it cross-references.
+    expect(
+      extractClaimWaves('feat(crisis): W524 — wire W458 crisisOrchestrator (ADR-033 boundary)')
+    ).toEqual(['524']);
+  });
+
+  it('ignores all post-em-dash references (multi-ref commit subject)', () => {
+    expect(
+      extractClaimWaves('feat(rights): W518 — self-advocacy REST surface for W462 + W516')
+    ).toEqual(['518']);
+  });
+
+  it('treats the scope-embedded wave before em-dash as the claim', () => {
+    expect(
+      extractClaimWaves('test(W521): Phase B routes E2E smoke — covers W513/W515/W518')
+    ).toEqual(['521']);
+  });
+
+  it('claims a contiguous multi-wave run when there is no em-dash separator', () => {
+    expect(
+      extractClaimWaves('feat: W512+W514 apply-move + reassigned event chain COMPLETE')
+    ).toEqual(['512', '514']);
+  });
+
+  it('falls back to whole-subject when no separator present', () => {
+    expect(extractClaimWaves('chore: W400 ratchet')).toEqual(['400']);
+  });
+
+  it('handles the ASCII " - " separator as well as the em-dash', () => {
+    expect(extractClaimWaves('feat: W600 - builds on W123')).toEqual(['600']);
+  });
+});
+
 describe('check-wave-collision — parseOneline', () => {
   it('splits sha + subject correctly', () => {
     expect(parseOneline('33937681c chore: remove stale W518 email test file')).toEqual({
@@ -123,6 +160,12 @@ describe('check-wave-collision — buildWaveIndex', () => {
 
   it('skips commits with no wave reference', () => {
     expect(buildWaveIndex(['aaa chore: bump deps', 'bbb refactor: cleanup'])).toEqual({});
+  });
+
+  it('indexes CLAIM waves only — a post-em-dash cross-ref is NOT indexed', () => {
+    const idx = buildWaveIndex(['aaa feat: W524 — wire W458 orchestrator']);
+    expect(Object.keys(idx)).toEqual(['524']);
+    expect(idx['458']).toBeUndefined();
   });
 });
 
@@ -330,6 +373,23 @@ describe('check-wave-collision — CLI exit-code contract', () => {
     const parsed = JSON.parse(r.stdout);
     expect(parsed.collisions).toEqual([]);
     expect(parsed.suggestedNextWave).toBeNull();
+  });
+
+  it('does NOT flag a cross-reference: pushing "W999 — wire W500" when W500 is prior history (the W524 fix)', () => {
+    // Prior history claims W500; the new commit references it after the
+    // em-dash while claiming a fresh W999. Must be collision-free.
+    initRepo(tmpDir, ['feat: W500 original feature']);
+    runGit(tmpDir, [
+      'commit',
+      '--allow-empty',
+      '-m',
+      'feat: W999 — wire W500 into the new surface',
+    ]);
+    initRepo(otherRepoDir, ['feat: W123 sibling']);
+    const r = runScript(tmpDir, ['--json']);
+    expect(r.status).toBe(0);
+    const parsed = JSON.parse(r.stdout);
+    expect(parsed.collisions).toEqual([]);
   });
 
   it('soft-skips when other repo path does not exist', () => {

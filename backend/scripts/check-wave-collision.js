@@ -151,6 +151,31 @@ function extractWaves(subject) {
   return out;
 }
 
+// Extract only the CLAIM waves from a subject — the wave(s) the commit
+// is actually minting, NOT the ones it cross-references.
+//
+// Convention in this repo: `type(scope): WNNN — description (… refs
+// WXXX …)`. The wave(s) before the first em-dash `—` (or ` - `) are the
+// claim; anything after is a cross-reference ("W524 — wire W458" claims
+// W524, references W458). Without a separator the whole subject is the
+// claim zone (covers short forms like "W512+W514 apply-move").
+//
+// This is the fix for the false-positive class the gate hit on its
+// FIRST real cross-ref commit (W524 wiring W458): the `WNNN — … WXXX`
+// shape is near-universal across this repo's feature commits, so
+// indexing references-as-claims made the gate cry wolf on essentially
+// every wave that builds on a prior one.
+function extractClaimWaves(subject) {
+  const em = subject.indexOf('—');
+  const hy = subject.indexOf(' - ');
+  let sepIdx;
+  if (em === -1) sepIdx = hy;
+  else if (hy === -1) sepIdx = em;
+  else sepIdx = Math.min(em, hy);
+  const claimZone = sepIdx === -1 ? subject : subject.slice(0, sepIdx);
+  return extractWaves(claimZone);
+}
+
 // Parse "abcdef1234 subject line text" → { sha, subject }.
 function parseOneline(line) {
   const idx = line.indexOf(' ');
@@ -159,12 +184,14 @@ function parseOneline(line) {
 }
 
 // Build a map { waveNumber: [{sha, subject}, ...] } from a list of
-// oneline-format commits.
+// oneline-format commits. Indexes CLAIM waves only (cross-references
+// after the em-dash are ignored) so collision detection compares
+// "what each commit minted", not "what each commit mentioned".
 function buildWaveIndex(lines) {
   const idx = {};
   for (const line of lines) {
     const { sha, subject } = parseOneline(line);
-    for (const wave of extractWaves(subject)) {
+    for (const wave of extractClaimWaves(subject)) {
       (idx[wave] ||= []).push({ sha, subject });
     }
   }
@@ -329,6 +356,7 @@ function main() {
 // real `git log` invocation.
 module.exports = {
   extractWaves,
+  extractClaimWaves,
   parseOneline,
   buildWaveIndex,
   detectCollisions,

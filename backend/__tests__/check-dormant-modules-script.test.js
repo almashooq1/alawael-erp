@@ -249,12 +249,13 @@ describe('check-dormant-modules — baseline + skip structures', () => {
     expect(KNOWN_DORMANT_BASELINE).toBeInstanceOf(Set);
   });
 
-  it('baseline holds 28 entries (29 triaged 2026-05-28; W524 wired crisisOrchestrator)', () => {
+  it('baseline holds 22 entries (29 triaged 2026-05-28; W524 wired 1, W526 deleted 6)', () => {
     // When a module is wired-up or deleted, drop it here AND from the
     // baseline in the same commit. Bumping this number without a
     // corresponding source change should fail the CLI contract below.
-    // W524: crisisOrchestrator.service.js wired at /api/clinical-crisis → 29→28.
-    expect(KNOWN_DORMANT_BASELINE.size).toBe(28);
+    // W524: crisisOrchestrator wired → 29→28.
+    // W526: 6 dead flat documentXService.js duplicates deleted → 28→22.
+    expect(KNOWN_DORMANT_BASELINE.size).toBe(22);
   });
 
   it('every baseline entry uses POSIX paths (no backslashes, no absolute paths)', () => {

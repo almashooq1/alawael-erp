@@ -155,12 +155,10 @@ const KNOWN_DORMANT_BASELINE = new Set([
   'services/clinical/clinicalProgress.service.js',
   // W524: crisisOrchestrator.service.js WIRED at /api/clinical-crisis
   // (routes/clinical-crisis.routes.js) per ADR-033 — removed from baseline.
-  'services/documentAuditService.js',
-  'services/documentComparisonService.js',
-  'services/documentExportService.js',
-  'services/documentFavoritesService.js',
-  'services/documentQRService.js',
-  'services/documentWatermarkService.js',
+  // W526: the 6 flat services/documentXService.js DELETED — confirmed
+  // dead duplicates of the wired services/documents/documentX.service.js
+  // suite (documentAdvanced.routes.js consumes the organized versions).
+  // 0 production referrers; live versions are supersets.
   'services/finance/servicePricing.service.js',
   'services/finance/zatcaCalculation.service.js',
   'services/gpsSecurityService.js',

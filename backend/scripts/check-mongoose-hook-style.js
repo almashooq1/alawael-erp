@@ -154,7 +154,6 @@ const KNOWN_CALLBACK_HOOK_BASELINE = new Set([
   'models/clinical-assessment/quality-of-life-assessment.model.js',
   'models/conversation.model.js',
   'models/disability-assessment.model.js',
-  'models/ecommerce.models.js',
   'models/emr.model.js',
   'models/gratuity.model.js',
   'models/pharmacy.model.js',

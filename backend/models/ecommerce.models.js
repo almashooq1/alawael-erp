@@ -137,11 +137,12 @@ productSchema.virtual('isLowStock').get(function () {
   return this.totalStock <= this.lowStockThreshold;
 });
 
-// Pre-save hook to calculate final price
-productSchema.pre('save', function (next) {
+// Pre-save hook to calculate final price.
+// Async style (no next): a callback-style hook threw "next is not a function"
+// when a global async plugin hook made the chain mixed (W483/W494 class).
+productSchema.pre('save', async function () {
   this.finalPrice = this.price - (this.price * this.discount) / 100;
   this.updatedAt = new Date();
-  next();
 });
 
 // ============================================
@@ -191,14 +192,13 @@ const cartSchema = new mongoose.Schema(
   }
 );
 
-// Pre-save hook to recalculate totals
-cartSchema.pre('save', function (next) {
-  this.subtotal = this.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+// Pre-save hook to recalculate totals (async style — see productSchema note).
+cartSchema.pre('save', async function () {
+  this.subtotal = this.items.reduce((sum, item) => sum + (item.price || 0) * item.quantity, 0);
   this.tax = this.subtotal * 0.1; // 10% tax
   this.shipping = this.subtotal > 100 ? 0 : 10; // Free shipping > $100
   this.total = this.subtotal + this.tax + this.shipping - this.discount;
   this.updatedAt = new Date();
-  next();
 });
 
 // ============================================

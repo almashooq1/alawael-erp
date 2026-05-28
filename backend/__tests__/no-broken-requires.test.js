@@ -67,6 +67,11 @@ const FALSE_POSITIVE_ALLOWLIST = new Set([
   // next maintainer). Not a real require — the scanner is fooled by
   // the pattern living in a quoted string.
   path.join('__tests__', 'no-duplicate-model-registration-wave340.test.js'),
+  // W522 check-dormant-modules-script self-test writes `require('./fooService')`
+  // as fixture CONTENT into a temp file via `write('alpha.js', "require('./fooService'); ...")`.
+  // Not a real require — the scanner matches the literal string-fixture pattern
+  // through the surrounding quotes.
+  path.join('__tests__', 'check-dormant-modules-script.test.js'),
 ]);
 
 // Per-(file, target) allow-list for legitimately-optional dynamic loads.

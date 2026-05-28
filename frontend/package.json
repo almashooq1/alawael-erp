@@ -81,7 +81,7 @@
     "jest-environment-jsdom": "^29.7.0",
     "postcss": "^8.5.10",
     "tailwindcss": "^4.0.0",
-    "vite": "^6.3.5",
+    "vite": "^8.0.14",
     "whatwg-fetch": "^3.6.20"
   },
   "browserslist": {

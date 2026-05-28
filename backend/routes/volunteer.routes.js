@@ -172,7 +172,10 @@ router.post('/register', async (req, res) => {
   }
 });
 
-router.get('/:id', async (req, res) => {
+router.get('/:id', async (req, res, next) => {
+  // Fall through to literal siblings (/opportunities, /assignments, /training,
+  // /recognitions) when the segment isn't a valid ObjectId — W536.
+  if (!_mongoose.Types.ObjectId.isValid(req.params.id)) return next();
   try {
     const doc = await Volunteer.findOne({ _id: req.params.id, ...branchFilter(req) }) /* W448 */
       .lean();

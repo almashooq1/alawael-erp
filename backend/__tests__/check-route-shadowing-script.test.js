@@ -107,6 +107,24 @@ describe('analyzeFile detects shadowed literals in declaration order', () => {
     );
     expect(analyzeFile(fp)).toHaveLength(0);
   });
+
+  test('a :param route that falls through via next() does NOT shadow (guarded)', () => {
+    // Mirrors montessori.js: the /:id handler returns next() for literal subpaths.
+    const fp = fixture(
+      'guarded.routes.js',
+      `
+      const router = require('express').Router();
+      router.get('/:id', async (req, res, next) => {
+        if (['students', 'plans'].includes(req.params.id)) return next();
+        res.json(await Model.findById(req.params.id));
+      });
+      router.get('/students', (req, res) => res.json([]));
+      router.get('/plans', (req, res) => res.json([]));
+      module.exports = router;
+    `
+    );
+    expect(analyzeFile(fp)).toHaveLength(0);
+  });
 });
 
 describe('CLI exit contract', () => {

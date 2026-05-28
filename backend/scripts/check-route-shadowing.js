@@ -61,15 +61,6 @@ const BASELINE = new Set([
   'routes/media.routes.js::GET::/albums',
   'routes/media.routes.js::GET::/tags',
   'routes/media.routes.js::GET::/trash',
-  'routes/montessori.js::GET::/students',
-  'routes/montessori.js::GET::/plans',
-  'routes/montessori.js::GET::/sessions',
-  'routes/montessori.js::GET::/evaluations',
-  'routes/montessori.js::GET::/activities',
-  'routes/montessori.js::GET::/team',
-  'routes/montessori.js::GET::/parents',
-  'routes/montessori.js::GET::/media',
-  'routes/montessori.js::GET::/reports',
   'routes/scheduling-module.routes.js::GET::/appointments/calendar',
   'routes/ticketing-system.routes.js::GET::/sla-configs',
   'routes/ticketing-system.routes.js::GET::/escalation-rules',
@@ -132,7 +123,19 @@ function analyzeFile(file) {
   const routes = [];
   let m;
   METHOD_RE.lastIndex = 0;
-  while ((m = METHOD_RE.exec(src))) routes.push({ method: m[1], path: m[2] });
+  while ((m = METHOD_RE.exec(src))) routes.push({ method: m[1], path: m[2], start: m.index });
+
+  // A :param route whose handler can fall through (calls next()) — e.g.
+  // `if (subResources.includes(req.params.id)) return next();` — does NOT
+  // actually shadow its literal siblings at runtime. Detect that by scanning
+  // the route's body (its decl → the next route decl) for a next() call.
+  const hasFallthrough = idx => {
+    const body = src.slice(
+      routes[idx].start,
+      idx + 1 < routes.length ? routes[idx + 1].start : src.length
+    );
+    return /\bnext\s*\(/.test(body);
+  };
 
   const findings = [];
   for (let i = 0; i < routes.length; i++) {
@@ -142,7 +145,7 @@ function analyzeFile(file) {
       const p = routes[j];
       if (p.method !== r.method) continue;
       if (p.path.includes('*')) continue;
-      if (!isLiteral(p.path) && paramShadows(p.path, r.path)) {
+      if (!isLiteral(p.path) && paramShadows(p.path, r.path) && !hasFallthrough(j)) {
         findings.push({ method: r.method.toUpperCase(), literal: r.path, shadowedBy: p.path });
         break;
       }

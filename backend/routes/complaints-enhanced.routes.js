@@ -361,10 +361,10 @@ router.post('/public-submit', async (req, res) => {
 });
 
 /** GET /api/complaints-enhanced/:id */
-router.get('/:id', async (req, res) => {
+router.get('/:id', async (req, res, next) => {
   try {
-    if (!mongoose.isValidObjectId(req.params.id))
-      return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
+    // Non-ObjectId id → fall through to literal siblings (/categories, /sla-configs, /feedback).
+    if (!mongoose.isValidObjectId(req.params.id)) return next();
     const complaint = await ComplaintV2.findById(req.params.id)
       .populate('assignedTo', 'name email')
       .populate('departmentId', 'name')

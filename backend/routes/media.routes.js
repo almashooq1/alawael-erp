@@ -507,10 +507,11 @@ router.get('/list', authenticate, requireBranchAccess, async (req, res) => {
  * GET /api/media/:id
  * Get single media details
  */
-router.get('/:id', authenticate, requireBranchAccess, async (req, res) => {
+router.get('/:id', authenticate, requireBranchAccess, async (req, res, next) => {
   try {
+    // Non-ObjectId id → fall through to literal sibling routes (/albums, /tags, /trash).
     if (!req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
-      return res.status(400).json({ success: false, message: 'معرف غير صالح' });
+      return next();
     }
 
     const media = await Media.findById(req.params.id)

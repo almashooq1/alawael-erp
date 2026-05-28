@@ -462,8 +462,10 @@ router.post('/', async (req, res) => {
 /**
  * GET /:id — تفاصيل تذكرة
  */
-router.get('/:id', async (req, res) => {
+router.get('/:id', async (req, res, next) => {
   try {
+    // Non-ObjectId id → fall through to literal siblings (/sla-configs, /escalation-rules, /auto-assignments).
+    if (!require('mongoose').Types.ObjectId.isValid(req.params.id)) return next();
     const ticket = await TicketEnhanced.findById(req.params.id)
       .populate('createdBy', 'name email')
       .populate('assignedTo', 'name email')

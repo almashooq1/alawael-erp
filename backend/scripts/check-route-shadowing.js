@@ -32,7 +32,6 @@ const ROUTES_DIR = path.join(__dirname, '..', 'routes');
 // only — never add new entries; fix + remove). Format: "relFile::METHOD::path".
 // W531 fixed biometric-attendance + branch-enhanced; the rest chip down next.
 const BASELINE = new Set([
-  'routes/ai-recommendations.routes.js::GET::/metrics',
   'routes/archive.routes.js::POST::/bulk/archive',
   'routes/community.js::GET::/sessions/upcoming',
   'routes/community.js::GET::/sessions/stats',
@@ -47,12 +46,9 @@ const BASELINE = new Set([
   'routes/dashboardWidget.routes.js::GET::/health',
   'routes/documentAdvanced.routes.js::GET::/watermarks/templates',
   'routes/documentAdvanced.routes.js::GET::/qr/stats',
-  'routes/electronic-directives.routes.js::GET::/templates',
-  'routes/electronic-directives.routes.js::GET::/stats',
   'routes/enterprisePro.routes.js::PUT::/project-pro/tasks/reorder',
   'routes/enterpriseProPlus.routes.js::GET::/facilities/leases',
   'routes/enterpriseProPlus.routes.js::GET::/facilities/utilities',
-  'routes/gradebook.routes.js::GET::/reports',
   'routes/managementReview.routes.js::GET::/analytics',
   'routes/measurements.routes.js::GET::/categories',
   'routes/measurements.routes.js::GET::/programs',

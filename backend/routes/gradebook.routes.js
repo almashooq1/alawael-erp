@@ -93,6 +93,32 @@ router.get('/student/:studentId', async (req, res) => {
   }
 });
 
+// ── Get semester reports ─────────────────────────────────────
+// NOTE: literal /reports must precede /:id (validateObjectId would 400 on it).
+router.get('/reports', async (req, res) => {
+  try {
+    const { student, academicYear, semester, status } = req.query;
+    const filter = {};
+    if (student) filter.student = student;
+    if (academicYear) filter.academicYear = academicYear;
+    if (semester) filter.semester = semester;
+    if (status) filter.status = status;
+
+    const reports = await SemesterReport.find(filter)
+      .populate('student', 'name')
+      .populate('academicYear', 'name')
+      .populate('subjects.subject', 'name code')
+      .sort({ generatedAt: -1 })
+      .lean();
+
+    res.json({ success: true, data: reports });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ success: false, message: 'خطأ في جلب التقارير', error: safeError(error) });
+  }
+});
+
 // ── Get single gradebook ─────────────────────────────────────
 router.get('/:id', validateObjectId('id'), async (req, res) => {
   try {
@@ -322,31 +348,6 @@ router.post('/reports/generate', authorize(['admin', 'teacher']), async (req, re
     res
       .status(400)
       .json({ success: false, message: 'خطأ في إنشاء التقرير', error: safeError(error) });
-  }
-});
-
-// ── Get semester reports ─────────────────────────────────────
-router.get('/reports', async (req, res) => {
-  try {
-    const { student, academicYear, semester, status } = req.query;
-    const filter = {};
-    if (student) filter.student = student;
-    if (academicYear) filter.academicYear = academicYear;
-    if (semester) filter.semester = semester;
-    if (status) filter.status = status;
-
-    const reports = await SemesterReport.find(filter)
-      .populate('student', 'name')
-      .populate('academicYear', 'name')
-      .populate('subjects.subject', 'name code')
-      .sort({ generatedAt: -1 })
-      .lean();
-
-    res.json({ success: true, data: reports });
-  } catch (error) {
-    res
-      .status(500)
-      .json({ success: false, message: 'خطأ في جلب التقارير', error: safeError(error) });
   }
 });
 

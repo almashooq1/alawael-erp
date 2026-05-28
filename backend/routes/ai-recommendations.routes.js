@@ -76,9 +76,11 @@ router.get('/pending', requireMfaTier(1), async (req, res) => {
 });
 
 // ── Single bundle with explainability ─────────────────────────────────
-router.get('/:id', requireMfaTier(1), async (req, res) => {
+router.get('/:id', requireMfaTier(1), async (req, res, next) => {
+  const mongoose = require('mongoose');
+  // Fall through to literal sibling routes (e.g. /metrics) for non-ObjectId ids.
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) return next();
   try {
-    const mongoose = require('mongoose');
     const Bundle = mongoose.model('AiRecommendationBundle');
     const doc = await Bundle.findById(req.params.id).lean();
     if (!doc) return res.status(404).json({ success: false, code: 'NOT_FOUND' });
@@ -129,13 +131,11 @@ router.post('/:id/approve', requireMfaTier(2), async (req, res) => {
 router.post('/:id/reject', requireMfaTier(1), async (req, res) => {
   try {
     if (!req.body?.reasonCode) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          code: 'REASON_CODE_REQUIRED',
-          message: 'reasonCode is required to reject',
-        });
+      return res.status(400).json({
+        success: false,
+        code: 'REASON_CODE_REQUIRED',
+        message: 'reasonCode is required to reject',
+      });
     }
     const doc = await aiRecommendationService.reject({
       bundleId: req.params.id,

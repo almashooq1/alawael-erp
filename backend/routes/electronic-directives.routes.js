@@ -95,6 +95,42 @@ router.post('/', requireRole('admin', 'manager', 'doctor', 'clinician'), async (
   }
 });
 
+// ── GET /templates ─────────────────────────────────────────────────────────
+// NOTE: literal routes must precede /:id or Express casts them as Document ids.
+router.get('/templates', async (req, res) => {
+  try {
+    const ESign = safeModel('ESignatureTemplate');
+    if (!ESign) return res.json({ success: true, data: [] });
+    const data = await ESign.find({ branchId: req.user.branchId }).sort({ name: 1 }).lean();
+    res.json({ success: true, data });
+  } catch (err) {
+    safeError(res, err, 'directive templates');
+  }
+});
+
+// ── GET /stats ─────────────────────────────────────────────────────────────
+router.get('/stats', requireRole('admin', 'manager', 'supervisor'), async (req, res) => {
+  try {
+    const Document = safeModel('Document');
+    if (!Document)
+      return res.json({
+        success: true,
+        data: { total: 0, draft: 0, active: 0, revoked: 0, awaitingSignature: 0 },
+      });
+    const base = { branchId: req.user.branchId, category: 'directive' };
+    const [total, draft, active, revoked, awaitingSignature] = await Promise.all([
+      Document.countDocuments(base),
+      Document.countDocuments({ ...base, status: 'draft' }),
+      Document.countDocuments({ ...base, status: 'active' }),
+      Document.countDocuments({ ...base, status: 'revoked' }),
+      Document.countDocuments({ ...base, status: 'awaiting_signature' }),
+    ]);
+    res.json({ success: true, data: { total, draft, active, revoked, awaitingSignature } });
+  } catch (err) {
+    safeError(res, err, 'directive stats');
+  }
+});
+
 // ── GET /:id ───────────────────────────────────────────────────────────────
 router.get('/:id', async (req, res) => {
   try {
@@ -331,41 +367,6 @@ router.get('/:id/audit-trail', async (req, res) => {
     });
   } catch (err) {
     safeError(res, err, 'directive audit trail');
-  }
-});
-
-// ── GET /templates ─────────────────────────────────────────────────────────
-router.get('/templates', async (req, res) => {
-  try {
-    const ESign = safeModel('ESignatureTemplate');
-    if (!ESign) return res.json({ success: true, data: [] });
-    const data = await ESign.find({ branchId: req.user.branchId }).sort({ name: 1 }).lean();
-    res.json({ success: true, data });
-  } catch (err) {
-    safeError(res, err, 'directive templates');
-  }
-});
-
-// ── GET /stats ─────────────────────────────────────────────────────────────
-router.get('/stats', requireRole('admin', 'manager', 'supervisor'), async (req, res) => {
-  try {
-    const Document = safeModel('Document');
-    if (!Document)
-      return res.json({
-        success: true,
-        data: { total: 0, draft: 0, active: 0, revoked: 0, awaitingSignature: 0 },
-      });
-    const base = { branchId: req.user.branchId, category: 'directive' };
-    const [total, draft, active, revoked, awaitingSignature] = await Promise.all([
-      Document.countDocuments(base),
-      Document.countDocuments({ ...base, status: 'draft' }),
-      Document.countDocuments({ ...base, status: 'active' }),
-      Document.countDocuments({ ...base, status: 'revoked' }),
-      Document.countDocuments({ ...base, status: 'awaiting_signature' }),
-    ]);
-    res.json({ success: true, data: { total, draft, active, revoked, awaitingSignature } });
-  } catch (err) {
-    safeError(res, err, 'directive stats');
   }
 });
 

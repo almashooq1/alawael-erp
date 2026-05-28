@@ -12,6 +12,10 @@ router.get('/', (_req, res) => ok(res, { data: [], total: 0 }));
 router.post('/', (req, res) =>
   ok(res, { _id: `att_${Date.now()}`, status: 'present', ...req.body }, 201)
 );
+// Summary & patterns — must precede /:id or Express casts them as record ids.
+router.get('/summary', (_req, res) => ok(res, { present: 0, absent: 0, late: 0, rate: 0 }));
+router.get('/patterns', (_req, res) => ok(res, { trends: [], anomalies: [] }));
+
 router.get('/:id', (req, res) => ok(res, { _id: req.params.id }));
 router.put('/:id', (req, res) => ok(res, { _id: req.params.id, ...req.body }));
 router.delete('/:id', (req, res) => ok(res, { deleted: true }));
@@ -23,10 +27,6 @@ router.post('/bulk-check-in', (req, res) =>
 router.post('/bulk-check-out', (req, res) =>
   ok(res, { checked: req.body.ids ? req.body.ids.length : 0 })
 );
-
-// Summary & patterns
-router.get('/summary', (_req, res) => ok(res, { present: 0, absent: 0, late: 0, rate: 0 }));
-router.get('/patterns', (_req, res) => ok(res, { trends: [], anomalies: [] }));
 
 // By date/period
 router.get('/by-date/:date', (req, res) => ok(res, { date: req.params.date, records: [] }));

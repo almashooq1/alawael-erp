@@ -99,6 +99,26 @@ router.post('/', requireRole('admin', 'manager', 'supervisor'), async (req, res)
   }
 });
 
+// ── GET /stats ─────────────────────────────────────────────────────────────
+// NOTE: must precede /:id or Express casts "stats" as a FormTemplate ObjectId.
+router.get('/stats', requireRole('admin', 'manager', 'supervisor'), async (req, res) => {
+  try {
+    const FormTemplate = safeModel('FormTemplate');
+    const FormSubmission = safeModel('FormSubmission');
+    if (!FormTemplate) return res.json({ success: true, data: { templates: 0, submissions: 0 } });
+    const base = { branchId: req.user.branchId };
+    const [templates, published, submissions, pendingReview] = await Promise.all([
+      FormTemplate.countDocuments({ ...base, isDeleted: { $ne: true } }),
+      FormTemplate.countDocuments({ ...base, status: 'published', isDeleted: { $ne: true } }),
+      FormSubmission ? FormSubmission.countDocuments(base) : 0,
+      FormSubmission ? FormSubmission.countDocuments({ ...base, status: 'submitted' }) : 0,
+    ]);
+    res.json({ success: true, data: { templates, published, submissions, pendingReview } });
+  } catch (err) {
+    safeError(res, err, 'form template stats');
+  }
+});
+
 // ── GET /:id ───────────────────────────────────────────────────────────────
 router.get('/:id', async (req, res) => {
   try {
@@ -365,24 +385,5 @@ router.patch(
     }
   }
 );
-
-// ── GET /stats ─────────────────────────────────────────────────────────────
-router.get('/stats', requireRole('admin', 'manager', 'supervisor'), async (req, res) => {
-  try {
-    const FormTemplate = safeModel('FormTemplate');
-    const FormSubmission = safeModel('FormSubmission');
-    if (!FormTemplate) return res.json({ success: true, data: { templates: 0, submissions: 0 } });
-    const base = { branchId: req.user.branchId };
-    const [templates, published, submissions, pendingReview] = await Promise.all([
-      FormTemplate.countDocuments({ ...base, isDeleted: { $ne: true } }),
-      FormTemplate.countDocuments({ ...base, status: 'published', isDeleted: { $ne: true } }),
-      FormSubmission ? FormSubmission.countDocuments(base) : 0,
-      FormSubmission ? FormSubmission.countDocuments({ ...base, status: 'submitted' }) : 0,
-    ]);
-    res.json({ success: true, data: { templates, published, submissions, pendingReview } });
-  } catch (err) {
-    safeError(res, err, 'form template stats');
-  }
-});
 
 module.exports = router;

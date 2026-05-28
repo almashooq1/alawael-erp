@@ -183,6 +183,35 @@ router.get('/dashboard', requireRole('admin', 'manager', 'supervisor'), async (r
   }
 });
 
+// ── GET /stats ─────────────────────────────────────────────────────────────
+// NOTE: must precede /:id or Express casts "stats" as a Document ObjectId.
+router.get('/stats', requireRole('admin', 'manager', 'supervisor'), async (req, res) => {
+  try {
+    const Document = safeModel('Document');
+    const DocumentAccessLog = safeModel('DocumentAccessLog');
+    if (!Document)
+      return res.json({ success: true, data: { total: 0, expired: 0, expiringSoon: 0 } });
+    const base = { branchId: req.user.branchId, isDeleted: { $ne: true } };
+    const thirtyDays = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    const [total, expired, expiringSoon, accessCount] = await Promise.all([
+      Document.countDocuments(base),
+      Document.countDocuments({ ...base, expiryDate: { $lt: new Date() } }),
+      Document.countDocuments({ ...base, expiryDate: { $gte: new Date(), $lte: thirtyDays } }),
+      DocumentAccessLog
+        ? DocumentAccessLog.countDocuments({
+            accessedAt: { $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) },
+          })
+        : 0,
+    ]);
+    res.json({
+      success: true,
+      data: { total, expired, expiringSoon, accessLast7Days: accessCount },
+    });
+  } catch (err) {
+    safeError(res, err, 'document stats');
+  }
+});
+
 // ── GET /:id ───────────────────────────────────────────────────────────────
 router.get('/:id', async (req, res) => {
   try {
@@ -369,34 +398,6 @@ router.post('/:id/revoke-share', requireRole('admin', 'manager'), async (req, re
     res.json({ success: true, message: 'Share revoked' });
   } catch (err) {
     safeError(res, err, 'revoke share');
-  }
-});
-
-// ── GET /stats ─────────────────────────────────────────────────────────────
-router.get('/stats', requireRole('admin', 'manager', 'supervisor'), async (req, res) => {
-  try {
-    const Document = safeModel('Document');
-    const DocumentAccessLog = safeModel('DocumentAccessLog');
-    if (!Document)
-      return res.json({ success: true, data: { total: 0, expired: 0, expiringSoon: 0 } });
-    const base = { branchId: req.user.branchId, isDeleted: { $ne: true } };
-    const thirtyDays = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-    const [total, expired, expiringSoon, accessCount] = await Promise.all([
-      Document.countDocuments(base),
-      Document.countDocuments({ ...base, expiryDate: { $lt: new Date() } }),
-      Document.countDocuments({ ...base, expiryDate: { $gte: new Date(), $lte: thirtyDays } }),
-      DocumentAccessLog
-        ? DocumentAccessLog.countDocuments({
-            accessedAt: { $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) },
-          })
-        : 0,
-    ]);
-    res.json({
-      success: true,
-      data: { total, expired, expiringSoon, accessLast7Days: accessCount },
-    });
-  } catch (err) {
-    safeError(res, err, 'document stats');
   }
 });
 

@@ -177,13 +177,20 @@ const requireAdmin = (req, res, next) => {
  * Authorization middleware: checks role-based permissions
  */
 const authorize =
-  (roles = []) =>
+  (...args) =>
   (req, res, next) => {
     if (!req.user) {
       return res.status(401).json({ success: false, message: 'Authentication required' });
     }
+    // Accept BOTH call styles: authorize('admin', 'manager') varargs AND
+    // authorize(['admin', 'manager']) array (and authorize(ROLE_CONST_ARRAY)).
+    // A 2026-03-27 case-insensitive refactor (e870f5c9a) switched
+    // roles.includes(...) → roles.some(...); strings have .includes but NOT
+    // .some, so every varargs call site (~300) began throwing
+    // "roles.some is not a function" → 500. flat() normalises both forms.
+    const roles = args.flat();
     const userRole = (req.user.role || '').toLowerCase();
-    if (roles && roles.length > 0 && !roles.some(r => r.toLowerCase() === userRole)) {
+    if (roles.length > 0 && !roles.some(r => String(r).toLowerCase() === userRole)) {
       return res.status(403).json({ success: false, message: 'Insufficient permissions' });
     }
     next();

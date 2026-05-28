@@ -41,9 +41,16 @@ jobs:
         working-directory: backend
         run: npm ci --legacy-peer-deps 2>&1 || npm install --legacy-peer-deps
 
-      - name: Run backend tests
+      - name: Run backend tests (canonical sprint gate)
         working-directory: backend
-        run: npm run quality:ci
+        # Was `npm run quality:ci` = audit + guard + the FULL `npm test`
+        # (--coverage --runInBand over 2000+ files). That consistently blew the
+        # 25-min cap and got cancelled → permanent false-failure that blocked
+        # deploy even though the Sprint Tests workflow was green. Run the
+        # project's CANONICAL gate instead: test:guard (meta-tests) + test:sprint
+        # (~13 min, the gate sprint-tests.yml already runs green). The security
+        # audit stays as its own step below.
+        run: npm run test:guard && npm run test:sprint
         env:
           NODE_ENV: test
           JWT_SECRET: test-jwt-secret-ci-only

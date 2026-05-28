@@ -4,6 +4,7 @@
  */
 
 const express = require('express');
+const mongoose = require('mongoose');
 const router = express.Router();
 const { protect, _authorize } = require('../middleware/auth');
 
@@ -69,7 +70,12 @@ router.post('/create', protect, dashboardController.createDashboard);
  * الحصول على لوحة المعلومات
  * @param {String} dashboardId - Dashboard ID
  */
-router.get('/:dashboardId', protect, dashboardController.getDashboard);
+router.get('/:dashboardId', protect, (req, res, next) => {
+  // W542: non-ObjectId segment → fall through to literal siblings declared later
+  // in this file (/templates, /themes, /stats, /health).
+  if (!mongoose.Types.ObjectId.isValid(req.params.dashboardId)) return next();
+  return dashboardController.getDashboard(req, res, next);
+});
 
 /**
  * GET /api/dashboard/:dashboardId/widgets

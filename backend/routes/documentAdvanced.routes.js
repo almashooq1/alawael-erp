@@ -305,7 +305,9 @@ router.get(
   authenticateToken,
   requireBranchAccess,
   requireBranchAccess,
-  wrap(async (req, res) => {
+  wrap(async (req, res, next) => {
+    // W544: non-ObjectId → fall through to literal sibling /watermarks/templates.
+    if (!/^[0-9a-fA-F]{24}$/.test(req.params.documentId)) return next('route');
     const result = await watermarkService.getDocumentWatermarks(req.params.documentId);
     res.json(result);
   })
@@ -1018,7 +1020,9 @@ router.get(
   authenticateToken,
   requireBranchAccess,
   requireBranchAccess,
-  wrap(async (req, res) => {
+  wrap(async (req, res, next) => {
+    // W544: non-ObjectId → fall through to literal sibling /qr/stats.
+    if (!/^[0-9a-fA-F]{24}$/.test(req.params.documentId)) return next('route');
     const result = await qrService.getDocumentQRCodes(req.params.documentId);
     res.json(result);
   })

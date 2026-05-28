@@ -153,7 +153,8 @@ const KNOWN_DORMANT_BASELINE = new Set([
   'routes/hr/hr-webhooks.routes.js',
   'services/base/BaseCrudService.js',
   'services/clinical/clinicalProgress.service.js',
-  'services/crisisOrchestrator.service.js',
+  // W524: crisisOrchestrator.service.js WIRED at /api/clinical-crisis
+  // (routes/clinical-crisis.routes.js) per ADR-033 — removed from baseline.
   'services/documentAuditService.js',
   'services/documentComparisonService.js',
   'services/documentExportService.js',

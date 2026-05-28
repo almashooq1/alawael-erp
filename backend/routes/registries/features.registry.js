@@ -41,6 +41,7 @@ module.exports = function registerFeatureRoutes(
   const restraintSeclusionRoutes = safeRequire('../routes/restraint-seclusion.routes');
   const seizureLogRoutes = safeRequire('../routes/seizure-log.routes');
   const safeguardingRoutes = safeRequire('../routes/safeguarding.routes');
+  const clinicalCrisisRoutes = safeRequire('../routes/clinical-crisis.routes');
   const communicationAidRoutes = safeRequire('../routes/communication-aid.routes');
   const assistiveDeviceRoutes = safeRequire('../routes/assistive-device.routes');
   const cbahiRoutes = safeRequire('../routes/cbahi.routes');
@@ -121,6 +122,10 @@ module.exports = function registerFeatureRoutes(
   dualMountAuth(app, 'seizure-log', seizureLogRoutes, authenticate);
   // Wave 357: Safeguarding (بلاغ حماية) — intake-to-closure + authority referral; CBAHI + Saudi child protection
   dualMountAuth(app, 'safeguarding', safeguardingRoutes, authenticate);
+  // Wave 524: Clinical crisis (أزمة المستفيد السريرية) — W458 crisisOrchestrator REST surface.
+  // BENEFICIARY-clinical crisis (seizure/safeguarding incident lifecycle), distinct from the
+  // FACILITY-emergency surface at /api/crisis. See ADR-033 for the domain boundary.
+  dualMountAuth(app, 'clinical-crisis', clinicalCrisisRoutes, authenticate);
   // Wave 358: AAC profile (ملف التواصل البديل/المعزّز) — ASHA-aligned modality tiers
   dualMountAuth(app, 'communication-aid', communicationAidRoutes, authenticate);
   // Wave 359: Assistive device loan + maintenance lifecycle (الأجهزة المساعدة)

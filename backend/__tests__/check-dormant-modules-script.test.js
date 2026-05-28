@@ -249,11 +249,12 @@ describe('check-dormant-modules — baseline + skip structures', () => {
     expect(KNOWN_DORMANT_BASELINE).toBeInstanceOf(Set);
   });
 
-  it('baseline holds the 29 entries triaged 2026-05-28 (ratchet-DOWN as resolved)', () => {
+  it('baseline holds 28 entries (29 triaged 2026-05-28; W524 wired crisisOrchestrator)', () => {
     // When a module is wired-up or deleted, drop it here AND from the
     // baseline in the same commit. Bumping this number without a
     // corresponding source change should fail the CLI contract below.
-    expect(KNOWN_DORMANT_BASELINE.size).toBe(29);
+    // W524: crisisOrchestrator.service.js wired at /api/clinical-crisis → 29→28.
+    expect(KNOWN_DORMANT_BASELINE.size).toBe(28);
   });
 
   it('every baseline entry uses POSIX paths (no backslashes, no absolute paths)', () => {

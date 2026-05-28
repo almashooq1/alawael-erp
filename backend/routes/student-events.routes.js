@@ -111,6 +111,50 @@ router.post('/', requireRole('admin', 'manager', 'supervisor'), async (req, res)
   }
 });
 
+// ── GET /calendar ──────────────────────────────────────────────────────────
+// NOTE: literal routes must precede /:id or Express casts them as ids.
+router.get('/calendar', async (req, res) => {
+  try {
+    const StudentActivity = safeModel('StudentActivity');
+    if (!StudentActivity) return res.json({ success: true, data: [] });
+    const { month, year } = req.query;
+    const now = new Date();
+    const y = parseInt(year || now.getFullYear());
+    const m = parseInt(month || now.getMonth() + 1);
+    const start = new Date(y, m - 1, 1);
+    const end = new Date(y, m, 0, 23, 59, 59);
+    const data = await StudentActivity.find({
+      branchId: req.user.branchId,
+      activityType: 'event',
+      date: { $gte: start, $lte: end },
+      'data.status': { $ne: 'cancelled' },
+    })
+      .select('date data.title data.eventType data.status data.maxCapacity data.registrations')
+      .lean();
+    res.json({ success: true, data });
+  } catch (err) {
+    safeError(res, err, 'events calendar');
+  }
+});
+
+// ── GET /stats ─────────────────────────────────────────────────────────────
+router.get('/stats', requireRole('admin', 'manager', 'supervisor'), async (req, res) => {
+  try {
+    const StudentActivity = safeModel('StudentActivity');
+    if (!StudentActivity)
+      return res.json({ success: true, data: { total: 0, published: 0, upcoming: 0 } });
+    const base = { branchId: req.user.branchId, activityType: 'event' };
+    const [total, published, cancelled] = await Promise.all([
+      StudentActivity.countDocuments(base),
+      StudentActivity.countDocuments({ ...base, 'data.status': 'published' }),
+      StudentActivity.countDocuments({ ...base, 'data.status': 'cancelled' }),
+    ]);
+    res.json({ success: true, data: { total, published, cancelled, upcoming: published } });
+  } catch (err) {
+    safeError(res, err, 'event stats');
+  }
+});
+
 // ── GET /:id ───────────────────────────────────────────────────────────────
 router.get('/:id', async (req, res) => {
   try {
@@ -354,49 +398,6 @@ router.post('/:id/feedback', async (req, res) => {
     res.json({ success: true, message: 'Feedback submitted' });
   } catch (err) {
     safeError(res, err, 'event feedback');
-  }
-});
-
-// ── GET /calendar ──────────────────────────────────────────────────────────
-router.get('/calendar', async (req, res) => {
-  try {
-    const StudentActivity = safeModel('StudentActivity');
-    if (!StudentActivity) return res.json({ success: true, data: [] });
-    const { month, year } = req.query;
-    const now = new Date();
-    const y = parseInt(year || now.getFullYear());
-    const m = parseInt(month || now.getMonth() + 1);
-    const start = new Date(y, m - 1, 1);
-    const end = new Date(y, m, 0, 23, 59, 59);
-    const data = await StudentActivity.find({
-      branchId: req.user.branchId,
-      activityType: 'event',
-      date: { $gte: start, $lte: end },
-      'data.status': { $ne: 'cancelled' },
-    })
-      .select('date data.title data.eventType data.status data.maxCapacity data.registrations')
-      .lean();
-    res.json({ success: true, data });
-  } catch (err) {
-    safeError(res, err, 'events calendar');
-  }
-});
-
-// ── GET /stats ─────────────────────────────────────────────────────────────
-router.get('/stats', requireRole('admin', 'manager', 'supervisor'), async (req, res) => {
-  try {
-    const StudentActivity = safeModel('StudentActivity');
-    if (!StudentActivity)
-      return res.json({ success: true, data: { total: 0, published: 0, upcoming: 0 } });
-    const base = { branchId: req.user.branchId, activityType: 'event' };
-    const [total, published, cancelled] = await Promise.all([
-      StudentActivity.countDocuments(base),
-      StudentActivity.countDocuments({ ...base, 'data.status': 'published' }),
-      StudentActivity.countDocuments({ ...base, 'data.status': 'cancelled' }),
-    ]);
-    res.json({ success: true, data: { total, published, cancelled, upcoming: published } });
-  } catch (err) {
-    safeError(res, err, 'event stats');
   }
 });
 

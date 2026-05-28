@@ -99,6 +99,51 @@ router.post('/', async (req, res) => {
   }
 });
 
+// ── GET /categories ────────────────────────────────────────────────────────
+// NOTE: literal routes must precede /:id or Express casts them as ids.
+router.get('/categories', (req, res) => {
+  res.json({
+    success: true,
+    data: [
+      { key: 'service_quality', label: 'جودة الخدمة' },
+      { key: 'staff_behavior', label: 'سلوك الموظف' },
+      { key: 'facilities', label: 'المرافق والتسهيلات' },
+      { key: 'scheduling', label: 'المواعيد والجدولة' },
+      { key: 'billing', label: 'الفواتير والمدفوعات' },
+      { key: 'privacy', label: 'الخصوصية والسرية' },
+      { key: 'other', label: 'أخرى' },
+    ],
+  });
+});
+
+// ── GET /stats ─────────────────────────────────────────────────────────────
+router.get('/stats', requireRole('admin', 'manager', 'supervisor'), async (req, res) => {
+  try {
+    const Communication = safeModel('Communication');
+    if (!Communication)
+      return res.json({ success: true, data: { total: 0, open: 0, resolved: 0, escalated: 0 } });
+    const base = { branchId: req.user.branchId, channel: 'complaint' };
+    const [total, open, resolved, escalated] = await Promise.all([
+      Communication.countDocuments(base),
+      Communication.countDocuments({ ...base, status: 'open' }),
+      Communication.countDocuments({ ...base, status: 'resolved' }),
+      Communication.countDocuments({ ...base, isEscalated: true }),
+    ]);
+    res.json({
+      success: true,
+      data: {
+        total,
+        open,
+        resolved,
+        escalated,
+        resolutionRate: total > 0 ? ((resolved / total) * 100).toFixed(1) : 0,
+      },
+    });
+  } catch (err) {
+    safeError(res, err, 'complaint stats');
+  }
+});
+
 // ── GET /:id ───────────────────────────────────────────────────────────────
 router.get('/:id', async (req, res) => {
   try {
@@ -272,50 +317,6 @@ router.post('/:id/feedback', async (req, res) => {
     res.json({ success: true, data: doc });
   } catch (err) {
     safeError(res, err, 'submit complaint feedback');
-  }
-});
-
-// ── GET /categories ────────────────────────────────────────────────────────
-router.get('/categories', (req, res) => {
-  res.json({
-    success: true,
-    data: [
-      { key: 'service_quality', label: 'جودة الخدمة' },
-      { key: 'staff_behavior', label: 'سلوك الموظف' },
-      { key: 'facilities', label: 'المرافق والتسهيلات' },
-      { key: 'scheduling', label: 'المواعيد والجدولة' },
-      { key: 'billing', label: 'الفواتير والمدفوعات' },
-      { key: 'privacy', label: 'الخصوصية والسرية' },
-      { key: 'other', label: 'أخرى' },
-    ],
-  });
-});
-
-// ── GET /stats ─────────────────────────────────────────────────────────────
-router.get('/stats', requireRole('admin', 'manager', 'supervisor'), async (req, res) => {
-  try {
-    const Communication = safeModel('Communication');
-    if (!Communication)
-      return res.json({ success: true, data: { total: 0, open: 0, resolved: 0, escalated: 0 } });
-    const base = { branchId: req.user.branchId, channel: 'complaint' };
-    const [total, open, resolved, escalated] = await Promise.all([
-      Communication.countDocuments(base),
-      Communication.countDocuments({ ...base, status: 'open' }),
-      Communication.countDocuments({ ...base, status: 'resolved' }),
-      Communication.countDocuments({ ...base, isEscalated: true }),
-    ]);
-    res.json({
-      success: true,
-      data: {
-        total,
-        open,
-        resolved,
-        escalated,
-        resolutionRate: total > 0 ? ((resolved / total) * 100).toFixed(1) : 0,
-      },
-    });
-  } catch (err) {
-    safeError(res, err, 'complaint stats');
   }
 });
 

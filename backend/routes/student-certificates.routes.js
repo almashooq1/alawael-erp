@@ -94,6 +94,50 @@ router.post('/generate', requireRole('admin', 'manager', 'supervisor'), async (r
   }
 });
 
+// ── GET /types ─────────────────────────────────────────────────────────────
+// NOTE: literal routes must precede /:id or Express casts them as Document ids.
+router.get('/types', (req, res) => {
+  res.json({
+    success: true,
+    data: [
+      { key: 'completion', label: 'شهادة إتمام البرنامج', requiresExpiry: false },
+      { key: 'attendance', label: 'شهادة حضور', requiresExpiry: false },
+      { key: 'assessment', label: 'شهادة تقييم', requiresExpiry: true },
+      { key: 'achievement', label: 'شهادة إنجاز', requiresExpiry: false },
+      { key: 'enrollment', label: 'شهادة تسجيل', requiresExpiry: true },
+      { key: 'medical_clearance', label: 'شهادة تصريح طبي', requiresExpiry: true },
+      { key: 'disability', label: 'شهادة إعاقة', requiresExpiry: true },
+    ],
+  });
+});
+
+// ── GET /stats ─────────────────────────────────────────────────────────────
+router.get('/stats', requireRole('admin', 'manager', 'supervisor'), async (req, res) => {
+  try {
+    const Document = safeModel('Document');
+    if (!Document)
+      return res.json({
+        success: true,
+        data: { total: 0, issued: 0, revoked: 0, expiringSoon: 0 },
+      });
+    const base = { branchId: req.user.branchId, category: 'certificate' };
+    const thirtyDays = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    const [total, issued, revoked, expiringSoon] = await Promise.all([
+      Document.countDocuments(base),
+      Document.countDocuments({ ...base, status: 'issued' }),
+      Document.countDocuments({ ...base, status: 'revoked' }),
+      Document.countDocuments({
+        ...base,
+        status: 'issued',
+        expiryDate: { $lte: thirtyDays, $gte: new Date() },
+      }),
+    ]);
+    res.json({ success: true, data: { total, issued, revoked, expiringSoon } });
+  } catch (err) {
+    safeError(res, err, 'certificate stats');
+  }
+});
+
 // ── GET /:id ───────────────────────────────────────────────────────────────
 router.get('/:id', async (req, res) => {
   try {
@@ -203,49 +247,6 @@ router.post('/verify', async (req, res) => {
     });
   } catch (err) {
     safeError(res, err, 'verify certificate');
-  }
-});
-
-// ── GET /types ─────────────────────────────────────────────────────────────
-router.get('/types', (req, res) => {
-  res.json({
-    success: true,
-    data: [
-      { key: 'completion', label: 'شهادة إتمام البرنامج', requiresExpiry: false },
-      { key: 'attendance', label: 'شهادة حضور', requiresExpiry: false },
-      { key: 'assessment', label: 'شهادة تقييم', requiresExpiry: true },
-      { key: 'achievement', label: 'شهادة إنجاز', requiresExpiry: false },
-      { key: 'enrollment', label: 'شهادة تسجيل', requiresExpiry: true },
-      { key: 'medical_clearance', label: 'شهادة تصريح طبي', requiresExpiry: true },
-      { key: 'disability', label: 'شهادة إعاقة', requiresExpiry: true },
-    ],
-  });
-});
-
-// ── GET /stats ─────────────────────────────────────────────────────────────
-router.get('/stats', requireRole('admin', 'manager', 'supervisor'), async (req, res) => {
-  try {
-    const Document = safeModel('Document');
-    if (!Document)
-      return res.json({
-        success: true,
-        data: { total: 0, issued: 0, revoked: 0, expiringSoon: 0 },
-      });
-    const base = { branchId: req.user.branchId, category: 'certificate' };
-    const thirtyDays = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-    const [total, issued, revoked, expiringSoon] = await Promise.all([
-      Document.countDocuments(base),
-      Document.countDocuments({ ...base, status: 'issued' }),
-      Document.countDocuments({ ...base, status: 'revoked' }),
-      Document.countDocuments({
-        ...base,
-        status: 'issued',
-        expiryDate: { $lte: thirtyDays, $gte: new Date() },
-      }),
-    ]);
-    res.json({ success: true, data: { total, issued, revoked, expiringSoon } });
-  } catch (err) {
-    safeError(res, err, 'certificate stats');
   }
 });
 

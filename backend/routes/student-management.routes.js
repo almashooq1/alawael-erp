@@ -87,6 +87,44 @@ router.post('/', requireRole('admin', 'manager', 'receptionist'), async (req, re
   }
 });
 
+// ── GET /classes ───────────────────────────────────────────────────────────
+// NOTE: literal collection routes must precede /:id or Express casts them as ids.
+router.get('/classes', async (req, res) => {
+  try {
+    const Beneficiary = safeModel('Beneficiary');
+    if (!Beneficiary) return res.json({ success: true, data: [] });
+    const classes = await Beneficiary.aggregate([
+      { $match: { branchId: req.user.branchId, classId: { $exists: true, $ne: null } } },
+      { $group: { _id: '$classId', studentCount: { $sum: 1 } } },
+    ]);
+    res.json({ success: true, data: classes });
+  } catch (err) {
+    safeError(res, err, 'list classes');
+  }
+});
+
+// ── GET /stats ─────────────────────────────────────────────────────────────
+router.get('/stats', requireRole('admin', 'manager', 'supervisor'), async (req, res) => {
+  try {
+    const Beneficiary = safeModel('Beneficiary');
+    if (!Beneficiary)
+      return res.json({ success: true, data: { total: 0, active: 0, inactive: 0 } });
+    const base = { branchId: req.user.branchId, type: 'student' };
+    const [total, active, graduated, transferred] = await Promise.all([
+      Beneficiary.countDocuments(base),
+      Beneficiary.countDocuments({ ...base, enrollmentStatus: 'active' }),
+      Beneficiary.countDocuments({ ...base, enrollmentStatus: 'graduated' }),
+      Beneficiary.countDocuments({ ...base, enrollmentStatus: 'transferred' }),
+    ]);
+    res.json({
+      success: true,
+      data: { total, active, graduated, transferred, inactive: total - active },
+    });
+  } catch (err) {
+    safeError(res, err, 'student stats');
+  }
+});
+
 // ── GET /:id ───────────────────────────────────────────────────────────────
 router.get('/:id', async (req, res) => {
   try {
@@ -253,42 +291,5 @@ router.post(
     }
   }
 );
-
-// ── GET /classes ───────────────────────────────────────────────────────────
-router.get('/classes', async (req, res) => {
-  try {
-    const Beneficiary = safeModel('Beneficiary');
-    if (!Beneficiary) return res.json({ success: true, data: [] });
-    const classes = await Beneficiary.aggregate([
-      { $match: { branchId: req.user.branchId, classId: { $exists: true, $ne: null } } },
-      { $group: { _id: '$classId', studentCount: { $sum: 1 } } },
-    ]);
-    res.json({ success: true, data: classes });
-  } catch (err) {
-    safeError(res, err, 'list classes');
-  }
-});
-
-// ── GET /stats ─────────────────────────────────────────────────────────────
-router.get('/stats', requireRole('admin', 'manager', 'supervisor'), async (req, res) => {
-  try {
-    const Beneficiary = safeModel('Beneficiary');
-    if (!Beneficiary)
-      return res.json({ success: true, data: { total: 0, active: 0, inactive: 0 } });
-    const base = { branchId: req.user.branchId, type: 'student' };
-    const [total, active, graduated, transferred] = await Promise.all([
-      Beneficiary.countDocuments(base),
-      Beneficiary.countDocuments({ ...base, enrollmentStatus: 'active' }),
-      Beneficiary.countDocuments({ ...base, enrollmentStatus: 'graduated' }),
-      Beneficiary.countDocuments({ ...base, enrollmentStatus: 'transferred' }),
-    ]);
-    res.json({
-      success: true,
-      data: { total, active, graduated, transferred, inactive: total - active },
-    });
-  } catch (err) {
-    safeError(res, err, 'student stats');
-  }
-});
 
 module.exports = router;

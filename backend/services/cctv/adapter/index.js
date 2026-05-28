@@ -26,8 +26,15 @@ function _targetKey(opts) {
   return opts?.ip || 'global';
 }
 
+// W548: single lazy reader for HIKVISION_MODE — keeps the env read inside a
+// plain function (Dynatrace-safe per Phase 27 + detectable by the W414 guard,
+// which can't see getter/`=> ({` arrow bodies) and DRY across all call sites.
+function resolveMode() {
+  return (process.env.HIKVISION_MODE || 'mock').toLowerCase();
+}
+
 function selectImpl() {
-  const mode = (process.env.HIKVISION_MODE || 'mock').toLowerCase();
+  const mode = resolveMode();
   if (mode === 'live') return live;
   if (mode === 'mock') return mock;
   return mock;
@@ -122,13 +129,13 @@ const surface = [
 
 const adapter = {
   get mode() {
-    return (process.env.HIKVISION_MODE || 'mock').toLowerCase();
+    return resolveMode();
   },
 };
 for (const fn of surface) adapter[fn] = wrap(fn);
 
 adapter.getConfig = () => ({
-  mode: (process.env.HIKVISION_MODE || 'mock').toLowerCase(),
+  mode: resolveMode(),
   surface,
   breakers: perTargetBreaker.snapshot(),
   agents: httpAgentPool.snapshot(),

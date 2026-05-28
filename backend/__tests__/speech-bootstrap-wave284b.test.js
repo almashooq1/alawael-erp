@@ -83,8 +83,12 @@ describe('W284b — Speech routes + bootstrap', () => {
   });
 
   describe('branch isolation (W269 pattern)', () => {
-    it('GET /recordings/:id enforces cross-branch isolation', () => {
-      expect(ROUTES).toMatch(/SPEECH_CROSS_BRANCH_DENIED/);
+    it('GET /recordings/:id enforces cross-branch isolation (W413: 404-unified)', () => {
+      // W413 replaced the dedicated SPEECH_CROSS_BRANCH_DENIED 403 with a unified
+      // 404 (SPEECH_RECORDING_NOT_FOUND) so a foreign-branch caller can't probe
+      // a recording's existence. Verify the cross-branch comparison + denial.
+      expect(ROUTES).toMatch(/String\(rec\.branchId\)\s*!==\s*String\(userBranch\)/);
+      expect(ROUTES).toMatch(/SPEECH_RECORDING_NOT_FOUND/);
     });
 
     it('GET /recordings filters by branchId when present on user', () => {

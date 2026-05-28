@@ -147,32 +147,28 @@ const KNOWN_DORMANT_BASELINE = new Set([
   'services/hr/hrCredentialStatusSync.js', // ← scripts/hr-credential-sync.js
   'services/rehabSeedPlanner.js', // ← scripts/rehab-seed-planner.js
 
-  // TEST_ONLY (24) — built + unit-tested but referenced by NO production
-  // code path (only test files). The real dormancy class. Each needs a
-  // wire-up (mount/bootstrap) OR a delete decision — see triage doc.
-  'routes/hr/hr-webhooks.routes.js',
-  'services/base/BaseCrudService.js',
-  'services/clinical/clinicalProgress.service.js',
-  // W524: crisisOrchestrator.service.js WIRED at /api/clinical-crisis
-  // (routes/clinical-crisis.routes.js) per ADR-033 — removed from baseline.
-  // W526: the 6 flat services/documentXService.js DELETED — confirmed
-  // dead duplicates of the wired services/documents/documentX.service.js
-  // suite (documentAdvanced.routes.js consumes the organized versions).
-  // 0 production referrers; live versions are supersets.
-  'services/finance/servicePricing.service.js',
-  'services/finance/zatcaCalculation.service.js',
-  'services/gpsSecurityService.js',
-  'services/hr/saudiLaborCalculations.service.js',
-  'services/isolationForest.service.js',
-  'services/policyEngine.service.js',
-  'services/rehabilitation/rehabilitationCalculations.service.js',
-  'services/rehabilitation/rehabProgressCalculations.service.js',
-  'services/rehabilitation/RehabService.js',
-  'services/reporting/webhookHandler.js',
-  'services/ruleBuilder.service.js',
-  'services/scheduling/waitlistPriority.service.js',
-  'services/smartFleetDashboard.service.js',
-  'services/smartGPSWebSocket.service.js',
+  // TEST_ONLY — built + unit-tested but referenced by NO production code
+  // path. The real dormancy class. Disposition history (see triage doc):
+  //   W524: crisisOrchestrator.service.js WIRED at /api/clinical-crisis
+  //         (ADR-033) — removed from baseline.
+  //   W526: 6 flat services/documentXService.js DELETED — dead duplicates
+  //         of the wired services/documents/* suite.
+  //   W527: 10 bulk-import orphans (no live sibling, 0 referrers, dead
+  //         2+ months) DELETED — policyEngine, ruleBuilder,
+  //         smartFleetDashboard, smartGPSWebSocket, servicePricing,
+  //         saudiLaborCalculations, clinicalProgress,
+  //         rehabilitationCalculations, rehabProgressCalculations,
+  //         waitlistPriority. See triage doc "W527 disposition".
+  //
+  // The 7 below are HELD (NOT auto-disposed) — each has a reason it
+  // needs individual / stakeholder review before wire-or-delete:
+  'routes/hr/hr-webhooks.routes.js', // deliberate Phase16-18 ship; verify intended mount
+  'services/base/BaseCrudService.js', // base class — adopt across CRUD services OR delete
+  'services/finance/zatcaCalculation.service.js', // ⚠ ZATCA compliance — verify vs live zatca path first
+  'services/gpsSecurityService.js', // entangled w/ W440 security drift-guard (verifyAPIKey timing-safe)
+  'services/isolationForest.service.js', // deliberate Phase16-18 ship — anomaly ML; wire OR delete
+  'services/rehabilitation/RehabService.js', // deliberate module add; rehab system is fragmented (future ADR)
+  'services/reporting/webhookHandler.js', // Phase10 "delivered/read receipts end-to-end" — wire-up likely missed
 ]);
 
 function walk(rootAbs, accept) {

@@ -115,3 +115,56 @@ When a module is wired-up or deleted, remove it from
 `backend/__tests__/check-dormant-modules-script.test.js`. The detector fails CI
 on either a NEW dormant (not in baseline) or a STALE baseline entry (now wired),
 forcing the baseline to stay equal to source truth.
+
+## Disposition log
+
+### W524 — crisisOrchestrator WIRED (1)
+
+`services/crisisOrchestrator.service.js` → mounted at `/api/clinical-crisis`
+(`routes/clinical-crisis.routes.js`) per [ADR-033](../architecture/decisions/033-crisis-subsystem-boundary.md).
+Unique clinical value (W356/W357 integration) — NOT a duplicate.
+
+### W526 — 6 dead document duplicates DELETED
+
+`services/document{Audit,Comparison,Export,Favorites,QR,Watermark}Service.js`
+— superseded by the wired `services/documents/documentX.service.js` suite
+(live replacement exists → safe delete). ~1497 LOC + 6 tests removed.
+
+### W527 — 10 bulk-import orphans DELETED
+
+These were NOT duplicates (no live sibling) — they were code dumped by the
+two mega-restructuring commits (`b759a656c` 2026-03-19 / `20c3461ad`
+2026-04-04), never wired, **0 production referrers**, dead 2+ months, with
+only their own auto-generated `tests/unit/*.test.js` smoke tests (none in
+`sprint-tests.txt`, none a wave drift-guard). Deleted under the ADR-030
+"dormant module disposition" framework (abandoned import → retire):
+
+| Deleted service                                                 | Origin commit |
+| --------------------------------------------------------------- | ------------- |
+| `services/policyEngine.service.js`                              | b759a656c     |
+| `services/ruleBuilder.service.js`                               | b759a656c     |
+| `services/smartFleetDashboard.service.js`                       | b759a656c     |
+| `services/smartGPSWebSocket.service.js`                         | b759a656c     |
+| `services/finance/servicePricing.service.js`                    | 20c3461ad     |
+| `services/hr/saudiLaborCalculations.service.js`                 | 20c3461ad     |
+| `services/clinical/clinicalProgress.service.js`                 | 20c3461ad     |
+| `services/rehabilitation/rehabilitationCalculations.service.js` | 20c3461ad     |
+| `services/rehabilitation/rehabProgressCalculations.service.js`  | 20c3461ad     |
+| `services/scheduling/waitlistPriority.service.js`               | 20c3461ad     |
+
+**Restore recipe** (if a capability is ever wanted): `git show <W527-commit>^:backend/services/<path>` or `git checkout <W527-commit>^ -- backend/services/<path>`.
+
+### Still HELD (7 TEST_ONLY + 5 CLI_TOOL = baseline 12)
+
+Deliberately NOT auto-disposed — each needs individual or stakeholder review:
+
+- `services/finance/zatcaCalculation.service.js` — ⚠ ZATCA tax compliance; verify against the live ZATCA path before any delete.
+- `services/gpsSecurityService.js` — entangled with the **W440** security drift-guard (`verifyAPIKey` timing-safe assertion); deleting needs editing that test.
+- `services/base/BaseCrudService.js` — base class; adopt across CRUD services OR delete.
+- `services/isolationForest.service.js` — anomaly-ML, shipped in the deliberate Phase 16-18 commit; wire OR delete.
+- `services/rehabilitation/RehabService.js` — deliberate module add; the rehab subsystem is fragmented (candidate for a future consolidation ADR).
+- `services/reporting/webhookHandler.js` — Phase 10 "delivered/read receipts end-to-end"; the wire-up was likely missed (wire candidate).
+- `routes/hr/hr-webhooks.routes.js` — deliberate Phase 16-18 ship; verify the intended mount.
+- 5 CLI_TOOL (insuranceTariffsBootstrap / hrAdaptiveRetentionService / hrAuditRetentionService / hrCredentialStatusSync / rehabSeedPlanner) — admin-script-invoked by design; keep unless a scheduled cron is wanted.
+
+**Net: dormant 35 → 12 across W522-W527 (−66%).**

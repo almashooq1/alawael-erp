@@ -28,6 +28,7 @@ const {
   buildTokenIndex,
   isReferenced,
   diffBaseline,
+  stripConventionalSuffix,
   KNOWN_DORMANT_BASELINE,
   GENERIC_NAMES,
   SKIP_DIR_NAMES,
@@ -101,35 +102,96 @@ describe('check-dormant-modules — buildTokenIndex (pure)', () => {
   });
 });
 
+describe('check-dormant-modules — stripConventionalSuffix (pure)', () => {
+  it('strips .service suffix', () => {
+    expect(stripConventionalSuffix('rehabilitation.service')).toBe('rehabilitation');
+  });
+
+  it('strips .routes suffix', () => {
+    expect(stripConventionalSuffix('biometric-attendance.routes')).toBe('biometric-attendance');
+  });
+
+  it('strips .model suffix', () => {
+    expect(stripConventionalSuffix('user.model')).toBe('user');
+  });
+
+  it('returns null when no conventional suffix present (avoids generic-word match)', () => {
+    expect(stripConventionalSuffix('chainAuditor')).toBeNull();
+    expect(stripConventionalSuffix('BaseCrudService')).toBeNull();
+    expect(stripConventionalSuffix('helpers')).toBeNull();
+  });
+
+  it('does not strip arbitrary 2-segment names (e.g. utils.misc)', () => {
+    expect(stripConventionalSuffix('utils.misc')).toBeNull();
+  });
+
+  it('does not strip when suffix is mid-path (only trailing matters)', () => {
+    expect(stripConventionalSuffix('foo.service.bar')).toBeNull();
+  });
+});
+
 describe('check-dormant-modules — isReferenced (pure)', () => {
-  function mkCandidate(abs, rel) {
+  function mkCandidate(abs, rel, baseStripped = null) {
     return {
       abs,
       rel,
       base: path.basename(abs),
       baseNoExt: path.basename(abs).replace(/\.js$/, ''),
+      baseStripped,
     };
   }
 
   it('returns false when baseNoExt absent from index', () => {
-    const c = mkCandidate('/x/orphan.service.js', 'services/orphan.service.js');
+    const c = mkCandidate('/x/orphan.service.js', 'services/orphan.service.js', 'orphan');
     expect(isReferenced(c, new Map())).toBe(false);
   });
 
   it('returns false when ONLY the candidate itself contains the token', () => {
-    const c = mkCandidate('/x/lonely.service.js', 'services/lonely.service.js');
+    const c = mkCandidate('/x/lonely.service.js', 'services/lonely.service.js', 'lonely');
     const idx = new Map([['lonely.service', new Set([c.abs])]]);
     expect(isReferenced(c, idx)).toBe(false);
   });
 
-  it('returns true when at least one OTHER file references the token', () => {
-    const c = mkCandidate('/x/wired.service.js', 'services/wired.service.js');
+  it('returns true via FULL baseNoExt when external file uses dotted form', () => {
+    const c = mkCandidate('/x/wired.service.js', 'services/wired.service.js', 'wired');
     const idx = new Map([['wired.service', new Set([c.abs, '/somewhere/route.js'])]]);
     expect(isReferenced(c, idx)).toBe(true);
   });
 
+  it('returns true via STRIPPED fallback when external file uses bare form (the W522 fix)', () => {
+    const c = mkCandidate(
+      '/x/rehabilitation.service.js',
+      'services/rehabilitation.service.js',
+      'rehabilitation'
+    );
+    // Only the stripped form `rehabilitation` is in the index — full
+    // `rehabilitation.service` is NOT. Pre-fix this returned false →
+    // 8 false-positive dormants in the v1 production run.
+    const idx = new Map([['rehabilitation', new Set([c.abs, '/somewhere/caller.js'])]]);
+    expect(isReferenced(c, idx)).toBe(true);
+  });
+
+  it('returns false when stripped form ONLY contains the candidate itself', () => {
+    const c = mkCandidate('/x/dormant.service.js', 'services/dormant.service.js', 'dormant');
+    const idx = new Map([['dormant', new Set([c.abs])]]);
+    expect(isReferenced(c, idx)).toBe(false);
+  });
+
+  it('returns true via WITH-EXTENSION base (JSDoc cross-ref like chainAuditor.js)', () => {
+    const c = mkCandidate('/x/chainAuditor.js', 'services/chainAuditor.js', null);
+    // Caller has a JSDoc comment referencing `chainAuditor.js`; the
+    // tokenizer captures the with-extension form as a single token.
+    const idx = new Map([['chainAuditor.js', new Set([c.abs, '/intelligence/hash-chain.lib.js'])]]);
+    expect(isReferenced(c, idx)).toBe(true);
+  });
+
+  it('returns false when baseStripped is null AND no with-extension match either', () => {
+    const c = mkCandidate('/x/chainAuditor.js', 'services/chainAuditor.js', null);
+    expect(isReferenced(c, new Map())).toBe(false);
+  });
+
   it('returns true when MULTIPLE other files reference (typical wired case)', () => {
-    const c = mkCandidate('/x/popular.service.js', 'services/popular.service.js');
+    const c = mkCandidate('/x/popular.service.js', 'services/popular.service.js', 'popular');
     const idx = new Map([['popular.service', new Set([c.abs, '/r1.js', '/r2.js', '/boot.js'])]]);
     expect(isReferenced(c, idx)).toBe(true);
   });
@@ -187,11 +249,25 @@ describe('check-dormant-modules — baseline + skip structures', () => {
     expect(KNOWN_DORMANT_BASELINE).toBeInstanceOf(Set);
   });
 
+  it('baseline holds the 29 entries triaged 2026-05-28 (ratchet-DOWN as resolved)', () => {
+    // When a module is wired-up or deleted, drop it here AND from the
+    // baseline in the same commit. Bumping this number without a
+    // corresponding source change should fail the CLI contract below.
+    expect(KNOWN_DORMANT_BASELINE.size).toBe(29);
+  });
+
   it('every baseline entry uses POSIX paths (no backslashes, no absolute paths)', () => {
     for (const entry of KNOWN_DORMANT_BASELINE) {
       expect(entry).not.toMatch(/\\/);
       expect(entry).not.toMatch(/^[A-Z]:\//);
       expect(entry).not.toMatch(/^\//);
+    }
+  });
+
+  it('no baseline entry points into a test or archived dir (those are excluded from scan)', () => {
+    for (const entry of KNOWN_DORMANT_BASELINE) {
+      expect(entry).not.toMatch(/(^|\/)(__tests__|tests|_archived)\//);
+      expect(entry).not.toMatch(/\.test\.js$/);
     }
   });
 

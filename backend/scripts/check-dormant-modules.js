@@ -131,10 +131,49 @@ const TOKEN_RE = /[A-Za-z_][A-Za-z0-9_.-]{2,}/g;
 //   - STALE baseline entry (file deleted or now wired) → fail
 //     (forces removal from baseline in same commit as the fix)
 const KNOWN_DORMANT_BASELINE = new Set([
-  // Add W340-tagged dormant module paths here, e.g.:
-  //   'services/vehicles/vehicleMaintenance.service.js',
-  //   'services/communication/announcement.service.js',
-  // Path format: relative to backend/, POSIX separators, no leading /.
+  // ── Baselined 2026-05-28 (W522 follow-up). Full triage in
+  //    docs/audits/dormant-modules-triage-2026-05-28.md. Each entry is
+  //    tracked for a wire-up-vs-delete decision; ratchet-DOWN as each
+  //    is resolved. Path format: relative to backend/, POSIX, no
+  //    leading slash.
+
+  // CLI_TOOL (5) — referenced ONLY from an admin-invoked seed/migration
+  // script (+ its own test). NOT auto-loaded at runtime by design. These
+  // are legitimately "not wired" — keep baselined unless a decision is
+  // made to run them on a schedule via a *Bootstrap.js cron.
+  'services/finance/insuranceTariffsBootstrap.js', // ← scripts/seed-insurance-tariffs.js
+  'services/hr/hrAdaptiveRetentionService.js', // ← scripts/hr-audit-retention.js
+  'services/hr/hrAuditRetentionService.js', // ← scripts/hr-audit-retention.js
+  'services/hr/hrCredentialStatusSync.js', // ← scripts/hr-credential-sync.js
+  'services/rehabSeedPlanner.js', // ← scripts/rehab-seed-planner.js
+
+  // TEST_ONLY (24) — built + unit-tested but referenced by NO production
+  // code path (only test files). The real dormancy class. Each needs a
+  // wire-up (mount/bootstrap) OR a delete decision — see triage doc.
+  'routes/hr/hr-webhooks.routes.js',
+  'services/base/BaseCrudService.js',
+  'services/clinical/clinicalProgress.service.js',
+  'services/crisisOrchestrator.service.js',
+  'services/documentAuditService.js',
+  'services/documentComparisonService.js',
+  'services/documentExportService.js',
+  'services/documentFavoritesService.js',
+  'services/documentQRService.js',
+  'services/documentWatermarkService.js',
+  'services/finance/servicePricing.service.js',
+  'services/finance/zatcaCalculation.service.js',
+  'services/gpsSecurityService.js',
+  'services/hr/saudiLaborCalculations.service.js',
+  'services/isolationForest.service.js',
+  'services/policyEngine.service.js',
+  'services/rehabilitation/rehabilitationCalculations.service.js',
+  'services/rehabilitation/rehabProgressCalculations.service.js',
+  'services/rehabilitation/RehabService.js',
+  'services/reporting/webhookHandler.js',
+  'services/ruleBuilder.service.js',
+  'services/scheduling/waitlistPriority.service.js',
+  'services/smartFleetDashboard.service.js',
+  'services/smartGPSWebSocket.service.js',
 ]);
 
 function walk(rootAbs, accept) {
@@ -161,6 +200,19 @@ function walk(rootAbs, accept) {
   return out;
 }
 
+// Strip conventional `.service` / `.routes` / `.model` suffix from a
+// baseNoExt token. Callers often `require('./rehabilitation.service')`
+// AND `const rehab = require('./rehabilitation')` interchangeably; the
+// LATTER form yields a `rehabilitation` token in the corpus that
+// wouldn't match `rehabilitation.service` lookup. Returns the
+// suffix-stripped form (or null when no conventional suffix present —
+// avoids degenerate matches against generic English words for files
+// whose baseNoExt has no `.suffix`).
+function stripConventionalSuffix(baseNoExt) {
+  const m = baseNoExt.match(/^(.+)\.(service|routes|model)$/);
+  return m ? m[1] : null;
+}
+
 // Collect candidate files honoring per-dir filter + global skips.
 function listCandidates() {
   const out = [];
@@ -170,11 +222,13 @@ function listCandidates() {
     for (const f of walk(dirAbs, c.filter)) {
       const base = path.basename(f);
       if (GENERIC_NAMES.has(base)) continue;
+      const baseNoExt = base.replace(/\.js$/, '');
       out.push({
         abs: f,
         rel: path.relative(BACKEND_ROOT, f).split(path.sep).join('/'),
         base,
-        baseNoExt: base.replace(/\.js$/, ''),
+        baseNoExt,
+        baseStripped: stripConventionalSuffix(baseNoExt),
       });
     }
   }
@@ -221,11 +275,33 @@ function buildTokenIndex(files) {
 
 // Decide whether a candidate is referenced by ANY file OTHER than
 // itself in the token index. Pure — exposed for tests.
+//
+// Three-layer lookup, in order of decreasing confidence:
+//   1. Full baseNoExt (e.g., `rehabilitation.service`) — strict.
+//      Matches `require('./rehabilitation.service')` style callers.
+//   2. With-extension base (e.g., `chainAuditor.js`) — for callers
+//      that reference the explicit filename, typically JSDoc/comment
+//      cross-refs like `// see chainAuditor.js`. Captured as a single
+//      token by the regex because `.` is in the char class.
+//   3. Suffix-stripped fallback (e.g., `rehabilitation`) — only when
+//      candidate has a conventional `.service`/`.routes`/`.model`
+//      suffix. Matches `const rehab = require('./rehabilitation')`
+//      style callers. Accepts higher false-WIRED risk (generic word
+//      collision) to eliminate the false-DORMANT class this script's
+//      whole purpose is to surface.
+//
+// A 2026-05-28 triage of the v1 baseline found false-dormants in two
+// shapes: callers using the bare `require('./x')` form (layer 3 catches
+// these) and JSDoc cross-refs naming the with-extension filename
+// (layer 2 catches these).
 function isReferenced(candidate, tokenIndex) {
-  const files = tokenIndex.get(candidate.baseNoExt);
-  if (!files) return false;
-  for (const f of files) {
-    if (f !== candidate.abs) return true;
+  const checks = [candidate.baseNoExt, candidate.base, candidate.baseStripped].filter(Boolean);
+  for (const key of checks) {
+    const files = tokenIndex.get(key);
+    if (!files) continue;
+    for (const f of files) {
+      if (f !== candidate.abs) return true;
+    }
   }
   return false;
 }
@@ -330,6 +406,7 @@ module.exports = {
   buildTokenIndex,
   isReferenced,
   diffBaseline,
+  stripConventionalSuffix,
   KNOWN_DORMANT_BASELINE,
   GENERIC_NAMES,
   SKIP_DIR_NAMES,

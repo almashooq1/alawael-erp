@@ -2,14 +2,22 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import OrderForm from './OrderForm';
-import axios from 'axios';
+import apiClient from '../utils/api';
 
-jest.mock('axios');
+jest.mock('../utils/api', () => ({
+  __esModule: true,
+  default: {
+    get: jest.fn(() => Promise.resolve({ data: [] })),
+    post: jest.fn(() => Promise.resolve({ data: {} })),
+    put: jest.fn(() => Promise.resolve({ data: {} })),
+    delete: jest.fn(() => Promise.resolve({ data: {} })),
+  },
+}));
 
 describe('OrderForm Component', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    axios.get.mockResolvedValue({ data: [] });
+    apiClient.get.mockResolvedValue({ data: [] });
   });
 
   test('renders without crashing', () => {
@@ -71,7 +79,7 @@ describe('OrderForm Component', () => {
 
   test('loads suppliers and products on mount', () => {
     render(<OrderForm onAdd={jest.fn()} />);
-    expect(axios.get).toHaveBeenCalled();
+    expect(apiClient.get).toHaveBeenCalled();
   });
 
   test('handles missing props gracefully', () => {
@@ -87,6 +95,6 @@ describe('OrderForm Component', () => {
 
   test('supports supplier and product selection', () => {
     render(<OrderForm onAdd={jest.fn()} />);
-    expect(axios.get).toHaveBeenCalled();
+    expect(apiClient.get).toHaveBeenCalled();
   });
 });

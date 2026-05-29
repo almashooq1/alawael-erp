@@ -40,6 +40,7 @@ const safeError = require('../utils/safeError');
 const engine = require('../services/measureScoringEngine.service');
 const { digitalAssessmentService } = require('../services/digitalAssessment.service');
 const { assessmentInsightService } = require('../services/assessmentInsight.service');
+const { digitalAssessmentPdfService } = require('../services/digitalAssessmentPdf.service');
 
 router.use(authenticateToken);
 router.use(requireBranchAccess);
@@ -258,6 +259,41 @@ router.get(
       await enforceBeneficiaryBranch(req, owner.beneficiaryId);
       const report = await digitalAssessmentService.buildReport(applicationId, { audience });
       res.json({ success: true, data: report });
+    } catch (err) {
+      if (err.statusCode) {
+        return res.status(err.statusCode).json({ success: false, message: err.message });
+      }
+      throw err;
+    }
+  })
+);
+
+// ── GET /report/:applicationId/pdf ───────────────────────────────────────
+// Professional bilingual PDF result sheet. ?audience=family|clinical.
+router.get(
+  '/report/:applicationId/pdf',
+  requireRole(READ_ROLES),
+  asyncHandler(async (req, res) => {
+    const { applicationId } = req.params;
+    if (!mongoose.isValidObjectId(applicationId)) {
+      return res.status(400).json({ success: false, message: 'applicationId غير صالح' });
+    }
+    const audience = req.query.audience === 'family' ? 'family' : 'clinical';
+    try {
+      const MeasureApplication = mongoose.model('MeasureApplication');
+      const owner = await MeasureApplication.findById(applicationId).select('beneficiaryId').lean();
+      if (!owner) {
+        return res.status(404).json({ success: false, message: 'التطبيق غير موجود' });
+      }
+      await enforceBeneficiaryBranch(req, owner.beneficiaryId);
+      const { buffer, filename } = await digitalAssessmentPdfService.buildAdministrationPdf(
+        applicationId,
+        { audience }
+      );
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.setHeader('Content-Length', String(buffer.length));
+      res.send(buffer);
     } catch (err) {
       if (err.statusCode) {
         return res.status(err.statusCode).json({ success: false, message: err.message });

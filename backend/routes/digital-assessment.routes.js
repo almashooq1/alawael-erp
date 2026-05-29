@@ -225,12 +225,23 @@ router.get(
       purpose: h.purpose,
       applicationNumber: h.applicationNumber,
     }));
+    // W576 — surface the W219 trend engine (slope / classification / R² /
+    // days-to-target / MCID-aware) per (beneficiary, measure). Best-effort:
+    // returns an INSUFFICIENT classification for <3 same-version admins.
+    let trend = null;
+    try {
+      const trendEngine = require('../services/measureTrendEngine.service');
+      trend = await trendEngine.analyze(beneficiaryId, measure._id);
+    } catch {
+      trend = null;
+    }
     res.json({
       success: true,
       data: {
         measure,
         applications: history,
         chartData,
+        trend,
         total: history.length,
         baseline: history.find(h => h.purpose === 'baseline') || history[0] || null,
         latest: history[history.length - 1] || null,

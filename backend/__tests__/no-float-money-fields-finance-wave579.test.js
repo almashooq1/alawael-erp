@@ -75,7 +75,8 @@ const COUNT =
 const FIELD = /([A-Za-z_][A-Za-z0-9_]*)\s*:\s*\{[^{}]*\btype:\s*Number\b[^{}]*\}/g;
 
 // Money-ish names that are actually counts/statistics (human-curated).
-const NOT_MONEY = new Set(['paidOnTime', 'paidLate', 'unpaid', 'partiallyPaid']);
+// budgetThreshold is an alert PERCENTAGE (compared to budgetUtilization), not money.
+const NOT_MONEY = new Set(['paidOnTime', 'paidLate', 'unpaid', 'partiallyPaid', 'budgetThreshold']);
 
 // Baseline of float-money fields in the finance domain as of W579 (2026-05-29).
 // Ratchet DOWN only: remove entries as each field migrates to integer halalas.
@@ -113,7 +114,6 @@ const BASELINE = new Set([
   'CostCenter.js::actualRevenue',
   'CostCenter.js::allocatedBudget',
   'CostCenter.js::budgetAmount',
-  'CostCenter.js::budgetThreshold',
   'CostCenter.js::expenseLimit',
   'CostCenter.js::fixedCosts',
   'CostCenter.js::remainingBudget',
@@ -285,6 +285,6 @@ describe('no-float-money-fields (finance domain) — W579 ratchet', () => {
   });
 
   it('baseline is the documented size and only ratchets down', () => {
-    expect(BASELINE.size).toBeLessThanOrEqual(164);
+    expect(BASELINE.size).toBeLessThanOrEqual(163);
   });
 });

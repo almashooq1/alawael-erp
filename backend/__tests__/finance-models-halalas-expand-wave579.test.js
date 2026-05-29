@@ -71,6 +71,20 @@ const SPECS = [
       'paidAmount',
     ],
   },
+  {
+    file: 'CostCenter.js',
+    fields: [
+      'totalBudget',
+      'allocatedBudget',
+      'spentBudget',
+      'remainingBudget',
+      'fixedCosts',
+      'variableCosts',
+      'totalRevenue',
+      'targetRevenue',
+      'actualRevenue',
+    ],
+  },
 ];
 
 describe('finance-models halalas expand — W579', () => {

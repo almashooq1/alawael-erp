@@ -108,6 +108,19 @@ const SPECS = [
       'incomeTax',
     ],
   },
+  {
+    file: 'mudad.models.js',
+    fields: [
+      'basicSalary',
+      'housingAllowance',
+      'transportAllowance',
+      'otherAllowances',
+      'totalSalary',
+      'deductions',
+      'netSalary',
+      'totalAmount',
+    ],
+  },
 ];
 
 describe('finance-models halalas expand — W579', () => {

@@ -17,23 +17,48 @@ export const lazyWithRetry = (importFunc, retries = 3) => {
     return new Promise((resolve, reject) => {
       const attempt = n => {
         importFunc()
-          .then(resolve)
+          .then(mod => {
+            // A clean load means the current build is reachable — reset the reload
+            // guard so a LATER deploy in this same tab gets its own fresh reload.
+            try {
+              sessionStorage.removeItem('chunk_reload_at');
+            } catch {
+              /* sessionStorage may be unavailable (private mode) */
+            }
+            resolve(mod);
+          })
           .catch(error => {
+            const msg = (error && error.message) || '';
             const isChunkError =
-              error && (error.name === 'ChunkLoadError' || /loading chunk/i.test(error.message));
+              !!error &&
+              (error.name === 'ChunkLoadError' ||
+                /loading chunk|dynamically imported module|module script failed/i.test(msg));
 
             if (n === 1) {
-              // All retries exhausted
+              // All retries exhausted.
               if (isChunkError) {
-                // Chunk hash mismatch — force full page reload (once)
-                const reloadKey = 'chunk_reload_' + Date.now();
-                if (!sessionStorage.getItem('chunk_force_reload')) {
-                  sessionStorage.setItem('chunk_force_reload', reloadKey);
-                  logger.warn('ChunkLoadError after all retries — forcing page reload');
-                  window.location.reload();
-                  return;
+                // A new deploy almost always rotates the content-hashed chunk
+                // names, so this tab's index.html points at chunks the server no
+                // longer serves. Force ONE reload to pull the fresh index.html.
+                //
+                // Guard with a short TIME WINDOW (not a permanent session flag):
+                // if we already reloaded in the last 10s and still fail, the chunk
+                // is genuinely gone (offline / broken build) — surface the error
+                // boundary instead of looping. Unlike the old permanent flag, the
+                // window lets a future deploy in this tab trigger a clean reload.
+                try {
+                  const now = Date.now();
+                  const last = parseInt(sessionStorage.getItem('chunk_reload_at') || '0', 10);
+                  if (!last || now - last > 10000) {
+                    sessionStorage.setItem('chunk_reload_at', String(now));
+                    logger.warn('ChunkLoadError after retries — reloading to fetch fresh build');
+                    window.location.reload();
+                    return;
+                  }
+                  logger.error('ChunkLoadError persists after reload — surfacing error boundary');
+                } catch {
+                  /* sessionStorage unavailable — fall through to reject */
                 }
-                sessionStorage.removeItem('chunk_force_reload');
               }
               reject(error);
               return;

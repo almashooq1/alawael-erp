@@ -196,11 +196,48 @@ if $DEPLOY_BACKEND; then
 fi
 
 if $DEPLOY_FRONTEND; then
-  echo "▶ Backup + replace CRA build..."
-  cp -r "\$APP/frontend/build" "\$APP/frontend/build.before-\$TS"
-  rm -rf "\$APP/frontend/build/"*
-  tar xzf /tmp/$(basename $FRONTEND_TAR) -C "\$APP/frontend/build/"
+  # Atomic, chunk-retaining frontend deploy.
+  #
+  # The OLD path was \`rm -rf build/* && tar x\`. That had two failure modes that
+  # surfaced as the React error boundary ("حدث خطأ غير متوقع" / ChunkLoadError):
+  #   1. Non-atomic window: between the rm and the end of tar, old chunks are gone
+  #      and new ones not yet written, so any in-flight request 404s.
+  #   2. Stale-tab clients: a browser still running the PREVIOUS index.html requests
+  #      the previous build's hashed chunks, which the rm just deleted → 404 forever.
+  # Vite/CRA asset filenames are content-hashed, so old and new chunks never collide.
+  # We therefore ADD the new assets next to the old ones, swap index.html last via an
+  # atomic rename, and prune only assets untouched for 14d (bounds disk growth).
+  echo "▶ Deploy CRA build (atomic; retains old hashed chunks for stale-tab clients)..."
+  STAGE="\$APP/frontend/build.stage-\$TS"
+  rm -rf "\$STAGE"; mkdir -p "\$STAGE"
+  tar xzf /tmp/$(basename $FRONTEND_TAR) -C "\$STAGE/"
+
+  # Lightweight rollback point: index.html alone determines which chunk hashes load.
+  cp -pf "\$APP/frontend/build/index.html" "\$APP/frontend/build/index.html.before-\$TS" 2>/dev/null || true
+
+  # 1) Add new content-hashed assets alongside the old ones (no clobber, old chunks survive).
+  if [ -d "\$STAGE/assets" ]; then
+    mkdir -p "\$APP/frontend/build/assets"
+    cp -rf "\$STAGE/assets/." "\$APP/frontend/build/assets/"
+  fi
+  # 2) Copy remaining top-level files (logos, manifest, ...) EXCEPT index.html.
+  for f in "\$STAGE"/*; do
+    [ -f "\$f" ] || continue
+    bn=\$(basename "\$f")
+    [ "\$bn" = "index.html" ] && continue
+    cp -f "\$f" "\$APP/frontend/build/\$bn"
+  done
+  # 3) Swap index.html LAST via atomic rename — no window points at not-yet-copied chunks.
+  cp -f "\$STAGE/index.html" "\$APP/frontend/build/.index.html.new-\$TS"
+  mv -f "\$APP/frontend/build/.index.html.new-\$TS" "\$APP/frontend/build/index.html"
+
+  # 4) Prune assets untouched for 14d + keep only the last ~10 index.html backups.
+  find "\$APP/frontend/build/assets" -type f -mtime +14 -delete 2>/dev/null || true
+  ls -1t "\$APP/frontend/build/"index.html.before-* 2>/dev/null | tail -n +11 | xargs -r rm -f
+
   chown -R www:www "\$APP/frontend/build"
+  rm -rf "\$STAGE"
+  echo "▶ Frontend in place (old chunks retained 14d)."
 fi
 
 echo "▶ Clean tarballs..."

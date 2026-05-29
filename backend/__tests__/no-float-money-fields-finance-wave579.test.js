@@ -249,6 +249,9 @@ function scan() {
     let m;
     while ((m = FIELD.exec(src))) {
       const f = m[1];
+      // `*_halalas` are the integer migration TARGET (audit #5), not a
+      // violation — they are expected to be `type: Number` (integer).
+      if (/_halalas$/i.test(f)) continue;
       if (MONEY.test(f) && !COUNT.test(f) && !NOT_MONEY.has(f)) {
         found.add(`${rel}::${f}`);
       }

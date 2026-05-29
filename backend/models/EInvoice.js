@@ -50,6 +50,11 @@ const eInvoiceSchema = new mongoose.Schema(
     totalVAT: { type: Number, default: 0 },
     totalDiscount: { type: Number, default: 0 },
     totalAmount: { type: Number, default: 0 },
+    // integer-halalas siblings (audit #5 EXPAND) — dual-written in pre('save')
+    subtotal_halalas: { type: Number, default: 0 },
+    totalVAT_halalas: { type: Number, default: 0 },
+    totalDiscount_halalas: { type: Number, default: 0 },
+    totalAmount_halalas: { type: Number, default: 0 },
     currency: { type: String, default: 'SAR' },
     notes: { type: String },
     paymentMethod: {
@@ -75,6 +80,14 @@ eInvoiceSchema.pre('save', function (next) {
     this.totalDiscount = this.lineItems.reduce((sum, item) => sum + (item.discount || 0), 0);
     this.totalAmount = this.subtotal + this.totalVAT - this.totalDiscount;
   }
+  // Money-Type Migration (audit #5) — dual-write integer-halalas siblings.
+  // (Extends the existing callback-style hook in-style; no new hook added.)
+  require('../intelligence/money.lib').deriveHalalas(this, [
+    'subtotal',
+    'totalVAT',
+    'totalDiscount',
+    'totalAmount',
+  ]);
   next();
 });
 

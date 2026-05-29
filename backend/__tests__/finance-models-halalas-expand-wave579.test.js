@@ -1,0 +1,59 @@
+'use strict';
+
+/**
+ * W579 — halalas EXPAND for FinancePayment / CreditNote / EInvoice (audit #5
+ * Phase 1). Mirrors the FinanceInvoice expand to the sibling finance/billing
+ * models. Pure (no DB / no mongoose) — verifies the dual-write helper output
+ * for each model's field set, plus static assertions that each model declares
+ * the `*_halalas` siblings and wires `deriveHalalas(this, [...])` into a
+ * pre('save') hook (matching each model's existing hook style).
+ */
+
+const fs = require('fs');
+const path = require('path');
+const { deriveHalalas, toHalalas } = require('../intelligence/money.lib');
+
+const MODELS = path.join(__dirname, '..', 'models');
+
+const SPECS = [
+  { file: 'finance/Payment.js', fields: ['amount', 'refund_amount'] },
+  { file: 'CreditNote.js', fields: ['subtotal', 'taxAmount', 'totalAmount', 'remainingAmount'] },
+  { file: 'EInvoice.js', fields: ['subtotal', 'totalVAT', 'totalDiscount', 'totalAmount'] },
+];
+
+describe('finance-models halalas expand — W579', () => {
+  describe('derivation per model', () => {
+    it.each(SPECS)('$file: derives integer-halalas siblings exactly', ({ fields }) => {
+      const doc = {};
+      fields.forEach((f, i) => {
+        doc[f] = [19.99, 100.5, 0.07 + 0.0, 12345.67][i % 4];
+      });
+      deriveHalalas(doc, fields);
+      for (const f of fields) {
+        expect(doc[`${f}_halalas`]).toBe(toHalalas(doc[f]));
+        expect(Number.isInteger(doc[`${f}_halalas`])).toBe(true);
+      }
+    });
+
+    it('handles the VAT/float-trap (19.99) exactly', () => {
+      const doc = { totalAmount: 19.99 };
+      deriveHalalas(doc, ['totalAmount']);
+      expect(doc.totalAmount_halalas).toBe(1999);
+    });
+  });
+
+  describe('model wiring (static)', () => {
+    it.each(SPECS)(
+      '$file declares siblings + calls deriveHalalas in a save hook',
+      ({ file, fields }) => {
+        const src = fs.readFileSync(path.join(MODELS, file), 'utf8');
+        for (const f of fields) {
+          expect(src).toMatch(new RegExp(`${f}_halalas\\s*:\\s*\\{[^}]*type:\\s*Number`));
+        }
+        expect(src).toMatch(/pre\(\s*['"]save['"]/);
+        expect(src).toMatch(/deriveHalalas\(this,/);
+        expect(src).toMatch(/money\.lib/);
+      }
+    );
+  });
+});

@@ -44,6 +44,9 @@ const paymentSchema = new mongoose.Schema(
       default: 'completed',
     },
     refund_amount: { type: Number, default: 0 },
+    // integer-halalas siblings (audit #5 EXPAND) — dual-written in pre('save')
+    amount_halalas: { type: Number, default: 0 },
+    refund_amount_halalas: { type: Number, default: 0 },
     refund_reason: { type: String },
     refunded_at: { type: Date },
     notes: { type: String },
@@ -62,6 +65,8 @@ paymentSchema.pre('save', async function (next) {
     });
     this.payment_number = `PMT-${year}-${String(count + 1).padStart(6, '0')}`;
   }
+  // Money-Type Migration (audit #5) — dual-write integer-halalas siblings.
+  require('../../intelligence/money.lib').deriveHalalas(this, ['amount', 'refund_amount']);
   next();
 });
 
@@ -74,5 +79,4 @@ paymentSchema.index({ deleted_at: 1 });
 
 // Registered as `FinancePayment` to dodge the collision with the
 // canonical models/Payment.js. Default export unchanged.
-module.exports =
-  mongoose.models.FinancePayment || mongoose.model('FinancePayment', paymentSchema);
+module.exports = mongoose.models.FinancePayment || mongoose.model('FinancePayment', paymentSchema);

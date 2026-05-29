@@ -11,6 +11,7 @@ const {
   formatSar,
   sumHalalas,
   applyPercent,
+  deriveHalalas,
 } = require('../intelligence/money.lib');
 
 describe('money.lib', () => {
@@ -85,6 +86,28 @@ describe('money.lib', () => {
 
     it('throws on non-integer entry', () => {
       expect(() => sumHalalas([100, 19.99])).toThrow(/non-integer/);
+    });
+  });
+
+  describe('deriveHalalas (dual-write helper)', () => {
+    it('mirrors each named float field to an integer-halalas sibling', () => {
+      const doc = { amount: 19.99, refund_amount: 5 };
+      deriveHalalas(doc, ['amount', 'refund_amount']);
+      expect(doc.amount_halalas).toBe(1999);
+      expect(doc.refund_amount_halalas).toBe(500);
+    });
+
+    it('derives missing/null fields to 0', () => {
+      const doc = { amount: 10 };
+      deriveHalalas(doc, ['amount', 'refund_amount']);
+      expect(doc.amount_halalas).toBe(1000);
+      expect(doc.refund_amount_halalas).toBe(0);
+    });
+
+    it('is a no-op on bad input', () => {
+      expect(deriveHalalas(null, ['x'])).toBe(null);
+      const d = {};
+      expect(deriveHalalas(d, 'notarray')).toBe(d);
     });
   });
 

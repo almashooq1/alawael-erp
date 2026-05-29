@@ -74,6 +74,10 @@ const creditNoteSchema = new mongoose.Schema(
     subtotal: { type: Number, required: true },
     taxAmount: { type: Number, default: 0 },
     totalAmount: { type: Number, required: true },
+    // integer-halalas siblings (audit #5 EXPAND) — dual-written in pre('save')
+    subtotal_halalas: { type: Number, default: 0 },
+    taxAmount_halalas: { type: Number, default: 0 },
+    totalAmount_halalas: { type: Number, default: 0 },
     currency: { type: String, default: 'SAR' },
 
     // الحالة
@@ -92,6 +96,7 @@ const creditNoteSchema = new mongoose.Schema(
       },
     ],
     remainingAmount: { type: Number },
+    remainingAmount_halalas: { type: Number, default: 0 },
 
     // اعتمادات
     approvedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
@@ -107,6 +112,19 @@ const creditNoteSchema = new mongoose.Schema(
     toObject: { virtuals: true },
   }
 );
+
+// Money-Type Migration (audit #5) — dual-write integer-halalas siblings.
+// New async hook (no prior save hook existed) — async style per the W483/
+// Mongoose-9 doctrine in CLAUDE.md.
+creditNoteSchema.pre('save', async function (next) {
+  require('../intelligence/money.lib').deriveHalalas(this, [
+    'subtotal',
+    'taxAmount',
+    'totalAmount',
+    'remainingAmount',
+  ]);
+  next();
+});
 
 creditNoteSchema.index({ type: 1, status: 1 });
 creditNoteSchema.index({ partyType: 1, partyName: 1 });

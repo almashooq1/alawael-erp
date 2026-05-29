@@ -95,4 +95,22 @@ function applyPercent(halalas, percent) {
   return Math.round((base * pct) / 100);
 }
 
-module.exports = { toHalalas, toSar, formatSar, sumHalalas, applyPercent };
+/**
+ * Dual-write helper for the migration EXPAND step: for each field name, set the
+ * integer-halalas sibling `<field>_halalas` from the float field. Mutates and
+ * returns the doc. Missing/null floats derive to 0. Used by model pre('save')
+ * hooks (audit #5). See docs/architecture/MONEY_TYPE_MIGRATION_PLAN.md.
+ * @param {object} doc - a mongoose document or plain object
+ * @param {string[]} fields - float money field names to mirror
+ * @returns {object} the same doc
+ */
+function deriveHalalas(doc, fields) {
+  if (!doc || !Array.isArray(fields)) return doc;
+  for (const f of fields) {
+    const v = doc[f];
+    doc[`${f}_halalas`] = v === undefined || v === null ? 0 : toHalalas(v);
+  }
+  return doc;
+}
+
+module.exports = { toHalalas, toSar, formatSar, sumHalalas, applyPercent, deriveHalalas };

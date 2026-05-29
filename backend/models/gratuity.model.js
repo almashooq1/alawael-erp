@@ -56,6 +56,7 @@ const gratuitySchema = new mongoose.Schema(
               rate: Number,
               calculation: String,
               amount: Number,
+              amount_halalas: { type: Number, default: 0 }, // audit #5 EXPAND (per-element)
             },
           ],
           totalYears: Number,
@@ -77,6 +78,7 @@ const gratuitySchema = new mongoose.Schema(
             type: String,
             description: String,
             amount: Number,
+            amount_halalas: { type: Number, default: 0 }, // audit #5 EXPAND (per-element)
             details: mongoose.Schema.Types.Mixed,
           },
         ],
@@ -88,6 +90,7 @@ const gratuitySchema = new mongoose.Schema(
             type: String,
             description: String,
             amount: Number,
+            amount_halalas: { type: Number, default: 0 }, // audit #5 EXPAND (per-element)
             details: mongoose.Schema.Types.Mixed,
           },
         ],
@@ -244,11 +247,13 @@ const gratuitySchema = new mongoose.Schema(
 );
 
 // تحديث updatedAt قبل الحفظ
-gratuitySchema.pre('save', function (next) {
+gratuitySchema.pre('save', async function () {
   this.updatedAt = new Date();
-  // Money-Type Migration (audit #5) — dual-write integer-halalas siblings (dot-paths).
-  // Array item amounts (yearsBreakdown[], additions/deductions items[]) deferred.
-  require('../intelligence/money.lib').deriveHalalas(this, [
+  // Money-Type Migration (audit #5) — dual-write integer-halalas siblings,
+  // including the per-element amounts in the calculation arrays. Async style
+  // (W494/Mongoose-9): a callback `function(next)` hook throws under Mongoose 9.
+  const { deriveHalalas } = require('../intelligence/money.lib');
+  deriveHalalas(this, [
     'summary.baseGratuity',
     'summary.totalAdditions',
     'summary.totalDeductions',
@@ -256,7 +261,12 @@ gratuitySchema.pre('save', function (next) {
     'summary.netSettlement',
     'calculation.baseGratuity.amount',
   ]);
-  next();
+  const calc = this.calculation || {};
+  (((calc.baseGratuity || {}).details || {}).yearsBreakdown || []).forEach(y =>
+    deriveHalalas(y, ['amount'])
+  );
+  ((calc.additions || {}).items || []).forEach(i => deriveHalalas(i, ['amount']));
+  ((calc.deductions || {}).items || []).forEach(d => deriveHalalas(d, ['amount']));
 });
 
 // الفهرس المركب للبحث السريع

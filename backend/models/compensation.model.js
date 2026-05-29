@@ -37,6 +37,7 @@ const compensationStructureSchema = new Schema(
           minExperience: Number,
           maxExperience: Number,
           amount: Number,
+          amount_halalas: { type: Number, default: 0 }, // audit #5 EXPAND (per-element)
         },
       ],
     },
@@ -58,6 +59,7 @@ const compensationStructureSchema = new Schema(
           ],
         },
         amount: Number,
+        amount_halalas: { type: Number, default: 0 }, // audit #5 EXPAND (per-element)
         percentage: Number, // من الراتب الأساسي
         currency: { type: String, default: 'SAR' },
         frequency: {
@@ -74,6 +76,7 @@ const compensationStructureSchema = new Schema(
         name: String,
         condition: String, // e.g., "high qualification", "management level"
         amount: Number,
+        amount_halalas: { type: Number, default: 0 }, // audit #5 EXPAND (per-element)
         percentage: Number,
         maxCap: Number,
       },
@@ -635,6 +638,13 @@ compensationStructureSchema.statics.getActiveStructures = function () {
 // ========== التصدير ==========
 // Money-Type Migration (audit #5) — dual-write integer-halalas siblings (before compile).
 // compensationStructure allowance/deduction array items are deferred.
+compensationStructureSchema.pre('save', async function (next) {
+  const { deriveHalalas } = require('../intelligence/money.lib');
+  ((this.baseSalary || {}).ranges || []).forEach(r => deriveHalalas(r, ['amount']));
+  (this.fixedAllowances || []).forEach(a => deriveHalalas(a, ['amount']));
+  (this.variableAllowances || []).forEach(a => deriveHalalas(a, ['amount']));
+  next();
+});
 individualIncentiveSchema.pre('save', async function (next) {
   require('../intelligence/money.lib').deriveHalalas(this, ['amount']);
   next();

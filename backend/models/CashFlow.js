@@ -36,6 +36,8 @@ const cashFlowSchema = new mongoose.Schema(
       changeAmount: {
         type: Number,
       },
+      // integer-halalas sibling (audit #5 EXPAND) — dual-written in pre('save')
+      changeAmount_halalas: { type: Number, default: 0 },
       changePercentage: {
         type: Number,
       },
@@ -106,6 +108,11 @@ const cashFlowSchema = new mongoose.Schema(
       endBalance: {
         type: Number,
       },
+      // integer-halalas siblings (audit #5 EXPAND) — dual-written in pre('save')
+      totalInflows_halalas: { type: Number, default: 0 },
+      totalOutflows_halalas: { type: Number, default: 0 },
+      netCashFlow_halalas: { type: Number, default: 0 },
+      endBalance_halalas: { type: Number, default: 0 },
     },
 
     // ط§ظ„طھظ†ط¨ط¤ط§طھ (3 ظ†ظ…ط§ط°ط¬)
@@ -261,6 +268,16 @@ cashFlowSchema.pre('save', function (next) {
   this.calculations.totalOutflows = this.outflows.reduce((sum, outflow) => sum + outflow.amount, 0);
   this.calculations.netCashFlow = this.calculations.totalInflows - this.calculations.totalOutflows;
   this.calculations.endBalance = this.cashPosition.current + this.calculations.netCashFlow;
+
+  // Money-Type Migration (audit #5) — dual-write integer-halalas siblings (dot-paths).
+  // Array (inflows/outflows) item amounts are deferred (per-element handling).
+  require('../intelligence/money.lib').deriveHalalas(this, [
+    'cashPosition.changeAmount',
+    'calculations.totalInflows',
+    'calculations.totalOutflows',
+    'calculations.netCashFlow',
+    'calculations.endBalance',
+  ]);
 
   // ط­ط³ط§ط¨ ظ†ط³ط¨ط© ظƒظپط§ظٹط© ط§ظ„ط§ط­طھظٹط§ط·ظٹط§طھ
   if (this.calculations.totalOutflows > 0) {

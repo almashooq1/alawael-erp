@@ -85,6 +85,11 @@ const SPECS = [
       'actualRevenue',
     ],
   },
+  {
+    file: 'CashFlow.js',
+    fields: ['changeAmount', 'totalInflows', 'totalOutflows', 'netCashFlow', 'endBalance'],
+  },
+  { file: 'FinancialTransaction.js', fields: ['amount'] },
 ];
 
 describe('finance-models halalas expand — W579', () => {

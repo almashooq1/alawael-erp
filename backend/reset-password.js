@@ -5,8 +5,22 @@ const bcrypt = require('bcryptjs');
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/alawael_erp';
 
-const NEW_PASSWORD = 'Admin@123456';
-const EMAIL = 'admin@alawael.com';
+// Credentials are NEVER hardcoded — supply via CLI args or env. This is a dev
+// utility; refuse to run in production so it can't be used to reset a live
+// admin password (set ALLOW_PASSWORD_RESET=1 to override deliberately).
+if (process.env.NODE_ENV === 'production' && !process.env.ALLOW_PASSWORD_RESET) {
+  console.error('❌ Refusing to run in production. Set ALLOW_PASSWORD_RESET=1 to override.');
+  process.exit(1);
+}
+const EMAIL = process.argv[2] || process.env.RESET_EMAIL;
+const NEW_PASSWORD = process.argv[3] || process.env.RESET_PASSWORD;
+if (!EMAIL || !NEW_PASSWORD) {
+  console.error(
+    'Usage: node reset-password.js <email> <newPassword>\n' +
+      '   or: RESET_EMAIL=… RESET_PASSWORD=… node reset-password.js'
+  );
+  process.exit(1);
+}
 
 async function run() {
   console.log('🔌 Connecting to MongoDB...');

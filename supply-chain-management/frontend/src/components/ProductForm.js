@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from '../utils/api';
 import FileUpload from './FileUpload';
 
 function ProductForm({ onAdd, initialData, editMode, user, notify }) {
@@ -21,7 +21,7 @@ function ProductForm({ onAdd, initialData, editMode, user, notify }) {
   const [imagePreview, setImagePreview] = useState('');
 
   useEffect(() => {
-    axios.get('/api/suppliers').then(res => setSuppliers(res.data));
+    apiClient.get('/api/suppliers').then(res => setSuppliers(res.data));
   }, []);
 
   useEffect(() => {
@@ -42,7 +42,7 @@ function ProductForm({ onAdd, initialData, editMode, user, notify }) {
         await onAdd(form);
       } else {
         // الصورة ترفع بشكل منفصل عبر FileUpload
-        await axios.post('/api/products', form, {
+        await apiClient.post('/api/products', form, {
           headers: { 'Content-Type': 'application/json' },
         });
         setForm({

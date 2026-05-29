@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from '../utils/api';
 
 function InventoryForm({ onAdd, initialData, editMode, user, notify }) {
   const [form, setForm] = useState(initialData || { product: '', quantity: '', location: '' });
@@ -8,7 +8,7 @@ function InventoryForm({ onAdd, initialData, editMode, user, notify }) {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    axios.get('/api/products').then(res => setProducts(res.data));
+    apiClient.get('/api/products').then(res => setProducts(res.data));
   }, []);
 
   useEffect(() => {
@@ -26,7 +26,7 @@ function InventoryForm({ onAdd, initialData, editMode, user, notify }) {
       if (editMode) {
         await onAdd(form);
       } else {
-        await axios.post('/api/inventory', { ...form, quantity: Number(form.quantity) });
+        await apiClient.post('/api/inventory', { ...form, quantity: Number(form.quantity) });
         setForm({ product: '', quantity: '', location: '' });
         if (onAdd) onAdd();
         notify && notify('تمت إضافة السطر للمخزون بنجاح', 'success');

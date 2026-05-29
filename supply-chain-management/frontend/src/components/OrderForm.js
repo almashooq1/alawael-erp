@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from '../utils/api';
 
 function OrderForm({ onAdd, initialData, editMode, user, notify }) {
   const [form, setForm] = useState(
@@ -20,8 +20,8 @@ function OrderForm({ onAdd, initialData, editMode, user, notify }) {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    axios.get('/api/suppliers').then(res => setSuppliers(res.data));
-    axios.get('/api/products').then(res => setProducts(res.data));
+    apiClient.get('/api/suppliers').then(res => setSuppliers(res.data));
+    apiClient.get('/api/products').then(res => setProducts(res.data));
   }, []);
 
   useEffect(() => {
@@ -51,7 +51,7 @@ function OrderForm({ onAdd, initialData, editMode, user, notify }) {
       if (editMode) {
         await onAdd(form);
       } else {
-        await axios.post('/api/orders', form);
+        await apiClient.post('/api/orders', form);
         setForm({
           supplier: '',
           products: [],

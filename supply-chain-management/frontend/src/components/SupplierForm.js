@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import React, { useState } from 'react';
-import axios from 'axios';
+import apiClient from '../utils/api';
 
 function SupplierForm({ onAdd, initialData, editMode, user, notify }) {
   const [form, setForm] = useState(initialData || { name: '', email: '', contact: '', address: '', rating: 0 });
@@ -21,7 +21,7 @@ function SupplierForm({ onAdd, initialData, editMode, user, notify }) {
       if (editMode) {
         await onAdd(form);
       } else {
-        await axios.post('/api/suppliers', form);
+        await apiClient.post('/api/suppliers', form);
         setForm({ name: '', email: '', contact: '', address: '', rating: 0 });
         if (onAdd) onAdd();
         notify && notify('تم إضافة المورد بنجاح', 'success');

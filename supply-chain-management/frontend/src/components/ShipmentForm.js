@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import React, { useState } from 'react';
-import axios from 'axios';
+import apiClient from '../utils/api';
 import FileUpload from './FileUpload';
 
 export default function ShipmentForm({ onAdd, initialData, editMode, user, notify }) {
@@ -20,7 +20,7 @@ export default function ShipmentForm({ onAdd, initialData, editMode, user, notif
   const [attachmentPreviews, setAttachmentPreviews] = useState([]);
 
   React.useEffect(() => {
-    axios.get('/api/orders').then(res => setOrders(res.data));
+    apiClient.get('/api/orders').then(res => setOrders(res.data));
   }, []);
 
   React.useEffect(() => {
@@ -38,7 +38,7 @@ export default function ShipmentForm({ onAdd, initialData, editMode, user, notif
       if (editMode) {
         await onAdd(shipment);
       } else {
-        await axios.post('/api/shipments', shipment, {
+        await apiClient.post('/api/shipments', shipment, {
           headers: { 'Content-Type': 'application/json' },
         });
         setShipment({

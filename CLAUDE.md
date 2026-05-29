@@ -16,6 +16,29 @@ Both are independent git repos under `almashooq1` on GitHub:
 
 Periodic bundles also live in `OneDrive/المستندات/04-10-2025/_backups/*.bundle` as a redundant backup. When asked to "ship a feature" verify which repo the change belongs in before editing.
 
+### Which repo? — routing doctrine (decide BEFORE editing)
+
+**Strategic direction (decided 2026-05-29, after a topology audit — full detail in [docs/MIGRATION_LEDGER.md](docs/MIGRATION_LEDGER.md)).** The system is **three layers**, not two:
+
+1. **`66666/backend`** (Express + Mongo) — the **live, canonical backend API**. 501 route files; serves every web-admin surface via `/api/v1` on port 3001.
+2. **`alawael-rehab-platform/apps/web-admin`** (Next.js) — the **live, go-forward UI** (~190 surfaces). Runs _on the 66666 API_ (`NEXT_PUBLIC_API_URL` → 66666).
+3. **`alawael-rehab-platform/services/*`** (NestJS + Prisma) — an **early V4 micro-services skeleton, ~5% built** (`core` = 20 modules; the other 16 service dirs are stubs/empty; no API gateway; port-collides with 66666 on 3001). **FROZEN** — the live UI does **not** consume it.
+
+We deliberately **do NOT physically merge** the repos (different stacks, public↔private boundary, near-zero shared code) **and do NOT build new domains in the V4 `services/*` skeleton** — code there is unwired to the UI and has no gateway, so it is invisible to the running product. **Unify the _direction_, not the files.** Recorded decision; revisit only if a deliberate, gateway-fronted backend cutover is funded.
+
+| Change type                                                    | Repo / path                                 | Notes                                                    |
+| -------------------------------------------------------------- | ------------------------------------------- | -------------------------------------------------------- |
+| New admin / dashboard UI                                       | `alawael-rehab-platform` → `apps/web-admin` | 66666/frontend (legacy React) is **dead** — do NOT touch |
+| New / changed backend API (endpoints, models, services, crons) | `66666` → `backend/`                        | this is what web-admin actually calls — the live path    |
+| Shared TS UI / auth / i18n / validators                        | `alawael-rehab-platform` → `packages/*`     | consumed by web-admin                                    |
+| Bug fix in existing code                                       | repo that **owns the file**                 | follow the bug; don't port code just to fix it           |
+| Docs / ADRs / blueprints / this ledger                         | `66666` → `docs/`                           | single docs home                                         |
+| V4 micro-services (`services/*`)                               | **frozen**                                  | do NOT add new domains; not consumed by the live UI      |
+
+**Cautionary example:** the HR Leave vertical (2026-05-29) was built into V4 `services/core`, but web-admin's `/hr/leaves` actually calls 66666's `routes/leave-requests.routes.js` — so the V4 endpoint is currently **orphaned**. This is exactly the split this doctrine prevents: **put backend changes in `66666/backend`, where the UI consumes them.**
+
+When a request is ambiguous: **UI → web-admin; backend → `66666/backend`.** Wave numbers are a single shared namespace across both repos — the `check:wave-collision` pre-push gate enforces this.
+
 ## Top-level layout (66666/)
 
 ```text

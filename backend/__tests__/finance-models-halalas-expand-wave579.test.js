@@ -50,6 +50,27 @@ const SPECS = [
   },
   { file: 'Expense.js', fields: ['amount', 'taxAmount'] },
   { file: 'RecurringTransaction.js', fields: ['amount'] },
+  { file: 'WithholdingTax.js', fields: ['grossAmount', 'withholdingAmount', 'netAmount'] },
+  { file: 'TaxCalendar.js', fields: ['amount', 'estimatedAmount'] },
+  {
+    file: 'TaxFiling.js',
+    fields: [
+      'preparedAmount',
+      'submittedAmount',
+      'assessedAmount',
+      'differenceAmount',
+      'taxableAmount',
+      'exemptAmount',
+      'zeroRatedAmount',
+      'inputTax',
+      'outputTax',
+      'netTaxPayable',
+      'amount',
+      'interestAmount',
+      'totalDue',
+      'paidAmount',
+    ],
+  },
 ];
 
 describe('finance-models halalas expand — W579', () => {

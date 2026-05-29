@@ -39,6 +39,9 @@ const taxCalendarSchema = new mongoose.Schema(
       type: Number,
       min: 0,
     },
+    // integer-halalas siblings (audit #5 EXPAND) — dual-written in pre('save')
+    amount_halalas: { type: Number, default: 0 },
+    estimatedAmount_halalas: { type: Number, default: 0 },
     status: {
       type: String,
       enum: ['upcoming', 'due', 'overdue', 'filed', 'paid', 'cancelled'],
@@ -81,6 +84,12 @@ const taxCalendarSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+// Money-Type Migration (audit #5) — dual-write integer-halalas siblings.
+taxCalendarSchema.pre('save', async function (next) {
+  require('../intelligence/money.lib').deriveHalalas(this, ['amount', 'estimatedAmount']);
+  next();
+});
 
 taxCalendarSchema.index({ dueDate: 1, status: 1 });
 taxCalendarSchema.index({ taxType: 1 });

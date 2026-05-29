@@ -48,6 +48,10 @@ const withholdingTaxSchema = new mongoose.Schema(
     withholdingRate: { type: Number, required: true },
     withholdingAmount: { type: Number, required: true },
     netAmount: { type: Number, required: true },
+    // integer-halalas siblings (audit #5 EXPAND) — dual-written in pre('save')
+    grossAmount_halalas: { type: Number, default: 0 },
+    withholdingAmount_halalas: { type: Number, default: 0 },
+    netAmount_halalas: { type: Number, default: 0 },
     currency: { type: String, default: 'SAR' },
 
     // الفاتورة المرتبطة
@@ -79,6 +83,16 @@ const withholdingTaxSchema = new mongoose.Schema(
     toObject: { virtuals: true },
   }
 );
+
+// Money-Type Migration (audit #5) — dual-write integer-halalas siblings.
+withholdingTaxSchema.pre('save', async function (next) {
+  require('../intelligence/money.lib').deriveHalalas(this, [
+    'grossAmount',
+    'withholdingAmount',
+    'netAmount',
+  ]);
+  next();
+});
 
 withholdingTaxSchema.index({ status: 1, fiscalYear: 1 });
 withholdingTaxSchema.index({ beneficiaryName: 1 });

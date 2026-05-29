@@ -54,6 +54,17 @@ const taxFilingSchema = new mongoose.Schema(
     inputTax: { type: Number, default: 0 },
     outputTax: { type: Number, default: 0 },
     netTaxPayable: { type: Number, default: 0 },
+    // integer-halalas siblings (audit #5 EXPAND) — dual-written in pre('save')
+    preparedAmount_halalas: { type: Number, default: 0 },
+    submittedAmount_halalas: { type: Number, default: 0 },
+    assessedAmount_halalas: { type: Number, default: 0 },
+    differenceAmount_halalas: { type: Number, default: 0 },
+    taxableAmount_halalas: { type: Number, default: 0 },
+    exemptAmount_halalas: { type: Number, default: 0 },
+    zeroRatedAmount_halalas: { type: Number, default: 0 },
+    inputTax_halalas: { type: Number, default: 0 },
+    outputTax_halalas: { type: Number, default: 0 },
+    netTaxPayable_halalas: { type: Number, default: 0 },
 
     preparedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     preparedAt: { type: Date },
@@ -79,6 +90,19 @@ const taxFilingSchema = new mongoose.Schema(
 );
 
 taxFilingSchema.pre('save', function (next) {
+  // Money-Type Migration (audit #5) — dual-write integer-halalas siblings.
+  require('../intelligence/money.lib').deriveHalalas(this, [
+    'preparedAmount',
+    'submittedAmount',
+    'assessedAmount',
+    'differenceAmount',
+    'taxableAmount',
+    'exemptAmount',
+    'zeroRatedAmount',
+    'inputTax',
+    'outputTax',
+    'netTaxPayable',
+  ]);
   if (!this.filingNumber && this.isNew) {
     this.filingNumber = `TF-${this.type}-${Date.now().toString(36).toUpperCase()}`;
   }
@@ -116,6 +140,11 @@ const taxPenaltySchema = new mongoose.Schema(
       default: 'assessed',
     },
     paidAmount: { type: Number, default: 0 },
+    // integer-halalas siblings (audit #5 EXPAND) — dual-written in pre('save')
+    amount_halalas: { type: Number, default: 0 },
+    interestAmount_halalas: { type: Number, default: 0 },
+    totalDue_halalas: { type: Number, default: 0 },
+    paidAmount_halalas: { type: Number, default: 0 },
     paidDate: { type: Date },
     paymentReference: { type: String },
     zatcaReference: { type: String },
@@ -128,6 +157,13 @@ const taxPenaltySchema = new mongoose.Schema(
 
 taxPenaltySchema.pre('save', function (next) {
   this.totalDue = (this.amount || 0) + (this.interestAmount || 0);
+  // Money-Type Migration (audit #5) — dual-write integer-halalas siblings.
+  require('../intelligence/money.lib').deriveHalalas(this, [
+    'amount',
+    'interestAmount',
+    'totalDue',
+    'paidAmount',
+  ]);
   next();
 });
 

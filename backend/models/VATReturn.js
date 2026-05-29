@@ -25,10 +25,14 @@ const vatReturnSchema = new mongoose.Schema(
       standardRated: {
         amount: { type: Number, default: 0 },
         vat: { type: Number, default: 0 },
+        amount_halalas: { type: Number, default: 0 }, // audit #5 EXPAND
+        vat_halalas: { type: Number, default: 0 },
       },
       zeroRated: {
         amount: { type: Number, default: 0 },
         vat: { type: Number, default: 0 },
+        amount_halalas: { type: Number, default: 0 }, // audit #5 EXPAND
+        vat_halalas: { type: Number, default: 0 },
       },
     },
 
@@ -37,10 +41,14 @@ const vatReturnSchema = new mongoose.Schema(
       standardRated: {
         amount: { type: Number, default: 0 },
         vat: { type: Number, default: 0 },
+        amount_halalas: { type: Number, default: 0 }, // audit #5 EXPAND
+        vat_halalas: { type: Number, default: 0 },
       },
       imports: {
         amount: { type: Number, default: 0 },
         vat: { type: Number, default: 0 },
+        amount_halalas: { type: Number, default: 0 }, // audit #5 EXPAND
+        vat_halalas: { type: Number, default: 0 },
       },
     },
 
@@ -133,6 +141,14 @@ vatReturnSchema.pre('save', async function (next) {
     'totalInputVAT',
     'netVAT',
     'adjustedNetVAT',
+    'taxableSales.standardRated.amount',
+    'taxableSales.standardRated.vat',
+    'taxableSales.zeroRated.amount',
+    'taxableSales.zeroRated.vat',
+    'taxablePurchases.standardRated.amount',
+    'taxablePurchases.standardRated.vat',
+    'taxablePurchases.imports.amount',
+    'taxablePurchases.imports.vat',
   ]);
   next();
 });

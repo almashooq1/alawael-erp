@@ -96,19 +96,37 @@ function applyPercent(halalas, percent) {
 }
 
 /**
- * Dual-write helper for the migration EXPAND step: for each field name, set the
- * integer-halalas sibling `<field>_halalas` from the float field. Mutates and
- * returns the doc. Missing/null floats derive to 0. Used by model pre('save')
- * hooks (audit #5). See docs/architecture/MONEY_TYPE_MIGRATION_PLAN.md.
+ * Dual-write helper for the migration EXPAND step: for each field, set the
+ * integer-halalas sibling `<leaf>_halalas` next to the float field. Mutates and
+ * returns the doc. Missing/null floats derive to 0. Field names may be DOT-PATHS
+ * for money nested in sub-objects (e.g. `'summary.totalAllowances'` sets
+ * `doc.summary.totalAllowances_halalas`). Used by model pre('save') hooks
+ * (audit #5). See docs/architecture/MONEY_TYPE_MIGRATION_PLAN.md.
  * @param {object} doc - a mongoose document or plain object
- * @param {string[]} fields - float money field names to mirror
+ * @param {string[]} fields - float money field names / dot-paths to mirror
  * @returns {object} the same doc
  */
 function deriveHalalas(doc, fields) {
   if (!doc || !Array.isArray(fields)) return doc;
   for (const f of fields) {
-    const v = doc[f];
-    doc[`${f}_halalas`] = v === undefined || v === null ? 0 : toHalalas(v);
+    if (typeof f !== 'string' || f.length === 0) continue;
+    if (f.indexOf('.') === -1) {
+      const v = doc[f];
+      doc[`${f}_halalas`] = v === undefined || v === null ? 0 : toHalalas(v);
+      continue;
+    }
+    // dot-path: walk to the leaf's parent, set `<leaf>_halalas` on it.
+    const parts = f.split('.');
+    const leaf = parts.pop();
+    let parent = doc;
+    for (const p of parts) {
+      if (parent === null || parent === undefined) break;
+      parent = parent[p];
+    }
+    if (parent !== null && parent !== undefined) {
+      const v = parent[leaf];
+      parent[`${leaf}_halalas`] = v === undefined || v === null ? 0 : toHalalas(v);
+    }
   }
   return doc;
 }

@@ -109,6 +109,32 @@ describe('money.lib', () => {
       const d = {};
       expect(deriveHalalas(d, 'notarray')).toBe(d);
     });
+
+    it('handles dot-path fields nested in sub-objects', () => {
+      const doc = { summary: { totalAllowances: 19.99, netPayable: 100 }, top: 5 };
+      deriveHalalas(doc, ['summary.totalAllowances', 'summary.netPayable', 'top']);
+      expect(doc.summary.totalAllowances_halalas).toBe(1999);
+      expect(doc.summary.netPayable_halalas).toBe(10000);
+      expect(doc.top_halalas).toBe(500);
+    });
+
+    it('derives 0 for a missing leaf under an existing parent', () => {
+      const doc = { summary: { totalAllowances: 50 } };
+      deriveHalalas(doc, ['summary.totalAllowances', 'summary.missing']);
+      expect(doc.summary.missing_halalas).toBe(0);
+    });
+
+    it('safely skips a dot-path whose parent is absent', () => {
+      const doc = { other: 1 };
+      expect(() => deriveHalalas(doc, ['summary.totalAllowances'])).not.toThrow();
+      expect(doc.summary).toBeUndefined();
+    });
+
+    it('skips empty/non-string field entries', () => {
+      const doc = { amount: 10 };
+      deriveHalalas(doc, ['', null, 'amount']);
+      expect(doc.amount_halalas).toBe(1000);
+    });
   });
 
   describe('applyPercent (VAT)', () => {

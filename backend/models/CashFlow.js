@@ -57,6 +57,7 @@ const cashFlowSchema = new mongoose.Schema(
             required: true,
             min: 0,
           },
+          amount_halalas: { type: Number, default: 0 }, // audit #5 EXPAND (per-element)
           expectedDate: Date,
           actualDate: Date,
           category: String,
@@ -79,6 +80,7 @@ const cashFlowSchema = new mongoose.Schema(
             required: true,
             min: 0,
           },
+          amount_halalas: { type: Number, default: 0 }, // audit #5 EXPAND (per-element)
           dueDate: Date,
           paidDate: Date,
           category: String,
@@ -269,15 +271,18 @@ cashFlowSchema.pre('save', function (next) {
   this.calculations.netCashFlow = this.calculations.totalInflows - this.calculations.totalOutflows;
   this.calculations.endBalance = this.cashPosition.current + this.calculations.netCashFlow;
 
-  // Money-Type Migration (audit #5) — dual-write integer-halalas siblings (dot-paths).
-  // Array (inflows/outflows) item amounts are deferred (per-element handling).
-  require('../intelligence/money.lib').deriveHalalas(this, [
+  // Money-Type Migration (audit #5) — dual-write integer-halalas siblings,
+  // including per-element amounts in the inflows[]/outflows[] arrays.
+  const { deriveHalalas } = require('../intelligence/money.lib');
+  deriveHalalas(this, [
     'cashPosition.changeAmount',
     'calculations.totalInflows',
     'calculations.totalOutflows',
     'calculations.netCashFlow',
     'calculations.endBalance',
   ]);
+  (this.inflows || []).forEach(i => deriveHalalas(i, ['amount']));
+  (this.outflows || []).forEach(o => deriveHalalas(o, ['amount']));
 
   // ط­ط³ط§ط¨ ظ†ط³ط¨ط© ظƒظپط§ظٹط© ط§ظ„ط§ط­طھظٹط§ط·ظٹط§طھ
   if (this.calculations.totalOutflows > 0) {

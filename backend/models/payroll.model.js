@@ -59,6 +59,7 @@ const payrollSchema = new mongoose.Schema(
           ],
         },
         amount: { type: Number, min: 0 },
+        amount_halalas: { type: Number, default: 0 }, // audit #5 EXPAND (per-element)
         isFixed: { type: Boolean, default: true },
         description: String,
       },
@@ -83,6 +84,7 @@ const payrollSchema = new mongoose.Schema(
           ],
         },
         amount: { type: Number, min: 0 },
+        amount_halalas: { type: Number, default: 0 }, // audit #5 EXPAND (per-element)
         percentage: { type: Number, min: 0, max: 100 },
         calculationType: {
           type: String,
@@ -259,7 +261,8 @@ const payrollSchema = new mongoose.Schema(
 // Money-Type Migration (audit #5) — dual-write integer-halalas siblings (dot-paths).
 // Array allowance/deduction item amounts are deferred (per-element handling).
 payrollSchema.pre('save', async function (next) {
-  require('../intelligence/money.lib').deriveHalalas(this, [
+  const { deriveHalalas } = require('../intelligence/money.lib');
+  deriveHalalas(this, [
     'baseSalary',
     'calculations.totalAllowances',
     'calculations.totalIncentives',
@@ -270,6 +273,8 @@ payrollSchema.pre('save', async function (next) {
     'calculations.netPayable',
     'taxes.incomeTax',
   ]);
+  (this.allowances || []).forEach(a => deriveHalalas(a, ['amount']));
+  (this.deductions || []).forEach(d => deriveHalalas(d, ['amount']));
   next();
 });
 

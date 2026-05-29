@@ -152,6 +152,9 @@ const costCenterSchema = new mongoose.Schema(
           type: Number,
           default: 0,
         },
+        // integer-halalas siblings (audit #5 EXPAND) — per-element, set in pre('save')
+        budgetAmount_halalas: { type: Number, default: 0 },
+        actualAmount_halalas: { type: Number, default: 0 },
         variance: {
           type: Number,
           default: 0,
@@ -705,7 +708,8 @@ costCenterSchema.pre('save', function () {
   // Money-Type Migration (audit #5) — dual-write integer-halalas siblings for
   // the nested money sub-objects (dot-paths). Array (monthlyBudgets) + Map
   // (revenueBySource) money are deferred — they need per-element handling.
-  require('../intelligence/money.lib').deriveHalalas(this, [
+  const { deriveHalalas } = require('../intelligence/money.lib');
+  deriveHalalas(this, [
     'budget.totalBudget',
     'budget.allocatedBudget',
     'budget.spentBudget',
@@ -716,6 +720,7 @@ costCenterSchema.pre('save', function () {
     'revenue.targetRevenue',
     'revenue.actualRevenue',
   ]);
+  (this.monthlyBudgets || []).forEach(m => deriveHalalas(m, ['budgetAmount', 'actualAmount']));
 });
 
 // بعد الحفظ - تحديث المراكز الفرعية
